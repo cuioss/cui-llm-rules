@@ -1,0 +1,7 @@
+= LLM Rules for CUI OSS Projects
+
+Currently, we evaluate using https://codeium.com/windsurf[codeium/windsurf] for working with code-bases within the cui-projects.
+
+This directory contains modularized configurations ('Memories') that guide AI assistants in maintaining and developing CUI OSS projects.
+
+The actual rules can be found within link:llm-rules/README.adoc[llm-rules]
