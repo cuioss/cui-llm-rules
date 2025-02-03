@@ -1,6 +1,6 @@
-# Finalize Java Maintenance
+# Java Maintenance Finalization
 
-## Command: cp: finalize java maintenance
+## Command: cp: maintenance java finalize
 
 ### Purpose
 Completes the Java maintenance process by performing final cleanup and verification steps.

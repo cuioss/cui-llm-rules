@@ -1,19 +1,20 @@
 # Project Configuration and Build Rules
 
-## Type: Rules
-## Related Files: 
-- `java-maintenance.md`: For Java-specific configurations
-- `technologies.md`: For technology standards
-- `memory-persistence.md`: For documentation updates
+## Purpose
+Defines the core project configuration and build rules for CUI OSS projects.
 
-## Commands: 
-- `cp: prepare project maintenance`
-- `cp: execute java maintenance`
+## Related Commands
+- `cp: maintenance java prepare`: Project preparation and initial setup
+- `cp: maintenance java perform`: Core maintenance execution
+- `cp: maintenance java finalize`: Maintenance completion
 
-## Overview
-This document defines the core project configuration and build rules for CUI OSS projects.
+## Related Documentation
+- maintenance/java.md: Java maintenance process
+- maintenance/javadoc.md: Javadoc standards
+- technologies.md: Technology standards
+- cascade/verify-rules.md: Documentation verification
 
-## Build Rules
+## Build Configuration
 
 ### Maven Wrapper Usage
 1. Always use maven-wrapper (mvnw) when available
@@ -40,9 +41,36 @@ This document defines the core project configuration and build rules for CUI OSS
      * Single module: `-Pjavadoc`
      * Multi-module: `-Pjavadoc-mm-reporting`
 
-### Additional Rules
-4. Use Java 17
-5. Follow Jakarta EE standards
-6. Use CDI for dependency injection
-7. Prefer cuioss libraries over alternatives
-8. Use cui-java-tools as standard utility library
+## Project Standards
+
+### Technology Stack
+1. Java Version: Java 17
+2. Enterprise Framework: Jakarta EE
+3. Dependency Injection: CDI
+4. Core Libraries:
+   - cuioss libraries (preferred)
+   - cui-java-tools (standard utility)
+
+### Documentation Requirements
+1. README.adoc in project root
+2. Module-specific documentation
+3. API documentation via Javadoc
+4. Build and deployment instructions
+
+### Quality Standards
+1. Sonar quality gates must pass
+2. Test coverage requirements met
+3. Documentation up to date
+4. No critical issues pending
+
+## Success Criteria
+1. All builds successful
+2. Tests passing
+3. Documentation complete
+4. Standards followed
+5. Quality gates passed
+
+## See Also
+- technologies.md: Detailed technology standards
+- maintenance/java.md: Java maintenance process
+- maintenance/javadoc.md: Javadoc standards

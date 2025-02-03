@@ -1,4 +1,4 @@
-# Cascade LLM Rules
+= Cascade LLM Rules
 
 This repository serves as the primary source of truth for Cascade's behavior and decision-making processes. It defines the standards, processes, and rules that Cascade follows when assisting with code maintenance and development.
 
@@ -11,9 +11,9 @@ This repository serves as the primary source of truth for Cascade's behavior and
 
 == Available Commands
 
-[cols="2,4"]
+[cols="1,2"]
 |===
-|Command |Purpose
+|Command |Description
 
 |`cp`
 |Lists all available commands:
@@ -21,21 +21,35 @@ This repository serves as the primary source of truth for Cascade's behavior and
 - Enables command selection
 - Executes selected command
 - Maintains consistent workflow
+See: cascade/cp.md
+
+|`cp: maintenance java prepare`
+|Initiates project maintenance:
+- Creates feature branch
+- Initial verification
+- Sets maintenance context
+See: maintenance/prepare.md
+
+|`cp: maintenance java perform`
+|Performs Java maintenance:
+- Updates code standards
+- Improves test coverage
+- Enhances documentation
+See: maintenance/java.md
+
+|`cp: maintenance java finalize`
+|Completes maintenance:
+- Final code cleanup
+- Build verification
+- Documentation check
+See: maintenance/finalize.md
 
 |`cp: fix javadoc`
-|Fixes Javadoc build errors and warnings:
-- Verifies build preconditions
-- Fixes only Javadoc errors/warnings
-- Makes minimal modifications
-- Preserves documentation content
-- No code changes allowed
-
-|`cp: prepare project maintenance`
-|Initiates project maintenance:
-- Verifies build status
-- Applies OpenRewrite modernization
-- Prepares for maintenance tasks
-See: maintenance/prepare.md
+|Fixes Javadoc errors:
+- Minimal modifications
+- Content preservation
+- Quality improvement
+See: maintenance/javadoc.md
 
 |`cp: verify sonar`
 |Performs SonarCloud analysis:
@@ -44,33 +58,56 @@ See: maintenance/prepare.md
 - Verifies coverage metrics
 See: maintenance/sonar.md
 
-|`cp: persist memory`
-|Updates documentation:
-- Updates local llm-rules
-- Updates README.adoc
+|`cp: commit llm-rules to memory`
+|Creates memories from documentation:
+- One-time transfer from @llm-rules
+- Creates/updates memories
+- Ensures completeness
+- Establishes memory source of truth
+See: cascade/commit-llm-rules-to-memory.md
+
+|`cp: persist memory to llm-rules`
+|Persists memory content to documentation:
+- Updates @llm-rules from memories
 - Maintains documentation structure
-- Ensures consistency
-
-|`cp: execute java maintenance`
-|Performs Java maintenance:
-- Updates code standards
-- Improves test coverage
-- Enhances documentation
-See: maintenance/java.md
-
-|`cp: finalize java maintenance`
-|Completes maintenance:
-- Final code cleanup
-- Build verification
-- Documentation check
-See: maintenance/finalize.md
+- Ensures completeness
+See: cascade/persist-memory-to-llm-rules.md
 
 |`cp: verify llm-rules`
 |Reviews and updates rules:
 - Checks consistency
 - Updates documentation
 - Ensures completeness
+See: cascade/verify-rules.md
+
 |===
+
+== Command Verification
+
+1. Command Documentation Requirements
+   - Every command must have:
+     * Entry in README.adoc command table
+     * Dedicated documentation file
+     * Complete implementation details
+     * Clear success criteria
+
+2. Command File Location
+   - Regular commands: maintenance/*.md
+   - Core rules: *.md
+   - No exceptions allowed
+
+3. Command Table Structure
+   - Command name (exact format)
+   - Purpose summary
+   - Key features (3-5 bullet points)
+   - Reference to documentation file
+
+4. Verification Steps
+   When adding/updating commands:
+   a. Update README.adoc command table
+   b. Create/update command documentation
+   c. Cross-reference all files
+   d. Verify command list completeness
 
 == Documentation Completeness
 
@@ -97,7 +134,7 @@ Each command and process must maintain complete documentation following these ru
    - Version tracking
    - Change documentation
 
-See: maintenance/verify-rules.md for detailed verification process.
+See: cascade/verify-rules.md for detailed verification process.
 
 == Directory Structure
 
@@ -105,13 +142,22 @@ See: maintenance/verify-rules.md for detailed verification process.
 |===
 |Directory/File |Purpose
 
+|`cascade/`
+|Cascade-specific operations:
+- cp.md: Command prompt interface
+- commands.md: Complete command listing and categories
+- verify-rules.md: Documentation verification rules
+- persist-memory-to-llm-rules.md: Persists memory content to documentation
+- commit-llm-rules-to-memory.md: Creates memories from documentation
+
 |`maintenance/`
-|Maintenance command definitions:
+|Maintenance operations:
 - prepare.md: Project preparation
 - java.md: Java maintenance
 - sonar.md: SonarCloud verification
 - finalize.md: Maintenance completion
-- verify-rules.md: Documentation verification
+- javadoc.md: Javadoc fixes and improvements
+- commit-memory.md: Commits rules to memory system
 
 |`logging.md`
 |Logging standards:
@@ -181,12 +227,3 @@ When adding new rules:
 3. Maintain consistency
 4. Include clear examples
 5. Document rationale
-
-## Version Control
-
-This documentation follows:
-
-1. Semantic versioning
-2. Conventional commits
-3. Feature branch workflow
-4. Pull request reviews

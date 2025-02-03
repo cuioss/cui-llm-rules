@@ -1,26 +1,37 @@
-# Java Maintenance
+# Java Maintenance Process
 
-## Command: cp: execute java maintenance
-
-### Purpose
+## Purpose
 Executes standardized Java maintenance tasks while preserving API stability and dependency constraints.
 
-### Critical Constraints
-- API Stability:
-  * Must preserve existing public API
-  * No changes to method signatures
-  * No changes to class hierarchies
-  * No changes to package structure
-  * No removal or modification of public methods
-  * No changes to method return types or parameters
-   
-- Dependency Management:
-  * No new dependencies may be added
-  * This constraint takes precedence over CUI standards
-  * Must work within existing dependency set
-  * Cannot add CUI dependencies if not already present
+## Related Commands
+- `cp: maintenance java prepare`: Initial setup
+- `cp: maintenance java perform`: Core maintenance
+- `cp: maintenance java finalize`: Completion tasks
+- `cp: fix javadoc`: Documentation fixes
 
-### Process Steps
+## Related Documentation
+- project.md: Project standards
+- technologies.md: Technology stack
+- maintenance/javadoc.md: Documentation standards
+- maintenance/sonar.md: Quality analysis
+
+## Critical Constraints
+
+### API Stability
+- Must preserve existing public API
+- No changes to method signatures
+- No changes to class hierarchies
+- No changes to package structure
+- No removal or modification of public methods
+- No changes to method return types or parameters
+   
+### Dependency Management
+- No new dependencies may be added
+- This constraint takes precedence over CUI standards
+- Must work within existing dependency set
+- Cannot add CUI dependencies if not already present
+
+## Process Steps
 
 1. Precondition Verification
    - Verify successful build with `./mvnw clean verify`
@@ -108,10 +119,22 @@ Executes standardized Java maintenance tasks while preserving API stability and 
    - Add final timestamp
    - Archive progress file
 
-### Success Criteria
-- All modules processed
-- All tests pass
-- Documentation complete
-- API stability maintained
-- No new dependencies added
-- Progress tracking complete
+## Success Criteria
+1. Code Quality
+   - All tests pass
+   - Documentation complete
+   - API stability maintained
+   - No new dependencies added
+   - Sonar quality gates passed
+
+2. Process Completion
+   - All modules processed
+   - Progress tracking complete
+   - All commits properly documented
+   - No critical issues pending
+
+## See Also
+- project.md: Project configuration
+- technologies.md: Technology standards
+- maintenance/javadoc.md: Documentation standards
+- maintenance/sonar.md: Quality analysis

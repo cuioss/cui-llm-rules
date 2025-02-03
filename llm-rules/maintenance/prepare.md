@@ -1,6 +1,6 @@
-# Prepare Project Maintenance
+# Java Maintenance Preparation
 
-## Command: cp: prepare project maintenance
+## Command: cp: maintenance java prepare
 
 ### Purpose
 Prepares a project for maintenance by setting up the environment and running initial verifications.

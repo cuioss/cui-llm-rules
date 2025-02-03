@@ -5,6 +5,8 @@
 ### Purpose
 Performs a definitive one-time transfer of @llm-rules into memories. Once executed successfully, these memories become the authoritative source of truth, eliminating the need to regularly check @llm-rules for updates.
 
+Note: This command is complementary to `cp: persist memory to llm-rules`, which handles the reverse flow of persisting memory content to documentation.
+
 ### Process Steps
 
 1. Rules Analysis

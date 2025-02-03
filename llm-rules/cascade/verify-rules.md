@@ -12,12 +12,18 @@ Ensures completeness and consistency of the LLM rules documentation by performin
      ```
      /llm-rules/
      ├── README.adoc
+     ├── cascade/
+     │   ├── cp.md
+     │   ├── commands.md
+     │   ├── verify-rules.md
+     │   ├── persist-memory-to-llm-rules.md
+     │   └── commit-llm-rules-to-memory.md
      ├── maintenance/
      │   ├── prepare.md
      │   ├── java.md
      │   ├── sonar.md
      │   ├── finalize.md
-     │   └── verify-rules.md
+     │   └── javadoc.md
      ├── logging.md
      ├── testing.md
      ├── documentation.md
@@ -27,11 +33,12 @@ Ensures completeness and consistency of the LLM rules documentation by performin
      ```
 
 2. Cross-Reference Check
-   For each command in README.adoc:
+   For each command in README.adoc and commands.md:
    - Verify corresponding implementation file exists
    - Check all referenced files are present
    - Validate all links are functional
    - Ensure documentation paths are correct
+   - Verify command descriptions match between files
 
 3. Command Documentation Completeness
    For each command file, verify presence of:
@@ -57,34 +64,61 @@ Ensures completeness and consistency of the LLM rules documentation by performin
 
 5. Command-Specific Verification
 
-   a. prepare.md:
-      - [ ] Build verification steps
-      - [ ] OpenRewrite modernization
-      - [ ] Error handling
-      - [ ] Success criteria
+   a. Cascade Commands:
+      - cp.md:
+        - [ ] Command prompt interface
+        - [ ] Command selection process
+        - [ ] Error handling
+        - [ ] User feedback
 
-   b. java.md:
-      - [ ] Progress tracking
-      - [ ] Project analysis
-      - [ ] Module-by-module steps
-      - [ ] Package-level maintenance
-      - [ ] API stability constraints
-      - [ ] Dependency constraints
+      - commands.md:
+        - [ ] Complete command listing
+        - [ ] Correct categorization
+        - [ ] Command descriptions
+        - [ ] Usage instructions
 
-   c. sonar.md:
-      - [ ] Access setup
-      - [ ] Quality gate review
-      - [ ] Issue analysis
-      - [ ] Coverage review
-      - [ ] Security assessment
-      - [ ] Integration points
+      - persist-memory-to-llm-rules.md:
+        - [ ] Memory persistence process
+        - [ ] Documentation update steps
+        - [ ] Validation requirements
+        - [ ] Success criteria
 
-   d. finalize.md:
-      - [ ] Precondition verification
-      - [ ] OpenRewrite cleanup
-      - [ ] Build verification
-      - [ ] Change management
-      - [ ] Success criteria
+      - commit-llm-rules-to-memory.md:
+        - [ ] Memory creation process
+        - [ ] Documentation transfer steps
+        - [ ] Validation requirements
+        - [ ] Success criteria
+
+   b. Maintenance Commands:
+      - prepare.md:
+        - [ ] Branch creation steps
+        - [ ] Initial verification
+        - [ ] Context setup
+        - [ ] Success criteria
+
+      - java.md:
+        - [ ] Code standards update
+        - [ ] Test coverage improvement
+        - [ ] Documentation enhancement
+        - [ ] Dependency constraints
+
+      - sonar.md:
+        - [ ] Quality gate review
+        - [ ] Issue examination
+        - [ ] Coverage verification
+        - [ ] Integration points
+
+      - finalize.md:
+        - [ ] Code cleanup steps
+        - [ ] Build verification
+        - [ ] Documentation check
+        - [ ] Success criteria
+
+      - javadoc.md:
+        - [ ] Error fixing process
+        - [ ] Content preservation
+        - [ ] Quality improvements
+        - [ ] Success criteria
 
 6. Version Control
    - Document last verification date
@@ -113,6 +147,7 @@ Ensures completeness and consistency of the LLM rules documentation by performin
 4. All cross-references valid
 5. All checklists completed
 6. Version information current
+7. Command descriptions consistent across all files
 
 ### Error Prevention
 1. Always compare against previous version
@@ -120,3 +155,4 @@ Ensures completeness and consistency of the LLM rules documentation by performin
 3. Maintain verification history
 4. Document all exceptions
 5. Regular completeness checks
+6. Verify command consistency between README.adoc and commands.md
