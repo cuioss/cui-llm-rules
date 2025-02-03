@@ -1,3 +1,11 @@
+# Documentation Rules
+
+## Purpose
+Defines the standards and requirements for documentation across the codebase.
+
+## Core Rules
+
+### Documentation Principles
 1. Only document existing code elements - no speculative or planned features
 2. All references must be verified to exist
 3. Use linking instead of duplication
@@ -7,19 +15,22 @@
    - Always use "Java beans" instead of "Jakarta beans"
    - Maintain "Java Bean Specification" terminology
    - This applies to all documentation (Javadoc, code comments, README files)
-7. Code examples must follow these rules:
-   - Must be complete and compilable
-   - Include all necessary imports
-   - Show proper error handling
-   - Follow project coding standards
-   - Be verified by unit tests
-   - Structure:
-     * Start with setup/configuration
-     * Show main functionality
-     * Include error handling
-     * Demonstrate cleanup if needed
 
-Package Documentation Structure:
+### Code Example Requirements
+1. Must be complete and compilable
+2. Include all necessary imports
+3. Show proper error handling
+4. Follow project coding standards
+5. Be verified by unit tests
+6. Structure:
+   * Start with setup/configuration
+   * Show main functionality
+   * Include error handling
+   * Demonstrate cleanup if needed
+
+## Documentation Structure
+
+### Package Documentation
 1. Overview section explaining purpose and scope
 2. Key Components section listing main classes/interfaces
 3. Usage Examples with actual code samples
@@ -27,7 +38,7 @@ Package Documentation Structure:
 5. Cross-references to related components
 6. Author and version information
 
-Class/Interface Documentation:
+### Class/Interface Documentation
 1. Clear purpose description
 2. Parameter descriptions with validation rules
 3. Return value descriptions
@@ -36,7 +47,7 @@ Class/Interface Documentation:
 6. Version information with @since tags
 7. Thread-safety notes where applicable
 
-Method Documentation:
+### Method Documentation
 1. Precise description of functionality
 2. Parameter validation rules
 3. Return value guarantees

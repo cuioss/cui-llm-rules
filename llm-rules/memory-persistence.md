@@ -6,41 +6,23 @@ This document outlines the process for persisting and updating memory rules in t
 
 When triggered by the prompt "cp: persist memory", follow these steps:
 
-1. Create Feature Branch (if needed)
-   - Branch name format: `/feature/memory_<descriptive_name>`
-   - Branch from latest master
-   - Pull latest changes before branching
-
-2. Update Documentation
-   - Identify relevant `.md` files in `doc/llm-rules/`
+1. Update Documentation
+   - Identify relevant `.md` files in `/home/oliver/git/cui-llm-rules/llm-rules/`
    - Make necessary updates or create new files
    - Ensure changes follow documentation guidelines
    - Verify all references exist
 
-3. Update README.adoc
+2. Update README.adoc
    - Maintain list of available Cascade Prompts
    - Update memory files overview
    - Add new prompts to the command table
    - Keep file descriptions current
 
-4. Commit Changes
+3. Commit Changes
    - Add modified files
    - Use clear, descriptive commit message
    - Include overview of changes
    - Reference related documentation
-
-5. Push Changes
-   - Push feature branch to remote
-   - Command: git push -u origin <branch_name>
-   - Verify push was successful
-
-6. Create Pull Request (if needed)
-   - Title: Clear description of memory updates
-   - Body should include:
-     * Overview of changes
-     * Detailed list of updates by category
-     * Validation steps taken
-     * Impact of changes
 
 ## File Organization
 
@@ -55,7 +37,7 @@ Memory rules are organized in topic-specific files:
 
 ## Validation Requirements
 
-Before submitting changes:
+Before committing changes:
 1. Verify all references exist
 2. Ensure no speculative features
 3. Maintain consistent terminology
@@ -64,11 +46,10 @@ Before submitting changes:
 6. Verify README.adoc is updated
 7. Check Cascade Prompt documentation is complete
 
-## Pull Request Template
+## Commit Message Format
 
 ```markdown
-## Overview
-[Brief description of memory updates]
+cp: persist memory - [Brief description]
 
 ### Changes
 [Category 1]
@@ -80,9 +61,9 @@ Before submitting changes:
 - Change detail 2
 
 ### README Updates
-- [ ] Added new Cascade Prompts
-- [ ] Updated memory files overview
-- [ ] Updated file descriptions
+- Added new Cascade Prompts: [Y/N]
+- Updated memory files overview: [Y/N]
+- Updated file descriptions: [Y/N]
 
 ### Validation
 - All additions based on existing practices
@@ -97,5 +78,5 @@ Before submitting changes:
 The "cp: persist memory" prompt ensures:
 1. Documentation is properly organized and maintained
 2. README.adoc reflects all available prompts and memory files
-3. Changes are properly tracked and reviewed
+3. Changes are properly tracked
 4. Documentation remains consistent and accurate

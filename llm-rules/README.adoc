@@ -1,23 +1,25 @@
-= Purpose and Scope
+# Cascade LLM Rules
 
-These rules ensure:
+This repository serves as the primary source of truth for Cascade's behavior and decision-making processes. It defines the standards, processes, and rules that Cascade follows when assisting with code maintenance and development.
 
-1. Consistent code quality
-2. Standardized maintenance processes
-3. Uniform documentation practices
-4. Reliable testing approaches
+== Core Principles
 
-== Available Cascade Prompts
+1. Code Quality
+2. API Stability
+3. Documentation Accuracy
+4. Process Consistency
+
+== Available Commands
 
 [cols="2,4"]
 |===
-|Cascade Prompt |Description
+|Command |Purpose
 
 |`cp`
-|Lists all available prompts:
-- Displays numbered prompt list
-- Enables prompt selection by number
-- Executes selected prompt
+|Lists all available commands:
+- Displays numbered command list
+- Enables command selection
+- Executes selected command
 - Maintains consistent workflow
 
 |`cp: fix javadoc`
@@ -29,157 +31,146 @@ These rules ensure:
 - No code changes allowed
 
 |`cp: prepare project maintenance`
-|Initiates standardized maintenance process:
-- Creates feature branch
-- Performs initial verification
-- Sets up maintenance context
+|Initiates project maintenance:
+- Verifies build status
+- Applies OpenRewrite modernization
+- Prepares for maintenance tasks
+See: maintenance/prepare.md
 
 |`cp: verify sonar`
 |Performs SonarCloud analysis:
-- Accesses current branch analysis
 - Reviews quality gates
-- Examines new issues
+- Examines code issues
 - Verifies coverage metrics
+See: maintenance/sonar.md
 
 |`cp: persist memory`
 |Updates documentation:
-- Adds new memory rules
+- Updates local llm-rules
 - Updates README.adoc
 - Maintains documentation structure
 - Ensures consistency
 
 |`cp: execute java maintenance`
-|Performs code maintenance:
-- Updates dependencies
-- Applies code cleanup
-- Improves code quality
-- Follows project standards
+|Performs Java maintenance:
+- Updates code standards
+- Improves test coverage
+- Enhances documentation
+See: maintenance/java.md
 
 |`cp: finalize java maintenance`
 |Completes maintenance:
-- Runs OpenRewrite recipes
-- Verifies build stability
-- Prepares pull request
-- Updates documentation
+- Final code cleanup
+- Build verification
+- Documentation check
+See: maintenance/finalize.md
 
 |`cp: verify llm-rules`
 |Reviews and updates rules:
 - Checks consistency
 - Updates documentation
-- Refactors as needed
 - Ensures completeness
-
 |===
 
-## File Organization
+== Documentation Completeness
 
-[cols="2,2,4"]
+Each command and process must maintain complete documentation following these rules:
+
+1. Structure Requirements
+   - Clear purpose statement
+   - Detailed process steps
+   - Error handling procedures
+   - Success criteria
+   - Integration points (if applicable)
+   - Command-specific constraints
+
+2. Content Requirements
+   - No information loss from previous versions
+   - All sections fully documented
+   - Clear step-by-step procedures
+   - Error scenarios covered
+   - Examples where needed
+
+3. Verification Process
+   - Regular completeness checks
+   - Cross-reference validation
+   - Version tracking
+   - Change documentation
+
+See: maintenance/verify-rules.md for detailed verification process.
+
+== Directory Structure
+
+[cols="2,4"]
 |===
-|Category |File |Description
+|Directory/File |Purpose
 
-|Meta
-|`_structure.md`
-|Documentation structure and navigation:
-- Document types and relationships
-- Standard file formats
-- Navigation guidelines
-- Terminology reference
+|`maintenance/`
+|Maintenance command definitions:
+- prepare.md: Project preparation
+- java.md: Java maintenance
+- sonar.md: SonarCloud verification
+- finalize.md: Maintenance completion
+- verify-rules.md: Documentation verification
 
-|Command References
-|`prompt-list.md`
-|Available Cascade Prompts:
-- Command list and usage
-- Implementation guidelines
-- Workflow definitions
-
-|Process Definitions
-|`memory-persistence.md`
-|Memory persistence workflow:
-- Documentation update process
-- File organization rules
-- Commit guidelines
-
-|Process Definitions
-|`java-maintenance.md`
-|Java maintenance procedures:
-- Dependency updates
-- Code cleanup steps
-- Quality improvements
-
-|Process Definitions
-|`fix-javadoc.md`
-|Javadoc fix process:
-- Build verification
-- Documentation updates
-- Content preservation
-
-|Rule Collections
-|`project.md`
-|Project structure and build rules:
-- Maven wrapper usage
-- Build process guidelines
-- Build optimization techniques
-- Technology standards
-- Dependency management
-
-|Rule Collections
-|`documentation.md`
-|Documentation standards:
-- File formats
-- Content guidelines
-- Update procedures
-
-|Rule Collections
 |`logging.md`
-|Logging conventions:
-- Configuration
-- Usage patterns
-- Best practices
+|Logging standards:
+- CuiLogger usage
+- Log level guidelines
+- Testing requirements
 
-|Rule Collections
-|`technologies.md`
-|Technology standards:
-- Version requirements
-- Tool configurations
-- Platform specifics
-
-|Rule Collections
 |`testing.md`
-|Testing requirements:
-- Test coverage
-- Implementation patterns
-- Quality metrics
+|Testing framework rules:
+- JUnit 5 standards
+- Coverage requirements
+- Test utilities usage
 
-|Rule Collections
+|`documentation.md`
+|Documentation guidelines:
+- Format standards
+- Content requirements
+- Reference rules
+
+|`technologies.md`
+|Technology stack rules:
+- Required frameworks
+- Dependency management
+- Version guidelines
+
+|`project.md`
+|Project standards:
+- Build practices
+- Maven configuration
+- Project structure
+
 |`commit-policy.md`
 |Commit guidelines:
 - Message formats
-- Change scopes
+- Change tracking
 - Review process
-
 |===
 
-## Implementation Notes
+== Rule Application
 
-=== Documentation Rules (`documentation.md`)
-* Ensures accurate API documentation
-* Maintains verified references
-* Requires test-based examples
-* Enforces zero-error builds
+1. Cascade always checks these rules before taking action
+2. Rules are applied in order of specificity
+3. Command-specific rules take precedence
+4. Core principles must always be maintained
+5. Documentation completeness must be verified
 
-=== Maintenance Processes (`maintenance.md`)
-* Defines workflow standards
-* Manages code quality
-* Integrates verification
-* Ensures consistency
+== Version Control
 
-=== Project Standards (`project.md`)
-* Enforces build practices
-* Manages dependencies
-* Defines requirements
-* Maintains compatibility
+1. Documentation Changes
+   - Track all modifications
+   - Maintain change history
+   - Document verification results
+   - Note any exceptions
 
-NOTE: This document is automatically updated when new memories are persisted to the repository.
+2. Verification Requirements
+   - Regular completeness checks
+   - Cross-reference validation
+   - Version tracking
+   - Change documentation
 
 ## Contributing
 
