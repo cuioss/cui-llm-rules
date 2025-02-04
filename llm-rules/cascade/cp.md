@@ -8,13 +8,13 @@ Displays and manages the execution of all available Cascade commands through an 
 ### Process Overview
 
 1. Command Display
-   - Lists all available commands (from commands.md)
-   - Shows numbered command list
-   - Displays brief descriptions
-   - Maintains alphabetical order
+   - Lists all available commands with numbers [1-8]
+   - Shows command descriptions
+   - Groups by category
+   - Maintains consistent order
 
 2. Command Selection
-   - Accepts numeric input
+   - Accepts numeric input [1-8]
    - Validates selection
    - Provides command preview
    - Confirms execution
@@ -31,24 +31,38 @@ Displays and manages the execution of all available Cascade commands through an 
    ```
    cp
    ```
-   - Shows numbered list of all commands from commands.md
+   - Shows numbered list [1-8] of all commands
    - Waits for user selection
 
-2. Direct Command
+2. List Commands
+   ```
+   cp: list
+   ```
+   or
+   ```
+   [1]
+   ```
+   - Shows numbered list [1-8] of all commands
+   - Waits for user selection
+
+3. Direct Command
    ```
    cp: [command-name]
    ```
+   or
+   ```
+   [command-number]
+   ```
    - Directly executes specific command
-   - Example: `cp: fix javadoc`
+   - Example: `cp: fix javadoc` or `[5]`
 
 ### Command Categories
 
-See commands.md for the complete categorized list of commands:
-1. Core Commands
-2. Documentation Commands
-3. Java Maintenance Commands
-4. Memory Management Commands
-5. Quality Assurance Commands
+See commands.md for the complete numbered list [1-8]:
+[1] Core Commands
+[2-5] Java Maintenance Commands
+[6-7] Memory Management Commands
+[8] Quality Assurance Commands and Documentation Commands
 
 ### Success Criteria
 1. All commands from commands.md are listed correctly

@@ -1,6 +1,6 @@
 # Memory Persistence Process
 
-## Command: cp: persist memory to llm-rules
+## Command: [7] cp: persist memory to llm-rules
 
 ### Purpose
 Persists the content of memories to @llm-rules documentation, ensuring that memory-based knowledge is properly documented in the repository.

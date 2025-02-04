@@ -1,6 +1,6 @@
 # LLM Rules Verification
 
-## Command: cp: verify llm-rules
+## Command: [8] cp: verify llm-rules
 
 ### Purpose
 Ensures completeness and consistency of the LLM rules documentation by performing systematic verification.
