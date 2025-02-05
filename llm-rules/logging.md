@@ -38,21 +38,89 @@ Defines the standards and requirements for logging across the codebase.
   - 600-699: TRACE level messages
 
 ### LogMessages Implementation
-1. Create a final class named LogMessages in each module
-2. Define module-specific prefix as constant
-3. Create LogRecord instances using LogRecordModel.builder():
+1. Create a final utility class following the naming pattern `[Module][Component]LogMessages` in the module's root package
+   ```java
+   @UtilityClass
+   public final class PortalCommonCDILogMessages {
+   ```
+
+2. Define module-specific prefix as constant, using fully qualified module name:
+   ```java
+   public static final String PREFIX = "PortalCommonCDI";
+   ```
+   - Prefix should be specific to the module (e.g., "PortalCommonCDI", "PortalAuthentication") rather than generic
+
+3. Place the class in the module's root package (e.g., `de.cuioss.portal.common` for portal-common-cdi module)
+
+4. Create LogRecord instances using LogRecordModel.builder():
    ```java
    public static final LogRecord BUNDLE_LOADED = LogRecordModel.builder()
            .template("Successfully loaded %s '%s' for locale '%s'")
-           .prefix(MODULE_PREFIX)
+           .prefix(PREFIX)
            .identifier(2)
            .build();
    ```
-4. Document each LogRecord with:
+
+5. Document each LogRecord with:
    - Purpose
-   - Message format
+   - Complete message format including prefix (e.g., "PortalCommonCDI-002: Successfully loaded...")
    - Parameter descriptions
    - Log level
+
+### Example Implementation
+
+```java
+package de.cuioss.portal.common;
+
+import de.cuioss.tools.logging.LogRecord;
+import de.cuioss.tools.logging.LogRecordModel;
+import lombok.experimental.UtilityClass;
+
+/**
+ * Centralized log messages for the portal-common-cdi module.
+ * All messages follow the format: PortalCommonCDI-[identifier]: [message]
+ * Debug level messages use 1-500 range
+ * Warn level messages use 501-999 range
+ */
+@UtilityClass
+public final class PortalCommonCDILogMessages {
+
+    /** Module prefix for all log messages */
+    public static final String PREFIX = "PortalCommonCDI";
+
+    /**
+     * Debug level message when a ResourceBundle is successfully loaded
+     * Message: PortalCommonCDI-002: Successfully loaded %s '%s' for locale '%s'
+     * Parameters:
+     * 1. Class name
+     * 2. Bundle path
+     * 3. Locale
+     */
+    public static final LogRecord BUNDLE_LOADED = LogRecordModel.builder()
+            .template("Successfully loaded %s '%s' for locale '%s'")
+            .prefix(PREFIX)
+            .identifier(2)
+            .build();
+}
+```
+
+Usage in code:
+```java
+import de.cuioss.portal.common.PortalCommonCDILogMessages;
+// ...
+
+LOGGER.debug(PortalCommonCDILogMessages.BUNDLE_LOADED.format(
+    getClass().getName(), bundlePath, locale));
+```
+
+Usage in tests:
+```java
+import de.cuioss.portal.common.PortalCommonCDILogMessages;
+// ...
+
+LogAsserts.assertLogMessagePresentContaining(TestLogLevel.DEBUG,
+    PortalCommonCDILogMessages.BUNDLE_LOADED.resolveIdentifierString());
+```
 
 ### LogRecord Documentation
 - Document all Log-Message within a file /doc/LogMessage.adoc
@@ -122,3 +190,4 @@ class ResourceBundleLocatorTest {
                 LogMessages.BUNDLE_LOAD_FAILED.resolveIdentifierString());
     }
 }
+```
