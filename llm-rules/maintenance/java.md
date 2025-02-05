@@ -109,6 +109,17 @@ Executes standardized Java maintenance tasks while preserving API stability and 
              + List of attempted fixes
              + Current test state
            * Wait for user guidance before proceeding
+         - Phase Completion Requirements:
+           * All test classes migrated to JUnit 5
+           * Descriptive test names added
+           * Test organization improved
+           * Code duplication removed
+           * Logging assertions updated
+           * Documentation improved
+           * No deprecated APIs in test code
+           * All tests passing
+           * Code review completed
+           * Changes documented in tracking file
          - Build and verify
          - Commit after each successful module build:
            * Verify all tests pass and build succeeds
@@ -117,9 +128,20 @@ Executes standardized Java maintenance tasks while preserving API stability and 
            * Include clear description and improvements
            * Reference tracking document
            * Ensure no unintended production code changes
+         - Phase Transition:
+           * Update phase history with completion timestamp
+           * Verify all completion requirements met
+           * Document phase completion in progress log
+           * Clear approval for next phase
 
       2. Code Refactoring Phase
          - Update progress: "Code Refactoring"
+         - Production code changes allowed with explicit approval
+         - Changes must be:
+           * Well-documented
+           * Impact-assessed
+           * Risk-evaluated
+           * Backward-compatible
          - Priority 1: Update to CUI logging standards
            * See logging.md for comprehensive logging requirements and implementation details
          - Priority 2: Fix deprecated API usage:
@@ -131,36 +153,84 @@ Executes standardized Java maintenance tasks while preserving API stability and 
            * Maintain existing API contracts and behavior
            * No refactoring of working code
            * No dependency updates unless required for deprecated API fixes
+         - Phase Completion Requirements:
+           * Static code analysis completed
+           * Deprecated API usage identified
+           * Improvement opportunities documented
+           * Changes proposed and reviewed
+           * Implementation patterns modernized
+           * Documentation updated
+           * Tests passing after changes
+           * Migration guide created if needed
+           * Code review completed
+           * Changes documented in tracking file
          - Build and verify after each change
          - Commit changes separately:
            * Logging updates: prefix with "logging(module-name):"
            * API updates: prefix with "api(module-name):"
+         - Phase Transition:
+           * Update phase history with completion timestamp
+           * Verify all completion requirements met
+           * Document phase completion in progress log
+           * Clear approval for next phase
 
-      3. Documentation Update Phase
-         - Update progress: "Documentation Update"
+      3. Documentation Phase
+         - Update progress: "Documentation"
          - Update to CUI standards:
            * Verify references
            * Add proper linking
            * Include test examples
            * Document parameters/returns
+         - Focus on documentation improvements:
+           * Update all affected documentation
+           * Create migration guides if needed
+         - Phase Completion Requirements:
+           * All public API documented
+           * Migration guides complete
+           * Release notes updated
+           * Documentation reviewed
+           * Changes documented in tracking file
          - Build javadoc
          - Fix warnings/errors
          - Commit with descriptive message
 
-      4. Package Completion
-         - Mark package as complete
-         - Record completed phases
-         - Add completion timestamp
-
    c. Module Completion
+      - Verify all packages completed
+      - Update module status in tracking
+      - Document any remaining issues
       - Mark module as complete
       - Record timestamp
       - Update progress file
 
-6. Process Completion
+6. Progress Tracking Requirements
+   - Maintain detailed java-maintenance.md
+   - For each phase:
+     * Clear start and end timestamps
+     * Explicit completion criteria
+     * Verification checklist
+     * Phase transition approval
+   - Document all changes and decisions
+   - Track progress at package level
+   - Regular status updates in progress log
+   - Clear phase transition markers
+
+7. Phase Management
+   - Each phase must have:
+     * Clear entry criteria
+     * Explicit completion requirements
+     * Verification checklist
+     * Transition approval process
+   - Phase transitions require:
+     * All completion criteria met
+     * Documentation updated
+     * Explicit approval
+     * Timestamp recording
+
+8. Process Completion
    - Update status to "Completed"
-   - Add final timestamp
-   - Archive progress file
+   - Verify all modules processed
+   - Final documentation review
+   - Comprehensive testing pass
 
 ## Success Criteria
 1. Code Quality
