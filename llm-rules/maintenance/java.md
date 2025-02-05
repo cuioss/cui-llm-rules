@@ -14,6 +14,7 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 - technologies.md: Technology stack
 - maintenance/javadoc.md: Documentation standards
 - maintenance/sonar.md: Quality analysis
+- logging.md: Logging standards and implementation
 
 ## Critical Constraints
 
@@ -100,6 +101,14 @@ Executes standardized Java maintenance tasks while preserving API stability and 
            * Error scenarios
            * Log levels
            * Edge cases
+         - If stuck on fixing a unit test:
+           * Define "stuck" as 3 consecutive failed builds
+           * Stop work on the test
+           * Provide user with:
+             + Summary of the issue
+             + List of attempted fixes
+             + Current test state
+           * Wait for user guidance before proceeding
          - Build and verify
          - Commit after each successful module build:
            * Verify all tests pass and build succeeds
@@ -111,13 +120,21 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 
       2. Code Refactoring Phase
          - Update progress: "Code Refactoring"
-         - Apply CUI standards within constraints:
-           * Use CuiLogger if available
-           * Maintain API contracts
-           * Enhance error handling
-           * Use existing utilities
-         - Build and verify
-         - Commit with descriptive message
+         - Priority 1: Update to CUI logging standards
+           * See logging.md for comprehensive logging requirements and implementation details
+         - Priority 2: Fix deprecated API usage:
+           * Identify and replace deprecated methods, classes, and annotations
+           * Ensure replacements maintain API compatibility
+           * Document any required migration steps
+         - Minimal Changes Policy:
+           * Only make changes related to logging and deprecated APIs
+           * Maintain existing API contracts and behavior
+           * No refactoring of working code
+           * No dependency updates unless required for deprecated API fixes
+         - Build and verify after each change
+         - Commit changes separately:
+           * Logging updates: prefix with "logging(module-name):"
+           * API updates: prefix with "api(module-name):"
 
       3. Documentation Update Phase
          - Update progress: "Documentation Update"
@@ -163,3 +180,4 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 - technologies.md: Technology standards
 - maintenance/javadoc.md: Documentation standards
 - maintenance/sonar.md: Quality analysis
+- logging.md: Logging standards

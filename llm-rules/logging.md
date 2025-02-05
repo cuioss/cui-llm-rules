@@ -26,14 +26,33 @@ Defines the standards and requirements for logging across the codebase.
 - Use LogRecord#format for parameterized log messages
 - Use LogRecord for all INFO/WARN/ERROR/FATAL logs in production code
 - For LogAsserts testing, use LogRecord#resolveIdentifierString()
-- Aggregate all LogRecords in a module specific type, 'LogMessages', see https://github.com/cuioss/cui-portal-core/blob/main/modules/authentication/portal-authentication-token/src/main/java/de/cuioss/portal/authentication/token/LogMessages.java as an example
-- Create a short prefix for each module, prompt the user if there is none set
+- Aggregate all LogRecords in a module specific type, 'LogMessages'
+- Create a unique prefix for each module (e.g., "Portal", "Authentication"): Prompt the user if there is none set
 - Persist the prefix as constant within LogMessages
-- Introduce a sensible numbering: 
-  - 001 - 99 -> INFO
-  - 100 - 199 -> WARN
-  - 200 - 299 -> ERROR
-  - 300 - 399 -> FATAL
+- Numeric identifiers follow level ranges:
+  - 001-99: INFO level messages
+  - 100-199: WARN level messages
+  - 200-299: ERROR level messages
+  - 300-399: FATAL level messages
+  - 500-599: DEBUG level messages
+  - 600-699: TRACE level messages
+
+### LogMessages Implementation
+1. Create a final class named LogMessages in each module
+2. Define module-specific prefix as constant
+3. Create LogRecord instances using LogRecordModel.builder():
+   ```java
+   public static final LogRecord BUNDLE_LOADED = LogRecordModel.builder()
+           .template("Successfully loaded %s '%s' for locale '%s'")
+           .prefix(MODULE_PREFIX)
+           .identifier(2)
+           .build();
+   ```
+4. Document each LogRecord with:
+   - Purpose
+   - Message format
+   - Parameter descriptions
+   - Log level
 
 ### LogRecord Documentation
 - Document all Log-Message within a file /doc/LogMessage.adoc
@@ -61,11 +80,45 @@ Defines the standards and requirements for logging across the codebase.
 1. First argument must be de.cuioss.test.juli.TestLogLevel
 2. Only assertNoLogMessagePresent needs Logger parameter
 3. Use appropriate assertion methods:
-   - assertLogMessagePresent
-   - assertNoLogMessagePresent
-   - assertSingleLogMessagePresent
+   - assertLogMessagePresent: Exact match of complete message
+   - assertLogMessagePresentContaining: Partial match (good for identifier-based checks)
+   - assertNoLogMessagePresent: Verify absence of specific messages
+   - assertSingleLogMessagePresent: Verify exactly one occurrence
 
-### Test Data Requirements
-1. Use LogRecord#resolveIdentifierString for message verification
-2. Test both successful and error scenarios
-3. Verify correct log level usage
+### Testing Strategy
+1. Happy Path Testing:
+   - Verify expected logs are present
+   - Verify absence of warnings/errors
+   - Use assertLogMessagePresentContaining with resolveIdentifierString()
+
+2. Error Path Testing:
+   - Verify error/warning logs are present
+   - Verify success logs are absent
+   - Test with actual exceptions where applicable
+
+3. Best Practices:
+   - One test method per logging scenario
+   - Use EnableTestLogger annotation to configure logging
+   - Match on message identifiers for stability
+   - Test both message presence and absence where relevant
+   - Keep tests maintainable using central message definitions
+
+### Example Test Implementation
+```java
+@EnableTestLogger(debug = ResourceBundleLocator.class)
+class ResourceBundleLocatorTest {
+    @Test
+    void shouldHandleHappyCase() {
+        // Test code...
+        LogAsserts.assertLogMessagePresentContaining(TestLogLevel.DEBUG,
+                LogMessages.BUNDLE_LOADED.resolveIdentifierString());
+        LogAsserts.assertNoLogMessagePresent(TestLogLevel.WARN);
+    }
+
+    @Test
+    void shouldHandleError() {
+        // Test error case...
+        LogAsserts.assertLogMessagePresentContaining(TestLogLevel.ERROR,
+                LogMessages.BUNDLE_LOAD_FAILED.resolveIdentifierString());
+    }
+}
