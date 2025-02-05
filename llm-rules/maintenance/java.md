@@ -58,7 +58,20 @@ Executes standardized Java maintenance tasks while preserving API stability and 
    - Review existing dependencies
    - Update progress file with module list
 
-4. Module-by-Module Maintenance
+4. Build Requirements
+   - ALWAYS use Maven wrapper ('./mvnw')
+   - For module-specific builds:
+     * Use '-pl' parameter
+     * Format: './mvnw clean verify -pl :module-artifactId'
+     * Execute from project root directory
+   - Build command structure:
+     * Start with clean verify
+     * Add module selection if needed
+     * Include additional parameters as required
+   - Never cd into module directories
+   - Maintain consistent build context
+
+5. Module-by-Module Maintenance
    For each module:
 
    a. Module Analysis
@@ -72,6 +85,13 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 
       1. Test Refactoring Phase
          - Update progress: "Test Refactoring"
+         - CRITICAL: Production code changes are strictly prohibited without explicit user confirmation
+         - Any proposed production code changes must be accompanied by detailed reasoning including:
+           * Clear problem statement
+           * Impact analysis
+           * Potential risks
+           * Alternative solutions considered
+         - Only proceed with production code changes after receiving explicit user approval
          - Refactor tests to CUI standards within constraints:
            * Use JUnit 5 if available
            * Use existing test utilities
@@ -81,7 +101,13 @@ Executes standardized Java maintenance tasks while preserving API stability and 
            * Log levels
            * Edge cases
          - Build and verify
-         - Commit with descriptive message
+         - Commit after each successful module build:
+           * Verify all tests pass and build succeeds
+           * Group related test changes
+           * Use prefix "test(module-name):"
+           * Include clear description and improvements
+           * Reference tracking document
+           * Ensure no unintended production code changes
 
       2. Code Refactoring Phase
          - Update progress: "Code Refactoring"
@@ -114,7 +140,7 @@ Executes standardized Java maintenance tasks while preserving API stability and 
       - Record timestamp
       - Update progress file
 
-5. Process Completion
+6. Process Completion
    - Update status to "Completed"
    - Add final timestamp
    - Archive progress file
@@ -125,7 +151,6 @@ Executes standardized Java maintenance tasks while preserving API stability and 
    - Documentation complete
    - API stability maintained
    - No new dependencies added
-   - Sonar quality gates passed
 
 2. Process Completion
    - All modules processed
