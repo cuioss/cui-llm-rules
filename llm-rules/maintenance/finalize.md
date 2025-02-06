@@ -8,11 +8,11 @@ Completes the Java maintenance process by performing final cleanup and verificat
 ### Process Steps
 
 1. Progress Initialization
-   - Initialize progress in `maintenance/finalize.md`
+   - Initialize progress in `maintenance/progress/finalize.md`
    - Record start time and initial state
    - Set status to "In Progress"
    - Document current configuration
-   See: progress-tracking.md for details
+   See: maintenance/documentation/progress-management.md for details
 
 2. Precondition Verification
    - Update progress: "Precondition Check"
@@ -76,7 +76,8 @@ Completes the Java maintenance process by performing final cleanup and verificat
    - Record end time
    - Document all changes made
    - Set status to "Completed"
-   See: progress-tracking.md for details
+   - Archive progress file
+   See: maintenance/documentation/progress-management.md for details
 
 ### Success Criteria
 - All preconditions met

@@ -8,11 +8,11 @@ Prepares a project for maintenance by setting up the environment and running ini
 ### Process Steps
 
 1. Progress Initialization
-   - Initialize progress in `maintenance/prepare.md`
+   - Initialize progress in `maintenance/progress/prepare.md`
    - Record start time and initial state
    - Set status to "In Progress"
    - Document current configuration
-   See: progress-tracking.md for details
+   See: maintenance/documentation/progress-management.md for details
 
 2. Initial Build and Verification
    - Update progress: "Build Verification"
@@ -28,6 +28,7 @@ Prepares a project for maintenance by setting up the environment and running ini
 
 3. Basic Modernization (Open Rewrite)
    - Update progress: "Basic Modernization"
+   See: maintenance/documentation/progress-management.md for details
    - Run `./mvnw -Prewrite-modernize rewrite:run`
    - Build verification:
      * Run `./mvnw clean verify`
@@ -56,7 +57,7 @@ Prepares a project for maintenance by setting up the environment and running ini
    - Record end time
    - Document all changes made
    - Set status to "Completed"
-   See: progress-tracking.md for details
+   See: maintenance/documentation/progress-management.md for details
 
 ### Success Criteria
 - Project builds successfully
