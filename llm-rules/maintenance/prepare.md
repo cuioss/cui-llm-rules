@@ -99,6 +99,12 @@ Prepares a project for maintenance by setting up the environment and running ini
 - No pending build issues
 - Progress tracking complete and archived
 
+### Next Steps
+When all success criteria are met, proceed with:
+```
+cp: maintenance java perform
+```
+
 ### Common Mistakes to Avoid
 1. Skipping commits after each phase
 2. Using incorrect commit messages
