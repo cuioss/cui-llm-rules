@@ -53,11 +53,9 @@ Defines the standard technology stack and framework guidelines for CUI OSS proje
 5. Follow package structure guidelines
 
 ### Documentation
-1. JavaDoc for public APIs
-   - Complete method documentation
-   - Parameter descriptions
-   - Return value documentation
-   - Exception documentation
+1. API Documentation
+   - See maintenance/documentation/javadoc.md for complete Javadoc standards
+   - All public APIs must be documented according to standards
 
 2. Project Documentation
    - README.adoc for project overview

@@ -10,7 +10,7 @@ Defines the core project configuration and build rules for CUI OSS projects.
 
 ## Related Documentation
 - maintenance/java.md: Java maintenance process
-- maintenance/javadoc.md: Javadoc standards
+- maintenance/documentation/javadoc.md: Javadoc standards
 - technologies.md: Technology standards
 - cascade/verify-rules.md: Documentation verification
 
@@ -37,9 +37,7 @@ Defines the core project configuration and build rules for CUI OSS projects.
    - Verify all tests pass before commit
    - Keep commits atomic and focused
    - Run up to 5 consecutive builds without user interaction
-   - Use javadoc profile as needed:
-     * Single module: `-Pjavadoc`
-     * Multi-module: `-Pjavadoc-mm-reporting`
+   - For Javadoc builds, see maintenance/documentation/javadoc.md
 
 ## Project Standards
 
@@ -54,7 +52,7 @@ Defines the core project configuration and build rules for CUI OSS projects.
 ### Documentation Requirements
 1. README.adoc in project root
 2. Module-specific documentation
-3. API documentation via Javadoc
+3. For API documentation standards, see maintenance/documentation/javadoc.md
 4. Build and deployment instructions
 
 ### Quality Standards
@@ -73,4 +71,4 @@ Defines the core project configuration and build rules for CUI OSS projects.
 ## See Also
 - technologies.md: Detailed technology standards
 - maintenance/java.md: Java maintenance process
-- maintenance/javadoc.md: Javadoc standards
+- maintenance/documentation/javadoc.md: Javadoc standards
