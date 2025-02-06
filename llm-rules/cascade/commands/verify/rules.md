@@ -39,7 +39,7 @@ Ensures completeness and consistency of the LLM rules documentation by performin
      ```
 
 2. Cross-Reference Check
-   For each command in README.adoc and commands.md:
+   For each command in [README](../../../README.adoc) and [Commands](../../commands.md):
    - Verify corresponding implementation file exists
    - Check all referenced files are present
    - Validate all links are functional
@@ -71,69 +71,69 @@ Ensures completeness and consistency of the LLM rules documentation by performin
 5. Command-Specific Verification
 
    a. Cascade Commands:
-      - cp.md:
+      - [Command Prompt](../../cascade/cp.md):
         - [ ] Command prompt interface
         - [ ] Command selection process
         - [ ] Error handling
         - [ ] User feedback
 
-      - commands.md:
+      - [Commands](../../cascade/commands.md):
         - [ ] Complete command listing
         - [ ] Correct categorization
         - [ ] Command descriptions
         - [ ] Usage instructions
 
-      - persist-memory-to-llm-rules.md:
+      - [Memory Persistence](../../cascade/persist-memory-to-llm-rules.md):
         - [ ] Memory persistence process
         - [ ] Documentation update steps
         - [ ] Validation requirements
         - [ ] Success criteria
 
-      - commit-llm-rules-to-memory.md:
+      - [Memory Commit](../../cascade/commit-llm-rules-to-memory.md):
         - [ ] Memory creation process
         - [ ] Documentation transfer steps
         - [ ] Validation requirements
         - [ ] Success criteria
 
    b. Maintenance Commands:
-      - prepare.md:
+      - [Prepare](../../../maintenance/prepare.md):
         - [ ] Branch creation steps
         - [ ] Initial verification
         - [ ] Context setup
         - [ ] Success criteria
 
-      - java.md:
+      - [Java Maintenance](../../../maintenance/java.md):
         - [ ] Code standards update
         - [ ] Test coverage improvement
         - [ ] Documentation enhancement
         - [ ] Dependency constraints
 
-      - sonar.md:
+      - [Sonar](../../../maintenance/sonar.md):
         - [ ] Quality gate review
         - [ ] Issue examination
         - [ ] Coverage verification
         - [ ] Integration points
 
-      - finalize.md:
+      - [Finalize](../../../maintenance/finalize.md):
         - [ ] Code cleanup steps
         - [ ] Build verification
         - [ ] Documentation check
         - [ ] Success criteria
 
-      - documentation/javadoc.md:
+      - [Javadoc](../../../maintenance/documentation/javadoc.md):
         - [ ] Error fixing process
         - [ ] Content preservation
         - [ ] Quality improvements
         - [ ] Success criteria
 
-      - quality-standards.md:
+      - [Quality Standards](../../../core/standards/quality-standards.md):
         - [ ] Test structure and organization
         - [ ] Coverage requirements
         - [ ] Testing tools and frameworks
         - [ ] Quality verification
         - [ ] Security standards
 
-      - documentation-standards.md:
+      - [Documentation Standards](../../../core/standards/documentation-standards.md):
         - [ ] General principles
         - [ ] Terminology standards
         - [ ] Code example requirements
@@ -176,4 +176,4 @@ Ensures completeness and consistency of the LLM rules documentation by performin
 3. Maintain verification history
 4. Document all exceptions
 5. Regular completeness checks
-6. Verify command consistency between README.adoc and commands.md
+6. Verify command consistency between [README](../../../README.adoc) and [Commands](../../commands.md)

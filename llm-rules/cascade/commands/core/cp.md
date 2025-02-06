@@ -58,7 +58,7 @@ Displays and manages the execution of all available Cascade commands through an 
 
 ### Command Categories
 
-See commands.md for the complete numbered list [1-8]:
+See [Complete Command Listing](../commands.md) for the complete numbered list [1-8]:
 [1] Core Commands
 [2-5] Java Maintenance Commands
 [6-7] Memory Management Commands
@@ -72,6 +72,6 @@ See commands.md for the complete numbered list [1-8]:
 5. User feedback is clear
 
 ### See Also
-- cascade/commands.md: Complete command listing and categories
-- README.adoc: Command documentation overview
+- [Complete Command Listing](../commands.md): Complete command listing and categories
+- [Command Documentation Overview](../../../README.adoc): Command documentation overview
 - Individual command documentation files

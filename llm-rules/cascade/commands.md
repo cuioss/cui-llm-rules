@@ -4,9 +4,9 @@
 Defines all available Cascade commands and their usage patterns.
 
 ## Related Documentation
-- cascade/commands/core/cp.md: Command prompt interface
-- cascade/documentation-management.md: Documentation management
-- core/standards/documentation-standards.md: Documentation standards
+- [Command Prompt Interface](commands/core/cp.md): Command prompt interface
+- [Documentation Management](documentation-management.md): Documentation management
+- [Documentation Standards](../core/standards/documentation-standards.md): Documentation standards
 
 ## Command Categories
 
@@ -15,59 +15,59 @@ Defines all available Cascade commands and their usage patterns.
   * Lists all available commands
   * Interactive command selection
   * Command execution management
-  * Documentation: commands/core/cp.md
+  * Documentation: [Command Prompt Interface](commands/core/cp.md)
 
 ### 2. Java Maintenance Commands
 - `cp: maintenance java prepare`
   * Creates feature branch
   * Performs initial verification
   * Sets up maintenance context
-  * Documentation: maintenance/java/process.md
+  * Documentation: [Java Process](../maintenance/java/process.md)
 
 - `cp: maintenance java perform`
   * Updates dependencies
   * Applies code cleanup
   * Improves code quality
-  * Documentation: maintenance/java/process.md
+  * Documentation: [Java Process](../maintenance/java/process.md)
 
 - `cp: maintenance java finalize`
   * Runs OpenRewrite recipes
   * Verifies build stability
   * Prepares pull request
-  * Documentation: maintenance/java/process.md
+  * Documentation: [Java Process](../maintenance/java/process.md)
 
 - `cp: fix javadoc`
   * Fixes Javadoc errors and warnings
   * Makes minimal modifications
   * Preserves content
-  * Documentation: maintenance/java/process.md
+  * Documentation: [Java Process](../maintenance/java/process.md)
 
 ### 3. Memory Management Commands
 - `cp: commit llm-rules to memory`
   * One-time transfer from @llm-rules
   * Creates/updates memories
   * Establishes memory source of truth
-  * Documentation: commands/memory/commit.md
+  * Documentation: [Memory Commit](commands/memory/commit.md)
 
 - `cp: persist memory to llm-rules`
   * Updates @llm-rules from memories
   * Maintains documentation structure
   * Ensures completeness
-  * Documentation: commands/memory/persist.md
+  * Documentation: [Memory Persist](commands/memory/persist.md)
 
 ### 4. Quality Assurance Commands
 - `cp: verify sonar`
   * Reviews quality gates
   * Examines new issues
   * Verifies coverage metrics
-  * Documentation: maintenance/sonar.md
+  * Documentation: [Sonar Verification](../maintenance/sonar.md)
 
 ### 5. Documentation Commands
 - `cp: verify llm-rules`
   * Checks consistency
   * Updates documentation
   * Ensures completeness
-  * Documentation: commands/verify/rules.md
+  * Documentation: [Rules Verification](commands/verify/rules.md)
 
 ## Usage Instructions
 
@@ -91,6 +91,6 @@ Defines all available Cascade commands and their usage patterns.
 5. User feedback is clear
 
 ## See Also
-- cascade/commands/core/cp.md: Command prompt interface
-- cascade/documentation-management.md: Documentation management
+- [Command Prompt Interface](commands/core/cp.md): Command prompt interface
+- [Documentation Management](documentation-management.md): Documentation management
 - Individual command documentation in respective directories
