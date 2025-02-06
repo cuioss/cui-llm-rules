@@ -15,6 +15,7 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 - maintenance/javadoc.md: Documentation standards
 - maintenance/sonar.md: Quality analysis
 - logging.md: Logging standards and implementation
+- maintenance/progress-tracking.md: Defines the progress tracking 
 
 ## Critical Constraints
 
@@ -39,6 +40,7 @@ Executes standardized Java maintenance tasks while preserving API stability and 
    - Check for uncommitted changes (must be none)
 
 2. Progress Tracking Setup
+   - Verify progress-tracking as defined within maintenance/progress-tracking.md
    - Check for existing java-maintenance.md
    - If exists:
      * Read current progress
