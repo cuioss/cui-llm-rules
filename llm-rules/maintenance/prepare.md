@@ -10,6 +10,38 @@ Prepares a project for maintenance by setting up the environment and running ini
 - [Java Process](java/process.md): Java maintenance process
 - [Build Requirements](java/build.md): Build configuration
 
+### Commit Requirements
+- Each phase must be committed separately with specific commit messages
+- Commits must be made immediately after successful verification
+- Never proceed to next phase without committing current changes
+
+#### Required Commit Messages
+1. Build Fixes (if needed):
+   ```
+   Fix build issues in preparation phase
+   
+   - List specific fixes made
+   - Reference failing tests or modules
+   ```
+
+2. Modernization Changes:
+   ```
+   Modernize codebase using open-rewrite
+   
+   Applied rewrite-modernize profile changes
+   - List specific improvements
+   - Note any manual adjustments
+   ```
+
+3. Cleanup Changes:
+   ```
+   Prepare release using open-rewrite
+   
+   Applied rewrite-prepare-release profile changes
+   - List specific improvements
+   - Note any manual adjustments
+   ```
+
 ### Process Steps
 
 1. Progress Initialization
@@ -27,9 +59,10 @@ Prepares a project for maintenance by setting up the environment and running ini
      * Analyze build logs
      * Fix identified issues
      * Update progress with fixes
-     * Commit fixes with descriptive message
+     * Commit fixes with descriptive message (see Commit Requirements)
      * Repeat until build succeeds
    - Record successful build in progress
+   - ⚠️ REQUIRED: Commit any changes before proceeding
 
 3. Basic Modernization (Open Rewrite)
    - Update progress: "Basic Modernization"
@@ -39,10 +72,7 @@ Prepares a project for maintenance by setting up the environment and running ini
      * Run `./mvnw clean verify`
      * Record any issues in progress
      * Fix build issues
-     * Commit changes if any with message:
-       "Modernize codebase using open-rewrite
-       
-       Applied rewrite-modernize profile changes"
+   - ⚠️ REQUIRED: Commit changes using modernization commit message (see Commit Requirements)
    - Record modernization completion
 
 4. Extended Cleanup (Open Rewrite)
@@ -52,10 +82,7 @@ Prepares a project for maintenance by setting up the environment and running ini
      * Run `./mvnw clean verify`
      * Record any issues in progress
      * Fix build issues
-     * Commit changes if any with message:
-       "Prepare release using open-rewrite
-       
-       Applied rewrite-prepare-release profile changes"
+   - ⚠️ REQUIRED: Commit changes using cleanup commit message (see Commit Requirements)
    - Record cleanup completion
 
 5. Progress Completion
@@ -67,9 +94,16 @@ Prepares a project for maintenance by setting up the environment and running ini
 ### Success Criteria
 - Project builds successfully
 - OpenRewrite modernization applied
-- All changes committed
+- All changes committed with required messages
+- Commits made at each phase completion
 - No pending build issues
 - Progress tracking complete and archived
+
+### Common Mistakes to Avoid
+1. Skipping commits after each phase
+2. Using incorrect commit messages
+3. Combining multiple phase changes in one commit
+4. Proceeding to next phase before committing
 
 ## See Also
 - [Java Process](java/process.md): Java maintenance process
