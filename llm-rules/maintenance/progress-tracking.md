@@ -69,9 +69,12 @@ Defines the standardized process for tracking progress across maintenance tasks.
 ```
 /maintenance/
   ├── prepare.md
-  ├── java.md
-  ├── finalize.md
-  ├── javadoc.md
+  ├── maintenance/
+  │   ├── java.md
+  │   ├── sonar.md
+  │   ├── finalize.md
+  │   └── documentation/
+  │       └── javadoc.md
   └── progress-tracking.md
 ```
 

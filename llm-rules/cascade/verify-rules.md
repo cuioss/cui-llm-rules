@@ -23,7 +23,8 @@ Ensures completeness and consistency of the LLM rules documentation by performin
      │   ├── java.md
      │   ├── sonar.md
      │   ├── finalize.md
-     │   └── javadoc.md
+     │   └── documentation/
+     │       └── javadoc.md
      ├── logging.md
      ├── testing.md
      ├── documentation.md
@@ -114,7 +115,7 @@ Ensures completeness and consistency of the LLM rules documentation by performin
         - [ ] Documentation check
         - [ ] Success criteria
 
-      - javadoc.md:
+      - documentation/javadoc.md:
         - [ ] Error fixing process
         - [ ] Content preservation
         - [ ] Quality improvements

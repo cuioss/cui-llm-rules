@@ -12,7 +12,7 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 ## Related Documentation
 - project.md: Project standards
 - technologies.md: Technology stack
-- maintenance/javadoc.md: Documentation standards
+- maintenance/documentation/javadoc.md: Documentation standards
 - maintenance/sonar.md: Quality analysis
 - logging.md: Logging standards and implementation
 - maintenance/progress-tracking.md: Defines the progress tracking 
@@ -250,6 +250,6 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 ## See Also
 - project.md: Project configuration
 - technologies.md: Technology standards
-- maintenance/javadoc.md: Documentation standards
+- maintenance/documentation/javadoc.md: Documentation standards
 - maintenance/sonar.md: Quality analysis
 - logging.md: Logging standards
