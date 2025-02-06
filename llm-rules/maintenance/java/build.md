@@ -14,7 +14,10 @@ Defines build requirements and standards for Java maintenance tasks.
 ### Maven Wrapper Usage
 1. ALWAYS use Maven wrapper ('./mvnw')
 2. Run complete module build after each change
-3. Create local commit after each successful build
+3. Create local commit after each successful build, including:
+   - Code changes
+   - Test additions/modifications
+   - Documentation updates
 4. Never cd into module directories
 5. Maintain consistent build context
 
@@ -31,6 +34,7 @@ Defines build requirements and standards for Java maintenance tasks.
    - Use '-pl' parameter for module selection
    - Execute from project root directory
    - Include necessary parameters
+   - Commit changes after successful build
 
 3. Test Execution:
    ```bash
@@ -55,11 +59,12 @@ Defines build requirements and standards for Java maintenance tasks.
    - Use `-rf :module-name` to resume from specific module
    - Only build affected module and downstream dependencies
    - Example: `./mvnw clean verify -rf :module-name`
+   - Commit changes after successful build
 
 2. Module Dependencies:
    - Understand module relationships
    - Build in correct order
-   - Respect dependency chain
+   - Ensure all changes are committed after successful builds
 
 ### Build Sequence
 1. Core Rules:
@@ -140,7 +145,7 @@ Defines build requirements and standards for Java maintenance tasks.
 
 ### 5. Quality Requirements
 - All tests must pass
-- Follow [SonarCloud Integration](../../maintenance/sonar.md) for quality analysis
+- Follow [SonarCloud Integration](../sonar.md) for quality analysis
 - No critical issues
 - Documentation complete
 - Standards followed
@@ -148,12 +153,13 @@ Defines build requirements and standards for Java maintenance tasks.
 ### 6. Success Criteria
 - Clean build output
 - All tests passing
-- Quality gates passed (see [SonarCloud Integration](../../maintenance/sonar.md))
+- Quality gates passed (via SonarCloud)
 - No unresolved warnings
 - Documentation verified
 
 ## See Also
-- [Java Process](process.md): Java maintenance process
-- [Java Constraints](constraints.md): Java maintenance constraints
 - [Project Standards](../../core/standards/project-standards.md): Project standards
 - [Quality Standards](../../core/standards/quality-standards.md): Quality standards
+- [SonarCloud Integration](../sonar.md): Quality analysis process
+- [Java Process](process.md): Java maintenance process
+- [Java Constraints](constraints.md): Java maintenance constraints

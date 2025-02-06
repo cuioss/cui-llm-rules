@@ -22,13 +22,19 @@ Defines the integration and usage of SonarCloud for quality analysis in CUI OSS 
    https://sonarcloud.io/api/issues/search?componentKeys=cuioss_<project-name>&branch=<branch-name>&resolved=false&sinceLeakPeriod=true
    ```
 
-### 2. Quality Gate Review
+### 2. Important Notes
+- Always fetch analysis data directly from SonarCloud
+- Never use Maven Sonar plugin directly
+- Use `cp: verify sonar` command for all quality analysis tasks
+- Analysis results are fetched automatically from SonarCloud
+
+### 3. Quality Gate Review
 - Check overall status
 - Review failing conditions
 - Note quality metric thresholds
 - Document gate configuration
 
-### 3. Issue Management
+### 4. Issue Management
 
 #### Issue Analysis
 Review issues by:
@@ -45,7 +51,7 @@ Review issues by:
 - Document remediation steps
 - Reference specific SonarCloud rules
 
-### 4. Security Standards
+### 5. Security Standards
 
 #### Security Assessment
 - Check for vulnerabilities
