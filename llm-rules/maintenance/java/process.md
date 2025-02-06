@@ -10,29 +10,28 @@ Defines the core process and steps for Java maintenance tasks.
 - `cp: fix javadoc`: Documentation fixes
 
 ## Related Documentation
-- maintenance/java/constraints.md: Java maintenance constraints
-- maintenance/java/build.md: Build requirements
-- core/standards/project-standards.md: Project standards
-- core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality standards
-- core/standards/logging-standards.md: Logging standards
-- core/standards/progress-standards.md: Progress tracking and phase management
-- logging.md: Logging standards
+- [Java Constraints](constraints.md): Java maintenance constraints
+- [Build Requirements](build.md): Build configuration
+- [Project Standards](../../core/standards/project-standards.md): Project standards
+- [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
+- [Quality Standards](../../core/standards/quality-standards.md): Quality standards
+- [Logging Standards](../../core/standards/logging-standards.md): Logging standards
+- [Progress Standards](../../core/standards/progress-standards.md): Progress tracking and phase management
 
 ## Process Steps
 
 ### 1. Precondition Verification
 - Verify successful build with `./mvnw clean verify`
 - Check for uncommitted changes (must be none)
-- Review maintenance constraints
-- Verify build requirements
+- Review [maintenance constraints](constraints.md)
+- Verify [build requirements](build.md)
 
 ### 2. Progress Tracking Setup
 1. Initial Setup:
    - Create/update progress file
    - Record start time and state
    - Document configuration
-   - Verify progress management standards
+   - Verify [progress management standards](../../core/standards/progress-standards.md)
 
 2. Progress File Management:
    - Check for existing java-maintenance.md
@@ -71,7 +70,7 @@ Defines the core process and steps for Java maintenance tasks.
 
 1. Test Refactoring Phase
    - Update progress: "Test Refactoring"
-   - Follow test refactoring constraints
+   - Follow [test refactoring constraints](constraints.md#test-code-changes)
    - Enhance test coverage
    - Update test documentation
    - Verify all tests pass
@@ -79,15 +78,15 @@ Defines the core process and steps for Java maintenance tasks.
 
 2. Code Refactoring Phase
    - Update progress: "Code Refactoring"
-   - Follow code modification rules
-   - Update logging standards
+   - Follow [code modification rules](constraints.md#code-modification-rules)
+   - Update [logging standards](../../core/standards/logging-standards.md)
    - Fix deprecated APIs
    - Document all changes
    - Verify backward compatibility
 
 3. Documentation Phase
    - Update progress: "Documentation"
-   - Update to documentation standards
+   - Update to [documentation standards](../../core/standards/documentation-standards.md)
    - Create migration guides
    - Update API documentation
    - Fix documentation issues
@@ -151,10 +150,10 @@ Defines the core process and steps for Java maintenance tasks.
 - All phases completed
 
 ## See Also
-- maintenance/java/constraints.md: Java maintenance constraints
-- maintenance/java/build.md: Build requirements
-- core/standards/project-standards.md: Project standards
-- core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality standards
-- core/standards/logging-standards.md: Logging standards
-- core/standards/progress-standards.md: Progress tracking and phase management
+- [Java Constraints](constraints.md): Java maintenance constraints
+- [Build Requirements](build.md): Build configuration
+- [Project Standards](../../core/standards/project-standards.md): Project standards
+- [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
+- [Quality Standards](../../core/standards/quality-standards.md): Quality standards
+- [Logging Standards](../../core/standards/logging-standards.md): Logging standards
+- [Progress Standards](../../core/standards/progress-standards.md): Progress tracking

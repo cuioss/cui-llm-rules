@@ -5,6 +5,12 @@
 ### Purpose
 Completes the Java maintenance process by performing final cleanup and verification steps.
 
+## Related Documentation
+- [Progress Standards](../core/standards/progress-standards.md): Progress tracking and phase management
+- [Java Process](java/process.md): Java maintenance process
+- [Build Requirements](java/build.md): Build configuration
+- [Quality Standards](../core/standards/quality-standards.md): Quality standards
+
 ### Process Steps
 
 1. Progress Initialization
@@ -12,7 +18,7 @@ Completes the Java maintenance process by performing final cleanup and verificat
    - Record start time and initial state
    - Set status to "In Progress"
    - Document current configuration
-   See: maintenance/documentation/progress-management.md for details
+   See: [Progress Standards](../core/standards/progress-standards.md) for details
 
 2. Precondition Verification
    - Update progress: "Precondition Check"
@@ -77,7 +83,7 @@ Completes the Java maintenance process by performing final cleanup and verificat
    - Document all changes made
    - Set status to "Completed"
    - Archive progress file
-   See: maintenance/documentation/progress-management.md for details
+   See: [Progress Standards](../core/standards/progress-standards.md) for details
 
 ### Success Criteria
 - All preconditions met
@@ -88,3 +94,9 @@ Completes the Java maintenance process by performing final cleanup and verificat
 - Documentation is complete and accurate
 - No unresolved issues remain
 - Progress tracking complete and archived
+
+## See Also
+- [Java Process](java/process.md): Java maintenance process
+- [Build Requirements](java/build.md): Build configuration
+- [Progress Standards](../core/standards/progress-standards.md): Progress tracking
+- [Quality Standards](../core/standards/quality-standards.md): Quality standards

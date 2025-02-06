@@ -5,6 +5,11 @@
 ### Purpose
 Prepares a project for maintenance by setting up the environment and running initial verifications.
 
+## Related Documentation
+- [Progress Standards](../core/standards/progress-standards.md): Progress tracking and phase management
+- [Java Process](java/process.md): Java maintenance process
+- [Build Requirements](java/build.md): Build configuration
+
 ### Process Steps
 
 1. Progress Initialization
@@ -12,7 +17,7 @@ Prepares a project for maintenance by setting up the environment and running ini
    - Record start time and initial state
    - Set status to "In Progress"
    - Document current configuration
-   See: maintenance/documentation/progress-management.md for details
+   See: [Progress Standards](../core/standards/progress-standards.md) for details
 
 2. Initial Build and Verification
    - Update progress: "Build Verification"
@@ -28,7 +33,7 @@ Prepares a project for maintenance by setting up the environment and running ini
 
 3. Basic Modernization (Open Rewrite)
    - Update progress: "Basic Modernization"
-   See: maintenance/documentation/progress-management.md for details
+   See: [Progress Standards](../core/standards/progress-standards.md) for details
    - Run `./mvnw -Prewrite-modernize rewrite:run`
    - Build verification:
      * Run `./mvnw clean verify`
@@ -57,7 +62,7 @@ Prepares a project for maintenance by setting up the environment and running ini
    - Record end time
    - Document all changes made
    - Set status to "Completed"
-   See: maintenance/documentation/progress-management.md for details
+   See: [Progress Standards](../core/standards/progress-standards.md) for details
 
 ### Success Criteria
 - Project builds successfully
@@ -65,3 +70,8 @@ Prepares a project for maintenance by setting up the environment and running ini
 - All changes committed
 - No pending build issues
 - Progress tracking complete and archived
+
+## See Also
+- [Java Process](java/process.md): Java maintenance process
+- [Build Requirements](java/build.md): Build configuration
+- [Progress Standards](../core/standards/progress-standards.md): Progress tracking

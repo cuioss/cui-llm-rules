@@ -10,33 +10,33 @@ Provides a high-level overview of Java maintenance tasks and directs to detailed
 - `cp: fix javadoc`: Documentation fixes
 
 ## Related Documentation
-- maintenance/java/process.md: Detailed maintenance process
-- maintenance/java/constraints.md: Critical constraints
-- maintenance/java/build.md: Build requirements
-- core/standards/project-standards.md: Project standards
-- core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality standards
-- maintenance/documentation/progress-management.md: Progress tracking
-- logging.md: Logging standards
+- [Java Process](java/process.md): Detailed maintenance process
+- [Java Constraints](java/constraints.md): Critical constraints
+- [Build Requirements](java/build.md): Build requirements
+- [Project Standards](../core/standards/project-standards.md): Project standards
+- [Documentation Standards](../core/standards/documentation-standards.md): Documentation standards
+- [Quality Standards](../core/standards/quality-standards.md): Quality standards
+- [Progress Standards](../core/standards/progress-standards.md): Progress tracking
+- [Logging Standards](../core/standards/logging-standards.md): Logging standards
 
 ## Core Components
 
 ### 1. Process Documentation
-See maintenance/java/process.md for:
+See [Java Process](java/process.md) for:
 - Detailed process steps
 - Phase management
 - Progress tracking
 - Success criteria
 
 ### 2. Critical Constraints
-See maintenance/java/constraints.md for:
+See [Java Constraints](java/constraints.md) for:
 - API stability requirements
 - Dependency management
 - Code modification rules
 - Quality standards
 
 ### 3. Build Requirements
-See maintenance/java/build.md for:
+See [Build Requirements](java/build.md) for:
 - Maven wrapper usage
 - Build command structure
 - Build optimization
@@ -45,9 +45,9 @@ See maintenance/java/build.md for:
 ## Quick Start Guide
 
 1. Review Documentation
-   - Read process documentation
-   - Understand constraints
-   - Review build requirements
+   - Read [process documentation](java/process.md)
+   - Understand [constraints](java/constraints.md)
+   - Review [build requirements](java/build.md)
 
 2. Initial Setup
    - Verify preconditions
@@ -75,9 +75,9 @@ See maintenance/java/build.md for:
 6. Build requirements met
 
 ## See Also
-- maintenance/java/process.md: Detailed maintenance process
-- maintenance/java/constraints.md: Critical constraints
-- maintenance/java/build.md: Build requirements
-- core/standards/project-standards.md: Project standards
-- core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality standards
+- [Java Process](java/process.md): Detailed maintenance process
+- [Java Constraints](java/constraints.md): Critical constraints
+- [Build Requirements](java/build.md): Build requirements
+- [Project Standards](../core/standards/project-standards.md): Project standards
+- [Documentation Standards](../core/standards/documentation-standards.md): Documentation standards
+- [Quality Standards](../core/standards/quality-standards.md): Quality standards

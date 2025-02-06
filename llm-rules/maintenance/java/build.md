@@ -4,10 +4,10 @@
 Defines build requirements and standards for Java maintenance tasks.
 
 ## Related Documentation
-- core/standards/project-standards.md: Project standards and technology stack
-- core/standards/documentation-standards.md: Documentation standards
-- maintenance/java/process.md: Java maintenance process
-- maintenance/java/constraints.md: Java maintenance constraints
+- [Project Standards](../../core/standards/project-standards.md): Project standards and technology stack
+- [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
+- [Java Process](process.md): Java maintenance process
+- [Java Constraints](constraints.md): Java maintenance constraints
 
 ## Core Build Requirements
 
@@ -103,7 +103,7 @@ Defines build requirements and standards for Java maintenance tasks.
    - Run full test suite
 
 ## See Also
-- maintenance/java/process.md: Java maintenance process
-- maintenance/java/constraints.md: Java maintenance constraints
-- core/standards/project-standards.md: Project standards
-- core/standards/quality-standards.md: Quality standards
+- [Java Process](process.md): Java maintenance process
+- [Java Constraints](constraints.md): Java maintenance constraints
+- [Project Standards](../../core/standards/project-standards.md): Project standards
+- [Quality Standards](../../core/standards/quality-standards.md): Quality standards

@@ -4,11 +4,11 @@
 Defines critical constraints and requirements for Java maintenance tasks to ensure API stability and dependency management.
 
 ## Related Documentation
-- core/standards/project-standards.md: Project standards and technology stack
-- core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality and testing standards
-- maintenance/java/process.md: Java maintenance process
-- maintenance/java/build.md: Build requirements
+- [Project Standards](../../core/standards/project-standards.md): Project standards and technology stack
+- [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
+- [Quality Standards](../../core/standards/quality-standards.md): Quality and testing standards
+- [Java Process](process.md): Java maintenance process
+- [Build Requirements](build.md): Build configuration and requirements
 
 ## API Stability Constraints
 
@@ -106,7 +106,7 @@ Defines critical constraints and requirements for Java maintenance tasks to ensu
 - No critical issues
 
 ## See Also
-- maintenance/java/process.md: Java maintenance process
-- maintenance/java/build.md: Build requirements
-- core/standards/project-standards.md: Project standards
-- core/standards/quality-standards.md: Quality standards
+- [Java Process](process.md): Java maintenance process
+- [Build Requirements](build.md): Build configuration
+- [Project Standards](../../core/standards/project-standards.md): Project standards
+- [Quality Standards](../../core/standards/quality-standards.md): Quality standards

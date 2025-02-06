@@ -3,6 +3,11 @@
 ## Purpose
 Defines the rules that must be followed when creating, updating, or deleting documents within @llm-rules.
 
+## Related Documentation
+- [Documentation Standards](../core/standards/documentation-standards.md)
+- [Project Standards](../core/standards/project-standards.md)
+- [Progress Standards](../core/standards/progress-standards.md)
+
 ## Core Rules
 
 ### 1. Pre-Update Consultation
@@ -21,7 +26,7 @@ Defines the rules that must be followed when creating, updating, or deleting doc
 ### 3. Modularization
 - Information must not be duplicated across documents
 - Use references to link to information in other documents
-  Example: "Verify progress-tracking as defined within maintenance/progress-tracking.md"
+  Example: `[Progress Standards](../core/standards/progress-standards.md)`
 - When finding duplicated information:
   1. Identify all instances
   2. Present user with numbered options for consolidation
@@ -29,9 +34,9 @@ Defines the rules that must be followed when creating, updating, or deleting doc
 
 ### 4. Document Structure
 - Follow directory organization:
-  * /cascade/ for command documentation
-  * /maintenance/ for process documentation
-  * /core/ for fundamental standards
+  * `/cascade/commands/` for command documentation
+  * `/maintenance/` for process documentation
+  * `/core/standards/` for fundamental standards
 - Each document must contain:
   * Clear purpose statement
   * Related documentation references
@@ -39,10 +44,10 @@ Defines the rules that must be followed when creating, updating, or deleting doc
   * Success criteria (if applicable)
 
 ### 5. Cross-References
-- Use relative paths from repository root
-- Format: "as defined within [path/to/file.md]"
+- Use markdown links: `[Title](path/to/file.md)`
 - Always verify reference exists before adding
 - Update all references when moving documents
+- Use relative paths from current file location
 
 ### 6. User Interaction
 When in doubt about any decision, present options as:
@@ -57,7 +62,10 @@ Please choose an option:
 
 ### Creating Documents
 1. Verify no existing document covers the topic
-2. Choose appropriate directory based on content type
+2. Choose appropriate directory based on content type:
+   - Commands: [commands/](commands/)
+   - Standards: [core/standards/](../core/standards/)
+   - Maintenance: [maintenance/](../maintenance/)
 3. Follow standard document structure
 4. Add all necessary cross-references
 5. Present to user for confirmation
@@ -65,7 +73,7 @@ Please choose an option:
 ### Updating Documents
 1. Preserve all existing information
 2. Update cross-references if needed
-3. Maintain document structure
+3. Maintain document structure as defined in [Documentation Standards](../core/standards/documentation-standards.md)
 4. Verify no information loss
 5. Present changes to user if significant
 
@@ -75,6 +83,18 @@ Please choose an option:
 3. Present plan for handling references
 4. Archive valuable information if instructed
 5. Update all dependent documents
+
+## Success Criteria
+1. All references use markdown links
+2. No broken links exist
+3. Directory structure is maintained
+4. Information is properly modularized
+5. User is consulted for significant changes
+
+## See Also
+- [Command Documentation](commands/core/cp.md)
+- [Project Standards](../core/standards/project-standards.md)
+- [Documentation Standards](../core/standards/documentation-standards.md)
 
 ## Important Notes
 - Primary audience is LLM, not humans

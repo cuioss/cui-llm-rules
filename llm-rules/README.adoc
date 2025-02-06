@@ -21,42 +21,42 @@ This repository serves as the primary source of truth for Cascade's behavior and
 - Enables command selection
 - Executes selected command
 - Maintains consistent workflow
-See: cascade/cp.md
+See: link:cascade/commands/core/cp.md[Command Prompt Interface]
 
 |`cp: maintenance java prepare`
 |Initiates project maintenance:
 - Creates feature branch
 - Initial verification
 - Sets maintenance context
-See: maintenance/prepare.md
+See: link:maintenance/prepare.md[Project Preparation]
 
 |`cp: maintenance java perform`
 |Performs Java maintenance:
 - Updates code standards
 - Improves test coverage
 - Enhances documentation
-See: maintenance/java.md
+See: link:maintenance/java/process.md[Java Process]
 
 |`cp: maintenance java finalize`
 |Completes maintenance:
 - Final code cleanup
 - Build verification
 - Documentation check
-See: maintenance/finalize.md
+See: link:maintenance/finalize.md[Finalization Process]
 
 |`cp: fix javadoc`
 |Fixes Javadoc errors:
 - Minimal modifications
 - Content preservation
 - Quality improvement
-See: maintenance/javadoc.md
+See: link:maintenance/java/process.md[Java Process]
 
 |`cp: verify sonar`
 |Performs SonarCloud analysis:
 - Reviews quality gates
 - Examines code issues
 - Verifies coverage metrics
-See: maintenance/sonar.md
+See: link:maintenance/java/process.md[Java Process]
 
 |`cp: commit llm-rules to memory`
 |Creates memories from documentation:
@@ -64,21 +64,21 @@ See: maintenance/sonar.md
 - Creates/updates memories
 - Ensures completeness
 - Establishes memory source of truth
-See: cascade/commit-llm-rules-to-memory.md
+See: link:cascade/commands/memory/commit.md[Memory Creation]
 
 |`cp: persist memory to llm-rules`
 |Persists memory content to documentation:
 - Updates @llm-rules from memories
 - Maintains documentation structure
 - Ensures completeness
-See: cascade/persist-memory-to-llm-rules.md
+See: link:cascade/commands/memory/persist.md[Memory Persistence]
 
 |`cp: verify llm-rules`
 |Reviews and updates rules:
 - Checks consistency
 - Updates documentation
 - Ensures completeness
-See: cascade/verify-rules.md
+See: link:cascade/commands/verify/rules.md[Rules Verification]
 
 |===
 
@@ -92,9 +92,9 @@ See: cascade/verify-rules.md
      * Clear success criteria
 
 2. Command File Location
-   - Regular commands: maintenance/*.md
-   - Core rules: *.md
-   - No exceptions allowed
+   - Cascade commands: link:cascade/commands/[category]/*.md[Command Documentation]
+   - Maintenance commands: link:maintenance/*.md[Maintenance Documentation]
+   - Core standards: link:core/standards/*.md[Core Standards]
 
 3. Command Table Structure
    - Command name (exact format)
@@ -134,7 +134,7 @@ Each command and process must maintain complete documentation following these ru
    - Version tracking
    - Change documentation
 
-See: cascade/verify-rules.md for detailed verification process.
+See: link:cascade/commands/verify/rules.md[Rules Verification Process]
 
 == Directory Structure
 
@@ -142,65 +142,45 @@ See: cascade/verify-rules.md for detailed verification process.
 |===
 |Directory/File |Purpose
 
-|`cascade/`
+|link:cascade/commands/[cascade/commands/]
+|Command documentation:
+- core/: Core command interface
+- memory/: Memory management commands
+- verify/: Verification commands
+
+|link:cascade/[cascade/]
 |Cascade-specific operations:
-- cp.md: Command prompt interface
-- commands.md: Complete command listing and categories
-- verify-rules.md: Documentation verification rules
-- persist-memory-to-llm-rules.md: Persists memory content to documentation
-- commit-llm-rules-to-memory.md: Creates memories from documentation
+- link:cascade/commands.md[Command Listing]
+- link:cascade/documentation-management.md[Documentation Management]
 
-|`maintenance/`
+|link:core/standards/[core/standards/]
+|Core standards and guidelines:
+- link:core/standards/documentation-standards.md[Documentation Rules]
+- link:core/standards/logging-standards.md[Logging Conventions]
+- link:core/standards/progress-standards.md[Progress Tracking]
+- link:core/standards/project-standards.md[Project Configuration]
+- link:core/standards/quality-standards.md[Quality Metrics]
+- link:core/standards/version-control-standards.md[Version Control]
+
+|link:maintenance/[maintenance/]
 |Maintenance operations:
-- prepare.md: Project preparation
-- java.md: Java maintenance
-- sonar.md: SonarCloud verification
-- finalize.md: Maintenance completion
-- javadoc.md: Javadoc fixes and improvements
-- commit-memory.md: Commits rules to memory system
+- link:maintenance/prepare.md[Project Preparation]
+- link:maintenance/java.md[Java Maintenance Overview]
+- link:maintenance/finalize.md[Maintenance Completion]
 
-|`logging.md`
-|Logging standards:
-- CuiLogger usage
-- Log level guidelines
-- Testing requirements
+|link:maintenance/java/[maintenance/java/]
+|Java-specific maintenance:
+- link:maintenance/java/build.md[Build Configuration]
+- link:maintenance/java/constraints.md[Java Constraints]
+- link:maintenance/java/process.md[Detailed Process Steps]
 
-|`testing.md`
-|Testing framework rules:
-- JUnit 5 standards
-- Coverage requirements
-- Test utilities usage
-
-|`documentation.md`
-|Documentation guidelines:
-- Format standards
-- Content requirements
-- Reference rules
-
-|`technologies.md`
-|Technology stack rules:
-- Required frameworks
-- Dependency management
-- Version guidelines
-
-|`project.md`
-|Project standards:
-- Build practices
-- Maven configuration
-- Project structure
-
-|`commit-policy.md`
-|Commit guidelines:
-- Message formats
-- Change tracking
-- Review process
 |===
 
 == Rule Application
 
 1. Cascade always checks these rules before taking action
 2. Rules are applied in order of specificity
-3. Command-specific rules take precedence
+3. Standards must be followed without exception
 4. Core principles must always be maintained
 5. Documentation completeness must be verified
 
@@ -218,7 +198,7 @@ See: cascade/verify-rules.md for detailed verification process.
    - Version tracking
    - Change documentation
 
-## Contributing
+== Contributing
 
 When adding new rules:
 
