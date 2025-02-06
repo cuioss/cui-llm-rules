@@ -10,7 +10,7 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
 
 ## Related Documentation
 - core/standards/project-standards.md: Project standards and technology stack
-- maintenance/documentation/javadoc.md: Documentation standards
+- core/standards/documentation-standards.md: Documentation standards
 - maintenance/java.md: Java maintenance process
 
 ## Core Testing Standards
@@ -183,5 +183,5 @@ Regular Review Points:
 
 ## See Also
 - core/standards/project-standards.md: Project standards and technology stack
-- maintenance/documentation/javadoc.md: Documentation standards
+- core/standards/documentation-standards.md: Documentation standards
 - maintenance/java.md: Java maintenance process

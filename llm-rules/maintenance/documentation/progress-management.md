@@ -4,8 +4,8 @@
 Defines comprehensive standards for tracking progress and managing phase transitions across maintenance tasks.
 
 ## Related Documentation
+- core/standards/documentation-standards.md: Documentation standards
 - maintenance/java.md: Java maintenance process
-- maintenance/documentation/javadoc.md: Javadoc standards
 - maintenance/prepare.md: Preparation process
 - maintenance/finalize.md: Finalization process
 

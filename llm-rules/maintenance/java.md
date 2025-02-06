@@ -11,7 +11,7 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 
 ## Related Documentation
 - core/standards/project-standards.md: Project standards and technology stack
-- maintenance/documentation/javadoc.md: Documentation standards
+- core/standards/documentation-standards.md: Documentation standards
 - core/standards/quality-standards.md: Quality and testing standards
 - maintenance/documentation/progress-management.md: Progress and phase management
 - logging.md: Logging standards and implementation
@@ -251,7 +251,7 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 
 ## See Also
 - core/standards/project-standards.md: Project standards and technology stack
-- maintenance/documentation/javadoc.md: Documentation standards
+- core/standards/documentation-standards.md: Documentation standards
 - core/standards/quality-standards.md: Quality and testing standards
 - maintenance/documentation/progress-management.md: Progress and phase management
 - logging.md: Logging standards

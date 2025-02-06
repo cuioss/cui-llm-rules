@@ -21,7 +21,8 @@ Ensures completeness and consistency of the LLM rules documentation by performin
      ├── core
      │   └── standards
      │       ├── project-standards.md
-     │       └── quality-standards.md
+     │       ├── quality-standards.md
+     │       └── documentation-standards.md
      ├── maintenance/
      │   ├── prepare.md
      │   ├── java.md
@@ -131,6 +132,14 @@ Ensures completeness and consistency of the LLM rules documentation by performin
         - [ ] Testing tools and frameworks
         - [ ] Quality verification
         - [ ] Security standards
+
+      - documentation-standards.md:
+        - [ ] General principles
+        - [ ] Terminology standards
+        - [ ] Code example requirements
+        - [ ] Documentation structure
+        - [ ] Javadoc maintenance
+        - [ ] Progress tracking
 
 6. Version Control
    - Document last verification date
