@@ -65,7 +65,7 @@ Defines the core project standards, technology stack, and framework guidelines f
 2. Build Sequence Rules:
    - Verify all tests pass before commit
    - Keep commits atomic and focused
-   - Run up to 5 consecutive builds without user interaction
+   - Run up to 5 consecutive builds maximum without user interaction
    - For Javadoc builds, see maintenance/documentation/javadoc.md
 
 ### 3. Framework Guidelines
@@ -113,13 +113,15 @@ Defines the core project standards, technology stack, and framework guidelines f
    - Quality gates must pass
    - No critical issues
    - Technical debt managed
-   - Security vulnerabilities addressed
+   - Security vulnerabilities must be addressed immediately
+   - Regular security audits required
 
 2. Test Coverage
    - Minimum 80% coverage
    - Critical paths covered
-   - Integration test coverage
+   - Integration test coverage required for all APIs
    - All tests passing
+   - Regular integration test maintenance
 
 3. Documentation Quality
    - Complete API documentation

@@ -10,10 +10,9 @@ Executes standardized Java maintenance tasks while preserving API stability and 
 - `cp: fix javadoc`: Documentation fixes
 
 ## Related Documentation
-- project.md: Project standards
-- technologies.md: Technology stack
-- maintenance/documentation/progress-management.md: Progress and phase management
+- core/standards/project-standards.md: Project standards and technology stack
 - maintenance/documentation/javadoc.md: Documentation standards
+- maintenance/documentation/progress-management.md: Progress and phase management
 - maintenance/sonar.md: Quality analysis
 - logging.md: Logging standards and implementation
 
@@ -251,9 +250,8 @@ Executes standardized Java maintenance tasks while preserving API stability and 
    - No critical issues pending
 
 ## See Also
-- project.md: Project configuration
-- technologies.md: Technology standards
-- maintenance/documentation/progress-management.md: Progress and phase management
+- core/standards/project-standards.md: Project standards and technology stack
 - maintenance/documentation/javadoc.md: Documentation standards
+- maintenance/documentation/progress-management.md: Progress and phase management
 - maintenance/sonar.md: Quality analysis
 - logging.md: Logging standards

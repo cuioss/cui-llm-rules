@@ -9,9 +9,9 @@ Defines comprehensive standards for Javadoc documentation and maintenance proced
 - `cp: maintenance java finalize`: Completion tasks
 
 ## Related Documentation
-- project.md: Project standards
-- technologies.md: Technology stack
+- core/standards/project-standards.md: Project standards and technology stack
 - maintenance/java.md: Java maintenance process
+- maintenance/sonar.md: Quality analysis
 
 ## Core Standards
 
@@ -159,6 +159,6 @@ Defines comprehensive standards for Javadoc documentation and maintenance proced
    - All steps documented
 
 ## See Also
-- project.md: Project standards
-- technologies.md: Technology stack
+- core/standards/project-standards.md: Project standards and technology stack
 - maintenance/java.md: Java maintenance process
+- maintenance/sonar.md: Quality analysis

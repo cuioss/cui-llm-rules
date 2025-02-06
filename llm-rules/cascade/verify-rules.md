@@ -18,6 +18,9 @@ Ensures completeness and consistency of the LLM rules documentation by performin
      │   ├── verify-rules.md
      │   ├── persist-memory-to-llm-rules.md
      │   └── commit-llm-rules-to-memory.md
+     ├── core
+     │   └── standards
+     │       └── project-standards.md
      ├── maintenance/
      │   ├── prepare.md
      │   ├── java.md

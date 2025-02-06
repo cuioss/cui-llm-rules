@@ -5,7 +5,7 @@ Defines the standards and requirements for documentation across the codebase.
 
 ## Related Documentation
 - maintenance/documentation/javadoc.md: Javadoc standards and maintenance
-- project.md: Project configuration
+- core/standards/project-standards.md: Project configuration and technology stack
 - technologies.md: Technology stack
 
 ## Core Rules

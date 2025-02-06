@@ -9,8 +9,8 @@ Verifies code quality through SonarCloud analysis and provides structured feedba
 - `cp: maintenance java finalize`: Completion tasks
 
 ## Related Documentation
-- project.md: Project standards
-- technologies.md: Technology stack
+- core/standards/project-standards.md: Project standards and technology stack
+- maintenance/documentation/javadoc.md: Documentation standards
 - maintenance/java.md: Java maintenance process
 
 ## Access Configuration
@@ -118,6 +118,6 @@ Verifies code quality through SonarCloud analysis and provides structured feedba
    - Security best practices followed
 
 ## See Also
-- project.md: Project standards
-- technologies.md: Technology stack
+- core/standards/project-standards.md: Project standards and technology stack
+- maintenance/documentation/javadoc.md: Documentation standards
 - maintenance/java.md: Java maintenance process
