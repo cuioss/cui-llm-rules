@@ -64,9 +64,9 @@ Defines all available Cascade commands and their usage patterns.
 
 ### 5. Documentation Commands
 - `cp: verify llm-rules`
-  * Checks consistency
-  * Updates documentation
-  * Ensures completeness
+  * Verifies all documentation against documentation-management.md rules
+  * Checks document structure and organization
+  * Validates cross-references and links
   * Documentation: [Rules Verification](commands/verify/rules.md)
 
 ## Usage Instructions

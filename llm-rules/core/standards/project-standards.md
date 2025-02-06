@@ -10,12 +10,12 @@ Defines the core project standards, technology stack, and framework guidelines f
 - `cp: verify sonar`: Quality analysis
 
 ## Related Documentation
-- maintenance/java.md: Java maintenance process
-- core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality standards
-- core/standards/version-control-standards.md: Version control and commit standards
-- core/standards/logging-standards.md: Logging configuration and implementation
-- cascade/verify-rules.md: Documentation verification
+- [Java Maintenance](../../maintenance/java.md): Java maintenance process
+- [Documentation Standards](documentation-standards.md): Documentation standards
+- [Quality Standards](quality-standards.md): Quality standards
+- [Version Control Standards](version-control-standards.md): Version control and commit standards
+- [Logging Standards](logging-standards.md): Logging configuration and implementation
+- [Rules Verification](../../cascade/commands/verify/rules.md): Documentation verification
 
 ## Core Standards
 
@@ -68,7 +68,7 @@ Defines the core project standards, technology stack, and framework guidelines f
    - Verify all tests pass before commit
    - Keep commits atomic and focused
    - Run up to 5 consecutive builds maximum without user interaction
-   - For Javadoc builds, see core/standards/documentation-standards.md
+   - For Javadoc builds, see [Documentation Standards](documentation-standards.md)
 
 ### 3. Framework Guidelines
 
@@ -99,7 +99,7 @@ Defines the core project standards, technology stack, and framework guidelines f
 #### Project Documentation
 1. README.adoc in project root
 2. Module-specific documentation
-3. API documentation (see core/standards/documentation-standards.md)
+3. API documentation (see [Documentation Standards](documentation-standards.md))
 4. Build and deployment instructions
 
 #### Change Documentation
@@ -152,6 +152,6 @@ Defines the core project standards, technology stack, and framework guidelines f
 - Security requirements satisfied
 
 ## See Also
-- core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality and testing standards
-- maintenance/documentation/progress-management.md: Progress and phase management
+- [Documentation Standards](documentation-standards.md): Documentation standards
+- [Quality Standards](quality-standards.md): Quality and testing standards
+- [Progress Standards](progress-standards.md): Progress and phase management

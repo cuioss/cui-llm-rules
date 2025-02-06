@@ -9,9 +9,9 @@ Defines comprehensive standards for all documentation across the codebase, inclu
 - `cp: maintenance java finalize`: Completion tasks
 
 ## Related Documentation
-- core/standards/project-standards.md: Project standards and technology stack
-- core/standards/quality-standards.md: Quality and testing standards
-- maintenance/java.md: Java maintenance process
+- [Project Standards](project-standards.md): Project standards and technology stack
+- [Quality Standards](quality-standards.md): Quality and testing standards
+- [Java Maintenance](../../maintenance/java.md): Java maintenance process
 
 ## Core Documentation Standards
 
@@ -208,6 +208,6 @@ Defines comprehensive standards for all documentation across the codebase, inclu
 - Status properly updated
 
 ## See Also
-- core/standards/project-standards.md: Project standards and technology stack
-- core/standards/quality-standards.md: Quality and testing standards
-- maintenance/java.md: Java maintenance process
+- [Project Standards](project-standards.md): Project standards and technology stack
+- [Quality Standards](quality-standards.md): Quality and testing standards
+- [Java Maintenance](../../maintenance/java.md): Java maintenance process

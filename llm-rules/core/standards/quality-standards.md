@@ -9,9 +9,9 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
 - `cp: maintenance java finalize`: Completion tasks
 
 ## Related Documentation
-- core/standards/project-standards.md: Project standards and technology stack
-- core/standards/documentation-standards.md: Documentation standards
-- maintenance/java.md: Java maintenance process
+- [Project Standards](project-standards.md): Project standards and technology stack
+- [Documentation Standards](documentation-standards.md): Documentation standards
+- [Java Maintenance](../../maintenance/java.md): Java maintenance process
 
 ## Core Testing Standards
 
@@ -182,6 +182,6 @@ Regular Review Points:
 - Security standards met
 
 ## See Also
-- core/standards/project-standards.md: Project standards and technology stack
-- core/standards/documentation-standards.md: Documentation standards
-- maintenance/java.md: Java maintenance process
+- [Project Standards](project-standards.md): Project standards and technology stack
+- [Documentation Standards](documentation-standards.md): Documentation standards
+- [Java Maintenance](../../maintenance/java.md): Java maintenance process
