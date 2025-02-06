@@ -29,7 +29,7 @@ Persists the content of memories to @llm-rules documentation, ensuring that memo
 
 Documentation follows topic-specific organization:
 - `README.adoc`: Overview and structure
-- `documentation.md`: Documentation standards
+- `core/standards/quality-standards.md`: Quality and testing standards
 - `logging.md`: Logging conventions
 - `project.md`: Build and project rules
 - `technologies.md`: Core technology stack

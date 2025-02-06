@@ -75,6 +75,10 @@ Defines the standardized process for tracking progress across maintenance tasks.
   │   ├── finalize.md
   │   └── documentation/
   │       └── javadoc.md
+  ├── core
+  │   └── standards
+  │       ├── project-standards.md
+  │       └── quality-standards.md
   └── progress-tracking.md
 ```
 

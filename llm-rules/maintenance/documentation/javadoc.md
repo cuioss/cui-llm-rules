@@ -10,8 +10,8 @@ Defines comprehensive standards for Javadoc documentation and maintenance proced
 
 ## Related Documentation
 - core/standards/project-standards.md: Project standards and technology stack
+- core/standards/quality-standards.md: Quality and testing standards
 - maintenance/java.md: Java maintenance process
-- maintenance/sonar.md: Quality analysis
 
 ## Core Standards
 
@@ -160,5 +160,5 @@ Defines comprehensive standards for Javadoc documentation and maintenance proced
 
 ## See Also
 - core/standards/project-standards.md: Project standards and technology stack
+- core/standards/quality-standards.md: Quality and testing standards
 - maintenance/java.md: Java maintenance process
-- maintenance/sonar.md: Quality analysis

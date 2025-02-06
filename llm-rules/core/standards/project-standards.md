@@ -11,8 +11,8 @@ Defines the core project standards, technology stack, and framework guidelines f
 
 ## Related Documentation
 - maintenance/java.md: Java maintenance process
-- maintenance/documentation/javadoc.md: Javadoc standards
-- maintenance/sonar.md: Quality analysis
+- maintenance/documentation/javadoc.md: Documentation standards
+- core/standards/quality-standards.md: Quality and testing standards
 - cascade/verify-rules.md: Documentation verification
 
 ## Core Standards
@@ -150,7 +150,6 @@ Defines the core project standards, technology stack, and framework guidelines f
 - Security requirements satisfied
 
 ## See Also
-- maintenance/java.md: Java maintenance process
-- maintenance/documentation/javadoc.md: Javadoc standards
-- maintenance/sonar.md: Quality analysis process
-- cascade/verify-rules.md: Documentation verification
+- maintenance/documentation/javadoc.md: Documentation standards
+- core/standards/quality-standards.md: Quality and testing standards
+- maintenance/documentation/progress-management.md: Progress and phase management

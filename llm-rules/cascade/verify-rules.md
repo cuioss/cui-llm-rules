@@ -20,7 +20,8 @@ Ensures completeness and consistency of the LLM rules documentation by performin
      │   └── commit-llm-rules-to-memory.md
      ├── core
      │   └── standards
-     │       └── project-standards.md
+     │       ├── project-standards.md
+     │       └── quality-standards.md
      ├── maintenance/
      │   ├── prepare.md
      │   ├── java.md
@@ -123,6 +124,13 @@ Ensures completeness and consistency of the LLM rules documentation by performin
         - [ ] Content preservation
         - [ ] Quality improvements
         - [ ] Success criteria
+
+      - quality-standards.md:
+        - [ ] Test structure and organization
+        - [ ] Coverage requirements
+        - [ ] Testing tools and frameworks
+        - [ ] Quality verification
+        - [ ] Security standards
 
 6. Version Control
    - Document last verification date
