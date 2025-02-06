@@ -12,7 +12,8 @@ Defines the core project standards, technology stack, and framework guidelines f
 ## Related Documentation
 - maintenance/java.md: Java maintenance process
 - core/standards/documentation-standards.md: Documentation standards
-- core/standards/quality-standards.md: Quality and testing standards
+- core/standards/quality-standards.md: Quality standards
+- core/standards/version-control-standards.md: Version control and commit standards
 - cascade/verify-rules.md: Documentation verification
 
 ## Core Standards
