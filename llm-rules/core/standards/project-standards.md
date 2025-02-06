@@ -39,7 +39,7 @@ Defines the core project standards, technology stack, and framework guidelines f
 
 #### Testing Framework
 - JUnit 5 for unit testing
-- JaCoCo for code coverage
+- SonarCloud for code analysis
 
 #### Quality Tools
 - SonarCloud for code analysis

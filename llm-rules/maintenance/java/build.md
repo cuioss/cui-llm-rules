@@ -115,10 +115,6 @@ Defines build requirements and standards for Java maintenance tasks.
   ```bash
   ./mvnw clean verify -pl modules/path/to/module -am
   ```
-- Coverage analysis:
-  ```bash
-  ./mvnw test jacoco:report -pl modules/path/to/module
-  ```
 - Documentation generation:
   ```bash
   ./mvnw javadoc:javadoc -pl modules/path/to/module
@@ -144,7 +140,7 @@ Defines build requirements and standards for Java maintenance tasks.
 
 ### 5. Quality Requirements
 - All tests must pass
-- Coverage must meet thresholds
+- Follow [SonarCloud Integration](../../maintenance/sonar.md) for quality analysis
 - No critical issues
 - Documentation complete
 - Standards followed
@@ -152,7 +148,7 @@ Defines build requirements and standards for Java maintenance tasks.
 ### 6. Success Criteria
 - Clean build output
 - All tests passing
-- Coverage requirements met
+- Quality gates passed (see [SonarCloud Integration](../../maintenance/sonar.md))
 - No unresolved warnings
 - Documentation verified
 

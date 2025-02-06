@@ -16,7 +16,7 @@ Defines the core process and steps for Java maintenance tasks.
 - [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
 - [Quality Standards](../../core/standards/quality-standards.md): Quality standards
 - [Logging Standards](../../core/standards/logging-standards.md): Logging standards
-- [Progress Standards](../../core/standards/progress-standards.md): Progress tracking and phase management
+- [Progress Standards](../../core/standards/progress-standards.md): Progress tracking
 
 ## Process Steps
 
@@ -73,9 +73,10 @@ Defines the core process and steps for Java maintenance tasks.
 1. Test Refactoring Phase
    - Update progress: "Test Refactoring"
    - Follow [test refactoring constraints](constraints.md#test-code-changes)
-   - Verify test coverage requirements
-   - Run coverage analysis from project root
-   - Use Maven wrapper for all commands
+   - Follow [SonarCloud integration](../../maintenance/sonar.md) for:
+     * Test coverage analysis
+     * Code quality review
+     * Issue identification
    - Document test gaps and improvements
    - Update test documentation
    - Verify all tests pass
@@ -88,7 +89,8 @@ Defines the core process and steps for Java maintenance tasks.
    - Fix deprecated APIs
    - Document all changes
    - Verify backward compatibility
-   - Run full build after changes
+   - Review SonarCloud quality analysis
+   - Address identified issues
    - Check for new warnings
 
 3. Documentation Phase
@@ -111,7 +113,7 @@ Defines the core process and steps for Java maintenance tasks.
 
 #### c. Module Completion
 - Verify all packages completed
-- Run final build with coverage
+- Run final Sonar analysis
 - Check quality gates
 - Update module status
 - Document remaining issues
