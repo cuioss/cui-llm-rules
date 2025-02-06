@@ -69,6 +69,12 @@ Defines all available Cascade commands and their usage patterns.
   * Validates cross-references and links
   * Documentation: [Rules Verification](commands/verify/rules.md)
 
+- `cp: update llm-rules`
+  * Interactively updates or creates documentation
+  * Ensures complete understanding before changes
+  * Maintains documentation standards
+  * Documentation: [Rules Update](commands/update/rules.md)
+
 ## Usage Instructions
 
 ### Command Selection

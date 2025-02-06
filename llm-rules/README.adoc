@@ -74,11 +74,19 @@ See: link:cascade/commands/memory/commit.md[Memory Creation]
 See: link:cascade/commands/memory/persist.md[Memory Persistence]
 
 |`cp: verify llm-rules`
-|Reviews and updates rules:
-- Checks consistency
-- Updates documentation
-- Ensures completeness
+|Verifies documentation against rules:
+- Checks document structure and organization
+- Validates cross-references and links
+- Ensures documentation standards compliance
 See: link:cascade/commands/verify/rules.md[Rules Verification]
+
+|`cp: update llm-rules`
+|Interactively updates documentation:
+- Consults latest documentation rules
+- Creates or updates documentation
+- Ensures complete understanding
+- Maintains documentation standards
+See: link:cascade/commands/update/rules.md[Rules Update]
 
 |===
 
