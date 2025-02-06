@@ -3,6 +3,9 @@
 ## Purpose
 Defines all available Cascade commands and their usage patterns.
 
+## Important Note
+All commands prefixed with `cp:` are AI assistant commands and must NEVER be executed in a shell. These commands are exclusively for communication with the AI assistant and are processed internally by the AI system.
+
 ## Related Documentation
 - [Command Prompt Interface](commands/core/cp.md): Command prompt interface
 - [Documentation Management](documentation-management.md): Documentation management
@@ -10,7 +13,7 @@ Defines all available Cascade commands and their usage patterns.
 
 ## Command Categories
 
-### 1. Core Commands
+### 1. Core Commands 
 - `[1] cp: list` - Command prompt interface
   * Lists all available commands
   * Interactive command selection
@@ -43,14 +46,14 @@ Defines all available Cascade commands and their usage patterns.
   * Documentation: [Java Process](../maintenance/java/process.md)
 
 ### 3. Memory Management Commands
-- `[6] cp: commit llm-rules to memory`
-  * One-time transfer from @llm-rules
-  * Creates/updates memories
+- `[6] cp: commit llm-rules to memory` *(AI Assistant Command)*
+  * One-time transfer from @llm-rules to AI memory
+  * Creates/updates AI assistant memories
   * Establishes memory source of truth
   * Documentation: [Memory Commit](commands/memory/commit.md)
 
-- `[7] cp: persist memory to llm-rules`
-  * Updates @llm-rules from memories
+- `[7] cp: persist memory to llm-rules` *(AI Assistant Command)*
+  * Updates @llm-rules from AI memories
   * Maintains documentation structure
   * Ensures completeness
   * Documentation: [Memory Persist](commands/memory/persist.md)

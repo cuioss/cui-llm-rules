@@ -5,6 +5,9 @@
 ### Purpose
 Displays and manages the execution of all available Cascade commands through an interactive prompt.
 
+### Important Note
+All commands prefixed with `cp:` are AI assistant commands and must NEVER be executed in a shell. These commands are exclusively for communication with the AI assistant and are processed internally by the AI system.
+
 ### Process Overview
 
 1. Command Display

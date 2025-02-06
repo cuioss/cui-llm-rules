@@ -3,9 +3,13 @@
 ## Command: [6] cp: commit llm-rules to memory
 
 ### Purpose
-Performs a definitive one-time transfer of @llm-rules into memories. Once executed successfully, these memories become the authoritative source of truth, eliminating the need to regularly check @llm-rules for updates.
+This is an AI assistant command (not a shell command) that performs a definitive one-time transfer of @llm-rules into memories. Once executed successfully, these memories become the authoritative source of truth for the AI assistant, eliminating the need to regularly check @llm-rules for updates.
 
 Note: This command is complementary to [7] `cp: persist memory to llm-rules`, which handles the reverse flow of persisting memory content to documentation.
+
+### Command Type
+- **AI Assistant Command**: This command is exclusively for use by the AI assistant, not for shell execution
+- **Memory Management**: Handles transfer of rules to AI assistant's memory system
 
 ### Process Steps
 
@@ -93,10 +97,11 @@ Note: This command is complementary to [7] `cp: persist memory to llm-rules`, wh
 6. User notified of any discrepancies
 
 ### Important Notes
-1. This is a one-time definitive transfer
-2. After successful execution, memories become the source of truth
-3. No need to check @llm-rules for future updates
-4. Any future changes should be made directly to memories
+1. This is an AI assistant command, not a shell command
+2. This is a one-time definitive transfer
+3. After successful execution, memories become the source of truth for the AI
+4. No need to check @llm-rules for future updates
+5. Any future changes should be made directly to memories
 
 ### Error Prevention
 1. Never modify rule content during memory creation
