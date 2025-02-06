@@ -14,6 +14,7 @@ Defines the core project standards, technology stack, and framework guidelines f
 - core/standards/documentation-standards.md: Documentation standards
 - core/standards/quality-standards.md: Quality standards
 - core/standards/version-control-standards.md: Version control and commit standards
+- core/standards/logging-standards.md: Logging configuration and implementation
 - cascade/verify-rules.md: Documentation verification
 
 ## Core Standards

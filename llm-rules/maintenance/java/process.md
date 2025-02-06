@@ -15,6 +15,7 @@ Defines the core process and steps for Java maintenance tasks.
 - core/standards/project-standards.md: Project standards
 - core/standards/documentation-standards.md: Documentation standards
 - core/standards/quality-standards.md: Quality standards
+- core/standards/logging-standards.md: Logging standards
 - maintenance/documentation/progress-management.md: Progress tracking
 - logging.md: Logging standards
 
@@ -155,4 +156,5 @@ Defines the core process and steps for Java maintenance tasks.
 - core/standards/project-standards.md: Project standards
 - core/standards/documentation-standards.md: Documentation standards
 - core/standards/quality-standards.md: Quality standards
+- core/standards/logging-standards.md: Logging standards
 - maintenance/documentation/progress-management.md: Progress tracking
