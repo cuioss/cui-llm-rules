@@ -15,7 +15,7 @@ This repository serves as the primary source of truth for Cascade's behavior and
 |===
 |Command |Description
 
-|`cp`
+|`[1] cp: list`
 |Lists all available commands:
 - Displays numbered command list
 - Enables command selection
@@ -23,42 +23,42 @@ This repository serves as the primary source of truth for Cascade's behavior and
 - Maintains consistent workflow
 See: link:cascade/commands/core/cp.md[Command Prompt Interface]
 
-|`cp: maintenance java prepare`
+|`[2] cp: maintenance java prepare`
 |Initiates project maintenance:
 - Creates feature branch
 - Initial verification
 - Sets maintenance context
 See: link:maintenance/prepare.md[Project Preparation]
 
-|`cp: maintenance java perform`
+|`[3] cp: maintenance java perform`
 |Performs Java maintenance:
 - Updates code standards
 - Improves test coverage
 - Enhances documentation
 See: link:maintenance/java/process.md[Java Process]
 
-|`cp: maintenance java finalize`
+|`[4] cp: maintenance java finalize`
 |Completes maintenance:
 - Final code cleanup
 - Build verification
 - Documentation check
 See: link:maintenance/finalize.md[Finalization Process]
 
-|`cp: fix javadoc`
+|`[5] cp: fix javadoc`
 |Fixes Javadoc errors:
 - Minimal modifications
 - Content preservation
 - Quality improvement
 See: link:maintenance/java/process.md[Java Process]
 
-|`cp: verify sonar`
+|`[8] cp: verify sonar`
 |Performs SonarCloud analysis:
 - Reviews quality gates
 - Examines code issues
 - Verifies coverage metrics
 See: link:maintenance/java/process.md[Java Process]
 
-|`cp: commit llm-rules to memory`
+|`[6] cp: commit llm-rules to memory`
 |Creates memories from documentation:
 - One-time transfer from @llm-rules
 - Creates/updates memories
@@ -66,21 +66,21 @@ See: link:maintenance/java/process.md[Java Process]
 - Establishes memory source of truth
 See: link:cascade/commands/memory/commit.md[Memory Creation]
 
-|`cp: persist memory to llm-rules`
+|`[7] cp: persist memory to llm-rules`
 |Persists memory content to documentation:
 - Updates @llm-rules from memories
 - Maintains documentation structure
 - Ensures completeness
 See: link:cascade/commands/memory/persist.md[Memory Persistence]
 
-|`cp: verify llm-rules`
+|`[9] cp: verify llm-rules`
 |Verifies documentation against rules:
 - Checks document structure and organization
 - Validates cross-references and links
 - Ensures documentation standards compliance
 See: link:cascade/commands/verify/rules.md[Rules Verification]
 
-|`cp: update llm-rules`
+|`[10] cp: update llm-rules`
 |Interactively updates documentation:
 - Consults latest documentation rules
 - Creates or updates documentation
