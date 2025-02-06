@@ -102,6 +102,60 @@ Defines build requirements and standards for Java maintenance tasks.
    - Fix test or code
    - Run full test suite
 
+## Detailed Build Requirements
+
+### 1. Maven Wrapper Usage
+- Always use mvnw wrapper
+- Run from project root directory
+- Never use direct maven commands
+- Verify wrapper is present and executable
+
+### 2. Build Command Structure
+- Module-specific builds:
+  ```bash
+  ./mvnw clean verify -pl modules/path/to/module -am
+  ```
+- Coverage analysis:
+  ```bash
+  ./mvnw test jacoco:report -pl modules/path/to/module
+  ```
+- Documentation generation:
+  ```bash
+  ./mvnw javadoc:javadoc -pl modules/path/to/module
+  ```
+- Full project build:
+  ```bash
+  ./mvnw clean verify
+  ```
+
+### 3. Build Optimization
+- Use -pl for module-specific builds
+- Always include -am for dependencies
+- Run from project root
+- Check exit codes
+- Document warnings
+
+### 4. Error Handling
+- Verify build success before proceeding
+- Document any build failures
+- Fix warnings before completion
+- Check for dependency issues
+- Ensure clean builds
+
+### 5. Quality Requirements
+- All tests must pass
+- Coverage must meet thresholds
+- No critical issues
+- Documentation complete
+- Standards followed
+
+### 6. Success Criteria
+- Clean build output
+- All tests passing
+- Coverage requirements met
+- No unresolved warnings
+- Documentation verified
+
 ## See Also
 - [Java Process](process.md): Java maintenance process
 - [Java Constraints](constraints.md): Java maintenance constraints

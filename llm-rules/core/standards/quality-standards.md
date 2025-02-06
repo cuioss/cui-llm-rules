@@ -79,60 +79,23 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
 
 ## Quality Verification
 
-### 1. SonarCloud Integration
+### 1. Quality Analysis Tools
+- SonarCloud for static code analysis (see [SonarCloud Integration](../../maintenance/sonar.md))
+- JUnit for unit testing
+- Mutation testing for test quality
+- Regular code reviews
+- Continuous integration checks
 
-#### Access Configuration
-1. Dashboard Access:
-   ```
-   https://sonarcloud.io/dashboard?id=cuioss_<project-name>&branch=<branch-name>
-   ```
-2. Issues API:
-   ```
-   https://sonarcloud.io/api/issues/search?componentKeys=cuioss_<project-name>&branch=<branch-name>&resolved=false&sinceLeakPeriod=true
-   ```
+### 2. Quality Metrics
+- Code coverage
+- Code duplication
+- Complexity metrics
+- Issue density
+- Technical debt ratio
 
-#### Quality Gate Review
-- Check overall status
-- Review failing conditions
-- Note quality metric thresholds
-- Document gate configuration
+### 3. Best Practices
 
-### 2. Issue Management
-
-#### Issue Analysis
-Review issues by:
-- Severity (MAJOR, MINOR, etc.)
-- Type (CODE_SMELL, BUG, VULNERABILITY)
-- Impact on quality metrics
-- Associated code locations
-- Rule references
-
-#### Issue Documentation
-- File and line references must be precise
-- Include issue descriptions from SonarCloud
-- Note severity and impact levels
-- Document remediation steps
-- Reference specific SonarCloud rules
-
-### 3. Security Standards
-
-#### Security Assessment
-- Check for vulnerabilities
-- Review security hotspots
-- Assess security-related code smells
-- Verify dependency security
-- No critical vulnerabilities allowed
-- Security best practices followed
-
-#### Security Documentation
-- Document security findings
-- Track vulnerability remediation
-- Record security decisions
-- Update security metrics
-
-## Best Practices
-
-### 1. Test Quality
+#### Test Quality
 - Regular test review
 - Mutation testing
 - Test failure analysis
@@ -140,20 +103,20 @@ Review issues by:
 - Clear test documentation
 - Consistent patterns
 
-### 2. Performance
+#### Performance
 - Fast test execution
 - Efficient resource usage
 - Parallel test execution where possible
 - Regular performance monitoring
 
-### 3. Review Process
+#### Review Process
 Regular Review Points:
 - After major feature completion
 - Before creating pull requests
 - During code review process
 - Post-merge verification
 
-### 4. Documentation
+#### Documentation
 - Record quality findings
 - Document remediation steps
 - Note technical debt decisions
@@ -185,3 +148,4 @@ Regular Review Points:
 - [Project Standards](project-standards.md): Project standards and technology stack
 - [Documentation Standards](documentation-standards.md): Documentation standards
 - [Java Maintenance](../../maintenance/java.md): Java maintenance process
+- [SonarCloud Integration](../../maintenance/sonar.md): SonarCloud configuration and usage

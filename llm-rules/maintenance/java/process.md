@@ -65,13 +65,18 @@ Defines the core process and steps for Java maintenance tasks.
 - Identify all Java packages
 - Document module-specific requirements
 - Map public API surface
+- Record start time for each module
+- Document dependencies and integration points
 
 #### b. Package-Level Maintenance
 
 1. Test Refactoring Phase
    - Update progress: "Test Refactoring"
    - Follow [test refactoring constraints](constraints.md#test-code-changes)
-   - Enhance test coverage
+   - Verify test coverage requirements
+   - Run coverage analysis from project root
+   - Use Maven wrapper for all commands
+   - Document test gaps and improvements
    - Update test documentation
    - Verify all tests pass
    - Document changes
@@ -83,22 +88,36 @@ Defines the core process and steps for Java maintenance tasks.
    - Fix deprecated APIs
    - Document all changes
    - Verify backward compatibility
+   - Run full build after changes
+   - Check for new warnings
 
 3. Documentation Phase
    - Update progress: "Documentation"
-   - Update to [documentation standards](../../core/standards/documentation-standards.md)
-   - Create migration guides
+   - Follow package documentation structure:
+     * Overview section with purpose
+     * Key Components listing
+     * Usage Examples from tests
+     * Best Practices section
+     * Cross-references
+     * Version information
    - Update API documentation
+   - Create migration guides
    - Fix documentation issues
-   - Verify completeness
+   - Use proper terminology:
+     * "Java beans" not "Jakarta beans"
+     * Follow Java Bean Specification terms
+   - Verify Javadoc builds without errors
+   - Document integration points
 
 #### c. Module Completion
 - Verify all packages completed
-- Update module status in tracking
-- Document any remaining issues
+- Run final build with coverage
+- Check quality gates
+- Update module status
+- Document remaining issues
 - Mark module as complete
-- Record timestamp
-- Update progress file
+- Record completion timestamp
+- Update progress tracking
 
 ### 5. Progress Management
 
