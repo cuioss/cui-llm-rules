@@ -1,66 +1,96 @@
 # Cascade Commands
 
-## Command Format
-The "cp" command is a standardized command format that triggers specific workflows.
+## Purpose
+Defines all available Cascade commands and their usage patterns.
 
-## Available Commands
+## Related Documentation
+- cascade/commands/core/cp.md: Command prompt interface
+- cascade/documentation-management.md: Documentation management
+- core/standards/documentation-standards.md: Documentation standards
 
-[1] Core Commands
-   - `cp: list` - Command prompt interface
-     * Lists all available commands
-     * Interactive command selection
-     * Command execution management
+## Command Categories
 
-[2] Java Maintenance Commands
-   - `cp: maintenance java prepare`
-     * Creates feature branch
-     * Performs initial verification
-     * Sets up maintenance context
+### 1. Core Commands
+- `cp: list` - Command prompt interface
+  * Lists all available commands
+  * Interactive command selection
+  * Command execution management
+  * Documentation: commands/core/cp.md
 
-[3] - `cp: maintenance java perform`
-     * Updates dependencies
-     * Applies code cleanup
-     * Improves code quality
+### 2. Java Maintenance Commands
+- `cp: maintenance java prepare`
+  * Creates feature branch
+  * Performs initial verification
+  * Sets up maintenance context
+  * Documentation: maintenance/java/process.md
 
-[4] - `cp: maintenance java finalize`
-     * Runs OpenRewrite recipes
-     * Verifies build stability
-     * Prepares pull request
+- `cp: maintenance java perform`
+  * Updates dependencies
+  * Applies code cleanup
+  * Improves code quality
+  * Documentation: maintenance/java/process.md
 
-[5] - `cp: fix javadoc`
-     * Fixes Javadoc errors and warnings
-     * Makes minimal modifications
-     * Preserves content
+- `cp: maintenance java finalize`
+  * Runs OpenRewrite recipes
+  * Verifies build stability
+  * Prepares pull request
+  * Documentation: maintenance/java/process.md
 
-[6] Memory Management Commands
-   - `cp: commit llm-rules to memory`
-     * One-time transfer from @llm-rules
-     * Creates/updates memories
-     * Establishes memory source of truth
+- `cp: fix javadoc`
+  * Fixes Javadoc errors and warnings
+  * Makes minimal modifications
+  * Preserves content
+  * Documentation: maintenance/java/process.md
 
-[7] - `cp: persist memory to llm-rules`
-     * Updates @llm-rules from memories
-     * Maintains documentation structure
-     * Ensures completeness
+### 3. Memory Management Commands
+- `cp: commit llm-rules to memory`
+  * One-time transfer from @llm-rules
+  * Creates/updates memories
+  * Establishes memory source of truth
+  * Documentation: commands/memory/commit.md
 
-[8] Quality Assurance Commands
-   - `cp: verify sonar`
-     * Reviews quality gates
-     * Examines new issues
-     * Verifies coverage metrics
+- `cp: persist memory to llm-rules`
+  * Updates @llm-rules from memories
+  * Maintains documentation structure
+  * Ensures completeness
+  * Documentation: commands/memory/persist.md
 
-[9] Documentation Commands
-   - `cp: verify llm-rules`
-     * Checks consistency
-     * Updates documentation
-     * Ensures completeness
+### 4. Quality Assurance Commands
+- `cp: verify sonar`
+  * Reviews quality gates
+  * Examines new issues
+  * Verifies coverage metrics
+  * Documentation: maintenance/sonar.md
 
-## Usage
-- Enter `cp: list` or number [1-9] to display/select commands
-- Enter the exact command with colon format (e.g. `cp: fix javadoc`)
-- Follow the defined workflow for each command
-- User confirmation may be required based on command type
+### 5. Documentation Commands
+- `cp: verify llm-rules`
+  * Checks consistency
+  * Updates documentation
+  * Ensures completeness
+  * Documentation: commands/verify/rules.md
+
+## Usage Instructions
+
+### Command Selection
+1. Use `cp: list` or number [1-9] to display/select commands
+2. Enter exact command with colon format (e.g. `cp: fix javadoc`)
+3. Follow the defined workflow for each command
+4. User confirmation may be required based on command type
+
+### Command Execution
+1. Commands are executed in defined order
+2. Each command follows its documented process
+3. Success criteria must be met to complete
+4. Error handling is provided for each command
+
+## Success Criteria
+1. All commands are properly documented
+2. Command selection works reliably
+3. Command execution follows defined process
+4. Error handling is effective
+5. User feedback is clear
 
 ## See Also
-- cascade/cp.md: Command prompt interface documentation
-- Individual command documentation files in maintenance/ and cascade/ directories
+- cascade/commands/core/cp.md: Command prompt interface
+- cascade/documentation-management.md: Documentation management
+- Individual command documentation in respective directories
