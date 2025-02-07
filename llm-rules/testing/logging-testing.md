@@ -150,6 +150,13 @@ void shouldNotLogInNormalCase() {
 - Not verifying absence of unexpected logs
 - Using wrong log levels in assertions
 
+## Important Notes
+- All rules are normative and must be applied unconditionally
+- Test all required log levels (INFO/WARN/ERROR/FATAL)
+- Always verify both presence and absence of messages
+- Keep tests focused on logging verification
+- Reference these rules with '@llm-rules'
+
 ## Success Criteria
 1. All required messages are tested
 2. Tests verify both success and failure cases
@@ -159,4 +166,6 @@ void shouldNotLogInNormalCase() {
 
 ## See Also
 - [Logging Standards](../core/standards/logging-standards.md): Core standards and requirements
-- [Logging Implementation Guide](../java/logging-implementation.md): Implementation patterns to test
+- [Logging Implementation Guide](../java/logging-implementation.md): Implementation to test
+- [Testing Standards](../core/standards/testing-standards.md): Core testing standards
+- [Project Standards](../core/standards/project-standards.md): Overall project standards

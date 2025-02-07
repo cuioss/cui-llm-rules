@@ -141,6 +141,15 @@ if (LOGGER.isDebugEnabled()) {
 - Verify no duplicate IDs within module
 - Follow level-specific ranges
 
+## Important Notes
+- All rules are normative and must be applied unconditionally
+- Follow DSL-Style Constants Pattern exactly
+- Never import below category level
+- Keep hierarchy depth at exactly 4 levels
+- Reference these rules with '@llm-rules'
+
 ## See Also
 - [Logging Standards](../core/standards/logging-standards.md): Core standards and requirements
-- [Logging Testing Guide](../testing/logging-testing.md): How to test logging implementations
+- [Logging Testing Guide](../testing/logging-testing.md): Testing patterns and examples
+- [DSL-Style Constants Pattern](./dsl-style-constants.md): Pattern for organizing constants
+- [Project Standards](../core/standards/project-standards.md): Overall project standards
