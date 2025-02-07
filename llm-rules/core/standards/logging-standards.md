@@ -8,6 +8,7 @@ Defines comprehensive standards for logging across the codebase, including confi
 - core/standards/documentation-standards.md: Documentation standards
 - core/standards/quality-standards.md: Quality standards
 - maintenance/java/process.md: Java maintenance process
+- java/dsl-style-constants.md: DSL-Style Constants Pattern
 
 ## Core Standards
 
@@ -55,28 +56,69 @@ Defines comprehensive standards for logging across the codebase, including confi
    - 600-699: TRACE level
 
 ### 2. LogMessages Implementation
-1. Class Structure:
+1. Class Structure and Organization:
+   - Follow the DSL-Style Nested Constants Pattern (see java/dsl-style-constants.md)
+   - Import category level constant, NOT its members
+   - Example:
+     ```java
+     // CORRECT:
+     import static de.cuioss.portal.core.PortalCoreLogMessages.SERVLET;
+     
+     // Then use:
+     SERVLET.INFO.SOME_MESSAGE
+     SERVLET.WARN.OTHER_MESSAGE
+     
+     // INCORRECT:
+     import static de.cuioss.portal.core.PortalCoreLogMessages.SERVLET.*;
+     
+     // Don't use:
+     INFO.SOME_MESSAGE
+     WARN.OTHER_MESSAGE
+     ```
+
+2. Complete Implementation Example:
    ```java
    @UtilityClass
-   public final class ModuleComponentLogMessages {
-       public static final String PREFIX = "ModuleComponent";
+   public final class PortalCoreLogMessages {
+       public static final String PREFIX = "PORTAL_CORE";
+       
+       @UtilityClass
+       public static final class SERVLET {
+           @UtilityClass
+           public static final class INFO {
+               public static final LogRecord USER_LOGIN = LogRecordModel.builder()
+                   .template("User %s logged in successfully")
+                   .prefix(PREFIX)
+                   .identifier(1)
+                   .build();
+           }
+           
+           @UtilityClass
+           public static final class WARN {
+               public static final LogRecord USER_NOT_LOGGED_IN = LogRecordModel.builder()
+                   .template("User not logged in for protected resource")
+                   .prefix(PREFIX)
+                   .identifier(100)
+                   .build();
+           }
+           
+           @UtilityClass
+           public static final class ERROR {
+               public static final LogRecord REQUEST_PROCESSING_ERROR = LogRecordModel.builder()
+                   .template("Error processing request: %s")
+                   .prefix(PREFIX)
+                   .identifier(200)
+                   .build();
+           }
+       }
    }
    ```
 
-2. Implementation Rules:
+3. Implementation Rules:
    - Create final utility class
    - Name pattern: [Module][Component]LogMessages
    - Place in module's root package
    - Define module-specific prefix constant
-
-3. LogRecord Creation:
-   ```java
-   public static final LogRecord BUNDLE_LOADED = LogRecordModel.builder()
-           .template("Successfully loaded %s '%s' for locale '%s'")
-           .prefix(PREFIX)
-           .identifier(2)
-           .build();
-   ```
 
 4. Documentation Requirements:
    - Purpose description
@@ -179,3 +221,4 @@ Defines comprehensive standards for logging across the codebase, including confi
 - core/standards/documentation-standards.md: Documentation standards
 - core/standards/quality-standards.md: Quality standards
 - maintenance/java/process.md: Java maintenance process
+- java/dsl-style-constants.md: DSL-Style Constants Pattern

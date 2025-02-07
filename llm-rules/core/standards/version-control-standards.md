@@ -25,7 +25,16 @@ Defines comprehensive standards for version control, including commit policies, 
 - Documentation updated
 - No unrelated changes
 
-### 3. Automated Commit Policy
+### 3. Tracking File Exception
+- Changes to tracking/progress files alone do not require commits
+- This applies specifically to files under maintenance/progress/
+- Include tracking file changes with related code commits
+- Exception cases requiring commits:
+  * Major milestone completions
+  * Phase transitions
+  * Critical status updates needing preservation
+
+### 4. Automated Commit Policy
 
 #### Core Requirements
 1. Automatic commits ONLY allowed when:
