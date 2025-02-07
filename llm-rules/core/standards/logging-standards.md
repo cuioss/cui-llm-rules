@@ -3,6 +3,30 @@
 ## Purpose
 Defines comprehensive standards for logging across the codebase, including configuration, implementation, and testing requirements.
 
+## Important Note on Code Changes
+When adapting code to these logging standards:
+- Only modify logging-related code (imports, log statements, assertions)
+- DO NOT change any unrelated production or test code
+- DO NOT refactor or "improve" other aspects while implementing logging changes
+- Keep changes focused solely on logging standard compliance
+
+This rule applies to both production and test code changes. For example:
+```java
+// When updating to DSL-style logging:
+
+// ALLOWED - Only logging-related changes:
+- Updating logging imports
+- Converting log statements to new format
+- Updating log assertions in tests
+
+// NOT ALLOWED (unless explicitly part of task):
+- Refactoring methods
+- Changing other imports
+- Modifying business logic
+- Adding new features
+- Updating unrelated documentation
+```
+
 ## Related Documentation
 - core/standards/project-standards.md: Project standards and technology stack
 - core/standards/documentation-standards.md: Documentation standards

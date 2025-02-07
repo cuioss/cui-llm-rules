@@ -85,7 +85,7 @@ Defines the core process and steps for Java maintenance tasks.
 2. Code Refactoring Phase
    - Update progress: "Code Refactoring"
    - Follow [code modification rules](constraints.md#code-modification-rules)
-   - Update [logging standards](../../core/standards/logging-standards.md)
+   - When adapting to [logging standards](../../core/standards/logging-standards.md), keep changes focused only on logging-related code
    - Fix deprecated APIs
    - Document all changes
    - Verify backward compatibility
