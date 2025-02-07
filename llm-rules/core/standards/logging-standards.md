@@ -163,6 +163,145 @@ This rule applies to both production and test code changes. For example:
    - Description
    - Only document existing messages
 
+## Documentation Requirements
+
+### LogMessage.adoc Format
+The documentation must be maintained in `doc/LogMessage.adoc` for each module and must follow this format:
+
+```asciidoc
+# Log Messages for [Module Name]
+
+All messages follow the format: [Module-Prefix]-[identifier]: [message]
+
+[cols="1,2,2,3,2"]
+|===
+|Identifier |Module |Package |Message |Description
+
+|ModulePrefix-001
+|ModuleName
+|PACKAGE_NAME
+|Message template with %s placeholders
+|Clear description of when and why this message occurs
+|===
+```
+
+### Documentation Rules
+1. Every LogMessages class must have a corresponding documentation file at `doc/LogMessage.adoc`
+2. Documentation must be updated whenever log messages are modified
+3. Documentation must exactly match the implementation - this is a success criterion
+4. Messages must be organized by:
+   - Package (e.g., BUNDLE, RESOURCE)
+   - Then by level (DEBUG, INFO, WARN, ERROR, FATAL)
+   - Then by identifier (ascending)
+5. Include all metadata:
+   - Full identifier with module prefix
+   - Module/component name
+   - Package name in uppercase
+   - Exact message template
+   - Clear description
+
+### Success Criteria
+1. Documentation exists at `doc/LogMessage.adoc`
+2. All implemented messages are documented
+3. No documented messages that don't exist in code
+4. Identifiers match between code and documentation
+5. Message templates match exactly
+6. All columns are properly filled out
+7. Messages are properly organized by package and level
+
+## Identifier Management
+
+### Distinct Identifier Rules
+1. Identifiers must be unique across ALL packages within a module
+2. Each package should use a different range within the level ranges:
+   ```
+   Example for DEBUG (500-599):
+   BUNDLE.DEBUG:   500-509
+   RESOURCE.DEBUG: 510-519
+   STAGE.DEBUG:    520-529
+   ```
+
+### Identifier Verification Process
+1. Before adding new messages:
+   - Check existing identifiers in ALL packages
+   - Choose next available number in appropriate range
+   - Verify no conflicts with other packages
+2. After modifying messages:
+   - Run full verification of all identifiers
+   - Check for any duplicates
+   - Update documentation to match
+
+### Example Package Ranges
+```java
+// Module: PortalCommonCDI
+// Package: BUNDLE
+DEBUG: 500-509  // BUNDLE.DEBUG messages
+WARN:  100-109  // BUNDLE.WARN messages
+
+// Package: RESOURCE
+DEBUG: 510-519  // RESOURCE.DEBUG messages
+WARN:  110-119  // RESOURCE.WARN messages
+
+// Package: STAGE
+ERROR: 200-209  // STAGE.ERROR messages
+```
+
+## Implementation Example with Documentation
+
+### Java Implementation
+```java
+@UtilityClass
+public final class PortalCommonCDILogMessages {
+    public static final String PREFIX = "PortalCommonCDI";
+    
+    @UtilityClass
+    public static final class BUNDLE {
+        @UtilityClass
+        public static final class DEBUG {
+            public static final LogRecord PATH_NOT_DEFINED = LogRecordModel.builder()
+                    .template("ResourceBundle path not defined for class: %s")
+                    .prefix(PREFIX)
+                    .identifier(500)  // First in BUNDLE.DEBUG range
+                    .build();
+        }
+    }
+    
+    @UtilityClass
+    public static final class RESOURCE {
+        @UtilityClass
+        public static final class DEBUG {
+            public static final LogRecord LOADER_FALLBACK = LogRecordModel.builder()
+                    .template("Resource not found, falling back")
+                    .prefix(PREFIX)
+                    .identifier(510)  // First in RESOURCE.DEBUG range
+                    .build();
+        }
+    }
+}
+```
+
+### Corresponding Documentation
+```asciidoc
+# Log Messages for Portal Common CDI Module
+
+[cols="1,2,2,3,2"]
+|===
+|Identifier |Module |Package |Message |Description
+
+|PortalCommonCDI-500
+|PortalCommonCDI
+|BUNDLE
+|ResourceBundle path not defined for class: %s
+|Indicates missing bundle path configuration
+
+|PortalCommonCDI-510
+|PortalCommonCDI
+|RESOURCE
+|Resource not found, falling back
+|Resource loading falls back to alternate loader
+|===
+```
+
 ## DSL-Style Nesting Pattern for LogMessages
 
 The logging system uses a strict DSL-Style Nesting Pattern to organize log messages in a hierarchical, type-safe manner.
@@ -234,6 +373,75 @@ public final class PortalCommonCDILogMessages {
 3. Clear visual hierarchy in code
 4. Type-safe access to log messages
 5. Self-documenting structure
+
+## Message Identifier Numbering
+
+### Range Allocation
+- 001-099: INFO messages
+- 100-199: WARN messages
+- 200-299: ERROR messages
+- 300-399: FATAL messages
+- 500-599: DEBUG messages
+- 600-699: TRACE messages
+
+### Numbering Rules
+1. Each package category (BUNDLE, RESOURCE, etc.) must maintain its own consistent sequence of numbers
+2. Numbers must be assigned sequentially within each range
+3. No gaps in numbering within a range
+4. No duplicate numbers within a package category
+
+### Example for Package Category BUNDLE:
+```java
+@UtilityClass
+public static final class BUNDLE {
+    @UtilityClass
+    public static final class INFO {
+        public static final LogRecord FIRST_MESSAGE = builder()
+            .identifier(1)  // Start with 1
+            .build();
+        public static final LogRecord SECOND_MESSAGE = builder()
+            .identifier(2)  // Next sequential number
+            .build();
+    }
+    
+    @UtilityClass
+    public static final class WARN {
+        public static final LogRecord FIRST_WARNING = builder()
+            .identifier(100)  // Start WARN at 100
+            .build();
+        public static final LogRecord SECOND_WARNING = builder()
+            .identifier(101)  // Next sequential number
+            .build();
+    }
+}
+```
+
+### Example for Package Category RESOURCE:
+```java
+@UtilityClass
+public static final class RESOURCE {
+    @UtilityClass
+    public static final class INFO {
+        public static final LogRecord FIRST_MESSAGE = builder()
+            .identifier(1)  // Start with 1 again (separate sequence per category)
+            .build();
+    }
+    
+    @UtilityClass
+    public static final class WARN {
+        public static final LogRecord FIRST_WARNING = builder()
+            .identifier(100)  // Start WARN at 100
+            .build();
+    }
+}
+```
+
+### Best Practices
+1. Keep track of used identifiers in the LogMessage.adoc documentation
+2. When adding new messages, always use the next available number in the sequence
+3. When removing messages, consider leaving a comment about the gap to prevent reuse
+4. Document the complete message catalog with identifiers in ascending order
+5. Review identifier sequence during code reviews
 
 ## Testing Standards
 
