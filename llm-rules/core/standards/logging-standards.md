@@ -163,6 +163,78 @@ This rule applies to both production and test code changes. For example:
    - Description
    - Only document existing messages
 
+## DSL-Style Nesting Pattern for LogMessages
+
+The logging system uses a strict DSL-Style Nesting Pattern to organize log messages in a hierarchical, type-safe manner.
+
+### Nesting Structure
+1. First level: Module-specific class (e.g., `PortalCommonCDILogMessages`)
+2. Second level: Package name in uppercase (e.g., `BUNDLE` for bundle package, `RESOURCE` for resource package)
+3. Third level: Log Level (e.g., `INFO`, `WARN`, `ERROR`, `DEBUG`)
+4. Fourth level: Message Constants (e.g., `PATH_NOT_DEFINED`, `LOADER_FALLBACK`)
+
+### Example Package to Log Message Mapping
+```
+de.cuioss.portal.common.bundle.* -> BUNDLE.*
+de.cuioss.portal.common.resource.* -> RESOURCE.*
+de.cuioss.portal.common.stage.* -> STAGE.*
+```
+
+### Import Rules
+```java
+// CORRECT:
+import static de.cuioss.portal.common.PortalCommonCDILogMessages.BUNDLE;
+
+// Then use:
+BUNDLE.DEBUG.PATH_NOT_DEFINED
+BUNDLE.WARN.LOAD_FAILED
+
+// INCORRECT - DO NOT:
+import static de.cuioss.portal.common.PortalCommonCDILogMessages.BUNDLE.DEBUG;
+import static de.cuioss.portal.common.PortalCommonCDILogMessages.*;
+```
+
+### Implementation Requirements
+1. Always import the component/category level constant (second level)
+2. Never import the log level or message constants
+3. Keep nesting depth at exactly 4 levels
+4. Each level must be a static final class with @UtilityClass
+
+### Example Structure
+```java
+@UtilityClass
+public final class PortalCommonCDILogMessages {
+    public static final String PREFIX = "PORTAL_CDI";
+    
+    @UtilityClass
+    public static final class BUNDLE {  // Package level
+        @UtilityClass
+        public static final class DEBUG {  // Log level
+            public static final LogRecord PATH_NOT_DEFINED = ...;  // Message
+        }
+        
+        @UtilityClass
+        public static final class WARN {
+            public static final LogRecord LOAD_FAILED = ...;
+        }
+    }
+}
+```
+
+### Common Mistakes to Avoid
+1. Importing log levels directly
+2. Skipping the component/category level
+3. Using wildcard imports
+4. Breaking the 4-level hierarchy
+5. Mixing different components in the same import
+
+### Benefits
+1. Improved code organization through logical grouping
+2. Better IDE support with auto-completion
+3. Clear visual hierarchy in code
+4. Type-safe access to log messages
+5. Self-documenting structure
+
 ## Testing Standards
 
 ### 1. Coverage Requirements
