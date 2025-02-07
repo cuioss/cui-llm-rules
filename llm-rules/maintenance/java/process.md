@@ -109,7 +109,6 @@ Defines the core process and steps for Java maintenance tasks.
      * "Java beans" not "Jakarta beans"
      * Follow Java Bean Specification terms
    - Verify Javadoc builds without errors
-   - Document integration points
 
 #### c. Module Completion
 - Verify all packages completed
