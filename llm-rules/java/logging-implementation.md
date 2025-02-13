@@ -100,7 +100,7 @@ public static final class BUNDLE {
 try {
     // Some code that might throw
 } catch (Exception e) {
-    LOGGER.error(SERVLET.ERROR.REQUEST_PROCESSING_ERROR.format(e.getMessage()), e);
+    LOGGER.error(e, SERVLET.ERROR.REQUEST_PROCESSING_ERROR.format(e.getMessage()));
 }
 ```
 
