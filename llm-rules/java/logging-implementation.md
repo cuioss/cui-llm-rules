@@ -93,6 +93,51 @@ public static final class BUNDLE {
 }
 ```
 
+### 5. LogRecord Usage Patterns
+
+#### Parameter-less Logging
+Use method reference syntax when no parameters are needed:
+```java
+// CORRECT - Use method reference for no parameters
+LOGGER.debug(DEBUG.STATE_PARAMETER_MATCHES::format);
+LOGGER.info(INFO.STARTUP_COMPLETE::format);
+
+// INCORRECT - Don't use empty format() call
+LOGGER.debug(DEBUG.STATE_PARAMETER_MATCHES.format());
+```
+
+#### Parameterized Logging
+Use format() method call when parameters are needed:
+```java
+// CORRECT - Use format() with parameters
+LOGGER.debug(DEBUG.ERROR_PARAMETER.format(errorValue));
+LOGGER.info(INFO.USER_LOGIN.format(username, timestamp));
+
+// INCORRECT - Don't use method reference with parameters
+LOGGER.debug(DEBUG.ERROR_PARAMETER::format, errorValue);
+```
+
+#### Exception Logging
+Exception parameter always comes first, followed by formatted message:
+```java
+// CORRECT - Exception first, then formatted message
+try {
+    // Some code
+} catch (IllegalStateException e) {
+    LOGGER.error(e, ERROR.CANNOT_GENERATE_CODE_CHALLENGE::format);
+    LOGGER.warn(e, WARN.PROCESSING_FAILED.format(requestId));
+    LOGGER.debug(e, DEBUG.GET_ATTRIBUTE_FAILED::format);
+}
+
+// INCORRECT - Never put exception after the message
+try {
+    // Some code
+} catch (IllegalStateException e) {
+    LOGGER.error(ERROR.CANNOT_GENERATE_CODE_CHALLENGE::format, e);  // WRONG
+    LOGGER.warn(WARN.PROCESSING_FAILED.format(requestId), e);       // WRONG
+}
+```
+
 ## Common Implementation Patterns
 
 ### 1. Exception Logging
