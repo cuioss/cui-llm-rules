@@ -95,54 +95,54 @@ public static final class BUNDLE {
 
 ### 5. LogRecord Usage Patterns
 
-#### Parameter-less Logging
-Use method reference syntax when no parameters are needed:
-```java
-// CORRECT - Use method reference for no parameters
-LOGGER.debug(DEBUG.STATE_PARAMETER_MATCHES::format);
-LOGGER.info(INFO.STARTUP_COMPLETE::format);
+#### Mandatory LogRecord Usage (INFO/WARN/ERROR/FATAL)
+LogRecord MUST be used for INFO/WARN/ERROR/FATAL levels in production code. Direct logging is NOT allowed for these levels:
 
-// INCORRECT - Don't use empty format() call
-LOGGER.debug(DEBUG.STATE_PARAMETER_MATCHES.format());
+```java
+// CORRECT:
+LOGGER.info(INFO.USER_LOGIN.format(username));
+LOGGER.error(e, ERROR.DATABASE_CONNECTION.format(url));
+
+// INCORRECT - Never use direct logging for INFO/WARN/ERROR/FATAL:
+logger.info("User %s logged in", username);
+logger.error(e, "Database connection failed: %s", url);
 ```
 
-#### Parameterized Logging
-Use lambda for lazy evaluation when parameters are needed:
+#### Forbidden LogRecord Usage (DEBUG/TRACE)
+LogRecord MUST NOT be used for DEBUG/TRACE levels. These levels MUST use direct logging:
+
 ```java
-// CORRECT - Use lambda for lazy evaluation
-LOGGER.debug(() -> DEBUG.ERROR_PARAMETER.format(errorValue));
-LOGGER.info(() -> INFO.USER_LOGIN.format(username, timestamp));
+// CORRECT:
+LOGGER.debug("Processing file %s", filename);
+LOGGER.trace(e, "Detailed error info: %s", e.getMessage());
 
-// Handle mutable variables correctly
-var user = getUser();
-final var finalUser = user;  // Create final copy for lambda
-LOGGER.debug(() -> DEBUG.USER_INFO.format(finalUser));
-
-// INCORRECT - Don't use immediate evaluation
-LOGGER.debug(DEBUG.ERROR_PARAMETER.format(errorValue));         // Wrong - eager evaluation
-LOGGER.debug(() -> DEBUG.ERROR_PARAMETER::format, errorValue);  // Wrong - incorrect syntax
+// INCORRECT - Never use LogRecord for DEBUG/TRACE:
+LOGGER.debug(DEBUG.SOME_DEBUG_MESSAGE.format());
+LOGGER.trace(TRACE.SOME_TRACE_MESSAGE.format());
 ```
 
-#### Exception Logging
-Exception parameter always comes first, followed by lazy-evaluated message:
-```java
-// CORRECT - Exception first, then lambda for message
-try {
-    // Some code
-} catch (IllegalStateException e) {
-    LOGGER.error(e, () -> ERROR.PROCESSING_FAILED.format(requestId));
-    LOGGER.warn(e, () -> WARN.INVALID_STATE.format(stateId));
-    LOGGER.debug(e, DEBUG.GET_ATTRIBUTE_FAILED::format);  // No params, use method reference
-}
+#### Parameter Handling
+- For LogRecords (INFO/WARN/ERROR/FATAL): Use format method
+  ```java
+  LOGGER.info(INFO.SOME_MESSAGE.format(param1, param2));
+  ```
 
-// INCORRECT - Never put exception after the message or use eager evaluation
-try {
-    // Some code
-} catch (IllegalStateException e) {
-    LOGGER.error(ERROR.PROCESSING_FAILED.format(requestId), e);     // Wrong - exception not first
-    LOGGER.error(e, ERROR.PROCESSING_FAILED.format(requestId));     // Wrong - eager evaluation
-}
-```
+- For Direct Logging (DEBUG/TRACE): Use '%s' for parameter substitution
+  ```java
+  LOGGER.debug("Processing file %s with size %s", filename, size);
+  ```
+
+#### Exception Handling
+- For LogRecords (INFO/WARN/ERROR/FATAL):
+  ```java
+  LOGGER.error(e, ERROR.CANNOT_GENERATE_CODE_CHALLENGE.format());
+  LOGGER.error(e, ERROR.SOME_ERROR.format(param1));
+  ```
+
+- For Direct Logging (DEBUG/TRACE):
+  ```java
+  LOGGER.debug(e, "Detailed error info: %s", e.getMessage());
+  ```
 
 ### 6. Performance Considerations
 
