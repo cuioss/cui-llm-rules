@@ -107,36 +107,65 @@ LOGGER.debug(DEBUG.STATE_PARAMETER_MATCHES.format());
 ```
 
 #### Parameterized Logging
-Use format() method call when parameters are needed:
+Use lambda for lazy evaluation when parameters are needed:
 ```java
-// CORRECT - Use format() with parameters
-LOGGER.debug(DEBUG.ERROR_PARAMETER.format(errorValue));
-LOGGER.info(INFO.USER_LOGIN.format(username, timestamp));
+// CORRECT - Use lambda for lazy evaluation
+LOGGER.debug(() -> DEBUG.ERROR_PARAMETER.format(errorValue));
+LOGGER.info(() -> INFO.USER_LOGIN.format(username, timestamp));
 
-// INCORRECT - Don't use method reference with parameters
-LOGGER.debug(DEBUG.ERROR_PARAMETER::format, errorValue);
+// Handle mutable variables correctly
+var user = getUser();
+final var finalUser = user;  // Create final copy for lambda
+LOGGER.debug(() -> DEBUG.USER_INFO.format(finalUser));
+
+// INCORRECT - Don't use immediate evaluation
+LOGGER.debug(DEBUG.ERROR_PARAMETER.format(errorValue));         // Wrong - eager evaluation
+LOGGER.debug(() -> DEBUG.ERROR_PARAMETER::format, errorValue);  // Wrong - incorrect syntax
 ```
 
 #### Exception Logging
-Exception parameter always comes first, followed by formatted message:
+Exception parameter always comes first, followed by lazy-evaluated message:
 ```java
-// CORRECT - Exception first, then formatted message
+// CORRECT - Exception first, then lambda for message
 try {
     // Some code
 } catch (IllegalStateException e) {
-    LOGGER.error(e, ERROR.CANNOT_GENERATE_CODE_CHALLENGE::format);
-    LOGGER.warn(e, WARN.PROCESSING_FAILED.format(requestId));
-    LOGGER.debug(e, DEBUG.GET_ATTRIBUTE_FAILED::format);
+    LOGGER.error(e, () -> ERROR.PROCESSING_FAILED.format(requestId));
+    LOGGER.warn(e, () -> WARN.INVALID_STATE.format(stateId));
+    LOGGER.debug(e, DEBUG.GET_ATTRIBUTE_FAILED::format);  // No params, use method reference
 }
 
-// INCORRECT - Never put exception after the message
+// INCORRECT - Never put exception after the message or use eager evaluation
 try {
     // Some code
 } catch (IllegalStateException e) {
-    LOGGER.error(ERROR.CANNOT_GENERATE_CODE_CHALLENGE::format, e);  // WRONG
-    LOGGER.warn(WARN.PROCESSING_FAILED.format(requestId), e);       // WRONG
+    LOGGER.error(ERROR.PROCESSING_FAILED.format(requestId), e);     // Wrong - exception not first
+    LOGGER.error(e, ERROR.PROCESSING_FAILED.format(requestId));     // Wrong - eager evaluation
 }
 ```
+
+### 6. Performance Considerations
+
+#### Lazy Evaluation Benefits
+- Format strings and parameter evaluation only occurs if the log level is enabled
+- Especially important for DEBUG/TRACE level logging
+- Prevents unnecessary string concatenation and object toString() calls
+- Particularly beneficial when logging complex objects or expensive toString() implementations
+
+#### When to Use Each Pattern
+1. Method Reference (`::format`):
+   - Use for parameter-less logging
+   - Most efficient, no lambda overhead
+
+2. Lambda (`() -> format()`):
+   - Use whenever parameters are needed
+   - Ensures lazy evaluation of parameters
+   - Required for mutable variables (create final copy)
+
+3. Direct Format (`.format()`):
+   - Never use this pattern
+   - Always leads to eager evaluation
+   - Wastes resources when logging is disabled
 
 ## Common Implementation Patterns
 
@@ -145,23 +174,23 @@ try {
 try {
     // Some code that might throw
 } catch (Exception e) {
-    LOGGER.error(e, SERVLET.ERROR.REQUEST_PROCESSING_ERROR.format(e.getMessage()));
+    LOGGER.error(e, () -> SERVLET.ERROR.REQUEST_PROCESSING_ERROR.format(e.getMessage()));
 }
 ```
 
 ### 2. Parameter Substitution
 ```java
 // Single parameter
-LOGGER.info(SERVLET.INFO.USER_LOGIN.format(username));
+LOGGER.info(() -> SERVLET.INFO.USER_LOGIN.format(username));
 
 // Multiple parameters
-LOGGER.debug(SERVLET.DEBUG.USER_INFO_ENRICHED.format(userId, attributeName));
+LOGGER.debug(() -> SERVLET.DEBUG.USER_INFO_ENRICHED.format(userId, attributeName));
 ```
 
 ### 3. Conditional Logging
 ```java
 if (LOGGER.isDebugEnabled()) {
-    LOGGER.debug(SERVLET.DEBUG.DETAILED_INFO.format(
+    LOGGER.debug(() -> SERVLET.DEBUG.DETAILED_INFO.format(
         createDetailedMessage()));  // Expensive operation
 }
 ```
