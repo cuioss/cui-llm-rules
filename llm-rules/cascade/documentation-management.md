@@ -10,12 +10,22 @@ Defines the rules that must be followed when creating, updating, or deleting doc
 
 ## Core Rules
 
-### 1. Pre-Update Consultation
+### 1. Repository Operations
+- NEVER perform any git operations on the llm-rules repository
+- This includes: git add, commit, push, rm, etc.
+- All repository operations must be performed by human maintainers
+- AI assistants are limited to:
+  * Reading files
+  * Proposing content changes
+  * Suggesting file structure changes
+  * Reporting issues or inconsistencies
+
+### 2. Pre-Update Consultation
 - Always consult this document before any documentation changes
 - Verify complete understanding of current rules
 - If any rule is unclear, prompt user with numbered options
 
-### 2. Information Preservation
+### 3. Information Preservation
 - Information must never be lost during updates unless explicitly instructed
 - When faced with uncertainty about information preservation:
   1. Stop the current operation
@@ -23,7 +33,7 @@ Defines the rules that must be followed when creating, updating, or deleting doc
   3. Wait for explicit choice
   4. Document the decision
 
-### 3. Modularization
+### 4. Modularization
 - Information must not be duplicated across documents
 - Use references to link to information in other documents
   Example: `[Progress Standards](../core/standards/progress-standards.md)`
@@ -32,7 +42,7 @@ Defines the rules that must be followed when creating, updating, or deleting doc
   2. Present user with numbered options for consolidation
   3. Update all references after consolidation
 
-### 4. Document Structure
+### 5. Document Structure
 - Follow directory organization:
   * `/cascade/commands/` for command documentation
   * `/maintenance/` for process documentation
@@ -43,13 +53,13 @@ Defines the rules that must be followed when creating, updating, or deleting doc
   * Process steps (if applicable)
   * Success criteria (if applicable)
 
-### 5. Cross-References
+### 6. Cross-References
 - Use markdown links: `[Title](path/to/file.md)`
 - Always verify reference exists before adding
 - Update all references when moving documents
 - Use relative paths from current file location
 
-### 6. User Interaction
+### 7. User Interaction
 When in doubt about any decision, present options as:
 ```
 Please choose an option:
