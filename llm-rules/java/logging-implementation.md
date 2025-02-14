@@ -144,30 +144,17 @@ LOGGER.trace(TRACE.SOME_TRACE_MESSAGE.format());
   LOGGER.debug(e, "Detailed error info: %s", e.getMessage());
   ```
 
-### 6. Performance Considerations
+#### Parameter-Free Calls
+For LogRecords without parameters, use method reference syntax:
+```java
+// CORRECT:
+LOGGER.info(INFO.STARTUP_COMPLETE::format);
 
-#### Lazy Evaluation Benefits
-- Format strings and parameter evaluation only occurs if the log level is enabled
-- Especially important for DEBUG/TRACE level logging
-- Prevents unnecessary string concatenation and object toString() calls
-- Particularly beneficial when logging complex objects or expensive toString() implementations
+// INCORRECT:
+LOGGER.info(INFO.STARTUP_COMPLETE.format());
+```
 
-#### When to Use Each Pattern
-1. Method Reference (`::format`):
-   - Use for parameter-less logging
-   - Most efficient, no lambda overhead
-
-2. Lambda (`() -> format()`):
-   - Use whenever parameters are needed
-   - Ensures lazy evaluation of parameters
-   - Required for mutable variables (create final copy)
-
-3. Direct Format (`.format()`):
-   - Never use this pattern
-   - Always leads to eager evaluation
-   - Wastes resources when logging is disabled
-
-## Common Implementation Patterns
+### 6. Common Implementation Patterns
 
 ### 1. Exception Logging
 ```java
