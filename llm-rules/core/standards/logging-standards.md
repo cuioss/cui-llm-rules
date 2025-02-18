@@ -85,7 +85,7 @@ When adapting code to these logging standards:
 ## Documentation Requirements
 
 ### LogMessage.md Format
-The documentation must be maintained in `doc/LogMessage.md` for each module and must follow this format:
+The documentation must be maintained in `doc/LogMessages.md` for each module and must follow this format:
 
 ```md
 # Log Messages for [Module Name]
@@ -113,7 +113,7 @@ All messages follow the format: [Module-Prefix]-[identifier]: [message]
 ```
 
 ### Documentation Rules
-1. Every LogMessages class must have a corresponding documentation file at `doc/LogMessage.md`
+1. Every LogMessages class must have a corresponding documentation file at `doc/LogMessages.md`
 2. Documentation must be updated whenever log messages are modified
 3. Documentation must exactly match the implementation - this is a success criterion
 4. Messages must be organized in separate tables by log level, with level ranges in headers:
