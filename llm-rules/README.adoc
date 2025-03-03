@@ -49,21 +49,29 @@ See: link:maintenance/java/process.md[Java Process]
 - Documentation check
 See: link:maintenance/finalize.md[Finalization Process]
 
-|`[5] cp: fix javadoc` *(AI Assistant Command)*
+|`[5] cp: requirements create` *(AI Assistant Command)*
+|Creates requirements and specification structure:
+- Sets up Requirements.adoc
+- Creates Specification.adoc
+- Establishes specification subdocuments
+- Maintains traceability links
+See: link:requirements/requirements-document.md[Requirements Structure]
+
+|`[6] cp: fix javadoc` *(AI Assistant Command)*
 |Fixes Javadoc errors:
 - Minimal modifications
 - Content preservation
 - Quality improvement
 See: link:maintenance/java/process.md[Java Process]
 
-|`[8] cp: verify sonar` *(AI Assistant Command)*
+|`[7] cp: verify sonar` *(AI Assistant Command)*
 |Performs SonarCloud analysis:
 - Reviews quality gates
 - Examines code issues
 - Verifies coverage metrics
 See: link:maintenance/java/process.md[Java Process]
 
-|`[6] cp: commit llm-rules to memory` *(AI Assistant Command)*
+|`[8] cp: commit llm-rules to memory` *(AI Assistant Command)*
 |Creates memories from documentation:
 - One-time transfer from @llm-rules to AI memory
 - Creates/updates AI assistant memories
@@ -71,21 +79,21 @@ See: link:maintenance/java/process.md[Java Process]
 - Establishes memory source of truth
 See: link:cascade/commands/memory/commit.md[Memory Creation]
 
-|`[7] cp: persist memory to llm-rules` *(AI Assistant Command)*
+|`[9] cp: persist memory to llm-rules` *(AI Assistant Command)*
 |Persists memory content to documentation:
 - Updates @llm-rules from AI memories
 - Maintains documentation structure
 - Ensures completeness
 See: link:cascade/commands/memory/persist.md[Memory Persistence]
 
-|`[9] cp: verify llm-rules` *(AI Assistant Command)*
+|`[10] cp: verify llm-rules` *(AI Assistant Command)*
 |Verifies documentation against rules:
 - Checks document structure and organization
 - Validates cross-references and links
 - Ensures documentation standards compliance
 See: link:cascade/commands/verify/rules.md[Rules Verification]
 
-|`[10] cp: update llm-rules` *(AI Assistant Command)*
+|`[11] cp: update llm-rules` *(AI Assistant Command)*
 |Interactively updates documentation:
 - Consults latest documentation rules
 - Creates or updates documentation
@@ -187,8 +195,12 @@ See: link:cascade/commands/verify/rules.md[Rules Verification Process]
 - link:maintenance/java/constraints.md[Java Constraints]
 - link:maintenance/java/process.md[Detailed Process Steps]
 
-|===
+|link:requirements/[requirements/]
+|Requirements and specification documentation:
+- link:requirements/requirements-document.md[Requirements Document Structure]
+- link:requirements/specification-documents.md[Specification Documents Structure]
 
+|===
 == Rule Application
 
 1. Cascade always checks these rules before taking action

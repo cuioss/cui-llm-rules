@@ -16,49 +16,46 @@ Provides detailed examples and patterns for implementing logging according to th
 public final class PortalCoreLogMessages {
     public static final String PREFIX = "PORTAL_CORE";
     
-    @UtilityClass
-    public static final class SERVLET {
-        @UtilityClass
-        public static final class INFO {
-            public static final LogRecord USER_LOGIN = LogRecordModel.builder()
-                .template("User %s logged in successfully")
-                .prefix(PREFIX)
-                .identifier(1)
-                .build();
-        }
-        
-        @UtilityClass
-        public static final class WARN {
-            public static final LogRecord USER_NOT_LOGGED_IN = LogRecordModel.builder()
-                .template("User not logged in for protected resource")
-                .prefix(PREFIX)
-                .identifier(100)
-                .build();
-        }
-        
-        @UtilityClass
-        public static final class ERROR {
-            public static final LogRecord REQUEST_PROCESSING_ERROR = LogRecordModel.builder()
-                .template("Error processing request: %s")
-                .prefix(PREFIX)
-                .identifier(200)
-                .build();
-        }
-    }
+      @UtilityClass
+      public static final class INFO {
+          public static final LogRecord USER_LOGIN = LogRecordModel.builder()
+              .template("User %s logged in successfully")
+              .prefix(PREFIX)
+              .identifier(1)
+              .build();
+      }
+      
+      @UtilityClass
+      public static final class WARN {
+          public static final LogRecord USER_NOT_LOGGED_IN = LogRecordModel.builder()
+              .template("User not logged in for protected resource")
+              .prefix(PREFIX)
+              .identifier(100)
+              .build();
+      }
+      
+      @UtilityClass
+      public static final class ERROR {
+          public static final LogRecord REQUEST_PROCESSING_ERROR = LogRecordModel.builder()
+              .template("Error processing request: %s")
+              .prefix(PREFIX)
+              .identifier(200)
+              .build();
+      }
 }
 ```
 
 ### 2. Import and Usage Pattern
 ```java
 // CORRECT:
-import static de.cuioss.portal.core.PortalCoreLogMessages.SERVLET;
+import static de.cuioss.portal.core.PortalCoreLogMessages.INFO;
 
 // Then use:
-SERVLET.INFO.USER_LOGIN
-SERVLET.WARN.USER_NOT_LOGGED_IN
+INFO.USER_LOGIN
+WARN.USER_NOT_LOGGED_IN
 
 // INCORRECT - DO NOT:
-import static de.cuioss.portal.core.PortalCoreLogMessages.SERVLET.*;
+import static de.cuioss.portal.core.PortalCoreLogMessages.INFO.*;
 import static de.cuioss.portal.core.PortalCoreLogMessages.*;
 ```
 
@@ -73,7 +70,7 @@ de.cuioss.portal.common.stage.* -> STAGE.*
 ### 4. Identifier Range Management
 ```java
 @UtilityClass
-public static final class BUNDLE {
+public static final class PortalCoreLogMessages {
     @UtilityClass
     public static final class INFO {
         public static final LogRecord FIRST_MESSAGE = builder()
@@ -161,26 +158,19 @@ LOGGER.info(INFO.STARTUP_COMPLETE.format());
 try {
     // Some code that might throw
 } catch (Exception e) {
-    LOGGER.error(e, () -> SERVLET.ERROR.REQUEST_PROCESSING_ERROR.format(e.getMessage()));
+    LOGGER.error(e, ERROR.REQUEST_PROCESSING_ERROR.format(e.getMessage()));
 }
 ```
 
 ### 2. Parameter Substitution
 ```java
 // Single parameter
-LOGGER.info(() -> SERVLET.INFO.USER_LOGIN.format(username));
+LOGGER.info(INFO.USER_LOGIN.format(username));
 
 // Multiple parameters
-LOGGER.debug(() -> SERVLET.DEBUG.USER_INFO_ENRICHED.format(userId, attributeName));
+LOGGER.warn(WARN.USER_INFO_ENRICHED.format(userId, attributeName));
 ```
 
-### 3. Conditional Logging
-```java
-if (LOGGER.isDebugEnabled()) {
-    LOGGER.debug(() -> SERVLET.DEBUG.DETAILED_INFO.format(
-        createDetailedMessage()));  // Expensive operation
-}
-```
 
 ## Best Practices
 
