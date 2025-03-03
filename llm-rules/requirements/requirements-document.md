@@ -25,18 +25,25 @@
 4. Each requirement must be described using bullet points
    - Main points should be clear and concise
    - Use sub-bullets for additional details
+5. Each requirement must be traceable to corresponding specification documents
+   - Specifications must include backtracking links to requirements
+   - Requirements should reference implementation specifications where appropriate
 
 ## Requirements Numbering
 1. Major requirements must use a sequential number (e.g., `PREFIX-1`, `PREFIX-2`)
 2. Sub-requirements must use a decimal notation (e.g., `PREFIX-1.1`, `PREFIX-1.2`)
 3. Requirements must maintain a consistent numbering scheme throughout the document
 4. When adding new requirements, assign the next available number in the sequence
+5. Never reuse requirement IDs, even if a requirement is removed or replaced
+6. When a requirement is no longer applicable, mark it as deprecated rather than removing it
+   - Format: `=== PREFIX-NUM: [DEPRECATED] Descriptive Title`
 
 ## Requirements Content
 1. Requirements must be specific, measurable, achievable, relevant, and time-bound ([SMART principles](https://www.atlassian.com/blog/productivity/how-to-write-smart-goals))
 2. Requirements must clearly state what is needed, not how it should be implemented
-3. Requirements must be written from the perspective of what the system should do
-4. Requirements must avoid implementation details unless they are specific constraints
+3. Requirements must be testable
+4. Requirements must be traceable to corresponding specification documents
+5. For logging requirements, refer to [Logging Standards](../core/standards/logging-standards.md) and ensure requirements align with established standards
 
 ## Prefix Selection
 1. When creating requirements for a new project, prompt the user to select a prefix

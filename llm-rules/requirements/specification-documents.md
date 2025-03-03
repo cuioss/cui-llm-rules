@@ -58,6 +58,41 @@
    // Code example
    ----
    ```
+4. Each specification section should directly address one or more requirements
+5. Complex implementations should include diagrams where appropriate
+   - Use PlantUML or other diagramming tools
+   - Include both the diagram source and rendered image
+6. For logging specifications, refer to [Logging Implementation Guide](../java/logging-implementation.md) and [Logging Testing Guide](../testing/logging-testing.md)
+
+## Examples
+
+### Example Backtracking Link
+```
+_See Requirement link:../Requirements.adoc#NIFI-AUTH-1[NIFI-AUTH-1: REST API Support Enhancement]_
+
+This section describes the implementation of the REST API support enhancement...
+```
+
+### Example Main Specification Document Structure
+```
+= Project Name Specification
+:toc:
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+
+== Overview
+_See Requirement link:Requirements.adoc#PREFIX-1[PREFIX-1: Project Overview]_
+
+This document provides the technical specification for implementing Project Name.
+For functional requirements, see link:Requirements.adoc[Requirements Document].
+
+== Document Structure
+This specification is organized into the following documents:
+
+* link:specification/technical-components.adoc[Technical Components] - Core implementation details
+* link:specification/configuration.adoc[Configuration] - Configuration properties and UI
+...
 
 ## Standard Specification Documents
 The following standard specification documents should be included for comprehensive projects:

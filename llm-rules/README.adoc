@@ -199,6 +199,7 @@ See: link:cascade/commands/verify/rules.md[Rules Verification Process]
 |Requirements and specification documentation:
 - link:requirements/requirements-document.md[Requirements Document Structure]
 - link:requirements/specification-documents.md[Specification Documents Structure]
+- link:requirements/new-project-guide.md[New Project Guide]
 
 |===
 == Rule Application
