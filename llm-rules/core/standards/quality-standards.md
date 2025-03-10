@@ -23,6 +23,7 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
 - Independent test execution
 - Clean test environment
 - Predictable test data
+- Use documentation tags for code examples (see [Documentation Tags](#documentation-tags))
 
 ### 2. Coverage Requirements
 - Minimum 80% line coverage
@@ -37,7 +38,7 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
 #### Required Frameworks
 1. JUnit 5
    - Use `@DisplayName` for readable test names
-   - Leverage parameterized tests
+   - Leverage parameterized tests (see [Parameterized Tests Best Practices](#parameterized-tests-best-practices))
    - Apply proper test lifecycle annotations
 
 #### CUI Testing Utilities
@@ -102,6 +103,57 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
 - DRY in test utilities
 - Clear test documentation
 - Consistent patterns
+
+### 4. Parameterized Tests Best Practices
+
+- **Minimum Test Cases**: Parameterized tests should have at least 3 test cases to justify the overhead
+  - For fewer than 3 test cases, use direct test methods instead
+  - Convert existing parameterized tests with fewer than 3 cases to direct methods
+
+- **Method Source Organization**:
+  - Use descriptive method names for test case providers
+  - Group related test cases together
+  - Document each test case's purpose in the provider method
+  - Return `Stream<Arguments>` with clear parameter descriptions
+
+- **Test Case Naming**:
+  - Use the `name` parameter in `@ParameterizedTest` for descriptive test names
+  - Include parameter values in the name template where appropriate
+  - Example: `@ParameterizedTest(name = "{0}: {1} should result in {2}")`
+
+- **Test Case Documentation**:
+  - Document the purpose of each test case in the provider method
+  - Include edge cases and boundary conditions
+  - Explain the relationship between inputs and expected outputs
+
+- **Maintenance Considerations**:
+  - Regularly review parameterized tests for relevance
+  - Avoid excessive parameterization that obscures test intent
+  - Balance between coverage and maintainability
+
+### 5. Documentation Tags
+
+- **Code Example Tags**:
+  - Use asciidoc tag comments to mark code examples in source files
+  - Format: `// tag::example-name[]` and `// end::example-name[]`
+  - Choose descriptive tag names that indicate the example's purpose
+
+- **Documentation Integration**:
+  - Include tagged code in documentation using asciidoc includes
+  - Format: `include::path/to/file.java[tags=example-name]`
+  - Place includes within appropriate code blocks: `[source,java]`
+
+- **Benefits**:
+  - Examples stay synchronized with actual code
+  - Documentation automatically updates when code changes
+  - Reduces duplication and maintenance burden
+  - Makes documentation more robust and reliable
+
+- **Best Practices**:
+  - Keep tagged sections focused and concise
+  - Use meaningful tag names that describe the example's purpose
+  - Document the existence of tags in class/method Javadoc
+  - Review tags during code reviews to ensure documentation relevance
 
 #### Performance
 - Fast test execution
