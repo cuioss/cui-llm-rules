@@ -115,6 +115,8 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
   - Group related test cases together
   - Document each test case's purpose in the provider method
   - Return `Stream<Arguments>` with clear parameter descriptions
+  - **Limit to test data only**: Method sources should only provide input data, expected outputs, and optionally error messages
+  - **Avoid strategy pattern**: Do not use method sources to implement different testing strategies or behaviors
 
 - **Test Case Naming**:
   - Use the `name` parameter in `@ParameterizedTest` for descriptive test names
@@ -130,6 +132,7 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
   - Regularly review parameterized tests for relevance
   - Avoid excessive parameterization that obscures test intent
   - Balance between coverage and maintainability
+  - Refactor tests that use method sources as strategy patterns into separate test methods
 
 ### 5. Documentation Tags
 

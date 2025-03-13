@@ -47,16 +47,9 @@ This document defines the standard structure for module README.adoc files in CUI
 - Best practice implementations
 - Each example must have:
   * Clear purpose explanation
-  * Complete code snippet (preferably using asciidoc includes with tags)
+  * Complete code snippet
   * Configuration if required
   * Expected outcome
-- Use asciidoc includes with tags to reference actual test code:
-  ```asciidoc
-  [source,java]
-  ----
-  include::src/test/java/package/ExampleTest.java[tags=example-name]
-  ----
-  ```
 
 ### 6. Configuration
 - Available configuration options
@@ -92,18 +85,13 @@ This document defines the standard structure for module README.adoc files in CUI
 - Maintain proper heading hierarchy
 - Use code blocks with language specification
 - Include line breaks between sections
-- Use asciidoc includes with tags for code examples instead of duplicating code
 
 ### Code Examples
 - Must be complete and working
-- Include all necessary imports
 - Show configuration where relevant
 - Use realistic variable names
 - Include comments for complex logic
-- Prefer using asciidoc includes with tags over duplicating code
-  * Add tags to source files: `// tag::example-name[]` and `// end::example-name[]`
-  * Include in README using: `include::path/to/file.java[tags=example-name]`
-  * This ensures examples stay in sync with actual code
+- Must be backed by an actual unit-test
 
 ### Links
 - Use relative paths for internal links
@@ -145,7 +133,7 @@ Concise description of the module's purpose and key features.
 === Basic Usage
 [source,java]
 ----
-include::src/test/java/package/ExampleTest.java[tags=basic-usage-example]
+// Complete code example
 ----
 
 == Configuration
