@@ -155,3 +155,54 @@ Concise description of the module's purpose and key features.
 == Related Documentation
 * link:url[External Resource]
 ```
+
+## Table of Contents Guidelines
+
+### AsciiDoc TOC Configuration
+- Use the built-in AsciiDoc TOC mechanism instead of manual TOC creation
+- Add the following attributes to the document header:
+  ```asciidoc
+  = Document Title
+  :toc: macro
+  :toclevels: 3
+  :sectnumlevels: 1
+  ```
+- Place the TOC macro `toc::[]` after the introduction sections and before the main content
+
+### Excluding Sections from TOC
+- Use the `[.discrete]` attribute for sections that should not appear in the TOC
+  ```asciidoc
+  [.discrete]
+  == Status
+  
+  Project status badges and links
+  ```
+- Typically exclude status badges, build information, and other metadata sections
+
+### TOC Structure Best Practices
+- Limit TOC to 3 levels for readability
+- Use section numbering only for main content sections
+- Ensure logical grouping of related topics
+- Place Migration Guide and similar reference sections at the end
+- Keep TOC focused on substantive documentation sections
+
+### Example TOC Implementation
+```asciidoc
+= Module Name
+:toc: macro
+:toclevels: 3
+:sectnumlevels: 1
+
+[.discrete]
+== Status
+Status badges and build information
+
+[.discrete]
+== What is it?
+Brief description of the module
+
+toc::[]
+
+== Core Concepts
+Main documentation starts here
+```
