@@ -53,7 +53,6 @@ Defines comprehensive standards for all documentation across the codebase, inclu
 1. Required Sections
    - Overview explaining purpose and scope
    - Key Components listing main classes/interfaces
-   - Usage Examples with actual code samples
    - Best Practices section with guidelines
    - Cross-references to related components
    - Author and version information
@@ -93,7 +92,27 @@ Defines comprehensive standards for all documentation across the codebase, inclu
    - Standard order of elements
    - Clear parameter descriptions
    - Explicit preconditions
-   - Detailed postconditions
+   - Detailed post-conditions
+
+3. Non-public Methods: Private, package-private, protected
+   - Document only if necessary
+   - Use @implSpec tag for implementation details
+   - Include usage examples if complex
+   - Do not comment on trivial methods
+   - Do not comment in the form of "Stating the obvious"
+
+### 4. Field Documentation
+1. Public Fields: Document all public fields
+   - Include usage examples if complex
+   - Do not comment on trivial fields
+   - Do not comment in the form of "Stating the obvious"
+   - DO not comment standard fields like serialVersionUID, LOGGER, etc.
+2. 
+3. Private Fields: Document only if necessary
+   - Include usage examples if complex
+   - Do not comment on trivial fields
+   - Do not comment in the form of "Stating the obvious"
+   - DO not comment standard fields like serialVersionUID, LOGGER, etc.
 
 ## Javadoc Maintenance
 
