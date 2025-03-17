@@ -78,10 +78,16 @@ All commands prefixed with `cp:` are AI assistant commands and must NEVER be exe
   * Maintains documentation standards
   * Documentation: [Rules Update](commands/update/rules.md)
 
+- `[11] cp: requirements create`
+  * Creates requirements and specification structure
+  * Sets up Requirements.adoc
+  * Establishes specification subdocuments
+  * Documentation: [Requirements Structure](../requirements/requirements-document.md)
+
 ## Usage Instructions
 
 ### Command Selection
-1. Use `cp: list` or number [1-10] to display/select commands
+1. Use `cp: list` or number [1-11] to display/select commands
 2. Enter exact command with colon format (e.g. `cp: fix javadoc`)
 3. Follow the defined workflow for each command
 4. User confirmation may be required based on command type

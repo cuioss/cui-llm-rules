@@ -1,6 +1,11 @@
 # DSL-Style Nested Constants Pattern
 
-The DSL-Style Nested Constants Pattern is a design pattern for organizing related constants in a hierarchical, discoverable manner. This pattern is particularly useful when dealing with a large number of related constants that can be logically grouped by multiple dimensions.
+## Purpose
+Defines a design pattern for organizing related constants in a hierarchical, discoverable manner. This pattern is particularly useful when dealing with a large number of related constants that can be logically grouped by multiple dimensions.
+
+## Related Documentation
+- [Logging Implementation](logging-implementation.md): Shows practical examples of this pattern
+- [Documentation Standards](../core/standards/documentation-standards.md): Standards for documenting constants
 
 ## Key Characteristics
 

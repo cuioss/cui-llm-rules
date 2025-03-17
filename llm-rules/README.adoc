@@ -199,6 +199,14 @@ See: link:cascade/commands/verify/rules.md[Rules Verification Process]
 |Requirements and specification documentation:
 - link:requirements/requirements-document.md[Requirements Document Structure]
 - link:requirements/specification-documents.md[Specification Documents Structure]
+
+|link:documentation/[documentation/]
+|Documentation structure guidelines:
+- link:documentation/readme-structure.md[README Structure Pattern]
+
+|link:testing/[testing/]
+|Testing guidelines and standards:
+- link:testing/logging-testing.md[Logging Testing Guide]
 - link:requirements/new-project-guide.md[New Project Guide]
 
 |===

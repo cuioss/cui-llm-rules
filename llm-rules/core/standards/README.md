@@ -1,6 +1,13 @@
 # Core Standards
 
-This directory contains the core standards for LLM operations and interactions.
+## Purpose
+Provides a centralized location for all core standards that govern LLM operations and interactions across the codebase.
+
+## Related Documentation
+- [Documentation Standards](documentation-standards.md): Standards for all documentation
+- [Logging Standards](logging-standards.md): Standards for logging implementation
+- [Testing Standards](testing-standards.md): Standards for testing implementation
+- [Version Control Standards](version-control-standards.md): Standards for version control
 
 ## Standards Overview
 

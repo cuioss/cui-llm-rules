@@ -2,8 +2,12 @@
 
 @llm-rules
 
-## Overview
-This document defines the standard structure for module README.adoc files in CUI projects.
+## Purpose
+Defines the standard structure for module README.adoc files in CUI projects to ensure consistency and completeness across all repositories.
+
+## Related Documentation
+- [Documentation Standards](../core/standards/documentation-standards.md): Core documentation standards
+- [Documentation Management](../cascade/documentation-management.md): Rules for documentation management
 
 ## Structure Requirements
 

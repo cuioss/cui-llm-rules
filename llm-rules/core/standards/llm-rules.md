@@ -1,5 +1,13 @@
 # LLM Command Execution Rules
 
+## Purpose
+Defines the critical rules and constraints for LLM assistants when executing commands and making changes to the @llm-rules repository.
+
+## Related Documentation
+- [Command Prompt Interface](../../cascade/commands/core/cp.md): Command execution interface
+- [Documentation Management](../../cascade/documentation-management.md): Rules for documentation changes
+- [Version Control Standards](version-control-standards.md): Standards for version control
+
 ## Critical Rules
 
 ### 1. Repository Changes
