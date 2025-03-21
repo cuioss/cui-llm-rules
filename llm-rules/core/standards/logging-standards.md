@@ -150,7 +150,7 @@ All messages follow the format: [Module-Prefix]-[identifier]: [message]
 
 ## See Also
 - [Logging Implementation Guide](../../java/logging-implementation.md): Detailed examples and patterns
-- [Logging Testing Guide](../../testing/logging-testing.md): Testing strategies and examples
+- [Logging Testing Guide](/standards/logging/testing-guide.adoc): Testing strategies and examples
 - [DSL-Style Constants Pattern](../../java/dsl-style-constants.md): Pattern for organizing log messages
 
 ## Important Notes

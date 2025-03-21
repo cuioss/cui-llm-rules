@@ -36,7 +36,8 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** `new-project-guide.adoc` - Guide for setting up a new project with requirements
 * `/testing/` - Testing standards and guidelines
 ** `core-standards.adoc` - Fundamental testing requirements and best practices
-** `logging-testing.adoc` - Specific guidance for testing logging implementations
+** `quality-standards.adoc` - Comprehensive quality standards and testing framework
+
 
 == Creating New Standards Documents
 When creating new standards documents, follow these guidelines:

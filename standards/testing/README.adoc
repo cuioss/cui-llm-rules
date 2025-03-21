@@ -14,7 +14,8 @@ This directory contains the comprehensive testing standards and guidelines for a
 The testing standards are organized into the following documents:
 
 * xref:core-standards.adoc[Core Standards] - Fundamental testing requirements and best practices
-* xref:logging-testing.adoc[Logging Testing] - Specific guidance for testing logging implementations
+* xref:quality-standards.adoc[Quality Standards] - Comprehensive quality standards and testing framework
+* xref:../logging/testing-guide.adoc[Logging Testing Guide] - Comprehensive guidance for testing logging implementations
 * `unit-testing.adoc` - Standards for unit testing
 * `integration-testing.adoc` - Standards for integration testing
 

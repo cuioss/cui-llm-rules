@@ -203,6 +203,6 @@ LOGGER.warn(WARN.USER_INFO_ENRICHED.format(userId, attributeName));
 
 ## See Also
 - [Logging Standards](../core/standards/logging-standards.md): Core standards and requirements
-- [Logging Testing Guide](../testing/logging-testing.md): Testing patterns and examples
+- [Logging Testing Guide](/standards/logging/testing-guide.adoc): Testing patterns and examples
 - [DSL-Style Constants Pattern](./dsl-style-constants.md): Pattern for organizing constants
 - [Project Standards](../core/standards/project-standards.md): Overall project standards

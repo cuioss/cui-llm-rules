@@ -28,7 +28,7 @@ The detailed specification document standards have been migrated to the standard
 5. Complex implementations should include diagrams where appropriate
    - Use PlantUML or other diagramming tools
    - Include both the diagram source and rendered image
-6. For logging specifications, refer to [Logging Implementation Guide](../java/logging-implementation.md) and [Logging Testing Guide](../testing/logging-testing.md)
+6. For logging specifications, refer to [Logging Implementation Guide](../java/logging-implementation.md) and [Logging Testing Guide](/standards/logging/testing-guide.adoc)
 
 ## Examples
 

@@ -6,10 +6,10 @@
 
 - [Testing Standards Overview](/standards/testing/README.adoc): Main testing standards documentation
 - [Testing Core Standards](/standards/testing/core-standards.adoc): Core testing standards and best practices
-- [Logging Testing Standards](/standards/testing/logging-testing.adoc): Specific guidance for testing logging
+- [Logging Testing Guide](/standards/logging/testing-guide.adoc): Comprehensive guidance for testing logging
 
 ## Migrated Documents
 
 The following documents have been migrated to the standards directory:
 
-- [logging-testing.md](logging-testing.md) → [/standards/testing/logging-testing.adoc](/standards/testing/logging-testing.adoc) and [/standards/logging/testing-guide.adoc](/standards/logging/testing-guide.adoc)
+- [logging-testing.md](logging-testing.md) → [/standards/logging/testing-guide.adoc](/standards/logging/testing-guide.adoc)

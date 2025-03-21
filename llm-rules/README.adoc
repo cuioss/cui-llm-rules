@@ -208,7 +208,7 @@ See: link:cascade/commands/verify/rules.md[Rules Verification Process]
 
 |link:testing/[testing/]
 |Testing guidelines and standards:
-- link:testing/logging-testing.md[Logging Testing Guide]
+- link:/standards/logging/testing-guide.adoc[Logging Testing Guide]
 - link:requirements/new-project-guide.md[New Project Guide]
 
 |===

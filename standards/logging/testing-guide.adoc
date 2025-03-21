@@ -7,17 +7,28 @@
 
 == Purpose
 
-This document provides comprehensive guidance and examples for testing logging implementations according to the xref:core-standards.adoc[Logging Core Standards].
+This document provides comprehensive guidance and examples for testing logging implementations according to the xref:core-standards.adoc[Logging Core Standards]. It includes both specific standards and practical examples to ensure consistent and effective logging tests across CUI projects.
 
 == Related Documentation
 
 * xref:core-standards.adoc[Logging Core Standards]
 * xref:implementation-guide.adoc[Logging Implementation Guide]
 * xref:../testing/README.adoc[Testing Standards]
+* xref:../testing/core-standards.adoc[Testing Core Standards]
 
 == Testing Requirements
 
-=== Required Coverage
+=== Required Test Coverage
+
+All production code that uses logging must have appropriate tests that verify:
+
+1. *Correct Log Level*: Messages are logged at the intended level
+2. *Correct Message Content*: The message content matches the expected template
+3. *Correct Message ID*: The message ID follows the defined pattern
+4. *Parameter Substitution*: Parameters are correctly substituted into the message template
+5. *Exception Handling*: Exceptions are properly included in log messages
+
+=== Required Coverage Levels
 
 * All INFO level messages
 * All WARN level messages
@@ -33,7 +44,16 @@ This document provides comprehensive guidance and examples for testing logging i
 * TRACE level messages
 * Test logging itself
 
-== Testing Tools
+== Testing Framework
+
+=== Required Tools
+
+All logging tests must use:
+
+* `cui-test-juli-logger`: Primary testing framework
+* `@EnableTestLogger` annotation on test classes
+* `de.cuioss.test.juli.TestLogLevel` for log level constants
+* `de.cuioss.test.juli.LogAsserts` for assertions
 
 === Core Components
 
@@ -62,6 +82,13 @@ assertSingleLogMessagePresent(TestLogLevel level, String message)
 == Testing Patterns
 
 === Basic Test Structure
+
+All logging tests should follow this structure:
+
+1. *Setup*: Configure the test environment and prepare input data
+2. *Exercise*: Execute the code that should produce log messages
+3. *Verify*: Assert that the expected log messages were produced
+4. *Teardown*: Clean up any resources (usually handled by the test framework)
 
 [source,java]
 ----
@@ -148,31 +175,38 @@ void shouldNotLogInNormalCase() {
 
 === Test Organization
 
+* Create dedicated test methods for each logging scenario
+* Use descriptive test method names that explain the scenario
+* Group related tests in the same test class
+* Follow the given/when/then pattern for clarity
 * One test method per logging scenario
-* Clear test method names describing the scenario
-* Follow given/when/then pattern
 * Keep tests focused on logging verification
 
 === Assertion Usage
 
-* Use most specific assertion method available
-* Verify both presence and absence of messages
-* Check exact message content when possible
-* Use resolveIdentifierString() for ID verification
+* Use the most specific assertion method available
+* Verify both the presence and absence of messages
+* Check the exact message content when possible
+* Use `resolveIdentifierString()` for ID verification
+* Verify both success and failure cases
 
 === Test Data
 
-* Use meaningful test data
+* Use meaningful test data that represents real-world scenarios
+* Test with various parameter values, including edge cases
+* Consider internationalization aspects if relevant
+* Test with different exception types when applicable
 * Avoid hardcoded strings
-* Consider edge cases
 * Test all parameter combinations
 
-=== Common Pitfalls
+== Common Pitfalls
 
-* Not testing parameter substitution
-* Missing exception logging tests
-* Not verifying absence of unexpected logs
-* Using wrong log levels in assertions
+* Not testing parameter substitution with different values
+* Missing tests for exception logging scenarios
+* Not verifying the absence of unexpected log messages
+* Using incorrect log levels in assertions
+* Not testing all required log levels (INFO/WARN/ERROR/FATAL)
+* Testing implementation details instead of behavior
 
 == Important Notes
 
@@ -180,11 +214,22 @@ void shouldNotLogInNormalCase() {
 * Test all required log levels (INFO/WARN/ERROR/FATAL)
 * Always verify both presence and absence of messages
 * Keep tests focused on logging verification
+* Reference these rules with '@llm-rules'
 
 == Success Criteria
 
-. All required messages are tested
-. Tests verify both success and failure cases
-. Parameter substitution is tested
-. Exception logging is verified
-. No unexpected logging occurs
+A logging test suite is considered successful when:
+
+1. All required messages are tested with appropriate assertions
+2. Tests verify both success and failure scenarios
+3. Parameter substitution is tested with various values
+4. Exception logging is verified with different exception types
+5. The absence of unexpected logging is confirmed
+6. All tests are deterministic and reliable
+
+== See Also
+
+* xref:core-standards.adoc[Logging Core Standards]
+* xref:implementation-guide.adoc[Logging Implementation Guide]
+* xref:../testing/core-standards.adoc[Testing Core Standards]
+* xref:../java/dsl-style-constants.adoc[DSL-Style Constants Pattern]
