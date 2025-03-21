@@ -19,7 +19,6 @@ Provides a high-level overview of Java maintenance tasks and directs to detailed
 - [Javadoc Maintenance](../standards/documentation/javadoc-maintenance.md): Javadoc maintenance process
 - [Quality Standards](../core/standards/quality-standards.md): Quality standards
 - [Progress Standards](../core/standards/progress-standards.md): Progress tracking
-- [Logging Standards](../core/standards/logging-standards.md): Logging standards
 
 ## Core Components
 

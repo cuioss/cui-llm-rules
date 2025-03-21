@@ -16,7 +16,6 @@ Defines the core project standards, technology stack, and framework guidelines f
 - [Javadoc Maintenance](../../standards/documentation/javadoc-maintenance.md): Javadoc maintenance process
 - [Quality Standards](quality-standards.md): Quality standards
 - [Version Control Standards](version-control-standards.md): Version control and commit standards
-- [Logging Standards](logging-standards.md): Logging configuration and implementation
 - [Rules Verification](../../cascade/commands/verify/rules.md): Documentation verification
 
 ## Core Standards

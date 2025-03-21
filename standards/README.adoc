@@ -39,6 +39,42 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** `quality-standards.adoc` - Comprehensive quality standards and testing framework
 
 
+== Standards Documentation Rules
+
+All documents within the standards directory must adhere to the following rules:
+
+1. *Document Format*: 
+   * Use AsciiDoc format with `.adoc` extension
+   * Include proper document header with title, TOC, and section numbering
+   * Use consistent heading hierarchy
+   * Include cross-references to related documents
+
+2. *Content Requirements*:
+   * Each document must have a clear purpose statement
+   * Include a "Related Documentation" section with cross-references
+   * All rules must be clearly stated and normative
+   * Use consistent terminology across all documents
+   * Reference these rules with '@llm-rules'
+
+3. *Document Structure*:
+   * Place documents in the appropriate subdirectory based on topic
+   * Update the main README.adoc when adding new documents
+   * Avoid duplicating content across multiple documents
+   * Update all links that referred to previous documents
+   * Documents in the standards directory must not reference anything within llm-rules
+
+4. *Code Examples*:
+   * Include practical, runnable code examples where appropriate
+   * Use syntax highlighting for code blocks
+   * Follow the established coding standards in examples
+   * Provide explanations for complex code patterns
+
+5. *Maintenance*:
+   * Keep documents up-to-date with current best practices
+   * Remove duplicate content when found
+   * Consolidate related information into a single authoritative source
+   * Ensure all cross-references remain valid
+
 == Creating New Standards Documents
 When creating new standards documents, follow these guidelines:
 
@@ -62,3 +98,30 @@ Brief description of the document's purpose.
 3. Place the document in the appropriate subdirectory
 4. Update this README.adoc to include the new document
 5. Follow the structure patterns defined in existing documents
+
+== Content Migration and References
+
+When moving or consolidating content within the standards directory, follow these guidelines:
+
+1. *Content Migration*:
+   * Ensure all content is properly formatted in AsciiDoc
+   * Update all cross-references in the new document
+   * Remove duplicate content after migration is complete
+
+2. *Reference Updates*:
+   * Update all references to the migrated document in other files
+   * Use xref for references in AsciiDoc files (e.g., `xref:path/to/document.adoc[Document Title]`)
+   * Check for and update references in all standards documents
+
+3. *Handling References from llm-rules*:
+   * If a document in the standards directory needs to be referenced from llm-rules, use one of these approaches:
+     .. Create a proxy document in standards that redirects to the appropriate content
+     .. Update the llm-rules document to point directly to the standards document
+     .. Consolidate the content from both sources into a single authoritative document
+
+4. *Resolving Circular References*:
+   * If you encounter circular references between standards and llm-rules, please select from these options:
+     .. Move all related content to standards and update references
+     .. Create a new consolidated document in standards that combines all related content
+     .. Refactor the document structure to eliminate the circular dependency
+     .. Maintain separate documents but clearly define their relationship and purpose

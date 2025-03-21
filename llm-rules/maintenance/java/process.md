@@ -15,7 +15,6 @@ Defines the core process and steps for Java maintenance tasks.
 - [Project Standards](../../core/standards/project-standards.md): Project standards
 - [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
 - [Quality Standards](../../core/standards/quality-standards.md): Quality standards
-- [Logging Standards](../../core/standards/logging-standards.md): Logging standards
 - [Progress Standards](../../core/standards/progress-standards.md): Progress tracking
 
 ## Process Steps
@@ -85,7 +84,6 @@ Defines the core process and steps for Java maintenance tasks.
 2. Code Refactoring Phase
    - Update progress: "Code Refactoring"
    - Follow [code modification rules](constraints.md#code-modification-rules)
-   - When adapting to [logging standards](../../core/standards/logging-standards.md), keep changes focused only on logging-related code
    - Fix deprecated APIs
    - Document all changes
    - Verify backward compatibility
@@ -175,5 +173,4 @@ Defines the core process and steps for Java maintenance tasks.
 - [Project Standards](../../core/standards/project-standards.md): Project standards
 - [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
 - [Quality Standards](../../core/standards/quality-standards.md): Quality standards
-- [Logging Standards](../../core/standards/logging-standards.md): Logging standards
 - [Progress Standards](../../core/standards/progress-standards.md): Progress tracking
