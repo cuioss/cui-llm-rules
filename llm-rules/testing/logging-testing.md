@@ -1,12 +1,14 @@
 # Logging Testing Guide
 
-## Purpose
-Provides comprehensive guidance and examples for testing logging implementations according to the [Logging Standards](../core/standards/logging-standards.md).
+> **Note:** This document has been migrated to the standards directory. Please refer to the [Logging Testing Guide](/standards/logging/testing-guide.adoc) for the current version.
 
-## Related Documentation
-- [Logging Standards](../core/standards/logging-standards.md): Core logging standards
-- [Logging Implementation Guide](../java/logging-implementation.md): Implementation patterns
-- [Testing Standards](../core/standards/testing-standards.md): Core testing standards
+## Migration Notice
+The detailed logging testing guide has been migrated to the standards directory in AsciiDoc format. Please refer to the following documents for the current standards:
+
+- [Logging Testing Guide](/standards/logging/testing-guide.adoc)
+- [Logging Core Standards](/standards/logging/core-standards.adoc)
+- [Logging Implementation Guide](/standards/logging/implementation-guide.adoc)
+- [Testing-Specific Logging Standards](/standards/testing/logging-testing.adoc)
 
 ## Testing Requirements
 

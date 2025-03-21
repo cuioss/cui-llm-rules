@@ -1,0 +1,51 @@
+= Logging Standards
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Overview
+
+This directory contains the comprehensive logging standards, implementation guides, and testing requirements for all CUI projects. These standards ensure consistent, traceable, and maintainable logging across the codebase.
+
+== Document Structure
+
+The logging standards are organized into the following documents:
+
+* xref:core-standards.adoc[Core Standards] - Fundamental logging configuration and implementation requirements
+* xref:implementation-guide.adoc[Implementation Guide] - Detailed examples and patterns for implementing logging
+* xref:testing-guide.adoc[Testing Guide] - Comprehensive guidance for testing logging implementations
+* xref:dsl-style-constants.adoc[DSL-Style Constants Pattern] - Pattern for organizing log messages and other constants
+
+== Key Principles
+
+1. *Consistency*: All logging follows the same patterns and conventions
+2. *Traceability*: Each log message has a unique identifier and is documented
+3. *Testability*: All log messages are verified through automated tests
+4. *Maintainability*: Log messages are organized in a discoverable, hierarchical structure
+
+== Quick Reference
+
+[cols="1,3", options="header"]
+|===
+|Topic |Guidance
+
+|Logger Configuration
+|Use `de.cuioss.tools.logging.CuiLogger` with constant name 'LOGGER'
+
+|Log Levels
+|INFO: 001-099, WARN: 100-199, ERROR: 200-299, FATAL: 300-399
+
+|Message Format
+|Use `LogRecord` for structured logging with '%s' for string substitutions
+
+|Testing
+|Use `cui-test-juli-logger` and `LogAsserts` methods for verification
+|===
+
+== See Also
+
+* xref:../README.adoc[Standards Overview]
+* xref:../java/README.adoc[Java Standards]
+* xref:../testing/README.adoc[Testing Standards]

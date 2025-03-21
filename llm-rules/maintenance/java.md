@@ -14,7 +14,9 @@ Provides a high-level overview of Java maintenance tasks and directs to detailed
 - [Java Constraints](java/constraints.md): Critical constraints
 - [Build Requirements](java/build.md): Build requirements
 - [Project Standards](../core/standards/project-standards.md): Project standards
-- [Documentation Standards](../core/standards/documentation-standards.md): Documentation standards
+- [General Documentation Standards](../standards/documentation/general-standard.md): General documentation standards
+- [Javadoc Standards](../standards/documentation/javadoc-standards.md): Javadoc standards
+- [Javadoc Maintenance](../standards/documentation/javadoc-maintenance.md): Javadoc maintenance process
 - [Quality Standards](../core/standards/quality-standards.md): Quality standards
 - [Progress Standards](../core/standards/progress-standards.md): Progress tracking
 - [Logging Standards](../core/standards/logging-standards.md): Logging standards
@@ -79,5 +81,7 @@ See [Build Requirements](java/build.md) for:
 - [Java Constraints](java/constraints.md): Critical constraints
 - [Build Requirements](java/build.md): Build requirements
 - [Project Standards](../core/standards/project-standards.md): Project standards
-- [Documentation Standards](../core/standards/documentation-standards.md): Documentation standards
+- [General Documentation Standards](../standards/documentation/general-standard.md): General documentation standards
+- [Javadoc Standards](../standards/documentation/javadoc-standards.md): Javadoc standards
+- [Javadoc Maintenance](../standards/documentation/javadoc-maintenance.md): Javadoc maintenance process
 - [Quality Standards](../core/standards/quality-standards.md): Quality standards

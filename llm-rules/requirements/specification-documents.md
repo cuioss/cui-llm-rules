@@ -1,47 +1,13 @@
 # Specification Documents Structure and Format
 
-## Document Location and Naming
-1. The main specification document must be located at `doc/Specification.adoc`
-2. Individual specification documents must be located in `doc/specification/` directory
-3. Individual specification documents must follow a consistent naming convention:
-   - Use lowercase with hyphens for multi-word names
-   - Example: `technical-components.adoc`, `error-handling.adoc`
-4. All specification documents must follow AsciiDoc format
+> **Note:** This document has been migrated to the standards directory. Please refer to the [Specification Documents Structure](/standards/requirements/specification-documents.adoc) for the current version.
 
-## Main Specification Document Structure
-1. The main specification document (`Specification.adoc`) must include:
-   - Title: `= [Project Name] Specification`
-   - Table of contents: `:toc:`, `:toclevels: 3`, `:toc-title: Table of Contents`, `:sectnums:`
-   - Overview section with a backtracking link to the corresponding requirement
-   - Document Structure section listing all individual specification documents with links
-   - Each section must include a backtracking link to the corresponding requirement
+## Migration Notice
+The detailed specification document standards have been migrated to the standards directory in AsciiDoc format. Please refer to the following documents for the current standards:
 
-## Individual Specification Document Structure
-1. Each individual specification document must include:
-   - Title: `= [Project Name] [Component/Feature]`
-   - Table of contents: `:toc:`, `:toclevels: 3`, `:toc-title: Table of Contents`, `:sectnums:`
-   - A link back to the main specification document at the top: `link:../Specification.adoc[Back to Main Specification]`
-   - Sections organized by component, feature, or aspect
-   - Each section must include a backtracking link to the corresponding requirement
-
-## Backtracking Links Format
-1. Each specification section must include a backtracking link to the corresponding requirement
-2. The backtracking link must follow this exact format:
-   ```
-   _See Requirement link:../Requirements.adoc#PREFIX-NUM[PREFIX-NUM: Requirement Title]_
-   ```
-3. For specification files in subdirectories, use relative paths:
-   ```
-   _See Requirement link:../Requirements.adoc#PREFIX-NUM[PREFIX-NUM: Requirement Title]_
-   ```
-4. For specification files in the root directory, use direct path:
-   ```
-   _See Requirement link:Requirements.adoc#PREFIX-NUM[PREFIX-NUM: Requirement Title]_
-   ```
-5. There must be exactly ONE empty line after each backtracking link before the content begins
-6. This empty line is required to create a proper paragraph separation in the rendered document
-
-## Specification Content
+- [Specification Documents Structure](/standards/requirements/specification-documents.adoc)
+- [Requirements Document Structure](/standards/requirements/requirements-document.adoc)
+- [New Project Guide](/standards/requirements/new-project-guide.adoc)
 1. Specifications must provide detailed implementation guidance for each requirement
 2. Specifications must include:
    - Technical details

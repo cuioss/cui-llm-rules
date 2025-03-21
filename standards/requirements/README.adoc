@@ -1,0 +1,21 @@
+= Requirements Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+This directory contains standards and guidelines for creating and maintaining requirements and specification documents in CUI projects.
+
+== Standards Documents
+
+* xref:requirements-document.adoc[Requirements Document Structure] - Defines the structure and format for requirements documents
+* xref:specification-documents.adoc[Specification Documents Structure] - Defines the structure and format for specification documents
+* xref:new-project-guide.adoc[New Project Guide] - Provides guidance for setting up a new project with requirements and specifications
+
+== Key Principles
+
+. All requirements must be traceable to specifications
+. All specifications must be traceable back to requirements
+. Documentation must follow AsciiDoc format
+. Requirements must be specific, measurable, achievable, relevant, and time-bound
+. Documentation structure must be consistent across all projects

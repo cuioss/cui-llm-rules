@@ -1,12 +1,14 @@
 # Logging Implementation Guide
 
-## Purpose
-Provides detailed examples and patterns for implementing logging according to the [Logging Standards](../core/standards/logging-standards.md).
+> **Note:** This document has been migrated to the standards directory. Please refer to the [Logging Implementation Guide](/standards/logging/implementation-guide.adoc) for the current version.
 
-## Related Documentation
-- [Logging Standards](../core/standards/logging-standards.md): Core logging standards
-- [DSL-Style Constants Pattern](./dsl-style-constants.md): Pattern for organizing constants
-- [Logging Testing Guide](../testing/logging-testing.md): Testing patterns and examples
+## Migration Notice
+The detailed logging implementation guide has been migrated to the standards directory in AsciiDoc format. Please refer to the following documents for the current standards:
+
+- [Logging Implementation Guide](/standards/logging/implementation-guide.adoc)
+- [Logging Core Standards](/standards/logging/core-standards.adoc)
+- [Logging Testing Guide](/standards/logging/testing-guide.adoc)
+- [DSL-Style Constants Pattern](/standards/java/dsl-style-constants.adoc)
 
 ## Implementation Examples
 

@@ -1,12 +1,13 @@
 # Testing Standards
 
-## Purpose
-Defines the core standards and best practices for writing and maintaining tests across all CUI projects.
+> **Note:** This document has been migrated to the standards directory. Please refer to the [Testing Core Standards](/standards/testing/core-standards.adoc) for the current version.
 
-## Related Documentation
-- [Test Code Changes](test-code-changes.md): Guidelines for modifying test code
-- [Logging Testing](../../testing/logging-testing.md): Specific standards for testing logging implementations
-- [Documentation Standards](documentation-standards.md): Standards for documenting tests
+## Migration Notice
+The detailed testing standards have been migrated to the standards directory in AsciiDoc format. Please refer to the following documents for the current standards:
+
+- [Testing Core Standards](/standards/testing/core-standards.adoc)
+- [Logging Testing Standards](/standards/testing/logging-testing.adoc)
+- [Logging Testing Guide](/standards/logging/testing-guide.adoc)
 
 ## Core Testing Principles
 

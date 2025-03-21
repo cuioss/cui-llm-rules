@@ -1,0 +1,155 @@
+= Logging Testing Standards
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Purpose
+
+This document provides specific standards and guidance for testing logging implementations in CUI projects.
+
+== Related Documentation
+
+* xref:README.adoc[Testing Standards Overview]
+* xref:../logging/core-standards.adoc[Logging Core Standards]
+* xref:../logging/testing-guide.adoc[Logging Testing Guide]
+* xref:../logging/implementation-guide.adoc[Logging Implementation Guide]
+
+== Testing Requirements
+
+=== Required Test Coverage
+
+All production code that uses logging must have appropriate tests that verify:
+
+1. *Correct Log Level*: Messages are logged at the intended level
+2. *Correct Message Content*: The message content matches the expected template
+3. *Correct Message ID*: The message ID follows the defined pattern
+4. *Parameter Substitution*: Parameters are correctly substituted into the message template
+5. *Exception Handling*: Exceptions are properly included in log messages
+
+=== Test Framework
+
+All logging tests must use:
+
+* `cui-test-juli-logger` as the testing framework
+* `@EnableTestLogger` annotation on test classes
+* `de.cuioss.test.juli.TestLogLevel` for log level constants
+* `de.cuioss.test.juli.LogAsserts` for assertions
+
+== Testing Patterns
+
+=== Basic Test Structure
+
+All logging tests should follow this structure:
+
+1. *Setup*: Configure the test environment and prepare input data
+2. *Exercise*: Execute the code that should produce log messages
+3. *Verify*: Assert that the expected log messages were produced
+4. *Teardown*: Clean up any resources (usually handled by the test framework)
+
+=== Common Test Cases
+
+==== Testing INFO Messages
+
+[source,java]
+----
+@Test
+void shouldLogInfoMessage() {
+    // given
+    var resourceName = "test.properties";
+
+    // when
+    loadResource(resourceName);
+
+    // then
+    assertSingleLogMessagePresent(
+        TestLogLevel.INFO,
+        INFO.RESOURCE_LOADED.format(resourceName));
+}
+----
+
+==== Testing ERROR Messages with Exceptions
+
+[source,java]
+----
+@Test
+void shouldLogErrorWithException() {
+    // given
+    var exception = new IOException("File not found");
+    
+    // when
+    try {
+        throw exception;
+    } catch (Exception e) {
+        service.handleException(e);
+    }
+    
+    // then
+    assertSingleLogMessagePresent(
+        TestLogLevel.ERROR,
+        ERROR.FILE_ACCESS_ERROR.format(exception.getMessage()));
+}
+----
+
+==== Testing Absence of Logging
+
+[source,java]
+----
+@Test
+void shouldNotLogInNormalCase() {
+    // when
+    service.performNormalOperation();
+    
+    // then
+    assertNoLogMessagePresent(TestLogLevel.WARN, LOGGER);
+    assertNoLogMessagePresent(TestLogLevel.ERROR, LOGGER);
+}
+----
+
+== Best Practices
+
+=== Test Organization
+
+* Create dedicated test methods for each logging scenario
+* Use descriptive test method names that explain the scenario
+* Group related tests in the same test class
+* Follow the given/when/then pattern for clarity
+
+=== Assertion Usage
+
+* Use the most specific assertion method available
+* Verify both the presence and absence of messages
+* Check the exact message content when possible
+* Use `resolveIdentifierString()` for ID verification
+
+=== Test Data
+
+* Use meaningful test data that represents real-world scenarios
+* Test with various parameter values, including edge cases
+* Consider internationalization aspects if relevant
+* Test with different exception types when applicable
+
+== Common Pitfalls
+
+* Not testing parameter substitution with different values
+* Missing tests for exception logging scenarios
+* Not verifying the absence of unexpected log messages
+* Using incorrect log levels in assertions
+* Not testing all required log levels (INFO/WARN/ERROR/FATAL)
+
+== Success Criteria
+
+A logging test suite is considered successful when:
+
+1. All required messages are tested with appropriate assertions
+2. Tests verify both success and failure scenarios
+3. Parameter substitution is tested with various values
+4. Exception logging is verified with different exception types
+5. The absence of unexpected logging is confirmed
+6. All tests are deterministic and reliable
+
+== See Also
+
+* xref:../logging/testing-guide.adoc[Comprehensive Logging Testing Guide]
+* xref:../logging/core-standards.adoc[Logging Core Standards]

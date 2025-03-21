@@ -1,16 +1,14 @@
 # Logging Standards
 
-## Purpose
-Defines comprehensive standards for logging across the codebase, including configuration, implementation, and testing requirements.
+> **Note:** This document has been migrated to the standards directory. Please refer to the [Logging Standards](/standards/logging/core-standards.adoc) for the current version.
 
-## Related Documentation
-- [Project Standards](../project-standards.md): Project standards and technology stack
-- [Documentation Standards](../documentation-standards.md): Documentation standards
-- [Quality Standards](../quality-standards.md): Quality standards
-- [Java Maintenance Process](../../maintenance/java/process.md): Java maintenance process
-- [DSL-Style Constants Pattern](../../java/dsl-style-constants.md): Pattern for organizing constants
-- [Logging Implementation Guide](../../java/logging-implementation.md): Detailed implementation examples
-- [Logging Testing Guide](../../testing/logging-testing.md): Testing patterns and examples
+## Migration Notice
+The detailed logging standards have been migrated to the standards directory in AsciiDoc format. Please refer to the following documents for the current standards:
+
+- [Logging Core Standards](/standards/logging/core-standards.adoc)
+- [Logging Implementation Guide](/standards/logging/implementation-guide.adoc)
+- [Logging Testing Guide](/standards/logging/testing-guide.adoc)
+- [DSL-Style Constants Pattern](/standards/logging/dsl-style-constants.adoc)
 
 ## Important Note on Code Changes
 When adapting code to these logging standards:
@@ -121,8 +119,6 @@ All messages follow the format: [Module-Prefix]-[identifier]: [message]
    - WARN Level (100-199)
    - ERROR Level (200-299)
    - FATAL Level (300-399)
-   - DEBUG Level (500-599)
-   - TRACE Level (600-699)
 5. Include all metadata:
    - Full identifier with module prefix
    - Module/component name

@@ -1,11 +1,13 @@
 # DSL-Style Nested Constants Pattern
 
-## Purpose
-Defines a design pattern for organizing related constants in a hierarchical, discoverable manner. This pattern is particularly useful when dealing with a large number of related constants that can be logically grouped by multiple dimensions.
+> **Note:** This document has been migrated to the standards directory. Please refer to the [DSL-Style Constants Pattern](/standards/java/dsl-style-constants.adoc) for the current version.
 
-## Related Documentation
-- [Logging Implementation](logging-implementation.md): Shows practical examples of this pattern
-- [Documentation Standards](../core/standards/documentation-standards.md): Standards for documenting constants
+## Migration Notice
+The detailed DSL-Style Nested Constants Pattern guide has been migrated to the standards directory in AsciiDoc format. Please refer to the following documents for the current standards:
+
+- [DSL-Style Constants Pattern](/standards/java/dsl-style-constants.adoc)
+- [Java Standards](/standards/java/README.adoc)
+- [Logging Implementation Guide](/standards/logging/implementation-guide.adoc)
 
 ## Key Characteristics
 

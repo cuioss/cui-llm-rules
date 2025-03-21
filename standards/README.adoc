@@ -1,0 +1,63 @@
+= CUI Standards Documentation
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+This directory contains all standardization documents for CUI projects, defining coding, documentation, and process standards.
+
+== Documentation Format
+All standards documentation in this directory uses AsciiDoc format with the following conventions:
+
+* Files use the `.adoc` extension
+* Each document includes a table of contents (TOC) on the left side
+* Section numbering is enabled for easier reference
+* Standard heading hierarchy is used consistently
+
+== Directory Structure
+* `/documentation/` - Documentation standards
+** `general-standard.adoc` - Core documentation standards
+** `javadoc-standards.adoc` - Specific standards for Javadoc documentation
+** `javadoc-maintenance.adoc` - Process for maintaining Javadoc documentation
+** `readme-structure.adoc` - Standard structure for README.adoc files
+* `/java/` - Java coding standards and guidelines
+** `coding-standards.adoc` - Core Java coding standards and best practices
+** `package-structure.adoc` - Standards for package organization and naming
+** `naming-conventions.adoc` - Naming conventions for classes, methods, and variables
+** `error-handling.adoc` - Standards for exception handling and error reporting
+** `dsl-style-constants.adoc` - Pattern for organizing related constants in a hierarchical manner
+* `/logging/` - Logging standards and implementation guides
+** `core-standards.adoc` - Core logging standards and requirements
+** `implementation-guide.adoc` - Detailed examples for implementing logging
+** `testing-guide.adoc` - Comprehensive guidance for testing logging
+* `/requirements/` - Requirements and specifications standards
+** `requirements-document.adoc` - Structure and format for requirements documents
+** `specification-documents.adoc` - Structure and format for specification documents
+** `new-project-guide.adoc` - Guide for setting up a new project with requirements
+* `/testing/` - Testing standards and guidelines
+** `core-standards.adoc` - Fundamental testing requirements and best practices
+** `logging-testing.adoc` - Specific guidance for testing logging implementations
+
+== Creating New Standards Documents
+When creating new standards documents, follow these guidelines:
+
+1. Use AsciiDoc format with `.adoc` extension
+2. Include the following document header:
++
+[source,asciidoc]
+----
+= Document Title
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Brief description of the document's purpose.
+
+== Related Documentation
+* xref:path/to/related-doc.adoc[Related Document]: Brief description
+----
+
+3. Place the document in the appropriate subdirectory
+4. Update this README.adoc to include the new document
+5. Follow the structure patterns defined in existing documents

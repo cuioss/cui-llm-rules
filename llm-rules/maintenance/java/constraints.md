@@ -5,7 +5,9 @@ Defines critical constraints and requirements for Java maintenance tasks to ensu
 
 ## Related Documentation
 - [Project Standards](../../core/standards/project-standards.md): Project standards and technology stack
-- [Documentation Standards](../../core/standards/documentation-standards.md): Documentation standards
+- [General Documentation Standards](../../standards/documentation/general-standard.md): General documentation standards
+- [Javadoc Standards](../../standards/documentation/javadoc-standards.md): Javadoc standards
+- [Javadoc Maintenance](../../standards/documentation/javadoc-maintenance.md): Javadoc maintenance process
 - [Quality Standards](../../core/standards/quality-standards.md): Quality and testing standards
 - [Java Process](process.md): Java maintenance process
 - [Build Requirements](build.md): Build configuration and requirements

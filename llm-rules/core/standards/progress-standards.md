@@ -5,7 +5,9 @@ Defines comprehensive standards for tracking progress and managing phase transit
 
 ## Related Documentation
 - core/standards/project-standards.md: Project standards and technology stack
-- core/standards/documentation-standards.md: Documentation standards
+- standards/documentation/general-standard.md: General documentation standards
+- standards/documentation/javadoc-standards.md: Javadoc standards
+- standards/documentation/javadoc-maintenance.md: Javadoc maintenance process
 - core/standards/quality-standards.md: Quality standards
 - maintenance/java/process.md: Java maintenance process
 
@@ -242,6 +244,8 @@ Defines comprehensive standards for tracking progress and managing phase transit
 
 ## See Also
 - core/standards/project-standards.md: Project standards
-- core/standards/documentation-standards.md: Documentation standards
+- standards/documentation/general-standard.md: General documentation standards
+- standards/documentation/javadoc-standards.md: Javadoc standards
+- standards/documentation/javadoc-maintenance.md: Javadoc maintenance process
 - core/standards/quality-standards.md: Quality standards
 - maintenance/java/process.md: Java maintenance process

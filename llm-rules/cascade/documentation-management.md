@@ -5,6 +5,10 @@ Defines the rules that must be followed when creating, updating, or deleting doc
 
 ## Related Documentation
 - [Documentation Standards](../core/standards/documentation-standards.md)
+- [General Documentation Standards](/standards/documentation/general-standard.adoc)
+- [Javadoc Standards](/standards/documentation/javadoc-standards.adoc)
+- [Javadoc Maintenance](/standards/documentation/javadoc-maintenance.adoc)
+- [README Structure](/standards/documentation/readme-structure.adoc)
 - [Project Standards](../core/standards/project-standards.md)
 - [Progress Standards](../core/standards/progress-standards.md)
 
@@ -83,7 +87,7 @@ Please choose an option:
 ### Updating Documents
 1. Preserve all existing information
 2. Update cross-references if needed
-3. Maintain document structure as defined in [Documentation Standards](../core/standards/documentation-standards.md)
+3. Maintain document structure as defined in the documentation standards
 4. Verify no information loss
 5. Present changes to user if significant
 
@@ -105,6 +109,10 @@ Please choose an option:
 - [Command Documentation](commands/core/cp.md)
 - [Project Standards](../core/standards/project-standards.md)
 - [Documentation Standards](../core/standards/documentation-standards.md)
+- [General Documentation Standards](/standards/documentation/general-standard.adoc)
+- [Javadoc Standards](/standards/documentation/javadoc-standards.adoc)
+- [Javadoc Maintenance](/standards/documentation/javadoc-maintenance.adoc)
+- [README Structure](/standards/documentation/readme-structure.adoc)
 
 ## Important Notes
 - Primary audience is LLM, not humans

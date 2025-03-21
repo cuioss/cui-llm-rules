@@ -1,0 +1,33 @@
+= Java Standards
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Overview
+
+This directory contains the comprehensive Java standards and guidelines for all CUI projects. These standards ensure consistent, maintainable, and high-quality Java code across the codebase.
+
+== Document Structure
+
+The Java standards are organized into the following documents:
+
+* `coding-standards.adoc` - Core Java coding standards and best practices
+* `package-structure.adoc` - Standards for package organization and naming
+* `naming-conventions.adoc` - Naming conventions for classes, methods, and variables
+* `error-handling.adoc` - Standards for exception handling and error reporting
+* xref:dsl-style-constants.adoc[DSL-Style Constants Pattern] - Pattern for organizing related constants in a hierarchical manner
+
+== Key Principles
+
+1. *Consistency*: All Java code follows the same patterns and conventions
+2. *Maintainability*: Code is organized for long-term maintenance
+3. *Readability*: Code is easy to read and understand
+4. *Testability*: Code is designed to be easily testable
+
+== See Also
+
+* xref:../README.adoc[Standards Overview]
+* xref:../logging/README.adoc[Logging Standards]
+* xref:../testing/README.adoc[Testing Standards]

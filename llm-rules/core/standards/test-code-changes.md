@@ -1,7 +1,9 @@
 # Test Code Changes
 
-## Purpose
-Defines standards and guidelines for making changes to test code while maintaining code quality and focus.
+> **Note:** This document has been migrated to the standards directory. Please refer to the [Testing Core Standards](/standards/testing/core-standards.adoc) for the current version.
+
+## Migration Notice
+The detailed guidelines for test code changes have been migrated to the standards directory in AsciiDoc format as part of the Testing Core Standards document.
 
 ## Core Standards
 

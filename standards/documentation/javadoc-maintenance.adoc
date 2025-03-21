@@ -1,0 +1,128 @@
+= Javadoc Maintenance
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines the process for maintaining Javadoc documentation, fixing errors, and ensuring documentation quality.
+
+== Related Documentation
+* xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
+* xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
+* xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
+
+== Critical Constraints
+
+=== Content Preservation
+* Fix ONLY Javadoc errors and warnings from build
+* Do NOT alter or improve documentation content
+* Do NOT modify any code
+* Make minimal modifications necessary
+* Focus only on formatting, references, and tags
+
+=== Common Fixes
+* Fix invalid `{@link}` references
+* Fix malformed HTML tags
+* Fix missing/incorrect parameter documentation
+* Fix missing/incorrect return value documentation
+* Fix missing/incorrect exception documentation
+
+=== Out of Scope
+* Documentation improvements
+* Code changes
+* Content rewrites
+* Style changes beyond error fixes
+
+== Maintenance Process
+
+=== Build Verification
+* Run appropriate command:
+** Single module: `./mvnw clean verify -Pjavadoc`
+** Multi-module: `./mvnw clean verify -Pjavadoc-mm-reporting`
+* Record any errors in progress file
+* Categorize issues:
+** Missing tags
+** Invalid references
+** Formatting problems
+* Document error locations
+
+=== Documentation Analysis
+* For each error:
+** Record issue details
+** Analyze context
+** Plan minimal fix
+** Document proposed changes
+* Record analysis completion
+
+=== Fix Application
+* For each documented issue:
+** Apply minimal fix
+** Verify no content loss
+** Run local javadoc check
+** Record changes made
+* Document all applied fixes
+
+=== Final Verification
+* Run appropriate javadoc command
+* If issues remain:
+** Record in progress file
+** Return to Fix Application
+* On success:
+** Record verification
+** Commit changes with descriptive message
+
+== Progress Tracking
+
+=== Process Steps
+==== Initialize Progress
+* Create/update progress file
+* Record start time and state
+* Document configuration
+
+==== Track Changes
+* Update after each step
+* Record all modifications
+* Document any issues
+
+==== Completion
+* Record end time
+* Document final state
+* Archive progress data
+
+=== Documentation
+* Record all changes made
+* Document any issues encountered
+* Track progress at each step
+* Maintain clear status updates
+
+== Common Javadoc Issues and Fixes
+
+=== Missing Parameter Documentation
+* Add @param tags for all undocumented parameters
+* Use parameter name exactly as in method signature
+* Add minimal description based on parameter name
+* Do not modify existing parameter documentation
+
+=== Invalid References
+* Fix `{@link}` references to non-existent classes/methods
+* Update references to renamed elements
+* Remove references to deleted elements
+* Replace with appropriate alternative references
+
+=== HTML Formatting Issues
+* Close unclosed HTML tags
+* Fix malformed HTML elements
+* Correct improper nesting of HTML tags
+* Ensure proper escaping of special characters
+
+=== Missing Return Documentation
+* Add @return tags for undocumented return values
+* Provide minimal description based on method name
+* Do not modify existing return documentation
+* For void methods, no @return tag is needed
+
+=== Missing Exception Documentation
+* Add @throws tags for undocumented exceptions
+* Document conditions that trigger exceptions
+* Do not modify existing exception documentation
+* Ensure exceptions in @throws tags match method signature

@@ -1,0 +1,190 @@
+= Logging Testing Guide
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Purpose
+
+This document provides comprehensive guidance and examples for testing logging implementations according to the xref:core-standards.adoc[Logging Core Standards].
+
+== Related Documentation
+
+* xref:core-standards.adoc[Logging Core Standards]
+* xref:implementation-guide.adoc[Logging Implementation Guide]
+* xref:../testing/README.adoc[Testing Standards]
+
+== Testing Requirements
+
+=== Required Coverage
+
+* All INFO level messages
+* All WARN level messages
+* All ERROR level messages
+* All FATAL level messages
+* Parameter substitution cases
+* Exception logging cases
+* Template-based logging
+
+=== Optional Coverage
+
+* DEBUG level messages
+* TRACE level messages
+* Test logging itself
+
+== Testing Tools
+
+=== Core Components
+
+* `cui-test-juli-logger`: Primary testing framework
+* `de.cuioss.test.juli.TestLogLevel`: Log level constants
+* `de.cuioss.test.juli.LogAsserts`: Assertion methods
+* `@EnableTestLogger`: Test class annotation
+
+=== LogAsserts Methods
+
+[source,java]
+----
+// Exact message match
+assertLogMessagePresent(TestLogLevel level, String message)
+
+// Partial message match
+assertLogMessagePresentContaining(TestLogLevel level, String partialMessage)
+
+// Verify no message exists
+assertNoLogMessagePresent(TestLogLevel level, Logger logger)
+
+// Verify exactly one message exists
+assertSingleLogMessagePresent(TestLogLevel level, String message)
+----
+
+== Testing Patterns
+
+=== Basic Test Structure
+
+[source,java]
+----
+@EnableTestLogger
+class ResourceBundleLocatorTest {
+    private static final CuiLogger LOGGER = new CuiLogger(ResourceBundleLocator.class);
+
+    @Test
+    void shouldLogSuccessfulOperation() {
+        // given
+        var resourceName = "test.properties";
+
+        // when
+        loadResource(resourceName);
+
+        // then
+        assertSingleLogMessagePresent(
+            TestLogLevel.INFO,
+            BUNDLE.INFO.RESOURCE_LOADED.format(resourceName));
+    }
+}
+----
+
+=== Testing Exception Logging
+
+[source,java]
+----
+@Test
+void shouldLogException() {
+    // given
+    var errorMessage = "Invalid configuration";
+    var exception = new IllegalStateException(errorMessage);
+
+    // when
+    try {
+        throw exception;
+    } catch (Exception e) {
+        LOGGER.error(ERROR.CONFIGURATION_ERROR.format(errorMessage), e);
+    }
+
+    // then
+    assertSingleLogMessagePresent(
+        TestLogLevel.ERROR,
+        ERROR.CONFIGURATION_ERROR.format(errorMessage));
+}
+----
+
+=== Testing Multiple Parameters
+
+[source,java]
+----
+@Test
+void shouldLogMultipleParameters() {
+    // given
+    var userId = "user123";
+    var role = "admin";
+
+    // when
+    LOGGER.info(INFO.USER_ROLE_ASSIGNED.format(userId, role));
+
+    // then
+    assertSingleLogMessagePresent(
+        TestLogLevel.INFO,
+        INFO.USER_ROLE_ASSIGNED.format(userId, role));
+}
+----
+
+=== Testing No Logging
+
+[source,java]
+----
+@Test
+void shouldNotLogInNormalCase() {
+    // when
+    performNormalOperation();
+
+    // then
+    assertNoLogMessagePresent(TestLogLevel.WARN, LOGGER);
+    assertNoLogMessagePresent(TestLogLevel.ERROR, LOGGER);
+}
+----
+
+== Best Practices
+
+=== Test Organization
+
+* One test method per logging scenario
+* Clear test method names describing the scenario
+* Follow given/when/then pattern
+* Keep tests focused on logging verification
+
+=== Assertion Usage
+
+* Use most specific assertion method available
+* Verify both presence and absence of messages
+* Check exact message content when possible
+* Use resolveIdentifierString() for ID verification
+
+=== Test Data
+
+* Use meaningful test data
+* Avoid hardcoded strings
+* Consider edge cases
+* Test all parameter combinations
+
+=== Common Pitfalls
+
+* Not testing parameter substitution
+* Missing exception logging tests
+* Not verifying absence of unexpected logs
+* Using wrong log levels in assertions
+
+== Important Notes
+
+* All rules are normative and must be applied unconditionally
+* Test all required log levels (INFO/WARN/ERROR/FATAL)
+* Always verify both presence and absence of messages
+* Keep tests focused on logging verification
+
+== Success Criteria
+
+. All required messages are tested
+. Tests verify both success and failure cases
+. Parameter substitution is tested
+. Exception logging is verified
+. No unexpected logging occurs

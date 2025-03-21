@@ -51,5 +51,7 @@ Defines the critical rules and constraints for LLM assistants when executing com
 
 ## See Also
 - [Progress Standards](progress-standards.md)
-- [Documentation Standards](documentation-standards.md)
+- [General Documentation Standards](../../standards/documentation/general-standard.md)
+- [Javadoc Standards](../../standards/documentation/javadoc-standards.md)
+- [Javadoc Maintenance](../../standards/documentation/javadoc-maintenance.md)
 - [Change Management](change-management.md)

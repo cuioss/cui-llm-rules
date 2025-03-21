@@ -10,7 +10,9 @@ Defines comprehensive quality standards, testing framework guidelines, and quali
 
 ## Related Documentation
 - [Project Standards](project-standards.md): Project standards and technology stack
-- [Documentation Standards](documentation-standards.md): Documentation standards
+- [General Documentation Standards](../../standards/documentation/general-standard.md): General documentation standards
+- [Javadoc Standards](../../standards/documentation/javadoc-standards.md): Javadoc standards
+- [Javadoc Maintenance](../../standards/documentation/javadoc-maintenance.md): Javadoc maintenance process
 - [Java Maintenance](../../maintenance/java.md): Java maintenance process
 
 ## Core Testing Standards
@@ -201,6 +203,8 @@ Regular Review Points:
 
 ## See Also
 - [Project Standards](project-standards.md): Project standards and technology stack
-- [Documentation Standards](documentation-standards.md): Documentation standards
+- [General Documentation Standards](../../standards/documentation/general-standard.md): General documentation standards
+- [Javadoc Standards](../../standards/documentation/javadoc-standards.md): Javadoc standards
+- [Javadoc Maintenance](../../standards/documentation/javadoc-maintenance.md): Javadoc maintenance process
 - [Java Maintenance](../../maintenance/java.md): Java maintenance process
 - [SonarCloud Integration](../../maintenance/sonar.md): SonarCloud configuration and usage
