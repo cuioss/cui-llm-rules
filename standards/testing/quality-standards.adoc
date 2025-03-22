@@ -32,6 +32,7 @@ This document defines comprehensive quality standards, testing framework guideli
 === Coverage Requirements
 
 * Minimum 80% line coverage
+* Minimum 80% branch coverage
 * Critical paths must have 100% coverage
 * All public APIs must be tested
 * Edge cases must be covered
@@ -208,7 +209,7 @@ To verify code coverage in your project, use the Maven profile `-Pcoverage`:
 
 [source,bash]
 ----
-mvn clean verify -Pcoverage
+./mvnw clean verify -Pcoverage
 ----
 
 This profile will:
