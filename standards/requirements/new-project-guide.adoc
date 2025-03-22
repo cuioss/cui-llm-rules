@@ -4,9 +4,9 @@
 :sectnums:
 
 == Purpose
-This guide outlines the process for setting up a new project with proper requirements and specification documentation following the established standards.
+This document defines the standards for requirements and specification documentation in new projects.
 
-== Initial Setup
+== Directory Structure Standards
 
 . Create the basic directory structure:
 +
@@ -38,7 +38,7 @@ project-root/
 ... `INT-` for integration projects
 .. Custom prefixes should be relevant to the project domain
 
-== Requirements Document Creation
+== Requirements Document Standards
 
 . Set up the Requirements.adoc file:
 +

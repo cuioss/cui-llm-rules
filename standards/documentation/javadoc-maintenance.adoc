@@ -4,7 +4,7 @@
 :sectnums:
 
 == Purpose
-Defines the process for maintaining Javadoc documentation, fixing errors, and ensuring documentation quality.
+Defines the standards for Javadoc maintenance, error resolution, and documentation quality assurance.
 
 == Related Documentation
 * xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
@@ -33,67 +33,42 @@ Defines the process for maintaining Javadoc documentation, fixing errors, and en
 * Content rewrites
 * Style changes beyond error fixes
 
-== Maintenance Process
+== Maintenance Standards
 
 === Build Verification
 * Run appropriate command:
 ** Single module: `./mvnw clean verify -Pjavadoc`
 ** Multi-module: `./mvnw clean verify -Pjavadoc-mm-reporting`
-* Record any errors in progress file
-* Categorize issues:
+* Identify and categorize issues:
 ** Missing tags
 ** Invalid references
 ** Formatting problems
-* Document error locations
+* Note error locations for resolution
 
 === Documentation Analysis
 * For each error:
-** Record issue details
+** Identify issue details
 ** Analyze context
 ** Plan minimal fix
-** Document proposed changes
-* Record analysis completion
+** Determine appropriate resolution
+* Complete analysis before proceeding
 
 === Fix Application
-* For each documented issue:
+* For each identified issue:
 ** Apply minimal fix
 ** Verify no content loss
 ** Run local javadoc check
-** Record changes made
-* Document all applied fixes
+** Ensure changes address the issue
+* Review all applied fixes
 
 === Final Verification
 * Run appropriate javadoc command
 * If issues remain:
-** Record in progress file
+** Note remaining issues
 ** Return to Fix Application
 * On success:
-** Record verification
+** Verify all issues are resolved
 ** Commit changes with descriptive message
-
-== Progress Tracking
-
-=== Process Steps
-==== Initialize Progress
-* Create/update progress file
-* Record start time and state
-* Document configuration
-
-==== Track Changes
-* Update after each step
-* Record all modifications
-* Document any issues
-
-==== Completion
-* Record end time
-* Document final state
-* Archive progress data
-
-=== Documentation
-* Record all changes made
-* Document any issues encountered
-* Track progress at each step
-* Maintain clear status updates
 
 == Common Javadoc Issues and Fixes
 

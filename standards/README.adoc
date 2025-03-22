@@ -4,7 +4,7 @@
 :sectnums:
 
 == Purpose
-This directory contains all standardization documents for CUI projects, defining coding, documentation, and process standards.
+This directory contains all standardization documents for CUI projects, defining coding, documentation, and technical standards. These standards serve as independent, authoritative sources of truth for technical requirements without being tied to specific implementation processes.
 
 == Documentation Format
 All standards documentation in this directory uses AsciiDoc format with the following conventions:
@@ -15,28 +15,24 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 * Standard heading hierarchy is used consistently
 
 == Directory Structure
-* `/documentation/` - Documentation standards
-** `general-standard.adoc` - Core documentation standards
-** `javadoc-standards.adoc` - Specific standards for Javadoc documentation
-** `javadoc-maintenance.adoc` - Process for maintaining Javadoc documentation
-** `readme-structure.adoc` - Standard structure for README.adoc files
-* `/java/` - Java coding standards and guidelines
-** `coding-standards.adoc` - Core Java coding standards and best practices
-** `package-structure.adoc` - Standards for package organization and naming
-** `naming-conventions.adoc` - Naming conventions for classes, methods, and variables
-** `error-handling.adoc` - Standards for exception handling and error reporting
-** `dsl-style-constants.adoc` - Pattern for organizing related constants in a hierarchical manner
-* `/logging/` - Logging standards and implementation guides
-** `core-standards.adoc` - Core logging standards and requirements
-** `implementation-guide.adoc` - Detailed examples for implementing logging
-** `testing-guide.adoc` - Comprehensive guidance for testing logging
-* `/requirements/` - Requirements and specifications standards
-** `requirements-document.adoc` - Structure and format for requirements documents
-** `specification-documents.adoc` - Structure and format for specification documents
-** `new-project-guide.adoc` - Guide for setting up a new project with requirements
-* `/testing/` - Testing standards and guidelines
-** `core-standards.adoc` - Fundamental testing requirements and best practices
-** `quality-standards.adoc` - Comprehensive quality standards and testing framework
+* xref:documentation/README.adoc[Documentation Standards]
+** xref:documentation/general-standard.adoc[General Standard] - Core documentation standards
+** xref:documentation/javadoc-standards.adoc[Javadoc Standards] - Specific standards for Javadoc documentation
+** xref:documentation/javadoc-maintenance.adoc[Javadoc Maintenance] - Standards for Javadoc maintenance and error resolution
+** xref:documentation/readme-structure.adoc[README Structure] - Standard structure for README.adoc files
+* xref:java/README.adoc[Java Standards]
+** xref:java/dsl-style-constants.adoc[DSL-Style Constants] - Pattern for organizing related constants in a hierarchical manner
+* xref:logging/README.adoc[Logging Standards]
+** xref:logging/core-standards.adoc[Core Standards] - Core logging standards and requirements
+** xref:logging/implementation-guide.adoc[Implementation Guide] - Detailed examples for implementing logging
+** xref:logging/testing-guide.adoc[Testing Guide] - Comprehensive guidance for testing logging
+* xref:requirements/README.adoc[Requirements Standards]
+** xref:requirements/requirements-document.adoc[Requirements Document] - Structure and format for requirements documents
+** xref:requirements/specification-documents.adoc[Specification Documents] - Structure and format for specification documents
+** xref:requirements/new-project-guide.adoc[New Project Guide] - Standards for requirements and specification documentation in new projects
+* xref:testing/README.adoc[Testing Standards]
+** xref:testing/core-standards.adoc[Core Standards] - Fundamental testing requirements and best practices
+** xref:testing/quality-standards.adoc[Quality Standards] - Comprehensive quality standards and testing framework
 
 
 == Standards Documentation Rules
@@ -55,6 +51,8 @@ All documents within the standards directory must adhere to the following rules:
    * All rules must be clearly stated and normative
    * Use consistent terminology across all documents
    * Reference these rules with '@llm-rules'
+   * Focus solely on standards and requirements, not on implementation processes
+   * Avoid references to specific tools, progress tracking, or procedural steps
 
 3. *Document Structure*:
    * Place documents in the appropriate subdirectory based on topic
