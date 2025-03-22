@@ -16,24 +16,38 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 
 == Directory Structure
 * xref:documentation/README.adoc[Documentation Standards]
-** xref:documentation/general-standard.adoc[General Standard] - Core documentation standards
-** xref:documentation/javadoc-standards.adoc[Javadoc Standards] - Specific standards for Javadoc documentation
-** xref:documentation/javadoc-maintenance.adoc[Javadoc Maintenance] - Standards for Javadoc maintenance and error resolution
-** xref:documentation/readme-structure.adoc[README Structure] - Standard structure for README.adoc files
+** xref:documentation/general-standard.adoc[General Standard] - Foundational documentation requirements and formats
+** xref:documentation/javadoc-standards.adoc[Javadoc Standards] - Standards for creating and maintaining Javadoc
+** xref:documentation/javadoc-maintenance.adoc[Javadoc Maintenance] - Standards for Javadoc error resolution and quality assurance
+** xref:documentation/readme-structure.adoc[README Structure] - Standard format and content for README files
 * xref:java/README.adoc[Java Standards]
-** xref:java/dsl-style-constants.adoc[DSL-Style Constants] - Pattern for organizing related constants in a hierarchical manner
+** xref:java/dsl-style-constants.adoc[DSL-Style Constants] - Standards for organizing constants in a hierarchical manner
 * xref:logging/README.adoc[Logging Standards]
-** xref:logging/core-standards.adoc[Core Standards] - Core logging standards and requirements
-** xref:logging/implementation-guide.adoc[Implementation Guide] - Detailed examples for implementing logging
-** xref:logging/testing-guide.adoc[Testing Guide] - Comprehensive guidance for testing logging
+** xref:logging/core-standards.adoc[Core Standards] - Fundamental logging requirements and formats
+** xref:logging/implementation-guide.adoc[Implementation Guide] - Standards for implementing logging functionality
+** xref:logging/testing-guide.adoc[Testing Guide] - Standards for testing logging implementations
 * xref:requirements/README.adoc[Requirements Standards]
-** xref:requirements/requirements-document.adoc[Requirements Document] - Structure and format for requirements documents
-** xref:requirements/specification-documents.adoc[Specification Documents] - Structure and format for specification documents
-** xref:requirements/new-project-guide.adoc[New Project Guide] - Standards for requirements and specification documentation in new projects
+** xref:requirements/requirements-document.adoc[Requirements Document] - Standards for requirements documentation
+** xref:requirements/specification-documents.adoc[Specification Documents] - Standards for technical specification documents
+** xref:requirements/new-project-guide.adoc[New Project Guide] - Standards for documentation in new projects
 * xref:testing/README.adoc[Testing Standards]
-** xref:testing/core-standards.adoc[Core Standards] - Fundamental testing requirements and best practices
-** xref:testing/quality-standards.adoc[Quality Standards] - Comprehensive quality standards and testing framework
+** xref:testing/core-standards.adoc[Core Standards] - Fundamental testing standards and requirements
+** xref:testing/quality-standards.adoc[Quality Standards] - Standards for test quality and coverage
 
+
+== Standards vs. Implementation
+
+A clear distinction between standards and implementation processes is essential:
+
+* *Standards* define the technical requirements, constraints, and expectations that must be met.
+* *Implementation* describes the specific processes, tools, and methods used to meet those standards.
+
+This separation ensures that:
+
+1. Standards remain applicable regardless of the specific tools or processes used
+2. Teams can adapt their implementation approaches while maintaining compliance with standards
+3. Standards documentation remains focused on the "what" rather than the "how"
+4. Documentation can evolve independently of specific implementation details
 
 == Standards Documentation Rules
 

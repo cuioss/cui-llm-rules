@@ -4,13 +4,13 @@
 :sectnums:
 
 == Purpose
-This directory contains standards and guidelines for creating and maintaining requirements and specification documents in CUI projects.
+This directory contains standards for requirements and specification documentation in CUI projects. These standards serve as independent, authoritative sources of truth for documentation requirements without being tied to specific implementation processes.
 
 == Standards Documents
 
-* xref:requirements-document.adoc[Requirements Document Structure] - Defines the structure and format for requirements documents
-* xref:specification-documents.adoc[Specification Documents Structure] - Defines the structure and format for specification documents
-* xref:new-project-guide.adoc[New Project Guide] - Provides guidance for setting up a new project with requirements and specifications
+* xref:requirements-document.adoc[Requirements Document Structure] - Standards for requirements documentation
+* xref:specification-documents.adoc[Specification Documents Structure] - Standards for technical specification documents
+* xref:new-project-guide.adoc[New Project Guide] - Standards for requirements and specification documentation in new projects
 
 == Key Principles
 

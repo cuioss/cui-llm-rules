@@ -7,17 +7,13 @@
 
 == Overview
 
-This directory contains the comprehensive Java standards and guidelines for all CUI projects. These standards ensure consistent, maintainable, and high-quality Java code across the codebase.
+This directory contains the comprehensive Java standards for all CUI projects. These standards serve as independent, authoritative sources of truth for Java development requirements without being tied to specific implementation processes. They ensure consistent, maintainable, and high-quality Java code across the codebase.
 
 == Document Structure
 
 The Java standards are organized into the following documents:
 
-* `coding-standards.adoc` - Core Java coding standards and best practices
-* `package-structure.adoc` - Standards for package organization and naming
-* `naming-conventions.adoc` - Naming conventions for classes, methods, and variables
-* `error-handling.adoc` - Standards for exception handling and error reporting
-* xref:dsl-style-constants.adoc[DSL-Style Constants Pattern] - Pattern for organizing related constants in a hierarchical manner
+* xref:dsl-style-constants.adoc[DSL-Style Constants Pattern] - Standards for organizing constants in a hierarchical manner
 
 == Key Principles
 
