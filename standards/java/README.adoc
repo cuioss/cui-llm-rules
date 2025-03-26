@@ -13,6 +13,7 @@ This directory contains the comprehensive Java standards for all CUI projects. T
 
 The Java standards are organized into the following documents:
 
+* xref:java-code-standards.adoc[Java Code Standards] - Standards for writing Java code
 * xref:dsl-style-constants.adoc[DSL-Style Constants Pattern] - Standards for organizing constants in a hierarchical manner
 
 == Key Principles
