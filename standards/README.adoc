@@ -33,7 +33,7 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 * xref:testing/README.adoc[Testing Standards]
 ** xref:testing/core-standards.adoc[Core Standards] - Fundamental testing standards and requirements
 ** xref:testing/quality-standards.adoc[Quality Standards] - Standards for test quality and coverage
-
+* xref:process/refactoring_process.adoc[Refactoring Process] - Process for code refactoring and improvement
 
 == Standards vs. Implementation
 

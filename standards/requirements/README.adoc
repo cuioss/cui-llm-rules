@@ -12,6 +12,7 @@ This directory contains standards for requirements and specification documentati
 * xref:specification-documents.adoc[Specification Documents Structure] - Standards for technical specification documents
 * xref:new-project-guide.adoc[New Project Guide] - Standards for requirements and specification documentation in new projects
 * xref:planning.adoc[Planning Documentation] - Standards for project planning documentation
+* xref:specification_and_implementation.adoc[Specification and Implementation Documentation] - Guidelines for linking specifications and implementation
 
 == Key Principles
 
