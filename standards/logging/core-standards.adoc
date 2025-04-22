@@ -79,6 +79,7 @@ LOGGER.info(INFO.USER_LOGIN.format(username));
 * Use LogRecord#format for parameterized messages
 * Required for INFO/WARN/ERROR/FATAL in production
 * Use LogRecord#resolveIdentifierString() for testing
+* On validating you must ensure, that there is no "dangling" LogRecord, saying each type must be used. If it is not used, analyze the codebase, whether it has somewhere to be used. Remove it otherwise. Remove it from LogMessage.adoc as well
 
 ==== Module Organization
 
@@ -119,7 +120,7 @@ LOGGER.info(INFO.USER_LOGIN.format(username));
 
 == Documentation Requirements
 
-=== LogMessage.md Format
+=== LogMessage.adoc Format
 
 The documentation must be maintained in `doc/LogMessages.adoc` for each module and must follow this format:
 
@@ -174,6 +175,7 @@ All messages follow the format: [Module-Prefix]-[identifier]: [message]
 ** Module/component name
 ** Exact message template
 ** Clear description of when the message is used
+* Other Level like debug or trace are not to be documented that way
 
 == Success Criteria
 
