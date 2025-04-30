@@ -44,7 +44,7 @@ Completes the Java maintenance process by performing final cleanup and verificat
 
 4. OpenRewrite Cleanup
    - Update progress: "OpenRewrite Cleanup"
-   - Execute: `./mvnw -Prewrite-prepare-release rewrite:run`
+   - Execute: `./mvnw -Prewrite rewrite:run`
    - Record any changes made
    - Document cleanup results
 

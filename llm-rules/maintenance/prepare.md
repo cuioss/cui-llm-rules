@@ -67,7 +67,7 @@ Prepares a project for maintenance by setting up the environment and running ini
 3. Basic Modernization (Open Rewrite)
    - Update progress: "Basic Modernization"
    See: [Progress Standards](../core/standards/progress-standards.md) for details
-   - Run `./mvnw -Prewrite-modernize rewrite:run`
+   - Run `./mvnw -Prewrite rewrite:run`
    - Build verification:
      * Run `./mvnw clean verify`
      * Record any issues in progress
@@ -77,7 +77,7 @@ Prepares a project for maintenance by setting up the environment and running ini
 
 4. Extended Cleanup (Open Rewrite)
    - Update progress: "Extended Cleanup"
-   - Run `./mvnw -Prewrite-prepare-release rewrite:run`
+   - Run `./mvnw -Prewrite rewrite:run`
    - Build verification:
      * Run `./mvnw clean verify`
      * Record any issues in progress
