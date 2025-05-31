@@ -73,6 +73,7 @@ This document defines general best practices and standards for writing Java code
 . Use streams for complex data transformations
 . Keep lambda expressions short and clear
 . Avoid side effects in streams
+. Prefer switch expressions over classic switch statements
 . Always use the most recent features from the version to compile against (e.g., usage of Record-classes for Java 17)
 . Use Lombok where sensible
 . Prefer delegation over inheritance.
@@ -155,3 +156,45 @@ List<String> names = users.stream()
     .map(User::getName)
     .toList();
 ----
+
+=== Using Switch Expressions
+
+Prefer switch expressions (introduced in Java 12 and enhanced in Java 14) over classic switch statements:
+
+[source,java]
+----
+// Avoid classic switch statement
+String dayType(DayOfWeek day) {
+    String type;
+    switch (day) {
+        case MONDAY:
+        case TUESDAY:
+        case WEDNESDAY:
+        case THURSDAY:
+        case FRIDAY:
+            type = "Weekday";
+            break;
+        case SATURDAY:
+        case SUNDAY:
+            type = "Weekend";
+            break;
+        default:
+            type = "Unknown";
+    }
+    return type;
+}
+
+// Prefer switch expression
+String dayType(DayOfWeek day) {
+    return switch (day) {
+        case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -> "Weekday";
+        case SATURDAY, SUNDAY -> "Weekend";
+    };
+}
+----
+
+Benefits of switch expressions:
+- No fall-through behavior (eliminates common bugs)
+- Exhaustiveness checking by compiler
+- Yields values directly
+- More concise syntax

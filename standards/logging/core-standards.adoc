@@ -46,13 +46,14 @@ private static final CuiLogger LOGGER = new CuiLogger(YourClass.class);
 * No log4j or slf4j usage
 * No System.out or System.err - use appropriate logger level
 * No direct logger instantiation
+* Usage of prefixes like [DEBUG_LOG] or similar. Allways us Log_levels like DEBUG, INFO, WARN, ERROR, FATAL
 
 === Logging Standards
 
 ==== Method Requirements
 
 * Exception parameter always comes first
-* Use '%s' for string substitutions (not '{}')
+* Use '%s' for string substitutions (not '{}', nor '%d', etc.)
 * Use `de.cuioss.tools.logging.LogRecord` for template logging
 
 [source,java]
