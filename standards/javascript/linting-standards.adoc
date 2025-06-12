@@ -24,6 +24,9 @@ module.exports = {
     'plugin:jest/recommended',
     'plugin:jsdoc/recommended',
     'plugin:unicorn/recommended',
+    'plugin:security/recommended',
+    'plugin:promise/recommended',
+    'plugin:sonarjs/recommended',
     'plugin:prettier/recommended',
     // Add framework-specific extensions when needed:
     // 'plugin:lit/recommended',      // For Quarkus DevUI
@@ -42,9 +45,9 @@ module.exports = {
     sourceType: 'module',
   },
   
-  plugins: ['jsdoc', 'unicorn', 'prettier'],
+  plugins: ['jsdoc', 'unicorn', 'security', 'promise', 'sonarjs', 'prettier'],
   // Add framework-specific plugins when needed:
-  // plugins: ['lit', 'wc', 'jsdoc', 'unicorn', 'prettier'], // For Lit/WebComponents
+  // plugins: ['lit', 'wc', 'jsdoc', 'unicorn', 'security', 'promise', 'sonarjs', 'prettier']
   
   rules: {
     // Project-specific rules
@@ -69,6 +72,9 @@ All projects must include these ESLint configurations:
 
 ==== Code Quality Extensions
 * `plugin:unicorn/recommended`: Additional JavaScript best practices
+* `plugin:security/recommended`: Security vulnerability detection
+* `plugin:promise/recommended`: Promise and async/await best practices
+* `plugin:sonarjs/recommended`: Code quality and complexity analysis (strongly recommended)
 
 ==== Framework-Specific Extensions (Optional)
 When using specific frameworks:
@@ -237,6 +243,176 @@ rules: {
 }
 ----
 
+== Security Rules
+
+=== Required Security Rules
+Essential for preventing security vulnerabilities:
+
+[source,javascript]
+----
+rules: {
+  // Security rules
+  'security/detect-object-injection': 'warn',          // Detect object injection
+  'security/detect-eval-with-expression': 'error',     // Prevent eval usage
+  'security/detect-unsafe-regex': 'error',             // Detect ReDoS vulnerabilities
+  'security/detect-buffer-noassert': 'error',          // Safe buffer usage
+  'security/detect-child-process': 'error',            // Prevent child process injection
+}
+----
+
+== Promise and Async/Await Rules
+
+=== Required Promise Rules
+Modern asynchronous JavaScript patterns:
+
+[source,javascript]
+----
+rules: {
+  // Promise rules
+  'promise/always-return': 'error',                    // Always return in promise chains
+  'promise/catch-or-return': 'error',                  // Handle promise rejections
+  'promise/no-return-wrap': 'error',                   // Avoid unnecessary wrapping
+  'promise/param-names': 'error',                      // Consistent parameter names
+  'promise/no-nesting': 'warn',                        // Avoid nested promises
+  'promise/prefer-await-to-then': 'warn',              // Prefer async/await
+  'promise/prefer-await-to-callbacks': 'warn',         // Modernize callback patterns
+}
+----
+
+== SonarJS Code Quality Rules
+
+=== SonarJS Recommended Configuration
+Use the default SonarJS recommended configuration for comprehensive code quality analysis:
+
+[source,javascript]
+----
+module.exports = {
+  extends: [
+    // ... other configurations
+    'plugin:sonarjs/recommended',   // Use SonarJS defaults
+    // ... prettier should be last
+  ],
+  
+  rules: {
+    // SonarJS rules - using recommended defaults
+    // All SonarJS rules are automatically configured with appropriate severity levels
+    // Most rules default to 'error' severity
+    // Only override specific rules if project requirements differ from defaults
+  }
+};
+----
+
+=== SonarJS Default Rules
+The recommended configuration automatically enables these rules with default settings:
+
+==== Error Level Rules (Default)
+* `sonarjs/cognitive-complexity`: Limits cognitive complexity (default: 15)
+* `sonarjs/no-identical-functions`: Detects duplicate functions
+* `sonarjs/no-collapsible-if`: Simplifies conditional logic
+* `sonarjs/prefer-immediate-return`: Simplifies return statements
+* `sonarjs/prefer-object-literal`: Enforces object literals
+* `sonarjs/prefer-single-boolean-return`: Simplifies boolean returns
+* `sonarjs/no-small-switch`: Warns about small switch statements
+* `sonarjs/no-redundant-boolean`: Removes redundant booleans
+* `sonarjs/no-unused-collection`: Detects unused collections
+* `sonarjs/no-useless-catch`: Removes useless catch blocks
+
+==== Disabled Rules (Default)
+* `sonarjs/no-inverted-boolean-check`: Disabled by default
+* `sonarjs/elseif-without-else`: Disabled by default
+
+=== SonarJS Rule Customization
+Only override SonarJS defaults when project-specific requirements demand it:
+
+[source,javascript]
+----
+rules: {
+  // Override only when necessary
+  'sonarjs/cognitive-complexity': ['warn', 20],  // Increase threshold if needed
+  'sonarjs/no-duplicate-string': ['warn', { threshold: 3 }], // Adjust threshold
+}
+----
+
+== Modern JavaScript Features
+
+=== Required Modern JavaScript Rules
+Enforce modern JavaScript patterns:
+
+[source,javascript]
+----
+rules: {
+  // Modern JavaScript features
+  'prefer-destructuring': ['error', { array: false, object: true }], // Use destructuring
+  'prefer-rest-params': 'error',                       // Use rest parameters
+  'prefer-spread': 'error',                            // Use spread operator
+  'symbol-description': 'error',                       // Require symbol descriptions
+  'no-useless-computed-key': 'error',                  // Remove useless computed keys
+  'no-useless-rename': 'error',                        // Remove useless renaming
+  'no-useless-return': 'error',                        // Remove useless returns
+  'no-void': 'error',                                  // Disallow void operator
+  'no-with': 'error',                                  // Disallow with statements
+  
+  // ES6+ features
+  'prefer-numeric-literals': 'error',                  // Use numeric literals
+  'prefer-object-spread': 'error',                     // Use object spread
+  'prefer-exponentiation-operator': 'error',           // Use ** operator
+  'prefer-regex-literals': 'error',                    // Use regex literals
+  'prefer-promise-reject-errors': 'error',             // Proper promise rejection
+}
+----
+
+== Error Handling and Performance
+
+=== Error Handling Rules
+Robust error handling patterns:
+
+[source,javascript]
+----
+rules: {
+  // Error handling
+  'no-throw-literal': 'error',                         // Throw Error objects
+  'no-return-await': 'error',                          // Avoid redundant await
+  'require-await': 'warn',                             // Require await in async functions
+  'no-async-promise-executor': 'error',                // No async promise executors
+  'no-await-in-loop': 'warn',                          // Avoid await in loops
+  'no-promise-executor-return': 'error',               // No returns in promise executors
+}
+----
+
+=== Performance Rules
+Code performance optimizations:
+
+[source,javascript]
+----
+rules: {
+  // Performance
+  'no-loop-func': 'error',                             // No functions in loops
+  'no-extend-native': 'error',                         // No native prototype extension
+  'no-iterator': 'error',                              // No __iterator__ usage
+  'no-proto': 'error',                                 // No __proto__ usage
+  'no-script-url': 'error',                            // No javascript: URLs
+}
+----
+
+=== Maintainability Rules
+Code maintainability standards:
+
+[source,javascript]
+----
+rules: {
+  // Maintainability
+  'complexity': ['warn', { max: 10 }],                 // Cyclomatic complexity
+  'max-statements': ['warn', { max: 20 }],             // Maximum statements per function
+  'max-params': ['warn', { max: 5 }],                  // Maximum function parameters
+  'max-nested-callbacks': ['error', { max: 4 }],       // Maximum callback nesting
+  'no-magic-numbers': ['warn', { 
+    ignore: [-1, 0, 1, 2, 100, 200, 404, 500, 1000, 30000],
+    ignoreArrayIndexes: true,
+    ignoreDefaultValues: true 
+  }],
+}
+----
+
 == Unicorn Best Practices
 
 === Recommended Unicorn Rules
@@ -280,6 +456,20 @@ overrides: [
       'no-unused-expressions': 'off',
       'no-unused-vars': 'warn',
       'no-undef': 'off',    // Jest globals handled by environment
+      // Relaxed rules for test files
+      'sonarjs/cognitive-complexity': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+      'complexity': 'off',
+      'max-statements': 'off',
+      'max-params': 'off',
+      'require-await': 'off',
+      'no-magic-numbers': 'off',
+      'security/detect-object-injection': 'off',
+      'promise/prefer-await-to-then': 'off',
+      'promise/always-return': 'off',
+      'no-promise-executor-return': 'off',
+      'arrow-parens': 'off', // Let Prettier handle this for test files
+      // Jest-specific rules
       'jest/expect-expect': [
         'error',
         {
@@ -333,6 +523,16 @@ overrides: [
       'class-methods-use-this': 'off',
       'no-unused-vars': 'off',
       'max-lines-per-function': 'off',
+      // Additional relaxed rules for mock files
+      'sonarjs/no-identical-functions': 'off',
+      'sonarjs/cognitive-complexity': 'off',
+      'security/detect-object-injection': 'off',
+      'promise/prefer-await-to-then': 'off',
+      'promise/always-return': 'off',
+      'no-promise-executor-return': 'off',
+      'complexity': 'off',
+      'max-statements': 'off',
+      'arrow-parens': 'off', // Let Prettier handle this for mock files
     },
   },
 ]

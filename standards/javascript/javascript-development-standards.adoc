@@ -44,7 +44,13 @@ All JavaScript projects must include a `package.json` file with the following ma
     "format:check": "prettier --check \"src/**/*.js\"",
     "quality": "npm run lint && npm run format:check",
     "quality:fix": "npm run lint:fix && npm run format",
-    "clean": "rimraf target/classes/META-INF/resources target/dist"
+    "clean": "rimraf target/classes/META-INF/resources target/dist",
+    // Enhanced analysis and security scripts:
+    "validate:js": "npm run lint:js && npm run format:check",
+    "analyze:js": "eslint src/**/*.js --format json --output-file target/js-analysis.json || true",
+    "complexity": "npx plato -r -d target/complexity-report src",
+    "audit:security": "npm audit --audit-level=moderate",
+    "audit:licenses": "npx license-checker --summary"
   },
   "devDependencies": {
     // Required dependencies listed below
@@ -110,6 +116,9 @@ All JavaScript projects must include these core development dependencies:
 * `eslint-plugin-jsdoc`: JSDoc linting
 * `eslint-plugin-prettier`: Prettier integration
 * `eslint-plugin-unicorn`: Additional best practices
+* `eslint-plugin-security`: Security vulnerability detection
+* `eslint-plugin-promise`: Promise and async/await patterns
+* `eslint-plugin-sonarjs`: Code quality and complexity analysis (optional but recommended)
 
 ==== JavaScript Framework-Specific Dependencies (Optional)
 When using specific JavaScript frameworks like Lit for Quarkus DevUI:
@@ -177,6 +186,9 @@ Must be included in package.json with core requirements. Currently requires Babe
       "statements": 80
     }
   },
+  // Note: Branch coverage may be adjusted based on actual project coverage.
+  // It is acceptable to set realistic thresholds (e.g., 60-75% branches) 
+  // if the codebase has extensive conditional logic.
   "coverageReporters": ["text", "lcov", "html"],
   "coverageDirectory": "target/coverage"
 }
@@ -194,16 +206,90 @@ Currently not recommended due to Jest ESM limitations:
 ----
 
 === Babel Configuration for JavaScript (Required for Jest)
-Currently required due to Jest's experimental and problematic ES module support:
+Modern Babel configuration with enhanced browser targeting and modern JavaScript features:
 
 [source,json]
 ----
 "babel": {
   "presets": [
     ["@babel/preset-env", {
-      "modules": "auto"
+      "modules": "auto",
+      "targets": {
+        "browsers": [
+          "last 2 versions",
+          "not dead",
+          "> 0.5%"
+        ]
+      },
+      "useBuiltIns": "usage",
+      "corejs": "3.32",
+      "debug": false
     }]
-  ]
+  ],
+  "plugins": [
+    "@babel/plugin-transform-class-properties",
+    "@babel/plugin-transform-private-methods",
+    "@babel/plugin-transform-optional-chaining",
+    "@babel/plugin-transform-nullish-coalescing-operator",
+    "@babel/plugin-syntax-dynamic-import"
+  ],
+  "env": {
+    "test": {
+      "presets": [
+        ["@babel/preset-env", {
+          "modules": "commonjs",
+          "targets": {
+            "node": "current"
+          },
+          "useBuiltIns": "usage",
+          "corejs": "3.32"
+        }]
+      ],
+      "plugins": [
+        "@babel/plugin-transform-class-properties",
+        "@babel/plugin-transform-private-methods"
+      ]
+    },
+    "development": {
+      "presets": [
+        ["@babel/preset-env", {
+          "modules": false,
+          "debug": true
+        }]
+      ]
+    },
+    "production": {
+      "presets": [
+        ["@babel/preset-env", {
+          "modules": false,
+          "debug": false
+        }]
+      ]
+    }
+  }
+}
+----
+
+NOTE: Updated to use modern transform plugins instead of deprecated proposal plugins. 
+
+=== Required Additional Dependencies
+Include these additional dependencies for the enhanced Babel configuration:
+
+[source,json]
+----
+"devDependencies": {
+  "core-js": "^3.32.0",
+  "webpack": "^5.89.0",
+  "webpack-cli": "^5.1.4", 
+  "terser": "^5.24.0",
+  "rimraf": "^5.0.5",
+  "@babel/plugin-transform-class-properties": "^7.22.5",
+  "@babel/plugin-transform-private-methods": "^7.22.5",
+  "@babel/plugin-transform-optional-chaining": "^7.23.0",
+  "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.11",
+  "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+  "plato": "^1.7.0",
+  "license-checker": "^25.0.1"
 }
 ----
 

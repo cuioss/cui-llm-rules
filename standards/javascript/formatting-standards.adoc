@@ -22,7 +22,8 @@ All projects must use a `.prettierrc.js` configuration file with this structure:
  * Prettier configuration for JavaScript projects
  * 
  * This configuration ensures consistent code formatting across
- * JavaScript files only (no JSON or Markdown).
+ * JavaScript and CSS-in-JS files with environment-specific overrides for
+ * production components and test files.
  */
 
 module.exports = {
@@ -54,14 +55,35 @@ module.exports = {
   // Embedded language formatting
   embeddedLanguageFormatting: 'auto',
   
-  // File-specific overrides - Only format JavaScript files
+  // File-specific overrides
   overrides: [
     {
-      files: '*.js',
+      files: ['*.js', '*.mjs'],
       options: {
         printWidth: 120,
         singleQuote: true,
         trailingComma: 'es5',
+        // Enhanced JavaScript formatting
+        arrowParens: 'always',
+        bracketSpacing: true,
+        bracketSameLine: false,
+        // CSS-in-JS specific formatting
+        htmlWhitespaceSensitivity: 'css',
+        embeddedLanguageFormatting: 'auto',
+      },
+    },
+    {
+      files: 'src/main/resources/dev-ui/**/*.js',
+      options: {
+        printWidth: 120,
+        singleQuote: true,
+        trailingComma: 'es5',
+        // Enhanced formatting for production components with CSS-in-JS
+        bracketSameLine: false,
+        singleAttributePerLine: false,
+        // Modern JavaScript features
+        arrowParens: 'always',
+        bracketSpacing: true,
       },
     },
     {
@@ -69,6 +91,10 @@ module.exports = {
       options: {
         printWidth: 100,
         singleQuote: true,
+        trailingComma: 'es5',
+        // Test-specific formatting
+        arrowParens: 'avoid',
+        bracketSpacing: true,
       },
     },
   ],
@@ -103,23 +129,29 @@ module.exports = {
 
 === File-Specific Overrides
 
+The configuration includes sophisticated overrides for different file types and environments:
+
 ==== Production JavaScript Files
-Standard formatting for main source files:
+Enhanced formatting for production components with CSS-in-JS support:
 
 [source,javascript]
 ----
 {
-  files: '*.js',
+  files: 'src/main/resources/dev-ui/**/*.js',
   options: {
     printWidth: 120,
     singleQuote: true,
     trailingComma: 'es5',
+    bracketSameLine: false,
+    singleAttributePerLine: false,
+    arrowParens: 'always',
+    bracketSpacing: true,
   },
 }
 ----
 
 ==== Test JavaScript Files
-Slightly more compact formatting for test files:
+Relaxed formatting for better test readability:
 
 [source,javascript]
 ----
@@ -128,18 +160,23 @@ Slightly more compact formatting for test files:
   options: {
     printWidth: 100,  // Shorter lines for test readability
     singleQuote: true,
+    trailingComma: 'es5',
+    arrowParens: 'avoid',  // Simpler arrow functions in tests
+    bracketSpacing: true,
   },
 }
 ----
 
-== JavaScript-Only Formatting Policy
 
-=== Scope Limitation
-Prettier configuration must only format JavaScript files:
+== JavaScript and CSS-in-JS Formatting Policy
 
-* **Include**: All `.js` files in src directory
-* **Exclude**: JSON files, Markdown files, other text files
-* **Rationale**: Focused formatting scope prevents unintended changes to configuration files
+=== Focused Scope Support
+Prettier configuration focuses specifically on JavaScript and CSS-in-JS formatting:
+
+* **Primary Focus**: JavaScript files (`.js`, `.mjs`)
+* **CSS-in-JS Support**: Embedded CSS within JavaScript template literals
+* **Environment-Specific**: Different rules for production vs. test JavaScript
+* **Framework Support**: CSS-in-JS and embedded language formatting
 
 === File Pattern Configuration
 NPM scripts must target only JavaScript files:
