@@ -1,0 +1,382 @@
+= CSS Development Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive standards for CSS development including package.json configuration, npm scripts, dependency management, CSS processing tools, and modern CSS practices for all CUI projects.
+
+== Related Documentation
+* xref:../javascript/project-structure.adoc[Project Structure Standards]: Directory structure, file organization, and package.json configuration
+* xref:../javascript/maven-integration-standards.adoc[Maven Integration Standards]: Frontend-maven-plugin integration
+* xref:linting-standards.adoc[Linting Standards]: Stylelint configuration and integration
+* xref:formatting-standards.adoc[Formatting Standards]: Prettier configuration for CSS
+* xref:css-best-practices.adoc[CSS Best Practices]: Modern CSS patterns and conventions
+
+== Package.json Configuration for CSS
+
+=== CSS-Specific Scripts
+CSS projects must include these technology-specific scripts in package.json:
+
+[source,json]
+----
+{
+  "scripts": {
+    "build:css": "postcss src/**/*.css --dir target/classes/META-INF/resources/css",
+    "build:css:dev": "postcss src/**/*.css --dir target/classes/META-INF/resources/css --watch",
+    "build:css:min": "postcss src/**/*.css --dir target/classes/META-INF/resources/css --env production",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
+    "format:css": "prettier --write \"src/**/*.css\"",
+    "format:css:check": "prettier --check \"src/**/*.css\"",
+    "test:css": "npm run lint:css && npm run format:css:check",
+    "validate:css": "css-validator src/**/*.css",
+    "optimize:css": "csso src/**/*.css --output target/classes/META-INF/resources/css",
+    "purge:css": "purgecss --css src/**/*.css --content src/**/*.html src/**/*.js --output target/classes/META-INF/resources/css"
+  }
+}
+----
+
+=== CSS Build Integration
+CSS scripts must integrate with the generic frontend scripts defined in xref:../javascript/project-structure.adoc[Project Structure Standards]:
+
+[source,json]
+----
+{
+  "scripts": {
+    "build": "npm run build:css:min",
+    "build:dev": "npm run build:css:dev",
+    "lint": "npm run lint:css",
+    "lint:fix": "npm run lint:css:fix", 
+    "format": "npm run format:css",
+    "format:check": "npm run format:css:check",
+    "quality": "npm run test:css",
+    "clean": "rimraf target/classes/META-INF/resources/css"
+  }
+}
+----
+
+== CSS Dependencies
+
+=== Required CSS Dependencies
+All CSS projects must include these core development dependencies:
+
+==== CSS Processing Tools
+* `postcss`: Latest stable version - CSS transformation toolkit
+* `postcss-cli`: Latest stable version - PostCSS command line interface
+* `autoprefixer`: Latest stable version - Automatic vendor prefixing
+* `postcss-preset-env`: Latest stable version - Modern CSS features
+* `postcss-import`: Latest stable version - CSS import resolution
+* `postcss-nested`: Latest stable version - Nested CSS support
+* `postcss-custom-properties`: Latest stable version - CSS custom properties fallback
+
+==== CSS Linting Tools
+* `stylelint`: Latest stable version - CSS linter
+* `stylelint-config-standard`: Latest stable version - Standard configuration
+* `stylelint-config-prettier`: Latest stable version - Prettier integration
+* `stylelint-order`: Latest stable version - CSS property ordering
+* `stylelint-scss`: Latest stable version - SCSS support (if using SCSS)
+* `stylelint-declaration-strict-value`: Latest stable version - Enforce variable usage
+
+==== CSS Formatting Tools
+* `prettier`: Latest stable version - Code formatting
+* `prettier-plugin-css`: Latest stable version - CSS-specific formatting
+
+==== CSS Optimization Tools
+* `csso`: Latest stable version - CSS minification
+* `purgecss`: Latest stable version - Unused CSS removal
+* `postcss-csso`: Latest stable version - PostCSS integration for CSSO
+* `css-validator`: Latest stable version - CSS validation
+
+==== CSS Quality Tools
+* `css-tree`: Latest stable version - CSS parsing and validation
+* `csstree-validator`: Latest stable version - CSS structure validation
+* `css-what`: Latest stable version - CSS selector parsing
+* `specificity`: Latest stable version - CSS specificity calculation
+
+=== Framework-Specific CSS Dependencies
+
+==== Bootstrap Integration (Optional)
+When using Bootstrap:
+
+* `bootstrap`: Latest stable version
+* `@popperjs/core`: Latest stable version
+* `postcss-bootstrap`: Latest stable version
+
+==== Tailwind CSS Integration (Optional)
+When using Tailwind CSS:
+
+* `tailwindcss`: Latest stable version
+* `@tailwindcss/forms`: Latest stable version
+* `@tailwindcss/typography`: Latest stable version
+
+==== CSS-in-JS Integration (Optional)
+When working with CSS-in-JS:
+
+* `postcss-lit`: Latest stable version - Lit component CSS processing
+* `postcss-styled-syntax`: Latest stable version - Styled components syntax
+
+== PostCSS Configuration
+
+=== Required PostCSS Setup
+Create `postcss.config.js` in project root:
+
+[source,javascript]
+----
+module.exports = (ctx) => ({
+  plugins: {
+    'postcss-import': {},
+    'postcss-nested': {},
+    'postcss-custom-properties': {
+      preserve: true,
+      fallback: true
+    },
+    'postcss-preset-env': {
+      stage: 1,
+      features: {
+        'custom-properties': false, // handled by postcss-custom-properties
+        'nesting-rules': false      // handled by postcss-nested
+      }
+    },
+    'autoprefixer': {
+      grid: 'autoplace'
+    },
+    'csso': ctx.env === 'production' ? {} : false,
+    'postcss-reporter': {
+      clearReportedMessages: true
+    }
+  }
+});
+----
+
+=== Environment-Specific Configuration
+For development vs production builds:
+
+[source,javascript]
+----
+module.exports = (ctx) => {
+  const isDev = ctx.env !== 'production';
+  
+  return {
+    plugins: {
+      'postcss-import': {},
+      'postcss-nested': {},
+      'postcss-custom-properties': {
+        preserve: isDev,
+        fallback: !isDev
+      },
+      'postcss-preset-env': {
+        stage: isDev ? 0 : 1,
+        autoprefixer: { grid: 'autoplace' }
+      },
+      'csso': !isDev ? { comments: false } : false,
+      'purgecss': !isDev ? {
+        content: ['./src/**/*.html', './src/**/*.js'],
+        defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || []
+      } : false
+    }
+  };
+};
+----
+
+== CSS Project Structure
+
+=== Required Directory Layout
+CSS projects must follow this structure, adapting the generic structure from xref:../javascript/project-structure.adoc[Project Structure Standards]:
+
+==== Standard Maven Projects
+----
+project-root/
+├── package.json                    # Generic + CSS-specific scripts
+├── postcss.config.js              # PostCSS configuration
+├── .stylelintrc.js                 # Stylelint configuration  
+├── .prettierrc.js                  # Prettier configuration
+├── src/
+│   ├── main/resources/static/css/  # CSS source files
+│   │   ├── main.css               # Main stylesheet
+│   │   ├── variables.css          # CSS custom properties
+│   │   ├── components/            # Component stylesheets
+│   │   └── utilities/             # Utility classes
+│   └── test/css/                  # CSS tests (if applicable)
+└── target/
+    └── classes/META-INF/resources/css/  # Build output
+----
+
+==== Quarkus DevUI Projects
+----
+project-root/
+├── package.json
+├── postcss.config.js
+├── .stylelintrc.js
+├── src/
+│   ├── main/resources/dev-ui/css/  # DevUI stylesheets
+│   │   ├── qwc-styles.css         # Web component styles
+│   │   └── dev-ui-theme.css       # DevUI theme
+│   └── test/css/
+└── target/
+----
+
+==== NiFi Extension Projects
+----
+project-root/
+├── package.json
+├── webpack.config.js              # Webpack with CSS processing
+├── src/
+│   ├── main/webapp/css/           # NiFi UI stylesheets
+│   │   ├── nifi-theme.css         # NiFi theme extension
+│   │   └── custom-components.css  # Custom component styles
+│   └── test/css/
+└── target/                        # WAR output
+----
+
+=== CSS File Organization
+
+==== Naming Conventions
+* **CSS files**: `kebab-case.css` (e.g., `user-profile.css`, `navigation-menu.css`)
+* **Component styles**: `component-name.css` (e.g., `button.css`, `card.css`)
+* **Utility files**: `utility-name.css` (e.g., `layout.css`, `typography.css`)
+* **Theme files**: `theme-name.css` (e.g., `dark-theme.css`, `brand-theme.css`)
+
+==== File Structure Patterns
+[source,css]
+----
+/* main.css - Main entry point */
+@import './variables.css';
+@import './base.css';
+@import './components/index.css';
+@import './utilities/index.css';
+
+/* variables.css - CSS custom properties */
+:root {
+  --primary-color: #1976d2;
+  --secondary-color: #424242;
+  --success-color: #4caf50;
+  /* ... */
+}
+
+/* components/button.css - Component styles */
+.btn {
+  /* Styles using CSS variables */
+  background-color: var(--primary-color);
+  color: var(--on-primary);
+}
+----
+
+== CSS Quality Standards
+
+=== CSS Validation Requirements
+* All CSS must pass W3C CSS validation
+* Use `css-validator` npm package for automated validation
+* Document any intentional validation exceptions
+
+=== Performance Requirements
+* CSS bundle size should be optimized for production
+* Unused CSS should be removed using PurgeCSS
+* Critical CSS should be identified and inlined when appropriate
+* CSS should be minified in production builds
+
+=== Browser Compatibility
+* Support modern browsers (Chrome, Firefox, Safari, Edge latest versions)
+* Use Autoprefixer for vendor prefix management
+* Test CSS in supported browser versions
+* Document any browser-specific workarounds
+
+== CSS Testing and Validation
+
+=== Automated CSS Testing
+[source,json]
+----
+{
+  "scripts": {
+    "test:css:validate": "css-validator src/**/*.css",
+    "test:css:lint": "stylelint \"src/**/*.css\"",
+    "test:css:format": "prettier --check \"src/**/*.css\"",
+    "test:css:specificity": "specificity src/**/*.css",
+    "test:css": "npm run test:css:validate && npm run test:css:lint && npm run test:css:format"
+  }
+}
+----
+
+=== CSS Quality Metrics
+* **Specificity**: Monitor and limit CSS specificity
+* **Bundle Size**: Track CSS file sizes
+* **Unused CSS**: Identify and remove unused styles
+* **Performance**: Measure CSS loading and rendering performance
+
+== CSS Build Process
+
+=== Development Workflow
+1. Write CSS using modern features and variables
+2. Run `npm run lint:css:fix` to fix linting issues
+3. Run `npm run format:css` to format CSS
+4. Run `npm run build:css:dev` for development build
+5. Run `npm run test:css` before committing
+
+=== Production Build
+1. Run `npm run validate:css` to validate CSS
+2. Run `npm run build:css:min` for optimized build
+3. Run `npm run purge:css` to remove unused styles
+4. Verify output in `target/classes/META-INF/resources/css/`
+
+=== Maven Integration
+CSS build process integrates with Maven phases as defined in xref:../javascript/maven-integration-standards.adoc[Maven Integration Standards]:
+
+* **compile phase**: `npm run format:css:check`
+* **test phase**: `npm run test:css` 
+* **verify phase**: `npm run lint:css:fix`
+* **package phase**: `npm run build:css:min`
+
+== CSS Dependency Management
+
+=== CSS-Specific Dependency Updates
+Follow the dependency management process from xref:../javascript/project-structure.adoc[Project Structure Standards] with CSS-specific considerations:
+
+1. **Update CSS Tools**: Regularly update PostCSS, Stylelint, and related plugins
+2. **Check CSS Warnings**: Review deprecation warnings from CSS processing tools
+3. **Test CSS Output**: Verify that updated tools don't break CSS output
+4. **Document CSS Issues**: Record any CSS-specific compatibility issues
+
+=== CSS Library Management
+* Keep CSS framework versions (Bootstrap, Tailwind) up to date
+* Monitor PostCSS plugin compatibility
+* Test CSS processing pipeline after updates
+* Document any CSS-specific breaking changes
+
+== Integration with Existing Infrastructure
+
+=== Package.json Integration
+CSS projects extend the generic package.json structure from xref:../javascript/project-structure.adoc[Project Structure Standards]:
+
+[source,json]
+----
+{
+  "scripts": {
+    // Generic scripts from project-structure.adoc
+    "build": "npm run build:css:min",
+    "lint": "npm run lint:css", 
+    "format": "npm run format:css",
+    
+    // CSS-specific scripts
+    "build:css": "postcss src/**/*.css --dir target/classes/META-INF/resources/css",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "format:css": "prettier --write \"src/**/*.css\""
+  }
+}
+----
+
+=== Maven Build Integration
+CSS processing integrates with the frontend-maven-plugin configuration from xref:../javascript/maven-integration-standards.adoc[Maven Integration Standards]:
+
+[source,xml]
+----
+<execution>
+  <id>npm-css-build</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <phase>generate-resources</phase>
+  <configuration>
+    <arguments>run build:css:min</arguments>
+  </configuration>
+</execution>
+----

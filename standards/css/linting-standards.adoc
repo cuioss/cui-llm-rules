@@ -1,0 +1,485 @@
+= CSS Linting Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive Stylelint configuration and rules for consistent, high-quality CSS code across all CUI projects, focusing on modern CSS practices and maintainability.
+
+== Related Documentation
+* xref:css-development-standards.adoc[CSS Development Standards]: CSS-specific configuration and dependencies
+* xref:formatting-standards.adoc[Formatting Standards]: Prettier configuration for CSS
+* xref:css-best-practices.adoc[CSS Best Practices]: Modern CSS patterns and conventions
+* xref:../javascript/maven-integration-standards.adoc[Maven Integration Standards]: Build integration
+
+== Stylelint Configuration
+
+=== Required Configuration File
+Create `.stylelintrc.js` in project root:
+
+[source,javascript]
+----
+module.exports = {
+  extends: [
+    'stylelint-config-standard',
+    'stylelint-config-prettier'
+  ],
+  plugins: [
+    'stylelint-order',
+    'stylelint-declaration-strict-value',
+    'stylelint-scss'
+  ],
+  rules: {
+    // Property ordering
+    'order/properties-order': [
+      'content',
+      'display',
+      'position',
+      'top',
+      'right',
+      'bottom',
+      'left',
+      'z-index',
+      'flex',
+      'flex-grow',
+      'flex-shrink',
+      'flex-basis',
+      'flex-direction',
+      'flex-wrap',
+      'justify-content',
+      'align-items',
+      'align-content',
+      'align-self',
+      'grid',
+      'grid-template',
+      'grid-template-rows',
+      'grid-template-columns',
+      'grid-template-areas',
+      'grid-auto-rows',
+      'grid-auto-columns',
+      'grid-auto-flow',
+      'grid-gap',
+      'grid-row-gap',
+      'grid-column-gap',
+      'gap',
+      'row-gap',
+      'column-gap',
+      'width',
+      'min-width',
+      'max-width',
+      'height',
+      'min-height',
+      'max-height',
+      'margin',
+      'margin-top',
+      'margin-right',
+      'margin-bottom',
+      'margin-left',
+      'padding',
+      'padding-top',
+      'padding-right',
+      'padding-bottom',
+      'padding-left',
+      'border',
+      'border-top',
+      'border-right',
+      'border-bottom',
+      'border-left',
+      'border-radius',
+      'background',
+      'background-color',
+      'background-image',
+      'background-repeat',
+      'background-position',
+      'background-size',
+      'color',
+      'font',
+      'font-family',
+      'font-size',
+      'font-weight',
+      'font-style',
+      'line-height',
+      'text-align',
+      'text-decoration',
+      'text-transform',
+      'opacity',
+      'visibility',
+      'overflow',
+      'transform',
+      'transition',
+      'animation'
+    ],
+
+    // CSS Variables enforcement
+    'scale-unlimited/declaration-strict-value': [
+      ['/color$/', 'fill', 'stroke'],
+      {
+        'ignoreValues': [
+          'currentColor',
+          'transparent',
+          'inherit',
+          'initial',
+          'unset'
+        ]
+      }
+    ],
+
+    // Modern CSS practices
+    'declaration-property-value-no-unknown': true,
+    'function-no-unknown': true,
+    'media-feature-name-no-unknown': true,
+    'property-no-unknown': true,
+    'selector-pseudo-class-no-unknown': true,
+    'selector-pseudo-element-no-unknown': true,
+    'selector-type-no-unknown': true,
+
+    // CSS Custom Properties
+    'custom-property-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+    'custom-property-empty-line-before': 'never',
+
+    // Selectors
+    'selector-class-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$',
+    'selector-id-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+    'selector-max-compound-selectors': 4,
+    'selector-max-specificity': '0,4,0',
+    'selector-no-qualifying-type': [true, {
+      'ignore': ['attribute', 'class']
+    }],
+
+    // Values
+    'declaration-property-value-allowed-list': {
+      'display': ['block', 'inline', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'none'],
+      'position': ['static', 'relative', 'absolute', 'fixed', 'sticky']
+    },
+
+    // Units
+    'unit-allowed-list': ['px', 'em', 'rem', '%', 'vh', 'vw', 'vmin', 'vmax', 'deg', 'turn', 's', 'ms'],
+    'declaration-property-unit-allowed-list': {
+      'font-size': ['rem', 'em'],
+      'line-height': ['rem', 'em', ''],
+      '/^animation/': ['s', 'ms']
+    },
+
+    // Performance
+    'no-duplicate-selectors': true,
+    'no-duplicate-at-import-rules': true,
+    'declaration-block-no-duplicate-properties': [true, {
+      'ignore': ['consecutive-duplicates-with-different-values']
+    }],
+
+    // Maintainability
+    'max-nesting-depth': 3,
+    'selector-max-id': 0,
+    'selector-max-universal': 1,
+    'declaration-block-single-line-max-declarations': 1,
+
+    // Modern CSS features
+    'at-rule-no-unknown': [true, {
+      'ignoreAtRules': [
+        'supports',
+        'layer',
+        'container',
+        'property'
+      ]
+    }],
+
+    // Accessibility
+    'selector-pseudo-class-no-unknown': [true, {
+      'ignorePseudoClasses': ['focus-visible']
+    }]
+  }
+};
+----
+
+=== SCSS Support Configuration
+For projects using SCSS, add SCSS-specific rules:
+
+[source,javascript]
+----
+module.exports = {
+  extends: [
+    'stylelint-config-standard',
+    'stylelint-config-standard-scss',
+    'stylelint-config-prettier'
+  ],
+  plugins: [
+    'stylelint-order',
+    'stylelint-declaration-strict-value',
+    'stylelint-scss'
+  ],
+  rules: {
+    // ... base rules from above ...
+
+    // SCSS-specific rules
+    'scss/at-rule-no-unknown': true,
+    'scss/at-import-partial-extension': 'never',
+    'scss/at-mixin-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+    'scss/at-function-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+    'scss/dollar-variable-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+    'scss/percent-placeholder-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+    'scss/selector-no-redundant-nesting-selector': true,
+    'scss/no-duplicate-dollar-variables': true
+  }
+};
+----
+
+== CSS Variable Enforcement
+
+=== Strict Variable Usage
+Enforce CSS custom properties for colors, spacing, and other design tokens:
+
+[source,javascript]
+----
+'scale-unlimited/declaration-strict-value': [
+  [
+    // Color properties must use variables
+    '/color$/',
+    'fill',
+    'stroke',
+    'background-color',
+    'border-color',
+    'outline-color',
+    'text-decoration-color',
+    
+    // Spacing properties should use variables
+    '/^margin/',
+    '/^padding/',
+    'gap',
+    'row-gap',
+    'column-gap',
+    
+    // Typography properties should use variables
+    'font-size',
+    'line-height',
+    'font-family'
+  ],
+  {
+    'ignoreValues': [
+      // Allow CSS keywords
+      'currentColor',
+      'transparent',
+      'inherit',
+      'initial',
+      'unset',
+      'auto',
+      '0',
+      
+      // Allow specific functional values
+      '/^url\\(/',
+      '/^linear-gradient\\(/',
+      '/^radial-gradient\\(/',
+      '/^calc\\(/',
+      
+      // Allow relative units for specific cases
+      '1em',
+      '100%'
+    ],
+    'ignoreProperties': [
+      // Allow direct values for these properties
+      'content',
+      'z-index',
+      'order',
+      'flex-grow',
+      'flex-shrink'
+    ]
+  }
+]
+----
+
+== Linting Rules Categories
+
+=== Code Quality Rules
+* **No duplicates**: Prevent duplicate selectors and properties
+* **Valid syntax**: Ensure all CSS syntax is valid
+* **Known properties**: Only use known CSS properties and values
+* **Performance**: Avoid inefficient selectors and patterns
+
+=== Modern CSS Rules
+* **CSS Custom Properties**: Enforce variable naming patterns
+* **CSS Grid/Flexbox**: Validate modern layout properties
+* **CSS Functions**: Allow modern CSS functions (calc, clamp, etc.)
+* **CSS Container Queries**: Support for container query syntax
+
+=== Maintainability Rules
+* **Nesting depth**: Limit nesting to 3 levels maximum
+* **Specificity**: Control CSS specificity (max 0,4,0)
+* **Selector complexity**: Limit compound selectors
+* **Property ordering**: Enforce consistent property order
+
+=== Accessibility Rules
+* **Focus states**: Ensure focus-visible support
+* **Color contrast**: Validate color usage patterns
+* **Responsive design**: Validate responsive CSS patterns
+
+== Integration with Development Workflow
+
+=== NPM Scripts Integration
+Stylelint integrates with the CSS development scripts:
+
+[source,json]
+----
+{
+  "scripts": {
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
+    "lint:css:report": "stylelint \"src/**/*.css\" --formatter json --output-file target/stylelint-report.json"
+  }
+}
+----
+
+=== Pre-commit Integration
+Configure pre-commit hooks to run Stylelint:
+
+[source,json]
+----
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.css": [
+      "stylelint --fix",
+      "prettier --write",
+      "git add"
+    ]
+  }
+}
+----
+
+=== IDE Integration
+* Configure VS Code with Stylelint extension
+* Set up auto-fix on save
+* Enable real-time linting feedback
+* Configure IntelliJ IDEA with Stylelint plugin
+
+== CSS Architecture Linting
+
+=== BEM Methodology Support
+For projects using BEM methodology:
+
+[source,javascript]
+----
+'selector-class-pattern': [
+  '^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$',
+  {
+    'message': 'Expected class selector to be BEM format'
+  }
+]
+----
+
+=== CSS Modules Support
+For CSS Modules projects:
+
+[source,javascript]
+----
+'selector-class-pattern': [
+  '^[a-z][a-zA-Z0-9]+$',
+  {
+    'message': 'Expected class selector to be camelCase for CSS Modules'
+  }
+]
+----
+
+=== Component-Based Architecture
+Enforce component-based CSS organization:
+
+[source,javascript]
+----
+'max-nesting-depth': 2,
+'selector-max-compound-selectors': 3,
+'selector-max-specificity': '0,3,0'
+----
+
+== Error Handling and Reporting
+
+=== Severity Levels
+Configure appropriate severity levels:
+
+[source,javascript]
+----
+'rules': {
+  // Errors - break the build
+  'declaration-property-value-no-unknown': 'error',
+  'function-no-unknown': 'error',
+  'property-no-unknown': 'error',
+  
+  // Warnings - report but don't break
+  'selector-max-specificity': 'warning',
+  'max-nesting-depth': 'warning',
+  
+  // Disabled - project-specific overrides
+  'at-rule-no-unknown': null
+}
+----
+
+=== Custom Error Messages
+Provide helpful error messages:
+
+[source,javascript]
+----
+'custom-property-pattern': [
+  '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+  {
+    'message': 'CSS custom properties must use kebab-case naming (e.g., --primary-color)'
+  }
+]
+----
+
+== Performance and Optimization
+
+=== Bundle Analysis Integration
+Integrate with CSS bundle analysis:
+
+[source,json]
+----
+{
+  "scripts": {
+    "analyze:css": "stylelint \"src/**/*.css\" --custom-formatter ./scripts/css-stats-formatter.js"
+  }
+}
+----
+
+=== Critical CSS Validation
+Validate critical CSS paths:
+
+[source,javascript]
+----
+'selector-max-specificity': ['0,2,0', {
+  'severity': 'warning',
+  'message': 'High specificity detected - consider if this selector belongs in critical CSS'
+}]
+----
+
+== Framework-Specific Configurations
+
+=== Bootstrap Projects
+For Bootstrap-based projects:
+
+[source,javascript]
+----
+'selector-class-pattern': [
+  '^(btn|card|nav|navbar|form|table|badge|alert|modal|dropdown|carousel|accordion|offcanvas|toast|tooltip|popover|progress|spinner|list-group|breadcrumb|pagination|ratio|visually-|d-|p-|m-|text-|bg-|border-|rounded-|shadow-|position-|top-|bottom-|start-|end-|translate-|w-|h-|mw-|mh-|vw-|vh-|min-vw-|min-vh-|flex-|justify-content-|align-items-|align-content-|align-self-|order-|overflow-|display-|opacity-|visible-|invisible-|z-|user-select-|pe-|cursor-|lh-|fw-|fst-|text-decoration-|font-|fs-|container|row|col|g-|gx-|gy-|offset-|order-|fixed-|sticky-)+.*$',
+  {
+    'message': 'Use Bootstrap utility classes or follow custom component naming'
+  }
+]
+----
+
+=== Tailwind CSS Projects
+For Tailwind CSS projects:
+
+[source,javascript]
+----
+'at-rule-no-unknown': [true, {
+  'ignoreAtRules': [
+    'tailwind',
+    'apply',
+    'variants',
+    'responsive',
+    'screen',
+    'layer'
+  ]
+}]
+----

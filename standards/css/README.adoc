@@ -1,0 +1,54 @@
+= CSS Standards
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Overview
+
+This directory contains the comprehensive CSS standards for all CUI projects. These standards serve as independent, authoritative sources of truth for CSS development requirements without being tied to specific implementation processes. They ensure consistent, maintainable, and high-quality CSS code across the codebase using modern CSS features and best practices.
+
+== Document Structure
+
+The CSS standards are organized into the following documents:
+
+* xref:css-development-standards.adoc[CSS Development Standards] - CSS-specific configuration, dependencies, and tooling setup
+* xref:linting-standards.adoc[Linting Standards] - Stylelint rules, configuration, and integration
+* xref:formatting-standards.adoc[Formatting Standards] - Prettier configuration for CSS formatting
+* xref:css-best-practices.adoc[CSS Best Practices] - Modern CSS patterns, variables, and conventions
+
+== Key Principles
+
+1. *Modern CSS*: Use CSS3+ features, custom properties (variables), and modern layout techniques
+2. *Maintainability*: Consistent naming conventions, modular architecture, and clear documentation
+3. *Performance*: Optimized CSS with minimal specificity and efficient selectors
+4. *Quality*: Automated linting, formatting, and validation in build pipeline
+5. *Accessibility*: CSS that supports accessibility requirements and responsive design
+6. *Framework Agnostic*: Standards apply to vanilla CSS and framework-specific contexts
+
+== Target Ecosystem
+
+These standards are designed for:
+
+* **Build System**: Maven with frontend-maven-plugin integration
+* **CSS Processing**: PostCSS with modern plugin ecosystem
+* **Linting**: Stylelint with comprehensive rule sets
+* **Formatting**: Prettier with CSS-specific configuration
+* **Package Management**: npm with lock file management
+* **Minification**: CSS optimization and minification tools
+* **Framework Support**: Vanilla CSS with optional framework-specific extensions
+
+== Generic Infrastructure
+
+These CSS standards leverage generic frontend infrastructure:
+
+* xref:../javascript/project-structure.adoc[Project Structure Standards] - Directory structure and package.json configuration
+* xref:../javascript/maven-integration-standards.adoc[Maven Integration Standards] - Frontend-maven-plugin configuration and build integration
+
+== See Also
+
+* xref:../README.adoc[Standards Overview]
+* xref:../javascript/README.adoc[JavaScript Standards]
+* xref:../testing/README.adoc[Testing Standards]
+* xref:../documentation/README.adoc[Documentation Standards]
