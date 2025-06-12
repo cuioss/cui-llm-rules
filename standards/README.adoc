@@ -22,6 +22,13 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** xref:documentation/readme-structure.adoc[README Structure] - Standard format and content for README files
 * xref:java/README.adoc[Java Standards]
 ** xref:java/dsl-style-constants.adoc[DSL-Style Constants] - Standards for organizing constants in a hierarchical manner
+* xref:javascript/README.adoc[JavaScript Standards]
+** xref:javascript/project-structure.adoc[Project Structure] - Standards for package.json and Maven integration
+** xref:javascript/linting-standards.adoc[Linting Standards] - ESLint rules, configuration, and integration
+** xref:javascript/unit-testing-standards.adoc[Unit Testing Standards] - Jest framework, configuration, and integration
+** xref:javascript/formatting-standards.adoc[Formatting Standards] - Prettier rules, configuration, and integration
+** xref:javascript/javascript-best-practices.adoc[JavaScript Best Practices] - Modern JavaScript patterns and conventions
+** xref:javascript/lit-components-standards.adoc[Lit Components Standards] - Rules and best practices for Lit web components (Quarkus DevUI context)
 * xref:logging/README.adoc[Logging Standards]
 ** xref:logging/core-standards.adoc[Core Standards] - Fundamental logging requirements and formats
 ** xref:logging/implementation-guide.adoc[Implementation Guide] - Standards for implementing logging functionality

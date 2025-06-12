@@ -1,0 +1,432 @@
+= JavaScript Linting Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive ESLint rules, configuration standards, and integration requirements for consistent code quality across JavaScript projects.
+
+== Related Documentation
+* xref:project-structure.adoc[Project Structure]: Package.json and Maven integration
+* xref:formatting-standards.adoc[Formatting Standards]: Prettier integration with ESLint
+* xref:javascript-best-practices.adoc[JavaScript Best Practices]: Code patterns and conventions
+
+== ESLint Configuration Standards
+
+=== Core Configuration Structure
+All projects must use a `.eslintrc.js` configuration file with this structure:
+
+[source,javascript]
+----
+module.exports = {
+  extends: [
+    'airbnb-base',
+    'plugin:jest/recommended',
+    'plugin:jsdoc/recommended',
+    'plugin:unicorn/recommended',
+    'plugin:prettier/recommended',
+    // Add framework-specific extensions when needed:
+    // 'plugin:lit/recommended',      // For Quarkus DevUI
+    // 'plugin:wc/recommended',       // For Web Components
+  ],
+  
+  env: {
+    browser: true,
+    es6: true,
+    jest: true,
+    node: true,
+  },
+  
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
+  },
+  
+  plugins: ['jsdoc', 'unicorn', 'prettier'],
+  // Add framework-specific plugins when needed:
+  // plugins: ['lit', 'wc', 'jsdoc', 'unicorn', 'prettier'], // For Lit/WebComponents
+  
+  rules: {
+    // Project-specific rules
+  },
+  
+  overrides: [
+    // Environment-specific overrides
+  ],
+};
+----
+
+=== Required Extensions
+All projects must include these ESLint configurations:
+
+==== Core Extensions
+* `airbnb-base`: Airbnb JavaScript style guide (without React)
+* `plugin:jest/recommended`: Jest testing best practices
+* `plugin:prettier/recommended`: Prettier integration (must be last)
+
+==== Documentation Extensions
+* `plugin:jsdoc/recommended`: JSDoc documentation standards
+
+==== Code Quality Extensions
+* `plugin:unicorn/recommended`: Additional JavaScript best practices
+
+==== Framework-Specific Extensions (Optional)
+When using specific frameworks:
+
+* `plugin:lit/recommended`: Lit-specific rules (for Quarkus DevUI)
+* `plugin:wc/recommended`: Web Components best practices (when applicable)
+
+=== Environment Configuration
+Must support these environments:
+
+[source,javascript]
+----
+env: {
+  browser: true,    // Browser globals
+  es6: true,        // ES6 globals and syntax
+  jest: true,       // Jest testing globals
+  node: true,       // Node.js globals
+}
+----
+
+=== Parser Options
+Must use modern JavaScript features:
+
+[source,javascript]
+----
+parserOptions: {
+  ecmaVersion: 2022,    // ES2022 support
+  sourceType: 'module', // ES modules
+}
+----
+
+== Required Rule Categories
+
+=== Import/Export Rules
+Essential for module management:
+
+[source,javascript]
+----
+rules: {
+  // Import/export rules
+  'import/no-unresolved': 'off',                    // Allow unresolved imports for mocks
+  'import/extensions': 'off',                       // No file extensions required
+  'import/prefer-default-export': 'off',            // Allow named exports
+  'import/no-extraneous-dependencies': [
+    'error', 
+    { devDependencies: true }
+  ],
+}
+----
+
+=== JavaScript Best Practices
+Core JavaScript quality rules:
+
+[source,javascript]
+----
+rules: {
+  // General JavaScript rules
+  'class-methods-use-this': 'off',       // Allow methods without 'this'
+  'no-console': 'warn',                  // Warning for console statements
+  'no-debugger': 'error',                // Error for debugger statements
+  'no-unused-vars': 'error',             // Error for unused variables
+  'no-underscore-dangle': 'off',         // Allow underscore for private properties
+  'no-param-reassign': 'off',            // Allow for test setups
+  'no-promise-executor-return': 'off',   // Allow for test utilities
+  'prefer-const': 'error',               // Require const when possible
+  'no-var': 'error',                     // No var declarations
+  'arrow-spacing': 'error',              // Consistent arrow function spacing
+  'object-shorthand': 'error',           // Use object shorthand
+  'prefer-template': 'error',            // Use template literals
+  'template-curly-spacing': 'error',     // Consistent template spacing
+}
+----
+
+=== Prettier Integration Rules
+Disable style rules handled by Prettier:
+
+[source,javascript]
+----
+rules: {
+  // Code style rules (disabled in favor of Prettier)
+  quotes: 'off',                    // Handled by Prettier
+  semi: 'off',                      // Handled by Prettier
+  indent: 'off',                    // Handled by Prettier
+  'max-len': [
+    'warn', 
+    { 
+      code: 120, 
+      ignoreComments: true, 
+      ignoreUrls: true 
+    }
+  ],
+  'comma-dangle': 'off',            // Handled by Prettier
+  'object-curly-spacing': 'off',    // Handled by Prettier
+  'array-bracket-spacing': 'off',   // Handled by Prettier
+  
+  // Prettier integration
+  'prettier/prettier': 'error',
+}
+----
+
+=== Function and Arrow Function Rules
+Modern function standards:
+
+[source,javascript]
+----
+rules: {
+  // Function rules
+  'function-paren-newline': 'off',
+  'arrow-parens': ['error', 'always'],
+  'prefer-arrow-callback': 'error',
+}
+----
+
+== Framework-Specific Rules (Optional)
+
+=== Lit Component Rules
+When using Lit for Quarkus DevUI or other contexts:
+
+[source,javascript]
+----
+rules: {
+  // Lit-specific rules (add when using Lit)
+  'lit/no-legacy-template-syntax': 'error',    // Use modern Lit syntax
+  'lit/no-invalid-html': 'error',              // Valid HTML in templates
+  'lit/no-value-attribute': 'error',           // Proper attribute binding
+  'lit/attribute-value-entities': 'error',     // Proper entity encoding
+  'lit/binding-positions': 'error',            // Correct binding syntax
+  'lit/no-property-change-update': 'error',    // Avoid property changes in update
+  'lit/lifecycle-super': 'error',              // Call super in lifecycle methods
+  'lit/no-native-attributes': 'warn',          // Avoid native attributes
+}
+----
+
+=== Web Components Rules
+When working with custom elements:
+
+[source,javascript]
+----
+rules: {
+  // Web Components rules (add when applicable)
+  'wc/no-constructor-attributes': 'error',     // No attributes in constructor
+  'wc/no-invalid-element-name': 'error',       // Valid custom element names
+  'wc/no-self-class': 'error',                 // No self-referencing classes
+  'wc/require-listener-teardown': 'error',     // Clean up event listeners
+  'wc/guard-super-call': 'off',                // Allow for framework components
+}
+----
+
+== JSDoc Documentation Rules
+
+=== Required JSDoc Rules
+Documentation quality standards:
+
+[source,javascript]
+----
+rules: {
+  // JSDoc rules
+  'jsdoc/require-description': 'warn',              // Require descriptions
+  'jsdoc/require-param-description': 'warn',        // Describe parameters
+  'jsdoc/require-returns-description': 'warn',      // Describe return values
+  'jsdoc/check-alignment': 'error',                 // Proper alignment
+  'jsdoc/check-indentation': 'error',               // Consistent indentation
+  'jsdoc/check-tag-names': 'error',                 // Valid JSDoc tags
+  'jsdoc/check-types': 'error',                     // Valid type annotations
+  'jsdoc/require-hyphen-before-param-description': 'error',
+}
+----
+
+== Unicorn Best Practices
+
+=== Recommended Unicorn Rules
+Additional code quality improvements:
+
+[source,javascript]
+----
+rules: {
+  // Unicorn rules (additional best practices)
+  'unicorn/filename-case': 'off',                   // Allow kebab-case for components
+  'unicorn/prevent-abbreviations': 'off',           // Allow common abbreviations
+  'unicorn/no-null': 'off',                         // Allow null values
+  'unicorn/prefer-dom-node-text-content': 'off',    // Allow textContent usage
+  'unicorn/prefer-query-selector': 'error',         // Use querySelector
+  'unicorn/prefer-modern-dom-apis': 'error',        // Use modern DOM APIs
+  'unicorn/no-array-for-each': 'off',               // Allow forEach for readability
+  'unicorn/consistent-function-scoping': 'warn',    // Consistent function scoping
+}
+----
+
+== Environment-Specific Overrides
+
+=== Test File Overrides
+Relaxed rules for test files:
+
+[source,javascript]
+----
+overrides: [
+  {
+    files: ['src/test/js/**/*.js'],
+    rules: {
+      'jsdoc/require-jsdoc': 'off',
+      'jsdoc/require-description': 'off',
+      'jsdoc/require-param-description': 'off',
+      'jsdoc/require-returns-description': 'off',
+      'jsdoc/require-param-type': 'off',
+      'jsdoc/require-returns': 'off',
+      'unicorn/consistent-function-scoping': 'off',
+      'lit/no-legacy-template-syntax': 'off',
+      'max-len': 'off',
+      'no-unused-expressions': 'off',
+      'no-unused-vars': 'warn',
+      'no-undef': 'off',    // Jest globals handled by environment
+      'jest/expect-expect': [
+        'error',
+        {
+          assertFunctionNames: ['expect', 'assert*', 'should*'],
+        },
+      ],
+      'jest/no-disabled-tests': 'warn',
+      'jest/no-focused-tests': 'error',
+      'jest/prefer-to-have-length': 'error',
+      'jest/valid-expect': 'error',
+    },
+  },
+]
+----
+
+=== DevUI Component Overrides
+Stricter rules for production components:
+
+[source,javascript]
+----
+overrides: [
+  {
+    files: ['src/main/resources/dev-ui/**/*.js'],
+    rules: {
+      'jsdoc/require-jsdoc': 'error',           // Require JSDoc for public components
+      'jsdoc/require-description': 'error',     // Require descriptions
+      'max-len': ['warn', { code: 120 }],       // Line length limit
+      'complexity': ['warn', { max: 15 }],      // Cyclomatic complexity
+      'max-depth': ['error', { max: 4 }],       // Maximum nesting depth
+      'max-lines-per-function': ['warn', { max: 100 }], // Function length limit
+    },
+  },
+]
+----
+
+=== Mock File Overrides
+Relaxed rules for mock files:
+
+[source,javascript]
+----
+overrides: [
+  {
+    files: ['src/test/js/mocks/**/*.js'],
+    rules: {
+      'jsdoc/require-jsdoc': 'off',
+      'unicorn/consistent-function-scoping': 'off',
+      'unicorn/no-array-reduce': 'off',
+      'unicorn/prefer-logical-operator-over-ternary': 'off',
+      'no-restricted-syntax': 'off',
+      'no-plusplus': 'off',
+      'class-methods-use-this': 'off',
+      'no-unused-vars': 'off',
+      'max-lines-per-function': 'off',
+    },
+  },
+]
+----
+
+== Stylelint Integration (Optional)
+
+=== CSS-in-JS Linting
+When using CSS-in-JS patterns (e.g., Lit components):
+
+[source,javascript]
+----
+// Package.json scripts (add when using CSS-in-JS)
+"lint:style": "stylelint src/**/*.js",
+"lint:style:fix": "stylelint --fix src/**/*.js",
+----
+
+=== Stylelint Configuration
+When using CSS-in-JS patterns:
+
+* `stylelint-config-standard`: Standard CSS rules
+* `stylelint-order`: CSS property ordering
+* `postcss-lit`: PostCSS support (for Lit templates when applicable)
+
+== Integration Requirements
+
+=== NPM Scripts Integration
+Required package.json scripts:
+
+[source,json]
+----
+{
+  "scripts": {
+    // Base scripts (always required)
+    "lint:js": "eslint src/**/*.js",
+    "lint:js:fix": "eslint --fix src/**/*.js",
+    
+    // When using CSS-in-JS (optional)
+    "lint:style": "stylelint src/**/*.js",
+    "lint:style:fix": "stylelint --fix src/**/*.js",
+    
+    // Combined scripts
+    "lint": "npm run lint:js",                                    // Base version
+    "lint": "npm run lint:js && npm run lint:style",             // With CSS-in-JS
+    "lint:fix": "npm run lint:js:fix",                           // Base version
+    "lint:fix": "npm run lint:js:fix && npm run lint:style:fix"  // With CSS-in-JS
+  }
+}
+----
+
+=== Maven Integration
+Required Maven execution:
+
+[source,xml]
+----
+<execution>
+  <id>npm-lint-fix</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <phase>verify</phase>
+  <configuration>
+    <arguments>run lint:fix</arguments>
+  </configuration>
+</execution>
+----
+
+=== CI/CD Integration
+Linting must be part of the build pipeline:
+
+1. **Local Development**: Pre-commit hooks recommended
+2. **Build Pipeline**: Automatic fixing in verify phase
+3. **Quality Gates**: Must pass linting for successful builds
+
+== Error Handling Standards
+
+=== Error Severity Levels
+* **Error**: Build-breaking issues that must be fixed
+* **Warning**: Issues that should be addressed but don't break builds
+* **Off**: Rules that are disabled for specific contexts
+
+=== Common Fixes
+* Use `eslint --fix` for automatic fixes
+* Manual review required for complex rule violations
+* Document any rule exceptions with comments
+
+== Performance Considerations
+
+=== Caching
+* Enable ESLint caching for faster subsequent runs
+* Use `.eslintcache` in gitignore
+* Consider parallel execution for large codebases
+
+=== Rule Selection
+* Focus on rules that provide real value
+* Avoid overly restrictive rules that impede development
+* Balance code quality with developer productivity

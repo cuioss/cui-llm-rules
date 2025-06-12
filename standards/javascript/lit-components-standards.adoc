@@ -1,0 +1,783 @@
+= Lit Components Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive standards for developing web components using the Lit framework, including architecture patterns, CSS-in-JS best practices, and component lifecycle management.
+
+== Related Documentation
+* xref:linting-standards.adoc[Linting Standards]: Lit-specific ESLint rules
+* xref:unit-testing-standards.adoc[Unit Testing Standards]: Component testing patterns
+* xref:javascript-best-practices.adoc[JavaScript Best Practices]: Modern JavaScript in components
+
+== Lit Framework Standards
+
+=== Framework Version Requirements
+* **Lit**: Version 3.0.0 or later
+* **Target**: Modern browsers with native Web Components support
+* **Polyfills**: Not required for supported browser targets
+
+=== Import Standards
+All Lit components must use these standard imports:
+
+[source,javascript]
+----
+import { html, css, LitElement } from 'lit';
+import { devui } from 'devui';  // For DevUI integration when needed
+----
+
+=== Component Base Class
+All components must extend `LitElement`:
+
+[source,javascript]
+----
+export class ComponentName extends LitElement {
+  // Component implementation
+}
+----
+
+== Component Architecture Standards
+
+=== Component Class Structure
+Components must follow this standardized structure:
+
+[source,javascript]
+----
+export class QwcComponentName extends LitElement {
+  // 1. Static styles (CSS-in-JS)
+  static styles = css`
+    /* Component styles */
+  `;
+
+  // 2. Static properties definition
+  static properties = {
+    propertyName: { type: String },
+    anotherProperty: { state: true },
+  };
+
+  // 3. Constructor (if needed)
+  constructor() {
+    super();
+    // Initialize properties
+  }
+
+  // 4. Lifecycle methods
+  connectedCallback() {
+    super.connectedCallback();
+    // Component connected to DOM
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Component removed from DOM
+  }
+
+  // 5. Event handlers (private methods)
+  _handleEvent() {
+    // Event handling logic
+  }
+
+  // 6. Public methods
+  publicMethod() {
+    // Public API
+  }
+
+  // 7. Render method (always last)
+  render() {
+    return html`
+      <!-- Component template -->
+    `;
+  }
+}
+----
+
+=== Component Naming Standards
+* **Class Names**: PascalCase with 'Qwc' prefix (e.g., `QwcJwtConfig`)
+* **File Names**: kebab-case (e.g., `qwc-jwt-config.js`)
+* **Custom Element Names**: kebab-case with project prefix (e.g., `qwc-jwt-config`)
+
+=== Component Registration
+Components should be self-registering:
+
+[source,javascript]
+----
+// At the end of component file
+customElements.define('qwc-component-name', QwcComponentName);
+----
+
+== Property and State Management
+
+=== Property Declaration Standards
+Use static properties with proper type annotations:
+
+[source,javascript]
+----
+static properties = {
+  // Public properties (reactive)
+  title: { type: String },
+  count: { type: Number },
+  isActive: { type: Boolean },
+  items: { type: Array },
+  config: { type: Object },
+  
+  // Private state (internal reactive state)
+  _loading: { state: true },
+  _error: { state: true },
+  _data: { state: true },
+};
+----
+
+=== Property Types
+Required type specifications:
+
+* **String**: `{ type: String }`
+* **Number**: `{ type: Number }`
+* **Boolean**: `{ type: Boolean }`
+* **Array**: `{ type: Array }`
+* **Object**: `{ type: Object }`
+* **State**: `{ state: true }` (for internal state)
+
+=== Property Initialization
+Initialize properties in constructor:
+
+[source,javascript]
+----
+constructor() {
+  super();
+  this.title = '';
+  this.count = 0;
+  this.isActive = false;
+  this.items = [];
+  this.config = {};
+  
+  // Private state
+  this._loading = false;
+  this._error = null;
+  this._data = null;
+}
+----
+
+=== Property Validation
+Implement property validation for public APIs:
+
+[source,javascript]
+----
+set count(value) {
+  const oldValue = this._count;
+  this._count = Math.max(0, Number(value) || 0);
+  this.requestUpdate('count', oldValue);
+}
+
+get count() {
+  return this._count;
+}
+----
+
+== CSS-in-JS Standards
+
+=== Static Styles Declaration
+All component styles must use the static styles pattern:
+
+[source,javascript]
+----
+static styles = css`
+  :host {
+    display: block;
+    /* Default host styles */
+  }
+
+  /* Component-specific styles */
+`;
+----
+
+=== CSS Architecture Principles
+1. **Encapsulation**: Styles are scoped to component shadow DOM
+2. **CSS Custom Properties**: Use for theming and external customization
+3. **No Global Styles**: Avoid styles that affect parent or sibling elements
+4. **Performance**: Styles are evaluated once per component class
+
+=== Host Element Styling
+Always define host element behavior:
+
+[source,javascript]
+----
+static styles = css`
+  :host {
+    display: block;
+    box-sizing: border-box;
+  }
+
+  :host([hidden]) {
+    display: none !important;
+  }
+
+  :host(.compact) {
+    padding: 0.5rem;
+  }
+`;
+----
+
+=== CSS Custom Properties for Theming
+Use CSS custom properties for customizable values:
+
+[source,javascript]
+----
+static styles = css`
+  .header {
+    background-color: var(--component-header-bg, var(--lumo-primary-color));
+    color: var(--component-header-text, var(--lumo-primary-contrast-color));
+    padding: var(--component-header-padding, 1rem);
+  }
+
+  .button {
+    background-color: var(--component-button-bg, var(--lumo-primary-color));
+    border-radius: var(--component-button-radius, 4px);
+  }
+`;
+----
+
+=== CSS Organization Patterns
+Organize CSS logically within components:
+
+[source,javascript]
+----
+static styles = css`
+  /* 1. Host styles */
+  :host {
+    display: block;
+  }
+
+  /* 2. Layout containers */
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 3. Component sections */
+  .header {
+    /* Header styles */
+  }
+
+  .content {
+    /* Content styles */
+  }
+
+  .footer {
+    /* Footer styles */
+  }
+
+  /* 4. Interactive elements */
+  .button {
+    /* Button styles */
+  }
+
+  .button:hover {
+    /* Hover states */
+  }
+
+  /* 5. State variations */
+  .loading {
+    /* Loading state */
+  }
+
+  .error {
+    /* Error state */
+  }
+
+  /* 6. Responsive design */
+  @media (max-width: 768px) {
+    /* Mobile styles */
+  }
+`;
+----
+
+=== Design System Integration
+Integrate with design system tokens:
+
+[source,javascript]
+----
+static styles = css`
+  .element {
+    /* Use design system tokens */
+    color: var(--lumo-primary-text-color);
+    background-color: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--lumo-border-radius-m);
+    font-size: var(--lumo-font-size-s);
+    padding: var(--lumo-space-m);
+  }
+`;
+----
+
+== Template and Rendering Standards
+
+=== Render Method Structure
+Implement consistent render method patterns:
+
+[source,javascript]
+----
+render() {
+  // 1. Early returns for loading/error states
+  if (this._loading && !this._data) {
+    return html`<div class="loading">Loading...</div>`;
+  }
+
+  if (this._error) {
+    return html`
+      <div class="error">
+        ${this._error}
+        <button @click="${this._retry}">Retry</button>
+      </div>
+    `;
+  }
+
+  // 2. Main content rendering
+  return html`
+    <div class="container">
+      <header class="header">
+        <h1 class="title">${this.title}</h1>
+      </header>
+      
+      <main class="content">
+        ${this._renderContent()}
+      </main>
+    </div>
+  `;
+}
+----
+
+=== Template Helper Methods
+Break complex templates into helper methods:
+
+[source,javascript]
+----
+_renderContent() {
+  return html`
+    <div class="content-wrapper">
+      ${this.items.map(item => this._renderItem(item))}
+    </div>
+  `;
+}
+
+_renderItem(item) {
+  return html`
+    <div class="item" data-id="${item.id}">
+      <span class="item-name">${item.name}</span>
+      <span class="item-value">${item.value}</span>
+      <button @click="${() => this._handleItemAction(item)}">
+        Action
+      </button>
+    </div>
+  `;
+}
+----
+
+=== Conditional Rendering
+Use proper conditional rendering patterns:
+
+[source,javascript]
+----
+render() {
+  return html`
+    <div class="container">
+      <!-- Conditional rendering with ternary -->
+      ${this.showHeader 
+        ? html`<header class="header">${this.title}</header>`
+        : ''
+      }
+      
+      <!-- Conditional rendering with guard -->
+      ${this.items.length > 0 
+        ? html`
+            <ul class="item-list">
+              ${this.items.map(item => html`
+                <li class="item">${item.name}</li>
+              `)}
+            </ul>
+          `
+        : html`<div class="empty">No items available</div>`
+      }
+    </div>
+  `;
+}
+----
+
+=== Event Binding Standards
+Use proper event binding syntax:
+
+[source,javascript]
+----
+render() {
+  return html`
+    <div class="container">
+      <!-- Simple event handlers -->
+      <button @click="${this._handleClick}">Click Me</button>
+      
+      <!-- Event handlers with parameters -->
+      <button @click="${() => this._handleAction('delete')}">
+        Delete
+      </button>
+      
+      <!-- Input event binding -->
+      <input 
+        type="text" 
+        .value="${this.inputValue}"
+        @input="${this._handleInput}"
+      />
+      
+      <!-- Custom events -->
+      <child-component 
+        @custom-event="${this._handleCustomEvent}"
+      ></child-component>
+    </div>
+  `;
+}
+----
+
+== Lifecycle Management Standards
+
+=== Component Lifecycle Methods
+Implement lifecycle methods when needed:
+
+[source,javascript]
+----
+connectedCallback() {
+  super.connectedCallback();
+  // Component connected to DOM
+  this._setupEventListeners();
+  this._fetchInitialData();
+}
+
+disconnectedCallback() {
+  super.disconnectedCallback();
+  // Component removed from DOM
+  this._cleanupEventListeners();
+  this._cancelPendingRequests();
+}
+
+firstUpdated(changedProperties) {
+  super.firstUpdated(changedProperties);
+  // First render complete
+  this._initializeThirdPartyLibraries();
+}
+
+updated(changedProperties) {
+  super.updated(changedProperties);
+  
+  // React to property changes
+  if (changedProperties.has('config')) {
+    this._handleConfigChange();
+  }
+}
+----
+
+=== Event Listener Management
+Properly manage event listeners:
+
+[source,javascript]
+----
+_setupEventListeners() {
+  this._resizeHandler = this._handleResize.bind(this);
+  window.addEventListener('resize', this._resizeHandler);
+}
+
+_cleanupEventListeners() {
+  if (this._resizeHandler) {
+    window.removeEventListener('resize', this._resizeHandler);
+    this._resizeHandler = null;
+  }
+}
+----
+
+=== Async Operations
+Handle asynchronous operations properly:
+
+[source,javascript]
+----
+async _fetchData() {
+  this._loading = true;
+  this._error = null;
+  
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    this._data = await response.json();
+  } catch (error) {
+    this._error = error.message;
+    console.error('Failed to fetch data:', error);
+  } finally {
+    this._loading = false;
+  }
+}
+----
+
+== DevUI Integration Standards
+
+=== DevUI Service Integration
+For Quarkus DevUI components:
+
+[source,javascript]
+----
+import { devui } from 'devui';
+
+export class QwcJwtConfig extends LitElement {
+  async _fetchConfiguration() {
+    try {
+      const config = await devui.jsonRPC.call('getJwtConfiguration');
+      this._configuration = config;
+    } catch (error) {
+      this._error = `Failed to fetch configuration: ${error.message}`;
+    }
+  }
+}
+----
+
+=== JSON-RPC Communication
+Standard pattern for DevUI JSON-RPC calls:
+
+[source,javascript]
+----
+async _callDevUIService(method, params = {}) {
+  this._loading = true;
+  this._error = null;
+  
+  try {
+    const result = await devui.jsonRPC.call(method, params);
+    return result;
+  } catch (error) {
+    this._error = `Service call failed: ${error.message}`;
+    throw error;
+  } finally {
+    this._loading = false;
+  }
+}
+----
+
+== Performance Standards
+
+=== Rendering Optimization
+Optimize component rendering:
+
+[source,javascript]
+----
+// Use property guards for expensive computations
+get processedItems() {
+  if (!this._processedItems || this._itemsChanged) {
+    this._processedItems = this.items.map(item => ({
+      ...item,
+      processed: this._processItem(item)
+    }));
+    this._itemsChanged = false;
+  }
+  return this._processedItems;
+}
+
+// Use shouldUpdate for performance optimization
+shouldUpdate(changedProperties) {
+  // Only update if relevant properties changed
+  return changedProperties.has('items') || 
+         changedProperties.has('config') ||
+         changedProperties.has('_loading');
+}
+----
+
+=== Memory Management
+Prevent memory leaks:
+
+[source,javascript]
+----
+disconnectedCallback() {
+  super.disconnectedCallback();
+  
+  // Cancel pending operations
+  if (this._abortController) {
+    this._abortController.abort();
+  }
+  
+  // Clear timers
+  if (this._timer) {
+    clearInterval(this._timer);
+  }
+  
+  // Clear references
+  this._data = null;
+  this._cache = null;
+}
+----
+
+== Testing Standards
+
+=== Component Testing Structure
+Test components comprehensively:
+
+[source,javascript]
+----
+describe('QwcComponentName', () => {
+  let element;
+
+  beforeEach(async () => {
+    element = await fixture(html`
+      <qwc-component-name 
+        title="Test Title"
+        .items="${testItems}"
+      ></qwc-component-name>
+    `);
+  });
+
+  describe('Rendering', () => {
+    it('should render with correct structure', () => {
+      expect(element.shadowRoot.querySelector('.container')).to.exist;
+      expect(element.shadowRoot.querySelector('.title')).to.have.text('Test Title');
+    });
+  });
+
+  describe('Properties', () => {
+    it('should update when properties change', async () => {
+      element.title = 'New Title';
+      await element.updateComplete;
+      expect(element.shadowRoot.querySelector('.title')).to.have.text('New Title');
+    });
+  });
+
+  describe('Events', () => {
+    it('should emit custom events', async () => {
+      let eventFired = false;
+      element.addEventListener('item-selected', () => {
+        eventFired = true;
+      });
+
+      const button = element.shadowRoot.querySelector('.select-button');
+      button.click();
+      await element.updateComplete;
+
+      expect(eventFired).to.be.true;
+    });
+  });
+});
+----
+
+=== Mock DevUI Services
+Mock DevUI integration for testing:
+
+[source,javascript]
+----
+// In test setup
+beforeEach(() => {
+  global.devui = {
+    jsonRPC: {
+      call: jest.fn().mockResolvedValue({ success: true }),
+    },
+  };
+});
+----
+
+== Accessibility Standards
+
+=== ARIA Implementation
+Implement proper ARIA attributes:
+
+[source,javascript]
+----
+render() {
+  return html`
+    <div 
+      class="container" 
+      role="region" 
+      aria-label="${this.title}"
+    >
+      <button 
+        class="action-button"
+        aria-describedby="button-help"
+        ?disabled="${this._loading}"
+      >
+        ${this._loading ? 'Loading...' : 'Action'}
+      </button>
+      
+      <div id="button-help" class="help-text">
+        Click to perform action
+      </div>
+    </div>
+  `;
+}
+----
+
+=== Keyboard Navigation
+Support keyboard navigation:
+
+[source,javascript]
+----
+_handleKeyDown(event) {
+  switch (event.key) {
+    case 'Enter':
+    case ' ':
+      event.preventDefault();
+      this._handleActivation();
+      break;
+    case 'Escape':
+      this._handleCancel();
+      break;
+  }
+}
+----
+
+=== Focus Management
+Manage focus properly:
+
+[source,javascript]
+----
+firstUpdated() {
+  super.firstUpdated();
+  
+  // Set initial focus
+  const firstFocusable = this.shadowRoot.querySelector('[tabindex="0"]');
+  if (firstFocusable) {
+    firstFocusable.focus();
+  }
+}
+----
+
+== Documentation Standards
+
+=== JSDoc Documentation
+Document all public APIs:
+
+[source,javascript]
+----
+/**
+ * A Lit component for displaying JWT configuration information.
+ * 
+ * @element qwc-jwt-config
+ * 
+ * @fires {CustomEvent} config-updated - Fired when configuration is updated
+ * @fires {CustomEvent} error-occurred - Fired when an error occurs
+ * 
+ * @example
+ * ```html
+ * <qwc-jwt-config 
+ *   title="JWT Configuration"
+ *   .config="${jwtConfig}"
+ * ></qwc-jwt-config>
+ * ```
+ */
+export class QwcJwtConfig extends LitElement {
+  /**
+   * The title displayed in the component header.
+   * @type {string}
+   */
+  title = '';
+
+  /**
+   * Refreshes the configuration data from the server.
+   * @returns {Promise<void>}
+   */
+  async refresh() {
+    // Implementation
+  }
+}
+----
+
+=== Component README
+Document component usage and API in dedicated README files when needed for complex components.

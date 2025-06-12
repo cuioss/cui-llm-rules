@@ -1,0 +1,471 @@
+= JavaScript Formatting Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive Prettier configuration standards and integration requirements for consistent code formatting across JavaScript projects.
+
+== Related Documentation
+* xref:project-structure.adoc[Project Structure]: Package.json and Maven integration
+* xref:linting-standards.adoc[Linting Standards]: ESLint and Prettier integration
+* xref:javascript-best-practices.adoc[JavaScript Best Practices]: Code style conventions
+
+== Prettier Configuration Standards
+
+=== Configuration File Structure
+All projects must use a `.prettierrc.js` configuration file with this structure:
+
+[source,javascript]
+----
+/**
+ * Prettier configuration for JavaScript projects
+ * 
+ * This configuration ensures consistent code formatting across
+ * JavaScript files only (no JSON or Markdown).
+ */
+
+module.exports = {
+  // Basic formatting options
+  printWidth: 120,
+  tabWidth: 2,
+  useTabs: false,
+  semi: true,
+  singleQuote: true,
+  quoteProps: 'as-needed',
+  
+  // Object and array formatting
+  trailingComma: 'es5',
+  bracketSpacing: true,
+  bracketSameLine: false,
+  
+  // Arrow function parentheses
+  arrowParens: 'always',
+  
+  // Prose formatting
+  proseWrap: 'preserve',
+  
+  // HTML formatting
+  htmlWhitespaceSensitivity: 'css',
+  
+  // End of line
+  endOfLine: 'lf',
+  
+  // Embedded language formatting
+  embeddedLanguageFormatting: 'auto',
+  
+  // File-specific overrides - Only format JavaScript files
+  overrides: [
+    {
+      files: '*.js',
+      options: {
+        printWidth: 120,
+        singleQuote: true,
+        trailingComma: 'es5',
+      },
+    },
+    {
+      files: 'src/test/js/**/*.js',
+      options: {
+        printWidth: 100,
+        singleQuote: true,
+      },
+    },
+  ],
+};
+----
+
+=== Core Formatting Rules
+
+==== Line Length and Spacing
+* **Print Width**: 120 characters for production code, 100 for test code
+* **Tab Width**: 2 spaces
+* **Use Tabs**: false (always use spaces)
+* **End of Line**: LF (Unix-style line endings)
+
+==== Quote and Semicolon Standards
+* **Single Quotes**: true (prefer single quotes over double quotes)
+* **Semicolons**: true (always use semicolons)
+* **Quote Props**: 'as-needed' (only quote object properties when necessary)
+
+==== Object and Array Formatting
+* **Trailing Commas**: 'es5' (trailing commas where valid in ES5)
+* **Bracket Spacing**: true (spaces inside object literals)
+* **Bracket Same Line**: false (closing bracket on new line)
+
+==== Function Formatting
+* **Arrow Parens**: 'always' (always use parentheses around arrow function parameters)
+
+==== Advanced Options
+* **Prose Wrap**: 'preserve' (maintain original wrapping)
+* **HTML Whitespace Sensitivity**: 'css' (respect CSS display property)
+* **Embedded Language Formatting**: 'auto' (format code in template literals)
+
+=== File-Specific Overrides
+
+==== Production JavaScript Files
+Standard formatting for main source files:
+
+[source,javascript]
+----
+{
+  files: '*.js',
+  options: {
+    printWidth: 120,
+    singleQuote: true,
+    trailingComma: 'es5',
+  },
+}
+----
+
+==== Test JavaScript Files
+Slightly more compact formatting for test files:
+
+[source,javascript]
+----
+{
+  files: 'src/test/js/**/*.js',
+  options: {
+    printWidth: 100,  // Shorter lines for test readability
+    singleQuote: true,
+  },
+}
+----
+
+== JavaScript-Only Formatting Policy
+
+=== Scope Limitation
+Prettier configuration must only format JavaScript files:
+
+* **Include**: All `.js` files in src directory
+* **Exclude**: JSON files, Markdown files, other text files
+* **Rationale**: Focused formatting scope prevents unintended changes to configuration files
+
+=== File Pattern Configuration
+NPM scripts must target only JavaScript files:
+
+[source,json]
+----
+{
+  "scripts": {
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\""
+  }
+}
+----
+
+== Integration Standards
+
+=== NPM Scripts Requirements
+All projects must include these formatting scripts in package.json:
+
+[source,json]
+----
+{
+  "scripts": {
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\"",
+    "quality": "npm run lint && npm run format:check",
+    "quality:fix": "npm run lint:fix && npm run format"
+  }
+}
+----
+
+=== Script Definitions
+* **format**: Apply formatting to all JavaScript files
+* **format:check**: Verify formatting without making changes
+* **quality**: Combined linting and format checking
+* **quality:fix**: Apply all automated fixes (linting and formatting)
+
+=== ESLint Integration
+Prettier must be integrated with ESLint through these configurations:
+
+==== Required ESLint Extensions
+[source,javascript]
+----
+extends: [
+  // ... other configurations
+  'plugin:prettier/recommended',  // Must be last
+]
+----
+
+==== Required ESLint Plugins
+[source,javascript]
+----
+plugins: [
+  // ... other plugins
+  'prettier',
+]
+----
+
+==== Required ESLint Rules
+[source,javascript]
+----
+rules: {
+  // Disable style rules that conflict with Prettier
+  quotes: 'off',
+  semi: 'off',
+  indent: 'off',
+  'comma-dangle': 'off',
+  'object-curly-spacing': 'off',
+  'array-bracket-spacing': 'off',
+  
+  // Enable Prettier as ESLint rule
+  'prettier/prettier': 'error',
+}
+----
+
+== Maven Build Integration
+
+=== Frontend Maven Plugin Configuration
+Formatting must be integrated into Maven build phases:
+
+[source,xml]
+----
+<execution>
+  <id>npm-format-check</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <phase>compile</phase>
+  <configuration>
+    <arguments>run format:check</arguments>
+  </configuration>
+</execution>
+----
+
+=== Build Phase Integration
+* **compile phase**: Format checking (fails build if files are not formatted)
+* **verify phase**: Linting with automatic fixes (includes formatting fixes)
+
+=== Continuous Integration Requirements
+* Format checking must occur early in build process
+* Build must fail if formatting is inconsistent
+* Automatic formatting fixes applied during verify phase
+
+== Code Style Standards
+
+=== Consistent Formatting Examples
+
+==== Object Literals
+Standard object formatting:
+
+[source,javascript]
+----
+// Correct formatting
+const config = {
+  apiEndpoint: 'https://api.example.com',
+  timeout: 5000,
+  retries: 3,
+};
+
+// Array formatting
+const items = [
+  'first-item',
+  'second-item', 
+  'third-item',
+];
+----
+
+==== Function Definitions
+Consistent function formatting:
+
+[source,javascript]
+----
+// Arrow functions
+const processData = (input, options = {}) => {
+  return input.map((item) => transform(item, options));
+};
+
+// Regular functions
+function calculateTotal(items) {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+// Async functions
+const fetchUserData = async (userId) => {
+  const response = await api.get(`/users/${userId}`);
+  return response.data;
+};
+----
+
+==== Template Literals
+Proper template literal formatting:
+
+[source,javascript]
+----
+// Multi-line templates
+const template = html`
+  <div class="container">
+    <h1>${title}</h1>
+    <p>${description}</p>
+  </div>
+`;
+
+// Inline templates
+const message = `Hello, ${user.name}! You have ${count} messages.`;
+----
+
+==== Import/Export Statements
+Consistent import formatting:
+
+[source,javascript]
+----
+// Named imports
+import { html, css, LitElement } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+
+// Default imports
+import MyComponent from './components/my-component.js';
+
+// Mixed imports
+import React, { Component, useState } from 'react';
+
+// Multi-line imports
+import {
+  verylongfunctionname,
+  anotherlongfunctionname,
+  yetanotherlongfunctionname,
+} from './utilities.js';
+----
+
+=== Lit Component-Specific Formatting
+
+==== CSS-in-JS Formatting
+Proper formatting for Lit component styles:
+
+[source,javascript]
+----
+static styles = css`
+  .container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    padding: 1rem;
+  }
+
+  .header {
+    align-items: center;
+    background-color: var(--primary-color);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .button {
+    background-color: var(--button-bg-color);
+    border: none;
+    border-radius: 4px;
+    color: var(--button-text-color);
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+  }
+
+  .button:hover {
+    background-color: var(--button-hover-bg-color);
+  }
+`;
+----
+
+==== Template Formatting
+Consistent HTML template formatting:
+
+[source,javascript]
+----
+render() {
+  return html`
+    <div class="container">
+      <header class="header">
+        <h1 class="title">${this.title}</h1>
+        <button class="refresh-button" @click="${this.refresh}">
+          Refresh
+        </button>
+      </header>
+      
+      <main class="content">
+        ${this.items.map(
+          (item) => html`
+            <div class="item">
+              <span class="item-name">${item.name}</span>
+              <span class="item-value">${item.value}</span>
+            </div>
+          `
+        )}
+      </main>
+    </div>
+  `;
+}
+----
+
+== Editor Integration
+
+=== IDE Configuration
+Development teams should configure their editors to:
+
+1. **Format on Save**: Automatically format JavaScript files when saving
+2. **Show Formatting Errors**: Highlight formatting inconsistencies
+3. **Prettier Plugin**: Install and configure Prettier editor plugins
+
+=== Common Editor Setups
+
+==== VS Code Configuration
+`.vscode/settings.json`:
+
+[source,json]
+----
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prettier.configPath": ".prettierrc.js"
+}
+----
+
+==== WebStorm Configuration
+* Enable Prettier in Settings → Languages & Frameworks → JavaScript → Prettier
+* Set configuration file path to `.prettierrc.js`
+* Enable "Run for files" pattern: `{**/*,*}.{js}`
+
+== Quality Assurance
+
+=== Pre-commit Hooks
+Consider implementing pre-commit hooks to enforce formatting:
+
+[source,json]
+----
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run format:check"
+    }
+  }
+}
+----
+
+=== Automated Fixing
+Use automated fixing during development:
+
+* **Local Development**: `npm run quality:fix`
+* **CI/CD Pipeline**: Automatic fixes in verify phase
+* **Editor Integration**: Format on save
+
+=== Formatting Validation
+Continuous validation of formatting standards:
+
+* **Build Pipeline**: Format checking in compile phase
+* **Code Review**: Automated formatting checks
+* **Quality Gates**: Prevent merging unformatted code
+
+== Performance Considerations
+
+=== Formatting Speed
+* Use `.prettierignore` to exclude large files or directories
+* Consider parallel execution for large codebases
+* Cache formatting results where possible
+
+=== Build Impact
+* Format checking adds minimal overhead to build process
+* Automatic formatting in verify phase prevents manual formatting tasks
+* Overall improvement in development efficiency
