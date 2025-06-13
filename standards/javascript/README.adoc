@@ -19,6 +19,7 @@ The JavaScript standards are organized into the following documents:
 * xref:linting-standards.adoc[Linting Standards] - ESLint rules, configuration, and integration (updated for ESLint v9)
 * xref:dependency-management-standards.adoc[Dependency Management Standards] - npm package management, security, and version control
 * xref:unit-testing-standards.adoc[Unit Testing Standards] - Jest framework, configuration, and integration
+* xref:cypress-e2e-testing-standards.adoc[Cypress E2E Testing Standards] - Framework-specific standards for Cypress end-to-end testing
 * xref:formatting-standards.adoc[Formatting Standards] - Prettier rules, configuration, and integration
 * xref:jsdoc-standards.adoc[JSDoc Documentation Standards] - Comprehensive documentation standards using JSDoc
 * xref:javascript-best-practices.adoc[JavaScript Best Practices] - Modern JavaScript patterns and conventions
