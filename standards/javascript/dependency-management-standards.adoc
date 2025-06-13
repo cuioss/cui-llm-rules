@@ -1,0 +1,440 @@
+= JavaScript Dependency Management Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive standards for managing JavaScript dependencies, security vulnerabilities, and package versions to ensure secure, maintainable, and up-to-date codebases.
+
+== Related Documentation
+* xref:linting-standards.adoc[Linting Standards]: ESLint package versions and configuration
+* xref:maven-integration-standards.adoc[Maven Integration]: Frontend Maven plugin dependency handling
+* xref:project-structure.adoc[Project Structure]: Package.json standards
+
+== Package Version Management
+
+=== Semantic Versioning Strategy
+All JavaScript dependencies must follow semantic versioning principles:
+
+[cols="2,3,4"]
+|===
+|Version Type |Pattern |Usage
+
+|Major Version
+|`^X.0.0`
+|Core frameworks and tools with breaking changes
+|Minor Version
+|`^X.Y.0`
+|Feature additions, new functionality
+|Patch Version
+|`^X.Y.Z`
+|Bug fixes, security patches
+|===
+
+=== Version Pinning Strategy
+* **Development Dependencies**: Use caret ranges (`^X.Y.Z`) for automatic updates
+* **Production Dependencies**: Consider exact versions for critical packages
+* **Security Packages**: Always use latest versions with caret ranges
+
+[source,json]
+----
+{
+  "devDependencies": {
+    "eslint": "^9.14.0",              // Caret for automatic updates
+    "webpack": "^5.96.1",             // Major build tools
+    "jest": "^29.7.0"                 // Testing frameworks
+  },
+  "dependencies": {
+    "lit": "^3.0.0",                  // Production framework
+    "core-js": "^3.39.0"              // Polyfills
+  }
+}
+----
+
+== Security Management
+
+=== Vulnerability Scanning
+All projects must implement continuous vulnerability scanning:
+
+==== Required npm Scripts
+[source,json]
+----
+{
+  "scripts": {
+    "audit:security": "npm audit --audit-level=moderate",
+    "audit:fix": "npm audit fix",
+    "audit:licenses": "npx license-checker --summary",
+    "update:check": "npx npm-check-updates --format group",
+    "update:dependencies": "npx npm-check-updates --upgrade"
+  }
+}
+----
+
+==== Maven Integration
+Include vulnerability scanning in Maven builds:
+
+[source,xml]
+----
+<execution>
+  <id>npm-security-audit</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <phase>validate</phase>
+  <configuration>
+    <arguments>audit --audit-level=moderate</arguments>
+  </configuration>
+</execution>
+----
+
+=== Security Vulnerability Resolution
+
+==== Immediate Action Required
+* **Critical vulnerabilities**: Fix within 24 hours
+* **High vulnerabilities**: Fix within 1 week  
+* **Moderate vulnerabilities**: Fix within 1 month
+* **Low vulnerabilities**: Address in next release cycle
+
+==== Resolution Strategies
+1. **Automatic fixes**: `npm audit fix` for compatible updates
+2. **Manual updates**: Update to secure versions manually
+3. **Alternative packages**: Replace deprecated/vulnerable packages
+4. **Workarounds**: Use `npm audit fix --force` only as last resort
+
+=== Deprecated Package Management
+
+==== Common Deprecated Packages and Replacements
+[cols="2,3,4"]
+|===
+|Deprecated Package |Replacement |Reason
+
+|`rimraf` < v4
+|`del-cli` or `rimraf` >= v5
+|Performance improvements, better API
+
+|`eslint` < v9  
+|`eslint` >= v9
+|Security fixes, flat config support
+
+|`abab`
+|Native `atob()`/`btoa()`
+|Use platform native methods
+
+|`osenv`
+|`process.env` or `os` module
+|No longer maintained
+
+|`inflight`
+|`lru-cache` or native solutions
+|Memory leaks, better alternatives
+
+|`glob` < v9
+|`glob` >= v9
+|Security fixes, performance
+
+|`airbnb-base`
+|`@eslint/js`
+|ESLint v9 compatibility
+|===
+
+==== Deprecation Warning Resolution
+Monitor and address these npm warnings during builds:
+
+[source,bash]
+----
+# Example deprecated warnings to resolve:
+npm WARN deprecated abab@2.0.6: Use your platform's native atob() and btoa()
+npm WARN deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm WARN deprecated eslint@8.57.1: This version is no longer supported
+----
+
+== Dependency Conflict Resolution
+
+=== Peer Dependency Management
+Handle peer dependency conflicts using these strategies:
+
+==== Legacy Peer Dependencies Flag
+For packages with incompatible peer dependencies:
+
+[source,xml]
+----
+<execution>
+  <id>npm-install</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <configuration>
+    <arguments>install --legacy-peer-deps</arguments>
+  </configuration>
+</execution>
+----
+
+==== Selective Dependency Resolution
+Use npm overrides for specific conflict resolution:
+
+[source,json]
+----
+{
+  "overrides": {
+    "eslint": "^9.14.0",              // Force specific version
+    "@typescript-eslint/eslint-plugin": {
+      "eslint": "$eslint"             // Use parent version
+    }
+  }
+}
+----
+
+=== Version Conflict Resolution
+1. **Update to compatible versions**: Prefer latest compatible versions
+2. **Remove conflicting packages**: Eliminate unnecessary dependencies  
+3. **Use peer dependency flags**: `--legacy-peer-deps` as fallback
+4. **Fork/patch packages**: Only for critical business needs
+
+== Package Categories and Standards
+
+=== Core Development Tools
+Essential packages for all JavaScript projects:
+
+[source,json]
+----
+{
+  "devDependencies": {
+    // Linting and Formatting
+    "eslint": "^9.14.0",
+    "@eslint/js": "^9.14.0", 
+    "prettier": "^3.0.3",
+    
+    // Testing
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    
+    // Build Tools  
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "terser": "^5.36.0",
+    
+    // Babel
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "babel-jest": "^29.7.0",
+    
+    // Utilities
+    "del-cli": "^6.0.0",
+    "license-checker": "^25.0.1"
+  }
+}
+----
+
+=== Framework-Specific Dependencies
+Additional packages for specific frameworks:
+
+==== Lit Components (Quarkus DevUI)
+[source,json]
+----
+{
+  "devDependencies": {
+    "lit": "^3.0.0",
+    "eslint-plugin-lit": "^1.10.1",
+    "eslint-plugin-wc": "^2.0.4",
+    "postcss-lit": "^1.0.0"
+  }
+}
+----
+
+==== CSS Processing
+[source,json]
+----
+{
+  "devDependencies": {
+    "stylelint": "^16.10.0",
+    "stylelint-config-standard": "^36.0.1",
+    "stylelint-order": "^6.0.3",
+    "css-tree": "^2.3.0"
+  }
+}
+----
+
+=== Code Quality Dependencies
+Packages for maintaining code quality:
+
+[source,json]
+----
+{
+  "devDependencies": {
+    // ESLint Plugins
+    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-jsdoc": "^46.8.0",
+    "eslint-plugin-unicorn": "^48.0.0", 
+    "eslint-plugin-security": "^1.7.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-sonarjs": "^2.0.3",
+    "eslint-plugin-prettier": "^5.0.0",
+    
+    // Core Libraries
+    "core-js": "^3.39.0"
+  }
+}
+----
+
+== Update Management
+
+=== Regular Update Schedule
+Maintain dependencies with this schedule:
+
+* **Security updates**: As needed (within vulnerability timeframes)
+* **Minor updates**: Monthly
+* **Major updates**: Quarterly review
+* **Annual audit**: Complete dependency review
+
+=== Update Process
+
+==== 1. Security Audit
+[source,bash]
+----
+npm audit
+npm audit fix
+----
+
+==== 2. Check for Updates  
+[source,bash]
+----
+npx npm-check-updates --format group
+----
+
+==== 3. Test Updates
+[source,bash]
+----
+npx npm-check-updates --target minor --upgrade
+npm test
+npm run lint
+----
+
+==== 4. Production Validation
+[source,bash]
+----
+npm run build
+npm run test:ci-strict
+----
+
+=== Breaking Change Management
+For major version updates:
+
+1. **Review changelog**: Understand breaking changes
+2. **Update in isolation**: Test one major update at a time
+3. **Configuration updates**: Update config files (e.g., ESLint flat config)
+4. **Test thoroughly**: Run full test suite
+5. **Document changes**: Update project documentation
+
+== Quality Gates and Automation
+
+=== Dependency Quality Requirements
+All builds must meet these criteria:
+
+* **Zero critical/high vulnerabilities**: No unaddressed security issues
+* **Up-to-date dependencies**: No packages >6 months behind latest
+* **License compatibility**: All licenses compatible with project requirements
+* **No deprecated warnings**: Address all deprecation warnings
+
+=== Automated Dependency Management
+
+==== GitHub Dependabot Configuration
+[source,yaml]
+----
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "security-team"
+    assignees:  
+      - "dev-team"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+----
+
+==== Automated Security Scanning
+[source,yaml]
+----
+# .github/workflows/security.yml
+- name: Run npm audit
+  run: npm audit --audit-level=moderate
+  
+- name: Check for outdated packages
+  run: npx npm-check-updates --errorLevel 2
+----
+
+== Troubleshooting Common Issues
+
+=== npm Install Failures
+
+==== Resolution Steps
+1. Clear npm cache: `npm cache clean --force`
+2. Delete node_modules: `rm -rf node_modules package-lock.json`
+3. Reinstall: `npm install`
+4. Use legacy peer deps: `npm install --legacy-peer-deps`
+
+==== Network/Proxy Issues
+[source,bash]
+----
+npm config set registry https://registry.npmjs.org/
+npm config set proxy http://proxy.company.com:8080
+npm config set https-proxy http://proxy.company.com:8080
+----
+
+=== Dependency Conflicts
+
+==== Common Solutions
+1. **Update conflicting packages**: Get compatible versions
+2. **Use resolutions**: Force specific versions
+3. **Remove unused dependencies**: Clean up package.json
+4. **Check for duplicate installations**: Use `npm ls` to identify duplicates
+
+=== Build Performance Issues
+
+==== Optimization Strategies  
+1. **Use .npmrc optimizations**:
+   ```
+   prefer-offline=true
+   audit=false
+   fund=false
+   ```
+
+2. **Enable package caching**:
+   ```xml
+   <configuration>
+     <arguments>install --prefer-offline --no-audit</arguments>
+   </configuration>
+   ```
+
+3. **Minimize dependencies**: Regular dependency cleanup
+
+== Compliance and Governance
+
+=== License Management
+All dependencies must have compatible licenses:
+
+* **Permitted**: MIT, Apache 2.0, BSD, ISC
+* **Review required**: GPL, LGPL, AGPL
+* **Prohibited**: Unlicensed, proprietary
+
+=== Dependency Approval Process
+For new dependencies:
+
+1. **Security review**: Check vulnerability history
+2. **License review**: Ensure compatibility  
+3. **Maintenance review**: Active development, community support
+4. **Alternatives review**: Consider existing solutions
+5. **Documentation**: Update dependency rationale
+
+=== Audit Trail
+Maintain records of:
+
+* Dependency addition rationale
+* Security vulnerability responses
+* Major version upgrade decisions
+* License compliance verification

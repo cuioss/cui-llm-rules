@@ -13,14 +13,94 @@ Defines comprehensive ESLint rules, configuration standards, and integration req
 
 == ESLint Configuration Standards
 
-=== Core Configuration Structure
-All projects must use a `.eslintrc.js` configuration file with this structure:
+=== ESLint v9 Flat Configuration Structure
+All projects must use ESLint v9 with the new flat configuration format. Create an `eslint.config.js` file:
+
+[source,javascript]
+----
+import js from '@eslint/js';
+import sonarjs from 'eslint-plugin-sonarjs';
+import jsdoc from 'eslint-plugin-jsdoc';
+import jest from 'eslint-plugin-jest';
+import security from 'eslint-plugin-security';
+import unicorn from 'eslint-plugin-unicorn';
+import promise from 'eslint-plugin-promise';
+import prettier from 'eslint-plugin-prettier';
+// Add framework-specific imports when needed:
+// import lit from 'eslint-plugin-lit';        // For Quarkus DevUI
+// import wc from 'eslint-plugin-wc';          // For Web Components
+
+export default [
+  js.configs.recommended,
+  {
+    plugins: {
+      sonarjs,
+      jsdoc,
+      jest,
+      security,
+      unicorn,
+      promise,
+      prettier,
+      // Add framework-specific plugins when needed:
+      // lit,    // For Quarkus DevUI  
+      // wc,     // For Web Components
+    },
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        document: 'readonly',
+        window: 'readonly',
+        navigator: 'readonly',
+        HTMLElement: 'readonly',
+        customElements: 'readonly',
+        CSSStyleSheet: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        Headers: 'readonly',
+        fetch: 'readonly',
+      },
+    },
+    rules: {
+      // Project-specific rules (see sections below)
+    },
+  },
+  // Test file configuration
+  {
+    files: ['**/*.test.js', '**/test/**/*.js'],
+    plugins: { jest },
+    languageOptions: {
+      globals: {
+        jest: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
+    },
+    rules: {
+      // Test-specific rule overrides (see Test File Overrides section)
+    },
+  },
+];
+----
+
+=== Legacy Configuration Support
+For projects not yet migrated to ESLint v9, maintain `.eslintrc.js` configuration:
 
 [source,javascript]
 ----
 module.exports = {
   extends: [
-    'airbnb-base',
+    '@eslint/js/configs/recommended',  // Updated from 'airbnb-base'
     'plugin:jest/recommended',
     'plugin:jsdoc/recommended',
     'plugin:unicorn/recommended',
@@ -28,9 +108,6 @@ module.exports = {
     'plugin:promise/recommended',
     'plugin:sonarjs/recommended',
     'plugin:prettier/recommended',
-    // Add framework-specific extensions when needed:
-    // 'plugin:lit/recommended',      // For Quarkus DevUI
-    // 'plugin:wc/recommended',       // For Web Components
   ],
   
   env: {
@@ -46,8 +123,6 @@ module.exports = {
   },
   
   plugins: ['jsdoc', 'unicorn', 'security', 'promise', 'sonarjs', 'prettier'],
-  // Add framework-specific plugins when needed:
-  // plugins: ['lit', 'wc', 'jsdoc', 'unicorn', 'security', 'promise', 'sonarjs', 'prettier']
   
   rules: {
     // Project-specific rules
@@ -59,12 +134,31 @@ module.exports = {
 };
 ----
 
-=== Required Extensions
-All projects must include these ESLint configurations:
+=== Required Dependencies and Packages
+All projects must include these ESLint packages in package.json:
+
+==== Core ESLint v9 Dependencies
+[source,json]
+----
+{
+  "devDependencies": {
+    "eslint": "^9.14.0",
+    "@eslint/js": "^9.14.0",
+    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-jsdoc": "^46.8.0", 
+    "eslint-plugin-unicorn": "^48.0.0",
+    "eslint-plugin-security": "^1.7.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-sonarjs": "^2.0.3",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.3"
+  }
+}
+----
 
 ==== Core Extensions
-* `airbnb-base`: Airbnb JavaScript style guide (without React)
-* `plugin:jest/recommended`: Jest testing best practices
+* `@eslint/js`: Official ESLint recommended configuration (replaces airbnb-base)
+* `plugin:jest/recommended`: Jest testing best practices  
 * `plugin:prettier/recommended`: Prettier integration (must be last)
 
 ==== Documentation Extensions

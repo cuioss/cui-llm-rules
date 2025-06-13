@@ -42,7 +42,7 @@ Projects must integrate JavaScript tooling with Maven using the frontend-maven-p
         <goal>npm</goal>
       </goals>
       <configuration>
-        <arguments>install</arguments>
+        <arguments>install --legacy-peer-deps</arguments>
       </configuration>
     </execution>
     <execution>
@@ -142,6 +142,28 @@ The executions must run in this order to ensure proper dependency resolution:
 * **Node.js Version**: v20.12.2 (LTS)
 * **npm Version**: 10.5.0 or compatible
 * **Installation Directory**: `target/` (Maven standard)
+* **Dependency Resolution**: Use `--legacy-peer-deps` for compatibility
+
+==== Dependency Resolution Strategy
+Modern npm packages may have peer dependency conflicts. Use these strategies:
+
+[source,xml]
+----
+<configuration>
+  <!-- Standard installation -->
+  <arguments>install</arguments>
+</configuration>
+
+<!-- For packages with peer dependency conflicts -->
+<configuration>
+  <arguments>install --legacy-peer-deps</arguments>
+</configuration>
+
+<!-- For performance optimization -->
+<configuration>
+  <arguments>install --prefer-offline --no-audit</arguments>
+</configuration>
+----
 
 === Script Integration
 The plugin must call these npm scripts:
@@ -293,7 +315,9 @@ May require additional WebJar integration:
 ==== npm Install Failures
 * Delete `node_modules/` and `package-lock.json`
 * Run `npm cache clean --force`
+* Use `--legacy-peer-deps` flag for peer dependency conflicts
 * Check for conflicting global npm packages
+* Verify Node.js version compatibility
 
 ==== Test Failures in CI
 * Ensure `CI=true` environment variable is set
@@ -333,10 +357,12 @@ Enable parallel npm operations:
 A successful Maven build must:
 
 1. Install correct Node.js and npm versions
-2. Install all npm dependencies without warnings
+2. Install all npm dependencies without critical warnings
 3. Pass all formatting checks
 4. Pass all JavaScript tests with 80% coverage
 5. Pass all linting checks with automatic fixes applied
+6. Resolve all npm security vulnerabilities (critical/high severity)
+7. Address deprecated package warnings in build logs
 
 === Quality Gates
 The following quality gates must pass:
