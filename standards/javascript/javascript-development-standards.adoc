@@ -48,7 +48,7 @@ All JavaScript projects must include a `package.json` file with the following ma
     // Enhanced analysis and security scripts:
     "validate:js": "npm run lint:js && npm run format:check",
     "analyze:js": "eslint src/**/*.js --format json --output-file target/js-analysis.json || true",
-    "complexity": "npx plato -r -d target/complexity-report src",
+    "complexity": "eslint src/**/*.js --format json --output-file target/complexity-report.json || true",
     "audit:security": "npm audit --audit-level=moderate",
     "audit:licenses": "npx license-checker --summary"
   },
@@ -137,22 +137,50 @@ When using specific JavaScript frameworks like Lit for Quarkus DevUI:
 === JavaScript Dependency Management
 When adding, removing, or updating JavaScript dependencies:
 
-1. **Update to Latest Versions**: Always use the most recent stable versions unless there are compatibility issues
-2. **Check All Warnings**: After any dependency changes, run `npm install` and review all warning messages
-3. **Fix Warnings**: Attempt to resolve all warnings through:
-   - Updating peer dependencies
-   - Adjusting package versions
-   - Reviewing deprecation notices
-4. **Document Unfixable Warnings**: Any warnings that cannot be resolved must be documented with:
-   - The specific warning message
+1. **Security Assessment First**: Run `npm audit` before making any changes to identify existing vulnerabilities
+2. **Update to Latest Secure Versions**: Always use the most recent stable versions unless there are compatibility issues
+3. **Post-Change Verification**: After any dependency changes:
+   - Run `npm install` and review all warning messages
+   - Execute `npm audit` to verify no new vulnerabilities were introduced
+   - Test that all functionality still works as expected
+4. **Fix Security Issues**: Attempt to resolve all security warnings through:
+   - Running `npm audit fix` for automatic fixes
+   - Updating peer dependencies to compatible secure versions
+   - Replacing vulnerable packages with secure alternatives
+5. **Fix Deprecation Warnings**: Address deprecation notices through:
+   - Updating to non-deprecated package versions
+   - Replacing deprecated packages with modern alternatives
+   - Reviewing and updating deprecated API usage
+6. **Document Unfixable Issues**: Any warnings or vulnerabilities that cannot be resolved must be documented with:
+   - The specific warning/vulnerability message and affected packages
    - Reason why it cannot be fixed (e.g., framework limitations, breaking changes)
+   - Risk assessment and temporary mitigation measures
    - Expected resolution timeline or alternative approaches
+
+=== JavaScript Security Management
+When adding, removing, or updating JavaScript dependencies:
+
+1. **Security First Approach**: Always run `npm audit` before and after dependency changes
+2. **Vulnerability Response**: Fix all critical and high vulnerabilities immediately
+3. **Risk Assessment**: Document any unresolvable moderate vulnerabilities with:
+   - Specific vulnerability details and affected packages
+   - Risk assessment and mitigation plan
+   - Expected resolution timeline or alternative approaches
+4. **Package Health Evaluation**: Before adding new dependencies, verify:
+   - Active maintenance (recent updates, responsive maintainers)
+   - Security track record and vulnerability history
+   - Community adoption and ecosystem support
+5. **Deprecated Package Replacement**: Replace outdated packages with modern alternatives:
+   - `plato` → `eslint-plugin-sonarjs` for complexity analysis
+   - Prefer actively maintained packages over deprecated ones
+   - Research security-focused alternatives when available
 
 === JavaScript Version Management
 * Always ensure the most recent working versions of all JavaScript libraries
 * Use exact versions for critical JavaScript dependencies
 * Allow patch-level updates for JavaScript development tools
-* Regular security auditing with `npm audit`
+* **Mandatory security auditing** with `npm audit` for every dependency change
+* Use `npm audit fix` as the first step to resolve fixable vulnerabilities
 * Document any JavaScript peer dependency requirements
 
 == Jest Configuration for JavaScript
@@ -288,7 +316,6 @@ Include these additional dependencies for the enhanced Babel configuration:
   "@babel/plugin-transform-optional-chaining": "^7.23.0",
   "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.11",
   "@babel/plugin-syntax-dynamic-import": "^7.8.3",
-  "plato": "^1.7.0",
   "license-checker": "^25.0.1"
 }
 ----

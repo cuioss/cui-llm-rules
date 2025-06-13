@@ -137,8 +137,24 @@ All projects must meet these coverage requirements:
 ----
 
 === Coverage Collection
-Must include source files and exclude test files:
+Coverage collection depends on testing approach:
 
+**For projects with mocked components** (DevUI projects):
+[source,json]
+----
+"collectCoverageFrom": [
+  "src/test/js/**/*.js",
+  "!src/test/js/**/*.test.js",
+  "!src/test/js/mocks/**/*.js",
+  "!src/test/js/setup/**/*.js"
+],
+"coveragePathIgnorePatterns": [
+  "node_modules",
+  "src/test"
+]
+----
+
+**For projects testing actual source files**:
 [source,json]
 ----
 "collectCoverageFrom": [
@@ -150,6 +166,8 @@ Must include source files and exclude test files:
   "src/test"
 ]
 ----
+
+IMPORTANT: When components are fully mocked during testing, coverage must be collected from test files themselves rather than the mocked source files to avoid 0% coverage failures.
 
 === Coverage Reporting
 Must generate multiple report formats:

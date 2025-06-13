@@ -74,7 +74,7 @@ All projects must include these ESLint configurations:
 * `plugin:unicorn/recommended`: Additional JavaScript best practices
 * `plugin:security/recommended`: Security vulnerability detection
 * `plugin:promise/recommended`: Promise and async/await best practices
-* `plugin:sonarjs/recommended`: Code quality and complexity analysis (strongly recommended)
+* `plugin:sonarjs/recommended`: Code quality and complexity analysis (required for security and maintainability)
 
 ==== Framework-Specific Extensions (Optional)
 When using specific frameworks:
@@ -281,8 +281,8 @@ rules: {
 
 == SonarJS Code Quality Rules
 
-=== SonarJS Recommended Configuration
-Use the default SonarJS recommended configuration for comprehensive code quality analysis:
+=== SonarJS Required Configuration
+SonarJS is required for all projects to ensure comprehensive code quality and complexity analysis. Use the default SonarJS recommended configuration:
 
 [source,javascript]
 ----

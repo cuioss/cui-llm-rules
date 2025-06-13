@@ -1,0 +1,56 @@
+= CDI and Quarkus Standards
+:toc: left
+:toclevels: 2
+
+== Purpose
+This directory contains standards and best practices for CDI (Contexts and Dependency Injection) and Quarkus framework development within CUI projects.
+
+== Standards Overview
+
+=== Testing Standards
+* xref:testing-standards.adoc[Testing Standards]: Comprehensive testing standards for Quarkus applications, including test coverage configuration, test annotations, and SonarQube integration
+
+== Key Areas Covered
+
+=== Test Coverage Configuration
+* JaCoCo configuration for Quarkus applications
+* SonarQube integration requirements
+* Maven plugin configurations for coverage collection
+
+=== Quarkus Test Types
+* `@QuarkusTest` for unit testing with CDI context
+* `@QuarkusIntegrationTest` for packaged application testing
+* Test profile configuration and usage
+
+=== Dependencies and Build Configuration
+* Required test dependencies including `quarkus-jacoco`
+* Maven Surefire and Failsafe plugin configurations
+* Build phase requirements and troubleshooting
+
+== Quick Reference
+
+=== Essential Dependencies
+[source,xml]
+----
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-jacoco</artifactId>
+    <scope>test</scope>
+</dependency>
+----
+
+=== Critical Configuration
+[source,xml]
+----
+<!-- In Surefire plugin -->
+<argLine>@{argLine} -XX:+IgnoreUnrecognizedVMOptions -Djava.awt.headless=true</argLine>
+
+<!-- For SonarQube -->
+<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+----
+
+== Related Standards
+* xref:../testing/README.adoc[Testing Standards Overview]
+* xref:../testing/core-standards.adoc[Testing Core Standards]
+* xref:../java/README.adoc[Java Standards Overview]
+* xref:../documentation/general-standard.adoc[Documentation Standards]

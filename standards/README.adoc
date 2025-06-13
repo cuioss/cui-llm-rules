@@ -20,6 +20,9 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 * xref:java/README.adoc[Java Standards] - Comprehensive Java development standards and best practices
 ** xref:java/dsl-style-constants.adoc[DSL-Style Constants] - Standards for organizing constants in a hierarchical manner
 
+* xref:cdi-quarkus/README.adoc[CDI and Quarkus Standards] - CDI and Quarkus framework development standards
+** xref:cdi-quarkus/testing-standards.adoc[Quarkus Testing Standards] - Comprehensive testing standards for Quarkus applications, including test coverage configuration and SonarQube integration
+
 * xref:javascript/README.adoc[JavaScript Standards] - JavaScript development standards and modern practices
 ** xref:javascript/project-structure.adoc[Project Structure] - Standards for directory structure, file organization, and package.json configuration
 ** xref:javascript/javascript-development-standards.adoc[JavaScript Development Standards] - JavaScript-specific configuration, dependencies, and Jest setup
