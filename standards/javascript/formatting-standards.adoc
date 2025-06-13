@@ -14,7 +14,10 @@ Defines comprehensive Prettier configuration standards and integration requireme
 == Prettier Configuration Standards
 
 === Configuration File Structure
-All projects must use a `.prettierrc.js` configuration file with this structure:
+All projects must use a `.prettierrc.js` configuration file. Use ES module syntax when `"type": "module"` is set in package.json:
+
+==== ES Module Configuration (Recommended)
+When using modern tooling with `"type": "module"`:
 
 [source,javascript]
 ----
@@ -26,7 +29,7 @@ All projects must use a `.prettierrc.js` configuration file with this structure:
  * production components and test files.
  */
 
-module.exports = {
+export default {
   // Basic formatting options
   printWidth: 120,
   tabWidth: 2,
@@ -100,6 +103,29 @@ module.exports = {
   ],
 };
 ----
+
+==== CommonJS Configuration (Legacy)
+For projects not using ES modules:
+
+[source,javascript]
+----
+/**
+ * Prettier configuration for JavaScript projects (CommonJS)
+ */
+
+module.exports = {
+  // Same configuration as above, but using module.exports
+  printWidth: 120,
+  tabWidth: 2,
+  useTabs: false,
+  semi: true,
+  singleQuote: true,
+  
+  // ... rest of configuration identical to ES module version
+};
+----
+
+**Migration Note**: When migrating to ES modules, change `module.exports = {` to `export default {` and add `"type": "module"` to package.json.
 
 === Core Formatting Rules
 

@@ -190,6 +190,153 @@ Use npm overrides for specific conflict resolution:
 3. **Use peer dependency flags**: `--legacy-peer-deps` as fallback
 4. **Fork/patch packages**: Only for critical business needs
 
+== ES Module Configuration Standards
+
+=== Package.json Module Type Configuration
+All projects using modern JavaScript tooling must properly configure their module system to avoid ES module import errors:
+
+==== ES Module Projects
+For projects using ES module syntax in configuration files (ESLint v9, modern tools):
+
+[source,json]
+----
+{
+  "name": "project-name",
+  "version": "1.0.0",
+  "type": "module",                    // REQUIRED: Enables ES module parsing
+  "private": true,
+  "scripts": {
+    "lint": "eslint src/**/*.js",
+    "test": "jest"
+  }
+}
+----
+
+**Required when:**
+- Using ESLint v9 with flat configuration (`eslint.config.js`)
+- Configuration files use `import`/`export` syntax
+- Modern bundler configurations with ES modules
+
+==== Configuration File Compatibility
+When `"type": "module"` is set, all `.js` configuration files must use ES module syntax:
+
+[cols="2,3,3"]
+|===
+|Configuration File |CommonJS (Legacy) |ES Module (Required)
+
+|`eslint.config.js`
+|`module.exports = { ... }`
+|`export default { ... }`
+
+|`.prettierrc.js`  
+|`module.exports = { ... }`
+|`export default { ... }`
+
+|`.stylelintrc.js`
+|`module.exports = { ... }`
+|`export default { ... }`
+
+|`jest.config.js`
+|`module.exports = { ... }`
+|`export default { ... }`
+|===
+
+==== Mixed Module System Projects
+For projects requiring both CommonJS and ES modules:
+
+[source,json]
+----
+{
+  "type": "module",
+  "scripts": {
+    "build": "node --loader ts-node/esm build.mjs"
+  }
+}
+----
+
+**File extension conventions:**
+- `.mjs` - ES module files
+- `.cjs` - CommonJS files  
+- `.js` - Follows package.json "type" setting
+
+=== Common ES Module Migration Issues
+
+==== Build Tool Configuration Errors
+**Symptom**: `Cannot use import statement outside a module`
+
+**Root Cause**: Configuration files using ES module syntax without proper package.json setup
+
+**Solution**:
+1. Add `"type": "module"` to package.json
+2. Convert all configuration files to ES module syntax
+3. Update Maven frontend plugin to handle ES modules
+
+==== Tool Chain Compatibility
+**Ensure compatibility across:**
+- ESLint v9 flat configuration
+- Prettier v3+ configuration  
+- StyleLint v16+ configuration
+- Jest v29+ with ES module support
+- Babel configuration with ES module support
+
+==== Maven Integration Requirements
+When using ES modules, ensure Maven frontend plugin arguments support the configuration:
+
+[source,xml]
+----
+<execution>
+  <id>npm-install</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <configuration>
+    <arguments>install --legacy-peer-deps</arguments>
+  </configuration>
+</execution>
+----
+
+=== ES Module Best Practices
+
+==== Configuration File Structure
+Use consistent import patterns in configuration files:
+
+[source,javascript]
+----
+// eslint.config.js - ES Module Format
+import js from '@eslint/js';
+import security from 'eslint-plugin-security';
+
+export default [
+  js.configs.recommended,
+  {
+    plugins: { security },
+    rules: {
+      // Configuration rules
+    }
+  }
+];
+----
+
+==== Package.json Script Compatibility
+Ensure npm scripts work with ES module configuration:
+
+[source,json]
+----
+{
+  "scripts": {
+    "lint": "eslint src/**/*.js",           // Works with eslint.config.js
+    "format": "prettier --write src/**/*.js", // Works with .prettierrc.js  
+    "style": "stylelint src/**/*.js"        // Works with .stylelintrc.js
+  }
+}
+----
+
+==== Node.js Version Requirements
+ES module support requires:
+- **Node.js >= 16.x**: Full ES module support
+- **NPM >= 8.x**: Package.json "type" field recognition
+- **Maven Frontend Plugin >= 1.15.x**: ES module aware execution
+
 == Package Categories and Standards
 
 === Core Development Tools

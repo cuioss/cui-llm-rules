@@ -93,6 +93,90 @@ export default [
 ];
 ----
 
+=== ESLint v9 Migration Process
+
+==== Migration Steps from ESLint v8 to v9
+Follow this process to migrate from legacy configuration to flat configuration:
+
+**1. Update Package Dependencies**
+[source,json]
+----
+{
+  "devDependencies": {
+    "eslint": "^9.14.0",            // Update from v8.x
+    "@eslint/js": "^9.14.0",        // Replaces airbnb-base
+    "eslint-config-prettier": "^9.0.0"
+  }
+}
+----
+
+**2. Add ES Module Support**
+Update package.json to enable ES module parsing:
+[source,json]
+----
+{
+  "type": "module"                  // REQUIRED for eslint.config.js
+}
+----
+
+**3. Create Flat Configuration**
+Replace `.eslintrc.js` with `eslint.config.js`:
+[source,javascript]
+----
+// eslint.config.js - New flat configuration format
+import js from '@eslint/js';
+import jsdoc from 'eslint-plugin-jsdoc';
+import jest from 'eslint-plugin-jest';
+
+export default [
+  js.configs.recommended,
+  {
+    plugins: { jsdoc, jest },
+    // Configuration objects...
+  }
+];
+----
+
+**4. Remove Legacy Configuration**
+Delete the old configuration file:
+[source,bash]
+----
+rm .eslintrc.js                    # Remove after migration
+----
+
+**5. Update Maven Integration**
+Ensure frontend-maven-plugin works with new configuration:
+[source,xml]
+----
+<execution>
+  <id>npm-lint-fix</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <configuration>
+    <arguments>run lint:fix</arguments>  <!-- Works with eslint.config.js -->
+  </configuration>
+</execution>
+----
+
+==== Common Migration Issues
+
+**Issue: `Cannot use import statement outside a module`**
+- **Cause**: Missing `"type": "module"` in package.json
+- **Solution**: Add module type and convert all config files to ES module syntax
+
+**Issue: `Plugin not found` errors**
+- **Cause**: Plugin import syntax changed in flat configuration
+- **Solution**: Use direct imports instead of string references:
+  ```javascript
+  // Old: extends: ['plugin:jest/recommended']
+  // New: import jest from 'eslint-plugin-jest'
+  ```
+
+**Issue: Configuration not applied**
+- **Cause**: Incorrect flat configuration structure
+- **Solution**: Use array format with proper configuration objects
+
 === Legacy Configuration Support
 For projects not yet migrated to ESLint v9, maintain `.eslintrc.js` configuration:
 
@@ -675,6 +759,168 @@ Required package.json scripts:
     "lint:fix": "npm run lint:js:fix && npm run lint:style:fix"  // With CSS-in-JS
   }
 }
+----
+
+== StyleLint Configuration Standards
+
+=== CSS-in-JS Linting with StyleLint
+For projects using CSS-in-JS (particularly Lit components), configure StyleLint for CSS validation:
+
+==== Required StyleLint Dependencies
+[source,json]
+----
+{
+  "devDependencies": {
+    "stylelint": "^16.10.0",
+    "stylelint-config-standard": "^36.0.1",
+    "stylelint-order": "^6.0.3",
+    "stylelint-declaration-strict-value": "^1.10.6",
+    "postcss-lit": "^1.0.0"
+  }
+}
+----
+
+==== StyleLint ES Module Configuration
+Create `.stylelintrc.js` with ES module syntax when using `"type": "module"`:
+
+[source,javascript]
+----
+/**
+ * StyleLint configuration for CSS-in-JS in Lit components
+ * 
+ * This configuration ensures consistent CSS styling within
+ * Lit component template literals and CSS-in-JS constructs.
+ */
+
+export default {
+  extends: [
+    'stylelint-config-standard'
+  ],
+  
+  plugins: [
+    'stylelint-order',
+    'stylelint-declaration-strict-value'
+  ],
+  
+  // Custom syntax for CSS-in-JS
+  customSyntax: 'postcss-lit',
+  
+  rules: {
+    // Modern CSS formatting
+    'color-hex-length': 'short',
+    
+    // Logical property ordering
+    'order/properties-order': [
+      'content', 'display', 'position', 'top', 'right', 'bottom', 'left',
+      'z-index', 'flex', 'flex-grow', 'flex-shrink', 'flex-basis',
+      'width', 'height', 'margin', 'padding', 'border', 'background',
+      'color', 'font', 'text-align', 'opacity', 'transform', 'transition'
+    ],
+    
+    // CSS Custom Properties enforcement
+    'scale-unlimited/declaration-strict-value': [
+      ['/color$/', 'fill', 'stroke', 'background-color'],
+      {
+        'ignoreValues': [
+          'currentColor', 'transparent', 'inherit', 'initial', 'unset'
+        ]
+      }
+    ],
+    
+    // CSS Custom Properties patterns  
+    'custom-property-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
+    'custom-property-empty-line-before': 'never',
+    
+    // Lit-specific CSS patterns
+    'selector-pseudo-class-no-unknown': [
+      true,
+      {
+        ignorePseudoClasses: ['host', 'host-context', 'focus-visible'],
+      },
+    ],
+    
+    // Performance and maintainability
+    'max-nesting-depth': 3,
+    'selector-max-id': 0,
+    'selector-max-universal': 1,
+    
+    // Disable rules that conflict with CSS-in-JS
+    'no-empty-source': null,
+    'value-keyword-case': null,
+  },
+  
+  overrides: [
+    {
+      files: ['src/main/resources/dev-ui/**/*.js'],
+      rules: {
+        // Stricter rules for production components
+        'max-nesting-depth': 3,
+        'selector-max-compound-selectors': 4,
+      },
+    },
+    {
+      files: ['src/test/js/**/*.js'],
+      rules: {
+        // Relaxed rules for test files
+        'selector-class-pattern': null,
+        'custom-property-pattern': null,
+      },
+    },
+  ],
+};
+----
+
+==== Common StyleLint Configuration Issues
+
+**Issue: Duplicate rule definitions**
+- **Problem**: Same rule appears multiple times in configuration
+- **Symptoms**: `There are duplicate names used: property-no-unknown`
+- **Solution**: Remove duplicate rule definitions, keep only one instance
+
+**Issue: Framework-specific theme variables**
+- **Problem**: Configuration includes unnecessary framework-specific patterns
+- **Solution**: Use generic patterns unless specific framework integration required:
+  ```javascript
+  // Generic (preferred)
+  'custom-property-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$'
+  
+  // Framework-specific (only when needed)
+  'custom-property-pattern': '^(lumo|vaadin)-[a-z0-9]+(-[a-z0-9]+)*$'
+  ```
+
+**Issue: ES module import errors**
+- **Problem**: `Cannot use import statement outside a module`
+- **Solution**: Use `export default` syntax when `"type": "module"` is set
+
+==== StyleLint npm Scripts
+Add these scripts to package.json:
+
+[source,json]
+----
+{
+  "scripts": {
+    "lint:css": "stylelint src/**/*.js",
+    "lint:css:fix": "stylelint --fix src/**/*.js",
+    "validate:css": "npm run lint:css && npm run format:js:check"
+  }
+}
+----
+
+==== Maven Integration with StyleLint
+Include StyleLint in Maven build process:
+
+[source,xml]
+----
+<execution>
+  <id>npm-css-validate</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <phase>compile</phase>
+  <configuration>
+    <arguments>run validate:css</arguments>
+  </configuration>
+</execution>
 ----
 
 === Maven Integration
