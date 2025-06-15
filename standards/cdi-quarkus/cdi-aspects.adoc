@@ -5,6 +5,11 @@
 == Purpose
 This document defines CDI (Contexts and Dependency Injection) standards and best practices for Quarkus applications within CUI projects.
 
+== References
+* https://docs.oracle.com/javaee/7/tutorial/cdi-basic.htm[CDI 2.0 Specification]
+* https://quarkus.io/guides/cdi[Quarkus CDI Guide]  
+* https://quarkus.io/guides/cdi-reference[Quarkus CDI Reference]
+
 == Constructor vs Field Injection
 
 === Mandatory Standard: Use Constructor Injection
@@ -341,5 +346,5 @@ public class PaymentService {
 
 == Related Standards
 * xref:testing-standards.adoc[Testing Standards]: CDI testing with Quarkus
-* xref:../java/java-code-standards.adoc[Java Code Standards]: General coding standards
-* xref:../testing/core-standards.adoc[Testing Core Standards]: Unit testing best practices
+* xref:security-standards.adoc[Security Standards]: CDI security patterns
+* xref:container-standards.adoc[Container Standards]: CDI deployment considerations

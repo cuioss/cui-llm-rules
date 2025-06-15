@@ -6,10 +6,16 @@
 == Purpose
 Defines comprehensive testing standards for Quarkus applications, including test coverage configuration, test annotations, and integration with SonarQube for coverage reporting.
 
+== References
+* https://quarkus.io/guides/getting-started-testing[Quarkus Testing Guide]
+* https://junit.org/junit5/docs/current/user-guide/[JUnit 5 User Guide]
+* https://www.jacoco.org/jacoco/trunk/doc/[JaCoCo Documentation]
+* https://docs.sonarqube.org/latest/analyzing-source-code/test-coverage/java-test-coverage/[SonarQube Java Test Coverage]
+
 == Related Documentation
-* xref:../testing/core-standards.adoc[Testing Core Standards]: General testing principles and patterns
-* xref:../javascript/unit-testing-standards.adoc[JavaScript Unit Testing Standards]: Frontend testing standards
-* xref:../documentation/general-standard.adoc[General Documentation Standards]: Documentation requirements
+* xref:cdi-aspects.adoc[CDI Development Patterns]: Constructor injection and dependency management for testability
+* xref:security-standards.adoc[Security Standards]: Security testing requirements
+* xref:container-standards.adoc[Container Standards]: Integration testing with containers
 
 == Quarkus Test Dependencies
 
@@ -307,9 +313,9 @@ cui:
 
 ==== Critical Configuration Elements
 * **`quarkus.jacoco.reuse-data-file=true`**: Enables proper JaCoCo coverage collection across test runs
-* **Logging Configuration**: Essential for debugging test issues and understanding coverage problems
-* **Test-Specific Endpoints**: Use `test-` prefixed URLs to avoid conflicts with production configuration
-* **Reduced Timeouts**: Lower timeout values for faster test execution
+* **Logging Configuration**: Essential for debugging test issues and coverage analysis
+* **Test-Specific Endpoints**: Use `test-` prefixed URLs to avoid production conflicts
+* **Appropriate Timeouts**: Configured for test environment performance
 * **Consistent Test Data**: Use standardized test audiences, algorithms, and issuer names
 
 == Testing Best Practices
@@ -418,7 +424,7 @@ class JwtValidationConfigTest {
 **Solution**: Remove `@Inject` annotations and use HTTP testing instead:
 [source,java]
 ----
-// Wrong - @Inject not supported
+// Not supported - @Inject not available
 @Inject TokenValidator tokenValidator;
 
 // Correct - Use HTTP endpoints

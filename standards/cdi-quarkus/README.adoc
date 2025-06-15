@@ -1,65 +1,25 @@
 = CDI and Quarkus Standards
 :toc: left
 :toclevels: 2
+:sectnums:
 
 == Purpose
-This directory contains standards and best practices for CDI (Contexts and Dependency Injection) and Quarkus framework development within CUI projects.
 
-== Standards Overview
+Standards and best practices for CDI (Contexts and Dependency Injection) and Quarkus framework development in CUI projects. This directory provides focused guidance covering development patterns, testing, security, and containerization.
 
-=== CDI Development Standards
-* xref:cdi-aspects.adoc[CDI Aspects and Best Practices]: Core CDI standards including constructor injection requirements, CDI scope management, and dependency injection patterns
+== Standards Documents
 
-=== Testing Standards
-* xref:testing-standards.adoc[Testing Standards]: Comprehensive testing standards for Quarkus applications, including test coverage configuration, test annotations, and SonarQube integration
+=== Core Development Standards
+* **xref:cdi-aspects.adoc[CDI Development Patterns]**: Constructor injection requirements, dependency patterns, and CDI lifecycle management
+* **xref:testing-standards.adoc[Testing Standards]**: Test coverage, JaCoCo configuration, and Quarkus-specific testing patterns
 
-=== Docker and Deployment Standards
-* xref:docker-health-check-best-practices.adoc[Docker Health Check Best Practices]: Best practices for implementing health checks in Quarkus Docker containers, avoiding external dependencies like curl
-* xref:container-standards.adoc[Container Standards]: Comprehensive container standards including base image selection, security practices, and operational requirements
+=== Operational Standards  
+* **xref:container-standards.adoc[Container Standards]**: Complete containerization guide including security, performance, and certificate management
+* **xref:security-standards.adoc[Security Standards]**: OWASP-compliant security implementations and enterprise-grade security requirements
 
-=== Security Standards
-* xref:security-standards.adoc[Security Standards]: OWASP-compliant security standards for CDI and Quarkus applications, including container security, certificate management, and enterprise-grade security implementations
+== Quick Start Guide
 
-== Key Areas Covered
-
-=== CDI Development Patterns
-* **Constructor injection requirements** - Mandatory use over field injection
-* **Automatic @Inject detection** - Single constructor rule for CDI beans  
-* **Dependency injection patterns** - Direct injection vs Instance<T> usage
-* **CDI scopes and lifecycle** - ApplicationScoped, RequestScoped best practices
-* **Optional dependency handling** - Contract-based vs optional injection patterns
-
-=== Test Coverage Configuration
-* JaCoCo configuration for Quarkus applications
-* SonarQube integration requirements
-* Maven plugin configurations for coverage collection
-
-=== Quarkus Test Types
-* `@QuarkusTest` for unit testing with CDI context
-* `@QuarkusIntegrationTest` for packaged application testing
-* Test profile configuration and usage
-
-=== Dependencies and Build Configuration
-* Required test dependencies including `quarkus-jacoco`
-* Maven Surefire and Failsafe plugin configurations
-* Build phase requirements and troubleshooting
-
-=== Docker Deployment
-* Internal health check script implementation using `/proc` filesystem
-* Avoiding external dependencies like `curl` in containers
-* IPv4/IPv6 port monitoring for application health validation
-* Certificate and application-specific health indicators
-
-=== Container Configuration
-* **Production Default**: Quarkus distroless base image (91.9MB)
-* **Development**: UBI9 minimal for debugging (219MB)
-* **Performance**: <0.5s startup, <150MB memory, <100MB image size
-* **Logging**: Console-only, no file logging required
-* **Security**: See xref:security-standards.adoc[Security Standards] for comprehensive security requirements
-
-== Quick Reference
-
-=== CDI Constructor Injection
+=== Essential CDI Pattern
 [source,java]
 ----
 @ApplicationScoped
@@ -73,7 +33,7 @@ public class UserService {
 }
 ----
 
-=== Essential Dependencies
+=== Basic Test Setup
 [source,xml]
 ----
 <dependency>
@@ -83,40 +43,78 @@ public class UserService {
 </dependency>
 ----
 
-=== Critical Configuration
-[source,xml]
-----
-<!-- In Surefire plugin -->
-<argLine>@{argLine} -XX:+IgnoreUnrecognizedVMOptions -Djava.awt.headless=true</argLine>
-
-<!-- For SonarQube -->
-<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-----
-
-=== Basic Dockerfile Template
+=== Production Container
 [source,dockerfile]
 ----
 FROM quay.io/quarkus/quarkus-distroless-image:2.0
-
-WORKDIR /app
-
-# Copy application files
-COPY --chmod=0755 target/*-runner /app/application
-COPY --chmod=0755 health-check.sh /app/health-check.sh
-COPY --chmod=0644 certificates/ /app/certificates/
-
-# Health check configuration
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=40s \
-  CMD /app/health-check.sh
-
-ENTRYPOINT ["./application"]
+COPY --chmod=0755 --chown=nonroot:nonroot target/*-runner /app/application
+USER nonroot
+ENTRYPOINT ["/app/application"]
 ----
 
-**Note**: For security-hardened production Dockerfiles, see xref:security-standards.adoc[Security Standards].
+== Standards Overview
+
+=== CDI Development (xref:cdi-aspects.adoc[→ Details])
+* **Constructor Injection**: Mandatory over field injection
+* **Single Constructor Rule**: No `@Inject` needed for single constructors  
+* **Immutability**: Use `final` fields for injected dependencies
+* **Optional Dependencies**: Use `Instance<T>` pattern when appropriate
+
+=== Testing Standards (xref:testing-standards.adoc[→ Details])
+* **Coverage Target**: 80% minimum with JaCoCo
+* **Quarkus Tests**: `@QuarkusTest` for CDI context, `@QuarkusIntegrationTest` for packaged apps
+* **SonarQube Integration**: XML report generation required
+* **Test Profiles**: Separate configurations for different test scenarios
+
+=== Container Standards (xref:container-standards.adoc[→ Details])  
+* **Base Image**: Quarkus distroless (91.9MB)
+* **Performance**: <0.5s startup, <150MB memory
+* **Security**: OWASP Docker Top 10 compliant with capability dropping
+* **Certificates**: PEM-based approach
+
+=== Security Standards (xref:security-standards.adoc[→ Details])
+* **OWASP Compliance**: Docker Top 10 security requirements
+* **Runtime Security**: Non-root execution, read-only filesystem, capability dropping
+* **Certificate Management**: External mounting, proper permissions, automated rotation
+* **Monitoring**: Security metrics and continuous compliance verification
+
+== Key Architecture Decisions
+
+=== Why Constructor Injection?
+* **Immutability**: Fields can be `final`
+* **Testability**: No CDI container needed for unit tests
+* **Fail-Fast**: Missing dependencies cause startup failure
+* **Clear Dependencies**: All dependencies visible in constructor
+
+=== Why Distroless Images?
+* **Security**: Minimal attack surface, no shell/package manager
+* **Performance**: 91.9MB compact size
+* **Compliance**: OWASP-aligned security posture
+* **Production Ready**: <0.5s startup
+
+=== Why PEM Certificates?
+* **Security**: No password storage required
+* **Simplicity**: File system permissions handle access control
+* **Cloud Native**: Better integration with orchestration platforms
+* **Operational**: Easier rotation and secret management
+
+== Implementation Results
+
+These standards support:
+
+* **Comprehensive Testing**: Unit and integration test coverage
+* **High Performance**: Sub-second startup times
+* **Security Compliance**: OWASP Docker Top 10 alignment
+* **Multi-Platform**: linux/amd64 and linux/arm64 support
+* **Certificate Management**: PEM-based approach
 
 == Related Standards
-* xref:security-standards.adoc[Security Standards]: Comprehensive security requirements and OWASP compliance
-* xref:../testing/README.adoc[Testing Standards Overview]
-* xref:../testing/core-standards.adoc[Testing Core Standards]
-* xref:../java/README.adoc[Java Standards Overview]
-* xref:../documentation/general-standard.adoc[Documentation Standards]
+* link:../testing/README.adoc[Testing Standards Overview]
+* link:../java/README.adoc[Java Standards Overview]  
+* link:../documentation/general-standard.adoc[Documentation Standards]
+
+== External References
+* https://quarkus.io/guides/cdi[Quarkus CDI Guide]
+* https://docs.oracle.com/javaee/7/tutorial/cdi-basic.htm[CDI Specification]
+* https://owasp.org/www-project-docker-top-10/[OWASP Docker Top 10]
+* https://github.com/GoogleContainerTools/distroless[Distroless Images]

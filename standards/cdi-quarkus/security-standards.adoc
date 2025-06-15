@@ -1,86 +1,119 @@
-= CDI and Quarkus Security Standards
+= Security Standards
 :toc: left
-:toclevels: 3
+:toclevels: 2
 :sectnums:
 
 == Purpose
 
-This document defines security standards and best practices for CDI and Quarkus applications, focusing on container security, OWASP compliance, and enterprise-grade security implementations within CUI projects.
+Security standards for CDI and Quarkus applications, focusing on OWASP compliance, enterprise-grade security implementations, and runtime security monitoring.
 
 == Related Documentation
 
-* xref:container-standards.adoc[Container Standards]: Comprehensive container standards with security configurations
-* xref:docker-health-check-best-practices.adoc[Docker Health Check Best Practices]: Secure health check implementations
+* xref:container-standards.adoc[Container Standards]: Complete container security configurations and certificate management
 * xref:README.adoc[CDI and Quarkus Standards Overview]: Main standards directory
 
-== Container Security Standards
+== Security Compliance Framework
 
-=== Production Security Requirements
+=== OWASP Docker Top 10 Compliance
 
-==== Security-Hardened Base Images
-* **Production Default**: Quarkus distroless base image (91.9MB)
-* **Security Benefits**: Minimal attack surface, no shell access, no package manager
-* **Compliance**: OWASP Docker Top 10 aligned
-* **Performance**: <0.5s startup, <150MB memory, <100MB image size
+**Production Mandatory Requirements**:
+- [x] **D01 - Secure User Mapping**: Non-root user execution (`USER nonroot`)
+- [x] **D02 - Patch Management**: Regular base image updates in CI/CD
+- [x] **D03 - Network Hardening**: HTTPS-only endpoints, network isolation
+- [x] **D04 - Security Defaults**: Read-only filesystem, no-new-privileges, capability dropping
+- [x] **D05 - Maintain Security Contexts**: Proper file permissions and ownership
+- [x] **D06 - Resource Protection**: Memory/CPU limits, DoS prevention
+- [x] **D07 - Data Protection**: Secure certificate management, no embedded secrets
+- [x] **D08 - Container Monitoring**: Health checks without external dependencies
+- [x] **D09 - Version Pinning**: Specific base image versions (never `latest`)
+- [x] **D10 - Secrets Management**: External secret stores, not embedded in images
 
-==== Development Security
-* **Development Alternative**: UBI9 minimal for debugging (219MB)
-* **Use Cases**: Debugging, troubleshooting, educational purposes
-* **Security Constraints**: Should not be used in production environments
+=== Security References
 
-=== Security-Hardened Dockerfile Standards
+* https://owasp.org/www-project-docker-top-10/[OWASP Docker Top 10]
+* https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf[NIST Container Security Guide]
+* https://www.cisecurity.org/benchmark/docker[CIS Docker Benchmark]
+* https://docs.docker.com/develop/security-best-practices/[Docker Security Best Practices]
 
-==== OWASP-Compliant Dockerfile Template
-[source,dockerfile]
+== Application Security Standards
+
+=== CDI Security Patterns
+
+==== Secure Dependency Injection
+[source,java]
 ----
-# Security-hardened Quarkus native container
-FROM quay.io/quarkus/quarkus-distroless-image:2.0
-
-# Security metadata (OWASP compliance)
-LABEL security.scan.required="true"
-LABEL security.distroless="true"
-LABEL org.opencontainers.image.vendor="CUI"
-LABEL org.opencontainers.image.title="Application Name"
-LABEL org.opencontainers.image.description="Security-hardened Quarkus application"
-
-WORKDIR /app
-
-# Secure copy operations with explicit ownership and permissions
-COPY --chmod=0755 --chown=nonroot:nonroot target/*-runner /app/application
-COPY --chmod=0755 --chown=nonroot:nonroot health-check.sh /app/health-check.sh
-COPY --chmod=0644 --chown=nonroot:nonroot certificates/ /app/certificates/
-
-# Expose HTTPS port only (no HTTP for security)
-EXPOSE 8443
-
-# Health check using internal script (no external dependencies)
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=40s \
-  CMD /app/health-check.sh
-
-# Non-root execution (OWASP requirement)
-USER nonroot
-
-# Use exec form for better signal handling and security
-ENTRYPOINT ["/app/application"]
+@ApplicationScoped
+public class SecurityService {
+    private final EncryptionService encryption;
+    private final AuditLogger auditLogger;
+    
+    // Constructor injection ensures dependencies are validated at startup
+    public SecurityService(EncryptionService encryption, AuditLogger auditLogger) {
+        this.encryption = Objects.requireNonNull(encryption, "EncryptionService required");
+        this.auditLogger = Objects.requireNonNull(auditLogger, "AuditLogger required");
+    }
+}
 ----
 
-==== Security Features Explained
-* **Distroless Base**: Minimal attack surface with no shell or package manager
-* **Security Labels**: Enable automated scanning and compliance tracking
-* **Non-Root User**: Prevents privilege escalation attacks
-* **Secure Permissions**: Minimal necessary file permissions (755 for executables, 644 for configs)
-* **Explicit Ownership**: All files owned by `nonroot:nonroot`
-* **HTTPS Only**: No HTTP endpoints exposed for security
-* **Internal Health Checks**: No external dependencies like `curl`
+==== Secure Configuration Injection
+[source,java]
+----
+@ApplicationScoped
+public class JwtSecurityConfig {
+    
+    @ConfigProperty(name = "security.jwt.secret")
+    Instance<String> jwtSecret;
+    
+    @ConfigProperty(name = "security.encryption.algorithm", defaultValue = "AES-256-GCM")
+    String encryptionAlgorithm;
+    
+    // Validate security configuration at startup
+    @PostConstruct
+    void validateSecurityConfig() {
+        if (!jwtSecret.isResolvable()) {
+            throw new SecurityException("JWT secret must be configured");
+        }
+        // Additional security validations
+    }
+}
+----
+
+=== Secure Logging Standards
+
+==== Security-Compliant Logging Configuration
+[source,properties]
+----
+# Console logging only (security requirement)
+quarkus.log.console.enable=true
+quarkus.log.console.format=%d{HH:mm:ss} %-5p [%c{2.}] (%t) %s%e%n
+quarkus.log.level=INFO
+
+# Application-specific debug (development only)
+quarkus.log.category."de.cuioss.jwt".level=DEBUG
+
+# SECURITY: Never log sensitive data
+# - No authentication tokens
+# - No certificate contents  
+# - No internal system information
+# - No user credentials
+----
+
+==== Secure Logging Requirements
+* **No Sensitive Data**: Never log tokens, passwords, or certificate contents
+* **Structured Format**: Use consistent, parseable log formats
+* **Appropriate Levels**: INFO for operations, DEBUG only for development
+* **Centralized Collection**: Use external log aggregation systems
+* **Retention Policies**: Follow organizational data retention requirements
 
 === Runtime Security Configuration
 
-==== Production Security Command Template
+==== Production Security Deployment
 [source,bash]
 ----
-# OWASP-compliant production deployment
+# Complete OWASP-compliant production deployment
 docker run -d \
-  --security-opt=no-new-privileges \
+  --name secure-application \
+  --security-opt=no-new-privileges:true \
   --cap-drop ALL \
   --read-only \
   --tmpfs /tmp:rw,noexec,nosuid,size=100m \
@@ -88,226 +121,20 @@ docker run -d \
   --memory="256m" \
   --cpus="1.0" \
   --restart=unless-stopped \
+  --network=secure-app-network \
   -v "./certificates:/app/certificates:ro" \
+  -e QUARKUS_LOG_LEVEL=INFO \
   application:latest
 ----
 
-==== Security Options Breakdown
+==== Security Options Explained
 * **`--security-opt=no-new-privileges`**: Prevents privilege escalation via setuid/setgid binaries
 * **`--cap-drop ALL`**: Removes all Linux capabilities (principle of least privilege)
 * **`--read-only`**: Makes root filesystem read-only (immutable infrastructure)
 * **`--tmpfs`**: Provides temporary writable space without persistence
 * **`--memory/--cpus`**: Resource limits prevent DoS attacks
 * **`--restart=unless-stopped`**: Production resilience without security risks
-
-=== Docker Compose Security Configuration
-
-==== Security-Hardened Compose Template
-[source,yaml]
-----
-version: '3.8'
-
-services:
-  application:
-    build:
-      context: .
-      dockerfile: src/main/docker/Dockerfile.native
-    ports:
-      - "external-port:8443"
-    volumes:
-      # Read-only certificate mount for security
-      - ./certificates:/app/certificates:ro
-    environment:
-      - QUARKUS_LOG_LEVEL=INFO
-    
-    # OWASP Security hardening configuration
-    security_opt:
-      - no-new-privileges:true
-    
-    # Drop all capabilities (principle of least privilege)
-    cap_drop:
-      - ALL
-    
-    # Read-only filesystem with tmpfs for temporary files
-    read_only: true
-    tmpfs:
-      - /tmp:rw,noexec,nosuid,size=100m
-      - /app/tmp:rw,noexec,nosuid,size=50m
-    
-    # Resource limitations (DoS protection)
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '1.0'
-        reservations:
-          memory: 128M
-          cpus: '0.5'
-    
-    # Health check using internal script
-    healthcheck:
-      test: ["CMD", "/app/health-check.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    
-    # Network isolation
-    networks:
-      - app-security-network
-    
-    # Production restart policy
-    restart: unless-stopped
-
-networks:
-  app-security-network:
-    driver: bridge
-    # Control inter-container communication
-    internal: false
-----
-
-== Security Compliance Standards
-
-=== OWASP Docker Top 10 Compliance Checklist
-
-==== Critical Security Requirements (Production Mandatory)
-- [ ] **D01 - Secure User Mapping**: Distroless base with explicit non-root user (`USER nonroot`)
-- [ ] **D02 - Patch Management**: Regular base image updates and vulnerability scanning in CI/CD
-- [ ] **D03 - Network Hardening**: HTTPS-only endpoints, proper network isolation
-- [ ] **D04 - Security Defaults**: Read-only filesystem, no-new-privileges, capability dropping
-- [ ] **D05 - Maintain Security Contexts**: Proper file permissions and ownership
-- [ ] **D06 - Resource Protection**: Memory/CPU limits, DoS prevention measures
-- [ ] **D07 - Data Protection**: Secure certificate management, no embedded secrets
-- [ ] **D08 - Container Monitoring**: Health checks without external dependencies
-- [ ] **D09 - Version Pinning**: Specific base image versions (never use `latest`)
-- [ ] **D10 - Secrets Management**: External secret stores, not embedded in images
-
-=== Security Verification Procedures
-
-==== Container Security Validation
-[source,bash]
-----
-# Verify container security configuration
-docker inspect container --format='User: {{.Config.User}}'
-docker inspect container --format='SecurityOpt: {{.HostConfig.SecurityOpt}}'
-docker inspect container --format='ReadOnly: {{.HostConfig.ReadonlyRootfs}}'
-
-# Test application functionality with security hardening
-curl -k https://localhost:8443/q/health/live  # Should return 200
-
-# Performance verification (should be < 0.5s)
-docker logs container | grep "started in"
-
-# Resource usage verification
-docker stats container --no-stream
-----
-
-==== Security Performance Metrics (Verified)
-* **Image Size**: 91.9MB (58% reduction from UBI9 baseline)
-* **Startup Time**: 0.167s (maintained with security hardening)
-* **Memory Usage**: <150MB (within security resource limits)
-* **Attack Surface**: Minimal (distroless + no shell access)
-* **Privilege Level**: Non-root execution only
-* **Compliance**: OWASP Docker Top 10 fully aligned
-
-=== Certificate Security Management
-
-==== Production Certificate Standards
-* **External Mounting**: Use read-only certificate mounts (`-v ./certs:/app/certificates:ro`)
-* **Rotation Policy**: 1 day validity for testing, maximum 90 days for production
-* **Storage Security**: Proper permissions (0644) with secure ownership (`nonroot:nonroot`)
-* **Format Requirements**: PKCS12 format for keystores and truststores
-* **Zero Embedding**: Never include certificates in container images
-* **Automated Validation**: Health checks verify certificate availability and readability
-
-==== Certificate Security Implementation
-[source,dockerfile]
-----
-# Secure certificate handling
-COPY --chmod=0644 --chown=nonroot:nonroot certificates/ /app/certificates/
-
-# Production deployment with external certificates
-# docker run -v "./secure-certs:/app/certificates:ro" application
-----
-
-== Health Check Security Standards
-
-=== Secure Health Check Implementation
-
-==== Internal Health Check Requirements
-* **No External Dependencies**: Avoid `curl`, `wget`, or similar tools
-* **Direct Port Testing**: Use `/dev/tcp` for connectivity verification
-* **Application-Specific Validation**: Check certificates, executables, and critical resources
-* **Fast Execution**: Health checks should complete in <10 seconds
-* **Error Handling**: Clear error messages for troubleshooting
-
-==== Secure Health Check Script Template
-[source,bash]
-----
-#!/bin/bash
-# Secure internal health check script
-
-# Direct port connectivity test (no external tools)
-if ! echo -n '' > /dev/tcp/127.0.0.1/8443 2>/dev/null; then
-    echo "Application not listening on port 8443"
-    exit 1
-fi
-
-# Validate critical security resources
-if [ ! -r "/app/certificates/keystore.p12" ]; then
-    echo "Certificate files missing or not readable"
-    exit 1
-fi
-
-if [ ! -x "/app/application" ]; then
-    echo "Application executable missing or not executable"
-    exit 1
-fi
-
-echo "Security health check passed"
-exit 0
-----
-
-=== Health Check Security Benefits
-* **No Attack Surface**: Internal scripts don't expose additional services
-* **Distroless Compatible**: Works without shell commands or external tools
-* **Resource Efficient**: Minimal overhead and fast execution
-* **Security Validation**: Verifies security-critical resources are accessible
-* **Production Ready**: Suitable for high-security environments
-
-== Logging Security Standards
-
-=== Secure Logging Configuration
-
-==== Console-Only Logging (Required)
-* **No File Logging**: All applications must use console logging only
-* **Security Rationale**: Prevents log file access and reduces attack surface
-* **Container Compatibility**: Works with read-only filesystems
-* **Monitoring Integration**: Compatible with centralized logging systems
-
-==== Secure Logging Configuration
-[source,properties]
-----
-# Console logging configuration (security compliant)
-quarkus.log.console.enable=true
-quarkus.log.console.format=%d{HH:mm:ss} %-5p [%c{2.}] (%t) %s%e%n
-quarkus.log.level=INFO
-
-# Debug levels for application-specific packages only
-quarkus.log.category."de.cuioss.jwt".level=DEBUG
-
-# SECURITY: Never log sensitive data
-# - No authentication tokens
-# - No certificate contents
-# - No internal system information
-----
-
-=== Logging Security Requirements
-* **No Sensitive Data**: Never log tokens, passwords, or certificate contents
-* **Structured Format**: Use consistent, parseable log formats
-* **Appropriate Levels**: INFO for operations, DEBUG only for development
-* **Centralized Collection**: Use external log aggregation systems
-* **Retention Policies**: Follow organizational data retention requirements
+* **`--network`**: Network isolation for controlled communication
 
 == Security Monitoring and Compliance
 
@@ -315,10 +142,10 @@ quarkus.log.category."de.cuioss.jwt".level=DEBUG
 
 ==== Required Security Metrics
 * **Container Resource Usage**: Monitor CPU and memory consumption
-* **Application Startup Time**: Verify performance isn't degraded by security
-* **Health Check Response Times**: Ensure health checks remain responsive
+* **Application Performance**: Verify security doesn't degrade performance
 * **Error Rates**: Monitor application and security-related errors
-* **Certificate Expiration**: Automated certificate lifecycle monitoring
+* **Certificate Lifecycle**: Automated certificate expiration monitoring
+* **Access Patterns**: Monitor for unusual access patterns
 
 ==== Security Scanning Requirements
 * **Image Vulnerability Scanning**: Integrate Trivy, Snyk, or similar tools in CI/CD
@@ -327,19 +154,142 @@ quarkus.log.category."de.cuioss.jwt".level=DEBUG
 * **Resource Usage Monitoring**: Detect potential DoS attacks
 * **Compliance Verification**: Regular OWASP Top 10 compliance checks
 
-=== Enterprise Security Standards
+=== Security Validation Procedures
+
+==== Container Security Validation
+[source,bash]
+----
+# Verify container security configuration
+docker inspect container --format='User: {{.Config.User}}'
+docker inspect container --format='SecurityOpt: {{.HostConfig.SecurityOpt}}'
+docker inspect container --format='ReadOnly: {{.HostConfig.ReadonlyRootfs}}'
+docker inspect container --format='CapDrop: {{.HostConfig.CapDrop}}'
+
+# Test application security endpoints
+curl -k https://localhost:8443/q/health/live   # Should return 200
+curl -k https://localhost:8443/q/health/ready  # Should return 200
+
+# Verify TLS configuration
+openssl s_client -connect localhost:8443 -servername localhost
+
+# Performance verification with security
+docker logs container | grep "started in"
+docker stats container --no-stream
+----
+
+==== Security Performance Metrics
+* **Image Size**: <100MB compact footprint
+* **Startup Time**: <0.5s with security hardening
+* **Memory Usage**: <150MB within security resource limits
+* **Attack Surface**: Minimal distroless + no shell access
+* **Privilege Level**: Non-root execution only
+* **Compliance**: OWASP Docker Top 10 aligned
+
+== Enterprise Security Standards
+
+=== Security Governance
 
 ==== Production Security Requirements
-* **Regular Security Assessments**: Quarterly penetration testing
+* **Security Reviews**: All container configurations must pass security review
+* **Change Control**: Security configuration changes require approval
 * **Incident Response**: Defined procedures for security incidents
 * **Compliance Auditing**: Regular OWASP and industry standard compliance verification
 * **Security Training**: Team training on container security best practices
-* **Documentation**: Maintain security configuration documentation and runbooks
 
-==== Security Governance
-* **Security Reviews**: All container configurations must pass security review
-* **Change Control**: Security configuration changes require approval
-* **Monitoring**: Continuous monitoring for security policy violations
-* **Reporting**: Regular security posture reporting to stakeholders
+==== Security Documentation Requirements
+* **Security Configuration**: Maintain security configuration documentation
+* **Incident Runbooks**: Security incident response procedures
+* **Compliance Reports**: Regular security posture reporting
+* **Risk Assessments**: Quarterly security risk assessments
+* **Security Metrics**: Continuous security metrics collection and reporting
+
+=== Certificate Security Management
+
+==== Certificate Security Standards
+* **External Mounting**: Use read-only certificate mounts (`-v ./certs:/app/certificates:ro`)
+* **Validity Periods**: 2 years maximum for production, 1 day for testing
+* **File Permissions**: 600 for private keys, 644 for certificates
+* **Zero Embedding**: Never include certificates in container images
+* **Automated Validation**: Health checks verify certificate availability and readability
+* **Rotation Policy**: Automated certificate rotation with zero-downtime deployment
+
+==== Certificate Monitoring
+[source,bash]
+----
+# Certificate expiration monitoring
+openssl x509 -in /app/certificates/tls.crt -noout -dates
+
+# Certificate validation in health checks
+test -r "/app/certificates/tls.crt" && test -r "/app/certificates/tls.key"
+
+# TLS endpoint validation
+openssl s_client -connect localhost:8443 -verify_return_error
+----
+
+== Security Testing Standards
+
+=== Security Test Requirements
+
+==== Security Unit Tests
+[source,java]
+----
+@QuarkusTest
+class SecurityConfigTest {
+
+    @Inject
+    SecurityConfig securityConfig;
+
+    @Test
+    @DisplayName("Should enforce secure configuration")
+    void shouldEnforceSecureConfiguration() {
+        // Verify security configuration is properly loaded
+        assertNotNull(securityConfig.getEncryptionAlgorithm());
+        assertTrue(securityConfig.getEncryptionAlgorithm().startsWith("AES"));
+        
+        // Verify required security settings
+        assertTrue(securityConfig.isHttpsOnly());
+        assertFalse(securityConfig.isDebugMode());
+    }
+}
+----
+
+==== Security Integration Tests
+[source,java]
+----
+@QuarkusIntegrationTest
+class SecurityIntegrationTest {
+
+    @Test
+    @DisplayName("Should enforce HTTPS-only access")
+    void shouldEnforceHttpsOnlyAccess() {
+        // HTTP should be rejected or redirected
+        RestAssured.given()
+            .when().get("http://localhost:8080/q/health")
+            .then()
+            .statusCode(anyOf(is(301), is(302), is(400)));
+            
+        // HTTPS should work
+        RestAssured.given()
+            .relaxedHTTPSValidation()
+            .when().get("https://localhost:8443/q/health")
+            .then()
+            .statusCode(200);
+    }
+}
+----
+
+=== Security Validation Checklist
+
+**Pre-Deployment Security Validation**:
+- [ ] Container runs as non-root user
+- [ ] Read-only filesystem enabled
+- [ ] All capabilities dropped
+- [ ] Resource limits configured
+- [ ] Certificates externally mounted
+- [ ] No sensitive data in environment variables
+- [ ] HTTPS-only endpoints configured
+- [ ] Security scanning completed
+- [ ] Vulnerability assessment passed
+- [ ] Penetration testing completed (production)
 
 This security standards document provides comprehensive guidance for implementing enterprise-grade security in CDI and Quarkus applications, ensuring OWASP compliance and industry best practices are consistently applied across all CUI projects.
