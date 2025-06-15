@@ -4,7 +4,7 @@
 :sectnums:
 
 == Purpose
-Defines comprehensive Stylelint configuration and rules for consistent, high-quality CSS code across all CUI projects, focusing on modern CSS practices and maintainability.
+Defines comprehensive Stylelint configuration and rules for consistent, high-quality CSS code, focusing on modern CSS practices and maintainability.
 
 == Related Documentation
 * xref:css-development-standards.adoc[CSS Development Standards]: CSS-specific configuration and dependencies
@@ -15,11 +15,11 @@ Defines comprehensive Stylelint configuration and rules for consistent, high-qua
 == Stylelint Configuration
 
 === Required Configuration File
-Create `.stylelintrc.js` in project root:
+Create `.stylelintrc.js` in project root with ES module syntax:
 
 [source,javascript]
 ----
-module.exports = {
+export default {
   extends: [
     'stylelint-config-standard',
     'stylelint-config-prettier'
@@ -196,7 +196,7 @@ For projects using SCSS, add SCSS-specific rules:
 
 [source,javascript]
 ----
-module.exports = {
+export default {
   extends: [
     'stylelint-config-standard',
     'stylelint-config-standard-scss',

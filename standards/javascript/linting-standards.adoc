@@ -13,8 +13,8 @@ Defines comprehensive ESLint rules, configuration standards, and integration req
 
 == ESLint Configuration Standards
 
-=== ESLint v9 Flat Configuration Structure
-All projects must use ESLint v9 with the new flat configuration format. Create an `eslint.config.js` file:
+=== ESLint Flat Configuration Structure
+All projects must use ESLint v9+ with flat configuration format. Create an `eslint.config.js` file:
 
 [source,javascript]
 ----
@@ -27,8 +27,8 @@ import unicorn from 'eslint-plugin-unicorn';
 import promise from 'eslint-plugin-promise';
 import prettier from 'eslint-plugin-prettier';
 // Add framework-specific imports when needed:
-// import lit from 'eslint-plugin-lit';        // For Quarkus DevUI
-// import wc from 'eslint-plugin-wc';          // For Web Components
+// import lit from 'eslint-plugin-lit';        // For web components
+// import wc from 'eslint-plugin-wc';          // For custom elements
 
 export default [
   js.configs.recommended,
@@ -42,8 +42,8 @@ export default [
       promise,
       prettier,
       // Add framework-specific plugins when needed:
-      // lit,    // For Quarkus DevUI  
-      // wc,     // For Web Components
+      // lit,    // For web components
+      // wc,     // For custom elements
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -93,37 +93,36 @@ export default [
 ];
 ----
 
-=== ESLint v9 Migration Process
+=== Required Package Dependencies
 
-==== Migration Steps from ESLint v8 to v9
-Follow this process to migrate from legacy configuration to flat configuration:
+All ESLint configurations require these core dependencies:
 
-**1. Update Package Dependencies**
 [source,json]
 ----
 {
   "devDependencies": {
-    "eslint": "^9.14.0",            // Update from v8.x
-    "@eslint/js": "^9.14.0",        // Replaces airbnb-base
+    "eslint": "^9.14.0",
+    "@eslint/js": "^9.14.0",
     "eslint-config-prettier": "^9.0.0"
   }
 }
 ----
 
-**2. Add ES Module Support**
-Update package.json to enable ES module parsing:
+=== ES Module Configuration Requirements
+
+ESLint flat configuration requires ES module support:
+
 [source,json]
 ----
 {
-  "type": "module"                  // REQUIRED for eslint.config.js
+  "type": "module"
 }
 ----
 
-**3. Create Flat Configuration**
-Replace `.eslintrc.js` with `eslint.config.js`:
+**Configuration File Structure**: Use `eslint.config.js` with flat configuration format:
+
 [source,javascript]
 ----
-// eslint.config.js - New flat configuration format
 import js from '@eslint/js';
 import jsdoc from 'eslint-plugin-jsdoc';
 import jest from 'eslint-plugin-jest';
@@ -132,90 +131,62 @@ export default [
   js.configs.recommended,
   {
     plugins: { jsdoc, jest },
-    // Configuration objects...
+    rules: {
+      // Rule configuration
+    }
   }
 ];
 ----
 
-**4. Remove Legacy Configuration**
-Delete the old configuration file:
-[source,bash]
-----
-rm .eslintrc.js                    # Remove after migration
-----
+=== Configuration File Requirements
 
-**5. Update Maven Integration**
-Ensure frontend-maven-plugin works with new configuration:
-[source,xml]
-----
-<execution>
-  <id>npm-lint-fix</id>
-  <goals>
-    <goal>npm</goal>
-  </goals>
-  <configuration>
-    <arguments>run lint:fix</arguments>  <!-- Works with eslint.config.js -->
-  </configuration>
-</execution>
-----
+**File Name**: `eslint.config.js` (required)
+**Syntax**: ES module format with `export default`
+**Structure**: Array of configuration objects
+**Plugin Import**: Direct imports instead of string references
 
-==== Common Migration Issues
+=== Framework-Specific Extensions
 
-**Issue: `Cannot use import statement outside a module`**
-- **Cause**: Missing `"type": "module"` in package.json
-- **Solution**: Add module type and convert all config files to ES module syntax
-
-**Issue: `Plugin not found` errors**
-- **Cause**: Plugin import syntax changed in flat configuration
-- **Solution**: Use direct imports instead of string references:
-  ```javascript
-  // Old: extends: ['plugin:jest/recommended']
-  // New: import jest from 'eslint-plugin-jest'
-  ```
-
-**Issue: Configuration not applied**
-- **Cause**: Incorrect flat configuration structure
-- **Solution**: Use array format with proper configuration objects
-
-=== Legacy Configuration Support
-For projects not yet migrated to ESLint v9, maintain `.eslintrc.js` configuration:
+**Web Components**: Add component-specific plugins for web component projects:
 
 [source,javascript]
 ----
-module.exports = {
-  extends: [
-    '@eslint/js/configs/recommended',  // Updated from 'airbnb-base'
-    'plugin:jest/recommended',
-    'plugin:jsdoc/recommended',
-    'plugin:unicorn/recommended',
-    'plugin:security/recommended',
-    'plugin:promise/recommended',
-    'plugin:sonarjs/recommended',
-    'plugin:prettier/recommended',
-  ],
-  
-  env: {
-    browser: true,
-    es6: true,
-    jest: true,
-    node: true,
-  },
-  
-  parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: 'module',
-  },
-  
-  plugins: ['jsdoc', 'unicorn', 'security', 'promise', 'sonarjs', 'prettier'],
-  
-  rules: {
-    // Project-specific rules
-  },
-  
-  overrides: [
-    // Environment-specific overrides
-  ],
-};
+import lit from 'eslint-plugin-lit';
+import wc from 'eslint-plugin-wc';
+
+export default [
+  js.configs.recommended,
+  {
+    plugins: {
+      // ... base plugins
+      lit,
+      wc,
+    },
+    rules: {
+      'lit/no-invalid-html': 'error',
+      'wc/require-listener-teardown': 'error',
+    }
+  }
+];
+----
+
+**Node.js Projects**: Configure for Node.js-specific environments:
+
+[source,javascript]
+----
+export default [
+  js.configs.recommended,
+  {
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-console': 'warn', // Allow console in Node.js
+    }
+  }
+];
 ----
 
 === Required Dependencies and Packages
@@ -257,7 +228,7 @@ All projects must include these ESLint packages in package.json:
 ==== Framework-Specific Extensions (Optional)
 When using specific frameworks:
 
-* `plugin:lit/recommended`: Lit-specific rules (for Quarkus DevUI)
+* `plugin:lit/recommended`: Lit-specific rules (for web components)
 * `plugin:wc/recommended`: Web Components best practices (when applicable)
 
 === Environment Configuration
@@ -368,8 +339,8 @@ rules: {
 
 == Framework-Specific Rules (Optional)
 
-=== Lit Component Rules
-When using Lit for Quarkus DevUI or other contexts:
+=== Web Component Rules
+When using Lit for web components:
 
 [source,javascript]
 ----
@@ -464,20 +435,19 @@ SonarJS is required for all projects to ensure comprehensive code quality and co
 
 [source,javascript]
 ----
-module.exports = {
-  extends: [
-    // ... other configurations
-    'plugin:sonarjs/recommended',   // Use SonarJS defaults
-    // ... prettier should be last
-  ],
-  
-  rules: {
-    // SonarJS rules - using recommended defaults
-    // All SonarJS rules are automatically configured with appropriate severity levels
-    // Most rules default to 'error' severity
-    // Only override specific rules if project requirements differ from defaults
+export default [
+  // ... other configurations
+  sonarjs.configs.recommended,   // Use SonarJS defaults
+  {
+    plugins: { sonarjs },
+    rules: {
+      // SonarJS rules - using recommended defaults
+      // All SonarJS rules are automatically configured with appropriate severity levels
+      // Most rules default to 'error' severity
+      // Only override specific rules if project requirements differ from defaults
+    }
   }
-};
+];
 ----
 
 === SonarJS Default Rules
@@ -663,14 +633,14 @@ overrides: [
 ]
 ----
 
-=== DevUI Component Overrides
+=== Production Component Overrides
 Stricter rules for production components:
 
 [source,javascript]
 ----
 overrides: [
   {
-    files: ['src/main/resources/dev-ui/**/*.js'],
+    files: ['src/main/resources/components/**/*.js'],
     rules: {
       'jsdoc/require-jsdoc': 'error',           // Require JSDoc for public components
       'jsdoc/require-description': 'error',     // Require descriptions
@@ -786,10 +756,10 @@ Create `.stylelintrc.js` with ES module syntax when using `"type": "module"`:
 [source,javascript]
 ----
 /**
- * StyleLint configuration for CSS-in-JS in Lit components
+ * StyleLint configuration for CSS-in-JS in web components
  * 
  * This configuration ensures consistent CSS styling within
- * Lit component template literals and CSS-in-JS constructs.
+ * component template literals and CSS-in-JS constructs.
  */
 
 export default {
@@ -831,7 +801,7 @@ export default {
     'custom-property-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
     'custom-property-empty-line-before': 'never',
     
-    // Lit-specific CSS patterns
+    // Web component-specific CSS patterns
     'selector-pseudo-class-no-unknown': [
       true,
       {
@@ -851,7 +821,7 @@ export default {
   
   overrides: [
     {
-      files: ['src/main/resources/dev-ui/**/*.js'],
+      files: ['src/main/resources/components/**/*.js'],
       rules: {
         // Stricter rules for production components
         'max-nesting-depth': 3,
@@ -970,3 +940,337 @@ Linting must be part of the build pipeline:
 * Focus on rules that provide real value
 * Avoid overly restrictive rules that impede development
 * Balance code quality with developer productivity
+
+== Cypress E2E Testing Configuration
+
+=== Cypress-Specific ESLint Configuration
+For Cypress end-to-end testing projects, implement specialized ESLint configuration that achieves zero-warning compliance while supporting Cypress testing patterns.
+
+==== Complete Cypress ESLint Configuration
+Based on successful 98 warnings → 0 warnings implementation:
+
+[source,javascript]
+----
+// .eslintrc.js for Cypress projects
+module.exports = {
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
+    "cypress/globals": true
+  },
+  extends: [
+    "eslint:recommended",
+    "plugin:cypress/recommended",
+    "plugin:jsdoc/recommended",
+    "plugin:prettier/recommended"
+  ],
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: "module"
+  },
+  plugins: [
+    "cypress", 
+    "prettier", 
+    "jsdoc", 
+    "sonarjs", 
+    "security",
+    "unicorn"
+  ],
+  rules: {
+    // CUI Standards - Fundamental Rules
+    "no-console": "warn",
+    "no-unused-vars": ["warn", { 
+      "argsIgnorePattern": "^_", 
+      "varsIgnorePattern": "^_" 
+    }],
+    "prefer-const": "error",
+    "no-var": "error",
+    
+    // CUI Standards - Code Quality Rules
+    "prettier/prettier": "error",
+    
+    // CUI Standards - Cypress Rules (Adapted for Best Practices)
+    "cypress/no-unnecessary-waiting": "warn",        // Encourage proper element waiting
+    "cypress/unsafe-to-chain-command": "off",        // Allow chaining for common Cypress patterns
+    "cypress/no-assigning-return-values": "error",   // Prevent async handling issues
+    
+    // CUI Standards - JSDoc Documentation Requirements (Cypress-adapted)
+    "jsdoc/require-description": "error",
+    "jsdoc/require-param-description": "error", 
+    "jsdoc/require-returns-description": "error",
+    "jsdoc/require-example": "warn",
+    "jsdoc/no-undefined-types": "off",               // Allow jQuery types
+    
+    // CUI Standards - Code Complexity Rules (Cypress-adapted)
+    "complexity": ["warn", 20],                      // Increased for Cypress test complexity
+    "max-depth": ["warn", 5],                        // Increased for nested describes/its
+    "max-lines-per-function": ["warn", 200],         // Cypress test functions can be large
+    "max-params": ["error", 5],
+    
+    // CUI Standards - Security Rules
+    "security/detect-object-injection": "warn",
+    "security/detect-non-literal-regexp": "warn",
+    
+    // CUI Standards - Code Quality from SonarJS (Cypress-adapted)
+    "sonarjs/cognitive-complexity": ["warn", 25],    // Increased for Cypress test complexity
+    "sonarjs/no-duplicate-string": "off",            // Handle via constants instead
+    "sonarjs/no-identical-functions": "warn",        // Allow similar test patterns
+    
+    // CUI Standards - Additional Quality Rules
+    "unicorn/filename-case": ["error", { "case": "kebabCase" }],
+    "unicorn/no-null": "off",                        // Allow null for Cypress compatibility
+  },
+  
+  // Cypress-specific file overrides
+  overrides: [
+    {
+      files: ["cypress/e2e/**/*.cy.js", "cypress/integration/**/*.cy.js"],
+      rules: {
+        "max-lines-per-function": "off",             // Tests can be very large
+        "complexity": "off",                         // Tests naturally complex
+        "sonarjs/cognitive-complexity": "off",       // Tests naturally complex
+        "sonarjs/no-duplicate-string": "off",        // Allow duplicate strings in test files
+        "jsdoc/require-jsdoc": "off",               // Don't require JSDoc for test functions
+        "jsdoc/require-description": "off",
+        "jsdoc/require-param-description": "off",
+        "jsdoc/require-returns-description": "off",
+        "jsdoc/require-example": "off",
+        "jsdoc/no-undefined-types": "off",          // Allow undefined types in tests
+        "cypress/unsafe-to-chain-command": "off",   // Allow chaining in tests  
+        "cypress/no-unnecessary-waiting": "off",    // Allow waits in tests
+        "no-unused-vars": "warn"                    // Keep as warning for cleanup
+      }
+    },
+    {
+      files: ["cypress/support/**/*.js"],
+      rules: {
+        "max-lines-per-function": ["warn", 150],    // Support functions can be larger
+        "complexity": ["warn", 20],
+        "sonarjs/cognitive-complexity": ["warn", 15],
+        "jsdoc/require-jsdoc": "off",              // Relaxed JSDoc for commands
+        "security/detect-object-injection": "off", // Dynamic property access needed
+        "cypress/unsafe-to-chain-command": "off",  // Allow chaining in support files
+        "cypress/no-unnecessary-waiting": "off",   // Allow necessary waits
+        "sonarjs/no-duplicate-string": "off"       // Allow duplicate strings
+      }
+    },
+    {
+      files: ["cypress/selftests/**/*.cy.js"],
+      rules: {
+        "max-lines-per-function": "off",           // Complete flexibility
+        "complexity": "off",                       // No complexity limits
+        "sonarjs/cognitive-complexity": "off",     // No constraints
+        "sonarjs/no-duplicate-string": "off",      // Allow duplicate strings
+        "jsdoc/require-jsdoc": "off",             // No documentation required
+        "cypress/unsafe-to-chain-command": "off", // Full chaining freedom
+        "cypress/no-unnecessary-waiting": "off",  // Allow waits
+        "no-unused-vars": "warn"
+      }
+    }
+  ]
+};
+----
+
+==== Required Cypress Dependencies
+[source,json]
+----
+{
+  "devDependencies": {
+    "cypress": "^13.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-cypress": "^3.5.0",
+    "eslint-plugin-jsdoc": "^46.8.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-security": "^2.1.1",
+    "eslint-plugin-sonarjs": "^0.25.1",
+    "eslint-plugin-unicorn": "^52.0.0",
+    "prettier": "^3.4.2"
+  }
+}
+----
+
+==== Cypress NPM Scripts
+[source,json]
+----
+{
+  "scripts": {
+    "cypress:run": "cypress run",
+    "cypress:open": "cypress open",
+    "lint": "eslint 'cypress/**/*.js'",
+    "lint:fix": "eslint 'cypress/**/*.js' --fix",
+    "lint:check": "eslint 'cypress/**/*.js' --max-warnings 0",
+    "format": "prettier --write 'cypress/**/*.js'",
+    "format:check": "prettier --check 'cypress/**/*.js'"
+  }
+}
+----
+
+==== Constants-Based Duplicate String Management
+Cypress projects must implement comprehensive constants to achieve zero duplicate string warnings:
+
+[source,javascript]
+----
+// cypress/support/constants.js
+export const SELECTORS = {
+  // Common UI selectors
+  PROCESSOR: 'g.processor, [class*="processor"], .component',
+  CANVAS_SELECTOR: '.canvas',
+  CONTEXT_MENU_SELECTOR: '.context-menu, .mat-menu-panel, [role="menu"]',
+  DIALOG: '[role="dialog"], .mat-dialog-container, .dialog',
+  
+  // Form elements
+  USERNAME_INPUT: '#username',
+  PASSWORD_INPUT: '#password',
+  LOGIN_BUTTON: '#login-button',
+  
+  // Data-testid selectors
+  PROCESSOR_DETAILS_METRICS: '[data-testid="processor-details-metrics"]',
+  CONFIG_DIALOG_TABS: '[data-testid="config-dialog-tabs"]'
+};
+
+export const TEXT_CONSTANTS = {
+  // Common assertions
+  BE_VISIBLE: 'be.visible',
+  BE_ENABLED: 'be.enabled',
+  EXIST: 'exist',
+  CONTAIN: 'contain',
+  HAVE_TEXT: 'have.text',
+  
+  // Common text values
+  APPLY: 'Apply',
+  CANCEL: 'Cancel',
+  SAVE: 'Save',
+  LOGIN: 'Login',
+  
+  // Application-specific constants
+  MULTI_ISSUER_JWT_TOKEN_AUTHENTICATOR: 'MultiIssuerJWTTokenAuthenticator',
+  ADMIN: 'admin',
+  ADMIN_PASSWORD: 'adminadminadmin'
+};
+
+export const TEST_DATA = {
+  // Test URLs and endpoints
+  TEST_ISSUER_URL: 'https://test.example.com',
+  TEST_JWKS_JSON_URL: 'https://test.example.com/jwks.json',
+  
+  // Test credentials
+  VALID_USERNAME: 'testuser',
+  TEST_PASSWORD: 'testpass',
+  
+  // Configuration values
+  SERVER_TYPE: 'server',
+  IN_MEMORY_TYPE: 'In-Memory'
+};
+
+export const TIMEOUTS = {
+  SHORT: 1000,
+  MEDIUM: 2000,
+  LONG: 5000,
+  VERY_LONG: 10000
+};
+----
+
+==== Console Error Management for Cypress
+Implement console error tracking and validation:
+
+[source,javascript]
+----
+// cypress/support/console-warnings-allowlist.js
+module.exports = [
+  // Third-party library warnings that cannot be fixed
+  'Warning: validateDOMNesting(...): <div> cannot appear as a descendant of <p>.',
+  'DevTools failed to load source map',
+  'Content Security Policy violation for inline script',
+  
+  // Framework-specific warnings
+  'Synchronous XMLHttpRequest on the main thread is deprecated',
+  '[Firefox] Unable to preventdefault inside passive event listener'
+];
+----
+
+[source,javascript]
+----
+// cypress/support/console-error-tracking.js
+const allowedWarnings = require('./console-warnings-allowlist');
+
+Cypress.on('window:before:load', (win) => {
+  win.consoleErrors = [];
+  win.consoleWarnings = [];
+
+  const originalConsole = {
+    error: win.console.error,
+    warn: win.console.warn,
+  };
+
+  win.console.error = (...args) => {
+    originalConsole.error(...args);
+    const message = args.map(arg => 
+      typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+    ).join(' ');
+    win.consoleErrors.push(message);
+  };
+
+  win.console.warn = (...args) => {
+    originalConsole.warn(...args);
+    const message = args.map(arg => 
+      typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+    ).join(' ');
+    
+    if (!allowedWarnings.some(allowedMsg => message.includes(allowedMsg))) {
+      win.consoleWarnings.push(message);
+    }
+  };
+});
+
+Cypress.Commands.add('verifyNoConsoleErrors', () => {
+  cy.window().then((win) => {
+    const errors = win.consoleErrors || [];
+    if (errors.length > 0) {
+      throw new Error(`Console errors detected: ${errors.join(', ')}`);
+    }
+  });
+});
+
+Cypress.Commands.add('verifyNoUnexpectedWarnings', () => {
+  cy.window().then((win) => {
+    const warnings = win.consoleWarnings || [];
+    if (warnings.length > 0) {
+      throw new Error(`Unexpected console warnings: ${warnings.join(', ')}`);
+    }
+  });
+});
+----
+
+=== Cypress Rule Rationale
+
+==== Why `cypress/unsafe-to-chain-command` is Disabled
+Cypress chaining is a fundamental pattern that improves test readability:
+[source,javascript]
+----
+// Natural Cypress pattern (allowed)
+cy.get(SELECTORS.PROCESSOR)
+  .should(TEXT_CONSTANTS.BE_VISIBLE)
+  .click()
+  .should('have.class', 'active');
+----
+
+==== Why `sonarjs/no-duplicate-string` is Disabled
+Instead of suppressing warnings, use constants-based approach:
+[source,javascript]
+----
+// Problem: Duplicate strings trigger warnings
+cy.get('.processor').should('be.visible');
+cy.get('.processor').click();
+
+// Solution: Constants eliminate duplication
+cy.get(SELECTORS.PROCESSOR).should(TEXT_CONSTANTS.BE_VISIBLE);
+cy.get(SELECTORS.PROCESSOR).click();
+----
+
+==== Complexity Thresholds Adjusted for Testing
+E2E tests naturally have higher complexity due to comprehensive user workflow testing:
+- **Standard complexity limit**: 10
+- **Cypress test complexity limit**: 20-25
+- **Cypress support function limit**: 15-20

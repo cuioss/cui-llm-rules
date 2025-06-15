@@ -14,10 +14,10 @@ Defines comprehensive Prettier configuration standards and integration requireme
 == Prettier Configuration Standards
 
 === Configuration File Structure
-All projects must use a `.prettierrc.js` configuration file. Use ES module syntax when `"type": "module"` is set in package.json:
+All projects must use a `.prettierrc.js` configuration file with ES module syntax:
 
-==== ES Module Configuration (Recommended)
-When using modern tooling with `"type": "module"`:
+==== Standard Configuration Structure
+All configurations must use ES module format:
 
 [source,javascript]
 ----
@@ -76,7 +76,7 @@ export default {
       },
     },
     {
-      files: 'src/main/resources/dev-ui/**/*.js',
+      files: 'src/main/resources/components/**/*.js',
       options: {
         printWidth: 120,
         singleQuote: true,
@@ -104,28 +104,6 @@ export default {
 };
 ----
 
-==== CommonJS Configuration (Legacy)
-For projects not using ES modules:
-
-[source,javascript]
-----
-/**
- * Prettier configuration for JavaScript projects (CommonJS)
- */
-
-module.exports = {
-  // Same configuration as above, but using module.exports
-  printWidth: 120,
-  tabWidth: 2,
-  useTabs: false,
-  semi: true,
-  singleQuote: true,
-  
-  // ... rest of configuration identical to ES module version
-};
-----
-
-**Migration Note**: When migrating to ES modules, change `module.exports = {` to `export default {` and add `"type": "module"` to package.json.
 
 === Core Formatting Rules
 
@@ -163,7 +141,7 @@ Enhanced formatting for production components with CSS-in-JS support:
 [source,javascript]
 ----
 {
-  files: 'src/main/resources/dev-ui/**/*.js',
+  files: 'src/main/resources/components/**/*.js',
   options: {
     printWidth: 120,
     singleQuote: true,
@@ -392,10 +370,10 @@ import {
 } from './utilities.js';
 ----
 
-=== Lit Component-Specific Formatting
+=== Web Component-Specific Formatting
 
 ==== CSS-in-JS Formatting
-Proper formatting for Lit component styles:
+Proper formatting for web component styles:
 
 [source,javascript]
 ----

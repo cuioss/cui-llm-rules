@@ -193,17 +193,14 @@ Use npm overrides for specific conflict resolution:
 == ES Module Configuration Standards
 
 === Package.json Module Type Configuration
-All projects using modern JavaScript tooling must properly configure their module system to avoid ES module import errors:
-
-==== ES Module Projects
-For projects using ES module syntax in configuration files (ESLint v9, modern tools):
+All projects must configure ES module support for modern JavaScript tooling:
 
 [source,json]
 ----
 {
   "name": "project-name",
   "version": "1.0.0",
-  "type": "module",                    // REQUIRED: Enables ES module parsing
+  "type": "module",
   "private": true,
   "scripts": {
     "lint": "eslint src/**/*.js",
@@ -212,75 +209,49 @@ For projects using ES module syntax in configuration files (ESLint v9, modern to
 }
 ----
 
-**Required when:**
-- Using ESLint v9 with flat configuration (`eslint.config.js`)
-- Configuration files use `import`/`export` syntax
-- Modern bundler configurations with ES modules
+**Module Type Requirements:**
+- ESLint flat configuration (`eslint.config.js`)
+- Configuration files using `import`/`export` syntax
+- Modern bundler configurations
 
-==== Configuration File Compatibility
-When `"type": "module"` is set, all `.js` configuration files must use ES module syntax:
+=== Configuration File Syntax Standards
+All `.js` configuration files must use ES module syntax:
 
-[cols="2,3,3"]
+[cols="2,4"]
 |===
-|Configuration File |CommonJS (Legacy) |ES Module (Required)
+|Configuration File |Required Syntax
 
 |`eslint.config.js`
-|`module.exports = { ... }`
-|`export default { ... }`
+|`export default [...]`
 
 |`.prettierrc.js`  
-|`module.exports = { ... }`
 |`export default { ... }`
 
 |`.stylelintrc.js`
-|`module.exports = { ... }`
 |`export default { ... }`
 
 |`jest.config.js`
-|`module.exports = { ... }`
 |`export default { ... }`
 |===
 
-==== Mixed Module System Projects
-For projects requiring both CommonJS and ES modules:
+=== File Extension Standards
+Standard file extensions for ES module projects:
 
-[source,json]
-----
-{
-  "type": "module",
-  "scripts": {
-    "build": "node --loader ts-node/esm build.mjs"
-  }
-}
-----
+* `.js` - ES module files (default with `"type": "module"`)
+* `.mjs` - Explicit ES module files
+* `.cjs` - CommonJS files (when needed)
 
-**File extension conventions:**
-- `.mjs` - ES module files
-- `.cjs` - CommonJS files  
-- `.js` - Follows package.json "type" setting
+=== Tool Chain Compatibility Requirements
+All tooling must support ES module configuration:
 
-=== Common ES Module Migration Issues
+* ESLint v9+ with flat configuration
+* Prettier v3+ configuration  
+* StyleLint v16+ configuration
+* Jest v29+ with ES module support
+* Babel configuration with ES module support
 
-==== Build Tool Configuration Errors
-**Symptom**: `Cannot use import statement outside a module`
-
-**Root Cause**: Configuration files using ES module syntax without proper package.json setup
-
-**Solution**:
-1. Add `"type": "module"` to package.json
-2. Convert all configuration files to ES module syntax
-3. Update Maven frontend plugin to handle ES modules
-
-==== Tool Chain Compatibility
-**Ensure compatibility across:**
-- ESLint v9 flat configuration
-- Prettier v3+ configuration  
-- StyleLint v16+ configuration
-- Jest v29+ with ES module support
-- Babel configuration with ES module support
-
-==== Maven Integration Requirements
-When using ES modules, ensure Maven frontend plugin arguments support the configuration:
+=== Maven Integration Requirements
+Maven frontend plugin configuration for ES modules:
 
 [source,xml]
 ----
@@ -376,7 +347,7 @@ Essential packages for all JavaScript projects:
 === Framework-Specific Dependencies
 Additional packages for specific frameworks:
 
-==== Lit Components (Quarkus DevUI)
+==== Web Components (Lit)
 [source,json]
 ----
 {

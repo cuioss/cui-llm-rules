@@ -7,10 +7,27 @@ This directory contains standards and best practices for CDI (Contexts and Depen
 
 == Standards Overview
 
+=== CDI Development Standards
+* xref:cdi-aspects.adoc[CDI Aspects and Best Practices]: Core CDI standards including constructor injection requirements, CDI scope management, and dependency injection patterns
+
 === Testing Standards
 * xref:testing-standards.adoc[Testing Standards]: Comprehensive testing standards for Quarkus applications, including test coverage configuration, test annotations, and SonarQube integration
 
+=== Docker and Deployment Standards
+* xref:docker-health-check-best-practices.adoc[Docker Health Check Best Practices]: Best practices for implementing health checks in Quarkus Docker containers, avoiding external dependencies like curl
+* xref:container-standards.adoc[Container Standards]: Comprehensive container standards including base image selection, security practices, and operational requirements
+
+=== Security Standards
+* xref:security-standards.adoc[Security Standards]: OWASP-compliant security standards for CDI and Quarkus applications, including container security, certificate management, and enterprise-grade security implementations
+
 == Key Areas Covered
+
+=== CDI Development Patterns
+* **Constructor injection requirements** - Mandatory use over field injection
+* **Automatic @Inject detection** - Single constructor rule for CDI beans  
+* **Dependency injection patterns** - Direct injection vs Instance<T> usage
+* **CDI scopes and lifecycle** - ApplicationScoped, RequestScoped best practices
+* **Optional dependency handling** - Contract-based vs optional injection patterns
 
 === Test Coverage Configuration
 * JaCoCo configuration for Quarkus applications
@@ -27,7 +44,34 @@ This directory contains standards and best practices for CDI (Contexts and Depen
 * Maven Surefire and Failsafe plugin configurations
 * Build phase requirements and troubleshooting
 
+=== Docker Deployment
+* Internal health check script implementation using `/proc` filesystem
+* Avoiding external dependencies like `curl` in containers
+* IPv4/IPv6 port monitoring for application health validation
+* Certificate and application-specific health indicators
+
+=== Container Configuration
+* **Production Default**: Quarkus distroless base image (91.9MB)
+* **Development**: UBI9 minimal for debugging (219MB)
+* **Performance**: <0.5s startup, <150MB memory, <100MB image size
+* **Logging**: Console-only, no file logging required
+* **Security**: See xref:security-standards.adoc[Security Standards] for comprehensive security requirements
+
 == Quick Reference
+
+=== CDI Constructor Injection
+[source,java]
+----
+@ApplicationScoped
+public class UserService {
+    private final UserRepository repository;  // Final field
+    
+    // No @Inject needed - single constructor
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
+}
+----
 
 === Essential Dependencies
 [source,xml]
@@ -49,7 +93,29 @@ This directory contains standards and best practices for CDI (Contexts and Depen
 <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 ----
 
+=== Basic Dockerfile Template
+[source,dockerfile]
+----
+FROM quay.io/quarkus/quarkus-distroless-image:2.0
+
+WORKDIR /app
+
+# Copy application files
+COPY --chmod=0755 target/*-runner /app/application
+COPY --chmod=0755 health-check.sh /app/health-check.sh
+COPY --chmod=0644 certificates/ /app/certificates/
+
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=40s \
+  CMD /app/health-check.sh
+
+ENTRYPOINT ["./application"]
+----
+
+**Note**: For security-hardened production Dockerfiles, see xref:security-standards.adoc[Security Standards].
+
 == Related Standards
+* xref:security-standards.adoc[Security Standards]: Comprehensive security requirements and OWASP compliance
 * xref:../testing/README.adoc[Testing Standards Overview]
 * xref:../testing/core-standards.adoc[Testing Core Standards]
 * xref:../java/README.adoc[Java Standards Overview]
