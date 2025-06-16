@@ -45,19 +45,19 @@ LABEL org.opencontainers.image.vendor="CUI"
 
 WORKDIR /app
 
-# Secure file operations with explicit permissions
-COPY --chmod=0755 --chown=nonroot:nonroot target/*-runner /app/application
-COPY --chmod=0755 --chown=nonroot:nonroot health-check.sh /app/health-check.sh
+# Secure file operations with root ownership to prevent modification
+COPY --chmod=0755 --chown=root:root target/*-runner /app/application
+COPY --chmod=0755 --chown=root:root health-check.sh /app/health-check.sh
 
-# PEM certificate files with strict permissions
-COPY --chmod=0600 --chown=nonroot:nonroot certificates/tls.key /app/certificates/tls.key
-COPY --chmod=0644 --chown=nonroot:nonroot certificates/tls.crt /app/certificates/tls.crt
+# PEM certificate files with root ownership for security
+COPY --chmod=0644 --chown=root:root certificates/tls.crt /app/certificates/tls.crt
+COPY --chmod=0600 --chown=root:root certificates/tls.key /app/certificates/tls.key
 
 EXPOSE 8443
 
-# Internal health check (no external dependencies)
+# Internal health check using exec form for security
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=40s \
-  CMD /app/health-check.sh
+  CMD ["/app/health-check.sh"]
 
 # Non-root execution
 USER nonroot
@@ -115,7 +115,7 @@ services:
           memory: 128M
           cpus: '0.5'
     
-    # Health check using internal script
+# Health check using exec form for security
     healthcheck:
       test: ["CMD", "/app/health-check.sh"]
       interval: 30s

@@ -12,6 +12,7 @@ Standards and best practices for CDI (Contexts and Dependency Injection) and Qua
 === Core Development Standards
 * **xref:cdi-aspects.adoc[CDI Development Patterns]**: Constructor injection requirements, dependency patterns, and CDI lifecycle management
 * **xref:testing-standards.adoc[Testing Standards]**: Test coverage, JaCoCo configuration, and Quarkus-specific testing patterns
+* **xref:integration-testing-standards.adoc[Integration Testing Standards]**: API-only testing patterns, Docker-based lifecycle, and HTTPS-only integration testing
 
 === Operational Standards  
 * **xref:container-standards.adoc[Container Standards]**: Complete containerization guide including security, performance, and certificate management
@@ -65,6 +66,12 @@ ENTRYPOINT ["/app/application"]
 * **Quarkus Tests**: `@QuarkusTest` for CDI context, `@QuarkusIntegrationTest` for packaged apps
 * **SonarQube Integration**: XML report generation required
 * **Test Profiles**: Separate configurations for different test scenarios
+
+=== Integration Testing Standards (xref:integration-testing-standards.adoc[→ Details])
+* **API-Only Testing**: No CDI injection, external client perspective only
+* **HTTPS Required**: All integration tests use TLS with proper certificates
+* **Docker Lifecycle**: Script-based container management via Maven phases
+* **Production Equivalence**: Container runtime with security hardening
 
 === Container Standards (xref:container-standards.adoc[→ Details])  
 * **Base Image**: Quarkus distroless (91.9MB)
