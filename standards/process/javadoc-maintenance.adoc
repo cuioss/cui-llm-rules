@@ -8,9 +8,9 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 
 == Related Documentation
 
-* xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
-* xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
-* xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
+* xref:../documentation/general-standard.adoc[General Documentation Standards]: Core documentation standards
+* xref:../documentation/javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
+* xref:../documentation/readme-structure.adoc[README Structure]: Standard structure for README.adoc files
 
 == Critical Constraints
 
@@ -41,11 +41,10 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 
 === Build Verification
 
-For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For standardized build verification processes, see <<task-completion-standards.adoc#,Task Completion Standards>>.
 
-* Run appropriate command following <<../process/task-completion-standards.adoc#,Task Completion Standards>>:
-** Single module: `./mvnw clean verify -Pjavadoc`
-** Multi-module: `./mvnw clean verify -Pjavadoc-mm-reporting`
+* Run appropriate command following <<task-completion-standards.adoc#,Task Completion Standards>>
+* `./mvnw -Ppre-commit clean verify -DskipTests`
 * Identify and categorize issues:
 ** Missing tags
 ** Invalid references
@@ -72,9 +71,9 @@ For standardized build verification processes, see <<../process/task-completion-
 
 === Final Verification
 
-For comprehensive final verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive final verification processes, see <<task-completion-standards.adoc#,Task Completion Standards>>.
 
-* Run appropriate javadoc command
+* Run appropriate command
 * If issues remain:
 ** Note remaining issues
 ** Return to Fix Application

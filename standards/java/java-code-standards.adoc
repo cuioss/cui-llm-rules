@@ -150,3 +150,5 @@ List<String> names = users.stream()
 * xref:../testing/core-standards.adoc[Testing Standards]
 * xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing Java development tasks
 * xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit messages for Java development
+* xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance] - Process for maintaining and fixing Javadoc documentation
+* xref:../process/java-test-maintenance.adoc[Java Test Maintenance] - Process for maintaining and improving Java test quality

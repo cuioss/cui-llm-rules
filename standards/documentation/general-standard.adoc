@@ -16,7 +16,7 @@ The documentation standards are organized into the following documents:
 * `general-standard.adoc` - Core documentation standards and best practices (this document)
 * xref:organization-standards.adoc[Organization Standards] - Documentation organization, structure, and review guidelines
 * `javadoc-standards.adoc` - Specific standards for Javadoc documentation
-* `javadoc-maintenance.adoc` - Standards for Javadoc maintenance and error resolution
+* `javadoc-maintenance.adoc` - Standards for Javadoc maintenance and error resolution (moved to process/)
 * `readme-structure.adoc` - Standard structure for README.adoc files
 
 == Key Principles
@@ -33,7 +33,7 @@ Defines comprehensive standards for all documentation across the codebase, inclu
 
 * xref:organization-standards.adoc[Organization Standards]: Documentation organization, structure, and review guidelines
 * xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
-* xref:javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
+* xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
 * xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
 
 == Core Documentation Standards

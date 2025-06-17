@@ -154,8 +154,23 @@ npm WARN deprecated eslint@8.57.1: This version is no longer supported
 Handle peer dependency conflicts using these strategies:
 
 ==== Legacy Peer Dependencies Flag
-For packages with incompatible peer dependencies:
+**WARNING**: Only use `--legacy-peer-deps` when absolutely necessary. Most modern packages have resolved peer dependency conflicts.
 
+**First, try standard installation**:
+[source,xml]
+----
+<execution>
+  <id>npm-install</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <configuration>
+    <arguments>install</arguments>
+  </configuration>
+</execution>
+----
+
+**Only use legacy peer deps if standard installation fails**:
 [source,xml]
 ----
 <execution>
@@ -168,6 +183,13 @@ For packages with incompatible peer dependencies:
   </configuration>
 </execution>
 ----
+
+**Investigation Required**: Before using `--legacy-peer-deps`, investigate if conflicts can be resolved by:
+
+1. **Update packages**: Check if newer versions resolve conflicts
+2. **Remove unused dependencies**: Clean up package.json  
+3. **Use npm overrides**: Force specific versions for conflicts
+4. **Document necessity**: Add comments explaining why the flag is needed
 
 ==== Selective Dependency Resolution
 Use npm overrides for specific conflict resolution:

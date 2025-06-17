@@ -9,7 +9,7 @@ Defines specific standards for Javadoc documentation across the codebase, ensuri
 == Related Documentation
 
 * xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
-* xref:javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
+* xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
 * xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
 
 == Javadoc Standards

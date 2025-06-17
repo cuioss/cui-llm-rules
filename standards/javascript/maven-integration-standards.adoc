@@ -42,7 +42,7 @@ Projects must integrate JavaScript tooling with Maven using the frontend-maven-p
         <goal>npm</goal>
       </goals>
       <configuration>
-        <arguments>install --legacy-peer-deps</arguments>
+        <arguments>install</arguments>
       </configuration>
     </execution>
     <execution>
@@ -66,13 +66,13 @@ Projects must integrate JavaScript tooling with Maven using the frontend-maven-p
       </configuration>
     </execution>
     <execution>
-      <id>npm-lint-fix</id>
+      <id>npm-lint</id>
       <goals>
         <goal>npm</goal>
       </goals>
-      <phase>verify</phase>
+      <phase>compile</phase>
       <configuration>
-        <arguments>run lint:fix</arguments>
+        <arguments>run lint</arguments>
       </configuration>
     </execution>
   </executions>
@@ -121,9 +121,9 @@ JavaScript tooling must be integrated into these Maven phases:
 |JavaScript unit tests
 |Run Jest tests with coverage
 
-|verify
-|Linting with fixes
-|Apply automated code quality fixes
+|compile  
+|Code linting
+|Enforce code quality standards without modifications
 |===
 
 === Execution Order
@@ -133,8 +133,8 @@ The executions must run in this order to ensure proper dependency resolution:
 2. **npm-install** (validate phase)
 3. **npm-build** (generate-resources phase, if applicable)
 4. **npm-format-check** (compile phase)
-5. **npm-test** (test phase)
-6. **npm-lint-fix** (verify phase)
+5. **npm-lint** (compile phase)  
+6. **npm-test** (test phase)
 
 == Configuration Standards
 
@@ -142,7 +142,7 @@ The executions must run in this order to ensure proper dependency resolution:
 * **Node.js Version**: v20.12.2 (LTS)
 * **npm Version**: 10.5.0 or compatible
 * **Installation Directory**: `target/` (Maven standard)
-* **Dependency Resolution**: Use `--legacy-peer-deps` for compatibility
+* **Dependency Resolution**: Use standard `npm install` unless conflicts require `--legacy-peer-deps`
 
 ==== Dependency Resolution Strategy
 Modern npm packages may have peer dependency conflicts. Use these strategies:
@@ -180,9 +180,9 @@ The plugin must call these npm scripts:
 |test
 |Run tests with strict coverage thresholds
 
-|`lint:fix`
-|verify
-|Apply linting fixes automatically
+|`lint`
+|compile
+|Check code quality without modifications
 
 |`build`
 |generate-resources
@@ -362,7 +362,7 @@ A successful Maven build must:
 2. Install all npm dependencies without critical warnings
 3. Pass all formatting checks
 4. Pass all JavaScript tests with 80% coverage
-5. Pass all linting checks with automatic fixes applied
+5. Pass all linting checks without errors
 6. Resolve all npm security vulnerabilities (critical/high severity)
 7. Address deprecated package warnings in build logs
 

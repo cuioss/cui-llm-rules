@@ -126,6 +126,8 @@ These standards support:
 * link:../documentation/general-standard.adoc[Documentation Standards]
 * link:../process/git-commit-standards.adoc[Git Commit Standards] - Follow standardized commit messages during CDI/Quarkus development
 * link:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing CDI/Quarkus development tasks
+* link:../process/javadoc-maintenance.adoc[Javadoc Maintenance] - Process for maintaining Javadoc documentation in CDI/Quarkus projects
+* link:../process/java-test-maintenance.adoc[Java Test Maintenance] - Process for maintaining Java test quality in CDI/Quarkus projects
 
 == External References
 * https://quarkus.io/guides/cdi[Quarkus CDI Guide]

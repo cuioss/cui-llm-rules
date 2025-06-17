@@ -1,0 +1,232 @@
+= Logger Maintenance Process
+:toc:
+:toclevels: 2
+:sectnums:
+
+Process for implementing and maintaining logging standards while preserving functionality and adhering to CUI logging requirements.
+
+== Pre-Maintenance Checklist
+
+Execute before starting logger maintenance following <<task-completion-standards.adoc#,Task Completion Standards>>:
+
+1. [ ] *Build Verification*: `./mvnw -Ppre-commit clean verify -DskipTests`
+2. [ ] *Test Execution*: `./mvnw clean test` - all tests must pass
+3. [ ] *Module Identification*: List all modules for systematic processing
+4. [ ] *Logging Standards Review*: Familiarize with <<../logging/core-standards.adoc#,Core Standards>>, <<../logging/implementation-guide.adoc#,Implementation Guide>>, and <<../logging/testing-guide.adoc#,Testing Guide>>
+
+== Module-by-Module Approach
+
+=== Single Module Process
+1. *Module Focus*: Process one module completely before moving to next
+2. *Test Execution*: `./mvnw clean test -pl module-name`
+3. *Documentation Update*: Ensure `doc/LogMessages.adoc` is current
+4. *Commit per Module*: Complete module before next following <<git-commit-standards.adoc#,Git Commit Standards>>
+
+=== Multi-Module Strategy
+* Process modules in dependency order (dependencies first)
+* Maintain build stability after each module
+* Verify inter-module logging compatibility
+
+== Logging Standards Implementation
+
+=== Required Changes per <<../logging/core-standards.adoc#,Core Standards>>
+
+==== Logger Configuration Issues
+* **Wrong Logger Type**: Replace slf4j, log4j, or java.util.logging with CuiLogger
+* **Incorrect Declaration**: Ensure `private static final CuiLogger LOGGER = new CuiLogger(ClassName.class)`
+* **System.out/err Usage**: Replace with appropriate logger level calls
+* **Log Level Prefixes**: Remove manual prefixes like [DEBUG], [ERROR] - use proper log levels
+
+==== LogRecord Implementation Issues
+* **Missing LogRecord Usage**: INFO/WARN/ERROR/FATAL must use LogRecord, not direct logging
+* **Incorrect LogRecord Usage**: DEBUG/TRACE must NOT use LogRecord - use direct logging only
+* **Wrong Parameter Format**: Use '%s' for string substitutions (not '{}' or '%d') - always prefer '%s' over '{}'
+* **Exception Handling**: Exception parameter must come first in log calls
+
+==== LogMessages Structure Issues
+* **Missing LogMessages Class**: Create module-specific LogMessages following DSL-Style Constants Pattern
+* **Incorrect Hierarchy**: Must be exactly 4 levels deep with category-level imports only
+* **ID Range Violations**: INFO (001-099), WARN (100-199), ERROR (200-299), FATAL (300-399)
+* **Duplicate IDs**: Ensure unique identifiers within module
+
+=== Documentation Requirements
+
+==== doc/LogMessages.adoc Compliance
+* **File Existence**: Must exist for each module with LogMessages
+* **Format Compliance**: Follow specified table structure per <<../logging/core-standards.adoc#,Core Standards>>
+* **Content Accuracy**: All documented messages must match implementation exactly
+* **Complete Coverage**: All INFO/WARN/ERROR/FATAL messages must be documented
+
+== Duplicate Detection and Resolution
+
+=== Common Duplication Patterns
+* **Identical Log Messages**: Same message across different components
+* **Similar Message Templates**: Messages that could be consolidated
+* **Redundant LogRecord Declarations**: Multiple LogRecords for the same purpose
+* **Duplicate Error Conditions**: Same error logged in multiple places
+* **Mixed Parameter Formats**: Some messages using '{}' and others using '%s' - standardize on '%s'
+
+=== Resolution Strategy
+* **Consolidate Messages**: Move common messages to shared LogMessages class
+* **Parameterize Templates**: Use parameters instead of multiple similar messages
+* **Extract Common Patterns**: Create reusable LogRecord declarations
+* **Centralize Error Logging**: Single point of logging for common errors
+
+== Testing Implementation
+
+=== Required Test Coverage per <<../logging/testing-guide.adoc#,Testing Guide>>
+* **All INFO Level Messages**: Verify content and level
+* **All WARN Level Messages**: Verify content and level  
+* **All ERROR Level Messages**: Verify content and level
+* **All FATAL Level Messages**: Verify content and level
+* **Parameter Substitution**: Test all parameter combinations
+* **Exception Logging**: Verify exception inclusion
+
+=== Testing Framework Requirements
+* **@EnableTestLogger**: Required on all test classes
+* **cui-test-juli-logger**: Use for all logging tests
+* **LogAsserts Methods**: Use appropriate assertion methods
+* **TestLogLevel Constants**: Use for log level verification
+
+== Critical Constraints
+
+=== Production Code Protection
+* **LOGGING CODE ONLY**: Only modify logging-related code, no other production changes
+* **Bug Discovery**: Must ask user for approval before fixing non-logging production bugs
+* **Behavior Preservation**: All existing functionality must continue to work
+* **Test-Only Changes**: Focus on logging implementation and testing
+
+=== Bug Handling Process
+When non-logging production bugs are discovered:
+1. **Stop maintenance process**
+2. **Document bug details** (location, issue, impact)
+3. **Ask user for approval** to fix non-logging production code
+4. **Wait for confirmation** before proceeding
+5. **Create separate commit** for bug fix following <<git-commit-standards.adoc#,Git Commit Standards>>
+
+== Maintenance Workflow
+
+=== Analysis Phase
+1. **Logger Audit**: Identify non-CuiLogger usage and system output calls
+2. **LogRecord Audit**: Check INFO/WARN/ERROR/FATAL use LogRecord, DEBUG/TRACE use direct logging
+3. **LogMessages Review**: Verify structure and ID ranges
+4. **Documentation Check**: Ensure doc/LogMessages.adoc exists and matches implementation
+5. **Duplicate Detection**: Identify redundant messages and patterns
+
+=== Implementation Phase
+1. **Logger Migration**: Replace non-CuiLogger instances
+2. **LogRecord Implementation**: Add LogRecord for production levels
+3. **LogMessages Creation**: Implement module LogMessages following DSL pattern
+4. **Documentation Update**: Create/update doc/LogMessages.adoc
+5. **Test Implementation**: Add comprehensive logging tests
+
+=== Verification Phase
+Following <<task-completion-standards.adoc#,Task Completion Standards>>:
+1. **Full Build**: `./mvnw -Ppre-commit clean verify -DskipTests`
+2. **Complete Test Suite**: `./mvnw clean install`
+3. **Documentation Validation**: Verify doc/LogMessages.adoc accuracy
+4. **Final Commit**: Consolidate if needed, update module status
+
+== Common Implementation Patterns
+
+=== Logger Migration
+**Before:**
+```java
+private static final Logger logger = LoggerFactory.getLogger(MyClass.class);
+System.out.println("Debug info: " + data);
+```
+
+**After:**
+```java
+private static final CuiLogger LOGGER = new CuiLogger(MyClass.class);
+LOGGER.debug("Debug info: %s", data);
+```
+
+=== LogRecord Implementation
+**Before:**
+```java
+logger.info("User {} logged in successfully", username);
+logger.error("Database connection failed: {}", e.getMessage());
+```
+
+**After:**
+```java
+LOGGER.info(INFO.USER_LOGIN.format(username));
+LOGGER.error(e, ERROR.DATABASE_CONNECTION.format());
+```
+
+**Key Points:**
+* Replace slf4j '{}' placeholders with '%s' in LogRecord templates
+* Always prefer '%s' over '{}' for parameter substitution
+* Use LogRecord.format() for parameterized messages
+
+=== LogMessages Structure
+```java
+@UtilityClass
+public final class ModuleLogMessages {
+    public static final String PREFIX = "MODULE";
+    
+    @UtilityClass
+    public static final class INFO {
+        public static final LogRecord USER_LOGIN = LogRecordModel.builder()
+            .template("User %s logged in successfully")
+            .prefix(PREFIX)
+            .identifier(1)
+            .build();
+    }
+    
+    @UtilityClass 
+    public static final class ERROR {
+        public static final LogRecord DATABASE_CONNECTION = LogRecordModel.builder()
+            .template("Database connection failed")
+            .prefix(PREFIX)
+            .identifier(200)
+            .build();
+    }
+}
+```
+
+=== Test Implementation
+```java
+@EnableTestLogger
+class ServiceTest {
+    @Test
+    void shouldLogUserLogin() {
+        // given
+        String username = "testuser";
+        
+        // when
+        service.loginUser(username);
+        
+        // then
+        assertSingleLogMessagePresent(
+            TestLogLevel.INFO,
+            INFO.USER_LOGIN.format(username));
+    }
+}
+```
+
+== Success Criteria
+
+=== Logger Configuration
+* Only CuiLogger instances used
+* No system output calls
+* Proper logger declaration pattern
+
+=== LogRecord Implementation  
+* INFO/WARN/ERROR/FATAL use LogRecord
+* DEBUG/TRACE use direct logging
+* Correct parameter formatting
+* Exception handling follows pattern
+
+=== Documentation
+* doc/LogMessages.adoc exists and is accurate
+* All production messages documented
+* Format follows specification
+
+=== Testing
+* All production log messages tested
+* Tests use cui-test-juli-logger
+* Comprehensive parameter and exception coverage
+
+For complete quality verification, see <<task-completion-standards.adoc#,Task Completion Standards>>.

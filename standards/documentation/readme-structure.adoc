@@ -10,7 +10,7 @@ Defines the standard structure for module README.adoc files in CUI projects to e
 
 * xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
 * xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
-* xref:javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
+* xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
 
 == Structure Requirements
 

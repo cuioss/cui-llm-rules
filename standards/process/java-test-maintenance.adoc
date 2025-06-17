@@ -1,0 +1,170 @@
+= Java Test Maintenance Process
+:toc:
+:toclevels: 2
+:sectnums:
+
+Process for maintaining and improving Java test quality while preserving functionality and adhering to CUI standards.
+
+== Pre-Maintenance Checklist
+
+Execute before starting test maintenance following <<task-completion-standards.adoc#,Task Completion Standards>>:
+
+1. [ ] *Build Verification*: `./mvnw -Ppre-commit clean verify -DskipTests`
+2. [ ] *Test Execution*: `./mvnw clean test` - all tests must pass
+3. [ ] *Coverage Baseline*: `./mvnw clean verify -Pcoverage` - record current metrics
+4. [ ] *Module Identification*: List all modules for systematic processing
+
+== Module-by-Module Approach
+
+=== Single Module Process
+1. *Module Focus*: Process one module completely before moving to next
+2. *Test Execution*: `./mvnw clean test -pl module-name`
+3. *Coverage Check*: `./mvnw clean verify -Pcoverage -pl module-name`
+4. *Commit per Module*: Complete module before next following <<git-commit-standards.adoc#,Git Commit Standards>>
+
+=== Multi-Module Strategy
+* Process modules in dependency order (dependencies first)
+* Maintain build stability after each module
+* Verify inter-module test compatibility
+
+== Test Quality Issues
+
+=== AI-Generated Code Detection
+* **Excessive Comments**: Remove verbose explanations in test methods
+* **Redundant Assertions**: Consolidate multiple similar assertions
+* **Over-Documentation**: Simplify JavaDoc to essential information only
+* **Verbose Test Names**: Shorten while maintaining clarity
+* **SonarQube Violations**: Fix assertThrows and other compliance issues per <<../testing/quality-standards.adoc#sonarqube-compliance,Quality Standards>>
+
+=== Duplicate Detection
+* **Identical Test Logic**: Consolidate into parameterized tests using JUnit 5 with @GeneratorsSource
+* **Similar Test Data**: Extract to shared TypeGenerator implementations
+* **Repeated Setup**: Move to `@BeforeEach` or test base classes
+* **Copy-Paste Patterns**: Refactor into reusable test methods with generator support
+* **Manual Data Duplication**: Replace with consistent generator-based data creation
+
+== CUI Framework Compliance
+
+=== Required CUI Testing Tools
+Verify usage per <<../testing/quality-standards.adoc#,Quality Standards>>:
+
+* **cui-test-generator**: Use for test data generation instead of manual creation
+* **cui-test-value-objects**: Apply for equality and serialization testing
+* **cui-jsf-test-basic**: Use for JSF component testing (where applicable)
+* **cui-test-mockwebserver-junit5**: Apply for HTTP client testing
+
+=== Framework Compliance Requirements
+
+* **Exclusive Test Data**: Use https://github.com/cuioss/cui-test-generator[cui-test-generator] for ALL test data generation
+* **No Random Alternatives**: Do NOT use manual data creation, Random, Faker, or other random data tools
+* **Custom Generators**: Create new TypeGenerator implementations where sensible for domain objects
+* **Required Annotations**: @EnableGeneratorController MUST be added to every test class using generators
+* **Value Object Testing**: Use https://github.com/cuioss/cui-test-value-objects[cui-test-value-objects] for comprehensive contract testing
+
+For detailed usage patterns and examples, see <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Usage Guide>>.
+
+=== Framework Migration Priorities
+
+* **Generator Adoption**: Replace manual test data with cui-test-generator patterns
+* **Value Object Migration**: Convert value object tests to cui-test-value-objects approach
+* **Annotation Updates**: Add @EnableGeneratorController to all test classes using generators
+* **Parameterized Test Enhancement**: Consider @GeneratorsSource for test data provision
+* **Custom Generator Creation**: Implement TypeGenerator for domain-specific objects
+
+=== CUI Framework Detection Issues
+
+* **Manual Data Creation**: Replace hardcoded test data with generator-based approach
+* **Missing Annotations**: Add @EnableGeneratorController where generators are used
+* **Incomplete Contract Testing**: Ensure all value objects use cui-test-value-objects
+* **Custom Random Logic**: Replace with appropriate TypeGenerator implementations
+
+== Maintenance Standards
+
+=== Test Structure
+Following <<../testing/core-standards.adoc#,Core Standards>>:
+* Verify AAA pattern (Arrange-Act-Assert)
+* Ensure test independence
+* Confirm descriptive test names
+* Check proper `@DisplayName` usage
+
+=== Coverage Requirements
+* Maintain minimum 80% line coverage
+* Preserve existing coverage levels
+* Identify untested critical paths
+* Document coverage gaps
+
+== Critical Constraints
+
+=== Production Code Protection
+* **NO PRODUCTION CHANGES** except confirmed bugs
+* **Bug Discovery**: Must ask user for approval before fixing production code
+* **Test-Only Changes**: Focus solely on test improvement
+* **Behavior Preservation**: All existing tests must continue to pass
+
+=== Bug Handling Process
+When production bugs are discovered:
+1. **Stop maintenance process**
+2. **Document bug details** (location, issue, impact)
+3. **Ask user for approval** to fix production code
+4. **Wait for confirmation** before proceeding
+5. **Create separate commit** for bug fix following <<git-commit-standards.adoc#,Git Commit Standards>>
+
+== Maintenance Workflow
+
+=== Analysis Phase
+1. **Scan for Issues**: Identify AI artifacts, duplicates, and non-compliance
+2. **CUI Framework Audit**: Check for manual data creation and missing annotations
+3. **Value Object Review**: Identify objects needing contract testing
+4. **Prioritize Changes**: Focus on high-impact improvements first
+5. **Plan Module Order**: Dependencies first, then dependent modules
+
+=== CUI Framework Compliance Checklist
+For each test class, verify:
+- [ ] **@EnableGeneratorController**: Present if using any generators
+- [ ] **Generator Usage**: All test data uses cui-test-generator (no manual/random data)
+- [ ] **Value Object Testing**: All value objects use cui-test-value-objects contracts
+- [ ] **Custom Generators**: Domain objects have appropriate TypeGenerator implementations
+- [ ] **@GeneratorsSource**: Used for parameterized tests where applicable
+- [ ] **Contract Coverage**: Equals, hashCode, serialization properly tested
+
+=== Implementation Phase
+1. **Apply Changes**: Fix one category of issues at a time
+2. **Verify Tests**: `./mvnw clean test -pl module-name` after each change
+3. **Check Coverage**: Ensure no coverage regression
+4. **Commit Incrementally**: Small, focused commits per improvement type
+
+=== Verification Phase
+Following <<task-completion-standards.adoc#,Task Completion Standards>>:
+1. **Full Build**: `./mvnw -Ppre-commit clean verify -DskipTests`
+2. **Complete Test Suite**: `./mvnw clean install`
+3. **Coverage Verification**: `./mvnw clean verify -Pcoverage`
+4. **Final Commit**: Consolidate if needed, update module status
+
+== Common Improvements
+
+=== Test Simplification
+* Remove excessive inline comments
+* Simplify overly complex test logic  
+* Extract repeated test data to TypeGenerator implementations
+* Convert similar tests to parameterized tests using @GeneratorsSource
+* Fix SonarQube assertThrows violations per <<../testing/quality-standards.adoc#sonarqube-compliance,Quality Standards>>
+
+=== Framework Migration Examples
+
+For comprehensive implementation examples, see <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Usage Guide>>.
+
+**Key Migration Patterns:**
+
+* **Manual Data Creation** → Use Generators.letterStrings(), Generators.integers(), etc.
+* **Hardcoded Test Values** → Use @GeneratorsSource with GeneratorType enum
+* **Custom Random Logic** → Implement TypedGenerator<T> for domain objects
+* **Manual Equals/HashCode Tests** → Use cui-test-value-objects framework
+* **Scattered Test Data** → Centralize with custom TypeGenerator implementations
+
+=== Structure Optimization
+* Group related tests in inner classes
+* Extract common setup to base classes  
+* Simplify test resource management
+* Improve test readability
+
+For complete quality verification, see <<task-completion-standards.adoc#,Task Completion Standards>>.

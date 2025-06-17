@@ -43,6 +43,7 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 === Quality and Process Standards
 * xref:testing/core-standards.adoc[Testing Standards] - Comprehensive testing standards and requirements
 ** xref:testing/quality-standards.adoc[Quality Standards] - Standards for test quality and coverage
+** xref:testing/cui-test-generator-guide.adoc[CUI Test Generator Usage Guide] - Comprehensive guide for using the CUI test generator framework
 
 * xref:logging/README.adoc[Logging Standards] - Logging implementation and best practices
 ** xref:logging/core-standards.adoc[Core Standards] - Fundamental logging requirements and formats
@@ -54,7 +55,6 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** xref:documentation/general-standard.adoc[General Standard] - Foundational documentation requirements and formats
 ** xref:documentation/organization-standards.adoc[Organization Standards] - Documentation organization, structure, and review guidelines
 ** xref:documentation/javadoc-standards.adoc[Javadoc Standards] - Standards for creating and maintaining Javadoc
-** xref:documentation/javadoc-maintenance.adoc[Javadoc Maintenance] - Standards for Javadoc error resolution and quality assurance
 ** xref:documentation/readme-structure.adoc[README Structure] - Standard format and content for README files
 
 * xref:requirements/README.adoc[Requirements Standards] - Requirements and specification documentation
@@ -66,6 +66,9 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 * xref:process/refactoring-process.adoc[Refactoring Process] - Process for code refactoring and improvement
 * xref:process/git-commit-standards.adoc[Git Commit Standards] - Standardized approach for git commit messages across all projects
 * xref:process/task-completion-standards.adoc[Task Completion Standards] - Quality standards and processes for completing development tasks
+* xref:process/javadoc-maintenance.adoc[Javadoc Maintenance] - Process for Javadoc error resolution and quality assurance
+* xref:process/java-test-maintenance.adoc[Java Test Maintenance] - Process for maintaining and improving Java test quality
+* xref:process/logger-maintenance.adoc[Logger Maintenance] - Process for implementing and maintaining logging standards compliance
 
 == Standards vs. Implementation
 
