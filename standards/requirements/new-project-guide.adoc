@@ -163,3 +163,4 @@ When implementing logging in a new project:
 == Related Documentation
 * xref:requirements-document.adoc[Requirements Document Structure]
 * xref:specification-documents.adoc[Specification Documents Structure]
+* xref:../process/git-commit-standards.adoc[Git Commit Standards] - Follow standardized commit messages during development

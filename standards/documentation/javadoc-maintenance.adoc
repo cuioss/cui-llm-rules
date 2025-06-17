@@ -41,7 +41,9 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 
 === Build Verification
 
-* Run appropriate command:
+For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
+* Run appropriate command following <<../process/task-completion-standards.adoc#,Task Completion Standards>>:
 ** Single module: `./mvnw clean verify -Pjavadoc`
 ** Multi-module: `./mvnw clean verify -Pjavadoc-mm-reporting`
 * Identify and categorize issues:
@@ -69,6 +71,8 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 * Review all applied fixes
 
 === Final Verification
+
+For comprehensive final verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
 
 * Run appropriate javadoc command
 * If issues remain:

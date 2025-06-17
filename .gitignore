@@ -1,3 +1,4 @@
 /.idea/
 .qodo
 **/**.iml
+**/**.DS_Store

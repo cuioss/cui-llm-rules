@@ -82,20 +82,9 @@ Progress can be assessed by:
 
 == Task Completion Process
 
-After implementing any task in the refactoring document, follow these steps:
+After implementing any refactoring task, follow the standardized process defined in <<task-completion-standards.adoc#,Task Completion Standards>>.
 
-1. *Clean-Up Code*: Use `./mvnw -Prewrite rewrite:run` -> verify with `./mvnw clean install` -> Fix if necessary and commit
-2. *Clean-Up Javadoc*: `./mvnw clean install -Pjavadoc` -> Fix all errors and warnings, verify until they are all corrected
-3. *Verify Documentation*: Ensure the documentation is updated correctly
-4. *Commit Changes*: Commit the changes with a git commit. Use the task name (e.g., "C1. Document Bouncy Castle Usage") as the commit message
-5. *Update Status*: Check the checkbox for the completed task in the Refactorings.adoc file
-
-This standardized process ensures:
-
-* Consistent code quality
-* Complete and accurate documentation
-* Clear tracking of completed work
-* Maintainable codebase
+When committing refactoring changes, use the task identifier and title as the commit subject (e.g., "refactor: C1. Document Bouncy Castle Usage").
 
 == Adding New Tasks
 

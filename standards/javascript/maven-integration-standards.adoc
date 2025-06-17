@@ -354,6 +354,8 @@ Enable parallel npm operations:
 == Validation
 
 === Build Verification
+For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 A successful Maven build must:
 
 1. Install correct Node.js and npm versions
@@ -365,6 +367,8 @@ A successful Maven build must:
 7. Address deprecated package warnings in build logs
 
 === Quality Gates
+For comprehensive quality gate processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 The following quality gates must pass:
 
 * **Formatting**: All JavaScript files properly formatted

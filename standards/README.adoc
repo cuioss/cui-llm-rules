@@ -63,7 +63,9 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** xref:requirements/new-project-guide.adoc[New Project Guide] - Standards for documentation in new projects
 
 === Process Standards
-* xref:process/refactoring_process.adoc[Refactoring Process] - Process for code refactoring and improvement
+* xref:process/refactoring-process.adoc[Refactoring Process] - Process for code refactoring and improvement
+* xref:process/git-commit-standards.adoc[Git Commit Standards] - Standardized approach for git commit messages across all projects
+* xref:process/task-completion-standards.adoc[Task Completion Standards] - Quality standards and processes for completing development tasks
 
 == Standards vs. Implementation
 

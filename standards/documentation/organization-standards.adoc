@@ -280,3 +280,4 @@ Comprehensive review process ensures documentation quality:
 * Minimize merge conflicts through logical organization
 * Maintain clear change history for documentation updates
 * Support collaborative editing through good organization
+* Follow <<../process/git-commit-standards.adoc#,Git Commit Standards>> for consistent commit messages

@@ -1,0 +1,201 @@
+= Git Commit Standards
+:toc:
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+
+This document defines the standardized approach for git commits across all CUI LLM projects.
+
+== Commit Message Structure
+
+=== Basic Format
+
+All commit messages must follow this structure:
+
+[source]
+----
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+----
+
+=== Components
+
+==== Type (Required)
+The type describes the nature of the change:
+
+* *feat*: A new feature
+* *fix*: A bug fix
+* *docs*: Documentation only changes
+* *style*: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+* *refactor*: A code change that neither fixes a bug nor adds a feature
+* *perf*: A code change that improves performance
+* *test*: Adding missing tests or correcting existing tests
+* *chore*: Changes to the build process or auxiliary tools and libraries
+
+==== Scope (Optional)
+The scope describes what part of the codebase is affected:
+
+* Component names (e.g., `auth`, `config`, `security`)
+* Module names (e.g., `jwt`, `validation`, `crypto`)
+* File categories (e.g., `docs`, `build`, `ci`)
+
+==== Subject (Required)
+The subject contains a succinct description of the change:
+
+* Use the imperative, present tense: "change" not "changed" nor "changes"
+* Don't capitalize the first letter
+* No dot (.) at the end
+* Maximum 50 characters
+
+==== Body (Optional)
+The body should include the motivation for the change and contrast this with previous behavior:
+
+* Use the imperative, present tense
+* Wrap at 72 characters
+* Explain what and why vs. how
+
+==== Footer (Optional)
+The footer should contain any information about breaking changes and reference issues:
+
+* Breaking changes should start with `BREAKING CHANGE:`
+* Reference issues with `Closes #123` or `Fixes #456`
+
+== Commit Message Examples
+
+=== Simple Commit
+[source]
+----
+fix(auth): resolve token validation error
+
+The JWT token validation was failing due to incorrect algorithm
+specification. Updated to use RS256 consistently across all
+validation methods.
+
+Fixes #234
+----
+
+=== Feature Addition
+[source]
+----
+feat(security): add rate limiting for API endpoints
+
+Implement rate limiting using sliding window algorithm to prevent
+abuse. Configurable limits per endpoint with default fallbacks.
+
+- Add RateLimitFilter class
+- Update configuration properties
+- Add rate limit exceeded error responses
+
+Closes #456
+----
+
+=== Refactoring Task Commit
+[source]
+----
+refactor: C1. Document Bouncy Castle Usage
+
+Ensure that the usage of Bouncy Castle for cryptographic operations
+is consistently documented throughout the codebase and documentation.
+
+- Add comprehensive JavaDoc comments
+- Update README with dependency information
+- Document security considerations
+----
+
+=== Documentation Update
+[source]
+----
+docs(process): update git commit standards
+
+Add comprehensive commit message guidelines including examples
+and formatting requirements for consistency across projects.
+----
+
+== Special Cases
+
+=== Task-Based Commits
+When committing refactoring tasks or structured work items, use the task identifier as the subject:
+
+[source]
+----
+refactor: [Task ID]. [Task Title]
+
+[Task description and implementation details]
+----
+
+Example:
+[source]
+----
+refactor: T3. Improve test coverage for JWT validation
+
+Add comprehensive unit tests for edge cases in JWT token validation
+including malformed tokens, expired signatures, and invalid algorithms.
+
+- Add 15 new test cases
+- Achieve 95% code coverage
+- Mock external dependencies properly
+----
+
+=== Breaking Changes
+Always document breaking changes clearly:
+
+[source]
+----
+feat(api): update authentication endpoint structure
+
+Change authentication response format to include additional
+security metadata and refresh token information.
+
+BREAKING CHANGE: Authentication response now returns object with
+`accessToken`, `refreshToken`, and `metadata` properties instead
+of plain token string.
+
+Migration: Update client code to access token via response.accessToken
+----
+
+== Commit Best Practices
+
+=== Frequency
+* Commit early and often
+* Make atomic commits (one logical change per commit)
+* Avoid mixing different types of changes in a single commit
+
+=== Message Quality
+* Write clear, descriptive commit messages
+* Use consistent formatting and conventions
+* Include relevant context in commit body
+* Reference related issues or tasks when applicable
+
+For comprehensive quality standards and task completion processes, see <<task-completion-standards.adoc#,Task Completion Standards>>.
+
+== Integration with Development Process
+
+For comprehensive task completion guidelines, see <<task-completion-standards.adoc#,Task Completion Standards>>.
+
+=== Git-Specific Integration
+* Use meaningful commit messages for code review
+* Link commits to relevant issues or tasks
+* Provide sufficient context in commit body for complex changes
+* Follow atomic commit principles (one logical change per commit)
+
+== Tools and Automation
+
+=== Git-Specific Tools
+* *commitizen*: Interactive commit message generation
+* *conventional-changelog*: Automatic changelog generation
+* *husky*: Git hooks for pre-commit validation
+
+=== Message Validation
+Consider implementing git hooks to validate:
+* Commit message format compliance
+* Required message components
+* Reference to issues or tasks
+
+For comprehensive automation and tooling standards, see <<task-completion-standards.adoc#,Task Completion Standards>>.
+
+== Conclusion
+
+Consistent commit practices improve code history readability, facilitate automated tooling, and enhance team collaboration. These standards ensure that all commits provide clear, actionable information about changes made to the codebase.

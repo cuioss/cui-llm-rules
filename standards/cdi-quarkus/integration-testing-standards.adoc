@@ -179,6 +179,10 @@ src/test/java/
 ----
 
 ==== Build Execution
+For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
+Integration test specific commands:
+
 [source,bash]
 ----
 # Run integration tests with native image
@@ -416,6 +420,10 @@ Certificates MUST be mounted as read-only volumes:
 ```
 
 === Build Command
+For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
+Integration test execution:
+
 [source,bash]
 ----
 # Run integration tests
@@ -424,6 +432,8 @@ Certificates MUST be mounted as read-only volumes:
 # Skip integration tests  
 ./mvnw package -pl integration-test-module
 ----
+
+NOTE: For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
 
 == Testing Patterns
 

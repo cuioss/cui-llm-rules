@@ -357,6 +357,8 @@ Configure pre-commit hooks to run Stylelint:
 }
 ----
 
+NOTE: When using git hooks for CSS linting, ensure commit messages follow the <<../process/git-commit-standards.adoc#,Git Commit Standards>>.
+
 === IDE Integration
 
 * Configure VS Code with Stylelint extension

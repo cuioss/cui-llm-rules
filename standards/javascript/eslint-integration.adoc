@@ -221,7 +221,7 @@ Linting must be part of the build pipeline:
 
 1. **Local Development**: Pre-commit hooks recommended
 2. **Build Pipeline**: Automatic fixing in verify phase
-3. **Quality Gates**: Must pass linting for successful builds
+3. **Quality Gates**: Must pass linting for successful builds (see <<../process/task-completion-standards.adoc#,Task Completion Standards>>)
 
 == Error Handling Standards
 

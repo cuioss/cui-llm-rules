@@ -446,6 +446,8 @@ For major version updates:
 
 == Quality Gates and Automation
 
+For comprehensive quality gate processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 === Dependency Quality Requirements
 All builds must meet these criteria:
 
@@ -474,6 +476,8 @@ updates:
       prefix: "deps"
       include: "scope"
 ----
+
+NOTE: Dependabot commit messages should follow the <<../process/git-commit-standards.adoc#,Git Commit Standards>> format. The "deps" prefix aligns with the "chore" type for dependency updates.
 
 ==== Automated Security Scanning
 [source,yaml]

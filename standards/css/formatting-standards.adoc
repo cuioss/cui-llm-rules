@@ -382,6 +382,8 @@ Configure automatic formatting on commit:
 }
 ----
 
+NOTE: When using git hooks for CSS formatting, ensure commit messages follow the <<../process/git-commit-standards.adoc#,Git Commit Standards>>.
+
 === IDE Integration
 
 ==== VS Code Configuration

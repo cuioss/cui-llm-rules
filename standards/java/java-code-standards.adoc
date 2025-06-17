@@ -148,3 +148,5 @@ List<String> names = users.stream()
 * xref:../README.adoc[Standards Overview]
 * xref:../logging/README.adoc[Logging Standards]
 * xref:../testing/core-standards.adoc[Testing Standards]
+* xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing Java development tasks
+* xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit messages for Java development

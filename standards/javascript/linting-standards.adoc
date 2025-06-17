@@ -360,7 +360,7 @@ ESLint rules are organized into focused categories for maintainability and clari
 
 **NPM Scripts**: Required lint and lint:fix commands
 **Maven Integration**: Build phase integration requirements
-**CI/CD Pipeline**: Quality gate integration
+**CI/CD Pipeline**: Quality gate integration (see <<../process/task-completion-standards.adoc#,Task Completion Standards>>)
 **StyleLint**: CSS-in-JS linting for web components
 
 === Framework-Specific Configurations

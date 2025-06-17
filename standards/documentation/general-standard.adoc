@@ -78,3 +78,5 @@ Defines comprehensive standards for all documentation across the codebase, inclu
 * xref:../README.adoc[Standards Overview]
 * xref:../java/java-code-standards.adoc[Java Standards]
 * xref:../logging/README.adoc[Logging Standards]
+* xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing documentation tasks
+* xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit messages for documentation changes

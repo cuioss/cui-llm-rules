@@ -181,3 +181,9 @@ _See Requirement REQ-5.1: Security Requirements in link:Requirements.adoc[Requir
 * [ ] Implement input validation
 * [ ] Implement authentication checks
 ----
+
+== Related Standards
+
+For task completion processes and quality standards, see:
+* xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards and processes for completing development tasks
+* xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit message format for tracking task completion

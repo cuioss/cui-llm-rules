@@ -48,3 +48,5 @@ The logging standards are organized into the following documents:
 * xref:../README.adoc[Standards Overview]
 * xref:../java/java-code-standards.adoc[Java Standards]
 * xref:../testing/core-standards.adoc[Testing Standards]
+* xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing logging implementation tasks
+* xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit messages for logging development

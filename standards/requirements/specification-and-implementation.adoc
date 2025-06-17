@@ -190,3 +190,9 @@ When updating documentation:
 3. Add cross-references between specification and implementation
 4. Remove references to transitionary states, focus on current state
 5. Ensure holistic view is maintained through proper linking
+
+== Related Standards
+
+For implementation and verification processes, see:
+* xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing implementation tasks
+* xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit messages for specification and implementation changes

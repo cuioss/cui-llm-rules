@@ -97,13 +97,15 @@ This document defines comprehensive quality standards, testing framework guideli
 
 == Quality Verification
 
+For comprehensive quality verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 === Quality Analysis Tools
 
 * SonarCloud for static code analysis
 * JUnit for unit testing
 * Mutation testing for test quality
 * Regular code reviews
-* Continuous integration checks
+* Continuous integration checks (see <<../process/task-completion-standards.adoc#,Task Completion Standards>>)
 
 === Quality Metrics
 
@@ -169,6 +171,8 @@ Regular Review Points:
 
 === Quality Analysis
 
+For comprehensive quality gate processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 * All quality gates passed
 * New issues addressed
 * Impact assessed
@@ -184,7 +188,11 @@ Regular Review Points:
 
 == Maven Coverage Profile
 
+For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 To verify code coverage in your project, use the Maven profile `-Pcoverage`:
+
+For code coverage verification, use the coverage profile following the <<../process/task-completion-standards.adoc#,Task Completion Standards>>:
 
 [source,bash]
 ----

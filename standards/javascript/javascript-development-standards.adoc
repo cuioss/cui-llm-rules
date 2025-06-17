@@ -139,7 +139,7 @@ When adding, removing, or updating JavaScript dependencies:
 
 1. **Security Assessment First**: Run `npm audit` before making any changes to identify existing vulnerabilities
 2. **Update to Latest Secure Versions**: Always use the most recent stable versions unless there are compatibility issues
-3. **Post-Change Verification**: After any dependency changes:
+3. **Post-Change Verification**: After any dependency changes, follow the verification process in <<../process/task-completion-standards.adoc#,Task Completion Standards>>:
    - Run `npm install` and review all warning messages
    - Execute `npm audit` to verify no new vulnerabilities were introduced
    - Test that all functionality still works as expected
@@ -420,10 +420,10 @@ For complete integration details, see xref:maven-integration-standards.adoc[Mave
 2. Run `npm run format` to format JavaScript code
 3. Run `npm run lint:fix` to fix JavaScript linting issues
 4. Run `npm run test` to verify JavaScript functionality
-5. Run `npm run quality` before committing
+5. Follow <<../process/task-completion-standards.adoc#,Task Completion Standards>> for final verification before committing
 
 === JavaScript Continuous Integration
-JavaScript projects must pass these checks in CI:
+JavaScript projects must pass these checks in CI, as defined in <<../process/task-completion-standards.adoc#,Task Completion Standards>>:
 * JavaScript formatting verification
 * JavaScript linting checks
 * JavaScript unit tests with 80% coverage

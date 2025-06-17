@@ -191,7 +191,7 @@ class NativeTokenValidatorProducerIT {
 ==== @QuarkusIntegrationTest Limitations
 * **No CDI Injection**: `@Inject` annotations are NOT supported
 * **HTTP Testing**: Use RestAssured to test through HTTP endpoints
-* **Application Packaging**: Requires `mvn package` to be run first
+* **Application Packaging**: Requires build packaging following <<../process/task-completion-standards.adoc#,Task Completion Standards>>
 * **Native Mode**: Primarily for testing native builds and packaged applications
 
 === Test Profiles
@@ -439,6 +439,8 @@ RestAssured.when().get("/q/health").then().statusCode(200);
 
 == Quality Gates
 
+For comprehensive quality gate processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 === Mandatory Requirements
 * All `@QuarkusTest` classes must have coverage data collected
 * All CDI producers must be tested with actual injection
@@ -447,7 +449,9 @@ RestAssured.when().get("/q/health").then().statusCode(200);
 * Build must fail if coverage falls below project thresholds
 
 === Integration with CI/CD
-* Run `mvn clean test` for unit test coverage
-* Run `mvn clean package verify` for full coverage including integration tests
+For comprehensive CI/CD integration processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
+* Follow <<../process/task-completion-standards.adoc#,Task Completion Standards>> for unit test coverage verification
+* Follow <<../process/task-completion-standards.adoc#,Task Completion Standards>> for full coverage including integration tests
 * SonarQube analysis must include coverage data from JaCoCo XML reports
 * Coverage thresholds enforced through quality gates

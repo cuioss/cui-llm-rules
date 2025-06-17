@@ -280,6 +280,8 @@ Formatting must be integrated into Maven build phases:
 * **verify phase**: Linting with automatic fixes (includes formatting fixes)
 
 === Continuous Integration Requirements
+For comprehensive continuous integration processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 * Format checking must occur early in build process
 * Build must fail if formatting is inconsistent
 * Automatic formatting fixes applied during verify phase
@@ -485,6 +487,8 @@ Consider implementing pre-commit hooks to enforce formatting:
 }
 ----
 
+NOTE: When using git hooks for JavaScript formatting, ensure commit messages follow the <<../process/git-commit-standards.adoc#,Git Commit Standards>>.
+
 === Automated Fixing
 Use automated fixing during development:
 
@@ -493,6 +497,8 @@ Use automated fixing during development:
 * **Editor Integration**: Format on save
 
 === Formatting Validation
+For comprehensive validation processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 Continuous validation of formatting standards:
 
 * **Build Pipeline**: Format checking in compile phase

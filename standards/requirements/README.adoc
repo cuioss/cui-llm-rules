@@ -70,3 +70,9 @@ Test cases have been implemented in:
 
 Refer to the test implementations for detailed test cases and coverage.
 ----
+
+== Related Standards
+
+For implementation and verification processes, see:
+* xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing requirements and specification tasks
+* xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit messages for requirements and specification changes

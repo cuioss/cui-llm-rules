@@ -510,6 +510,8 @@ Coverage reports must be available for SonarQube:
 
 == Continuous Integration Requirements
 
+For comprehensive continuous integration processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+
 === CI/CD Pipeline Integration
 * Tests must pass before code can be merged
 * Coverage thresholds must be met
