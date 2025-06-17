@@ -56,30 +56,35 @@ ENTRYPOINT ["/app/application"]
 == Standards Overview
 
 === CDI Development (xref:cdi-aspects.adoc[→ Details])
+
 * **Constructor Injection**: Mandatory over field injection
 * **Single Constructor Rule**: No `@Inject` needed for single constructors  
 * **Immutability**: Use `final` fields for injected dependencies
 * **Optional Dependencies**: Use `Instance<T>` pattern when appropriate
 
 === Testing Standards (xref:testing-standards.adoc[→ Details])
+
 * **Coverage Target**: 80% minimum with JaCoCo
 * **Quarkus Tests**: `@QuarkusTest` for CDI context, `@QuarkusIntegrationTest` for packaged apps
 * **SonarQube Integration**: XML report generation required
 * **Test Profiles**: Separate configurations for different test scenarios
 
 === Integration Testing Standards (xref:integration-testing-standards.adoc[→ Details])
+
 * **API-Only Testing**: No CDI injection, external client perspective only
 * **HTTPS Required**: All integration tests use TLS with proper certificates
 * **Docker Lifecycle**: Script-based container management via Maven phases
 * **Production Equivalence**: Container runtime with security hardening
 
 === Container Standards (xref:container-standards.adoc[→ Details])  
+
 * **Base Image**: Quarkus distroless (91.9MB)
 * **Performance**: <0.5s startup, <150MB memory
 * **Security**: OWASP Docker Top 10 compliant with capability dropping
 * **Certificates**: PEM-based approach
 
 === Security Standards (xref:security-standards.adoc[→ Details])
+
 * **OWASP Compliance**: Docker Top 10 security requirements
 * **Runtime Security**: Non-root execution, read-only filesystem, capability dropping
 * **Certificate Management**: External mounting, proper permissions, automated rotation
@@ -116,8 +121,8 @@ These standards support:
 * **Certificate Management**: PEM-based approach
 
 == Related Standards
-* link:../testing/README.adoc[Testing Standards Overview]
-* link:../java/README.adoc[Java Standards Overview]  
+* link:../testing/core-standards.adoc[Testing Standards Overview]
+* link:../java/java-code-standards.adoc[Java Standards Overview]  
 * link:../documentation/general-standard.adoc[Documentation Standards]
 
 == External References

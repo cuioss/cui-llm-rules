@@ -14,17 +14,9 @@ This document defines comprehensive standards for logging across the codebase, i
 * xref:README.adoc[Logging Standards Overview]
 * xref:implementation-guide.adoc[Logging Implementation Guide]
 * xref:testing-guide.adoc[Logging Testing Guide]
-* xref:dsl-style-constants.adoc[DSL-Style Constants Pattern]
-* xref:../java/README.adoc[Java Standards]
+* xref:../java/dsl-style-constants.adoc[DSL-Style Constants Pattern]
+* xref:../java/java-code-standards.adoc[Java Standards]
 
-== Important Note on Code Changes
-
-When adapting code to these logging standards:
-
-* Only modify logging-related code (imports, log statements, assertions)
-* DO NOT change any unrelated production or test code
-* DO NOT refactor or "improve" other aspects while implementing logging changes
-* Keep changes focused solely on logging standard compliance
 
 == Core Standards
 
@@ -46,7 +38,7 @@ private static final CuiLogger LOGGER = new CuiLogger(YourClass.class);
 * No log4j or slf4j usage
 * No System.out or System.err - use appropriate logger level
 * No direct logger instantiation
-* Usage of prefixes like [DEBUG_LOG] or similar. Allways us Log_levels like DEBUG, INFO, WARN, ERROR, FATAL
+* Usage of prefixes like [DEBUG_LOG] or similar. Always use log levels like DEBUG, INFO, WARN, ERROR, FATAL
 
 === Logging Standards
 
@@ -100,7 +92,7 @@ LOGGER.info(INFO.USER_LOGIN.format(username));
 
 ==== Class Structure and Organization
 
-* Follow the xref:dsl-style-constants.adoc[DSL-Style Constants Pattern]
+* Follow the xref:../java/dsl-style-constants.adoc[DSL-Style Constants Pattern]
 * Import category level constant, NOT its members
 * See xref:implementation-guide.adoc[Logging Implementation Guide] for examples
 
@@ -162,20 +154,12 @@ All messages follow the format: [Module-Prefix]-[identifier]: [message]
 
 === Documentation Rules
 
-. Every LogMessages class must have a corresponding documentation file at `doc/LogMessages.adoc`
-. Documentation must be updated whenever log messages are modified
-. Documentation must exactly match the implementation - this is a success criterion
-. Messages must be organized in separate tables by log level, with level ranges in headers:
-** INFO Level (001-099)
-** WARN Level (100-199)
-** ERROR Level (200-299)
-** FATAL Level (300-399)
-. Include all metadata:
-** Full identifier with module prefix
-** Module/component name
-** Exact message template
-** Clear description of when the message is used
-* Other Level like debug or trace are not to be documented that way
+* Every LogMessages class must have a corresponding documentation file at `doc/LogMessages.adoc`
+* Documentation must be updated whenever log messages are modified
+* Documentation must exactly match the implementation
+* Messages must be organized in separate tables by log level
+* Include all metadata: identifier, component name, message template, description
+* DEBUG and TRACE levels are not documented this way
 
 == Success Criteria
 
@@ -191,7 +175,7 @@ All messages follow the format: [Module-Prefix]-[identifier]: [message]
 * Message identifiers follow level ranges
 * DSL-Style pattern is followed
 * Imports are correct
-* On validating you must ensure, that there is no "dangling" LogRecords, saying each type must be used. If it is not used, analyze the codebase, whether it has somewhere to be used. Remove it otherwise. Remove it from doc/LogMessages.adoc as well
+* No unused LogRecords - remove from code and documentation if not used
 
 === Documentation
 

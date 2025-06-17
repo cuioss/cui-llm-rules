@@ -1,17 +1,18 @@
-= JavaScript Linting Standards
+= ESLint Configuration Standards
 :toc: left
 :toclevels: 3
 :sectnums:
 
 == Purpose
-Defines comprehensive ESLint rules, configuration standards, and integration requirements for consistent code quality across JavaScript projects.
+Defines ESLint setup, dependencies, and configuration standards for consistent JavaScript code quality across all CUI projects.
 
 == Related Documentation
+* xref:eslint-rules.adoc[ESLint Rules]: Rule configuration and enforcement standards
+* xref:eslint-integration.adoc[ESLint Integration]: Build system and CI/CD integration
 * xref:project-structure.adoc[Project Structure]: Package.json and Maven integration
 * xref:formatting-standards.adoc[Formatting Standards]: Prettier integration with ESLint
-* xref:javascript-best-practices.adoc[JavaScript Best Practices]: Code patterns and conventions
 
-== ESLint Configuration Standards
+== ESLint v9 Configuration Standards
 
 === ESLint Flat Configuration Structure
 All projects must use ESLint v9+ with flat configuration format. Create an `eslint.config.js` file:
@@ -66,7 +67,7 @@ export default [
       },
     },
     rules: {
-      // Project-specific rules (see sections below)
+      // Project-specific rules (see eslint-rules.adoc)
     },
   },
   // Test file configuration
@@ -87,7 +88,7 @@ export default [
       },
     },
     rules: {
-      // Test-specific rule overrides (see Test File Overrides section)
+      // Test-specific rule overrides (see eslint-rules.adoc)
     },
   },
 ];
@@ -189,10 +190,12 @@ export default [
 ];
 ----
 
-=== Required Dependencies and Packages
+== Required Dependencies and Packages
+
 All projects must include these ESLint packages in package.json:
 
-==== Core ESLint v9 Dependencies
+=== Core ESLint v9 Dependencies
+
 [source,json]
 ----
 {
@@ -211,27 +214,33 @@ All projects must include these ESLint packages in package.json:
 }
 ----
 
-==== Core Extensions
+=== Core Extensions
+
 * `@eslint/js`: Official ESLint recommended configuration (replaces airbnb-base)
 * `plugin:jest/recommended`: Jest testing best practices  
 * `plugin:prettier/recommended`: Prettier integration (must be last)
 
-==== Documentation Extensions
+=== Documentation Extensions
+
 * `plugin:jsdoc/recommended`: JSDoc documentation standards
 
-==== Code Quality Extensions
+=== Code Quality Extensions
+
 * `plugin:unicorn/recommended`: Additional JavaScript best practices
 * `plugin:security/recommended`: Security vulnerability detection
 * `plugin:promise/recommended`: Promise and async/await best practices
 * `plugin:sonarjs/recommended`: Code quality and complexity analysis (required for security and maintainability)
 
-==== Framework-Specific Extensions (Optional)
+=== Framework-Specific Extensions (Optional)
+
 When using specific frameworks:
+
 
 * `plugin:lit/recommended`: Lit-specific rules (for web components)
 * `plugin:wc/recommended`: Web Components best practices (when applicable)
 
-=== Environment Configuration
+== Environment Configuration
+
 Must support these environments:
 
 [source,javascript]
@@ -244,7 +253,8 @@ env: {
 }
 ----
 
-=== Parser Options
+== Parser Options
+
 Must use modern JavaScript features:
 
 [source,javascript]
@@ -255,9 +265,10 @@ parserOptions: {
 }
 ----
 
-== Required Rule Categories
+== Basic Rule Configuration
 
 === Import/Export Rules
+
 Essential for module management:
 
 [source,javascript]
@@ -275,6 +286,7 @@ rules: {
 ----
 
 === JavaScript Best Practices
+
 Core JavaScript quality rules:
 
 [source,javascript]
@@ -298,6 +310,7 @@ rules: {
 ----
 
 === Prettier Integration Rules
+
 Disable style rules handled by Prettier:
 
 [source,javascript]
@@ -325,6 +338,7 @@ rules: {
 ----
 
 === Function and Arrow Function Rules
+
 Modern function standards:
 
 [source,javascript]
@@ -336,33 +350,3 @@ rules: {
   'prefer-arrow-callback': 'error',
 }
 ----
-
-== Rule Configuration Overview
-
-ESLint rules are organized into focused categories for maintainability and clarity. Detailed configurations are documented in specialized documents:
-
-* **xref:eslint-rules.adoc[ESLint Rule Configurations]**: Comprehensive rule definitions including framework-specific rules, JSDoc standards, security controls, code quality rules, and environment-specific overrides
-* **xref:eslint-integration.adoc[ESLint Build Integration]**: Build pipeline integration, CI/CD processes, Maven configuration, and StyleLint setup for CSS-in-JS patterns
-
-== Quick Reference
-
-=== Essential Rule Categories
-
-**Core Quality Rules**: Basic JavaScript best practices and code quality
-**Framework Rules**: Optional Lit and Web Components specific configurations  
-**Documentation Rules**: JSDoc requirements and standards
-**Security Rules**: Security vulnerability prevention
-**Modern JavaScript**: ES6+ features and patterns
-**Performance**: Code performance optimizations
-**Environment Overrides**: Test, production, and mock file specific rules
-
-=== Integration Points
-
-**NPM Scripts**: Required lint and lint:fix commands
-**Maven Integration**: Build phase integration requirements
-**CI/CD Pipeline**: Quality gate integration
-**StyleLint**: CSS-in-JS linting for web components
-
-=== Framework-Specific Configurations
-
-For Cypress E2E testing ESLint configuration, see xref:cypress-e2e-testing-standards.adoc[Cypress E2E Testing Standards].

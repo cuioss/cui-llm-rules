@@ -9,7 +9,8 @@ Defines comprehensive standards for developing web components using the Lit fram
 == Related Documentation
 * xref:linting-standards.adoc[Linting Standards]: Lit-specific ESLint rules
 * xref:unit-testing-standards.adoc[Unit Testing Standards]: Component testing patterns
-* xref:javascript-best-practices.adoc[JavaScript Best Practices]: Modern JavaScript in components
+* xref:javascript-core-patterns.adoc[JavaScript Core Patterns]: Modern JavaScript syntax in components
+* xref:javascript-async-patterns.adoc[JavaScript Async Patterns]: Asynchronous patterns in component lifecycle
 
 == Lit Framework Standards
 
@@ -120,7 +121,7 @@ static properties = {
   isActive: { type: Boolean },
   items: { type: Array },
   config: { type: Object },
-  
+
   // Private state (internal reactive state)
   _loading: { state: true },
   _error: { state: true },
@@ -150,7 +151,7 @@ constructor() {
   this.isActive = false;
   this.items = [];
   this.config = {};
-  
+
   // Private state
   this._loading = false;
   this._error = null;
@@ -338,7 +339,7 @@ render() {
       <header class="header">
         <h1 class="title">${this.title}</h1>
       </header>
-      
+
       <main class="content">
         ${this._renderContent()}
       </main>
@@ -386,7 +387,7 @@ render() {
         ? html`<header class="header">${this.title}</header>`
         : ''
       }
-      
+
       <!-- Conditional rendering with guard -->
       ${this.items.length > 0 
         ? html`
@@ -413,19 +414,19 @@ render() {
     <div class="container">
       <!-- Simple event handlers -->
       <button @click="${this._handleClick}">Click Me</button>
-      
+
       <!-- Event handlers with parameters -->
       <button @click="${() => this._handleAction('delete')}">
         Delete
       </button>
-      
+
       <!-- Input event binding -->
       <input 
         type="text" 
         .value="${this.inputValue}"
         @input="${this._handleInput}"
       />
-      
+
       <!-- Custom events -->
       <child-component 
         @custom-event="${this._handleCustomEvent}"
@@ -464,7 +465,7 @@ firstUpdated(changedProperties) {
 
 updated(changedProperties) {
   super.updated(changedProperties);
-  
+
   // React to property changes
   if (changedProperties.has('config')) {
     this._handleConfigChange();
@@ -495,10 +496,11 @@ Handle asynchronous operations properly:
 
 [source,javascript]
 ----
+// Component method - handle errors for UI state management
 async _fetchData() {
   this._loading = true;
   this._error = null;
-  
+
   try {
     const response = await fetch('/api/data');
     if (!response.ok) {
@@ -506,8 +508,32 @@ async _fetchData() {
     }
     this._data = await response.json();
   } catch (error) {
+    // Store error for UI display and log for debugging
     this._error = error.message;
     console.error('Failed to fetch data:', error);
+    // Note: Not re-throwing here is appropriate for component methods
+    // that manage their own error state for UI display
+  } finally {
+    this._loading = false;
+  }
+}
+
+// Alternative: Public method that allows caller to handle errors
+async fetchData() {
+  this._loading = true;
+  this._error = null;
+
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    this._data = await response.json();
+    return this._data;
+  } catch (error) {
+    this._error = error.message;
+    console.error('Failed to fetch data:', error);
+    throw error; // Re-throw for caller to handle
   } finally {
     this._loading = false;
   }
@@ -524,12 +550,30 @@ For Quarkus DevUI components:
 import { devui } from 'devui';
 
 export class QwcJwtConfig extends LitElement {
+  // Component method - handle errors for UI state management
   async _fetchConfiguration() {
     try {
       const config = await devui.jsonRPC.call('getJwtConfiguration');
       this._configuration = config;
     } catch (error) {
+      // Store error for UI display
       this._error = `Failed to fetch configuration: ${error.message}`;
+      console.error('Failed to fetch JWT configuration:', error);
+      // Note: Not re-throwing here is appropriate for component methods
+      // that manage their own error state for UI display
+    }
+  }
+
+  // Alternative: Public method that allows caller to handle errors
+  async fetchConfiguration() {
+    try {
+      const config = await devui.jsonRPC.call('getJwtConfiguration');
+      this._configuration = config;
+      return config;
+    } catch (error) {
+      this._error = `Failed to fetch configuration: ${error.message}`;
+      console.error('Failed to fetch JWT configuration:', error);
+      throw error; // Re-throw for caller to handle
     }
   }
 }
@@ -543,7 +587,7 @@ Standard pattern for DevUI JSON-RPC calls:
 async _callDevUIService(method, params = {}) {
   this._loading = true;
   this._error = null;
-  
+
   try {
     const result = await devui.jsonRPC.call(method, params);
     return result;
@@ -591,17 +635,17 @@ Prevent memory leaks:
 ----
 disconnectedCallback() {
   super.disconnectedCallback();
-  
+
   // Cancel pending operations
   if (this._abortController) {
     this._abortController.abort();
   }
-  
+
   // Clear timers
   if (this._timer) {
     clearInterval(this._timer);
   }
-  
+
   // Clear references
   this._data = null;
   this._cache = null;
@@ -695,7 +739,7 @@ render() {
       >
         ${this._loading ? 'Loading...' : 'Action'}
       </button>
-      
+
       <div id="button-help" class="help-text">
         Click to perform action
       </div>
@@ -730,7 +774,7 @@ Manage focus properly:
 ----
 firstUpdated() {
   super.firstUpdated();
-  
+
   // Set initial focus
   const firstFocusable = this.shadowRoot.querySelector('[tabindex="0"]');
   if (firstFocusable) {

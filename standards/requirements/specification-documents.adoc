@@ -31,6 +31,7 @@ Defines the structure and format for specification documents in CUI projects, en
 .. Each section must include a backtracking link to the corresponding requirement
 
 == Backtracking Links Format
+
 . Each specification section must include a backtracking link to the corresponding requirement
 . The backtracking link must follow this exact format:
 +

@@ -17,6 +17,7 @@ Defines comprehensive Prettier configuration and formatting rules for consistent
 === Required Configuration File
 Create `.prettierrc.js` in project root with CSS-specific settings:
 
+
 [source,javascript]
 ----
 module.exports = {
@@ -70,6 +71,7 @@ module.exports = {
 === Alternative JSON Configuration
 For projects preferring JSON configuration, create `.prettierrc`:
 
+
 [source,json]
 ----
 {
@@ -99,6 +101,7 @@ For projects preferring JSON configuration, create `.prettierrc`:
 === Property Formatting
 CSS properties should follow consistent formatting patterns:
 
+
 [source,css]
 ----
 /* ✅ Correct formatting */
@@ -124,6 +127,7 @@ CSS properties should follow consistent formatting patterns:
 
 === Selector Formatting
 CSS selectors should be formatted consistently:
+
 
 [source,css]
 ----
@@ -157,6 +161,7 @@ CSS selectors should be formatted consistently:
 
 === CSS Custom Properties Formatting
 CSS custom properties should follow specific formatting:
+
 
 [source,css]
 ----
@@ -193,6 +198,7 @@ CSS custom properties should follow specific formatting:
 === CSS Functions and Calculations
 Format CSS functions consistently:
 
+
 [source,css]
 ----
 /* ✅ Correct function formatting */
@@ -220,6 +226,7 @@ Format CSS functions consistently:
 
 === SCSS-Specific Formatting Rules
 For SCSS files, apply additional formatting considerations:
+
 
 [source,scss]
 ----
@@ -262,6 +269,7 @@ $primary-color:#1976d2;$spacing-md:1rem;
 === Nested Rules Formatting
 Format nested CSS rules with proper indentation:
 
+
 [source,scss]
 ----
 /* ✅ Correct nesting formatting */
@@ -296,6 +304,7 @@ Format nested CSS rules with proper indentation:
 
 === Styled Components Formatting
 For projects using CSS-in-JS solutions:
+
 
 [source,javascript]
 ----
@@ -336,6 +345,7 @@ const Button = styled.button`
 === NPM Scripts Integration
 Prettier integrates with CSS development workflow:
 
+
 [source,json]
 ----
 {
@@ -352,6 +362,7 @@ Prettier integrates with CSS development workflow:
 
 === Pre-commit Hooks
 Configure automatic formatting on commit:
+
 
 [source,json]
 ----
@@ -376,6 +387,7 @@ Configure automatic formatting on commit:
 ==== VS Code Configuration
 Configure VS Code for CSS formatting:
 
+
 [source,json]
 ----
 {
@@ -397,6 +409,7 @@ Configure VS Code for CSS formatting:
 
 ==== IntelliJ IDEA Configuration
 Configure IntelliJ IDEA for CSS formatting:
+
 * Enable Prettier plugin
 * Set Prettier as default formatter for CSS/SCSS
 * Configure format on save
@@ -406,6 +419,7 @@ Configure IntelliJ IDEA for CSS formatting:
 
 === Documentation Comments
 Format CSS documentation comments consistently:
+
 
 [source,css]
 ----
@@ -449,6 +463,7 @@ Format CSS documentation comments consistently:
 
 === Section Comments
 Use section comments to organize CSS:
+
 
 [source,css]
 ----
@@ -498,6 +513,7 @@ Use section comments to organize CSS:
 === CSS Import Organization
 Format CSS imports consistently:
 
+
 [source,css]
 ----
 /* CSS imports should be at the top and organized */
@@ -518,6 +534,7 @@ Format CSS imports consistently:
 
 === Media Query Formatting
 Format media queries with proper spacing:
+
 
 [source,css]
 ----
@@ -558,6 +575,7 @@ Format media queries with proper spacing:
 === Formatting Validation
 Ensure consistent formatting across the codebase:
 
+
 [source,json]
 ----
 {
@@ -570,6 +588,7 @@ Ensure consistent formatting across the codebase:
 
 === CI/CD Integration
 Integrate formatting checks in CI/CD pipeline:
+
 
 [source,yaml]
 ----

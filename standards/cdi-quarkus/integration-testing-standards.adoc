@@ -577,7 +577,7 @@ quarkus.log.category."io.quarkus.http".level=DEBUG
 * xref:testing-standards.adoc[General Testing Standards]
 * xref:container-standards.adoc[Container Standards]
 * xref:security-standards.adoc[Security Standards]
-* link:../testing/README.adoc[CUI Testing Standards Overview]
+* link:../testing/core-standards.adoc[CUI Testing Standards Overview]
 
 == External References
 * https://quarkus.io/guides/getting-started-testing[Quarkus Testing Guide]

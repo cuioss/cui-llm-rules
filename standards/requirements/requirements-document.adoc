@@ -7,10 +7,12 @@
 Defines the structure and format for requirements documents in CUI projects, ensuring consistency and traceability.
 
 == Document Location and Naming
+
 . Requirements must be located in the project under `doc/Requirements.adoc`
 . The document must follow AsciiDoc format with proper headings, sections, and formatting
 
 == Document Structure
+
 . The document must include:
 .. Title: `= [Project Name] Requirements`
 .. Table of contents: `:toc:`, `:toclevels: 3`, `:toc-title: Table of Contents`, `:sectnums:`
@@ -19,6 +21,7 @@ Defines the structure and format for requirements documents in CUI projects, ens
 .. Specific requirements sections organized by component or feature
 
 == Requirements Format
+
 . Each requirement must have a unique ID with a consistent prefix
 .. Format: `[#PREFIX-NUM]`
 .. Example: `[#NIFI-AUTH-1]`
@@ -36,6 +39,7 @@ Defines the structure and format for requirements documents in CUI projects, ens
 .. Requirements should reference implementation specifications where appropriate
 
 == Requirements Numbering
+
 . Major requirements must use a sequential number (e.g., `PREFIX-1`, `PREFIX-2`)
 . Sub-requirements must use a decimal notation (e.g., `PREFIX-1.1`, `PREFIX-1.2`)
 . Requirements must maintain a consistent numbering scheme throughout the document
@@ -45,6 +49,7 @@ Defines the structure and format for requirements documents in CUI projects, ens
 .. Format: `=== PREFIX-NUM: [DEPRECATED] Descriptive Title`
 
 == Requirements Content
+
 . Requirements must be specific, measurable, achievable, relevant, and time-bound (https://www.atlassian.com/blog/productivity/how-to-write-smart-goals[SMART principles])
 . Requirements must clearly state what is needed, not how it should be implemented
 . Requirements must be testable
@@ -52,6 +57,7 @@ Defines the structure and format for requirements documents in CUI projects, ens
 . For logging requirements, refer to the logging standards and ensure requirements align with established standards
 
 == Prefix Selection
+
 . When creating requirements for a new project, prompt the user to select a prefix
 . Provide a numbered list of recommended prefixes based on the project domain
 . Suggested prefixes should be short (3-5 characters) and relevant to the project
@@ -64,6 +70,7 @@ Defines the structure and format for requirements documents in CUI projects, ens
 .. `INT-` for integration projects
 
 == Updating Requirements
+
 . When adding new requirements, maintain the existing structure and formatting
 . When modifying requirements, preserve the requirement ID and update only the content
 . When removing requirements, mark them as deprecated rather than deleting them

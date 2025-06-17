@@ -1,0 +1,272 @@
+= JavaScript Core Patterns
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines core modern JavaScript patterns including ES modules, variable declarations, functions, destructuring, and object/array manipulation standards for CUI projects.
+
+== Related Documentation
+* xref:javascript-best-practices.adoc[JavaScript Best Practices]: Complete best practices overview
+* xref:javascript-async-patterns.adoc[JavaScript Async Patterns]: Asynchronous programming patterns
+* xref:javascript-architecture-patterns.adoc[JavaScript Architecture Patterns]: Advanced patterns and organization
+* xref:linting-standards.adoc[Linting Standards]: ESLint rules that enforce these practices
+
+== Modern JavaScript Standards
+
+=== ECMAScript Version Support
+* **Target**: ES2022 (ES13) and later features
+* **Browser Support**: Modern browsers with native ES modules
+* **Node.js**: Version 20.12.2 LTS or later
+* **Transpilation**: Babel for test environments only
+
+=== Module System Standards
+Use ES modules exclusively:
+
+[source,javascript]
+----
+// Named exports (preferred)
+export const utilityFunction = () => {
+  // Implementation
+};
+
+export class ComponentClass {
+  // Implementation
+}
+
+// Default exports (when appropriate)
+export default class MainComponent {
+  // Implementation
+}
+
+// Re-exports
+export { SomeClass } from './some-module.js';
+export * from './utilities.js';
+----
+
+=== Import Patterns
+Follow consistent import conventions:
+
+[source,javascript]
+----
+// Framework imports first
+import { html, css, LitElement } from 'lit';
+
+// Third-party imports
+import { customElement, property } from 'lit/decorators.js';
+
+// Local imports (relative paths)
+import { validateInput } from '../utilities/validation.js';
+import { API_ENDPOINTS } from '../config/constants.js';
+
+// Import specific items, avoid wildcard imports
+import { debounce, throttle } from '../utilities/performance.js';
+----
+
+== Variable and Function Standards
+
+=== Variable Declaration
+Use `const` by default, `let` when reassignment is needed:
+
+[source,javascript]
+----
+// Preferred: const for immutable bindings
+const apiEndpoint = 'https://api.example.com';
+const userConfig = { timeout: 5000 };
+
+// Use let for reassignment
+let currentUser = null;
+let retryCount = 0;
+
+// Never use var
+// var deprecatedVariable = 'avoid this';
+----
+
+=== Function Declaration Patterns
+Use arrow functions for most cases, regular functions for methods:
+
+[source,javascript]
+----
+// Arrow functions for utilities and callbacks
+const processData = (data) => {
+  return data.map(item => item.value);
+};
+
+const handleEvent = (event) => {
+  event.preventDefault();
+  // Handle event
+};
+
+// Regular functions for methods and constructors
+class DataProcessor {
+  constructor(options) {
+    this.options = options;
+  }
+
+  processItems(items) {
+    return items.filter(item => this.isValid(item));
+  }
+}
+
+// Async functions - let errors bubble up naturally
+const fetchUserData = async (userId) => {
+  const response = await fetch(`/api/users/${userId}`);
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  return await response.json();
+};
+
+// Alternative: Transform errors meaningfully when caught
+const fetchUserDataWithContext = async (userId) => {
+  try {
+    const response = await fetch(`/api/users/${userId}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    // Only catch to add meaningful context or transform the error
+    throw new Error(`Failed to fetch user data for ID ${userId}: ${error.message}`, {
+      cause: error,
+      userId
+    });
+  }
+};
+----
+
+=== Destructuring Standards
+Use destructuring for object and array manipulation:
+
+[source,javascript]
+----
+// Object destructuring
+const { name, email, preferences = {} } = user;
+const { theme, language } = preferences;
+
+// Array destructuring
+const [first, second, ...rest] = items;
+
+// Function parameter destructuring
+const createUser = ({ name, email, role = 'user' }) => {
+  return { id: generateId(), name, email, role };
+};
+
+// Nested destructuring (when readable)
+const { 
+  config: { api: { endpoint, timeout } },
+  user: { name, permissions }
+} = applicationState;
+----
+
+=== Template Literals
+Use template literals for string interpolation:
+
+[source,javascript]
+----
+// String interpolation
+const message = `Hello, ${user.name}! You have ${messageCount} messages.`;
+
+// Multi-line strings
+const htmlTemplate = `
+  <div class="user-card">
+    <h2>${user.name}</h2>
+    <p>${user.email}</p>
+  </div>
+`;
+
+// Complex expressions
+const apiUrl = `${baseUrl}/api/v${apiVersion}/users/${userId}?include=${includes.join(',')}`;
+----
+
+== Object and Array Standards
+
+=== Object Creation and Manipulation
+Use modern object syntax and methods:
+
+[source,javascript]
+----
+// Object shorthand properties
+const createConfig = (endpoint, timeout, retries) => ({
+  endpoint,
+  timeout,
+  retries,
+  timestamp: Date.now(),
+});
+
+// Computed property names
+const createDynamicObject = (key, value) => ({
+  [key]: value,
+  [`${key}Processed`]: processValue(value),
+});
+
+// Object spread for immutable updates
+const updateUser = (user, updates) => ({
+  ...user,
+  ...updates,
+  lastModified: Date.now(),
+});
+
+// Object.entries for iteration
+const processConfig = (config) => {
+  Object.entries(config).forEach(([key, value]) => {
+    console.log(`${key}: ${value}`);
+  });
+};
+----
+
+=== Array Methods and Patterns
+Use functional array methods:
+
+[source,javascript]
+----
+// Transformation
+const processedItems = items
+  .filter(item => item.isActive)
+  .map(item => ({
+    ...item,
+    processed: true,
+    timestamp: Date.now(),
+  }))
+  .sort((a, b) => a.priority - b.priority);
+
+// Finding elements
+const activeUser = users.find(user => user.status === 'active');
+const hasAdminUser = users.some(user => user.role === 'admin');
+const allValidated = users.every(user => user.isValidated);
+
+// Aggregation
+const totalValue = items.reduce((sum, item) => sum + item.value, 0);
+
+// Grouping (modern approach)
+const groupedByCategory = items.reduce((groups, item) => {
+  const key = item.category;
+  groups[key] = groups[key] || [];
+  groups[key].push(item);
+  return groups;
+}, {});
+----
+
+=== Array Spread and Rest
+Use spread and rest operators effectively:
+
+[source,javascript]
+----
+// Array spreading
+const mergedItems = [...existingItems, ...newItems];
+const clonedArray = [...originalArray];
+
+// Rest parameters
+const processItems = (primaryItem, ...additionalItems) => {
+  console.log('Processing primary:', primaryItem);
+  additionalItems.forEach(item => console.log('Additional:', item));
+};
+
+// Array destructuring with rest
+const [head, ...tail] = items;
+const [first, second, ...remaining] = sortedItems;
+----

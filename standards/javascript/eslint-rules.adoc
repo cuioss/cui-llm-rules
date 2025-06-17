@@ -1,0 +1,380 @@
+= ESLint Rule Configurations
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive ESLint rule configurations for framework-specific requirements, documentation standards, security controls, code quality, and environment-specific overrides.
+
+== Related Documentation
+* xref:linting-standards.adoc[JavaScript Linting Standards]: Configuration overview and base setup
+* xref:eslint-integration.adoc[ESLint Integration]: Build integration and CI/CD
+* xref:javascript-development-standards.adoc[JavaScript Development Standards]: Core development practices
+
+== Framework-Specific Rules (Optional)
+
+=== Web Component Rules
+When using Lit for web components:
+
+[source,javascript]
+----
+rules: {
+  // Lit-specific rules (add when using Lit)
+  'lit/no-legacy-template-syntax': 'error',    // Use modern Lit syntax
+  'lit/no-invalid-html': 'error',              // Valid HTML in templates
+  'lit/no-value-attribute': 'error',           // Proper attribute binding
+  'lit/attribute-value-entities': 'error',     // Proper entity encoding
+  'lit/binding-positions': 'error',            // Correct binding syntax
+  'lit/no-property-change-update': 'error',    // Avoid property changes in update
+  'lit/lifecycle-super': 'error',              // Call super in lifecycle methods
+  'lit/no-native-attributes': 'warn',          // Avoid native attributes
+}
+----
+
+=== Web Components Rules
+When working with custom elements:
+
+[source,javascript]
+----
+rules: {
+  // Web Components rules (add when applicable)
+  'wc/no-constructor-attributes': 'error',     // No attributes in constructor
+  'wc/no-invalid-element-name': 'error',       // Valid custom element names
+  'wc/no-self-class': 'error',                 // No self-referencing classes
+  'wc/require-listener-teardown': 'error',     // Clean up event listeners
+  'wc/guard-super-call': 'off',                // Allow for framework components
+}
+----
+
+== JSDoc Documentation Rules
+
+=== Required JSDoc Rules
+Documentation quality standards:
+
+[source,javascript]
+----
+rules: {
+  // JSDoc rules
+  'jsdoc/require-description': 'warn',              // Require descriptions
+  'jsdoc/require-param-description': 'warn',        // Describe parameters
+  'jsdoc/require-returns-description': 'warn',      // Describe return values
+  'jsdoc/check-alignment': 'error',                 // Proper alignment
+  'jsdoc/check-indentation': 'error',               // Consistent indentation
+  'jsdoc/check-tag-names': 'error',                 // Valid JSDoc tags
+  'jsdoc/check-types': 'error',                     // Valid type annotations
+  'jsdoc/require-hyphen-before-param-description': 'error',
+}
+----
+
+== Security Rules
+
+=== Required Security Rules
+Essential for preventing security vulnerabilities:
+
+[source,javascript]
+----
+rules: {
+  // Security rules
+  'security/detect-object-injection': 'warn',          // Detect object injection
+  'security/detect-eval-with-expression': 'error',     // Prevent eval usage
+  'security/detect-unsafe-regex': 'error',             // Detect ReDoS vulnerabilities
+  'security/detect-buffer-noassert': 'error',          // Safe buffer usage
+  'security/detect-child-process': 'error',            // Prevent child process injection
+}
+----
+
+== Promise and Async/Await Rules
+
+=== Required Promise Rules
+Modern asynchronous JavaScript patterns:
+
+[source,javascript]
+----
+rules: {
+  // Promise rules
+  'promise/always-return': 'error',                    // Always return in promise chains
+  'promise/catch-or-return': 'error',                  // Handle promise rejections
+  'promise/no-return-wrap': 'error',                   // Avoid unnecessary wrapping
+  'promise/param-names': 'error',                      // Consistent parameter names
+  'promise/no-nesting': 'warn',                        // Avoid nested promises
+  'promise/prefer-await-to-then': 'warn',              // Prefer async/await
+  'promise/prefer-await-to-callbacks': 'warn',         // Modernize callback patterns
+}
+----
+
+== SonarJS Code Quality Rules
+
+=== SonarJS Required Configuration
+SonarJS is required for all projects to ensure comprehensive code quality and complexity analysis. Use the default SonarJS recommended configuration:
+
+[source,javascript]
+----
+export default [
+  // ... other configurations
+  sonarjs.configs.recommended,   // Use SonarJS defaults
+  {
+    plugins: { sonarjs },
+    rules: {
+      // SonarJS rules - using recommended defaults
+      // All SonarJS rules are automatically configured with appropriate severity levels
+      // Most rules default to 'error' severity
+      // Only override specific rules if project requirements differ from defaults
+    }
+  }
+];
+----
+
+=== SonarJS Default Rules
+The recommended configuration automatically enables these rules with default settings:
+
+==== Error Level Rules (Default)
+* `sonarjs/cognitive-complexity`: Limits cognitive complexity (default: 15)
+* `sonarjs/no-identical-functions`: Detects duplicate functions
+* `sonarjs/no-collapsible-if`: Simplifies conditional logic
+* `sonarjs/prefer-immediate-return`: Simplifies return statements
+* `sonarjs/prefer-object-literal`: Enforces object literals
+* `sonarjs/prefer-single-boolean-return`: Simplifies boolean returns
+* `sonarjs/no-small-switch`: Warns about small switch statements
+* `sonarjs/no-redundant-boolean`: Removes redundant booleans
+* `sonarjs/no-unused-collection`: Detects unused collections
+* `sonarjs/no-useless-catch`: Removes useless catch blocks
+
+==== Disabled Rules (Default)
+* `sonarjs/no-inverted-boolean-check`: Disabled by default
+* `sonarjs/elseif-without-else`: Disabled by default
+
+=== SonarJS Rule Customization
+Only override SonarJS defaults when project-specific requirements demand it:
+
+[source,javascript]
+----
+rules: {
+  // Override only when necessary
+  'sonarjs/cognitive-complexity': ['warn', 20],  // Increase threshold if needed
+  'sonarjs/no-duplicate-string': ['warn', { threshold: 3 }], // Adjust threshold
+}
+----
+
+== Modern JavaScript Features
+
+=== Required Modern JavaScript Rules
+Enforce modern JavaScript patterns:
+
+[source,javascript]
+----
+rules: {
+  // Modern JavaScript features
+  'prefer-destructuring': ['error', { array: false, object: true }], // Use destructuring
+  'prefer-rest-params': 'error',                       // Use rest parameters
+  'prefer-spread': 'error',                            // Use spread operator
+  'symbol-description': 'error',                       // Require symbol descriptions
+  'no-useless-computed-key': 'error',                  // Remove useless computed keys
+  'no-useless-rename': 'error',                        // Remove useless renaming
+  'no-useless-return': 'error',                        // Remove useless returns
+  'no-void': 'error',                                  // Disallow void operator
+  'no-with': 'error',                                  // Disallow with statements
+  
+  // ES6+ features
+  'prefer-numeric-literals': 'error',                  // Use numeric literals
+  'prefer-object-spread': 'error',                     // Use object spread
+  'prefer-exponentiation-operator': 'error',           // Use ** operator
+  'prefer-regex-literals': 'error',                    // Use regex literals
+  'prefer-promise-reject-errors': 'error',             // Proper promise rejection
+}
+----
+
+== Error Handling and Performance
+
+=== Error Handling Rules
+Robust error handling patterns:
+
+[source,javascript]
+----
+rules: {
+  // Error handling
+  'no-throw-literal': 'error',                         // Throw Error objects
+  'no-return-await': 'error',                          // Avoid redundant await
+  'require-await': 'warn',                             // Require await in async functions
+  'no-async-promise-executor': 'error',                // No async promise executors
+  'no-await-in-loop': 'warn',                          // Avoid await in loops
+  'no-promise-executor-return': 'error',               // No returns in promise executors
+}
+----
+
+=== Performance Rules
+Code performance optimizations:
+
+[source,javascript]
+----
+rules: {
+  // Performance
+  'no-loop-func': 'error',                             // No functions in loops
+  'no-extend-native': 'error',                         // No native prototype extension
+  'no-iterator': 'error',                              // No __iterator__ usage
+  'no-proto': 'error',                                 // No __proto__ usage
+  'no-script-url': 'error',                            // No javascript: URLs
+}
+----
+
+=== Maintainability Rules
+Code maintainability standards:
+
+[source,javascript]
+----
+rules: {
+  // Maintainability
+  'complexity': ['warn', { max: 10 }],                 // Cyclomatic complexity
+  'max-statements': ['warn', { max: 20 }],             // Maximum statements per function
+  'max-params': ['warn', { max: 5 }],                  // Maximum function parameters
+  'max-nested-callbacks': ['error', { max: 4 }],       // Maximum callback nesting
+  'no-magic-numbers': ['warn', { 
+    ignore: [-1, 0, 1, 2, 100, 200, 404, 500, 1000, 30000],
+    ignoreArrayIndexes: true,
+    ignoreDefaultValues: true 
+  }],
+}
+----
+
+== Unicorn Best Practices
+
+=== Recommended Unicorn Rules
+Additional code quality improvements:
+
+[source,javascript]
+----
+rules: {
+  // Unicorn rules (additional best practices)
+  'unicorn/filename-case': 'off',                   // Allow kebab-case for components
+  'unicorn/prevent-abbreviations': 'off',           // Allow common abbreviations
+  'unicorn/no-null': 'off',                         // Allow null values
+  'unicorn/prefer-dom-node-text-content': 'off',    // Allow textContent usage
+  'unicorn/prefer-query-selector': 'error',         // Use querySelector
+  'unicorn/prefer-modern-dom-apis': 'error',        // Use modern DOM APIs
+  'unicorn/no-array-for-each': 'off',               // Allow forEach for readability
+  'unicorn/consistent-function-scoping': 'warn',    // Consistent function scoping
+}
+----
+
+== Environment-Specific Overrides
+
+=== Test File Overrides
+Relaxed rules for test files:
+
+[source,javascript]
+----
+overrides: [
+  {
+    files: ['src/test/js/**/*.js'],
+    rules: {
+      'jsdoc/require-jsdoc': 'off',
+      'jsdoc/require-description': 'off',
+      'jsdoc/require-param-description': 'off',
+      'jsdoc/require-returns-description': 'off',
+      'jsdoc/require-param-type': 'off',
+      'jsdoc/require-returns': 'off',
+      'unicorn/consistent-function-scoping': 'off',
+      'lit/no-legacy-template-syntax': 'off',
+      'max-len': 'off',
+      'no-unused-expressions': 'off',
+      'no-unused-vars': 'warn',
+      'no-undef': 'off',    // Jest globals handled by environment
+      // Relaxed rules for test files
+      'sonarjs/cognitive-complexity': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+      'complexity': 'off',
+      'max-statements': 'off',
+      'max-params': 'off',
+      'require-await': 'off',
+      'no-magic-numbers': 'off',
+      'security/detect-object-injection': 'off',
+      'promise/prefer-await-to-then': 'off',
+      'promise/always-return': 'off',
+      'no-promise-executor-return': 'off',
+      'arrow-parens': 'off', // Let Prettier handle this for test files
+      // Jest-specific rules
+      'jest/expect-expect': [
+        'error',
+        {
+          assertFunctionNames: ['expect', 'assert*', 'should*'],
+        },
+      ],
+      'jest/no-disabled-tests': 'warn',
+      'jest/no-focused-tests': 'error',
+      'jest/prefer-to-have-length': 'error',
+      'jest/valid-expect': 'error',
+    },
+  },
+]
+----
+
+=== Production Component Overrides
+Stricter rules for production components:
+
+[source,javascript]
+----
+overrides: [
+  {
+    files: ['src/main/resources/components/**/*.js'],
+    rules: {
+      'jsdoc/require-jsdoc': 'error',           // Require JSDoc for public components
+      'jsdoc/require-description': 'error',     // Require descriptions
+      'max-len': ['warn', { code: 120 }],       // Line length limit
+      'complexity': ['warn', { max: 15 }],      // Cyclomatic complexity
+      'max-depth': ['error', { max: 4 }],       // Maximum nesting depth
+      'max-lines-per-function': ['warn', { max: 100 }], // Function length limit
+    },
+  },
+]
+----
+
+=== Mock File Overrides
+Relaxed rules for mock files:
+
+[source,javascript]
+----
+overrides: [
+  {
+    files: ['src/test/js/mocks/**/*.js'],
+    rules: {
+      'jsdoc/require-jsdoc': 'off',
+      'unicorn/consistent-function-scoping': 'off',
+      'unicorn/no-array-reduce': 'off',
+      'unicorn/prefer-logical-operator-over-ternary': 'off',
+      'no-restricted-syntax': 'off',
+      'no-plusplus': 'off',
+      'class-methods-use-this': 'off',
+      'no-unused-vars': 'off',
+      'max-lines-per-function': 'off',
+      // Additional relaxed rules for mock files
+      'sonarjs/no-identical-functions': 'off',
+      'sonarjs/cognitive-complexity': 'off',
+      'security/detect-object-injection': 'off',
+      'promise/prefer-await-to-then': 'off',
+      'promise/always-return': 'off',
+      'no-promise-executor-return': 'off',
+      'complexity': 'off',
+      'max-statements': 'off',
+      'arrow-parens': 'off', // Let Prettier handle this for mock files
+    },
+  },
+]
+----
+
+== Stylelint Integration (Optional)
+
+=== CSS-in-JS Linting
+When using CSS-in-JS patterns (e.g., Lit components):
+
+[source,javascript]
+----
+// Package.json scripts (add when using CSS-in-JS)
+"lint:style": "stylelint src/**/*.js",
+"lint:style:fix": "stylelint --fix src/**/*.js",
+----
+
+=== Stylelint Configuration
+When using CSS-in-JS patterns:
+
+* `stylelint-config-standard`: Standard CSS rules
+* `stylelint-order`: CSS property ordering
+* `postcss-lit`: PostCSS support (for Lit templates when applicable)

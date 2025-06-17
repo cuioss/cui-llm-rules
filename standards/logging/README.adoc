@@ -46,5 +46,5 @@ The logging standards are organized into the following documents:
 == See Also
 
 * xref:../README.adoc[Standards Overview]
-* xref:../java/README.adoc[Java Standards]
-* xref:../testing/README.adoc[Testing Standards]
+* xref:../java/java-code-standards.adoc[Java Standards]
+* xref:../testing/core-standards.adoc[Testing Standards]

@@ -1,9 +1,27 @@
-= Java Coding Standards
+= Java Standards
 :toc: left
 :toclevels: 3
 :toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
+
+== Overview
+
+This document contains the comprehensive Java standards for all CUI projects. These standards serve as independent, authoritative sources of truth for Java development requirements without being tied to specific implementation processes. They ensure consistent, maintainable, and high-quality Java code across the codebase.
+
+== Document Structure
+
+The Java standards are organized into the following documents:
+
+* xref:java-code-standards.adoc[Java Code Standards] - Standards for writing Java code (this document)
+* xref:dsl-style-constants.adoc[DSL-Style Constants Pattern] - Standards for organizing constants in a hierarchical manner
+
+== Key Principles
+
+1. *Consistency*: All Java code follows the same patterns and conventions
+2. *Maintainability*: Code is organized for long-term maintenance
+3. *Readability*: Code is easy to read and understand
+4. *Testability*: Code is designed to be easily testable
 
 == Purpose
 
@@ -11,11 +29,13 @@ This document defines general best practices and standards for writing Java code
 
 == Related Documentation
 
-* xref:README.adoc[Java Standards]
+* xref:dsl-style-constants.adoc[DSL-Style Constants Pattern]
 * xref:../documentation/javadoc-standards.adoc[Javadoc Standards]
 * xref:../logging/implementation-guide.adoc[Logging Implementation Guide]
+* xref:../testing/core-standards.adoc[Testing Standards]
 
 == General Principles
+
 
 . *Code Readability*: Write code that is easy to read and understand
 . *Maintainability*: Design code that is easy to modify and extend
@@ -27,17 +47,20 @@ This document defines general best practices and standards for writing Java code
 
 === Package Structure
 
+
 . Use reverse domain name notation for package names
 . Organize packages by feature rather than layer
 . Keep package cohesion high
 
 === Class Structure
 
+
 . Follow the Single Responsibility Principle
 . Keep classes small and focused
 . Use proper access modifiers (public, protected, private)
 
 === Method Design
+
 
 . Keep methods short and focused
 . Use meaningful method names
@@ -47,11 +70,13 @@ This document defines general best practices and standards for writing Java code
 
 === Naming Conventions
 
+
 . Use meaningful and descriptive names
 . Follow standard Java naming conventions
 . Avoid abbreviations unless widely understood
 
 === Exception Handling
+
 
 . Use checked exceptions for recoverable conditions
 . Use unchecked exceptions for programming errors
@@ -60,9 +85,11 @@ This document defines general best practices and standards for writing Java code
 
 === Documentation
 
+
 . Follow Javadoc standards (see xref:../documentation/javadoc-standards.adoc[Javadoc Standards])
 
 == Best Practices
+
 
 . Prefer immutable objects
 . Use final fields where appropriate
@@ -81,50 +108,32 @@ This document defines general best practices and standards for writing Java code
 
 === Using Lombok
 
-Lombok can help reduce boilerplate code and improve readability. Here are some guidelines on when to use specific Lombok annotations:
+Use Lombok annotations to reduce boilerplate code:
 
-. Use `@Delegate` for delegation over inheritance:
-[source,java]
-----
-public class Printer {
-    @Delegate
-    private final PrinterService printerService = new PrinterServiceImpl();
-}
-----
+. `@Delegate` for delegation over inheritance
+. `@Builder` for building complex objects  
+. `@Value` for immutable objects
 
-. Use `@Builder` for building complex objects:
-[source,java]
-----
-@Builder
-public class User {
-    private String id;
-    private String name;
-    private String email;
-}
-----
+== Modern Java Features
 
-. Use `@Value` for immutable objects:
-[source,java]
-----
-@Value
-public class Address {
-    String street;
-    String city;
-    String zipCode;
-}
-----
-
-== Best Practices Examples
-
-=== Using Records for Data Carriers
-
+=== Records for Data Carriers
 [source,java]
 ----
 public record User(String id, String name, String email) {}
 ----
 
-=== Using Streams for Complex Data Transformations
+=== Switch Expressions
+[source,java]
+----
+String dayType(DayOfWeek day) {
+    return switch (day) {
+        case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -> "Weekday";
+        case SATURDAY, SUNDAY -> "Weekend";
+    };
+}
+----
 
+=== Stream Processing
 [source,java]
 ----
 List<String> names = users.stream()
@@ -134,67 +143,8 @@ List<String> names = users.stream()
     .toList();
 ----
 
-=== Keeping Lambda Expressions Short and Clear
+== See Also
 
-[source,java]
-----
-List<Integer> lengths = strings.stream()
-    .map(String::length)
-    .toList();
-----
-
-=== Avoiding Side Effects in Streams
-
-[source,java]
-----
-// Avoid this
-List<String> names = new ArrayList<>();
-users.stream().forEach(user -> names.add(user.getName()));
-
-// Prefer this
-List<String> names = users.stream()
-    .map(User::getName)
-    .toList();
-----
-
-=== Using Switch Expressions
-
-Prefer switch expressions (introduced in Java 12 and enhanced in Java 14) over classic switch statements:
-
-[source,java]
-----
-// Avoid classic switch statement
-String dayType(DayOfWeek day) {
-    String type;
-    switch (day) {
-        case MONDAY:
-        case TUESDAY:
-        case WEDNESDAY:
-        case THURSDAY:
-        case FRIDAY:
-            type = "Weekday";
-            break;
-        case SATURDAY:
-        case SUNDAY:
-            type = "Weekend";
-            break;
-        default:
-            type = "Unknown";
-    }
-    return type;
-}
-
-// Prefer switch expression
-String dayType(DayOfWeek day) {
-    return switch (day) {
-        case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -> "Weekday";
-        case SATURDAY, SUNDAY -> "Weekend";
-    };
-}
-----
-
-Benefits of switch expressions:
-- No fall-through behavior (eliminates common bugs)
-- Exhaustiveness checking by compiler
-- Yields values directly
-- More concise syntax
+* xref:../README.adoc[Standards Overview]
+* xref:../logging/README.adoc[Logging Standards]
+* xref:../testing/core-standards.adoc[Testing Standards]

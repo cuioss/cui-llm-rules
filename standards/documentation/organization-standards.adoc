@@ -1,0 +1,282 @@
+= Documentation Organization Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Purpose
+Defines comprehensive standards for organizing, reviewing, and maintaining documentation structure, including file organization, naming conventions, size limits, and quality review processes for all CUI projects.
+
+== Related Documentation
+* xref:general-standard.adoc[Documentation Standards]: Core documentation standards and best practices
+* xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
+* xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
+
+== File Organization Standards
+
+=== Single Aspect Principle
+Each document should represent one coherent aspect or domain:
+
+
+* **Focused Scope**: Document covers one specific technology, process, or domain area
+* **Clear Boundaries**: No overlap between documents - use cross-references instead
+* **Logical Grouping**: Related concepts within the same document should flow logically
+* **Separation of Concerns**: Configuration, rules, and integration kept in separate documents when appropriate
+
+=== Document Size Guidelines
+
+=== Optimal Size Limits
+Documents should maintain optimal size for readability and maintainability:
+
+
+* **Minimum Size**: 50 lines (excluding headers and TOC)
+* **Maximum Size**: 400 lines (including all content)
+* **Target Range**: 100-300 lines for most comprehensive documents
+* **Exception Handling**: Documents exceeding 400 lines should be split into focused components
+
+=== Size-Based Actions
+
+**Oversized Documents (>400 lines)**:
+
+* Split into logical components based on content sections
+* Create overview document that cross-references split components
+* Maintain comprehensive coverage while improving navigation
+* Update all cross-references to new document structure
+
+**Undersized Documents (<50 lines)**:
+
+* Evaluate for consolidation with related documents
+* Consider integration into parent or related documents
+* Maintain as standalone only if serving unique, specific purpose
+* Ensure adequate depth of coverage for the topic
+
+=== File Naming Standards
+
+=== Naming Convention
+All documentation files must follow consistent kebab-case naming:
+
+
+* **Format**: `descriptive-name.adoc`
+* **Character Set**: Lowercase letters, numbers, and hyphens only
+* **Descriptive**: Name clearly indicates document content and scope
+* **Consistent**: Similar documents use parallel naming patterns
+* **No Abbreviations**: Use full, clear names rather than abbreviations
+
+=== Naming Examples
+
+**Correct Naming**:
+
+* `javascript-best-practices.adoc`
+* `eslint-configuration.adoc`
+* `integration-testing-standards.adoc`
+* `css-design-system.adoc`
+
+**Incorrect Naming**:
+
+* `JavaScript_BestPractices.adoc` (mixed case, underscores)
+* `eslint_config.adoc` (underscore, abbreviation)
+* `IntegrationTestingStandards.adoc` (camelCase)
+
+== Documentation Review Guidelines
+
+=== Quality Standards
+Comprehensive review process ensures documentation quality:
+
+
+* **Consistency**: Uniform terminology, formatting, and structure across all documents
+* **Completeness**: All standards areas fully documented without gaps
+* **Correctness**: Technical information and cross-references validated
+* **Focus**: Content concise but preserves all essential information
+
+=== Content Requirements
+
+**No Duplication**:
+
+* Eliminate duplicate information across documents
+* Use cross-references instead of repeating content
+* Maintain single source of truth for each concept
+* Reference shared concepts rather than duplicating
+
+**Current State Only**:
+
+* Document present requirements only
+* Remove transitional, status, or deprecation information  
+* Eliminate "changed from X to Y" references
+* Focus on current technical requirements
+
+**Source Attribution**:
+
+* Always link to authoritative sources when referencing external standards
+* Provide proper citations for best practices
+* Include relevant external documentation links
+* Maintain traceability to original sources
+
+**Standards Linking**:
+
+* Cross-reference related standards documents using `xref:` syntax
+* Maintain logical navigation between related documents
+* Create clear document hierarchy and relationships
+* Update cross-references when restructuring content
+
+== Document Maintenance Standards
+
+=== Structural Maintenance
+
+**Cross-Reference Integrity**:
+
+* Update all cross-references when restructuring content
+* Verify all `xref:` links remain valid after changes
+* Test link integrity during document updates
+* Maintain proper document relationships
+
+**Formatting Consistency**:
+
+* Maintain AsciiDoc formatting conventions
+* Use standard document header structure
+* Ensure proper table of contents configuration
+* Apply consistent section numbering
+
+**Content Focus**:
+
+* Focus on technical requirements rather than implementation procedures
+* Maintain clear separation between standards and processes
+* Emphasize "what" rather than "how" in standards documents
+* Keep implementation details in separate process documents
+
+=== File Structure Adaptation
+
+**Reorganization Authority**:
+
+* Adapt structure when necessary to improve logical organization
+* Reorganize files and directories for better usability
+* Split overly broad documents into focused components
+* Consolidate fragmented information into coherent documents
+
+**Logical Linking**:
+
+* Use README files to provide overview and navigation
+* Link related documents together in coherent structure
+* Create clear entry points for each domain area
+* Maintain hierarchical organization within directories
+
+== AsciiDoc Formatting Standards
+
+=== Required Formatting Rules
+
+**Document Header**:
+
+[source,asciidoc]
+----
+= Document Title
+:toc: left
+:toclevels: 3
+:sectnums:
+----
+
+**List Formatting**:
+
+* Always include blank line before any list (bulleted, numbered, or definition)
+* Maintain consistent indentation for nested lists
+* Use proper AsciiDoc list syntax
+
+**Code Block Formatting**:
+
+* Include language specification for syntax highlighting
+* Use proper source block delimiters
+* Maintain consistent indentation within code blocks
+
+**Cross-Reference Syntax**:
+
+* Use `xref:path/to/document.adoc[Link Text]` for internal references
+* Provide descriptive link text that indicates target content
+* Use relative paths from current document location
+
+=== Grammar and Style
+
+**AsciiDoc Grammar**:
+
+* Consult AsciiDoc documentation when uncertain about syntax
+* Ensure proper section hierarchy and numbering
+* Use consistent heading patterns across documents
+* Validate document structure before finalizing
+
+**Content Style**:
+
+* Use clear, professional technical writing
+* Maintain active voice where appropriate
+* Use consistent terminology throughout document
+* Structure content logically with clear section flow
+
+== Review Process Standards
+
+=== Comprehensive Review Scope
+
+**Document Analysis**:
+
+* Review all documents for size compliance (50-400 lines)
+* Identify oversized documents requiring split
+* Identify undersized documents for potential consolidation
+* Assess file naming consistency across all documents
+
+**Content Quality Review**:
+
+* Eliminate duplicate information across documents
+* Remove transitional or status information
+* Verify cross-reference accuracy and consistency
+* Ensure current-state focus throughout all content
+
+**Structural Assessment**:
+
+* Evaluate logical organization within and across documents
+* Assess single-aspect compliance for each document
+* Review file naming for consistency and clarity
+* Validate overall documentation architecture
+
+=== Implementation Standards
+
+**Change Management**:
+
+* Update cross-references immediately after restructuring
+* Maintain document relationships during reorganization
+* Preserve all essential technical information during changes
+* Test navigation and link integrity after modifications
+
+**Quality Assurance**:
+
+* Verify AsciiDoc formatting compliance
+* Validate proper list and code block formatting
+* Ensure consistent document header structure
+* Check table of contents and section numbering
+
+== Integration with Development Process
+
+=== Documentation Lifecycle
+
+**Creation Standards**:
+
+* New documents must comply with size and naming guidelines
+* Follow established organizational patterns
+* Include proper cross-references to related documents
+* Maintain consistency with existing documentation structure
+
+**Maintenance Requirements**:
+
+* Regular review for continued compliance with organization standards
+* Update structure as content grows or requirements change
+* Maintain cross-reference accuracy during ongoing development
+* Preserve organizational quality through iterative improvements
+
+=== Tool Integration
+
+**AsciiDoc Processing**:
+
+* Ensure compatibility with standard AsciiDoc processors
+* Validate syntax and formatting in build processes
+* Maintain consistent rendering across different environments
+* Support automated quality checking where possible
+
+**Version Control**:
+
+* Structure documents for effective version control
+* Minimize merge conflicts through logical organization
+* Maintain clear change history for documentation updates
+* Support collaborative editing through good organization

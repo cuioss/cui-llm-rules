@@ -17,6 +17,7 @@ Defines comprehensive Stylelint configuration and rules for consistent, high-qua
 === Required Configuration File
 Create `.stylelintrc.js` in project root with ES module syntax:
 
+
 [source,javascript]
 ----
 export default {
@@ -194,6 +195,7 @@ export default {
 === SCSS Support Configuration
 For projects using SCSS, add SCSS-specific rules:
 
+
 [source,javascript]
 ----
 export default {
@@ -227,6 +229,7 @@ export default {
 
 === Strict Variable Usage
 Enforce CSS custom properties for colors, spacing, and other design tokens:
+
 
 [source,javascript]
 ----
@@ -289,24 +292,28 @@ Enforce CSS custom properties for colors, spacing, and other design tokens:
 == Linting Rules Categories
 
 === Code Quality Rules
+
 * **No duplicates**: Prevent duplicate selectors and properties
 * **Valid syntax**: Ensure all CSS syntax is valid
 * **Known properties**: Only use known CSS properties and values
 * **Performance**: Avoid inefficient selectors and patterns
 
 === Modern CSS Rules
+
 * **CSS Custom Properties**: Enforce variable naming patterns
 * **CSS Grid/Flexbox**: Validate modern layout properties
 * **CSS Functions**: Allow modern CSS functions (calc, clamp, etc.)
 * **CSS Container Queries**: Support for container query syntax
 
 === Maintainability Rules
+
 * **Nesting depth**: Limit nesting to 3 levels maximum
 * **Specificity**: Control CSS specificity (max 0,4,0)
 * **Selector complexity**: Limit compound selectors
 * **Property ordering**: Enforce consistent property order
 
 === Accessibility Rules
+
 * **Focus states**: Ensure focus-visible support
 * **Color contrast**: Validate color usage patterns
 * **Responsive design**: Validate responsive CSS patterns
@@ -315,6 +322,7 @@ Enforce CSS custom properties for colors, spacing, and other design tokens:
 
 === NPM Scripts Integration
 Stylelint integrates with the CSS development scripts:
+
 
 [source,json]
 ----
@@ -329,6 +337,7 @@ Stylelint integrates with the CSS development scripts:
 
 === Pre-commit Integration
 Configure pre-commit hooks to run Stylelint:
+
 
 [source,json]
 ----
@@ -349,6 +358,7 @@ Configure pre-commit hooks to run Stylelint:
 ----
 
 === IDE Integration
+
 * Configure VS Code with Stylelint extension
 * Set up auto-fix on save
 * Enable real-time linting feedback
@@ -358,6 +368,7 @@ Configure pre-commit hooks to run Stylelint:
 
 === BEM Methodology Support
 For projects using BEM methodology:
+
 
 [source,javascript]
 ----
@@ -372,6 +383,7 @@ For projects using BEM methodology:
 === CSS Modules Support
 For CSS Modules projects:
 
+
 [source,javascript]
 ----
 'selector-class-pattern': [
@@ -385,6 +397,7 @@ For CSS Modules projects:
 === Component-Based Architecture
 Enforce component-based CSS organization:
 
+
 [source,javascript]
 ----
 'max-nesting-depth': 2,
@@ -396,6 +409,7 @@ Enforce component-based CSS organization:
 
 === Severity Levels
 Configure appropriate severity levels:
+
 
 [source,javascript]
 ----
@@ -417,6 +431,7 @@ Configure appropriate severity levels:
 === Custom Error Messages
 Provide helpful error messages:
 
+
 [source,javascript]
 ----
 'custom-property-pattern': [
@@ -432,6 +447,7 @@ Provide helpful error messages:
 === Bundle Analysis Integration
 Integrate with CSS bundle analysis:
 
+
 [source,json]
 ----
 {
@@ -443,6 +459,7 @@ Integrate with CSS bundle analysis:
 
 === Critical CSS Validation
 Validate critical CSS paths:
+
 
 [source,javascript]
 ----
@@ -457,6 +474,7 @@ Validate critical CSS paths:
 === Bootstrap Projects
 For Bootstrap-based projects:
 
+
 [source,javascript]
 ----
 'selector-class-pattern': [
@@ -469,6 +487,7 @@ For Bootstrap-based projects:
 
 === Tailwind CSS Projects
 For Tailwind CSS projects:
+
 
 [source,javascript]
 ----

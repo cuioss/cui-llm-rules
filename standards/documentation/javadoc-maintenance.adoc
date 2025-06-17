@@ -7,6 +7,7 @@
 Defines the standards for Javadoc maintenance, error resolution, and documentation quality assurance.
 
 == Related Documentation
+
 * xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
 * xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
 * xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
@@ -14,6 +15,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 == Critical Constraints
 
 === Content Preservation
+
 * Fix ONLY Javadoc errors and warnings from build
 * Do NOT alter or improve documentation content
 * Do NOT modify any code
@@ -21,6 +23,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 * Focus only on formatting, references, and tags
 
 === Common Fixes
+
 * Fix invalid `{@link}` references
 * Fix malformed HTML tags
 * Fix missing/incorrect parameter documentation
@@ -28,6 +31,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 * Fix missing/incorrect exception documentation
 
 === Out of Scope
+
 * Documentation improvements
 * Code changes
 * Content rewrites
@@ -36,6 +40,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 == Maintenance Standards
 
 === Build Verification
+
 * Run appropriate command:
 ** Single module: `./mvnw clean verify -Pjavadoc`
 ** Multi-module: `./mvnw clean verify -Pjavadoc-mm-reporting`
@@ -46,6 +51,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 * Note error locations for resolution
 
 === Documentation Analysis
+
 * For each error:
 ** Identify issue details
 ** Analyze context
@@ -54,6 +60,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 * Complete analysis before proceeding
 
 === Fix Application
+
 * For each identified issue:
 ** Apply minimal fix
 ** Verify no content loss
@@ -62,6 +69,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 * Review all applied fixes
 
 === Final Verification
+
 * Run appropriate javadoc command
 * If issues remain:
 ** Note remaining issues
@@ -73,30 +81,35 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 == Common Javadoc Issues and Fixes
 
 === Missing Parameter Documentation
+
 * Add @param tags for all undocumented parameters
 * Use parameter name exactly as in method signature
 * Add minimal description based on parameter name
 * Do not modify existing parameter documentation
 
 === Invalid References
+
 * Fix `{@link}` references to non-existent classes/methods
 * Update references to renamed elements
 * Remove references to deleted elements
 * Replace with appropriate alternative references
 
 === HTML Formatting Issues
+
 * Close unclosed HTML tags
 * Fix malformed HTML elements
 * Correct improper nesting of HTML tags
 * Ensure proper escaping of special characters
 
 === Missing Return Documentation
+
 * Add @return tags for undocumented return values
 * Provide minimal description based on method name
 * Do not modify existing return documentation
 * For void methods, no @return tag is needed
 
 === Missing Exception Documentation
+
 * Add @throws tags for undocumented exceptions
 * Document conditions that trigger exceptions
 * Do not modify existing exception documentation

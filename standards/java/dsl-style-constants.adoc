@@ -11,10 +11,11 @@ This document defines a design pattern for organizing related constants in a hie
 
 == Related Documentation
 
-* xref:README.adoc[Java Standards]
+* xref:java-code-standards.adoc[Java Standards]
 * xref:../logging/implementation-guide.adoc[Logging Implementation Guide]
 
 == Key Characteristics
+
 
 . *Hierarchical Organization*: Constants are organized in nested static classes, each representing a dimension or category
 . *Type Safety*: Each level in the hierarchy is a proper type, enabling IDE support and compile-time checks
@@ -23,6 +24,7 @@ This document defines a design pattern for organizing related constants in a hie
 . *Self-Documenting*: The hierarchy itself documents the relationship between constants
 
 == Implementation Guidelines
+
 
 . Use `@UtilityClass` for all levels to prevent instantiation
 . Make all classes and constants public static final
@@ -58,12 +60,14 @@ ModuleConstants.CATEGORY_A.TYPE_1.CONSTANT_1
 
 == Common Use Cases
 
+
 . *Logging Systems*: Organizing messages by module, level, and component
 . *Configuration*: Grouping settings by feature, environment, and type
 . *Error Codes*: Categorizing by module, severity, and subsystem
 . *Resource Bundles*: Organizing by language, region, and resource type
 
 == Benefits
+
 
 . *Improved Code Organization*: Clear structure for related constants
 . *Better Maintainability*: Easy to add new categories without changing existing code
@@ -72,6 +76,7 @@ ModuleConstants.CATEGORY_A.TYPE_1.CONSTANT_1
 . *Documentation*: Structure itself documents relationships
 
 == Best Practices
+
 
 . Keep hierarchy depth reasonable (3-4 levels maximum)
 . Use consistent naming conventions across all levels

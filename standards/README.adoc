@@ -17,7 +17,7 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 == Directory Structure
 
 === Development Standards
-* xref:java/README.adoc[Java Standards] - Comprehensive Java development standards and best practices
+* xref:java/java-code-standards.adoc[Java Standards] - Comprehensive Java development standards and best practices
 ** xref:java/dsl-style-constants.adoc[DSL-Style Constants] - Standards for organizing constants in a hierarchical manner
 
 * xref:cdi-quarkus/README.adoc[CDI and Quarkus Standards] - CDI and Quarkus framework development standards
@@ -31,18 +31,17 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** xref:javascript/unit-testing-standards.adoc[Unit Testing Standards] - Jest framework, configuration, and integration
 ** xref:javascript/formatting-standards.adoc[Formatting Standards] - Prettier rules, configuration, and integration
 ** xref:javascript/jsdoc-standards.adoc[JSDoc Documentation Standards] - Comprehensive documentation standards using JSDoc
-** xref:javascript/javascript-best-practices.adoc[JavaScript Best Practices] - Modern JavaScript patterns and conventions
+** xref:javascript/javascript-best-practices.adoc[JavaScript Best Practices] - Complete best practices overview and quick reference
 ** xref:javascript/lit-components-standards.adoc[Lit Components Standards] - Rules and best practices for Lit web components (Quarkus DevUI context)
 
 * xref:css/README.adoc[CSS Standards] - Modern CSS development standards, variables, and best practices
 ** xref:css/css-development-standards.adoc[CSS Development Standards] - CSS-specific configuration, dependencies, and tooling setup
 ** xref:css/linting-standards.adoc[Linting Standards] - Stylelint rules, configuration, and integration
 ** xref:css/formatting-standards.adoc[Formatting Standards] - Prettier configuration for CSS formatting
-** xref:css/css-best-practices.adoc[CSS Best Practices] - Modern CSS patterns, variables, and conventions
+** xref:css/css-best-practices.adoc[CSS Best Practices] - Complete CSS standards overview and quick reference
 
 === Quality and Process Standards
-* xref:testing/README.adoc[Testing Standards] - Comprehensive testing standards and requirements
-** xref:testing/core-standards.adoc[Core Standards] - Fundamental testing standards and requirements
+* xref:testing/core-standards.adoc[Testing Standards] - Comprehensive testing standards and requirements
 ** xref:testing/quality-standards.adoc[Quality Standards] - Standards for test quality and coverage
 
 * xref:logging/README.adoc[Logging Standards] - Logging implementation and best practices
@@ -51,8 +50,9 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** xref:logging/testing-guide.adoc[Testing Guide] - Standards for testing logging implementations
 
 === Documentation Standards
-* xref:documentation/README.adoc[Documentation Standards] - Documentation creation and maintenance standards
+* xref:documentation/general-standard.adoc[Documentation Standards] - Documentation creation and maintenance standards
 ** xref:documentation/general-standard.adoc[General Standard] - Foundational documentation requirements and formats
+** xref:documentation/organization-standards.adoc[Organization Standards] - Documentation organization, structure, and review guidelines
 ** xref:documentation/javadoc-standards.adoc[Javadoc Standards] - Standards for creating and maintaining Javadoc
 ** xref:documentation/javadoc-maintenance.adoc[Javadoc Maintenance] - Standards for Javadoc error resolution and quality assurance
 ** xref:documentation/readme-structure.adoc[README Structure] - Standard format and content for README files

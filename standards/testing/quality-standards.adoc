@@ -11,11 +11,11 @@ This document defines comprehensive quality standards, testing framework guideli
 
 == Related Documentation
 
-* xref:README.adoc[Testing Standards Overview]
+* xref:core-standards.adoc[Testing Standards Overview]
 * xref:core-standards.adoc[Core Testing Standards]
 * xref:../logging/testing-guide.adoc[Logging Testing Guide]
 * xref:../documentation/javadoc-standards.adoc[Javadoc Standards]
-* xref:../java/README.adoc[Java Standards]
+* xref:../java/java-code-standards.adoc[Java Standards]
 
 == Core Testing Standards
 
@@ -127,33 +127,12 @@ This document defines comprehensive quality standards, testing framework guideli
 [[parameterized-tests-best-practices]]
 === Parameterized Tests Best Practices
 
-* *Minimum Test Cases*: Parameterized tests should have at least 3 test cases to justify the overhead
-** For fewer than 3 test cases, use direct test methods instead
-** Convert existing parameterized tests with fewer than 3 cases to direct methods
-
-* *Method Source Organization*:
-** Use descriptive method names for test case providers
-** Group related test cases together
-** Document each test case's purpose in the provider method
-** Return `Stream<Arguments>` with clear parameter descriptions
-** *Limit to test data only*: Method sources should only provide input data, expected outputs, and optionally error messages
-** *Avoid strategy pattern*: Do not use method sources to implement different testing strategies or behaviors
-
-* *Test Case Naming*:
-** Use the `name` parameter in `@ParameterizedTest` for descriptive test names
-** Include parameter values in the name template where appropriate
-** Example: `@ParameterizedTest(name = "{0}: {1} should result in {2}")`
-
-* *Test Case Documentation*:
-** Document the purpose of each test case in the provider method
-** Include edge cases and boundary conditions
-** Explain the relationship between inputs and expected outputs
-
-* *Maintenance Considerations*:
-** Regularly review parameterized tests for relevance
-** Avoid excessive parameterization that obscures test intent
-** Balance between coverage and maintainability
-** Refactor tests that use method sources as strategy patterns into separate test methods
+* Use minimum 3 test cases to justify parameterized tests
+* Use descriptive method names for test case providers
+* Limit method sources to test data only
+* Use descriptive test names with parameter templates
+* Document test case purposes and relationships
+* Balance coverage with maintainability
 
 === Performance
 
@@ -221,6 +200,6 @@ This profile will:
 
 == See Also
 
-* xref:../java/README.adoc[Java Standards]
+* xref:../java/java-code-standards.adoc[Java Standards]
 * xref:../documentation/javadoc-standards.adoc[Javadoc Standards]
 * xref:../logging/README.adoc[Logging Standards]

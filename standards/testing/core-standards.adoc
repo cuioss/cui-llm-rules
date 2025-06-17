@@ -1,9 +1,29 @@
-= Testing Core Standards
+= Testing Standards
 :toc: left
 :toclevels: 3
 :toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
+
+== Overview
+
+This document contains the comprehensive testing standards for all CUI projects. These standards serve as independent, authoritative sources of truth for testing requirements without being tied to specific implementation processes. They ensure consistent, thorough, and maintainable testing across the codebase.
+
+== Document Structure
+
+The testing standards are organized into the following documents:
+
+* xref:core-standards.adoc[Core Standards] - Fundamental testing standards and requirements (this document)
+* xref:quality-standards.adoc[Quality Standards] - Standards for test quality and coverage
+* xref:../cdi-quarkus/testing-standards.adoc[Quarkus Testing Standards] - Testing standards for Quarkus applications
+* xref:../logging/testing-guide.adoc[Logging Testing Guide] - Standards for testing logging implementations
+
+== Key Principles
+
+1. *Comprehensive Coverage*: All code should have appropriate test coverage
+2. *Maintainability*: Tests should be easy to understand and maintain
+3. *Reliability*: Tests should be deterministic and not flaky
+4. *Efficiency*: Tests should run quickly and use resources efficiently
 
 == Purpose
 
@@ -11,7 +31,7 @@ This document defines the core standards and best practices for writing and main
 
 == Related Documentation
 
-* xref:README.adoc[Testing Standards Overview]
+* xref:quality-standards.adoc[Quality Standards] - Standards for test quality and coverage
 * xref:../logging/testing-guide.adoc[Logging Testing Guide]
 * xref:../documentation/javadoc-standards.adoc[Javadoc Standards]
 
@@ -68,59 +88,14 @@ This document defines the core standards and best practices for writing and main
 * May involve multiple components and services
 * Should simulate real-world usage
 
-== Test Code Changes
+== Test Code Guidelines
 
 === Scope of Changes
 
-When adapting test code (e.g., to new logging standards), changes must be strictly limited to the test-related modifications:
-
-* DO NOT modify production code that is unrelated to the current task
-* DO NOT refactor or "improve" other aspects of the code while working on test changes
-* Each change should have a single, clear purpose
-
-.Example - Updating tests for new logging standard
-[source,java]
-----
-// CORRECT - Only change logging related code
-- import static de.cuioss.portal.core.PortalCoreLogMessages.SERVLET;  // New import
-- assertLogMessagePresentContaining(TestLogLevel.WARN, SERVLET.WARN.USER_NOT_LOGGED_IN);  // Updated assertion
-
-// INCORRECT - Making unrelated changes
-- Refactoring test method names
-- Changing test data structures
-- Modifying production code formatting
-- Adding new test cases unrelated to logging
-----
-
-=== Implementation Guidelines
-
-==== Change Strategy
-
-* Identify all affected test files
-* Plan changes before implementation
-* Make changes systematically and consistently
-* Review changes to ensure they stay within scope
-
-==== Documentation
-
-* Document the specific purpose of test changes
-* Note any test-specific configurations or requirements
-* Keep commit messages focused on the test changes
-
-=== Quality Assurance
-
-==== Verification
-
-* Run affected test suites
-* Verify only intended changes were made
-* Check for unintended side effects
-* Ensure test coverage remains consistent
-
-==== Review Process
-
-* Separate test changes from production code changes
-* Focus review on the specific test modifications
-* Ensure changes adhere to testing standards
+* Make targeted changes with single, clear purpose
+* Avoid unrelated refactoring or improvements
+* Focus on specific test requirements
+* Document purpose of test changes
 
 == Best Practices
 
@@ -151,3 +126,10 @@ When adapting test code (e.g., to new logging standards), changes must be strict
 * Test code should be treated with the same care as production code
 * Tests should be maintainable and readable
 * Focus on testing behavior, not implementation details
+
+== See Also
+
+* xref:../README.adoc[Standards Overview]
+* xref:../cdi-quarkus/README.adoc[CDI and Quarkus Standards]
+* xref:../logging/testing-guide.adoc[Logging Testing Guide]
+* xref:../java/java-code-standards.adoc[Java Standards]

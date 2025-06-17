@@ -13,7 +13,7 @@ This document provides comprehensive guidance and examples for testing logging i
 
 * xref:core-standards.adoc[Logging Core Standards]
 * xref:implementation-guide.adoc[Logging Implementation Guide]
-* xref:../testing/README.adoc[Testing Standards]
+* xref:../testing/core-standards.adoc[Testing Standards]
 * xref:../testing/core-standards.adoc[Testing Core Standards]
 
 == Testing Requirements
