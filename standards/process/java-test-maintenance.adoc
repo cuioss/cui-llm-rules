@@ -45,6 +45,20 @@ Execute before starting test maintenance following <<task-completion-standards.a
 
 == CUI Framework Compliance
 
+=== Allowed Testing Libraries
+Strict compliance with approved testing libraries per <<../testing/quality-standards.adoc#testing-library-restrictions,Quality Standards>>:
+
+**ALLOWED:**
+* **cui-test-libs**: All CUI testing utilities and frameworks
+* **junit-jupiter**: JUnit 5 for all test execution
+* **awaitility**: For asynchronous testing and waiting conditions
+* **rest-assured**: For REST API testing and validation
+
+**FORBIDDEN:**
+* **Mockito**: Do NOT use for mocking (use CUI alternatives)
+* **PowerMock**: Do NOT use for advanced mocking scenarios
+* **Hamcrest**: Do NOT use for assertions (use JUnit 5 assertions)
+
 === Required CUI Testing Tools
 Verify usage per <<../testing/quality-standards.adoc#,Quality Standards>>:
 

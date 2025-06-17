@@ -44,7 +44,7 @@ Execute before starting logger maintenance following <<task-completion-standards
 * **Exception Handling**: Exception parameter must come first in log calls
 
 ==== LogMessages Structure Issues
-* **Missing LogMessages Class**: Create module-specific LogMessages following DSL-Style Constants Pattern
+* **Missing LogMessages Class**: Create module-specific LogMessages following DSL-Style Constants Pattern if the module provides at least 10 Java types or 10 messages of INFO level or higher.
 * **Incorrect Hierarchy**: Must be exactly 4 levels deep with category-level imports only
 * **ID Range Violations**: INFO (001-099), WARN (100-199), ERROR (200-299), FATAL (300-399)
 * **Duplicate IDs**: Ensure unique identifiers within module
@@ -52,7 +52,7 @@ Execute before starting logger maintenance following <<task-completion-standards
 === Documentation Requirements
 
 ==== doc/LogMessages.adoc Compliance
-* **File Existence**: Must exist for each module with LogMessages
+* **File Existence**: Must exist for each module with LogMessages if the module provides at least 10 Java types or 10 messages of INFO level or higher.
 * **Format Compliance**: Follow specified table structure per <<../logging/core-standards.adoc#,Core Standards>>
 * **Content Accuracy**: All documented messages must match implementation exactly
 * **Complete Coverage**: All INFO/WARN/ERROR/FATAL messages must be documented
