@@ -1,0 +1,146 @@
+= Process Standards
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Purpose
+
+This directory contains process documentation that defines WHEN and WHAT to do for various development and maintenance activities. Process standards focus on workflow, sequencing, and decision-making rather than technical implementation details.
+
+== Process vs. Standards
+
+Process documents in this directory complement the technical standards found elsewhere in the standards ecosystem:
+
+* **Process Documents** (this directory): Define workflows, timing, and decision processes
+* **Technical Standards** (other directories): Define implementation requirements and quality criteria
+* **Cross-References**: Process documents reference technical standards for detailed "HOW" guidance
+
+== Process Documentation
+
+=== Development Workflow
+
+==== xref:task-completion-standards.adoc[Task Completion Standards]
+Standardized quality verification process for all CUI LLM project development tasks. Defines the mandatory pre-commit checklist, Maven profile requirements, and quality gates that must be met before any code is committed.
+
+**Key Features:**
+* Pre-commit checklist with concrete Maven commands
+* Quality verification requirements
+* Documentation and commit message standards
+* Task management guidelines
+
+==== xref:git-commit-standards.adoc[Git Commit Standards]
+Standardized approach for git commit messages across all projects following conventional commit format. Ensures consistent, traceable commit history that supports automated tooling and code review processes.
+
+**Key Features:**
+* Conventional commit message format
+* Type and scope guidelines
+* Examples for various scenarios including task-based commits
+* Breaking change documentation patterns
+
+=== Code Maintenance Processes
+
+==== xref:refactoring-process.adoc[Refactoring Process]
+Process for systematic code refactoring and improvement activities. Provides structured approach to planning, executing, and verifying refactoring work while maintaining code quality and functionality.
+
+**Key Features:**
+* Systematic refactoring workflow
+* Quality verification at each step
+* Risk management and rollback procedures
+* Integration with task completion standards
+
+==== xref:java-test-maintenance.adoc[Java Test Maintenance Process]
+Process for maintaining and improving Java test quality while preserving functionality and adhering to CUI testing standards. Focuses on module-by-module approach with emphasis on CUI framework compliance.
+
+**Key Features:**
+* Module-by-module processing strategy
+* CUI framework compliance requirements
+* Test quality issue detection and resolution
+* AI-generated code cleanup patterns
+* SonarQube compliance guidance
+
+==== xref:logger-maintenance.adoc[Logger Maintenance Process]
+Process for implementing and maintaining logging standards compliance while preserving functionality. Provides systematic approach to migrating to CuiLogger and implementing proper LogRecord usage patterns.
+
+**Key Features:**
+* CuiLogger migration workflow
+* LogRecord implementation requirements
+* LogMessages structure compliance
+* Testing implementation for logging code
+* Documentation synchronization
+
+=== Documentation Maintenance
+
+==== xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]
+Process for Javadoc error resolution and quality assurance. Provides systematic approach to identifying, prioritizing, and resolving Javadoc issues while maintaining documentation quality.
+
+**Key Features:**
+* Javadoc error detection and categorization
+* Systematic resolution workflow
+* Quality verification procedures
+* Integration with build processes
+
+== Common Process Patterns
+
+All process documents in this directory follow consistent patterns:
+
+=== Structure
+* **Pre-Maintenance Checklist**: Required verification before starting
+* **Module-by-Module Approach**: Systematic processing strategy
+* **Critical Constraints**: Protection of production code and behavior
+* **Workflow Phases**: Analysis → Implementation → Verification
+* **Success Criteria**: Clear completion requirements
+
+=== Integration Points
+* **Task Completion Standards**: Referenced by all processes for quality verification
+* **Git Commit Standards**: Referenced for proper commit message formatting
+* **Technical Standards**: Cross-referenced for implementation details
+* **Quality Gates**: Consistent Maven commands and verification steps
+
+=== Quality Assurance
+* Build verification before and after changes
+* Test execution requirements
+* Coverage preservation
+* Documentation synchronization
+* Incremental commit strategies
+
+== Usage Guidelines
+
+=== When to Use Process Documents
+* Planning systematic code improvements
+* Onboarding team members to development workflows
+* Establishing consistent practices across projects
+* Ensuring quality gates are properly implemented
+* Coordinating multi-module changes
+
+=== Process Selection
+* **General Development**: Start with xref:task-completion-standards.adoc[Task Completion Standards]
+* **Code Refactoring**: Use xref:refactoring-process.adoc[Refactoring Process]
+* **Test Improvements**: Follow xref:java-test-maintenance.adoc[Java Test Maintenance Process]
+* **Logging Updates**: Apply xref:logger-maintenance.adoc[Logger Maintenance Process]
+* **Documentation Fixes**: Use xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]
+
+=== Cross-Process Coordination
+When working across multiple areas:
+1. Always start with task completion standards for baseline requirements
+2. Apply specific maintenance processes for targeted improvements
+3. Use git commit standards for all commits
+4. Reference technical standards for implementation details
+5. Verify quality gates throughout the process
+
+== Integration with Technical Standards
+
+Process documents reference technical standards for implementation guidance:
+
+* **Testing Standards**: xref:../testing/quality-standards.adoc[Quality Standards], xref:../testing/cui-test-generator-guide.adoc[CUI Test Generator Guide]
+* **Logging Standards**: xref:../logging/core-standards.adoc[Core Standards], xref:../logging/implementation-guide.adoc[Implementation Guide]
+* **Java Standards**: xref:../java/java-code-standards.adoc[Java Code Standards]
+* **Documentation Standards**: xref:../documentation/javadoc-standards.adoc[Javadoc Standards]
+
+== See Also
+
+* xref:../README.adoc[Standards Overview] - Complete standards ecosystem
+* xref:../testing/README.adoc[Testing Standards] - Testing framework requirements
+* xref:../logging/README.adoc[Logging Standards] - Logging implementation standards
+* xref:../java/java-code-standards.adoc[Java Standards] - Java development standards
