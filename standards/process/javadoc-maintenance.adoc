@@ -3,6 +3,11 @@
 :toclevels: 3
 :sectnums:
 
+[IMPORTANT]
+====
+This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+====
+
 == Purpose
 Defines the standards for Javadoc maintenance, error resolution, and documentation quality assurance.
 

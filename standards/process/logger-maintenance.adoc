@@ -3,6 +3,11 @@
 :toclevels: 2
 :sectnums:
 
+[IMPORTANT]
+====
+This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+====
+
 Process for implementing and maintaining logging standards while preserving functionality and adhering to CUI logging requirements.
 
 == Pre-Maintenance Checklist

@@ -4,6 +4,10 @@
 :toc-title: Table of Contents
 :sectnums:
 
+[IMPORTANT]
+====
+This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+
 This document describes the process and structure used for managing refactoring tasks in the cui-jwt-token-handling project.
 
 == Task Structure

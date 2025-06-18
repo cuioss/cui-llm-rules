@@ -3,6 +3,11 @@
 :toclevels: 2
 :sectnums:
 
+[IMPORTANT]
+====
+This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+====
+
 Standardized git commit format for all CUI LLM projects following conventional commits.
 
 == Commit Message Format

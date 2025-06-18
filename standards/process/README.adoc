@@ -5,6 +5,7 @@
 :sectnums:
 :source-highlighter: highlight.js
 
+
 == Purpose
 
 This directory contains process documentation that defines WHEN and WHAT to do for various development and maintenance activities. Process standards focus on workflow, sequencing, and decision-making rather than technical implementation details.
