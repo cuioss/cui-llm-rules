@@ -17,7 +17,8 @@ Execute before starting test maintenance following <<task-completion-standards.a
 1. [ ] *Build Verification*: `./mvnw -Ppre-commit clean verify -DskipTests`
 2. [ ] *Test Execution*: `./mvnw clean test` - all tests must pass
 3. [ ] *Coverage Baseline*: `./mvnw clean verify -Pcoverage` - record current metrics
-4. [ ] *Module Identification*: List all modules for systematic processing
+4. [ ] *Security Test Audit*: Verify security testing patterns and vulnerability coverage
+5. [ ] *Module Identification*: List all modules for systematic processing
 
 == Module-by-Module Approach
 
@@ -39,6 +40,39 @@ Execute before starting test maintenance following <<task-completion-standards.a
 * **Removal Actions**: Apply removal rules as defined in quality standards
 * **Process Focus**: Systematic identification and elimination during maintenance cycles
 
+=== Test Enhancement Prioritization
+
+**High Priority - Business Logic Tests:**
+* Domain object tests (token content, claims, validators)
+* Business rule validation tests
+* API contract and behavior tests
+* User-facing functionality tests
+* Security and compliance tests
+
+**Medium Priority - Value Objects:**
+* Data transfer objects with equals/hashCode contracts
+* Configuration objects used in business logic
+* Domain enums with complex behavior
+
+**Low Priority - Infrastructure Tests:**
+* HTTP client/server communication tests
+* JWKS loading and caching tests
+* Security infrastructure tests (if already comprehensive)
+* Build and deployment infrastructure tests
+* Framework integration tests
+
+**Infrastructure Test Criteria:**
+Tests that should remain as infrastructure (no CUI enhancement needed):
+* Test external service integrations
+* Test framework behavior rather than business logic
+* Already provide adequate coverage through existing patterns
+* Would not benefit from generator-based test data
+
+**Classification Documentation Requirements:**
+* Maintain test file inventory with enhancement status
+* Document justification for infrastructure classification
+* Track enhancement completion and coverage impact
+
 === Duplicate Detection
 * **Identical Test Logic**: Consolidate into parameterized tests using JUnit 5 with @GeneratorsSource
 * **Similar Test Data**: Extract to shared TypeGenerator implementations
@@ -53,6 +87,42 @@ Execute before starting test maintenance following <<task-completion-standards.a
 * **Apply Standards**: Follow <<../testing/core-standards.adoc#cui-framework-requirements,CUI Framework Requirements>>
 * **Library Restrictions**: Adhere to <<../testing/quality-standards.adoc#testing-library-restrictions,Testing Library Requirements>>
 * **Implementation Guide**: Reference <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Guide>> for examples
+
+=== Security Testing Standards
+
+**Security Test Categories:**
+* **Attack Simulation Tests**: Verify protection against known attack vectors (JKU/X5U, embedded JWK, KID injection)
+* **Vulnerability Regression Tests**: Prevent reintroduction of patched vulnerabilities (CVE-2018-0114, CVE-2022-21449)
+* **Security Event Tracking**: Ensure proper logging and monitoring of security events
+
+**Parameterized Security Testing:**
+* Use `@TestTokenSource` with count parameters for comprehensive security testing
+* Include `SecurityEventCounter` integration for tracking security events
+* Verify protection against algorithm confusion attacks
+
+**Example Implementation:**
+[source,java]
+----
+@ParameterizedTest
+@TestTokenSource(value = TokenType.ACCESS_TOKEN, count = 3)
+@DisplayName("Should reject tokens with tampered payloads")
+void shouldRejectTokensWithTamperedPayloads(TestTokenHolder tokenHolder) {
+    String validToken = tokenHolder.getRawToken();
+    String tamperedToken = tamperTokenPayload(validToken);
+    
+    assertThrows(TokenValidationException.class,
+        () -> validator.createAccessToken(tamperedToken),
+        "Should reject token with tampered payload");
+        
+    assertTrue(securityEventCounter.getCount(SIGNATURE_VALIDATION_FAILED) > 0,
+        "Security event should be recorded for tampered token");
+}
+----
+
+**Count Parameter Guidelines:**
+* Use count=2 for basic variation testing
+* Use count=3 for security-critical scenarios  
+* Use count=5+ for complex business logic with many edge cases
 
 === Framework Migration Process
 
@@ -99,9 +169,12 @@ When production bugs are discovered:
 2. **AI Pattern Detection**: Check for method names >75 chars, excessive comments, verbose @DisplayName
 3. **Non-Sensible Test Review**: Identify meaningless constructor tests and framework behavior tests
 4. **CUI Framework Audit**: Check for manual data creation and missing annotations
-5. **Value Object Review**: Identify objects needing contract testing
-6. **Prioritize Changes**: Focus on high-impact improvements first
-7. **Plan Module Order**: Dependencies first, then dependent modules
+5. **Value Object Review**: Identify objects needing contract testing per value object criteria
+6. **Security Test Review**: Verify security testing patterns and vulnerability coverage
+7. **Classify Test Files**: Apply prioritization framework (High/Medium/Low priority)
+8. **Document Classification**: Maintain test file inventory with enhancement status and justification
+9. **Prioritize Changes**: Focus on high-priority business logic tests first
+10. **Plan Module Order**: Dependencies first, then dependent modules
 
 === Compliance Verification Checklist
 For each test class, verify compliance with:
@@ -117,10 +190,34 @@ For each test class, verify compliance with:
 
 === Verification Phase
 Following <<task-completion-standards.adoc#,Task Completion Standards>>:
-1. **Full Build**: `./mvnw -Ppre-commit clean verify -DskipTests`
-2. **Complete Test Suite**: `./mvnw clean install`
-3. **Coverage Verification**: `./mvnw clean verify -Pcoverage`
+
+**Build Profile Standards:**
+
+1. **Quality Build (Fast Feedback)**: `./mvnw -Ppre-commit clean verify -DskipTests -pl <module>`
+   * Purpose: Code quality checks without test execution
+   * Usage: Development iteration, pre-commit validation
+   * Includes: License headers, compilation, static analysis
+
+2. **Verification Build (Comprehensive)**: `./mvnw clean verify -pl <module>`
+   * Purpose: Full test suite execution with comprehensive validation
+   * Usage: Release preparation, CI/CD pipelines
+   * Includes: Complete test suite, coverage analysis, quality gates
+
+3. **Coverage Analysis**: `./mvnw clean verify -Pcoverage -pl <module>`
+   * Purpose: Detailed coverage analysis and reporting
+   * Usage: Coverage verification, regression detection
+   * Includes: JaCoCo reports, threshold enforcement
+
+**Verification Steps:**
+1. **Quality Build**: Execute quality build for rapid feedback
+2. **Complete Test Suite**: Execute verification build for comprehensive validation
+3. **Coverage Verification**: Execute coverage build for detailed metrics
 4. **Final Commit**: Consolidate if needed, update module status
+
+**Important Notes:**
+* No `-Pverification` profile exists - use standard `verify` goal
+* Use module-specific execution with `-pl <module>` for faster builds
+* Combine profiles as needed: `-Ppre-commit,coverage`
 
 == Common Improvements
 
@@ -142,11 +239,45 @@ Following <<task-completion-standards.adoc#,Task Completion Standards>>:
 
 === Value Object Testing Process
 
+**Apply ShouldHandleObjectContracts<T> when:**
+* Class implements custom equals()/hashCode() methods
+* Class represents domain data with value semantics
+* Class is used in collections or as map keys
+* Class participates in caching or persistence operations
+
+**Do NOT apply to:**
+* Enums (already have proper equals/hashCode from Java)
+* Utility classes with only static methods
+* Infrastructure classes (parsers, validators, builders)
+* Classes that don't represent business value objects
+* Builder pattern classes (test the built object instead)
+
 **Implementation Steps:**
-1. **Identify Value Objects**: Locate classes requiring contract testing
+1. **Identify Value Objects**: Locate classes requiring contract testing using above criteria
 2. **Apply Standards**: Follow patterns per <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Guide>>
 3. **Verify Coverage**: Ensure equals(), hashCode(), toString(), and Serializable contracts are tested
 4. **Generator Integration**: Use cui-test-generator for all test data creation
+
+**Implementation Pattern:**
+[source,java]
+----
+@EnableGeneratorController
+class AccessTokenContentTest implements ShouldHandleObjectContracts<AccessTokenContent> {
+    
+    @ParameterizedTest
+    @TestTokenSource(value = TokenType.ACCESS_TOKEN, count = 2)
+    @DisplayName("Should handle business logic correctly")
+    void shouldHandleBusinessLogic(TestTokenHolder tokenHolder) {
+        // Business logic tests here
+        // Contract testing is automatically applied via interface
+    }
+}
+----
+
+**Common Mistakes to Avoid:**
+* Applying contracts to enums (unnecessary)
+* Testing infrastructure classes as value objects
+* Mixing business logic tests with contract-only test classes
 
 === Structure Optimization
 * Group related tests in inner classes

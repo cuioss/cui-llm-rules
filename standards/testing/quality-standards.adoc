@@ -170,6 +170,8 @@ For comprehensive quality verification processes, see <<../process/task-completi
 * **SIMPLIFY**: Overly verbose method and test names
 * **CONSOLIDATE**: Identical test patterns into parameterized tests with @GeneratorsSource  
 * **REPLACE**: Verbose @DisplayName with focused descriptions under 50 characters
+* **PRESERVE**: Meaningful assertion messages that provide debugging context (see <<assertion-message-standards,Assertion Message Standards>>)
+* **REMOVE ONLY**: Meaningless assertion messages like "Should be true" or overly verbose descriptions (100+ characters)
 
 **Examples of AI Artifacts to Remove:**
 ```java
@@ -198,6 +200,49 @@ void shouldValidateToken() {
 ```
 
 [[sonarqube-compliance]]
+==== Assertion Message Standards
+
+===== Meaningful Assertion Messages
+
+**Requirement:** ALL assertions must include meaningful, concise failure messages that provide context for debugging when tests fail.
+
+**Key Principles:**
+
+* **Include WHY the assertion should pass**: Explain the expected behavior being verified
+* **Keep messages concise but informative**: Aim for 20-60 characters
+* **Provide debugging context**: Help identify what went wrong when the test fails
+* **Use consistent language**: Follow established patterns within the test suite
+
+**Examples:**
+
+**Good Assertion Messages:**
+```java
+assertTrue(result.isPresent(), "User should be found by valid ID");
+assertEquals(expected, actual, "Token should contain correct issuer");
+assertFalse(errors.isEmpty(), "Validation should detect invalid input");
+assertNotNull(response, "API should return non-null response");
+```
+
+**Poor Assertion Messages (DO NOT USE):**
+```java
+assertTrue(result.isPresent()); // Missing context
+assertTrue(result.isPresent(), "Should be true"); // Meaningless
+assertTrue(result.isPresent(), "This assertion verifies that the result optional contains a value as expected when..."); // Too verbose
+```
+
+**Exception Testing:**
+```java
+TokenValidationException exception = assertThrows(TokenValidationException.class, 
+    () -> validator.validate(invalidToken),
+    "Invalid token should trigger validation exception");
+```
+
+**Standard Message Patterns:**
+* For presence checks: `"X should be present"`, `"X should not be null"`
+* For equality: `"X should equal Y"`, `"X should match expected value"`
+* For collections: `"Collection should contain X"`, `"List should have Y elements"`
+* For exceptions: `"X should throw Y exception"`, `"Invalid X should trigger Y"`
+
 ==== SonarQube Compliance
 
 ===== assertThrows Best Practices
