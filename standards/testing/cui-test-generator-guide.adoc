@@ -45,81 +45,68 @@ class MyGeneratorTest {
 
 === Built-in Generators
 
-==== Basic Type Generation
-
 [source,java]
 ----
 @EnableGeneratorController
-class BasicGeneratorExamples {
+class GeneratorExamples {
     
     @Test
     void shouldDemonstrateBasicGenerators() {
-        // Basic type generation
+        // Basic types
         String text = Generators.strings().next();
         Integer number = Generators.integers().next();
-        LocalDateTime dateTime = Generators.localDateTimes().next();
         Boolean flag = Generators.booleans().next();
+        LocalDateTime dateTime = Generators.localDateTimes().next();
         
-        // Configurable generation with parameters
-        String letters = Generators.letterStrings(5, 10).next(); // 5-10 characters
-        List<Integer> numbers = Generators.integers(1, 100).list(5); // 5 numbers between 1-100
+        // Configured generation
+        String letters = Generators.letterStrings(5, 10).next();
+        List<Integer> numbers = Generators.integers(1, 100).list(5);
         Float decimal = Generators.floats(0.0f, 100.0f).next();
     }
-}
-----
-
-==== Fixed and Enum Values
-
-[source,java]
-----
-@EnableGeneratorController  
-class FixedValueExamples {
     
     @Test
-    void shouldUseFixedValues() {
-        // Fixed values for specific test scenarios
+    void shouldUseFixedAndEnumValues() {
+        // Fixed values
         var urlGen = Generators.fixedValues(String.class, 
-            "https://cuioss.de", 
-            "https://www.heise.de",
-            "https://example.com");
+            "https://cuioss.de", "https://example.com");
         String url = urlGen.next();
         
-        // Enum value generation
+        // Enum generation
         var enumGen = Generators.enumValues(TimeUnit.class);
         TimeUnit timeUnit = enumGen.next();
-        
-        // Domain-specific fixed values
-        var emailGen = Generators.fixedValues(String.class,
-            "test@example.com",
-            "user@test.org",
-            "admin@demo.net");
-        String email = emailGen.next();
     }
 }
 ----
 
 == Test Reproducibility
 
-=== Seed Configuration
+[IMPORTANT]
+====
+**Seed Usage Restrictions:**
+
+* **Fixed seeds are ONLY for reproducing test failures during debugging**
+* **NEVER commit tests with hardcoded @GeneratorSeed values**
+* **Remove all @GeneratorSeed annotations before check-in/commit**
+* **Use seeds temporarily for local debugging only**
+
+Fixed seeds defeat the purpose of random testing and reduce test coverage over time.
+====
 
 [source,java]
 ----
 @EnableGeneratorController
-@GeneratorSeed(8042L) // Class-level seed for all tests
+@GeneratorSeed(8042L) // Class-level seed - REMOVE BEFORE COMMIT!
 class ReproducibleTest {
     
     @Test
-    @GeneratorSeed(4711L) // Method-level seed override
+    @GeneratorSeed(4711L) // Method-level override - REMOVE BEFORE COMMIT!
     void shouldGenerateSpecificData() {
-        // Always generates the same data
-        String data = Generators.strings().next();
-        // assertions...
+        String data = Generators.strings().next(); // Always same data
     }
     
     @Test
     void shouldGenerateConsistentData() {
-        // Uses class-level seed
-        var result = Generators.strings().next();
+        var result = Generators.strings().next(); // Uses class seed
         assertFalse(result.isEmpty());
     }
 }
@@ -127,145 +114,85 @@ class ReproducibleTest {
 
 == Parameterized Tests
 
-=== @GeneratorsSource with GeneratorType
+=== @GeneratorsSource Patterns
 
 [source,java]
 ----
 @EnableGeneratorController
 class ParameterizedGeneratorTests {
     
-    // String generator with size parameters
+    // String generator with parameters
     @ParameterizedTest
-    @GeneratorsSource(
-        generator = GeneratorType.STRINGS,
-        minSize = 3,
-        maxSize = 10,
-        count = 5
-    )
+    @GeneratorsSource(generator = GeneratorType.STRINGS, minSize = 3, maxSize = 10, count = 5)
     void testWithStringGenerator(String value) {
-        assertNotNull(value);
         assertTrue(value.length() >= 3 && value.length() <= 10);
     }
 
-    // Number generator with range parameters
+    // Number generator with range
     @ParameterizedTest
-    @GeneratorsSource(
-        generator = GeneratorType.INTEGERS,
-        low = "1",
-        high = "100",
-        count = 5
-    )
+    @GeneratorsSource(generator = GeneratorType.INTEGERS, low = "1", high = "100", count = 5)
     void testWithIntegerGenerator(Integer value) {
-        assertNotNull(value);
         assertTrue(value >= 1 && value <= 100);
     }
 
     // Simple generator without parameters
     @ParameterizedTest
-    @GeneratorsSource(
-        generator = GeneratorType.NON_EMPTY_STRINGS,
-        count = 3
-    )
+    @GeneratorsSource(generator = GeneratorType.NON_EMPTY_STRINGS, count = 3)
     void testWithNonEmptyStrings(String value) {
-        assertNotNull(value);
         assertFalse(value.isEmpty());
     }
 
-    // Domain-specific generator
+    // Domain-specific generators
     @ParameterizedTest
-    @GeneratorsSource(
-        generator = GeneratorType.DOMAIN_EMAIL,
-        count = 3
-    )
+    @GeneratorsSource(generator = GeneratorType.DOMAIN_EMAIL, count = 3)
     void testWithEmailGenerator(String email) {
-        assertNotNull(email);
         assertTrue(email.contains("@"));
     }
 
-    // Using GeneratorSeed for reproducible tests
+    // Reproducible parameterized tests - REMOVE @GeneratorSeed BEFORE COMMIT!
     @ParameterizedTest
-    @GeneratorSeed(42L)
-    @GeneratorsSource(
-        generator = GeneratorType.STRINGS,
-        minSize = 3,
-        maxSize = 10,
-        count = 3
-    )
+    @GeneratorSeed(42L) // DEBUGGING ONLY - REMOVE BEFORE COMMIT!
+    @GeneratorsSource(generator = GeneratorType.STRINGS, minSize = 3, maxSize = 10, count = 3)
     void testWithSpecificSeed(String value) {
-        // This test will always generate the same values
-        assertNotNull(value);
+        assertNotNull(value); // Always same values
     }
 }
 ----
 
-=== TypeGenerator in Parameterized Tests
+=== TypeGenerator and Factory Patterns
 
 [source,java]
 ----
 @EnableGeneratorController
-class TypeGeneratorParameterizedTests {
+class AdvancedParameterizedTests {
 
-    // Class-based configuration
+    // Class-based generator
     @ParameterizedTest
     @TypeGeneratorSource(value = NonBlankStringGenerator.class, count = 5)
     void testWithGeneratedStrings(String value) {
-        assertNotNull(value);
         assertFalse(value.isBlank());
     }
 
-    // Method-based configuration
+    // Method-based generator
     @ParameterizedTest
     @TypeGeneratorMethodSource("createStringGenerator")
     void testWithCustomGenerator(String value) {
         assertNotNull(value);
     }
 
-    // Factory method that returns a configured generator
-    static TypedGenerator<String> createStringGenerator() {
-        return Generators.strings(5, 10); // Strings between 5-10 characters
-    }
-}
-----
-
-=== Factory-Based Generators
-
-[source,java]
-----
-@EnableGeneratorController
-class FactoryBasedGeneratorTests {
-
-    // Use a factory method to create a generator
-    @ParameterizedTest
-    @TypeGeneratorFactorySource(
-        factoryClass = MyGeneratorFactory.class,
-        factoryMethod = "createStringGenerator"
-    )
-    void testWithFactoryGenerator(String value) {
-        assertNotNull(value);
-    }
-
-    // Factory with parameters
+    // Factory-based generator
     @ParameterizedTest
     @TypeGeneratorFactorySource(
         factoryClass = MyGeneratorFactory.class,
         factoryMethod = "createRangeGenerator",
-        methodParameters = {"1", "100"},
-        count = 5
+        methodParameters = {"1", "100"}, count = 5
     )
-    void testWithParameterizedFactory(Integer value) {
-        assertNotNull(value);
+    void testWithFactoryGenerator(Integer value) {
         assertTrue(value >= 1 && value <= 100);
     }
-}
 
-// Factory class
-public class MyGeneratorFactory {
-    public static TypedGenerator<String> createStringGenerator() {
+    static TypedGenerator<String> createStringGenerator() {
         return Generators.strings(5, 10);
-    }
-
-    public static TypedGenerator<Integer> createRangeGenerator(String min, String max) {
-        return Generators.integers(Integer.parseInt(min), Integer.parseInt(max));
     }
 }
 ----
@@ -277,13 +204,10 @@ public class MyGeneratorFactory {
 @EnableGeneratorController
 class CompositeGeneratorTests {
     
-    // Preferred: Combine multiple generators using GeneratorType enum
+    // Multiple generators combined
     @ParameterizedTest
     @CompositeTypeGeneratorSource(
-        generators = {
-            GeneratorType.NON_EMPTY_STRINGS,
-            GeneratorType.INTEGERS
-        },
+        generators = {GeneratorType.NON_EMPTY_STRINGS, GeneratorType.INTEGERS},
         count = 3
     )
     void testWithGeneratorTypes(String text, Integer number) {
@@ -291,33 +215,25 @@ class CompositeGeneratorTests {
         assertNotNull(number);
     }
 
-    // Domain-specific generators can also be used
+    // Domain-specific combinations
     @ParameterizedTest
     @CompositeTypeGeneratorSource(
-        generators = {
-            GeneratorType.DOMAIN_EMAIL,
-            GeneratorType.DOMAIN_ZIP_CODE
-        },
+        generators = {GeneratorType.DOMAIN_EMAIL, GeneratorType.DOMAIN_ZIP_CODE},
         count = 2
     )
     void testWithDomainGenerators(String email, String zipCode) {
-        assertNotNull(email);
         assertTrue(email.contains("@"));
         assertNotNull(zipCode);
     }
 
-    // With specific seed for reproducible tests
+    // Reproducible composite tests - REMOVE @GeneratorSeed BEFORE COMMIT!
     @ParameterizedTest
-    @GeneratorSeed(42L)
+    @GeneratorSeed(42L) // DEBUGGING ONLY - REMOVE BEFORE COMMIT!
     @CompositeTypeGeneratorSource(
-        generators = {
-            GeneratorType.NON_EMPTY_STRINGS,
-            GeneratorType.INTEGERS
-        },
+        generators = {GeneratorType.NON_EMPTY_STRINGS, GeneratorType.INTEGERS},
         count = 2
     )
     void testWithSpecificSeed(String text, Integer number) {
-        // This test will always generate the same combinations
         assertNotNull(text);
         assertNotNull(number);
     }
@@ -358,14 +274,13 @@ class CustomGeneratorUsageTests {
     @TypeGeneratorSource(value = UserTypeGenerator.class, count = 5)
     void shouldProcessGeneratedUsers(User user) {
         UserService.process(user);
-        // test logic
+        assertNotNull(user.getName());
     }
     
     @ParameterizedTest
     @TypeGeneratorMethodSource("createUserGenerator")
     void shouldUseMethodBasedGenerator(User user) {
         assertNotNull(user);
-        // test logic
     }
     
     static TypedGenerator<User> createUserGenerator() {
@@ -378,7 +293,7 @@ class CustomGeneratorUsageTests {
 
 [source,java]
 ----
-// Factory class for more complex generator creation
+// Factory for complex generator creation
 public class UserGeneratorFactory {
     public static TypedGenerator<User> createAgeRangeGenerator(String minAge, String maxAge) {
         return new UserTypeGenerator() {
@@ -387,101 +302,67 @@ public class UserGeneratorFactory {
             
             @Override
             public User next() {
-                return new User(
-                    Generators.letterStrings(2, 20).next(),
-                    ageGen.next()
-                );
+                return new User(Generators.letterStrings(2, 20).next(), ageGen.next());
             }
         };
     }
 }
 
 // Usage with factory-based approach
-@EnableGeneratorController
-class FactoryPatternTests {
-    
-    @ParameterizedTest
-    @TypeGeneratorFactorySource(
-        factoryClass = UserGeneratorFactory.class,
-        factoryMethod = "createAgeRangeGenerator",
-        methodParameters = {"18", "65"},
-        count = 5
-    )
-    void shouldTestSpecificAgeRange(User user) {
-        assertTrue(user.getAge() >= 18 && user.getAge() <= 65);
-    }
+@ParameterizedTest
+@TypeGeneratorFactorySource(
+    factoryClass = UserGeneratorFactory.class,
+    factoryMethod = "createAgeRangeGenerator",
+    methodParameters = {"18", "65"}, count = 5
+)
+void shouldTestSpecificAgeRange(User user) {
+    assertTrue(user.getAge() >= 18 && user.getAge() <= 65);
 }
 ----
 
-== GeneratorType Enum Reference
-
-The `GeneratorType` enum provides type-safe references to all available generators:
+== GeneratorType Reference
 
 === Standard Generators
-* `GeneratorType.STRINGS` - General string generator
-* `GeneratorType.NON_EMPTY_STRINGS` - Non-empty string generator
-* `GeneratorType.INTEGERS` - Integer generator
-* `GeneratorType.BOOLEANS` - Boolean generator
-* `GeneratorType.LOCAL_DATE_TIMES` - LocalDateTime generator
-* `GeneratorType.URLS` - URL generator
+* `STRINGS` - General string generator (supports minSize/maxSize)
+* `NON_EMPTY_STRINGS` - Non-empty string generator
+* `INTEGERS` - Integer generator (supports low/high range)
+* `BOOLEANS` - Boolean generator
+* `LOCAL_DATE_TIMES` - LocalDateTime generator
+* `URLS` - URL generator
 
-=== Domain-Specific Generators
-* `GeneratorType.DOMAIN_EMAIL` - Email address generator
-* `GeneratorType.DOMAIN_CITY` - City name generator
-* `GeneratorType.DOMAIN_FULL_NAME` - Person name generator
-* `GeneratorType.DOMAIN_ZIP_CODE` - Zip/postal code generator
+=== Domain Generators
+* `DOMAIN_EMAIL` - Email address generator
+* `DOMAIN_CITY` - City name generator
+* `DOMAIN_FULL_NAME` - Person name generator
+* `DOMAIN_ZIP_CODE` - Zip/postal code generator
 
 == Migration Patterns
 
-=== From Manual Data Creation
+=== Migration Examples
 
-**Before (Manual/Random):**
+**Manual Data → CUI Generator:**
 ```java
-// Remove manual data creation
+// Before: Manual/Random
 String randomName = "TestUser" + System.currentTimeMillis();
-int randomAge = new Random().nextInt(100);
-User user = new User(randomName, randomAge);
-```
+User user = new User(randomName, new Random().nextInt(100));
 
-**After (CUI Generator):**
-```java
+// After: CUI Generator
 @EnableGeneratorController
-class UserTest {
-    @Test
-    void shouldProcessUser() {
-        String userName = Generators.letterStrings(5, 10).next();
-        Integer userAge = Generators.integers(18, 65).next();
-        User user = new User(userName, userAge);
-        // test logic
-    }
-}
+String userName = Generators.letterStrings(5, 10).next();
+User user = new User(userName, Generators.integers(18, 65).next());
 ```
 
-=== From Hardcoded Test Data
-
-**Before:**
+**Hardcoded Data → Parameterized:**
 ```java
-@Test
-void shouldValidateMultipleUsers() {
-    validateUser("John", 25);
-    validateUser("Jane", 30);
-    validateUser("Bob", 35);
-}
-```
+// Before: Hardcoded
+validateUser("John", 25); validateUser("Jane", 30);
 
-**After:**
-```java
+// After: Generated
 @ParameterizedTest
 @CompositeTypeGeneratorSource(
-    generators = {
-        GeneratorType.NON_EMPTY_STRINGS,
-        GeneratorType.INTEGERS
-    },
-    count = 3
+    generators = {GeneratorType.NON_EMPTY_STRINGS, GeneratorType.INTEGERS}, count = 3
 )
-void shouldValidateGeneratedUsers(String name, Integer age) {
-    validateUser(name, age);
-}
+void shouldValidateGeneratedUsers(String name, Integer age) { validateUser(name, age); }
 ```
 
 == Best Practices
@@ -489,7 +370,7 @@ void shouldValidateGeneratedUsers(String name, Integer age) {
 === Generator Selection
 * Use `GeneratorType` enum for standard scenarios
 * Create custom `TypedGenerator` for domain objects
-* Use `@GeneratorSeed` for reproducible debugging
+* Use `@GeneratorSeed` ONLY for temporary local debugging (never commit)
 * Prefer `@GeneratorsSource` over manual generator instantiation
 
 === Test Organization
@@ -517,7 +398,8 @@ void shouldValidateGeneratedUsers(String name, Integer age) {
 * `@EnableGeneratorController` must be present on all test classes using generators
 * Use CUI generators exclusively - no Random, Faker, or manual data creation
 * Implement custom TypedGenerator for domain-specific objects
-* Follow reproducible test patterns with `@GeneratorSeed` where debugging is needed
+* **NEVER commit @GeneratorSeed annotations** - use only for local debugging
+* Remove all @GeneratorSeed before check-in/commit
 
 == See Also
 

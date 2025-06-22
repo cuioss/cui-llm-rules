@@ -35,11 +35,9 @@ Execute before starting test maintenance following <<task-completion-standards.a
 == Test Quality Issues
 
 === AI-Generated Code Detection
-* **Excessive Comments**: Remove verbose explanations in test methods
-* **Redundant Assertions**: Consolidate multiple similar assertions
-* **Over-Documentation**: Simplify JavaDoc to essential information only
-* **Verbose Test Names**: Shorten while maintaining clarity
-* **SonarQube Violations**: Fix assertThrows and other compliance issues per <<../testing/quality-standards.adoc#sonarqube-compliance,Quality Standards>>
+* **Detection Process**: Identify AI artifacts per <<../testing/quality-standards.adoc#ai-generated-code-detection,Quality Standards AI Detection>>
+* **Removal Actions**: Apply removal rules as defined in quality standards
+* **Process Focus**: Systematic identification and elimination during maintenance cycles
 
 === Duplicate Detection
 * **Identical Test Logic**: Consolidate into parameterized tests using JUnit 5 with @GeneratorsSource
@@ -50,52 +48,18 @@ Execute before starting test maintenance following <<task-completion-standards.a
 
 == CUI Framework Compliance
 
-=== Allowed Testing Libraries
-Strict compliance with approved testing libraries per <<../testing/quality-standards.adoc#testing-library-restrictions,Quality Standards>>:
-
-**ALLOWED:**
-* **cui-test-libs**: All CUI testing utilities and frameworks
-* **junit-jupiter**: JUnit 5 for all test execution
-* **awaitility**: For asynchronous testing and waiting conditions
-* **rest-assured**: For REST API testing and validation
-
-**FORBIDDEN:**
-* **Mockito**: Do NOT use for mocking (use CUI alternatives)
-* **PowerMock**: Do NOT use for advanced mocking scenarios
-* **Hamcrest**: Do NOT use for assertions (use JUnit 5 assertions)
-
-=== Required CUI Testing Tools
-Verify usage per <<../testing/quality-standards.adoc#,Quality Standards>>:
-
-* **cui-test-generator**: Use for test data generation instead of manual creation
-* **cui-test-value-objects**: Apply for equality and serialization testing
-* **cui-jsf-test-basic**: Use for JSF component testing (where applicable)
-* **cui-test-mockwebserver-junit5**: Apply for HTTP client testing
-
 === Framework Compliance Requirements
 
-* **Exclusive Test Data**: Use https://github.com/cuioss/cui-test-generator[cui-test-generator] for ALL test data generation
-* **No Random Alternatives**: Do NOT use manual data creation, Random, Faker, or other random data tools
-* **Custom Generators**: Create new TypeGenerator implementations where sensible for domain objects
-* **Required Annotations**: @EnableGeneratorController MUST be added to every test class using generators
-* **Value Object Testing**: Use https://github.com/cuioss/cui-test-value-objects[cui-test-value-objects] for comprehensive contract testing
+* **Apply Standards**: Follow <<../testing/core-standards.adoc#cui-framework-requirements,CUI Framework Requirements>>
+* **Library Restrictions**: Adhere to <<../testing/quality-standards.adoc#testing-library-restrictions,Testing Library Requirements>>
+* **Implementation Guide**: Reference <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Guide>> for examples
 
-For detailed usage patterns and examples, see <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Usage Guide>>.
+=== Framework Migration Process
 
-=== Framework Migration Priorities
-
-* **Generator Adoption**: Replace manual test data with cui-test-generator patterns
-* **Value Object Migration**: Convert value object tests to cui-test-value-objects approach
-* **Annotation Updates**: Add @EnableGeneratorController to all test classes using generators
-* **Parameterized Test Enhancement**: Consider @GeneratorsSource for test data provision
-* **Custom Generator Creation**: Implement TypeGenerator for domain-specific objects
-
-=== CUI Framework Detection Issues
-
-* **Manual Data Creation**: Replace hardcoded test data with generator-based approach
-* **Missing Annotations**: Add @EnableGeneratorController where generators are used
-* **Incomplete Contract Testing**: Ensure all value objects use cui-test-value-objects
-* **Custom Random Logic**: Replace with appropriate TypeGenerator implementations
+1. **Scan for Issues**: Identify violations of CUI framework requirements
+2. **Apply Standards**: Follow migration patterns per framework standards
+3. **Verify Compliance**: Check against CUI framework requirements
+4. **Update Implementation**: Use generator guide examples for correct patterns
 
 == Maintenance Standards
 
@@ -132,19 +96,18 @@ When production bugs are discovered:
 
 === Analysis Phase
 1. **Scan for Issues**: Identify AI artifacts, duplicates, and non-compliance
-2. **CUI Framework Audit**: Check for manual data creation and missing annotations
-3. **Value Object Review**: Identify objects needing contract testing
-4. **Prioritize Changes**: Focus on high-impact improvements first
-5. **Plan Module Order**: Dependencies first, then dependent modules
+2. **AI Pattern Detection**: Check for method names >75 chars, excessive comments, verbose @DisplayName
+3. **Non-Sensible Test Review**: Identify meaningless constructor tests and framework behavior tests
+4. **CUI Framework Audit**: Check for manual data creation and missing annotations
+5. **Value Object Review**: Identify objects needing contract testing
+6. **Prioritize Changes**: Focus on high-impact improvements first
+7. **Plan Module Order**: Dependencies first, then dependent modules
 
-=== CUI Framework Compliance Checklist
-For each test class, verify:
-- [ ] **@EnableGeneratorController**: Present if using any generators
-- [ ] **Generator Usage**: All test data uses cui-test-generator (no manual/random data)
-- [ ] **Value Object Testing**: All value objects use cui-test-value-objects contracts
-- [ ] **Custom Generators**: Domain objects have appropriate TypeGenerator implementations
-- [ ] **@GeneratorsSource**: Used for parameterized tests where applicable
-- [ ] **Contract Coverage**: Equals, hashCode, serialization properly tested
+=== Compliance Verification Checklist
+For each test class, verify compliance with:
+- [ ] **CUI Framework Standards**: <<../testing/core-standards.adoc#cui-framework-requirements,Framework Requirements>>
+- [ ] **Quality Standards**: <<../testing/quality-standards.adoc#ai-generated-code-detection,AI Detection>> and <<../testing/quality-standards.adoc#testing-library-restrictions,Library Restrictions>>
+- [ ] **Coverage Requirements**: <<../testing/quality-standards.adoc#coverage-requirements,Coverage Standards>>
 
 === Implementation Phase
 1. **Apply Changes**: Fix one category of issues at a time
@@ -161,24 +124,29 @@ Following <<task-completion-standards.adoc#,Task Completion Standards>>:
 
 == Common Improvements
 
-=== Test Simplification
-* Remove excessive inline comments
-* Simplify overly complex test logic  
-* Extract repeated test data to TypeGenerator implementations
-* Convert similar tests to parameterized tests using @GeneratorsSource
-* Fix SonarQube assertThrows violations per <<../testing/quality-standards.adoc#sonarqube-compliance,Quality Standards>>
+=== Test Simplification Process
+* **Apply AI artifact removal** per <<../testing/quality-standards.adoc#ai-generated-code-detection,Quality Standards>>
+* **Remove non-sensible tests** per quality standards criteria
+* **Refactor complex test logic** to follow AAA pattern per <<../testing/core-standards.adoc#,Core Standards>>
+* **Extract repeated test data** to TypeGenerator implementations
+* **Convert similar tests** to parameterized tests using @GeneratorsSource
+* **Fix compliance violations** per <<../testing/quality-standards.adoc#sonarqube-compliance,SonarQube Standards>>
 
-=== Framework Migration Examples
+=== Framework Migration Process
 
-For comprehensive implementation examples, see <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Usage Guide>>.
+**Migration Steps:**
+1. **Identify Violations**: Scan for manual data creation, hardcoded values, non-CUI frameworks
+2. **Apply Standards**: Follow patterns per <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Guide>>
+3. **Verify Compliance**: Check against <<../testing/quality-standards.adoc#cui-testing-utilities,CUI Testing Standards>>
+4. **Test Execution**: Ensure all tests pass after migration
 
-**Key Migration Patterns:**
+=== Value Object Testing Process
 
-* **Manual Data Creation** → Use Generators.letterStrings(), Generators.integers(), etc.
-* **Hardcoded Test Values** → Use @GeneratorsSource with GeneratorType enum
-* **Custom Random Logic** → Implement TypedGenerator<T> for domain objects
-* **Manual Equals/HashCode Tests** → Use cui-test-value-objects framework
-* **Scattered Test Data** → Centralize with custom TypeGenerator implementations
+**Implementation Steps:**
+1. **Identify Value Objects**: Locate classes requiring contract testing
+2. **Apply Standards**: Follow patterns per <<../testing/cui-test-generator-guide.adoc#,CUI Test Generator Guide>>
+3. **Verify Coverage**: Ensure equals(), hashCode(), toString(), and Serializable contracts are tested
+4. **Generator Integration**: Use cui-test-generator for all test data creation
 
 === Structure Optimization
 * Group related tests in inner classes

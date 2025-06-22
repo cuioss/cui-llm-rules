@@ -30,6 +30,7 @@ This document defines comprehensive quality standards, testing framework guideli
 * Clean test environment
 * Predictable test data
 
+[[coverage-requirements]]
 === Coverage Requirements
 
 * Minimum 80% line coverage
@@ -77,19 +78,11 @@ Strict compliance with approved testing libraries to ensure consistency and comp
 
 ==== CUI Testing Utilities
 
-1. https://github.com/cuioss/cui-test-generator[cui-test-generator]
-   * Use for generating test data
-   * See xref:cui-test-generator-guide.adoc[CUI Test Generator Usage Guide] for comprehensive examples
-   * Follow builder patterns
-   * Document generator configurations
+1. **CUI Framework Compliance**: All testing must follow xref:core-standards.adoc#cui-framework-requirements[CUI Framework Requirements]
+   * See xref:cui-test-generator-guide.adoc[CUI Test Generator Usage Guide] for implementation examples
+   * See xref:core-standards.adoc[Core Standards] for mandatory framework requirements
 
-2. https://github.com/cuioss/cui-test-value-objects[cui-test-value-objects]
-   * Leverage for value object testing
-   * Follow equality testing guidelines
-   * Include serialization tests
-   * Use ObjectTestContracts.assertNiceObject() for comprehensive contract testing
-
-3. https://github.com/cuioss/cui-jsf-test-basic[cui-jsf-test-basic]
+2. https://github.com/cuioss/cui-jsf-test-basic[cui-jsf-test-basic]
    * Use for JSF component testing
    * Follow component test patterns
    * Include lifecycle tests
@@ -148,11 +141,61 @@ For comprehensive quality verification processes, see <<../process/task-completi
 ==== Test Quality
 
 * Regular test review
-* Mutation testing
+* Mutation testing  
 * Test failure analysis
 * DRY in test utilities
 * Clear test documentation
 * Consistent patterns
+
+[[ai-generated-code-detection]]
+==== AI-Generated Code Detection and Elimination
+
+**Critical Indicators of AI-Generated Test Code:**
+* Method names exceeding 75 characters
+* Excessive inline comments explaining obvious operations
+* Repetitive test patterns with only minor variations
+* Verbose @DisplayName annotations (54+ characters)
+* Over-documentation with redundant explanations
+* Meaningless constructor tests verifying trivial functionality
+
+**Test Categories to Eliminate:**
+1. **Meaningless Tests**: Tests that verify trivial functionality without business value
+2. **Framework Behavior Tests**: Tests that verify framework functionality rather than application logic  
+3. **Duplicate Logic Tests**: Tests that duplicate existing test scenarios without added value
+4. **Over-Complex Unit Tests**: Tests that are disproportionately complex for the functionality being tested
+
+**Removal Requirements:**
+* **ELIMINATE**: Tests that verify trivial functionality without business value
+* **REMOVE**: Comments explaining obvious operations
+* **SIMPLIFY**: Overly verbose method and test names
+* **CONSOLIDATE**: Identical test patterns into parameterized tests with @GeneratorsSource  
+* **REPLACE**: Verbose @DisplayName with focused descriptions under 50 characters
+
+**Examples of AI Artifacts to Remove:**
+```java
+// REMOVE: Meaningless constructor test
+@Test
+void shouldCreateWithValidParameters() {
+    assertNotNull(new AccessTokenContent(validClaims));
+}
+
+// REMOVE: Framework behavior test
+@Test  
+void shouldLogInfoMessageWhenTokenValidatorIsInitialized() {
+    // Testing framework logging behavior, not application logic
+}
+
+// REMOVE: Excessive inline comments
+@Test
+void shouldValidateToken() {
+    // Create a token holder for testing purposes
+    TestTokenHolder holder = new TestTokenHolder();
+    // Set the token type to access token for validation
+    holder.setTokenType(ACCESS_TOKEN);
+    // Perform validation and check result
+    assertTrue(validator.validate(holder.build()).isValid());
+}
+```
 
 [[sonarqube-compliance]]
 ==== SonarQube Compliance
@@ -190,20 +233,6 @@ void shouldThrowExceptionOnInvalidInput() {
 }
 ```
 
-**Alternative Solution (Extract Method):**
-```java
-@Test
-void shouldThrowExceptionOnInvalidInput() {
-    assertThrows(IllegalArgumentException.class, () -> 
-        processInvalidInput("invalid")
-    );
-}
-
-private void processInvalidInput(String input) {
-    service.validateInput(input);
-    service.processInput(input);
-}
-```
 
 **Key Principles:**
 * Move setup code outside the lambda expression

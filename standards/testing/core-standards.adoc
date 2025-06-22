@@ -42,7 +42,7 @@ This document defines the core standards and best practices for writing and main
 * All public methods must have unit tests
 * All business logic must have appropriate test coverage
 * Edge cases and error conditions must be tested
-* Test coverage should aim for at least 80% line coverage
+* See xref:quality-standards.adoc#coverage-requirements[Quality Standards] for detailed coverage requirements
 
 === Test Independence
 
@@ -88,6 +88,24 @@ This document defines the core standards and best practices for writing and main
 * May involve multiple components and services
 * Should simulate real-world usage
 
+[[cui-framework-requirements]]
+== CUI Framework Requirements
+
+=== Generator Usage Standards
+
+* **Mandatory for All Test Data**: Use cui-test-generator for ALL test data generation
+* **No Manual Alternatives**: Do NOT use manual data creation, Random, Faker, or other data tools
+* **Required Annotation**: @EnableGeneratorController MUST be added to every test class using generators
+* **Generator Methods**: Use Generators.strings(), integers(), booleans(), etc. for all values
+* **Parameterized Tests**: Use @GeneratorsSource with GeneratorType enum for data-driven tests
+
+=== Value Object Testing Standards
+
+* **Contract Testing**: Use cui-test-value-objects for all value object testing
+* **Primary Interface**: Implement `ShouldHandleObjectContracts<T>` for comprehensive testing
+* **Generator Integration**: getUnderTest() method MUST use cui-test-generator for object creation
+* **Individual Contracts**: Use specific interfaces when needed (ShouldImplementEqualsAndHashCode, etc.)
+
 == Test Code Guidelines
 
 === Scope of Changes
@@ -104,21 +122,7 @@ This document defines the core standards and best practices for writing and main
 * Group related tests in the same test class
 * Use descriptive test method names
 * Follow a consistent naming convention
-* Organize tests in a logical order
-
-=== Test Data
-
-* Use meaningful test data
-* Avoid hardcoded values
-* Consider edge cases
-* Use test data builders when appropriate
-
-=== Assertions
-
-* Use specific assertions
-* Include meaningful error messages
-* Verify only what is necessary
-* Use assertion libraries appropriately
+* See xref:quality-standards.adoc[Quality Standards] for detailed best practices
 
 == Important Notes
 

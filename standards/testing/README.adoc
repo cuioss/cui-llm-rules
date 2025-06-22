@@ -110,28 +110,28 @@ Clear distinction between unit tests, integration tests, and other test types
 * **link:../process/java-test-maintenance.adoc[Java Test Maintenance Process]** - Maintenance procedures for existing tests
 * **link:../process/code-review-guidelines.adoc[Code Review Guidelines]** - Review processes that include testing standards
 
-== Testing Technology Stack
+== CUI Testing Framework
 
-The standards support and recommend the following technologies:
+The standards require the following CUI-approved technologies:
 
-=== **Unit Testing**
-* JUnit 5 (Jupiter) - Primary testing framework
-* Mockito - Mocking framework
-* AssertJ - Fluent assertions
+=== **Required Frameworks**
+* **JUnit 5 (Jupiter)** - Primary testing framework
+* **cui-test-generator** - Mandatory for all test data generation
+* **cui-test-value-objects** - Required for value object contract testing
 
-=== **Integration Testing**
-* Maven Failsafe Plugin - Integration test execution
-* TestContainers - Container-based integration testing
-* REST Assured - API testing
+=== **Allowed Libraries**
+* **awaitility** - For asynchronous testing and waiting conditions
+* **rest-assured** - For REST API testing and validation
 
-=== **Test Data Generation**
-* CUI Test Generator - Primary test data generation framework
-* Custom generators for domain-specific data
+=== **Forbidden Libraries**
+* **Mockito** - Use CUI framework alternatives instead
+* **PowerMock** - Use dependency injection patterns instead
+* **Hamcrest** - Use JUnit 5 assertions exclusively
 
 === **Build Integration**
-* Maven Surefire Plugin - Unit test execution
-* Maven Failsafe Plugin - Integration test execution
-* GitHub Actions - CI/CD integration
+* **Maven Surefire Plugin** - Unit test execution
+* **Maven Failsafe Plugin** - Integration test execution
+* **Coverage Profile** - Use `-Pcoverage` for coverage verification
 
 == Compliance and Updates
 
