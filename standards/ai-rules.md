@@ -44,6 +44,7 @@ Common Maven commands for CUI projects:
 - Container Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus/container-standards.adoc`
 
 ## Code Style Guidelines
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java`
 - Follow package structure: reverse domain name notation (de.cuioss.*)
 - Use DSL-style nested constants for logging messages
 - Organize imports: Java standard first, then 3rd party, then project imports
@@ -57,6 +58,7 @@ Common Maven commands for CUI projects:
 - Prefer delegation over inheritance
 
 ## Lombok Usage
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java/java-code-standards.adoc`
 - Use `@Builder` for complex object creation
 - Use `@Value` for immutable objects
 - Use `@NonNull` for required parameters
@@ -65,44 +67,118 @@ Common Maven commands for CUI projects:
 - Make proper use of `lombok.config` settings
 
 ## Logging Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging`
 - Use `de.cuioss.tools.logging.CuiLogger` (private static final LOGGER)
-- Use LogRecord API for structured logging with dedicated message constants
-- Follow logging level ranges: INFO (001-99), WARN (100-199), ERROR (200-299), FATAL (300-399)
-- Use CuiLogger.error(exception, ERROR.CONSTANT.format(param)) pattern
-- All log messages must be documented in doc/LogMessages.adoc
+- Logger must be private static final with constant name 'LOGGER'
+- Module/artifact: cui-java-tools
 - Exception parameter always comes first in logging methods
-- Use '%s' for string substitutions (not '{}')
+- Use '%s' for string substitutions (not '{}' or '%d')
+- Use `de.cuioss.tools.logging.LogRecord` for template logging
+- Follow logging level ranges: INFO (001-99), WARN (100-199), ERROR (200-299), FATAL (300-399)
+- All log messages must be documented in doc/LogMessages.adoc
+- No log4j, slf4j, System.out, or System.err usage
 
 ## Testing Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/testing`
 - Use JUnit 5 (`@Test`, `@DisplayName`, `@Nested`)
-- Use cui-test-juli-logger for logger testing with `@EnableTestLogger`
-- Test all code paths, edge cases, and error conditions
-- Use assertLogMessagePresentContaining for testing log messages
-- Follow Arrange-Act-Assert pattern in test methods
+- Follow AAA pattern (Arrange-Act-Assert)
+- One logical assertion per test
 - Tests must be independent and not rely on execution order
-- Unit tests should use descriptive method names
-- Use nested test classes to organize related tests
+- Minimum 80% line and branch coverage
+- Use Maven profile `-Pcoverage` for coverage verification
+- All public APIs must be tested
+- Use cui-test-juli-logger for logger testing with `@EnableTestLogger`
+- Use assertLogMessagePresentContaining for testing log messages
 - Mock or stub dependencies in unit tests
-- Use test data builders when appropriate
-- All public methods must have unit tests
-- Test coverage should aim for at least 80% line coverage
+- Critical paths must have 100% coverage
 
 ## CUI Test Generator Usage
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-test-generator`
 - Mandatory for all test data generation
 - Use annotation hierarchy: @GeneratorsSource > @CompositeTypeGeneratorSource > @CsvSource > @ValueSource > @MethodSource (last resort)
 - Parameterized tests mandatory for 3+ similar test variants
-- See CUI Test Generator Guide for comprehensive examples
+- Strict compliance with approved testing libraries
+- No Mockito, PowerMock, or Hamcrest - use CUI framework alternatives
+- Use cui-test-value-objects for value object contract testing
 
 ## Javadoc Standards
-- Every public class/interface must be documented
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/javadoc-standards.adoc`
+- Every public and protected class/interface must be documented
 - Include clear purpose statement in class documentation
 - Document all public methods with parameters, returns, and exceptions
 - Include `@since` tag with version information
 - Document thread-safety considerations
 - Include usage examples for complex classes and methods
-- Every package should have package-info.java
+- Every package must have package-info.java
 - Use `{@link}` for references to classes, methods, and fields
 - Document Builder classes with complete usage examples
+
+## CDI and Quarkus Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus`
+- Use constructor injection (mandatory over field injection)
+- Single constructor rule: No `@Inject` needed for single constructors
+- Use `final` fields for injected dependencies
+- Use `@ApplicationScoped` for stateless services
+- Use `@QuarkusTest` for CDI context testing
+- Use `@QuarkusIntegrationTest` for packaged app testing
+- Container: Use Quarkus distroless base image (91.9MB)
+- HTTPS required for all integration tests
+- OWASP Docker Top 10 compliance mandatory
+
+## CSS Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/css`
+- Use CSS custom properties (variables) for theming
+- Follow BEM methodology for class naming
+- Use Stylelint for code quality enforcement
+- Use Prettier for consistent formatting
+- Mobile-first responsive design approach
+- Semantic HTML with accessible CSS patterns
+- Performance optimization: minimize CSS bundle size
+- Support for modern browsers (last 2 versions)
+
+## JavaScript Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/javascript`
+- Use ES6+ modern JavaScript features
+- Use ESLint with strict configuration
+- Use Prettier for code formatting
+- Use Jest for unit testing framework
+- Follow functional programming patterns when appropriate
+- Use JSDoc for comprehensive documentation
+- Use Lit components for web components (Quarkus DevUI context)
+- Maven integration via frontend-maven-plugin
+- Cypress for E2E testing
+
+## Documentation Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation`
+- Use AsciiDoc format with `.adoc` extension
+- Include proper document header with TOC and section numbering
+- Use `:source-highlighter: highlight.js` attribute
+- Use `xref:` syntax for cross-references (not `<<>>`)
+- Blank lines required before all lists
+- Consistent heading hierarchy
+- Update main README when adding new documents
+- Reference AsciiDoc standards from all relevant documents
+
+## Process Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/process`
+- Follow standardized git commit message format
+- Use structured refactoring process for code improvements
+- Complete task completion standards for quality assurance
+- Maintain Javadoc error resolution process
+- Follow Java test maintenance procedures
+- Implement logger maintenance standards compliance
+- If in doubt, ask the user - never guess or be creative
+- Always research topics using available tools
+
+## Requirements Standards
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements`
+- All requirements must be traceable to specifications
+- Use AsciiDoc format for all documentation
+- Requirements must be specific, measurable, achievable, relevant, time-bound
+- Maintain consistent documentation structure across projects
+- Link implemented specifications to actual implementation code
+- Use standard directory structure: doc/Requirements.adoc, doc/Specification.adoc
+- Update specifications when implementation is complete
 
 ## AI Tool Specific Instructions
 
