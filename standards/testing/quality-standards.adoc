@@ -92,6 +92,84 @@ Strict compliance with approved testing libraries to ensure consistency and comp
    * Mock HTTP server responses
    * Test request/response handling
 
+[[parameterized-tests-best-practices]]
+==== Parameterized Tests Best Practices
+
+Parameterized tests are **mandatory** when testing at least 3 similar variants of the same behavior. This ensures comprehensive test coverage while maintaining clean, maintainable test code.
+
+===== When to Use Parameterized Tests
+
+* **Mandatory Usage**: When you have 3 or more similar test cases that differ only in input data or expected outcomes
+* **Code Consolidation**: Replace multiple identical test methods with a single parameterized test
+* **Data-Driven Testing**: Test the same logic with different input combinations
+
+===== Annotation Hierarchy (Preferred Order)
+
+1. **@GeneratorsSource** (Most Preferred)
+   * Leverage CUI test generators for complex object creation
+   * Provides comprehensive test data coverage
+   * Maintains consistency with CUI framework standards
+   * Example: Testing with various token configurations, user objects, or configuration beans
+
+2. **@CompositeTypeGeneratorSource** (Highly Preferred)
+   * Use for testing with multiple related complex types
+   * Combines multiple generators for comprehensive scenarios
+   * Ideal for integration-style unit tests
+
+3. **@CsvSource** (Standard Choice)
+   * Use for simple data combinations
+   * Good for testing multiple input/output pairs
+   * Easy to read and maintain
+   * Example: `@CsvSource({"input1,expected1", "input2,expected2", "input3,expected3"})`
+
+4. **@ValueSource** (Simple Cases)
+   * Use when testing with single parameter variations
+   * Suitable for boundary value testing
+   * Example: `@ValueSource(strings = {"", "   ", "null"})`
+
+5. **@MethodSource** (Last Resort)
+   * Only use when other options are insufficient
+   * Required for complex data setup that cannot be handled by generators
+   * Must provide clear justification in test documentation
+
+===== Implementation Examples
+
+.Generator-Based Parameterized Test (Preferred)
+[source,java]
+----
+@ParameterizedTest
+@DisplayName("Should validate tokens with different configurations")
+@GeneratorsSource(TokenConfigGenerator.class)
+void shouldValidateTokensWithDifferentConfigurations(TokenConfig config) {
+    // Test implementation using generated configuration
+    assertDoesNotThrow(() -> validator.validate(token, config));
+}
+----
+
+.CSV-Based Parameterized Test (Standard)
+[source,java]
+----
+@ParameterizedTest
+@DisplayName("Should validate issuer with different URL patterns")
+@CsvSource({
+    "https://example.com, https://example.com/.well-known/openid-configuration",
+    "https://example.com/auth/realms/master, https://example.com/auth/realms/master/.well-known/openid-configuration",
+    "https://example.com:443, https://example.com/.well-known/openid-configuration"
+})
+void shouldValidateMatchingIssuerSuccessfully(String issuer, String wellKnownUrl) {
+    URL wellKnown = URI.create(wellKnownUrl).toURL();
+    assertDoesNotThrow(() -> parser.validateIssuer(issuer, wellKnown));
+}
+----
+
+===== Quality Requirements
+
+* **Test Method Names**: Use descriptive `@DisplayName` annotations
+* **Parameter Names**: Choose meaningful parameter names that clearly indicate their purpose
+* **Documentation**: Comment complex parameter combinations or business logic
+* **Consolidation**: Always refactor duplicate test patterns into parameterized tests
+* **Generator Priority**: Prefer CUI generators over manual data creation for consistency with framework standards
+
 === Test Categories
 
 ==== Unit Tests
@@ -118,7 +196,7 @@ Strict compliance with approved testing libraries to ensure consistency and comp
 
 == Quality Verification
 
-For comprehensive quality verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive quality verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 === Quality Analysis Tools
 
@@ -126,7 +204,7 @@ For comprehensive quality verification processes, see <<../process/task-completi
 * JUnit for unit testing
 * Mutation testing for test quality
 * Regular code reviews
-* Continuous integration checks (see <<../process/task-completion-standards.adoc#,Task Completion Standards>>)
+* Continuous integration checks (see xref:../process/task-completion-standards.adoc[Task Completion Standards])
 
 === Quality Metrics
 
@@ -320,7 +398,7 @@ Regular Review Points:
 
 === Quality Analysis
 
-For comprehensive quality gate processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive quality gate processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 * All quality gates passed
 * New issues addressed
@@ -337,11 +415,11 @@ For comprehensive quality gate processes, see <<../process/task-completion-stand
 
 == Maven Coverage Profile
 
-For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 To verify code coverage in your project, use the Maven profile `-Pcoverage`:
 
-For code coverage verification, use the coverage profile following the <<../process/task-completion-standards.adoc#,Task Completion Standards>>:
+For code coverage verification, use the coverage profile following the xref:../process/task-completion-standards.adoc[Task Completion Standards]:
 
 [source,bash]
 ----

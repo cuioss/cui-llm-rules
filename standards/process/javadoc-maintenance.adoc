@@ -2,10 +2,11 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 [IMPORTANT]
 ====
-This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+This document is governed by the general process rules defined in xref:general.adoc[General Process Rules].
 ====
 
 == Purpose
@@ -14,6 +15,7 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 == Related Documentation
 
 * xref:../documentation/general-standard.adoc[General Documentation Standards]: Core documentation standards
+* xref:../documentation/asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
 * xref:../documentation/javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
 * xref:../documentation/readme-structure.adoc[README Structure]: Standard structure for README.adoc files
 
@@ -46,9 +48,9 @@ Defines the standards for Javadoc maintenance, error resolution, and documentati
 
 === Build Verification
 
-For standardized build verification processes, see <<task-completion-standards.adoc#,Task Completion Standards>>.
+For standardized build verification processes, see xref:task-completion-standards.adoc[Task Completion Standards].
 
-* Run appropriate command following <<task-completion-standards.adoc#,Task Completion Standards>>
+* Run appropriate command following xref:task-completion-standards.adoc[Task Completion Standards]
 * `./mvnw -Ppre-commit clean verify -DskipTests`
 * Identify and categorize issues:
 ** Missing tags
@@ -76,7 +78,7 @@ For standardized build verification processes, see <<task-completion-standards.a
 
 === Final Verification
 
-For comprehensive final verification processes, see <<task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive final verification processes, see xref:task-completion-standards.adoc[Task Completion Standards].
 
 * Run appropriate command
 * If issues remain:

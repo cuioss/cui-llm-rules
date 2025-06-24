@@ -2,10 +2,16 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 
 This document defines the standards for project planning documentation. It establishes a consistent structure for tracking planned work, implementation tasks, and progress without prescribing specific implementation processes.
+
+== Related Documentation
+
+* xref:../documentation/asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
+* xref:../documentation/general-standard.adoc[General Documentation Standards]: Core documentation standards
 
 == Planning Document Structure
 
@@ -26,6 +32,7 @@ The planning document should include a standardized header:
 :toclevels: 3
 :toc-title: Table of Contents
 :sectnums:
+:source-highlighter: highlight.js
 ----
 
 === Content Organization
@@ -136,6 +143,7 @@ This creates a traceable relationship between requirements, specifications, and 
 :toclevels: 3
 :toc-title: Table of Contents
 :sectnums:
+:source-highlighter: highlight.js
 
 == Overview
 

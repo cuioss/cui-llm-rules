@@ -2,9 +2,15 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 This directory contains standards for requirements and specification documentation in CUI projects. These standards serve as independent, authoritative sources of truth for documentation requirements without being tied to specific implementation processes.
+
+== Related Documentation
+
+* xref:../documentation/asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
+* xref:../documentation/general-standard.adoc[General Documentation Standards]: Core documentation standards
 
 == Standards Documents
 

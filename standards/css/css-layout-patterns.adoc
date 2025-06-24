@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines modern CSS layout techniques including CSS Grid, Flexbox patterns, and Container Queries for responsive component design.

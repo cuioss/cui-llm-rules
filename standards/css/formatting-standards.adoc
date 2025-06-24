@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines comprehensive Prettier configuration and formatting rules for consistent, readable CSS code across all CUI projects, ensuring uniformity in code style and presentation.
@@ -382,7 +383,7 @@ Configure automatic formatting on commit:
 }
 ----
 
-NOTE: When using git hooks for CSS formatting, ensure commit messages follow the <<../process/git-commit-standards.adoc#,Git Commit Standards>>.
+NOTE: When using git hooks for CSS formatting, ensure commit messages follow the xref:../process/git-commit-standards.adoc[Git Commit Standards].
 
 === IDE Integration
 

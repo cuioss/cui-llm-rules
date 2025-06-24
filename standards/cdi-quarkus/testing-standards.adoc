@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines comprehensive testing standards for Quarkus applications, including test coverage configuration, test annotations, and integration with SonarQube for coverage reporting.
@@ -191,7 +192,7 @@ class NativeTokenValidatorProducerIT {
 ==== @QuarkusIntegrationTest Limitations
 * **No CDI Injection**: `@Inject` annotations are NOT supported
 * **HTTP Testing**: Use RestAssured to test through HTTP endpoints
-* **Application Packaging**: Requires build packaging following <<../process/task-completion-standards.adoc#,Task Completion Standards>>
+* **Application Packaging**: Requires build packaging following xref:../process/task-completion-standards.adoc[Task Completion Standards]
 * **Native Mode**: Primarily for testing native builds and packaged applications
 
 === Test Profiles
@@ -439,7 +440,7 @@ RestAssured.when().get("/q/health").then().statusCode(200);
 
 == Quality Gates
 
-For comprehensive quality gate processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive quality gate processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 === Mandatory Requirements
 * All `@QuarkusTest` classes must have coverage data collected
@@ -449,9 +450,9 @@ For comprehensive quality gate processes, see <<../process/task-completion-stand
 * Build must fail if coverage falls below project thresholds
 
 === Integration with CI/CD
-For comprehensive CI/CD integration processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive CI/CD integration processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
-* Follow <<../process/task-completion-standards.adoc#,Task Completion Standards>> for unit test coverage verification
-* Follow <<../process/task-completion-standards.adoc#,Task Completion Standards>> for full coverage including integration tests
+* Follow xref:../process/task-completion-standards.adoc[Task Completion Standards] for unit test coverage verification
+* Follow xref:../process/task-completion-standards.adoc[Task Completion Standards] for full coverage including integration tests
 * SonarQube analysis must include coverage data from JaCoCo XML reports
 * Coverage thresholds enforced through quality gates

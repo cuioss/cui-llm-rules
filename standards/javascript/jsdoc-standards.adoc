@@ -2,11 +2,14 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Establishes comprehensive standards for JavaScript documentation using JSDoc to ensure consistent, maintainable, and professional code documentation across all CUI projects.
 
 == Related Documentation
+* xref:../documentation/asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting for project documentation
+* xref:../documentation/general-standard.adoc[General Documentation Standards]: Core documentation standards
 * xref:linting-standards.adoc[Linting Standards]: ESLint JSDoc plugin integration
 * xref:javascript-best-practices.adoc[Best Practices]: Code quality and maintainability
 * xref:project-structure.adoc[Project Structure]: Configuration and setup

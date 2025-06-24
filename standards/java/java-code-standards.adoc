@@ -62,9 +62,36 @@ This document defines general best practices and standards for writing Java code
 === Method Design
 
 
-. Keep methods short and focused
+. Keep methods short and focused (preferably under 50 lines)
 . Use meaningful method names
 . Follow the Command-Query Separation principle
+. Limit method parameters to a reasonable number (preferably 3 or fewer)
+
+==== Parameter Objects
+
+When methods require many parameters, consider creating parameter objects to group related parameters:
+
+. Only introduce parameter objects when replacing *3 or more parameters*
+. Parameter objects should represent cohesive concepts where the parameters naturally belong together
+. Avoid creating parameter objects for just 2 parameters unless they represent a clear domain concept
+. Use records for simple parameter objects in Java 17+
+
+[source,java]
+----
+// Good: Multiple related parameters grouped into a cohesive object
+public record ValidationRequest(
+    String tokenId,
+    Set<String> expectedScopes,
+    Duration maxAge,
+    String issuer
+) {}
+
+public boolean validate(ValidationRequest request) { ... }
+
+// Avoid: Parameter object for just 2 unrelated parameters
+// Instead, use the parameters directly:
+public void log(String message, CuiLogger logger) { ... }
+----
 
 == Coding Practices
 

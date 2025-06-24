@@ -61,5 +61,6 @@ These standards are designed for:
 * xref:../java/java-code-standards.adoc[Java Standards]
 * xref:../testing/core-standards.adoc[Testing Standards]
 * xref:../documentation/general-standard.adoc[Documentation Standards]
+* xref:../documentation/asciidoc-standards.adoc[AsciiDoc Standards] - Comprehensive AsciiDoc formatting for project documentation
 * xref:../process/git-commit-standards.adoc[Git Commit Standards] - Follow standardized commit messages during JavaScript development
 * xref:../process/task-completion-standards.adoc[Task Completion Standards] - Quality standards for completing JavaScript development tasks

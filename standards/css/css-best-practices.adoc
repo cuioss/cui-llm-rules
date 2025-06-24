@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines modern CSS best practices, patterns, and conventions focusing on CSS custom properties (variables), performance, maintainability, and accessibility for all CUI projects.

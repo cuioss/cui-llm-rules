@@ -3,10 +3,11 @@
 :toclevels: 3
 :toc-title: Table of Contents
 :sectnums:
+:source-highlighter: highlight.js
 
 [IMPORTANT]
 ====
-This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+This document is governed by the general process rules defined in xref:general.adoc[General Process Rules].
 
 This document describes the process and structure used for managing refactoring tasks in the cui-jwt-token-handling project.
 
@@ -86,7 +87,7 @@ Progress can be assessed by:
 
 == Task Completion Process
 
-After implementing any refactoring task, follow the standardized process defined in <<task-completion-standards.adoc#,Task Completion Standards>>.
+After implementing any refactoring task, follow the standardized process defined in xref:task-completion-standards.adoc[Task Completion Standards].
 
 When committing refactoring changes, use the task identifier and title as the commit subject (e.g., "refactor: C1. Document Bouncy Castle Usage").
 

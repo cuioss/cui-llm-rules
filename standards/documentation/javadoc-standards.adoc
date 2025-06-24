@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines specific standards for Javadoc documentation across the codebase, ensuring consistency and completeness.
@@ -9,6 +10,7 @@ Defines specific standards for Javadoc documentation across the codebase, ensuri
 == Related Documentation
 
 * xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
+* xref:asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
 * xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
 * xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
 

@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines comprehensive standards for developing web components using the Lit framework, including architecture patterns, CSS-in-JS best practices, and component lifecycle management.

@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines CSS custom properties, design tokens, component-level variables, and dark mode implementation for consistent design systems across CUI projects.

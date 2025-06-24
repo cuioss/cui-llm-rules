@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 This directory contains all standardization documents for CUI projects, defining coding, documentation, and technical standards. These standards serve as independent, authoritative sources of truth for technical requirements without being tied to specific implementation processes.
@@ -52,10 +53,10 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 
 === Documentation Standards
 * xref:documentation/general-standard.adoc[Documentation Standards] - Documentation creation and maintenance standards
-** xref:documentation/general-standard.adoc[General Standard] - Foundational documentation requirements and formats
+** xref:documentation/asciidoc-standards.adoc[AsciiDoc Standards] - Comprehensive AsciiDoc formatting, grammar, and best practices
 ** xref:documentation/organization-standards.adoc[Organization Standards] - Documentation organization, structure, and review guidelines
-** xref:documentation/javadoc-standards.adoc[Javadoc Standards] - Standards for creating and maintaining Javadoc
-** xref:documentation/readme-structure.adoc[README Structure] - Standard format and content for README files
+** xref:documentation/javadoc-standards.adoc[Javadoc Standards] - Specific standards for Javadoc documentation
+** xref:documentation/readme-structure.adoc[README Structure] - Standard structure for README.adoc files
 
 * xref:requirements/README.adoc[Requirements Standards] - Requirements and specification documentation
 ** xref:requirements/requirements-document.adoc[Requirements Document] - Standards for requirements documentation
@@ -134,6 +135,7 @@ When creating new standards documents, follow these guidelines:
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Brief description of the document's purpose.

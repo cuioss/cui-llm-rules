@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines comprehensive Prettier configuration standards and integration requirements for consistent code formatting across JavaScript projects.
@@ -280,7 +281,7 @@ Formatting must be integrated into Maven build phases:
 * **verify phase**: Linting with automatic fixes (includes formatting fixes)
 
 === Continuous Integration Requirements
-For comprehensive continuous integration processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive continuous integration processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 * Format checking must occur early in build process
 * Build must fail if formatting is inconsistent
@@ -487,7 +488,7 @@ Consider implementing pre-commit hooks to enforce formatting:
 }
 ----
 
-NOTE: When using git hooks for JavaScript formatting, ensure commit messages follow the <<../process/git-commit-standards.adoc#,Git Commit Standards>>.
+NOTE: When using git hooks for JavaScript formatting, ensure commit messages follow the xref:../process/git-commit-standards.adoc[Git Commit Standards].
 
 === Automated Fixing
 Use automated fixing during development:
@@ -497,7 +498,7 @@ Use automated fixing during development:
 * **Editor Integration**: Format on save
 
 === Formatting Validation
-For comprehensive validation processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive validation processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 Continuous validation of formatting standards:
 

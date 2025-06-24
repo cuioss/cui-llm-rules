@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines the standard structure for module README.adoc files in CUI projects to ensure consistency and completeness across all repositories.
@@ -9,6 +10,7 @@ Defines the standard structure for module README.adoc files in CUI projects to e
 == Related Documentation
 
 * xref:general-standard.adoc[General Documentation Standards]: Core documentation standards
+* xref:asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
 * xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
 * xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
 

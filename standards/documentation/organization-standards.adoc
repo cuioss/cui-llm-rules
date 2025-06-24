@@ -2,12 +2,14 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines comprehensive standards for organizing, reviewing, and maintaining documentation structure, including file organization, naming conventions, size limits, and quality review processes for all CUI projects.
 
 == Related Documentation
 * xref:general-standard.adoc[Documentation Standards]: Core documentation standards and best practices
+* xref:asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
 * xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
 * xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
 
@@ -170,6 +172,7 @@ Comprehensive review process ensures documentation quality:
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 ----
 
 **List Formatting**:
@@ -280,4 +283,4 @@ Comprehensive review process ensures documentation quality:
 * Minimize merge conflicts through logical organization
 * Maintain clear change history for documentation updates
 * Support collaborative editing through good organization
-* Follow <<../process/git-commit-standards.adoc#,Git Commit Standards>> for consistent commit messages
+* Follow xref:../process/git-commit-standards.adoc[Git Commit Standards] for consistent commit messages

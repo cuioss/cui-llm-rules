@@ -2,10 +2,11 @@
 :toc:
 :toclevels: 2
 :sectnums:
+:source-highlighter: highlight.js
 
 [IMPORTANT]
 ====
-This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+This document is governed by the general process rules defined in xref:general.adoc[General Process Rules].
 ====
 
 Standardized git commit format for all CUI LLM projects following conventional commits.
@@ -70,4 +71,4 @@ Migration: Update client code to access token via response.accessToken
 * **Meaningful messages**: Clear, descriptive subjects
 * **Reference issues**: Link to relevant tasks/issues when applicable
 
-For complete task completion process, see <<task-completion-standards.adoc#,Task Completion Standards>>.
+For complete task completion process, see xref:task-completion-standards.adoc[Task Completion Standards].

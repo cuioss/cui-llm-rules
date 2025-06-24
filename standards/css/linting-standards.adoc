@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines comprehensive Stylelint configuration and rules for consistent, high-quality CSS code, focusing on modern CSS practices and maintainability.
@@ -357,7 +358,7 @@ Configure pre-commit hooks to run Stylelint:
 }
 ----
 
-NOTE: When using git hooks for CSS linting, ensure commit messages follow the <<../process/git-commit-standards.adoc#,Git Commit Standards>>.
+NOTE: When using git hooks for CSS linting, ensure commit messages follow the xref:../process/git-commit-standards.adoc[Git Commit Standards].
 
 === IDE Integration
 

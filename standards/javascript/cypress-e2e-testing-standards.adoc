@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines comprehensive standards for Cypress End-to-End (E2E) testing that extend the base CUI JavaScript standards with framework-specific adaptations for test automation scenarios.

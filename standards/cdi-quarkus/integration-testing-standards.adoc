@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 
@@ -179,7 +180,7 @@ src/test/java/
 ----
 
 ==== Build Execution
-For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 Integration test specific commands:
 
@@ -420,7 +421,7 @@ Certificates MUST be mounted as read-only volumes:
 ```
 
 === Build Command
-For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 Integration test execution:
 
@@ -433,7 +434,7 @@ Integration test execution:
 ./mvnw package -pl integration-test-module
 ----
 
-NOTE: For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+NOTE: For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 == Testing Patterns
 

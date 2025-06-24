@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines integration requirements for ESLint in build pipelines, CI/CD processes, and development workflows, including StyleLint configuration for CSS-in-JS patterns.
@@ -221,7 +222,7 @@ Linting must be part of the build pipeline:
 
 1. **Local Development**: Pre-commit hooks recommended
 2. **Build Pipeline**: Automatic fixing in verify phase
-3. **Quality Gates**: Must pass linting for successful builds (see <<../process/task-completion-standards.adoc#,Task Completion Standards>>)
+3. **Quality Gates**: Must pass linting for successful builds (see xref:../process/task-completion-standards.adoc[Task Completion Standards])
 
 == Error Handling Standards
 

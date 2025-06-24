@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines standards for integrating JavaScript tooling with Maven build processes using the frontend-maven-plugin, ensuring consistent build pipelines across all CUI projects.
@@ -354,7 +355,7 @@ Enable parallel npm operations:
 == Validation
 
 === Build Verification
-For standardized build verification processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 A successful Maven build must:
 
@@ -367,7 +368,7 @@ A successful Maven build must:
 7. Address deprecated package warnings in build logs
 
 === Quality Gates
-For comprehensive quality gate processes, see <<../process/task-completion-standards.adoc#,Task Completion Standards>>.
+For comprehensive quality gate processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
 
 The following quality gates must pass:
 

@@ -2,10 +2,11 @@
 :toc:
 :toclevels: 2
 :sectnums:
+:source-highlighter: highlight.js
 
 [IMPORTANT]
 ====
-This document is governed by the general process rules defined in <<general.adoc#,General Process Rules>>.
+This document is governed by the general process rules defined in xref:general.adoc[General Process Rules].
 ====
 
 Standardized quality verification process for all CUI LLM project development tasks.
@@ -25,7 +26,7 @@ Execute in sequence before any commit:
 
 3. [ ] *Documentation*: Update if changes affect APIs, features, or configuration
 
-4. [ ] *Commit Message*: Follow <<git-commit-standards.adoc#,Git Commit Standards>>
+4. [ ] *Commit Message*: Follow xref:git-commit-standards.adoc[Git Commit Standards]
 
 5. [ ] *Task Status*: Update project management tools (if applicable)
 
@@ -50,5 +51,5 @@ Projects must include a `pre-commit` profile for quality checks without test exe
 * Use meaningful commit messages for code review
 
 === Refactoring
-For structured refactoring work, follow <<refactoring-process.adoc#,Refactoring Process Documentation>>.
+For structured refactoring work, follow xref:refactoring-process.adoc[Refactoring Process Documentation].
 

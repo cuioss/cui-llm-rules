@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines advanced JavaScript patterns including object-oriented design, functional programming, performance optimization, code organization, and documentation standards.

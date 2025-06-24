@@ -1,6 +1,7 @@
 = General Process Rules
 :toc:
 :icons: font
+:source-highlighter: highlight.js
 
 == Core Rules
 

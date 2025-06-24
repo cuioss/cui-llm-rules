@@ -2,9 +2,15 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines the structure and format for requirements documents in CUI projects, ensuring consistency and traceability.
+
+== Related Documentation
+
+* xref:../documentation/asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
+* xref:../documentation/general-standard.adoc[General Documentation Standards]: Core documentation standards
 
 == Document Location and Naming
 

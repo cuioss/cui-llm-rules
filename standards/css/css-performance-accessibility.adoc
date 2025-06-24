@@ -2,6 +2,7 @@
 :toc: left
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Purpose
 Defines CSS architecture patterns, performance optimization strategies, responsive design patterns, and accessibility best practices for CUI projects.
