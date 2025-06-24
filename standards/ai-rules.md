@@ -109,6 +109,20 @@ Common Maven commands for CUI projects:
 - No Mockito, PowerMock, or Hamcrest - use CUI framework alternatives
 - Use cui-test-value-objects for value object contract testing
 
+## Parameterized Tests Standards
+**Reference**: `{STANDARDS_BASE_URL}/standards/testing/quality-standards.adoc#parameterized-tests-best-practices`
+- **Mandatory** for 3+ similar test variants
+- Annotation hierarchy (preferred order):
+  1. `@GeneratorsSource` - Most preferred for complex objects
+  2. `@CompositeTypeGeneratorSource` - For multiple related types
+  3. `@CsvSource` - Standard choice for simple data
+  4. `@ValueSource` - Single parameter variations
+  5. `@MethodSource` - Last resort only
+- Use `@ParameterizedTest` with `@DisplayName`
+- Consolidate duplicate test methods
+- Provide clear test data and expected outcomes
+- Document why @MethodSource if used
+
 ## Javadoc Standards
 **Reference**: `{STANDARDS_BASE_URL}/standards/documentation/javadoc-standards.adoc`
 - Every public and protected class/interface must be documented
