@@ -10,50 +10,38 @@ Common Maven commands for CUI projects:
 - Run single test: `./mvnw test -Dtest=ClassName#methodName`
 - Clean-Up Code: `./mvnw -Ppre-commit clean install -DskipTests` -> Check the console after running the command and fix all errors and warnings, verify until they are all corrected
 
-## Project Documentation Structure
-Standard documentation structure for CUI projects:
-- Requirements: `doc/Requirements.adoc`
-- Specification: `doc/Specification.adoc`
-- Technical components: `doc/specification/technical-components.adoc`
-- Security specification: `doc/specification/security.adoc`
-- Testing guidelines: `doc/specification/testing.adoc`
-- Threat model: `doc/security/Threat-Model.adoc`
-- Refactorings: `doc/Refactorings.adoc`
-- TODOs: `doc/TODO.adoc`
-- Log messages: `doc/LogMessages.adoc`
-
 ## CUI Standards Documentation
-- Standards Overview: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
+- Standards Overview: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards`
 
 ### Java Standards
-- Java Code Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- DSL-Style Constants: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
+- Java Code Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java`
+- DSL-Style Constants: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java/dsl-style-constants.adoc`
 
 ### Documentation Standards
-- General Documentation: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- Javadoc Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- AsciiDoc Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- README Structure: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
+- General Documentation: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation`
+- Javadoc Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/javadoc-standards.adoc`
+- AsciiDoc Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/asciidoc-standards.adoc`
+- README Structure: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/readme-structure.adoc`
 
 ### Logging Standards
-- Logging Core Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- Logging Implementation Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- Logging Testing Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
+- Logging Core Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging`
+- Logging Implementation Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging/implementation-guide.adoc`
+- Logging Testing Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging/testing-guide.adoc`
 
 ### Testing Standards
-- Testing Core Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- Quality Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
+- Testing Core Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/testing`
+- Quality Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/testing/quality-standards.adoc`
 - CUI Test Generator Guide: `https://gitingest.com/github.com/cuioss/cui-test-generator`
 
 ### Requirements Standards
-- Requirements Documents: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- Specification Documents: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- New Project Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
+- Requirements Documents: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements`
+- Specification Documents: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements/specification-documents.adoc`
+- New Project Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements/new-project-guide.adoc`
 
 ### CDI and Quarkus Standards
-- CDI Development Patterns: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- Quarkus Testing Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
-- Container Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules`
+- CDI Development Patterns: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus`
+- Quarkus Testing Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus/testing-standards.adoc`
+- Container Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus/container-standards.adoc`
 
 ## Code Style Guidelines
 - Follow package structure: reverse domain name notation (de.cuioss.*)
