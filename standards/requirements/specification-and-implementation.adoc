@@ -9,7 +9,7 @@ This document defines the standard approach for distributing information between
 
 == Related Documentation
 * link:specification/security.adoc[Security Specification]: Example of a specification document following these guidelines
-* https://github.com/cuioss/cui-llm-rules/blob/main/standards/README.adoc#creating-new-standards-documents[CUI Standards Documentation]: Guidelines for creating standards documents
+* https://gitingest.com/github.com/cuioss/cui-llm-rules[CUI Standards Documentation]: Guidelines for creating standards documents
 
 == Information Distribution Guidelines
 

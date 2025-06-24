@@ -7,7 +7,7 @@
 
 == Purpose
 
-This guide provides comprehensive examples and patterns for using the https://github.com/cuioss/cui-test-generator[CUI Test Generator framework] in test development and maintenance.
+This guide provides comprehensive examples and patterns for using the https://gitingest.com/github.com/cuioss/cui-test-generator[CUI Test Generator framework] in test development and maintenance.
 
 == Related Documentation
 
@@ -403,6 +403,6 @@ void shouldValidateGeneratedUsers(String name, Integer age) { validateUser(name,
 
 == See Also
 
-* https://github.com/cuioss/cui-test-generator[CUI Test Generator Repository]
+* https://gitingest.com/github.com/cuioss/cui-test-generator[CUI Test Generator Repository]
 * xref:quality-standards.adoc[Quality Standards and Testing Framework]
 * xref:../process/java-test-maintenance.adoc[Java Test Maintenance Process]

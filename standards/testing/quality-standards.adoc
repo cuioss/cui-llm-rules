@@ -82,12 +82,12 @@ Strict compliance with approved testing libraries to ensure consistency and comp
    * See xref:cui-test-generator-guide.adoc[CUI Test Generator Usage Guide] for implementation examples
    * See xref:core-standards.adoc[Core Standards] for mandatory framework requirements
 
-2. https://github.com/cuioss/cui-jsf-test-basic[cui-jsf-test-basic]
+2. https://gitingest.com/github.com/cuioss/cui-jsf-test-basic[cui-jsf-test-basic]
    * Use for JSF component testing
    * Follow component test patterns
    * Include lifecycle tests
 
-4. https://github.com/cuioss/cui-test-mockwebserver-junit5[cui-test-mockwebserver-junit5]
+4. https://gitingest.com/github.com/cuioss/cui-test-mockwebserver-junit5[cui-test-mockwebserver-junit5]
    * Use for testing HTTP client interactions
    * Mock HTTP server responses
    * Test request/response handling
