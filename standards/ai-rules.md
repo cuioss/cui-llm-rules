@@ -56,7 +56,6 @@ Common Maven commands for CUI projects:
 - Follow package structure: reverse domain name notation (de.cuioss.*)
 - Use DSL-style nested constants for logging messages
 - Organize imports: Java standard first, then 3rd party, then project imports
-- Use `@NonNull` annotations from Lombok for required parameters
 - Keep classes small and focused - follow Single Responsibility Principle
 - Follow builder pattern for complex object creation
 - Use meaningful, descriptive method and variable names
@@ -64,6 +63,7 @@ Common Maven commands for CUI projects:
 - Use immutable objects when possible
 - Always validate input parameters
 - Prefer delegation over inheritance
+- See Lombok Usage section for annotation patterns
 
 ## Lombok Usage
 **Reference**: `{STANDARDS_BASE_URL}/standards/java/java-code-standards.adoc`
@@ -97,17 +97,17 @@ Common Maven commands for CUI projects:
 - All public APIs must be tested
 - Use cui-test-juli-logger for logger testing with `@EnableTestLogger`
 - Use assertLogMessagePresentContaining for testing log messages
-- Mock or stub dependencies in unit tests
 - Critical paths must have 100% coverage
+- Forbidden: Mockito, PowerMock, Hamcrest - use CUI alternatives
 
 ## CUI Test Generator Usage
 **Reference**: `https://gitingest.com/github.com/cuioss/cui-test-generator` (separate repository)
-- Mandatory for all test data generation
-- Use annotation hierarchy: @GeneratorsSource > @CompositeTypeGeneratorSource > @CsvSource > @ValueSource > @MethodSource (last resort)
-- Parameterized tests mandatory for 3+ similar test variants
-- Strict compliance with approved testing libraries
-- No Mockito, PowerMock, or Hamcrest - use CUI framework alternatives
+- Mandatory for all test data generation in CUI projects
+- Primary framework for creating test objects and data
+- Provides type-safe, consistent test data generation
 - Use cui-test-value-objects for value object contract testing
+- Integrates with parameterized tests via @GeneratorsSource
+- See Parameterized Tests Standards for annotation hierarchy
 
 ## Parameterized Tests Standards
 **Reference**: `{STANDARDS_BASE_URL}/standards/testing/quality-standards.adoc#parameterized-tests-best-practices`
@@ -195,12 +195,12 @@ Common Maven commands for CUI projects:
 ## Requirements Standards
 **Reference**: `{STANDARDS_BASE_URL}/standards/requirements`
 - All requirements must be traceable to specifications
-- Use AsciiDoc format for all documentation
 - Requirements must be specific, measurable, achievable, relevant, time-bound
 - Maintain consistent documentation structure across projects
 - Link implemented specifications to actual implementation code
 - Use standard directory structure: doc/Requirements.adoc, doc/Specification.adoc
 - Update specifications when implementation is complete
+- See Documentation Standards for AsciiDoc formatting rules
 
 ## AI Tool Specific Instructions
 
