@@ -15,7 +15,7 @@ Container standards for CUI Quarkus applications ensuring consistent, secure, an
 * https://www.cisecurity.org/benchmark/docker[CIS Docker Benchmark]
 * https://docs.docker.com/develop/security-best-practices/[Docker Security Best Practices]
 * https://quarkus.io/guides/container-image[Quarkus Container Guide]
-* https://github.com/GoogleContainerTools/distroless[Distroless Images]
+* https://gitingest.com/github.com/GoogleContainerTools/distroless[Distroless Images]
 
 == Base Image Standards
 

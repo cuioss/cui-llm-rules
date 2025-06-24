@@ -134,4 +134,4 @@ These standards support:
 * https://quarkus.io/guides/cdi[Quarkus CDI Guide]
 * https://docs.oracle.com/javaee/7/tutorial/cdi-basic.htm[CDI Specification]
 * https://owasp.org/www-project-docker-top-10/[OWASP Docker Top 10]
-* https://github.com/GoogleContainerTools/distroless[Distroless Images]
+* https://gitingest.com/github.com/GoogleContainerTools/distroless[Distroless Images]
