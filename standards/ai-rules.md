@@ -2,6 +2,14 @@
 
 This file provides guidance to AI tools (IntelliJ Junie, Claude Code, GitHub Copilot, etc.) when working with code in CUI projects.
 
+## Configuration
+
+**Standards Base URL**: Configure this based on your development environment:
+- **Remote (gitingest)**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main`
+- **Local checkout**: Use relative path to your local standards directory (e.g., `../cui-llm-rules`)
+
+Replace `{STANDARDS_BASE_URL}` in all references below with your chosen base URL.
+
 ## Build Commands Template
 Common Maven commands for CUI projects:
 - Build project: `./mvnw clean install`
@@ -11,40 +19,40 @@ Common Maven commands for CUI projects:
 - Clean-Up Code: `./mvnw -Ppre-commit clean install -DskipTests` -> Check the console after running the command and fix all errors and warnings, verify until they are all corrected
 
 ## CUI Standards Documentation
-- Standards Overview: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards`
+- Standards Overview: `{STANDARDS_BASE_URL}/standards`
 
 ### Java Standards
-- Java Code Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java`
-- DSL-Style Constants: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java/dsl-style-constants.adoc`
+- Java Code Standards: `{STANDARDS_BASE_URL}/standards/java`
+- DSL-Style Constants: `{STANDARDS_BASE_URL}/standards/java/dsl-style-constants.adoc`
 
 ### Documentation Standards
-- General Documentation: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation`
-- Javadoc Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/javadoc-standards.adoc`
-- AsciiDoc Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/asciidoc-standards.adoc`
-- README Structure: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/readme-structure.adoc`
+- General Documentation: `{STANDARDS_BASE_URL}/standards/documentation`
+- Javadoc Standards: `{STANDARDS_BASE_URL}/standards/documentation/javadoc-standards.adoc`
+- AsciiDoc Standards: `{STANDARDS_BASE_URL}/standards/documentation/asciidoc-standards.adoc`
+- README Structure: `{STANDARDS_BASE_URL}/standards/documentation/readme-structure.adoc`
 
 ### Logging Standards
-- Logging Core Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging`
-- Logging Implementation Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging/implementation-guide.adoc`
-- Logging Testing Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging/testing-guide.adoc`
+- Logging Core Standards: `{STANDARDS_BASE_URL}/standards/logging`
+- Logging Implementation Guide: `{STANDARDS_BASE_URL}/standards/logging/implementation-guide.adoc`
+- Logging Testing Guide: `{STANDARDS_BASE_URL}/standards/logging/testing-guide.adoc`
 
 ### Testing Standards
-- Testing Core Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/testing`
-- Quality Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/testing/quality-standards.adoc`
-- CUI Test Generator Guide: `https://gitingest.com/github.com/cuioss/cui-test-generator`
+- Testing Core Standards: `{STANDARDS_BASE_URL}/standards/testing`
+- Quality Standards: `{STANDARDS_BASE_URL}/standards/testing/quality-standards.adoc`
+- CUI Test Generator Guide: `https://gitingest.com/github.com/cuioss/cui-test-generator` (separate repository)
 
 ### Requirements Standards
-- Requirements Documents: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements`
-- Specification Documents: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements/specification-documents.adoc`
-- New Project Guide: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements/new-project-guide.adoc`
+- Requirements Documents: `{STANDARDS_BASE_URL}/standards/requirements`
+- Specification Documents: `{STANDARDS_BASE_URL}/standards/requirements/specification-documents.adoc`
+- New Project Guide: `{STANDARDS_BASE_URL}/standards/requirements/new-project-guide.adoc`
 
 ### CDI and Quarkus Standards
-- CDI Development Patterns: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus`
-- Quarkus Testing Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus/testing-standards.adoc`
-- Container Standards: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus/container-standards.adoc`
+- CDI Development Patterns: `{STANDARDS_BASE_URL}/standards/cdi-quarkus`
+- Quarkus Testing Standards: `{STANDARDS_BASE_URL}/standards/cdi-quarkus/testing-standards.adoc`
+- Container Standards: `{STANDARDS_BASE_URL}/standards/cdi-quarkus/container-standards.adoc`
 
 ## Code Style Guidelines
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java`
+**Reference**: `{STANDARDS_BASE_URL}/standards/java`
 - Follow package structure: reverse domain name notation (de.cuioss.*)
 - Use DSL-style nested constants for logging messages
 - Organize imports: Java standard first, then 3rd party, then project imports
@@ -58,7 +66,7 @@ Common Maven commands for CUI projects:
 - Prefer delegation over inheritance
 
 ## Lombok Usage
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/java/java-code-standards.adoc`
+**Reference**: `{STANDARDS_BASE_URL}/standards/java/java-code-standards.adoc`
 - Use `@Builder` for complex object creation
 - Use `@Value` for immutable objects
 - Use `@NonNull` for required parameters
@@ -67,7 +75,7 @@ Common Maven commands for CUI projects:
 - Make proper use of `lombok.config` settings
 
 ## Logging Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/logging`
+**Reference**: `{STANDARDS_BASE_URL}/standards/logging`
 - Use `de.cuioss.tools.logging.CuiLogger` (private static final LOGGER)
 - Logger must be private static final with constant name 'LOGGER'
 - Module/artifact: cui-java-tools
@@ -79,7 +87,7 @@ Common Maven commands for CUI projects:
 - No log4j, slf4j, System.out, or System.err usage
 
 ## Testing Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/testing`
+**Reference**: `{STANDARDS_BASE_URL}/standards/testing`
 - Use JUnit 5 (`@Test`, `@DisplayName`, `@Nested`)
 - Follow AAA pattern (Arrange-Act-Assert)
 - One logical assertion per test
@@ -93,7 +101,7 @@ Common Maven commands for CUI projects:
 - Critical paths must have 100% coverage
 
 ## CUI Test Generator Usage
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-test-generator`
+**Reference**: `https://gitingest.com/github.com/cuioss/cui-test-generator` (separate repository)
 - Mandatory for all test data generation
 - Use annotation hierarchy: @GeneratorsSource > @CompositeTypeGeneratorSource > @CsvSource > @ValueSource > @MethodSource (last resort)
 - Parameterized tests mandatory for 3+ similar test variants
@@ -102,7 +110,7 @@ Common Maven commands for CUI projects:
 - Use cui-test-value-objects for value object contract testing
 
 ## Javadoc Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation/javadoc-standards.adoc`
+**Reference**: `{STANDARDS_BASE_URL}/standards/documentation/javadoc-standards.adoc`
 - Every public and protected class/interface must be documented
 - Include clear purpose statement in class documentation
 - Document all public methods with parameters, returns, and exceptions
@@ -114,7 +122,7 @@ Common Maven commands for CUI projects:
 - Document Builder classes with complete usage examples
 
 ## CDI and Quarkus Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/cdi-quarkus`
+**Reference**: `{STANDARDS_BASE_URL}/standards/cdi-quarkus`
 - Use constructor injection (mandatory over field injection)
 - Single constructor rule: No `@Inject` needed for single constructors
 - Use `final` fields for injected dependencies
@@ -126,7 +134,7 @@ Common Maven commands for CUI projects:
 - OWASP Docker Top 10 compliance mandatory
 
 ## CSS Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/css`
+**Reference**: `{STANDARDS_BASE_URL}/standards/css`
 - Use CSS custom properties (variables) for theming
 - Follow BEM methodology for class naming
 - Use Stylelint for code quality enforcement
@@ -137,7 +145,7 @@ Common Maven commands for CUI projects:
 - Support for modern browsers (last 2 versions)
 
 ## JavaScript Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/javascript`
+**Reference**: `{STANDARDS_BASE_URL}/standards/javascript`
 - Use ES6+ modern JavaScript features
 - Use ESLint with strict configuration
 - Use Prettier for code formatting
@@ -149,7 +157,7 @@ Common Maven commands for CUI projects:
 - Cypress for E2E testing
 
 ## Documentation Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/documentation`
+**Reference**: `{STANDARDS_BASE_URL}/standards/documentation`
 - Use AsciiDoc format with `.adoc` extension
 - Include proper document header with TOC and section numbering
 - Use `:source-highlighter: highlight.js` attribute
@@ -160,7 +168,7 @@ Common Maven commands for CUI projects:
 - Reference AsciiDoc standards from all relevant documents
 
 ## Process Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/process`
+**Reference**: `{STANDARDS_BASE_URL}/standards/process`
 - Follow standardized git commit message format
 - Use structured refactoring process for code improvements
 - Complete task completion standards for quality assurance
@@ -171,7 +179,7 @@ Common Maven commands for CUI projects:
 - Always research topics using available tools
 
 ## Requirements Standards
-**Reference**: `https://gitingest.com/github.com/cuioss/cui-llm-rules/tree/main/standards/requirements`
+**Reference**: `{STANDARDS_BASE_URL}/standards/requirements`
 - All requirements must be traceable to specifications
 - Use AsciiDoc format for all documentation
 - Requirements must be specific, measurable, achievable, relevant, time-bound
