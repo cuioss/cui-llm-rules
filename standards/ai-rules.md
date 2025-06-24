@@ -10,6 +10,42 @@ This file provides guidance to AI tools (IntelliJ Junie, Claude Code, GitHub Cop
 
 Replace `{STANDARDS_BASE_URL}` in all references below with your chosen base URL.
 
+## Core Process Rules (CRITICAL - READ FIRST)
+**Reference**: `{STANDARDS_BASE_URL}/standards/process/general.adoc`
+
+These rules govern ALL development activities:
+
+1. **If in doubt, ask the user** - Never make assumptions
+2. **Always research topics** - Use available tools (WebSearch, WebFetch, etc.) to find the most recent best practices
+3. **Never guess or be creative** - If you cannot find best practices, ask the user
+4. **Do not proliferate documents** - Always use context-relevant documents, never create without user approval
+5. **Never add dependencies without approval** - Always ask before adding any dependency
+
+## Task Completion Standards (MANDATORY)
+**Reference**: `{STANDARDS_BASE_URL}/standards/process/task-completion-standards.adoc`
+
+### Pre-Commit Checklist
+Execute in sequence before ANY commit:
+
+1. **Quality Verification**: `./mvnw -Ppre-commit clean verify -DskipTests`
+   - Fix ALL errors and warnings (mandatory)
+   - Address code quality, formatting, and linting issues
+
+2. **Final Verification**: `./mvnw clean install`
+   - Must complete without errors or warnings
+   - All tests must pass
+   - Tasks are complete ONLY after this succeeds
+
+3. **Documentation**: Update if changes affect APIs, features, or configuration
+
+4. **Commit Message**: Follow Git Commit Standards
+
+### Quality Requirements
+- New code requires appropriate test coverage
+- Existing tests must continue to pass
+- Documentation must be updated for API/feature changes
+- Link commits to relevant issues or tasks
+
 ## Build Commands Template
 Common Maven commands for CUI projects:
 - Build project: `./mvnw clean install`
@@ -53,16 +89,37 @@ Common Maven commands for CUI projects:
 
 ## Code Style Guidelines
 **Reference**: `{STANDARDS_BASE_URL}/standards/java`
-- Follow package structure: reverse domain name notation (de.cuioss.*)
+
+### Language Standards
+- Use latest Java LTS version features (Java 17+ minimum)
+- Use records for data carriers and DTOs
+- Use switch expressions over classic switch statements
+- Use text blocks for multi-line strings
+- Use var for local variables with obvious types
+- Use sealed classes for restricted hierarchies
+- Pattern matching in instanceof and switch
+- Stream API for complex data transformations
+- Use proper access modifiers (prefer package-private over public)
+- Mark classes final unless designed for inheritance
+- Prefer composition over inheritance
+- Return empty collections instead of null
+- Use Optional for nullable return values
 - Use DSL-style nested constants for logging messages
-- Organize imports: Java standard first, then 3rd party, then project imports
-- Keep classes small and focused - follow Single Responsibility Principle
 - Follow builder pattern for complex object creation
-- Use meaningful, descriptive method and variable names
-- Use Optional for nullable return values instead of null
+- Implement fluent interfaces where appropriate
+- Use method references over lambdas when possible
+- Keep lambda expressions short and clear
+- Avoid side effects in streams
 - Use immutable objects when possible
-- Always validate input parameters
-- Prefer delegation over inheritance
+- Make fields final by default
+- Use enum instead of constants for fixed sets
+- Prefer immutable collections (List.of(), Set.of())
+- Avoid magic numbers, use named constants
+- Use StringBuilder for string concatenation in loops
+- Override toString() for debugging
+- Implement equals() and hashCode() together
+- Use @Override annotation consistently
+- Avoid premature optimization
 - See Lombok Usage section for annotation patterns
 
 ## Lombok Usage
