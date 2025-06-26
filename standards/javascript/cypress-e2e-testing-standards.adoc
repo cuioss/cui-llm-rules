@@ -64,11 +64,11 @@ export default [
       "cypress/no-unnecessary-waiting": "warn",
       "cypress/unsafe-to-chain-command": "off",
       "cypress/no-assigning-return-values": "error",
-      
+
       // Adapted complexity rules
       "max-lines-per-function": ["error", { "max": 200 }],
       "complexity": ["error", { "max": 25 }],
-      
+
       // JSDoc requirements
       "jsdoc/require-description": "error",
       "jsdoc/require-param-description": "error",
@@ -97,7 +97,7 @@ const allowedWarnings = [
 Cypress.on('window:before:load', (win) => {
   win.consoleErrors = [];
   win.consoleWarnings = [];
-  
+
   // Override console methods to track messages
   const originalError = win.console.error;
   win.console.error = (...args) => {
@@ -223,3 +223,141 @@ Tests should complete within reasonable timeframes and use appropriate timeouts 
 
 === Reliability
 Tests must be stable and not rely on timing-based assertions or hard-coded delays.
+
+== Best Practices
+This section provides a brief overview of key best practices for Cypress testing.
+
+=== Core Testing Principles
+
+==== No Branching Logic in Tests
+**MANDATORY**: Tests must never contain conditional logic (`if/else`, `switch`, ternary operators).
+
+[source,javascript]
+----
+// GOOD
+expect(context.pageType).to.equal('LOGIN');
+expect(context.isLoggedIn).to.be.false;
+----
+
+==== Always Be Explicit
+**MANDATORY**: Tests must use direct assertions without ambiguous conditions.
+
+[source,javascript]
+----
+// GOOD
+expect(context.pageType).to.equal('LOGIN');
+expect(context.pageType).to.not.equal('MAIN_CANVAS');
+----
+
+==== Fail Fast Pattern
+Tests should fail immediately on first error rather than continuing with invalid state.
+
+=== Session Management
+
+==== Clean State Guarantee
+Use dedicated session management methods for reliable test isolation:
+
+[source,javascript]
+----
+// For tests requiring clean state
+beforeEach(() => {
+  cy.clearSession();
+});
+
+// For tests that can reuse sessions
+beforeEach(() => {
+  cy.retrieveSession();
+});
+----
+
+==== Session Context Verification
+Always verify session context after authentication operations:
+
+[source,javascript]
+----
+cy.getSessionContext().then((context) => {
+  expect(context.isLoggedIn).to.be.false;
+});
+----
+
+=== Navigation Patterns
+
+==== Use Navigation Helpers
+**MANDATORY**: Use navigation helpers instead of direct `cy.visit()` or `cy.url()` checks.
+
+[source,javascript]
+----
+// GOOD
+cy.navigateToPage('/nifi', { expectedPageType: 'MAIN_CANVAS', waitForReady: true });
+cy.verifyPageType('MAIN_CANVAS');
+----
+
+==== Page Type Verification
+Use page type detection for robust navigation verification:
+
+[source,javascript]
+----
+cy.getPageContext().then((context) => {
+  expect(context.pageType).to.equal('EXPECTED_TYPE');
+});
+----
+
+=== Error Handling
+
+==== No Silent Failures
+Tests must explicitly validate all expected outcomes:
+* Assert successful navigation
+* Verify authentication state
+* Validate page readiness
+
+==== Timeout Configuration
+Use appropriate timeouts for different operations:
+* Navigation: 30s
+* Element interaction: 15s
+* Authentication: 45s
+
+=== Code Organization
+
+==== Self-Sufficient Tests
+Each test must be independently executable:
+* Clear session state if needed
+* Establish required authentication
+* Verify initial conditions
+
+==== Descriptive Test Names
+Use descriptive, action-based test names:
+
+[source,javascript]
+----
+it('R-AUTH-001: Should reject invalid credentials', () => {
+  // Test implementation
+});
+----
+
+=== Modern Cypress Patterns
+
+==== Use cy.session()
+Leverage Cypress session caching for authentication for faster test execution and reliable session management.
+
+==== Custom Commands
+Create reusable custom commands for common operations:
+* `cy.clearSession()`
+* `cy.retrieveSession()`
+* `cy.navigateToPage()`
+
+==== Avoid Anti-Patterns
+**Prohibited**:
+* `cy.wait()` with fixed timeouts
+* Element existence checks in test logic
+* Manual session clearing
+* Direct URL manipulation
+
+=== Performance Optimization
+* Reuse valid sessions across tests when possible
+* Only clear sessions when test requires clean state
+* Structure tests for parallel execution compatibility
+
+=== Maintenance Guidelines
+* Keep navigation and authentication helpers updated with application changes
+* Ensure tests don't depend on execution order
+* Regularly validate test reliability in CI/CD environment
