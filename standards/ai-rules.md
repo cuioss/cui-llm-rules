@@ -54,41 +54,13 @@ Common Maven commands for CUI projects:
 - Run single test: `./mvnw test -Dtest=ClassName#methodName`
 - Clean-Up Code: `./mvnw -Ppre-commit clean install -DskipTests` -> Check the console after running the command and fix all errors and warnings, verify until they are all corrected
 
-## CUI Standards Documentation
-- Standards Overview: `{STANDARDS_BASE_URL}/standards`
+## Standards Overview
+**Base Reference**: `{STANDARDS_BASE_URL}/standards`
 
-### Java Standards
+## Java Standards
+**References**: 
 - Java Code Standards: `{STANDARDS_BASE_URL}/standards/java`
 - DSL-Style Constants: `{STANDARDS_BASE_URL}/standards/java/dsl-style-constants.adoc`
-
-### Documentation Standards
-- General Documentation: `{STANDARDS_BASE_URL}/standards/documentation`
-- Javadoc Standards: `{STANDARDS_BASE_URL}/standards/documentation/javadoc-standards.adoc`
-- AsciiDoc Standards: `{STANDARDS_BASE_URL}/standards/documentation/asciidoc-standards.adoc`
-- README Structure: `{STANDARDS_BASE_URL}/standards/documentation/readme-structure.adoc`
-
-### Logging Standards
-- Logging Core Standards: `{STANDARDS_BASE_URL}/standards/logging`
-- Logging Implementation Guide: `{STANDARDS_BASE_URL}/standards/logging/implementation-guide.adoc`
-- Logging Testing Guide: `{STANDARDS_BASE_URL}/standards/logging/testing-guide.adoc`
-
-### Testing Standards
-- Testing Core Standards: `{STANDARDS_BASE_URL}/standards/testing`
-- Quality Standards: `{STANDARDS_BASE_URL}/standards/testing/quality-standards.adoc`
-- CUI Test Generator Guide: `https://gitingest.com/github.com/cuioss/cui-test-generator` (separate repository)
-
-### Requirements Standards
-- Requirements Documents: `{STANDARDS_BASE_URL}/standards/requirements`
-- Specification Documents: `{STANDARDS_BASE_URL}/standards/requirements/specification-documents.adoc`
-- New Project Guide: `{STANDARDS_BASE_URL}/standards/requirements/new-project-guide.adoc`
-
-### CDI and Quarkus Standards
-- CDI Development Patterns: `{STANDARDS_BASE_URL}/standards/cdi-quarkus`
-- Quarkus Testing Standards: `{STANDARDS_BASE_URL}/standards/cdi-quarkus/testing-standards.adoc`
-- Container Standards: `{STANDARDS_BASE_URL}/standards/cdi-quarkus/container-standards.adoc`
-
-## Code Style Guidelines
-**Reference**: `{STANDARDS_BASE_URL}/standards/java`
 
 ### Language Standards
 - Use latest Java LTS version features (Java 17+ minimum)
@@ -122,7 +94,7 @@ Common Maven commands for CUI projects:
 - Avoid premature optimization
 - See Lombok Usage section for annotation patterns
 
-## Lombok Usage
+### Lombok Usage
 **Reference**: `{STANDARDS_BASE_URL}/standards/java/java-code-standards.adoc`
 - Use `@Builder` for complex object creation
 - Use `@Value` for immutable objects
@@ -132,7 +104,10 @@ Common Maven commands for CUI projects:
 - Make proper use of `lombok.config` settings
 
 ## Logging Standards
-**Reference**: `{STANDARDS_BASE_URL}/standards/logging`
+**References**: 
+- Logging Core Standards: `{STANDARDS_BASE_URL}/standards/logging`
+- Logging Implementation Guide: `{STANDARDS_BASE_URL}/standards/logging/implementation-guide.adoc`
+- Logging Testing Guide: `{STANDARDS_BASE_URL}/standards/logging/testing-guide.adoc`
 - Use `de.cuioss.tools.logging.CuiLogger` (private static final LOGGER)
 - Logger must be private static final with constant name 'LOGGER'
 - Module/artifact: cui-java-tools
@@ -144,7 +119,10 @@ Common Maven commands for CUI projects:
 - No log4j, slf4j, System.out, or System.err usage
 
 ## Testing Standards
-**Reference**: `{STANDARDS_BASE_URL}/standards/testing`
+**References**: 
+- Testing Core Standards: `{STANDARDS_BASE_URL}/standards/testing`
+- Quality Standards: `{STANDARDS_BASE_URL}/standards/testing/quality-standards.adoc`
+- CUI Test Generator Guide: `https://gitingest.com/github.com/cuioss/cui-test-generator` (separate repository)
 - Use JUnit 5 (`@Test`, `@DisplayName`, `@Nested`)
 - Follow AAA pattern (Arrange-Act-Assert)
 - One logical assertion per test
@@ -157,7 +135,7 @@ Common Maven commands for CUI projects:
 - Critical paths must have 100% coverage
 - Forbidden: Mockito, PowerMock, Hamcrest - use CUI alternatives
 
-## CUI Test Generator Usage
+### CUI Test Generator Usage
 **Reference**: `https://gitingest.com/github.com/cuioss/cui-test-generator` (separate repository)
 - Mandatory for all test data generation in CUI projects
 - Primary framework for creating test objects and data
@@ -166,7 +144,7 @@ Common Maven commands for CUI projects:
 - Integrates with parameterized tests via @GeneratorsSource
 - See Parameterized Tests Standards for annotation hierarchy
 
-## Parameterized Tests Standards
+### Parameterized Tests Standards
 **Reference**: `{STANDARDS_BASE_URL}/standards/testing/quality-standards.adoc#parameterized-tests-best-practices`
 - **Mandatory** for 3+ similar test variants
 - Annotation hierarchy (preferred order):
@@ -180,8 +158,14 @@ Common Maven commands for CUI projects:
 - Provide clear test data and expected outcomes
 - Document why @MethodSource if used
 
-## Javadoc Standards
-**Reference**: `{STANDARDS_BASE_URL}/standards/documentation/javadoc-standards.adoc`
+## Documentation Standards
+**References**: 
+- General Documentation: `{STANDARDS_BASE_URL}/standards/documentation`
+- Javadoc Standards: `{STANDARDS_BASE_URL}/standards/documentation/javadoc-standards.adoc`
+- AsciiDoc Standards: `{STANDARDS_BASE_URL}/standards/documentation/asciidoc-standards.adoc`
+- README Structure: `{STANDARDS_BASE_URL}/standards/documentation/readme-structure.adoc`
+
+### Javadoc Standards
 - Every public and protected class/interface must be documented
 - Include clear purpose statement in class documentation
 - Document all public methods with parameters, returns, and exceptions
@@ -193,7 +177,10 @@ Common Maven commands for CUI projects:
 - Document Builder classes with complete usage examples
 
 ## CDI and Quarkus Standards
-**Reference**: `{STANDARDS_BASE_URL}/standards/cdi-quarkus`
+**References**: 
+- CDI Development Patterns: `{STANDARDS_BASE_URL}/standards/cdi-quarkus`
+- Quarkus Testing Standards: `{STANDARDS_BASE_URL}/standards/cdi-quarkus/testing-standards.adoc`
+- Container Standards: `{STANDARDS_BASE_URL}/standards/cdi-quarkus/container-standards.adoc`
 - Use constructor injection (mandatory over field injection)
 - Single constructor rule: No `@Inject` needed for single constructors
 - Use `final` fields for injected dependencies
@@ -216,7 +203,11 @@ Common Maven commands for CUI projects:
 - Support for modern browsers (last 2 versions)
 
 ## JavaScript Standards
-**Reference**: `{STANDARDS_BASE_URL}/standards/javascript`
+**References**: 
+- JavaScript Standards: `{STANDARDS_BASE_URL}/standards/javascript`
+- Cypress E2E Testing Standards: `{STANDARDS_BASE_URL}/standards/javascript/cypress-e2e-testing-standards.adoc`
+
+### Core JavaScript Standards
 - Use ES6+ modern JavaScript features
 - Use ESLint with strict configuration
 - Use Prettier for code formatting
@@ -227,7 +218,7 @@ Common Maven commands for CUI projects:
 - Maven integration via frontend-maven-plugin
 - Cypress for E2E testing
 
-## Cypress E2E Testing Best Practices
+### Cypress E2E Testing Best Practices
 **Reference**: `{STANDARDS_BASE_URL}/standards/javascript/cypress-e2e-testing-standards.adoc`
 - **No Branching Logic**: Tests must never contain conditional logic (if/else, switch, ternary)
 - **Explicit Assertions**: Use direct assertions without ambiguous conditions
@@ -244,8 +235,7 @@ Common Maven commands for CUI projects:
 - **Performance Optimization**: Reuse valid sessions across tests when possible
 - **Maintenance Guidelines**: Keep helpers updated with application changes
 
-## Documentation Standards
-**Reference**: `{STANDARDS_BASE_URL}/standards/documentation`
+### General Documentation Standards
 - Use AsciiDoc format with `.adoc` extension
 - Include proper document header with TOC and section numbering
 - Use `:source-highlighter: highlight.js` attribute
@@ -267,7 +257,10 @@ Common Maven commands for CUI projects:
 - Always research topics using available tools
 
 ## Requirements Standards
-**Reference**: `{STANDARDS_BASE_URL}/standards/requirements`
+**References**: 
+- Requirements Documents: `{STANDARDS_BASE_URL}/standards/requirements`
+- Specification Documents: `{STANDARDS_BASE_URL}/standards/requirements/specification-documents.adoc`
+- New Project Guide: `{STANDARDS_BASE_URL}/standards/requirements/new-project-guide.adoc`
 - All requirements must be traceable to specifications
 - Requirements must be specific, measurable, achievable, relevant, time-bound
 - Maintain consistent documentation structure across projects
