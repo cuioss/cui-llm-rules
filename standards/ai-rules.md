@@ -10,6 +10,23 @@ This file provides guidance to AI tools (IntelliJ Junie, Claude Code, GitHub Cop
 
 Replace `{STANDARDS_BASE_URL}` in all references below with your chosen base URL.
 
+## Context Hierarchy and Priority Framework
+**Critical for AI System Decision Making**
+
+When conflicting information exists, AI systems must follow this priority order:
+
+1. **Core Process Rules** (CRITICAL - highest priority, non-negotiable)
+2. **Project-Specific Context** (CLAUDE.md, .github/copilot-instructions.md, local config)
+3. **Standards References** (adaptable based on context and requirements)
+4. **General Guidelines** (lowest priority, may be overridden by higher levels)
+
+### Context-Aware Response Patterns
+- **New Project Context**: Emphasize architecture decisions and initial setup standards
+- **Legacy Code Context**: Prioritize compatibility, incremental changes, and migration paths
+- **Testing Context**: Focus on coverage requirements and quality standards
+- **Documentation Context**: Emphasize clarity, completeness, and AsciiDoc standards
+- **Security Context**: Apply strictest security standards without compromise
+
 ## Core Process Rules (CRITICAL - READ FIRST)
 **Reference**: `{STANDARDS_BASE_URL}/standards/process/general.adoc`
 
@@ -20,6 +37,30 @@ These rules govern ALL development activities:
 3. **Never guess or be creative** - If you cannot find best practices, ask the user
 4. **Do not proliferate documents** - Always use context-relevant documents, never create without user approval
 5. **Never add dependencies without approval** - Always ask before adding any dependency
+
+## AI Safety and Validation Framework
+**Mandatory for All AI-Generated Content**
+
+### Safety Constraints (NON-NEGOTIABLE)
+- **Never bypass security measures**: AI must not suggest workarounds for security controls
+- **Preserve data integrity**: All changes must maintain data consistency
+- **Respect privacy**: No exposure of sensitive data in logs or outputs
+- **Maintain auditability**: All AI-generated changes must be traceable
+- **Follow standards hierarchy**: Respect the context priority framework above
+
+### Validation Requirements
+Before any code implementation:
+1. **Standards Compliance Check**: Verify output matches CUI standards
+2. **Build Verification**: Ensure generated code compiles and passes pre-commit checks
+3. **Security Review**: Check for security anti-patterns and vulnerabilities
+4. **Documentation Sync**: Verify documentation reflects any code changes
+5. **Test Coverage**: Ensure adequate test coverage for new functionality
+
+### Error Recovery Patterns
+- **Standards Violation**: Provide specific correction guidance with reference links
+- **Build Failures**: Include diagnostic steps and reference Build Commands Template
+- **Test Failures**: Guide through debugging using Testing Standards
+- **Integration Issues**: Escalate to human review with detailed context
 
 ## Task Completion Standards (MANDATORY)
 **Reference**: `{STANDARDS_BASE_URL}/standards/process/task-completion-standards.adoc`
@@ -275,21 +316,56 @@ Common Maven commands for CUI projects:
 - Always check for pre-commit profile availability
 - Use proper Maven module selection for focused builds
 - Leverage IDE integration for testing and debugging
+- **Context Management**: Use module-level context awareness for focused assistance
+- **Incremental Guidance**: Apply progressive disclosure of standards based on task complexity
 
-### For Claude Code
+### For Claude Code (Agentic Coding)
+- **CLAUDE.md Integration**: Auto-generate and maintain project-specific CLAUDE.md files
+- **Permission Management**: Configure safe tool allowlists using `/permissions` command
+- **Custom Slash Commands**: Create CUI-specific workflow commands in `.claude/commands/`
+- **MCP Integration**: Leverage Model Context Protocol for enhanced capabilities
 - Use todo lists for complex multi-step tasks
 - Batch tool calls for parallel operations
 - Always run lint and typecheck commands after code changes
+- **Context Window Optimization**: Prioritize recent and relevant context for token efficiency
 
 ### For GitHub Copilot
+- **Repository Instructions**: Maintain `.github/copilot-instructions.md` for repo-specific guidance
+- **Setup Steps**: Configure `copilot-setup-steps.yml` for consistent development environments
+- **Task Scoping**: Optimize issue descriptions as effective AI prompts
+- **Review Iteration**: Structure PR comments for effective AI collaboration using batch reviews
 - Context-aware suggestions based on CUI standards
 - Follow established patterns in the codebase
 - Respect existing code style and architecture
 
 ### For All AI Tools
+- **Standards Hierarchy**: Follow the Context Hierarchy and Priority Framework
+- **Safety First**: Apply AI Safety and Validation Framework for all outputs
 - Always refer to CUI standards documentation before making changes
 - Validate against existing patterns in the codebase
 - Run tests after any code modifications
 - Follow the pre-commit process for code quality
 - Document any new public APIs according to Javadoc standards
 - Use gitingest.com links for accessing CUI standards repository content
+- **Feedback Integration**: Learn from user corrections and adapt instruction effectiveness
+- **Escalation Protocol**: When in doubt, ask the user rather than making assumptions
+
+## Performance and Context Optimization
+**Guidelines for Efficient AI Interactions**
+
+### Context Window Management
+- **Prioritize Recent Context**: Weight recent files and conversations higher in decision making
+- **Dynamic Context Selection**: Load only relevant standards for current task context
+- **Token Economy**: Balance instruction comprehensiveness with context window efficiency
+- **Incremental Loading**: Request additional context only when needed for task completion
+
+### Iterative Improvement Patterns
+- **Pattern Recognition**: Identify and codify successful interaction patterns within CUI projects
+- **Continuous Calibration**: Adjust instruction effectiveness based on build outcomes and user feedback
+- **Workflow Optimization**: Streamline common development workflows through custom commands and templates
+
+### Integration with Development Workflows
+- **CI/CD Awareness**: Understand and respect automated build and deployment processes
+- **Quality Gate Integration**: Ensure all outputs pass automated quality checks
+- **Collaborative Development**: Optimize for effective human-AI pair programming
+- **Knowledge Contribution**: Help maintain and improve team knowledge base and documentation
