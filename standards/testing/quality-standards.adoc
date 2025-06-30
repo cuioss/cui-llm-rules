@@ -53,7 +53,7 @@ Strict compliance with approved testing libraries to ensure consistency and comp
 
 * **cui-test-libs**: All CUI testing utilities and frameworks (required for CUI projects)
 * **junit-jupiter**: JUnit 5 for all test execution and assertions
-* **awaitility**: For asynchronous testing, waiting conditions, and polling
+* **awaitility**: For asynchronous testing, waiting conditions, and polling. Documentation see https://gitingest.com/awaitility/awaitility/tree/awaitility-4.3.0
 * **rest-assured**: For REST API testing, HTTP request/response validation
 
 **FORBIDDEN LIBRARIES:**

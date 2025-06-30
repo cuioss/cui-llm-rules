@@ -121,7 +121,7 @@ The standards require the following CUI-approved technologies:
 * **cui-test-value-objects** - Required for value object contract testing
 
 === **Allowed Libraries**
-* **awaitility** - For asynchronous testing and waiting conditions
+* **awaitility** - For asynchronous testing and waiting conditions- Documentation see https://gitingest.com/awaitility/awaitility/tree/awaitility-4.3.0
 * **rest-assured** - For REST API testing and validation
 
 === **Forbidden Libraries**
