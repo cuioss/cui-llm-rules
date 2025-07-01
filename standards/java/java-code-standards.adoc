@@ -250,3 +250,4 @@ List<String> names = users.stream()
 * xref:../process/git-commit-standards.adoc[Git Commit Standards] - Standardized commit messages for Java development
 * xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance] - Process for maintaining and fixing Javadoc documentation
 * xref:../process/java-test-maintenance.adoc[Java Test Maintenance] - Process for maintaining and improving Java test quality
+* xref:../process/java-code-maintenance.adoc[Java Code Maintenance] - Process for refactoring and maintaining Java production code to enforce these standards
