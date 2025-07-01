@@ -10,28 +10,45 @@
 This document is governed by the general process rules defined in xref:general.adoc[General Process Rules].
 ====
 
-Process for maintaining and improving Java test quality while preserving functionality and adhering to CUI standards.
+== Purpose
+
+This document defines the comprehensive process for maintaining and improving Java test quality while preserving functionality and adhering to CUI standards. It provides systematic approaches for identifying, prioritizing, and resolving test quality issues across Java codebases.
+
+== Related Documentation
+
+* xref:../testing/core-standards.adoc[Core Testing Standards] - Fundamental testing requirements and patterns
+* xref:../testing/quality-standards.adoc[Testing Quality Standards] - Quality requirements and AI artifact detection
+* xref:../testing/cui-test-generator-guide.adoc[CUI Test Generator Guide] - Implementation guide for CUI testing framework
+* xref:task-completion-standards.adoc[Task Completion Standards] - Quality verification processes
+* xref:git-commit-standards.adoc[Git Commit Standards] - Standardized commit messaging
+* xref:general.adoc[General Process Rules] - Overarching process governance
 
 == Pre-Maintenance Checklist
 
-Execute before starting test maintenance following xref:task-completion-standards.adoc[Task Completion Standards]:
+**Requirements**: Execute the following verification steps before starting test maintenance, following xref:task-completion-standards.adoc[Task Completion Standards]:
 
-1. [ ] *Build Verification*: `./mvnw -Ppre-commit clean verify -DskipTests`
-2. [ ] *Test Execution*: `./mvnw clean test` - all tests must pass
-3. [ ] *Coverage Baseline*: `./mvnw clean verify -Pcoverage` - record current metrics
-4. [ ] *Security Test Audit*: Verify security testing patterns and vulnerability coverage
-5. [ ] *Module Identification*: List all modules for systematic processing
+1. [ ] **Build Verification**: `./mvnw -Ppre-commit clean verify -DskipTests`
+2. [ ] **Test Execution**: `./mvnw clean test` - all tests must pass
+3. [ ] **Coverage Baseline**: `./mvnw clean verify -Pcoverage` - record current metrics
+4. [ ] **Security Test Audit**: Verify security testing patterns and vulnerability coverage
+5. [ ] **Module Identification**: List all modules for systematic processing
 
 == Module-by-Module Approach
 
+**Strategy**: Process modules systematically to maintain build stability and ensure comprehensive coverage.
+
 === Single Module Process
 
-1. *Module Focus*: Process one module completely before moving to next
-2. *Test Execution*: `./mvnw clean test -pl module-name`
-3. *Coverage Check*: `./mvnw clean verify -Pcoverage -pl module-name`
-4. *Commit per Module*: Complete module before next following xref:git-commit-standards.adoc[Git Commit Standards]
+**Requirements**: Complete each module entirely before proceeding to the next:
+
+1. **Module Focus**: Process one module completely before moving to next
+2. **Test Execution**: `./mvnw clean test -pl module-name`
+3. **Coverage Check**: `./mvnw clean verify -Pcoverage -pl module-name`
+4. **Commit per Module**: Complete module before next following xref:git-commit-standards.adoc[Git Commit Standards]
 
 === Multi-Module Strategy
+
+**Dependencies Management**:
 
 * Process modules in dependency order (dependencies first)
 * Maintain build stability after each module
@@ -39,7 +56,13 @@ Execute before starting test maintenance following xref:task-completion-standard
 
 == Test Quality Issues
 
+**Overview**: This section defines the identification and resolution processes for common test quality issues found in Java codebases.
+
 === AI-Generated Code Detection
+
+**Purpose**: Identify and systematically remove AI-generated code artifacts that compromise test quality.
+
+**Process Requirements**:
 
 * **Detection Process**: Identify AI artifacts per xref:../testing/quality-standards.adoc#ai-generated-code-detection[Quality Standards AI Detection]
 * **Removal Actions**: Apply removal rules as defined in quality standards
@@ -49,6 +72,7 @@ Execute before starting test maintenance following xref:task-completion-standard
 
 **High Priority - Business Logic Tests:**
 
+* **Unit Test Coverage**: Each type MUST have a separate dedicated unit test that focuses exclusively on that class, including comprehensive corner cases and edge cases. Always verify that aspects testable within that unit are not duplicated in other unit tests
 * Domain object tests (token content, claims, validators)
 * Business rule validation tests
 * API contract and behavior tests
@@ -94,18 +118,16 @@ Tests that should remain as infrastructure (no CUI enhancement needed):
 
 == CUI Framework Compliance
 
+**Overview**: Ensure all test code adheres to CUI framework requirements and follows established testing patterns.
+
 === Framework Compliance Requirements
+
+**Standards Application**:
 
 * **Apply Standards**: Follow xref:../testing/core-standards.adoc#cui-framework-requirements[CUI Framework Requirements]
 * **Library Restrictions**: Adhere to xref:../testing/quality-standards.adoc#testing-library-restrictions[Testing Library Requirements]
 * **Implementation Guide**: Reference xref:../testing/cui-test-generator-guide.adoc[CUI Test Generator Guide] for examples
 
-
-**Count Parameter Guidelines:**
-
-* Use count=2 for basic variation testing
-* Use count=3 for security-critical scenarios  
-* Use count=5+ for complex business logic with many edge cases
 
 === Framework Migration Process
 
@@ -116,9 +138,11 @@ Tests that should remain as infrastructure (no CUI enhancement needed):
 
 == Maintenance Standards
 
+**Overview**: Define quality requirements for test structure and coverage that must be maintained throughout the maintenance process.
+
 === Test Structure
 
-Following xref:../testing/core-standards.adoc[Core Standards]:
+**Requirements**: Following xref:../testing/core-standards.adoc[Core Standards]:
 
 * Verify AAA pattern (Arrange-Act-Assert)
 * Ensure test independence
@@ -127,6 +151,8 @@ Following xref:../testing/core-standards.adoc[Core Standards]:
 
 === Coverage Requirements
 
+**Quality Gates**:
+
 * Maintain minimum 80% line coverage
 * Preserve existing coverage levels
 * Identify untested critical paths
@@ -134,7 +160,11 @@ Following xref:../testing/core-standards.adoc[Core Standards]:
 
 == Critical Constraints
 
+**Overview**: Mandatory constraints that govern all test maintenance activities to ensure code safety and process integrity.
+
 === Production Code Protection
+
+**Strict Requirements**:
 
 * **NO PRODUCTION CHANGES** except confirmed bugs
 * **Bug Discovery**: Must ask user for approval before fixing production code
@@ -143,7 +173,7 @@ Following xref:../testing/core-standards.adoc[Core Standards]:
 
 === Bug Handling Process
 
-When production bugs are discovered:
+**When production bugs are discovered**:
 
 1. **Stop maintenance process**
 2. **Document bug details** (location, issue, impact)
@@ -156,20 +186,23 @@ When production bugs are discovered:
 === Analysis Phase
 
 1. **Scan for Issues**: Identify AI artifacts, duplicates, and non-compliance
-2. **AI Pattern Detection**: Check for method names >75 chars, excessive comments, verbose @DisplayName
-3. **Non-Sensible Test Review**: Identify meaningless constructor tests and framework behavior tests
-4. **CUI Framework Audit**: Check for manual data creation and missing annotations
-5. **Value Object Review**: Identify objects needing contract testing per value object criteria
-6. **Security Test Review**: Verify security testing patterns and vulnerability coverage
-7. **Classify Test Files**: Apply prioritization framework (High/Medium/Low priority)
-8. **Document Classification**: Maintain test file inventory with enhancement status and justification
-9. **Prioritize Changes**: Focus on high-priority business logic tests first
-10. **Plan Module Order**: Dependencies first, then dependent modules
+2. **Unit Test Coverage Audit**: Verify each type has dedicated unit test focusing exclusively on that class with comprehensive corner/edge cases. Identify test duplication across unit tests
+3. **AI Pattern Detection**: Check for method names >75 chars, excessive comments, verbose @DisplayName
+4. **Non-Sensible Test Review**: Identify meaningless constructor tests and framework behavior tests
+5. **CUI Framework Audit**: Check for manual data creation and missing annotations
+6. **Value Object Review**: Identify objects needing contract testing per value object criteria
+7. **Security Test Review**: Verify security testing patterns and vulnerability coverage
+8. **Classify Test Files**: Apply prioritization framework (High/Medium/Low priority)
+9. **Document Classification**: Maintain test file inventory with enhancement status and justification
+10. **Prioritize Changes**: Focus on high-priority business logic tests first
+11. **Plan Module Order**: Dependencies first, then dependent modules
 
 === Compliance Verification Checklist
 
 For each test class, verify compliance with:
 
+- [ ] **Unit Test Focus**: Each type has dedicated unit test focusing exclusively on that class with comprehensive corner/edge case coverage
+- [ ] **Test Isolation**: Verify no duplication of unit-testable aspects across different unit tests
 - [ ] **CUI Framework Standards**: xref:../testing/core-standards.adoc#cui-framework-requirements[Framework Requirements]
 - [ ] **Quality Standards**: xref:../testing/quality-standards.adoc#ai-generated-code-detection[AI Detection] and xref:../testing/quality-standards.adoc#testing-library-restrictions[Library Restrictions]
 - [ ] **Coverage Requirements**: xref:../testing/quality-standards.adoc#coverage-requirements[Coverage Standards]
@@ -221,6 +254,7 @@ Following xref:task-completion-standards.adoc[Task Completion Standards]:
 
 === Test Simplification Process
 
+* **Ensure Unit Test Focus**: Verify each type has dedicated unit test with comprehensive corner/edge case coverage and eliminate test duplication across units
 * **Apply AI artifact removal** per xref:../testing/quality-standards.adoc#ai-generated-code-detection[Quality Standards]
 * **Remove non-sensible tests** per quality standards criteria
 * **Refactor complex test logic** to follow AAA pattern per xref:../testing/core-standards.adoc[Core Standards]
@@ -291,3 +325,17 @@ class AccessTokenContentTest implements ShouldHandleObjectContracts<AccessTokenC
 * Improve test readability
 
 For complete quality verification, see xref:task-completion-standards.adoc[Task Completion Standards].
+
+== See Also
+
+**Core Documentation**:
+
+* xref:../testing/core-standards.adoc[Core Testing Standards] - Fundamental testing requirements
+* xref:../testing/quality-standards.adoc[Testing Quality Standards] - Quality requirements and compliance
+* xref:../testing/cui-test-generator-guide.adoc[CUI Test Generator Guide] - Implementation guide
+
+**Process Documentation**:
+
+* xref:task-completion-standards.adoc[Task Completion Standards] - Quality verification processes
+* xref:git-commit-standards.adoc[Git Commit Standards] - Commit message standards
+* xref:general.adoc[General Process Rules] - Overarching process governance
