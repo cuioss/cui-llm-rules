@@ -30,8 +30,7 @@ This document defines the comprehensive process for maintaining and improving Ja
 1. [ ] **Build Verification**: `./mvnw -Ppre-commit clean verify -DskipTests`
 2. [ ] **Test Execution**: `./mvnw clean test` - all tests must pass
 3. [ ] **Coverage Baseline**: `./mvnw clean verify -Pcoverage` - record current metrics
-4. [ ] **Security Test Audit**: Verify security testing patterns and vulnerability coverage
-5. [ ] **Module Identification**: List all modules for systematic processing
+4. [ ] **Module Identification**: List all modules for systematic processing
 
 == Module-by-Module Approach
 
@@ -294,22 +293,6 @@ Following xref:task-completion-standards.adoc[Task Completion Standards]:
 2. **Apply Standards**: Follow patterns per xref:../testing/cui-test-generator-guide.adoc[CUI Test Generator Guide]
 3. **Verify Coverage**: Ensure equals(), hashCode(), toString(), and Serializable contracts are tested
 4. **Generator Integration**: Use cui-test-generator for all test data creation
-
-**Implementation Pattern:**
-[source,java]
-----
-@EnableGeneratorController
-class AccessTokenContentTest implements ShouldHandleObjectContracts<AccessTokenContent> {
-    
-    @ParameterizedTest
-    @TestTokenSource(value = TokenType.ACCESS_TOKEN, count = 2)
-    @DisplayName("Should handle business logic correctly")
-    void shouldHandleBusinessLogic(TestTokenHolder tokenHolder) {
-        // Business logic tests here
-        // Contract testing is automatically applied via interface
-    }
-}
-----
 
 **Common Mistakes to Avoid:**
 
