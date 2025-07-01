@@ -110,6 +110,77 @@ public void log(String message, CuiLogger logger) { ... }
 . Don't catch generic Exception
 . Include meaningful error messages
 
+=== Null Safety and API Design
+
+==== @NonNull Annotations for Public APIs
+
+All public API methods that guarantee not to return null for non-primitive types MUST be annotated with `@NonNull` to document this contract. 
+
+**IMPORTANT**: This annotation serves as documentation only. No code will be generated and there is no automatic enforcement. The implementation must manually ensure the non-null guarantee.
+
+[source,java]
+----
+// Good: Clear contract - method will never return null
+@NonNull
+public String processToken(@NonNull String input) {
+    return input.toUpperCase();
+}
+
+// Good: Use Optional when null might be returned
+public Optional<User> findUser(String id) {
+    return userRepository.findById(id);
+}
+
+// Bad: No annotation and unclear if null can be returned
+public String processToken(String input) {
+    return input != null ? input.toUpperCase() : null;
+}
+----
+
+==== API Return Type Guidelines
+
+For public API methods, choose one of these patterns:
+
+. **@NonNull return type**: When the method guarantees a non-null result
+. **Optional<T> return type**: When the method may not have a result to return
+
+[source,java]
+----
+// Pattern 1: Guaranteed non-null result
+@NonNull
+public ValidationResult validate(@NonNull String token) {
+    // Implementation must ensure non-null return
+    return new ValidationResult(token, true);
+}
+
+// Pattern 2: Optional result
+public Optional<UserInfo> extractUserInfo(@NonNull String token) {
+    // May return empty Optional
+    return parseToken(token)
+        .map(this::extractUser);
+}
+----
+
+==== Implementation Requirements
+
+. **Implementation Responsibility**: The implementation MUST ensure that `@NonNull` annotated methods never return null
+. **Manual Enforcement**: Since no automatic checks are generated, developers must implement the non-null guarantee manually
+. **Unit Testing**: Test that `@NonNull` annotated methods never return null under any valid input conditions
+. **Documentation Contract**: The `@NonNull` annotation serves as executable documentation of the API contract
+
+[source,java]
+----
+@Test
+void shouldNeverReturnNull() {
+    // Test various valid inputs
+    assertNotNull(service.processToken("valid"));
+    assertNotNull(service.processToken(""));
+    
+    // @NonNull methods should handle edge cases without returning null
+    assertNotNull(service.processToken("edge-case"));
+}
+----
+
 === Documentation
 
 

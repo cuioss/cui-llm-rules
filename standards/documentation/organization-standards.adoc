@@ -1,6 +1,7 @@
 = Documentation Organization Standards
 :toc: left
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
 
@@ -171,6 +172,7 @@ Comprehensive review process ensures documentation quality:
 = Document Title
 :toc: left
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
 ----

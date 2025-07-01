@@ -1,6 +1,7 @@
 = Git Commit Standards
-:toc:
-:toclevels: 2
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
 
@@ -13,7 +14,7 @@ Standardized git commit format for all CUI LLM projects following conventional c
 
 == Commit Message Format
 
-[source]
+[source,text]
 ----
 <type>(<scope>): <subject>
 
@@ -36,7 +37,7 @@ Standardized git commit format for all CUI LLM projects following conventional c
 == Examples
 
 === Basic Commit
-[source]
+[source,text]
 ----
 fix(auth): resolve token validation error
 
@@ -46,7 +47,7 @@ Fixes #234
 ----
 
 === Task-Based Commit
-[source]
+[source,text]
 ----
 refactor: C1. Document Bouncy Castle Usage
 
@@ -55,7 +56,7 @@ dependency information for cryptographic operations.
 ----
 
 === Breaking Change
-[source]
+[source,text]
 ----
 feat(api): update authentication endpoint structure
 

@@ -1,5 +1,5 @@
 = Refactoring Process Documentation
-:toc:
+:toc: left
 :toclevels: 3
 :toc-title: Table of Contents
 :sectnums:
@@ -36,7 +36,7 @@ This categorization allows for:
 
 Each task follows a consistent format:
 
-[source]
+[source,text]
 ----
 === [Category][Number]. [Task Title]
 [ ] *Priority:* [High/Medium/Low]
@@ -47,7 +47,7 @@ Each task follows a consistent format:
 ----
 
 Example:
-[source]
+[source,text]
 ----
 === C1. Document Bouncy Castle Usage
 [x] *Priority:* Medium

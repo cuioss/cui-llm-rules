@@ -1,6 +1,7 @@
 = CUI Standards Documentation
 :toc: left
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
 
@@ -134,6 +135,7 @@ When creating new standards documents, follow these guidelines:
 = Document Title
 :toc: left
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
 

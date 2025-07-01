@@ -41,19 +41,19 @@ Defines the structure and format for specification documents in CUI projects, en
 . Each specification section must include a backtracking link to the corresponding requirement
 . The backtracking link must follow this exact format:
 +
-[source]
+[source,text]
 ----
 _See Requirement link:../Requirements.adoc#PREFIX-NUM[PREFIX-NUM: Requirement Title]_
 ----
 . For specification files in subdirectories, use relative paths:
 +
-[source]
+[source,text]
 ----
 _See Requirement link:../Requirements.adoc#PREFIX-NUM[PREFIX-NUM: Requirement Title]_
 ----
 . For specification files in the root directory, use direct path:
 +
-[source]
+[source,text]
 ----
 _See Requirement link:Requirements.adoc#PREFIX-NUM[PREFIX-NUM: Requirement Title]_
 ----

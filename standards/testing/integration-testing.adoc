@@ -1,5 +1,5 @@
 = Integration Testing Standards
-:toc:
+:toc: left
 :toclevels: 3
 :toc-title: Table of Contents
 :sectnums:

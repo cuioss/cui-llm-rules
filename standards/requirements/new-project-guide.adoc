@@ -18,7 +18,7 @@ This document defines the standards for requirements and specification documenta
 
 . Create the basic directory structure:
 +
-[source]
+[source,text]
 ----
 project-root/
 ├── doc/

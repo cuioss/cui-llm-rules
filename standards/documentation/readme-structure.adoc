@@ -1,6 +1,7 @@
 = README.adoc Structure Pattern
 :toc: left
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
 
@@ -191,6 +192,7 @@ Concise description of the module's purpose and key features.
 = Document Title
 :toc: macro
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnumlevels: 1
 ----
 * Place the TOC macro `toc::[]` after the introduction sections and before the main content
@@ -223,6 +225,7 @@ Project status badges and links
 = Module Name
 :toc: macro
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnumlevels: 1
 
 [.discrete]

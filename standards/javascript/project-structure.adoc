@@ -1,6 +1,7 @@
 = JavaScript Project Structure Standards
 :toc: left
 :toclevels: 3
+:toc-title: Table of Contents
 :sectnums:
 :source-highlighter: highlight.js
 
@@ -145,7 +146,7 @@ For JavaScript-specific package.json configuration including Jest, Babel, and Ja
 Choose the appropriate structure for your project type:
 
 ==== Standard Maven Projects
-[source]
+[source,text]
 ----
 project-root/
 ├── package.json
@@ -158,7 +159,7 @@ project-root/
 ----
 
 ==== Quarkus DevUI Projects
-[source]
+[source,text]
 ----
 project-root/
 ├── package.json
@@ -171,7 +172,7 @@ project-root/
 ----
 
 ==== NiFi Extension Projects
-[source]
+[source,text]
 ----
 project-root/
 ├── package.json
@@ -183,7 +184,7 @@ project-root/
 ----
 
 ==== Standalone Projects
-[source]
+[source,text]
 ----
 project-root/
 ├── package.json
