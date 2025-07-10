@@ -13,6 +13,7 @@ Standards and best practices for CDI (Contexts and Dependency Injection) and Qua
 
 === Core Development Standards
 * **xref:cdi-aspects.adoc[CDI Development Patterns]**: Constructor injection requirements, dependency patterns, and CDI lifecycle management
+* **xref:quarkus-reflection-standards.adoc[Quarkus Reflection Standards]**: Reflection registration best practices, @RegisterForReflection vs ReflectiveClassBuildItem usage patterns
 * **xref:testing-standards.adoc[Testing Standards]**: Test coverage, JaCoCo configuration, and Quarkus-specific testing patterns
 * **xref:integration-testing-standards.adoc[Integration Testing Standards]**: API-only testing patterns, Docker-based lifecycle, and HTTPS-only integration testing
 
@@ -63,6 +64,13 @@ ENTRYPOINT ["/app/application"]
 * **Single Constructor Rule**: No `@Inject` needed for single constructors  
 * **Immutability**: Use `final` fields for injected dependencies
 * **Optional Dependencies**: Use `Instance<T>` pattern when appropriate
+
+=== Quarkus Reflection (xref:quarkus-reflection-standards.adoc[→ Details])
+
+* **Hybrid Strategy**: `@RegisterForReflection` for application classes, `ReflectiveClassBuildItem` for infrastructure
+* **Performance Focus**: Selective registration, avoid over-registration
+* **Type Safety**: Prefer class-based over string-based registration
+* **No Redundancy**: Each class registered only once
 
 === Testing Standards (xref:testing-standards.adoc[→ Details])
 

@@ -283,6 +283,215 @@ public class NotificationService {
 }
 ----
 
+== CDI Producer Methods
+
+=== Producer Method Scopes and Null Returns
+
+**CRITICAL**: CDI has strict rules about producer methods returning null based on their scope.
+
+==== @Dependent Scope Producers (Allows null)
+
+Use `@Dependent` scope when the producer method might return null:
+
+[source,java]
+----
+@ApplicationScoped
+public class ServletObjectsProducer {
+    
+    @Produces
+    @CuiServletObjects
+    @Dependent  // ✅ REQUIRED for null returns
+    public HttpServletRequest produceHttpServletRequest() {
+        // Can safely return null outside REST context
+        return getHttpServletRequest().orElse(null);
+    }
+    
+    private Optional<HttpServletRequest> getHttpServletRequest() {
+        ResteasyProviderFactory factory = ResteasyProviderFactory.getInstance();
+        if (factory == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.getContextData(HttpServletRequest.class));
+    }
+}
+----
+
+==== Normal Scoped Producers (Cannot return null)
+
+Normal scoped producers (`@RequestScoped`, `@SessionScoped`, etc.) **MUST NOT** return null:
+
+[source,java]
+----
+@ApplicationScoped
+public class BadProducer {
+    
+    @Produces
+    @RequestScoped  // ❌ ILLEGAL - will throw IllegalProductException
+    public SomeService createService() {
+        return null;  // ❌ CDI will throw exception at runtime
+    }
+}
+----
+
+**Error**: `jakarta.enterprise.inject.IllegalProductException: Normal scoped producer method may not return null`
+
+==== Why This Restriction Exists
+
+Normal scoped beans use CDI client proxies:
+- Proxies require a target object to delegate method calls
+- Null cannot be proxied - no object to delegate to
+- CDI enforces this at runtime to prevent proxy failures
+
+=== Optional<T> in Producer Methods - NOT RECOMMENDED
+
+**AVOID**: Returning `Optional<T>` from producer methods is not considered CDI best practice:
+
+[source,java]
+----
+@ApplicationScoped
+public class NotRecommendedProducer {
+    
+    @Produces
+    @RequestScoped
+    public Optional<SomeService> createOptionalService() {  // ❌ Not recommended
+        return Optional.ofNullable(someService);
+    }
+}
+----
+
+**Problems with Optional Producers:**
+1. **Goes against CDI design philosophy** - CDI expects concrete bean instances
+2. **Adds unnecessary complexity** - Consumers must handle Optional unwrapping
+3. **Performance overhead** - Creates additional wrapper objects
+4. **Type safety issues** - Makes injection points less clear
+
+=== Recommended Patterns for Optional Dependencies
+
+==== 1. Use Instance<T> at Injection Points
+
+[source,java]
+----
+@ApplicationScoped
+public class MyService {
+    
+    private final OptionalService optionalService;
+    
+    public MyService(Instance<OptionalService> optionalServiceInstance) {
+        this.optionalService = optionalServiceInstance.isResolvable() ? 
+                              optionalServiceInstance.get() : null;
+    }
+}
+----
+
+==== 2. Use @Dependent Scope with Null Returns
+
+[source,java]
+----
+@Produces
+@Dependent  // Allows null returns
+public OptionalService createOptionalService() {
+    return serviceAvailable() ? new OptionalService() : null;
+}
+----
+
+==== 3. Use Null Object Pattern
+
+[source,java]
+----
+@Produces
+@RequestScoped
+public NotificationService createNotificationService() {
+    return notificationEnabled ? 
+           new EmailNotificationService() : 
+           new NoOpNotificationService();  // Never null
+}
+----
+
+==== 4. Use Conditional Bean Creation
+
+[source,java]
+----
+@ApplicationScoped
+public class ConditionalProducer {
+    
+    @Produces
+    @ConditionalOnProperty("feature.enabled")
+    public FeatureService createFeatureService() {
+        return new FeatureService();
+    }
+}
+----
+
+=== Producer Method Best Practices
+
+==== ✅ Recommended Patterns
+
+1. **Use @Dependent for nullable producers**
+[source,java]
+----
+@Produces
+@Dependent
+public HttpServletRequest produceRequest() {
+    return getRequest().orElse(null);  // ✅ Safe with @Dependent
+}
+----
+
+2. **Use Internal Optional with concrete returns**
+[source,java]
+----
+@Produces
+@RequestScoped
+public DatabaseService createDatabaseService() {
+    return getDatabaseService().orElse(new DefaultDatabaseService());
+}
+
+private Optional<DatabaseService> getDatabaseService() {
+    // Internal logic with Optional for null safety
+}
+----
+
+3. **Clear producer method names**
+[source,java]
+----
+@Produces
+@Named("primary")
+public PaymentGateway createPrimaryPaymentGateway() {
+    return new StripePaymentGateway();
+}
+----
+
+==== ❌ Anti-Patterns to Avoid
+
+1. **Normal scoped producers returning null**
+[source,java]
+----
+@Produces
+@RequestScoped
+public SomeService createService() {
+    return null;  // ❌ IllegalProductException
+}
+----
+
+2. **Returning Optional from producers**
+[source,java]
+----
+@Produces
+@RequestScoped
+public Optional<SomeService> createOptionalService() {  // ❌ Not recommended
+    return Optional.ofNullable(service);
+}
+----
+
+3. **Producer methods without clear scope**
+[source,java]
+----
+@Produces
+// ❌ Missing scope - defaults to @Dependent but unclear intent
+public SomeService createService() {
+    return new SomeService();
+}
+----
+
 === Contract-Based Injection
 
 **Preferred**: When dependencies are guaranteed by architectural contract, use direct injection:

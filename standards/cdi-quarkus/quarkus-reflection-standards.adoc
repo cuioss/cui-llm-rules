@@ -1,0 +1,472 @@
+= Quarkus Reflection Registration Standards
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Purpose
+
+Standards and best practices for registering classes for reflection in Quarkus applications and extensions. This document provides comprehensive guidance on choosing between `@RegisterForReflection` annotations and deployment-time `ReflectiveClassBuildItem` registration, ensuring optimal native image compilation and runtime performance.
+
+== Overview
+
+Quarkus uses ahead-of-time (AOT) compilation to build fast native executables through closed-world analysis, which eliminates unused code paths. This optimization can break functionality relying on runtime reflection, making explicit reflection registration crucial for native image compilation success.
+
+== Registration Approaches
+
+=== @RegisterForReflection Annotation
+
+Application-level reflection registration using annotations directly on classes or configuration classes.
+
+==== When to Use
+
+* Simple application-level reflection needs
+* Registering your own classes
+* Third-party classes with minimal complexity
+* Quick and declarative approach
+* Classes that users directly interact with
+
+==== Usage Patterns
+
+[source,java]
+----
+// Direct class registration
+@RegisterForReflection
+public class MyClass {
+    // Implementation
+}
+
+// Third-party class registration
+@RegisterForReflection(targets = {
+    ThirdPartyClass.class,
+    AnotherThirdPartyClass.class
+})
+public class ReflectionConfiguration {
+}
+
+// Private class registration using class names
+@RegisterForReflection(classNames = {"com.example.PrivateClass"})
+public class ReflectionConfig {
+}
+----
+
+=== ReflectiveClassBuildItem in BuildStep
+
+Deployment-time reflection registration using Quarkus extension processors.
+
+==== When to Use
+
+* Building Quarkus extensions
+* Programmatic registration based on conditions
+* Bulk registration of classes
+* Fine-grained control over reflection scope
+* Dynamic discovery using Jandex
+
+==== Usage Patterns
+
+[source,java]
+----
+@BuildStep
+ReflectiveClassBuildItem basicReflection() {
+    // Constructor reflection only
+    return new ReflectiveClassBuildItem(false, false, "com.example.DemoClass");
+}
+
+@BuildStep
+ReflectiveClassBuildItem fullReflection() {
+    return ReflectiveClassBuildItem.builder(MyClass.class)
+        .methods(true)
+        .fields(true)
+        .constructors(true)
+        .build();
+}
+
+// Dynamic registration using Jandex
+@BuildStep
+void registerImplementations(CombinedIndexBuildItem combinedIndex,
+                             BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
+    DotName interfaceName = DotName.createSimple(MyInterface.class.getName());
+    for (ClassInfo implClass : combinedIndex.getIndex().getAllKnownImplementors(interfaceName)) {
+        reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true, implClass.name().toString()));
+    }
+}
+----
+
+== Hybrid Strategy Guidelines
+
+=== Recommended Boundaries
+
+==== Use @RegisterForReflection For
+
+* Application-level endpoints and controllers
+* Simple DTOs and record classes
+* Integration test classes
+* User-facing configuration classes
+
+==== Use ReflectiveClassBuildItem For
+
+* Core library classes (JWT validation, parsing, etc.)
+* Complex dependency chains
+* Classes requiring conditional registration
+* Third-party library integration
+* Dynamic class discovery and registration
+
+=== Strategy Implementation
+
+[source,java]
+----
+// Application level - annotation approach
+@RegisterForReflection(targets = {
+    JwtClaims.class,
+    CustomUserPrincipal.class
+})
+public class JwtReflectionConfig {
+}
+
+// Extension level - processor approach
+@BuildStep
+void registerCryptoClasses(BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
+    // Register crypto algorithm classes based on configuration
+    List<String> enabledAlgorithms = getEnabledAlgorithms();
+    for (String algorithm : enabledAlgorithms) {
+        String className = "com.auth0.jwt.algorithms." + algorithm + "Algorithm";
+        reflectiveClasses.produce(new ReflectiveClassBuildItem(true, false, className));
+    }
+}
+----
+
+== Performance Optimization
+
+**Important**: Both `@RegisterForReflection` and `ReflectiveClassBuildItem` have identical runtime performance. The performance considerations below affect native image size and build time, not runtime reflection performance.
+
+=== Selective Registration
+
+Only register classes that are actually accessed via reflection:
+
+[source,java]
+----
+// Optimal - specific reflection needs
+ReflectiveClassBuildItem.builder(MyClass.class)
+    .constructors(true)  // Only if constructors are called via reflection
+    .methods(false)      // Only if methods are called via reflection
+    .fields(false)       // Only if fields are accessed via reflection
+    .build();
+----
+
+=== Avoid Over-Registration
+
+Over-registration increases native image size and build time without providing runtime performance benefits:
+
+[source,java]
+----
+// Avoid - excessive registration (increases image size)
+@RegisterForReflection(targets = {
+    // Don't register entire packages or class hierarchies
+    com.example.package1.Class1.class,
+    com.example.package1.Class2.class,
+    // ... hundreds of classes
+})
+
+// Prefer - selective registration (smaller image size)
+@RegisterForReflection(targets = {
+    // Only classes actually used via reflection
+    com.example.SpecificClass.class
+})
+
+// Or use conditional registration for even better optimization
+@BuildStep
+void registerConditionally(BuildProducer<ReflectiveClassBuildItem> producer) {
+    if (featureEnabled()) {
+        producer.produce(new ReflectiveClassBuildItem(ConditionalClass.class));
+    }
+}
+----
+
+== Type Safety Best Practices
+
+=== Prefer Class-Based Registration
+
+[source,java]
+----
+// Preferred - type-safe registration
+ReflectiveClassBuildItem.builder(RestEasyServletObjectsResolver.class)
+    .methods(true)
+    .build();
+
+// Avoid - string-based registration (error-prone)
+ReflectiveClassBuildItem.builder("de.cuioss.jwt.quarkus.servlet.RestEasyServletObjectsResolver")
+    .methods(true)
+    .build();
+----
+
+=== Handle Deployment-Time Accessibility
+
+[source,java]
+----
+// Use string registration only when class is not accessible at deployment time
+@BuildStep
+public ReflectiveClassBuildItem registerRuntimeOnlyClasses() {
+    return ReflectiveClassBuildItem.builder(
+            // Runtime-only classes that can't be referenced directly
+            "io.vertx.core.impl.VertxInternal",
+            "io.netty.channel.epoll.EpollEventLoop")
+            .methods(true)
+            .build();
+}
+----
+
+== Organizational Standards
+
+=== Logical Grouping
+
+Group related classes together in separate build steps:
+
+[source,java]
+----
+@BuildStep
+public ReflectiveClassBuildItem registerJwtValidationClasses() {
+    return ReflectiveClassBuildItem.builder(
+            // Core validation components
+            TokenValidator.class,
+            IssuerConfig.class,
+            ParserConfig.class)
+            .methods(true)
+            .fields(true)
+            .constructors(true)
+            .build();
+}
+
+@BuildStep
+public ReflectiveClassBuildItem registerJwtDomainClasses() {
+    return ReflectiveClassBuildItem.builder(
+            // Domain model classes
+            AccessTokenContent.class,
+            IdTokenContent.class,
+            ClaimValue.class)
+            .methods(true)
+            .fields(true)
+            .constructors(true)
+            .build();
+}
+----
+
+=== Documentation Requirements
+
+Document reflection registration strategy:
+
+[source,java]
+----
+/**
+ * Reflection registration strategy for JWT validation:
+ * - @RegisterForReflection: Application-level classes (endpoints, DTOs)
+ * - ReflectiveClassBuildItem: Core infrastructure and third-party integration
+ * - Avoid duplicates between annotation and processor approaches
+ */
+public class JwtReflectionProcessor {
+    // Implementation
+}
+----
+
+== Common Patterns
+
+=== Interface-Based Registration
+
+[source,java]
+----
+@BuildStep
+void registerServiceImplementations(CombinedIndexBuildItem combinedIndex,
+                                   BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
+    // Register all implementations of a service interface
+    DotName serviceName = DotName.createSimple(MyService.class.getName());
+    for (ClassInfo implClass : combinedIndex.getIndex().getAllKnownImplementors(serviceName)) {
+        reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true, implClass.name().toString()));
+    }
+}
+----
+
+=== Annotation-Based Discovery
+
+[source,java]
+----
+@BuildStep
+void registerAnnotatedClasses(CombinedIndexBuildItem combinedIndex,
+                              BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
+    // Register classes with specific annotations
+    DotName annotationName = DotName.createSimple(MyAnnotation.class.getName());
+    for (AnnotationInstance annotation : combinedIndex.getIndex().getAnnotations(annotationName)) {
+        if (annotation.target().kind() == AnnotationTarget.Kind.CLASS) {
+            reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true, 
+                annotation.target().asClass().name().toString()));
+        }
+    }
+}
+----
+
+=== Conditional Registration
+
+[source,java]
+----
+@BuildStep
+void registerConditionalClasses(BuildProducer<ReflectiveClassBuildItem> reflectiveClasses,
+                                CombinedIndexBuildItem combinedIndex) {
+    // Only register if specific conditions are met
+    if (combinedIndex.getIndex().getClassByName(DotName.createSimple("io.vertx.core.Vertx")) != null) {
+        reflectiveClasses.produce(new ReflectiveClassBuildItem(true, false, 
+            "io.vertx.core.impl.VertxInternal"));
+    }
+}
+----
+
+== Anti-Patterns to Avoid
+
+=== Redundant Registration
+
+[source,java]
+----
+// AVOID - Double registration
+@RegisterForReflection
+public class MyClass {
+    // Class already registered via annotation
+}
+
+@BuildStep
+public ReflectiveClassBuildItem registerMyClass() {
+    // DON'T register the same class again
+    return new ReflectiveClassBuildItem(true, true, MyClass.class.getName());
+}
+----
+
+=== Excessive String Usage
+
+[source,java]
+----
+// AVOID - String-based registration when class is available
+@BuildStep
+public ReflectiveClassBuildItem registerAvailableClasses() {
+    return ReflectiveClassBuildItem.builder(
+            // Don't use strings for accessible classes
+            "de.cuioss.jwt.validation.TokenValidator")
+            .build();
+}
+
+// PREFER - Type-safe registration
+@BuildStep
+public ReflectiveClassBuildItem registerAvailableClasses() {
+    return ReflectiveClassBuildItem.builder(TokenValidator.class)
+            .build();
+}
+----
+
+=== Blanket Registration
+
+[source,java]
+----
+// AVOID - Registering everything
+@RegisterForReflection(targets = {
+    // Don't register entire packages
+    com.example.package1.Class1.class,
+    com.example.package1.Class2.class,
+    // ... all classes in package
+})
+
+// PREFER - Selective registration
+@RegisterForReflection(targets = {
+    // Only register classes that need reflection
+    com.example.package1.ReflectionRequiredClass.class
+})
+----
+
+== Implementation Example
+
+Based on the CUI JWT project analysis, here's the recommended implementation:
+
+[source,java]
+----
+// Application-level endpoint class
+@RegisterForReflection
+@Path("/jwt")
+public class JwtValidationEndpoint {
+    // Implementation
+}
+
+// Extension processor for infrastructure classes
+public class CuiJwtProcessor {
+    
+    @BuildStep
+    public ReflectiveClassBuildItem registerJwtValidationClasses() {
+        return ReflectiveClassBuildItem.builder(
+                // Core validation components
+                TokenValidator.class,
+                IssuerConfig.class,
+                ParserConfig.class)
+                .methods(true)
+                .fields(true)
+                .constructors(true)
+                .build();
+    }
+    
+    @BuildStep
+    public ReflectiveClassBuildItem registerJwtDomainClasses() {
+        return ReflectiveClassBuildItem.builder(
+                // Domain model classes
+                AccessTokenContent.class,
+                ClaimValue.class)
+                .methods(true)
+                .fields(true)
+                .constructors(true)
+                .build();
+    }
+}
+----
+
+== Source References
+
+This document is based on analysis of the following CUI JWT project files:
+
+* link:https://github.com/cuioss/cui-jwt/blob/main/cui-jwt-quarkus-parent/cui-jwt-quarkus/src/main/java/de/cuioss/jwt/quarkus/producer/BearerTokenProducer.java[BearerTokenProducer.java] - Example of `@RegisterForReflection` usage
+* link:https://github.com/cuioss/cui-jwt/blob/main/cui-jwt-quarkus-parent/cui-jwt-quarkus-integration-tests/src/main/java/de/cuioss/jwt/integration/endpoint/JwtValidationEndpoint.java[JwtValidationEndpoint.java] - Application-level reflection registration
+* link:https://github.com/cuioss/cui-jwt/blob/main/cui-jwt-quarkus-parent/cui-jwt-quarkus-deployment/src/main/java/de/cuioss/jwt/quarkus/deployment/CuiJwtProcessor.java[CuiJwtProcessor.java] - Comprehensive deployment-time reflection registration
+
+== Testing and Validation
+
+=== Native Image Testing
+
+Always test reflection registration with native image compilation:
+
+[source,bash]
+----
+# Build native image
+./mvnw clean package -Pnative
+
+# Run native image tests
+./mvnw verify -Pnative
+----
+
+=== Runtime Verification
+
+Verify reflection works at runtime:
+
+[source,java]
+----
+@Test
+public void testReflectionRegistration() {
+    // Verify classes can be instantiated via reflection
+    Class<?> clazz = Class.forName("com.example.MyReflectiveClass");
+    Object instance = clazz.getDeclaredConstructor().newInstance();
+    assertThat(instance).isNotNull();
+}
+----
+
+== Related Standards
+
+* xref:cdi-aspects.adoc[CDI Development Patterns] - CDI best practices that complement reflection registration
+* xref:testing-standards.adoc[Testing Standards] - Testing reflection registration in Quarkus applications
+* xref:../documentation/general-standard.adoc[Documentation Standards] - Standards for documenting reflection requirements
+
+== External References
+
+* https://quarkus.io/guides/writing-native-applications-tips[Quarkus Native Application Tips]
+* https://quarkus.io/guides/writing-extensions[Quarkus Extension Development Guide]
+* https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/Reflection.md[GraalVM Native Image Reflection Documentation]
+* https://quarkus.io/guides/cdi-reference[Quarkus CDI Reference Guide]

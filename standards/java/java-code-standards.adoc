@@ -114,7 +114,7 @@ public void log(String message, CuiLogger logger) { ... }
 
 ==== @NonNull Annotations for Public APIs
 
-All public API methods that guarantee not to return null for non-primitive types MUST be annotated with `@NonNull` to document this contract. 
+All public API methods that guarantee not to return null for non-primitive types MUST be annotated with Lomboks `@NonNull` to document this contract.
 
 **IMPORTANT**: This annotation serves as documentation only. No code will be generated and there is no automatic enforcement. The implementation must manually ensure the non-null guarantee.
 
