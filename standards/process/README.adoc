@@ -51,6 +51,16 @@ Process for systematic code refactoring and improvement activities. Provides str
 * Risk management and rollback procedures
 * Integration with task completion standards
 
+==== xref:quarkus-native-optimization.adoc[Quarkus Native Optimization Process]
+Systematic process for optimizing Quarkus applications for native image compilation, focusing on reflection registration optimization and performance improvements. Provides structured workflow for identifying, implementing, and verifying native optimization opportunities.
+
+**Key Features:**
+* Reflection usage analysis and optimization strategies
+* Deployment processor and application-level optimization techniques
+* Native image compatibility testing procedures
+* Performance metrics tracking and verification
+* Integration with CDI framework requirements
+
 ==== xref:java-test-maintenance.adoc[Java Test Maintenance Process]
 Process for maintaining and improving Java test quality while preserving functionality and adhering to CUI testing standards. Focuses on module-by-module approach with emphasis on CUI framework compliance.
 
@@ -118,6 +128,7 @@ All process documents in this directory follow consistent patterns:
 === Process Selection
 * **General Development**: Start with xref:task-completion-standards.adoc[Task Completion Standards]
 * **Code Refactoring**: Use xref:refactoring-process.adoc[Refactoring Process]
+* **Quarkus Native Optimization**: Follow xref:quarkus-native-optimization.adoc[Quarkus Native Optimization Process]
 * **Test Improvements**: Follow xref:java-test-maintenance.adoc[Java Test Maintenance Process]
 * **Logging Updates**: Apply xref:logger-maintenance.adoc[Logger Maintenance Process]
 * **Documentation Fixes**: Use xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]

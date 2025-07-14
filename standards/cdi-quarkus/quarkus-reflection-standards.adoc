@@ -93,6 +93,36 @@ void registerImplementations(CombinedIndexBuildItem combinedIndex,
 }
 ----
 
+=== AdditionalBeanBuildItem for CDI Beans
+
+**CRITICAL**: For CDI beans, use `AdditionalBeanBuildItem` instead of reflection registration.
+
+==== When to Use
+
+* Registering CDI beans that need explicit discovery
+* Ensuring beans are not removed by aggressive bean removal
+* Type-safe bean registration in extensions
+
+==== Usage Pattern
+
+[source,java]
+----
+@BuildStep
+public AdditionalBeanBuildItem additionalBeans() {
+    return AdditionalBeanBuildItem.builder()
+            .addBeanClasses(
+                    TokenValidatorProducer.class,
+                    BearerTokenProducer.class,
+                    IssuerConfigResolver.class,
+                    ParserConfigResolver.class
+            )
+            .setUnremovable()
+            .build();
+}
+----
+
+**IMPORTANT**: When using `AdditionalBeanBuildItem`, remove `@RegisterForReflection` annotations from the bean classes to avoid conflicts and redundancy.
+
 == Hybrid Strategy Guidelines
 
 === Recommended Boundaries
@@ -334,6 +364,39 @@ public class MyClass {
 public ReflectiveClassBuildItem registerMyClass() {
     // DON'T register the same class again
     return new ReflectiveClassBuildItem(true, true, MyClass.class.getName());
+}
+----
+
+=== CDI Bean Reflection Conflicts
+
+[source,java]
+----
+// AVOID - CDI bean with reflection annotation
+@ApplicationScoped
+@RegisterForReflection(methods = false, fields = false)
+public class TokenValidatorProducer {
+    // This class should use AdditionalBeanBuildItem instead
+}
+
+@BuildStep
+public AdditionalBeanBuildItem additionalBeans() {
+    return AdditionalBeanBuildItem.builder()
+            .addBeanClasses(TokenValidatorProducer.class) // Conflicts with annotation above
+            .build();
+}
+
+// CORRECT - CDI bean without reflection annotation
+@ApplicationScoped  // Remove @RegisterForReflection annotation
+public class TokenValidatorProducer {
+    // CDI bean registered via AdditionalBeanBuildItem only
+}
+
+@BuildStep
+public AdditionalBeanBuildItem additionalBeans() {
+    return AdditionalBeanBuildItem.builder()
+            .addBeanClasses(TokenValidatorProducer.class) // Type-safe CDI registration
+            .setUnremovable()
+            .build();
 }
 ----
 
