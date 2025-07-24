@@ -9,6 +9,7 @@
 Defines comprehensive Prettier configuration and formatting rules for consistent, readable CSS code across all CUI projects, ensuring uniformity in code style and presentation.
 
 == Related Documentation
+
 * xref:css-development-standards.adoc[CSS Development Standards]: CSS-specific configuration and dependencies
 * xref:linting-standards.adoc[Linting Standards]: Stylelint configuration and integration
 * xref:css-best-practices.adoc[CSS Best Practices]: Modern CSS patterns and conventions
@@ -428,6 +429,7 @@ Format CSS documentation comments consistently:
 [source,css]
 ----
 /**
+
  * Button Component
  * 
  * A flexible button component that supports multiple variants,

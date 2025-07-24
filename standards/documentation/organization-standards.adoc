@@ -9,6 +9,7 @@
 Defines comprehensive standards for organizing, reviewing, and maintaining documentation structure, including file organization, naming conventions, size limits, and quality review processes for all CUI projects.
 
 == Related Documentation
+
 * xref:general-standard.adoc[Documentation Standards]: Core documentation standards and best practices
 * xref:asciidoc-standards.adoc[AsciiDoc Standards]: Comprehensive AsciiDoc formatting, grammar, and best practices
 * xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation

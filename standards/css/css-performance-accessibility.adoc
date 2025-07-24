@@ -9,6 +9,7 @@
 Defines CSS architecture patterns, performance optimization strategies, responsive design patterns, and accessibility best practices for CUI projects.
 
 == Related Documentation
+
 * xref:css-best-practices.adoc[CSS Best Practices]: Complete CSS standards overview
 * xref:css-design-system.adoc[CSS Design System]: Design tokens and custom properties
 * xref:css-layout-patterns.adoc[CSS Layout Patterns]: Grid, Flexbox, and Container Queries

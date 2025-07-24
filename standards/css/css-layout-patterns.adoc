@@ -9,6 +9,7 @@
 Defines modern CSS layout techniques including CSS Grid, Flexbox patterns, and Container Queries for responsive component design.
 
 == Related Documentation
+
 * xref:css-best-practices.adoc[CSS Best Practices]: Complete CSS standards overview
 * xref:css-design-system.adoc[CSS Design System]: Design tokens and custom properties
 * xref:css-performance-accessibility.adoc[CSS Performance & Accessibility]: Optimization and accessibility standards

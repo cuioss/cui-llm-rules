@@ -9,6 +9,7 @@
 Defines comprehensive Stylelint configuration and rules for consistent, high-quality CSS code, focusing on modern CSS practices and maintainability.
 
 == Related Documentation
+
 * xref:css-development-standards.adoc[CSS Development Standards]: CSS-specific configuration and dependencies
 * xref:formatting-standards.adoc[Formatting Standards]: Prettier configuration for CSS
 * xref:css-best-practices.adoc[CSS Best Practices]: Modern CSS patterns and conventions

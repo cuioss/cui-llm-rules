@@ -16,6 +16,7 @@ Defines the systematic process for maintaining requirements and specification do
 
 == Related Documentation
 
+
 * xref:../requirements/requirements-document.adoc[Requirements Document Structure] - Format and structure for requirements
 * xref:../requirements/specification-documents.adoc[Specification Documents Structure] - Format for specifications
 * xref:../requirements/specification-and-implementation.adoc[Specification and Implementation] - Information distribution guidelines
@@ -29,6 +30,7 @@ Defines the systematic process for maintaining requirements and specification do
 
 Adhere to key principles from xref:../documentation/general-standard.adoc#_key_principles[Documentation Standards]:
 
+
 * **Consistency** - Uniform terminology and structure
 * **Completeness** - All requirements fully documented
 * **Clarity** - Unambiguous statements
@@ -36,11 +38,13 @@ Adhere to key principles from xref:../documentation/general-standard.adoc#_key_p
 
 === Integrity Requirements
 
+
 * **No Hallucinations** - Document only existing functionality
 * **No Duplications** - Use cross-references, not copies
 * **Verified Links** - All references must point to existing documents or code
 
 == Pre-Maintenance Checklist
+
 
 * [ ] Identify scope of maintenance (specific documents or full review)
 * [ ] Verify access to all referenced specifications and requirements
@@ -53,6 +57,7 @@ Adhere to key principles from xref:../documentation/general-standard.adoc#_key_p
 
 Review target requirements documents for:
 
+
 * Missing or incomplete requirements
 * Outdated references to deprecated functionality
 * Broken cross-references
@@ -63,6 +68,7 @@ Review target requirements documents for:
 
 Apply changes following xref:../requirements/requirements-document.adoc[Requirements Document Structure]:
 
+
 * Update requirement statements for accuracy
 * Maintain requirement IDs and traceability
 * Preserve requirement rationale and constraints
@@ -71,6 +77,7 @@ Apply changes following xref:../requirements/requirements-document.adoc[Requirem
 === Verify Specification Alignment
 
 Ensure specifications match requirements per xref:../requirements/specification-and-implementation.adoc[Specification and Implementation]:
+
 
 * Check specification links to requirements
 * Verify implementation references are accurate
@@ -83,6 +90,7 @@ Ensure specifications match requirements per xref:../requirements/specification-
 
 Examine specification documents for:
 
+
 * Alignment with current requirements
 * Accurate implementation references
 * Complete behavioral descriptions
@@ -91,6 +99,7 @@ Examine specification documents for:
 === Update Specifications
 
 Follow xref:../requirements/specification-documents.adoc[Specification Documents Structure]:
+
 
 * Maintain clear linkage to requirements
 * Update implementation details as needed
@@ -103,6 +112,7 @@ Follow xref:../requirements/specification-documents.adoc[Specification Documents
 
 Verify all internal documentation links:
 
+
 * Check `xref:` references resolve correctly
 * Update paths after any restructuring
 * Remove references to deleted documents
@@ -111,6 +121,7 @@ Verify all internal documentation links:
 === Code References
 
 Validate implementation references:
+
 
 * Verify referenced classes/methods exist
 * Update package names if changed
@@ -123,6 +134,7 @@ Validate implementation references:
 
 When documenting new features:
 
+
 * Add requirements following established format
 * Create specifications linked to requirements
 * Update related documents with cross-references
@@ -130,16 +142,20 @@ When documenting new features:
 
 === Deprecation Handling
 
-When functionality is deprecated:
+When functionality changes or is removed:
 
-* Mark requirements as deprecated (do not delete)
-* Update specifications to reflect deprecated status
-* Add migration guidance if applicable
-* Maintain historical record
+
+* **Pre-1.0 Projects**: Update requirements directly without deprecation process
+* **Post-1.0 Projects**: Always ask user whether to deprecate or remove
+* **If Deprecating**: Mark requirements as deprecated (do not delete)
+* **If Deprecating**: Update specifications to reflect deprecated status
+* **If Deprecating**: Add migration guidance if applicable
+* **If Deprecating**: Maintain historical record
 
 === Refactoring Impact
 
 After code refactoring:
+
 
 * Update implementation references in specifications
 * Verify requirement statements remain accurate
@@ -150,6 +166,7 @@ After code refactoring:
 
 Complete maintenance per xref:task-completion-standards.adoc[Task Completion Standards]:
 
+
 * All cross-references validated
 * No duplicate information remains
 * Consistent terminology throughout
@@ -159,6 +176,7 @@ Complete maintenance per xref:task-completion-standards.adoc[Task Completion Sta
 == Commit Guidelines
 
 Follow xref:git-commit-standards.adoc[Git Commit Standards]:
+
 
 * Use prefix: `docs(requirements):`
 * Describe specific changes made

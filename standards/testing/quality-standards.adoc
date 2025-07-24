@@ -229,6 +229,8 @@ For comprehensive quality verification processes, see xref:../process/task-compl
 ==== AI-Generated Code Detection and Elimination
 
 **Critical Indicators of AI-Generated Test Code:**
+
+
 * Method names exceeding 75 characters
 * Excessive inline comments explaining obvious operations
 * Repetitive test patterns with only minor variations
@@ -237,12 +239,14 @@ For comprehensive quality verification processes, see xref:../process/task-compl
 * Meaningless constructor tests verifying trivial functionality
 
 **Test Categories to Eliminate:**
+
 1. **Meaningless Tests**: Tests that verify trivial functionality without business value
 2. **Framework Behavior Tests**: Tests that verify framework functionality rather than application logic  
 3. **Duplicate Logic Tests**: Tests that duplicate existing test scenarios without added value
 4. **Over-Complex Unit Tests**: Tests that are disproportionately complex for the functionality being tested
 
 **Removal Requirements:**
+
 * **ELIMINATE**: Tests that verify trivial functionality without business value
 * **REMOVE**: Comments explaining obvious operations
 * **SIMPLIFY**: Overly verbose method and test names
@@ -316,6 +320,7 @@ TokenValidationException exception = assertThrows(TokenValidationException.class
 ```
 
 **Standard Message Patterns:**
+
 * For presence checks: `"X should be present"`, `"X should not be null"`
 * For equality: `"X should equal Y"`, `"X should match expected value"`
 * For collections: `"Collection should contain X"`, `"List should have Y elements"`
@@ -358,6 +363,7 @@ void shouldThrowExceptionOnInvalidInput() {
 
 
 **Key Principles:**
+
 * Move setup code outside the lambda expression
 * Keep only the single method call that should throw the exception
 * Use helper methods for complex throwing operations

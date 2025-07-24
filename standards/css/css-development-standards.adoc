@@ -9,6 +9,7 @@
 Defines comprehensive standards for CSS development including package.json configuration, npm scripts, dependency management, CSS processing tools, and modern CSS practices for all CUI projects.
 
 == Related Documentation
+
 * xref:../javascript/project-structure.adoc[Project Structure Standards]: Directory structure, file organization, and package.json configuration
 * xref:../javascript/maven-integration-standards.adoc[Maven Integration Standards]: Frontend-maven-plugin integration
 * xref:linting-standards.adoc[Linting Standards]: Stylelint configuration and integration
@@ -206,17 +207,20 @@ CSS files use kebab-case naming and follow component-based organization. See xre
 == CSS Quality Standards
 
 === CSS Validation Requirements
+
 * All CSS must pass W3C CSS validation
 * Use `css-validator` npm package for automated validation
 * Document any intentional validation exceptions
 
 === Performance Requirements
+
 * CSS bundle size should be optimized for production
 * Unused CSS should be removed using PurgeCSS
 * Critical CSS should be identified and inlined when appropriate
 * CSS should be minified in production builds
 
 === Browser Compatibility
+
 * Support modern browsers (Chrome, Firefox, Safari, Edge latest versions)
 * Use Autoprefixer for vendor prefix management
 * Test CSS in supported browser versions
@@ -239,6 +243,7 @@ CSS files use kebab-case naming and follow component-based organization. See xre
 ----
 
 === CSS Quality Metrics
+
 * **Specificity**: Monitor and limit CSS specificity
 * **Bundle Size**: Track CSS file sizes
 * **Unused CSS**: Identify and remove unused styles

@@ -9,6 +9,7 @@
 Defines modern CSS best practices, patterns, and conventions focusing on CSS custom properties (variables), performance, maintainability, and accessibility for all CUI projects.
 
 == Related Documentation
+
 * xref:css-development-standards.adoc[CSS Development Standards]: CSS-specific configuration and dependencies
 * xref:linting-standards.adoc[Linting Standards]: Stylelint configuration and integration
 * xref:formatting-standards.adoc[Formatting Standards]: Prettier configuration for CSS

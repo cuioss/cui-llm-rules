@@ -432,6 +432,7 @@ When creating or modifying AsciiDoc documentation:
 * AsciiDoctor for document processing
 * Link validation scripts for cross-reference checking
 * Automated style guide validators
+* xref:../../scripts/README.adoc[AsciiDoc Standards Validation Script] - Tool for checking compliance with these standards
 
 === External Resources
 
@@ -465,3 +466,4 @@ For comprehensive quality verification processes, see xref:../process/task-compl
 * xref:readme-structure.adoc[README Structure Standards]
 * xref:../process/git-commit-standards.adoc[Git Commit Standards]
 * xref:../process/task-completion-standards.adoc[Task Completion Standards]
+* xref:../../scripts/README.adoc[AsciiDoc Validation Script Documentation]
