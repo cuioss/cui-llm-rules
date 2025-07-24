@@ -130,6 +130,9 @@ This document defines the comprehensive process for maintaining and refactoring 
 * **Inappropriate Exception Types**: Wrong exception types for the situation
   - **Action Required**: Use checked exceptions for recoverable conditions, unchecked for programming errors
 
+* **Catch and Rethrow Anti-Pattern**: Catching and throwing the same or very similar exception
+  - **Action Required**: Remove unnecessary catch blocks or add meaningful context per xref:../java/java-code-standards.adoc#exception-handling[Exception Handling Standards]
+
 === When to Adopt Modern Java Features
 
 **Triggers for Action**: Apply modern Java feature adoption when:
