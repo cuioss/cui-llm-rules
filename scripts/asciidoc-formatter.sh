@@ -150,34 +150,68 @@ fix_lists() {
   local fixed_count=0
   
   awk '
-    function count_spaces(line) {
-      match(line, /^[[:space:]]*/)
-      return RLENGTH
+    BEGIN {
+        in_code_block = 0
+        prev_line = ""
+        prev_was_blank = 1  # Start as if previous was blank
+        in_list = 0
+        fixed_count = 0
     }
     
-    # Fix unordered lists
-    /^[[:space:]]*\* / && !/^[[:space:]]*\*\*/ && prev !~ /^[[:space:]]*$/ && prev !~ /^[[:space:]]*\* / && prev !~ /^[[:space:]]*[0-9]+\. / {
-      current_spaces = count_spaces($0)
-      prev_spaces = count_spaces(prev)
-      if (current_spaces <= prev_spaces) {
-        print ""
-        fixed_count++
-      }
+    {
+        # Track if we are inside a code block
+        if ($0 == "----") {
+            in_code_block = !in_code_block
+        }
+        
+        # Check if current line is blank
+        current_is_blank = (length($0) == 0)
+        
+        # Detect if current line starts a new list (only outside code blocks)
+        starts_new_list = 0
+        if (!in_code_block) {
+            # Check for list starters
+            if (match($0, /^[\*\-\+] /) ||           # Unordered list
+                match($0, /^[0-9]+\. /) ||           # Ordered list  
+                match($0, /^[^:]+::/) ||             # Definition list
+                (match($0, /^\. /) && !in_list)) {  # Numbered list with dot
+                starts_new_list = 1
+            }
+        }
+        
+        # Detect if we are continuing a list
+        continuing_list = 0
+        if (!in_code_block && in_list) {
+            # Check for list continuations
+            if (match($0, /^[\*\-\+] /) ||     # Another unordered item
+                match($0, /^\*\* /) ||         # Nested unordered
+                match($0, /^[0-9]+\. /) ||     # Another ordered item
+                current_is_blank) {            # Blank line within list
+                continuing_list = 1
+            }
+        }
+        
+        # If this starts a new list and previous line was not blank
+        # and we are not at the beginning of the file
+        if (starts_new_list && !prev_was_blank && NR > 1 && !in_list) {
+            print ""  # Add blank line
+            fixed_count++
+        }
+        
+        # Print current line
+        print $0
+        
+        # Update list state
+        if (starts_new_list) {
+            in_list = 1
+        } else if (!continuing_list && !current_is_blank) {
+            in_list = 0
+        }
+        
+        # Update state for next iteration
+        prev_line = $0
+        prev_was_blank = current_is_blank
     }
-    
-    # Fix ordered lists
-    /^[[:space:]]*[0-9]+\. / && prev !~ /^[[:space:]]*$/ && prev !~ /^[[:space:]]*[0-9]+\. / {
-      print ""
-      fixed_count++
-    }
-    
-    # Fix definition lists
-    /^[[:space:]]*[^:]+::/ && prev !~ /^[[:space:]]*$/ && prev !~ /^[[:space:]]*[^:]+::/ {
-      print ""
-      fixed_count++
-    }
-    
-    {print; prev=$0}
     
     END {print fixed_count > "/tmp/fix_count"}
   ' "$file" > "$temp_file"

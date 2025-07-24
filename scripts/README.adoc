@@ -25,6 +25,7 @@ Comprehensive validation tool for AsciiDoc documents with multiple check types, 
 * **Configurable Severity** - Filter by error, warning, or info level
 * **Parallel Processing** - Speed up validation of large documentation sets
 * **Extensible** - Configuration file support for custom validation rules
+* **Smart List Validation** - Enhanced detection of list formatting issues with code block awareness
 
 ==== Usage
 
@@ -71,6 +72,7 @@ Auto-formatting tool that fixes common AsciiDoc formatting issues. Works as a co
 * **Dry Run Mode** - Preview changes without modifying files
 * **Interactive Mode** - Review and approve each change
 * **Batch Processing** - Format entire directories at once
+* **Enhanced List Detection** - Improved algorithm that properly handles code blocks and nested lists
 
 ==== Fix Types
 

@@ -152,30 +152,76 @@ check_file() {
   
   # Check for list formatting issues
   local list_issues=$(awk '
-    function count_spaces(line) {
-      match(line, /^[[:space:]]*/)
-      return RLENGTH
+    BEGIN {
+        in_code_block = 0
+        prev_line = ""
+        prev_was_blank = 1  # Start as if previous was blank
+        in_list = 0
     }
     
-    /^[[:space:]]*\* / && !/^[[:space:]]*\*\*/ && prev !~ /^[[:space:]]*$/ && prev !~ /^[[:space:]]*\* / && prev !~ /^[[:space:]]*[0-9]+\. / {
-      current_spaces = count_spaces($0)
-      prev_spaces = count_spaces(prev)
-      if (current_spaces <= prev_spaces) {
-        print NR ":unordered:" substr(prev, 1, 50)
-      }
+    {
+        # Track if we are inside a code block
+        if ($0 == "----") {
+            in_code_block = !in_code_block
+        }
+        
+        # Check if current line is blank
+        current_is_blank = (length($0) == 0)
+        
+        # Detect if current line starts a new list (only outside code blocks)
+        starts_new_list = 0
+        if (!in_code_block) {
+            # Check for list starters
+            if (match($0, /^[\*\-\+] /)) {              # Unordered list
+                starts_new_list = 1
+                list_type = "unordered"
+            } else if (match($0, /^[0-9]+\. /)) {        # Ordered list  
+                starts_new_list = 1
+                list_type = "ordered"
+            } else if (match($0, /^[^:]+::/)) {          # Definition list
+                starts_new_list = 1
+                list_type = "definition"
+            } else if (match($0, /^\. /) && !in_list) { # Numbered list with dot
+                starts_new_list = 1
+                list_type = "numbered"
+            }
+        }
+        
+        # Detect if we are continuing a list
+        continuing_list = 0
+        if (!in_code_block && in_list) {
+            # Check for list continuations
+            if (match($0, /^[\*\-\+] /) ||     # Another unordered item
+                match($0, /^\*\* /) ||         # Nested unordered
+                match($0, /^[0-9]+\. /) ||     # Another ordered item
+                current_is_blank) {            # Blank line within list
+                continuing_list = 1
+            }
+        }
+        
+        # If this starts a new list and previous line was not blank
+        # and we are not at the beginning of the file and not already in list
+        if (starts_new_list && !prev_was_blank && NR > 1 && !in_list) {
+            print NR ":" list_type ":" substr(prev_line, 1, 50)
+        }
+        
+        # Update list state
+        if (starts_new_list) {
+            in_list = 1
+        } else if (!continuing_list && !current_is_blank) {
+            in_list = 0
+        }
+        
+        # Update state for next iteration
+        prev_line = $0
+        prev_was_blank = current_is_blank
     }
-    /^[[:space:]]*[0-9]+\. / && prev !~ /^[[:space:]]*$/ && prev !~ /^[[:space:]]*[0-9]+\. / {
-      print NR ":ordered:" substr(prev, 1, 50)
-    }
-    /^[[:space:]]*[^:]+::/ && prev !~ /^[[:space:]]*$/ && prev !~ /^[[:space:]]*[^:]+::/ {
-      print NR ":definition:" substr(prev, 1, 50)
-    }
-    {prev=$0}
   ' "$file")
   
   if [ -n "$list_issues" ]; then
     file_has_issues=true
-    file_warnings=$(echo "$list_issues" | wc -l | tr -d ' ')
+    local list_count=$(echo "$list_issues" | wc -l | tr -d ' ')
+    ((file_warnings += list_count))
   fi
   
   # Check for cross-reference syntax issues
