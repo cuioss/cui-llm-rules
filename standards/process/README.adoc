@@ -92,6 +92,15 @@ Process for Javadoc error resolution and quality assurance. Provides systematic 
 * Quality verification procedures
 * Integration with build processes
 
+==== xref:requirements-maintenance.adoc[Requirements Maintenance Process]
+Process for maintaining requirements and specification documents to ensure continued accuracy, traceability, and alignment with implementation. Provides systematic approach to document review, update, and cross-reference verification.
+
+**Key Features:**
+* Requirements and specification alignment
+* Cross-reference verification workflow
+* Traceability maintenance procedures
+* Documentation integrity requirements
+
 == Common Process Patterns
 
 All process documents in this directory follow consistent patterns:
@@ -132,6 +141,7 @@ All process documents in this directory follow consistent patterns:
 * **Test Improvements**: Follow xref:java-test-maintenance.adoc[Java Test Maintenance Process]
 * **Logging Updates**: Apply xref:logger-maintenance.adoc[Logger Maintenance Process]
 * **Documentation Fixes**: Use xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]
+* **Requirements Updates**: Follow xref:requirements-maintenance.adoc[Requirements Maintenance Process]
 
 === Cross-Process Coordination
 When working across multiple areas:
