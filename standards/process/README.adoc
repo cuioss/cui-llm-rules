@@ -61,6 +61,16 @@ Systematic process for optimizing Quarkus applications for native image compilat
 * Performance metrics tracking and verification
 * Integration with CDI framework requirements
 
+==== xref:java-code-maintenance.adoc[Java Code Maintenance Process]
+Process for maintaining and refactoring Java production code to enforce all aspects of Java Code Standards. Provides systematic approaches for identifying, prioritizing, and resolving code quality issues while preserving functionality.
+
+**Key Features:**
+* Standards violation detection and resolution
+* Refactoring prioritization framework
+* Module-by-module processing strategy
+* Production code protection protocols
+* Comprehensive compliance checklists
+
 ==== xref:java-test-maintenance.adoc[Java Test Maintenance Process]
 Process for maintaining and improving Java test quality while preserving functionality and adhering to CUI testing standards. Focuses on module-by-module approach with emphasis on CUI framework compliance.
 
@@ -70,6 +80,26 @@ Process for maintaining and improving Java test quality while preserving functio
 * Test quality issue detection and resolution
 * AI-generated code cleanup patterns
 * SonarQube compliance guidance
+
+==== xref:javascript-code-maintenance.adoc[JavaScript Code Maintenance Process]
+Process for maintaining and refactoring JavaScript production code to enforce all aspects of JavaScript Development Standards. Focuses on vanilla JavaScript preference, proper modularization, and package.json management.
+
+**Key Features:**
+* Vanilla JavaScript usage enforcement
+* Test/mock code separation from production
+* Modularization and duplication management
+* Package.json and dependency maintenance
+* JSDoc and comment quality standards
+
+==== xref:javascript-test-maintenance.adoc[JavaScript Test Maintenance Process]
+Process for maintaining and improving JavaScript test quality while preserving functionality and adhering to modern JavaScript testing standards. Provides systematic approaches for Jest and Cypress test improvements.
+
+**Key Features:**
+* JavaScript test anti-pattern detection
+* Mock and stub management best practices
+* Async test pattern improvements
+* Testing Library query optimization
+* E2E test maintenance with Cypress
 
 ==== xref:logger-maintenance.adoc[Logger Maintenance Process]
 Process for implementing and maintaining logging standards compliance while preserving functionality. Provides systematic approach to migrating to CuiLogger and implementing proper LogRecord usage patterns.
@@ -138,7 +168,10 @@ All process documents in this directory follow consistent patterns:
 * **General Development**: Start with xref:task-completion-standards.adoc[Task Completion Standards]
 * **Code Refactoring**: Use xref:refactoring-process.adoc[Refactoring Process]
 * **Quarkus Native Optimization**: Follow xref:quarkus-native-optimization.adoc[Quarkus Native Optimization Process]
-* **Test Improvements**: Follow xref:java-test-maintenance.adoc[Java Test Maintenance Process]
+* **Java Code Improvements**: Follow xref:java-code-maintenance.adoc[Java Code Maintenance Process]
+* **Java Test Improvements**: Follow xref:java-test-maintenance.adoc[Java Test Maintenance Process]
+* **JavaScript Code Improvements**: Follow xref:javascript-code-maintenance.adoc[JavaScript Code Maintenance Process]
+* **JavaScript Test Improvements**: Follow xref:javascript-test-maintenance.adoc[JavaScript Test Maintenance Process]
 * **Logging Updates**: Apply xref:logger-maintenance.adoc[Logger Maintenance Process]
 * **Documentation Fixes**: Use xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]
 * **Requirements Updates**: Follow xref:requirements-maintenance.adoc[Requirements Maintenance Process]
@@ -158,7 +191,8 @@ Process documents reference technical standards for implementation guidance:
 * **Testing Standards**: xref:../testing/quality-standards.adoc[Quality Standards], xref:../testing/cui-test-generator-guide.adoc[CUI Test Generator Guide]
 * **Logging Standards**: xref:../logging/core-standards.adoc[Core Standards], xref:../logging/implementation-guide.adoc[Implementation Guide]
 * **Java Standards**: xref:../java/java-code-standards.adoc[Java Code Standards]
-* **Documentation Standards**: xref:../documentation/javadoc-standards.adoc[Javadoc Standards]
+* **JavaScript Standards**: xref:../javascript/javascript-development-standards.adoc[JavaScript Development Standards], xref:../javascript/javascript-core-patterns.adoc[Core Patterns]
+* **Documentation Standards**: xref:../documentation/javadoc-standards.adoc[Javadoc Standards], xref:../javascript/jsdoc-standards.adoc[JSDoc Standards]
 
 == See Also
 

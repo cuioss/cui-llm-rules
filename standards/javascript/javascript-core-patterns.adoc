@@ -22,6 +22,41 @@ Defines core modern JavaScript patterns including ES modules, variable declarati
 * **Node.js**: Version 20.12.2 LTS or later
 * **Transpilation**: Babel for test environments only
 
+=== Critical Rule: Vanilla JavaScript Preference
+**The preferred way is to use vanilla JavaScript where possible: fetch instead of ajax. If it is not too complex to implement without jQuery/cash, always resort to vanilla JS.**
+
+This rule ensures:
+* Better performance by avoiding unnecessary library overhead
+* Reduced bundle sizes and faster load times
+* Native browser API usage for modern features
+* Elimination of legacy dependencies
+
+Examples:
+[source,javascript]
+----
+// ✅ Preferred: Vanilla JavaScript fetch
+const response = await fetch('/api/data');
+const data = await response.json();
+
+// ❌ Avoid: jQuery ajax
+$.ajax({
+  url: '/api/data',
+  success: (data) => { /* ... */ }
+});
+
+// ✅ Preferred: Native DOM manipulation
+document.querySelector('.button').addEventListener('click', handleClick);
+
+// ❌ Avoid: jQuery DOM manipulation
+$('.button').on('click', handleClick);
+
+// ✅ Preferred: Native element selection
+const elements = document.querySelectorAll('.item');
+
+// ❌ Avoid: jQuery selection
+const elements = $('.item');
+----
+
 === Module System Standards
 Use ES modules exclusively:
 
