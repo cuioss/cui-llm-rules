@@ -148,6 +148,24 @@ Tests that should remain as infrastructure (no CUI enhancement needed):
 * Confirm descriptive test names
 * Check proper `@DisplayName` usage
 
+==== Assert Statement Messages
+
+**Mandatory Requirements**:
+
+* **Always Present**: Every assert statement MUST have a descriptive message
+* **Preserve Existing**: Keep existing messages during maintenance - do not remove them
+* **Add Missing**: Add descriptive messages to any assert statements lacking them
+* **Review Quality**: During maintenance, verify that existing messages are:
+  - Still correct and accurate for the test condition
+  - Meaningful and helpful for debugging failures
+  - Clear about what was expected vs what occurred
+
+**Message Guidelines**:
+
+* Describe the business condition being tested, not just the technical assertion
+* Include relevant context (e.g., "User with admin role should have access to all resources")
+* Make failure diagnosis easier by explaining why the assertion matters
+
 === Coverage Requirements
 
 **Quality Gates**:
@@ -257,6 +275,7 @@ Following xref:task-completion-standards.adoc[Task Completion Standards]:
 * **Apply AI artifact removal** per xref:../testing/quality-standards.adoc#ai-generated-code-detection[Quality Standards]
 * **Remove non-sensible tests** per quality standards criteria
 * **Refactor complex test logic** to follow AAA pattern per xref:../testing/core-standards.adoc[Core Standards]
+* **Avoid Excessive AAA Comments**: Do not add comments like `// Arrange`, `// Act`, `// Assert` unless the test structure is genuinely unclear - the code should be self-documenting through proper structure
 * **Extract repeated test data** to TypeGenerator implementations
 * **Convert similar tests** to parameterized tests using @GeneratorsSource
 * **Fix compliance violations** per xref:../testing/quality-standards.adoc#sonarqube-compliance[SonarQube Standards]
