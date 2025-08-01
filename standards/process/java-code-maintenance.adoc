@@ -159,12 +159,14 @@ This document defines the comprehensive process for maintaining and refactoring 
   - **Process**: Follow user consultation protocol below
 
 **Detection Strategy**:
+
 1. Use IDE warnings and inspections to identify unused elements
 2. Leverage static analysis tools (SonarQube, SpotBugs)
 3. Manual code review for systematic identification
 4. Build tool analysis with Maven/Gradle plugins
 
 **User Consultation Protocol**: When unused methods are detected, MUST:
+
 1. Document all findings with locations and signatures
 2. Categorize by visibility (private, package-private, protected, public)
 3. Ask user for guidance with context and potential impact
@@ -172,11 +174,13 @@ This document defines the comprehensive process for maintaining and refactoring 
 5. Remove approved unused code in focused commits
 
 **Special Considerations** - Do NOT remove when:
+
 * Framework dependencies may require "unused" methods (Spring, JPA, etc.)
 * Methods may be called via reflection
 * Private fields required for serialization frameworks
 * Code prepared for upcoming features
 * Public/protected methods needed for backward compatibility
+
 == Refactoring Prioritization
 
 **Overview**: Systematic prioritization ensures high-impact improvements are addressed first while maintaining code stability.
@@ -356,6 +360,7 @@ Following xref:task-completion-standards.adoc[Task Completion Standards]:
 * xref:../logging/implementation-guide.adoc[Logging Implementation Guide] - Logging implementation patterns
 
 **Refactoring Categories**:
+
 * **Code Organization**: When to restructure packages and classes
 * **Method Design**: When to extract methods and create parameter objects  
 * **API Design**: When to add null safety and improve exception handling
