@@ -58,13 +58,13 @@ Strict compliance with approved testing libraries to ensure consistency and comp
 
 **FORBIDDEN LIBRARIES:**
 
-* **Mockito**: Do NOT use for mocking - use CUI framework alternatives instead
-* **PowerMock**: Do NOT use for advanced mocking scenarios - refactor to use dependency injection
+* **Mockito**: Do NOT use for mocking - use CUI framework alternatives instead. Or EasyMock for simple mocking scenarios.
+* **PowerMock**: Do NOT use for advanced mocking scenarios - refactor to use dependency injection. Or EasyMock for simple mocking scenarios.
 * **Hamcrest**: Do NOT use for assertions - use JUnit 5 assertions exclusively
 
 **Migration Guidelines:**
 
-* Replace Mockito with CUI framework dependency injection patterns
+* Replace Mockito with CUI framework dependency injection patterns. Or EasyMock for simple mocking scenarios.
 * Convert Hamcrest matchers to JUnit 5 assertion methods
 * Use cui-test-mockwebserver-junit5 for HTTP mocking instead of Mockito
 * Leverage cui-test-generator for test data creation instead of manual or random approaches

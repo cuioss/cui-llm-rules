@@ -8,6 +8,9 @@
 [IMPORTANT]
 ====
 This document is governed by the general process rules defined in xref:general.adoc[General Process Rules].
+====
+
+== Purpose
 
 This document describes the process and structure used for managing refactoring tasks in the cui-jwt-token-handling project.
 
@@ -38,7 +41,7 @@ Each task follows a consistent format:
 
 [source,text]
 ----
-=== [Category][Number]. [Task Title]
+[Category][Number]. [Task Title]
 [ ] *Priority:* [High/Medium/Low]
 
 *Description:* [Detailed description of the task]
@@ -49,7 +52,7 @@ Each task follows a consistent format:
 Example:
 [source,text]
 ----
-=== C1. Document Bouncy Castle Usage
+C1. Document Bouncy Castle Usage
 [x] *Priority:* Medium
 
 *Description:* Ensure that the usage of Bouncy Castle for cryptographic operations is consistently documented throughout the codebase and documentation.
@@ -109,6 +112,8 @@ When adding new tasks to the refactoring list:
 * Complete the entire Task Completion Process before moving to the next task
 * Prioritize tasks based on their priority level (High, Medium, Low)
 * Document any unexpected challenges or decisions made during implementation
+* Do not provide estimates for task completion times, as this is not part of the process. Neither planing aspect like phases nor time estimates are part of the refactoring process.
+* Do neither provide any project-management-related information such as "in progress" or "done". The only status is the checkbox indicating whether the task is completed or not. Do not provide stuff like "Executive Summary" either
 
 === Documentation Updates
 

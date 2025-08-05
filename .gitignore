@@ -2,3 +2,5 @@
 .qodo
 **/**.iml
 **/**.DS_Store
+# Claude Code configuration
+.claude/
