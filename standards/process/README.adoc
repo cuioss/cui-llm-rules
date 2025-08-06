@@ -101,6 +101,16 @@ Process for maintaining and improving JavaScript test quality while preserving f
 * Testing Library query optimization
 * E2E test maintenance with Cypress
 
+==== xref:pom-maintenance.adoc[POM Maintenance Process]
+Process for maintaining and optimizing Maven POM files across Java projects. Provides systematic approaches for dependency management, BOM utilization, version optimization, and POM quality improvements while adhering to Maven best practices.
+
+**Key Features:**
+* OpenRewrite integration for automated cleanup
+* BOM management and centralized version control
+* Dependency scope optimization and verification
+* Multi-module dependency aggregation strategies
+* Maven wrapper maintenance procedures
+
 ==== xref:logger-maintenance.adoc[Logger Maintenance Process]
 Process for implementing and maintaining logging standards compliance while preserving functionality. Provides systematic approach to migrating to CuiLogger and implementing proper LogRecord usage patterns.
 
@@ -172,6 +182,7 @@ All process documents in this directory follow consistent patterns:
 * **Java Test Improvements**: Follow xref:java-test-maintenance.adoc[Java Test Maintenance Process]
 * **JavaScript Code Improvements**: Follow xref:javascript-code-maintenance.adoc[JavaScript Code Maintenance Process]
 * **JavaScript Test Improvements**: Follow xref:javascript-test-maintenance.adoc[JavaScript Test Maintenance Process]
+* **Maven POM Maintenance**: Apply xref:pom-maintenance.adoc[POM Maintenance Process]
 * **Logging Updates**: Apply xref:logger-maintenance.adoc[Logger Maintenance Process]
 * **Documentation Fixes**: Use xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]
 * **Requirements Updates**: Follow xref:requirements-maintenance.adoc[Requirements Maintenance Process]
