@@ -306,7 +306,7 @@ class ServiceTest {
             TestLogLevel.INFO,
             INFO.USER_LOGIN.format(username));
         // Alternative, if you want to verify only the level and the LogRecord -> Usually sufficient
-        assertSingleLogMessagePresent(
+        assertSingleLogMessagePresentContaining(
             TestLogLevel.INFO,
             INFO.USER_LOGIN.resolveIdentifierString());
     }
