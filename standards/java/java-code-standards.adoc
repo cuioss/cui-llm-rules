@@ -112,72 +112,105 @@ public void log(String message, CuiLogger logger) { ... }
 
 === Null Safety and API Design
 
-==== @NonNull Annotations for Public APIs
+==== JSpecify Annotations for Null Safety
 
-All public API methods that guarantee not to return null for non-primitive types MUST be annotated with Lomboks `@NonNull` to document this contract.
+All CUI projects MUST use JSpecify annotations for null safety. Apply annotations preferably at package level in `package-info.java` files for consistent null-handling across the entire package.
 
-**IMPORTANT**: This annotation serves as documentation only. No code will be generated and there is no automatic enforcement. The implementation must manually ensure the non-null guarantee.
+**Package-Level Configuration (PREFERRED)**:
+[source,java]
+----
+// package-info.java
+@NullMarked  // Everything is non-null by default in this package
+package de.cuioss.tools.example;
+
+import org.jspecify.annotations.NullMarked;
+----
+
+**IMPORTANT**: With `@NullMarked` at package level, all references are non-null by default. Use `@Nullable` to explicitly mark nullable elements.
 
 [source,java]
 ----
-// Good: Clear contract - method will never return null
-@NonNull
-public String processToken(@NonNull String input) {
-    return input.toUpperCase();
+// With @NullMarked at package level (default non-null):
+public String processToken(String input) {  // input is non-null by default
+    return input.toUpperCase();  // return is non-null by default
+}
+
+// Good: Mark nullable parameters (but never nullable returns)
+public String processWithDefault(@Nullable String input) {
+    return input != null ? input.toUpperCase() : "DEFAULT";
 }
 
 // Good: Use Optional when null might be returned
-public Optional<User> findUser(String id) {
+public Optional<User> findUser(String id) {  // id is non-null by default
     return userRepository.findById(id);
 }
 
-// Bad: No annotation and unclear if null can be returned
-public String processToken(String input) {
-    return input != null ? input.toUpperCase() : null;
+// Without package-level @NullMarked (explicit annotations needed):
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+@NonNull
+public String processToken(@NonNull String input) {
+    return input.toUpperCase();
 }
 ----
 
 ==== API Return Type Guidelines
 
-For public API methods, choose one of these patterns:
+For public API methods with `@NullMarked` at package level, choose one of these patterns:
 
-. **@NonNull return type**: When the method guarantees a non-null result
-. **Optional<T> return type**: When the method may not have a result to return
+. **Default non-null return type**: Methods return non-null by default with package-level `@NullMarked`
+. **Optional<T> return type**: Use when the method may not have a result to return
+
+**IMPORTANT**: Never use `@Nullable` for return types. Either guarantee a non-null return or use Optional.
 
 [source,java]
 ----
-// Pattern 1: Guaranteed non-null result
-@NonNull
-public ValidationResult validate(@NonNull String token) {
+// With @NullMarked at package level:
+
+// Pattern 1: Guaranteed non-null result (default behavior)
+public ValidationResult validate(String token) {
     // Implementation must ensure non-null return
     return new ValidationResult(token, true);
 }
 
-// Pattern 2: Optional result
-public Optional<UserInfo> extractUserInfo(@NonNull String token) {
+// Pattern 2: Optional result (use instead of @Nullable returns)
+public Optional<UserInfo> extractUserInfo(String token) {
     // May return empty Optional
     return parseToken(token)
         .map(this::extractUser);
 }
+
+// BAD: Never use @Nullable for return types
+// public @Nullable ValidationResult validate(String token) { ... }
 ----
 
 ==== Implementation Requirements
 
-. **Implementation Responsibility**: The implementation MUST ensure that `@NonNull` annotated methods never return null
-. **Manual Enforcement**: Since no automatic checks are generated, developers must implement the non-null guarantee manually
-. **Unit Testing**: Test that `@NonNull` annotated methods never return null under any valid input conditions
-. **Documentation Contract**: The `@NonNull` annotation serves as executable documentation of the API contract
+. **Package-Level Configuration**: Always prefer `@NullMarked` in `package-info.java` for consistent null-safety across the entire package
+. **Default Non-Null**: With `@NullMarked`, all types are non-null by default - only use `@Nullable` for exceptions
+. **Implementation Responsibility**: The implementation MUST ensure that non-nullable methods never return null
+. **Static Analysis**: JSpecify annotations enable static analysis tools to detect potential null pointer issues
+. **Unit Testing**: Test that non-nullable methods never return null under any valid input conditions
+. **Documentation Contract**: JSpecify annotations serve as executable documentation of the API contract
 
 [source,java]
 ----
 @Test
 void shouldNeverReturnNull() {
-    // Test various valid inputs
+    // With @NullMarked, non-nullable methods must never return null
     assertNotNull(service.processToken("valid"));
     assertNotNull(service.processToken(""));
     
-    // @NonNull methods should handle edge cases without returning null
+    // Non-nullable methods should handle edge cases without returning null
     assertNotNull(service.processToken("edge-case"));
+}
+
+@Test
+void shouldUseOptionalForMissingValues() {
+    // Use Optional.empty() instead of null returns
+    assertTrue(service.findUser("unknown").isEmpty());
+    assertTrue(service.findUser("existing").isPresent());
 }
 ----
 
