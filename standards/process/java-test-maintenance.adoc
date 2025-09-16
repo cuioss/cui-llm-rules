@@ -65,6 +65,7 @@ This document defines the comprehensive process for maintaining and improving Ja
 
 * **Detection Process**: Identify AI artifacts per xref:../testing/quality-standards.adoc#ai-generated-code-detection[Quality Standards AI Detection]
 * **Removal Actions**: Apply removal rules as defined in quality standards
+* **Reflection Workarounds**: Ensure that there are no workaround tests using reflection to change internal state - this is always a bug
 * **Process Focus**: Systematic identification and elimination during maintenance cycles
 
 === Test Enhancement Prioritization
