@@ -167,6 +167,152 @@ Tests that should remain as infrastructure (no CUI enhancement needed):
 * Include relevant context (e.g., "User with admin role should have access to all resources")
 * Make failure diagnosis easier by explaining why the assertion matters
 
+=== Forbidden Test Anti-Patterns
+
+**Overview**: Test code must be deterministic and straightforward. The following patterns are strictly forbidden in unit tests as they compromise test reliability and readability.
+
+==== No Conditional Testing
+
+**Strict Requirements**:
+
+* **NO if-else statements**: Tests must not contain conditional logic that changes test behavior
+* **NO switch statements**: Test flow must be linear without branching logic
+* **NO Optional.orElse()**: Using Optional.orElse() or Optional.orElseGet() is an error - test the Optional state explicitly
+* **NO ternary operators**: Avoid `condition ? value1 : value2` in test assertions
+
+**Correct Patterns**:
+
+[source,java]
+----
+// WRONG - Conditional logic in test
+@Test
+void testUserAccess() {
+    User user = getUser();
+    if (user.hasRole("admin")) {
+        assertTrue(user.canAccessAllResources());
+    } else {
+        assertFalse(user.canAccessAdminPanel());
+    }
+}
+
+// CORRECT - Separate focused tests
+@Test
+void adminUserShouldAccessAllResources() {
+    User adminUser = createAdminUser();
+    assertTrue(adminUser.canAccessAllResources(),
+        "Admin user should have access to all resources");
+}
+
+@Test
+void regularUserShouldNotAccessAdminPanel() {
+    User regularUser = createRegularUser();
+    assertFalse(regularUser.canAccessAdminPanel(),
+        "Regular user should not access admin panel");
+}
+----
+
+**Optional Testing**:
+
+[source,java]
+----
+// WRONG - Using Optional.orElse in assertions
+@Test
+void testOptionalValue() {
+    Optional<String> result = service.findValue();
+    assertEquals("default", result.orElse("default"));
+}
+
+// CORRECT - Test Optional state explicitly
+@Test
+void shouldReturnEmptyOptionalWhenValueNotFound() {
+    Optional<String> result = service.findValue();
+    assertFalse(result.isPresent(),
+        "Should return empty Optional when value not found");
+}
+
+@Test
+void shouldReturnOptionalWithValueWhenFound() {
+    Optional<String> result = service.findExistingValue();
+    assertTrue(result.isPresent(),
+        "Should return Optional with value when found");
+    result.ifPresent(value ->
+        assertEquals("expected", value,
+            "Optional should contain expected value"));
+}
+----
+
+==== Proper Exception Handling
+
+**Strict Requirements**:
+
+* **NO try-catch blocks**: Never use try-catch in unit tests
+* **Checked exceptions**: Add `throws` declaration to test method
+* **Expected exceptions**: Use `assertThrows()` for expected exceptions
+* **No exceptions expected**: Use `assertDoesNotThrow()` when verifying no exceptions
+
+**Exception Handling Patterns**:
+
+[source,java]
+----
+// WRONG - Using try-catch in test
+@Test
+void testFileReading() {
+    try {
+        String content = fileReader.read("test.txt");
+        assertEquals("expected", content);
+    } catch (IOException e) {
+        fail("Should not throw exception");
+    }
+}
+
+// CORRECT - For checked exceptions, declare throws
+@Test
+void shouldReadFileContent() throws IOException {
+    String content = fileReader.read("test.txt");
+    assertEquals("expected", content,
+        "File content should match expected value");
+}
+
+// CORRECT - Testing for expected exceptions
+@Test
+void shouldThrowExceptionForInvalidFile() {
+    IllegalArgumentException exception = assertThrows(
+        IllegalArgumentException.class,
+        () -> fileReader.read("invalid.txt"),
+        "Should throw IllegalArgumentException for invalid file"
+    );
+    assertEquals("File not found: invalid.txt", exception.getMessage(),
+        "Exception message should indicate file not found");
+}
+
+// CORRECT - Explicitly verify no exception is thrown
+@Test
+void shouldNotThrowExceptionForValidInput() {
+    assertDoesNotThrow(
+        () -> validator.validate("valid-input"),
+        "Should not throw exception for valid input"
+    );
+}
+----
+
+**Multiple Exception Testing**:
+
+[source,java]
+----
+// CORRECT - Parameterized test for multiple exception cases
+@ParameterizedTest
+@MethodSource("invalidInputProvider")
+void shouldThrowExceptionForInvalidInputs(String input, String expectedMessage) {
+    ValidationException exception = assertThrows(
+        ValidationException.class,
+        () -> validator.validate(input),
+        "Should throw ValidationException for invalid input: " + input
+    );
+    assertTrue(exception.getMessage().contains(expectedMessage),
+        "Exception message should contain: " + expectedMessage);
+}
+----
+
 === Coverage Requirements
 
 **Quality Gates**:
@@ -207,13 +353,15 @@ Tests that should remain as infrastructure (no CUI enhancement needed):
 2. **Unit Test Coverage Audit**: Verify each type has dedicated unit test focusing exclusively on that class with comprehensive corner/edge cases. Identify test duplication across unit tests
 3. **AI Pattern Detection**: Check for method names >75 chars, excessive comments, verbose @DisplayName
 4. **Non-Sensible Test Review**: Identify meaningless constructor tests and framework behavior tests
-5. **CUI Framework Audit**: Check for manual data creation and missing annotations
-6. **Value Object Review**: Identify objects needing contract testing per value object criteria
-7. **Security Test Review**: Verify security testing patterns and vulnerability coverage
-8. **Classify Test Files**: Apply prioritization framework (High/Medium/Low priority)
-9. **Document Classification**: Maintain test file inventory with enhancement status and justification
-10. **Prioritize Changes**: Focus on high-priority business logic tests first
-11. **Plan Module Order**: Dependencies first, then dependent modules
+5. **Anti-Pattern Detection**: Scan for forbidden patterns - conditional logic (if-else, switch, ternary), Optional.orElse(), try-catch blocks
+6. **Exception Handling Audit**: Verify proper exception handling - throws declarations for checked exceptions, assertThrows/assertDoesNotThrow usage
+7. **CUI Framework Audit**: Check for manual data creation and missing annotations
+8. **Value Object Review**: Identify objects needing contract testing per value object criteria
+9. **Security Test Review**: Verify security testing patterns and vulnerability coverage
+10. **Classify Test Files**: Apply prioritization framework (High/Medium/Low priority)
+11. **Document Classification**: Maintain test file inventory with enhancement status and justification
+12. **Prioritize Changes**: Focus on high-priority business logic tests first
+13. **Plan Module Order**: Dependencies first, then dependent modules
 
 === Compliance Verification Checklist
 
@@ -221,6 +369,8 @@ For each test class, verify compliance with:
 
 - [ ] **Unit Test Focus**: Each type has dedicated unit test focusing exclusively on that class with comprehensive corner/edge case coverage
 - [ ] **Test Isolation**: Verify no duplication of unit-testable aspects across different unit tests
+- [ ] **No Conditional Logic**: Verify absence of if-else, switch, Optional.orElse(), and ternary operators in test methods
+- [ ] **Proper Exception Handling**: Verify no try-catch blocks; checked exceptions use throws declaration; use assertThrows/assertDoesNotThrow appropriately
 - [ ] **CUI Framework Standards**: xref:../testing/core-standards.adoc#cui-framework-requirements[Framework Requirements]
 - [ ] **Quality Standards**: xref:../testing/quality-standards.adoc#ai-generated-code-detection[AI Detection] and xref:../testing/quality-standards.adoc#testing-library-restrictions[Library Restrictions]
 - [ ] **Coverage Requirements**: xref:../testing/quality-standards.adoc#coverage-requirements[Coverage Standards]
@@ -275,6 +425,8 @@ Following xref:task-completion-standards.adoc[Task Completion Standards]:
 * **Ensure Unit Test Focus**: Verify each type has dedicated unit test with comprehensive corner/edge case coverage and eliminate test duplication across units
 * **Apply AI artifact removal** per xref:../testing/quality-standards.adoc#ai-generated-code-detection[Quality Standards]
 * **Remove non-sensible tests** per quality standards criteria
+* **Eliminate conditional logic**: Remove all if-else, switch, Optional.orElse(), and ternary operators from test methods
+* **Fix exception handling**: Remove try-catch blocks; use throws declarations or assertThrows/assertDoesNotThrow
 * **Refactor complex test logic** to follow AAA pattern per xref:../testing/core-standards.adoc[Core Standards]
 * **Avoid Excessive AAA Comments**: Do not add comments like `// Arrange`, `// Act`, `// Assert` unless the test structure is genuinely unclear - the code should be self-documenting through proper structure
 * **Extract repeated test data** to TypeGenerator implementations
