@@ -51,10 +51,10 @@ private static final CuiLogger LOGGER = new CuiLogger(YourClass.class);
 [source,java]
 ----
 // With exception:
-LOGGER.error(exception, ERROR.DATABASE_CONNECTION.format(url));
+LOGGER.error(exception, ERROR.DATABASE_CONNECTION, url);
 
 // With parameters:
-LOGGER.info(INFO.USER_LOGIN.format(username));
+LOGGER.info(INFO.USER_LOGIN, username);
 ----
 
 ==== Testing Configuration

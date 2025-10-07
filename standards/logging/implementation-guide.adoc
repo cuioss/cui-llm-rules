@@ -114,8 +114,8 @@ LogRecord MUST be used for INFO/WARN/ERROR/FATAL levels in production code. Dire
 [source,java]
 ----
 // CORRECT:
-LOGGER.info(INFO.USER_LOGIN.format(username));
-LOGGER.error(e, ERROR.DATABASE_CONNECTION.format(url));
+LOGGER.info(INFO.USER_LOGIN, username);
+LOGGER.error(e, ERROR.DATABASE_CONNECTION, url);
 
 // INCORRECT - Never use direct logging for INFO/WARN/ERROR/FATAL:
 logger.info("User %s logged in", username);
@@ -139,11 +139,11 @@ LOGGER.trace(TRACE.SOME_TRACE_MESSAGE.format());
 
 ==== Parameter Handling
 
-* For LogRecords (INFO/WARN/ERROR/FATAL): Use format method
+* For LogRecords (INFO/WARN/ERROR/FATAL): Pass LogRecord and parameters directly
 +
 [source,java]
 ----
-LOGGER.info(INFO.SOME_MESSAGE.format(param1, param2));
+LOGGER.info(INFO.SOME_MESSAGE, param1, param2);
 ----
 
 * For Direct Logging (DEBUG/TRACE): Use '%s' for parameter substitution
@@ -159,8 +159,8 @@ LOGGER.debug("Processing file %s with size %s", filename, size);
 +
 [source,java]
 ----
-LOGGER.error(e, ERROR.CANNOT_GENERATE_CODE_CHALLENGE.format());
-LOGGER.error(e, ERROR.SOME_ERROR.format(param1));
+LOGGER.error(e, ERROR.CANNOT_GENERATE_CODE_CHALLENGE);
+LOGGER.error(e, ERROR.SOME_ERROR, param1);
 ----
 
 * For Direct Logging (DEBUG/TRACE):
@@ -172,15 +172,15 @@ LOGGER.debug(e, "Detailed error info: %s", e.getMessage());
 
 ==== Parameter-Free Calls
 
-For LogRecords without parameters, use method reference syntax:
+For LogRecords without parameters, pass the LogRecord directly:
 
 [source,java]
 ----
 // CORRECT:
-LOGGER.info(INFO.STARTUP_COMPLETE::format);
+LOGGER.info(INFO.STARTUP_COMPLETE);
 
-// INCORRECT:
-LOGGER.info(INFO.STARTUP_COMPLETE.format());
+// ALSO CORRECT (lazy evaluation):
+LOGGER.info(INFO.STARTUP_COMPLETE::format);
 ----
 
 === Common Implementation Patterns
@@ -192,7 +192,7 @@ LOGGER.info(INFO.STARTUP_COMPLETE.format());
 try {
     // Some code that might throw
 } catch (Exception e) {
-    LOGGER.error(e, ERROR.REQUEST_PROCESSING_ERROR.format(e.getMessage()));
+    LOGGER.error(e, ERROR.REQUEST_PROCESSING_ERROR, e.getMessage());
 }
 ----
 
@@ -201,10 +201,10 @@ try {
 [source,java]
 ----
 // Single parameter
-LOGGER.info(INFO.USER_LOGIN.format(username));
+LOGGER.info(INFO.USER_LOGIN, username);
 
 // Multiple parameters
-LOGGER.warn(WARN.USER_INFO_ENRICHED.format(userId, attributeName));
+LOGGER.warn(WARN.USER_INFO_ENRICHED, userId, attributeName);
 ----
 
 == Best Practices

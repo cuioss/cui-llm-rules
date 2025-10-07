@@ -107,7 +107,7 @@ class ResourceBundleLocatorTest {
         // then
         assertSingleLogMessagePresent(
             TestLogLevel.INFO,
-            BUNDLE.INFO.RESOURCE_LOADED.format(resourceName));
+            INFO.RESOURCE_LOADED.format(resourceName));
     }
 }
 ----
@@ -126,7 +126,7 @@ void shouldLogException() {
     try {
         throw exception;
     } catch (Exception e) {
-        LOGGER.error(ERROR.CONFIGURATION_ERROR.format(errorMessage), e);
+        LOGGER.error(e, ERROR.CONFIGURATION_ERROR, errorMessage);
     }
 
     // then
@@ -147,7 +147,7 @@ void shouldLogMultipleParameters() {
     var role = "admin";
 
     // when
-    LOGGER.info(INFO.USER_ROLE_ASSIGNED.format(userId, role));
+    LOGGER.info(INFO.USER_ROLE_ASSIGNED, userId, role);
 
     // then
     assertSingleLogMessagePresent(
