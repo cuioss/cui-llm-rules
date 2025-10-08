@@ -440,6 +440,251 @@ public ReflectiveClassBuildItem registerAvailableClasses() {
 })
 ----
 
+== Quarkus Auto-Registration: When NOT to Use @RegisterForReflection
+
+Modern Quarkus (3.x+) automatically registers many classes for reflection through its build-time analysis. Understanding which classes are auto-registered prevents redundant configuration and simplifies maintenance.
+
+=== Classes That Are Automatically Registered
+
+==== CDI Beans
+
+**Rule**: CDI beans with scope annotations are automatically analyzed and registered by Quarkus.
+
+[source,java]
+----
+// NO @RegisterForReflection needed - CDI scope annotation is sufficient
+@ApplicationScoped
+public class MyService {
+    // Quarkus automatically registers this for reflection
+}
+
+@RequestScoped
+public class MyRequestBean {
+    // Also automatically registered
+}
+----
+
+**Rationale**: Quarkus's CDI integration performs build-time bean discovery and ensures all CDI beans are accessible for dependency injection and proxy generation.
+
+==== MicroProfile Health Checks
+
+**Rule**: Health check implementations are automatically discovered through their annotations.
+
+[source,java]
+----
+// NO @RegisterForReflection needed
+@Liveness
+public class DatabaseHealthCheck implements HealthCheck {
+    @Override
+    public HealthCheckResponse call() {
+        return HealthCheckResponse.up("database");
+    }
+}
+----
+
+**Rationale**: Quarkus health extension performs build-time discovery of all `@Liveness`, `@Readiness`, and `@Startup` annotated classes.
+
+==== CDI Qualifiers and Stereotypes
+
+**Rule**: CDI qualifier annotations do not need reflection registration.
+
+[source,java]
+----
+// NO @RegisterForReflection needed
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface CustomQualifier {
+}
+----
+
+**Rationale**: Qualifiers are metadata annotations processed entirely at build time. They are not instantiated or accessed via reflection at runtime.
+
+=== Classes That Require Explicit Registration
+
+==== Data Transfer Objects (DTOs) and Records
+
+**Rule**: Classes used in JSON serialization/deserialization or REST responses require explicit registration.
+
+[source,java]
+----
+// @RegisterForReflection IS required
+@RegisterForReflection
+public class UserDTO {
+    private String username;
+    private String email;
+    // Getters/setters accessed via reflection by JSON-B/Jackson
+}
+
+// For records
+@RegisterForReflection
+public record ErrorResponse(int code, String message) {
+}
+----
+
+**Rationale**: JSON processing libraries use reflection to access fields and methods. These classes are not CDI beans, so they require explicit registration.
+
+==== Enums in REST/JSON Context
+
+**Rule**: Enums used in serialization contexts need minimal reflection registration.
+
+[source,java]
+----
+// Minimal registration for enum constants
+@RegisterForReflection(methods = false, fields = false)
+public enum Status {
+    ACTIVE, INACTIVE, PENDING
+}
+----
+
+**Rationale**: Only enum constants need to be accessible; methods and fields typically don't require reflection.
+
+==== Interceptors
+
+**Rule**: CDI interceptors need reflection for proxy generation.
+
+[source,java]
+----
+@Interceptor
+@Priority(Interceptor.Priority.APPLICATION)
+@RegisterForReflection  // Required for proxy generation
+public class SecurityInterceptor {
+    @AroundInvoke
+    public Object intercept(InvocationContext ctx) throws Exception {
+        // Interceptor logic
+    }
+}
+----
+
+**Rationale**: Interceptors use runtime proxy generation which requires reflection access to methods.
+
+==== JAX-RS Filters and Interceptors
+
+**Rule**: JAX-RS filters require reflection for the JAX-RS runtime.
+
+[source,java]
+----
+@Provider
+@RegisterForReflection  // Required for JAX-RS instantiation
+public class RequestLoggingFilter implements ContainerRequestFilter {
+    @Override
+    public void filter(ContainerRequestContext ctx) {
+        // Filter logic
+    }
+}
+----
+
+**Rationale**: JAX-RS runtime instantiates filters via reflection.
+
+==== InterceptorBinding Annotations with @Nonbinding
+
+**Rule**: InterceptorBinding annotations with `@Nonbinding` members need method reflection.
+
+[source,java]
+----
+@InterceptorBinding
+@Retention(RetentionPolicy.RUNTIME)
+@RegisterForReflection(methods = true, fields = false)  // methods=true required
+public @interface Secured {
+    @Nonbinding  // This member is accessed via reflection
+    String[] roles() default {};
+}
+----
+
+**Rationale**: `@Nonbinding` annotation members are read via reflection to pass values to interceptors.
+
+=== Decision Matrix
+
+[cols="3,1,3"]
+|===
+|Class Type |Needs @RegisterForReflection? |Reason
+
+|CDI Bean (@ApplicationScoped, etc.)
+|❌ No
+|Auto-registered by CDI extension
+
+|Health Check (@Liveness, @Readiness)
+|❌ No
+|Auto-discovered by health extension
+
+|CDI Qualifier (@Qualifier)
+|❌ No
+|Build-time metadata only
+
+|DTO/POJO for JSON
+|✅ Yes
+|JSON processors use reflection
+
+|Enum in REST context
+|✅ Yes (minimal)
+|Enum constants accessed via reflection
+
+|@Interceptor
+|✅ Yes
+|Proxy generation requires reflection
+
+|JAX-RS @Provider
+|✅ Yes
+|JAX-RS runtime instantiation
+
+|@InterceptorBinding with @Nonbinding
+|✅ Yes (methods=true)
+|Runtime parameter access
+|===
+
+=== Common Pitfalls
+
+==== Pitfall 1: Double Registration
+
+[source,java]
+----
+// WRONG - Redundant registration
+@ApplicationScoped
+@RegisterForReflection  // ❌ Not needed - CDI handles this
+public class MyService {
+}
+----
+
+**Impact**: Unnecessary metadata in native image, potential configuration conflicts.
+
+**Solution**: Remove `@RegisterForReflection` from all CDI beans.
+
+==== Pitfall 2: Missing Registration for DTOs
+
+[source,java]
+----
+// WRONG - Missing registration
+public class UserDTO {  // ❌ Will fail in native image if used in REST
+    private String name;
+}
+----
+
+**Impact**: Native image build succeeds but runtime reflection fails with `ClassNotFoundException`.
+
+**Solution**: Add `@RegisterForReflection` to all DTOs used in REST/JSON contexts.
+
+==== Pitfall 3: Incorrect Scope for Enums
+
+[source,java]
+----
+// INEFFICIENT - Too much reflection
+@RegisterForReflection  // ❌ Registers methods/fields unnecessarily
+public enum Status {
+    ACTIVE, INACTIVE
+}
+----
+
+**Solution**: Use minimal scope: `@RegisterForReflection(methods = false, fields = false)`
+
+=== Verification Strategy
+
+To verify correct reflection registration:
+
+1. **Build Native Image**: `./mvnw package -Pnative`
+2. **Check for Warnings**: Look for reflection-related warnings during build
+3. **Runtime Testing**: Test all REST endpoints and JSON operations in native mode
+4. **Minimal Scope**: Use most restrictive reflection scope that works
+
 == Implementation Example
 
 Based on the CUI JWT project analysis, here's the recommended implementation:
