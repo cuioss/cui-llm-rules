@@ -194,6 +194,7 @@ check_file() {
             if (match($0, /^[\*\-\+] /) ||     # Another unordered item
                 match($0, /^\*\* /) ||         # Nested unordered
                 match($0, /^[0-9]+\. /) ||     # Another ordered item
+                match($0, /^\. /) ||           # Another numbered item (dot syntax)
                 current_is_blank) {            # Blank line within list
                 continuing_list = 1
             }
