@@ -547,19 +547,79 @@ The `--check` flag reports which synchronized components are out of date without
 * ✅ Git-controlled versions ensure consistency
 * ✅ No network dependencies at runtime
 
-**Distribution Strategies**: See xref:architecture-overview.adoc#skills-distribution-strategies[Architecture Overview § Skills Distribution Strategies] for complete details on two strategies:
+**Why this is the only recommended approach**: See xref:architecture-overview.adoc#skills-distribution-strategy[Architecture Overview § Skills Distribution Strategy] for architectural background and comparison with theoretical alternatives.
 
-* **Strategy 1**: Skills Synchronization (✅ Verified - **USE THIS**)
-* **Strategy 2**: Dynamic Repository Access (⚠️ Proposed - requires verification before use)
+This synchronization-based approach is:
+* ✅ Verified and tested on all platforms
+* ✅ The ONLY approach recommended for use
+* ✅ Simple and proven (same mechanism as agents/commands)
 
 === Managing Drift
 
-Since synchronized skills can become outdated, follow these practices:
+Since synchronized skills can become outdated when the plugin is updated, follow these practices:
 
-* Synchronize regularly when plugin updates (weekly or on-demand)
-* Document which plugin version was synchronized in commit message
-* Use `/synchronize --check` to check for out-of-date components
-* Update synchronized skills: `/synchronize --all --include-skills --force`
+==== Detection
+
+Use the `--check` flag to detect outdated components:
+
+[source,bash]
+----
+/synchronize --check
+
+# Output shows which components need updates:
+# ✓ project-builder.md - up to date
+# ⚠ cui-java-standards - update available (synced: 2025-10-15, plugin: 2025-10-22)
+----
+
+**How it works**:
+* Reads `Synchronized date:` from file header comments
+* Compares with plugin file modification dates
+* Reports status for each component
+
+==== Update Frequency
+
+**Recommended schedule**:
+* After each plugin update: `/plugin marketplace update cui-llm-rules` → `/synchronize --check`
+* Before starting new feature work (ensure current standards)
+* When standards violations appear (may indicate outdated rules)
+
+**Automation**: Consider adding to git hooks or CI/CD pipeline
+
+==== Review Changes Before Applying
+
+[source,bash]
+----
+# Step 1: Update plugin
+/plugin marketplace update cui-llm-rules
+
+# Step 2: Check for updates
+/synchronize --check
+
+# Step 3: Review changes in plugin
+cd ~/.claude/plugins/cui-standards/
+git log  # (if plugin repo is git-cloned)
+
+# Step 4: Apply updates
+/synchronize --update  # Updates all outdated components
+# OR
+/synchronize --all --include-skills --force  # Force update everything
+
+# Step 5: Review diffs before committing
+git diff .claude/
+
+# Step 6: Commit if acceptable
+git add .claude/
+git commit -m "sync: Update cui-standards components to v1.2.0"
+----
+
+==== Testing After Sync
+
+After synchronizing updates:
+
+1. **Verify agents still work**: Run one agent to ensure no breaking changes
+2. **Check skills load**: Verify skill files are valid
+3. **Test in CI/CD**: If using automated pipelines, verify they still pass
+4. **Update team**: Notify team members to pull changes
 
 == Implementation Algorithm
 

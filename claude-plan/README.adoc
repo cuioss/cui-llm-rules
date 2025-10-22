@@ -5,7 +5,15 @@
 
 == Overview
 
+**DOCUMENT STATUS**: ✅ Architectural specifications complete (as of 2025-10-22)
+
+**IMPLEMENTATION STATUS**: 📋 Specifications ready for implementation - implementation has not yet begun
+
 This directory contains the technical specifications for the `cui-standards` Claude Code plugin. These documents define the architecture, component structure, and implementation requirements for transforming cui-llm-rules into a distributable plugin.
+
+**What you'll find here**: Complete specifications for architecture, component design, and distribution mechanisms
+
+**What's NOT here**: Implementation code (to be developed based on these specifications)
 
 == Document Index
 
@@ -68,10 +76,10 @@ This directory contains the technical specifications for the `cui-standards` Cla
 *Contents*:
 
 * `/synchronize` command specification
-* Copying agents/commands to project `.claude/` (git-controlled)
-* Skills accessed dynamically from repository (never synchronized)
+* Synchronizing agents, commands, and skills to project `.claude/` (git-controlled)
+* Skills synchronization required for cross-platform support
 * Platform support (Claude Code, Claude.ai web, CI/CD)
-* Update strategy and team collaboration workflow
+* Update strategy, drift management, and team collaboration workflow
 
 *Audience*: Developers setting up projects, teams using Claude.ai web or CI/CD
 
@@ -156,30 +164,15 @@ This directory contains complete specifications for:
 
 **Last Updated**: 2025-10-22
 
-Core Claude Code assumptions have been tested as documented below.
+**Complete verification tracking**: See xref:research-topics.adoc[Research Topics] for detailed status of all assumptions and research items.
 
-**Verified** ✅:
+**Key verifications**:
 
-* Plugins CAN contain `skills/` directory
-* Plugin installation commands work as documented
-* Progressive disclosure model is correct
-* YAML frontmatter structure is correct
-* Marketplace update mechanism confirmed
-
-**Failed** ❌:
-
-* `${CLAUDE_PLUGIN_ROOT}` environment variable does NOT exist (use programmatic detection)
-* `/plugin list` command does NOT exist (use `/plugin` interactive)
-* `/skill list` and `/agents list` commands do NOT exist
-
-**Discoveries** 🔍:
-
-* `hooks/` directory supported (optional)
-* `.mcp.json` MCP integration supported (optional)
-
-**Deferred** ⏸️:
-
-* Claude.ai web skills access (lower priority - focus on Claude Code first)
+* ✅ Skills synchronization approach verified (Project Synchronization works on all platforms)
+* ✅ Plugin installation and marketplace mechanisms confirmed
+* ✅ YAML frontmatter structure validated
+* ❌ `${CLAUDE_PLUGIN_ROOT}` environment variable does NOT exist
+* ⏸️ Dynamic repository access deferred (Project Synchronization is working solution)
 
 == Known Limitations
 

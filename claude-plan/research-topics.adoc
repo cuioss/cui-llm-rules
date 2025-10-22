@@ -19,9 +19,9 @@ This document identifies assumptions in the plugin architecture that **require e
 
 '''
 
-== CRITICAL Research Topics
+== CRITICAL Research Topics (Currently Deferred)
 
-=== 1. Skills Access from Claude.ai Web ⚠️
+=== 1. Skills Access from Claude.ai Web ⚠️ CRITICAL (⏸️ Deferred)
 
 ==== Current Assumption
 
@@ -38,18 +38,24 @@ Agent prompt: "Read cui-java-standards skill from https://github.com/cuioss/cui-
 → Claude fetches: https://github.com/cuioss/cui-llm-rules/standards/java/java-code-standards.adoc
 ----
 
-==== Why This Matters
+==== Why This Matters (and Why It's Deferred)
 
-**Impact**: If this doesn't work, the **entire cross-platform strategy fails**.
+**Original Concern**: If dynamic access doesn't work, the entire cross-platform strategy fails.
 
-* Claude.ai web users cannot install plugins
-* Skills must be accessible somehow or architecture needs redesign
-* Affects 50% of expected users (web vs CLI)
+**Current Resolution**: ✅ Cross-platform strategy already works via Project Synchronization
+* Skills ARE synchronized to `.claude/skills/` (not "never synchronized" as originally planned)
+* This approach works on all platforms TODAY (Claude Code, Claude.ai web, CI/CD)
+* Dynamic access would be an optimization, not a requirement
 
-**Architectural dependencies**:
-* Agents can be synchronized to `.claude/` (git-controlled)
-* But skills are never synchronized (to avoid drift)
-* Therefore, skills MUST be accessible dynamically or entire approach breaks
+**Why Still Track This**:
+* Could reduce synchronization overhead in future
+* May enable "always current" skills without manual sync
+* Affects long-term maintenance burden
+
+**Why Deferred**:
+* Working solution exists (Project Synchronization)
+* Focus on Claude Code implementation first
+* Can research later if synchronization proves problematic
 
 ==== What Needs Testing
 
@@ -100,22 +106,31 @@ System prompt:
 * [ ] Test Scenario 3 succeeds (relative path resolution after fetch)
 * [ ] Test Scenario 2 is optional (nice-to-have skill name resolution)
 
-==== Alternative Approaches if Assumption Fails
+==== Resolution Status
 
-**Option A: Embed Essential Content in Agents**
-* Pros: Self-contained, no external dependencies
-* Cons: Drift risk (defeats purpose of skills layer), large agent files
+**✅ RESOLVED**: Option B has been adopted as the standard approach
 
-**Option B: Skills in Project .claude/**
-* Synchronize skills to `.claude/skills/` (currently not in spec)
-* Pros: Available to all platforms
-* Cons: Drift risk, violates "never synchronize skills" principle
+**Chosen Approach: Skills in Project .claude/** (Option B)
+* Synchronize skills to `.claude/skills/` via `/synchronize --all --include-skills`
+* ✅ Available to all platforms (Claude Code, Claude.ai web, CI/CD)
+* ✅ Git-controlled for version management
+* ⚠️ Requires manual synchronization (use `/synchronize --check` to detect drift)
 
-**Option C: Hybrid Approach**
-* Essential Rules embedded (already in spec)
-* Skills provide "nice to have" additional context
-* Pros: Degrades gracefully
-* Cons: Reduces value of skills layer
+**Why this works**:
+* Proven mechanism - same as agents/commands distribution
+* No dependency on unverified dynamic access
+* Simple mental model: "everything in `.claude/` is synchronized"
+
+**Other considered approaches**:
+
+**Option A: Embed Essential Content in Agents** (rejected)
+* Would defeat purpose of skills layer
+* High drift risk, large agent files
+
+**Option C: Hybrid Approach** (partially adopted)
+* Essential Rules embedded in agents for core requirements ✅
+* Skills provide complete, detailed standards ✅
+* Agents reference skills for full context ✅
 
 ==== Verification Steps
 

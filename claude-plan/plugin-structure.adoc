@@ -354,8 +354,6 @@ standards/java/... (missing ./ prefix)
 
 === Environment Variables
 
-**Verification Status**: ✅ Tested 2025-10-22
-
 **Available Variables**:
 
 * **CLAUDECODE=1**: Indicates Claude Code environment
@@ -579,9 +577,7 @@ The following features are supported by Claude Code plugins but NOT required for
 
 === Hooks Directory (Optional)
 
-**Verification Status**: ✅ Discovered 2025-10-22
-
-Event handlers for workflow automation.
+Event handlers for workflow automation. (Feature verified - see xref:research-topics.adoc[Research Topics] for verification details)
 
 ==== When to Use Hooks
 
@@ -634,9 +630,7 @@ Use hooks when you need to:
 
 === MCP Integration (Optional)
 
-**Verification Status**: ✅ Discovered 2025-10-22
-
-MCP (Model Context Protocol) integration for external tools and services.
+MCP (Model Context Protocol) integration for external tools and services. (Feature verified - see xref:research-topics.adoc[Research Topics] for verification details)
 
 ==== When to Use MCP
 
@@ -694,9 +688,7 @@ Use MCP integration when you need to:
 
 === Plugin Installation Verification
 
-After installing the plugin, verify it's working correctly.
-
-**Verification Status**: ✅ Tested 2025-10-22
+After installing the plugin, verify it's working correctly. (Commands verified - see xref:research-topics.adoc[Research Topics] for complete verification status)
 
 **Available Commands**:
 
@@ -845,9 +837,7 @@ Use built-in doctor commands to verify components:
 
 === No Individual Plugin Update Command
 
-**Verification Status**: ✅ Tested 2025-10-22
-
-Claude Code does **NOT support updating individual plugins** via `/plugin update plugin-name`.
+Claude Code does **NOT support updating individual plugins** via `/plugin update plugin-name`. (Verified - see xref:research-topics.adoc[Research Topics])
 
 **Update Mechanism**: Use `/plugin marketplace update marketplace-name` to refresh the marketplace, which distributes updates to all plugins from that marketplace.
 

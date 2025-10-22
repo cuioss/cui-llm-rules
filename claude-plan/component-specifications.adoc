@@ -21,16 +21,13 @@ Skills are knowledge layers that provide Claude with context and methodology by 
 
 ==== YAML Frontmatter
 
-Skills use YAML frontmatter to define metadata.
+Skills use YAML frontmatter to define metadata. For complete field specifications shared across all component types, see xref:#yaml-frontmatter-common-fields[Common YAML Frontmatter Fields].
 
-**Required fields**:
+**Skills-specific configuration**:
 
-* **name**: Display name of the skill
-* **description**: Clear, specific description for context matching
-
-**Optional fields**:
-
-* **allowed-tools**: Comma-separated list of tools (e.g., `Read, Grep, Glob`)
+* **name** (required): Display name of the skill
+* **description** (required): Clear, specific description for context matching
+* **allowed-tools** (optional): Comma-separated list of tools (e.g., `Read, Grep, Glob`)
 
 **Example**:
 [source,yaml]
@@ -41,8 +38,6 @@ description: Clear description that triggers auto-activation based on context
 allowed-tools: Read  # Optional: Read-only recommended for knowledge skills
 ---
 ----
-
-For field specifications shared across components, see xref:#yaml-frontmatter-common-fields[Common YAML Frontmatter Fields].
 
 ==== Progressive Disclosure
 
@@ -147,18 +142,15 @@ Agents are autonomous task executors that combine embedded Essential Rules with 
 
 ==== YAML Frontmatter
 
-Agents use YAML frontmatter to define metadata and configuration.
+Agents use YAML frontmatter to define metadata and configuration. For complete field specifications shared across all component types, see xref:#yaml-frontmatter-common-fields[Common YAML Frontmatter Fields].
 
-**Required fields**:
+**Agents-specific configuration**:
 
-* **name**: Agent identifier
-* **description**: When to use this agent (triggers proactive activation)
-
-**Optional fields**:
-
-* **tools**: Comma-separated list (e.g., `Read, Edit, Write, Bash`); inherits all if omitted
-* **model**: Specific model (e.g., `sonnet`, `haiku`)
-* **color**: Terminal output color (e.g., `green`, `blue`)
+* **name** (required): Agent identifier
+* **description** (required): When to use this agent (triggers proactive activation)
+* **tools** (optional): Comma-separated list (e.g., `Read, Edit, Write, Bash`); inherits all if omitted
+* **model** (optional): Specific model (e.g., `sonnet`, `haiku`)
+* **color** (optional): Terminal output color (e.g., `green`, `blue`)
 
 **Example**:
 [source,yaml]
@@ -172,15 +164,46 @@ color: green
 ---
 ----
 
-For field specifications shared across components, see xref:#yaml-frontmatter-common-fields[Common YAML Frontmatter Fields].
-
-=== Essential Rules Pattern (Custom Implementation)
+=== Essential Rules Pattern (Manual Maintenance Required)
 
 **IMPORTANT**: This is a **MANUAL PATTERN** created for this plugin, NOT a native Claude Code feature.
 
-==== What "Custom Implementation" Means
+==== Quick Start
 
-The Essential Rules Pattern is a **convention** that requires manual work:
+**In 3 steps:**
+
+1. **Extract core requirements from standards**
+   * Read source file (e.g., `standards/documentation/javadoc-standards.adoc`)
+   * Extract only MUST requirements (5-15 core rules)
+   * Remove examples, rationale, and edge cases
+
+2. **Format as Essential Rules block**
+   ```markdown
+   ## ESSENTIAL RULES
+
+   ### Domain Standards (e.g., "JavaDoc Standards")
+   Source: ./standards/path/to/file.adoc
+   Last Synced: 2025-10-22
+
+   **Category Name**:
+   - Core requirement 1
+   - Core requirement 2
+   ```
+
+3. **Embed in agent and maintain**
+   * Paste block into agent `.md` file (after YAML frontmatter)
+   * Use `/agents-doctor sync` to detect drift
+   * Update manually when standards change (requires approval)
+
+**What to include**: Mandatory requirements agents must enforce
+
+**What to exclude**: Examples, rationale, optional recommendations, edge cases
+
+**Size guideline**: 15-30 lines per domain (not per agent)
+
+==== Why "Manual Maintenance Required"
+
+The Essential Rules Pattern is a **user-defined convention** that requires manual work:
 
 * **NOT automated** - No Claude Code feature automatically extracts or embeds rules
 * **Manual extraction** - You must read standards files and extract core requirements
@@ -339,17 +362,16 @@ Commands are user-invoked utilities for verification and management.
 
 ==== YAML Frontmatter
 
-Commands use YAML frontmatter to define metadata and configuration.
+Commands use YAML frontmatter to define metadata and configuration. For complete field specifications shared across all component types, see xref:#yaml-frontmatter-common-fields[Common YAML Frontmatter Fields].
 
-**All fields are optional** (commands can have no frontmatter).
+**Commands-specific notes**:
 
-**Common fields**:
-
-* **description**: Brief description of command purpose
-* **allowed-tools**: Comma-separated list (e.g., `Read, Write, Edit, Bash`)
-* **argument-hint**: Parameter hint shown in help (e.g., `"[project|global|name]"`)
-* **model**: Specific model to use (e.g., `sonnet`, `haiku`)
-* **disable-model-invocation**: Set to `true` for pure text commands
+* **All fields are optional** (commands can have no frontmatter at all)
+* **description** (optional): Brief description shown in help text
+* **allowed-tools** (optional): Comma-separated list (e.g., `Read, Write, Edit, Bash`)
+* **argument-hint** (optional): Parameter hint shown in help (e.g., `"[project|global|name]"`)
+* **model** (optional): Specific model to use
+* **disable-model-invocation** (optional): Set to `true` for pure text commands
 
 **Example**:
 [source,yaml]
@@ -361,8 +383,6 @@ argument-hint: "[project|global|agent-name]"
 model: sonnet
 ---
 ----
-
-For field specifications shared across components, see xref:#yaml-frontmatter-common-fields[Common YAML Frontmatter Fields].
 
 ==== Parameter Support
 
@@ -395,18 +415,14 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 
 The `/agents-doctor sync` command updates Essential Rules blocks in agents with current content from source standards files.
 
-**IMPORTANT - Command Semantics**:
+**Command Semantics** (one-way update: source → agent):
 
-* **"sync"** means **one-way update: source → agent** (NOT bidirectional)
-* Source standards files are authoritative (never modified by this command)
-* Agent Essential Rules blocks are updated to match source
-* Changes require explicit user approval (not automatic)
+* Reads standards from source files (authoritative)
+* Updates agent Essential Rules blocks to match source
+* Requires explicit user approval for each change
+* Never modifies source standards files
 
-**Why "sync" not "update"?**
-
-* Historical naming convention from similar commands
-* Conveys "keeping in synchronization" with source
-* Common term in development tools (e.g., `git sync`, `npm sync`)
+**Note on naming**: "sync" = "synchronize agent with source" (one-way). The command keeps agents synchronized with authoritative standards.
 
 **What this command does**:
 
@@ -427,14 +443,7 @@ The `/agents-doctor sync` command updates Essential Rules blocks in agents with 
 
 # Check specific agent only
 /agents-doctor sync project-builder
-
-# Alternative phrasing (if supported in future):
-/agents-doctor update-essential-rules
 ----
-
-**Note**: Consider the term "sync" as shorthand for "synchronize embedded rules with source." The direction is always source → agent, never agent → source.
-
-The command provides:
 
 ==== Verification Checks
 
@@ -671,15 +680,18 @@ Apply fix? [y/N]: y
 
 == Path Resolution
 
-**All paths must be relative to plugin/repository root and start with `./`**
+**CRITICAL REQUIREMENT**: All paths must be relative to plugin/repository root and start with `./`
 
-**Complete requirements**: See xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resolution]
+**Complete specification**: See xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resolution] for detailed requirements, examples, and environment variable information.
 
 **Quick reference**:
 
 * ✅ Correct: `./standards/java/java-code-standards.adoc`
 * ❌ Wrong: `~/git/cui-llm-rules/standards/...` (absolute path)
 * ❌ Wrong: `standards/java/...` (missing `./` prefix)
+* ❌ Wrong: `/Users/oliver/...` (absolute path)
+
+This applies to all component types: skills, agents, and commands.
 
 == Tool Access Patterns
 
