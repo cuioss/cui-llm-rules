@@ -391,269 +391,66 @@ git commit -m "sync: Update project-builder to latest version"
 /synchronize adoc-review agents-doctor --force
 ----
 
-== Skills Access Pattern
+== Skills Synchronization
 
-=== Skills Are Never Synchronized (Current Policy)
+The `/synchronize` command can synchronize skills to `.claude/skills/` for cross-platform availability.
 
-[WARNING]
-====
-**⚠️ CONTINGENT ON VERIFICATION**
-
-This policy assumes Claude.ai web and CI/CD can access skills from repository URLs. This is an **unverified assumption**.
-
-**See**: xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access] for verification status.
-
-**If verification fails**, see §10.3 below for fallback approach.
-====
-
-**Current policy** (requires verification): Skills are NEVER copied to `.claude/`. They are always accessed dynamically from the repository.
-
-**Rationale** (if dynamic access works):
-
-- Skills reference standards that change frequently
-- Synchronizing creates drift risk
-- Dynamic access ensures always-current data
-- Smaller .claude/ directory size
-
-=== How Skills Are Accessed (Proposed)
-
-See xref:architecture-overview.adoc#skills-access-mechanism[Architecture Overview § Skills Access Mechanism] for complete details on how Claude accesses skills from plugin installations (Claude Code) or repository (Claude.ai web, CI/CD).
-
-⚠️ **This mechanism is unverified** - test before implementation.
-
-=== Fallback: Skills Synchronization (If Dynamic Access Fails)
-
-**If verification shows** that Claude.ai web/CI/CD cannot access skills from repository URLs, use this fallback approach:
-
-==== Fallback Policy
-
-**Synchronize skills** to `.claude/skills/` along with agents and commands.
+**Recommendation**: Synchronize skills along with agents and commands for reliable cross-platform operation.
 
 [source,bash]
 ----
-# Fallback synchronization (if web access fails)
+# Synchronize skills to project (recommended)
 /synchronize --all --include-skills
 
-# This would copy:
+# This copies:
 # - Agents → .claude/agents/
 # - Commands → .claude/commands/
-# - Skills → .claude/skills/ (ONLY if fallback needed)
+# - Skills → .claude/skills/
 ----
 
-==== Fallback Trade-offs
+**Distribution Strategies**: See xref:architecture-overview.adoc#skills-distribution-strategies[Architecture Overview § Skills Distribution Strategies] for complete details on two alternative approaches:
 
-**Advantages**:
-- Works on all platforms (no external dependencies)
-- Self-contained project
-- No network access required
+* **Strategy 1**: Skills Synchronization (Verified - works on all platforms)
+* **Strategy 2**: Dynamic Repository Access (Proposed - requires verification)
 
-**Disadvantages**:
-- Drift risk: Skills in `.claude/` may become out of sync with standards
-- Larger repository size
-- Requires explicit updates via `/synchronize`
-- Skills reference standards that may also need synchronization
+**Mitigation for drift**:
 
-==== Fallback Mitigation
+* Synchronize regularly when plugin updates (weekly or on-demand)
+* Document which plugin version was synchronized
+* Use `/agents-doctor` to check for out-of-date skills
 
-If fallback approach is needed:
+== Implementation Algorithm
 
-1. **Add update warnings**: `/agents-doctor` should warn when skills are out of date
-2. **Sync standards too**: May need to also synchronize `standards/` files to `.claude/standards/`
-3. **Document update frequency**: Teams should synchronize regularly (e.g., weekly)
-4. **Version pinning**: Document which plugin version skills came from
+High-level implementation approach:
 
-==== Decision Point
+. **Discovery Phase**
+   * Locate plugin installation (`~/.claude/plugins/cui-standards/`)
+   * Scan available agents and commands
+   * Validate requested component names
 
-**Before implementing**, verify Skills Access Mechanism:
+. **Selection Phase**
+   * **Interactive mode** (no arguments): Display numbered menus for agents and commands
+   * **Command-line mode**: Parse arguments for specific components or `--all`
+   * Extract descriptions from YAML frontmatter for display
 
-* ✅ **If web access works**: Use current policy (skills never synchronized)
-* ❌ **If web access fails**: Use fallback policy (synchronize skills)
+. **Synchronization Phase**
+   * Create `.claude/agents/` and `.claude/commands/` directories if needed
+   * Copy selected components from plugin to project
+   * Add synchronization metadata header (source, date, update command)
+   * Preserve YAML frontmatter and content
 
-See xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics] for test scenarios.
+. **Verification Phase**
+   * Verify copied files exist and are valid
+   * Report results with file locations
+   * Display git commit instructions
+   * Note about skills access mechanism
 
-== Command Implementation Pseudocode
+**Key Functions**:
 
-[source,python]
-----
-def synchronize(components, options):
-    # 1. Discover plugin location
-    plugin_path = find_plugin_installation("cui-standards")
-    if not plugin_path:
-        error("Plugin not installed. Run: /plugin install cui-standards@cui-llm-rules")
-
-    # 2. Resolve component names
-    agents_to_sync = []
-    commands_to_sync = []
-
-    if not components and not options.all:
-        # Interactive mode - no arguments provided
-        agents_to_sync, commands_to_sync = interactive_selection(plugin_path)
-    elif options.all:
-        agents_to_sync = list_all_agents(plugin_path)
-        commands_to_sync = list_all_commands(plugin_path)
-    elif options.agents:
-        agents_to_sync = components
-    elif options.commands:
-        commands_to_sync = components
-    else:
-        # Auto-detect type by name
-        agents_to_sync, commands_to_sync = classify_components(components)
-
-def interactive_selection(plugin_path):
-    """Interactive mode with numbered selection"""
-
-    # 1. Get available components
-    available_agents = discover_agents(plugin_path)
-    available_commands = discover_commands(plugin_path)
-
-    # 2. Display agents menu
-    print("Select agents to synchronize (space-separated numbers, or 'all', or 'skip'):")
-    print()
-    print("Available agents:")
-    for i, agent in enumerate(available_agents, 1):
-        description = get_description(f"{plugin_path}/agents/{agent}.md")
-        print(f"  {i:2d}. {agent:25s} - {description}")
-
-    print()
-    agent_selection = input(f"Selection [1-{len(available_agents)}, all, skip]: ").strip()
-
-    selected_agents = []
-    if agent_selection.lower() == 'all':
-        selected_agents = available_agents
-    elif agent_selection.lower() != 'skip':
-        # Parse numbers
-        numbers = parse_selection(agent_selection)
-        selected_agents = [available_agents[n-1] for n in numbers if 1 <= n <= len(available_agents)]
-
-    if selected_agents:
-        print(f"✓ Selected: {', '.join(selected_agents)}")
-        print()
-
-    # 3. Display commands menu
-    print("Select commands to synchronize (space-separated numbers, or 'all', or 'skip'):")
-    print()
-    print("Available commands:")
-    for i, command in enumerate(available_commands, 1):
-        description = get_description(f"{plugin_path}/commands/{command}.md")
-        print(f"  {i:2d}. {command:28s} - {description}")
-
-    print()
-    command_selection = input(f"Selection [1-{len(available_commands)}, all, skip]: ").strip()
-
-    selected_commands = []
-    if command_selection.lower() == 'all':
-        selected_commands = available_commands
-    elif command_selection.lower() != 'skip':
-        # Parse numbers
-        numbers = parse_selection(command_selection)
-        selected_commands = [available_commands[n-1] for n in numbers if 1 <= n <= len(available_commands)]
-
-    if selected_commands:
-        print(f"✓ Selected: {', '.join(selected_commands)}")
-        print()
-
-    return selected_agents, selected_commands
-
-def parse_selection(input_str):
-    """Parse space-separated numbers from user input"""
-    numbers = []
-    for part in input_str.split():
-        try:
-            numbers.append(int(part))
-        except ValueError:
-            pass  # Ignore non-numeric input
-    return numbers
-
-def discover_agents(plugin_path):
-    """Get list of agent names from plugin"""
-    agents = []
-    agents_dir = f"{plugin_path}/agents"
-    for file in list_files(agents_dir):
-        if file.endswith('.md'):
-            agents.append(file[:-3])  # Remove .md extension
-    return sorted(agents)
-
-def discover_commands(plugin_path):
-    """Get list of command names from plugin"""
-    commands = []
-    commands_dir = f"{plugin_path}/commands"
-    for file in list_files(commands_dir):
-        if file.endswith('.md'):
-            commands.append(file[:-3])  # Remove .md extension
-    return sorted(commands)
-
-def get_description(file_path):
-    """Extract description from YAML frontmatter or first line"""
-    content = read_file(file_path)
-
-    # Try to extract from YAML frontmatter
-    if content.startswith('---'):
-        lines = content.split('\n')
-        for line in lines[1:]:
-            if line.startswith('description:'):
-                return line.split(':', 1)[1].strip().strip('"\'')
-            if line.strip() == '---':
-                break
-
-    # Fallback: use first non-empty line after frontmatter/comments
-    for line in content.split('\n'):
-        if line.strip() and not line.startswith('#') and not line.startswith('<!--'):
-            return line.strip()[:60]  # First 60 chars
-
-    return "No description"
-
-    # 3. Ensure .claude/ directories exist
-    ensure_directory_exists(".claude/agents")
-    ensure_directory_exists(".claude/commands")
-
-    # 4. Synchronize each component
-    results = []
-    for agent in agents_to_sync:
-        result = copy_component(
-            source=f"{plugin_path}/agents/{agent}.md",
-            dest=f".claude/agents/{agent}.md",
-            force=options.force
-        )
-        results.append(result)
-
-    for command in commands_to_sync:
-        result = copy_component(
-            source=f"{plugin_path}/commands/{command}.md",
-            dest=f".claude/commands/{command}.md",
-            force=options.force
-        )
-        results.append(result)
-
-    # 5. Report results
-    print_summary(results)
-    print_git_instructions()
-    print_skill_access_reminder()
-
-def copy_component(source, dest, force):
-    # Check if destination exists
-    if exists(dest) and not force:
-        if not confirm(f"Overwrite {dest}?"):
-            return {"status": "skipped", "file": dest}
-
-    # Read source
-    content = read_file(source)
-
-    # Add synchronization metadata
-    metadata = f"""<!--
-Synchronized from: cui-standards plugin
-Synchronized date: {today()}
-Source: {source}
-
-To update: /synchronize {basename(dest, '.md')} --force
--->
-
-"""
-
-    # Write to destination
-    write_file(dest, metadata + content)
-
-    return {"status": "synchronized", "file": dest}
-----
+* `discover_components(path)`: List agents/commands from plugin directory
+* `interactive_selection()`: Display numbered menus, parse user input
+* `copy_component(source, dest)`: Copy file with metadata header
+* `validate_component(path)`: Check YAML frontmatter validity
 
 == Error Handling
 

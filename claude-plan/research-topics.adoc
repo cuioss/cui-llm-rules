@@ -5,7 +5,11 @@
 
 == Overview
 
+**Document Purpose**: Research tracking (not specification)
+
 This document identifies assumptions in the plugin architecture that **require empirical verification** before implementation. These are not design decisions but **unknowns about Claude Code/Claude.ai capabilities** that could affect architectural feasibility.
+
+**Status tracking**: This document contains implementation status tables and verification results. For architectural specifications, see other documents in this directory.
 
 == Status Legend
 

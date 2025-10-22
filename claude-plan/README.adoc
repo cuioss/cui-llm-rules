@@ -119,9 +119,9 @@ This directory contains the technical specifications for the `cui-standards` Cla
 
 === Essential Rules Pattern
 
-Agents use an **Essential Rules Pattern** where core requirements are embedded for performance, with skill references for complete standards.
+Agents embed core requirements for performance while referencing skills for complete standards.
 
-See xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern] for complete specification.
+**Details**: xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern]
 
 === Path Requirements
 
@@ -133,81 +133,44 @@ See xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resoluti
 
 See xref:plugin-structure.adoc#installation[Plugin Structure § Installation] for complete installation instructions including local development, GitHub repository, and project auto-installation.
 
-=== Complete Workflow
-
-==== Quick Start
+=== Quick Start
 
 [source,bash]
 ----
-# 1. Install plugin (Claude Code users only)
+# Install plugin (Claude Code users)
 /plugin install cui-standards@cui-llm-rules
 
-# 2. Synchronize to project (makes available to all platforms)
+# Synchronize to project (all users)
 cd ~/my-project
-/synchronize
+/synchronize --all --include-skills
 
-# 3. Commit to git
+# Commit to git
 git add .claude/
 git commit -m "sync: Add cui-standards components"
 git push
 ----
 
-**What gets synchronized**:
+**Complete installation and workflow details**:
 
-* ✅ Agents → `.claude/agents/` (git-controlled, available to all platforms)
-* ✅ Commands → `.claude/commands/` (git-controlled, available to all platforms)
-* ❌ Skills → NOT synchronized (accessed dynamically from repository)
+* xref:plugin-structure.adoc#installation[Plugin Structure § Installation]
+* xref:synchronize-command-spec.adoc[Synchronize Command Specification]
 
-**For detailed workflow**, including:
+== Specification Scope
 
-* Interactive vs command-line synchronization modes
-* Platform-specific usage (Claude Code, Claude.ai web, CI/CD)
-* Skills resolution mechanism (⚠️ requires verification)
-* Team collaboration workflow
-* Update strategy
+This directory contains complete specifications for:
 
-See xref:synchronize-command-spec.adoc[Synchronize Command Specification].
-
-== Implementation Status
-
-[cols="1,2,1"]
-|===
-|Component |Description |Status
-
-|**Architecture**
-|Four-layer model defined
-|✅ Specified
-
-|**Skills**
-|4 skills planned (Java, Testing, Documentation, Process)
-|⏳ Not implemented
-
-|**Agents**
-|7 agents to migrate from `~/.claude/agents/`
-|⏳ Not implemented
-
-|**Commands**
-|11 commands to migrate/create
-|⏳ Not implemented
-
-|**/synchronize command**
-|Project synchronization for cross-platform compatibility
-|✅ Specified
-
-|**plugin.json**
-|Manifest specification complete
-|✅ Specified
-
-|**Research Topics**
-|Critical assumptions requiring verification before implementation
-|⚠️ Needs Research
-|===
+* **Architecture**: Four-layer model (Standards, Skills, Agents, Commands)
+* **Skills**: 4 skills (Java, Testing, Documentation, Process)
+* **Agents**: 7 agents for task execution
+* **Commands**: 11 commands including `/synchronize` for cross-platform distribution
+* **Plugin Manifest**: Complete `plugin.json` specification
+* **Research Topics**: Unverified assumptions requiring testing
 
 == Verification Status
 
 **Last Updated**: 2025-10-22
 
-Core Claude Code assumptions have been tested. See xref:VERIFICATION-RESULTS.adoc[Verification Results] for complete details.
+Core Claude Code assumptions have been tested as documented below.
 
 **Verified** ✅:
 

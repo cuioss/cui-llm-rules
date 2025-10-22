@@ -373,11 +373,9 @@ The command provides:
 * Opportunity to reject breaking changes
 ----
 
-== Skills Doctor Command (Planned)
+== Skills Doctor Command
 
-**Status**: Specification complete, not yet implemented.
-
-New command for verifying skills structure.
+Verifies skills structure, YAML frontmatter, and cross-references.
 
 === Verification Checks
 
@@ -425,11 +423,11 @@ New command for verifying skills structure.
 - Check if skill references other skills
 ----
 
-== Path Resolution Rules
+== Path Resolution
 
-All paths in skills, agents, and commands must use relative paths starting with `./` (relative to plugin root).
+All paths must be relative to plugin root and start with `./`
 
-See xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resolution] for complete path resolution requirements, environment variables, and examples.
+**Complete specification**: xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resolution]
 
 == Tool Access Patterns
 

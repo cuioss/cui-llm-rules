@@ -119,26 +119,31 @@ Layer 4: Commands (command.md) - User utilities
 * **Implementation**: Skills use Read tool to dynamically fetch from `standards/`
 * **Benefit**: No duplication between skills, always current
 
-==== Skills Access Mechanism
+==== Skills Distribution Strategies
 
-[WARNING]
-====
-**⚠️ PROPOSED MECHANISM - REQUIRES VERIFICATION**
+Skills can be distributed to different platforms using two strategies:
 
-The Claude.ai web and CI/CD access mechanism documented below is an **unverified assumption that could break the core cross-platform architecture if incorrect**.
+**Strategy 1: Project Synchronization** ✅ VERIFIED
 
-**Verification Status**: ❌ Not tested
+This approach synchronizes skills to project `.claude/skills/` directory (git-controlled), making them available on all platforms.
 
-**See**: xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access from Claude.ai Web] for:
+* **Status**: Verified and works on all platforms
+* **Platforms**: Claude Code, Claude.ai web, CI/CD
+* **Trade-off**: Requires explicit synchronization, potential for drift
+* **Recommendation**: Use this approach until Strategy 2 is verified
 
-* Test scenarios and acceptance criteria
-* Alternative approaches if this assumption fails
-* Architectural impact assessment
+See xref:synchronize-command-spec.adoc[Synchronize Command Specification] for complete details.
 
-**Do NOT implement** based on this section alone. Verification must be completed first.
-====
+**Strategy 2: Dynamic Repository Access** ⚠️ PROPOSED - NOT VERIFIED
 
-**If this mechanism works as proposed**, skills would be accessed dynamically at runtime using the following mechanism:
+This approach accesses skills dynamically from repository URLs at runtime, avoiding synchronization.
+
+* **Status**: Unverified proposal requiring testing
+* **Platforms**: Potentially all platforms (if verification succeeds)
+* **Trade-off**: No synchronization needed, always current, but requires network access
+* **Verification Required**: See xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access]
+
+**If Strategy 2 works as proposed**, skills would be accessed dynamically at runtime using the following mechanism:
 
 **When Claude Code is Running:**
 
@@ -181,28 +186,20 @@ The Claude.ai web and CI/CD access mechanism documented below is an **unverified
    → Claude fetches: https://github.com/cuioss/cui-llm-rules/standards/java/java-code-standards.adoc
    ```
 
-**Critical Requirements (if mechanism works as proposed):**
+**Critical Requirements for Strategy 2** (all unverified):
 
-* **Repository must be public** OR agents must include explicit repository URLs (mechanism unverified)
-* **Skills never synchronized** to `.claude/` (to avoid drift) - unless verification fails, see xref:research-topics.adoc#_1_skills_access_from_claudeai_web[alternative approaches]
-* **Standards files must be accessible** via same mechanism as skills (unverified)
-* **Relative path resolution** must work when Claude fetches from repository root (unverified)
+* Repository must be public OR agents must include explicit repository URLs
+* Skills would NOT be synchronized to `.claude/` (to avoid drift)
+* Standards files must be accessible via same mechanism as skills
+* Relative path resolution must work when Claude fetches from repository root
+
+**Until Strategy 2 is verified**, use **Strategy 1 (Project Synchronization)** which has no such requirements and works on all platforms today.
 
 === Decision 2: Agents Use Essential Rules Pattern (Custom Implementation)
 
-**Overview**: Agents embed core requirements from standards for performance while maintaining skill references for complete information.
+Agents embed core requirements from standards for performance while maintaining skill references for complete information. This custom pattern provides fast, autonomous execution without I/O overhead while keeping access to complete standards when needed.
 
-* **Important**: This is a **custom pattern**, not a native Claude Code feature
-* **Rationale**: Performance (no I/O during execution), autonomy (self-contained during task execution)
-* **Trade-off**: Duplication accepted for speed and reliability
-* **Mitigation**: Synchronization and drift detection via `/agents-doctor sync` command (custom implementation requiring manual approval)
-
-**Pattern Structure**: Agents contain two knowledge layers:
-
-1. **Essential Rules**: Embedded core requirements (5-15 critical rules per domain)
-2. **Skill References**: Prompts that direct Claude to read skills for complete standards
-
-**For complete specification** including implementation details, synchronization workflow, and drift detection mechanisms, see xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern].
+**Complete specification**: xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern]
 
 === Decision 3: Plugin-Based Distribution
 
@@ -244,102 +241,6 @@ For nested CLAUDE.md files, the most specific (deepest nested) takes priority.
 
 == Installation and Updates
 
-See xref:plugin-structure.adoc#installation[Plugin Structure § Installation] for complete installation instructions and xref:plugin-structure.adoc#version-management[Plugin Structure § Version Management] for version management details.
-
-== Version Management (Summary)
-
-* **Version Field**: Defined in `.claude-plugin/plugin.json` and `marketplace.json`
-* **Git Tags**: Used for version tracking (e.g., `v1.0.0`, `v1.1.0`)
-* **Semantic Versioning**: Standard semver format (MAJOR.MINOR.PATCH)
-* **Distribution**: Via marketplace refresh
-* **Limitation**: No explicit version pinning mechanism in Claude Code (as of research date)
-
-=== Skills Versioning Strategy
-
-**Key principle**: Skills are **always accessed from repository HEAD** (latest version), not pinned to plugin version.
-
-==== Versioning Behavior by Platform
-
-**Claude Code (Plugin Installed)**:
-
-* Skills loaded from: `~/.claude/plugins/cui-standards/skills/` (plugin installation)
-* Version: Matches installed plugin version
-* Update: When plugin updates (via marketplace refresh)
-
-**Claude.ai Web & CI/CD** (⚠️ mechanism unverified):
-
-* Skills accessed from: Repository URL (e.g., GitHub)
-* Version: **Always latest** (HEAD of default branch)
-* Update: Automatic (fetches from repository at runtime)
-* **Implication**: Web users get latest skills even if plugin version is older
-
-==== Version Consistency Implications
-
-**Scenario**: Plugin v1.0.0 installed, but repository has newer standards
-
-|===
-|Platform |Skills Version |Standards Version |Consistent?
-
-|**Claude Code**
-|v1.0.0 (from plugin)
-|v1.0.0 (via skills)
-|✅ Yes
-
-|**Claude.ai Web** (if access works)
-|Latest (from repo)
-|Latest (from repo)
-|✅ Yes
-
-|**Mixed team** (some CLI, some web)
-|Mixed (v1.0.0 + latest)
-|Mixed
-|⚠️ **Inconsistent**
-|===
-
-==== Recommendations
-
-**For consistent team experience**:
-
-1. **Keep plugin updated**: Claude Code users should update plugin when standards change
-   ```bash
-   /plugin marketplace update cui-llm-rules
-   ```
-
-2. **Document standards version**: In `standards/README.adoc`, note current version
-   ```adoc
-   = CUI Standards
-   Version: 1.2.0 (matches plugin version)
-   Last Updated: 2025-10-22
-   ```
-
-3. **Breaking changes**: When standards have breaking changes:
-   * Bump plugin MAJOR version
-   * Document migration guide
-   * Test agents with new standards before release
-
-4. **Accept eventual consistency**: Web users always get latest; CLI users get plugin version. This is acceptable if changes are backward-compatible.
-
-==== Skills vs Agents vs Standards Versioning
-
-[cols="1,2,2"]
-|===
-|Component |Versioning Strategy |Rationale
-
-|**Standards** (Layer 1)
-|Git-tracked, references in skills
-|Source of truth, versioned via git
-
-|**Skills** (Layer 2)
-|Dynamic fetch, always latest
-|Mediates access to standards, should match standards version
-
-|**Agents** (Layer 3)
-|Synchronized to project, versioned via git
-|Project-specific, may be customized
-
-|**Commands** (Layer 4)
-|Synchronized to project, versioned via git
-|Project-specific workflows
-|===
-
-**Implication**: Skills act as "latest" adapters to standards, while agents can be version-controlled per project.
+* **Installation**: xref:plugin-structure.adoc#installation[Plugin Structure § Installation]
+* **Version Management**: xref:plugin-structure.adoc#version-management[Plugin Structure § Version Management]
+* **Update**: `/plugin marketplace update cui-llm-rules` (no version pinning available)
