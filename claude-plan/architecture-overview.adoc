@@ -1,0 +1,273 @@
+= CUI LLM Rules: Plugin Architecture Overview
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Introduction
+
+This document describes the architectural design of the cui-llm-rules Claude Code plugin, which provides centralized standards, skills, agents, and commands for CUI (Common User Interface) OSS projects.
+
+== Executive Summary
+
+The cui-llm-rules repository transforms from a documentation-only repository into a Claude Code plugin that provides a four-layer architecture:
+
+* **Standards**: Authoritative technical requirements (existing AsciiDoc documentation)
+* **Skills**: Knowledge layers that reference standards and provide methodologies
+* **Agents**: Task executors that use skills and embedded essential rules
+* **Commands**: User-invoked utilities for verification and management
+
+All layers are distributed via a single plugin installation, eliminating manual synchronization.
+
+== Four-Layer Architecture Model
+
+=== Layer Overview
+
+----
+Layer 1: Standards (AsciiDoc) - Source of truth
+Layer 2: Skills (SKILL.md) - Knowledge & methodology (references Layer 1)
+Layer 3: Agents (agent.md) - Task executors (use Layer 2, embed essential rules from Layer 1)
+Layer 4: Commands (command.md) - User utilities
+----
+
+=== Visual Architecture
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 1: Standards (Source of Truth)                        │
+│ Location: cui-llm-rules/standards/                          │
+│ Format: AsciiDoc (.adoc)                                    │
+│ Purpose: Define technical requirements                      │
+│                                                              │
+│ Examples:                                                    │
+│ • java/java-code-standards.adoc                             │
+│ • testing/core-standards.adoc                               │
+│ • documentation/javadoc-standards.adoc                      │
+│ • process/task-completion-standards.adoc                    │
+└─────────────────────────────────────────────────────────────┘
+                            ▲
+                            │ Referenced by (dynamic reads)
+                            │
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 2: Skills (Knowledge & Methodology)                   │
+│ Location: cui-llm-rules/skills/                             │
+│ Format: SKILL.md with YAML frontmatter                      │
+│ Purpose: Provide Claude with context and methodology        │
+│                                                              │
+│ Examples:                                                    │
+│ • cui-java-standards/SKILL.md                               │
+│   - Reads standards/java/*.adoc dynamically                 │
+│   - Provides quick reference, templates, examples           │
+│   - allowed-tools: Read                                     │
+│                                                              │
+│ • cui-testing-methodology/SKILL.md                          │
+│ • cui-documentation-standards/SKILL.md                      │
+│ • cui-process-standards/SKILL.md                            │
+└─────────────────────────────────────────────────────────────┘
+                            ▲
+                            │ Used by (skills referenced in prompts)
+                            │
+                            │ Embedded essential rules (synced via agents-doctor)
+                            │ from Layer 1
+                            │
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 3: Agents (Task Executors)                            │
+│ Location: cui-llm-rules/agents/                             │
+│ Format: agent.md with YAML frontmatter                      │
+│ Purpose: Autonomous task execution                          │
+│                                                              │
+│ Pattern: Essential Rules (embedded) + Skill References      │
+│                                                              │
+│ Examples:                                                    │
+│ • project-builder.md                                        │
+│   - System prompt: "Read cui-java-standards skill"          │
+│   - Essential Rules: Embedded JavaDoc/testing requirements  │
+│   - Tools: Read, Edit, Write, Bash                          │
+│                                                              │
+│ • code-reviewer.md                                          │
+│ • adoc-review.md                                            │
+│ • test-generator.md                                         │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 4: Commands (User Utilities)                          │
+│ Location: cui-llm-rules/commands/                           │
+│ Format: Markdown                                            │
+│ Purpose: User-invoked utilities and verification            │
+│                                                              │
+│ Examples:                                                    │
+│ • agents-doctor.md - Verify agents, sync essential rules    │
+│ • slash-doctor.md - Verify commands                         │
+│ • setup-project-permissions.md                              │
+└─────────────────────────────────────────────────────────────┘
+
+           ▲
+           │ All layers distributed via Plugin
+           │
+┌──────────┴──────────────────────────────────────────────────┐
+│ PLUGIN: cui-standards                                        │
+│ Installation: /plugin install cui-standards@cui-llm-rules   │
+│ Updates: /plugin marketplace update cui-llm-rules           │
+└─────────────────────────────────────────────────────────────┘
+----
+
+== Key Architectural Decisions
+
+=== Decision 1: Skills Reference Standards (Not Embed)
+
+* **Rationale**: Standards are authoritative source, skills provide access layer
+* **Implementation**: Skills use Read tool to dynamically fetch from `standards/`
+* **Benefit**: No duplication between skills, always current
+
+=== Decision 2: Agents Use Essential Rules Pattern (Custom Implementation)
+
+* **Important**: This is a **custom pattern** we implement, not a native Claude Code feature
+* **Rationale**: Performance (no I/O during execution), autonomy (self-contained)
+* **Trade-off**: Duplication accepted for speed
+* **Mitigation**: Semi-automated sync via `/agents-doctor` command (custom implementation)
+* **Pattern**: Embed essential rules as markdown sections with:
+** `Source:` citation (relative path to standards file)
+** `Last Synced:` date stamp (for drift detection)
+** Core requirements extracted from standards
+* **Implementation**: `/agents-doctor sync` verifies rules against source and highlights drift
+
+=== Decision 3: Plugin-Based Distribution
+
+* **Rationale**: Native Claude Code mechanism, no manual copying
+* **Implementation**: cui-llm-rules becomes installable plugin
+* **Benefit**: Version control, team consistency, automatic updates
+
+=== Decision 4: Project-Specific Overrides Allowed
+
+* **Rationale**: Projects may need specialized skills/agents
+* **Implementation**: `.claude/skills/` and `.claude/agents/` override plugin
+* **Benefit**: Global defaults + project customization
+
+== Current State Analysis
+
+=== Existing Repository Structure
+
+[source]
+----
+/Users/oliver/git/cui-llm-rules/
+├── standards/                    # ✅ AsciiDoc standards (source of truth)
+│   ├── java/, testing/, documentation/, process/, etc.
+│   └── README.adoc
+│
+├── claude/                       # ⚠️ Architecture documentation
+│   └── agents/
+│       ├── agents-architecture.md
+│       └── agents-doctor/        # Supporting files
+│
+├── scripts/                      # ✅ Utility scripts
+│   ├── asciidoc-validator.sh
+│   └── verify-adoc-links.py
+│
+└── .claude/                      # ✅ Repo's own Claude config
+    └── settings.local.json
+----
+
+=== Current Global Installation (User's Machine)
+
+[source]
+----
+~/.claude/
+├── agents/
+│   ├── project-builder.md
+│   ├── adoc-review.md
+│   ├── commit-current-changes.md
+│   ├── pr-handle-gemini-comments.md
+│   ├── pr-handle-sonar-issues.md
+│   └── research-best-practices.md
+│
+└── commands/
+    ├── agents-doctor.md
+    ├── slash-doctor.md
+    ├── agents-create.md
+    ├── setup-project-permissions.md
+    ├── docs-technical-adoc-review.md
+    ├── handle-pull-request.md
+    ├── slash-create.md
+    ├── verify-plantuml-diagrams.md
+    └── verify-project.md
+----
+
+=== Current Problems
+
+. **Synchronization Hell**: Agents embed standards as snapshots (e.g., "Last Synced: 2025-10-20")
+. **Manual Distribution**: Agents/commands must be manually copied to `~/.claude/`
+. **Drift Risk**: Standards update in repo, but agents have stale embedded rules
+. **No Skills Layer**: Missing knowledge layer between standards and agents
+. **Version Inconsistency**: Team members may have different versions
+. **Duplication**: Same standards embedded in multiple agent files
+
+== Progressive Disclosure Model
+
+=== Skills Loading Pattern
+
+Skills utilize progressive disclosure as validated by research:
+
+. **Startup Phase**: Name + description loaded (30-50 tokens)
+. **Context Matching**: Claude determines relevance based on task
+. **Dynamic Fetch**: Read tool loads `SKILL.md` and referenced files only when needed
+
+This pattern ensures:
+
+* Low memory footprint at startup
+* Current data always (read from source)
+* Efficient resource usage
+
+=== Conflict Resolution Hierarchy
+
+Project-level files take precedence over plugin-provided files:
+
+----
+Priority: Project .claude/ > User ~/.claude/ > Plugin-provided
+----
+
+For nested CLAUDE.md files, the most specific (deepest nested) takes priority.
+
+== Installation and Updates
+
+=== Plugin Installation
+
+[source,bash]
+----
+# Add marketplace
+/plugin marketplace add cuioss/cui-llm-rules
+
+# Install plugin
+/plugin install cui-standards@cui-llm-rules
+----
+
+=== Updates
+
+[source,bash]
+----
+# Refresh marketplace to get latest versions
+/plugin marketplace update cui-llm-rules
+----
+
+**Note**: Individual plugin update commands (`/plugin update`) are not supported. Updates are distributed via marketplace refresh.
+
+=== Team Distribution
+
+Projects can auto-install plugins via `.claude/settings.json`:
+
+[source,json]
+----
+{
+  "plugins": {
+    "marketplaces": ["cuioss/cui-llm-rules"],
+    "installed": ["cui-standards@cui-llm-rules"]
+  }
+}
+----
+
+== Version Management
+
+* **Version Field**: Defined in `.claude-plugin/plugin.json` and `marketplace.json`
+* **Git Tags**: Used for version tracking (e.g., `v1.0.0`, `v1.1.0`)
+* **Semantic Versioning**: Standard semver format (MAJOR.MINOR.PATCH)
+* **Distribution**: Via marketplace refresh
+* **Limitation**: No explicit version pinning mechanism in Claude Code (as of research date)

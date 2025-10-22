@@ -9,6 +9,8 @@ Verifies all links in AsciiDoc files including:
 
 import re
 import os
+import sys
+import argparse
 from pathlib import Path
 from typing import List, Dict, Tuple, Set
 from dataclasses import dataclass
@@ -246,36 +248,107 @@ def verify_links(files: List[str]) -> Tuple[List[Link], List[Issue]]:
 
     return all_links, issues
 
-def main():
-    # Get all .adoc files (excluding target directories)
-    files = []
-    for root, dirs, filenames in os.walk('.'):
-        # Skip target directories
-        if 'target' in dirs:
-            dirs.remove('target')
+def discover_files(target_path: str, recursive: bool = False) -> List[str]:
+    """
+    Discover AsciiDoc files based on target path.
 
-        for filename in filenames:
-            if filename.endswith('.adoc'):
-                filepath = os.path.join(root, filename)
-                # Normalize path
-                filepath = os.path.normpath(filepath)
-                if filepath.startswith('./'):
-                    filepath = filepath[2:]
-                files.append(filepath)
+    Args:
+        target_path: File or directory path
+        recursive: If True, walk subdirectories (default: False for directory mode)
+
+    Returns:
+        List of normalized file paths
+    """
+    files = []
+    target_path = os.path.normpath(target_path)
+
+    if os.path.isfile(target_path):
+        # Single file mode
+        if not target_path.endswith('.adoc'):
+            raise ValueError(f"Target file must be .adoc file: {target_path}")
+        files.append(target_path)
+
+    elif os.path.isdir(target_path):
+        # Directory mode
+        if recursive:
+            # Recursive walk
+            for root, dirs, filenames in os.walk(target_path):
+                # Skip target directories
+                if 'target' in dirs:
+                    dirs.remove('target')
+
+                for filename in filenames:
+                    if filename.endswith('.adoc'):
+                        filepath = os.path.join(root, filename)
+                        filepath = os.path.normpath(filepath)
+                        files.append(filepath)
+        else:
+            # Non-recursive: only files directly in directory
+            for filename in os.listdir(target_path):
+                filepath = os.path.join(target_path, filename)
+                if os.path.isfile(filepath) and filename.endswith('.adoc'):
+                    files.append(os.path.normpath(filepath))
+    else:
+        raise ValueError(f"Target path does not exist: {target_path}")
 
     files.sort()
+    return files
+
+def generate_markdown_report(files: List[str], all_links: List[Link], issues: List[Issue]) -> str:
+    """Generate markdown format report"""
+    broken_links = [i for i in issues if i.issue_type == 'broken']
+    format_violations = [i for i in issues if i.issue_type == 'format_violation']
+    valid_links = len(all_links) - len(issues)
+
+    report = []
+    report.append("# AsciiDoc Link Verification Report\n")
+    report.append("## Summary\n")
+    report.append(f"- **Files processed**: {len(files)}")
+    report.append(f"- **Total links found**: {len(all_links)}")
+    report.append(f"- **Valid links**: {valid_links}")
+    report.append(f"- **Broken links**: {len(broken_links)}")
+    report.append(f"- **Format violations**: {len(format_violations)}\n")
+
+    if broken_links:
+        report.append("## Broken Links\n")
+        for issue in broken_links:
+            report.append(f"### {issue.file}:{issue.line_num}\n")
+            report.append(f"**Link**: `{issue.link_text}`\n")
+            report.append(f"**Issue**: {issue.description}\n")
+            report.append("**Context**:")
+            report.append("```")
+            report.append(issue.context)
+            report.append("```\n")
+
+    if format_violations:
+        report.append("## Format Violations\n")
+        for issue in format_violations:
+            report.append(f"### {issue.file}:{issue.line_num}\n")
+            report.append(f"**Link**: `{issue.link_text}`\n")
+            report.append(f"**Violation**: {issue.description}\n")
+            if issue.suggested_fix:
+                report.append(f"**Should be**: `{issue.suggested_fix}`\n")
+            report.append("**Context**:")
+            report.append("```")
+            report.append(issue.context)
+            report.append("```\n")
+
+    report.append("## Final Verdict\n")
+    if not issues:
+        report.append("✅ All links valid\n")
+    else:
+        report.append(f"❌ Found {len(broken_links)} broken links and {len(format_violations)} format violations\n")
+
+    return "\n".join(report)
+
+def print_console_output(files: List[str], all_links: List[Link], issues: List[Issue]):
+    """Print formatted output to console"""
+    broken_links = [i for i in issues if i.issue_type == 'broken']
+    format_violations = [i for i in issues if i.issue_type == 'format_violation']
+    valid_links = len(all_links) - len(issues)
 
     print(f"Processing {len(files)} AsciiDoc files...")
     print()
-
-    # Verify links
-    all_links, issues = verify_links(files)
-
-    # Categorize issues
-    broken_links = [i for i in issues if i.issue_type == 'broken']
-    format_violations = [i for i in issues if i.issue_type == 'format_violation']
-
-    valid_links = len(all_links) - len(issues)
 
     # Print summary
     print("=" * 80)
@@ -328,6 +401,77 @@ def main():
     else:
         print(f"❌ Found {len(broken_links)} broken links and {len(format_violations)} format violations")
     print()
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Verify links in AsciiDoc files',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Single file mode
+  %(prog)s --file doc/README.adoc
+
+  # Directory mode (non-recursive)
+  %(prog)s --directory doc/
+
+  # Directory mode with markdown report
+  %(prog)s --directory doc/ --report /tmp/link-report.md
+
+  # Recursive mode (default if no --directory or --file specified)
+  %(prog)s
+        """
+    )
+
+    parser.add_argument('--file', type=str, help='Single AsciiDoc file to verify')
+    parser.add_argument('--directory', type=str, help='Directory containing AsciiDoc files (non-recursive)')
+    parser.add_argument('--report', type=str, help='Output markdown report to specified file')
+    parser.add_argument('--recursive', action='store_true', help='Recursively scan subdirectories (only with --directory)')
+
+    args = parser.parse_args()
+
+    # Determine target path and mode
+    if args.file and args.directory:
+        print("Error: Cannot specify both --file and --directory", file=sys.stderr)
+        return 1
+
+    if args.file:
+        target_path = args.file
+        recursive = False
+    elif args.directory:
+        target_path = args.directory
+        recursive = args.recursive
+    else:
+        # Default: recursive walk from current directory
+        target_path = '.'
+        recursive = True
+
+    # Discover files
+    try:
+        files = discover_files(target_path, recursive=recursive)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    if not files:
+        print(f"No AsciiDoc files found in {target_path}", file=sys.stderr)
+        return 1
+
+    # Verify links
+    all_links, issues = verify_links(files)
+
+    # Print to console
+    print_console_output(files, all_links, issues)
+
+    # Generate markdown report if requested
+    if args.report:
+        markdown_report = generate_markdown_report(files, all_links, issues)
+        try:
+            with open(args.report, 'w', encoding='utf-8') as f:
+                f.write(markdown_report)
+            print(f"Markdown report written to: {args.report}")
+        except Exception as e:
+            print(f"Error writing report to {args.report}: {e}", file=sys.stderr)
+            return 1
 
     return len(issues)
 

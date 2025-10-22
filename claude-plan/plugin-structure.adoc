@@ -1,0 +1,580 @@
+= Plugin Structure Specification
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Introduction
+
+This document specifies the technical requirements for the cui-standards Claude Code plugin structure, including directory organization, manifest files, and component discovery rules.
+
+== Repository Directory Structure
+
+=== Proposed Structure
+
+[source]
+----
+/cui-llm-rules/
+│
+├── .claude-plugin/                   # Plugin definition
+│   ├── plugin.json                   # Manifest with metadata
+│   └── README.md                     # Plugin documentation
+│
+├── standards/                        # Source of truth (Layer 1)
+│   ├── java/
+│   │   ├── java-code-standards.adoc
+│   │   └── dsl-style-constants.adoc
+│   ├── testing/
+│   │   ├── core-standards.adoc
+│   │   └── quality-standards.adoc
+│   ├── documentation/
+│   │   ├── javadoc-standards.adoc
+│   │   ├── asciidoc-standards.adoc
+│   │   └── readme-structure.adoc
+│   ├── process/
+│   │   ├── task-completion-standards.adoc
+│   │   ├── git-commit-standards.adoc
+│   │   └── refactoring-process.adoc
+│   └── README.adoc
+│
+├── skills/                           # Knowledge layer (Layer 2)
+│   ├── README.md                     # Skills overview
+│   │
+│   ├── cui-java-standards/
+│   │   ├── SKILL.md                  # Main skill definition
+│   │   ├── README.md                 # Usage documentation
+│   │   ├── templates/                # Code templates
+│   │   │   ├── package-info.java
+│   │   │   ├── class-template.java
+│   │   │   └── test-template.java
+│   │   └── examples/
+│   │       ├── logging-example.java
+│   │       └── builder-example.java
+│   │
+│   ├── cui-testing-methodology/
+│   │   ├── SKILL.md
+│   │   ├── README.md
+│   │   ├── templates/
+│   │   │   └── test-class-template.java
+│   │   └── checklists/
+│   │       └── coverage-checklist.md
+│   │
+│   ├── cui-documentation-standards/
+│   │   ├── SKILL.md
+│   │   ├── README.md
+│   │   └── templates/
+│   │       ├── javadoc-class.java
+│   │       ├── javadoc-method.java
+│   │       └── asciidoc-template.adoc
+│   │
+│   └── cui-process-standards/
+│       ├── SKILL.md
+│       ├── README.md
+│       └── checklists/
+│           ├── pre-commit-checklist.md
+│           └── task-completion-checklist.md
+│
+├── agents/                           # Task executors (Layer 3)
+│   ├── README.md                     # Agents overview
+│   │
+│   ├── project-builder.md            # Build & verification agent
+│   ├── code-reviewer.md              # Code review agent
+│   ├── adoc-review.md                # Documentation review agent
+│   ├── commit-current-changes.md     # Git commit agent
+│   ├── pr-handle-gemini-comments.md  # PR comment handler
+│   ├── pr-handle-sonar-issues.md     # Sonar issue fixer
+│   └── research-best-practices.md    # Web research agent
+│
+├── commands/                         # User utilities (Layer 4)
+│   ├── README.md                     # Commands overview
+│   │
+│   ├── agents-doctor.md              # Agent verification
+│   ├── slash-doctor.md               # Command verification
+│   ├── skills-doctor.md              # Skill verification (new)
+│   ├── agents-create.md              # Agent creation wizard
+│   ├── slash-create.md               # Command creation wizard
+│   ├── skills-create.md              # Skill creation wizard (new)
+│   ├── setup-project-permissions.md  # Project setup
+│   ├── docs-technical-adoc-review.md # Documentation review
+│   ├── handle-pull-request.md        # PR handling
+│   ├── verify-plantuml-diagrams.md   # Diagram verification
+│   └── verify-project.md             # Project verification
+│
+├── scripts/                          # Utility scripts
+│   ├── asciidoc-validator.sh
+│   ├── verify-adoc-links.py
+│   └── sync-essential-rules.sh       # Sync automation (new)
+│
+├── docs/                             # Meta documentation
+│   ├── plugin-architecture.md
+│   ├── agents-architecture.md
+│   ├── skills-guide.md
+│   └── contribution-guide.md
+│
+├── .claude/                          # Repo's own config
+│   └── settings.local.json
+│
+├── CLAUDE.md                         # Repo instructions
+└── README.adoc                       # Repository overview
+----
+
+=== Directory Naming Convention
+
+**Recommendation**: Flatten to root-level (NOT nested under `claude/`)
+
+[source]
+----
+✅ RECOMMENDED:
+agents/
+commands/
+skills/
+
+❌ NOT RECOMMENDED:
+claude/agents/
+claude/commands/
+claude/skills/
+----
+
+**Rationale**: Plugin structure expects component directories at root level for simplified discovery and path resolution.
+
+== Plugin Manifest (.claude-plugin/plugin.json)
+
+=== Required Structure
+
+[source,json]
+----
+{
+  "name": "cui-standards",
+  "displayName": "CUI Development Standards",
+  "version": "1.0.0",
+  "description": "Comprehensive development standards, skills, agents, and commands for CUI OSS projects. Provides Java, JavaScript, testing, documentation, and process standards with automated enforcement.",
+  "author": "CUI OSS",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/cuioss/cui-llm-rules",
+  "homepage": "https://github.com/cuioss/cui-llm-rules#readme",
+
+  "claudeCode": {
+    "minVersion": "0.1.0"
+  },
+
+  "components": {
+    "skills": [
+      "skills/cui-java-standards",
+      "skills/cui-testing-methodology",
+      "skills/cui-documentation-standards",
+      "skills/cui-process-standards"
+    ],
+
+    "agents": [
+      "agents/project-builder.md",
+      "agents/code-reviewer.md",
+      "agents/adoc-review.md",
+      "agents/commit-current-changes.md",
+      "agents/pr-handle-gemini-comments.md",
+      "agents/pr-handle-sonar-issues.md",
+      "agents/research-best-practices.md"
+    ],
+
+    "commands": [
+      "commands/agents-doctor.md",
+      "commands/slash-doctor.md",
+      "commands/skills-doctor.md",
+      "commands/agents-create.md",
+      "commands/slash-create.md",
+      "commands/skills-create.md",
+      "commands/setup-project-permissions.md",
+      "commands/docs-technical-adoc-review.md",
+      "commands/handle-pull-request.md",
+      "commands/verify-plantuml-diagrams.md",
+      "commands/verify-project.md"
+    ]
+  },
+
+  "metadata": {
+    "platforms": ["cli", "jetbrains", "vscode"],
+    "tags": [
+      "standards",
+      "java",
+      "javascript",
+      "testing",
+      "documentation",
+      "quality",
+      "CUI",
+      "OSS"
+    ],
+    "categories": [
+      "Code Quality",
+      "Documentation",
+      "Development Standards",
+      "Testing"
+    ]
+  },
+
+  "dependencies": {
+    "plugins": [],
+    "mcpServers": []
+  }
+}
+----
+
+=== Field Specifications
+
+==== Required Fields
+
+* **name**: Plugin identifier (kebab-case, unique)
+* **displayName**: Human-readable name
+* **version**: Semantic version (MAJOR.MINOR.PATCH)
+* **description**: Clear description of plugin purpose
+* **author**: Author/organization name
+
+==== Optional Fields
+
+* **license**: SPDX license identifier
+* **repository**: Git repository URL
+* **homepage**: Documentation URL
+* **claudeCode.minVersion**: Minimum Claude Code version required
+
+==== Components Section
+
+* **skills**: Array of skill directory paths (relative to plugin root)
+* **agents**: Array of agent file paths (relative to plugin root)
+* **commands**: Array of command file paths (relative to plugin root)
+
+==== Metadata Section
+
+* **platforms**: Supported platforms (cli, jetbrains, vscode, web)
+* **tags**: Search keywords
+* **categories**: Classification categories
+
+==== Dependencies Section
+
+* **plugins**: Other plugins required
+* **mcpServers**: MCP servers required
+
+== Marketplace Configuration
+
+=== Marketplace.json Structure
+
+For repository-based marketplace:
+
+[source,json]
+----
+{
+  "name": "cui-llm-rules",
+  "owner": "cuioss",
+  "plugins": [
+    {
+      "name": "cui-standards",
+      "source": "./",
+      "metadata": {
+        "description": "CUI Development Standards Plugin",
+        "version": "1.0.0",
+        "pluginRoot": "./"
+      }
+    }
+  ]
+}
+----
+
+=== Field Specifications
+
+* **name**: Marketplace identifier
+* **owner**: Organization/user name
+* **plugins**: Array of plugin definitions
+* **plugins[].name**: Plugin name (matches plugin.json name)
+* **plugins[].source**: Path to plugin directory (relative or Git URL)
+* **plugins[].metadata.version**: Version field (synced with plugin.json)
+* **plugins[].metadata.pluginRoot**: Root directory for plugin (default: `./`)
+
+== Component Discovery Rules
+
+=== Default Discovery Directories
+
+Claude Code automatically discovers components in:
+
+* `commands/` - All `.md` files treated as commands
+* `agents/` - All `.md` files treated as agents
+* `skills/` - All subdirectories with `SKILL.md`
+
+=== Custom Paths
+
+Plugin.json `components` section can specify:
+
+* Additional paths (supplement default directories)
+* Explicit file listings (for organization)
+
+[source,json]
+----
+{
+  "components": {
+    "commands": [
+      "commands/agents-doctor.md",  // Explicit listing
+      "custom/my-command.md"         // Custom path
+    ]
+  }
+}
+----
+
+=== Discovery Priority
+
+. **Explicit paths** in plugin.json `components` section
+. **Default directories** (`commands/`, `agents/`, `skills/`)
+. **Custom paths** as supplements
+
+== Path Resolution
+
+=== Relative Path Requirements
+
+All paths in plugin must be:
+
+* **Relative to plugin root**
+* **Start with** `./`
+* **Never use absolute paths** (`~/...`, `/Users/...`)
+
+=== Examples
+
+[source]
+----
+✅ CORRECT:
+./standards/java/java-code-standards.adoc
+./templates/class-template.java
+./docs/architecture.adoc
+
+❌ INCORRECT:
+~/git/cui-llm-rules/standards/java/java-code-standards.adoc
+/Users/oliver/git/cui-llm-rules/standards/...
+standards/java/... (missing ./ prefix)
+----
+
+=== Environment Variables
+
+* **${CLAUDE_PLUGIN_ROOT}**: Absolute path to plugin installation
+* **Use in**: Bash scripts, hooks requiring absolute paths
+
+[source,bash]
+----
+#!/bin/bash
+# Correct usage in script
+PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT}
+bash "${PLUGIN_ROOT}/scripts/validator.sh"
+----
+
+== Conflict Resolution
+
+=== Priority Hierarchy
+
+[source]
+----
+1. Project .claude/ (highest priority)
+2. User ~/.claude/
+3. Plugin-provided (lowest priority)
+----
+
+=== Override Behavior
+
+Projects can override plugin components by creating files in `.claude/`:
+
+[source]
+----
+.claude/
+├── agents/
+│   └── project-builder.md      # Overrides plugin version
+├── commands/
+│   └── custom-command.md        # Adds new command
+└── skills/
+    └── project-specific-skill/  # Adds new skill
+        └── SKILL.md
+----
+
+=== Nested CLAUDE.md Files
+
+For nested `CLAUDE.md` context files, most specific (deepest nested) takes priority.
+
+== Component Loading Sequence
+
+=== Startup Phase
+
+. **Load plugin.json**: Parse manifest, validate structure
+. **Discover skills**: Load name + description (30-50 tokens each)
+. **Register agents**: Load frontmatter, register descriptions
+. **Register commands**: Load frontmatter, register slash commands
+
+=== Runtime Phase
+
+. **Skills**: Dynamically loaded via Read tool when context matches
+. **Agents**: Loaded when invoked or proactively activated
+. **Commands**: Loaded when user invokes via `/command-name`
+
+== Platform Support
+
+=== Supported Platforms
+
+* **CLI**: Claude Code command-line interface
+* **JetBrains**: IntelliJ IDEA, PyCharm, WebStorm, etc.
+* **VS Code**: Visual Studio Code extension
+* **Web**: Claude.ai web interface (if supported)
+
+=== Platform-Specific Considerations
+
+* **Paths**: Must work across all platforms (use relative paths)
+* **Scripts**: Bash scripts require bash-compatible platform
+* **Tools**: Tool availability may vary by platform
+
+== Version Management
+
+=== Semantic Versioning
+
+Use standard semver: `MAJOR.MINOR.PATCH`
+
+* **MAJOR**: Breaking changes to component structure or interfaces
+* **MINOR**: New features, new skills/agents/commands (backward compatible)
+* **PATCH**: Bug fixes, documentation updates
+
+=== Git Tags
+
+Tag releases with version:
+
+[source,bash]
+----
+git tag v1.0.0
+git push origin v1.0.0
+----
+
+=== Version Synchronization
+
+Keep version consistent across:
+
+. `.claude-plugin/plugin.json` - `version` field
+. `marketplace.json` - `plugins[].metadata.version` field
+. Git tags - `vX.Y.Z` format
+
+=== Update Distribution
+
+Updates distributed via marketplace refresh:
+
+[source,bash]
+----
+/plugin marketplace update cui-llm-rules
+----
+
+**Note**: No individual plugin update command exists (as of research date).
+
+== Installation
+
+=== Local Development
+
+[source,bash]
+----
+# Add local repository as marketplace
+/plugin marketplace add file:///Users/oliver/git/cui-llm-rules
+
+# Install plugin from local marketplace
+/plugin install cui-standards@cui-llm-rules
+----
+
+=== GitHub Repository
+
+[source,bash]
+----
+# Add GitHub repository as marketplace
+/plugin marketplace add cuioss/cui-llm-rules
+
+# Install plugin
+/plugin install cui-standards@cui-llm-rules
+----
+
+=== Project Auto-Installation
+
+Projects can auto-install via `.claude/settings.json`:
+
+[source,json]
+----
+{
+  "plugins": {
+    "marketplaces": ["cuioss/cui-llm-rules"],
+    "installed": ["cui-standards@cui-llm-rules"]
+  }
+}
+----
+
+== Supporting Directories
+
+=== Scripts Directory
+
+Utility scripts for validation and automation:
+
+* **asciidoc-validator.sh**: Validate AsciiDoc syntax
+* **verify-adoc-links.py**: Check cross-references
+* **sync-essential-rules.sh**: Automated sync helper (custom)
+
+Scripts must:
+
+* Use `${CLAUDE_PLUGIN_ROOT}` for absolute paths
+* Work cross-platform (or provide alternatives)
+* Return meaningful exit codes
+
+=== Docs Directory
+
+Meta-documentation for plugin development:
+
+* **plugin-architecture.md**: This specification
+* **agents-architecture.md**: Agent design principles
+* **skills-guide.md**: How to create skills
+* **contribution-guide.md**: Contribution guidelines
+
+Not loaded by Claude Code, but available for reference.
+
+=== Templates Directory (in Skills)
+
+Code templates provided by skills:
+
+* Must be in skill subdirectory: `skills/skill-name/templates/`
+* Referenced in SKILL.md
+* Can be language-specific (.java, .js, .adoc, etc.)
+
+=== Examples Directory (in Skills)
+
+Working code examples:
+
+* Must be in skill subdirectory: `skills/skill-name/examples/`
+* Should be functional, tested code
+* Referenced in SKILL.md for learning
+
+== Known Limitations
+
+=== No Individual Plugin Update Command
+
+Claude Code does NOT support updating individual plugins via `/plugin update plugin-name`.
+
+**Workaround**: Use `/plugin marketplace update marketplace-name` to refresh the marketplace, which distributes updates to all plugins from that marketplace.
+
+[source,bash]
+----
+# ❌ NOT SUPPORTED
+/plugin update cui-standards
+
+# ✅ CORRECT
+/plugin marketplace update cui-llm-rules
+----
+
+=== No Semantic Version Pinning
+
+Cannot pin to specific plugin version (e.g., `cui-standards@1.2.0`).
+
+**Workaround**: Version management via Git tags and marketplace `version` field. Teams get latest version from marketplace refresh.
+
+=== Relative Paths Required
+
+All paths in plugin components MUST be relative to plugin root and start with `./`
+
+Absolute paths (`~/...`, `/Users/...`) will cause errors.
+
+**Critical for**:
+* Skills referencing standards files
+* Agents referencing standards in Essential Rules
+* Commands referencing documentation
+
+[source]
+----
+✅ CORRECT: ./standards/java/java-code-standards.adoc
+❌ WRONG:   ~/git/cui-llm-rules/standards/java/java-code-standards.adoc
+----

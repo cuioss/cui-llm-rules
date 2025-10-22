@@ -1,0 +1,469 @@
+= Component Specifications
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Introduction
+
+This document specifies the technical structure and format requirements for Skills, Agents, and Commands in the cui-standards plugin.
+
+== Skill Specifications
+
+=== Skill Structure
+
+Skills are knowledge layers that provide Claude with context and methodology by referencing standards documentation.
+
+==== File Format
+
+* **Primary File**: `SKILL.md` (required)
+* **Location**: `skills/skill-name/SKILL.md`
+* **Format**: Markdown with YAML frontmatter
+
+==== YAML Frontmatter
+
+Required fields:
+
+[source,yaml]
+----
+---
+name: Skill Name
+description: Clear description that triggers auto-activation based on context
+allowed-tools: Read, Grep, Glob  # Optional: Restricts tools available to skill
+---
+----
+
+* **name** (required): Display name of the skill
+* **description** (required): Clear, specific description for context matching
+* **allowed-tools** (optional): Comma-separated list of tools; Read-only recommended for knowledge skills
+
+==== Progressive Disclosure
+
+Skills load progressively:
+
+. **Startup**: Name + description (30-50 tokens)
+. **Context Matching**: Claude determines relevance
+. **Dynamic Fetch**: Read tool loads content when needed
+
+=== Skill Directory Structure
+
+[source]
+----
+skills/skill-name/
+├── SKILL.md                  # Main skill definition (required)
+├── README.md                 # Usage documentation (optional)
+├── templates/                # Code templates (optional)
+│   ├── template1.java
+│   └── template2.java
+├── examples/                 # Working examples (optional)
+│   └── example1.java
+└── checklists/               # Verification checklists (optional)
+    └── checklist.md
+----
+
+=== Example: CUI Java Standards Skill
+
+==== File: `skills/cui-java-standards/SKILL.md`
+
+[source,yaml]
+----
+---
+name: CUI Java Standards
+description: Provides CUI Java development standards including coding patterns, logging, testing, null-safety, Lombok usage, and Javadoc requirements. Use when writing, reviewing, or refactoring Java code for CUI projects.
+allowed-tools: Read
+---
+----
+
+==== Standards References
+
+All paths must be relative to plugin root:
+
+[source,markdown]
+----
+## Standards Reference
+
+**Primary Standards:**
+- Java Code: `./standards/java/java-code-standards.adoc`
+- Testing: `./standards/testing/core-standards.adoc`
+- Javadoc: `./standards/documentation/javadoc-standards.adoc`
+- Process: `./standards/process/task-completion-standards.adoc`
+
+**Note**: All paths are relative to plugin root. When installed, use
+`${CLAUDE_PLUGIN_ROOT}` environment variable for absolute path resolution
+in scripts.
+----
+
+==== Quick Reference Pattern
+
+Skills should provide quick reference sections for common requirements:
+
+[source,markdown]
+----
+## Quick Reference
+
+### Logging Standards (MANDATORY)
+**Source**: `standards/logging/core-standards.adoc`
+
+- **Logger Declaration**: `private static final CuiLogger LOGGER = new CuiLogger(...)`
+- **Never use**: System.out, System.err, slf4j directly
+- **Parameterized messages**: Use `%s` for all substitutions
+----
+
+==== Usage Patterns
+
+[source,markdown]
+----
+## Usage Patterns
+
+### For Claude (Main Conversation)
+When user asks about Java standards:
+1. Activate this skill automatically (based on description triggers)
+2. Read relevant standards files for complete information
+3. Apply quick reference for common questions
+4. Provide templates for code generation
+
+### For Agents
+Agents should reference this skill in their system prompts.
+----
+
+== Agent Specifications
+
+=== Agent Structure
+
+Agents are autonomous task executors that combine embedded Essential Rules with skill references.
+
+==== File Format
+
+* **File**: `agent-name.md`
+* **Location**: `agents/agent-name.md`
+* **Format**: Markdown with YAML frontmatter
+
+==== YAML Frontmatter
+
+[source,yaml]
+----
+---
+name: agent-name
+description: Clear description of when to use this agent. This agent should be used proactively when...
+tools: Read, Edit, Write, Bash  # Optional: Comma-separated list
+model: sonnet                   # Optional: claude-sonnet-4, haiku, etc.
+color: green                    # Optional: Terminal output color
+---
+----
+
+* **name** (required): Agent identifier
+* **description** (required): When to use this agent (triggers proactive activation)
+* **tools** (optional): Available tools; inherits all main thread tools if omitted
+* **model** (optional): Specific model to use
+* **color** (optional): Visual identifier
+
+=== Essential Rules Pattern (Custom Implementation)
+
+**Important**: This is a custom pattern we implement, not a native Claude Code feature.
+
+==== Pattern Structure
+
+[source,markdown]
+----
+## ESSENTIAL RULES
+
+### JavaDoc Standards
+Source: ./standards/documentation/javadoc-standards.adoc
+Last Synced: 2025-10-22
+
+**Package Documentation**:
+- Every package must have package-info.java
+- Package documentation must describe the package purpose
+
+**Class/Interface Documentation**:
+- Every public and protected class/interface must be documented
+- Include clear purpose statement
+- Include @since tag with version information
+
+[... essential requirements extracted from source ...]
+
+### Testing Standards
+Source: ./standards/testing/core-standards.adoc
+Last Synced: 2025-10-22
+
+- JUnit 5 only (no Mockito, PowerMock, Hamcrest)
+- Minimum 80% coverage overall
+- Critical paths need 100% coverage
+----
+
+==== Essential Rules Components
+
+Each Essential Rules block must contain:
+
+. **Section Header**: Domain-specific (e.g., "JavaDoc Standards", "Testing Standards")
+. **Source Citation**: Relative path to standards file (starts with `./`)
+. **Last Synced Date**: ISO format date (YYYY-MM-DD)
+. **Core Requirements**: Essential rules extracted from source (simplified for performance)
+
+==== Synchronization
+
+The `/agents-doctor sync` command (custom implementation) verifies:
+
+* Essential Rules content matches source
+* `Last Synced` date is current
+* Source files exist and are valid
+* Reports drift if content differs
+
+=== Skills Reference in Agents
+
+Agents should reference skills for complete standards:
+
+[source,markdown]
+----
+## STANDARDS COMPLIANCE
+
+**Before fixing any code, READ these skills for current, complete standards:**
+- `cui-java-standards` skill - Java coding, Javadoc, null-safety
+- `cui-testing-methodology` skill - Test coverage requirements
+- `cui-process-standards` skill - Pre-commit checklist
+
+The Essential Rules above are core requirements. For complete standards
+and edge cases, consult the skills.
+----
+
+=== Example: Project Builder Agent
+
+[source,yaml]
+----
+---
+name: project-builder
+description: Use this agent when the user needs to build and verify the entire project with quality checks. This agent should be used proactively after code changes are made to ensure the project still compiles and passes all quality gates.
+tools: Read, Edit, Write, Bash
+model: sonnet
+color: green
+---
+----
+
+Agent combines:
+
+. **Essential Rules**: Embedded JavaDoc, testing, logging requirements
+. **Skill References**: Points to skills for complete standards
+. **Workflow**: Detailed task execution steps
+. **Tool Access**: Read, Edit, Write, Bash for full build verification
+
+== Command Specifications
+
+=== Command Structure
+
+Commands are user-invoked utilities for verification and management.
+
+==== File Format
+
+* **File**: `command-name.md`
+* **Location**: `commands/command-name.md`
+* **Format**: Markdown with optional YAML frontmatter
+
+==== YAML Frontmatter
+
+[source,yaml]
+----
+---
+description: Brief description of command purpose
+allowed-tools: Read, Write, Edit, Bash  # Optional
+argument-hint: "[project|global|agent-name]"  # Optional: Parameter hint
+model: sonnet  # Optional
+disable-model-invocation: false  # Optional
+---
+----
+
+All frontmatter fields are optional.
+
+==== Parameter Support
+
+Commands support parameters via:
+
+* `$ARGUMENTS`: All arguments as single string
+* `$1`, `$2`, `$3`: Positional parameters
+* Bash execution with `!` prefix
+
+=== Example: Agents Doctor Command
+
+[source,markdown]
+----
+# Agents Doctor - Verify and Fix Agents
+
+Analyze, verify, and fix agents for tool coverage, best practices, and structural issues.
+
+**Architecture Reference**: `./docs/agents-architecture.md`
+
+## PARAMETERS
+
+- **project** (optional): Review all project-specific agents in `.claude/agents/`
+- **global** (optional): Review all global agents (from plugin)
+- **agent-name** (optional): Review a specific agent by name (e.g., `project-builder`)
+- **sync** (optional): Synchronize Essential Rules from standards sources
+- **No parameters**: Interactive mode - display menu of all agents and let user select
+----
+
+=== Essential Rules Synchronization Command
+
+The `/agents-doctor sync` command is a custom implementation that provides:
+
+==== Verification Checks
+
+. **Detect Essential Rules blocks**: Find sections with `Source:` and `Last Synced:` markers
+. **Verify against source**: Read source file, extract section, compare content
+. **Report sync status**:
+** UP_TO_DATE: Content matches, sync date recent
+** OUT_OF_DATE: Content matches but sync date > 30 days old
+** DRIFT_DETECTED: Content differs from source
+** SOURCE_MISSING: Source file not found
+** NO_SYNC_DATE: Missing `Last Synced` marker
+
+==== Workflow
+
+[source]
+----
+1. Detect Essential Rules blocks
+   - Pattern: ## Essential Rules or ### {Domain} Standards
+   - Look for Source: and Last Synced: markers
+
+2. Verify against source
+   - Read source file specified in Source: line
+   - Extract referenced section (if #section-anchor provided)
+   - Compare embedded content with source content
+   - Check Last Synced date vs source modification date
+
+3. Report sync status
+   - Show status for each Essential Rules block
+   - Highlight drift with diff if detected
+
+4. Offer sync assistance (semi-automated)
+   - Show diff of changes
+   - Ask user to approve sync
+   - Update embedded content
+   - Update Last Synced: date to today
+   - Write updated agent file
+----
+
+== Skills Doctor Command
+
+New command for verifying skills structure.
+
+=== Verification Checks
+
+. **YAML Frontmatter**: Validate syntax, required fields (name, description)
+. **Standards References**: Verify referenced files exist, check section anchors
+. **Structure**: Verify SKILL.md exists, check supporting directories
+. **Tool Restrictions**: Validate `allowed-tools` makes sense for skill type
+. **Cross-References**: Check if skill is referenced by agents
+
+=== Example Structure
+
+[source,markdown]
+----
+# Skills Doctor - Verify and Fix Skills
+
+## PARAMETERS
+
+- **project** (optional): Review all project-specific skills in `.claude/skills/`
+- **global** (optional): Review all global skills (from plugin)
+- **skill-name** (optional): Review a specific skill by name
+- **No parameters**: Interactive mode
+
+## VERIFICATION CHECKS
+
+### 1. YAML Frontmatter
+- Validate YAML syntax (proper `---` delimiters)
+- Required fields: `name`, `description`
+- Optional fields: `allowed-tools`
+
+### 2. Standards References
+- Find all references to `standards/` files
+- Verify referenced files exist
+- Check for valid section anchors (if `#section` provided)
+
+### 3. Structure
+- Verify SKILL.md exists and is primary file
+- Check for supporting directories (templates/, examples/, checklists/)
+
+### 4. Tool Restrictions
+- If `allowed-tools` specified, verify it makes sense for skill
+- Recommend Read-only for pure knowledge skills
+
+### 5. Cross-References
+- Check if skill is referenced by agents
+- Check if skill references other skills
+----
+
+== Path Resolution Rules
+
+All paths in skills, agents, and commands must follow these rules:
+
+=== Relative Path Requirements
+
+* **Must start with**: `./` (relative to plugin root)
+* **Never use**: Absolute paths like `~/git/...` or `/Users/...`
+* **Standards references**: `./standards/java/java-code-standards.adoc`
+* **Documentation references**: `./docs/agents-architecture.md`
+
+=== Environment Variables
+
+* **${CLAUDE_PLUGIN_ROOT}**: Absolute path to plugin installation directory
+* **Use in**: Bash scripts, hooks that need absolute paths
+* **Example**: `${CLAUDE_PLUGIN_ROOT}/scripts/validator.sh`
+
+=== Path Examples
+
+[source]
+----
+✅ CORRECT:
+- ./standards/java/java-code-standards.adoc
+- ./templates/class-template.java
+- ./docs/architecture.adoc
+- ${CLAUDE_PLUGIN_ROOT}/scripts/validator.sh
+
+❌ INCORRECT:
+- ~/git/cui-llm-rules/standards/java/java-code-standards.adoc
+- /Users/oliver/git/cui-llm-rules/standards/...
+- standards/java/... (missing ./ prefix)
+----
+
+== Tool Access Patterns
+
+=== Skills Tool Restrictions
+
+Skills should typically use Read-only access:
+
+[source,yaml]
+----
+allowed-tools: Read
+----
+
+For skills that need to search:
+
+[source,yaml]
+----
+allowed-tools: Read, Grep, Glob
+----
+
+=== Agent Tool Access
+
+Agents can access all tools or specific subset:
+
+[source,yaml]
+----
+# All tools (inherits from main thread)
+tools:
+
+# Specific tools
+tools: Read, Edit, Write, Bash
+
+# Full access for complex agents
+tools: Read, Edit, Write, Bash, Grep, Glob, Task
+----
+
+=== Command Tool Access
+
+Commands can specify allowed tools via frontmatter:
+
+[source,yaml]
+----
+allowed-tools: Read, Write, Edit, Bash
+----
+
+If not specified, commands have full tool access.

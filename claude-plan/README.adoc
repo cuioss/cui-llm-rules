@@ -1,0 +1,200 @@
+= CUI Standards Plugin: Technical Specifications
+:toc: left
+:toclevels: 2
+:sectnums:
+
+== Overview
+
+This directory contains the technical specifications for the `cui-standards` Claude Code plugin. These documents define the architecture, component structure, and implementation requirements for transforming cui-llm-rules into a distributable plugin.
+
+**Last Updated**: 2025-10-22
+
+== Document Index
+
+=== xref:architecture-overview.adoc[Architecture Overview]
+
+*Purpose*: High-level architectural design and layer model
+
+*Contents*:
+
+* Four-layer architecture (Standards, Skills, Agents, Commands)
+* Visual architecture diagrams
+* Key architectural decisions
+* Current state analysis
+* Installation and update procedures
+* Version management strategy
+
+*Audience*: Architects, technical leads, anyone needing to understand the overall design
+
+---
+
+=== xref:component-specifications.adoc[Component Specifications]
+
+*Purpose*: Detailed technical specifications for Skills, Agents, and Commands
+
+*Contents*:
+
+* Skill structure and YAML frontmatter format
+* Agent structure and Essential Rules Pattern
+* Command structure and parameter support
+* Path resolution rules
+* Tool access patterns
+* Complete examples for each component type
+
+*Audience*: Developers implementing skills, agents, or commands
+
+---
+
+=== xref:plugin-structure.adoc[Plugin Structure Specification]
+
+*Purpose*: Repository organization and plugin manifest requirements
+
+*Contents*:
+
+* Complete directory structure
+* `plugin.json` manifest specification
+* `marketplace.json` configuration
+* Component discovery rules
+* Path resolution requirements
+* Version management
+* Installation procedures
+
+*Audience*: Plugin maintainers, developers setting up the repository
+
+== Quick Reference
+
+=== Core Architectural Decisions
+
+[cols="1,2,2"]
+|===
+|Decision |Approach |Rationale
+
+|**Standards Layer**
+|AsciiDoc files in `standards/`
+|Single source of truth, version controlled
+
+|**Skills Layer**
+|SKILL.md files that reference standards
+|Dynamic reads, always current, no duplication
+
+|**Agents Layer**
+|agent.md with Essential Rules (custom pattern)
+|Performance (embedded) + Currency (skill references)
+
+|**Distribution**
+|Claude Code plugin via marketplace
+|Native mechanism, automatic updates, team consistency
+|===
+
+=== Essential Rules Pattern
+
+**Custom Implementation** (not native Claude Code feature):
+
+[source,markdown]
+----
+## ESSENTIAL RULES
+
+### Domain Standards
+Source: ./standards/domain/file.adoc
+Last Synced: 2025-10-22
+
+[... core requirements extracted from source ...]
+----
+
+Verified via `/agents-doctor sync` command (custom).
+
+=== Path Requirements
+
+[cols="1,2"]
+|===
+|Requirement |Example
+
+|**All paths relative**
+|`./standards/java/java-code-standards.adoc`
+
+|**Must start with**
+|`./`
+
+|**Never absolute**
+|❌ `~/git/cui-llm-rules/...`
+
+|**Scripts use**
+|`${CLAUDE_PLUGIN_ROOT}/scripts/validator.sh`
+|===
+
+=== Installation Commands
+
+[source,bash]
+----
+# Add marketplace
+/plugin marketplace add cuioss/cui-llm-rules
+
+# Install plugin
+/plugin install cui-standards@cui-llm-rules
+
+# Update (refresh marketplace)
+/plugin marketplace update cui-llm-rules
+----
+
+== Implementation Status
+
+[cols="1,2,1"]
+|===
+|Component |Description |Status
+
+|**Architecture**
+|Four-layer model defined
+|✅ Specified
+
+|**Skills**
+|4 skills planned (Java, Testing, Documentation, Process)
+|⏳ Not implemented
+
+|**Agents**
+|7 agents to migrate from `~/.claude/agents/`
+|⏳ Not implemented
+
+|**Commands**
+|11 commands to migrate/create
+|⏳ Not implemented
+
+|**plugin.json**
+|Manifest specification complete
+|✅ Specified
+|===
+
+== Known Limitations
+
+See xref:plugin-structure.adoc#known-limitations[Plugin Structure § Known Limitations] for complete details.
+
+**Key constraints**:
+
+* **No individual plugin update command**: Use `/plugin marketplace update marketplace-name`
+* **No semantic version pinning**: Version management via Git tags and marketplace `version` field
+* **Relative paths required**: All paths must start with `./` (relative to plugin root)
+* **Essential Rules**: Custom pattern requiring manual implementation and maintenance
+
+== References
+
+=== Official Documentation
+
+* Claude Code Plugins: https://docs.claude.com/en/docs/claude-code/plugins
+* Claude Code Skills: https://docs.claude.com/en/docs/claude-code/skills
+* Claude Code Agents: https://docs.claude.com/en/docs/claude-code/sub-agents
+* Claude Code Commands: https://docs.claude.com/en/docs/claude-code/slash-commands
+* Plugin Marketplaces: https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
+
+=== Project Files
+
+* Main plan (with implementation details): `../plan.md`
+* Standards documentation: `../standards/`
+* Current agents (user): `~/.claude/agents/`
+* Current commands (user): `~/.claude/commands/`
+
+== Document Conventions
+
+* **Format**: AsciiDoc (.adoc)
+* **TOC**: Left sidebar, 3 levels
+* **Section Numbering**: Enabled
+* **Code Blocks**: Syntax highlighting via `[source,type]`
+* **Cross-References**: `xref:file.adoc[Link Text]`

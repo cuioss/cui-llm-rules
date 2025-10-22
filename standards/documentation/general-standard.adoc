@@ -15,6 +15,7 @@ The documentation standards are organized into the following documents:
 
 * `general-standard.adoc` - Core documentation standards and best practices (this document)
 * xref:asciidoc-standards.adoc[AsciiDoc Standards] - Comprehensive AsciiDoc formatting, grammar, and best practices
+* xref:tone-and-style-standards.adoc[Tone and Style Standards] - Professional tone, neutral language, and writing style requirements
 * xref:organization-standards.adoc[Organization Standards] - Documentation organization, structure, and review guidelines
 * xref:javadoc-standards.adoc[Javadoc Standards] - Specific standards for Javadoc documentation
 * xref:readme-structure.adoc[README Structure] - Standard structure for README.adoc files
@@ -31,12 +32,25 @@ Defines comprehensive standards for all documentation across the codebase, inclu
 
 == Related Documentation
 
+* xref:tone-and-style-standards.adoc[Tone and Style Standards]: Professional tone, neutral language, and writing style requirements
 * xref:organization-standards.adoc[Organization Standards]: Documentation organization, structure, and review guidelines
 * xref:javadoc-standards.adoc[Javadoc Standards]: Specific standards for Javadoc documentation
 * xref:../process/javadoc-maintenance.adoc[Javadoc Maintenance]: Process for maintaining Javadoc documentation
 * xref:readme-structure.adoc[README Structure]: Standard structure for README.adoc files
 
 == Core Documentation Standards
+
+=== Tone and Style Requirements
+
+**MANDATORY**: All documentation must strictly adhere to xref:tone-and-style-standards.adoc[Tone and Style Standards] including:
+
+* Professional, neutral, and objective tone
+* No marketing language or promotional wording
+* Factual descriptions with verifiable sources
+* Technical precision without subjective claims
+* Concise, clear language without verbosity
+
+See the comprehensive xref:tone-and-style-standards.adoc[Tone and Style Standards] document for detailed guidelines, examples, and analysis patterns.
 
 === AsciiDoc Formatting Requirements
 
