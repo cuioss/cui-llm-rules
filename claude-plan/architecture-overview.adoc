@@ -233,12 +233,14 @@ For nested CLAUDE.md files, the most specific (deepest nested) takes priority.
 
 [source,bash]
 ----
-# Add marketplace
+# Add marketplace (GitHub shorthand: owner/repo resolves to GitHub URL)
 /plugin marketplace add cuioss/cui-llm-rules
 
 # Install plugin
 /plugin install cui-standards@cui-llm-rules
 ----
+
+**Marketplace formats**: `owner/repo` (GitHub), `https://...` (Git URL), or `file:///...` (local)
 
 === Updates
 

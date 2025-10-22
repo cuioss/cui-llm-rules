@@ -475,12 +475,22 @@ Updates distributed via marketplace refresh:
 
 [source,bash]
 ----
-# Add GitHub repository as marketplace
+# Add GitHub repository as marketplace (shorthand)
+# Resolves to: https://github.com/cuioss/cui-llm-rules
 /plugin marketplace add cuioss/cui-llm-rules
+
+# Alternative: Full Git URL
+/plugin marketplace add https://github.com/cuioss/cui-llm-rules.git
 
 # Install plugin
 /plugin install cui-standards@cui-llm-rules
 ----
+
+**Supported formats**:
+
+* **GitHub shorthand**: `owner/repo` (auto-resolves to GitHub URL)
+* **Full Git URL**: `https://github.com/owner/repo.git`
+* **SSH URL**: `git@github.com:owner/repo.git`
 
 === Project Auto-Installation
 

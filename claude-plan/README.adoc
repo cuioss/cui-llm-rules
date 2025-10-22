@@ -7,8 +7,6 @@
 
 This directory contains the technical specifications for the `cui-standards` Claude Code plugin. These documents define the architecture, component structure, and implementation requirements for transforming cui-llm-rules into a distributable plugin.
 
-**Last Updated**: 2025-10-22
-
 == Document Index
 
 === xref:architecture-overview.adoc[Architecture Overview]
@@ -60,6 +58,22 @@ This directory contains the technical specifications for the `cui-standards` Cla
 * Installation procedures
 
 *Audience*: Plugin maintainers, developers setting up the repository
+
+---
+
+=== xref:synchronize-command-spec.adoc[Synchronize Command Specification]
+
+*Purpose*: Project-specific synchronization for cross-platform compatibility
+
+*Contents*:
+
+* `/synchronize` command specification
+* Copying agents/commands to project `.claude/` (git-controlled)
+* Skills accessed dynamically from repository (never synchronized)
+* Platform support (Claude Code, Claude.ai web, CI/CD)
+* Update strategy and team collaboration workflow
+
+*Audience*: Developers setting up projects, teams using Claude.ai web or CI/CD
 
 == Quick Reference
 
@@ -126,7 +140,7 @@ Verified via `/agents-doctor sync` command (custom).
 
 [source,bash]
 ----
-# Add marketplace
+# Add marketplace (GitHub shorthand: resolves to https://github.com/cuioss/cui-llm-rules)
 /plugin marketplace add cuioss/cui-llm-rules
 
 # Install plugin
@@ -135,6 +149,68 @@ Verified via `/agents-doctor sync` command (custom).
 # Update (refresh marketplace)
 /plugin marketplace update cui-llm-rules
 ----
+
+**Note**: Claude Code supports multiple marketplace formats: GitHub shorthand (`owner/repo`), full Git URLs (`https://...`), or local paths (`file:///...`).
+
+=== Complete Workflow
+
+==== 1. One-Time Setup (Claude Code Users)
+
+[source,bash]
+----
+# Install plugin globally (provides agents/commands for synchronization)
+# Skills are always accessed from repository (never synchronized)
+/plugin install cui-standards@cui-llm-rules
+----
+
+==== 2. Project Synchronization (Git-Controlled)
+
+[source,bash]
+----
+# In project directory, use interactive mode (recommended)
+cd ~/my-project
+/synchronize
+
+# Interactive prompts appear with numbered lists:
+# - Select agents by number (e.g., "1 3 5")
+# - Select commands by number (e.g., "1 7")
+# - Or use "all" or "skip"
+
+# Alternative: Synchronize by name
+/synchronize project-builder adoc-review agents-doctor
+
+# Commit to git (makes available to all platforms)
+git add .claude/
+git commit -m "sync: Add cui-standards agents"
+git push
+----
+
+**What gets synchronized**:
+* ✅ Agents → `.claude/agents/` (git-controlled)
+* ✅ Commands → `.claude/commands/` (git-controlled)
+* ❌ Skills → NOT synchronized (accessed dynamically from repository)
+
+==== 3. Cross-Platform Usage
+
+**Claude Code (CLI/IDE)**:
+- Uses project's `.claude/` (overrides plugin)
+- Agents reference skills from repository dynamically
+
+**Claude.ai Web**:
+- Uses project's `.claude/` (only way to access)
+- Agents reference skills from repository dynamically
+
+**CI/CD (GitHub Actions)**:
+- Uses project's `.claude/` (committed to git)
+- Agents reference skills from repository dynamically
+
+**Skills resolution** (all platforms):
+```
+Agent reads: .claude/agents/project-builder.md
+Agent references: "Read cui-java-standards skill"
+Resolved from: https://github.com/cuioss/cui-llm-rules/skills/cui-java-standards/SKILL.md
+Skill references: ./standards/java/java-code-standards.adoc
+```
 
 == Implementation Status
 
@@ -157,6 +233,10 @@ Verified via `/agents-doctor sync` command (custom).
 |**Commands**
 |11 commands to migrate/create
 |⏳ Not implemented
+
+|**/synchronize command**
+|Project synchronization for cross-platform compatibility
+|✅ Specified
 
 |**plugin.json**
 |Manifest specification complete
