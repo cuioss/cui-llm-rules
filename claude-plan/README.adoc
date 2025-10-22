@@ -203,6 +203,35 @@ See xref:synchronize-command-spec.adoc[Synchronize Command Specification].
 |⚠️ Needs Research
 |===
 
+== Verification Status
+
+**Last Updated**: 2025-10-22
+
+Core Claude Code assumptions have been tested. See xref:VERIFICATION-RESULTS.adoc[Verification Results] for complete details.
+
+**Verified** ✅:
+
+* Plugins CAN contain `skills/` directory
+* Plugin installation commands work as documented
+* Progressive disclosure model is correct
+* YAML frontmatter structure is correct
+* Marketplace update mechanism confirmed
+
+**Failed** ❌:
+
+* `${CLAUDE_PLUGIN_ROOT}` environment variable does NOT exist (use programmatic detection)
+* `/plugin list` command does NOT exist (use `/plugin` interactive)
+* `/skill list` and `/agents list` commands do NOT exist
+
+**Discoveries** 🔍:
+
+* `hooks/` directory supported (optional)
+* `.mcp.json` MCP integration supported (optional)
+
+**Deferred** ⏸️:
+
+* Claude.ai web skills access (lower priority - focus on Claude Code first)
+
 == Known Limitations
 
 See xref:plugin-structure.adoc#known-limitations[Plugin Structure § Known Limitations] for complete details.

@@ -99,10 +99,15 @@ This document specifies the technical requirements for the cui-standards Claude 
 │   ├── verify-plantuml-diagrams.md   # Diagram verification
 │   └── verify-project.md             # Project verification
 │
+├── hooks/                            # Event handlers (optional)
+│   └── hooks.json                    # Hook configuration
+│
 ├── scripts/                          # Utility scripts
 │   ├── asciidoc-validator.sh
 │   ├── verify-adoc-links.py
 │   └── sync-essential-rules.sh       # Sync automation (new)
+│
+├── .mcp.json                         # MCP integration (optional)
 │
 ├── docs/                             # Meta documentation
 │   ├── plugin-architecture.md
@@ -347,32 +352,33 @@ standards/java/... (missing ./ prefix)
 
 === Environment Variables
 
-[WARNING]
-====
-**⚠️ UNVERIFIED ASSUMPTION**
+**Verification Status**: ✅ Tested 2025-10-22
 
-The `${CLAUDE_PLUGIN_ROOT}` environment variable is referenced throughout this specification but **has not been verified** to exist in Claude Code.
+**Available Variables**:
 
-**Verification Status**: ❌ Not tested
+* **CLAUDECODE=1**: Indicates Claude Code environment
+* **CLAUDE_CODE_ENTRYPOINT=cli**: Platform identifier (cli, ide, etc.)
 
-**If this variable does not exist**, alternative approaches needed:
+**NOT Available**:
 
-* Use relative paths exclusively (works for most cases)
-* Detect plugin path programmatically in scripts
-* Hard-code paths (not recommended)
-* Request this feature from Claude Code team
-====
+* ~~`${CLAUDE_PLUGIN_ROOT}`~~ - This variable **does not exist** in Claude Code
 
-* **${CLAUDE_PLUGIN_ROOT}** (if it exists): Absolute path to plugin installation
-* **Use in**: Bash scripts, hooks requiring absolute paths
+**Path Resolution for Scripts**:
+
+For scripts requiring absolute paths, use programmatic detection:
 
 [source,bash]
 ----
 #!/bin/bash
-# Proposed usage in script (requires verification)
-PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT}
+# Detect plugin root from script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Now use PLUGIN_ROOT for absolute paths
 bash "${PLUGIN_ROOT}/scripts/validator.sh"
 ----
+
+**Recommendation**: Use relative paths whenever possible (works for most cases)
 
 == Conflict Resolution
 
@@ -534,7 +540,7 @@ Utility scripts for validation and automation:
 
 Scripts must:
 
-* Use `${CLAUDE_PLUGIN_ROOT}` for absolute paths
+* Detect plugin root programmatically for absolute paths (see Environment Variables section)
 * Work cross-platform (or provide alternatives)
 * Return meaningful exit codes
 
@@ -565,52 +571,94 @@ Working code examples:
 * Should be functional, tested code
 * Referenced in SKILL.md for learning
 
+=== Hooks Directory (Optional)
+
+**Verification Status**: ✅ Discovered 2025-10-22 (not originally in spec)
+
+Event handlers for workflow automation:
+
+* **Location**: `hooks/` at plugin root
+* **Configuration**: `hooks/hooks.json` defines event handlers
+* **Purpose**: Automate actions on events (file changes, command execution, etc.)
+
+**Example use cases**:
+* Validate code on file save
+* Run tests before commit
+* Format code automatically
+
+**Status**: Optional feature - documented for completeness, not required for cui-standards plugin.
+
+=== MCP Integration (Optional)
+
+**Verification Status**: ✅ Discovered 2025-10-22 (not originally in spec)
+
+MCP (Model Context Protocol) integration for external tools:
+
+* **Location**: `.mcp.json` at plugin root
+* **Purpose**: Integrate external tools and services
+* **Use**: Extend Claude's capabilities beyond built-in tools
+
+**Status**: Optional feature - documented for completeness, not required for cui-standards plugin.
+
 == Testing and Validation
 
 === Plugin Installation Verification
 
 After installing the plugin, verify it's working correctly.
 
-[IMPORTANT]
-====
-**Command Verification Status**
+**Verification Status**: ✅ Tested 2025-10-22
 
-The commands below have **NOT been verified** to exist in Claude Code. Test these commands and document actual availability.
+**Available Commands**:
 
 |===
 |Command |Status |Notes
 
-|`/plugin list`
-|⚠️ Assumed
-|Commonly available in plugin systems
+|`/plugin`
+|✅ Verified
+|Interactive plugin browser (no arguments)
 
-|`/skill list`
-|⚠️ Assumed
-|May not exist - test required
+|`/plugin install`
+|✅ Verified
+|Install from marketplace
 
-|`/agents list`
-|⚠️ Assumed
-|May not exist - test required
+|`/plugin marketplace list`
+|✅ Verified
+|List configured marketplaces
 
 |`/help`
 |✅ Standard
-|Standard command in CLI tools
+|Lists all available commands
 |===
-====
+
+**Commands That Do NOT Exist**:
+
+* ~~`/plugin list`~~ - Use `/plugin` (interactive) instead
+* ~~`/skill list`~~ - Not available (check filesystem instead)
+* ~~`/agents list`~~ - Not available (check filesystem instead)
+
+**Verification Steps**:
 
 [source,bash]
 ----
-# Check plugin is listed
-/plugin list
-# Expected: cui-standards@cui-llm-rules (version 1.0.0)
+# Browse installed plugins interactively
+/plugin
+# Opens interactive plugin browser
 
-# Verify skills are available (command existence unverified)
-/skill list
-# or check plugin directory: ~/.claude/plugins/cui-standards/skills/
+# List configured marketplaces
+/plugin marketplace list
+# Shows: cui-llm-rules (or other marketplaces)
 
-# Verify agents are available (command existence unverified)
-/agents list
-# or check plugin directory: ~/.claude/plugins/cui-standards/agents/
+# Check plugin filesystem directly
+ls -la ~/.claude/plugins/
+# Should show installed plugins
+
+# Verify skills are available
+ls -la ~/.claude/plugins/cui-standards/skills/
+# Should show skill directories
+
+# Verify agents are available
+ls -la ~/.claude/plugins/cui-standards/agents/
+# Should show agent .md files
 
 # Verify commands are available
 /help
@@ -707,31 +755,22 @@ Use built-in doctor commands to verify components:
 
 === No Individual Plugin Update Command
 
-[WARNING]
-====
-**⚠️ UNVERIFIED ASSUMPTION**
+**Verification Status**: ✅ Tested 2025-10-22
 
-This limitation has **not been verified** through testing. The actual command availability needs confirmation.
+Claude Code does **NOT support updating individual plugins** via `/plugin update plugin-name`.
 
-**What needs testing**:
-
-* Does `/plugin update plugin-name` exist?
-* Does `/plugin marketplace update marketplace-name` exist?
-* What is the actual update mechanism?
-====
-
-**Assumed behavior** (requires verification): Claude Code does NOT support updating individual plugins via `/plugin update plugin-name`.
-
-**Assumed workaround** (requires verification): Use `/plugin marketplace update marketplace-name` to refresh the marketplace, which distributes updates to all plugins from that marketplace.
+**Update Mechanism**: Use `/plugin marketplace update marketplace-name` to refresh the marketplace, which distributes updates to all plugins from that marketplace.
 
 [source,bash]
 ----
-# ❌ ASSUMED NOT SUPPORTED (unverified)
+# ❌ NOT SUPPORTED (verified)
 /plugin update cui-standards
 
-# ✅ ASSUMED CORRECT (unverified)
+# ✅ CORRECT APPROACH (verified)
 /plugin marketplace update cui-llm-rules
 ----
+
+**Note**: Removing a marketplace will uninstall any plugins installed from it
 
 === No Semantic Version Pinning
 

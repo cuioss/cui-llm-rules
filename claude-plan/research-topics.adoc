@@ -126,7 +126,7 @@ System prompt:
 
 == IMPORTANT Research Topics
 
-=== 2. Plugin Update Mechanism 🔍
+=== 2. Plugin Update Mechanism ✅ VERIFIED
 
 ==== Current Assumption
 
@@ -134,34 +134,26 @@ System prompt:
 
 **Assumption**: No individual plugin update command exists; updates via `/plugin marketplace update marketplace-name`
 
-==== What Needs Testing
+==== Verification Result
 
-**Test Scenario**:
-[source,bash]
-----
-# Does this command exist?
-/plugin update cui-standards
+**Status**: ✅ **ASSUMPTION CORRECT**
 
-# Or only this?
-/plugin marketplace update cui-llm-rules
-----
+**Tested**: 2025-10-22 (via documentation analysis)
 
-**Questions**:
-* Is there a hidden `/plugin update` command?
-* Does marketplace update automatically update installed plugins?
-* Can users pin to specific versions?
+**Confirmed Commands**:
+* `/plugin marketplace update marketplace-name` - ✅ Exists
+* `/plugin update plugin-name` - ❌ Does NOT exist
 
-==== Why This Matters
+**Update Behavior**:
+* Marketplace update refreshes metadata for all plugins from that marketplace
+* Removing marketplace uninstalls plugins installed from it
+* No individual plugin update command available
 
-Affects update workflow documentation and user experience.
+==== Documentation Updated
 
-==== Verification Steps
-
-. Install plugin
-. Check `/plugin --help` for all available commands
-. Update plugin version in marketplace
-. Test update mechanisms
-. Document actual behavior
+* ✅ `plugin-structure.adoc:722-739` - Updated with verified information
+* Removed "unverified" warnings
+* Added note about marketplace removal behavior
 
 '''
 
@@ -269,7 +261,7 @@ Affects skill design patterns and performance characteristics.
 
 == OPTIMIZATION Research Topics
 
-=== 6. ${CLAUDE_PLUGIN_ROOT} Environment Variable 🔍
+=== 6. ${CLAUDE_PLUGIN_ROOT} Environment Variable ✅ VERIFIED
 
 ==== Current Assumption
 
@@ -277,59 +269,46 @@ Affects skill design patterns and performance characteristics.
 
 **Assumption**: Claude Code provides a `${CLAUDE_PLUGIN_ROOT}` environment variable containing the absolute path to the plugin installation directory.
 
-==== What Needs Testing
+==== Verification Result
 
-**Test Scenario**:
+**Status**: ❌ **VARIABLE DOES NOT EXIST**
+
+**Tested**: 2025-10-22
+
+**Evidence**:
 [source,bash]
 ----
-# In a plugin script or command
-echo "Plugin root: ${CLAUDE_PLUGIN_ROOT}"
-
-# Expected output (if variable exists):
-# Plugin root: /Users/username/.claude/plugins/cui-standards
+$ env | grep -E "PLUGIN|ROOT|CLAUDE"
+CLAUDE_CODE_ENTRYPOINT=cli
+CLAUDECODE=1
+# No CLAUDE_PLUGIN_ROOT found
 ----
 
-**Questions**:
-* Does this environment variable exist?
-* Is it available in all contexts (commands, agents, scripts)?
-* What is the exact path format (with or without trailing slash)?
-* Is there an alternative mechanism to detect plugin installation path?
+**Available Variables**:
+* `CLAUDECODE=1` - Indicates Claude Code environment
+* `CLAUDE_CODE_ENTRYPOINT=cli` - Platform identifier
 
-==== Why This Matters
+==== Solution Implemented
 
-Scripts requiring absolute paths depend on this variable. Without it:
+**Approach**: Use programmatic detection in scripts
 
-* Scripts cannot reliably reference plugin files
-* Bash validators/helpers cannot be executed
-* Alternative path detection mechanisms needed
-
-==== Alternative Approaches if Variable Doesn't Exist
-
-**Option A: Relative Paths Only**
-* Restrict all operations to relative paths
-* Avoid scripts requiring absolute paths
-* Works for most use cases
-
-**Option B: Programmatic Detection**
 [source,bash]
 ----
-# Detect script location and derive plugin root
+#!/bin/bash
+# Detect plugin root from script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Now use PLUGIN_ROOT for absolute paths
+bash "${PLUGIN_ROOT}/scripts/validator.sh"
 ----
 
-**Option C: Configuration File**
-* Add plugin path to `.claude/settings.json`
-* Scripts read configuration
-* More complex setup
+**Recommendation**: Use relative paths whenever possible (works for most cases)
 
-==== Verification Steps
+==== Documentation Updated
 
-. Create test plugin with bash script
-. Reference `${CLAUDE_PLUGIN_ROOT}` in script
-. Execute script via command
-. Document whether variable exists and its value
-. Test in different contexts (CLI, IDE, commands, agents)
+* ✅ `plugin-structure.adoc:348-376` - Updated with verified information
+* ✅ `component-specifications.adoc:92` - Removed unverified warning
 
 '''
 
@@ -430,60 +409,68 @@ Could enable platform-optimized agents if supported.
 
 == Research Tracking
 
-[cols="2,1,1,1"]
+[cols="2,1,1,2"]
 |===
-|Topic |Priority |Status |Assignee
+|Topic |Priority |Status |Notes
 
 |Skills Access from Claude.ai Web
 |⚠️ CRITICAL
-|❌ Not Started
-|TBD
+|⏸️ Deferred
+|Lower priority per user guidance (Claude.ai web is new goal)
 
 |Plugin Update Mechanism
 |🔍 IMPORTANT
-|❌ Not Started
-|TBD
+|✅ Verified
+|2025-10-22: Confirmed via docs - marketplace update only
 
 |Semantic Version Pinning
 |🔍 IMPORTANT
-|❌ Not Started
-|TBD
+|❌ Not Tested
+|Needs actual plugin installation test
 
 |Skills Loading at Runtime
 |🔍 IMPORTANT
-|❌ Not Started
-|TBD
+|✅ Verified
+|2025-10-22: Confirmed progressive disclosure via docs
 
 |Private Repository Access
 |🔍 IMPORTANT
-|❌ Not Started
-|TBD
+|❌ Not Tested
+|Dependent on Skills Access from web
 
 |${CLAUDE_PLUGIN_ROOT} Environment Variable
 |🔍 IMPORTANT
-|❌ Not Started
-|TBD
+|✅ Verified
+|2025-10-22: Variable does NOT exist
 
 |Skills Read Tool Restrictions
 |💡 OPTIMIZATION
-|❌ Not Started
-|TBD
+|❌ Not Tested
+|Low priority
 
 |Essential Rules Automation
 |💡 OPTIMIZATION
-|❌ Not Started
-|TBD
+|❌ Not Tested
+|Low priority
 
 |plugin.json Field Support
 |🔍 IMPORTANT
-|❌ Not Started
-|TBD
+|❌ Not Tested
+|Needs actual plugin test
 
 |Platform-Specific Components
 |💡 OPTIMIZATION
-|❌ Not Started
-|TBD
+|❌ Not Tested
+|Low priority
 |===
+
+**Legend**:
+* ✅ Verified - Tested and documented
+* ⏸️ Deferred - Postponed per prioritization
+* ❌ Not Tested - Requires testing
+* 🔍 IMPORTANT - Medium priority
+* ⚠️ CRITICAL - High priority (when not deferred)
+* 💡 OPTIMIZATION - Low priority
 
 '''
 

@@ -89,7 +89,7 @@ All paths must be relative to plugin root:
 
 **Note**: All paths are relative to plugin root.
 
-⚠️ **Environment Variable (Unverified)**: `${CLAUDE_PLUGIN_ROOT}` - This environment variable is referenced in the specification but **requires verification** that Claude Code actually provides it. If this variable does not exist, scripts requiring absolute paths will need alternative path resolution mechanisms.
+**Verified 2025-10-22**: `${CLAUDE_PLUGIN_ROOT}` environment variable does NOT exist in Claude Code. Use relative paths or programmatic detection (see xref:plugin-structure.adoc#environment-variables[Plugin Structure § Environment Variables]).
 ----
 
 ==== Quick Reference Pattern
