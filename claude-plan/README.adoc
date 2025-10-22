@@ -135,25 +135,11 @@ See xref:plugin-structure.adoc#installation[Plugin Structure § Installation] fo
 
 === Quick Start
 
-[source,bash]
-----
-# Install plugin (Claude Code users)
-/plugin install cui-standards@cui-llm-rules
+For complete installation instructions, see:
 
-# Synchronize to project (all users)
-cd ~/my-project
-/synchronize --all --include-skills
-
-# Commit to git
-git add .claude/
-git commit -m "sync: Add cui-standards components"
-git push
-----
-
-**Complete installation and workflow details**:
-
-* xref:plugin-structure.adoc#installation[Plugin Structure § Installation]
-* xref:synchronize-command-spec.adoc[Synchronize Command Specification]
+* xref:plugin-structure.adoc#installation[Plugin Structure § Installation] - Detailed installation procedures
+* xref:synchronize-command-spec.adoc[Synchronize Command Specification] - Cross-platform distribution
+* xref:architecture-overview.adoc#implementation-decision-guide[Architecture Overview § Implementation Decision Guide] - Choose the right approach for your team
 
 == Specification Scope
 

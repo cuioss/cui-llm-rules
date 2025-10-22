@@ -121,31 +121,41 @@ Layer 4: Commands (command.md) - User utilities
 
 ==== Skills Distribution Strategies
 
-Skills can be distributed to different platforms using two strategies:
+Skills must be distributed to make them available across different platforms. Two strategies exist:
 
-**Strategy 1: Project Synchronization** ✅ VERIFIED
+**Strategy 1: Project Synchronization** ✅ CURRENT RECOMMENDATION (VERIFIED)
 
 This approach synchronizes skills to project `.claude/skills/` directory (git-controlled), making them available on all platforms.
 
-* **Status**: Verified and works on all platforms
+* **Status**: ✅ Verified and works on all platforms TODAY
 * **Platforms**: Claude Code, Claude.ai web, CI/CD
-* **Trade-off**: Requires explicit synchronization, potential for drift
-* **Recommendation**: Use this approach until Strategy 2 is verified
+* **Trade-off**: Requires explicit synchronization via `/synchronize --include-skills`, potential for drift if not updated regularly
+* **Implementation**: See xref:synchronize-command-spec.adoc[Synchronize Command Specification]
 
-See xref:synchronize-command-spec.adoc[Synchronize Command Specification] for complete details.
+**This is the RECOMMENDED approach for all users until Strategy 2 is fully verified.**
 
-**Strategy 2: Dynamic Repository Access** ⚠️ PROPOSED - NOT VERIFIED
+**Strategy 2: Dynamic Repository Access** ⚠️ FUTURE POSSIBILITY (NOT VERIFIED)
 
-This approach accesses skills dynamically from repository URLs at runtime, avoiding synchronization.
+This proposed approach would access skills dynamically from repository URLs at runtime, avoiding synchronization.
 
-* **Status**: Unverified proposal requiring testing
-* **Platforms**: Potentially all platforms (if verification succeeds)
-* **Trade-off**: No synchronization needed, always current, but requires network access
+* **Status**: ⚠️ Unverified proposal - requires testing before use
+* **Platforms**: Unknown (requires verification for each platform)
+* **Trade-off**: No synchronization needed, always current, but requires network access and repository URL configuration
 * **Verification Required**: See xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access]
 
-**If Strategy 2 works as proposed**, skills would be accessed dynamically at runtime using the following mechanism:
+**Do NOT use this approach until verification is complete.**
 
-**When Claude Code is Running:**
+**Current Recommendation**: Use Strategy 1 (Project Synchronization) - it's verified and works today.
+
+=== Strategy 2: Technical Proposal (For Future Implementation)
+
+**IMPORTANT**: This section describes a PROPOSED mechanism, NOT current functionality.
+
+The following describes how Strategy 2 COULD work if verification succeeds. This is included for architectural planning but should NOT be implemented until testing confirms feasibility.
+
+==== Proposed Mechanism - Dynamic Skills Access
+
+**When Claude Code is Running (Proposed):**
 
 1. **Plugin Installation Provides Skills**
    * Skills remain in plugin directory: `~/.claude/plugins/cui-standards/skills/`
@@ -159,13 +169,15 @@ This approach accesses skills dynamically from repository URLs at runtime, avoid
    * Reads `~/.claude/plugins/cui-standards/skills/cui-java-standards/SKILL.md`
    * Skill then reads standards files via relative paths
 
-**When Using Claude.ai Web or CI/CD (No Plugin Support) - PROPOSED:**
+**When Using Claude.ai Web or CI/CD (Proposed):**
 
-1. **Agents Are Git-Controlled** ✅ (Verified mechanism)
+**Note**: This entire section is PROPOSED and unverified.
+
+1. **Agents Are Git-Controlled** ✅ (This part is verified - agents can be git-controlled)
    * Project has `.claude/agents/` with synchronized agents (committed to git)
    * Agents reference skills by name in their prompts
 
-2. **Skills Must Be Accessible via Repository** ⚠️ (Unverified - see research-topics.adoc)
+2. **Skills Must Be Accessible via Repository** ⚠️ **UNVERIFIED - REQUIRES TESTING**
    * **Public Repository - PROPOSED**: Claude can access via GitHub API/web fetch
      - Repository URL: `https://github.com/cuioss/cui-llm-rules`
      - Skill path: `skills/cui-java-standards/SKILL.md`
@@ -186,14 +198,90 @@ This approach accesses skills dynamically from repository URLs at runtime, avoid
    → Claude fetches: https://github.com/cuioss/cui-llm-rules/standards/java/java-code-standards.adoc
    ```
 
-**Critical Requirements for Strategy 2** (all unverified):
+==== Critical Requirements for Strategy 2 (ALL UNVERIFIED)
 
-* Repository must be public OR agents must include explicit repository URLs
-* Skills would NOT be synchronized to `.claude/` (to avoid drift)
-* Standards files must be accessible via same mechanism as skills
-* Relative path resolution must work when Claude fetches from repository root
+If implementing Strategy 2 in the future, these requirements must be validated:
 
-**Until Strategy 2 is verified**, use **Strategy 1 (Project Synchronization)** which has no such requirements and works on all platforms today.
+* ⚠️ Repository must be public OR agents must include explicit repository URLs
+* ⚠️ Skills would NOT be synchronized to `.claude/` (to avoid drift)
+* ⚠️ Standards files must be accessible via same mechanism as skills
+* ⚠️ Relative path resolution must work when Claude fetches from repository root
+* ⚠️ Network access must be available at runtime
+* ⚠️ Claude.ai web must support WebFetch or similar for GitHub content
+
+**Verification Required**: See xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access from Claude.ai Web]
+
+=== Implementation Guidance
+
+**For All Users TODAY**:
+
+* ✅ **Use Strategy 1** (Project Synchronization)
+* ✅ Synchronize skills to `.claude/skills/` via `/synchronize --include-skills`
+* ✅ Commit `.claude/` to git for team distribution
+* ✅ Update periodically when plugin version changes
+
+**Do NOT attempt Strategy 2** until research verification is complete and documented as successful.
+
+=== Implementation Decision Guide
+
+Use this table to determine the correct approach for your scenario:
+
+[cols="2,1,2,2"]
+|===
+|Your Scenario |Install Plugin? |Synchronize to .claude/? |Include Skills?
+
+|**Solo developer, Claude Code only**
+|✅ Yes
+|Optional (for customization)
+|No (use from plugin)
+
+|**Team, all use Claude Code**
+|✅ Yes (all members)
+|⚠️ Optional (for consistency)
+|No (use from plugin)
+
+|**Team, mixed Claude Code + Web**
+|✅ Yes (Code users)
+|✅ **REQUIRED**
+|✅ **REQUIRED**
+
+|**Claude.ai web only (no CLI)**
+|❌ Not possible
+|✅ **REQUIRED** (only option)
+|✅ **REQUIRED**
+
+|**CI/CD pipelines only**
+|❌ Not possible
+|✅ **REQUIRED** (only option)
+|✅ **REQUIRED**
+
+|**Private repository for standards**
+|✅ Yes
+|✅ **REQUIRED**
+|✅ **REQUIRED**
+|===
+
+**Key Takeaways**:
+
+* **Mixed teams** = Always synchronize everything to `.claude/` + commit to git
+* **Web/CI/CD users** = Synchronization is mandatory (no plugin support)
+* **Claude Code only** = Plugin is sufficient, synchronization optional
+* **Private repositories** = Always use Strategy 1 (synchronization)
+
+**Commands**:
+
+```bash
+# For mixed teams, web users, CI/CD, or private repos
+/plugin install cui-standards@cui-llm-rules  # (if using Claude Code)
+/synchronize --all --include-skills           # REQUIRED
+git add .claude/
+git commit -m "sync: Add cui-standards components"
+git push
+
+# For Claude Code only (solo/small teams)
+/plugin install cui-standards@cui-llm-rules  # Sufficient
+# No synchronization needed unless customizing
+```
 
 === Decision 2: Agents Use Essential Rules Pattern (Custom Implementation)
 
@@ -207,11 +295,29 @@ Agents embed core requirements from standards for performance while maintaining 
 * **Implementation**: cui-llm-rules becomes installable plugin
 * **Benefit**: Version control, team consistency, automatic updates
 
-=== Decision 4: Project-Specific Overrides Allowed
+=== Decision 4: Project `.claude/` Priority Model
 
-* **Rationale**: Projects may need specialized skills/agents
-* **Implementation**: `.claude/skills/` and `.claude/agents/` override plugin
-* **Benefit**: Global defaults + project customization
+**Context-Dependent Role**: Project `.claude/` serves different purposes depending on user's platform:
+
+**For Claude Code Users** (have plugin installed):
+
+* `.claude/` files **OVERRIDE** plugin-provided components
+* Plugin provides defaults, project customizes
+* Use case: Project-specific variations of standard agents/skills
+
+**For Claude.ai Web / CI/CD Users** (no plugin support):
+
+* `.claude/` files are the **PRIMARY (only) mechanism**
+* No plugin available, all components must be in `.claude/`
+* Use case: Git-controlled distribution to non-CLI users
+
+**Implementation**:
+
+* Components in `.claude/skills/`, `.claude/agents/`, `.claude/commands/` take precedence over plugin
+* Synchronized via `/synchronize` command from plugin installation
+* Git-controlled for team distribution
+
+**Benefit**: Single mechanism serves both use cases (customization + distribution)
 
 == Progressive Disclosure Model
 

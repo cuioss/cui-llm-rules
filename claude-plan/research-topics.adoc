@@ -196,42 +196,32 @@ System prompt:
 
 '''
 
-=== 4. Skills Loading at Runtime 🔍
+=== 4. Skills Loading at Runtime ✅ VERIFIED (Strategy 1)
 
-==== Current Assumption
+==== Status
 
 **Documented in**: `architecture-overview.adoc:196-210` (Progressive Disclosure Model)
 
-**Assumption**: Skills use "progressive disclosure" - metadata loaded at startup, full content via Read tool when needed.
+**Verification Status**: ✅ **VERIFIED** for Strategy 1 (Project Synchronization)
 
-==== What Needs Testing
+**Strategy 1 (Synchronized Skills)**:
+* Skills synchronized to `.claude/skills/` are loaded as regular files
+* Claude reads SKILL.md when skill is invoked or referenced
+* Skills can use Read tool to fetch standards dynamically
+* Relative paths resolve against project root (`.claude/skills/...`)
 
-**Questions**:
-* When exactly does Claude load skill content?
-* Does "Read tool" mean Claude's Read tool or just reading the file?
-* Can skills use Read tool to fetch standards, or is this one fetch operation?
+**Strategy 2 (Dynamic Repository Access)**: ⚠️ NOT VERIFIED - See Topic #1
 
-**Test Scenario**:
-[source,yaml]
-----
-# skills/test-skill/SKILL.md with frontmatter:
----
-name: Test Skill
-description: Test skill loading
-allowed-tools: Read
----
+==== Verified Behavior (Strategy 1)
 
-This skill references: ./standards/test.adoc
-----
+When skills are synchronized to `.claude/skills/`:
 
-**Questions to answer**:
-* When is SKILL.md content loaded?
-* Can the skill use Read tool from within its context?
-* How are relative paths resolved?
+1. **Discovery**: Claude discovers skills in `.claude/skills/` at startup
+2. **Loading**: SKILL.md content loaded when skill is activated (on-demand)
+3. **Tool Access**: Skills can use Read tool (if `allowed-tools: Read` specified)
+4. **Path Resolution**: Relative paths like `./standards/...` resolve against repository/plugin root
 
-==== Why This Matters
-
-Affects skill design patterns and performance characteristics.
+**Note**: This verification applies to Strategy 1 only. Strategy 2 (dynamic repository access) remains unverified - see xref:#_1_skills_access_from_claudeai_web[Topic #1].
 
 '''
 
@@ -249,17 +239,74 @@ Affects skill design patterns and performance characteristics.
 * Can Claude.ai web access private GitHub repos if user is authenticated?
 * Is there a `.claude/settings.json` field for repository credentials?
 * Does it require repository to be cloned locally?
+* Can agents reference private repo URLs directly?
 
-**Test Scenarios**:
-. Make cui-llm-rules private
-. Test if Claude.ai can still access it
-. Document authentication mechanism (if any)
+==== Test Scenarios
+
+**Scenario 1: Private Repository with GitHub Authentication**
+
+1. Make test repository private on GitHub
+2. Ensure test user has repository access (as collaborator or org member)
+3. In Claude.ai web, reference skill from private repo:
+   ```
+   Read https://github.com/cuioss/cui-llm-rules/skills/test-skill/SKILL.md
+   ```
+4. Observe whether Claude can access the file
+
+**Expected Results**:
+* ✅ Claude can access if user is authenticated to GitHub in browser
+* ❌ Claude cannot access (requires alternative approach)
+
+**Scenario 2: Local Clone Configuration**
+
+1. Clone repository locally
+2. Add to project `.claude/settings.json`:
+   ```json
+   {
+     "repositories": {
+       "cui-llm-rules": "/local/path/to/cui-llm-rules"
+     }
+   }
+   ```
+3. Agent references skill by repository name
+4. Observe whether Claude resolves to local path
+
+**Expected Results**:
+* ✅ Claude resolves repository name to local path
+* ❌ No such configuration supported
+
+**Scenario 3: Synchronization-Only Approach**
+
+1. Keep repository private
+2. Use `/synchronize --all --include-skills` to copy to `.claude/`
+3. Commit `.claude/` to project (project can be private or public)
+4. Test in Claude.ai web
+
+**Expected Results**:
+* ✅ This should work (doesn't depend on repository access)
+* Confirms Strategy 1 works with private repositories
+
+==== Acceptance Criteria
+
+* [ ] At least one approach works for private repositories
+* [ ] Document authentication requirements (if any)
+* [ ] Document configuration steps (if needed)
+* [ ] Update architecture-overview.adoc with findings
 
 ==== Why This Matters
 
-* Many organizations use private repositories
+* Many organizations use private repositories for proprietary standards
 * Affects adoption for enterprise users
-* May require different distribution strategy
+* May influence whether Strategy 1 or Strategy 2 is preferred
+
+==== Fallback Position
+
+If no private repository access mechanism works:
+
+* **Strategy 1 (Synchronization) is mandatory** for private repositories
+* Skills/agents must be synchronized to `.claude/` (git-controlled)
+* Document this as a known limitation
+* Users must grant access to project repository, not plugin repository
 
 '''
 
@@ -432,10 +479,10 @@ Could enable platform-optimized agents if supported.
 |❌ Not Tested
 |Needs actual plugin installation test
 
-|Skills Loading at Runtime
+|Skills Loading at Runtime (Strategy 1)
 |🔍 IMPORTANT
 |✅ Verified
-|2025-10-22: Confirmed progressive disclosure via docs
+|2025-10-22: Confirmed for synchronized skills. Strategy 2 unverified.
 
 |Private Repository Access
 |🔍 IMPORTANT
