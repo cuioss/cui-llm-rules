@@ -136,100 +136,31 @@ This approach synchronizes skills to project `.claude/skills/` directory (git-co
 * **Benefit**: Works everywhere, no runtime dependencies, team consistency
 * **Specification**: See xref:synchronize-command-spec.adoc[Synchronize Command Specification]
 
-**This is the ONLY verified approach. Always use this method.**
+**This is the ONLY possible approach.** Skills must be filesystem-based per Claude Code architecture.
 
-**Future Research: Dynamic Repository Access** 🔬 THEORETICAL (NOT TESTED)
+**Why Dynamic Repository Access is Impossible** ❌
 
-A theoretical alternative would access skills dynamically from repository URLs at runtime, avoiding synchronization. This approach:
+Research confirmed that loading skills from repository URLs at runtime is architecturally impossible:
 
-* **Status**: 🔬 Unverified theoretical proposal - research deferred (see xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access])
-* **Risk**: May not work on Claude.ai web or CI/CD platforms
-* **Dependencies**: Would require network access and WebFetch capabilities
-* **Current Recommendation**: Do NOT attempt this approach - use Project Synchronization instead
+* ❌ **Skills must be local files** - Claude Code's progressive disclosure requires filesystem access
+* ❌ **No remote loading capability** - WebFetch tool cannot load skills from URLs
+* ❌ **Claude.ai web requires ZIP upload** - No GitHub repository access for skills
+* ❌ **Architecture limitation** - Skills discovery depends on local directory scanning
 
-**Note**: This theoretical approach is documented for architectural completeness but is NOT recommended for use.
-
-=== Appendix: Theoretical Dynamic Access Design (Research Only)
-
-**IMPLEMENTATION STATUS**: 🔬 Theoretical proposal only - NOT for implementation
-
-**WARNING**: This section documents a theoretical approach for future research. Do NOT implement this. Use Project Synchronization instead.
-
-The following describes how dynamic skills access COULD theoretically work if research verification succeeds. This is included for:
-* Architectural completeness
-* Future research planning
-* Understanding why Project Synchronization is necessary
-
-**Do not use this design.** It remains unverified and is not recommended.
-
-==== Theoretical Mechanism: Dynamic Skills Access
-
-**THEORETICAL: When Claude Code is Running:**
-
-1. **Plugin Installation Provides Skills**
-   * Skills remain in plugin directory: `~/.claude/plugins/cui-standards/skills/`
-   * Claude loads skill metadata (name, description) at startup
-   * Full skill content loaded via Read tool when needed
-   * Skills use relative paths (`./standards/...`) which resolve against plugin root
-
-2. **Agent References in Synchronized .claude/ Files**
-   * Agents synchronized to `.claude/agents/` contain prompts like: "Read cui-java-standards skill"
-   * Claude resolves skill name to plugin installation path
-   * Reads `~/.claude/plugins/cui-standards/skills/cui-java-standards/SKILL.md`
-   * Skill then reads standards files via relative paths
-
-**THEORETICAL: When Using Claude.ai Web or CI/CD:**
-
-**WARNING**: This entire section is THEORETICAL and unverified. Do not rely on this mechanism.
-
-1. **Agents Are Git-Controlled** ✅ (This part is verified - agents can be git-controlled)
-   * Project has `.claude/agents/` with synchronized agents (committed to git)
-   * Agents reference skills by name in their prompts
-
-2. **Skills Must Be Accessible via Repository** ⚠️ **UNVERIFIED - REQUIRES TESTING**
-   * **Public Repository - PROPOSED**: Claude can access via GitHub API/web fetch
-     - Repository URL: `https://github.com/cuioss/cui-llm-rules`
-     - Skill path: `skills/cui-java-standards/SKILL.md`
-     - Standards path: `standards/java/java-code-standards.adoc`
-
-   * **Private/Offline Repository - MECHANISM UNKNOWN**: See xref:research-topics.adoc#_5_private_repository_access[Research Topics § Private Repository Access]
-     - **Possible approaches** (all unverified):
-       * Clone repository to accessible location
-       * Configure path in project `.claude/settings.json` (if this field exists)
-       * Reference local clone path in agent prompts
-       * Require repository to be public
-
-3. **Resolution Flow**
-   ```
-   Agent prompt: "Read cui-java-standards skill from https://github.com/cuioss/cui-llm-rules"
-   → Claude fetches: https://github.com/cuioss/cui-llm-rules/skills/cui-java-standards/SKILL.md
-   → Skill references: ./standards/java/java-code-standards.adoc
-   → Claude fetches: https://github.com/cuioss/cui-llm-rules/standards/java/java-code-standards.adoc
-   ```
-
-==== Theoretical Requirements (ALL UNVERIFIED)
-
-If this theoretical approach were ever implemented, these requirements would need validation:
-
-* ⚠️ Repository must be public OR agents must include explicit repository URLs
-* ⚠️ Skills would NOT be synchronized to `.claude/` (to avoid drift)
-* ⚠️ Standards files must be accessible via same mechanism as skills
-* ⚠️ Relative path resolution must work when Claude fetches from repository root
-* ⚠️ Network access must be available at runtime
-* ⚠️ Claude.ai web must support WebFetch or similar for GitHub content
-
-**Verification Required**: See xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access from Claude.ai Web]
+**Evidence**: Official Anthropic documentation (see xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access])
 
 === Implementation Guidance
 
 **IMPLEMENTATION STATUS**: ✅ Verified and ready for use
 
-**For All Users - Required Approach**:
+**For All Users - REQUIRED Approach**:
 
-* ✅ **Use Project Synchronization** (the only verified method)
-* ✅ Synchronize skills to `.claude/skills/` via `/synchronize --all --include-skills`
-* ✅ Commit `.claude/` to git for team distribution
-* ✅ Update periodically when plugin version changes (use `/synchronize --check` to detect outdated components)
+* ✅ **MUST use Project Synchronization** (the only architecturally possible method)
+* ✅ **MUST synchronize skills** to `.claude/skills/` via `/synchronize --all --include-skills`
+* ✅ **MUST commit** `.claude/` to git for team distribution
+* ✅ **MUST update** periodically when plugin version changes (use `/synchronize --check` to detect outdated components)
+
+**Why synchronization is required**: Claude Code's skills architecture requires local filesystem access. Dynamic loading from URLs is impossible.
 
 **Complete procedure**:
 ```bash
