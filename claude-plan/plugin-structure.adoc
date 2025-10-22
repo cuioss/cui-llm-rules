@@ -549,6 +549,117 @@ Working code examples:
 * Should be functional, tested code
 * Referenced in SKILL.md for learning
 
+== Testing and Validation
+
+=== Plugin Installation Verification
+
+After installing the plugin, verify it's working correctly:
+
+[source,bash]
+----
+# Check plugin is listed
+/plugin list
+
+# Should show:
+# cui-standards@cui-llm-rules (version 1.0.0)
+
+# Verify skills are available (if supported by Claude Code)
+/skill list
+
+# Verify agents are available
+/agents list
+
+# Verify commands are available
+/help
+# Should list all custom commands including /agents-doctor, /slash-doctor, etc.
+----
+
+=== Skills Access Verification
+
+**For Claude Code users:**
+
+[source,bash]
+----
+# Create test project
+mkdir test-project
+cd test-project
+
+# Invoke agent that uses skills
+# Agent should successfully read skills from plugin installation
+----
+
+**For Claude.ai web/CI/CD users:**
+
+. Verify repository is accessible (public or configured)
+. Check that `.claude/agents/` contains synchronized agents
+. Verify agents can access skills by testing with simple prompt
+. Check that relative path resolution works for standards files
+
+=== Component Validation Commands
+
+Use built-in doctor commands to verify components:
+
+[source,bash]
+----
+# Verify all agents
+/agents-doctor global
+
+# Verify specific agent
+/agents-doctor project-builder
+
+# Check Essential Rules synchronization
+/agents-doctor sync
+
+# Verify commands
+/slash-doctor global
+----
+
+=== Troubleshooting
+
+==== Plugin Not Loading
+
+**Symptoms**: Commands/agents/skills not available after installation
+
+**Solutions**:
+. Restart Claude Code
+. Verify plugin.json is valid JSON
+. Check Claude Code logs for errors
+. Verify marketplace was added correctly: `/plugin marketplace list`
+
+==== Skills Not Accessible
+
+**Symptoms**: Agents fail to read skills
+
+**For Claude Code**:
+. Verify plugin is installed: `/plugin list`
+. Check plugin path: Skills should be at `~/.claude/plugins/cui-standards/skills/`
+. Verify skill SKILL.md files exist
+
+**For Claude.ai web/CI/CD**:
+. Verify repository is public OR
+. Verify repository URL is accessible
+. Check agent prompts include repository URL
+. Test direct access to skill URL in browser
+
+==== Essential Rules Out of Sync
+
+**Symptoms**: `/agents-doctor sync` reports drift
+
+**Solutions**:
+. Review reported differences
+. Approve sync to update embedded rules
+. Verify standards files haven't changed unexpectedly
+
+==== Relative Paths Not Resolving
+
+**Symptoms**: "File not found" errors for standards references
+
+**Solutions**:
+. Verify all paths start with `./`
+. Check paths are relative to plugin root, not absolute
+. For skills: Paths resolve against plugin installation directory
+. For web access: Paths resolve against repository root
+
 == Known Limitations
 
 === No Individual Plugin Update Command

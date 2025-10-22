@@ -75,6 +75,23 @@ This directory contains the technical specifications for the `cui-standards` Cla
 
 *Audience*: Developers setting up projects, teams using Claude.ai web or CI/CD
 
+---
+
+=== xref:research-topics.adoc[Research Topics: Requires Verification]
+
+*Purpose*: Document assumptions that require empirical verification before implementation
+
+*Contents*:
+
+* Critical unknowns about Claude Code/Claude.ai capabilities
+* Skills access from Claude.ai web (CRITICAL - could break architecture)
+* Plugin update mechanisms and version pinning
+* Test scenarios and acceptance criteria
+* Alternative approaches if assumptions fail
+* Research tracking and documentation impact
+
+*Audience*: Architects, implementers - **MUST READ** before implementation begins
+
 == Quick Reference
 
 === Core Architectural Decisions
@@ -102,55 +119,19 @@ This directory contains the technical specifications for the `cui-standards` Cla
 
 === Essential Rules Pattern
 
-**Custom Implementation** (not native Claude Code feature):
+Agents use an **Essential Rules Pattern** where core requirements are embedded for performance, with skill references for complete standards.
 
-[source,markdown]
-----
-## ESSENTIAL RULES
-
-### Domain Standards
-Source: ./standards/domain/file.adoc
-Last Synced: 2025-10-22
-
-[... core requirements extracted from source ...]
-----
-
-Verified via `/agents-doctor sync` command (custom).
+See xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern] for complete specification.
 
 === Path Requirements
 
-[cols="1,2"]
-|===
-|Requirement |Example
+All paths must be relative to plugin root and start with `./`
 
-|**All paths relative**
-|`./standards/java/java-code-standards.adoc`
+See xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resolution] for complete requirements.
 
-|**Must start with**
-|`./`
+=== Installation
 
-|**Never absolute**
-|❌ `~/git/cui-llm-rules/...`
-
-|**Scripts use**
-|`${CLAUDE_PLUGIN_ROOT}/scripts/validator.sh`
-|===
-
-=== Installation Commands
-
-[source,bash]
-----
-# Add marketplace (GitHub shorthand: resolves to https://github.com/cuioss/cui-llm-rules)
-/plugin marketplace add cuioss/cui-llm-rules
-
-# Install plugin
-/plugin install cui-standards@cui-llm-rules
-
-# Update (refresh marketplace)
-/plugin marketplace update cui-llm-rules
-----
-
-**Note**: Claude Code supports multiple marketplace formats: GitHub shorthand (`owner/repo`), full Git URLs (`https://...`), or local paths (`file:///...`).
+See xref:plugin-structure.adoc#installation[Plugin Structure § Installation] for complete installation instructions including local development, GitHub repository, and project auto-installation.
 
 === Complete Workflow
 
@@ -241,6 +222,10 @@ Skill references: ./standards/java/java-code-standards.adoc
 |**plugin.json**
 |Manifest specification complete
 |✅ Specified
+
+|**Research Topics**
+|Critical assumptions requiring verification before implementation
+|⚠️ Needs Research
 |===
 
 == Known Limitations
@@ -266,7 +251,6 @@ See xref:plugin-structure.adoc#known-limitations[Plugin Structure § Known Limit
 
 === Project Files
 
-* Main plan (with implementation details): `../plan.md`
 * Standards documentation: `../standards/`
 * Current agents (user): `~/.claude/agents/`
 * Current commands (user): `~/.claude/commands/`

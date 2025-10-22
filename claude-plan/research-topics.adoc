@@ -1,0 +1,473 @@
+= Research Topics: Requires Verification
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Overview
+
+This document identifies assumptions in the plugin architecture that **require empirical verification** before implementation. These are not design decisions but **unknowns about Claude Code/Claude.ai capabilities** that could affect architectural feasibility.
+
+== Status Legend
+
+* ⚠️ **CRITICAL** - Could break core architecture if assumption is wrong
+* 🔍 **IMPORTANT** - Affects implementation approach
+* 💡 **OPTIMIZATION** - Affects performance or user experience
+
+'''
+
+== CRITICAL Research Topics
+
+=== 1. Skills Access from Claude.ai Web ⚠️
+
+==== Current Assumption
+
+**Documented in**: `architecture-overview.adoc:122-170` (Skills Access Mechanism)
+
+**Assumption**: Claude.ai web can automatically fetch skills from public GitHub repositories via URL.
+
+**What the spec claims**:
+[source]
+----
+Agent prompt: "Read cui-java-standards skill from https://github.com/cuioss/cui-llm-rules"
+→ Claude fetches: https://github.com/cuioss/cui-llm-rules/skills/cui-java-standards/SKILL.md
+→ Skill references: ./standards/java/java-code-standards.adoc
+→ Claude fetches: https://github.com/cuioss/cui-llm-rules/standards/java/java-code-standards.adoc
+----
+
+==== Why This Matters
+
+**Impact**: If this doesn't work, the **entire cross-platform strategy fails**.
+
+* Claude.ai web users cannot install plugins
+* Skills must be accessible somehow or architecture needs redesign
+* Affects 50% of expected users (web vs CLI)
+
+**Architectural dependencies**:
+* Agents can be synchronized to `.claude/` (git-controlled)
+* But skills are never synchronized (to avoid drift)
+* Therefore, skills MUST be accessible dynamically or entire approach breaks
+
+==== What Needs Testing
+
+**Test Environment**: Claude.ai web interface (NOT Claude Code)
+
+**Test Scenario 1: Direct URL in Agent Prompt**
+[source,markdown]
+----
+# In .claude/agents/test-agent.md
+System prompt:
+"Read the skill file from this URL:
+https://raw.githubusercontent.com/cuioss/cui-llm-rules/main/skills/cui-java-standards/SKILL.md
+
+Then follow the instructions in that skill."
+----
+
+**Expected Behavior**:
+* ✅ Claude can access the URL
+* ✅ Claude reads the SKILL.md content
+* ✅ Claude can then follow references to standards files
+
+**Test Scenario 2: Skill Reference by Name**
+[source,markdown]
+----
+# In .claude/agents/test-agent.md
+System prompt:
+"Read the cui-java-standards skill from the cuioss/cui-llm-rules repository."
+----
+
+**Expected Behavior**:
+* ✅ Claude resolves skill name to repository URL
+* ✅ Claude fetches skill content
+
+**Test Scenario 3: Relative Path Resolution**
+[source,markdown]
+----
+# After Claude reads SKILL.md which contains:
+"Read standards from: ./standards/java/java-code-standards.adoc"
+----
+
+**Expected Behavior**:
+* ✅ Claude resolves relative path against repository root
+* ✅ Claude fetches: https://github.com/cuioss/cui-llm-rules/standards/java/java-code-standards.adoc
+
+==== Acceptance Criteria
+
+* [ ] Test Scenario 1 succeeds (direct URL fetch)
+* [ ] Test Scenario 3 succeeds (relative path resolution after fetch)
+* [ ] Test Scenario 2 is optional (nice-to-have skill name resolution)
+
+==== Alternative Approaches if Assumption Fails
+
+**Option A: Embed Essential Content in Agents**
+* Pros: Self-contained, no external dependencies
+* Cons: Drift risk (defeats purpose of skills layer), large agent files
+
+**Option B: Skills in Project .claude/**
+* Synchronize skills to `.claude/skills/` (currently not in spec)
+* Pros: Available to all platforms
+* Cons: Drift risk, violates "never synchronize skills" principle
+
+**Option C: Hybrid Approach**
+* Essential Rules embedded (already in spec)
+* Skills provide "nice to have" additional context
+* Pros: Degrades gracefully
+* Cons: Reduces value of skills layer
+
+==== Verification Steps
+
+. Create test repository with sample skill
+. Create test agent that references skill by URL
+. Deploy to project `.claude/agents/`
+. Test in Claude.ai web interface
+. Document actual behavior
+. Update architecture if needed
+
+'''
+
+== IMPORTANT Research Topics
+
+=== 2. Plugin Update Mechanism 🔍
+
+==== Current Assumption
+
+**Documented in**: `plugin-structure.adoc:663-689` (Known Limitations)
+
+**Assumption**: No individual plugin update command exists; updates via `/plugin marketplace update marketplace-name`
+
+==== What Needs Testing
+
+**Test Scenario**:
+[source,bash]
+----
+# Does this command exist?
+/plugin update cui-standards
+
+# Or only this?
+/plugin marketplace update cui-llm-rules
+----
+
+**Questions**:
+* Is there a hidden `/plugin update` command?
+* Does marketplace update automatically update installed plugins?
+* Can users pin to specific versions?
+
+==== Why This Matters
+
+Affects update workflow documentation and user experience.
+
+==== Verification Steps
+
+. Install plugin
+. Check `/plugin --help` for all available commands
+. Update plugin version in marketplace
+. Test update mechanisms
+. Document actual behavior
+
+'''
+
+=== 3. Semantic Version Pinning 🔍
+
+==== Current Assumption
+
+**Documented in**: `plugin-structure.adoc:569-574`
+
+**Assumption**: Cannot pin to specific plugin version (e.g., `cui-standards@1.2.0`)
+
+==== What Needs Testing
+
+**Test Scenario**:
+[source,bash]
+----
+# Does this work?
+/plugin install cui-standards@1.0.0
+
+# Or does it always install latest?
+/plugin install cui-standards@cui-llm-rules
+----
+
+==== Why This Matters
+
+* Affects version management strategy
+* Impacts team consistency (can teams enforce same version?)
+* Affects rollback capability
+
+==== Verification Steps
+
+. Create plugin with v1.0.0
+. Tag and release v1.1.0
+. Try installing v1.0.0 specifically
+. Document whether version pinning is supported
+
+'''
+
+=== 4. Skills Loading at Runtime 🔍
+
+==== Current Assumption
+
+**Documented in**: `architecture-overview.adoc:196-210` (Progressive Disclosure Model)
+
+**Assumption**: Skills use "progressive disclosure" - metadata loaded at startup, full content via Read tool when needed.
+
+==== What Needs Testing
+
+**Questions**:
+* When exactly does Claude load skill content?
+* Does "Read tool" mean Claude's Read tool or just reading the file?
+* Can skills use Read tool to fetch standards, or is this one fetch operation?
+
+**Test Scenario**:
+[source,yaml]
+----
+# skills/test-skill/SKILL.md with frontmatter:
+---
+name: Test Skill
+description: Test skill loading
+allowed-tools: Read
+---
+
+This skill references: ./standards/test.adoc
+----
+
+**Questions to answer**:
+* When is SKILL.md content loaded?
+* Can the skill use Read tool from within its context?
+* How are relative paths resolved?
+
+==== Why This Matters
+
+Affects skill design patterns and performance characteristics.
+
+'''
+
+=== 5. Private Repository Access 🔍
+
+==== Current Assumption
+
+**Documented in**: `architecture-overview.adoc:152-155`
+
+**Assumption**: Private repositories require "explicit configuration" but mechanism unspecified.
+
+==== What Needs Testing
+
+**For Private Repositories**:
+* Can Claude.ai web access private GitHub repos if user is authenticated?
+* Is there a `.claude/settings.json` field for repository credentials?
+* Does it require repository to be cloned locally?
+
+**Test Scenarios**:
+. Make cui-llm-rules private
+. Test if Claude.ai can still access it
+. Document authentication mechanism (if any)
+
+==== Why This Matters
+
+* Many organizations use private repositories
+* Affects adoption for enterprise users
+* May require different distribution strategy
+
+'''
+
+== OPTIMIZATION Research Topics
+
+=== 6. Skills Read Tool Restrictions 💡
+
+==== Current Assumption
+
+**Documented in**: `component-specifications.adoc:428-442`
+
+**Assumption**: Skills should restrict tools to Read-only via `allowed-tools: Read`
+
+==== What Needs Testing
+
+**Questions**:
+* What happens if skill has no `allowed-tools` restriction?
+* Can skills execute arbitrary code if unrestricted?
+* Is `allowed-tools` enforced or just advisory?
+
+==== Why This Matters
+
+Security and isolation of skills layer.
+
+'''
+
+=== 7. Essential Rules Drift Detection Automation 💡
+
+==== Current Assumption
+
+**Documented in**: `component-specifications.adoc:302-344`
+
+**Assumption**: `/agents-doctor sync` requires manual approval for updates.
+
+==== What Needs Testing
+
+**Questions**:
+* Could this be fully automated with user opt-in?
+* Should there be a "safe mode" for non-breaking updates?
+* Can we detect semantic vs. trivial changes?
+
+==== Why This Matters
+
+Reduces maintenance burden if automation is possible.
+
+'''
+
+== PLUGIN MANIFEST Research Topics
+
+=== 8. plugin.json Field Support 🔍
+
+==== What Needs Testing
+
+**Documented field support**:
+[source,json]
+----
+{
+  "claudeCode": {
+    "minVersion": "0.1.0"  // Is this enforced?
+  },
+  "dependencies": {
+    "plugins": [],         // Does this work?
+    "mcpServers": []       // Does this work?
+  }
+}
+----
+
+**Questions**:
+* Is `minVersion` enforced by Claude Code?
+* Can plugins declare dependencies on other plugins?
+* Can plugins require MCP servers?
+
+==== Verification Steps
+
+. Create test plugin with `minVersion` higher than Claude Code version
+. Test if installation is blocked
+. Test plugin dependency declaration
+. Document actual behavior
+
+'''
+
+=== 9. Platform-Specific Components 💡
+
+==== What Needs Testing
+
+**Documented in**: `plugin-structure.adoc:244` (metadata.platforms)
+
+**Assumption**: `platforms: ["cli", "jetbrains", "vscode"]` is metadata only, not functional filtering.
+
+**Questions**:
+* Can components be platform-specific?
+* Does Claude Code hide components based on platform?
+* Or is this just documentation?
+
+==== Why This Matters
+
+Could enable platform-optimized agents if supported.
+
+'''
+
+== Research Tracking
+
+[cols="2,1,1,1"]
+|===
+|Topic |Priority |Status |Assignee
+
+|Skills Access from Claude.ai Web
+|⚠️ CRITICAL
+|❌ Not Started
+|TBD
+
+|Plugin Update Mechanism
+|🔍 IMPORTANT
+|❌ Not Started
+|TBD
+
+|Semantic Version Pinning
+|🔍 IMPORTANT
+|❌ Not Started
+|TBD
+
+|Skills Loading at Runtime
+|🔍 IMPORTANT
+|❌ Not Started
+|TBD
+
+|Private Repository Access
+|🔍 IMPORTANT
+|❌ Not Started
+|TBD
+
+|Skills Read Tool Restrictions
+|💡 OPTIMIZATION
+|❌ Not Started
+|TBD
+
+|Essential Rules Automation
+|💡 OPTIMIZATION
+|❌ Not Started
+|TBD
+
+|plugin.json Field Support
+|🔍 IMPORTANT
+|❌ Not Started
+|TBD
+
+|Platform-Specific Components
+|💡 OPTIMIZATION
+|❌ Not Started
+|TBD
+|===
+
+'''
+
+== Documentation Impact
+
+Once research is completed, update the following documents:
+
+=== If Skills Access WORKS as Assumed
+* ✅ No changes needed
+* Add verification note to `architecture-overview.adoc`
+
+=== If Skills Access FAILS
+* 🔴 **CRITICAL**: Update `architecture-overview.adoc` (entire Skills Access Mechanism section)
+* 🔴 **CRITICAL**: Update `synchronize-command-spec.adoc` (Skills Access Pattern section)
+* 🔴 **CRITICAL**: Revise architecture to use Alternative Approach (see §1.4)
+* Update README.adoc to reflect new approach
+
+'''
+
+== Test Repository Setup
+
+For research verification, create:
+
+[source,bash]
+----
+# Test repository structure
+test-plugin-research/
+├── .claude-plugin/
+│   └── plugin.json
+├── skills/
+│   └── test-skill/
+│       └── SKILL.md
+├── standards/
+│   └── test-standard.adoc
+└── agents/
+    └── test-agent.md
+----
+
+**Purpose**: Minimal test case for each research topic.
+
+**Repository**: Should be public for testing web access.
+
+'''
+
+== References
+
+* Claude Code Plugin Docs: https://docs.claude.com/en/docs/claude-code/plugins
+* WebFetch Tool Capabilities: https://docs.claude.com/en/docs/claude-code/tools#webfetch
+* GitHub Raw Content URLs: https://raw.githubusercontent.com/
+
+== Notes
+
+* Research should be completed **before implementation begins**
+* Critical topics (⚠️) are **blockers** - architecture may need revision
+* Important topics (🔍) affect implementation details but not feasibility
+* Optimization topics (💡) can be deferred to future iterations

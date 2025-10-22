@@ -119,17 +119,66 @@ Layer 4: Commands (command.md) - User utilities
 * **Implementation**: Skills use Read tool to dynamically fetch from `standards/`
 * **Benefit**: No duplication between skills, always current
 
+==== Skills Access Mechanism
+
+**IMPORTANT**: The Claude.ai web access mechanism documented below is an **assumption that requires verification**. See xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access from Claude.ai Web] for test scenarios and alternative approaches if this assumption fails.
+
+Skills are accessed dynamically at runtime using the following mechanism:
+
+**When Claude Code is Running:**
+
+1. **Plugin Installation Provides Skills**
+   * Skills remain in plugin directory: `~/.claude/plugins/cui-standards/skills/`
+   * Claude loads skill metadata (name, description) at startup
+   * Full skill content loaded via Read tool when needed
+   * Skills use relative paths (`./standards/...`) which resolve against plugin root
+
+2. **Agent References in Synchronized .claude/ Files**
+   * Agents synchronized to `.claude/agents/` contain prompts like: "Read cui-java-standards skill"
+   * Claude resolves skill name to plugin installation path
+   * Reads `~/.claude/plugins/cui-standards/skills/cui-java-standards/SKILL.md`
+   * Skill then reads standards files via relative paths
+
+**When Using Claude.ai Web or CI/CD (No Plugin Support):**
+
+1. **Agents Are Git-Controlled**
+   * Project has `.claude/agents/` with synchronized agents (committed to git)
+   * Agents reference skills by name in their prompts
+
+2. **Skills Must Be Accessible via Repository**
+   * **Public Repository**: Claude can access via GitHub API/web fetch
+     - Repository URL: `https://github.com/cuioss/cui-llm-rules`
+     - Skill path: `skills/cui-java-standards/SKILL.md`
+     - Standards path: `standards/java/java-code-standards.adoc`
+
+   * **Private/Offline Repository**: Requires explicit configuration
+     - Clone repository to accessible location
+     - Configure path in project `.claude/settings.json` (if supported)
+     - Or reference local clone path in agent prompts
+
+3. **Resolution Flow**
+   ```
+   Agent prompt: "Read cui-java-standards skill from https://github.com/cuioss/cui-llm-rules"
+   → Claude fetches: https://github.com/cuioss/cui-llm-rules/skills/cui-java-standards/SKILL.md
+   → Skill references: ./standards/java/java-code-standards.adoc
+   → Claude fetches: https://github.com/cuioss/cui-llm-rules/standards/java/java-code-standards.adoc
+   ```
+
+**Critical Requirements:**
+
+* **Repository must be public** OR agents must include explicit repository URLs
+* **Skills never synchronized** to `.claude/` (to avoid drift)
+* **Standards files must be accessible** via same mechanism as skills
+* **Relative path resolution** works because Claude fetches from repository root
+
 === Decision 2: Agents Use Essential Rules Pattern (Custom Implementation)
 
-* **Important**: This is a **custom pattern** we implement, not a native Claude Code feature
+* **Important**: This is a **custom pattern**, not a native Claude Code feature
 * **Rationale**: Performance (no I/O during execution), autonomy (self-contained)
 * **Trade-off**: Duplication accepted for speed
-* **Mitigation**: Semi-automated sync via `/agents-doctor` command (custom implementation)
-* **Pattern**: Embed essential rules as markdown sections with:
-** `Source:` citation (relative path to standards file)
-** `Last Synced:` date stamp (for drift detection)
-** Core requirements extracted from standards
-* **Implementation**: `/agents-doctor sync` verifies rules against source and highlights drift
+* **Mitigation**: Synchronization via `/agents-doctor sync` command (custom implementation)
+
+See xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern] for complete pattern specification and synchronization details.
 
 === Decision 3: Plugin-Based Distribution
 
@@ -142,64 +191,6 @@ Layer 4: Commands (command.md) - User utilities
 * **Rationale**: Projects may need specialized skills/agents
 * **Implementation**: `.claude/skills/` and `.claude/agents/` override plugin
 * **Benefit**: Global defaults + project customization
-
-== Current State Analysis
-
-=== Existing Repository Structure
-
-[source]
-----
-/Users/oliver/git/cui-llm-rules/
-├── standards/                    # ✅ AsciiDoc standards (source of truth)
-│   ├── java/, testing/, documentation/, process/, etc.
-│   └── README.adoc
-│
-├── claude/                       # ⚠️ Architecture documentation
-│   └── agents/
-│       ├── agents-architecture.md
-│       └── agents-doctor/        # Supporting files
-│
-├── scripts/                      # ✅ Utility scripts
-│   ├── asciidoc-validator.sh
-│   └── verify-adoc-links.py
-│
-└── .claude/                      # ✅ Repo's own Claude config
-    └── settings.local.json
-----
-
-=== Current Global Installation (User's Machine)
-
-[source]
-----
-~/.claude/
-├── agents/
-│   ├── project-builder.md
-│   ├── adoc-review.md
-│   ├── commit-current-changes.md
-│   ├── pr-handle-gemini-comments.md
-│   ├── pr-handle-sonar-issues.md
-│   └── research-best-practices.md
-│
-└── commands/
-    ├── agents-doctor.md
-    ├── slash-doctor.md
-    ├── agents-create.md
-    ├── setup-project-permissions.md
-    ├── docs-technical-adoc-review.md
-    ├── handle-pull-request.md
-    ├── slash-create.md
-    ├── verify-plantuml-diagrams.md
-    └── verify-project.md
-----
-
-=== Current Problems
-
-. **Synchronization Hell**: Agents embed standards as snapshots (e.g., "Last Synced: 2025-10-20")
-. **Manual Distribution**: Agents/commands must be manually copied to `~/.claude/`
-. **Drift Risk**: Standards update in repo, but agents have stale embedded rules
-. **No Skills Layer**: Missing knowledge layer between standards and agents
-. **Version Inconsistency**: Team members may have different versions
-. **Duplication**: Same standards embedded in multiple agent files
 
 == Progressive Disclosure Model
 
@@ -229,44 +220,9 @@ For nested CLAUDE.md files, the most specific (deepest nested) takes priority.
 
 == Installation and Updates
 
-=== Plugin Installation
+See xref:plugin-structure.adoc#installation[Plugin Structure § Installation] for complete installation instructions and xref:plugin-structure.adoc#version-management[Plugin Structure § Version Management] for version management details.
 
-[source,bash]
-----
-# Add marketplace (GitHub shorthand: owner/repo resolves to GitHub URL)
-/plugin marketplace add cuioss/cui-llm-rules
-
-# Install plugin
-/plugin install cui-standards@cui-llm-rules
-----
-
-**Marketplace formats**: `owner/repo` (GitHub), `https://...` (Git URL), or `file:///...` (local)
-
-=== Updates
-
-[source,bash]
-----
-# Refresh marketplace to get latest versions
-/plugin marketplace update cui-llm-rules
-----
-
-**Note**: Individual plugin update commands (`/plugin update`) are not supported. Updates are distributed via marketplace refresh.
-
-=== Team Distribution
-
-Projects can auto-install plugins via `.claude/settings.json`:
-
-[source,json]
-----
-{
-  "plugins": {
-    "marketplaces": ["cuioss/cui-llm-rules"],
-    "installed": ["cui-standards@cui-llm-rules"]
-  }
-}
-----
-
-== Version Management
+== Version Management (Summary)
 
 * **Version Field**: Defined in `.claude-plugin/plugin.json` and `marketplace.json`
 * **Git Tags**: Used for version tracking (e.g., `v1.0.0`, `v1.1.0`)

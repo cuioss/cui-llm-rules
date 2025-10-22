@@ -403,40 +403,9 @@ git commit -m "sync: Update project-builder to latest version"
 - Dynamic access ensures always-current data
 - Smaller .claude/ directory size
 
-=== How Agents Access Skills
+=== How Skills Are Accessed
 
-**Agent prompt pattern**:
-[source,markdown]
-----
-Before fixing code, READ the cui-java-standards skill for current standards.
-
-Skill location (dynamic access):
-- Repository: https://github.com/cuioss/cui-llm-rules
-- Path: skills/cui-java-standards/SKILL.md
-----
-
-**Claude resolves this by**:
-1. Reading from repository (web/API access)
-2. Or reading from local clone if available
-3. Skill then references standards with `./standards/...` relative paths
-
-=== Repository Access Requirements
-
-For Claude.ai web and CI/CD to access skills:
-
-**Option 1**: Public repository (current)
-```
-Repository is public, Claude can read directly via GitHub API
-```
-
-**Option 2**: Local clone (for offline/private repos)
-```bash
-# Clone repository locally
-git clone https://github.com/cuioss/cui-llm-rules ~/.cui-standards
-
-# Agents reference local clone
-# Skills at: ~/.cui-standards/skills/cui-java-standards/SKILL.md
-```
+See xref:architecture-overview.adoc#skills-access-mechanism[Architecture Overview § Skills Access Mechanism] for complete details on how Claude accesses skills from plugin installations (Claude Code) or repository (Claude.ai web, CI/CD).
 
 == Command Implementation Pseudocode
 

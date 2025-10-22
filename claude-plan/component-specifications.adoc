@@ -158,7 +158,7 @@ color: green                    # Optional: Terminal output color
 
 === Essential Rules Pattern (Custom Implementation)
 
-**Important**: This is a custom pattern we implement, not a native Claude Code feature.
+**Important**: This is a custom pattern, not a native Claude Code feature.
 
 ==== Pattern Structure
 
@@ -332,15 +332,20 @@ The `/agents-doctor sync` command is a custom implementation that provides:
    - Show status for each Essential Rules block
    - Highlight drift with diff if detected
 
-4. Offer sync assistance (semi-automated)
-   - Show diff of changes
-   - Ask user to approve sync
-   - Update embedded content
-   - Update Last Synced: date to today
-   - Write updated agent file
+4. Synchronization assistance (requires user approval)
+   - AUTOMATED: Detection, comparison, diff generation
+   - MANUAL APPROVAL REQUIRED: User must review and approve changes
+   - AUTOMATED: Update embedded content after approval
+   - AUTOMATED: Update Last Synced: date to today
+   - AUTOMATED: Write updated agent file
+
+   Rationale: Essential Rules are critical for agent behavior. Manual review
+   ensures no unintended changes affect agent execution.
 ----
 
-== Skills Doctor Command
+== Skills Doctor Command (Planned)
+
+**Status**: Specification complete, not yet implemented.
 
 New command for verifying skills structure.
 
@@ -392,36 +397,9 @@ New command for verifying skills structure.
 
 == Path Resolution Rules
 
-All paths in skills, agents, and commands must follow these rules:
+All paths in skills, agents, and commands must use relative paths starting with `./` (relative to plugin root).
 
-=== Relative Path Requirements
-
-* **Must start with**: `./` (relative to plugin root)
-* **Never use**: Absolute paths like `~/git/...` or `/Users/...`
-* **Standards references**: `./standards/java/java-code-standards.adoc`
-* **Documentation references**: `./docs/agents-architecture.md`
-
-=== Environment Variables
-
-* **${CLAUDE_PLUGIN_ROOT}**: Absolute path to plugin installation directory
-* **Use in**: Bash scripts, hooks that need absolute paths
-* **Example**: `${CLAUDE_PLUGIN_ROOT}/scripts/validator.sh`
-
-=== Path Examples
-
-[source]
-----
-✅ CORRECT:
-- ./standards/java/java-code-standards.adoc
-- ./templates/class-template.java
-- ./docs/architecture.adoc
-- ${CLAUDE_PLUGIN_ROOT}/scripts/validator.sh
-
-❌ INCORRECT:
-- ~/git/cui-llm-rules/standards/java/java-code-standards.adoc
-- /Users/oliver/git/cui-llm-rules/standards/...
-- standards/java/... (missing ./ prefix)
-----
+See xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resolution] for complete path resolution requirements, environment variables, and examples.
 
 == Tool Access Patterns
 
