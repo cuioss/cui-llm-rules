@@ -393,19 +393,83 @@ git commit -m "sync: Update project-builder to latest version"
 
 == Skills Access Pattern
 
-=== Skills Are Never Synchronized
+=== Skills Are Never Synchronized (Current Policy)
 
-**IMPORTANT**: Skills are NEVER copied to `.claude/`. They are always accessed dynamically from the repository.
+[WARNING]
+====
+**⚠️ CONTINGENT ON VERIFICATION**
 
-**Rationale**:
+This policy assumes Claude.ai web and CI/CD can access skills from repository URLs. This is an **unverified assumption**.
+
+**See**: xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access] for verification status.
+
+**If verification fails**, see §10.3 below for fallback approach.
+====
+
+**Current policy** (requires verification): Skills are NEVER copied to `.claude/`. They are always accessed dynamically from the repository.
+
+**Rationale** (if dynamic access works):
+
 - Skills reference standards that change frequently
 - Synchronizing creates drift risk
 - Dynamic access ensures always-current data
 - Smaller .claude/ directory size
 
-=== How Skills Are Accessed
+=== How Skills Are Accessed (Proposed)
 
 See xref:architecture-overview.adoc#skills-access-mechanism[Architecture Overview § Skills Access Mechanism] for complete details on how Claude accesses skills from plugin installations (Claude Code) or repository (Claude.ai web, CI/CD).
+
+⚠️ **This mechanism is unverified** - test before implementation.
+
+=== Fallback: Skills Synchronization (If Dynamic Access Fails)
+
+**If verification shows** that Claude.ai web/CI/CD cannot access skills from repository URLs, use this fallback approach:
+
+==== Fallback Policy
+
+**Synchronize skills** to `.claude/skills/` along with agents and commands.
+
+[source,bash]
+----
+# Fallback synchronization (if web access fails)
+/synchronize --all --include-skills
+
+# This would copy:
+# - Agents → .claude/agents/
+# - Commands → .claude/commands/
+# - Skills → .claude/skills/ (ONLY if fallback needed)
+----
+
+==== Fallback Trade-offs
+
+**Advantages**:
+- Works on all platforms (no external dependencies)
+- Self-contained project
+- No network access required
+
+**Disadvantages**:
+- Drift risk: Skills in `.claude/` may become out of sync with standards
+- Larger repository size
+- Requires explicit updates via `/synchronize`
+- Skills reference standards that may also need synchronization
+
+==== Fallback Mitigation
+
+If fallback approach is needed:
+
+1. **Add update warnings**: `/agents-doctor` should warn when skills are out of date
+2. **Sync standards too**: May need to also synchronize `standards/` files to `.claude/standards/`
+3. **Document update frequency**: Teams should synchronize regularly (e.g., weekly)
+4. **Version pinning**: Document which plugin version skills came from
+
+==== Decision Point
+
+**Before implementing**, verify Skills Access Mechanism:
+
+* ✅ **If web access works**: Use current policy (skills never synchronized)
+* ❌ **If web access fails**: Use fallback policy (synchronize skills)
+
+See xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics] for test scenarios.
 
 == Command Implementation Pseudocode
 

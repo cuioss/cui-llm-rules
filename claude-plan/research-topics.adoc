@@ -269,7 +269,71 @@ Affects skill design patterns and performance characteristics.
 
 == OPTIMIZATION Research Topics
 
-=== 6. Skills Read Tool Restrictions 💡
+=== 6. ${CLAUDE_PLUGIN_ROOT} Environment Variable 🔍
+
+==== Current Assumption
+
+**Documented in**: `plugin-structure.adoc:348-375`, `component-specifications.adoc:92`
+
+**Assumption**: Claude Code provides a `${CLAUDE_PLUGIN_ROOT}` environment variable containing the absolute path to the plugin installation directory.
+
+==== What Needs Testing
+
+**Test Scenario**:
+[source,bash]
+----
+# In a plugin script or command
+echo "Plugin root: ${CLAUDE_PLUGIN_ROOT}"
+
+# Expected output (if variable exists):
+# Plugin root: /Users/username/.claude/plugins/cui-standards
+----
+
+**Questions**:
+* Does this environment variable exist?
+* Is it available in all contexts (commands, agents, scripts)?
+* What is the exact path format (with or without trailing slash)?
+* Is there an alternative mechanism to detect plugin installation path?
+
+==== Why This Matters
+
+Scripts requiring absolute paths depend on this variable. Without it:
+
+* Scripts cannot reliably reference plugin files
+* Bash validators/helpers cannot be executed
+* Alternative path detection mechanisms needed
+
+==== Alternative Approaches if Variable Doesn't Exist
+
+**Option A: Relative Paths Only**
+* Restrict all operations to relative paths
+* Avoid scripts requiring absolute paths
+* Works for most use cases
+
+**Option B: Programmatic Detection**
+[source,bash]
+----
+# Detect script location and derive plugin root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+----
+
+**Option C: Configuration File**
+* Add plugin path to `.claude/settings.json`
+* Scripts read configuration
+* More complex setup
+
+==== Verification Steps
+
+. Create test plugin with bash script
+. Reference `${CLAUDE_PLUGIN_ROOT}` in script
+. Execute script via command
+. Document whether variable exists and its value
+. Test in different contexts (CLI, IDE, commands, agents)
+
+'''
+
+=== 7. Skills Read Tool Restrictions 💡
 
 ==== Current Assumption
 
@@ -290,7 +354,7 @@ Security and isolation of skills layer.
 
 '''
 
-=== 7. Essential Rules Drift Detection Automation 💡
+=== 8. Essential Rules Drift Detection Automation 💡
 
 ==== Current Assumption
 
@@ -313,7 +377,7 @@ Reduces maintenance burden if automation is possible.
 
 == PLUGIN MANIFEST Research Topics
 
-=== 8. plugin.json Field Support 🔍
+=== 9. plugin.json Field Support 🔍
 
 ==== What Needs Testing
 
@@ -345,7 +409,7 @@ Reduces maintenance burden if automation is possible.
 
 '''
 
-=== 9. Platform-Specific Components 💡
+=== 10. Platform-Specific Components 💡
 
 ==== What Needs Testing
 
@@ -391,6 +455,11 @@ Could enable platform-optimized agents if supported.
 |TBD
 
 |Private Repository Access
+|🔍 IMPORTANT
+|❌ Not Started
+|TBD
+
+|${CLAUDE_PLUGIN_ROOT} Environment Variable
 |🔍 IMPORTANT
 |❌ Not Started
 |TBD

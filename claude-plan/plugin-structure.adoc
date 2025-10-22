@@ -347,13 +347,29 @@ standards/java/... (missing ./ prefix)
 
 === Environment Variables
 
-* **${CLAUDE_PLUGIN_ROOT}**: Absolute path to plugin installation
+[WARNING]
+====
+**⚠️ UNVERIFIED ASSUMPTION**
+
+The `${CLAUDE_PLUGIN_ROOT}` environment variable is referenced throughout this specification but **has not been verified** to exist in Claude Code.
+
+**Verification Status**: ❌ Not tested
+
+**If this variable does not exist**, alternative approaches needed:
+
+* Use relative paths exclusively (works for most cases)
+* Detect plugin path programmatically in scripts
+* Hard-code paths (not recommended)
+* Request this feature from Claude Code team
+====
+
+* **${CLAUDE_PLUGIN_ROOT}** (if it exists): Absolute path to plugin installation
 * **Use in**: Bash scripts, hooks requiring absolute paths
 
 [source,bash]
 ----
 #!/bin/bash
-# Correct usage in script
+# Proposed usage in script (requires verification)
 PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT}
 bash "${PLUGIN_ROOT}/scripts/validator.sh"
 ----
@@ -553,21 +569,48 @@ Working code examples:
 
 === Plugin Installation Verification
 
-After installing the plugin, verify it's working correctly:
+After installing the plugin, verify it's working correctly.
+
+[IMPORTANT]
+====
+**Command Verification Status**
+
+The commands below have **NOT been verified** to exist in Claude Code. Test these commands and document actual availability.
+
+|===
+|Command |Status |Notes
+
+|`/plugin list`
+|⚠️ Assumed
+|Commonly available in plugin systems
+
+|`/skill list`
+|⚠️ Assumed
+|May not exist - test required
+
+|`/agents list`
+|⚠️ Assumed
+|May not exist - test required
+
+|`/help`
+|✅ Standard
+|Standard command in CLI tools
+|===
+====
 
 [source,bash]
 ----
 # Check plugin is listed
 /plugin list
+# Expected: cui-standards@cui-llm-rules (version 1.0.0)
 
-# Should show:
-# cui-standards@cui-llm-rules (version 1.0.0)
-
-# Verify skills are available (if supported by Claude Code)
+# Verify skills are available (command existence unverified)
 /skill list
+# or check plugin directory: ~/.claude/plugins/cui-standards/skills/
 
-# Verify agents are available
+# Verify agents are available (command existence unverified)
 /agents list
+# or check plugin directory: ~/.claude/plugins/cui-standards/agents/
 
 # Verify commands are available
 /help
@@ -664,16 +707,29 @@ Use built-in doctor commands to verify components:
 
 === No Individual Plugin Update Command
 
-Claude Code does NOT support updating individual plugins via `/plugin update plugin-name`.
+[WARNING]
+====
+**⚠️ UNVERIFIED ASSUMPTION**
 
-**Workaround**: Use `/plugin marketplace update marketplace-name` to refresh the marketplace, which distributes updates to all plugins from that marketplace.
+This limitation has **not been verified** through testing. The actual command availability needs confirmation.
+
+**What needs testing**:
+
+* Does `/plugin update plugin-name` exist?
+* Does `/plugin marketplace update marketplace-name` exist?
+* What is the actual update mechanism?
+====
+
+**Assumed behavior** (requires verification): Claude Code does NOT support updating individual plugins via `/plugin update plugin-name`.
+
+**Assumed workaround** (requires verification): Use `/plugin marketplace update marketplace-name` to refresh the marketplace, which distributes updates to all plugins from that marketplace.
 
 [source,bash]
 ----
-# ❌ NOT SUPPORTED
+# ❌ ASSUMED NOT SUPPORTED (unverified)
 /plugin update cui-standards
 
-# ✅ CORRECT
+# ✅ ASSUMED CORRECT (unverified)
 /plugin marketplace update cui-llm-rules
 ----
 

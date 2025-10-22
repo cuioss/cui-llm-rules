@@ -135,63 +135,38 @@ See xref:plugin-structure.adoc#installation[Plugin Structure § Installation] fo
 
 === Complete Workflow
 
-==== 1. One-Time Setup (Claude Code Users)
+==== Quick Start
 
 [source,bash]
 ----
-# Install plugin globally (provides agents/commands for synchronization)
-# Skills are always accessed from repository (never synchronized)
+# 1. Install plugin (Claude Code users only)
 /plugin install cui-standards@cui-llm-rules
-----
 
-==== 2. Project Synchronization (Git-Controlled)
-
-[source,bash]
-----
-# In project directory, use interactive mode (recommended)
+# 2. Synchronize to project (makes available to all platforms)
 cd ~/my-project
 /synchronize
 
-# Interactive prompts appear with numbered lists:
-# - Select agents by number (e.g., "1 3 5")
-# - Select commands by number (e.g., "1 7")
-# - Or use "all" or "skip"
-
-# Alternative: Synchronize by name
-/synchronize project-builder adoc-review agents-doctor
-
-# Commit to git (makes available to all platforms)
+# 3. Commit to git
 git add .claude/
-git commit -m "sync: Add cui-standards agents"
+git commit -m "sync: Add cui-standards components"
 git push
 ----
 
 **What gets synchronized**:
-* ✅ Agents → `.claude/agents/` (git-controlled)
-* ✅ Commands → `.claude/commands/` (git-controlled)
+
+* ✅ Agents → `.claude/agents/` (git-controlled, available to all platforms)
+* ✅ Commands → `.claude/commands/` (git-controlled, available to all platforms)
 * ❌ Skills → NOT synchronized (accessed dynamically from repository)
 
-==== 3. Cross-Platform Usage
+**For detailed workflow**, including:
 
-**Claude Code (CLI/IDE)**:
-- Uses project's `.claude/` (overrides plugin)
-- Agents reference skills from repository dynamically
+* Interactive vs command-line synchronization modes
+* Platform-specific usage (Claude Code, Claude.ai web, CI/CD)
+* Skills resolution mechanism (⚠️ requires verification)
+* Team collaboration workflow
+* Update strategy
 
-**Claude.ai Web**:
-- Uses project's `.claude/` (only way to access)
-- Agents reference skills from repository dynamically
-
-**CI/CD (GitHub Actions)**:
-- Uses project's `.claude/` (committed to git)
-- Agents reference skills from repository dynamically
-
-**Skills resolution** (all platforms):
-```
-Agent reads: .claude/agents/project-builder.md
-Agent references: "Read cui-java-standards skill"
-Resolved from: https://github.com/cuioss/cui-llm-rules/skills/cui-java-standards/SKILL.md
-Skill references: ./standards/java/java-code-standards.adoc
-```
+See xref:synchronize-command-spec.adoc[Synchronize Command Specification].
 
 == Implementation Status
 

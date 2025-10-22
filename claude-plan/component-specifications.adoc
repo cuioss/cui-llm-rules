@@ -87,9 +87,9 @@ All paths must be relative to plugin root:
 - Javadoc: `./standards/documentation/javadoc-standards.adoc`
 - Process: `./standards/process/task-completion-standards.adoc`
 
-**Note**: All paths are relative to plugin root. When installed, use
-`${CLAUDE_PLUGIN_ROOT}` environment variable for absolute path resolution
-in scripts.
+**Note**: All paths are relative to plugin root.
+
+⚠️ **Environment Variable (Unverified)**: `${CLAUDE_PLUGIN_ROOT}` - This environment variable is referenced in the specification but **requires verification** that Claude Code actually provides it. If this variable does not exist, scripts requiring absolute paths will need alternative path resolution mechanisms.
 ----
 
 ==== Quick Reference Pattern
@@ -301,7 +301,26 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 
 === Essential Rules Synchronization Command
 
-The `/agents-doctor sync` command is a custom implementation that provides:
+The `/agents-doctor sync` command synchronizes (updates) Essential Rules from source standards files.
+
+**Command semantics**: "sync" means **one-way update from source to agent**, not bidirectional synchronization. This command:
+
+* Reads current standards from source files
+* Compares with embedded Essential Rules in agents
+* Proposes updates where drift detected
+* **Requires explicit approval** for each agent update
+
+**Example usage**:
+[source,bash]
+----
+# Check all agents for drift
+/agents-doctor sync
+
+# Check specific agent
+/agents-doctor sync project-builder
+----
+
+The command provides:
 
 ==== Verification Checks
 
@@ -332,15 +351,26 @@ The `/agents-doctor sync` command is a custom implementation that provides:
    - Show status for each Essential Rules block
    - Highlight drift with diff if detected
 
-4. Synchronization assistance (requires user approval)
-   - AUTOMATED: Detection, comparison, diff generation
-   - MANUAL APPROVAL REQUIRED: User must review and approve changes
-   - AUTOMATED: Update embedded content after approval
-   - AUTOMATED: Update Last Synced: date to today
-   - AUTOMATED: Write updated agent file
+4. Synchronization workflow
+   a. AUTOMATED: Detection, comparison, diff generation
+   b. MANUAL REVIEW: Display proposed changes with detailed diff
+   c. APPROVAL REQUIRED: User must explicitly approve each agent update
+      - Command prompts: "Apply changes to project-builder.md? [y/N]"
+      - User types 'y' to approve, any other key to skip
+      - No batch approval - each agent reviewed individually
+   d. AUTOMATED: After approval:
+      - Update embedded Essential Rules content
+      - Update Last Synced: date to today (ISO format: YYYY-MM-DD)
+      - Write updated agent file
+      - Verify write succeeded
+   e. AUTOMATED: Summary report of all updates (approved, skipped, failed)
 
-   Rationale: Essential Rules are critical for agent behavior. Manual review
-   ensures no unintended changes affect agent execution.
+**Rationale for manual approval**: Essential Rules are embedded directly in agent prompts and affect autonomous behavior. Manual review ensures:
+
+* No unintended behavior changes
+* Content accuracy before embedding
+* User awareness of what agents will execute
+* Opportunity to reject breaking changes
 ----
 
 == Skills Doctor Command (Planned)
