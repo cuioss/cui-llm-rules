@@ -15,7 +15,7 @@ Standards for initializing and configuring new CUI projects including Maven setu
 **CRITICAL**: Load project setup standards for guidance.
 
 ```
-Read: ../../standards/requirements/new-project-guide.adoc
+Read: standards/new-project-guide.md
 ```
 
 ### Step 2: Analyze Project Requirements

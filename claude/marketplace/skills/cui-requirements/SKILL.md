@@ -16,16 +16,14 @@ Standards for requirements engineering, planning, and specification in CUI proje
 
 1. **Always load core requirements standards**:
    ```
-   Read: ../../standards/requirements/requirements-document.adoc
-   Read: ../../standards/requirements/planning.adoc
+   Read: standards/requirements-core.md
    ```
 
 2. **Conditional loading based on context**:
 
    - If creating specifications:
      ```
-     Read: ../../standards/requirements/specification-documents.adoc
-     Read: ../../standards/requirements/specification-and-implementation.adoc
+     Read: standards/specification-standards.md
      ```
 
 ### Step 2: Analyze Requirements Context

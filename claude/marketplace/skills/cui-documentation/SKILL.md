@@ -20,21 +20,19 @@ Standards for writing clear, maintainable technical documentation in CUI project
 
 1. **Always load core documentation standards**:
    ```
-   Read: ../../standards/documentation/general-standard.adoc
-   Read: ../../standards/documentation/tone-and-style-standards.adoc
+   Read: standards/documentation-core.md
    ```
 
 2. **Conditional loading based on context**:
 
    - If creating or editing README files:
      ```
-     Read: ../../standards/documentation/readme-structure.adoc
+     Read: standards/readme-structure.md
      ```
 
    - If working with AsciiDoc files:
      ```
-     Read: ../../standards/documentation/asciidoc-standards.adoc
-     Read: ../../standards/documentation/organization-standards.adoc
+     Read: standards/asciidoc-formatting.md
      ```
 
 3. **Extract key requirements from all loaded standards**
