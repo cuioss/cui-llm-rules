@@ -167,7 +167,7 @@ color: green
 ----
 
 [#essential-rules-pattern-manual-maintenance-required]
-=== Essential Rules Pattern (Manual Maintenance Required)
+=== Essential Rules Pattern (Manual Creation, Semi-Automated Maintenance)
 
 This is a manual pattern created for this plugin, not a native Claude Code feature.
 

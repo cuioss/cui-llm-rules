@@ -16,18 +16,14 @@ This directory contains technical specifications for the `cui-standards` Claude 
 == Quick Start
 
 ```bash
-# Add marketplace (GitHub repository: https://github.com/cuioss/cui-llm-rules)
+# Add marketplace and install plugin
 /plugin marketplace add cuioss/cui-llm-rules
-
-# Install plugin
 /plugin install cui-standards@cui-llm-rules
-
-# Verify installation
-/help     # Shows commands
-/agents   # Lists agents
 ```
 
 That's it! All components (skills, agents, commands) are now available.
+
+For detailed installation instructions, updates, and troubleshooting, see xref:plugin-structure.adoc#installation[Plugin Structure § Installation].
 
 == Document Index
 

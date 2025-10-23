@@ -140,35 +140,16 @@ All components (skills, agents, commands) are distributed via plugin marketplace
 
 === Installation Instructions
 
-**Installation Procedure**:
+Plugin installation is simple and handles all component registration automatically:
 
 ```bash
-# Step 1: Add marketplace (GitHub repository: https://github.com/cuioss/cui-llm-rules)
 /plugin marketplace add cuioss/cui-llm-rules
-
-# Step 2: Install plugin
 /plugin install cui-standards@cui-llm-rules
-
-# Done! All components (skills, agents, commands) are now available
 ```
 
-**Verification**:
-```bash
-/help                  # Shows available commands
-/agents                # Lists installed agents
-# Skills activate automatically based on context
-```
+All components (skills, agents, commands) are immediately available after installation.
 
-**Updates**:
-```bash
-# Check for updates
-/plugin marketplace update cui-llm-rules
-
-# Install latest version
-/plugin install cui-standards@cui-llm-rules --force
-```
-
-Plugin installation handles all component registration automatically.
+For complete installation details including verification steps, update procedures, version management, and troubleshooting, see xref:plugin-structure.adoc#installation[Plugin Structure § Installation].
 
 === Target Users
 
