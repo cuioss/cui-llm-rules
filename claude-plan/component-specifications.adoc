@@ -1,7 +1,9 @@
 = Component Specifications
 :toc: left
+:toc-title: Table of Contents
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Introduction
 
@@ -164,9 +166,10 @@ color: green
 ---
 ----
 
+[#essential-rules-pattern-manual-maintenance-required]
 === Essential Rules Pattern (Manual Maintenance Required)
 
-**IMPORTANT**: This is a **MANUAL PATTERN** created for this plugin, NOT a native Claude Code feature.
+This is a manual pattern created for this plugin, not a native Claude Code feature.
 
 ==== Quick Start
 
@@ -488,12 +491,7 @@ The `/agents-doctor sync` command updates Essential Rules blocks in agents with 
       - Verify write succeeded
    e. AUTOMATED: Summary report of all updates (approved, skipped, failed)
 
-**Rationale for manual approval**: Essential Rules are embedded directly in agent prompts and affect autonomous behavior. Manual review ensures:
-
-* No unintended behavior changes
-* Content accuracy before embedding
-* User awareness of what agents will execute
-* Opportunity to reject breaking changes
+Essential Rules are embedded directly in agent prompts and affect autonomous behavior. Manual review ensures content accuracy and user awareness before changes are applied.
 ----
 
 == Skills Doctor Command
@@ -738,6 +736,7 @@ allowed-tools: Read, Write, Edit, Bash
 
 If not specified, commands have full tool access.
 
+[#yaml-frontmatter-common-fields]
 == Common YAML Frontmatter Fields
 
 This section documents YAML frontmatter fields shared across Skills, Agents, and Commands to avoid duplication.

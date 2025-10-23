@@ -1,7 +1,9 @@
 = CUI LLM Rules: Plugin Architecture Overview
 :toc: left
+:toc-title: Table of Contents
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Introduction
 
@@ -9,7 +11,7 @@ This document describes the architectural design of the cui-llm-rules Claude Cod
 
 == Executive Summary
 
-The cui-llm-rules repository transforms from a documentation-only repository into a Claude Code plugin that provides a four-layer architecture:
+The cui-llm-rules repository provides a Claude Code plugin with a four-layer architecture:
 
 * **Standards**: Authoritative technical requirements (existing AsciiDoc documentation)
 * **Skills**: Knowledge layers that reference standards and provide methodologies
@@ -121,13 +123,10 @@ Layer 4: Commands (command.md) - User utilities
 
 ==== Component Distribution Strategy
 
-**IMPLEMENTATION STATUS**: ✅ Verified and production-proven (2025-10-22/23)
-
-**Plugin Distribution (ONLY Supported Method)**
+**Plugin Distribution**
 
 All components (skills, agents, commands) are distributed via plugin marketplace installation.
 
-* **Status**: ✅ Verified working in production (227+ plugins using this approach)
 * **Target Platform**: Claude Code CLI only
 * **Components Distributed**: Skills, Agents, Commands (all three types)
 * **Installation**: Single command: `/plugin install cui-standards@cui-llm-rules`
@@ -135,14 +134,9 @@ All components (skills, agents, commands) are distributed via plugin marketplace
   - Automatic component discovery
   - Built-in version management
   - No manual file management
-  - Single command installation/update
-* **Evidence**: Multiple production plugins confirmed working (obra/superpowers, wshobson/agents, etc.)
-
-**This is the ONLY distribution method.** Plugin architecture handles all component types automatically.
+* **Evidence**: See xref:research-topics.adoc[Research Topics] for verification details
 
 === Installation Instructions
-
-**IMPLEMENTATION STATUS**: ✅ Production-ready
 
 **Installation Procedure**:
 
@@ -172,7 +166,7 @@ All components (skills, agents, commands) are distributed via plugin marketplace
 /plugin install cui-standards@cui-llm-rules --force
 ```
 
-**No additional steps required** - Plugin installation handles everything automatically.
+Plugin installation handles all component registration automatically.
 
 === Target Users
 
@@ -184,13 +178,13 @@ All components (skills, agents, commands) are distributed via plugin marketplace
 * ❌ Claude.ai web interface (not supported - agents/commands don't exist on web)
 * ❌ CI/CD pipelines (plugin installation requires interactive mode)
 
-**Rationale**: Plugin distribution is the simplest, most maintainable approach for Claude Code users.
+**Rationale**: Plugin distribution provides native integration with Claude Code's component discovery and version management systems.
 
 === Key Architectural Decisions
 
 ==== Decision 1: Plugin-Only Distribution
 
-* **Rationale**: Native Claude Code mechanism, production-proven (227+ plugins)
+* **Rationale**: Native Claude Code mechanism with established marketplace ecosystem
 * **Implementation**: cui-llm-rules distributed as plugin via marketplace
 * **Benefits**:
   - Single command installation

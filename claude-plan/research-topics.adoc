@@ -1,15 +1,13 @@
 = Research Topics: Verification Status
 :toc: left
+:toc-title: Table of Contents
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Overview
 
-**Document Purpose**: Track verification status of architectural assumptions
-
 This document records research findings that validated the plugin-only distribution approach for cui-standards plugin.
-
-**Status**: Research complete - all critical assumptions verified (2025-10-23)
 
 == Key Verified Findings
 
@@ -19,7 +17,7 @@ This document records research findings that validated the plugin-only distribut
 
 **Finding**: Plugins can distribute all three component types (skills, agents, commands)
 
-**Evidence** (HIGH confidence from multiple production examples):
+**Evidence**:
 * obra/superpowers - Plugin with skills, agents, commands working
 * wshobson/agents - 85 agents, 47 skills distributed via plugins
 * jeremylongshore/claude-code-plugins-plus - 227+ production plugins

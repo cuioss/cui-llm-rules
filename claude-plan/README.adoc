@@ -1,13 +1,11 @@
 = CUI Standards Plugin: Technical Specifications
 :toc: left
-:toclevels: 2
+:toc-title: Table of Contents
+:toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Overview
-
-**DOCUMENT STATUS**: ✅ Specifications complete and validated (2025-10-23)
-
-**IMPLEMENTATION STATUS**: 📋 Ready for implementation
 
 This directory contains technical specifications for the `cui-standards` Claude Code plugin - a plugin that distributes coding standards, development agents, and utility commands for CUI OSS projects.
 
@@ -105,7 +103,7 @@ Verification status of architectural assumptions.
 |command.md for utility commands
 
 |**Distribution**
-|Plugin marketplace (production-proven, 227+ plugins)
+|Plugin marketplace
 |===
 
 == Component Counts
@@ -122,7 +120,6 @@ Verification status of architectural assumptions.
 **Key Findings**:
 
 * ✅ Plugin distribution works for all component types (skills, agents, commands)
-* ✅ Production-proven approach (227+ existing plugins)
 * ✅ Automatic component discovery after installation
 * ✅ No manual file management required
 * ❌ Claude.ai web not supported (agents/commands are CLI-only features)
@@ -138,7 +135,7 @@ See xref:research-topics.adoc[Research Topics] for complete evidence and sources
 
 |**Distribution**
 |Plugin marketplace only
-|Simplest, production-proven, no manual sync
+|Single installation command, automatic updates, no manual synchronization
 
 |**Platform**
 |Claude Code CLI only

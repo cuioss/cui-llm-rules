@@ -1,7 +1,9 @@
 = Plugin Structure Specification
 :toc: left
+:toc-title: Table of Contents
 :toclevels: 3
 :sectnums:
+:source-highlighter: highlight.js
 
 == Introduction
 
@@ -327,6 +329,7 @@ Plugin.json `components` section can specify:
 . **Default directories** (`commands/`, `agents/`, `skills/`)
 . **Custom paths** as supplements
 
+[#path-resolution]
 == Path Resolution
 
 === Relative Path Requirements
@@ -441,6 +444,7 @@ For nested `CLAUDE.md` context files, most specific (deepest nested) takes prior
 * **Scripts**: Bash scripts require bash-compatible platform
 * **Tools**: Tool availability may vary by platform
 
+[#version-management]
 == Version Management
 
 === Semantic Versioning
@@ -480,6 +484,7 @@ Updates distributed via marketplace refresh:
 
 **Note**: No individual plugin update command exists (as of research date).
 
+[#installation]
 == Installation
 
 === Local Development
