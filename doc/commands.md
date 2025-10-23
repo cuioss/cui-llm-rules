@@ -63,8 +63,3 @@ Add anchor insertion workflow for automated fixing.
 The verify-adoc-links.py script has a path resolution bug when checking relative xref links within the same directory - it tries to resolve "claude-plan" as a file path instead of recognizing it as part of a relative reference. This causes automated link verification to fail even when all links are valid, requiring manual verification as a workaround.
 
 **Suggested improvement**: Enhance verify-adoc-links.py to properly handle xref: links that reference files in the same directory (e.g., `xref:file.adoc[Label]` should resolve to `./file.adoc` from the current file's directory). Future reviews would benefit from a fixed script that correctly validates same-directory cross-references without manual intervention.
-
-#### Discovery 5: AsciiDoc Blank Line Requirement Strictness
-AsciiDoc format standards require blank lines before ALL lists, including those that follow bold text markers like "**Key Topics**:" or "**Reports**:". This is more strict than typical markdown formatting conventions. The asciidoc-validator.sh script correctly detects these issues, and the adoc-review agent successfully fixes them automatically.
-
-**Pattern**: This is a common formatting issue (24 instances found in claude-plan/) that the agent handles reliably without user intervention. The validator detects missing blank lines, and the agent's Edit tool adds them in the correct locations. No additional tooling or user action required.
