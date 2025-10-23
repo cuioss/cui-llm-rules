@@ -1,0 +1,840 @@
+= Implementation Plan: Skills Migration Phase 1
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 3
+:sectnums:
+:source-highlighter: highlight.js
+
+== Overview
+
+This document provides the implementation plan for Phase 1 of skills migration, focusing on creating the new skill structure alongside existing standards with zero content loss.
+
+== Phase 1 Scope
+
+Based on conditional loading analysis (xref:atomic-standards-analysis.adoc[Atomic Standards Analysis]), Phase 1 focuses on skills with highest token savings potential:
+
+1. **cui-java-unit-testing** - Highest conditional loading benefit (40-72% savings)
+2. **cui-javadoc** - Moderate conditional loading benefit (7-29% savings)
+3. **cui-java-core** - Foundation skill with navigation overhead reduction (15% savings)
+
+**Rationale**: Start with high-value skills to validate approach and demonstrate benefit before expanding to remaining skills.
+
+== Directory Structure
+
+=== Target Structure
+
+[source]
+----
+cui-llm-rules/
+├── claude/
+│   └── marketplace/
+│       └── skills/
+│           ├── cui-java-core/
+│           │   ├── SKILL.md
+│           │   └── standards/
+│           │       ├── java-core-patterns.md
+│           │       ├── java-null-safety.md
+│           │       ├── java-lombok-patterns.md
+│           │       ├── java-modern-features.md
+│           │       ├── logging-standards.md
+│           │       └── dsl-constants.md
+│           │
+│           ├── cui-java-unit-testing/
+│           │   ├── SKILL.md
+│           │   └── standards/
+│           │       ├── testing-junit-core.md
+│           │       ├── testing-value-objects.md
+│           │       ├── testing-generators.md
+│           │       ├── testing-mockwebserver.md
+│           │       └── integration-testing.md
+│           │
+│           └── cui-javadoc/
+│               ├── SKILL.md
+│               └── standards/
+│                   ├── javadoc-core.md
+│                   ├── javadoc-class-documentation.md
+│                   ├── javadoc-method-documentation.md
+│                   └── javadoc-code-examples.md
+│
+└── standards/  (existing - kept for reference until migration complete)
+    ├── java/
+    ├── testing/
+    ├── documentation/
+    └── ...
+----
+
+=== Coexistence Strategy
+
+**During Phase 1**:
+
+- New skills created in `claude/marketplace/skills/`
+- Existing standards remain in `standards/` unchanged
+- Both structures exist in parallel
+- No deletion of existing content
+
+**Benefits**:
+
+- Zero risk of content loss
+- Easy rollback if issues found
+- Side-by-side comparison possible
+- Gradual validation and testing
+
+**After Phase 1 validation**:
+
+- Phase 2+ skills created
+- Once all skills complete and validated, `standards/` directory deprecated
+- Clear migration path with safety net
+
+== Implementation Workflow
+
+**For each skill, follow this workflow**:
+
+1. **Implement** - Create skill structure, extract content, convert to Markdown, write SKILL.md
+2. **Verify all validation criteria** - Check all completion criteria for the skill (see each skill's "Validation Criteria" section)
+3. **Verify no information loss** - **CRITICAL**: Compare against original standards to ensure 100% content preservation
+4. **Commit** - Commit the completed skill with descriptive message documenting zero information loss
+
+**No skill is complete until**:
+
+- All validation criteria checkboxes marked complete
+- Content comparison confirms zero information loss
+- Skill is committed to version control
+
+== Skill 1: cui-java-unit-testing
+
+=== Overview
+
+**Target**: `claude/marketplace/skills/cui-java-unit-testing/`
+
+**Highest priority** due to maximum conditional loading benefit (40-72% token savings per invocation).
+
+=== Content Mapping
+
+[cols="2,2,1"]
+|===
+|Source (Current Standards) |Target (New Skill) |Loading
+
+|`standards/testing/core-standards.adoc` (lines 1-180)
+|`standards/testing-junit-core.md`
+|Always
+
+|`standards/testing/core-standards.adoc` (lines 181-240)
+|`standards/testing-value-objects.md`
+|Conditional
+
+|`standards/testing/core-standards.adoc` (lines 241-310)
+|`standards/testing-generators.md`
+|Conditional
+
+|`standards/testing/README.adoc` (MockWebServer section)
+|`standards/testing-mockwebserver.md`
+|Conditional
+
+|`standards/testing/integration-testing.adoc` (complete)
+|`standards/integration-testing.md`
+|Conditional
+|===
+
+=== Standards Files Detail
+
+==== testing-junit-core.md (~150 lines, always loaded)
+
+**Content from**: `standards/testing/core-standards.adoc` sections:
+
+- Testing principles and philosophy
+- JUnit 5 basics and setup
+- Test structure (Given-When-Then)
+- Assertions and assertion patterns
+- Test naming conventions
+- Test lifecycle (@BeforeEach, @AfterEach)
+
+**Format**: Markdown with code examples, no navigation overhead
+
+**Loading**: Always loaded when cui-java-unit-testing skill invoked
+
+==== testing-value-objects.md (~60 lines, conditional)
+
+**Content from**: `standards/testing/core-standards.adoc` § Value Object Testing
+
+- Immutability testing patterns
+- Equals/hashCode testing
+- Builder pattern testing
+- Serialization testing
+
+**Format**: Markdown with examples
+
+**Loading**: Conditional - only when testing value objects detected
+
+==== testing-generators.md (~70 lines, conditional)
+
+**Content from**: `standards/testing/core-standards.adoc` § Test Data Generators
+
+- Generator usage patterns
+- Generator.of() patterns
+- Custom generator creation
+- Generator composition
+
+**Format**: Markdown with examples
+
+**Loading**: Conditional - only when generator imports detected in project
+
+==== testing-mockwebserver.md (~80 lines, conditional)
+
+**Content from**: `standards/testing/README.adoc` § MockWebServer patterns
+
+- MockWebServer setup
+- Request/response mocking patterns
+- Assertion patterns for HTTP
+- Testing retry logic
+
+**Format**: Markdown with examples
+
+**Loading**: Conditional - only when testing HTTP clients
+
+==== integration-testing.md (~180 lines, conditional)
+
+**Content from**: `standards/testing/integration-testing.adoc` (entire file)
+
+- Integration test setup
+- Quarkus test patterns
+- Test resources and lifecycle
+- Database testing patterns
+- Container testing with Testcontainers
+
+**Format**: Markdown (convert from AsciiDoc), preserve all examples
+
+**Loading**: Conditional - only when writing integration tests
+
+=== SKILL.md Structure
+
+[source,markdown]
+----
+---
+name: cui-java-unit-testing
+description: CUI Java unit testing standards and patterns with JUnit 5
+tools: [Read, Edit, Write, Bash, Grep, Glob]
+---
+
+# CUI Java Unit Testing Skill
+
+Standards and patterns for writing high-quality unit tests in CUI Java projects using JUnit 5.
+
+## Workflow
+
+### Step 1: Load Applicable Testing Standards
+
+**CRITICAL**: Load current testing standards to use as enforcement criteria.
+
+1. **Always load foundational testing standards**:
+   ```
+   Read: standards/testing-junit-core.md
+   ```
+   This provides core JUnit 5 patterns always needed for testing.
+
+2. **Conditional loading based on testing context**:
+
+   - If testing value objects (classes with equals/hashCode/toString):
+     ```
+     Read: standards/testing-value-objects.md
+     ```
+
+   - If project uses test data generators (de.cuioss.test.generator):
+     ```
+     Read: standards/testing-generators.md
+     ```
+
+   - If testing HTTP clients or APIs:
+     ```
+     Read: standards/testing-mockwebserver.md
+     ```
+
+   - If writing integration tests:
+     ```
+     Read: standards/integration-testing.md
+     ```
+
+3. **Extract key requirements from all loaded standards**
+
+4. **Store in working memory** for use during task execution
+
+### Step 2: Analyze Existing Tests
+
+[... continue with workflow steps ...]
+
+### Step 3: Write/Modify Tests According to Standards
+
+[... workflow continues ...]
+
+## Quality Verification
+
+[... quality checks ...]
+----
+
+=== Migration Steps
+
+1. **Create directory structure**:
+   ```bash
+   mkdir -p claude/marketplace/skills/cui-java-unit-testing/standards
+   ```
+
+2. **Read existing testing standards**:
+   - Read: `standards/testing/core-standards.adoc`
+   - Read: `standards/testing/integration-testing.adoc`
+   - Read: `standards/testing/README.adoc`
+
+3. **Extract and convert content**:
+   - Extract core JUnit content → `testing-junit-core.md`
+   - Extract value object section → `testing-value-objects.md`
+   - Extract generators section → `testing-generators.md`
+   - Extract MockWebServer patterns → `testing-mockwebserver.md`
+   - Convert integration-testing.adoc → `integration-testing.md`
+
+4. **Convert AsciiDoc to Markdown**:
+   - Remove AsciiDoc headers (:toc:, :sectnums:, etc.)
+   - Convert code blocks: `[source,java]` → ` ```java`
+   - Remove cross-references (make self-contained)
+   - Remove "See Also" sections (navigation overhead)
+   - Preserve all code examples and explanations
+
+5. **Create SKILL.md**:
+   - YAML frontmatter with name, description, tools
+   - Workflow with explicit Read instructions
+   - Conditional loading logic
+   - Quality verification steps
+
+6. **Validate no content loss**:
+   - Compare line counts
+   - Verify all code examples present
+   - Check all requirements captured
+   - Ensure completeness
+
+7. **Verify all validation criteria completed**:
+   - Check all items in "Content Completeness" section below
+   - Check all items in "Format Quality" section below
+   - Check all items in "Functional Verification" section below
+   - **CRITICAL**: No information loss - all content from original standards must be present
+
+8. **Commit the skill**:
+   ```bash
+   git add claude/marketplace/skills/cui-java-unit-testing
+   git commit -m "feat: Add cui-java-unit-testing skill with conditional loading
+
+   - Create skill structure with SKILL.md and 5 standards files
+   - Split testing standards by conditional loading patterns
+   - Zero information loss verified against original standards"
+   ```
+
+=== Validation Criteria
+
+**Content Completeness**:
+
+- [ ] All testing principles from core-standards.adoc present
+- [ ] All JUnit patterns documented
+- [ ] All value object testing patterns included
+- [ ] All generator patterns included
+- [ ] All MockWebServer patterns included
+- [ ] All integration testing content preserved
+- [ ] All code examples preserved
+
+**Format Quality**:
+
+- [ ] Valid Markdown syntax
+- [ ] Code blocks properly formatted
+- [ ] No broken internal references (files are self-contained)
+- [ ] Clear headings and structure
+
+**Functional Verification**:
+
+- [ ] SKILL.md has valid YAML frontmatter
+- [ ] Read instructions use correct relative paths
+- [ ] Conditional loading logic is clear
+- [ ] Standards files are self-contained
+
+== Skill 2: cui-javadoc
+
+=== Overview
+
+**Target**: `claude/marketplace/skills/cui-javadoc/`
+
+**Moderate conditional benefit** (7-29% token savings) - documentation context determines loading.
+
+=== Content Mapping
+
+[cols="2,2,1"]
+|===
+|Source (Current Standards) |Target (New Skill) |Loading
+
+|`standards/documentation/javadoc-standards.adoc` (lines 1-120)
+|`standards/javadoc-core.md`
+|Always
+
+|`standards/documentation/javadoc-standards.adoc` (lines 121-180)
+|`standards/javadoc-class-documentation.md`
+|Conditional
+
+|`standards/documentation/javadoc-standards.adoc` (lines 181-260)
+|`standards/javadoc-method-documentation.md`
+|Conditional
+
+|`standards/documentation/javadoc-standards.adoc` (lines 261-300)
+|`standards/javadoc-code-examples.md`
+|Conditional
+|===
+
+=== Standards Files Detail
+
+==== javadoc-core.md (~120 lines, always loaded)
+
+**Content from**: `standards/documentation/javadoc-standards.adoc` core sections:
+
+- JavaDoc principles and purpose
+- Mandatory documentation requirements
+- Tag usage basics (@param, @return, @throws)
+- Documentation maintenance approach
+- When to document vs when not to
+
+**Format**: Markdown with examples
+
+**Loading**: Always loaded when cui-javadoc skill invoked
+
+==== javadoc-class-documentation.md (~60 lines, conditional)
+
+**Content from**: `standards/documentation/javadoc-standards.adoc` § Class Documentation
+
+- Class-level JavaDoc patterns
+- Package documentation (package-info.java)
+- Interface documentation
+- Abstract class documentation
+- Enum documentation
+
+**Format**: Markdown with examples
+
+**Loading**: Conditional - only when documenting classes/interfaces
+
+==== javadoc-method-documentation.md (~80 lines, conditional)
+
+**Content from**: `standards/documentation/javadoc-standards.adoc` § Method Documentation
+
+- Method JavaDoc structure
+- Parameter documentation best practices
+- Return value documentation
+- Exception documentation
+- Overridden method documentation
+- Generic method documentation
+
+**Format**: Markdown with examples
+
+**Loading**: Conditional - only when documenting methods
+
+==== javadoc-code-examples.md (~40 lines, conditional)
+
+**Content from**: `standards/documentation/javadoc-standards.adoc` § Code Examples
+
+- Code example formatting in JavaDoc
+- Using @code and @literal tags
+- Multi-line code examples
+- Testing code examples
+
+**Format**: Markdown with examples
+
+**Loading**: Conditional - when documentation includes code examples
+
+=== SKILL.md Structure
+
+[source,markdown]
+----
+---
+name: cui-javadoc
+description: CUI JavaDoc documentation standards and patterns
+tools: [Read, Edit, Write, Grep, Glob]
+---
+
+# CUI JavaDoc Skill
+
+Standards for writing high-quality JavaDoc documentation in CUI projects.
+
+## Workflow
+
+### Step 1: Load Applicable JavaDoc Standards
+
+**CRITICAL**: Load current JavaDoc standards.
+
+1. **Always load foundational standards**:
+   ```
+   Read: standards/javadoc-core.md
+   ```
+
+2. **Conditional loading based on documentation context**:
+
+   - If documenting classes or interfaces:
+     ```
+     Read: standards/javadoc-class-documentation.md
+     ```
+
+   - If documenting methods:
+     ```
+     Read: standards/javadoc-method-documentation.md
+     ```
+
+   - If adding code examples to documentation:
+     ```
+     Read: standards/javadoc-code-examples.md
+     ```
+
+[... continue workflow ...]
+----
+
+=== Migration Steps
+
+1. **Create directory structure**:
+   ```bash
+   mkdir -p claude/marketplace/skills/cui-javadoc/standards
+   ```
+
+2. **Read existing JavaDoc standards**:
+   - Read: `standards/documentation/javadoc-standards.adoc`
+
+3. **Extract and convert content**:
+   - Extract core concepts → `javadoc-core.md`
+   - Extract class documentation → `javadoc-class-documentation.md`
+   - Extract method documentation → `javadoc-method-documentation.md`
+   - Extract code examples → `javadoc-code-examples.md`
+
+4. **Convert to Markdown** (remove navigation, preserve content)
+
+5. **Create SKILL.md** with conditional loading logic
+
+6. **Validate completeness**:
+   - Compare line counts
+   - Verify all code examples present
+   - Check all requirements captured
+   - Ensure completeness
+
+7. **Verify all validation criteria completed**:
+   - Check all items in "Content Completeness" section below
+   - Check all items in "Format and Function" section below
+   - **CRITICAL**: No information loss - all content from original standards must be present
+
+8. **Commit the skill**:
+   ```bash
+   git add claude/marketplace/skills/cui-javadoc
+   git commit -m "feat: Add cui-javadoc skill with conditional loading
+
+   - Create skill structure with SKILL.md and 4 standards files
+   - Split JavaDoc standards by documentation context
+   - Zero information loss verified against original standards"
+   ```
+
+=== Validation Criteria
+
+**Content Completeness**:
+
+- [ ] All JavaDoc principles present
+- [ ] All tag usage documented
+- [ ] All class documentation patterns included
+- [ ] All method documentation patterns included
+- [ ] All code example patterns included
+- [ ] All maintenance guidance preserved
+
+**Format and Function**:
+
+- [ ] Valid Markdown syntax
+- [ ] SKILL.md valid YAML frontmatter
+- [ ] Conditional loading logic clear
+- [ ] Self-contained standards files
+
+== Skill 3: cui-java-core
+
+=== Overview
+
+**Target**: `claude/marketplace/skills/cui-java-core/`
+
+**Foundation skill** with always-loaded standards. Focus on navigation overhead reduction (15% savings) and maintainable coherent groupings.
+
+=== Content Mapping
+
+[cols="2,2,1"]
+|===
+|Source (Current Standards) |Target (New Skill) |Loading
+
+|`standards/java/java-code-standards.adoc` (core sections)
+|`standards/java-core-patterns.md`
+|Always
+
+|`standards/java/java-code-standards.adoc` (null safety section)
+|`standards/java-null-safety.md`
+|Always
+
+|`standards/java/dsl-style-constants.adoc` (complete)
+|`standards/dsl-constants.md`
+|Always
+
+|`standards/java/lombok-standards.adoc` (if exists, or extract from java-code-standards)
+|`standards/java-lombok-patterns.md`
+|Always
+
+|`standards/java/java-code-standards.adoc` (modern features)
+|`standards/java-modern-features.md`
+|Always
+
+|`standards/logging/cui-logging-standards.adoc`
+|`standards/logging-standards.md`
+|Always
+|===
+
+=== Standards Files Detail
+
+==== java-core-patterns.md (~150 lines, always loaded)
+
+**Content from**: `standards/java/java-code-standards.adoc` sections:
+
+- General principles (readability, maintainability, consistency)
+- Code organization (packages, classes, methods)
+- Naming conventions
+- Method design and parameter objects
+- Exception handling
+- Documentation requirements
+
+**Format**: Markdown, remove navigation overhead
+
+**Loading**: Always
+
+==== java-null-safety.md (~60 lines, always loaded)
+
+**Content from**: `standards/java/java-code-standards.adoc` § Null Safety
+
+- JSpecify annotations (@NullMarked, @Nullable)
+- Package-level null safety configuration
+- API return type guidelines (Optional vs non-null)
+- Implementation requirements
+- Testing null safety
+
+**Format**: Markdown with code examples
+
+**Loading**: Always
+
+==== java-lombok-patterns.md (~80 lines, always loaded)
+
+**Content from**: Lombok-related sections in standards:
+
+- @Builder usage and patterns
+- @Value for immutable objects
+- @Data usage guidelines
+- @Delegate for delegation
+- When to use each annotation
+- Best practices and anti-patterns
+
+**Format**: Markdown with examples
+
+**Loading**: Always
+
+==== java-modern-features.md (~100 lines, always loaded)
+
+**Content from**: `standards/java/java-code-standards.adoc` modern Java sections:
+
+- Records for data carriers
+- Switch expressions
+- Stream processing patterns
+- Pattern matching (if documented)
+- Text blocks (if documented)
+- Modern collection patterns
+
+**Format**: Markdown with examples
+
+**Loading**: Always
+
+==== dsl-constants.md (~120 lines, always loaded)
+
+**Content from**: `standards/java/dsl-style-constants.adoc` (complete file)
+
+- DSL-style constants pattern
+- Hierarchical constant organization
+- UPPER_SNAKE_CASE conventions
+- Type-safe constant patterns
+- Builder patterns for complex constants
+
+**Format**: Markdown (convert from AsciiDoc)
+
+**Loading**: Always
+
+==== logging-standards.md (~80 lines, always loaded)
+
+**Content from**: `standards/logging/cui-logging-standards.adoc`:
+
+- CUI logging principles
+- Logger declaration patterns
+- Log level usage
+- Structured logging patterns
+- Performance considerations
+
+**Format**: Markdown (convert from AsciiDoc)
+
+**Loading**: Always
+
+=== SKILL.md Structure
+
+[source,markdown]
+----
+---
+name: cui-java-core
+description: Core Java development standards for CUI projects
+tools: [Read, Edit, Write, Bash, Grep, Glob]
+---
+
+# CUI Java Core Development Skill
+
+Foundational Java development standards for all CUI projects.
+
+## Workflow
+
+### Step 1: Load Core Java Standards
+
+**CRITICAL**: Load all foundational Java standards (always required).
+
+```
+Read: standards/java-core-patterns.md
+Read: standards/java-null-safety.md
+Read: standards/java-lombok-patterns.md
+Read: standards/java-modern-features.md
+Read: standards/dsl-constants.md
+Read: standards/logging-standards.md
+```
+
+These standards are fundamental to all CUI Java development.
+
+### Step 2: Extract Key Requirements
+
+[... workflow continues ...]
+
+### Step 3: Apply Standards to Development Task
+
+[... workflow continues ...]
+----
+
+=== Migration Steps
+
+1. **Create directory structure**:
+   ```bash
+   mkdir -p claude/marketplace/skills/cui-java-core/standards
+   ```
+
+2. **Read existing standards**:
+   - Read: `standards/java/java-code-standards.adoc`
+   - Read: `standards/java/dsl-style-constants.adoc`
+   - Read: `standards/logging/cui-logging-standards.adoc`
+
+3. **Extract and group content**:
+   - Group core patterns from java-code-standards
+   - Extract null safety as separate file
+   - Extract Lombok patterns
+   - Extract modern features
+   - Convert DSL constants (complete)
+   - Convert logging standards (complete)
+
+4. **Convert to Markdown**: Remove all navigation overhead
+
+5. **Create SKILL.md**: Simple always-load pattern
+
+6. **Validate**: Ensure all content preserved
+   - Compare line counts
+   - Verify all code examples present
+   - Check all requirements captured
+   - Ensure completeness
+
+7. **Verify all validation criteria completed**:
+   - Check all items in "Content Completeness" section below
+   - Check all items in "Format and Function" section below
+   - **CRITICAL**: No information loss - all content from original standards must be present
+
+8. **Commit the skill**:
+   ```bash
+   git add claude/marketplace/skills/cui-java-core
+   git commit -m "feat: Add cui-java-core skill with always-loaded standards
+
+   - Create skill structure with SKILL.md and 6 standards files
+   - Group core Java standards for maintainability
+   - Zero information loss verified against original standards"
+   ```
+
+=== Validation Criteria
+
+**Content Completeness**:
+
+- [ ] All general principles present
+- [ ] All naming conventions documented
+- [ ] All code organization patterns included
+- [ ] Complete null safety coverage
+- [ ] All Lombok patterns documented
+- [ ] All modern Java features covered
+- [ ] Complete DSL constants pattern
+- [ ] All logging standards included
+
+**Format and Function**:
+
+- [ ] Valid Markdown syntax
+- [ ] No navigation overhead
+- [ ] Self-contained files
+- [ ] SKILL.md with valid YAML
+- [ ] All Read instructions correct
+
+== Quality Assurance
+
+=== Content Loss Prevention
+
+**Verification Method**: Side-by-side comparison
+
+For each skill:
+
+1. **Line count comparison**:
+   - Count content lines in original standards
+   - Count content lines in new standards (excluding old navigation overhead)
+   - Verify: new content ≥ original content - navigation overhead
+
+2. **Section coverage**:
+   - List all sections in original standards
+   - Verify each section present in new standards
+   - Document any intentional omissions
+
+3. **Code example preservation**:
+   - Extract all code blocks from originals
+   - Verify all code blocks in new standards
+   - Ensure examples remain complete and accurate
+
+4. **Requirement preservation**:
+   - List all "must", "should", "shall" requirements in originals
+   - Verify all requirements in new standards
+   - Ensure no weakening of standards
+
+=== Format Validation
+
+**Markdown Syntax**:
+
+- Run Markdown linter on all .md files
+- Verify code fence syntax (` ```language`)
+- Check heading hierarchy
+- Validate link syntax (if any internal links)
+
+**SKILL.md Validation**:
+
+- Verify YAML frontmatter parses correctly
+- Test Read instruction paths (files exist)
+- Validate tool list completeness
+- Check workflow structure
+
+=== Functional Testing
+
+**Skill Invocation Test**:
+
+For each skill:
+
+1. Invoke skill in test scenario
+2. Verify standards files loaded correctly
+3. Check conditional loading logic works
+4. Validate workflow execution
+
+**Token Usage Measurement**:
+
+- Measure tokens loaded with original standards
+- Measure tokens loaded with new skill structure
+- Calculate actual savings percentage
+- Compare to expected savings (from atomic-standards-analysis.adoc)

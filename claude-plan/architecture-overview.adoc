@@ -11,96 +11,103 @@ This document describes the architectural design of the cui-llm-rules Claude Cod
 
 == Executive Summary
 
-The cui-llm-rules repository provides a Claude Code plugin with a four-layer architecture:
+The cui-llm-rules repository provides a Claude Code plugin with a three-layer architecture:
 
-* **Standards**: Authoritative technical requirements (existing AsciiDoc documentation)
-* **Skills**: Knowledge layers that reference standards and provide methodologies
-* **Agents**: Task executors that use skills and embedded essential rules
+* **Skills**: Self-contained bundles containing standards (AsciiDoc), methodology, and workflow logic
+* **Agents**: Task executors that use skills and embed essential rules from skill standards
 * **Commands**: User-invoked utilities for verification and management
 
 All layers are distributed via a single plugin installation, eliminating manual synchronization.
 
-== Four-Layer Architecture Model
+== Three-Layer Architecture Model
 
 === Layer Overview
 
 ----
-Layer 1: Standards (AsciiDoc) - Source of truth
-Layer 2: Skills (SKILL.md) - Knowledge & methodology (references Layer 1)
-Layer 3: Agents (agent.md) - Task executors (use Layer 2, embed essential rules from Layer 1)
-Layer 4: Commands (command.md) - User utilities
+Layer 1: Skills (SKILL.md + bundled standards) - Knowledge, methodology, and standards
+Layer 2: Agents (agent.md) - Task executors (use Layer 1, embed essential rules from Layer 1)
+Layer 3: Commands (command.md) - User utilities
 ----
+
+**Key Change**: Standards are now bundled within skills rather than maintained separately. Each skill is a self-contained package containing its SKILL.md workflow file and all related standards files in a `standards/` subdirectory.
 
 === Visual Architecture
 
 [source]
 ----
 ┌─────────────────────────────────────────────────────────────┐
-│ LAYER 1: Standards (Source of Truth)                        │
-│ Location: cui-llm-rules/standards/                          │
-│ Format: AsciiDoc (.adoc)                                    │
-│ Purpose: Define technical requirements                      │
-│                                                              │
-│ Examples:                                                    │
-│ • java/java-code-standards.adoc                             │
-│ • testing/core-standards.adoc                               │
-│ • documentation/javadoc-standards.adoc                      │
-│ • process/task-completion-standards.adoc                    │
-└─────────────────────────────────────────────────────────────┘
-                            ▲
-                            │ Referenced by (dynamic reads)
-                            │
-┌─────────────────────────────────────────────────────────────┐
-│ LAYER 2: Skills (Knowledge & Methodology)                   │
+│ LAYER 1: Skills (Self-Contained Bundles)                    │
 │ Location: cui-llm-rules/skills/                             │
-│ Format: SKILL.md with YAML frontmatter                      │
-│ Purpose: Provide Claude with context and methodology        │
+│ Purpose: Knowledge, methodology, and standards              │
 │                                                              │
-│ Examples:                                                    │
-│ • cui-java-standards/SKILL.md                               │
-│   - Reads standards/java/*.adoc dynamically                 │
-│   - Provides quick reference, templates, examples           │
-│   - allowed-tools: Read                                     │
+│ Structure: Each skill is a complete package                 │
 │                                                              │
-│ • cui-testing-methodology/SKILL.md                          │
-│ • cui-documentation-standards/SKILL.md                      │
-│ • cui-process-standards/SKILL.md                            │
+│ Example: cui-java-development/                              │
+│   ├── SKILL.md                                              │
+│   │   - YAML frontmatter (name, description, tools)         │
+│   │   - Workflow with explicit Read instructions           │
+│   │   - Progressive loading logic                           │
+│   │   - Templates and examples                              │
+│   │                                                          │
+│   └── standards/                                            │
+│       ├── java-core-standards.adoc (always)                 │
+│       ├── java-lombok-standards.adoc (always)               │
+│       ├── java-jspecify-standards.adoc (always)             │
+│       ├── logging-standards.adoc (always)                   │
+│       ├── javadoc-standards.adoc (conditional)              │
+│       ├── testing-junit-standards.adoc (conditional)        │
+│       └── cdi-*.adoc (conditional)                          │
+│                                                              │
+│ Other Skills:                                                │
+│ • cui-javadoc/ (JavaDoc standards)                          │
+│ • cui-java-cdi/ (CDI/Quarkus standards)                     │
+│ • cui-java-unit-testing/ (JUnit testing)                    │
+│ • cui-frontend-development/ (JS, CSS, web components)       │
+│ • cui-documentation/ (general docs standards)               │
+│ • cui-project-setup/ (project initialization)               │
+│ • cui-requirements/ (requirements & specs)                  │
 └─────────────────────────────────────────────────────────────┘
                             ▲
-                            │ Used by (skills referenced in prompts)
+                            │ Used by (skills referenced in agent prompts)
                             │
                             │ Embedded essential rules (synced via agents-doctor)
-                            │ from Layer 1
+                            │ extracted from skill standards
                             │
 ┌─────────────────────────────────────────────────────────────┐
-│ LAYER 3: Agents (Task Executors)                            │
+│ LAYER 2: Agents (Task Executors)                            │
 │ Location: cui-llm-rules/agents/                             │
 │ Format: agent.md with YAML frontmatter                      │
 │ Purpose: Autonomous task execution                          │
 │                                                              │
-│ Pattern: Essential Rules (embedded) + Skill References      │
+│ Pattern: Essential Rules (embedded) + Skill Invocation      │
 │                                                              │
-│ Examples:                                                    │
-│ • project-builder.md                                        │
-│   - System prompt: "Read cui-java-standards skill"          │
-│   - Essential Rules: Embedded JavaDoc/testing requirements  │
+│ Example: project-builder.md                                 │
+│   - Invokes: cui-java-development skill                     │
+│   - Essential Rules: Embedded core requirements from        │
+│     cui-java-development/standards/*.adoc                   │
 │   - Tools: Read, Edit, Write, Bash                          │
+│   - Progressive: Skill loads full standards as needed       │
 │                                                              │
-│ • code-reviewer.md                                          │
-│ • adoc-review.md                                            │
-│ • test-generator.md                                         │
+│ Other Agents:                                                │
+│ • code-reviewer.md (uses cui-java-core + cui-javadoc)       │
+│ • adoc-review.md (uses cui-documentation skill)             │
+│ • test-generator.md (uses cui-java-unit-testing skill)      │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
-│ LAYER 4: Commands (User Utilities)                          │
+│ LAYER 3: Commands (User Utilities)                          │
 │ Location: cui-llm-rules/commands/                           │
 │ Format: Markdown                                            │
 │ Purpose: User-invoked utilities and verification            │
 │                                                              │
 │ Examples:                                                    │
-│ • agents-doctor.md - Verify agents, sync essential rules    │
+│ • agents-doctor.md                                          │
+│   - Verifies agents follow best practices                   │
+│   - Syncs essential rules from skill standards              │
+│   - Validates tool coverage                                 │
+│                                                              │
 │ • slash-doctor.md - Verify commands                         │
-│ • setup-project-permissions.md                              │
+│ • setup-project-permissions.md - Permission management      │
 └─────────────────────────────────────────────────────────────┘
 
            ▲
@@ -110,16 +117,107 @@ Layer 4: Commands (command.md) - User utilities
 │ PLUGIN: cui-standards                                        │
 │ Installation: /plugin install cui-standards@cui-llm-rules   │
 │ Updates: /plugin marketplace update cui-llm-rules           │
+│                                                              │
+│ Progressive Disclosure:                                      │
+│ 1. Skill description loaded (30-50 tokens)                  │
+│ 2. On invocation: SKILL.md loaded (~400 lines)              │
+│ 3. Workflow executes: Reads relevant standards files        │
+│ 4. Conditional loading: Only needed standards loaded        │
 └─────────────────────────────────────────────────────────────┘
 ----
 
 == Key Architectural Decisions
 
-=== Decision 1: Skills Reference Standards (Not Embed)
+=== Decision 1: Bundled Skills with Explicit Read Instructions
 
-* **Rationale**: Standards are authoritative source, skills provide access layer
-* **Implementation**: Skills use Read tool to dynamically fetch from `standards/`
-* **Benefit**: No duplication between skills, always current
+**Pattern**: Skills are self-contained bundles with standards in subdirectories, using explicit Read workflow instructions
+
+**Architecture**:
+
+```
+skills/cui-java-development/
+├── SKILL.md (workflow + logic)
+└── standards/
+    ├── java-core-standards.adoc
+    ├── java-lombok-standards.adoc
+    ├── javadoc-standards.adoc
+    └── ... (all related standards)
+```
+
+**Rationale**:
+
+* **Self-Contained**: Each skill is a complete, distributable package
+* **Reliable Loading**: Explicit Read instructions proven reliable (agents-doctor pattern)
+* **Progressive Disclosure**: Standards loaded conditionally based on context
+* **Clear Ownership**: Each skill owns and maintains its standards
+* **Activity-Based**: Skills map to developer workflows, not technology subdivisions
+* **No External Dependencies**: Skills don't rely on separate standards repository
+
+**Implementation**:
+
+Skills contain workflow steps that explicitly instruct Claude to execute Read tool on bundled standards:
+
+[source,markdown]
+----
+### Step 1: Load Applicable Standards
+
+**CRITICAL**: Load current standards to use as enforcement criteria.
+
+1. **Always load foundational standards**:
+   ```
+   Read: standards/java-core-standards.adoc
+   Read: standards/java-lombok-standards.adoc
+   Read: standards/java-jspecify-standards.adoc
+   Read: standards/logging-standards.adoc
+   ```
+   These are fundamental to all CUI Java development.
+
+2. **Conditional loading based on code context**:
+   - If documenting:
+     ```
+     Read: standards/javadoc-standards.adoc
+     ```
+   - If testing:
+     ```
+     Read: standards/testing-junit-standards.adoc
+     ```
+   - If CDI/Quarkus:
+     ```
+     Read: standards/cdi-standards.adoc
+     ```
+
+3. **Extract key requirements from all loaded standards**
+
+4. **Store in working memory** for use during task execution
+----
+
+**Cross-Cutting Standards**:
+
+When standards are used by multiple skills (e.g., JavaDoc used by both Java and Documentation skills):
+
+* **Preferred**: Use symlinks (git symlinks with `core.symlinks true`)
+* **Alternative**: Direct cross-skill references (`../cui-java-development/standards/...`)
+* **Natural**: Let Claude compose multiple skills automatically for complex workflows
+
+See xref:skill-distribution.adoc#cross-cutting-standards[Skill Distribution § Cross-Cutting Standards] for detailed approaches.
+
+**Benefits**:
+
+* **Self-contained distribution** - each skill is a complete package
+* **Reliable loading** - explicit Read tool invocation (not passive reference)
+* **Progressive disclosure** - only loads relevant standards based on context
+* **Token efficient** - skill description loads first (30-50 tokens), then SKILL.md (~400 lines), then only needed standards
+* **Activity-based granularity** - 4-6 skills vs 20+ micro-skills
+* **Clear ownership** - each skill maintains its standards
+* **Proven pattern** - successfully used in agents-doctor command
+
+**Evidence**:
+
+* Pattern validated through agents-doctor implementation
+* Web research on Claude Code's progressive disclosure architecture
+* Skill bundling pattern documented in official Claude Code skills documentation
+
+**Detailed Specification**: See xref:skill-distribution.adoc[Skill Distribution and Standards Clustering]
 
 ==== Component Distribution Strategy
 
@@ -178,7 +276,50 @@ For complete installation details including verification steps, update procedure
 
 ==== Decision 2: Agents Use Essential Rules Pattern
 
-Agents embed core requirements from standards for performance while maintaining skill references for complete information. This provides fast, autonomous execution without I/O overhead while keeping access to complete standards when needed.
+Agents embed core requirements from skill standards for performance while invoking skills for complete information. This provides fast, autonomous execution without I/O overhead while keeping access to complete standards when needed.
+
+**Pattern**:
+
+```markdown
+# agent-name.md
+
+## Essential Rules
+
+### Java Standards
+Source: ~/plugins/cui-llm-rules/skills/cui-java-development/standards/java-core-standards.adoc#key-patterns
+Last Synced: 2025-10-23
+
+- All constants must use DSL-style naming (UPPER_SNAKE_CASE)
+- All public methods require JavaDoc
+- Use @NonNull/@Nullable annotations
+...
+
+## Workflow
+
+When developing Java code, invoke cui-java-development skill for complete standards.
+```
+
+**Rationale**:
+
+* **Performance**: Agents have critical requirements immediately available (no I/O delay)
+* **Completeness**: Agents can invoke skills for full standards when needed
+* **Maintenance**: `agents-doctor` verifies embedded rules match skill standards source
+* **Source of Truth**: Skill standards remain authoritative; agents embed copies
+
+**Synchronization**:
+
+Essential rules in agents reference skill standards as source:
+
+```
+Source: ~/plugins/cui-llm-rules/skills/cui-java-development/standards/java-core-standards.adoc#section
+```
+
+`agents-doctor` command verifies and syncs:
+
+* Compares embedded rules with skill standards source
+* Reports out-of-date rules
+* Offers to update from source
+* Tracks last sync date
 
 **Complete specification**: xref:component-specifications.adoc#essential-rules-pattern-manual-maintenance-required[Component Specifications § Essential Rules Pattern]
 
@@ -196,13 +337,17 @@ Skills utilize progressive disclosure as validated by research:
 
 . **Startup Phase**: Name + description loaded (30-50 tokens)
 . **Context Matching**: Claude determines relevance based on task
-. **Dynamic Fetch**: Read tool loads `SKILL.md` and referenced files only when needed
+. **Skill Invocation**: Claude loads complete `SKILL.md` file
+. **Workflow Execution**: Skill workflow explicitly instructs Claude to Read standards files
+. **Standards Loading**: Claude executes Read tool commands from skill workflow
 
 This pattern ensures:
 
-* Low memory footprint at startup
-* Current data always (read from source)
-* Efficient resource usage
+* Low memory footprint at startup (skill description only)
+* Current data always (reads from standards source at execution time)
+* Efficient resource usage (only loads standards when skill is invoked)
+* Reliable loading (explicit Read instructions, not passive references)
+* Controlled context (skill determines which standards files to load)
 
 === Conflict Resolution Hierarchy
 

@@ -1,0 +1,623 @@
+= Skill Distribution and Standards Clustering
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 3
+:sectnums:
+:source-highlighter: highlight.js
+
+== Overview
+
+This document defines how CUI standards are distributed across skills, establishing the granularity and clustering strategy for the cui-llm-rules plugin.
+
+== Granularity Philosophy
+
+**Approach**: Domain-based skills with focused technical scope.
+
+**Key Principles**:
+
+* Clear skill names match developer mental models (e.g., "cui-javadoc" when documenting Java)
+* Each skill covers a coherent technical domain (JavaDoc, CDI, testing are separate)
+* 8 focused skills - discoverable yet specific
+* Skills compose naturally for complex workflows (Claude invokes multiple skills automatically when needed)
+
+== Skill Catalog
+
+=== Java Development Skills
+
+==== cui-java-core
+
+**Description**: Core Java development standards for CUI projects, covering coding style, Lombok usage, JSpecify nullability, CUI utility libraries, and logging.
+
+**Invocation Triggers**: Java code writing, Java code review, Java refactoring
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`java-core-standards.adoc`
+|Core Java coding standards (always loaded)
+
+|`java-lombok-standards.adoc`
+|Lombok usage patterns and constraints (always loaded)
+
+|`java-jspecify-standards.adoc`
+|JSpecify nullability annotations (always loaded)
+
+|`logging-standards.adoc`
+|Logging standards using CUI logging framework (always loaded)
+
+|`cui-java-util-standards.adoc`
+|CUI Java utility library standards (always loaded - logging is part of it)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load Core Java Standards
+
+**Always load all foundational standards**:
+```
+Read: standards/java-core-standards.adoc
+Read: standards/java-lombok-standards.adoc
+Read: standards/java-jspecify-standards.adoc
+Read: standards/logging-standards.adoc
+Read: standards/cui-java-util-standards.adoc
+```
+----
+
+==== cui-javadoc
+
+**Description**: JavaDoc documentation standards for CUI Java projects, including mandatory elements, structure, and maintenance.
+
+**Invocation Triggers**: Documenting Java code, JavaDoc review, JavaDoc maintenance
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`javadoc-standards.adoc`
+|JavaDoc requirements and patterns (always loaded)
+
+|`javadoc-maintenance.adoc`
+|JavaDoc maintenance procedures (always loaded)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load JavaDoc Standards
+
+**Always load all JavaDoc standards**:
+```
+Read: standards/javadoc-standards.adoc
+Read: standards/javadoc-maintenance.adoc
+```
+----
+
+==== cui-java-cdi
+
+**Description**: CDI and Quarkus development standards for CUI projects, covering CDI aspects, container configuration, and testing.
+
+**Invocation Triggers**: CDI/Quarkus development, CDI testing, Quarkus native optimization
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`cdi-standards.adoc`
+|CDI aspects and patterns (always loaded)
+
+|`cdi-container-standards.adoc`
+|CDI container standards (always loaded)
+
+|`cdi-testing-standards.adoc`
+|CDI testing standards (conditional: if testing context)
+
+|`quarkus-native-optimization.adoc`
+|Quarkus native compilation optimization (conditional: if native context)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load CDI Standards
+
+1. **Always load core CDI standards**:
+   ```
+   Read: standards/cdi-standards.adoc
+   Read: standards/cdi-container-standards.adoc
+   ```
+
+2. **Conditional loading**:
+   - If testing CDI components:
+     ```
+     Read: standards/cdi-testing-standards.adoc
+     ```
+   - If Quarkus native compilation:
+     ```
+     Read: standards/quarkus-native-optimization.adoc
+     ```
+----
+
+=== Testing Skills
+
+==== cui-java-unit-testing
+
+**Description**: Java unit testing standards for CUI projects, covering JUnit testing, test generators, value-object testing, and HTTP testing with MockWebServer.
+
+**Invocation Triggers**: Writing Java unit tests, JUnit test review, testing value objects, HTTP client testing with Java
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`core-testing-standards.adoc`
+|Language-agnostic testing principles (always loaded)
+
+|`testing-junit-standards.adoc`
+|JUnit testing standards and patterns (always loaded)
+
+|`integration-testing-standards.adoc`
+|Integration test patterns (always loaded)
+
+|`testing-quality-standards.adoc`
+|Coverage requirements, test quality metrics (always loaded)
+
+|`mockwebserver-junit5-standards.adoc`
+|HTTP testing with MockWebServer (conditional: if testing HTTP)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load Testing Standards
+
+1. **Always load core testing standards**:
+   ```
+   Read: standards/core-testing-standards.adoc
+   Read: standards/testing-junit-standards.adoc
+   Read: standards/integration-testing-standards.adoc
+   Read: standards/testing-quality-standards.adoc
+   ```
+
+2. **Conditional loading**:
+   - If testing HTTP clients/servers:
+     ```
+     Read: standards/mockwebserver-junit5-standards.adoc
+     ```
+----
+
+=== Frontend Development Skills
+
+==== cui-frontend-development
+
+**Description**: Frontend development standards covering JavaScript, CSS, web components, and end-to-end testing with Cypress.
+
+**Invocation Triggers**: JavaScript code writing, CSS styling, web component development, Cypress E2E test creation
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`javascript-core-standards.adoc`
+|Modern JavaScript standards, ESLint config, code patterns (always loaded)
+
+|`css-standards.adoc`
+|CSS/SCSS development standards (always loaded)
+
+|`web-components-standards.adoc`
+|Web component development patterns (conditional: if web components detected)
+
+|`javascript-project-structure.adoc`
+|Maven integration, directory structure (conditional: if project setup)
+
+|`jsdoc-standards.adoc`
+|JSDoc documentation requirements (conditional: if documenting)
+
+|`cypress-integration-standards.adoc`
+|Cypress E2E testing standards (conditional: if writing E2E tests)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load Frontend Standards
+
+1. **Always load core frontend standards**:
+   ```
+   Read: standards/javascript-core-standards.adoc
+   Read: standards/css-standards.adoc
+   ```
+
+2. **Conditional loading based on context**:
+   - If developing web components:
+     ```
+     Read: standards/web-components-standards.adoc
+     ```
+   - If project setup context:
+     ```
+     Read: standards/javascript-project-structure.adoc
+     ```
+   - If documenting JavaScript:
+     ```
+     Read: standards/jsdoc-standards.adoc
+     ```
+   - If writing/reviewing Cypress tests:
+     ```
+     Read: standards/cypress-integration-standards.adoc
+     ```
+----
+
+=== Documentation Skills
+
+==== cui-documentation
+
+**Description**: General documentation writing standards for README files, AsciiDoc documents, and technical documentation (excluding JavaDoc and JSDoc).
+
+**Invocation Triggers**: Writing README, creating documentation, AsciiDoc authoring, technical writing
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`documentation-core-standards.adoc`
+|General documentation principles (always loaded)
+
+|`readme-structure-standards.adoc`
+|README.md structure and content (conditional: README editing)
+
+|`asciidoc-standards.adoc`
+|AsciiDoc formatting and conventions (conditional: .adoc files)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load Documentation Standards
+
+1. **Always load core documentation standards**:
+   ```
+   Read: standards/documentation-core-standards.adoc
+   ```
+
+2. **Conditional loading based on file type**:
+   - If editing README files:
+     ```
+     Read: standards/readme-structure-standards.adoc
+     ```
+   - If writing AsciiDoc:
+     ```
+     Read: standards/asciidoc-standards.adoc
+     ```
+----
+
+**Note**: For Java-specific JavaDoc or JavaScript JSDoc, use the respective `cui-javadoc` or reference JSDoc from `cui-frontend-development` skill.
+
+=== Process and Workflow Skills
+
+==== cui-project-setup
+
+**Description**: New project setup, Maven configuration, project structure, and CI/CD pipeline configuration.
+
+**Invocation Triggers**: New project creation, project configuration, Maven setup, CI/CD pipeline setup
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`new-project-guide.adoc`
+|Project initialization checklist (always loaded)
+
+|`project-structure-standards.adoc`
+|Maven/Gradle project layout (always loaded)
+
+|`maven-integration.adoc`
+|Maven configuration patterns (conditional: Maven projects)
+
+|`cicd-standards.adoc`
+|CI/CD pipeline requirements (conditional: pipeline setup)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load Project Setup Standards
+
+1. **Always load core project standards**:
+   ```
+   Read: standards/new-project-guide.adoc
+   Read: standards/project-structure-standards.adoc
+   ```
+
+2. **Conditional loading**:
+   - If Maven project:
+     ```
+     Read: standards/maven-integration.adoc
+     ```
+   - If setting up CI/CD:
+     ```
+     Read: standards/cicd-standards.adoc
+     ```
+----
+
+==== cui-requirements
+
+**Description**: Requirements engineering, specification writing, and project planning standards.
+
+**Invocation Triggers**: Writing requirements, creating specifications, project planning, feature design
+
+**Bundled Standards**:
+
+[cols="1,3"]
+|===
+|Standard File |Purpose
+
+|`planning-standards.adoc`
+|Project planning and estimation (always loaded)
+
+|`specification-and-implementation.adoc`
+|Specification writing and implementation tracking (always loaded)
+|===
+
+**Loading Logic**:
+
+[source,markdown]
+----
+### Step 1: Load Requirements Standards
+
+**Always load all requirements standards**:
+```
+Read: standards/planning-standards.adoc
+Read: standards/specification-and-implementation.adoc
+```
+----
+
+== Standards Mapping to Skills
+
+==== cui-java-core Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/java/java-code-standards.adoc`
+|`skills/cui-java-core/standards/java-core-standards.adoc`
+
+|Extract from `standards/java/java-code-standards.adoc`
+|`skills/cui-java-core/standards/java-lombok-standards.adoc`
+
+|Extract from `standards/java/java-code-standards.adoc`
+|`skills/cui-java-core/standards/java-jspecify-standards.adoc`
+
+|`standards/logging/cui-logging-standards.adoc`
+|`skills/cui-java-core/standards/logging-standards.adoc`
+
+|Extract from `standards/java/java-code-standards.adoc`
+|`skills/cui-java-core/standards/cui-java-util-standards.adoc`
+|===
+
+==== cui-javadoc Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/documentation/javadoc-standards.adoc`
+|`skills/cui-javadoc/standards/javadoc-standards.adoc`
+
+|`standards/process/javadoc-maintenance.adoc`
+|`skills/cui-javadoc/standards/javadoc-maintenance.adoc`
+|===
+
+==== cui-java-cdi Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/cdi-quarkus/cdi-aspects.adoc`
+|`skills/cui-java-cdi/standards/cdi-standards.adoc`
+
+|`standards/cdi-quarkus/container-standards.adoc`
+|`skills/cui-java-cdi/standards/cdi-container-standards.adoc`
+
+|`standards/cdi-quarkus/testing-standards.adoc`
+|`skills/cui-java-cdi/standards/cdi-testing-standards.adoc`
+
+|`standards/process/quarkus-native-optimization.adoc`
+|`skills/cui-java-cdi/standards/quarkus-native-optimization.adoc`
+|===
+
+==== cui-java-unit-testing Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/testing/core-standards.adoc`
+|`skills/cui-java-unit-testing/standards/core-testing-standards.adoc`
+
+|`standards/testing/integration-testing.adoc`
+|`skills/cui-java-unit-testing/standards/integration-testing-standards.adoc`
+
+|Extract from `standards/testing/core-standards.adoc`
+|`skills/cui-java-unit-testing/standards/testing-junit-standards.adoc`
+
+|Extract from `standards/testing/core-standards.adoc`
+|`skills/cui-java-unit-testing/standards/testing-quality-standards.adoc`
+
+|New (HTTP testing with MockWebServer)
+|`skills/cui-java-unit-testing/standards/mockwebserver-junit5-standards.adoc`
+|===
+
+==== cui-frontend-development Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/javascript/javascript-code-standards.adoc`
+|`skills/cui-frontend-development/standards/javascript-core-standards.adoc`
+
+|`standards/css/css-standards.adoc`
+|`skills/cui-frontend-development/standards/css-standards.adoc`
+
+|`standards/javascript/web-components.adoc`
+|`skills/cui-frontend-development/standards/web-components-standards.adoc`
+
+|`standards/javascript/project-structure.adoc`
+|`skills/cui-frontend-development/standards/javascript-project-structure.adoc`
+
+|`standards/javascript/jsdoc-standards.adoc`
+|`skills/cui-frontend-development/standards/jsdoc-standards.adoc`
+
+|`standards/javascript/cypress-e2e-testing-standards.adoc`
+|`skills/cui-frontend-development/standards/cypress-integration-standards.adoc`
+|===
+
+==== cui-documentation Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/documentation/documentation-standards.adoc`
+|`skills/cui-documentation/standards/documentation-core-standards.adoc`
+
+|`standards/documentation/readme-structure.adoc`
+|`skills/cui-documentation/standards/readme-structure-standards.adoc`
+
+|New (AsciiDoc formatting rules)
+|`skills/cui-documentation/standards/asciidoc-standards.adoc`
+|===
+
+==== cui-project-setup Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/requirements/new-project-guide.adoc`
+|`skills/cui-project-setup/standards/new-project-guide.adoc`
+
+|New (project structure patterns)
+|`skills/cui-project-setup/standards/project-structure-standards.adoc`
+
+|Extract from `standards/javascript/project-structure.adoc`
+|`skills/cui-project-setup/standards/maven-integration.adoc`
+
+|New (CI/CD pipeline standards)
+|`skills/cui-project-setup/standards/cicd-standards.adoc`
+|===
+
+==== cui-requirements Mapping
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/requirements/planning.adoc`
+|`skills/cui-requirements/standards/planning-standards.adoc`
+
+|`standards/requirements/specification-and-implementation.adoc`
+|`skills/cui-requirements/standards/specification-and-implementation.adoc`
+|===
+
+=== Maintenance Process Standards
+
+**Location**: Maintenance standards are included in their respective domain skills
+
+[cols="2,3"]
+|===
+|Current Location |New Location
+
+|`standards/process/java-code-maintenance.adoc`
+|`skills/cui-java-core/standards/java-code-maintenance.adoc`
+
+|`standards/process/javadoc-maintenance.adoc`
+|`skills/cui-javadoc/standards/javadoc-maintenance.adoc`
+
+|`standards/process/logger-maintenance.adoc`
+|`skills/cui-java-core/standards/logger-maintenance.adoc`
+
+|`standards/process/quarkus-native-optimization.adoc`
+|`skills/cui-java-cdi/standards/quarkus-native-optimization.adoc`
+|===
+
+== Cross-Cutting Standards
+
+**Strategy**: Each skill owns its standards. When multiple skills need the same standard:
+
+1. **Primary approach**: Let Claude compose multiple skills automatically
+   - Example: "Document my Java code" → Claude invokes both `cui-java-core` and `cui-javadoc`
+
+2. **Alternative (if needed)**: Use symlinks for truly shared files
+   - Set up: `git config core.symlinks true`
+   - Example: JavaDoc standards owned by `cui-javadoc`, symlinked from `cui-documentation` if needed
+
+3. **Verification**: `agents-doctor` can verify consistency across any duplicated standards
+
+== Skill Size Examples
+
+**cui-java-core**: ~1,850 lines total
+
+- SKILL.md: ~300 lines
+- Always loaded: ~1,550 lines (core + Lombok + JSpecify + logging + cui-java-util)
+- Token efficiency: 30-50 tokens until invoked, then ~1,850 lines always loaded
+
+**cui-java-unit-testing**: ~1,450 lines total
+
+- SKILL.md: ~300 lines
+- Always loaded: ~1,000 lines (all testing standards)
+- Conditional: ~150 lines (MockWebServer)
+- Token efficiency: 30-50 tokens until invoked, then ~1,300 lines typical
+
+== Verification and Maintenance
+
+=== Agents-Doctor Integration
+
+Update `agents-doctor` to verify:
+
+* Skills reference standards using correct relative paths
+* Bundled standards are current and well-formed
+* No broken cross-references between skills
+* Symlinks resolve correctly
+* Progressive loading logic is sound
+
+=== Standards Consistency
+
+For duplicated/symlinked standards:
+
+* `agents-doctor` compares content across skills
+* Reports discrepancies
+* Offers to sync from designated "source of truth"
+
+=== Documentation
+
+Each skill should document:
+
+* Which standards it bundles
+* Conditional loading rules
+* Source of truth for shared standards
+* Last sync date for duplicated content

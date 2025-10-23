@@ -1,0 +1,448 @@
+= Atomic Standards Analysis: Eliminating Navigation Overhead
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 3
+:sectnums:
+:source-highlighter: highlight.js
+
+== Overview
+
+Analysis of current standards structure focusing on **conditional loading opportunities** where granular standards provide actual token savings. The key insight: splitting always-loaded standards into smaller files provides no benefit - token savings come from loading only what's needed for the current context.
+
+== Current Structure Analysis
+
+**Total files**: 72 .adoc files
+
+**Format overhead per file**:
+
+- Header (TOC, section numbering): ~7 lines
+- Purpose section: ~2 lines
+- Related Documentation (xrefs): ~6 lines
+- Document Structure section: ~5 lines
+- See Also section: ~3 lines
+- **Total overhead**: ~15-23 lines per file
+
+**Key Finding**: Files contain multiple distinct topics that could be atomic documents.
+
+== Conditional Loading: The Key to Token Savings
+
+**When Granularity Helps**:
+
+1. **Conditional standards** - Loaded only when needed for specific contexts
+   - Testing standards (only when writing/modifying tests)
+   - Documentation standards (only when documenting APIs)
+   - Integration testing (only when writing integration tests)
+   - CDI standards (only in CDI/Quarkus projects)
+   - MockWebServer (only when testing HTTP clients)
+
+2. **Cross-skill reuse** - Standards used independently by different skills
+   - JavaDoc used by both cui-javadoc and cui-java-core
+   - Testing patterns used by multiple language skills
+
+**When Granularity Doesn't Help**:
+
+- **Always-loaded standards** - If cui-java-core always loads foundational standards, splitting them into 10 tiny files instead of 2 coherent files provides zero token savings. We just execute more Read commands for the same content.
+
+**Key Principle**: **Token savings come from selective loading, not from file count**.
+
+== Example: cui-java-core Standards (Always-Loaded)
+
+**Current**: java-code-standards.adoc (285 lines, 14 major sections, 4 xrefs)
+
+**Problem**: cui-java-core skill **always loads** foundational Java standards. Splitting into 9 tiny files (25-60 lines each) provides **zero token savings** - we'd execute 9 Read commands instead of 1 for the same content.
+
+**Better Approach**: Group into coherent documents by domain
+
+[cols="1,1,3"]
+|===
+|File |Lines |Content
+
+|`java-core-patterns.md`
+|~150
+|Naming conventions, package structure, method design, code organization, exception handling
+
+|`java-null-safety.md`
+|~60
+|JSpecify @NullMarked patterns, Optional returns, API contracts
+
+|`java-lombok-patterns.md`
+|~80
+|@Builder, @Value, @Data usage patterns and best practices
+
+|`java-modern-features.md`
+|~100
+|Records, switch expressions, streams, modern Java syntax
+
+|`logging-standards.md`
+|~80
+|CUI logging patterns, logger usage, log levels
+|===
+
+**Result**: 5 coherent documents (~470 lines total) instead of 9 fragments. **Always loaded together = no token savings from splitting, but better maintainability**.
+
+**Key insight**: For always-loaded standards, optimize for **maintainability and coherence**, not file count.
+
+== Example: cui-java-unit-testing Standards (Conditional Loading)
+
+**Current**: testing/core-standards.adoc (320 lines), integration-testing.adoc (180 lines)
+
+**Loading pattern**:
+
+- **Always**: Core testing principles and JUnit basics
+- **Conditional**: Integration testing (only when writing integration tests), MockWebServer (only when testing HTTP), generators (only when using test data generators)
+
+**Optimized Structure with Conditional Loading**:
+
+[cols="2,1,1,3"]
+|===
+|File |Lines |Loading |Content
+
+|`testing-junit-core.md`
+|~150
+|Always
+|JUnit basics, assertions, test structure, naming - foundational standards always needed
+
+|`testing-value-objects.md`
+|~60
+|Conditional
+|Value object testing patterns - only when testing value objects
+
+|`testing-generators.md`
+|~70
+|Conditional
+|Test data generator usage - only when generators are detected in project
+
+|`testing-mockwebserver.md`
+|~80
+|Conditional
+|MockWebServer setup and patterns - only when testing HTTP clients
+
+|`integration-testing.md`
+|~180
+|Conditional
+|Integration test setup, patterns, configuration - only when writing integration tests
+|===
+
+**Token Savings Example**:
+
+- **Scenario 1**: Writing unit test for simple business logic
+  - Load: `testing-junit-core.md` (150 lines)
+  - Skip: 390 lines of conditional standards
+  - **Savings**: 72% of testing standards content
+
+- **Scenario 2**: Writing integration test with HTTP mocking
+  - Load: `testing-junit-core.md` (150) + `integration-testing.md` (180) + `testing-mockwebserver.md` (80) = 410 lines
+  - Skip: 130 lines of irrelevant conditional standards
+  - **Savings**: 24% of testing standards content
+
+**Key insight**: Conditional loading provides real token savings by loading only relevant standards for the current context.
+
+== Current vs Atomic: Side-by-Side Comparison
+
+=== Current Approach (AsciiDoc with Navigation)
+
+[source,asciidoc]
+----
+= Java Standards
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Overview
+This document contains...
+
+== Document Structure
+* xref:java-code-standards.adoc[Java Code Standards]
+* xref:dsl-style-constants.adoc[DSL Constants]
+
+== Related Documentation
+* xref:../documentation/javadoc-standards.adoc[Javadoc]
+* xref:../logging/implementation-guide.adoc[Logging]
+* xref:../testing/core-standards.adoc[Testing]
+
+== Naming Conventions
+[actual content - 40 lines]
+
+== Exception Handling
+[actual content - 50 lines]
+
+== Null Safety
+[actual content - 60 lines]
+
+...
+----
+
+**Characteristics**:
+- Human-friendly navigation
+- Cross-references to other documents
+- TOC for browsing
+- Multiple topics in one file
+- **Claude must read entire file (285 lines) even if only needs one topic**
+
+=== Atomic Approach (Markdown, No Navigation)
+
+**File**: `java-naming-conventions.md`
+
+[source,markdown]
+----
+# Java Naming Conventions
+
+## Package Names
+- Use reverse domain notation: `de.cuioss.tools`
+- Lowercase only
+- Organize by feature, not layer
+
+## Class Names
+- PascalCase: `TokenValidator`
+- Nouns or noun phrases
+- Clear, descriptive names
+
+## Method Names
+- camelCase: `validateToken()`
+- Verbs or verb phrases
+- Clear intent
+
+## Constants
+- UPPER_SNAKE_CASE: `MAX_RETRIES`
+- Use DSL-style grouping for related constants
+
+## Variables
+- camelCase: `userToken`
+- Meaningful names, avoid abbreviations
+- Boolean variables: use `is`, `has`, `can` prefixes
+----
+
+**Characteristics**:
+- Pure content, no overhead
+- Self-contained (no xrefs)
+- Focused on one topic
+- Simple Markdown
+- **Skill loads only this (40 lines) when needed**
+
+== Standards Redistribution by Loading Pattern
+
+=== cui-java-core: Always-Loaded Standards
+
+**Current**: java-code-standards.adoc (285 lines), dsl-style-constants.adoc (120 lines), logging standards (80 lines)
+
+**Strategy**: Keep as coherent documents since always loaded together
+
+[source]
+----
+skills/cui-java-core/standards/
+├── java-core-patterns.md (~150 lines, always)
+├── java-null-safety.md (~60 lines, always)
+├── java-lombok-patterns.md (~80 lines, always)
+├── java-modern-features.md (~100 lines, always)
+├── logging-standards.md (~80 lines, always)
+└── dsl-constants.md (~120 lines, always)
+----
+
+**Loading**: All 6 files always loaded (total ~590 lines)
+**Token savings**: None from splitting, but removes ~90 lines of navigation overhead
+**Benefit**: Better maintainability with coherent groupings
+
+=== cui-java-unit-testing: Conditional Loading Opportunities
+
+**Current**: core-standards.adoc (320 lines), integration-testing.adoc (180 lines)
+
+**Strategy**: Split by conditional usage patterns for selective loading
+
+[source]
+----
+skills/cui-java-unit-testing/standards/
+├── testing-junit-core.md (~150 lines, always)
+├── testing-value-objects.md (~60 lines, conditional)
+├── testing-generators.md (~70 lines, conditional)
+├── testing-mockwebserver.md (~80 lines, conditional)
+└── integration-testing.md (~180 lines, conditional)
+----
+
+**Loading patterns**:
+- Basic unit test: 150 lines (72% savings)
+- Integration test: 330-410 lines (24-39% savings)
+- HTTP client test: 310 lines (43% savings)
+
+**Benefit**: Real token savings through selective loading
+
+=== cui-javadoc: Conditional Loading by Context
+
+**Current**: javadoc-standards.adoc (280 lines)
+
+**Strategy**: Split by documentation context
+
+[source]
+----
+skills/cui-javadoc/standards/
+├── javadoc-core.md (~120 lines, always)
+├── javadoc-class-documentation.md (~60 lines, conditional)
+├── javadoc-method-documentation.md (~80 lines, conditional)
+└── javadoc-code-examples.md (~40 lines, conditional)
+----
+
+**Loading patterns**:
+- Quick method docs: 200 lines (29% savings)
+- Full class documentation: 260 lines (7% savings)
+- Documentation review: All files
+
+**Benefit**: Moderate token savings when documenting specific elements
+
+=== cui-java-cdi: Fully Conditional Skill
+
+**Current**: Multiple CDI standards files (400+ lines total)
+
+**Strategy**: Entire skill is conditionally invoked (only in CDI/Quarkus projects)
+
+[source]
+----
+skills/cui-java-cdi/standards/
+├── cdi-core-patterns.md (~120 lines)
+├── cdi-producers.md (~80 lines)
+├── cdi-events.md (~70 lines)
+└── quarkus-integration.md (~130 lines)
+----
+
+**Loading**: Skill only invoked in CDI projects - all files loaded when needed
+**Benefit**: Entire skill (~400 lines) not loaded in non-CDI projects
+
+== Format Recommendation: Markdown
+
+**Why Markdown over AsciiDoc for atomic standards:**
+
+1. **Simplicity**: Atomic files don't need AsciiDoc's advanced features
+   - No TOC needed (files are short)
+   - No section numbering needed (flat structure)
+   - No cross-references (self-contained)
+
+2. **Native to Claude**: Markdown is Claude's native format
+   - Skills already use Markdown (SKILL.md)
+   - Better for embedding code examples
+   - Simpler for Claude to parse
+
+3. **Readability**: Markdown is cleaner for focused content
+   - Less markup overhead
+   - Clearer code fences
+   - Better for inline code
+
+4. **Maintainability**: Easier to edit and review
+   - Standard GitHub Markdown
+   - Preview in any Markdown viewer
+   - Simpler syntax rules
+
+**What we lose**: Complex tables, callouts, advanced cross-referencing (which we don't need for atomic files)
+
+**What we gain**: Simplicity, clarity, Claude-native format
+
+== Migration Strategy
+
+=== Phase 1: Analyze and Map
+
+For each current standard file:
+1. Read the file
+2. Identify distinct topics (each level-2 section is usually a topic)
+3. Determine atomic boundaries
+4. Map to new filenames
+
+=== Phase 2: Extract and Simplify
+
+For each topic:
+1. Extract content
+2. Remove navigation overhead (TOC, xrefs, "Related Documentation")
+3. Convert AsciiDoc to Markdown
+4. Ensure self-contained (all context in file)
+5. Keep examples and code blocks
+
+=== Phase 3: Update Skills
+
+Update each SKILL.md to:
+1. List explicit Read instructions for atomic files
+2. Remove conditional xref logic
+3. Always load core atomic standards
+4. Load specialized atomic standards conditionally
+
+=== Phase 4: Validation
+
+1. Ensure all content migrated (no lost standards)
+2. Verify atomic files are self-contained
+3. Test skill loading with new structure
+4. Validate Markdown syntax
+
+== Expected Outcomes
+
+**Before** (current):
+- 72 AsciiDoc files with navigation overhead
+- ~15-23 lines navigation per file (~1,300 lines total overhead)
+- Cross-references between files
+- Always-loaded standards mixed with conditional standards
+- Example: Load 500 lines to use 150 lines of relevant content
+
+**After** (optimized):
+- ~60-80 Markdown files (coherent groupings)
+- ~0-2 lines overhead per file (~120 lines total overhead)
+- No cross-references (self-contained)
+- Clear always-loaded vs conditional separation
+- Example: Load 150 lines of exactly relevant content
+
+**Token Savings by Category**:
+
+1. **Navigation overhead removal**: ~1,200 lines saved (18% of total content)
+2. **Conditional loading for cui-java-unit-testing**: 40-72% savings per invocation
+3. **Conditional loading for cui-javadoc**: 7-29% savings per invocation
+4. **Skill-level conditioning (cui-java-cdi)**: 100% savings when not needed (~400 lines)
+
+**Overall Impact**:
+- **Always-loaded skills** (cui-java-core): ~15% savings (navigation overhead only)
+- **Conditionally-loaded skills** (cui-java-unit-testing): 40-70% savings per invocation
+- **Average across all skill invocations**: 25-35% token savings
+
+== Implementation Recommendation
+
+**Approach**: Prioritize skills with highest conditional loading benefit
+
+1. **Start with cui-java-unit-testing** (highest token savings opportunity)
+   - Split core-standards.adoc by conditional loading patterns
+   - Separate: always-loaded core, conditional value-objects, conditional generators, conditional MockWebServer, conditional integration
+   - Update SKILL.md with conditional Read logic
+   - **Expected savings**: 40-72% per invocation
+
+2. **Continue with cui-javadoc** (moderate conditional benefit)
+   - Split javadoc-standards.adoc by documentation context
+   - Separate: always-loaded core, conditional class docs, conditional method docs, conditional examples
+   - **Expected savings**: 7-29% per invocation
+
+3. **Then cui-java-core** (mainly overhead reduction)
+   - Group into 6 coherent always-loaded documents
+   - Focus on removing navigation overhead (~90 lines)
+   - **Expected savings**: ~15% (navigation only)
+
+4. **Finally remaining skills** (cui-frontend-development, cui-java-cdi)
+   - Convert to Markdown, remove overhead
+   - Establish conditional loading patterns where applicable
+
+== Conclusion
+
+**Key Insight**: Token savings come from **conditional loading**, not file count. Splitting always-loaded standards into tiny files provides no benefit - optimize for maintainability instead.
+
+**Recommendation**: **Restructure standards with conditional loading patterns**
+
+**Where to Optimize**:
+1. **High value**: Skills with clear conditional loading opportunities (testing, documentation)
+   - Split by usage context
+   - Enable selective loading
+   - 40-70% token savings per invocation
+
+2. **Moderate value**: Remove navigation overhead from always-loaded standards (java-core)
+   - Group into coherent documents
+   - Convert to Markdown
+   - 15% token savings (overhead removal only)
+
+3. **Natural benefit**: Skill-level conditioning (CDI only loaded in CDI projects)
+   - Already optimized by skill architecture
+   - 100% savings when skill not invoked
+
+**Benefits**:
+- ✅ Real token savings through selective loading (25-35% average)
+- ✅ Zero cross-references needed (self-contained documents)
+- ✅ No navigation overhead (Markdown format)
+- ✅ Better maintainability (coherent groupings for always-loaded)
+- ✅ Clear loading patterns (always vs conditional explicit in SKILL.md)
