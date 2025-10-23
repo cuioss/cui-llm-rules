@@ -141,6 +141,70 @@ All factual claims must be verifiable or properly attributed.
 * ✅ "Pattern used by [specific projects/frameworks]"
 * ✅ "According to [authoritative source], ..."
 
+=== Qualification Patterns
+
+Qualification patterns use subjective qualifiers to make factual claims sound more impressive. These are particularly problematic in technical specifications where neutral, factual descriptions are required.
+
+**Examples to Avoid:**
+
+* ❌ "Production-proven (227+ plugins)" - Promotional framing of usage statistics
+* ❌ "HIGH confidence from multiple production examples" - Subjective qualifier
+* ❌ "Extensively tested" - Vague claim without metrics
+* ❌ "Well-established pattern" - Subjective assessment
+* ❌ "Widely adopted" - Vague claim without specifics
+* ❌ "Battle-tested in production" - Marketing language
+* ❌ "Proven track record" - Self-praise without evidence
+
+**Correct Alternatives:**
+
+* ✅ "Used by 227+ plugins in marketplace" - Factual statement
+* ✅ "Verified in production environments (see examples)" - Neutral with attribution
+* ✅ "Test coverage: [specific percentage/metrics]" - Measurable claim
+* ✅ "Pattern defined in [standard/specification]" - Attributed source
+* ✅ "Used by [list specific projects]" - Concrete examples
+* ✅ "Deployed in [specific contexts/environments]" - Factual description
+* ✅ "Benchmark results: [link to data]" - Verifiable evidence
+
+**Context Matters:**
+
+Technical specifications require stricter scrutiny than general documentation:
+
+* Architecture documents: Describe structure, not quality judgments
+* API documentation: State functionality, not promotional claims
+* Implementation guides: Provide facts, not persuasive language
+
+=== Transitional Documentation Markers
+
+Transitional markers indicate work-in-progress documentation. These undermine the authoritative tone of technical documentation and create maintenance burden. Documentation should represent the current state, not track historical transitions.
+
+**Examples to Remove:**
+
+* ❌ "DOCUMENT STATUS: Draft" or "DOCUMENT STATUS: ✅ Complete"
+* ❌ "IMPLEMENTATION STATUS: In Progress" or "IMPLEMENTATION STATUS: ✅ Production-ready"
+* ❌ "Status: ✅ Verified and production-proven"
+* ❌ "This transforms from X to Y" - Temporal transitional language
+* ❌ "Note: This section is being updated"
+* ❌ "TODO: Add more details"
+* ❌ "Work in progress"
+
+**Why These Are Problematic:**
+
+* Create maintenance burden (need constant updates)
+* Undermine authoritative tone (suggests incompleteness)
+* Add no technical value to readers
+* Confuse whether documentation reflects current or future state
+* Appropriate for project management, not technical documentation
+
+**Correct Approaches:**
+
+* ✅ Document current state only - remove status markers
+* ✅ Use git history for tracking changes, not inline markers
+* ✅ Complete sections before publishing, or omit incomplete content
+* ✅ Use issue tracker for TODO items, not documentation
+* ✅ Present information as established fact, not transitional state
+
+**Exception:** Release notes and changelogs may document state changes, but should still avoid promotional status markers.
+
 == Required Content Patterns
 
 === Technical Precision
