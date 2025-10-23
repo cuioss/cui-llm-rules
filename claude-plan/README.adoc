@@ -5,206 +5,164 @@
 
 == Overview
 
-**DOCUMENT STATUS**: ✅ Architectural specifications complete (as of 2025-10-22)
+**DOCUMENT STATUS**: ✅ Specifications complete and validated (2025-10-23)
 
-**IMPLEMENTATION STATUS**: 📋 Specifications ready for implementation - implementation has not yet begun
+**IMPLEMENTATION STATUS**: 📋 Ready for implementation
 
-This directory contains the technical specifications for the `cui-standards` Claude Code plugin. These documents define the architecture, component structure, and implementation requirements for transforming cui-llm-rules into a distributable plugin.
+This directory contains technical specifications for the `cui-standards` Claude Code plugin - a plugin that distributes coding standards, development agents, and utility commands for CUI OSS projects.
 
-**What you'll find here**: Complete specifications for architecture, component design, and distribution mechanisms
+**Target Platform**: Claude Code CLI only (terminal and VS Code)
 
-**What's NOT here**: Implementation code (to be developed based on these specifications)
+**Distribution**: Plugin marketplace (single-command installation)
+
+== Quick Start
+
+```bash
+# Install plugin
+/plugin marketplace add cuioss/cui-llm-rules
+/plugin install cui-standards@cui-llm-rules
+
+# Verify installation
+/help     # Shows commands
+/agents   # Lists agents
+```
+
+That's it! All components (skills, agents, commands) are now available.
 
 == Document Index
 
 === xref:architecture-overview.adoc[Architecture Overview]
 
-*Purpose*: High-level architectural design and layer model
+High-level architectural design and distribution strategy.
 
-*Contents*:
-
+**Key Topics**:
 * Four-layer architecture (Standards, Skills, Agents, Commands)
-* Visual architecture diagrams
-* Key architectural decisions
-* Current state analysis
+* Plugin-only distribution model
 * Installation and update procedures
-* Version management strategy
+* Target users and platform scope
 
-*Audience*: Architects, technical leads, anyone needing to understand the overall design
+**Audience**: Architects, technical leads
 
 ---
 
 === xref:component-specifications.adoc[Component Specifications]
 
-*Purpose*: Detailed technical specifications for Skills, Agents, and Commands
+Detailed specifications for skills, agents, and commands.
 
-*Contents*:
-
-* Skill structure and YAML frontmatter format
-* Agent structure and Essential Rules Pattern
-* Command structure and parameter support
-* Path resolution rules
+**Key Topics**:
+* YAML frontmatter formats
+* Essential Rules Pattern (manual maintenance)
+* Component structure and examples
 * Tool access patterns
-* Complete examples for each component type
 
-*Audience*: Developers implementing skills, agents, or commands
+**Audience**: Developers creating components
 
 ---
 
 === xref:plugin-structure.adoc[Plugin Structure Specification]
 
-*Purpose*: Repository organization and plugin manifest requirements
+Repository organization and plugin manifest requirements.
 
-*Contents*:
-
-* Complete directory structure
-* `plugin.json` manifest specification
-* `marketplace.json` configuration
-* Component discovery rules
-* Path resolution requirements
+**Key Topics**:
+* Directory structure
+* plugin.json manifest
+* marketplace.json configuration
+* Path resolution rules
 * Version management
-* Installation procedures
 
-*Audience*: Plugin maintainers, developers setting up the repository
-
----
-
-=== xref:synchronize-command-spec.adoc[Synchronize Command Specification]
-
-*Purpose*: Project-specific synchronization for cross-platform compatibility
-
-*Contents*:
-
-* `/synchronize` command specification
-* Synchronizing agents, commands, and skills to project `.claude/` (git-controlled)
-* Skills synchronization required for cross-platform support
-* Platform support (Claude Code, Claude.ai web, CI/CD)
-* Update strategy, drift management, and team collaboration workflow
-
-*Audience*: Developers setting up projects, teams using Claude.ai web or CI/CD
+**Audience**: Plugin maintainers
 
 ---
 
-=== xref:research-topics.adoc[Research Topics: Requires Verification]
+=== xref:research-topics.adoc[Research Topics]
 
-*Purpose*: Document assumptions that require empirical verification before implementation
+Verification status of architectural assumptions.
 
-*Contents*:
+**Key Topics**:
+* Plugin component distribution (VERIFIED ✅)
+* Skills/agents/commands in plugins (VERIFIED ✅)
+* Platform capabilities and limitations
+* Research evidence and sources
 
-* Critical unknowns about Claude Code/Claude.ai capabilities
-* Skills access from Claude.ai web (CRITICAL - could break architecture)
-* Plugin update mechanisms and version pinning
-* Test scenarios and acceptance criteria
-* Alternative approaches if assumptions fail
-* Research tracking and documentation impact
+**Audience**: Architects verifying assumptions
 
-*Audience*: Architects, implementers - **MUST READ** before implementation begins
+== Architecture Summary
 
-== Quick Reference
+[cols="1,2"]
+|===
+|Layer |Implementation
 
-=== Core Architectural Decisions
+|**Standards**
+|AsciiDoc files in `standards/` (authoritative source)
+
+|**Skills**
+|SKILL.md files with dynamic standard references
+
+|**Agents**
+|agent.md with Essential Rules embedded + skill references
+
+|**Commands**
+|command.md for utility commands
+
+|**Distribution**
+|Plugin marketplace (production-proven, 227+ plugins)
+|===
+
+== Component Counts
+
+* **Skills**: 4 skills (Java, Testing, Documentation, Process)
+* **Agents**: 7 agents for development tasks
+* **Commands**: 11 utility commands
+* **Installation**: Single command
+
+== Verification Status
+
+**Last Updated**: 2025-10-23
+
+**Key Findings**:
+
+* ✅ Plugin distribution works for all component types (skills, agents, commands)
+* ✅ Production-proven approach (227+ existing plugins)
+* ✅ Automatic component discovery after installation
+* ✅ No manual file management required
+* ❌ Claude.ai web not supported (agents/commands are CLI-only features)
+* ❌ CI/CD requires manual plugin configuration
+
+See xref:research-topics.adoc[Research Topics] for complete evidence and sources.
+
+== Key Design Decisions
 
 [cols="1,2,2"]
 |===
 |Decision |Approach |Rationale
 
-|**Standards Layer**
-|AsciiDoc files in `standards/`
-|Single source of truth, version controlled
-
-|**Skills Layer**
-|SKILL.md files that reference standards
-|Dynamic reads, always current, no duplication
-
-|**Agents Layer**
-|agent.md with Essential Rules (custom pattern)
-|Performance (embedded) + Currency (skill references)
-
 |**Distribution**
-|Claude Code plugin via marketplace
-|Native mechanism, automatic updates, team consistency
+|Plugin marketplace only
+|Simplest, production-proven, no manual sync
+
+|**Platform**
+|Claude Code CLI only
+|Agents/commands don't exist on web platform
+
+|**Skills Pattern**
+|Dynamic standard references
+|Always current, no duplication
+
+|**Agents Pattern**
+|Essential Rules embedded
+|Performance + completeness
 |===
-
-=== Essential Rules Pattern
-
-Agents embed core requirements for performance while referencing skills for complete standards.
-
-**Details**: xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern]
-
-=== Path Requirements
-
-All paths must be relative to plugin root and start with `./`
-
-See xref:plugin-structure.adoc#path-resolution[Plugin Structure § Path Resolution] for complete requirements.
-
-=== Installation
-
-See xref:plugin-structure.adoc#installation[Plugin Structure § Installation] for complete installation instructions including local development, GitHub repository, and project auto-installation.
-
-=== Quick Start
-
-For complete installation instructions, see:
-
-* xref:plugin-structure.adoc#installation[Plugin Structure § Installation] - Detailed installation procedures
-* xref:synchronize-command-spec.adoc[Synchronize Command Specification] - Cross-platform distribution
-* xref:architecture-overview.adoc#implementation-decision-guide[Architecture Overview § Implementation Decision Guide] - Choose the right approach for your team
-
-== Specification Scope
-
-This directory contains complete specifications for:
-
-* **Architecture**: Four-layer model (Standards, Skills, Agents, Commands)
-* **Skills**: 4 skills (Java, Testing, Documentation, Process)
-* **Agents**: 7 agents for task execution
-* **Commands**: 11 commands including `/synchronize` for cross-platform distribution
-* **Plugin Manifest**: Complete `plugin.json` specification
-* **Research Topics**: Unverified assumptions requiring testing
-
-== Verification Status
-
-**Last Updated**: 2025-10-22
-
-**Complete verification tracking**: See xref:research-topics.adoc[Research Topics] for detailed status of all assumptions and research items.
-
-**Key verifications**:
-
-* ✅ Skills synchronization approach verified (Project Synchronization works on all platforms)
-* ✅ Plugin installation and marketplace mechanisms confirmed
-* ✅ YAML frontmatter structure validated
-* ❌ `${CLAUDE_PLUGIN_ROOT}` environment variable does NOT exist
-* ⏸️ Dynamic repository access deferred (Project Synchronization is working solution)
-
-== Known Limitations
-
-See xref:plugin-structure.adoc#known-limitations[Plugin Structure § Known Limitations] for complete details.
-
-**Key constraints**:
-
-* **No individual plugin update command**: Use `/plugin marketplace update marketplace-name`
-* **No semantic version pinning**: Version management via Git tags and marketplace `version` field
-* **Relative paths required**: All paths must start with `./` (relative to plugin root)
-* **Essential Rules**: Custom pattern requiring manual implementation and maintenance
 
 == References
 
-=== Official Documentation
+**Official Documentation**:
 
 * Claude Code Plugins: https://docs.claude.com/en/docs/claude-code/plugins
-* Claude Code Skills: https://docs.claude.com/en/docs/claude-code/skills
-* Claude Code Agents: https://docs.claude.com/en/docs/claude-code/sub-agents
-* Claude Code Commands: https://docs.claude.com/en/docs/claude-code/slash-commands
 * Plugin Marketplaces: https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
+* Skills Reference: https://docs.claude.com/en/docs/claude-code/skills
+* Agents Reference: https://docs.claude.com/en/docs/claude-code/sub-agents
 
-=== Project Files
+**Project Files**:
 
-* Standards documentation: `../standards/`
-* Current agents (user): `~/.claude/agents/`
-* Current commands (user): `~/.claude/commands/`
-
-== Document Conventions
-
-* **Format**: AsciiDoc (.adoc)
-* **TOC**: Left sidebar, 3 levels
-* **Section Numbering**: Enabled
-* **Code Blocks**: Syntax highlighting via `[source,type]`
-* **Cross-References**: `xref:file.adoc[Link Text]`
+* Standards: `../standards/` (AsciiDoc documentation)
+* Plugin source: To be created based on these specifications

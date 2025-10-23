@@ -19,19 +19,26 @@ This document identifies assumptions in the plugin architecture that **require e
 
 '''
 
-== RESOLVED Research Topics
+== OBSOLETE Research Topics
 
-=== 1. Skills Access from Claude.ai Web ✅ RESOLVED (Impossible)
+**Note**: These topics are now obsolete due to plugin-only distribution strategy (2025-10-23).
+
+=== 1. Skills Access from Claude.ai Web ❌ OBSOLETE (Web platform not supported)
 
 ==== Research Status
 
-**Research Date**: 2025-10-22
+**Research Dates**: 2025-10-22 (skills access), 2025-10-23 (plugin distribution)
 
-**Finding**: ❌ **IMPOSSIBLE** - Dynamic repository access is architecturally impossible, not just unverified
+**Finding**: ❌ **OBSOLETE** - Claude.ai web platform not supported in plugin-only distribution strategy
 
-**Original Assumption**: Claude.ai web could fetch skills from GitHub repositories via URL
+**Original Assumption**: Claude.ai web could fetch skills from GitHub repositories via URL OR receive them via ZIP upload
 
-**Reality**: Skills MUST be filesystem-based. No remote loading capability exists.
+**Reality**:
+* ZIP upload only supports skills (not agents/commands)
+* Agents and commands don't exist on web platform
+* Plugin-only distribution targets Claude Code CLI exclusively
+
+**Resolution**: Target Claude Code CLI only - eliminates cross-platform complexity
 
 ==== Evidence from Official Sources
 

@@ -119,152 +119,96 @@ Layer 4: Commands (command.md) - User utilities
 * **Implementation**: Skills use Read tool to dynamically fetch from `standards/`
 * **Benefit**: No duplication between skills, always current
 
-==== Skills Distribution Strategy
+==== Component Distribution Strategy
 
-**IMPLEMENTATION STATUS**: ✅ Verified approach defined and tested (2025-10-22)
+**IMPLEMENTATION STATUS**: ✅ Verified and production-proven (2025-10-22/23)
 
-Skills must be distributed to make them available across different platforms. The verified and recommended approach is:
+**Plugin Distribution (ONLY Supported Method)**
 
-**Project Synchronization (REQUIRED for Cross-Platform Support)**
+All components (skills, agents, commands) are distributed via plugin marketplace installation.
 
-This approach synchronizes skills to project `.claude/skills/` directory (git-controlled), making them available on all platforms.
+* **Status**: ✅ Verified working in production (227+ plugins using this approach)
+* **Target Platform**: Claude Code CLI only
+* **Components Distributed**: Skills, Agents, Commands (all three types)
+* **Installation**: Single command: `/plugin install cui-standards@cui-llm-rules`
+* **Benefits**:
+  - Automatic component discovery
+  - Built-in version management
+  - No manual file management
+  - Single command installation/update
+* **Evidence**: Multiple production plugins confirmed working (obra/superpowers, wshobson/agents, etc.)
 
-* **Status**: ✅ Verified and works on all platforms TODAY
-* **Platforms**: Claude Code, Claude.ai web, CI/CD
-* **Implementation**: Use `/synchronize --all --include-skills` command
-* **Trade-off**: Requires explicit synchronization, must update when plugin changes
-* **Benefit**: Works everywhere, no runtime dependencies, team consistency
-* **Specification**: See xref:synchronize-command-spec.adoc[Synchronize Command Specification]
+**This is the ONLY distribution method.** Plugin architecture handles all component types automatically.
 
-**This is the ONLY possible approach.** Skills must be filesystem-based per Claude Code architecture.
+=== Installation Instructions
 
-**Why Dynamic Repository Access is Impossible** ❌
+**IMPLEMENTATION STATUS**: ✅ Production-ready
 
-Research confirmed that loading skills from repository URLs at runtime is architecturally impossible:
-
-* ❌ **Skills must be local files** - Claude Code's progressive disclosure requires filesystem access
-* ❌ **No remote loading capability** - WebFetch tool cannot load skills from URLs
-* ❌ **Claude.ai web requires ZIP upload** - No GitHub repository access for skills
-* ❌ **Architecture limitation** - Skills discovery depends on local directory scanning
-
-**Evidence**: Official Anthropic documentation (see xref:research-topics.adoc#_1_skills_access_from_claudeai_web[Research Topics § Skills Access])
-
-=== Implementation Guidance
-
-**IMPLEMENTATION STATUS**: ✅ Verified and ready for use
-
-**For All Users - REQUIRED Approach**:
-
-* ✅ **MUST use Project Synchronization** (the only architecturally possible method)
-* ✅ **MUST synchronize skills** to `.claude/skills/` via `/synchronize --all --include-skills`
-* ✅ **MUST commit** `.claude/` to git for team distribution
-* ✅ **MUST update** periodically when plugin version changes (use `/synchronize --check` to detect outdated components)
-
-**Why synchronization is required**: Claude Code's skills architecture requires local filesystem access. Dynamic loading from URLs is impossible.
-
-**Complete procedure**:
-```bash
-/plugin install cui-standards@cui-llm-rules  # (if using Claude Code)
-/synchronize --all --include-skills           # REQUIRED for cross-platform
-git add .claude/
-git commit -m "sync: Add cui-standards components"
-```
-
-See xref:synchronize-command-spec.adoc[Synchronize Command Specification] for detailed instructions.
-
-=== Implementation Decision Guide
-
-Use this table to determine the correct approach for your scenario:
-
-[cols="2,1,2"]
-|===
-|Your Scenario |Install Plugin? |Synchronize to .claude/? (includes skills)
-
-|**Solo developer, Claude Code only**
-|✅ Yes
-|✅ **RECOMMENDED** (simpler, consistent with team workflow)
-
-|**Team, all use Claude Code**
-|✅ Yes (all members)
-|✅ **REQUIRED** (for consistency)
-
-|**Team, mixed Claude Code + Web**
-|✅ Yes (Code users)
-|✅ **REQUIRED**
-
-|**Claude.ai web only (no CLI)**
-|❌ Not possible
-|✅ **REQUIRED** (only option)
-
-|**CI/CD pipelines only**
-|❌ Not possible
-|✅ **REQUIRED** (only option)
-
-|**Private repository for standards**
-|✅ Yes (if using Code)
-|✅ **REQUIRED**
-|===
-
-**Key Takeaways**:
-
-* **Skills must always be synchronized** - Use `/synchronize --all --include-skills`
-* **Agents and commands must be synchronized** for cross-platform support
-* **Web/CI/CD users** = Synchronization is the only option (no plugin support)
-* **Claude Code users** = Install plugin + synchronize for best experience
-* **All scenarios** = Commit `.claude/` to git for version control and distribution
-
-**Commands**:
+**Installation Procedure**:
 
 ```bash
-# For mixed teams, web users, CI/CD, or private repos
-/plugin install cui-standards@cui-llm-rules  # (if using Claude Code)
-/synchronize --all --include-skills           # REQUIRED
-git add .claude/
-git commit -m "sync: Add cui-standards components"
-git push
+# Step 1: Add marketplace (one-time setup)
+/plugin marketplace add cuioss/cui-llm-rules
 
-# For Claude Code users (any team size)
-/plugin install cui-standards@cui-llm-rules   # Install plugin
-/synchronize --all --include-skills            # RECOMMENDED (ensures consistency)
-git add .claude/
-git commit -m "sync: Add cui-standards components"
+# Step 2: Install plugin
+/plugin install cui-standards@cui-llm-rules
+
+# Done! All components (skills, agents, commands) are now available
 ```
 
-=== Decision 2: Agents Use Essential Rules Pattern (Custom Implementation)
+**Verification**:
+```bash
+/help                  # Shows available commands
+/agents                # Lists installed agents
+# Skills activate automatically based on context
+```
 
-Agents embed core requirements from standards for performance while maintaining skill references for complete information. This custom pattern provides fast, autonomous execution without I/O overhead while keeping access to complete standards when needed.
+**Updates**:
+```bash
+# Check for updates
+/plugin marketplace update cui-llm-rules
 
-**Complete specification**: xref:component-specifications.adoc#essential-rules-pattern-custom-implementation[Component Specifications § Essential Rules Pattern]
+# Install latest version
+/plugin install cui-standards@cui-llm-rules --force
+```
 
-=== Decision 3: Plugin-Based Distribution
+**No additional steps required** - Plugin installation handles everything automatically.
 
-* **Rationale**: Native Claude Code mechanism, no manual copying
-* **Implementation**: cui-llm-rules becomes installable plugin
-* **Benefit**: Version control, team consistency, automatic updates
+=== Target Users
 
-=== Decision 4: Project `.claude/` Priority Model
+**Supported Users**: Claude Code CLI users only
 
-**Context-Dependent Role**: Project `.claude/` serves different purposes depending on user's platform:
+**Platform Scope**:
+* ✅ Claude Code CLI (terminal)
+* ✅ Claude Code in VS Code
+* ❌ Claude.ai web interface (not supported - agents/commands don't exist on web)
+* ❌ CI/CD pipelines (plugin installation requires interactive mode)
 
-**For Claude Code Users** (have plugin installed):
+**Rationale**: Plugin distribution is the simplest, most maintainable approach for Claude Code users.
 
-* `.claude/` files **OVERRIDE** plugin-provided components
-* Plugin provides defaults, project customizes
-* Use case: Project-specific variations of standard agents/skills
+=== Key Architectural Decisions
 
-**For Claude.ai Web / CI/CD Users** (no plugin support):
+==== Decision 1: Plugin-Only Distribution
 
-* `.claude/` files are the **PRIMARY (only) mechanism**
-* No plugin available, all components must be in `.claude/`
-* Use case: Git-controlled distribution to non-CLI users
+* **Rationale**: Native Claude Code mechanism, production-proven (227+ plugins)
+* **Implementation**: cui-llm-rules distributed as plugin via marketplace
+* **Benefits**:
+  - Single command installation
+  - Automatic component discovery
+  - Built-in version management
+  - No manual file management
 
-**Implementation**:
+==== Decision 2: Agents Use Essential Rules Pattern
 
-* Components in `.claude/skills/`, `.claude/agents/`, `.claude/commands/` take precedence over plugin
-* Synchronized via `/synchronize` command from plugin installation
-* Git-controlled for team distribution
+Agents embed core requirements from standards for performance while maintaining skill references for complete information. This provides fast, autonomous execution without I/O overhead while keeping access to complete standards when needed.
 
-**Benefit**: Single mechanism serves both use cases (customization + distribution)
+**Complete specification**: xref:component-specifications.adoc#essential-rules-pattern-manual-maintenance-required[Component Specifications § Essential Rules Pattern]
+
+==== Decision 3: Global Plugin Scope
+
+* **Installation Location**: `~/.claude/plugins/marketplaces/cui-llm-rules/`
+* **Availability**: Global across all projects for user
+* **Customization**: Users can override specific components via project-level `.claude/` directories if needed
 
 == Progressive Disclosure Model
 
