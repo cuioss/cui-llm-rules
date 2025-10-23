@@ -60,15 +60,11 @@ AsciiDoc cross-references using `xref:file.adoc#anchor-id[Label]` syntax require
 Add anchor insertion workflow for automated fixing.
 
 #### Discovery 4: Link Verification Script Path Resolution Bug
-The verify-adoc-links.py script has a path resolution bug when checking relative xref links within the same directory - it tries to resolve "claude-plan" as a file path instead of recognizing it as part of a relative reference.
+The verify-adoc-links.py script has a path resolution bug when checking relative xref links within the same directory - it tries to resolve "claude-plan" as a file path instead of recognizing it as part of a relative reference. This causes automated link verification to fail even when all links are valid, requiring manual verification as a workaround.
 
-**Suggested improvement**: Enhance verify-adoc-links.py to properly handle xref: links that reference files in the same directory (e.g., `xref:file.adoc[Label]` should resolve to `./file.adoc` from the current file's directory).
-
-**Impact**: Future reviews would benefit from a fixed link verification script that correctly validates same-directory cross-references without manual intervention.
+**Suggested improvement**: Enhance verify-adoc-links.py to properly handle xref: links that reference files in the same directory (e.g., `xref:file.adoc[Label]` should resolve to `./file.adoc` from the current file's directory). Future reviews would benefit from a fixed script that correctly validates same-directory cross-references without manual intervention.
 
 #### Discovery 5: AsciiDoc Blank Line Requirement Strictness
-AsciiDoc format standards require blank lines before ALL lists, including those that follow bold text markers like "**Key Topics**:" or "**Reports**:". This is more strict than typical markdown formatting conventions.
+AsciiDoc format standards require blank lines before ALL lists, including those that follow bold text markers like "**Key Topics**:" or "**Reports**:". This is more strict than typical markdown formatting conventions. The asciidoc-validator.sh script correctly enforces this rule, but it may not be intuitive to document authors who are used to markdown.
 
-**Suggested improvement**: Consider adding a pre-commit hook or editor plugin that automatically inserts blank lines before lists to prevent these formatting issues during writing.
-
-**Impact**: Would reduce format validation failures and make AsciiDoc authoring more efficient.
+**Suggested improvement**: Consider adding a pre-commit hook or editor plugin that automatically inserts blank lines before lists to prevent these formatting issues during writing. This would reduce format validation failures and make AsciiDoc authoring more efficient.
