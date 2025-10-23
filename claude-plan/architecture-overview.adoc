@@ -141,7 +141,7 @@ All components (skills, agents, commands) are distributed via plugin marketplace
 **Installation Procedure**:
 
 ```bash
-# Step 1: Add marketplace (one-time setup)
+# Step 1: Add marketplace (GitHub repository: https://github.com/cuioss/cui-llm-rules)
 /plugin marketplace add cuioss/cui-llm-rules
 
 # Step 2: Install plugin
