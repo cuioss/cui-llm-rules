@@ -163,6 +163,10 @@ def get_context(filepath: str, line_num: int, context_lines: int = 3) -> str:
 
 def resolve_path(base_file: str, target: str) -> str:
     """Resolve relative path from base file to target"""
+    # Empty target means same file (xref:#anchor syntax)
+    if not target or target.strip() == '':
+        return base_file
+
     base_dir = os.path.dirname(base_file)
     resolved = os.path.normpath(os.path.join(base_dir, target))
     # Remove leading ./ if present
