@@ -112,7 +112,7 @@ Verification status of architectural assumptions.
 
 * **Skills**: 4 skills (Java, Testing, Documentation, Process)
 * **Agents**: 7 agents for development tasks
-* **Commands**: 11 utility commands
+* **Commands**: 10 utility commands
 * **Installation**: Single command
 
 == Verification Status

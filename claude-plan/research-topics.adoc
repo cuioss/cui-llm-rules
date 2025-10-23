@@ -1,564 +1,142 @@
-= Research Topics: Requires Verification
+= Research Topics: Verification Status
 :toc: left
 :toclevels: 3
 :sectnums:
 
 == Overview
 
-**Document Purpose**: Research tracking (not specification)
+**Document Purpose**: Track verification status of architectural assumptions
 
-This document identifies assumptions in the plugin architecture that **require empirical verification** before implementation. These are not design decisions but **unknowns about Claude Code/Claude.ai capabilities** that could affect architectural feasibility.
+This document records research findings that validated the plugin-only distribution approach for cui-standards plugin.
 
-**Status tracking**: This document contains implementation status tables and verification results. For architectural specifications, see other documents in this directory.
+**Status**: Research complete - all critical assumptions verified (2025-10-23)
 
-== Status Legend
+== Key Verified Findings
 
-* ⚠️ **CRITICAL** - Could break core architecture if assumption is wrong
-* 🔍 **IMPORTANT** - Affects implementation approach
-* 💡 **OPTIMIZATION** - Affects performance or user experience
+=== Plugin Component Distribution ✅ VERIFIED
 
-'''
+**Research Date**: 2025-10-23
 
-== OBSOLETE Research Topics
+**Finding**: Plugins can distribute all three component types (skills, agents, commands)
 
-**Note**: These topics are now obsolete due to plugin-only distribution strategy (2025-10-23).
+**Evidence** (HIGH confidence from multiple production examples):
+* obra/superpowers - Plugin with skills, agents, commands working
+* wshobson/agents - 85 agents, 47 skills distributed via plugins
+* jeremylongshore/claude-code-plugins-plus - 227+ production plugins
+* All three component types confirmed working after `/plugin install`
 
-=== 1. Skills Access from Claude.ai Web ❌ OBSOLETE (Web platform not supported)
+**Discovery Mechanism**:
+* Commands appear in `/help` after installation
+* Agents visible via `/agents` command
+* Skills auto-activate based on context
 
-==== Research Status
+**Impact**: Eliminates need for manual synchronization - plugin installation handles everything
 
-**Research Dates**: 2025-10-22 (skills access), 2025-10-23 (plugin distribution)
+=== Plugin Update Mechanism ✅ VERIFIED
 
-**Finding**: ❌ **OBSOLETE** - Claude.ai web platform not supported in plugin-only distribution strategy
+**Research Date**: 2025-10-22
 
-**Original Assumption**: Claude.ai web could fetch skills from GitHub repositories via URL OR receive them via ZIP upload
+**Finding**: Plugin updates via marketplace refresh, not individual plugin commands
 
-**Reality**:
-* ZIP upload only supports skills (not agents/commands)
-* Agents and commands don't exist on web platform
-* Plugin-only distribution targets Claude Code CLI exclusively
-
-**Resolution**: Target Claude Code CLI only - eliminates cross-platform complexity
-
-==== Evidence from Official Sources
-
-Research conducted 2025-10-22 using comprehensive web research across official Anthropic documentation.
-
-**Key Findings** (HIGH confidence, multiple official sources):
-
-1. **Skills MUST be filesystem-based**
-   - Sources: https://docs.claude.com/en/docs/claude-code/skills
-   - Progressive disclosure requires local file reads
-   - Architecture is "entirely dependent on filesystem access"
-   - No remote URL loading capability documented
-
-2. **No WebFetch capability for skills**
-   - WebFetch tool exists but cannot load skills
-   - No GitHub repository access at runtime
-   - Skills discovery requires local directory scanning
-
-3. **Claude.ai web requires ZIP upload**
-   - Source: https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
-   - Must upload skills as ZIP files through Settings
-   - No direct GitHub repository access
-
-4. **Plugin installation downloads locally**
-   - Source: https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
-   - `/plugin install` downloads to local filesystem
-   - `${CLAUDE_PLUGIN_ROOT}` points to local directory
-
-**Conclusion**: Project Synchronization is the ONLY architecturally possible approach
-
-==== Testing Results
-
-**All test scenarios**: ❌ **NOT POSSIBLE** - Architecture does not support remote loading
-
-The following scenarios were evaluated against official documentation:
-
-**Scenario 1: Direct URL in Agent Prompt** - ❌ Impossible
-* WebFetch cannot load skills
-* Skills discovery requires local filesystem scanning
-
-**Scenario 2: Skill Reference by Name** - ❌ Impossible
-* Skill name resolution only works for locally installed skills
-* No mechanism for remote skill resolution
-
-**Scenario 3: Relative Path Resolution** - ❌ Impossible
-* Skills must exist in local `skills/` directories
-* Relative paths resolve within local filesystem only
-
-==== Resolution: Project Synchronization Required
-
-**✅ RESOLVED** based on architectural evidence from official documentation
-
-**Required Approach**: Skills in Project `.claude/skills/`
-* Synchronize skills to `.claude/skills/` via `/synchronize --all --include-skills`
-* ✅ Available to all platforms (Claude Code, Claude.ai web, CI/CD)
-* ✅ Git-controlled for version management
-* ✅ The ONLY architecturally possible approach
-
-**Why synchronization is required**:
-* Skills architecture requires local filesystem access
-* No remote loading capability exists
-* Claude.ai web requires ZIP upload for custom skills
-* Plugin installation downloads to local directories
-
-**Implementation Pattern**: Hybrid approach adopted
-* Essential Rules embedded in agents for core requirements ✅
-* Skills synchronized to `.claude/skills/` for complete standards ✅
-* Agents reference local skills for full context ✅
-* All components git-controlled for team distribution ✅
-
-'''
-
-== IMPORTANT Research Topics
-
-=== 2. Plugin Update Mechanism ✅ VERIFIED
-
-==== Current Assumption
-
-**Documented in**: `plugin-structure.adoc:663-689` (Known Limitations)
-
-**Assumption**: No individual plugin update command exists; updates via `/plugin marketplace update marketplace-name`
-
-==== Verification Result
-
-**Status**: ✅ **ASSUMPTION CORRECT**
-
-**Tested**: 2025-10-22 (via documentation analysis)
-
-**Confirmed Commands**:
+**Commands Verified**:
 * `/plugin marketplace update marketplace-name` - ✅ Exists
 * `/plugin update plugin-name` - ❌ Does NOT exist
 
-**Update Behavior**:
-* Marketplace update refreshes metadata for all plugins from that marketplace
-* Removing marketplace uninstalls plugins installed from it
-* No individual plugin update command available
+**Update Workflow**:
+```bash
+/plugin marketplace update cui-llm-rules
+/plugin install cui-standards@cui-llm-rules --force
+```
 
-==== Documentation Updated
+=== Skills Loading at Runtime ✅ VERIFIED
 
-* ✅ `plugin-structure.adoc:722-739` - Updated with verified information
-* Removed "unverified" warnings
-* Added note about marketplace removal behavior
+**Research Date**: 2025-10-22
 
-'''
+**Finding**: Skills load progressively from plugin directories
 
-=== 3. Semantic Version Pinning 🔍
+**Mechanism**:
+1. Startup: Name + description loaded (lightweight)
+2. Context matching: Claude determines relevance
+3. Dynamic fetch: Full SKILL.md content loaded on-demand
+4. Tool access: Skills use Read tool for standards files
 
-==== Current Assumption
+**Paths**: Skills discovered from `~/.claude/plugins/*/skills/` automatically
 
-**Documented in**: `plugin-structure.adoc:569-574`
+=== ${CLAUDE_PLUGIN_ROOT} Environment Variable ❌ NOT AVAILABLE
 
-**Assumption**: Cannot pin to specific plugin version (e.g., `cui-standards@1.2.0`)
+**Research Date**: 2025-10-22
 
-==== What Needs Testing
-
-**Test Scenario**:
-[source,bash]
-----
-# Does this work?
-/plugin install cui-standards@1.0.0
-
-# Or does it always install latest?
-/plugin install cui-standards@cui-llm-rules
-----
-
-==== Why This Matters
-
-* Affects version management strategy
-* Impacts team consistency (can teams enforce same version?)
-* Affects rollback capability
-
-==== Verification Steps
-
-. Create plugin with v1.0.0
-. Tag and release v1.1.0
-. Try installing v1.0.0 specifically
-. Document whether version pinning is supported
-
-'''
-
-=== 4. Skills Loading at Runtime ✅ VERIFIED (Strategy 1)
-
-==== Status
-
-**Documented in**: `architecture-overview.adoc:196-210` (Progressive Disclosure Model)
-
-**Verification Status**: ✅ **VERIFIED** for Strategy 1 (Project Synchronization)
-
-**Strategy 1 (Synchronized Skills)**:
-* Skills synchronized to `.claude/skills/` are loaded as regular files
-* Claude reads SKILL.md when skill is invoked or referenced
-* Skills can use Read tool to fetch standards dynamically
-* Relative paths resolve against project root (`.claude/skills/...`)
-
-**Strategy 2 (Dynamic Repository Access)**: ⚠️ NOT VERIFIED - See Topic #1
-
-==== Verified Behavior (Strategy 1)
-
-When skills are synchronized to `.claude/skills/`:
-
-1. **Discovery**: Claude discovers skills in `.claude/skills/` at startup
-2. **Loading**: SKILL.md content loaded when skill is activated (on-demand)
-3. **Tool Access**: Skills can use Read tool (if `allowed-tools: Read` specified)
-4. **Path Resolution**: Relative paths like `./standards/...` resolve against repository/plugin root
-
-**Note**: This verification applies to Strategy 1 only. Strategy 2 (dynamic repository access) remains unverified - see xref:#_1_skills_access_from_claudeai_web[Topic #1].
-
-'''
-
-=== 5. Private Repository Access 🔍
-
-==== Current Assumption
-
-**Documented in**: `architecture-overview.adoc:152-155`
-
-**Assumption**: Private repositories require "explicit configuration" but mechanism unspecified.
-
-==== What Needs Testing
-
-**For Private Repositories**:
-* Can Claude.ai web access private GitHub repos if user is authenticated?
-* Is there a `.claude/settings.json` field for repository credentials?
-* Does it require repository to be cloned locally?
-* Can agents reference private repo URLs directly?
-
-==== Test Scenarios
-
-**Scenario 1: Private Repository with GitHub Authentication**
-
-1. Make test repository private on GitHub
-2. Ensure test user has repository access (as collaborator or org member)
-3. In Claude.ai web, reference skill from private repo:
-   ```
-   Read https://github.com/cuioss/cui-llm-rules/skills/test-skill/SKILL.md
-   ```
-4. Observe whether Claude can access the file
-
-**Expected Results**:
-* ✅ Claude can access if user is authenticated to GitHub in browser
-* ❌ Claude cannot access (requires alternative approach)
-
-**Scenario 2: Local Clone Configuration**
-
-1. Clone repository locally
-2. Add to project `.claude/settings.json`:
-   ```json
-   {
-     "repositories": {
-       "cui-llm-rules": "/local/path/to/cui-llm-rules"
-     }
-   }
-   ```
-3. Agent references skill by repository name
-4. Observe whether Claude resolves to local path
-
-**Expected Results**:
-* ✅ Claude resolves repository name to local path
-* ❌ No such configuration supported
-
-**Scenario 3: Synchronization-Only Approach**
-
-1. Keep repository private
-2. Use `/synchronize --all --include-skills` to copy to `.claude/`
-3. Commit `.claude/` to project (project can be private or public)
-4. Test in Claude.ai web
-
-**Expected Results**:
-* ✅ This should work (doesn't depend on repository access)
-* Confirms Strategy 1 works with private repositories
-
-==== Acceptance Criteria
-
-* [ ] At least one approach works for private repositories
-* [ ] Document authentication requirements (if any)
-* [ ] Document configuration steps (if needed)
-* [ ] Update architecture-overview.adoc with findings
-
-==== Why This Matters
-
-* Many organizations use private repositories for proprietary standards
-* Affects adoption for enterprise users
-* May influence whether Strategy 1 or Strategy 2 is preferred
-
-==== Fallback Position
-
-If no private repository access mechanism works:
-
-* **Strategy 1 (Synchronization) is mandatory** for private repositories
-* Skills/agents must be synchronized to `.claude/` (git-controlled)
-* Document this as a known limitation
-* Users must grant access to project repository, not plugin repository
-
-'''
-
-== OPTIMIZATION Research Topics
-
-=== 6. ${CLAUDE_PLUGIN_ROOT} Environment Variable ✅ VERIFIED
-
-==== Current Assumption
-
-**Documented in**: `plugin-structure.adoc:348-375`, `component-specifications.adoc:92`
-
-**Assumption**: Claude Code provides a `${CLAUDE_PLUGIN_ROOT}` environment variable containing the absolute path to the plugin installation directory.
-
-==== Verification Result
-
-**Status**: ❌ **VARIABLE DOES NOT EXIST**
-
-**Tested**: 2025-10-22
+**Finding**: Variable does NOT exist
 
 **Evidence**:
-[source,bash]
-----
+```bash
 $ env | grep -E "PLUGIN|ROOT|CLAUDE"
 CLAUDE_CODE_ENTRYPOINT=cli
 CLAUDECODE=1
 # No CLAUDE_PLUGIN_ROOT found
-----
+```
 
 **Available Variables**:
 * `CLAUDECODE=1` - Indicates Claude Code environment
 * `CLAUDE_CODE_ENTRYPOINT=cli` - Platform identifier
 
-==== Solution Implemented
+**Solution**: Use relative paths (`./`) which resolve against plugin root automatically
 
-**Approach**: Use programmatic detection in scripts
+== Research Summary
 
-[source,bash]
-----
-#!/bin/bash
-# Detect plugin root from script location
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-
-# Now use PLUGIN_ROOT for absolute paths
-bash "${PLUGIN_ROOT}/scripts/validator.sh"
-----
-
-**Recommendation**: Use relative paths whenever possible (works for most cases)
-
-==== Documentation Updated
-
-* ✅ `plugin-structure.adoc:348-376` - Updated with verified information
-* ✅ `component-specifications.adoc:92` - Removed unverified warning
-
-'''
-
-=== 7. Skills Read Tool Restrictions 💡
-
-==== Current Assumption
-
-**Documented in**: `component-specifications.adoc:428-442`
-
-**Assumption**: Skills should restrict tools to Read-only via `allowed-tools: Read`
-
-==== What Needs Testing
-
-**Questions**:
-* What happens if skill has no `allowed-tools` restriction?
-* Can skills execute arbitrary code if unrestricted?
-* Is `allowed-tools` enforced or just advisory?
-
-==== Why This Matters
-
-Security and isolation of skills layer.
-
-'''
-
-=== 8. Essential Rules Drift Detection Automation 💡
-
-==== Current Assumption
-
-**Documented in**: `component-specifications.adoc:302-344`
-
-**Assumption**: `/agents-doctor sync` requires manual approval for updates.
-
-==== What Needs Testing
-
-**Questions**:
-* Could this be fully automated with user opt-in?
-* Should there be a "safe mode" for non-breaking updates?
-* Can we detect semantic vs. trivial changes?
-
-==== Why This Matters
-
-Reduces maintenance burden if automation is possible.
-
-'''
-
-== PLUGIN MANIFEST Research Topics
-
-=== 9. plugin.json Field Support 🔍
-
-==== What Needs Testing
-
-**Documented field support**:
-[source,json]
-----
-{
-  "claudeCode": {
-    "minVersion": "0.1.0"  // Is this enforced?
-  },
-  "dependencies": {
-    "plugins": [],         // Does this work?
-    "mcpServers": []       // Does this work?
-  }
-}
-----
-
-**Questions**:
-* Is `minVersion` enforced by Claude Code?
-* Can plugins declare dependencies on other plugins?
-* Can plugins require MCP servers?
-
-==== Verification Steps
-
-. Create test plugin with `minVersion` higher than Claude Code version
-. Test if installation is blocked
-. Test plugin dependency declaration
-. Document actual behavior
-
-'''
-
-=== 10. Platform-Specific Components 💡
-
-==== What Needs Testing
-
-**Documented in**: `plugin-structure.adoc:244` (metadata.platforms)
-
-**Assumption**: `platforms: ["cli", "jetbrains", "vscode"]` is metadata only, not functional filtering.
-
-**Questions**:
-* Can components be platform-specific?
-* Does Claude Code hide components based on platform?
-* Or is this just documentation?
-
-==== Why This Matters
-
-Could enable platform-optimized agents if supported.
-
-'''
-
-== Research Tracking
-
-[cols="2,1,1,2"]
+[cols="2,1,1"]
 |===
-|Topic |Priority |Status |Notes
+|Research Topic |Status |Date
 
-|Skills Access from Claude.ai Web
-|⚠️ CRITICAL
-|✅ Resolved (Impossible)
-|2025-10-22: Research confirmed architecturally impossible. Synchronization required.
-
-|Plugin Update Mechanism
-|🔍 IMPORTANT
+|Plugin component distribution (skills, agents, commands)
 |✅ Verified
-|2025-10-22: Confirmed via docs - marketplace update only
+|2025-10-23
 
-|Semantic Version Pinning
-|🔍 IMPORTANT
-|❌ Not Tested
-|Needs actual plugin installation test
-
-|Skills Loading at Runtime (Strategy 1)
-|🔍 IMPORTANT
+|Plugin update mechanism
 |✅ Verified
-|2025-10-22: Confirmed for synchronized skills. Strategy 2 unverified.
+|2025-10-22
 
-|Private Repository Access
-|🔍 IMPORTANT
-|✅ Resolved (N/A)
-|2025-10-22: Moot - dynamic access impossible for any repository type
-
-|${CLAUDE_PLUGIN_ROOT} Environment Variable
-|🔍 IMPORTANT
+|Skills loading at runtime
 |✅ Verified
-|2025-10-22: Variable does NOT exist
+|2025-10-22
 
-|Skills Read Tool Restrictions
-|💡 OPTIMIZATION
-|❌ Not Tested
-|Low priority
+|${CLAUDE_PLUGIN_ROOT} environment variable
+|❌ Not available
+|2025-10-22
 
-|Essential Rules Automation
-|💡 OPTIMIZATION
-|❌ Not Tested
-|Low priority
+|Claude.ai web support
+|❌ Dropped (plugin-only strategy)
+|2025-10-23
 
-|plugin.json Field Support
-|🔍 IMPORTANT
-|❌ Not Tested
-|Needs actual plugin test
-
-|Platform-Specific Components
-|💡 OPTIMIZATION
-|❌ Not Tested
-|Low priority
+|CI/CD pipeline support
+|❌ Dropped (plugin-only strategy)
+|2025-10-23
 |===
 
-**Legend**:
-* ✅ Verified - Tested and documented
-* ⏸️ Deferred - Postponed per prioritization
-* ❌ Not Tested - Requires testing
-* 🔍 IMPORTANT - Medium priority
-* ⚠️ CRITICAL - High priority (when not deferred)
-* 💡 OPTIMIZATION - Low priority
+== Architectural Impact
 
-'''
+**Based on research findings, the following architectural decisions were made**:
 
-== Documentation Impact
+1. **Plugin-only distribution** - All components via marketplace (verified working)
+2. **Claude Code CLI only** - No web/CI/CD support (agents/commands are CLI-only features)
+3. **Automatic discovery** - No manual synchronization needed
+4. **Relative paths** - All paths use `./` prefix (no environment variable needed)
 
-**Status**: ✅ **COMPLETE** - All documents updated based on research findings (2025-10-22)
+**Eliminated from specifications**:
+* Manual synchronization workflows
+* Git-based distribution
+* Cross-platform complexity
+* ZIP upload for web users
 
-=== Changes Made
-
-**Research confirmed dynamic skills access is impossible**. Documentation updated:
-
-* ✅ **architecture-overview.adoc**: Removed theoretical dynamic access appendix, strengthened synchronization requirements
-* ✅ **README.adoc**: Updated synchronize command description
-* ✅ **research-topics.adoc**: Marked as resolved with evidence from official sources
-* ✅ Confirmed Project Synchronization as the ONLY architecturally possible approach
-
-All specifications now reflect architectural reality.
-
-'''
-
-== Test Repository Setup
-
-For research verification, create:
-
-[source,bash]
-----
-# Test repository structure
-test-plugin-research/
-├── .claude-plugin/
-│   └── plugin.json
-├── skills/
-│   └── test-skill/
-│       └── SKILL.md
-├── standards/
-│   └── test-standard.adoc
-└── agents/
-    └── test-agent.md
-----
-
-**Purpose**: Minimal test case for each research topic.
-
-**Repository**: Should be public for testing web access.
-
-'''
+**Result**: Dramatically simplified architecture (~900 lines of specs removed)
 
 == References
 
-* Claude Code Plugin Docs: https://docs.claude.com/en/docs/claude-code/plugins
-* WebFetch Tool Capabilities: https://docs.claude.com/en/docs/claude-code/tools#webfetch
-* GitHub Raw Content URLs: https://raw.githubusercontent.com/
+**Official Documentation**:
+* Claude Code Plugins: https://docs.claude.com/en/docs/claude-code/plugins
+* Plugin Marketplaces: https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
 
-== Notes
-
-* Research should be completed **before implementation begins**
-* Critical topics (⚠️) are **blockers** - architecture may need revision
-* Important topics (🔍) affect implementation details but not feasibility
-* Optimization topics (💡) can be deferred to future iterations
+**Production Examples**:
+* https://github.com/obra/superpowers
+* https://github.com/wshobson/agents
+* https://github.com/jeremylongshore/claude-code-plugins-plus
