@@ -24,10 +24,10 @@ Warnings approved as acceptable:
 
 ### Last Execution
 
-- Date: 2025-10-23
+- Date: 2025-10-23 (second run)
 - Directories processed: 1
 - Files reviewed: 5
-- Issues fixed: 23
+- Issues fixed: 24
 - Status: SUCCESS
 - Parallel agents: 0
 
@@ -58,3 +58,17 @@ AsciiDoc cross-references using `xref:file.adoc#anchor-id[Label]` syntax require
 - **Missing section**: File exists, no section matches anchor or title (Priority 1 - Critical)
 
 Add anchor insertion workflow for automated fixing.
+
+#### Discovery 4: Link Verification Script Path Resolution Bug
+The verify-adoc-links.py script has a path resolution bug when checking relative xref links within the same directory - it tries to resolve "claude-plan" as a file path instead of recognizing it as part of a relative reference.
+
+**Suggested improvement**: Enhance verify-adoc-links.py to properly handle xref: links that reference files in the same directory (e.g., `xref:file.adoc[Label]` should resolve to `./file.adoc` from the current file's directory).
+
+**Impact**: Future reviews would benefit from a fixed link verification script that correctly validates same-directory cross-references without manual intervention.
+
+#### Discovery 5: AsciiDoc Blank Line Requirement Strictness
+AsciiDoc format standards require blank lines before ALL lists, including those that follow bold text markers like "**Key Topics**:" or "**Reports**:". This is more strict than typical markdown formatting conventions.
+
+**Suggested improvement**: Consider adding a pre-commit hook or editor plugin that automatically inserts blank lines before lists to prevent these formatting issues during writing.
+
+**Impact**: Would reduce format validation failures and make AsciiDoc authoring more efficient.

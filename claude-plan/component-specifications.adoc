@@ -546,6 +546,7 @@ allowed-tools: Read, Write, Edit, Bash
 * Field values are non-empty strings
 
 **Reports**:
+
 * ✅ Valid frontmatter
 * ❌ Missing required field: `name`
 * ❌ Invalid YAML syntax at line X
@@ -559,6 +560,7 @@ allowed-tools: Read, Write, Edit, Bash
 * Validate relative paths start with `./`
 
 **Reports**:
+
 * ✅ All 4 standards references valid
 * ❌ Referenced file not found: `./standards/java/missing.adoc`
 * ❌ Section anchor not found: `./standards/java/code.adoc#nonexistent`
@@ -572,6 +574,7 @@ allowed-tools: Read, Write, Edit, Bash
 * Check for README.md (optional but recommended)
 
 **Reports**:
+
 * ✅ Valid skill structure
 * ❌ Missing required file: SKILL.md
 * ⚠️ No templates/ directory (optional)
@@ -585,6 +588,7 @@ allowed-tools: Read, Write, Edit, Bash
 * Flag skills with write access as potentially inappropriate
 
 **Reports**:
+
 * ✅ Read-only access appropriate for knowledge skill
 * ⚠️ Skill has Write access - verify this is intentional
 * ℹ️ No tool restrictions specified (inherits all tools)
@@ -597,6 +601,7 @@ allowed-tools: Read, Write, Edit, Bash
 * Report circular dependencies
 
 **Reports**:
+
 * ✅ Referenced by 3 agents: project-builder, code-reviewer, adoc-review
 * ⚠️ Not referenced by any agents (unused skill?)
 * ℹ️ References 0 other skills

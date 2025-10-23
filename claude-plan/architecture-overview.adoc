@@ -131,9 +131,11 @@ All components (skills, agents, commands) are distributed via plugin marketplace
 * **Components Distributed**: Skills, Agents, Commands (all three types)
 * **Installation**: Single command: `/plugin install cui-standards@cui-llm-rules`
 * **Benefits**:
+
   - Automatic component discovery
   - Built-in version management
   - No manual file management
+
 * **Evidence**: See xref:research-topics.adoc[Research Topics] for verification details
 
 === Installation Instructions
@@ -173,6 +175,7 @@ Plugin installation handles all component registration automatically.
 **Supported Users**: Claude Code CLI users only
 
 **Platform Scope**:
+
 * ✅ Claude Code CLI (terminal)
 * ✅ Claude Code in VS Code
 * ❌ Claude.ai web interface (not supported - agents/commands don't exist on web)

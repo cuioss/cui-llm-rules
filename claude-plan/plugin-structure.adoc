@@ -680,6 +680,7 @@ Use built-in doctor commands to verify components:
 **Symptoms**: Commands/agents/skills not available after installation
 
 **Solutions**:
+
 . Restart Claude Code
 . Verify plugin.json is valid JSON
 . Check Claude Code logs for errors
@@ -690,11 +691,13 @@ Use built-in doctor commands to verify components:
 **Symptoms**: Agents fail to read skills
 
 **For Claude Code**:
+
 . Verify plugin is installed: `/plugin list`
 . Check plugin path: Skills should be at `~/.claude/plugins/cui-standards/skills/`
 . Verify skill SKILL.md files exist
 
 **For Claude.ai web/CI/CD**:
+
 . Verify repository is public OR
 . Verify repository URL is accessible
 . Check agent prompts include repository URL
@@ -705,6 +708,7 @@ Use built-in doctor commands to verify components:
 **Symptoms**: `/agents-doctor sync` reports drift
 
 **Solutions**:
+
 . Review reported differences
 . Approve sync to update embedded rules
 . Verify standards files haven't changed unexpectedly
@@ -714,6 +718,7 @@ Use built-in doctor commands to verify components:
 **Symptoms**: "File not found" errors for standards references
 
 **Solutions**:
+
 . Verify all paths start with `./`
 . Check paths are relative to plugin root, not absolute
 . For skills: Paths resolve against plugin installation directory
@@ -751,6 +756,7 @@ All paths in plugin components MUST be relative to plugin root and start with `.
 Absolute paths (`~/...`, `/Users/...`) will cause errors.
 
 **Critical for**:
+
 * Skills referencing standards files
 * Agents referencing standards in Essential Rules
 * Commands referencing documentation

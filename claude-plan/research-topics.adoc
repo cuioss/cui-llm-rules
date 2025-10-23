@@ -18,13 +18,16 @@ This document records research findings that validated the plugin-only distribut
 **Finding**: Plugins can distribute all three component types (skills, agents, commands)
 
 **Evidence**:
+
 * obra/superpowers - Plugin with skills, agents, commands working
 * wshobson/agents - 85 agents, 47 skills distributed via plugins
 * jeremylongshore/claude-code-plugins-plus - 227+ production plugins
 * All three component types confirmed working after `/plugin install`
 
 **Discovery Mechanism**:
+
 * Commands appear in `/help` after installation
+
 * Agents visible via `/agents` command
 * Skills auto-activate based on context
 
@@ -37,6 +40,7 @@ This document records research findings that validated the plugin-only distribut
 **Finding**: Plugin updates via marketplace refresh, not individual plugin commands
 
 **Commands Verified**:
+
 * `/plugin marketplace update marketplace-name` - ✅ Exists
 * `/plugin update plugin-name` - ❌ Does NOT exist
 
@@ -53,6 +57,7 @@ This document records research findings that validated the plugin-only distribut
 **Finding**: Skills load progressively from plugin directories
 
 **Mechanism**:
+
 1. Startup: Name + description loaded (lightweight)
 2. Context matching: Claude determines relevance
 3. Dynamic fetch: Full SKILL.md content loaded on-demand
@@ -75,6 +80,7 @@ CLAUDECODE=1
 ```
 
 **Available Variables**:
+
 * `CLAUDECODE=1` - Indicates Claude Code environment
 * `CLAUDE_CODE_ENTRYPOINT=cli` - Platform identifier
 
@@ -121,6 +127,7 @@ CLAUDECODE=1
 4. **Relative paths** - All paths use `./` prefix (no environment variable needed)
 
 **Eliminated from specifications**:
+
 * Manual synchronization workflows
 * Git-based distribution
 * Cross-platform complexity
@@ -131,10 +138,12 @@ CLAUDECODE=1
 == References
 
 **Official Documentation**:
+
 * Claude Code Plugins: https://docs.claude.com/en/docs/claude-code/plugins
 * Plugin Marketplaces: https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
 
 **Production Examples**:
+
 * https://github.com/obra/superpowers
 * https://github.com/wshobson/agents
 * https://github.com/jeremylongshore/claude-code-plugins-plus

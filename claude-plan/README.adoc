@@ -36,6 +36,7 @@ That's it! All components (skills, agents, commands) are now available.
 High-level architectural design and distribution strategy.
 
 **Key Topics**:
+
 * Four-layer architecture (Standards, Skills, Agents, Commands)
 * Plugin-only distribution model
 * Installation and update procedures
@@ -50,6 +51,7 @@ High-level architectural design and distribution strategy.
 Detailed specifications for skills, agents, and commands.
 
 **Key Topics**:
+
 * YAML frontmatter formats
 * Essential Rules Pattern (manual maintenance)
 * Component structure and examples
@@ -64,6 +66,7 @@ Detailed specifications for skills, agents, and commands.
 Repository organization and plugin manifest requirements.
 
 **Key Topics**:
+
 * Directory structure
 * plugin.json manifest
 * marketplace.json configuration
@@ -79,6 +82,7 @@ Repository organization and plugin manifest requirements.
 Verification status of architectural assumptions.
 
 **Key Topics**:
+
 * Plugin component distribution (VERIFIED ✅)
 * Skills/agents/commands in plugins (VERIFIED ✅)
 * Platform capabilities and limitations
