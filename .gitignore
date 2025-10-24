@@ -3,4 +3,9 @@
 **/**.iml
 **/**.DS_Store
 # Claude Code configuration
-.claude/
+# Claude Code files
+.claude/*
+
+# But allow project skills and settings to be shared
+!.claude/skills/
+!.claude/settings.json

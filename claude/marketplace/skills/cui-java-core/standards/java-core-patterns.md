@@ -54,10 +54,10 @@ public class TokenValidator {
 
 ### Method Design
 
-* Keep methods short and focused (preferably under 50 lines)
+* Keep methods short and focused (under 50 lines preferred, 100 lines maximum)
 * Use meaningful method names
 * Follow the Command-Query Separation principle
-* Limit method parameters to a reasonable number (preferably 3 or fewer)
+* Limit method parameters (3 or fewer preferred, use parameter objects for 4+)
 
 **Command-Query Separation**:
 ```java
@@ -405,12 +405,13 @@ public class UserAuthenticator {
 ## Quality Checklist
 
 - [ ] Classes follow Single Responsibility Principle
-- [ ] Methods are short and focused (< 50 lines)
-- [ ] Meaningful names used throughout
-- [ ] Exception handling is appropriate
-- [ ] Immutability used where possible
-- [ ] No magic numbers or strings
-- [ ] Code is self-documenting
-- [ ] Public APIs are documented
-- [ ] Design patterns applied appropriately
-- [ ] No god classes or deep inheritance
+- [ ] Methods are short and focused (< 50 lines preferred, < 100 lines maximum)
+- [ ] Method parameters limited (≤ 3 preferred, use parameter objects for 4+)
+- [ ] Meaningful names used throughout (PascalCase classes, camelCase methods, UPPER_SNAKE_CASE constants)
+- [ ] Exception handling is appropriate (specific exceptions, meaningful messages, preserved causes)
+- [ ] Immutability used where possible (final fields, immutable collections)
+- [ ] No magic numbers or strings (use named constants)
+- [ ] Code is self-documenting (clear names, minimal comments explaining why not what)
+- [ ] Public APIs are documented (JavaDoc with parameters, returns, throws)
+- [ ] Design patterns applied appropriately (delegation over inheritance, composition)
+- [ ] No god classes or deep inheritance (prefer flat, focused classes)
