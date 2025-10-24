@@ -1,7 +1,7 @@
 ---
 name: cui-documentation
 description: General documentation standards for README, AsciiDoc, and technical documentation
-tools: [Read, Edit, Write, Grep, Glob]
+tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # CUI Documentation Skill
@@ -164,7 +164,70 @@ Standards for writing clear, maintainable technical documentation in CUI project
    mvn clean install -DskipTests
    ```
 
-### Step 5: Document Changes and Commit
+### Step 5: Automated Validation (AsciiDoc)
+
+**When to Execute**: After creating or updating AsciiDoc files
+
+**Available Validation Scripts**:
+
+This skill includes two validation scripts in the `scripts/` directory:
+
+1. **`asciidoc-validator.sh`** - Format validation script
+   - Validates AsciiDoc format compliance
+   - Checks for blank lines before lists
+   - Verifies section header formatting
+   - Detects list syntax issues
+
+   Usage:
+   ```bash
+   # Validate a single file
+   scripts/asciidoc-validator.sh path/to/file.adoc
+
+   # Validate all files in a directory
+   scripts/asciidoc-validator.sh directory/
+   ```
+
+2. **`verify-adoc-links.py`** - Link verification script
+   - Validates cross-reference links
+   - Checks for broken file references
+   - Verifies anchor existence
+   - Detects deprecated syntax
+
+   Usage:
+   ```bash
+   # Verify links in a single file
+   python3 scripts/verify-adoc-links.py --file path/to/file.adoc --report target/links.md
+
+   # Verify links in directory (non-recursive)
+   python3 scripts/verify-adoc-links.py --directory directory/ --report target/links.md
+
+   # Verify links recursively
+   python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report target/links.md
+   ```
+
+**Validation Workflow**:
+
+1. Run format validation:
+   ```bash
+   scripts/asciidoc-validator.sh target_file_or_directory 2>&1
+   ```
+
+2. Run link verification:
+   ```bash
+   mkdir -p target/adoc-review
+   python3 scripts/verify-adoc-links.py --file target.adoc --report target/adoc-review/links.md 2>&1
+   ```
+
+3. Review validation output and fix issues
+
+4. Re-run validation to confirm fixes
+
+**Script Paths**:
+- Scripts are located in the skill directory at: `scripts/asciidoc-validator.sh` and `scripts/verify-adoc-links.py`
+- When running from project root, use relative path from current working directory
+- Scripts require execution from a location where relative paths to AsciiDoc files are correct
+
+### Step 6: Document Changes and Commit
 
 **When to Execute**: After verification passes
 

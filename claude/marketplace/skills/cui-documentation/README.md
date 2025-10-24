@@ -31,8 +31,11 @@ Use `cui-documentation` when:
 - Text editor with AsciiDoc support (VS Code, IntelliJ)
 - AsciiDoc processor (asciidoctor) for preview
 
+**Recommended**:
+- Bash shell (for format validation script)
+- Python 3.6+ (for link verification script)
+
 **Optional**:
-- AsciiDoc validator scripts
 - Documentation linters
 
 ## Standards Included
@@ -266,6 +269,142 @@ void shouldValidateValidToken() {
 ```
 ```
 
+## Validation Scripts
+
+This skill includes automated validation scripts for AsciiDoc documentation located in the `scripts/` directory.
+
+### Available Scripts
+
+#### 1. AsciiDoc Format Validator (`asciidoc-validator.sh`)
+
+Validates AsciiDoc format compliance including:
+- Blank lines before lists
+- Section header formatting
+- List syntax correctness
+- Nested list indentation
+
+**Usage**:
+```bash
+# Validate a single file
+./scripts/asciidoc-validator.sh path/to/file.adoc
+
+# Validate all files in a directory
+./scripts/asciidoc-validator.sh directory/
+```
+
+**Output**: Reports format violations with file name and line number
+
+#### 2. Link Verification Script (`verify-adoc-links.py`)
+
+Validates cross-references and links in AsciiDoc files:
+- Cross-reference (`xref:`) links
+- Internal anchor references (`<<anchor>>`)
+- File existence verification
+- Anchor existence verification
+
+**Usage**:
+```bash
+# Verify links in a single file
+python3 scripts/verify-adoc-links.py --file path/to/file.adoc --report target/links.md
+
+# Verify links in directory (non-recursive)
+python3 scripts/verify-adoc-links.py --directory directory/ --report target/links.md
+
+# Verify links recursively
+python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report target/links.md
+```
+
+**Output**: Generates a markdown report with broken links and format violations
+
+### Validation Workflow
+
+**Standard validation process**:
+
+1. **Create report directory**:
+   ```bash
+   mkdir -p target/adoc-review
+   ```
+
+2. **Run format validation**:
+   ```bash
+   ./scripts/asciidoc-validator.sh path/to/docs/ 2>&1 | tee target/adoc-review/format.log
+   ```
+
+3. **Run link verification**:
+   ```bash
+   python3 scripts/verify-adoc-links.py \
+       --directory path/to/docs/ \
+       --report target/adoc-review/links.md \
+       2>&1 | tee target/adoc-review/links.log
+   ```
+
+4. **Review reports**:
+   - Check `target/adoc-review/format.log` for format violations
+   - Check `target/adoc-review/links.md` for broken links
+   - Fix reported issues
+   - Re-run validation to confirm fixes
+
+### Common Validation Issues
+
+**Format violations**:
+- Missing blank line before list
+- Incorrect list syntax (using `1.` instead of `.`)
+- Missing blank line after section header
+- Incorrect nested list indentation
+
+**Link issues**:
+- Broken file references (file doesn't exist)
+- Missing anchors (anchor ID not found)
+- Deprecated link syntax (using `link:` instead of `xref:`)
+- Incorrect relative paths
+
+### Prerequisites for Scripts
+
+**Format validator** (`asciidoc-validator.sh`):
+- Bash shell
+- awk (standard Unix utility)
+- grep (standard Unix utility)
+
+**Link verifier** (`verify-adoc-links.py`):
+- Python 3.6+
+- No external dependencies (uses standard library)
+
+### Example Validation Session
+
+```bash
+# 1. Validate format
+$ ./scripts/asciidoc-validator.sh standards/documentation/
+Checking standards/documentation/general-standard.adoc
+Line 45: Missing blank line before list
+Line 89: Missing blank line after section header
+
+# 2. Fix reported issues in editor
+# 3. Re-validate
+$ ./scripts/asciidoc-validator.sh standards/documentation/
+All files valid ✓
+
+# 4. Verify links
+$ python3 scripts/verify-adoc-links.py \
+    --directory standards/documentation/ \
+    --report target/links.md
+Processed 5 files
+Found 2 broken links
+Report generated: target/links.md
+
+# 5. Review and fix broken links
+$ cat target/links.md
+## Broken Links
+- File: general-standard.adoc, Line 34: xref:missing.adoc[Label]
+  Error: File not found
+
+# 6. Fix links and re-verify
+$ python3 scripts/verify-adoc-links.py \
+    --directory standards/documentation/ \
+    --report target/links.md
+Processed 5 files
+All links valid ✓
+```
+
 ## Integration with Other Skills
 
 **Recommended skill combinations**:
@@ -394,9 +533,11 @@ For issues or questions:
 
 1. Review detailed standards in `standards/` directory
 2. Check AsciiDoc syntax guide for formatting
-3. Verify code examples compile
-4. Use AsciiDoc preview in IDE
-5. Run AsciiDoc validator scripts
+3. Run validation scripts in `scripts/` directory:
+   - `asciidoc-validator.sh` for format validation
+   - `verify-adoc-links.py` for link verification
+4. Verify code examples compile
+5. Use AsciiDoc preview in IDE
 
 ## License
 
