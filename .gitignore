@@ -2,6 +2,10 @@
 .qodo
 **/**.iml
 **/**.DS_Store
+
+# Build output
+target/
+
 # Claude Code configuration
 # Claude Code files
 .claude/*
