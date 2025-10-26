@@ -1,7 +1,7 @@
 ---
 name: cui-frontend-development
 description: Frontend development standards for CUI projects including JavaScript, CSS, web components, JSDoc, and Cypress testing
-tools: [Read, Edit, Write, Bash, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # CUI Frontend Development Skill

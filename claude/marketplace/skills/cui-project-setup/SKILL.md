@@ -1,7 +1,7 @@
 ---
 name: cui-project-setup
 description: Project initialization and configuration standards for CUI projects
-tools: [Read, Edit, Write, Bash, Glob]
+allowed-tools: [Read, Edit, Write, Bash, Glob]
 ---
 
 # CUI Project Setup Skill

@@ -1,7 +1,7 @@
 ---
 name: cui-java-unit-testing
 description: CUI Java unit testing standards and patterns with JUnit 5, generators, and value object testing
-tools: [Read, Edit, Write, Bash, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # CUI Java Unit Testing Skill

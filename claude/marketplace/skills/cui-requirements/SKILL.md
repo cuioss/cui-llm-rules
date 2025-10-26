@@ -1,7 +1,7 @@
 ---
 name: cui-requirements
 description: Requirements engineering and planning standards for CUI projects
-tools: [Read, Edit, Write, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Grep, Glob]
 ---
 
 # CUI Requirements Skill

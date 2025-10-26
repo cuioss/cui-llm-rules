@@ -1,6 +1,6 @@
 # CUI Marketplace Plugin Metadata
 
-This directory contains metadata for the CUI Development Standards Marketplace, enabling it to be recognized and added as a local plugin marketplace in Claude Code.
+This directory contains metadata for the CUI Development Standards Marketplace, enabling it to be recognized and added as a plugin marketplace in Claude Code.
 
 ## Structure
 
@@ -12,47 +12,53 @@ This directory contains metadata for the CUI Development Standards Marketplace, 
 
 ## marketplace.json
 
-The `marketplace.json` file contains:
+The `marketplace.json` file follows the official Claude Code marketplace schema:
 
-- **Basic Information**: Name, ID, version, description
-- **Skills Catalog**: All 8 available CUI skills with descriptions and paths
-- **Categories**: Organized by development domain
-- **Quality Metrics**: Current quality scores and thresholds
-- **Metadata**: Repository structure and documentation links
+- **name**: `cui-development-standards`
+- **owner**: Object with name (and optional email)
+- **metadata**: Description and version information
+- **plugins**: Array of plugin groupings, each containing:
+  - `name`: Kebab-case plugin identifier
+  - `description`: What the plugin provides
+  - `source`: Base path (usually `./`)
+  - `strict`: Validation mode (false for permissive)
+  - `skills`: Array of paths to individual skill directories
+
+## Plugin Organization
+
+The marketplace organizes 8 skills into 4 logical plugin groupings:
+
+### cui-java-skills (4 skills)
+Java development standards including core patterns, unit testing, JavaDoc, and CDI/Quarkus
+- `./skills/cui-java-core`
+- `./skills/cui-java-unit-testing`
+- `./skills/cui-javadoc`
+- `./skills/cui-java-cdi`
+
+### cui-frontend-skills (1 skill)
+Frontend development standards for JavaScript, CSS, web components, and testing
+- `./skills/cui-frontend-development`
+
+### cui-documentation-skills (1 skill)
+Documentation standards for README, AsciiDoc, and technical writing
+- `./skills/cui-documentation`
+
+### cui-project-management-skills (2 skills)
+Project setup and requirements engineering standards
+- `./skills/cui-project-setup`
+- `./skills/cui-requirements`
 
 ## Adding the Marketplace to Claude Code
 
-To add this marketplace as a local plugin marketplace in Claude Code:
+To add this marketplace in Claude Code:
 
 ```bash
-# Navigate to the marketplace directory
-cd /Users/oliver/git/cui-llm-rules/claude/marketplace
+# From within Claude Code, add the marketplace by path or repository
+/plugin marketplace add /Users/oliver/git/cui-llm-rules/claude/marketplace
 
-# Add as local marketplace (example command - adjust based on Claude Code CLI)
-# The exact command depends on your Claude Code setup
+# Or if hosted on GitHub:
+/plugin marketplace add cuioss/cui-llm-rules/claude/marketplace
 ```
-
-Alternatively, reference the absolute path to this marketplace directory in your Claude Code settings.
-
-## Marketplace Contents
-
-**8 Production-Ready Skills** (97.75/100 average quality):
-
-### Java Development (4 skills)
-- `cui-java-core` - Core Java patterns and standards
-- `cui-java-unit-testing` - JUnit 5 testing standards
-- `cui-javadoc` - JavaDoc documentation standards
-- `cui-java-cdi` - CDI/Quarkus development standards
-
-### Frontend Development (1 skill)
-- `cui-frontend-development` - JavaScript, CSS, web components, testing
-
-### Documentation (1 skill)
-- `cui-documentation` - README, AsciiDoc, technical writing
-
-### Project Management (2 skills)
-- `cui-project-setup` - Project initialization and configuration
-- `cui-requirements` - Requirements engineering and planning
 
 ## Verification
 
@@ -68,11 +74,12 @@ ls -la ../skills/cui-*
 
 ## Version Information
 
+- **Marketplace Name**: cui-development-standards
 - **Marketplace Version**: 1.0.0
+- **Plugins Count**: 4
 - **Skills Count**: 8
-- **Average Quality**: 97.75/100
 - **Status**: Production Ready ✅
-- **Last Updated**: 2025-10-24
+- **Last Updated**: 2025-10-26
 
 ## Related Documentation
 
@@ -83,4 +90,15 @@ ls -la ../skills/cui-*
 
 ---
 
-**Note**: This metadata structure enables the CUI marketplace to be discoverable and installable as a local plugin marketplace in Claude Code, providing centralized access to all CUI development standards and skills.
+## Schema Compliance
+
+The marketplace.json structure complies with the Claude Code marketplace schema:
+
+- ✅ Owner as object (not string)
+- ✅ Plugin names in kebab-case (no spaces)
+- ✅ Valid `source` field for each plugin
+- ✅ Skills array with relative paths
+- ✅ No unrecognized keys (removed: `id`, `type`, `path`, `category`, `version`)
+- ✅ Proper metadata structure
+
+**Note**: This metadata structure enables the CUI marketplace to be discoverable and installable as a plugin marketplace in Claude Code, providing centralized access to all CUI development standards and skills.

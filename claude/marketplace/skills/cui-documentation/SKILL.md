@@ -1,7 +1,7 @@
 ---
 name: cui-documentation
 description: General documentation standards for README, AsciiDoc, and technical documentation
-tools: [Read, Edit, Write, Bash, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # CUI Documentation Skill

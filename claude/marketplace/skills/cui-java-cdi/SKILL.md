@@ -1,7 +1,7 @@
 ---
 name: cui-java-cdi
 description: CDI and Quarkus development standards for CUI projects, including CDI aspects, container configuration, testing, and native optimization
-tools: [Read, Edit, Write, Bash, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # CUI Java CDI Skill

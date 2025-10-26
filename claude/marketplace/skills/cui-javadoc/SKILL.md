@@ -1,7 +1,7 @@
 ---
 name: cui-javadoc
 description: CUI JavaDoc documentation standards for Java classes, methods, and code examples
-tools: [Read, Edit, Write, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Grep, Glob]
 ---
 
 # CUI JavaDoc Documentation Skill
