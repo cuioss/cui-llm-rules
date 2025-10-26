@@ -6,6 +6,9 @@
 # Claude Code files
 .claude/*
 
-# But allow project skills and settings to be shared
+# But allow project skills and run configuration to be shared
 !.claude/skills/
-!.claude/settings.json
+!.claude/run-configuration.md
+
+# Ignore user-specific settings
+.claude/settings.local.json

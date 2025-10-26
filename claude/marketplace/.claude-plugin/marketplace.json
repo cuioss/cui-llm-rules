@@ -1,0 +1,94 @@
+{
+  "name": "cui-marketplace",
+  "owner": "cuioss",
+  "version": "1.0.0",
+  "description": "Comprehensive marketplace of CUI development standards, skills, and best practices for AI-assisted development",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "plugins": [
+    {
+      "id": "cui-java-core",
+      "name": "CUI Java Core",
+      "description": "Core Java development standards for CUI projects including coding patterns, null safety, Lombok, modern features, DSL constants, and logging",
+      "type": "skill",
+      "path": "skills/cui-java-core",
+      "category": "Java Development",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cui-java-unit-testing",
+      "name": "CUI Java Unit Testing",
+      "description": "CUI Java unit testing standards and patterns with JUnit 5, generators, and value object testing",
+      "type": "skill",
+      "path": "skills/cui-java-unit-testing",
+      "category": "Java Development",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cui-javadoc",
+      "name": "CUI JavaDoc",
+      "description": "CUI JavaDoc documentation standards for Java classes, methods, and code examples",
+      "type": "skill",
+      "path": "skills/cui-javadoc",
+      "category": "Documentation",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cui-java-cdi",
+      "name": "CUI Java CDI",
+      "description": "CDI and Quarkus development standards for CUI projects, including CDI aspects, container configuration, testing, and native optimization",
+      "type": "skill",
+      "path": "skills/cui-java-cdi",
+      "category": "Java Development",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cui-frontend-development",
+      "name": "CUI Frontend Development",
+      "description": "Frontend development standards for CUI projects including JavaScript, CSS, web components, JSDoc, and Cypress testing",
+      "type": "skill",
+      "path": "skills/cui-frontend-development",
+      "category": "Frontend Development",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cui-documentation",
+      "name": "CUI Documentation",
+      "description": "General documentation standards for README, AsciiDoc, and technical documentation",
+      "type": "skill",
+      "path": "skills/cui-documentation",
+      "category": "Documentation",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cui-project-setup",
+      "name": "CUI Project Setup",
+      "description": "Project initialization and configuration standards for CUI projects",
+      "type": "skill",
+      "path": "skills/cui-project-setup",
+      "category": "Project Management",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cui-requirements",
+      "name": "CUI Requirements Engineering",
+      "description": "Requirements engineering and planning standards for CUI projects",
+      "type": "skill",
+      "path": "skills/cui-requirements",
+      "category": "Project Management",
+      "version": "1.0.0"
+    }
+  ],
+  "categories": [
+    "Java Development",
+    "Frontend Development",
+    "Documentation",
+    "Testing",
+    "Project Management"
+  ],
+  "metadata": {
+    "lastUpdated": "2025-10-24",
+    "totalPlugins": 8,
+    "averageQuality": 97.75,
+    "status": "production-ready"
+  }
+}
