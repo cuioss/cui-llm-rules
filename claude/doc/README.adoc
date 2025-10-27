@@ -1,0 +1,29 @@
+= CUI Standards Plugin Documentation
+
+== Overview
+
+Technical documentation for the **cui-standards** Claude Code plugin - a standards distribution system providing skills, agents, and commands for CUI OSS projects.
+
+== Documentation
+
+=== xref:plugin-architecture.adoc[Plugin Architecture]
+
+System design and key architectural decisions. Three-layer architecture (Skills → Agents → Commands), progressive disclosure, and platform support.
+
+**Read this**: To understand how the plugin works
+
+---
+
+=== xref:plugin-specifications.adoc[Plugin Specifications]
+
+Technical reference for implementation. Directory structure, manifest formats, component specifications, and installation procedures.
+
+**Read this**: When creating or modifying plugin components
+
+---
+
+=== xref:agent-design-principles.adoc[Agent Design Principles]
+
+Comprehensive agent design guide. Design patterns, Essential Rules Pattern, Tool Fit, industry best practices, and quality standards.
+
+**Read this**: Before creating or modifying agents
