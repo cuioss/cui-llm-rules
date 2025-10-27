@@ -47,7 +47,15 @@ Standards for writing clear, maintainable technical documentation in CUI project
 
 1. **General Documentation Quality**:
    - Check tone and style (professional, neutral, objective)
-   - Verify no marketing language or promotional wording
+   - **Verify no marketing language or promotional wording**:
+     - Marketing adjectives: "comprehensive," "powerful," "seamless," "robust," "enterprise-grade," "cutting-edge," "revolutionary," "amazing," "best-in-class"
+     - Promotional phrases: "Our solution," "We provide," "Industry-leading," "Unmatched performance"
+     - Bold/italic emphasis on features (e.g., "**powerful** validation")
+     - Superlatives: "fastest," "most reliable," "easiest to use"
+     - Replace with factual, measurable descriptions:
+       - "comprehensive validation" → "validates X, Y, and Z"
+       - "powerful features" → "supports features A, B, C"
+       - "seamless integration" → "integrates via CDI injection"
    - Validate factual descriptions with sources
    - Review technical precision
    - Check for conciseness and clarity
@@ -70,6 +78,14 @@ Standards for writing clear, maintainable technical documentation in CUI project
 4. **Content Quality**:
    - Only existing code/features documented
    - All references verified to exist
+   - **RFC References Verification**:
+     - When document mentions "per RFC XXXX" or cites RFC specifications
+     - Verify RFC is relevant to the documented feature
+     - Check: Does the RFC actually define/require this behavior?
+     - Example violations:
+       - Citing HTTP/2 RFC (7540) in OAuth token validation docs
+       - Citing HTTP/1.1 RFC (7230) when discussing JWT claims
+     - Correct practice: Only cite RFCs that directly define the feature
    - Consistent terminology used
    - Code examples from unit tests
    - All public APIs documented
@@ -89,7 +105,29 @@ Standards for writing clear, maintainable technical documentation in CUI project
    - Use linking instead of duplication
 
 2. **AsciiDoc Formatting** (if .adoc files):
-   - Include required document header:
+
+   **README Files** (README.adoc, */README.adoc):
+   - Use `:toc: macro` (NOT `:toc: left`)
+   - Place `toc::[]` manually where TOC should appear
+   - Example header:
+     ```asciidoc
+     = Module Name
+     :toc: macro
+     :toclevels: 3
+     :sectnums:
+     :source-highlighter: highlight.js
+
+     Brief module description.
+
+     toc::[]
+
+     == Core Concepts
+     ```
+
+   **General Documentation Files** (not READMEs):
+   - Use `:toc: left` for automatic left sidebar TOC
+   - Do NOT use `:toc: macro`
+   - Example header:
      ```asciidoc
      = Document Title
      :toc: left
@@ -98,6 +136,8 @@ Standards for writing clear, maintainable technical documentation in CUI project
      :sectnums:
      :source-highlighter: highlight.js
      ```
+
+   **All AsciiDoc Files**:
    - Use `xref:path/to/file.adoc[Link Text]` for cross-references
    - **ALWAYS** add blank line before lists
    - Specify language in code blocks
@@ -122,6 +162,21 @@ Standards for writing clear, maintainable technical documentation in CUI project
    - Be verified by unit tests
    - Use clear variable names
    - Include comments for complex steps
+   - **Configuration Examples - Placeholder Identification**:
+     - ALL placeholders must be clearly identified
+     - Use inline comments to mark placeholders
+     - Provide example values alongside placeholders
+     - Example (GOOD):
+       ```properties
+       # Replace with your issuer URL
+       oauth.issuer=https://your-auth-server.com  # Placeholder: your actual auth server
+       oauth.audience=your-api-id                  # Placeholder: your API identifier
+       ```
+     - Example (BAD):
+       ```properties
+       oauth.issuer=https://your-auth-server.com
+       oauth.audience=your-api-id
+       ```
 
 ### Step 4: Verify Documentation Quality
 
@@ -218,9 +273,18 @@ This skill includes two validation scripts in the `scripts/` directory:
    python3 scripts/verify-adoc-links.py --file target.adoc --report target/adoc-review/links.md 2>&1
    ```
 
-3. Review validation output and fix issues
+3. **Distinguish link validation results**:
+   - **Syntax Valid + Target Exists**: ✅ Link is correct
+   - **Syntax Valid + Target Missing**: ❌ Reference to non-existent file
+     - Common cause: Documentation for planned/future features
+     - Action: Either create the target document or remove the reference
+     - Do NOT leave references to non-existent files
+   - **Syntax Invalid**: ❌ Malformed cross-reference
+     - Fix syntax to use proper `xref:path[text]` format
 
-4. Re-run validation to confirm fixes
+4. Review validation output and fix issues
+
+5. Re-run validation to confirm fixes
 
 **Script Paths**:
 - Scripts are located in the skill directory at: `scripts/asciidoc-validator.sh` and `scripts/verify-adoc-links.py`
