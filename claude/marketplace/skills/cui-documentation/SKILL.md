@@ -269,8 +269,8 @@ This skill includes two validation scripts in the `scripts/` directory:
 
 2. Run link verification:
    ```bash
-   mkdir -p target/adoc-review
-   python3 scripts/verify-adoc-links.py --file target.adoc --report target/adoc-review/links.md 2>&1
+   mkdir -p target/asciidoc-reviewer
+   python3 scripts/verify-adoc-links.py --file target.adoc --report target/asciidoc-reviewer/links.md 2>&1
    ```
 
 3. **Distinguish link validation results**:

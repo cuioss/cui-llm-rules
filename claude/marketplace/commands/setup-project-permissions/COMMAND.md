@@ -478,7 +478,7 @@ These permissions are already globally approved and should be removed from local
 
 Exact Duplicates:
 1. Bash(grep:*) - Already in global settings.json
-2. SlashCommand(/agents-create) - Already in global settings.json
+2. SlashCommand(/create-agent) - Already in global settings.json
 
 Covered by Broader Global Permission:
 3. Read(//~/git/any-project/**) - Covered by global Read(//~/git/**) (UNIVERSAL GIT ACCESS)

@@ -73,7 +73,7 @@ The command performs comprehensive permission optimization across 13 steps:
 ### ensurePermissions (Optional)
 - **Format**: `ensurePermissions="<permission1>,<permission2>,..."`
 - **Description**: Ensures exact set of permissions approved
-- **Use Case**: Called by doctor commands (slash-doctor, agents-doctor)
+- **Use Case**: Called by doctor commands (diagnose-commands, diagnose-agents)
 - **Actions**:
   - Adds missing permissions (globally or locally based on type)
   - Reports over-permissions (approved but not in list)
@@ -318,7 +318,7 @@ Permissions flagged as suspicious but approved by user:
 
 ### ensurePermissions Usage
 
-**Slash-doctor** and **agents-doctor** use this parameter to verify commands/agents have required bash approvals:
+**Slash-doctor** and **diagnose-agents** use this parameter to verify commands/agents have required bash approvals:
 
 1. Doctor extracts bash commands from workflow
 2. Converts to permission format (e.g., `grep` → `Bash(grep:*)`)
@@ -326,7 +326,7 @@ Permissions flagged as suspicious but approved by user:
 4. Receives Permission Fit Score and recommendations
 5. Offers to fix missing/over-permissions
 
-**Example from slash-doctor:**
+**Example from diagnose-commands:**
 ```bash
 # Extract bash commands from command file
 required="Bash(grep:*),Bash(find:*),Bash(wc:*),Bash(~/git/project/scripts/validator.sh:*)"
@@ -348,9 +348,9 @@ Use this command:
 - After updating global settings
 
 Often used with:
-- `/manage-webfetch-domains` - Optimize WebFetch permissions
-- `/slash-doctor` - Verify slash command permissions
-- `/agents-doctor` - Verify agent permissions
+- `/manage-web-permissions` - Optimize WebFetch permissions
+- `/diagnose-commands` - Verify slash command permissions
+- `/diagnose-agents` - Verify agent permissions
 
 ## Example Output
 

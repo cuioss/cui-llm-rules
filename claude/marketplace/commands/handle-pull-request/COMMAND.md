@@ -49,12 +49,12 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ### Step 2: Verify Project Build Status
 
-**Use Agent: project-builder**
+**Use Agent: maven-project-builder**
 
-1. Invoke the `project-builder` agent using Task tool:
+1. Invoke the `maven-project-builder` agent using Task tool:
    ```
    Task tool with:
-     subagent_type: "project-builder"
+     subagent_type: "maven-project-builder"
      prompt: "Verify the project builds and passes all quality checks"
    ```
 2. Wait for agent completion (~8-10 minutes)
@@ -64,19 +64,19 @@ This ensures the command evolves and becomes more effective with each execution.
    - Any warnings or errors
 
 **Decision Point:**
-- If project-builder reports FAILURE: **STOP** - Report to user and exit
-- If project-builder reports SUCCESS: Continue to Step 3
+- If maven-project-builder reports FAILURE: **STOP** - Report to user and exit
+- If maven-project-builder reports SUCCESS: Continue to Step 3
 
 **Purpose:** Ensure codebase is in clean state before creating/updating PR
 
 ### Step 3: Create/Update PR and Wait for CI/Sonar
 
-**Use Agent: commit-current-changes**
+**Use Agent: commit-changes**
 
 #### A. Determine PR Mode
 
 **If `create` parameter is provided (no existing PR):**
-1. Invoke `commit-current-changes` agent with parameters: "push and create a pr"
+1. Invoke `commit-changes` agent with parameters: "push and create a pr"
 2. Capture PR URL from agent output (e.g., `https://github.com/owner/repo/pull/151`)
 3. Store as `PR_LINK` for subsequent steps
 4. Extract PR number from URL (e.g., `151`)
@@ -84,7 +84,7 @@ This ensures the command evolves and becomes more effective with each execution.
 **If `url` parameter is provided (existing PR):**
 1. Extract PR number from URL (pattern: `/pull/(\d+)`)
 2. Store URL as `PR_LINK`
-3. Invoke `commit-current-changes` agent with parameter: "push"
+3. Invoke `commit-changes` agent with parameter: "push"
 4. This will push any uncommitted or unpushed changes
 
 **Agent Invocation Example:**
@@ -92,13 +92,13 @@ This ensures the command evolves and becomes more effective with each execution.
 For create mode:
   Task tool invocation:
     description: "Commit and create PR"
-    subagent_type: "commit-current-changes"
+    subagent_type: "commit-changes"
     prompt: "push and create a pr"
 
 For url mode:
   Task tool invocation:
     description: "Push changes"
-    subagent_type: "commit-current-changes"
+    subagent_type: "commit-changes"
     prompt: "push"
 ```
 
@@ -137,12 +137,12 @@ For url mode:
 
 ### Step 4: Handle Gemini Review Comments
 
-**Use Agent: pr-handle-gemini-comments**
+**Use Agent: pr-review-responder**
 
-1. Invoke `pr-handle-gemini-comments` agent using Task tool:
+1. Invoke `pr-review-responder` agent using Task tool:
    ```
    Task tool with:
-     subagent_type: "pr-handle-gemini-comments"
+     subagent_type: "pr-review-responder"
      prompt: "url={PR_LINK} push"
    ```
 2. Wait for agent completion
@@ -166,16 +166,16 @@ For url mode:
 
 ### Step 5: Handle Sonar Issues (Loop Until Clean)
 
-**Use Agent: pr-handle-sonar-issues**
+**Use Agent: pr-quality-fixer**
 
 This step implements a loop that continues until all Sonar issues are resolved.
 
 #### Step 5.1: Invoke Sonar Issue Handler
 
-1. Invoke `pr-handle-sonar-issues` agent using Task tool:
+1. Invoke `pr-quality-fixer` agent using Task tool:
    ```
    Task tool with:
-     subagent_type: "pr-handle-sonar-issues"
+     subagent_type: "pr-quality-fixer"
      prompt: "url={PR_LINK} push"
    ```
 2. Wait for agent completion (~10-15 minutes including builds)
@@ -209,7 +209,7 @@ Check agent report metrics:
 - Calculate new wait duration: `ci-sonar-duration * 1.25`
 - Wait for Sonar to re-scan: `sleep $((ci-sonar-duration * 1.25 / 1000))` (convert ms to seconds)
 - Wait for build completion (same as Step 3.B)
-- **Return to Step 5.1** (invoke pr-handle-sonar-issues again)
+- **Return to Step 5.1** (invoke pr-quality-fixer again)
 - Repeat until clean
 
 **Safety Limit:**
@@ -223,23 +223,23 @@ Check agent report metrics:
 #### Step 6.1: Collect All Lessons Learned
 
 1. Gather "Lessons Learned" sections from:
-   - project-builder agent (Step 2)
-   - commit-current-changes agent (Step 3)
-   - pr-handle-gemini-comments agent (Step 4)
-   - pr-handle-sonar-issues agent (Step 5, all iterations)
+   - maven-project-builder agent (Step 2)
+   - commit-changes agent (Step 3)
+   - pr-review-responder agent (Step 4)
+   - pr-quality-fixer agent (Step 5, all iterations)
 
 2. Store in memory as structured list:
    ```
    lessons_learned = [
      {
-       source: "project-builder",
+       source: "maven-project-builder",
        discovery: "...",
        why_it_matters: "...",
        suggested_improvement: "...",
        impact: "..."
      },
      {
-       source: "pr-handle-gemini-comments",
+       source: "pr-review-responder",
        discovery: "...",
        ...
      }
@@ -350,8 +350,8 @@ Create a structured proposal with:
 **Estimated Time**: {minutes} minutes
 
 **Quality Verification Steps**:
-1. Run agents-doctor for each changed agent
-2. Run slash-doctor for each changed command
+1. Run diagnose-agents for each changed agent
+2. Run diagnose-commands for each changed command
 3. Test updated workflow with sample PR
 
 **Would you like me to implement these changes?**
@@ -381,26 +381,26 @@ For each approved change:
 1. Read current agent file
 2. Apply proposed changes using Edit tool
 3. Save updated agent file
-4. Invoke `/agents-doctor` using SlashCommand tool:
+4. Invoke `/diagnose-agents` using SlashCommand tool:
    ```
-   command: "/agents-doctor {agent_name}"
+   command: "/diagnose-agents {agent_name}"
    ```
-5. Wait for agents-doctor completion
+5. Wait for diagnose-agents completion
 6. Review report for validation errors
-7. If errors found: Fix and re-run agents-doctor
+7. If errors found: Fix and re-run diagnose-agents
 8. Repeat until clean
 
 **For Command Updates:**
 1. Read current command file
 2. Apply proposed changes using Edit tool
 3. Save updated command file
-4. Invoke `/slash-doctor` using SlashCommand tool:
+4. Invoke `/diagnose-commands` using SlashCommand tool:
    ```
-   command: "/slash-doctor {command_name}"
+   command: "/diagnose-commands {command_name}"
    ```
-5. Wait for slash-doctor completion
+5. Wait for diagnose-commands completion
 6. Review report for validation errors
-7. If errors found: Fix and re-run slash-doctor
+7. If errors found: Fix and re-run diagnose-commands
 8. Repeat until clean
 
 **For Configuration Updates:**
@@ -445,22 +445,22 @@ For each approved change:
 
 ### Agent Execution Results
 
-#### project-builder (Step 2)
+#### maven-project-builder (Step 2)
 - Status: {SUCCESS/FAILURE}
 - Issues fixed: {count}
 
-#### commit-current-changes (Step 3)
+#### commit-changes (Step 3)
 - PR created: {yes/no}
 - PR URL: {url if created}
 - Commits pushed: {count}
 
-#### pr-handle-gemini-comments (Step 4)
+#### pr-review-responder (Step 4)
 - Total comments: {count}
 - Resolved: {count}
 - Not applicable: {count}
 - Commits created: {count}
 
-#### pr-handle-sonar-issues (Step 5)
+#### pr-quality-fixer (Step 5)
 - Iterations: {count}
 - Total issues: {count}
 - Fixed: {count}
@@ -545,39 +545,39 @@ This command requires the following permission to be globally approved to avoid 
 - **ALWAYS loop Step 5** until Sonar issues = 0 (max 5 iterations)
 - **ALWAYS return to Step 3.B** after code changes in Step 4
 - **ALWAYS perform deep analysis** of lessons learned in Step 6
-- **ALWAYS run agents-doctor** after updating agents (Step 6.5)
-- **ALWAYS run slash-doctor** after updating commands (Step 6.5)
+- **ALWAYS run diagnose-agents** after updating agents (Step 6.5)
+- **ALWAYS run diagnose-commands** after updating commands (Step 6.5)
 - **ALWAYS verify all checks pass** before completing workflow
 - **UPDATE duration only if change > 10%**
 - **ALWAYS track** total wait times for all Sonar builds
-- **NEVER proceed** if project-builder fails in Step 2
+- **NEVER proceed** if maven-project-builder fails in Step 2
 - **NEVER skip** lessons learned analysis if insights exist
 - **ALWAYS use standard commit format** with Claude Code footer (agents handle this)
 - **ALWAYS update this file** when you discover better orchestration approaches
 
 ## AGENT USAGE REFERENCE
 
-### project-builder
+### maven-project-builder
 **Purpose:** Verify project builds and passes all quality checks
 **When:** Step 2 (initial verification)
 **Tools:** Read, Edit, Write, Bash
 **Duration:** ~8-10 minutes
 
-### commit-current-changes
+### commit-changes
 **Purpose:** Commit changes, push to remote, create PRs
 **When:** Step 3 (create/update PR)
 **Parameters:** "push", "push and create a pr"
 **Tools:** Read, Bash
 **Duration:** ~1-2 minutes
 
-### pr-handle-gemini-comments
+### pr-review-responder
 **Purpose:** Retrieve and resolve Gemini code review comments
 **When:** Step 4 (after PR created and builds complete)
 **Parameters:** "url={PR_LINK} push"
 **Tools:** Read, Edit, Bash, Task
 **Duration:** ~10-15 minutes (varies with comment count)
 
-### pr-handle-sonar-issues
+### pr-quality-fixer
 **Purpose:** Retrieve and resolve all Sonar issues, improve coverage
 **When:** Step 5 (loop until clean)
 **Parameters:** "url={PR_LINK} push"
@@ -586,12 +586,12 @@ This command requires the following permission to be globally approved to avoid 
 
 ## DOCTOR COMMAND REFERENCE
 
-### /agents-doctor {agent_name}
+### /diagnose-agents {agent_name}
 **Purpose:** Validate agent file structure and compliance
 **When:** After updating agent in Step 6.5
 **Validates:** Frontmatter, rules embedding, tool coverage, response format
 
-### /slash-doctor {command_name}
+### /diagnose-commands {command_name}
 **Purpose:** Validate slash command structure and documentation
 **When:** After updating command in Step 6.5
 **Validates:** Parameter documentation, workflow clarity, examples

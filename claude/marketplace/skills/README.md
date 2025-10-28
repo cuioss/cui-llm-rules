@@ -239,7 +239,7 @@ To create a new skill:
 3. **Add README.md** for human documentation
 4. **Create standards/** directory with detailed standards
 5. **Add code examples** from real unit tests
-6. **Verify quality** with `/skill-doctor skill-name`
+6. **Verify quality** with `/diagnose-skills skill-name`
 
 ### Required YAML Frontmatter
 
@@ -264,12 +264,12 @@ tools: [Read, Edit, Write, Bash, Grep, Glob]  # Adjust as needed
 
 Run skill doctor on all skills:
 ```bash
-/skill-doctor global
+/diagnose-skills global
 ```
 
 Or verify specific skill:
 ```bash
-/skill-doctor cui-java-core
+/diagnose-skills cui-java-core
 ```
 
 ### Updating Skills
@@ -277,7 +277,7 @@ Or verify specific skill:
 When updating skills:
 1. Update standards files with new requirements
 2. Update code examples to match
-3. Run `/skill-doctor` to verify quality
+3. Run `/diagnose-skills` to verify quality
 4. Update README.md with new features
 5. Test with actual development tasks
 
@@ -297,7 +297,7 @@ For issues or questions:
 1. Review individual skill README.md files
 2. Check SKILL.md for AI workflow instructions
 3. Consult standards files for detailed guidance
-4. Run `/skill-doctor` for quality verification
+4. Run `/diagnose-skills` for quality verification
 5. Report issues in repository
 
 ## License

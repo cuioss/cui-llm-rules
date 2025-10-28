@@ -112,7 +112,7 @@ All marketplace components must meet:
 5. Add working examples
 
 ### Verification
-1. Run quality checker (e.g., `/skill-doctor`)
+1. Run quality checker (e.g., `/diagnose-skills`)
 2. Verify no duplication, conflicts, ambiguities
 3. Check integration with other components
 4. Test with real development tasks
@@ -141,7 +141,7 @@ To contribute a new marketplace component:
 
 ### Quality Verification Tools
 
-- `/skill-doctor` - Verify skill quality
+- `/diagnose-skills` - Verify skill quality
 - `/agent-doctor` - Verify agent quality (future)
 - `/command-doctor` - Verify command quality (future)
 

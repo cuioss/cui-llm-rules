@@ -229,9 +229,9 @@ ln -sf ../../claude/marketplace/skills/new-skill new-skill
 
 ### Quality Verification
 
-Run skill-doctor to verify quality:
+Run diagnose-skills to verify quality:
 ```bash
-/skill-doctor new-skill
+/diagnose-skills new-skill
 ```
 
 Target: Quality score ≥ 75/100
@@ -273,13 +273,13 @@ ls -la .claude/skills/
 **Adding skills**:
 1. Create in `claude/marketplace/skills/`
 2. Create symlink in `.claude/skills/`
-3. Run `/skill-doctor` to verify
+3. Run `/diagnose-skills` to verify
 4. Commit both directories
 
 **Updating skills**:
 1. Edit files in `claude/marketplace/skills/`
 2. Changes automatically reflected (via symlinks)
-3. Run `/skill-doctor` to verify
+3. Run `/diagnose-skills` to verify
 4. Commit changes
 
 **Removing skills**:

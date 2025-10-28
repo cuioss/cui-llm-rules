@@ -322,25 +322,25 @@ python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report
 
 1. **Create report directory**:
    ```bash
-   mkdir -p target/adoc-review
+   mkdir -p target/asciidoc-reviewer
    ```
 
 2. **Run format validation**:
    ```bash
-   ./scripts/asciidoc-validator.sh path/to/docs/ 2>&1 | tee target/adoc-review/format.log
+   ./scripts/asciidoc-validator.sh path/to/docs/ 2>&1 | tee target/asciidoc-reviewer/format.log
    ```
 
 3. **Run link verification**:
    ```bash
    python3 scripts/verify-adoc-links.py \
        --directory path/to/docs/ \
-       --report target/adoc-review/links.md \
-       2>&1 | tee target/adoc-review/links.log
+       --report target/asciidoc-reviewer/links.md \
+       2>&1 | tee target/asciidoc-reviewer/links.log
    ```
 
 4. **Review reports**:
-   - Check `target/adoc-review/format.log` for format violations
-   - Check `target/adoc-review/links.md` for broken links
+   - Check `target/asciidoc-reviewer/format.log` for format violations
+   - Check `target/asciidoc-reviewer/links.md` for broken links
    - Fix reported issues
    - Re-run validation to confirm fixes
 

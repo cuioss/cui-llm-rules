@@ -296,10 +296,10 @@ skills:
 
 ```bash
 # Verify single skill
-/skill-doctor cui-java-core
+/diagnose-skills cui-java-core
 
 # Verify all skills
-/skill-doctor global
+/diagnose-skills global
 
 # Pre-commit checks
 ./mvnw clean verify -Ppre-commit,coverage
@@ -323,7 +323,7 @@ skills:
 1. **Skill README** - Detailed documentation
 2. **SKILL.md** - AI workflow instructions
 3. **Standards files** - Detailed requirements
-4. **Quality checker** - `/skill-doctor`
+4. **Quality checker** - `/diagnose-skills`
 5. **Repository issues** - Report problems
 
 ---

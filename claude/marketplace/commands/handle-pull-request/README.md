@@ -23,11 +23,11 @@ Automates the entire PR lifecycle by orchestrating specialized agents in sequenc
 
 The command executes a comprehensive 7-step workflow:
 
-1. **Verify Project Build** - Runs project-builder agent to ensure clean codebase
-2. **Create/Update PR** - Uses commit-current-changes agent to push and create/update PR
+1. **Verify Project Build** - Runs maven-project-builder agent to ensure clean codebase
+2. **Create/Update PR** - Uses commit-changes agent to push and create/update PR
 3. **Wait for CI/Sonar** - Monitors build checks using `gh pr checks` until complete
-4. **Handle Review Comments** - Runs pr-handle-gemini-comments agent to address code review feedback
-5. **Fix Sonar Issues** - Loops pr-handle-sonar-issues agent until all issues resolved
+4. **Handle Review Comments** - Runs pr-review-responder agent to address code review feedback
+5. **Fix Sonar Issues** - Loops pr-quality-fixer agent until all issues resolved
 6. **Analyze Lessons Learned** - Aggregates insights from all agents, proposes improvements to agents/commands
 7. **Update Configuration** - Records new CI/Sonar duration if changed >10%
 
@@ -58,13 +58,13 @@ The command executes a comprehensive 7-step workflow:
 - Creates config file if missing
 
 ### Step 2: Verify Project Build
-- **Agent**: project-builder
+- **Agent**: maven-project-builder
 - **Purpose**: Ensure clean codebase before PR operations
 - **Duration**: ~8-10 minutes
 - **Exit if fails**: Build must succeed to proceed
 
 ### Step 3: Create/Update PR and Wait for CI/Sonar
-- **Agent**: commit-current-changes
+- **Agent**: commit-changes
 - **Create mode**: Commits, pushes, creates PR, captures URL
 - **URL mode**: Pushes uncommitted/unpushed changes to existing PR
 - **Wait Strategy**: Initial wait of duration * 1.25, then check `gh pr checks` every 30s
@@ -72,13 +72,13 @@ The command executes a comprehensive 7-step workflow:
 - **Proceed when**: All checks completed (Sonar can be success or failure)
 
 ### Step 4: Handle Gemini Review Comments
-- **Agent**: pr-handle-gemini-comments
+- **Agent**: pr-review-responder
 - **Input**: PR URL from Step 3
 - **Actions**: Retrieves Gemini code review comments, fixes issues or marks not applicable
 - **Loop back**: If commits created, return to Step 3.B (wait for CI to rerun)
 
 ### Step 5: Handle Sonar Issues (Loop Until Clean)
-- **Agent**: pr-handle-sonar-issues
+- **Agent**: pr-quality-fixer
 - **Purpose**: Fix code issues, suppress false positives, add tests for coverage
 - **Loop condition**: Repeats until "0 remaining issues"
 - **Safety limit**: Maximum 5 iterations
@@ -98,22 +98,22 @@ The command executes a comprehensive 7-step workflow:
 
 ## Orchestrated Agents
 
-### project-builder
+### maven-project-builder
 - **Purpose**: Verify project builds and passes quality checks
 - **Tools**: Read, Edit, Write, Bash
 - **Duration**: ~8-10 minutes
 
-### commit-current-changes
+### commit-changes
 - **Purpose**: Commit changes, push to remote, create PRs
 - **Tools**: Read, Bash
 - **Duration**: ~1-2 minutes
 
-### pr-handle-gemini-comments
+### pr-review-responder
 - **Purpose**: Retrieve and resolve Gemini code review comments
 - **Tools**: Read, Edit, Bash, Task
 - **Duration**: ~10-15 minutes (varies with comment count)
 
-### pr-handle-sonar-issues
+### pr-quality-fixer
 - **Purpose**: Retrieve and resolve Sonar issues, improve coverage
 - **Tools**: Read, Edit, Write, Bash, Task
 - **Duration**: ~10-20 minutes per iteration
@@ -158,7 +158,7 @@ This command implements a unique **continuous improvement pattern**:
 2. **Analyze** - Categorizes insights by type (agent/command/config) and impact (high/medium/low)
 3. **Propose** - Generates structured change-set with before/after snippets
 4. **Implement** - Edits agent/command files based on user approval
-5. **Verify** - Runs agents-doctor or slash-doctor to validate changes
+5. **Verify** - Runs diagnose-agents or diagnose-commands to validate changes
 
 This ensures the workflow evolves based on real execution experience.
 
@@ -202,8 +202,8 @@ Use this command:
 - To handle existing PRs with review comments/Sonar issues
 
 Often used with:
-- `/project-builder` - Called internally as first step
-- `/commit-current-changes` - Called internally for PR creation
+- `/maven-project-builder` - Called internally as first step
+- `/commit-changes` - Called internally for PR creation
 - Direct agent invocations from marketplace
 
 ## Example Output
@@ -229,22 +229,22 @@ Often used with:
 
 ### Agent Execution Results
 
-#### project-builder (Step 2)
+#### maven-project-builder (Step 2)
 - Status: SUCCESS
 - Issues fixed: 12
 
-#### commit-current-changes (Step 3)
+#### commit-changes (Step 3)
 - PR created: yes
 - PR URL: https://github.com/owner/repo/pull/151
 - Commits pushed: 1
 
-#### pr-handle-gemini-comments (Step 4)
+#### pr-review-responder (Step 4)
 - Total comments: 8
 - Resolved: 6
 - Not applicable: 2
 - Commits created: 1
 
-#### pr-handle-sonar-issues (Step 5)
+#### pr-quality-fixer (Step 5)
 - Iterations: 2
 - Total issues: 23
 - Fixed: 20
@@ -269,7 +269,7 @@ Often used with:
 **Insights Collected**: 4
 
 **Changes Implemented**: 2
-- Agents updated: pr-handle-sonar-issues
+- Agents updated: pr-quality-fixer
 - Commands updated: handle-pull-request
 - Config updated: none
 
