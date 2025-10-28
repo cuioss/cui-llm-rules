@@ -7,8 +7,7 @@
   "agents": [
     "./agents/task-reviewer",
     "./agents/task-breakdown-agent",
-    "./agents/task-executor",
-    "./agents/research-best-practices"
+    "./agents/task-executor"
   ],
   "commands": [
     "./commands/implement-task"

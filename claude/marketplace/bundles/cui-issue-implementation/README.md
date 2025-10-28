@@ -12,7 +12,6 @@ This bundle includes the following components:
 - **task-reviewer** - Reviews task plans and provides feedback on clarity and completeness
 - **task-breakdown-agent** - Breaks down complex issues into structured, actionable task plans
 - **task-executor** - Executes task plan steps sequentially with build verification
-- **research-best-practices** - Researches industry best practices for implementation guidance
 
 ### Commands
 - **implement-task** - Orchestrates the complete issue implementation workflow
@@ -103,6 +102,9 @@ The agent will:
 
 ### Inter-Bundle Dependencies
 - **cui-project-quality-gates** (recommended) - Task executor invokes maven-project-builder for build verification and commit-changes for commits
+
+### Standalone Agent Dependencies
+- **research-best-practices** (general-purpose agent) - Task-reviewer and task-breakdown-agent may invoke this for researching industry best practices
 
 ### External Dependencies
 - Requires GitHub CLI (`gh`) for issue operations when working with GitHub issues
