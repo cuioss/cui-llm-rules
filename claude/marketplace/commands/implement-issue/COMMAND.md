@@ -573,22 +573,14 @@ Before starting workflow, verify:
 
 2. **If push parameter enabled:**
 
-   a. Invoke commit-current-changes agent:
+   a. Invoke commit-current-changes agent to commit and push:
       - **Subagent Type**: commit-current-changes
-      - **Prompt**: "Commit all changes from issue implementation: {issue_reference}"
+      - **Prompt**: "Commit all changes from issue implementation: {issue_reference}, and push"
       - Wait for completion
 
-   b. Parse commit result:
-      - If SUCCESS: Display "✅ Changes committed"
-      - If FAILURE: Display "❌ Commit failed: {error}", skip push
-
-   c. If commit succeeded, push changes:
-      - Use Bash tool: `git push`
-      - Display result:
-        - If success: "✅ Changes pushed to remote"
-        - If failure: "❌ Push failed: {error}"
-
-   d. Final push status display
+   b. Display agent's final report showing commit and push status:
+      - If SUCCESS: Display "✅ Changes committed and pushed"
+      - If FAILURE: Display "❌ Commit/push failed: {error from agent report}"
 
 3. **If push parameter NOT enabled:**
    - Display:
@@ -599,7 +591,7 @@ Before starting workflow, verify:
      3. Push: git push
      ```
 
-**Tools**: Task (commit-current-changes agent), Bash (for git push), Read
+**Tools**: Task (commit-current-changes agent), Read
 
 **Success Criteria**: Summary displayed, push completed (if enabled)
 

@@ -315,25 +315,18 @@ Post-Conditions Status:
    - At least one fix applied (don't push if no changes)
 
 9.2. **If post-conditions met**:
-   - Stage all modified files using `git add`
-   - Create descriptive commit message:
-     ```
-     fix: resolve IDE diagnostics in {filename}
+   - Invoke commit-current-changes agent to commit and push:
+     - Use Task tool with subagent_type: "commit-current-changes"
+     - Prompt: "Commit all changes with message 'fix: resolve IDE diagnostics in {filename}
 
      - Applied {fix_count} automatic fixes
      - Suppressed {suppression_count} issues (with justification)
      - All tests passing
 
      Issues resolved:
-     {list key issues fixed}
-
-     🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-     Co-Authored-By: Claude <noreply@anthropic.com>
-     ```
-   - Commit changes
-   - Push to remote repository
-   - Display: "✓ Changes committed and pushed successfully"
+     {list key issues fixed}', and push"
+     - Wait for agent completion
+   - Display agent's final report showing commit status and push result
 
 9.3. **If post-conditions NOT met**:
    - Display: "Cannot push: Post-conditions not satisfied"

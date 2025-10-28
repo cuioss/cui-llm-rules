@@ -374,16 +374,9 @@ Next Steps:
 
 **Only execute if `push` parameter was provided:**
 
-1. **Check for changes:**
-   ```bash
-   git status --porcelain
-   ```
-
-2. **If changes exist, create commit:**
-   ```bash
-   git add -A
-   git commit -m "$(cat <<'EOF'
-   docs: Technical review and refactoring of AsciiDoc documentation
+1. **Invoke commit-current-changes agent to commit and push:**
+   - Use Task tool with subagent_type: "commit-current-changes"
+   - Prompt: "Commit all changes with message 'docs: Technical review and refactoring of AsciiDoc documentation
 
    Executed comprehensive review using adoc-review agent:
    - Validated format compliance (AsciiDoc standards)
@@ -395,27 +388,13 @@ Next Steps:
 
    Changes by directory:
    - {dir1}: {changes}
-   - {dir2}: {changes}
+   - {dir2}: {changes}', and push"
+   - Wait for agent completion
 
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   EOF
-   )"
-   ```
-
-3. **Push to remote:**
-   ```bash
-   git push
-   ```
-
-4. **Verify and display confirmation:**
-   ```
-   ✅ Changes committed and pushed successfully
-
-   Commit: {commit_hash}
-   Files changed: {count}
-   ```
+2. **Display agent's final report showing commit and push status:**
+   - If SUCCESS: Display "✅ Changes committed and pushed successfully"
+   - If FAILURE: Display "❌ Commit/push failed: {error from agent report}"
+   - Show commit hash and files changed from agent report
 
 ## CRITICAL RULES
 

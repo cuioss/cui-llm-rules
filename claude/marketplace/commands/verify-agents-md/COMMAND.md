@@ -195,25 +195,18 @@ Before proceeding with the main workflow, verify:
    - Exit successfully
 
 8.2. If push parameter provided
-   - Stage agents.md: `git add agents.md`
-   - If doc/ai-rules.md was removed: `git add doc/ai-rules.md`
-   - Stage any files with updated references: `git add CLAUDE.md [other files if updated]`
-   - Commit with message:
-     ```
-     docs: create/update agents.md
+   - Invoke commit-current-changes agent to commit and push:
+     - Use Task tool with subagent_type: "commit-current-changes"
+     - Prompt: "Commit all changes with message 'docs: create/update agents.md
 
      - Generated agents.md following OpenAI agents.md specification
      - Sourced from [list sources used]
      - Removed deprecated doc/ai-rules.md [if existed]
      - Updated references in [list files] to point to agents.md
 
-     agents.md is now the single source of truth for AI agent guidance.
-
-     🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-     Co-Authored-By: Claude <noreply@anthropic.com>
-     ```
-   - Push to remote: `git push`
+     agents.md is now the single source of truth for AI agent guidance.', and push"
+     - Wait for agent completion
+   - Display agent's final report showing commit and push status
 
 ### POST-CONDITION VERIFICATION
 
