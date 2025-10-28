@@ -47,6 +47,36 @@
         "./skills/cui-project-setup",
         "./skills/cui-requirements"
       ]
+    },
+    {
+      "name": "cui-project-quality-gates",
+      "description": "Build verification and change management infrastructure for CUI projects",
+      "source": "./bundles/cui-project-quality-gates",
+      "strict": false
+    },
+    {
+      "name": "cui-issue-implementation",
+      "description": "Complete issue implementation workflow from review to execution",
+      "source": "./bundles/cui-issue-implementation",
+      "strict": false
+    },
+    {
+      "name": "cui-pull-request-workflow",
+      "description": "PR review response and quality fixing workflow",
+      "source": "./bundles/cui-pull-request-workflow",
+      "strict": false
+    },
+    {
+      "name": "cui-documentation-standards",
+      "description": "AsciiDoc and documentation standards enforcement for CUI projects",
+      "source": "./bundles/cui-documentation-standards",
+      "strict": false
+    },
+    {
+      "name": "cui-plugin-development-tools",
+      "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
+      "source": "./bundles/cui-plugin-development-tools",
+      "strict": false
     }
   ]
 }

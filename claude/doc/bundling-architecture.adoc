@@ -1,0 +1,457 @@
+= CUI Standards Plugin: Bundling Architecture
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Overview
+
+Plugin bundling organizes related agents, commands, and skills into cohesive functional units. Each bundle represents a complete workflow or domain, installed as a single package.
+
+**Purpose**: Reduce marketplace complexity and improve usability by grouping components that serve common goals.
+
+**Distribution**: Bundles distributed via plugin marketplace at `claude/marketplace/bundles/`
+
+**Target Users**: CUI project developers requiring complete workflows for quality gates, issue implementation, PR handling, documentation standards, and plugin development.
+
+== Bundle Patterns
+
+The marketplace implements 5 bundle patterns based on functional cohesion and co-occurrence analysis:
+
+=== Pattern 1: Quality Gates Bundle
+
+**Name**: `cui-project-quality-gates`
+
+**Purpose**: Build verification and change management infrastructure
+
+**Components**: 3 components
+- Agent: `maven-project-builder` (executes Maven builds)
+- Agent: `commit-changes` (commits verified changes)
+- Skill: `cui-javadoc` (JavaDoc standards for build validation)
+
+**Use Case**: Verify project builds correctly and commit changes
+
+**Rationale**: These components always work together (100% co-occurrence). Build → verify → commit is an atomic workflow.
+
+=== Pattern 2: Issue Implementation Bundle
+
+**Name**: `cui-issue-implementation`
+
+**Purpose**: Structured issue implementation workflow
+
+**Components**: 5 components
+- Agent: `task-reviewer` (analyzes task requirements)
+- Agent: `task-breakdown-agent` (creates implementation plan)
+- Agent: `task-executor` (executes implementation steps)
+- Agent: `research-best-practices` (researches technical patterns)
+- Command: `/implement-task` (orchestrates workflow)
+
+**Use Case**: Complete end-to-end issue implementation
+
+**Rationale**: Sequential workflow representing complete business function: review → plan → execute.
+
+=== Pattern 3: Pull Request Workflow Bundle
+
+**Name**: `cui-pull-request-workflow`
+
+**Purpose**: PR review response and quality fixing
+
+**Components**: 3 components
+- Agent: `pr-review-responder` (responds to review comments)
+- Agent: `pr-quality-fixer` (fixes quality issues)
+- Command: `/handle-pull-request` (orchestrates PR workflow)
+
+**Use Case**: Handle PR reviews and fix quality issues
+
+**Rationale**: PR-specific workflow with high coupling. Both agents change together when PR process evolves.
+
+=== Pattern 4: Documentation Standards Bundle
+
+**Name**: `cui-documentation-standards`
+
+**Purpose**: AsciiDoc and documentation enforcement
+
+**Components**: 3 components
+- Agent: `asciidoc-reviewer` (reviews AsciiDoc documentation)
+- Skill: `cui-documentation` (documentation standards)
+- Command: `/review-technical-docs` (orchestrates documentation review)
+
+**Use Case**: Review and enforce documentation standards
+
+**Rationale**: Domain-specific bundle. Agent loads skill for standards. Documentation standards evolve together.
+
+=== Pattern 5: Plugin Development Tools Bundle
+
+**Name**: `cui-plugin-development-tools`
+
+**Purpose**: Complete toolchain for plugin development
+
+**Components**: 5 components
+- Command: `/create-agent` (scaffolds new agents)
+- Command: `/create-command` (scaffolds new commands)
+- Command: `/diagnose-agents` (validates agent manifests)
+- Command: `/diagnose-commands` (validates command manifests)
+- Command: `/diagnose-skills` (validates skill manifests)
+
+**Use Case**: Create and maintain high-quality Claude Code plugins
+
+**Rationale**: Complete development lifecycle. Create tools + diagnostic tools = cohesive toolchain for plugin developers.
+
+== Design Principles
+
+=== Functional Cohesion
+
+**Definition**: Components bundled together contribute to a single well-defined task or domain.
+
+**Application**:
+- Quality Gates: All components serve "verify and persist changes"
+- Issue Implementation: All components serve "implement structured issue"
+- PR Workflow: All components serve "handle PR quality"
+- Documentation: All components serve "enforce documentation standards"
+- Plugin Tools: All components serve "plugin development lifecycle"
+
+**Guideline**: Each bundle answers "What single task does this enable?"
+
+=== Component Count Range
+
+**Target Range**: 2-8 components per bundle
+
+**Current Distribution**:
+- Quality Gates: 3 components
+- Issue Implementation: 5 components
+- PR Workflow: 3 components
+- Documentation Standards: 3 components
+- Plugin Development Tools: 5 components
+
+**Average**: 3.8 components per bundle
+
+**Rationale**: Avoids both nano-services (1 component) and monolithic bundles (>8 components). Based on research showing optimal plugin size is 2-8 components.
+
+=== Domain Clustering
+
+**Pattern**: Group components by workflow or domain, not by type
+
+**Examples**:
+- ✅ Group by workflow: "PR Workflow" (combines agents + commands for PR handling)
+- ✅ Group by domain: "Documentation Standards" (combines agent + skill + command for docs)
+- ❌ Avoid grouping by type: "All Agents Bundle" (no functional cohesion)
+
+**Guideline**: Bundle boundaries follow business workflows, not technical classifications.
+
+=== Common Closure Principle
+
+**Definition**: Components that change together belong together
+
+**Application**:
+- Quality Gates: Build and commit standards evolve together
+- Issue Implementation: Task workflow components evolve together
+- PR Workflow: PR handling process evolves together
+- Documentation: Documentation standards evolve together
+- Plugin Tools: Development tooling evolves together
+
+**Benefit**: When requirements change, updates affect single bundle instead of scattered components.
+
+=== Independent Components Remain Unbundled
+
+**Examples of Unbundled Components**:
+- General utilities without workflow coupling
+- One-time setup tools (`setup-project-permissions`)
+- Cross-cutting utilities (`manage-web-permissions`)
+
+**Rationale**: Not all components belong in bundles. General-purpose utilities with low co-occurrence remain standalone.
+
+== Bundle Structure
+
+=== Directory Layout
+
+**Pattern**: Each bundle is self-contained directory with manifest and component subdirectories
+
+[source]
+----
+claude/marketplace/bundles/{bundle-name}/
+├── .claude-plugin/
+│   └── plugin.json           # Bundle manifest
+├── README.md                  # Bundle documentation
+├── agents/                    # Agent components (if any)
+│   └── {agent-name}/
+│       └── AGENT.md
+├── commands/                  # Command components (if any)
+│   └── {command-name}.md
+└── skills/                    # Skill components (if any)
+    └── {skill-name}/
+        ├── SKILL.md
+        └── standards/
+----
+
+**Notes**:
+- Not all bundles have all subdirectories (commands-only bundles have no agents/)
+- Bundles must have at least one component directory
+- Plugin manifest is required for all bundles
+
+=== Plugin Manifest Format
+
+**Location**: `.claude-plugin/plugin.json`
+
+**Required Fields**:
+[source,json]
+----
+{
+  "name": "cui-{bundle-name}",
+  "version": "1.0.0",
+  "description": "{concise bundle purpose}",
+  "keywords": ["{domain}", "{workflow}", "{functionality}"],
+  "category": "development"
+}
+----
+
+**Field Guidelines**:
+- `name`: Must start with `cui-` prefix for CUI bundles
+- `version`: Semantic versioning (MAJOR.MINOR.PATCH)
+- `description`: One-sentence explanation of bundle purpose
+- `keywords`: 3-6 terms for marketplace search
+- `category`: Typically "development" for CUI bundles
+
+=== Bundle README Format
+
+**Location**: `{bundle-name}/README.md`
+
+**Required Sections**:
+
+1. **Purpose**: 1-2 sentences explaining bundle goal
+2. **Components Included**: List of all agents/commands/skills with brief descriptions
+3. **Installation Instructions**: `/plugin install {bundle-name}` command
+4. **Usage Examples**: At least 2 concrete usage scenarios
+5. **Dependencies**: Inter-bundle dependencies (if any)
+
+**Guideline**: Keep README focused on usage, not implementation details.
+
+== Component Distribution
+
+=== Quality Gates Bundle Components
+
+**Bundle**: `cui-project-quality-gates`
+
+**Location**: `claude/marketplace/bundles/cui-project-quality-gates/`
+
+**Components**:
+- `agents/maven-project-builder/` - Maven build execution
+- `agents/commit-changes/` - Git commit automation
+- `skills/cui-javadoc/` - JavaDoc standards
+
+**Used By**: task-executor, pr-quality-fixer, pr-review-responder agents; build-and-verify, fix-intellij-diagnostics commands
+
+=== Issue Implementation Bundle Components
+
+**Bundle**: `cui-issue-implementation`
+
+**Location**: `claude/marketplace/bundles/cui-issue-implementation/`
+
+**Components**:
+- `agents/task-reviewer/` - Task requirements analysis
+- `agents/task-breakdown-agent/` - Implementation planning
+- `agents/task-executor/` - Step-by-step execution
+- `agents/research-best-practices/` - Technical research
+- `commands/implement-task.md` - Workflow orchestration
+
+**Used By**: Direct user invocation via `/implement-task` command
+
+=== Pull Request Workflow Bundle Components
+
+**Bundle**: `cui-pull-request-workflow`
+
+**Location**: `claude/marketplace/bundles/cui-pull-request-workflow/`
+
+**Components**:
+- `agents/pr-review-responder/` - Review comment responses
+- `agents/pr-quality-fixer/` - Quality issue fixes
+- `commands/handle-pull-request.md` - PR workflow orchestration
+
+**Used By**: Direct user invocation via `/handle-pull-request` command
+
+=== Documentation Standards Bundle Components
+
+**Bundle**: `cui-documentation-standards`
+
+**Location**: `claude/marketplace/bundles/cui-documentation-standards/`
+
+**Components**:
+- `agents/asciidoc-reviewer/` - AsciiDoc validation
+- `skills/cui-documentation/` - Documentation standards
+- `commands/review-technical-docs.md` - Review orchestration
+
+**Used By**: Direct user invocation via `/review-technical-docs` command
+
+=== Plugin Development Tools Bundle Components
+
+**Bundle**: `cui-plugin-development-tools`
+
+**Location**: `claude/marketplace/bundles/cui-plugin-development-tools/`
+
+**Components**:
+- `commands/create-agent.md` - Agent scaffolding
+- `commands/create-command.md` - Command scaffolding
+- `commands/diagnose-agents.md` - Agent validation
+- `commands/diagnose-commands.md` - Command validation
+- `commands/diagnose-skills.md` - Skill validation
+
+**Used By**: Plugin developers creating and maintaining marketplace components
+
+=== Unbundled Components
+
+**Location**: `claude/marketplace/agents/`, `claude/marketplace/commands/`, `claude/marketplace/skills/`
+
+**Remaining Standalone Components**:
+- Utility commands without workflow coupling
+- Skill-only plugins (cui-java-skills, cui-frontend-skills, cui-documentation-skills, cui-project-management-skills)
+
+**Rationale**: These components have low co-occurrence with bundled workflows or already exist as well-structured skill plugins.
+
+== Extensibility
+
+=== Adding New Bundles
+
+**Process**:
+
+1. **Identify Candidates**: Find components with high co-occurrence (>70%) and functional cohesion
+2. **Define Workflow**: Articulate single well-defined task or domain
+3. **Validate Component Count**: Ensure 2-8 components per bundle
+4. **Create Structure**: Follow directory layout pattern
+5. **Write Manifest**: Create `.claude-plugin/plugin.json`
+6. **Document Usage**: Write bundle README with required sections
+7. **Register Bundle**: Add entry to `marketplace.json`
+
+**Example Decision Process**:
+[source]
+----
+Question: Should components be bundled?
+
+1. Do they serve single task/domain? (Functional cohesion)
+   NO → Keep separate
+   YES → Continue
+
+2. Are they used together >70% of time? (Co-occurrence)
+   NO → Keep separate
+   YES → Continue
+
+3. Do they change together? (Common closure)
+   NO → Keep separate
+   YES → Continue
+
+4. Component count 2-8?
+   NO → Split into smaller bundles or keep separate
+   YES → Bundle them
+----
+
+=== Domain-Clustered Pattern
+
+**Strategy**: Organize bundles by domain or workflow, not component type
+
+**Current Domains**:
+- Quality Gates (build + commit)
+- Issue Implementation (task workflow)
+- Pull Request Workflow (PR handling)
+- Documentation Standards (docs domain)
+- Plugin Development Tools (tooling domain)
+
+**Future Domain Examples**:
+- Testing workflow bundle (test generation + execution + coverage)
+- Security workflow bundle (vulnerability scanning + dependency updates)
+- Release workflow bundle (versioning + changelog + publishing)
+
+**Guideline**: When adding bundles, identify new domains/workflows rather than splitting existing bundles by component type.
+
+== Installation Model
+
+=== Marketplace Registration
+
+**Location**: `claude/marketplace/.claude-plugin/marketplace.json`
+
+**Bundle Entry Format**:
+[source,json]
+----
+{
+  "name": "cui-{bundle-name}",
+  "description": "{bundle purpose}",
+  "source": "./bundles/{bundle-name}"
+}
+----
+
+**Requirements**:
+- Entry in `plugins` array
+- `source` path relative to marketplace root
+- Description matches bundle plugin.json description
+
+=== Installation Command
+
+**User Command**:
+[source,bash]
+----
+/plugin install cui-{bundle-name}
+----
+
+**What Happens**:
+1. Claude Code reads marketplace.json
+2. Locates bundle at `source` path
+3. Reads `.claude-plugin/plugin.json` manifest
+4. Discovers all component directories (agents/, commands/, skills/)
+5. Installs bundle to `~/.claude/plugins/marketplaces/{marketplace-name}/`
+6. Makes all components available globally
+
+=== Component Resolution
+
+**Path Resolution**: All paths in bundles use relative paths from bundle root
+
+**Examples**:
+[source]
+----
+✅ CORRECT:
+./agents/maven-project-builder/AGENT.md
+./skills/cui-javadoc/SKILL.md
+
+❌ INCORRECT:
+~/git/cui-llm-rules/claude/marketplace/bundles/...
+/Users/oliver/git/...
+----
+
+**Cross-Bundle References**: Components reference bundled paths when invoking agents or skills
+
+**Example - Command referencing bundled agent**:
+[source,yaml]
+----
+sub_agents:
+  - path: ../bundles/cui-project-quality-gates/agents/maven-project-builder
+----
+
+=== Bundle Updates
+
+**Update Mechanism**: Marketplace refresh updates all bundles
+
+[source,bash]
+----
+/plugin marketplace update cui-llm-rules
+----
+
+**Versioning**: Semantic versioning in plugin.json tracked at bundle level
+
+== Cross-References
+
+=== Related Documentation
+
+**Plugin System Architecture**:
+- xref:plugin-architecture.adoc[Plugin Architecture] - Three-layer model, progressive disclosure, Essential Rules pattern
+
+**Component Specifications**:
+- xref:plugin-specifications.adoc[Plugin Specifications] - Manifest formats, directory structure, installation procedures
+
+**Agent Design**:
+- xref:agent-design-principles.adoc[Agent Design Principles] - Design patterns, tool fit, quality standards
+
+=== Integration with Plugin Architecture
+
+**Relationship**: Bundling implements grouping layer on top of three-layer architecture (Skills → Agents → Commands)
+
+**Benefits**:
+- Preserves three-layer model (bundles don't change layer responsibilities)
+- Enhances progressive disclosure (load entire workflows on-demand)
+- Improves component management (toggle bundles instead of individual components)
+
+**Key Insight**: Bundles are packaging mechanism, not new architectural layer. They group components for distribution while maintaining existing layer model.

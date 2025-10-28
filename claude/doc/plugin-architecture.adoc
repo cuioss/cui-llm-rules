@@ -288,3 +288,4 @@ PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 * Standards: `standards/` (AsciiDoc documentation)
 * Technical Specifications: xref:plugin-specifications.adoc[Plugin Specifications]
+* Bundling Architecture: xref:bundling-architecture.adoc[Bundling Architecture]

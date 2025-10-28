@@ -27,3 +27,11 @@ Technical reference for implementation. Directory structure, manifest formats, c
 Comprehensive agent design guide. Design patterns, Essential Rules Pattern, Tool Fit, industry best practices, and quality standards.
 
 **Read this**: Before creating or modifying agents
+
+---
+
+=== xref:bundling-architecture.adoc[Bundling Architecture]
+
+Plugin bundling architecture for organizing components into functional workflow bundles. Bundle patterns, design principles, component distribution, and extensibility guidelines.
+
+**Read this**: To understand how components are organized into bundles

@@ -1,0 +1,14 @@
+{
+  "name": "cui-project-quality-gates",
+  "version": "1.0.0",
+  "description": "Build verification and change management infrastructure for CUI projects",
+  "keywords": ["maven", "build", "commit", "quality", "verification"],
+  "category": "development",
+  "agents": [
+    "./agents/maven-project-builder",
+    "./agents/commit-changes"
+  ],
+  "skills": [
+    "./skills/cui-javadoc"
+  ]
+}

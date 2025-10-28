@@ -88,10 +88,10 @@ Before starting workflow, verify:
 1. ✅ Git repository: Project is a git repository (check `.git/` exists)
 2. ✅ GitHub CLI: `gh` command available if GitHub issue references used
 3. ✅ Agent files: Required agents exist:
-   - `~/.claude/agents/task-reviewer.md`
-   - `~/.claude/agents/task-breakdown-agent.md`
-   - `~/.claude/agents/task-executor.md`
-   - `~/.claude/agents/maven-project-builder.md`
+   - `../../agents/task-reviewer/AGENT.md`
+   - `../../agents/task-breakdown-agent/AGENT.md`
+   - `../../agents/task-executor/AGENT.md`
+   - Agent from cui-project-quality-gates bundle: maven-project-builder
 4. ✅ Clean state: No merge conflicts or unrecoverable git state
 
 **Failure Handling**:

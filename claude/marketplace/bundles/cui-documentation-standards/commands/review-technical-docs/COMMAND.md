@@ -41,18 +41,14 @@ This command orchestrates the `asciidoc-reviewer` agent across your entire proje
 
 Run all checks in parallel using a single Bash command:
 ```bash
-(test -f ~/.claude/agents/asciidoc-reviewer.md && \
- test -f ./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh && \
- test -f ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py && \
- find . -name "*.adoc" -type f -not -path "*/target/*" -not -path "*/node_modules/*" -not -path "*/.git/*" | head -1 > /dev/null) && \
+(find . -name "*.adoc" -type f -not -path "*/target/*" -not -path "*/node_modules/*" -not -path "*/.git/*" | head -1 > /dev/null) && \
 echo "✅ All pre-conditions verified" || echo "❌ Pre-condition check failed"
 ```
 
+**Note:** Agent and skill verification is handled by the plugin system. This check only verifies AsciiDoc files exist.
+
 **If check fails, run individual checks to identify the problem:**
-1. `test -f ~/.claude/agents/asciidoc-reviewer.md || echo "❌ Agent missing: ~/.claude/agents/asciidoc-reviewer.md"`
-2. `test -f ./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh || echo "❌ Validator missing"`
-3. `test -f ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py || echo "❌ Link verifier missing"`
-4. `find . -name "*.adoc" -type f -not -path "*/target/*" -not -path "*/node_modules/*" -not -path "*/.git/*" | head -1 || echo "❌ No AsciiDoc files found"`
+1. `find . -name "*.adoc" -type f -not -path "*/target/*" -not -path "*/node_modules/*" -not -path "*/.git/*" | head -1 || echo "❌ No AsciiDoc files found"`
 
 Display specific error and exit if any pre-condition fails.
 

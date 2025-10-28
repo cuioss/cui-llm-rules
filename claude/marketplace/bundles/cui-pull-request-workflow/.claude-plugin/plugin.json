@@ -1,0 +1,14 @@
+{
+  "name": "cui-pull-request-workflow",
+  "version": "1.0.0",
+  "description": "PR review response and quality fixing workflow",
+  "keywords": ["pull-request", "pr", "review", "quality"],
+  "category": "quality",
+  "agents": [
+    "./agents/pr-review-responder",
+    "./agents/pr-quality-fixer"
+  ],
+  "commands": [
+    "./commands/handle-pull-request"
+  ]
+}

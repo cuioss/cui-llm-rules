@@ -50,9 +50,8 @@ The command performs comprehensive orchestration:
 ## Pre-Conditions
 
 The command verifies before execution:
-- `~/.claude/agents/asciidoc-reviewer.md` exists
-- `./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh` exists
-- `./.claude/skills/cui-documentation/scripts/verify-adoc-links.py` exists
+- Agent `asciidoc-reviewer` is available (provided by cui-documentation-standards bundle)
+- Skill `cui-documentation` is available (provided by cui-documentation-standards bundle)
 - At least one .adoc file exists in project
 
 If any pre-condition fails, displays specific error and exits.

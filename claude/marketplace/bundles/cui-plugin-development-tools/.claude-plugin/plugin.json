@@ -1,0 +1,14 @@
+{
+  "name": "cui-plugin-development-tools",
+  "version": "1.0.0",
+  "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
+  "keywords": ["plugin", "development", "tools", "diagnose", "create"],
+  "category": "development",
+  "commands": [
+    "./commands/create-agent",
+    "./commands/create-command",
+    "./commands/diagnose-agents",
+    "./commands/diagnose-commands",
+    "./commands/diagnose-skills"
+  ]
+}

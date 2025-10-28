@@ -1,0 +1,16 @@
+{
+  "name": "cui-documentation-standards",
+  "version": "1.0.0",
+  "description": "AsciiDoc and documentation standards enforcement for CUI projects",
+  "keywords": ["documentation", "asciidoc", "standards", "review"],
+  "category": "documentation",
+  "agents": [
+    "./agents/asciidoc-reviewer"
+  ],
+  "commands": [
+    "./commands/review-technical-docs"
+  ],
+  "skills": [
+    "./skills/cui-documentation"
+  ]
+}
