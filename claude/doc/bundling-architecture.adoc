@@ -212,12 +212,8 @@ claude/marketplace/bundles/{bundle-name}/
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cuioss/cui-llm-rules.git"
-  },
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["maven", "build", "commit", "quality", "verification"],
-  "category": "development",
   "agents": [
     "./agents/maven-project-builder.md",
     "./agents/commit-changes.md"
@@ -242,9 +238,8 @@ claude/marketplace/bundles/{bundle-name}/
 - `author`: Object with `name` and optional `email`
 - `license`: License identifier (e.g., "Apache-2.0", "MIT")
 - `homepage`: URL to documentation or project home
-- `repository`: Object with `type` and `url` for source repository
+- `repository`: Repository URL as a string (e.g., "https://github.com/owner/repo.git")
 - `keywords`: 3-6 terms for marketplace search
-- `category`: Typically "development", "documentation", or "quality" for CUI bundles
 
 **Component Fields:**
 - `agents`: Array of paths to agent `.md` files (include `.md` extension)

@@ -167,12 +167,8 @@ bundles/{bundle-name}/
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cuioss/cui-llm-rules.git"
-  },
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["maven", "build", "commit", "quality", "verification"],
-  "category": "development",
   "agents": [
     "./agents/maven-project-builder.md",
     "./agents/commit-changes.md"
@@ -220,13 +216,10 @@ bundles/{bundle-name}/
 |URL to documentation or project homepage
 
 |`repository`
-|Object with `type` (e.g., "git") and `url` fields
+|Repository URL as a string. Example: `"https://github.com/owner/repo.git"`
 
 |`keywords`
 |Array of 3-6 search terms for marketplace discovery
-
-|`category`
-|Plugin category (e.g., "development", "documentation", "quality")
 |===
 
 ==== Component Fields
