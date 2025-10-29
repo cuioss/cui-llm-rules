@@ -42,7 +42,7 @@ The marketplace implements 5 bundle patterns based on functional cohesion and co
 - Agent: `task-reviewer` (analyzes task requirements)
 - Agent: `task-breakdown-agent` (creates implementation plan)
 - Agent: `task-executor` (executes implementation steps)
-- Command: `/implement-task` (orchestrates workflow)
+- Command: `/cui-implement-task` (orchestrates workflow)
 
 **Use Case**: Complete end-to-end issue implementation
 
@@ -57,7 +57,7 @@ The marketplace implements 5 bundle patterns based on functional cohesion and co
 **Components**: 3 components
 - Agent: `pr-review-responder` (responds to review comments)
 - Agent: `pr-quality-fixer` (fixes quality issues)
-- Command: `/handle-pull-request` (orchestrates PR workflow)
+- Command: `/cui-handle-pull-request` (orchestrates PR workflow)
 
 **Use Case**: Handle PR reviews and fix quality issues
 
@@ -72,7 +72,7 @@ The marketplace implements 5 bundle patterns based on functional cohesion and co
 **Components**: 3 components
 - Agent: `asciidoc-reviewer` (reviews AsciiDoc documentation)
 - Skill: `cui-documentation` (documentation standards)
-- Command: `/review-technical-docs` (orchestrates documentation review)
+- Command: `/cui-review-technical-docs` (orchestrates documentation review)
 
 **Use Case**: Review and enforce documentation standards
 
@@ -85,11 +85,11 @@ The marketplace implements 5 bundle patterns based on functional cohesion and co
 **Purpose**: Complete toolchain for plugin development
 
 **Components**: 5 components
-- Command: `/create-agent` (scaffolds new agents)
-- Command: `/create-command` (scaffolds new commands)
-- Command: `/diagnose-agents` (validates agent manifests)
-- Command: `/diagnose-commands` (validates command manifests)
-- Command: `/diagnose-skills` (validates skill manifests)
+- Command: `/cui-create-agent` (scaffolds new agents)
+- Command: `/cui-create-command` (scaffolds new commands)
+- Command: `/cui-diagnose-agents` (validates agent manifests)
+- Command: `/cui-diagnose-commands` (validates command manifests)
+- Command: `/cui-diagnose-skills` (validates skill manifests)
 
 **Use Case**: Create and maintain high-quality Claude Code plugins
 
@@ -219,7 +219,7 @@ claude/marketplace/bundles/{bundle-name}/
     "./agents/commit-changes.md"
   ],
   "commands": [
-    "./commands/verify-build.md"
+    "./commands/cui-verify-build.md"
   ],
   "skills": [
     "./skills/cui-javadoc"
@@ -279,7 +279,7 @@ claude/marketplace/bundles/{bundle-name}/
 - `agents/commit-changes.md` - Git commit automation
 - `skills/cui-javadoc/` - JavaDoc standards (directory with SKILL.md)
 
-**Used By**: task-executor, pr-quality-fixer, pr-review-responder agents; build-and-verify, fix-intellij-diagnostics commands
+**Used By**: task-executor, pr-quality-fixer, pr-review-responder agents; cui-build-and-verify, cui-fix-intellij-diagnostics commands
 
 === Issue Implementation Bundle Components
 
@@ -291,11 +291,11 @@ claude/marketplace/bundles/{bundle-name}/
 - `agents/task-reviewer.md` - Task requirements analysis
 - `agents/task-breakdown-agent.md` - Implementation planning
 - `agents/task-executor.md` - Step-by-step execution
-- `commands/implement-task.md` - Workflow orchestration
+- `commands/cui-implement-task.md` - Workflow orchestration
 
 **Dependencies**: Agents may invoke standalone `research-best-practices` agent for technical research
 
-**Used By**: Direct user invocation via `/implement-task` command
+**Used By**: Direct user invocation via `/cui-implement-task` command
 
 === Pull Request Workflow Bundle Components
 
@@ -306,9 +306,9 @@ claude/marketplace/bundles/{bundle-name}/
 **Components**:
 - `agents/pr-review-responder.md` - Review comment responses
 - `agents/pr-quality-fixer.md` - Quality issue fixes
-- `commands/handle-pull-request.md` - PR workflow orchestration
+- `commands/cui-handle-pull-request.md` - PR workflow orchestration
 
-**Used By**: Direct user invocation via `/handle-pull-request` command
+**Used By**: Direct user invocation via `/cui-handle-pull-request` command
 
 === Documentation Standards Bundle Components
 
@@ -319,9 +319,9 @@ claude/marketplace/bundles/{bundle-name}/
 **Components**:
 - `agents/asciidoc-reviewer.md` - AsciiDoc validation
 - `skills/cui-documentation/` - Documentation standards (directory with SKILL.md)
-- `commands/review-technical-docs.md` - Review orchestration
+- `commands/cui-review-technical-docs.md` - Review orchestration
 
-**Used By**: Direct user invocation via `/review-technical-docs` command
+**Used By**: Direct user invocation via `/cui-review-technical-docs` command
 
 === Plugin Development Tools Bundle Components
 
@@ -330,11 +330,11 @@ claude/marketplace/bundles/{bundle-name}/
 **Location**: `claude/marketplace/bundles/cui-plugin-development-tools/`
 
 **Components**:
-- `commands/create-agent.md` - Agent scaffolding
-- `commands/create-command.md` - Command scaffolding
-- `commands/diagnose-agents.md` - Agent validation
-- `commands/diagnose-commands.md` - Command validation
-- `commands/diagnose-skills.md` - Skill validation
+- `commands/cui-create-agent.md` - Agent scaffolding
+- `commands/cui-create-command.md` - Command scaffolding
+- `commands/cui-diagnose-agents.md` - Agent validation
+- `commands/cui-diagnose-commands.md` - Command validation
+- `commands/cui-diagnose-skills.md` - Skill validation
 
 **Used By**: Plugin developers creating and maintaining marketplace components
 
@@ -345,12 +345,12 @@ claude/marketplace/bundles/{bundle-name}/
 **Location**: `claude/marketplace/bundles/cui-utility-commands/`
 
 **Components**:
-- `commands/build-and-verify.md` - Project verification and build
-- `commands/create-update-agents-md.md` - agents.md generation
-- `commands/fix-intellij-diagnostics.md` - IDE diagnostics fixer
-- `commands/manage-web-permissions.md` - WebFetch domain manager
-- `commands/setup-project-permissions.md` - Permission setup and verification
-- `commands/verify-architecture-diagrams.md` - PlantUML diagram verification
+- `commands/cui-build-and-verify.md` - Project verification and build
+- `commands/cui-create-update-agents-md.md` - agents.md generation
+- `commands/cui-fix-intellij-diagnostics.md` - IDE diagnostics fixer
+- `commands/cui-manage-web-permissions.md` - WebFetch domain manager
+- `commands/cui-setup-project-permissions.md` - Permission setup and verification
+- `commands/cui-verify-architecture-diagrams.md` - PlantUML diagram verification
 
 **Used By**: Cross-project maintenance and setup tasks
 
@@ -466,7 +466,7 @@ Question: Should components be bundled?
 ----
 ✅ CORRECT:
 ./agents/maven-project-builder.md      # Agent as single .md file
-./commands/verify-build.md             # Command as single .md file
+./commands/cui-verify-build.md             # Command as single .md file
 ./skills/cui-javadoc                   # Skill as directory (contains SKILL.md)
 
 ❌ INCORRECT:
@@ -510,7 +510,7 @@ sub_agents:
 
 |**Commands**
 |Single `.md` file
-|`commands/build-and-verify.md`
+|`commands/cui-build-and-verify.md`
 |Direct loading without directory traversal
 
 |**Agents**
@@ -532,7 +532,7 @@ sub_agents:
 [source]
 ----
 commands/
-└── build-and-verify/          ❌ Directory
+└── cui-build-and-verify/          ❌ Directory
     ├── COMMAND.md             ❌ Exposed as ":COMMAND"
     └── README.md              ❌ Exposed as ":README"
 ----
@@ -541,7 +541,7 @@ commands/
 [source]
 ----
 commands/
-└── build-and-verify.md        ✅ Single file
+└── cui-build-and-verify.md        ✅ Single file
 ----
 
 **Verification**: After restructuring, ensure:

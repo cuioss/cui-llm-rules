@@ -1,5 +1,5 @@
 ---
-name: manage-web-permissions
+name: cui-manage-web-permissions
 description: Analyze and consolidate WebFetch domain permissions across projects with security research and validation
 ---
 

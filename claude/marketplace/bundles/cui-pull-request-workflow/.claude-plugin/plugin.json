@@ -15,6 +15,6 @@
     "./agents/pr-quality-fixer.md"
   ],
   "commands": [
-    "./commands/handle-pull-request.md"
+    "./commands/cui-handle-pull-request.md"
   ]
 }

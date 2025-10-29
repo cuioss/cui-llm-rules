@@ -1,5 +1,5 @@
 ---
-name: verify-architecture-diagrams
+name: cui-verify-architecture-diagrams
 description: Analyze and update PlantUML diagrams to reflect current codebase state and regenerate PNG images
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: diagnose-agents
+name: cui-diagnose-agents
 description: Analyze, verify, and fix agents for tool coverage, best practices, and structural issues
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: review-technical-docs
+name: cui-review-technical-docs
 description: Execute comprehensive AsciiDoc review with format validation, link verification, and quality analysis
 ---
 

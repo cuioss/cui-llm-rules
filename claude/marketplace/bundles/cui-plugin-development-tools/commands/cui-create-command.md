@@ -1,5 +1,5 @@
 ---
-name: create-command
+name: cui-create-command
 description: Guide users through creating a new well-structured slash command with comprehensive questionnaire
 ---
 

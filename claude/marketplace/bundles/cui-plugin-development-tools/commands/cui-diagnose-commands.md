@@ -1,5 +1,5 @@
 ---
-name: diagnose-commands
+name: cui-diagnose-commands
 description: Analyze, verify, and fix slash commands for ambiguities, inconsistencies, and structural issues
 ---
 

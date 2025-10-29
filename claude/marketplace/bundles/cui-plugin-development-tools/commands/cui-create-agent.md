@@ -1,5 +1,5 @@
 ---
-name: create-agent
+name: cui-create-agent
 description: Guide users through creating a new well-structured agent following architectural best practices
 ---
 

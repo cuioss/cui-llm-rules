@@ -174,7 +174,7 @@ bundles/{bundle-name}/
     "./agents/commit-changes.md"
   ],
   "commands": [
-    "./commands/verify-build.md"
+    "./commands/cui-verify-build.md"
   ],
   "skills": [
     "./skills/cui-javadoc"
@@ -232,7 +232,7 @@ bundles/{bundle-name}/
 |Array of paths to agent `.md` files. **MUST include `.md` extension**. Example: `"./agents/maven-project-builder.md"`
 
 |`commands`
-|Array of paths to command `.md` files. **MUST include `.md` extension**. Example: `"./commands/verify-build.md"`
+|Array of paths to command `.md` files. **MUST include `.md` extension**. Example: `"./commands/cui-verify-build.md"`
 
 |`skills`
 |Array of paths to skill directories (no `.md` extension). Directory must contain `SKILL.md`. Example: `"./skills/cui-javadoc"`
@@ -251,7 +251,7 @@ bundles/{bundle-name}/
 ```json
 // ✅ CORRECT
 "agents": ["./agents/maven-project-builder.md"]
-"commands": ["./commands/verify-build.md"]
+"commands": ["./commands/cui-verify-build.md"]
 "skills": ["./skills/cui-javadoc"]
 
 // ❌ INCORRECT
@@ -548,7 +548,7 @@ ls -la ~/.claude/plugins/marketplaces/cui-development-standards/
 /help
 
 # Verify specific command exists
-/build-and-verify --help
+/cui-build-and-verify --help
 ```
 
 === Skills Verification
@@ -632,7 +632,7 @@ color: green
 - Quote strings with special characters
 - Match `name:` field to filename (without `.md`)
 
-**Validation**: Use `/diagnose-commands` or `/diagnose-agents` to verify frontmatter
+**Validation**: Use `/cui-diagnose-commands` or `/cui-diagnose-agents` to verify frontmatter
 
 === Missing .md Extensions
 
@@ -701,8 +701,8 @@ agents/
 {
   "name": "cui-utility-commands",
   "commands": [
-    "./commands/build-and-verify.md",
-    "./commands/setup-project-permissions.md"
+    "./commands/cui-build-and-verify.md",
+    "./commands/cui-setup-project-permissions.md"
   ]
 }
 ```

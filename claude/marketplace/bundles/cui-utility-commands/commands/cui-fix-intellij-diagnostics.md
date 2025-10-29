@@ -1,5 +1,5 @@
 ---
-name: fix-intellij-diagnostics
+name: cui-fix-intellij-diagnostics
 description: Retrieve and fix IDE diagnostics automatically, suppressing only when no reasonable fix is available
 ---
 

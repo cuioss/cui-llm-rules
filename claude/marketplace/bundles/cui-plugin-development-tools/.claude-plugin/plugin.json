@@ -11,10 +11,10 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["plugin", "development", "tools", "diagnose", "create"],
   "commands": [
-    "./commands/create-agent.md",
-    "./commands/create-command.md",
-    "./commands/diagnose-agents.md",
-    "./commands/diagnose-commands.md",
-    "./commands/diagnose-skills.md"
+    "./commands/cui-create-agent.md",
+    "./commands/cui-create-command.md",
+    "./commands/cui-diagnose-agents.md",
+    "./commands/cui-diagnose-commands.md",
+    "./commands/cui-diagnose-skills.md"
   ]
 }

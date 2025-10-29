@@ -16,6 +16,6 @@
     "./agents/task-executor.md"
   ],
   "commands": [
-    "./commands/implement-task.md"
+    "./commands/cui-implement-task.md"
   ]
 }

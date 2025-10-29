@@ -1,5 +1,5 @@
 ---
-name: handle-pull-request
+name: cui-handle-pull-request
 description: Execute comprehensive PR workflow including CI/Sonar wait, review responses, and fixes
 ---
 

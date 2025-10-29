@@ -1,5 +1,5 @@
 ---
-name: diagnose-skills
+name: cui-diagnose-skills
 description: Analyze, verify, and fix skills for structure, YAML frontmatter, standards references, and integration quality
 ---
 

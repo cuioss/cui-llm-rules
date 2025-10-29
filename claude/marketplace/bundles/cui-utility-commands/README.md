@@ -20,35 +20,35 @@ These utilities are independent tools that can be used across different CUI proj
 1. **build-and-verify** - Project verification and build command
    - Runs Maven build with all quality checks
    - Optionally commits and pushes changes
-   - Usage: `/build-and-verify [push]`
+   - Usage: `/cui-build-and-verify [push]`
 
 2. **create-update-agents-md** - agents.md generation
    - Creates or updates agents.md following OpenAI specification
    - Sources from CLAUDE.md, doc/ai-rules.md, or global standards
-   - Usage: `/create-update-agents-md [push]`
+   - Usage: `/cui-create-update-agents-md [push]`
 
 3. **fix-intellij-diagnostics** - IDE diagnostics fixer
    - Retrieves and fixes IDE diagnostics automatically
    - Suppresses only when no reasonable fix available
-   - Usage: `/fix-intellij-diagnostics [file=<path>] [auto-fix=<boolean>] [push]`
+   - Usage: `/cui-fix-intellij-diagnostics [file=<path>] [auto-fix=<boolean>] [push]`
 
 4. **manage-web-permissions** - WebFetch domain manager
    - Analyzes domains across all projects
    - Consolidates safe domains to global settings
    - Performs security research on unknown domains
-   - Usage: `/manage-web-permissions [auto] [project=<path>] [dry-run]`
+   - Usage: `/cui-manage-web-permissions [auto] [project=<path>] [dry-run]`
 
 5. **setup-project-permissions** - Permission setup and verification
    - Fixes duplicates, suspicious permissions, path formats
    - Manages temp directory permissions
    - Ensures proper permission organization
-   - Usage: `/setup-project-permissions [add=<permission>] [ensurePermissions=<list>] [dry-run] [auto-fix]`
+   - Usage: `/cui-setup-project-permissions [add=<permission>] [ensurePermissions=<list>] [dry-run] [auto-fix]`
 
 6. **verify-architecture-diagrams** - PlantUML diagram verification
    - Analyzes and updates PlantUML diagrams
    - Regenerates PNG images
    - Removes orphaned diagrams with approval
-   - Usage: `/verify-architecture-diagrams [plantuml_dir] [push]`
+   - Usage: `/cui-verify-architecture-diagrams [plantuml_dir] [push]`
 
 ## Installation
 
@@ -61,64 +61,64 @@ These utilities are independent tools that can be used across different CUI proj
 ### Setup Project Permissions
 ```bash
 # Basic verification and fixing
-/setup-project-permissions
+/cui-setup-project-permissions
 
 # Add specific permission
-/setup-project-permissions add="Edit(//~/git/new-project/**)"
+/cui-setup-project-permissions add="Edit(//~/git/new-project/**)"
 
 # Auto-fix safe issues
-/setup-project-permissions auto-fix
+/cui-setup-project-permissions auto-fix
 ```
 
 ### Manage WebFetch Permissions
 ```bash
 # Analyze all projects and consolidate domains
-/manage-web-permissions
+/cui-manage-web-permissions
 
 # Auto-consolidate safe domains
-/manage-web-permissions auto
+/cui-manage-web-permissions auto
 
 # Preview changes without applying
-/manage-web-permissions dry-run
+/cui-manage-web-permissions dry-run
 ```
 
 ### Build and Verify Project
 ```bash
 # Run build and fix issues
-/build-and-verify
+/cui-build-and-verify
 
 # Build, fix, commit, and push
-/build-and-verify push
+/cui-build-and-verify push
 ```
 
 ### Fix IDE Diagnostics
 ```bash
 # Fix current file automatically
-/fix-intellij-diagnostics
+/cui-fix-intellij-diagnostics
 
 # Fix specific file with manual approval
-/fix-intellij-diagnostics file=src/main/java/MyClass.java auto-fix=false
+/cui-fix-intellij-diagnostics file=src/main/java/MyClass.java auto-fix=false
 
 # Fix and push changes
-/fix-intellij-diagnostics push
+/cui-fix-intellij-diagnostics push
 ```
 
 ### Update agents.md
 ```bash
 # Create/update agents.md
-/create-update-agents-md
+/cui-create-update-agents-md
 
 # Update and commit/push
-/create-update-agents-md push
+/cui-create-update-agents-md push
 ```
 
 ### Verify Architecture Diagrams
 ```bash
 # Verify all diagrams in doc/plantuml
-/verify-architecture-diagrams
+/cui-verify-architecture-diagrams
 
 # Verify and commit/push changes
-/verify-architecture-diagrams push
+/cui-verify-architecture-diagrams push
 ```
 
 ## Dependencies

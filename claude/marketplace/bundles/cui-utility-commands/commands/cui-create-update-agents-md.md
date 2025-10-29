@@ -1,5 +1,5 @@
 ---
-name: create-update-agents-md
+name: cui-create-update-agents-md
 description: Create or update project-specific agents.md file following OpenAI specification
 ---
 

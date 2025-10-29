@@ -1,5 +1,5 @@
 ---
-name: build-and-verify
+name: cui-build-and-verify
 description: Execute comprehensive project verification by running Maven build and optionally committing changes
 ---
 

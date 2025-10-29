@@ -14,7 +14,7 @@
     "./agents/asciidoc-reviewer.md"
   ],
   "commands": [
-    "./commands/review-technical-docs.md"
+    "./commands/cui-review-technical-docs.md"
   ],
   "skills": [
     "./skills/cui-documentation"

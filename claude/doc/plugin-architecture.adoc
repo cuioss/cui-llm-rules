@@ -40,7 +40,7 @@ The cui-standards plugin provides centralized development standards, skills, age
 │ LAYER 3: Commands (User Utilities)                          │
 │ • User-invoked slash commands                               │
 │ • Verification and management tools                         │
-│ • Examples: /agents-doctor, /setup-project-permissions      │
+│ • Examples: /agents-doctor, /cui-setup-project-permissions      │
 └─────────────────────────────────────────────────────────────┘
 
            All layers distributed via single plugin installation

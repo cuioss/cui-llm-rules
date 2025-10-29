@@ -1,5 +1,5 @@
 ---
-name: implement-task
+name: cui-implement-task
 description: Verify, plan, and implement issues through end-to-end workflow with agent coordination
 ---
 

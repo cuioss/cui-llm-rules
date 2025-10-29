@@ -1,5 +1,5 @@
 ---
-name: setup-project-permissions
+name: cui-setup-project-permissions
 description: Verify and fix permissions in settings by removing duplicates, fixing formats, and ensuring proper organization
 ---
 
