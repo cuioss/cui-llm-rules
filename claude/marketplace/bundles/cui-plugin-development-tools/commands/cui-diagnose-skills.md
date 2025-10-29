@@ -9,29 +9,39 @@ Analyze, verify, and fix skills for structure, YAML frontmatter, standards refer
 
 ## PARAMETERS
 
-- **project** (optional): Review all project-specific skills in `.claude/skills/`
-- **global** (optional): Review all global skills in `claude/marketplace/skills/` (plugin skills)
+- **scope=marketplace** (default): Analyze skills in marketplace bundles (~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/)
+- **scope=global**: Analyze skills in global location (~/.claude/skills/)
+- **scope=project**: Analyze skills in project location (.claude/skills/)
 - **skill-name** (optional): Review a specific skill by name (e.g., `cui-java-core`)
-- **No parameters**: Interactive mode - display menu of all skills and let user select
+- **No parameters**: Interactive mode with marketplace default - display menu of all skills and let user select
 
 ## PARAMETER VALIDATION
 
-**If `project` parameter is provided:**
+**If `scope=marketplace` (default):**
+- Process all skill directories in `~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/` directories
+- Search across all bundles in marketplace
+- Example paths:
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/skills/`
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/skills/`
+
+**If `scope=global`:**
+- Process all skill directories in `~/.claude/skills/`
+- Flat directory structure (no bundles)
+
+**If `scope=project`:**
 - Process all skill directories in `.claude/skills/`
 - Skip if directory doesn't exist (display message)
 
-**If `global` parameter is provided:**
-- Process all skill directories in `claude/marketplace/skills/`
-- Exclude `diagnose-skills` itself from analysis
-
 **If specific skill name is provided:**
-- Look for skill in both `.claude/skills/` and `claude/marketplace/skills/`
+- Search based on current scope parameter
+- If no scope specified, search marketplace first, then global, then project
 - Process the first match found
 - Report error if skill not found
 
 **If no parameters provided:**
-- Display interactive menu with numbered list of all skills
-- Let user select which skill(s) to review
+- Use default scope (marketplace)
+- Display interactive menu with numbered list of all skills from marketplace
+- Let user select which skill(s) to review or change scope
 
 ## WORKFLOW INSTRUCTIONS
 
@@ -39,53 +49,55 @@ Analyze, verify, and fix skills for structure, YAML frontmatter, standards refer
 
 **A. Parse Parameters**
 
-Determine what to process based on parameters:
+Determine what to process based on scope parameter (defaults to "marketplace"):
 
-1. If `project` → Set scope to `.claude/skills/`
-2. If `global` → Set scope to `claude/marketplace/skills/`
-3. If skill name provided → Search both directories
-4. If no parameters → Interactive mode
+1. If `scope=marketplace` (default) → Set scope to `~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/`
+2. If `scope=global` → Set scope to `~/.claude/skills/`
+3. If `scope=project` → Set scope to `.claude/skills/`
+4. If skill name provided → Search in current scope only
+5. If no parameters → Interactive mode with marketplace default
 
 **B. Discover Skills**
 
 Based on scope, find all skill directories:
 
 ```bash
+# For marketplace scope (default)
+find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
+
+# For global scope
+find ~/.claude/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
+
 # For project scope
 find .claude/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
 
-# For global scope
-find claude/marketplace/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
+# For specific skill in marketplace scope
+find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
 
-# For specific skill (search both)
-find .claude/skills claude/marketplace/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
+# For specific skill in global scope
+find ~/.claude/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
+
+# For specific skill in project scope
+find .claude/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
 ```
 
 **C. Interactive Mode (if no parameters)**
 
-Display menu:
+Display menu based on scope:
 
 ```
-Available Skills:
+Available Skills (scope=marketplace):
 
-PROJECT SKILLS (.claude/skills/):
-(none found)
-
-GLOBAL SKILLS (claude/marketplace/skills/):
-1. cui-java-core
-2. cui-java-unit-testing
-3. cui-javadoc
-4. cui-java-cdi
-5. cui-frontend-development
-6. cui-documentation
-7. cui-project-setup
-8. cui-requirements
+MARKETPLACE SKILLS (~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/):
+1. cui-javadoc (cui-project-quality-gates bundle)
+2. cui-documentation (cui-documentation-standards bundle)
+...
 
 Options:
 - Enter number to select single skill
-- Enter "project" to review all project skills
-- Enter "global" to review all global skills
-- Enter "all" to review everything
+- Enter "all" to review all skills in current scope
+- Enter "scope=global" to switch to global skills
+- Enter "scope=project" to switch to project skills
 - Enter "quit" to exit
 
 Your choice:
@@ -681,6 +693,126 @@ Update statistics:
 - `content_ambiguities`: Count of ambiguous statements
 - `integrated_content_score`: Overall quality score (0-100)
 
+#### Step 3.8B: Validate Architecture Compliance
+
+**CRITICAL**: Validate skill follows marketplace architecture rules.
+
+**Invoke Architecture Skill**:
+```
+Skill: cui-marketplace-architecture
+```
+
+This loads architecture rules and validation patterns for marketplace components.
+
+**A. Check Self-Containment**
+
+Apply validation from loaded standards (self-containment-validation.md):
+
+```bash
+# Scan for external references (escape sequences)
+grep -n "\.\..*\.\..*\.\." <skill-path>/SKILL.md
+
+# Scan for absolute paths
+grep -n "~/\|^/" <skill-path>/SKILL.md | grep -v "https://"
+
+# Check for .adoc references (likely external)
+grep -n "\.adoc" <skill-path>/SKILL.md
+```
+
+Report findings:
+```
+Architecture Compliance - Self-Containment:
+✅ No external file references (fully self-contained)
+❌ External file references found (3):
+  Line 272: ../../../../standards/requirements/requirements-document.adoc
+  Line 273: ../../../../standards/requirements/specification-documents.adoc
+  Line 274: ../../../../standards/requirements/planning.adoc
+
+  VIOLATION: Skills must be self-contained
+  FIX: Copy these files to skill/standards/ or remove if documentation-only
+```
+
+**B. Verify Internal References**
+
+Validate all `Read:` statements point to existing internal files:
+
+```bash
+# Extract all Read: standards/ statements
+grep "Read: standards/" <skill-path>/SKILL.md | awk '{print $2}'
+
+# Verify each file exists
+for file in $(extracted_files); do
+  if [ ! -f "<skill-path>/$file" ]; then
+    echo "MISSING: $file"
+  fi
+done
+```
+
+**C. Categorize References Section**
+
+Apply reference patterns from loaded standards (reference-patterns.md):
+
+```
+## References Section Analysis:
+✅ External URLs: 5 (allowed - https://...)
+✅ Skill references: 0 (allowed - Skill: cui-*)
+✅ Internal standards: 6 (allowed - standards/*.md)
+❌ External file refs: 4 (VIOLATION - ../../../../...)
+```
+
+**D. Calculate Architecture Score**
+
+Apply scoring criteria from loaded standards (scoring-criteria.md):
+
+```
+Self-Containment Score = 100 - total_deductions
+
+Deductions:
+- External file ref in workflow: -20 points each
+- External file ref in documentation: -10 points each
+- Absolute path: -20 points each
+- Missing internal file: -10 points each
+```
+
+Display:
+```
+Architecture Compliance Score: 92/100 (Excellent)
+
+Breakdown:
+- External refs in workflow: 0 (-0 points)
+- External refs in docs: 0 (-0 points)
+- Absolute paths: 0 (-0 points)
+- Missing files: 0 (-0 points)
+
+Status: ✅ Fully self-contained, marketplace ready
+```
+
+**E. Add to Issue Report**
+
+Categorize architecture violations:
+
+**CRITICAL** (if external references in workflow):
+```
+- External file reference at line X: ../../../../path/to/file.adoc
+  Impact: Skill not self-contained, breaks portability
+  Fix: Copy file to standards/ or convert to Skill dependency
+```
+
+**WARNINGS** (if external references only in documentation):
+```
+- Documentation reference at line X: ../../../../path/to/file.adoc
+  Impact: Link may break if skill distributed separately
+  Fix: Remove, internalize, or convert to https:// URL
+```
+
+**F. Update Statistics**
+
+Track architecture compliance:
+- `architecture_score`: Self-containment score (0-100)
+- `external_file_refs`: Count of external file references
+- `external_doc_refs`: Count of documentation-only external refs
+- `architecture_violations`: Total architecture issues
+
 #### Step 3.9: Generate Issue Report
 
 Categorize all issues found:
@@ -1110,26 +1242,33 @@ A well-formed skill should have:
 
 ## USAGE EXAMPLES
 
-### Analyze All Project Skills
+### Analyze All Marketplace Skills (default)
 ```
-/diagnose-skills project
+/cui-diagnose-skills
+/cui-diagnose-skills scope=marketplace
 ```
 
 ### Analyze All Global Skills
 ```
-/diagnose-skills global
+/cui-diagnose-skills scope=global
 ```
 
-### Analyze Specific Skill
+### Analyze All Project Skills
 ```
-/diagnose-skills cui-java-core
-/diagnose-skills cui-java-unit-testing
+/cui-diagnose-skills scope=project
 ```
 
-### Interactive Mode
+### Analyze Specific Skill (uses scope to determine where to search)
 ```
-/diagnose-skills
-[Select from menu]
+/cui-diagnose-skills cui-javadoc
+/cui-diagnose-skills scope=global cui-custom-skill
+/cui-diagnose-skills scope=project my-project-skill
+```
+
+### Interactive Mode (defaults to marketplace)
+```
+/cui-diagnose-skills
+[Select from menu or change scope]
 ```
 
 ## ERROR HANDLING

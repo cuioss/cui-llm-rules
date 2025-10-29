@@ -9,29 +9,39 @@ Analyze, verify, and fix slash commands for ambiguities, inconsistencies, and st
 
 ## PARAMETERS
 
-- **project** (optional): Review all project-specific slash commands in `.claude/commands/`
-- **global** (optional): Review all global slash commands in `~/.claude/commands/`
-- **command-name** (optional): Review a specific command by name (e.g., `build-and-verify`)
-- **No parameters**: Interactive mode - display menu of all commands and let user select
+- **scope=marketplace** (default): Analyze commands in marketplace bundles (~/git/cui-llm-rules/claude/marketplace/bundles/*/commands/)
+- **scope=global**: Analyze commands in global location (~/.claude/commands/)
+- **scope=project**: Analyze commands in project location (.claude/commands/)
+- **command-name** (optional): Review a specific command by name (e.g., `cui-build-and-verify`)
+- **No parameters**: Interactive mode with marketplace default - display menu of all commands and let user select
 
 ## PARAMETER VALIDATION
 
-**If `project` parameter is provided:**
+**If `scope=marketplace` (default):**
+- Process all `.md` files in `~/git/cui-llm-rules/claude/marketplace/bundles/*/commands/` directories
+- Search across all bundles in marketplace
+- Example paths:
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/commands/`
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-pull-request-workflow/commands/`
+
+**If `scope=global`:**
+- Process all `.md` files in `~/.claude/commands/` directory
+- Flat directory structure (no bundles)
+
+**If `scope=project`:**
 - Process all `.md` files in `.claude/commands/` directory
 - Skip if directory doesn't exist (display message)
 
-**If `global` parameter is provided:**
-- Process all `.md` files in `~/.claude/commands/` directory
-- Exclude `diagnose-commands.md` (this file) from analysis
-
 **If specific command name is provided:**
-- Look for command in both `.claude/commands/` and `~/.claude/commands/`
+- Search based on current scope parameter
+- If no scope specified, search marketplace first, then global, then project
 - Process the first match found
 - Report error if command not found
 
 **If no parameters provided:**
-- Display interactive menu with numbered list of all commands
-- Let user select which command(s) to review
+- Use default scope (marketplace)
+- Display interactive menu with numbered list of all commands from marketplace
+- Let user select which command(s) to review or change scope
 
 ## WORKFLOW INSTRUCTIONS
 
@@ -39,52 +49,64 @@ Analyze, verify, and fix slash commands for ambiguities, inconsistencies, and st
 
 **A. Parse Parameters**
 
-Determine what to process based on parameters:
+Determine what to process based on scope parameter (defaults to "marketplace"):
 
-1. If `project` → Set scope to `.claude/commands/`
-2. If `global` → Set scope to `~/.claude/commands/`
-3. If command name provided → Search both directories
-4. If no parameters → Interactive mode
+1. If `scope=marketplace` (default) → Set scope to `~/git/cui-llm-rules/claude/marketplace/bundles/*/commands/`
+2. If `scope=global` → Set scope to `~/.claude/commands/`
+3. If `scope=project` → Set scope to `.claude/commands/`
+4. If command name provided → Search in current scope only
+5. If no parameters → Interactive mode with marketplace default
 
 **B. Discover Commands**
 
 Based on scope, find all slash command files:
 
 ```bash
+# For marketplace scope (default)
+find ~/git/cui-llm-rules/claude/marketplace/bundles/*/commands -name "*.md" -type f 2>/dev/null | sort
+
+# For global scope
+find ~/.claude/commands -name "*.md" -type f 2>/dev/null | sort
+
 # For project scope
 find .claude/commands -name "*.md" -type f 2>/dev/null | sort
 
-# For global scope
-find ~/.claude/commands -name "*.md" -type f ! -name "diagnose-commands.md" | sort
+# For specific command in marketplace scope
+find ~/git/cui-llm-rules/claude/marketplace/bundles/*/commands -name "<command-name>.md" -type f 2>/dev/null | head -1
 
-# For specific command (search both)
-find .claude/commands ~/.claude/commands -name "<command-name>.md" -type f 2>/dev/null | head -1
+# For specific command in global scope
+find ~/.claude/commands -name "<command-name>.md" -type f 2>/dev/null | head -1
+
+# For specific command in project scope
+find .claude/commands -name "<command-name>.md" -type f 2>/dev/null | head -1
 ```
 
 **C. Interactive Mode (if no parameters)**
 
-Display menu:
+Display menu based on scope:
 
 ```
-Available Slash Commands:
+Available Slash Commands (scope=marketplace):
 
-PROJECT COMMANDS (.claude/commands/):
-1. build-and-verify
-2. verify-integration-tests
-3. verify-micro-benchmark
-...
-
-GLOBAL COMMANDS (~/.claude/commands/):
-10. docs-adoc
-11. handle-pull-request
-12. diagnose-commands
+MARKETPLACE COMMANDS (~/git/cui-llm-rules/claude/marketplace/bundles/*/commands/):
+1. cui-build-and-verify (cui-utility-commands bundle)
+2. cui-create-update-agents-md (cui-utility-commands bundle)
+3. cui-fix-intellij-diagnostics (cui-utility-commands bundle)
+4. cui-create-agent (cui-plugin-development-tools bundle)
+5. cui-create-command (cui-plugin-development-tools bundle)
+6. cui-diagnose-agents (cui-plugin-development-tools bundle)
+7. cui-diagnose-commands (cui-plugin-development-tools bundle)
+8. cui-diagnose-skills (cui-plugin-development-tools bundle)
+9. cui-handle-pull-request (cui-pull-request-workflow bundle)
+10. cui-implement-task (cui-issue-implementation bundle)
+11. cui-review-technical-docs (cui-documentation-standards bundle)
 ...
 
 Options:
 - Enter number to select single command
-- Enter "project" to review all project commands
-- Enter "global" to review all global commands
-- Enter "all" to review everything
+- Enter "all" to review all commands in current scope
+- Enter "scope=global" to switch to global commands
+- Enter "scope=project" to switch to project commands
 - Enter "quit" to exit
 
 Your choice:
@@ -1113,31 +1135,38 @@ A well-formed slash command should have:
 
 ## USAGE EXAMPLES
 
-### Analyze All Project Commands
+### Analyze All Marketplace Commands (default)
 ```
-/diagnose-commands project
+/cui-diagnose-commands
+/cui-diagnose-commands scope=marketplace
 ```
 
 ### Analyze All Global Commands
 ```
-/diagnose-commands global
+/cui-diagnose-commands scope=global
 ```
 
-### Analyze Specific Command
+### Analyze All Project Commands
 ```
-/diagnose-commands docs-adoc
-/diagnose-commands build-and-verify
-```
-
-### Interactive Mode
-```
-/diagnose-commands
-[Select from menu]
+/cui-diagnose-commands scope=project
 ```
 
-### Review Multiple Commands
+### Analyze Specific Command (uses scope to determine where to search)
 ```
-/diagnose-commands project
+/cui-diagnose-commands cui-build-and-verify
+/cui-diagnose-commands scope=global my-custom-command
+/cui-diagnose-commands scope=project verify-all
+```
+
+### Interactive Mode (defaults to marketplace)
+```
+/cui-diagnose-commands
+[Select from menu or change scope]
+```
+
+### Review and Fix Multiple Commands
+```
+/cui-diagnose-commands scope=marketplace
 [Fix all automatically]
 ```
 

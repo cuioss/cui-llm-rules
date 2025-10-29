@@ -7,40 +7,41 @@ description: Analyze, verify, and fix agents for tool coverage, best practices, 
 
 Analyze, verify, and fix agents for tool coverage, best practices, and structural issues.
 
-## SCOPE
-
-**Repository-Specific Utility**: This command is designed for the `cui-llm-rules` repository and verifies agents against repository-specific architectural standards. It enforces agent design principles defined in the architecture document.
-
-**Architecture Reference**: `~/git/cui-llm-rules/claude/agents-architecture.md`
-- Defines agent design principles and patterns
-- Explains Essential Rules pattern, Tool Fit requirement, and other architectural decisions
-- This command enforces those principles
-
 ## PARAMETERS
 
-- **project** (optional): Review all project-specific agents in `.claude/agents/`
-- **global** (optional): Review all global agents in `~/.claude/agents/`
+- **scope=marketplace** (default): Analyze agents in marketplace bundles (~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/)
+- **scope=global**: Analyze agents in global location (~/.claude/agents/)
+- **scope=project**: Analyze agents in project location (.claude/agents/)
 - **agent-name** (optional): Review a specific agent by name (e.g., `maven-project-builder`)
-- **No parameters**: Interactive mode - display menu of all agents and let user select
+- **No parameters**: Interactive mode with marketplace default - display menu of all agents and let user select
 
 ## PARAMETER VALIDATION
 
-**If `project` parameter is provided:**
+**If `scope=marketplace` (default):**
+- Process all `.md` files in `~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/` directories
+- Search across all bundles in marketplace
+- Example paths:
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/agents/`
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-pull-request-workflow/agents/`
+
+**If `scope=global`:**
+- Process all `.md` files in `~/.claude/agents/` directory
+- Flat directory structure (no bundles)
+
+**If `scope=project`:**
 - Process all `.md` files in `.claude/agents/` directory
 - Skip if directory doesn't exist (display message)
 
-**If `global` parameter is provided:**
-- Process all `.md` files in `~/.claude/agents/` directory
-- Exclude `diagnose-agents.md` (this file) from analysis
-
 **If specific agent name is provided:**
-- Look for agent in both `.claude/agents/` and `~/.claude/agents/`
+- Search based on current scope parameter
+- If no scope specified, search marketplace first, then global, then project
 - Process the first match found
 - Report error if agent not found
 
 **If no parameters provided:**
-- Display interactive menu with numbered list of all agents
-- Let user select which agent(s) to review
+- Use default scope (marketplace)
+- Display interactive menu with numbered list of all agents from marketplace
+- Let user select which agent(s) to review or change scope
 
 ## WORKFLOW INSTRUCTIONS
 
@@ -48,50 +49,61 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 
 **A. Parse Parameters**
 
-Determine what to process based on parameters:
+Determine what to process based on scope parameter (defaults to "marketplace"):
 
-1. If `project` → Set scope to `.claude/agents/`
-2. If `global` → Set scope to `~/.claude/agents/`
-3. If agent name provided → Search both directories
-4. If no parameters → Interactive mode
+1. If `scope=marketplace` (default) → Set scope to `~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/`
+2. If `scope=global` → Set scope to `~/.claude/agents/`
+3. If `scope=project` → Set scope to `.claude/agents/`
+4. If agent name provided → Search in current scope only
+5. If no parameters → Interactive mode with marketplace default
 
 **B. Discover Agents**
 
 Based on scope, find all agent files:
 
 ```bash
+# For marketplace scope (default)
+find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "*.md" -type f 2>/dev/null | sort
+
+# For global scope
+find ~/.claude/agents -name "*.md" -type f 2>/dev/null | sort
+
 # For project scope
 find .claude/agents -name "*.md" -type f 2>/dev/null | sort
 
-# For global scope
-find ~/.claude/agents -name "*.md" -type f ! -name "diagnose-agents.md" | sort
+# For specific agent in marketplace scope
+find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
 
-# For specific agent (search both)
-find .claude/agents ~/.claude/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
+# For specific agent in global scope
+find ~/.claude/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
+
+# For specific agent in project scope
+find .claude/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
 ```
 
 **C. Interactive Mode (if no parameters)**
 
-Display menu:
+Display menu based on scope:
 
 ```
-Available Agents:
+Available Agents (scope=marketplace):
 
-PROJECT AGENTS (.claude/agents/):
-1. custom-validator
-2. code-reviewer
-...
-
-GLOBAL AGENTS (~/.claude/agents/):
-10. maven-project-builder
-11. documentation-analyzer
+MARKETPLACE AGENTS (~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/):
+1. maven-project-builder (cui-project-quality-gates bundle)
+2. commit-changes (cui-project-quality-gates bundle)
+3. asciidoc-reviewer (cui-documentation-standards bundle)
+4. pr-quality-fixer (cui-pull-request-workflow bundle)
+5. pr-review-responder (cui-pull-request-workflow bundle)
+6. task-breakdown-agent (cui-issue-implementation bundle)
+7. task-executor (cui-issue-implementation bundle)
+8. task-reviewer (cui-issue-implementation bundle)
 ...
 
 Options:
 - Enter number to select single agent
-- Enter "project" to review all project agents
-- Enter "global" to review all global agents
-- Enter "all" to review everything
+- Enter "all" to review all agents in current scope
+- Enter "scope=global" to switch to global agents
+- Enter "scope=project" to switch to project agents
 - Enter "quit" to exit
 
 Your choice:
@@ -671,6 +683,166 @@ Track in statistics:
 - `rules_updated`: Count successfully synced
 - `rules_old_sync`: Count with old sync warnings
 
+#### Step 4.6A: Validate Architecture Compliance
+
+**CRITICAL**: Validate agent follows marketplace architecture rules for skill usage.
+
+**Invoke Architecture Skill**:
+```
+Skill: cui-marketplace-architecture
+```
+
+This loads architecture rules and validation patterns for marketplace components.
+
+**A. Check if Agent Uses Standards**
+
+Scan agent content for standards usage indicators:
+
+```bash
+# Look for references to standards, patterns, rules
+grep -i "standard\|pattern\|guideline\|rule\|requirement" <agent-path>
+```
+
+If no standards references found:
+- Display: "ℹ️ Agent does not reference standards (pure implementation agent)"
+- Set `architecture_score = 100` (N/A)
+- Continue to Step 4.7
+
+If standards references found, proceed with validation:
+
+**B. Validate Proper Skill Usage**
+
+Apply validation from loaded standards (skill-usage-patterns.md):
+
+1. **Check tools list**:
+   ```yaml
+   # Agent frontmatter should have:
+   tools: [..., Skill]
+   ```
+
+   If `Skill` missing but agent uses standards:
+   - Issue: "CRITICAL - Agent uses standards but missing 'Skill' in tools list"
+   - Deduct 30 points from architecture score
+
+2. **Check for Skill invocations**:
+   ```
+   # Look for proper skill usage pattern
+   grep "Skill: cui-" <agent-path>
+   ```
+
+   If no `Skill:` invocations found but agent uses standards:
+   - Issue: "CRITICAL - Agent references standards but has no Skill: invocations"
+   - Deduct 30 points from architecture score
+
+3. **Check for prohibited direct file references**:
+
+   Apply detection from loaded standards (reference-patterns.md):
+
+   ```bash
+   # Check for escape sequences
+   grep -n "\.\..*\.\..*\.\." <agent-path>
+
+   # Check for absolute paths (excluding URLs)
+   grep -n "~/\|^/" <agent-path> | grep -v "https://"
+
+   # Check for direct .adoc references
+   grep -n "Read:.*\.adoc" <agent-path>
+   ```
+
+   For each violation found:
+   - Issue: "ARCHITECTURE VIOLATION - Direct file reference: {reference}"
+   - Deduct 20 points from architecture score per violation
+   - Add to issue report
+
+**C. Calculate Architecture Score**
+
+Apply scoring criteria from loaded standards (scoring-criteria.md):
+
+```
+Base score: 100
+
+Deductions:
+- Missing Skill in tools: -30 points
+- No Skill: invocations: -30 points
+- Direct file reference: -20 points each
+- Absolute path: -20 points each
+- Escape sequence: -20 points each
+
+architecture_score = 100 - total_deductions
+Min score: 0
+```
+
+**D. Report Architecture Status**
+
+Display:
+```
+Architecture Compliance:
+
+✅ Tools List: Has 'Skill' in allowed tools
+✅ Skill Usage: Invokes Skill: cui-java-core, Skill: cui-javadoc
+✅ Reference Patterns: No prohibited file references
+
+Architecture Score: 100/100
+Status: ✅ Excellent - Marketplace ready
+```
+
+Or if violations found:
+```
+Architecture Compliance:
+
+❌ Tools List: Missing 'Skill' in tools list
+   Impact: Cannot invoke skills at runtime
+   Fix: Add 'Skill' to tools: [...] in frontmatter
+
+❌ Direct References: 2 prohibited file references found
+   Line 45: Read: ~/git/cui-llm-rules/standards/java-core.adoc
+   Line 78: Read: ../../../../standards/logging/logging.adoc
+   Impact: Breaks portability, bypasses skill abstraction
+   Fix: Replace with Skill: cui-java-core, Skill: cui-logging
+
+Architecture Score: 40/100
+Status: ❌ Poor - Significant architecture violations
+```
+
+**E. Add to Issue Report**
+
+Categorize architecture issues:
+
+**CRITICAL Issues:**
+- Missing `Skill` in tools list
+- No skill invocations despite using standards
+- Direct file references (escape sequences or absolute paths)
+
+**WARNINGS:**
+- Old pattern usage (if agent has Essential Rules but could use Skills)
+
+Add to issue counts:
+```
+architecture_violations++  # for each violation
+```
+
+**F. Integrate with Tool Fit Score**
+
+The architecture score should inform the overall Tool Fit Score:
+
+```
+# If architecture_score < 60:
+#   Consider adding warning to Tool Fit assessment
+#   Agent may need refactoring to use proper skill patterns
+
+# Example integration:
+if architecture_score < 60 and tool_fit_score > 75:
+    display: "⚠️ Tool Fit is good but Architecture Compliance is poor"
+    display: "   Recommendation: Refactor to use Skills instead of direct file references"
+```
+
+**G. Update Statistics**
+
+Track in statistics:
+- `architecture_score`: Architecture compliance (0-100)
+- `architecture_violations`: Count of violations found
+- `uses_skills`: Boolean - does agent properly invoke skills?
+
 #### Step 4.7: Internal Duplication Analysis
 
 **Purpose**: Detect and report duplicated instructions, rules, or content within the agent file.
@@ -1238,26 +1410,33 @@ Re-run diagnose-agents on these agents to fix.
 
 ## USAGE EXAMPLES
 
-### Analyze All Project Agents
+### Analyze All Marketplace Agents (default)
 ```
-/diagnose-agents project
+/cui-diagnose-agents
+/cui-diagnose-agents scope=marketplace
 ```
 
 ### Analyze All Global Agents
 ```
-/diagnose-agents global
+/cui-diagnose-agents scope=global
 ```
 
-### Analyze Specific Agent
+### Analyze All Project Agents
 ```
-/diagnose-agents maven-project-builder
-/diagnose-agents custom-validator
+/cui-diagnose-agents scope=project
 ```
 
-### Interactive Mode
+### Analyze Specific Agent (uses scope to determine where to search)
 ```
-/diagnose-agents
-[Select from menu]
+/cui-diagnose-agents maven-project-builder
+/cui-diagnose-agents scope=global maven-project-builder
+/cui-diagnose-agents scope=project custom-validator
+```
+
+### Interactive Mode (defaults to marketplace)
+```
+/cui-diagnose-agents
+[Select from menu or change scope]
 ```
 
 ## ERROR HANDLING

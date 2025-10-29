@@ -7,9 +7,28 @@ description: Guide users through creating a new well-structured agent following 
 
 Guide users through creating a new, well-structured agent following architectural best practices.
 
-## SCOPE
+## PARAMETERS
 
-**Repository-Specific Utility**: This command is designed for the `cui-llm-rules` repository and references repository-specific architecture documentation. It creates agents that follow CUI standards and patterns.
+- **scope=marketplace** (default): Create agent in marketplace bundle (~/git/cui-llm-rules/claude/marketplace/bundles/)
+- **scope=global**: Create agent in global location (~/.claude/agents/)
+- **scope=project**: Create agent in project location (.claude/agents/)
+
+## PARAMETER VALIDATION
+
+**If `scope=marketplace` (default):**
+- Work in: `~/git/cui-llm-rules/claude/marketplace/bundles/`
+- Prompt for bundle name (or create new bundle)
+- Agent file location: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/agents/{agent_name}.md`
+
+**If `scope=global`:**
+- Work in: `~/.claude/agents/`
+- No bundle structure (flat directory)
+- Agent file location: `~/.claude/agents/{agent_name}.md`
+
+**If `scope=project`:**
+- Work in: `.claude/agents/`
+- No bundle structure (flat directory)
+- Agent file location: `.claude/agents/{agent_name}.md`
 
 ## CRITICAL: Reference Architecture
 
@@ -70,43 +89,42 @@ Wait for user acknowledgment (any input will proceed).
 
 ### Step 3: Collect Basic Information
 
-#### Question 3.1: Agent Location
-```
-[Question 1/10] Where should the agent be located?
+#### Step 3.1: Determine Scope and Location
 
-1. Marketplace bundle (~/git/cui-llm-rules/claude/marketplace/bundles/)
-   - Part of a shareable plugin bundle
-   - Use for reusable, versioned agents
-   - Examples: maven-project-builder, asciidoc-reviewer, task-executor
+Parse the `scope` parameter (defaults to "marketplace"):
 
-2. Project agent (.claude/agents/)
-   - Available only in this project
-   - Use for project-specific workflows
-   - Examples: custom validators, project-specific analysis
+**If scope=marketplace:**
+- Set `location` = "marketplace"
+- Set `base_path` = "~/git/cui-llm-rules/claude/marketplace/bundles/"
+- Prompt for bundle name:
+  ```
+  Which bundle should contain this agent?
 
-Enter 1 or 2:
-```
+  Existing bundles:
+  - cui-utility-commands (project utilities)
+  - cui-plugin-development-tools (plugin/command/agent creation)
+  - cui-pull-request-workflow (PR management)
+  - cui-issue-implementation (issue planning and implementation)
+  - cui-documentation-standards (documentation review)
+  - cui-project-quality-gates (build and quality checks)
 
-Store response as `location` (marketplace or project).
+  Enter bundle name or "new" to create a new bundle:
+  ```
+  Store response as `bundle_name`.
 
-**If marketplace (option 1) selected, ask follow-up:**
-```
-Which bundle should contain this agent?
+**If scope=global:**
+- Set `location` = "global"
+- Set `base_path` = "~/.claude/agents/"
+- No bundle (flat structure)
+- Set `bundle_name` = "" (empty)
 
-Existing bundles:
-- cui-utility-commands (project utilities)
-- cui-plugin-development-tools (plugin/command/agent creation)
-- cui-pull-request-workflow (PR management)
-- cui-issue-implementation (issue planning and implementation)
-- cui-documentation-standards (documentation review)
-- cui-project-quality-gates (build and quality checks)
+**If scope=project:**
+- Set `location` = "project"
+- Set `base_path` = ".claude/agents/"
+- No bundle (flat structure)
+- Set `bundle_name` = "" (empty)
 
-Enter bundle name or "new" to create a new bundle:
-```
-
-Store response as `bundle_name`.
-
-#### Question 3.2: Agent Name
+#### Step 3.2: Agent Name
 ```
 [Question 2/10] What is the agent name?
 
@@ -524,11 +542,12 @@ After completing all work, return findings in this format:
 
 **File Generation:**
 
-1. Determine full path:
-   - If marketplace: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/agents/{agent_name}.md`
-   - If project: `.claude/agents/{agent_name}.md`
+1. Determine full path based on scope:
+   - If scope=marketplace: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/agents/{agent_name}.md`
+   - If scope=global: `~/.claude/agents/{agent_name}.md`
+   - If scope=project: `.claude/agents/{agent_name}.md`
 
-2. If marketplace and bundle doesn't exist:
+2. If scope=marketplace and bundle doesn't exist:
    - Create bundle directory structure: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/`
    - Create subdirectories: `commands/`, `agents/`, `skills/`
    - Create `.claude-plugin/plugin.json` with minimal structure (see bundling-architecture.adoc)
@@ -646,7 +665,7 @@ Happy coding! 🚀
 - **ALWAYS include response format template** - structured output is required
 - **ALWAYS include tool usage tracking** - visibility into agent behavior
 - **ALWAYS run diagnose-agents** after creation to verify quality
-- **DEFAULT to marketplace bundles** unless explicitly project-specific
+- **DEFAULT to marketplace scope** (scope=marketplace is default)
 - **VERIFY frontmatter syntax** is valid YAML with name, description, tools, model, and color fields
 - **APPLY industry best practices** from architecture document
 - **ENSURE self-contained agents** - no external file reads during execution
@@ -706,6 +725,20 @@ Key patterns applied:
 
 ## USAGE
 
-Simply invoke: `/create-agent`
+**Create agent in marketplace (default):**
+```
+/cui-create-agent
+/cui-create-agent scope=marketplace
+```
+
+**Create global agent:**
+```
+/cui-create-agent scope=global
+```
+
+**Create project-local agent:**
+```
+/cui-create-agent scope=project
+```
 
 The wizard will guide you through all questions and generate a compliant agent.

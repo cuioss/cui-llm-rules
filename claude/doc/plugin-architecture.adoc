@@ -13,60 +13,21 @@ The cui-standards plugin provides centralized development standards, skills, age
 
 == Three-Layer Architecture
 
-=== Layer Model
+The CUI marketplace follows a three-layer architecture where Skills (knowledge) → Agents (executors) → Commands (user utilities).
 
-[source]
-----
-┌─────────────────────────────────────────────────────────────┐
-│ LAYER 1: Skills (Knowledge + Standards)                     │
-│ • Self-contained bundles with SKILL.md + standards/        │
-│ • Progressive loading: description → workflow → standards   │
-│ • Read-only tools recommended                               │
-│ • Examples: cui-java-core, cui-documentation                │
-└─────────────────────────────────────────────────────────────┘
-                            ▲
-                            │ Used by (skill invocation)
-                            │ Essential rules embedded from
-                            │
-┌─────────────────────────────────────────────────────────────┐
-│ LAYER 2: Agents (Task Executors)                            │
-│ • Autonomous task execution with agent.md                   │
-│ • Essential Rules embedded for performance                  │
-│ • Invokes skills for complete standards                     │
-│ • Examples: project-builder, code-reviewer                  │
-└─────────────────────────────────────────────────────────────┘
+**For complete architecture details**, see the `cui-marketplace-architecture` skill which defines:
 
-┌─────────────────────────────────────────────────────────────┐
-│ LAYER 3: Commands (User Utilities)                          │
-│ • User-invoked slash commands                               │
-│ • Verification and management tools                         │
-│ • Examples: /agents-doctor, /cui-setup-project-permissions      │
-└─────────────────────────────────────────────────────────────┘
+* Layer responsibilities and interaction patterns
+* Component organization rules
+* Cross-layer communication patterns
 
-           All layers distributed via single plugin installation
-----
+**Key architectural rules enforced by marketplace**:
 
-=== Layer Responsibilities
+* Skills must be self-contained (all content in standards/ directory)
+* Agents must use Skills via `Skill:` invocations (not direct file reads)
+* Only specific reference types allowed (internal files, external URLs, skill dependencies)
 
-**Skills (Layer 1)**: Knowledge and methodology
-
-* Contain standards documentation (AsciiDoc) in `standards/` subdirectory
-* Provide workflow instructions in SKILL.md
-* Define templates, examples, and checklists
-* Self-contained packages with all related standards
-
-**Agents (Layer 2)**: Task execution
-
-* Execute specific development tasks autonomously
-* Embed essential rules from skill standards (performance)
-* Invoke skills for complete standards when needed
-* Use Read, Edit, Write, Bash tools for implementation
-
-**Commands (Layer 3)**: User utilities
-
-* User-invoked verification and management tools
-* Examples: doctor commands, setup utilities, validation scripts
-* Accessible via `/command-name` syntax
+See: `claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/`
 
 == Key Design Decisions
 
@@ -89,42 +50,13 @@ The cui-standards plugin provides centralized development standards, skills, age
 
 **Evidence**: Verified via research - plugins successfully distribute skills, agents, and commands (obra/superpowers, wshobson/agents, 227+ production plugins)
 
-=== Decision 2: Bundled Skills Pattern
+=== Decision 2: Self-Contained Skills Pattern
 
-**Architecture**: Skills are self-contained bundles with standards in subdirectories
+**Architecture**: Skills are self-contained with all standards in their own standards/ directory.
 
-```
-skills/cui-java-core/
-├── SKILL.md                    # Workflow + logic
-└── standards/                  # All related standards
-    ├── java-core-standards.adoc
-    ├── java-lombok-standards.adoc
-    └── logging-standards.adoc
-```
+**For detailed self-containment rules and validation patterns**, see the `cui-marketplace-architecture` skill.
 
-**Workflow Pattern**: Skills contain explicit Read instructions
-
-```markdown
-### Step 1: Load Applicable Standards
-
-1. **Always load foundational standards**:
-   ```
-   Read: standards/java-core-standards.adoc
-   Read: standards/java-lombok-standards.adoc
-   ```
-
-2. **Conditional loading based on context**:
-   - If documenting: Read: standards/javadoc-standards.adoc
-   - If testing: Read: standards/testing-junit-standards.adoc
-```
-
-**Rationale**:
-
-* Self-contained distribution - each skill is complete package
-* Reliable loading - explicit Read tool invocation (proven pattern)
-* Progressive disclosure - loads only needed standards
-* Token efficient - description (30-50 tokens) → SKILL.md (~400 lines) → standards as needed
-* Activity-based granularity - 4-6 skills vs 20+ micro-skills
+**Key requirement**: Skills must work when distributed independently (global install, marketplace download, project copy). All file references must be internal to the skill directory.
 
 === Decision 3: Essential Rules Pattern for Agents
 
@@ -235,45 +167,15 @@ For complete standards, invoke cui-java-core skill when needed.
 
 == Path Resolution
 
-=== Critical Rule: Relative Paths Only
+All paths in plugin components must be relative to ensure portability across different installation locations.
 
-All paths in plugin components **MUST**:
+**For complete path resolution rules and reference patterns**, see the `cui-marketplace-architecture` skill which defines:
 
-* Be relative to plugin root
-* Start with `./`
-* Never use absolute paths (`~/...`, `/Users/...`)
+* Allowed reference patterns (internal files, external URLs, skill dependencies)
+* Prohibited patterns (escape sequences, absolute paths, cross-skill file access)
+* Validation procedures and fix strategies
 
-**Examples**:
-```
-✅ CORRECT:
-./standards/java/java-core-standards.adoc
-./templates/class-template.java
-
-❌ INCORRECT:
-~/git/cui-llm-rules/standards/java/java-core-standards.adoc
-/Users/oliver/git/cui-llm-rules/standards/...
-standards/java/... (missing ./ prefix)
-```
-
-=== Environment Variables
-
-**Available**:
-
-* `CLAUDECODE=1` - Indicates Claude Code environment
-* `CLAUDE_CODE_ENTRYPOINT=cli` - Platform identifier
-
-**NOT Available**:
-
-* ~~`${CLAUDE_PLUGIN_ROOT}`~~ - This variable does NOT exist (verified)
-
-**For Scripts Requiring Absolute Paths**:
-
-```bash
-#!/bin/bash
-# Detect plugin root from script location
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-```
+**Environment**: `CLAUDECODE=1` indicates Claude Code environment
 
 == References
 

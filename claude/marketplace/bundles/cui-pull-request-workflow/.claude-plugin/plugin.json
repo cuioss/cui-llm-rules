@@ -16,5 +16,6 @@
   ],
   "commands": [
     "./commands/cui-handle-pull-request.md"
-  ]
+  ],
+  "skills": []
 }

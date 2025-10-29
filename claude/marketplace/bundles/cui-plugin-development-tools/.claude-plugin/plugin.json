@@ -12,9 +12,15 @@
   "keywords": ["plugin", "development", "tools", "diagnose", "create"],
   "commands": [
     "./commands/cui-create-agent.md",
+    "./commands/cui-create-bundle.md",
     "./commands/cui-create-command.md",
+    "./commands/cui-create-skill.md",
     "./commands/cui-diagnose-agents.md",
+    "./commands/cui-diagnose-bundle.md",
     "./commands/cui-diagnose-commands.md",
     "./commands/cui-diagnose-skills.md"
+  ],
+  "skills": [
+    "./skills/cui-marketplace-architecture"
   ]
 }

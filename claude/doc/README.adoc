@@ -4,13 +4,27 @@
 
 Technical documentation for the **cui-standards** Claude Code plugin - a standards distribution system providing skills, agents, and commands for CUI OSS projects.
 
-== Documentation
+== Marketplace Architecture Rules
+
+**Primary Reference**: `cui-marketplace-architecture` skill
+
+Location: `claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/`
+
+The marketplace architecture skill defines:
+
+* **Self-Containment Rules**: Skills must contain all content in their standards/ directory
+* **Skill Usage Patterns**: Agents must invoke skills, not read files directly
+* **Reference Patterns**: Allowed vs prohibited reference types with examples
+* **Validation Procedures**: How to validate skills and agents for compliance
+* **Scoring Criteria**: Quantifiable compliance metrics (0-100 scores)
+
+== Plugin Documentation
 
 === xref:plugin-architecture.adoc[Plugin Architecture]
 
-System design and key architectural decisions. Three-layer architecture (Skills → Agents → Commands), progressive disclosure, and platform support.
+System design and key architectural decisions including plugin distribution, Essential Rules Pattern for agents, progressive disclosure, and platform support.
 
-**Read this**: To understand how the plugin works
+**Read this**: To understand plugin system design decisions
 
 ---
 
@@ -24,7 +38,7 @@ Technical reference for implementation. Directory structure, manifest formats, c
 
 === xref:agent-design-principles.adoc[Agent Design Principles]
 
-Comprehensive agent design guide. Design patterns, Essential Rules Pattern, Tool Fit, industry best practices, and quality standards.
+Comprehensive agent design guide including Essential Rules Pattern, Tool Fit requirements, structured response formats, industry best practices, and quality standards.
 
 **Read this**: Before creating or modifying agents
 
@@ -32,6 +46,6 @@ Comprehensive agent design guide. Design patterns, Essential Rules Pattern, Tool
 
 === xref:bundling-architecture.adoc[Bundling Architecture]
 
-Plugin bundling architecture for organizing components into functional workflow bundles. Bundle patterns, design principles, component distribution, and extensibility guidelines.
+Plugin bundling architecture for organizing components into functional workflow bundles including bundle patterns, manifest formats, component distribution, and extensibility guidelines.
 
-**Read this**: To understand how components are organized into bundles
+**Read this**: To understand bundle structure and organization

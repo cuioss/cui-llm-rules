@@ -269,7 +269,7 @@ All requirements must pass:
 
 ## References
 
-* Requirements Document: ../../standards/requirements/requirements-document.adoc
-* Specification Documents: ../../standards/requirements/specification-documents.adoc
-* Planning Standards: ../../standards/requirements/planning.adoc
-* Implementation Guide: ../../standards/requirements/specification-and-implementation.adoc
+* Requirements Document: ../../../../standards/requirements/requirements-document.adoc
+* Specification Documents: ../../../../standards/requirements/specification-documents.adoc
+* Planning Standards: ../../../../standards/requirements/planning.adoc
+* Implementation Guide: ../../../../standards/requirements/specification-and-implementation.adoc

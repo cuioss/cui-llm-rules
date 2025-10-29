@@ -7,6 +7,29 @@ description: Guide users through creating a new well-structured slash command wi
 
 Guide users through creating a new, well-structured slash command with a comprehensive questionnaire.
 
+## PARAMETERS
+
+- **scope=marketplace** (default): Create command in marketplace bundle (~/git/cui-llm-rules/claude/marketplace/bundles/)
+- **scope=global**: Create command in global location (~/.claude/commands/)
+- **scope=project**: Create command in project location (.claude/commands/)
+
+## PARAMETER VALIDATION
+
+**If `scope=marketplace` (default):**
+- Work in: `~/git/cui-llm-rules/claude/marketplace/bundles/`
+- Prompt for bundle name (or create new bundle)
+- Command file location: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/commands/{command_name}.md`
+
+**If `scope=global`:**
+- Work in: `~/.claude/commands/`
+- No bundle structure (flat directory)
+- Command file location: `~/.claude/commands/{command_name}.md`
+
+**If `scope=project`:**
+- Work in: `.claude/commands/`
+- No bundle structure (flat directory)
+- Command file location: `.claude/commands/{command_name}.md`
+
 ## WORKFLOW INSTRUCTIONS
 
 ### Step 1: Display Welcome and Overview
@@ -40,43 +63,42 @@ Wait for user acknowledgment (any input will proceed).
 
 ### Step 2: Collect Basic Information
 
-#### Question 2.1: Command Location
-```
-[Question 1/11] Where should the command be located?
+#### Step 2.1: Determine Scope and Location
 
-1. Marketplace bundle (~/git/cui-llm-rules/claude/marketplace/bundles/)
-   - Part of a shareable plugin bundle
-   - Use for reusable, versioned commands
-   - Examples: build-and-verify, handle-pull-request, review-technical-docs
+Parse the `scope` parameter (defaults to "marketplace"):
 
-2. Project command (.claude/commands/)
-   - Available only in this project
-   - Use for project-specific workflows
-   - Examples: verify-all, verify-integration-tests
+**If scope=marketplace:**
+- Set `location` = "marketplace"
+- Set `base_path` = "~/git/cui-llm-rules/claude/marketplace/bundles/"
+- Prompt for bundle name:
+  ```
+  Which bundle should contain this command?
 
-Enter 1 or 2:
-```
+  Existing bundles:
+  - cui-utility-commands (project utilities)
+  - cui-plugin-development-tools (plugin/command/agent creation)
+  - cui-pull-request-workflow (PR management)
+  - cui-issue-implementation (issue planning and implementation)
+  - cui-documentation-standards (documentation review)
+  - cui-project-quality-gates (build and quality checks)
 
-Store response as `location` (marketplace or project).
+  Enter bundle name or "new" to create a new bundle:
+  ```
+  Store response as `bundle_name`.
 
-**If marketplace (option 1) selected, ask follow-up:**
-```
-Which bundle should contain this command?
+**If scope=global:**
+- Set `location` = "global"
+- Set `base_path` = "~/.claude/commands/"
+- No bundle (flat structure)
+- Set `bundle_name` = "" (empty)
 
-Existing bundles:
-- cui-utility-commands (project utilities)
-- cui-plugin-development-tools (plugin/command/agent creation)
-- cui-pull-request-workflow (PR management)
-- cui-issue-implementation (issue planning and implementation)
-- cui-documentation-standards (documentation review)
-- cui-project-quality-gates (build and quality checks)
+**If scope=project:**
+- Set `location` = "project"
+- Set `base_path` = ".claude/commands/"
+- No bundle (flat structure)
+- Set `bundle_name` = "" (empty)
 
-Enter bundle name or "new" to create a new bundle:
-```
-
-Store response as `bundle_name`.
-
-#### Question 2.2: Command Name
+#### Step 2.2: Command Name
 ```
 [Question 2/11] What is the command name?
 
@@ -517,11 +539,12 @@ From `verify-all`:
 
 **File Generation:**
 
-1. Determine full path:
-   - If marketplace: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/commands/{command_name}.md`
-   - If project: `.claude/commands/{command_name}.md`
+1. Determine full path based on scope:
+   - If scope=marketplace: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/commands/{command_name}.md`
+   - If scope=global: `~/.claude/commands/{command_name}.md`
+   - If scope=project: `.claude/commands/{command_name}.md`
 
-2. If marketplace and bundle doesn't exist:
+2. If scope=marketplace and bundle doesn't exist:
    - Create bundle directory structure: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/`
    - Create subdirectories: `commands/`, `agents/`, `skills/`
    - Create `.claude-plugin/plugin.json` with minimal structure (see bundling-architecture.adoc)
@@ -629,7 +652,7 @@ Happy coding! 🚀
 - **INCLUDE state management** only if genuinely needed
 - **APPLY anti-bloat principles** - concise but complete
 - **USE proper markdown formatting** - consistent with existing commands
-- **DEFAULT to marketplace bundles** unless explicitly project-specific
+- **DEFAULT to marketplace scope** (scope=marketplace is default)
 - **VERIFY frontmatter syntax** is valid YAML with name and description fields
 
 ## PATTERN MATCHING GUIDE
@@ -693,6 +716,20 @@ Before writing the command file:
 
 ## USAGE
 
-Simply invoke: `/create-command`
+**Create command in marketplace (default):**
+```
+/cui-create-command
+/cui-create-command scope=marketplace
+```
+
+**Create global command:**
+```
+/cui-create-command scope=global
+```
+
+**Create project-local command:**
+```
+/cui-create-command scope=project
+```
 
 The wizard will guide you through all questions.

@@ -97,66 +97,26 @@ The marketplace implements 5 bundle patterns based on functional cohesion and co
 
 == Design Principles
 
-=== Functional Cohesion
+Bundles follow functional cohesion principles where components that serve a common purpose or change together are packaged together.
 
-**Definition**: Components bundled together contribute to a single well-defined task or domain.
+**For complete bundle architecture rules**, see the `cui-marketplace-architecture` skill which defines:
 
-**Application**:
-- Quality Gates: All components serve "verify and persist changes"
-- Issue Implementation: All components serve "implement structured issue"
-- PR Workflow: All components serve "handle PR quality"
-- Documentation: All components serve "enforce documentation standards"
-- Plugin Tools: All components serve "plugin development lifecycle"
+* Functional cohesion requirements
+* Common closure principle
+* Component organization patterns
+* Bundle scoring criteria
 
-**Guideline**: Each bundle answers "What single task does this enable?"
+**Key principles applied in marketplace**:
 
-=== Component Count Range
-
-**Target Range**: 2-8 components per bundle
-
-**Current Distribution**:
-- Quality Gates: 3 components
-- Issue Implementation: 5 components
-- PR Workflow: 3 components
-- Documentation Standards: 3 components
-- Plugin Development Tools: 5 components
-
-**Average**: 3.8 components per bundle
-
-**Rationale**: Avoids both nano-services (1 component) and monolithic bundles (>8 components). Based on research showing optimal plugin size is 2-8 components.
-
-=== Domain Clustering
-
-**Pattern**: Group components by workflow or domain, not by type
+* **Component Count**: 2-8 components per bundle (current average: 3.8)
+* **Domain Clustering**: Group by workflow/domain, not by component type
+* **Common Closure**: Components that change together belong together
+* **Independence**: General-purpose utilities without workflow coupling remain unbundled
 
 **Examples**:
-- ✅ Group by workflow: "PR Workflow" (combines agents + commands for PR handling)
-- ✅ Group by domain: "Documentation Standards" (combines agent + skill + command for docs)
-- ❌ Avoid grouping by type: "All Agents Bundle" (no functional cohesion)
-
-**Guideline**: Bundle boundaries follow business workflows, not technical classifications.
-
-=== Common Closure Principle
-
-**Definition**: Components that change together belong together
-
-**Application**:
-- Quality Gates: Build and commit standards evolve together
-- Issue Implementation: Task workflow components evolve together
-- PR Workflow: PR handling process evolves together
-- Documentation: Documentation standards evolve together
-- Plugin Tools: Development tooling evolves together
-
-**Benefit**: When requirements change, updates affect single bundle instead of scattered components.
-
-=== Independent Components Remain Unbundled
-
-**Examples of Unbundled Components**:
-- General utilities without workflow coupling
-- One-time setup tools (`setup-project-permissions`)
-- Cross-cutting utilities (`manage-web-permissions`)
-
-**Rationale**: Not all components belong in bundles. General-purpose utilities with low co-occurrence remain standalone.
+- ✅ Workflow bundle: "PR Workflow" (agents + commands for PR handling)
+- ✅ Domain bundle: "Documentation Standards" (agent + skill + command for docs)
+- ❌ Anti-pattern: "All Agents Bundle" (no functional cohesion)
 
 == Bundle Structure
 
