@@ -8,12 +8,8 @@
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cuioss/cui-llm-rules.git"
-  },
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["issue", "task", "implementation", "workflow"],
-  "category": "development",
   "agents": [
     "./agents/task-reviewer.md",
     "./agents/task-breakdown-agent.md",

@@ -8,12 +8,8 @@
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cuioss/cui-llm-rules.git"
-  },
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["documentation", "asciidoc", "standards", "review"],
-  "category": "documentation",
   "agents": [
     "./agents/asciidoc-reviewer.md"
   ],

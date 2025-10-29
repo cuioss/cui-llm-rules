@@ -8,12 +8,8 @@
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cuioss/cui-llm-rules.git"
-  },
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["maven", "build", "commit", "quality", "verification"],
-  "category": "development",
   "agents": [
     "./agents/maven-project-builder.md",
     "./agents/commit-changes.md"

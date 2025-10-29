@@ -8,10 +8,6 @@
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cuioss/cui-llm-rules.git"
-  },
-  "keywords": ["utilities", "project-setup", "permissions", "diagnostics", "documentation", "architecture"],
-  "category": "development"
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["utilities", "project-setup", "permissions", "diagnostics", "documentation", "architecture"]
 }

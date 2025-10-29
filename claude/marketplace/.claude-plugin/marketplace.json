@@ -10,13 +10,12 @@
   "plugins": [
     {
       "name": "cui-java-skills",
-      "description": "Java development standards including core patterns, unit testing, JavaDoc, and CDI/Quarkus best practices",
+      "description": "Java development standards including core patterns, unit testing, and CDI/Quarkus best practices",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/cui-java-core",
         "./skills/cui-java-unit-testing",
-        "./skills/cui-javadoc",
         "./skills/cui-java-cdi"
       ]
     },
@@ -27,15 +26,6 @@
       "strict": false,
       "skills": [
         "./skills/cui-frontend-development"
-      ]
-    },
-    {
-      "name": "cui-documentation-skills",
-      "description": "Documentation standards for README, AsciiDoc, and technical writing",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/cui-documentation"
       ]
     },
     {

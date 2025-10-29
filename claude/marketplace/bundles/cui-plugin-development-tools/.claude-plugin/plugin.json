@@ -8,12 +8,8 @@
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cuioss/cui-llm-rules.git"
-  },
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["plugin", "development", "tools", "diagnose", "create"],
-  "category": "development",
   "commands": [
     "./commands/create-agent.md",
     "./commands/create-command.md",
