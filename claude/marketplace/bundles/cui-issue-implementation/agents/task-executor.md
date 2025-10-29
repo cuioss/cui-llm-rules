@@ -76,91 +76,45 @@ Given a task plan file (e.g., `http-client-plan/plan-http-client-extension.md`),
 
 ## ESSENTIAL RULES
 
-### CUI Development Standards
-**Provided by:** cui-java-core, cui-java-unit-testing, cui-javadoc skills
+### CUI Standards
+**From skills** (cui-java-core, cui-java-unit-testing, cui-javadoc):
+- Maven: Use `./mvnw` (NOT mvn), pre-commit: `-Ppre-commit clean verify`
+- Testing: JUnit 5 only (NO Mockito/Hamcrest), 80% coverage (100% critical paths)
+- Logging: CuiLogger only (NOT slf4j/System.out)
+- Null Safety: @Nullable/@NonNull (JSpecify)
+- Lombok: @Builder, @Value, @UtilityClass
+- JavaDoc: All public APIs with examples, @param/@return/@throws tags
 
-**Key Standards (see skills for complete details):**
-- Use `./mvnw` for all Maven operations (NOT `mvn` or `maven`)
-- Pre-commit checks: `./mvnw -Ppre-commit clean verify`
-- Minimum 80% test coverage overall, 100% for critical paths
-- Use CuiLogger (private static final LOGGER), NEVER slf4j or System.out
-- JUnit 5 only (no Mockito, PowerMock, Hamcrest)
-- Use @Nullable/@NonNull from JSpecify
-- Lombok annotations: @Builder, @Value, @UtilityClass where appropriate
-- All public APIs must have JavaDoc with examples
-- JavaDoc must include @param, @return, @throws tags
+**Invoke skills before implementation for complete standards.**
 
-**For complete standards, invoke the appropriate skills before implementation.**
-
-### Task Plan Structure
-
-**Agent-specific knowledge** - Task plan file format:
-
-**Task Format:**
-```markdown
-### Task N: Task Name
-
-**Goal:** {Brief description}
-
-**References:**
-- Specification: {path} lines {range}
-- Package: {package.name}
-
-**Checklist:**
-- [ ] Read and understand all references above
-- [ ] If unclear, ask user for clarification (DO NOT guess)
-- [ ] {Implementation step}
-- [ ] {Implementation step}
-- [ ] Run `maven-project-builder` agent to verify build passes
-- [ ] Analyze build results - if issues found, fix and re-run
-- [ ] Commit changes using `commit-changes` agent
-
-**Acceptance Criteria:**
-- {Criterion 1}
-- {Criterion 2}
+### Task Plan Format
+```
+### Task N: Name
+Goal: {description}
+References: {paths/lines}
+Checklist: [ ] items
+Acceptance Criteria: {list}
 ```
 
-**Critical Rules:**
-- ALWAYS read all references BEFORE implementation
-- NEVER guess implementation details - ask user if unclear
-- Mark each checklist item `[x]` immediately after completion
-- Run maven-project-builder agent when checklist requires it
-- Analyze build results and fix issues before proceeding
-- Commit only when checklist requires it
+**Critical:**
+- Read ALL references before coding
+- Ask if unclear (NEVER guess)
+- Mark [x] immediately after each item
+- Build/commit only when checklist says so
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
-### ⚠️ BEFORE YOU START: TOOL SELECTION DECISION TREE
+### ⚠️ TOOL SELECTION (NEVER USE BASH FOR FILE OPS)
 
-**For EVERY operation, follow this decision tree:**
+**Use dedicated tools, NOT bash commands:**
+- Read file → Read tool (NOT cat/head/tail)
+- Edit file → Edit tool (NOT sed/awk)
+- Create file → Write tool (NOT echo >/cat <<)
+- Search content → Grep tool (NOT grep/rg)
+- Find files → Glob tool (NOT find)
+- Build/test → Bash tool (./mvnw, ./gradlew ONLY)
 
-```
-Need to read a file?
-  ├─ YES → Use Read tool (NEVER Bash cat/head/tail)
-  └─ NO → Continue
-
-Need to edit a file?
-  ├─ YES → Use Edit tool (NEVER Bash sed/awk)
-  └─ NO → Continue
-
-Need to create a file?
-  ├─ YES → Use Write tool (NEVER Bash echo >/cat <<)
-  └─ NO → Continue
-
-Need to search file contents?
-  ├─ YES → Use Grep tool (NEVER Bash grep/rg)
-  └─ NO → Continue
-
-Need to find files by pattern?
-  ├─ YES → Use Glob tool (NEVER Bash find)
-  └─ NO → Continue
-
-Need to run build/test command?
-  ├─ YES → Use Bash tool (./mvnw, ./gradlew ONLY)
-  └─ NO → ERROR - Invalid operation
-```
-
-**REMEMBER:** Bash cat/grep/find WILL TRIGGER USER PROMPTS and BREAK autonomous operation!
+**Bash cat/grep/find trigger user prompts and break automation!**
 
 ### Step 0: Activate Required Skills (If Implementing Java Code)
 
@@ -302,13 +256,19 @@ Skill: cui-javadoc
 
 ### Step 5: Verify Acceptance Criteria
 
-**Actions:**
-1. Read all acceptance criteria for the task
-2. For EACH criterion:
-   - Verify it is met (check code, tests, build output)
-   - If NOT met: ERROR - return failure listing unmet criteria
-   - Document verification method (e.g., "Test coverage verified in build output: 85%")
-3. If ALL criteria met: Proceed to Step 6
+For EACH criterion:
+1. Parse to testable condition
+2. Verify using appropriate method:
+   - Code exists: Grep for class/method/field with signature
+   - Test passes: Check maven output for "Tests run: X, Failures: 0" + test name
+   - Coverage: Check maven output for percentage ≥ threshold
+   - File exists: Bash `ls` for path
+   - Artifact: Bash `ls target/` for .jar
+   - Docs: Read for JavaDoc/comment content
+3. Result: PASS (expected) or FAIL (actual vs expected)
+4. Document: "{criterion} = PASS/FAIL - {method} - {details}"
+5. If ANY FAIL: Return error with all failures
+6. If ALL PASS: Continue Step 6
 
 ### Step 6: Mark Task as Complete
 

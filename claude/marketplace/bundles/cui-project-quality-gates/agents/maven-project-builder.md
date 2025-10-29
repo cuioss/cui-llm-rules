@@ -46,16 +46,18 @@ Skill: cui-javadoc
 
 ### Step 2: Execute Maven Build
 
-1. Run from project root: `./mvnw -Ppre-commit clean install`
-2. Calculate timeout: `last-execution-duration * 1.25` (25% safety margin to prevent premature timeouts)
-3. **CRITICAL**: Use the Bash tool's built-in timeout parameter when executing the command:
-   - When invoking the Bash tool, add: `<parameter name="timeout">{calculated_timeout_ms}</parameter>`
-   - Example: If calculated timeout is 150000ms, use `timeout: 150000`
-   - The timeout value must be in milliseconds
-   - This is cross-platform and works on both macOS and Linux
-4. **DO NOT run in background** - wait for completion
-5. Capture the complete output log
-6. Record the actual execution time
+1. Run: `./mvnw -Ppre-commit clean install` (from project root)
+2. Timeout: `last-execution-duration * 1.25` ms (25% safety margin)
+3. Use Bash tool timeout parameter: `<parameter name="timeout">{calculated_ms}</parameter>`
+4. Wait for completion (NOT background)
+5. Capture output, record actual time
+
+**Build Success Criteria** (ALL must be true to proceed to Step 3):
+- Exit code = 0 (command completed without errors)
+- Output contains "BUILD SUCCESS" text (exact match, case-sensitive)
+- Output does NOT contain "BUILD FAILURE" text
+- Output does NOT contain "[ERROR]" lines (except in acceptable warnings list)
+- If `-Ppre-commit` profile active: target/ directory contains at least one .jar file
 
 ### Step 3: Analyze Build Output
 
@@ -101,32 +103,14 @@ OpenRewrite markers are embedded in source code, NOT in Maven console output. Yo
    - Identify all marker locations and messages
    - Count how many times the same marker is duplicated (markers pile up with repeated builds)
 
-4. **Decision logic for each unique marker type:**
-
-   **a) LogRecord pattern warnings (CuiLogRecordPatternRecipe):**
-   - Message pattern: `TODO: WARN/ERROR needs LogRecord. Suppress: // cui-rewrite:disable CuiLogRecordPatternRecipe`
-   - **DEFAULT ACTION**: Suppress these for simple logging statements (DO NOT ask user)
-   - Add suppression comment on the line BEFORE the affected LOGGER statement:
-     ```java
-     // cui-rewrite:disable CuiLogRecordPatternRecipe
-     LOGGER.warn("...", args);
-     ```
-   - Remove ALL TODO markers from that LOGGER line (may be multiple duplicates)
-
-   **b) Exception usage warnings (InvalidExceptionUsageRecipe):**
-   - Message pattern: `TODO: Catch specific not Exception. Suppress: // cui-rewrite:disable InvalidExceptionUsageRecipe`
-   - **DEFAULT ACTION**: Suppress these (DO NOT ask user)
-   - Add suppression comment on the line BEFORE the catch statement:
-     ```java
-     // cui-rewrite:disable InvalidExceptionUsageRecipe
-     } catch (Exception e) {
-     ```
-   - Remove ALL TODO markers from that catch line
-
-   **c) Other marker types:**
-   - **ASK USER** what action to take
-   - Provide marker message, file path, line number, and surrounding code context
-   - Wait for user decision before proceeding
+4. **Decision per marker type:**
+   - **LogRecord warnings** (CuiLogRecordPatternRecipe): AUTO-SUPPRESS (NO prompt)
+     - Add `// cui-rewrite:disable CuiLogRecordPatternRecipe` before LOGGER statement
+     - Remove ALL TODO markers from line
+   - **Exception warnings** (InvalidExceptionUsageRecipe): AUTO-SUPPRESS (NO prompt)
+     - Add `// cui-rewrite:disable InvalidExceptionUsageRecipe` before catch
+     - Remove ALL TODO markers from line
+   - **Other types**: ASK USER (provide message, file, line, context, wait for decision)
 
 5. **After making ANY changes to fix markers:**
    - **MANDATORY**: Return to Step 2 (re-run build)
@@ -173,41 +157,16 @@ Once the build completes successfully with no changes needed:
 
 ## CRITICAL RULES
 
-- **NEVER cancel the Maven build** - always wait for completion
-- **ALWAYS use timeout = last-execution-duration * 1.25** (25% safety margin)
-- **ALWAYS repeat** the process after making code changes
-- **ALWAYS check for OpenRewrite markers** after every build (Step 4 is NOT optional)
-- **NEVER skip Step 4** even if build shows SUCCESS
-- **ALWAYS ask user** before adding new acceptable warnings (except JavaDoc - see below)
-- **DO NOT fix OpenRewrite recipe warnings** - only fix code warnings
-- **UPDATE duration only if change > 10%**
-- **Tool Coverage**: All tools in frontmatter must be used (100% Tool Fit)
-
-### OPENREWRITE MARKER RULES (MANDATORY)
-
-- **ALWAYS search for markers** after every build using Grep tool
-- **DEFAULT: Suppress LogRecord warnings** for simple logging (DO NOT ask user)
-- **DEFAULT: Suppress Exception usage warnings** for generic catch blocks (DO NOT ask user)
-- **ASK USER for other marker types** before taking action
-- **VERIFY markers are removed** by re-running build after fixes
-- **REPORT failure** if markers persist after 3 iterations
-
-### JAVADOC WARNING RULES (NON-NEGOTIABLE)
-
-- **ALWAYS FIX JavaDoc warnings** - no exceptions
-- **NEVER ask user** if JavaDoc warnings can be ignored
-- **NEVER add JavaDoc warnings** to acceptable warnings list
-- **ALL JavaDoc must be complete and correct**
-- **USE cui-javadoc skill standards** for all JavaDoc fixes
-- Missing JavaDoc = mandatory fix
-- Malformed JavaDoc = mandatory fix
-- Invalid references = mandatory fix
-
-### GENERAL WARNING RULES
-
-- **DEFAULT: FIX ALL WARNINGS** unless explicitly documented as acceptable
-- Only ask about ignoring warnings for non-critical, infrastructure-related warnings
-- Code quality warnings (unused variables, deprecations, etc.) = mandatory fix
+**Build:** NEVER cancel, wait for completion, timeout = duration * 1.25 (25% margin)
+**Iteration:** ALWAYS repeat after code changes
+**OpenRewrite Markers:** ALWAYS check after EVERY build (Step 4 NOT optional), search with Grep
+**Markers - Auto:** Suppress LogRecord/Exception warnings (NO user prompt)
+**Markers - Ask:** Other types require user approval
+**Markers - Verify:** Re-run build after fixes, report if persist after 3 iterations
+**JavaDoc:** ALWAYS FIX (NO exceptions, NO ignoring, NO adding to acceptable list), use cui-javadoc skill
+**Warnings:** DEFAULT FIX ALL (only ask for non-critical infrastructure warnings)
+**Duration:** Update only if change >10%
+**Tools:** 100% coverage
 
 ## Example .claude/run-configuration.md Structure
 

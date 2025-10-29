@@ -51,17 +51,13 @@ At the start of execution:
 1. Extract PR number from provided identifier:
    - If full URL: Parse number from URL pattern `https://github.com/owner/repo/pull/{number}`
    - If number: Use directly
-2. Verify PR exists and is accessible:
-   ```bash
-   gh pr view <number> --json number,title,state,url
-   ```
-3. Confirm PR is in valid state (open or closed)
-4. Store PR number and repository context for subsequent operations
+2. Verify PR: `gh pr view <number> --json number,title,state,url`
+3. Store PR number and repository context
 
 **Error Handling**:
-- If PR not found: FAIL with message "Error: Pull request #{number} not found"
-- If access denied: FAIL with message "Error: Cannot access pull request #{number}"
-- If invalid state: WARN but continue (comments can be addressed even on closed PRs)
+- PR not found → FAIL "Error: Pull request #{number} not found"
+- Access denied → FAIL "Error: Cannot access pull request #{number}"
+- PR closed → WARN but continue (can address comments on closed PRs)
 
 ### Step 2: Retrieve Gemini Review Comments
 
@@ -105,66 +101,41 @@ For EACH unresolved Gemini comment, follow this decision process:
 
 #### Step 3.2: Determine Resolution Strategy
 
-Analyze the comment and choose ONE of two strategies:
+**Strategy A - Fix** (ANY true):
+1. Missing null check AND (@Nullable param OR external input)
+2. Resource leak (unclosed Stream/Connection/Reader) AND no try-with-resources/close()
+3. Missing error handling AND (external API call OR I/O without try-catch)
+4. Missing JavaDoc AND public element AND not @Generated
+5. Security improvement (valid approach for input validation/SQL injection/XSS)
+6. Performance improvement with >10% impact
+7. CUI standards violation AND suggestion aligns
 
-**Strategy A - Fix the Code/Documentation**:
-- The suggestion is valid and improves code quality
-- The change addresses a real issue
-- The modification aligns with project standards
+**Strategy B - Disagree** (NO Strategy A AND ANY true):
+1. Code implements documented design (in JavaDoc OR spec)
+2. Change violates CUI standards (cite specific standard)
+3. Suggests forbidden library (Mockito/Hamcrest/Random)
+4. Breaks API contract (signature/return/exceptions)
+5. Comment factually incorrect (provide evidence)
+6. Reduces clarity without benefit (subjective style)
 
-**Strategy B - Disagree with Comment**:
-- The suggestion is not applicable in this context
-- The current implementation is intentional
-- The change would violate project standards or architecture
-- The comment is a false positive
+**Neither:** Ask user with context
 
 #### Step 3.3: Execute Resolution
 
-**If Strategy A (Fix the code/documentation)**:
+**If Strategy A - Fix**:
+1. Identify type: code (.java/.xml/.properties) or docs (.adoc/.md)
+2. Apply fix using Edit tool
+3. **Code fix**: Build then commit immediately
+   - maven-project-builder (Task, ~8-10 min): FAILURE → revert, mark "not applicable"
+   - commit-changes (Task): message "fix(review): address Gemini in {file}:{line}", NO push, increment commits_created
+4. **Doc fix**: Track only (commit together at end)
+5. Reply: `gh api repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies -f body="Resolved: {explanation}"`
+6. Increment resolved counter
 
-1. Determine if this is a **code fix** or **documentation fix**:
-   - **Code fix**: Changes to .java, .xml, .properties, or other source files
-   - **Documentation fix**: Changes to .adoc, .md files
-
-2. Make necessary changes to address the comment:
-   - Use Edit tool to modify the file
-   - Apply the suggested improvement
-   - Ensure changes comply with project standards
-
-3. **If code fix**: Verify and commit immediately:
-   a. Run maven-project-builder agent to verify build:
-      - Invoke using Task tool with subagent_type: "maven-project-builder"
-      - Wait for completion (~8-10 minutes)
-      - If FAILURE: Revert changes and mark comment as "not applicable" with reason
-      - If SUCCESS: Continue to step 3b
-   b. Commit changes using commit-changes agent:
-      - Invoke using Task tool with subagent_type: "commit-changes"
-      - Provide commit message: "fix(review): address Gemini comment in {file_path}:{line}\n\n{comment_summary}"
-      - Do NOT pass "push" parameter (will be done at end if requested)
-      - Track: Increment "commits_created" counter
-
-4. **If documentation fix**: Just track the change (will be committed together at end)
-
-5. Add a reply to the comment thread:
-   ```bash
-   gh api repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies \
-     -f body="Resolved: {concise explanation of what was fixed and why}"
-   ```
-
-6. Track: Increment "resolved" counter
-
-**If Strategy B (Disagree with comment)**:
-
-1. Formulate clear reasoning:
-   - Why the suggestion is not applicable
-   - What architectural or design principle supports current implementation
-   - Reference project standards if relevant
-2. Add a reply to the comment thread:
-   ```bash
-   gh api repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies \
-     -f body="Not applicable: {detailed reasoning why this should not be changed}"
-   ```
-3. Track: Increment "not applicable" counter
+**If Strategy B - Disagree**:
+1. Formulate reasoning (why not applicable, design principle, standards reference)
+2. Reply: `gh api repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies -f body="Not applicable: {reasoning}"`
+3. Increment not_applicable counter
 
 #### Step 3.4: Verify All Comments Addressed
 
@@ -221,20 +192,12 @@ Compile comprehensive summary with all metrics.
 
 ## CRITICAL RULES
 
-- **NEVER proceed without PR identifier** - Fail immediately if missing
-- **ALWAYS use `gh` tool** for GitHub interactions - NEVER use GitHub MCP server
-- **ALWAYS respond** to every Gemini comment (resolved or not applicable)
-- **NEVER skip comments** - verify count matches (resolved + not_applicable = total)
-- **ALWAYS verify build for code changes** - Run maven-project-builder BEFORE commit for code fixes
-- **ALWAYS commit after successful code fix build** - Use commit-changes agent
-- **NEVER commit code without successful build** - Build must pass before code commits
-- **ALWAYS use commit-changes agent** for commits - Do NOT use git commands directly
-- **SEPARATE code and documentation commits** - Code fixes committed individually, docs together
-- **ONLY push at end** - If `push` parameter provided, push all commits after completion
-- **ALWAYS track** commits_created counter and check before push
-- **ALWAYS track** resolved vs not applicable counts separately
-- **NEVER make assumptions** about Gemini username - check common variants
-- **Tool Coverage**: All tools in frontmatter must be used (100% Tool Fit)
+**Execution:** NEVER proceed without PR (fail immediate), use `gh` tool (NOT GitHub MCP)
+**Comments:** Respond to ALL (resolved + not_applicable = total), check Gemini username variants
+**Build/Commit:** Build BEFORE commit (maven-project-builder), NEVER commit without successful build, use commit-changes (NOT git direct)
+**Commits:** Separate: code individual, docs together. Push only at end if parameter
+**Tracking:** Track commits_created, resolved, not_applicable
+**Tools:** 100% coverage
 
 ## TOOL USAGE TRACKING
 

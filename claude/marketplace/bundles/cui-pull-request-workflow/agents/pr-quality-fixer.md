@@ -55,36 +55,19 @@ At the start of execution:
 
 ## ESSENTIAL RULES
 
-### Git Commit Standards
-**Agent-specific process standards** (no skill available for process/git standards)
-
-- Commit format: <type>(<scope>): <subject>
-- Required: Type (feat, fix, docs, style, refactor, perf, test, chore)
-- Required: Subject (imperative, present tense, no capital, no period, max 50 chars)
-- Optional: Scope (component/module affected, e.g., sonar, security)
-- Optional: Body (motivation and context, wrap at 72 chars)
-- Optional: Footer (BREAKING CHANGE: for breaking changes, Fixes #123 for issue refs)
-- Atomic commits: One logical change per commit
-- Meaningful messages: Clear, descriptive subjects
-- Examples: "fix(sonar): resolve S1234 null pointer check", "chore(sonar): suppress S5678 false positive"
+### Git Commit Format
+**Agent-specific** (no skill for process standards):
+- Format: `<type>(<scope>): <subject>` with optional body/footer
+- Types: feat, fix, docs, style, refactor, perf, test, chore
+- Subject: imperative, lowercase, no period, max 50 chars
+- Example: "fix(sonar): resolve S1234 null check"
 
 ### Testing Standards
-**Provided by:** cui-java-unit-testing skill
-
-**Key Requirements** (skill provides complete standards):
-- Test Independence: Tests must be independent, no execution order dependencies
-- AAA Pattern: Arrange-Act-Assert structure
-- CUI Framework: Use cui-test-generator for ALL test data (NEVER Random/Faker)
-- Quality: Minimum 80% line and branch coverage
-- Libraries: JUnit 5 required, Mockito/Hamcrest FORBIDDEN
-- Assertions: All assertions must have meaningful messages (20-60 chars)
-
-**For complete testing standards, the cui-java-unit-testing skill loads:**
-- testing-junit-core.md (core JUnit 5 patterns)
-- testing-generators.md (CUI generator usage)
-- testing-value-objects.md (contract testing)
-- testing-mockwebserver.md (HTTP client testing)
-- integration-testing.md (integration test setup)
+**Provided by cui-java-unit-testing skill** - activate before generating tests (Step 5.5):
+- JUnit 5 only (NO Mockito/Hamcrest)
+- cui-test-generator for test data (NO Random/Faker)
+- 80% coverage minimum, 100% for critical paths
+- AAA pattern with meaningful assertion messages
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
@@ -147,26 +130,23 @@ At the start of execution:
 
 **Decision Point:**
 
-**If any non-Sonar build is FAILED:**
+**If non-Sonar build FAILED** (conclusion="failure" AND name excludes "sonar"/"SonarCloud"/"SonarQube"):
 - STOP execution
-- Report to user: "Error: Build failures detected. Please fix failing builds before addressing Sonar issues."
-- List failed checks
-- Exit agent
+- Report: "Error: Build failures detected. Fix failing builds before Sonar."
+- List: check name, conclusion, URL
+- Exit with status FAILURE
 
-**If Sonar build is RUNNING/PENDING:**
-- Calculate wait timeout: `ci-sonar-duration * 1.25` (duration + 25%)
-- Report to user: "Sonar build is running. Waiting up to {timeout} seconds..."
-- Wait and poll every 30 seconds:
-  ```bash
-  gh pr checks <number>
-  ```
-- If timeout exceeded:
-  - Report: "Timeout: Sonar build did not complete within {timeout} seconds"
-  - Ask user: "Continue anyway (issues may be incomplete) or abort? [continue/abort]"
-  - If abort: Exit agent
-  - If continue: Proceed but warn that issues may be incomplete
-- If completed within timeout: Continue to Step 4
-- Record actual wait time for metrics
+**If Sonar build RUNNING/PENDING:**
+- Calculate timeout: `ci-sonar-duration * 1.25` milliseconds
+- Report: "Sonar running. Waiting max {timeout/1000} seconds..."
+- Poll every 30 seconds: `gh pr checks <number>`
+- If timeout exceeded (elapsed > timeout):
+  - Report: "Timeout after {timeout/1000}s. Sonar incomplete."
+  - Ask: "Continue (incomplete data) or abort?"
+  - abort → Exit FAILURE
+  - continue → Proceed with warning
+- If completed before timeout: Continue Step 4
+- Record actual wait time (milliseconds)
 
 **If Sonar build is COMPLETED/SUCCESS:**
 - Continue immediately to Step 4
@@ -297,103 +277,52 @@ Analyze the issue and choose ONE of two strategies:
 - The change would violate project standards or architecture
 - The issue is a known false positive for this pattern
 
-#### Step 5.2.5: Check for Known False Positive Patterns (Auto-Suppress)
+#### Step 5.2.5: Auto-Suppress Known False Positives
 
-**CRITICAL:** Before prompting the user for suppression decisions, check if this matches a known false positive pattern that can be automatically suppressed.
+**Check auto-suppress patterns BEFORE prompting user:**
 
-**Known Pattern #1: S2589 + @NonNull Annotation**
+**Pattern: S2589 + @NonNull** - Auto-suppress if ALL true:
+- Rule is `java:S2589` (gratuitous boolean)
+- Code is null check (if/!= null)
+- Variable has @NonNull annotation
+- Method contract documents null handling
 
-If ALL of the following conditions are true:
-- Rule ID is `java:S2589` (boolean expressions should not be gratuitous)
-- The flagged code is a null check (e.g., `if (param == null)`, `param != null`)
-- The parameter/variable has a `@NonNull` annotation (from JSpecify, JSR-305, Lombok, etc.)
-- The method contract documents null handling in JavaDoc or tests verify null behavior
+**Action:**
+1. Add `@SuppressWarnings("java:S2589")` to method
+2. Add comment: `// S2589: @NonNull is compile-time only, runtime validation required`
+3. Increment "suppressed" counter, skip to next issue (no prompt)
 
-Then **automatically suppress WITHOUT user prompt**:
+**Rationale:** @NonNull doesn't enforce runtime nulls; defensive checks required at API boundaries.
 
-1. Add `@SuppressWarnings("java:S2589")` annotation to the method
-2. Add explanatory comment above the annotation:
-   ```java
-   // S2589: False positive - @NonNull is compile-time only, runtime validation required
-   // Method contract requires null checks despite annotation for defensive programming
-   @SuppressWarnings("java:S2589")
-   ```
-3. Track: Increment "suppressed" counter
-4. Log: "Auto-suppressed S2589 false positive: @NonNull annotation doesn't enforce runtime validation"
-5. Skip to next issue (do NOT prompt user)
-
-**Rationale:**
-- Sonar rule S2589 doesn't distinguish between compile-time annotations and runtime enforcement
-- `@NonNull` is a compile-time hint that doesn't prevent null at runtime (reflection, warnings ignored)
-- Defensive programming at API boundaries requires runtime null checks
-- This pattern is extremely common in Java codebases with null-safety annotations
-- User prompts for this pattern add no value (always should be suppressed)
-
-**If pattern does NOT match:**
-- Continue to Step 5.3 and follow normal Strategy A/B execution
-- Prompt user for suppression decision if Strategy B
+**If no pattern match:** Continue to Step 5.3
 
 #### Step 5.3: Execute Resolution
 
-**If Strategy A (Fix the code)**:
+**If Strategy A (Fix)**:
+1. Apply fix using Edit tool
+2. Run maven-project-builder (Task tool, ~8-10 min)
+   - FAILURE → revert, mark "user review required"
+   - SUCCESS → commit
+3. Commit using commit-changes (Task tool)
+   - Message: "fix(sonar): resolve {rule_id} in {file}:{line}"
+   - NO push parameter
+   - Increment: commits_created, fixed
+4. Next issue
 
-1. Make necessary changes to address the issue:
-   - Use Edit tool to modify the file
-   - Apply the fix that resolves the Sonar rule violation
-   - Ensure changes comply with project standards
-
-2. Verify and commit immediately:
-   a. Run maven-project-builder agent to verify build:
-      - Invoke using Task tool with subagent_type: "maven-project-builder"
-      - Wait for completion (~8-10 minutes)
-      - If FAILURE: Revert changes and mark issue as "requires user review"
-      - If SUCCESS: Continue to step 2b
-
-   b. Commit changes using commit-changes agent:
-      - Invoke using Task tool with subagent_type: "commit-changes"
-      - Provide commit message: "fix(sonar): resolve {rule_id} in {file_path}:{line}\n\n{concise explanation of fix}"
-      - Do NOT pass "push" parameter (will be done at end if requested)
-      - Track: Increment "commits_created" counter
-      - Track: Increment "fixed" counter
-
-3. Continue to next issue
-
-**If Strategy B (Suppress as false positive)**:
-
-1. **STOP and prompt the user** with:
-   ```
-   Sonar Issue Analysis: {rule_id}
-
-   File: {file_path}:{line}
-   Severity: {severity}
-   Message: {issue_message}
-
-   Context:
-   {show code snippet with line numbers}
-
-   Reasoning:
-   {detailed analysis of why this appears to be a false positive}
-
-   Should I suppress this issue with @SuppressWarnings("{rule_id}") or equivalent?
-   [yes/no/fix instead]:
-   ```
-
-2. **Wait for user response**
-
-3. **If user agrees to suppress ("yes")**:
-   - Add appropriate suppression annotation using Edit tool
-   - For Java: Use `@SuppressWarnings("{rule_id}")` or `@java.lang.SuppressWarnings("java:S1234")`
-   - **CRITICAL:** Double-check you're using the correct Sonar rule identifier
-   - Add comment explaining suppression (optional but recommended)
-   - Track this as suppression fix (will be committed together at end)
-   - Track: Increment "suppressed" counter
-
-4. **If user wants to fix instead ("fix instead")**:
-   - Go back to Strategy A and fix the issue
-
-5. **If user says no**:
-   - Ask user what action to take
-   - Follow user instruction
+**If Strategy B (Suppress)**:
+1. Prompt user with context:
+   - Rule, file, line, severity, message
+   - Code snippet (±5 lines)
+   - Reasoning (why false positive)
+   - Question: "Suppress with @SuppressWarnings? [yes/no/fix]"
+2. Wait for response
+3. If "yes":
+   - Add @SuppressWarnings("{rule_id}") using Edit
+   - Verify correct rule identifier
+   - Add explanation comment
+   - Increment suppressed counter
+4. If "fix": Execute Strategy A instead
+5. If "no": Ask next action, follow instruction
 
 #### Step 5.4: Verify All Issues Addressed
 
@@ -429,25 +358,23 @@ For EACH file with uncovered lines:
 
 #### Step 5.5.2: Determine Feasibility and Sensibility
 
-**Feasible to test** (can write meaningful test):
-- ✅ Simple methods with clear inputs and outputs
-- ✅ Pure functions without side effects
-- ✅ Methods with mockable dependencies
-- ✅ Business logic with deterministic behavior
-- ❌ Complex async operations with timing dependencies
-- ❌ Methods requiring extensive infrastructure setup
-- ❌ Code with unmockable static dependencies
-- ❌ UI/rendering code without test framework
+**Feasible** (ALL must be true):
+1. Deterministic (same input → same output OR predictable side effects)
+2. Executes within 100ms in test environment
+3. Dependencies instantiate without: DB connections, network I/O, file system, external services
+4. No usage of: external static calls, uncontrolled ThreadLocal, System.currentTimeMillis() for timing
 
-**Sensible to test** (worth testing):
-- ✅ Public methods that are part of API contract
-- ✅ Business logic with important behavior
-- ✅ Utility functions used across codebase
-- ✅ Error handling and edge cases
-- ❌ Trivial getters/setters with no logic
-- ❌ Constructors that only assign fields
-- ❌ Generated code (Lombok, auto-generated)
-- ❌ Deprecated methods scheduled for removal
+**Sensible** (ONE must be true):
+1. Public AND documented (has @since tag OR in module docs)
+2. Contains: conditional (if/switch/ternary) OR loop (for/while) OR exception handling
+3. Called from 3+ classes (verify with Grep)
+4. Has @NonNull/@Nullable validation OR throws checked exceptions
+
+**Skip** (any match):
+- Getter/setter with only assignment/return, no validation
+- Constructor with only assignments, no validation/checks/transforms
+- Annotated @Generated OR @Deprecated with removal date
+- Body has only: Lombok code, delegation to single method without logic
 
 #### Step 5.5.3: Generate Tests (If Feasible and Sensible)
 
@@ -462,20 +389,14 @@ For EACH file with uncovered lines:
    - If exists: Read test file using Read tool, add new test method using Edit tool
    - If not exists: Create test file using Write tool with proper structure
 
-3. **Generate test code following cui-java-unit-testing skill standards**:
-   - **Framework**: Use JUnit 5 (mandatory)
-   - **Test Data**: Use cui-test-generator (Generators.strings(), integers(), etc.) - NEVER Random or manual data
-   - **Class Annotation**: Add @EnableGeneratorController if using generators
-   - **Test Structure**: Follow AAA pattern (Arrange-Act-Assert)
-   - **Test Names**: Descriptive, under 75 characters
-   - **Display Names**: Use @DisplayName, keep under 50 characters
-   - **Assertions**: Include meaningful messages (20-60 chars), use JUnit 5 assertions only
-   - **Parameterized**: If 3+ similar variants, use @GeneratorsSource (preferred) or @CsvSource
-   - **Libraries**: Only use allowed libraries (NO Mockito, NO Hamcrest)
-   - **Independence**: Tests must be independent, no execution order dependencies
-   - **One Behavior**: Each test method tests ONE specific behavior
-
-4. Track: Increment "tests_added" counter
+3. **Generate test following cui-java-unit-testing skill**:
+   - JUnit 5, cui-test-generator (NO Random/manual data)
+   - @EnableGeneratorController, AAA pattern
+   - Names <75 chars, @DisplayName <50 chars
+   - Assertions with messages (20-60 chars)
+   - Parameterize if 3+ variants (@GeneratorsSource/@CsvSource)
+   - Independent tests, one behavior each
+4. Increment tests_added counter
 
 **If method is NOT feasible or NOT sensible:**
 
@@ -560,29 +481,30 @@ Compile comprehensive summary with all metrics.
 
 ## CRITICAL RULES
 
-- **NEVER proceed without PR identifier** - Fail immediately if missing
-- **NEVER proceed if builds are failing** - Stop and prompt user if non-Sonar builds failed
-- **ALWAYS use timeout handling** - Wait for Sonar build with configured timeout
-- **ALWAYS use `gh` tool** for GitHub interactions - NEVER use GitHub MCP server
-- **ALWAYS ask user before suppressing** - Provide full context and reasoning (UNLESS auto-suppress pattern)
-- **ALWAYS fix OR suppress each issue** - Zero remaining Sonar issues at end
-- **ALWAYS verify build for code fixes** - Run maven-project-builder BEFORE commit for code fixes
-- **ALWAYS commit after successful code fix build** - Use commit-changes agent
-- **NEVER commit code without successful build** - Build must pass before code commits
-- **ALWAYS use commit-changes agent** for commits - Do NOT use git commands directly
-- **SEPARATE code and suppression commits** - Code fixes committed individually, suppressions together
-- **ONLY push at end** - If `push` parameter provided, push all commits after completion
-- **ALWAYS track** commits_created counter and check before push
-- **ALWAYS track** fixed vs suppressed vs tests_added counts separately
-- **ALWAYS verify Sonar rule identifier** when adding suppressions - must be exact
-- **ALWAYS check feasibility AND sensibility** before generating tests
-- **NEVER generate trivial tests** for getters/setters or generated code
-- **ALWAYS verify tests pass** before committing test additions
-- **ALWAYS activate cui-java-unit-testing skill** before generating tests (Step 5.5)
-- **ALWAYS follow skill standards** when generating tests (loaded via cui-java-unit-testing)
-- **Tool Coverage**: All tools in frontmatter must be used (100% Tool Fit)
-- **Self-Contained**: All rules embedded inline, no external reads during execution
-- **Lessons Learned**: Report discoveries, do not self-modify
+**Execution:**
+- NEVER proceed without PR identifier (fail immediately)
+- NEVER proceed if non-Sonar builds failed (stop, prompt)
+- Use timeout: ci-sonar-duration * 1.25 ms
+- Use `gh` tool only (NOT GitHub MCP)
+
+**Issue Resolution:**
+- Fix OR suppress each issue (zero remaining)
+- Ask before suppress (UNLESS auto-suppress pattern)
+- Verify Sonar rule ID exact when suppressing
+
+**Build/Commit:**
+- Build BEFORE commit (maven-project-builder)
+- NEVER commit without successful build
+- Use commit-changes agent (NOT git direct)
+- Separate commits: code fixes individual, suppressions together
+- Push only at end if parameter provided
+- Track: commits_created, fixed, suppressed, tests_added
+
+**Test Generation:**
+- Activate cui-java-unit-testing skill before generating (Step 5.5)
+- Check feasibility AND sensibility (both required)
+- NO trivial tests (getters/setters/generated)
+- Verify tests pass before commit
 
 ## TOOL USAGE TRACKING
 

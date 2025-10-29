@@ -54,12 +54,12 @@ Your task is to analyze an issue (from files or GitHub) and ensure it is ready f
 
 **Actions**:
 1. Use ULTRATHINK reasoning to analyze:
-   - What is the problem or requirement?
-   - What is the proposed solution or approach?
-   - What are the acceptance criteria?
-   - What are the technical constraints?
-   - What are the dependencies?
-   - What are the edge cases?
+   - What is the problem or requirement? (Must have: specific user need OR technical debt description)
+   - What is the proposed solution or approach? (Must have: component names, file paths, or architecture changes)
+   - What are the acceptance criteria? (Must have: testable conditions with format "WHEN {condition} THEN {expected result}")
+   - What are the technical constraints? (Must have: language version, framework versions, or performance thresholds)
+   - What are the dependencies? (Must have: list of other issues/tasks that must complete first, or "none")
+   - What are the edge cases? (Must have: at least 2 boundary conditions OR explicit statement "no edge cases")
 
 2. Identify gaps in understanding:
    - Ambiguous requirements
@@ -109,19 +109,12 @@ Your task is to analyze an issue (from files or GitHub) and ensure it is ready f
 **Objective**: Verify 100% confidence in understanding before proceeding to updates.
 
 **Actions**:
-1. Self-assess understanding:
-   - Can you describe exactly what needs to be implemented?
-   - Can you describe exactly how it should be implemented?
-   - Are all acceptance criteria clear and measurable?
-   - Are all edge cases identified?
-   - Is the scope clearly bounded?
-
+1. Self-assess: Can describe what/how to implement? Criteria measurable? Edge cases known? Scope bounded?
 2. Rate confidence: 0-100%
 
 **Decision Point**:
-- Confidence = 100%?
-  - **YES** → Proceed to Step 5
-  - **NO** → Identify what is still unclear, return to Step 2
+- 100% confident → Step 5
+- <100% → Identify unclear aspects, return Step 2
 
 **Tools**: None (self-assessment)
 
@@ -196,20 +189,20 @@ EOF
 
 **Objective**: Verify issue documentation meets all quality criteria.
 
-**Quality Criteria**:
-1. **Consistency**: All sections align, no contradictions
-2. **Correctness**: Technical details are accurate
-3. **Unambiguous**: Every statement has single clear interpretation
-4. **No duplication**: Each point stated once
-5. **Complete**: All necessary information present
-6. **Actionable**: Clear what needs to be implemented
+**Quality Criteria** (ALL must PASS):
+1. **Consistency**: Zero contradictions (requirements vs criteria, approach vs constraints)
+2. **Correctness**: All paths exist (Read), versions match pom.xml/package.json, APIs valid (Grep)
+3. **Unambiguous**: Zero vague terms (if needed, appropriate, proper, adequate, handle, manage, process)
+4. **No duplication**: Zero semantic repeats
+5. **Complete**: Has acceptance criteria (≥2), constraints (versions OR "none"), dependencies (issues OR "none"), edge cases (≥2 OR "none")
+6. **Actionable**: Steps have: file path/pattern + action verb (create/modify/delete) + outcome
 
 **Actions**:
 1. Review updated documentation against each quality criterion
 
 2. For each criterion:
-   - Rate: Pass/Fail
-   - If Fail: Document specific issue
+   - Rate: Pass/Fail using EXACT criteria above
+   - If Fail: Document specific issue with line/section reference and failing pattern
 
 3. Count total issues found
 
@@ -251,23 +244,10 @@ EOF
 
 ## CRITICAL RULES
 
-**Documentation Focus**:
-- **NEVER start coding** - This is a documentation preparation task only
-- **NEVER lose essential information** - When editing, preserve all critical details
-- **ALWAYS keep the focus** - The goal is to prepare an implementation task, not implement it
-
-**Issue Updates**:
-- **MUST edit GitHub issue description** - NEVER use comments (use `gh issue edit`, not `gh issue comment`)
-- **MUST read before editing** - Always use Read tool before Edit tool
-
-**Quality Requirements**:
-- **100% confidence required** - Do not proceed to updates without complete understanding
-- **All quality criteria must pass** - Loop Step 6-7 until achieved
-- **Zero ambiguity tolerance** - Every statement must have single clear interpretation
-
-**Tool Coverage**:
-- All tools in frontmatter must be used (100% Tool Fit)
-- Self-contained execution - no external reads during execution
+**Focus:** Documentation prep only (NO coding), preserve critical info
+**Updates:** Edit issue description (use `gh issue edit`, NOT `gh issue comment`), Read before Edit
+**Quality:** 100% confidence required, all 6 criteria must pass (loop Step 6-7), zero ambiguity
+**Tools:** 100% coverage (all frontmatter tools used), self-contained
 
 ---
 

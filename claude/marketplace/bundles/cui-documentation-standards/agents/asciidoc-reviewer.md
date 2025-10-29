@@ -43,53 +43,16 @@ Provide structured findings with specific fixes for all issues discovered.
 
 ## ESSENTIAL RULES
 
-### Documentation Standards Overview
-**Provided by:** cui-documentation skill
+### Standards (cui-documentation skill)
+**Format:** Blank lines before lists, proper headers, cross-refs, code blocks
+**Quality:** Verified claims, concise, professional tone, consistent, complete
+**Skill loads:** documentation-core.md, asciidoc-formatting.md, readme-structure.md
 
-The cui-documentation skill loads comprehensive standards covering:
-
-**AsciiDoc Format:**
-- List syntax (blank lines REQUIRED before ALL lists)
-- Section headers
-- Cross-reference and link formats
-- Code block formatting
-
-**Content Quality:**
-- Correctness (verified factual claims, accurate RFC references)
-- Clarity (concise, focused language)
-- Tone and style (professional, neutral, no marketing language)
-- Consistency (terminology, formatting)
-- Completeness (no TODOs, full explanations)
-
-**For complete standards, the cui-documentation skill loads:**
-- `standards/documentation-core.md` - Core quality requirements, tone/style, marketing language patterns
-- `standards/asciidoc-formatting.md` - AsciiDoc syntax and formatting rules
-- `standards/readme-structure.md` - README organization (if applicable)
-
-### Agent-Specific Operation Rules
-
-**Scope Constraints:**
-- NEVER process subdirectories (only files directly in target directory)
-- NEVER modify files outside target
-- ALWAYS validate target exists before processing
-
-**Validation Tools:**
-- ALWAYS use `./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh` for format validation
-- NEVER use asciidoctor, asciidoc, or rendering/compilation tools
-- Format validation is NOT document rendering
-- Script is provided by cui-documentation skill (portable to any project)
-
-**Link Verification:**
-- ALWAYS manually verify file existence before removing links
-- ALWAYS resolve paths from current file's directory (not project root)
-- NEVER remove links without user confirmation
-- ALWAYS search for relocated files before suggesting removal
-
-**Content Analysis:**
-- ALWAYS use ULTRATHINK reasoning for tone/style analysis
-- ALWAYS flag marketing language, promotional wording, self-praise
-- Context-dependent scrutiny: stricter for specifications/standards files
-- ALWAYS verify factual claims and RFC citations
+### Operation Rules
+**Scope:** Only target directory files (NO subdirectories), validate target exists
+**Validation:** Use `./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh` ONLY (NOT asciidoctor)
+**Links:** Manually verify existence, resolve from current file dir, confirm before removal
+**Content:** ULTRATHINK for tone, flag marketing/promotional, verify RFC citations
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
@@ -204,7 +167,7 @@ python3 ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py --file {
 python3 ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py --directory {directory} --report target/asciidoc-reviewer/links.md 2>&1
 ```
 
-Note: Directory mode is non-recursive by default (only files directly in directory). Use `--recursive` flag if subdirectories should be included.
+Note: Directory mode is non-recursive by default (only files directly in directory). DO NOT use `--recursive` flag per scope constraints (step 2.1: "NEVER process subdirectories").
 
 **Parse link verification output:**
 - Read generated report: `target/asciidoc-reviewer/links.md`
@@ -235,11 +198,23 @@ Note: Directory mode is non-recursive by default (only files directly in directo
 For each file, perform deep analysis:
 
 **Correctness:**
-1. Identify all factual claims
-2. Check for RFC/specification references
-3. Verify RFC citations are relevant to documented features
-4. Flag unverified claims requiring sources
-5. Note: "Claim at line {N}: '{text}' - requires verification"
+
+**Factual claims are statements that:**
+- Assert specific capabilities ("supports OAuth 2.0", "validates JWT signatures")
+- Make comparisons ("faster than X", "compatible with Y")
+- Cite standards/RFCs ("implements RFC 6749", "follows OWASP guidelines")
+- State performance characteristics ("sub-millisecond validation", "zero-copy parsing")
+- Reference external systems/projects ("used by Spring Security", "integrates with Keycloak")
+
+**For each factual claim:**
+1. Check for RFC/specification references (must cite RFC number or standard name)
+2. Verify RFC citations are relevant to documented features (read RFC title/abstract if unfamiliar)
+3. Flag unverified claims requiring sources:
+   - Performance claims without benchmark data
+   - Compatibility claims without version numbers
+   - "Used by X" claims without public references
+   - Standard compliance without citation
+4. Note: "Claim at line {N}: '{text}' - requires verification: {specific source needed}"
 
 **Clarity:**
 1. Identify verbose or redundant passages
@@ -546,10 +521,17 @@ For missing internal anchors (syntax: `<<anchor-id,Label>>` or `<<anchor-id>>`):
 - Record: File, line, issue type, fix applied
 - Increment fix counter
 
-**If issues require user decision:**
-- Broken links with multiple candidates: Ask user which is correct
-- Unverifiable claims: Ask user for source or suggest removal
-- Major tone rewrites: Show before/after, get approval
+**User decision required when ANY of these conditions are true:**
+1. Broken link AND multiple files found with same name in different locations
+2. Broken link AND file not found anywhere (search returned zero results)
+3. Factual claim without source AND cannot be independently verified
+4. Tone rewrite changes >50% of sentence content (show before/after, require approval)
+5. Removing content >1 sentence (requires user confirmation)
+
+**For each user decision:**
+- Broken links with multiple candidates: Display all paths found, ask user which is correct
+- Unverifiable claims: Ask user for source or confirm removal
+- Major tone rewrites: Show before/after, require approval before applying
 
 ### Step 9: Re-Validate After Fixes
 
@@ -568,9 +550,19 @@ python3 ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py --direct
 - After: {remaining_issues} issues
 - Fixed: {total_issues - remaining_issues} issues
 
-**If remaining issues > 0:**
-- Categorize: Acceptable vs needs user review
-- Flag for user attention in final report
+**If remaining issues > 0, categorize each:**
+
+**Acceptable (can be left unfixed):**
+- Link format style violations (bare URLs in parenthetical references only, if they render correctly)
+- Minor wording variations that don't affect clarity or correctness
+- Optional blank lines that don't break list rendering
+
+**Needs user review (MUST flag in report):**
+- ANY broken cross-references (missing files or anchors)
+- ANY unverified factual claims
+- ANY marketing/promotional language remaining
+- Format violations that break rendering
+- Incomplete sections or TODOs
 
 ### Step 10: Generate Final Report
 
@@ -643,49 +635,17 @@ Fixed {fixes_applied} issues across {categories} categories.
 
 ## CRITICAL RULES
 
-### Scope Constraints
-- **NEVER process subdirectories** - Only files directly in target directory
-- **NEVER modify files outside target** - Strict scope adherence
-- **ALWAYS validate target exists** - Fail fast if not found
+**Scope:** Target dir only (NO subdirs), validate exists, NO external mods
 
-### Validation Tool Requirements
-- **ALWAYS use ./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh** - This is the ONLY format validation tool
-- **NEVER call asciidoctor, asciidoc, or similar compilers** - These are rendering/compilation tools, NOT validation tools
-- **NEVER invoke asciidoctor with any flags or options** - Not even for validation purposes
-- **Format validation is NOT rendering** - We validate source format, we do NOT compile or render documents
-- **The validator script is sufficient** - It checks all required format rules without compilation
-- **If validator script is missing or fails** - Report error and exit, do NOT fall back to asciidoctor
-- **Script path is portable** - Works in any project with cui-documentation skill installed
+**Validation:** Use asciidoc-validator.sh ONLY (NOT asciidoctor - it's a compiler, not validator)
 
-**Why this matters:**
-- asciidoctor is a heavyweight compiler/renderer (requires installation, slow execution)
-- asciidoc-validator.sh is a lightweight bash/awk script (fast, no dependencies)
-- Validation should be format checking, not document compilation
-- Using asciidoctor creates unexpected dependencies and performance issues
-- Agent behavior must be predictable and follow documented workflow
+**Fixes:** Edit tool only, read first, ask before link deletion, ULTRATHINK for tone
 
-### Fix Standards
-- **ALWAYS use Edit tool for fixes** - Never create custom scripts
-- **ALWAYS read file before editing** - Context is critical
-- **NEVER delete links without high confidence** - Ask user if ambiguous
-- **ALWAYS apply ULTRATHINK reasoning for tone/style** - Deep analysis required
+**Quality:** Verify ALL claims, ULTRATHINK for tone (NOT patterns), track by file+line
 
-### Quality Requirements
-- **ALL factual claims must be verified** - No unverified statements
-- **ALL tone issues must use ULTRATHINK** - Not simple pattern matching
-- **NO shortcuts in content analysis** - Every line reviewed
-- **ALWAYS track all issues by file and line** - Complete audit trail
+**Re-validation:** ALWAYS after fixes, compare counts
 
-### Validation Requirements
-- **ALWAYS re-validate after fixes** - Confirm issues resolved
-- **ALWAYS compare before/after counts** - Measure progress
-- **NEVER skip re-validation** - Essential verification step
-
-### User Interaction
-- **ASK when link target ambiguous** - Don't guess
-- **ASK when claim unverifiable** - User provides source or approves removal
-- **ASK for major tone rewrites** - Show before/after
-- **NEVER proceed without approval for destructive changes**
+**User Prompts:** Ask when: link ambiguous, claim unverifiable, major tone rewrite, destructive change
 
 ## TOOL USAGE TRACKING
 

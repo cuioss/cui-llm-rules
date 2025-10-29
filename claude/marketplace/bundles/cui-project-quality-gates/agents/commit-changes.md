@@ -35,19 +35,10 @@ This agent accepts the following parameters extracted from user requests:
 ## ESSENTIAL RULES
 
 ### Git Commit Standards
-
-**Note**: This knowledge is embedded as no existing skill covers process/Git standards.
-
-- Commit format: `<type>(<scope>): <subject>`
-- Required: Type (feat, fix, docs, style, refactor, perf, test, chore)
-- Required: Subject (imperative, present tense, no capital, no period, max 50 chars)
-- Optional: Scope (component/module affected, e.g., auth, config, security)
-- Optional: Body (motivation and context, wrap at 72 chars)
-- Optional: Footer (BREAKING CHANGE: for breaking changes, Fixes #123 for issue refs)
-- Atomic commits: One logical change per commit
-- Meaningful messages: Clear, descriptive subjects
-- Reference issues: Link to relevant tasks/issues when applicable
-- Examples: "fix(auth): resolve token validation error", "refactor: improve logging structure"
+Format: `<type>(<scope>): <subject>` + optional body/footer
+Types: feat, fix, docs, style, refactor, perf, test, chore
+Subject: imperative, lowercase, no period, max 50 chars
+Example: "fix(auth): resolve token validation error"
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
@@ -91,11 +82,12 @@ For each artifact identified:
 - Action: Execute `rm <file>` and log deletion
 - Track count of deleted files
 
-**Uncertain Cases** (require user confirmation):
-- Files in unexpected locations
-- Large files that might be intentional
-- Files with unusual extensions
-- Action: Ask user: "Found artifact: {file_path}. Delete this file? [y/N]:"
+**Uncertain Cases** (require user confirmation when ANY of these conditions are true):
+- Files >1MB in size (might be intentional binary assets)
+- Files with extensions not in safe list (.class, .temp, .backup*, .log, .cache)
+- Files in `target/` or `build/` directories that are tracked by git (git status shows as staged "A")
+- Files matching artifact patterns but outside `src/`, `target/`, `build/` directories
+- Action: For each uncertain file, ask user: "Found potential artifact: {file_path} ({size}). Delete this file? [y/N]:"
 - If yes: Delete and log
 - If no: Keep and warn in report
 
@@ -110,15 +102,12 @@ For each artifact identified:
 2. Validate it follows Git Commit Standards format
 3. If format is invalid, warn user but proceed with provided message
 
-**If NO COMMIT_MESSAGE provided:**
-1. Execute: `git diff --staged` or `git diff` to see changes
-2. Use Read tool to analyze changed files for context
-3. Analyze changes to determine:
-   - Type: feat, fix, docs, refactor, chore, etc.
-   - Scope: Which component/module is affected
-   - Subject: Clear, imperative description (max 50 chars)
-4. Generate commit message following Git Commit Standards
-5. If changes span multiple types, choose the most significant type
+**If NO COMMIT_MESSAGE:**
+1. Run: `git diff --staged` or `git diff`
+2. Use Read to analyze changed files
+3. Determine: type (feat/fix/docs/refactor/etc), scope (component), subject (imperative, max 50 chars)
+4. Generate message per Git Commit Standards (see Essential Rules)
+5. Multi-type priority: fix > feat > perf > refactor > docs > style > test > chore
 
 **B. Stage and Commit**
 
@@ -195,16 +184,11 @@ EOF
 
 ## CRITICAL RULES
 
-- **NEVER commit artifacts**: *.class, *.temp, *.backup* files that are newly created must be cleaned before commit
-- **NEVER push without permission**: Only push if "push" parameter explicitly provided
-- **NEVER create PR without permission**: Only create PR if "create a pr" parameter explicitly provided
-- **ALWAYS follow Git Commit Standards**: All commit messages must follow format: <type>(<scope>): <subject>
-- **ALWAYS ask if uncertain**: When unsure about deleting a file, ask user for confirmation
-- **ALWAYS clean before commit**: Remove artifacts in Step 3 before staging in Step 4
-- **ALWAYS include Co-Authored-By footer**: Add Claude attribution to commits and PRs
-- **Tool Coverage**: All tools in frontmatter must be used (100% Tool Fit)
-- **Self-Contained**: All rules embedded inline, no external reads during execution
-- **Lessons Learned**: Report discoveries, do not self-modify
+**Artifacts:** NEVER commit (*.class, *.temp, *.backup*), clean in Step 3 before staging
+**Permissions:** NEVER push without "push" param, NEVER create PR without "create a pr" param
+**Standards:** Follow `<type>(<scope>): <subject>` format, add Co-Authored-By footer
+**Safety:** Ask if uncertain about file deletion
+**Tools:** 100% coverage, self-contained
 
 ## TOOL USAGE TRACKING
 
