@@ -9,7 +9,7 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 
 ## PARAMETERS
 
-- **scope=marketplace** (default): Analyze agents in marketplace bundles (~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/)
+- **scope=marketplace** (default): Analyze all marketplace agents (standalone + bundle agents)
 - **scope=global**: Analyze agents in global location (~/.claude/agents/)
 - **scope=project**: Analyze agents in project location (.claude/agents/)
 - **agent-name** (optional): Review a specific agent by name (e.g., `maven-project-builder`)
@@ -18,11 +18,13 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 ## PARAMETER VALIDATION
 
 **If `scope=marketplace` (default):**
-- Process all `.md` files in `~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/` directories
-- Search across all bundles in marketplace
+- Process all `.md` files in two locations:
+  - Standalone: `~/git/cui-llm-rules/claude/marketplace/agents/`
+  - Bundle agents: `~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/`
+- Search across all marketplace locations
 - Example paths:
-  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/agents/`
-  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-pull-request-workflow/agents/`
+  - `~/git/cui-llm-rules/claude/marketplace/agents/research-best-practices.md` (standalone)
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/agents/maven-project-builder.md` (bundle)
 
 **If `scope=global`:**
 - Process all `.md` files in `~/.claude/agents/` directory
@@ -51,7 +53,7 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 
 Determine what to process based on scope parameter (defaults to "marketplace"):
 
-1. If `scope=marketplace` (default) → Set scope to `~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/`
+1. If `scope=marketplace` (default) → Set scope to both marketplace locations (standalone + bundle agents)
 2. If `scope=global` → Set scope to `~/.claude/agents/`
 3. If `scope=project` → Set scope to `.claude/agents/`
 4. If agent name provided → Search in current scope only
@@ -62,8 +64,9 @@ Determine what to process based on scope parameter (defaults to "marketplace"):
 Based on scope, find all agent files:
 
 ```bash
-# For marketplace scope (default)
-find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "*.md" -type f 2>/dev/null | sort
+# For marketplace scope (default) - search both standalone and bundle agents
+(find ~/git/cui-llm-rules/claude/marketplace/agents -name "*.md" -type f 2>/dev/null; \
+ find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "*.md" -type f 2>/dev/null) | sort
 
 # For global scope
 find ~/.claude/agents -name "*.md" -type f 2>/dev/null | sort
@@ -71,8 +74,9 @@ find ~/.claude/agents -name "*.md" -type f 2>/dev/null | sort
 # For project scope
 find .claude/agents -name "*.md" -type f 2>/dev/null | sort
 
-# For specific agent in marketplace scope
-find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
+# For specific agent in marketplace scope - search both locations
+(find ~/git/cui-llm-rules/claude/marketplace/agents -name "<agent-name>.md" -type f 2>/dev/null; \
+ find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "<agent-name>.md" -type f 2>/dev/null) | head -1
 
 # For specific agent in global scope
 find ~/.claude/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
@@ -88,15 +92,18 @@ Display menu based on scope:
 ```
 Available Agents (scope=marketplace):
 
-MARKETPLACE AGENTS (~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/):
-1. maven-project-builder (cui-project-quality-gates bundle)
-2. commit-changes (cui-project-quality-gates bundle)
-3. asciidoc-reviewer (cui-documentation-standards bundle)
-4. pr-quality-fixer (cui-pull-request-workflow bundle)
-5. pr-review-responder (cui-pull-request-workflow bundle)
-6. task-breakdown-agent (cui-issue-implementation bundle)
-7. task-executor (cui-issue-implementation bundle)
-8. task-reviewer (cui-issue-implementation bundle)
+STANDALONE AGENTS (~/git/cui-llm-rules/claude/marketplace/agents/):
+1. research-best-practices
+
+BUNDLE AGENTS (~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/):
+2. maven-project-builder (cui-project-quality-gates bundle)
+3. commit-changes (cui-project-quality-gates bundle)
+4. asciidoc-reviewer (cui-documentation-standards bundle)
+5. pr-quality-fixer (cui-pull-request-workflow bundle)
+6. pr-review-responder (cui-pull-request-workflow bundle)
+7. task-breakdown-agent (cui-issue-implementation bundle)
+8. task-executor (cui-issue-implementation bundle)
+9. task-reviewer (cui-issue-implementation bundle)
 ...
 
 Options:
