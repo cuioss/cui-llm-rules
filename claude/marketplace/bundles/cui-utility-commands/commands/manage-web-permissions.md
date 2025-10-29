@@ -1,3 +1,8 @@
+---
+name: manage-web-permissions
+description: Analyze and consolidate WebFetch domain permissions across projects with security research and validation
+---
+
 # Manage WebFetch Domains Command
 
 Analyzes all WebFetch domain permissions across projects in ~/git/, consolidates safe and common domains to global settings, and maintains clean project-level configurations with security research and validation.

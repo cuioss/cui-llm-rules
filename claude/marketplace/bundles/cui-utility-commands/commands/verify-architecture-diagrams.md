@@ -1,3 +1,8 @@
+---
+name: verify-architecture-diagrams
+description: Analyze and update PlantUML diagrams to reflect current codebase state and regenerate PNG images
+---
+
 # Verify and Update PlantUML Diagrams
 
 Analyze all PlantUML files in the specified directory (default: doc/plantuml), verify they reflect the current codebase state, and regenerate PNG images.

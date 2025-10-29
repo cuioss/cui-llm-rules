@@ -1,3 +1,8 @@
+---
+name: diagnose-agents
+description: Analyze, verify, and fix agents for tool coverage, best practices, and structural issues
+---
+
 # Agents Doctor - Verify and Fix Agents
 
 Analyze, verify, and fix agents for tool coverage, best practices, and structural issues.

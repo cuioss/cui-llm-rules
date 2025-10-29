@@ -1,3 +1,8 @@
+---
+name: implement-task
+description: Verify, plan, and implement issues through end-to-end workflow with agent coordination
+---
+
 # Implement Issue - Full Issue Verification, Planning, and Implementation
 
 Fully verify, plan, and implement a given issue through an end-to-end workflow involving issue review, planning, project verification, and sequential task implementation.

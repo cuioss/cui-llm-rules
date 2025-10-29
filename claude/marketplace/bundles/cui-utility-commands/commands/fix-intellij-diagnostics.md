@@ -1,3 +1,8 @@
+---
+name: fix-intellij-diagnostics
+description: Retrieve and fix IDE diagnostics automatically, suppressing only when no reasonable fix is available
+---
+
 # Fix IDE Diagnostics Command
 
 Retrieves IDE diagnostics for the current file, analyzes issues, and applies sensible fixes. Suppresses Sonar issues only when no reasonable fix is available.

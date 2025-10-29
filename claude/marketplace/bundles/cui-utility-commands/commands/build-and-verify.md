@@ -1,3 +1,8 @@
+---
+name: build-and-verify
+description: Execute comprehensive project verification by running Maven build and optionally committing changes
+---
+
 # Verify Project Command
 
 Execute a comprehensive project verification workflow by delegating to specialized agents:

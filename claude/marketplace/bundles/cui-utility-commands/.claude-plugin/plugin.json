@@ -13,13 +13,5 @@
     "url": "https://github.com/cuioss/cui-llm-rules.git"
   },
   "keywords": ["utilities", "project-setup", "permissions", "diagnostics", "documentation", "architecture"],
-  "category": "development",
-  "commands": [
-    "./commands/build-and-verify.md",
-    "./commands/create-update-agents-md.md",
-    "./commands/fix-intellij-diagnostics.md",
-    "./commands/manage-web-permissions.md",
-    "./commands/setup-project-permissions.md",
-    "./commands/verify-architecture-diagrams.md"
-  ]
+  "category": "development"
 }

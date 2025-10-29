@@ -1,3 +1,8 @@
+---
+name: review-technical-docs
+description: Execute comprehensive AsciiDoc review with format validation, link verification, and quality analysis
+---
+
 # Technical AsciiDoc Documentation Review Command
 
 Execute comprehensive technical review of all AsciiDoc documentation using the asciidoc-reviewer agent for format validation, link verification, and content quality analysis.

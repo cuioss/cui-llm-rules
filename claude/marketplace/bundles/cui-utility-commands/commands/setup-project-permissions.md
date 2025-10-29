@@ -1,3 +1,8 @@
+---
+name: setup-project-permissions
+description: Verify and fix permissions in settings by removing duplicates, fixing formats, and ensuring proper organization
+---
+
 # Setup Project Permissions Command
 
 Verifies and fixes permissions in `.claude/settings.local.json` by removing duplicates and suspicious permissions, fixing path formats, managing temp directory permissions, and ensuring proper permission organization.

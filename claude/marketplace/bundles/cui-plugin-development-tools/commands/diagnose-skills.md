@@ -1,3 +1,8 @@
+---
+name: diagnose-skills
+description: Analyze, verify, and fix skills for structure, YAML frontmatter, standards references, and integration quality
+---
+
 # Skill Doctor - Verify and Fix Skills
 
 Analyze, verify, and fix skills for structure, YAML frontmatter, standards references, and integration quality.

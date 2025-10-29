@@ -1,3 +1,8 @@
+---
+name: create-command
+description: Guide users through creating a new well-structured slash command with comprehensive questionnaire
+---
+
 # Slash Command Creation Wizard
 
 Guide users through creating a new, well-structured slash command with a comprehensive questionnaire.

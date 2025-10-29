@@ -1,3 +1,8 @@
+---
+name: handle-pull-request
+description: Execute comprehensive PR workflow including CI/Sonar wait, review responses, and fixes
+---
+
 # Handle Pull Request Command
 
 Execute a comprehensive pull request workflow that creates/manages PRs, waits for CI/Sonar completion, addresses review comments, and fixes Sonar issues using specialized agents.

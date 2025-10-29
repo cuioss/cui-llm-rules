@@ -1,3 +1,8 @@
+---
+name: diagnose-commands
+description: Analyze, verify, and fix slash commands for ambiguities, inconsistencies, and structural issues
+---
+
 # Slash Command Doctor - Verify and Fix Slash Commands
 
 Analyze, verify, and fix slash commands for ambiguities, inconsistencies, and structural issues.

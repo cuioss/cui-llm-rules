@@ -1,3 +1,8 @@
+---
+name: create-update-agents-md
+description: Create or update project-specific agents.md file following OpenAI specification
+---
+
 # Verify Agents.md Command
 
 Creates or update the project specific agents.md
