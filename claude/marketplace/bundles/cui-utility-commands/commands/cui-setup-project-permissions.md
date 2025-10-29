@@ -11,7 +11,7 @@ Verifies and fixes permissions in `.claude/settings.local.json` by removing dupl
 
 **Global Permissions** (`~/.claude/settings.json`):
 - `Read(//~/git/**)` - Universal read access to ALL git repositories
-- `Skill(cui-*-skills:*)` - All CUI skills across four plugin packages
+- All CUI marketplace skills (9 individual skills)
 - `WebFetch(domain:*)` - Universal web access
 - All common Bash commands (git, mvn, grep, find, etc.)
 
@@ -216,7 +216,7 @@ Key global permissions:
 - Bash commands: {count} (git, mvn, find, grep, etc.)
 - All git repositories: Read(//~/git/**) - Universal git access
 - CUI standards: Read(//~/git/cui-llm-rules/**) - Redundant, covered by ~/git/**
-- CUI Skills: Skill(cui-*-skills:*) - All four skill packages
+- CUI Skills: All 9 marketplace skills
 - Claude tools: SlashCommand, Read .claude/**
 - WebFetch: domain:* (any domain allowed globally)
 ```
@@ -472,7 +472,7 @@ For each permission in local allow list:
    - Example: `Read(//~/git/cui-llm-rules/standards/logging/**)` is covered by global `Read(//~/git/**)`
    - Example: `Bash(grep:*)` is covered by global `Bash(grep:*)`
    - Example: `WebFetch(domain:github.com)` is covered by global `WebFetch(domain:*)`
-   - Example: `Skill(cui-java-skills:cui-java-core)` is covered by global `Skill(cui-java-skills:*)`
+   - Example: `cui-java-core` is covered by global skills
 3. Store redundant permissions in `redundant_local_permissions` array
 
 **B. Report redundant permissions found**
@@ -489,7 +489,7 @@ Covered by Broader Global Permission:
 3. Read(//~/git/any-project/**) - Covered by global Read(//~/git/**) (UNIVERSAL GIT ACCESS)
 4. Read(//~/git/cui-llm-rules/standards/**) - Covered by global Read(//~/git/**)
 5. WebFetch(domain:github.com) - Covered by global WebFetch(domain:*)
-6. Skill(cui-java-skills:cui-java-core) - Covered by global Skill(cui-java-skills:*)
+6. cui-java-core - Covered by global skills
 
 Total redundant: {count}
 ```
@@ -1073,7 +1073,7 @@ Added Permissions:
 Removed Permissions (redundant - globally covered):
 - Read(//~/git/OAuth-Sheriff/**) - Covered by global Read(//~/git/**)
 - Read(//~/git/cui-llm-rules/**) - Covered by global Read(//~/git/**)
-- Skill(cui-java-skills:cui-java-core) - Covered by global Skill(cui-java-skills:*)
+- cui-java-core - Covered by global skills
 - WebFetch(domain:github.com) - Covered by global WebFetch(domain:*)
 
 Path Fixes Applied:
@@ -1278,7 +1278,7 @@ Task(...)                         - Task execution
 - **Read is NOT added** - Already globally available via `Read(//~/git/**)`
 
 **CUI Skills (SKIP - globally covered as of 2025-10-27):**
-- All CUI skills globally available via `Skill(cui-*-skills:*)`
+- All CUI marketplace skills globally available
 - No local additions needed for any CUI skills
 
 **WebFetch Domains (SKIP - globally covered as of 2025-10-27):**
@@ -1373,12 +1373,17 @@ This command improves itself over time. When you discover:
    - Eliminates need for project-specific Read permissions in local settings
    - `Read(//~/git/cui-llm-rules/**)` now redundant but kept for clarity
 
-2. **Universal CUI Skills Access**: Added skill wildcards to global settings
-   - `Skill(cui-documentation-skills:*)` - All documentation skills
-   - `Skill(cui-frontend-skills:*)` - All frontend skills
-   - `Skill(cui-java-skills:*)` - All Java/CDI skills
-   - `Skill(cui-project-management-skills:*)` - All PM skills
-   - Covers all 8 unique skills across four plugin packages
+2. **Universal CUI Skills Access**: Added individual skills to global settings
+   - `cui-documentation` - Documentation standards
+   - `cui-frontend-development` - Frontend standards
+   - `cui-java-cdi` - CDI and Quarkus standards
+   - `cui-java-core` - Core Java standards
+   - `cui-java-unit-testing` - Unit testing standards
+   - `cui-javadoc` - JavaDoc standards
+   - `cui-marketplace-architecture` - Marketplace architecture
+   - `cui-project-setup` - Project setup standards
+   - `cui-requirements` - Requirements engineering
+   - Covers all 9 marketplace skills
 
 **Impact on Command Behavior:**
 
