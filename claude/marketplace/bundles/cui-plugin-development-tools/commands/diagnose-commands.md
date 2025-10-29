@@ -149,15 +149,43 @@ Command Overview:
 
 Check for common structural issues:
 
-**A. Missing Critical Sections**
+**A. YAML Frontmatter Validation** (CRITICAL)
+
+**REQUIRED**: Every command MUST have valid YAML frontmatter at the very beginning:
+
+```yaml
+---
+name: command-name
+description: Brief description
+---
+```
+
+Check:
+- ✅ Frontmatter exists at line 1
+- ✅ Starts with `---` and ends with `---`
+- ✅ Contains `name:` field matching filename (without .md extension)
+- ✅ Contains `description:` field (max 100 characters recommended)
+- ✅ Valid YAML syntax (no tabs, proper indentation)
+
+**CRITICAL**: Without proper frontmatter, the command will NOT be discovered by Claude Code.
+
+**B. Missing Critical Sections**
 
 Required sections for well-formed commands:
+- ✅ YAML Frontmatter (validated above)
 - ✅ Title (# heading)
 - ✅ Description (summary of what command does)
 - ✅ PARAMETERS (if command accepts parameters)
 - ✅ WORKFLOW INSTRUCTIONS or similar execution section
 
-**B. Parameter Issues**
+**C. Frontmatter-Filename Consistency**
+
+Verify that:
+- ✅ `name:` in frontmatter matches filename (without .md extension)
+  - Example: `build-and-verify.md` → `name: build-and-verify`
+- ✅ No mismatches that would prevent command discovery
+
+**D. Parameter Issues**
 
 If command has parameters:
 - ✅ Each parameter documented
@@ -165,7 +193,7 @@ If command has parameters:
 - ✅ Clear handling of each parameter combination
 - ✅ Examples showing parameter usage
 
-**C. Workflow Issues**
+**E. Workflow Issues**
 
 Check workflow structure:
 - ✅ Clear step-by-step instructions
@@ -175,7 +203,7 @@ Check workflow structure:
 - ✅ User prompts are consistent
 - ✅ Tool invocations use correct syntax
 
-**D. Consistency Issues**
+**F. Consistency Issues**
 
 - ✅ User prompt formats (Y/N/S/P/Q vs inconsistent)
 - ✅ Tool names referenced correctly
@@ -183,7 +211,7 @@ Check workflow structure:
 - ✅ Commands use proper bash syntax
 - ✅ No conflicting instructions
 
-**E. Documentation Quality**
+**G. Documentation Quality**
 
 - ✅ Examples provided
 - ✅ CRITICAL RULES or similar section exists
@@ -193,6 +221,7 @@ Check workflow structure:
 Display findings:
 ```
 Structural Analysis:
+❌ MISSING FRONTMATTER - Command will not be discovered!
 ✅ All required sections present
 ⚠️  Parameter validation could be clearer
 ✅ Workflow is well-structured

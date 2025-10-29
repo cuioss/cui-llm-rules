@@ -44,10 +44,10 @@ Wait for user acknowledgment (any input will proceed).
 ```
 [Question 1/11] Where should the command be located?
 
-1. Global command (~/.claude/commands/)
-   - Available in all projects
-   - Use for general-purpose commands
-   - Examples: docs-adoc, handle-pull-request, verify-architecture-diagrams
+1. Marketplace bundle (~/git/cui-llm-rules/claude/marketplace/bundles/)
+   - Part of a shareable plugin bundle
+   - Use for reusable, versioned commands
+   - Examples: build-and-verify, handle-pull-request, review-technical-docs
 
 2. Project command (.claude/commands/)
    - Available only in this project
@@ -57,7 +57,24 @@ Wait for user acknowledgment (any input will proceed).
 Enter 1 or 2:
 ```
 
-Store response as `location` (global or project).
+Store response as `location` (marketplace or project).
+
+**If marketplace (option 1) selected, ask follow-up:**
+```
+Which bundle should contain this command?
+
+Existing bundles:
+- cui-utility-commands (project utilities)
+- cui-plugin-development-tools (plugin/command/agent creation)
+- cui-pull-request-workflow (PR management)
+- cui-issue-implementation (issue planning and implementation)
+- cui-documentation-standards (documentation review)
+- cui-project-quality-gates (build and quality checks)
+
+Enter bundle name or "new" to create a new bundle:
+```
+
+Store response as `bundle_name`.
 
 #### Question 2.2: Command Name
 ```
@@ -77,13 +94,14 @@ Validate: No spaces, lowercase, hyphens only, doesn't already exist.
 ```
 [Question 3/11] Provide a brief description of the command.
 
-This will appear at the top of the command file.
-Be concise but descriptive (1-2 sentences).
+This will appear in the YAML frontmatter and is required for command discovery.
+Be concise but descriptive (1-2 sentences, max 100 characters).
 
 Description:
 ```
 
 Store response as `description`.
+Validate: Length <= 100 characters for frontmatter compatibility.
 
 #### Question 2.4: Continuous Improvement Rule
 
@@ -408,14 +426,24 @@ Based on collected information, generate the command file with proper structure:
 
 **Components to include:**
 
-1. **Title and Description**
+1. **YAML Frontmatter** (REQUIRED - MUST be first)
+   ```yaml
+   ---
+   name: {command_name}
+   description: {description}
+   ---
+   ```
+   **CRITICAL**: This frontmatter is REQUIRED for command discovery by Claude Code.
+   Without it, the command will not appear in the command palette.
+
+2. **Title and Description**
    ```markdown
    # {CommandName} Command
 
    {description}
    ```
 
-2. **CONTINUOUS IMPROVEMENT RULE** (if include_continuous_improvement is true)
+3. **CONTINUOUS IMPROVEMENT RULE** (if include_continuous_improvement is true)
    ```markdown
    ## CONTINUOUS IMPROVEMENT RULE
 
@@ -429,15 +457,15 @@ Based on collected information, generate the command file with proper structure:
    ```
    Customize the list items to match the command's domain (e.g., for API commands mention "API endpoints, data formats"; for validation commands mention "validation patterns, edge cases").
 
-3. **PARAMETERS Section**
+4. **PARAMETERS Section**
    - Document all parameters (push + custom)
    - Include examples
 
-4. **PARAMETER VALIDATION Section**
+5. **PARAMETER VALIDATION Section**
    - Validation logic for each parameter
    - Handle all combinations
 
-5. **WORKFLOW INSTRUCTIONS Section**
+6. **WORKFLOW INSTRUCTIONS Section**
    - Structure workflow_description into numbered steps
    - Add substeps as needed
    - Include decision points
@@ -445,22 +473,22 @@ Based on collected information, generate the command file with proper structure:
    - **PRE-CONDITIONS**: If pre_conditions provided, add verification step BEFORE main workflow
    - **POST-CONDITIONS**: If post_conditions provided, add verification step AFTER main workflow
 
-6. **State Management Steps** (if state_config provided)
+7. **State Management Steps** (if state_config provided)
    - Step for reading .claude/run-configuration.md
    - Step for updating .claude/run-configuration.md
 
-7. **CRITICAL RULES Section**
+8. **CRITICAL RULES Section**
    - Best practices from similar commands
    - Specific rules for this command's domain
    - **CONSTRAINTS**: Incorporate critical_constraints as NEVER/MUST NOT rules
    - **PRE-CONDITIONS**: List as requirements that must be checked
    - **POST-CONDITIONS**: List as guarantees/success criteria
 
-8. **Example .claude/run-configuration.md Structure** (if state_config provided)
+9. **Example .claude/run-configuration.md Structure** (if state_config provided)
 
-9. **Usage Examples**
+10. **Usage Examples**
 
-10. **Important Notes** (if applicable)
+11. **Important Notes** (if applicable)
 
 **Apply these structural patterns from existing commands:**
 
@@ -490,12 +518,20 @@ From `verify-all`:
 **File Generation:**
 
 1. Determine full path:
-   - If global: `~/.claude/commands/{command_name}.md`
+   - If marketplace: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/commands/{command_name}.md`
    - If project: `.claude/commands/{command_name}.md`
 
-2. Generate content with proper structure
+2. If marketplace and bundle doesn't exist:
+   - Create bundle directory structure: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/`
+   - Create subdirectories: `commands/`, `agents/`, `skills/`
+   - Create `.claude-plugin/plugin.json` with minimal structure (see bundling-architecture.adoc)
+   - Create bundle README.md
 
-3. Write file using Write tool
+3. Generate content with proper structure (MUST start with YAML frontmatter)
+
+4. Write file using Write tool
+
+5. Verify frontmatter is present and valid
 
 ### Step 9: Display Creation Summary
 
@@ -568,6 +604,7 @@ To use it:
 /{command_name} {example with parameters}
 
 The command follows best practices from existing commands:
+✅ YAML frontmatter for command discovery
 ✅ Proper structure and sections
 ✅ Clear parameter validation
 ✅ Comprehensive workflow steps
@@ -581,6 +618,7 @@ Happy coding! 🚀
 
 ## CRITICAL RULES
 
+- **ALWAYS include YAML frontmatter** as the FIRST element in the file (required for command discovery)
 - **ALWAYS collect ALL information** before generating the command
 - **NEVER skip validation** of command name and location
 - **ALWAYS check for existing commands** to avoid conflicts
@@ -591,6 +629,8 @@ Happy coding! 🚀
 - **INCLUDE state management** only if genuinely needed
 - **APPLY anti-bloat principles** - concise but complete
 - **USE proper markdown formatting** - consistent with existing commands
+- **DEFAULT to marketplace bundles** unless explicitly project-specific
+- **VERIFY frontmatter syntax** is valid YAML with name and description fields
 
 ## PATTERN MATCHING GUIDE
 

@@ -194,6 +194,71 @@ Agent Overview:
 - Complexity: <Low/Medium/High>
 ```
 
+#### Step 4.2.5: Validate YAML Frontmatter (CRITICAL)
+
+**REQUIRED**: Every agent MUST have valid YAML frontmatter at the very beginning.
+
+```yaml
+---
+name: agent-name
+description: Brief description of agent purpose
+tools: Read, Write, Bash
+model: sonnet
+color: green
+---
+```
+
+**Validation Checks:**
+
+**A. Frontmatter Presence**
+- ✅ Frontmatter exists at line 1
+- ✅ Starts with `---` and ends with `---`
+- ❌ **CRITICAL**: Without frontmatter, agent will NOT be discovered by Claude Code
+
+**B. Required Fields**
+- ✅ `name:` field present and matches filename (without .md extension)
+  - Example: `maven-project-builder.md` → `name: maven-project-builder`
+- ✅ `description:` field present (1-2 sentences describing when to use this agent)
+- ✅ `tools:` field present (comma-separated list of tools)
+- ✅ `model:` field present (typically: sonnet, opus, or haiku)
+- ✅ `color:` field present (for UI visualization)
+
+**C. YAML Syntax Validation**
+- ✅ No tabs (must use spaces for indentation)
+- ✅ Proper YAML syntax (key: value format)
+- ✅ Tools list is comma-separated or YAML array
+- ✅ Description is properly quoted if contains special characters
+
+**D. Semantic Validation**
+- ✅ Description clearly states WHEN agent should be invoked
+- ✅ Description includes invocation examples (optional but recommended)
+- ✅ Tools list will be validated against workflow in Step 4.3 (Tool Fit Analysis)
+
+Display:
+```
+Frontmatter Validation:
+✅ Valid YAML frontmatter present
+✅ All required fields present
+✅ Name matches filename
+⚠️  Description could be more specific about invocation examples
+✅ YAML syntax is valid
+```
+
+**If frontmatter is missing or invalid:**
+```
+❌ CRITICAL: No YAML frontmatter found!
+   Agent will NOT be discovered by Claude Code.
+
+   Required format at line 1:
+   ---
+   name: {agent-name}
+   description: {description}
+   tools: {tool-list}
+   model: sonnet
+   color: green
+   ---
+```
+
 #### Step 4.3: Perform Tool Coverage Analysis
 
 **CRITICAL: This is the most important analysis for agents**

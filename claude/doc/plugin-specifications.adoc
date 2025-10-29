@@ -330,8 +330,37 @@ From loaded standards, extract and organize key requirements.
 
 **Structure**: Single Markdown file (NOT a directory)
 
+**YAML Frontmatter** (REQUIRED):
+[source,yaml]
+----
+---
+name: agent-name
+description: Brief description of agent purpose and when to invoke
+tools: Read, Write, Bash
+model: sonnet
+color: green
+---
+----
+
+**Required Fields**:
+- `name`: Agent identifier (kebab-case, must match filename without `.md`)
+- `description`: Clear explanation of when to use this agent (1-2 sentences)
+- `tools`: Comma-separated list of tools the agent uses
+- `model`: Model to use (typically: `sonnet`, `opus`, or `haiku`)
+- `color`: UI color (e.g., `green`, `blue`, `red`)
+
+**CRITICAL**: Without valid YAML frontmatter, the agent will NOT be discovered by Claude Code.
+
 **Content Pattern**:
 ```markdown
+---
+name: maven-project-builder
+description: Use this agent when the user needs to build and verify projects with Maven
+tools: Read, Bash, Edit
+model: sonnet
+color: green
+---
+
 # Agent Name
 
 Agent purpose and description.
@@ -348,8 +377,6 @@ Agent purpose and description.
 [Output format]
 ```
 
-**Note**: Agents do NOT use YAML frontmatter in the current implementation.
-
 === Commands
 
 ==== File Format
@@ -360,8 +387,28 @@ Agent purpose and description.
 
 **Invocation**: `/command-name` (filename without `.md` extension)
 
+**YAML Frontmatter** (REQUIRED):
+[source,yaml]
+----
+---
+name: command-name
+description: Brief description of what this command does
+---
+----
+
+**Required Fields**:
+- `name`: Command identifier (kebab-case, must match filename without `.md`)
+- `description`: Clear one-sentence description (max 100 characters recommended)
+
+**CRITICAL**: Without valid YAML frontmatter, the command will NOT be discovered by Claude Code and will not appear in the command palette.
+
 **Content Pattern**:
 ```markdown
+---
+name: build-and-verify
+description: Execute comprehensive project verification by running Maven build
+---
+
 # Command Name
 
 You are a command that [purpose].
@@ -380,8 +427,6 @@ You are a command that [purpose].
 
 Expected output format and behavior.
 ```
-
-**Note**: Commands do NOT use YAML frontmatter in the current implementation.
 
 == Bundle Types
 
@@ -553,6 +598,49 @@ sub_agents:
 
 == Common Issues
 
+=== Missing YAML Frontmatter
+
+**Problem**: Command or agent files without YAML frontmatter
+
+**Symptom**: Components exist in filesystem but don't appear in Claude Code command palette or agent list
+
+**Solution**: Add required YAML frontmatter at the very beginning of each file
+
+**For Commands**:
+```yaml
+---
+name: command-name
+description: Brief description
+---
+```
+
+**For Agents**:
+```yaml
+---
+name: agent-name
+description: Brief description
+tools: Read, Write, Bash
+model: sonnet
+color: green
+---
+```
+
+**Critical Rule**: Frontmatter MUST be the first content in the file (line 1). Without it, Claude Code will not discover the component.
+
+=== Invalid YAML Syntax
+
+**Problem**: Malformed YAML in frontmatter (tabs instead of spaces, missing colons, etc.)
+
+**Symptom**: Component not discovered or parsing errors
+
+**Solution**: Validate YAML syntax:
+- Use spaces, NOT tabs for indentation
+- Ensure proper `key: value` format
+- Quote strings with special characters
+- Match `name:` field to filename (without `.md`)
+
+**Validation**: Use `/diagnose-commands` or `/diagnose-agents` to verify frontmatter
+
 === Missing .md Extensions
 
 **Problem**: Component paths in plugin.json without `.md` extension
@@ -608,7 +696,14 @@ agents/
 
 **Symptom**: Commands not registered and not discoverable
 
-**Solution**: Add `commands` array to plugin.json listing all command files
+**Solution**: Commands are auto-discovered from the `commands/` directory if they have valid YAML frontmatter. The `commands` field in `plugin.json` is optional but can be used for explicit control.
+
+**Auto-Discovery** (Recommended):
+- Place command files in `commands/` directory
+- Ensure each has valid YAML frontmatter
+- Claude Code will discover them automatically
+
+**Explicit Listing** (Optional):
 ```json
 {
   "name": "cui-utility-commands",
@@ -618,6 +713,8 @@ agents/
   ]
 }
 ```
+
+**Note**: With auto-discovery via frontmatter, the `commands` array is optional and can be omitted for simpler maintenance.
 
 == Cross-References
 

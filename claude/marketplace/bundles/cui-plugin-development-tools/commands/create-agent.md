@@ -74,10 +74,10 @@ Wait for user acknowledgment (any input will proceed).
 ```
 [Question 1/10] Where should the agent be located?
 
-1. Global agent (~/.claude/agents/)
-   - Available in all projects
-   - Use for general-purpose agents
-   - Examples: maven-project-builder, documentation-analyzer
+1. Marketplace bundle (~/git/cui-llm-rules/claude/marketplace/bundles/)
+   - Part of a shareable plugin bundle
+   - Use for reusable, versioned agents
+   - Examples: maven-project-builder, asciidoc-reviewer, task-executor
 
 2. Project agent (.claude/agents/)
    - Available only in this project
@@ -87,7 +87,24 @@ Wait for user acknowledgment (any input will proceed).
 Enter 1 or 2:
 ```
 
-Store response as `location` (global or project).
+Store response as `location` (marketplace or project).
+
+**If marketplace (option 1) selected, ask follow-up:**
+```
+Which bundle should contain this agent?
+
+Existing bundles:
+- cui-utility-commands (project utilities)
+- cui-plugin-development-tools (plugin/command/agent creation)
+- cui-pull-request-workflow (PR management)
+- cui-issue-implementation (issue planning and implementation)
+- cui-documentation-standards (documentation review)
+- cui-project-quality-gates (build and quality checks)
+
+Enter bundle name or "new" to create a new bundle:
+```
+
+Store response as `bundle_name`.
 
 #### Question 3.2: Agent Name
 ```
@@ -508,12 +525,20 @@ After completing all work, return findings in this format:
 **File Generation:**
 
 1. Determine full path:
-   - If global: `~/.claude/agents/{agent_name}.md`
+   - If marketplace: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/agents/{agent_name}.md`
    - If project: `.claude/agents/{agent_name}.md`
 
-2. Generate content with all sections above
+2. If marketplace and bundle doesn't exist:
+   - Create bundle directory structure: `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle_name}/`
+   - Create subdirectories: `commands/`, `agents/`, `skills/`
+   - Create `.claude-plugin/plugin.json` with minimal structure (see bundling-architecture.adoc)
+   - Create bundle README.md
 
-3. Write file using Write tool
+3. Generate content with all sections above (MUST start with YAML frontmatter)
+
+4. Write file using Write tool
+
+5. Verify frontmatter is present and valid
 
 ### Step 10: Display Creation Summary
 
@@ -594,6 +619,7 @@ If issues exist and user chooses Yes, diagnose-agents continues in fix mode.
 Your new agent is ready: {agent_name}
 
 The agent follows architectural best practices:
+✅ YAML frontmatter for agent discovery
 ✅ 100% Tool Fit (all required tools configured)
 ✅ Self-contained (Essential Rules embedded)
 ✅ Structured response format
@@ -612,6 +638,7 @@ Happy coding! 🚀
 ## CRITICAL RULES
 
 - **READ ARCHITECTURE DOCUMENT** at Step 2 - ensures compliance with patterns
+- **ALWAYS include YAML frontmatter** as the FIRST element in the file (required for agent discovery)
 - **ALWAYS collect ALL information** before generating the agent
 - **NEVER skip tool fit analysis** - 100% is required
 - **ALWAYS embed Essential Rules** inline - no external reads during execution
@@ -619,7 +646,8 @@ Happy coding! 🚀
 - **ALWAYS include response format template** - structured output is required
 - **ALWAYS include tool usage tracking** - visibility into agent behavior
 - **ALWAYS run diagnose-agents** after creation to verify quality
-- **USE proper YAML frontmatter** - required for agent discovery
+- **DEFAULT to marketplace bundles** unless explicitly project-specific
+- **VERIFY frontmatter syntax** is valid YAML with name, description, tools, model, and color fields
 - **APPLY industry best practices** from architecture document
 - **ENSURE self-contained agents** - no external file reads during execution
 
