@@ -57,7 +57,10 @@ Example: "fix(auth): resolve token validation error"
 ### Step 2: Analyze Changes for Artifacts
 
 1. Execute: `git status --porcelain` to list all changed/new files
-2. Execute: `find . -name "*.class" -o -name "*.temp" -o -name "*.backup*"` to locate artifacts
+2. Use Glob tool to locate artifacts:
+   - Class files: `Glob(pattern="**/*.class", path=".")`
+   - Temp files: `Glob(pattern="**/*.temp", path=".")`
+   - Backup files: `Glob(pattern="**/*.backup*", path=".")`
 3. Cross-reference with git status to identify newly added artifacts
 4. Focus on problematic patterns:
    - `*.class` files in src/ directories (should only be in target/)

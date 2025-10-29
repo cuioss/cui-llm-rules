@@ -79,7 +79,9 @@ The skill will load:
 - If neither: Ask user for target (file or directory)
 
 **Validate the target:**
-1. Check if target exists using Read tool or Bash `test -e`
+1. Check if target exists using Read tool with try/except:
+   - For files: Try `Read(file_path="{target}")` - if succeeds, file exists
+   - For directories: Use `Glob(pattern="*", path="{target}")` - if returns results, directory exists
 2. Determine type:
    - If file: Verify extension is `.adoc`, exit with error if not
    - If directory: Verify it's accessible
@@ -389,9 +391,12 @@ Before removing ANY cross-reference or link, you MUST:
      - Relative target: `../../doc/specification/well-known.adoc`
      - Absolute path: `/Users/oliver/git/OAuth-Sheriff/doc/specification/well-known.adoc`
 
-3. **Verify file existence using the ABSOLUTE PATH:**
-   ```bash
-   test -f {absolute_path} && echo "EXISTS" || echo "NOT FOUND"
+3. **Verify file existence using the ABSOLUTE PATH with Read tool:**
+   ```
+   Try to read the file:
+   - Read(file_path="{absolute_path}")
+   - If Read succeeds: File EXISTS
+   - If Read fails with FileNotFoundError: File NOT FOUND
    ```
 
 4. **Decision tree:**
@@ -426,9 +431,9 @@ Before removing ANY cross-reference or link, you MUST:
 - ❌ Trusting link verification script output without double-checking
 
 **Examples of CORRECT behavior:**
-- ✅ Manually verify file exists: `test -f {absolute_path}`
+- ✅ Manually verify file exists using Read tool: `Read(file_path="{absolute_path}")`
 - ✅ If file exists, keep the link even if script reports issue
-- ✅ If file doesn't exist, search for it: `find . -name "well-known.adoc"`
+- ✅ If file doesn't exist, search for it using Glob: `Glob(pattern="**/well-known.adoc", path=".")`
 - ✅ Ask user before any removal
 - ✅ Document discrepancies between your findings and script output
 
