@@ -77,6 +77,12 @@
       "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
       "source": "./bundles/cui-plugin-development-tools",
       "strict": false
+    },
+    {
+      "name": "cui-utility-commands",
+      "description": "Standalone utility commands for project setup, permissions, diagnostics, and documentation",
+      "source": "./bundles/cui-utility-commands",
+      "strict": false
     }
   ]
 }

@@ -2,11 +2,21 @@
   "name": "cui-project-quality-gates",
   "version": "1.0.0",
   "description": "Build verification and change management infrastructure for CUI projects",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuioss/cui-llm-rules.git"
+  },
   "keywords": ["maven", "build", "commit", "quality", "verification"],
   "category": "development",
   "agents": [
-    "./agents/maven-project-builder",
-    "./agents/commit-changes"
+    "./agents/maven-project-builder.md",
+    "./agents/commit-changes.md"
   ],
   "skills": [
     "./skills/cui-javadoc"

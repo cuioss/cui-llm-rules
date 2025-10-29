@@ -1,0 +1,25 @@
+{
+  "name": "cui-utility-commands",
+  "version": "1.0.0",
+  "description": "Standalone utility commands for CUI project development and maintenance",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuioss/cui-llm-rules.git"
+  },
+  "keywords": ["utilities", "project-setup", "permissions", "diagnostics", "documentation", "architecture"],
+  "category": "development",
+  "commands": [
+    "./commands/build-and-verify.md",
+    "./commands/create-update-agents-md.md",
+    "./commands/fix-intellij-diagnostics.md",
+    "./commands/manage-web-permissions.md",
+    "./commands/setup-project-permissions.md",
+    "./commands/verify-architecture-diagrams.md"
+  ]
+}

@@ -2,13 +2,23 @@
   "name": "cui-pull-request-workflow",
   "version": "1.0.0",
   "description": "PR review response and quality fixing workflow",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuioss/cui-llm-rules.git"
+  },
   "keywords": ["pull-request", "pr", "review", "quality"],
   "category": "quality",
   "agents": [
-    "./agents/pr-review-responder",
-    "./agents/pr-quality-fixer"
+    "./agents/pr-review-responder.md",
+    "./agents/pr-quality-fixer.md"
   ],
   "commands": [
-    "./commands/handle-pull-request"
+    "./commands/handle-pull-request.md"
   ]
 }

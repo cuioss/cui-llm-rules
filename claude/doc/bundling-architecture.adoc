@@ -38,11 +38,10 @@ The marketplace implements 5 bundle patterns based on functional cohesion and co
 
 **Purpose**: Structured issue implementation workflow
 
-**Components**: 5 components
+**Components**: 4 components
 - Agent: `task-reviewer` (analyzes task requirements)
 - Agent: `task-breakdown-agent` (creates implementation plan)
 - Agent: `task-executor` (executes implementation steps)
-- Agent: `research-best-practices` (researches technical patterns)
 - Command: `/implement-task` (orchestrates workflow)
 
 **Use Case**: Complete end-to-end issue implementation
@@ -172,43 +171,91 @@ claude/marketplace/bundles/{bundle-name}/
 │   └── plugin.json           # Bundle manifest
 ├── README.md                  # Bundle documentation
 ├── agents/                    # Agent components (if any)
-│   └── {agent-name}/
-│       └── AGENT.md
+│   ├── {agent-name-1}.md     # Single file per agent
+│   └── {agent-name-2}.md
 ├── commands/                  # Command components (if any)
-│   └── {command-name}.md
+│   ├── {command-name-1}.md   # Single file per command
+│   └── {command-name-2}.md
 └── skills/                    # Skill components (if any)
-    └── {skill-name}/
-        ├── SKILL.md
+    └── {skill-name}/          # Directory per skill
+        ├── SKILL.md           # Required
+        ├── scripts/           # Optional support files
         └── standards/
 ----
+
+**Component File Structure Requirements**:
+- **Commands**: Single `.md` files (NOT directories)
+- **Agents**: Single `.md` files (NOT directories)
+- **Skills**: Directories containing `SKILL.md` file (with optional support files)
 
 **Notes**:
 - Not all bundles have all subdirectories (commands-only bundles have no agents/)
 - Bundles must have at least one component directory
 - Plugin manifest is required for all bundles
+- Commands and agents use single-file format for direct loading
+- Skills use directory format to support additional resources (scripts, templates, documentation)
 
 === Plugin Manifest Format
 
 **Location**: `.claude-plugin/plugin.json`
 
-**Required Fields**:
+**Complete Example**:
 [source,json]
 ----
 {
-  "name": "cui-{bundle-name}",
+  "name": "cui-project-quality-gates",
   "version": "1.0.0",
-  "description": "{concise bundle purpose}",
-  "keywords": ["{domain}", "{workflow}", "{functionality}"],
-  "category": "development"
+  "description": "Build verification and change management infrastructure for CUI projects",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuioss/cui-llm-rules.git"
+  },
+  "keywords": ["maven", "build", "commit", "quality", "verification"],
+  "category": "development",
+  "agents": [
+    "./agents/maven-project-builder.md",
+    "./agents/commit-changes.md"
+  ],
+  "commands": [
+    "./commands/verify-build.md"
+  ],
+  "skills": [
+    "./skills/cui-javadoc"
+  ]
 }
 ----
 
 **Field Guidelines**:
-- `name`: Must start with `cui-` prefix for CUI bundles
+
+**Required Fields:**
+- `name`: Must start with `cui-` prefix for CUI bundles (kebab-case)
 - `version`: Semantic versioning (MAJOR.MINOR.PATCH)
 - `description`: One-sentence explanation of bundle purpose
+
+**Recommended Fields:**
+- `author`: Object with `name` and optional `email`
+- `license`: License identifier (e.g., "Apache-2.0", "MIT")
+- `homepage`: URL to documentation or project home
+- `repository`: Object with `type` and `url` for source repository
 - `keywords`: 3-6 terms for marketplace search
-- `category`: Typically "development" for CUI bundles
+- `category`: Typically "development", "documentation", or "quality" for CUI bundles
+
+**Component Fields:**
+- `agents`: Array of paths to agent `.md` files (include `.md` extension)
+- `commands`: Array of paths to command `.md` files (include `.md` extension)
+- `skills`: Array of paths to skill directories (no `.md` extension, directory contains `SKILL.md`)
+
+**Path Format Requirements:**
+- All paths must be relative starting with `./`
+- Agent and command paths must include `.md` file extension
+- Skill paths point to directories (not files)
+- Example: `"./agents/maven-project-builder.md"` not `"./agents/maven-project-builder"`
 
 === Bundle README Format
 
@@ -233,9 +280,9 @@ claude/marketplace/bundles/{bundle-name}/
 **Location**: `claude/marketplace/bundles/cui-project-quality-gates/`
 
 **Components**:
-- `agents/maven-project-builder/` - Maven build execution
-- `agents/commit-changes/` - Git commit automation
-- `skills/cui-javadoc/` - JavaDoc standards
+- `agents/maven-project-builder.md` - Maven build execution
+- `agents/commit-changes.md` - Git commit automation
+- `skills/cui-javadoc/` - JavaDoc standards (directory with SKILL.md)
 
 **Used By**: task-executor, pr-quality-fixer, pr-review-responder agents; build-and-verify, fix-intellij-diagnostics commands
 
@@ -246,11 +293,12 @@ claude/marketplace/bundles/{bundle-name}/
 **Location**: `claude/marketplace/bundles/cui-issue-implementation/`
 
 **Components**:
-- `agents/task-reviewer/` - Task requirements analysis
-- `agents/task-breakdown-agent/` - Implementation planning
-- `agents/task-executor/` - Step-by-step execution
-- `agents/research-best-practices/` - Technical research
+- `agents/task-reviewer.md` - Task requirements analysis
+- `agents/task-breakdown-agent.md` - Implementation planning
+- `agents/task-executor.md` - Step-by-step execution
 - `commands/implement-task.md` - Workflow orchestration
+
+**Dependencies**: Agents may invoke standalone `research-best-practices` agent for technical research
 
 **Used By**: Direct user invocation via `/implement-task` command
 
@@ -261,8 +309,8 @@ claude/marketplace/bundles/{bundle-name}/
 **Location**: `claude/marketplace/bundles/cui-pull-request-workflow/`
 
 **Components**:
-- `agents/pr-review-responder/` - Review comment responses
-- `agents/pr-quality-fixer/` - Quality issue fixes
+- `agents/pr-review-responder.md` - Review comment responses
+- `agents/pr-quality-fixer.md` - Quality issue fixes
 - `commands/handle-pull-request.md` - PR workflow orchestration
 
 **Used By**: Direct user invocation via `/handle-pull-request` command
@@ -274,8 +322,8 @@ claude/marketplace/bundles/{bundle-name}/
 **Location**: `claude/marketplace/bundles/cui-documentation-standards/`
 
 **Components**:
-- `agents/asciidoc-reviewer/` - AsciiDoc validation
-- `skills/cui-documentation/` - Documentation standards
+- `agents/asciidoc-reviewer.md` - AsciiDoc validation
+- `skills/cui-documentation/` - Documentation standards (directory with SKILL.md)
 - `commands/review-technical-docs.md` - Review orchestration
 
 **Used By**: Direct user invocation via `/review-technical-docs` command
@@ -295,15 +343,33 @@ claude/marketplace/bundles/{bundle-name}/
 
 **Used By**: Plugin developers creating and maintaining marketplace components
 
+=== Utility Commands Bundle Components
+
+**Bundle**: `cui-utility-commands`
+
+**Location**: `claude/marketplace/bundles/cui-utility-commands/`
+
+**Components**:
+- `commands/build-and-verify.md` - Project verification and build
+- `commands/create-update-agents-md.md` - agents.md generation
+- `commands/fix-intellij-diagnostics.md` - IDE diagnostics fixer
+- `commands/manage-web-permissions.md` - WebFetch domain manager
+- `commands/setup-project-permissions.md` - Permission setup and verification
+- `commands/verify-architecture-diagrams.md` - PlantUML diagram verification
+
+**Used By**: Cross-project maintenance and setup tasks
+
+**Rationale**: General-purpose utility commands that don't form a cohesive workflow but are useful across all CUI projects. Bundled together to prevent exposure via skill plugin sources.
+
 === Unbundled Components
 
-**Location**: `claude/marketplace/agents/`, `claude/marketplace/commands/`, `claude/marketplace/skills/`
+**Location**: `claude/marketplace/agents/`, `claude/marketplace/skills/`
 
 **Remaining Standalone Components**:
-- Utility commands without workflow coupling
+- `agents/research-best-practices.md` - General-purpose research agent used across multiple bundles
 - Skill-only plugins (cui-java-skills, cui-frontend-skills, cui-documentation-skills, cui-project-management-skills)
 
-**Rationale**: These components have low co-occurrence with bundled workflows or already exist as well-structured skill plugins.
+**Rationale**: Research agent is invoked by multiple bundles and should remain standalone. Skill plugins are well-structured packages without command/agent components.
 
 == Extensibility
 
@@ -404,12 +470,15 @@ Question: Should components be bundled?
 [source]
 ----
 ✅ CORRECT:
-./agents/maven-project-builder/AGENT.md
-./skills/cui-javadoc/SKILL.md
+./agents/maven-project-builder.md      # Agent as single .md file
+./commands/verify-build.md             # Command as single .md file
+./skills/cui-javadoc                   # Skill as directory (contains SKILL.md)
 
 ❌ INCORRECT:
-~/git/cui-llm-rules/claude/marketplace/bundles/...
-/Users/oliver/git/...
+./agents/maven-project-builder         # Missing .md extension
+./agents/maven-project-builder/AGENT.md # Incorrect directory structure
+~/git/cui-llm-rules/claude/marketplace/bundles/... # Absolute path
+/Users/oliver/git/...                  # User-specific absolute path
 ----
 
 **Cross-Bundle References**: Components reference bundled paths when invoking agents or skills
@@ -418,8 +487,10 @@ Question: Should components be bundled?
 [source,yaml]
 ----
 sub_agents:
-  - path: ../bundles/cui-project-quality-gates/agents/maven-project-builder
+  - path: ../bundles/cui-project-quality-gates/agents/maven-project-builder.md
 ----
+
+**Note**: Cross-bundle references must include `.md` extension for agents and commands.
 
 === Bundle Updates
 
@@ -431,6 +502,73 @@ sub_agents:
 ----
 
 **Versioning**: Semantic versioning in plugin.json tracked at bundle level
+
+== Implementation Notes
+
+=== Critical: Component File Structure
+
+**IMPORTANT**: Claude Code has strict requirements for component file structures:
+
+[cols="1,2,2,3"]
+|===
+|Component |Structure |Example |Rationale
+
+|**Commands**
+|Single `.md` file
+|`commands/build-and-verify.md`
+|Direct loading without directory traversal
+
+|**Agents**
+|Single `.md` file
+|`agents/maven-project-builder.md`
+|Direct loading without directory traversal
+
+|**Skills**
+|Directory with `SKILL.md`
+|`skills/cui-javadoc/SKILL.md`
+|Supports additional resources (scripts, templates, standards)
+|===
+
+**Common Mistake**: Creating directories with `COMMAND.md` or `AGENT.md` files inside
+
+**Consequence**: Claude Code exposes each file in the directory as a separate component, resulting in duplicate command/agent listings (e.g., `:COMMAND` and `:README` suffixes)
+
+**Example of INCORRECT Structure**:
+[source]
+----
+commands/
+└── build-and-verify/          ❌ Directory
+    ├── COMMAND.md             ❌ Exposed as ":COMMAND"
+    └── README.md              ❌ Exposed as ":README"
+----
+
+**Example of CORRECT Structure**:
+[source]
+----
+commands/
+└── build-and-verify.md        ✅ Single file
+----
+
+**Verification**: After restructuring, ensure:
+- Zero subdirectories under `commands/` (except for skills)
+- Zero subdirectories under `agents/` (except for skills)
+- All command files are `.md` files in `commands/` directory
+- All agent files are `.md` files in `agents/` directory
+- All skill directories contain `SKILL.md` file
+
+=== Bundle vs Standalone Components
+
+**Problem**: Skill plugins with `"source": "./"` automatically load all components in marketplace root
+
+**Solution**: Bundle standalone commands/agents to prevent unintended exposure
+
+**Example Issue**:
+- Skill plugin `cui-documentation-skills` has `"source": "./"`
+- This points to `claude/marketplace/` as plugin root
+- Plugin automatically loads `claude/marketplace/commands/` directory
+- Result: All marketplace commands appear under `cui-documentation-skills` namespace
+
+**Fix**: Create dedicated bundles for standalone utilities (e.g., `cui-utility-commands`)
 
 == Cross-References
 

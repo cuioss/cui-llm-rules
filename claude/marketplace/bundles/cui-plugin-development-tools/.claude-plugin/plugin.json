@@ -2,13 +2,23 @@
   "name": "cui-plugin-development-tools",
   "version": "1.0.0",
   "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuioss/cui-llm-rules.git"
+  },
   "keywords": ["plugin", "development", "tools", "diagnose", "create"],
   "category": "development",
   "commands": [
-    "./commands/create-agent",
-    "./commands/create-command",
-    "./commands/diagnose-agents",
-    "./commands/diagnose-commands",
-    "./commands/diagnose-skills"
+    "./commands/create-agent.md",
+    "./commands/create-command.md",
+    "./commands/diagnose-agents.md",
+    "./commands/diagnose-commands.md",
+    "./commands/diagnose-skills.md"
   ]
 }

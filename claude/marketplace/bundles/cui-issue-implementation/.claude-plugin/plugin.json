@@ -2,14 +2,24 @@
   "name": "cui-issue-implementation",
   "version": "1.0.0",
   "description": "Complete issue implementation workflow from review to execution",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuioss/cui-llm-rules.git"
+  },
   "keywords": ["issue", "task", "implementation", "workflow"],
   "category": "development",
   "agents": [
-    "./agents/task-reviewer",
-    "./agents/task-breakdown-agent",
-    "./agents/task-executor"
+    "./agents/task-reviewer.md",
+    "./agents/task-breakdown-agent.md",
+    "./agents/task-executor.md"
   ],
   "commands": [
-    "./commands/implement-task"
+    "./commands/implement-task.md"
   ]
 }

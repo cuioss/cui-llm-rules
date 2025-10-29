@@ -26,27 +26,55 @@ The `marketplace.json` file follows the official Claude Code marketplace schema:
 
 ## Plugin Organization
 
-The marketplace organizes 8 skills into 4 logical plugin groupings:
+The marketplace organizes components into skill plugins and workflow bundles:
 
-### cui-java-skills (4 skills)
+### Skill Plugins (4 plugins, 8 skills)
+
+#### cui-java-skills (4 skills)
 Java development standards including core patterns, unit testing, JavaDoc, and CDI/Quarkus
 - `./skills/cui-java-core`
 - `./skills/cui-java-unit-testing`
 - `./skills/cui-javadoc`
 - `./skills/cui-java-cdi`
 
-### cui-frontend-skills (1 skill)
+#### cui-frontend-skills (1 skill)
 Frontend development standards for JavaScript, CSS, web components, and testing
 - `./skills/cui-frontend-development`
 
-### cui-documentation-skills (1 skill)
+#### cui-documentation-skills (1 skill)
 Documentation standards for README, AsciiDoc, and technical writing
 - `./skills/cui-documentation`
 
-### cui-project-management-skills (2 skills)
+#### cui-project-management-skills (2 skills)
 Project setup and requirements engineering standards
 - `./skills/cui-project-setup`
 - `./skills/cui-requirements`
+
+### Workflow Bundles (6 bundles)
+
+#### cui-project-quality-gates
+Build verification and change management infrastructure
+- 2 agents, 1 skill
+
+#### cui-issue-implementation
+Complete issue implementation workflow from review to execution
+- 3 agents, 1 command
+
+#### cui-pull-request-workflow
+PR review response and quality fixing workflow
+- 2 agents, 1 command
+
+#### cui-documentation-standards
+AsciiDoc and documentation standards enforcement
+- 1 agent, 1 skill, 1 command
+
+#### cui-plugin-development-tools
+Complete toolchain for creating and diagnosing Claude Code plugins
+- 5 commands
+
+#### cui-utility-commands
+Standalone utility commands for project setup, permissions, diagnostics, and documentation
+- 6 commands
 
 ## Adding the Marketplace to Claude Code
 
@@ -76,10 +104,13 @@ ls -la ../skills/cui-*
 
 - **Marketplace Name**: cui-development-standards
 - **Marketplace Version**: 1.0.0
-- **Plugins Count**: 4
-- **Skills Count**: 8
+- **Skill Plugins Count**: 4
+- **Workflow Bundles Count**: 6
+- **Total Skills**: 8 (10 including bundled skills)
+- **Total Agents**: 9
+- **Total Commands**: 14
 - **Status**: Production Ready ✅
-- **Last Updated**: 2025-10-26
+- **Last Updated**: 2025-10-29
 
 ## Related Documentation
 
