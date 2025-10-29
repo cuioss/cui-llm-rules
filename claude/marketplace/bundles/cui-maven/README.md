@@ -1,0 +1,372 @@
+# CUI Maven Tools
+
+Comprehensive Maven build, verification, and POM maintenance tools for CUI projects.
+
+## Overview
+
+This bundle provides complete Maven workflow support for CUI projects, including build verification, quality gate enforcement, POM maintenance standards, and Maven best practices. It ensures consistent build processes, proper dependency management, and comprehensive quality checks across all CUI Maven-based projects.
+
+## Components
+
+### Agents
+
+Agents in this bundle:
+
+- **maven-project-builder** - Executes comprehensive Maven builds with quality checks, fixes all issues, and tracks execution time
+
+### Commands
+
+Commands in this bundle:
+
+- **/cui-build-and-verify** - Execute comprehensive project verification by running Maven build and optionally committing changes
+
+### Skills
+
+Skills in this bundle:
+
+- **cui-maven-rules** - Complete Maven standards covering build processes, POM maintenance, dependency management, and Maven integration
+
+## Installation
+
+This bundle is part of the CUI marketplace and can be installed via:
+
+```bash
+# Clone the repository (if not already done)
+git clone https://github.com/cuioss/cui-llm-rules.git
+
+# Navigate to marketplace bundles
+cd cui-llm-rules/claude/marketplace/bundles
+
+# The bundle is at: cui-maven/
+```
+
+## Usage
+
+### For Users
+
+**Commands**: Invoke commands directly in Claude Code:
+
+```bash
+# Run full build verification
+/cui-build-and-verify
+
+# Run build verification and commit/push changes
+/cui-build-and-verify push
+```
+
+**Agents**: The `maven-project-builder` agent is automatically activated when:
+- User requests a full project build
+- User wants to verify project after code changes
+- User asks to run quality checks
+
+Example user requests that trigger the agent:
+- "I've finished implementing X, can you build the project?"
+- "Run the full build with quality checks"
+- "Make sure everything compiles after my changes"
+
+**Skills**: The `cui-maven-rules` skill is automatically loaded by agents that need Maven standards.
+
+### For Developers
+
+To add components to this bundle:
+
+**Create an agent**:
+```
+/cui-create-agent scope=marketplace
+# Select "cui-maven" as the bundle
+```
+
+**Create a command**:
+```
+/cui-create-command scope=marketplace
+# Select "cui-maven" as the bundle
+```
+
+**Create a skill**:
+```
+/cui-create-skill scope=marketplace
+# Select "cui-maven" as the bundle
+```
+
+## Architecture
+
+### Bundle Structure
+
+```
+cui-maven/
+├── .claude-plugin/
+│   └── plugin.json          # Bundle manifest
+├── agents/
+│   └── maven-project-builder.md   # Comprehensive build agent
+├── commands/
+│   └── cui-build-and-verify.md    # Build verification command
+├── skills/
+│   └── cui-maven-rules/     # Maven standards skill
+│       ├── SKILL.md         # Skill definition
+│       ├── standards/       # Standards files
+│       │   ├── pom-maintenance.md
+│       │   └── maven-integration.md
+│       └── README.md        # Skill documentation
+└── README.md                # This file
+```
+
+### Design Principles
+
+- **Automated Quality Checks**: Enforce quality gates through build verification
+- **Iterative Fix Workflow**: Automatically fix issues and re-run builds until clean
+- **Execution Time Tracking**: Monitor and update build duration expectations
+- **Comprehensive Standards**: Cover all aspects of Maven usage in CUI projects
+- **Integration with OpenRewrite**: Leverage automated POM cleanup recipes
+- **JavaDoc Enforcement**: Mandatory JavaDoc warning fixes using CUI standards
+
+### Key Features
+
+#### Build Verification
+- Execute Maven builds with pre-commit profile
+- Analyze all output for errors, warnings, and issues
+- Fix compilation errors, test failures, code warnings automatically
+- Handle OpenRewrite TODO markers with auto-suppression
+- Mandatory JavaDoc warning fixes
+- Track execution duration with 10% change threshold
+
+#### POM Maintenance
+- BOM (Bill of Materials) management standards
+- Dependency version management with properties
+- Scope optimization guidance
+- Maven wrapper updates
+- OpenRewrite integration for automated cleanup
+
+#### Quality Gates
+- Build success verification
+- Dependency analysis
+- Test execution and coverage
+- Format checking integration
+- Linting compliance
+
+## Dependencies
+
+Currently no dependencies on other bundles.
+
+## Configuration
+
+### Project Configuration
+
+Maven projects can configure build behavior in `.claude/run-configuration.md`:
+
+```markdown
+# Command Configuration
+
+## ./mvnw -Ppre-commit clean install
+
+### Last Execution Duration
+- **Duration**: 120000ms (2 minutes)
+- **Last Updated**: 2025-10-29
+
+### Acceptable Warnings
+- `[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources`
+- `[WARNING] Parameter 'session' is deprecated`
+```
+
+### Build Profiles
+
+Projects should define a `pre-commit` profile in their POM:
+
+```xml
+<profile>
+  <id>pre-commit</id>
+  <build>
+    <!-- Quality checks, tests, coverage, etc. -->
+  </build>
+</profile>
+```
+
+## Development
+
+### Adding New Components
+
+1. Use creation wizards:
+   - `/cui-create-agent` for agents
+   - `/cui-create-command` for commands
+   - `/cui-create-skill` for skills
+
+2. Update this README.md with component descriptions
+
+3. Test components:
+   - `/cui-diagnose-agents` for agents
+   - `/cui-diagnose-commands` for commands
+   - `/cui-diagnose-skills` for skills
+
+4. Validate entire bundle:
+   - `/cui-diagnose-bundle cui-maven`
+
+### Quality Standards
+
+All components must meet:
+- ✅ Proper YAML frontmatter
+- ✅ Clear documentation
+- ✅ Appropriate tool access
+- ✅ Integration with other components
+- ✅ Zero critical issues in diagnosis
+
+### Testing
+
+Test the bundle:
+
+```bash
+# Test individual components
+/cui-diagnose-agents scope=marketplace
+/cui-diagnose-commands scope=marketplace
+/cui-diagnose-skills scope=marketplace
+
+# Test entire bundle integration
+/cui-diagnose-bundle cui-maven
+```
+
+## Workflow Examples
+
+### Basic Build Verification
+
+```bash
+# User: "Can you run the full build?"
+# System invokes: maven-project-builder agent
+# Agent:
+#   1. Activates cui-maven-rules skill
+#   2. Reads .claude/run-configuration.md
+#   3. Executes ./mvnw -Ppre-commit clean install
+#   4. Analyzes output
+#   5. Fixes all issues
+#   6. Re-runs build until clean
+#   7. Updates execution duration if needed
+#   8. Reports results
+```
+
+### Build with Automatic Commit
+
+```bash
+# User: "/cui-build-and-verify push"
+# System:
+#   1. Delegates to maven-project-builder agent (full build)
+#   2. Delegates to commit-changes agent (commit and push)
+#   3. Reports consolidated results
+```
+
+### OpenRewrite Marker Handling
+
+```bash
+# During build, agent:
+#   1. Searches for /*~~(TODO: markers in source code
+#   2. Auto-suppresses LogRecord and Exception warnings
+#   3. Asks user for other marker types
+#   4. Removes markers from source
+#   5. Re-runs build to verify
+#   6. Reports if markers persist after 3 iterations
+```
+
+## Contributing
+
+To contribute to this bundle:
+
+1. Create components using creation wizards
+2. Follow CUI coding standards
+3. Add comprehensive documentation
+4. Test thoroughly
+5. Run quality checks
+6. Submit for review
+
+## Troubleshooting
+
+### Common Issues
+
+**Build timeouts**:
+- Check `.claude/run-configuration.md` for current duration
+- Agent uses 25% safety margin (duration * 1.25)
+- Update duration if builds consistently take longer
+
+**JavaDoc warnings persist**:
+- Agent MUST fix all JavaDoc warnings (not optional)
+- Uses cui-javadoc skill standards for fixes
+- Never add JavaDoc warnings to acceptable list
+
+**OpenRewrite markers multiply**:
+- Agent searches with Grep after EVERY build
+- Auto-suppresses LogRecord/Exception markers
+- Reports if markers persist after 3 fix iterations
+
+**Components not discovered**:
+- Check YAML frontmatter is valid
+- Verify file naming conventions
+- Ensure bundle is in correct location
+
+**Tool access issues**:
+- Review tool permissions in component frontmatter
+- Check for missing approvals
+- Use appropriate tool restrictions
+
+## Standards Covered
+
+### Maven Build Standards
+- Pre-commit profile configuration
+- Build success criteria
+- Quality gate enforcement
+- Execution time tracking
+
+### POM Maintenance Standards
+- BOM (Bill of Materials) management
+- Dependency management with properties
+- Version naming conventions
+- Scope optimization
+- OpenRewrite integration
+- Maven wrapper updates
+
+### Maven Integration Standards
+- Frontend-maven-plugin configuration
+- JavaScript tooling integration
+- SonarQube integration
+- Coverage reporting
+- CI/CD integration
+
+### Quality Standards
+- Compilation error handling
+- Test failure resolution
+- Code warning fixes
+- JavaDoc mandatory fixes
+- OpenRewrite marker handling
+- Acceptable warning management
+
+## Version History
+
+### Version 0.1.0 (Initial Release)
+
+- Initial bundle structure created
+- Moved maven-project-builder agent from cui-project-quality-gates
+- Moved cui-build-and-verify command from cui-utility-commands
+- Created cui-maven-rules skill with complete Maven standards
+- Ready for comprehensive Maven workflow support
+
+## License
+
+MIT
+
+## Support
+
+For issues, questions, or contributions:
+- Repository: https://github.com/cuioss/cui-llm-rules
+- Bundle: claude/marketplace/bundles/cui-maven/
+
+## Related Bundles
+
+- **cui-project-quality-gates**: Project-wide quality enforcement (now focuses on non-Maven quality aspects)
+- **cui-utility-commands**: General utility commands (now focuses on non-Maven utilities)
+- **cui-javadoc**: JavaDoc standards used by maven-project-builder agent
+
+## Acknowledgments
+
+This bundle consolidates Maven-related functionality previously distributed across:
+- cui-project-quality-gates (maven-project-builder agent)
+- cui-utility-commands (cui-build-and-verify command)
+- standards/process (pom-maintenance.adoc)
+- standards/javascript (maven-integration-standards.adoc)
+
+---
+
+*Generated by /cui-create-bundle - CUI Plugin Development Tools*

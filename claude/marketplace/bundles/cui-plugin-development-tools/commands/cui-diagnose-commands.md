@@ -43,6 +43,46 @@ Analyze, verify, and fix slash commands for ambiguities, inconsistencies, and st
 - Display interactive menu with numbered list of all commands from marketplace
 - Let user select which command(s) to review or change scope
 
+## TOOL USAGE REQUIREMENTS
+
+**CRITICAL**: This command must use non-prompting tools to avoid user interruptions during diagnosis.
+
+### Activate Diagnostic Patterns Skill
+
+```
+Skill: cui-diagnostic-patterns
+```
+
+This loads all tool usage patterns for non-prompting file operations.
+
+### Required Tool Usage Patterns
+
+Follow patterns from cui-diagnostic-patterns skill:
+
+✅ **File Discovery (Pattern 1):**
+- Use `Glob` tool to discover command files
+- Never use `find` via Bash
+
+✅ **Existence Checks (Pattern 2):**
+- Use `Read` + try/except for file existence
+- Use `Glob` for directory existence
+- Never use `test -f` or `test -d` via Bash
+
+✅ **Content Search (Pattern 3):**
+- Use `Grep` tool for content searching
+- Never use `grep` via Bash
+
+✅ **File Reading (Pattern 4):**
+- Use `Read` tool to load file contents
+- Never use `cat` via Bash
+
+**Why**: Bash commands trigger user prompts which interrupt the diagnostic flow and create poor UX.
+
+Refer to skill standards for complete pattern details:
+- tool-usage-patterns.md - Core tool selection guide
+- file-operations.md - File and directory checking patterns
+- search-operations.md - Content search and integration validation
+
 ## WORKFLOW INSTRUCTIONS
 
 ### Step 1: Determine Scope and Discover Commands
@@ -59,26 +99,43 @@ Determine what to process based on scope parameter (defaults to "marketplace"):
 
 **B. Discover Commands**
 
-Based on scope, find all slash command files:
+Use Glob to discover command files (Pattern 1):
 
-```bash
-# For marketplace scope (default)
-find ~/git/cui-llm-rules/claude/marketplace/bundles/*/commands -name "*.md" -type f 2>/dev/null | sort
+```
+# For marketplace scope (default) - search all bundle command directories
+bundle_dirs = Glob(pattern="*/commands", path="~/git/cui-llm-rules/claude/marketplace/bundles")
+marketplace_commands = []
+for bundle_cmd_dir in bundle_dirs:
+    commands_in_bundle = Glob(pattern="*.md", path=bundle_cmd_dir)
+    marketplace_commands.extend(commands_in_bundle)
+marketplace_commands.sort()
 
 # For global scope
-find ~/.claude/commands -name "*.md" -type f 2>/dev/null | sort
+global_commands = Glob(pattern="*.md", path="~/.claude/commands")
+global_commands.sort()
 
 # For project scope
-find .claude/commands -name "*.md" -type f 2>/dev/null | sort
+try:
+    project_commands = Glob(pattern="*.md", path=".claude/commands")
+    project_commands.sort()
+except Exception:
+    project_commands = []  # Directory doesn't exist
 
-# For specific command in marketplace scope
-find ~/git/cui-llm-rules/claude/marketplace/bundles/*/commands -name "<command-name>.md" -type f 2>/dev/null | head -1
-
-# For specific command in global scope
-find ~/.claude/commands -name "<command-name>.md" -type f 2>/dev/null | head -1
-
-# For specific command in project scope
-find .claude/commands -name "<command-name>.md" -type f 2>/dev/null | head -1
+# For specific command by name - search in current scope
+def find_command_by_name(command_name, scope):
+    if scope == "marketplace":
+        result = [c for c in marketplace_commands if command_name in c]
+        if result:
+            return result[0]
+    elif scope == "global":
+        result = [c for c in global_commands if command_name in c]
+        if result:
+            return result[0]
+    elif scope == "project":
+        result = [c for c in project_commands if command_name in c]
+        if result:
+            return result[0]
+    return None
 ```
 
 **C. Interactive Mode (if no parameters)**
@@ -89,7 +146,7 @@ Display menu based on scope:
 Available Slash Commands (scope=marketplace):
 
 MARKETPLACE COMMANDS (~/git/cui-llm-rules/claude/marketplace/bundles/*/commands/):
-1. cui-build-and-verify (cui-utility-commands bundle)
+1. cui-build-and-verify (cui-maven bundle)
 2. cui-create-update-agents-md (cui-utility-commands bundle)
 3. cui-fix-intellij-diagnostics (cui-utility-commands bundle)
 4. cui-create-agent (cui-plugin-development-tools bundle)
@@ -296,9 +353,14 @@ Check against Claude Code workflow best practices:
 
 **E. Maven/Build Context Best Practices**
 
-Search command workflow for temp directory usage:
-```bash
-grep -E '/tmp/|/private/tmp/|mktemp|tempfile|~/tmp/' {command_file}
+Use Grep to search command workflow for temp directory usage (Pattern 3):
+```
+temp_usage = Grep(
+    pattern="/tmp/|/private/tmp/|mktemp|tempfile|~/tmp/",
+    path="{command_file}",
+    output_mode="content",
+    -n=true
+)
 ```
 
 Check for violations:
@@ -326,11 +388,22 @@ Deep Analysis:
 
 **CRITICAL**: Scan for hardcoded absolute paths that should be user-relative.
 
-**Search for absolute path patterns:**
-```bash
+Use Grep to search for absolute path patterns (Pattern 3):
+```
 # Search for common absolute path patterns
-grep -n "~/" <command-file>
-grep -n "/home/[^/]*/" <command-file>
+home_tilde = Grep(
+    pattern="~/",
+    path="<command-file>",
+    output_mode="content",
+    -n=true
+)
+
+home_paths = Grep(
+    pattern="/home/[^/]*/",
+    path="<command-file>",
+    output_mode="content",
+    -n=true
+)
 ```
 
 **Categorize absolute paths:**
@@ -381,9 +454,25 @@ Line 312: find ~/.claude/commands
 Scan command file for bash command usage:
 
 1. **Extract bash code blocks**:
-   ```bash
-   # Find all ```bash or ```sh blocks in command file
-   grep -A 100 '```bash\|```sh' <command-file>
+   ```
+   # Read command file and parse bash/sh code blocks (Pattern 4)
+   command_content = Read(file_path="<command-file>")
+
+   # Find all ```bash or ```sh blocks
+   bash_blocks = []
+   in_bash_block = False
+   current_block = []
+
+   for line in command_content.split("\n"):
+       if line.strip().startswith("```bash") or line.strip().startswith("```sh"):
+           in_bash_block = True
+           current_block = []
+       elif line.strip().startswith("```") and in_bash_block:
+           in_bash_block = False
+           if current_block:
+               bash_blocks.append("\n".join(current_block))
+       elif in_bash_block:
+           current_block.append(line)
    ```
 
 2. **Extract commands and convert to permission format**:

@@ -96,7 +96,7 @@ Before starting workflow, verify:
    - `../../agents/task-reviewer/AGENT.md`
    - `../../agents/task-breakdown-agent/AGENT.md`
    - `../../agents/task-executor/AGENT.md`
-   - Agent from cui-project-quality-gates bundle: maven-project-builder
+   - Agent from cui-maven bundle: maven-project-builder
 4. ✅ Clean state: No merge conflicts or unrecoverable git state
 
 **Failure Handling**:

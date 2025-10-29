@@ -759,13 +759,68 @@ Start adding components with:
 - /cui-create-command scope=marketplace
 - /cui-create-skill scope=marketplace
 
-Validate your bundle with:
-- /cui-diagnose-bundle {bundle_name}
+Running automatic bundle validation...
+
+╚════════════════════════════════════════════════════════════
+```
+
+### Step 7: Automatic Bundle Diagnosis
+
+**CRITICAL**: Automatically run bundle diagnosis to validate the newly created bundle.
+
+**Execution:**
+
+1. Use the SlashCommand tool to invoke bundle diagnosis:
+   ```
+   SlashCommand: /cui-diagnose-bundle {bundle_name}
+   ```
+
+2. Wait for diagnosis to complete
+
+3. Display diagnosis results to user
+
+**Expected Results:**
+
+Since the bundle was just created with proper structure, diagnosis should show:
+- ✅ plugin.json valid
+- ✅ Directory structure complete
+- ✅ README.md present
+- ⚠️ No components yet (agents/, commands/, skills/ directories empty)
+
+**If diagnosis reveals issues:**
+- Display issues clearly to user
+- Suggest immediate fixes if needed
+- Note that these are baseline structural issues that should be addressed
+
+**Success Message:**
+
+```
+╔════════════════════════════════════════════════════════════╗
+║      Bundle Creation and Validation Complete!             ║
+╔════════════════════════════════════════════════════════════╝
+
+Bundle: {bundle_name}
+Status: ✅ Validated and ready for component development
+
+Diagnosis Results:
+{summary of diagnosis results}
+
+Next Steps:
+1. Add components using creation wizards
+2. Run /cui-diagnose-bundle {bundle_name} after adding components
+3. Review and customize documentation
 
 Happy bundle development! 🚀
 
 ╚════════════════════════════════════════════════════════════
 ```
+
+**Benefits of Automatic Diagnosis:**
+- Immediate validation of bundle structure
+- Catches any issues right away
+- Provides confidence that bundle is properly set up
+- Demonstrates best practices (validate after creation)
+- Sets expectation for regular diagnosis during development
 
 ## CRITICAL RULES
 
@@ -774,6 +829,7 @@ Happy bundle development! 🚀
 - **ALWAYS follow semver** for version numbers (X.Y.Z format)
 - **ALWAYS create all three directories** (agents/, commands/, skills/) even if not immediately used
 - **ALWAYS generate comprehensive README.md** - Documentation is critical
+- **ALWAYS run automatic diagnosis** after creation (Step 7) - Validates structure immediately
 - **VALIDATE bundle name** doesn't already exist before creating
 - **USE lowercase-with-hyphens** for bundle names
 - **INCLUDE "cui-" prefix** for CUI marketplace bundles (recommended)
@@ -811,6 +867,12 @@ Happy bundle development! 🚀
 **Solution**: Bundle README guides integration from start
 **Prevention**: Component README templates show integration patterns
 
+### Lesson 7: Immediate Validation
+**Issue**: Bundle structural issues discovered much later during development
+**Solution**: Run automatic diagnosis immediately after bundle creation
+**Prevention**: Step 7 automatically validates bundle structure, catching issues early
+**Benefit**: Developers get immediate feedback and confidence that bundle is properly set up
+
 ## VALIDATION RULES
 
 Before creating bundle:
@@ -842,6 +904,13 @@ Before creating bundle:
    - All required files present
    - README.md not empty
 
+6. **Diagnosis Validation (Step 7):**
+   - Automatically run /cui-diagnose-bundle after creation
+   - Verify bundle structure is valid
+   - Confirm plugin.json is properly formatted
+   - Check all directories exist
+   - Report any structural issues immediately
+
 ## USAGE
 
 **Create a new marketplace bundle:**
@@ -851,7 +920,14 @@ Before creating bundle:
 
 **Note**: scope=marketplace is the only option (and default) for bundles.
 
-The wizard will guide you through all configuration and create a complete bundle structure ready for component development.
+The wizard will:
+1. Guide you through configuration (7 questions)
+2. Create complete bundle structure
+3. Generate plugin.json and README.md
+4. **Automatically validate** the bundle with /cui-diagnose-bundle
+5. Report validation results
+
+This ensures your bundle is properly structured and ready for component development.
 
 ## INTEGRATION WITH OTHER COMMANDS
 
@@ -870,9 +946,11 @@ After creating a bundle, use these commands to add components:
 /cui-create-skill scope=marketplace
 # Select your bundle name when prompted
 
-# Validate the entire bundle
+# Validate the entire bundle (automatically run during creation, but can be run again)
 /cui-diagnose-bundle your-bundle-name
 ```
+
+**Note**: The bundle is automatically validated during creation (Step 7). Run diagnosis again after adding components to ensure everything integrates properly.
 
 ## MARKETPLACE CONVENTIONS
 

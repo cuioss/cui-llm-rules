@@ -22,6 +22,46 @@ Analyze, verify, and fix marketplace bundles for structure, plugin manifest qual
 - Display list of all bundles in marketplace
 - Let user select which bundle to analyze
 
+## TOOL USAGE REQUIREMENTS
+
+**CRITICAL**: This command must use non-prompting tools to avoid user interruptions during diagnosis.
+
+### Activate Diagnostic Patterns Skill
+
+```
+Skill: cui-diagnostic-patterns
+```
+
+This loads all tool usage patterns for non-prompting file operations.
+
+### Required Tool Usage Patterns
+
+Follow patterns from cui-diagnostic-patterns skill:
+
+✅ **File Discovery (Pattern 1):**
+- Use `Glob` tool to discover files and directories
+- Never use `find` or `ls` via Bash
+
+✅ **Existence Checks (Pattern 2):**
+- Use `Read` + try/except for file existence
+- Use `Glob` for directory existence
+- Never use `test -f` or `test -d` via Bash
+
+✅ **Content Search (Pattern 3):**
+- Use `Grep` tool for content searching
+- Never use `grep` via Bash
+
+✅ **File Reading (Pattern 4):**
+- Use `Read` tool to load file contents
+- Never use `cat` via Bash
+
+**Why**: Bash commands trigger user prompts which interrupt the diagnostic flow and create poor UX.
+
+Refer to skill standards for complete pattern details:
+- tool-usage-patterns.md - Core tool selection guide
+- file-operations.md - File and directory checking patterns
+- search-operations.md - Content search and integration validation
+
 ## WORKFLOW INSTRUCTIONS
 
 ### Step 1: Discover and Select Bundle
@@ -33,9 +73,11 @@ If bundle-name provided:
 - Verify exists at `~/git/cui-llm-rules/claude/marketplace/bundles/{bundle-name}/`
 
 If no parameters:
-- List all bundles:
-  ```bash
-  find ~/git/cui-llm-rules/claude/marketplace/bundles -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort
+- Use Glob to discover all bundles (Pattern 1):
+  ```
+  bundles = Glob(pattern="*", path="~/git/cui-llm-rules/claude/marketplace/bundles")
+  bundle_names = [path.split("/")[-1] for path in bundles]
+  bundle_names.sort()
   ```
 
 Display menu:
@@ -88,16 +130,17 @@ Step 1/8: Structure Validation
 
 #### Step 3.1: Check Required Directories
 
-Verify required directories exist:
+Use Glob to check directory existence (Pattern 2):
 
-```bash
+```
 # Check .claude-plugin/
-test -d {bundle_path}/.claude-plugin
+result = Glob(pattern=".claude-plugin", path="{bundle_path}")
+plugin_dir_exists = len(result) > 0
 
 # Check component directories
-test -d {bundle_path}/agents
-test -d {bundle_path}/commands
-test -d {bundle_path}/skills
+agents_exists = len(Glob(pattern="agents", path="{bundle_path}")) > 0
+commands_exists = len(Glob(pattern="commands", path="{bundle_path}")) > 0
+skills_exists = len(Glob(pattern="skills", path="{bundle_path}")) > 0
 ```
 
 Report findings:
@@ -115,15 +158,27 @@ Increment `structure_issues` for each missing required directory.
 
 #### Step 3.2: Check Required Files
 
-Verify required files exist:
+Use Read to check file existence and load content (Pattern 2):
 
-```bash
-# Check plugin manifest
-test -f {bundle_path}/.claude-plugin/plugin.json
-
-# Check README
-test -f {bundle_path}/README.md
 ```
+# Check plugin manifest (load content for later validation)
+try:
+    manifest_content = Read(file_path="{bundle_path}/.claude-plugin/plugin.json")
+    manifest_exists = True
+except Exception:
+    manifest_exists = False
+    manifest_content = None
+
+# Check README (load content for later validation)
+try:
+    readme_content = Read(file_path="{bundle_path}/README.md")
+    readme_exists = True
+except Exception:
+    readme_exists = False
+    readme_content = None
+```
+
+**Benefit**: File content is loaded once and available for later validation steps.
 
 Report findings:
 ```
@@ -138,11 +193,14 @@ Increment `structure_issues` for missing files.
 
 #### Step 3.3: Check for Unexpected Files
 
-Scan for files that shouldn't be in bundle root:
+Use Glob to list files in bundle root (Pattern 1):
 
-```bash
-# List all files in bundle root
-ls -la {bundle_path}/
+```
+# List all files/directories in bundle root
+all_items = Glob(pattern="*", path="{bundle_path}")
+
+# List hidden files
+hidden_items = Glob(pattern=".*", path="{bundle_path}")
 ```
 
 Look for unexpected files:
@@ -168,10 +226,18 @@ Step 2/8: Plugin Manifest Validation
 
 #### Step 4.1: Parse JSON
 
-Read and parse `{bundle_path}/.claude-plugin/plugin.json`:
+Use already loaded content from Step 3.2 (Pattern 4):
 
-```bash
-cat {bundle_path}/.claude-plugin/plugin.json
+```
+# Already loaded as manifest_content in Step 3.2
+# Parse as JSON
+import json
+try:
+    manifest = json.loads(manifest_content)
+    json_valid = True
+except json.JSONDecodeError as e:
+    json_valid = False
+    json_error = str(e)
 ```
 
 **Validate JSON syntax:**
@@ -247,13 +313,21 @@ Optional Fields:
 
 If `components` field present in plugin.json:
 
-Compare listed components with actual files:
+Use Glob to discover actual components (Pattern 1):
 
-```bash
-# Count actual components
-agents_count=$(find {bundle_path}/agents -name "*.md" -type f | wc -l)
-commands_count=$(find {bundle_path}/commands -name "*.md" -type f | wc -l)
-skills_count=$(find {bundle_path}/skills -mindepth 1 -maxdepth 1 -type d | wc -l)
+```
+# Discover actual components
+agents = Glob(pattern="*.md", path="{bundle_path}/agents")
+actual_agent_names = [f.split("/")[-1].replace(".md", "") for f in agents]
+agents_count = len(agents)
+
+commands = Glob(pattern="*.md", path="{bundle_path}/commands")
+actual_command_names = [f.split("/")[-1].replace(".md", "") for f in commands]
+commands_count = len(commands)
+
+skills = Glob(pattern="*", path="{bundle_path}/skills")
+actual_skill_names = [f.split("/")[-1] for f in skills]
+skills_count = len(skills)
 ```
 
 Report mismatches:
@@ -332,17 +406,24 @@ Step 4/8: Component Health Analysis
 
 #### Step 6.1: Scan Components
 
-Discover all components:
+Use Glob to discover all components (Pattern 1):
 
-```bash
+```
 # Find all agents
-find {bundle_path}/agents -name "*.md" -type f
+agents = Glob(pattern="*.md", path="{bundle_path}/agents")
+component_agents = len(agents)
 
 # Find all commands
-find {bundle_path}/commands -name "*.md" -type f
+commands = Glob(pattern="*.md", path="{bundle_path}/commands")
+component_commands = len(commands)
 
-# Find all skills
-find {bundle_path}/skills -mindepth 1 -maxdepth 1 -type d
+# Find all skills (directories containing SKILL.md)
+skill_dirs = Glob(pattern="*", path="{bundle_path}/skills")
+skills = []
+for skill_path in skill_dirs:
+    if len(Glob(pattern="SKILL.md", path=skill_path)) > 0:
+        skills.append(skill_path)
+component_skills = len(skills)
 ```
 
 Store counts in `component_agents`, `component_commands`, `component_skills`.
@@ -452,17 +533,34 @@ This loads architecture rules and validation patterns for marketplace components
 
 For each skill in `{bundle_path}/skills/`:
 
-Apply validation from loaded standards (self-containment-validation.md):
+Use Grep to validate (Pattern 3):
 
-```bash
+```
 # Check for escape sequences
-grep -n "\.\..*\.\..*\.\." {skill_path}/SKILL.md
+escape_refs = Grep(
+    pattern="\\.\\.\\.*/\\.\\.\\.*/\\.\\.",
+    path="{skill_path}/SKILL.md",
+    output_mode="content",
+    -n=true
+)
 
 # Check for absolute paths
-grep -n "~/\|^/" {skill_path}/SKILL.md | grep -v "https://"
+absolute_paths = Grep(
+    pattern="~/|^/",
+    path="{skill_path}/SKILL.md",
+    output_mode="content",
+    -n=true
+)
+# Filter out https:// URLs
+absolute_paths = [m for m in absolute_paths if "https://" not in m]
 
 # Check for .adoc references (likely external)
-grep -n "Read:.*\.adoc" {skill_path}/SKILL.md
+adoc_refs = Grep(
+    pattern="Read:.*\\.adoc",
+    path="{skill_path}/SKILL.md",
+    output_mode="content",
+    -n=true
+)
 ```
 
 Calculate self-containment score for each skill:
@@ -486,36 +584,59 @@ Track results:
 
 For each agent in `{bundle_path}/agents/`:
 
-Apply validation from loaded standards (skill-usage-patterns.md):
+Use Grep to validate (Pattern 3):
 
 **A. Check if agent uses standards:**
-```bash
-grep -i "standard\|pattern\|guideline\|rule" {agent_path}
+```
+standards_usage = Grep(
+    pattern="standard|pattern|guideline|rule",
+    path="{agent_path}",
+    output_mode="files_with_matches",
+    -i=true
+)
 ```
 
 If yes, validate skill usage:
 
 **B. Check for Skill in tools list:**
-```yaml
-# Should have:
-tools: [..., Skill]
-```
+Read agent frontmatter and parse tools field.
 
 **C. Check for Skill invocations:**
-```bash
-grep "Skill: cui-" {agent_path}
+```
+skill_refs = Grep(
+    pattern="Skill: cui-",
+    path="{agent_path}",
+    output_mode="content",
+    -n=true
+)
 ```
 
 **D. Check for prohibited references:**
-```bash
+```
 # Escape sequences
-grep -n "\.\..*\.\..*\.\." {agent_path}
+escape_refs = Grep(
+    pattern="\\.\\.\\.*/\\.\\.\\.*/\\.\\.",
+    path="{agent_path}",
+    output_mode="content",
+    -n=true
+)
 
-# Absolute paths
-grep -n "~/\|^/" {agent_path} | grep -v "https://"
+# Absolute paths (excluding URLs)
+absolute_paths = Grep(
+    pattern="~/|^/",
+    path="{agent_path}",
+    output_mode="content",
+    -n=true
+)
+absolute_paths = [m for m in absolute_paths if "https://" not in m]
 
 # Direct .adoc references
-grep -n "Read:.*\.adoc" {agent_path}
+adoc_refs = Grep(
+    pattern="Read:.*\\.adoc",
+    path="{agent_path}",
+    output_mode="content",
+    -n=true
+)
 ```
 
 Calculate agent skill usage score:
@@ -670,11 +791,23 @@ Step 5/8: Integration Validation
 
 #### Step 7.1: Check Agent-Command Integration
 
-Look for agents that invoke commands:
+Use Grep to find command references (Pattern 3):
 
-Scan agent files for command references:
-```bash
-grep -r "SlashCommand\|/cui-" {bundle_path}/agents/
+```
+# Search for command references in all agents
+command_refs = Grep(
+    pattern="SlashCommand|/cui-",
+    path="{bundle_path}/agents",
+    output_mode="content",
+    -n=true
+)
+
+# Parse results to extract command names
+# Example result: "filename:42:SlashCommand: /cui-build-and-verify"
+for match in command_refs:
+    # Extract command name and verify it exists
+    command_name = extract_command_name(match)
+    verify_command_exists(command_name)
 ```
 
 Verify referenced commands exist in bundle or are valid external commands.
@@ -690,11 +823,23 @@ Increment `integration_issues` for broken references.
 
 #### Step 7.2: Check Agent-Skill Integration
 
-Look for agents that reference skills:
+Use Grep to find skill references (Pattern 3):
 
-Scan agent files for skill references:
-```bash
-grep -r "Skill:\|skill:" {bundle_path}/agents/
+```
+# Search for skill references in all agents
+skill_refs = Grep(
+    pattern="Skill:|skill:",
+    path="{bundle_path}/agents",
+    output_mode="content",
+    -n=true
+)
+
+# Parse results to extract skill names
+# Example result: "filename:37:Skill: cui-javadoc"
+for match in skill_refs:
+    # Extract skill name and verify it exists
+    skill_name = extract_skill_name(match)
+    verify_skill_exists(skill_name)
 ```
 
 Verify referenced skills exist.
@@ -784,12 +929,29 @@ Increment `documentation_issues` for each issue.
 
 #### Step 8.2: Check Component Documentation
 
-Verify each component directory has README.md:
+Use Read to check README existence (Pattern 2):
 
-```bash
-test -f {bundle_path}/agents/README.md
-test -f {bundle_path}/commands/README.md
-test -f {bundle_path}/skills/README.md
+```
+# Check agents README
+try:
+    agents_readme = Read(file_path="{bundle_path}/agents/README.md")
+    agents_readme_exists = True
+except Exception:
+    agents_readme_exists = False
+
+# Check commands README
+try:
+    commands_readme = Read(file_path="{bundle_path}/commands/README.md")
+    commands_readme_exists = True
+except Exception:
+    commands_readme_exists = False
+
+# Check skills README
+try:
+    skills_readme = Read(file_path="{bundle_path}/skills/README.md")
+    skills_readme_exists = True
+except Exception:
+    skills_readme_exists = False
 ```
 
 If exists, check quality:

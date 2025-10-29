@@ -24,7 +24,7 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 - Search across all marketplace locations
 - Example paths:
   - `~/git/cui-llm-rules/claude/marketplace/agents/research-best-practices.md` (standalone)
-  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/agents/maven-project-builder.md` (bundle)
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-project-builder.md` (bundle)
 
 **If `scope=global`:**
 - Process all `.md` files in `~/.claude/agents/` directory
@@ -45,6 +45,46 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 - Display interactive menu with numbered list of all agents from marketplace
 - Let user select which agent(s) to review or change scope
 
+## TOOL USAGE REQUIREMENTS
+
+**CRITICAL**: This command must use non-prompting tools to avoid user interruptions during diagnosis.
+
+### Activate Diagnostic Patterns Skill
+
+```
+Skill: cui-diagnostic-patterns
+```
+
+This loads all tool usage patterns for non-prompting file operations.
+
+### Required Tool Usage Patterns
+
+Follow patterns from cui-diagnostic-patterns skill:
+
+✅ **File Discovery (Pattern 1):**
+- Use `Glob` tool to discover agent files
+- Never use `find` via Bash
+
+✅ **Existence Checks (Pattern 2):**
+- Use `Read` + try/except for file existence
+- Use `Glob` for directory existence
+- Never use `test -f` or `test -d` via Bash
+
+✅ **Content Search (Pattern 3):**
+- Use `Grep` tool for content searching
+- Never use `grep` or `awk` via Bash
+
+✅ **File Reading (Pattern 4):**
+- Use `Read` tool to load file contents
+- Never use `cat` via Bash
+
+**Why**: Bash commands trigger user prompts which interrupt the diagnostic flow and create poor UX.
+
+Refer to skill standards for complete pattern details:
+- tool-usage-patterns.md - Core tool selection guide
+- file-operations.md - File and directory checking patterns
+- search-operations.md - Content search and integration validation
+
 ## WORKFLOW INSTRUCTIONS
 
 ### Step 1: Determine Scope and Discover Agents
@@ -61,28 +101,53 @@ Determine what to process based on scope parameter (defaults to "marketplace"):
 
 **B. Discover Agents**
 
-Based on scope, find all agent files:
+Use Glob to discover agent files (Pattern 1):
 
-```bash
+```
 # For marketplace scope (default) - search both standalone and bundle agents
-(find ~/git/cui-llm-rules/claude/marketplace/agents -name "*.md" -type f 2>/dev/null; \
- find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "*.md" -type f 2>/dev/null) | sort
+standalone_agents = Glob(pattern="*.md", path="~/git/cui-llm-rules/claude/marketplace/agents")
+
+# Find all bundle agent directories
+bundle_dirs = Glob(pattern="*/agents", path="~/git/cui-llm-rules/claude/marketplace/bundles")
+bundle_agents = []
+for bundle_agent_dir in bundle_dirs:
+    agents_in_bundle = Glob(pattern="*.md", path=bundle_agent_dir)
+    bundle_agents.extend(agents_in_bundle)
+
+marketplace_agents = standalone_agents + bundle_agents
+marketplace_agents.sort()
 
 # For global scope
-find ~/.claude/agents -name "*.md" -type f 2>/dev/null | sort
+global_agents = Glob(pattern="*.md", path="~/.claude/agents")
+global_agents.sort()
 
 # For project scope
-find .claude/agents -name "*.md" -type f 2>/dev/null | sort
+try:
+    project_agents = Glob(pattern="*.md", path=".claude/agents")
+    project_agents.sort()
+except Exception:
+    project_agents = []  # Directory doesn't exist
 
-# For specific agent in marketplace scope - search both locations
-(find ~/git/cui-llm-rules/claude/marketplace/agents -name "<agent-name>.md" -type f 2>/dev/null; \
- find ~/git/cui-llm-rules/claude/marketplace/bundles/*/agents -name "<agent-name>.md" -type f 2>/dev/null) | head -1
-
-# For specific agent in global scope
-find ~/.claude/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
-
-# For specific agent in project scope
-find .claude/agents -name "<agent-name>.md" -type f 2>/dev/null | head -1
+# For specific agent by name - search in current scope
+def find_agent_by_name(agent_name, scope):
+    if scope == "marketplace":
+        # Search standalone first
+        result = [a for a in standalone_agents if agent_name in a]
+        if result:
+            return result[0]
+        # Search bundles
+        result = [a for a in bundle_agents if agent_name in a]
+        if result:
+            return result[0]
+    elif scope == "global":
+        result = [a for a in global_agents if agent_name in a]
+        if result:
+            return result[0]
+    elif scope == "project":
+        result = [a for a in project_agents if agent_name in a]
+        if result:
+            return result[0]
+    return None
 ```
 
 **C. Interactive Mode (if no parameters)**
@@ -96,7 +161,7 @@ STANDALONE AGENTS (~/git/cui-llm-rules/claude/marketplace/agents/):
 1. research-best-practices
 
 BUNDLE AGENTS (~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/):
-2. maven-project-builder (cui-project-quality-gates bundle)
+2. maven-project-builder (cui-maven bundle)
 3. commit-changes (cui-project-quality-gates bundle)
 4. asciidoc-reviewer (cui-documentation-standards bundle)
 5. pr-quality-fixer (cui-pull-request-workflow bundle)
@@ -454,9 +519,14 @@ Check against agent best practices:
 
 **E. Maven/Build Context Best Practices**
 
-Search agent workflow for temp directory usage:
-```bash
-grep -E '/tmp/|/private/tmp/|mktemp|tempfile|~/tmp/' {agent_file}
+Use Grep to search agent workflow for temp directory usage (Pattern 3):
+```
+temp_usage = Grep(
+    pattern="/tmp/|/private/tmp/|mktemp|tempfile|~/tmp/",
+    path="{agent_file}",
+    output_mode="content",
+    -n=true
+)
 ```
 
 Check for violations:
@@ -703,11 +773,16 @@ This loads architecture rules and validation patterns for marketplace components
 
 **A. Check if Agent Uses Standards**
 
-Scan agent content for standards usage indicators:
+Use Grep to scan agent content for standards usage indicators (Pattern 3):
 
-```bash
+```
 # Look for references to standards, patterns, rules
-grep -i "standard\|pattern\|guideline\|rule\|requirement" <agent-path>
+standards_usage = Grep(
+    pattern="standard|pattern|guideline|rule|requirement",
+    path="<agent-path>",
+    output_mode="files_with_matches",
+    -i=true
+)
 ```
 
 If no standards references found:
@@ -733,8 +808,13 @@ Apply validation from loaded standards (skill-usage-patterns.md):
 
 2. **Check for Skill invocations**:
    ```
-   # Look for proper skill usage pattern
-   grep "Skill: cui-" <agent-path>
+   # Use Grep to find Skill invocations (Pattern 3)
+   skill_refs = Grep(
+       pattern="Skill: cui-",
+       path="<agent-path>",
+       output_mode="content",
+       -n=true
+   )
    ```
 
    If no `Skill:` invocations found but agent uses standards:
@@ -743,17 +823,34 @@ Apply validation from loaded standards (skill-usage-patterns.md):
 
 3. **Check for prohibited direct file references**:
 
-   Apply detection from loaded standards (reference-patterns.md):
+   Use Grep to detect prohibited patterns (Pattern 3):
 
-   ```bash
+   ```
    # Check for escape sequences
-   grep -n "\.\..*\.\..*\.\." <agent-path>
+   escape_refs = Grep(
+       pattern="\\.\\.\\.*/\\.\\.\\.*/\\.\\.",
+       path="<agent-path>",
+       output_mode="content",
+       -n=true
+   )
 
    # Check for absolute paths (excluding URLs)
-   grep -n "~/\|^/" <agent-path> | grep -v "https://"
+   absolute_paths = Grep(
+       pattern="~/|^/",
+       path="<agent-path>",
+       output_mode="content",
+       -n=true
+   )
+   # Filter out https:// URLs
+   absolute_paths = [m for m in absolute_paths if "https://" not in m]
 
    # Check for direct .adoc references
-   grep -n "Read:.*\.adoc" <agent-path>
+   adoc_refs = Grep(
+       pattern="Read:.*\\.adoc",
+       path="<agent-path>",
+       output_mode="content",
+       -n=true
+   )
    ```
 
    For each violation found:
@@ -894,11 +991,22 @@ Track in statistics:
 
 **CRITICAL**: Scan for hardcoded absolute paths that should be user-relative.
 
-**Search for absolute path patterns:**
-```bash
+Use Grep to search for absolute path patterns (Pattern 3):
+```
 # Search for common absolute path patterns
-grep -n "~/" <agent-file>
-grep -n "/home/[^/]*/" <agent-file>
+home_tilde = Grep(
+    pattern="~/",
+    path="<agent-file>",
+    output_mode="content",
+    -n=true
+)
+
+home_paths = Grep(
+    pattern="/home/[^/]*/",
+    path="<agent-file>",
+    output_mode="content",
+    -n=true
+)
 ```
 
 **Categorize absolute paths:**
@@ -947,9 +1055,25 @@ Line 245: ~/git/cui-llm-rules/scripts/verify.sh {file_path} 2>&1
 Scan agent file for bash command usage:
 
 1. **Extract bash code blocks**:
-   ```bash
-   # Find all ```bash blocks in agent file
-   awk '/```bash/,/```/' <agent-file>
+   ```
+   # Read agent file and parse bash code blocks
+   agent_content = Read(file_path="<agent-file>")
+
+   # Find all ```bash blocks
+   bash_blocks = []
+   in_bash_block = False
+   current_block = []
+
+   for line in agent_content.split("\n"):
+       if line.strip().startswith("```bash"):
+           in_bash_block = True
+           current_block = []
+       elif line.strip().startswith("```") and in_bash_block:
+           in_bash_block = False
+           if current_block:
+               bash_blocks.append("\n".join(current_block))
+       elif in_bash_block:
+           current_block.append(line)
    ```
 
 2. **Extract commands and convert to permission format**:

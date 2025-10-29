@@ -16,6 +16,11 @@ Execute the complete Maven build with pre-commit profile, analyze all output, fi
 
 **This agent leverages the following CUI skills:**
 
+- **cui-maven-rules**: Complete Maven standards
+  - Provides: Build verification standards, POM maintenance rules, dependency management, Maven integration, quality gate criteria
+  - Loads: pom-maintenance.md, maven-integration.md
+  - When activated: At workflow start (Step 0) to load Maven standards before build execution
+
 - **cui-javadoc**: JavaDoc documentation standards
   - Provides: Package documentation requirements, class/interface documentation rules, method documentation standards, field documentation guidelines, mandatory fix rules
   - Loads: javadoc-standards.adoc, javadoc-maintenance.adoc
@@ -25,16 +30,17 @@ Execute the complete Maven build with pre-commit profile, analyze all output, fi
 
 ### Step 0: Activate Required Skills
 
-**CRITICAL**: Before starting the build workflow, activate the cui-javadoc skill to load JavaDoc standards.
+**CRITICAL**: Before starting the build workflow, activate the required skills to load Maven and JavaDoc standards.
 
 Invocation:
 ```
+Skill: cui-maven-rules
 Skill: cui-javadoc
 ```
 
-**Purpose**: The skill provides the authoritative JavaDoc standards that guide JavaDoc warning fixes throughout the build process. This ensures all JavaDoc fixes comply with CUI standards.
+**Purpose**: The cui-maven-rules skill provides authoritative Maven build standards, quality gate criteria, and issue handling procedures. The cui-javadoc skill provides JavaDoc standards for mandatory JavaDoc warning fixes. Together they ensure all fixes comply with CUI standards.
 
-**Timing**: Execute once at the start, before Step 1.
+**Timing**: Execute both skills once at the start, before Step 1.
 
 ### Step 1: Read Configuration
 

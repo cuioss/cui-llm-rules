@@ -13,38 +13,35 @@ This bundle provides general-purpose utility commands for:
 
 These utilities are independent tools that can be used across different CUI projects and workflows.
 
+> **Note**: Maven build verification has been moved to the **cui-maven** bundle. Use `/cui-build-and-verify` from that bundle for Maven-related build tasks.
+
 ## Components Included
 
-### Commands (6 commands)
+### Commands (5 commands)
 
-1. **build-and-verify** - Project verification and build command
-   - Runs Maven build with all quality checks
-   - Optionally commits and pushes changes
-   - Usage: `/cui-build-and-verify [push]`
-
-2. **create-update-agents-md** - agents.md generation
+1. **create-update-agents-md** - agents.md generation
    - Creates or updates agents.md following OpenAI specification
    - Sources from CLAUDE.md, doc/ai-rules.md, or global standards
    - Usage: `/cui-create-update-agents-md [push]`
 
-3. **fix-intellij-diagnostics** - IDE diagnostics fixer
+2. **fix-intellij-diagnostics** - IDE diagnostics fixer
    - Retrieves and fixes IDE diagnostics automatically
    - Suppresses only when no reasonable fix available
    - Usage: `/cui-fix-intellij-diagnostics [file=<path>] [auto-fix=<boolean>] [push]`
 
-4. **manage-web-permissions** - WebFetch domain manager
+3. **manage-web-permissions** - WebFetch domain manager
    - Analyzes domains across all projects
    - Consolidates safe domains to global settings
    - Performs security research on unknown domains
    - Usage: `/cui-manage-web-permissions [auto] [project=<path>] [dry-run]`
 
-5. **setup-project-permissions** - Permission setup and verification
+4. **setup-project-permissions** - Permission setup and verification
    - Fixes duplicates, suspicious permissions, path formats
    - Manages temp directory permissions
    - Ensures proper permission organization
    - Usage: `/cui-setup-project-permissions [add=<permission>] [ensurePermissions=<list>] [dry-run] [auto-fix]`
 
-6. **verify-architecture-diagrams** - PlantUML diagram verification
+5. **verify-architecture-diagrams** - PlantUML diagram verification
    - Analyzes and updates PlantUML diagrams
    - Regenerates PNG images
    - Removes orphaned diagrams with approval
@@ -80,15 +77,6 @@ These utilities are independent tools that can be used across different CUI proj
 
 # Preview changes without applying
 /cui-manage-web-permissions dry-run
-```
-
-### Build and Verify Project
-```bash
-# Run build and fix issues
-/cui-build-and-verify
-
-# Build, fix, commit, and push
-/cui-build-and-verify push
 ```
 
 ### Fix IDE Diagnostics
@@ -136,7 +124,8 @@ None - this bundle is standalone and can be used independently.
 ## Related Bundles
 
 These utilities complement but don't depend on other bundles:
-- `cui-project-quality-gates` - For build verification within workflows
+- `cui-maven` - Maven build verification and POM maintenance (formerly included build-and-verify command)
+- `cui-project-quality-gates` - Git commit workflows
 - `cui-documentation-standards` - For documentation review (separate from diagram verification)
 - `cui-plugin-development-tools` - For plugin creation tools
 

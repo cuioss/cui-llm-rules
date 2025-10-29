@@ -101,7 +101,8 @@ The agent will:
 ## Dependencies
 
 ### Inter-Bundle Dependencies
-- **cui-project-quality-gates** (recommended) - Task executor invokes maven-project-builder for build verification and commit-changes for commits
+- **cui-maven** (recommended) - Task executor invokes maven-project-builder for build verification
+- **cui-project-quality-gates** (recommended) - Task executor invokes commit-changes for commits
 
 ### Standalone Agent Dependencies
 - **research-best-practices** (general-purpose agent) - Task-reviewer and task-breakdown-agent may invoke this for researching industry best practices

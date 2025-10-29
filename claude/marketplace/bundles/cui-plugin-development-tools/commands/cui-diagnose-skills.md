@@ -45,6 +45,46 @@ Analyze, verify, and fix skills for structure, YAML frontmatter, standards refer
 - Display interactive menu with numbered list of all skills from marketplace
 - Let user select which skill(s) to review or change scope
 
+## TOOL USAGE REQUIREMENTS
+
+**CRITICAL**: This command must use non-prompting tools to avoid user interruptions during diagnosis.
+
+### Activate Diagnostic Patterns Skill
+
+```
+Skill: cui-diagnostic-patterns
+```
+
+This loads all tool usage patterns for non-prompting file operations.
+
+### Required Tool Usage Patterns
+
+Follow patterns from cui-diagnostic-patterns skill:
+
+✅ **File Discovery (Pattern 1):**
+- Use `Glob` tool to discover skill directories and files
+- Never use `find` via Bash
+
+✅ **Existence Checks (Pattern 2):**
+- Use `Read` + try/except for file existence
+- Use `Glob` for directory existence
+- Never use `test -f` or `test -d` via Bash
+
+✅ **Content Search (Pattern 3):**
+- Use `Grep` tool for content searching
+- Never use `grep` or `awk` via Bash
+
+✅ **File Reading (Pattern 4):**
+- Use `Read` tool to load file contents
+- Never use `cat` via Bash
+
+**Why**: Bash commands trigger user prompts which interrupt the diagnostic flow and create poor UX.
+
+Refer to skill standards for complete pattern details:
+- tool-usage-patterns.md - Core tool selection guide
+- file-operations.md - File and directory checking patterns
+- search-operations.md - Content search and integration validation
+
 ## WORKFLOW INSTRUCTIONS
 
 ### Step 1: Determine Scope and Discover Skills
@@ -61,28 +101,53 @@ Determine what to process based on scope parameter (defaults to "marketplace"):
 
 **B. Discover Skills**
 
-Based on scope, find all skill directories:
+Use Glob to discover skill directories (Pattern 1):
 
-```bash
+```
 # For marketplace scope (default) - search both standalone and bundle skills
-(find ~/git/cui-llm-rules/claude/marketplace/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null; \
- find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null) | sort
+standalone_skills = Glob(pattern="*", path="~/git/cui-llm-rules/claude/marketplace/skills")
+
+# Find all bundle skill directories
+bundle_skill_dirs = Glob(pattern="*/skills", path="~/git/cui-llm-rules/claude/marketplace/bundles")
+bundle_skills = []
+for bundle_skill_dir in bundle_skill_dirs:
+    skills_in_bundle = Glob(pattern="*", path=bundle_skill_dir)
+    bundle_skills.extend(skills_in_bundle)
+
+marketplace_skills = standalone_skills + bundle_skills
+marketplace_skills.sort()
 
 # For global scope
-find ~/.claude/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
+global_skills = Glob(pattern="*", path="~/.claude/skills")
+global_skills.sort()
 
 # For project scope
-find .claude/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
+try:
+    project_skills = Glob(pattern="*", path=".claude/skills")
+    project_skills.sort()
+except Exception:
+    project_skills = []  # Directory doesn't exist
 
-# For specific skill in marketplace scope - search both locations
-(find ~/git/cui-llm-rules/claude/marketplace/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null; \
- find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null) | head -1
-
-# For specific skill in global scope
-find ~/.claude/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
-
-# For specific skill in project scope
-find .claude/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
+# For specific skill by name - search in current scope
+def find_skill_by_name(skill_name, scope):
+    if scope == "marketplace":
+        # Search standalone first
+        result = [s for s in standalone_skills if skill_name in s]
+        if result:
+            return result[0]
+        # Search bundles
+        result = [s for s in bundle_skills if skill_name in s]
+        if result:
+            return result[0]
+    elif scope == "global":
+        result = [s for s in global_skills if skill_name in s]
+        if result:
+            return result[0]
+    elif scope == "project":
+        result = [s for s in project_skills if skill_name in s]
+        if result:
+            return result[0]
+    return None
 ```
 
 **C. Interactive Mode (if no parameters)**
@@ -249,9 +314,15 @@ Update statistics: Increment `yaml_errors` for each ❌ issue.
 
 Search SKILL.md for standards file references:
 
-```bash
+Use Grep to find standards references (Pattern 3):
+```
 # Find lines with "Read: standards/" or similar patterns
-grep -E "(Read:|Source:)\s*standards/" <skill-path>/SKILL.md
+standards_refs = Grep(
+    pattern="(Read:|Source:)\\s*standards/",
+    path="<skill-path>/SKILL.md",
+    output_mode="content",
+    -n=true
+)
 ```
 
 Typical patterns:
@@ -397,22 +468,38 @@ Find relationships between this skill and other components.
 
 Search all agent files for references to this skill:
 
-```bash
+Use Grep to search for skill references (Pattern 3):
+```
 # Search in project agents
-grep -r "skill.*<skill-name>" .claude/agents/ 2>/dev/null
+project_usage = Grep(
+    pattern="skill.*<skill-name>",
+    path=".claude/agents",
+    output_mode="files_with_matches",
+    -i=true
+)
 
 # Search in global agents
-grep -r "skill.*<skill-name>" claude/agents/ 2>/dev/null
+global_usage = Grep(
+    pattern="skill.*<skill-name>",
+    path="claude/agents",
+    output_mode="files_with_matches",
+    -i=true
+)
 ```
 
 Count agents that reference this skill.
 
 **B. Find Skill-to-Skill References**
 
-Search this skill's SKILL.md for references to other skills:
+Use Grep to search for other skill references (Pattern 3):
 
-```bash
-grep -E "skill.*cui-[a-z-]+" <skill-path>/SKILL.md
+```
+skill_dependencies = Grep(
+    pattern="skill.*cui-[a-z-]+",
+    path="<skill-path>/SKILL.md",
+    output_mode="content",
+    -i=true
+)
 ```
 
 Count other skills referenced by this skill.
@@ -486,13 +573,25 @@ This step ensures the skill provides a coherent, non-conflicting, unambiguous in
 
 Read all standards files referenced in SKILL.md workflow:
 
-```bash
+Use Grep and Read to extract and load standards files (Patterns 3 & 4):
+```
 # Extract all Read: standards/ lines from SKILL.md
-grep "Read: standards/" <skill-path>/SKILL.md | awk '{print $2}'
+standards_refs = Grep(
+    pattern="Read: standards/",
+    path="<skill-path>/SKILL.md",
+    output_mode="content"
+)
+
+# Parse file paths from matches (second token after "Read:")
+standards_files = []
+for match in standards_refs:
+    parts = match.split()
+    if len(parts) >= 2:
+        standards_files.append(parts[1])
 
 # Read each file
-for file in <standards-files>; do
-  cat "<skill-path>/$file"
+for file in standards_files:
+    content = Read(file_path=f"<skill-path>/{file}")
 done
 ```
 
@@ -718,17 +817,34 @@ This loads architecture rules and validation patterns for marketplace components
 
 **A. Check Self-Containment**
 
-Apply validation from loaded standards (self-containment-validation.md):
+Use Grep to validate self-containment (Pattern 3):
 
-```bash
+```
 # Scan for external references (escape sequences)
-grep -n "\.\..*\.\..*\.\." <skill-path>/SKILL.md
+escape_refs = Grep(
+    pattern="\\.\\.\\.*/\\.\\.\\.*/\\.\\.",
+    path="<skill-path>/SKILL.md",
+    output_mode="content",
+    -n=true
+)
 
-# Scan for absolute paths
-grep -n "~/\|^/" <skill-path>/SKILL.md | grep -v "https://"
+# Scan for absolute paths (excluding URLs)
+absolute_paths = Grep(
+    pattern="~/|^/",
+    path="<skill-path>/SKILL.md",
+    output_mode="content",
+    -n=true
+)
+# Filter out https:// URLs
+absolute_paths = [m for m in absolute_paths if "https://" not in m]
 
 # Check for .adoc references (likely external)
-grep -n "\.adoc" <skill-path>/SKILL.md
+adoc_refs = Grep(
+    pattern="\\.adoc",
+    path="<skill-path>/SKILL.md",
+    output_mode="content",
+    -n=true
+)
 ```
 
 Report findings:
@@ -748,12 +864,24 @@ Architecture Compliance - Self-Containment:
 
 Validate all `Read:` statements point to existing internal files:
 
-```bash
+Use Grep to extract standards references and verify files exist (Patterns 3 & 2):
+```
 # Extract all Read: standards/ statements
-grep "Read: standards/" <skill-path>/SKILL.md | awk '{print $2}'
+standards_refs = Grep(
+    pattern="Read: standards/",
+    path="<skill-path>/SKILL.md",
+    output_mode="content"
+)
+
+# Parse file paths
+standards_files = []
+for match in standards_refs:
+    parts = match.split()
+    if len(parts) >= 2:
+        standards_files.append(parts[1])
 
 # Verify each file exists
-for file in $(extracted_files); do
+for file in standards_files:
   if [ ! -f "<skill-path>/$file" ]; then
     echo "MISSING: $file"
   fi

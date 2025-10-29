@@ -1,0 +1,36 @@
+{
+  "name": "cui-maven",
+  "displayName": "CUI Maven Tools",
+  "version": "0.1.0",
+  "description": "Comprehensive Maven build, verification, and POM maintenance tools for CUI projects",
+  "author": {
+    "name": "CUI Team"
+  },
+  "license": "MIT",
+  "category": "Development Tools",
+  "homepage": "https://github.com/cuioss/cui-llm-rules/tree/main/claude/marketplace/bundles/cui-maven",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cuioss/cui-llm-rules.git"
+  },
+  "components": {
+    "agents": ["maven-project-builder"],
+    "commands": ["cui-build-and-verify"],
+    "skills": ["cui-maven-rules"]
+  },
+  "dependencies": {
+    "cui-project-quality-gates": ">=1.0.0"
+  },
+  "keywords": [
+    "cui",
+    "maven",
+    "build",
+    "verification",
+    "pom",
+    "quality-gates",
+    "marketplace"
+  ],
+  "engines": {
+    "claude-code": ">=1.0.0"
+  }
+}

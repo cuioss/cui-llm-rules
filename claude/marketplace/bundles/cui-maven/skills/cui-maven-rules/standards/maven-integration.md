@@ -1,0 +1,379 @@
+= Maven Integration Standards for JavaScript
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+== Purpose
+Defines standards for integrating JavaScript tooling with Maven build processes using the frontend-maven-plugin, ensuring consistent build pipelines across all CUI projects.
+
+== Related Documentation
+* xref:project-structure.adoc[Project Structure Standards]: Package.json configuration and directory structure
+* xref:javascript-development-standards.adoc[JavaScript Development Standards]: JavaScript-specific package.json configuration
+* xref:linting-standards.adoc[Linting Standards]: ESLint integration with Maven
+* xref:unit-testing-standards.adoc[Unit Testing Standards]: Jest integration with Maven
+* xref:formatting-standards.adoc[Formatting Standards]: Prettier integration with Maven
+
+== Frontend Maven Plugin Configuration
+
+=== Required Plugin Setup
+Projects must integrate JavaScript tooling with Maven using the frontend-maven-plugin:
+
+[source,xml]
+----
+<plugin>
+  <groupId>com.github.eirslett</groupId>
+  <artifactId>frontend-maven-plugin</artifactId>
+  <version>1.15.1</version>
+  <configuration>
+    <nodeVersion>v20.12.2</nodeVersion>
+    <npmVersion>10.5.0</npmVersion>
+    <installDirectory>target</installDirectory>
+  </configuration>
+  <executions>
+    <execution>
+      <id>install-node-and-npm</id>
+      <goals>
+        <goal>install-node-and-npm</goal>
+      </goals>
+    </execution>
+    <execution>
+      <id>npm-install</id>
+      <goals>
+        <goal>npm</goal>
+      </goals>
+      <configuration>
+        <arguments>install</arguments>
+      </configuration>
+    </execution>
+    <execution>
+      <id>npm-format-check</id>
+      <goals>
+        <goal>npm</goal>
+      </goals>
+      <phase>compile</phase>
+      <configuration>
+        <arguments>run format:check</arguments>
+      </configuration>
+    </execution>
+    <execution>
+      <id>npm-test</id>
+      <goals>
+        <goal>npm</goal>
+      </goals>
+      <phase>test</phase>
+      <configuration>
+        <arguments>run test:ci-strict</arguments>
+      </configuration>
+    </execution>
+    <execution>
+      <id>npm-lint</id>
+      <goals>
+        <goal>npm</goal>
+      </goals>
+      <phase>compile</phase>
+      <configuration>
+        <arguments>run lint</arguments>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+----
+
+=== Optional Build Integration
+For projects that generate minified or bundled JavaScript files:
+
+[source,xml]
+----
+<execution>
+  <id>npm-build</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <phase>generate-resources</phase>
+  <configuration>
+    <arguments>run build</arguments>
+  </configuration>
+</execution>
+----
+
+== Maven Phase Integration
+
+=== Required Phase Mapping
+JavaScript tooling must be integrated into these Maven phases:
+
+[cols="2,3,4"]
+|===
+|Phase |Tool |Purpose
+
+|validate
+|Node.js and npm installation
+|Ensure consistent Node.js environment
+
+|generate-resources
+|npm build (optional)
+|Generate minified/bundled assets
+
+|compile
+|Format checking
+|Enforce code formatting standards
+
+|test
+|JavaScript unit tests
+|Run Jest tests with coverage
+
+|compile  
+|Code linting
+|Enforce code quality standards without modifications
+|===
+
+=== Execution Order
+The executions must run in this order to ensure proper dependency resolution:
+
+1. **install-node-and-npm** (validate phase)
+2. **npm-install** (validate phase)
+3. **npm-build** (generate-resources phase, if applicable)
+4. **npm-format-check** (compile phase)
+5. **npm-lint** (compile phase)  
+6. **npm-test** (test phase)
+
+== Configuration Standards
+
+=== Node.js Version Management
+* **Node.js Version**: v20.12.2 (LTS)
+* **npm Version**: 10.5.0 or compatible
+* **Installation Directory**: `target/` (Maven standard)
+* **Dependency Resolution**: Use standard `npm install` unless conflicts require `--legacy-peer-deps`
+
+==== Dependency Resolution Strategy
+Modern npm packages may have peer dependency conflicts. Use these strategies:
+
+[source,xml]
+----
+<configuration>
+  <!-- Standard installation -->
+  <arguments>install</arguments>
+</configuration>
+
+<!-- For packages with peer dependency conflicts -->
+<configuration>
+  <arguments>install --legacy-peer-deps</arguments>
+</configuration>
+
+<!-- For performance optimization -->
+<configuration>
+  <arguments>install --prefer-offline --no-audit</arguments>
+</configuration>
+----
+
+=== Script Integration
+The plugin must call these npm scripts:
+
+[cols="2,3,4"]
+|===
+|Script |Maven Phase |Purpose
+
+|`format:check`
+|compile
+|Verify code formatting compliance
+
+|`test:ci-strict`
+|test
+|Run tests with strict coverage thresholds
+
+|`lint`
+|compile
+|Check code quality without modifications
+
+|`build`
+|generate-resources
+|Generate production assets (optional)
+|===
+
+=== Environment Variables
+Set these environment variables for consistent builds:
+
+[source,xml]
+----
+<configuration>
+  <environmentVariables>
+    <CI>true</CI>
+    <NODE_ENV>test</NODE_ENV>
+  </environmentVariables>
+  <arguments>run test:ci-strict</arguments>
+</configuration>
+----
+
+== SonarQube Integration
+
+=== Required Properties
+For SonarQube integration, include these properties in Maven:
+
+[source,xml]
+----
+<properties>
+  <!-- JavaScript coverage reporting -->
+  <sonar.javascript.lcov.reportPaths>target/coverage/lcov.info</sonar.javascript.lcov.reportPaths>
+  <sonar.coverage.exclusions>**/*.test.js,**/test/**/*,**/mocks/**/*</sonar.coverage.exclusions>
+  <sonar.javascript.file.suffixes>.js</sonar.javascript.file.suffixes>
+  <sonar.javascript.coverage.overall_condition.branch>80</sonar.javascript.coverage.overall_condition.branch>
+  <sonar.javascript.coverage.new_condition.branch>80</sonar.javascript.coverage.new_condition.branch>
+</properties>
+----
+
+=== Coverage Path Configuration
+Ensure Jest outputs coverage to the correct location:
+
+[source,json]
+----
+"jest": {
+  "coverageDirectory": "target/coverage",
+  "coverageReporters": ["text", "lcov", "html", "cobertura"]
+}
+----
+
+== Build Environment Standards
+
+=== Reproducible Builds
+* Frontend-maven-plugin ensures consistent Node.js installation
+* Build must be reproducible across different machines
+* All builds must pass formatting, linting, and testing requirements
+
+=== CI/CD Integration
+* Use `test:ci-strict` script for strict coverage enforcement
+* Set `CI=true` environment variable
+* Ensure all quality gates pass before deployment
+
+=== File Exclusions
+Ensure these patterns are excluded from version control:
+
+[source,gitignore]
+----
+# Maven frontend plugin
+target/node/
+target/coverage/
+
+# npm
+node_modules/
+npm-debug.log*
+
+# Build outputs
+target/classes/META-INF/resources/
+target/dist/
+----
+
+== Project-Specific Adaptations
+
+=== Standard Maven Projects
+[source,xml]
+----
+<configuration>
+  <workingDirectory>${project.basedir}</workingDirectory>
+  <installDirectory>target</installDirectory>
+</configuration>
+----
+
+=== Multi-Module Projects
+For parent/child module structures:
+
+[source,xml]
+----
+<configuration>
+  <workingDirectory>${project.basedir}/src/main/frontend</workingDirectory>
+  <installDirectory>${project.basedir}/target</installDirectory>
+</configuration>
+----
+
+=== Quarkus DevUI Projects
+No special configuration needed - uses standard setup with DevUI-specific paths in package.json.
+
+=== NiFi Extension Projects
+May require additional WebJar integration:
+
+[source,xml]
+----
+<execution>
+  <id>npm-build-webjars</id>
+  <goals>
+    <goal>npm</goal>
+  </goals>
+  <phase>generate-resources</phase>
+  <configuration>
+    <arguments>run build:webjars</arguments>
+  </configuration>
+</execution>
+----
+
+== Troubleshooting
+
+=== Common Issues
+
+==== Node.js Installation Failures
+* Verify internet connectivity for Node.js download
+* Check proxy settings in Maven configuration
+* Ensure sufficient disk space in `target/` directory
+
+==== npm Install Failures
+* Delete `node_modules/` and `package-lock.json`
+* Run `npm cache clean --force`
+* Use `--legacy-peer-deps` flag for peer dependency conflicts
+* Check for conflicting global npm packages
+* Verify Node.js version compatibility
+
+==== Test Failures in CI
+* Ensure `CI=true` environment variable is set
+* Use `test:ci-strict` script with `--watchAll=false`
+* Verify coverage thresholds match SonarQube requirements
+
+==== Format Check Failures
+* Run `npm run format` locally before committing
+* Ensure Prettier configuration is consistent
+* Check for conflicting editor formatting settings
+
+=== Performance Optimization
+
+==== Cache Node.js Installation
+For CI/CD environments:
+
+[source,xml]
+----
+<configuration>
+  <installDirectory>${user.home}/.m2/frontend</installDirectory>
+</configuration>
+----
+
+==== Parallel Execution
+Enable parallel npm operations:
+
+[source,xml]
+----
+<configuration>
+  <arguments>install --prefer-offline --no-audit</arguments>
+</configuration>
+----
+
+== Validation
+
+=== Build Verification
+For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
+
+A successful Maven build must:
+
+1. Install correct Node.js and npm versions
+2. Install all npm dependencies without critical warnings
+3. Pass all formatting checks
+4. Pass all JavaScript tests with 80% coverage
+5. Pass all linting checks without errors
+6. Resolve all npm security vulnerabilities (critical/high severity)
+7. Address deprecated package warnings in build logs
+
+=== Quality Gates
+For comprehensive quality gate processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
+
+The following quality gates must pass:
+
+* **Formatting**: All JavaScript files properly formatted
+* **Linting**: All ESLint rules pass
+* **Testing**: All tests pass with required coverage
+* **Dependencies**: All npm dependencies up to date and secure
