@@ -210,6 +210,6 @@ All project setup must pass:
 
 ## References
 
-* New Project Guide: ../../../../standards/requirements/new-project-guide.adoc
+* New Project Guide: standards/new-project-guide.md
 * CUI Parent POM: https://github.com/cuioss
 * Maven Standards: https://maven.apache.org/guides/

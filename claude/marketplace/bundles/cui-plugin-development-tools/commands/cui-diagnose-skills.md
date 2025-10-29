@@ -9,7 +9,7 @@ Analyze, verify, and fix skills for structure, YAML frontmatter, standards refer
 
 ## PARAMETERS
 
-- **scope=marketplace** (default): Analyze skills in marketplace bundles (~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/)
+- **scope=marketplace** (default): Analyze all marketplace skills (standalone + bundle skills)
 - **scope=global**: Analyze skills in global location (~/.claude/skills/)
 - **scope=project**: Analyze skills in project location (.claude/skills/)
 - **skill-name** (optional): Review a specific skill by name (e.g., `cui-java-core`)
@@ -18,11 +18,13 @@ Analyze, verify, and fix skills for structure, YAML frontmatter, standards refer
 ## PARAMETER VALIDATION
 
 **If `scope=marketplace` (default):**
-- Process all skill directories in `~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/` directories
-- Search across all bundles in marketplace
+- Process all skill directories in two locations:
+  - Standalone: `~/git/cui-llm-rules/claude/marketplace/skills/`
+  - Bundle skills: `~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/`
+- Search across all marketplace locations
 - Example paths:
-  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/skills/`
-  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/skills/`
+  - `~/git/cui-llm-rules/claude/marketplace/skills/cui-java-core/` (standalone)
+  - `~/git/cui-llm-rules/claude/marketplace/bundles/cui-project-quality-gates/skills/cui-javadoc/` (bundle)
 
 **If `scope=global`:**
 - Process all skill directories in `~/.claude/skills/`
@@ -51,7 +53,7 @@ Analyze, verify, and fix skills for structure, YAML frontmatter, standards refer
 
 Determine what to process based on scope parameter (defaults to "marketplace"):
 
-1. If `scope=marketplace` (default) → Set scope to `~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/`
+1. If `scope=marketplace` (default) → Set scope to both marketplace locations (standalone + bundle skills)
 2. If `scope=global` → Set scope to `~/.claude/skills/`
 3. If `scope=project` → Set scope to `.claude/skills/`
 4. If skill name provided → Search in current scope only
@@ -62,8 +64,9 @@ Determine what to process based on scope parameter (defaults to "marketplace"):
 Based on scope, find all skill directories:
 
 ```bash
-# For marketplace scope (default)
-find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
+# For marketplace scope (default) - search both standalone and bundle skills
+(find ~/git/cui-llm-rules/claude/marketplace/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null; \
+ find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null) | sort
 
 # For global scope
 find ~/.claude/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
@@ -71,8 +74,9 @@ find ~/.claude/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
 # For project scope
 find .claude/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
 
-# For specific skill in marketplace scope
-find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
+# For specific skill in marketplace scope - search both locations
+(find ~/git/cui-llm-rules/claude/marketplace/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null; \
+ find ~/git/cui-llm-rules/claude/marketplace/bundles/*/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null) | head -1
 
 # For specific skill in global scope
 find ~/.claude/skills -mindepth 1 -maxdepth 1 -type d -name "*<skill-name>*" 2>/dev/null | head -1
@@ -88,10 +92,18 @@ Display menu based on scope:
 ```
 Available Skills (scope=marketplace):
 
-MARKETPLACE SKILLS (~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/):
-1. cui-javadoc (cui-project-quality-gates bundle)
-2. cui-documentation (cui-documentation-standards bundle)
-...
+STANDALONE SKILLS (~/git/cui-llm-rules/claude/marketplace/skills/):
+1. cui-frontend-development
+2. cui-java-cdi
+3. cui-java-core
+4. cui-java-unit-testing
+5. cui-project-setup
+6. cui-requirements
+
+BUNDLE SKILLS (~/git/cui-llm-rules/claude/marketplace/bundles/*/skills/):
+7. cui-documentation (cui-documentation-standards bundle)
+8. cui-javadoc (cui-project-quality-gates bundle)
+9. cui-marketplace-architecture (cui-plugin-development-tools bundle)
 
 Options:
 - Enter number to select single skill
