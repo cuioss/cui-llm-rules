@@ -50,14 +50,14 @@ Analyze, verify, and fix slash commands for ambiguities, inconsistencies, and st
 ### Activate Diagnostic Patterns Skill
 
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
 This loads all tool usage patterns for non-prompting file operations.
 
 ### Required Tool Usage Patterns
 
-Follow patterns from cui-diagnostic-patterns skill:
+Follow patterns from cui-utility-commands:cui-diagnostic-patterns skill:
 
 ✅ **File Discovery (Pattern 1):**
 - Use `Glob` tool to discover command files
@@ -373,6 +373,84 @@ Check for violations:
 
 **Update Statistics**: If violations found, increment `temp_directory_violations`
 
+**F. Tool Usage Patterns (Non-Prompting) - CRITICAL**
+
+**ENFORCEMENT**: Check that command follows non-prompting tool patterns from cui-utility-commands:cui-diagnostic-patterns skill.
+
+Use Grep to scan for prohibited Bash commands for file operations:
+
+```
+# Scan for prohibited bash commands for file operations
+prohibited_patterns = [
+    "find ",      # Should use Glob
+    "test -f",    # Should use Read + try/except
+    "test -d",    # Should use Glob
+    "grep ",      # Should use Grep tool
+    "cat ",       # Should use Read
+    "ls ",        # Should use Glob
+    "awk "        # Should parse with Read
+]
+
+violations = []
+for pattern in prohibited_patterns:
+    matches = Grep(
+        pattern=pattern,
+        path="{command_file}",
+        output_mode="content",
+        -n=true
+    )
+    if matches:
+        violations.extend(matches)
+```
+
+**Categorize violations:**
+
+**CRITICAL Issues - Bash for File Operations:**
+- `find` → Should use `Glob` tool (Pattern 1)
+- `test -f` / `test -d` → Should use `Read` + try/except or `Glob` (Pattern 2)
+- `grep` → Should use `Grep` tool (Pattern 3)
+- `cat` → Should use `Read` tool (Pattern 4)
+- `ls` → Should use `Glob` tool (Pattern 1)
+- `awk` → Should parse with `Read` tool (Pattern 4)
+
+**Acceptable Bash usage:**
+- Git operations: `git status`, `git commit`, etc.
+- Build commands: `mvn`, `npm`, `gradle`, etc.
+- Shell operations that truly require bash execution
+
+**Report violations:**
+```
+Tool Usage Patterns (Non-Prompting):
+❌ CRITICAL: Uses prohibited Bash commands for file operations (3 violations)
+  Line 125: find ~/.claude/commands -name "*.md"
+    → Should use: Glob(pattern="*.md", path="~/.claude/commands")
+  Line 178: test -f {file}
+    → Should use: Read(file_path="{file}") with try/except
+  Line 234: grep "pattern" {file}
+    → Should use: Grep(pattern="pattern", path="{file}")
+
+Recommendation: Activate cui-utility-commands:cui-diagnostic-patterns skill and replace Bash commands
+Impact: Command triggers user prompts, cannot run in automated workflows
+```
+
+**Update Statistics**:
+- If violations found, increment `tool_usage_violations`
+- Set `uses_non_prompting_patterns = false`
+- Add to CRITICAL issues list
+
+**Check for skill activation:**
+```
+# Check if command activates cui-diagnostic-patterns skill
+skill_activation = Grep(
+    pattern="Skill:.*cui-diagnostic-patterns",
+    path="{command_file}",
+    output_mode="files_with_matches"
+)
+
+if violations and not skill_activation:
+    report_critical("Command should activate cui-utility-commands:cui-diagnostic-patterns skill for proper tool usage")
+```
+
 Display findings:
 ```
 Deep Analysis:
@@ -382,6 +460,7 @@ Deep Analysis:
 ❌ Three different user prompt formats used (inconsistent)
 ✅ Statistics tracking is complete
 ⚠️  Missing error handling for tool failures
+❌ CRITICAL: Uses Bash for file operations (3 violations) - should use cui-utility-commands:cui-diagnostic-patterns
 ```
 
 #### Step 3.5: Detect Absolute Path Issues

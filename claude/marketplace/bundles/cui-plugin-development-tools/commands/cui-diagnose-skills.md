@@ -52,14 +52,14 @@ Analyze, verify, and fix skills for structure, YAML frontmatter, standards refer
 ### Activate Diagnostic Patterns Skill
 
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
 This loads all tool usage patterns for non-prompting file operations.
 
 ### Required Tool Usage Patterns
 
-Follow patterns from cui-diagnostic-patterns skill:
+Follow patterns from cui-utility-commands:cui-diagnostic-patterns skill:
 
 ✅ **File Discovery (Pattern 1):**
 - Use `Glob` tool to discover skill directories and files

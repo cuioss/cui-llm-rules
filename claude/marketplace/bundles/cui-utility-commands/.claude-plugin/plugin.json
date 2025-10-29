@@ -17,5 +17,8 @@
     "./commands/cui-manage-web-permissions.md",
     "./commands/cui-setup-project-permissions.md",
     "./commands/cui-verify-architecture-diagrams.md"
+  ],
+  "skills": [
+    "./skills/cui-diagnostic-patterns"
   ]
 }

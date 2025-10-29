@@ -52,14 +52,14 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 ### Activate Diagnostic Patterns Skill
 
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
 This loads all tool usage patterns for non-prompting file operations.
 
 ### Required Tool Usage Patterns
 
-Follow patterns from cui-diagnostic-patterns skill:
+Follow patterns from cui-utility-commands:cui-diagnostic-patterns skill:
 
 ✅ **File Discovery (Pattern 1):**
 - Use `Glob` tool to discover agent files
@@ -539,6 +539,84 @@ Check for violations:
 
 **Update Statistics**: If violations found, increment `temp_directory_violations`
 
+**F. Tool Usage Patterns (Non-Prompting) - CRITICAL**
+
+**ENFORCEMENT**: Check that agent follows non-prompting tool patterns from cui-utility-commands:cui-diagnostic-patterns skill.
+
+Use Grep to scan for prohibited Bash commands for file operations:
+
+```
+# Scan for prohibited bash commands for file operations
+prohibited_patterns = [
+    "find ",      # Should use Glob
+    "test -f",    # Should use Read + try/except
+    "test -d",    # Should use Glob
+    "grep ",      # Should use Grep tool
+    "cat ",       # Should use Read
+    "ls ",        # Should use Glob
+    "awk "        # Should parse with Read
+]
+
+violations = []
+for pattern in prohibited_patterns:
+    matches = Grep(
+        pattern=pattern,
+        path="{agent_file}",
+        output_mode="content",
+        -n=true
+    )
+    if matches:
+        violations.extend(matches)
+```
+
+**Categorize violations:**
+
+**CRITICAL Issues - Bash for File Operations:**
+- `find` → Should use `Glob` tool (Pattern 1)
+- `test -f` / `test -d` → Should use `Read` + try/except or `Glob` (Pattern 2)
+- `grep` → Should use `Grep` tool (Pattern 3)
+- `cat` → Should use `Read` tool (Pattern 4)
+- `ls` → Should use `Glob` tool (Pattern 1)
+- `awk` → Should parse with `Read` tool (Pattern 4)
+
+**Acceptable Bash usage:**
+- Git operations: `git status`, `git commit`, etc.
+- Build commands: `mvn`, `npm`, `gradle`, etc.
+- Shell operations that truly require bash execution
+
+**Report violations:**
+```
+Tool Usage Patterns (Non-Prompting):
+❌ CRITICAL: Uses prohibited Bash commands for file operations (5 violations)
+  Line 45: find . -name "*.java"
+    → Should use: Glob(pattern="**/*.java", path=".")
+  Line 67: test -f README.md
+    → Should use: Read(file_path="README.md") with try/except
+  Line 89: grep "pattern" file.txt
+    → Should use: Grep(pattern="pattern", path="file.txt")
+
+Recommendation: Activate cui-utility-commands:cui-diagnostic-patterns skill and replace Bash commands
+Impact: Agent triggers user prompts, cannot run in automated workflows
+```
+
+**Update Statistics**:
+- If violations found, increment `tool_usage_violations`
+- Set `uses_non_prompting_patterns = false`
+- Add to CRITICAL issues list
+
+**Check for skill activation:**
+```
+# Check if agent activates cui-diagnostic-patterns skill
+skill_activation = Grep(
+    pattern="Skill:.*cui-diagnostic-patterns",
+    path="{agent_file}",
+    output_mode="files_with_matches"
+)
+
+if violations and not skill_activation:
+    report_critical("Agent should activate cui-utility-commands:cui-diagnostic-patterns skill for proper tool usage")
+```
+
 Display findings:
 ```
 Best Practices Analysis:
@@ -547,6 +625,7 @@ Best Practices Analysis:
 ✅ Agent has clear, single responsibility
 ⚠️  No tool usage tracking in response format
 ✅ Lessons learned reporting present
+❌ CRITICAL: Uses Bash for file operations (5 violations) - should use cui-utility-commands:cui-diagnostic-patterns
 ```
 
 #### Step 4.6: Verify Essential Rules Synchronization
@@ -1206,6 +1285,7 @@ Categorize all issues found:
 - Self-modification references → Wrong pattern for agents
 - Over-permissions (security risk) → Dangerous commands auto-approved unnecessarily
 - Missing bash command approvals → Agent will prompt user frequently
+- **Uses Bash for file operations (find, test, grep, cat, ls, awk) → Triggers user prompts, cannot run automated**
 
 **WARNINGS (Should Fix):**
 - Unnecessary tools configured → Bloat, security

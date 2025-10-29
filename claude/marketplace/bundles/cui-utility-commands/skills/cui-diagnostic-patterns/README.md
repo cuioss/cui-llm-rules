@@ -1,14 +1,16 @@
-# CUI Diagnostic Patterns
+# CUI Tool Usage Patterns (Non-Prompting File Operations)
 
-Tool usage patterns and best practices for building diagnostic commands that run without user interruptions.
+Tool usage patterns and best practices for building agents and commands that run without user interruptions.
 
 ## Overview
 
-This skill provides comprehensive patterns for implementing diagnostic operations using non-prompting tools. It eliminates user interruptions by replacing Bash commands with specialized tools (Glob, Read, Grep) that execute automatically.
+This skill provides comprehensive patterns for implementing file operations using non-prompting tools. It eliminates user interruptions by replacing Bash commands with specialized tools (Glob, Read, Grep) that execute automatically.
+
+**This skill applies to ALL agents and commands that perform file operations**, not just diagnostic commands.
 
 ## Problem Statement
 
-**Traditional Approach**: Diagnostic commands that use Bash for file operations (find, test, ls, grep) trigger user prompts for every operation, making diagnostics:
+**Traditional Approach**: Agents and commands that use Bash for file operations (find, test, ls, grep) trigger user prompts for every operation, making them:
 - Interrupt users constantly
 - Impossible to run in automated workflows
 - Provide poor user experience
@@ -69,20 +71,27 @@ All patterns are organized in the `standards/` directory:
 
 ## When to Use This Skill
 
-Activate this skill when:
-- Building diagnostic commands (cui-diagnose-*)
-- Implementing file discovery logic
-- Checking file/directory existence
-- Searching file content
-- Validating project structure
-- Analyzing component health
-- Performing automated quality checks
+Activate this skill when building any agent or command that:
+- Performs file discovery or listing
+- Checks file or directory existence
+- Searches file content
+- Validates project structure
+- Analyzes code or components
+- Performs automated quality checks
+- Needs to run without user interruption
 
-## Usage in Diagnostic Commands
+**Examples:**
+- **Diagnostic commands** (cui-diagnose-*)
+- **Validation commands** (cui-build-and-verify, etc.)
+- **Analysis agents** (code reviewers, quality checkers)
+- **Project setup commands** (initialization, scaffolding)
+- **Any agent/command that performs file system operations**
+
+## Usage in Agents and Commands
 
 ### Activation
 
-All diagnostic commands should activate this skill:
+All agents and commands that perform file operations should activate this skill:
 
 ```markdown
 Skill: cui-diagnostic-patterns
@@ -90,7 +99,7 @@ Skill: cui-diagnostic-patterns
 
 ### Referencing Patterns
 
-Commands reference patterns throughout their workflows:
+Agents and commands reference patterns throughout their workflows:
 
 ```markdown
 ## TOOL USAGE
@@ -105,12 +114,25 @@ Refer to skill standards for complete pattern details.
 
 ### Benefits
 
-Commands benefit by:
+Agents and commands benefit by:
 - Not duplicating tool usage guidelines
 - Getting updated patterns automatically
-- Following consistent standards across all diagnostics
+- Following consistent standards
 - Avoiding prompt-triggering operations
 - Running fully automated without user interruption
+
+### Enforcement by Diagnostic Commands
+
+**CRITICAL**: Diagnostic commands enforce these patterns:
+
+- **cui-diagnose-agents**: Scans agents for prohibited Bash usage (find, test, grep, cat, etc.)
+- **cui-diagnose-commands**: Scans commands for prohibited Bash usage
+
+When violations are found:
+- Reported as **CRITICAL issues**
+- Blocks agents/commands from high quality scores
+- Provides remediation guidance referencing this skill
+- Recommends: "Activate cui-diagnostic-patterns skill and replace Bash commands"
 
 ## Pattern Coverage
 
@@ -242,21 +264,29 @@ Executes automatically with structured results.
 - Complete diagnostic reports in seconds
 - Focus on results, not confirmations
 
-## Integration with Commands
+## Integration with Commands and Agents
 
-### Diagnostic Commands Using This Skill
+### Components Using This Skill
 
-All CUI diagnostic commands use these patterns:
+**Diagnostic commands** (use and enforce):
 - `/cui-diagnose-bundle` - Bundle structure and health validation
-- `/cui-diagnose-agents` - Agent quality and compliance analysis
-- `/cui-diagnose-commands` - Command structure and quality checks
+- `/cui-diagnose-agents` - Agent quality and compliance analysis (enforces patterns)
+- `/cui-diagnose-commands` - Command structure and quality checks (enforces patterns)
 - `/cui-diagnose-skills` - Skill validation and standards compliance
+
+**Other commands and agents** (should use):
+- Any agent that performs file system operations
+- Any command that needs to scan, validate, or analyze files
+- Build and verification tools
+- Quality check agents
+- Analysis and reporting tools
 
 ### Related Skills
 
 This skill is foundational for:
-- All cui-diagnose-* commands
-- Any command requiring file system operations
+- All cui-diagnose-* commands (diagnostic tools)
+- All agents that perform file operations
+- All commands requiring file system operations
 - Validation and quality check tools
 - Automated workflow tools
 
@@ -273,14 +303,16 @@ When tool usage patterns need updates, modify files in the `standards/` director
 
 Version: 1.0.0 (Initial release)
 
-Part of: cui-plugin-development-tools bundle
+Part of: cui-utility-commands bundle
 
 ## Summary
 
 **Golden Rule**: If the operation involves the file system, use Glob/Read/Grep, never Bash.
 
-**Result**: Zero user prompts, fully automated diagnostics with excellent performance.
+**Result**: Zero user prompts, fully automated agents and commands with excellent performance.
+
+**Quality Gate**: Diagnostic commands enforce these patterns - agents and commands using Bash for file operations will be flagged as having CRITICAL issues.
 
 ---
 
-*This skill eliminates user prompts from diagnostic workflows by providing comprehensive non-prompting tool usage patterns.*
+*This skill eliminates user prompts from all agents and commands by providing comprehensive non-prompting tool usage patterns for file operations.*
