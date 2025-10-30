@@ -34,7 +34,7 @@ This document defines design principles, patterns, and quality standards for Cla
 **Trade-off**: Duplication of standards across agents vs execution speed
 
 * ✅ Accepted: Speed and autonomy outweigh duplication concerns
-* ✅ Mitigation: Automated synchronization via `/agents-doctor`
+* ✅ Mitigation: Automated synchronization via `/cui-diagnose-agents`
 
 === Principle 2: Perfect Tool Fit
 
@@ -51,7 +51,7 @@ This document defines design principles, patterns, and quality standards for Cla
 * **Clarity**: Tool list documents capabilities
 * **Efficiency**: No unused tool overhead
 
-**Enforcement**: `/agents-doctor` verifies tool coverage and flags mismatches
+**Enforcement**: `/cui-diagnose-agents` verifies tool coverage and flags mismatches
 
 === Principle 3: No Self-Modification
 
@@ -143,7 +143,7 @@ Last Synced: 2025-10-23
 
 **Automated Synchronization**:
 
-* `/agents-doctor` verifies embedded rules match sources
+* `/cui-diagnose-agents` verifies embedded rules match sources
 * Detects: OUT_OF_DATE, ORPHANED, OLD_SYNC
 * Offers auto-update from source
 
@@ -216,12 +216,12 @@ Last Synced: {YYYY-MM-DD}
 **Accepted Trade-offs**:
 
 * ✅ Duplication across agents (acceptable for performance)
-* ✅ Manual sync trigger (automated via `/agents-doctor`)
+* ✅ Manual sync trigger (automated via `/cui-diagnose-agents`)
 
 **Mitigation**:
 
 * ✅ Sync burden → Automated detection and update
-* ✅ Drift risk → `/agents-doctor` warns when out of sync
+* ✅ Drift risk → `/cui-diagnose-agents` warns when out of sync
 
 == Tool Fit Requirement
 
@@ -281,7 +281,7 @@ Agent has Grep configured
 
 === Tool Coverage Analysis
 
-`/agents-doctor` performs comprehensive analysis:
+`/cui-diagnose-agents` performs comprehensive analysis:
 
 1. **Scan Workflow**: Extract all tool references
 2. **Compare**: Required tools vs configured tools
@@ -827,9 +827,9 @@ Use this checklist when creating or reviewing agents:
 
 == Enforcement and Tooling
 
-=== agents-doctor Command
+=== cui-diagnose-agents Command
 
-**Tool**: `/agents-doctor`
+**Tool**: `/cui-diagnose-agents`
 
 **Purpose**: Verify agents follow architectural principles
 
@@ -845,9 +845,9 @@ Use this checklist when creating or reviewing agents:
 
 **Usage**:
 ```bash
-/agents-doctor global           # Check all global agents
-/agents-doctor project-builder  # Check specific agent
-/agents-doctor                  # Interactive mode
+/cui-diagnose-agents           # Check all marketplace agents (default)
+/cui-diagnose-agents global    # Check all global agents
+/cui-diagnose-agents project   # Check all project agents
 ```
 
 **Automated Fixes**:
@@ -860,19 +860,19 @@ Use this checklist when creating or reviewing agents:
 
 **Pre-commit Hook** (recommended):
 ```bash
-/agents-doctor project
+/cui-diagnose-agents project
 ```
 
 **CI/CD Pipeline** (recommended):
 ```bash
-/agents-doctor global
-/agents-doctor project
+/cui-diagnose-agents global
+/cui-diagnose-agents project
 ```
 
 **Regular Maintenance** (recommended):
 ```bash
 # Weekly: Check for out-of-date Essential Rules
-/agents-doctor global
+/cui-diagnose-agents global
 ```
 
 == Migration Guide
@@ -917,7 +917,7 @@ Remove self-modification logic, add lessons learned reporting
 **Step 6: Verify Tool Fit**
 
 ```bash
-/agents-doctor agent-name
+/cui-diagnose-agents
 ```
 
 Fix issues until Tool Fit Score = 100%
@@ -1007,7 +1007,7 @@ After creating new agent:
 3. ✅ Include Tool Usage Tracking section
 4. ✅ Include Lessons Learned Reporting section
 5. ✅ Define structured Response Format
-6. ✅ Run `/agents-doctor {agent-name}` to verify
+6. ✅ Run `/cui-diagnose-agents` to verify
 7. ✅ Fix any issues until Tool Fit Score = 100%
 
 == Cross-References

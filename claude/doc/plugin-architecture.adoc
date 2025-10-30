@@ -84,10 +84,10 @@ For complete standards, invoke cui-java-core skill when needed.
 
 * **Performance**: Critical requirements immediately available (no I/O delay)
 * **Completeness**: Agents can invoke skills for full standards
-* **Maintenance**: `/agents-doctor` verifies embedded rules match source
+* **Maintenance**: `/cui-diagnose-agents` verifies embedded rules match source
 * **Source of Truth**: Skill standards remain authoritative
 
-**Synchronization**: `/agents-doctor sync` verifies and updates embedded rules from skill standards
+**Synchronization**: `/cui-diagnose-agents` verifies and updates embedded rules from skill standards
 
 === Decision 4: Global Plugin Scope
 
