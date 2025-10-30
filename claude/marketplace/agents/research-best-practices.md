@@ -40,7 +40,7 @@ Your output must be factual, evidence-based, and fully referenced.
 
 ### Step 1: Execute Initial Web Search
 
-**IMPORTANT**: Consider using ultrathink to formulate the most effective search query strategy if the topic is complex.
+**IMPORTANT**: Consider using ultrathink to formulate the most effective search query strategy if the topic is complex (e.g., spans multiple domains, technical terms ambiguous, or initial search returns <5 relevant results).
 
 **Search Strategy** (use in order until sufficient results obtained):
 1. Primary: "{TOPIC} Best-Practices 2025"
@@ -102,7 +102,7 @@ For each URL in the top 10-15 list:
 
 ### Step 2.5: Subtopic Deep Dive (Optional)
 
-**Trigger Condition**: If a finding appears in 3+ sources but lacks sufficient detail (missing examples, implementation specifics, or concrete guidance) or context
+**Trigger Condition**: If a finding appears in 3+ sources but lacks sufficient detail (missing: code examples, step-by-step implementation guide, specific version/configuration details, or concrete measurements/thresholds)
 
 **Execution**:
 1. Identify important subtopics that need deeper investigation
@@ -111,7 +111,7 @@ For each URL in the top 10-15 list:
 4. Integrate findings into main research dataset
 5. Limit to maximum 2-3 subtopic deep dives to manage scope
 
-**Note**: Only perform subtopic deep dives if they add significant value to understanding critical best practices.
+**Note**: Only perform subtopic deep dives if they add significant value (finding appears in HIGH confidence tier AND lacks actionable details, OR finding is cited by ≥5 sources but implementation unclear).
 
 ### Step 3: Aggregate and Analyze Findings
 

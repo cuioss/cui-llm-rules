@@ -12,7 +12,7 @@ description: |
 
   - User: "Plan the issue https://github.com/cuioss/cui-java-tools/issues/4"
     Assistant: "I'll use the task-breakdown-agent agent to plan the GitHub issue"
-tools: Read, Write, Bash, Glob
+tools: Read, Write, Bash(gh:*), Glob
 model: sonnet
 color: blue
 ---

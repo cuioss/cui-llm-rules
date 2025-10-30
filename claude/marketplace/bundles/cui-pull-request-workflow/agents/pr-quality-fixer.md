@@ -9,7 +9,7 @@ Examples:
 - User: "Process Sonar feedback for https://github.com/owner/repo/pull/123"
   Assistant: "I'll launch the pr-handle-sonar-issue agent to address all Sonar issues on that pull request."
 
-tools: Read, Edit, Write, Bash, Task, Skill
+tools: Read, Edit, Write, Bash(gh:*), Task, Skill
 model: sonnet
 color: purple
 ---
@@ -169,7 +169,40 @@ At the start of execution:
 
 **CRITICAL**: Use comprehensive method to get ALL Sonar issues.
 
-**Priority 1 - Sonar REST API (Most Complete):**
+**Priority 1 - MCP SonarQube Server (Recommended):**
+
+Use MCP SonarQube tools to retrieve issues. The MCP server is configured via mcp.json with secure token storage.
+
+**Check for available MCP tools** - Look for tools matching pattern `mcp__sonarqube*` or `mcp__sonar*`.
+
+Common MCP tool names:
+- `mcp__sonarqube__search_issues` or similar
+- `mcp__sonarqube__get_pull_request_issues` or similar
+- Check tool descriptions to find the right one for PR issue retrieval
+
+**Example usage pattern:**
+```
+Use the available MCP SonarQube tool to:
+- Search for issues in project: <project_key>
+- Filter by pull request: <pr_number>
+- Include statuses: OPEN, CONFIRMED, REOPENED
+- Return fields: key, rule, severity, message, component, line, type
+```
+
+This provides complete issue details:
+- Rule identifier (e.g., java:S1234)
+- Severity (BLOCKER, CRITICAL, MAJOR, MINOR, INFO)
+- Type (BUG, VULNERABILITY, CODE_SMELL, SECURITY_HOTSPOT)
+- Status (OPEN, CONFIRMED, REOPENED)
+- Message (issue description)
+- Component (file path)
+- Line number
+- Issue key (for suppression tracking)
+
+**Priority 2 - Sonar REST API (Requires Setup):**
+
+Only use if MCP not available. Requires SONAR_TOKEN environment variable.
+
 ```bash
 # Get project key from repository (e.g., cuioss_nifi-extensions for cuioss/nifi-extensions)
 PROJECT_KEY="org_repo"
@@ -184,30 +217,12 @@ gh api https://sonarcloud.io/api/issues/search \
   --jq '.issues[] | {key, rule, severity, message, component, line, type}'
 ```
 
-This provides complete issue details:
-- Rule identifier (e.g., java:S1234)
-- Severity (BLOCKER, CRITICAL, MAJOR, MINOR, INFO)
-- Type (BUG, VULNERABILITY, CODE_SMELL, SECURITY_HOTSPOT)
-- Status (OPEN, CONFIRMED, REOPENED)
-- Message (issue description)
-- Component (file path)
-- Line number
-- Issue key (for suppression tracking)
-
-**Priority 2 - MCP SonarQube Tool (if available):**
-```bash
-mcp__sonarqube-official__search_sonar_issues_in_projects with parameters:
-- projects: ["<project_key>"]
-- pullRequestId: "<pr_number>"
-- ps: 500
-```
-
 **Priority 3 - GitHub Annotations (Incomplete Fallback):**
 ```bash
 gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contains("sonar")) | .output.annotations'
 ```
 
-**WARNING**: GitHub annotations are incomplete - they show ~20-30 issues max. Always prefer Sonar API.
+**WARNING**: GitHub annotations are incomplete - they show ~20-30 issues max. Always prefer MCP or Sonar API.
 
 **If you CANNOT access Sonar data:**
 - STOP immediately
@@ -236,7 +251,28 @@ gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contai
 
 **CRITICAL**: Retrieve coverage metrics to identify test gaps.
 
-**Priority 1 - Sonar REST API (Most Accurate):**
+**Priority 1 - MCP SonarQube Server (Recommended):**
+
+Use MCP SonarQube tools to retrieve coverage and quality gate data. The MCP server is configured via mcp.json with secure token storage.
+
+**Check for available MCP tools** for coverage metrics:
+- Tools for getting measures/metrics for a PR
+- Tools for quality gate status
+- Look for tool descriptions mentioning "coverage", "measures", "metrics", "quality gate"
+
+**Example usage pattern:**
+```
+Use the available MCP SonarQube tool to:
+- Get coverage metrics for project: <project_key>
+- Filter by pull request: <pr_number>
+- Retrieve metrics: coverage, new_coverage, uncovered_lines, line_coverage
+- Get quality gate status to check coverage thresholds
+```
+
+**Priority 2 - Sonar REST API (Requires Setup):**
+
+Only use if MCP not available. Requires SONAR_TOKEN environment variable.
+
 ```bash
 # Get coverage for specific PR
 gh api https://sonarcloud.io/api/measures/component \
@@ -254,10 +290,7 @@ gh api https://sonarcloud.io/api/measures/component_tree \
   -f metricKeys="coverage,line_coverage,uncovered_lines" \
   -f ps=500 \
   --jq '.components[] | {key, measures}'
-```
 
-**Priority 2 - Quality Gate Status (for thresholds):**
-```bash
 # Check if coverage caused quality gate failure
 gh api https://sonarcloud.io/api/qualitygates/project_status \
   -H "Authorization: Bearer $SONAR_TOKEN" \

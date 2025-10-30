@@ -11,7 +11,7 @@ description: |
   - User: "Commit my changes with COMMIT_MESSAGE, push and create a pr"
     Assistant: Invokes commit-changes agent to commit all changes with COMMIT_MESSAGE, push and create a PR
 
-tools: Read, Bash
+tools: Read, Glob, Bash(git:*), Bash(rm:*), Bash(gh:*)
 model: sonnet
 color: green
 ---

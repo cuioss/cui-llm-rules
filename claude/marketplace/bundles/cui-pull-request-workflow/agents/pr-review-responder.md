@@ -9,7 +9,7 @@ Examples:
 - User: "Process Gemini feedback for https://github.com/owner/repo/pull/123"
   Assistant: "I'll launch the pr-review-responder agent to address all Gemini comments on that pull request."
 
-tools: Read, Edit, Bash, Task
+tools: Read, Edit, Bash(gh:*), Task
 model: sonnet
 color: blue
 ---

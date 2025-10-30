@@ -10,7 +10,7 @@ Examples:
 - User: "Review issue described within /http-client"
   Assistant: "Review issue described within /http-client"
 
-tools: Read, Edit, Write, Bash, Task
+tools: Read, Edit, Write, Bash(gh:*), Task, SlashCommand
 model: sonnet
 color: blue
 ---

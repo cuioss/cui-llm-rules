@@ -12,7 +12,7 @@ description: |
 
   - User: "Continue implementing the HTTP client extension"
     Assistant: I'll use the task-executor agent to find and implement the next incomplete task.
-tools: Read, Edit, Write, Glob, Grep, Task, Bash, Skill
+tools: Read, Edit, Write, Glob, Grep, Task, Bash(./mvnw:*), Bash(./gradlew:*), Bash(ls:*), Skill
 model: sonnet
 color: blue
 ---

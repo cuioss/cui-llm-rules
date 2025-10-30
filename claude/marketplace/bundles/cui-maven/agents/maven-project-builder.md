@@ -1,7 +1,7 @@
 ---
 name: maven-project-builder
 description: Use this agent when the user needs to build and verify the entire project with quality checks. This agent should be used proactively after code changes are made to ensure the project still compiles and passes all quality gates.\n\nExamples:\n- User: "I've finished implementing the new token validation logic"\n  Assistant: "Let me use the maven-project-builder agent to verify the project builds successfully with all quality checks."\n  \n- User: "Can you run the full build?"\n  Assistant: "I'll use the maven-project-builder agent to execute the complete project build with pre-commit verification."\n  \n- User: "I want to make sure everything compiles after my changes"\n  Assistant: "I'll launch the maven-project-builder agent to run the Maven build and verify there are no compilation or quality issues."
-tools: Read, Edit, Write, Bash, Grep, Skill
+tools: Read, Edit, Write, Bash(./mvnw:*), Grep, Skill
 model: sonnet
 color: green
 ---
