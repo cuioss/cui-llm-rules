@@ -54,6 +54,37 @@ Activate this skill when:
 - Setting up CI/CD Maven builds
 - Troubleshooting Maven issues
 
+## Workflow
+
+### Step 1: Load Maven Standards
+
+**CRITICAL**: Load Maven standards based on the task context.
+
+1. **For POM maintenance tasks** (editing POM files, managing dependencies, updating BOMs):
+   ```
+   Read: standards/pom-maintenance.md
+   ```
+
+2. **For Maven integration tasks** (JavaScript/frontend integration, SonarQube setup):
+   ```
+   Read: standards/maven-integration.md
+   ```
+
+3. **For comprehensive Maven work** (build verification, complete project setup):
+   ```
+   Read: standards/pom-maintenance.md
+   Read: standards/maven-integration.md
+   ```
+
+### Step 2: Apply Standards to Task
+
+After loading the appropriate standards:
+
+1. Extract key requirements relevant to your specific task
+2. Follow the patterns and guidelines from the loaded standards
+3. Apply quality gates and verification criteria as specified
+4. Ensure all changes align with CUI Maven best practices
+
 ## Standards Organization
 
 All standards are organized in the `standards/` directory:

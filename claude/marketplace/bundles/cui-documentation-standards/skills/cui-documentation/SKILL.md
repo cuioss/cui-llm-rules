@@ -403,7 +403,7 @@ All documentation must pass:
 
 ## References
 
-* General Documentation Standards: ../../standards/documentation/general-standard.adoc
-* AsciiDoc Standards: ../../standards/documentation/asciidoc-standards.adoc
-* README Structure: ../../standards/documentation/readme-structure.adoc
-* Tone and Style: ../../standards/documentation/tone-and-style-standards.adoc
+All documentation standards are located in the `standards/` directory:
+* Core documentation principles: standards/documentation-core.md
+* AsciiDoc formatting guidelines: standards/asciidoc-formatting.md
+* README structure patterns: standards/readme-structure.md

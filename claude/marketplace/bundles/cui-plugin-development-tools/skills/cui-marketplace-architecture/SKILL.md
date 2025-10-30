@@ -38,21 +38,6 @@ Standards for marketplace component architecture ensuring self-contained skills,
      Read: standards/scoring-criteria.md
      ```
 
-   - If understanding plugin architecture:
-     ```
-     Read: standards/plugin-architecture.md
-     ```
-
-   - If understanding bundle design:
-     ```
-     Read: standards/bundling-architecture.md
-     ```
-
-   - If designing agents:
-     ```
-     Read: standards/agent-design-principles.md
-     ```
-
 ### Step 2: Apply Architecture Rules
 
 **When to Execute**: During component creation or validation
@@ -166,6 +151,8 @@ All marketplace components must pass:
 ## References
 
 * Claude Code Plugin System: https://docs.claude.com/en/docs/claude-code/plugins
-* Three-Layer Architecture: standards/plugin-architecture.md
-* Bundle Design Principles: standards/bundling-architecture.md
-* Agent Design Guide: standards/agent-design-principles.md
+* Architecture rules: standards/architecture-rules.md
+* Reference patterns: standards/reference-patterns.md
+* Self-containment validation: standards/self-containment-validation.md
+* Skill usage patterns: standards/skill-usage-patterns.md
+* Scoring criteria: standards/scoring-criteria.md

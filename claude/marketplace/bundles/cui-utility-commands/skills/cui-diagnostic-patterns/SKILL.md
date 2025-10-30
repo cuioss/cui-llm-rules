@@ -55,6 +55,53 @@ Activate this skill when building:
 - **Quality check agents** - Agents that verify standards
 - **Any agent/command that performs file operations** - To ensure non-prompting execution
 
+## Workflow
+
+### Step 1: Load Tool Usage Patterns
+
+**CRITICAL**: Load all tool usage patterns to ensure non-prompting execution.
+
+```
+Read: standards/tool-usage-patterns.md
+Read: standards/file-operations.md
+Read: standards/search-operations.md
+```
+
+These standards provide:
+- Core tool selection guide (when to use Glob vs Bash)
+- File and directory checking patterns with error handling
+- Content search patterns and result parsing
+- Non-prompting alternatives for all common operations
+
+### Step 2: Apply Patterns to Agent/Command
+
+When building agents or commands:
+
+1. **Replace all file discovery operations**:
+   - Use `Glob` instead of `find` or `ls` via Bash
+   - Follow patterns from `file-operations.md`
+
+2. **Replace all existence checks**:
+   - Use `Read` (with error handling) or `Glob` instead of `test -f`/`test -d`
+   - Apply error handling patterns from `file-operations.md`
+
+3. **Replace all content searches**:
+   - Use `Grep` instead of `grep`/`awk` via Bash
+   - Follow search patterns from `search-operations.md`
+
+4. **Reserve Bash only for**:
+   - Git operations
+   - Build commands (mvn, npm, etc.)
+   - Operations that truly require shell execution
+
+### Step 3: Test Non-Prompting Execution
+
+Verify that your agent/command:
+- Does not trigger user prompts during file operations
+- Handles missing files/directories gracefully
+- Provides clear error messages without stopping execution
+- Uses only approved non-prompting tools for file operations
+
 ## Standards Organization
 
 All patterns are organized in the `standards/` directory:
@@ -62,7 +109,6 @@ All patterns are organized in the `standards/` directory:
 - `tool-usage-patterns.md` - Core tool selection guide and basic patterns
 - `file-operations.md` - File and directory checking patterns with error handling
 - `search-operations.md` - Content search patterns and result parsing
-- `error-handling.md` - Error handling strategies and graceful degradation
 
 ## Tool Access
 
