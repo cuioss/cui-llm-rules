@@ -10,6 +10,7 @@ Comprehensive analysis of entire bundle including structure, skills, commands, a
 ## PARAMETERS
 
 - **bundle-name** (optional): Specific bundle to analyze (e.g., `cui-maven`)
+- **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Analyze current bundle or prompt for selection
 
 ## TOOL USAGE REQUIREMENTS
@@ -168,6 +169,14 @@ Recommendations:
 ✅ Bundle is marketplace ready!
 </if>
 ```
+
+**If --save-report flag is set:**
+- Write the complete report above to `bundle-diagnosis-report.md` in project root
+- Inform user: "Report saved to: bundle-diagnosis-report.md"
+
+**Default behavior (no flag):**
+- Display report only (as shown above)
+- Do NOT create any files
 
 ## CRITICAL RULES
 

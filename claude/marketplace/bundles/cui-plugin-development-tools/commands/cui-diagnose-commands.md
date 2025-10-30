@@ -13,6 +13,7 @@ Orchestrates comprehensive analysis of slash commands by coordinating cui-diagno
 - **scope=global**: Analyze commands in ~/.claude/commands/
 - **scope=project**: Analyze commands in .claude/commands/
 - **command-name** (optional): Review specific command
+- **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode
 
 ## WORKFLOW
@@ -155,6 +156,14 @@ Recommendations:
 ✅ All commands are well-sized and follow anti-bloat rules!
 {endif}
 ```
+
+**If --save-report flag is set:**
+- Write the complete report above to `commands-diagnosis-report.md` in project root
+- Inform user: "Report saved to: commands-diagnosis-report.md"
+
+**Default behavior (no flag):**
+- Display report only (as shown above)
+- Do NOT create any files
 
 ## FIXING ISSUES
 

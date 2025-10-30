@@ -13,6 +13,7 @@ Orchestrates comprehensive analysis of agents by coordinating cui-diagnose-singl
 - **scope=global**: Analyze agents in global location (~/.claude/agents/)
 - **scope=project**: Analyze agents in project location (.claude/agents/)
 - **agent-name** (optional): Review a specific agent by name (e.g., `maven-project-builder`)
+- **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode with marketplace default
 
 ## WORKFLOW
@@ -151,6 +152,14 @@ Recommendations:
 ✅ All agents are well-formed and follow best practices!
 {endif}
 ```
+
+**If --save-report flag is set:**
+- Write the complete report above to `agents-diagnosis-report.md` in project root
+- Inform user: "Report saved to: agents-diagnosis-report.md"
+
+**Default behavior (no flag):**
+- Display report only (as shown above)
+- Do NOT create any files
 
 ## FIXING ISSUES
 

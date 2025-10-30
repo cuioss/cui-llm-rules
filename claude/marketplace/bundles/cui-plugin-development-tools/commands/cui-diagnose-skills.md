@@ -13,6 +13,7 @@ Orchestrates comprehensive analysis of skills by coordinating cui-diagnose-singl
 - **scope=global**: Analyze skills in global location (~/.claude/skills/)
 - **scope=project**: Analyze skills in project location (.claude/skills/)
 - **skill-name** (optional): Review a specific skill by name (e.g., `cui-java-core`)
+- **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode with marketplace default
 
 ## WORKFLOW
@@ -148,6 +149,14 @@ Recommendations:
 ✅ All skills are well-formed and high quality!
 {endif}
 ```
+
+**If --save-report flag is set:**
+- Write the complete report above to `skills-diagnosis-report.md` in project root
+- Inform user: "Report saved to: skills-diagnosis-report.md"
+
+**Default behavior (no flag):**
+- Display report only (as shown above)
+- Do NOT create any files
 
 ## FIXING ISSUES
 
