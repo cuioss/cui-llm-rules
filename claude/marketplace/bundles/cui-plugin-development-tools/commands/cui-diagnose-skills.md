@@ -14,6 +14,7 @@ Orchestrates comprehensive analysis of skills by coordinating cui-diagnose-singl
 - **scope=project**: Analyze skills in project location (.claude/skills/)
 - **skill-name** (optional): Review a specific skill by name (e.g., `cui-java-core`)
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
+- **--check-cross-duplication** (optional): Detect content duplication BETWEEN skills. Expensive O(n²) operation. Default: false
 - **No parameters**: Interactive mode with marketplace default
 
 ## WORKFLOW
@@ -110,7 +111,118 @@ Task:
 }
 ```
 
-### Step 5: Generate Summary Report
+### Step 5: Detect Cross-Skill Duplication (Optional)
+
+**When to Execute**: When `--check-cross-duplication` flag is provided
+
+**Purpose**: Identify content duplication BETWEEN different skills to recommend consolidation or skill invocation.
+
+**Approach**:
+
+1. **Extract Content Fingerprints**:
+   - For each skill analyzed, extract key content blocks from all standards files
+   - Generate content hashes for sections (by heading)
+   - Track: skill name, file name, section heading, content hash, line numbers
+
+2. **Compare Across Skills**:
+   ```
+   For each pair of skills (A, B):
+     - Compare content hashes
+     - Identify sections with high similarity (>80%)
+     - Record: both skills, duplicate content summary, similarity %
+   ```
+
+3. **Analyze Duplication Patterns**:
+
+   **Pattern 1: Identical Content Blocks**
+   - Same section heading + nearly identical content
+   - Example: "Constructor Injection" in both cui-java-core and cui-java-cdi
+   - **Severity**: WARNING if intentional domain overlap, SUGGESTION to review
+
+   **Pattern 2: Substantial Overlap**
+   - 50%+ of one skill's content duplicated in another
+   - **Severity**: WARNING - Consider consolidation or skill invocation
+   - **Recommendation**: Have smaller skill invoke larger skill, or extract to shared skill
+
+   **Pattern 3: Complementary Duplication**
+   - Similar topics but different focus/context
+   - Example: JavaScript testing in cui-frontend-development vs generic testing in cui-java-unit-testing
+   - **Assessment**: ACCEPTABLE - Different domains, keep separate
+
+4. **Generate Recommendations**:
+
+   **For Identical Content**:
+   - Option A: Extract to new shared skill, both skills invoke it
+   - Option B: Have Skill B invoke Skill A (if Skill A is authoritative)
+   - Option C: Accept duplication if different contexts warrant it
+
+   **For Substantial Overlap**:
+   - Consider merging skills if they serve similar purposes
+   - Or have one skill depend on another via Skill: invocation
+
+5. **Report Cross-Skill Duplication**:
+
+   ```json
+   "cross_skill_duplication": {
+     "total_duplicate_pairs": {count},
+     "by_severity": {
+       "warnings": {count},
+       "suggestions": {count}
+     },
+     "findings": [
+       {
+         "severity": "WARNING",
+         "skills": ["cui-java-core", "cui-java-cdi"],
+         "similarity_percent": 35,
+         "duplicate_sections": [
+           {
+             "section": "Constructor Injection Pattern",
+             "skill_a_location": "cui-java-core/standards/java-core-patterns.md:45-60",
+             "skill_b_location": "cui-java-cdi/standards/cdi-aspects.md:120-135",
+             "similarity": 95,
+             "content_summary": "Identical explanation of constructor injection benefits"
+           }
+         ],
+         "recommendation": "Extract constructor injection pattern to shared skill 'cui-java-dependency-injection' or have cui-java-cdi invoke cui-java-core for this pattern",
+         "rationale": "Reduces maintenance burden and ensures consistency"
+       }
+     ],
+     "consolidation_opportunities": [
+       {
+         "skills": ["cui-requirements", "cui-project-setup"],
+         "overlap_percent": 45,
+         "recommendation": "Consider having cui-project-setup invoke cui-requirements for requirements standards rather than duplicating"
+       }
+     ]
+   }
+   ```
+
+6. **Include in Summary Report**:
+   - Add cross-skill duplication section after individual skill results
+   - Show top duplication pairs
+   - Provide consolidation recommendations
+
+**Implementation Notes**:
+
+- This check is OPTIONAL (--check-cross-duplication flag)
+- Expensive operation: O(n²) skill comparisons
+- Should use content hashing for performance
+- Only flag duplications above similarity threshold (>70%)
+- Distinguish intentional overlap (complementary domains) from harmful duplication
+
+**Example Usage**:
+```
+/cui-diagnose-skills --check-cross-duplication
+/cui-diagnose-skills --check-cross-duplication --save-report
+```
+
+**Benefits**:
+- Identifies opportunities for skill consolidation
+- Reduces marketplace bloat
+- Improves maintenance (one source of truth)
+- Suggests proper skill composition via Skill: invocations
+
+### Step 6: Generate Summary Report
 
 **Display:**
 
@@ -147,6 +259,33 @@ Recommendations:
 
 {if all clean}
 ✅ All skills are well-formed and high quality!
+{endif}
+
+{if --check-cross-duplication flag set}
+==================================================
+Cross-Skill Duplication Analysis
+==================================================
+
+Duplicate Pairs Found: {count}
+- High similarity (>80%): {count} ⚠️
+- Moderate similarity (70-80%): {count} ℹ️
+
+Top Duplication Issues:
+1. {skill-a} ↔ {skill-b}: {similarity}% overlap
+   - Duplicate section: {section-name}
+   - Recommendation: {recommendation}
+
+2. {skill-c} ↔ {skill-d}: {similarity}% overlap
+   - Duplicate section: {section-name}
+   - Recommendation: {recommendation}
+
+Consolidation Opportunities:
+- {opportunity-1}
+- {opportunity-2}
+
+{if no cross-skill duplication}
+✅ No significant content duplication detected between skills!
+{endif}
 {endif}
 ```
 
