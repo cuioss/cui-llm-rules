@@ -152,36 +152,62 @@ At the start of execution:
 - Continue immediately to Step 4
 
 **If Sonar build is FAILED:**
-- WARN user: "Sonar build failed. Issues may not be complete."
-- Ask user: "Continue anyway or abort? [continue/abort]"
-- If abort: Exit agent
-- If continue: Proceed with warning
+- **CRITICAL**: First determine failure type (infrastructure vs quality)
+- Check build logs for auth/infrastructure errors:
+  ```bash
+  gh run view <run_id> --log --job <job_id> | grep -E "HTTP 403|SONAR_TOKEN|authentication|Failed to query JRE"
+  ```
+- **If auth/infrastructure failure detected** (HTTP 403, token errors, JRE provisioning):
+  - STOP immediately with error: "Sonar authentication/infrastructure failed. Fix SONAR_TOKEN configuration and re-run."
+  - List specific error found
+  - Exit agent with FAILURE status
+- **If quality gate failure** (no auth errors):
+  - WARN user: "Sonar quality gate failed. Issues will be addressed."
+  - Continue to Step 4 (this is expected - we're here to fix issues)
 
 ### Step 4: Retrieve Sonar Issues
 
-**CRITICAL**: Use MCP SonarQube tool or API access.
+**CRITICAL**: Use comprehensive method to get ALL Sonar issues.
 
-**Best Method (Use MCP SonarQube Tool):**
+**Priority 1 - Sonar REST API (Most Complete):**
 ```bash
-mcp__sonarqube-official__search_sonar_issues_in_projects with parameters:
-- projects: ["<project_key>"]  // Extract from repository
-- pullRequestId: "<pr_number>"  // PR number as string
-- ps: 100  // page size
+# Get project key from repository (e.g., cuioss_nifi-extensions for cuioss/nifi-extensions)
+PROJECT_KEY="org_repo"
+
+# Fetch all issues for the PR
+gh api https://sonarcloud.io/api/issues/search \
+  -H "Authorization: Bearer $SONAR_TOKEN" \
+  -f componentKeys="$PROJECT_KEY" \
+  -f pullRequest="$PR_NUMBER" \
+  -f statuses="OPEN,CONFIRMED,REOPENED" \
+  -f ps=500 \
+  --jq '.issues[] | {key, rule, severity, message, component, line, type}'
 ```
 
-This provides complete issue details including:
+This provides complete issue details:
 - Rule identifier (e.g., java:S1234)
 - Severity (BLOCKER, CRITICAL, MAJOR, MINOR, INFO)
-- Status (OPEN, CONFIRMED, REOPENED, RESOLVED)
+- Type (BUG, VULNERABILITY, CODE_SMELL, SECURITY_HOTSPOT)
+- Status (OPEN, CONFIRMED, REOPENED)
 - Message (issue description)
 - Component (file path)
 - Line number
-- Issue key (for tracking)
+- Issue key (for suppression tracking)
 
-**Alternative Method (if MCP not available):**
+**Priority 2 - MCP SonarQube Tool (if available):**
 ```bash
-gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contains("sonar")) | {id, html_url, conclusion, output}'
+mcp__sonarqube-official__search_sonar_issues_in_projects with parameters:
+- projects: ["<project_key>"]
+- pullRequestId: "<pr_number>"
+- ps: 500
 ```
+
+**Priority 3 - GitHub Annotations (Incomplete Fallback):**
+```bash
+gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contains("sonar")) | .output.annotations'
+```
+
+**WARNING**: GitHub annotations are incomplete - they show ~20-30 issues max. Always prefer Sonar API.
 
 **If you CANNOT access Sonar data:**
 - STOP immediately
@@ -210,37 +236,62 @@ gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contai
 
 **CRITICAL**: Retrieve coverage metrics to identify test gaps.
 
-**Best Method (Use MCP SonarQube Tool):**
+**Priority 1 - Sonar REST API (Most Accurate):**
 ```bash
-mcp__sonarqube-official__get_coverage_for_pull_request or similar
+# Get coverage for specific PR
+gh api https://sonarcloud.io/api/measures/component \
+  -H "Authorization: Bearer $SONAR_TOKEN" \
+  -f component="$PROJECT_KEY" \
+  -f pullRequest="$PR_NUMBER" \
+  -f metricKeys="coverage,new_coverage,uncovered_lines,new_uncovered_lines" \
+  --jq '.component.measures'
+
+# Get file-level coverage for changed files
+gh api https://sonarcloud.io/api/measures/component_tree \
+  -H "Authorization: Bearer $SONAR_TOKEN" \
+  -f component="$PROJECT_KEY" \
+  -f pullRequest="$PR_NUMBER" \
+  -f metricKeys="coverage,line_coverage,uncovered_lines" \
+  -f ps=500 \
+  --jq '.components[] | {key, measures}'
 ```
 
-**Alternative Method (Use Sonar API):**
+**Priority 2 - Quality Gate Status (for thresholds):**
 ```bash
-# Get coverage data for PR
-gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contains("sonar")) | .output'
-# Or direct Sonar API call for coverage metrics
+# Check if coverage caused quality gate failure
+gh api https://sonarcloud.io/api/qualitygates/project_status \
+  -H "Authorization: Bearer $SONAR_TOKEN" \
+  -f projectKey="$PROJECT_KEY" \
+  -f pullRequest="$PR_NUMBER" \
+  --jq '.projectStatus.conditions[] | select(.metricKey | contains("coverage"))'
 ```
 
-**Retrieve:**
-1. Overall coverage % for the PR
-2. List of files changed in PR with their coverage %
-3. Specific uncovered lines for each file
-4. Coverage threshold (if defined in Quality Gate)
+**Retrieve and Analyze:**
+1. Overall coverage % for the PR (new code)
+2. Coverage threshold from Quality Gate (typically 80%)
+3. List of files changed in PR with their coverage %
+4. Specific uncovered line ranges for each file
+5. **Coverage gap calculation**: `threshold - current_coverage`
 
-**If coverage data available:**
-1. Filter to files changed in this PR only
-2. Identify files with coverage below threshold (typically 80%)
-3. Extract uncovered line numbers for each file
-4. Store coverage gaps for Step 5.5
+**Decision Logic:**
 
-**If coverage data NOT available:**
-- Log warning: "Code coverage data not available"
-- Skip Step 5.5 (continue with issue resolution only)
+**If Quality Gate FAILS due to coverage:**
+- Calculate coverage improvement needed: e.g., 80% required - 61.8% current = **18.2% gap**
+- Estimate test additions required: `gap * total_lines / 100` (e.g., 18.2% of 5000 lines = ~910 lines need coverage)
+- Prioritize files by coverage impact:
+  1. **0% coverage files** (highest impact per test)
+  2. **<40% coverage files** (high impact)
+  3. **40-80% coverage files** (moderate impact)
+- Store prioritized file list and coverage targets for Step 5.5
+
+**If Quality Gate PASSES or coverage data unavailable:**
+- Skip strategic coverage improvement (Step 5.5)
+- Continue with code quality issue fixes only
 
 **Success Criteria**:
-- Coverage data retrieved or determined unavailable
-- Uncovered lines identified for changed files
+- Coverage status determined (pass/fail, gap calculated)
+- Prioritized file list created if coverage improvement needed
+- Test addition strategy defined based on gap size
 
 ### Step 5: Analyze and Resolve Each Sonar Issue
 

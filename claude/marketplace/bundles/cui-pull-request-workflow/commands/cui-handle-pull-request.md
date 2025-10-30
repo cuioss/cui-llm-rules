@@ -201,16 +201,45 @@ This step implements a loop that continues until all Sonar issues are resolved.
 
 Check agent report metrics:
 - Verify: `fixed + suppressed = total issues`
-- Verify: Final status shows "0 remaining issues"
+- Check final status for remaining issues
+- **NEW**: Check if failure is due to coverage vs code quality
 
-**Decision Point:**
+**Decision Logic:**
+
+**If agent report shows quality gate failure due to COVERAGE:**
+- Extract coverage metrics: current% vs required%
+- Calculate gap: e.g., "61.8% vs 80% = 18.2% gap"
+- Estimate effort: ~6-8 hours for 20% coverage improvement
+- Display message:
+  ```
+  Quality gate fails on code coverage:
+  - Current: {current}%
+  - Required: {required}%
+  - Gap: {gap}%
+  - Estimated effort: {hours} hours of test writing
+
+  Options:
+  1. Continue - pr-quality-fixer will add strategic tests (long-running)
+  2. Defer - Skip coverage improvement, address manually later
+  3. Abort - Exit workflow
+
+  Choose: [continue/defer/abort]
+  ```
+- **If user chooses "continue":**
+  - Return to Step 5.1 with guidance: "focus on coverage improvement - add strategic tests"
+  - Repeat iteration
+- **If user chooses "defer":**
+  - Log: "Coverage improvement deferred. Manual test additions required."
+  - Skip to Step 6
+- **If user chooses "abort":**
+  - Exit workflow
 
 **If agent report shows "0 remaining issues" AND build is clean:**
 - Sonar issues fully resolved
 - Continue to Step 6
 
-**If agent report shows remaining issues OR new issues appeared:**
-- This means the fixes created new issues (common scenario)
+**If agent report shows remaining CODE QUALITY issues (not coverage):**
+- This means fixes created new issues (common scenario)
 - Calculate new wait duration: `ci-sonar-duration * 1.25`
 - Wait for Sonar to re-scan: `sleep $((ci-sonar-duration * 1.25 / 1000))` (convert ms to seconds)
 - Wait for build completion (same as Step 3.B)

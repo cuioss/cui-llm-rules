@@ -72,9 +72,13 @@ At the start of execution:
 3. Filter for comments from Gemini bot:
    - Common Gemini usernames: "gemini-code-review", "gemini-bot", "google-gemini-bot", "gemini-code-assist[bot]"
    - Check `user.login` field matches known Gemini identifiers
-4. Count total Gemini comments found
-5. If count = 0:
-   - Report: "No unresolved Gemini comments found"
+4. **Filter out non-actionable summary comments:**
+   - Exclude comments where `body` starts with "## Summary of Changes\n\nHello @"
+   - These are Gemini's initial PR summary comments, not code review suggestions
+   - Only retain comments with specific code change suggestions or questions
+5. Count total actionable Gemini comments found
+6. If count = 0:
+   - Report: "No unresolved Gemini code review comments found"
    - Proceed to Step 5 (skip comment resolution)
 
 **Success Criteria**:
