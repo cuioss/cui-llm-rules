@@ -54,10 +54,10 @@ public class TokenValidator {
 
 ### Method Design
 
-* Keep methods short and focused (under 50 lines preferred, 100 lines maximum)
 * Use meaningful method names
 * Follow the Command-Query Separation principle
 * Limit method parameters (3 or fewer preferred, use parameter objects for 4+)
+* For method complexity and length guidelines, see "Method Complexity" section below
 
 **Command-Query Separation**:
 ```java
@@ -277,7 +277,8 @@ public abstract class BaseValidator extends AbstractValidator
 
 ### Method Complexity
 
-* Keep cyclomatic complexity low
+* Keep methods short and focused (under 50 lines preferred, 100 lines maximum)
+* Keep cyclomatic complexity low (prefer <15, maximum 20)
 * Extract complex conditions into well-named methods
 * Use early returns to reduce nesting
 

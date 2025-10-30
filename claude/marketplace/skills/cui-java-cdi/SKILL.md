@@ -10,7 +10,24 @@ Standards and patterns for CDI and Quarkus development in CUI projects. This ski
 
 ## Workflow
 
-### Step 1: Load Applicable CDI Standards
+### Step 1: Load Foundational Java Patterns
+
+**CRITICAL**: Load foundational Java development patterns first.
+
+```
+Skill: cui-java-core
+```
+
+The cui-java-core skill provides essential foundational patterns that CDI builds upon:
+- Constructor injection principles and benefits
+- Dependency management and null safety patterns
+- Immutability and defensive programming
+- Exception handling standards
+- Modern Java features (records, sealed classes, pattern matching)
+
+These core Java patterns are prerequisites for CDI-specific development.
+
+### Step 2: Load Applicable CDI Standards
 
 **CRITICAL**: Load current CDI standards to use as enforcement criteria.
 
@@ -37,7 +54,7 @@ Standards and patterns for CDI and Quarkus development in CUI projects. This ski
 
 4. **Store in working memory** for use during task execution
 
-### Step 2: Analyze Existing CDI Code
+### Step 3: Analyze Existing CDI Code
 
 **When to Execute**: After loading standards
 
@@ -73,7 +90,7 @@ Standards and patterns for CDI and Quarkus development in CUI projects. This ski
    - Check deployment processor configurations
    - Identify optimization opportunities
 
-### Step 3: Apply CDI Standards to Development Task
+### Step 4: Apply CDI Standards to Development Task
 
 **When to Execute**: During implementation or code review
 
@@ -115,7 +132,7 @@ Standards and patterns for CDI and Quarkus development in CUI projects. This ski
    - Use type-safe class references (not strings)
    - Remove duplicate annotations after deployment processor registration
 
-### Step 4: Verify Implementation Quality
+### Step 5: Verify Implementation Quality
 
 **When to Execute**: After applying standards
 

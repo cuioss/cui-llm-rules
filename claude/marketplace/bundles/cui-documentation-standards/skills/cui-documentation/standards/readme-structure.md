@@ -175,6 +175,7 @@ Concise description of the module's purpose and key features.
 ### AsciiDoc TOC Configuration
 
 * Use the built-in AsciiDoc TOC mechanism instead of manual TOC creation
+* README files use `:toc: macro` for manual TOC placement
 * Add required attributes to document header:
 
 ```asciidoc
@@ -182,7 +183,8 @@ Concise description of the module's purpose and key features.
 :toc: macro
 :toclevels: 3
 :toc-title: Table of Contents
-:sectnumlevels: 1
+:sectnums:
+:source-highlighter: highlight.js
 ```
 
 * Place the TOC macro `toc::[]` after introduction sections and before main content

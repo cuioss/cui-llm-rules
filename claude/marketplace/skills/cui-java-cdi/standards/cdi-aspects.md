@@ -8,75 +8,15 @@ This document defines CDI (Contexts and Dependency Injection) standards and best
 * [Quarkus CDI Guide](https://quarkus.io/guides/cdi)
 * [Quarkus CDI Reference](https://quarkus.io/guides/cdi-reference)
 
-## Constructor vs Field Injection
+## Constructor Injection in CDI
 
 ### Mandatory Standard: Use Constructor Injection
 
 **REQUIRED**: Always use constructor injection instead of field injection in CDI beans.
 
-#### Constructor Injection (Preferred)
-```java
-@ApplicationScoped
-public class UserService {
+For foundational constructor injection principles (immutability, testability, fail-fast behavior), see **cui-java-core** skill (invoked in SKILL.md Step 1).
 
-    private final UserRepository userRepository;
-    private final NotificationService notificationService;
-
-    // Constructor injection - PREFERRED
-    public UserService(UserRepository userRepository,
-                      NotificationService notificationService) {
-        this.userRepository = userRepository;
-        this.notificationService = notificationService;
-    }
-}
-```
-
-#### Field Injection (Prohibited)
-```java
-@ApplicationScoped
-public class UserService {
-
-    @Inject  // PROHIBITED - Do not use field injection
-    UserRepository userRepository;
-
-    @Inject  // PROHIBITED - Do not use field injection
-    NotificationService notificationService;
-}
-```
-
-### Rationale for Constructor Injection
-
-#### 1. Immutability
-* Fields can be declared `final`
-* Dependencies cannot be modified after construction
-* Thread-safe by design
-
-#### 2. Testability
-* Easy to create instances in unit tests
-* No reflection or CDI container required for testing
-* Clear visibility of dependencies
-
-```java
-// Easy unit testing with constructor injection
-@Test
-void shouldProcessUser() {
-    UserRepository mockRepo = mock(UserRepository.class);
-    NotificationService mockNotification = mock(NotificationService.class);
-
-    UserService service = new UserService(mockRepo, mockNotification);
-    // Test implementation
-}
-```
-
-#### 3. Fail-Fast Behavior
-* Missing dependencies cause immediate failure at startup
-* No NullPointerException during runtime
-* Clear error messages for misconfiguration
-
-#### 4. Explicit Dependencies
-* All dependencies visible in constructor signature
-* Easy to identify when a class has too many dependencies
-* Encourages proper separation of concerns
+This section focuses on **CDI-specific** constructor injection rules and patterns
 
 ## CDI Constructor Injection Rules
 

@@ -7,7 +7,28 @@ Comprehensive AsciiDoc formatting, grammar, and best practice standards for all 
 
 ### Document Header Requirements
 
-All AsciiDoc documents MUST include:
+All AsciiDoc documents MUST include a standard header. The TOC configuration varies by document type:
+
+**For README Files** (README.adoc, */README.adoc):
+
+```asciidoc
+= Document Title
+:toc: macro
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
+
+Brief introduction paragraph.
+
+toc::[]
+
+== Main Content
+```
+
+Use `:toc: macro` to manually control TOC placement after introductory content.
+
+**For General Documentation Files** (specifications, standards, guides):
 
 ```asciidoc
 = Document Title
@@ -18,10 +39,12 @@ All AsciiDoc documents MUST include:
 :source-highlighter: highlight.js
 ```
 
+Use `:toc: left` for automatic left sidebar TOC.
+
 **Required Attributes**:
 
 * **Document Title**: Clear, descriptive title using `=` syntax
-* **TOC Configuration**: Left-positioned table of contents
+* **TOC Configuration**: `:toc: macro` (READMEs) or `:toc: left` (other docs)
 * **TOC Levels**: Limited to 3 levels for readability
 * **Section Numbering**: Enabled for main content sections
 * **Syntax Highlighting**: highlight.js for code blocks

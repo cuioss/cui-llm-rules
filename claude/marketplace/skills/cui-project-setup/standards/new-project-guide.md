@@ -31,131 +31,20 @@ project-root/
 └── pom.xml
 ```
 
-## Requirement Prefix Standards
+## Requirements and Specification Documentation
 
-Determine the requirement prefix:
+For complete guidance on requirements and specification documentation:
 
-1. Choose a short, meaningful prefix (3-5 characters)
-2. Recommended prefixes:
-   - `NIFI-` for Apache NiFi related projects
-   - `SEC-` for security-related projects
-   - `API-` for API-related projects
-   - `UI-` for user interface projects
-   - `DB-` for database projects
-   - `INT-` for integration projects
-3. Custom prefixes should be relevant to the project domain
+**See cui-requirements skill** (invoked in SKILL.md Step 1)
 
-## Requirements Document Standards
+The cui-requirements skill provides:
+- Requirement document structure and templates
+- Specification document organization
+- Requirement ID prefixes and numbering standards
+- Planning document formats
+- Traceability and backtracking link patterns
 
-### Requirements.adoc Template
-
-```asciidoc
-= Project Name Requirements
-:toc:
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
-
-== Overview
-This document outlines the requirements for Project Name, a component designed to...
-
-== General Requirements
-
-[#PREFIX-1]
-=== PREFIX-1: Project Overview
-* High-level requirement 1
-* High-level requirement 2
-* High-level requirement 3
-
-[#PREFIX-2]
-=== PREFIX-2: Core Functionality
-* Core functionality requirement 1
-* Core functionality requirement 2
-* Core functionality requirement 3
-
-[#PREFIX-2.1]
-==== PREFIX-2.1: Sub-requirement
-* Detailed requirement 1
-* Detailed requirement 2
-```
-
-### Requirements Organization
-
-Organize requirements into logical sections:
-
-1. General Requirements
-2. Functional Requirements
-3. Non-Functional Requirements
-4. Component-Specific Requirements
-
-## Specification Document Standards
-
-### Specification.adoc Template
-
-```asciidoc
-= Project Name Specification
-:toc:
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
-
-== Overview
-_See Requirement link:Requirements.adoc#PREFIX-1[PREFIX-1: Project Overview]_
-
-This document provides the technical specification for implementing Project Name.
-For functional requirements, see link:Requirements.adoc[Requirements Document].
-
-== Document Structure
-This specification is organized into the following documents:
-
-* link:specification/technical-components.adoc[Technical Components] - Core implementation details
-* link:specification/configuration.adoc[Configuration] - Configuration properties and UI
-* link:specification/error-handling.adoc[Error Handling] - Error handling implementation
-* link:specification/testing.adoc[Testing] - Unit and integration testing
-* link:specification/security.adoc[Security] - Security considerations
-* link:specification/integration-patterns.adoc[Integration Patterns] - Integration examples
-* link:specification/internationalization.adoc[Internationalization] - i18n implementation
-* link:LogMessages.adoc[Log Messages] - Logging standards and implementation
-```
-
-### Individual Specification Document Template
-
-```asciidoc
-= Project Name Technical Components
-:toc:
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
-
-link:../Specification.adoc[Back to Main Specification]
-
-== Core Components
-_See Requirement link:../Requirements.adoc#PREFIX-2[PREFIX-2: Core Functionality]_
-
-This section describes the core components of the Project Name implementation.
-
-=== Component 1
-_See Requirement link:../Requirements.adoc#PREFIX-2.1[PREFIX-2.1: Sub-requirement]_
-
-The Component 1 is responsible for...
-
-[source,java]
-----
-public class Component1 {
-    // Implementation details
-}
-----
-```
-
-## Maintaining Traceability
-
-1. Always ensure each specification section has a backtracking link to a requirement
-2. When adding new requirements, update the corresponding specification documents
-3. When updating specifications, ensure they remain aligned with requirements
-4. Regularly review documentation to ensure consistency and completeness
+This skill focuses on the **technical project setup** (Maven configuration, directory structure, and build configuration).
 
 ## Maven Project Setup
 
@@ -235,10 +124,6 @@ git commit -m "feat: Initial project setup
 - Requirements and specification documents
 - Standard configuration
 - Initial documentation
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
 ## Quality Checklist

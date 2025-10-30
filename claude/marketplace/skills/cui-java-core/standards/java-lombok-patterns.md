@@ -146,15 +146,7 @@ public class ValidationResult {
 * API response/request objects
 * Configuration data classes
 
-**Consider using records instead** (Java 17+):
-```java
-// Records are preferred for simple immutable data carriers
-public record ValidationResult(
-    boolean valid,
-    List<String> errors,
-    Instant validatedAt
-) {}
-```
+**When to use records instead**: For detailed comparison of records vs Lombok @Value, see `java-modern-features.md` section "When to Use Records vs Lombok @Value".
 
 ## Additional Lombok Annotations
 

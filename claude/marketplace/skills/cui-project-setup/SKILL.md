@@ -10,15 +10,29 @@ Standards for initializing and configuring new CUI projects including Maven setu
 
 ## Workflow
 
-### Step 1: Load Project Setup Standards
+### Step 1: Load Requirements Engineering Standards
 
-**CRITICAL**: Load project setup standards for guidance.
+**CRITICAL**: Load requirements and specification documentation standards first.
+
+```
+Skill: cui-requirements
+```
+
+This skill provides comprehensive guidance on:
+- Requirements document structure and format
+- Specification standards and organization
+- Requirement ID prefixes and numbering
+- Planning document templates
+
+### Step 2: Load Project Setup Standards
+
+**CRITICAL**: Load project setup standards for technical configuration.
 
 ```
 Read: standards/new-project-guide.md
 ```
 
-### Step 2: Analyze Project Requirements
+### Step 3: Analyze Project Requirements
 
 **When to Execute**: Before starting project setup
 
@@ -50,7 +64,7 @@ Read: standards/new-project-guide.md
    - Directory layout
    - Resource organization
 
-### Step 3: Apply Project Setup Standards
+### Step 4: Apply Project Setup Standards
 
 **When to Execute**: During project initialization
 
@@ -90,7 +104,7 @@ Read: standards/new-project-guide.md
    - Checkstyle rules
    - Frontend quality tools (if applicable)
 
-### Step 4: Verify Project Setup
+### Step 5: Verify Project Setup
 
 **When to Execute**: After project initialization
 
@@ -121,7 +135,7 @@ Read: standards/new-project-guide.md
    - [ ] npm scripts configured
    - [ ] Frontend tests configured
 
-### Step 5: Document and Commit
+### Step 6: Document and Commit
 
 **When to Execute**: After verification passes
 
