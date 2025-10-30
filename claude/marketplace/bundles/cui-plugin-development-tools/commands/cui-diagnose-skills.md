@@ -117,110 +117,38 @@ Task:
 
 **Purpose**: Identify content duplication BETWEEN different skills to recommend consolidation or skill invocation.
 
-**Approach**:
+**Prepare skill paths**:
+- Collect all skill paths from Step 2 (from discovered SKILL.md files)
+- Pass as array to cross-skill analyzer
 
-1. **Extract Content Fingerprints**:
-   - For each skill analyzed, extract key content blocks from all standards files
-   - Generate content hashes for sections (by heading)
-   - Track: skill name, file name, section heading, content hash, line numbers
+**Launch cui-analyze-cross-skill-duplication agent**:
 
-2. **Compare Across Skills**:
-   ```
-   For each pair of skills (A, B):
-     - Compare content hashes
-     - Identify sections with high similarity (>80%)
-     - Record: both skills, duplicate content summary, similarity %
-   ```
-
-3. **Analyze Duplication Patterns**:
-
-   **Pattern 1: Identical Content Blocks**
-   - Same section heading + nearly identical content
-   - Example: "Constructor Injection" in both cui-java-core and cui-java-cdi
-   - **Severity**: WARNING if intentional domain overlap, SUGGESTION to review
-
-   **Pattern 2: Substantial Overlap**
-   - 50%+ of one skill's content duplicated in another
-   - **Severity**: WARNING - Consider consolidation or skill invocation
-   - **Recommendation**: Have smaller skill invoke larger skill, or extract to shared skill
-
-   **Pattern 3: Complementary Duplication**
-   - Similar topics but different focus/context
-   - Example: JavaScript testing in cui-frontend-development vs generic testing in cui-java-unit-testing
-   - **Assessment**: ACCEPTABLE - Different domains, keep separate
-
-4. **Generate Recommendations**:
-
-   **For Identical Content**:
-   - Option A: Extract to new shared skill, both skills invoke it
-   - Option B: Have Skill B invoke Skill A (if Skill A is authoritative)
-   - Option C: Accept duplication if different contexts warrant it
-
-   **For Substantial Overlap**:
-   - Consider merging skills if they serve similar purposes
-   - Or have one skill depend on another via Skill: invocation
-
-5. **Report Cross-Skill Duplication**:
-
-   ```json
-   "cross_skill_duplication": {
-     "total_duplicate_pairs": {count},
-     "by_severity": {
-       "warnings": {count},
-       "suggestions": {count}
-     },
-     "findings": [
-       {
-         "severity": "WARNING",
-         "skills": ["cui-java-core", "cui-java-cdi"],
-         "similarity_percent": 35,
-         "duplicate_sections": [
-           {
-             "section": "Constructor Injection Pattern",
-             "skill_a_location": "cui-java-core/standards/java-core-patterns.md:45-60",
-             "skill_b_location": "cui-java-cdi/standards/cdi-aspects.md:120-135",
-             "similarity": 95,
-             "content_summary": "Identical explanation of constructor injection benefits"
-           }
-         ],
-         "recommendation": "Extract constructor injection pattern to shared skill 'cui-java-dependency-injection' or have cui-java-cdi invoke cui-java-core for this pattern",
-         "rationale": "Reduces maintenance burden and ensures consistency"
-       }
-     ],
-     "consolidation_opportunities": [
-       {
-         "skills": ["cui-requirements", "cui-project-setup"],
-         "overlap_percent": 45,
-         "recommendation": "Consider having cui-project-setup invoke cui-requirements for requirements standards rather than duplicating"
-       }
-     ]
-   }
-   ```
-
-6. **Include in Summary Report**:
-   - Add cross-skill duplication section after individual skill results
-   - Show top duplication pairs
-   - Provide consolidation recommendations
-
-**Implementation Notes**:
-
-- This check is OPTIONAL (--check-cross-duplication flag)
-- Expensive operation: O(n²) skill comparisons
-- Should use content hashing for performance
-- Only flag duplications above similarity threshold (>70%)
-- Distinguish intentional overlap (complementary domains) from harmful duplication
-
-**Example Usage**:
 ```
-/cui-diagnose-skills --check-cross-duplication
-/cui-diagnose-skills --check-cross-duplication --save-report
+Task:
+  subagent_type: cui-analyze-cross-skill-duplication
+  description: Detect cross-skill duplication
+  prompt: |
+    Analyze content duplication between all marketplace skills.
+
+    Parameters:
+    - skill_paths: [{array of absolute skill paths}]
+
+    Return complete JSON report with:
+    - Duplicate skill pairs with similarity percentages
+    - Specific duplicate sections with locations
+    - Consolidation recommendations
+    - Skill composition suggestions (Skill: invocations)
 ```
 
-**Benefits**:
-- Identifies opportunities for skill consolidation
-- Reduces marketplace bloat
-- Improves maintenance (one source of truth)
-- Suggests proper skill composition via Skill: invocations
+**Collect cross-skill analysis results**:
+- Receive JSON report from agent
+- Include in aggregated findings for summary report (Step 6)
+
+**Notes**:
+- This is an expensive O(n²) operation comparing all skill pairs
+- Only run when needed: before releases, monthly reviews, after adding skills
+- Agent compares skills with OTHER SKILLS only (not with /standards/ directory)
+- Distinguishes intentional overlap (different domains) from harmful duplication
 
 ### Step 6: Generate Summary Report
 
@@ -311,13 +239,15 @@ This command currently REPORTS issues only. To fix:
 
 This command is a simple orchestrator:
 - Discovers skills using Glob (non-prompting)
-- Launches cui-diagnose-single-skill agents in parallel
+- Launches cui-diagnose-single-skill agents in parallel (for each skill)
+- Optionally launches cui-analyze-cross-skill-duplication (when --check-cross-duplication flag set)
 - Aggregates and reports results
 
 All analysis logic is in specialized agents:
-- cui-analyze-standards-file (single file quality)
-- cui-analyze-integrated-standards (cross-file quality)
-- cui-diagnose-single-skill (skill orchestrator)
+- **cui-analyze-standards-file**: Single file quality analysis
+- **cui-analyze-integrated-standards**: Cross-file quality within a skill
+- **cui-diagnose-single-skill**: Skill orchestrator (coordinates above two agents)
+- **cui-analyze-cross-skill-duplication**: Cross-skill duplication detection (optional, O(n²))
 
 ## TOOL USAGE
 
