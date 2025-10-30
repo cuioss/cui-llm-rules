@@ -192,6 +192,46 @@ All analysis logic is in specialized agents:
 - `/cui-diagnose-commands` - Diagnose commands
 - `/cui-diagnose-bundle` - Diagnose entire bundle
 
+## UNDERSTANDING DIAGNOSTIC RESULTS
+
+### Marketplace Self-Containment Principle
+
+**IMPORTANT**: Marketplace skills MUST be self-contained and CANNOT reference the `/standards/` directory.
+
+**Why**:
+- Skills may be distributed independently
+- Skills may be installed globally outside the cui-llm-rules repo
+- External dependencies break portability and marketplace distribution
+
+**This means**:
+- ✅ Skills having similar content to `/standards/` is EXPECTED and CORRECT
+- ✅ Skills must contain all standards within their own `standards/` directory
+- ❌ Skills should NOT reference `~/git/cui-llm-rules/standards/`
+- ❌ Skills should NOT use relative paths like `../../../../standards/`
+
+**What diagnostics check**:
+- Duplication WITHIN the skill's own files (flagged as warning/suggestion)
+- Prohibited references TO `/standards/` directory (flagged as CRITICAL violation)
+- NOT similarity with `/standards/` content (this is expected)
+
+### Issue Severity Levels
+
+**CRITICAL**:
+- Invalid YAML or missing required fields
+- Broken file references (files don't exist)
+- Prohibited references to `/standards/` directory or repo paths
+- Critical conflicts between standards files
+
+**WARNING**:
+- Harmful duplication within skill's own files
+- Zero-information content
+- Contradictory guidance
+
+**SUGGESTION**:
+- Contextual duplication that may be acceptable
+- Minor formatting improvements
+- Missing cross-references between skill's own files
+
 ## STANDARDS
 
 Skill analysis follows marketplace architecture principles and content quality standards.
