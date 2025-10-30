@@ -72,37 +72,24 @@ Read: standards/new-project-guide.md
 
 1. **Maven Project Structure**:
    - Standard directory layout (src/main/java, src/test/java)
-   - Maven pom.xml with proper parent
-   - Group ID: `de.cuioss` or `io.github.cuioss`
+   - Maven pom.xml with cui-java-parent
+   - Group ID: `de.cuioss`
    - Follow semantic versioning
-   - Include required build plugins
 
-2. **Project Configuration**:
-   - Configure Maven compiler (Java 17+)
-   - Set up dependency management
-   - Configure build plugins (surefire, failsafe, jacoco)
-   - Set up quality plugins (spotbugs, checkstyle)
-   - Configure frontend-maven-plugin (if applicable)
-
-3. **Package Structure**:
+2. **Package Structure**:
    - Follow reverse domain naming
    - Logical package organization
    - Separation of concerns
    - Public API in root packages
 
-4. **Initial Files**:
+3. **Initial Files**:
    - README.adoc with standard structure
    - LICENSE file
    - .gitignore for Java/Maven/Node
-   - pom.xml with complete configuration
+   - pom.xml referencing parent
    - Basic test structure
 
-5. **Quality Configuration**:
-   - Maven pre-commit profile
-   - JaCoCo coverage configuration
-   - Spotbugs configuration
-   - Checkstyle rules
-   - Frontend quality tools (if applicable)
+**Note**: The parent POM (cui-java-parent) handles all plugin configuration including compiler, testing (surefire, failsafe), and code coverage (jacoco). Do not duplicate plugin configuration in project POMs.
 
 ### Step 5: Verify Project Setup
 
@@ -113,7 +100,7 @@ Read: standards/new-project-guide.md
 1. **Build Verification**:
    - [ ] Clean build succeeds: `mvn clean install`
    - [ ] Pre-commit checks pass: `mvn -Ppre-commit clean verify`
-   - [ ] All plugins configured correctly
+   - [ ] Parent POM referenced correctly
    - [ ] Dependency resolution works
 
 2. **Structure Verification**:
@@ -123,11 +110,8 @@ Read: standards/new-project-guide.md
    - [ ] .gitignore configured
    - [ ] LICENSE file included
 
-3. **Quality Tool Verification**:
-   - [ ] JaCoCo configured
-   - [ ] Spotbugs configured
+3. **Testing Verification**:
    - [ ] Tests run successfully
-   - [ ] Coverage thresholds set
 
 4. **Frontend Verification** (if applicable):
    - [ ] package.json configured
@@ -159,7 +143,7 @@ All project setup must pass:
 - [x] Pre-commit checks pass
 - [x] Standard directory layout
 - [x] README.adoc present
-- [x] Quality tools configured
+- [x] Parent POM referenced
 - [x] Tests run successfully
 
 ## References

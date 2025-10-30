@@ -58,7 +58,6 @@ Fix all quality issues in the current PR branch before requesting review.
 The agent will:
 - Run Maven build with quality checks
 - Identify formatting violations
-- Fix checkstyle issues
 - Improve test coverage for critical paths
 - Address JavaDoc warnings
 - Commit fixes with descriptive messages
@@ -104,5 +103,5 @@ Typical workflow for handling PR reviews:
 
 ### Integration Points
 - Works with GitHub PR review system
-- Integrates with Maven quality checks (checkstyle, SpotBugs, test coverage)
+- Integrates with Maven quality checks (test coverage, SonarQube)
 - Uses git for branch management and pushing changes

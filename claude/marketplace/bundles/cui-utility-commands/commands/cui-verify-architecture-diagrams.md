@@ -82,42 +82,11 @@ Before making updates, evaluate if the diagram is becoming too large or complex:
 
 ### 7. Generate and Verify PNG
 - Generate PNG using: `plantuml {filename}.puml`
-- **CRITICAL QUALITY CHECK**: Read and verify the generated PNG image:
-  - Check that the image is visually sensible and clear
-  - Verify there are NO errors such as:
-    - **Black boxes obscuring text/labels** (common in sequence diagrams - indicates missing color settings in skin)
-    - Missing links or connections
-    - Broken references
-    - Improper layout (overlapping text, unreadable labels)
-    - Syntax error messages in the image
-    - Unreadable text due to poor color contrast
-  - **SPECIAL CASE - Black Boxes Over Text**:
-    - This commonly occurs in sequence diagrams when participant/database colors are not defined in the skin file
-    - **DIAGNOSIS STEPS**:
-      1. Check if the diagram is a sequence diagram (uses `participant`, `database`, etc.)
-      2. Read the `plantuml.skin` file (usually in same directory)
-      3. Check if these skinparam settings exist:
-         - `ParticipantBackgroundColor`
-         - `ParticipantBorderColor`
-         - `ParticipantFontColor`
-         - For databases: `DatabaseBackgroundColor`, `DatabaseBorderColor`, `DatabaseFontColor`
-      4. If missing, these are likely causing the black boxes
-    - **FIX APPROACH**:
-      - Add missing color definitions to `plantuml.skin`
-      - Example additions:
-        ```
-        ' Participant settings (for sequence diagrams)
-        ParticipantBackgroundColor #ECF0F1
-        ParticipantBorderColor #2C3E50
-        ParticipantFontColor #000000
-        ```
-      - Ensure consistency with existing color scheme in the skin file
-      - Regenerate PNG after updating skin file
-  - If errors are found:
-    - Determine root cause (diagram syntax vs skin file issue)
-    - Fix the `.puml` file OR the `plantuml.skin` file as appropriate
-    - Regenerate the PNG
-    - **REPEAT** until the image is completely correct and error-free
+- **CRITICAL QUALITY CHECK**: Read and verify the generated PNG image for visual correctness:
+  - Ensure image is clear, readable, and properly rendered
+  - Verify no visual errors (black boxes, overlapping elements, syntax errors, poor contrast)
+  - **Common Issue**: Black boxes in sequence diagrams often indicate missing color settings in `plantuml.skin` file
+  - If errors found: Diagnose root cause, fix the `.puml` or skin file, regenerate, and verify again until correct
 
 ### 8. Repeat for All Diagrams
 Continue with the next diagram until all have been processed.

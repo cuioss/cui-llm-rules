@@ -68,9 +68,6 @@ For issues that cannot be reasonably fixed:
 
 **A. Determine suppression approach** based on tool:
 - IntelliJ: `//noinspection {InspectionName}`
-- SpotBugs: `@SuppressFBWarnings`
-- Checkstyle: `// CHECKSTYLE:OFF`
-- PMD: `// NOPMD`
 - SonarQube: `@SuppressWarnings("java:S####")`
 - ErrorProne: `@SuppressWarnings("ErrorProneName")`
 

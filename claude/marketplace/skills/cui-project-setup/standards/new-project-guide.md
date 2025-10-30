@@ -60,32 +60,63 @@ This skill focuses on the **technical project setup** (Maven configuration, dire
 
     <parent>
         <groupId>de.cuioss</groupId>
-        <artifactId>cui-parent</artifactId>
-        <version>1.0.0</version>
+        <artifactId>cui-java-parent</artifactId>
+        <version>1.3.6</version>
+        <relativePath/>
     </parent>
 
-    <groupId>de.cuioss</groupId>
     <artifactId>project-name</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <name>Project Name</name>
+    <version>1.0.0-SNAPSHOT</version>
+    <description>Project description</description>
+    <packaging>jar</packaging>
+
+    <url>https://github.com/cuioss/project-name/</url>
+
+    <scm>
+        <url>https://github.com/cuioss/project-name/</url>
+        <connection>scm:git:https://github.com/cuioss/project-name.git</connection>
+        <developerConnection>scm:git:https://github.com/cuioss/project-name/</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <url>https://github.com/cuioss/project-name/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
 
     <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
+        <maven.jar.plugin.automatic.module.name>de.cuioss.project.name</maven.jar.plugin.automatic.module.name>
     </properties>
 
     <dependencies>
-        <!-- Dependencies here -->
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <!-- JSpecify -->
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
+        <!-- Unit testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.cuioss.test</groupId>
+            <artifactId>cui-test-generator</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <!-- Build plugins here -->
-        </plugins>
-    </build>
 </project>
 ```
+
+**Note:** The parent POM (`cui-java-parent`) handles all plugin configuration (compiler, surefire, failsafe, jacoco, etc.). Do not duplicate plugin configuration in project POMs.
 
 ## Package Structure
 
@@ -123,7 +154,7 @@ git commit -m "feat: Initial project setup
 - Maven project structure
 - Requirements and specification documents
 - Standard configuration
-- Initial documentation
+- Initial documentation"
 ```
 
 ## Quality Checklist
@@ -132,8 +163,9 @@ git commit -m "feat: Initial project setup
 - [ ] Requirements.adoc created with proper prefix
 - [ ] Specification.adoc created with backtracking links
 - [ ] Individual specification documents created
-- [ ] Maven pom.xml configured
+- [ ] Maven pom.xml configured with parent POM and dependencies
 - [ ] Package structure follows standards
 - [ ] .gitignore configured
 - [ ] README.adoc present
 - [ ] LICENSE file included
+- [ ] Parent POM properly referenced (cui-java-parent)

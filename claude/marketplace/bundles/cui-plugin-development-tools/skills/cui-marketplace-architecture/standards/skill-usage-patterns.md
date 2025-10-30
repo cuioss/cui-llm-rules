@@ -80,25 +80,9 @@ if grep -q "Read: ~/\|Read: \.\./\.\./\.\." agent.md; then
 fi
 ```
 
-## Scoring Formula
+## Scoring
 
-```
-IF agent uses standards:
-  Agent Skill Usage Score = 100 - total_deductions
-
-  Deductions:
-  - Missing Skill in tools: -30 points
-  - No Skill: invocations: -30 points
-  - Direct file reference: -20 points each
-  - Skill in tools but unused: -10 points
-
-  Minimum: 0
-  Maximum: 100
-
-ELSE (agent doesn't use standards):
-  Score: N/A
-  Status: "Simple Utility Agent"
-```
+See **scoring-criteria.md** for the complete Agent Skill Usage Score formula, deductions, and thresholds.
 
 ## Common Patterns
 

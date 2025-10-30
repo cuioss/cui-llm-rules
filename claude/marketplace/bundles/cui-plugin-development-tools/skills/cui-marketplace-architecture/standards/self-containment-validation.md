@@ -48,21 +48,9 @@ sed -n '/^## References/,/^##/p' skill/SKILL.md
 # - ../../../../ → External file (VIOLATION)
 ```
 
-## Scoring Formula
+## Scoring
 
-```
-Self-Containment Score = 100 - total_deductions
-
-Deductions:
-- External file ref in workflow: -20 points each
-- External file ref in documentation: -10 points each
-- Absolute path: -20 points each
-- Missing internal file: -10 points each
-- Cross-skill file access: -15 points each
-
-Minimum score: 0
-Maximum score: 100
-```
+See **scoring-criteria.md** for the complete Skill Self-Containment Score formula, deductions, and thresholds.
 
 ## Score Interpretation
 

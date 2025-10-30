@@ -50,11 +50,36 @@ Glob: pattern="*.md", path=".claude/agents"
 
 **If specific agent name provided:**
 - Filter list to matching agent only
+- If no match found: Display error and exit
 
 **If no parameters (interactive mode):**
 - Display numbered list of all agents found
 - Separate standalone and bundle agents
 - Let user select which to analyze or change scope
+
+**Error Handling:**
+
+- **If Glob fails (directory not found):**
+  ```
+  ❌ Error: Directory not found: {path}
+
+  Suggestions:
+  - Verify path exists
+  - Check scope parameter (marketplace/global/project)
+  - For marketplace: ensure ~/git/cui-llm-rules is correct
+  ```
+  Exit with error status.
+
+- **If no agents found in scope:**
+  ```
+  ℹ️ No agents found in {scope} scope
+
+  Scopes searched:
+  - {list of directories checked}
+
+  Try a different scope or create agents first.
+  ```
+  Exit gracefully.
 
 ### Step 3: Analyze Agents (Parallel)
 
@@ -78,6 +103,36 @@ Task:
 **CRITICAL**: Launch ALL agents in PARALLEL (single message, multiple Task calls).
 
 **Collect results** from each agent as they complete.
+
+**Error Handling:**
+
+- **If Task fails to launch:**
+  ```
+  ⚠️ Failed to analyze: {agent-name}
+  Error: {task_error_message}
+  ```
+  Continue with remaining agents. Mark this agent as "Analysis Failed" in report.
+
+- **If agent returns malformed JSON:**
+  ```
+  ⚠️ Invalid response from: {agent-name}
+  Expected: JSON report
+  Received: {truncated_response}
+  ```
+  Mark agent as "Malformed Response" and continue.
+
+- **If agent analysis times out:**
+  ```
+  ⚠️ Analysis timeout: {agent-name}
+  ```
+  Mark agent as "Timeout" and continue with remaining agents.
+
+**Partial Success Handling:**
+
+If some agents fail but others succeed:
+- Include successful analyses in report
+- Add "Failed Analyses" section listing agents that couldn't be analyzed
+- Report partial metrics (based on successful analyses only)
 
 ### Step 4: Aggregate Results
 
@@ -160,6 +215,33 @@ Recommendations:
 **Default behavior (no flag):**
 - Display report only (as shown above)
 - Do NOT create any files
+
+**Error Handling for Report Writing:**
+
+- **If file write fails:**
+  ```
+  ❌ Failed to save report: agents-diagnosis-report.md
+  Error: {error_message}
+
+  Possible causes:
+  - Insufficient permissions
+  - Disk full
+  - File locked by another process
+
+  Report displayed above (not saved to file).
+  ```
+  Continue execution - report was already displayed.
+
+- **If path doesn't exist:**
+  ```
+  ❌ Cannot save report: project root not found
+
+  Current directory: {cwd}
+  Expected: valid project directory
+
+  Report displayed above (not saved to file).
+  ```
+  Continue execution with displayed report only.
 
 ## FIXING ISSUES
 

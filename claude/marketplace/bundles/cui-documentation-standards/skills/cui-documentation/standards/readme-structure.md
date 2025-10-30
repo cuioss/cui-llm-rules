@@ -35,7 +35,8 @@ Standard structure for module README.adoc files in CUI projects to ensure consis
 ### Detailed Component Documentation
 
 * Each major component with its own section
-* Links to source files using asciidoc format: `link:path/to/file[ComponentName]`
+* Links to source code files (Java, JavaScript, etc.): `link:path/to/file.java[ComponentName]`
+* Links to AsciiDoc documentation files: `xref:path/to/file.adoc[Title]`
 * Feature lists and capabilities
 * Technical details and requirements
 * Implementation considerations
@@ -104,7 +105,8 @@ Standard structure for module README.adoc files in CUI projects to ensure consis
 
 * Use relative paths for internal links
 * Use absolute URLs for external resources
-* Link to source files using asciidoc format
+* Link to source code files (.java, .js, etc.) using `link:` syntax
+* Link to AsciiDoc files (.adoc) using `xref:` syntax
 * Verify all links are valid
 
 ### Configuration Examples

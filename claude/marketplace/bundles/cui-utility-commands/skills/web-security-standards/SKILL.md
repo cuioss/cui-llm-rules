@@ -1,11 +1,8 @@
 ---
 name: web-security-standards
 description: Trusted domains, security assessment patterns, and domain research standards for WebFetch permissions
-requirements:
-  - Read tool for loading standards
-standards:
-  - standards/trusted-domains.md
-  - standards/domain-security-assessment.md
+allowed-tools:
+  - Read
 ---
 
 # Web Security Standards Skill

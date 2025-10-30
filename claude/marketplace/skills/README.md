@@ -127,8 +127,8 @@ This directory contains production-ready skills that provide standards, patterns
 
 **Covers**:
 - Maven project structure and configuration
-- Build plugin setup (surefire, failsafe, jacoco)
-- Quality tools (Spotbugs, Checkstyle)
+- Parent POM usage (cui-java-parent)
+- Build plugin configuration (via parent POM)
 - Multi-module project organization
 
 **When to Use**: Initializing new CUI projects
