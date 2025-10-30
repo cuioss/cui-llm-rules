@@ -22,14 +22,6 @@ Skill: cui-utility-commands:cui-diagnostic-patterns
 
 ## WORKFLOW INSTRUCTIONS
 
-### Load Analysis Standards
-
-```
-Skill: cui-plugin-development-tools:cui-skill-quality-standards
-```
-
-This skill provides validation standards for skills, commands, and agents.
-
 ### Workflow Overview
 
 1. **Discover Bundle** - Identify bundle and components
@@ -187,9 +179,12 @@ Recommendations:
 - **CALCULATE SCORES** - Overall bundle quality score
 - **MARKETPLACE READINESS** - All quality gates must pass
 
-## STANDARDS REFERENCED
+## STANDARDS
 
-**Skill: cui-plugin-development-tools:cui-skill-quality-standards**
+Bundle analysis delegates to specialized diagnostic commands which use their own standards:
+- Skill standards - Validated by cui-analyze-standards-file and cui-analyze-integrated-standards agents
+- Command standards - bundles/cui-plugin-development-tools/standards/command-quality-standards.md
+- Agent standards - bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
 
 **Related Commands:**
 - /cui-diagnose-skills - For detailed skill analysis

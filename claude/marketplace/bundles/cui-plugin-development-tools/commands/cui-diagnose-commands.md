@@ -5,7 +5,7 @@ description: Analyze, verify, and fix slash commands for clarity, structure, and
 
 # Commands Doctor - Verify and Fix Commands
 
-Analyze, verify, and fix slash commands for clarity, structure, and anti-bloat compliance.
+Orchestrates comprehensive analysis of slash commands by coordinating cui-diagnose-single-command for each command.
 
 ## PARAMETERS
 
@@ -15,156 +15,185 @@ Analyze, verify, and fix slash commands for clarity, structure, and anti-bloat c
 - **command-name** (optional): Review specific command
 - **No parameters**: Interactive mode
 
-## TOOL USAGE REQUIREMENTS
+## WORKFLOW
 
-**CRITICAL**: Use non-prompting tools.
+### Step 1: Activate Diagnostic Patterns
+
+**CRITICAL**: Load non-prompting tool patterns:
 
 ```
 Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
-✅ File Discovery: Use `Glob` (never `find`)
-✅ Content Search: Use `Grep` (never `grep`/`awk`)
-✅ File Reading: Use `Read` (never `cat`)
+### Step 2: Discover Commands
 
-## WORKFLOW INSTRUCTIONS
+**Parse parameters** to determine scope.
 
-### Load Analysis Standards
-
+**For marketplace scope (default):**
 ```
-Skill: cui-plugin-development-tools:cui-skill-quality-standards
+Glob: pattern="*.md", path="~/git/cui-llm-rules/claude/marketplace/commands"
+Glob: pattern="*/commands/*.md", path="~/git/cui-llm-rules/claude/marketplace/bundles"
 ```
 
-This skill provides:
-- Command quality standards (15 best practices)
-- 20 common issue patterns
-- Anti-bloat rules (8 rules)
-- Quality scoring criteria
-- Bloat detection algorithm
-
-### Workflow Overview
-
-1. **Discover** - Find commands in specified scope
-2. **Analyze** - Run validation checks (bloat, patterns, quality)
-3. **Fix** - Apply anti-bloat rules and fixes
-4. **Report** - Generate summary with metrics
-
-### Analysis Steps
-
-For each command:
-
-1. **Read and Parse**
-   - Extract YAML frontmatter (Pattern 16, 17)
-   - Count lines and sections
-   - Calculate complexity score
-
-2. **Bloat Detection** (Pattern 11)
-   - Lines > 500: BLOATED
-   - Lines > 400: LARGE
-   - Identify extractable content
-   - Calculate bloat score
-
-3. **Structure Validation**
-   - Check YAML (Patterns 16-19)
-   - Validate parameters section (Pattern 10)
-   - Check workflow structure
-   - Verify decision points (Pattern 3)
-
-4. **Content Quality**
-   - Detect duplication (Pattern 12)
-   - Find over-specification (Pattern 13)
-   - Check for obsolete content (Pattern 15)
-   - Detect documentation noise (Pattern 20)
-
-5. **Workflow Analysis**
-   - Check overlapping steps (Pattern 2)
-   - Verify cleanup logic (Pattern 5)
-   - Check error handling (Pattern 6)
-   - Validate statistics tracking (Pattern 7)
-
-6. **Anti-Bloat Compliance**
-   - Apply Rule 1: Never Add, Only Fix
-   - Apply Rule 2: Consolidate, Don't Duplicate
-   - Apply Rule 3: Clarify, Don't Expand
-   - Apply Rule 4: Remove, Don't Accumulate
-   - Calculate before/after metrics
-
-### Issue Report
-
-**CRITICAL:**
-- Missing/invalid YAML (Patterns 16, 17, 18)
-- Missing error handling for critical tools (Pattern 6)
-- Parameter validation gap (Pattern 10)
-
-**WARNINGS:**
-- Command bloat >500 lines (Pattern 11)
-- Duplicate content (Pattern 12)
-- Overlapping steps (Pattern 2)
-- Over-specification (Pattern 13)
-- Obsolete content (Pattern 15)
-
-**SUGGESTIONS:**
-- Inconsistent prompts (Pattern 1)
-- Unclear step purpose (Pattern 9)
-- Missing config persistence (Pattern 8)
-
-### Auto-Fix Strategy
-
-- **Bloat (>500 lines)**: Recommend extracting to skill
-- **Duplication**: Consolidate to single source
-- **Over-specification**: Simplify, trust AI
-- **Obsolete content**: Remove entirely
-- **YAML issues**: Repair structure
-
-**Anti-Bloat Metrics:**
+**For global scope:**
 ```
-Total lines: <before> → <after> (<+/- count>)
-Sections removed: <count>
-Duplicate text eliminated: <lines>
-
-Target: 0 to -10% change
-Warning: >5% increase
-Error: >10% increase (revert)
+Glob: pattern="*.md", path="~/.claude/commands"
 ```
 
-### Final Report
+**For project scope:**
+```
+Glob: pattern="*.md", path=".claude/commands"
+```
+
+**Extract command names** from file paths.
+
+**If specific command name provided:**
+- Filter list to matching command only
+
+**If no parameters (interactive mode):**
+- Display numbered list of all commands found
+- Separate standalone and bundle commands
+- Let user select which to analyze or change scope
+
+### Step 3: Analyze Commands (Parallel)
+
+**For EACH command discovered:**
+
+Launch cui-diagnose-single-command:
 
 ```
-Commands Analyzed: <total>
-- Bloated (>500 lines): <count> - NEEDS RESTRUCTURING
-- Large (>400 lines): <count> - MONITOR
-- Well-sized (<400 lines): <count>
+Task:
+  subagent_type: cui-diagnose-single-command
+  description: Analyze {command-name}
+  prompt: |
+    Analyze this command comprehensively.
+
+    Parameters:
+    - command_path: {absolute_path_to_command}
+
+    Return complete JSON report with all issues found.
+```
+
+**CRITICAL**: Launch ALL commands in PARALLEL (single message, multiple Task calls).
+
+**Collect results** from each command as they complete.
+
+### Step 4: Aggregate Results
+
+**Combine findings from all commands:**
+
+```json
+{
+  "total_commands_analyzed": {count},
+  "commands_with_issues": {count},
+  "bloated_commands": {count},
+  "issue_summary": {
+    "critical": {total_count},
+    "warnings": {total_count},
+    "suggestions": {total_count}
+  },
+  "by_command": {
+    "command-name-1": {
+      "status": "Clean|Warnings|Critical",
+      "classification": "ACCEPTABLE|LARGE|BLOATED",
+      "issues": {...},
+      "scores": {...}
+    },
+    ...
+  },
+  "overall_metrics": {
+    "avg_bloat_score": {score},
+    "avg_anti_bloat_compliance": {score},
+    "avg_structure_score": {score},
+    "avg_quality_score": {score},
+    "commands_excellent": {count},
+    "commands_good": {count},
+    "commands_fair": {count},
+    "commands_poor": {count}
+  }
+}
+```
+
+### Step 5: Generate Summary Report
+
+**Display:**
+
+```
+==================================================
+Commands Doctor - Analysis Complete
+==================================================
+
+Commands Analyzed: {total}
+- Acceptable (<400 lines): {count} ✅
+- Large (400-500 lines): {count} ⚠️
+- Bloated (>500 lines): {count} ❌ NEEDS RESTRUCTURING
 
 Issue Statistics:
-- Critical: <count>
-- Warnings: <count>
-- Bloat detected: <count>
+- Critical: {count}
+- Warnings: {count}
+- Suggestions: {count}
+- Total: {count}
 
-Anti-Bloat Metrics:
-- Total reduction: <lines> lines removed
-- Duplicate content eliminated: <lines>
+Quality Scores:
+- Average Bloat: {score}/100 (target <100)
+- Average Anti-Bloat Compliance: {score}/100
+- Average Structure: {score}/100
+- Average Quality: {score}/100
 
 By Command:
-- <command>: <lines> lines | <issues>C/<warnings>W | Bloat: <YES/NO>
+- {cmd-1}: {classification} | {lines} lines | Bloat: {score} | Quality: {score}
+- {cmd-2}: {classification} | {lines} lines | Bloat: {score} | Quality: {score}
+...
+
+Recommendations:
+{if bloated commands}
+⚠️ CRITICAL: {count} commands are bloated and need restructuring
+- {command-name}: {lines} lines - Extract sections to skills
+{endif}
+
+{if all acceptable}
+✅ All commands are well-sized and follow anti-bloat rules!
+{endif}
 ```
 
-## CRITICAL RULES
+## FIXING ISSUES
 
-- **LOAD STANDARDS FIRST** - Reference skill for patterns and anti-bloat rules
-- **ANTI-BLOAT MANDATORY** - Never increase command length
-- **MEASURE IMPACT** - Track before/after metrics
-- **RESTRUCTURE IF BLOATED** - Commands >500 lines need skill extraction
-- **TRUST AI INFERENCE** - Remove over-specification
-- **REMOVE OBSOLETE** - Delete deprecated content entirely
-- **ONE SOURCE OF TRUTH** - Consolidate duplicates
+This command currently REPORTS issues only. To fix:
 
-## STANDARDS REFERENCED
+1. Review recommendations in report
+2. For bloated commands: Extract sections to skills
+3. For quality issues: Manually edit files
+4. Re-run cui-diagnose-commands to verify fixes
 
-**Skill: cui-plugin-development-tools:cui-skill-quality-standards**
+**Critical**: Commands >500 lines MUST be restructured by extracting content to skills.
 
-Provides:
-- Command quality standards
-- 20 analysis patterns
-- 8 anti-bloat rules
-- Bloat detection algorithm
-- Restructuring strategies
+## ARCHITECTURE
+
+This command is a simple orchestrator:
+- Discovers commands using Glob (non-prompting)
+- Launches cui-diagnose-single-command in parallel
+- Aggregates and reports results with bloat metrics
+
+All analysis logic is in the specialized agent:
+- cui-diagnose-single-command (comprehensive command analysis)
+
+## TOOL USAGE
+
+- **Glob**: Discover commands (non-prompting)
+- **Task**: Launch cui-diagnose-single-command (parallel)
+- **Skill**: Load diagnostic patterns
+
+## RELATED
+
+- `/cui-diagnose-agents` - Diagnose agents
+- `/cui-diagnose-skills` - Diagnose skills
+- `/cui-diagnose-bundle` - Diagnose entire bundle
+
+## STANDARDS
+
+Command analysis follows:
+- Command quality standards (bundles/cui-plugin-development-tools/standards/command-quality-standards.md)
+- Command analysis patterns (bundles/cui-plugin-development-tools/standards/command-analysis-patterns.md)
+- 8 anti-bloat rules (CRITICAL for preventing bloat)
+
+Standards are loaded automatically by cui-diagnose-single-command.

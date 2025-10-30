@@ -5,7 +5,7 @@ description: Analyze, verify, and fix agents for tool coverage, best practices, 
 
 # Agents Doctor - Verify and Fix Agents
 
-Analyze, verify, and fix agents for tool coverage, best practices, and structural issues.
+Orchestrates comprehensive analysis of agents by coordinating cui-diagnose-single-agent for each agent.
 
 ## PARAMETERS
 
@@ -15,400 +15,179 @@ Analyze, verify, and fix agents for tool coverage, best practices, and structura
 - **agent-name** (optional): Review a specific agent by name (e.g., `maven-project-builder`)
 - **No parameters**: Interactive mode with marketplace default
 
-## PARAMETER VALIDATION
+## WORKFLOW
 
-**If `scope=marketplace` (default):**
-- Process all `.md` files in two locations:
-  - Standalone: `~/git/cui-llm-rules/claude/marketplace/agents/`
-  - Bundle agents: `~/git/cui-llm-rules/claude/marketplace/bundles/*/agents/`
+### Step 1: Activate Diagnostic Patterns
 
-**If `scope=global`:**
-- Process all `.md` files in `~/.claude/agents/`
-
-**If `scope=project`:**
-- Process all `.md` files in `.claude/agents/`
-- Skip if directory doesn't exist
-
-**If specific agent name provided:**
-- Search based on current scope parameter
-- If no scope specified, search marketplace first, then global, then project
-
-**If no parameters provided:**
-- Display interactive menu with numbered list of all agents
-- Let user select which agent(s) to review or change scope
-
-## TOOL USAGE REQUIREMENTS
-
-**CRITICAL**: This command must use non-prompting tools to avoid user interruptions during diagnosis.
-
-### Activate Diagnostic Patterns Skill
+**CRITICAL**: Load non-prompting tool patterns:
 
 ```
 Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
-This loads all tool usage patterns for non-prompting file operations.
+### Step 2: Discover Agents
 
-### Required Tool Usage Patterns
+**Parse parameters** to determine scope.
 
-✅ **File Discovery**: Use `Glob` tool (never `find` via Bash)
-✅ **Existence Checks**: Use `Read` + try/except or `Glob` (never `test -f`/`test -d` via Bash)
-✅ **Content Search**: Use `Grep` tool (never `grep`/`awk` via Bash)
-✅ **File Reading**: Use `Read` tool (never `cat` via Bash)
-
-**Why**: Bash commands trigger user prompts which interrupt the diagnostic flow.
-
-## WORKFLOW INSTRUCTIONS
-
-### Overview
-
-The agents doctor performs comprehensive analysis in these phases:
-
-1. **Discover** - Find all agents in specified scope
-2. **Analyze** - Run validation checks on each agent
-3. **Fix** - Apply automated fixes (if user approves)
-4. **Report** - Generate comprehensive summary
-
-### Load Analysis Standards
-
-Before starting analysis, load the quality standards skill:
-
+**For marketplace scope (default):**
 ```
-Skill: cui-plugin-development-tools:cui-skill-quality-standards
+Glob: pattern="*.md", path="~/git/cui-llm-rules/claude/marketplace/agents"
+Glob: pattern="*/agents/*.md", path="~/git/cui-llm-rules/claude/marketplace/bundles"
 ```
 
-This skill provides:
-- Agent quality standards (9 best practices)
-- 20 common issue patterns (Pattern 1-20)
-- Tool coverage analysis formulas
-- Quality scoring criteria
-- Fix patterns and strategies
-
-### Step 1: Determine Scope and Discover Agents
-
-**A. Parse Parameters**
-
-Determine what to process based on scope parameter:
-1. If `scope=marketplace` (default) → Search both standalone and bundle agents
-2. If `scope=global` → Search `~/.claude/agents/`
-3. If `scope=project` → Search `.claude/agents/`
-4. If agent name provided → Search in current scope only
-5. If no parameters → Interactive mode with marketplace default
-
-**B. Discover Agents**
-
-Use Glob to discover agent files:
-
+**For global scope:**
 ```
-# For marketplace scope (default)
-standalone_agents = Glob(pattern="*.md", path="~/git/cui-llm-rules/claude/marketplace/agents")
-bundle_agent_dirs = Glob(pattern="*/agents", path="~/git/cui-llm-rules/claude/marketplace/bundles")
-
-# Combine and sort
-marketplace_agents = standalone_agents + bundle_agents
-marketplace_agents.sort()
+Glob: pattern="*.md", path="~/.claude/agents"
 ```
 
-**C. Interactive Mode (if no parameters)**
-
-Display menu with all discovered agents:
+**For project scope:**
 ```
-Available Agents (scope=marketplace):
-
-STANDALONE AGENTS:
-1. research-best-practices
-2. asciidoc-reviewer
-...
-
-BUNDLE AGENTS:
-7. maven-project-builder (cui-maven bundle)
-8. task-executor (cui-issue-implementation bundle)
-...
-
-Options: Enter number, "all", "scope=X", or "quit"
+Glob: pattern="*.md", path=".claude/agents"
 ```
 
-### Step 2: Read Architectural Principles
+**Extract agent names** from file paths.
 
-**CRITICAL**: Load agent architecture principles:
+**If specific agent name provided:**
+- Filter list to matching agent only
 
-```
-Read: ~/git/cui-llm-rules/claude/agents-architecture.md
-```
+**If no parameters (interactive mode):**
+- Display numbered list of all agents found
+- Separate standalone and bundle agents
+- Let user select which to analyze or change scope
 
-Extract verification criteria:
-- Best Practices for Well-Formed Agents
-- Tool Coverage Analysis guidelines
-- Essential Rules format specification
-- Tool Fit Score calculation formula
-- Response Format requirements
+### Step 3: Analyze Agents (Parallel)
 
-### Step 3: Initialize Analysis Statistics
+**For EACH agent discovered:**
 
-Create tracking variables for reporting:
-- `total_agents`, `agents_with_issues`, `agents_fixed`
-- `total_issues`, `issues_fixed`
-- `critical_issues`, `warnings`
-- `tool_coverage_issues`
-- `rules_out_of_date`, `rules_orphaned`
-- `duplication_issues`, `ambiguity_issues`, `precision_issues`
-- `permission_issues`
-
-### Step 4: Analyze Each Agent
-
-For EACH agent file, execute comprehensive analysis:
-
-#### Step 4.1: Display Agent Header
+Launch cui-diagnose-single-agent:
 
 ```
-==================================================
-Analyzing: <agent-name>
-Location: <file-path>
-==================================================
+Task:
+  subagent_type: cui-diagnose-single-agent
+  description: Analyze {agent-name}
+  prompt: |
+    Analyze this agent comprehensively.
+
+    Parameters:
+    - agent_path: {absolute_path_to_agent}
+
+    Return complete JSON report with all issues found.
 ```
 
-#### Step 4.2-4.13: Run Validation Checks
+**CRITICAL**: Launch ALL agents in PARALLEL (single message, multiple Task calls).
 
-Apply all validation checks from standards (in order):
+**Collect results** from each agent as they complete.
 
-**Structural Validation:**
-- Read and parse agent (frontmatter + body)
-- Validate YAML frontmatter (Pattern 3, 4)
-- Check agent length and complexity (Pattern 17)
+### Step 4: Aggregate Results
 
-**Tool Coverage Analysis:**
-- Extract tools from frontmatter
-- Parse workflow for actual tool usage
-- Calculate Tool Fit Score (Pattern 1, 2, 16)
-- Identify missing/unused tools
+**Combine findings from all agents:**
 
-**Structural Analysis:**
-- Check for task description (Pattern 19)
-- Verify workflow presence
-- Check response format (Pattern 15)
-
-**Best Practices Compliance:**
-- Tool best practices
-- Autonomy best practices
-- Communication best practices
-- Scope best practices
-- Maven/Build context (Pattern 6)
-
-**Essential Rules Synchronization:**
-- Verify format (Pattern 7)
-- Check sync status (Pattern 8)
-- Detect orphaned rules
-- Validate source references
-
-**Architecture Compliance:**
-- Check self-containment
-- Detect absolute paths (Pattern 5)
-- Validate portable paths
-
-**Content Quality:**
-- Internal duplication analysis (Pattern 11)
-- Ambiguity detection (Pattern 10)
-- Precision analysis
-- Calculate precision score
-
-**Industry Best Practices:**
-- 9-point checklist compliance
-- Calculate compliance score
-
-**Permission Patterns:**
-- Verify Bash permissions (Pattern 9)
-- Detect missing approvals
-- Find over-permissions (Pattern 20)
-- Identify stale patterns
-
-**Documentation Noise:**
-- Detect broken external links (Pattern 18)
-- Find documentation-only sections
-
-### Step 5: Generate Issue Report
-
-For each agent, categorize all issues found:
-
-**CRITICAL Issues (Must Fix):**
-- Missing critical tools (Pattern 1)
-- Invalid YAML (Pattern 3)
-- Absolute paths (Pattern 5)
-- Orphaned rules (Pattern 7)
-- Permission violations (Pattern 9)
-- Missing description (Pattern 12)
-
-**Warnings (Should Fix):**
-- Over-permission (Pattern 2)
-- Wrong tool field (Pattern 4)
-- Temp directory violation (Pattern 6)
-- Out-of-date rules (Pattern 8)
-- Ambiguous instructions (Pattern 10)
-- Internal duplication (Pattern 11)
-- Description too long (Pattern 13)
-- Low tool coverage score (Pattern 16)
-- Documentation noise (Pattern 18)
-- Stale permission patterns (Pattern 20)
-
-**Suggestions (Nice to Have):**
-- Inconsistent naming (Pattern 14)
-- Missing response format (Pattern 15)
-- Agent too complex (Pattern 17)
-- Missing task description (Pattern 19)
-
-Display categorized report:
-```
-Issue Report for <agent-name>:
-
-CRITICAL (X issues):
-1. [Description]
-   Impact: [Impact]
-   Fix: [Fix strategy]
-
-WARNINGS (X issues):
-...
-
-SUGGESTIONS (X items):
-...
-
-Total: X issues found
-Tool Fit Score: X/100
-Precision Score: X/100
-Compliance Score: X/100
+```json
+{
+  "total_agents_analyzed": {count},
+  "agents_with_issues": {count},
+  "issue_summary": {
+    "critical": {total_count},
+    "warnings": {total_count},
+    "suggestions": {total_count}
+  },
+  "by_agent": {
+    "agent-name-1": {
+      "status": "Clean|Warnings|Critical",
+      "issues": {...},
+      "scores": {...}
+    },
+    ...
+  },
+  "overall_metrics": {
+    "avg_tool_fit": {score},
+    "avg_precision": {score},
+    "avg_compliance": {score},
+    "agents_excellent": {count},
+    "agents_good": {count},
+    "agents_fair": {count},
+    "agents_poor": {count}
+  }
+}
 ```
 
-### Step 6: Fix Issues (If User Approves)
+### Step 5: Generate Summary Report
 
-**Decision Point:**
-```
-Found <count> issues in <agent-name>:
-- Critical: <count>
-- Warnings: <count>
-- Suggestions: <count>
-
-Options:
-F - Fix all issues automatically
-R - Review each issue individually before fixing
-S - Skip this agent (do not fix)
-Q - Quit analysis entirely
-
-Please choose [F/r/s/q]:
-```
-
-**Auto-Fix Behavior:**
-- YAML issues → Add/fix frontmatter structure
-- Tool issues → Add missing tools, remove unused tools
-- Path issues → Convert absolute to relative
-- Permission issues → Add missing patterns, remove stale patterns
-- Rules issues → Sync from source, add attribution
-- Documentation noise → Remove sections with only broken links
-
-**After Fixing:**
-- Re-run analysis to verify fixes
-- Compare before/after
-- Update statistics
-- Offer revert if new issues introduced
-
-### Step 7: Generate Final Report
-
-After processing all agents, display comprehensive summary:
+**Display:**
 
 ```
 ==================================================
 Agents Doctor - Analysis Complete
 ==================================================
 
-Agents Analyzed: <total_agents>
-- With issues: <agents_with_issues>
-- Fixed: <agents_fixed>
-- Still have issues: <remaining>
+Agents Analyzed: {total}
+- Clean: {count} ✅
+- With warnings: {count} ⚠️
+- With critical issues: {count} ❌
 
 Issue Statistics:
-- Total issues found: <total_issues>
-- Critical: <critical_count>
-- Warnings: <warning_count>
-- Suggestions: <suggestion_count>
-- Issues fixed: <issues_fixed>
-
-Issue Breakdown by Category:
-- Tool coverage issues: <tool_coverage_issues>
-- Essential rules issues: <rules_out_of_date + rules_orphaned>
-- Duplication issues: <duplication_issues>
-- Ambiguity issues: <ambiguity_issues>
-- Permission issues: <permission_issues>
+- Critical: {count}
+- Warnings: {count}
+- Suggestions: {count}
+- Total: {count}
 
 Quality Scores:
-- Average Tool Fit: <avg_tool_fit>/100
-- Average Precision: <avg_precision>/100
-- Average Compliance: <avg_compliance>/100
+- Average Tool Fit: {score}/100
+- Average Precision: {score}/100
+- Average Compliance: {score}/100
 
 By Agent:
-<for each agent analyzed>
-- <agent-name>: <issue_count> issues (<critical>C / <warnings>W / <suggestions>S)
-  Status: <Clean/Warnings/Critical>
-  Tool Fit: <score>/100 | Precision: <score>/100 | Compliance: <score>/100
-</for each>
+- {agent-1}: {status} | Tool Fit: {score} | Precision: {score} | Compliance: {score}
+- {agent-2}: {status} | Tool Fit: {score} | Precision: {score} | Compliance: {score}
+...
 
 Recommendations:
-<if critical issues remain>
-⚠️  CRITICAL: <count> agents still have critical issues
-- <agent-1>: <issue>
-Re-run diagnose-agents on these agents to fix.
-</if>
+{if critical issues}
+⚠️ CRITICAL: {count} agents need immediate attention
+- {agent-name}: {issue summary}
+{endif}
 
-<if quality issues>
-⚠️  QUALITY: <count> agents have quality concerns
-- Low tool fit: <list>
-- Low precision: <list>
-- Low compliance: <list>
-</if>
-
-<if all clean>
-✅ All analyzed agents are well-formed and follow best practices!
-</if>
+{if all clean}
+✅ All agents are well-formed and follow best practices!
+{endif}
 ```
 
-## CRITICAL RULES
+## FIXING ISSUES
 
-- **READ ENTIRE AGENT** before analyzing - context is essential
-- **USE NON-PROMPTING TOOLS** - Follow diagnostic patterns skill guidance
-- **LOAD STANDARDS FIRST** - Read quality standards and architecture document
-- **LOAD ARCHITECTURE DOCUMENT** - Read ~/git/cui-llm-rules/claude/agents-architecture.md for verification criteria
-- **CATEGORIZE ISSUES PROPERLY** - Critical vs Warning vs Suggestion based on loaded patterns
-- **EXPLAIN FIXES CLEARLY** - User should understand why each change is made
-- **VERIFY AFTER FIXING** - Always re-analyze to ensure fixes worked
-- **PRESERVE INTENT** - Fix structure/consistency but preserve agent's purpose
-- **USE EDIT TOOL** - Never rewrite entire files, use targeted edits
-- **TRACK STATISTICS** - Maintain counters throughout analysis for final report
-- **HANDLE ERRORS** - If agent file is malformed/unreadable, report and skip
-- **INTERACTIVE BY DEFAULT** - Ask before making changes unless told otherwise
-- **CALCULATE SCORES** - Tool Fit, Precision, and Compliance scores for each agent
+This command currently REPORTS issues only. To fix:
 
-## STANDARDS REFERENCED
+1. Review recommendations in report
+2. Manually edit affected files
+3. Re-run cui-diagnose-agents to verify fixes
 
-This command relies on the skill quality standards skill and architecture document:
+**Future enhancement**: Auto-fix capability with user approval.
 
-**Skill: cui-plugin-development-tools:cui-skill-quality-standards**
+## ARCHITECTURE
 
-This skill provides:
-- Agent quality standards (9 best practices)
-- 20 common agent issue patterns
-- Quality scoring criteria
-- Fix strategies
+This command is a simple orchestrator:
+- Discovers agents using Glob (non-prompting)
+- Launches cui-diagnose-single-agent in parallel
+- Aggregates and reports results
 
-**Architecture Document: ~/git/cui-llm-rules/claude/agents-architecture.md**
+All analysis logic is in the specialized agent:
+- cui-diagnose-single-agent (comprehensive agent analysis)
 
-This document provides:
-- Single source of truth for agent architecture
-- Best practices verification criteria
-- Tool coverage analysis guidelines
-- Essential Rules format specification
+## TOOL USAGE
 
-Load both at the beginning of execution to guide analysis and fixes.
+- **Glob**: Discover agents (non-prompting)
+- **Task**: Launch cui-diagnose-single-agent (parallel)
+- **Skill**: Load diagnostic patterns
 
-## RELATED DOCUMENTATION
+## RELATED
 
-See agents-architecture.md for:
-- Agent architecture principles
-- Best practices details
-- Tool coverage requirements
-- Essential Rules specification
+- `/cui-diagnose-commands` - Diagnose commands
+- `/cui-diagnose-skills` - Diagnose skills
+- `/cui-diagnose-bundle` - Diagnose entire bundle
+
+## STANDARDS
+
+Agent analysis follows:
+- Agent quality standards (bundles/cui-plugin-development-tools/standards/agent-quality-standards.md)
+- Agent analysis patterns (bundles/cui-plugin-development-tools/standards/agent-analysis-patterns.md)
+
+Standards are loaded automatically by cui-diagnose-single-agent.

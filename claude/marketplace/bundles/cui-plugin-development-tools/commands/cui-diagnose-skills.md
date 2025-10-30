@@ -182,3 +182,8 @@ All analysis logic is in specialized agents:
 - `/cui-diagnose-agents` - Diagnose agents
 - `/cui-diagnose-commands` - Diagnose commands
 - `/cui-diagnose-bundle` - Diagnose entire bundle
+
+## STANDARDS
+
+Skill analysis follows marketplace architecture principles and content quality standards.
+Standards validation is performed automatically by specialized agents (cui-analyze-standards-file, cui-analyze-integrated-standards).

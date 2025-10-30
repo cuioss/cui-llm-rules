@@ -26,6 +26,8 @@
   "agents": [
     "./agents/cui-analyze-standards-file.md",
     "./agents/cui-analyze-integrated-standards.md",
-    "./agents/cui-diagnose-single-skill.md"
+    "./agents/cui-diagnose-single-skill.md",
+    "./agents/cui-diagnose-single-agent.md",
+    "./agents/cui-diagnose-single-command.md"
   ]
 }
