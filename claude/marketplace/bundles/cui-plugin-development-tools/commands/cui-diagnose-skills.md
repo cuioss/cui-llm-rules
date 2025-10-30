@@ -675,9 +675,15 @@ Identify vague or unclear requirements:
    - Missing criteria: "should be good", "must be sufficient"
 
 2. **Scan for ambiguous language**:
-   ```bash
-   # Search for vague terms in standards files
-   grep -E "(some|many|few|several|appropriate|when needed|sometimes|often|usually)" <standards-files>
+
+   Use Grep tool to search for vague terms in standards files:
+   ```
+   Grep(
+       pattern="(some|many|few|several|appropriate|when needed|sometimes|often|usually)",
+       path="<standards-directory>",
+       output_mode="content",
+       -n=true
+   )
    ```
 
 3. **Assess precision**:

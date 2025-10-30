@@ -44,18 +44,20 @@ This command orchestrates the `asciidoc-reviewer` agent across your entire proje
 
 **Verify before starting (silently unless errors):**
 
-Run all checks in parallel using a single Bash command:
-```bash
-(find . -name "*.adoc" -type f -not -path "*/target/*" -not -path "*/node_modules/*" -not -path "*/.git/*" | head -1 > /dev/null) && \
-echo "✅ All pre-conditions verified" || echo "❌ Pre-condition check failed"
+Check for AsciiDoc files using Glob tool:
+```
+adoc_files = Glob(pattern="**/*.adoc", path=".")
+
+if not adoc_files:
+    display "❌ No AsciiDoc files found"
+    exit
+else:
+    display "✅ All pre-conditions verified"
 ```
 
 **Note:** Agent and skill verification is handled by the plugin system. This check only verifies AsciiDoc files exist.
 
-**If check fails, run individual checks to identify the problem:**
-1. `find . -name "*.adoc" -type f -not -path "*/target/*" -not -path "*/node_modules/*" -not -path "*/.git/*" | head -1 || echo "❌ No AsciiDoc files found"`
-
-Display specific error and exit if any pre-condition fails.
+Display specific error and exit if pre-condition fails.
 
 ## WORKFLOW INSTRUCTIONS
 
@@ -94,11 +96,12 @@ Starting discovery...
 
 **2.1: Find All AsciiDoc Files**
 
-```bash
-find . -name "*.adoc" -type f \
-  -not -path "*/target/*" \
-  -not -path "*/node_modules/*" \
-  -not -path "*/.git/*" | sort
+Use Glob tool to discover all AsciiDoc files (excludes target/, node_modules/, .git/):
+```
+adoc_files = Glob(pattern="**/*.adoc", path=".")
+# Glob automatically excludes common build/dependency directories
+# Sort the results for consistent processing
+adoc_files.sort()
 ```
 
 **2.2: Extract Unique Directories**
