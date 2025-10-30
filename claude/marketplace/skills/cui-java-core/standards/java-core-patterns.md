@@ -400,7 +400,7 @@ public class UserAuthenticator {
 * Follow JavaDoc standards for all public APIs
 * Document non-obvious behavior
 * Document assumptions and preconditions
-* See JavaDoc standards for detailed requirements
+* For detailed JavaDoc requirements, see the cui-javadoc skill in the marketplace
 
 ## Quality Checklist
 

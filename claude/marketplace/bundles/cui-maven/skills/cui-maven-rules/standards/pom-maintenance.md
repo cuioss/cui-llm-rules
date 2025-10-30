@@ -5,10 +5,6 @@
 :sectnums:
 :source-highlighter: highlight.js
 
-[IMPORTANT]
-====
-This document is governed by the general process rules defined in xref:general.adoc[General Process Rules].
-====
 
 == Purpose
 
@@ -16,15 +12,11 @@ This document defines the comprehensive process for maintaining and optimizing M
 
 == Related Documentation
 
-* xref:../java/java-code-standards.adoc[Java Code Standards] - Java development standards
-* xref:java-code-maintenance.adoc[Java Code Maintenance] - Code maintenance processes
-* xref:task-completion-standards.adoc[Task Completion Standards] - Quality verification processes
-* xref:git-commit-standards.adoc[Git Commit Standards] - Standardized commit messaging
-* xref:general.adoc[General Process Rules] - Overarching process governance
+* Maven Integration Standards (see maven-integration.md) - JavaScript/Maven integration patterns
 
 == Pre-Maintenance Checklist
 
-**Requirements**: Execute the following verification steps before starting POM maintenance, following xref:task-completion-standards.adoc[Task Completion Standards]:
+**Requirements**: Execute the following verification steps before starting POM maintenance:
 
 1. [ ] **Build Verification**: `./mvnw clean verify` - ensure all modules build successfully
 2. [ ] **Dependency Analysis**: `./mvnw dependency:analyze` - identify unused and undeclared dependencies
@@ -277,7 +269,7 @@ Note: Version updates are handled by Dependabot - focus on structure and usage o
 
 === Verification Phase
 
-Following xref:task-completion-standards.adoc[Task Completion Standards]:
+Execute these verification steps to ensure POM maintenance was successful:
 
 1. **Clean Build**: `./mvnw clean install`
 2. **Dependency Analysis**: `./mvnw dependency:analyze`
@@ -412,9 +404,6 @@ Following xref:task-completion-standards.adoc[Task Completion Standards]:
 * link:https://maven.apache.org/enforcer/maven-enforcer-plugin/[Maven Enforcer Plugin]
 * link:https://maven.apache.org/plugins/maven-dependency-plugin/[Maven Dependency Plugin]
 
-**Process Documentation**:
+**Related Standards**:
 
-* xref:task-completion-standards.adoc[Task Completion Standards]
-* xref:git-commit-standards.adoc[Git Commit Standards]
-* xref:general.adoc[General Process Rules]
-* xref:java-code-maintenance.adoc[Java Code Maintenance]
+* Maven Integration Standards (see maven-integration.md in this skill)

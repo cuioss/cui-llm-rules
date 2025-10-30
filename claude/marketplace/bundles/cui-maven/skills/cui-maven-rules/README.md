@@ -127,7 +127,7 @@ To update standards:
 
 ## Related Documentation
 
-- Bundle README: ../../../README.md
+- Bundle README: ../../README.md
 - maven-project-builder agent: ../../agents/maven-project-builder.md
 - cui-build-and-verify command: ../../commands/cui-build-and-verify.md
 

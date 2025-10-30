@@ -1,39 +1,23 @@
 ---
 name: cui-skill-quality-standards
-description: Quality standards and analysis patterns for skills, commands, and agents in Claude Code marketplace
-allowed-tools: [Read, Grep, Glob]
+description: Quality standards and analysis patterns for commands and agents in Claude Code marketplace
+allowed-tools: [Read]
 ---
 
-# Skill Quality Standards
+# Command and Agent Quality Standards
 
-Quality standards, analysis patterns, and validation rules for Claude Code marketplace components (skills, commands, agents).
+Quality standards, analysis patterns, and validation rules for Claude Code marketplace commands and agents.
 
 ## When to Use This Skill
 
 Use this skill when you need to:
-- Validate skills for structure, YAML frontmatter, and content quality
 - Check commands for bloat, clarity, and anti-bloat compliance
 - Analyze agents for tool coverage, best practices, and structural issues
 - Apply consistent quality standards across marketplace components
 
+**Note**: Skill analysis is now handled by specialized agents (cui-analyze-standards-file, cui-analyze-integrated-standards) rather than this skill.
+
 ## Workflow
-
-### For Skill Analysis
-
-Read skill quality standards and patterns:
-
-```
-Read: standards/skill-quality-standards.md
-Read: standards/skill-analysis-patterns.md
-```
-
-These provide:
-- 16 common skill issue patterns
-- Quality scoring criteria (architecture, content)
-- Structural requirements
-- YAML frontmatter standards
-- Content quality requirements (duplication, conflicts, ambiguities)
-- "Minimize without information loss" principle
 
 ### For Command Analysis
 
@@ -68,22 +52,6 @@ These provide:
 - Essential Rules synchronization patterns
 
 ## Standards Structure
-
-### Skill Standards
-
-**standards/skill-quality-standards.md** - Comprehensive quality requirements:
-- Structural requirements (12 rules)
-- Content quality requirements (8 rules)
-- Scoring criteria (architecture + integrated content)
-- YAML frontmatter standards
-- Tool access standards
-- Directory structure standards
-
-**standards/skill-analysis-patterns.md** - 16 common issue patterns:
-- Pattern 1-5: Structural issues
-- Pattern 6, 10: Configuration issues
-- Pattern 7, 9: Integration issues
-- Pattern 11-16: Content quality issues
 
 ### Command Standards
 

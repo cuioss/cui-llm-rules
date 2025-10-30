@@ -67,7 +67,7 @@ Each requirement must be traceable to corresponding specification documents:
 
 ## Requirements Content
 
-* Requirements must be specific, measurable, achievable, relevant, and time-bound (SMART principles)
+* Requirements must be specific, measurable, achievable, relevant, and time-bound ([SMART principles](https://www.atlassian.com/blog/productivity/how-to-write-smart-goals))
 * Requirements must clearly state what is needed, not how it should be implemented
 * Requirements must be testable
 * Requirements must be traceable to corresponding specification documents

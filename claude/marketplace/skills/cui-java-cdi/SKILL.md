@@ -183,75 +183,13 @@ Standards and patterns for CDI and Quarkus development in CUI projects. This ski
 - Include "Zero information loss verified" if migrating code
 - Add co-authored-by line for Claude Code
 
-## Common CDI Patterns
+## Common Patterns and Error Prevention
 
-### Constructor Injection Pattern
-```java
-@ApplicationScoped
-public class UserService {
-    private final UserRepository repository;
-    private final NotificationService notifications;
-
-    public UserService(UserRepository repository, NotificationService notifications) {
-        this.repository = repository;
-        this.notifications = notifications;
-    }
-}
-```
-
-### Optional Dependencies Pattern
-```java
-@ApplicationScoped
-public class NotificationService {
-    private final EmailService email;
-    private final SmsService sms;
-
-    public NotificationService(EmailService email, Instance<SmsService> smsInstance) {
-        this.email = email;
-        this.sms = smsInstance.isResolvable() ? smsInstance.get() : null;
-    }
-}
-```
-
-### Producer Method Pattern
-```java
-@ApplicationScoped
-public class ConfigProducer {
-
-    @Produces
-    @Dependent  // Required for nullable returns
-    public HttpServletRequest produceRequest() {
-        return getRequest().orElse(null);
-    }
-
-    @Produces
-    @RequestScoped  // Must not return null
-    public DatabaseService produceDatabase() {
-        return getDatabase().orElse(new DefaultDatabaseService());
-    }
-}
-```
-
-## Error Prevention
-
-### Common CDI Issues
-
-1. **UnsatisfiedResolutionException**: Missing CDI bean - ensure dependency has proper scope annotation
-2. **AmbiguousResolutionException**: Multiple beans match - use `@Named` or custom qualifier
-3. **IllegalProductException**: Normal-scoped producer returned null - use `@Dependent` or return non-null value
-4. **DeploymentException**: Circular dependency - refactor or use `Instance<T>` for lazy loading
-
-### Testing Issues
-
-1. **Zero Coverage**: Missing `@{argLine}` in Surefire configuration
-2. **Injection Errors in @QuarkusIntegrationTest**: Use HTTP testing, not `@Inject`
-3. **Test Configuration Not Applied**: Verify `@TestProfile` annotation present
-
-### Native Compilation Issues
-
-1. **Missing Reflection**: Add `@RegisterForReflection` or deployment processor registration
-2. **Over-registration**: Use fine-grained reflection scope parameters
-3. **Runtime Errors**: Verify reflection scope includes required methods/fields
+For detailed CDI patterns and troubleshooting, see the loaded standards files:
+- **CDI Patterns**: Constructor injection, optional dependencies, producer methods - see `standards/cdi-aspects.md`
+- **Common Issues**: Resolution exceptions, testing problems, native compilation - see `standards/cdi-aspects.md` and `standards/cdi-testing.md`
+- **Container Configuration**: DevUI, health checks - see `standards/cdi-container.md`
+- **Native Optimization**: Reflection configuration, build settings - see `standards/quarkus-native.md`
 
 ## Quality Verification
 

@@ -162,7 +162,9 @@ function processActiveUser(user) {
 
 ## Package.json Configuration
 
-### Required Structure
+For complete package.json organization and structure standards, see `javascript-project-structure.md` in this skill.
+
+### Required Structure Example
 ```json
 {
   "name": "project-name",

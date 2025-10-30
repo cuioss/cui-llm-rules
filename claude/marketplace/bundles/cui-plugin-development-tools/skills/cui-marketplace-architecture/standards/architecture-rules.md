@@ -30,13 +30,7 @@ Read: ../../../../standards/java/java-core.adoc
 Read: ~/git/cui-llm-rules/standards/logging.adoc
 ```
 
-**Validation Pattern**:
-```bash
-# Check for external references
-grep -E "(\.\.){3,}|~/git/cui-llm-rules" skill/SKILL.md
-
-# Should return nothing for compliant skill
-```
+**Validation**: See `self-containment-validation.md` for comprehensive validation commands
 
 **Impact of Violation**:
 - Skill cannot be distributed independently

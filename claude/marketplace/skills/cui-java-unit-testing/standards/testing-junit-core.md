@@ -24,8 +24,7 @@
 ### Test Clarity
 
 * Test names must clearly describe what is being tested
-* Test methods should follow the Arrange-Act-Assert (AAA) pattern
-* Each test should test one specific behavior
+* Test methods should follow the Arrange-Act-Assert (AAA) pattern (see AAA Pattern section below)
 * Comments should explain complex test setups or assertions
 * Use descriptive `@DisplayName` annotations for readable test names
 

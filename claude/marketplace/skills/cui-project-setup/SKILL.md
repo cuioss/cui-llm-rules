@@ -125,78 +125,18 @@ Read: standards/new-project-guide.md
 
 **When to Execute**: After verification passes
 
-**Initial Commit**:
-```bash
-git init
-git add .
-git commit -m "feat: Initial project setup
-
-- Maven project structure
-- Standard configuration
-- Quality tools configured
-- Initial documentation
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-```
+**Process**:
+1. Initialize git repository
+2. Stage all files
+3. Create initial commit (see standards/new-project-guide.md for commit message template)
 
 ## Common Project Setup Patterns
 
-### Maven POM Structure
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>de.cuioss</groupId>
-        <artifactId>cui-parent</artifactId>
-        <version>1.0.0</version>
-    </parent>
-
-    <groupId>de.cuioss</groupId>
-    <artifactId>project-name</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <name>Project Name</name>
-
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
-
-    <dependencies>
-        <!-- Dependencies here -->
-    </dependencies>
-
-    <build>
-        <plugins>
-            <!-- Build plugins here -->
-        </plugins>
-    </build>
-</project>
-```
-
-### Package Structure
-```
-src/main/java/
-└── de/cuioss/projectname/
-    ├── core/           # Core functionality
-    ├── model/          # Data models
-    ├── service/        # Business logic
-    └── util/           # Utilities
-
-src/test/java/
-└── de/cuioss/projectname/
-    ├── core/
-    ├── model/
-    ├── service/
-    └── util/
-```
+Refer to `standards/new-project-guide.md` for detailed templates including:
+- Maven POM structure and configuration
+- Java package organization
+- Git commit message format
+- Frontend project setup guidelines
 
 ## Quality Verification
 

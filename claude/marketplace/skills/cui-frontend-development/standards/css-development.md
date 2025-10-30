@@ -20,6 +20,8 @@ Comprehensive standards for CSS development including modern CSS3+ features, Pos
 
 ## Package.json CSS Scripts
 
+These CSS-specific scripts integrate with the core JavaScript scripts defined in `javascript-project-structure.md`.
+
 ### Required CSS Scripts
 ```json
 {

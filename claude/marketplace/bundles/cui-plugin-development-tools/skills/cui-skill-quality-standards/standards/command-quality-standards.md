@@ -4,6 +4,8 @@ Quality standards and anti-bloat rules for Claude Code slash commands.
 
 ## Command Best Practices
 
+These practices are synthesized from Claude Code marketplace requirements and common command quality patterns observed in production skills.
+
 A well-formed slash command must have:
 
 1. **Clear Title and Description** - User knows exactly what command does

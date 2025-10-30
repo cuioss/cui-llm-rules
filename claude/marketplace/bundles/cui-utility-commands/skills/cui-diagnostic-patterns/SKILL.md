@@ -1,7 +1,7 @@
 ---
 name: cui-diagnostic-patterns
 description: Tool usage patterns for non-prompting file operations - use Glob, Read, Grep instead of Bash commands to avoid user interruptions in all agents and commands
-allowed-tools: Read, Grep
+allowed-tools: [Read, Grep]
 ---
 
 # CUI Tool Usage Patterns

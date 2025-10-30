@@ -405,36 +405,11 @@ public boolean hasAnyRole(String... requiredRoles) {
 
 ## Method Documentation Anti-Patterns
 
-### 1. Repeating Method Name
+For general JavaDoc anti-patterns including "stating the obvious" and redundant documentation, see the **Documentation Anti-Patterns** section in `javadoc-core.md`.
 
-```java
-// ❌ Bad
-/**
- * Gets the user name.
- * @return the user name
- */
-public String getUserName() {
-    return userName;
-}
+Method-specific anti-patterns to avoid:
 
-// ✅ Good (only if there's something meaningful to say)
-/**
- * Returns the user's display name. The name is normalized to title case
- * and may differ from the original input.
- *
- * @return normalized display name, never null or empty
- */
-public String getUserName() {
-    return userName;
-}
-
-// ✅ Best (for simple getters, no documentation needed)
-public String getUserName() {
-    return userName;
-}
-```
-
-### 2. Vague @param Descriptions
+### 1. Vague @param Descriptions
 
 ```java
 // ❌ Bad - vague
@@ -452,7 +427,7 @@ public String getUserName() {
  */
 ```
 
-### 3. Missing Exception Conditions
+### 2. Missing Exception Conditions
 
 ```java
 // ❌ Bad - doesn't explain when exception is thrown

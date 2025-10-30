@@ -245,31 +245,12 @@ Hardcoded path only works for one user.
 
 ### Scan for Violations
 
-**Check 1: Escape Sequences**
-```bash
-grep -n "\.\..*\.\..*\.\." skill/SKILL.md
-# Any match is violation
-```
-
-**Check 2: Absolute Paths**
-```bash
-grep -n "~/\|^/" skill/SKILL.md
-# Filter out URLs starting with https://
-grep -n "~/\|^/" skill/SKILL.md | grep -v "https://"
-```
-
-**Check 3: External .adoc**
-```bash
-grep -n "\.adoc" skill/SKILL.md
-# Verify these are NOT external file references
-# URLs ending in .adoc are OK
-```
-
-**Check 4: Cross-Skill Access**
-```bash
-grep -n "\.\./cui-" skill/SKILL.md
-# Any match is likely cross-skill file access
-```
+For comprehensive validation commands and checks, see `self-containment-validation.md` which provides:
+- Escape sequence detection
+- Absolute path checking
+- External .adoc reference detection
+- Cross-skill access detection
+- Automated validation scripts
 
 ## Fix Strategies
 

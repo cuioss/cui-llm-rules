@@ -218,7 +218,7 @@ public class TokenValidator {
 }
 ```
 
-**Reason**: CUI projects use `CuiLogger`, not SLF4J. See logging standards for details.
+**Reason**: CUI projects use `CuiLogger`, not SLF4J. See `logging-standards.md` in this skill for details.
 
 ## Combining Annotations
 

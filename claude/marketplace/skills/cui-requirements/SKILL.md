@@ -26,6 +26,16 @@ Standards for requirements engineering, planning, and specification in CUI proje
      Read: standards/specification-standards.md
      ```
 
+   - If creating planning or TODO documents:
+     ```
+     Read: standards/planning.md
+     ```
+
+   - If implementing features based on specifications:
+     ```
+     Read: standards/specification-and-implementation.md
+     ```
+
 ### Step 2: Analyze Requirements Context
 
 **When to Execute**: Before creating requirements documentation
@@ -269,7 +279,7 @@ All requirements must pass:
 
 ## References
 
-* Requirements Document: standards/requirements-document.md
-* Specification Documents: standards/specification-documents.md
+* Requirements Standards: standards/requirements-core.md
+* Specification Standards: standards/specification-standards.md
 * Planning Standards: standards/planning.md
 * Implementation Guide: standards/specification-and-implementation.md

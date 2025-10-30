@@ -46,16 +46,8 @@ Standards for writing clear, maintainable technical documentation in CUI project
 **What to Analyze**:
 
 1. **General Documentation Quality**:
-   - Check tone and style (professional, neutral, objective)
-   - **Verify no marketing language or promotional wording**:
-     - Marketing adjectives: "comprehensive," "powerful," "seamless," "robust," "enterprise-grade," "cutting-edge," "revolutionary," "amazing," "best-in-class"
-     - Promotional phrases: "Our solution," "We provide," "Industry-leading," "Unmatched performance"
-     - Bold/italic emphasis on features (e.g., "**powerful** validation")
-     - Superlatives: "fastest," "most reliable," "easiest to use"
-     - Replace with factual, measurable descriptions:
-       - "comprehensive validation" → "validates X, Y, and Z"
-       - "powerful features" → "supports features A, B, C"
-       - "seamless integration" → "integrates via CDI injection"
+   - Check tone and style (see documentation-core.md for requirements)
+   - Verify no marketing language or promotional wording
    - Validate factual descriptions with sources
    - Review technical precision
    - Check for conciseness and clarity
@@ -78,14 +70,7 @@ Standards for writing clear, maintainable technical documentation in CUI project
 4. **Content Quality**:
    - Only existing code/features documented
    - All references verified to exist
-   - **RFC References Verification**:
-     - When document mentions "per RFC XXXX" or cites RFC specifications
-     - Verify RFC is relevant to the documented feature
-     - Check: Does the RFC actually define/require this behavior?
-     - Example violations:
-       - Citing HTTP/2 RFC (7540) in OAuth token validation docs
-       - Citing HTTP/1.1 RFC (7230) when discussing JWT claims
-     - Correct practice: Only cite RFCs that directly define the feature
+   - RFC references must be relevant (see documentation-core.md for verification requirements)
    - Consistent terminology used
    - Code examples from unit tests
    - All public APIs documented
@@ -155,28 +140,14 @@ Standards for writing clear, maintainable technical documentation in CUI project
    - Related Documentation
 
 4. **Code Examples**:
-   - Must be complete and compilable
+   - Must be complete and compilable (see documentation-core.md for requirements)
    - Include all necessary imports
    - Show proper error handling
    - Follow project coding standards
    - Be verified by unit tests
    - Use clear variable names
    - Include comments for complex steps
-   - **Configuration Examples - Placeholder Identification**:
-     - ALL placeholders must be clearly identified
-     - Use inline comments to mark placeholders
-     - Provide example values alongside placeholders
-     - Example (GOOD):
-       ```properties
-       # Replace with your issuer URL
-       oauth.issuer=https://your-auth-server.com  # Placeholder: your actual auth server
-       oauth.audience=your-api-id                  # Placeholder: your API identifier
-       ```
-     - Example (BAD):
-       ```properties
-       oauth.issuer=https://your-auth-server.com
-       oauth.audience=your-api-id
-       ```
+   - Configuration placeholders must be clearly identified
 
 ### Step 4: Verify Documentation Quality
 

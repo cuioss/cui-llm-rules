@@ -22,5 +22,10 @@
   ],
   "skills": [
     "./skills/cui-marketplace-architecture"
+  ],
+  "agents": [
+    "./agents/cui-analyze-standards-file.md",
+    "./agents/cui-analyze-integrated-standards.md",
+    "./agents/cui-diagnose-single-skill.md"
   ]
 }

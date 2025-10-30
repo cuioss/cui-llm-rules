@@ -9,11 +9,8 @@
 Defines standards for integrating JavaScript tooling with Maven build processes using the frontend-maven-plugin, ensuring consistent build pipelines across all CUI projects.
 
 == Related Documentation
-* xref:project-structure.adoc[Project Structure Standards]: Package.json configuration and directory structure
-* xref:javascript-development-standards.adoc[JavaScript Development Standards]: JavaScript-specific package.json configuration
-* xref:linting-standards.adoc[Linting Standards]: ESLint integration with Maven
-* xref:unit-testing-standards.adoc[Unit Testing Standards]: Jest integration with Maven
-* xref:formatting-standards.adoc[Formatting Standards]: Prettier integration with Maven
+* POM Maintenance Standards (see pom-maintenance.md) - Maven POM maintenance and dependency management
+* For JavaScript development standards, ESLint, Jest, and Prettier configuration details, refer to your project's frontend documentation
 
 == Frontend Maven Plugin Configuration
 
@@ -356,8 +353,6 @@ Enable parallel npm operations:
 == Validation
 
 === Build Verification
-For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
-
 A successful Maven build must:
 
 1. Install correct Node.js and npm versions
@@ -369,8 +364,6 @@ A successful Maven build must:
 7. Address deprecated package warnings in build logs
 
 === Quality Gates
-For comprehensive quality gate processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
-
 The following quality gates must pass:
 
 * **Formatting**: All JavaScript files properly formatted

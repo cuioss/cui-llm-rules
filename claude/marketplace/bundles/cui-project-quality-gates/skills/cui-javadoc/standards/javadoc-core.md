@@ -23,21 +23,7 @@ This document defines core JavaDoc documentation standards for CUI projects, ens
 * Standard fields that follow common patterns
 * Methods that simply delegate without logic
 
-**Anti-Pattern (Do NOT do this)**:
-```java
-/**
- * Gets the name.
- * @return the name
- */
-public String getName() {
-    return name;
-}
-
-/**
- * Logger for this class.
- */
-private static final Logger LOGGER = LoggerFactory.getLogger(MyClass.class);
-```
+(See "Documentation Anti-Patterns" section below for examples of what NOT to document)
 
 ## Core JavaDoc Principles
 

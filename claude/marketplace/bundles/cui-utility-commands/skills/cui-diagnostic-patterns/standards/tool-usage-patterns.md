@@ -22,67 +22,29 @@ Bash commands trigger user prompts. Non-prompting tools execute automatically.
 
 Use **Glob** tool for all file and directory discovery operations.
 
-### Find all files by extension
-
+**Quick Example**:
 ```
-# Find all .md files in directory
-Glob(pattern="*.md", path="/path/to/directory")
-
-# Returns: ["/path/to/directory/file1.md", "/path/to/directory/file2.md", ...]
-```
-
-### Find files recursively
-
-```
-# Find all .md files in directory and subdirectories
+# Find all .md files recursively
 Glob(pattern="**/*.md", path="/path/to/root")
-
-# Returns: All matching files including nested ones
 ```
 
-### Find specific file by name
+**For detailed patterns including**:
+- Finding files by extension
+- Recursive searches
+- Finding directories
+- Multiple file types
+- Counting files
+- Error handling strategies
 
-```
-# Find specific file
-Glob(pattern="plugin.json", path="/path/to/directory")
-
-# Returns: ["/path/to/directory/plugin.json"] or []
-```
-
-### Find directories
-
-```
-# List all directories in parent
-Glob(pattern="*", path="/path/to/parent")
-
-# Returns: All files and directories (filter by checking for subdirectory contents)
-```
-
-### Find multiple extensions
-
-```
-# Find .md and .adoc files
-md_files = Glob(pattern="*.md", path="/path")
-adoc_files = Glob(pattern="*.adoc", path="/path")
-all_files = md_files + adoc_files
-```
-
-### Count files
-
-```
-# Count files matching pattern
-files = Glob(pattern="*.md", path="/path")
-count = len(files)
-```
+**See**: `file-operations.md` - File Discovery section
 
 ## Pattern 2: Existence Checks
 
-Use **Read** for file existence, **Glob** for directory existence.
+Use **Read** (with error handling) for file existence, **Glob** for directory existence.
 
-### Check if file exists
-
+**Quick Example**:
 ```
-# Method 1: Try to read file
+# Check if file exists by trying to read
 try:
     content = Read(file_path="/path/to/file")
     file_exists = True
@@ -90,190 +52,69 @@ except:
     file_exists = False
 ```
 
-**Advantage**: If file exists, you already have the content loaded.
+**For detailed patterns including**:
+- File existence checks (Read vs Glob trade-offs)
+- Directory existence checks
+- Empty directory detection
+- Required structure validation
+- Frontmatter validation
+- Batch existence checking
 
-```
-# Method 2: Use Glob
-result = Glob(pattern="filename", path="/path/to/directory")
-file_exists = len(result) > 0
-```
-
-**Advantage**: Doesn't load content, faster for large files.
-
-### Check if directory exists
-
-```
-# Use Glob to check directory
-result = Glob(pattern="*", path="/path/to/directory")
-directory_exists = result is not None  # Empty dir returns [], missing dir may error
-
-# More reliable: Try to glob a known subdirectory or file
-result = Glob(pattern="dirname", path="/path/to/parent")
-directory_exists = len(result) > 0
-```
-
-### Check if directory is empty
-
-```
-# Get all items in directory
-items = Glob(pattern="*", path="/path/to/directory")
-is_empty = len(items) == 0
-```
-
-### Check required structure
-
-```
-# Check multiple directories exist
-required_dirs = [".claude-plugin", "agents", "commands", "skills"]
-missing_dirs = []
-
-for dir_name in required_dirs:
-    result = Glob(pattern=dir_name, path="/bundle/path")
-    if len(result) == 0:
-        missing_dirs.append(dir_name)
-
-all_present = len(missing_dirs) == 0
-```
+**See**: `file-operations.md` - File and Directory Checking section
 
 ## Pattern 3: Content Search
 
 Use **Grep** tool for all content searching operations.
 
-### Search for pattern in files
-
+**Quick Example**:
 ```
 # Search for pattern with line numbers
 Grep(
     pattern="search_term",
-    path="/path/to/file",
+    path="/path/to/directory",
     output_mode="content",
     -n=true
 )
-
-# Returns: Lines containing pattern with line numbers
-# Format: "filename:42:matching line content"
 ```
 
-### Find files containing pattern
+**For detailed patterns including**:
+- Finding files containing patterns
+- Counting matches
+- Case-insensitive searches
+- Context lines (before/after matches)
+- Multi-pattern searches
+- Regex patterns
+- Result parsing strategies
+- Error handling
 
-```
-# Find which files contain pattern (don't show matches)
-Grep(
-    pattern="search_term",
-    path="/path/to/directory",
-    output_mode="files_with_matches"
-)
-
-# Returns: ["/path/to/directory/file1.md", "/path/to/directory/file2.md"]
-```
-
-### Count matches
-
-```
-# Search and count occurrences
-Grep(
-    pattern="search_term",
-    path="/path",
-    output_mode="count"
-)
-
-# Returns: Count of matches per file
-```
-
-### Case-insensitive search
-
-```
-# Search ignoring case
-Grep(
-    pattern="search_term",
-    path="/path",
-    output_mode="content",
-    -i=true
-)
-```
-
-### Search with context lines
-
-```
-# Show lines before and after match
-Grep(
-    pattern="search_term",
-    path="/path",
-    output_mode="content",
-    -C=3  # 3 lines before and after
-)
-```
-
-### Multi-pattern search (regex)
-
-```
-# Search for multiple patterns using regex
-Grep(
-    pattern="pattern1|pattern2|pattern3",
-    path="/path",
-    output_mode="content"
-)
-```
-
-### Filter by file type
-
-```
-# Search only in specific file types
-Grep(
-    pattern="search_term",
-    path="/path",
-    glob="*.md",  # Only search .md files
-    output_mode="content"
-)
-```
+**See**: `search-operations.md` - Complete content search patterns
 
 ## Pattern 4: File Reading
 
 Use **Read** tool for all file reading operations.
 
-### Read entire file
-
+**Quick Example**:
 ```
-# Read complete file content
+# Read complete file
 content = Read(file_path="/path/to/file")
 ```
 
-### Read with line limits
+**For detailed patterns including**:
+- Reading entire files
+- Reading with line limits and offsets
+- Reading specific sections
+- Error handling for missing files
+- Memory considerations for large files
 
-```
-# Read first 100 lines
-content = Read(file_path="/path/to/file", limit=100)
-
-# Read lines 50-150
-content = Read(file_path="/path/to/file", offset=50, limit=100)
-```
-
-### Read and parse
-
-```
-# Read and parse JSON
-content = Read(file_path="/path/to/file.json")
-import json
-data = json.loads(content)
-
-# Read and parse YAML frontmatter
-content = Read(file_path="/path/to/file.md")
-if content.startswith("---"):
-    # Extract and parse YAML
-    yaml_end = content.find("---", 3)
-    yaml_content = content[3:yaml_end]
-```
+**See**: `file-operations.md` - File Reading section
 
 ## Pattern 5: Combining Patterns
 
-### Discover and validate
-
+**Quick Example**:
 ```
-# Find all agents and validate each
+# Discover files and validate each
 agents = Glob(pattern="*.md", path="/bundle/agents")
-
 for agent_path in agents:
-    # Read and validate
     try:
         content = Read(file_path=agent_path)
         # Validate content
@@ -283,45 +124,14 @@ for agent_path in agents:
         valid = False
 ```
 
-### Search and analyze
+**For detailed patterns including**:
+- Discover and validate workflows
+- Search and analyze pipelines
+- Recursive validation
+- Batch processing with error handling
+- Result aggregation strategies
 
-```
-# Find files, search content, analyze results
-files = Glob(pattern="*.md", path="/path")
-
-for file_path in files:
-    # Search for specific patterns
-    matches = Grep(
-        pattern="Skill:|tools:",
-        path=file_path,
-        output_mode="content",
-        -n=true
-    )
-    # Analyze matches
-    analyze_tool_usage(matches)
-```
-
-### Recursive validation
-
-```
-# Check structure recursively
-def validate_bundle(bundle_path):
-    # Check directories
-    dirs = ["agents", "commands", "skills"]
-    for dir_name in dirs:
-        result = Glob(pattern=dir_name, path=bundle_path)
-        if not result:
-            return False
-
-    # Check files in each directory
-    agents = Glob(pattern="*.md", path=f"{bundle_path}/agents")
-    for agent in agents:
-        content = Read(file_path=agent)
-        if not validate_agent(content):
-            return False
-
-    return True
-```
+**See**: Both `file-operations.md` and `search-operations.md` for comprehensive error handling patterns
 
 ## Common Pitfalls to Avoid
 

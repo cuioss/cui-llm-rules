@@ -22,6 +22,34 @@ Comprehensive standards for all documentation across CUI projects, including gen
 * Technical precision without subjective claims
 * Concise, clear language without verbosity
 
+#### Marketing Language Detection
+
+**Prohibited marketing language includes**:
+
+* Marketing adjectives: "comprehensive," "powerful," "seamless," "robust," "enterprise-grade," "cutting-edge," "revolutionary," "amazing," "best-in-class"
+* Promotional phrases: "Our solution," "We provide," "Industry-leading," "Unmatched performance"
+* Bold/italic emphasis on features (e.g., "**powerful** validation")
+* Superlatives: "fastest," "most reliable," "easiest to use"
+
+**Correct replacements** (factual, measurable descriptions):
+* "comprehensive validation" → "validates X, Y, and Z"
+* "powerful features" → "supports features A, B, C"
+* "seamless integration" → "integrates via CDI injection"
+
+#### RFC References Verification
+
+**When citing RFC specifications**:
+
+* Verify RFC is relevant to the documented feature
+* Check: Does the RFC actually define/require this behavior?
+* Only cite RFCs that directly define the feature
+
+**Example violations**:
+* Citing HTTP/2 RFC (7540) in OAuth token validation docs
+* Citing HTTP/1.1 RFC (7230) when discussing JWT claims
+
+**Correct practice**: Only cite RFCs that directly define the feature being documented
+
 ### General Principles
 
 * Only document existing code elements - no speculative or planned features
@@ -57,6 +85,26 @@ Comprehensive standards for all documentation across CUI projects, including gen
 * Demonstrate cleanup if needed
 * Use clear variable names
 * Include comments for complex steps
+
+#### Configuration Examples - Placeholder Identification
+
+**Requirements**:
+* ALL placeholders must be clearly identified
+* Use inline comments to mark placeholders
+* Provide example values alongside placeholders
+
+**Example (GOOD)**:
+```properties
+# Replace with your issuer URL
+oauth.issuer=https://your-auth-server.com  # Placeholder: your actual auth server
+oauth.audience=your-api-id                  # Placeholder: your API identifier
+```
+
+**Example (BAD)**:
+```properties
+oauth.issuer=https://your-auth-server.com
+oauth.audience=your-api-id
+```
 
 ## Documentation Quality
 
