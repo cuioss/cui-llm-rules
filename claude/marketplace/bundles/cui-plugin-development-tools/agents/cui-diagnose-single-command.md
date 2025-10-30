@@ -7,7 +7,7 @@ description: |
   - Input: command_path=/path/to/command.md
   - Output: Comprehensive command quality report with bloat analysis
 
-tools: Read, Grep, Glob
+tools: Read
 model: sonnet
 color: green
 ---
@@ -35,10 +35,12 @@ Analyze ONE command file completely:
 ### Step 1: Load Analysis Standards
 
 **Read command quality standards:**
-```
-Read: ~/git/cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/command-quality-standards.md
-Read: ~/git/cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/command-analysis-patterns.md
-```
+
+Use Read tool to load the following standards files from the bundle's standards directory:
+- command-quality-standards.md
+- command-analysis-patterns.md
+
+These files are located in the same bundle as this agent (cui-plugin-development-tools/standards/).
 
 These provide:
 - 15 command best practices

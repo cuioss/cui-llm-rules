@@ -7,7 +7,7 @@ description: |
   - Input: agent_path=/path/to/agent.md
   - Output: Comprehensive agent quality report with issues categorized by severity
 
-tools: Read, Grep, Glob
+tools: Read
 model: sonnet
 color: blue
 ---
@@ -35,10 +35,12 @@ Analyze ONE agent file completely:
 ### Step 1: Load Analysis Standards
 
 **Read agent quality standards:**
-```
-Read: ~/git/cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
-Read: ~/git/cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-analysis-patterns.md
-```
+
+Use Read tool to load the following standards files from the bundle's standards directory:
+- agent-quality-standards.md
+- agent-analysis-patterns.md
+
+These files are located in the same bundle as this agent (cui-plugin-development-tools/standards/).
 
 These provide:
 - 9 agent best practices

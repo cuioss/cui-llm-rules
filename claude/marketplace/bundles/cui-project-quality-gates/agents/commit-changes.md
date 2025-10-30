@@ -34,11 +34,9 @@ This agent accepts the following parameters extracted from user requests:
 
 ## ESSENTIAL RULES
 
-### Git Commit Standards
-Format: `<type>(<scope>): <subject>` + optional body/footer
-Types: feat, fix, docs, style, refactor, perf, test, chore
-Subject: imperative, lowercase, no period, max 50 chars
-Example: "fix(auth): resolve token validation error"
+- **Git Commit Format**: Use format `<type>(<scope>): <subject>` with optional body/footer. Types: feat, fix, docs, style, refactor, perf, test, chore. Subject must be imperative, lowercase, no period, max 50 chars (from: Git Commit Standards)
+- **Commit Message Quality**: Subject line must clearly describe what changed and why, focusing on user-facing impact rather than implementation details (from: Git Commit Standards)
+- **Clean Working Tree**: Remove build artifacts before committing - check target/, .DS_Store, *.iml, and IDE-specific files (from: Repository Best Practices)
 
 ## WORKFLOW (FOLLOW EXACTLY)
 

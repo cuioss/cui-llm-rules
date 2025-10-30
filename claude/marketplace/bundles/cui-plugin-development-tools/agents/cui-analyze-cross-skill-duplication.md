@@ -9,7 +9,7 @@ description: |
   - Input: skill_paths=[/path/to/skill1, /path/to/skill2, ...]
   - Output: Cross-skill duplication report with recommendations
 
-tools: Read, Grep, Glob
+tools: Read, Glob
 model: sonnet
 color: purple
 ---

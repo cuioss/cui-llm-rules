@@ -134,6 +134,50 @@ Common issues and patterns to detect when analyzing agents.
 **Example:** `Bash(docker:*)` approved but agent doesn't use Docker anymore
 **Fix:** Remove outdated patterns
 
+## Pattern 21: Incorrect Skill Script References
+
+**Problem:** Agent references scripts within skills using wrong paths or patterns
+**Context:** Skills can contain executable scripts (e.g., validation, processing scripts) in their `scripts/` subdirectory
+**Standard Pattern:** `./.claude/skills/{skill-name}/scripts/{script-name}`
+
+**Examples of INCORRECT patterns:**
+- `scripts/asciidoc-validator.sh` (relative path - fails due to cwd reset between bash calls)
+- `~/git/cui-llm-rules/...` (absolute development path - not portable)
+- `$HOME/git/...` (environment-specific - not portable)
+- Multiple path checking with fallbacks (overly complex, unnecessary)
+
+**Examples of CORRECT pattern:**
+```yaml
+tools: Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh)
+```
+```bash
+./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh {file_path} 2>&1
+```
+
+**Why This Pattern:**
+1. **System Constraint:** Agent threads have cwd reset between bash calls, requiring absolute-style paths
+2. **Standard Location:** Skills install to `./.claude/skills/` directory when using `/plugin install`
+3. **Portability:** Works across projects, requires proper skill installation (correct dependency management)
+4. **Consistency:** All skill-based scripts use the same pattern
+5. **Documentation:** Documented in skill SKILL.md and README.md files
+
+**Detection:**
+- Find agents with `Bash` tool that reference `.sh` or `.py` files
+- Check if path uses non-standard format
+- Verify against `./.claude/skills/{skill-name}/scripts/` pattern
+
+**Fix:**
+1. Update tool declaration: `Bash(./.claude/skills/{skill-name}/scripts/{script-name})`
+2. Update workflow execution paths to use `./.claude/skills/...`
+3. Remove dynamic path checking or fallback logic
+4. Document that skill must be installed for agent to work
+
+**Impact:** Scripts may fail to execute or require complex environment setup. Using standard pattern ensures reliability and proper dependency declaration.
+
+**Reference Implementation:**
+- `asciidoc-link-verifier.md` (lines 12, 72-77) - Correct implementation
+- `asciidoc-format-validator.md` (lines 12, 68-73) - Correct implementation
+
 ## Pattern Detection Priority
 
 ### CRITICAL (Must Fix Before Use):
@@ -155,6 +199,7 @@ Common issues and patterns to detect when analyzing agents.
 - Pattern 16: Tool Coverage Score Low
 - Pattern 18: Documentation-Only Noise
 - Pattern 20: Stale Permission Patterns
+- Pattern 21: Incorrect Skill Script References
 
 ### SUGGESTION (Nice to Have):
 - Pattern 14: Inconsistent Naming
@@ -168,7 +213,7 @@ When analyzing agents, check patterns in this order:
 
 1. **Structural Issues** (Patterns 3, 12, 13, 14) - Agent must be loadable
 2. **Tool Coverage** (Patterns 1, 2, 16) - Core functionality
-3. **Portability** (Patterns 5, 6) - Must work across systems
+3. **Portability** (Patterns 5, 6, 21) - Must work across systems and environments
 4. **Permissions** (Patterns 9, 20) - Security and UX
 5. **Essential Rules** (Patterns 7, 8) - Accuracy of guidance
 6. **Content Quality** (Patterns 10, 11, 15, 18, 19) - Clarity and usability
@@ -216,3 +261,9 @@ When analyzing agents, check patterns in this order:
 - Maven agent using /tmp
 - Violates project context
 - Use target/ directory
+
+**The Script Path Guesser:**
+- Tries multiple script locations with fallbacks
+- Uses relative or development-specific paths
+- Violates standard skill installation pattern
+- Use `./.claude/skills/{skill-name}/scripts/` pattern

@@ -289,11 +289,8 @@ For EACH criterion:
 
 **Code Quality:**
 - Invoke appropriate skills before implementation
-- Follow standards from cui-java-core, cui-java-unit-testing, cui-javadoc
-- JUnit 5 only (no Mockito, PowerMock, Hamcrest)
-- CuiLogger only (not slf4j or System.out)
-- Lombok: @Builder, @Value, @UtilityClass where appropriate
-- @Nullable/@NonNull from JSpecify
+- Follow CUI standards defined in Essential Rules section (see above)
+- Refer to skills for complete guidance: cui-java-core, cui-java-unit-testing, cui-javadoc
 
 **Build/Commit:**
 - Verify build passes before commit
