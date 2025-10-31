@@ -112,9 +112,15 @@ Acceptance Criteria: {list}
 - Create file → Write tool (NOT echo >/cat <<)
 - Search content → Grep tool (NOT grep/rg)
 - Find files → Glob tool (NOT find)
-- Build/test → Bash tool (./mvnw, ./gradlew ONLY)
+- Build verification → maven-project-builder agent (preferred)
+- Build/test → maven-builder agent (for specific commands) or Bash (./mvnw, ./gradlew) if required by checklist
 
 **Bash cat/grep/find trigger user prompts and break automation!**
+
+**Maven Build Preference:**
+- **Full verification**: Use maven-project-builder agent (handles build + fix cycle)
+- **Specific build command**: Use maven-builder agent (configurable build execution)
+- **Direct execution**: Only if checklist explicitly requires specific ./mvnw command
 
 ### Step 0: Activate Required Skills (If Implementing Java Code)
 
