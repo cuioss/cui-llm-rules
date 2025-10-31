@@ -25,7 +25,6 @@ class UserDataTest implements ShouldHandleObjectContracts<UserData> {
 
     @Override
     public UserData getUnderTest() {
-        // MUST use cui-test-generator for object creation
         return UserData.builder()
             .username(Generators.strings().next())
             .email(Generators.emailAddress().next())

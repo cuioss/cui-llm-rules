@@ -18,14 +18,7 @@ Standards and patterns for CDI and Quarkus development in CUI projects. This ski
 Skill: cui-java-core
 ```
 
-The cui-java-core skill provides essential foundational patterns that CDI builds upon:
-- Constructor injection principles and benefits
-- Dependency management and null safety patterns
-- Immutability and defensive programming
-- Exception handling standards
-- Modern Java features (records, sealed classes, pattern matching)
-
-These core Java patterns are prerequisites for CDI-specific development.
+The cui-java-core skill provides essential foundational patterns that CDI builds upon, including constructor injection, dependency management, null safety, immutability, exception handling, and modern Java features. These core Java patterns are prerequisites for CDI-specific development.
 
 ### Step 2: Load Applicable CDI Standards
 

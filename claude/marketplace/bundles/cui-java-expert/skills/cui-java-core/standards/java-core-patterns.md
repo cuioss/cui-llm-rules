@@ -402,6 +402,7 @@ public class UserAuthenticator {
 * Document non-obvious behavior
 * Document assumptions and preconditions
 * For detailed JavaDoc requirements, see the cui-javadoc skill in the marketplace
+* For logging standards and requirements, see [logging-standards.md](logging-standards.md)
 
 ## Quality Checklist
 

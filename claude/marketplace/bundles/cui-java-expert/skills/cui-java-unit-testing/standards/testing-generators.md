@@ -24,17 +24,6 @@ The CUI Test Generator framework (`cui-test-generator`) is **mandatory** for ALL
 
 ## Basic Generator Usage
 
-### Essential Annotation
-
-Every test class using generators must include the controller annotation:
-
-```java
-@EnableGeneratorController
-class MyTest {
-    // test methods using generators
-}
-```
-
 ### Built-in Generators
 
 ```java
@@ -200,7 +189,7 @@ class TokenConfigTest {
 
 Fixed seeds defeat the purpose of random testing and reduce test coverage over time.
 
-### Temporary Seed Usage (Debugging Only)
+**Temporary Seed Usage Example (Debugging Only):**
 
 ```java
 @EnableGeneratorController
@@ -352,13 +341,7 @@ When migrating existing tests:
 4. **Verify Tests**: Ensure all tests pass with generated data
 5. **Remove Seeds**: Remove any @GeneratorSeed annotations used during debugging
 
-## Quality Requirements
-
-* **Test Method Names**: Use descriptive `@DisplayName` annotations
-* **Parameter Names**: Choose meaningful parameter names
-* **Documentation**: Comment complex generator setups or business logic
-* **Consolidation**: Refactor duplicate test patterns into parameterized tests
-* **Generator Priority**: Always prefer CUI generators over manual data creation
+For general test quality requirements including naming, documentation, and code quality standards, see [testing-junit-core.md](testing-junit-core.md).
 
 ## Additional Resources
 

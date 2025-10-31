@@ -346,7 +346,7 @@ public ValidationResult validate(String token) {
 - [ ] No @Nullable used for return types (use Optional instead)
 - [ ] Nullable parameters documented and justified
 - [ ] Defensive null checks at API boundaries
-- [ ] Unit tests verify non-null contracts
+- [ ] Unit tests verify non-null contracts (see cui-java-unit-testing skill for testing best practices)
 - [ ] Static analysis configured and passing
 - [ ] JavaDoc documents null-safety contract
 - [ ] Collections specify element nullability if needed

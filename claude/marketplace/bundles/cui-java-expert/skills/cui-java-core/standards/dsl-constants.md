@@ -66,6 +66,8 @@ ModuleConstants.CATEGORY_A.TYPE_1.CONSTANT_1  // Clear context, discoverable
 
 For logging systems, the recommended structure organizes messages by log level:
 
+> **Note**: This example demonstrates the DSL constants pattern applied to logging. For comprehensive logging standards including implementation details and best practices, see [logging-standards.md](logging-standards.md). The pattern appears in both files to show its application from different perspectives: here for the DSL pattern structure, and in logging-standards.md for logging-specific implementation.
+
 ### Structure
 
 ```java

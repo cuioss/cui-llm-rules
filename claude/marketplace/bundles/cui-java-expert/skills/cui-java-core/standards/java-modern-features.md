@@ -114,6 +114,8 @@ public record Range(int start, int end) {
 * Need custom equals/hashCode logic
 * Need additional annotations (@JsonProperty, etc.)
 
+For detailed Lombok patterns and usage guidelines, see [java-lombok-patterns.md](java-lombok-patterns.md).
+
 ## Switch Expressions
 
 Use switch expressions instead of classic switch statements:

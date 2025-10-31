@@ -320,7 +320,7 @@ class ComprehensiveHttpTest {
 
 ### Clear Test Structure
 
-* Use AAA pattern (Arrange-Act-Assert)
+* Follow AAA pattern (see [testing-junit-core.md](testing-junit-core.md) for details)
 * Configure mock responses before making requests
 * Verify both response data and request details
 * Clean separation between setup and assertions

@@ -27,7 +27,12 @@ Container standards for CUI Quarkus applications ensuring consistent, secure, an
 ### Development (Debugging Only)
 **Base Image**: `registry.access.redhat.com/ubi9/ubi-minimal:9.4`
 
-**Use Case**: Debugging and troubleshooting only - never in production
+**Use Cases**:
+* **Local debugging**: When you need shell access to inspect container internals
+* **Troubleshooting**: Diagnosing container runtime issues with diagnostic tools
+* **Development**: Initial development before production hardening
+
+**Important**: Use distroless for all automated testing (CI/CD, integration tests). Only use UBI minimal when you specifically need shell access for debugging. Never use in production.
 
 ## Production Dockerfile Template
 

@@ -84,6 +84,12 @@
       "description": "Standalone utility commands for project setup, permissions, diagnostics, and documentation",
       "source": "./bundles/cui-utility-commands",
       "strict": false
+    },
+    {
+      "name": "cui-java-expert",
+      "description": "Comprehensive Java development expertise bundle aggregating core Java patterns, CDI/Quarkus, and unit testing standards",
+      "source": "./bundles/cui-java-expert",
+      "strict": false
     }
   ]
 }

@@ -63,9 +63,6 @@ void shouldValidateTokenWithCorrectIssuer() {
 * One logical assertion per test
 * Clear separation of test phases
 * Descriptive variable names
-* Independent test execution
-* Clean test environment
-* Predictable test data
 
 ## JUnit 5 Framework Standards
 
