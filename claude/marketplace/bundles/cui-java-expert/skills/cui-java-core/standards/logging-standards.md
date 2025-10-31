@@ -181,57 +181,19 @@ Follow the DSL-Style Constants Pattern:
 
 **REQUIRED**: Every LogMessages class MUST have corresponding documentation at `doc/LogMessages.adoc`.
 
-The documentation file must follow this structure:
+**See [logmessages-documentation.md](logmessages-documentation.md) for complete documentation standards** including:
+- Complete AsciiDoc template and structure
+- Table format and column definitions
+- Documentation rules and update requirements
+- Integration with project documentation
+- Complete working examples
 
-```asciidoc
-= Log Messages for [Module Name]
-:toc: left
-:toclevels: 2
-
-== Overview
-
-All messages follow the format: [Module-Prefix]-[identifier]: [message]
-
-== INFO Level (001-099)
-
-[cols="1,1,2,2", options="header"]
-|===
-|ID |Component |Message |Description
-|AUTH-001 |AUTH |User '%s' successfully logged in |Logged when a user successfully authenticates
-|AUTH-002 |AUTH |User '%s' logged out |Logged when a user logs out of the system
-|===
-
-== WARN Level (100-199)
-
-[cols="1,1,2,2", options="header"]
-|===
-|ID |Component |Message |Description
-|AUTH-100 |AUTH |Login failed for user '%s' |Logged when a login attempt fails
-|===
-
-== ERROR Level (200-299)
-
-[cols="1,1,2,2", options="header"]
-|===
-|ID |Component |Message |Description
-|AUTH-200 |AUTH |Authentication error occurred: %s |Logged when a system error occurs
-|===
-
-== FATAL Level (300-399)
-
-[cols="1,1,2,2", options="header"]
-|===
-|ID |Component |Message |Description
-|AUTH-300 |AUTH |Critical authentication failure: %s |Logged when authentication system fails
-|===
-```
-
-**Documentation Rules**:
-* Documentation must be updated whenever log messages are modified
-* Documentation must exactly match the implementation
-* Messages must be organized in separate tables by log level
-* Include all metadata: identifier, component name, message template, description
-* DEBUG and TRACE levels are not documented (they don't use LogRecord)
+**Quick summary**:
+- Document all INFO/WARN/ERROR/FATAL messages in `doc/LogMessages.adoc`
+- Use AsciiDoc tables organized by log level
+- Include: identifier, component, message template, description
+- Keep documentation synchronized with implementation
+- DEBUG and TRACE are not documented (they don't use LogRecord)
 
 ## Usage Examples
 
