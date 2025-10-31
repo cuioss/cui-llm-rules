@@ -1,51 +1,43 @@
-= CUI Standards Plugin Documentation
+= Plugin Documentation
+:toc: left
 
 == Overview
 
-Technical documentation for the **cui-standards** Claude Code plugin - a standards distribution system providing skills, agents, and commands for CUI OSS projects.
+Technical documentation for the **cui-standards** Claude Code plugin - marketplace of development standards, skills, agents, and commands for CUI OSS projects.
 
-== Marketplace Architecture Rules
+== Documents
+
+[cols="2,3"]
+|===
+|Document |Purpose
+
+|xref:plugin-architecture.adoc[Architecture]
+|System design: plugin distribution, skill loading, progressive disclosure
+
+|xref:plugin-specifications.adoc[Specifications]
+|Technical reference: manifests, directory structure, component formats
+
+|xref:agent-design-principles.adoc[Agent Design]
+|Agent creation: skill loading, tool fit, quality standards
+
+|xref:bundling-architecture.adoc[Bundling]
+|Bundle organization: workflow patterns, manifest formats
+|===
+
+== Key Concepts
+
+**Skills** (Layer 1): Self-contained standards packages loaded via `Skill:` invocations
+
+**Agents** (Layer 2): Autonomous executors that load skills for standards
+
+**Commands** (Layer 3): User-facing utilities that orchestrate agents
+
+**Bundles**: Cohesive packages grouping related components by workflow/domain
+
+== Marketplace Architecture
 
 **Primary Reference**: `cui-marketplace-architecture` skill
 
 Location: `claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/`
 
-The marketplace architecture skill defines:
-
-* **Self-Containment Rules**: Skills must contain all content in their standards/ directory
-* **Skill Usage Patterns**: Agents must invoke skills, not read files directly
-* **Reference Patterns**: Allowed vs prohibited reference types with examples
-* **Validation Procedures**: How to validate skills and agents for compliance
-* **Scoring Criteria**: Quantifiable compliance metrics (0-100 scores)
-
-== Plugin Documentation
-
-=== xref:plugin-architecture.adoc[Plugin Architecture]
-
-System design and key architectural decisions including plugin distribution, Essential Rules Pattern for agents, progressive disclosure, and platform support.
-
-**Read this**: To understand plugin system design decisions
-
----
-
-=== xref:plugin-specifications.adoc[Plugin Specifications]
-
-Technical reference for implementation. Directory structure, manifest formats, component specifications, and installation procedures.
-
-**Read this**: When creating or modifying plugin components
-
----
-
-=== xref:agent-design-principles.adoc[Agent Design Principles]
-
-Comprehensive agent design guide including Essential Rules Pattern, Tool Fit requirements, structured response formats, industry best practices, and quality standards.
-
-**Read this**: Before creating or modifying agents
-
----
-
-=== xref:bundling-architecture.adoc[Bundling Architecture]
-
-Plugin bundling architecture for organizing components into functional workflow bundles including bundle patterns, manifest formats, component distribution, and extensibility guidelines.
-
-**Read this**: To understand bundle structure and organization
+Defines: Self-containment rules, skill usage patterns, reference patterns, validation procedures, scoring criteria.

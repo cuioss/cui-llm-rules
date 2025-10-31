@@ -5,1013 +5,267 @@
 
 == Overview
 
-This document defines design principles, patterns, and quality standards for Claude Code agents in the CUI standards plugin.
+Design principles and quality standards for Claude Code agents.
 
-**Audience**: Agent creators, reviewers, and maintainers
+**Audience**: Agent creators and reviewers
 
-**Scope**: Agent internal architecture, quality standards, and best practices
+**Related**: xref:plugin-architecture.adoc[Architecture] · xref:plugin-specifications.adoc[Specifications]
 
-**Related Documents**:
+== Core Principles
 
-* xref:plugin-architecture.adoc[Plugin Architecture] - Overall system architecture
-* xref:plugin-specifications.adoc[Plugin Specifications] - Technical component specs
+=== 1. Standards via Skills
 
-== Core Design Principles
+**Rule**: Agents load standards using the Skill tool, not direct file reads.
 
-=== Principle 1: Self-Contained Agents
+**Implementation**:
 
-**Definition**: Agents contain all necessary information to execute their task without external file reads during execution.
-
-**Rationale**:
-
-* **Performance**: External file reads consume tokens and add latency
-* **Autonomy**: Agent operates independently of external state
-* **Clarity**: Agent file shows exactly what rules it follows
-* **Reliability**: No broken references to moved/deleted files
-
-**Implementation**: Use Essential Rules Pattern (embedded standards)
-
-**Trade-off**: Duplication of standards across agents vs execution speed
-
-* ✅ Accepted: Speed and autonomy outweigh duplication concerns
-* ✅ Mitigation: Automated synchronization via `/cui-diagnose-agents`
-
-=== Principle 2: Perfect Tool Fit
-
-**Goal**: Agent executes autonomously without requesting user approval for tool usage
-
-**Requirement**: Tool Fit Score = 100%
-
-**Definition**: Agent must have exactly the tools it needs - no more, no less
-
-**Rationale**:
-
-* **Autonomy**: User approval breaks agent flow
-* **Security**: Minimal permission surface area
-* **Clarity**: Tool list documents capabilities
-* **Efficiency**: No unused tool overhead
-
-**Enforcement**: `/cui-diagnose-agents` verifies tool coverage and flags mismatches
-
-=== Principle 3: No Self-Modification
-
-**Rule**: Agents report lessons learned but do not modify themselves
-
-**Distinction**:
-
-[cols="1,1,1"]
-|===
-|Aspect |Commands |Agents
-
-|Self-modification
-|✅ Allowed (Continuous Improvement)
-|❌ Forbidden (Lessons Learned Reporting)
-
-|Invocation
-|User types `/command`
-|System invokes via Task tool
-
-|Changes take effect
-|Next invocation
-|Requires restart (race condition)
-|===
-
-**Rationale**:
-
-* Agents invoked by system, not directly by user
-* Agent modifications require restart to take effect
-* Creates race conditions (agent modifies self while running)
-* User should review and approve architectural changes
-
-**Implementation**: Agents include "Lessons Learned Reporting" section in output
-
-=== Principle 4: Structured Response Format
-
-**Requirement**: All agents produce structured, parseable output
-
-**Required Elements**:
-
-1. **Status**: Success/Failure indicator
-2. **Summary**: Brief description of work done
-3. **Metrics**: Quantified results (files processed, issues found)
-4. **Tool Usage Tracking**: Which tools used and how many times
-5. **Lessons Learned**: Insights for manual improvement (recommended)
-
-**Rationale**:
-
-* Main process can parse and act on results
-* Enables automation and chaining
-* Provides visibility into agent behavior
-* Facilitates debugging and improvement
-
-== Essential Rules Pattern
-
-=== Problem Statement
-
-Agents need to follow standards but reading external files has costs:
-
-* External file read consumes ~2,000 tokens
-* Adds latency (I/O operation)
-* Standards file may be large (100+ lines)
-* Repeated reads across multiple agent invocations
-
-**Traditional Approach** (used in commands):
-```markdown
-### Step 1: Read Standards
-1. Read standards/logging/logging-standards.adoc
-2. Extract LogRecord pattern rules
-3. Store in working memory
-```
-
-=== Solution: Embed + Sync Pattern
-
-**Embed essential rules directly in agent file**:
-
-[source,markdown]
-----
-## Essential Rules
-
-### Logging Standards
-Source: .claude/skills/cui-java-core/standards/logging-standards.adoc#logrecord-pattern
-Last Synced: 2025-10-23
-
-- All INFO/WARN/ERROR must use LogRecord constants
-- Use %s for all string substitutions (never %d, %.2f, {})
-- Exceptions must come first in parameter list
-- LogRecord identifiers: INFO (001-099), WARN (100-199), ERROR (200-299)
-----
-
-**Automated Synchronization**:
-
-* `/cui-diagnose-agents` verifies embedded rules match sources
-* Detects: OUT_OF_DATE, ORPHANED, OLD_SYNC
-* Offers auto-update from source
-
-=== Format Specification
-
-[source,markdown]
-----
-## Essential Rules
-
-### {Domain} Standards
-Source: {path_to_skill_standard}#{optional_section_anchor}
-Last Synced: {YYYY-MM-DD}
-
-{Embedded rules content - bullet points or prose}
-----
-
-**Required Fields**:
-
-[cols="1,2"]
-|===
-|Field |Description
-
-|Domain
-|Clear category (e.g., "Logging Standards", "JavaDoc Standards")
-
-|Source
-|Path to authoritative skill standard (relative to plugin root)
-
-|Section Anchor
-|Optional `#section-id` to reference specific part of source
-
-|Last Synced
-|Date when rules were last synchronized with source
-|===
-
-**Content Guidelines**:
-
-* **Selective**: Only include rules relevant to agent's domain
-* **Essential**: 10-30 lines per domain (not entire standard)
-* **Curated**: Extract key rules, not every detail
-* **Actionable**: Rules the agent will actually enforce
-
-=== Benefits and Trade-offs
-
-[cols="1,1,1"]
-|===
-|Aspect |External Read |Embedded + Sync
-
-|Execution tokens
-|~2,000 per read
-|~0 (already in agent)
-
-|Performance
-|Slower (I/O)
-|Faster (inline)
-
-|Autonomy
-|Depends on external file
-|Self-contained
-
-|Clarity
-|References external docs
-|Clear what agent follows
-
-|Maintenance
-|Auto (always current)
-|Semi-auto (verify + sync)
-|===
-
-**Accepted Trade-offs**:
-
-* ✅ Duplication across agents (acceptable for performance)
-* ✅ Manual sync trigger (automated via `/cui-diagnose-agents`)
-
-**Mitigation**:
-
-* ✅ Sync burden → Automated detection and update
-* ✅ Drift risk → `/cui-diagnose-agents` warns when out of sync
-
-== Tool Fit Requirement
-
-=== Scoring System
-
-**Tool Fit Score**: Percentage measuring how well configured tools match workflow needs
-
-[source]
-----
-Tool Fit Score = (Correctly Configured Tools / (Required Tools + Unnecessary Tools)) * 100
-----
+* Declare `Skill` in tools list
+* Invoke `Skill: cui-skill-name` in workflow Step 0
+* Skills are self-contained bundles that read their own standards
+* Never use direct file references (`../../../../` or `~/git/`)
 
 **Example**:
-
-* Required tools (from workflow): Read, Edit, Write, Bash (4 tools)
-* Configured tools (in frontmatter): Read, Edit, Bash, Grep (4 tools)
-* Missing: Write (1 tool)
-* Unnecessary: Grep (1 tool)
-* Score: (3 / 6) * 100 = 50% (Poor fit)
-
-=== Ratings
-
-[cols="1,2"]
-|===
-|Score |Assessment
-
-|100%
-|Perfect fit - All required tools, no extras
-
-|90-99%
-|Good fit - Minor issue (1 missing or 1 extra)
-
-|70-89%
-|Fair fit - Multiple issues
-
-|<70%
-|Poor fit - Needs fixing
-|===
-
-=== Why 100% Matters
-
-**Missing Tools → User Approval Required**:
+```yaml
+tools: Read, Edit, Skill
 ```
-Agent tries to use Write tool
-→ Write not configured
-→ Claude asks user for approval
-→ Breaks autonomous execution
-```
-
-**Extra Tools → Security/Clarity Issues**:
-```
-Agent has Grep configured
-→ Never uses it in workflow
-→ Unnecessary permission surface
-→ Misleading about capabilities
-```
-
-=== Tool Coverage Analysis
-
-`/cui-diagnose-agents` performs comprehensive analysis:
-
-1. **Scan Workflow**: Extract all tool references
-2. **Compare**: Required tools vs configured tools
-3. **Categorize Issues**:
-   - CRITICAL: Missing required tool
-   - WARNING: Unnecessary configured tool
-4. **Calculate Score**: Tool Fit percentage
-5. **Offer Fixes**: Auto-update frontmatter
-
-=== Tool Dependencies
-
-**Special Rules**:
-
-* **Edit requires Read**: Edit tool must read file first in same context
-  - If workflow uses Edit → Must configure both Read and Edit
-* **Bash for git**: If workflow runs git commands → Must configure Bash
-* **Write for creation**: If workflow creates files → Must configure Write
-
-== Agent vs Command Decision Matrix
-
-=== When to Use Commands
-
-**Location**: `.claude/commands/*.md`
-
-**Invocation**: User types `/command-name`
-
-**Use When**:
-
-* User needs direct control over execution
-* Interactive decisions required throughout
-* Complex multi-step workflows
-* Learning/improving over time (continuous improvement)
-* Processing large datasets (may require multiple sessions)
-
-**Characteristics**:
-
-* Can self-modify (continuous improvement)
-* Direct user interaction
-* May ask questions mid-execution
-* Can span multiple sessions
-* User sees full execution
-
-**Examples**:
-
-* `/docs-review` - Interactive document review with user decisions
-* `/verify-project` - Build verification with user approvals
-* `/slash-doctor` - Command analysis with fix approval
-
-=== When to Use Agents
-
-**Location**: `.claude/agents/*.md`
-
-**Invocation**: System uses Task tool (not directly user-typed)
-
-**Use When**:
-
-* Task is well-defined and autonomous
-* No user interaction needed during execution
-* Single-session completion expected
-* Faster execution preferred (self-contained)
-* Result needs to be parseable by main process
-
-**Characteristics**:
-
-* Cannot self-modify (lessons learned instead)
-* Minimal user interaction (decisions only, not approvals)
-* Complete execution in one session
-* Self-contained (embedded rules)
-* Structured output format
-
-**Examples**:
-
-* `project-builder` - Autonomous build verification
-* `code-reviewer` - Review code and report findings
-* `adoc-review` - Analyze docs without interaction
-
-=== Decision Criteria
-
-[cols="1,1,1"]
-|===
-|Criterion |Use Command |Use Agent
-
-|Execution time
-|Can be hours/days
-|< 30 minutes
-
-|User interaction
-|Frequent questions
-|Minimal (decisions only)
-
-|Learning pattern
-|Continuous improvement
-|Lessons learned reporting
-
-|Output format
-|Flexible
-|Structured, parseable
-
-|External reads
-|Acceptable
-|Avoid (use embedded rules)
-
-|Self-contained
-|Not required
-|Required
-
-|Invoked by
-|User directly
-|System (Task tool)
-|===
-
-== Response Format Standard
-
-=== Required Structure
-
-[source,markdown]
-----
-## {Agent Name} - {Task} Complete
-
-**Status**: ✅ SUCCESS | ❌ FAILURE | ⚠️ PARTIAL
-
-**Summary**:
-{Brief 1-2 sentence description of work done}
-
-**Metrics**:
-- {Metric 1}: {count}
-- {Metric 2}: {count}
-- {Metric 3}: {count}
-
-**Tool Usage**:
-- Read: {count} invocations
-- Edit: {count} invocations
-- Write: {count} invocations
-- Bash: {count} invocations
-
-**Lessons Learned** (for future improvement):
-{if any insights discovered:}
-- Discovery: {what was discovered}
-- Why it matters: {explanation}
-- Suggested improvement: {what should change}
-- Impact: {how this would help}
-
-{if no lessons learned: "None - execution followed expected patterns"}
-
-**Details**:
-{Detailed results, findings, changes made}
-----
-
-=== Required Elements
-
-[cols="1,2"]
-|===
-|Element |Purpose
-
-|Status Indicator
-|Parseable success/failure determination
-
-|Summary
-|1-2 sentences, high-level outcome
-
-|Metrics
-|Quantified results for trend analysis
-
-|Tool Usage Tracking
-|Optimize tool configuration, identify inefficiencies
-
-|Lessons Learned
-|Insights for manual improvement
-|===
-
-== Industry Best Practices
-
-=== Source References
-
-**Primary Sources**:
-
-* Anthropic Claude Prompt Engineering (2025)
-* Anthropic Building Effective Agents (2025)
-* Anthropic Effective Context Engineering (2025)
-
-**Industry Research**:
-
-* AI Agent Design Patterns (Databricks, AWS, MongoDB)
-* Agentic AI Architectures (LangChain, LlamaIndex, Microsoft AutoGen)
-* Prompt Engineering Best Practices (academic and industry)
-
-**Last Reviewed**: 2025-10-20
-
-=== Principle 1: Clarity and Specificity
-
-**Guideline**: Agent instructions must be clear, explicit, and specific
-
-**Best Practices**:
-
-[cols="1,1"]
-|===
-|✅ DO |❌ DON'T
-
-|Run `./mvnw clean install` with timeout of 120000ms
-|Build the project appropriately
-
-|Generate 3-5 sentence summary in markdown format
-|Provide a fairly short summary
-
-|Analyze all `.java` files in `src/main/java` excluding test files
-|Analyze the codebase
-
-|Validate, transform, calculate, parse, extract, verify
-|Handle, manage, deal with, work with, process
-|===
-
-=== Principle 2: Avoid Ambiguous Language
-
-**Anti-Pattern Detection**: Flag and eliminate vague phrases with multiple interpretations
-
-[cols="1,2,2"]
-|===
-|Vague Phrase |Problem |Specific Alternative
-
-|"if needed"
-|When is it needed?
-|"if error count > 0"
-
-|"appropriately"
-|What defines appropriate?
-|"using format: YYYY-MM-DD"
-
-|"handle errors"
-|Which errors? How?
-|"catch IOException, log, and retry once"
-
-|"ensure quality"
-|What are criteria?
-|"achieve 100% test coverage"
-
-|"fairly short"
-|How short?
-|"3-5 sentences" or "< 200 words"
-
-|"reasonable timeout"
-|What's reasonable?
-|"120 seconds"
-|===
-
-**Detection Rules**:
-
-Flag these patterns in agent instructions:
-
-* Conditional phrases without criteria: "if necessary", "when appropriate", "as needed"
-* Subjective modifiers: "appropriately", "reasonably", "fairly", "sufficiently"
-* Generic action verbs: "handle", "manage", "deal with", "work with"
-* Undefined scope: "relevant files", "important sections", "key points"
-* Unmeasurable goals: "good quality", "better performance", "clean code"
-
-=== Principle 3: Eliminate Internal Duplication
-
-**Guideline**: Each rule or instruction should appear once
-
-**Detection Strategy**:
-
-1. **Exact Duplicates**: Same instruction repeated in multiple steps
-2. **Semantic Duplicates**: Different wording, same meaning
-3. **Redundant Clarifications**: Over-explanation of same concept
-
-**Consolidation Pattern**:
-
-* State rule ONCE in "CRITICAL RULES" section
-* Reference it in workflow: "See CRITICAL RULES #3"
-* Do not repeat verbatim
-
-=== Principle 4: Measurable Success Criteria
-
-**Guideline**: All goals, conditions, and outcomes must be measurable or objectively verifiable
-
-**Best Practices**:
-
-[cols="1,1"]
-|===
-|✅ DO |❌ DON'T
-
-|Retry up to 3 times
-|Retry several times
-
-|Success = exit code 0 and no ERROR lines in output
-|Success = build completes successfully
-
-|If status is one of: [FAILED, TIMEOUT, ERROR]
-|If status indicates failure
-
-|Output as JSON with keys: {status, count, duration}
-|Output as structured data
-|===
-
-=== Principle 5: Explicit Error Handling
-
-**Guideline**: Every error condition must have a defined handling strategy
-
-**Required Error Specification**:
-
-[source,markdown]
-----
-Error Handling:
-- FileNotFoundException: Log error, skip file, continue
-- TimeoutException: Retry once with 2x timeout, then fail
-- ParseException: Log details, mark file as invalid, continue
-- NetworkException: Retry 3 times with exponential backoff, then fail
-----
-
-**Define**:
-
-* Max retry count (explicit number)
-* Retry conditions (which errors are retryable)
-* Backoff strategy (immediate, exponential, fixed delay)
-* Final action after retries exhausted
-
-**Anti-Pattern**: Generic error handling
-
-```
-❌ "Handle errors appropriately"
-❌ "If errors occur, deal with them"
-❌ "Ensure robust error handling"
-```
-
-=== Principle 6: Chain-of-Thought Reasoning
-
-**Guideline**: For complex tasks, explicitly instruct agent to think step-by-step
-
-**Patterns**:
-
-1. **Explicit Thinking Steps**:
 ```markdown
-Before executing Step 3, perform analysis:
-1. List all files to be processed
-2. Estimate token cost: <count> * 200 tokens
-3. Check if within budget (< 50,000 tokens)
-4. If over budget, partition into batches
+### Step 0: Activate Skills
+Skill: cui-java-core
+Skill: cui-javadoc
 ```
 
-2. **Decision Trees**:
-```markdown
-Decision Point:
-- If test count = 0: ERROR - no tests found
-- If test count < 5: WARNING - insufficient coverage
-- If test failures > 0: FAIL - fix failures first
-- If all pass: SUCCESS - proceed to next step
-```
+=== 2. Perfect Tool Fit (100%)
 
-3. **Validation Checkpoints**:
-```markdown
-After Step 4, verify:
-✅ All files processed (expected: 10, actual: ?)
-✅ No errors in log (grep "ERROR")
-✅ Output file exists and > 0 bytes
-If any check fails, abort and report.
-```
+**Rule**: Agent has exactly the tools it needs - no more, no less.
 
-=== Principle 7: Minimal Context, Maximum Signal
+**Why**: Missing tools require user approval (breaks autonomy), extra tools mislead about capabilities.
 
-**Guideline**: Provide only essential information
+**Enforcement**: `/cui-diagnose-agents` verifies tool coverage.
 
-**Context Engineering Principles**:
+**Tool Dependencies**:
 
-* **Attention Budget Management**: Every token competes for attention
-* **Signal-to-Noise Ratio**: Curate smallest set of high-signal tokens
-* **Essential Rules Pattern**: Embed 10-30 lines per domain, not 100+ lines
+* `Edit` requires `Read`
+* Standards usage requires `Skill`
+* Git commands require `Bash`
 
-**Anti-Pattern**: Information overload
+=== 3. No Self-Modification
 
-* Embedding entire standard documents
-* Repeating same information in multiple sections
-* Verbose explanations where concise instructions suffice
+**Rule**: Agents report lessons learned but never modify themselves.
 
-=== Principle 8: Provide Examples
+**Why**: Agents invoked by system (not user), modifications require restart, creates race conditions.
 
-**Guideline**: For nuanced or stylistic requirements, show concrete examples
+**Implementation**: Include "Lessons Learned" in response format.
 
-**Patterns**:
+=== 4. Structured Response Format
 
-1. **Input-Output Examples**:
-```markdown
-Format transformation examples:
+**Required elements**:
 
-Input: "2025-10-20T14:30:00Z"
-Output: "October 20, 2025 at 2:30 PM"
+* Status: ✅ SUCCESS | ❌ FAILURE | ⚠️ PARTIAL
+* Summary: 1-2 sentences
+* Metrics: Quantified results
+* Tool Usage: Count per tool
+* Lessons Learned: Insights for improvement
 
-Input: "2025-01-05T09:00:00Z"
-Output: "January 5, 2025 at 9:00 AM"
-```
+== Agent Structure
 
-2. **Good vs Bad Examples**:
-```markdown
-✅ GOOD: "Add logging for authentication failure"
-- Changes 1 specific thing
-- Clear scope (authentication only)
-- Actionable
+=== Frontmatter
 
-❌ BAD: "Improve logging"
-- Vague scope (all logging?)
-- Undefined improvement
-- Not actionable
-```
-
-3. **Edge Case Examples**:
-```markdown
-Handle edge cases:
-- Empty file: Return {count: 0, status: "EMPTY"}
-- Binary file: Return {count: null, status: "BINARY"}
-- Access denied: Return {count: null, status: "DENIED"}
-```
-
-=== Principle 9: Start Simple, Add Complexity
-
-**Guideline**: Begin with minimal workflow. Add complexity only when simpler solutions fail
-
-**Agent Design Progression**:
-
-1. **Level 0: Simple Prompt** - Single instruction, no tools
-2. **Level 1: Single-Step Agent** - One tool, linear workflow
-3. **Level 2: Multi-Step Agent** - Multiple tools, sequential workflow
-4. **Level 3: Branching Agent** - Decision points, conditional logic
-5. **Level 4: Multi-Agent System** - Coordination, parallel execution
-
-**Principle**: Only move to next level when current level cannot solve the problem
-
-=== Principle 10: Observability and Evaluation
-
-**Guideline**: Agents must be measurable
-
-**Required Metrics**:
-
-**Performance**:
-
-* Execution time (per step, total)
-* Token usage (input, output, total)
-* Tool invocations (count per tool)
-* Success/failure rate
-
-**Quality**:
-
-* Task completion rate
-* Accuracy (if measurable)
-* User approval required (should be 0)
-* Retries needed
-
-**Behavior**:
-
-* Which code paths executed
-* Decision points reached
-* Error conditions encountered
-
-== Quality Checklist
-
-Use this checklist when creating or reviewing agents:
-
-=== Clarity & Specificity
-
-* [ ] No vague language ("appropriately", "if needed", "handle")
-* [ ] All thresholds quantified (numbers, not "several" or "many")
-* [ ] Concrete action verbs (validate, calculate, not "manage")
-* [ ] Specific formats defined (JSON schema, markdown structure)
-
-=== Ambiguity Elimination
-
-* [ ] All conditionals have explicit criteria ("if X > 5", not "if necessary")
-* [ ] Decision points enumerate all options
-* [ ] Scope clearly bounded ("files in src/main/java", not "relevant files")
-* [ ] Success criteria measurable and objective
-
-=== Duplication Prevention
-
-* [ ] Each rule stated once (in CRITICAL RULES or workflow, not both)
-* [ ] No semantic duplication (same meaning, different words)
-* [ ] No redundant clarifications
-
-=== Error Handling
-
-* [ ] All error types enumerated
-* [ ] Retry strategy explicit (count, backoff, conditions)
-* [ ] Failure modes defined (abort vs continue)
-* [ ] No generic "handle errors" instructions
-
-=== Measurability
-
-* [ ] Success criteria are verifiable (exit code, output format)
-* [ ] Thresholds have explicit numbers
-* [ ] Conditions are boolean-evaluable
-* [ ] Outcomes are observable
-
-=== Context Efficiency
-
-* [ ] Essential Rules section: 10-30 lines per domain (not 100+)
-* [ ] No verbose explanations where concise works
-* [ ] High signal-to-noise ratio
-
-=== Examples Provided
-
-* [ ] Complex formats shown with examples
-* [ ] Edge cases illustrated
-* [ ] Good vs bad examples for nuanced requirements
-
-=== Observability
-
-* [ ] Tool usage tracking required
-* [ ] Metrics defined and quantified
-* [ ] Response format structured and parseable
-
-== Common Anti-Patterns
-
-=== Anti-Pattern 1: Vague Instructions
-
-```
-❌ "Process the files as needed"
-✅ "Process all .java files in src/main/java, excluding files matching *Test.java"
-```
-
-=== Anti-Pattern 2: Undefined Success
-
-```
-❌ "Build succeeds"
-✅ "Build succeeds = exit code 0 AND no lines matching 'ERROR' in output"
-```
-
-=== Anti-Pattern 3: Generic Error Handling
-
-```
-❌ "Handle exceptions appropriately"
-✅ "Catch FileNotFoundException → log and skip file. Catch IOException → retry once, then fail."
-```
-
-=== Anti-Pattern 4: Ambiguous Conditions
-
-```
-❌ "If the file is too large..."
-✅ "If file size > 10MB..."
-```
-
-=== Anti-Pattern 5: Unmeasurable Criteria
-
-```
-❌ "Ensure good code quality"
-✅ "Ensure: 0 checkstyle violations, 0 SpotBugs errors, test coverage > 80%"
-```
-
-== Enforcement and Tooling
-
-=== cui-diagnose-agents Command
-
-**Tool**: `/cui-diagnose-agents`
-
-**Purpose**: Verify agents follow architectural principles
-
-**Checks**:
-
-1. ✅ Tool Fit Score = 100%
-2. ✅ Essential Rules synchronized with sources
-3. ✅ No self-modification references
-4. ✅ Valid frontmatter
-5. ✅ Structured response format
-6. ✅ Tool usage tracking present
-7. ✅ Lessons learned reporting (recommended)
-
-**Usage**:
-```bash
-/cui-diagnose-agents           # Check all marketplace agents (default)
-/cui-diagnose-agents global    # Check all global agents
-/cui-diagnose-agents project   # Check all project agents
-```
-
-**Automated Fixes**:
-
-* Updates tool configuration (adds missing, removes extra)
-* Synchronizes Essential Rules from sources
-* Adds missing response format sections
-
-=== Integration Points
-
-**Pre-commit Hook** (recommended):
-```bash
-/cui-diagnose-agents project
-```
-
-**CI/CD Pipeline** (recommended):
-```bash
-/cui-diagnose-agents global
-/cui-diagnose-agents project
-```
-
-**Regular Maintenance** (recommended):
-```bash
-# Weekly: Check for out-of-date Essential Rules
-/cui-diagnose-agents global
-```
-
-== Migration Guide
-
-=== Converting Command to Agent
-
-**Step 1: Evaluate Suitability**
-
-* Can it complete in < 30 minutes? ✅
-* Can it be self-contained? ✅
-* Does it need continuous improvement? ❌
-* Does it need frequent user interaction? ❌
-
-If all answers match, proceed with conversion.
-
-**Step 2: Create Agent File**
-
-Create `.claude/agents/agent-name.md` with frontmatter (see xref:plugin-specifications.adoc#agents-layer-2[Plugin Specifications § Agents])
-
-**Step 3: Embed Essential Rules**
-
-Replace external reads with Essential Rules pattern:
-
-```markdown
-## Essential Rules
-
-### {Domain} Standards
-Source: .claude/skills/skill-name/standards/standard-file.adoc#section
-Last Synced: 2025-10-23
-
-{Embedded essential rules}
-```
-
-**Step 4: Add Response Format**
-
-Add structured response template (see <<Response Format Standard>>)
-
-**Step 5: Replace Continuous Improvement**
-
-Remove self-modification logic, add lessons learned reporting
-
-**Step 6: Verify Tool Fit**
-
-```bash
-/cui-diagnose-agents
-```
-
-Fix issues until Tool Fit Score = 100%
-
-**Step 7: Test**
-
-Verify:
-
-* Executes without user approval
-* Produces structured output
-* Reports tool usage
-* Reports lessons learned
-
-== Reference Template
-
-=== project-builder Agent
-
-**Location**: `.claude/agents/project-builder.md`
-
-**Status**: Fully compliant reference implementation (as of 2025-10-20)
-
-**Why Use as Template**:
-
-* ✅ Perfect Tool Fit (100%)
-* ✅ Essential Rules section with source reference
-* ✅ Structured response format
-* ✅ No self-modification
-* ✅ Complete frontmatter
-
-=== Template Structure
-
-[source,markdown]
-----
+```yaml
 ---
-name: {agent-name}
-description: {Clear description with usage examples}
-tools: {Comma-separated required tools only}
+name: agent-name
+description: When to use with examples
+tools: Read, Edit, Write, Bash, Skill
 model: sonnet
-color: {green|blue|purple}
+color: green|blue|purple
 ---
+```
 
-{Brief role description}
+=== Required Sections
 
+```markdown
 ## YOUR TASK
+{Clear, specific task definition}
 
-{Clear task definition}
-
-## ESSENTIAL RULES
-
-### {Domain} Standards
-Source: {path/to/skill/standard.adoc}#{optional-section}
-Last Synced: {YYYY-MM-DD}
-
-{Curated essential rules - 10-30 lines}
+## SKILLS USED
+- **skill-name**: Description
+  - Provides: {standards provided}
+  - When activated: Step 0
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
-### Step 1: {Task}
-{Detailed instructions}
+### Step 0: Activate Skills
+Skill: cui-skill-name
 
-### Step 2: {Task}
-{Detailed instructions}
-
-## CRITICAL RULES
-
-{Non-negotiable constraints}
-
-## TOOL USAGE TRACKING
-
-{Requirement to track all tool invocations}
-
-## LESSONS LEARNED REPORTING
-
-{Report insights without self-modification}
+### Step 1-N: Task Steps
+{Numbered, specific instructions}
 
 ## RESPONSE FORMAT
+{Structured output template with required elements}
+```
 
-{Structured output template}
-----
+== Agent vs Command
 
-=== Verification Checklist
+[cols="1,1,1"]
+|===
+|Aspect |Command |Agent
 
-After creating new agent:
+|Invocation
+|User types `/command`
+|System via Task tool
 
-1. ✅ Add Essential Rules with source reference
-2. ✅ Configure only required tools
-3. ✅ Include Tool Usage Tracking section
-4. ✅ Include Lessons Learned Reporting section
-5. ✅ Define structured Response Format
-6. ✅ Run `/cui-diagnose-agents` to verify
-7. ✅ Fix any issues until Tool Fit Score = 100%
+|Duration
+|Can be hours/days
+|< 30 minutes
+
+|Interaction
+|Frequent questions
+|Minimal (decisions only)
+
+|Self-modify
+|✅ Continuous improvement
+|❌ Lessons learned only
+
+|Standards
+|Direct file reads OK
+|Skills via Skill tool
+
+|Output
+|Flexible
+|Structured, parseable
+|===
+
+**Use Agent When**:
+
+* Well-defined autonomous task
+* No user interaction during execution
+* Single-session completion
+* Structured output needed
+
+== Writing Quality Standards
+
+=== Clarity
+
+* Quantify thresholds ("3 retries", not "several")
+* Use concrete verbs ("validate", "parse", not "handle")
+* Define explicit criteria ("exit code 0", not "succeeds")
+* Enumerate all options in decision points
+
+=== Specificity
+
+[cols="1,1"]
+|===
+|❌ Avoid |✅ Use
+
+|"if needed"
+|"if error count > 0"
+
+|"appropriately"
+|"using format YYYY-MM-DD"
+
+|"handle errors"
+|"catch IOException, log, retry once"
+
+|"fairly short"
+|"3-5 sentences" or "< 200 words"
+|===
+
+=== Error Handling
+
+Define for each error type:
+
+* Retry count (explicit number)
+* Retry conditions (which errors)
+* Backoff strategy (immediate, exponential, fixed)
+* Final action after exhaustion
+
+=== Measurability
+
+All conditions must be boolean-evaluable:
+
+* ✅ "Retry up to 3 times"
+* ❌ "Retry several times"
+* ✅ "Success = exit code 0 AND no ERROR lines"
+* ❌ "Success = build completes successfully"
+
+== Validation
+
+=== Tool: /cui-diagnose-agents
+
+**Checks**:
+
+* ✅ Tool Fit Score = 100%
+* ✅ Agents using standards invoke skills properly
+* ✅ No direct file references
+* ✅ No self-modification
+* ✅ Valid frontmatter
+* ✅ Structured response format
+
+**Usage**:
+```bash
+/cui-diagnose-agents           # Marketplace agents
+/cui-diagnose-agents global    # Global agents
+/cui-diagnose-agents project   # Project agents
+```
+
+**Auto-fixes**:
+
+* Adds/removes tools for 100% fit
+* Adds Skill tool if missing
+* Converts file refs to skill invocations
+
+=== Quality Checklist
+
+Before creating agent:
+
+* [ ] Clear, quantified instructions (no "appropriately", "if needed")
+* [ ] All thresholds have explicit numbers
+* [ ] Error handling defined per error type
+* [ ] Success criteria are measurable
+* [ ] SKILLS USED section documents required skills
+* [ ] Step 0 activates skills via Skill tool
+* [ ] Only required tools configured (including Skill if using standards)
+* [ ] Structured response format defined
+* [ ] Tool Fit Score = 100% (verify with `/cui-diagnose-agents`)
+
+== Common Anti-Patterns
+
+[cols="1,1"]
+|===
+|❌ Anti-Pattern |✅ Correct Pattern
+
+|"Process files as needed"
+|"Process all .java files in src/main/java"
+
+|"Build succeeds"
+|"exit code 0 AND no ERROR lines"
+
+|"Handle exceptions appropriately"
+|"Catch FileNotFoundException → log, skip. IOException → retry once, fail"
+
+|"If file is too large..."
+|"If file size > 10MB..."
+
+|`Read: ~/git/cui-llm-rules/standards/java.adoc`
+|`Skill: cui-java-core`
+
+|tools: Read, Edit
+(workflow uses Skill)
+|tools: Read, Edit, Skill
+|===
+
+== Reference Template
+
+See `.claude/agents/maven-project-builder.md` for fully compliant implementation:
+
+* ✅ Perfect Tool Fit (100%)
+* ✅ Proper skill loading (Step 0)
+* ✅ SKILLS USED documentation
+* ✅ Structured response format
+* ✅ Complete frontmatter
 
 == Cross-References
 
-* **System Architecture**: xref:plugin-architecture.adoc[Plugin Architecture]
-* **Component Specs**: xref:plugin-specifications.adoc[Plugin Specifications]
-* **Essential Rules in Context**: xref:plugin-architecture.adoc#decision-3-essential-rules-pattern-for-agents[Plugin Architecture § Essential Rules Pattern]
+* xref:plugin-architecture.adoc[Plugin Architecture]
+* xref:plugin-specifications.adoc[Plugin Specifications]
+* xref:../marketplace/skills/README.md[Skills Marketplace]
+* xref:../marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/SKILL.md[Marketplace Architecture Skill]

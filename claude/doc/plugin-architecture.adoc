@@ -1,39 +1,13 @@
-= CUI Standards Plugin: Architecture
+= Plugin Architecture
 :toc: left
 :toclevels: 3
 :sectnums:
 
 == Overview
 
-The cui-standards plugin provides centralized development standards, skills, agents, and commands for CUI OSS projects via Claude Code's plugin marketplace.
+CUI standards plugin provides development standards, skills, agents, and commands via Claude Code's plugin marketplace.
 
-**Distribution**: Single-command installation via plugin marketplace
-
-**Target Platform**: Claude Code CLI (terminal and VS Code)
-
-== Three-Layer Architecture
-
-The CUI marketplace follows a three-layer architecture where Skills (knowledge) → Agents (executors) → Commands (user utilities).
-
-**For complete architecture details**, see the `cui-marketplace-architecture` skill which defines:
-
-* Layer responsibilities and interaction patterns
-* Component organization rules
-* Cross-layer communication patterns
-
-**Key architectural rules enforced by marketplace**:
-
-* Skills must be self-contained (all content in standards/ directory)
-* Agents must use Skills via `Skill:` invocations (not direct file reads)
-* Only specific reference types allowed (internal files, external URLs, skill dependencies)
-
-See: `claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/`
-
-== Key Design Decisions
-
-=== Decision 1: Plugin-Only Distribution
-
-**Approach**: All components distributed via plugin marketplace
+**Platform**: Claude Code CLI (terminal and VS Code)
 
 **Installation**:
 ```bash
@@ -41,59 +15,62 @@ See: `claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketp
 /plugin install cui-standards@cui-llm-rules
 ```
 
-**Rationale**:
+== Three-Layer Architecture
 
-* Single command installation
+Skills (knowledge) → Agents (executors) → Commands (user utilities)
+
+**Layer Rules**:
+
+* Skills are self-contained (all content in `standards/` directory)
+* Agents use Skills via `Skill:` invocations (not direct file reads)
+* Commands orchestrate agents and provide user interaction
+
+**Details**: See `cui-marketplace-architecture` skill for complete architecture rules, validation patterns, and reference standards.
+
+== Design Decisions
+
+=== 1. Plugin Distribution
+
+**Approach**: Single-command marketplace installation
+
+**Benefits**:
+
 * Automatic component discovery
 * Built-in version management
 * No manual file synchronization
+* Cross-project availability
 
-**Evidence**: Verified via research - plugins successfully distribute skills, agents, and commands (obra/superpowers, wshobson/agents, 227+ production plugins)
+=== 2. Self-Contained Skills
 
-=== Decision 2: Self-Contained Skills Pattern
+**Rule**: Skills contain all standards in their own `standards/` directory.
 
-**Architecture**: Skills are self-contained with all standards in their own standards/ directory.
+**Requirement**: Skills must work when distributed independently (no external file dependencies).
 
-**For detailed self-containment rules and validation patterns**, see the `cui-marketplace-architecture` skill.
+**Validation**: See `cui-marketplace-architecture` skill.
 
-**Key requirement**: Skills must work when distributed independently (global install, marketplace download, project copy). All file references must be internal to the skill directory.
+=== 3. Skill Loading in Agents
 
-=== Decision 3: Essential Rules Pattern for Agents
-
-**Pattern**: Agents embed core requirements from skill standards while maintaining skill invocation capability
+**Pattern**: Agents load standards dynamically via Skill tool
 
 ```markdown
-# agent.md
+## SKILLS USED
+- **cui-java-core**: Java standards
+  - When activated: Step 0
 
-## Essential Rules
-
-### Java Standards
-Source: skills/cui-java-core/standards/java-core-standards.adoc#key-patterns
-Last Synced: 2025-10-23
-
-- All constants must use DSL-style naming (UPPER_SNAKE_CASE)
-- All public methods require JavaDoc
-- Use @NonNull/@Nullable annotations
-
-## Workflow
-
-For complete standards, invoke cui-java-core skill when needed.
+## WORKFLOW
+### Step 0: Activate Skills
+Skill: cui-java-core
 ```
 
-**Rationale**:
+**Benefits**:
 
-* **Performance**: Critical requirements immediately available (no I/O delay)
-* **Completeness**: Agents can invoke skills for full standards
-* **Maintenance**: `/cui-diagnose-agents` verifies embedded rules match source
-* **Source of Truth**: Skill standards remain authoritative
+* Modularity (skills reusable across agents)
+* Maintainability (single source of truth)
+* Always current (loads from source)
 
-**Synchronization**: `/cui-diagnose-agents` verifies and updates embedded rules from skill standards
+=== 4. Global Installation
 
-=== Decision 4: Global Plugin Scope
-
-**Installation Location**: `~/.claude/plugins/marketplaces/cui-llm-rules/`
-
-**Availability**: Global across all projects for user
+**Location**: `~/.claude/plugins/marketplaces/cui-llm-rules/`
 
 **Override Hierarchy**:
 ```
@@ -102,92 +79,42 @@ For complete standards, invoke cui-java-core skill when needed.
 3. Plugin-provided       (lowest priority)
 ```
 
-**Rationale**: Projects can override specific components while benefiting from global baseline
+**Benefit**: Projects override specific components while using global baseline.
 
-== Progressive Disclosure Model
+== Loading Model
 
-=== Skills Loading Sequence
+**Skills** (progressive disclosure):
 
-1. **Startup Phase**: Name + description loaded (30-50 tokens)
-2. **Context Matching**: Claude determines relevance based on task
-3. **Skill Invocation**: Claude loads complete SKILL.md file
-4. **Workflow Execution**: Skill workflow instructs Claude to Read standards
-5. **Standards Loading**: Claude executes Read tool commands from workflow
+1. Startup: Description loaded (~30 tokens)
+2. Context match: Claude determines relevance
+3. Invocation: `Skill:` loads SKILL.md
+4. Execution: Skill reads its own standards files
 
-**Benefits**:
+**Agents**:
 
-* Low memory footprint at startup (descriptions only)
-* Always current data (reads from source at execution time)
-* Efficient resource usage (loads standards only when needed)
-* Reliable loading (explicit Read instructions, not passive references)
-
-=== Agents Loading
-
-* **Startup**: Frontmatter metadata loaded
-* **Invocation**: Full agent.md loaded with embedded Essential Rules
-* **Skill Access**: Agent can invoke skills via Skill tool for complete standards
-* **Performance**: Essential Rules provide immediate access to critical requirements
-
-== Platform Support
-
-=== Supported Platforms
-
-* ✅ Claude Code CLI (terminal)
-* ✅ Claude Code in VS Code
-* ❌ Claude.ai web interface (agents/commands don't exist on web)
-* ❌ CI/CD pipelines (plugin installation requires interactive mode)
-
-**Rationale**: Agents and commands are CLI-only features. Plugin distribution provides native integration with Claude Code's component discovery.
-
-== Component Counts
-
-* **Skills**: 8 skills (Java Core, JavaDoc, CDI, Testing, Frontend, Documentation, Project Setup, Requirements)
-* **Agents**: 7+ agents for development tasks
-* **Commands**: 10+ utility commands
-* **Installation**: Single command
+1. Startup: Frontmatter metadata
+2. Invocation: Full agent.md loaded
+3. Step 0: Loads skills via Skill tool
 
 == Version Management
 
-=== Update Mechanism
-
-**Updates via marketplace refresh**:
+**Updates**:
 ```bash
 /plugin marketplace update cui-llm-rules
 ```
 
-**Note**: No individual plugin update command exists (verified via research)
+**Versioning**: Semantic (MAJOR.MINOR.PATCH)
 
-=== Versioning
+**Sync across**:
 
-* **Format**: Semantic versioning (MAJOR.MINOR.PATCH)
-* **Synchronization**: Keep version consistent across:
-  - `.claude-plugin/plugin.json`
-  - `marketplace.json`
-  - Git tags (`vX.Y.Z`)
-
-== Path Resolution
-
-All paths in plugin components must be relative to ensure portability across different installation locations.
-
-**For complete path resolution rules and reference patterns**, see the `cui-marketplace-architecture` skill which defines:
-
-* Allowed reference patterns (internal files, external URLs, skill dependencies)
-* Prohibited patterns (escape sequences, absolute paths, cross-skill file access)
-* Validation procedures and fix strategies
-
-**Environment**: `CLAUDECODE=1` indicates Claude Code environment
+* `.claude-plugin/plugin.json`
+* `marketplace.json`
+* Git tags (`vX.Y.Z`)
 
 == References
 
-**Official Documentation**:
-
 * Claude Code Plugins: https://docs.claude.com/en/docs/claude-code/plugins
 * Plugin Marketplaces: https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
-* Skills: https://docs.claude.com/en/docs/claude-code/skills
-* Agents: https://docs.claude.com/en/docs/claude-code/sub-agents
-
-**Project Files**:
-
-* Standards: `standards/` (AsciiDoc documentation)
-* Technical Specifications: xref:plugin-specifications.adoc[Plugin Specifications]
-* Bundling Architecture: xref:bundling-architecture.adoc[Bundling Architecture]
+* xref:plugin-specifications.adoc[Plugin Specifications]
+* xref:bundling-architecture.adoc[Bundling Architecture]
+* xref:agent-design-principles.adoc[Agent Design Principles]

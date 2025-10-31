@@ -1,717 +1,239 @@
-= CUI Marketplace: Technical Specifications
+= Plugin Specifications
 :toc: left
 :toclevels: 3
 :sectnums:
 
 == Overview
 
-This document provides technical specifications for the CUI Development Standards Marketplace, including manifest formats, directory structure, component requirements, and bundle organization.
-
-The marketplace follows a **bundle-based architecture** where related components (agents, commands, skills) are packaged together into cohesive plugins.
+Technical specifications for CUI marketplace bundles: manifests, directory structure, component formats.
 
 == Directory Structure
 
-=== Repository Layout
+=== Marketplace Layout
 
-[source]
-----
-/cui-llm-rules/
-│
-├── claude/marketplace/                # Marketplace root
-│   │
-│   ├── .claude-plugin/                # Marketplace definition
-│   │   ├── marketplace.json           # Marketplace manifest
-│   │   └── README.md                  # Marketplace documentation
-│   │
-│   ├── bundles/                       # Workflow bundles
-│   │   ├── cui-project-quality-gates/
-│   │   │   ├── .claude-plugin/
-│   │   │   │   └── plugin.json
-│   │   │   ├── README.md
-│   │   │   ├── agents/
-│   │   │   │   ├── maven-project-builder.md
-│   │   │   │   └── commit-changes.md
-│   │   │   └── skills/
-│   │   │       └── cui-javadoc/
-│   │   │           └── SKILL.md
-│   │   │
-│   │   ├── cui-issue-implementation/
-│   │   ├── cui-pull-request-workflow/
-│   │   ├── cui-documentation-standards/
-│   │   ├── cui-plugin-development-tools/
-│   │   └── cui-utility-commands/
-│   │
-│   ├── skills/                        # Standalone skill plugins
-│   │   ├── cui-java-core/
-│   │   │   ├── SKILL.md
-│   │   │   └── standards/
-│   │   ├── cui-java-unit-testing/
-│   │   ├── cui-frontend-development/
-│   │   ├── cui-documentation/
-│   │   ├── cui-project-setup/
-│   │   └── cui-requirements/
-│   │
-│   └── agents/                        # Standalone agents
-│       └── research-best-practices.md
-│
-├── standards/                         # Source documentation (AsciiDoc)
-│   ├── java/
-│   ├── javascript/
-│   ├── cdi/
-│   ├── testing/
-│   ├── documentation/
-│   └── logging/
-│
-├── scripts/                           # Utility scripts
-│   ├── asciidoc-validator.sh
-│   └── verify-adoc-links.py
-│
-└── README.adoc
-----
-
-=== Directory Conventions
-
-**Bundle Structure**:
 ```
-bundles/{bundle-name}/
+claude/marketplace/
 ├── .claude-plugin/
-│   └── plugin.json           # Required manifest
-├── README.md                  # Bundle documentation
-├── agents/                    # Agent components (optional)
-│   ├── agent-1.md            # Single .md file per agent
-│   └── agent-2.md
-├── commands/                  # Command components (optional)
-│   ├── command-1.md          # Single .md file per command
-│   └── command-2.md
-└── skills/                    # Skill components (optional)
-    └── skill-name/           # Directory per skill
-        ├── SKILL.md          # Required
-        └── standards/        # Optional support files
+│   └── marketplace.json           # Marketplace manifest
+├── bundles/                        # Workflow bundles
+│   ├── cui-project-quality-gates/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json       # Bundle manifest
+│   │   ├── README.md
+│   │   ├── agents/               # .md files
+│   │   ├── commands/             # .md files
+│   │   └── skills/               # directories
+│   └── cui-issue-implementation/
+└── skills/                         # Standalone skills
+    └── cui-java-core/
+        ├── SKILL.md
+        └── standards/
 ```
 
-**Critical Requirements**:
-- Commands: Single `.md` files (NOT directories)
-- Agents: Single `.md` files (NOT directories)
-- Skills: Directories containing `SKILL.md` file
+=== Component Formats
 
-== Marketplace Manifest
+* **Commands**: Single `.md` files (NOT directories)
+* **Agents**: Single `.md` files (NOT directories)
+* **Skills**: Directories containing `SKILL.md`
 
-=== marketplace.json Structure
+== Manifests
+
+=== marketplace.json
 
 **Location**: `claude/marketplace/.claude-plugin/marketplace.json`
 
-[source,json]
-----
+```json
 {
   "name": "cui-development-standards",
-  "owner": {
-    "name": "CUI OSS Project"
-  },
+  "owner": {"name": "CUI OSS Project"},
   "metadata": {
-    "description": "Comprehensive marketplace of CUI development standards, skills, and best practices",
+    "description": "CUI development standards marketplace",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "cui-java-skills",
-      "description": "Java development standards including core patterns, unit testing, JavaDoc, and CDI/Quarkus",
+      "description": "Java development standards",
       "source": "./",
-      "strict": false,
       "skills": [
         "./skills/cui-java-core",
-        "./skills/cui-java-unit-testing",
-        "./skills/cui-javadoc",
-        "./skills/cui-java-cdi"
+        "./skills/cui-java-unit-testing"
       ]
     },
     {
       "name": "cui-project-quality-gates",
-      "description": "Build verification and change management infrastructure",
-      "source": "./bundles/cui-project-quality-gates",
-      "strict": false
+      "description": "Build verification infrastructure",
+      "source": "./bundles/cui-project-quality-gates"
     }
   ]
 }
-----
+```
 
-=== Field Specifications
+**Plugin config**:
 
-**Root Level**:
-- `name` (required): Marketplace identifier (kebab-case)
-- `owner` (required): Object with `name` field (and optional `email`)
-- `metadata` (required): Object with `description` and `version`
-- `plugins` (required): Array of plugin configurations
+* `name`: Kebab-case identifier (prefix `cui-`)
+* `description`: One-sentence purpose
+* `source`: Relative path to bundle root
+* `skills`: Array of skill paths (for skill-only plugins)
 
-**Plugin Configuration**:
-- `name` (required): Plugin identifier (kebab-case, must start with `cui-` for CUI plugins)
-- `description` (required): One-sentence explanation of plugin purpose
-- `source` (required): Relative path to plugin root (e.g., `"./"` or `"./bundles/bundle-name"`)
-- `strict` (optional): Validation mode (default: false)
-- `skills` (optional): Array of skill directory paths (for skill-only plugins)
-
-== Bundle Plugin Manifest
-
-=== plugin.json Structure
+=== plugin.json (Bundle)
 
 **Location**: `bundles/{bundle-name}/.claude-plugin/plugin.json`
 
-[source,json]
-----
+```json
 {
   "name": "cui-project-quality-gates",
   "version": "1.0.0",
-  "description": "Build verification and change management infrastructure for CUI projects",
-  "author": {
-    "name": "CUI OSS Project",
-    "email": "contact@cuioss.de"
+  "description": "Build verification and change management",
+  "author": {"name": "CUI Team"},
+  "agents": {
+    "subdir": "agents",
+    "files": ["maven-project-builder", "commit-changes"]
   },
-  "license": "Apache-2.0",
-  "homepage": "https://github.com/cuioss/cui-llm-rules",
-  "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["maven", "build", "commit", "quality", "verification"],
-  "agents": [
-    "./agents/maven-project-builder.md",
-    "./agents/commit-changes.md"
-  ],
-  "commands": [
-    "./commands/cui-verify-build.md"
-  ],
-  "skills": [
-    "./skills/cui-javadoc"
-  ]
+  "commands": {
+    "subdir": "commands",
+    "files": ["commit-with-verification"]
+  },
+  "skills": {
+    "subdir": "skills",
+    "folders": ["cui-javadoc"]
+  }
 }
-----
-
-=== Field Specifications
-
-==== Required Fields
-
-[cols="1,2"]
-|===
-|Field |Description
-
-|`name`
-|Plugin identifier (kebab-case, must start with `cui-` for CUI bundles)
-
-|`version`
-|Semantic version (MAJOR.MINOR.PATCH format)
-
-|`description`
-|Clear one-sentence explanation of bundle purpose
-|===
-
-==== Recommended Fields
-
-[cols="1,2"]
-|===
-|Field |Description
-
-|`author`
-|Object with `name` (required) and `email` (optional)
-
-|`license`
-|SPDX license identifier (e.g., "Apache-2.0", "MIT")
-
-|`homepage`
-|URL to documentation or project homepage
-
-|`repository`
-|Repository URL as a string. Example: `"https://github.com/owner/repo.git"`
-
-|`keywords`
-|Array of 3-6 search terms for marketplace discovery
-|===
-
-==== Component Fields
-
-[cols="1,2"]
-|===
-|Field |Description
-
-|`agents`
-|Array of paths to agent `.md` files. **MUST include `.md` extension**. Example: `"./agents/maven-project-builder.md"`
-
-|`commands`
-|Array of paths to command `.md` files. **MUST include `.md` extension**. Example: `"./commands/cui-verify-build.md"`
-
-|`skills`
-|Array of paths to skill directories (no `.md` extension). Directory must contain `SKILL.md`. Example: `"./skills/cui-javadoc"`
-|===
-
-==== Path Requirements
-
-**Critical Rules**:
-- All paths must be relative starting with `./`
-- Agent paths: **MUST include `.md` file extension**
-- Command paths: **MUST include `.md` file extension**
-- Skill paths: Point to directories (no `.md` extension)
-- No absolute paths (no `~/`, no `/Users/`, no `C:\`)
-
-**Examples**:
-```json
-// ✅ CORRECT
-"agents": ["./agents/maven-project-builder.md"]
-"commands": ["./commands/cui-verify-build.md"]
-"skills": ["./skills/cui-javadoc"]
-
-// ❌ INCORRECT
-"agents": ["./agents/maven-project-builder"]        // Missing .md
-"agents": ["./agents/maven-project-builder/AGENT.md"] // Wrong structure
-"agents": ["~/git/project/agents/builder.md"]      // Absolute path
 ```
 
-== Component Specifications
+**Component fields**:
+
+* `agents.files`: Agent filenames (without `.md`)
+* `commands.files`: Command filenames (without `.md`)
+* `skills.folders`: Skill directory names
+
+== Components
 
 === Skills
 
-==== Directory Structure
-
-[source]
-----
-skills/skill-name/
-├── SKILL.md                  # Main skill definition (required)
-├── README.md                 # Usage documentation (optional)
-├── standards/                # Bundled standards (typical)
-│   ├── standard1.adoc
-│   └── standard2.adoc
-├── scripts/                  # Helper scripts (optional)
-└── templates/                # Code templates (optional)
-----
-
-==== SKILL.md Format
-
-**YAML Frontmatter**:
-[source,yaml]
-----
----
-name: cui-java-core
-description: Core Java development standards for CUI projects including coding patterns, null safety, Lombok, modern features, DSL constants, and logging
-allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
----
-----
-
-**Required Fields**:
-- `name`: Skill identifier (kebab-case, max 64 chars, lowercase/numbers/hyphens only)
-- `description`: Clear description that triggers auto-activation (max 1024 chars)
-
-**Optional Fields**:
-- `allowed-tools`: Array of tool names the skill can use
-
-**Content Pattern**:
-```markdown
-# Skill Display Name
-
-Brief description of what this skill provides.
-
-## Workflow
-
-### Step 1: Load Standards
-**CRITICAL**: Load relevant standards files.
-
-### Step 2: Extract Requirements
-From loaded standards, extract and organize key requirements.
-
-### Step 3: Execute Task
-[Task-specific implementation]
+**Structure**:
 ```
+skills/skill-name/
+├── SKILL.md          # Required: Workflow with YAML frontmatter
+├── README.md         # Recommended: Human documentation
+└── standards/        # Optional: Standards files
+```
+
+**SKILL.md frontmatter**:
+```yaml
+---
+name: skill-name
+description: When and why to use this skill
+allowed-tools: [Read, Grep, Glob]
+---
+```
+
+**Self-containment**: All file references must be internal (`standards/file.md`), no external paths (`../../../../`).
 
 === Agents
 
-==== File Format
+**Format**: Single `.md` file with YAML frontmatter
 
-**Location**: `agents/agent-name.md` or `bundles/{bundle}/agents/agent-name.md`
-
-**Structure**: Single Markdown file (NOT a directory)
-
-**YAML Frontmatter** (REQUIRED):
-[source,yaml]
-----
+```yaml
 ---
 name: agent-name
-description: Brief description of agent purpose and when to invoke
-tools: Read, Write, Bash
+description: When to use with examples
+tools: Read, Edit, Write, Bash, Skill
 model: sonnet
 color: green
 ---
-----
-
-**Required Fields**:
-- `name`: Agent identifier (kebab-case, must match filename without `.md`)
-- `description`: Clear explanation of when to use this agent (1-2 sentences)
-- `tools`: Comma-separated list of tools the agent uses
-- `model`: Model to use (typically: `sonnet`, `opus`, or `haiku`)
-- `color`: UI color (e.g., `green`, `blue`, `red`)
-
-**CRITICAL**: Without valid YAML frontmatter, the agent will NOT be discovered by Claude Code.
-
-**Content Pattern**:
-```markdown
----
-name: maven-project-builder
-description: Use this agent when the user needs to build and verify projects with Maven
-tools: Read, Bash, Edit
-model: sonnet
-color: green
----
-
-# Agent Name
-
-Agent purpose and description.
-
-## Workflow
-
-### Step 1: Analysis
-[Analysis steps]
-
-### Step 2: Implementation
-[Implementation steps]
-
-### Step 3: Output
-[Output format]
 ```
+
+**Structure**: See xref:agent-design-principles.adoc[Agent Design Principles]
 
 === Commands
 
-==== File Format
+**Format**: Single `.md` file with YAML frontmatter
 
-**Location**: `commands/command-name.md` or `bundles/{bundle}/commands/command-name.md`
-
-**Structure**: Single Markdown file (NOT a directory)
-
-**Invocation**: `/command-name` (filename without `.md` extension)
-
-**YAML Frontmatter** (REQUIRED):
-[source,yaml]
-----
+```yaml
 ---
 name: command-name
-description: Brief description of what this command does
+description: What this command does
 ---
-----
-
-**Required Fields**:
-- `name`: Command identifier (kebab-case, must match filename without `.md`)
-- `description`: Clear one-sentence description (max 100 characters recommended)
-
-**CRITICAL**: Without valid YAML frontmatter, the command will NOT be discovered by Claude Code and will not appear in the command palette.
-
-**Content Pattern**:
-```markdown
----
-name: build-and-verify
-description: Execute comprehensive project verification by running Maven build
----
-
-# Command Name
-
-You are a command that [purpose].
-
-## Parameters
-- `param1` (optional): Description
-- `param2` (required): Description
-
-## Process
-
-1. Step 1
-2. Step 2
-3. Step 3
-
-## Output
-
-Expected output format and behavior.
 ```
 
-== Bundle Types
-
-=== Workflow Bundles
-
-**Purpose**: Package related agents, commands, and skills for specific workflows
-
-**Examples**:
-- `cui-project-quality-gates`: Build verification and commit management
-- `cui-issue-implementation`: Issue-to-implementation workflow
-- `cui-pull-request-workflow`: PR review and quality fixing
-
-**Characteristics**:
-- Contain multiple component types (agents + commands + skills)
-- Components work together toward a common goal
-- Installed as cohesive unit
-
-=== Skill-Only Plugins
-
-**Purpose**: Package domain-specific standards and knowledge
-
-**Examples**:
-- `cui-java-skills`: Java development standards
-- `cui-frontend-skills`: Frontend development standards
-- `cui-documentation-skills`: Documentation standards
-
-**Characteristics**:
-- Contain only skills (no agents or commands)
-- Referenced by `skills` array in marketplace.json
-- Use `"source": "./"` pointing to marketplace root
-
-=== Utility Bundles
-
-**Purpose**: Package standalone utility commands
-
-**Example**:
-- `cui-utility-commands`: Project setup, permissions, diagnostics utilities
-
-**Characteristics**:
-- Primarily commands (may have some agents)
-- General-purpose utilities usable across projects
-- Don't form cohesive workflow like other bundles
+**Invocation**: User types `/command-name`
 
 == Installation
 
-=== Adding Marketplace
-
+**Add marketplace**:
 ```bash
-# From GitHub repository
-/plugin marketplace add cuioss/cui-llm-rules/claude/marketplace
-
-# From local path
-/plugin marketplace add file:///Users/oliver/git/cui-llm-rules/claude/marketplace
+/plugin marketplace add cuioss/cui-llm-rules
 ```
 
-=== Installing Plugins
-
+**Install plugin**:
 ```bash
-# Install specific plugin from marketplace
-/plugin install cui-project-quality-gates@cui-development-standards
-
-# Browse and install interactively
-/plugin
+/plugin install cui-java-skills@cui-llm-rules
 ```
 
-=== Project Auto-Configuration
-
-**File**: `.claude/settings.json`
-
-[source,json]
-----
-{
-  "plugins": {
-    "marketplaces": ["cuioss/cui-llm-rules/claude/marketplace"],
-    "installed": [
-      "cui-project-quality-gates@cui-development-standards",
-      "cui-java-skills@cui-development-standards"
-    ]
-  }
-}
-----
-
-== Updates
-
-=== Updating Marketplace
-
+**Update marketplace**:
 ```bash
-# Update all plugins in marketplace
-/plugin marketplace update cui-development-standards
+/plugin marketplace update cui-llm-rules
 ```
 
-**Note**: Individual plugin updates are not supported. All plugins in marketplace update together.
+== Validation
 
-=== Version Management
-
-Keep versions synchronized:
-1. `bundles/{bundle}/.claude-plugin/plugin.json` → `version` field
-2. `claude/marketplace/.claude-plugin/marketplace.json` → `metadata.version` field
-3. Git tags → `vX.Y.Z` format
-
+**Verify bundle**:
 ```bash
-# Create release
-git tag v1.0.0
-git push origin v1.0.0
+/cui-diagnose-bundle {bundle-name}
 ```
 
-== Verification
-
-=== Marketplace Verification
-
+**Verify agents**:
 ```bash
-# List configured marketplaces
-/plugin marketplace list
-
-# Check installation
-ls -la ~/.claude/plugins/marketplaces/cui-development-standards/
+/cui-diagnose-agents
 ```
 
-=== Component Verification
-
+**Verify skills**:
 ```bash
-# Check installed plugins
-/plugin
-
-# List available commands
-/help
-
-# Verify specific command exists
-/cui-build-and-verify --help
+/cui-diagnose-skills
 ```
-
-=== Skills Verification
-
-Skills auto-activate based on context. Verify by:
-
-1. Create test file matching skill domain (e.g., Java file for cui-java-core)
-2. Request relevant task (e.g., code review)
-3. Check that Claude references standards from skill
-
-== Path Resolution
-
-=== Relative Paths
-
-All paths in manifests use **relative paths from the file's location**:
-
-**In marketplace.json**:
-- `"source": "./"` → Points to `claude/marketplace/`
-- `"source": "./bundles/cui-project-quality-gates"` → Points to `claude/marketplace/bundles/cui-project-quality-gates/`
-- `"skills": ["./skills/cui-java-core"]` → Points to `claude/marketplace/skills/cui-java-core/`
-
-**In bundle plugin.json**:
-- `"agents": ["./agents/maven-project-builder.md"]` → Points to `bundles/{bundle}/agents/maven-project-builder.md`
-- `"skills": ["./skills/cui-javadoc"]` → Points to `bundles/{bundle}/skills/cui-javadoc/`
-
-=== Cross-Bundle References
-
-Components can reference other bundles using relative paths:
-
-```yaml
-# In command file
-sub_agents:
-  - path: ../bundles/cui-project-quality-gates/agents/maven-project-builder.md
-```
-
-**Requirements**:
-- Must include `.md` extension for agents and commands
-- Must use relative paths from current file location
-- Must navigate through bundle structure correctly
 
 == Common Issues
 
 === Missing YAML Frontmatter
 
-**Problem**: Command or agent files without YAML frontmatter
+**Error**: Component not recognized
 
-**Symptom**: Components exist in filesystem but don't appear in Claude Code command palette or agent list
+**Fix**: Add frontmatter with `name` and `description`
 
-**Solution**: Add required YAML frontmatter at the very beginning of each file
-
-**For Commands**:
 ```yaml
 ---
-name: command-name
-description: Brief description
+name: component-name
+description: Component purpose
 ---
 ```
 
-**For Agents**:
-```yaml
----
-name: agent-name
-description: Brief description
-tools: Read, Write, Bash
-model: sonnet
-color: green
----
-```
+=== Wrong File Extension
 
-**Critical Rule**: Frontmatter MUST be the first content in the file (line 1). Without it, Claude Code will not discover the component.
+**Error**: Commands/agents must be `.md` files
 
-=== Invalid YAML Syntax
+**Fix**: Rename `.txt` or extensionless files to `.md`
 
-**Problem**: Malformed YAML in frontmatter (tabs instead of spaces, missing colons, etc.)
+=== Directory vs File
 
-**Symptom**: Component not discovered or parsing errors
+**Error**: Commands and agents are files, not directories
 
-**Solution**: Validate YAML syntax:
-- Use spaces, NOT tabs for indentation
-- Ensure proper `key: value` format
-- Quote strings with special characters
-- Match `name:` field to filename (without `.md`)
-
-**Validation**: Use `/cui-diagnose-commands` or `/cui-diagnose-agents` to verify frontmatter
-
-=== Missing .md Extensions
-
-**Problem**: Component paths in plugin.json without `.md` extension
-
-**Symptom**: Components not loading or errors during plugin installation
-
-**Solution**: Add `.md` extension to all agent and command paths
-```json
-// ❌ WRONG
-"agents": ["./agents/maven-project-builder"]
-
-// ✅ CORRECT
-"agents": ["./agents/maven-project-builder.md"]
-```
-
-=== Directory Structure Mistakes
-
-**Problem**: Agents or commands as directories instead of single files
-
-**Symptom**: Multiple components appear (e.g., `:COMMAND` and `:README` suffixes)
-
-**Solution**: Convert directories to single `.md` files
-```
-// ❌ WRONG
-agents/
-└── maven-project-builder/
-    ├── AGENT.md
-    └── README.md
-
-// ✅ CORRECT
-agents/
-└── maven-project-builder.md
-```
+**Fix**:
+* ❌ `commands/my-command/command.md`
+* ✅ `commands/my-command.md`
 
 === Absolute Paths
 
-**Problem**: Using absolute paths in manifests
+**Error**: Skills with external file references
 
-**Symptom**: Paths break when repository is cloned to different location
+**Fix**: Move external content into skill's `standards/` directory
 
-**Solution**: Always use relative paths starting with `./`
-```json
-// ❌ WRONG
-"agents": ["/Users/oliver/git/cui-llm-rules/claude/marketplace/agents/builder.md"]
-
-// ✅ CORRECT
-"agents": ["./agents/builder.md"]
-```
-
-=== Missing commands Field
-
-**Problem**: Bundle has command files but no `commands` field in plugin.json
-
-**Symptom**: Commands not registered and not discoverable
-
-**Solution**: Commands are auto-discovered from the `commands/` directory if they have valid YAML frontmatter. The `commands` field in `plugin.json` is optional but can be used for explicit control.
-
-**Auto-Discovery** (Recommended):
-- Place command files in `commands/` directory
-- Ensure each has valid YAML frontmatter
-- Claude Code will discover them automatically
-
-**Explicit Listing** (Optional):
-```json
-{
-  "name": "cui-utility-commands",
-  "commands": [
-    "./commands/cui-build-and-verify.md",
-    "./commands/cui-setup-project-permissions.md"
-  ]
-}
-```
-
-**Note**: With auto-discovery via frontmatter, the `commands` array is optional and can be omitted for simpler maintenance.
+* ❌ `Read: ../../../../standards/file.adoc`
+* ✅ `Read: standards/file.md`
 
 == Cross-References
 
-* **Bundling Architecture**: xref:bundling-architecture.adoc[Bundling Architecture]
-* **Plugin Architecture**: xref:plugin-architecture.adoc[Plugin Architecture]
-* **Agent Design**: xref:agent-design-principles.adoc[Agent Design Principles]
-* **Official Docs**: https://docs.claude.com/en/docs/claude-code/plugins
+* xref:plugin-architecture.adoc[Plugin Architecture]
+* xref:bundling-architecture.adoc[Bundling Architecture]
+* xref:agent-design-principles.adoc[Agent Design Principles]
+* https://docs.claude.com/en/docs/claude-code/plugins[Claude Code Plugins]
