@@ -87,10 +87,15 @@ LOGGER.fatal(exception, "System shutdown due to: %s", reason);
 
 ### Core Requirements
 
-* Use `LogRecord` API for structured logging
+**CRITICAL RULES**:
+* **REQUIRED**: LogRecord MUST be used for INFO, WARN, ERROR, and FATAL levels
+* **PROHIBITED**: LogRecord MUST NOT be used for DEBUG or TRACE levels
 * Use `LogRecord#format()` for parameterized messages
-* **Required for INFO/WARN/ERROR/FATAL in production code**
 * Use `LogRecord#resolveIdentifierString()` for testing
+
+**Rationale**:
+- INFO/WARN/ERROR/FATAL are production-critical messages that require structured identifiers for monitoring, alerting, and documentation
+- DEBUG/TRACE are development-only messages that don't need the overhead of LogRecord structure
 
 ### Module Organization
 
@@ -160,9 +165,8 @@ Organize identifiers by log level:
 * **100-199**: WARN level
 * **200-299**: ERROR level
 * **300-399**: FATAL level
-* **500-599**: DEBUG level (optional)
-* **600-699**: TRACE level (optional)
 
+**Note**: DEBUG and TRACE levels do NOT have identifier ranges because they must NOT use LogRecord.
 ### LogMessages Best Practices
 
 Follow the DSL-Style Constants Pattern:
@@ -172,6 +176,62 @@ Follow the DSL-Style Constants Pattern:
 * Organize by log level (INFO, WARN, ERROR, FATAL)
 * Use meaningful module prefix (e.g., "AUTH", "TOKEN", "DB")
 * Store prefix as constant in LogMessages class
+
+### LogMessages Documentation Requirements
+
+**REQUIRED**: Every LogMessages class MUST have corresponding documentation at `doc/LogMessages.adoc`.
+
+The documentation file must follow this structure:
+
+```asciidoc
+= Log Messages for [Module Name]
+:toc: left
+:toclevels: 2
+
+== Overview
+
+All messages follow the format: [Module-Prefix]-[identifier]: [message]
+
+== INFO Level (001-099)
+
+[cols="1,1,2,2", options="header"]
+|===
+|ID |Component |Message |Description
+|AUTH-001 |AUTH |User '%s' successfully logged in |Logged when a user successfully authenticates
+|AUTH-002 |AUTH |User '%s' logged out |Logged when a user logs out of the system
+|===
+
+== WARN Level (100-199)
+
+[cols="1,1,2,2", options="header"]
+|===
+|ID |Component |Message |Description
+|AUTH-100 |AUTH |Login failed for user '%s' |Logged when a login attempt fails
+|===
+
+== ERROR Level (200-299)
+
+[cols="1,1,2,2", options="header"]
+|===
+|ID |Component |Message |Description
+|AUTH-200 |AUTH |Authentication error occurred: %s |Logged when a system error occurs
+|===
+
+== FATAL Level (300-399)
+
+[cols="1,1,2,2", options="header"]
+|===
+|ID |Component |Message |Description
+|AUTH-300 |AUTH |Critical authentication failure: %s |Logged when authentication system fails
+|===
+```
+
+**Documentation Rules**:
+* Documentation must be updated whenever log messages are modified
+* Documentation must exactly match the implementation
+* Messages must be organized in separate tables by log level
+* Include all metadata: identifier, component name, message template, description
+* DEBUG and TRACE levels are not documented (they don't use LogRecord)
 
 ## Usage Examples
 
@@ -315,23 +375,27 @@ void shouldLogCorrectIdentifier() {
 ### Examples by Level
 
 ```java
-// DEBUG - technical details
+// DEBUG - technical details (MUST NOT use LogRecord)
 LOGGER.debug("Parsing JWT token with algorithm: %s", algorithm);
 LOGGER.debug("Cache hit for key: %s", cacheKey);
 
-// INFO - important business events
+// TRACE - fine-grained details (MUST NOT use LogRecord)
+LOGGER.trace("Entering method validateToken with parameter: %s", tokenId);
+LOGGER.trace("Token signature bytes: %s", signatureHex);
+
+// INFO - important business events (MUST use LogRecord)
 LOGGER.info(INFO.USER_LOGIN, username);
 LOGGER.info(INFO.SESSION_CREATED, sessionId);
 
-// WARN - potentially harmful situations
+// WARN - potentially harmful situations (MUST use LogRecord)
 LOGGER.warn(WARN.RATE_LIMIT, userId);
-LOGGER.warn("Clock skew detected: %s seconds", skew);
+LOGGER.warn(WARN.CLOCK_SKEW, skewSeconds);
 
-// ERROR - failed operations
+// ERROR - failed operations (MUST use LogRecord)
 LOGGER.error(exception, ERROR.VALIDATION_FAILED, tokenId);
 LOGGER.error(exception, ERROR.DATABASE_ERROR, "connection timeout");
 
-// FATAL - critical failures
+// FATAL - critical failures (MUST use LogRecord)
 LOGGER.fatal(exception, FATAL.SYSTEM_FAILURE, "database unreachable");
 LOGGER.fatal(FATAL.CONFIGURATION_INVALID, "required config missing");
 ```
@@ -341,28 +405,37 @@ LOGGER.fatal(FATAL.CONFIGURATION_INVALID, "required config missing");
 ### 1. Use Appropriate Log Levels
 
 ```java
-// ✅ Good - appropriate levels
-LOGGER.debug("Token signature algorithm: %s", algorithm);
-LOGGER.info(INFO.USER_LOGIN, username);
-LOGGER.error(exception, ERROR.VALIDATION_FAILED, tokenId);
+// ✅ Good - appropriate levels with correct LogRecord usage
+LOGGER.debug("Token signature algorithm: %s", algorithm);  // Simple string for debug
+LOGGER.info(INFO.USER_LOGIN, username);  // LogRecord for info
+LOGGER.error(exception, ERROR.VALIDATION_FAILED, tokenId);  // LogRecord for error
 
 // ❌ Bad - wrong levels
 LOGGER.info("Debug info: token = %s", fullToken);  // Should be debug
 LOGGER.error("User logged in");  // Should be info
+LOGGER.debug(DEBUG.SOME_MESSAGE, value);  // PROHIBITED - no LogRecord for debug!
 ```
 
-### 2. Use LogRecord for Important Messages
+### 2. Use LogRecord for Production Levels Only
 
 ```java
-// ✅ Good - LogRecord for production logging
+// ✅ Good - LogRecord REQUIRED for INFO/WARN/ERROR/FATAL
 LOGGER.info(INFO.USER_LOGIN, username);
+LOGGER.warn(WARN.RATE_LIMIT, userId);
 LOGGER.error(exception, ERROR.DATABASE_ERROR, details);
+LOGGER.fatal(FATAL.SYSTEM_FAILURE, reason);
 
-// ✅ Acceptable - simple string for debug
+// ✅ Good - simple strings for DEBUG/TRACE (LogRecord prohibited)
 LOGGER.debug("Validating token signature");
+LOGGER.trace("Entering method with parameter: %s", paramValue);
 
-// ❌ Bad - simple string for important events
-LOGGER.info("User " + username + " logged in");
+// ❌ Bad - simple string for production levels
+LOGGER.info("User " + username + " logged in");  // MUST use LogRecord
+LOGGER.warn("Rate limit exceeded");  // MUST use LogRecord
+
+// ❌ Bad - LogRecord for debug/trace levels
+LOGGER.debug(DEBUG.TOKEN_DETAILS, token);  // PROHIBITED - no LogRecord for debug!
+LOGGER.trace(TRACE.METHOD_ENTRY, methodName);  // PROHIBITED - no LogRecord for trace!
 ```
 
 ### 3. Exception Parameter First
@@ -480,9 +553,14 @@ public class TokenValidator {
 - [ ] CuiLogger used (not SLF4J or Log4j)
 - [ ] Logger is private static final
 - [ ] Logger constant named LOGGER
-- [ ] LogRecord used for INFO/WARN/ERROR/FATAL
+- [ ] **LogRecord REQUIRED for INFO/WARN/ERROR/FATAL**
+- [ ] **LogRecord NOT used for DEBUG/TRACE**
 - [ ] LogMessages class follows DSL pattern
-- [ ] Message identifiers in correct ranges
+- [ ] Message identifiers in correct ranges (001-099 INFO, 100-199 WARN, 200-299 ERROR, 300-399 FATAL)
+- [ ] No DEBUG or TRACE identifiers defined (prohibited)
+- [ ] **doc/LogMessages.adoc file exists and is up-to-date**
+- [ ] LogMessages.adoc includes all INFO/WARN/ERROR/FATAL messages
+- [ ] LogMessages.adoc matches implementation exactly
 - [ ] Exception parameter comes first
 - [ ] %s used for all substitutions
 - [ ] Appropriate log levels used
