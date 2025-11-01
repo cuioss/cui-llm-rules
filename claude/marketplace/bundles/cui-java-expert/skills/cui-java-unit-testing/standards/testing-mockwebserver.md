@@ -64,10 +64,8 @@ class SimpleMockWebServerTest {
     @Test
     @DisplayName("Should fetch users from API")
     void shouldFetchUsers(URIBuilder uriBuilder) throws Exception {
-        // Arrange
         HttpClient client = HttpClient.newHttpClient();
 
-        // Act - URIBuilder is pre-configured with server details
         HttpRequest request = HttpRequest.newBuilder()
             .uri(uriBuilder.addPathSegments("api", "users").build())
             .GET()
@@ -76,7 +74,6 @@ class SimpleMockWebServerTest {
         HttpResponse<String> response = client.send(request,
             HttpResponse.BodyHandlers.ofString());
 
-        // Assert
         assertEquals(200, response.statusCode(), "Should return 200 OK");
         assertEquals("{\"users\":[]}", response.body(), "Should return empty users array");
     }
@@ -362,18 +359,15 @@ class AutoHttpsTest {
     @DisplayName("Should connect via HTTPS with auto-generated certificates")
     void shouldConnectViaHttps(URIBuilder uriBuilder, SSLContext sslContext)
             throws Exception {
-        // Arrange
         assertNotNull(sslContext, "SSLContext should be injected");
 
         URI uri = uriBuilder.build();
         assertEquals("https", uri.getScheme(), "Should use HTTPS");
 
-        // Configure HttpClient with injected SSLContext
         HttpClient client = HttpClient.newBuilder()
             .sslContext(sslContext)
             .build();
 
-        // Act & Assert
         HttpRequest request = HttpRequest.newBuilder()
             .uri(uriBuilder.addPathSegment("api").build())
             .GET()
@@ -567,11 +561,9 @@ class RequestVerificationTest {
     @DisplayName("Should include authorization header")
     void shouldIncludeAuthHeader(MockWebServer server, URIBuilder uriBuilder)
             throws Exception {
-        // Arrange & Act
         client.fetchSecureResource(uriBuilder.addPathSegments("api", "users").build(),
                                    "token123");
 
-        // Assert - Use MockWebServer to verify request
         RecordedRequest request = server.takeRequest();
         assertEquals("Bearer token123", request.getHeader("Authorization"),
             "Authorization header should be included");
@@ -590,16 +582,13 @@ class RequestVerificationTest {
 @DisplayName("Should send correct request body")
 void shouldSendCorrectBody(MockWebServer server, URIBuilder uriBuilder)
         throws Exception {
-    // Arrange
     User user = User.builder()
         .name(Generators.strings().next())
         .email(Generators.emailAddress().next())
         .build();
 
-    // Act
     client.createUser(uriBuilder.addPathSegments("api", "users").build(), user);
 
-    // Assert
     RecordedRequest request = server.takeRequest();
     String body = request.getBody().readUtf8();
 
@@ -619,11 +608,9 @@ void shouldSendCorrectBody(MockWebServer server, URIBuilder uriBuilder)
 @DisplayName("Should handle multiple sequential requests")
 void shouldHandleMultipleRequests(MockWebServer server, URIBuilder uriBuilder)
         throws Exception {
-    // Act
     client.getUser(uriBuilder.addPathSegments("api", "users", "1").build());
     client.getUser(uriBuilder.addPathSegments("api", "users", "2").build());
 
-    // Assert
     assertEquals(2, server.getRequestCount(), "Should have made 2 requests");
 
     RecordedRequest request1 = server.takeRequest();

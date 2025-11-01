@@ -46,14 +46,11 @@ All tests must follow the AAA pattern:
 @Test
 @DisplayName("Should validate token with correct issuer")
 void shouldValidateTokenWithCorrectIssuer() {
-    // Arrange - Set up test data and preconditions
     String issuer = "https://example.com";
     Token token = createTokenWithIssuer(issuer);
 
-    // Act - Execute the behavior being tested
     ValidationResult result = validator.validate(token);
 
-    // Assert - Verify the expected outcome
     assertTrue(result.isValid(), "Token with correct issuer should be valid");
 }
 ```
