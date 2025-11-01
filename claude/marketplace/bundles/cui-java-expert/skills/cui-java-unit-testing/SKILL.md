@@ -22,17 +22,17 @@ Standards and patterns for writing high-quality unit tests in CUI Java projects 
 
 2. **Conditional loading based on testing context**:
 
-   **A. If testing value objects** (classes with equals/hashCode/toString or annotated with @Value, @Data):
+   **A. If project uses test data generators** (presence of `de.cuioss.test.generator` imports or `@EnableGeneratorController`):
+   ```
+   Read: standards/cui-test-generator-reference.md
+   ```
+   Provides comprehensive generator standards including mandatory requirements, all parameterized testing annotations (@GeneratorsSource, @CompositeTypeGeneratorSource, etc.), seed restrictions, anti-patterns, and complete API reference.
+
+   **B. If testing value objects** (classes with equals/hashCode/toString or annotated with @Value, @Data):
    ```
    Read: standards/testing-value-objects.md
    ```
    Provides comprehensive contract testing standards using `ShouldHandleObjectContracts<T>` interface and proper generator integration.
-
-   **B. If project uses test data generators** (presence of `de.cuioss.test.generator` imports or `@EnableGeneratorController`):
-   ```
-   Read: standards/testing-generators.md
-   ```
-   Covers mandatory generator usage patterns, @GeneratorsSource for parameterized tests, seed restrictions, and generator composition.
 
    **C. If testing HTTP clients or APIs** (testing code that makes HTTP requests):
    ```
@@ -46,17 +46,15 @@ Standards and patterns for writing high-quality unit tests in CUI Java projects 
    ```
    Covers Maven surefire/failsafe configuration, integration test naming conventions (*IT.java), profile setup, and CI/CD integration.
 
-3. **Optional: Load additional knowledge on demand**:
-
    **E. If testing applications that use Java Util Logging (JUL)** (testing code that uses `java.util.logging` or needs to assert log output):
    ```
    Read: standards/testing-juli-logger.md
    ```
    Provides patterns for configuring test loggers with `@EnableTestLogger`, asserting log statements with `LogAsserts`, and dynamically changing log levels in tests.
 
-4. **Extract key requirements from all loaded standards**
+3. **Extract key requirements from all loaded standards**
 
-5. **Store in working memory** for use during task execution
+4. **Store in working memory** for use during task execution
 
 ### Step 2: Analyze Existing Tests (if applicable)
 

@@ -283,7 +283,7 @@ void shouldHandleMultipleRequests() throws Exception {
 
 Combine MockWebServer with generator framework for comprehensive testing.
 
-For detailed generator usage patterns and requirements, see `testing-generators.md` in this skill.
+For detailed generator usage patterns and requirements, see [cui-test-generator-reference.md](cui-test-generator-reference.md).
 
 ```java
 @EnableMockWebServer

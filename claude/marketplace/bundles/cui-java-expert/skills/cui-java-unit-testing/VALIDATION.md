@@ -89,17 +89,19 @@
 ### Standards Files
 - ✅ testing-junit-core.md (295 lines) - Self-contained, no external dependencies
 - ✅ testing-value-objects.md (210 lines) - Self-contained with complete examples
-- ✅ testing-generators.md (366 lines) - Comprehensive generator documentation
+- ✅ cui-test-generator-reference.md (556 lines) - Comprehensive generator standards and API reference
 - ✅ testing-mockwebserver.md (363 lines) - Complete HTTP testing guide
 - ✅ integration-testing.md (251 lines) - Full Maven integration setup
+- ✅ testing-juli-logger.md (138 lines) - JUL testing patterns
 
 ### Relative Paths Verification
 All Read instructions in SKILL.md:
 - ✅ Read: standards/testing-junit-core.md
 - ✅ Read: standards/testing-value-objects.md
-- ✅ Read: standards/testing-generators.md
+- ✅ Read: standards/cui-test-generator-reference.md
 - ✅ Read: standards/testing-mockwebserver.md
 - ✅ Read: standards/integration-testing.md
+- ✅ Read: standards/testing-juli-logger.md
 
 ## Line Count Comparison
 
@@ -107,12 +109,13 @@ All Read instructions in SKILL.md:
 |------|----------|--------|--------|
 | testing-junit-core.md | ~150 | 295 | ✅ Enhanced |
 | testing-value-objects.md | ~60 | 210 | ✅ Enhanced |
-| testing-generators.md | ~70 | 366 | ✅ Enhanced |
+| cui-test-generator-reference.md | ~100 | 556 | ✅ Complete |
 | testing-mockwebserver.md | ~80 | 363 | ✅ Enhanced |
 | integration-testing.md | ~180 | 251 | ✅ Complete |
+| testing-juli-logger.md | ~50 | 138 | ✅ Complete |
 | SKILL.md | N/A | 288 | ✅ Comprehensive |
 
-**Total Standards Lines**: 1,485 lines (much more comprehensive than planned)
+**Total Standards Lines**: 1,813 lines (consolidated from original testing-generators.md)
 
 ## Information Loss Assessment
 
