@@ -80,12 +80,7 @@ Verify:
 - Usage examples
 - Integration notes
 
-**D. Generate VALIDATION.md** with:
-- Validation rules for standards
-- Quality checks
-- Review criteria
-
-**E. Create placeholder standards files** based on user input
+**D. Create placeholder standards files** based on user input
 
 ### Step 7: Display Success Summary
 

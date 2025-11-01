@@ -24,7 +24,7 @@ Standards and patterns for writing high-quality unit tests in CUI Java projects 
 
    **A. If project uses test data generators** (presence of `de.cuioss.test.generator` imports or `@EnableGeneratorController`):
    ```
-   Read: standards/cui-test-generator-reference.md
+   Read: standards/test-generator-framework.md
    ```
    Provides comprehensive generator standards including mandatory requirements, all parameterized testing annotations (@GeneratorsSource, @CompositeTypeGeneratorSource, etc.), seed restrictions, anti-patterns, and complete API reference.
 

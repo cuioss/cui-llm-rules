@@ -161,7 +161,6 @@ Each skill contains:
 - **SKILL.md** - AI-consumable instructions with workflow and standards
 - **README.md** - Human-readable documentation with examples
 - **standards/** - Detailed standards files for specific aspects
-- **VALIDATION.md** - Quality verification report (where applicable)
 
 ### Activating Skills
 

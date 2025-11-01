@@ -86,7 +86,7 @@ class SerializableValueTest implements ShouldBeSerializable<SerializableValue> {
 
 **CRITICAL**: The `getUnderTest()` method MUST use cui-test-generator for all data creation.
 
-For comprehensive generator usage guidelines, see [cui-test-generator-reference.md](cui-test-generator-reference.md).
+For comprehensive generator usage guidelines, see [test-generator-framework.md](test-generator-framework.md).
 
 ### Good Examples:
 
