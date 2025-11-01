@@ -46,9 +46,17 @@ Standards and patterns for writing high-quality unit tests in CUI Java projects 
    ```
    Covers Maven surefire/failsafe configuration, integration test naming conventions (*IT.java), profile setup, and CI/CD integration.
 
-3. **Extract key requirements from all loaded standards**
+3. **Optional: Load additional knowledge on demand**:
 
-4. **Store in working memory** for use during task execution
+   **E. If testing applications that use Java Util Logging (JUL)** (testing code that uses `java.util.logging` or needs to assert log output):
+   ```
+   Read: standards/testing-juli-logger.md
+   ```
+   Provides patterns for configuring test loggers with `@EnableTestLogger`, asserting log statements with `LogAsserts`, and dynamically changing log levels in tests.
+
+4. **Extract key requirements from all loaded standards**
+
+5. **Store in working memory** for use during task execution
 
 ### Step 2: Analyze Existing Tests (if applicable)
 
@@ -286,3 +294,4 @@ If encountering issues:
 * Generator Usage: standards/testing-generators.md
 * MockWebServer Testing: standards/testing-mockwebserver.md
 * Integration Testing: standards/integration-testing.md
+* JULi Logger Testing: standards/testing-juli-logger.md

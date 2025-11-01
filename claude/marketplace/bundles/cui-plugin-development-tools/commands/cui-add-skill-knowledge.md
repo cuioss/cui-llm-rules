@@ -150,13 +150,30 @@ Read: standards/{knowledge-name}.md
 
 **CRITICAL: Manual line-by-line review required**
 
-**Scan all existing standards in the skill:**
+**SCOPE: Scan ALL marketplace bundles, not just the target bundle**
+
+**Why marketplace-wide scanning is required:**
+- Knowledge often spans multiple bundles (e.g., testing standards may appear in Java, frontend, and documentation bundles)
+- Related bundles naturally share common patterns and practices
+- Cross-bundle duplication is common and must be detected
+- Previous failures:
+  - Only scanning target skill missed duplicates in related skills
+  - Only scanning target bundle missed duplicates in related bundles
+
+**Scan all existing standards across ALL marketplace bundles:**
 ```
-Read all files in {target-skill}/standards/*.md
-Read {target-skill}/SKILL.md
+# Get marketplace path from target-skill path
+marketplace_path = extract_marketplace_path({target-skill})
+
+# Scan ALL bundles in the marketplace
+Read all files in {marketplace_path}/bundles/*/skills/*/standards/*.md
+Read all files in {marketplace_path}/bundles/*/skills/*/SKILL.md
+
+# Also check bundle-level standards if they exist
+Read all files in {marketplace_path}/bundles/*/standards/*.md (if exists)
 ```
 
-**For each existing file, manually compare:**
+**For each existing file in ANY skill, manually compare:**
 
 1. **Read source knowledge document completely**
 2. **Read each existing standards file line by line**
@@ -165,9 +182,11 @@ Read {target-skill}/SKILL.md
    - Similar code examples
    - Redundant guidance
    - Overlapping sections
+   - Related topics that should cross-reference
 
-4. **Document findings**:
+4. **Document findings with skill context**:
    ```
+   Skill: {skill-name}
    File: {filename}
    Duplicate sections found:
    - Lines {X-Y}: {Description of duplicate content}
@@ -178,6 +197,14 @@ Read {target-skill}/SKILL.md
 - This requires semantic understanding
 - Must identify conceptual duplication, not just text matching
 - Requires judgment about what constitutes harmful vs contextual duplication
+
+**Common cross-skill and cross-bundle duplication patterns:**
+- Testing content in both production and testing skills
+- Configuration examples in both core and specialized skills
+- Integration patterns in multiple related skills
+- Best practices repeated across related domains
+- Testing patterns duplicated across Java, frontend, and documentation bundles
+- Common tool usage (e.g., logging testing) appearing in multiple bundles
 
 ### Step 6: Remove Duplicates
 
@@ -212,6 +239,7 @@ Read {target-skill}/SKILL.md
 ## Knowledge Integration Report
 
 **Skill**: {skill-name}
+**Bundle**: {bundle-name}
 **Source**: {source-knowledge}
 **Knowledge Document**: standards/{knowledge-name}.md
 **Integration Type**: {load-type}
@@ -223,24 +251,40 @@ Read {target-skill}/SKILL.md
 
 ### Duplicates Removed
 
-{For each file with duplicates removed}:
+{For each skill with duplicates removed}:
+
+#### Skill: {skill-name}
+
 - **{filename}**:
   - Removed lines {X-Y}: {description}
   - Removed lines {A-B}: {description}
-  - Added cross-reference to {knowledge-name}.md
+  - Added cross-reference to {knowledge-name}.md in {target-skill}
 
 ### Files Scanned (No Duplicates Found)
 
-{List files scanned that had no duplicates}
+**Marketplace-wide scan summary**:
+- Total bundles scanned: {count}
+- Total skills scanned: {count}
+- Total files scanned: {count}
+
+**Bundles scanned**:
+
+{For each bundle}:
+#### Bundle: {bundle-name}
+- Skills scanned: {count}
+- Files scanned: {count}
+
+**Skills scanned**:
+{List each skill and its files that were scanned}
 
 ### Authoritative Source
 
-The new document `standards/{knowledge-name}.md` is now the authoritative source for:
+The new document `{target-skill}/standards/{knowledge-name}.md` is now the authoritative source for:
 - {Topic 1}
 - {Topic 2}
 - {Topic 3}
 
-All other standards files now reference this document for these topics.
+All other standards files across ALL marketplace bundles now reference this document for these topics.
 ```
 
 ## CRITICAL RULES

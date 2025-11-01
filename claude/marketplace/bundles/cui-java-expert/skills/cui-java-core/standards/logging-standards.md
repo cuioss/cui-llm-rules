@@ -247,59 +247,33 @@ LOGGER.error(exception, ERROR.VALIDATION_FAILED, exception.getMessage());
 LOGGER.fatal(exception, FATAL.SYSTEM_FAILURE, "Database unavailable");
 ```
 
-## Testing Configuration
+## How to Test
 
-### Test Logger Setup
+For comprehensive testing of logging in unit tests, see the dedicated testing guide:
 
-Use `cui-test-juli-logger` for testing:
+**CUI Test JULi Logger** - Complete guide for testing log output in unit tests, including:
+- `@EnableTestLogger` setup and configuration
+- `LogAsserts` for verifying log messages
+- Testing with LogRecord identifiers
+- Dynamic log level configuration
+- Integration with CUI logging framework
 
-```xml
-<dependency>
-    <groupId>de.cuioss.test</groupId>
-    <artifactId>cui-test-juli-logger</artifactId>
-    <scope>test</scope>
-</dependency>
-```
+See: `cui-java-unit-testing` skill → `standards/testing-juli-logger.md`
 
-### Testing Log Output
+**Quick example**:
 
 ```java
+import de.cuioss.test.juli.junit5.EnableTestLogger;
 import de.cuioss.test.juli.LogAsserts;
 import de.cuioss.test.juli.TestLogLevel;
-import de.cuioss.test.juli.junit5.EnableTestLogger;
 
 @EnableTestLogger
 class TokenValidatorTest {
-
     @Test
     void shouldLogValidationSuccess() {
         validator.validate(validToken);
-
-        // Assert log message was written
-        LogAsserts.assertSingleLogMessagePresentContaining(TestLogLevel.INFO, "validated");
+        LogAsserts.assertLogMessagePresentContaining(TestLogLevel.INFO, "validated");
     }
-
-    @Test
-    void shouldLogValidationError() {
-        validator.validate(invalidToken);
-
-        // Assert error was logged
-        LogAsserts.assertLogMessagePresentContaining(TestLogLevel.ERROR, "validation failed");
-    }
-}
-```
-
-### Testing with LogRecord Identifiers
-
-```java
-@Test
-void shouldLogCorrectIdentifier() {
-    validator.validate(token);
-
-    // Verify the correct LogRecord was used
-    String expectedIdentifier = INFO.TOKEN_VALIDATED.resolveIdentifierString();
-    LogAsserts.assertSingleLogMessagePresentContaining(
-        TestLogLevel.INFO, expectedIdentifier);
 }
 ```
 
