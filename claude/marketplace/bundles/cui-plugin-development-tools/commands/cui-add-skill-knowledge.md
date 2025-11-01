@@ -16,6 +16,18 @@ When you have valuable documentation (README files, external guides, technical s
 3. Scans all existing skill standards for duplicate content
 4. Removes duplicates, keeping the new document as authoritative source
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** with:
+1. Improved knowledge integration patterns or transformation techniques
+2. Better methods for identifying semantic duplication
+3. More effective strategies for cross-referencing and deduplication
+4. Enhanced content organization and load-type selection guidelines
+5. Improved integration report formats or validation checklist items
+6. Any lessons learned about knowledge document creation and maintenance
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 **Required Parameters** (will prompt if missing):
