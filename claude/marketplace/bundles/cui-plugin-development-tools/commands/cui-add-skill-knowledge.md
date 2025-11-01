@@ -287,6 +287,44 @@ The new document `{target-skill}/standards/{knowledge-name}.md` is now the autho
 All other standards files across ALL marketplace bundles now reference this document for these topics.
 ```
 
+### Step 8: Verify Skill Quality
+
+**Run diagnostics on the modified skill:**
+
+```bash
+/cui-diagnose-skills {skill-name}
+```
+
+This verifies:
+- SKILL.md structure and references are correct
+- All standards files are properly formatted
+- Cross-references resolve correctly
+- No broken links or missing files
+- Standards organization follows best practices
+
+**Review diagnostic output:**
+- Fix any issues identified
+- Ensure all checks pass before proceeding
+
+### Step 9: Verify Bundle Quality
+
+**Run diagnostics on the bundle containing the skill:**
+
+```bash
+/cui-diagnose-bundle {bundle-name}
+```
+
+This verifies:
+- Bundle-wide integration is correct
+- All skills within bundle are properly structured
+- No conflicts or inconsistencies across bundle
+- plugin.json is up to date
+- Bundle documentation reflects changes
+
+**Review diagnostic output:**
+- Fix any bundle-level issues identified
+- Ensure bundle quality standards are met
+
 ## CRITICAL RULES
 
 **Duplication Prevention:**
@@ -394,6 +432,8 @@ After integration, verify:
 - [ ] Integration report generated
 - [ ] No broken references in existing files
 - [ ] Knowledge document is authoritative source
+- [ ] `/cui-diagnose-skills` executed and all checks pass
+- [ ] `/cui-diagnose-bundle` executed and all checks pass
 
 ## RELATED
 
