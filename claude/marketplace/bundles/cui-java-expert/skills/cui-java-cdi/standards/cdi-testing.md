@@ -310,9 +310,19 @@ cui:
 * **Configuration Consistency**: All test modules must use consistent base configuration from the standards above
 
 ### Coverage Requirements
-* **Minimum Coverage**: 80% line coverage for business logic
-* **CDI Components**: All producers, observers, and interceptors must be tested
-* **Configuration**: All configuration classes must have tests
+
+**What Constitutes "Business Logic"**:
+* ✅ **Include in coverage**: Services, validators, processors, domain logic, business rules, data transformation, calculation logic
+* ❌ **Exclude from coverage**: Generated code (Lombok, MapStruct), simple DTOs without logic, configuration POJOs, framework adapters with only delegation
+
+**Minimum Coverage Targets**:
+* **Business Logic**: 80% line coverage minimum
+  - Services implementing business rules
+  - Validators with business validation logic
+  - Processors transforming data
+  - Domain model methods with behavior
+* **CDI Components**: 100% coverage for producers, observers, and interceptors (critical infrastructure)
+* **Configuration Classes**: All configuration classes must have tests validating correct bean production
 * **Health Checks**: All health check implementations must be tested
 
 ### Quarkus-Specific Testing Patterns

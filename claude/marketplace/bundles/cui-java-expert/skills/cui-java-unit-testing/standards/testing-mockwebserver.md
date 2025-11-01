@@ -771,7 +771,6 @@ class ContextAwareTest {
 
 ### Avoid Common Pitfalls
 
-* **Don't use deprecated API**: Never use `MockWebServerHolder` or `@InjectMockWebServer`
 * **Use parameter injection**: Always inject URIBuilder, MockWebServer, or SSLContext
 * **WeldUnit compatibility**: Add `@ExplicitParamInjection` when using WeldUnit
 * **Handle InterruptedException**: Properly handle when using `server.takeRequest()`

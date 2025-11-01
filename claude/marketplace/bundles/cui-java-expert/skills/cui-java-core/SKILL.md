@@ -25,7 +25,25 @@ Read: standards/logging-standards.md
 
 These standards are fundamental to all CUI Java development and should be loaded together for consistent, comprehensive guidance.
 
-### Step 2: Extract Key Requirements
+### Step 2: Load Additional Knowledge (Optional)
+
+**When needed**: Load domain-specific knowledge on demand.
+
+**LogMessages Documentation** (load when needed):
+```
+Read: standards/logmessages-documentation.md
+```
+
+Use when: Writing or maintaining AsciiDoc documentation for LogMessages classes, or needing guidance on documenting log message standards.
+
+**CUI HTTP Client** (load when needed):
+```
+Read: standards/cui-http.md
+```
+
+Use when: Working with HTTP client code, implementing HTTP request/response handling, or needing guidance on the HttpResult pattern, retry logic, ETag caching, or HTTP error handling.
+
+### Step 3: Extract Key Requirements
 
 From all loaded standards, extract and organize:
 
@@ -67,7 +85,7 @@ From all loaded standards, extract and organize:
    - Log level guidelines
    - Exception logging patterns
 
-### Step 3: Analyze Existing Code (if applicable)
+### Step 4: Analyze Existing Code (if applicable)
 
 If working with existing Java code:
 
@@ -93,7 +111,7 @@ If working with existing Java code:
    - Method sizes (< 50 lines preferred)
    - Parameter counts (≤ 3 preferred)
 
-### Step 4: Write/Refactor Java Code According to Standards
+### Step 5: Write/Refactor Java Code According to Standards
 
 When writing or refactoring Java code:
 
@@ -142,7 +160,7 @@ When writing or refactoring Java code:
    - Use %s for all string substitutions
    - Organize identifiers by log level ranges
 
-### Step 5: Verify Standards Compliance
+### Step 6: Verify Standards Compliance
 
 Before completing the task:
 
@@ -194,7 +212,7 @@ Before completing the task:
    ./mvnw clean verify
    ```
 
-### Step 6: Report Results
+### Step 7: Report Results
 
 Provide summary of:
 

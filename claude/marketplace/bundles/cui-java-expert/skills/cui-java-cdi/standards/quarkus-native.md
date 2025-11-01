@@ -345,20 +345,50 @@ For large projects:
 
 ### Risk Assessment
 
-**Low Risk Optimizations**:
-- Removing unnecessary `methods = true` for CDI beans
-- Eliminating `fields = true` when no field access occurs
-- Replacing string constants with class references
+**How to Determine Risk Level**:
 
-**Medium Risk Optimizations**:
-- Changing constructor reflection for framework-managed classes
-- Optimizing data classes with complex serialization needs
-- Modifying reflection for classes with complex inheritance
+Use these concrete criteria to assess optimization safety:
 
-**High Risk Optimizations**:
-- Changing reflection for core framework integration points
-- Modifying reflection for classes with runtime proxy generation
-- Altering reflection for classes with complex annotation processing
+**Low Risk** - Classes you own with no framework interaction:
+- ✅ Simple domain objects/DTOs without framework annotations
+- ✅ Utility classes with only static methods
+- ✅ Value objects (records, @Value classes) with no serialization
+- ✅ Classes that you fully control and can test comprehensively
+
+**Medium Risk** - Classes with framework annotations but standard patterns:
+- ⚠️ CDI beans with `@ApplicationScoped`, `@RequestScoped` using standard injection patterns
+- ⚠️ JAX-RS resources with standard `@Path`, `@GET`, `@POST` annotations
+- ⚠️ Data classes using Jackson/JSON-B with simple serialization
+- ⚠️ Classes with inheritance where parent classes are also in your codebase
+
+**High Risk** - Classes implementing framework SPIs or using advanced features:
+- ❌ Classes implementing Quarkus/CDI SPIs (e.g., `BeanConfigurator`, `Interceptor`)
+- ❌ Classes with runtime proxy generation (CDI interceptors, decorators)
+- ❌ Classes using advanced reflection features (dynamic class loading, annotation synthesis)
+- ❌ Third-party library classes (you don't control the code)
+- ❌ Classes with complex annotation processing or meta-annotations
+
+**Examples**:
+
+```java
+// LOW RISK - Simple domain object
+public record UserData(String name, String email) {}
+
+// MEDIUM RISK - Standard CDI bean
+@ApplicationScoped
+public class UserService {
+    @Inject UserRepository repository;
+    public User findUser(String id) { ... }
+}
+
+// HIGH RISK - Framework SPI implementation
+@Interceptor
+@Logged
+public class LoggingInterceptor {
+    @AroundInvoke
+    public Object logInvocation(InvocationContext ctx) { ... }
+}
+```
 
 ## Success Metrics
 

@@ -101,7 +101,7 @@ Designed specifically for AI assistants:
 - DSL-style constants for type-safe configuration
 - CUI logging framework usage
 
-**Standards Files**: 6 comprehensive documents covering core patterns, null safety, Lombok, modern features, constants, and logging
+**Standards Files**: 9 comprehensive documents covering core patterns, null safety, Lombok, modern features, constants, logging, LogMessages documentation, and HTTP client patterns
 
 ### cui-java-cdi
 
@@ -134,7 +134,7 @@ Designed specifically for AI assistants:
 - Test coverage strategies
 - Integration with build systems
 
-**Standards Files**: 3 documents covering core testing requirements, generators, and value object patterns
+**Standards Files**: 6 documents covering JUnit core, generators, value objects, MockWebServer, integration testing, and JUL logger testing
 
 ## Usage Examples
 
@@ -225,9 +225,9 @@ This Java expertise bundle complements other CUI bundles:
 ## Bundle Statistics
 
 - **Total Skills**: 3
-- **Total Standards Files**: 13
-- **Total Lines of Documentation**: ~3,500
-- **Quality Score**: 97.75/100 average
+- **Total Standards Files**: 19
+- **Total Lines of Documentation**: ~5,800
+- **Quality Score**: 94.0/100 average
 - **Status**: Production Ready ✅
 
 ## Maintenance
@@ -255,6 +255,6 @@ Apache-2.0 - Part of the CUI LLM Rules documentation system for CUI OSS projects
 ---
 
 **Version**: 1.0.0
-**Last Updated**: 2025-10-31
+**Last Updated**: 2025-11-01
 **Status**: Production Ready ✅
-**Average Quality Score**: 97.75/100 ⭐
+**Average Quality Score**: 94.0/100 ⭐
