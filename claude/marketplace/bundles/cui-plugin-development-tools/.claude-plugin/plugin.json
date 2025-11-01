@@ -11,6 +11,7 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["plugin", "development", "tools", "diagnose", "create"],
   "commands": [
+    "./commands/cui-add-skill-knowledge.md",
     "./commands/cui-create-agent.md",
     "./commands/cui-create-bundle.md",
     "./commands/cui-create-command.md",
