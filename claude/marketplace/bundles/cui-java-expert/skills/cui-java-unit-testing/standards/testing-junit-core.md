@@ -2,6 +2,26 @@
 
 ## Core Testing Principles
 
+### Test Class Requirements
+
+**CRITICAL: Each type (class, interface, enum with behavior) MUST have at least one dedicated test class.**
+
+* Every production class requires a corresponding test class
+* Test class naming: `{ClassName}Test.java` for the production class `{ClassName}.java`
+* Test classes must be in the same package structure under `src/test/java`
+* One test class per production class (1:1 mapping)
+* Additional test classes allowed for complex scenarios (e.g., `{ClassName}IntegrationTest.java`)
+
+**Examples:**
+* `TokenValidator.java` → `TokenValidatorTest.java`
+* `UserService.java` → `UserServiceTest.java`
+* `HttpResultMapper.java` → `HttpResultMapperTest.java`
+
+**Exceptions:**
+* Simple DTOs with no behavior (pure data classes with only getters/setters)
+* Enums without custom methods (only constants)
+* Package-private utility classes used only internally by tested classes
+
 ### Test Coverage
 
 * All public methods must have unit tests
