@@ -139,19 +139,38 @@ Before completing the task:
    Task:
      subagent_type: maven-builder
      description: Run unit tests
-     prompt: Execute Maven build with command "./mvnw clean test"
+     prompt: |
+       Execute unit tests only.
+
+       Parameters:
+       - command: clean test
+
+       CRITICAL: Wait for tests to complete. Inspect results and fix any failures.
 
    # Run integration tests (if applicable)
    Task:
      subagent_type: maven-builder
      description: Run integration tests
-     prompt: Execute Maven build with command "./mvnw clean verify -Pintegration-tests"
+     prompt: |
+       Execute integration tests with the integration-tests profile.
+
+       Parameters:
+       - command: clean verify -Pintegration-tests
+
+       CRITICAL: Wait for tests to complete. Inspect results and fix any failures.
 
    # Verify coverage
    Task:
      subagent_type: maven-builder
      description: Verify test coverage
-     prompt: Execute Maven build with command "./mvnw clean verify -Pcoverage"
+     prompt: |
+       Execute tests with coverage analysis using the coverage profile.
+
+       Parameters:
+       - command: clean verify -Pcoverage
+
+       CRITICAL: Wait for build to complete. Inspect coverage results and ensure
+       minimum 80% line/branch coverage is met. Address any coverage gaps.
    ```
 
 4. **Check coverage requirements**:

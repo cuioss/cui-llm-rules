@@ -14,7 +14,7 @@ Execute Maven builds with configurable commands, output modes, and module target
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
-### Step 1: Parse Input Parameters
+### Step 1: Parse Input Parameters and Construct Command
 
 Extract and validate the following parameters from the user's request:
 
@@ -22,7 +22,9 @@ Extract and validate the following parameters from the user's request:
 - NONE (all have defaults)
 
 **Optional Parameters:**
-- **command**: Maven command to execute (default: `./mvnw -Ppre-commit clean install`)
+- **command**: Maven goals and options to execute (default: `-Ppre-commit clean install`)
+  - **Do NOT include `./mvnw`** - this is added automatically
+  - Examples: `clean test`, `clean verify -Pcoverage`, `-Ppre-commit clean install`
 - **outputMode**: Output filtering mode (default: `DEFAULT`)
   - `FILE`: Status + file path only
   - `DEFAULT`: Status + file path + all errors and warnings
@@ -31,16 +33,31 @@ Extract and validate the following parameters from the user's request:
 - **module**: Specific module to build (e.g., `oauth-sheriff-quarkus-deployment`)
 - **reactor**: Module name to resume reactor build from (e.g., `sample-services`)
 
-**Command Construction:**
-1. Start with base command (default or provided)
-2. If `module` parameter provided:
+**Command Construction Algorithm:**
+
+1. **Normalize command parameter**:
+   - If command starts with `./mvnw ` or `./mvnw` → strip it (backwards compatibility)
+   - If command is empty or not provided → use default: `-Ppre-commit clean install`
+   - Store normalized command as `{maven_goals}`
+
+2. **Build base command**:
+   - Start with: `./mvnw`
+   - Append: `{maven_goals}`
+   - Result: `./mvnw {maven_goals}`
+
+3. **Add module targeting** (if `module` parameter provided):
    - Extract module name (e.g., `oauth-sheriff-quarkus-deployment`)
-   - Determine correct -pl path by searching for module in pom.xml files
-   - Append `-pl <parent>/<module>` to command
-3. If `reactor` parameter provided:
+   - Use Grep to find module in pom.xml files
+   - Determine correct -pl path (e.g., `modules/oauth-sheriff-quarkus-deployment`)
+   - Append: `-pl {parent}/{module}`
+
+4. **Add reactor resumption** (if `reactor` parameter provided):
    - Extract module name (e.g., `sample-services`)
-   - Append `-rf :<module-name>` to command to resume from that module
-4. Final command always starts with `./mvnw` from project root
+   - Append: `-rf :{module-name}`
+
+5. **Final command format**:
+   - `./mvnw {maven_goals} {-pl ...} {-rf ...}`
+   - Example: `./mvnw clean verify -Pcoverage -pl modules/auth`
 
 ### Step 2: Read Configuration
 

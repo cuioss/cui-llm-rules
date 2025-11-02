@@ -196,7 +196,13 @@ Before completing the task:
    Task:
      subagent_type: maven-builder
      description: Build and verify project
-     prompt: Execute Maven build with clean verify to ensure all tests pass and code compiles correctly.
+     prompt: |
+       Execute Maven build to verify all tests pass and code compiles correctly.
+
+       Parameters:
+       - command: clean verify
+
+       CRITICAL: Wait for build to complete. Inspect results and respond to any failures.
    ```
 
 ### Step 7: Report Results

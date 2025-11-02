@@ -276,7 +276,14 @@ Use the maven-builder agent to verify coverage requirements:
 Task:
   subagent_type: maven-builder
   description: Verify test coverage
-  prompt: Execute Maven build with command "./mvnw clean verify -Pcoverage"
+  prompt: |
+    Execute tests with coverage analysis using the coverage profile.
+
+    Parameters:
+    - command: clean verify -Pcoverage
+
+    CRITICAL: Wait for build to complete. Inspect coverage results and ensure
+    minimum 80% line/branch coverage is met. Address any coverage gaps.
 ```
 
 This will:
