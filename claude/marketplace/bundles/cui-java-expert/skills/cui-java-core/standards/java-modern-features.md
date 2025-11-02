@@ -1,48 +1,5 @@
 # Java Modern Features Standards
 
-## Required Imports
-
-```java
-// Java 17+ Records (no explicit import needed - language feature)
-
-// Java 17+ Sealed Interfaces/Classes
-import java.lang.constant.Constable;
-import java.lang.constant.ConstantDesc;
-
-// Collections (modern factories and streams)
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-// Functional Interfaces
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-// Java Time API
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.DayOfWeek;
-
-// Pattern Matching (Java 17+)
-import java.util.Objects;
-
-// Text Blocks and String Processing
-import java.lang.String;
-
-// Records with Validation
-import java.util.Objects;
-
-// Immutable Collections
-import java.util.Collections;
-```
-
 ## Overview
 
 CUI projects use modern Java features to write concise, readable, and maintainable code. Always use the most recent features from the version you compile against.

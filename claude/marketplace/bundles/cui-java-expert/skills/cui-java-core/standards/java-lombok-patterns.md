@@ -3,41 +3,22 @@
 ## Required Imports
 
 ```java
-// Lombok Core Annotations
+// Lombok Core
 import lombok.Builder;
 import lombok.Value;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
-// Lombok Advanced Features
+// Lombok Advanced
 import lombok.Delegate;
 import lombok.Singular;
 import lombok.experimental.UtilityClass;
-import lombok.experimental.FieldDefaults;
-import lombok.AccessLevel;
-
-// Lombok Builder Features
 import lombok.Builder.Default;
 
-// Jackson Integration (if using JSON)
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-// Guava (for caching examples)
+// Guava (for delegation caching pattern)
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
-// Java Standard Library
-import java.time.Duration;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
 ```
 
 ## Overview
