@@ -1,5 +1,12 @@
 # Value Object Testing Standards
 
+## Required Imports
+
+```java
+// CUI Test Value Objects
+import de.cuioss.test.valueobjects.api.contracts.ShouldHandleObjectContracts;
+```
+
 ## Overview
 
 Value objects require comprehensive contract testing to ensure proper behavior in collections, caching, and persistence scenarios. CUI projects use the cui-test-value-objects framework for consistent and thorough contract testing.
@@ -17,9 +24,6 @@ Use `ShouldHandleObjectContracts<T>` for comprehensive value object testing. Thi
 * Immutability verification
 
 ```java
-import de.cuioss.test.valueobjects.api.contracts.ShouldHandleObjectContracts;
-import de.cuioss.test.generator.Generators;
-
 @EnableGeneratorController
 class UserDataTest implements ShouldHandleObjectContracts<UserData> {
 

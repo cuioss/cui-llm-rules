@@ -4,6 +4,15 @@
 > **Integration Date**: 2025-11-01
 > **Load Type**: on-demand
 
+## Required Imports
+
+```java
+// CUI Test JULi Logger
+import de.cuioss.test.juli.junit5.EnableTestLogger;
+import de.cuioss.test.juli.LogAsserts;
+import de.cuioss.test.juli.TestLogLevel;
+```
+
 ## What is it?
 
 Provides classes simplifying the configuration and asserting of logging in the context of unit tests using Java Util Logging (JUL).
@@ -60,10 +69,6 @@ The `LogAsserts` class provides comprehensive assertion methods for verifying lo
 ### Basic Log Assertions
 
 ```java
-import de.cuioss.test.juli.LogAsserts;
-import de.cuioss.test.juli.TestLogLevel;
-import de.cuioss.test.juli.junit5.EnableTestLogger;
-
 @EnableTestLogger
 class TokenValidatorTest {
 
