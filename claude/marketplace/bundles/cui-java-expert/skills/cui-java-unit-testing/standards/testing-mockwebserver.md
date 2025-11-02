@@ -22,10 +22,8 @@ import de.cuioss.test.mockwebserver.dispatcher.HttpMethodMapper;
 import de.cuioss.test.mockwebserver.tls.KeyMaterialUtil;
 import de.cuioss.test.mockwebserver.tls.KeyAlgorithm;
 
-// OkHttp MockWebServer (underlying library)
+// OkHttp MockWebServer (underlying library - server instance only)
 import mockwebserver3.MockWebServer;
-import mockwebserver3.MockResponse;
-import mockwebserver3.RecordedRequest;
 
 // OkHttp TLS Certificates
 import okhttp3.tls.HandshakeCertificates;
@@ -299,8 +297,8 @@ class UserApiDispatcher implements ModuleDispatcherElement {
     }
 
     @Override
-    public Optional<MockResponse> handleGet(@NonNull RecordedRequest request) {
-        return Optional.of(new MockResponse.Builder()
+    public Optional<mockwebserver3.MockResponse> handleGet(@NonNull mockwebserver3.RecordedRequest request) {
+        return Optional.of(new mockwebserver3.MockResponse.Builder()
             .addHeader("Content-Type", "application/json")
             .body("{\"users\":[]}")
             .code(200)
@@ -345,12 +343,12 @@ class PathBasedDispatcherTest {
             }
 
             @Override
-            public Optional<MockResponse> handleGet(@NonNull RecordedRequest request) {
+            public Optional<mockwebserver3.MockResponse> handleGet(@NonNull mockwebserver3.RecordedRequest request) {
                 String path = request.getPath();
 
                 // Route based on path patterns
                 if (path.endsWith("/api/users/active")) {
-                    return Optional.of(new MockResponse.Builder()
+                    return Optional.of(new mockwebserver3.MockResponse.Builder()
                         .code(200)
                         .addHeader("Content-Type", "application/json")
                         .body("{\"users\":[{\"id\":1,\"status\":\"active\"}]}")
@@ -358,14 +356,14 @@ class PathBasedDispatcherTest {
                 } else if (path.matches(".*/api/users/\\d+")) {
                     // Extract ID from path
                     String userId = path.substring(path.lastIndexOf('/') + 1);
-                    return Optional.of(new MockResponse.Builder()
+                    return Optional.of(new mockwebserver3.MockResponse.Builder()
                         .code(200)
                         .body("{\"id\":" + userId + "}")
                         .build());
                 }
 
                 // Default response
-                return Optional.of(new MockResponse.Builder()
+                return Optional.of(new mockwebserver3.MockResponse.Builder()
                     .code(200)
                     .body("{\"users\":[]}")
                     .build());
@@ -547,8 +545,8 @@ class TimeoutTest {
             }
 
             @Override
-            public Optional<MockResponse> handleGet(@NonNull RecordedRequest request) {
-                return Optional.of(new MockResponse.Builder()
+            public Optional<mockwebserver3.MockResponse> handleGet(@NonNull mockwebserver3.RecordedRequest request) {
+                return Optional.of(new mockwebserver3.MockResponse.Builder()
                     .code(200)
                     .setBodyDelay(5, TimeUnit.SECONDS)
                     .build());
@@ -599,7 +597,7 @@ class RequestVerificationTest {
         client.fetchSecureResource(uriBuilder.addPathSegments("api", "users").build(),
                                    "token123");
 
-        RecordedRequest request = server.takeRequest();
+        mockwebserver3.RecordedRequest request = server.takeRequest();
         assertEquals("Bearer token123", request.getHeader("Authorization"),
             "Authorization header should be included");
         assertEquals("GET", request.getMethod(), "Should use GET method");
@@ -624,7 +622,7 @@ void shouldSendCorrectBody(MockWebServer server, URIBuilder uriBuilder)
 
     client.createUser(uriBuilder.addPathSegments("api", "users").build(), user);
 
-    RecordedRequest request = server.takeRequest();
+    mockwebserver3.RecordedRequest request = server.takeRequest();
     String body = request.getBody().readUtf8();
 
     assertTrue(body.contains(user.getName()),
@@ -648,10 +646,10 @@ void shouldHandleMultipleRequests(MockWebServer server, URIBuilder uriBuilder)
 
     assertEquals(2, server.getRequestCount(), "Should have made 2 requests");
 
-    RecordedRequest request1 = server.takeRequest();
+    mockwebserver3.RecordedRequest request1 = server.takeRequest();
     assertTrue(request1.getPath().endsWith("/api/users/1"));
 
-    RecordedRequest request2 = server.takeRequest();
+    mockwebserver3.RecordedRequest request2 = server.takeRequest();
     assertTrue(request2.getPath().endsWith("/api/users/2"));
 }
 ```
@@ -675,14 +673,14 @@ class RetryLogicTest {
             }
 
             @Override
-            public Optional<MockResponse> handleGet(@NonNull RecordedRequest request) {
+            public Optional<mockwebserver3.MockResponse> handleGet(@NonNull mockwebserver3.RecordedRequest request) {
                 callCount++;
                 if (callCount == 1) {
                     // First request fails
-                    return Optional.of(new MockResponse.Builder().code(500).build());
+                    return Optional.of(new mockwebserver3.MockResponse.Builder().code(500).build());
                 }
                 // Second request succeeds
-                return Optional.of(new MockResponse.Builder()
+                return Optional.of(new mockwebserver3.MockResponse.Builder()
                     .code(200)
                     .body("{\"status\":\"success\"}")
                     .build());
