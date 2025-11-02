@@ -123,7 +123,38 @@ Scan for vague guidance:
 - Record the vague statement
 - Suggest specific alternative
 
-### Step 5: Check Formatting and Structure
+### Step 5: Check for Missing Import Block (Code-Heavy Files)
+
+**Purpose**: Code-heavy standards files should include a "Required Imports" section for developer convenience.
+
+**Detect code-heavy files:**
+```
+Grep: pattern="^```java$", path={file_path}, output_mode=count
+```
+
+**If file has 5+ Java code blocks:**
+- Check for "Required Imports" or "## Required Imports" section
+- Search for import block pattern:
+  ```
+  Grep: pattern="## Required Imports", path={file_path}, output_mode=content
+  ```
+
+**Assessment criteria:**
+- Files with 5+ code blocks WITHOUT import section → **SUGGESTION**
+- Files with 10+ code blocks WITHOUT import section → **WARNING**
+- Rationale: Developers benefit from copy-paste ready import blocks for immediate IDE use
+
+**For missing import blocks:**
+- Record as suggestion/warning based on code block count
+- Note: "Standards file has {count} code examples but no 'Required Imports' section"
+- Recommendation: "Add comprehensive import block at document start following testing-mockwebserver.md pattern"
+
+**Skip import block check for:**
+- Configuration files (XML, YAML, properties examples)
+- Documentation-focused files with minimal code
+- Process/workflow documents
+
+### Step 6: Check Formatting and Structure
 
 **Check 1: Markdown/AsciiDoc Syntax**
 - Headers properly formatted
@@ -138,7 +169,7 @@ Scan for vague guidance:
 - File > 500 lines may indicate bloat
 - Consider splitting if multiple unrelated topics
 
-### Step 6: Generate Issue Report
+### Step 7: Generate Issue Report
 
 **Output format:**
 
@@ -179,10 +210,17 @@ Scan for vague guidance:
       "issue": "Missing blank line before list"
     }
   ],
+  "missing_import_block": {
+    "severity": "suggestion|warning|none",
+    "code_block_count": {count},
+    "has_import_block": true|false,
+    "recommendation": "Add comprehensive import block at document start following testing-mockwebserver.md pattern"
+  },
   "metrics": {
     "total_lines": {count},
     "removable_lines": {count},
-    "reduction_percentage": "{percentage}%"
+    "reduction_percentage": "{percentage}%",
+    "code_block_count": {count}
   }
 }
 ```
