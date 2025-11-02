@@ -4,6 +4,59 @@
 > **Integration Date**: 2025-11-01
 > **Load Type**: on-demand
 
+## Required Imports
+
+```java
+// CUI HTTP Client Core
+import de.cuioss.http.client.HttpHandler;
+import de.cuioss.http.client.SecureSSLContextProvider;
+
+// HTTP Adapters
+import de.cuioss.http.adapter.HttpAdapter;
+import de.cuioss.http.adapter.ETagAwareHttpAdapter;
+import de.cuioss.http.adapter.ResilientHttpAdapter;
+import de.cuioss.http.adapter.RetryConfig;
+
+// HTTP Result Pattern
+import de.cuioss.http.result.HttpResult;
+import de.cuioss.http.result.HttpErrorCategory;
+import de.cuioss.http.result.HttpResultState;
+
+// Content Conversion
+import de.cuioss.http.converter.HttpContentConverter;
+import de.cuioss.http.converter.HttpResponseConverter;
+import de.cuioss.http.converter.StringContentConverter;
+import de.cuioss.http.converter.ContentType;
+
+// HTTP Status Classification
+import de.cuioss.http.status.HttpStatusFamily;
+
+// Logging
+import de.cuioss.http.logging.HttpLogMessages;
+import de.cuioss.tools.logging.CuiLogger;
+
+// Java HTTP Client (standard library)
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
+
+// SSL/TLS
+import javax.net.ssl.SSLContext;
+
+// Async Support
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+// Collections and Optional
+import java.util.Map;
+import java.util.Optional;
+
+// Lombok (for builders)
+import lombok.Builder;
+import lombok.Value;
+```
+
 ## Maven Coordinates
 
 ```xml

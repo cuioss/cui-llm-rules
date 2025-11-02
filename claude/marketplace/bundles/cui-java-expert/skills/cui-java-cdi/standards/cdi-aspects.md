@@ -1,5 +1,46 @@
 # CDI Aspects and Best Practices
 
+## Required Imports
+
+```java
+// CDI Core Annotations
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
+
+// CDI Scopes
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.context.Dependent;
+
+// CDI Producers and Qualifiers
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.BeanManager;
+
+// Quarkus Configuration
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+// Quarkus Conditional Beans
+import io.quarkus.arc.properties.IfBuildProperty;
+
+// Servlet Objects (if using REST/web layer)
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+// RESTEasy Provider Factory (for servlet object producers)
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
+
+// Java Standard Library
+import java.util.Optional;
+
+// CUI Custom Qualifiers (example - adjust based on project)
+import de.cuioss.portal.core.servlet.CuiServletObjects;
+```
+
 ## Purpose
 This document defines CDI (Contexts and Dependency Injection) standards and best practices for Quarkus applications within CUI projects.
 

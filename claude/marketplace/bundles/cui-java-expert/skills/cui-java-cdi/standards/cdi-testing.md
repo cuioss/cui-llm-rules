@@ -1,5 +1,42 @@
 # Quarkus Testing Standards
 
+## Required Imports
+
+```java
+// Quarkus Testing Core
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.QuarkusIntegrationTest;
+import io.quarkus.test.junit.QuarkusTestProfile;
+import io.quarkus.test.junit.TestProfile;
+
+// CDI Injection
+import jakarta.inject.Inject;
+
+// JUnit 5
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
+
+// REST Assured (for HTTP testing)
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+// Health Check Testing
+import org.eclipse.microprofile.health.HealthCheckResponse;
+
+// Configuration
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+// Java Standard Library
+import java.util.Map;
+import java.util.List;
+```
+
 ## Purpose
 Defines comprehensive testing standards for Quarkus applications, including test coverage configuration, test annotations, and integration with SonarQube for coverage reporting.
 

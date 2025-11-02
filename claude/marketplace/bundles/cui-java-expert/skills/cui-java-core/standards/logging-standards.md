@@ -1,5 +1,37 @@
 # CUI Logging Standards
 
+## Required Imports
+
+```java
+// CUI Logging Framework
+import de.cuioss.tools.logging.CuiLogger;
+import de.cuioss.tools.logging.LogRecord;
+import de.cuioss.tools.logging.LogRecordModel;
+
+// Lombok (for LogMessages DSL pattern)
+import lombok.experimental.UtilityClass;
+
+// CUI Test JULi Logger (for testing)
+import de.cuioss.test.juli.junit5.EnableTestLogger;
+import de.cuioss.test.juli.LogAsserts;
+import de.cuioss.test.juli.TestLogLevel;
+import de.cuioss.test.juli.TestLogHandler;
+
+// JUnit 5 (for testing)
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import static org.junit.jupiter.api.Assertions.*;
+
+// Static imports for LogMessages usage
+import static com.example.YourLogMessages.INFO;
+import static com.example.YourLogMessages.WARN;
+import static com.example.YourLogMessages.ERROR;
+import static com.example.YourLogMessages.FATAL;
+
+// Java Standard Library (optional - for Duration, exception handling)
+import java.time.Duration;
+```
+
 ## Overview
 
 CUI projects use the CUI logging framework from cui-java-tools. This document defines standards for logger configuration, log message organization, and logging best practices.
