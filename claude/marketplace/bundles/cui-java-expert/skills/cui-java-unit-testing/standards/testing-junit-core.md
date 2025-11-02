@@ -18,9 +18,7 @@
 * `HttpResultMapper.java` → `HttpResultMapperTest.java`
 
 **Exceptions:**
-* Simple DTOs with no behavior (pure data classes with only getters/setters)
-* Enums without custom methods (only constants)
-* Package-private utility classes used only internally by tested classes
+* Enums without custom methods (only constants)s
 
 ### Test Coverage
 
@@ -272,13 +270,16 @@ class TokenValidatorTest {
 
 ### Coverage Verification
 
-Use the Maven coverage profile to verify coverage requirements:
+Use the maven-builder agent to verify coverage requirements:
 
-```bash
-./mvnw clean verify -Pcoverage
+```
+Task:
+  subagent_type: maven-builder
+  description: Verify test coverage
+  prompt: Execute Maven build with command "./mvnw clean verify -Pcoverage"
 ```
 
-This profile will:
+This will:
 * Enable JaCoCo code coverage analysis
 * Generate detailed coverage reports
 * Enforce minimum coverage thresholds (80% line/branch)

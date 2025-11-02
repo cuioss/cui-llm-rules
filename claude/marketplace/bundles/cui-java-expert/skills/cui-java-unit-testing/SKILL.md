@@ -134,15 +134,24 @@ Before completing the task:
    - [ ] MockWebServer setup follows patterns
 
 3. **Run tests and verify success**:
-   ```bash
+   ```
    # Run unit tests
-   ./mvnw clean test
+   Task:
+     subagent_type: maven-builder
+     description: Run unit tests
+     prompt: Execute Maven build with command "./mvnw clean test"
 
    # Run integration tests (if applicable)
-   ./mvnw clean verify -Pintegration-tests
+   Task:
+     subagent_type: maven-builder
+     description: Run integration tests
+     prompt: Execute Maven build with command "./mvnw clean verify -Pintegration-tests"
 
    # Verify coverage
-   ./mvnw clean verify -Pcoverage
+   Task:
+     subagent_type: maven-builder
+     description: Verify test coverage
+     prompt: Execute Maven build with command "./mvnw clean verify -Pcoverage"
    ```
 
 4. **Check coverage requirements**:
@@ -182,7 +191,7 @@ Provide summary of:
 
 ### Coverage Verification
 
-- [ ] Run coverage profile: `./mvnw clean verify -Pcoverage`
+- [ ] Run coverage profile using maven-builder agent with -Pcoverage
 - [ ] Coverage meets minimum requirements (80% line/branch)
 - [ ] Critical paths have 100% coverage
 - [ ] No coverage regressions from previous state

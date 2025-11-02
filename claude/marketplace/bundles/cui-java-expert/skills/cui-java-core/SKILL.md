@@ -192,8 +192,11 @@ Before completing the task:
    - [ ] No System.out or System.err
 
 6. **Run build and tests**:
-   ```bash
-   ./mvnw clean verify
+   ```
+   Task:
+     subagent_type: maven-builder
+     description: Build and verify project
+     prompt: Execute Maven build with clean verify to ensure all tests pass and code compiles correctly.
    ```
 
 ### Step 7: Report Results
@@ -369,7 +372,7 @@ Map<String, List<User>> usersByRole = users.stream()
 6. Implement methods with proper null safety
 7. Use modern Java features (records for DTOs, switch expressions, streams)
 8. Write unit tests verifying behavior
-9. Run build: `./mvnw clean verify`
+9. Run build using maven-builder agent
 
 ### Task: Refactor existing code to standards
 
