@@ -1,9 +1,5 @@
 # CUI Test JULi Logger
 
-> **Source**: /Users/oliver/git/cui-test-juli-logger/README.adoc
-> **Integration Date**: 2025-11-01
-> **Load Type**: on-demand
-
 ## Required Imports
 
 ```java
@@ -157,4 +153,8 @@ This testing framework integrates seamlessly with the CUI logging standards:
 
 ## References
 
+**Source:**
+- [README Documentation](https://github.com/cuioss/cui-test-juli-logger/blob/main/README.adoc)
+
+**Additional Resources:**
 - [cui-test-juli-logger on GitHub](https://github.com/cuioss/cui-test-juli-logger)

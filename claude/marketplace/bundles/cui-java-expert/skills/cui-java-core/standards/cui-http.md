@@ -1,9 +1,5 @@
 # CUI HTTP Client Standards
 
-> **Source**: /Users/oliver/git/cui-http/doc/client-handlers-readme.adoc, /Users/oliver/git/cui-http/doc/http-result-pattern.adoc
-> **Integration Date**: 2025-11-01
-> **Load Type**: on-demand
-
 ## Required Imports
 
 ```java
@@ -611,6 +607,11 @@ String msg = result.getErrorMessage().orElse("Unknown error");
 
 ## Related Documentation
 
+**Sources:**
+* [Client Handlers Documentation](https://github.com/cuioss/cui-http/blob/main/doc/client-handlers-readme.adoc)
+* [HTTP Result Pattern Documentation](https://github.com/cuioss/cui-http/blob/main/doc/http-result-pattern.adoc)
+
+**Additional References:**
 * [RFC 7231 - HTTP/1.1 Semantics](https://tools.ietf.org/html/rfc7231)
 * `de.cuioss.http.client.result.HttpResult` - API documentation
 * `de.cuioss.http.client.result.HttpErrorCategory` - Error categories

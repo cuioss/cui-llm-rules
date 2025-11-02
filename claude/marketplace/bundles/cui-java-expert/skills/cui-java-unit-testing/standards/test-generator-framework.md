@@ -1,9 +1,5 @@
 # CUI Test Generator Standards and Reference
 
-> **Source**: /Users/oliver/git/cui-test-generator/README.adoc
-> **Integration Date**: 2025-11-01
-> **Load Type**: conditional (when using generators)
-
 ## Overview
 
 The CUI Test Generator framework (`cui-test-generator`) is **mandatory** for ALL test data generation in CUI projects. This framework provides robust and reproducible test data generation, combining random data with the ability to reproduce specific test scenarios during debugging.
@@ -582,5 +578,9 @@ When migrating existing tests:
 
 ## Additional Resources
 
-* CUI Test Generator Framework: https://github.com/cuioss/cui-test-generator
-* Complete Usage Guide: https://gitingest.com/github.com/cuioss/cui-test-generator
+**Source:**
+* [README Documentation](https://github.com/cuioss/cui-test-generator/blob/main/README.adoc)
+
+**Additional References:**
+* [CUI Test Generator Framework](https://github.com/cuioss/cui-test-generator)
+* [Complete Usage Guide](https://gitingest.com/github.com/cuioss/cui-test-generator)
