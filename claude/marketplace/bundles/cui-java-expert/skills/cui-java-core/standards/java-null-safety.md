@@ -1,5 +1,14 @@
 # Java Null Safety Standards
 
+## Required Imports
+
+```java
+// JSpecify Null Safety Annotations
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+```
+
 ## Overview
 
 All CUI projects MUST use JSpecify annotations for null safety. This document defines how to apply null safety annotations to ensure robust, null-safe APIs.
