@@ -4,6 +4,60 @@
 
 For testing HTTP client interactions in CUI projects, use the `cui-test-mockwebserver-junit5` framework. This provides a lightweight, in-process HTTP server for mocking HTTP responses and testing client behavior without external dependencies.
 
+## Required Imports
+
+```java
+// JUnit 5
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import static org.junit.jupiter.api.Assertions.*;
+
+// MockWebServer Extensions
+import de.cuioss.test.mockwebserver.junit5.EnableMockWebServer;
+import de.cuioss.test.mockwebserver.junit5.MockResponseConfig;
+import de.cuioss.test.mockwebserver.junit5.ModuleDispatcher;
+import de.cuioss.test.mockwebserver.junit5.TestProvidedCertificate;
+
+// MockWebServer Core
+import de.cuioss.test.mockwebserver.dispatcher.ModuleDispatcherElement;
+import de.cuioss.test.mockwebserver.dispatcher.BaseAllAcceptDispatcher;
+import de.cuioss.test.mockwebserver.dispatcher.HttpMethodMapper;
+import de.cuioss.uimodel.nameprovider.URIBuilder;
+
+// OkHttp MockWebServer
+import mockwebserver3.MockWebServer;
+import mockwebserver3.MockResponse;
+import mockwebserver3.RecordedRequest;
+
+// HTTPS Support
+import javax.net.ssl.SSLContext;
+import okhttp3.tls.HandshakeCertificates;
+import de.cuioss.test.mockwebserver.tls.KeyMaterialUtil;
+import de.cuioss.test.mockwebserver.tls.KeyAlgorithm;
+
+// Java Standard Library
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+// Lombok (if needed)
+import lombok.NonNull;
+
+// CUI Test Generators (optional - for data generation)
+import de.cuioss.test.generator.Generators;
+import de.cuioss.test.generator.junit.EnableGeneratorController;
+import de.cuioss.test.generator.junit.GeneratorsSource;
+import de.cuioss.test.generator.domain.GeneratorType;
+```
+
 ## Framework Requirements
 
 ### Maven Dependency
@@ -33,8 +87,6 @@ For testing HTTP client interactions in CUI projects, use the `cui-test-mockwebs
 
 ## Modern API Approach
 
-**CRITICAL**: Version 1.4.0 removed the deprecated `MockWebServerHolder` interface. Always use parameter injection and annotations.
-
 ### Parameter Resolvers
 
 The MockWebServer extension provides automatic parameter injection for test methods:
@@ -44,6 +96,8 @@ The MockWebServer extension provides automatic parameter injection for test meth
 | `MockWebServer` | The actual MockWebServer instance for advanced configuration |
 | `URIBuilder` | Pre-configured builder for constructing URIs pointing to the mock server |
 | `SSLContext` | SSL context (when HTTPS is enabled with `useHttps = true`) |
+
+Always use parameter injection and annotations for clean, modern test code.
 
 ## Basic MockWebServer Usage
 
@@ -713,7 +767,7 @@ class ComprehensiveHttpTest {
 
 ## Context-Aware Behavior
 
-**Important**: Starting with version 1.2, `@MockResponseConfig` annotations are context-aware.
+`@MockResponseConfig` annotations are context-aware for test isolation.
 
 Each test method only has access to:
 1. Its own method-level `@MockResponseConfig` annotations
@@ -787,52 +841,6 @@ class ContextAwareTest {
 * **404 Not Found** - Resource not found
 * **500 Internal Server Error** - Server errors
 * **503 Service Unavailable** - Temporary service issues
-
-## Migration Notes
-
-**Version 1.4.0 Breaking Changes:**
-
-The `MockWebServerHolder` interface was completely removed in version 1.4.0. If you encounter compilation errors:
-
-```
-error: cannot find symbol MockWebServerHolder
-```
-
-**Quick Migration:**
-1. Remove `implements MockWebServerHolder`
-2. Remove `@Setter private MockWebServer mockWebServer` field
-3. Remove `getDispatcher()` method
-4. Add `@MockResponseConfig` annotations or `@ModuleDispatcher`
-5. Update test methods to use parameter injection
-
-**Before (Deprecated):**
-```java
-@EnableMockWebServer
-class OldTest implements MockWebServerHolder {
-    @Setter private MockWebServer mockWebServer;
-
-    @Override
-    public Dispatcher getDispatcher() {
-        return new CombinedDispatcher(new BaseAllAcceptDispatcher("/api"));
-    }
-}
-```
-
-**After (Modern):**
-```java
-@EnableMockWebServer
-@ModuleDispatcher
-class ModernTest {
-    ModuleDispatcherElement getModuleDispatcher() {
-        return new BaseAllAcceptDispatcher("/api");
-    }
-
-    @Test
-    void testApi(URIBuilder uriBuilder) {
-        // Use parameter injection
-    }
-}
-```
 
 ## Additional Resources
 
