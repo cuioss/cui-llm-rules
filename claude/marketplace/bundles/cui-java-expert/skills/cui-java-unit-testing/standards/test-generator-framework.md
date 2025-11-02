@@ -26,6 +26,37 @@ The CUI Test Generator framework (`cui-test-generator`) is **mandatory** for ALL
 </dependency>
 ```
 
+## Required Imports
+
+```java
+// CUI Test Generator Core
+import de.cuioss.test.generator.Generators;
+import de.cuioss.test.generator.TypedGenerator;
+
+// CUI Test Generator JUnit 5 Integration
+import de.cuioss.test.generator.junit.EnableGeneratorController;
+import de.cuioss.test.generator.junit.GeneratorSeed;
+import de.cuioss.test.generator.junit.GeneratorsSource;
+import de.cuioss.test.generator.junit.TypeGeneratorSource;
+import de.cuioss.test.generator.junit.TypeGeneratorMethodSource;
+import de.cuioss.test.generator.junit.TypeGeneratorFactorySource;
+import de.cuioss.test.generator.junit.CompositeTypeGeneratorSource;
+
+// CUI Test Generator Domain
+import de.cuioss.test.generator.domain.GeneratorType;
+
+// CUI Test Generator Implementations (domain-specific generators)
+import de.cuioss.test.generator.impl.CollectionGenerator;
+import de.cuioss.test.generator.impl.ZonedDateTimeGenerator;
+import de.cuioss.test.generator.impl.FloatObjectGenerator;
+import de.cuioss.test.generator.impl.URLGenerator;
+import de.cuioss.test.generator.impl.NonBlankStringGenerator;
+import de.cuioss.test.generator.impl.EmailGenerator;
+import de.cuioss.test.generator.impl.CityGenerator;
+import de.cuioss.test.generator.impl.FullNameGenerator;
+import de.cuioss.test.generator.impl.IntegerGenerator;
+```
+
 ## Core Components
 
 ### Generators - The Central Factory
