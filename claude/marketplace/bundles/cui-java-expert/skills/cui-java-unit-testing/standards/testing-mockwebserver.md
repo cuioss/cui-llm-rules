@@ -7,55 +7,36 @@ For testing HTTP client interactions in CUI projects, use the `cui-test-mockwebs
 ## Required Imports
 
 ```java
-// JUnit 5
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import static org.junit.jupiter.api.Assertions.*;
-
-// MockWebServer Extensions
+// CUI MockWebServer JUnit 5 Extensions
 import de.cuioss.test.mockwebserver.junit5.EnableMockWebServer;
 import de.cuioss.test.mockwebserver.junit5.MockResponseConfig;
 import de.cuioss.test.mockwebserver.junit5.ModuleDispatcher;
 import de.cuioss.test.mockwebserver.junit5.TestProvidedCertificate;
 
-// MockWebServer Core
+// CUI MockWebServer Dispatcher
 import de.cuioss.test.mockwebserver.dispatcher.ModuleDispatcherElement;
 import de.cuioss.test.mockwebserver.dispatcher.BaseAllAcceptDispatcher;
 import de.cuioss.test.mockwebserver.dispatcher.HttpMethodMapper;
-import de.cuioss.uimodel.nameprovider.URIBuilder;
 
-// OkHttp MockWebServer
+// CUI MockWebServer HTTPS/TLS Support
+import de.cuioss.test.mockwebserver.tls.KeyMaterialUtil;
+import de.cuioss.test.mockwebserver.tls.KeyAlgorithm;
+
+// OkHttp MockWebServer (underlying library)
 import mockwebserver3.MockWebServer;
 import mockwebserver3.MockResponse;
 import mockwebserver3.RecordedRequest;
 
-// HTTPS Support
-import javax.net.ssl.SSLContext;
+// OkHttp TLS Certificates
 import okhttp3.tls.HandshakeCertificates;
-import de.cuioss.test.mockwebserver.tls.KeyMaterialUtil;
-import de.cuioss.test.mockwebserver.tls.KeyAlgorithm;
 
-// Java Standard Library
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
-import java.time.Duration;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+// CUI URI Builder
+import de.cuioss.uimodel.nameprovider.URIBuilder;
 
-// Lombok (if needed)
-import lombok.NonNull;
-
-// CUI Test Generators (optional - for data generation)
+// CUI Test Generators (optional - for test data generation)
 import de.cuioss.test.generator.Generators;
 import de.cuioss.test.generator.junit.EnableGeneratorController;
 import de.cuioss.test.generator.junit.GeneratorsSource;
-import de.cuioss.test.generator.domain.GeneratorType;
 ```
 
 ## Framework Requirements
