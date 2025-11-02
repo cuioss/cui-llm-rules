@@ -144,14 +144,18 @@ public class UsrAuthSvc {
 
 ### Exception Handling
 
+**CRITICAL: NEVER catch or throw generic exceptions.**
+
+* **NEVER catch**: `Exception`, `RuntimeException`, `Error`, or `Throwable`
+* **NEVER throw**: `Exception`, `RuntimeException`, `Error`, or `Throwable`
+* **ALWAYS use specific exception types** - both when catching and throwing
 * Use checked exceptions for recoverable conditions
 * Use unchecked exceptions for programming errors
-* Don't catch generic `Exception`
 * Include meaningful error messages
 * Preserve exception causes with exception chaining
 
 ```java
-// ✅ Good exception handling
+// ✅ Good exception handling - specific exception types
 public Configuration loadConfig(Path configPath)
         throws ConfigurationException {
     try {
@@ -169,8 +173,36 @@ public Configuration loadConfig(Path configPath)
 public Configuration loadConfig(Path configPath) {
     try {
         return parser.parse(Files.readString(configPath));
-    } catch (Exception e) {  // Too broad
+    } catch (Exception e) {  // NEVER - too broad
         return null;  // Loses error information
+    }
+}
+
+// ❌ Bad - throws generic Exception
+public void processData(String data) throws Exception {  // NEVER
+    // Should throw specific exception type
+}
+
+// ❌ Bad - catches Throwable
+public void riskyOperation() {
+    try {
+        performOperation();
+    } catch (Throwable t) {  // NEVER - catches even Errors
+        log.error("Operation failed", t);
+    }
+}
+
+// ❌ Bad - throws RuntimeException
+public void validateInput(String input) {
+    if (input == null) {
+        throw new RuntimeException("Invalid input");  // NEVER - use specific type
+    }
+}
+
+// ✅ Good - throws specific exception type
+public void validateInput(String input) {
+    if (input == null) {
+        throw new IllegalArgumentException("Input must not be null");
     }
 }
 
@@ -184,6 +216,12 @@ public Configuration loadConfig(Path configPath) {
     }
 }
 ```
+
+**Rationale:**
+* Generic exceptions hide the actual problem and prevent proper error handling
+* Catching `Error` or `Throwable` can mask serious JVM issues (OutOfMemoryError, StackOverflowError)
+* Specific exception types enable targeted recovery strategies
+* SonarQube rule violations: S1181 (catch Throwable), S112 (throw generic exceptions)
 
 ## Best Practices
 
