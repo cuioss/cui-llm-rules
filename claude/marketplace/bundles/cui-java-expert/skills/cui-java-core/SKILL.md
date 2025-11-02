@@ -1,12 +1,12 @@
 ---
 name: cui-java-core
-description: Core Java development standards for CUI projects including coding patterns, null safety, Lombok, modern features, DSL constants, and logging
+description: Core Java development standards for CUI projects including coding patterns, null safety, Lombok, modern features, and logging
 allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 ---
 
 # CUI Java Core Development Skill
 
-Foundational Java development standards for all CUI projects, covering core patterns, null safety, Lombok usage, modern Java features, DSL-style constants, and the CUI logging framework.
+Foundational Java development standards for all CUI projects, covering core patterns, null safety, Lombok usage, modern Java features, and the CUI logging framework.
 
 ## Workflow
 
@@ -19,7 +19,6 @@ Read: standards/java-core-patterns.md
 Read: standards/java-null-safety.md
 Read: standards/java-lombok-patterns.md
 Read: standards/java-modern-features.md
-Read: standards/dsl-constants.md
 Read: standards/logging-standards.md
 ```
 
@@ -28,6 +27,13 @@ These standards are fundamental to all CUI Java development and should be loaded
 ### Step 2: Load Additional Knowledge (Optional)
 
 **When needed**: Load domain-specific knowledge on demand.
+
+**DSL-Style Constants** (load when needed):
+```
+Read: standards/dsl-constants.md
+```
+
+Use when: Implementing LogMessages classes, creating structured constant hierarchies, or needing guidance on organizing related constants with nested static classes and the @UtilityClass pattern.
 
 **LogMessages Documentation** (load when needed):
 ```
@@ -73,13 +79,7 @@ From all loaded standards, extract and organize:
    - Text blocks and pattern matching
    - Optional enhancements
 
-5. **DSL Constants**:
-   - Hierarchical organization with nested static classes
-   - @UtilityClass usage
-   - Naming conventions
-   - Static import patterns
-
-6. **Logging**:
+5. **Logging**:
    - CuiLogger configuration
    - LogRecord usage and organization
    - Log level guidelines
@@ -94,7 +94,6 @@ If working with existing Java code:
    - Verify logger configuration (CuiLogger, not SLF4J)
    - Review Lombok usage (appropriate annotations)
    - Check for modern Java features (records, switch expressions)
-   - Verify DSL-style constants organization
    - Review exception handling patterns
 
 2. **Identify improvement opportunities**:
@@ -102,7 +101,6 @@ If working with existing Java code:
    - Legacy logging (System.out, SLF4J annotations)
    - Inefficient patterns (deep inheritance, god classes)
    - Missing modern features (classic switch, manual data classes)
-   - Flat constant organization
    - Verbose boilerplate that Lombok could handle
 
 3. **Check code organization**:
@@ -145,14 +143,7 @@ When writing or refactoring Java code:
    - Use pattern matching for instanceof
    - Leverage modern collection factories (List.of(), Set.of())
 
-5. **Organize constants properly**:
-   - Use DSL-style nested structure for related constants
-   - Apply @UtilityClass at all levels
-   - Group by logical dimensions (log level, feature, etc.)
-   - Keep hierarchy depth reasonable (≤ 4 levels)
-   - Use static imports at category level
-
-6. **Implement CUI logging**:
+5. **Implement CUI logging**:
    - Declare logger: `private static final CuiLogger LOGGER = new CuiLogger(YourClass.class);`
    - Create LogMessages class for structured logging
    - Use LogRecord for INFO/WARN/ERROR/FATAL
@@ -192,22 +183,15 @@ Before completing the task:
    - [ ] Text blocks used for multi-line strings
    - [ ] Modern collection factories used
 
-5. **DSL constants check**:
-   - [ ] Related constants organized hierarchically
-   - [ ] @UtilityClass used at all levels
-   - [ ] Consistent naming conventions
-   - [ ] Static imports at category level
-
-6. **Logging check**:
+5. **Logging check**:
    - [ ] CuiLogger used (not SLF4J/Log4j)
    - [ ] Logger is private static final named LOGGER
    - [ ] LogRecord used for important messages
-   - [ ] LogMessages follows DSL pattern
    - [ ] Exception parameter comes first
    - [ ] %s used for substitutions
    - [ ] No System.out or System.err
 
-7. **Run build and tests**:
+6. **Run build and tests**:
    ```bash
    ./mvnw clean verify
    ```
@@ -221,9 +205,8 @@ Provide summary of:
 3. **Null safety**: Package-level @NullMarked and Optional usage
 4. **Lombok usage**: Which annotations were applied and why
 5. **Modern features**: Records, switch expressions, streams implemented
-6. **DSL constants**: Hierarchical organization applied
-7. **Logging**: CuiLogger and LogRecord implementation
-8. **Build verification**: Confirm successful build and test execution
+6. **Logging**: CuiLogger and LogRecord implementation
+7. **Build verification**: Confirm successful build and test execution
 
 ## Common Patterns and Examples
 
@@ -393,17 +376,16 @@ Map<String, List<User>> usersByRole = users.stream()
 1. Load all core Java standards
 2. Add @NullMarked to package-info.java if missing
 3. Replace SLF4J/Log4j with CuiLogger
-4. Convert flat constants to DSL-style nested structure
-5. Apply Lombok where appropriate (@Builder, @Value, @Delegate)
-6. Replace classic patterns with modern features (records, switch expressions)
-7. Add null checks at API boundaries
-8. Update tests to verify compliance
-9. Run build and verify no regressions
+4. Apply Lombok where appropriate (@Builder, @Value, @Delegate)
+5. Replace classic patterns with modern features (records, switch expressions)
+6. Add null checks at API boundaries
+7. Update tests to verify compliance
+8. Run build and verify no regressions
 
 ### Task: Add comprehensive logging
 
-1. Load logging standards
-2. Create LogMessages class with DSL structure
+1. Load logging standards and DSL constants standards
+2. Create LogMessages class with DSL-style nested structure
 3. Define LogRecord for each important message
 4. Organize by log level (INFO, WARN, ERROR, FATAL)
 5. Use correct identifier ranges
@@ -424,9 +406,14 @@ If encountering issues:
 
 ## References
 
+**Core Standards (always loaded):**
 * Core Patterns: standards/java-core-patterns.md
 * Null Safety: standards/java-null-safety.md
 * Lombok Patterns: standards/java-lombok-patterns.md
 * Modern Features: standards/java-modern-features.md
-* DSL Constants: standards/dsl-constants.md
 * Logging: standards/logging-standards.md
+
+**Optional Standards (load when needed):**
+* DSL Constants: standards/dsl-constants.md
+* LogMessages Documentation: standards/logmessages-documentation.md
+* CUI HTTP Client: standards/cui-http.md
