@@ -1,0 +1,197 @@
+---
+name: java-task-manager
+description: Implements Java tasks end-to-end with automated testing and coverage verification
+---
+
+# Java Task Manager Command
+
+Orchestrates complete Java task implementation through code creation, unit testing, and coverage verification workflow. Coordinates three specialized agents iteratively until full coverage is achieved.
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=java-task-manager update="[your improvement]"` with:
+1. Improved agent coordination patterns and error recovery strategies
+2. Better coverage gap analysis and iterative fix workflows
+3. More effective parameter preparation for agent handoffs
+4. Enhanced detection of production vs. test code issues
+5. Any lessons learned about Java task implementation workflows
+
+This ensures the command evolves and becomes more effective with each execution.
+
+## PARAMETERS
+
+- **types** - Existing type(s), package(s), or name(s) of type(s) to be created
+- **description** - Detailed, precise description of what to implement
+- **module** - (Optional) Module name for multi-module projects; if unset, assume single-module
+
+## WORKFLOW
+
+### Step 1: Determine Entry Point
+
+Analyze the `description` parameter to determine workflow entry point:
+
+- **Contains "implement", "create", "add feature"** → Start at Step 2 (Implementation)
+- **Contains "test", "unit test", "junit"** → Start at Step 3 (Testing)
+- **Contains "coverage", "verify coverage", "fix coverage"** → Start at Step 4 (Coverage)
+
+### Step 2: Implementation Phase
+
+Call agent `java-task-implementer`:
+
+```
+Task: subagent_type=cui-java-expert:java-task-implementer
+prompt: "Implement task for types: {types}
+
+Description: {description}
+
+Module: {module or 'single-module project'}"
+```
+
+**On success:**
+- Analyze implementation result
+- Prepare parameters for Step 3
+- Continue to Step 3
+
+**On error/problems:**
+- Attempt to fix issues in interaction with agent
+- If unresolvable, ask caller for guidance
+- Track in `implementation_retries` counter
+
+### Step 3: Unit Testing Phase
+
+Analyze Step 2 results and call agent `java-junit-implementer`:
+
+```
+Task: subagent_type=cui-java-expert:java-junit-implementer
+prompt: "Implement unit tests for types: {types}
+
+Production code analysis: {summary from Step 2}
+
+Test requirements: {inferred from description and implementation}
+
+Module: {module}"
+```
+
+**On success:**
+- Analyze test implementation result
+- Continue to Step 4
+
+**On error indicating production code issue:**
+- Analyze root cause
+- Return to Step 2 with adapted description: "Fix {identified issue} in {types}"
+- Track in `production_fixes` counter
+
+**On error indicating test code issue:**
+- Attempt to fix in iteration with agent
+- If unresolvable, ask caller
+- Track in `test_retries` counter
+
+### Step 4: Coverage Verification Phase
+
+Call agent `java-coverage-reporter`:
+
+```
+Task: subagent_type=cui-java-expert:java-coverage-reporter
+prompt: "Analyze coverage for types: {types}
+
+Module: {module}
+
+Report all coverage gaps requiring tests."
+```
+
+**On error indicating production code issue:**
+- Return to Step 2 with adapted description
+- Track in `production_fixes` counter
+
+**On error indicating test code issue:**
+- Return to Step 3 with adapted description
+- Track in `test_fixes` counter
+
+**On success with coverage results:**
+
+Analyze each coverage finding:
+
+- **For each "Coverage: ❌ INSUFFICIENT":**
+  - Return to Step 3 with description: "Add tests for {specific uncovered code path}"
+  - Process sequentially (one at a time)
+  - Track in `coverage_fixes` counter
+
+- **All "Coverage: ✅ SUFFICIENT":**
+  - Workflow complete
+  - Display final summary
+
+### Step 5: Iterative Refinement
+
+Continue cycling through Steps 2-4 until:
+- All coverage reports show "✅ SUFFICIENT"
+- No production or test errors remain
+
+**Maximum iterations:** 5 cycles
+- **If exceeded:** Report status and ask caller for guidance
+
+## STATISTICS TRACKING
+
+Track throughout workflow:
+- `implementation_retries`: Implementation phase retries
+- `test_retries`: Test phase retries
+- `coverage_fixes`: Coverage gap fixes applied
+- `production_fixes`: Production code fixes
+- `test_fixes`: Test code fixes
+- `total_cycles`: Complete workflow cycles executed
+
+Display all statistics in final summary.
+
+## CRITICAL RULES
+
+**Parameter Validation:**
+- `types` and `description` are required
+- `module` defaults to single-module if unset
+- Validate parameters before calling first agent
+
+**Agent Coordination:**
+- Always analyze agent results before next call
+- Prepare precise parameters for each agent
+- Never guess - ask caller if agent output unclear
+
+**Error Handling:**
+- Distinguish production vs. test code issues
+- Return to appropriate workflow step
+- Track all retries and fixes
+- Prevent infinite loops (max 5 cycles)
+
+**Coverage Goals:**
+- Continue until ALL findings show "✅ SUFFICIENT"
+- Process coverage gaps sequentially
+- Each gap gets dedicated test implementation
+
+**Entry Point Flexibility:**
+- Support starting at Steps 2, 3, or 4 based on description
+- Validate entry point choice with caller if ambiguous
+
+## USAGE EXAMPLES
+
+**Full implementation:**
+```
+/java-task-manager types=UserService description="Implement user authentication with JWT tokens" module=auth-service
+```
+
+**Testing existing code:**
+```
+/java-task-manager types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
+```
+
+**Coverage verification:**
+```
+/java-task-manager types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
+```
+
+**Single-module project:**
+```
+/java-task-manager types=com.example.util.StringUtils description="Add string validation utilities"
+```
+
+## RELATED
+
+- `java-task-implementer` - Agent for production code implementation
+- `java-junit-implementer` - Agent for unit test implementation
+- `java-coverage-reporter` - Agent for coverage analysis
