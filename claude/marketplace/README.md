@@ -8,46 +8,37 @@ The marketplace provides production-ready, reusable components that AI assistant
 
 ## Marketplace Components
 
-### Skills
+### Bundles
 
-**Location**: `marketplace/skills/`
+**Location**: `marketplace/bundles/`
 
-**Purpose**: Comprehensive standards and patterns for specific development domains
+**Purpose**: Self-contained, production-ready bundles combining skills, agents, and commands for specific development domains
 
-**Count**: 8 skills (97.75/100 average quality)
+**Active Bundles**:
+- **cui-java-expert**: Java development (skills: cui-java-core, cui-java-cdi, cui-java-unit-testing; agents: java-code-implementer, java-junit-implementer, java-coverage-reporter; commands: cui-java-task-manager)
+- **cui-plugin-development-tools**: Claude Code marketplace development tools
+- **cui-utility-commands**: General-purpose utility commands and diagnostics
+- **cui-project-quality-gates**: Quality gates and commit workflows
+- **cui-documentation-standards**: AsciiDoc documentation standards and review
+- **cui-issue-implementation**: Issue implementation workflow
+- **cui-pull-request-workflow**: Pull request handling and review
+- **cui-maven**: Maven build and verification tools
 
-**Categories**:
-- **Java Development**: Core patterns, unit testing, JavaDoc, CDI/Quarkus
-- **Frontend Development**: JavaScript, CSS, web components, testing
-- **Documentation**: README, AsciiDoc, technical writing
-- **Project Management**: Project setup, requirements engineering
-
-**See**: [Skills README](skills/README.md) for complete catalog
-
----
-
-### Agents (Planned)
-
-**Location**: `marketplace/agents/` (future)
-
-**Purpose**: Specialized AI agents for complex, multi-step tasks
-
-**Examples** (future):
-- code-reviewer: Comprehensive code review agent
-- test-generator: Automated test generation
-- doc-generator: Documentation generation
-- refactoring-agent: Code refactoring automation
+**See**: `bundles/*/README.md` for bundle documentation
 
 ---
 
-### Commands (Planned)
+### Agents
 
-**Location**: `marketplace/commands/` (future)
+**Location**: `marketplace/agents/`
 
-**Purpose**: Reusable slash commands for common tasks
+**Status**: Legacy directory - agents now bundled within bundles
 
-**Examples** (future):
-- /review-pr: Review pull request
+---
+
+### Commands & Skills
+
+**Status**: Now organized within bundles for better modularity and self-containment
 - /generate-tests: Generate unit tests
 - /update-docs: Update documentation
 - /analyze-coverage: Analyze test coverage
