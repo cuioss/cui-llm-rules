@@ -1,5 +1,5 @@
 ---
-name: java-task-implementer
+name: java-code-implementer
 description: Implements specific Java tasks with verification, full standards compliance, and build validation
 tools: Read, Write, Edit, Glob, Grep, Task, Skill
 model: sonnet
@@ -13,7 +13,7 @@ Implement a specific Java task following CUI standards, verify correctness again
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=java-task-implementer update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=java-code-implementer update="[your improvement]"` with:
 1. Better requirements verification patterns and ambiguity detection
 2. More effective code context analysis strategies
 3. Improved implementation planning approaches

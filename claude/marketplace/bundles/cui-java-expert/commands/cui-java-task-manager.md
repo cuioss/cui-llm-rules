@@ -36,10 +36,10 @@ Analyze the `description` parameter to determine workflow entry point:
 
 ### Step 2: Implementation Phase
 
-Call agent `java-task-implementer`:
+Call agent `java-code-implementer`:
 
 ```
-Task: subagent_type=cui-java-expert:java-task-implementer
+Task: subagent_type=cui-java-expert:java-code-implementer
 prompt: "Implement task for types: {types}
 
 Description: {description}
@@ -192,6 +192,6 @@ Display all statistics in final summary.
 
 ## RELATED
 
-- `java-task-implementer` - Agent for production code implementation
+- `java-code-implementer` - Agent for production code implementation
 - `java-junit-implementer` - Agent for unit test implementation
 - `java-coverage-reporter` - Agent for coverage analysis
