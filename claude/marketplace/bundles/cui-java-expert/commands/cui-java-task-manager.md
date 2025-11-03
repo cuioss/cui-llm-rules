@@ -1,15 +1,15 @@
 ---
-name: java-task-manager
+name: cui-java-task-manager
 description: Implements Java tasks end-to-end with automated testing and coverage verification
 ---
 
-# Java Task Manager Command
+# CUI Java Task Manager Command
 
 Orchestrates complete Java task implementation through code creation, unit testing, and coverage verification workflow. Coordinates three specialized agents iteratively until full coverage is achieved.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=java-task-manager update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-task-manager update="[your improvement]"` with:
 1. Improved agent coordination patterns and error recovery strategies
 2. Better coverage gap analysis and iterative fix workflows
 3. More effective parameter preparation for agent handoffs
@@ -172,22 +172,22 @@ Display all statistics in final summary.
 
 **Full implementation:**
 ```
-/java-task-manager types=UserService description="Implement user authentication with JWT tokens" module=auth-service
+/cui-java-task-manager types=UserService description="Implement user authentication with JWT tokens" module=auth-service
 ```
 
 **Testing existing code:**
 ```
-/java-task-manager types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
+/cui-java-task-manager types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
 ```
 
 **Coverage verification:**
 ```
-/java-task-manager types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
+/cui-java-task-manager types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
 ```
 
 **Single-module project:**
 ```
-/java-task-manager types=com.example.util.StringUtils description="Add string validation utilities"
+/cui-java-task-manager types=com.example.util.StringUtils description="Add string validation utilities"
 ```
 
 ## RELATED
