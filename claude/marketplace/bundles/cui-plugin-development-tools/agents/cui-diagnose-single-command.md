@@ -111,6 +111,7 @@ bloat_score = (current_lines / 400) * 100
 **Rule 1: Never Add, Only Fix**
 - Command doesn't unnecessarily grow with each edit
 - No "just-in-case" content
+- **Exception**: CONTINUOUS IMPROVEMENT RULE section is REQUIRED and exempt (check for its presence)
 
 **Rule 2: Consolidate, Don't Duplicate**
 - No repeated content across sections
@@ -152,6 +153,13 @@ anti_bloat_score = (rules_followed / 8) * 100
 - Workflow/steps section
 - Tool usage requirements
 - Decision points (Pattern 3)
+- **CONTINUOUS IMPROVEMENT RULE section** (REQUIRED for >90% of commands - flag as WARNING if missing unless command is simple orchestrator with <150 lines)
+
+**Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
+- **CRITICAL Check**: Must include explicit usage instruction: `using /cui-update-command command-name={command-name} update="[your improvement]"` with:
+- **WARNING**: If section exists but missing usage instruction, flag as CRITICAL issue
+- **SUGGESTION**: Should list 3-5 specific improvement areas relevant to command purpose
+- **Pattern**: Check format matches: `**CRITICAL:** Every time you execute this command...YOU MUST immediately update this file** using /cui-update-command...`
 
 **Check parameter validation (Pattern 10):**
 - All parameters documented

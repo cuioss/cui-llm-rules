@@ -64,11 +64,9 @@ ModuleConstants.CATEGORY_A.TYPE_1.CONSTANT_1  // Clear context, discoverable
 
 ## Logging System Example
 
-For logging systems, the recommended structure organizes messages by log level:
+For logging systems, the recommended structure organizes messages by log level. For complete logging implementation details and best practices, see [logging-standards.md](logging-standards.md).
 
-> **Note**: This example demonstrates the DSL constants pattern applied to logging. For comprehensive logging standards including implementation details and best practices, see [logging-standards.md](logging-standards.md). The pattern appears in both files to show its application from different perspectives: here for the DSL pattern structure, and in logging-standards.md for logging-specific implementation.
-
-### Structure
+### Minimal Structure Example
 
 ```java
 @UtilityClass
@@ -82,76 +80,29 @@ public final class ModuleLogMessages {
             .prefix(PREFIX)
             .identifier(1)
             .build();
-
-        public static final LogRecord SESSION_CREATED = LogRecordModel.builder()
-            .template("New session created for user %s")
-            .prefix(PREFIX)
-            .identifier(2)
-            .build();
+        // Additional INFO messages...
     }
 
     @UtilityClass
     public static final class WARN {
-        public static final LogRecord INVALID_TOKEN = LogRecordModel.builder()
-            .template("Invalid token received: %s")
-            .prefix(PREFIX)
-            .identifier(100)
-            .build();
-
-        public static final LogRecord RATE_LIMIT = LogRecordModel.builder()
-            .template("Rate limit exceeded for user %s")
-            .prefix(PREFIX)
-            .identifier(101)
-            .build();
+        // Warning messages (identifiers 100-199)
     }
 
     @UtilityClass
     public static final class ERROR {
-        public static final LogRecord DATABASE_ERROR = LogRecordModel.builder()
-            .template("Database connection failed: %s")
-            .prefix(PREFIX)
-            .identifier(200)
-            .build();
-
-        public static final LogRecord VALIDATION_FAILED = LogRecordModel.builder()
-            .template("Token validation failed: %s")
-            .prefix(PREFIX)
-            .identifier(201)
-            .build();
-    }
-
-    @UtilityClass
-    public static final class FATAL {
-        public static final LogRecord SYSTEM_FAILURE = LogRecordModel.builder()
-            .template("Critical system failure: %s")
-            .prefix(PREFIX)
-            .identifier(300)
-            .build();
+        // Error messages (identifiers 200-299)
     }
 }
 ```
 
-### Usage with Static Imports
+**For complete LogMessages implementation**, including:
+- Full identifier range allocation
+- All log level nested classes
+- Usage examples with CuiLogger
+- Static import patterns
+- Testing strategies
 
-```java
-import static com.example.ModuleLogMessages.INFO;
-import static com.example.ModuleLogMessages.ERROR;
-
-public class AuthenticationService {
-    private static final CuiLogger LOGGER = new CuiLogger(AuthenticationService.class);
-
-    public void authenticateUser(String username) {
-        try {
-            // ... authentication logic
-            LOGGER.info(INFO.USER_LOGIN, username);
-
-        } catch (DatabaseException e) {
-            LOGGER.error(e, ERROR.DATABASE_ERROR, e.getMessage());
-            throw new AuthenticationException("Authentication failed", e);
-        }
-    }
-}
-```
+See [logging-standards.md](logging-standards.md)
 
 ## Configuration System Example
 

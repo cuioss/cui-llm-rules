@@ -120,5 +120,5 @@ oauth.audience=your-api-id
 
 ## References
 
-* AsciiDoc Standards: asciidoc-formatting.md
-* README Structure: readme-structure.md
+* xref:asciidoc-formatting.md[AsciiDoc Standards]
+* xref:readme-structure.md[README Structure]

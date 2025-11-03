@@ -214,5 +214,5 @@ Project status badges and links
 
 ## References
 
-* Documentation Core: documentation-core.md
-* AsciiDoc Formatting: asciidoc-formatting.md
+* xref:documentation-core.md[Documentation Core]
+* xref:asciidoc-formatting.md[AsciiDoc Formatting]

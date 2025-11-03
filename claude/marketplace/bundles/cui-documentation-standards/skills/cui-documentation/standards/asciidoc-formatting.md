@@ -288,5 +288,5 @@ information block
 
 ## References
 
-* Documentation Core: documentation-core.md
-* README Structure: readme-structure.md
+* xref:documentation-core.md[Documentation Core]
+* xref:readme-structure.md[README Structure]

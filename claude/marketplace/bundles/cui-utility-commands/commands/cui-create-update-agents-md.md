@@ -3,9 +3,9 @@ name: cui-create-update-agents-md
 description: Create or update project-specific agents.md file following OpenAI specification
 ---
 
-# Verify Agents.md Command
+# Create/Update Agents.md
 
-Creates or update the project specific agents.md
+Creates or updates project-specific agents.md following OpenAI specification.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -66,16 +66,11 @@ Before proceeding with the main workflow, verify:
 
 **Step 1: Research OpenAI agents.md Format**
 
-1.1. Fetch OpenAI agents.md specification
-   - Use WebFetch or research-best-practices agent to fetch: https://github.com/openai/agents.md
-   - Goal: Understand the target structure, required sections, and format standards
-   - Store structure requirements for later validation
-   - Look for: required sections, optional sections, formatting conventions, examples
+1.1. Fetch OpenAI agents.md specification from https://github.com/openai/agents.md
+   - Use WebFetch to retrieve specification
+   - Store structure requirements for validation
 
-1.2. If fetch fails or content unclear
-   - Try alternative approach: search for cached/local documentation
-   - Use Task tool with research-best-practices agent to find agents.md documentation
-   - Extract structural requirements from any found documentation
+1.2. **Error handling:** If WebFetch fails, use alternative research approach or proceed with basic structure (title, description, instructions)
 
 **Step 2: Check Existing agents.md**
 
@@ -147,6 +142,8 @@ Before proceeding with the main workflow, verify:
    - If update: Use Edit tool to update existing `./agents.md`
    - Ensure content is project-specific and actionable
 
+**Error handling:** If Write/Edit fails, display error message with details and abort.
+
 **Step 6: Review and Validate agents.md**
 
 6.1. Review for quality
@@ -174,23 +171,15 @@ Before proceeding with the main workflow, verify:
 
 7.1. Remove references to doc/ai-rules.md from project files
    - Use Grep tool to search for references: `doc/ai-rules\.md|ai-rules\.md`
-   - For each file containing references:
-     - If file is `agents.md`: Remove the reference from "Important Files" section
-     - If file is `CLAUDE.md`: Update references to point to `agents.md` instead
-     - If file is other documentation: Update to reference `agents.md` or remove if not applicable
-   - Use Edit tool to update each file
+   - For each file containing references, use Edit tool to update references to point to `agents.md`
    - Verify all references removed using Grep again
 
-7.2. Remove doc/ai-rules.md file (MANDATORY if exists)
-   - **CRITICAL**: If doc/ai-rules.md exists, it MUST be removed after creating/updating agents.md
-   - Check if doc/ai-rules.md exists: Use Glob or test command
-   - If exists:
-     - Use Bash tool to remove: `rm ./doc/ai-rules.md`
-     - Verify deletion successful with: `test ! -f ./doc/ai-rules.md`
-     - Display: "✅ Removed deprecated doc/ai-rules.md"
-   - If does not exist:
-     - Display: "ℹ️ No doc/ai-rules.md found (already migrated)"
-   - **Rationale**: agents.md is now the single source of truth; doc/ai-rules.md causes confusion and must be removed to complete migration
+7.2. Remove doc/ai-rules.md file (if exists)
+   - Check if doc/ai-rules.md exists using Glob
+   - If exists: Remove using `rm ./doc/ai-rules.md` and verify deletion
+   - If not exists: Skip to Step 8
+
+**Error handling:** If Edit fails during reference updates, log error and continue with remaining files.
 
 **Step 8: Commit and Push (if push parameter provided)**
 
@@ -217,29 +206,17 @@ Before proceeding with the main workflow, verify:
 
 **Step 9: Verify Success**
 
-9.1. Confirm agents.md exists
-   - Use Read tool to verify `./agents.md` is readable
-   - Verify file is not empty
+9.1. Confirm agents.md exists and is readable (abort if not)
 
-9.2. Verify doc/ai-rules.md removal (CRITICAL)
+9.2. Verify doc/ai-rules.md removal (if it existed in Step 4.1)
    - Check that `./doc/ai-rules.md` does NOT exist
-   - Use: `test ! -f ./doc/ai-rules.md && echo "✅ Confirmed: doc/ai-rules.md removed" || echo "❌ ERROR: doc/ai-rules.md still exists"`
-   - If file still exists: Display error and instruct to remove manually
-   - This is MANDATORY for migration completion
+   - If still exists: Display error and instruct to remove manually
 
-9.3. Structural correctness check
-   - Verify agents.md follows OpenAI structure (from Step 1)
-   - Check all required sections present
-   - Confirm valid markdown format
-
-9.4. Display completion summary
-   - Show what was created/updated
-   - List sources used
-   - **CRITICAL**: Confirm doc/ai-rules.md was removed (if it existed)
-   - List files updated with reference changes (CLAUDE.md, etc.)
-   - Confirm structural compliance
-   - Verify no references to doc/ai-rules.md remain in project
-   - Confirm agents.md is now the single source of truth
+9.3. Display completion summary
+   - Created/updated: agents.md
+   - Sources used: {list sources}
+   - Files modified: {list files where references updated}
+   - doc/ai-rules.md status: {removed/not present}
 
 ## CRITICAL RULES
 
@@ -285,21 +262,24 @@ Before proceeding with the main workflow, verify:
 - **NEVER proceed** if pre-conditions fail
 - **NEVER complete** if post-conditions not met
 
-## Important Notes
+## TOOL USAGE
 
-1. **OpenAI agents.md Format**: This command follows the OpenAI agents.md specification. Research this format thoroughly at the start of each execution to ensure compliance with latest standards.
+- **WebFetch**: Retrieve OpenAI agents.md specification
+- **Read**: Check existing agents.md, CLAUDE.md, doc/ai-rules.md
+- **Write/Edit**: Create or update agents.md
+- **Grep**: Find doc/ai-rules.md references
+- **Bash**: Remove doc/ai-rules.md file, verify git repository
+- **Task**: Invoke commit-changes agent (if push parameter)
+- **AskUserQuestion**: Query user about CLAUDE.md usage
 
-2. **Source Hierarchy**: The command uses this source priority:
-   - Highest: Local doc/ai-rules.md (if present) or user-selected CLAUDE.md
-   - Medium: Project analysis and discovery
-   - Baseline: Global standards (only for new creation, never modified)
+## STATISTICS TRACKING
 
-3. **Cleanup Behavior**: The command ALWAYS removes doc/ai-rules.md if it exists (regardless of whether it was used as a source) and updates all references to doc/ai-rules.md in project files (CLAUDE.md, etc.) to point to agents.md instead. This mandatory deletion is intentional to complete the migration from the old doc/ai-rules.md pattern to the new agents.md pattern. agents.md is now the single source of truth.
+Track throughout workflow:
+- `sources_used`: List of sources (CLAUDE.md, doc/ai-rules.md, project analysis)
+- `files_modified`: Count of files updated with reference changes
+- `doc_ai_rules_removed`: Boolean flag
 
-4. **Structural Validation**: Always perform thorough structural validation against OpenAI spec. The agents.md must be both structurally compliant AND content-accurate.
+## RELATED
 
-5. **Git Integration**: The push parameter provides convenience for automated workflows, but manual review mode (without push) is recommended for first-time creation.
-
-6. **Content Synthesis**: When multiple sources exist (CLAUDE.md + doc/ai-rules.md + project analysis), synthesize intelligently - prefer project-specific details over generic guidelines.
-
-7. **Research Approach**: Use the research-best-practices agent or WebFetch to deeply understand the OpenAI agents.md repository structure. Don't just skim - understand the intent and required sections.
+- OpenAI agents.md specification: https://github.com/openai/agents.md
+- commit-changes agent: Handles git commit and push

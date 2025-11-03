@@ -167,6 +167,41 @@ files = Glob(pattern="*.md", path="/path")
 file_count = len(files)
 ```
 
+## When Bash IS Appropriate
+
+While this skill focuses on non-prompting tools, Bash is still necessary for certain operations:
+
+### ✅ Legitimate Bash Use Cases
+
+**Git Operations**:
+```
+Bash(command="git status")
+Bash(command="git log --oneline -10")
+Bash(command="git diff main...HEAD")
+```
+
+**Build Commands**:
+```
+Bash(command="./mvnw clean verify")
+Bash(command="npm install")
+Bash(command="docker build -t image:tag .")
+```
+
+**Shell-Specific Features**:
+```
+Bash(command="export VAR=value && some-command")
+Bash(command="source ~/.bashrc && echo $PATH")
+```
+
+**When External Tools Required**:
+- Package managers (npm, pip, mvn)
+- Version control systems (git, svn)
+- Build systems (make, gradle, maven)
+- Container tools (docker, kubectl)
+- Language runtime operations (java, node, python)
+
+**Rule of Thumb**: Use Bash when the operation truly requires shell execution or external tools. Use non-prompting tools (Glob, Read, Grep) for all file system operations.
+
 ## Performance Considerations
 
 ### Glob is Fast

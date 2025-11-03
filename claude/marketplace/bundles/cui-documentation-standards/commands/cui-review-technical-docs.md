@@ -7,6 +7,17 @@ description: Execute comprehensive AsciiDoc review with format validation, link 
 
 Comprehensive AsciiDoc documentation review orchestrating validation, link verification, and content quality agents across documentation directories.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** with:
+1. Improved directory discovery patterns for AsciiDoc files
+2. Better agent coordination strategies for parallel execution
+3. More effective result aggregation and reporting methods
+4. Enhanced error handling for agent failures
+5. Any lessons learned about documentation review workflows
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 **push** - Auto-push after fixes (optional flag)
@@ -29,6 +40,8 @@ Task:
   prompt: Validate AsciiDoc format in {dir}
 ```
 
+**Error handling:** If asciidoc-format-validator fails, increment agent_failures counter and prompt user "[R]etry/[S]kip validation/[A]bort all".
+
 **Link Verification:**
 ```
 Task:
@@ -36,6 +49,8 @@ Task:
   description: Verify links in {dir}
   prompt: Verify all xref links in {dir}
 ```
+
+**Error handling:** If asciidoc-link-verifier fails, increment agent_failures counter and prompt user "[R]etry/[S]kip verification/[A]bort all".
 
 **Content Review:**
 ```
@@ -45,13 +60,20 @@ Task:
   prompt: Review content quality in {dir}
 ```
 
+**Error handling:** If asciidoc-content-reviewer fails, increment agent_failures counter and prompt user "[R]etry/[S]kip review/[A]bort all".
+
 ### Step 3: Collect and Aggregate Results
 
 Wait for all agents, aggregate:
-- Format issues by severity
-- Broken links count
-- Content quality issues
-- Files analyzed count
+- Format issues by severity (track in validation_errors counter)
+- Broken links count (track in link_errors counter)
+- Content quality issues (track in content_issues counter)
+- Files analyzed count (track in files_analyzed counter)
+
+**Handle partial results:**
+- If agent returned PARTIAL: Display partial results and prompt "[C]ontinue with partial data/[R]etry agent/[A]bort"
+- If agent returned FAILURE: Prompt "[R]etry agent/[C]ontinue without this data/[A]bort"
+- Track all decisions for final report
 
 ### Step 4: Consolidate Lessons Learned
 
@@ -70,10 +92,15 @@ Files analyzed: {count}
 Agents executed: {count}
 
 Issues by Category:
-- Format errors: {count}
-- Broken links: {count}
-- Content quality: {count}
-- Total issues: {count}
+- Format errors: {validation_errors}
+- Broken links: {link_errors}
+- Content quality: {content_issues}
+- Total issues: {total_issues}
+
+Statistics:
+- Agent failures: {agent_failures}
+- Directories processed: {count}
+- Files analyzed: {files_analyzed}
 
 Recommendations:
 {aggregated recommendations}
@@ -87,6 +114,18 @@ Prompt user to apply recommended fixes or skip.
 
 Use commit-changes agent to commit documentation improvements.
 
+## STATISTICS TRACKING
+
+Track throughout workflow:
+- `files_analyzed`: Count of .adoc files analyzed
+- `validation_errors`: Format validation issues found
+- `link_errors`: Broken links found
+- `content_issues`: Content quality issues found
+- `agent_failures`: Count of agent execution failures
+- `total_issues`: Sum of all issues (validation_errors + link_errors + content_issues)
+
+Display all statistics in final report.
+
 ## CRITICAL RULES
 
 **Parallel Execution:**
@@ -98,6 +137,11 @@ Use commit-changes agent to commit documentation improvements.
 - Each directory reviewed by 3 agents
 - Agents run independently
 - Results aggregated at end
+
+**Error Handling:**
+- Prompt user on agent failures
+- Allow retry/skip/abort decisions
+- Track all failures in agent_failures counter
 
 **State Management:**
 - Track in run-configuration.md

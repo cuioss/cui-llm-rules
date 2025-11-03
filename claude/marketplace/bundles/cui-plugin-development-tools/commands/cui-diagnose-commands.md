@@ -167,14 +167,33 @@ Recommendations:
 
 ## FIXING ISSUES
 
-This command currently REPORTS issues only. To fix:
+To fix reported issues:
 
-1. Review recommendations in report
-2. For bloated commands: Extract sections to skills
-3. For quality issues: Manually edit files
-4. Re-run cui-diagnose-commands to verify fixes
+1. **Review recommendations** in report
+2. **Use `/cui-update-command`** to apply fixes:
+   ```
+   /cui-update-command command-name={command-name} update="{issue description}"
+   ```
+3. **Re-run diagnosis** to verify:
+   ```
+   /cui-diagnose-commands command-name={command-name}
+   ```
 
-**Critical**: Commands >500 lines MUST be restructured by extracting content to skills.
+**For bloated commands (>500 lines):**
+- Extract content to skills using `/cui-create-skill`
+- Commands MUST be restructured by extracting detailed content to skills
+
+**Example workflow:**
+```
+# 1. Diagnose command
+/cui-diagnose-commands command-name=my-command
+
+# 2. Apply fix using update command
+/cui-update-command command-name=my-command update="Add error handling in Step 3"
+
+# 3. Verify fix
+/cui-diagnose-commands command-name=my-command
+```
 
 ## ARCHITECTURE
 
@@ -194,9 +213,11 @@ All analysis logic is in the specialized agent:
 
 ## RELATED
 
+- `/cui-update-command` - Apply fixes to commands
 - `/cui-diagnose-agents` - Diagnose agents
 - `/cui-diagnose-skills` - Diagnose skills
 - `/cui-diagnose-bundle` - Diagnose entire bundle
+- `/cui-create-skill` - Extract bloated content to skills
 
 ## STANDARDS
 

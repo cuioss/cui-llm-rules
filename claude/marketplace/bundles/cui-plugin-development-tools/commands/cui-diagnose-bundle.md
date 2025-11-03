@@ -23,6 +23,15 @@ Skill: cui-utility-commands:cui-diagnostic-patterns
 
 ## WORKFLOW INSTRUCTIONS
 
+### Step 0: Parameter Validation
+
+**Validate bundle-name parameter:**
+1. If bundle-name provided, verify it exists:
+   - Use Glob to check bundle directory exists
+   - If not found: Display error "Bundle '{bundle-name}' not found" and abort
+2. If not provided, discover available bundles and prompt user to select
+3. Validate --save-report flag if present (boolean value)
+
 ### Workflow Overview
 
 1. **Discover Bundle** - Identify bundle and components
@@ -58,48 +67,32 @@ Delegate to specialized commands:
 ```
 Run: /cui-diagnose-skills scope=bundle bundle-name=<name>
 ```
-- Validates all skills in bundle/skills/
-- Checks self-containment, quality, standards
-- Returns skill-level issues
+**Error handling:** If command fails or not available, skip skills analysis and mark as "Not Analyzed" in report.
 
 **Commands Analysis:**
 ```
 Run: /cui-diagnose-commands scope=bundle bundle-name=<name>
 ```
-- Validates all commands in bundle/commands/
-- Checks bloat, clarity, anti-bloat compliance
-- Returns command-level issues
+**Error handling:** If command fails or not available, skip commands analysis and mark as "Not Analyzed" in report.
 
 **Agents Analysis:**
 ```
 Run: /cui-diagnose-agents scope=bundle bundle-name=<name>
 ```
-- Validates all agents in bundle/agents/
-- Checks tool coverage, best practices
-- Returns agent-level issues
+**Error handling:** If command fails or not available, skip agents analysis and mark as "Not Analyzed" in report.
 
 ### Integration Validation
 
 Cross-component checks:
 
-1. **Inventory Accuracy**
-   - plugin.json lists all components correctly
-   - No missing/extra entries
+1. **Inventory Accuracy** - Validate plugin.json lists all components (Read plugin.json, compare with Glob results)
+2. **Cross-References** - Check references are valid (Grep for skill/command references, verify they exist)
+3. **Naming Consistency** - Validate naming conventions (bundle name matches directory)
+4. **Self-Containment** - Check for external dependencies (Grep for absolute paths, external references)
 
-2. **Cross-References**
-   - Commands reference existing skills
-   - Agents use valid skill references
-   - No broken dependencies
-
-3. **Naming Consistency**
-   - Bundle name matches directory
-   - Component names follow conventions
-   - No conflicts with other bundles
-
-4. **Self-Containment**
-   - Skills don't reference external files
-   - Commands don't reference external standards
-   - Agents portable (no absolute paths)
+**Decision logic:**
+- If any integration check fails: Continue analysis but mark as "Integration Issues" in final report
+- If plugin.json missing or malformed: Mark as CRITICAL and abort bundle analysis
 
 ### Quality Gates
 
@@ -180,13 +173,24 @@ Recommendations:
 
 ## CRITICAL RULES
 
+- **VALIDATE PARAMETERS** - Check bundle-name exists before proceeding
 - **LOAD STANDARDS** - Reference quality standards skill
-- **DELEGATE TO SPECIALISTS** - Use component-specific diagnose commands
+- **DELEGATE TO SPECIALISTS** - Use component-specific diagnose commands (handle failures gracefully)
 - **CHECK INTEGRATION** - Validate cross-component references
-- **VALIDATE INVENTORY** - Ensure plugin.json accuracy
+- **VALIDATE INVENTORY** - Ensure plugin.json accuracy (abort if missing/invalid)
 - **ENFORCE SELF-CONTAINMENT** - No external dependencies
 - **CALCULATE SCORES** - Overall bundle quality score
 - **MARKETPLACE READINESS** - All quality gates must pass
+
+## STATISTICS TRACKING
+
+Track throughout workflow:
+- `components_analyzed`: Total components examined
+- `skills_analyzed`, `commands_analyzed`, `agents_analyzed`: Counts per component type
+- `integration_issues`: Count of integration problems found
+- `total_issues`: Aggregate issue count across all components
+- `quality_gates_passed`: Count of quality gates passed
+- `marketplace_ready`: Boolean flag
 
 ## STANDARDS
 

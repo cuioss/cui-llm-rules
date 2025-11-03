@@ -70,26 +70,13 @@ Read: standards/new-project-guide.md
 
 **What to Apply**:
 
-1. **Maven Project Structure**:
-   - Standard directory layout (src/main/java, src/test/java)
-   - Maven pom.xml with cui-java-parent
-   - Group ID: `de.cuioss`
-   - Follow semantic versioning
+Apply project setup standards from `standards/new-project-guide.md`:
+- Maven project structure and POM configuration
+- Package structure and naming conventions
+- Initial file templates (.gitignore, README.adoc, LICENSE)
+- Frontend integration setup (if applicable)
 
-2. **Package Structure**:
-   - Follow reverse domain naming
-   - Logical package organization
-   - Separation of concerns
-   - Public API in root packages
-
-3. **Initial Files**:
-   - README.adoc with standard structure
-   - LICENSE file
-   - .gitignore for Java/Maven/Node
-   - pom.xml referencing parent
-   - Basic test structure
-
-**Note**: The parent POM (cui-java-parent) handles all plugin configuration including compiler, testing (surefire, failsafe), and code coverage (jacoco). Do not duplicate plugin configuration in project POMs.
+**Note**: The parent POM (cui-java-parent) handles all plugin configuration. See new-project-guide.md for complete templates.
 
 ### Step 5: Verify Project Setup
 

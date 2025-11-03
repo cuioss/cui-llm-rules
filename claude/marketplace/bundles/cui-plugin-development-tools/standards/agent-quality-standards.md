@@ -4,7 +4,7 @@ Quality standards and best practices for Claude Code agents.
 
 ## Agent Best Practices
 
-A well-formed agent must follow these 9 core practices:
+A well-formed agent must follow these 10 core practices:
 
 ### 1. Tool Coverage
 - Agent must have access to ALL tools required for its stated task
@@ -55,6 +55,13 @@ A well-formed agent must follow these 9 core practices:
 - Self-contained (no external file references)
 - No documentation-only noise
 - Follows marketplace architecture rules
+
+### 10. Continuous Improvement Rule
+- **REQUIRED** for >90% of agents (exempt only for simple orchestrators <150 lines)
+- **Required Format**: Must include explicit usage instruction: `using /cui-update-agent agent-name={agent-name} update="[your improvement]"` with:
+- **Required Elements**: List 3-5 specific improvement areas relevant to the agent's purpose
+- **Validation**: Diagnosis must check format compliance, not just presence
+- **Purpose**: Enables iterative refinement through self-documentation
 
 ## YAML Frontmatter Standards
 

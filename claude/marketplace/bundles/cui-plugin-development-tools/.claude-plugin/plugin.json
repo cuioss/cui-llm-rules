@@ -19,7 +19,9 @@
     "./commands/cui-diagnose-agents.md",
     "./commands/cui-diagnose-bundle.md",
     "./commands/cui-diagnose-commands.md",
-    "./commands/cui-diagnose-skills.md"
+    "./commands/cui-diagnose-skills.md",
+    "./commands/cui-update-agent.md",
+    "./commands/cui-update-command.md"
   ],
   "skills": [
     "./skills/cui-marketplace-architecture"

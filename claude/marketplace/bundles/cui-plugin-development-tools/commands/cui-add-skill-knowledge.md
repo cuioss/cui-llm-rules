@@ -13,12 +13,12 @@ When you have valuable documentation (README files, external guides, technical s
 
 1. Creates an isolated knowledge document in the skill's standards directory
 2. References it from SKILL.md as on-demand loading
-3. Scans all existing skill standards for duplicate content
+3. Scans all existing skill standards marketplace-wide for duplicate content
 4. Removes duplicates, keeping the new document as authoritative source
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-add-skill-knowledge update="[your improvement]"` with:
 1. Improved knowledge integration patterns or transformation techniques
 2. Better methods for identifying semantic duplication
 3. More effective strategies for cross-referencing and deduplication
@@ -38,71 +38,35 @@ This ensures the command evolves and becomes more effective with each execution.
 **Optional Parameters**:
 
 - **knowledge-name**: Name for the knowledge document (default: derived from source filename)
-- **load-type**: How to load knowledge (default: `on-demand`)
-  - `on-demand`: Load only when explicitly requested
-  - `conditional`: Load based on specific conditions
-  - `always`: Load with other standards (use sparingly)
+- **load-type**: How to load knowledge - `on-demand` (default), `conditional`, or `always`
 
 ## WORKFLOW
 
 ### Step 1: Validate Input Parameters
 
-**If target-skill not provided:**
-```
-Ask user: "Which skill should receive this knowledge? (provide path to skill directory)"
-Example: claude/marketplace/bundles/cui-java-expert/skills/cui-java-unit-testing
-```
-
-**If source-knowledge not provided:**
-```
-Ask user: "What is the source of the knowledge? (provide path to document)"
-Example: /Users/oliver/git/cui-test-juli-logger/README.adoc
-```
+**Prompt for missing parameters:**
+- `target-skill`: "Which skill should receive this knowledge? (provide path to skill directory)"
+- `source-knowledge`: "What is the source of the knowledge? (provide path to document)"
 
 **Validation:**
-- Verify target-skill directory exists and contains SKILL.md
-- Verify source-knowledge file exists and is readable
+- Verify target-skill directory exists and contains SKILL.md (abort if not found)
+- Verify source-knowledge file exists and is readable (abort if not found)
 - Confirm target skill has `standards/` directory (create if missing)
+- Verify knowledge-name (if provided) is valid kebab-case with .md extension
 
 ### Step 2: Analyze Source Knowledge
 
-**Read and analyze the source document:**
-
 1. Read the complete source document
 2. Identify key topics and content sections
-3. Determine appropriate knowledge document name
-4. Extract format (AsciiDoc, Markdown, etc.)
-
-**Generate knowledge document name:**
-- Use source filename as base (e.g., `README.adoc` → `juli-logger-reference.md`)
-- Convert to kebab-case
-- Ensure `.md` extension for consistency
-- Prompt user to confirm or customize name
+3. Generate knowledge document name from filename (convert to kebab-case with `.md` extension)
+4. Prompt user to confirm or customize name
 
 ### Step 3: Create Isolated Knowledge Document
 
-**Create new file:**
-```
-{target-skill}/standards/{knowledge-name}.md
-```
-
-**Document structure:**
-```markdown
-# {Title from Source}
-
-> **Source**: {Original source path/URL}
-> **Integration Date**: {Current date}
-> **Load Type**: {on-demand/conditional/always}
-
-{Content from source document, converted to Markdown if needed}
-```
-
-**Content transformation:**
-- Convert AsciiDoc to Markdown if source is .adoc
-- Preserve code examples exactly
-- Maintain heading hierarchy
-- Keep all technical details
-- Add source attribution at top
+Create `{target-skill}/standards/{knowledge-name}.md` with:
+- Source attribution header (source path, integration date, load type)
+- Content from source document (convert AsciiDoc to Markdown if needed)
+- Preserve all code examples and technical details exactly
 
 ### Step 4: Update SKILL.md
 
@@ -141,216 +105,73 @@ Read: standards/{knowledge-name}.md
 ```
 ```
 
-**Placement:**
-- On-demand: Add after core standards loading section
-- Conditional: Place where condition naturally occurs in workflow
-- Always: Include in main standards loading section
+**Placement:** Add reference based on load-type (on-demand: after core standards, conditional: where condition occurs, always: in main loading section)
 
-### Step 5: Scan for Duplicate Content
+### Step 5: Scan for Duplicate Content (Marketplace-Wide)
 
-**CRITICAL: Manual line-by-line review required**
+**CRITICAL: Scan ALL marketplace bundles for semantic duplication**
 
-**SCOPE: Scan ALL marketplace bundles, not just the target bundle**
+1. **Discover all marketplace standards files:**
+   - Use Glob to find all `bundles/*/skills/*/standards/*.md` and `bundles/*/skills/*/SKILL.md`
+   - Also scan bundle-level `bundles/*/standards/*.md` if they exist
 
-**Why marketplace-wide scanning is required:**
-- Knowledge often spans multiple bundles (e.g., testing standards may appear in Java, frontend, and documentation bundles)
-- Related bundles naturally share common patterns and practices
-- Cross-bundle duplication is common and must be detected
-- Previous failures:
-  - Only scanning target skill missed duplicates in related skills
-  - Only scanning target bundle missed duplicates in related bundles
+2. **For each file, perform semantic comparison:**
+   - Read source knowledge document completely
+   - Read each existing standards file
+   - Identify duplicate content: same concepts, similar examples, redundant guidance, overlapping sections
+   - Document findings: `{skill-name}/{filename}: Lines {X-Y} - {description}`
 
-**Scan all existing standards across ALL marketplace bundles:**
-```
-# Get marketplace path from target-skill path
-marketplace_path = extract_marketplace_path({target-skill})
+3. **Track statistics:** files_scanned, duplicates_found, bundles_scanned, skills_scanned
 
-# Scan ALL bundles in the marketplace
-Read all files in {marketplace_path}/bundles/*/skills/*/standards/*.md
-Read all files in {marketplace_path}/bundles/*/skills/*/SKILL.md
-
-# Also check bundle-level standards if they exist
-Read all files in {marketplace_path}/bundles/*/standards/*.md (if exists)
-```
-
-**For each existing file in ANY skill, manually compare:**
-
-1. **Read source knowledge document completely**
-2. **Read each existing standards file line by line**
-3. **Identify duplicate content**:
-   - Same concepts explained
-   - Similar code examples
-   - Redundant guidance
-   - Overlapping sections
-   - Related topics that should cross-reference
-
-4. **Document findings with skill context**:
-   ```
-   Skill: {skill-name}
-   File: {filename}
-   Duplicate sections found:
-   - Lines {X-Y}: {Description of duplicate content}
-   - Lines {A-B}: {Description of duplicate content}
-   ```
-
-**DO NOT use automated tools like grep or diff:**
-- This requires semantic understanding
-- Must identify conceptual duplication, not just text matching
-- Requires judgment about what constitutes harmful vs contextual duplication
-
-**Common cross-skill and cross-bundle duplication patterns:**
-- Testing content in both production and testing skills
-- Configuration examples in both core and specialized skills
-- Integration patterns in multiple related skills
-- Best practices repeated across related domains
-- Testing patterns duplicated across Java, frontend, and documentation bundles
-- Common tool usage (e.g., logging testing) appearing in multiple bundles
+**Error handling:** If marketplace path cannot be determined or files cannot be read, log error and continue with remaining files.
 
 ### Step 6: Remove Duplicates
 
 **For each duplicate identified:**
 
-1. **Confirm duplication** with user:
-   ```
-   Found duplicate content in {filename} (lines {X-Y}):
-   - Topic: {Description}
-   - Action: Remove and reference new knowledge document
+1. **Prompt user for confirmation:** "Found duplicate content in {skill-name}/{filename} (lines {X-Y}: {topic}). Remove and add cross-reference? [Y/n/q]"
+2. **If yes:** Remove duplicate section and add cross-reference to new knowledge document
+3. **Verify:** Check section transitions and ensure document remains coherent
+4. **Track:** Increment duplicates_removed counter
 
-   Proceed with removal? (yes/no)
-   ```
+**Error handling:** If Edit tool fails, log error and continue with remaining duplicates.
 
-2. **Remove duplicate section** from existing file
+### Step 7: Display Integration Report
 
-3. **Add cross-reference** to new knowledge document:
-   ```markdown
-   For {topic}, see [{knowledge-name}]({knowledge-name}.md).
-   ```
-
-4. **Verify removal** doesn't break document flow:
-   - Check section transitions
-   - Update table of contents if present
-   - Ensure remaining content is coherent
-
-### Step 7: Generate Integration Report
-
-**Create summary report:**
-
-```markdown
-## Knowledge Integration Report
-
-**Skill**: {skill-name}
-**Bundle**: {bundle-name}
-**Source**: {source-knowledge}
-**Knowledge Document**: standards/{knowledge-name}.md
-**Integration Type**: {load-type}
-
-### Changes Made
-
-1. **Created**: standards/{knowledge-name}.md ({line-count} lines)
-2. **Updated**: SKILL.md (added {load-type} reference)
-
-### Duplicates Removed
-
-{For each skill with duplicates removed}:
-
-#### Skill: {skill-name}
-
-- **{filename}**:
-  - Removed lines {X-Y}: {description}
-  - Removed lines {A-B}: {description}
-  - Added cross-reference to {knowledge-name}.md in {target-skill}
-
-### Files Scanned (No Duplicates Found)
-
-**Marketplace-wide scan summary**:
-- Total bundles scanned: {count}
-- Total skills scanned: {count}
-- Total files scanned: {count}
-
-**Bundles scanned**:
-
-{For each bundle}:
-#### Bundle: {bundle-name}
-- Skills scanned: {count}
-- Files scanned: {count}
-
-**Skills scanned**:
-{List each skill and its files that were scanned}
-
-### Authoritative Source
-
-The new document `{target-skill}/standards/{knowledge-name}.md` is now the authoritative source for:
-- {Topic 1}
-- {Topic 2}
-- {Topic 3}
-
-All other standards files across ALL marketplace bundles now reference this document for these topics.
-```
+Display summary with statistics:
+- **Created:** `{knowledge-name}.md` ({line_count} lines)
+- **Updated:** SKILL.md (added {load-type} reference)
+- **Scanned:** {bundles_scanned} bundles, {skills_scanned} skills, {files_scanned} files
+- **Duplicates found:** {duplicates_found}
+- **Duplicates removed:** {duplicates_removed}
+- **Skills modified:** {list of skills where duplicates were removed}
+- **Authoritative source:** `{target-skill}/standards/{knowledge-name}.md`
 
 ### Step 8: Verify Skill Quality
 
-**Run diagnostics on the modified skill:**
+Run `/cui-diagnose-skills {skill-name}` to verify skill structure, references, and standards organization.
 
-```bash
-/cui-diagnose-skills {skill-name}
-```
+**Error handling:** If diagnosis fails, log error and display diagnostic output for review.
 
-This verifies:
-- SKILL.md structure and references are correct
-- All standards files are properly formatted
-- Cross-references resolve correctly
-- No broken links or missing files
-- Standards organization follows best practices
+### Step 9: Verify Bundle Quality (If modifications span multiple skills)
 
-**Review diagnostic output:**
-- Fix any issues identified
-- Ensure all checks pass before proceeding
+**Decision logic:** If duplicates were removed from skills outside the target skill, run `/cui-diagnose-bundle {bundle-name}` for each affected bundle.
 
-### Step 9: Verify Bundle Quality
-
-**Run diagnostics on the bundle containing the skill:**
-
-```bash
-/cui-diagnose-bundle {bundle-name}
-```
-
-This verifies:
-- Bundle-wide integration is correct
-- All skills within bundle are properly structured
-- No conflicts or inconsistencies across bundle
-- plugin.json is up to date
-- Bundle documentation reflects changes
-
-**Review diagnostic output:**
-- Fix any bundle-level issues identified
-- Ensure bundle quality standards are met
+**Error handling:** If diagnosis fails, log error and display diagnostic output for review.
 
 ## CRITICAL RULES
 
 **Duplication Prevention:**
 - New knowledge document is ALWAYS authoritative
-- Remove ALL duplicates from existing files
-- Manual review is REQUIRED (no automated deduplication)
-- Must identify semantic duplication, not just text matching
+- Scan ALL marketplace bundles (not just target bundle)
+- Identify semantic duplication (conceptual overlap, not just text matching)
+- Confirm all removals with user before modifying files
 
 **Integration Quality:**
-- Source attribution must be preserved
-- Content must be transformed to Markdown format
-- Original technical details must be maintained exactly
-- Integration type (on-demand/conditional/always) guides SKILL.md update
-
-**Manual Review Process:**
-- Read source knowledge completely first
-- Read each existing file line by line
-- Document all duplicates found before removing
-- Confirm removals with user
-- Verify coherence after removal
-
-**Default Behavior:**
-- Load type: `on-demand` (only when explicitly requested)
-- Format: Markdown (.md)
-- Placement: After core standards in SKILL.md
-- Duplication: Remove from existing, keep in new
+- Preserve source attribution in knowledge document
+- Convert content to Markdown format
+- Maintain all technical details exactly
+- Use on-demand loading by default (load only when explicitly requested)
 
 ## USAGE EXAMPLES
 
@@ -387,56 +208,25 @@ This verifies:
   load-type=always
 ```
 
-## EXAMPLE INTEGRATION
+## TOOL USAGE
 
-**Before** (SKILL.md):
-```markdown
-### Step 1: Load Core Standards
+- **Glob**: Discover marketplace standards files (non-prompting)
+- **Read**: Read source knowledge and existing standards files
+- **Write**: Create new knowledge document
+- **Edit**: Update SKILL.md and remove duplicates
+- **SlashCommand**: Run `/cui-diagnose-skills` and `/cui-diagnose-bundle`
 
-```
-Read: standards/testing-junit-core.md
-Read: standards/testing-generators.md
-```
-```
+## STATISTICS TRACKING
 
-**After** (SKILL.md with on-demand knowledge):
-```markdown
-### Step 1: Load Core Standards
-
-```
-Read: standards/testing-junit-core.md
-Read: standards/testing-generators.md
-```
-
-### Step 2: Load Additional Knowledge (Optional)
-
-**JUnit Logger Testing** (load when needed):
-```
-Read: standards/juli-logger-reference.md
-```
-
-Use when: Testing applications that use java.util.logging (JUL) or need to assert log output in tests.
-```
-
-## VALIDATION
-
-After integration, verify:
-
-- [ ] Knowledge document created in standards/
-- [ ] Source attribution present in knowledge document
-- [ ] SKILL.md updated with appropriate load type
-- [ ] All existing standards files scanned manually
-- [ ] All duplicates identified and documented
-- [ ] Duplicates removed with user confirmation
-- [ ] Cross-references added where duplicates removed
-- [ ] Integration report generated
-- [ ] No broken references in existing files
-- [ ] Knowledge document is authoritative source
-- [ ] `/cui-diagnose-skills` executed and all checks pass
-- [ ] `/cui-diagnose-bundle` executed and all checks pass
+Track throughout workflow:
+- `files_scanned`: Total standards files reviewed
+- `bundles_scanned`: Total bundles examined
+- `skills_scanned`: Total skills examined
+- `duplicates_found`: Duplicate sections identified
+- `duplicates_removed`: Duplicate sections removed with user confirmation
+- `skills_modified`: Skills where duplicates were removed
 
 ## RELATED
 
 - `/cui-diagnose-skills` - Validates skill structure and quality
 - `/cui-create-skill` - Creates new skills
-- Skill quality standards - Standards for skill structure and content

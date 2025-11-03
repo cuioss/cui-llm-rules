@@ -157,6 +157,131 @@ git commit -m "feat: Initial project setup
 - Initial documentation"
 ```
 
+## Frontend Integration Setup
+
+For projects with frontend components (JavaScript, CSS, web components):
+
+### package.json Template
+
+```json
+{
+  "name": "module-name",
+  "version": "1.0.0",
+  "description": "Module description",
+  "scripts": {
+    "lint": "eslint src/main/resources/META-INF/resources/javascript",
+    "lint:fix": "eslint --fix src/main/resources/META-INF/resources/javascript",
+    "format": "prettier --write src/main/resources/META-INF/resources",
+    "test": "cypress run",
+    "test:open": "cypress open"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "cypress": "^13.0.0"
+  }
+}
+```
+
+### Frontend Directory Structure
+
+```
+src/main/resources/META-INF/resources/
+├── javascript/
+│   └── modules/
+│       └── module-name/
+│           ├── components/
+│           └── utils/
+└── css/
+    └── module-name.css
+```
+
+### Maven Integration
+
+The `frontend-maven-plugin` integration is handled by cui-java-parent. Projects only need to:
+1. Add `package.json` in project root
+2. Define npm scripts for lint, format, test
+3. Organize JavaScript/CSS in standard resource paths
+
+For detailed Maven/JavaScript integration, see cui-frontend-development skill.
+
+## .gitignore Template
+
+```gitignore
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Node.js / Frontend
+node_modules/
+package-lock.json
+.npm/
+dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test Reports
+cypress/videos/
+cypress/screenshots/
+```
+
+## README.adoc Template
+
+```asciidoc
+= Project Name
+
+Description of the project purpose and functionality.
+
+== Maven Coordinates
+
+[source,xml]
+----
+<dependency>
+    <groupId>de.cuioss</groupId>
+    <artifactId>module-name</artifactId>
+    <version>1.0.0</version>
+</dependency>
+----
+
+== Features
+
+* Feature 1
+* Feature 2
+* Feature 3
+
+== Requirements
+
+* Java 17+
+* Maven 3.8+
+* Node.js 20+ (if using frontend components)
+
+== Building
+
+[source,bash]
+----
+mvn clean install
+----
+
+== License
+
+Apache License 2.0 - See LICENSE file
+```
+
 ## Quality Checklist
 
 - [ ] Directory structure complete
@@ -165,7 +290,12 @@ git commit -m "feat: Initial project setup
 - [ ] Individual specification documents created
 - [ ] Maven pom.xml configured with parent POM and dependencies
 - [ ] Package structure follows standards
-- [ ] .gitignore configured
-- [ ] README.adoc present
+- [ ] .gitignore configured (using template above)
+- [ ] README.adoc present (using template above)
 - [ ] LICENSE file included
 - [ ] Parent POM properly referenced (cui-java-parent)
+- [ ] Frontend setup complete (if applicable):
+  - [ ] package.json configured
+  - [ ] npm scripts defined
+  - [ ] Frontend directory structure created
+  - [ ] ESLint and Prettier configured

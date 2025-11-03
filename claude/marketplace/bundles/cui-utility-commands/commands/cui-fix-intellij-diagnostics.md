@@ -7,6 +7,17 @@ description: Retrieve and fix IDE diagnostics automatically, suppressing only wh
 
 Retrieves diagnostics from IntelliJ IDE via MCP, analyzes issues, applies fixes, and handles unfixable issues through suppression.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** with:
+1. Improved MCP diagnostics retrieval patterns and timeout handling
+2. Better issue categorization and fix strategies
+3. More effective suppression patterns for unfixable issues
+4. Enhanced build verification and re-check strategies
+5. Any lessons learned about IntelliJ MCP integration
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 **file** - Specific file to check (optional, checks all open files if not provided)
@@ -21,37 +32,66 @@ IntelliJ MCP server ONLY works on currently active/focused file. If file not act
 
 ## WORKFLOW
 
-### Step 1: Get Diagnostics from IDE
+### Step 1: Validate Parameters and Get Diagnostics
 
-**A. If file parameter provided**: Open file in IDE, get diagnostics for that file
+**Parameter validation:**
+1. If `file` parameter provided:
+   - Validate it's one of: 'all', 'active', or valid file path
+   - If file path: Use Read to verify file exists, handle errors gracefully
+   - If invalid: Display error "Invalid scope. Use 'all', 'active', or valid file path" and abort
+2. If no parameter: Default to 'all' (all open files)
 
-**B. If no parameter**: Get diagnostics for all open files
+**Get diagnostics from IDE:**
+
+**A. If file parameter is specific path**: Open file in IDE, get diagnostics for that file
+
+**B. If file='all' or no parameter**: Get diagnostics for all open files
+
+**C. If file='active'**: Get diagnostics for currently active file only
 
 Use MCP ide tool:
 ```
 mcp__ide__getDiagnostics uri="file:///{absolute_path}"
 ```
 
+**Error handling:** If MCP getDiagnostics fails or times out:
+- Increment mcp_failures counter
+- Display: "MCP server not responding or file not active in IDE. Ensure IntelliJ is running and file is focused."
+- Prompt user: "[R]etry/[A]bort"
+- If retry: Wait 5 seconds, try again (max 3 retries)
+- If abort or max retries: Exit with error report
+
 ### Step 2: Categorize Issues
 
 Group by:
-- Errors vs Warnings
+- Errors vs Warnings (track in issues_found counter)
 - Fixable vs Unfixable
-- By file (if multiple)
+- By file (if multiple files analyzed, track in files_analyzed counter)
+
+**Decision logic for each issue type:**
+- **Error (severity: Error)**:
+  - Display: "ERROR in {file}:{line} - {message}"
+  - Options: "[F]ix automatically/[S]uppress with justification/[S]kip this issue"
+
+- **Warning (severity: Warning)**:
+  - Display: "WARNING in {file}:{line} - {message}"
+  - Options: "[F]ix automatically/[S]uppress with justification/[I]gnore (skip)/[A]bort all"
 
 ### Step 3: Attempt Fixes
 
-For each diagnostic:
+For each diagnostic marked for automatic fix:
 
 **A. Analyze issue** - Understand problem and possible solutions
 
 **B. Determine if fixable**:
-- Code issues → Fix code
-- Import issues → Add imports
-- Type issues → Fix types
-- Style issues → Fix formatting
+- Code issues → Fix code (increment issues_fixed on success)
+- Import issues → Add imports (increment issues_fixed on success)
+- Type issues → Fix types (increment issues_fixed on success)
+- Style issues → Fix formatting (increment issues_fixed on success)
 
 **C. Apply fix** using Edit tool
+
+**Error handling:** If Edit fails, display error and prompt "[R]etry edit/[S]uppress issue/[S]kip/[A]bort"
 
 ### Step 4: Re-verify Build
 
@@ -71,11 +111,13 @@ For issues that cannot be reasonably fixed:
 - SonarQube: `@SuppressWarnings("java:S####")`
 - ErrorProne: `@SuppressWarnings("ErrorProneName")`
 
-**B. Add suppression comment** with justification
+**B. Add suppression comment** with justification (increment issues_suppressed counter)
 
 ### Step 6: Re-check Diagnostics
 
 Call getDiagnostics again to verify issues resolved.
+
+**Error handling:** If MCP fails during re-check, increment mcp_failures and prompt "[R]etry/[C]ontinue without verification/[A]bort".
 
 ### Step 7: Build and Commit
 
@@ -89,22 +131,43 @@ Task:
   prompt: Commit fixes with message describing issues resolved
 ```
 
-### Step 8: Display Report
+### Step 8: Cleanup and Display Report
+
+**Cleanup:**
+- Clear any temporary IntelliJ state (cached diagnostics)
+- No file artifacts to clean (MCP is stateless)
+
+**Display comprehensive report:**
 
 ```
 ╔════════════════════════════════════════════════════════════╗
 ║          Diagnostic Fix Report                             ║
 ╚════════════════════════════════════════════════════════════╝
 
-Files analyzed: {count}
-Issues found: {count}
-Issues fixed: {count}
-Issues suppressed: {count}
+Files analyzed: {files_analyzed}
+Issues found: {issues_found}
+Issues fixed: {issues_fixed}
+Issues suppressed: {issues_suppressed}
 Remaining issues: {count}
+
+MCP Statistics:
+- MCP failures: {mcp_failures}
+- Retries attempted: {retry_count}
 
 Build status: {SUCCESS/FAILURE}
 Committed: {yes/no}
 ```
+
+## STATISTICS TRACKING
+
+Track throughout workflow:
+- `files_analyzed`: Count of files checked for diagnostics
+- `issues_found`: Total diagnostic issues discovered
+- `issues_fixed`: Issues successfully fixed automatically
+- `issues_suppressed`: Issues suppressed with justification
+- `mcp_failures`: Count of MCP getDiagnostics failures/timeouts
+
+Display all statistics in final report.
 
 ## CRITICAL RULES
 
@@ -112,6 +175,12 @@ Committed: {yes/no}
 - File must be active in IDE
 - Timeout ~60-120 seconds if file not active
 - Use mcp__ide__getDiagnostics tool
+- Handle MCP failures with retry logic (max 3 retries)
+
+**Parameter Validation:**
+- Validate 'file' parameter is 'all', 'active', or valid file path
+- Use Read to verify file existence before attempting diagnostics
+- Clear error messages for invalid parameters
 
 **Fix Priority:**
 1. Try reasonable fix first
@@ -127,6 +196,11 @@ Committed: {yes/no}
 - Use appropriate tool-specific syntax
 - Add comment explaining why suppressed
 - Document in commit message
+
+**Error Handling:**
+- Prompt user on MCP failures with retry option
+- Track all failures in mcp_failures counter
+- Allow graceful abort at any decision point
 
 ## USAGE EXAMPLES
 

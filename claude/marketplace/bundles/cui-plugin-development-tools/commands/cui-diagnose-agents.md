@@ -245,13 +245,29 @@ Recommendations:
 
 ## FIXING ISSUES
 
-This command currently REPORTS issues only. To fix:
+To fix reported issues:
 
-1. Review recommendations in report
-2. Manually edit affected files
-3. Re-run cui-diagnose-agents to verify fixes
+1. **Review recommendations** in report
+2. **Use `/cui-update-agent`** to apply fixes:
+   ```
+   /cui-update-agent agent-name={agent-name} update="{issue description}"
+   ```
+3. **Re-run diagnosis** to verify:
+   ```
+   /cui-diagnose-agents agent-name={agent-name}
+   ```
 
-**Future enhancement**: Auto-fix capability with user approval.
+**Example workflow:**
+```
+# 1. Diagnose agent
+/cui-diagnose-agents agent-name=my-agent
+
+# 2. Apply fix using update command
+/cui-update-agent agent-name=my-agent update="Add error handling for tool failures"
+
+# 3. Verify fix
+/cui-diagnose-agents agent-name=my-agent
+```
 
 ## ARCHITECTURE
 
@@ -271,6 +287,7 @@ All analysis logic is in the specialized agent:
 
 ## RELATED
 
+- `/cui-update-agent` - Apply fixes to agents
 - `/cui-diagnose-commands` - Diagnose commands
 - `/cui-diagnose-skills` - Diagnose skills
 - `/cui-diagnose-bundle` - Diagnose entire bundle

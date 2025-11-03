@@ -18,7 +18,7 @@
 * `HttpResultMapper.java` → `HttpResultMapperTest.java`
 
 **Exceptions:**
-* Enums without custom methods (only constants)s
+* Enums without custom methods (only constants)
 
 ### Test Coverage
 

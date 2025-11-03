@@ -24,5 +24,5 @@ Activate when:
 
 ## Standards
 
-- `standards/trusted-domains.md` - Categorized list of major trusted domains
-- `standards/domain-security-assessment.md` - Security evaluation criteria
+Read: standards/trusted-domains.md
+Read: standards/domain-security-assessment.md

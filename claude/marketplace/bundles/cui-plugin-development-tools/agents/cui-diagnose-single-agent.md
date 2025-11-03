@@ -43,7 +43,7 @@ Use Read tool to load the following standards files from the bundle's standards 
 These files are located in the same bundle as this agent (cui-plugin-development-tools/standards/).
 
 These provide:
-- 9 agent best practices
+- 10 agent best practices
 - 20 common issue patterns (Pattern 1-20)
 - Tool coverage analysis formulas
 - Quality scoring criteria
@@ -113,6 +113,13 @@ Tool Fit Score:
 - Task description (Pattern 19)
 - Workflow/steps section
 - Response format specification (Pattern 15)
+- **CONTINUOUS IMPROVEMENT RULE section** (REQUIRED for >90% of agents - flag as WARNING if missing unless agent is simple orchestrator with <150 lines)
+
+**Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
+- **CRITICAL Check**: Must include explicit usage instruction: `using /cui-update-agent agent-name={agent-name} update="[your improvement]"` with:
+- **WARNING**: If section exists but missing usage instruction, flag as CRITICAL issue
+- **SUGGESTION**: Should list 3-5 specific improvement areas relevant to agent purpose
+- **Pattern**: Check format matches: `**CRITICAL:** Every time you execute this agent...YOU MUST immediately update this file** using /cui-update-agent...`
 
 **Check complexity (Pattern 17):**
 - Lines > 800: TOO COMPLEX (CRITICAL)
@@ -121,7 +128,7 @@ Tool Fit Score:
 
 ### Step 6: Best Practices Compliance
 
-**Check against 9 best practices:**
+**Check against 10 best practices:**
 1. Tool best practices - Uses right tools for tasks
 2. Autonomy best practices - Self-sufficient, clear workflow
 3. Communication best practices - Clear response format
@@ -131,10 +138,11 @@ Tool Fit Score:
 7. No absolute paths (Pattern 5)
 8. Parameter validation
 9. Statistics tracking (Pattern 7)
+10. Continuous Improvement Rule - Required format with update tool usage instruction
 
 **Calculate compliance score:**
 ```
-Compliance Score = (practices met / 9) * 100
+Compliance Score = (practices met / 10) * 100
 ```
 
 ### Step 7: Essential Rules Analysis (Patterns 7, 8)

@@ -1,13 +1,9 @@
 ---
 name: permission-management
 description: Permission validation, architecture patterns, anti-patterns, and best practices for Claude Code settings management
-requirements:
-  - Read tool for loading standards
-standards:
-  - standards/permission-validation-standards.md
-  - standards/permission-architecture.md
-  - standards/permission-anti-patterns.md
-  - best-practices/lessons-learned.md
+allowed-tools:
+  - Read
+  - Grep
 ---
 
 # Permission Management Skill

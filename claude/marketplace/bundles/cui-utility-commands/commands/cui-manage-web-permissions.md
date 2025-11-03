@@ -7,9 +7,22 @@ description: Analyze and consolidate WebFetch domain permissions across projects
 
 Analyzes WebFetch domains across global and project settings, researches domains for security, consolidates permissions, and provides recommendations.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-manage-web-permissions update="[your improvement]"` with:
+1. Improved domain security research patterns and validation strategies
+2. Better permission consolidation and deduplication algorithms
+3. More effective domain categorization and trust assessment methods
+4. Enhanced settings file parsing and merging techniques
+5. Any lessons learned about WebFetch permission management workflows
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 **scope** - Which settings to analyze (global/local/both, default: both)
+   - **Validation**: Must be one of: global, local, both
+   - **Error**: If invalid: "Invalid scope '{value}'. Must be: global, local, or both" and retry
 
 ## WORKFLOW
 
@@ -24,10 +37,21 @@ Loads trusted domains, security assessment patterns, and research methodology.
 ### Step 2: Collect All WebFetch Permissions
 
 **A. Read global settings** (`~/.claude/settings.json`)
+   - **Error handling**: If Read fails (file not found):
+     - Display: "Global settings not found: ~/.claude/settings.json"
+     - Prompt: "[C]reate default settings/[S]kip global analysis/[A]bort"
+     - Track in files_read counter
 
 **B. Read local settings** (`./.claude/settings.local.json`)
+   - **Error handling**: If Read fails (file not found):
+     - Display: "Local settings not found: ./.claude/settings.local.json"
+     - Prompt: "[C]reate default settings/[S]kip local analysis/[A]bort"
+     - Track in files_read counter
 
 **C. Extract all WebFetch permissions** from both sources
+   - **Error handling**: If JSON parsing fails:
+     - Display: "Invalid JSON in {file}: {error}"
+     - Prompt: "[F]ix manually/[S]kip this file/[A]bort"
 
 **D. Categorize domains**:
 - Universal (domain:*)
@@ -136,14 +160,50 @@ r - Review each change
 ```
 
 If yes:
-- Update global settings
-- Update local settings
+- Update global settings (track in permissions_added and permissions_removed counters)
+- Update local settings (track in permissions_added and permissions_removed counters)
 - Remove duplicates and redundant permissions
 - Consolidate domains per recommendations
 
+**Error handling:**
+- **If Write fails**: Display "Failed to update {file}: {error}" and prompt "[R]etry/[S]kip file/[A]bort"
+- **If Edit fails**: Display "Failed to edit {file}: {error}" and prompt "[R]etry/[S]kip change/[A]bort"
+- Track all successful updates in files_modified counter
+
 ### Step 8: Report Results
 
-Display summary of changes made and final state.
+Display summary of changes made and final state:
+
+```
+╔════════════════════════════════════════════════════════════╗
+║          WebFetch Permission Update Complete               ║
+╚════════════════════════════════════════════════════════════╝
+
+Statistics:
+- Domains analyzed: {domains_analyzed}
+- Permissions added: {permissions_added}
+- Permissions removed: {permissions_removed}
+- Security checks performed: {security_checks_performed}
+- Files read: {files_read}
+- Files modified: {files_modified}
+
+Final State:
+- Global permissions: {count}
+- Local permissions: {count}
+- Total unique domains: {count}
+```
+
+## STATISTICS TRACKING
+
+Track throughout workflow:
+- `domains_analyzed`: Total unique domains discovered and analyzed
+- `permissions_added`: Count of new permissions added to settings
+- `permissions_removed`: Count of redundant/duplicate permissions removed
+- `security_checks_performed`: Count of unknown domains researched
+- `files_read`: Count of settings files successfully read
+- `files_modified`: Count of settings files successfully updated
+
+Display all statistics in Step 8 report.
 
 ## CRITICAL RULES
 

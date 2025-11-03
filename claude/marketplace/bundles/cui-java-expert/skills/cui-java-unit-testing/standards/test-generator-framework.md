@@ -95,14 +95,7 @@ class MyGeneratorTest {
 
 #### GeneratorSeed
 
-**CRITICAL SEED USAGE RESTRICTIONS:**
-
-* **Fixed seeds are ONLY for reproducing test failures during debugging**
-* **NEVER commit tests with hardcoded @GeneratorSeed values**
-* **REMOVE all @GeneratorSeed annotations before check-in/commit**
-* **Use seeds temporarily for local debugging only**
-
-Fixed seeds defeat the purpose of random testing and reduce test coverage over time.
+**CRITICAL: Fixed seeds are ONLY for reproducing test failures during debugging. NEVER commit tests with hardcoded @GeneratorSeed values.**
 
 Use `@GeneratorSeed` to fix the random seed for reproducible tests (debugging only):
 
