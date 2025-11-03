@@ -229,10 +229,10 @@ If file path contains "specification", "architecture", "standards":
 3. Use Edit tool for precise changes
 4. Track fix applied
 
-**User Decision Required:**
-- Removing content >1 sentence
-- Major tone rewrites (>50% of sentence)
-- Unverifiable claims (no known source)
+**User Decision Required (ask before applying):**
+- Removing content exceeding 1 sentence (20+ words)
+- Major tone rewrites affecting >50% of sentence words
+- Unverifiable claims with no authoritative source found via web search
 
 ### Step 7: Generate Report
 

@@ -111,7 +111,7 @@ For EACH unresolved Gemini comment, follow this decision process:
 3. Missing error handling AND (external API call OR I/O without try-catch)
 4. Missing JavaDoc AND public element AND not @Generated
 5. Security improvement (valid approach for input validation/SQL injection/XSS)
-6. Performance improvement with >10% impact
+6. Performance improvement with measurable >10% reduction in execution time or memory usage
 7. CUI standards violation AND suggestion aligns
 
 **Strategy B - Disagree** (NO Strategy A AND ANY true):
@@ -120,7 +120,7 @@ For EACH unresolved Gemini comment, follow this decision process:
 3. Suggests forbidden library (Mockito/Hamcrest/Random)
 4. Breaks API contract (signature/return/exceptions)
 5. Comment factually incorrect (provide evidence)
-6. Reduces clarity without benefit (subjective style)
+6. Reduces clarity without measurable benefit (e.g., renaming with no semantic improvement)
 
 **Neither:** Ask user with context
 

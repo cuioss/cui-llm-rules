@@ -43,9 +43,9 @@ Analyze a given issue (from GitHub URL, issue number, or local directory) and cr
    - Read all relevant files in the directory
 
 **Decision Point:**
-- If GitHub → Use Bash with `gh` commands
-- If local directory → Use Glob + Read tools
-- If unclear → Ask user to clarify issue location
+- If GitHub issue number or URL provided → Use Bash with `gh` commands
+- If file path provided → Use Read tool
+- If neither provided → Ask user to specify issue location (GitHub issue number/URL or file path)
 
 ### Step 2: Read and Analyze Issue Content
 

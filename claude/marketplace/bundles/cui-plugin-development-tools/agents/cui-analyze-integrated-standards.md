@@ -95,8 +95,8 @@ Store ALL content in memory for cross-file analysis.
 
 **Pattern 3: Contextual Duplication**
 - Same information repeated for different contexts within skill
-- May be acceptable if provides clarity
-- **Assessment**: Keep if adds value, remove if purely redundant
+- Acceptable when: provides essential context-specific examples, clarifies application in different scenarios, or aids comprehension for different reader personas
+- **Assessment**: Keep if adds measurable learning value (enables faster comprehension or reduces ambiguity), remove if purely redundant without context-specific benefits
 
 **For each duplication**:
 - Record files involved (must be within same skill)
@@ -142,8 +142,8 @@ Store ALL content in memory for cross-file analysis.
 
 **Pattern 3: Orphaned Content**
 - File has no references from other files
-- May indicate unused/redundant file
-- **Assessment**: Is this file needed?
+- Likely indicates orphaned or redundant file
+- **Assessment**: File needed if: provides unique domain knowledge not covered elsewhere, serves as authoritative reference for specific standards area, or contains reusable patterns/templates. Otherwise recommend removal or consolidation.
 
 **For each gap:**
 - Record affected files

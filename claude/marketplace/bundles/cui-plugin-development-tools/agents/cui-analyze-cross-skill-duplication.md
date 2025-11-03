@@ -183,12 +183,12 @@ For each skill pair with duplication:
 - **Option B**: Establish skill hierarchy
   - If skill A is more foundational, have skill B invoke skill A
   - Example: `cui-java-cdi` invokes `cui-java-core` for DI patterns
-- **Option C**: Accept duplication if contexts warrant
-  - Document why duplication is intentional
+- **Option C**: Accept duplication if contexts warrant different technology domains (e.g., backend vs frontend), different user personas (e.g., developers vs architects), or different abstraction levels (e.g., overview vs implementation details)
+  - Document why duplication is intentional with specific justification
 
 **If Substantial Overlap (>50%)**:
-- **Consider merging**: If skills serve very similar purposes
-- **Consider refactoring**: Split into focused skills with clear boundaries
+- **Merge skills if**: Both skills serve nearly identical purposes, target same persona, cover same technology domain, and have no distinct value proposition
+- **Refactor if**: Overlap is 50-70% - split into 3 focused skills: (1) shared-core containing common standards, (2) skill-A-specific, (3) skill-B-specific, with both specific skills referencing shared-core
 
 ### Step 7: Generate Cross-Skill Duplication Report
 
@@ -304,10 +304,11 @@ For each skill pair with duplication:
 
 ## PERFORMANCE OPTIMIZATION
 
-- **Only compare skills from same domain** (optional filter):
-  - Java skills: cui-java-*
-  - Frontend skills: cui-frontend-*
-  - This reduces comparison space
+- **Domain filtering** (apply when analyzing >10 skills or when user specifies domain):
+  - Java domain: cui-java-* skills only
+  - Frontend domain: cui-frontend-* skills only
+  - Documentation domain: cui-documentation-* skills only
+  - Reduces comparison space by ~70% for targeted analysis
 
 - **Skip very short sections** (<50 words):
   - Too small to meaningfully compare

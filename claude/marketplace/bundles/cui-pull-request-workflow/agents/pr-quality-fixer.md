@@ -53,21 +53,13 @@ At the start of execution:
   - When activated: Before generating any test code (Step 5.5 - test generation)
   - Loads: testing-junit-core.md, testing-generators.md, testing-value-objects.md, integration-testing.md
 
-## ESSENTIAL RULES
+## Essential Rules
 
-### Git Commit Format
-**Agent-specific** (no skill for process standards):
-- Format: `<type>(<scope>): <subject>` with optional body/footer
-- Types: feat, fix, docs, style, refactor, perf, test, chore
-- Subject: imperative, lowercase, no period, max 50 chars
-- Example: "fix(sonar): resolve S1234 null check"
-
-### Testing Standards
-**Provided by cui-java-unit-testing skill** - activate before generating tests (Step 5.5):
-- JUnit 5 only (NO Mockito/Hamcrest)
-- cui-test-generator for test data (NO Random/Faker)
-- 80% coverage minimum, 100% for critical paths
-- AAA pattern with meaningful assertion messages
+- Git commit format: `<type>(<scope>): <subject>` - types: feat, fix, docs, style, refactor, perf, test, chore; subject: imperative, lowercase, no period, max 50 chars (from: agent-specific - no shared process standards)
+- JUnit 5 only, NO Mockito/Hamcrest (from: cui-java-unit-testing skill)
+- cui-test-generator for test data, NO Random/Faker (from: cui-java-unit-testing skill)
+- 80% coverage minimum, 100% for critical paths (from: cui-java-unit-testing skill)
+- AAA pattern with meaningful assertion messages (from: cui-java-unit-testing skill)
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
@@ -167,29 +159,21 @@ At the start of execution:
 
 ### Step 4: Retrieve Sonar Issues
 
-**CRITICAL**: Use comprehensive method to get ALL Sonar issues.
+**CRITICAL**: Use MCP SonarQube tools to retrieve ALL Sonar issues.
 
-**Priority 1 - MCP SonarQube Server (Recommended):**
+**MCP SonarQube Server Required:**
 
-Use MCP SonarQube tools to retrieve issues. The MCP server is configured via mcp.json with secure token storage.
+Use `mcp__sonarqube__search_sonar_issues_in_projects` to retrieve issues. The MCP server must be configured via mcp.json with secure token storage.
 
-**Check for available MCP tools** - Look for tools matching pattern `mcp__sonarqube*` or `mcp__sonar*`.
-
-Common MCP tool names:
-- `mcp__sonarqube__search_issues` or similar
-- `mcp__sonarqube__get_pull_request_issues` or similar
-- Check tool descriptions to find the right one for PR issue retrieval
-
-**Example usage pattern:**
+**Tool invocation:**
 ```
-Use the available MCP SonarQube tool to:
-- Search for issues in project: <project_key>
-- Filter by pull request: <pr_number>
-- Include statuses: OPEN, CONFIRMED, REOPENED
-- Return fields: key, rule, severity, message, component, line, type
+mcp__sonarqube__search_sonar_issues_in_projects:
+  - pullRequestId: <pr_number>
+  - severities: optional (BLOCKER,CRITICAL,MAJOR,MINOR,INFO)
+  - ps: 500 (page size for comprehensive retrieval)
 ```
 
-This provides complete issue details:
+**Response includes complete issue details:**
 - Rule identifier (e.g., java:S1234)
 - Severity (BLOCKER, CRITICAL, MAJOR, MINOR, INFO)
 - Type (BUG, VULNERABILITY, CODE_SMELL, SECURITY_HOTSPOT)
@@ -199,37 +183,12 @@ This provides complete issue details:
 - Line number
 - Issue key (for suppression tracking)
 
-**Priority 2 - Sonar REST API (Requires Setup):**
-
-Only use if MCP not available. Requires SONAR_TOKEN environment variable.
-
-```bash
-# Get project key from repository (e.g., cuioss_nifi-extensions for cuioss/nifi-extensions)
-PROJECT_KEY="org_repo"
-
-# Fetch all issues for the PR
-gh api https://sonarcloud.io/api/issues/search \
-  -H "Authorization: Bearer $SONAR_TOKEN" \
-  -f componentKeys="$PROJECT_KEY" \
-  -f pullRequest="$PR_NUMBER" \
-  -f statuses="OPEN,CONFIRMED,REOPENED" \
-  -f ps=500 \
-  --jq '.issues[] | {key, rule, severity, message, component, line, type}'
-```
-
-**Priority 3 - GitHub Annotations (Incomplete Fallback):**
-```bash
-gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contains("sonar")) | .output.annotations'
-```
-
-**WARNING**: GitHub annotations are incomplete - they show ~20-30 issues max. Always prefer MCP or Sonar API.
-
-**If you CANNOT access Sonar data:**
+**If MCP tools NOT available:**
 - STOP immediately
-- Report: "Error: Cannot access Sonar issues. Please provide Sonar data or grant access to SonarQube API."
-- Exit agent
+- Report: "Error: SonarQube MCP server not configured. Configure mcp.json with SonarQube connection details. See: https://docs.sonarsource.com/sonarqube-for-vs-code/ai-capabilities/sonarqube-mcp-server"
+- Exit agent with FAILURE status
 
-**If you CAN access Sonar data:**
+**If MCP retrieval successful:**
 
 1. Count total issues found
 2. Filter to only OPEN/CONFIRMED/REOPENED issues (exclude RESOLVED)
@@ -244,60 +203,37 @@ gh api repos/:owner/:repo/check-runs --jq '.check_runs[] | select(.name | contai
 5. Store issue list for processing
 
 **Success Criteria**:
-- Retrieved complete list of Sonar issues
+- Retrieved complete list of Sonar issues via MCP
 - Extracted: rule ID, severity, file path, line number, message, issue key
 
 ### Step 4.5: Retrieve Code Coverage Data
 
-**CRITICAL**: Retrieve coverage metrics to identify test gaps.
+**CRITICAL**: Retrieve coverage metrics to identify test gaps using MCP SonarQube tools.
 
-**Priority 1 - MCP SonarQube Server (Recommended):**
+**MCP SonarQube Server Required:**
 
-Use MCP SonarQube tools to retrieve coverage and quality gate data. The MCP server is configured via mcp.json with secure token storage.
+**1. Get Coverage Metrics:**
 
-**Check for available MCP tools** for coverage metrics:
-- Tools for getting measures/metrics for a PR
-- Tools for quality gate status
-- Look for tool descriptions mentioning "coverage", "measures", "metrics", "quality gate"
-
-**Example usage pattern:**
+Use `mcp__sonarqube__get_component_measures` for overall coverage:
 ```
-Use the available MCP SonarQube tool to:
-- Get coverage metrics for project: <project_key>
-- Filter by pull request: <pr_number>
-- Retrieve metrics: coverage, new_coverage, uncovered_lines, line_coverage
-- Get quality gate status to check coverage thresholds
+mcp__sonarqube__get_component_measures:
+  - component: <project_key>
+  - pullRequest: <pr_number>
+  - metricKeys: ["coverage", "new_coverage", "uncovered_lines", "new_uncovered_lines", "line_coverage"]
 ```
 
-**Priority 2 - Sonar REST API (Requires Setup):**
+**2. Get Quality Gate Status:**
 
-Only use if MCP not available. Requires SONAR_TOKEN environment variable.
-
-```bash
-# Get coverage for specific PR
-gh api https://sonarcloud.io/api/measures/component \
-  -H "Authorization: Bearer $SONAR_TOKEN" \
-  -f component="$PROJECT_KEY" \
-  -f pullRequest="$PR_NUMBER" \
-  -f metricKeys="coverage,new_coverage,uncovered_lines,new_uncovered_lines" \
-  --jq '.component.measures'
-
-# Get file-level coverage for changed files
-gh api https://sonarcloud.io/api/measures/component_tree \
-  -H "Authorization: Bearer $SONAR_TOKEN" \
-  -f component="$PROJECT_KEY" \
-  -f pullRequest="$PR_NUMBER" \
-  -f metricKeys="coverage,line_coverage,uncovered_lines" \
-  -f ps=500 \
-  --jq '.components[] | {key, measures}'
-
-# Check if coverage caused quality gate failure
-gh api https://sonarcloud.io/api/qualitygates/project_status \
-  -H "Authorization: Bearer $SONAR_TOKEN" \
-  -f projectKey="$PROJECT_KEY" \
-  -f pullRequest="$PR_NUMBER" \
-  --jq '.projectStatus.conditions[] | select(.metricKey | contains("coverage"))'
+Use `mcp__sonarqube__get_project_quality_gate_status` to check coverage thresholds:
 ```
+mcp__sonarqube__get_project_quality_gate_status:
+  - projectKey: <project_key>
+  - pullRequest: <pr_number>
+```
+
+**3. Get File-Level Coverage (if needed):**
+
+For detailed uncovered line ranges, use component tree variant to get coverage for each changed file.
 
 **Retrieve and Analyze:**
 1. Overall coverage % for the PR (new code)
@@ -569,7 +505,8 @@ Compile comprehensive summary with all metrics.
 - NEVER proceed without PR identifier (fail immediately)
 - NEVER proceed if non-Sonar builds failed (stop, prompt)
 - Use timeout: ci-sonar-duration * 1.25 ms
-- Use `gh` tool only (NOT GitHub MCP)
+- Use `gh` tool for GitHub operations (NOT GitHub MCP)
+- Use MCP SonarQube tools for ALL Sonar operations (issues, coverage, quality gates)
 
 **Issue Resolution:**
 - Fix OR suppress each issue (zero remaining)
@@ -598,9 +535,10 @@ Required tracking for each tool invocation:
 - **Read**: Count file reads (.claude/run-configuration.md, affected source files, test files)
 - **Edit**: Count file edits (code fixes, suppressions, test additions to existing files)
 - **Write**: Count file writes (new test files created)
-- **Bash**: Count shell commands (gh pr view, gh pr checks, gh api calls, git status)
+- **Bash**: Count shell commands (gh pr view, gh pr checks, git status)
 - **Task**: Count agent invocations (maven-project-builder, commit-changes calls)
 - **Skill**: Count skill invocations (cui-java-unit-testing)
+- **MCP SonarQube**: Count MCP tool calls (search_sonar_issues_in_projects, get_component_measures, get_project_quality_gate_status, change_sonar_issue_status)
 
 Include in final report under "Tool Usage" section.
 
@@ -612,7 +550,7 @@ If during execution you discover insights that could improve future executions:
 - New Sonar rule patterns discovered
 - Better issue analysis techniques
 - More efficient fix strategies
-- Edge cases in Sonar API responses
+- Edge cases in MCP SonarQube responses
 - Unexpected issue formats
 - Better suppression patterns
 - Timeout handling improvements
@@ -620,6 +558,7 @@ If during execution you discover insights that could improve future executions:
 - Test generation patterns that work well or poorly
 - Coverage calculation improvements
 - New auto-suppress patterns discovered
+- MCP tool usage improvements or limitations discovered
 
 **Include in final report**:
 - **Discovery**: What was discovered
@@ -661,6 +600,7 @@ After completing all work, return findings in this format:
 - Bash: {count} invocations
 - Task: {count} invocations
 - Skill: {count} invocations
+- MCP SonarQube: {count} invocations
 
 **Lessons Learned** (for future improvement):
 {if any insights discovered:}

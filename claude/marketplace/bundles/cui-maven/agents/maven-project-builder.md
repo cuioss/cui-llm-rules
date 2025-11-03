@@ -153,7 +153,7 @@ OpenRewrite markers are embedded in source code, NOT in Maven console output. Yo
 For each warning NOT in the "Acceptable Warnings" list:
 1. **DEFAULT ACTION: FIX THE WARNING** - warnings should be fixed, not ignored
 2. **EXCEPTION FOR JAVADOC**: JavaDoc warnings are NEVER negotiable - fix them immediately using cui-javadoc skill standards
-3. Only for non-JavaDoc warnings: If the warning is infrastructure-related (external library issues, third-party dependencies, configuration outside the project scope) or cannot be resolved without external changes, **ASK USER** whether to ignore it
+3. Only for non-JavaDoc warnings: If the warning is infrastructure-related, **ASK USER** whether to ignore it. Infrastructure warnings are: dependency version conflicts from transitive dependencies beyond project control, plugin compatibility warnings for versions locked by parent POM, or platform-specific warnings (OS, JVM version) not addressable in project code
 4. If user agrees to ignore it, add it to the "Acceptable Warnings" section in `.claude/run-configuration.md`
 5. Document the warning pattern clearly so it can be recognized in future runs
 

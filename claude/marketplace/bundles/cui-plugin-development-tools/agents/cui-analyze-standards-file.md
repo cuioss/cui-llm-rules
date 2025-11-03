@@ -166,8 +166,8 @@ Grep: pattern="^```java$", path={file_path}, output_mode=count
 - Related content grouped together
 
 **Check 3: Length**
-- File > 500 lines may indicate bloat
-- Consider splitting if multiple unrelated topics
+- File > 500 lines indicates potential bloat - split if it contains 3+ unrelated topic domains (e.g., combining testing + logging + security standards in one file)
+- File < 50 lines may indicate content too sparse to warrant separate file - consider consolidating with related standard unless it represents complete, focused domain
 
 ### Step 7: Generate Issue Report
 

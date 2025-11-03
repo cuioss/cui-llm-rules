@@ -101,12 +101,12 @@ For each broken link reported:
 
 3. Verify file exists using Read tool:
    - Try: `Read(file_path="{absolute_path}")`
-   - If succeeds: File EXISTS (script may be wrong!)
-   - If fails: File NOT FOUND
+   - If succeeds: File EXISTS (script output may have false positive)
+   - If fails: File NOT FOUND (script output is correct)
 
 4. Decision:
-   - **If file EXISTS**: Keep link, report script discrepancy
-   - **If file NOT FOUND**: Ask user before removing
+   - **If file EXISTS**: Keep link, report script false positive: "Script reported broken link but file exists at {path}"
+   - **If file NOT FOUND**: Ask user before removing broken link
 
 ### Step 6: Fix Internal Anchors
 
