@@ -8,10 +8,10 @@ For testing HTTP client interactions in CUI projects, use the `cui-test-mockwebs
 
 ```java
 // CUI MockWebServer JUnit 5 Extensions
-import de.cuioss.test.mockwebserver.junit5.EnableMockWebServer;
-import de.cuioss.test.mockwebserver.junit5.MockResponseConfig;
-import de.cuioss.test.mockwebserver.junit5.ModuleDispatcher;
-import de.cuioss.test.mockwebserver.junit5.TestProvidedCertificate;
+import de.cuioss.test.mockwebserver.EnableMockWebServer;
+import de.cuioss.test.mockwebserver.mockresponse.MockResponseConfig;
+import de.cuioss.test.mockwebserver.dispatcher.ModuleDispatcher;
+import de.cuioss.test.mockwebserver.TestProvidedCertificate;
 
 // CUI MockWebServer Dispatcher
 import de.cuioss.test.mockwebserver.dispatcher.ModuleDispatcherElement;

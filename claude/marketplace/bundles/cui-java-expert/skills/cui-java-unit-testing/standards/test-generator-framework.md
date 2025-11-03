@@ -38,19 +38,14 @@ import de.cuioss.test.generator.junit.TypeGeneratorMethodSource;
 import de.cuioss.test.generator.junit.TypeGeneratorFactorySource;
 import de.cuioss.test.generator.junit.CompositeTypeGeneratorSource;
 
-// CUI Test Generator Domain
-import de.cuioss.test.generator.domain.GeneratorType;
+// CUI Test Generator Parameterized Testing
+import de.cuioss.test.generator.junit.parameterized.GeneratorType;
 
-// CUI Test Generator Implementations (domain-specific generators)
-import de.cuioss.test.generator.impl.CollectionGenerator;
-import de.cuioss.test.generator.impl.ZonedDateTimeGenerator;
-import de.cuioss.test.generator.impl.FloatObjectGenerator;
-import de.cuioss.test.generator.impl.URLGenerator;
-import de.cuioss.test.generator.impl.NonBlankStringGenerator;
-import de.cuioss.test.generator.impl.EmailGenerator;
-import de.cuioss.test.generator.impl.CityGenerator;
-import de.cuioss.test.generator.impl.FullNameGenerator;
-import de.cuioss.test.generator.impl.IntegerGenerator;
+// CUI Test Generator Domain-specific generators
+// Note: Use Generators.emailAddress(), Generators.cities(), etc. instead of direct imports
+import de.cuioss.test.generator.domain.EmailGenerator;
+import de.cuioss.test.generator.domain.CityGenerator;
+import de.cuioss.test.generator.domain.FullNameGenerator;
 ```
 
 ## Core Components
