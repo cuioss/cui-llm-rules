@@ -157,24 +157,75 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
    - [ ] Performance metrics maintained or improved
 
 5. **Compilation and Build**:
-   ```bash
+   ```
    # Compile the module
-   ./mvnw clean compile -pl [module-name]
+   Task:
+     subagent_type: maven-builder
+     description: Compile module
+     prompt: |
+       Compile module to verify changes.
+
+       Parameters:
+       - command: clean compile
+       - module: [module-name]
+
+       CRITICAL: Wait for completion. Fix any compilation errors.
 
    # Run tests
-   ./mvnw clean test -pl [module-name]
+   Task:
+     subagent_type: maven-builder
+     description: Run tests
+     prompt: |
+       Run module tests.
+
+       Parameters:
+       - command: clean test
+       - module: [module-name]
+
+       CRITICAL: Wait for completion. Fix any test failures.
 
    # Quality verification
-   ./mvnw -Ppre-commit clean verify -DskipTests -pl [module-name]
+   Task:
+     subagent_type: maven-builder
+     description: Quality verification
+     prompt: |
+       Run pre-commit quality checks.
+
+       Parameters:
+       - command: -Ppre-commit clean verify -DskipTests
+       - module: [module-name]
+
+       CRITICAL: Wait for completion. Fix all quality issues.
 
    # Final verification
-   ./mvnw clean install -pl [module-name]
+   Task:
+     subagent_type: maven-builder
+     description: Final verification
+     prompt: |
+       Run final build and install.
+
+       Parameters:
+       - command: clean install
+       - module: [module-name]
+
+       CRITICAL: Wait for completion. Ensure all tests and quality checks pass.
    ```
 
 6. **Native Build** (if native context):
-   ```bash
+   ```
    # Native compilation
-   ./mvnw clean package -Dnative -pl [module-name]
+   Task:
+     subagent_type: maven-builder
+     description: Native build
+     prompt: |
+       Build native executable.
+
+       Parameters:
+       - command: clean package -Dnative
+       - module: [module-name]
+
+       CRITICAL: Wait for completion (may take several minutes).
+       Record build time and executable size.
    ```
 
 ### Step 5: Document Changes and Commit

@@ -11,13 +11,32 @@ This process defines WHEN and WHAT to optimize in Quarkus applications for nativ
 Before starting any native optimization work:
 
 1. [ ] **Baseline Verification**: Ensure application builds and tests pass
-   ```bash
-   ./mvnw clean install
+   ```
+   Task:
+     subagent_type: maven-builder
+     description: Verify baseline build
+     prompt: |
+       Build and install project to verify baseline functionality.
+
+       Parameters:
+       - command: clean install
+
+       CRITICAL: Wait for completion. Ensure all tests pass before proceeding.
    ```
 
 2. [ ] **Native Image Compatibility**: Verify project supports native compilation
-   ```bash
-   ./mvnw clean package -Dnative
+   ```
+   Task:
+     subagent_type: maven-builder
+     description: Verify native image build
+     prompt: |
+       Build native image to verify Quarkus native compilation works.
+
+       Parameters:
+       - command: clean package -Dnative
+
+       CRITICAL: Wait for completion (may take several minutes).
+       Record build time and image size for baseline metrics.
    ```
 
 3. [ ] **Performance Baseline**: Record current metrics (build time, image size, startup time)
@@ -141,12 +160,32 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 **CRITICAL**: When registering CDI beans in the deployment processor, remove duplicate `@RegisterForReflection` annotations from the bean classes to avoid conflicts.
 
 **Verification Commands**:
-```bash
+```
 # Test compilation after each change
-./mvnw clean compile -pl [module-name]
+Task:
+  subagent_type: maven-builder
+  description: Test compilation
+  prompt: |
+    Compile module to verify changes.
+
+    Parameters:
+    - command: clean compile
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Fix any compilation errors.
 
 # Run quality verification
-./mvnw -Ppre-commit clean verify -DskipTests -pl [module-name]
+Task:
+  subagent_type: maven-builder
+  description: Run quality checks
+  prompt: |
+    Run pre-commit quality verification without tests.
+
+    Parameters:
+    - command: -Ppre-commit clean verify -DskipTests
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Fix any quality issues.
 ```
 
 **Success Criteria**:
@@ -199,15 +238,45 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 - **Framework Integration**: Some frameworks require specific reflection access
 
 **Verification Process**:
-```bash
+```
 # Compile module
-./mvnw clean compile -pl [module-name]
+Task:
+  subagent_type: maven-builder
+  description: Compile module
+  prompt: |
+    Compile module to verify reflection annotations.
+
+    Parameters:
+    - command: clean compile
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Fix any compilation errors.
 
 # Test reflection optimization
-./mvnw clean test -pl [module-name] -Dtest=[ReflectionTest]
+Task:
+  subagent_type: maven-builder
+  description: Test reflection configuration
+  prompt: |
+    Run specific reflection tests to verify optimization.
+
+    Parameters:
+    - command: clean test -Dtest=[ReflectionTest]
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Verify reflection tests pass.
 
 # Full module verification
-./mvnw clean install -pl [module-name]
+Task:
+  subagent_type: maven-builder
+  description: Full module build
+  prompt: |
+    Build and install module with optimized reflection.
+
+    Parameters:
+    - command: clean install
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Ensure all tests pass.
 ```
 
 **Success Criteria**:
@@ -237,12 +306,32 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 - [ ] **Serialization/Deserialization**: Test data classes if applicable
 
 **Commands**:
-```bash
+```
 # Run reflection verification tests
-./mvnw test -pl [module-name] -Dtest="*Reflection*Test"
+Task:
+  subagent_type: maven-builder
+  description: Run reflection tests
+  prompt: |
+    Run all reflection-related tests.
+
+    Parameters:
+    - command: test -Dtest="*Reflection*Test"
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Verify all reflection tests pass.
 
 # Run full test suite
-./mvnw clean install -pl [module-name]
+Task:
+  subagent_type: maven-builder
+  description: Run full test suite
+  prompt: |
+    Run complete test suite with optimized reflection.
+
+    Parameters:
+    - command: clean install
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Ensure all tests pass.
 ```
 
 #### 3.2 Native Image Compatibility Testing
@@ -251,8 +340,19 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 
 **What to Test**:
 - [ ] **Native Compilation**: Verify native image builds successfully
-  ```bash
-  ./mvnw clean package -Dnative -pl [module-name]
+  ```
+  Task:
+    subagent_type: maven-builder
+    description: Build native image
+    prompt: |
+      Build native executable using GraalVM.
+
+      Parameters:
+      - command: clean package -Dnative
+      - module: [module-name]
+
+      CRITICAL: Wait for completion (may take several minutes).
+      Record build time and executable size metrics.
   ```
 
 - [ ] **Runtime Testing**: Test application functionality in native mode
@@ -275,12 +375,32 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 **When to Execute**: Before committing optimizations
 
 **Mandatory Checks**:
-```bash
+```
 # Quality verification (mandatory)
-./mvnw -Ppre-commit clean verify -DskipTests -pl [module-name]
+Task:
+  subagent_type: maven-builder
+  description: Run quality checks
+  prompt: |
+    Run pre-commit quality verification without tests.
+
+    Parameters:
+    - command: -Ppre-commit clean verify -DskipTests
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Fix all quality issues before committing.
 
 # Final verification (mandatory)
-./mvnw clean install -pl [module-name]
+Task:
+  subagent_type: maven-builder
+  description: Final build verification
+  prompt: |
+    Run final build and test verification.
+
+    Parameters:
+    - command: clean install
+    - module: [module-name]
+
+    CRITICAL: Wait for completion. Ensure all tests and quality checks pass.
 ```
 
 **Success Criteria**:
