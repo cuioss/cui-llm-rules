@@ -30,6 +30,7 @@ This ensures the agent evolves and becomes more effective with each execution.
 **Required Parameters:**
 - **types**: Existing type(s), package(s), or name(s) of type(s) to be created
 - **description**: Detailed, precise description of what to implement
+- **module**: (Optional) Module name for multi-module projects; if unset, assume single-module
 
 **Verification Process:**
 
@@ -45,10 +46,17 @@ This ensures the agent evolves and becomes more effective with each execution.
    - Identify any missing information
    - List assumptions that need confirmation
 
-3. **Decision point**:
+3. **Verify module parameter** (if multi-module):
+   - Use Glob to find pom.xml files
+   - If module specified: verify module exists
+   - If module unset: confirm single-module project
+   - Track: `module_name`, `is_multi_module`
+
+4. **Decision point**:
    - If types don't exist when they should: Return error asking caller to clarify
    - If description has ambiguities: Return specific questions to caller
    - If description incomplete: Return list of missing information
+   - If module invalid: Return error with available modules
    - If all clear: Proceed to Step 2
 
 **Error Response Format:**
@@ -59,11 +67,13 @@ Issues Found:
 - Type 'UserService' not found in codebase (expected to exist)
 - Description ambiguous: "should probably validate" - needs definitive requirement
 - Missing information: No specification for error handling approach
+- Module 'auth-service' not found (available: user-service, api-gateway)
 
 Required Actions:
 1. Confirm UserService location or provide creation details
 2. Clarify validation requirements (what validates what?)
 3. Specify error handling pattern (exceptions? Optional? error codes?)
+4. Correct module name or omit for single-module build
 
 Cannot proceed until these are resolved.
 ```
@@ -152,13 +162,21 @@ Cannot proceed until build is clean.
 1. **Load existing types** (if working with existing code):
    - Use Read to load all related Java files
    - Identify class structure, dependencies, patterns
-   - Note existing patterns (Builder? Records? Services?)
+   - Note existing patterns:
+     - **Creational**: Builder pattern, Factory pattern, Records for data carriers
+     - **Structural**: Service classes, Repository pattern, Utility classes (@UtilityClass)
+     - **Behavioral**: Strategy pattern, Command pattern, Template method
+     - **Domain**: Value objects (@Value), Entities, DTOs, Domain services
 
 2. **Analyze package structure**:
    - Use Glob to find related files in package
-   - Identify naming conventions
-   - Check for existing test files
-   - Note architectural patterns
+   - Identify naming conventions (Service, Repository, Validator, Processor, etc.)
+   - Check for existing test files (*Test.java)
+   - Note architectural layers:
+     - **Presentation**: Controllers, REST endpoints
+     - **Application**: Services, Use cases, Application logic
+     - **Domain**: Entities, Value objects, Domain services
+     - **Infrastructure**: Repositories, External integrations, Persistence
 
 3. **Identify dependencies**:
    - Check imports in related files
@@ -290,14 +308,13 @@ For each step in the plan:
 
 ### Step 7: Verify Build with Maven (Post-Implementation)
 
-**Build Verification:**
+**Build Verification** (uses same scope determination as Step 2):
 
-1. **Determine build scope**:
-   - If multi-module project: identify module containing changes
-   - If single module: build entire project
-   - Use Glob to find pom.xml locations if needed
+**Key Difference from Step 2**: Step 2 verifies precondition (must pass or abort). Step 7 verifies post-implementation (must fix until passing or max retries).
 
-2. **Execute build using maven-builder agent**:
+1. **Determine build scope** (see Step 2 for details)
+
+2. **Execute build using maven-builder agent** (same as Step 2):
    ```
    Task:
      subagent_type: maven-builder
@@ -313,19 +330,21 @@ For each step in the plan:
        Return status and any errors/warnings found.
    ```
 
-3. **Analyze build results**:
+3. **Analyze build results** (DIFFERENT from Step 2 - includes retry logic):
    - If SUCCESS with no errors/warnings: Proceed to Step 8
-   - If SUCCESS with warnings: Fix warnings, return to this step
-   - If FAILURE: Analyze errors, fix issues, return to this step
+   - If SUCCESS with warnings: Fix warnings, return to this step (max 5 retries)
+   - If FAILURE: Analyze errors, fix issues, return to this step (max 5 retries)
 
-4. **Fix build issues**:
+4. **Fix build issues** (with retry limit):
    - Read error messages carefully
    - Identify root causes
    - Apply fixes using Edit tool
    - Re-run build
-   - Continue until clean build achieved
+   - Track retry count: `build_fix_attempts`
+   - Continue until clean build achieved OR max 5 retries reached
+   - If max retries exceeded: Return detailed failure report to caller
 
-**Critical Rule**: Do not proceed until build is completely clean (no errors, no warnings).
+**Critical Rule**: Do not proceed until build is completely clean (no errors, no warnings). If unable to fix after 5 attempts, return to caller with detailed analysis of remaining issues.
 
 ### Step 8: Verify Implementation Against Requirements
 
