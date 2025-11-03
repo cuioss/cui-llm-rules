@@ -4,31 +4,31 @@
 
 ```java
 // CUI HTTP Client Core
-import de.cuioss.http.client.HttpHandler;
-import de.cuioss.http.client.SecureSSLContextProvider;
+import de.cuioss.http.client.handler.HttpHandler;
+import de.cuioss.http.client.handler.SecureSSLContextProvider;
 
 // HTTP Adapters
-import de.cuioss.http.adapter.HttpAdapter;
-import de.cuioss.http.adapter.ETagAwareHttpAdapter;
-import de.cuioss.http.adapter.ResilientHttpAdapter;
-import de.cuioss.http.adapter.RetryConfig;
+import de.cuioss.http.client.adapter.HttpAdapter;
+import de.cuioss.http.client.adapter.ETagAwareHttpAdapter;
+import de.cuioss.http.client.adapter.ResilientHttpAdapter;
+import de.cuioss.http.client.adapter.RetryConfig;
 
 // HTTP Result Pattern (sealed interface)
-import de.cuioss.http.result.HttpResult;
-import de.cuioss.http.result.HttpErrorCategory;
-import de.cuioss.http.result.HttpResultState;
+import de.cuioss.http.client.result.HttpResult;
+import de.cuioss.http.client.result.HttpErrorCategory;
+import de.cuioss.http.client.result.HttpResultState;
 
 // Content Conversion
-import de.cuioss.http.converter.HttpContentConverter;
-import de.cuioss.http.converter.HttpResponseConverter;
-import de.cuioss.http.converter.StringContentConverter;
-import de.cuioss.http.converter.ContentType;
+import de.cuioss.http.client.converter.HttpRequestConverter;
+import de.cuioss.http.client.converter.HttpResponseConverter;
+import de.cuioss.http.client.converter.StringContentConverter;
+import de.cuioss.http.client.ContentType;
 
 // HTTP Status Classification
-import de.cuioss.http.status.HttpStatusFamily;
+import de.cuioss.http.client.handler.HttpStatusFamily;
 
 // Logging
-import de.cuioss.http.logging.HttpLogMessages;
+import de.cuioss.http.client.HttpLogMessages;
 ```
 
 ## Maven Coordinates
