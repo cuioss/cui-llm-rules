@@ -88,6 +88,18 @@ After all agents complete, provide a consolidated summary to the user:
 {Key details from commit-changes agent report}
 ```
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-build-and-verify update="[your improvement]"` with:
+1. Improved agent delegation patterns and error recovery strategies
+2. Better error handling strategies for agent failures and partial successes
+3. Enhanced parameter validation and user input handling techniques
+4. More effective orchestration workflow optimization and sequencing
+5. Improved commit integration and Git workflow coordination
+6. Any lessons learned about command orchestration and agent coordination
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## CRITICAL RULES
 
 - **ALWAYS invoke maven-project-builder agent** - never duplicate its verification logic

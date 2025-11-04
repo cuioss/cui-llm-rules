@@ -325,27 +325,19 @@ When `reactor` parameter is provided with a module name:
 
 **Note**: The colon prefix (`:`) before the module name is standard Maven syntax for artifact identifiers in reactor commands.
 
-## CONTINUOUS IMPROVEMENT
+## CONTINUOUS IMPROVEMENT RULE
 
-If during execution you discover insights that could improve future executions, track them for reporting.
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=maven-builder update="[your improvement]"` with:
+1. Improved timeout behavior patterns and duration calculation strategies
+2. Better module path detection techniques for challenges or edge cases
+3. Enhanced output filtering patterns and error detection refinements
+4. More effective command construction approaches for special cases
+5. Improved configuration management and run-configuration.md handling
+6. More accurate error detection and status determination techniques
+7. Better reactor/module build handling for edge cases
+8. Optimized tool usage patterns and non-prompting execution strategies
 
-**When to capture lessons learned:**
-- Unexpected timeout behavior or duration patterns
-- Module path detection challenges or edge cases
-- Output filtering patterns that need refinement
-- Command construction issues or special cases
-- Configuration management improvements
-- Better error detection techniques
-- Reactor/module build edge cases
-- Tool usage optimizations
-
-**Include in final report** (see RESPONSE FORMAT below):
-- What was discovered
-- Why it matters
-- Suggested improvement for this agent
-- Impact on future executions
-
-**Purpose**: Allow users to manually improve this agent based on real execution experience, without agent self-modification.
+This ensures the agent evolves and becomes more effective with each execution.
 
 ## RESPONSE FORMAT EXAMPLES
 

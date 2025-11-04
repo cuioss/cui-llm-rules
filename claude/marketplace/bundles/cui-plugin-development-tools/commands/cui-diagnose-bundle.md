@@ -59,6 +59,143 @@ bundle-name/
     └── agent-name.md
 ```
 
+### Step 1: Validate Component Inventory
+
+**CRITICAL: This step MUST execute and auto-fix inventory issues without user prompts.**
+
+**Purpose:** Ensure plugin.json correctly registers all component files that exist in the bundle.
+
+#### 1.1: Discover Actual Components
+
+Use Glob to find all component files in the bundle:
+
+**Agents:**
+```
+Glob: claude/marketplace/bundles/{bundle-name}/agents/*.md
+```
+Extract filenames (without .md extension) to list: `discovered_agents`
+
+**Commands:**
+```
+Glob: claude/marketplace/bundles/{bundle-name}/commands/*.md
+```
+Extract filenames (without .md extension) to list: `discovered_commands`
+
+**Skills:**
+```
+Glob: claude/marketplace/bundles/{bundle-name}/skills/*/SKILL.md
+```
+Extract parent directory names to list: `discovered_skills`
+
+**Track statistics:**
+- `discovered_agents_count`
+- `discovered_commands_count`
+- `discovered_skills_count`
+
+#### 1.2: Read plugin.json Registration
+
+```
+Read: claude/marketplace/bundles/{bundle-name}/.claude-plugin/plugin.json
+```
+
+Parse JSON and extract arrays (may not exist):
+- `registered_agents` = plugin.json["agents"] or []
+- `registered_commands` = plugin.json["commands"] or []
+- `registered_skills` = plugin.json["skills"] or []
+
+Convert paths to component names:
+- `"./agents/foo.md"` → `"foo"`
+- `"./commands/bar.md"` → `"bar"`
+- `"./skills/baz.md"` → `"baz"`
+
+**Track statistics:**
+- `registered_agents_count`
+- `registered_commands_count`
+- `registered_skills_count`
+
+#### 1.3: Compare and Detect Mismatches
+
+For each component type, compare discovered vs registered:
+
+**Missing registrations:**
+- `missing_agents` = discovered_agents - registered_agents
+- `missing_commands` = discovered_commands - registered_commands
+- `missing_skills` = discovered_skills - registered_skills
+
+**Orphaned registrations:**
+- `orphaned_agents` = registered_agents - discovered_agents
+- `orphaned_commands` = registered_commands - discovered_commands
+- `orphaned_skills` = registered_skills - discovered_skills
+
+**Missing arrays:**
+- `agents_array_missing` = "agents" key not in plugin.json
+- `commands_array_missing` = "commands" key not in plugin.json
+- `skills_array_missing` = "skills" key not in plugin.json
+
+**Track issues:**
+- Increment `inventory_issues` for each mismatch or missing array
+
+#### 1.4: Report Inventory Issues
+
+Display findings:
+```
+[INFO] Component Inventory Check:
+  Agents:
+    Discovered: {discovered_agents_count}
+    Registered: {registered_agents_count}
+    ✗ Missing array in plugin.json (if agents_array_missing)
+    ✗ Not registered: {missing_agents} (if any)
+    ✗ Orphaned: {orphaned_agents} (if any)
+
+  Commands:
+    Discovered: {discovered_commands_count}
+    Registered: {registered_commands_count}
+    ✗ Missing array in plugin.json (if commands_array_missing)
+    ✗ Not registered: {missing_commands} (if any)
+    ✗ Orphaned: {orphaned_commands} (if any)
+
+  Skills:
+    Discovered: {discovered_skills_count}
+    Registered: {registered_skills_count}
+    ✗ Missing array in plugin.json (if skills_array_missing)
+    ✗ Not registered: {missing_skills} (if any)
+    ✗ Orphaned: {orphaned_skills} (if any)
+```
+
+#### 1.5: Auto-Fix Inventory Issues
+
+**CRITICAL: NO USER PROMPTS - Fix automatically**
+
+If any inventory issues found:
+
+1. **Read current plugin.json**
+2. **Parse JSON to object**
+3. **Build correct arrays:**
+   ```
+   agents_array = ["./agents/{name}.md" for name in discovered_agents]
+   commands_array = ["./commands/{name}.md" for name in discovered_commands]
+   skills_array = ["./skills/{name}.md" for name in discovered_skills]
+   ```
+4. **Update JSON object:**
+   - Add or replace `"agents"` key with agents_array
+   - Add or replace `"commands"` key with commands_array
+   - Add or replace `"skills"` key with skills_array
+5. **Write updated JSON back to plugin.json**
+6. **Increment `inventory_fixes` statistic**
+
+Display:
+```
+[FIX] Updated plugin.json component inventory:
+  ✓ Added/updated agents array: {discovered_agents_count} entries
+  ✓ Added/updated commands array: {discovered_commands_count} entries
+  ✓ Added/updated skills array: {discovered_skills_count} entries
+```
+
+**If no issues found:**
+```
+[INFO] ✓ Component inventory is accurate
+```
+
 ### Component Analysis
 
 Delegate to specialized commands:
@@ -175,9 +312,11 @@ Recommendations:
 
 - **VALIDATE PARAMETERS** - Check bundle-name exists before proceeding
 - **LOAD STANDARDS** - Reference quality standards skill
+- **VALIDATE INVENTORY FIRST** - Step 1 MUST execute before component analysis
+- **AUTO-FIX INVENTORY** - Automatically fix missing/incorrect component arrays (NO user prompts)
+- **USE GLOB FOR DISCOVERY** - Never use Bash ls/find, only Glob tool
 - **DELEGATE TO SPECIALISTS** - Use component-specific diagnose commands (handle failures gracefully)
 - **CHECK INTEGRATION** - Validate cross-component references
-- **VALIDATE INVENTORY** - Ensure plugin.json accuracy (abort if missing/invalid)
 - **ENFORCE SELF-CONTAINMENT** - No external dependencies
 - **CALCULATE SCORES** - Overall bundle quality score
 - **MARKETPLACE READINESS** - All quality gates must pass
@@ -185,6 +324,10 @@ Recommendations:
 ## STATISTICS TRACKING
 
 Track throughout workflow:
+- `discovered_agents_count`, `discovered_commands_count`, `discovered_skills_count`: Component files found
+- `registered_agents_count`, `registered_commands_count`, `registered_skills_count`: Components registered in plugin.json
+- `inventory_issues`: Count of inventory mismatches (missing arrays, unregistered, orphaned)
+- `inventory_fixes`: Count of inventory corrections applied
 - `components_analyzed`: Total components examined
 - `skills_analyzed`, `commands_analyzed`, `agents_analyzed`: Counts per component type
 - `integration_issues`: Count of integration problems found
