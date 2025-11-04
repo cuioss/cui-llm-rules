@@ -36,6 +36,8 @@ Always prefer `@NullMarked` in `package-info.java` for consistent null-safety ac
 
 ### Correct package-info.java Structure
 
+The `package-info.java` file has a **unique syntax** that differs from regular Java classes:
+
 ```java
 // package-info.java
 /*
@@ -54,25 +56,35 @@ package de.cuioss.portal.authentication;
 import org.jspecify.annotations.NullMarked;
 ```
 
-**CRITICAL: Import Statement Placement**
+**CRITICAL: Unique package-info.java Syntax**
 
-In `package-info.java` files, the structure is special and MUST follow this exact order:
+The structure is special and MUST follow this exact order:
 
-1. File header comment (copyright, license)
-2. Package JavaDoc comment
-3. `@NullMarked` annotation (or other package annotations)
-4. `package` declaration
-5. `import` statements (AFTER the package declaration)
+1. **File header comment** (copyright, license)
+2. **Package JavaDoc comment** (describes the package)
+3. **Package annotations** (like `@NullMarked`)
+4. **`package` declaration**
+5. **`import` statements** (AFTER the package declaration)
 
-This is different from regular Java classes where imports come before the class declaration. The import statement appearing AFTER the package declaration is the correct and required syntax for `package-info.java` files.
+**Why This Is Different:**
 
-**Known Issue: OpenRewrite RemoveUnusedImports**
+In regular Java classes, imports come BEFORE the class declaration:
+```java
+import java.util.List;  // Import first
 
-OpenRewrite had a bug (Issue #429) where `RemoveUnusedImports` incorrectly removed imports from `package-info.java` files. While this was fixed in PR #443, if you experience this issue:
+public class MyClass {  // Then class
+}
+```
 
-1. Ensure you're using a recent version of OpenRewrite (6.22.1+)
-2. The import statement MUST come after the package declaration
-3. If the import is still removed, you may need to exclude `package-info.java` from the `RemoveUnusedImports` recipe or update OpenRewrite
+In `package-info.java`, imports come AFTER the package declaration:
+```java
+@NullMarked            // Annotation first
+package com.example;   // Then package
+
+import org.jspecify.annotations.NullMarked;  // Import last
+```
+
+This reverse ordering is the **Java Language Specification** requirement for package-info.java files. Placing imports before the package declaration will cause compilation errors.
 
 **Benefits**:
 * Consistent null-safety across entire package
