@@ -270,6 +270,12 @@ Structure: ✅ VALID
 - README.md: ✅
 - Directories: ✅
 
+Component Inventory: ✅ ACCURATE
+- Agents: {discovered_agents_count} discovered, {registered_agents_count} registered
+  {if inventory_fixes > 0: "✓ Fixed {inventory_fixes} registration issues"}
+- Commands: {discovered_commands_count} discovered, {registered_commands_count} registered
+- Skills: {discovered_skills_count} discovered, {registered_skills_count} registered
+
 Components:
 - Skills: <count> (<issues_count> issues)
   Average Quality: <score>/100
