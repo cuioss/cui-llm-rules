@@ -70,7 +70,7 @@ This loads:
 
 #### LogMessages Classes
 - Package: com.example.auth → Class: AuthenticationLogMessages
-- Package: com.example.token → Class: TokenLogMessages
+- Package: com.example.token → Class: TokenLogMeLgMessagessages
 
 #### LogMessages Documentation
 - doc/LogMessages.adoc
@@ -211,7 +211,42 @@ For each LogMessages class:
 See: `logging-standards.md` → Message Identifier Ranges
 See: `logging-enforcement-patterns.md` → Patterns 13-14 (Identifier Validation)
 
-### Step 10: Final Verification and Report
+### Step 10: Update LogMessages Documentation
+
+**Synchronize documentation with code changes:**
+
+For each LogMessages class that was modified:
+1. Determine fully qualified class name from file path
+2. Locate corresponding LogMessages.adoc file (from configuration in Step 3)
+3. Invoke cui-log-record-documenter agent
+
+**Execute documentation update:**
+
+```
+Task:
+  subagent_type: cui-java-expert:cui-log-record-documenter
+  description: Update LogMessages documentation
+  prompt: |
+    Update the LogMessages documentation to reflect code changes.
+
+    Parameters:
+    - holderClass: {fully-qualified-class-name}
+    - logMessagesAdoc: {path-to-adoc-file}
+
+    Analyze the LogMessages class and update the AsciiDoc documentation
+    following CUI standards.
+```
+
+**Verification:**
+- Check documenter agent completed successfully
+- Verify AsciiDoc file was updated
+- Ensure all LogRecords are documented
+
+**Error handling:**
+- If documenter fails: Report warning but continue (documentation is secondary to code correctness)
+- If AsciiDoc path not found: Skip documentation update and report warning
+
+### Step 11: Final Verification and Report
 
 Execute final build verification (see Build Verification Protocol in CRITICAL RULES).
 
@@ -258,7 +293,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Use module parameter in all maven-builder agent calls
 
 **Build Verification Protocol:**
-- Execute at Steps 2, 8, and 10
+- Execute at Steps 2, 8, and 11
 - Use maven-builder agent with `clean verify` command
 - Parameters: command=clean verify, outputMode=DEFAULT, module={if specified}
 - Success criteria: Exit code 0, zero errors, zero test failures
@@ -335,4 +370,5 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Standards: `logging-standards.md`, `logmessages-documentation.md`, `logging-enforcement-patterns.md`
 - Agent: `cui-java-expert:java-code-implementer` - Fix production code
 - Agent: `cui-java-expert:java-junit-implementer` - Add tests
+- Agent: `cui-java-expert:cui-log-record-documenter` - Update LogMessages documentation
 - Agent: `cui-maven:maven-builder` - Build verification
