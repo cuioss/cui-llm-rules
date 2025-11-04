@@ -50,15 +50,12 @@ Project setup and requirements engineering standards
 - `./skills/cui-project-setup`
 - `./skills/cui-requirements`
 
-### Workflow Bundles (5 bundles)
+### Workflow Bundles (4 bundles)
 
-#### cui-issue-implementation
-Complete issue implementation workflow from review to execution
-- 3 agents, 1 command
-
-#### cui-pull-request-workflow
-PR review response and quality fixing workflow
-- 2 agents, 1 command
+#### cui-workflow
+Complete development workflow from issue implementation to PR review and quality verification
+- 5 agents (task-reviewer, task-breakdown-agent, task-executor, pr-review-responder, pr-quality-fixer)
+- 2 commands (cui-implement-task, cui-handle-pull-request)
 
 #### cui-documentation-standards
 AsciiDoc and documentation standards enforcement

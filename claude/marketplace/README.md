@@ -19,8 +19,7 @@ The marketplace provides production-ready, reusable components that AI assistant
 - **cui-plugin-development-tools**: Claude Code marketplace development tools
 - **cui-utility-commands**: General-purpose utility commands, git commit management, and diagnostics
 - **cui-documentation-standards**: AsciiDoc documentation standards and review
-- **cui-issue-implementation**: Issue implementation workflow
-- **cui-pull-request-workflow**: Pull request handling and review
+- **cui-workflow**: Complete development workflow from issue implementation to PR review
 - **cui-maven**: Maven build and verification tools
 
 **See**: `bundles/*/README.md` for bundle documentation

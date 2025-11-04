@@ -251,7 +251,7 @@ This Java expertise bundle complements other CUI bundles:
 
 - **cui-utility-commands** - For git commit management and utility commands
 - **cui-maven** - For Maven build and POM maintenance
-- **cui-issue-implementation** - For complete issue implementation workflows
+- **cui-workflow** - For complete development workflow from issue implementation to PR review
 - **cui-documentation-standards** - For JavaDoc and technical documentation
 
 ## Bundle Statistics

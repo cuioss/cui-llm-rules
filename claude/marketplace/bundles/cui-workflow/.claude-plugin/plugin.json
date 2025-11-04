@@ -1,7 +1,7 @@
 {
-  "name": "cui-pull-request-workflow",
+  "name": "cui-workflow",
   "version": "1.0.0",
-  "description": "PR review response and quality fixing workflow",
+  "description": "Complete development workflow from issue implementation to PR review and quality verification",
   "author": {
     "name": "CUI OSS Project",
     "email": "contact@cuioss.de"
@@ -9,12 +9,16 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["pull-request", "pr", "review", "quality"],
+  "keywords": ["workflow", "issue", "pull-request", "pr", "task", "implementation", "review", "quality"],
   "agents": [
+    "./agents/task-reviewer.md",
+    "./agents/task-breakdown-agent.md",
+    "./agents/task-executor.md",
     "./agents/pr-review-responder.md",
     "./agents/pr-quality-fixer.md"
   ],
   "commands": [
+    "./commands/cui-implement-task.md",
     "./commands/cui-handle-pull-request.md"
   ],
   "skills": []

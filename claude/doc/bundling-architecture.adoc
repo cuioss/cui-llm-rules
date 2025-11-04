@@ -13,7 +13,7 @@ Bundles organize related agents, commands, and skills into cohesive functional u
 
 == Bundle Patterns
 
-The marketplace implements 5 bundle types:
+The marketplace implements 4 bundle types:
 
 === 1. Maven Build Tools
 
@@ -25,27 +25,19 @@ The marketplace implements 5 bundle types:
 
 **Rationale**: Specialized Maven build tooling with dedicated standards
 
-=== 2. Issue Implementation
+=== 2. Development Workflow
 
-**Bundle**: `cui-issue-implementation`
+**Bundle**: `cui-workflow`
 
-**Purpose**: Structured issue implementation workflow
+**Purpose**: Complete development workflow from issue implementation to PR review and quality verification
 
-**Components**: task-reviewer, task-breakdown-agent, task-executor agents; /cui-implement-task command
+**Components**:
+- Issue implementation: task-reviewer, task-breakdown-agent, task-executor agents; /cui-implement-task command
+- PR workflow: pr-review-responder, pr-quality-fixer agents; /cui-handle-pull-request command
 
-**Rationale**: Sequential workflow: review → plan → execute
+**Rationale**: Unified end-to-end development cycle workflow with high cohesion (issue → implementation → PR → review → quality)
 
-=== 3. Pull Request Workflow
-
-**Bundle**: `cui-pull-request-workflow`
-
-**Purpose**: PR review response and quality fixing
-
-**Components**: pr-review-responder, pr-quality-fixer agents; /cui-handle-pull-request command
-
-**Rationale**: PR-specific workflow with high coupling
-
-=== 4. Documentation Standards
+=== 3. Documentation Standards
 
 **Bundle**: `cui-documentation-standards`
 
@@ -55,7 +47,7 @@ The marketplace implements 5 bundle types:
 
 **Rationale**: Domain-specific bundle where agent loads skill for standards
 
-=== 5. Plugin Development Tools
+=== 4. Plugin Development Tools
 
 **Bundle**: `cui-plugin-development-tools`
 

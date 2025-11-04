@@ -180,8 +180,7 @@ These utilities complement but don't depend on other bundles:
 - `cui-maven` - Maven build verification and POM maintenance
 - `cui-documentation-standards` - For documentation review (separate from diagram verification)
 - `cui-plugin-development-tools` - For plugin creation tools
-- `cui-issue-implementation` - Uses commit-changes agent for task implementation commits
-- `cui-pull-request-workflow` - Uses commit-changes agent for PR workflow commits
+- `cui-workflow` - Uses commit-changes agent for workflow commits (issue implementation and PR handling)
 
 ## Notes
 

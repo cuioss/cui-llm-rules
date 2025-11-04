@@ -193,13 +193,12 @@ Marketplace Overall: 88/100 ⭐⭐⭐⭐ Good
 Bundle Scores:
 - cui-maven: 92/100
 - cui-documentation-standards: 90/100
-- cui-plugin-development-tools: 88/100
-- cui-pull-request-workflow: 87/100
-- cui-issue-implementation: 85/100
-- cui-utility-commands: 85/100
 - cui-java-expert: 90/100
+- cui-plugin-development-tools: 88/100
+- cui-workflow: 88/100
+- cui-utility-commands: 85/100
 
-Average: 88.1/100
+Average: 88.8/100
 
 Status: ⚠️ Minor improvements recommended
 ```

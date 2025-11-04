@@ -23,7 +23,7 @@ claude/marketplace/
 │   │   ├── agents/               # .md files
 │   │   ├── commands/             # .md files
 │   │   └── skills/               # directories
-│   └── cui-issue-implementation/
+│   └── cui-workflow/
 └── skills/                         # Standalone skills
     └── cui-java-core/
         ├── SKILL.md

@@ -33,15 +33,9 @@
       "strict": false
     },
     {
-      "name": "cui-issue-implementation",
-      "description": "Complete issue implementation workflow from review to execution",
-      "source": "./bundles/cui-issue-implementation",
-      "strict": false
-    },
-    {
-      "name": "cui-pull-request-workflow",
-      "description": "PR review response and quality fixing workflow",
-      "source": "./bundles/cui-pull-request-workflow",
+      "name": "cui-workflow",
+      "description": "Complete development workflow from issue implementation to PR review and quality verification",
+      "source": "./bundles/cui-workflow",
       "strict": false
     },
     {
