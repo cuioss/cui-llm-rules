@@ -50,11 +50,7 @@ Project setup and requirements engineering standards
 - `./skills/cui-project-setup`
 - `./skills/cui-requirements`
 
-### Workflow Bundles (6 bundles)
-
-#### cui-project-quality-gates
-Build verification and change management infrastructure
-- 2 agents, 1 skill
+### Workflow Bundles (5 bundles)
 
 #### cui-issue-implementation
 Complete issue implementation workflow from review to execution

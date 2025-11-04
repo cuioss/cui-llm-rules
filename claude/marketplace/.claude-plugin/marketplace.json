@@ -33,12 +33,6 @@
       "strict": false
     },
     {
-      "name": "cui-project-quality-gates",
-      "description": "Build verification and change management infrastructure for CUI projects",
-      "source": "./bundles/cui-project-quality-gates",
-      "strict": false
-    },
-    {
       "name": "cui-issue-implementation",
       "description": "Complete issue implementation workflow from review to execution",
       "source": "./bundles/cui-issue-implementation",

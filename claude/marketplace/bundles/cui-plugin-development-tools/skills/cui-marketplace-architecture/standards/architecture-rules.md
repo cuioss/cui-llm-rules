@@ -158,10 +158,10 @@ Bundles must maintain clean architecture across all components.
 
 **Examples**:
 
-✅ GOOD BUNDLE (cui-project-quality-gates):
-- maven-project-builder (agent) → uses Skill: cui-javadoc
-- commit-changes (agent) → standalone utility
-- cui-javadoc (skill) → self-contained
+✅ GOOD BUNDLE (cui-utility-commands):
+- commit-changes (agent) → standalone git commit utility
+- research-best-practices (agent) → standalone research utility
+- cui-diagnostic-patterns (skill) → self-contained diagnostic standards
 
 ✅ GOOD BUNDLE (cui-documentation-standards):
 - asciidoc-reviewer (agent) → uses Skill: cui-documentation

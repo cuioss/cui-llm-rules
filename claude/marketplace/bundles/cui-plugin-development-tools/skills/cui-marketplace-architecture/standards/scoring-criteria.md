@@ -164,22 +164,23 @@ Status: ✅ Marketplace ready
 ### Bundle Report
 
 ```
-Bundle: cui-project-quality-gates
+Bundle: cui-maven
 Architecture Score: 92/100 ⭐⭐⭐⭐⭐ Excellent
 
-Skills (2):
-- maven-project-builder: 100/100
-- cui-javadoc: 100/100
+Skills (1):
+- cui-maven-rules: 100/100
 Average: 100/100
 
 Agents (2):
-- commit-changes: N/A (simple utility)
-- quality-checker: 95/100
-Average: 95/100
+- maven-project-builder: 95/100
+- maven-builder: 90/100
+Average: 92.5/100
 
-Commands (0): N/A
+Commands (1):
+- cui-build-and-verify: 90/100
+Average: 90/100
 
-Weighted Score: (100 × 0.6) + (95 × 0.3) + (0 × 0.1) = 92/100
+Weighted Score: (100 × 0.6) + (92.5 × 0.3) + (90 × 0.1) = 92/100
 
 Status: ✅ Marketplace ready
 ```
@@ -190,14 +191,15 @@ Status: ✅ Marketplace ready
 Marketplace Overall: 88/100 ⭐⭐⭐⭐ Good
 
 Bundle Scores:
-- cui-project-quality-gates: 92/100
-- cui-issue-implementation: 85/100
+- cui-maven: 92/100
 - cui-documentation-standards: 90/100
 - cui-plugin-development-tools: 88/100
 - cui-pull-request-workflow: 87/100
+- cui-issue-implementation: 85/100
 - cui-utility-commands: 85/100
+- cui-java-expert: 90/100
 
-Average: 87.8/100
+Average: 88.1/100
 
 Status: ⚠️ Minor improvements recommended
 ```

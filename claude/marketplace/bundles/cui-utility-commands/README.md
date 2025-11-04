@@ -1,10 +1,11 @@
 # CUI Utility Commands
 
-Standalone utility tools including research agents and commands for CUI project development and maintenance tasks that don't fit into specific workflow bundles.
+Standalone utility tools including git commit management, research agents, and commands for CUI project development and maintenance tasks that don't fit into specific workflow bundles.
 
 ## Purpose
 
 This bundle provides general-purpose utility tools for:
+- Git commit management with proper formatting
 - Web research and best practices investigation
 - Project setup and permissions management
 - IDE diagnostics and fixes
@@ -18,9 +19,17 @@ These utilities are independent tools that can be used across different CUI proj
 
 ## Components Included
 
-### Agents (1 agent)
+### Agents (2 agents)
 
-1. **research-best-practices** - Web research and best practices investigation
+1. **commit-changes** - Git commit management
+   - Commits current repository state with proper formatting
+   - Follows Git Commit Standards (conventional commits)
+   - Cleans build artifacts before committing
+   - Optional push and PR creation capabilities
+   - Auto-generates commit messages or accepts custom messages
+   - Adds Claude Code co-authorship attribution
+
+2. **research-best-practices** - Web research and best practices investigation
    - Performs comprehensive web research on any topic
    - Searches and analyzes top 10-15 sources
    - Provides confidence levels (HIGH/MEDIUM/LOW) based on source quality
@@ -65,6 +74,23 @@ These utilities are independent tools that can be used across different CUI proj
 ```
 
 ## Usage Examples
+
+### Commit Changes
+The commit-changes agent manages git commits with proper formatting:
+
+```
+User: "Commit my changes"
+User: "Commit with message 'fix: resolve authentication bug' and push"
+User: "Commit and create a PR"
+```
+
+The agent will:
+- Analyze uncommitted changes
+- Clean any build artifacts (*.class, *.temp, *.backup*)
+- Generate or use provided commit message
+- Follow conventional commit format
+- Optionally push and create pull request
+- Add Claude Code co-authorship
 
 ### Research Best Practices
 The research-best-practices agent is automatically invoked when you ask for research:
@@ -151,10 +177,11 @@ None - this bundle is standalone and can be used independently.
 ## Related Bundles
 
 These utilities complement but don't depend on other bundles:
-- `cui-maven` - Maven build verification and POM maintenance (formerly included build-and-verify command)
-- `cui-project-quality-gates` - Git commit workflows
+- `cui-maven` - Maven build verification and POM maintenance
 - `cui-documentation-standards` - For documentation review (separate from diagram verification)
 - `cui-plugin-development-tools` - For plugin creation tools
+- `cui-issue-implementation` - Uses commit-changes agent for task implementation commits
+- `cui-pull-request-workflow` - Uses commit-changes agent for PR workflow commits
 
 ## Notes
 

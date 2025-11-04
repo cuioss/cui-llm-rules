@@ -379,7 +379,7 @@ To contribute to this bundle:
 ### Version 0.1.0 (Initial Release)
 
 - Initial bundle structure created
-- Moved maven-project-builder agent from cui-project-quality-gates
+- Created maven-project-builder agent consolidating Maven build functionality
 - Moved cui-build-and-verify command from cui-utility-commands
 - Created cui-maven-rules skill with complete Maven standards
 - Ready for comprehensive Maven workflow support
@@ -396,14 +396,12 @@ For issues, questions, or contributions:
 
 ## Related Bundles
 
-- **cui-project-quality-gates**: Project-wide quality enforcement (now focuses on non-Maven quality aspects)
-- **cui-utility-commands**: General utility commands (now focuses on non-Maven utilities)
+- **cui-utility-commands**: General utility commands including git commit management
 - **cui-java-expert**: Java development standards bundle (maven-project-builder uses cui-javadoc skill for JavaDoc validation)
 
 ## Acknowledgments
 
 This bundle consolidates Maven-related functionality previously distributed across:
-- cui-project-quality-gates (maven-project-builder agent)
 - cui-utility-commands (cui-build-and-verify command)
 - standards/process (pom-maintenance.adoc)
 - standards/javascript (maven-integration-standards.adoc)

@@ -249,7 +249,7 @@ None - this bundle is standalone and aggregates existing marketplace skills.
 
 This Java expertise bundle complements other CUI bundles:
 
-- **cui-project-quality-gates** - For build verification and git workflows
+- **cui-utility-commands** - For git commit management and utility commands
 - **cui-maven** - For Maven build and POM maintenance
 - **cui-issue-implementation** - For complete issue implementation workflows
 - **cui-documentation-standards** - For JavaDoc and technical documentation

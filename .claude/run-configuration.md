@@ -42,31 +42,64 @@ Warnings approved as acceptable:
 ### WebFetch Domains for This Project
 
 **Local Domains** (project-specific):
-- `mcpcat.io` - MCP server analytics and debugging tools, relevant for Model Context Protocol development
-- `skywork.ai` - AI workspace research platform, legitimate but new service (launched May 2025)
+- `blog.sonatype.com` - Sonatype security blog for dependency security best practices
+- `docs.sonarsource.com` - SonarQube/SonarCloud documentation
+- `www.martinkanters.dev` - Martin Kanters' blog on Java and security topics
+- `www.sonatype.com` - Sonatype documentation and resources
 
 **Global Domains Available**:
-This project has access to 7 globally-approved domains:
-- `github.com` - Code hosting
-- `raw.githubusercontent.com` - GitHub raw content
-- `medium.com` - Publishing platform
-- `ux.stackexchange.com` - UX Q&A
-- `www.anthropic.com` - Anthropic documentation
-- `www.llamaindex.ai` - LlamaIndex LLM framework docs
-- `www.usertesting.com` - UX research platform
+This project has access to globally-approved domains for common development resources
 
-**Total WebFetch Access**: 9 domains (2 local + 7 global)
+**Total WebFetch Access**: 4 local domains + global domains
 
 ### Last Updated
 
-- Date: 2025-01-27
-- Action: Migrated from universal access (WebFetch(domain:*)) to specific domains
-- Removed redundant domains: 7 (moved to global)
-- Kept local: 2 (project-specific)
+- Date: 2025-11-04
+- Action: Cleaned up permissions during setup-project-permissions execution
+- Removed: Invalid/suspicious bash patterns, redundant read permissions
+- Added: `Write(.claude/settings.local.json)` to ask list for security
 
 ### Notes
 
 **Security Improvement**: Removed `WebFetch(domain:*)` from global settings and replaced with explicit domain permissions for better security control and auditability.
+
+---
+
+## setup-project-permissions
+
+### Last Execution
+
+- Date: 2025-11-04
+- Status: SUCCESS
+- Changes Applied: YES
+
+### Changes Summary
+
+**Removed (17 permissions):**
+- 11 suspicious Bash patterns (shell loop constructs)
+- 2 redundant Read permissions (covered by global `Read(//~/git/**)`)
+- 3 absolute paths using `/Users/oliver/` instead of `~/`
+- 1 duplicate Skill permission
+
+**Added (1 permission):**
+- `Write(.claude/settings.local.json)` to ask list (security requirement)
+
+**Final Permission Count:**
+- Allow: 19 (down from 36)
+- Deny: 0
+- Ask: 1 (up from 0)
+
+### Issues Fixed
+
+1. **Suspicious Bash Patterns**: Removed invalid bash loop constructs that should be shell scripts
+2. **Redundant Permissions**: Removed Read permissions already covered by global settings
+3. **Path Format Issues**: Cleaned up absolute paths
+4. **Duplicates**: Removed duplicate Skill(cui-marketplace-architecture)
+5. **Security**: Added Write(.claude/settings.local.json) to ask list
+
+### User-Approved Permissions
+
+(None currently - all suspicious permissions removed)
 
 ---
 

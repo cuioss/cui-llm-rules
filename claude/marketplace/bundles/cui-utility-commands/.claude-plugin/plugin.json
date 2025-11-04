@@ -1,7 +1,7 @@
 {
   "name": "cui-utility-commands",
   "version": "1.0.0",
-  "description": "Standalone utility tools including research agents and commands for CUI project development and maintenance",
+  "description": "Standalone utility tools including git commit management, research agents, and commands for CUI project development and maintenance",
   "author": {
     "name": "CUI OSS Project",
     "email": "contact@cuioss.de"
@@ -9,8 +9,9 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["utilities", "research", "project-setup", "permissions", "diagnostics", "documentation", "architecture"],
+  "keywords": ["utilities", "git", "commit", "research", "project-setup", "permissions", "diagnostics", "documentation", "architecture"],
   "agents": [
+    "./agents/commit-changes.md",
     "./agents/research-best-practices.md"
   ],
   "commands": [

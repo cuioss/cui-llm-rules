@@ -17,8 +17,7 @@ The marketplace provides production-ready, reusable components that AI assistant
 **Active Bundles**:
 - **cui-java-expert**: Java development (skills: cui-java-core, cui-java-cdi, cui-java-unit-testing; agents: java-code-implementer, java-junit-implementer, java-coverage-reporter; commands: cui-java-task-manager)
 - **cui-plugin-development-tools**: Claude Code marketplace development tools
-- **cui-utility-commands**: General-purpose utility commands and diagnostics
-- **cui-project-quality-gates**: Quality gates and commit workflows
+- **cui-utility-commands**: General-purpose utility commands, git commit management, and diagnostics
 - **cui-documentation-standards**: AsciiDoc documentation standards and review
 - **cui-issue-implementation**: Issue implementation workflow
 - **cui-pull-request-workflow**: Pull request handling and review

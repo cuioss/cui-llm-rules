@@ -93,7 +93,7 @@ Typical workflow for handling PR reviews:
 
 ### Inter-Bundle Dependencies
 - **cui-maven** (required) - Both agents use maven-project-builder for build verification
-- **cui-project-quality-gates** (required) - Both agents use commit-changes for commits
+- **cui-utility-commands** (required) - Both agents use commit-changes agent for commits
 
 ### External Dependencies
 - Requires GitHub CLI (`gh`) for fetching PR comments and posting responses

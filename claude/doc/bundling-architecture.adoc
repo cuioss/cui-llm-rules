@@ -15,15 +15,15 @@ Bundles organize related agents, commands, and skills into cohesive functional u
 
 The marketplace implements 5 bundle types:
 
-=== 1. Quality Gates
+=== 1. Maven Build Tools
 
-**Bundle**: `cui-project-quality-gates`
+**Bundle**: `cui-maven`
 
-**Purpose**: Build verification and change management
+**Purpose**: Maven build verification and project management
 
-**Components**: maven-project-builder agent, commit-changes agent, cui-javadoc skill
+**Components**: maven-project-builder agent, maven-builder agent, /cui-build-and-verify command, cui-maven-rules skill
 
-**Rationale**: Build → verify → commit is atomic workflow (100% co-occurrence)
+**Rationale**: Specialized Maven build tooling with dedicated standards
 
 === 2. Issue Implementation
 
@@ -108,19 +108,21 @@ bundles/{bundle-name}/
 
 ```json
 {
-  "name": "cui-project-quality-gates",
+  "name": "cui-utility-commands",
   "version": "1.0.0",
-  "description": "Build verification and change management",
+  "description": "Standalone utility tools including git commit management",
   "author": {"name": "CUI OSS Project"},
   "agents": [
-    "./agents/maven-project-builder.md",
-    "./agents/commit-changes.md"
+    "./agents/commit-changes.md",
+    "./agents/research-best-practices.md"
   ],
   "commands": [
-    "./commands/cui-verify-build.md"
+    "./commands/cui-setup-project-permissions.md",
+    "./commands/cui-manage-web-permissions.md"
   ],
   "skills": [
-    "./skills/cui-javadoc"
+    "./skills/cui-diagnostic-patterns",
+    "./skills/permission-management"
   ]
 }
 ```
@@ -152,7 +154,7 @@ bundles/{bundle-name}/
 
 **Install bundle**:
 ```bash
-/plugin install cui-project-quality-gates@cui-llm-rules
+/plugin install cui-utility-commands@cui-llm-rules
 ```
 
 **Update**:
