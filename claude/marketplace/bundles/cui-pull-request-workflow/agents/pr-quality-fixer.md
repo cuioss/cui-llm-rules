@@ -9,7 +9,7 @@ Examples:
 - User: "Process Sonar feedback for https://github.com/owner/repo/pull/123"
   Assistant: "I'll launch the pr-handle-sonar-issue agent to address all Sonar issues on that pull request."
 
-tools: Read, Edit, Write, Bash(gh:*), Task, Skill
+tools: Read, Edit, Bash(gh:*), Task, mcp__sonarqube__search_sonar_issues_in_projects, mcp__sonarqube__get_component_measures, mcp__sonarqube__get_project_quality_gate_status, mcp__sonarqube__change_sonar_issue_status
 model: sonnet
 color: purple
 ---
@@ -44,39 +44,27 @@ At the start of execution:
    - Do not proceed with execution
 3. If identifier provided, extract the PR number and continue
 
-## SKILLS USED
+## AGENTS USED
 
-**This agent leverages the following CUI skills:**
+**This agent leverages the following specialized agents:**
 
-- **cui-java-unit-testing**: Java unit testing standards and patterns
-  - Provides: JUnit 5 patterns, CUI test generator framework, assertion standards, quality requirements
-  - When activated: Before generating any test code (Step 5.5 - test generation)
-  - Loads: testing-junit-core.md, testing-generators.md, testing-value-objects.md, integration-testing.md
+- **cui-java-expert:java-code-implementer**: Implements Java code fixes with full standards compliance
+  - When: Fixing Sonar issues that require code changes (Step 5.3 - Fix Strategy A)
+  - Provides: Standards-compliant code implementation, build verification, proper error handling
+
+- **cui-java-expert:java-junit-implementer**: Implements JUnit tests for Java types
+  - When: Adding tests for coverage gaps (Step 5.5 - Improve Code Coverage)
+  - Provides: Test generation following CUI standards, generator usage, proper assertions, build verification
 
 ## Essential Rules
 
-- Git commit format: `<type>(<scope>): <subject>` - types: feat, fix, docs, style, refactor, perf, test, chore; subject: imperative, lowercase, no period, max 50 chars (from: agent-specific - no shared process standards)
-- JUnit 5 only, NO Mockito/Hamcrest (from: cui-java-unit-testing skill)
-- cui-test-generator for test data, NO Random/Faker (from: cui-java-unit-testing skill)
-- 80% coverage minimum, 100% for critical paths (from: cui-java-unit-testing skill)
-- AAA pattern with meaningful assertion messages (from: cui-java-unit-testing skill)
+- Git commit format: `<type>(<scope>): <subject>` - types: feat, fix, docs, style, refactor, perf, test, chore; subject: imperative, lowercase, no period, max 50 chars (from: commit-changes agent conventions)
+- Delegate Java code fixes to java-code-implementer agent (ensures standards compliance) (from: cui-java-expert:java-code-implementer agent)
+- Delegate test generation to java-junit-implementer agent (ensures proper test quality) (from: cui-java-expert:java-junit-implementer agent)
+- 80% coverage minimum, 100% for critical paths (from: CUI testing standards via java-junit-implementer agent)
+- All Java work follows CUI standards via specialized agents (from: agent design principle - use specialized agents for domain-specific work)
 
 ## WORKFLOW (FOLLOW EXACTLY)
-
-### Step 0: Activate Required Skills (If Needed)
-
-**CRITICAL:** Activate skills BEFORE they are needed in workflow.
-
-**When to activate cui-java-unit-testing:**
-- **Condition**: If Step 4.5 identifies coverage gaps requiring test generation
-- **Timing**: Activate at the START of Step 5.5 (before generating any tests)
-- **Invocation**:
-  ```
-  Skill: cui-java-unit-testing
-  ```
-
-**If no coverage gaps or test generation not needed:**
-- Skip skill activation (not all Sonar issues require tests)
 
 ### Step 1: Read Configuration
 
@@ -319,14 +307,30 @@ Analyze the issue and choose ONE of two strategies:
 #### Step 5.3: Execute Resolution
 
 **If Strategy A (Fix)**:
-1. Apply fix using Edit tool
-2. Run maven-project-builder (Task tool, ~8-10 min)
-   - FAILURE → revert, mark "user review required"
-   - SUCCESS → commit
-3. Commit using commit-changes (Task tool)
-   - Message: "fix(sonar): resolve {rule_id} in {file}:{line}"
-   - NO push parameter
-   - Increment: commits_created, fixed
+1. **Delegate to java-code-implementer agent**:
+   ```
+   Task: subagent_type=cui-java-expert:java-code-implementer
+   prompt: "Fix Sonar issue in {file_path}
+
+   Issue: {rule_id} ({severity})
+   Line: {line}
+   Message: {issue_message}
+
+   Description: {detailed analysis of what needs to be fixed}
+
+   The fix must resolve the Sonar finding while maintaining code correctness and following CUI Java standards."
+   ```
+2. **On agent success**:
+   - Agent handles: code fix, standards compliance, build verification
+   - Increment: fixed counter
+   - Commit using commit-changes (Task tool)
+     - Message: "fix(sonar): resolve {rule_id} in {file}:{line}"
+     - NO push parameter
+     - Increment: commits_created
+3. **On agent failure**:
+   - Mark issue as "user review required"
+   - Log detailed failure reason
+   - Continue to next issue
 4. Next issue
 
 **If Strategy B (Suppress)**:
@@ -359,102 +363,51 @@ After processing all issues:
 
 **Only execute if coverage gaps were identified in Step 4.5**:
 
-**CRITICAL: Activate cui-java-unit-testing skill BEFORE generating any tests:**
-```
-Skill: cui-java-unit-testing
-```
-
 For EACH file with uncovered lines:
 
-#### Step 5.5.1: Analyze Uncovered Code
-
-1. Read the source file using Read tool
-2. Identify methods/functions containing uncovered lines
-3. For each uncovered method, analyze:
-   - **Complexity**: Simple logic vs complex state management
-   - **Dependencies**: Standalone vs heavy external dependencies
-   - **Visibility**: Public API vs private implementation
-   - **Type**: Business logic vs trivial code (getters/setters)
-
-#### Step 5.5.2: Determine Feasibility and Sensibility
-
-**Feasible** (ALL must be true):
-1. Deterministic (same input → same output OR predictable side effects)
-2. Executes within 100ms in test environment
-3. Dependencies instantiate without: DB connections, network I/O, file system, external services
-4. No usage of: external static calls, uncontrolled ThreadLocal, System.currentTimeMillis() for timing
-
-**Sensible** (ONE must be true):
-1. Public AND documented (has @since tag OR in module docs)
-2. Contains: conditional (if/switch/ternary) OR loop (for/while) OR exception handling
-3. Called from 3+ classes (verify with Grep)
-4. Has @NonNull/@Nullable validation OR throws checked exceptions
-
-**Skip** (any match):
-- Getter/setter with only assignment/return, no validation
-- Constructor with only assignments, no validation/checks/transforms
-- Annotated @Generated OR @Deprecated with removal date
-- Body has only: Lombok code, delegation to single method without logic
-
-#### Step 5.5.3: Generate Tests (If Feasible and Sensible)
-
-**If method is BOTH feasible AND sensible:**
-
-1. Determine test file location:
-   - Source: `src/main/java/com/example/Foo.java`
-   - Test: `src/test/java/com/example/FooTest.java`
-   - Follow project's test structure conventions
-
-2. Check if test file exists:
-   - If exists: Read test file using Read tool, add new test method using Edit tool
-   - If not exists: Create test file using Write tool with proper structure
-
-3. **Generate test following cui-java-unit-testing skill**:
-   - JUnit 5, cui-test-generator (NO Random/manual data)
-   - @EnableGeneratorController, AAA pattern
-   - Names <75 chars, @DisplayName <50 chars
-   - Assertions with messages (20-60 chars)
-   - Parameterize if 3+ variants (@GeneratorsSource/@CsvSource)
-   - Independent tests, one behavior each
-4. Increment tests_added counter
-
-**If method is NOT feasible or NOT sensible:**
-
-1. Log reason:
+1. **Delegate to java-junit-implementer agent**:
    ```
-   Skipped test for {file}:{method}
-   Reason: {not feasible/not sensible}
-   Details: {specific reason, e.g., "requires database connection", "trivial getter"}
+   Task: subagent_type=cui-java-expert:java-junit-implementer
+   prompt: "Implement unit tests for uncovered code in {file_path}
+
+   Coverage Gap Analysis:
+   - Current coverage: {current_coverage}%
+   - Target coverage: {target_coverage}% (from Quality Gate)
+   - Uncovered lines: {line_ranges}
+   - Methods needing tests: {method_list}
+
+   Description: Generate comprehensive unit tests to improve coverage for the identified methods. Focus on:
+   - Happy path scenarios
+   - Error conditions and edge cases
+   - Boundary value testing
+   - Null/invalid input handling
+
+   Tests must follow CUI testing standards and achieve target coverage."
    ```
-2. Track: Increment "tests_skipped" counter
-3. Continue to next uncovered method
 
-#### Step 5.5.4: Verify Tests
+2. **On agent success**:
+   - Agent handles: test file creation/modification, test generation, build verification
+   - Tests are standards-compliant (generators, AAA pattern, proper assertions)
+   - Increment: tests_added counter
+   - Track: files tested
 
-After adding all feasible tests:
+3. **On agent failure with production code issues**:
+   - Agent reports production bugs found by tests
+   - Document production issues for user review
+   - Skip this file, continue to next uncovered file
 
-1. Run maven-project-builder agent to verify build:
-   - Invoke using Task tool with subagent_type: "maven-project-builder"
-   - Wait for completion (~8-10 minutes)
-   - If FAILURE: Review test errors, fix or remove failing tests
-   - If SUCCESS: Continue to step 2
+4. **On agent failure with test issues**:
+   - Log failure reason
+   - Mark file as "needs manual test implementation"
+   - Continue to next uncovered file
 
-2. Check coverage improvement:
-   - Ideally re-check coverage (may not be available without re-running Sonar)
-   - Verify new tests exist and pass
-   - Track: Final "tests_added" count
+5. **After all files processed**:
+   - Commit test additions using commit-changes agent:
+     - Message: "test(coverage): add tests for uncovered code on PR #{pr_number}\n\n- Added tests for {file_count} file(s)\n- Improved coverage for: {list of files}"
+     - NO push parameter
+     - Increment: commits_created
 
-#### Step 5.5.5: Commit Test Additions
-
-**Only execute if tests were added (tests_added > 0)**:
-
-1. Commit changes using commit-changes agent:
-   - Invoke using Task tool with subagent_type: "commit-changes"
-   - Provide commit message: "test(coverage): add tests for uncovered code on PR #{pr_number}\n\n- Added {tests_added} test(s)\n- Improved coverage for: {list of files}"
-   - Do NOT pass "push" parameter (will be done at end if requested)
-   - Track: Increment "commits_created" counter
-
-**Tool Usage**: Read, Write, Edit, Task (for maven-project-builder and commit-changes)
+**Tool Usage**: Task (for java-junit-implementer and commit-changes agents)
 
 ### Step 6: Commit Suppression Fixes (If Any)
 
@@ -512,9 +465,10 @@ Compile comprehensive summary with all metrics.
 - Fix OR suppress each issue (zero remaining)
 - Ask before suppress (UNLESS auto-suppress pattern)
 - Verify Sonar rule ID exact when suppressing
+- Delegate code fixes to java-code-implementer agent (NOT inline edits)
 
 **Build/Commit:**
-- Build BEFORE commit (maven-project-builder)
+- Agent handles builds (java-code-implementer, java-junit-implementer)
 - NEVER commit without successful build
 - Use commit-changes agent (NOT git direct)
 - Separate commits: code fixes individual, suppressions together
@@ -522,22 +476,24 @@ Compile comprehensive summary with all metrics.
 - Track: commits_created, fixed, suppressed, tests_added
 
 **Test Generation:**
-- Activate cui-java-unit-testing skill before generating (Step 5.5)
-- Check feasibility AND sensibility (both required)
-- NO trivial tests (getters/setters/generated)
-- Verify tests pass before commit
+- Delegate to java-junit-implementer agent (NOT inline test generation)
+- Agent handles: feasibility checks, test generation, build verification
+- Agent ensures: proper generators, AAA pattern, standards compliance
+- Handle agent failures gracefully (production bugs vs test issues)
 
 ## TOOL USAGE TRACKING
 
 **CRITICAL**: Track and report all tools used during execution.
 
 Required tracking for each tool invocation:
-- **Read**: Count file reads (.claude/run-configuration.md, affected source files, test files)
-- **Edit**: Count file edits (code fixes, suppressions, test additions to existing files)
-- **Write**: Count file writes (new test files created)
-- **Bash**: Count shell commands (gh pr view, gh pr checks, git status)
-- **Task**: Count agent invocations (maven-project-builder, commit-changes calls)
-- **Skill**: Count skill invocations (cui-java-unit-testing)
+- **Read**: Count file reads (.claude/run-configuration.md, Sonar issue context files)
+- **Edit**: Count file edits (suppressions only - code fixes delegated to agents)
+- **Write**: Not used directly (agents handle file creation)
+- **Bash**: Count shell commands (gh pr view, gh pr checks)
+- **Task**: Count agent invocations:
+  - java-code-implementer (for code fixes)
+  - java-junit-implementer (for test generation)
+  - commit-changes (for commits)
 - **MCP SonarQube**: Count MCP tool calls (search_sonar_issues_in_projects, get_component_measures, get_project_quality_gate_status, change_sonar_issue_status)
 
 Include in final report under "Tool Usage" section.
@@ -595,11 +551,12 @@ After completing all work, return findings in this format:
 
 **Tool Usage**:
 - Read: {count} invocations
-- Edit: {count} invocations
-- Write: {count} invocations
+- Edit: {count} invocations (suppressions only)
 - Bash: {count} invocations
-- Task: {count} invocations
-- Skill: {count} invocations
+- Task: {count} invocations (breakdown below)
+  - java-code-implementer: {count} (code fixes)
+  - java-junit-implementer: {count} (test generation)
+  - commit-changes: {count} (commits)
 - MCP SonarQube: {count} invocations
 
 **Lessons Learned** (for future improvement):
