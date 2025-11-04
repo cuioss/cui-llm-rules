@@ -34,8 +34,14 @@ All CUI projects MUST use JSpecify annotations for null safety. This document de
 
 Always prefer `@NullMarked` in `package-info.java` for consistent null-safety across the entire package.
 
+### Correct package-info.java Structure
+
 ```java
 // package-info.java
+/*
+ * Copyright headers and license...
+ */
+
 /**
  * Token validation and authentication services.
  *
@@ -47,6 +53,26 @@ package de.cuioss.portal.authentication;
 
 import org.jspecify.annotations.NullMarked;
 ```
+
+**CRITICAL: Import Statement Placement**
+
+In `package-info.java` files, the structure is special and MUST follow this exact order:
+
+1. File header comment (copyright, license)
+2. Package JavaDoc comment
+3. `@NullMarked` annotation (or other package annotations)
+4. `package` declaration
+5. `import` statements (AFTER the package declaration)
+
+This is different from regular Java classes where imports come before the class declaration. The import statement appearing AFTER the package declaration is the correct and required syntax for `package-info.java` files.
+
+**Known Issue: OpenRewrite RemoveUnusedImports**
+
+OpenRewrite had a bug (Issue #429) where `RemoveUnusedImports` incorrectly removed imports from `package-info.java` files. While this was fixed in PR #443, if you experience this issue:
+
+1. Ensure you're using a recent version of OpenRewrite (6.22.1+)
+2. The import statement MUST come after the package declaration
+3. If the import is still removed, you may need to exclude `package-info.java` from the `RemoveUnusedImports` recipe or update OpenRewrite
 
 **Benefits**:
 * Consistent null-safety across entire package
