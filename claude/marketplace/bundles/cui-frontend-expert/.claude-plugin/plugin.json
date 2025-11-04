@@ -1,0 +1,14 @@
+{
+  "name": "cui-frontend-expert",
+  "display_name": "CUI Frontend Expert",
+  "description": "JavaScript, CSS, and web component standards for CUI applications",
+  "version": "1.0.0",
+  "author": "CUI Team",
+  "components": [
+    {
+      "type": "skill",
+      "name": "cui-css",
+      "path": "skills/cui-css/SKILL.md"
+    }
+  ]
+}

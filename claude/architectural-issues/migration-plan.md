@@ -3,82 +3,164 @@
 **Date**: 2025-11-04
 **Reference**: agent-nesting-limitation.md
 
-## Primary Architectural Pattern: Three-Layer Design
+## Primary Architectural Patterns
 
-**THE PATTERN** (use this everywhere):
+### Pattern 1: Self-Contained Command (Single Operation)
+
+**For single, focused operations** (implement, test, analyze, build):
+
+```
+/command-name (self-contained)
+  ├─> Task(focused-agent) [does the work]
+  ├─> Task(maven-builder) [verifies if needed]
+  ├─> Analyzes results
+  ├─> Iterates if issues found
+  └─> Returns structured result
+
+Focused Agent (execution only)
+  └─> Does ONE specific task
+      NO Task delegation, NO verification, NO commit
+```
+
+**Examples**: `/java-implement-code`, `/java-implement-tests`, `/java-coverage-report`
+
+### Pattern 2: Three-Layer Design (Batch Operations)
+
+**For batch/collection operations** (multiple independent items):
 
 ```
 Layer 1: Batch Command (collection/iteration)
   ├─> Collects items (files, issues, tasks, etc.)
   ├─> For each item:
-  │    └─> SlashCommand(/single-item-command item)
+  │    └─> SlashCommand(/self-contained-command item)
   └─> Aggregates results
 
-Layer 2: Single-Item Command (orchestration)
-  ├─> Task(focused-agent-1) [does one thing]
-  ├─> Task(focused-agent-2) [does another thing]
-  ├─> Analyzes results in command context
-  ├─> Iterates if needed
-  └─> Returns structured result
+Layer 2: Self-Contained Command (see Pattern 1)
+  ├─> Task(focused-agent)
+  ├─> Task(verification-agent)
+  └─> Returns result
 
 Layer 3: Focused Agents (execution)
-  └─> Does ONE specific task, returns result
+  └─> Does ONE specific task
       NO Task delegation, NO verification, NO commit
 ```
 
-**Examples**:
+**Examples**: `/review-technical-docs` → `/review-single-asciidoc`, `/cui-java-task-manager` → `/java-implement-code`
+
+### Pattern 3: Fetch + Triage + Delegate (Smart Orchestration)
+
+**For complex orchestration** (requires analysis before action):
 
 ```
-Documentation Review:
-/review-technical-docs (batch)
-  ├─> Glob *.adoc
+Orchestrator Command
+  ├─> Task(fetcher-agent) [retrieves all items with filtering]
+  ├─> For each item:
+  │    ├─> Task(triager-agent) [analyzes and decides action]
+  │    ├─> Based on triage decision:
+  │    │    ├─> Option A: SlashCommand(/implementation-command)
+  │    │    ├─> Option B: Direct Edit for trivial changes
+  │    │    └─> Option C: AskUserQuestion for user approval
+  │    └─> Store result
+  ├─> Task(verification-agent) [verify all changes together]
+  └─> Task(commit-agent) [commit if clean]
+
+Fetcher Agent (data retrieval)
+  └─> Fetches items with optional filtering
+      Returns structured list
+
+Triager Agent (decision making)
+  └─> Analyzes single item, decides action
+      Returns: {action, reason, implementation_approach, suppression_string}
+```
+
+**Example**: `/cui-handle-pull-request` (Sonar issues)
+
+**Concrete Examples**:
+
+```
+Documentation Review (Three-Layer):
+/review-technical-docs (Layer 1: batch)
+  ├─> Glob *.adoc files
   ├─> For each: SlashCommand(/review-single-asciidoc file.adoc)
   └─> Aggregate results
 
-/review-single-asciidoc (single-item)
-  ├─> Task(asciidoc-format-validator)
-  ├─> Task(asciidoc-link-verifier)
-  ├─> Task(asciidoc-content-reviewer)
-  └─> Report combined results
+/review-single-asciidoc (Layer 2: self-contained)
+  ├─> Task(asciidoc-format-validator) [Layer 3: focused]
+  ├─> Task(asciidoc-link-verifier) [Layer 3: focused]
+  ├─> Task(asciidoc-content-reviewer) [Layer 3: focused]
+  └─> Return combined validation results
 
-Java Implementation:
-/implement-java-task (batch - if multiple classes)
-  ├─> Parse task for affected classes
-  ├─> For each class: SlashCommand(/implement-single-class task)
+Java Implementation (Three-Layer):
+/cui-java-task-manager (Layer 1: batch - if multiple implementations)
+  ├─> Parse task for required implementations
+  ├─> For each: SlashCommand(/java-implement-code class-task)
+  ├─> For tests: SlashCommand(/java-implement-tests test-task)
   └─> Aggregate results
 
-/implement-single-class (single-item)
-  ├─> Task(java-code-implementer)
-  ├─> Task(maven-builder)
+/java-implement-code (Layer 2: self-contained)
+  ├─> Task(java-code-implementer) [Layer 3: focused]
+  ├─> Task(maven-builder) [verifies]
   ├─> Analyze build output
-  ├─> Iterate if issues found
-  └─> Return result
+  ├─> Iterate if issues
+  └─> Return implementation result
 
-PR Quality:
-/handle-pull-request (batch)
-  ├─> Fetch all Sonar issues
-  ├─> For each issue: SlashCommand(/fix-single-issue issue)
-  ├─> Task(maven-builder) [verify all fixes]
-  └─> Task(commit-changes)
+/java-implement-tests (Layer 2: self-contained)
+  ├─> Task(java-junit-implementer) [Layer 3: focused]
+  ├─> Task(maven-builder) [verifies]
+  ├─> Analyze test results
+  ├─> Iterate if failures
+  └─> Return test result
 
-/fix-single-issue (single-item)
-  ├─> Task(issue-analyzer)
-  ├─> Task(code-fixer)
-  └─> Return fix result
+PR Quality Fix (Fetch + Triage + Delegate - Pattern 3):
+/cui-handle-pull-request (orchestrator command)
+  ├─> Task(sonar-issue-fetcher) [fetches all Sonar issues]
+  ├─> For each Sonar issue:
+  │    ├─> Task(sonar-issue-triager) [decides: fix or suppress]
+  │    ├─> If fix: SlashCommand(/java-implement-code "fix")
+  │    └─> If suppress: AskUserQuestion for approval
+  ├─> Task(review-comment-fetcher) [fetches all review comments]
+  ├─> For each review comment:
+  │    ├─> Task(review-comment-triager) [decides: code_change, explain, or ignore]
+  │    ├─> If code_change: SlashCommand(/java-implement-code "change")
+  │    ├─> If explain: Post explanation via Bash(gh:*)
+  │    └─> If ignore: Skip
+  └─> SlashCommand(/cui-build-and-verify push) [verify + fix + commit + push]
+
+Task Execution (Three-Layer):
+/cui-implement-task (Layer 1: batch - if complex task with subtasks)
+  ├─> Analyze and break into subtasks
+  ├─> For each: SlashCommand(/execute-task subtask)
+  └─> SlashCommand(/cui-build-and-verify push) [verify all + commit + push]
+
+/execute-task (Layer 2: self-contained)
+  ├─> Task(task-executor) [Layer 3: focused]
+  ├─> Task(maven-builder) [verifies]
+  ├─> Analyze build output
+  ├─> Iterate if issues
+  └─> Return task result
 ```
 
-**Why This Works**:
+**Why These Patterns Work**:
 - ✅ No agent nesting (commands orchestrate, agents execute)
-- ✅ Reusable components (single-item commands work standalone)
-- ✅ Clear separation (collection vs orchestration vs execution)
-- ✅ Scalable (batch handles 1 or 1000 items same way)
-- ✅ Testable (test each layer independently)
+- ✅ Reusable components (Pattern 1 commands work standalone)
+- ✅ Clear separation (Pattern 2: collection vs orchestration vs execution)
+- ✅ Smart orchestration (Pattern 3: fetch → triage → delegate with user approval)
+- ✅ Scalable (batch patterns handle 1 or 1000 items same way)
+- ✅ Testable (test each layer/component independently)
 
 ## Architecture Standards
 
 - [ ] Add Rule 6 "Agent Delegation Constraints" to `cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md`
 
-- [ ] Add Rule 7 "Maven Execution Principle" to `architecture-rules.md`: Agents NEVER call Maven directly, Commands orchestrate maven-builder
+- [ ] Add Rule 7 "Maven Execution Principle" to `architecture-rules.md`: Agents NEVER call Maven directly (Bash(./mvnw:*) always a bug), Commands orchestrate maven-builder agent
+  ```
+  EXCEPTION: maven-builder agent is ALLOWED Bash(./mvnw:*) - it's the central build execution agent
+             All other agents must delegate to maven-builder instead of calling Maven directly
+
+  WHY: Centralizes build execution, output capture, performance tracking
+       Enables reusable build logic across all commands
+       Prevents duplicate build configuration and error handling
+  ```
 
 - [ ] Add Rule 8 "Three-Layer Pattern" to `architecture-rules.md`: Batch command → Single-item command → Focused agents (PRIMARY PATTERN)
 
@@ -102,7 +184,7 @@ PR Quality:
 
 ### cui-maven
 
-- [ ] Remove `maven-project-builder` agent entirely
+- [ ] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-verify command)
   ```
   BEFORE:
   /cui-build-and-verify (command)
@@ -110,38 +192,78 @@ PR Quality:
          └─> Task(maven-builder) ❌ FAILS - Task not available to agents
 
   AFTER:
-  /cui-build-and-verify (command)
-    ├─> Task(maven-builder) [focused: just builds]
-    ├─> Analyze output in command context
-    ├─> Fix issues in command context
+  /cui-build-and-verify (command - orchestrator)
+    ├─> Task(maven-builder) [returns: structured issue data]
+    ├─> Analyze issue types and locations
+    ├─> Delegate to appropriate fix commands:
+    │    └─> SlashCommand(/cui-java-task-manager "fix issues")
+    ├─> Task(maven-builder) [verify fixes]
     └─> Iterate until clean
+
+  WHY: Commands can orchestrate other commands (SlashCommand tool available)
+       Commands can delegate based on issue analysis
+       maven-project-builder tried to delegate (Task tool not available to agents)
   ```
 
-- [ ] Update `/cui-build-and-verify` command: add analysis/fixing logic, use Task(maven-builder) + iterate in command
+- [ ] Update `/cui-build-and-verify` command: orchestrate build + delegate fixes to appropriate commands
   ```
   BEFORE:
   /cui-build-and-verify
     └─> Delegates everything to maven-project-builder agent
 
   AFTER:
-  /cui-build-and-verify
-    ├─> Task(maven-builder) - returns output file path + errors/warnings
-    ├─> Read output file, analyze issues
-    ├─> Fix each issue using Edit/Write tools
-    ├─> Task(maven-builder) again to verify
+  /cui-build-and-verify (orchestrates verification workflow)
+    ├─> Task(maven-builder) [returns: structured results with categorized issues]
+    ├─> Analyze results to determine issue types and locations
+    ├─> For each issue category:
+    │    ├─> Java compilation errors → SlashCommand(/cui-java-task-manager "fix compilation errors")
+    │    ├─> Test failures → SlashCommand(/cui-java-task-manager "fix failing tests")
+    │    ├─> JavaDoc warnings → SlashCommand(/cui-java-task-manager "fix JavaDoc warnings")
+    │    └─> Other issues → Analyze and delegate appropriately
+    ├─> Task(maven-builder) [verify fixes]
     ├─> Repeat until clean
     └─> Task(commit-changes) if 'push' parameter provided
+
+  NOTE: Command orchestrates and delegates, does NOT fix issues directly
+        /cui-java-task-manager determines which classes need fixing and handles implementation
   ```
 
-- [ ] Keep `maven-builder` agent as-is (focused executor)
+- [ ] Update `maven-builder` agent to return structured results (not just raw output)
   ```
-  NO CHANGE:
+  BEFORE:
   maven-builder [agent]
-    ├─> Reads .claude/run-configuration.md for timeout
+    ├─> Executes ./mvnw
+    ├─> Captures output to timestamped file
+    ├─> Extracts errors/warnings as text
+    └─> Returns: status + file path + raw error/warning lines
+
+  AFTER:
+  maven-builder [agent]
     ├─> Executes ./mvnw with timeout
     ├─> Captures output to timestamped file
-    ├─> Extracts errors/warnings
-    └─> Returns: status + file path + filtered output
+    ├─> Parses output to extract structured data
+    └─> Returns: {
+          status: SUCCESS|FAILURE,
+          output_file: "target/build-output-*.log",
+          issues: [
+            {
+              type: "compilation_error" | "test_failure" | "javadoc_warning" | etc,
+              file: "path/to/File.java",
+              line: 123,
+              message: "error message",
+              severity: "ERROR" | "WARNING"
+            }
+          ],
+          summary: {
+            compilation_errors: count,
+            test_failures: count,
+            javadoc_warnings: count,
+            other_warnings: count
+          }
+        }
+
+  NOTE: Structured results enable commands to delegate appropriately
+        Commands can route issues to correct fix commands based on type/location
   ```
 
 ### cui-documentation-standards
@@ -202,38 +324,38 @@ PR Quality:
     └─> Implements code changes ONLY (no verification)
   ```
 
-- [ ] Create `/implement-single-java-class` command if needed (single-item orchestrator)
+- [ ] Create `/java-implement-code` command (self-contained implementation + verification)
   ```
-  NEW COMMAND (optional - may not be needed):
-  /implement-single-java-class <classname> <task-description>
+  NEW COMMAND:
+  /java-implement-code <task-description>
     ├─> Task(java-code-implementer) [focused: just implements]
-    ├─> Task(maven-builder) [focused: just builds]
+    ├─> Task(maven-builder) [verifies implementation]
     ├─> Analyze build output
     ├─> Iterate if issues found
     └─> Return result
+
+  WHY: Self-contained command users can invoke directly
+       Handles single implementation task end-to-end
+       No need for /implement-single-java-class wrapper
   ```
 
-- [ ] Update `/cui-java-task-manager` command: orchestrate using three-layer pattern if multiple classes
+- [ ] Update `/cui-java-task-manager` command: orchestrate using self-contained commands
   ```
   BEFORE:
   /cui-java-task-manager
     └─> Task(java-code-implementer)
          └─> implements + verifies internally ❌
 
-  AFTER (if single class):
-  /cui-java-task-manager
-    ├─> Task(java-code-implementer) [focused: just implements]
-    ├─> Task(maven-builder) [focused: just builds]
-    ├─> Analyze build output
-    └─> Iterate if issues found
+  AFTER:
+  /cui-java-task-manager (orchestrator)
+    ├─> Parse task to determine scope
+    ├─> SlashCommand(/java-implement-code "implement feature X")
+    ├─> SlashCommand(/java-implement-tests "test feature X")
+    └─> Return aggregated results
 
-  AFTER (if multiple classes - three-layer):
-  /cui-java-task-manager (batch)
-    ├─> Parse task for affected classes
-    ├─> For each class:
-    │    └─> SlashCommand(/implement-single-java-class class task)
-    ├─> Task(maven-builder) [verify all changes together]
-    └─> Aggregate results
+  NOTE: No three-layer needed - commands ARE already single-item
+        /java-implement-code handles one implementation task
+        /cui-java-task-manager orchestrates multiple if needed
   ```
 
 - [ ] Remove Task from `java-junit-implementer` - make focused (just writes tests, no verification)
@@ -250,22 +372,24 @@ PR Quality:
     └─> Writes tests ONLY (no verification)
   ```
 
-- [ ] Update `/cui-java-task-manager` command: orchestrate Task(java-junit-implementer) + Task(maven-builder)
+- [ ] Create `/java-implement-tests` command (self-contained test writing + verification)
   ```
-  BEFORE:
-  /cui-java-task-manager
-    └─> Task(java-junit-implementer)
-         └─> writes tests + verifies internally ❌
-
-  AFTER:
-  /cui-java-task-manager
+  NEW COMMAND:
+  /java-implement-tests <test-description>
     ├─> Task(java-junit-implementer) [focused: just writes tests]
-    ├─> Task(maven-builder) [focused: just builds + runs tests]
-    ├─> Analyze test results in command
-    └─> Iterate if tests fail
+    ├─> Task(maven-builder) [runs tests]
+    ├─> Analyze test results
+    ├─> Iterate if tests fail
+    └─> Return result
+
+  WHY: Self-contained command users can invoke directly
+       Handles single test implementation end-to-end
+       Already single-item focused
   ```
 
-- [ ] Remove Task from `java-coverage-reporter` - make focused (just analyzes coverage, no building)
+- [ ] `/cui-java-task-manager` orchestrates these self-contained commands (see above)
+
+- [ ] Convert `java-coverage-reporter` agent → `/java-coverage-report` command (self-contained)
   ```
   BEFORE:
   java-coverage-reporter [agent]
@@ -274,12 +398,21 @@ PR Quality:
     └─> Analyzes coverage reports
 
   AFTER:
-  java-coverage-reporter [agent]
+  /java-coverage-report [command - self-contained]
+    ├─> Task(maven-builder) with -Pcoverage profile [generates coverage]
+    ├─> Task(java-coverage-analyzer) [analyzes reports]
+    └─> Returns structured coverage results
+
+  java-coverage-analyzer [agent - NEW, focused]
     tools: Read, Glob, Grep
-    └─> Analyzes existing coverage reports ONLY (no building)
+    └─> Analyzes existing JaCoCo XML/HTML reports ONLY
+
+  WHY: Self-contained command that builds + analyzes
+       Users can invoke /java-coverage-report directly
+       Agent is focused (just analysis, no building)
   ```
 
-- [ ] Update commands using it: orchestrate Task(java-coverage-reporter) + Task(maven-builder)
+- [ ] Update commands using it: invoke /java-coverage-report command instead
   ```
   BEFORE:
   command
@@ -288,8 +421,22 @@ PR Quality:
 
   AFTER:
   command
-    ├─> Task(maven-builder) with jacoco profile [generates coverage]
-    └─> Task(java-coverage-reporter) [analyzes existing reports]
+    └─> SlashCommand(/java-coverage-report)
+         └─> self-contained (builds + analyzes)
+  ```
+
+- [ ] Create `logging-violation-analyzer` agent (focused: analyzes LOGGER usage)
+  ```
+  NEW AGENT:
+  logging-violation-analyzer [agent]
+    tools: Read, Grep, Glob
+    └─> Analyzes all LOGGER statements, returns structured violation list
+
+  WHAT IT DOES:
+  - Uses Grep to find all LOGGER.(info|debug|trace|warn|error|fatal) calls
+  - Parses each statement to determine LogRecord vs direct string usage
+  - Applies validation rules (INFO/WARN/ERROR/FATAL need LogRecord, DEBUG/TRACE must NOT)
+  - Returns: [{file, line, level, violation_type, current_usage}]
   ```
 
 - [ ] Remove Task from `cui-log-record-documenter` - make focused (just updates AsciiDoc, no verification)
@@ -322,8 +469,8 @@ PR Quality:
   AFTER:
   /cui-log-record-enforcer (orchestrates complete logging enforcement)
     ├─> Task(maven-builder) [pre-check: verify build before starting]
-    ├─> Analyze logging violations (Grep for LOGGER statements)
-    ├─> Task(java-code-implementer) [fix logging violations]
+    ├─> Task(logging-violation-analyzer) [analyze LOGGER statements, return violations]
+    ├─> Task(java-code-implementer) [fix logging violations based on analysis]
     ├─> Task(java-junit-implementer) [add LogAssert tests for coverage]
     ├─> Task(maven-builder) [verify: compilation + tests pass]
     ├─> Task(java-code-implementer) [renumber identifiers if needed]
@@ -333,20 +480,48 @@ PR Quality:
 
   NOTE: maven-builder verifies compilation + tests, NOT JavaDoc
         cui-log-record-documenter updates AsciiDoc files, NOT JavaDoc
+        logging-violation-analyzer is NEW focused agent for LOGGER analysis
   ```
 
 ### cui-workflow
 
-- [ ] Create `/fix-single-sonar-issue` command (single-item orchestrator)
+- [ ] Create `sonar-issue-fetcher` agent (focused: fetches issues from SonarQube)
   ```
-  NEW COMMAND:
-  /fix-single-sonar-issue <issue-key>
-    ├─> Task(sonar-issue-analyzer) [focused: analyzes issue type/location]
-    ├─> Task(code-fixer) [focused: applies fix]
-    └─> Return fix result (no verification)
+  NEW AGENT:
+  sonar-issue-fetcher [agent]
+    tools: Bash(gh:*), mcp__sonarqube__*
+    └─> Fetches Sonar issues with filtering options
+
+  WHAT IT DOES:
+  - Accepts filter parameters: "all", severity level, coverage-related, etc.
+  - Queries SonarQube API (via MCP tools) for PR issues
+  - Returns structured list: [{key, type, severity, file, line, rule, message}]
+  - NO analysis, NO fixing - pure data retrieval
   ```
 
-- [ ] Remove Task from `pr-quality-fixer` - make focused OR split into focused agents
+- [ ] Create `sonar-issue-triager` agent (focused: decides fix vs suppress)
+  ```
+  NEW AGENT:
+  sonar-issue-triager [agent]
+    tools: Read, Grep
+    └─> Analyzes single issue and decides action
+
+  WHAT IT DOES:
+  - Reads code context around issue location
+  - Analyzes issue rule, severity, pattern
+  - Applies triage logic: is this fixable programmatically?
+  - Returns decision: {
+      action: "fix" | "suppress",
+      reason: "explanation",
+      suggested_implementation: "which command or approach to use",
+      suppression_string: "// NOSONAR rule-key - reason" (ALWAYS derived from finding)
+    }
+  - For "fix": suggests which implementation approach (code change, test addition, etc.)
+  - For "suppress": explains why suppression is appropriate
+  - ALWAYS returns suppression_string regardless of decision (useful for fallback or user override)
+  ```
+
+- [ ] Update `pr-quality-fixer` agent → `/cui-handle-pull-request` command (orchestrator)
   ```
   BEFORE:
   pr-quality-fixer [agent]
@@ -357,46 +532,70 @@ PR Quality:
     ├─> Task(maven-builder) ❌
     └─> Task(commit-changes) ❌
 
-  AFTER (Option 1 - Keep as focused agent):
-  pr-quality-fixer [agent]
-    tools: Read, Edit, Bash(gh:*), mcp__sonarqube__*
-    └─> Fixes Sonar issues ONLY (no verification/commit)
-
-  AFTER (Option 2 - Split into focused agents):
-  sonar-issue-analyzer [agent]
-    └─> Analyzes issue type/location
-  code-fixer [agent]
-    └─> Applies fix based on analysis
-  ```
-
-- [ ] Update `/cui-handle-pull-request` command: use three-layer pattern
-  ```
-  BEFORE:
-  /cui-handle-pull-request
-    └─> Task(pr-quality-fixer)
-         └─> fixes + verifies + commits internally ❌
-
-  AFTER (three-layer):
-  /cui-handle-pull-request (batch command)
-    ├─> Fetch all Sonar issues for PR
+  AFTER:
+  /cui-handle-pull-request [command - orchestrator]
+    ├─> Task(sonar-issue-fetcher) [returns all issues with optional filters]
     ├─> For each issue:
-    │    └─> SlashCommand(/fix-single-sonar-issue issue-key)
-    ├─> Task(maven-builder) [verify all fixes together]
-    ├─> Analyze build output
-    ├─> Iterate if issues found
-    └─> Task(commit-changes) [commit all fixes]
+    │    ├─> Task(sonar-issue-triager) [returns: {action, reason, suggested_implementation}]
+    │    ├─> If action = "fix":
+    │    │    └─> Delegate to appropriate command based on suggested_implementation:
+    │    │         ├─> SlashCommand(/java-implement-code "fix issue X")
+    │    │         ├─> SlashCommand(/java-implement-tests "add test for Y")
+    │    │         └─> Or direct Edit for trivial changes
+    │    └─> If action = "suppress":
+    │         └─> AskUserQuestion: "Triager suggests suppressing issue X because {reason}. Approve?"
+    │              ├─> If approved: Add suppression comment to code
+    │              └─> If rejected: Attempt fix anyway or skip
+    └─> SlashCommand(/cui-build-and-verify push) [verify, fix issues, commit, and push]
+
+  WHY: Command-to-command delegation (SlashCommand, not Task)
+       Reuses /cui-build-and-verify logic including commit+push
+       Single command handles: verify → fix issues → iterate → commit → push
+       No separate Task(commit-changes) needed
+       Triage logic is reusable in focused agent
+       User approval workflow for suppressions
+       Keeps pr-quality-fixer functionality but as command (not agent)
   ```
 
-- [ ] Create `/respond-to-single-review-comment` command (single-item orchestrator)
+- [ ] Remove `pr-quality-fixer` agent file (logic moved to /cui-handle-pull-request command)
+
+- [ ] Create `review-comment-fetcher` agent (focused: fetches review comments from GitHub)
   ```
-  NEW COMMAND:
-  /respond-to-single-review-comment <comment-id>
-    ├─> Task(review-comment-analyzer) [focused: understands request]
-    ├─> Task(code-responder) [focused: makes changes or explains]
-    └─> Return response result (no verification)
+  NEW AGENT:
+  review-comment-fetcher [agent]
+    tools: Bash(gh:*)
+    └─> Fetches review comments with filtering options
+
+  WHAT IT DOES:
+  - Accepts filter parameters: "all", unresolved only, specific reviewers, etc.
+  - Queries GitHub API (via gh CLI) for PR review comments
+  - Returns structured list: [{id, author, file, line, body, resolved}]
+  - NO analysis, NO responding - pure data retrieval
   ```
 
-- [ ] Remove Task from `pr-review-responder` - make focused OR split
+- [ ] Create `review-comment-triager` agent (focused: decides code change vs explanation)
+  ```
+  NEW AGENT:
+  review-comment-triager [agent]
+    tools: Read, Grep
+    └─> Analyzes single review comment and decides action
+
+  WHAT IT DOES:
+  - Reads code context around comment location
+  - Analyzes comment content and intent
+  - Applies triage logic: code change needed, explanation sufficient, or ignore?
+  - Returns decision: {
+      action: "code_change" | "explain" | "ignore",
+      reason: "explanation",
+      suggested_implementation: "which command or approach to use",
+      explanation_text: "draft explanation to post" (if action = "explain")
+    }
+  - For "code_change": suggests which implementation approach (refactor, test, fix)
+  - For "explain": provides draft explanation (why no change needed, already addressed, etc.)
+  - For "ignore": explains why comment doesn't require response
+  ```
+
+- [ ] Remove `pr-review-responder` agent (logic moved to /cui-handle-pull-request command)
   ```
   BEFORE:
   pr-review-responder [agent]
@@ -405,83 +604,105 @@ PR Quality:
     ├─> Task(maven-builder) ❌
     └─> Task(commit-changes) ❌
 
-  AFTER (Option 1 - Keep as focused):
-  pr-review-responder [agent]
-    tools: Read, Edit, Bash(gh:*)
-    └─> Responds to review comments ONLY (no verification/commit)
+  AFTER:
+  REMOVED - orchestration moved to /cui-handle-pull-request command
+           Fetch + triage pattern with focused agents instead
 
-  AFTER (Option 2 - Split):
-  review-comment-analyzer [agent]
-    └─> Analyzes comment intent
-  code-responder [agent]
-    └─> Makes requested changes or explains
+  WHY: Agent tried to orchestrate other agents (impossible)
+       Fetch + triage pattern is consistent with Sonar issue handling
+       Batch command handles orchestration
   ```
 
-- [ ] Update `/cui-handle-pull-request` command: use three-layer for review responses
+- [ ] Update `/cui-handle-pull-request` command: use fetch + triage for review comments
   ```
   BEFORE:
   /cui-handle-pull-request
     └─> Task(pr-review-responder)
          └─> responds + verifies + commits internally ❌
 
-  AFTER (three-layer):
-  /cui-handle-pull-request (batch command)
-    ├─> Fetch all Gemini review comments
-    ├─> For each comment:
-    │    └─> SlashCommand(/respond-to-single-review-comment comment-id)
-    ├─> Task(maven-builder) [verify all changes]
-    ├─> Analyze build output
-    ├─> Iterate if issues found
-    └─> Task(commit-changes) [commit all responses]
+  AFTER:
+  /cui-handle-pull-request [command - orchestrator]
+    ├─> Task(sonar-issue-fetcher) [returns all Sonar issues]
+    ├─> For each Sonar issue:
+    │    ├─> Task(sonar-issue-triager) [decides: fix or suppress]
+    │    ├─> If fix: SlashCommand(/java-implement-code "fix issue")
+    │    └─> If suppress: AskUserQuestion for approval
+    ├─> Task(review-comment-fetcher) [returns all review comments]
+    ├─> For each review comment:
+    │    ├─> Task(review-comment-triager) [decides: code_change, explain, or ignore]
+    │    ├─> If code_change: delegate based on suggested_implementation
+    │    │    └─> SlashCommand(/java-implement-code "implement change")
+    │    ├─> If explain: Post explanation to GitHub using Bash(gh:*)
+    │    └─> If ignore: Skip (log reason)
+    └─> SlashCommand(/cui-build-and-verify push) [verify + fix + commit + push all changes]
+
+  WHY: Consistent fetch + triage pattern for both Sonar and review comments
+       Triage logic decides appropriate action for each comment
+       User sees explanations posted to GitHub
+       Single verification and commit for all changes
+       No separate /respond-to-single-review-comment command needed
   ```
 
-- [ ] Create `/execute-single-subtask` command if task can be split (single-item orchestrator)
-  ```
-  NEW COMMAND (optional):
-  /execute-single-subtask <subtask-description>
-    ├─> Task(task-executor) [focused: implements subtask]
-    └─> Return implementation result (no verification)
-  ```
-
-- [ ] Remove Task from `task-executor` - make focused (just executes task, no verification/commit)
+- [ ] Remove Task and Bash(./mvnw:*) from `task-executor` - make focused
   ```
   BEFORE:
   task-executor [agent]
     tools: Read, Edit, Write, Glob, Grep, Task, Bash(./mvnw:*), Bash(./gradlew:*), Skill
     ├─> Executes implementation task
-    ├─> Task(maven-builder) ❌
-    └─> Task(commit-changes) ❌
+    ├─> Task(maven-builder) ❌ Agent delegation impossible
+    └─> Task(commit-changes) ❌ Agent delegation impossible
 
   AFTER:
   task-executor [agent]
     tools: Read, Edit, Write, Glob, Grep, Skill
     └─> Executes implementation task ONLY (no verification/commit)
+
+  WHY: Agents cannot delegate to other agents
+       Bash(./mvnw:*) is anti-pattern (Rule 7)
+       Task tool causes nesting limitation
   ```
 
-- [ ] Update `/cui-implement-task` command: use three-layer if task has subtasks
+- [ ] Create `/execute-task` command (self-contained: implement + verify single task)
+  ```
+  NEW COMMAND:
+  /execute-task <task-description>
+    ├─> Task(task-executor) [focused: implements task]
+    ├─> Task(maven-builder) [verifies implementation]
+    ├─> Analyze build output
+    ├─> Iterate if verification fails
+    └─> Return implementation result
+
+  WHY: Self-contained command that implements and verifies ONE task
+       Users can invoke directly for single task execution
+       Returns structured result for batch aggregation
+       Replaces agent attempting orchestration
+  ```
+
+- [ ] Update `/cui-implement-task` command: determine if atomic or batch
   ```
   BEFORE:
   /cui-implement-task
     └─> Task(task-executor)
          └─> executes + verifies + commits internally ❌
 
-  AFTER (if single atomic task):
-  /cui-implement-task
-    ├─> Task(task-executor) [focused: just executes task]
-    ├─> Task(maven-builder) [focused: just verifies]
-    ├─> Analyze output in command
-    ├─> Iterate if issues found
-    └─> Task(commit-changes) [focused: just commits]
+  AFTER (if single atomic task - self-contained pattern):
+  /cui-implement-task (orchestrator)
+    ├─> Task(task-executor) [focused: executes task]
+    └─> SlashCommand(/cui-build-and-verify push) [verify + fix + commit + push]
 
-  AFTER (if task has subtasks - three-layer):
-  /cui-implement-task (batch)
-    ├─> Break task into subtasks
+  AFTER (if task has subtasks - three-layer pattern):
+  /cui-implement-task (batch command - Layer 1)
+    ├─> Analyze task and break into subtasks
     ├─> For each subtask:
-    │    └─> SlashCommand(/execute-single-subtask subtask)
-    ├─> Task(maven-builder) [verify all changes]
-    ├─> Analyze output
-    ├─> Iterate if issues found
-    └─> Task(commit-changes) [commit all]
+    │    └─> SlashCommand(/execute-task subtask-description) [Layer 2: self-contained]
+    │         └─> Task(task-executor) [Layer 3: focused execution]
+    └─> SlashCommand(/cui-build-and-verify push) [verify all + fix + commit + push]
+
+  WHY: Command determines pattern based on task complexity
+       Atomic tasks: direct self-contained execution
+       Complex tasks: three-layer decomposition
+       /cui-build-and-verify handles verification, fixes, commit, push
+       No duplication of verification/commit logic
   ```
 
 - [ ] Change `Task(/review-technical-docs)` → `SlashCommand(/review-technical-docs)` in `task-reviewer`
@@ -516,6 +737,64 @@ PR Quality:
   ```
 
 - [ ] Inline validation logic using Grep/Read/Glob in `cui-diagnose-single-skill`
+
+## Migration Summary
+
+### Components Removed (3 agents)
+Agents that attempted orchestration (Task delegation) - logic moved to commands:
+- `maven-project-builder` (cui-maven) - orchestration moved to /cui-build-and-verify command
+- `pr-quality-fixer` (cui-workflow) - orchestration moved to /cui-handle-pull-request command
+- `pr-review-responder` (cui-workflow) - orchestration moved to /cui-handle-pull-request command (fetch + triage pattern)
+
+### New Focused Agents (7 agents)
+Agents that do ONE specific task (no Task, no Bash(./mvnw:*), no verification):
+- `logging-violation-analyzer` (cui-java-expert) - analyzes LOGGER statements, returns violations
+- `java-coverage-analyzer` (cui-java-expert) - analyzes JaCoCo reports only
+- `sonar-issue-fetcher` (cui-workflow) - fetches Sonar issues with filtering
+- `sonar-issue-triager` (cui-workflow) - decides fix vs suppress for single issue
+- `review-comment-fetcher` (cui-workflow) - fetches GitHub review comments with filtering
+- `review-comment-triager` (cui-workflow) - decides code change vs explanation for single comment
+- `commit-changes` (cui-workflow) - commits and pushes changes [already exists, included for completeness]
+
+### New Self-Contained Commands (5 commands)
+Layer 2 commands that orchestrate agent + verification for single items:
+- `/java-implement-code` (cui-java-expert) - implements + verifies code changes
+- `/java-implement-tests` (cui-java-expert) - writes + verifies tests
+- `/java-coverage-report` (cui-java-expert) - generates + analyzes coverage
+- `/review-single-asciidoc` (cui-documentation-standards) - validates single AsciiDoc file
+- `/execute-task` (cui-workflow) - executes + verifies single task
+
+### Updated Orchestrator Commands (6 commands)
+Commands that orchestrate agents and delegate to other commands:
+- `/cui-build-and-verify` (cui-maven) - orchestrates maven-builder + delegates fixes to /cui-java-task-manager
+- `/cui-java-task-manager` (cui-java-expert) - delegates to /java-implement-code, /java-implement-tests (batch pattern)
+- `/cui-log-record-enforcer` (cui-java-expert) - orchestrates logging enforcement workflow
+- `/review-technical-docs` (cui-documentation-standards) - delegates to /review-single-asciidoc per file (batch pattern)
+- `/cui-handle-pull-request` (cui-workflow) - fetch + triage + delegate pattern (NOT batch, orchestrator)
+- `/cui-implement-task` (cui-workflow) - delegates to /execute-task (batch if complex) or direct orchestration (if atomic)
+
+### Modified Existing Agents (7 agents)
+Agents with Task and/or Bash(./mvnw:*) removed, made focused:
+- `maven-builder` (cui-maven) - remove Task if present, keep Bash(./mvnw:*) [EXCEPTION: central build agent]
+- `java-code-implementer` (cui-java-expert) - remove Task, keep only implementation
+- `java-junit-implementer` (cui-java-expert) - remove Task, keep only test writing
+- `cui-log-record-documenter` (cui-java-expert) - remove Task, keep only AsciiDoc updates
+- `task-executor` (cui-workflow) - remove Task and Bash(./mvnw:*), keep only execution
+- `task-reviewer` (cui-workflow) - change Task(/review-technical-docs) to SlashCommand
+- `cui-diagnose-single-skill` (cui-plugin-development-tools) - remove Task, inline validation
+
+### Affected Validator Agents (3 agents)
+AsciiDoc validators already focused, no changes needed (used by /review-single-asciidoc):
+- `asciidoc-format-validator` (cui-documentation-standards)
+- `asciidoc-link-verifier` (cui-documentation-standards)
+- `asciidoc-content-reviewer` (cui-documentation-standards)
+
+### Total Impact
+- **Agents**: 3 removed, 6 new created (7 listed but commit-changes exists), 7 modified = 16 agents changed
+- **Commands**: 5 created, 6 updated = 11 commands changed
+- **Architecture rules**: 3 new rules added
+- **Diagnostic checks**: 2 new checks added
+- **Patterns**: 3 architectural patterns established (Self-Contained, Three-Layer, Fetch+Triage+Delegate)
 
 ## Testing
 
