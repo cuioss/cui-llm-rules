@@ -1,25 +1,20 @@
-= Quarkus Reflection Registration Standards
-:toc: left
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
+# Quarkus Reflection Registration Standards
 
-== Purpose
+## Purpose
 
-Standards and best practices for registering classes for reflection in Quarkus applications and extensions. This document provides comprehensive guidance on choosing between `@RegisterForReflection` annotations and deployment-time `ReflectiveClassBuildItem` registration, ensuring optimal native image compilation and runtime performance.
+Standards for registering classes for reflection in Quarkus applications and extensions, ensuring optimal native image compilation and runtime performance.
 
-== Overview
+## Overview
 
 Quarkus uses ahead-of-time (AOT) compilation to build fast native executables through closed-world analysis, which eliminates unused code paths. This optimization can break functionality relying on runtime reflection, making explicit reflection registration crucial for native image compilation success.
 
-== Registration Approaches
+## Registration Approaches
 
-=== @RegisterForReflection Annotation
+### @RegisterForReflection Annotation
 
 Application-level reflection registration using annotations directly on classes or configuration classes.
 
-==== When to Use
+#### When to Use
 
 * Simple application-level reflection needs
 * Registering your own classes
@@ -27,10 +22,9 @@ Application-level reflection registration using annotations directly on classes 
 * Quick and declarative approach
 * Classes that users directly interact with
 
-==== Usage Patterns
+#### Usage Patterns
 
-[source,java]
-----
+```java
 // Direct class registration
 @RegisterForReflection
 public class MyClass {
@@ -49,13 +43,13 @@ public class ReflectionConfiguration {
 @RegisterForReflection(classNames = {"com.example.PrivateClass"})
 public class ReflectionConfig {
 }
-----
+```
 
-=== ReflectiveClassBuildItem in BuildStep
+### ReflectiveClassBuildItem in BuildStep
 
 Deployment-time reflection registration using Quarkus extension processors.
 
-==== When to Use
+#### When to Use
 
 * Building Quarkus extensions
 * Programmatic registration based on conditions
@@ -63,10 +57,9 @@ Deployment-time reflection registration using Quarkus extension processors.
 * Fine-grained control over reflection scope
 * Dynamic discovery using Jandex
 
-==== Usage Patterns
+#### Usage Patterns
 
-[source,java]
-----
+```java
 @BuildStep
 ReflectiveClassBuildItem basicReflection() {
     // Constructor reflection only
@@ -91,22 +84,21 @@ void registerImplementations(CombinedIndexBuildItem combinedIndex,
         reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true, implClass.name().toString()));
     }
 }
-----
+```
 
-=== AdditionalBeanBuildItem for CDI Beans
+### AdditionalBeanBuildItem for CDI Beans
 
 **CRITICAL**: For CDI beans, use `AdditionalBeanBuildItem` instead of reflection registration.
 
-==== When to Use
+#### When to Use
 
 * Registering CDI beans that need explicit discovery
 * Ensuring beans are not removed by aggressive bean removal
 * Type-safe bean registration in extensions
 
-==== Usage Pattern
+#### Usage Pattern
 
-[source,java]
-----
+```java
 @BuildStep
 public AdditionalBeanBuildItem additionalBeans() {
     return AdditionalBeanBuildItem.builder()
@@ -119,33 +111,32 @@ public AdditionalBeanBuildItem additionalBeans() {
             .setUnremovable()
             .build();
 }
-----
+```
 
 **IMPORTANT**: When using `AdditionalBeanBuildItem`, remove `@RegisterForReflection` annotations from the bean classes to avoid conflicts and redundancy.
 
-== Hybrid Strategy Guidelines
+## Hybrid Strategy Guidelines
 
-=== Recommended Boundaries
+### Recommended Boundaries
 
-==== Use @RegisterForReflection For
+#### Use @RegisterForReflection For
 
 * Application-level endpoints and controllers
 * Simple DTOs and record classes
 * Integration test classes
 * User-facing configuration classes
 
-==== Use ReflectiveClassBuildItem For
+#### Use ReflectiveClassBuildItem For
 
-* Core library classes (JWT validation, parsing, etc.)
+* Core library classes (validation, parsing, etc.)
 * Complex dependency chains
 * Classes requiring conditional registration
 * Third-party library integration
 * Dynamic class discovery and registration
 
-=== Strategy Implementation
+### Strategy Implementation
 
-[source,java]
-----
+```java
 // Application level - annotation approach
 @RegisterForReflection(targets = {
     JwtClaims.class,
@@ -164,32 +155,30 @@ void registerCryptoClasses(BuildProducer<ReflectiveClassBuildItem> reflectiveCla
         reflectiveClasses.produce(new ReflectiveClassBuildItem(true, false, className));
     }
 }
-----
+```
 
-== Performance Optimization
+## Performance Optimization
 
 **Important**: Both `@RegisterForReflection` and `ReflectiveClassBuildItem` have identical runtime performance. The performance considerations below affect native image size and build time, not runtime reflection performance.
 
-=== Selective Registration
+### Selective Registration
 
 Only register classes that are actually accessed via reflection:
 
-[source,java]
-----
+```java
 // Optimal - specific reflection needs
 ReflectiveClassBuildItem.builder(MyClass.class)
     .constructors(true)  // Only if constructors are called via reflection
     .methods(false)      // Only if methods are called via reflection
     .fields(false)       // Only if fields are accessed via reflection
     .build();
-----
+```
 
-=== Avoid Over-Registration
+### Avoid Over-Registration
 
 Over-registration increases native image size and build time without providing runtime performance benefits:
 
-[source,java]
-----
+```java
 // Avoid - excessive registration (increases image size)
 @RegisterForReflection(targets = {
     // Don't register entire packages or class hierarchies
@@ -211,14 +200,13 @@ void registerConditionally(BuildProducer<ReflectiveClassBuildItem> producer) {
         producer.produce(new ReflectiveClassBuildItem(ConditionalClass.class));
     }
 }
-----
+```
 
-== Type Safety Best Practices
+## Type Safety Best Practices
 
-=== Prefer Class-Based Registration
+### Prefer Class-Based Registration
 
-[source,java]
-----
+```java
 // Preferred - type-safe registration
 ReflectiveClassBuildItem.builder(RestEasyServletObjectsResolver.class)
     .methods(true)
@@ -228,12 +216,11 @@ ReflectiveClassBuildItem.builder(RestEasyServletObjectsResolver.class)
 ReflectiveClassBuildItem.builder("de.cuioss.jwt.quarkus.servlet.RestEasyServletObjectsResolver")
     .methods(true)
     .build();
-----
+```
 
-=== Handle Deployment-Time Accessibility
+### Handle Deployment-Time Accessibility
 
-[source,java]
-----
+```java
 // Use string registration only when class is not accessible at deployment time
 @BuildStep
 public ReflectiveClassBuildItem registerRuntimeOnlyClasses() {
@@ -244,18 +231,17 @@ public ReflectiveClassBuildItem registerRuntimeOnlyClasses() {
             .methods(true)
             .build();
 }
-----
+```
 
-== Organizational Standards
+## Organizational Standards
 
-=== Logical Grouping
+### Logical Grouping
 
 Group related classes together in separate build steps:
 
-[source,java]
-----
+```java
 @BuildStep
-public ReflectiveClassBuildItem registerJwtValidationClasses() {
+public ReflectiveClassBuildItem registerValidationClasses() {
     return ReflectiveClassBuildItem.builder(
             // Core validation components
             TokenValidator.class,
@@ -268,7 +254,7 @@ public ReflectiveClassBuildItem registerJwtValidationClasses() {
 }
 
 @BuildStep
-public ReflectiveClassBuildItem registerJwtDomainClasses() {
+public ReflectiveClassBuildItem registerDomainClasses() {
     return ReflectiveClassBuildItem.builder(
             // Domain model classes
             AccessTokenContent.class,
@@ -279,31 +265,29 @@ public ReflectiveClassBuildItem registerJwtDomainClasses() {
             .constructors(true)
             .build();
 }
-----
+```
 
-=== Documentation Requirements
+### Documentation Requirements
 
 Document reflection registration strategy:
 
-[source,java]
-----
+```java
 /**
- * Reflection registration strategy for JWT validation:
+ * Reflection registration strategy:
  * - @RegisterForReflection: Application-level classes (endpoints, DTOs)
  * - ReflectiveClassBuildItem: Core infrastructure and third-party integration
  * - Avoid duplicates between annotation and processor approaches
  */
-public class JwtReflectionProcessor {
+public class ReflectionProcessor {
     // Implementation
 }
-----
+```
 
-== Common Patterns
+## Common Patterns
 
-=== Interface-Based Registration
+### Interface-Based Registration
 
-[source,java]
-----
+```java
 @BuildStep
 void registerServiceImplementations(CombinedIndexBuildItem combinedIndex,
                                    BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
@@ -313,12 +297,11 @@ void registerServiceImplementations(CombinedIndexBuildItem combinedIndex,
         reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true, implClass.name().toString()));
     }
 }
-----
+```
 
-=== Annotation-Based Discovery
+### Annotation-Based Discovery
 
-[source,java]
-----
+```java
 @BuildStep
 void registerAnnotatedClasses(CombinedIndexBuildItem combinedIndex,
                               BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
@@ -326,34 +309,32 @@ void registerAnnotatedClasses(CombinedIndexBuildItem combinedIndex,
     DotName annotationName = DotName.createSimple(MyAnnotation.class.getName());
     for (AnnotationInstance annotation : combinedIndex.getIndex().getAnnotations(annotationName)) {
         if (annotation.target().kind() == AnnotationTarget.Kind.CLASS) {
-            reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true, 
+            reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true,
                 annotation.target().asClass().name().toString()));
         }
     }
 }
-----
+```
 
-=== Conditional Registration
+### Conditional Registration
 
-[source,java]
-----
+```java
 @BuildStep
 void registerConditionalClasses(BuildProducer<ReflectiveClassBuildItem> reflectiveClasses,
                                 CombinedIndexBuildItem combinedIndex) {
     // Only register if specific conditions are met
     if (combinedIndex.getIndex().getClassByName(DotName.createSimple("io.vertx.core.Vertx")) != null) {
-        reflectiveClasses.produce(new ReflectiveClassBuildItem(true, false, 
+        reflectiveClasses.produce(new ReflectiveClassBuildItem(true, false,
             "io.vertx.core.impl.VertxInternal"));
     }
 }
-----
+```
 
-== Anti-Patterns to Avoid
+## Anti-Patterns to Avoid
 
-=== Redundant Registration
+### Redundant Registration
 
-[source,java]
-----
+```java
 // AVOID - Double registration
 @RegisterForReflection
 public class MyClass {
@@ -365,12 +346,11 @@ public ReflectiveClassBuildItem registerMyClass() {
     // DON'T register the same class again
     return new ReflectiveClassBuildItem(true, true, MyClass.class.getName());
 }
-----
+```
 
-=== CDI Bean Reflection Conflicts
+### CDI Bean Reflection Conflicts
 
-[source,java]
-----
+```java
 // AVOID - CDI bean with reflection annotation
 @ApplicationScoped
 @RegisterForReflection(methods = false, fields = false)
@@ -398,12 +378,11 @@ public AdditionalBeanBuildItem additionalBeans() {
             .setUnremovable()
             .build();
 }
-----
+```
 
-=== Excessive String Usage
+### Excessive String Usage
 
-[source,java]
-----
+```java
 // AVOID - String-based registration when class is available
 @BuildStep
 public ReflectiveClassBuildItem registerAvailableClasses() {
@@ -419,39 +398,19 @@ public ReflectiveClassBuildItem registerAvailableClasses() {
     return ReflectiveClassBuildItem.builder(TokenValidator.class)
             .build();
 }
-----
+```
 
-=== Blanket Registration
+## Quarkus Auto-Registration
 
-[source,java]
-----
-// AVOID - Registering everything
-@RegisterForReflection(targets = {
-    // Don't register entire packages
-    com.example.package1.Class1.class,
-    com.example.package1.Class2.class,
-    // ... all classes in package
-})
+### Classes That Are Automatically Registered
 
-// PREFER - Selective registration
-@RegisterForReflection(targets = {
-    // Only register classes that need reflection
-    com.example.package1.ReflectionRequiredClass.class
-})
-----
+Modern Quarkus (3.x+) automatically registers many classes for reflection through its build-time analysis.
 
-== Quarkus Auto-Registration: When NOT to Use @RegisterForReflection
-
-Modern Quarkus (3.x+) automatically registers many classes for reflection through its build-time analysis. Understanding which classes are auto-registered prevents redundant configuration and simplifies maintenance.
-
-=== Classes That Are Automatically Registered
-
-==== CDI Beans
+#### CDI Beans
 
 **Rule**: CDI beans with scope annotations are automatically analyzed and registered by Quarkus.
 
-[source,java]
-----
+```java
 // NO @RegisterForReflection needed - CDI scope annotation is sufficient
 @ApplicationScoped
 public class MyService {
@@ -462,16 +421,15 @@ public class MyService {
 public class MyRequestBean {
     // Also automatically registered
 }
-----
+```
 
 **Rationale**: Quarkus's CDI integration performs build-time bean discovery and ensures all CDI beans are accessible for dependency injection and proxy generation.
 
-==== MicroProfile Health Checks
+#### MicroProfile Health Checks
 
 **Rule**: Health check implementations are automatically discovered through their annotations.
 
-[source,java]
-----
+```java
 // NO @RegisterForReflection needed
 @Liveness
 public class DatabaseHealthCheck implements HealthCheck {
@@ -480,34 +438,30 @@ public class DatabaseHealthCheck implements HealthCheck {
         return HealthCheckResponse.up("database");
     }
 }
-----
+```
 
-**Rationale**: Quarkus health extension performs build-time discovery of all `@Liveness`, `@Readiness`, and `@Startup` annotated classes.
-
-==== CDI Qualifiers and Stereotypes
+#### CDI Qualifiers and Stereotypes
 
 **Rule**: CDI qualifier annotations do not need reflection registration.
 
-[source,java]
-----
+```java
 // NO @RegisterForReflection needed
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 public @interface CustomQualifier {
 }
-----
+```
 
-**Rationale**: Qualifiers are metadata annotations processed entirely at build time. They are not instantiated or accessed via reflection at runtime.
+**Rationale**: Qualifiers are metadata annotations processed entirely at build time.
 
-=== Classes That Require Explicit Registration
+### Classes That Require Explicit Registration
 
-==== Data Transfer Objects (DTOs) and Records
+#### Data Transfer Objects (DTOs) and Records
 
 **Rule**: Classes used in JSON serialization/deserialization or REST responses require explicit registration.
 
-[source,java]
-----
+```java
 // @RegisterForReflection IS required
 @RegisterForReflection
 public class UserDTO {
@@ -520,31 +474,25 @@ public class UserDTO {
 @RegisterForReflection
 public record ErrorResponse(int code, String message) {
 }
-----
+```
 
-**Rationale**: JSON processing libraries use reflection to access fields and methods. These classes are not CDI beans, so they require explicit registration.
-
-==== Enums in REST/JSON Context
+#### Enums in REST/JSON Context
 
 **Rule**: Enums used in serialization contexts need minimal reflection registration.
 
-[source,java]
-----
+```java
 // Minimal registration for enum constants
 @RegisterForReflection(methods = false, fields = false)
 public enum Status {
     ACTIVE, INACTIVE, PENDING
 }
-----
+```
 
-**Rationale**: Only enum constants need to be accessible; methods and fields typically don't require reflection.
-
-==== Interceptors
+#### Interceptors
 
 **Rule**: CDI interceptors need reflection for proxy generation.
 
-[source,java]
-----
+```java
 @Interceptor
 @Priority(Interceptor.Priority.APPLICATION)
 @RegisterForReflection  // Required for proxy generation
@@ -554,16 +502,13 @@ public class SecurityInterceptor {
         // Interceptor logic
     }
 }
-----
+```
 
-**Rationale**: Interceptors use runtime proxy generation which requires reflection access to methods.
-
-==== JAX-RS Filters and Interceptors
+#### JAX-RS Filters and Interceptors
 
 **Rule**: JAX-RS filters require reflection for the JAX-RS runtime.
 
-[source,java]
-----
+```java
 @Provider
 @RegisterForReflection  // Required for JAX-RS instantiation
 public class RequestLoggingFilter implements ContainerRequestFilter {
@@ -572,16 +517,13 @@ public class RequestLoggingFilter implements ContainerRequestFilter {
         // Filter logic
     }
 }
-----
+```
 
-**Rationale**: JAX-RS runtime instantiates filters via reflection.
-
-==== InterceptorBinding Annotations with @Nonbinding
+#### InterceptorBinding Annotations with @Nonbinding
 
 **Rule**: InterceptorBinding annotations with `@Nonbinding` members need method reflection.
 
-[source,java]
-----
+```java
 @InterceptorBinding
 @Retention(RetentionPolicy.RUNTIME)
 @RegisterForReflection(methods = true, fields = false)  // methods=true required
@@ -589,174 +531,81 @@ public @interface Secured {
     @Nonbinding  // This member is accessed via reflection
     String[] roles() default {};
 }
-----
+```
 
-**Rationale**: `@Nonbinding` annotation members are read via reflection to pass values to interceptors.
+### Decision Matrix
 
-=== Decision Matrix
+| Class Type | Needs @RegisterForReflection? | Reason |
+|---|---|---|
+| CDI Bean (@ApplicationScoped, etc.) | ❌ No | Auto-registered by CDI extension |
+| Health Check (@Liveness, @Readiness) | ❌ No | Auto-discovered by health extension |
+| CDI Qualifier (@Qualifier) | ❌ No | Build-time metadata only |
+| DTO/POJO for JSON | ✅ Yes | JSON processors use reflection |
+| Enum in REST context | ✅ Yes (minimal) | Enum constants accessed via reflection |
+| @Interceptor | ✅ Yes | Proxy generation requires reflection |
+| JAX-RS @Provider | ✅ Yes | JAX-RS runtime instantiation |
+| @InterceptorBinding with @Nonbinding | ✅ Yes (methods=true) | Runtime parameter access |
 
-[cols="3,1,3"]
-|===
-|Class Type |Needs @RegisterForReflection? |Reason
+### Common Pitfalls
 
-|CDI Bean (@ApplicationScoped, etc.)
-|❌ No
-|Auto-registered by CDI extension
+#### Pitfall 1: Double Registration
 
-|Health Check (@Liveness, @Readiness)
-|❌ No
-|Auto-discovered by health extension
-
-|CDI Qualifier (@Qualifier)
-|❌ No
-|Build-time metadata only
-
-|DTO/POJO for JSON
-|✅ Yes
-|JSON processors use reflection
-
-|Enum in REST context
-|✅ Yes (minimal)
-|Enum constants accessed via reflection
-
-|@Interceptor
-|✅ Yes
-|Proxy generation requires reflection
-
-|JAX-RS @Provider
-|✅ Yes
-|JAX-RS runtime instantiation
-
-|@InterceptorBinding with @Nonbinding
-|✅ Yes (methods=true)
-|Runtime parameter access
-|===
-
-=== Common Pitfalls
-
-==== Pitfall 1: Double Registration
-
-[source,java]
-----
+```java
 // WRONG - Redundant registration
 @ApplicationScoped
 @RegisterForReflection  // ❌ Not needed - CDI handles this
 public class MyService {
 }
-----
+```
 
 **Impact**: Unnecessary metadata in native image, potential configuration conflicts.
 
 **Solution**: Remove `@RegisterForReflection` from all CDI beans.
 
-==== Pitfall 2: Missing Registration for DTOs
+#### Pitfall 2: Missing Registration for DTOs
 
-[source,java]
-----
+```java
 // WRONG - Missing registration
 public class UserDTO {  // ❌ Will fail in native image if used in REST
     private String name;
 }
-----
+```
 
 **Impact**: Native image build succeeds but runtime reflection fails with `ClassNotFoundException`.
 
 **Solution**: Add `@RegisterForReflection` to all DTOs used in REST/JSON contexts.
 
-==== Pitfall 3: Incorrect Scope for Enums
+#### Pitfall 3: Incorrect Scope for Enums
 
-[source,java]
-----
+```java
 // INEFFICIENT - Too much reflection
 @RegisterForReflection  // ❌ Registers methods/fields unnecessarily
 public enum Status {
     ACTIVE, INACTIVE
 }
-----
+```
 
 **Solution**: Use minimal scope: `@RegisterForReflection(methods = false, fields = false)`
 
-=== Verification Strategy
+## Testing and Validation
 
-To verify correct reflection registration:
-
-1. **Build Native Image**: `./mvnw package -Pnative`
-2. **Check for Warnings**: Look for reflection-related warnings during build
-3. **Runtime Testing**: Test all REST endpoints and JSON operations in native mode
-4. **Minimal Scope**: Use most restrictive reflection scope that works
-
-== Implementation Example
-
-Based on the CUI JWT project analysis, here's the recommended implementation:
-
-[source,java]
-----
-// Application-level endpoint class
-@RegisterForReflection
-@Path("/jwt")
-public class JwtValidationEndpoint {
-    // Implementation
-}
-
-// Extension processor for infrastructure classes
-public class CuiJwtProcessor {
-    
-    @BuildStep
-    public ReflectiveClassBuildItem registerJwtValidationClasses() {
-        return ReflectiveClassBuildItem.builder(
-                // Core validation components
-                TokenValidator.class,
-                IssuerConfig.class,
-                ParserConfig.class)
-                .methods(true)
-                .fields(true)
-                .constructors(true)
-                .build();
-    }
-    
-    @BuildStep
-    public ReflectiveClassBuildItem registerJwtDomainClasses() {
-        return ReflectiveClassBuildItem.builder(
-                // Domain model classes
-                AccessTokenContent.class,
-                ClaimValue.class)
-                .methods(true)
-                .fields(true)
-                .constructors(true)
-                .build();
-    }
-}
-----
-
-== Source References
-
-This document is based on analysis of the following CUI JWT project files:
-
-* link:https://github.com/cuioss/cui-jwt/blob/main/cui-jwt-quarkus-parent/cui-jwt-quarkus/src/main/java/de/cuioss/jwt/quarkus/producer/BearerTokenProducer.java[BearerTokenProducer.java] - Example of `@RegisterForReflection` usage
-* link:https://github.com/cuioss/cui-jwt/blob/main/cui-jwt-quarkus-parent/cui-jwt-quarkus-integration-tests/src/main/java/de/cuioss/jwt/integration/endpoint/JwtValidationEndpoint.java[JwtValidationEndpoint.java] - Application-level reflection registration
-* link:https://github.com/cuioss/cui-jwt/blob/main/cui-jwt-quarkus-parent/cui-jwt-quarkus-deployment/src/main/java/de/cuioss/jwt/quarkus/deployment/CuiJwtProcessor.java[CuiJwtProcessor.java] - Comprehensive deployment-time reflection registration
-
-== Testing and Validation
-
-=== Native Image Testing
+### Native Image Testing
 
 Always test reflection registration with native image compilation:
 
-[source,bash]
-----
+```bash
 # Build native image
 ./mvnw clean package -Pnative
 
 # Run native image tests
 ./mvnw verify -Pnative
-----
+```
 
-=== Runtime Verification
+### Runtime Verification
 
 Verify reflection works at runtime:
 
-[source,java]
-----
+```java
 @Test
 public void testReflectionRegistration() {
     // Verify classes can be instantiated via reflection
@@ -764,17 +613,11 @@ public void testReflectionRegistration() {
     Object instance = clazz.getDeclaredConstructor().newInstance();
     assertThat(instance).isNotNull();
 }
-----
+```
 
-== Related Standards
+## References
 
-* xref:cdi-aspects.adoc[CDI Development Patterns] - CDI best practices that complement reflection registration
-* xref:testing-standards.adoc[Testing Standards] - Testing reflection registration in Quarkus applications
-* xref:../documentation/general-standard.adoc[Documentation Standards] - Standards for documenting reflection requirements
-
-== External References
-
-* https://quarkus.io/guides/writing-native-applications-tips[Quarkus Native Application Tips]
-* https://quarkus.io/guides/writing-extensions[Quarkus Extension Development Guide]
-* https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/Reflection.md[GraalVM Native Image Reflection Documentation]
-* https://quarkus.io/guides/cdi-reference[Quarkus CDI Reference Guide]
+* [Quarkus Native Application Tips](https://quarkus.io/guides/writing-native-applications-tips)
+* [Quarkus Extension Development Guide](https://quarkus.io/guides/writing-extensions)
+* [GraalVM Native Image Reflection Documentation](https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/Reflection.md)
+* [Quarkus CDI Reference Guide](https://quarkus.io/guides/cdi-reference)

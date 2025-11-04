@@ -1,35 +1,33 @@
-= Integration Testing Standards for Quarkus Applications
-:toc: left
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
+# Integration Testing Standards
 
-== Purpose
+## Purpose
 
-Standards and best practices for implementing integration tests in Quarkus applications that test the complete application stack through external API interfaces. This document defines the architecture for testing containerized applications using production-like configurations.
+Standards for implementing integration tests in Quarkus applications that test the complete application stack through external API interfaces using production-like configurations.
 
-== Core Principles
+## Core Principles
 
-=== API-Only Testing
-Integration tests MUST test only through published APIs, never through internal CDI injection:
+### API-Only Testing
+
+Integration tests **MUST** test only through published APIs, never through internal CDI injection:
 
 * **No CDI Injection**: Tests must not use `@Inject` for services
 * **External Client Perspective**: Tests simulate real client interactions
 * **Protocol Compliance**: Use actual HTTP/HTTPS protocols
 * **Container Isolation**: Application runs in separate process/container
 
-=== Production Equivalence
-Integration tests MUST use production-equivalent configurations:
+### Production Equivalence
+
+Integration tests **MUST** use production-equivalent configurations:
 
 * **HTTPS Required**: All tests use TLS with proper certificates
 * **Real Networking**: Actual TCP/IP communication, not in-memory
 * **Container Runtime**: Application runs in Docker container
 * **Resource Constraints**: Same memory/CPU limits as production
 
-== Architecture Pattern
+## Test Structure
 
-=== Test Structure
+### Directory Organization
+
 ```
 src/test/java/
 └── integration/           # All integration tests here
@@ -38,26 +36,26 @@ src/test/java/
     └── *IT.java                    # Alternative naming pattern
 ```
 
-=== Maven Configuration Pattern
+### Maven Profile Configuration
 
-==== Profile-Based Configuration
-[source,xml]
-----
+**Critical**: Use profile-based configuration to avoid duplicate native builds.
+
+```xml
 <profiles>
     <profile>
         <id>integration-tests</id>
         <properties>
             <!-- Skip unit tests for integration test profile -->
             <skipITs>false</skipITs>
-            
+
             <!-- Enable native image building -->
             <quarkus.native.container-build>true</quarkus.native.container-build>
             <quarkus.native.enabled>true</quarkus.native.enabled>
-            
+
             <!-- External port from docker-compose -->
             <test.https.port>10443</test.https.port>
         </properties>
-        
+
         <build>
             <plugins>
                 <!-- Quarkus Maven Plugin for native builds -->
@@ -81,7 +79,7 @@ src/test/java/
                         </properties>
                     </configuration>
                 </plugin>
-                
+
                 <!-- Skip unit tests -->
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -89,7 +87,7 @@ src/test/java/
                         <skipTests>true</skipTests>
                     </configuration>
                 </plugin>
-                
+
                 <!-- Application lifecycle via scripts -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -101,7 +99,6 @@ src/test/java/
                             <goals><goal>exec</goal></goals>
                             <configuration>
                                 <executable>./scripts/start-integration-container.sh</executable>
-                                <workingDirectory>${project.basedir}</workingDirectory>
                             </configuration>
                         </execution>
                         <execution>
@@ -110,12 +107,11 @@ src/test/java/
                             <goals><goal>exec</goal></goals>
                             <configuration>
                                 <executable>./scripts/stop-integration-container.sh</executable>
-                                <workingDirectory>${project.basedir}</workingDirectory>
                             </configuration>
                         </execution>
                     </executions>
                 </plugin>
-                
+
                 <!-- Integration test execution -->
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
@@ -131,8 +127,6 @@ src/test/java/
                                 </includes>
                                 <systemPropertyVariables>
                                     <test.https.port>${test.https.port}</test.https.port>
-                                    <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                                    <quarkus.native.enabled>${quarkus.native.enabled}</quarkus.native.enabled>
                                 </systemPropertyVariables>
                                 <skipITs>${skipITs}</skipITs>
                             </configuration>
@@ -143,27 +137,20 @@ src/test/java/
         </build>
     </profile>
 </profiles>
-----
+```
 
-==== Maven Plugin Configuration Best Practices
+### Critical Configuration Requirements
 
-**Critical Configuration Requirements**:
+**Single Execution Pattern**: Use one execution with all goals to prevent duplicate native builds
 
-* **Single Execution**: Use one execution with all goals to prevent duplicate native builds
-* **Modern Properties**: Use `quarkus.native.enabled` instead of deprecated `quarkus.package.type`
-* **Profile Isolation**: Keep integration test configuration in dedicated profile
-* **Explicit Lifecycle**: Define execution phases and goals explicitly
-
-**Anti-Pattern Prevention**:
-[source,xml]
-----
+**Anti-Pattern** (causes duplicate builds):
+```xml
 <!-- ❌ WRONG: Causes duplicate native builds -->
 <executions>
     <execution>
         <id>default</id>
         <goals>
             <goal>generate-code</goal>
-            <goal>generate-code-tests</goal>
         </goals>
     </execution>
     <execution>
@@ -173,34 +160,15 @@ src/test/java/
         </goals>
     </execution>
 </executions>
-<configuration>
-    <properties>
-        <quarkus.package.type>native</quarkus.package.type>  <!-- DEPRECATED! -->
-    </properties>
-</configuration>
-----
+```
 
-==== Build Execution
-For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
+**Modern Properties**: Use `quarkus.native.enabled` instead of deprecated `quarkus.package.type`
 
-Integration test specific commands:
+## Base Test Class Pattern
 
-[source,bash]
-----
-# Run integration tests with native image
-./mvnw clean verify -Pintegration-tests -pl module-name
-
-# Skip integration tests (JAR build only)
-./mvnw clean package -pl module-name
-----
-
-=== Base Test Class Pattern
-[source,java]
-----
-@EnableTestLogger
+```java
 public abstract class BaseIntegrationTest {
-    
-    private static final CuiLogger log = new CuiLogger(BaseIntegrationTest.class);
+
     private static final String DEFAULT_TEST_PORT = "10443";
 
     @BeforeAll
@@ -212,15 +180,13 @@ public abstract class BaseIntegrationTest {
         // Use external port from docker-compose (10443:8443)
         String testPort = System.getProperty("test.https.port", DEFAULT_TEST_PORT);
         RestAssured.port = Integer.parseInt(testPort);
-
-        log.info("Integration tests configured for HTTPS port: {}", testPort);
     }
 }
-----
+```
 
-=== Individual Test Pattern
-[source,java]
-----
+## Individual Test Pattern
+
+```java
 /**
  * Integration tests for health check endpoints.
  * Tests verify functionality through REST API calls against external application.
@@ -248,16 +214,16 @@ class HealthCheckIntegrationTest extends BaseIntegrationTest {
                 .body("status", equalTo("UP"));
     }
 }
-----
+```
 
-== Application Configuration
+## Application Configuration
 
-=== HTTPS Configuration
-Application MUST be configured for HTTPS-only operation:
+### HTTPS Configuration
 
-[source,properties]
-----
-# application.properties - HTTPS Configuration
+Application **MUST** be configured for HTTPS-only operation:
+
+```properties
+# HTTPS Configuration
 quarkus.http.ssl-port=8443
 quarkus.http.insecure-requests=disabled
 
@@ -268,27 +234,25 @@ quarkus.http.ssl.certificate.key-files=/app/certificates/localhost.key
 # Enhanced TLS Security
 quarkus.http.ssl.cipher-suites=TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256
 quarkus.http.ssl.protocols=TLSv1.3,TLSv1.2
-----
+```
 
-=== Port Mapping Strategy
+### Port Mapping Strategy
+
 * **Internal Port**: `8443` (application listening port)
 * **External Port**: `10443` (docker-compose exposed port)
 * **Test Configuration**: Tests connect to external port `10443`
 
-== Script-Based Lifecycle Management
+## Script-Based Lifecycle Management
 
-=== Start Script Pattern
-Integration tests MUST use script-based application lifecycle:
+### Start Script Pattern
 
-[source,bash]
-----
+```bash
 #!/bin/bash
 # scripts/start-integration-container.sh
 
 set -e
 
-echo "🚀 Starting JWT Integration Tests with Docker Compose"
-echo "Project directory: ${PROJECT_DIR}"
+echo "🚀 Starting Integration Tests with Docker Compose"
 
 cd "${PROJECT_DIR}"
 
@@ -324,17 +288,11 @@ NATIVE_STARTUP=$(docker compose logs 2>/dev/null | grep "started in" | sed -n 's
 if [ ! -z "$NATIVE_STARTUP" ]; then
     echo "⚡ Native app startup: ${NATIVE_STARTUP}s (application only)"
 fi
+```
 
-# Show actual image size
-IMAGE_SIZE=$(docker images --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}" | grep integration-tests | awk '{print $2}' | head -1)
-if [ ! -z "$IMAGE_SIZE" ]; then
-    echo "📦 Image size: ${IMAGE_SIZE} (distroless native)"
-fi
-----
+### Stop Script Pattern
 
-=== Stop Script Pattern
-[source,bash]
-----
+```bash
 #!/bin/bash
 # scripts/stop-integration-container.sh
 
@@ -348,12 +306,6 @@ cd "${PROJECT_DIR}"
 echo "📦 Stopping Docker containers..."
 docker compose down
 
-# Optional: Clean up images and volumes
-if [ "$1" = "--clean" ]; then
-    echo "🧹 Cleaning up Docker images and volumes..."
-    docker compose down --volumes --rmi all
-fi
-
 echo "✅ Integration Tests stopped successfully"
 
 # Show final status
@@ -363,26 +315,25 @@ if docker compose ps | grep -q "Up"; then
 else
     echo "✅ All containers are stopped"
 fi
-----
+```
 
-== Docker Compose Integration
+## Docker Compose Integration
 
-=== Container Configuration
-[source,yaml]
-----
-# docker-compose.yml
+### Container Configuration
+
+```yaml
 services:
   app-integration-tests:
     build:
       context: .
       dockerfile: src/main/docker/Dockerfile.native
-    
+
     ports:
       - "10443:8443"  # External:Internal port mapping
-    
+
     volumes:
       - ./src/main/docker/certificates:/app/certificates:ro
-    
+
     # OWASP Security hardening
     security_opt:
       - no-new-privileges:true
@@ -391,25 +342,27 @@ services:
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=100m
-    
+
     healthcheck:
       test: ["CMD", "/app/health-check.sh"]
       interval: 30s
       timeout: 10s
       retries: 3
-----
+```
 
-=== Certificate Management
-Certificates MUST be mounted as read-only volumes:
+### Certificate Management
+
+Certificates **MUST** be mounted as read-only volumes:
 
 * **Host Path**: `./src/main/docker/certificates/`
 * **Container Path**: `/app/certificates/`
 * **Permissions**: Read-only mount (`:ro`)
 * **Files**: `localhost.crt` and `localhost.key`
 
-== Test Execution Phases
+## Test Execution Phases
 
-=== Maven Lifecycle Integration
+### Maven Lifecycle Integration
+
 ```
 1. compile          → Build application
 2. test-compile     → Compile integration tests
@@ -421,27 +374,21 @@ Certificates MUST be mounted as read-only volumes:
 8. verify           → Check test results
 ```
 
-=== Build Command
-For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
+### Build Commands
 
-Integration test execution:
-
-[source,bash]
-----
+```bash
 # Run integration tests
-./mvnw verify -pl integration-test-module
+./mvnw verify -Pintegration-tests -pl integration-test-module
 
-# Skip integration tests  
+# Skip integration tests
 ./mvnw package -pl integration-test-module
-----
+```
 
-NOTE: For standardized build verification processes, see xref:../process/task-completion-standards.adoc[Task Completion Standards].
+## Testing Patterns
 
-== Testing Patterns
+### Health Check Testing
 
-=== Health Check Testing
-[source,java]
-----
+```java
 @Test
 void shouldProvideComprehensiveHealthCheck() {
     given()
@@ -452,11 +399,11 @@ void shouldProvideComprehensiveHealthCheck() {
             .body("status", equalTo("UP"))
             .body("checks", notNullValue());
 }
-----
+```
 
-=== Metrics Testing
-[source,java]
-----
+### Metrics Testing
+
+```java
 @Test
 void shouldExposePrometheusMetrics() {
     given()
@@ -468,11 +415,11 @@ void shouldExposePrometheusMetrics() {
             .body(containsString("# HELP"))
             .body(containsString("# TYPE"));
 }
-----
+```
 
-=== API Endpoint Testing
-[source,java]
-----
+### API Endpoint Testing
+
+```java
 @Test
 void shouldHandleValidRequest() {
     given()
@@ -489,25 +436,28 @@ void shouldHandleValidRequest() {
             .body("id", notNullValue())
             .body("status", equalTo("created"));
 }
-----
+```
 
-== Security Considerations
+## Security Considerations
 
-=== HTTPS Requirements
+### HTTPS Requirements
+
 * **Self-Signed Certificates**: Acceptable for integration tests
 * **Certificate Validation**: Use `RestAssured.useRelaxedHTTPSValidation()`
 * **TLS Versions**: Support TLS 1.2 and 1.3
 * **Cipher Suites**: Use strong cipher suites only
 
-=== Container Security
+### Container Security
+
 * **Non-Root Execution**: Application runs as `nonroot` user
 * **Read-Only Filesystem**: Root filesystem mounted read-only
 * **Capability Dropping**: All capabilities dropped except required
 * **Resource Limits**: Memory and CPU constraints applied
 
-== Anti-Patterns
+## Anti-Patterns
 
-=== Forbidden Practices
+### Forbidden Practices
+
 * ❌ **CDI Injection in Tests**: Never use `@Inject` in integration tests
 * ❌ **@QuarkusTest Usage**: Use for unit tests only, not integration tests
 * ❌ **HTTP in Production**: All integration tests must use HTTPS
@@ -515,9 +465,9 @@ void shouldHandleValidRequest() {
 * ❌ **Hardcoded Ports**: Always use configurable port properties
 * ❌ **Duplicate Maven Executions**: Multiple executions cause duplicate native builds
 * ❌ **Deprecated Properties**: Using `quarkus.package.type` instead of modern alternatives
-* ❌ **Shell Form Commands**: Use exec form for Dockerfile CMD/ENTRYPOINT instructions
 
-=== Legacy Pattern Migration
+### Legacy Pattern Migration
+
 When converting from embedded to external testing:
 
 1. **Remove Test Annotations**: Delete `@QuarkusTest`, `@QuarkusIntegrationTest`
@@ -526,11 +476,10 @@ When converting from embedded to external testing:
 4. **Configure HTTPS**: Update base URL and SSL handling
 5. **Update Maven**: Configure script-based lifecycle
 
-== Troubleshooting
+## Troubleshooting
 
-=== Common Issues
+### Container Won't Start
 
-==== Container Won't Start
 ```bash
 # Check logs
 docker compose logs
@@ -542,7 +491,8 @@ ls -la src/main/docker/certificates/
 openssl x509 -in src/main/docker/certificates/localhost.crt -text -noout
 ```
 
-==== Connection Refused
+### Connection Refused
+
 ```bash
 # Check port mapping
 docker compose ps
@@ -554,7 +504,8 @@ docker compose exec app netstat -tlnp | grep 8443
 docker compose exec app curl -k https://localhost:8443/q/health
 ```
 
-==== SSL Certificate Errors
+### SSL Certificate Errors
+
 ```bash
 # Regenerate certificates
 cd src/main/docker/certificates
@@ -564,35 +515,24 @@ cd src/main/docker/certificates
 openssl verify -CAfile localhost.crt localhost.crt
 ```
 
-=== Debug Configuration
-[source,properties]
-----
-# Enable debug logging for integration tests
-quarkus.log.category."de.cuioss".level=DEBUG
-quarkus.log.category."io.quarkus.http".level=DEBUG
-----
+## Performance Considerations
 
-== Performance Considerations
+### Native Image Benefits
 
-=== Native Image Benefits
 * **Startup Time**: 0.15s cold start (application only), 1-2s total (container + application)
 * **Memory Usage**: <150MB runtime memory
 * **Container Size**: ~93MB with distroless base
 * **Build Time**: 1.5 minutes optimized (single build), ~3 minutes unoptimized (duplicate builds)
 
-=== Test Execution Optimization
+### Test Execution Optimization
+
 * **Parallel Execution**: Configure failsafe for parallel test execution
 * **Container Reuse**: Keep container running for multiple test classes
 * **Image Caching**: Use Docker layer caching for faster builds
 
-== Related Standards
-* xref:testing-standards.adoc[General Testing Standards]
-* xref:container-standards.adoc[Container Standards]
-* xref:security-standards.adoc[Security Standards]
-* link:../testing/core-standards.adoc[CUI Testing Standards Overview]
+## References
 
-== External References
-* https://quarkus.io/guides/getting-started-testing[Quarkus Testing Guide]
-* https://rest-assured.io/[REST Assured Documentation]
-* https://maven.apache.org/surefire/maven-failsafe-plugin/[Maven Failsafe Plugin]
-* https://docs.docker.com/compose/[Docker Compose Documentation]
+* [Quarkus Testing Guide](https://quarkus.io/guides/getting-started-testing)
+* [REST Assured Documentation](https://rest-assured.io/)
+* [Maven Failsafe Plugin](https://maven.apache.org/surefire/maven-failsafe-plugin/)
+* [Docker Compose Documentation](https://docs.docker.com/compose/)

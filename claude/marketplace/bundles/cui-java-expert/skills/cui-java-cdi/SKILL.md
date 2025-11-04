@@ -33,14 +33,29 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
 
 2. **Conditional loading based on context**:
 
-   - If writing CDI tests or integration tests:
+   - If writing CDI unit tests:
      ```
      Read: standards/cdi-testing.md
      ```
 
-   - If working with Quarkus native compilation:
+   - If writing integration tests or setting up integration test infrastructure:
+     ```
+     Read: standards/integration-testing.md
+     ```
+
+   - If working with reflection registration patterns and native image requirements:
+     ```
+     Read: standards/quarkus-reflection.md
+     ```
+
+   - If performing native optimization or systematic reflection optimization:
      ```
      Read: standards/quarkus-native.md
+     ```
+
+   - If implementing security features or security testing:
+     ```
+     Read: standards/cdi-security.md
      ```
 
 3. **Extract key requirements from all loaded standards**
@@ -77,11 +92,26 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
    - Verify test profiles and configuration overrides
    - Validate test resource configuration
 
-5. **Native Optimization** (if native context):
+5. **Integration Testing Setup** (if integration test context):
+   - Verify script-based lifecycle management (start/stop scripts)
+   - Check Maven profile configuration for native builds
+   - Review Docker Compose configuration
+   - Validate HTTPS and certificate setup
+   - Ensure API-only testing (no CDI injection in integration tests)
+
+6. **Native Optimization** (if native context):
    - Analyze reflection registration patterns
    - Review `@RegisterForReflection` annotations
-   - Check deployment processor configurations
+   - Check deployment processor configurations (ReflectiveClassBuildItem)
+   - Verify AdditionalBeanBuildItem usage for CDI beans
    - Identify optimization opportunities
+
+7. **Security Configuration** (if security context):
+   - Verify secure dependency injection patterns
+   - Check security configuration validation at startup
+   - Review secure logging practices (no sensitive data logging)
+   - Validate security testing coverage
+   - Ensure runtime security hardening (OWASP compliance)
 
 ### Step 4: Apply CDI Standards to Development Task
 
@@ -116,14 +146,32 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
 5. **Testing Practices** (if testing context):
    - Configure JaCoCo for Quarkus correctly
    - Use `@QuarkusTest` for CDI injection tests
-   - Use `@QuarkusIntegrationTest` for packaged app tests
    - Ensure `@{argLine}` in Surefire configuration
+   - Implement test profiles for different scenarios
 
-6. **Native Optimization** (if native context):
+6. **Integration Testing Setup** (if integration test context):
+   - Configure Maven profile with single execution (avoid duplicate builds)
+   - Implement script-based lifecycle (start/stop containers)
+   - Use API-only testing with RestAssured (no `@Inject`)
+   - Configure HTTPS with self-signed certificates
+   - Set up external port mapping (10443:8443)
+   - Ensure production-equivalent Docker Compose configuration
+
+7. **Native Optimization** (if native context):
+   - Use `@RegisterForReflection` for application-level classes
+   - Use `ReflectiveClassBuildItem` for infrastructure classes
+   - Use `AdditionalBeanBuildItem` for CDI beans (not reflection)
    - Minimize reflection scope to actual needs
-   - Split deployment processor by reflection requirements
    - Use type-safe class references (not strings)
-   - Remove duplicate annotations after deployment processor registration
+   - Avoid double registration (annotation + build step)
+
+8. **Security Implementation** (if security context):
+   - Implement secure configuration validation at startup
+   - Use constructor injection for security dependencies
+   - Implement secure logging (mask sensitive data)
+   - Add security unit and integration tests
+   - Validate HTTPS-only enforcement
+   - Configure runtime security hardening
 
 ### Step 5: Verify Implementation Quality
 
@@ -144,19 +192,37 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
    - [ ] Test profiles configured correctly
    - [ ] All CDI components tested
 
-3. **Container Verification** (if container context):
+3. **Integration Testing Verification** (if integration test context):
+   - [ ] Maven profile configured with single execution
+   - [ ] Script-based lifecycle scripts exist and work
+   - [ ] Docker Compose uses production-equivalent configuration
+   - [ ] Tests use API-only approach (no CDI injection)
+   - [ ] HTTPS configured with certificates
+   - [ ] Port mapping correct (external 10443, internal 8443)
+
+4. **Container Verification** (if container context):
    - [ ] Distroless base image used
    - [ ] Security hardening applied
    - [ ] Health checks implemented correctly
    - [ ] Certificates configured with proper permissions
 
-4. **Native Optimization Verification** (if native context):
-   - [ ] Reflection registration optimized
+5. **Native Optimization Verification** (if native context):
+   - [ ] Reflection registration optimized and selective
+   - [ ] No double registration (annotation + build step)
+   - [ ] CDI beans use AdditionalBeanBuildItem
+   - [ ] Type-safe class references used
    - [ ] Native compilation succeeds
    - [ ] Tests pass in native mode
    - [ ] Performance metrics maintained or improved
 
-5. **Compilation and Build**:
+6. **Security Verification** (if security context):
+   - [ ] Secure configuration validation at startup
+   - [ ] No sensitive data logged
+   - [ ] Security tests implemented with 100% coverage
+   - [ ] HTTPS-only enforcement verified
+   - [ ] Runtime security hardening applied
+
+7. **Compilation and Build**:
    ```
    # Compile the module
    Task:
@@ -211,7 +277,7 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
        CRITICAL: Wait for completion. Ensure all tests and quality checks pass.
    ```
 
-6. **Native Build** (if native context):
+8. **Native Build** (if native context):
    ```
    # Native compilation
    Task:
@@ -228,7 +294,7 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
        Record build time and executable size.
    ```
 
-### Step 5: Document Changes and Commit
+### Step 6: Document Changes and Commit
 
 **When to Execute**: After verification passes
 
@@ -248,9 +314,12 @@ The cui-java-core skill provides essential foundational patterns that CDI builds
 
 For detailed CDI patterns and troubleshooting, see the loaded standards files:
 - **CDI Patterns**: Constructor injection, optional dependencies, producer methods - see `standards/cdi-aspects.md`
-- **Common Issues**: Resolution exceptions, testing problems, native compilation - see `standards/cdi-aspects.md` and `standards/cdi-testing.md`
-- **Container Configuration**: DevUI, health checks - see `standards/cdi-container.md`
-- **Native Optimization**: Reflection configuration, build settings - see `standards/quarkus-native.md`
+- **CDI Testing**: JaCoCo configuration, test profiles, coverage requirements - see `standards/cdi-testing.md`
+- **Integration Testing**: API-only testing, script-based lifecycle, Maven profiles - see `standards/integration-testing.md`
+- **Container Configuration**: Docker, health checks, certificates, OWASP security - see `standards/cdi-container.md`
+- **Reflection Standards**: Registration patterns, AdditionalBeanBuildItem, auto-registration - see `standards/quarkus-reflection.md`
+- **Native Optimization Process**: Systematic optimization workflow, phases, verification - see `standards/quarkus-native.md`
+- **Security Patterns**: Secure configuration, secure logging, security testing - see `standards/cdi-security.md`
 
 ## Quality Verification
 
@@ -260,13 +329,38 @@ All changes must pass:
 - [x] Proper CDI scopes applied
 - [x] Producer methods follow scope rules
 - [x] Tests pass with coverage collected
+- [x] Integration tests use API-only approach (if applicable)
+- [x] Reflection registration optimized (if applicable)
+- [x] Security validation at startup (if applicable)
+- [x] No sensitive data logged (always)
 - [x] Quality checks pass (`-Ppre-commit`)
 - [x] Native compilation succeeds (if applicable)
 
 ## References
 
+### Core CDI and Quarkus
 * CDI 2.0 Specification: https://docs.oracle.com/javaee/7/tutorial/cdi-basic.htm
 * Quarkus CDI Guide: https://quarkus.io/guides/cdi
+* Quarkus CDI Reference: https://quarkus.io/guides/cdi-reference
+
+### Testing
 * Quarkus Testing Guide: https://quarkus.io/guides/getting-started-testing
-* Docker Security Best Practices: https://docs.docker.com/develop/security-best-practices/
+* JUnit 5 User Guide: https://junit.org/junit5/docs/current/user-guide/
+* REST Assured Documentation: https://rest-assured.io/
+* Maven Failsafe Plugin: https://maven.apache.org/surefire/maven-failsafe-plugin/
+* JaCoCo Documentation: https://www.jacoco.org/jacoco/trunk/doc/
+
+### Native Compilation
 * Quarkus Native Guide: https://quarkus.io/guides/writing-native-applications-tips
+* Quarkus Extension Development: https://quarkus.io/guides/writing-extensions
+* GraalVM Native Image Reflection: https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/Reflection.md
+
+### Container Security
+* Docker Security Best Practices: https://docs.docker.com/develop/security-best-practices/
+* OWASP Docker Top 10: https://owasp.org/www-project-docker-top-10/
+* NIST Container Security Guide: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf
+* CIS Docker Benchmark: https://www.cisecurity.org/benchmark/docker
+
+### Application Security
+* OWASP Top 10: https://owasp.org/www-project-top-ten/
+* Quarkus Security Guide: https://quarkus.io/guides/security
