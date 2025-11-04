@@ -292,21 +292,27 @@ PR Quality:
     └─> Task(java-coverage-reporter) [analyzes existing reports]
   ```
 
-- [ ] Remove Task from `cui-log-record-documenter` - make focused (just documents LogRecords, no verification)
+- [ ] Remove Task from `cui-log-record-documenter` - make focused (just updates AsciiDoc, no verification)
   ```
   BEFORE:
   cui-log-record-documenter [agent]
     tools: Read, Edit, Write, Grep, Glob, Task
-    ├─> Documents LogRecord classes
+    ├─> Updates LogMessages.adoc documentation
     └─> Task(maven-builder) for verification ❌
 
   AFTER:
   cui-log-record-documenter [agent]
     tools: Read, Edit, Write, Grep, Glob
-    └─> Documents LogRecord classes ONLY (no verification)
+    └─> Updates LogMessages.adoc documentation ONLY (no verification)
+
+  WHAT IT DOES:
+  - Reads LogMessages Java class to extract LogRecord definitions
+  - Updates corresponding LogMessages.adoc file (AsciiDoc format)
+  - Synchronizes documentation with code (identifier, level, message)
+  - Does NOT touch JavaDoc comments in Java files
   ```
 
-- [ ] Update `/cui-log-record-enforcer` command: orchestrate Task(cui-log-record-documenter) + Task(maven-builder)
+- [ ] Update `/cui-log-record-enforcer` command: orchestrate multiple agents for complete workflow
   ```
   BEFORE:
   /cui-log-record-enforcer
@@ -314,11 +320,19 @@ PR Quality:
          └─> documents + verifies internally ❌
 
   AFTER:
-  /cui-log-record-enforcer
-    ├─> Task(cui-log-record-documenter) [focused: just documents]
-    ├─> Task(maven-builder) [focused: just verifies JavaDoc]
-    ├─> Analyze output in command
-    └─> Iterate if JavaDoc errors found
+  /cui-log-record-enforcer (orchestrates complete logging enforcement)
+    ├─> Task(maven-builder) [pre-check: verify build before starting]
+    ├─> Analyze logging violations (Grep for LOGGER statements)
+    ├─> Task(java-code-implementer) [fix logging violations]
+    ├─> Task(java-junit-implementer) [add LogAssert tests for coverage]
+    ├─> Task(maven-builder) [verify: compilation + tests pass]
+    ├─> Task(java-code-implementer) [renumber identifiers if needed]
+    ├─> Task(cui-log-record-documenter) [update LogMessages.adoc documentation]
+    ├─> Task(maven-builder) [final verification: compilation + tests]
+    └─> Report compliance status
+
+  NOTE: maven-builder verifies compilation + tests, NOT JavaDoc
+        cui-log-record-documenter updates AsciiDoc files, NOT JavaDoc
   ```
 
 ### cui-workflow
