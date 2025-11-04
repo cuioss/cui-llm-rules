@@ -158,10 +158,16 @@ Bundles must maintain clean architecture across all components.
 
 **Examples**:
 
+✅ GOOD BUNDLE (cui-workflow):
+- commit-changes (agent) → git commit utility for workflow
+- task-executor (agent) → executes implementation tasks
+- pr-quality-fixer (agent) → fixes quality issues
+- High cohesion: all agents work together in development cycle
+
 ✅ GOOD BUNDLE (cui-utility-commands):
-- commit-changes (agent) → standalone git commit utility
 - research-best-practices (agent) → standalone research utility
 - cui-diagnostic-patterns (skill) → self-contained diagnostic standards
+- cui-setup-project-permissions (command) → standalone utility
 
 ✅ GOOD BUNDLE (cui-documentation-standards):
 - asciidoc-reviewer (agent) → uses Skill: cui-documentation

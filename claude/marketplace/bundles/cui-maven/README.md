@@ -396,7 +396,7 @@ For issues, questions, or contributions:
 
 ## Related Bundles
 
-- **cui-utility-commands**: General utility commands including git commit management
+- **cui-utility-commands**: General utility commands and research capabilities
 - **cui-java-expert**: Java development standards bundle (maven-project-builder uses cui-javadoc skill for JavaDoc validation)
 
 ## Acknowledgments

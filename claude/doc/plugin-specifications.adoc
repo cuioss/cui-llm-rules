@@ -82,22 +82,22 @@ claude/marketplace/
 
 ```json
 {
-  "name": "cui-utility-commands",
+  "name": "cui-workflow",
   "version": "1.0.0",
-  "description": "Standalone utility tools including git commit management",
+  "description": "Complete development workflow from issue implementation to PR review",
   "author": {"name": "CUI Team"},
   "agents": [
     "./agents/commit-changes.md",
-    "./agents/research-best-practices.md"
+    "./agents/task-reviewer.md",
+    "./agents/task-executor.md",
+    "./agents/pr-review-responder.md",
+    "./agents/pr-quality-fixer.md"
   ],
   "commands": [
-    "./commands/cui-setup-project-permissions.md",
-    "./commands/cui-manage-web-permissions.md"
+    "./commands/cui-implement-task.md",
+    "./commands/cui-handle-pull-request.md"
   ],
-  "skills": [
-    "./skills/cui-diagnostic-patterns",
-    "./skills/permission-management"
-  ]
+  "skills": []
 }
 ```
 

@@ -9,8 +9,9 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["workflow", "issue", "pull-request", "pr", "task", "implementation", "review", "quality"],
+  "keywords": ["workflow", "issue", "pull-request", "pr", "task", "implementation", "review", "quality", "commit", "git"],
   "agents": [
+    "./agents/commit-changes.md",
     "./agents/task-reviewer.md",
     "./agents/task-breakdown-agent.md",
     "./agents/task-executor.md",

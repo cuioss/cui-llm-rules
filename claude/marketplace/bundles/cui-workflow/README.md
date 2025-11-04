@@ -13,24 +13,34 @@ By combining these workflows, developers get a seamless experience from task ass
 
 ## Components Included
 
-### Agents (5 agents)
+### Agents (6 agents)
+
+#### Core Workflow Agent
+
+1. **commit-changes** - Git commit management with proper formatting
+   - Commits repository changes with conventional commit format
+   - Cleans build artifacts before committing (*.class, *.temp, *.backup*)
+   - Auto-generates or accepts custom commit messages
+   - Follows Git Commit Standards (feat, fix, docs, etc.)
+   - Optional push and PR creation capabilities
+   - Adds Claude Code co-authorship attribution
 
 #### Issue Implementation Agents
 
-1. **task-reviewer** - Reviews task plans and provides feedback on clarity and completeness
+2. **task-reviewer** - Reviews task plans and provides feedback on clarity and completeness
    - Validates acceptance criteria
    - Verifies implementation steps are specific
    - Identifies missing technical details
    - Suggests improvements
 
-2. **task-breakdown-agent** - Breaks down complex issues into structured, actionable task plans
+3. **task-breakdown-agent** - Breaks down complex issues into structured, actionable task plans
    - Analyzes requirements and specifications
    - Researches relevant best practices
    - Creates numbered tasks with acceptance criteria
    - Defines clear implementation steps
    - Identifies dependencies and risks
 
-3. **task-executor** - Executes task plan steps sequentially with build verification
+4. **task-executor** - Executes task plan steps sequentially with build verification
    - Reads and parses task plans
    - Executes checklist items sequentially
    - Runs build verification when required
@@ -39,7 +49,7 @@ By combining these workflows, developers get a seamless experience from task ass
 
 #### PR Workflow Agents
 
-4. **pr-review-responder** - Analyzes PR review comments and implements requested changes
+5. **pr-review-responder** - Analyzes PR review comments and implements requested changes
    - Reads specific review comment context
    - Understands reviewer concerns
    - Implements requested improvements
@@ -47,7 +57,7 @@ By combining these workflows, developers get a seamless experience from task ass
    - Verifies build passes
    - Prepares response comments
 
-5. **pr-quality-fixer** - Automatically fixes common quality issues
+6. **pr-quality-fixer** - Automatically fixes common quality issues
    - Runs Maven build with quality checks
    - Identifies formatting violations
    - Improves test coverage for critical paths
@@ -167,7 +177,7 @@ Fix all quality issues before requesting code review.
 
 ### Inter-Bundle Dependencies
 - **cui-maven** (required) - Agents use maven-project-builder for build verification
-- **cui-utility-commands** (required) - Agents use commit-changes agent for commits and research-best-practices for best practices research
+- **cui-utility-commands** (recommended) - Agents may invoke research-best-practices for industry best practices research
 
 ### External Dependencies
 - Requires GitHub CLI (`gh`) for issue and PR operations when working with GitHub
@@ -222,13 +232,13 @@ Use pr-quality-fixer to resolve any quality issues identified during review.
 This workflow bundle depends on and complements other CUI bundles:
 
 - **cui-maven** - For Maven build and quality verification
-- **cui-utility-commands** - For git commit management and research capabilities
+- **cui-utility-commands** - For research capabilities (research-best-practices agent)
 - **cui-java-expert** - For Java development standards and expertise
 - **cui-documentation-standards** - For documentation quality standards
 
 ## Bundle Statistics
 
-- **Total Agents**: 5 (3 issue implementation + 2 PR workflow)
+- **Total Agents**: 6 (1 core + 3 issue implementation + 2 PR workflow)
 - **Total Commands**: 2 (1 issue implementation + 1 PR workflow)
 - **Total Skills**: 0 (uses skills from other bundles)
 
