@@ -4,11 +4,11 @@ Comprehensive Java development expertise bundle aggregating core Java patterns, 
 
 ## Purpose
 
-This bundle provides a complete Java development knowledge base by aggregating three foundational Java skills into a single, cohesive package. It serves as the primary resource for AI assistants working with Java code in CUI projects, ensuring consistent application of standards, patterns, and best practices across all Java development tasks.
+This bundle provides a complete Java development knowledge base by aggregating four foundational Java skills into a single, cohesive package. It serves as the primary resource for AI assistants working with Java code in CUI projects, ensuring consistent application of standards, patterns, and best practices across all Java development tasks.
 
 ## Components Included
 
-### Skills (3 skills)
+### Skills (4 skills)
 
 1. **cui-java-core** - Core Java development standards
    - Coding patterns and best practices
@@ -31,6 +31,12 @@ This bundle provides a complete Java development knowledge base by aggregating t
    - Value object testing patterns
    - Assertion strategies
    - Test organization and naming
+
+4. **cui-javadoc** - JavaDoc documentation standards
+   - JavaDoc best practices and validation
+   - Documentation requirements
+   - Code example standards
+   - JavaDoc maintenance patterns
 
 ### Agents (4 agents)
 
@@ -148,6 +154,20 @@ Designed specifically for AI assistants:
 
 **Standards Files**: 6 documents covering JUnit core, generators, value objects, MockWebServer, integration testing, and JUL logger testing
 
+### cui-javadoc
+
+**Focus**: JavaDoc documentation standards and validation for Java code
+
+**Key Topics**:
+- JavaDoc best practices and formatting
+- Documentation requirements for classes, methods, and fields
+- Code examples in JavaDoc
+- JavaDoc validation and quality checks
+- Documentation maintenance patterns
+- Integration with build systems
+
+**Standards Files**: 4 documents covering JavaDoc standards, code examples, validation, and maintenance
+
 ## Usage Examples
 
 ### Core Java Development
@@ -236,12 +256,12 @@ This Java expertise bundle complements other CUI bundles:
 
 ## Bundle Statistics
 
-- **Total Skills**: 3
+- **Total Skills**: 4
 - **Total Agents**: 4
 - **Total Commands**: 2
-- **Total Standards Files**: 19
-- **Total Lines of Documentation**: ~5,800
-- **Quality Score**: 91.6/100 average
+- **Total Standards Files**: 23
+- **Total Lines of Documentation**: ~6,800
+- **Quality Score**: 92.5/100 average
 - **Status**: Production Ready ✅
 
 ## Maintenance

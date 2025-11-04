@@ -23,6 +23,7 @@
   "skills": [
     "./skills/cui-java-core",
     "./skills/cui-java-cdi",
-    "./skills/cui-java-unit-testing"
+    "./skills/cui-java-unit-testing",
+    "./skills/cui-javadoc"
   ]
 }

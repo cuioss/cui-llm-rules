@@ -398,7 +398,7 @@ For issues, questions, or contributions:
 
 - **cui-project-quality-gates**: Project-wide quality enforcement (now focuses on non-Maven quality aspects)
 - **cui-utility-commands**: General utility commands (now focuses on non-Maven utilities)
-- **cui-javadoc**: JavaDoc standards used by maven-project-builder agent
+- **cui-java-expert**: Java development standards bundle (maven-project-builder uses cui-javadoc skill for JavaDoc validation)
 
 ## Acknowledgments
 

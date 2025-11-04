@@ -70,14 +70,14 @@ Given a task plan file (e.g., `http-client-plan/plan-http-client-extension.md`),
   - Provides: Test patterns, coverage requirements, generator usage
   - When activated: Before implementing unit tests
 
-- **cui-javadoc**: JavaDoc documentation standards
+- **cui-java-expert:cui-javadoc**: JavaDoc documentation standards
   - Provides: Documentation requirements for public APIs
   - When activated: Before documenting classes and methods
 
 ## ESSENTIAL RULES
 
 ### CUI Standards
-**From skills** (cui-java-core, cui-java-unit-testing, cui-javadoc):
+**From skills** (cui-java-core, cui-java-unit-testing, cui-java-expert:cui-javadoc):
 - Maven: Use `./mvnw` (NOT mvn), pre-commit: `-Ppre-commit clean verify`
 - Testing: JUnit 5 only (NO Mockito/Hamcrest), 80% coverage (100% critical paths)
 - Logging: CuiLogger only (NOT slf4j/System.out)
@@ -139,7 +139,7 @@ Skill: cui-java-unit-testing
 **When task involves JavaDoc:**
 
 ```
-Skill: cui-javadoc
+Skill: cui-java-expert:cui-javadoc
 ```
 
 **Note:** Skills provide comprehensive standards. Invoke them before implementation to ensure compliance.
@@ -296,7 +296,7 @@ For EACH criterion:
 **Code Quality:**
 - Invoke appropriate skills before implementation
 - Follow CUI standards defined in Essential Rules section (see above)
-- Refer to skills for complete guidance: cui-java-core, cui-java-unit-testing, cui-javadoc
+- Refer to skills for complete guidance: cui-java-core, cui-java-unit-testing, cui-java-expert:cui-javadoc
 
 **Build/Commit:**
 - Verify build passes before commit

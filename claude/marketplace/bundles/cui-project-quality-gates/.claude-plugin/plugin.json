@@ -12,8 +12,5 @@
   "keywords": ["maven", "build", "commit", "quality", "verification"],
   "agents": [
     "./agents/commit-changes.md"
-  ],
-  "skills": [
-    "./skills/cui-javadoc"
   ]
 }

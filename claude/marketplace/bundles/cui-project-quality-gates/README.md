@@ -2,9 +2,11 @@
 
 ## Purpose
 
-Change management infrastructure for CUI projects. This bundle provides essential tools for streamlined git commit workflows and JavaDoc documentation standards.
+Change management infrastructure for CUI projects. This bundle provides essential tools for streamlined git commit workflows.
 
 > **Note**: Maven build verification has been moved to the **cui-maven** bundle. Use that bundle for Maven-related build and verification tasks.
+>
+> **Note**: JavaDoc standards have been moved to the **cui-java-expert** bundle as part of comprehensive Java development expertise.
 
 ## Components Included
 
@@ -12,9 +14,6 @@ This bundle includes the following components:
 
 ### Agents
 - **commit-changes** - Manages git staging and commits with proper formatting
-
-### Skills
-- **cui-javadoc** - JavaDoc standards and validation
 
 ## Installation Instructions
 
@@ -70,5 +69,5 @@ Typical workflow combining agents from cui-maven and cui-project-quality-gates b
 This bundle is commonly used by:
 - **cui-issue-implementation** - Task executor uses commit-changes for git operations
 - **cui-pull-request-workflow** - PR workflow uses commit-changes for git operations
-- **cui-maven** - Maven agents use cui-javadoc skill for JavaDoc validation
-- Various commands that need commit operations or JavaDoc standards
+- **cui-maven** - Maven agents use commit-changes for git operations
+- Various commands that need commit operations

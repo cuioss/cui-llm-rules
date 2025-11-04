@@ -21,7 +21,7 @@ Delegate Maven build execution to the maven-builder agent, analyze all errors an
   - Loads: pom-maintenance.md, maven-integration.md
   - When activated: At workflow start (Step 0) to load Maven standards before build execution
 
-- **cui-javadoc**: JavaDoc documentation standards
+- **cui-java-expert:cui-javadoc**: JavaDoc documentation standards
   - Provides: Package documentation requirements, class/interface documentation rules, method documentation standards, field documentation guidelines, mandatory fix rules
   - Loads: javadoc-standards.adoc, javadoc-maintenance.adoc
   - When activated: At workflow start (Step 0) to load JavaDoc standards before analyzing build output
@@ -35,10 +35,10 @@ Delegate Maven build execution to the maven-builder agent, analyze all errors an
 Invocation:
 ```
 Skill: cui-maven-rules
-Skill: cui-javadoc
+Skill: cui-java-expert:cui-javadoc
 ```
 
-**Purpose**: The cui-maven-rules skill provides authoritative Maven build standards, quality gate criteria, and issue handling procedures. The cui-javadoc skill provides JavaDoc standards for mandatory JavaDoc warning fixes. Together they ensure all fixes comply with CUI standards.
+**Purpose**: The cui-maven-rules skill provides authoritative Maven build standards, quality gate criteria, and issue handling procedures. The cui-java-expert:cui-javadoc skill provides JavaDoc standards for mandatory JavaDoc warning fixes. Together they ensure all fixes comply with CUI standards.
 
 **Timing**: Execute both skills once at the start, before Step 1.
 
@@ -102,7 +102,7 @@ Thoroughly analyze the errors and warnings returned by maven-builder for:
 - **NEVER ask to ignore JavaDoc warnings**
 - **NEVER add JavaDoc warnings to acceptable warnings**
 - **ALWAYS fix JavaDoc warnings immediately**
-- **Use cui-javadoc skill standards** for all JavaDoc fixes
+- **Use cui-java-expert:cui-javadoc skill standards** for all JavaDoc fixes
 
 Only ignore warnings that are explicitly in the "Acceptable Warnings" list from `.claude/run-configuration.md`
 
@@ -152,7 +152,7 @@ OpenRewrite markers are embedded in source code, NOT in Maven console output. Yo
 
 For each warning NOT in the "Acceptable Warnings" list:
 1. **DEFAULT ACTION: FIX THE WARNING** - warnings should be fixed, not ignored
-2. **EXCEPTION FOR JAVADOC**: JavaDoc warnings are NEVER negotiable - fix them immediately using cui-javadoc skill standards
+2. **EXCEPTION FOR JAVADOC**: JavaDoc warnings are NEVER negotiable - fix them immediately using cui-java-expert:cui-javadoc skill standards
 3. Only for non-JavaDoc warnings: If the warning is infrastructure-related, **ASK USER** whether to ignore it. Infrastructure warnings are: dependency version conflicts from transitive dependencies beyond project control, plugin compatibility warnings for versions locked by parent POM, or platform-specific warnings (OS, JVM version) not addressable in project code
 4. If user agrees to ignore it, add it to the "Acceptable Warnings" section in `.claude/run-configuration.md`
 5. Document the warning pattern clearly so it can be recognized in future runs
@@ -195,7 +195,7 @@ Once the build completes successfully with no changes needed:
 **Markers - Auto:** Suppress LogRecord/Exception warnings (NO user prompt)
 **Markers - Ask:** Other types require user approval
 **Markers - Verify:** Re-run build after fixes (via maven-builder), report if persist after 3 iterations
-**JavaDoc:** ALWAYS FIX (NO exceptions, NO ignoring, NO adding to acceptable list), use cui-javadoc skill
+**JavaDoc:** ALWAYS FIX (NO exceptions, NO ignoring, NO adding to acceptable list), use cui-java-expert:cui-javadoc skill
 **Warnings:** DEFAULT FIX ALL (only ask for non-critical infrastructure warnings)
 **Duration Tracking:** Handled by maven-builder automatically (updates if change >10%)
 **Acceptable Warnings:** Managed in `.claude/run-configuration.md` (read/write by maven-builder)
