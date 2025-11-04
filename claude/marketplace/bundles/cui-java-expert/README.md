@@ -32,6 +32,18 @@ This bundle provides a complete Java development knowledge base by aggregating t
    - Assertion strategies
    - Test organization and naming
 
+### Agents (4 agents)
+
+1. **java-code-implementer** - Implements Java code following CUI standards with build verification
+2. **java-junit-implementer** - Implements JUnit tests with full standards compliance and build validation
+3. **java-coverage-reporter** - Analyzes test coverage and identifies methods needing tests
+4. **cui-log-record-documenter** - Documents LogRecord classes in AsciiDoc format per CUI standards
+
+### Commands (2 commands)
+
+1. **cui-java-task-manager** - End-to-end Java task implementation with automated testing and coverage verification
+2. **cui-log-record-enforcer** - Enforces CUI logging standards by validating LogRecord usage and testing coverage
+
 ## Installation
 
 ```bash
@@ -225,9 +237,11 @@ This Java expertise bundle complements other CUI bundles:
 ## Bundle Statistics
 
 - **Total Skills**: 3
+- **Total Agents**: 4
+- **Total Commands**: 2
 - **Total Standards Files**: 19
 - **Total Lines of Documentation**: ~5,800
-- **Quality Score**: 94.0/100 average
+- **Quality Score**: 91.6/100 average
 - **Status**: Production Ready ✅
 
 ## Maintenance

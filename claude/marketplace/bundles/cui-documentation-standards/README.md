@@ -9,7 +9,10 @@ AsciiDoc and documentation standards enforcement for CUI projects. This bundle p
 This bundle includes the following components:
 
 ### Agents
-- **asciidoc-reviewer** - Reviews AsciiDoc documents for standards compliance and quality
+- **asciidoc-reviewer** - Orchestrates comprehensive AsciiDoc review by coordinating specialized agents
+- **asciidoc-format-validator** - Validates AsciiDoc formatting and structure using automated scripts
+- **asciidoc-link-verifier** - Verifies cross-references and links in AsciiDoc documents
+- **asciidoc-content-reviewer** - Reviews AsciiDoc content for quality, tone, and completeness
 
 ### Commands
 - **review-technical-docs** - Orchestrates comprehensive documentation review workflow

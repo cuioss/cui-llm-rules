@@ -425,3 +425,14 @@ After completing the task, return findings in this format:
 - Action: List available tasks from plan
 - Request: User to specify correct task identifier
 - Return: ❌ FAILURE with available options
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=task-executor update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Better checklist parsing patterns and task plan format handling
+2. Acceptance criteria verification methods and validation strategies
+3. Error recovery strategies and build failure diagnosis
+4. Task plan format handling edge cases
+5. Integration with maven-builder and commit-changes agents

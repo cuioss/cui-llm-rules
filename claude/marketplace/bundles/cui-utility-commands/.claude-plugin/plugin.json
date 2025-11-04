@@ -18,6 +18,8 @@
     "./commands/cui-verify-architecture-diagrams.md"
   ],
   "skills": [
-    "./skills/cui-diagnostic-patterns"
+    "./skills/cui-diagnostic-patterns",
+    "./skills/permission-management",
+    "./skills/web-security-standards"
   ]
 }

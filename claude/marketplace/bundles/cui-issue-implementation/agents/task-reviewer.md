@@ -341,3 +341,14 @@ After completing all work, return findings in this format:
 ### Issue Location:
 {File path or GitHub issue URL}
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=task-reviewer update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Ambiguity detection patterns and quality criteria refinement
+2. Clarification question templates and effectiveness
+3. Research agent integration improvements
+4. GitHub issue update strategies and best practices
+5. Quality criteria validation and edge case handling

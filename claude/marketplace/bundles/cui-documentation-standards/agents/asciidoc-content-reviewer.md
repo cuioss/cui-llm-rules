@@ -340,3 +340,14 @@ Use template from Step 7 above.
 - ✅ PASS: No content quality issues
 - ⚠️ WARNINGS: Minor issues found
 - ❌ FAILURES: Critical quality problems (unverified claims, marketing language in specs)
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-content-reviewer update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Tone detection accuracy and ULTRATHINK reasoning quality
+2. Fix application precision and user confirmation flow
+3. Pattern detection coverage for factual vs promotional language
+4. Metrics for ULTRATHINK effectiveness
+5. Context-aware analysis improvements for different document types

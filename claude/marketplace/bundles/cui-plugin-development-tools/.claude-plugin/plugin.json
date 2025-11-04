@@ -19,6 +19,7 @@
     "./commands/cui-diagnose-agents.md",
     "./commands/cui-diagnose-bundle.md",
     "./commands/cui-diagnose-commands.md",
+    "./commands/cui-diagnose-marketplace.md",
     "./commands/cui-diagnose-skills.md",
     "./commands/cui-update-agent.md",
     "./commands/cui-update-command.md"
@@ -27,10 +28,11 @@
     "./skills/cui-marketplace-architecture"
   ],
   "agents": [
-    "./agents/cui-analyze-standards-file.md",
+    "./agents/cui-analyze-cross-skill-duplication.md",
     "./agents/cui-analyze-integrated-standards.md",
-    "./agents/cui-diagnose-single-skill.md",
+    "./agents/cui-analyze-standards-file.md",
     "./agents/cui-diagnose-single-agent.md",
-    "./agents/cui-diagnose-single-command.md"
+    "./agents/cui-diagnose-single-command.md",
+    "./agents/cui-diagnose-single-skill.md"
   ]
 }

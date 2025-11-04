@@ -354,3 +354,14 @@ After implementing each task:
 
 ---
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=task-breakdown-agent update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Task decomposition patterns and granularity strategies
+2. Better reference formatting and GitHub issue integration
+3. Handling edge cases between GitHub and local issues
+4. Plan template improvements and clarity enhancements
+5. Integration patterns with task-executor and task-reviewer agents

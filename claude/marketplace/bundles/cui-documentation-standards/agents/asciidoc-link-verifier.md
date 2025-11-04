@@ -258,3 +258,14 @@ Use template from Step 9 above.
 - ✅ PASS: All links valid
 - ⚠️ WARNINGS: Some broken links but fixable
 - ❌ FAILURES: Critical broken links requiring manual intervention
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-link-verifier update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Link verification accuracy and false positive handling
+2. Anchor format detection and correction strategies
+3. User interaction patterns for link removal approval
+4. Script output parsing and validation improvements
+5. Cross-reference resolution logic enhancements

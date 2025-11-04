@@ -188,3 +188,14 @@ Orchestrates specialized agents:
 - Task-reviewer agent
 - Task-breakdown-agent
 - Task-executor agent
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /cui-update-command command-name=cui-implement-task update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Agent coordination patterns and retry strategies
+2. Error recovery and failure handling optimization
+3. Task breakdown quality and granularity improvements
+4. Build verification efficiency and integration
+5. User interaction patterns and decision prompts

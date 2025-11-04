@@ -326,3 +326,14 @@ Use template from Step 10 above.
 - ✅ PASS: All 3 agents report PASS
 - ⚠️ WARNINGS: Mixed results, no failures
 - ❌ FAILURES: At least one agent reports FAILURES
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-reviewer update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Error handling patterns for agent failures and retry strategies
+2. Result aggregation logic and cross-agent issue correlation
+3. Report formatting and clarity of recommendations
+4. Performance optimization for parallel agent execution
+5. Integration patterns with documentation workflows

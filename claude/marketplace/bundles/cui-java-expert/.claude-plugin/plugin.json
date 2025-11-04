@@ -10,6 +10,16 @@
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["java", "cdi", "quarkus", "testing", "standards", "patterns"],
+  "agents": [
+    "./agents/cui-log-record-documenter.md",
+    "./agents/java-code-implementer.md",
+    "./agents/java-coverage-reporter.md",
+    "./agents/java-junit-implementer.md"
+  ],
+  "commands": [
+    "./commands/cui-java-task-manager.md",
+    "./commands/cui-log-record-enforcer.md"
+  ],
   "skills": [
     "./skills/cui-java-core",
     "./skills/cui-java-cdi",

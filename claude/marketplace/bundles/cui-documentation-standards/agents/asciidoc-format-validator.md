@@ -180,3 +180,14 @@ Use template from Step 7 above.
 - ✅ PASS: Zero format issues found
 - ⚠️ WARNINGS: Issues found but not critical
 - ❌ FAILURES: Critical format violations
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-format-validator update="[your improvement]"
+
+**Areas for continuous improvement:**
+1. Format validation patterns not covered by current rules
+2. Fix application accuracy and edge case handling
+3. Validator script output parsing improvements
+4. AsciiDoc format issue detection enhancements
+5. Report clarity and actionable recommendations

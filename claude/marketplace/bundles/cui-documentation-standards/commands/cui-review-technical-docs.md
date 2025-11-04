@@ -9,14 +9,14 @@ Comprehensive AsciiDoc documentation review orchestrating validation, link verif
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /cui-update-command command-name=cui-review-technical-docs update="[your improvement]"
+
+**Areas for continuous improvement:**
 1. Improved directory discovery patterns for AsciiDoc files
 2. Better agent coordination strategies for parallel execution
 3. More effective result aggregation and reporting methods
 4. Enhanced error handling for agent failures
 5. Any lessons learned about documentation review workflows
-
-This ensures the command evolves and becomes more effective with each execution.
 
 ## PARAMETERS
 

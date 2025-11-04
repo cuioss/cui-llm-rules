@@ -9,5 +9,15 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["maven", "build", "verification", "pom", "quality-gates"]
+  "keywords": ["maven", "build", "verification", "pom", "quality-gates"],
+  "agents": [
+    "./agents/maven-builder.md",
+    "./agents/maven-project-builder.md"
+  ],
+  "commands": [
+    "./commands/cui-build-and-verify.md"
+  ],
+  "skills": [
+    "./skills/cui-maven-rules"
+  ]
 }
