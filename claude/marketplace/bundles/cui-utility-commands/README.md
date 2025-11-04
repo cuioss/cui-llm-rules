@@ -1,10 +1,11 @@
 # CUI Utility Commands
 
-Standalone utility commands for CUI project development and maintenance tasks that don't fit into specific workflow bundles.
+Standalone utility tools including research agents and commands for CUI project development and maintenance tasks that don't fit into specific workflow bundles.
 
 ## Purpose
 
-This bundle provides general-purpose utility commands for:
+This bundle provides general-purpose utility tools for:
+- Web research and best practices investigation
 - Project setup and permissions management
 - IDE diagnostics and fixes
 - Documentation generation and verification
@@ -16,6 +17,16 @@ These utilities are independent tools that can be used across different CUI proj
 > **Note**: Maven build verification has been moved to the **cui-maven** bundle. Use `/cui-build-and-verify` from that bundle for Maven-related build tasks.
 
 ## Components Included
+
+### Agents (1 agent)
+
+1. **research-best-practices** - Web research and best practices investigation
+   - Performs comprehensive web research on any topic
+   - Searches and analyzes top 10-15 sources
+   - Provides confidence levels (HIGH/MEDIUM/LOW) based on source quality
+   - Identifies contradictions and conflicting recommendations
+   - Maintains complete reference trails
+   - Invoked when user requests research, best practices, or topic investigation
 
 ### Commands (5 commands)
 
@@ -54,6 +65,22 @@ These utilities are independent tools that can be used across different CUI proj
 ```
 
 ## Usage Examples
+
+### Research Best Practices
+The research-best-practices agent is automatically invoked when you ask for research:
+
+```
+User: "Research best practices for API design"
+User: "What are the recommendations for Java logging frameworks?"
+User: "Investigate test automation best practices 2025"
+```
+
+The agent will:
+- Search for "{topic} best practices 2025"
+- Fetch and analyze top 10-15 sources
+- Provide HIGH/MEDIUM/LOW confidence ratings
+- Include complete source references
+- Flag any conflicting recommendations
 
 ### Setup Project Permissions
 ```bash
