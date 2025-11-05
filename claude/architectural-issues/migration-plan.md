@@ -131,7 +131,7 @@ Java Implementation (Three-Layer):
 PR Quality Fix (Full PR Workflow):
 /cui-handle-pull-request pr={number} (orchestrator - setup + wait + delegate + report)
   ├─> Get PR info, wait for CI/Sonar (30s polling, timeout handling)
-  ├─> If build failed: SlashCommand(/cui-build-and-verify) [fix build]
+  ├─> If build failed: SlashCommand(/cui-build-and-fix) [fix build]
   ├─> SlashCommand(/respond-to-review-comments) [self-contained: respond + verify + commit]
   ├─> SlashCommand(/fix-sonar-issues) [self-contained: fix + verify + commit]
   └─> Report: CI status, Sonar status, statistics, duration
@@ -140,21 +140,21 @@ PR Quality Fix (Full PR Workflow):
   PRECONDITIONS: PR checked out, CI complete, Sonar analysis done
   ├─> Task(sonar-issue-fetcher) [fetches all issues]
   ├─> For each: Task(sonar-issue-triager) → fix or suppress (with user approval)
-  ├─> SlashCommand(/cui-build-and-verify push) [verify + commit]
+  ├─> SlashCommand(/cui-build-and-fix push) [verify + commit]
   └─> Return summary: {issues_fixed, issues_suppressed, commits}
 
 /respond-to-review-comments (Pattern 3: Fetch + Triage + Delegate)
   PRECONDITIONS: PR checked out, review comments available
   ├─> Task(review-comment-fetcher) [fetches all comments]
   ├─> For each: Task(review-comment-triager) → code change, explain, or ignore
-  ├─> If code changed: SlashCommand(/cui-build-and-verify push) [verify + commit]
+  ├─> If code changed: SlashCommand(/cui-build-and-fix push) [verify + commit]
   └─> Return summary: {comments_addressed, code_changes, explanations}
 
 Task Execution (Three-Layer):
 /cui-implement-task (Layer 1: batch - if complex task with subtasks)
   ├─> Analyze and break into subtasks
   ├─> For each: SlashCommand(/execute-task subtask)
-  └─> SlashCommand(/cui-build-and-verify push) [verify all + commit + push]
+  └─> SlashCommand(/cui-build-and-fix push) [verify all + commit + push]
 
 /execute-task (Layer 2: self-contained)
   ├─> Task(task-executor) [Layer 3: focused]
@@ -202,6 +202,115 @@ Choose the appropriate pattern based on your task characteristics:
 - ✅ Smart orchestration (Pattern 3: fetch → triage → delegate with user approval)
 - ✅ Scalable (batch patterns handle 1 or 1000 items same way)
 - ✅ Testable (test each layer/component independently)
+
+## Error Handling Strategy
+
+All migrated commands and agents must follow consistent error handling patterns to ensure robustness and predictability.
+
+### Command-Level Error Handling
+
+**Transient Failures** (network, API timeouts, temporary resource unavailability):
+- Retry up to 3 times with exponential backoff (1s, 2s, 4s)
+- Log each retry attempt with reason
+- After 3 failures, treat as persistent error
+
+**Persistent Errors** (compilation failures, test failures, invalid parameters):
+- Stop iteration immediately
+- Report current state: what succeeded, what failed, what's pending
+- Do NOT attempt automatic rollback (preserve partial progress for inspection)
+- Return structured error: `{status: "FAILED", completed: [...], failed: {...}, remaining: [...]}`
+
+**Agent Execution Failures**:
+- If focused agent (Layer 3) fails: Report structured error to calling command
+- Calling command decides: retry with different parameters, skip item, or abort workflow
+- Include error category in response: `"compilation_error"`, `"test_failure"`, `"timeout"`, `"invalid_input"`
+
+**Batch Processing Failures** (Pattern 2: Three-Layer):
+- Continue processing remaining items after single item failure
+- Aggregate results: successful items + failed items + errors
+- Report summary: `{total: N, succeeded: M, failed: P, errors: [...]}`
+- User can inspect failures and retry specific items
+
+**Fetch+Triage+Delegate Failures** (Pattern 3):
+- If fetcher agent fails: Abort workflow, report fetch error
+- If triager agent fails on single item: Log error, skip item, continue with remaining
+- If delegated command fails: Record failure, continue with remaining items
+- Final report includes all failures with context
+
+### Agent-Level Error Handling
+
+**Focused Agents** (Layer 3 execution agents):
+- Return structured errors, NOT plain text
+- Include error category, affected files/locations, and diagnostic info
+- Example: `{status: "ERROR", category: "compilation_error", file: "Foo.java", line: 42, message: "..."}`
+- Do NOT attempt recovery (agents are focused, not orchestrators)
+- Do NOT log to console (return structured data to caller)
+
+**Verification Agents** (maven-builder, coverage analyzers):
+- Distinguish between "build failed" vs "build succeeded with warnings"
+- Return structured results with categorized issues
+- Include severity levels: `ERROR`, `WARNING`, `INFO`
+- Enable callers to filter and prioritize issues
+
+### User Notification Patterns
+
+**Recoverable Errors** (fix attempts available):
+- Report error with suggested actions
+- Example: "Compilation failed in Foo.java:42. Delegating to /java-implement-code to fix."
+- Continue workflow automatically
+
+**Unrecoverable Errors** (user decision required):
+- Use `AskUserQuestion` for decisions
+- Provide context: what happened, what's at stake, what are the options
+- Example: "Triager suggests suppressing Sonar issue X because {reason}. Approve suppression?"
+- Support options: **Approve** | **Fix Anyway** | **Skip** | **Abort**
+
+**Timeout Handling**:
+- Set reasonable timeouts for all external operations
+- maven-builder: 10 minutes (configurable)
+- GitHub API calls: 30 seconds
+- Sonar API calls: 30 seconds
+- On timeout: Report timeout error, do NOT retry automatically
+- User prompt: "Operation timed out. **Retry** | **Skip** | **Abort**"
+
+**Partial Success Reporting**:
+- Always report final state explicitly
+- Show: completed tasks, failed tasks, skipped tasks, total duration
+- Provide actionable next steps
+- Example: "Fixed 8/10 issues. Failed: [issue1, issue2]. Run /fix-sonar-issues filter=failed to retry."
+
+### Rollback Strategy
+
+**Default: NO automatic rollback**
+- Preserve partial progress for inspection
+- Uncommitted changes remain in working directory
+- User can review, adjust, and commit manually
+
+**Explicit Rollback** (user-requested only):
+- If user requests abort during AskUserQuestion
+- Use git commands to discard uncommitted changes
+- Report what was rolled back
+
+**Commit Strategy with Errors**:
+- If 'push' parameter provided BUT errors remain: Do NOT commit
+- Report: "Errors remain, cannot commit. Fix errors first."
+- User can run without 'push' to fix iteratively, then commit separately
+
+### Error Message Standards
+
+**Structure**: `[COMPONENT] Error: {category} - {specific_message}`
+- Example: `[maven-builder] Error: compilation_error - Cannot find symbol 'Foo' in Bar.java:42`
+
+**Include**:
+- What failed (specific operation)
+- Why it failed (root cause if known)
+- Where it failed (file, line, component)
+- What to do next (suggested action)
+
+**Avoid**:
+- Generic messages ("Something went wrong")
+- Stack traces in user-facing output (log separately)
+- Blame language ("You provided invalid input")
 
 ## Architecture Standards
 
@@ -278,7 +387,7 @@ Choose the appropriate pattern based on your task characteristics:
 
 ### cui-maven
 
-- [ ] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-verify command)
+- [ ] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-fix command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-project-builder.md
   ACTION: DELETE FILE
@@ -289,7 +398,7 @@ Choose the appropriate pattern based on your task characteristics:
          └─> Task(maven-builder) ❌ FAILS - Task not available to agents
 
   AFTER:
-  /cui-build-and-verify (command - orchestrator)
+  /cui-build-and-fix (command - orchestrator, renamed from cui-build-and-verify)
     ├─> Task(maven-builder) [returns: structured issue data]
     ├─> Analyze issue types and locations
     ├─> Delegate to appropriate fix commands:
@@ -302,17 +411,17 @@ Choose the appropriate pattern based on your task characteristics:
        maven-project-builder tried to delegate (Task tool not available to agents)
   ```
 
-- [ ] Update `/cui-build-and-verify` command: orchestrate build + delegate fixes to appropriate commands
+- [ ] Rename `/cui-build-and-verify` to `/cui-build-and-fix`: orchestrate build + delegate fixes to appropriate commands
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/commands/cui-build-and-verify.md
-  ACTION: UPDATE WORKFLOW
+  ACTION: RENAME FILE to cui-build-and-fix.md AND UPDATE WORKFLOW
 
   BEFORE:
   /cui-build-and-verify
     └─> Delegates everything to maven-project-builder agent
 
   AFTER:
-  /cui-build-and-verify (orchestrates verification workflow)
+  /cui-build-and-fix (orchestrates build + fix workflow, renamed for clarity)
     ├─> Task(maven-builder) [returns: structured results with categorized issues]
     ├─> Analyze results to determine issue types and locations
     ├─> For each issue category:
@@ -324,7 +433,8 @@ Choose the appropriate pattern based on your task characteristics:
     ├─> Repeat until clean
     └─> Task(commit-changes) if 'push' parameter provided
 
-  NOTE: Command orchestrates and delegates, does NOT fix issues directly
+  NOTE: Renamed from /cui-build-and-verify to /cui-build-and-fix for clarity
+        Command orchestrates and delegates, does NOT fix issues directly
         /cui-java-task-manager determines which classes need fixing and handles implementation
   ```
 
@@ -474,16 +584,24 @@ Choose the appropriate pattern based on your task characteristics:
     └─> Task(java-code-implementer)
          └─> implements + verifies internally ❌
 
-  AFTER:
-  /cui-java-task-manager (orchestrator)
-    ├─> Parse task to determine scope
+  AFTER (if single task - Pattern 1):
+  /cui-java-task-manager (self-contained)
+    ├─> Parse task to determine scope (single class/method)
     ├─> SlashCommand(/java-implement-code "implement feature X")
-    ├─> SlashCommand(/java-implement-tests "test feature X")
+    └─> Return result
+
+  AFTER (if multiple tasks - Pattern 2: Three-Layer):
+  /cui-java-task-manager (orchestrator - Layer 1)
+    ├─> Parse task to determine scope (multiple classes/features)
+    ├─> For each subtask:
+    │    ├─> SlashCommand(/java-implement-code "implement class X") [Layer 2]
+    │    └─> SlashCommand(/java-implement-tests "test class X") [Layer 2]
     └─> Return aggregated results
 
-  NOTE: No three-layer needed - commands ARE already single-item
-        /java-implement-code handles one implementation task
-        /cui-java-task-manager orchestrates multiple if needed
+  NOTE: Pattern depends on task scope
+        Single class/method → Pattern 1 (self-contained)
+        Multiple classes/features → Pattern 2 (three-layer batch)
+        /java-implement-code and /java-implement-tests are Layer 2 self-contained commands
   ```
 
 - [ ] Remove Task from `java-junit-implementer` - make focused (just writes tests, no verification)
@@ -704,7 +822,7 @@ Choose the appropriate pattern based on your task characteristics:
     │         └─> AskUserQuestion: "Triager suggests suppressing issue X because {reason}. Approve?"
     │              ├─> If approved: Add suppression_string to code
     │              └─> If rejected: Attempt fix anyway or skip
-    ├─> SlashCommand(/cui-build-and-verify push) [verify all changes + commit + push]
+    ├─> SlashCommand(/cui-build-and-fix push) [verify all changes + commit + push]
     └─> Return summary: {issues_fixed: count, issues_suppressed: count, changes_made: file_list}
 
   WHY: Self-contained command with own verify + commit cycle
@@ -812,7 +930,7 @@ Choose the appropriate pattern based on your task characteristics:
     │    └─> If action = "ignore":
     │         └─> Log reason, skip comment
     ├─> If any code changes made:
-    │    └─> SlashCommand(/cui-build-and-verify push) [verify all changes + commit + push]
+    │    └─> SlashCommand(/cui-build-and-fix push) [verify all changes + commit + push]
     └─> Return summary: {comments_addressed: count, code_changes: count, explanations_posted: count}
 
   WHY: Self-contained command with own verify + commit cycle (if code changed)
@@ -843,7 +961,7 @@ Choose the appropriate pattern based on your task characteristics:
   /cui-handle-pull-request pr={number}
     ├─> Step 1: Get PR info via gh pr view (KEEP)
     ├─> Step 2: Wait for CI and Sonar (KEEP - poll every 30s, timeout handling)
-    ├─> Step 3: If build failed → SlashCommand(/cui-build-and-verify) to fix
+    ├─> Step 3: If build failed → SlashCommand(/cui-build-and-fix) to fix
     ├─> Step 4: Handle review comments → SlashCommand(/respond-to-review-comments)
     │    └─> Self-contained: responds + verifies + commits
     ├─> Step 5: Handle Sonar issues → SlashCommand(/fix-sonar-issues)
@@ -913,7 +1031,7 @@ Choose the appropriate pattern based on your task characteristics:
   AFTER (if single atomic task - self-contained pattern):
   /cui-implement-task (orchestrator)
     ├─> Task(task-executor) [focused: executes task]
-    └─> SlashCommand(/cui-build-and-verify push) [verify + fix + commit + push]
+    └─> SlashCommand(/cui-build-and-fix push) [verify + fix + commit + push]
 
   AFTER (if task has subtasks - three-layer pattern):
   /cui-implement-task (batch command - Layer 1)
@@ -921,12 +1039,12 @@ Choose the appropriate pattern based on your task characteristics:
     ├─> For each subtask:
     │    └─> SlashCommand(/execute-task subtask-description) [Layer 2: self-contained]
     │         └─> Task(task-executor) [Layer 3: focused execution]
-    └─> SlashCommand(/cui-build-and-verify push) [verify all + fix + commit + push]
+    └─> SlashCommand(/cui-build-and-fix push) [verify all + fix + commit + push]
 
   WHY: Command determines pattern based on task complexity
        Atomic tasks: direct self-contained execution
        Complex tasks: three-layer decomposition
-       /cui-build-and-verify handles verification, fixes, commit, push
+       /cui-build-and-fix handles verification, fixes, commit, push
        No duplication of verification/commit logic
   ```
 
@@ -1002,17 +1120,11 @@ Choose the appropriate pattern based on your task characteristics:
     └─> Direct validation using Grep/Read patterns
   ```
 
-- [ ] Inline validation logic using Grep/Read/Glob in `cui-diagnose-single-skill`
-  ```
-  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/agents/cui-diagnose-single-skill.md
-  ACTION: INLINE VALIDATION LOGIC (covered by task above)
-  ```
-
 ## Migration Summary
 
 ### Components Removed (5 agents)
 Agents that attempted orchestration (Task delegation) or were replaced by commands:
-- `maven-project-builder` (cui-maven) - orchestration moved to /cui-build-and-verify command
+- `maven-project-builder` (cui-maven) - orchestration moved to /cui-build-and-fix command
 - `asciidoc-reviewer` (cui-documentation-standards) - replaced by /review-single-asciidoc command
 - `java-coverage-reporter` (cui-java-expert) - converted to /java-coverage-report command + java-coverage-analyzer agent
 - `pr-quality-fixer` (cui-workflow) - orchestration moved to /cui-handle-pull-request command
@@ -1046,11 +1158,11 @@ Pattern 3 commands that fetch, analyze, and delegate based on triage:
 
 ### Updated Orchestrator Commands (6 commands)
 Commands that orchestrate agents and delegate to other commands:
-- `/cui-build-and-verify` (cui-maven) - orchestrates maven-builder + delegates fixes to /cui-java-task-manager
+- `/cui-build-and-fix` (cui-maven, renamed from cui-build-and-verify) - orchestrates maven-builder + delegates fixes to /cui-java-task-manager
 - `/cui-java-task-manager` (cui-java-expert) - delegates to /java-implement-code, /java-implement-tests (batch pattern)
 - `/cui-log-record-enforcer` (cui-java-expert) - orchestrates logging enforcement workflow
 - `/review-technical-docs` (cui-documentation-standards) - delegates to /review-single-asciidoc per file (batch pattern)
-- `/cui-handle-pull-request` (cui-workflow) - simple orchestrator: delegates to /fix-sonar-issues, /respond-to-review-comments, /cui-build-and-verify
+- `/cui-handle-pull-request` (cui-workflow) - simple orchestrator: delegates to /fix-sonar-issues, /respond-to-review-comments, /cui-build-and-fix
 - `/cui-implement-task` (cui-workflow) - delegates to /execute-task (batch if complex) or direct orchestration (if atomic)
 
 ### Modified Existing Agents (7 agents)
@@ -1086,45 +1198,186 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
 
 ## Testing
 
-- [ ] Test `maven-project-builder` removal + `cui-build-and-verify` update
+- [ ] Test `maven-project-builder` removal + `/cui-build-and-fix` command (renamed from cui-build-and-verify)
   ```
-  ACTION: MANUAL TESTING - no specific file
+  SCENARIO: Run build on project with compilation errors
+  COMMAND: /cui-build-and-fix
+  EXPECTED: Detects errors, delegates to /cui-java-task-manager, iterates until clean
+  VERIFY: No Task(maven-project-builder) calls, proper error categorization
   ```
 - [ ] Test all migrated cui-java-expert agents
   ```
-  ACTION: MANUAL TESTING - test all agents in cui-java-expert bundle
+  AGENT: java-code-implementer
+  SCENARIO: Implement new method in existing class
+  COMMAND: Task(java-code-implementer, types="ExistingClass", description="Add getFullName() method")
+  EXPECTED: Method added, compiles successfully, no Task tool usage
+  VERIFY: Read agent execution log, confirm no Task(maven-builder) calls
+
+  AGENT: java-junit-implementer
+  SCENARIO: Write test for existing class
+  COMMAND: Task(java-junit-implementer, types="ExistingClass", description="Test getFullName() method")
+  EXPECTED: Test class created/updated, compiles successfully, no Task tool usage
+  VERIFY: Test methods added, no Task(maven-builder) calls
+
+  AGENT: cui-log-record-documenter
+  SCENARIO: Update LogMessages.adoc for LogRecord class
+  COMMAND: Task(cui-log-record-documenter, logrecord_class="LogMessages.java")
+  EXPECTED: AsciiDoc file updated with all LogRecords, no verification attempted
+  VERIFY: No Task(maven-builder) calls, only Read/Edit/Write operations
+
+  AGENT: logging-violation-analyzer (NEW)
+  SCENARIO: Analyze LOGGER statements in module
+  COMMAND: Task(logging-violation-analyzer, module="core")
+  EXPECTED: Returns structured violation list [{file, line, level, violation_type}]
+  VERIFY: Uses only Grep/Read, returns JSON-like structure
+
+  AGENT: java-coverage-analyzer (NEW)
+  SCENARIO: Analyze existing coverage reports
+  COMMAND: Task(java-coverage-analyzer, types="com.example.UserService")
+  EXPECTED: Returns per-method coverage metrics from existing reports
+  VERIFY: Does NOT run maven, only reads XML/HTML reports
   ```
 - [ ] Test all migrated cui-workflow agents
   ```
-  ACTION: MANUAL TESTING - test all agents in cui-workflow bundle
+  AGENT: task-executor
+  SCENARIO: Execute single implementation task
+  COMMAND: Task(task-executor, task="Implement getUserById method")
+  EXPECTED: Implementation completed, no verification or commit
+  VERIFY: No Task tool usage, no Bash(./mvnw:*) calls
+
+  AGENT: task-reviewer
+  SCENARIO: Review issue for implementation readiness
+  COMMAND: Task(task-reviewer, issue="#123")
+  EXPECTED: Returns structured review with delegation suggestions
+  VERIFY: No Task or SlashCommand usage, returns research_needed and asciidoc_files lists
+
+  AGENT: sonar-issue-fetcher (NEW)
+  SCENARIO: Fetch Sonar issues for PR
+  COMMAND: Task(sonar-issue-fetcher, pr=123, filter="all")
+  EXPECTED: Returns structured issue list from Sonar API
+  VERIFY: Uses mcp__sonarqube__* tools, returns [{key, type, severity, file, line}]
+
+  AGENT: sonar-issue-triager (NEW)
+  SCENARIO: Triage single Sonar issue
+  COMMAND: Task(sonar-issue-triager, issue_key="AX-123")
+  EXPECTED: Returns {action, reason, suggested_implementation, suppression_string}
+  VERIFY: Uses Read/Grep only, always includes suppression_string
+
+  AGENT: review-comment-fetcher (NEW)
+  SCENARIO: Fetch GitHub review comments for PR
+  COMMAND: Task(review-comment-fetcher, pr=123, filter="unresolved")
+  EXPECTED: Returns structured comment list from GitHub API
+  VERIFY: Uses Bash(gh:*), returns [{id, author, file, line, body}]
+
+  AGENT: review-comment-triager (NEW)
+  SCENARIO: Triage single review comment
+  COMMAND: Task(review-comment-triager, comment_id="RC_123")
+  EXPECTED: Returns {action, reason, suggested_implementation, explanation_text}
+  VERIFY: Uses Read/Grep only, provides draft explanation for "explain" action
   ```
-- [ ] Test `asciidoc-reviewer` changes
+- [ ] Test documentation workflow migration
   ```
-  ACTION: MANUAL TESTING - test /review-single-asciidoc command
+  COMMAND: /review-single-asciidoc file.adoc
+  SCENARIO: Validate single AsciiDoc file
+  EXPECTED: Runs format validator, link verifier, content reviewer
+  VERIFY: All three agents invoked, combined report returned
+  EDGE_CASES: Test with broken links, invalid format, content issues
+
+  COMMAND: /review-technical-docs
+  SCENARIO: Validate all AsciiDoc files in directory
+  EXPECTED: Globs *.adoc, delegates to /review-single-asciidoc per file
+  VERIFY: Uses SlashCommand (not Task), aggregates results
   ```
-- [ ] Test `cui-diagnose-single-skill` changes
+- [ ] Test diagnostic agent migration
   ```
-  ACTION: MANUAL TESTING - test cui-diagnose-single-skill agent
+  AGENT: cui-diagnose-single-skill
+  SCENARIO: Analyze skill with YAML and standards issues
+  COMMAND: Task(cui-diagnose-single-skill, skill_path="/path/to/skill")
+  EXPECTED: Returns comprehensive quality report
+  VERIFY: No Task tool usage, uses only Read/Grep/Glob for validation
+  EDGE_CASES: Test with missing YAML fields, invalid standards references
   ```
 - [ ] Run `/cui-diagnose-agents` - verify 0 Task tool violations
   ```
-  ACTION: EXECUTE DIAGNOSTIC COMMAND
+  COMMAND: /cui-diagnose-agents
+  EXPECTED: Analyzes all agents across all bundles
+  VERIFY: Reports 0 agents with Task tool in execution agents (Layer 3)
+  PASS_CRITERIA: All focused agents (implementation, fetcher, triager) have no Task
+  FAIL_IF: Any agent in cui-java-expert, cui-workflow, cui-documentation-standards has Task tool
+  OUTPUT_CHECK: Look for "Check 6: Task Tool Misuse Detection - PASS" in report
   ```
 - [ ] Run `/cui-diagnose-bundle` for each affected bundle
   ```
-  ACTION: EXECUTE DIAGNOSTIC COMMAND FOR EACH BUNDLE
+  BUNDLES: cui-maven, cui-java-expert, cui-documentation-standards, cui-workflow
+
+  COMMAND: /cui-diagnose-bundle bundle=cui-maven
+  EXPECTED: Reports structure, integration, quality status
+  VERIFY: maven-project-builder.md deleted, cui-build-and-fix.md exists
+
+  COMMAND: /cui-diagnose-bundle bundle=cui-java-expert
+  EXPECTED: All agents pass quality checks
+  VERIFY: java-coverage-reporter.md deleted, java-coverage-analyzer.md and /java-coverage-report command exist
+
+  COMMAND: /cui-diagnose-bundle bundle=cui-workflow
+  EXPECTED: All agents pass quality checks
+  VERIFY: pr-quality-fixer.md and pr-review-responder.md deleted, new fetcher/triager agents exist
+
+  COMMAND: /cui-diagnose-bundle bundle=cui-documentation-standards
+  EXPECTED: All agents pass quality checks
+  VERIFY: asciidoc-reviewer.md deleted, /review-single-asciidoc command exists
   ```
-- [ ] Test `/cui-build-and-verify` end-to-end
+- [ ] Test `/cui-build-and-fix` end-to-end
   ```
-  ACTION: MANUAL END-TO-END TESTING
+  SCENARIO: Complete workflow from broken to clean build
+  COMMAND: /cui-build-and-fix push
+  EXPECTED: Builds, fixes all issues, verifies, commits, pushes
+  VERIFY: Clean build, all changes committed, proper commit message
+  EDGE_CASES: Test with mixed error types (compilation + test + javadoc)
   ```
 - [ ] Test `/cui-handle-pull-request` end-to-end
   ```
-  ACTION: MANUAL END-TO-END TESTING
+  SCENARIO: Complete PR workflow with CI wait, review responses, Sonar fixes
+  COMMAND: /cui-handle-pull-request pr=123
+  EXPECTED:
+    1. Gets PR info via gh pr view
+    2. Waits for CI and Sonar (polls every 30s)
+    3. If build fails, delegates to /cui-build-and-fix
+    4. Delegates to /respond-to-review-comments
+    5. Delegates to /fix-sonar-issues
+    6. Reports final summary with statistics
+  VERIFY:
+    - No direct Task(pr-quality-fixer) or Task(pr-review-responder) calls
+    - Uses SlashCommand to delegate to specialized commands
+    - Each specialized command handles its own verify+commit cycle
+  EDGE_CASES:
+    - PR with failing CI build
+    - PR with review comments requiring code changes
+    - PR with Sonar issues requiring suppressions (user approval)
+    - Timeout during CI wait (30 min timeout with user prompt)
   ```
 - [ ] Test `/cui-implement-task` end-to-end
   ```
-  ACTION: MANUAL END-TO-END TESTING
+  SCENARIO 1: Atomic task (single class implementation)
+  COMMAND: /cui-implement-task task="Add getUserById method to UserService"
+  EXPECTED:
+    - Task(task-executor) implements the method
+    - SlashCommand(/cui-build-and-fix push) verifies and commits
+    - Returns structured result
+  VERIFY: Pattern 1 (self-contained) usage
+
+  SCENARIO 2: Complex task (multiple classes/features)
+  COMMAND: /cui-implement-task task="Implement user authentication module"
+  EXPECTED:
+    - Analyzes and breaks into subtasks
+    - For each: SlashCommand(/execute-task subtask)
+    - SlashCommand(/cui-build-and-fix push) at end
+    - Aggregates results
+  VERIFY: Pattern 2 (three-layer batch) usage
+
+  EDGE_CASES:
+    - Task requiring research (task-reviewer returns research_needed list)
+    - Task with AsciiDoc files (task-reviewer returns asciidoc_files list)
+    - Subtask failure midway through batch
   ```
 
 ## Documentation
