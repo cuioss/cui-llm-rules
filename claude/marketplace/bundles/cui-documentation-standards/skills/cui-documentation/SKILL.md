@@ -35,6 +35,16 @@ Standards for writing clear, maintainable technical documentation in CUI project
      Read: standards/asciidoc-formatting.md
      ```
 
+   - If reviewing tone, style, or language (or comprehensive reviews):
+     ```
+     Read: standards/tone-and-style.md
+     ```
+
+   - If organizing, restructuring, or reviewing documentation structure:
+     ```
+     Read: standards/organization-standards.md
+     ```
+
 3. **Extract key requirements from all loaded standards**
 
 4. **Store in working memory** for use during task execution
@@ -52,14 +62,31 @@ Standards for writing clear, maintainable technical documentation in CUI project
    - Review technical precision
    - Check for conciseness and clarity
 
-2. **AsciiDoc Format** (if .adoc files):
+2. **Tone and Style** (if tone-and-style.md loaded):
+   - Identify marketing language and subjective claims
+   - Check for qualification patterns ("production-proven", "extensively tested")
+   - Verify no transitional markers (status indicators, TODO items)
+   - Ensure objective vs subjective language compliance
+   - Review for promotional wording and self-praise
+   - Validate all claims are verifiable or attributed
+
+3. **Organization and Structure** (if organization-standards.md loaded):
+   - Verify document follows single-aspect principle
+   - Check document size (50-400 lines)
+   - Validate file naming (kebab-case)
+   - Identify duplicate content across documents
+   - Check for transitional/status markers
+   - Assess cross-reference integrity
+   - Review logical document organization
+
+4. **AsciiDoc Format** (if .adoc files):
    - Verify document header with required attributes
    - Check cross-reference syntax (`xref:` format)
    - **CRITICAL**: Validate blank lines before all lists
    - Review code block formatting with language specification
    - Check section hierarchy and numbering
 
-3. **README Structure** (if README files):
+5. **README Structure** (if README files):
    - Verify title and description
    - Check Maven coordinates placement
    - Review core concepts section
@@ -67,7 +94,7 @@ Standards for writing clear, maintainable technical documentation in CUI project
    - Check configuration documentation
    - Review best practices section
 
-4. **Content Quality**:
+6. **Content Quality**:
    - Only existing code/features documented
    - All references verified to exist
    - RFC references must be relevant (see documentation-core.md for verification requirements)
@@ -375,6 +402,9 @@ All documentation must pass:
 ## References
 
 All documentation standards are located in the `standards/` directory:
-* Core documentation principles: standards/documentation-core.md
-* AsciiDoc formatting guidelines: standards/asciidoc-formatting.md
-* README structure patterns: standards/readme-structure.md
+
+* **Core documentation principles**: [standards/documentation-core.md](standards/documentation-core.md)
+* **Tone and style requirements**: [standards/tone-and-style.md](standards/tone-and-style.md)
+* **Organization and structure**: [standards/organization-standards.md](standards/organization-standards.md)
+* **AsciiDoc formatting guidelines**: [standards/asciidoc-formatting.md](standards/asciidoc-formatting.md)
+* **README structure patterns**: [standards/readme-structure.md](standards/readme-structure.md)

@@ -214,5 +214,7 @@ Project status badges and links
 
 ## References
 
-* xref:documentation-core.md[Documentation Core]
-* xref:asciidoc-formatting.md[AsciiDoc Formatting]
+* [documentation-core.md](documentation-core.md) - Core documentation principles
+* [asciidoc-formatting.md](asciidoc-formatting.md) - AsciiDoc formatting standards
+* [tone-and-style.md](tone-and-style.md) - Professional tone requirements
+* [organization-standards.md](organization-standards.md) - Organization and structure

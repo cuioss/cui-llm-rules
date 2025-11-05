@@ -73,7 +73,13 @@ Triager Agent (decision making)
       Returns: {action, reason, implementation_approach, suppression_string}
 ```
 
-**Example**: `/cui-handle-pull-request` (Sonar issues)
+**When to Use**:
+- Items require analysis before deciding how to handle them
+- Different items need different actions (fix vs suppress, code change vs explanation)
+- User approval may be needed for certain decisions
+- Items are heterogeneous (not uniform like in batch processing)
+
+**Examples**: `/fix-sonar-issues`, `/respond-to-review-comments`
 
 **Concrete Examples**:
 
@@ -111,20 +117,27 @@ Java Implementation (Three-Layer):
   ├─> Iterate if failures
   └─> Return test result
 
-PR Quality Fix (Fetch + Triage + Delegate - Pattern 3):
-/cui-handle-pull-request (orchestrator command)
-  ├─> Task(sonar-issue-fetcher) [fetches all Sonar issues]
-  ├─> For each Sonar issue:
-  │    ├─> Task(sonar-issue-triager) [decides: fix or suppress]
-  │    ├─> If fix: SlashCommand(/java-implement-code "fix")
-  │    └─> If suppress: AskUserQuestion for approval
-  ├─> Task(review-comment-fetcher) [fetches all review comments]
-  ├─> For each review comment:
-  │    ├─> Task(review-comment-triager) [decides: code_change, explain, or ignore]
-  │    ├─> If code_change: SlashCommand(/java-implement-code "change")
-  │    ├─> If explain: Post explanation via Bash(gh:*)
-  │    └─> If ignore: Skip
-  └─> SlashCommand(/cui-build-and-verify push) [verify + fix + commit + push]
+PR Quality Fix (Full PR Workflow):
+/cui-handle-pull-request pr={number} (orchestrator - setup + wait + delegate + report)
+  ├─> Get PR info, wait for CI/Sonar (30s polling, timeout handling)
+  ├─> If build failed: SlashCommand(/cui-build-and-verify) [fix build]
+  ├─> SlashCommand(/respond-to-review-comments) [self-contained: respond + verify + commit]
+  ├─> SlashCommand(/fix-sonar-issues) [self-contained: fix + verify + commit]
+  └─> Report: CI status, Sonar status, statistics, duration
+
+/fix-sonar-issues (Pattern 3: Fetch + Triage + Delegate)
+  PRECONDITIONS: PR checked out, CI complete, Sonar analysis done
+  ├─> Task(sonar-issue-fetcher) [fetches all issues]
+  ├─> For each: Task(sonar-issue-triager) → fix or suppress (with user approval)
+  ├─> SlashCommand(/cui-build-and-verify push) [verify + commit]
+  └─> Return summary: {issues_fixed, issues_suppressed, commits}
+
+/respond-to-review-comments (Pattern 3: Fetch + Triage + Delegate)
+  PRECONDITIONS: PR checked out, review comments available
+  ├─> Task(review-comment-fetcher) [fetches all comments]
+  ├─> For each: Task(review-comment-triager) → code change, explain, or ignore
+  ├─> If code changed: SlashCommand(/cui-build-and-verify push) [verify + commit]
+  └─> Return summary: {comments_addressed, code_changes, explanations}
 
 Task Execution (Three-Layer):
 /cui-implement-task (Layer 1: batch - if complex task with subtasks)
@@ -186,6 +199,9 @@ Task Execution (Three-Layer):
 
 - [ ] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-verify command)
   ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-project-builder.md
+  ACTION: DELETE FILE
+
   BEFORE:
   /cui-build-and-verify (command)
     └─> Task(maven-project-builder) [agent]
@@ -207,6 +223,9 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/cui-build-and-verify` command: orchestrate build + delegate fixes to appropriate commands
   ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-maven/commands/cui-build-and-verify.md
+  ACTION: UPDATE WORKFLOW
+
   BEFORE:
   /cui-build-and-verify
     └─> Delegates everything to maven-project-builder agent
@@ -230,6 +249,9 @@ Task Execution (Three-Layer):
 
 - [ ] Update `maven-builder` agent to return structured results (not just raw output)
   ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-builder.md
+  ACTION: UPDATE RESPONSE FORMAT
+
   BEFORE:
   maven-builder [agent]
     ├─> Executes ./mvnw
@@ -270,6 +292,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `/review-single-asciidoc` command (single-file orchestrator)
   ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/review-single-asciidoc.md
+  ACTION: CREATE NEW COMMAND FILE
+
   NEW COMMAND:
   /review-single-asciidoc <file.adoc> (single-item command)
     ├─> Task(asciidoc-format-validator) [focused: format only]
@@ -280,6 +305,9 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/review-technical-docs` to use three-layer pattern
   ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/cui-review-technical-docs.md
+  ACTION: UPDATE WORKFLOW
+
   BEFORE:
   /review-technical-docs (command)
     └─> Task(asciidoc-reviewer) [agent]
@@ -295,6 +323,12 @@ Task Execution (Three-Layer):
 
 - [ ] Keep focused validation agents as-is
   ```
+  FILES:
+  - /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-format-validator.md
+  - /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-link-verifier.md
+  - /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-content-reviewer.md
+  ACTION: NO CHANGES NEEDED
+
   NO CHANGE:
   asciidoc-format-validator [agent]
     └─> Bash(asciidoc-validator.sh) - returns format issues
@@ -307,11 +341,18 @@ Task Execution (Three-Layer):
   ```
 
 - [ ] Remove old `asciidoc-reviewer` agent (replaced by /review-single-asciidoc command)
+  ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-reviewer.md
+  ACTION: DELETE FILE (if exists - functionality moved to /review-single-asciidoc command)
+  ```
 
 ### cui-java-expert
 
 - [ ] Remove Task from `java-code-implementer` - make focused (just implements code, no verification)
   ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-code-implementer.md
+  ACTION: UPDATE tools (remove Task)
+
   BEFORE:
   java-code-implementer [agent]
     tools: Read, Write, Edit, Glob, Grep, Task, Skill
@@ -326,6 +367,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `/java-implement-code` command (self-contained implementation + verification)
   ```
+  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-code.md
+  ACTION: CREATE NEW COMMAND FILE
+
   NEW COMMAND:
   /java-implement-code <task-description>
     ├─> Task(java-code-implementer) [focused: just implements]
@@ -521,22 +565,21 @@ Task Execution (Three-Layer):
   - ALWAYS returns suppression_string regardless of decision (useful for fallback or user override)
   ```
 
-- [ ] Update `pr-quality-fixer` agent → `/cui-handle-pull-request` command (orchestrator)
+- [ ] Create `/fix-sonar-issues` command (fetch + triage + fix Sonar issues)
   ```
-  BEFORE:
-  pr-quality-fixer [agent]
-    tools: Read, Edit, Bash(gh:*), Task, mcp__sonarqube__*
-    ├─> Fixes Sonar issues
-    ├─> Task(java-code-implementer) ❌
-    ├─> Task(java-junit-implementer) ❌
-    ├─> Task(maven-builder) ❌
-    └─> Task(commit-changes) ❌
+  NEW COMMAND:
+  /fix-sonar-issues [filter-options]
 
-  AFTER:
-  /cui-handle-pull-request [command - orchestrator]
+  PRECONDITIONS (handled by caller):
+  - PR exists and is checked out locally
+  - CI build has completed
+  - Sonar analysis has finished and results are available
+  - Caller has waited for all prerequisite steps
+
+  WORKFLOW:
     ├─> Task(sonar-issue-fetcher) [returns all issues with optional filters]
     ├─> For each issue:
-    │    ├─> Task(sonar-issue-triager) [returns: {action, reason, suggested_implementation}]
+    │    ├─> Task(sonar-issue-triager) [returns: {action, reason, suggested_implementation, suppression_string}]
     │    ├─> If action = "fix":
     │    │    └─> Delegate to appropriate command based on suggested_implementation:
     │    │         ├─> SlashCommand(/java-implement-code "fix issue X")
@@ -544,20 +587,20 @@ Task Execution (Three-Layer):
     │    │         └─> Or direct Edit for trivial changes
     │    └─> If action = "suppress":
     │         └─> AskUserQuestion: "Triager suggests suppressing issue X because {reason}. Approve?"
-    │              ├─> If approved: Add suppression comment to code
+    │              ├─> If approved: Add suppression_string to code
     │              └─> If rejected: Attempt fix anyway or skip
-    └─> SlashCommand(/cui-build-and-verify push) [verify, fix issues, commit, and push]
+    ├─> SlashCommand(/cui-build-and-verify push) [verify all changes + commit + push]
+    └─> Return summary: {issues_fixed: count, issues_suppressed: count, changes_made: file_list}
 
-  WHY: Command-to-command delegation (SlashCommand, not Task)
-       Reuses /cui-build-and-verify logic including commit+push
-       Single command handles: verify → fix issues → iterate → commit → push
-       No separate Task(commit-changes) needed
-       Triage logic is reusable in focused agent
-       User approval workflow for suppressions
-       Keeps pr-quality-fixer functionality but as command (not agent)
+  WHY: Self-contained command with own verify + commit cycle
+       Assumes prerequisites met (CI complete, Sonar results ready)
+       NO waiting, NO setup - pure issue handling
+       Reusable independently (not just for PRs)
+       Returns structured result for orchestration
+       Triage logic with user approval for suppressions
   ```
 
-- [ ] Remove `pr-quality-fixer` agent file (logic moved to /cui-handle-pull-request command)
+- [ ] Remove `pr-quality-fixer` agent file (logic moved to /fix-sonar-issues command)
 
 - [ ] Create `review-comment-fetcher` agent (focused: fetches review comments from GitHub)
   ```
@@ -613,34 +656,73 @@ Task Execution (Three-Layer):
        Batch command handles orchestration
   ```
 
-- [ ] Update `/cui-handle-pull-request` command: use fetch + triage for review comments
+- [ ] Create `/respond-to-review-comments` command (fetch + triage + respond to review comments)
   ```
-  BEFORE:
-  /cui-handle-pull-request
-    └─> Task(pr-review-responder)
-         └─> responds + verifies + commits internally ❌
+  NEW COMMAND:
+  /respond-to-review-comments [filter-options]
 
-  AFTER:
-  /cui-handle-pull-request [command - orchestrator]
-    ├─> Task(sonar-issue-fetcher) [returns all Sonar issues]
-    ├─> For each Sonar issue:
-    │    ├─> Task(sonar-issue-triager) [decides: fix or suppress]
-    │    ├─> If fix: SlashCommand(/java-implement-code "fix issue")
-    │    └─> If suppress: AskUserQuestion for approval
-    ├─> Task(review-comment-fetcher) [returns all review comments]
-    ├─> For each review comment:
-    │    ├─> Task(review-comment-triager) [decides: code_change, explain, or ignore]
-    │    ├─> If code_change: delegate based on suggested_implementation
-    │    │    └─> SlashCommand(/java-implement-code "implement change")
-    │    ├─> If explain: Post explanation to GitHub using Bash(gh:*)
-    │    └─> If ignore: Skip (log reason)
-    └─> SlashCommand(/cui-build-and-verify push) [verify + fix + commit + push all changes]
+  PRECONDITIONS (handled by caller):
+  - PR exists and is checked out locally
+  - CI build has completed (so reviewers have seen current state)
+  - Review comments exist and are available via GitHub API
+  - Caller has waited for all prerequisite steps
 
-  WHY: Consistent fetch + triage pattern for both Sonar and review comments
-       Triage logic decides appropriate action for each comment
-       User sees explanations posted to GitHub
-       Single verification and commit for all changes
-       No separate /respond-to-single-review-comment command needed
+  WORKFLOW:
+    ├─> Task(review-comment-fetcher) [returns all review comments with optional filters]
+    ├─> For each comment:
+    │    ├─> Task(review-comment-triager) [returns: {action, reason, suggested_implementation, explanation_text}]
+    │    ├─> If action = "code_change":
+    │    │    └─> Delegate based on suggested_implementation:
+    │    │         ├─> SlashCommand(/java-implement-code "implement change")
+    │    │         ├─> SlashCommand(/java-implement-tests "add test")
+    │    │         └─> Or direct Edit for trivial changes
+    │    ├─> If action = "explain":
+    │    │    └─> Post explanation_text to GitHub using Bash(gh:*)
+    │    └─> If action = "ignore":
+    │         └─> Log reason, skip comment
+    ├─> If any code changes made:
+    │    └─> SlashCommand(/cui-build-and-verify push) [verify all changes + commit + push]
+    └─> Return summary: {comments_addressed: count, code_changes: count, explanations_posted: count}
+
+  WHY: Self-contained command with own verify + commit cycle (if code changed)
+       Assumes prerequisites met (PR checked out, reviews available)
+       NO waiting, NO setup - pure comment handling
+       Reusable independently (not just for PRs)
+       Returns structured result for orchestration
+       Triage logic decides code change vs explanation
+  ```
+
+- [ ] Update `/cui-handle-pull-request` command: orchestrate specialized commands with setup/waiting
+  ```
+  CURRENT WORKFLOW (from existing command):
+  /cui-handle-pull-request pr={number}
+    ├─> Step 1: Get PR info via gh pr view
+    ├─> Step 2: Wait for CI and Sonar (poll every 30s, 30min timeout with user prompt)
+    ├─> Step 3: If build failed → Task(maven-project-builder) to fix ❌
+    ├─> Step 4: Handle review comments → Task(pr-review-responder) ❌
+    ├─> Step 5: Handle Sonar issues → Loop with Task(pr-quality-fixer) ❌
+    │    └─> User decision after each iteration: [C]ontinue/[S]kip/[A]bort
+    ├─> Step 6: Final verification → Task(maven-project-builder) ❌
+    └─> Step 7: Display summary with statistics
+
+  AFTER (updated workflow):
+  /cui-handle-pull-request pr={number}
+    ├─> Step 1: Get PR info via gh pr view (KEEP)
+    ├─> Step 2: Wait for CI and Sonar (KEEP - poll every 30s, timeout handling)
+    ├─> Step 3: If build failed → SlashCommand(/cui-build-and-verify) to fix
+    ├─> Step 4: Handle review comments → SlashCommand(/respond-to-review-comments)
+    │    └─> Self-contained: responds + verifies + commits
+    ├─> Step 5: Handle Sonar issues → SlashCommand(/fix-sonar-issues)
+    │    └─> Self-contained: fixes + verifies + commits (includes triage + user approval)
+    └─> Step 6: Display summary (KEEP - aggregate results from commands)
+         - Track: reviews_responded_to, sonar_issues_fixed, build_verifications
+         - Display: CI status, Sonar status, commits made, workflow duration
+
+  WHY: Keeps existing user experience (wait, prompts, statistics)
+       Replaces agent orchestration with command orchestration
+       Removes duplicate final verification (commands verify themselves)
+       Keeps timeout handling and user control patterns
+       Each specialized command is self-contained and reusable
   ```
 
 - [ ] Remove Task and Bash(./mvnw:*) from `task-executor` - make focused
@@ -764,13 +846,18 @@ Layer 2 commands that orchestrate agent + verification for single items:
 - `/review-single-asciidoc` (cui-documentation-standards) - validates single AsciiDoc file
 - `/execute-task` (cui-workflow) - executes + verifies single task
 
+### New Fetch+Triage+Delegate Commands (2 commands)
+Pattern 3 commands that fetch, analyze, and delegate based on triage:
+- `/fix-sonar-issues` (cui-workflow) - fetches Sonar issues, triages, fixes or suppresses
+- `/respond-to-review-comments` (cui-workflow) - fetches review comments, triages, responds or explains
+
 ### Updated Orchestrator Commands (6 commands)
 Commands that orchestrate agents and delegate to other commands:
 - `/cui-build-and-verify` (cui-maven) - orchestrates maven-builder + delegates fixes to /cui-java-task-manager
 - `/cui-java-task-manager` (cui-java-expert) - delegates to /java-implement-code, /java-implement-tests (batch pattern)
 - `/cui-log-record-enforcer` (cui-java-expert) - orchestrates logging enforcement workflow
 - `/review-technical-docs` (cui-documentation-standards) - delegates to /review-single-asciidoc per file (batch pattern)
-- `/cui-handle-pull-request` (cui-workflow) - fetch + triage + delegate pattern (NOT batch, orchestrator)
+- `/cui-handle-pull-request` (cui-workflow) - simple orchestrator: delegates to /fix-sonar-issues, /respond-to-review-comments, /cui-build-and-verify
 - `/cui-implement-task` (cui-workflow) - delegates to /execute-task (batch if complex) or direct orchestration (if atomic)
 
 ### Modified Existing Agents (7 agents)
@@ -791,7 +878,7 @@ AsciiDoc validators already focused, no changes needed (used by /review-single-a
 
 ### Total Impact
 - **Agents**: 3 removed, 6 new created (7 listed but commit-changes exists), 7 modified = 16 agents changed
-- **Commands**: 5 created, 6 updated = 11 commands changed
+- **Commands**: 7 created (5 self-contained + 2 fetch+triage+delegate), 6 updated = 13 commands changed
 - **Architecture rules**: 3 new rules added
 - **Diagnostic checks**: 2 new checks added
 - **Patterns**: 3 architectural patterns established (Self-Contained, Three-Layer, Fetch+Triage+Delegate)

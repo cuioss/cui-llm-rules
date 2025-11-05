@@ -1,7 +1,26 @@
 # Documentation Core Standards
 
 ## Purpose
-Comprehensive standards for all documentation across CUI projects, including general documentation rules and principles.
+
+Comprehensive standards for all documentation across CUI projects, including general documentation rules and principles. This document serves as the foundation for all CUI documentation standards.
+
+## Documentation Standards Overview
+
+The CUI documentation standards are organized into focused documents covering specific aspects:
+
+* **[documentation-core.md](documentation-core.md)** (this document) - Core principles, terminology, and code examples
+* **[tone-and-style.md](tone-and-style.md)** - Professional tone, neutral language, prohibited patterns, and writing style
+* **[organization-standards.md](organization-standards.md)** - File organization, naming conventions, size guidelines, and review processes
+* **[asciidoc-formatting.md](asciidoc-formatting.md)** - AsciiDoc formatting, grammar, cross-references, and validation
+* **[readme-structure.md](readme-structure.md)** - Standard structure for README files
+
+**When to Use Which Document:**
+
+* **Creating/editing any documentation** → Start with this document (documentation-core.md)
+* **Reviewing tone and language** → Use [tone-and-style.md](tone-and-style.md)
+* **Organizing/restructuring documents** → Use [organization-standards.md](organization-standards.md)
+* **Formatting AsciiDoc files** → Use [asciidoc-formatting.md](asciidoc-formatting.md)
+* **Creating README files** → Use [readme-structure.md](readme-structure.md)
 
 ## Key Principles
 
@@ -120,5 +139,9 @@ oauth.audience=your-api-id
 
 ## References
 
-* xref:asciidoc-formatting.md[AsciiDoc Standards]
-* xref:readme-structure.md[README Structure]
+### Related Standards Documents
+
+* **[tone-and-style.md](tone-and-style.md)** - Professional tone, neutral language, and prohibited patterns
+* **[organization-standards.md](organization-standards.md)** - File organization, naming, and structure
+* **[asciidoc-formatting.md](asciidoc-formatting.md)** - AsciiDoc formatting and grammar
+* **[readme-structure.md](readme-structure.md)** - README file structure patterns

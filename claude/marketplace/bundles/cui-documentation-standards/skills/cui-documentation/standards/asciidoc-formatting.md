@@ -275,6 +275,188 @@ information block
 ====
 ```
 
+## Document Validation Requirements
+
+### Pre-Publication Checklist
+
+Before finalizing any AsciiDoc document:
+
+- [ ] **Header Attributes**: All required document attributes present
+- [ ] **Section Hierarchy**: Proper heading levels and logical flow
+- [ ] **List Formatting**: Blank lines before all lists
+- [ ] **Cross-References**: All use `xref:` syntax for file references
+- [ ] **Code Blocks**: Language specification for all source blocks
+- [ ] **Grammar Check**: Proper AsciiDoc syntax throughout
+- [ ] **Link Validation**: All internal references resolve correctly
+- [ ] **Table of Contents**: Generated correctly with proper levels
+
+### Common Formatting Errors
+
+#### List Formatting Violations
+
+**Error**: Missing blank line before list
+```asciidoc
+This is a paragraph.
+* List item 1  ❌ INCORRECT
+```
+
+**Correction**: Add blank line
+```asciidoc
+This is a paragraph.
+
+* List item 1  ✅ CORRECT
+```
+
+#### Cross-Reference Violations
+
+**Error**: Using deprecated reference syntax
+```asciidoc
+<<../other/file.adoc#,Other Document>>  ❌ INCORRECT
+```
+
+**Correction**: Use xref syntax
+```asciidoc
+xref:../other/file.adoc[Other Document]  ✅ CORRECT
+```
+
+#### Code Block Violations
+
+**Error**: Missing language specification
+```asciidoc
+----
+public class Example {
+}
+----  ❌ INCORRECT
+```
+
+**Correction**: Include language specification
+```asciidoc
+[source,java]
+----
+public class Example {
+}
+----  ✅ CORRECT
+```
+
+## Validation Tools and Scripts
+
+### Available Validation Scripts
+
+The cui-documentation skill includes two validation scripts in the `scripts/` directory:
+
+#### 1. AsciiDoc Format Validator (`asciidoc-validator.sh`)
+
+Validates AsciiDoc format compliance:
+* Checks for blank lines before lists
+* Verifies section header formatting
+* Detects list syntax issues
+* Validates document structure
+
+**Usage:**
+```bash
+# Validate a single file
+scripts/asciidoc-validator.sh path/to/file.adoc
+
+# Validate all files in a directory
+scripts/asciidoc-validator.sh directory/
+```
+
+**Common Validation Errors:**
+* "Missing blank line before list" - Add blank line before list items
+* "Invalid section header" - Check heading level syntax (`==`, `===`, etc.)
+* "Unclosed code block" - Ensure code blocks have closing delimiters
+
+#### 2. Link Verification Script (`verify-adoc-links.py`)
+
+Validates cross-reference links:
+* Checks for broken file references
+* Verifies anchor existence
+* Detects deprecated link syntax
+* Reports link integrity issues
+
+**Usage:**
+```bash
+# Verify links in a single file
+python3 scripts/verify-adoc-links.py --file path/to/file.adoc --report target/links.md
+
+# Verify links in directory (non-recursive)
+python3 scripts/verify-adoc-links.py --directory directory/ --report target/links.md
+
+# Verify links recursively
+python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report target/links.md
+```
+
+**Interpreting Results:**
+
+* **Syntax Valid + Target Exists**: ✅ Link is correct
+* **Syntax Valid + Target Missing**: ❌ Reference to non-existent file
+  - Common cause: Documentation for planned/future features
+  - Action: Either create the target document or remove the reference
+  - Do NOT leave references to non-existent files
+* **Syntax Invalid**: ❌ Malformed cross-reference
+  - Fix syntax to use proper `xref:path[text]` format
+
+### Validation Workflow
+
+1. **Run format validation:**
+   ```bash
+   scripts/asciidoc-validator.sh target_file_or_directory 2>&1
+   ```
+
+2. **Run link verification:**
+   ```bash
+   mkdir -p target/asciidoc-reviewer
+   python3 scripts/verify-adoc-links.py --file target.adoc --report target/asciidoc-reviewer/links.md 2>&1
+   ```
+
+3. **Review validation output and fix issues**
+
+4. **Re-run validation to confirm fixes**
+
+### Quality Assurance Standards
+
+#### AsciiDoc Processing Compatibility
+
+**Requirements:**
+* Ensure compatibility with standard AsciiDoc processors
+* Validate output in multiple rendering environments
+* Test document generation in CI/CD pipelines
+* Verify TOC generation and cross-reference resolution
+
+#### Content Quality Standards
+
+**Technical Writing Requirements:**
+* Use clear, professional technical writing
+* Maintain active voice where appropriate
+* Use consistent terminology throughout documents
+* Structure content logically with clear section flow
+* Provide sufficient context for all technical concepts
+
+**Documentation Completeness:**
+* Include comprehensive examples for complex topics
+* Provide step-by-step instructions for procedures
+* Link to related documentation appropriately
+* Include troubleshooting information where relevant
+
+### CI/CD Integration
+
+**Automated Checks:**
+* AsciiDoc syntax validation
+* Cross-reference link validation
+* Document generation testing
+* Style guide compliance verification
+
+**Example CI/CD Integration:**
+```yaml
+documentation-validation:
+  script:
+    - scripts/asciidoc-validator.sh docs/
+    - python3 scripts/verify-adoc-links.py --directory docs/ --recursive --report target/validation-report.md
+  artifacts:
+    reports:
+      - target/validation-report.md
+```
+
 ## Quality Checklist
 
 - [ ] Document header complete with all required attributes
@@ -285,8 +467,13 @@ information block
 - [ ] Links have descriptive text
 - [ ] Tables properly formatted
 - [ ] Admonitions used appropriately
+- [ ] All validation scripts pass without errors
+- [ ] All cross-reference links resolve correctly
+- [ ] Document renders correctly in AsciiDoc processors
 
 ## References
 
-* xref:documentation-core.md[Documentation Core]
-* xref:readme-structure.md[README Structure]
+* [documentation-core.md](documentation-core.md) - Core documentation principles
+* [readme-structure.md](readme-structure.md) - README structure patterns
+* [tone-and-style.md](tone-and-style.md) - Professional tone requirements
+* [organization-standards.md](organization-standards.md) - Organization and structure

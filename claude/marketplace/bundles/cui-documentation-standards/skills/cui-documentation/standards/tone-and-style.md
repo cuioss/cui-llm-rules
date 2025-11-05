@@ -1,29 +1,14 @@
-= Tone and Style Standards for Technical Documentation
-:toc: left
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
+# Tone and Style Standards for Technical Documentation
 
-== Overview
+## Purpose
 
-This document defines comprehensive tone and style standards for all technical documentation in CUI projects. These standards ensure documentation maintains a professional, neutral, and objective voice appropriate for technical audiences.
+Technical documentation must maintain a professional, neutral, and objective voice. These standards ensure documentation serves to inform and educate without promotional language or subjective claims.
 
-== Purpose
+## Core Principles
 
-Technical documentation serves to inform, educate, and guide users and developers. The tone and style must reflect this purpose through:
-
-* **Clarity**: Information presented in clear, understandable language
-* **Objectivity**: Facts and technical details without subjective opinions
-* **Professionalism**: Appropriate formality and respect for the audience
-* **Consistency**: Uniform voice and style across all documentation
-
-== Core Principles
-
-=== Neutral and Professional Tone
+### Neutral and Professional Tone
 
 **Required Characteristics:**
-
 * Technical, professional voice throughout
 * Neutral presentation of information
 * Objective descriptions of functionality
@@ -31,17 +16,15 @@ Technical documentation serves to inform, educate, and guide users and developer
 * Appropriate formality for technical audience
 
 **Prohibited Characteristics:**
-
 * Marketing language or promotional wording
 * Self-praise or superlative claims
 * Subjective opinions without attribution
 * Casual or overly informal language
 * Emotional or persuasive writing
 
-=== Objective vs Subjective Language
+### Objective vs Subjective Language
 
-==== Objective Language (Use This)
-
+**Objective Language (Use This):**
 Objective language presents facts, technical specifications, and verifiable information:
 
 * "This library implements RFC 7519 for JWT validation"
@@ -49,8 +32,7 @@ Objective language presents facts, technical specifications, and verifiable info
 * "Configuration supports three authentication modes"
 * "The API follows REST principles as defined in Roy Fielding's dissertation"
 
-==== Subjective Language (Avoid This)
-
+**Subjective Language (Avoid This):**
 Subjective language includes opinions, marketing claims, or unverifiable statements:
 
 * ❌ "This is the best JWT library available"
@@ -58,36 +40,38 @@ Subjective language includes opinions, marketing claims, or unverifiable stateme
 * ❌ "Blazingly fast performance"
 * ❌ "The easiest API you'll ever use"
 
-== Prohibited Content Patterns
+## Prohibited Content Patterns
 
-=== Marketing Language
+### Marketing Language
 
 Marketing language attempts to sell or promote rather than inform.
 
 **Examples to Avoid:**
-
 * ❌ "Revolutionary new features"
 * ❌ "Cutting-edge technology"
 * ❌ "Industry-leading performance"
 * ❌ "State-of-the-art implementation"
 * ❌ "Powerful capabilities"
 * ❌ "Seamless integration"
+* ❌ "Comprehensive" (as marketing adjective)
+* ❌ "Robust" (as marketing adjective)
+* ❌ "Enterprise-grade"
 
 **Correct Alternatives:**
-
 * ✅ "New features in version 2.0"
 * ✅ "Implementation based on [specific standard]"
 * ✅ "Performance benchmarks: [specific metrics]"
 * ✅ "Implementation following [specific pattern]"
 * ✅ "Capabilities: [list specific features]"
 * ✅ "Integration via [specific mechanism]"
+* ✅ "Validates X, Y, and Z" (instead of "comprehensive validation")
+* ✅ "Handles errors: [list specific types]" (instead of "robust")
 
-=== Self-Praise and Superlatives
+### Self-Praise and Superlatives
 
 Self-praise elevates the project beyond objective assessment.
 
 **Examples to Avoid:**
-
 * ❌ "Excellent error handling"
 * ❌ "Superior design"
 * ❌ "The most comprehensive solution"
@@ -95,19 +79,17 @@ Self-praise elevates the project beyond objective assessment.
 * ❌ "Best-in-class architecture"
 
 **Correct Alternatives:**
-
 * ✅ "Error handling includes: [list specific error types]"
 * ✅ "Design follows [specific pattern/principle]"
 * ✅ "Features include: [complete list]"
 * ✅ "Supports: [list configuration options]"
 * ✅ "Architecture based on [specific style]"
 
-=== Promotional Wording
+### Promotional Wording
 
 Promotional wording attempts to persuade rather than describe.
 
 **Examples to Avoid:**
-
 * ❌ "You'll love how easy this is"
 * ❌ "Simply add one line of code"
 * ❌ "Effortlessly handles complex scenarios"
@@ -115,38 +97,34 @@ Promotional wording attempts to persuade rather than describe.
 * ❌ "Instantly improves performance"
 
 **Correct Alternatives:**
-
 * ✅ "Configuration requires: [specific steps]"
 * ✅ "Add the following dependency: [code]"
 * ✅ "Handles scenarios: [list specific cases]"
 * ✅ "Provides: [specific capabilities]"
 * ✅ "Performance characteristics: [specific metrics]"
 
-=== Unverified Claims
+### Unverified Claims
 
 All factual claims must be verifiable or properly attributed.
 
 **Examples Requiring Verification:**
-
 * ❌ "Industry standard practice" (without citation)
 * ❌ "Commonly used approach" (without reference)
 * ❌ "Improves performance by 50%" (without benchmarks)
 * ❌ "Widely adopted pattern" (without examples)
 
 **Correct Approaches:**
-
 * ✅ "Practice recommended in [source/standard]"
 * ✅ "Approach described in [citation]"
 * ✅ "Benchmark results: [link to data]"
 * ✅ "Pattern used by [specific projects/frameworks]"
 * ✅ "According to [authoritative source], ..."
 
-=== Qualification Patterns
+### Qualification Patterns
 
 Qualification patterns use subjective qualifiers to make factual claims sound more impressive. These are particularly problematic in technical specifications where neutral, factual descriptions are required.
 
 **Examples to Avoid:**
-
 * ❌ "Production-proven (227+ plugins)" - Promotional framing of usage statistics
 * ❌ "HIGH confidence from multiple production examples" - Subjective qualifier
 * ❌ "Extensively tested" - Vague claim without metrics
@@ -156,7 +134,6 @@ Qualification patterns use subjective qualifiers to make factual claims sound mo
 * ❌ "Proven track record" - Self-praise without evidence
 
 **Correct Alternatives:**
-
 * ✅ "Used by 227+ plugins in marketplace" - Factual statement
 * ✅ "Verified in production environments (see examples)" - Neutral with attribution
 * ✅ "Test coverage: [specific percentage/metrics]" - Measurable claim
@@ -166,19 +143,16 @@ Qualification patterns use subjective qualifiers to make factual claims sound mo
 * ✅ "Benchmark results: [link to data]" - Verifiable evidence
 
 **Context Matters:**
-
 Technical specifications require stricter scrutiny than general documentation:
-
 * Architecture documents: Describe structure, not quality judgments
 * API documentation: State functionality, not promotional claims
 * Implementation guides: Provide facts, not persuasive language
 
-=== Transitional Documentation Markers
+### Transitional Documentation Markers
 
 Transitional markers indicate work-in-progress documentation. These undermine the authoritative tone of technical documentation and create maintenance burden. Documentation should represent the current state, not track historical transitions.
 
 **Examples to Remove:**
-
 * ❌ "DOCUMENT STATUS: Draft" or "DOCUMENT STATUS: ✅ Complete"
 * ❌ "IMPLEMENTATION STATUS: In Progress" or "IMPLEMENTATION STATUS: ✅ Production-ready"
 * ❌ "Status: ✅ Verified and production-proven"
@@ -188,7 +162,6 @@ Transitional markers indicate work-in-progress documentation. These undermine th
 * ❌ "Work in progress"
 
 **Why These Are Problematic:**
-
 * Create maintenance burden (need constant updates)
 * Undermine authoritative tone (suggests incompleteness)
 * Add no technical value to readers
@@ -196,7 +169,6 @@ Transitional markers indicate work-in-progress documentation. These undermine th
 * Appropriate for project management, not technical documentation
 
 **Correct Approaches:**
-
 * ✅ Document current state only - remove status markers
 * ✅ Use git history for tracking changes, not inline markers
 * ✅ Complete sections before publishing, or omit incomplete content
@@ -205,178 +177,137 @@ Transitional markers indicate work-in-progress documentation. These undermine th
 
 **Exception:** Release notes and changelogs may document state changes, but should still avoid promotional status markers.
 
-== Required Content Patterns
+## Required Content Patterns
 
-=== Technical Precision
+### Technical Precision
 
 Use precise technical language that accurately describes functionality.
 
 **Good Examples:**
-
 * ✅ "Validates JWT signatures using HMAC SHA-256"
 * ✅ "Implements OAuth 2.0 Authorization Code Flow as defined in RFC 6749"
 * ✅ "Provides thread-safe token cache with configurable TTL"
 * ✅ "Supports PKCE extension per RFC 7636"
 
-=== Factual Descriptions
+### Factual Descriptions
 
 Present features and capabilities as factual statements.
 
 **Good Examples:**
-
 * ✅ "The library includes three validation modes: strict, lenient, and custom"
 * ✅ "Configuration options are documented in [location]"
 * ✅ "Compatibility: Java 11 and higher"
 * ✅ "Dependencies: [list with versions]"
 
-=== Attributed Sources
+### Attributed Sources
 
 When referencing standards, specifications, or external sources, provide attribution.
 
 **Required Pattern:**
-
-```asciidoc
-As specified in https://tools.ietf.org/html/rfc7519[RFC 7519], JWT tokens consist of three parts: header, payload, and signature.
+```markdown
+As specified in [RFC 7519](https://tools.ietf.org/html/rfc7519), JWT tokens consist of three parts: header, payload, and signature.
 ```
 
 **Components:**
-
 * Link to authoritative source
 * Clear indication of what comes from that source
 * Accurate representation of the source material
 
-== Clarity Standards
+## Clarity Standards
 
-=== Concise Writing
+### Concise Writing
 
 Avoid verbose or redundant passages.
 
 **Verbose (Avoid):**
-
 ❌ "This library provides functionality that allows developers to perform validation of JWT tokens in a way that ensures security and compliance with industry standards through comprehensive checking mechanisms."
 
 **Concise (Use):**
-
 ✅ "This library validates JWT tokens according to RFC 7519 security requirements."
 
-=== Direct Language
+### Direct Language
 
 Use direct, straightforward language without unnecessary complexity.
 
 **Indirect (Avoid):**
-
 ❌ "It should be noted that there exists a possibility for configuring the validation process in such a manner that..."
 
 **Direct (Use):**
-
 ✅ "Configure validation by setting..."
 
-=== No Jargon Without Explanation
+### No Jargon Without Explanation
 
 Technical terms are acceptable when properly introduced.
 
 **Bad (Jargon Unexplained):**
-
 ❌ "Uses PKCE for enhanced security."
 
 **Good (Jargon Explained):**
-
 ✅ "Uses PKCE (Proof Key for Code Exchange) to prevent authorization code interception attacks, as defined in RFC 7636."
 
-== Humor and Personality
+## Voice and Tense
 
-=== Minimal Humor Only
-
-Humor is generally avoided in technical documentation. When used, it must be:
-
-* Genuinely suitable for the context
-* Not at the expense of clarity
-* Professional and inoffensive
-* Minimal (rare exceptions only)
-
-**Generally Avoid:**
-
-* Jokes or puns in API documentation
-* Casual references or pop culture
-* Sarcasm or irony
-* Easter eggs in technical content
-
-**Acceptable (Rare):**
-
-* Brief, professional wit in blog posts or tutorials
-* Self-deprecating humor about known limitations (if factual)
-* Historical anecdotes if directly relevant
-
-**Example of Acceptable:**
-
-✅ "Note: Early versions named this parameter `magicFlag`. We've since learned to be more descriptive."
-
-== Voice and Tense
-
-=== Active vs Passive Voice
+### Active vs Passive Voice
 
 **Prefer Active Voice:**
-
 * ✅ "The library validates tokens"
 * ✅ "Call `validate()` to check the token"
 * ✅ "The parser throws `InvalidTokenException`"
 
 **Passive Voice (Acceptable for Processes):**
-
 * ✅ "Tokens are validated against the configured issuer"
 * ✅ "Errors are logged to the specified output"
 
-=== Present Tense
+### Present Tense
 
 Use present tense for describing current functionality.
 
 **Good Examples:**
-
 * ✅ "The method returns a validated token"
 * ✅ "Configuration accepts three parameters"
 * ✅ "Errors are reported via exceptions"
 
 **Avoid Future Tense for Current Features:**
-
 * ❌ "The method will return a token"
 * ❌ "Configuration will accept parameters"
 
-== Consistency Standards
+## Common Patterns to Fix
 
-=== Terminology Consistency
+### Pattern 1: Feature Announcement
 
-Use consistent terms throughout documentation.
+**Problematic:**
+❌ "We're excited to announce our new validation API with amazing features!"
 
-**Examples:**
+**Fixed:**
+✅ "Version 2.0 introduces a new validation API with the following features: [list]"
 
-* If you use "JWT token" in one place, don't switch to "JSON Web Token" elsewhere without good reason
-* If you call something a "validator", don't alternate with "checker" or "verifier"
-* Maintain consistent parameter names across examples
+### Pattern 2: Ease-of-Use Claims
 
-=== Formatting Consistency
+**Problematic:**
+❌ "Integration is incredibly simple and takes just minutes."
 
-Apply consistent formatting to similar elements.
+**Fixed:**
+✅ "Integration requires three steps: [numbered list with code examples]"
 
-**Examples:**
+### Pattern 3: Performance Bragging
 
-* All method names in backticks: `validate()`
-* All configuration properties in same format: `oauth.issuer.url`
-* All code examples with proper language specification
-* All warnings formatted identically
+**Problematic:**
+❌ "Lightning-fast performance that outperforms all competitors."
 
-=== Style Consistency
+**Fixed:**
+✅ "Validation throughput: 50,000 tokens/second on reference hardware (see benchmarks/setup.md)"
 
-Maintain uniform style across documentation.
+### Pattern 4: Vague Benefits
 
-**Examples:**
+**Problematic:**
+❌ "Provides better security and enhanced reliability."
 
-* If one README uses bullet points for features, others should too
-* If one guide uses numbered steps, maintain that pattern
-* If one document uses second person ("you"), be consistent
+**Fixed:**
+✅ "Implements security requirements from RFC 7519 sections 4-6. Includes validation of: signature, expiration, issuer, audience."
 
-== Analysis Guidelines
+## Analysis Guidelines
 
-=== Identifying Tone Issues
+### Identifying Tone Issues
 
 When reviewing documentation, assess each statement:
 
@@ -396,32 +327,28 @@ When reviewing documentation, assess each statement:
    - Precise: Specific, measurable, clear
    - Vague: General, ambiguous, unclear
 
-=== Fixing Tone Issues
+### Fixing Tone Issues
 
 For each identified issue:
 
 **Step 1: Identify the Problem**
-
 * What makes this text problematic?
 * Which principle does it violate?
 * What is the underlying intent?
 
 **Step 2: Determine the Fix**
-
 * What factual information can replace the subjective claim?
 * How can this be stated neutrally?
 * What technical details are needed?
 * What source or attribution is required?
 
 **Step 3: Rewrite**
-
 * Remove subjective language
 * Add technical precision
 * Include sources/references
 * Verify factual accuracy
 
 **Example:**
-
 ```
 Original: "Our revolutionary caching system dramatically improves performance."
 
@@ -439,91 +366,13 @@ Rationale:
 - Maintained technical focus
 ```
 
-== Common Patterns to Fix
+## Examples
 
-=== Pattern 1: Feature Announcement
-
-**Problematic:**
-
-❌ "We're excited to announce our new validation API with amazing features!"
-
-**Fixed:**
-
-✅ "Version 2.0 introduces a new validation API with the following features: [list]"
-
-=== Pattern 2: Ease-of-Use Claims
-
-**Problematic:**
-
-❌ "Integration is incredibly simple and takes just minutes."
-
-**Fixed:**
-
-✅ "Integration requires three steps: [numbered list with code examples]"
-
-=== Pattern 3: Performance Bragging
-
-**Problematic:**
-
-❌ "Lightning-fast performance that outperforms all competitors."
-
-**Fixed:**
-
-✅ "Validation throughput: 50,000 tokens/second on reference hardware (see benchmarks/setup.md)"
-
-=== Pattern 4: Vague Benefits
-
-**Problematic:**
-
-❌ "Provides better security and enhanced reliability."
-
-**Fixed:**
-
-✅ "Implements security requirements from RFC 7519 sections 4-6. Includes validation of: signature, expiration, issuer, audience."
-
-== Integration with Review Process
-
-When performing documentation reviews, apply these standards through:
-
-1. **Systematic Analysis**
-   - Read each section critically
-   - Flag subjective language
-   - Note unverified claims
-   - Identify marketing patterns
-
-2. **ULTRATHINK Reasoning** (for automated reviews)
-   - Engage deeper analysis for tone issues
-   - Consider context and intent
-   - Evaluate alternatives
-   - Justify recommended changes
-
-3. **Prioritization**
-   - Critical: Unverified claims, marketing language
-   - High: Subjective descriptions, unclear statements
-   - Medium: Minor tone inconsistencies
-   - Low: Style preferences
-
-4. **Verification**
-   - After fixes, re-read for tone
-   - Ensure technical accuracy preserved
-   - Check that information is complete
-   - Verify sources are attributed
-
-== Related Standards
-
-* xref:general-standard.adoc[General Documentation Standards] - Overall documentation requirements
-* xref:asciidoc-standards.adoc[AsciiDoc Standards] - Formatting and structure requirements
-* xref:organization-standards.adoc[Organization Standards] - Documentation organization and review
-* xref:javadoc-standards.adoc[Javadoc Standards] - Java-specific documentation standards
-
-== Examples
-
-=== Example 1: Project Overview
+### Example 1: Project Overview
 
 **Before (Problematic):**
-
-```asciidoc
-= Amazing OAuth Library
+```markdown
+# Amazing OAuth Library
 
 Our revolutionary OAuth implementation makes authentication incredibly easy!
 With blazing-fast performance and a beautifully designed API, you'll love
@@ -533,9 +382,8 @@ application's security.
 ```
 
 **After (Compliant):**
-
-```asciidoc
-= OAuth Sheriff
+```markdown
+# OAuth Sheriff
 
 OAuth 2.0 implementation for Java applications following RFC 6749 and RFC 7636.
 
@@ -545,15 +393,14 @@ Features:
 * Integration with Quarkus via CDI extension
 * Configurable token cache (default: 10-minute TTL)
 
-For usage examples, see xref:examples/README.adoc[Examples].
+For usage examples, see [Examples](examples/README.md).
 ```
 
-=== Example 2: Feature Description
+### Example 2: Feature Description
 
 **Before (Problematic):**
-
-```asciidoc
-== Awesome Validation Features
+```markdown
+## Awesome Validation Features
 
 Our state-of-the-art validation engine provides unmatched flexibility and
 performance. You'll be amazed at how it effortlessly handles even the most
@@ -561,9 +408,8 @@ complex scenarios while maintaining incredible speed.
 ```
 
 **After (Compliant):**
-
-```asciidoc
-== Token Validation
+```markdown
+## Token Validation
 
 The validation engine supports three modes:
 
@@ -571,49 +417,30 @@ The validation engine supports three modes:
 * **Lenient**: Allows expired tokens for testing
 * **Custom**: User-defined validation rules
 
-Performance: Validates 50,000 tokens/second (benchmark details in
-xref:../benchmarking/results.adoc[Benchmark Results]).
+Performance: Validates 50,000 tokens/second (benchmark details in [Benchmark Results](../benchmarking/results.md)).
 ```
 
-=== Example 3: API Documentation
+## Quality Checklist
 
-**Before (Problematic):**
+Before finalizing documentation, verify:
 
-```asciidoc
-== Using the API
+- [ ] Professional, neutral tone maintained
+- [ ] No marketing language (revolutionary, cutting-edge, powerful, etc.)
+- [ ] No self-praise or superlatives
+- [ ] No promotional wording
+- [ ] All claims are verifiable or attributed
+- [ ] No qualification patterns (production-proven, extensively tested, etc.)
+- [ ] No transitional markers (status indicators, TODO items)
+- [ ] Technical precision throughout
+- [ ] Concise, direct language
+- [ ] Jargon explained when used
+- [ ] Active voice preferred
+- [ ] Present tense for current features
+- [ ] Factual descriptions only
+- [ ] Sources attributed where appropriate
 
-Simply call our elegant validation API and watch it work its magic!
-The API is so intuitive that you'll be up and running in no time.
-```
+## References
 
-**After (Compliant):**
-
-```asciidoc
-== API Usage
-
-Validate a token using the `TokenValidator`:
-
-[source,java]
-----
-TokenValidator validator = TokenValidator.builder()
-    .issuer("https://auth.example.com")
-    .audience("api.example.com")
-    .build();
-
-ValidatedToken token = validator.validate(rawToken);
-----
-
-Throws `InvalidTokenException` if validation fails. See
-xref:api/exceptions.adoc[Exception Handling] for details.
-```
-
-== Conclusion
-
-Maintaining appropriate tone and style in technical documentation ensures:
-
-* **Credibility**: Readers trust factual, objective information
-* **Clarity**: Technical details are not obscured by marketing language
-* **Professionalism**: Documentation reflects well on the project
-* **Usability**: Users find accurate information quickly
-
-All documentation must adhere to these tone and style standards to maintain quality and consistency across CUI projects.
+* xref:documentation-core.md[Documentation Core Standards]
+* xref:asciidoc-formatting.md[AsciiDoc Formatting Standards]
+* xref:readme-structure.md[README Structure Standards]
