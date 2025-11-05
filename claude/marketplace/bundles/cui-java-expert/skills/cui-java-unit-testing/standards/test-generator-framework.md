@@ -118,6 +118,8 @@ class AllTestsReproducible {
 
 Parameterized tests are **mandatory** when testing at least 3 similar variants of the same behavior.
 
+For complete parameterized test best practices including quality requirements, see [Test Quality Standards - Parameterized Test Guidelines](testing-quality-standards.md#parameterized-test-guidelines).
+
 **Annotation Preference Order:**
 
 1. **@GeneratorsSource** (Most Preferred) - For single generator with GeneratorType enum

@@ -52,6 +52,12 @@ Standards and patterns for writing high-quality unit tests in CUI Java projects 
    ```
    Provides patterns for configuring test loggers with `@EnableTestLogger`, asserting log statements with `LogAsserts`, and dynamically changing log levels in tests.
 
+   **F. If focusing on test quality or reviewing existing tests** (improving test quality, eliminating AI-generated artifacts, or ensuring compliance):
+   ```
+   Read: standards/testing-quality-standards.md
+   ```
+   Provides quality best practices including AI-generated code detection, parameterized test guidelines, assertion message standards, SonarQube compliance, library migration guidelines, and coverage requirements.
+
 3. **Extract key requirements from all loaded standards**
 
 4. **Store in working memory** for use during task execution
@@ -77,6 +83,7 @@ If working with existing tests:
    - Verify test independence and isolation
    - Assess test naming and @DisplayName usage
    - Identify potential test consolidation opportunities
+   - Detect AI-generated code artifacts (see testing-quality-standards.md for indicators)
 
 ### Step 3: Write/Modify Tests According to Standards
 

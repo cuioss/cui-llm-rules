@@ -164,9 +164,16 @@ Task Execution (Three-Layer):
 ## Architecture Standards
 
 - [ ] Add Rule 6 "Agent Delegation Constraints" to `cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md`
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
+  ACTION: ADD NEW RULE 6
+  ```
 
 - [ ] Add Rule 7 "Maven Execution Principle" to `architecture-rules.md`: Agents NEVER call Maven directly (Bash(./mvnw:*) always a bug), Commands orchestrate maven-builder agent
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
+  ACTION: ADD NEW RULE 7
+
   EXCEPTION: maven-builder agent is ALLOWED Bash(./mvnw:*) - it's the central build execution agent
              All other agents must delegate to maven-builder instead of calling Maven directly
 
@@ -176,22 +183,54 @@ Task Execution (Three-Layer):
   ```
 
 - [ ] Add Rule 8 "Three-Layer Pattern" to `architecture-rules.md`: Batch command → Single-item command → Focused agents (PRIMARY PATTERN)
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
+  ACTION: ADD NEW RULE 8
+  ```
 
 - [ ] Update Rule 5 "Component Organization" cross-layer communication section in `architecture-rules.md`
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
+  ACTION: UPDATE RULE 5
+  ```
 
 - [ ] Add Task tool misuse detection to `cui-plugin-development-tools/standards/agent-quality-standards.md`
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
+  ACTION: ADD TASK TOOL MISUSE DETECTION
+  ```
 
 - [ ] Add `Bash(./mvnw:*)` anti-pattern to `agent-quality-standards.md`: Always a bug in agents
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
+  ACTION: ADD MAVEN ANTI-PATTERN DETECTION
+  ```
 
 ## Diagnostic Tools
 
 - [ ] Add Check 6 "Task Tool Misuse Detection" to `cui-plugin-development-tools/commands/cui-diagnose-agents.md`
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-diagnose-agents.md
+  ACTION: ADD CHECK 6 - TASK TOOL MISUSE DETECTION
+  ```
 
 - [ ] Add Check 7 "Maven Anti-Pattern Detection" to `cui-diagnose-agents.md`: Detect `Bash(./mvnw:*)` in agent tools
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-diagnose-agents.md
+  ACTION: ADD CHECK 7 - MAVEN ANTI-PATTERN DETECTION
+  ```
 
 - [ ] Add Task tool validation to questionnaire in `cui-plugin-development-tools/commands/cui-create-agent.md`
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-create-agent.md
+  ACTION: ADD TASK TOOL VALIDATION TO QUESTIONNAIRE
+  ```
 
 - [ ] Add Maven tool validation to `cui-create-agent.md`: Reject `Bash(./mvnw:*)` in agent tool selection
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-create-agent.md
+  ACTION: ADD MAVEN TOOL VALIDATION TO QUESTIONNAIRE
+  ```
 
 ## Agent Migrations
 
@@ -199,7 +238,7 @@ Task Execution (Three-Layer):
 
 - [ ] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-verify command)
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-project-builder.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-project-builder.md
   ACTION: DELETE FILE
 
   BEFORE:
@@ -223,7 +262,7 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/cui-build-and-verify` command: orchestrate build + delegate fixes to appropriate commands
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-maven/commands/cui-build-and-verify.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/commands/cui-build-and-verify.md
   ACTION: UPDATE WORKFLOW
 
   BEFORE:
@@ -249,7 +288,7 @@ Task Execution (Three-Layer):
 
 - [ ] Update `maven-builder` agent to return structured results (not just raw output)
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-builder.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-builder.md
   ACTION: UPDATE RESPONSE FORMAT
 
   BEFORE:
@@ -292,7 +331,7 @@ Task Execution (Three-Layer):
 
 - [ ] Create `/review-single-asciidoc` command (single-file orchestrator)
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/review-single-asciidoc.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/review-single-asciidoc.md
   ACTION: CREATE NEW COMMAND FILE
 
   NEW COMMAND:
@@ -305,7 +344,7 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/review-technical-docs` to use three-layer pattern
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/cui-review-technical-docs.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/cui-review-technical-docs.md
   ACTION: UPDATE WORKFLOW
 
   BEFORE:
@@ -342,7 +381,7 @@ Task Execution (Three-Layer):
 
 - [ ] Remove old `asciidoc-reviewer` agent (replaced by /review-single-asciidoc command)
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-reviewer.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-reviewer.md
   ACTION: DELETE FILE (if exists - functionality moved to /review-single-asciidoc command)
   ```
 
@@ -350,7 +389,7 @@ Task Execution (Three-Layer):
 
 - [ ] Remove Task from `java-code-implementer` - make focused (just implements code, no verification)
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-code-implementer.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-code-implementer.md
   ACTION: UPDATE tools (remove Task)
 
   BEFORE:
@@ -367,7 +406,7 @@ Task Execution (Three-Layer):
 
 - [ ] Create `/java-implement-code` command (self-contained implementation + verification)
   ```
-  FILE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-code.md
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-code.md
   ACTION: CREATE NEW COMMAND FILE
 
   NEW COMMAND:
@@ -385,6 +424,9 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/cui-java-task-manager` command: orchestrate using self-contained commands
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/cui-java-task-manager.md
+  ACTION: UPDATE WORKFLOW
+
   BEFORE:
   /cui-java-task-manager
     └─> Task(java-code-implementer)
@@ -404,6 +446,9 @@ Task Execution (Three-Layer):
 
 - [ ] Remove Task from `java-junit-implementer` - make focused (just writes tests, no verification)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-junit-implementer.md
+  ACTION: UPDATE tools (remove Task)
+
   BEFORE:
   java-junit-implementer [agent]
     tools: Read, Write, Edit, Glob, Grep, Task, Skill
@@ -418,6 +463,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `/java-implement-tests` command (self-contained test writing + verification)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-tests.md
+  ACTION: CREATE NEW COMMAND FILE
+
   NEW COMMAND:
   /java-implement-tests <test-description>
     ├─> Task(java-junit-implementer) [focused: just writes tests]
@@ -435,6 +483,12 @@ Task Execution (Three-Layer):
 
 - [ ] Convert `java-coverage-reporter` agent → `/java-coverage-report` command (self-contained)
   ```
+  FILES:
+  - DELETE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-coverage-reporter.md
+  - CREATE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-coverage-report.md
+  - CREATE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-coverage-analyzer.md
+  ACTION: DELETE AGENT, CREATE COMMAND + FOCUSED AGENT
+
   BEFORE:
   java-coverage-reporter [agent]
     tools: Read, Glob, Grep, Task
@@ -471,6 +525,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `logging-violation-analyzer` agent (focused: analyzes LOGGER usage)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/logging-violation-analyzer.md
+  ACTION: CREATE NEW AGENT FILE
+
   NEW AGENT:
   logging-violation-analyzer [agent]
     tools: Read, Grep, Glob
@@ -485,6 +542,9 @@ Task Execution (Three-Layer):
 
 - [ ] Remove Task from `cui-log-record-documenter` - make focused (just updates AsciiDoc, no verification)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/cui-log-record-documenter.md
+  ACTION: UPDATE tools (remove Task)
+
   BEFORE:
   cui-log-record-documenter [agent]
     tools: Read, Edit, Write, Grep, Glob, Task
@@ -505,6 +565,9 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/cui-log-record-enforcer` command: orchestrate multiple agents for complete workflow
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/cui-log-record-enforcer.md
+  ACTION: UPDATE WORKFLOW
+
   BEFORE:
   /cui-log-record-enforcer
     └─> Task(cui-log-record-documenter)
@@ -531,6 +594,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `sonar-issue-fetcher` agent (focused: fetches issues from SonarQube)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/sonar-issue-fetcher.md
+  ACTION: CREATE NEW AGENT FILE
+
   NEW AGENT:
   sonar-issue-fetcher [agent]
     tools: Bash(gh:*), mcp__sonarqube__*
@@ -545,6 +611,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `sonar-issue-triager` agent (focused: decides fix vs suppress)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/sonar-issue-triager.md
+  ACTION: CREATE NEW AGENT FILE
+
   NEW AGENT:
   sonar-issue-triager [agent]
     tools: Read, Grep
@@ -567,6 +636,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `/fix-sonar-issues` command (fetch + triage + fix Sonar issues)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/fix-sonar-issues.md
+  ACTION: CREATE NEW COMMAND FILE
+
   NEW COMMAND:
   /fix-sonar-issues [filter-options]
 
@@ -601,9 +673,16 @@ Task Execution (Three-Layer):
   ```
 
 - [ ] Remove `pr-quality-fixer` agent file (logic moved to /fix-sonar-issues command)
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/pr-quality-fixer.md
+  ACTION: DELETE FILE
+  ```
 
 - [ ] Create `review-comment-fetcher` agent (focused: fetches review comments from GitHub)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/review-comment-fetcher.md
+  ACTION: CREATE NEW AGENT FILE
+
   NEW AGENT:
   review-comment-fetcher [agent]
     tools: Bash(gh:*)
@@ -618,6 +697,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `review-comment-triager` agent (focused: decides code change vs explanation)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/review-comment-triager.md
+  ACTION: CREATE NEW AGENT FILE
+
   NEW AGENT:
   review-comment-triager [agent]
     tools: Read, Grep
@@ -640,6 +722,9 @@ Task Execution (Three-Layer):
 
 - [ ] Remove `pr-review-responder` agent (logic moved to /cui-handle-pull-request command)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/pr-review-responder.md
+  ACTION: DELETE FILE
+
   BEFORE:
   pr-review-responder [agent]
     tools: Read, Edit, Bash(gh:*), Task
@@ -648,16 +733,19 @@ Task Execution (Three-Layer):
     └─> Task(commit-changes) ❌
 
   AFTER:
-  REMOVED - orchestration moved to /cui-handle-pull-request command
+  REMOVED - orchestration moved to /respond-to-review-comments command
            Fetch + triage pattern with focused agents instead
 
   WHY: Agent tried to orchestrate other agents (impossible)
        Fetch + triage pattern is consistent with Sonar issue handling
-       Batch command handles orchestration
+       Command handles orchestration
   ```
 
 - [ ] Create `/respond-to-review-comments` command (fetch + triage + respond to review comments)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/respond-to-review-comments.md
+  ACTION: CREATE NEW COMMAND FILE
+
   NEW COMMAND:
   /respond-to-review-comments [filter-options]
 
@@ -694,6 +782,9 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/cui-handle-pull-request` command: orchestrate specialized commands with setup/waiting
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/cui-handle-pull-request.md
+  ACTION: UPDATE WORKFLOW
+
   CURRENT WORKFLOW (from existing command):
   /cui-handle-pull-request pr={number}
     ├─> Step 1: Get PR info via gh pr view
@@ -727,6 +818,9 @@ Task Execution (Three-Layer):
 
 - [ ] Remove Task and Bash(./mvnw:*) from `task-executor` - make focused
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-executor.md
+  ACTION: UPDATE tools (remove Task and Bash(./mvnw:*))
+
   BEFORE:
   task-executor [agent]
     tools: Read, Edit, Write, Glob, Grep, Task, Bash(./mvnw:*), Bash(./gradlew:*), Skill
@@ -746,6 +840,9 @@ Task Execution (Three-Layer):
 
 - [ ] Create `/execute-task` command (self-contained: implement + verify single task)
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/execute-task.md
+  ACTION: CREATE NEW COMMAND FILE
+
   NEW COMMAND:
   /execute-task <task-description>
     ├─> Task(task-executor) [focused: implements task]
@@ -762,6 +859,9 @@ Task Execution (Three-Layer):
 
 - [ ] Update `/cui-implement-task` command: determine if atomic or batch
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/cui-implement-task.md
+  ACTION: UPDATE WORKFLOW
+
   BEFORE:
   /cui-implement-task
     └─> Task(task-executor)
@@ -789,6 +889,9 @@ Task Execution (Three-Layer):
 
 - [ ] Change `Task(/review-technical-docs)` → `SlashCommand(/review-technical-docs)` in `task-reviewer`
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
+  ACTION: UPDATE tools (change Task to SlashCommand)
+
   BEFORE:
   task-reviewer [agent]
     tools: Read, Edit, Write, Bash(gh:*), Task, SlashCommand
@@ -807,6 +910,9 @@ Task Execution (Three-Layer):
 
 - [ ] Remove Task from `cui-diagnose-single-skill`
   ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/agents/cui-diagnose-single-skill.md
+  ACTION: UPDATE tools (remove Task, inline validation)
+
   BEFORE:
   cui-diagnose-single-skill [agent]
     tools: Read, Grep, Glob, Task
@@ -819,6 +925,10 @@ Task Execution (Three-Layer):
   ```
 
 - [ ] Inline validation logic using Grep/Read/Glob in `cui-diagnose-single-skill`
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/agents/cui-diagnose-single-skill.md
+  ACTION: INLINE VALIDATION LOGIC (covered by task above)
+  ```
 
 ## Migration Summary
 
@@ -886,20 +996,70 @@ AsciiDoc validators already focused, no changes needed (used by /review-single-a
 ## Testing
 
 - [ ] Test `maven-project-builder` removal + `cui-build-and-verify` update
+  ```
+  ACTION: MANUAL TESTING - no specific file
+  ```
 - [ ] Test all migrated cui-java-expert agents
+  ```
+  ACTION: MANUAL TESTING - test all agents in cui-java-expert bundle
+  ```
 - [ ] Test all migrated cui-workflow agents
+  ```
+  ACTION: MANUAL TESTING - test all agents in cui-workflow bundle
+  ```
 - [ ] Test `asciidoc-reviewer` changes
+  ```
+  ACTION: MANUAL TESTING - test /review-single-asciidoc command
+  ```
 - [ ] Test `cui-diagnose-single-skill` changes
+  ```
+  ACTION: MANUAL TESTING - test cui-diagnose-single-skill agent
+  ```
 - [ ] Run `/cui-diagnose-agents` - verify 0 Task tool violations
+  ```
+  ACTION: EXECUTE DIAGNOSTIC COMMAND
+  ```
 - [ ] Run `/cui-diagnose-bundle` for each affected bundle
+  ```
+  ACTION: EXECUTE DIAGNOSTIC COMMAND FOR EACH BUNDLE
+  ```
 - [ ] Test `/cui-build-and-verify` end-to-end
+  ```
+  ACTION: MANUAL END-TO-END TESTING
+  ```
 - [ ] Test `/cui-handle-pull-request` end-to-end
+  ```
+  ACTION: MANUAL END-TO-END TESTING
+  ```
 - [ ] Test `/cui-implement-task` end-to-end
+  ```
+  ACTION: MANUAL END-TO-END TESTING
+  ```
 
 ## Documentation
 
 - [ ] Update cui-maven bundle README
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/README.md
+  ACTION: UPDATE BUNDLE DOCUMENTATION
+  ```
 - [ ] Update cui-documentation-standards bundle README
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/README.md
+  ACTION: UPDATE BUNDLE DOCUMENTATION
+  ```
 - [ ] Update cui-java-expert bundle README
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/README.md
+  ACTION: UPDATE BUNDLE DOCUMENTATION
+  ```
 - [ ] Update cui-workflow bundle README
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/README.md
+  ACTION: UPDATE BUNDLE DOCUMENTATION
+  ```
 - [ ] Update cui-plugin-development-tools bundle README
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/README.md
+  ACTION: UPDATE BUNDLE DOCUMENTATION
+  ```

@@ -1,5 +1,14 @@
 # JUnit Core Testing Standards
 
+## Related Documentation
+
+* [Test Quality Standards](testing-quality-standards.md) - Quality best practices, AI code detection, and library compliance
+* [Test Generator Framework](test-generator-framework.md) - CUI test generator standards and API reference
+* [Value Object Testing](testing-value-objects.md) - Contract testing for value objects
+* [HTTP Testing with MockWebServer](testing-mockwebserver.md) - HTTP client testing patterns
+* [Integration Testing](integration-testing.md) - Maven configuration for integration tests
+* [JULi Logger Testing](testing-juli-logger.md) - Testing logging with Java Util Logging
+
 ## Core Testing Principles
 
 ### Test Class Requirements
@@ -121,7 +130,7 @@ class TokenValidatorTest {
 
 **Use JUnit 5 assertions exclusively - Hamcrest is forbidden.**
 
-All assertions must include meaningful, concise failure messages:
+All assertions must include meaningful, concise failure messages (20-60 characters):
 
 ```java
 // Good - Meaningful assertion messages
@@ -135,19 +144,7 @@ assertTrue(result.isPresent()); // Missing context
 assertTrue(result.isPresent(), "Should be true"); // Meaningless
 ```
 
-**Assertion Message Requirements:**
-
-* Include WHY the assertion should pass
-* Keep messages concise but informative (20-60 characters)
-* Provide debugging context
-* Use consistent language patterns
-
-**Standard Message Patterns:**
-
-* For presence checks: `"X should be present"`, `"X should not be null"`
-* For equality: `"X should equal Y"`, `"X should match expected value"`
-* For collections: `"Collection should contain X"`, `"List should have Y elements"`
-* For exceptions: `"X should throw Y exception"`, `"Invalid X should trigger Y"`
+For detailed assertion message standards, patterns, and best practices, see [Test Quality Standards](testing-quality-standards.md#assertion-message-standards).
 
 ### Exception Testing
 
@@ -218,6 +215,8 @@ void shouldThrowExceptionOnInvalidInput() {
 * **Mockito**: Do NOT use - use CUI framework alternatives or EasyMock for simple mocking
 * **PowerMock**: Do NOT use - refactor to use dependency injection or EasyMock
 * **Hamcrest**: Do NOT use - use JUnit 5 assertions exclusively
+
+For migration guidelines from forbidden libraries, see [Test Quality Standards](testing-quality-standards.md#testing-library-compliance).
 
 ## Best Practices
 
