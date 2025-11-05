@@ -50,46 +50,37 @@ tools: Read, Edit, Write, Grep, Skill
 
 ## Solution: Hybrid Command and Agent Architecture
 
-Use BOTH command-to-command orchestration AND command-to-agent delegation appropriately:
+Use BOTH command-to-command orchestration AND command-to-agent delegation appropriately.
 
-### Pattern 1: Commands Orchestrate Commands
-For high-level workflows that compose multiple logical operations:
+The **migration-plan.md** document defines three operational patterns for implementing this architecture:
 
-```
-/cui-build-and-verify (command)
-  ↓ Main Claude executes (has SlashCommand tool)
-  ├─> SlashCommand("/cui-maven-build") - reusable build command
-  └─> SlashCommand("/cui-commit-changes") - reusable commit command
-```
+### Pattern 1: Self-Contained Command (Single Operation)
+For single, focused operations (implement, test, analyze, build):
+- Command orchestrates: focused agent → verification agent → iterate → return result
+- Examples: `/java-implement-code`, `/java-implement-tests`, `/java-coverage-report`, `/execute-task`
 
-**Use when**: Composing reusable operations, each valuable as standalone command
+### Pattern 2: Three-Layer Design (Batch Operations)
+For batch/collection operations (multiple independent items):
+- **Layer 1** (Batch Command): Collects items, delegates to Layer 2 per item
+- **Layer 2** (Self-Contained Command): Pattern 1 for single item
+- **Layer 3** (Focused Agents): Execute specific tasks only
+- Examples: `/review-technical-docs` → `/review-single-asciidoc` → validator agents
 
-### Pattern 2: Commands Delegate to Agents (Single Level)
-For focused tasks requiring autonomous execution in isolated context:
+### Pattern 3: Fetch + Triage + Delegate (Smart Orchestration)
+For complex orchestration requiring analysis before action:
+- Command: Fetcher agent → For each: Triager agent → Delegate based on triage → Verify
+- Used when items need analysis before deciding action (fix vs suppress, code change vs explanation)
+- Examples: `/fix-sonar-issues`, `/respond-to-review-comments`
 
-```
-/cui-maven-build (command)
-  ↓ Main Claude executes (has Task tool)
-  └─> Task(maven-builder) - focused build execution agent
-```
-
-**Use when**: Task benefits from separate context window, specialized tools, or focused system prompt
-
-### Combined Architecture Example
-```
-/cui-build-and-verify (orchestration command)
-  ├─> SlashCommand("/cui-maven-build")
-  │    └─> Task(maven-builder agent) - builds with output capture
-  ├─> Main Claude analyzes output and fixes issues
-  └─> SlashCommand("/cui-commit-changes")
-       └─> Task(commit-changes agent) - commits and pushes
-```
+See **migration-plan.md** for detailed workflow examples, concrete implementations, and complete migration tasks.
 
 ### Critical Rules
 - ✅ Commands CAN invoke other commands (via SlashCommand tool)
 - ✅ Commands CAN invoke agents (via Task tool)
 - ❌ Agents CANNOT invoke other agents (Task tool unavailable)
-- ✅ Agents CAN use all other tools (Read, Write, Edit, Bash, etc.)
+- ❌ Agents CANNOT invoke commands (SlashCommand tool unavailable)
+- ✅ Agents CAN use all other tools (Read, Write, Edit, Bash, Grep, Glob, Skill, etc.)
+- 📋 Flow is unidirectional: command → command OR command → agent (NEVER agent → *)
 
 ## References
 

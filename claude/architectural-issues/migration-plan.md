@@ -3,6 +3,17 @@
 **Date**: 2025-11-04
 **Reference**: agent-nesting-limitation.md
 
+## Critical Rules
+
+These architectural constraints govern all agent and command design (see agent-nesting-limitation.md for details):
+
+- ✅ Commands CAN invoke other commands (via SlashCommand tool)
+- ✅ Commands CAN invoke agents (via Task tool)
+- ❌ Agents CANNOT invoke other agents (Task tool unavailable at runtime)
+- ❌ Agents CANNOT invoke commands (SlashCommand tool unavailable)
+- ✅ Agents CAN use all other tools (Read, Write, Edit, Bash, Grep, Glob, Skill, etc.)
+- 📋 Flow is unidirectional: command → command OR command → agent (NEVER agent → *)
+
 ## Primary Architectural Patterns
 
 ### Pattern 1: Self-Contained Command (Single Operation)
@@ -62,7 +73,7 @@ Orchestrator Command
   │    │    └─> Option C: AskUserQuestion for user approval
   │    └─> Store result
   ├─> Task(verification-agent) [verify all changes together]
-  └─> Task(commit-agent) [commit if clean]
+  └─> Task(commit-changes) [commit if clean]
 
 Fetcher Agent (data retrieval)
   └─> Fetches items with optional filtering
@@ -152,6 +163,37 @@ Task Execution (Three-Layer):
   ├─> Iterate if issues
   └─> Return task result
 ```
+
+## Pattern Selection Guide
+
+Choose the appropriate pattern based on your task characteristics:
+
+### Pattern 1: Self-Contained Command
+**Use when**: Single, focused operation on one item
+- One implementation task
+- One test class
+- One analysis report
+- One build execution
+
+**Examples**: `/java-implement-code`, `/java-implement-tests`, `/execute-task`, `/java-coverage-report`
+
+### Pattern 2: Three-Layer Design
+**Use when**: Multiple **uniform** items (same type, same processing)
+- All files in a directory
+- All classes needing same change
+- All subtasks of same type
+- Batch processing where each item gets identical treatment
+
+**Examples**: `/review-technical-docs` (all .adoc files), `/cui-java-task-manager` (multiple implementations)
+
+### Pattern 3: Fetch + Triage + Delegate
+**Use when**: **Heterogeneous** items requiring analysis before action
+- Items need different actions (fix vs suppress, code vs explanation)
+- Decision required before processing (what type of fix, which command to use)
+- User approval needed for certain decisions
+- Items vary in complexity or handling approach
+
+**Examples**: `/fix-sonar-issues`, `/respond-to-review-comments`
 
 **Why These Patterns Work**:
 - ✅ No agent nesting (commands orchestrate, agents execute)
@@ -382,7 +424,7 @@ Task Execution (Three-Layer):
 - [ ] Remove old `asciidoc-reviewer` agent (replaced by /review-single-asciidoc command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-reviewer.md
-  ACTION: DELETE FILE (if exists - functionality moved to /review-single-asciidoc command)
+  ACTION: DELETE FILE (functionality moved to /review-single-asciidoc command)
   ```
 
 ### cui-java-expert
@@ -587,6 +629,7 @@ Task Execution (Three-Layer):
 
   NOTE: maven-builder verifies compilation + tests, NOT JavaDoc
         cui-log-record-documenter updates AsciiDoc files, NOT JavaDoc
+        JavaDoc for LogRecord classes: handled by java-code-implementer when fixing violations (if needed)
         logging-violation-analyzer is NEW focused agent for LOGGER analysis
   ```
 
@@ -887,23 +930,58 @@ Task Execution (Three-Layer):
        No duplication of verification/commit logic
   ```
 
-- [ ] Change `Task(/review-technical-docs)` → `SlashCommand(/review-technical-docs)` in `task-reviewer`
+- [ ] Update `task-reviewer` agent: Remove Task and SlashCommand from tools frontmatter
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
-  ACTION: UPDATE tools (change Task to SlashCommand)
+  ACTION: UPDATE tools frontmatter (line 13)
 
   BEFORE:
-  task-reviewer [agent]
-    tools: Read, Edit, Write, Bash(gh:*), Task, SlashCommand
-    └─> Task(/review-technical-docs) ❌ Wrong tool
+  tools: Read, Edit, Write, Bash(gh:*), Task, SlashCommand
 
   AFTER:
-  task-reviewer [agent]
-    tools: Read, Edit, Write, Bash(gh:*), SlashCommand
-    └─> SlashCommand(/review-technical-docs) ✅ Correct tool
+  tools: Read, Edit, Write, Bash(gh:*)
 
-  NOTE: SlashCommand executes in main context (available to agents)
-        Task tool not available to agents (platform limitation)
+  WHY: Agents cannot use Task (nesting limitation) or SlashCommand (unidirectional flow)
+  ```
+
+- [ ] Update `task-reviewer` agent: Remove Task(research-best-practices) delegation
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
+  ACTION: UPDATE Step 3 (lines 86-103)
+
+  CHANGES:
+  - Remove "If unclear aspect is researchable" branch entirely (Line 89)
+  - Remove Task(research-best-practices) call
+  - Simplify to: "If unclear aspect" → AskUserQuestion
+
+  WHY: Agent cannot delegate to research-best-practices agent (Task tool unavailable)
+       Calling command can handle research delegation if needed
+  ```
+
+- [ ] Update `task-reviewer` agent: Remove SlashCommand(/review-technical-docs) delegation
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
+  ACTION: UPDATE Step 8 (lines 222-242)
+
+  CHANGES:
+  - Remove Step 8 conditional AsciiDoc review entirely (Line 232)
+  - Remove SlashCommand(/review-technical-docs) call
+
+  WHY: Agent cannot invoke commands (SlashCommand tool unavailable)
+       Calling command can handle doc review delegation if needed
+  ```
+
+- [ ] Update `task-reviewer` agent: Update RESPONSE FORMAT with delegation info
+  ```
+  FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
+  ACTION: UPDATE RESPONSE FORMAT (line 292)
+
+  ADD FIELDS:
+  - **Research Needed**: {list of topics requiring research, or "None"}
+  - **AsciiDoc Files Detected**: {list of .adoc file paths, or "None"}
+
+  WHY: Agent returns delegation info so calling command (/cui-implement-task) can handle
+       research and doc review as needed
   ```
 
 ### cui-plugin-development-tools
@@ -932,13 +1010,15 @@ Task Execution (Three-Layer):
 
 ## Migration Summary
 
-### Components Removed (3 agents)
-Agents that attempted orchestration (Task delegation) - logic moved to commands:
+### Components Removed (5 agents)
+Agents that attempted orchestration (Task delegation) or were replaced by commands:
 - `maven-project-builder` (cui-maven) - orchestration moved to /cui-build-and-verify command
+- `asciidoc-reviewer` (cui-documentation-standards) - replaced by /review-single-asciidoc command
+- `java-coverage-reporter` (cui-java-expert) - converted to /java-coverage-report command + java-coverage-analyzer agent
 - `pr-quality-fixer` (cui-workflow) - orchestration moved to /cui-handle-pull-request command
 - `pr-review-responder` (cui-workflow) - orchestration moved to /cui-handle-pull-request command (fetch + triage pattern)
 
-### New Focused Agents (7 agents)
+### New Focused Agents (6 agents)
 Agents that do ONE specific task (no Task, no Bash(./mvnw:*), no verification):
 - `logging-violation-analyzer` (cui-java-expert) - analyzes LOGGER statements, returns violations
 - `java-coverage-analyzer` (cui-java-expert) - analyzes JaCoCo reports only
@@ -946,7 +1026,10 @@ Agents that do ONE specific task (no Task, no Bash(./mvnw:*), no verification):
 - `sonar-issue-triager` (cui-workflow) - decides fix vs suppress for single issue
 - `review-comment-fetcher` (cui-workflow) - fetches GitHub review comments with filtering
 - `review-comment-triager` (cui-workflow) - decides code change vs explanation for single comment
-- `commit-changes` (cui-workflow) - commits and pushes changes [already exists, included for completeness]
+
+### Existing Utility Agents (1 agent)
+Agents already exist and are used by migrated commands:
+- `commit-changes` (cui-workflow) - commits and pushes changes (used by multiple commands)
 
 ### New Self-Contained Commands (5 commands)
 Layer 2 commands that orchestrate agent + verification for single items:
@@ -972,12 +1055,12 @@ Commands that orchestrate agents and delegate to other commands:
 
 ### Modified Existing Agents (7 agents)
 Agents with Task and/or Bash(./mvnw:*) removed, made focused:
-- `maven-builder` (cui-maven) - remove Task if present, keep Bash(./mvnw:*) [EXCEPTION: central build agent]
+- `maven-builder` (cui-maven) - update to return structured results, keep Bash(./mvnw:*) [EXCEPTION: central build agent]
 - `java-code-implementer` (cui-java-expert) - remove Task, keep only implementation
 - `java-junit-implementer` (cui-java-expert) - remove Task, keep only test writing
 - `cui-log-record-documenter` (cui-java-expert) - remove Task, keep only AsciiDoc updates
 - `task-executor` (cui-workflow) - remove Task and Bash(./mvnw:*), keep only execution
-- `task-reviewer` (cui-workflow) - change Task(/review-technical-docs) to SlashCommand
+- `task-reviewer` (cui-workflow) - remove Task and SlashCommand, return delegation info to caller
 - `cui-diagnose-single-skill` (cui-plugin-development-tools) - remove Task, inline validation
 
 ### Affected Validator Agents (3 agents)
@@ -986,8 +1069,16 @@ AsciiDoc validators already focused, no changes needed (used by /review-single-a
 - `asciidoc-link-verifier` (cui-documentation-standards)
 - `asciidoc-content-reviewer` (cui-documentation-standards)
 
+### Verified Clean Agents (5 agents)
+cui-plugin-development-tools diagnostic agents verified to have no Task tool usage:
+- `cui-analyze-integrated-standards` - tools: Read only
+- `cui-analyze-standards-file` - tools: Read, Grep
+- `cui-diagnose-single-command` - tools: Read only
+- `cui-diagnose-single-agent` - tools: Read only
+- `cui-analyze-cross-skill-duplication` - tools: Read, Glob
+
 ### Total Impact
-- **Agents**: 3 removed, 6 new created (7 listed but commit-changes exists), 7 modified = 16 agents changed
+- **Agents**: 5 removed, 6 new created, 7 modified = 18 agents changed
 - **Commands**: 7 created (5 self-contained + 2 fetch+triage+delegate), 6 updated = 13 commands changed
 - **Architecture rules**: 3 new rules added
 - **Diagnostic checks**: 2 new checks added

@@ -1,0 +1,58 @@
+{
+  "name": "cui-requirements",
+  "display_name": "CUI Requirements & Specifications",
+  "description": "Comprehensive standards for requirements and specification documentation in CUI projects, covering project setup, documentation lifecycle, and implementation traceability",
+  "version": "1.0.0",
+  "author": "CUI Development Team",
+  "components": [
+    {
+      "type": "skill",
+      "name": "cui-requirements:requirements-documentation",
+      "path": "skills/requirements-documentation.md",
+      "description": "Standards for creating and maintaining requirements documents with SMART principles, consistent formatting, and traceability"
+    },
+    {
+      "type": "skill",
+      "name": "cui-requirements:specification-documentation",
+      "path": "skills/specification-documentation.md",
+      "description": "Standards for creating specification documents with proper structure, backtracking links, and traceability to requirements"
+    },
+    {
+      "type": "skill",
+      "name": "cui-requirements:project-setup",
+      "path": "skills/project-setup.md",
+      "description": "Standards for setting up requirements and specification documentation in new CUI projects with proper directory structure and initial documents"
+    },
+    {
+      "type": "skill",
+      "name": "cui-requirements:planning-documentation",
+      "path": "skills/planning-documentation.md",
+      "description": "Standards for creating and maintaining project planning documentation with task tracking, status indicators, and traceability to requirements"
+    },
+    {
+      "type": "skill",
+      "name": "cui-requirements:implementation-linkage",
+      "path": "skills/implementation-linkage.md",
+      "description": "Standards for linking specifications to implementation code and maintaining bidirectional traceability between documentation and source code"
+    }
+  ],
+  "tags": [
+    "requirements",
+    "specifications",
+    "documentation",
+    "project-setup",
+    "planning",
+    "traceability",
+    "SMART-requirements",
+    "AsciiDoc",
+    "standards"
+  ],
+  "category": "standards",
+  "marketplace_metadata": {
+    "icon": "📋",
+    "preview_images": [],
+    "documentation_url": "https://github.com/cuioss/cui-llm-rules",
+    "support_url": "https://github.com/cuioss/cui-llm-rules/issues",
+    "homepage_url": "https://github.com/cuioss/cui-llm-rules"
+  }
+}
