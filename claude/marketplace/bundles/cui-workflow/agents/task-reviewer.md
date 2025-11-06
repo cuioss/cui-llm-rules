@@ -10,7 +10,7 @@ Examples:
 - User: "Review issue described within /http-client"
   Assistant: "Review issue described within /http-client"
 
-tools: Read, Edit, Write, Bash(gh:*), Task, SlashCommand
+tools: Read, Edit, Write, Bash(gh:*)
 model: sonnet
 color: blue
 ---
@@ -86,19 +86,19 @@ Your task is to analyze an issue (from files or GitHub) and ensure it is ready f
 **Actions for unclear aspects**:
 
 1. **If unclear aspect is researchable** (technical patterns, best practices, external standards):
-   - Invoke research-best-practices agent using Task tool
-   - Prompt: "Research best practices for {specific unclear aspect}"
-   - Wait for research results
-   - **Retry Strategy**: If research agent fails or returns insufficient information, retry once with refined prompt. If still insufficient, escalate to user via AskUserQuestion.
+   - Document research needed for caller to handle
+   - Specify: topic, context, what information is needed
+   - Return this in final report (Research Needed field)
+   - Caller can delegate to research agent if needed
 
 2. **If unclear aspect requires user input** (business requirements, design decisions, priorities):
    - Use AskUserQuestion to request clarification
    - Be specific about what needs clarification and why
    - **Failure Handling**: If user response is unclear, ask follow-up question with examples to clarify intent.
 
-**Tools**: Task (research-best-practices agent), AskUserQuestion
+**Tools**: AskUserQuestion
 
-**Loop Condition**: After gathering new information, return to Step 2 to re-analyze with new knowledge
+**Loop Condition**: After gathering clarification from user, return to Step 2 to re-analyze with new knowledge
 
 **Success Criteria**: All unclear aspects resolved
 
@@ -219,9 +219,9 @@ EOF
 
 ---
 
-### Step 8: AsciiDoc Technical Review (Conditional)
+### Step 8: AsciiDoc Technical Review Detection (Conditional)
 
-**Objective**: If issue involves AsciiDoc files, perform technical documentation review.
+**Objective**: If issue involves AsciiDoc files, document for caller to handle review.
 
 **Condition**: Issue contains or references .adoc files
 
@@ -229,16 +229,16 @@ EOF
 1. Check if any .adoc files are involved in the issue
 
 2. If YES:
-   - Invoke /review-technical-docs command
-   - Wait for review completion
-   - Incorporate any findings into final report
+   - Document list of .adoc files detected
+   - Return this in final report (AsciiDoc Files Detected field)
+   - Caller can delegate to /review-technical-docs if needed
 
 3. If NO:
-   - Skip this step
+   - Mark as "None" in AsciiDoc Files Detected field
 
-**Tools**: SlashCommand (/review-technical-docs)
+**Tools**: None (detection only)
 
-**Success Criteria**: Technical review completed (if applicable) or confirmed not needed
+**Success Criteria**: AsciiDoc files detected and documented (if applicable)
 
 ---
 
@@ -247,7 +247,8 @@ EOF
 **Focus:** Documentation prep only (NO coding), preserve critical info
 **Updates:** Edit issue description (use `gh issue edit`, NOT `gh issue comment`), Read before Edit
 **Quality:** 100% confidence required, all 6 criteria must pass (loop Step 6-7), zero ambiguity
-**Tools:** 100% coverage (all frontmatter tools used), self-contained
+**Delegation:** Return research topics and AsciiDoc files to caller for delegation
+**No Orchestration:** Cannot use Task or SlashCommand (Rule 6)
 
 ---
 
@@ -260,7 +261,6 @@ Record each tool invocation:
 - **Edit**: Count every file edit operation
 - **Write**: Count every file write operation
 - **Bash**: Count every shell command execution
-- **Task**: Count every agent invocation
 
 Include total invocations per tool in final report.
 
@@ -310,7 +310,10 @@ After completing all work, return findings in this format:
 - Edit: {count} invocations
 - Write: {count} invocations
 - Bash: {count} invocations
-- Task: {count} invocations
+
+**Delegation Info** (for caller to handle):
+- **Research Needed**: {list of topics requiring research, or "None"}
+- **AsciiDoc Files Detected**: {list of .adoc file paths, or "None"}
 
 **Lessons Learned** (for future improvement):
 {if any insights discovered:}
