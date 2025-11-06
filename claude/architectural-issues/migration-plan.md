@@ -915,10 +915,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - For "ignore": explains why comment doesn't require response
   ```
 
-- [ ] Remove `pr-review-responder` agent (logic moved to /cui-handle-pull-request command)
+- [x] Remove `pr-review-responder` agent (logic moved to /cui-handle-pull-request command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/pr-review-responder.md
   ACTION: DELETE FILE
+  COMPLETED: Commit 81ca930
 
   BEFORE:
   pr-review-responder [agent]
@@ -976,10 +977,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        Triage logic decides code change vs explanation
   ```
 
-- [ ] Update `/cui-handle-pull-request` command: orchestrate specialized commands with setup/waiting
+- [x] Update `/cui-handle-pull-request` command: orchestrate specialized commands with setup/waiting
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/cui-handle-pull-request.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit 81ca930
 
   CURRENT WORKFLOW (from existing command):
   /cui-handle-pull-request pr={number}
@@ -1040,6 +1042,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/execute-task.md
   ACTION: CREATE NEW COMMAND FILE
 
+  COMPLETED: Commit 81ca930
   NEW COMMAND:
   /execute-task <task-description>
     ├─> Task(task-executor) [focused: implements task]
@@ -1059,6 +1062,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/cui-implement-task.md
   ACTION: UPDATE WORKFLOW
 
+  COMPLETED: Commit 81ca930
   BEFORE:
   /cui-implement-task
     └─> Task(task-executor)
@@ -1084,6 +1088,7 @@ All migrated commands and agents must follow consistent error handling patterns 
        No duplication of verification/commit logic
   ```
 
+  COMPLETED: Commit 81ca930
 - [ ] Update `task-reviewer` agent: Remove Task and SlashCommand from tools frontmatter
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
@@ -1099,6 +1104,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
 
 - [ ] Update `task-reviewer` agent: Remove Task(research-best-practices) delegation
+  COMPLETED: Commit 81ca930
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE Step 3 (lines 86-103)
@@ -1114,6 +1120,7 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 - [ ] Update `task-reviewer` agent: Remove SlashCommand(/review-technical-docs) delegation
   ```
+  COMPLETED: Commit 81ca930
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE Step 8 (lines 222-242)
 
@@ -1129,6 +1136,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE RESPONSE FORMAT (line 292)
+  COMPLETED: Commit 81ca930
 
   ADD FIELDS:
   - **Research Needed**: {list of topics requiring research, or "None"}
