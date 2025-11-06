@@ -1037,7 +1037,7 @@ All migrated commands and agents must follow consistent error handling patterns 
        Task tool causes nesting limitation
   ```
 
-- [ ] Create `/execute-task` command (self-contained: implement + verify single task)
+- [x] Create `/execute-task` command (self-contained: implement + verify single task)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/execute-task.md
   ACTION: CREATE NEW COMMAND FILE
@@ -1057,7 +1057,7 @@ All migrated commands and agents must follow consistent error handling patterns 
        Replaces agent attempting orchestration
   ```
 
-- [ ] Update `/cui-implement-task` command: determine if atomic or batch
+- [x] Update `/cui-implement-task` command: determine if atomic or batch
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/cui-implement-task.md
   ACTION: UPDATE WORKFLOW
@@ -1089,7 +1089,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
 
   COMPLETED: Commit 81ca930
-- [ ] Update `task-reviewer` agent: Remove Task and SlashCommand from tools frontmatter
+- [x] Update `task-reviewer` agent: Remove Task and SlashCommand from tools frontmatter
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE tools frontmatter (line 13)
@@ -1103,7 +1103,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   WHY: Agents cannot use Task (nesting limitation) or SlashCommand (unidirectional flow)
   ```
 
-- [ ] Update `task-reviewer` agent: Remove Task(research-best-practices) delegation
+- [x] Update `task-reviewer` agent: Remove Task(research-best-practices) delegation
   COMPLETED: Commit 81ca930
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
@@ -1118,7 +1118,7 @@ All migrated commands and agents must follow consistent error handling patterns 
        Calling command can handle research delegation if needed
   ```
 
-- [ ] Update `task-reviewer` agent: Remove SlashCommand(/review-technical-docs) delegation
+- [x] Update `task-reviewer` agent: Remove SlashCommand(/review-technical-docs) delegation
   ```
   COMPLETED: Commit 81ca930
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
@@ -1132,7 +1132,7 @@ All migrated commands and agents must follow consistent error handling patterns 
        Calling command can handle doc review delegation if needed
   ```
 
-- [ ] Update `task-reviewer` agent: Update RESPONSE FORMAT with delegation info
+- [x] Update `task-reviewer` agent: Update RESPONSE FORMAT with delegation info
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE RESPONSE FORMAT (line 292)
@@ -1149,7 +1149,7 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ### cui-plugin-development-tools
 
-- [ ] Remove Task from `cui-diagnose-single-skill`
+- [x] Remove Task from `cui-diagnose-single-skill`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/agents/cui-diagnose-single-skill.md
   ACTION: UPDATE tools (remove Task, inline validation)

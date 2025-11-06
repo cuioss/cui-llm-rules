@@ -13,75 +13,89 @@ By combining these workflows, developers get a seamless experience from task ass
 
 ## Components Included
 
-### Agents (6 agents)
+### Agents (8 focused agents - Rule 6 compliant)
 
-#### Core Workflow Agent
+#### Core Workflow Agents
 
-1. **commit-changes** - Git commit management with proper formatting
+1. **commit-changes** - Git commit management with proper formatting (focused utility)
    - Commits repository changes with conventional commit format
-   - Cleans build artifacts before committing (*.class, *.temp, *.backup*)
+   - Cleans build artifacts before committing
    - Auto-generates or accepts custom commit messages
-   - Follows Git Commit Standards (feat, fix, docs, etc.)
    - Optional push and PR creation capabilities
-   - Adds Claude Code co-authorship attribution
 
-#### Issue Implementation Agents
+2. **task-reviewer** - Reviews issues for implementation readiness (focused analyzer - Rule 6 compliant)
+   - Validates requirements clarity and completeness
+   - Returns delegation info (research needed, AsciiDoc files detected)
+   - No Task/SlashCommand tools (caller handles delegation)
 
-2. **task-reviewer** - Reviews task plans and provides feedback on clarity and completeness
-   - Validates acceptance criteria
-   - Verifies implementation steps are specific
-   - Identifies missing technical details
-   - Suggests improvements
+3. **task-breakdown-agent** - Breaks down issues into actionable tasks (focused planner)
+   - Analyzes requirements and creates numbered task list
+   - Defines acceptance criteria and dependencies
 
-3. **task-breakdown-agent** - Breaks down complex issues into structured, actionable task plans
-   - Analyzes requirements and specifications
-   - Researches relevant best practices
-   - Creates numbered tasks with acceptance criteria
-   - Defines clear implementation steps
-   - Identifies dependencies and risks
+4. **task-executor** - Executes single implementation task (focused implementer - Rule 6 compliant)
+   - Implements ONE task following specifications
+   - No verification or commit (caller handles)
+   - No Task or Bash(./mvnw:*) tools
 
-4. **task-executor** - Executes task plan steps sequentially with build verification
-   - Reads and parses task plans
-   - Executes checklist items sequentially
-   - Runs build verification when required
-   - Verifies acceptance criteria
-   - Returns detailed completion reports
+#### PR Workflow Agents (Pattern 3: Fetch + Triage + Delegate)
 
-#### PR Workflow Agents
+5. **sonar-issue-fetcher** - Fetches Sonar issues with filtering (focused fetcher)
+   - Retrieves issues from SonarQube API
+   - Returns structured list: [{key, type, severity, file, line, rule, message}]
+   - No analysis, pure data retrieval
 
-5. **pr-review-responder** - Analyzes PR review comments and implements requested changes
-   - Reads specific review comment context
-   - Understands reviewer concerns
-   - Implements requested improvements
-   - Adds tests if needed
-   - Verifies build passes
-   - Prepares response comments
+6. **sonar-issue-triager** - Decides fix vs suppress for single issue (focused triager)
+   - Analyzes code context around issue
+   - Returns {action, reason, suggested_implementation, suppression_string}
+   - No fixing, pure decision-making
 
-6. **pr-quality-fixer** - Automatically fixes common quality issues
-   - Runs Maven build with quality checks
-   - Identifies formatting violations
-   - Improves test coverage for critical paths
-   - Addresses JavaDoc warnings
-   - Retrieves and resolves Sonar issues
-   - Commits fixes with descriptive messages
+7. **review-comment-fetcher** - Fetches GitHub review comments (focused fetcher)
+   - Retrieves comments via GitHub API (gh CLI)
+   - Returns structured list: [{id, author, file, line, body, resolved}]
+   - No analysis, pure data retrieval
 
-### Commands (2 commands)
+8. **review-comment-triager** - Decides code change vs explanation (focused triager)
+   - Analyzes comment intent and code context
+   - Returns {action, reason, suggested_implementation, explanation_text}
+   - No changes, pure decision-making
 
-1. **cui-implement-task** - Orchestrates complete issue implementation workflow
-   - Analyzes issue requirements
-   - Creates structured task plan
-   - Executes each task sequentially
-   - Verifies builds after each change
-   - Commits changes with proper messages
-   - Reports completion status
+### Commands (5 commands)
 
-2. **cui-handle-pull-request** - Orchestrates PR review handling and quality improvements
-   - Fetches PR review comments using GitHub CLI
-   - Analyzes reviewer feedback and requested changes
-   - Categorizes comments (code changes, questions, discussions)
-   - Implements requested code changes
-   - Runs quality verification
-   - Pushes updates and responds to comments
+#### Orchestrator Commands
+
+1. **/cui-implement-task** - Orchestrates complete issue implementation workflow
+   - Delegates to task-reviewer, task-breakdown-agent
+   - Pattern Decision: atomic (direct) vs batch (delegates to /execute-task)
+   - Uses /cui-build-and-fix for verification
+   - Optionally commits and pushes
+
+2. **/cui-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
+   - Waits for CI/Sonar checks
+   - Delegates to /cui-build-and-fix for build fixes
+   - Delegates to /respond-to-review-comments for review handling
+   - Delegates to /fix-sonar-issues for quality fixes
+   - Aggregates results from self-contained commands
+
+#### Self-Contained Commands (Pattern 1 & Pattern 3)
+
+3. **/execute-task** - Implements and verifies single task (Pattern 1)
+   - Uses task-executor agent for implementation
+   - Uses maven-builder for verification
+   - Iterates up to 3 cycles
+   - Returns structured result
+
+4. **/fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
+   - Fetches issues with sonar-issue-fetcher
+   - Triages each with sonar-issue-triager
+   - Delegates fixes based on triage decision
+   - Includes user approval for suppressions
+   - Verifies, commits, and pushes
+
+5. **/respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
+   - Fetches comments with review-comment-fetcher
+   - Triages each with review-comment-triager
+   - Code changes or explanations based on triage
+   - Verifies, commits, and pushes if code changed
 
 ## Installation Instructions
 
