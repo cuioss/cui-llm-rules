@@ -314,13 +314,14 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ## Architecture Standards
 
-- [ ] Add Rule 6 "Agent Delegation Constraints" to `cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md`
+- [x] Add Rule 6 "Agent Delegation Constraints" to `cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: ADD NEW RULE 6
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Add Rule 7 "Maven Execution Principle" to `architecture-rules.md`: Agents NEVER call Maven directly (Bash(./mvnw:*) always a bug), Commands orchestrate maven-builder agent
+- [x] Add Rule 7 "Maven Execution Principle" to `architecture-rules.md`: Agents NEVER call Maven directly (Bash(./mvnw:*) always a bug), Commands orchestrate maven-builder agent
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: ADD NEW RULE 7
@@ -331,66 +332,76 @@ All migrated commands and agents must follow consistent error handling patterns 
   WHY: Centralizes build execution, output capture, performance tracking
        Enables reusable build logic across all commands
        Prevents duplicate build configuration and error handling
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Add Rule 8 "Three-Layer Pattern" to `architecture-rules.md`: Batch command → Single-item command → Focused agents (PRIMARY PATTERN)
+- [x] Add Rule 8 "Three-Layer Pattern" to `architecture-rules.md`: Batch command → Single-item command → Focused agents (PRIMARY PATTERN)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: ADD NEW RULE 8
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Update Rule 5 "Component Organization" cross-layer communication section in `architecture-rules.md`
+- [x] Update Rule 5 "Component Organization" cross-layer communication section in `architecture-rules.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: UPDATE RULE 5
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Add Task tool misuse detection to `cui-plugin-development-tools/standards/agent-quality-standards.md`
+- [x] Add Task tool misuse detection to `cui-plugin-development-tools/standards/agent-quality-standards.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
   ACTION: ADD TASK TOOL MISUSE DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add `Bash(./mvnw:*)` anti-pattern to `agent-quality-standards.md`: Always a bug in agents
+- [x] Add `Bash(./mvnw:*)` anti-pattern to `agent-quality-standards.md`: Always a bug in agents
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
   ACTION: ADD MAVEN ANTI-PATTERN DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
 ## Diagnostic Tools
 
-- [ ] Add Check 6 "Task Tool Misuse Detection" to `cui-plugin-development-tools/commands/cui-diagnose-agents.md`
+- [x] Add Check 6 "Task Tool Misuse Detection" to `cui-plugin-development-tools/commands/cui-diagnose-agents.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-diagnose-agents.md
   ACTION: ADD CHECK 6 - TASK TOOL MISUSE DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add Check 7 "Maven Anti-Pattern Detection" to `cui-diagnose-agents.md`: Detect `Bash(./mvnw:*)` in agent tools
+- [x] Add Check 7 "Maven Anti-Pattern Detection" to `cui-diagnose-agents.md`: Detect `Bash(./mvnw:*)` in agent tools
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-diagnose-agents.md
   ACTION: ADD CHECK 7 - MAVEN ANTI-PATTERN DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add Task tool validation to questionnaire in `cui-plugin-development-tools/commands/cui-create-agent.md`
+- [x] Add Task tool validation to questionnaire in `cui-plugin-development-tools/commands/cui-create-agent.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-create-agent.md
   ACTION: ADD TASK TOOL VALIDATION TO QUESTIONNAIRE
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add Maven tool validation to `cui-create-agent.md`: Reject `Bash(./mvnw:*)` in agent tool selection
+- [x] Add Maven tool validation to `cui-create-agent.md`: Reject `Bash(./mvnw:*)` in agent tool selection
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-create-agent.md
   ACTION: ADD MAVEN TOOL VALIDATION TO QUESTIONNAIRE
+  COMPLETED: Commit 8e6d102
   ```
 
 ## Agent Migrations
 
 ### cui-maven
 
-- [ ] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-fix command)
+- [x] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-fix command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-project-builder.md
   ACTION: DELETE FILE
+  COMPLETED: Commit 6e3e026
 
   BEFORE:
   /cui-build-and-verify (command)
@@ -481,10 +492,11 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ### cui-documentation-standards
 
-- [ ] Create `/review-single-asciidoc` command (single-file orchestrator)
+- [x] Create `/review-single-asciidoc` command (single-file orchestrator)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/review-single-asciidoc.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 155737b
 
   NEW COMMAND:
   /review-single-asciidoc <file.adoc> (single-item command)
@@ -494,10 +506,11 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Return combined validation results
   ```
 
-- [ ] Update `/review-technical-docs` to use three-layer pattern
+- [x] Update `/review-technical-docs` to use three-layer pattern
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/cui-review-technical-docs.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit 155737b
 
   BEFORE:
   /review-technical-docs (command)
@@ -512,7 +525,7 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Aggregate results from all files
   ```
 
-- [ ] Keep focused validation agents as-is
+- [x] Keep focused validation agents as-is
   ```
   FILES:
   - /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-format-validator.md
@@ -531,10 +544,11 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Direct analysis - returns content issues
   ```
 
-- [ ] Remove old `asciidoc-reviewer` agent (replaced by /review-single-asciidoc command)
+- [x] Remove old `asciidoc-reviewer` agent (replaced by /review-single-asciidoc command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-reviewer.md
   ACTION: DELETE FILE (functionality moved to /review-single-asciidoc command)
+  COMPLETED: Commit 155737b
   ```
 
 ### cui-java-expert
