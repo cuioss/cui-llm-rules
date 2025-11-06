@@ -59,9 +59,45 @@ Skill: cui-marketplace-architecture
    - **Error**: If empty: "Agent capabilities description required" and retry
 
 **B. Required tools** - Which tools does agent need?
-- Read, Write, Edit, Glob, Grep, Bash, Task, WebFetch, etc.
+- Read, Write, Edit, Glob, Grep, Bash, WebFetch, etc.
    - **Validation**: Must list at least one tool
    - **Error**: If none: "At least one tool required" and retry
+   - **CRITICAL Validation - Task Tool**:
+     - If user lists `Task` as a tool:
+       ```
+       ❌ ERROR: Agents CANNOT use the Task tool
+
+       Platform Limitation: Task tool is unavailable to agents at runtime (Rule 6)
+       - Agents are focused executors (do ONE task)
+       - Commands orchestrate agents (delegate using Task)
+       - Agent attempting Task delegation = guaranteed runtime failure
+
+       Refactoring needed:
+       - If agent needs to delegate: Create a COMMAND instead (commands can use Task)
+       - If agent is focused: Remove Task from tools list
+
+       Reference: architecture-rules.md Rule 6
+       ```
+       - Force user to either remove Task from list OR abort and create command instead
+   - **CRITICAL Validation - Maven Calls**:
+     - If user lists `Bash` as a tool AND agent name ≠ "maven-builder":
+       ```
+       ⚠️  WARNING: Maven Execution Pattern Check
+
+       You selected Bash tool for an agent. Per Rule 7:
+       - Agents CANNOT call Maven directly (Bash(./mvnw:*) is always a bug)
+       - ONLY maven-builder agent may execute Maven
+       - All other agents must return results to caller who orchestrates maven-builder
+
+       Does this agent need to execute Maven commands?
+       - [Y]es, it needs to run Maven → ❌ ERROR: Cannot proceed
+         "Create maven-builder agent OR restructure as command that orchestrates maven-builder"
+       - [N]o, it uses Bash for other purposes → ✅ Continue with Bash tool
+
+       Reference: architecture-rules.md Rule 7
+       ```
+       - If user confirms Maven execution needed: abort with error
+       - If user confirms non-Maven Bash usage: continue
 
 **C. When should this agent be used?** (trigger conditions)
    - **Validation**: Must provide use cases
@@ -178,7 +214,8 @@ Display all statistics in final summary.
 **Architecture:**
 - Agents must be self-contained
 - List ALL required tools in frontmatter
-- Use Task tool for delegation only
+- **NEVER include Task tool (Rule 6)** - Agents cannot delegate, guaranteed runtime failure
+- **NEVER allow Maven calls in non-maven-builder agents (Rule 7)** - Bypasses centralized build execution
 - Follow essential rules from marketplace architecture
 
 **Structure:**
