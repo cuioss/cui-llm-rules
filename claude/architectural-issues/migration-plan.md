@@ -422,10 +422,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        maven-project-builder tried to delegate (Task tool not available to agents)
   ```
 
-- [ ] Rename `/cui-build-and-verify` to `/cui-build-and-fix`: orchestrate build + delegate fixes to appropriate commands
+- [x] Rename `/cui-build-and-verify` to `/cui-build-and-fix`: orchestrate build + delegate fixes to appropriate commands
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/commands/cui-build-and-verify.md
   ACTION: RENAME FILE to cui-build-and-fix.md AND UPDATE WORKFLOW
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   /cui-build-and-verify
@@ -449,10 +450,11 @@ All migrated commands and agents must follow consistent error handling patterns 
         /cui-java-task-manager determines which classes need fixing and handles implementation
   ```
 
-- [ ] Update `maven-builder` agent to return structured results (not just raw output)
+- [x] Update `maven-builder` agent to return structured results (not just raw output)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-builder.md
   ACTION: UPDATE RESPONSE FORMAT
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   maven-builder [agent]
