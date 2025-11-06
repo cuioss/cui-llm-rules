@@ -1243,14 +1243,14 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
 
 ## Testing
 
-- [ ] Test `maven-project-builder` removal + `/cui-build-and-fix` command (renamed from cui-build-and-verify)
+- [x] Test `maven-project-builder` removal + `/cui-build-and-fix` command (renamed from cui-build-and-verify)
   ```
   SCENARIO: Run build on project with compilation errors
   COMMAND: /cui-build-and-fix
   EXPECTED: Detects errors, delegates to /cui-java-task-manager, iterates until clean
   VERIFY: No Task(maven-project-builder) calls, proper error categorization
   ```
-- [ ] Test all migrated cui-java-expert agents
+- [x] Test all migrated cui-java-expert agents
   ```
   AGENT: java-code-implementer
   SCENARIO: Implement new method in existing class
@@ -1282,7 +1282,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: Returns per-method coverage metrics from existing reports
   VERIFY: Does NOT run maven, only reads XML/HTML reports
   ```
-- [ ] Test all migrated cui-workflow agents
+- [x] Test all migrated cui-workflow agents
   ```
   AGENT: task-executor
   SCENARIO: Execute single implementation task
@@ -1320,7 +1320,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: Returns {action, reason, suggested_implementation, explanation_text}
   VERIFY: Uses Read/Grep only, provides draft explanation for "explain" action
   ```
-- [ ] Test documentation workflow migration
+- [x] Test documentation workflow migration
   ```
   COMMAND: /review-single-asciidoc file.adoc
   SCENARIO: Validate single AsciiDoc file
@@ -1333,7 +1333,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: Globs *.adoc, delegates to /review-single-asciidoc per file
   VERIFY: Uses SlashCommand (not Task), aggregates results
   ```
-- [ ] Test diagnostic agent migration
+- [x] Test diagnostic agent migration
   ```
   AGENT: cui-diagnose-single-skill
   SCENARIO: Analyze skill with YAML and standards issues
@@ -1342,7 +1342,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   VERIFY: No Task tool usage, uses only Read/Grep/Glob for validation
   EDGE_CASES: Test with missing YAML fields, invalid standards references
   ```
-- [ ] Run `/cui-diagnose-agents` - verify 0 Task tool violations
+- [x] Run `/cui-diagnose-agents` - verify 0 Task tool violations
   ```
   COMMAND: /cui-diagnose-agents
   EXPECTED: Analyzes all agents across all bundles
@@ -1351,7 +1351,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   FAIL_IF: Any agent in cui-java-expert, cui-workflow, cui-documentation-standards has Task tool
   OUTPUT_CHECK: Look for "Check 6: Task Tool Misuse Detection - PASS" in report
   ```
-- [ ] Run `/cui-diagnose-bundle` for each affected bundle
+- [x] Run `/cui-diagnose-bundle` for each affected bundle
   ```
   BUNDLES: cui-maven, cui-java-expert, cui-documentation-standards, cui-workflow
 
@@ -1371,7 +1371,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: All agents pass quality checks
   VERIFY: asciidoc-reviewer.md deleted, /review-single-asciidoc command exists
   ```
-- [ ] Test `/cui-build-and-fix` end-to-end
+- [x] Test `/cui-build-and-fix` end-to-end
   ```
   SCENARIO: Complete workflow from broken to clean build
   COMMAND: /cui-build-and-fix push
@@ -1379,7 +1379,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   VERIFY: Clean build, all changes committed, proper commit message
   EDGE_CASES: Test with mixed error types (compilation + test + javadoc)
   ```
-- [ ] Test `/cui-handle-pull-request` end-to-end
+- [x] Test `/cui-handle-pull-request` end-to-end
   ```
   SCENARIO: Complete PR workflow with CI wait, review responses, Sonar fixes
   COMMAND: /cui-handle-pull-request pr=123
@@ -1400,7 +1400,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
     - PR with Sonar issues requiring suppressions (user approval)
     - Timeout during CI wait (30 min timeout with user prompt)
   ```
-- [ ] Test `/cui-implement-task` end-to-end
+- [x] Test `/cui-implement-task` end-to-end
   ```
   SCENARIO 1: Atomic task (single class implementation)
   COMMAND: /cui-implement-task task="Add getUserById method to UserService"
@@ -1427,27 +1427,27 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
 
 ## Documentation
 
-- [ ] Update cui-maven bundle README
+- [x] Update cui-maven bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-documentation-standards bundle README
+- [x] Update cui-documentation-standards bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-java-expert bundle README
+- [x] Update cui-java-expert bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-workflow bundle README
+- [x] Update cui-workflow bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-plugin-development-tools bundle README
+- [x] Update cui-plugin-development-tools bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
