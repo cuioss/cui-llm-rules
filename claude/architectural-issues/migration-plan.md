@@ -573,10 +573,11 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Implements code changes ONLY (no verification)
   ```
 
-- [ ] Create `/java-implement-code` command (self-contained implementation + verification)
+- [x] Create `/java-implement-code` command (self-contained implementation + verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-code.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 7168d7b
 
   NEW COMMAND:
   /java-implement-code <task-description>
@@ -591,10 +592,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        No need for /implement-single-java-class wrapper
   ```
 
-- [ ] Update `/cui-java-task-manager` command: orchestrate using self-contained commands
+- [x] Update `/cui-java-task-manager` command: orchestrate using self-contained commands
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/cui-java-task-manager.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit e39daa6
 
   BEFORE:
   /cui-java-task-manager
@@ -639,10 +641,11 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Writes tests ONLY (no verification)
   ```
 
-- [ ] Create `/java-implement-tests` command (self-contained test writing + verification)
+- [x] Create `/java-implement-tests` command (self-contained test writing + verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-tests.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 7168d7b
 
   NEW COMMAND:
   /java-implement-tests <test-description>
@@ -657,15 +660,17 @@ All migrated commands and agents must follow consistent error handling patterns 
        Already single-item focused
   ```
 
-- [ ] `/cui-java-task-manager` orchestrates these self-contained commands (see above)
+- [x] `/cui-java-task-manager` orchestrates these self-contained commands (see above)
+  COMPLETED: Commit e39daa6
 
-- [ ] Convert `java-coverage-reporter` agent → `/java-coverage-report` command (self-contained)
+- [x] Convert `java-coverage-reporter` agent → `/java-coverage-report` command (self-contained)
   ```
   FILES:
   - DELETE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-coverage-reporter.md
   - CREATE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-coverage-report.md
   - CREATE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-coverage-analyzer.md
   ACTION: DELETE AGENT, CREATE COMMAND + FOCUSED AGENT
+  COMPLETED: Commit 7168d7b
 
   BEFORE:
   java-coverage-reporter [agent]
@@ -688,7 +693,7 @@ All migrated commands and agents must follow consistent error handling patterns 
        Agent is focused (just analysis, no building)
   ```
 
-- [ ] Update commands using it: invoke /java-coverage-report command instead
+- [x] Update commands using it: invoke /java-coverage-report command instead
   ```
   BEFORE:
   command
@@ -699,12 +704,15 @@ All migrated commands and agents must follow consistent error handling patterns 
   command
     └─> SlashCommand(/java-coverage-report)
          └─> self-contained (builds + analyzes)
+
+  COMPLETED: Commit e39daa6 (updated cui-java-task-manager, README)
   ```
 
-- [ ] Create `logging-violation-analyzer` agent (focused: analyzes LOGGER usage)
+- [x] Create `logging-violation-analyzer` agent (focused: analyzes LOGGER usage)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/logging-violation-analyzer.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 7168d7b
 
   NEW AGENT:
   logging-violation-analyzer [agent]
@@ -742,10 +750,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - Does NOT touch JavaDoc comments in Java files
   ```
 
-- [ ] Update `/cui-log-record-enforcer` command: orchestrate multiple agents for complete workflow
+- [x] Update `/cui-log-record-enforcer` command: orchestrate multiple agents for complete workflow
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/cui-log-record-enforcer.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit e39daa6
 
   BEFORE:
   /cui-log-record-enforcer
