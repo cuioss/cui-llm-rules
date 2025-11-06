@@ -781,10 +781,11 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ### cui-workflow
 
-- [ ] Create `sonar-issue-fetcher` agent (focused: fetches issues from SonarQube)
+- [x] Create `sonar-issue-fetcher` agent (focused: fetches issues from SonarQube)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/sonar-issue-fetcher.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   sonar-issue-fetcher [agent]
@@ -798,10 +799,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - NO analysis, NO fixing - pure data retrieval
   ```
 
-- [ ] Create `sonar-issue-triager` agent (focused: decides fix vs suppress)
+- [x] Create `sonar-issue-triager` agent (focused: decides fix vs suppress)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/sonar-issue-triager.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   sonar-issue-triager [agent]
@@ -823,10 +825,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - ALWAYS returns suppression_string regardless of decision (useful for fallback or user override)
   ```
 
-- [ ] Create `/fix-sonar-issues` command (fetch + triage + fix Sonar issues)
+- [x] Create `/fix-sonar-issues` command (fetch + triage + fix Sonar issues)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/fix-sonar-issues.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 94bcae1
 
   NEW COMMAND:
   /fix-sonar-issues [filter-options]
@@ -861,16 +864,18 @@ All migrated commands and agents must follow consistent error handling patterns 
        Triage logic with user approval for suppressions
   ```
 
-- [ ] Remove `pr-quality-fixer` agent file (logic moved to /fix-sonar-issues command)
+- [x] Remove `pr-quality-fixer` agent file (logic moved to /fix-sonar-issues command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/pr-quality-fixer.md
   ACTION: DELETE FILE
+  COMPLETED: Commit 94bcae1
   ```
 
-- [ ] Create `review-comment-fetcher` agent (focused: fetches review comments from GitHub)
+- [x] Create `review-comment-fetcher` agent (focused: fetches review comments from GitHub)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/review-comment-fetcher.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   review-comment-fetcher [agent]
@@ -884,10 +889,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - NO analysis, NO responding - pure data retrieval
   ```
 
-- [ ] Create `review-comment-triager` agent (focused: decides code change vs explanation)
+- [x] Create `review-comment-triager` agent (focused: decides code change vs explanation)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/review-comment-triager.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   review-comment-triager [agent]
@@ -930,10 +936,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        Command handles orchestration
   ```
 
-- [ ] Create `/respond-to-review-comments` command (fetch + triage + respond to review comments)
+- [x] Create `/respond-to-review-comments` command (fetch + triage + respond to review comments)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/respond-to-review-comments.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 94bcae1
 
   NEW COMMAND:
   /respond-to-review-comments [filter-options]
@@ -1005,10 +1012,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        Each specialized command is self-contained and reusable
   ```
 
-- [ ] Remove Task and Bash(./mvnw:*) from `task-executor` - make focused
+- [x] Remove Task and Bash(./mvnw:*) from `task-executor` - make focused
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-executor.md
   ACTION: UPDATE tools (remove Task and Bash(./mvnw:*))
+  COMPLETED: Commit 94bcae1
 
   BEFORE:
   task-executor [agent]
