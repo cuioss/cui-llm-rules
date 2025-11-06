@@ -555,10 +555,11 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ### cui-java-expert
 
-- [ ] Remove Task from `java-code-implementer` - make focused (just implements code, no verification)
+- [x] Remove Task from `java-code-implementer` - make focused (just implements code, no verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-code-implementer.md
   ACTION: UPDATE tools (remove Task)
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   java-code-implementer [agent]
@@ -620,10 +621,11 @@ All migrated commands and agents must follow consistent error handling patterns 
         /java-implement-code and /java-implement-tests are Layer 2 self-contained commands
   ```
 
-- [ ] Remove Task from `java-junit-implementer` - make focused (just writes tests, no verification)
+- [x] Remove Task from `java-junit-implementer` - make focused (just writes tests, no verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-junit-implementer.md
   ACTION: UPDATE tools (remove Task)
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   java-junit-implementer [agent]
@@ -716,10 +718,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - Returns: [{file, line, level, violation_type, current_usage}]
   ```
 
-- [ ] Remove Task from `cui-log-record-documenter` - make focused (just updates AsciiDoc, no verification)
+- [x] Remove Task from `cui-log-record-documenter` - make focused (just updates AsciiDoc, no verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/cui-log-record-documenter.md
   ACTION: UPDATE tools (remove Task)
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   cui-log-record-documenter [agent]
