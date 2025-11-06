@@ -12,14 +12,13 @@ This bundle provides complete Maven workflow support for CUI projects, including
 
 Agents in this bundle:
 
-- **maven-builder** - Central agent for executing configurable Maven builds with output capture, filtering, and performance tracking
-- **maven-project-builder** - Comprehensive project verification agent that delegates build execution to maven-builder, analyzes output, fixes all issues, and ensures clean builds through iteration
+- **maven-builder** - Central focused agent for executing Maven builds with configurable output modes (STRUCTURED for intelligent routing, DEFAULT for logs), performance tracking, and error categorization. Only agent allowed to execute Maven commands (Rule 7).
 
 ### Commands
 
 Commands in this bundle:
 
-- **/cui-build-and-verify** - Execute comprehensive project verification by running Maven build and optionally committing changes
+- **/cui-build-and-fix** - Self-contained command that executes Maven build, analyzes issues using maven-builder's STRUCTURED output, delegates fixes to appropriate commands (e.g., /cui-java-task-manager), iterates until clean, and optionally commits/pushes changes
 
 ### Skills
 
@@ -48,37 +47,44 @@ cd cui-llm-rules/claude/marketplace/bundles
 **Commands**: Invoke commands directly in Claude Code:
 
 ```bash
-# Run full build verification
-/cui-build-and-verify
+# Run full build verification with automatic fix iteration
+/cui-build-and-fix
 
-# Run build verification and commit/push changes
-/cui-build-and-verify push
+# Run build verification, fix issues, commit, and push
+/cui-build-and-fix push
 ```
 
-**Agents**:
+**Architecture** (Rule 6 compliant):
 
-The `maven-project-builder` agent is automatically activated when:
-- User requests a full project build
-- User wants to verify project after code changes
-- User asks to run quality checks
+The `/cui-build-and-fix` command orchestrates the complete build workflow:
+1. Executes maven-builder with STRUCTURED output mode
+2. Analyzes categorized issues (compilation_error, test_failure, javadoc_warning, etc.)
+3. Routes fixes to appropriate commands based on issue type
+4. Iterates until build is clean
+5. Optionally commits and pushes changes
 
-Example user requests that trigger the agent:
-- "I've finished implementing X, can you build the project?"
-- "Run the full build with quality checks"
-- "Make sure everything compiles after my changes"
+Example workflow:
+```
+/cui-build-and-fix (command)
+  ├─> Task(maven-builder) with outputMode: STRUCTURED
+  ├─> Analyze structured issues
+  ├─> For Java issues: SlashCommand(/cui-java-task-manager "fix {issue}")
+  ├─> Iterate until clean
+  └─> Commit and push if requested
+```
 
-The `maven-builder` agent is used for:
-- Configurable Maven build execution (called by other agents)
-- Direct build execution when specific commands or output modes are needed
-- Integration into custom workflows requiring build execution
+The `maven-builder` agent is used by commands for:
+- Executing Maven builds (only agent with Bash(./mvnw:*) permission - Rule 7)
+- Returning structured categorized results for intelligent routing
+- Performance tracking and output filtering
 
-Example direct usage from other agents:
+Example usage from commands:
 ```
 Task:
   subagent_type: maven-builder
   prompt: |
-    command: "./mvnw clean test"
-    outputMode: "ERRORS"
+    command: "clean verify"
+    outputMode: "STRUCTURED"
 ```
 
 **Skills**: The `cui-maven-rules` skill is automatically loaded by agents that need Maven standards.

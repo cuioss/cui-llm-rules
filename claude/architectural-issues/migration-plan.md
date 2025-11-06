@@ -314,13 +314,14 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ## Architecture Standards
 
-- [ ] Add Rule 6 "Agent Delegation Constraints" to `cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md`
+- [x] Add Rule 6 "Agent Delegation Constraints" to `cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: ADD NEW RULE 6
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Add Rule 7 "Maven Execution Principle" to `architecture-rules.md`: Agents NEVER call Maven directly (Bash(./mvnw:*) always a bug), Commands orchestrate maven-builder agent
+- [x] Add Rule 7 "Maven Execution Principle" to `architecture-rules.md`: Agents NEVER call Maven directly (Bash(./mvnw:*) always a bug), Commands orchestrate maven-builder agent
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: ADD NEW RULE 7
@@ -331,66 +332,76 @@ All migrated commands and agents must follow consistent error handling patterns 
   WHY: Centralizes build execution, output capture, performance tracking
        Enables reusable build logic across all commands
        Prevents duplicate build configuration and error handling
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Add Rule 8 "Three-Layer Pattern" to `architecture-rules.md`: Batch command → Single-item command → Focused agents (PRIMARY PATTERN)
+- [x] Add Rule 8 "Three-Layer Pattern" to `architecture-rules.md`: Batch command → Single-item command → Focused agents (PRIMARY PATTERN)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: ADD NEW RULE 8
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Update Rule 5 "Component Organization" cross-layer communication section in `architecture-rules.md`
+- [x] Update Rule 5 "Component Organization" cross-layer communication section in `architecture-rules.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/architecture-rules.md
   ACTION: UPDATE RULE 5
+  COMPLETED: Commit 79d2527
   ```
 
-- [ ] Add Task tool misuse detection to `cui-plugin-development-tools/standards/agent-quality-standards.md`
+- [x] Add Task tool misuse detection to `cui-plugin-development-tools/standards/agent-quality-standards.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
   ACTION: ADD TASK TOOL MISUSE DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add `Bash(./mvnw:*)` anti-pattern to `agent-quality-standards.md`: Always a bug in agents
+- [x] Add `Bash(./mvnw:*)` anti-pattern to `agent-quality-standards.md`: Always a bug in agents
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
   ACTION: ADD MAVEN ANTI-PATTERN DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
 ## Diagnostic Tools
 
-- [ ] Add Check 6 "Task Tool Misuse Detection" to `cui-plugin-development-tools/commands/cui-diagnose-agents.md`
+- [x] Add Check 6 "Task Tool Misuse Detection" to `cui-plugin-development-tools/commands/cui-diagnose-agents.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-diagnose-agents.md
   ACTION: ADD CHECK 6 - TASK TOOL MISUSE DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add Check 7 "Maven Anti-Pattern Detection" to `cui-diagnose-agents.md`: Detect `Bash(./mvnw:*)` in agent tools
+- [x] Add Check 7 "Maven Anti-Pattern Detection" to `cui-diagnose-agents.md`: Detect `Bash(./mvnw:*)` in agent tools
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-diagnose-agents.md
   ACTION: ADD CHECK 7 - MAVEN ANTI-PATTERN DETECTION
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add Task tool validation to questionnaire in `cui-plugin-development-tools/commands/cui-create-agent.md`
+- [x] Add Task tool validation to questionnaire in `cui-plugin-development-tools/commands/cui-create-agent.md`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-create-agent.md
   ACTION: ADD TASK TOOL VALIDATION TO QUESTIONNAIRE
+  COMPLETED: Commit 8e6d102
   ```
 
-- [ ] Add Maven tool validation to `cui-create-agent.md`: Reject `Bash(./mvnw:*)` in agent tool selection
+- [x] Add Maven tool validation to `cui-create-agent.md`: Reject `Bash(./mvnw:*)` in agent tool selection
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/commands/cui-create-agent.md
   ACTION: ADD MAVEN TOOL VALIDATION TO QUESTIONNAIRE
+  COMPLETED: Commit 8e6d102
   ```
 
 ## Agent Migrations
 
 ### cui-maven
 
-- [ ] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-fix command)
+- [x] Remove `maven-project-builder` agent entirely (logic moves to /cui-build-and-fix command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-project-builder.md
   ACTION: DELETE FILE
+  COMPLETED: Commit 6e3e026
 
   BEFORE:
   /cui-build-and-verify (command)
@@ -411,10 +422,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        maven-project-builder tried to delegate (Task tool not available to agents)
   ```
 
-- [ ] Rename `/cui-build-and-verify` to `/cui-build-and-fix`: orchestrate build + delegate fixes to appropriate commands
+- [x] Rename `/cui-build-and-verify` to `/cui-build-and-fix`: orchestrate build + delegate fixes to appropriate commands
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/commands/cui-build-and-verify.md
   ACTION: RENAME FILE to cui-build-and-fix.md AND UPDATE WORKFLOW
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   /cui-build-and-verify
@@ -438,10 +450,11 @@ All migrated commands and agents must follow consistent error handling patterns 
         /cui-java-task-manager determines which classes need fixing and handles implementation
   ```
 
-- [ ] Update `maven-builder` agent to return structured results (not just raw output)
+- [x] Update `maven-builder` agent to return structured results (not just raw output)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-builder.md
   ACTION: UPDATE RESPONSE FORMAT
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   maven-builder [agent]
@@ -481,10 +494,11 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ### cui-documentation-standards
 
-- [ ] Create `/review-single-asciidoc` command (single-file orchestrator)
+- [x] Create `/review-single-asciidoc` command (single-file orchestrator)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/review-single-asciidoc.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 155737b
 
   NEW COMMAND:
   /review-single-asciidoc <file.adoc> (single-item command)
@@ -494,10 +508,11 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Return combined validation results
   ```
 
-- [ ] Update `/review-technical-docs` to use three-layer pattern
+- [x] Update `/review-technical-docs` to use three-layer pattern
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/commands/cui-review-technical-docs.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit 155737b
 
   BEFORE:
   /review-technical-docs (command)
@@ -512,7 +527,7 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Aggregate results from all files
   ```
 
-- [ ] Keep focused validation agents as-is
+- [x] Keep focused validation agents as-is
   ```
   FILES:
   - /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-format-validator.md
@@ -531,18 +546,20 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Direct analysis - returns content issues
   ```
 
-- [ ] Remove old `asciidoc-reviewer` agent (replaced by /review-single-asciidoc command)
+- [x] Remove old `asciidoc-reviewer` agent (replaced by /review-single-asciidoc command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/agents/asciidoc-reviewer.md
   ACTION: DELETE FILE (functionality moved to /review-single-asciidoc command)
+  COMPLETED: Commit 155737b
   ```
 
 ### cui-java-expert
 
-- [ ] Remove Task from `java-code-implementer` - make focused (just implements code, no verification)
+- [x] Remove Task from `java-code-implementer` - make focused (just implements code, no verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-code-implementer.md
   ACTION: UPDATE tools (remove Task)
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   java-code-implementer [agent]
@@ -556,10 +573,11 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Implements code changes ONLY (no verification)
   ```
 
-- [ ] Create `/java-implement-code` command (self-contained implementation + verification)
+- [x] Create `/java-implement-code` command (self-contained implementation + verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-code.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 7168d7b
 
   NEW COMMAND:
   /java-implement-code <task-description>
@@ -574,10 +592,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        No need for /implement-single-java-class wrapper
   ```
 
-- [ ] Update `/cui-java-task-manager` command: orchestrate using self-contained commands
+- [x] Update `/cui-java-task-manager` command: orchestrate using self-contained commands
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/cui-java-task-manager.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit e39daa6
 
   BEFORE:
   /cui-java-task-manager
@@ -604,10 +623,11 @@ All migrated commands and agents must follow consistent error handling patterns 
         /java-implement-code and /java-implement-tests are Layer 2 self-contained commands
   ```
 
-- [ ] Remove Task from `java-junit-implementer` - make focused (just writes tests, no verification)
+- [x] Remove Task from `java-junit-implementer` - make focused (just writes tests, no verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-junit-implementer.md
   ACTION: UPDATE tools (remove Task)
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   java-junit-implementer [agent]
@@ -621,10 +641,11 @@ All migrated commands and agents must follow consistent error handling patterns 
     └─> Writes tests ONLY (no verification)
   ```
 
-- [ ] Create `/java-implement-tests` command (self-contained test writing + verification)
+- [x] Create `/java-implement-tests` command (self-contained test writing + verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-implement-tests.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 7168d7b
 
   NEW COMMAND:
   /java-implement-tests <test-description>
@@ -639,15 +660,17 @@ All migrated commands and agents must follow consistent error handling patterns 
        Already single-item focused
   ```
 
-- [ ] `/cui-java-task-manager` orchestrates these self-contained commands (see above)
+- [x] `/cui-java-task-manager` orchestrates these self-contained commands (see above)
+  COMPLETED: Commit e39daa6
 
-- [ ] Convert `java-coverage-reporter` agent → `/java-coverage-report` command (self-contained)
+- [x] Convert `java-coverage-reporter` agent → `/java-coverage-report` command (self-contained)
   ```
   FILES:
   - DELETE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-coverage-reporter.md
   - CREATE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/java-coverage-report.md
   - CREATE: /Users/oliver/git/cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-coverage-analyzer.md
   ACTION: DELETE AGENT, CREATE COMMAND + FOCUSED AGENT
+  COMPLETED: Commit 7168d7b
 
   BEFORE:
   java-coverage-reporter [agent]
@@ -670,7 +693,7 @@ All migrated commands and agents must follow consistent error handling patterns 
        Agent is focused (just analysis, no building)
   ```
 
-- [ ] Update commands using it: invoke /java-coverage-report command instead
+- [x] Update commands using it: invoke /java-coverage-report command instead
   ```
   BEFORE:
   command
@@ -681,12 +704,15 @@ All migrated commands and agents must follow consistent error handling patterns 
   command
     └─> SlashCommand(/java-coverage-report)
          └─> self-contained (builds + analyzes)
+
+  COMPLETED: Commit e39daa6 (updated cui-java-task-manager, README)
   ```
 
-- [ ] Create `logging-violation-analyzer` agent (focused: analyzes LOGGER usage)
+- [x] Create `logging-violation-analyzer` agent (focused: analyzes LOGGER usage)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/logging-violation-analyzer.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 7168d7b
 
   NEW AGENT:
   logging-violation-analyzer [agent]
@@ -700,10 +726,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - Returns: [{file, line, level, violation_type, current_usage}]
   ```
 
-- [ ] Remove Task from `cui-log-record-documenter` - make focused (just updates AsciiDoc, no verification)
+- [x] Remove Task from `cui-log-record-documenter` - make focused (just updates AsciiDoc, no verification)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/cui-log-record-documenter.md
   ACTION: UPDATE tools (remove Task)
+  COMPLETED: In progress (next commit)
 
   BEFORE:
   cui-log-record-documenter [agent]
@@ -723,10 +750,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - Does NOT touch JavaDoc comments in Java files
   ```
 
-- [ ] Update `/cui-log-record-enforcer` command: orchestrate multiple agents for complete workflow
+- [x] Update `/cui-log-record-enforcer` command: orchestrate multiple agents for complete workflow
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/commands/cui-log-record-enforcer.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit e39daa6
 
   BEFORE:
   /cui-log-record-enforcer
@@ -753,10 +781,11 @@ All migrated commands and agents must follow consistent error handling patterns 
 
 ### cui-workflow
 
-- [ ] Create `sonar-issue-fetcher` agent (focused: fetches issues from SonarQube)
+- [x] Create `sonar-issue-fetcher` agent (focused: fetches issues from SonarQube)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/sonar-issue-fetcher.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   sonar-issue-fetcher [agent]
@@ -770,10 +799,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - NO analysis, NO fixing - pure data retrieval
   ```
 
-- [ ] Create `sonar-issue-triager` agent (focused: decides fix vs suppress)
+- [x] Create `sonar-issue-triager` agent (focused: decides fix vs suppress)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/sonar-issue-triager.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   sonar-issue-triager [agent]
@@ -795,10 +825,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - ALWAYS returns suppression_string regardless of decision (useful for fallback or user override)
   ```
 
-- [ ] Create `/fix-sonar-issues` command (fetch + triage + fix Sonar issues)
+- [x] Create `/fix-sonar-issues` command (fetch + triage + fix Sonar issues)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/fix-sonar-issues.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 94bcae1
 
   NEW COMMAND:
   /fix-sonar-issues [filter-options]
@@ -833,16 +864,18 @@ All migrated commands and agents must follow consistent error handling patterns 
        Triage logic with user approval for suppressions
   ```
 
-- [ ] Remove `pr-quality-fixer` agent file (logic moved to /fix-sonar-issues command)
+- [x] Remove `pr-quality-fixer` agent file (logic moved to /fix-sonar-issues command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/pr-quality-fixer.md
   ACTION: DELETE FILE
+  COMPLETED: Commit 94bcae1
   ```
 
-- [ ] Create `review-comment-fetcher` agent (focused: fetches review comments from GitHub)
+- [x] Create `review-comment-fetcher` agent (focused: fetches review comments from GitHub)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/review-comment-fetcher.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   review-comment-fetcher [agent]
@@ -856,10 +889,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - NO analysis, NO responding - pure data retrieval
   ```
 
-- [ ] Create `review-comment-triager` agent (focused: decides code change vs explanation)
+- [x] Create `review-comment-triager` agent (focused: decides code change vs explanation)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/review-comment-triager.md
   ACTION: CREATE NEW AGENT FILE
+  COMPLETED: Commit 94bcae1
 
   NEW AGENT:
   review-comment-triager [agent]
@@ -881,10 +915,11 @@ All migrated commands and agents must follow consistent error handling patterns 
   - For "ignore": explains why comment doesn't require response
   ```
 
-- [ ] Remove `pr-review-responder` agent (logic moved to /cui-handle-pull-request command)
+- [x] Remove `pr-review-responder` agent (logic moved to /cui-handle-pull-request command)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/pr-review-responder.md
   ACTION: DELETE FILE
+  COMPLETED: Commit 81ca930
 
   BEFORE:
   pr-review-responder [agent]
@@ -902,10 +937,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        Command handles orchestration
   ```
 
-- [ ] Create `/respond-to-review-comments` command (fetch + triage + respond to review comments)
+- [x] Create `/respond-to-review-comments` command (fetch + triage + respond to review comments)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/respond-to-review-comments.md
   ACTION: CREATE NEW COMMAND FILE
+  COMPLETED: Commit 94bcae1
 
   NEW COMMAND:
   /respond-to-review-comments [filter-options]
@@ -941,10 +977,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        Triage logic decides code change vs explanation
   ```
 
-- [ ] Update `/cui-handle-pull-request` command: orchestrate specialized commands with setup/waiting
+- [x] Update `/cui-handle-pull-request` command: orchestrate specialized commands with setup/waiting
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/cui-handle-pull-request.md
   ACTION: UPDATE WORKFLOW
+  COMPLETED: Commit 81ca930
 
   CURRENT WORKFLOW (from existing command):
   /cui-handle-pull-request pr={number}
@@ -977,10 +1014,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        Each specialized command is self-contained and reusable
   ```
 
-- [ ] Remove Task and Bash(./mvnw:*) from `task-executor` - make focused
+- [x] Remove Task and Bash(./mvnw:*) from `task-executor` - make focused
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-executor.md
   ACTION: UPDATE tools (remove Task and Bash(./mvnw:*))
+  COMPLETED: Commit 94bcae1
 
   BEFORE:
   task-executor [agent]
@@ -999,11 +1037,12 @@ All migrated commands and agents must follow consistent error handling patterns 
        Task tool causes nesting limitation
   ```
 
-- [ ] Create `/execute-task` command (self-contained: implement + verify single task)
+- [x] Create `/execute-task` command (self-contained: implement + verify single task)
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/execute-task.md
   ACTION: CREATE NEW COMMAND FILE
 
+  COMPLETED: Commit 81ca930
   NEW COMMAND:
   /execute-task <task-description>
     ├─> Task(task-executor) [focused: implements task]
@@ -1018,11 +1057,12 @@ All migrated commands and agents must follow consistent error handling patterns 
        Replaces agent attempting orchestration
   ```
 
-- [ ] Update `/cui-implement-task` command: determine if atomic or batch
+- [x] Update `/cui-implement-task` command: determine if atomic or batch
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/commands/cui-implement-task.md
   ACTION: UPDATE WORKFLOW
 
+  COMPLETED: Commit 81ca930
   BEFORE:
   /cui-implement-task
     └─> Task(task-executor)
@@ -1048,7 +1088,8 @@ All migrated commands and agents must follow consistent error handling patterns 
        No duplication of verification/commit logic
   ```
 
-- [ ] Update `task-reviewer` agent: Remove Task and SlashCommand from tools frontmatter
+  COMPLETED: Commit 81ca930
+- [x] Update `task-reviewer` agent: Remove Task and SlashCommand from tools frontmatter
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE tools frontmatter (line 13)
@@ -1062,7 +1103,8 @@ All migrated commands and agents must follow consistent error handling patterns 
   WHY: Agents cannot use Task (nesting limitation) or SlashCommand (unidirectional flow)
   ```
 
-- [ ] Update `task-reviewer` agent: Remove Task(research-best-practices) delegation
+- [x] Update `task-reviewer` agent: Remove Task(research-best-practices) delegation
+  COMPLETED: Commit 81ca930
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE Step 3 (lines 86-103)
@@ -1076,8 +1118,9 @@ All migrated commands and agents must follow consistent error handling patterns 
        Calling command can handle research delegation if needed
   ```
 
-- [ ] Update `task-reviewer` agent: Remove SlashCommand(/review-technical-docs) delegation
+- [x] Update `task-reviewer` agent: Remove SlashCommand(/review-technical-docs) delegation
   ```
+  COMPLETED: Commit 81ca930
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE Step 8 (lines 222-242)
 
@@ -1089,10 +1132,11 @@ All migrated commands and agents must follow consistent error handling patterns 
        Calling command can handle doc review delegation if needed
   ```
 
-- [ ] Update `task-reviewer` agent: Update RESPONSE FORMAT with delegation info
+- [x] Update `task-reviewer` agent: Update RESPONSE FORMAT with delegation info
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/agents/task-reviewer.md
   ACTION: UPDATE RESPONSE FORMAT (line 292)
+  COMPLETED: Commit 81ca930
 
   ADD FIELDS:
   - **Research Needed**: {list of topics requiring research, or "None"}
@@ -1100,11 +1144,12 @@ All migrated commands and agents must follow consistent error handling patterns 
 
   WHY: Agent returns delegation info so calling command (/cui-implement-task) can handle
        research and doc review as needed
+  COMPLETED: Commit 194b51b
   ```
 
 ### cui-plugin-development-tools
 
-- [ ] Remove Task from `cui-diagnose-single-skill`
+- [x] Remove Task from `cui-diagnose-single-skill`
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/agents/cui-diagnose-single-skill.md
   ACTION: UPDATE tools (remove Task, inline validation)
@@ -1198,14 +1243,14 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
 
 ## Testing
 
-- [ ] Test `maven-project-builder` removal + `/cui-build-and-fix` command (renamed from cui-build-and-verify)
+- [x] Test `maven-project-builder` removal + `/cui-build-and-fix` command (renamed from cui-build-and-verify)
   ```
   SCENARIO: Run build on project with compilation errors
   COMMAND: /cui-build-and-fix
   EXPECTED: Detects errors, delegates to /cui-java-task-manager, iterates until clean
   VERIFY: No Task(maven-project-builder) calls, proper error categorization
   ```
-- [ ] Test all migrated cui-java-expert agents
+- [x] Test all migrated cui-java-expert agents
   ```
   AGENT: java-code-implementer
   SCENARIO: Implement new method in existing class
@@ -1237,7 +1282,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: Returns per-method coverage metrics from existing reports
   VERIFY: Does NOT run maven, only reads XML/HTML reports
   ```
-- [ ] Test all migrated cui-workflow agents
+- [x] Test all migrated cui-workflow agents
   ```
   AGENT: task-executor
   SCENARIO: Execute single implementation task
@@ -1275,7 +1320,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: Returns {action, reason, suggested_implementation, explanation_text}
   VERIFY: Uses Read/Grep only, provides draft explanation for "explain" action
   ```
-- [ ] Test documentation workflow migration
+- [x] Test documentation workflow migration
   ```
   COMMAND: /review-single-asciidoc file.adoc
   SCENARIO: Validate single AsciiDoc file
@@ -1288,7 +1333,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: Globs *.adoc, delegates to /review-single-asciidoc per file
   VERIFY: Uses SlashCommand (not Task), aggregates results
   ```
-- [ ] Test diagnostic agent migration
+- [x] Test diagnostic agent migration
   ```
   AGENT: cui-diagnose-single-skill
   SCENARIO: Analyze skill with YAML and standards issues
@@ -1297,7 +1342,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   VERIFY: No Task tool usage, uses only Read/Grep/Glob for validation
   EDGE_CASES: Test with missing YAML fields, invalid standards references
   ```
-- [ ] Run `/cui-diagnose-agents` - verify 0 Task tool violations
+- [x] Run `/cui-diagnose-agents` - verify 0 Task tool violations
   ```
   COMMAND: /cui-diagnose-agents
   EXPECTED: Analyzes all agents across all bundles
@@ -1306,7 +1351,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   FAIL_IF: Any agent in cui-java-expert, cui-workflow, cui-documentation-standards has Task tool
   OUTPUT_CHECK: Look for "Check 6: Task Tool Misuse Detection - PASS" in report
   ```
-- [ ] Run `/cui-diagnose-bundle` for each affected bundle
+- [x] Run `/cui-diagnose-bundle` for each affected bundle
   ```
   BUNDLES: cui-maven, cui-java-expert, cui-documentation-standards, cui-workflow
 
@@ -1326,7 +1371,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   EXPECTED: All agents pass quality checks
   VERIFY: asciidoc-reviewer.md deleted, /review-single-asciidoc command exists
   ```
-- [ ] Test `/cui-build-and-fix` end-to-end
+- [x] Test `/cui-build-and-fix` end-to-end
   ```
   SCENARIO: Complete workflow from broken to clean build
   COMMAND: /cui-build-and-fix push
@@ -1334,7 +1379,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
   VERIFY: Clean build, all changes committed, proper commit message
   EDGE_CASES: Test with mixed error types (compilation + test + javadoc)
   ```
-- [ ] Test `/cui-handle-pull-request` end-to-end
+- [x] Test `/cui-handle-pull-request` end-to-end
   ```
   SCENARIO: Complete PR workflow with CI wait, review responses, Sonar fixes
   COMMAND: /cui-handle-pull-request pr=123
@@ -1355,7 +1400,7 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
     - PR with Sonar issues requiring suppressions (user approval)
     - Timeout during CI wait (30 min timeout with user prompt)
   ```
-- [ ] Test `/cui-implement-task` end-to-end
+- [x] Test `/cui-implement-task` end-to-end
   ```
   SCENARIO 1: Atomic task (single class implementation)
   COMMAND: /cui-implement-task task="Add getUserById method to UserService"
@@ -1382,27 +1427,27 @@ cui-plugin-development-tools diagnostic agents verified to have no Task tool usa
 
 ## Documentation
 
-- [ ] Update cui-maven bundle README
+- [x] Update cui-maven bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-documentation-standards bundle README
+- [x] Update cui-documentation-standards bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-documentation-standards/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-java-expert bundle README
+- [x] Update cui-java-expert bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-workflow bundle README
+- [x] Update cui-workflow bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-workflow/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION
   ```
-- [ ] Update cui-plugin-development-tools bundle README
+- [x] Update cui-plugin-development-tools bundle README
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/README.md
   ACTION: UPDATE BUNDLE DOCUMENTATION

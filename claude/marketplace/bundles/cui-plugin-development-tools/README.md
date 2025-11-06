@@ -9,11 +9,14 @@ Complete toolchain for creating and diagnosing Claude Code plugins. This bundle 
 This bundle includes the following components:
 
 ### Commands
-- **create-agent** - Scaffolds new agent with proper structure and documentation
+- **create-agent** - Scaffolds new agent with proper structure and documentation (includes Rule 6 validation - prevents Task tool in agents)
 - **create-command** - Scaffolds new command with standard format
-- **diagnose-agents** - Validates agent structure, AGENT.md format, and integration
+- **diagnose-agents** - Validates agent structure, AGENT.md format, and integration (includes Checks 6-7 for Rule 6/7 violations)
 - **diagnose-commands** - Validates command structure, markdown format, and metadata
 - **diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
+
+### Agents (Rule 6 compliant)
+- **cui-diagnose-single-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
 
 ## Installation Instructions
 
@@ -78,6 +81,8 @@ The command will:
 - Validate AGENT.md structure
 - Check required metadata presence
 - Verify documentation completeness
+- **Check 6: Task Tool Misuse Detection** - Validates agents don't use Task tool (Rule 6 violation)
+- **Check 7: Maven Anti-Pattern Detection** - Validates only maven-builder uses Bash(./mvnw:*) (Rule 7)
 - Identify missing sections
 - Report formatting issues
 - Suggest improvements

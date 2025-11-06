@@ -5,7 +5,7 @@ description: Implements Java tasks end-to-end with automated testing and coverag
 
 # CUI Java Task Manager Command
 
-Orchestrates complete Java task implementation through code creation, unit testing, and coverage verification workflow. Coordinates three specialized agents iteratively until full coverage is achieved.
+Orchestrates complete Java task implementation through code creation, unit testing, and coverage verification workflow. Delegates to self-contained commands iteratively until full coverage is achieved.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -36,16 +36,17 @@ Analyze the `description` parameter to determine workflow entry point:
 
 ### Step 2: Implementation Phase
 
-Call agent `java-code-implementer`:
+Call self-contained command `/java-implement-code`:
 
 ```
-Task: subagent_type=cui-java-expert:java-code-implementer
-prompt: "Implement task for types: {types}
-
-Description: {description}
-
-Module: {module or 'single-module project'}"
+SlashCommand: /java-implement-code
+Parameters: |
+  types={types}
+  description={description}
+  module={module or 'single-module project'}
 ```
+
+This command handles implementation AND verification internally (implements → verifies → iterates).
 
 **On success:**
 - Analyze implementation result
@@ -53,24 +54,24 @@ Module: {module or 'single-module project'}"
 - Continue to Step 3
 
 **On error/problems:**
-- Attempt to fix issues in interaction with agent
+- Command returns error details
 - If unresolvable, ask caller for guidance
 - Track in `implementation_retries` counter
 
 ### Step 3: Unit Testing Phase
 
-Analyze Step 2 results and call agent `java-junit-implementer`:
+Analyze Step 2 results and call self-contained command `/java-implement-tests`:
 
 ```
-Task: subagent_type=cui-java-expert:java-junit-implementer
-prompt: "Implement unit tests for types: {types}
-
-Production code analysis: {summary from Step 2}
-
-Test requirements: {inferred from description and implementation}
-
-Module: {module}"
+SlashCommand: /java-implement-tests
+Parameters: |
+  types={types}
+  description=Implement unit tests for {types}
+  context={summary from Step 2}
+  module={module}
 ```
+
+This command handles test implementation AND verification internally (writes tests → runs tests → iterates).
 
 **On success:**
 - Analyze test implementation result
@@ -82,22 +83,22 @@ Module: {module}"
 - Track in `production_fixes` counter
 
 **On error indicating test code issue:**
-- Attempt to fix in iteration with agent
+- Command returns error details
 - If unresolvable, ask caller
 - Track in `test_retries` counter
 
 ### Step 4: Coverage Verification Phase
 
-Call agent `java-coverage-reporter`:
+Call self-contained command `/java-coverage-report`:
 
 ```
-Task: subagent_type=cui-java-expert:java-coverage-reporter
-prompt: "Analyze coverage for types: {types}
-
-Module: {module}
-
-Report all coverage gaps requiring tests."
+SlashCommand: /java-coverage-report
+Parameters: |
+  types={types}
+  module={module}
 ```
+
+This command handles coverage generation AND analysis internally (builds with -Pcoverage → analyzes JaCoCo reports).
 
 **On error indicating production code issue:**
 - Return to Step 2 with adapted description
@@ -148,10 +149,11 @@ Display all statistics in final summary.
 - `module` defaults to single-module if unset
 - Validate parameters before calling first agent
 
-**Agent Coordination:**
-- Always analyze agent results before next call
-- Prepare precise parameters for each agent
-- Never guess - ask caller if agent output unclear
+**Command Coordination:**
+- Always analyze command results before next call
+- Prepare precise parameters for each command
+- Never guess - ask caller if command output unclear
+- Self-contained commands handle their own verification internally
 
 **Error Handling:**
 - Distinguish production vs. test code issues
@@ -192,6 +194,6 @@ Display all statistics in final summary.
 
 ## RELATED
 
-- `java-code-implementer` - Agent for production code implementation
-- `java-junit-implementer` - Agent for unit test implementation
-- `java-coverage-reporter` - Agent for coverage analysis
+- `/java-implement-code` - Self-contained command for production code implementation + verification
+- `/java-implement-tests` - Self-contained command for unit test implementation + verification
+- `/java-coverage-report` - Self-contained command for coverage generation + analysis
