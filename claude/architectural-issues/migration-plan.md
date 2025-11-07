@@ -426,7 +426,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/commands/cui-build-and-verify.md
   ACTION: RENAME FILE to cui-build-and-fix.md AND UPDATE WORKFLOW
-  COMPLETED: In progress (next commit)
+  COMPLETED: Commit a2fd0fe
 
   BEFORE:
   /cui-build-and-verify
@@ -454,7 +454,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-maven/agents/maven-builder.md
   ACTION: UPDATE RESPONSE FORMAT
-  COMPLETED: In progress (next commit)
+  COMPLETED: Commit a2fd0fe
 
   BEFORE:
   maven-builder [agent]
@@ -559,7 +559,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-code-implementer.md
   ACTION: UPDATE tools (remove Task)
-  COMPLETED: In progress (next commit)
+  COMPLETED: Commit 23deb2d
 
   BEFORE:
   java-code-implementer [agent]
@@ -627,7 +627,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/java-junit-implementer.md
   ACTION: UPDATE tools (remove Task)
-  COMPLETED: In progress (next commit)
+  COMPLETED: Commit 23deb2d
 
   BEFORE:
   java-junit-implementer [agent]
@@ -730,7 +730,7 @@ All migrated commands and agents must follow consistent error handling patterns 
   ```
   FILE: /cui-llm-rules/claude/marketplace/bundles/cui-java-expert/agents/cui-log-record-documenter.md
   ACTION: UPDATE tools (remove Task)
-  COMPLETED: In progress (next commit)
+  COMPLETED: Commit 23deb2d
 
   BEFORE:
   cui-log-record-documenter [agent]
