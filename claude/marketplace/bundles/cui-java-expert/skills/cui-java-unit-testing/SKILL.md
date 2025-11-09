@@ -324,7 +324,7 @@ If encountering issues:
 
 * Core Testing Standards: standards/testing-junit-core.md
 * Value Object Testing: standards/testing-value-objects.md
-* Generator Usage: standards/testing-generators.md
+* Generator Usage: standards/test-generator-framework.md
 * MockWebServer Testing: standards/testing-mockwebserver.md
 * Integration Testing: standards/integration-testing.md
 * JULi Logger Testing: standards/testing-juli-logger.md

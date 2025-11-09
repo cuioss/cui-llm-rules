@@ -49,6 +49,13 @@ Read: standards/cui-http.md
 
 Use when: Working with HTTP client code, implementing HTTP request/response handling, or needing guidance on the HttpResult pattern, retry logic, ETag caching, or HTTP error handling.
 
+**Logging Enforcement Patterns** (reference only - for tooling):
+```
+Read: standards/logging-enforcement-patterns.md
+```
+
+Use when: Building validation tools or linters for logging standards. This file contains enforcement patterns and validation rules intended for tooling integration rather than direct application during development.
+
 ### Step 3: Extract Key Requirements
 
 From all loaded standards, extract and organize:

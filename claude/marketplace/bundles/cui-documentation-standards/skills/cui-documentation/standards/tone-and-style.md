@@ -441,6 +441,6 @@ Before finalizing documentation, verify:
 
 ## References
 
-* xref:documentation-core.md[Documentation Core Standards]
-* xref:asciidoc-formatting.md[AsciiDoc Formatting Standards]
-* xref:readme-structure.md[README Structure Standards]
+* [Documentation Core Standards](documentation-core.md)
+* [AsciiDoc Formatting Standards](asciidoc-formatting.md)
+* [README Structure Standards](readme-structure.md)

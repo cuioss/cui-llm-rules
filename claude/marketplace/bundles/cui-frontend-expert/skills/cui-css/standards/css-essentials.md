@@ -473,58 +473,6 @@ Components + utilities:
 }
 ```
 
-## Common Pitfalls
-
-### Don't Use !important
-
-```css
-/* ❌ Avoid */
-.button {
-  color: red !important;
-}
-
-/* ✅ Increase specificity properly */
-.card .button {
-  color: red;
-}
-```
-
-### Don't Use Magic Numbers
-
-```css
-/* ❌ What is 23px? */
-.element {
-  margin-top: 23px;
-}
-
-/* ✅ Use variables */
-.element {
-  margin-top: var(--spacing-md);
-}
-```
-
-### Don't Use Presentational Names
-
-```css
-/* ❌ What if design changes? */
-.blue-button { }
-.right-sidebar { }
-
-/* ✅ Use semantic names */
-.button--primary { }
-.sidebar--secondary { }
-```
-
-### Don't Nest Elements
-
-```css
-/* ❌ Don't nest elements */
-.card__body__title { }
-
-/* ✅ Flatten the structure */
-.card__title { }
-```
-
 ## Theming with Custom Properties
 
 ```css
