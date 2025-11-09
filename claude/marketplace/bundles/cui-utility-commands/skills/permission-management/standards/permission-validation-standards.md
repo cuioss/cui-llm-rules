@@ -89,7 +89,7 @@ Standards and patterns for validating and maintaining Claude Code permissions in
 
 **Security Validation:**
 - No overly permissive patterns without justification
-- WebFetch domains must be vetted (see domain-security-assessment.md)
+- WebFetch domains must be vetted (see `web-security-standards` skill: domain-security-assessment.md and trusted-domains.md)
 - File access patterns must be scoped appropriately
 - Bash commands must be safe operations
 
@@ -174,49 +174,11 @@ Or bundle wildcard:
 {"tool": "Skill", "pattern": "bundle:my-bundle:*"}
 ```
 
-## Validation Process
-
-### Step 1: Format Check
-```
-For each permission:
-1. Verify tool field is valid Claude Code tool
-2. Verify pattern matches required format for tool type
-3. Check for syntax errors (missing colons, incorrect prefixes)
-4. Validate paths exist (for Read/Write/Edit)
-```
-
-### Step 2: Duplication Check
-```
-1. Group permissions by tool
-2. Sort by pattern specificity (broad to specific)
-3. Identify exact duplicates (same tool + pattern)
-4. Identify redundant permissions (specific covered by broad)
-5. Mark duplicates/redundancies for removal
-```
-
-### Step 3: Security Check
-```
-1. For WebFetch: validate each domain against security standards
-2. For Bash: verify commands are safe operations
-3. For file access: ensure appropriate scope
-4. Flag overly permissive patterns for review
-```
-
-### Step 4: Organization Check
-```
-1. Verify permissions grouped by tool
-2. Check alphabetical ordering within tool groups
-3. Validate consistent formatting
-4. Ensure no mixing of permission types
-```
-
-### Step 5: Reference Check
-```
-1. For Skills: verify skill exists in loaded plugins
-2. For SlashCommands: verify command exists
-3. For file paths: check paths are valid
-4. Flag broken references
-```
+**For validation implementation**, see:
+- Format validation examples in sections above
+- [permission-architecture.md](permission-architecture.md) for scoping guidelines
+- [permission-anti-patterns.md](permission-anti-patterns.md) for common issues to check
+- [best-practices/lessons-learned.md](best-practices/lessons-learned.md) for validation workflow
 
 ## Permission Scoping Best Practices
 

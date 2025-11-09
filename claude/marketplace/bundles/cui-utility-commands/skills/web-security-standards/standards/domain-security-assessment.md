@@ -105,13 +105,18 @@ Security evaluation criteria and risk indicators for assessing domain trustworth
 
 ## Trust Levels
 
+For the complete list of pre-approved trusted domains, see [trusted-domains.md](trusted-domains.md).
+
 ### Fully Trusted
-- Major tech companies (Google, Microsoft, Apple, etc.)
-- Established open-source foundations (Apache, Eclipse, Mozilla)
-- Government educational institutions (.gov, .edu)
-- Well-known documentation sites (MDN, Stack Overflow, official docs)
-- Reputable news organizations
-- Industry standards bodies (W3C, IETF, ISO)
+
+Domains that have been comprehensively assessed and approved. Categories include:
+- Major tech companies and platforms
+- Established open-source foundations
+- Government and educational institutions
+- Official documentation sites for widely-used technologies
+- Industry standards bodies
+
+**See [trusted-domains.md](trusted-domains.md) for the authoritative list of approved domains with detailed justifications.**
 
 ### Generally Trusted (Verify First)
 - Popular developer resources and blogs
