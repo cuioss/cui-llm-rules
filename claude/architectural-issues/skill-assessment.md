@@ -128,6 +128,17 @@ This document provides a comprehensive inventory of all agents and commands in t
 3. **java-coverage-analyzer** should load `cui-java-expert:cui-java-unit-testing` (Step 1) for coverage thresholds (80% line/branch) to determine SUFFICIENT/INSUFFICIENT status
 4. **commit-changes** should load `cui-workflow:cui-git-workflow` (Step 1) for conventional commit format standards
 
+### Cross-Cutting Skills
+
+**cui-general-development-rules skill** (cui-utility-commands bundle) provides foundational principles applicable to ALL agents and commands:
+- When to ask users vs proceed
+- Research requirements (using research-best-practices agent)
+- Tool usage standards (Read, Write, Edit vs cat, tail, find)
+- Document management (reuse vs create)
+- Dependency approval requirements
+
+**Usage:** Agents and commands can optionally reference this skill for general development guidance, but it's not required since many components implicitly follow these principles.
+
 **Commands with complete skill configuration:**
 All commands correctly delegate skills to agents or load skills only when needed for cross-cutting concerns.
 
