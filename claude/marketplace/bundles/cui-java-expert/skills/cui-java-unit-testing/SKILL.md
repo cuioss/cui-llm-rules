@@ -58,6 +58,12 @@ Standards and patterns for writing high-quality unit tests in CUI Java projects 
    ```
    Provides quality best practices including AI-generated code detection, parameterized test guidelines, assertion message standards, SonarQube compliance, library migration guidelines, and coverage requirements.
 
+   **G. If performing test maintenance or refactoring** (maintaining or improving existing test code quality):
+   ```
+   Read: standards/testing-maintenance-reference.md
+   ```
+   Use when: Maintaining or improving existing test code. Provides detection criteria for forbidden test anti-patterns (conditional logic, Optional.orElse(), try-catch blocks), maintenance-specific testing requirements, unit test focus guidelines, value object testing criteria, test enhancement prioritization, common mistakes to avoid, and troubleshooting guide for test quality issues. Different from testing-quality-standards.md which focuses on writing NEW tests.
+
 3. **Extract key requirements from all loaded standards**
 
 4. **Store in working memory** for use during task execution
