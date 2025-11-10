@@ -84,15 +84,9 @@ Process for maintaining and improving JavaScript test quality while preserving f
 * Testing Library query optimization
 * E2E test maintenance with Cypress
 
-==== xref:pom-maintenance.adoc[POM Maintenance Process]
-Process for maintaining and optimizing Maven POM files across Java projects. Provides systematic approaches for dependency management, BOM utilization, version optimization, and POM quality improvements while adhering to Maven best practices.
-
-**Key Features:**
-* OpenRewrite integration for automated cleanup
-* BOM management and centralized version control
-* Dependency scope optimization and verification
-* Multi-module dependency aggregation strategies
-* Maven wrapper maintenance procedures
+==== POM Maintenance Process [MIGRATED]
+**MIGRATED** to marketplace: `pom-maintenance.md` standard in cui-maven-rules skill (cui-maven bundle).
+Process for maintaining and optimizing Maven POM files across Java projects. Standards documented in skill; execution via maven-builder agent.
 
 ==== Logger Maintenance Process [MIGRATED]
 **MIGRATED** to marketplace: `/cui-logger-maintain` command in cui-java-expert bundle.
@@ -149,7 +143,7 @@ All process documents in this directory follow consistent patterns:
 * **Java Test Improvements**: Use `/cui-test-maintain` command (cui-java-expert bundle)
 * **JavaScript Code Improvements**: Follow xref:javascript-code-maintenance.adoc[JavaScript Code Maintenance Process]
 * **JavaScript Test Improvements**: Follow xref:javascript-test-maintenance.adoc[JavaScript Test Maintenance Process]
-* **Maven POM Maintenance**: Apply xref:pom-maintenance.adoc[POM Maintenance Process]
+* **Maven POM Maintenance**: Use cui-maven-rules skill (pom-maintenance.md standard)
 * **Logging Updates**: Use `/cui-logger-maintain` command (cui-java-expert bundle)
 * **Documentation Fixes**: Use `/cui-javadoc-fix` command (cui-java-expert bundle)
 * **Requirements Updates**: Use `/cui-requirements-maintain` command (cui-requirements bundle)
