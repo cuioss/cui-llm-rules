@@ -20,7 +20,7 @@ This document provides a comprehensive inventory of all agents and commands in t
 | **asciidoc-format-validator** | `cui-documentation-standards/agents/asciidoc-format-validator.md` | **Required:** cui-documentation-standards:cui-documentation (Step 1) | **Required:** cui-documentation-standards:cui-documentation |
 | **asciidoc-link-verifier** | `cui-documentation-standards/agents/asciidoc-link-verifier.md` | **Required:** cui-documentation-standards:cui-documentation (Step 1) | **Required:** cui-documentation-standards:cui-documentation |
 | **asciidoc-content-reviewer** | `cui-documentation-standards/agents/asciidoc-content-reviewer.md` | **Required:** cui-documentation-standards:cui-documentation (Step 1) | **Required:** cui-documentation-standards:cui-documentation |
-| **commit-changes** | `cui-workflow/agents/commit-changes.md` | None | None (git operations, no standards needed) |
+| **commit-changes** | `cui-workflow/agents/commit-changes.md` | None | **Required:** cui-workflow:cui-git-workflow (Step 1 - conventional commit format standards) |
 | **task-breakdown-agent** | `cui-workflow/agents/task-breakdown-agent.md` | None | None (analyzes issues, no standards needed) |
 | **review-comment-fetcher** | `cui-workflow/agents/review-comment-fetcher.md` | None | None (fetches GitHub data, no standards needed) |
 | **review-comment-triager** | `cui-workflow/agents/review-comment-triager.md` | None | None (triages comments, no standards needed) |
@@ -125,6 +125,7 @@ This document provides a comprehensive inventory of all agents and commands in t
 1. **logging-violation-analyzer** should load `cui-java-expert:cui-java-core` (Step 1) for logging standards
 2. **maven-builder** should optionally load `cui-maven:cui-maven-rules` for Maven best practices
 3. **java-coverage-analyzer** should load `cui-java-expert:cui-java-unit-testing` (Step 1) for coverage thresholds (80% line/branch) to determine SUFFICIENT/INSUFFICIENT status
+4. **commit-changes** should load `cui-workflow:cui-git-workflow` (Step 1) for conventional commit format standards
 
 **Commands with complete skill configuration:**
 All commands correctly delegate skills to agents or load skills only when needed for cross-cutting concerns.
