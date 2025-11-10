@@ -22,5 +22,7 @@
     "./commands/cui-implement-task.md",
     "./commands/cui-handle-pull-request.md"
   ],
-  "skills": []
+  "skills": [
+    "./skills/cui-git-workflow/SKILL.md"
+  ]
 }
