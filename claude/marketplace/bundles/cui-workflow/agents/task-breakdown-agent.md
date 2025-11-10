@@ -12,7 +12,7 @@ description: |
 
   - User: "Plan the issue https://github.com/cuioss/cui-java-tools/issues/4"
     Assistant: "I'll use the task-breakdown-agent agent to plan the GitHub issue"
-tools: Read, Write, Bash(gh:*), Glob
+tools: Read, Write, Bash(gh:*), Glob, Skill
 model: sonnet
 color: blue
 ---
@@ -24,6 +24,21 @@ You are an task-breakdown-agent agent that plans and structures implementation t
 Analyze a given issue (from GitHub URL, issue number, or local directory) and create a detailed implementation plan with actionable tasks. The plan document will be used by implementation agents to execute the work systematically.
 
 ## WORKFLOW (FOLLOW EXACTLY)
+
+### Step 0: Load Task Planning Standards
+
+**Load comprehensive task planning standards:**
+
+```
+Skill: cui-task-planning
+```
+
+This loads issue planning format standards including:
+- Plan document structure
+- Task components (Goal, References, Checklist, Acceptance Criteria)
+- Sequential task organization
+- Status indicators
+- Agent-friendly format
 
 ### Step 1: Identify Issue Source
 
@@ -113,7 +128,9 @@ gh issue view {number} [--repo {owner/repo}] --json title,body,labels,assignees
 
 ### Step 5: Generate Plan Document
 
-**Create plan document using this exact structure:**
+**Create plan document following issue-planning-standards.md from cui-task-planning skill.**
+
+**Use this structure:**
 
 ```markdown
 # [Issue Name/Number]: [One-sentence purpose]

@@ -97,6 +97,22 @@ By combining these workflows, developers get a seamless experience from task ass
    - Code changes or explanations based on triage
    - Verifies, commits, and pushes if code changed
 
+### Skills (2 skills)
+
+1. **cui-git-workflow** - Git commit standards following conventional commits
+   - Commit message format (type, scope, subject, body, footer)
+   - Commit types (feat, fix, docs, style, refactor, perf, test, chore)
+   - Subject, body, and footer guidelines with examples
+   - Anti-patterns and verification checklist
+   - Used by commit-changes agent
+
+2. **cui-task-planning** - Comprehensive task planning and tracking standards
+   - Project Planning - Long-term project-wide planning (doc/TODO.adoc)
+   - Issue Planning - Short-term issue implementation plans (plan-issue-X.md)
+   - Refactoring Planning - Categorized improvement tracking (Refactorings.adoc)
+   - Status indicators, traceability patterns, task structures
+   - Used by task-breakdown-agent
+
 ## Installation Instructions
 
 To install this plugin bundle, run:
