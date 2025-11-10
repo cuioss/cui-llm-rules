@@ -22,14 +22,9 @@ Process documents in this directory complement the technical standards found els
 
 === Development Workflow
 
-==== xref:task-completion-standards.adoc[Task Completion Standards]
-Standardized quality verification process for all CUI LLM project development tasks. Defines the mandatory pre-commit checklist, Maven profile requirements, and quality gates that must be met before any code is committed.
-
-**Key Features:**
-* Pre-commit checklist with concrete Maven commands
-* Quality verification requirements
-* Documentation and commit message standards
-* Task management guidelines
+**NOTE**: Process standards are being migrated to the marketplace architecture (claude/marketplace/bundles).
+Many processes have been migrated to commands in cui-java-expert, cui-requirements, and other bundles.
+Remaining files will be migrated to appropriate bundles.
 
 ==== xref:git-commit-standards.adoc[Git Commit Standards]
 Standardized approach for git commit messages across all projects following conventional commit format. Ensures consistent, traceable commit history that supports automated tooling and code review processes.
@@ -61,25 +56,13 @@ Systematic process for optimizing Quarkus applications for native image compilat
 * Performance metrics tracking and verification
 * Integration with CDI framework requirements
 
-==== xref:java-code-maintenance.adoc[Java Code Maintenance Process]
-Process for maintaining and refactoring Java production code to enforce all aspects of Java Code Standards. Provides systematic approaches for identifying, prioritizing, and resolving code quality issues while preserving functionality.
+==== Java Code Maintenance Process [MIGRATED]
+**MIGRATED** to marketplace: `/cui-java-refactor` command in cui-java-expert bundle.
+Process for maintaining and refactoring Java production code to enforce all aspects of Java Code Standards.
 
-**Key Features:**
-* Standards violation detection and resolution
-* Refactoring prioritization framework
-* Module-by-module processing strategy
-* Production code protection protocols
-* Comprehensive compliance checklists
-
-==== xref:java-test-maintenance.adoc[Java Test Maintenance Process]
-Process for maintaining and improving Java test quality while preserving functionality and adhering to CUI testing standards. Focuses on module-by-module approach with emphasis on CUI framework compliance.
-
-**Key Features:**
-* Module-by-module processing strategy
-* CUI framework compliance requirements
-* Test quality issue detection and resolution
-* AI-generated code cleanup patterns
-* SonarQube compliance guidance
+==== Java Test Maintenance Process [MIGRATED]
+**MIGRATED** to marketplace: `/cui-test-maintain` command in cui-java-expert bundle.
+Process for maintaining and improving Java test quality while preserving functionality and adhering to CUI testing standards.
 
 ==== xref:javascript-code-maintenance.adoc[JavaScript Code Maintenance Process]
 Process for maintaining and refactoring JavaScript production code to enforce all aspects of JavaScript Development Standards. Focuses on vanilla JavaScript preference, proper modularization, and package.json management.
@@ -111,35 +94,19 @@ Process for maintaining and optimizing Maven POM files across Java projects. Pro
 * Multi-module dependency aggregation strategies
 * Maven wrapper maintenance procedures
 
-==== xref:logger-maintenance.adoc[Logger Maintenance Process]
-Process for implementing and maintaining logging standards compliance while preserving functionality. Provides systematic approach to migrating to CuiLogger and implementing proper LogRecord usage patterns.
-
-**Key Features:**
-* CuiLogger migration workflow
-* LogRecord implementation requirements
-* LogMessages structure compliance
-* Testing implementation for logging code
-* Documentation synchronization
+==== Logger Maintenance Process [MIGRATED]
+**MIGRATED** to marketplace: `/cui-logger-maintain` command in cui-java-expert bundle.
+Process for implementing and maintaining logging standards compliance while preserving functionality.
 
 === Documentation Maintenance
 
-==== xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]
-Process for Javadoc error resolution and quality assurance. Provides systematic approach to identifying, prioritizing, and resolving Javadoc issues while maintaining documentation quality.
+==== Javadoc Maintenance Process [MIGRATED]
+**MIGRATED** to marketplace: `/cui-javadoc-fix` command in cui-java-expert bundle.
+Process for Javadoc error resolution and quality assurance.
 
-**Key Features:**
-* Javadoc error detection and categorization
-* Systematic resolution workflow
-* Quality verification procedures
-* Integration with build processes
-
-==== xref:requirements-maintenance.adoc[Requirements Maintenance Process]
-Process for maintaining requirements and specification documents to ensure continued accuracy, traceability, and alignment with implementation. Provides systematic approach to document review, update, and cross-reference verification.
-
-**Key Features:**
-* Requirements and specification alignment
-* Cross-reference verification workflow
-* Traceability maintenance procedures
-* Documentation integrity requirements
+==== Requirements Maintenance Process [MIGRATED]
+**MIGRATED** to marketplace: `/cui-requirements-maintain` command in cui-requirements bundle.
+Process for maintaining requirements and specification documents to ensure continued accuracy, traceability, and alignment with implementation.
 
 == Common Process Patterns
 
@@ -153,10 +120,10 @@ All process documents in this directory follow consistent patterns:
 * **Success Criteria**: Clear completion requirements
 
 === Integration Points
-* **Task Completion Standards**: Referenced by all processes for quality verification
 * **Git Commit Standards**: Referenced for proper commit message formatting
 * **Technical Standards**: Cross-referenced for implementation details
-* **Quality Gates**: Consistent Maven commands and verification steps
+* **Quality Gates**: Maven commands and verification steps (integrated into marketplace commands)
+* **Marketplace Commands**: Process orchestration via cui-java-expert, cui-maven, cui-requirements bundles
 
 === Quality Assurance
 * Build verification before and after changes
@@ -175,25 +142,25 @@ All process documents in this directory follow consistent patterns:
 * Coordinating multi-module changes
 
 === Process Selection
-* **General Development**: Start with xref:task-completion-standards.adoc[Task Completion Standards]
-* **Code Refactoring**: Use xref:refactoring-process.adoc[Refactoring Process]
+* **General Development**: Use marketplace commands (cui-java-expert, cui-maven bundles)
+* **Code Refactoring**: Use `/cui-java-refactor` command (migrated to marketplace)
 * **Quarkus Native Optimization**: Follow xref:quarkus-native-optimization.adoc[Quarkus Native Optimization Process]
-* **Java Code Improvements**: Follow xref:java-code-maintenance.adoc[Java Code Maintenance Process]
-* **Java Test Improvements**: Follow xref:java-test-maintenance.adoc[Java Test Maintenance Process]
+* **Java Code Improvements**: Use `/cui-java-refactor` command (cui-java-expert bundle)
+* **Java Test Improvements**: Use `/cui-test-maintain` command (cui-java-expert bundle)
 * **JavaScript Code Improvements**: Follow xref:javascript-code-maintenance.adoc[JavaScript Code Maintenance Process]
 * **JavaScript Test Improvements**: Follow xref:javascript-test-maintenance.adoc[JavaScript Test Maintenance Process]
 * **Maven POM Maintenance**: Apply xref:pom-maintenance.adoc[POM Maintenance Process]
-* **Logging Updates**: Apply xref:logger-maintenance.adoc[Logger Maintenance Process]
-* **Documentation Fixes**: Use xref:javadoc-maintenance.adoc[Javadoc Maintenance Process]
-* **Requirements Updates**: Follow xref:requirements-maintenance.adoc[Requirements Maintenance Process]
+* **Logging Updates**: Use `/cui-logger-maintain` command (cui-java-expert bundle)
+* **Documentation Fixes**: Use `/cui-javadoc-fix` command (cui-java-expert bundle)
+* **Requirements Updates**: Use `/cui-requirements-maintain` command (cui-requirements bundle)
 
 === Cross-Process Coordination
 When working across multiple areas:
-1. Always start with task completion standards for baseline requirements
+1. Use marketplace commands for orchestrated workflows (cui-java-expert, cui-maven bundles)
 2. Apply specific maintenance processes for targeted improvements
 3. Use git commit standards for all commits
 4. Reference technical standards for implementation details
-5. Verify quality gates throughout the process
+5. Verify quality gates throughout the process (integrated into marketplace commands)
 
 == Integration with Technical Standards
 

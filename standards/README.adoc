@@ -65,12 +65,11 @@ All standards documentation in this directory uses AsciiDoc format with the foll
 ** xref:requirements/new-project-guide.adoc[New Project Guide] - Standards for documentation in new projects
 
 === Process Standards
-* xref:process/refactoring-process.adoc[Refactoring Process] - Process for code refactoring and improvement
+
+**NOTE**: Process standards are being migrated to the marketplace architecture (claude/marketplace/bundles).
+Remaining files in this directory will be migrated to appropriate bundles (cui-java-expert, cui-javascript, cui-maven, etc.).
+
 * xref:process/git-commit-standards.adoc[Git Commit Standards] - Standardized approach for git commit messages across all projects
-* xref:process/task-completion-standards.adoc[Task Completion Standards] - Quality standards and processes for completing development tasks
-* xref:process/javadoc-maintenance.adoc[Javadoc Maintenance] - Process for Javadoc error resolution and quality assurance
-* xref:process/java-test-maintenance.adoc[Java Test Maintenance] - Process for maintaining and improving Java test quality
-* xref:process/logger-maintenance.adoc[Logger Maintenance] - Process for implementing and maintaining logging standards compliance
 
 == Standards vs. Implementation
 
