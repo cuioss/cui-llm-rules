@@ -21,7 +21,7 @@ This document provides a comprehensive inventory of all agents and commands in t
 | **asciidoc-link-verifier** | `cui-documentation-standards/agents/asciidoc-link-verifier.md` | **Required:** cui-documentation-standards:cui-documentation (Step 1) | **Required:** cui-documentation-standards:cui-documentation |
 | **asciidoc-content-reviewer** | `cui-documentation-standards/agents/asciidoc-content-reviewer.md` | **Required:** cui-documentation-standards:cui-documentation (Step 1) | **Required:** cui-documentation-standards:cui-documentation |
 | **commit-changes** | `cui-workflow/agents/commit-changes.md` | None | **Required:** cui-workflow:cui-git-workflow (Step 1 - conventional commit format standards) |
-| **task-breakdown-agent** | `cui-workflow/agents/task-breakdown-agent.md` | None | None (analyzes issues, no standards needed) |
+| **task-breakdown-agent** | `cui-workflow/agents/task-breakdown-agent.md` | **Required:** cui-workflow:cui-task-planning (Step 0) | **Required:** cui-workflow:cui-task-planning (plan document format, task structure, status indicators) |
 | **review-comment-fetcher** | `cui-workflow/agents/review-comment-fetcher.md` | None | None (fetches GitHub data, no standards needed) |
 | **review-comment-triager** | `cui-workflow/agents/review-comment-triager.md` | None | None (triages comments, no standards needed) |
 | **sonar-issue-fetcher** | `cui-workflow/agents/sonar-issue-fetcher.md` | None | None (fetches Sonar data, no standards needed) |
@@ -82,15 +82,16 @@ This document provides a comprehensive inventory of all agents and commands in t
 **Total Agents Analyzed:** 24
 
 **Agents with Configured Skills:**
-- **9 agents** (37.5%) explicitly load skills using `Skill:` invocation
-- **15 agents** (62.5%) do not load skills (focused on data fetching, analysis, or orchestration)
+- **10 agents** (41.7%) explicitly load skills using `Skill:` invocation
+- **14 agents** (58.3%) do not load skills (focused on data fetching, analysis, or orchestration)
 
 **Pattern Observations:**
 1. **Implementation agents** (java-code-implementer, java-junit-implementer) load relevant domain skills
 2. **Documentation agents** (asciidoc-*) load cui-documentation skill
-3. **Workflow agents** (task-executor) optionally load skills based on task context
-4. **Fetcher/triager agents** do not need skills (data operations only)
-5. **Analysis agents** in plugin-development-tools read standards files directly from their bundle instead of using skills
+3. **Planning agents** (task-breakdown-agent) load task planning skills for creating structured plans
+4. **Workflow agents** (task-executor) optionally load skills based on task context
+5. **Fetcher/triager agents** do not need skills (data operations only)
+6. **Analysis agents** in plugin-development-tools read standards files directly from their bundle instead of using skills
 
 ### Command Skills
 
