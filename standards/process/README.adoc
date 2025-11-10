@@ -46,15 +46,9 @@ Process for systematic code refactoring and improvement activities. Provides str
 * Risk management and rollback procedures
 * Integration with task completion standards
 
-==== xref:quarkus-native-optimization.adoc[Quarkus Native Optimization Process]
-Systematic process for optimizing Quarkus applications for native image compilation, focusing on reflection registration optimization and performance improvements. Provides structured workflow for identifying, implementing, and verifying native optimization opportunities.
-
-**Key Features:**
-* Reflection usage analysis and optimization strategies
-* Deployment processor and application-level optimization techniques
-* Native image compatibility testing procedures
-* Performance metrics tracking and verification
-* Integration with CDI framework requirements
+==== Quarkus Native Optimization Process [MIGRATED]
+**MIGRATED** to marketplace: `/cui-quarkus-native-optimize` command in cui-java-expert bundle.
+Systematic process for optimizing Quarkus applications for native image compilation with reflection registration optimization. Standards documented in cui-java-cdi skill (quarkus-native.md); orchestration via command.
 
 ==== Java Code Maintenance Process [MIGRATED]
 **MIGRATED** to marketplace: `/cui-java-refactor` command in cui-java-expert bundle.
@@ -137,8 +131,8 @@ All process documents in this directory follow consistent patterns:
 
 === Process Selection
 * **General Development**: Use marketplace commands (cui-java-expert, cui-maven bundles)
-* **Code Refactoring**: Use `/cui-java-refactor` command (migrated to marketplace)
-* **Quarkus Native Optimization**: Follow xref:quarkus-native-optimization.adoc[Quarkus Native Optimization Process]
+* **Code Refactoring**: Use `/cui-java-refactor` command (cui-java-expert bundle)
+* **Quarkus Native Optimization**: Use `/cui-quarkus-native-optimize` command (cui-java-expert bundle)
 * **Java Code Improvements**: Use `/cui-java-refactor` command (cui-java-expert bundle)
 * **Java Test Improvements**: Use `/cui-test-maintain` command (cui-java-expert bundle)
 * **JavaScript Code Improvements**: Follow xref:javascript-code-maintenance.adoc[JavaScript Code Maintenance Process]
