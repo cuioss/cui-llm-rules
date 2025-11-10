@@ -19,7 +19,8 @@
   "commands": [
     "./commands/cui-java-task-manager.md",
     "./commands/cui-log-record-enforcer.md",
-    "./commands/cui-java-refactor.md"
+    "./commands/cui-java-refactor.md",
+    "./commands/cui-javadoc-fix.md"
   ],
   "skills": [
     "./skills/cui-java-core",
