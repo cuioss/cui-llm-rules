@@ -18,12 +18,14 @@
   ],
   "commands": [
     "./commands/cui-java-task-manager.md",
-    "./commands/cui-log-record-enforcer.md"
+    "./commands/cui-log-record-enforcer.md",
+    "./commands/cui-java-refactor.md"
   ],
   "skills": [
     "./skills/cui-java-core",
     "./skills/cui-java-cdi",
     "./skills/cui-java-unit-testing",
-    "./skills/cui-javadoc"
+    "./skills/cui-javadoc",
+    "./skills/cui-java-maintenance"
   ]
 }
