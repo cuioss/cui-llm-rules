@@ -56,6 +56,13 @@ Read: standards/logging-enforcement-patterns.md
 
 Use when: Building validation tools or linters for logging standards. This file contains enforcement patterns and validation rules intended for tooling integration rather than direct application during development.
 
+**Logging Maintenance Reference** (load when needed):
+```
+Read: standards/logging-maintenance-reference.md
+```
+
+Use when: Maintaining or migrating existing code to CUI logging standards. Provides detection criteria for logging violations, migration patterns from legacy logging (slf4j, log4j, System.out), troubleshooting guide for LogAsserts failures, and testing requirements specific to maintenance work. Different from logging-standards.md which is for writing NEW code.
+
 ### Step 3: Extract Key Requirements
 
 From all loaded standards, extract and organize:
