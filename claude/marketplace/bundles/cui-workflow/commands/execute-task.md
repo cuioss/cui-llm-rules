@@ -1,11 +1,11 @@
 ---
 name: execute-task
-description: Self-contained command that executes and verifies a single task (Pattern 1)
+description: Self-contained command that executes and verifies a single task
 ---
 
 # Execute Task Command
 
-Self-contained command that implements ONE task and verifies it. Uses Pattern 1 (Self-Contained Command).
+Self-contained command that implements ONE task and verifies it.
 
 ## CONTINUOUS IMPROVEMENT RULE
 

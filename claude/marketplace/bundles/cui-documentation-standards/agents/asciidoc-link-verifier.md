@@ -3,7 +3,7 @@ name: asciidoc-link-verifier
 description: |
   Verifies links and cross-references in AsciiDoc files (file links, anchors, xrefs).
 
-  Specialized agent for link verification only - part of the asciidoc-reviewer suite.
+  Specialized agent for link verification only.
 
   Examples:
   - User: "Verify links in Requirements.adoc"

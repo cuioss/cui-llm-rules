@@ -5,7 +5,7 @@ description: Self-contained command for JUnit test implementation with verificat
 
 # Java Implement Tests Command
 
-Self-contained command that implements JUnit tests using java-junit-implementer agent, verifies with maven-builder, and iterates until tests pass. Part of Pattern 1 (Self-Contained Command) architecture.
+Self-contained command that implements JUnit tests using java-junit-implementer agent, verifies with maven-builder, and iterates until tests pass.
 
 ## CONTINUOUS IMPROVEMENT RULE
 

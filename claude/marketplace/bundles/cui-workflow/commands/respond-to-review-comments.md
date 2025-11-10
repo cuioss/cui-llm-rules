@@ -1,11 +1,11 @@
 ---
 name: respond-to-review-comments
-description: Fetch, triage, and respond to PR review comments using Pattern 3
+description: Fetch, triage, and respond to PR review comments
 ---
 
 # Respond To Review Comments Command
 
-Pattern 3 command that fetches review comments, triages each one, and takes appropriate action (code change, explanation, or ignore).
+Fetches review comments, triages each one, and takes appropriate action (code change, explanation, or ignore).
 
 ## CONTINUOUS IMPROVEMENT RULE
 

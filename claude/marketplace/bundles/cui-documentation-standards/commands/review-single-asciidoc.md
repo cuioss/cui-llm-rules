@@ -5,7 +5,7 @@ description: Validate and review a single AsciiDoc file with format, links, and 
 
 # Review Single AsciiDoc Command
 
-Self-contained command that orchestrates format validation, link verification, and content review for a single AsciiDoc file. Part of the three-layer documentation review architecture.
+Self-contained command that orchestrates format validation, link verification, and content review for a single AsciiDoc file.
 
 ## CONTINUOUS IMPROVEMENT RULE
 

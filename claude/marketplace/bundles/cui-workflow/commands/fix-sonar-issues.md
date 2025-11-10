@@ -1,11 +1,11 @@
 ---
 name: fix-sonar-issues
-description: Fetch, triage, and fix Sonar issues using Pattern 3 (Fetch + Triage + Delegate)
+description: Fetch, triage, and fix Sonar issues
 ---
 
 # Fix Sonar Issues Command
 
-Pattern 3 command that fetches Sonar issues, triages each one, and delegates fixes. Self-contained with own verify + commit cycle.
+Fetches Sonar issues, triages each one, and delegates fixes. Self-contained with own verify + commit cycle.
 
 ## CONTINUOUS IMPROVEMENT RULE
 

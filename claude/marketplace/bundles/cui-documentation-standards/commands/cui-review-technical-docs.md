@@ -1,11 +1,11 @@
 ---
 name: cui-review-technical-docs
-description: Execute comprehensive AsciiDoc review for all documentation files using three-layer pattern
+description: Execute comprehensive AsciiDoc review for all documentation files
 ---
 
 # Review Technical Docs Command
 
-Batch command for comprehensive AsciiDoc documentation review. Discovers all .adoc files and delegates to /review-single-asciidoc for each file, aggregating results. **Layer 1** of the three-layer documentation review architecture.
+Batch command for comprehensive AsciiDoc documentation review. Discovers all .adoc files and delegates to /review-single-asciidoc for each file, aggregating results.
 
 ## CONTINUOUS IMPROVEMENT RULE
 

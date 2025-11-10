@@ -5,7 +5,7 @@ description: Self-contained command for Java code implementation with verificati
 
 # Java Implement Code Command
 
-Self-contained command that implements Java code using java-code-implementer agent, verifies with maven-builder, and iterates until clean. Part of Pattern 1 (Self-Contained Command) architecture.
+Self-contained command that implements Java code using java-code-implementer agent, verifies with maven-builder, and iterates until clean.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
