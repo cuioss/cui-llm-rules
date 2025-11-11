@@ -10,6 +10,7 @@ This bundle includes the following components:
 
 ### Agents (Focused Layer 3)
 - **asciidoc-format-validator** - Validates AsciiDoc formatting and structure using automated scripts (focused validator)
+- **asciidoc-auto-formatter** - Auto-fixes common AsciiDoc formatting issues with safety features (focused executor)
 - **asciidoc-link-verifier** - Verifies cross-references and links in AsciiDoc documents (focused validator)
 - **asciidoc-content-reviewer** - Reviews AsciiDoc content for quality, tone, and completeness (focused validator)
 
@@ -19,6 +20,16 @@ This bundle includes the following components:
 
 ### Skills
 - **cui-documentation** - Documentation standards including AsciiDoc conventions, structure requirements, and quality guidelines
+
+### Utility Scripts
+The bundle includes four powerful utility scripts in `skills/cui-documentation/scripts/`:
+
+- **asciidoc-validator.sh** - Comprehensive format validation with multiple output formats (console, JSON, XML, JUnit)
+- **asciidoc-formatter.sh** - Auto-fixes formatting issues (blank lines, xref syntax, headers, whitespace) with dry-run and backup modes
+- **verify-adoc-links.py** - Validates cross-reference links, checks broken references, verifies anchor existence
+- **documentation-stats.sh** - Generates comprehensive metrics (lines, words, sections, cross-references, code blocks)
+
+These scripts power the specialized agents and can also be used directly for CI/CD integration.
 
 ## Installation Instructions
 
@@ -105,7 +116,32 @@ The agent will:
 - Suggest proper cross-reference patterns
 - Validate link text clarity
 
-### Example 4: Pre-Commit Documentation Check
+### Example 4: Auto-Fix Formatting Issues
+
+Use the asciidoc-auto-formatter agent to automatically fix common issues:
+
+```
+/agent asciidoc-auto-formatter
+
+Preview formatting fixes for standards/java/java-core-standards.adoc (dry-run mode).
+```
+
+The agent will:
+- Preview changes without modifying files (safe by default)
+- Add blank lines before lists
+- Convert deprecated `<<>>` syntax to `xref:`
+- Fix header attributes and whitespace
+- Create backups when applying changes
+- Validate results after fixes
+
+Then to apply the fixes:
+```
+/agent asciidoc-auto-formatter
+
+Apply formatting fixes to standards/java/java-core-standards.adoc (create backups).
+```
+
+### Example 5: Pre-Commit Documentation Check
 
 Before committing documentation changes:
 
