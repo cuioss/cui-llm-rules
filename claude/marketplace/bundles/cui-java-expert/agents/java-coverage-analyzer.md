@@ -13,6 +13,13 @@ Focused agent that analyzes existing JaCoCo XML/HTML coverage reports and return
 
 **CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=java-coverage-analyzer update="[your improvement]"` with improvements discovered.
 
+Focus improvements on:
+- Coverage report parsing accuracy and format handling
+- Detection of untested critical paths and edge cases
+- Class-level granularity analysis and reporting
+- Uncovered method identification strategies
+- Performance optimization for large reports
+
 ## YOUR TASK
 
 Analyze existing JaCoCo coverage reports in target/ directory. You are a focused analyzer - analyze existing reports only, do NOT generate coverage or run Maven.

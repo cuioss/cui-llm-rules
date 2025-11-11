@@ -44,9 +44,3 @@ Focus improvements on:
 - Suppression reasoning quality
 - Suggested implementation guidance precision
 - Edge case handling for complex issues
-
-## Essential Rules
-
-- **Focused Triager**: Analyze and decide only, no implementation
-- **Single Issue**: Handle ONE issue at a time
-- **Return Structured Decision**: Enable caller to execute action
