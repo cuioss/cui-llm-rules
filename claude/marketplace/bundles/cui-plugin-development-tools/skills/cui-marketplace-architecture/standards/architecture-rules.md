@@ -228,6 +228,18 @@ Agents CANNOT delegate to other agents or commands due to platform limitations.
 
 **Platform Constraint**: The Claude Code platform intentionally restricts the Task tool from being available to sub-agents at runtime to prevent infinite nesting and control resource consumption. Similarly, the SlashCommand tool is unavailable to agents.
 
+**Configuration vs Runtime Mismatch**:
+```yaml
+# Agent configuration declares:
+tools: Read, Edit, Write, Grep, Skill, Task
+
+# Runtime provides:
+tools: Read, Edit, Write, Grep, Skill
+# Task is MISSING
+```
+
+This mismatch means agents configured with `tools: Task` will find at runtime that the Task tool is unavailable, causing delegation attempts to fail.
+
 **Critical Rules**:
 - ✅ Commands CAN invoke other commands (via SlashCommand tool)
 - ✅ Commands CAN invoke agents (via Task tool)
@@ -309,7 +321,19 @@ Task(commit-changes)  # ❌ FAILS - Task unavailable at runtime
 - Task(...) calls in agent workflow = guaranteed runtime failure
 - Bash(./mvnw:*) in agent = anti-pattern (see Rule 7)
 
-**Reference**: See `claude/architectural-issues/agent-nesting-limitation.md` for technical details and evidence sources
+**Evidence Sources**:
+- **Official Documentation**: https://docs.claude.com/en/docs/claude-code/sub-agents
+  > "Subagents cannot spawn other subagents" - preventing infinite nesting
+- **GitHub Issues** (all closed as known limitation):
+  - #4182: "Sub-Agent Task Tool Not Exposed When Launching Nested Agents"
+  - #5528: "Sub-agent delegation pattern unusable for hierarchical task decomposition"
+  - #4799: "Tool specifications completely ignored by sub-agents"
+- **Real-World Validation**: User test in #5528 confirmed agents configured with `tools: Task` report "I don't have access to a 'Task' tool" at runtime
+
+**Why Workarounds Fail**:
+- **Attempted**: `claude -p` via Bash to spawn separate instances
+- **Problems**: No visibility, complex error handling, no context sharing, causes crashes
+- **Verdict**: Not recommended by community - use proper command orchestration instead
 
 ## Rule 7: Maven Execution Principle
 
@@ -548,10 +572,8 @@ Step 3: Aggregate Results
 - **Composability**: Layer 2 commands can be used by multiple Layer 1 commands
 
 **Alternative Patterns**:
-- **Single Operation**: Use Layer 2 pattern only (self-contained command + agents)
-- **Smart Orchestration**: Use Fetch + Triage + Delegate for heterogeneous items (see migration-plan.md Pattern 3)
-
-**Reference**: See `claude/architectural-issues/migration-plan.md` for comprehensive pattern descriptions and workflow examples
+- **Single Operation**: Use Layer 2 pattern only (self-contained command + agents) for focused, single-task operations
+- **Smart Orchestration**: Use Fetch + Triage + Delegate pattern for heterogeneous items requiring analysis before action (e.g., `/fix-sonar-issues`, `/respond-to-review-comments`). This pattern fetches items, triages each one to determine action (fix vs suppress, code change vs explanation), then delegates based on triage results
 
 ## Rule 9: Knowledge vs. Workflow Separation
 

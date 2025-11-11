@@ -271,7 +271,7 @@ Return structured result to caller (caller handles verification)
 1. **Flag as CRITICAL** if Task in tools list
 2. **Scan workflow** for Task(...) calls
 3. **Suggest refactoring**: Move orchestration to command, make agent focused
-4. **Reference**: Point to claude/architectural-issues/agent-nesting-limitation.md
+4. **Reference**: See cui-marketplace-architecture skill, architecture-rules.md Rule 6 for technical details and evidence
 
 **Exception:**
 - NONE - No agents should ever have Task tool

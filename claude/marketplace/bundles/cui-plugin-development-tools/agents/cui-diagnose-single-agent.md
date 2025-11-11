@@ -257,7 +257,7 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Remove Task from tools list
 - Move orchestration logic to command
 - Make agent focused (single task execution only)
-- Reference: claude/architectural-issues/agent-nesting-limitation.md
+- Reference: cui-marketplace-architecture skill, architecture-rules.md Rule 6
 
 ### Step 13: Maven Anti-Pattern Detection (CRITICAL)
 
