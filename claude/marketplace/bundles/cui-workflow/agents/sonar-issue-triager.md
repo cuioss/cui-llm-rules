@@ -34,7 +34,18 @@ Analyze rule, severity, code pattern. Determine if fixable programmatically.
 }
 ```
 
-## CRITICAL RULES
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=sonar-issue-triager update="[your improvement]"` with improvements discovered during execution.
+
+Focus improvements on:
+- Issue classification accuracy (fix vs suppress decisions)
+- Code context analysis depth and efficiency
+- Suppression reasoning quality
+- Suggested implementation guidance precision
+- Edge case handling for complex issues
+
+## Essential Rules
 
 - **Focused Triager**: Analyze and decide only, no implementation
 - **Single Issue**: Handle ONE issue at a time

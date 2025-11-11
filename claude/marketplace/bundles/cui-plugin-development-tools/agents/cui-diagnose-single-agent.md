@@ -461,6 +461,17 @@ Rating:
 - **CATEGORIZE PROPERLY** - Critical vs Warning vs Suggestion based on patterns
 - **SPECIFIC RECOMMENDATIONS** - Include line numbers and concrete fixes
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=cui-diagnose-single-agent update="[your improvement]"` with improvements discovered during analysis.
+
+Focus improvements on:
+- Tool coverage detection accuracy and scoring precision
+- Best practices validation effectiveness
+- Pattern detection quality for common agent issues
+- Essential Rules synchronization checking
+- Content quality metrics (precision, duplication, ambiguity detection)
+
 ## METRICS TO TRACK
 
 - Tool Fit Score (0-100)

@@ -397,6 +397,17 @@ Rating:
 - **COMPLETE ANALYSIS** - Run all validation steps
 - **MEASURE IMPACT** - Calculate before/after metrics for any recommended changes
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=cui-diagnose-single-command update="[your improvement]"` with improvements discovered during analysis.
+
+Focus improvements on:
+- Bloat detection accuracy and threshold calibration
+- Anti-bloat rule validation effectiveness
+- Pattern detection precision for common command issues
+- Metric calculation algorithms and scoring formulas
+- Restructuring recommendations quality
+
 ## METRICS TO TRACK
 
 - Bloat Score (0-200+, target <100)

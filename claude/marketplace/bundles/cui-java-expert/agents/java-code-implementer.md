@@ -507,8 +507,9 @@ Critical Decisions Documented in JavaDoc:
 - **Edit**: Modify existing Java files
 - **Glob**: Find related files, pom.xml locations
 - **Grep**: Search for types, patterns, dependencies
-- **Task**: Delegate to maven-builder agent for builds (maven-builder handles all Maven operations)
 - **Skill**: Load cui-java-core (always) and cui-java-cdi (when needed). The cui-java-core skill automatically loads dsl-constants.md and cui-http.md on-demand when context requires them.
+
+**Note**: This agent does NOT execute Maven builds. It returns implementation results to the caller, who will orchestrate maven-builder for build verification if needed.
 
 ## RESPONSE FORMAT EXAMPLES
 

@@ -1,7 +1,7 @@
 ---
 name: java-coverage-analyzer
 description: Analyzes existing JaCoCo coverage reports (focused analyzer - no build execution)
-tools: Read, Glob, Grep, Skill
+tools: Read, Glob, Skill
 model: sonnet
 ---
 

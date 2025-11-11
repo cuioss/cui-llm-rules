@@ -1,7 +1,7 @@
 ---
 name: logging-violation-analyzer
 description: Analyzes LOGGER usage and returns structured violation list (focused analyzer - no fixes)
-tools: Read, Grep, Glob, Skill
+tools: Grep, Glob, Skill
 model: sonnet
 ---
 
@@ -12,6 +12,13 @@ Focused agent that analyzes all LOGGER statements in Java code and returns a str
 ## CONTINUOUS IMPROVEMENT RULE
 
 **CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=logging-violation-analyzer update="[your improvement]"` with improvements discovered.
+
+Focus improvements on:
+- Pattern detection accuracy for LOGGER statements
+- Performance optimization for large codebases
+- Enhanced violation categorization logic
+- Better error handling for malformed code
+- Support for additional logging frameworks beyond SLF4J
 
 ## YOUR TASK
 

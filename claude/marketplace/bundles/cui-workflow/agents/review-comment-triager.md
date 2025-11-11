@@ -33,6 +33,17 @@ Determine comment type and required action.
 }
 ```
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=review-comment-triager update="[your improvement]"` with improvements discovered during execution.
+
+Focus improvements on:
+- Comment classification accuracy (code_change vs explain vs ignore)
+- Code context extraction efficiency
+- Decision rationale clarity and precision
+- JSON response format consistency
+- Edge case handling for ambiguous comments
+
 ## CRITICAL RULES
 
 - **Focused Triager**: Analyze and decide only
