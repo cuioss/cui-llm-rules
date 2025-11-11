@@ -23,7 +23,9 @@ Analyze ONE agent file completely:
 4. Verify Essential Rules synchronization
 5. Analyze content quality (precision, duplication, ambiguity)
 6. Check permission patterns
-7. Generate comprehensive quality report
+7. Detect Task tool misuse (agent delegation constraint)
+8. Detect Maven anti-pattern (direct Maven calls)
+9. Generate comprehensive quality report
 
 ## INPUT PARAMETERS
 
@@ -227,7 +229,64 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Sections with only links and no content
 - Can be removed without information loss
 
-### Step 12: Generate Issue Report
+### Step 12: Task Tool Misuse Detection (CRITICAL)
+
+**Check for Task tool in agent frontmatter:**
+- Parse `tools:` array in YAML
+- If contains `Task` = CRITICAL VIOLATION
+
+**Scan workflow for Task(...) calls:**
+- Search agent body for `Task(` patterns
+- Any Task delegation calls = CRITICAL VIOLATION
+
+**Check description for orchestration language:**
+- Words like "delegates", "orchestrates", "coordinates" = architectural smell
+- Suggests agent attempting orchestration instead of focused execution
+
+**Why This Is Critical:**
+- Platform limitation: Task tool unavailable to agents at runtime
+- Guaranteed runtime failure
+- Architectural violation (Rule 6)
+
+**Issues to flag:**
+- **CRITICAL**: `Task` in tools array
+- **CRITICAL**: `Task(...)` calls in workflow
+- **WARNING**: Orchestration language in description without actual Task usage
+
+**Recommendations:**
+- Remove Task from tools list
+- Move orchestration logic to command
+- Make agent focused (single task execution only)
+- Reference: claude/architectural-issues/agent-nesting-limitation.md
+
+### Step 13: Maven Anti-Pattern Detection (CRITICAL)
+
+**Check agent name:**
+- If agent name = "maven-builder" → Skip this check (exception)
+
+**For all other agents, scan workflow for Maven calls:**
+- Search for `Bash(./mvnw` patterns
+- Search for `Bash(mvn ` patterns
+- Any Maven execution = CRITICAL VIOLATION
+
+**Why This Is Critical:**
+- Bypasses centralized build execution (Rule 7)
+- Duplicates build configuration and error handling
+- Prevents performance tracking
+- Should delegate to maven-builder agent via caller command
+
+**Issues to flag:**
+- **CRITICAL**: `Bash(./mvnw` in non-maven-builder agent
+- **CRITICAL**: `Bash(mvn ` in non-maven-builder agent
+- **SUGGESTION**: Agent has Bash tool but no problematic patterns
+
+**Recommendations:**
+- Remove Maven calls from agent
+- Return results to caller who orchestrates maven-builder
+- Make agent focused (no verification, no build)
+- Reference: architecture-rules.md Rule 7
+
+### Step 14: Generate Issue Report
 
 **Categorize all issues:**
 
@@ -239,6 +298,9 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Permission violations (Pattern 9)
 - Tool Fit Score < 60 (Pattern 16)
 - Too complex > 800 lines (Pattern 17)
+- **Task tool in agent frontmatter (Check 6)**
+- **Task(...) delegation calls in workflow (Check 6)**
+- **Maven calls in non-maven-builder agent (Check 7)**
 
 **WARNINGS (Should Fix):**
 - Over-permission (Pattern 2)
@@ -251,13 +313,14 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Missing response format (Pattern 15)
 - Documentation noise (Pattern 18)
 - Stale permission patterns (Pattern 20)
+- **Orchestration language without Task usage (Check 6)**
 
 **SUGGESTIONS (Nice to Have):**
 - Inconsistent naming (Pattern 14)
 - Missing task description (Pattern 19)
 - Could improve error handling
 
-### Step 13: Calculate Final Scores
+### Step 15: Calculate Final Scores
 
 **Tool Fit Score:** (calculated in Step 4)
 
@@ -276,7 +339,7 @@ Rating:
 - < 60: Poor
 ```
 
-### Step 14: Generate JSON Report
+### Step 16: Generate JSON Report
 
 **Output format:**
 
@@ -344,6 +407,23 @@ Rating:
   "documentation": {
     "broken_links": [...],
     "noise_sections": [...],
+    "issues": [...]
+  },
+
+  "task_tool_misuse": {
+    "has_task_in_tools": true|false,
+    "has_task_calls": true|false,
+    "has_orchestration_language": true|false,
+    "violations": [...],
+    "issues": [...]
+  },
+
+  "maven_anti_pattern": {
+    "agent_name": "{name}",
+    "is_maven_builder": true|false,
+    "has_maven_calls": true|false,
+    "maven_patterns_found": [...],
+    "violations": [...],
     "issues": [...]
   },
 

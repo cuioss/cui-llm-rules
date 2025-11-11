@@ -4,7 +4,170 @@ Advanced JavaScript patterns including classes, functional programming, composit
 
 ## Overview
 
-Modern JavaScript provides powerful patterns for building maintainable applications. This guide covers object-oriented patterns, functional programming techniques, composition strategies, and performance optimizations.
+Modern JavaScript provides powerful patterns for building maintainable applications. This guide covers modern syntax fundamentals, object-oriented patterns, functional programming techniques, composition strategies, and performance optimizations.
+
+## Modern Syntax Patterns
+
+### Destructuring
+
+Use destructuring for object and array manipulation:
+
+```javascript
+// Object destructuring
+const { name, email, preferences = {} } = user;
+const { theme, language } = preferences;
+
+// Array destructuring
+const [first, second, ...rest] = items;
+const [head, ...tail] = sortedItems;
+
+// Function parameter destructuring
+const createConfig = ({ endpoint, timeout = 5000, retries = 3 }) => ({
+  endpoint,
+  timeout,
+  retries,
+  timestamp: Date.now(),
+});
+
+// Nested destructuring (when readable)
+const {
+  config: { api: { endpoint, timeout } },
+  user: { name, permissions }
+} = applicationState;
+```
+
+### Template Literals
+
+Use template literals for string interpolation:
+
+```javascript
+// String interpolation
+const message = `Hello, ${user.name}! You have ${messageCount} messages.`;
+
+// Multi-line strings
+const htmlTemplate = `
+  <div class="user-card">
+    <h2>${user.name}</h2>
+    <p>${user.email}</p>
+  </div>
+`;
+
+// Complex expressions
+const apiUrl = `${baseUrl}/api/v${apiVersion}/users/${userId}?include=${includes.join(',')}`;
+
+// Conditional content
+const status = `User is ${user.isActive ? 'active' : 'inactive'}`;
+```
+
+### Spread and Rest Operators
+
+Use spread and rest operators effectively:
+
+```javascript
+// Object spreading
+const defaultOptions = { timeout: 5000, retries: 3 };
+const customOptions = { retries: 5, cache: true };
+const finalOptions = { ...defaultOptions, ...customOptions };
+
+// Array spreading
+const mergedItems = [...existingItems, ...newItems];
+const clonedArray = [...originalArray];
+
+// Rest parameters
+const processItems = (primaryItem, ...additionalItems) => {
+  console.log('Processing primary:', primaryItem);
+  additionalItems.forEach(item => console.log('Additional:', item));
+};
+
+// Array destructuring with rest
+const [head, ...tail] = items;
+const [first, second, ...remaining] = sortedItems;
+```
+
+## Object Patterns
+
+Use modern object syntax and methods:
+
+```javascript
+// Object shorthand properties
+const createConfig = (endpoint, timeout, retries) => ({
+  endpoint,
+  timeout,
+  retries,
+  timestamp: Date.now(),
+});
+
+// Computed property names
+const createDynamicObject = (key, value) => ({
+  [key]: value,
+  [`${key}Processed`]: processValue(value),
+});
+
+// Object spread for immutable updates
+const updateUser = (user, updates) => ({
+  ...user,
+  ...updates,
+  lastModified: Date.now(),
+});
+
+// Object.entries for iteration
+const processConfig = (config) => {
+  Object.entries(config).forEach(([key, value]) => {
+    console.log(`${key}: ${value}`);
+  });
+};
+
+// Object.keys, Object.values
+const keys = Object.keys(config);
+const values = Object.values(config);
+
+// Object.fromEntries for transformation
+const normalized = Object.fromEntries(
+  Object.entries(data).map(([key, value]) => [
+    key.toLowerCase(),
+    value
+  ])
+);
+```
+
+## Array Methods
+
+Use functional array methods:
+
+```javascript
+// Transformation chain
+const processedItems = items
+  .filter(item => item.isActive)
+  .map(item => ({
+    ...item,
+    processed: true,
+    timestamp: Date.now(),
+  }))
+  .sort((a, b) => a.priority - b.priority);
+
+// Finding elements
+const activeUser = users.find(user => user.status === 'active');
+const hasAdminUser = users.some(user => user.role === 'admin');
+const allValidated = users.every(user => user.isValidated);
+
+// Aggregation with reduce
+const totalValue = items.reduce((sum, item) => sum + item.value, 0);
+
+// Grouping with reduce
+const groupedByCategory = items.reduce((groups, item) => {
+  const key = item.category;
+  groups[key] = groups[key] || [];
+  groups[key].push(item);
+  return groups;
+}, {});
+
+// Flattening arrays
+const flattened = nested.flat();
+const deepFlattened = deeplyNested.flat(Infinity);
+
+// Map and flatten in one step
+const allTags = posts.flatMap(post => post.tags);
+```
 
 ## Class Patterns
 

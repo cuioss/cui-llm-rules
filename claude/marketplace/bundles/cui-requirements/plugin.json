@@ -34,6 +34,18 @@
       "name": "cui-requirements:implementation-linkage",
       "path": "skills/implementation-linkage.md",
       "description": "Standards for linking specifications to implementation code and maintaining bidirectional traceability between documentation and source code"
+    },
+    {
+      "type": "skill",
+      "name": "cui-requirements:requirements-maintenance",
+      "path": "skills/requirements-maintenance.md",
+      "description": "Standards for maintaining requirements and specification documents with integrity, consistency, and traceability"
+    },
+    {
+      "type": "command",
+      "name": "cui-requirements-maintain",
+      "path": "commands/cui-requirements-maintain.md",
+      "description": "Systematic workflow for maintaining requirements and specification documents with integrity verification"
     }
   ],
   "tags": [

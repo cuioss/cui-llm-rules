@@ -3,7 +3,7 @@ name: asciidoc-format-validator
 description: |
   Validates AsciiDoc files for format compliance (section headers, lists, blank lines).
 
-  Specialized agent for format validation only - part of the asciidoc-reviewer suite.
+  Specialized agent for format validation only.
 
   Examples:
   - User: "Validate AsciiDoc format for Requirements.adoc"

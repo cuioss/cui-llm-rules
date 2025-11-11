@@ -5,7 +5,7 @@ description: |
 
   Uses ULTRATHINK reasoning for deep tone/style analysis.
 
-  Specialized agent for content review only - part of the asciidoc-reviewer suite.
+  Specialized agent for content review only.
 
   Examples:
   - User: "Review content quality of Requirements.adoc"

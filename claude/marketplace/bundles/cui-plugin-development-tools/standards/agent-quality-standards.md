@@ -221,6 +221,139 @@ tools: [Bash(git:*), Bash(npm:*), Bash(mvn:*)]
    - Outdated or redundant patterns
    - Fix: Update or consolidate
 
+## Anti-Patterns Detection
+
+### Task Tool Misuse (CRITICAL)
+
+Agents CANNOT delegate to other agents or commands - the Task tool is unavailable at runtime.
+
+**Detection Pattern:**
+- `tools:` list contains `Task` = potential violation
+- Workflow contains `Task(agent-name)` calls = guaranteed runtime failure
+- Agent description mentions "delegates", "orchestrates", "coordinates" = architectural smell
+
+**Why This Is Critical:**
+- Platform limitation: Claude Code intentionally restricts Task tool from sub-agents
+- Runtime failure: Agent will report "I don't have access to a 'Task' tool" when executed
+- Architectural violation: Agents are executors, commands are orchestrators (see Rule 6)
+
+**Examples:**
+
+❌ **VIOLATION - Task in Tools List:**
+```yaml
+---
+name: java-code-implementer
+tools: Read, Write, Edit, Task  # ❌ Task should NOT be in agent tools
+---
+
+Step 1: Implement Code
+[Implementation logic]
+
+Step 2: Verify Implementation
+Task(maven-builder)  # ❌ FAILS - Task unavailable at runtime
+```
+
+✅ **CORRECT - Focused Agent:**
+```yaml
+---
+name: java-code-implementer
+tools: Read, Write, Edit, Grep, Glob, Skill
+---
+
+Step 1: Implement Code
+[Implementation logic]
+
+Step 2: Return Result
+Return structured result to caller (caller handles verification)
+```
+
+**Diagnostic Actions:**
+1. **Flag as CRITICAL** if Task in tools list
+2. **Scan workflow** for Task(...) calls
+3. **Suggest refactoring**: Move orchestration to command, make agent focused
+4. **Reference**: Point to claude/architectural-issues/agent-nesting-limitation.md
+
+**Exception:**
+- NONE - No agents should ever have Task tool
+- Commands orchestrate agents, agents execute tasks
+
+**Auto-Fix:**
+- NOT RECOMMENDED - requires architectural refactoring
+- Manual intervention needed to separate orchestration from execution
+
+### Maven Anti-Pattern (CRITICAL)
+
+Agents (except maven-builder) calling Maven directly bypasses centralized build execution.
+
+**Detection Pattern:**
+- `Bash(./mvnw` in agent workflow = bug
+- `Bash(mvn ` in agent workflow = bug
+- Agent name ≠ "maven-builder" AND contains Maven calls = violation
+
+**Why This Is Critical:**
+- Bypasses centralized build configuration
+- Duplicates error handling and output capture
+- Prevents performance tracking
+- Violates Rule 7: Maven Execution Principle
+
+**Examples:**
+
+❌ **VIOLATION - Direct Maven Call:**
+```yaml
+---
+name: task-executor
+tools: Read, Write, Edit, Bash
+---
+
+Step 1: Execute Task
+[Task execution]
+
+Step 2: Build Project
+Bash(./mvnw clean verify)  # ❌ BUG - should delegate to maven-builder
+```
+
+✅ **CORRECT - No Maven Call:**
+```yaml
+---
+name: task-executor
+tools: Read, Write, Edit, Grep, Glob
+---
+
+Step 1: Execute Task
+[Task execution]
+
+Step 2: Return Result
+Return result to caller (caller orchestrates maven-builder for verification)
+```
+
+✅ **EXCEPTION - maven-builder Agent:**
+```yaml
+---
+name: maven-builder
+tools: Bash, Read, Write
+---
+
+Step 1: Execute Maven
+Bash(./mvnw clean verify)  # ✅ ALLOWED - this IS the build agent
+
+Step 2: Parse Output
+[Output processing]
+```
+
+**Diagnostic Actions:**
+1. **Flag as CRITICAL** if non-maven-builder agent contains `Bash(./mvnw` or `Bash(mvn `
+2. **Scan entire workflow** for Maven execution patterns
+3. **Suggest refactoring**: Remove Maven calls, return results to caller who orchestrates maven-builder
+4. **Reference**: Point to architecture-rules.md Rule 7
+
+**Exception:**
+- maven-builder agent IS allowed Maven calls (it's the central build agent)
+- All other agents must delegate to maven-builder via caller command
+
+**Auto-Fix:**
+- NOT RECOMMENDED - requires workflow refactoring
+- Manual intervention needed to remove Maven calls and adjust agent design
+
 ## Directory Structure Standards
 
 ```

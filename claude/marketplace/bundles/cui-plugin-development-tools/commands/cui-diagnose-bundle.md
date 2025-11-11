@@ -19,6 +19,15 @@ Comprehensive analysis of entire bundle including structure, skills, commands, a
 Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
+**Optionally load marketplace architecture standards**:
+
+You may optionally load the marketplace architecture skill for additional architectural context:
+```
+Skill: cui-plugin-development-tools:cui-marketplace-architecture
+```
+
+This provides architecture rules and validation patterns for marketplace components that may be useful for understanding bundle design principles.
+
 ✅ Use `Glob`, `Grep`, `Read` (never Bash alternatives)
 
 ## WORKFLOW INSTRUCTIONS

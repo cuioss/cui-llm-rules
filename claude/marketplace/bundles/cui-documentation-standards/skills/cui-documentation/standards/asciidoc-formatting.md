@@ -359,6 +359,9 @@ scripts/asciidoc-validator.sh path/to/file.adoc
 
 # Validate all files in a directory
 scripts/asciidoc-validator.sh directory/
+
+# CI/CD integration with JUnit output
+scripts/asciidoc-validator.sh -f junit -s error directory/
 ```
 
 **Common Validation Errors:**
@@ -366,7 +369,36 @@ scripts/asciidoc-validator.sh directory/
 * "Invalid section header" - Check heading level syntax (`==`, `===`, etc.)
 * "Unclosed code block" - Ensure code blocks have closing delimiters
 
-#### 2. Link Verification Script (`verify-adoc-links.py`)
+#### 2. Auto-Formatting Script (`asciidoc-formatter.sh`)
+
+Auto-fixes common AsciiDoc formatting issues:
+* Adds blank lines before lists
+* Converts deprecated `<<>>` syntax to `xref:`
+* Fixes header attributes
+* Removes trailing whitespace
+
+**Usage:**
+```bash
+# Preview changes without modifying files (dry-run)
+scripts/asciidoc-formatter.sh -n path/to/file.adoc
+
+# Auto-fix all issues in a directory
+scripts/asciidoc-formatter.sh directory/
+
+# Fix only specific issue types
+scripts/asciidoc-formatter.sh -t lists directory/
+
+# Interactive mode - review each change
+scripts/asciidoc-formatter.sh -i path/to/file.adoc
+```
+
+**Safe Operation:**
+* Creates backup files by default (`.bak` extension)
+* Use `-n` for dry-run to preview changes
+* Use `-i` for interactive confirmation of each fix
+* Use `-t` to target specific fix types
+
+#### 3. Link Verification Script (`verify-adoc-links.py`)
 
 Validates cross-reference links:
 * Checks for broken file references
@@ -396,6 +428,37 @@ python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report
 * **Syntax Invalid**: ❌ Malformed cross-reference
   - Fix syntax to use proper `xref:path[text]` format
 
+#### 4. Documentation Metrics Script (`documentation-stats.sh`)
+
+Generates comprehensive statistics for AsciiDoc documentation:
+* File counts and sizes
+* Line and word counts
+* Section structure and depth
+* Cross-reference usage
+* Media elements (images)
+* Code blocks, tables, and lists
+
+**Usage:**
+```bash
+# Basic statistics for current directory
+scripts/documentation-stats.sh
+
+# Generate JSON report for processing
+scripts/documentation-stats.sh -f json directory/ > stats.json
+
+# Detailed markdown report
+scripts/documentation-stats.sh -f markdown -d > metrics.md
+
+# Find largest documentation areas
+scripts/documentation-stats.sh -s lines -g directory standards/
+```
+
+**Use Cases:**
+* Track documentation growth over time
+* Identify areas needing attention
+* Generate metrics for reporting
+* Monitor documentation health
+
 ### Validation Workflow
 
 1. **Run format validation:**
@@ -403,15 +466,29 @@ python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report
    scripts/asciidoc-validator.sh target_file_or_directory 2>&1
    ```
 
-2. **Run link verification:**
+2. **Auto-fix common issues (optional):**
+   ```bash
+   # Preview changes first
+   scripts/asciidoc-formatter.sh -n target_file_or_directory
+
+   # Apply fixes
+   scripts/asciidoc-formatter.sh target_file_or_directory
+   ```
+
+3. **Run link verification:**
    ```bash
    mkdir -p target/asciidoc-reviewer
    python3 scripts/verify-adoc-links.py --file target.adoc --report target/asciidoc-reviewer/links.md 2>&1
    ```
 
-3. **Review validation output and fix issues**
+4. **Review validation output and fix remaining issues**
 
-4. **Re-run validation to confirm fixes**
+5. **Re-run validation to confirm all fixes**
+
+6. **Generate metrics (optional):**
+   ```bash
+   scripts/documentation-stats.sh -f markdown > doc-metrics.md
+   ```
 
 ### Quality Assurance Standards
 

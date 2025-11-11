@@ -9,6 +9,11 @@
       "type": "skill",
       "name": "cui-css",
       "path": "skills/cui-css/SKILL.md"
+    },
+    {
+      "type": "skill",
+      "name": "cui-javascript-maintenance",
+      "path": "skills/cui-javascript-maintenance/SKILL.md"
     }
   ]
 }

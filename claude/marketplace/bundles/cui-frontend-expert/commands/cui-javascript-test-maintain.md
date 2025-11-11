@@ -1,0 +1,539 @@
+---
+name: cui-javascript-test-maintain
+description: Execute systematic JavaScript test quality improvement with NO production code changes
+---
+
+# CUI JavaScript Test Maintain Command
+
+Orchestrates systematic JavaScript test quality improvement workflow while ensuring NO production code changes except confirmed bugs (with user approval).
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-javascript-test-maintain update="[your improvement]"` with:
+1. Improved test anti-pattern detection
+2. Better test improvement strategies
+3. More effective agent coordination
+4. Enhanced verification workflows
+5. Any lessons learned about test maintenance
+
+This ensures the command evolves and becomes more effective with each execution.
+
+## PARAMETERS
+
+- **workspace** - Workspace name for single workspace test maintenance (optional, processes all if not specified)
+- **priority** - Priority filter: `high`, `medium`, `low`, `all` (default: `all`)
+
+## WORKFLOW
+
+### Step 0: Parameter Validation
+
+**Validate parameters:**
+- If `workspace` specified: verify workspace exists
+- Validate `priority` is one of: high, medium, low, all
+- Set defaults if not provided
+
+### Step 1: Load Maintenance Standards
+
+```
+Skill: cui-javascript-maintenance
+```
+
+This loads comprehensive maintenance standards including:
+- Test quality standards
+- Test improvement prioritization framework
+- Test compliance verification
+
+**On load failure:**
+- Report error
+- Cannot proceed without standards
+- Abort command
+
+### Step 2: Pre-Maintenance Verification
+
+Execute pre-maintenance checklist to establish baseline:
+
+**2.1 Test Execution:**
+```
+Task:
+  subagent_type: npm-builder
+  description: Execute test suite
+  prompt: |
+    Execute test suite to verify baseline.
+
+    Parameters:
+    - command: run test
+    - workspace: {workspace if specified, otherwise all}
+    - outputMode: DEFAULT
+
+    All tests must pass before test maintenance begins.
+```
+
+**On test failure:**
+- Display test failures
+- Prompt user: "[F]ix manually and retry / [A]bort"
+- Track in `pre_verification_failures` counter
+- Cannot proceed until tests pass
+
+**2.2 Coverage Baseline:**
+```
+SlashCommand: /javascript-coverage-report
+Parameters: workspace={workspace if specified}
+```
+
+Store baseline coverage metrics for comparison after improvement.
+
+**2.3 Test File Identification:**
+
+If `workspace` parameter not specified:
+- Use Glob to identify all JavaScript test files
+- Determine processing order
+- Display test file list to user
+
+If `workspace` parameter specified:
+- Verify workspace exists
+- Process test files in single workspace only
+
+### Step 3: Test Quality Audit
+
+Analyze test files for quality issues using test-quality-standards.md:
+
+```
+Task:
+  subagent_type: Explore
+  model: sonnet
+  description: Identify test quality issues
+  prompt: |
+    Analyze test files using cui-javascript-maintenance test-quality-standards.md.
+
+    Workspace: {workspace or 'all workspaces'}
+
+    Identify test quality issues:
+    - Overly complex test setup (>20 lines)
+    - Hardcoded test data scattered in tests
+    - Missing async handling (no async/await)
+    - DOM testing without cleanup
+    - Test independence violations (shared state)
+    - Framework compliance issues (Jest, Testing Library)
+    - Mock management problems (not reset, over-mocking)
+    - Coverage gaps (< 80% for business logic)
+    - E2E test quality issues (if Cypress tests present)
+
+    Return structured list of findings with:
+    - Issue type
+    - Location (test file, test name, line)
+    - Description
+    - Suggested priority (HIGH/MEDIUM/LOW)
+```
+
+**Store findings** for prioritization step.
+
+**On analysis failure:**
+- Increment `analysis_failures` counter
+- Prompt user: "[R]etry / [A]bort"
+
+### Step 4: Prioritize Test Improvements
+
+Apply test prioritization framework from maintenance-prioritization.md:
+
+1. **Categorize findings** by type:
+   - HIGH: Business logic tests missing/inadequate
+   - MEDIUM: Utility function tests, anti-patterns
+   - LOW: Configuration tests, minor improvements
+
+2. **Assign priorities** using framework:
+   - HIGH: Critical functionality without tests, security-sensitive code
+   - MEDIUM: Test anti-patterns, mock issues, moderate coverage gaps
+   - LOW: Minor test improvements, style consistency
+
+3. **Filter by priority parameter** if specified:
+   - If priority=high: only HIGH priority items
+   - If priority=medium: HIGH and MEDIUM items
+   - If priority=low: Only LOW items
+   - If priority=all: all items
+
+4. **Sort within each priority** by impact
+
+5. **Display prioritized list** to user:
+   ```
+   Prioritized Test Quality Issues Found:
+
+   HIGH Priority (X items):
+   - [Type] Location: Description
+
+   MEDIUM Priority (Y items):
+   - [Type] Location: Description
+
+   LOW Priority (Z items):
+   - [Type] Location: Description
+
+   Processing order: HIGH → MEDIUM → LOW
+   ```
+
+6. **Prompt user for confirmation**:
+   - "[P]roceed with test improvement / [M]odify priorities / [A]bort"
+
+### Step 5: Execute Test Improvements
+
+Process test improvements systematically file-by-file or workspace-by-workspace:
+
+**For each workspace/batch of test files in processing order:**
+
+**5.1 Workspace/Test File Focus:**
+```
+Current Workspace: {workspace-name or 'batch N'}
+Test improvements: {count} ({HIGH/MEDIUM/LOW distribution})
+```
+
+**5.2 Implement Test Improvements:**
+
+For each test improvement in priority order (HIGH → MEDIUM → LOW):
+
+```
+Task:
+  subagent_type: javascript-test-implementer
+  description: Improve {test issue type}
+  prompt: |
+    Improve test quality using cui-javascript-maintenance test-quality-standards.md:
+
+    Issue: {issue description}
+    Location: {test file}:{line}
+    Type: {issue type}
+    Priority: {priority}
+
+    Apply appropriate improvements:
+    - If complex setup: extract to helper functions or beforeEach
+    - If hardcoded data: create test factories or fixtures
+    - If missing async: add async/await handling
+    - If no cleanup: add afterEach cleanup
+    - If shared state: ensure test independence
+    - If framework violations: use proper patterns (AAA, describe blocks)
+    - If mock issues: implement proper mock management
+    - If coverage gaps: add tests for business logic
+    - If E2E issues: apply Cypress best practices
+
+    **CRITICAL: Make NO production code changes.**
+    **If you discover production bugs, STOP and ask user for approval.**
+
+    Return implementation status.
+```
+
+Track in `improvements_applied` counter.
+
+**On implementation error:**
+- Log error details
+- Track in `improvements_failed` counter
+- Prompt user: "[S]kip this improvement / [R]etry / [A]bort workspace"
+
+**On production bug discovery:**
+- **STOP immediately**
+- Document bug details (location, issue, impact)
+- Ask user: "[F]ix production bug / [S]kip and continue test-only work / [A]bort"
+- If approved to fix:
+  - Track in `production_bugs_fixed` counter
+  - Fix bug and create separate commit
+- If not approved:
+  - Document bug for later
+  - Continue with test-only improvements
+
+**5.3 Workspace/Batch Verification:**
+
+After all improvements for workspace/batch:
+
+```
+Task:
+  subagent_type: npm-builder
+  description: Verify test improvements
+  prompt: |
+    Execute tests for workspace.
+
+    Parameters:
+    - command: run test
+    - workspace: {workspace-name}
+    - outputMode: DEFAULT
+
+    All tests must pass.
+```
+
+**On verification failure:**
+- Increment `workspace_verification_failures` counter
+- Attempt to rollback workspace changes
+- Prompt user: "[R]etry / [S]kip workspace / [A]bort"
+
+**5.4 Workspace Coverage Check:**
+
+```
+SlashCommand: /javascript-coverage-report
+Parameters: workspace={workspace-name}
+```
+
+**Compare to baseline:**
+- If coverage decreased: ERROR - test work should not decrease coverage
+- If coverage same: WARN - expected improvement
+- If coverage increased: OK
+
+**5.5 Workspace Commit:**
+
+Commit workspace changes:
+```
+Bash: git add {workspace test files}
+Bash: git commit -m "test: {workspace-name} - improve test quality and coverage"
+```
+
+If production bugs were fixed, create separate commit:
+```
+Bash: git add {production files}
+Bash: git commit -m "fix: {workspace-name} - {bug description} (discovered during test maintenance)"
+```
+
+Track in `workspaces_completed` counter.
+
+**Continue to next workspace/batch.**
+
+### Step 6: Final Verification
+
+After all workspaces/test files processed:
+
+**6.1 Full Test Suite:**
+```
+Task:
+  subagent_type: npm-builder
+  description: Final test verification
+  prompt: |
+    Execute complete test suite.
+
+    Parameters:
+    - command: run test
+
+    All tests must pass.
+```
+
+**6.2 Coverage Verification:**
+```
+SlashCommand: /javascript-coverage-report
+```
+
+Compare final coverage to baseline:
+- Display coverage change
+- Should show improvement, not regression
+
+**6.3 Test Quality Verification:**
+
+Apply test quality checklist from cui-javascript-maintenance:
+
+For sample of improved test files:
+- Verify test independence
+- Verify async patterns
+- Verify mock management
+- Verify DOM cleanup
+- Verify descriptive names
+- Verify AAA pattern
+- Verify no implementation details tested
+- Verify proper queries (Testing Library)
+- Verify coverage improvement
+
+Report compliance status.
+
+### Step 7: Display Summary
+
+```
+╔════════════════════════════════════════════════════════════╗
+║          Test Maintenance Summary                          ║
+╚════════════════════════════════════════════════════════════╝
+
+Workspaces Processed: {workspaces_completed} / {total_workspaces}
+Test Issues Found: {total_issues}
+  - HIGH Priority: {high_count}
+  - MEDIUM Priority: {medium_count}
+  - LOW Priority: {low_count}
+
+Improvements Applied: {improvements_applied}
+Improvements Failed: {improvements_failed}
+Improvements Skipped: {improvements_skipped}
+
+Production Bugs Discovered: {bugs_found}
+Production Bugs Fixed: {production_bugs_fixed}
+
+Coverage:
+  - Baseline: {baseline_coverage}%
+  - Final: {final_coverage}%
+  - Change: +{coverage_delta}%
+
+Test Status: {SUCCESS/FAILURE}
+Tests: {passing_count} / {total_tests} passed
+
+Test Quality: {compliant_categories} / {total_categories} categories compliant
+
+Time Taken: {elapsed_time}
+```
+
+## STATISTICS TRACKING
+
+Track throughout workflow:
+- `pre_verification_failures`: Pre-maintenance verification failures
+- `analysis_failures`: Test quality audit failures
+- `workspaces_completed`: Workspaces successfully improved
+- `workspaces_failed`: Workspaces that failed verification
+- `improvements_applied`: Individual test improvements applied
+- `improvements_failed`: Individual improvements that failed
+- `improvements_skipped`: Improvements skipped by user
+- `workspace_verification_failures`: Workspace verification failures
+- `bugs_found`: Production bugs discovered during testing
+- `production_bugs_fixed`: Production bugs fixed with approval
+- `coverage_baseline`: Initial coverage percentage
+- `coverage_final`: Final coverage percentage
+- `elapsed_time`: Total execution time
+
+Display all statistics in final summary.
+
+## CRITICAL CONSTRAINTS
+
+**Production Code Protection:**
+- **NO PRODUCTION CHANGES** except confirmed bugs with user approval
+- **Bug Discovery Process:**
+  1. Stop immediately when production bug found
+  2. Document bug details
+  3. Ask user for approval to fix
+  4. Wait for confirmation before proceeding
+  5. Create separate commit for bug fix
+- Focus solely on test improvement
+- All existing tests must continue to pass
+
+**Test-Only Changes:**
+- Refactor test code only
+- Improve test patterns
+- Add missing tests
+- Fix test anti-patterns
+- Improve coverage
+
+**Coverage Requirement:**
+- Coverage must NOT decrease
+- Expected to increase with improvements
+- If coverage decreases, investigate immediately
+
+**Safety Protocols:**
+- Incremental changes (workspace-by-workspace or file-by-file)
+- Continuous verification after each workspace
+- Ability to rollback at workspace level
+- User confirmation before production changes
+
+## TEST IMPROVEMENT CATEGORIES
+
+### HIGH Priority - Business Logic Tests
+
+Critical functionality that must be tested comprehensively:
+- Component logic tests for core features
+- User interaction handlers and event processing
+- State management and data flow tests
+- API integration and data transformation
+- Form validation and submission logic
+- Security-sensitive functionality (authentication, authorization)
+- Payment processing and financial calculations
+
+**Coverage Target:** 90%+ line and branch coverage
+
+### MEDIUM Priority - Utility Functions
+
+Important functionality that should be tested:
+- Data transformation utilities
+- Validation functions
+- Custom hooks (React) or composables (Vue)
+- Service layer functions
+- Formatting utilities
+- Helper functions used across components
+
+**Coverage Target:** 80%+ line and branch coverage
+
+### LOW Priority - Configuration Tests
+
+Less critical tests:
+- Build configuration tests
+- Simple utility functions with obvious behavior
+- Framework-provided functionality
+- Third-party library wrappers
+- Trivial getters/setters
+
+**Coverage Target:** 60%+ line coverage acceptable
+
+## ERROR HANDLING
+
+**Test Failures:**
+- Display failed test details
+- Preserve test failure output
+- Do not proceed with improvements
+- Rollback if failures introduced
+
+**Implementation Errors:**
+- Log specific improvement that failed
+- Skip individual improvements on user request
+- Continue with other improvements
+- Report failures in summary
+
+**Coverage Regression:**
+- Error if coverage decreases
+- Investigate cause immediately
+- Rollback changes causing regression
+
+**Production Bug Discovery:**
+- Stop immediately
+- Document bug
+- Get user approval before fixing
+- Create separate commit if fixed
+
+## ROLLBACK STRATEGY
+
+**Workspace-level rollback:**
+```
+Bash: git reset HEAD~1  # Rollback workspace commit
+Bash: git checkout -- {workspace test files}  # Restore test files
+```
+
+**Complete rollback:**
+```
+Bash: git reset --hard {initial_commit}  # Restore to pre-maintenance state
+```
+
+## USAGE EXAMPLES
+
+**Full test maintenance (all workspaces, all priorities):**
+```
+/cui-javascript-test-maintain
+```
+
+**Single workspace test maintenance:**
+```
+/cui-javascript-test-maintain workspace=frontend
+```
+
+**Only high priority test improvements:**
+```
+/cui-javascript-test-maintain priority=high
+```
+
+**Medium and high priority improvements:**
+```
+/cui-javascript-test-maintain priority=medium
+```
+
+**Specific workspace, high priority only:**
+```
+/cui-javascript-test-maintain workspace=core priority=high
+```
+
+## ARCHITECTURE
+
+Orchestrates agents and commands:
+- **cui-javascript-maintenance skill** - Test quality standards and prioritization
+- **Explore agent** - Test quality analysis
+- **javascript-test-implementer agent** - Focused test improvements (Layer 3)
+- **npm-builder agent** - Test execution and verification (Layer 3)
+- **`/javascript-coverage-report` command** - Coverage analysis
+
+## RELATED
+
+- `cui-javascript-maintenance` skill - Test quality standards this command implements
+- `javascript-test-implementer` agent - Test implementation and improvement
+- `npm-builder` agent - Test execution and verification
+- `/javascript-coverage-report` command - Coverage analysis
+- `cui-javascript-unit-testing` skill - Jest testing patterns
+- `cui-cypress` skill - E2E testing patterns
+- `cui-task-planning` skill - For test improvement planning

@@ -183,7 +183,7 @@ Add comments explaining why non-obvious permissions exist.
 
 **Example:**
 ```json
-// Required for AsciiDoc link verification script
+// Legacy: Direct AsciiDoc script access (prefer using asciidoc-link-verifier agent instead)
 {"tool": "Bash", "pattern": "python3 ~/git/cui-llm-rules/scripts/verify-adoc-links.py:*"},
 
 // Required for custom build wrapper script
@@ -344,17 +344,33 @@ Don't assume tool consistency across projects. Support both wrapper and system v
 **Challenge:**
 Project had custom validation scripts that Claude needed to run.
 
-**Solution:**
+**Solution (Preferred - Marketplace Bundle):**
 ```json
-// Project-specific validation scripts
+// Documentation scripts via marketplace bundle agents
+// Use specialized agents instead of direct script permissions
+```
+
+Agents available:
+- `asciidoc-format-validator` - Format validation
+- `asciidoc-auto-formatter` - Auto-fix formatting
+- `asciidoc-link-verifier` - Link verification
+
+Agents have built-in access to scripts at:
+`./.claude/skills/cui-documentation/scripts/`
+
+**Alternative Solution (Direct Script Access):**
+```json
+// Legacy script paths (backward compatibility)
 {"tool": "Bash", "pattern": "~/git/cui-llm-rules/scripts/asciidoc-validator.sh:*"},
 {"tool": "Bash", "pattern": "python3 ~/git/cui-llm-rules/scripts/verify-adoc-links.py:*"}
 ```
 
 **Lesson:**
-- Use absolute paths for custom scripts
+- Prefer marketplace bundle agents over direct script permissions
+- Agents provide better integration with standards and workflows
+- Use absolute paths for custom scripts when direct access needed
 - Document why custom scripts need permissions
-- Consider moving scripts to project directory if possible
+- Consider migrating scripts to marketplace bundles for reusability
 
 ### Bundle Development Workflow
 

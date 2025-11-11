@@ -84,22 +84,24 @@ This loads:
 
 ### Step 4: Find and Analyze Logging Violations
 
-**Find and analyze all logging statements:**
+**Delegate to logging-violation-analyzer agent:**
 
-Use Grep to locate all logger invocations:
 ```
-Grep: pattern="LOGGER\.(info|debug|trace|warn|error|fatal)\(" output_mode="content" -n=true
+Task:
+  subagent_type: cui-java-expert:logging-violation-analyzer
+  description: Analyze logging violations
+  prompt: |
+    Analyze all LOGGER statements in {module or project root}.
+    Return structured violation list.
 ```
 
-**Apply violation detection patterns:**
+**Agent returns structured violations:**
+- File locations and line numbers
+- Violation types (MISSING_LOG_RECORD, INCORRECT_LOG_RECORD_USAGE)
+- Current vs expected usage
+- Summary counts
 
-Follow violation detection patterns from cui-java-core skill:
-- Extract context (file, line, level, statement)
-- Determine LogRecord usage (LogRecord vs direct string)
-- Apply validation rules (see CRITICAL RULES section)
-- Record violations with location and type
-
-See: `standards/logging-enforcement-patterns.md` → Patterns 1-5 (Violation Detection)
+This replaces manual Grep analysis with focused agent that applies CUI logging standards validation.
 
 ### Step 5: Verify LogRecord Usage and Test Coverage
 
@@ -307,10 +309,10 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Update configuration for future executions
 
 **Violation Detection:**
-- Use Grep with line numbers (`-n=true`) for all searches
-- Search for: `LOGGER\.(info|debug|trace|warn|error|fatal)\(`
-- Analyze each match to determine LogRecord usage
-- Record file, line, level, and violation type
+- Use logging-violation-analyzer agent for structured violation analysis
+- Agent handles: finding statements, determining LogRecord usage, applying rules
+- Receive structured violations with file locations and types
+- Process violation data for batched fixes
 
 **LogRecord Validation Rules:**
 - INFO/WARN/ERROR/FATAL: LogRecord REQUIRED → violation if missing
@@ -368,7 +370,8 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 
 - Skill: `cui-java-expert:cui-java-core` - Logging standards and enforcement patterns
 - Standards: `logging-standards.md`, `logmessages-documentation.md`, `logging-enforcement-patterns.md`
-- Agent: `cui-java-expert:java-code-implementer` - Fix production code
-- Agent: `cui-java-expert:java-junit-implementer` - Add tests
-- Agent: `cui-java-expert:cui-log-record-documenter` - Update LogMessages documentation
+- Agent: `cui-java-expert:logging-violation-analyzer` - Analyze LOGGER statement violations (focused analyzer)
+- Agent: `cui-java-expert:java-code-implementer` - Fix production code (focused implementer)
+- Agent: `cui-java-expert:java-junit-implementer` - Add tests (focused implementer)
+- Agent: `cui-java-expert:cui-log-record-documenter` - Update LogMessages documentation (focused documenter)
 - Agent: `cui-maven:maven-builder` - Build verification

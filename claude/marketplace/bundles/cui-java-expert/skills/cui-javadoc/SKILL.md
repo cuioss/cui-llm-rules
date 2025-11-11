@@ -40,6 +40,12 @@ Standards for writing high-quality JavaDoc documentation in CUI Java projects, e
    ```
    Provides standards for inline code (`{@code}`, `{@literal}`), code blocks (`<pre><code>`), links (`{@link}`), HTML formatting, tables, lists, and complete code examples.
 
+   **D. If fixing Javadoc build errors**:
+   ```
+   Read: standards/javadoc-error-reference.md
+   ```
+   Quick reference for identifying and fixing common Javadoc build errors and warnings. Focuses on minimal, content-preserving fixes for formatting, references, and tag issues.
+
 3. **Extract key requirements from all loaded standards**
 
 4. **Store in working memory** for use during task execution

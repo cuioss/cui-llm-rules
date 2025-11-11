@@ -38,17 +38,21 @@ This bundle provides a complete Java development knowledge base by aggregating f
    - Code example standards
    - JavaDoc maintenance patterns
 
-### Agents (4 agents)
+### Agents (5 focused agents)
 
-1. **java-code-implementer** - Implements Java code following CUI standards with build verification
-2. **java-junit-implementer** - Implements JUnit tests with full standards compliance and build validation
-3. **java-coverage-reporter** - Analyzes test coverage and identifies methods needing tests
-4. **cui-log-record-documenter** - Documents LogRecord classes in AsciiDoc format per CUI standards
+1. **java-code-implementer** - Implements Java code following CUI standards (focused implementer - no verification)
+2. **java-junit-implementer** - Implements JUnit tests with full standards compliance (focused implementer - no verification)
+3. **java-coverage-analyzer** - Analyzes existing JaCoCo coverage reports (focused analyzer - no build execution)
+4. **logging-violation-analyzer** - Analyzes LOGGER statement violations (focused analyzer - no fixes)
+5. **cui-log-record-documenter** - Documents LogRecord classes in AsciiDoc format (focused documenter)
 
-### Commands (2 commands)
+### Commands (5 commands)
 
-1. **cui-java-task-manager** - End-to-end Java task implementation with automated testing and coverage verification
-2. **cui-log-record-enforcer** - Enforces CUI logging standards by validating LogRecord usage and testing coverage
+1. **cui-java-task-manager** - End-to-end Java task implementation orchestrator (delegates to self-contained commands)
+2. **cui-log-record-enforcer** - Enforces CUI logging standards (orchestrates violation analysis and fixes)
+3. **java-implement-code** - Self-contained command: implements code + verifies + iterates
+4. **java-implement-tests** - Self-contained command: writes tests + runs tests + iterates
+5. **java-coverage-report** - Self-contained command: generates coverage + analyzes reports
 
 ## Installation
 
@@ -257,12 +261,12 @@ This Java expertise bundle complements other CUI bundles:
 ## Bundle Statistics
 
 - **Total Skills**: 4
-- **Total Agents**: 4
-- **Total Commands**: 2
+- **Total Agents**: 5 (focused Layer 3 agents)
+- **Total Commands**: 5 (orchestrators + self-contained)
 - **Total Standards Files**: 23
 - **Total Lines of Documentation**: ~6,800
 - **Quality Score**: 92.5/100 average
-- **Status**: Production Ready ✅
+- **Status**: Refactored for Rule 6 Compliance ✅
 
 ## Maintenance
 

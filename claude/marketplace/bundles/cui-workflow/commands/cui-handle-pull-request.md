@@ -11,7 +11,7 @@ Comprehensive pull request workflow handling CI/Sonar checks, code review respon
 
 **CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-handle-pull-request update="[your improvement]"` with:
 1. Improved strategies for CI/Sonar polling and timeout handling
-2. Better agent coordination patterns for review/quality workflows
+2. Better command orchestration patterns for review/quality workflows
 3. More effective error recovery strategies for build/check failures
 4. Enhanced decision point prompts for user control
 5. Any lessons learned about PR workflow automation
@@ -62,73 +62,48 @@ Display status updates every 30 seconds.
 
 If build failed:
 ```
-Task:
-  subagent_type: maven-project-builder
-  description: Fix build failures
-  prompt: Review build logs and fix failures
+SlashCommand: /cui-build-and-fix push
 ```
 
+Self-contained command that fixes build + verifies + commits.
+
 **Error handling:**
-- **If agent launch fails**: Display "Failed to launch maven-project-builder: {error}" and prompt "[R]etry/[M]anual fix/[A]bort"
-- **If agent cannot fix build**: Display agent report and prompt "[M]anual intervention needed/[A]bort workflow"
+- **If command fails**: Display "Failed to fix build: {error}" and prompt "[R]etry/[M]anual fix/[A]bort"
+- **If cannot fix build**: Display command report and prompt "[M]anual intervention needed/[A]bort workflow"
 - Track in build_verifications counter
 
 ### Step 4: Handle Code Review Comments
 
 ```
-Task:
-  subagent_type: pr-review-responder
-  description: Respond to review comments
-  prompt: Retrieve and resolve Gemini code review comments on PR {pr}
+SlashCommand: /respond-to-review-comments
 ```
 
-Agent either fixes issues or explains why changes not applicable.
+Self-contained Pattern 3 command: fetches comments → triages each → code change or explanation → verifies + commits.
 
 **Error handling:**
-- **If agent launch fails**: Display "Failed to launch pr-review-responder: {error}" and prompt "[R]etry/[S]kip review comments/[A]bort"
-- Track resolved comments in reviews_responded_to counter
+- **If command fails**: Display "Failed to respond to review comments: {error}" and prompt "[R]etry/[S]kip review comments/[A]bort"
+- Track resolved comments in reviews_responded_to counter (from command result)
 
 ### Step 5: Handle Sonar Issues
 
-Loop until Sonar quality gate passes or user decides to skip:
-
 ```
-Task:
-  subagent_type: pr-quality-fixer
-  description: Fix Sonar issues
-  prompt: Retrieve and resolve Sonar issues on PR {pr}
+SlashCommand: /fix-sonar-issues
 ```
 
-Agent fixes code issues, suppresses false positives, improves coverage.
+Self-contained Pattern 3 command: fetches Sonar issues → triages each → fixes or suppresses (with user approval) → verifies + commits.
 
-**Decision point after each iteration:**
-- Display: "Sonar iteration complete. {count} issues fixed, {count} suppressed."
-- Prompt: "[C]ontinue fixing/[S]kip remaining/[A]bort workflow"
+Command includes triage logic with user approval for suppressions internally.
 
 **Error handling:**
-- **If agent launch fails**: Display "Failed to launch pr-quality-fixer: {error}" and prompt "[R]etry/[S]kip Sonar/[A]bort"
-- Track fixed and suppressed issues in sonar_issues_fixed counter
+- **If command fails**: Display "Failed to fix Sonar issues: {error}" and prompt "[R]etry/[S]kip Sonar/[A]bort"
+- Track fixed and suppressed issues in sonar_issues_fixed counter (from command result)
 
-### Step 6: Final Verification
+### Step 6: Display Summary
 
-Run maven-project-builder to verify all changes build successfully:
-
-```
-Task:
-  subagent_type: maven-project-builder
-  description: Final build verification
-  prompt: Run full build to verify all PR changes
-```
-
-**Error handling:**
-- **If build fails**: Display "Final build failed" and prompt "[F]ix issues/[A]bort workflow"
-- Track in build_verifications counter
-
-### Step 7: Cleanup and Display Summary
-
-**Cleanup:**
-- No temporary files created (all state managed by agents)
-- No cleanup required
+**Aggregate results from self-contained commands:**
+- Each command returns structured results
+- Aggregate: reviews_responded_to, sonar_issues_fixed, build_verifications
+- No final verification needed (commands verify themselves)
 
 **Display summary:**
 ```
@@ -167,13 +142,12 @@ Display all statistics in Step 7 summary.
 **Workflow:**
 - Must wait for CI/Sonar before proceeding
 - Handle build failures before code review
-- Allow user to skip Sonar if needed
-- Final build verification required
+- No final verification needed (commands verify themselves)
 
-**Agent Delegation:**
-- Use specialized agents for each concern
-- Don't duplicate agent logic in command
-- Trust agent capabilities
+**Command Orchestration:**
+- Delegate to self-contained Pattern 3 commands
+- Commands handle fetch → triage → fix → verify → commit internally
+- Aggregate results from command structured returns
 
 **User Control:**
 - Timeout warnings for long waits
@@ -210,14 +184,16 @@ Display all statistics in Step 7 summary.
 
 ## ARCHITECTURE
 
-Orchestrates:
-- maven-project-builder - Build verification
-- pr-review-responder - Code review handling
-- pr-quality-fixer - Sonar issue resolution
+Simple orchestrator that delegates to self-contained commands:
+- `/cui-build-and-fix` - Fix build failures + verify + commit
+- `/respond-to-review-comments` - Handle review comments (Pattern 3: fetch → triage → respond)
+- `/fix-sonar-issues` - Handle Sonar issues (Pattern 3: fetch → triage → fix)
+
+Each command is self-contained with own verify + commit cycle.
 
 ## RELATED
 
 - `/cui-update-command` - Update this command
-- pr-review-responder agent
-- pr-quality-fixer agent
-- maven-project-builder agent
+- `/cui-build-and-fix` - Build fixing command
+- `/respond-to-review-comments` - Review comment handling (Pattern 3)
+- `/fix-sonar-issues` - Sonar issue fixing (Pattern 3)

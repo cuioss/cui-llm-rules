@@ -162,25 +162,6 @@ Cypress.Commands.add('login', (username, password) => {
 });
 ```
 
-## TypeScript Configuration (Optional)
-
-For TypeScript-based Cypress tests:
-
-```typescript
-// cypress/tsconfig.json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM"],
-    "types": ["cypress", "node"],
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true
-  },
-  "include": ["**/*.ts"]
-}
-```
-
 ## Dependencies
 
 ### Required Packages

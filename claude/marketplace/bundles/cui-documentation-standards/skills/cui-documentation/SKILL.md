@@ -221,15 +221,16 @@ Standards for writing clear, maintainable technical documentation in CUI project
 
 **When to Execute**: After creating or updating AsciiDoc files
 
-**Available Validation Scripts**:
+**Available Documentation Scripts**:
 
-This skill includes two validation scripts in the `scripts/` directory:
+This skill includes four utility scripts in the `scripts/` directory:
 
 1. **`asciidoc-validator.sh`** - Format validation script
    - Validates AsciiDoc format compliance
    - Checks for blank lines before lists
    - Verifies section header formatting
    - Detects list syntax issues
+   - Multiple output formats (console, JSON, XML, JUnit)
 
    Usage:
    ```bash
@@ -238,6 +239,9 @@ This skill includes two validation scripts in the `scripts/` directory:
 
    # Validate all files in a directory
    scripts/asciidoc-validator.sh directory/
+
+   # CI/CD integration with JUnit output
+   scripts/asciidoc-validator.sh -f junit -s error directory/
    ```
 
 2. **`verify-adoc-links.py`** - Link verification script
@@ -256,6 +260,43 @@ This skill includes two validation scripts in the `scripts/` directory:
 
    # Verify links recursively
    python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report target/links.md
+   ```
+
+3. **`asciidoc-formatter.sh`** - Auto-formatting script
+   - Auto-fixes common AsciiDoc formatting issues
+   - Adds blank lines before lists
+   - Converts deprecated `<<>>` syntax to `xref:`
+   - Fixes header attributes and whitespace
+   - Safe operation with backups and dry-run mode
+
+   Usage:
+   ```bash
+   # Preview changes without modifying files
+   scripts/asciidoc-formatter.sh -n path/to/file.adoc
+
+   # Auto-fix all issues in a directory
+   scripts/asciidoc-formatter.sh directory/
+
+   # Fix only specific issue types
+   scripts/asciidoc-formatter.sh -t lists directory/
+   ```
+
+4. **`documentation-stats.sh`** - Documentation metrics script
+   - Generates comprehensive documentation statistics
+   - Tracks lines, words, sections, cross-references
+   - Multiple output formats (console, JSON, CSV, markdown)
+   - Useful for documentation health tracking
+
+   Usage:
+   ```bash
+   # Basic statistics for current directory
+   scripts/documentation-stats.sh
+
+   # Generate JSON report
+   scripts/documentation-stats.sh -f json directory/ > stats.json
+
+   # Detailed markdown report
+   scripts/documentation-stats.sh -f markdown -d > metrics.md
    ```
 
 **Validation Workflow**:
@@ -285,7 +326,11 @@ This skill includes two validation scripts in the `scripts/` directory:
 5. Re-run validation to confirm fixes
 
 **Script Paths**:
-- Scripts are located in the skill directory at: `scripts/asciidoc-validator.sh` and `scripts/verify-adoc-links.py`
+- All scripts are located in the skill directory at: `scripts/`
+  - `scripts/asciidoc-validator.sh` - Validation
+  - `scripts/verify-adoc-links.py` - Link verification
+  - `scripts/asciidoc-formatter.sh` - Auto-formatting
+  - `scripts/documentation-stats.sh` - Metrics generation
 - When running from project root, use relative path from current working directory
 - Scripts require execution from a location where relative paths to AsciiDoc files are correct
 

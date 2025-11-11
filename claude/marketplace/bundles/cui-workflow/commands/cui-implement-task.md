@@ -65,28 +65,39 @@ Task:
 
 **Error handling:** If task-breakdown-agent fails to execute, increment agent_failures counter and prompt user "[R]etry/[A]bort".
 
-### Step 4: Verify Build with maven-project-builder
+### Step 4: Verify Build
 
 ```
-Task:
-  subagent_type: maven-project-builder
-  description: Verify project builds
-  prompt: Run maven build and verify success
+SlashCommand: /cui-build-and-fix
 ```
 
-Handle build failures before proceeding.
+Self-contained command that runs build, fixes issues if found, verifies, and commits fixes.
 
-**Error handling:** If maven-project-builder agent fails to execute, increment agent_failures counter and prompt user "[R]etry/[A]bort".
+**Error handling:** If command fails, increment build_failures counter and prompt user "[R]etry/[A]bort".
 
-### Step 5: Implement Tasks with task-executor
+### Step 5: Implement Tasks
 
-For each task in plan:
+**Pattern Decision: Determine if atomic or batch:**
+- If plan has 1 task (atomic): Use task-executor directly + verify
+- If plan has multiple tasks (batch): Delegate to /execute-task for each
+
+**For atomic (single task):**
 ```
 Task:
   subagent_type: task-executor
-  description: Implement task {n}
+  description: Implement task
   prompt: Implement task: {task_description}
 ```
+
+Then verify with SlashCommand(/cui-build-and-fix).
+
+**For batch (multiple tasks):**
+```
+For each task in plan:
+  SlashCommand: /execute-task task="{task_description}"
+```
+
+Each /execute-task is self-contained (implements + verifies + iterates).
 
 Track: tasks_completed, tasks_failed, tasks_skipped.
 
@@ -94,17 +105,17 @@ Track: tasks_completed, tasks_failed, tasks_skipped.
 
 Check all tasks completed. Prompt for incomplete items.
 
-### Step 7: Build Final Verification
+### Step 7: Final Verification and Commit
 
-Run maven-project-builder again to verify implementation builds successfully.
+```
+SlashCommand: /cui-build-and-fix push={push parameter}
+```
 
-**Error handling:** If maven-project-builder agent fails during final verification, increment agent_failures counter and prompt user "[F]ix manually/[R]etry/[A]bort".
+Self-contained command: runs build, fixes issues if found, verifies, commits all changes, and pushes if push=true.
 
-### Step 8: Commit and Push (if requested)
+**Error handling:** If command fails during final verification, increment build_failures counter and prompt user "[F]ix manually/[R]etry/[A]bort".
 
-Use commit-changes agent if push parameter provided.
-
-### Step 9: Display Summary
+### Step 8: Display Summary
 
 ```
 ╔════════════════════════════════════════════════════════════╗
@@ -132,10 +143,11 @@ Display all statistics in final summary.
 
 ## CRITICAL RULES
 
-**Agent Coordination:**
-- Wait for each agent to complete before next step
-- Handle agent failures gracefully
-- Provide clear status updates
+**Command Orchestration:**
+- Delegate to self-contained commands for build/verify/commit operations
+- Pattern Decision: atomic tasks use task-executor + verify, batch uses /execute-task per task
+- Wait for each operation to complete before next step
+- Handle failures gracefully
 
 **User Interaction:**
 - Prompt on PARTIAL results
@@ -176,18 +188,20 @@ Display all statistics in final summary.
 
 ## ARCHITECTURE
 
-Orchestrates specialized agents:
-- task-reviewer - Issue validation
+Orchestrates agents and commands:
+- task-reviewer agent - Issue validation
 - task-breakdown-agent - Planning
-- maven-project-builder - Build verification
-- task-executor - Implementation
-- commit-changes - Git operations
+- task-executor agent - Focused implementation (for atomic tasks)
+- `/execute-task` command - Self-contained (for batch tasks)
+- `/cui-build-and-fix` command - Build + verify + fix + commit
 
 ## RELATED
 
-- Task-reviewer agent
-- Task-breakdown-agent
-- Task-executor agent
+- task-reviewer agent
+- task-breakdown-agent
+- task-executor agent
+- `/execute-task` command (self-contained)
+- `/cui-build-and-fix` command
 
 ## CONTINUOUS IMPROVEMENT RULE
 

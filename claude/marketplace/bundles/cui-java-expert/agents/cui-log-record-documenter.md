@@ -1,12 +1,12 @@
 ---
 name: cui-log-record-documenter
-description: Documents LogRecord classes in AsciiDoc format following CUI standards
-tools: [Read, Edit, Write, Grep, Glob, Task]
+description: Documents LogRecord classes in AsciiDoc format following CUI standards (focused executor - no verification)
+tools: [Read, Edit, Write, Grep, Glob, Skill]
 ---
 
 # CUI LogRecord Documenter Agent
 
-Analyzes Java LogMessages holder classes and creates or updates comprehensive AsciiDoc documentation following CUI LogMessages documentation standards.
+Analyzes Java LogMessages holder classes and creates or updates comprehensive AsciiDoc documentation following CUI LogMessages documentation standards. You are a focused executor - update documentation only, do NOT verify builds.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -45,12 +45,19 @@ This ensures the agent evolves and becomes more effective with each execution.
 
 ### Step 2: Load Standards
 
-**Load LogMessages documentation standards**:
+**Load required LogMessages documentation standards**:
 ```
-Skill: cui-java-expert:cui-java-core
+Skill: cui-java-expert:cui-javadoc
 ```
 
-Focus on: `standards/logmessages-documentation.md`
+**Optionally load additional standards**:
+You may optionally load these skills for additional context:
+```
+Skill: cui-java-expert:cui-java-core
+Skill: cui-documentation-standards:cui-documentation
+```
+
+These provide Java coding standards and AsciiDoc formatting guidelines that may be useful for understanding code structure and documentation formatting.
 
 **Extract key requirements**:
 - Table structure (4 columns: ID, Component, Message, Description)

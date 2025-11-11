@@ -11,7 +11,7 @@ description: |
   - User: "Commit my changes with COMMIT_MESSAGE, push and create a pr"
     Assistant: Invokes commit-changes agent to commit all changes with COMMIT_MESSAGE, push and create a PR
 
-tools: Read, Glob, Bash(git:*), Bash(rm:*), Bash(gh:*)
+tools: Read, Glob, Bash(git:*), Bash(rm:*), Bash(gh:*), Skill
 model: sonnet
 color: green
 ---
@@ -40,19 +40,29 @@ This agent accepts the following parameters extracted from user requests:
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
-### Step 1: Check for Uncommitted Changes
+### Step 1: Load Git Workflow Standards
+
+**Load CUI Git Workflow Standards:**
+
+1. **Load cui-workflow:cui-git-workflow skill**:
+   ```
+   Skill: cui-workflow:cui-git-workflow
+   ```
+   This skill provides the Git commit standards including conventional commit format, commit message quality requirements, and commit structure rules.
+
+### Step 2: Check for Uncommitted Changes
 
 1. Execute: `git status --porcelain`
 2. Parse output to determine if there are uncommitted changes
 3. Count files changed
 
 **Decision Point:**
-- If no changes exist → Skip to Step 5 (Push Section)
-- If changes exist → Continue to Step 2
+- If no changes exist → Skip to Step 6 (Push Section)
+- If changes exist → Continue to Step 3
 
 **Success Criteria**: Command executes with exit code 0
 
-### Step 2: Analyze Changes for Artifacts
+### Step 3: Analyze Changes for Artifacts
 
 1. Execute: `git status --porcelain` to list all changed/new files
 2. Use Glob tool to locate artifacts:
@@ -69,10 +79,10 @@ This agent accepts the following parameters extracted from user requests:
 **Success Criteria**: All files analyzed, artifact list compiled
 
 **Decision Point:**
-- If artifacts found → Continue to Step 3
-- If no artifacts → Continue to Step 4
+- If artifacts found → Continue to Step 4
+- If no artifacts → Continue to Step 5
 
-### Step 3: Clean Artifacts
+### Step 4: Clean Artifacts
 
 For each artifact identified:
 
@@ -94,7 +104,7 @@ For each artifact identified:
 
 **Success Criteria**: All artifacts either deleted or user-confirmed to keep
 
-### Step 4: Commit Changes
+### Step 5: Commit Changes
 
 **A. Determine Commit Message**
 
@@ -133,12 +143,12 @@ EOF
 
 **Failure Handling**:
 - If commit fails → Report error, do not proceed to push/PR
-- If nothing to commit → Report "No changes to commit", proceed to Step 5
+- If nothing to commit → Report "No changes to commit", proceed to Step 6
 
-### Step 5: Push Section
+### Step 6: Push Section
 
 **Decision Point:**
-- If "push" parameter NOT passed → Skip to Step 6
+- If "push" parameter NOT passed → Skip to Step 7
 - If "push" parameter passed → Continue with push
 
 **Execution:**
@@ -153,7 +163,7 @@ EOF
 - If push fails (e.g., remote ahead) → Report error with suggestion to pull first
 - If push rejected → Report error and stop (do not create PR)
 
-### Step 6: PR Section
+### Step 7: PR Section
 
 **Decision Point:**
 - If "create a pr" parameter NOT passed → Complete (go to response)

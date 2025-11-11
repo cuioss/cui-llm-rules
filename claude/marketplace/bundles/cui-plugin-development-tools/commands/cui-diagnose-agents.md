@@ -26,6 +26,15 @@ Orchestrates comprehensive analysis of agents by coordinating cui-diagnose-singl
 Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
+**Optionally load marketplace architecture standards**:
+
+You may optionally load the marketplace architecture skill for additional architectural context:
+```
+Skill: cui-plugin-development-tools:cui-marketplace-architecture
+```
+
+This provides architecture rules and validation patterns for marketplace components that may be useful for understanding agent design principles.
+
 ### Step 2: Discover Agents
 
 **Parse parameters** to determine scope.

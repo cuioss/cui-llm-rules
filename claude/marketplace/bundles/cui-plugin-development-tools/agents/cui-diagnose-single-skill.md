@@ -7,7 +7,7 @@ description: |
   - Input: skill_path=/path/to/skill
   - Output: Comprehensive skill quality report with issues categorized by severity
 
-tools: Read, Grep, Glob, Task
+tools: Read, Grep, Glob
 model: sonnet
 color: orange
 ---
@@ -68,49 +68,51 @@ Glob: pattern="standards/*", path={skill_path}
 - Referenced files that don't exist
 - Standards files that exist but aren't referenced
 
-### Step 3: Analyze Each Standards File (Parallel)
+### Step 3: Analyze Each Standards File
 
 For EACH standards file found:
 
-**Launch cui-analyze-standards-file agent:**
+**Inline standards file analysis using Read and Grep:**
 ```
-Task:
-  subagent_type: cui-analyze-standards-file
-  description: Analyze {filename}
-  prompt: |
-    Analyze this standards file for quality issues.
-
-    Parameters:
-    - file_path: {skill_path}/standards/{filename}
-    - skill_path: {skill_path}
-
-    Return JSON report with all issues found.
+Read: {skill_path}/standards/{filename}
+Grep: Apply quality checks directly:
+  - Zero-information content detection
+  - Ambiguous language patterns
+  - Duplication detection
+  - Formatting issues
 ```
 
-**Launch ALL file analyses in PARALLEL** (single message, multiple Task calls)
+**Apply cui-analyze-standards-file validation patterns:**
+- Check for empty or trivial content
+- Identify vague requirements
+- Detect redundant information
+- Validate structure and formatting
 
-**Collect results from each agent**
+**Record issues found for each file**
 
 ### Step 4: Analyze Integrated Standards Quality
 
 **Prepare file list** from Step 2
 
-**Launch cui-analyze-integrated-standards agent:**
+**Inline integrated standards analysis using Read:**
 ```
-Task:
-  subagent_type: cui-analyze-integrated-standards
-  description: Analyze cross-file quality
-  prompt: |
-    Analyze all standards files together for cross-file quality issues.
+For each standards file:
+  Read: {skill_path}/standards/{filename}
 
-    Parameters:
-    - standards_files: [{list of absolute paths}]
-    - skill_path: {skill_path}
-
-    Return JSON report with integrated quality assessment.
+Compare across files:
+  - Detect harmful duplication (exact copies)
+  - Identify conflicting guidance
+  - Check cross-reference consistency
+  - Validate integration patterns
 ```
 
-**Collect cross-file analysis results**
+**Apply cui-analyze-integrated-standards validation patterns:**
+- Compare content across all files
+- Detect duplicate sections
+- Identify conflicting requirements
+- Check cross-file consistency
+
+**Record cross-file issues**
 
 ### Step 5: Aggregate Results
 
