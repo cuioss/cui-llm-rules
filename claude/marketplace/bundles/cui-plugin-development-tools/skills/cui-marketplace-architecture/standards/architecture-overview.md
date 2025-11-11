@@ -1,9 +1,6 @@
-= Plugin Architecture
-:toc: left
-:toclevels: 3
-:sectnums:
+# Plugin Architecture
 
-== Overview
+## Overview
 
 CUI standards plugin provides development standards, skills, agents, and commands via Claude Code's plugin marketplace.
 
@@ -15,7 +12,7 @@ CUI standards plugin provides development standards, skills, agents, and command
 /plugin install cui-standards@cui-llm-rules
 ```
 
-== Three-Layer Architecture
+## Three-Layer Architecture
 
 Skills (knowledge) → Agents (executors) → Commands (user utilities)
 
@@ -27,9 +24,9 @@ Skills (knowledge) → Agents (executors) → Commands (user utilities)
 
 **Details**: See `cui-marketplace-architecture` skill for complete architecture rules, validation patterns, and reference standards.
 
-== Design Decisions
+## Design Decisions
 
-=== 1. Plugin Distribution
+### 1. Plugin Distribution
 
 **Approach**: Single-command marketplace installation
 
@@ -40,7 +37,7 @@ Skills (knowledge) → Agents (executors) → Commands (user utilities)
 * No manual file synchronization
 * Cross-project availability
 
-=== 2. Self-Contained Skills
+### 2. Self-Contained Skills
 
 **Rule**: Skills contain all standards in their own `standards/` directory.
 
@@ -48,7 +45,7 @@ Skills (knowledge) → Agents (executors) → Commands (user utilities)
 
 **Validation**: See `cui-marketplace-architecture` skill.
 
-=== 3. Skill Loading in Agents
+### 3. Skill Loading in Agents
 
 **Pattern**: Agents load standards dynamically via Skill tool
 
@@ -68,7 +65,7 @@ Skill: cui-java-core
 * Maintainability (single source of truth)
 * Always current (loads from source)
 
-=== 4. Global Installation
+### 4. Global Installation
 
 **Location**: `~/.claude/plugins/marketplaces/cui-llm-rules/`
 
@@ -81,7 +78,7 @@ Skill: cui-java-core
 
 **Benefit**: Projects override specific components while using global baseline.
 
-== Loading Model
+## Loading Model
 
 **Skills** (progressive disclosure):
 
@@ -96,7 +93,7 @@ Skill: cui-java-core
 2. Invocation: Full agent.md loaded
 3. Step 0: Loads skills via Skill tool
 
-== Version Management
+## Version Management
 
 **Updates**:
 ```bash
@@ -111,10 +108,10 @@ Skill: cui-java-core
 * `marketplace.json`
 * Git tags (`vX.Y.Z`)
 
-== References
+## References
 
 * Claude Code Plugins: https://docs.claude.com/en/docs/claude-code/plugins
 * Plugin Marketplaces: https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
-* xref:plugin-specifications.adoc[Plugin Specifications]
-* xref:bundling-architecture.adoc[Bundling Architecture]
-* xref:agent-design-principles.adoc[Agent Design Principles]
+* [Plugin Specifications](plugin-specifications.md)
+* [Bundling Architecture](bundling-patterns.md)
+* [Agent Design Principles](agent-design-principles.md)

@@ -1,9 +1,6 @@
-= Bundling Architecture
-:toc: left
-:toclevels: 3
-:sectnums:
+# Bundling Architecture
 
-== Overview
+## Overview
 
 Bundles organize related agents, commands, and skills into cohesive functional units installed as single packages.
 
@@ -11,11 +8,11 @@ Bundles organize related agents, commands, and skills into cohesive functional u
 
 **Distribution**: Via plugin marketplace at `claude/marketplace/bundles/`
 
-== Bundle Patterns
+## Bundle Patterns
 
 The marketplace implements 4 bundle types:
 
-=== 1. Maven Build Tools
+### 1. Maven Build Tools
 
 **Bundle**: `cui-maven`
 
@@ -25,7 +22,7 @@ The marketplace implements 4 bundle types:
 
 **Rationale**: Specialized Maven build tooling with dedicated standards
 
-=== 2. Development Workflow
+### 2. Development Workflow
 
 **Bundle**: `cui-workflow`
 
@@ -37,7 +34,7 @@ The marketplace implements 4 bundle types:
 
 **Rationale**: Unified end-to-end development cycle workflow with high cohesion (issue → implementation → PR → review → quality)
 
-=== 3. Documentation Standards
+### 3. Documentation Standards
 
 **Bundle**: `cui-documentation-standards`
 
@@ -47,7 +44,7 @@ The marketplace implements 4 bundle types:
 
 **Rationale**: Domain-specific bundle where agent loads skill for standards
 
-=== 4. Plugin Development Tools
+### 4. Plugin Development Tools
 
 **Bundle**: `cui-plugin-development-tools`
 
@@ -57,7 +54,7 @@ The marketplace implements 4 bundle types:
 
 **Rationale**: Complete development lifecycle tooling
 
-== Design Principles
+## Design Principles
 
 **See**: `cui-marketplace-architecture` skill for complete bundle architecture rules
 
@@ -74,9 +71,9 @@ The marketplace implements 4 bundle types:
 * ✅ "Documentation Standards" (agent + skill + command for docs)
 * ❌ "All Agents Bundle" (no functional cohesion)
 
-== Structure
+## Structure
 
-=== Directory Layout
+### Directory Layout
 
 ```
 bundles/{bundle-name}/
@@ -94,7 +91,7 @@ bundles/{bundle-name}/
 * Agents: Single `.md` files (NOT directories)
 * Skills: Directories containing `SKILL.md`
 
-=== Manifest Format
+### Manifest Format
 
 **Location**: `.claude-plugin/plugin.json`
 
@@ -125,7 +122,7 @@ bundles/{bundle-name}/
 * Skills: Directory path (no extension)
 * All paths start with `./`
 
-=== README Format
+### README Format
 
 **Required sections**:
 
@@ -135,7 +132,7 @@ bundles/{bundle-name}/
 4. Usage Examples (2+ scenarios)
 5. Dependencies (if any)
 
-== Installation
+## Installation
 
 **Add marketplace**:
 ```bash
@@ -152,7 +149,7 @@ bundles/{bundle-name}/
 /plugin marketplace update cui-llm-rules
 ```
 
-== Creating Bundles
+## Creating Bundles
 
 **Decision process**:
 
@@ -182,9 +179,9 @@ bundles/{bundle-name}/
 }
 ```
 
-== Common Issues
+## Common Issues
 
-=== Command/Agent Directory Structure
+### Command/Agent Directory Structure
 
 **Error**: Creating directories instead of single files
 
@@ -203,7 +200,7 @@ commands/
 
 **Consequence**: Directory structure creates duplicate listings with `:COMMAND` and `:README` suffixes
 
-=== Missing .md Extension
+### Missing .md Extension
 
 **Error**: Manifest paths without `.md`
 
@@ -211,7 +208,7 @@ commands/
 
 **Correct**: `"./agents/maven-builder.md"`
 
-=== Absolute Paths
+### Absolute Paths
 
 **Error**: Using absolute or user-specific paths
 
@@ -219,9 +216,9 @@ commands/
 
 **Correct**: `./agents/...` (relative from bundle root)
 
-== Cross-References
+## Cross-References
 
-* xref:plugin-architecture.adoc[Plugin Architecture]
-* xref:plugin-specifications.adoc[Plugin Specifications]
-* xref:agent-design-principles.adoc[Agent Design Principles]
+* [Plugin Architecture](architecture-overview.md)
+* [Plugin Specifications](plugin-specifications.md)
+* [Agent Design Principles](agent-design-principles.md)
 * `cui-marketplace-architecture` skill - Complete bundle rules

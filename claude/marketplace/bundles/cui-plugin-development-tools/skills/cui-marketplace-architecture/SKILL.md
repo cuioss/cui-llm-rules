@@ -38,6 +38,26 @@ Standards for marketplace component architecture ensuring self-contained skills,
      Read: standards/scoring-criteria.md
      ```
 
+   - If understanding plugin architecture or distribution:
+     ```
+     Read: standards/architecture-overview.md
+     ```
+
+   - If creating/validating manifests or component structure:
+     ```
+     Read: standards/plugin-specifications.md
+     ```
+
+   - If creating/validating agent design:
+     ```
+     Read: standards/agent-design-principles.md
+     ```
+
+   - If designing/organizing bundles:
+     ```
+     Read: standards/bundling-patterns.md
+     ```
+
 ### Step 2: Apply Architecture Rules
 
 **When to Execute**: During component creation or validation
@@ -156,3 +176,7 @@ All marketplace components must pass:
 * Self-containment validation: standards/self-containment-validation.md
 * Skill usage patterns: standards/skill-usage-patterns.md
 * Scoring criteria: standards/scoring-criteria.md
+* Architecture overview: standards/architecture-overview.md
+* Plugin specifications: standards/plugin-specifications.md
+* Agent design principles: standards/agent-design-principles.md
+* Bundling patterns: standards/bundling-patterns.md

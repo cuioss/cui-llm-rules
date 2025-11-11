@@ -68,7 +68,7 @@ Skill: cui-plugin-development-tools:cui-marketplace-architecture
 **Read agent quality standards:**
 ```
 Read: ~/git/cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
-Read: ~/git/cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/standards/agent-design-principles.md
+Read: ~/git/cui-llm-rules/claude/marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/standards/agent-design-principles.md
 ```
 
 ### Step 3: Read Current Agent

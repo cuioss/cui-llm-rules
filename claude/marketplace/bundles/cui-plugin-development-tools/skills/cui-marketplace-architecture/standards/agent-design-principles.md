@@ -1,19 +1,16 @@
-= Agent Design Principles
-:toc: left
-:toclevels: 3
-:sectnums:
+# Agent Design Principles
 
-== Overview
+## Overview
 
 Design principles and quality standards for Claude Code agents.
 
 **Audience**: Agent creators and reviewers
 
-**Related**: xref:plugin-architecture.adoc[Architecture] · xref:plugin-specifications.adoc[Specifications]
+**Related**: [Architecture](architecture-overview.md) · [Specifications](plugin-specifications.md)
 
-== Core Principles
+## Core Principles
 
-=== 1. Standards via Skills
+### 1. Standards via Skills
 
 **Rule**: Agents load standards using the Skill tool, not direct file reads.
 
@@ -34,7 +31,7 @@ Skill: cui-java-core
 Skill: cui-javadoc
 ```
 
-=== 2. Perfect Tool Fit (100%)
+### 2. Perfect Tool Fit (100%)
 
 **Rule**: Agent has exactly the tools it needs - no more, no less.
 
@@ -48,7 +45,7 @@ Skill: cui-javadoc
 * Standards usage requires `Skill`
 * Git commands require `Bash`
 
-=== 3. No Self-Modification
+### 3. No Self-Modification
 
 **Rule**: Agents report lessons learned but never modify themselves.
 
@@ -56,7 +53,7 @@ Skill: cui-javadoc
 
 **Implementation**: Include "Lessons Learned" in response format.
 
-=== 4. Structured Response Format
+### 4. Structured Response Format
 
 **Required elements**:
 
@@ -66,9 +63,9 @@ Skill: cui-javadoc
 * Tool Usage: Count per tool
 * Lessons Learned: Insights for improvement
 
-== Agent Structure
+## Agent Structure
 
-=== Frontmatter
+### Frontmatter
 
 ```yaml
 ---
@@ -80,7 +77,7 @@ color: green|blue|purple
 ---
 ```
 
-=== Required Sections
+### Required Sections
 
 ```markdown
 ## YOUR TASK
@@ -103,36 +100,16 @@ Skill: cui-skill-name
 {Structured output template with required elements}
 ```
 
-== Agent vs Command
+## Agent vs Command
 
-[cols="1,1,1"]
-|===
-|Aspect |Command |Agent
-
-|Invocation
-|User types `/command`
-|System via Task tool
-
-|Duration
-|Can be hours/days
-|< 30 minutes
-
-|Interaction
-|Frequent questions
-|Minimal (decisions only)
-
-|Self-modify
-|✅ Continuous improvement
-|❌ Lessons learned only
-
-|Standards
-|Direct file reads OK
-|Skills via Skill tool
-
-|Output
-|Flexible
-|Structured, parseable
-|===
+| Aspect | Command | Agent |
+|--------|---------|-------|
+| Invocation | User types `/command` | System via Task tool |
+| Duration | Can be hours/days | < 30 minutes |
+| Interaction | Frequent questions | Minimal (decisions only) |
+| Self-modify | ✅ Continuous improvement | ❌ Lessons learned only |
+| Standards | Direct file reads OK | Skills via Skill tool |
+| Output | Flexible | Structured, parseable |
 
 **Use Agent When**:
 
@@ -141,35 +118,25 @@ Skill: cui-skill-name
 * Single-session completion
 * Structured output needed
 
-== Writing Quality Standards
+## Writing Quality Standards
 
-=== Clarity
+### Clarity
 
 * Quantify thresholds ("3 retries", not "several")
 * Use concrete verbs ("validate", "parse", not "handle")
 * Define explicit criteria ("exit code 0", not "succeeds")
 * Enumerate all options in decision points
 
-=== Specificity
+### Specificity
 
-[cols="1,1"]
-|===
-|❌ Avoid |✅ Use
+| ❌ Avoid | ✅ Use |
+|---------|--------|
+| "if needed" | "if error count > 0" |
+| "appropriately" | "using format YYYY-MM-DD" |
+| "handle errors" | "catch IOException, log, retry once" |
+| "fairly short" | "3-5 sentences" or "< 200 words" |
 
-|"if needed"
-|"if error count > 0"
-
-|"appropriately"
-|"using format YYYY-MM-DD"
-
-|"handle errors"
-|"catch IOException, log, retry once"
-
-|"fairly short"
-|"3-5 sentences" or "< 200 words"
-|===
-
-=== Error Handling
+### Error Handling
 
 Define for each error type:
 
@@ -178,7 +145,7 @@ Define for each error type:
 * Backoff strategy (immediate, exponential, fixed)
 * Final action after exhaustion
 
-=== Measurability
+### Measurability
 
 All conditions must be boolean-evaluable:
 
@@ -187,9 +154,9 @@ All conditions must be boolean-evaluable:
 * ✅ "Success = exit code 0 AND no ERROR lines"
 * ❌ "Success = build completes successfully"
 
-== Validation
+## Validation
 
-=== Tool: /cui-diagnose-agents
+### Tool: /cui-diagnose-agents
 
 **Checks**:
 
@@ -213,7 +180,7 @@ All conditions must be boolean-evaluable:
 * Adds Skill tool if missing
 * Converts file refs to skill invocations
 
-=== Quality Checklist
+### Quality Checklist
 
 Before creating agent:
 
@@ -227,33 +194,18 @@ Before creating agent:
 * [ ] Structured response format defined
 * [ ] Tool Fit Score = 100% (verify with `/cui-diagnose-agents`)
 
-== Common Anti-Patterns
+## Common Anti-Patterns
 
-[cols="1,1"]
-|===
-|❌ Anti-Pattern |✅ Correct Pattern
+| ❌ Anti-Pattern | ✅ Correct Pattern |
+|----------------|-------------------|
+| "Process files as needed" | "Process all .java files in src/main/java" |
+| "Build succeeds" | "exit code 0 AND no ERROR lines" |
+| "Handle exceptions appropriately" | "Catch FileNotFoundException → log, skip. IOException → retry once, fail" |
+| "If file is too large..." | "If file size > 10MB..." |
+| `Read: ~/git/cui-llm-rules/standards/java.adoc` | `Skill: cui-java-core` |
+| tools: Read, Edit<br>(workflow uses Skill) | tools: Read, Edit, Skill |
 
-|"Process files as needed"
-|"Process all .java files in src/main/java"
-
-|"Build succeeds"
-|"exit code 0 AND no ERROR lines"
-
-|"Handle exceptions appropriately"
-|"Catch FileNotFoundException → log, skip. IOException → retry once, fail"
-
-|"If file is too large..."
-|"If file size > 10MB..."
-
-|`Read: ~/git/cui-llm-rules/standards/java.adoc`
-|`Skill: cui-java-core`
-
-|tools: Read, Edit
-(workflow uses Skill)
-|tools: Read, Edit, Skill
-|===
-
-== Reference Template
+## Reference Template
 
 See `.claude/agents/maven-project-builder.md` for fully compliant implementation:
 
@@ -263,9 +215,9 @@ See `.claude/agents/maven-project-builder.md` for fully compliant implementation
 * ✅ Structured response format
 * ✅ Complete frontmatter
 
-== Cross-References
+## Cross-References
 
-* xref:plugin-architecture.adoc[Plugin Architecture]
-* xref:plugin-specifications.adoc[Plugin Specifications]
-* xref:../marketplace/skills/README.md[Skills Marketplace]
-* xref:../marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/SKILL.md[Marketplace Architecture Skill]
+* [Plugin Architecture](architecture-overview.md)
+* [Plugin Specifications](plugin-specifications.md)
+* [Skills Marketplace](../../../README.md)
+* [Marketplace Architecture Skill](../SKILL.md)

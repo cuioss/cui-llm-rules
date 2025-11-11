@@ -1,15 +1,12 @@
-= Plugin Specifications
-:toc: left
-:toclevels: 3
-:sectnums:
+# Plugin Specifications
 
-== Overview
+## Overview
 
 Technical specifications for CUI marketplace bundles: manifests, directory structure, component formats.
 
-== Directory Structure
+## Directory Structure
 
-=== Marketplace Layout
+### Marketplace Layout
 
 ```
 claude/marketplace/
@@ -30,15 +27,15 @@ claude/marketplace/
         └── standards/
 ```
 
-=== Component Formats
+### Component Formats
 
 * **Commands**: Single `.md` files (NOT directories)
 * **Agents**: Single `.md` files (NOT directories)
 * **Skills**: Directories containing `SKILL.md`
 
-== Manifests
+## Manifests
 
-=== marketplace.json
+### marketplace.json
 
 **Location**: `claude/marketplace/.claude-plugin/marketplace.json`
 
@@ -76,7 +73,7 @@ claude/marketplace/
 * `source`: Relative path to bundle root
 * `skills`: Array of skill paths (for skill-only plugins)
 
-=== plugin.json (Bundle)
+### plugin.json (Bundle)
 
 **Location**: `bundles/{bundle-name}/.claude-plugin/plugin.json`
 
@@ -107,9 +104,9 @@ claude/marketplace/
 * `commands.files`: Command filenames (without `.md`)
 * `skills.folders`: Skill directory names
 
-== Components
+## Components
 
-=== Skills
+### Skills
 
 **Structure**:
 ```
@@ -130,7 +127,7 @@ allowed-tools: [Read, Grep, Glob]
 
 **Self-containment**: All file references must be internal (`standards/file.md`), no external paths (`../../../../`).
 
-=== Agents
+### Agents
 
 **Format**: Single `.md` file with YAML frontmatter
 
@@ -144,9 +141,9 @@ color: green
 ---
 ```
 
-**Structure**: See xref:agent-design-principles.adoc[Agent Design Principles]
+**Structure**: See [Agent Design Principles](agent-design-principles.md)
 
-=== Commands
+### Commands
 
 **Format**: Single `.md` file with YAML frontmatter
 
@@ -159,7 +156,7 @@ description: What this command does
 
 **Invocation**: User types `/command-name`
 
-== Installation
+## Installation
 
 **Add marketplace**:
 ```bash
@@ -176,7 +173,7 @@ description: What this command does
 /plugin marketplace update cui-llm-rules
 ```
 
-== Validation
+## Validation
 
 **Verify bundle**:
 ```bash
@@ -193,9 +190,9 @@ description: What this command does
 /cui-diagnose-skills
 ```
 
-== Common Issues
+## Common Issues
 
-=== Missing YAML Frontmatter
+### Missing YAML Frontmatter
 
 **Error**: Component not recognized
 
@@ -208,13 +205,13 @@ description: Component purpose
 ---
 ```
 
-=== Wrong File Extension
+### Wrong File Extension
 
 **Error**: Commands/agents must be `.md` files
 
 **Fix**: Rename `.txt` or extensionless files to `.md`
 
-=== Directory vs File
+### Directory vs File
 
 **Error**: Commands and agents are files, not directories
 
@@ -222,7 +219,7 @@ description: Component purpose
 * ❌ `commands/my-command/command.md`
 * ✅ `commands/my-command.md`
 
-=== Absolute Paths
+### Absolute Paths
 
 **Error**: Skills with external file references
 
@@ -231,9 +228,9 @@ description: Component purpose
 * ❌ `Read: ../../../../standards/file.adoc`
 * ✅ `Read: standards/file.md`
 
-== Cross-References
+## Cross-References
 
-* xref:plugin-architecture.adoc[Plugin Architecture]
-* xref:bundling-architecture.adoc[Bundling Architecture]
-* xref:agent-design-principles.adoc[Agent Design Principles]
-* https://docs.claude.com/en/docs/claude-code/plugins[Claude Code Plugins]
+* [Plugin Architecture](architecture-overview.md)
+* [Bundling Architecture](bundling-patterns.md)
+* [Agent Design Principles](agent-design-principles.md)
+* https://docs.claude.com/en/docs/claude-code/plugins
