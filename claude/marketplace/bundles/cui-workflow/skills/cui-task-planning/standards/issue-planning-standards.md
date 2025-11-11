@@ -205,21 +205,15 @@ Each task should:
 
 ## Status Indicators
 
-Issue planning uses two status types:
+For complete status indicator definitions and rationale, see **[task-planning-core.md](task-planning-core.md)** section "Status Indicators".
 
-**`[ ]` - Incomplete** (not started or in progress)
-```markdown
-- [ ] Implement the functionality
-- [ ] Run build to verify
-```
+Issue planning uses only the two basic status markers:
+- `[ ]` - Pending (not started or in progress)
+- `[x]` - Completed (fully implemented and verified)
 
-**`[x]` - Complete**
-```markdown
-- [x] Implement the functionality
-- [x] Run build to verify
-```
+Extended markers (`[~]` partially completed, `[!]` blocked) are NOT used in issue planning - issues are tracked as simple pending/complete workflows.
 
-Status is tracked both at task level and checklist level.
+Status is tracked both at task level and checklist level within the issue planning document.
 
 ## Goal Statements
 

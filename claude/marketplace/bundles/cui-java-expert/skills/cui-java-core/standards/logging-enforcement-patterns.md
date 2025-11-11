@@ -68,15 +68,11 @@ LOGGER.trace("Token value: %s", token)
 
 ### Pattern 4: Apply Validation Rules
 
-**See logging-standards.md for complete LogRecord usage rules.** Apply these validations:
+Apply validation rules from **logging-standards.md**:
+- **LogRecord for INFO/WARN/ERROR/FATAL** (lines 111-193): Violation type = MISSING_LOGRECORD if using direct string
+- **Direct Strings for DEBUG/TRACE** (lines 194-210): Violation type = PROHIBITED_LOGRECORD if using LogRecord
 
-**INFO/WARN/ERROR/FATAL:**
-- Validate: Must use LogRecord (see logging-standards.md section "LogRecord for INFO/WARN/ERROR/FATAL")
-- Violation type: MISSING_LOGRECORD if using direct string
-
-**DEBUG/TRACE:**
-- Validate: Must use direct string (see logging-standards.md section "Direct Strings for DEBUG/TRACE")
-- Violation type: PROHIBITED_LOGRECORD if using LogRecord
+See logging-standards.md for complete rules, rationale, and examples.
 
 ### Pattern 5: Record Violations
 

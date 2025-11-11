@@ -64,6 +64,7 @@ Add this Jest configuration to package.json:
     ],
     "coverageThreshold": {
       "global": {
+        // See coverage-standards.md for threshold values (80% for all metrics)
         "branches": 80,
         "functions": 80,
         "lines": 80,
@@ -274,9 +275,10 @@ module.exports = {
     : ['text'],
 
   // CI: fail on coverage threshold, local: warn
+  // See coverage-standards.md for threshold definitions and rationale
   coverageThreshold: {
     global: {
-      branches: 80,
+      branches: 80,  // See coverage-standards.md
       functions: 80,
       lines: 80,
       statements: 80,

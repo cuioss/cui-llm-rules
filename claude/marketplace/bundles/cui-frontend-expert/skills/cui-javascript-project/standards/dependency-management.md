@@ -270,9 +270,9 @@ Ensure all tools support ES modules:
 - Babel with ES module support
 
 **Node.js requirements**:
-- Node.js >= 16.x (full ES module support)
-- npm >= 8.x (recognizes "type" field)
-- Maven frontend-maven-plugin >= 1.15.x
+For complete Node.js version requirements, see **[project-structure.md](project-structure.md)** section "Node.js Version Management" and **[maven-integration.md](maven-integration.md)** section "Configuration Parameters".
+
+Quick reference: Node.js v20.12.2+ (LTS), npm 10.5.0+
 
 ## Package Categories
 
@@ -516,7 +516,7 @@ For major version updates:
 2. **Audit security regularly** - Run `npm audit` weekly
 3. **Update dependencies monthly** - Keep packages current
 4. **Test after updates** - Run full test suite
-5. **Commit package-lock.json** - Ensure reproducible builds
+5. **Commit package-lock.json** - See **[project-structure.md](project-structure.md)** section "Lock File Requirements"
 6. **Configure "type": "module"** - Enable ES module support
 7. **Review deprecation warnings** - Address before they become critical
 8. **Use overrides for conflicts** - Better than --legacy-peer-deps

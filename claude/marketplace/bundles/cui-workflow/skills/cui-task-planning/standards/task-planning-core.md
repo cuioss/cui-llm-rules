@@ -36,16 +36,23 @@ Every task progresses through states tracked by status indicators.
 
 All task planning uses checkbox notation for status tracking:
 
-**`[ ]` - Not Started or In Progress**
-- Task has not been started yet, OR
-- Task is currently being worked on
-- Use this as the default state for active work
+**`[ ]` - Pending (Not Started or In Progress)**
+- Task is pending completion
+- Covers both "not yet started" and "currently in progress" states
+- **Rationale for combined state**: In task planning, the distinction between "not started" and "in progress" is less important than tracking completion. What matters is whether work is DONE or PENDING.
+- Use this as the default state for all active work
 
 **`[x]` - Completed**
 - Task has been fully implemented
 - All acceptance criteria met
 - Verification passed
 - Changes committed
+
+**Why we don't distinguish "not started" from "in progress":**
+- Task planning focuses on completion tracking, not workflow states
+- Progress details belong in task notes/descriptions
+- Simpler status model reduces overhead
+- If you need detailed progress tracking, use the extended markers ([~] for partial completion)
 
 ### Extended Status Markers
 

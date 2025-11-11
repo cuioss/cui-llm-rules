@@ -88,13 +88,12 @@ All JavaScript projects must use frontend-maven-plugin to manage Node.js install
 ### Configuration Parameters
 
 **nodeVersion**: Node.js LTS version to install
-- Required: `v20.12.2` (exact version)
+- Required: `v20.12.2` (exact version - see project-structure.md for version management)
 - Ensures consistent Node.js across all environments
 - Downloaded automatically during build
-- Updated periodically to follow Node.js LTS release schedule
 
 **npmVersion**: npm version to use
-- Always: `10.5.0` or compatible
+- Always: `10.5.0` or compatible (see project-structure.md for version requirements)
 - Bundled with Node.js installation
 - Supports modern package.json features
 
@@ -237,7 +236,9 @@ For projects generating bundled or minified JavaScript assets:
 
 ### Required npm Scripts
 
-Maven executions must call these npm scripts from package.json:
+For complete npm script definitions and requirements, see **[project-structure.md](project-structure.md)** section "Required npm Scripts".
+
+Maven executions call these npm scripts from package.json:
 
 | npm Script | Called From | Purpose |
 |------------|-------------|---------|
@@ -245,21 +246,6 @@ Maven executions must call these npm scripts from package.json:
 | `lint` | npm-lint | Check code quality without modifications |
 | `test:ci-strict` | npm-test | Run tests with strict CI settings |
 | `build` | npm-build (optional) | Generate production assets |
-
-### Script Definitions in package.json
-
-These scripts must exist in package.json:
-
-```json
-{
-  "scripts": {
-    "format:check": "prettier --check \"src/**/*.js\"",
-    "lint": "eslint src/**/*.js",
-    "test:ci-strict": "jest --ci --coverage --watchAll=false --maxWorkers=2",
-    "build": "webpack --mode production"
-  }
-}
-```
 
 ### Script Behavior Requirements
 
@@ -430,29 +416,14 @@ mvn clean verify -DskipTests=false
 
 ### File Exclusions
 
-Ensure these patterns are excluded in .gitignore:
+For complete .gitignore patterns and explanations, see **[project-structure.md](project-structure.md)** section "Version Control Integration".
 
-```gitignore
-# Maven frontend plugin
-target/node/
-target/coverage/
+**Maven-specific exclusions** to verify:
+- `target/node/` - Maven-installed Node.js binaries (platform-specific)
+- `target/classes/META-INF/resources/` - Maven-generated build outputs
+- `target/dist/` - Webpack build outputs in Maven target directory
 
-# npm
-node_modules/
-npm-debug.log*
-
-# Build outputs
-target/classes/META-INF/resources/
-target/dist/
-```
-
-**Why these exclusions?**
-- `target/node/` - Platform-specific Node.js binaries
-- `target/coverage/` - Generated coverage reports
-- `node_modules/` - npm dependencies (hundreds of MB)
-- Build outputs - Generated from source during build
-
-**IMPORTANT**: Do NOT exclude `package-lock.json` - it must be committed to ensure reproducible builds across environments
+**IMPORTANT**: Do NOT exclude `package-lock.json`. For complete lock file requirements and rationale, see **[project-structure.md](project-structure.md)** section "Lock File Requirements"
 
 ## Project-Specific Adaptations
 

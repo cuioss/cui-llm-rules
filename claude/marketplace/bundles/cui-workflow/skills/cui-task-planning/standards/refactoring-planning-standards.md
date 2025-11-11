@@ -215,19 +215,13 @@ C5. Refactor UserService
 
 ## Status Indicators
 
-Refactoring planning uses two status types:
+For complete status indicator definitions and rationale, see **[task-planning-core.md](task-planning-core.md)** section "Status Indicators".
 
-**`[ ]` - Not Started or In Progress**
-```asciidoc
-C1. Extract Common Validation Logic
-[ ] *Priority:* High
-```
+Refactoring planning uses only the two basic status markers:
+- `[ ]` - Pending (not started or in progress)
+- `[x]` - Completed (refactoring implemented and verified)
 
-**`[x]` - Completed**
-```asciidoc
-C1. Extract Common Validation Logic
-[x] *Priority:* High
-```
+Extended markers (`[~]` partially completed, `[!]` blocked) are NOT used in refactoring planning - refactoring tasks are tracked as simple pending/complete workflows.
 
 ## Priority Assignment
 

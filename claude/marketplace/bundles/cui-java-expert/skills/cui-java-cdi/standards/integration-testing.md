@@ -319,45 +319,22 @@ fi
 
 ## Docker Compose Integration
 
-### Container Configuration
+For complete Docker Compose configuration including production-grade security hardening, health checks, and certificate management, see **[cdi-container.md](cdi-container.md)** section "Docker Compose Standards".
+
+For OWASP security hardening details (`no-new-privileges`, `cap_drop`, `read_only`), see **[cdi-security.md](cdi-security.md)** section "OWASP-Compliant Deployment".
+
+### Integration Test Port Mapping
+
+Integration tests use external port `10443` mapping to internal port `8443`:
 
 ```yaml
-services:
-  app-integration-tests:
-    build:
-      context: .
-      dockerfile: src/main/docker/Dockerfile.native
-
-    ports:
-      - "10443:8443"  # External:Internal port mapping
-
-    volumes:
-      - ./src/main/docker/certificates:/app/certificates:ro
-
-    # OWASP Security hardening
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    read_only: true
-    tmpfs:
-      - /tmp:rw,noexec,nosuid,size=100m
-
-    healthcheck:
-      test: ["CMD", "/app/health-check.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+ports:
+  - "10443:8443"  # External:Internal port mapping for integration tests
 ```
 
-### Certificate Management
-
-Certificates **MUST** be mounted as read-only volumes:
-
-* **Host Path**: `./src/main/docker/certificates/`
-* **Container Path**: `/app/certificates/`
-* **Permissions**: Read-only mount (`:ro`)
-* **Files**: `localhost.crt` and `localhost.key`
+**Test Configuration**:
+* **External Port**: `10443` (accessed from test host via https://localhost:10443)
+* **Internal Port**: `8443` (Quarkus HTTPS port inside container)
 
 ## Test Execution Phases
 

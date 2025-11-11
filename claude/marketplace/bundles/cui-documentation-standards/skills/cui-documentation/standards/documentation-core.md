@@ -36,7 +36,7 @@ The CUI documentation standards are organized into focused documents covering sp
 **See tone-and-style.md for complete guidance** on:
 * Professional tone and neutral language requirements
 * Marketing language detection and prohibited patterns
-* RFC reference verification standards
+* Writing style and analysis guidelines
 
 ### General Principles
 
@@ -108,9 +108,4 @@ oauth.audience=your-api-id
 
 ## References
 
-### Related Standards Documents
-
-* **[tone-and-style.md](tone-and-style.md)** - Professional tone, neutral language, and prohibited patterns
-* **[organization-standards.md](organization-standards.md)** - File organization, naming, and structure
-* **[asciidoc-formatting.md](asciidoc-formatting.md)** - AsciiDoc formatting and grammar
-* **[readme-structure.md](readme-structure.md)** - README file structure patterns
+See "Documentation Standards Overview" section at the top of this document for complete list of related standards files and their purposes.

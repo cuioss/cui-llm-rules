@@ -44,6 +44,16 @@ Domains on this list meet ALL of the following criteria:
 
 For detailed security assessment methodology, see [domain-security-assessment.md](domain-security-assessment.md).
 
+## Trust Level Taxonomy
+
+For complete trust level definitions and decision framework, see **[domain-security-assessment.md](domain-security-assessment.md)** section "Trust Levels".
+
+Domains in this list are classified using a 4-level taxonomy:
+- **Fully Trusted**: Official documentation, major tech companies, established foundations
+- **Generally Trusted**: Popular resources requiring verification before use
+- **Review Required**: Case-by-case assessment needed (see domain-security-assessment.md)
+- **High Scrutiny**: Thorough review required (see domain-security-assessment.md)
+
 ## Trusted Domains List
 
 ### Major Documentation Sites
@@ -168,4 +178,4 @@ Even for trusted domains, implement defense-in-depth:
 ## Related Standards
 
 - [domain-security-assessment.md](domain-security-assessment.md) - Comprehensive security assessment methodology
-- See `web-security-standards` skill for integration with permission management
+- See permission-management standards in the cui-utility-commands bundle for WebFetch permission validation patterns

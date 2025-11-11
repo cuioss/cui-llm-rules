@@ -6,9 +6,13 @@ This document defines integration requirements for ESLint in build pipelines, CI
 
 ## NPM Scripts Integration
 
-### Required Package.json Scripts
+### Complete Package.json Scripts Reference
 
-All projects must include these essential linting scripts:
+All CUI JavaScript projects must include comprehensive linting and formatting scripts. This section consolidates all required npm scripts for ESLint, Prettier, and StyleLint integration.
+
+### Core ESLint Scripts
+
+Essential linting scripts for all projects:
 
 ```json
 {
@@ -21,9 +25,50 @@ All projects must include these essential linting scripts:
 }
 ```
 
+### Prettier Formatting Scripts
+
+Required formatting scripts (see prettier-configuration.md for details):
+
+```json
+{
+  "scripts": {
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\""
+  }
+}
+```
+
+### Combined Quality Scripts
+
+Comprehensive quality assurance scripts combining linting and formatting:
+
+```json
+{
+  "scripts": {
+    "quality": "npm run lint && npm run format:check",
+    "quality:fix": "npm run lint:fix && npm run format"
+  }
+}
+```
+
 ### With StyleLint Integration
 
-For projects using CSS-in-JS (Lit components):
+For projects using CSS-in-JS (Lit components), add StyleLint scripts:
+
+```json
+{
+  "scripts": {
+    "lint:style": "stylelint src/**/*.js",
+    "lint:style:fix": "stylelint --fix src/**/*.js",
+    "lint": "npm run lint:js && npm run lint:style",
+    "lint:fix": "npm run lint:js:fix && npm run lint:style:fix"
+  }
+}
+```
+
+### Complete Script Set
+
+Full package.json scripts for projects with ESLint, Prettier, and StyleLint:
 
 ```json
 {
@@ -33,25 +78,42 @@ For projects using CSS-in-JS (Lit components):
     "lint:style": "stylelint src/**/*.js",
     "lint:style:fix": "stylelint --fix src/**/*.js",
     "lint": "npm run lint:js && npm run lint:style",
-    "lint:fix": "npm run lint:js:fix && npm run lint:style:fix"
-  }
-}
-```
-
-### Additional Useful Scripts
-
-Recommended additional linting scripts:
-
-```json
-{
-  "scripts": {
+    "lint:fix": "npm run lint:js:fix && npm run lint:style:fix",
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\"",
+    "quality": "npm run lint && npm run format:check",
+    "quality:fix": "npm run lint:fix && npm run format",
     "lint:check": "npm run lint",
     "lint:report": "eslint src/**/*.js --format html --output-file target/eslint-report.html",
     "lint:ci": "eslint src/**/*.js --max-warnings 0",
-    "validate": "npm run lint && npm run format:check"
+    "validate": "npm run quality"
   }
 }
 ```
+
+### Script Definitions
+
+**Linting Scripts**:
+- `lint:js`: Run ESLint on JavaScript files (read-only)
+- `lint:js:fix`: Run ESLint with automatic fixing
+- `lint:style`: Run StyleLint on CSS-in-JS (read-only)
+- `lint:style:fix`: Run StyleLint with automatic fixing
+- `lint`: Run all linters (combined)
+- `lint:fix`: Apply all linting fixes (combined)
+
+**Formatting Scripts**:
+- `format`: Apply Prettier formatting to all files
+- `format:check`: Verify formatting without changes (for CI)
+
+**Quality Scripts**:
+- `quality`: Run all checks (linting + formatting verification)
+- `quality:fix`: Apply all automated fixes (linting + formatting)
+- `validate`: Alias for quality check
+
+**CI/CD Scripts**:
+- `lint:check`: Alias for lint (clarity in CI pipelines)
+- `lint:ci`: ESLint with zero warnings enforcement
+- `lint:report`: Generate HTML report for build artifacts
 
 ## Maven Integration
 
@@ -161,27 +223,12 @@ Establish quality gates for successful builds:
 
 ### Pre-commit Hooks
 
-Recommended pre-commit hook setup using Husky:
+For complete pre-commit hook setup using Husky and lint-staged, see **prettier-configuration.md** section "Pre-commit Hooks".
 
-```json
-{
-  "devDependencies": {
-    "husky": "^8.0.0",
-    "lint-staged": "^13.0.0"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  }
-}
-```
-
-```bash
-# .husky/pre-commit
-npm run lint:fix
-```
+Pre-commit hooks automatically run linting and formatting before each commit:
+- Prevents committing unformatted code
+- Automatic fixing before commit
+- Consistent style across team
 
 ## Error Handling Standards
 

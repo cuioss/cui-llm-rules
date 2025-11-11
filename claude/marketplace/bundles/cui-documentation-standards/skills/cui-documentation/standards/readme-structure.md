@@ -95,10 +95,11 @@ Standard structure for module README.adoc files in CUI projects to ensure consis
 
 ### Code Examples
 
-* Must be complete and working
+For complete code example requirements, see **documentation-core.md** section "Code Example Requirements".
+
+README-specific considerations:
+* Keep examples concise and focused on the feature being demonstrated
 * Show configuration where relevant
-* Use realistic variable names
-* Include comments for complex logic
 * Must be backed by an actual unit-test
 
 ### Links

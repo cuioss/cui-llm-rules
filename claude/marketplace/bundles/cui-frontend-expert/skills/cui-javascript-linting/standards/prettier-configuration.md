@@ -203,90 +203,49 @@ const double = x => x * 2;
 
 ## File-Specific Overrides
 
-### Standard JavaScript Files
+The complete configuration shown above includes three override blocks. See the Configuration File Structure section for the complete `.prettierrc.js` file.
 
-Default configuration for all `.js` and `.mjs` files:
+### Standard JavaScript Files (*.js, *.mjs)
 
-```javascript
-{
-  files: ['*.js', '*.mjs'],
-  options: {
-    printWidth: 120,
-    singleQuote: true,
-    trailingComma: 'es5',
-    arrowParens: 'always',
-    bracketSpacing: true,
-    bracketSameLine: false,
-    htmlWhitespaceSensitivity: 'css',
-    embeddedLanguageFormatting: 'auto',
-  },
-}
-```
+Default configuration for all standard JavaScript files:
+- Print width: 120 characters
+- Single quotes, trailing commas (ES5)
+- Always use parentheses around arrow function parameters
+- Standard bracket spacing and formatting
 
-### Production Component Files
+### Production Component Files (src/main/resources/components/**/*.js)
 
 Enhanced formatting for production components with CSS-in-JS:
-
-```javascript
-{
-  files: 'src/main/resources/components/**/*.js',
-  options: {
-    printWidth: 120,
-    singleQuote: true,
-    trailingComma: 'es5',
-    bracketSameLine: false,
-    singleAttributePerLine: false,
-    arrowParens: 'always',
-    bracketSpacing: true,
-  },
-}
-```
-
-**Key differences**:
-- Consistent with standard JavaScript
-- Optimized for web component formatting
+- Print width: 120 characters
+- Optimized for Lit web component formatting
 - CSS-in-JS friendly settings
+- Single attribute per line disabled for compact templates
 
-### Test Files
+### Test Files (src/test/js/**/*.js)
 
 Relaxed formatting for better test readability:
-
-```javascript
-{
-  files: 'src/test/js/**/*.js',
-  options: {
-    printWidth: 100,      // Shorter lines for readability
-    singleQuote: true,
-    trailingComma: 'es5',
-    arrowParens: 'avoid', // Simpler arrow functions
-    bracketSpacing: true,
-  },
-}
-```
-
-**Key differences**:
-- Shorter line length (100 vs 120)
-- Simplified arrow function syntax
-- Optimized for test clarity
+- Print width: 100 characters (shorter for readability)
+- Avoid parentheses around single arrow function parameters
+- Simpler syntax optimized for test clarity
 
 ## NPM Scripts Integration
 
-### Required Scripts
+For complete npm scripts reference including ESLint, Prettier, and StyleLint integration, see **eslint-integration.md** section "NPM Scripts Integration".
 
-All projects must include these formatting scripts in package.json:
+### Prettier-Specific Scripts
+
+The essential Prettier scripts to add to your package.json:
 
 ```json
 {
   "scripts": {
     "format": "prettier --write \"src/**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.js\"",
-    "quality": "npm run lint && npm run format:check",
-    "quality:fix": "npm run lint:fix && npm run format"
+    "format:check": "prettier --check \"src/**/*.js\""
   }
 }
 ```
 
-### Script Definitions
+### Script Usage
 
 **format**: Apply formatting to all JavaScript files
 - Writes changes to disk
@@ -296,32 +255,11 @@ All projects must include these formatting scripts in package.json:
 - Read-only validation
 - Use in CI/CD pipelines
 
-**quality**: Combined linting and format checking
-- Runs both ESLint and Prettier checks
-- Use as comprehensive quality gate
+### Integration with Quality Scripts
 
-**quality:fix**: Apply all automated fixes
-- Fixes linting issues and formatting
-- Use to clean up code before commit
-
-### Combined Linting and Formatting
-
-Integrate with ESLint scripts for complete workflow:
-
-```json
-{
-  "scripts": {
-    "lint:js": "eslint src/**/*.js",
-    "lint:js:fix": "eslint --fix src/**/*.js",
-    "format": "prettier --write \"src/**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.js\"",
-    "lint": "npm run lint:js",
-    "lint:fix": "npm run lint:js:fix",
-    "quality": "npm run lint && npm run format:check",
-    "quality:fix": "npm run lint:fix && npm run format"
-  }
-}
-```
+Prettier integrates with the `quality` and `quality:fix` scripts defined in eslint-integration.md:
+- `quality`: Runs linting + formatting checks
+- `quality:fix`: Applies linting + formatting fixes
 
 ## ESLint Integration
 
@@ -374,7 +312,9 @@ rules: {
 
 ### Frontend Maven Plugin Configuration
 
-Integrate Prettier into Maven build process:
+For complete frontend-maven-plugin configuration including Node.js installation and dependency management, see **eslint-integration.md** section "Maven Integration".
+
+Add these Prettier-specific executions to the plugin configuration:
 
 ```xml
 <!-- Format check in compile phase -->

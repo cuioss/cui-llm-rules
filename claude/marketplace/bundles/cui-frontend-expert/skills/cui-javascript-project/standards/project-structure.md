@@ -499,11 +499,7 @@ Thumbs.db
 - Enable test coverage reporting
 - Configure Maven to run quality scripts
 
-**Environment variables**:
-```bash
-CI=true              # Disable watch mode, enable CI-specific behavior
-NODE_ENV=test        # Set Node environment for tests
-```
+For complete environment variable configuration and purposes, see **[maven-integration.md](maven-integration.md)** section "Environment Variable Purposes".
 
 ## Best Practices
 

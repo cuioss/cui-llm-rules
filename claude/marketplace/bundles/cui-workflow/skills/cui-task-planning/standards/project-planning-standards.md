@@ -130,29 +130,23 @@ Choose organization that best fits your project:
 
 ## Status Indicators
 
-Project planning uses all four status types (see task-planning-core.md):
+For complete status indicator definitions and rationale, see **[task-planning-core.md](task-planning-core.md)** section "Status Indicators".
 
-**`[ ]` - Not started/In progress:**
+Project planning uses all four status markers:
+- `[ ]` - Pending (not started or in progress)
+- `[x]` - Completed (fully implemented and verified)
+- `[~]` - Partially Completed (some criteria met, needs more work)
+- `[!]` - Blocked (cannot proceed due to external dependency)
+
+**Examples:**
 ```asciidoc
-* [ ] Implement token validation
-* [ ] Add signature verification
+* [ ] Implement token validation         # Pending
+* [x] Implement token parsing            # Completed
+* [~] Implement error handling           # Partially done (basic errors done, need edge cases)
+* [!] Add Redis caching                   # Blocked (waiting for Redis infrastructure)
 ```
 
-**`[x]` - Completed:**
-```asciidoc
-* [x] Implement token parsing
-* [x] Add claim extraction
-```
-
-**`[~]` - Partially completed:**
-```asciidoc
-* [~] Implement error handling (basic errors done, need edge cases)
-```
-
-**`[!]` - Blocked:**
-```asciidoc
-* [!] Add Redis caching (waiting for Redis infrastructure)
-```
+Project planning is the only use case that supports all four markers. Issue and refactoring planning use only the two basic markers ([ ] and [x]).
 
 ## Traceability Requirements
 
