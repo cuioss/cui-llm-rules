@@ -253,10 +253,7 @@ npm install
 ```json
 {
   "overrides": {
-    "eslint": "^9.14.0",
-    "@typescript-eslint/eslint-plugin": {
-      "eslint": "$eslint"
-    }
+    "eslint": "^9.14.0"
   }
 }
 ```

@@ -553,6 +553,186 @@ Step 3: Aggregate Results
 
 **Reference**: See `claude/architectural-issues/migration-plan.md` for comprehensive pattern descriptions and workflow examples
 
+## Rule 9: Knowledge vs. Workflow Separation
+
+Code examples, patterns, and teaching material belong in Skills (Layer 1), not in Agents or Commands (Layers 2-3).
+
+**Rationale**: Skills are the knowledge layer containing standards, patterns, and examples. Agents/commands are the execution layer containing workflow logic. Embedding code examples in agents duplicates knowledge, violates DRY principle, and prevents independent skill updates.
+
+**The Principle**:
+- **Skills (Layer 1)** = KNOWLEDGE: standards, patterns, code examples, best practices, teaching material
+- **Commands (Layer 2)** = ORCHESTRATION: coordination logic, iteration, decision flow
+- **Agents (Layer 3)** = WORKFLOW: step-by-step execution logic, tool usage patterns
+
+**Requirements**:
+
+**For Skills**:
+- ✅ Include comprehensive code examples
+- ✅ Provide pattern demonstrations
+- ✅ Show before/after comparisons
+- ✅ Include anti-pattern examples
+- ✅ Provide complete reference implementations
+
+**For Agents/Commands**:
+- ✅ Reference skill patterns by name
+- ✅ Reference skill standards sections
+- ✅ Load skills via `Skill: skill-name`
+- ❌ DO NOT embed code examples
+- ❌ DO NOT duplicate teaching material
+- ⚠️ EXCEPTION: Output format examples (what agent writes to files)
+
+**Acceptable Agent/Command Content**:
+1. **Output format examples** (showing what agent writes):
+   ```java
+   /**
+    * Design Decision: Returns Optional rather than throwing...
+    * @param input the user input
+    * @return Optional containing result
+    */
+   ```
+   ✅ ACCEPTABLE - Shows format of JavaDoc/JSDoc agent will write
+
+2. **Return message format** (showing agent response structure):
+   ```
+   IMPLEMENTATION COMPLETE
+   Files Modified: 3
+   Standards Applied: ✅
+   ```
+   ✅ ACCEPTABLE - Shows agent's return message structure
+
+3. **Workflow references** (pointing to skill content):
+   ```
+   Reference patterns from loaded `cui-java-unit-testing` skill:
+   - AAA pattern from testing standards
+   - Generator usage patterns
+   - Exception testing with assertThrows()
+   ```
+   ✅ CORRECT - References skill, doesn't duplicate content
+
+**Prohibited Agent/Command Content**:
+1. **Teaching code examples** (showing how to write code):
+   ```java
+   // Example implementation:
+   class UserValidator {
+       public boolean validate(String email) {
+           return email.matches("...");
+       }
+   }
+   ```
+   ❌ PROHIBITED - Teaching material belongs in skill
+
+2. **Pattern demonstrations** (showing technique):
+   ```javascript
+   // Example test with AAA pattern:
+   test('should validate email', () => {
+       // Arrange
+       const validator = new Validator();
+       // Act
+       const result = validator.validate(email);
+       // Assert
+       expect(result).toBe(true);
+   });
+   ```
+   ❌ PROHIBITED - Pattern teaching belongs in skill
+
+**Examples**:
+
+✅ CORRECT - Agent References Skill:
+```yaml
+---
+name: java-junit-implementer
+tools: Read, Write, Edit, Skill
+---
+
+Step 2: Load Testing Standards
+Skill: cui-java-unit-testing
+
+Step 4: Implement Tests
+Reference patterns from loaded skill:
+- AAA pattern from testing standards
+- Generator usage (@EnableGeneratorController, Generators API)
+- Exception testing with assertThrows()
+
+All test implementation examples in skill standards.
+```
+
+✅ CORRECT - Skill Contains Examples:
+```markdown
+# cui-java-unit-testing Skill
+
+## Test Implementation Patterns
+
+### AAA Pattern Example
+```java
+@Test
+void shouldValidateEmail() {
+    // Arrange
+    String email = Generators.emailAddress().next();
+    UserValidator validator = new UserValidator();
+
+    // Act
+    boolean result = validator.validateEmail(email);
+
+    // Assert
+    assertTrue(result);
+}
+```
+```
+
+❌ INCORRECT - Agent Embeds Example:
+```yaml
+---
+name: javascript-test-implementer
+---
+
+Step 4: Implement Tests
+
+Example test implementation:
+```javascript
+import { validateEmail } from '../validator';
+
+describe('Email Validator', () => {
+  test('should validate correct email', () => {
+    // Arrange
+    const email = 'user@example.com';
+    // Act
+    const result = validateEmail(email);
+    // Assert
+    expect(result).toBe(true);
+  });
+});
+```
+```
+**Why Wrong**: Code example duplicates skill content. Should reference skill instead.
+
+**Benefits of Separation**:
+- **Single Source of Truth**: Examples maintained in one place (skill)
+- **Independent Updates**: Skills can be updated without touching agents
+- **Reusability**: Multiple agents reference same skill examples
+- **Consistency**: All agents use same patterns from skill
+- **DRY Principle**: No duplication of teaching material
+- **Smaller Agents**: Agents contain workflow only, not knowledge
+
+**Migration Pattern**:
+When fixing agents with embedded examples:
+1. Read embedded example from agent
+2. Check if skill already has this pattern (avoid duplication)
+3. If not in skill: add to skill's standards/
+4. Replace agent's embedded example with skill reference
+5. Verify agent loads skill with `Skill:` invocation
+
+**Detection**:
+- Search agents for code blocks: ` ```java`, ` ```javascript`, ` ```typescript`
+- Categorize each code block:
+  - Teaching example? → Move to skill
+  - Output format? → Keep in agent
+  - Pattern demonstration? → Move to skill
+- Verify corresponding skill has comprehensive examples
+
+**Related Rules**:
+- See Rule 2: Agents Must Use Skills (for skill invocation patterns)
+- See Rule 5: Component Organization (for layer responsibilities)
+
 ## Enforcement
 
 These rules are enforced through:

@@ -199,9 +199,6 @@ Use overrides for selective dependency resolution:
 {
   "overrides": {
     "eslint": "^9.14.0",
-    "@typescript-eslint/eslint-plugin": {
-      "eslint": "$eslint"
-    },
     "some-package": {
       "problematic-dep": "^2.0.0"
     }

@@ -318,53 +318,16 @@ For each test method in the plan:
    - Note test patterns used
    - Track coverage areas addressed
 
-**Example Test Implementation:**
-```java
-@EnableGeneratorController
-@DisplayName("User Validator Tests")
-class UserValidatorTest {
+**Implementation Patterns:**
 
-    @Test
-    @DisplayName("Should validate correct email format")
-    void shouldValidateCorrectEmail() {
-        // Arrange
-        String validEmail = Generators.emailAddress().next();
-        UserValidator validator = new UserValidator();
+Reference patterns from loaded `cui-java-unit-testing` skill:
+- AAA (Arrange-Act-Assert) pattern from testing standards
+- Test generator usage (@EnableGeneratorController, Generators API)
+- Parameterized testing with @GeneratorsSource
+- Exception testing with assertThrows()
+- @DisplayName usage for readable test names
 
-        // Act
-        boolean result = validator.validateEmail(validEmail);
-
-        // Assert
-        assertTrue(result, "Valid email format should pass validation");
-    }
-
-    @ParameterizedTest
-    @DisplayName("Should reject invalid email formats")
-    @GeneratorsSource(generator = GeneratorType.STRINGS, count = 5)
-    void shouldRejectInvalidEmail(String invalidEmail) {
-        // Arrange
-        UserValidator validator = new UserValidator();
-
-        // Act
-        boolean result = validator.validateEmail(invalidEmail);
-
-        // Assert
-        assertFalse(result, "Invalid email format should fail validation");
-    }
-
-    @Test
-    @DisplayName("Should throw exception for null email")
-    void shouldThrowExceptionForNullEmail() {
-        // Arrange
-        UserValidator validator = new UserValidator();
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class,
-            () -> validator.validateEmail(null),
-            "Null email should throw IllegalArgumentException");
-    }
-}
-```
+All test implementation examples and patterns are in the skill standards, not duplicated here.
 
 ### Step 6: Verify Tests with Maven Build
 
