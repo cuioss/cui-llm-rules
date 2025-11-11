@@ -183,23 +183,7 @@ For each LogRecord in this level:
 - [ ] AsciiDoc syntax correct
 - [ ] Section boundaries preserved (multi-holder)
 
-### Step 8: Run AsciiDoc Review
-
-**Delegate to AsciiDoc reviewer**:
-```
-Task:
-  subagent_type: asciidoc-reviewer
-  description: Review LogMessages documentation
-  prompt: |
-    Review the AsciiDoc file at {logMessagesAdoc} for:
-    - Format validation (table syntax, column widths)
-    - Link verification (cross-references)
-    - Quality analysis (structure, completeness)
-
-    Focus on LogMessages documentation standards compliance.
-```
-
-### Step 9: Display Summary
+### Step 8: Display Summary
 
 ```
 ╔════════════════════════════════════════════════════════════╗
@@ -221,12 +205,11 @@ Statistics:
 - Tables generated: {tables_generated}
 - Rows updated: {rows_updated}
 - Validations performed: {validations_performed}
-- AsciiDoc review: {passed|issues_found}
-
 Next steps:
 1. Review documentation: {logMessagesAdoc}
 2. Verify message descriptions are clear
-3. Commit changes with corresponding code
+3. Run /review-technical-docs if AsciiDoc validation needed
+4. Commit changes with corresponding code
 ```
 
 ## TOOL USAGE
@@ -252,8 +235,8 @@ Next steps:
 **Write**:
 - Create new sections if needed (rare)
 
-**Task**:
-- Invoke asciidoc-reviewer for final validation
+**Skill**:
+- Load CUI JavaDoc and documentation standards
 
 ## CRITICAL RULES
 
@@ -343,5 +326,5 @@ Action: Creating new section at end of file
 ## RELATED
 
 - `cui-java-core` skill - LogMessages documentation standards
-- `asciidoc-reviewer` agent - Final documentation validation
+- `/review-technical-docs` command - AsciiDoc validation (call from orchestrating command if needed)
 - `cui-log-record-enforcer` command - Enforce LogRecord implementation standards

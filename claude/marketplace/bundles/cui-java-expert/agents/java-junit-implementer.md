@@ -107,30 +107,12 @@ If the description explicitly indicates the task is to **fix the build or failin
    - If multi-module and module unset: build all modules
    - If single-module: build entire project
 
-2. **Execute clean test using maven-builder agent**:
-   ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify clean test
-     prompt: |
-       Execute Maven test build to verify codebase compiles and all existing tests pass.
+2. **Note: Build verification handled by caller**:
+   - This agent is a focused executor - it implements tests only
+   - Caller will orchestrate maven-builder agent for build verification after test implementation
+   - If types_missing found in Step 1, return failure immediately
 
-       Parameters:
-       - command: clean test
-       - outputMode: DEFAULT
-       {- module: [module-name] (if multi-module and module specified)}
-
-       CRITICAL: Build must succeed with ZERO errors, ZERO warnings, and ALL tests passing.
-       Return detailed status including any errors, warnings, or test failures found.
-   ```
-
-3. **Analyze build results**:
-   - If SUCCESS with no errors/warnings/test failures: Proceed to Step 3
-   - If SUCCESS with warnings: Return failure to caller with warning details
-   - If FAILURE with errors: Return failure to caller with error details
-   - If FAILURE with test failures: Return failure to caller with test failure details
-
-4. **Return to caller if build fails**:
+3. **Return to caller if types missing**:
 
 **Build Failure Response Format:**
 ```

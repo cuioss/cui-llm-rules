@@ -11,7 +11,7 @@ description: |
   - User: "Preview formatting changes for Requirements.adoc"
     Assistant: "I'll use the asciidoc-auto-formatter agent in dry-run mode"
 
-tools: Read, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-formatter.sh), Glob, Skill
+tools: Read, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-formatter.sh), Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh), Glob, Skill
 model: sonnet
 color: green
 ---
@@ -244,3 +244,14 @@ Then: scripts/asciidoc-validator.sh {target}
 - Content accuracy
 - Document organization
 - Cross-reference targets
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better parameter validation, more comprehensive fix types, improved backup management, enhanced user feedback), **YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-auto-formatter update="[your improvement]"
+
+Focus improvements on:
+1. Parameter validation logic and error messaging clarity
+2. Fix type coverage and formatting rule comprehensiveness
+3. Backup file management and restoration procedures
+4. Dry-run preview accuracy and user feedback quality
+5. Integration with asciidoc-validator for post-fix verification

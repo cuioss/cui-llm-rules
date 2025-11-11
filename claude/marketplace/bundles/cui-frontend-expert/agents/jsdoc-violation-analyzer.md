@@ -1,7 +1,7 @@
 ---
 name: jsdoc-violation-analyzer
 description: Analyzes JSDoc compliance and returns structured violation list (focused analyzer - no fixes)
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Skill
 model: sonnet
 ---
 

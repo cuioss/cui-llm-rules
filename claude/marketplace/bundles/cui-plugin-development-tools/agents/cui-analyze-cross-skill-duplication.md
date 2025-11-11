@@ -347,3 +347,14 @@ For each skill pair with duplication:
 **Acceptable (<70%)**:
 - "Configuration" sections in different skills are 40% similar
 - Assessment: Different contexts, keep separate
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better similarity detection, more accurate overlap calculation, improved harmful duplication identification, enhanced recommendation quality), **YOU MUST immediately update this file** using /cui-update-agent agent-name=cui-analyze-cross-skill-duplication update="[your improvement]"
+
+Focus improvements on:
+1. Content similarity detection algorithms and accuracy
+2. Semantic overlap percentage calculation precision
+3. Harmful vs acceptable duplication classification logic
+4. Cross-skill consolidation recommendation quality
+5. Performance optimization for large skill sets

@@ -367,3 +367,15 @@ After completing all work, return findings in this format:
 
 {if no lessons learned: "None - execution followed expected patterns"}
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better search query optimization, more accurate confidence scoring, improved subtopic identification, enhanced source prioritization), **YOU MUST immediately update this file** using /cui-update-agent agent-name=research-best-practices update="[your improvement]"
+
+Focus improvements on:
+1. Search query construction and keyword selection strategies
+2. Confidence level calculation accuracy and criteria refinement
+3. Source quality assessment and prioritization algorithms
+4. Subtopic identification and deep-dive decision logic
+5. Result structuring and actionable insights generation
+

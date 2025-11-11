@@ -346,3 +346,14 @@ css-utilities.md: "Use !important for utility classes"
 - Integrated content score (0-100)
 - Rating (Excellent/Good/Fair/Poor)
 - Total deductions from base coherence score
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better duplication detection, more accurate coherence scoring, improved conflict identification, enhanced integration analysis), **YOU MUST immediately update this file** using /cui-update-agent agent-name=cui-analyze-integrated-standards update="[your improvement]"
+
+Focus improvements on:
+1. Cross-file duplication detection accuracy and pattern recognition
+2. Coherence scoring formula precision and consistency assessment
+3. Conflict identification logic and severity categorization
+4. Gap detection algorithms and coverage analysis
+5. Integration quality metrics and reporting effectiveness

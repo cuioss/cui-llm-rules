@@ -272,3 +272,14 @@ After completing all work, return findings in this format:
 **Details**:
 {List of files committed, artifacts cleaned, any warnings or notes}
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better artifact detection, more accurate commit message generation, improved PR creation, enhanced error handling), **YOU MUST immediately update this file** using /cui-update-agent agent-name=commit-changes update="[your improvement]"
+
+Focus improvements on:
+1. Artifact detection patterns and cleanup accuracy
+2. Commit message generation quality and type/scope inference
+3. PR creation enhancements and template optimization
+4. Error handling for merge conflicts and permission issues
+5. User experience improvements and feedback clarity

@@ -107,29 +107,12 @@ If the description explicitly indicates the task is to **fix the build** (e.g., 
    - If single module: build entire project
    - Use Glob to find pom.xml locations if needed
 
-2. **Execute clean compile using maven-builder agent**:
-   ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify clean compile
-     prompt: |
-       Execute Maven build to verify codebase compiles without errors or warnings.
+2. **Note: Build verification handled by caller**:
+   - This agent is a focused executor - it implements code only
+   - Caller will orchestrate maven-builder agent for build verification after implementation
+   - If types_missing found in Step 1 or description ambiguous, return failure immediately
 
-       Parameters:
-       - command: clean compile
-       - outputMode: DEFAULT
-       {- module: [module-name] (if multi-module)}
-
-       CRITICAL: Build must succeed with ZERO errors and ZERO warnings.
-       Return detailed status including any errors or warnings found.
-   ```
-
-3. **Analyze build results**:
-   - If SUCCESS with no errors/warnings: Proceed to Step 3
-   - If SUCCESS with warnings: Return failure to caller with warning details
-   - If FAILURE with errors: Return failure to caller with error details
-
-4. **Return to caller if build fails**:
+3. **Return to caller if preconditions fail**:
 
 **Build Failure Response Format:**
 ```
@@ -320,37 +303,13 @@ For each step in the plan:
 
 1. **Determine build scope** (see Step 2 for details)
 
-2. **Execute build using maven-builder agent** (same as Step 2):
-   ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify implementation compiles
-     prompt: |
-       Execute Maven build to verify implementation compiles without errors or warnings.
+2. **Note: Build verification is caller's responsibility**:
+   - This agent is a focused executor - implementation complete
+   - Return implementation results to caller
+   - Caller will orchestrate maven-builder for build verification
+   - If build fails, caller will provide feedback for fixes
 
-       Parameters:
-       - command: clean compile
-       - outputMode: DEFAULT
-       {- module: [module-name] (if multi-module)}
-
-       Return status and any errors/warnings found.
-   ```
-
-3. **Analyze build results** (DIFFERENT from Step 2 - includes retry logic):
-   - If SUCCESS with no errors/warnings: Proceed to Step 8
-   - If SUCCESS with warnings: Fix warnings, return to this step (max 5 retries)
-   - If FAILURE: Analyze errors, fix issues, return to this step (max 5 retries)
-
-4. **Fix build issues** (with retry limit):
-   - Read error messages carefully
-   - Identify root causes
-   - Apply fixes using Edit tool
-   - Re-run build
-   - Track retry count: `build_fix_attempts`
-   - Continue until clean build achieved OR max 5 retries reached
-   - If max retries exceeded: Return detailed failure report to caller
-
-**Critical Rule**: Do not proceed until build is completely clean (no errors, no warnings). If unable to fix after 5 attempts, return to caller with detailed analysis of remaining issues.
+**Critical Rule**: This agent implements code and returns results. It does not verify builds. Caller handles build verification and iterative fix cycles via maven-builder agent.
 
 ### Step 8: Verify Implementation Against Requirements
 

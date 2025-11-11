@@ -10,7 +10,7 @@ Examples:
 - User: "Review issue described within /http-client"
   Assistant: "Review issue described within /http-client"
 
-tools: Read, Edit, Write, Bash(gh:*)
+tools: Read, Edit, Write, Bash(gh:*), AskUserQuestion
 model: sonnet
 color: blue
 ---

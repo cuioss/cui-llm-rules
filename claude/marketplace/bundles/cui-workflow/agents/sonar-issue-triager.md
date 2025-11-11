@@ -1,7 +1,7 @@
 ---
 name: sonar-issue-triager
 description: Analyzes single Sonar issue and decides fix vs suppress (focused triager - no implementation)
-tools: Read, Grep
+tools: Read
 model: sonnet
 ---
 

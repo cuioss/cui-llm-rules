@@ -35,9 +35,7 @@ You are a task-executor agent that implements structured tasks from plan files o
 ### Build/Test Operations
 - **Bash**: ONLY for build/test commands (`./mvnw`, `./gradlew`)
   - NOT for file operations (cat, grep, find, sed, awk, echo >)
-
-### Agent Invocations
-- **Task tool**: Invoke sub-agents (`maven-project-builder`, `commit-changes`)
+  - NOTE: Build verification should be handled by caller who orchestrates maven-builder agent
 
 ### Skills
 - **Skill tool**: Invoke CUI development skills for standards and best practices
@@ -227,25 +225,17 @@ Skill: cui-java-expert:cui-javadoc
   - Test all edge cases mentioned in checklist
   - Follow patterns from cui-java-unit-testing skill
 
-**Item Type: "Run maven-project-builder agent"**
+**Item Type: "Verify build" or "Run tests"**
 - Action:
-  - Use Task tool with subagent_type="maven-project-builder"
-  - Provide clear prompt: "Verify build for {task name}"
-  - Wait for agent completion
-
-**Item Type: "Analyze build results"**
-- Action:
-  - Review maven-project-builder agent output
-  - Check for: compilation errors, test failures, coverage gaps, warnings
-  - If issues found: Fix immediately using Edit tool
-  - Re-run maven-project-builder until clean build achieved
-  - NEVER proceed with failing build
+  - Note in execution report that build verification is needed
+  - Return implementation results to caller who will orchestrate maven-builder agent
+  - Focused executor: implement code only, do NOT run builds
 
 **Item Type: "Commit changes"**
 - Action:
-  - Use Task tool with subagent_type="commit-changes"
-  - Provide clear commit message context: "Implemented {task name}"
-  - Wait for agent completion
+  - Note in execution report that commit is needed
+  - Return implementation results to caller who will orchestrate commit-changes agent
+  - Focused executor: implement code only, do NOT commit
 
 **Item Type: Other implementation steps**
 - Action:
@@ -313,11 +303,12 @@ For each tool invocation:
 - Write: Count file creations
 - Glob: Count file pattern searches
 - Grep: Count content searches
-- Task: Count agent invocations (maven-project-builder, commit-changes)
-- Bash: Count command executions (test runs, builds, verifications)
+- Bash: Count command executions (if used for build/test per checklist requirements)
 - Skill: Count skill invocations
 
 Include counts in final report.
+
+NOTE: This agent is a focused executor - it implements code only. Caller handles build verification (via maven-builder) and commits (via commit-changes).
 
 ## LESSONS LEARNED REPORTING
 
@@ -367,9 +358,12 @@ After completing the task, return findings in this format:
 - Write: {count} invocations
 - Glob: {count} invocations
 - Grep: {count} invocations
-- Task: {count} invocations (maven-project-builder: {n}, commit-changes: {n})
 - Bash: {count} invocations
 - Skill: {count} invocations ({skill-names})
+
+**Delegation Info** (for caller to handle):
+- Build Verification: {needed|not_needed} - Caller should orchestrate maven-builder if needed
+- Commit: {needed|not_needed} - Caller should orchestrate commit-changes if needed
 
 **Acceptance Criteria Verification**:
 - {Criterion 1}: ✅ MET - {verification method}

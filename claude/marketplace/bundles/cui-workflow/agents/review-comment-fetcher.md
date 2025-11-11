@@ -41,3 +41,14 @@ Use gh CLI to fetch PR review comments.
 - **Focused Fetcher**: Retrieve data only
 - **No Analysis**: Return raw data for triager
 - **Structured Output**: Enable command orchestration
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better comment parsing, more accurate data extraction, improved error handling, enhanced JSON formatting), **YOU MUST immediately update this file** using /cui-update-agent agent-name=review-comment-fetcher update="[your improvement]"
+
+Focus improvements on:
+1. GitHub API response parsing accuracy and completeness
+2. Comment metadata extraction precision and field coverage
+3. Error handling for network issues and API failures
+4. JSON output structure optimization and consistency
+5. Performance optimization for large PR comment sets
