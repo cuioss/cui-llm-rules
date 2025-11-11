@@ -350,7 +350,7 @@ This skill complements:
 7. **Implement all required npm scripts** - lint, format, test, quality scripts
 8. **Map scripts to correct Maven phases** - validate for setup, compile for checks, test for testing
 9. **Set up security auditing** - Regular vulnerability scanning with response procedures
-10. **Use Node.js v20.12.2 LTS** - Consistent version managed by frontend-maven-plugin
+10. **Use Node.js LTS** - Consistent version managed by frontend-maven-plugin (see standards/project-structure.md for exact version)
 11. **Configure SonarQube coverage** - JavaScript code quality and coverage reporting
 12. **Handle deprecations promptly** - Replace deprecated packages before critical
 13. **Document project structure** - Update README with setup and organization

@@ -17,9 +17,9 @@ This checklist ensures systematic verification of standards compliance after ref
 5. Document any intentional deviations with rationale
 
 **Verification levels:**
-- ✅ **Compliant** - Meets standards fully
-- ⚠️ **Needs Work** - Violations found, must fix
-- 🔵 **Not Applicable** - Standard doesn't apply to this code
+- [OK] **Compliant** - Meets standards fully
+- [WARNING] **Needs Work** - Violations found, must fix
+- [N/A] **Not Applicable** - Standard doesn't apply to this code
 
 ## Package Organization
 
@@ -28,8 +28,8 @@ This checklist ensures systematic verification of standards compliance after ref
 ### Verification Items
 
 - [ ] **Feature-Based Packages**: Code organized by feature/domain, not by layer
-  - ❌ Avoid: `com.example.controllers`, `com.example.services`, `com.example.repositories`
-  - ✅ Prefer: `com.example.authentication`, `com.example.billing`, `com.example.orders`
+  - [AVOID] `com.example.controllers`, `com.example.services`, `com.example.repositories`
+  - [PREFER] `com.example.authentication`, `com.example.billing`, `com.example.orders`
 
 - [ ] **Package-Info Present**: Each package has `package-info.java` with @NullMarked
   - Must contain package declaration
@@ -74,7 +74,7 @@ This checklist ensures systematic verification of standards compliance after ref
 ### Verification Items
 
 - [ ] **Method Length**: Methods are short and focused (see [refactoring-triggers.md](refactoring-triggers.md) for detailed criteria)
-  - Prefer methods under 50 lines
+  - Target under 50 lines, require refactoring over 60 lines
   - Single level of abstraction per method
   - Complex methods extracted into helper methods
 
@@ -166,9 +166,9 @@ This checklist ensures systematic verification of standards compliance after ref
   - Variables: descriptive nouns (userName, maxRetries)
 
 - [ ] **No Poor Abbreviations**: Avoid unclear abbreviations
-  - ❌ Avoid: usr, mgr, txt, num, cnt
-  - ✅ Prefer: user, manager, text, number, count
-  - ✅ OK: standard abbreviations (dto, id, url)
+  - [AVOID] usr, mgr, txt, num, cnt
+  - [PREFER] user, manager, text, number, count
+  - [OK] standard abbreviations (dto, id, url)
 
 - [ ] **Consistent Naming**: Naming follows Java conventions
   - Classes: PascalCase

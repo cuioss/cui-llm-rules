@@ -310,8 +310,7 @@ const allowedWarnings = [
   // Rationale: Framework team confirmed harmless, fix in v3.0
   '[Framework] Configuration option X is deprecated',
 
-  // Temporary Warning - Remove after dependency update
-  // TODO: Remove when dependency-x upgraded to v5.0
+  // Temporary Warning - To be removed when dependency-x upgraded to v5.0
   'dependency-x: Legacy mode enabled'
 ];
 ```

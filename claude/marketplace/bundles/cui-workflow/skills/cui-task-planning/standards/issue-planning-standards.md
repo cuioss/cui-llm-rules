@@ -191,29 +191,16 @@ Use simple sequential numbering:
 
 ### Task Granularity
 
-Each task should:
-- Be completable in reasonable time (hours to 1-2 days)
-- Produce tangible, verifiable result
-- Build on previous tasks
-- Have clear acceptance criteria
-
-**Too large:** "Implement entire authentication system"
-- Break into: authentication config, token generation, token validation, etc.
-
-**Too small:** "Add import statement"
-- Combine with: "Implement TokenValidator class"
+For comprehensive task granularity guidance, see [task-planning-core.md](task-planning-core.md) section "Task Granularity". When applying this guidance to issue planning, ensure tasks are:
+- Completable in reasonable time (hours to 1-2 days)
+- Scoped to a single issue's implementation needs
+- Not so granular they become individual code edits
 
 ## Status Indicators
 
-For complete status indicator definitions and rationale, see **[task-planning-core.md](task-planning-core.md)** section "Status Indicators".
+For complete status indicator definitions and rationale, see [task-planning-core.md](task-planning-core.md) section "Status Indicators".
 
-Issue planning uses only the two basic status markers:
-- `[ ]` - Pending (not started or in progress)
-- `[x]` - Completed (fully implemented and verified)
-
-Extended markers (`[~]` partially completed, `[!]` blocked) are NOT used in issue planning - issues are tracked as simple pending/complete workflows.
-
-Status is tracked both at task level and checklist level within the issue planning document.
+Issue planning uses only the two basic status markers: `[ ]` (Pending) and `[x]` (Completed). Extended markers (`[~]`, `[!]`) are NOT used - issues are tracked as simple pending/complete workflows. Status is tracked both at task level and checklist level.
 
 ## Goal Statements
 

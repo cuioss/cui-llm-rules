@@ -96,7 +96,7 @@ When this skill is activated:
 
 ### 4. Integrate with Maven Build
 - Use **maven-integration.md** for frontend-maven-plugin setup
-- Configure Node.js version (v20.12.2 LTS)
+- Configure Node.js version (see standards/project-structure.md for exact version)
 - Map npm scripts to Maven phases
 - Set up environment variables (CI=true, NODE_ENV=test)
 - Configure SonarQube integration for JavaScript coverage
@@ -129,7 +129,7 @@ For comprehensive frontend development, this skill works with:
 Project standards integrate with:
 - npm for package management and script execution
 - Maven for build automation via frontend-maven-plugin
-- Node.js v20.12.2 LTS for runtime environment
+- Node.js LTS for runtime environment (see standards/project-structure.md for exact version)
 - SonarQube for quality analysis and coverage reporting
 - Git for version control with proper .gitignore setup
 
@@ -155,7 +155,7 @@ When setting up JavaScript projects for CUI:
 8. **Implement all required npm scripts** - lint, format, test, quality scripts
 9. **Integrate with Maven properly** - Map scripts to correct lifecycle phases
 10. **Set up security auditing** - Regular vulnerability scanning and response
-11. **Use Node.js v20.12.2 LTS** - Consistent version managed by frontend-maven-plugin
+11. **Use Node.js LTS** - Consistent version managed by frontend-maven-plugin (see standards/project-structure.md for exact version)
 12. **Configure SonarQube coverage** - JavaScript code quality and coverage analysis
 13. **Handle deprecations promptly** - Replace deprecated packages before they become critical
 14. **Document project-specific setup** - Update README.md with structure and setup instructions
@@ -198,7 +198,7 @@ For detailed configuration examples and complete reference, see the individual s
 
 ### Key Requirements Summary
 
-- **Node.js Version**: v20.12.2 LTS (managed by frontend-maven-plugin)
+- **Node.js Version**: See standards/project-structure.md (managed by frontend-maven-plugin)
 - **Package.json**: Must include `"type": "module"` for ES module support
 - **Required npm scripts**: lint, format, test, test:ci-strict, quality
 - **Maven Integration**: Map npm scripts to validate/compile/test phases

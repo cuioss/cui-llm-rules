@@ -146,21 +146,8 @@ All custom commands and helper functions must include comprehensive JSDoc docume
 - Description of command purpose and behavior
 
 **Example:**
-```javascript
-/**
- * Login with provided credentials and verify successful authentication
- * @param {string} username - User login name
- * @param {string} password - User password
- * @returns {Cypress.Chainable} Cypress command chain
- */
-Cypress.Commands.add('login', (username, password) => {
-  cy.visit('/login');
-  cy.get(TestConstants.SELECTORS.LOGIN.USERNAME_INPUT).type(username);
-  cy.get(TestConstants.SELECTORS.LOGIN.PASSWORD_INPUT).type(password);
-  cy.get(TestConstants.SELECTORS.LOGIN.SUBMIT_BUTTON).click();
-  cy.url().should('not.include', '/login');
-});
-```
+
+For complete login command implementation with modern `cy.session()` caching and validation, see [testing-patterns.md](testing-patterns.md#use-cysession).
 
 ## Dependencies
 

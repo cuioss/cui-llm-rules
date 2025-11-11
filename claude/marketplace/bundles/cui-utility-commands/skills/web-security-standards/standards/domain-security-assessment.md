@@ -189,11 +189,7 @@ Domains that have been comprehensively assessed and approved. Categories include
 
 ## Maintenance
 
-### Regular Reviews
-- Periodically re-assess approved domains (quarterly)
-- Monitor security news for compromised trusted domains
-- Update trusted domains list based on ecosystem changes
-- Remove or flag domains with security incidents
+For comprehensive maintenance procedures including adding domains, reviewing existing domains, and reporting issues, see [trusted-domains.md](trusted-domains.md#maintenance-procedures).
 
 ### Documentation
 - Document reason for approval/rejection decisions

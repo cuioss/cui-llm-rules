@@ -249,38 +249,7 @@ const calculator = {
 
 ### Function Parameters
 
-Use destructuring and default parameters:
-
-```javascript
-// Destructuring parameters
-const createUser = ({ name, email, role = 'user' }) => {
-  return {
-    id: generateId(),
-    name,
-    email,
-    role,
-    createdAt: Date.now(),
-  };
-};
-
-// Rest parameters
-const sum = (...numbers) => {
-  return numbers.reduce((total, n) => total + n, 0);
-};
-
-// Default parameters
-const fetchData = (url, options = {}) => {
-  const config = {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  };
-
-  return fetch(url, config);
-};
-```
-
-**Note**: For modern syntax patterns like destructuring, template literals, spread/rest operators, object patterns, and array methods, see [modern-patterns.md](modern-patterns.md).
+For comprehensive coverage of function parameter patterns including destructuring, default parameters, and rest parameters, see [modern-patterns.md](modern-patterns.md) section "Destructuring Patterns".
 
 ## Common Patterns
 

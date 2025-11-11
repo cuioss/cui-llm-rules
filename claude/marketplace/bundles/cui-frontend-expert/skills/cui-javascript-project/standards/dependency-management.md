@@ -46,7 +46,7 @@ Use appropriate version patterns based on dependency type and stability requirem
 ### Version Update Strategy
 
 **Development Dependencies**: Use caret ranges for flexibility
-- Allows automatic security patches
+- Allows automatic patch and minor version updates within same major version
 - Enables minor feature updates
 - Maintains major version compatibility
 
@@ -270,9 +270,7 @@ Ensure all tools support ES modules:
 - Babel with ES module support
 
 **Node.js requirements**:
-For complete Node.js version requirements, see **[project-structure.md](project-structure.md)** section "Node.js Version Management" and **[maven-integration.md](maven-integration.md)** section "Configuration Parameters".
-
-Quick reference: Node.js v20.12.2+ (LTS), npm 10.5.0+
+For complete Node.js version requirements, see **[project-structure.md](project-structure.md#environment-requirements)** section "Environment Requirements".
 
 ## Package Categories
 

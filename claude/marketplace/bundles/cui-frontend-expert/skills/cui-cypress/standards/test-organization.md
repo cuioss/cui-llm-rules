@@ -199,18 +199,8 @@ Define reusable Cypress commands for common operations.
 ```javascript
 // cypress/support/commands.js
 
-/**
- * Login with provided credentials
- * @param {string} username - User login name
- * @param {string} password - User password
- * @returns {Cypress.Chainable} Cypress command chain
- */
-Cypress.Commands.add('login', (username, password) => {
-  cy.visit('/login');
-  cy.get(TestConstants.SELECTORS.LOGIN.USERNAME_INPUT).type(username);
-  cy.get(TestConstants.SELECTORS.LOGIN.PASSWORD_INPUT).type(password);
-  cy.get(TestConstants.SELECTORS.LOGIN.SUBMIT_BUTTON).click();
-});
+// For complete login command implementation with modern cy.session() caching,
+// see testing-patterns.md "Use cy.session()" section
 
 /**
  * Clear current session and ensure clean state
@@ -230,20 +220,82 @@ Cypress.Commands.add('clearSession', () => {
  * @param {Object} options - Navigation options
  * @param {string} options.expectedPageType - Expected page type after navigation
  * @param {boolean} options.waitForReady - Whether to wait for page ready state
+ * @param {number} options.timeout - Custom timeout in milliseconds
  * @returns {Cypress.Chainable} Cypress command chain
  */
 Cypress.Commands.add('navigateToPage', (path, options = {}) => {
-  const { expectedPageType, waitForReady = true } = options;
+  const {
+    expectedPageType,
+    waitForReady = true,
+    timeout = TestConstants.TIMEOUTS.PAGE_LOAD
+  } = options;
 
-  cy.visit(path);
+  cy.visit(path, { timeout });
 
   if (waitForReady) {
-    cy.waitForPageReady();
+    cy.waitForPageReady({ timeout });
   }
 
   if (expectedPageType) {
     cy.verifyPageType(expectedPageType);
   }
+});
+
+/**
+ * Wait for page to reach ready state
+ * @param {Object} options - Wait options
+ * @param {number} options.timeout - Custom timeout
+ * @returns {Cypress.Chainable} Cypress command chain
+ */
+Cypress.Commands.add('waitForPageReady', (options = {}) => {
+  const { timeout = TestConstants.TIMEOUTS.PAGE_LOAD } = options;
+
+  cy.window({ timeout }).should((win) => {
+    expect(win.document.readyState).to.equal('complete');
+  });
+});
+
+/**
+ * Verify current page type matches expected
+ * @param {string} expectedType - Expected page type constant
+ * @returns {Cypress.Chainable} Cypress command chain
+ */
+Cypress.Commands.add('verifyPageType', (expectedType) => {
+  cy.getPageContext({ timeout: TestConstants.TIMEOUTS.PAGE_LOAD })
+    .then((context) => {
+      expect(context.pageType).to.equal(expectedType);
+    });
+});
+
+/**
+ * Get current page context including type and state
+ * @param {Object} options - Options
+ * @param {number} options.timeout - Custom timeout
+ * @returns {Object} Page context
+ */
+Cypress.Commands.add('getPageContext', (options = {}) => {
+  const { timeout = TestConstants.TIMEOUTS.DEFAULT } = options;
+
+  return cy.window({ timeout }).then((win) => {
+    return win.pageContext || {
+      pageType: 'UNKNOWN',
+      isReady: false
+    };
+  });
+});
+
+/**
+ * Get current session context
+ * @returns {Object} Session context with authentication state
+ */
+Cypress.Commands.add('getSessionContext', () => {
+  return cy.window().then((win) => {
+    return win.sessionContext || {
+      isLoggedIn: false,
+      pageType: 'UNKNOWN',
+      user: null
+    };
+  });
 });
 ```
 

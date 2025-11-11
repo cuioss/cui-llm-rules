@@ -41,6 +41,8 @@ doc/BACKLOG.adoc     # Future work items, not yet prioritized
 
 ### Document Header
 
+Replace `[Project Name]` with your actual project name:
+
 ```asciidoc
 = [Project Name] TODO List
 :toc: left
@@ -130,29 +132,17 @@ Choose organization that best fits your project:
 
 ## Status Indicators
 
-For complete status indicator definitions and rationale, see **[task-planning-core.md](task-planning-core.md)** section "Status Indicators".
+For complete status indicator definitions and rationale, see [task-planning-core.md](task-planning-core.md) section "Status Indicators".
 
-Project planning uses all four status markers:
-- `[ ]` - Pending (not started or in progress)
-- `[x]` - Completed (fully implemented and verified)
-- `[~]` - Partially Completed (some criteria met, needs more work)
-- `[!]` - Blocked (cannot proceed due to external dependency)
-
-**Examples:**
-```asciidoc
-* [ ] Implement token validation         # Pending
-* [x] Implement token parsing            # Completed
-* [~] Implement error handling           # Partially done (basic errors done, need edge cases)
-* [!] Add Redis caching                   # Blocked (waiting for Redis infrastructure)
-```
-
-Project planning is the only use case that supports all four markers. Issue and refactoring planning use only the two basic markers ([ ] and [x]).
+Project planning is the only use case that uses all four status markers: `[ ]` (Pending), `[x]` (Completed), `[~]` (Partially Completed), and `[!]` (Blocked). Issue and refactoring planning use only the two basic markers.
 
 ## Traceability Requirements
 
 ### Linking to Requirements
 
-**REQUIRED:** Every task group MUST reference its source requirement:
+**REQUIRED:** Every task group MUST reference its source requirement.
+
+**Note:** The following examples use AsciiDoc `link:` syntax with assumed file structures (Requirements.adoc, specification/ directory). Adapt paths and file names to match your project's actual documentation structure.
 
 ```asciidoc
 ==== Token Validation

@@ -215,13 +215,9 @@ C5. Refactor UserService
 
 ## Status Indicators
 
-For complete status indicator definitions and rationale, see **[task-planning-core.md](task-planning-core.md)** section "Status Indicators".
+For complete status indicator definitions and rationale, see [task-planning-core.md](task-planning-core.md) section "Status Indicators".
 
-Refactoring planning uses only the two basic status markers:
-- `[ ]` - Pending (not started or in progress)
-- `[x]` - Completed (refactoring implemented and verified)
-
-Extended markers (`[~]` partially completed, `[!]` blocked) are NOT used in refactoring planning - refactoring tasks are tracked as simple pending/complete workflows.
+Refactoring planning uses only the two basic status markers: `[ ]` (Pending) and `[x]` (Completed). Extended markers (`[~]`, `[!]`) are NOT used - refactoring tasks are tracked as simple pending/complete workflows.
 
 ## Priority Assignment
 
@@ -449,16 +445,10 @@ Keep completed tasks for:
 
 ### Task Granularity
 
-**Right-sized:**
+For comprehensive task granularity guidance, see [task-planning-core.md](task-planning-core.md) section "Task Granularity". When applying this guidance to refactoring planning, ensure tasks are:
 - Completable in reasonable time (hours to days)
-- Has clear start and end
-- Produces verifiable result
-
-**Too large:** "Refactor entire codebase"
-- Break into specific refactoring tasks
-
-**Too small:** "Fix single typo"
-- Combine with related documentation improvements
+- Focused on specific refactoring operations
+- Not so broad they span multiple refactoring categories
 
 ### Clear Descriptions
 

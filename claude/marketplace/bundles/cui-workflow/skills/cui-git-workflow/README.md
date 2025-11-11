@@ -79,42 +79,7 @@ This skill integrates with:
 
 ## Examples
 
-### Feature Commit
-
-```text
-feat(auth): add JWT token validation
-
-Implement RS256 signature validation for authentication tokens
-with automatic key rotation support.
-
-Fixes #123
-```
-
-### Bug Fix
-
-```text
-fix(api): handle null response in user endpoint
-
-Add null check before accessing user data to prevent NPE.
-Return 404 when user not found instead of 500 error.
-
-Fixes #456
-```
-
-### Breaking Change
-
-```text
-feat(api): update authentication endpoint structure
-
-BREAKING CHANGE: Authentication response format changed
-
-Old format: { token: "..." }
-New format: { accessToken: "...", refreshToken: "...", metadata: {...} }
-
-Migration: Update client code to access token via response.accessToken
-
-Fixes #789
-```
+For complete commit message examples including feature commits, bug fixes, breaking changes, and anti-patterns, see [git-commit-standards.md](standards/git-commit-standards.md).
 
 ## References
 

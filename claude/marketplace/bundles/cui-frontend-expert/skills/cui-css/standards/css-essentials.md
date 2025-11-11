@@ -210,7 +210,7 @@ Order properties logically:
 
 ### Directory Organization
 
-```
+```text
 src/css/
 ├── base/
 │   ├── reset.css           # Browser reset
@@ -411,7 +411,7 @@ Small, single-purpose classes for common patterns:
 
 Organize CSS around reusable components:
 
-```
+```text
 ✅ Advantages:
 - Easy to find related styles
 - Components are portable
@@ -475,23 +475,22 @@ Components + utilities:
 
 ## Theming with Custom Properties
 
+Use CSS custom properties for theming to enable easy color scheme switching:
+
 ```css
 :root {
   --bg-primary: white;
   --text-primary: #1c1b1f;
 }
 
-[data-theme="dark"] {
-  --bg-primary: #121212;
-  --text-primary: #e6e1e5;
-}
-
-/* Components automatically adapt */
+/* Components use custom properties */
 .page {
   background: var(--bg-primary);
   color: var(--text-primary);
 }
 ```
+
+For complete dark mode implementation including system preference detection and manual toggle, see [CSS Quality & Tooling](css-quality-tooling.md#dark-mode).
 
 ## Browser Compatibility
 

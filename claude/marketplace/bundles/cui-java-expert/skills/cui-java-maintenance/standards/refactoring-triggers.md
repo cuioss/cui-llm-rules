@@ -30,20 +30,20 @@ This section defines when and how to identify violations of Java coding standard
 
 **Triggers for Action**: Apply method design refactoring when:
 
-**Long Methods**: Methods significantly exceeding 50 lines (guideline)
+**Long Methods**: Methods over 60 lines, or methods with complex logic regardless of line count
 - **Action Required**: Extract methods per Method Design Standards
-- **Guideline**: Prefer methods under 50 lines for better readability and maintainability
-- **Detection**: Methods with multiple levels of nesting, methods doing multiple things
-- **Note**: 50 lines is a guideline, not a hard rule - focus on keeping methods focused on a single responsibility
+- **Guideline**: Target methods under 50 lines for better readability and maintainability
+- **Detection**: Methods with multiple levels of nesting, methods doing multiple things, methods with more than one clear responsibility
+- **Note**: Line count is secondary to single responsibility - a focused 70-line method may be acceptable, while a 45-line method doing multiple things requires refactoring
 
 **High Cyclomatic Complexity**: Methods with complexity >15 (SonarQube default)
 - **Action Required**: Simplify logic and extract sub-methods
-- **Detection**: Use static analysis tools, count decision points (if, for, while, case, &&, ||)
+- **Detection**: Use SonarQube, or manually count decision points: `grep -c -E "(if|for|while|case|&&|\|\|)" MethodFile.java` (>15 occurrences indicates high complexity)
 
 **Too Many Parameters**: Methods with 3+ parameters without parameter objects
 - **Action Required**: Create parameter objects per Parameter Objects Standards
-- **Exception**: Only when parameters represent cohesive concepts
-- **Detection**: Methods with long parameter lists, methods with similar parameter groups
+- **Exception**: Parameters representing cohesive concepts (e.g., coordinates: x, y, z for geometric calculations; or primitive configuration: enabled, timeout, retryCount for simple settings)
+- **Detection**: Count method parameters using `grep -E "^\s*(public|private|protected).*\(([^)]*,){3,}" *.java`, or identify methods with similar parameter groups across multiple methods
 
 **Command-Query Separation Violations**: Methods that both query and modify state
 - **Action Required**: Separate into command and query methods per Method Design Standards
@@ -112,7 +112,7 @@ This section defines when and how to identify violations of Java coding standard
 **Manual Stream Operations**: Imperative loops that could use streams
 - **Action Required**: Simplify with streams per Stream Processing Standards
 - **Detection**: Loops with filters, maps, or accumulations that could be replaced with streams
-- **Exception**: Simple loops where streams would reduce readability
+- **Exception**: Simple loops where streams would reduce readability (e.g., single iteration with early return, nested streams >3 levels deep, complex stateful operations requiring mutable accumulation)
 
 ### When to Remove Unused Code
 

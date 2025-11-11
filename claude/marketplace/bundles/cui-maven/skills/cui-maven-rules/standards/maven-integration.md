@@ -113,16 +113,12 @@ JavaScript tooling must be integrated into these Maven phases:
 |Generate minified/bundled assets
 
 |compile
-|Format checking
-|Enforce code formatting standards
+|Format checking + Code linting
+|Enforce code formatting and quality standards (format-check runs before linting)
 
 |test
 |JavaScript unit tests
 |Run Jest tests with coverage
-
-|compile  
-|Code linting
-|Enforce code quality standards without modifications
 |===
 
 === Execution Order

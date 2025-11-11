@@ -78,9 +78,7 @@ Standards and patterns for validating and maintaining Claude Code permissions in
 
 **No Duplicates:**
 - Same tool + same pattern = duplicate (remove)
-- Broader pattern makes specific pattern redundant:
-  - `Bash(git:*)` makes `Bash(git:status)` redundant
-  - `Read(//project/**)` makes `Read(//project/src/**)` redundant
+- For redundancy detection logic and algorithms, see [permission-anti-patterns.md](permission-anti-patterns.md#detection-algorithms)
 
 **Proper Organization:**
 - Group by tool type

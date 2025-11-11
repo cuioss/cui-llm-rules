@@ -128,28 +128,7 @@ Use dedicated session management methods for reliable test isolation.
 
 **Custom Commands:**
 
-```javascript
-/**
- * Clear all session data for clean test state
- */
-Cypress.Commands.add('clearSession', () => {
-  cy.clearCookies();
-  cy.clearLocalStorage();
-  cy.window().then((win) => {
-    win.sessionStorage.clear();
-  });
-});
-
-/**
- * Retrieve and validate existing session
- */
-Cypress.Commands.add('retrieveSession', () => {
-  cy.getCookies().should('have.length.gt', 0);
-  cy.getSessionContext().then((context) => {
-    expect(context.isLoggedIn).to.be.true;
-  });
-});
-```
+For complete command definitions including `clearSession`, `retrieveSession`, and session context management, see [test-organization.md](test-organization.md#custom-commands).
 
 **Usage Patterns:**
 
@@ -191,22 +170,11 @@ Always verify session context after authentication operations.
 
 **Pattern:**
 
-```javascript
-/**
- * Get current session context
- * @returns {Object} Session context with authentication state
- */
-Cypress.Commands.add('getSessionContext', () => {
-  return cy.window().then((win) => {
-    return win.sessionContext || {
-      isLoggedIn: false,
-      pageType: 'UNKNOWN',
-      user: null
-    };
-  });
-});
+For complete `getSessionContext` command definition, see [test-organization.md](test-organization.md#custom-commands).
 
-// Usage
+**Usage:**
+
+```javascript
 it('should authenticate user successfully', () => {
   cy.login('testuser', 'password');
 
@@ -226,46 +194,7 @@ it('should authenticate user successfully', () => {
 
 **Custom Navigation Command:**
 
-```javascript
-/**
- * Navigate to page with comprehensive verification
- * @param {string} path - URL path to navigate to
- * @param {Object} options - Navigation options
- * @param {string} options.expectedPageType - Expected page type after navigation
- * @param {boolean} options.waitForReady - Whether to wait for page ready state
- * @param {number} options.timeout - Custom timeout in milliseconds
- */
-Cypress.Commands.add('navigateToPage', (path, options = {}) => {
-  const {
-    expectedPageType,
-    waitForReady = true,
-    timeout = TestConstants.TIMEOUTS.PAGE_LOAD
-  } = options;
-
-  cy.visit(path, { timeout });
-
-  if (waitForReady) {
-    cy.waitForPageReady({ timeout });
-  }
-
-  if (expectedPageType) {
-    cy.verifyPageType(expectedPageType);
-  }
-});
-
-/**
- * Wait for page to reach ready state
- * @param {Object} options - Wait options
- * @param {number} options.timeout - Custom timeout
- */
-Cypress.Commands.add('waitForPageReady', (options = {}) => {
-  const { timeout = TestConstants.TIMEOUTS.PAGE_LOAD } = options;
-
-  cy.window({ timeout }).should((win) => {
-    expect(win.document.readyState).to.equal('complete');
-  });
-});
-```
+For complete navigation command definitions including `navigateToPage`, `waitForPageReady`, and `verifyPageType`, see [test-organization.md](test-organization.md#custom-commands).
 
 **Usage:**
 
@@ -296,32 +225,7 @@ Use page type detection for robust navigation verification.
 
 **Implementation:**
 
-```javascript
-/**
- * Verify current page type matches expected
- * @param {string} expectedType - Expected page type constant
- */
-Cypress.Commands.add('verifyPageType', (expectedType) => {
-  cy.getPageContext({ timeout: TestConstants.TIMEOUTS.PAGE_LOAD })
-    .then((context) => {
-      expect(context.pageType).to.equal(expectedType);
-    });
-});
-
-/**
- * Get current page context including type and state
- */
-Cypress.Commands.add('getPageContext', (options = {}) => {
-  const { timeout = TestConstants.TIMEOUTS.DEFAULT } = options;
-
-  return cy.window({ timeout }).then((win) => {
-    return win.pageContext || {
-      pageType: 'UNKNOWN',
-      isReady: false
-    };
-  });
-});
-```
+For complete page type verification command definitions including `verifyPageType` and `getPageContext`, see [test-organization.md](test-organization.md#custom-commands).
 
 **Usage:**
 
@@ -389,17 +293,7 @@ Use appropriate timeouts for different operation types.
 
 **Timeout Constants:**
 
-```javascript
-export const TestConstants = {
-  TIMEOUTS: {
-    DEFAULT: 10000,           // Standard operations
-    API_CALL: 30000,          // API requests
-    PAGE_LOAD: 15000,         // Page navigation
-    AUTHENTICATION: 45000,    // Login/logout operations
-    ELEMENT_INTERACTION: 15000 // User interactions
-  }
-};
-```
+For complete TestConstants definition including TIMEOUTS, SELECTORS, TEST_DATA, API, and PAGE_TYPES, see [test-organization.md](test-organization.md#centralized-test-constants).
 
 **Usage:**
 

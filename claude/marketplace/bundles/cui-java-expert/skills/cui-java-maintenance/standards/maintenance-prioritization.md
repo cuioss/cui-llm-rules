@@ -67,7 +67,7 @@ Systematic prioritization ensures:
 - Limited blast radius
 
 **Examples**:
-- Methods exceeding 50 lines
+- Long methods (see [refactoring-triggers.md](refactoring-triggers.md) for detailed criteria)
 - High parameter counts without parameter objects
 - Complex methods with high cyclomatic complexity (>15)
 - Poor naming conventions

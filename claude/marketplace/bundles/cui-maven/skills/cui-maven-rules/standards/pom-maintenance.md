@@ -12,7 +12,7 @@ This document defines the comprehensive process for maintaining and optimizing M
 
 == Related Documentation
 
-* Maven Integration Standards (see maven-integration.md) - JavaScript/Maven integration patterns
+* [Maven Integration Standards](maven-integration.md) - JavaScript/Maven integration patterns
 
 == Pre-Maintenance Checklist
 
