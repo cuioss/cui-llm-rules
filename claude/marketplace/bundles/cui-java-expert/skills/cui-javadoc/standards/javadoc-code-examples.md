@@ -533,17 +533,10 @@ For links to external resources, use standard HTML anchors:
 
 ## Quality Checklist
 
+For comprehensive JavaDoc quality checklist covering all API types, see [javadoc-core.md](javadoc-core.md) section "Quality Checklist".
+
+**Code example-specific verification:**
 - [ ] Inline code uses `{@code}` tag
-- [ ] Special characters use `{@literal}` tag
-- [ ] Class/method references use `{@link}`
 - [ ] Code blocks use `<pre><code>` tags
 - [ ] Examples are complete and compilable
 - [ ] Examples show error handling
-- [ ] Examples follow project coding standards
-- [ ] HTML tags are properly closed
-- [ ] Lists use proper `<ul>`/`<ol>` tags
-- [ ] Paragraphs separated with `<p>` tags
-- [ ] External links use `<a href="">` format
-- [ ] No mixing of code and prose
-- [ ] Examples focus on common use cases
-- [ ] Complex examples are simplified or broken down

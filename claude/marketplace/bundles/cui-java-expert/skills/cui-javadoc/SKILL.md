@@ -373,3 +373,4 @@ If encountering issues:
 * Class Documentation: standards/javadoc-class-documentation.md
 * Method Documentation: standards/javadoc-method-documentation.md
 * Code Examples and Formatting: standards/javadoc-code-examples.md
+* Error Reference: standards/javadoc-error-reference.md

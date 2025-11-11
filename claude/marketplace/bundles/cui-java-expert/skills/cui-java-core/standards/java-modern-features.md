@@ -101,20 +101,7 @@ public record Range(int start, int end) {
 
 ### When to Use Records vs Lombok @Value
 
-**Use records when**:
-* Simple immutable data carrier
-* No builder needed
-* Standard equals/hashCode/toString sufficient
-* Java 17+ available
-
-**Use Lombok @Value + @Builder when**:
-* Need builder pattern for complex construction
-* Many optional parameters
-* Need @Singular for collections
-* Need custom equals/hashCode logic
-* Need additional annotations (@JsonProperty, etc.)
-
-For detailed Lombok patterns and usage guidelines, see [java-lombok-patterns.md](java-lombok-patterns.md).
+For comprehensive comparison of records vs Lombok @Value including decision criteria and migration strategies, see [java-lombok-patterns.md](java-lombok-patterns.md) section "Lombok vs Records".
 
 ## Switch Expressions
 

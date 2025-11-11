@@ -192,13 +192,7 @@ Organize identifiers by log level:
 **Note**: DEBUG and TRACE levels do NOT have identifier ranges because they must NOT use LogRecord.
 ### LogMessages Best Practices
 
-Follow the DSL-Style Constants Pattern:
-
-* Use `@UtilityClass` for LogMessages class and all nested levels
-* Import category level constant, NOT individual messages
-* Organize by log level (INFO, WARN, ERROR, FATAL)
-* Use meaningful module prefix (e.g., "AUTH", "TOKEN", "DB")
-* Store prefix as constant in LogMessages class
+LogMessages classes follow the DSL-Style Constants Pattern. For comprehensive DSL pattern documentation including nested structure, import patterns, and complete examples, see [dsl-constants.md](dsl-constants.md).
 
 ### LogMessages Documentation Requirements
 

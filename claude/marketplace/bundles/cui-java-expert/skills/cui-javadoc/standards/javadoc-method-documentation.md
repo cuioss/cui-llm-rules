@@ -487,16 +487,10 @@ public UserInfo validateAndExtractUser(String token, @Nullable String expectedAu
 
 ## Quality Checklist
 
+For comprehensive JavaDoc quality checklist covering all API types, see [javadoc-core.md](javadoc-core.md) section "Quality Checklist".
+
+**Method-specific verification:**
 - [ ] All public/protected methods documented
 - [ ] All parameters documented with constraints
 - [ ] Return values documented with guarantees
 - [ ] All exceptions documented with conditions
-- [ ] Overridden methods document additional behavior
-- [ ] Builder methods show method chaining
-- [ ] Factory methods explain what they create
-- [ ] Generic methods document type parameters
-- [ ] No "stating the obvious" documentation
-- [ ] Complex methods include detailed explanations
-- [ ] Thread-safety noted where relevant
-- [ ] @since tags for public APIs
-- [ ] Proper tag order maintained
