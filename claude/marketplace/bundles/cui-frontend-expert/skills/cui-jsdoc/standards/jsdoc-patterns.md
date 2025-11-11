@@ -76,9 +76,9 @@ async function createSession(sessionData) {
 
 ```javascript
 /**
- * Manages JWT token validation and user authentication.
+ * Validates JWT tokens against JWKS endpoints and authenticates users.
  *
- * Handles JWKS key rotation automatically and caches keys
+ * Automatically refreshes JWKS public keys on rotation and caches keys
  * for improved performance.
  *
  * @class JWTManager
@@ -153,7 +153,7 @@ class RefreshableJWTManager extends JWTManager {
 /**
  * @fileoverview JWT validation utilities for Quarkus DevUI.
  *
- * Provides utilities for JWT token validation, user authentication,
+ * Utility functions for JWT token validation, user authentication,
  * and security configuration management.
  *
  * @module jwt-utils
@@ -224,11 +224,11 @@ function validateProfile(profile) {
  */
 
 /**
- * Processes items with progress callback.
+ * Transforms items asynchronously while reporting progress via callback.
  *
- * @param {Array<Object>} items - Items to process
+ * @param {Array<Object>} items - Items to transform
  * @param {ProgressCallback} onProgress - Progress callback
- * @returns {Promise<Array>} Processed items
+ * @returns {Promise<Array>} Transformed items
  */
 async function processItems(items, onProgress) {
   // Implementation
@@ -270,8 +270,8 @@ async function updateRole(userId, role) {
 /**
  * JWT Configuration component for Quarkus DevUI.
  *
- * Provides an interactive interface for viewing and managing
- * JWT validation configuration.
+ * Displays and updates JWT validation configuration through
+ * an interactive user interface.
  *
  * @customElement qwc-jwt-config
  * @extends {LitElement}

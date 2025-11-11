@@ -274,5 +274,3 @@ After identifying violations using refactoring-triggers.md:
 
 - refactoring-triggers.md - Detection criteria for violations
 - compliance-checklist.md - Verification after fixes applied
-- cui-java-core skill - Implementation patterns
-- cui-task-planning skill - Planning and tracking structure

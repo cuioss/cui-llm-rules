@@ -455,8 +455,3 @@ Recommendation: Remove specific pattern
 Fix: Keep only Read(//~/git/project/**), remove Read(//~/git/project/src/**)
 ```
 
-## Related Standards
-
-- [permission-validation-standards.md](permission-validation-standards.md) - Validation procedures
-- [permission-architecture.md](permission-architecture.md) - Architectural patterns
-- [best-practices/lessons-learned.md](../best-practices/lessons-learned.md) - Real-world examples

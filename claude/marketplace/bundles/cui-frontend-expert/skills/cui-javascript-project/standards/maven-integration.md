@@ -416,7 +416,7 @@ mvn clean verify -DskipTests=false
 
 ### File Exclusions
 
-For complete .gitignore patterns and explanations, see **[project-structure.md](project-structure.md)** section "Version Control Integration".
+For complete .gitignore patterns and explanations, see **[project-structure.md](project-structure.md)** section "Git Ignore Requirements".
 
 **Maven-specific exclusions** to verify:
 - `target/node/` - Maven-installed Node.js binaries (platform-specific)

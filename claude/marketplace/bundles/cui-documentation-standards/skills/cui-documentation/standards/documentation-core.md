@@ -50,10 +50,8 @@ The CUI documentation standards are organized into focused documents covering sp
 
 ### Terminology Standards
 
-* Maintain consistent technical terminology
-* Apply terminology consistently across all documentation types
+* Maintain consistent technical terminology across all documentation types
 * Follow project glossary and naming conventions
-* Use technical terms consistently
 
 ### Code Example Requirements
 

@@ -73,7 +73,7 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ### Verification Items
 
-- [ ] **Method Length**: Methods are short and focused
+- [ ] **Method Length**: Methods are short and focused (see [refactoring-triggers.md](refactoring-triggers.md) for detailed criteria)
   - Prefer methods under 50 lines
   - Single level of abstraction per method
   - Complex methods extracted into helper methods
@@ -406,10 +406,3 @@ private Long id;
 - Create follow-up issue
 - Set deadline for resolution
 
-## Related Standards
-
-- refactoring-triggers.md - When to apply refactoring
-- maintenance-prioritization.md - How to prioritize work
-- cui-java-core skill - Implementation patterns and standards
-- cui-javadoc skill - Documentation standards
-- cui-java-unit-testing skill - Testing patterns

@@ -100,7 +100,6 @@ For complete code example requirements, see **documentation-core.md** section "C
 README-specific considerations:
 * Keep examples concise and focused on the feature being demonstrated
 * Show configuration where relevant
-* Must be backed by an actual unit-test
 
 ### Links
 

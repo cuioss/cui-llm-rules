@@ -188,13 +188,5 @@ Do NOT remove when:
 - **Detection**: Comments that just repeat method name, obvious comments like "// increment i"
 
 ## Related Standards
-
-**Implementation References** (for HOW to implement fixes):
-- cui-java-core skill - Core patterns, null safety, Lombok, modern features
-- cui-javadoc skill - Documentation implementation details
-- cui-java-cdi skill - CDI aspects and container standards
-- cui-java-unit-testing skill - Testing patterns
-
-**Planning References**:
 - maintenance-prioritization.md - How to prioritize violations
 - compliance-checklist.md - How to verify fixes are complete

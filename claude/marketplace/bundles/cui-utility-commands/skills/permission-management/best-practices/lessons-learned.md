@@ -4,6 +4,8 @@ Real-world insights and lessons from managing Claude Code permissions across mul
 
 ## Common Anti-Patterns
 
+> For formal anti-pattern definitions and detection algorithms, see [permission-anti-patterns.md](../standards/permission-anti-patterns.md).
+
 ### Anti-Pattern 1: Permission Explosion
 
 **What Happened:**
@@ -131,6 +133,8 @@ Settings file grew to 100+ permissions over a year. Many were for deprecated fea
 Permissions should be treated like dependencies - add intentionally, remove when unused.
 
 ## Best Practices from Experience
+
+> For formal validation and architectural standards, see [permission-validation-standards.md](../standards/permission-validation-standards.md) and [permission-architecture.md](../standards/permission-architecture.md).
 
 ### Practice 1: Start Narrow, Expand as Needed
 
