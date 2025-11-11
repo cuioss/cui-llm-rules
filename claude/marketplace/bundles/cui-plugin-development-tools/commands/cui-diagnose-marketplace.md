@@ -62,7 +62,24 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ## WORKFLOW
 
-### Step 1: Initialize Diagnostics
+### Step 1: Load Diagnostic Standards
+
+**CRITICAL**: Load non-prompting tool patterns:
+
+```
+Skill: cui-utility-commands:cui-diagnostic-patterns
+```
+
+**Optionally load marketplace architecture standards**:
+
+You may optionally load the marketplace architecture skill for additional architectural context:
+```
+Skill: cui-plugin-development-tools:cui-marketplace-architecture
+```
+
+This provides architecture rules and validation patterns for marketplace components that may be useful for understanding marketplace structure and plugin configuration.
+
+### Step 2: Initialize Diagnostics
 
 Track statistics:
 - `files_checked`: Count of configuration files examined

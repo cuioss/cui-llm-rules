@@ -206,6 +206,12 @@ Cannot proceed until build is clean.
    Skill: cui-java-cdi
    ```
 
+   **Maven Build Context** (optionally load for Maven-related context):
+   ```
+   Skill: cui-maven:cui-maven-rules
+   ```
+   This provides Maven best practices, POM maintenance guidelines, and dependency management standards that may be useful for understanding project structure and build context.
+
    **DSL-Style Constants** (load if implementing LogMessages or structured constant hierarchies):
    - Automatically loaded by cui-java-core skill when needed
    - Task description mentions: "LogMessages", "log messages", "structured constants", "constant hierarchies"

@@ -1,7 +1,7 @@
 ---
 name: logging-violation-analyzer
 description: Analyzes LOGGER usage and returns structured violation list (focused analyzer - no fixes)
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Skill
 model: sonnet
 ---
 
@@ -19,11 +19,21 @@ Analyze all LOGGER statements in specified directory/files and return structured
 
 ## WORKFLOW
 
-### Step 1: Discover Java Files
+### Step 1: Load Logging Standards
+
+**Load CUI Java Standards:**
+
+1. **Load cui-java-expert:cui-java-core skill**:
+   ```
+   Skill: cui-java-expert:cui-java-core
+   ```
+   This skill provides the logging standards including the rules that INFO/WARN/ERROR/FATAL must use LogRecord and DEBUG/TRACE must use direct strings.
+
+### Step 2: Discover Java Files
 
 Use Glob to find all .java files in specified path.
 
-### Step 2: Find LOGGER Statements
+### Step 3: Find LOGGER Statements
 
 Use Grep to find all patterns:
 - `LOGGER.info(`
@@ -33,7 +43,7 @@ Use Grep to find all patterns:
 - `LOGGER.error(`
 - `LOGGER.fatal(`
 
-### Step 3: Analyze Each Statement
+### Step 4: Analyze Each Statement
 
 For each LOGGER statement, determine:
 - **Level**: info, debug, trace, warn, error, fatal
@@ -42,7 +52,7 @@ For each LOGGER statement, determine:
   - INFO/WARN/ERROR/FATAL MUST use LogRecord
   - DEBUG/TRACE must NOT use LogRecord (direct string only)
 
-### Step 4: Return Structured Results
+### Step 5: Return Structured Results
 
 ```json
 {

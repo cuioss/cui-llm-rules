@@ -27,6 +27,15 @@ Orchestrates comprehensive analysis of skills by coordinating cui-diagnose-singl
 Skill: cui-utility-commands:cui-diagnostic-patterns
 ```
 
+**Optionally load marketplace architecture standards**:
+
+You may optionally load the marketplace architecture skill for additional architectural context:
+```
+Skill: cui-plugin-development-tools:cui-marketplace-architecture
+```
+
+This provides architecture rules and validation patterns for marketplace components that may be useful for understanding skill design principles.
+
 ### Step 2: Discover Skills
 
 **Parse parameters** to determine scope.

@@ -1,7 +1,7 @@
 ---
 name: maven-builder
 description: Central agent for executing Maven builds with output capture, issue categorization, and performance tracking
-tools: Read, Write, Bash(./mvnw:*), Grep
+tools: Read, Write, Bash(./mvnw:*), Grep, Skill
 model: sonnet
 color: blue
 ---
@@ -14,7 +14,17 @@ Execute Maven builds with configurable commands, output modes, and module target
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
-### Step 1: Parse Input Parameters and Construct Command
+### Step 1: Load Maven Standards (Optional)
+
+**Optionally Load CUI Maven Rules:**
+
+You may optionally load the Maven standards skill to access Maven best practices:
+```
+Skill: cui-maven:cui-maven-rules
+```
+This skill provides Maven best practices, POM maintenance guidelines, and dependency management standards that may be useful for understanding build context.
+
+### Step 2: Parse Input Parameters and Construct Command
 
 Extract and validate the following parameters from the user's request:
 
@@ -60,7 +70,7 @@ Extract and validate the following parameters from the user's request:
    - `./mvnw {maven_goals} {-pl ...} {-rf ...}`
    - Example: `./mvnw clean verify -Pcoverage -pl modules/auth`
 
-### Step 2: Read Configuration
+### Step 3: Read Configuration
 
 1. Check if `.claude/run-configuration.md` exists in the project root
 2. If it doesn't exist, create it with initial structure (see Example Configuration below)
@@ -68,14 +78,14 @@ Extract and validate the following parameters from the user's request:
 4. Read `last-execution-duration` for this command
 5. If no duration recorded, use **60000ms (1 minute)** as default timeout
 
-### Step 3: Prepare Output File
+### Step 4: Prepare Output File
 
 1. Create timestamped filename: `build-output-{YYYY-MM-DD-HHmmss}.log`
 2. Target directory: `target/` in project root
 3. Ensure target directory exists (create if needed with `mkdir -p target`)
 4. Full output path: `target/build-output-{timestamp}.log`
 
-### Step 4: Execute Maven Build
+### Step 5: Execute Maven Build
 
 **Command Execution:**
 1. Run from project root: `{constructed_command} > target/build-output-{timestamp}.log 2>&1`
@@ -94,21 +104,21 @@ Extract and validate the following parameters from the user's request:
 
 Determine status from TWO sources:
 1. **Exit code** from Bash tool
-2. **Output file content** (read in Step 5)
+2. **Output file content** (read in Step 6)
 
 Status logic:
 - **SUCCESS**: Exit code 0 AND output file contains "BUILD SUCCESS"
 - **FAILURE**: Exit code ≠ 0 OR output file contains "BUILD FAILURE" OR [ERROR] lines present
 
-### Step 5: Parse Build Output
+### Step 6: Parse Build Output
 
-**Read the output file** created in Step 3 using the Read tool.
+**Read the output file** created in Step 4 using the Read tool.
 
 **First, determine final build status:**
-1. Check exit code from Step 4 Bash execution
+1. Check exit code from Step 5 Bash execution
 2. Use Grep to search output file for "BUILD SUCCESS" or "BUILD FAILURE"
 3. Use Grep to search for "[ERROR]" lines
-4. Apply status logic from Step 4 to determine SUCCESS or FAILURE
+4. Apply status logic from Step 5 to determine SUCCESS or FAILURE
 
 **Then extract relevant information based on output mode:**
 
@@ -133,7 +143,7 @@ Status logic:
 - For NO_OPEN_REWRITE mode: Use negative lookahead or post-filter
 - Format: `line_number: [ERROR] message` or `line_number: [WARNING] message`
 
-### Step 6: Update Duration Tracking (SUCCESS Only)
+### Step 7: Update Duration Tracking (SUCCESS Only)
 
 **CRITICAL**: This step ONLY executes for successful builds (Status = SUCCESS). Skip for failed builds.
 
@@ -147,7 +157,7 @@ Status logic:
 
 **Rationale**: Failed builds have unpredictable durations (may fail early or timeout). Only successful builds provide reliable timing data for future timeout calculations.
 
-### Step 7: Format and Return Results
+### Step 8: Format and Return Results
 
 **Based on output mode, return:**
 
