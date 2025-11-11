@@ -126,24 +126,11 @@ This document defines the comprehensive process for maintaining and optimizing M
 
 === Property Naming Conventions
 
-[source,xml]
-----
-<properties>
-    <!-- Dependency versions - use version.* prefix -->
-    <version.quarkus>3.5.0</version.quarkus>
-    <version.cui.core.ui.model>24.1.0</version.cui.core.ui.model>
-    <version.cui.java.tools>2.5.1</version.cui.java.tools>
-    <version.junit.jupiter>5.9.3</version.junit.jupiter>
-    
-    <!-- Plugin versions - use maven.*.plugin.version pattern -->
-    <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
-    <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
-    
-    <!-- Non-maven plugin versions - use *.maven.plugin.version pattern -->
-    <jacoco.maven.plugin.version>0.8.13</jacoco.maven.plugin.version>
-    <asciidoctor.maven.plugin.version>3.2.0</asciidoctor.maven.plugin.version>
-</properties>
-----
+See **Property Organization** section below for complete property naming examples including:
+- Dependency version properties (`version.*` prefix)
+- Maven plugin versions (`maven.*.plugin.version` pattern)
+- Non-maven plugin versions (`*.maven.plugin.version` pattern)
+- Configuration properties
 
 === Dependency Aggregation Rules
 

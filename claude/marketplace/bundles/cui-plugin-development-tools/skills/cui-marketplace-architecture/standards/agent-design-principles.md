@@ -219,5 +219,4 @@ See `.claude/agents/maven-project-builder.md` for fully compliant implementation
 
 * [Plugin Architecture](architecture-overview.md)
 * [Plugin Specifications](plugin-specifications.md)
-* [Skills Marketplace](../../../README.md)
 * [Marketplace Architecture Skill](../SKILL.md)

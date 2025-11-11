@@ -68,29 +68,15 @@ LOGGER.trace("Token value: %s", token)
 
 ### Pattern 4: Apply Validation Rules
 
-**INFO/WARN/ERROR/FATAL Validation:**
-- **REQUIRED**: Must use LogRecord
-- **VIOLATION**: Using direct string
-- **Example Violation**:
-  ```java
-  // ❌ MISSING_LOGRECORD violation
-  LOGGER.info("User %s logged in", username);
+**See logging-standards.md for complete LogRecord usage rules.** Apply these validations:
 
-  // ✅ Correct
-  LOGGER.info(INFO.USER_LOGIN, username);
-  ```
+**INFO/WARN/ERROR/FATAL:**
+- Validate: Must use LogRecord (see logging-standards.md section "LogRecord for INFO/WARN/ERROR/FATAL")
+- Violation type: MISSING_LOGRECORD if using direct string
 
-**DEBUG/TRACE Validation:**
-- **REQUIRED**: Must use direct string
-- **PROHIBITED**: Using LogRecord
-- **Example Violation**:
-  ```java
-  // ❌ PROHIBITED_LOGRECORD violation
-  LOGGER.debug(DEBUG.TOKEN_DETAILS, token);
-
-  // ✅ Correct
-  LOGGER.debug("Token details: %s", token);
-  ```
+**DEBUG/TRACE:**
+- Validate: Must use direct string (see logging-standards.md section "Direct Strings for DEBUG/TRACE")
+- Violation type: PROHIBITED_LOGRECORD if using LogRecord
 
 ### Pattern 5: Record Violations
 

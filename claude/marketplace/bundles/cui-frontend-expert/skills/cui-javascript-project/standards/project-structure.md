@@ -449,12 +449,13 @@ Thumbs.db
 
 ## Node.js Version Requirements
 
-### Minimum Versions
+### Required Versions
 
-**Node.js**: v20.12.2 LTS (minimum)
+**Node.js**: v20.12.2 LTS (exact version)
 - LTS (Long Term Support) for stability
-- Consistent across all environments
-- Updated annually following Node.js LTS schedule
+- Exact version managed by frontend-maven-plugin
+- Consistent across all environments (development, CI/CD, production)
+- Updated periodically following Node.js LTS schedule
 
 **npm**: 10.5.0 or compatible
 - Bundled with Node.js installation

@@ -16,6 +16,7 @@ Add these dev dependencies to package.json:
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.0.0",
     "@testing-library/jest-dom": "^6.0.0",
+    "@open-wc/testing": "^4.0.0",
     "babel-jest": "^29.0.0",
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0"

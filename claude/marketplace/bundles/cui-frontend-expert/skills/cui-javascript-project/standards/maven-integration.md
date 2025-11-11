@@ -88,9 +88,10 @@ All JavaScript projects must use frontend-maven-plugin to manage Node.js install
 ### Configuration Parameters
 
 **nodeVersion**: Node.js LTS version to install
-- Always: `v20.12.2` (or latest LTS)
+- Required: `v20.12.2` (exact version)
 - Ensures consistent Node.js across all environments
 - Downloaded automatically during build
+- Updated periodically to follow Node.js LTS release schedule
 
 **npmVersion**: npm version to use
 - Always: `10.5.0` or compatible

@@ -209,7 +209,7 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Unused Code
 
-**Standards Reference**: Unused Code Detection in cui-java-maintenance
+**Standards Reference**: See refactoring-triggers.md for unused code detection criteria
 
 ### Verification Items
 

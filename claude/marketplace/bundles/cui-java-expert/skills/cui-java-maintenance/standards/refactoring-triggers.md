@@ -30,10 +30,11 @@ This section defines when and how to identify violations of Java coding standard
 
 **Triggers for Action**: Apply method design refactoring when:
 
-**Long Methods**: Methods exceeding 50 lines detected
+**Long Methods**: Methods significantly exceeding 50 lines (guideline)
 - **Action Required**: Extract methods per Method Design Standards
-- **Target**: Keep methods focused and under 50 lines
+- **Guideline**: Prefer methods under 50 lines for better readability and maintainability
 - **Detection**: Methods with multiple levels of nesting, methods doing multiple things
+- **Note**: 50 lines is a guideline, not a hard rule - focus on keeping methods focused on a single responsibility
 
 **High Cyclomatic Complexity**: Methods with complexity >15 (SonarQube default)
 - **Action Required**: Simplify logic and extract sub-methods

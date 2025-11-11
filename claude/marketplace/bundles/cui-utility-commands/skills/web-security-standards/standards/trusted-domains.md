@@ -169,13 +169,3 @@ Even for trusted domains, implement defense-in-depth:
 
 - [domain-security-assessment.md](domain-security-assessment.md) - Comprehensive security assessment methodology
 - See `web-security-standards` skill for integration with permission management
-
-## Version History
-
-- **2025-11-09**: Enhanced with purpose, criteria, guidelines, and maintenance procedures
-- **Initial**: Basic trusted domains list
-
----
-
-**Last Reviewed**: 2025-11-09
-**Next Review**: 2026-02-09 (Quarterly)

@@ -470,17 +470,7 @@ td::before {
 
 ## Touch-Friendly Design
 
-### Minimum Touch Targets
-
-```css
-/* Minimum touch target: 44x44px */
-.button,
-.link {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0.75rem 1rem;
-}
-```
+See **css-quality-tooling.md** Accessibility section for touch target requirements (minimum 44x44px) and implementation patterns.
 
 ## Print Styles
 

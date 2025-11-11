@@ -187,172 +187,20 @@ When setting up JavaScript projects for CUI:
 
 ## Quick Reference
 
-### Essential package.json Structure
+For detailed configuration examples and complete reference, see the individual standards documents:
 
-```json
-{
-  "name": "project-name",
-  "version": "1.0.0-SNAPSHOT",
-  "description": "Brief project description",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "lint:js": "eslint src/**/*.js",
-    "lint:js:fix": "eslint --fix src/**/*.js",
-    "format": "prettier --write \"src/**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.js\"",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci-strict": "jest --ci --coverage --watchAll=false --maxWorkers=2",
-    "quality": "npm run lint:js && npm run format:check",
-    "quality:fix": "npm run lint:js:fix && npm run format"
-  },
-  "devDependencies": {
-    "eslint": "^9.14.0",
-    "@eslint/js": "^9.14.0",
-    "prettier": "^3.0.3",
-    "jest": "^29.7.0"
-  }
-}
-```
+- **package.json structure and npm scripts** - See `project-structure.md` for complete examples
+- **Directory structures by project type** - See `project-structure.md` for Maven, Quarkus, NiFi, and standalone layouts
+- **Maven frontend-maven-plugin configuration** - See `maven-integration.md` for complete plugin setup
+- **Semantic versioning strategies** - See `dependency-management.md` for caret ranges vs exact versions
+- **Security audit setup** - See `dependency-management.md` for audit scripts and vulnerability handling
+- **Git ignore patterns** - See `project-structure.md` for essential .gitignore configuration
 
-### Directory Structure by Project Type
+### Key Requirements Summary
 
-**Standard Maven**:
-```
-src/main/resources/static/js/    # JavaScript source
-src/test/js/                      # JavaScript tests
-```
-
-**Quarkus DevUI**:
-```
-src/main/resources/dev-ui/       # Quarkus DevUI components (qwc-*.js)
-src/test/js/                     # Component tests
-```
-
-**NiFi Extension**:
-```
-src/main/webapp/js/              # NiFi UI components (nf-*.js)
-src/test/js/                     # Tests with NiFi mocks
-```
-
-**Standalone**:
-```
-src/main/js/                     # JavaScript source
-src/test/                        # Tests
-```
-
-### Maven Frontend Plugin Configuration
-
-```xml
-<plugin>
-  <groupId>com.github.eirslett</groupId>
-  <artifactId>frontend-maven-plugin</artifactId>
-  <version>1.15.1</version>
-  <configuration>
-    <nodeVersion>v20.12.2</nodeVersion>
-    <npmVersion>10.5.0</npmVersion>
-    <installDirectory>target</installDirectory>
-  </configuration>
-  <executions>
-    <execution>
-      <id>install-node-and-npm</id>
-      <goals><goal>install-node-and-npm</goal></goals>
-      <phase>validate</phase>
-    </execution>
-    <execution>
-      <id>npm-install</id>
-      <goals><goal>npm</goal></goals>
-      <phase>validate</phase>
-      <configuration>
-        <arguments>install</arguments>
-      </configuration>
-    </execution>
-    <execution>
-      <id>npm-format-check</id>
-      <goals><goal>npm</goal></goals>
-      <phase>compile</phase>
-      <configuration>
-        <arguments>run format:check</arguments>
-      </configuration>
-    </execution>
-    <execution>
-      <id>npm-lint</id>
-      <goals><goal>npm</goal></goals>
-      <phase>compile</phase>
-      <configuration>
-        <arguments>run lint</arguments>
-      </configuration>
-    </execution>
-    <execution>
-      <id>npm-test</id>
-      <goals><goal>npm</goal></goals>
-      <phase>test</phase>
-      <configuration>
-        <environmentVariables>
-          <CI>true</CI>
-          <NODE_ENV>test</NODE_ENV>
-        </environmentVariables>
-        <arguments>run test:ci-strict</arguments>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
-```
-
-### Semantic Versioning Quick Guide
-
-**Caret ranges** (allow compatible updates):
-```json
-{
-  "devDependencies": {
-    "eslint": "^9.14.0",    // Updates to 9.x.x
-    "webpack": "^5.96.1"    // Updates to 5.x.x
-  }
-}
-```
-
-**Exact versions** (pin specific version):
-```json
-{
-  "dependencies": {
-    "lit": "3.2.0",         // Exact version, no updates
-    "core-js": "3.39.0"     // Polyfills require exact versions
-  }
-}
-```
-
-### Security Audit Commands
-
-```json
-{
-  "scripts": {
-    "audit:security": "npm audit --audit-level=moderate",
-    "audit:fix": "npm audit fix",
-    "audit:licenses": "npx license-checker --summary",
-    "update:check": "npx npm-check-updates --format group",
-    "update:dependencies": "npx npm-check-updates --upgrade"
-  }
-}
-```
-
-### Essential .gitignore Patterns
-
-```gitignore
-# Node.js
-node_modules/
-target/node/
-
-# npm
-.npm/
-npm-debug.log*
-
-# Coverage
-target/coverage/
-coverage/
-
-# Build outputs
-target/dist/
-dist/
-```
+- **Node.js Version**: v20.12.2 LTS (managed by frontend-maven-plugin)
+- **Package.json**: Must include `"type": "module"` for ES module support
+- **Required npm scripts**: lint, format, test, test:ci-strict, quality
+- **Maven Integration**: Map npm scripts to validate/compile/test phases
+- **Security**: Implement audit scripts and respond to vulnerabilities within 30 days
+- **Version Control**: Always commit package-lock.json, never commit node_modules/

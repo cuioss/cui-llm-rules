@@ -33,41 +33,10 @@ The CUI documentation standards are organized into focused documents covering sp
 
 ### Tone and Style Requirements
 
-**MANDATORY**: All documentation must use:
-
-* Professional, neutral, and objective tone
-* No marketing language or promotional wording
-* Factual descriptions with verifiable sources
-* Technical precision without subjective claims
-* Concise, clear language without verbosity
-
-#### Marketing Language Detection
-
-**Prohibited marketing language includes**:
-
-* Marketing adjectives: "comprehensive," "powerful," "seamless," "robust," "enterprise-grade," "cutting-edge," "revolutionary," "amazing," "best-in-class"
-* Promotional phrases: "Our solution," "We provide," "Industry-leading," "Unmatched performance"
-* Bold/italic emphasis on features (e.g., "**powerful** validation")
-* Superlatives: "fastest," "most reliable," "easiest to use"
-
-**Correct replacements** (factual, measurable descriptions):
-* "comprehensive validation" → "validates X, Y, and Z"
-* "powerful features" → "supports features A, B, C"
-* "seamless integration" → "integrates via CDI injection"
-
-#### RFC References Verification
-
-**When citing RFC specifications**:
-
-* Verify RFC is relevant to the documented feature
-* Check: Does the RFC actually define/require this behavior?
-* Only cite RFCs that directly define the feature
-
-**Example violations**:
-* Citing HTTP/2 RFC (7540) in OAuth token validation docs
-* Citing HTTP/1.1 RFC (7230) when discussing JWT claims
-
-**Correct practice**: Only cite RFCs that directly define the feature being documented
+**See tone-and-style.md for complete guidance** on:
+* Professional tone and neutral language requirements
+* Marketing language detection and prohibited patterns
+* RFC reference verification standards
 
 ### General Principles
 
