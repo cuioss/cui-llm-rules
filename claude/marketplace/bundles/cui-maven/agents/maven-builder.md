@@ -18,7 +18,7 @@ Execute Maven builds with configurable commands, output modes, and module target
 
 **Optionally Load CUI Maven Rules:**
 
-You may optionally load the Maven standards skill to access Maven best practices:
+You may load the Maven standards skill when you need context about Maven best practices, dependency management, or POM structure. Recommended when working with complex builds, multi-module projects, or investigating build issues:
 ```
 Skill: cui-maven:cui-maven-rules
 ```

@@ -245,7 +245,7 @@ Errors:
 **Always include:**
 - Execution time: `{duration}ms`
 - If duration updated (SUCCESS only): `⚠️ Duration updated in .claude/run-configuration.md`
-- Lessons learned section (if any insights discovered, otherwise state "None - execution followed expected patterns")
+- Lessons learned section (report insights when discovered: unexpected duration changes >50%, unusual error patterns not in categorization, workspace detection edge cases, environment variable interactions, or new npm/npx tool behaviors; otherwise state "None - execution followed expected patterns")
 
 ## CRITICAL RULES
 

@@ -236,7 +236,7 @@ All tasks above must be marked `[x]` before the issue is considered complete.
 ## CRITICAL RULES
 
 - **NEVER write code** - This agent only creates plans, does not implement
-- **ALWAYS ask user if unclear** - Do not guess or make assumptions about requirements
+- **ALWAYS ask user if requirements are unclear** - Unclear means: missing acceptance criteria, contradictory requirements, undefined technical terms, or ambiguous specifications. Do not guess or make assumptions about requirements
 - **Tool Coverage**: All tools in frontmatter must be used (100% Tool Fit)
 - **Self-Contained**: All rules embedded inline, no external reads during execution
 - **One Issue Per Invocation**: Plan one issue at a time
@@ -261,8 +261,8 @@ Include in final report with total invocations per tool.
 If during execution you discover insights that could improve future executions:
 
 **When to report lessons learned:**
-- Better task decomposition strategies discovered
-- New issue patterns that require different planning approaches
+- Better task decomposition strategies discovered (e.g., "breaking tasks by component instead of by feature improved clarity", "separating test tasks from implementation tasks reduced checklist length", "identifying shared utilities first prevented duplication")
+- New issue patterns that require different planning approaches (e.g., "microservice issues benefit from per-service task grouping", "refactoring issues need separate analysis/implementation/verification tasks")
 - Improved reference formats that make plans clearer
 - Edge cases in issue formats (GitHub, local, etc.)
 - Workflow improvements for plan generation

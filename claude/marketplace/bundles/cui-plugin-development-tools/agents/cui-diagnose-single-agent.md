@@ -73,14 +73,14 @@ Read: {agent_path}
 
 **Required fields:**
 - `name` - Agent name
-- `description` - Brief description (< 100 words)
+- `description` - Brief description (50-200 characters, not words)
 - `tools` - Array of tools (correct field name for agents)
 
 **Issues to detect:**
 - Missing required fields
 - Invalid YAML syntax
 - Wrong field name (`allowed-tools` instead of `tools`)
-- Description too long (> 200 words)
+- Description too long (> 200 characters) or too short (< 50 characters)
 
 ### Step 4: Analyze Tool Coverage (Patterns 1, 2, 16)
 
@@ -331,7 +331,7 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Document that git provides version control (no backups needed)
 - Reference: Git context makes backups redundant
 
-### Step 15: Generate Issue Report
+### Step 16: Generate Issue Report
 
 **Categorize all issues:**
 
@@ -367,7 +367,7 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Missing task description (Pattern 19)
 - Could improve error handling
 
-### Step 15: Calculate Final Scores
+### Step 17: Calculate Final Scores
 
 **Tool Fit Score:** (calculated in Step 4)
 
@@ -386,7 +386,7 @@ Rating:
 - < 60: Poor
 ```
 
-### Step 16: Generate JSON Report
+### Step 18: Generate JSON Report
 
 **Output format:**
 

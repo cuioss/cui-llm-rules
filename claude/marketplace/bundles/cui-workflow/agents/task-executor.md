@@ -110,15 +110,15 @@ Acceptance Criteria: {list}
 - Create file → Write tool (NOT echo >/cat <<)
 - Search content → Grep tool (NOT grep/rg)
 - Find files → Glob tool (NOT find)
-- Build verification → maven-project-builder agent (preferred)
-- Build/test → maven-builder agent (for specific commands) or Bash (./mvnw, ./gradlew) if required by checklist
+- Build verification → Note in execution report for caller to orchestrate via maven-builder agent
+- Build/test → Note in execution report for caller to orchestrate via maven-builder agent
 
 **Bash cat/grep/find trigger user prompts and break automation!**
 
-**Maven Build Preference:**
-- **Full verification**: Use maven-project-builder agent (handles build + fix cycle)
-- **Specific build command**: Use maven-builder agent (configurable build execution)
-- **Direct execution**: Only if checklist explicitly requires specific ./mvnw command
+**Maven Build Delegation Pattern:**
+- This agent is a focused executor: it implements code only
+- Build verification is delegated to the caller who orchestrates the maven-builder agent
+- Never execute Maven builds directly - note build verification needs in Delegation Info section
 
 ### Step 0: Activate Required Skills (If Implementing Java Code)
 
@@ -227,7 +227,12 @@ Skill: cui-java-expert:cui-javadoc
 
 **Item Type: "Verify build" or "Run tests"**
 - Action:
-  - Note in execution report that build verification is needed
+  - Add structured note to Delegation Info section of execution report:
+    ```
+    - Build Verification: needed
+      - Reason: Checklist item "{item_text}" requires build validation
+      - Recommended action: Caller should invoke maven-builder agent with appropriate command
+    ```
   - Return implementation results to caller who will orchestrate maven-builder agent
   - Focused executor: implement code only, do NOT run builds
 

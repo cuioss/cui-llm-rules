@@ -229,11 +229,11 @@ Compare across files:
 - Architecture score
 - Integrated content score
 - Overall quality rating
-- Total analysis time (if available)
+- Total analysis time (track duration from start to end of analysis execution)
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better structural validation, more accurate quality assessment, improved integration analysis, enhanced issue categorization), **YOU MUST immediately update this file** using /cui-update-agent agent-name=cui-diagnose-single-skill update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=cui-diagnose-single-skill update="[your improvement]"` with improvements discovered during analysis.
 
 Focus improvements on:
 1. YAML frontmatter validation logic and error detection
