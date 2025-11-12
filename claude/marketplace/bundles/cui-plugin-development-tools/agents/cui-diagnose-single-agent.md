@@ -286,7 +286,52 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Make agent focused (no verification, no build)
 - Reference: architecture-rules.md Rule 7
 
-### Step 14: Generate Issue Report
+### Step 14: Backup File Creation Detection (CRITICAL)
+
+**Context:**
+- Working in git context - git provides version control
+- Backup files (.bak, .backup, etc.) are unnecessary and create clutter
+- Anti-pattern from non-version-controlled environments
+
+**Scan workflow for backup file creation patterns:**
+- Search for `.bak` file references
+- Search for `.backup` file references
+- Search for `cp` commands creating backup files (e.g., `cp "$file" "${file}.bak"`)
+- Search for backup parameters (`create_backup`, `backup=true`, `--no-backup` flags)
+- Search for backup-related documentation ("creates backup", "backup file", etc.)
+
+**Patterns to detect:**
+```
+- cp {file} {file}.bak
+- cp "$file" "${file}.bak"
+- cp {file} {file}.backup*
+- create_backup: true
+- backup=true
+- --no-backup flag (indicates backup capability exists)
+- .bak extension references
+- .backup extension references
+```
+
+**Why This Is Critical:**
+- Git already provides version control and history
+- Backup files create repository clutter
+- Backup files may accidentally get committed
+- Inconsistent with modern version control practices
+- Should rely on git for rollback/recovery
+
+**Issues to flag:**
+- **CRITICAL**: Bash commands creating .bak files
+- **CRITICAL**: Bash commands creating .backup files
+- **CRITICAL**: Parameters enabling backup file creation
+- **WARNING**: Documentation mentioning backup file creation (may be explanatory vs actual creation)
+
+**Recommendations:**
+- Remove all backup file creation logic
+- Rely on git version control for rollback
+- Document that git provides version control (no backups needed)
+- Reference: Git context makes backups redundant
+
+### Step 15: Generate Issue Report
 
 **Categorize all issues:**
 
@@ -301,6 +346,7 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - **Task tool in agent frontmatter (Check 6)**
 - **Task(...) delegation calls in workflow (Check 6)**
 - **Maven calls in non-maven-builder agent (Check 7)**
+- **Backup file creation (.bak, .backup files) (Check 8)**
 
 **WARNINGS (Should Fix):**
 - Over-permission (Pattern 2)
@@ -314,6 +360,7 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Documentation noise (Pattern 18)
 - Stale permission patterns (Pattern 20)
 - **Orchestration language without Task usage (Check 6)**
+- **Documentation mentioning backup file creation (Check 8)**
 
 **SUGGESTIONS (Nice to Have):**
 - Inconsistent naming (Pattern 14)
@@ -423,6 +470,16 @@ Rating:
     "is_maven_builder": true|false,
     "has_maven_calls": true|false,
     "maven_patterns_found": [...],
+    "violations": [...],
+    "issues": [...]
+  },
+
+  "backup_file_creation": {
+    "has_backup_creation": true|false,
+    "bak_file_patterns": [...],
+    "backup_file_patterns": [...],
+    "backup_parameters": [...],
+    "backup_documentation": [...],
     "violations": [...],
     "issues": [...]
   },

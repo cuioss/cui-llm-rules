@@ -238,6 +238,11 @@ Cross-component checks:
 2. **Cross-References** - Check references are valid (Grep for skill/command references, verify they exist)
 3. **Naming Consistency** - Validate naming conventions (bundle name matches directory)
 4. **Self-Containment** - Check for external dependencies (Grep for absolute paths, external references)
+5. **Backup File Creation** - Check for backup file creation patterns across all components (aggregated from agent analysis results)
+   - Verify no agents create .bak files
+   - Verify no agents create .backup files
+   - Verify no commands create backup files
+   - Check scripts for backup file creation (Grep for backup patterns in scripts directory if present)
 
 **Decision logic:**
 - If any integration check fails: Continue analysis but mark as "Integration Issues" in final report
@@ -380,6 +385,7 @@ Bundle Verification Complete:
 ✅ **Agents**: All have tool fit ≥ 75%
 ✅ **Integration**: No broken references
 ✅ **Self-Containment**: No external dependencies
+✅ **Git Context**: No backup file creation (git provides version control)
 
 **Quality Score:**
 ```
@@ -428,6 +434,7 @@ Integration: ✅ CLEAN
 - Cross-references valid: ✅
 - Naming consistent: ✅
 - Self-contained: ✅
+- No backup file creation: ✅
 
 BUNDLE QUALITY SCORE: <score>/100 (<Excellent/Good/Fair/Poor>)
 
@@ -479,6 +486,7 @@ Track throughout workflow:
 - `components_analyzed`: Total components examined
 - `skills_analyzed`, `commands_analyzed`, `agents_analyzed`: Counts per component type
 - `integration_issues`: Count of integration problems found
+- `backup_file_creation_issues`: Count of components creating backup files (aggregated from component analysis)
 - `total_issues`: Aggregate issue count across all components
 - `quality_gates_passed`: Count of quality gates passed
 - `marketplace_ready`: Boolean flag
