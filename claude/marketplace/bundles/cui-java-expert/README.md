@@ -38,13 +38,11 @@ This bundle provides a complete Java development knowledge base by aggregating f
    - Code example standards
    - JavaDoc maintenance patterns
 
-### Agents (5 focused agents)
+### Agents (3 focused agents)
 
-1. **java-code-implementer** - Implements Java code following CUI standards (focused implementer - no verification)
-2. **java-junit-implementer** - Implements JUnit tests with full standards compliance (focused implementer - no verification)
-3. **java-coverage-analyzer** - Analyzes existing JaCoCo coverage reports (focused analyzer - no build execution)
-4. **logging-violation-analyzer** - Analyzes LOGGER statement violations (focused analyzer - no fixes)
-5. **cui-log-record-documenter** - Documents LogRecord classes in AsciiDoc format (focused documenter)
+1. **java-coverage-analyzer** - Analyzes existing JaCoCo coverage reports (focused analyzer - no build execution)
+2. **logging-violation-analyzer** - Analyzes LOGGER statement violations (focused analyzer - no fixes)
+3. **cui-log-record-documenter** - Documents LogRecord classes in AsciiDoc format (focused documenter)
 
 ### Commands (5 commands)
 

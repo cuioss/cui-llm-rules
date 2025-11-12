@@ -237,10 +237,7 @@ Apply fixes systematically by category:
 For each simple, content-neutral fix:
 
 ```
-Task:
-  subagent_type: java-code-implementer
-  description: Apply Javadoc fix
-  prompt: |
+SlashCommand: /java-implement-code task="Apply Javadoc fix:
     Apply minimal Javadoc fix to resolve error.
 
     Error Details:
@@ -473,11 +470,11 @@ Orchestrates agents and commands:
 - **cui-javadoc skill** - Standards and error reference
 - **maven-builder agent** - Build execution and error capture (Layer 3)
 - **Explore agent** - Error context analysis
-- **java-code-implementer agent** - Apply Javadoc fixes (Layer 3)
+- **/java-implement-code command** - Apply Javadoc fixes (Layer 2)
 
 ## RELATED
 
 - `cui-javadoc` skill - Javadoc standards and error reference
 - `maven-builder` agent - Build and verification
-- `java-code-implementer` agent - Code modifications
+- `/java-implement-code` command - Code modifications
 - `/cui-java-refactor` command - Broader code refactoring

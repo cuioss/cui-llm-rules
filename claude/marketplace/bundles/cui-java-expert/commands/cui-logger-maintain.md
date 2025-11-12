@@ -192,34 +192,26 @@ Task:
 
 ### Step 5: Implementation Phase
 
-Apply fixes using java-code-implementer agent with patterns from cui-java-core skill:
+Apply fixes using /java-implement-code command with patterns from cui-java-core skill:
 
 **5.1 Logger Migration:**
 
 ```
-Task:
-  subagent_type: java-code-implementer
-  description: Migrate logger to CuiLogger
-  prompt: |
-    Replace logger with CuiLogger in {file}.
-    Apply migration pattern from cui-java-core skill:
-    logging-maintenance-reference.md#logger-migration
+SlashCommand: /java-implement-code task="Migrate logger to CuiLogger in {file}.
+Replace logger with CuiLogger.
+Apply migration pattern from cui-java-core skill: logging-maintenance-reference.md#logger-migration
 
-    CRITICAL: Only modify logging code, no other changes.
+CRITICAL: Only modify logging code, no other changes."
 ```
 
 **5.2 LogRecord Implementation:**
 
 ```
-Task:
-  subagent_type: java-code-implementer
-  description: Add LogRecord usage
-  prompt: |
-    Convert direct logging to LogRecord in {file}.
-    Apply implementation pattern from cui-java-core skill:
-    logging-maintenance-reference.md#logrecord-implementation
+SlashCommand: /java-implement-code task="Add LogRecord usage in {file}.
+Convert direct logging to LogRecord.
+Apply implementation pattern from cui-java-core skill: logging-maintenance-reference.md#logrecord-implementation
 
-    CRITICAL: Only modify logging code.
+CRITICAL: Only modify logging code."
 ```
 
 **If non-logging bug discovered:** Apply bug handling protocol (stop, document, ask user, wait).
@@ -227,15 +219,10 @@ Task:
 **5.3 LogMessages Creation/Update:**
 
 ```
-Task:
-  subagent_type: java-code-implementer
-  description: Create/update LogMessages class
-  prompt: |
-    Create/update LogMessages class for module {module}.
-    Use template from cui-java-core skill:
-    logging-maintenance-reference.md#logmessages-structure
+SlashCommand: /java-implement-code task="Create/update LogMessages class for module {module}.
+Use template from cui-java-core skill: logging-maintenance-reference.md#logmessages-structure
 
-    CRITICAL: Only create/modify LogMessages, no other changes.
+CRITICAL: Only create/modify LogMessages, no other changes."
 ```
 
 **5.4 Documentation Update:**
@@ -407,14 +394,14 @@ Display all statistics in final summary.
 Orchestrates agents and commands:
 - **cui-java-core skill** - Logging standards and maintenance reference
 - **Explore agent** - Violation detection and business test location
-- **java-code-implementer agent** - Logging code modifications
+- **/java-implement-code command** - Logging code modifications
 - **maven-builder agent** - Build and test verification
 - **Bash** - LogRecord discovery script and plan.md updates (scripts from skill)
 
 ## RELATED
 
 - `cui-java-core` skill - Logging standards and maintenance reference
-- `java-code-implementer` agent - Code modifications
+- `/java-implement-code` command - Code modifications
 - `maven-builder` agent - Build verification
 - `/cui-java-refactor` command - Broader code refactoring
 - `/cui-log-record-enforcer` command - Automated logging enforcement

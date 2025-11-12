@@ -170,18 +170,14 @@ Options:
 **Apply test improvements based on scope**:
 
 ```
-Task:
-  subagent_type: java-junit-implementer
-  description: Implement test improvements for [module]
-  prompt: |
-    Implement test quality improvements for module: [module]
-    Scope: [scope parameter]
-    Priority: [priority parameter]
+SlashCommand: /java-implement-tests task="Implement test quality improvements for module: [module]
+Scope: [scope parameter]
+Priority: [priority parameter]
 
-    Load testing maintenance reference:
-    Read: claude/marketplace/bundles/cui-java-expert/skills/cui-java-unit-testing/standards/testing-maintenance-reference.md
+Load testing maintenance reference:
+Read: claude/marketplace/bundles/cui-java-expert/skills/cui-java-unit-testing/standards/testing-maintenance-reference.md
 
-    Apply improvements based on scope:
+Apply improvements based on scope:
 
     [If scope = "anti-patterns" or "full"]
     **Remove Forbidden Anti-Patterns**:
@@ -505,9 +501,9 @@ Test maintenance is complete when:
 **Skills Used**:
 * cui-java-unit-testing - Complete testing standards and patterns
 
-**Agents Orchestrated**:
+**Commands and Agents Orchestrated**:
 * Explore - Test quality analysis and module identification
-* java-junit-implementer - Test improvement implementation
+* /java-implement-tests - Test improvement implementation (Layer 2)
 * maven-builder - Build verification and coverage analysis
 
 **Related Commands**:

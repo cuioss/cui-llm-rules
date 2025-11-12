@@ -135,9 +135,9 @@ See: `standards/logging-enforcement-patterns.md` → Patterns 6-9 (Coverage Anal
    - Test-only LogRecords (critical bugs)
 
 3. **Create batched work plan:**
-   - Batch 1: Fix logging statement violations (java-code-implementer)
-   - Batch 2: Remove unused LogRecords (java-code-implementer)
-   - Batch 3: Add missing LogAsserts (java-junit-implementer)
+   - Batch 1: Fix logging statement violations (/java-implement-code)
+   - Batch 2: Remove unused LogRecords (/java-implement-code)
+   - Batch 3: Add missing LogAsserts (/java-implement-tests)
    - Batch 4: User review for test-only LogRecords
 
 **Plan format:**
@@ -151,15 +151,15 @@ Total LogRecord Issues: {count}
 Batch 1: Fix Logging Statements
 - {count} missing LogRecord conversions
 - {count} prohibited LogRecord removals
-- Agent: java-code-implementer
+- Command: /java-implement-code
 
 Batch 2: Remove Unused LogRecords
 - {count} unused LogRecord definitions
-- Agent: java-code-implementer
+- Command: /java-implement-code
 
 Batch 3: Add Test Coverage
 - {count} untested LogRecords
-- Agent: java-junit-implementer
+- Command: /java-implement-tests
 
 Batch 4: User Review Required
 - {count} test-only LogRecords (critical)
@@ -171,15 +171,15 @@ Batch 4: User Review Required
 
 Follow batch execution templates from cui-java-core skill (Pattern 11).
 
-**Batch 1:** Fix logging violations using java-code-implementer
+**Batch 1:** Fix logging violations using /java-implement-code
 - Pass violations list with file locations and required corrections
 - Verify compilation
 
-**Batch 2:** Remove unused LogRecords using java-code-implementer
+**Batch 2:** Remove unused LogRecords using /java-implement-code
 - Pass list of unused LogRecords with locations
 - Verify compilation
 
-**Batch 3:** Add LogAssert tests using java-junit-implementer
+**Batch 3:** Add LogAssert tests using /java-implement-tests
 - Pass untested LogRecords with production usage locations
 - Use @EnableTestLogger and LogAsserts
 - Verify tests pass
@@ -204,7 +204,7 @@ If verification fails, report details and stop execution.
 For each LogMessages class:
 1. Extract all identifiers with levels
 2. Check for gaps, ordering issues, and range compliance
-3. Apply renumbering if needed using java-code-implementer
+3. Apply renumbering if needed using /java-implement-code
 4. Verify no DEBUG/TRACE LogRecords exist
 
 **Standard ranges** (from logging-standards.md):
@@ -327,10 +327,10 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Both references → Compliant
 
 **Agent Coordination:**
-- Use java-code-implementer for production code changes
-- Use java-junit-implementer for LogAssert test implementation
+- Use /java-implement-code for production code changes
+- Use /java-implement-tests for LogAssert test implementation
 - Use maven-builder for all build verifications
-- Execute agents in batches (grouped by change type)
+- Execute commands in batches (grouped by change type)
 
 **Identifier Management:**
 - Standard ranges (from logging-standards.md): INFO 001-099, WARN 100-199, ERROR 200-299, FATAL 300-399
@@ -371,7 +371,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Skill: `cui-java-expert:cui-java-core` - Logging standards and enforcement patterns
 - Standards: `logging-standards.md`, `logmessages-documentation.md`, `logging-enforcement-patterns.md`
 - Agent: `cui-java-expert:logging-violation-analyzer` - Analyze LOGGER statement violations (focused analyzer)
-- Agent: `cui-java-expert:java-code-implementer` - Fix production code (focused implementer)
-- Agent: `cui-java-expert:java-junit-implementer` - Add tests (focused implementer)
+- Command: `/java-implement-code` - Fix production code (Layer 2)
+- Command: `/java-implement-tests` - Add tests (Layer 2)
 - Agent: `cui-java-expert:cui-log-record-documenter` - Update LogMessages documentation (focused documenter)
 - Agent: `cui-maven:maven-builder` - Build verification

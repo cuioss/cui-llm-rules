@@ -12,9 +12,7 @@
   "keywords": ["java", "cdi", "quarkus", "testing", "standards", "patterns"],
   "agents": [
     "./agents/cui-log-record-documenter.md",
-    "./agents/java-code-implementer.md",
     "./agents/java-coverage-analyzer.md",
-    "./agents/java-junit-implementer.md",
     "./agents/logging-violation-analyzer.md"
   ],
   "commands": [

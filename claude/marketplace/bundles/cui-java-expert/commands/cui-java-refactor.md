@@ -199,19 +199,15 @@ Display current module, violations to fix, priority distribution.
 For each violation in priority order (HIGH → MEDIUM → LOW):
 
 ```
-Task:
-  subagent_type: java-code-implementer
-  description: Fix {violation type}
-  prompt: |
-    Fix the following violation using cui-java-core standards:
+SlashCommand: /java-implement-code task="Fix {violation type}:
+Fix the following violation using cui-java-core standards:
 
-    Violation: {violation description}
-    Location: {file}:{line}
-    Type: {violation type}
-    Priority: {priority}
+Violation: {violation description}
+Location: {file}:{line}
+Type: {violation type}
+Priority: {priority}
 
-    Apply appropriate fix following cui-java-core skill patterns.
-    Return implementation status.
+Apply appropriate fix following cui-java-core skill patterns."
 ```
 
 Track in `fixes_applied` counter.
@@ -384,7 +380,7 @@ Bash: git reset --hard {initial_commit}
 Orchestrates agents and commands:
 - **cui-java-maintenance skill** - Standards for detection, prioritization, verification
 - **Explore agent** - Codebase analysis for violation detection
-- **java-code-implementer agent** - Focused code fixes (Layer 3)
+- **/java-implement-code command** - Focused code fixes (Layer 2)
 - **maven-builder agent** - Build and verification (Layer 3)
 - **`/cui-build-and-fix` command** - Build verification and fixes
 - **`/java-coverage-report` command** - Coverage analysis
@@ -392,7 +388,7 @@ Orchestrates agents and commands:
 ## RELATED
 
 - `cui-java-maintenance` skill - Standards this command implements
-- `java-code-implementer` agent - Implementation fixes
+- `/java-implement-code` command - Implementation fixes
 - `maven-builder` agent - Build verification
 - `/cui-build-and-fix` command - Build and fix workflow
 - `/java-coverage-report` command - Coverage analysis

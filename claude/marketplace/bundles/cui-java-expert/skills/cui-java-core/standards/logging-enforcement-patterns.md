@@ -211,7 +211,7 @@ Action: ADD_TESTS
 **Batch 4: Missing Test Coverage**
 - All LogRecords with production usage but no tests
 - Requires: Create LogAssert verification tests
-- Agent: java-junit-implementer
+- Command: /java-implement-tests
 
 **Batch 5: Test-Only LogRecords**
 - All LogRecords with test references but no production usage
@@ -221,32 +221,26 @@ Action: ADD_TESTS
 
 **For code changes (Batches 1-3):**
 ```
-Task:
-  subagent_type: cui-java-expert:java-code-implementer
-  description: Fix {violation-type}
-  prompt: |
-    Fix logging violations in the following locations:
+SlashCommand: /java-implement-code task="Fix {violation-type}:
+Fix logging violations in the following locations:
 
-    {list of files with violations}
+{list of files with violations}
 
-    Apply corrections:
-    {for each violation: location, current code, required correction}
+Apply corrections:
+{for each violation: location, current code, required correction}
 
-    Verify compilation after changes.
+Verify compilation after changes."
 ```
 
 **For test additions (Batch 4):**
 ```
-Task:
-  subagent_type: cui-java-expert:java-junit-implementer
-  description: Add LogAssert tests
-  prompt: |
-    Add LogAssert verification for untested LogRecords.
+SlashCommand: /java-implement-tests task="Add LogAssert tests:
+Add LogAssert verification for untested LogRecords.
 
-    For each untested LogRecord:
-    - LogRecord: {PREFIX}-{IDENTIFIER} ({CONSTANT_NAME})
-    - Production usage: {file}:{line}
-    - Add test verifying this log message is produced
+For each untested LogRecord:
+- LogRecord: {PREFIX}-{IDENTIFIER} ({CONSTANT_NAME})
+- Production usage: {file}:{line}
+- Add test verifying this log message is produced
 
     Use @EnableTestLogger and LogAsserts.
     Verify tests pass.
