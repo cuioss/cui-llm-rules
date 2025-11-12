@@ -9,7 +9,14 @@ Self-contained command that generates JaCoCo coverage reports using maven-builde
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=java-coverage-report update="[your improvement]"` with improvements discovered.
+**This command should be improved using**: `/cui-update-command java-coverage-report`
+
+**Improvement areas**:
+- Enhanced report parsing for multi-module project coverage aggregation
+- Better visualization of coverage trends across modules
+- Improved low-coverage detection with historical comparison
+- Expanded analysis of uncovered critical paths and business logic
+- Advanced filtering and threshold customization per module type
 
 ## WORKFLOW
 

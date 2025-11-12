@@ -350,6 +350,17 @@ Track throughout workflow:
 - `quality_gates_passed`: Count of quality gates passed
 - `marketplace_ready`: Boolean flag
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**This command should be improved using**: `/cui-update-command cui-diagnose-bundle`
+
+**Improvement areas**:
+- Enhanced quality scoring algorithm with weighted component impact
+- Improved integration validation detecting circular dependencies
+- Better marketplace readiness criteria based on bundle type
+- Expanded report formatting with visual health indicators
+- Advanced cross-bundle dependency analysis for ecosystem validation
+
 ## STANDARDS
 
 Bundle analysis delegates to specialized diagnostic commands which use their own standards:

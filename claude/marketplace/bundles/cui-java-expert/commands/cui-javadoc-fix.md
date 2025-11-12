@@ -406,63 +406,20 @@ Display all statistics in final summary.
 
 ## ERROR CATEGORIES AND FIX STRATEGIES
 
-### Missing Parameter Documentation
+For comprehensive error detection patterns and fix strategies, refer to:
 
-**Detection:** `warning: no @param for <param-name>`
+```
+Read: claude/marketplace/bundles/cui-java-expert/skills/cui-javadoc/standards/javadoc-error-reference.md
+```
 
-**Fix Strategy:**
-1. Add `@param` tag with parameter name
-2. Generate minimal description from parameter name
-3. Follow existing documentation style
-4. Example: `@param userId the user identifier`
+This reference covers all common Javadoc errors including:
+- Missing parameter/return/exception documentation
+- Invalid references and malformed tags
+- HTML formatting issues and code blocks
+- Tag ordering problems
+- Empty documentation blocks
 
-### Invalid References
-
-**Detection:** `warning: reference not found: ClassName`
-
-**Fix Strategy:**
-1. Check if class was renamed (search codebase)
-2. Update reference to new name
-3. If class deleted, remove reference
-4. If unclear, prompt user for replacement
-
-### HTML Formatting Issues
-
-**Detection:** `warning: unclosed tag: <p>`
-
-**Fix Strategy:**
-1. Close unclosed tags
-2. Fix nesting issues
-3. Escape special characters (&, <, >)
-4. Replace with `{@code}` where appropriate
-
-### Missing Return Documentation
-
-**Detection:** `warning: no @return`
-
-**Fix Strategy:**
-1. Add `@return` tag
-2. Generate description from method name
-3. Example: `@return the calculated total`
-4. Skip for void methods
-
-### Missing Exception Documentation
-
-**Detection:** `warning: no @throws for <ExceptionType>`
-
-**Fix Strategy:**
-1. Add `@throws` tag
-2. Document condition that triggers exception
-3. Example: `@throws IllegalArgumentException if input is null`
-
-### Tag Ordering Issues
-
-**Detection:** `warning: tag out of order`
-
-**Fix Strategy:**
-1. Reorder tags to standard sequence
-2. Standard order: description → @param → @return → @throws → @see → @since → @deprecated
-3. Preserve all content, just reorder
+All fix strategies follow content-preservation rules and minimal modification approach.
 
 ## ERROR HANDLING
 

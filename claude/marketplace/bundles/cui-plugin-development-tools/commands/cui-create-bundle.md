@@ -155,6 +155,17 @@ This command:
 - Validates structure via /cui-diagnose-bundle
 - Trusts AI to format content appropriately
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**This command should be improved using**: `/cui-update-command cui-create-bundle`
+
+**Improvement areas**:
+- Enhanced questionnaire flow with better default suggestions
+- Improved plugin.json validation and schema enforcement
+- Better component dependency detection and ordering
+- Enhanced README generation based on bundle type patterns
+- Expanded integration testing after bundle creation
+
 ## STANDARDS
 
 Follows:

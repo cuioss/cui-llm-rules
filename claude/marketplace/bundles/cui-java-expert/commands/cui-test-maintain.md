@@ -114,65 +114,17 @@ Task:
   prompt: |
     Analyze test quality in module: [module]
 
-    Execute comprehensive analysis:
+    Load comprehensive analysis checklist:
+    Read: claude/marketplace/bundles/cui-java-expert/skills/cui-java-unit-testing/standards/test-quality-analysis-checklist.md
 
-    1. **Scan for AI Artifacts**:
-       - Method names > 75 characters
-       - Excessive obvious comments
-       - Verbose @DisplayName annotations
-       - Boilerplate AAA comments
-
-    2. **Unit Test Coverage Audit**:
-       - Verify each type has dedicated unit test focusing exclusively on that class
-       - Check comprehensive corner/edge case coverage
-       - Identify test duplication across unit tests
-
-    3. **Forbidden Anti-Pattern Detection**:
-       - Conditional logic: if-else, switch, ternary operators
-       - Optional.orElse() usage in assertions
-       - try-catch blocks in tests
-       - Missing assertThrows/assertDoesNotThrow
-
-    4. **Exception Handling Audit**:
-       - Verify throws declarations for checked exceptions
-       - Verify assertThrows usage for expected exceptions
-       - Verify assertDoesNotThrow for explicit no-exception verification
-
-    5. **Non-Sensible Test Review**:
-       - Meaningless constructor tests
-       - Framework behavior tests
-       - Getter/setter only tests without validation
-       - Reflection workarounds (CRITICAL - always a bug)
-
-    6. **CUI Framework Audit**:
-       - Manual data creation instead of Generators
-       - Missing @GeneratorsSource annotations
-       - Forbidden libraries: Mockito, Hamcrest, PowerMock
-
-    7. **Value Object Review**:
-       - Identify objects needing ShouldHandleObjectContracts<T>
-       - Check for incorrect application (enums, utilities, infrastructure)
-
-    8. **Test Duplication Detection**:
-       - Multiple unit tests testing same method
-       - Integration tests repeating unit test scenarios
-
-    9. **Classify Test Files**:
-       Apply prioritization framework:
-       - HIGH: Business logic, domain objects, API contracts, security
-       - MEDIUM: Value objects, configuration objects, domain enums
-       - LOW: Infrastructure, HTTP clients, framework integration
-
-    10. **Document Findings**:
-        Create structured report:
-        - Test file inventory with priority classification
-        - Violations by category
-        - Enhancement recommendations
-        - Estimated effort per category
-
+    Execute comprehensive analysis following the 10-category checklist.
     Apply priority filter: [priority parameter]
 
-    Return comprehensive analysis report.
+    Return structured analysis report with:
+    - Test file inventory with priority classification
+    - Violations by category with counts
+    - Enhancement recommendations prioritized by impact
+    - Estimated effort per improvement category
 ```
 
 **Outcome**: Complete understanding of test quality issues in module.
@@ -536,6 +488,17 @@ Test maintenance is complete when:
 - [ ] Coverage maintained or improved (minimum 80%)
 - [ ] All commits created following standards
 - [ ] Comprehensive summary report provided
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**This command should be improved using**: `/cui-update-command cui-test-maintain`
+
+**Improvement areas**:
+- Analysis efficiency optimization for large multi-module projects
+- Enhanced bug detection patterns and production code isolation
+- Expanded value object contract detection heuristics
+- Improved coverage regression analysis and reporting
+- Additional test classification categories and priority refinement
 
 ## REFERENCES
 

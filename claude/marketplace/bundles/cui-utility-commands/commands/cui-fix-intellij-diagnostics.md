@@ -9,14 +9,14 @@ Retrieves diagnostics from IntelliJ IDE via MCP, analyzes issues, applies fixes,
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** with:
-1. Improved MCP diagnostics retrieval patterns and timeout handling
-2. Better issue categorization and fix strategies
-3. More effective suppression patterns for unfixable issues
-4. Enhanced build verification and re-check strategies
-5. Any lessons learned about IntelliJ MCP integration
+**This command should be improved using**: `/cui-update-command cui-fix-intellij-diagnostics`
 
-This ensures the command evolves and becomes more effective with each execution.
+**Improvement areas**:
+- Improved MCP diagnostics retrieval patterns and timeout handling
+- Better issue categorization and fix strategies
+- More effective suppression patterns for unfixable issues
+- Enhanced build verification and re-check strategies
+- Any lessons learned about IntelliJ MCP integration
 
 ## PARAMETERS
 

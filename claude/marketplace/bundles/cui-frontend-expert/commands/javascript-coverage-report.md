@@ -9,7 +9,14 @@ Self-contained command that generates test coverage reports and analyzes results
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=javascript-coverage-report update="[your improvement]"` with improvements discovered.
+**This command should be improved using**: `/cui-update-command javascript-coverage-report`
+
+**Improvement areas**:
+- Enhanced report parsing for different test frameworks (Jest, Vitest, Mocha)
+- Better monorepo workspace coverage aggregation
+- Improved low-coverage detection with component-specific thresholds
+- Expanded analysis of uncovered user interaction paths
+- Advanced filtering by file patterns and module boundaries
 
 ## PARAMETERS
 

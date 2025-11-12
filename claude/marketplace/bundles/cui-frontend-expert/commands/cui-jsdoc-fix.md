@@ -9,7 +9,14 @@ Orchestrates systematic JSDoc violation fixing workflow with standards complianc
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-jsdoc-fix update="[your improvement]"` with improvements discovered.
+**This command should be improved using**: `/cui-update-command cui-jsdoc-fix`
+
+**Improvement areas**:
+- Enhanced violation detection for TypeScript JSDoc patterns
+- Better prioritization based on API surface and public exports
+- Improved fix suggestions leveraging type inference
+- Expanded content preservation during complex documentation updates
+- Advanced integration with ESLint JSDoc plugins and rules
 
 ## PARAMETERS
 

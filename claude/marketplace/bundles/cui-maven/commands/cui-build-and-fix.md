@@ -9,15 +9,14 @@ Comprehensive project verification command that orchestrates Maven builds, analy
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-build-and-fix update="[your improvement]"` with:
-1. Improved issue categorization and routing strategies
-2. Better error analysis and fix delegation patterns
-3. Enhanced iteration logic and convergence detection
-4. More effective command orchestration and result aggregation
-5. Improved performance tracking and reporting
-6. Any lessons learned about build-fix-verify workflows
+**This command should be improved using**: `/cui-update-command cui-build-and-fix`
 
-This ensures the command evolves and becomes more effective with each execution.
+**Improvement areas**:
+- Improved issue categorization and routing strategies
+- Better error analysis and fix delegation patterns
+- Enhanced iteration logic and convergence detection
+- More effective command orchestration and result aggregation
+- Improved performance tracking and reporting
 
 ## PARAMETERS
 
