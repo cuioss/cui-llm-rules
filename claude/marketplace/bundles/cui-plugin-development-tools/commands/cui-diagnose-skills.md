@@ -5,7 +5,7 @@ description: Analyze, verify, and fix skills for structure, YAML frontmatter, st
 
 # Skill Doctor - Verify and Fix Skills
 
-Orchestrates comprehensive analysis of skills by coordinating cui-diagnose-single-skill agent for each skill.
+Orchestrates comprehensive analysis of skills by coordinating diagnose-skill agent for each skill.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -81,11 +81,11 @@ Glob: pattern="*/SKILL.md", path=".claude/skills"
 
 **For EACH skill discovered:**
 
-Launch cui-diagnose-single-skill agent:
+Launch diagnose-skill agent:
 
 ```
 Task:
-  subagent_type: cui-diagnose-single-skill
+  subagent_type: diagnose-skill
   description: Analyze {skill-name}
   prompt: |
     Analyze this skill comprehensively.
@@ -142,11 +142,11 @@ Task:
 - Collect all skill paths from Step 2 (from discovered SKILL.md files)
 - Pass as array to cross-skill analyzer
 
-**Launch cui-analyze-cross-skill-duplication agent**:
+**Launch analyze-cross-skill-duplication agent**:
 
 ```
 Task:
-  subagent_type: cui-analyze-cross-skill-duplication
+  subagent_type: analyze-cross-skill-duplication
   description: Detect cross-skill duplication
   prompt: |
     Analyze content duplication between all marketplace skills.
@@ -340,7 +340,7 @@ Apply this fix? [Y]es / [N]o / [S]kip all remaining
 **Re-run analysis** on modified skills:
 ```
 Task:
-  subagent_type: cui-diagnose-single-skill
+  subagent_type: diagnose-skill
   description: Verify fixes for {skill-name}
   prompt: |
     Re-analyze this skill after fixes.
@@ -379,20 +379,20 @@ Verification Complete:
 
 This command is a simple orchestrator:
 - Discovers skills using Glob (non-prompting)
-- Launches cui-diagnose-single-skill agents in parallel (for each skill)
-- Optionally launches cui-analyze-cross-skill-duplication (when --check-cross-duplication flag set)
+- Launches diagnose-skill agents in parallel (for each skill)
+- Optionally launches analyze-cross-skill-duplication (when --check-cross-duplication flag set)
 - Aggregates and reports results
 
 All analysis logic is in specialized agents:
-- **cui-analyze-standards-file**: Single file quality analysis
-- **cui-analyze-integrated-standards**: Cross-file quality within a skill
-- **cui-diagnose-single-skill**: Skill orchestrator (coordinates above two agents)
-- **cui-analyze-cross-skill-duplication**: Cross-skill duplication detection (optional, O(n²))
+- **analyze-standards-file**: Single file quality analysis
+- **analyze-integrated-standards**: Cross-file quality within a skill
+- **diagnose-skill**: Skill orchestrator (coordinates above two agents)
+- **analyze-cross-skill-duplication**: Cross-skill duplication detection (optional, O(n²))
 
 ## TOOL USAGE
 
 - **Glob**: Discover skills (non-prompting)
-- **Task**: Launch cui-diagnose-single-skill agents (parallel)
+- **Task**: Launch diagnose-skill agents (parallel)
 - **Skill**: Load diagnostic patterns
 
 ## RELATED
@@ -444,4 +444,4 @@ All analysis logic is in specialized agents:
 ## STANDARDS
 
 Skill analysis follows marketplace architecture principles and content quality standards.
-Standards validation is performed automatically by specialized agents (cui-analyze-standards-file, cui-analyze-integrated-standards).
+Standards validation is performed automatically by specialized agents (analyze-standards-file, analyze-integrated-standards).

@@ -28,11 +28,11 @@
     "./skills/cui-marketplace-architecture"
   ],
   "agents": [
-    "./agents/cui-analyze-cross-skill-duplication.md",
-    "./agents/cui-analyze-integrated-standards.md",
-    "./agents/cui-analyze-standards-file.md",
-    "./agents/cui-diagnose-single-agent.md",
-    "./agents/cui-diagnose-single-command.md",
-    "./agents/cui-diagnose-single-skill.md"
+    "./agents/analyze-cross-skill-duplication.md",
+    "./agents/analyze-integrated-standards.md",
+    "./agents/analyze-standards-file.md",
+    "./agents/diagnose-agent.md",
+    "./agents/diagnose-command.md",
+    "./agents/diagnose-skill.md"
   ]
 }

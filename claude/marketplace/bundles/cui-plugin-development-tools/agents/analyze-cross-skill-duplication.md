@@ -1,5 +1,5 @@
 ---
-name: cui-analyze-cross-skill-duplication
+name: analyze-cross-skill-duplication
 description: |
   Analyzes content duplication BETWEEN different marketplace skills to identify consolidation opportunities and recommend skill composition patterns.
 
@@ -32,7 +32,7 @@ Analyze ALL skills together to identify:
 - This agent ONLY compares skills with OTHER SKILLS
 
 **NOT CHECKED**: Duplication within a single skill
-- That's handled by `cui-analyze-integrated-standards` agent
+- That's handled by `analyze-integrated-standards` agent
 - This agent ONLY checks BETWEEN different skills
 
 ## INPUT PARAMETERS
@@ -350,7 +350,7 @@ For each skill pair with duplication:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better similarity detection, more accurate overlap calculation, improved harmful duplication identification, enhanced recommendation quality), **YOU MUST immediately update this file** using /cui-update-agent agent-name=cui-analyze-cross-skill-duplication update="[your improvement]"
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better similarity detection, more accurate overlap calculation, improved harmful duplication identification, enhanced recommendation quality), **YOU MUST immediately update this file** using /cui-update-agent agent-name=analyze-cross-skill-duplication update="[your improvement]"
 
 Focus improvements on:
 1. Content similarity detection algorithms and accuracy

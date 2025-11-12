@@ -5,7 +5,7 @@ description: Analyze, verify, and fix slash commands for clarity, structure, and
 
 # Commands Doctor - Verify and Fix Commands
 
-Orchestrates comprehensive analysis of slash commands by coordinating cui-diagnose-single-command for each command.
+Orchestrates comprehensive analysis of slash commands by coordinating diagnose-command for each command.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -81,11 +81,11 @@ Glob: pattern="*.md", path=".claude/commands"
 
 **For EACH command discovered:**
 
-Launch cui-diagnose-single-command:
+Launch diagnose-command:
 
 ```
 Task:
-  subagent_type: cui-diagnose-single-command
+  subagent_type: diagnose-command
   description: Analyze {command-name}
   prompt: |
     Analyze this command comprehensively.
@@ -311,7 +311,7 @@ Note: Automatic extraction is experimental and may require review.
 **Re-run analysis** on modified commands:
 ```
 Task:
-  subagent_type: cui-diagnose-single-command
+  subagent_type: diagnose-command
   description: Verify fixes for {command-name}
   prompt: |
     Re-analyze this command after fixes.
@@ -355,16 +355,16 @@ Verification Complete:
 
 This command is a simple orchestrator:
 - Discovers commands using Glob (non-prompting)
-- Launches cui-diagnose-single-command in parallel
+- Launches diagnose-command in parallel
 - Aggregates and reports results with bloat metrics
 
 All analysis logic is in the specialized agent:
-- cui-diagnose-single-command (comprehensive command analysis)
+- diagnose-command (comprehensive command analysis)
 
 ## TOOL USAGE
 
 - **Glob**: Discover commands (non-prompting)
-- **Task**: Launch cui-diagnose-single-command (parallel)
+- **Task**: Launch diagnose-command (parallel)
 - **Skill**: Load diagnostic patterns
 
 ## RELATED
@@ -382,4 +382,4 @@ Command analysis follows:
 - Command analysis patterns (bundles/cui-plugin-development-tools/standards/command-analysis-patterns.md)
 - 8 anti-bloat rules (CRITICAL for preventing bloat)
 
-Standards are loaded automatically by cui-diagnose-single-command.
+Standards are loaded automatically by diagnose-command.

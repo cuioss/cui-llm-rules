@@ -16,7 +16,7 @@ This bundle includes the following components:
 - **diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
 
 ### Agents (Rule 6 compliant)
-- **cui-diagnose-single-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
+- **diagnose-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
 
 ## Installation Instructions
 

@@ -42,7 +42,7 @@ This bundle provides a complete Java development knowledge base by aggregating f
 
 1. **java-coverage-analyzer** - Analyzes existing JaCoCo coverage reports (focused analyzer - no build execution)
 2. **logging-violation-analyzer** - Analyzes LOGGER statement violations (focused analyzer - no fixes)
-3. **cui-log-record-documenter** - Documents LogRecord classes in AsciiDoc format (focused documenter)
+3. **log-record-documenter** - Documents LogRecord classes in AsciiDoc format (focused documenter)
 
 ### Commands (5 commands)
 

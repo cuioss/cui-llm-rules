@@ -1,5 +1,5 @@
 ---
-name: javascript-coverage-analyzer
+name: js-coverage-analyzer
 description: Analyzes existing test coverage reports (focused analyzer - no build execution)
 tools: Read, Glob, Grep
 model: sonnet
@@ -11,7 +11,7 @@ Focused agent that analyzes existing test coverage reports (Istanbul/NYC, Jest, 
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=javascript-coverage-analyzer update="[your improvement]"` with improvements discovered:
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=js-coverage-analyzer update="[your improvement]"` with improvements discovered:
 1. Better coverage report parsing strategies for different testing frameworks
 2. More accurate coverage threshold calculations and recommendations
 3. Enhanced low-coverage file identification patterns

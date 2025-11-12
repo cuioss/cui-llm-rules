@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-single-agent
+name: diagnose-agent
 description: |
   Analyzes a single agent file for tool coverage, best practices, and structural issues.
 
@@ -520,7 +520,7 @@ Rating:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=cui-diagnose-single-agent update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=diagnose-agent update="[your improvement]"` with improvements discovered during analysis.
 
 Focus improvements on:
 - Tool coverage detection accuracy and scoring precision

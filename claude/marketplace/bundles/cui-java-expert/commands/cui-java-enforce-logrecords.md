@@ -220,13 +220,13 @@ See: `logging-enforcement-patterns.md` → Patterns 13-14 (Identifier Validation
 For each LogMessages class that was modified:
 1. Determine fully qualified class name from file path
 2. Locate corresponding LogMessages.adoc file (from configuration in Step 3)
-3. Invoke cui-log-record-documenter agent
+3. Invoke log-record-documenter agent
 
 **Execute documentation update:**
 
 ```
 Task:
-  subagent_type: cui-java-expert:cui-log-record-documenter
+  subagent_type: cui-java-expert:log-record-documenter
   description: Update LogMessages documentation
   prompt: |
     Update the LogMessages documentation to reflect code changes.
@@ -373,5 +373,5 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Agent: `cui-java-expert:logging-violation-analyzer` - Analyze LOGGER statement violations (focused analyzer)
 - Command: `/cui-java-implement-code` - Fix production code (Layer 2)
 - Command: `/cui-java-implement-tests` - Add tests (Layer 2)
-- Agent: `cui-java-expert:cui-log-record-documenter` - Update LogMessages documentation (focused documenter)
+- Agent: `cui-java-expert:log-record-documenter` - Update LogMessages documentation (focused documenter)
 - Agent: `cui-maven:maven-builder` - Build verification

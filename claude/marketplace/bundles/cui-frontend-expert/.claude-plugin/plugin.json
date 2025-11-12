@@ -11,8 +11,8 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["javascript", "css", "frontend", "web-components", "testing", "standards"],
   "agents": [
-    "./agents/javascript-coverage-analyzer.md",
-    "./agents/jsdoc-violation-analyzer.md",
+    "./agents/js-coverage-analyzer.md",
+    "./agents/js-doc-violation-analyzer.md",
     "./agents/npm-builder.md"
   ],
   "commands": [

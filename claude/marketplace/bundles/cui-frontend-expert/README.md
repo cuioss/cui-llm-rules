@@ -18,8 +18,8 @@ cui-frontend-expert/
 │   └── cui-cypress/
 ├── agents/              # Focused executors (Layer 3)
 │   ├── npm-builder.md
-│   ├── javascript-coverage-analyzer.md
-│   └── jsdoc-violation-analyzer.md
+│   ├── js-coverage-analyzer.md
+│   └── js-doc-violation-analyzer.md
 └── commands/            # User utilities (Layer 2)
     ├── cui-js-implement-code.md
     ├── cui-js-implement-tests.md
@@ -51,8 +51,8 @@ cui-frontend-expert/
 - **npm-builder** - Central agent for npm/npx builds with output capture, issue categorization, performance tracking
 
 ### Analysis
-- **javascript-coverage-analyzer** - Analyzes existing coverage reports (focused analyzer - no build execution)
-- **jsdoc-violation-analyzer** - Analyzes JSDoc compliance and returns structured violation list (focused analyzer - no fixes)
+- **js-coverage-analyzer** - Analyzes existing coverage reports (focused analyzer - no build execution)
+- **js-doc-violation-analyzer** - Analyzes JSDoc compliance and returns structured violation list (focused analyzer - no fixes)
 
 ## Commands (Layer 2: User Utilities)
 
@@ -146,8 +146,8 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | cui-java-expert | cui-frontend-expert | Purpose |
 |----------------|---------------------|---------|
 | maven-builder | npm-builder | Build execution |
-| java-coverage-analyzer | javascript-coverage-analyzer | Coverage analysis |
-| cui-log-record-documenter | jsdoc-violation-analyzer | Documentation analysis |
+| java-coverage-analyzer | js-coverage-analyzer | Coverage analysis |
+| log-record-documenter | js-doc-violation-analyzer | Documentation analysis |
 | java-implement-code | cui-js-implement-code | Self-contained implementation |
 | java-implement-tests | cui-js-implement-tests | Self-contained testing |
 | java-coverage-report | cui-js-generate-coverage | Coverage generation/analysis |

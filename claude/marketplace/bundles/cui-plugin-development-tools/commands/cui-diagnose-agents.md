@@ -5,7 +5,7 @@ description: Analyze, verify, and fix agents for tool coverage, best practices, 
 
 # Agents Doctor - Verify and Fix Agents
 
-Orchestrates comprehensive analysis of agents by coordinating cui-diagnose-single-agent for each agent.
+Orchestrates comprehensive analysis of agents by coordinating diagnose-agent for each agent.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -106,11 +106,11 @@ Glob: pattern="*.md", path=".claude/agents"
 
 **For EACH agent discovered:**
 
-Launch cui-diagnose-single-agent:
+Launch diagnose-agent:
 
 ```
 Task:
-  subagent_type: cui-diagnose-single-agent
+  subagent_type: diagnose-agent
   description: Analyze {agent-name}
   prompt: |
     Analyze this agent comprehensively.
@@ -376,7 +376,7 @@ Apply this fix? [Y]es / [N]o / [S]kip all remaining
 **Re-run analysis** on modified agents:
 ```
 Task:
-  subagent_type: cui-diagnose-single-agent
+  subagent_type: diagnose-agent
   description: Verify fixes for {agent-name}
   prompt: |
     Re-analyze this agent after fixes.
@@ -415,16 +415,16 @@ Verification Complete:
 
 This command is a simple orchestrator:
 - Discovers agents using Glob (non-prompting)
-- Launches cui-diagnose-single-agent in parallel
+- Launches diagnose-agent in parallel
 - Aggregates and reports results
 
 All analysis logic is in the specialized agent:
-- cui-diagnose-single-agent (comprehensive agent analysis)
+- diagnose-agent (comprehensive agent analysis)
 
 ## TOOL USAGE
 
 - **Glob**: Discover agents (non-prompting)
-- **Task**: Launch cui-diagnose-single-agent (parallel)
+- **Task**: Launch diagnose-agent (parallel)
 - **Skill**: Load diagnostic patterns
 
 ## RELATED
@@ -440,4 +440,4 @@ Agent analysis follows:
 - Agent quality standards (bundles/cui-plugin-development-tools/standards/agent-quality-standards.md)
 - Agent analysis patterns (bundles/cui-plugin-development-tools/standards/agent-analysis-patterns.md)
 
-Standards are loaded automatically by cui-diagnose-single-agent.
+Standards are loaded automatically by diagnose-agent.

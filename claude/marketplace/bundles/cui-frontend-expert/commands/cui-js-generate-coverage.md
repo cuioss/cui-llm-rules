@@ -40,7 +40,7 @@ Generate coverage reports in coverage/ directory.
 ### Step 2: Analyze Coverage
 
 ```
-Task: javascript-coverage-analyzer
+Task: js-coverage-analyzer
 Analyze existing coverage reports in coverage/ directory.
 Return structured coverage data.
 ```
@@ -61,4 +61,4 @@ Return structured coverage data.
 ## RELATED
 
 - `npm-builder` - Generates coverage (Layer 3)
-- `javascript-coverage-analyzer` - Analyzes reports (Layer 3)
+- `js-coverage-analyzer` - Analyzes reports (Layer 3)

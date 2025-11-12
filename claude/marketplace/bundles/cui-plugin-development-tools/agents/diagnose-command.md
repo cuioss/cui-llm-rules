@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-single-command
+name: diagnose-command
 description: |
   Analyzes a single command file for bloat, clarity, structure, and anti-bloat compliance.
 
@@ -399,7 +399,7 @@ Rating:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=cui-diagnose-single-command update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=diagnose-command update="[your improvement]"` with improvements discovered during analysis.
 
 Focus improvements on:
 - Bloat detection accuracy and threshold calibration

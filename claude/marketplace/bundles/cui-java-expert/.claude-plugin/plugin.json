@@ -11,7 +11,7 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["java", "cdi", "quarkus", "testing", "standards", "patterns"],
   "agents": [
-    "./agents/cui-log-record-documenter.md",
+    "./agents/log-record-documenter.md",
     "./agents/java-coverage-analyzer.md",
     "./agents/logging-violation-analyzer.md"
   ],

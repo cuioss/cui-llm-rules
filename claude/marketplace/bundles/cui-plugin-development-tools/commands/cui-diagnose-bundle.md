@@ -505,7 +505,7 @@ Track throughout workflow:
 ## STANDARDS
 
 Bundle analysis delegates to specialized diagnostic commands which use their own standards:
-- Skill standards - Validated by cui-analyze-standards-file and cui-analyze-integrated-standards agents
+- Skill standards - Validated by analyze-standards-file and analyze-integrated-standards agents
 - Command standards - bundles/cui-plugin-development-tools/standards/command-quality-standards.md
 - Agent standards - bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
 

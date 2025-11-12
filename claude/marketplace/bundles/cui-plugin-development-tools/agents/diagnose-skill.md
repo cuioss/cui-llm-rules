@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-single-skill
+name: diagnose-skill
 description: |
   Analyzes comprehensive quality of a single skill: validates structure, YAML, and standards quality.
 
@@ -82,7 +82,7 @@ Grep: Apply quality checks directly:
   - Formatting issues
 ```
 
-**Apply cui-analyze-standards-file validation patterns:**
+**Apply analyze-standards-file validation patterns:**
 - Check for empty or trivial content
 - Identify vague requirements
 - Detect redundant information
@@ -106,7 +106,7 @@ Compare across files:
   - Validate integration patterns
 ```
 
-**Apply cui-analyze-integrated-standards validation patterns:**
+**Apply analyze-integrated-standards validation patterns:**
 - Compare content across all files
 - Detect duplicate sections
 - Identify conflicting requirements
@@ -145,7 +145,7 @@ Compare across files:
 
 **Calculate scores:**
 - Architecture Score: 100 - (structural issues * 5) - (broken refs * 5)
-- Integrated Content Score: From cui-analyze-integrated-standards agent
+- Integrated Content Score: From analyze-integrated-standards agent
 - Overall Quality: Average of both scores
 
 ### Step 6: Generate Comprehensive Report
@@ -233,7 +233,7 @@ Compare across files:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=cui-diagnose-single-skill update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=diagnose-skill update="[your improvement]"` with improvements discovered during analysis.
 
 Focus improvements on:
 1. YAML frontmatter validation logic and error detection

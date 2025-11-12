@@ -28,7 +28,7 @@ Orchestrates systematic JSDoc violation fixing workflow with standards complianc
 ### Step 1: Identify JSDoc Violations
 
 ```
-Task: jsdoc-violation-analyzer
+Task: js-doc-violation-analyzer
 Parameters:
 - files: {files or '**/*.js'}
 - scope: all
@@ -89,6 +89,6 @@ Result: {summary}
 
 ## RELATED
 
-- `jsdoc-violation-analyzer` - Identifies violations (Layer 3)
+- `js-doc-violation-analyzer` - Identifies violations (Layer 3)
 - `/cui-js-implement-code` - Fixes violations (Layer 2)
 - `npm-builder` - Verifies fixes (Layer 3)
