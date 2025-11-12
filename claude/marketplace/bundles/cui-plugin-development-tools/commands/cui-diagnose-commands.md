@@ -24,6 +24,7 @@ This ensures the command evolves and becomes more effective with each execution.
 - **scope=global**: Analyze commands in ~/.claude/commands/
 - **scope=project**: Analyze commands in .claude/commands/
 - **command-name** (optional): Review specific command
+- **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode
 
@@ -185,34 +186,169 @@ Recommendations:
 - Display report only (as shown above)
 - Do NOT create any files
 
-## FIXING ISSUES
+### Step 6: Categorize Issues for Fixing
 
-To fix reported issues:
+**Categorize all issues into Safe vs Risky:**
 
-1. **Review recommendations** in report
-2. **Use `/cui-update-command`** to apply fixes:
-   ```
-   /cui-update-command command-name={command-name} update="{issue description}"
-   ```
-3. **Re-run diagnosis** to verify:
-   ```
-   /cui-diagnose-commands command-name={command-name}
-   ```
+**Safe fixes** (auto-apply when auto-fix=true):
+- YAML frontmatter syntax errors
+- Missing YAML fields (add defaults: `name`, `description`)
+- Obsolete content removal (deprecated sections, outdated comments)
+- Add missing CONTINUOUS IMPROVEMENT RULE template
+- Formatting/whitespace normalization
+- Broken cross-references (remove or fix)
 
-**For bloated commands (>500 lines):**
-- Extract content to skills using `/cui-create-skill`
-- Commands MUST be restructured by extracting detailed content to skills
+**Risky fixes** (always prompt user):
+- Bloat resolution (>500 lines - requires extraction to skills)
+- Over-specification reduction (requires judgment on what's essential)
+- Duplication consolidation (requires understanding context)
+- Parameter validation additions (requires understanding parameters)
+- Structural reorganization (requires understanding workflow)
 
-**Example workflow:**
+### Step 7: Apply Safe Fixes
+
+**When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**For each safe fix:**
+
+**YAML syntax errors:**
 ```
-# 1. Diagnose command
-/cui-diagnose-commands command-name=my-command
+Edit: {command-file}
+- Fix YAML frontmatter syntax
+- Add missing required fields with defaults
+- Correct field name typos
+```
 
-# 2. Apply fix using update command
-/cui-update-command command-name=my-command update="Add error handling in Step 3"
+**Obsolete content removal:**
+```
+Edit: {command-file}
+- Remove deprecated sections marked as obsolete
+- Remove outdated comments and TODOs
+- Clean up legacy instructions
+```
 
-# 3. Verify fix
-/cui-diagnose-commands command-name=my-command
+**Add missing CONTINUOUS IMPROVEMENT RULE:**
+```
+Edit: {command-file}
+- Insert CONTINUOUS IMPROVEMENT RULE template after YAML frontmatter
+- Include command-specific improvement areas
+```
+
+**Formatting normalization:**
+```
+Edit: {command-file}
+- Normalize whitespace and indentation
+- Fix heading hierarchy
+- Ensure proper markdown structure
+- Fix broken cross-references
+```
+
+**Track fixes applied:**
+```json
+{
+  "safe_fixes_applied": {count},
+  "by_type": {
+    "yaml_fixes": {count},
+    "obsolete_content_removed": {count},
+    "continuous_improvement_added": {count},
+    "formatting_fixes": {count}
+  }
+}
+```
+
+### Step 8: Prompt for Risky Fixes
+
+**When to execute**: If risky fixes exist (regardless of auto-fix setting)
+
+**For each risky fix, prompt user:**
+
+```
+[PROMPT] Risky fix detected in {command-name}:
+
+Issue: {issue description}
+Location: {file path and line number}
+Proposed fix: {fix description}
+Impact: {explanation of changes needed}
+
+Apply this fix? [Y]es / [N]o / [S]kip all remaining
+```
+
+**Handle responses:**
+- **Yes**: Apply the fix using Edit tool
+- **No**: Skip this fix, continue to next
+- **Skip all remaining**: Exit fixing phase, proceed to verification
+
+**Special handling for bloated commands (>500 lines):**
+```
+[PROMPT] Bloated command detected: {command-name} ({line_count} lines)
+
+This command exceeds the 500-line limit and requires restructuring.
+
+Recommended action:
+1. Extract detailed content to skills using /cui-create-skill
+2. Update command to reference skills instead of inline content
+
+This requires manual intervention. Options:
+[D]efer to manual fix / [A]ttempt automatic extraction / [S]kip
+
+Note: Automatic extraction is experimental and may require review.
+```
+
+**Track risky fixes:**
+```json
+{
+  "risky_fixes_prompted": {count},
+  "risky_fixes_applied": {count},
+  "risky_fixes_skipped": {count},
+  "bloat_fixes_deferred": {count}
+}
+```
+
+### Step 9: Verify Fixes
+
+**When to execute**: After any fixes applied (Step 7 or Step 8)
+
+**Re-run analysis** on modified commands:
+```
+Task:
+  subagent_type: cui-diagnose-single-command
+  description: Verify fixes for {command-name}
+  prompt: |
+    Re-analyze this command after fixes.
+
+    Parameters:
+    - command_path: {absolute_path_to_command}
+
+    Return complete JSON report.
+```
+
+**Compare before/after:**
+```json
+{
+  "verification": {
+    "commands_fixed": {count},
+    "issues_resolved": {count},
+    "issues_remaining": {count},
+    "new_issues": {count}  // Should be 0!
+  }
+}
+```
+
+**Report verification results:**
+```
+Verification Complete:
+✅ {issues_resolved} issues resolved
+{if issues_remaining > 0}
+⚠️ {issues_remaining} issues remain (require manual intervention or /cui-update-command)
+{endif}
+{if new_issues > 0}
+❌ {new_issues} NEW issues introduced (fixes need review!)
+{endif}
+{if bloated_commands_remain}
+⚠️ Bloated commands require extraction to skills:
+- Use /cui-create-skill to extract content
+- Update command to reference skills
+{endif}
 ```
 
 ## ARCHITECTURE

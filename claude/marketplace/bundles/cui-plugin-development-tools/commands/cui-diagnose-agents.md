@@ -24,6 +24,7 @@ This ensures the command evolves and becomes more effective with each execution.
 - **scope=global**: Analyze agents in global location (~/.claude/agents/)
 - **scope=project**: Analyze agents in project location (.claude/agents/)
 - **agent-name** (optional): Review a specific agent by name (e.g., `maven-project-builder`)
+- **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode with marketplace default
 
@@ -263,30 +264,151 @@ Recommendations:
   ```
   Continue execution with displayed report only.
 
-## FIXING ISSUES
+### Step 6: Categorize Issues for Fixing
 
-To fix reported issues:
+**Categorize all issues into Safe vs Risky:**
 
-1. **Review recommendations** in report
-2. **Use `/cui-update-agent`** to apply fixes:
-   ```
-   /cui-update-agent agent-name={agent-name} update="{issue description}"
-   ```
-3. **Re-run diagnosis** to verify:
-   ```
-   /cui-diagnose-agents agent-name={agent-name}
-   ```
+**Safe fixes** (auto-apply when auto-fix=true):
+- YAML frontmatter syntax errors
+- Missing YAML fields (add defaults: `description`)
+- Remove unused tools from `allowed-tools` frontmatter
+- Add missing tools to `allowed-tools` based on workflow usage
+- Add missing CONTINUOUS IMPROVEMENT RULE template
+- Formatting/whitespace normalization
 
-**Example workflow:**
+**Risky fixes** (always prompt user):
+- Task tool misuse resolution (requires architectural redesign)
+- Maven anti-pattern fixes (requires workflow restructuring)
+- Ambiguous instruction clarification (judgment call on intent)
+- Tool coverage gaps requiring workflow changes
+- Precision issues requiring scope reduction
+
+### Step 7: Apply Safe Fixes
+
+**When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**For each safe fix:**
+
+**YAML syntax errors:**
 ```
-# 1. Diagnose agent
-/cui-diagnose-agents agent-name=my-agent
+Edit: {agent-file}
+- Fix YAML frontmatter syntax
+- Add missing required fields with defaults
+- Correct field name typos
+```
 
-# 2. Apply fix using update command
-/cui-update-agent agent-name=my-agent update="Add error handling for tool failures"
+**Tool declaration fixes:**
+```
+Edit: {agent-file}
+- Remove unused tools from allowed-tools array
+- Add missing tools found in workflow (Read, Glob, Grep, etc.)
+- Ensure proper tool declaration format
+```
 
-# 3. Verify fix
-/cui-diagnose-agents agent-name=my-agent
+**Add missing CONTINUOUS IMPROVEMENT RULE:**
+```
+Edit: {agent-file}
+- Insert CONTINUOUS IMPROVEMENT RULE template after description
+- Include agent-specific improvement areas
+```
+
+**Formatting normalization:**
+```
+Edit: {agent-file}
+- Normalize whitespace and indentation
+- Fix heading hierarchy
+- Ensure proper markdown structure
+```
+
+**Track fixes applied:**
+```json
+{
+  "safe_fixes_applied": {count},
+  "by_type": {
+    "yaml_fixes": {count},
+    "tool_declaration_fixes": {count},
+    "continuous_improvement_added": {count},
+    "formatting_fixes": {count}
+  }
+}
+```
+
+### Step 8: Prompt for Risky Fixes
+
+**When to execute**: If risky fixes exist (regardless of auto-fix setting)
+
+**For each risky fix, prompt user:**
+
+```
+[PROMPT] Risky fix detected in {agent-name}:
+
+Issue: {issue description}
+Location: {file path and line number}
+Proposed fix: {fix description}
+Impact: {explanation of architectural/workflow changes needed}
+
+Apply this fix? [Y]es / [N]o / [S]kip all remaining
+```
+
+**Handle responses:**
+- **Yes**: Apply the fix using Edit tool (may require significant workflow changes)
+- **No**: Skip this fix, continue to next
+- **Skip all remaining**: Exit fixing phase, proceed to verification
+
+**Note**: For complex fixes like Task tool misuse or Maven anti-patterns:
+- Prompt should explain the architectural change required
+- Consider suggesting use of `/cui-update-agent` for complex refactoring
+
+**Track risky fixes:**
+```json
+{
+  "risky_fixes_prompted": {count},
+  "risky_fixes_applied": {count},
+  "risky_fixes_skipped": {count},
+  "risky_fixes_deferred_to_update_agent": {count}
+}
+```
+
+### Step 9: Verify Fixes
+
+**When to execute**: After any fixes applied (Step 7 or Step 8)
+
+**Re-run analysis** on modified agents:
+```
+Task:
+  subagent_type: cui-diagnose-single-agent
+  description: Verify fixes for {agent-name}
+  prompt: |
+    Re-analyze this agent after fixes.
+
+    Parameters:
+    - agent_path: {absolute_path_to_agent}
+
+    Return complete JSON report.
+```
+
+**Compare before/after:**
+```json
+{
+  "verification": {
+    "agents_fixed": {count},
+    "issues_resolved": {count},
+    "issues_remaining": {count},
+    "new_issues": {count}  // Should be 0!
+  }
+}
+```
+
+**Report verification results:**
+```
+Verification Complete:
+✅ {issues_resolved} issues resolved
+{if issues_remaining > 0}
+⚠️ {issues_remaining} issues remain (require manual intervention or /cui-update-agent)
+{endif}
+{if new_issues > 0}
+❌ {new_issues} NEW issues introduced (fixes need review!)
+{endif}
 ```
 
 ## ARCHITECTURE

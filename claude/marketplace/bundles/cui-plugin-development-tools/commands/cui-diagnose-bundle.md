@@ -10,6 +10,7 @@ Comprehensive analysis of entire bundle including structure, skills, commands, a
 ## PARAMETERS
 
 - **bundle-name** (optional): Specific bundle to analyze (e.g., `cui-maven`)
+- **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Analyze current bundle or prompt for selection
 
@@ -173,9 +174,9 @@ Display findings:
 
 #### 1.5: Auto-Fix Inventory Issues
 
-**CRITICAL: NO USER PROMPTS - Fix automatically**
+**CRITICAL: Respects auto-fix parameter (default: true) - Fix automatically when enabled, NO USER PROMPTS**
 
-If any inventory issues found:
+If any inventory issues found AND auto-fix=true (default):
 
 1. **Read current plugin.json**
 2. **Parse JSON to object**
@@ -207,25 +208,27 @@ Display:
 
 ### Component Analysis
 
-Delegate to specialized commands:
+Delegate to specialized commands (pass auto-fix parameter):
 
 **Skills Analysis:**
 ```
-Run: /cui-diagnose-skills scope=bundle bundle-name=<name>
+Run: /cui-diagnose-skills scope=bundle bundle-name=<name> auto-fix=<auto-fix>
 ```
 **Error handling:** If command fails or not available, skip skills analysis and mark as "Not Analyzed" in report.
 
 **Commands Analysis:**
 ```
-Run: /cui-diagnose-commands scope=bundle bundle-name=<name>
+Run: /cui-diagnose-commands scope=bundle bundle-name=<name> auto-fix=<auto-fix>
 ```
 **Error handling:** If command fails or not available, skip commands analysis and mark as "Not Analyzed" in report.
 
 **Agents Analysis:**
 ```
-Run: /cui-diagnose-agents scope=bundle bundle-name=<name>
+Run: /cui-diagnose-agents scope=bundle bundle-name=<name> auto-fix=<auto-fix>
 ```
 **Error handling:** If command fails or not available, skip agents analysis and mark as "Not Analyzed" in report.
+
+**Note:** Component-level fixes are handled by the delegated commands. Bundle-level fixes (cross-references, integration) are handled in Steps 2-5.
 
 ### Integration Validation
 
@@ -239,6 +242,133 @@ Cross-component checks:
 **Decision logic:**
 - If any integration check fails: Continue analysis but mark as "Integration Issues" in final report
 - If plugin.json missing or malformed: Mark as CRITICAL and abort bundle analysis
+
+### Step 2: Categorize Bundle-Level Issues for Fixing
+
+**After component analysis and integration validation, categorize bundle-level issues:**
+
+**Safe fixes** (auto-apply when auto-fix=true):
+- Broken cross-references (remove or fix invalid references)
+- Naming inconsistencies (standardize component names)
+- Missing README sections (add standard structure)
+- plugin.json formatting issues
+
+**Risky fixes** (always prompt user):
+- External dependency removal (requires understanding dependency purpose)
+- Structural reorganization (requires understanding architecture)
+- Integration issue resolution requiring component changes
+- Self-containment violations requiring architectural changes
+
+### Step 3: Apply Bundle-Level Safe Fixes
+
+**When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**For each safe fix:**
+
+**Broken cross-references:**
+```
+Edit: {component-file}
+- Remove or comment out invalid references
+- Update references to use correct paths
+```
+
+**Naming inconsistencies:**
+```
+Edit: {component-file}
+- Standardize component names to match bundle conventions
+- Update references to reflect naming changes
+```
+
+**Missing README sections:**
+```
+Edit: {bundle-path}/README.md
+- Add missing standard sections (Installation, Usage, Components)
+- Ensure proper structure and formatting
+```
+
+**plugin.json formatting:**
+```
+Edit: {bundle-path}/.claude-plugin/plugin.json
+- Format JSON with proper indentation
+- Ensure proper field ordering
+```
+
+**Track fixes applied:**
+```json
+{
+  "bundle_safe_fixes_applied": {count},
+  "by_type": {
+    "cross_reference_fixes": {count},
+    "naming_fixes": {count},
+    "readme_fixes": {count},
+    "plugin_json_formatting": {count}
+  }
+}
+```
+
+### Step 4: Prompt for Bundle-Level Risky Fixes
+
+**When to execute**: If risky fixes exist (regardless of auto-fix setting)
+
+**For each risky fix, prompt user:**
+
+```
+[PROMPT] Risky fix detected in bundle {bundle-name}:
+
+Issue: {issue description}
+Location: {file path and context}
+Proposed fix: {fix description}
+Impact: {explanation of architectural/integration changes needed}
+
+Apply this fix? [Y]es / [N]o / [S]kip all remaining
+```
+
+**Handle responses:**
+- **Yes**: Apply the fix using Edit tool (may require multi-component changes)
+- **No**: Skip this fix, continue to next
+- **Skip all remaining**: Exit fixing phase, proceed to quality gates
+
+**Track risky fixes:**
+```json
+{
+  "bundle_risky_fixes_prompted": {count},
+  "bundle_risky_fixes_applied": {count},
+  "bundle_risky_fixes_skipped": {count}
+}
+```
+
+### Step 5: Verify Bundle-Level Fixes
+
+**When to execute**: After any bundle-level fixes applied (Step 3 or Step 4)
+
+**Re-run integration validation:**
+- Check cross-references are valid
+- Verify naming consistency
+- Validate self-containment
+- Check plugin.json structure
+
+**Compare before/after:**
+```json
+{
+  "bundle_verification": {
+    "integration_issues_resolved": {count},
+    "integration_issues_remaining": {count},
+    "new_issues": {count}  // Should be 0!
+  }
+}
+```
+
+**Report verification results:**
+```
+Bundle Verification Complete:
+✅ {integration_issues_resolved} integration issues resolved
+{if integration_issues_remaining > 0}
+⚠️ {integration_issues_remaining} issues remain (require manual intervention)
+{endif}
+{if new_issues > 0}
+❌ {new_issues} NEW issues introduced (fixes need review!)
+{endif}
+```
 
 ### Quality Gates
 
@@ -328,7 +458,10 @@ Recommendations:
 - **VALIDATE PARAMETERS** - Check bundle-name exists before proceeding
 - **LOAD STANDARDS** - Reference quality standards skill
 - **VALIDATE INVENTORY FIRST** - Step 1 MUST execute before component analysis
-- **AUTO-FIX INVENTORY** - Automatically fix missing/incorrect component arrays (NO user prompts)
+- **AUTO-FIX INVENTORY** - Automatically fix missing/incorrect component arrays when auto-fix=true (default, NO user prompts)
+- **AUTO-FIX SAFE ISSUES** - When auto-fix=true (default), automatically fix safe issues without prompts
+- **PROMPT FOR RISKY FIXES** - Always prompt user for risky fixes, even when auto-fix=true
+- **PASS AUTO-FIX TO DELEGATES** - Pass auto-fix parameter to component diagnostic commands
 - **USE GLOB FOR DISCOVERY** - Never use Bash ls/find, only Glob tool
 - **DELEGATE TO SPECIALISTS** - Use component-specific diagnose commands (handle failures gracefully)
 - **CHECK INTEGRATION** - Validate cross-component references

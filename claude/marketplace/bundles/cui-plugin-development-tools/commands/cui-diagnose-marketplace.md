@@ -49,7 +49,7 @@ When plugins are removed from marketplace, user's local cache still references t
 **CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-marketplace update="[your improvement]"` with:
 1. Enhanced detection patterns for obsolete plugin references
 2. Improved schema validation for plugin.json manifests
-3. Better backup and rollback strategies for configuration fixes
+3. Better categorization of safe vs risky fixes
 4. More comprehensive cross-file consistency checks
 5. Any lessons learned about marketplace configuration issues
 
@@ -57,8 +57,7 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ## PARAMETERS
 
-**auto-fix** (optional, default: false) - Automatically fix issues without prompting user
-**backup** (optional, default: true) - Create timestamped backups before making changes
+- **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
 
 ## WORKFLOW
 
@@ -85,7 +84,6 @@ Track statistics:
 - `files_checked`: Count of configuration files examined
 - `issues_found`: Count of total issues detected
 - `issues_fixed`: Count of issues successfully resolved
-- `backups_created`: Count of backup files created
 
 Display:
 ```
@@ -252,65 +250,70 @@ Issues by Category:
 {issues_list}
 ```
 
-### Step 7: Offer Fixes
+### Step 7: Categorize Issues for Fixing
 
-**If auto-fix=false:**
+**Categorize all issues into Safe vs Risky:**
+
+**Safe fixes** (auto-apply when auto-fix=true):
+- Remove obsolete plugin definitions from marketplace.json
+- Remove orphaned plugin entries from installed_plugins.json
+- Remove obsolete Skill() permissions from settings.json
+- Remove obsolete enabledPlugins entries from settings.json
+- Remove invalid schema fields from bundle plugin.json (displayName, category, components, dependencies, engines)
+- Convert repository object to string in plugin.json
+
+**Risky fixes** (always prompt user):
+- Remove plugins that might still be in use (if uncertain)
+- Structural changes to marketplace.json that affect multiple bundles
+- Changes that might break user workflows
+
+**Note**: Most marketplace diagnostics issues are safe to auto-fix because they involve removing obsolete/invalid entries.
+
+### Step 8: Apply Safe Fixes
+
+**When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**For each safe fix:**
+
+**Fix marketplace.json:**
 ```
-[PROMPT] Fix issues automatically? [Y]es/[N]o/[S]elective
-```
-
-**If auto-fix=true or user selects Yes:**
-- Skip prompt, proceed to Step 8
-
-**If user selects Selective:**
-- Show each issue with [F]ix/[S]kip option
-- Track user choices
-
-**If user selects No:**
-- Display: "Run /cui-diagnose-marketplace auto-fix=true to apply fixes"
-- Exit
-
-### Step 8: Create Backups (if backup=true)
-
-For each file that will be modified:
-```
-Bash: cp {file} {file}.backup-{timestamp}
-```
-
-Example:
-- `~/.claude/settings.json` → `~/.claude/settings.json.backup-20250104-143022`
-- `~/.claude/plugins/installed_plugins.json` → `~/.claude/plugins/installed_plugins.json.backup-20250104-143022`
-
-Increment `backups_created` for each backup.
-
-Display:
-```
-[INFO] Created backups:
-  • ~/.claude/settings.json.backup-20250104-143022
-  • ~/.claude/plugins/installed_plugins.json.backup-20250104-143022
-```
-
-### Step 9: Apply Fixes
-
-**A. Fix marketplace.json:**
+Edit: claude/marketplace/.claude-plugin/marketplace.json
 - Remove obsolete plugin definitions
-- Update with Edit tool
+- Update plugins array
+```
 
-**B. Fix installed_plugins.json:**
-- Remove orphaned plugin entries
-- Update with Edit tool or jq via Bash
+**Fix installed_plugins.json:**
+```
+Edit: ~/.claude/plugins/installed_plugins.json
+- Remove orphaned plugin entries from plugins object
+```
 
-**C. Fix settings.json:**
-- Remove obsolete Skill() permissions from allowedToolUse
-- Remove obsolete entries from enabledPlugins
-- Update with Edit tool
+**Fix settings.json:**
+```
+Edit: ~/.claude/settings.json
+- Remove obsolete Skill() permissions from permissions.allow array
+- Remove obsolete entries from enabledPlugins object
+```
 
-**D. Fix bundle plugin.json manifests:**
-- Remove invalid fields
-- Convert repository object to string if needed
-- Update with Edit tool
+**Fix bundle plugin.json manifests:**
+```
+Edit: claude/marketplace/bundles/{bundle-name}/.claude-plugin/plugin.json
+- Remove invalid schema fields (displayName, category, components, dependencies, engines)
+- Convert repository object to string format
+```
 
-Increment `issues_fixed` for each successful fix.
+**Track fixes applied:**
+```json
+{
+  "safe_fixes_applied": {count},
+  "by_type": {
+    "marketplace_json_fixes": {count},
+    "installed_plugins_fixes": {count},
+    "settings_json_fixes": {count},
+    "plugin_json_schema_fixes": {count}
+  }
+}
+```
 
 Display progress:
 ```
@@ -322,26 +325,65 @@ Display progress:
   ✓ Fixed cui-maven plugin.json schema
 ```
 
+### Step 9: Prompt for Risky Fixes
+
+**When to execute**: If risky fixes exist (regardless of auto-fix setting)
+
+**For each risky fix, prompt user:**
+
+```
+[PROMPT] Risky fix detected:
+
+Issue: {issue description}
+Location: {file path}
+Proposed fix: {fix description}
+Impact: {explanation of potential impact}
+
+Apply this fix? [Y]es / [N]o / [S]kip all remaining
+```
+
+**Handle responses:**
+- **Yes**: Apply the fix using Edit tool
+- **No**: Skip this fix, continue to next
+- **Skip all remaining**: Exit fixing phase, proceed to verification
+
+**Track risky fixes:**
+```json
+{
+  "risky_fixes_prompted": {count},
+  "risky_fixes_applied": {count},
+  "risky_fixes_skipped": {count}
+}
+```
+
 ### Step 10: Verification
 
-**A. Re-run all checks from Steps 2-5**
+**When to execute**: After any fixes applied (Step 8 or Step 9)
 
-**B. Compare issues_found:**
-- Before: {original_issues}
-- After: {remaining_issues}
+**Re-run all checks from Steps 2-5**
 
-**C. Display verification:**
-```
-[INFO] Verification complete:
-  • Original issues: {original_issues}
-  • Remaining issues: {remaining_issues}
-  • Fixed: {issues_fixed}
+**Compare before/after:**
+```json
+{
+  "verification": {
+    "original_issues": {count},
+    "issues_resolved": {count},
+    "issues_remaining": {count},
+    "new_issues": {count}  // Should be 0!
+  }
+}
 ```
 
-If `remaining_issues > 0`:
+**Report verification results:**
 ```
-[WARN] Some issues could not be fixed automatically:
-{list_of_remaining_issues}
+Verification Complete:
+✅ {issues_resolved} issues resolved
+{if issues_remaining > 0}
+⚠️ {issues_remaining} issues remain (require manual intervention)
+{endif}
+{if new_issues > 0}
+❌ {new_issues} NEW issues introduced (fixes need review!)
+{endif}
 ```
 
 ### Step 11: Display Final Summary
@@ -355,13 +397,12 @@ Results:
 - Files checked: {files_checked}
 - Issues found: {issues_found}
 - Issues fixed: {issues_fixed}
-- Backups created: {backups_created}
 
 Configuration Status: {✓ HEALTHY | ⚠ NEEDS ATTENTION | ✗ ERRORS REMAIN}
 
 Next Steps:
 1. Restart Claude Code to apply plugin changes
-2. Review backup files in ~/.claude/*.backup-*
+2. Review changes with git diff if needed
 3. Run /cui-diagnose-bundle for individual bundle checks
 ```
 
@@ -372,10 +413,14 @@ Next Steps:
 - Validate plugin.json schema for ALL bundles
 - Cross-reference plugin names across all configuration files
 
+**Autofix:**
+- When auto-fix=true (default), automatically fix safe issues without prompts
+- Always prompt user for risky fixes, even when auto-fix=true
+- Most marketplace issues are safe to auto-fix (obsolete entries, invalid schema fields)
+
 **Safety:**
-- ALWAYS create backups before modifications (unless backup=false)
-- Timestamp backups for traceability: `{filename}.backup-{YYYYMMDD-HHMMSS}`
 - Verify fixes by re-running diagnostics
+- Git provides version control - no separate backups needed
 
 **User Experience:**
 - Clear severity indicators: ✓ (valid), ⚠ (warning), ✗ (error)
@@ -386,7 +431,6 @@ Next Steps:
 **Error Handling:**
 - If Read fails: Report file not found, skip that check
 - If Edit fails: Report error, mark issue as unfixed
-- If Bash backup fails: Abort fixes, warn user
 - Non-blocking failures: Continue checking other files
 
 **Schema Validation:**
@@ -396,27 +440,17 @@ Next Steps:
 
 ## USAGE EXAMPLES
 
-**Basic diagnostics (report only):**
+**Basic diagnostics with auto-fix (default):**
 ```
 /cui-diagnose-marketplace
 ```
 
-**Auto-fix all issues:**
+**Disable auto-fix (report only):**
 ```
-/cui-diagnose-marketplace auto-fix=true
-```
-
-**Fix without backups (not recommended):**
-```
-/cui-diagnose-marketplace auto-fix=true backup=false
+/cui-diagnose-marketplace auto-fix=false
 ```
 
-**Selective fix mode:**
-```
-/cui-diagnose-marketplace
-→ [User chooses Selective]
-→ For each issue: [F]ix or [S]kip
-```
+**Note:** Safe issues are auto-fixed by default. Risky fixes always prompt for confirmation.
 
 ## RELATED
 

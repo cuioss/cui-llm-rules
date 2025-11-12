@@ -24,6 +24,7 @@ This ensures the command evolves and becomes more effective with each execution.
 - **scope=global**: Analyze skills in global location (~/.claude/skills/)
 - **scope=project**: Analyze skills in project location (.claude/skills/)
 - **skill-name** (optional): Review a specific skill by name (e.g., `cui-java-core`)
+- **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **--check-cross-duplication** (optional): Detect content duplication BETWEEN skills. Expensive O(n²) operation. Default: false
 - **No parameters**: Interactive mode with marketplace default
@@ -245,15 +246,134 @@ Consolidation Opportunities:
 - Display report only (as shown above)
 - Do NOT create any files
 
-## FIXING ISSUES
+### Step 7: Categorize Issues for Fixing
 
-This command currently REPORTS issues only. To fix:
+**Categorize all issues into Safe vs Risky:**
 
-1. Review recommendations in report
-2. Manually edit affected files
-3. Re-run cui-diagnose-skills to verify fixes
+**Safe fixes** (auto-apply when auto-fix=true):
+- YAML frontmatter syntax errors
+- Formatting/whitespace normalization
+- Missing YAML fields (add defaults: `description`, `audience`, `prerequisites`)
+- Broken file references (remove or comment out)
 
-**Future enhancement**: Auto-fix capability with user approval.
+**Risky fixes** (always prompt user):
+- Duplication consolidation (requires judgment on what to keep)
+- Missing standards files (create stub vs remove reference - user decides)
+- Zero-information content removal (may have context we don't understand)
+- Conflicting guidance resolution (requires domain expertise)
+
+### Step 8: Apply Safe Fixes
+
+**When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**For each safe fix:**
+
+**YAML syntax errors:**
+```
+Edit: {skill-file}
+- Fix YAML frontmatter syntax
+- Add missing required fields with defaults
+- Correct field name typos (e.g., `tools` → `allowed-tools`)
+```
+
+**Formatting normalization:**
+```
+Edit: {skill-file}
+- Normalize whitespace and indentation
+- Ensure blank lines before lists (AsciiDoc requirement)
+- Fix heading hierarchy
+```
+
+**Broken references:**
+```
+Edit: {skill-file}
+- Remove or comment out references to non-existent files
+- Add comment: "<!-- Reference removed: file not found -->"
+```
+
+**Track fixes applied:**
+```json
+{
+  "safe_fixes_applied": {count},
+  "by_type": {
+    "yaml_fixes": {count},
+    "formatting_fixes": {count},
+    "reference_fixes": {count}
+  }
+}
+```
+
+### Step 9: Prompt for Risky Fixes
+
+**When to execute**: If risky fixes exist (regardless of auto-fix setting)
+
+**For each risky fix, prompt user:**
+
+```
+[PROMPT] Risky fix detected in {skill-name}:
+
+Issue: {issue description}
+Location: {file path and line number}
+Proposed fix: {fix description}
+
+Apply this fix? [Y]es / [N]o / [S]kip all remaining
+```
+
+**Handle responses:**
+- **Yes**: Apply the fix using Edit tool
+- **No**: Skip this fix, continue to next
+- **Skip all remaining**: Exit fixing phase, proceed to verification
+
+**Track risky fixes:**
+```json
+{
+  "risky_fixes_prompted": {count},
+  "risky_fixes_applied": {count},
+  "risky_fixes_skipped": {count}
+}
+```
+
+### Step 10: Verify Fixes
+
+**When to execute**: After any fixes applied (Step 8 or Step 9)
+
+**Re-run analysis** on modified skills:
+```
+Task:
+  subagent_type: cui-diagnose-single-skill
+  description: Verify fixes for {skill-name}
+  prompt: |
+    Re-analyze this skill after fixes.
+
+    Parameters:
+    - skill_path: {absolute_path_to_skill}
+
+    Return complete JSON report.
+```
+
+**Compare before/after:**
+```json
+{
+  "verification": {
+    "skills_fixed": {count},
+    "issues_resolved": {count},
+    "issues_remaining": {count},
+    "new_issues": {count}  // Should be 0!
+  }
+}
+```
+
+**Report verification results:**
+```
+Verification Complete:
+✅ {issues_resolved} issues resolved
+{if issues_remaining > 0}
+⚠️ {issues_remaining} issues remain (require manual intervention)
+{endif}
+{if new_issues > 0}
+❌ {new_issues} NEW issues introduced (fixes need review!)
+{endif}
+```
 
 ## ARCHITECTURE
 
