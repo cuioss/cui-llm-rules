@@ -22,7 +22,7 @@
   ],
   "skills": [
     "./skills/cui-diagnostic-patterns",
-    "./skills/cui-general-development-rules/SKILL.md",
+    "./skills/cui-general-development-rules",
     "./skills/permission-management",
     "./skills/web-security-standards"
   ]

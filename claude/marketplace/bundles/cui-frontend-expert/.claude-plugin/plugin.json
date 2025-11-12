@@ -1,19 +1,25 @@
 {
   "name": "cui-frontend-expert",
-  "display_name": "CUI Frontend Expert",
-  "description": "JavaScript, CSS, and web component standards for CUI applications",
   "version": "1.0.0",
-  "author": "CUI Team",
-  "components": [
-    {
-      "type": "skill",
-      "name": "cui-css",
-      "path": "skills/cui-css/SKILL.md"
-    },
-    {
-      "type": "skill",
-      "name": "cui-javascript-maintenance",
-      "path": "skills/cui-javascript-maintenance/SKILL.md"
-    }
+  "description": "JavaScript, CSS, and web component standards for CUI applications",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["javascript", "css", "frontend", "web-components", "testing", "standards"],
+  "agents": [],
+  "commands": [],
+  "skills": [
+    "./skills/cui-css",
+    "./skills/cui-cypress",
+    "./skills/cui-javascript",
+    "./skills/cui-javascript-linting",
+    "./skills/cui-javascript-maintenance",
+    "./skills/cui-javascript-project",
+    "./skills/cui-javascript-unit-testing",
+    "./skills/cui-jsdoc"
   ]
 }

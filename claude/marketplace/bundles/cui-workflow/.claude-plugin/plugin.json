@@ -12,18 +12,23 @@
   "keywords": ["workflow", "issue", "pull-request", "pr", "task", "implementation", "review", "quality", "commit", "git"],
   "agents": [
     "./agents/commit-changes.md",
-    "./agents/task-reviewer.md",
+    "./agents/review-comment-fetcher.md",
+    "./agents/review-comment-triager.md",
+    "./agents/sonar-issue-fetcher.md",
+    "./agents/sonar-issue-triager.md",
     "./agents/task-breakdown-agent.md",
     "./agents/task-executor.md",
-    "./agents/pr-review-responder.md",
-    "./agents/pr-quality-fixer.md"
+    "./agents/task-reviewer.md"
   ],
   "commands": [
+    "./commands/cui-handle-pull-request.md",
     "./commands/cui-implement-task.md",
-    "./commands/cui-handle-pull-request.md"
+    "./commands/execute-task.md",
+    "./commands/fix-sonar-issues.md",
+    "./commands/respond-to-review-comments.md"
   ],
   "skills": [
-    "./skills/cui-git-workflow/SKILL.md",
-    "./skills/cui-task-planning/SKILL.md"
+    "./skills/cui-git-workflow",
+    "./skills/cui-task-planning"
   ]
 }

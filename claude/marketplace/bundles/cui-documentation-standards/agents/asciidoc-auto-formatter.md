@@ -3,7 +3,7 @@ name: asciidoc-auto-formatter
 description: |
   Auto-fixes common AsciiDoc formatting issues (blank lines before lists, xref syntax, headers, whitespace).
 
-  Specialized agent for automated formatting with safety features (backups, dry-run, interactive mode).
+  Specialized agent for automated formatting with safety features (dry-run, interactive mode).
 
   Examples:
   - User: "Auto-fix formatting issues in standards/"
@@ -26,7 +26,7 @@ Auto-fix AsciiDoc formatting issues:
 - Fix header attributes
 - Remove trailing whitespace
 
-Operate safely with backups and optional preview mode.
+Operate safely with optional preview mode. Changes tracked in git version control.
 
 ## SKILLS USED
 
@@ -50,7 +50,6 @@ Skill: cui-documentation
 - `dry_run` (boolean, default: true) - Preview changes without modifying
 - `fix_types` (array, default: ["all"]) - Types of fixes: "lists", "xref", "headers", "whitespace", "all"
 - `interactive` (boolean, default: false) - Ask before each fix
-- `create_backup` (boolean, default: true) - Create .bak files
 
 **Validate target:**
 - For files: Use Read tool to verify exists and has `.adoc` extension
@@ -86,11 +85,6 @@ done
 # Interactive mode
 if [interactive == true]; then
   OPTIONS="$OPTIONS -i"
-fi
-
-# Backup control
-if [create_backup == false]; then
-  OPTIONS="$OPTIONS -b"
 fi
 ```
 
@@ -135,7 +129,7 @@ Issues fixed: {count}
 Changes applied:
 {list of files and fixes}
 
-Backup files created with .bak extension
+Changes tracked in git version control
 ```
 
 **No changes needed:**
@@ -160,8 +154,8 @@ Report validation results to confirm formatting is correct.
 
 **Default Behavior:**
 - Dry-run mode enabled by default (preview only)
-- Backups created automatically
 - User must explicitly request applying changes
+- Changes tracked in git version control
 
 **Before Applying Changes:**
 - Always run in dry-run mode first
@@ -170,8 +164,8 @@ Report validation results to confirm formatting is correct.
 
 **Error Handling:**
 - If formatter fails, preserve original files
-- If backup creation fails, abort operation
 - Report any script errors clearly
+- Use git to restore files if needed
 
 ## COMMON USE CASES
 
@@ -204,7 +198,6 @@ dry_run: true
 # Step 2: Apply (after user confirms)
 target: "docs/"
 dry_run: false
-create_backup: true
 ```
 
 ## INTEGRATION WITH VALIDATION
@@ -247,11 +240,11 @@ Then: scripts/asciidoc-validator.sh {target}
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better parameter validation, more comprehensive fix types, improved backup management, enhanced user feedback), **YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-auto-formatter update="[your improvement]"
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better parameter validation, more comprehensive fix types, enhanced user feedback), **YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-auto-formatter update="[your improvement]"
 
 Focus improvements on:
 1. Parameter validation logic and error messaging clarity
 2. Fix type coverage and formatting rule comprehensiveness
-3. Backup file management and restoration procedures
-4. Dry-run preview accuracy and user feedback quality
-5. Integration with asciidoc-validator for post-fix verification
+3. Dry-run preview accuracy and user feedback quality
+4. Integration with asciidoc-validator for post-fix verification
+5. Git integration patterns for file restoration and rollback

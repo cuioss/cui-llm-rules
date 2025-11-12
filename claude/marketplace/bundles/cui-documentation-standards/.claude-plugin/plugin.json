@@ -11,13 +11,14 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["documentation", "asciidoc", "standards", "review"],
   "agents": [
+    "./agents/asciidoc-auto-formatter.md",
     "./agents/asciidoc-content-reviewer.md",
     "./agents/asciidoc-format-validator.md",
-    "./agents/asciidoc-link-verifier.md",
-    "./agents/asciidoc-reviewer.md"
+    "./agents/asciidoc-link-verifier.md"
   ],
   "commands": [
-    "./commands/cui-review-technical-docs.md"
+    "./commands/cui-review-technical-docs.md",
+    "./commands/review-single-asciidoc.md"
   ],
   "skills": [
     "./skills/cui-documentation"
