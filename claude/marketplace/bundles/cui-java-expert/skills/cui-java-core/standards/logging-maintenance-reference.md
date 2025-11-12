@@ -676,6 +676,95 @@ grep -n "increment.*JWKS_JSON_PARSE_FAILED" src/main/java/
 - [ ] Common errors logged from single point
 - [ ] All parameter formats standardized to `%s`
 
+## LogRecord Discovery and Coverage Verification
+
+**Systematic script for finding all LogRecords and verifying test coverage:**
+
+```bash
+#!/bin/bash
+# Find all LogRecords and verify test coverage
+
+MODULE_PATH="${1:-src}"
+
+echo "=== Finding all LogRecords ==="
+grep -r "public static final LogRecord" --include="*LogMessages.java" $MODULE_PATH/main/java | \
+  awk '{print $5}' | sort -u
+
+echo ""
+echo "=== Checking Production and Test Coverage ==="
+for record in $(grep -r "public static final LogRecord" --include="*LogMessages.java" $MODULE_PATH/main/java | awk '{print $5}' | sort -u); do
+    echo "LogRecord: $record"
+
+    echo "  Production usage:"
+    grep -rn "$record\.format\|$record::format" --include="*.java" $MODULE_PATH/main/java | head -3
+    PROD_COUNT=$(grep -r "$record\.format\|$record::format" --include="*.java" $MODULE_PATH/main/java | wc -l)
+
+    echo "  Test coverage (must be in business logic test):"
+    grep -rn "LogAsserts.*$record\|$record.*resolveIdentifierString" --include="*Test.java" $MODULE_PATH/test/java | head -3
+    TEST_COUNT=$(grep -r "LogAsserts.*$record\|$record.*resolveIdentifierString" --include="*Test.java" $MODULE_PATH/test/java | wc -l)
+
+    if [ $PROD_COUNT -eq 0 ]; then
+        echo "  ⚠️  WARNING: LogRecord not used in production - consider removing"
+    elif [ $TEST_COUNT -eq 0 ]; then
+        echo "  ❌ WARNING: No LogAsserts found - add to business logic test"
+    else
+        echo "  ✅ OK: Production ($PROD_COUNT) and Test ($TEST_COUNT) coverage"
+    fi
+    echo ""
+done
+
+echo "=== Summary ==="
+echo "Update plan.md with findings before proceeding"
+```
+
+**plan.md Generation Script:**
+
+```bash
+#!/bin/bash
+MODULE_PATH="${1:-src}"
+
+echo "# LogRecord Test Coverage Status" > plan.md
+echo "" >> plan.md
+echo "## Summary" >> plan.md
+
+# Count total LogRecords
+TOTAL=$(grep -r "LogRecord.*=" --include="*LogMessages.java" $MODULE_PATH/main/java | wc -l)
+echo "- Total LogRecords: $TOTAL" >> plan.md
+
+# Count tested LogRecords
+TESTED=$(grep -r "LogAsserts.*resolveIdentifierString" --include="*Test.java" $MODULE_PATH/test/java | wc -l)
+echo "- Tested with LogAsserts: $TESTED" >> plan.md
+
+# Calculate missing
+MISSING=$((TOTAL - TESTED))
+echo "- Missing LogAsserts: $MISSING" >> plan.md
+echo "" >> plan.md
+
+echo "## LogRecord Inventory" >> plan.md
+echo "| LogRecord | Production Location | Business Test Location | Status |" >> plan.md
+echo "|-----------|-------------------|----------------------|--------|" >> plan.md
+
+# Find all LogRecords and their usage
+for record in $(grep -rh "public static final LogRecord" --include="*LogMessages.java" $MODULE_PATH/main/java | awk '{print $5}' | sort -u); do
+  # Find production usage
+  PROD_LOC=$(grep -rn "$record\.format\|$record::format" --include="*.java" $MODULE_PATH/main/java | head -1 | cut -d: -f1-2 | sed 's|.*/||')
+
+  # Find test usage
+  TEST_LOC=$(grep -rn "LogAsserts.*$record\|$record.*resolveIdentifierString" --include="*Test.java" $MODULE_PATH/test/java | head -1 | cut -d: -f1-2 | sed 's|.*/||')
+
+  if [ -n "$TEST_LOC" ]; then
+    STATUS="✅"
+  else
+    STATUS="❌ Missing"
+  fi
+
+  echo "| $record | ${PROD_LOC:-Not found} | ${TEST_LOC:-Missing} | $STATUS |" >> plan.md
+done
+
+echo "" >> plan.md
+echo "Generated: $(date)" >> plan.md
+```
+
 ## Related Standards
 
 - logging-standards.md - Standards for writing NEW logging code

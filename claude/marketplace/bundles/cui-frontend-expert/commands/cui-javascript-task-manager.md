@@ -9,7 +9,14 @@ Orchestrates complete JavaScript task implementation through code creation, unit
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-javascript-task-manager update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-javascript-task-manager update="[your improvement]"` with:
+1. Task breakdown patterns - How to decompose JavaScript tasks into implementation + testing phases, recognizing when components need separate test utilities or fixtures
+2. Implementation strategy refinement - Best practices for handling async code, module imports, external dependencies, framework-specific patterns (Vue, React, etc.)
+3. Test implementation approaches - Unit test patterns for JavaScript, mocking strategies, fixture setup efficiency, achieving meaningful coverage vs line coverage
+4. Coverage verification patterns - Understanding coverage thresholds by file type, identifying false coverage, recognizing when integration tests are needed vs unit tests
+5. Any lessons learned about JavaScript tooling patterns, common implementation mistakes, test framework quirks, or iteration efficiency improvements
+
+This ensures the command evolves to handle increasingly complex JavaScript tasks with better technical accuracy and more efficient testing strategies.
 
 ## PARAMETERS
 

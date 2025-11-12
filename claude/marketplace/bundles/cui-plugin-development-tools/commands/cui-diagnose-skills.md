@@ -7,6 +7,17 @@ description: Analyze, verify, and fix skills for structure, YAML frontmatter, st
 
 Orchestrates comprehensive analysis of skills by coordinating cui-diagnose-single-skill agent for each skill.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-skills update="[your improvement]"` with:
+1. Improved skill analysis detection patterns and quality metrics
+2. Better methods for identifying skill structural issues and YAML problems
+3. More effective cross-skill duplication detection and consolidation recommendations
+4. Enhanced marketplace architecture validation techniques
+5. Any lessons learned about skill design patterns and self-containment principles
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 - **scope=marketplace** (default): Analyze all marketplace skills (standalone + bundle skills)

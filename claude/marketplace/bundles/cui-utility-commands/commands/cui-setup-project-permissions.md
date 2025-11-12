@@ -7,6 +7,17 @@ description: Verify and fix permissions in settings by removing duplicates, fixi
 
 Verifies and fixes permissions in `.claude/settings.local.json` using permission management standards from the `permission-management` skill.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-setup-project-permissions update="[your improvement]"` with:
+1. Improved permission validation patterns and syntax checking techniques
+2. Better methods for detecting and consolidating redundant permissions
+3. More effective consolidation strategies for global vs local permissions
+4. Enhanced path normalization and format fixing approaches
+5. Any lessons learned about permission architecture patterns
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 **add=<permission>** - Add new permission to allow list (e.g., `Edit(//~/git/project/**)`)

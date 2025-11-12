@@ -1,6 +1,22 @@
+---
+name: cui-requirements-maintain
+description: Maintain and synchronize requirements and specifications with comprehensive validation
+---
+
 # Requirements and Specifications Maintenance Command
 
 Systematic workflow for maintaining requirements and specification documents to ensure continued accuracy, traceability, and alignment with implementation.
+
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-requirements-maintain update="[your improvement]"` with:
+1. Improved requirements integrity detection patterns
+2. Better cross-reference verification strategies
+3. More efficient scenario workflow approaches
+4. Enhanced duplicate detection methods
+5. Any lessons learned about requirements maintenance
+
+This ensures the command evolves and becomes more effective with each execution.
 
 ## PARAMETERS
 
@@ -14,796 +30,463 @@ Systematic workflow for maintaining requirements and specification documents to 
   - `deprecation` - Handling deprecated or removed functionality
   - `refactoring` - Updating after code refactoring
 
-## OVERVIEW
+## CRITICAL CONSTRAINTS
 
-This command provides comprehensive requirements and specifications maintenance workflow with:
+### Documentation Integrity
 
-* Pre-maintenance checklist and scope identification
-* Requirements review and update process
-* Specification maintenance and alignment verification
-* Cross-reference verification (documents and code)
-* Integrity checking (no hallucinations, no duplications, verified links)
-* Deprecation handling protocol (pre-1.0 vs post-1.0)
-* Quality verification with comprehensive checklist
-* Scenario-specific workflows
+**MUST:**
+- Document only existing or approved functionality
+- Verify all code references resolve correctly
+- Replace duplications with cross-references
+- Maintain requirement ID stability (NEVER renumber)
 
-**Key Constraint**: NO hallucinations - document only existing or approved functionality.
+**MUST NOT:**
+- Document non-existent features (hallucinations)
+- Copy content between documents
+- Break cross-reference traceability
+- Change requirement IDs
 
-## PREREQUISITES
+### Deprecation Handling Protocol
 
-**Load Required Skills**:
+**Pre-1.0 projects:**
+- Update requirements directly
+- Simply remove or update outdated content
+- No deprecation markers needed
+
+**Post-1.0 projects - ASK USER:**
+- STOP and use AskUserQuestion tool
+- Present options: Deprecate (mark but keep) or Remove (delete)
+- Wait for user decision
+- Apply chosen approach
+
+**Never remove post-1.0 requirements without user approval.**
+
+## WORKFLOW
+
+### Step 0: Parameter Validation
+
+- If `scope` specified: Use specified scope
+- If NO `scope`: Default to full maintenance
+- If `scenario` specified: Tailor workflow accordingly
+
+### Step 1: Load Requirements Standards
+
 ```
 Skill: cui-requirements:requirements-maintenance
 Skill: cui-requirements:requirements-documentation
 Skill: cui-requirements:specification-documentation
 ```
 
-This loads all requirements/specifications standards including:
-- Maintenance principles (consistency, completeness, clarity, maintainability)
-- Integrity requirements (no hallucinations, no duplications, verified links)
-- Deprecation handling rules
+This loads comprehensive requirements standards including:
+- requirements-maintenance.md - Maintenance principles and integrity requirements
+- requirements-documentation.md - Requirements creation patterns
+- specification-documentation.md - Specification structure standards
+
+**On load failure:** Report error and abort command.
+
+### Step 2: Pre-Maintenance Discovery
+
+**2.1 Identify Documents:**
+
+```
+Task:
+  subagent_type: Explore
+  model: haiku
+  description: Locate requirements and specification documents
+  prompt: |
+    Locate all requirements and specification documents in project.
+    Search for:
+    - Requirements.adoc (typically in doc/)
+    - Specification documents (typically in doc/specifications/)
+    - Related documentation files
+
+    Return structured list with paths.
+```
+
+**2.2 Load Maintenance Standards:**
+
+Verify standards loaded from skills, confirm understanding of:
 - SMART requirements principles
-- Specification structure standards
+- Integrity requirements (no hallucinations, no duplications, verified links)
+- Deprecation handling rules (pre-1.0 vs post-1.0)
+- Traceability requirements
 
-## WORKFLOW
-
-### Step 1: Pre-Maintenance Checklist
-
-**Execute pre-maintenance verification**:
-
-1. **Identify Scope**:
-   - If `scope` parameter provided: Use specified scope
-   - If NO `scope` parameter: Default to full maintenance
-   - If `scenario` parameter provided: Tailor workflow to scenario
-
-2. **Verify Document Access**:
-   ```
-   Task:
-     subagent_type: Explore
-     thoroughness: quick
-     description: Identify requirements and specification documents
-     prompt: |
-       Locate all requirements and specification documents in the project.
-
-       Search for:
-       - Requirements.adoc (typically in doc/ directory)
-       - Specification documents (typically in doc/specifications/ or similar)
-       - Related documentation files
-
-       Return:
-       - List of requirements documents found
-       - List of specification documents found
-       - Document structure and organization
-   ```
-
-3. **Load Maintenance Standards**:
-   ```
-   Read: claude/marketplace/bundles/cui-requirements/skills/requirements-maintenance.md
-   ```
-
-4. **Understand Current State**:
-   - Review document structure
-   - Identify dependencies between documents
-   - Note any existing issues or warnings
-
-**Outcome**: Scope defined, documents identified, standards loaded.
-
-### Step 2: Requirements Review Process
+### Step 3: Requirements Analysis
 
 **[If scope = "requirements" OR scope = "full"]**
 
-#### Step 2a: Analyze Current Requirements State
+**3.1 Analyze Requirements State:**
 
 ```
 Task:
   subagent_type: Explore
-  thoroughness: medium
-  description: Analyze requirements documents for issues
+  model: haiku
+  description: Identify requirements maintenance needs
   prompt: |
-    Analyze requirements documents for maintenance needs.
+    Analyze requirements documents for issues.
+    Apply detection criteria from cui-requirements:requirements-maintenance skill:
+    - Missing/incomplete requirements
+    - Outdated references
+    - Broken cross-references
+    - Inconsistent terminology
+    - Duplicate information
+    - Integrity violations (hallucinations, unverified references)
 
-    Review for:
-
-    1. **Missing or Incomplete Requirements**:
-       - Requirements without descriptions
-       - Missing rationale or acceptance criteria
-       - Incomplete traceability links
-       - TBD placeholders or gaps
-
-    2. **Outdated References**:
-       - References to deprecated functionality
-       - Broken links to specifications
-       - Obsolete code references
-       - Incorrect package/class names
-
-    3. **Broken Cross-References**:
-       - xref: links that don't resolve
-       - References to deleted documents
-       - Invalid section IDs
-       - External links that are broken
-
-    4. **Inconsistent Terminology**:
-       - Different terms for same concept
-       - Contradictory definitions
-       - Non-standard naming conventions
-
-    5. **Duplicate Information**:
-       - Same information in multiple places
-       - Copy-pasted requirement text
-       - Redundant definitions
-
-    6. **Integrity Violations**:
-       - Potential hallucinations (documented features that don't exist)
-       - Missing verification sources
-       - Unverified code references
-
-    Apply scope filter: [scope parameter]
-
-    Return structured analysis with:
-    - Issues found by category
-    - Affected requirement IDs
-    - Severity (High/Medium/Low)
-    - Recommended actions
+    Return structured analysis by category with severity.
 ```
 
-**Outcome**: Complete understanding of requirements maintenance needs.
-
-#### Step 2b: Update Requirements
-
-Apply changes following requirements documentation standards:
+**3.2 Update Requirements:**
 
 ```
-For each identified issue:
+Task:
+  subagent_type: Task
+  description: Apply requirements updates
+  prompt: |
+    Update requirements following patterns from
+    cui-requirements:requirements-documentation skill.
 
-1. **Update Requirement Statements**:
-   - Correct inaccurate statements
-   - Complete incomplete requirements
-   - Clarify ambiguous language
-   - Ensure SMART compliance
+    Apply maintenance rules from cui-requirements:requirements-maintenance skill:
+    - NEVER renumber requirement IDs
+    - Ensure SMART compliance
+    - Preserve rationale
+    - Update status indicators
+    - Maintain traceability
 
-2. **Maintain Requirement IDs**:
-   - NEVER renumber requirements
-   - Preserve traceability through ID stability
-   - Only add new IDs for new requirements
-
-3. **Preserve Requirement Rationale**:
-   - Keep historical context
-   - Update rationale if context changes
-   - Document reason for changes
-
-4. **Update Status Indicators**:
-   - Mark deprecated requirements (if post-1.0)
-   - Update implementation status
-   - Reflect current project state
+    CRITICAL: Document only existing or approved functionality.
 ```
 
-**Example Update**:
-```asciidoc
-// Before
-=== REQ-001: Authentication
+**If scenario = "new-feature":** Follow new-feature documentation pattern from requirements-documentation skill.
 
-System needs auth.
+**If scenario = "deprecation":** Apply deprecation handling protocol (check version, ask user for post-1.0).
 
-// After
-=== REQ-001: User Authentication
-
-The system shall authenticate users via OAuth2 protocol with support
-for multiple OIDC identity providers.
-
-**Rationale**: OAuth2 provides industry-standard security and enables
-single sign-on across multiple applications.
-
-**Acceptance Criteria**:
-- Support at least 3 OIDC providers (Google, Microsoft, Okta)
-- Complete authentication within 2 seconds for 95% of requests
-- Maintain session security according to OWASP standards
-
-**Traceability**: xref:specifications/OAuth2Specification.adoc[OAuth2 Specification]
-```
-
-#### Step 2c: Verify Specification Alignment
-
-Ensure specifications match requirements:
+**3.3 Verify Specification Alignment:**
 
 ```
-For each updated requirement:
+Task:
+  subagent_type: Explore
+  model: haiku
+  description: Check specification links
+  prompt: |
+    Verify requirements link to specifications correctly.
+    Apply verification patterns from cui-requirements:requirements-maintenance skill:
+    - Check xref: links resolve
+    - Verify specifications exist
+    - Confirm bidirectional traceability
+    - Validate implementation references
 
-1. **Check Specification Links**:
-   - Verify xref: to specifications resolve
-   - Ensure specifications exist for all requirements
-   - Confirm bidirectional traceability
-
-2. **Verify Implementation References**:
-   - Check code references are accurate
-   - Verify package/class names correct
-   - Confirm methods/interfaces exist
-
-3. **Update Cross-References**:
-   - Add missing specification links
-   - Fix broken references
-   - Update changed paths
-
-4. **Maintain Traceability Matrix** (if present):
-   - Update requirement-to-specification mappings
-   - Verify completeness
-   - Check for orphaned entries
+    Return list of broken or missing links.
 ```
 
-**Outcome**: Requirements updated and aligned with specifications.
-
-### Step 3: Specification Maintenance Process
+### Step 4: Specification Maintenance
 
 **[If scope = "specifications" OR scope = "full"]**
 
-#### Step 3a: Review Specifications
+**4.1 Analyze Specifications:**
 
 ```
 Task:
   subagent_type: Explore
-  thoroughness: medium
-  description: Analyze specification documents for maintenance needs
+  model: haiku
+  description: Identify specification maintenance needs
   prompt: |
-    Analyze specification documents for maintenance issues.
+    Analyze specification documents for issues.
+    Apply detection criteria from cui-requirements:requirements-maintenance skill:
+    - Alignment with requirements
+    - Accurate implementation references
+    - Complete behavioral descriptions
+    - Valid cross-references
 
-    Review for:
-
-    1. **Alignment with Requirements**:
-       - Each specification linked to requirements
-       - All requirement changes reflected
-       - No specifications without requirements
-
-    2. **Accurate Implementation References**:
-       - Code references point to existing files
-       - Package/class names are current
-       - Method signatures match code
-       - Line numbers updated if specified
-
-    3. **Complete Behavioral Descriptions**:
-       - All behavior fully specified
-       - Edge cases documented
-       - Error handling described
-       - Performance characteristics stated
-
-    4. **Valid Cross-References**:
-       - Links to requirements resolve
-       - Links to other specifications work
-       - Code examples are current
-       - External references accessible
-
-    Apply scope filter: [scope parameter]
-
-    Return structured analysis of specification issues.
+    Return structured analysis with locations.
 ```
 
-#### Step 3b: Update Specifications
-
-Follow specification documentation standards:
+**4.2 Update Specifications:**
 
 ```
-For each identified issue:
+Task:
+  subagent_type: Task
+  description: Apply specification updates
+  prompt: |
+    Update specifications following patterns from
+    cui-requirements:specification-documentation skill.
 
-1. **Maintain Linkage to Requirements**:
-   - Ensure every specification links to requirements
-   - Use clear requirement ID references
-   - Update links if requirements changed
+    Apply maintenance rules:
+    - Maintain linkage to requirements
+    - Update implementation details
+    - Preserve specification IDs
+    - Keep examples current and valid
 
-2. **Update Implementation Details**:
-   - Correct code references to match current structure
-   - Update package/class names after refactoring
-   - Refresh code examples
-   - Remove references to deleted code
-
-3. **Preserve Specification IDs**:
-   - Keep specification IDs stable
-   - Maintain traceability throughout lifecycle
-
-4. **Keep Examples Current and Valid**:
-   - Verify code examples compile
-   - Update examples to match current API
-   - Ensure examples follow project standards
+    CRITICAL: Verify all code references exist.
 ```
 
-**Outcome**: Specifications updated and synchronized.
+**If scenario = "refactoring":** Update implementation references following refactoring patterns from requirements-maintenance skill.
 
-### Step 4: Cross-Reference Verification
+### Step 5: Cross-Reference Verification
 
 **[If scope = "references" OR scope = "full"]**
 
-#### Step 4a: Verify Document Links
-
-Check all internal documentation links:
+**5.1 Verify Document Links:**
 
 ```
-Verification process:
+Task:
+  subagent_type: Explore
+  model: haiku
+  description: Validate all xref: links
+  prompt: |
+    Verify all cross-references resolve correctly.
+    Check:
+    - xref: links point to existing sections
+    - Paths are current after restructuring
+    - Section IDs are correct
+    - No references to deleted documents
 
-1. **Check xref: References**:
-   - Compile list of all xref: links in documents
-   - Verify each link resolves to existing section
-   - Test that target sections exist
-   - Confirm section IDs are correct
-
-2. **Update Paths After Restructuring**:
-   - If documents moved, update paths
-   - If sections renamed, update section IDs
-   - Maintain link integrity
-
-3. **Remove References to Deleted Documents**:
-   - Identify links to non-existent files
-   - Either remove link or update to new location
-   - Document reason for removal
-
-4. **Add References to New Documents**:
-   - When new related documents added
-   - Create appropriate cross-references
-   - Maintain documentation network
+    Return list of broken links with suggested fixes.
 ```
 
-#### Step 4b: Validate Code References
-
-**CRITICAL**: Verify implementation references exist:
+**5.2 Validate Code References:**
 
 ```
-Verification process:
+Task:
+  subagent_type: Explore
+  model: haiku
+  description: Verify implementation references
+  prompt: |
+    Validate all code references in documentation.
+    Use Grep to verify:
+    - Referenced classes exist
+    - Method signatures correct
+    - Package names current
+    - Line numbers accurate (if specified)
 
-1. **Verify Referenced Classes/Methods Exist**:
-   For each code reference:
-   - Check class exists in codebase
-   - Verify method signatures correct
-   - Confirm interfaces/types are accurate
+    Pattern: de\.cuioss\.[a-zA-Z.]+
 
-2. **Update Package Names if Changed**:
-   - Search for old package references
-   - Update to current package structure
-   - Verify new paths are correct
-
-3. **Confirm Line Numbers if Specified**:
-   - If documentation references specific lines
-   - Verify line numbers are current
-   - Update or remove if code changed significantly
-
-4. **Remove References to Deleted Code**:
-   - Identify references to non-existent code
-   - Remove or update to replacement code
-   - Document why code reference removed
+    Return list of invalid references with corrections.
 ```
 
-**Tool Usage**:
-```
-Use Grep to find code references:
-Pattern: `de\.cuioss\.[a-zA-Z.]+`
+**CRITICAL:** All code references must resolve to existing code.
 
-Verify each match exists in codebase.
-```
+### Step 6: Integrity Verification
 
-**Outcome**: All cross-references verified and updated.
-
-### Step 5: Integrity Verification
-
-**CRITICAL CHECKS**:
-
-#### Check 1: No Hallucinations
+**6.1 Check for Hallucinations:**
 
 ```
 For each requirement and specification:
 
-1. **Verify Feature Exists or Is Approved**:
-   - Check implementation code exists
-   - OR verify feature is in approved roadmap
-   - OR mark clearly as future functionality
-
-2. **Flag Unverified Documentation**:
+1. Verify feature exists in code OR is in approved roadmap
+2. Flag unverified documentation:
    - Requirements without implementation
    - Specifications describing non-existent behavior
    - Code references to non-existent elements
 
-3. **User Approval for Unknowns**:
-   If documentation found without verification:
+3. If unverified content found:
    - STOP maintenance process
    - Document the unverified content
    - ASK USER: "Is this documented feature planned or should it be removed?"
    - WAIT for user decision
 ```
 
-#### Check 2: No Duplications
+**6.2 Eliminate Duplications:**
 
 ```
-Search for duplicate content:
+Task:
+  subagent_type: Explore
+  model: haiku
+  description: Detect duplicate content
+  prompt: |
+    Identify duplicate information across documents.
+    Apply detection patterns from cui-requirements:requirements-maintenance skill.
 
-1. **Identify Repeated Information**:
-   - Same requirement text in multiple places
-   - Copied specifications
-   - Redundant definitions
+    For each duplication:
+    - Identify canonical location
+    - Suggest cross-reference replacement
 
-2. **Determine Canonical Location**:
-   - Identify single source of truth
-   - Keep most complete version
-   - Note location for cross-references
-
-3. **Replace Duplicates with Cross-References**:
-   - Replace copied text with xref: link
-   - Add brief context if needed (max 1 sentence)
-   - Verify link resolves correctly
+    Return structured list of duplications with canonical sources.
 ```
 
-#### Check 3: Verified Links
+Replace duplicates with xref: links to canonical location.
 
-```
-Final link verification:
+**6.3 Final Link Verification:**
 
+Checklist:
 - [ ] All xref: links resolve
 - [ ] All code references verified
 - [ ] All external links accessible
 - [ ] No broken references remain
-```
-
-**Outcome**: Documentation integrity verified.
-
-### Step 6: Scenario-Specific Workflows
-
-**[If scenario parameter provided]**
-
-#### Scenario: New Feature Documentation
-
-**[If scenario = "new-feature"]**
-
-```
-Workflow for documenting new features:
-
-1. **Add Requirements**:
-   - Follow SMART principles
-   - Assign unique requirement ID following project scheme
-   - Include rationale and acceptance criteria
-   - Link to related requirements
-
-2. **Create Specifications**:
-   - Link specification to requirements
-   - Describe behavior completely
-   - Include implementation references
-   - Add code examples if helpful
-
-3. **Update Related Documents**:
-   - Add cross-references in related requirements
-   - Update traceability matrix
-   - Link from overview/index documents
-
-4. **Maintain Consistency**:
-   - Use established terminology
-   - Follow document structure standards
-   - Apply consistent formatting
-```
-
-#### Scenario: Deprecation Handling
-
-**[If scenario = "deprecation"]**
-
-**CRITICAL**: Handle deprecation based on project version.
-
-```
-Process:
-
-1. **Determine Project Version**:
-   - Check if project is pre-1.0 or post-1.0
-   - Apply appropriate deprecation rule
-
-2. **Pre-1.0 Projects**:
-   - Update requirements directly
-   - No deprecation markers needed
-   - Simply remove or update content
-   - Update linked specifications
-
-3. **Post-1.0 Projects - ASK USER**:
-   STOP and ask user:
-
-   Use AskUserQuestion tool:
-   Question: "This functionality appears to be removed or changed.
-
-   Details:
-   - Affected requirements: [list IDs]
-   - Affected specifications: [list docs]
-   - Current status: [description]
-
-   Should I deprecate (mark as deprecated but keep) or remove (delete)?
-
-   Deprecate: Maintains historical record, shows migration path
-   Remove: Cleans up documentation, removes outdated info"
-
-   Options:
-   - "Deprecate - mark as deprecated and add migration guidance"
-   - "Remove - delete requirements and update all references"
-
-4. **If User Chooses Deprecate**:
-   - Mark requirements with [DEPRECATED] in title
-   - Add deprecation warning block
-   - Document replacement functionality
-   - Add migration guidance
-   - Preserve original content
-   - Update specification status
-
-5. **If User Chooses Remove**:
-   - Delete requirement sections
-   - Remove from traceability matrix
-   - Update all cross-references
-   - Remove from specifications
-   - Clean up implementation references
-```
-
-#### Scenario: Refactoring Impact
-
-**[If scenario = "refactoring"]**
-
-```
-Workflow after code refactoring:
-
-1. **Identify Refactoring Changes**:
-   - List moved/renamed classes
-   - List changed package names
-   - List modified method signatures
-   - Note structural changes
-
-2. **Update Implementation References**:
-   - Search for old package names in specifications
-   - Replace with new package/class names
-   - Update method signatures if changed
-   - Verify all references resolve
-
-3. **Verify Requirement Statements**:
-   - Confirm requirements still accurate
-   - Requirements describe WHAT, not HOW
-   - Usually requirements don't change
-   - Only update if behavior changed
-
-4. **Adjust Examples**:
-   - Update code examples to new structure
-   - Verify examples still compile
-   - Ensure examples follow current standards
-
-5. **Maintain Requirement IDs**:
-   - NEVER renumber requirements
-   - Keep traceability intact
-   - Only update content, not IDs
-```
-
-**Outcome**: Scenario-specific updates applied correctly.
 
 ### Step 7: Quality Verification
 
-**Complete comprehensive quality checklist**:
+Run comprehensive quality checklist from cui-requirements:requirements-maintenance skill:
 
 ```
 Quality Verification:
 
-- [ ] **Cross-References Validated**:
-  - All xref: links resolve correctly
-  - All document references point to current files
-  - No broken internal links
-  - Cross-references use correct syntax
-
-- [ ] **No Duplicate Information**:
-  - Each piece of information has single source
-  - Cross-references used instead of copying
-  - No conflicting statements across documents
-  - Information distributed following standards
-
-- [ ] **Consistent Terminology**:
-  - Same terms used for same concepts
-  - Glossary terms used consistently
-  - No contradictory definitions
-  - Standard naming conventions followed
-
-- [ ] **Clear Traceability Maintained**:
-  - Requirements have unique IDs
-  - Specifications link to requirements
-  - Implementation references specifications
-  - Traceability complete and current
-
-- [ ] **No Hallucinated Functionality**:
-  - All documented features verified in code
-  - All code references point to existing elements
-  - No fictional capabilities documented
-  - Future features clearly marked
-
-- [ ] **Integrity Maintained**:
-  - No hallucinations present
-  - No duplications remain
-  - All links verified and working
-  - Documentation reflects reality
+- [ ] Cross-References Validated (all links work)
+- [ ] No Duplicate Information (cross-references used)
+- [ ] Consistent Terminology (same terms for same concepts)
+- [ ] Clear Traceability Maintained (complete requirement-to-implementation chain)
+- [ ] No Hallucinated Functionality (all features verified)
+- [ ] Integrity Maintained (documentation reflects reality)
 ```
 
-**If ANY check fails**:
-1. Document the failure
-2. Fix the issue
-3. Re-run verification
-4. Continue only when all checks pass
+**If ANY check fails:** Document failure, fix issue, re-run verification.
 
-**Outcome**: Quality standards met.
+### Step 8: Scenario-Specific Finalization
 
-### Step 8: Commit Changes
+**[If scenario parameter provided]**
 
-**Create focused commit following standards**:
+**If scenario = "new-feature":**
+- Verify new requirements follow SMART principles
+- Confirm specifications link to requirements
+- Ensure traceability matrix updated
 
-1. **Review All Changes**:
-   - Check what was modified
-   - Ensure changes are intentional
-   - Verify no unintended edits
+**If scenario = "deprecation":**
+- Verify deprecation markers applied (if post-1.0 and user chose deprecate)
+- OR confirm removals complete (if user chose remove)
+- Check all references updated
 
-2. **Prepare Commit Message**:
-   ```
-   docs(requirements): [brief description of changes]
+**If scenario = "refactoring":**
+- Verify all package/class name updates applied
+- Confirm method signatures current
+- Ensure examples compile with new structure
 
-   [Detailed description of maintenance performed]
+### Step 9: Commit Changes
 
-   - [Specific change 1]
-   - [Specific change 2]
-   - [Specific change 3]
+**9.1 Review Changes:**
 
-   Affected requirements: [list requirement IDs]
-   [Optional: Affected specifications: list spec IDs]
-   [Optional: Structural changes: describe]
-
-   🤖 Generated with Claude Code
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   ```
-
-3. **Execute Commit**:
-   ```bash
-   git add [affected files]
-   git commit -m "$(cat <<'EOF'
-   [commit message from above]
-   EOF
-   )"
-   ```
-
-**Example Commit Message**:
 ```
-docs(requirements): update authentication requirements after OAuth2 migration
-
-Comprehensive maintenance of authentication requirements and specifications
-following code refactoring to OAuth2 implementation.
-
-- Updated REQ-001 through REQ-005 for OAuth2 authentication
-- Removed deprecated SAML authentication requirements (pre-1.0 project)
-- Updated implementation references to new package structure
-- Fixed broken cross-references to specifications
-- Verified all code references resolve correctly
-
-Affected requirements: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005
-Affected specifications: OAuth2Specification.adoc, AuthenticationFlows.adoc
+Bash: git status
+Bash: git diff
 ```
 
-**Outcome**: Changes committed with proper documentation.
+Verify all changes are intentional and requirements-related.
 
-### Step 9: Summary Report
+**9.2 Create Commit:**
 
-**Provide comprehensive maintenance summary**:
-
-Report:
-
-1. **Scope Processed**:
-   - Scope: [scope parameter value]
-   - Scenario: [scenario parameter value if provided]
-   - Documents reviewed: [list]
-
-2. **Requirements Updated**:
-   - Requirements reviewed: [count]
-   - Requirements updated: [list of IDs]
-   - New requirements added: [list if any]
-   - Requirements deprecated/removed: [list if any]
-
-3. **Specifications Updated**:
-   - Specifications reviewed: [count]
-   - Specifications updated: [list]
-   - Implementation references corrected: [count]
-
-4. **Cross-References Fixed**:
-   - Broken document links fixed: [count]
-   - Broken code references fixed: [count]
-   - New cross-references added: [count]
-
-5. **Integrity Checks**:
-   - Hallucinations found and resolved: [count]
-   - Duplications removed: [count]
-   - Links verified: [total count]
-
-6. **Quality Verification**: All checks passed ✓
-
-7. **Commit Created**: [commit hash] ✓
-
-## PARAMETERS USAGE
-
-**Example 1: Full maintenance**
 ```
-scope: "full"
-```
-Performs complete requirements and specifications maintenance with all verification checks.
+Bash: git add {affected files}
+Bash: git commit -m "$(cat <<'EOF'
+docs(requirements): [brief description of changes]
 
-**Example 2: Requirements only**
-```
-scope: "requirements"
-```
-Focuses on requirements documents, skips specification-specific updates.
+[Detailed description of maintenance performed]
 
-**Example 3: New feature documentation**
-```
-scope: "full"
-scenario: "new-feature"
-```
-Tailors workflow for documenting new functionality with proper traceability.
+- [Specific change 1]
+- [Specific change 2]
+- [Specific change 3]
 
-**Example 4: Handle deprecation (post-1.0 project)**
-```
-scope: "full"
-scenario: "deprecation"
-```
-Executes deprecation workflow, asks user whether to deprecate or remove.
+Affected requirements: [list requirement IDs]
+[Optional: Affected specifications: list spec IDs]
+[Optional: Structural changes: describe]
 
-**Example 5: After refactoring**
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
 ```
-scope: "specifications"
-scenario: "refactoring"
+
+### Step 10: Display Summary
+
 ```
-Updates implementation references after code refactoring.
+╔════════════════════════════════════════════════════════════╗
+║       Requirements Maintenance Summary                     ║
+╚════════════════════════════════════════════════════════════╝
+
+Scope: {scope parameter value}
+Scenario: {scenario parameter value if provided}
+
+Requirements Reviewed: {count}
+Requirements Updated: {list of IDs}
+New Requirements Added: {count if any}
+Requirements Deprecated/Removed: {count if any}
+
+Specifications Reviewed: {count}
+Specifications Updated: {list}
+Implementation References Corrected: {count}
+
+Cross-References Fixed:
+- Broken document links: {count}
+- Broken code references: {count}
+- New cross-references added: {count}
+
+Integrity Checks:
+- Hallucinations resolved: {count}
+- Duplications removed: {count}
+- Links verified: {total count}
+
+Quality Verification: All checks passed ✓
+Commit Created: {commit hash} ✓
+
+Time Taken: {elapsed_time}
+```
+
+## STATISTICS TRACKING
+
+Track throughout workflow:
+- `requirements_reviewed` / `requirements_updated` - Requirements processing
+- `specifications_reviewed` / `specifications_updated` - Specifications processing
+- `broken_links_fixed` - Cross-reference repairs
+- `hallucinations_found` / `hallucinations_resolved` - Integrity issues
+- `duplications_removed` - Content deduplication
+- `scenario_specific_actions` - Scenario workflow steps
+- `elapsed_time` - Total execution time
+
+Display all statistics in final summary.
 
 ## ERROR HANDLING
 
-### Unverified Documentation Found
-
-If documentation is found without verification source:
+**Unverified Documentation Found:**
 1. Stop maintenance process
-2. Document the unverified content details
+2. Document unverified content details
 3. Ask user: "Is this documented feature planned or should it be removed?"
 4. Wait for user decision
 5. Proceed based on user choice
 
-### Broken Links Cannot Be Fixed
-
-If cross-reference target is missing:
-1. Document the broken link
+**Broken Links Cannot Be Fixed:**
+1. Document broken link
 2. Try to locate moved content
 3. If found: Update link
 4. If not found: Ask user for guidance
 5. Remove link only with user approval
 
-### Conflicting Information
-
-If duplicate information conflicts:
+**Conflicting Information:**
 1. Document both versions
 2. Identify most authoritative source
 3. Ask user which version is correct
 4. Update to correct version
 5. Replace duplicates with cross-references
 
-## CONSTRAINTS
+## USAGE EXAMPLES
 
-**STRICT REQUIREMENTS**:
+```
+# Complete maintenance
+/cui-requirements-maintain scope=full
 
-* **NO hallucinations**: Document only existing or approved functionality
-* **NO duplications**: Use cross-references, not copies
-* **Verified links**: All references must resolve correctly
-* **Ask before removing**: For post-1.0 projects, ask user about deprecation vs removal
-* **Preserve IDs**: Never renumber requirements or specifications
-* **Maintain traceability**: Keep complete requirement-to-implementation chain
+# Requirements only
+/cui-requirements-maintain scope=requirements
 
-## SUCCESS CRITERIA
+# New feature documentation
+/cui-requirements-maintain scope=full scenario=new-feature
 
-Requirements maintenance is complete when:
+# Handle deprecation (will ask user for post-1.0)
+/cui-requirements-maintain scope=full scenario=deprecation
 
-- [ ] All requirements reviewed and updated
-- [ ] All specifications aligned with requirements
-- [ ] All cross-references verified and working
-- [ ] No duplicate information remains
-- [ ] Consistent terminology throughout
-- [ ] No hallucinated functionality documented
-- [ ] All integrity checks passed
-- [ ] Quality verification checklist complete
-- [ ] Changes committed with proper message
-- [ ] Summary report provided
+# After refactoring
+/cui-requirements-maintain scope=specifications scenario=refactoring
+```
 
-## REFERENCES
+## ARCHITECTURE
 
-**Skills Used**:
-* cui-requirements:requirements-maintenance - Maintenance standards and principles
-* cui-requirements:requirements-documentation - Requirements creation standards
-* cui-requirements:specification-documentation - Specification creation standards
+Orchestrates agents and skills:
+- **cui-requirements:requirements-maintenance skill** - Maintenance standards and integrity rules
+- **cui-requirements:requirements-documentation skill** - Requirements creation patterns
+- **cui-requirements:specification-documentation skill** - Specification structure standards
+- **Explore agent** - Document analysis and issue identification
+- **Task agent** - Requirements and specification updates
+- **Grep** - Code reference verification
 
-**Agents Orchestrated**:
-* Explore - Document analysis and issue identification
+## RELATED
+
+- `cui-requirements:requirements-maintenance` skill - Maintenance principles
+- `cui-requirements:requirements-documentation` skill - Requirements patterns
+- `cui-requirements:specification-documentation` skill - Specification patterns
+- `/cui-implement-task` command - End-to-end issue implementation
+- `/cui-handle-pull-request` command - PR workflow including documentation review

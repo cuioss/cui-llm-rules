@@ -7,6 +7,17 @@ description: Analyze, verify, and fix slash commands for clarity, structure, and
 
 Orchestrates comprehensive analysis of slash commands by coordinating cui-diagnose-single-command for each command.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-commands update="[your improvement]"` with:
+1. Improved command bloat detection and size classification metrics
+2. Better methods for identifying structural issues and anti-bloat violations
+3. More effective quality scoring and command organization assessment techniques
+4. Enhanced detection of commands requiring extraction to skills
+5. Any lessons learned about command design patterns and complexity reduction strategies
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 - **scope=marketplace** (default): Analyze all marketplace commands

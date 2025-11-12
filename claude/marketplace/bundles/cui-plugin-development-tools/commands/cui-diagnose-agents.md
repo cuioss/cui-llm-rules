@@ -7,6 +7,17 @@ description: Analyze, verify, and fix agents for tool coverage, best practices, 
 
 Orchestrates comprehensive analysis of agents by coordinating cui-diagnose-single-agent for each agent.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-agents update="[your improvement]"` with:
+1. Improved agent quality analysis patterns and tool fit detection
+2. Better methods for identifying tool coverage gaps and precision issues
+3. More effective compliance checking and structural validation approaches
+4. Enhanced error handling and partial success detection in parallel analysis
+5. Any lessons learned about agent design patterns and best practices
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 - **scope=marketplace** (default): Analyze all marketplace agents (standalone + bundle agents)

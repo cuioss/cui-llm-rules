@@ -9,7 +9,14 @@ Fetches Sonar issues, triages each one, and delegates fixes. Self-contained with
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Update this file using `/cui-update-command command-name=fix-sonar-issues update="[improvement]"` with discoveries.
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=fix-sonar-issues update="[your improvement]"` with:
+1. Issue triage patterns - When to automatically fix vs escalate vs suppress, detection of high-confidence vs complex issues
+2. Issue categorization strategies - Grouping related issues, identifying root causes affecting multiple files, handling cascading issues
+3. Fix validation patterns - How to verify fixes don't introduce new issues, regressions in related code, test coverage impact
+4. Suppression criteria refinement - When suppressions are justified (e.g., false positives, architectural exceptions, intentional patterns)
+5. Any lessons learned about Sonar API patterns, issue classification accuracy, or fix delegation effectiveness
+
+This ensures the command evolves to handle increasingly complex Sonar issue scenarios with better accuracy and efficiency.
 
 ## PRECONDITIONS
 

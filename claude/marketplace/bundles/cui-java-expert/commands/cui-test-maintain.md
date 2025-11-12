@@ -1,3 +1,8 @@
+---
+name: cui-test-maintain
+description: Systematic workflow for maintaining and improving Java test quality
+---
+
 # Java Test Maintenance Command
 
 Systematic workflow for maintaining and improving Java test quality while preserving functionality and adhering to CUI standards.
