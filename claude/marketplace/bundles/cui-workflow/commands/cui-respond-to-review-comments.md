@@ -1,5 +1,5 @@
 ---
-name: respond-to-review-comments
+name: cui-respond-to-review-comments
 description: Fetch, triage, and respond to PR review comments
 ---
 
@@ -9,7 +9,7 @@ Fetches review comments, triages each one, and takes appropriate action (code ch
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=respond-to-review-comments update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-respond-to-review-comments update="[your improvement]"` with:
 1. Comment triage patterns - How to identify actionable vs informational comments, distinguish preference feedback from requirements, detect conflicting feedback
 2. Response strategy refinement - When to implement code changes vs explain design decisions vs suggest alternatives, handling subjective feedback
 3. Implementation approach improvements - Optimal delegation patterns (direct Edit vs SlashCommand), handling complex multi-file changes from single comments
@@ -77,7 +77,7 @@ SlashCommand: /cui-build-and-fix push
 ## ARCHITECTURE
 
 ```
-/respond-to-review-comments (Pattern 3 orchestrator)
+/cui-respond-to-review-comments (Pattern 3 orchestrator)
   ├─> Task(review-comment-fetcher) [fetches]
   ├─> For each: Task(review-comment-triager) [decides]
   ├─> Delegates changes: SlashCommand(/java-implement-code) or direct Edit

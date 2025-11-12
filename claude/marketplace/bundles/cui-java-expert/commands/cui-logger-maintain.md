@@ -192,12 +192,12 @@ Task:
 
 ### Step 5: Implementation Phase
 
-Apply fixes using /java-implement-code command with patterns from cui-java-core skill:
+Apply fixes using /cui-java-implement-code command with patterns from cui-java-core skill:
 
 **5.1 Logger Migration:**
 
 ```
-SlashCommand: /java-implement-code task="Migrate logger to CuiLogger in {file}.
+SlashCommand: /cui-java-implement-code task="Migrate logger to CuiLogger in {file}.
 Replace logger with CuiLogger.
 Apply migration pattern from cui-java-core skill: logging-maintenance-reference.md#logger-migration
 
@@ -207,7 +207,7 @@ CRITICAL: Only modify logging code, no other changes."
 **5.2 LogRecord Implementation:**
 
 ```
-SlashCommand: /java-implement-code task="Add LogRecord usage in {file}.
+SlashCommand: /cui-java-implement-code task="Add LogRecord usage in {file}.
 Convert direct logging to LogRecord.
 Apply implementation pattern from cui-java-core skill: logging-maintenance-reference.md#logrecord-implementation
 
@@ -219,7 +219,7 @@ CRITICAL: Only modify logging code."
 **5.3 LogMessages Creation/Update:**
 
 ```
-SlashCommand: /java-implement-code task="Create/update LogMessages class for module {module}.
+SlashCommand: /cui-java-implement-code task="Create/update LogMessages class for module {module}.
 Use template from cui-java-core skill: logging-maintenance-reference.md#logmessages-structure
 
 CRITICAL: Only create/modify LogMessages, no other changes."
@@ -394,14 +394,14 @@ Display all statistics in final summary.
 Orchestrates agents and commands:
 - **cui-java-core skill** - Logging standards and maintenance reference
 - **Explore agent** - Violation detection and business test location
-- **/java-implement-code command** - Logging code modifications
+- **/cui-java-implement-code command** - Logging code modifications
 - **maven-builder agent** - Build and test verification
 - **Bash** - LogRecord discovery script and plan.md updates (scripts from skill)
 
 ## RELATED
 
 - `cui-java-core` skill - Logging standards and maintenance reference
-- `/java-implement-code` command - Code modifications
+- `/cui-java-implement-code` command - Code modifications
 - `maven-builder` agent - Build verification
 - `/cui-java-refactor` command - Broader code refactoring
 - `/cui-log-record-enforcer` command - Automated logging enforcement

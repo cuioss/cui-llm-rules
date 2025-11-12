@@ -123,7 +123,7 @@ Task:
 **2.3 Coverage Baseline:**
 
 ```
-SlashCommand: /java-coverage-report
+SlashCommand: /cui-java-coverage-report
 Parameters: module={module if specified}
 ```
 
@@ -199,7 +199,7 @@ Display current module, violations to fix, priority distribution.
 For each violation in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /java-implement-code task="Fix {violation type}:
+SlashCommand: /cui-java-implement-code task="Fix {violation type}:
 Fix the following violation using cui-java-core standards:
 
 Violation: {violation description}
@@ -228,7 +228,7 @@ Self-contained command that runs build, fixes issues, verifies tests, commits fi
 **5.4 Module Coverage Check:**
 
 ```
-SlashCommand: /java-coverage-report
+SlashCommand: /cui-java-coverage-report
 Parameters: module={module-name}
 ```
 
@@ -273,7 +273,7 @@ Task:
 **6.3 Coverage Verification:**
 
 ```
-SlashCommand: /java-coverage-report
+SlashCommand: /cui-java-coverage-report
 ```
 
 Compare final coverage to baseline, display coverage change, ensure no significant regression.
@@ -380,17 +380,17 @@ Bash: git reset --hard {initial_commit}
 Orchestrates agents and commands:
 - **cui-java-maintenance skill** - Standards for detection, prioritization, verification
 - **Explore agent** - Codebase analysis for violation detection
-- **/java-implement-code command** - Focused code fixes (Layer 2)
+- **/cui-java-implement-code command** - Focused code fixes (Layer 2)
 - **maven-builder agent** - Build and verification (Layer 3)
 - **`/cui-build-and-fix` command** - Build verification and fixes
-- **`/java-coverage-report` command** - Coverage analysis
+- **`/cui-java-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-java-maintenance` skill - Standards this command implements
-- `/java-implement-code` command - Implementation fixes
+- `/cui-java-implement-code` command - Implementation fixes
 - `maven-builder` agent - Build verification
 - `/cui-build-and-fix` command - Build and fix workflow
-- `/java-coverage-report` command - Coverage analysis
+- `/cui-java-coverage-report` command - Coverage analysis
 - `cui-java-core` skill - Implementation patterns
 - `cui-task-planning` skill - For refactoring task planning

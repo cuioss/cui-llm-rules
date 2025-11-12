@@ -23,9 +23,9 @@
     "./commands/cui-logger-maintain.md",
     "./commands/cui-quarkus-native-optimize.md",
     "./commands/cui-test-maintain.md",
-    "./commands/java-coverage-report.md",
-    "./commands/java-implement-code.md",
-    "./commands/java-implement-tests.md"
+    "./commands/cui-java-coverage-report.md",
+    "./commands/cui-java-implement-code.md",
+    "./commands/cui-java-implement-tests.md"
   ],
   "skills": [
     "./skills/cui-java-cdi",

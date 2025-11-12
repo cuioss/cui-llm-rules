@@ -1,5 +1,5 @@
 ---
-name: javascript-implement-tests
+name: cui-javascript-implement-tests
 description: Self-contained command for JavaScript test implementation with verification and iteration
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements Jest/Vitest tests with full standards com
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=javascript-implement-tests update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-javascript-implement-tests update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -444,7 +444,7 @@ Result: ⚠️ PARTIAL SUCCESS
 This is a Layer 2 self-contained command:
 
 ```
-/javascript-implement-tests (Layer 2: Single-item orchestration)
+/cui-javascript-implement-tests (Layer 2: Single-item orchestration)
   ├─> Implement tests directly (no agent delegation)
   ├─> Task(npm-builder) [Layer 3: executes tests]
   ├─> Analyze and iterate (max 3 cycles)
@@ -468,9 +468,9 @@ This is a Layer 2 self-contained command:
 ## USAGE EXAMPLES
 
 ```
-/javascript-implement-tests task="Test validateEmail and validatePhone functions" files="src/utils/validator.js"
+/cui-javascript-implement-tests task="Test validateEmail and validatePhone functions" files="src/utils/validator.js"
 
-/javascript-implement-tests task="Create comprehensive tests for auth service" files="src/services/auth.js" workspace="packages/core"
+/cui-javascript-implement-tests task="Create comprehensive tests for auth service" files="src/services/auth.js" workspace="packages/core"
 
-/javascript-implement-tests task="Fix failing tests in UserRepository"
+/cui-javascript-implement-tests task="Fix failing tests in UserRepository"
 ```

@@ -36,10 +36,10 @@ Analyze the `description` parameter to determine workflow entry point:
 
 ### Step 2: Implementation Phase
 
-Call self-contained command `/java-implement-code`:
+Call self-contained command `/cui-java-implement-code`:
 
 ```
-SlashCommand: /java-implement-code
+SlashCommand: /cui-java-implement-code
 Parameters: |
   types={types}
   description={description}
@@ -60,10 +60,10 @@ This command handles implementation AND verification internally (implements → 
 
 ### Step 3: Unit Testing Phase
 
-Analyze Step 2 results and call self-contained command `/java-implement-tests`:
+Analyze Step 2 results and call self-contained command `/cui-java-implement-tests`:
 
 ```
-SlashCommand: /java-implement-tests
+SlashCommand: /cui-java-implement-tests
 Parameters: |
   types={types}
   description=Implement unit tests for {types}
@@ -89,10 +89,10 @@ This command handles test implementation AND verification internally (writes tes
 
 ### Step 4: Coverage Verification Phase
 
-Call self-contained command `/java-coverage-report`:
+Call self-contained command `/cui-java-coverage-report`:
 
 ```
-SlashCommand: /java-coverage-report
+SlashCommand: /cui-java-coverage-report
 Parameters: |
   types={types}
   module={module}
@@ -194,6 +194,6 @@ Display all statistics in final summary.
 
 ## RELATED
 
-- `/java-implement-code` - Self-contained command for production code implementation + verification
-- `/java-implement-tests` - Self-contained command for unit test implementation + verification
-- `/java-coverage-report` - Self-contained command for coverage generation + analysis
+- `/cui-java-implement-code` - Self-contained command for production code implementation + verification
+- `/cui-java-implement-tests` - Self-contained command for unit test implementation + verification
+- `/cui-java-coverage-report` - Self-contained command for coverage generation + analysis

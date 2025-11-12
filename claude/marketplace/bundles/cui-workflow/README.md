@@ -65,33 +65,33 @@ By combining these workflows, developers get a seamless experience from task ass
 
 1. **/cui-implement-task** - Orchestrates complete issue implementation workflow
    - Delegates to task-reviewer, task-breakdown-agent
-   - Pattern Decision: atomic (direct) vs batch (delegates to /execute-task)
+   - Pattern Decision: atomic (direct) vs batch (delegates to /cui-execute-task)
    - Uses /cui-build-and-fix for verification
    - Optionally commits and pushes
 
 2. **/cui-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
    - Waits for CI/Sonar checks
    - Delegates to /cui-build-and-fix for build fixes
-   - Delegates to /respond-to-review-comments for review handling
-   - Delegates to /fix-sonar-issues for quality fixes
+   - Delegates to /cui-respond-to-review-comments for review handling
+   - Delegates to /cui-fix-sonar-issues for quality fixes
    - Aggregates results from self-contained commands
 
 #### Self-Contained Commands (Pattern 1 & Pattern 3)
 
-3. **/execute-task** - Implements and verifies single task (Pattern 1)
+3. **/cui-execute-task** - Implements and verifies single task (Pattern 1)
    - Uses task-executor agent for implementation
    - Uses maven-builder for verification
    - Iterates up to 3 cycles
    - Returns structured result
 
-4. **/fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
+4. **/cui-fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
    - Fetches issues with sonar-issue-fetcher
    - Triages each with sonar-issue-triager
    - Delegates fixes based on triage decision
    - Includes user approval for suppressions
    - Verifies, commits, and pushes
 
-5. **/respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
+5. **/cui-respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
    - Fetches comments with review-comment-fetcher
    - Triages each with review-comment-triager
    - Code changes or explanations based on triage

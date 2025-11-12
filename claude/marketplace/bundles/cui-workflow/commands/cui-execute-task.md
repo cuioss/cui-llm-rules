@@ -1,5 +1,5 @@
 ---
-name: execute-task
+name: cui-execute-task
 description: Self-contained command that executes and verifies a single task
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements ONE task and verifies it.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Update this file using `/cui-update-command command-name=execute-task update="[improvement]"` with discoveries.
+**CRITICAL:** Update this file using `/cui-update-command command-name=cui-execute-task update="[improvement]"` with discoveries.
 
 ## PARAMETERS
 
@@ -78,7 +78,7 @@ Task:
 ## ARCHITECTURE
 
 ```
-/execute-task (Pattern 1 - self-contained)
+/cui-execute-task (Pattern 1 - self-contained)
   ├─> Task(task-executor) [implements]
   ├─> Task(maven-builder) [verifies]
   ├─> Analyze and iterate (max 3 cycles)
@@ -89,12 +89,12 @@ Task:
 
 **Single task execution:**
 ```
-/execute-task task="Add validation method to UserService"
+/cui-execute-task task="Add validation method to UserService"
 ```
 
 **With context:**
 ```
-/execute-task task="Implement authentication filter" context="Use JWT tokens, integrate with existing SecurityContext"
+/cui-execute-task task="Implement authentication filter" context="Use JWT tokens, integrate with existing SecurityContext"
 ```
 
 ## RELATED

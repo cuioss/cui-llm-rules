@@ -171,7 +171,7 @@ Display workspace name and violation count/distribution.
 For each violation in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /javascript-implement-code task="Fix violation using cui-javascript standards.
+SlashCommand: /cui-javascript-implement-code task="Fix violation using cui-javascript standards.
 
 Violation: {description}
 Location: {file}:{line}
@@ -368,14 +368,14 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-refactor state
 Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Standards for detection, prioritization, verification
 - **Explore agent** - Codebase analysis for violation detection
-- **`/javascript-implement-code` command** - Self-contained code fixes (Layer 2)
+- **`/cui-javascript-implement-code` command** - Self-contained code fixes (Layer 2)
 - **npm-builder agent** - Build and verification
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Standards this command implements
-- `/javascript-implement-code` command - Implementation fixes (Layer 2)
+- `/cui-javascript-implement-code` command - Implementation fixes (Layer 2)
 - `npm-builder` agent - Build verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript` skill - Implementation patterns

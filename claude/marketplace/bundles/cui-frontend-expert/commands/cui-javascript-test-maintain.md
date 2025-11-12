@@ -189,7 +189,7 @@ Test improvements: {count} ({HIGH/MEDIUM/LOW distribution})
 For each test improvement in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /javascript-implement-tests task="Improve test quality using cui-javascript-maintenance test-quality-standards.md:
+SlashCommand: /cui-javascript-implement-tests task="Improve test quality using cui-javascript-maintenance test-quality-standards.md:
 
 Issue: {issue description}
 Location: {test file}:{line}
@@ -518,14 +518,14 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-maintenance state
 Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Test quality standards and prioritization
 - **Explore agent** - Test quality analysis
-- **`/javascript-implement-tests` command** - Self-contained test improvements (Layer 2)
+- **`/cui-javascript-implement-tests` command** - Self-contained test improvements (Layer 2)
 - **npm-builder agent** - Test execution and verification (Layer 3)
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Test quality standards this command implements
-- `/javascript-implement-tests` command - Test implementation and improvement (Layer 2)
+- `/cui-javascript-implement-tests` command - Test implementation and improvement (Layer 2)
 - `npm-builder` agent - Test execution and verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript-unit-testing` skill - Jest testing patterns

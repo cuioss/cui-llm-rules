@@ -1,5 +1,5 @@
 ---
-name: javascript-implement-code
+name: cui-javascript-implement-code
 description: Self-contained command for JavaScript code implementation with verification and iteration
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements JavaScript code with full standards compl
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=javascript-implement-code update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-javascript-implement-code update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -490,7 +490,7 @@ Summary:
 This is a Layer 2 self-contained command:
 
 ```
-/javascript-implement-code (Layer 2: Single-item orchestration)
+/cui-javascript-implement-code (Layer 2: Single-item orchestration)
   ├─> Implement code directly (no agent delegation)
   ├─> Task(npm-builder) [Layer 3: verifies builds]
   ├─> Analyze and iterate (max 3 cycles)
@@ -513,9 +513,9 @@ This is a Layer 2 self-contained command:
 ## USAGE EXAMPLES
 
 ```
-/javascript-implement-code task="Implement email and phone validation functions" files="src/utils/validator.js"
+/cui-javascript-implement-code task="Implement email and phone validation functions" files="src/utils/validator.js"
 
-/javascript-implement-code task="Create reusable Button component with variants" files="src/components/Button.js"
+/cui-javascript-implement-code task="Create reusable Button component with variants" files="src/components/Button.js"
 
-/javascript-implement-code task="Implement REST API client" files="src/services/api.js" workspace="packages/core"
+/cui-javascript-implement-code task="Implement REST API client" files="src/services/api.js" workspace="packages/core"
 ```

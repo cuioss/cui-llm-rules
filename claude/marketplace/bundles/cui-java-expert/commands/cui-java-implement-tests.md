@@ -1,5 +1,5 @@
 ---
-name: java-implement-tests
+name: cui-java-implement-tests
 description: Self-contained command for JUnit test implementation with verification and iteration
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements JUnit tests with full standards complianc
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=java-implement-tests update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-implement-tests update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -497,7 +497,7 @@ Result: ⚠️ PARTIAL SUCCESS
 This is a Layer 2 self-contained command:
 
 ```
-/java-implement-tests (Layer 2: Single-item orchestration)
+/cui-java-implement-tests (Layer 2: Single-item orchestration)
   ├─> Implement tests directly (no agent delegation)
   ├─> Task(maven-builder) [Layer 3: executes tests]
   ├─> Analyze and iterate (max 3 cycles)
@@ -516,14 +516,14 @@ This is a Layer 2 self-contained command:
 - `maven-builder` - Test execution agent (Layer 3)
 - `/cui-java-task-manager` - Orchestrates multiple test tasks (Layer 1)
 - `cui-java-unit-testing` - Testing standards skill
-- `/java-implement-code` - Production code implementation (Layer 2)
+- `/cui-java-implement-code` - Production code implementation (Layer 2)
 
 ## USAGE EXAMPLES
 
 ```
-/java-implement-tests task="Test UserService.getUserById method"
+/cui-java-implement-tests task="Test UserService.getUserById method"
 
-/java-implement-tests task="Create comprehensive tests for TokenValidator" types="com.example.auth.TokenValidator" module="auth-service"
+/cui-java-implement-tests task="Create comprehensive tests for TokenValidator" types="com.example.auth.TokenValidator" module="auth-service"
 
-/java-implement-tests task="Fix failing tests in UserRepository"
+/cui-java-implement-tests task="Fix failing tests in UserRepository"
 ```

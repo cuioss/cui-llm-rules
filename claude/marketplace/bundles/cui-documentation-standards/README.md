@@ -16,7 +16,7 @@ This bundle includes the following components:
 
 ### Commands
 - **/review-technical-docs** - Layer 1 batch command that orchestrates review of all AsciiDoc files (Three-Layer Pattern)
-- **/review-single-asciidoc** - Layer 2 self-contained command that validates a single AsciiDoc file by coordinating the three focused validator agents
+- **/cui-review-single-asciidoc** - Layer 2 self-contained command that validates a single AsciiDoc file by coordinating the three focused validator agents
 
 ### Skills
 - **cui-documentation** - Documentation standards including AsciiDoc conventions, structure requirements, and quality guidelines
@@ -58,7 +58,7 @@ Review all AsciiDoc documentation in the standards/ directory.
 /review-technical-docs (Layer 1: Batch)
   ├─> Glob *.adoc to find all files
   ├─> For each file:
-  │    └─> SlashCommand(/review-single-asciidoc {file}) (Layer 2: Self-Contained)
+  │    └─> SlashCommand(/cui-review-single-asciidoc {file}) (Layer 2: Self-Contained)
   │         ├─> Task(asciidoc-format-validator) (Layer 3: Focused)
   │         ├─> Task(asciidoc-link-verifier) (Layer 3: Focused)
   │         └─> Task(asciidoc-content-reviewer) (Layer 3: Focused)
@@ -67,21 +67,21 @@ Review all AsciiDoc documentation in the standards/ directory.
 
 The command will:
 1. Identify all AsciiDoc files in scope
-2. Delegate to /review-single-asciidoc for each file
+2. Delegate to /cui-review-single-asciidoc for each file
 3. Each file gets validated by three focused agents
 4. Aggregate and report all issues
 
 ### Example 2: Review Single Document
 
-Use the /review-single-asciidoc command for focused document review:
+Use the /cui-review-single-asciidoc command for focused document review:
 
 ```
-/review-single-asciidoc standards/java/java-core-standards.adoc
+/cui-review-single-asciidoc standards/java/java-core-standards.adoc
 ```
 
 **Architecture** (Pattern 1 - Self-Contained):
 ```
-/review-single-asciidoc (Layer 2: Self-Contained)
+/cui-review-single-asciidoc (Layer 2: Self-Contained)
   ├─> Task(asciidoc-format-validator) - Check formatting and structure
   ├─> Task(asciidoc-link-verifier) - Verify cross-references and links
   ├─> Task(asciidoc-content-reviewer) - Review content quality

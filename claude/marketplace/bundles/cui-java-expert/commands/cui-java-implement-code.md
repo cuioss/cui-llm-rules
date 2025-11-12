@@ -1,5 +1,5 @@
 ---
-name: java-implement-code
+name: cui-java-implement-code
 description: Self-contained command for Java code implementation with verification and iteration
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements Java code with full standards compliance,
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=java-implement-code update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-implement-code update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -472,7 +472,7 @@ Summary:
 This is a Layer 2 self-contained command:
 
 ```
-/java-implement-code (Layer 2: Single-item orchestration)
+/cui-java-implement-code (Layer 2: Single-item orchestration)
   ├─> Implement code directly (no agent delegation)
   ├─> Task(maven-builder) [Layer 3: verifies builds]
   ├─> Analyze and iterate (max 3 cycles)
@@ -495,9 +495,9 @@ This is a Layer 2 self-contained command:
 ## USAGE EXAMPLES
 
 ```
-/java-implement-code task="Add getUserById method to UserService"
+/cui-java-implement-code task="Add getUserById method to UserService"
 
-/java-implement-code task="Create TokenValidator service" types="TokenValidator" module="auth-service"
+/cui-java-implement-code task="Create TokenValidator service" types="TokenValidator" module="auth-service"
 
-/java-implement-code task="Fix compilation errors in UserRepository"
+/cui-java-implement-code task="Fix compilation errors in UserRepository"
 ```

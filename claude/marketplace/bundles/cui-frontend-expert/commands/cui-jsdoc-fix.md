@@ -48,7 +48,7 @@ Categorize by severity:
 For each violation (CRITICAL → WARNING):
 
 ```
-SlashCommand: /javascript-implement-code task="Add JSDoc documentation for {violation.target}.
+SlashCommand: /cui-javascript-implement-code task="Add JSDoc documentation for {violation.target}.
 
 Type: {violation.type}
 Line: {violation.line}
@@ -90,5 +90,5 @@ Result: {summary}
 ## RELATED
 
 - `jsdoc-violation-analyzer` - Identifies violations (Layer 3)
-- `/javascript-implement-code` - Fixes violations (Layer 2)
+- `/cui-javascript-implement-code` - Fixes violations (Layer 2)
 - `npm-builder` - Verifies fixes (Layer 3)

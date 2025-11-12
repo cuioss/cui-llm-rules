@@ -21,9 +21,9 @@
     "./commands/cui-javascript-task-manager.md",
     "./commands/cui-javascript-test-maintain.md",
     "./commands/cui-jsdoc-fix.md",
-    "./commands/javascript-coverage-report.md",
-    "./commands/javascript-implement-code.md",
-    "./commands/javascript-implement-tests.md"
+    "./commands/cui-javascript-coverage-report.md",
+    "./commands/cui-javascript-implement-code.md",
+    "./commands/cui-javascript-implement-tests.md"
   ],
   "skills": [
     "./skills/cui-css",

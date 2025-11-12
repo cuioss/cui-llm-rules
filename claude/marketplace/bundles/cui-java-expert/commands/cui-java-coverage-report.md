@@ -1,5 +1,5 @@
 ---
-name: java-coverage-report
+name: cui-java-coverage-report
 description: Generate coverage with Maven and analyze results (self-contained command)
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that generates JaCoCo coverage reports using maven-builde
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command java-coverage-report`
+**This command should be improved using**: `/cui-update-command cui-java-coverage-report`
 
 **Improvement areas**:
 - Enhanced report parsing for multi-module project coverage aggregation
@@ -57,13 +57,13 @@ Return combined results from maven-builder and java-coverage-analyzer.
 ## USAGE
 
 ```
-/java-coverage-report
+/cui-java-coverage-report
 ```
 
 ## ARCHITECTURE
 
 ```
-/java-coverage-report
+/cui-java-coverage-report
   ├─> Task(maven-builder) [generates coverage]
   └─> Task(java-coverage-analyzer) [analyzes reports]
 ```

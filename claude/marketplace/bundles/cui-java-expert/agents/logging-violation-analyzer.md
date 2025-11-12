@@ -93,4 +93,4 @@ For each LOGGER statement, determine:
 ## RELATED
 
 - `/cui-log-record-enforcer` - Orchestrates violation fixing (Layer 2)
-- `/java-implement-code` - Fixes violations based on analysis (Layer 2)
+- `/cui-java-implement-code` - Fixes violations based on analysis (Layer 2)

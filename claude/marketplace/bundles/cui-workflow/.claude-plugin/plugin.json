@@ -23,9 +23,9 @@
   "commands": [
     "./commands/cui-handle-pull-request.md",
     "./commands/cui-implement-task.md",
-    "./commands/execute-task.md",
-    "./commands/fix-sonar-issues.md",
-    "./commands/respond-to-review-comments.md"
+    "./commands/cui-execute-task.md",
+    "./commands/cui-fix-sonar-issues.md",
+    "./commands/cui-respond-to-review-comments.md"
   ],
   "skills": [
     "./skills/cui-git-workflow",

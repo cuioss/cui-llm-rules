@@ -79,7 +79,7 @@ Self-contained command that runs build, fixes issues if found, verifies, and com
 
 **Pattern Decision: Determine if atomic or batch:**
 - If plan has 1 task (atomic): Use task-executor directly + verify
-- If plan has multiple tasks (batch): Delegate to /execute-task for each
+- If plan has multiple tasks (batch): Delegate to /cui-execute-task for each
 
 **For atomic (single task):**
 ```
@@ -94,10 +94,10 @@ Then verify with SlashCommand(/cui-build-and-fix).
 **For batch (multiple tasks):**
 ```
 For each task in plan:
-  SlashCommand: /execute-task task="{task_description}"
+  SlashCommand: /cui-execute-task task="{task_description}"
 ```
 
-Each /execute-task is self-contained (implements + verifies + iterates).
+Each /cui-execute-task is self-contained (implements + verifies + iterates).
 
 Track: tasks_completed, tasks_failed, tasks_skipped.
 
@@ -145,7 +145,7 @@ Display all statistics in final summary.
 
 **Command Orchestration:**
 - Delegate to self-contained commands for build/verify/commit operations
-- Pattern Decision: atomic tasks use task-executor + verify, batch uses /execute-task per task
+- Pattern Decision: atomic tasks use task-executor + verify, batch uses /cui-execute-task per task
 - Wait for each operation to complete before next step
 - Handle failures gracefully
 
@@ -192,7 +192,7 @@ Orchestrates agents and commands:
 - task-reviewer agent - Issue validation
 - task-breakdown-agent - Planning
 - task-executor agent - Focused implementation (for atomic tasks)
-- `/execute-task` command - Self-contained (for batch tasks)
+- `/cui-execute-task` command - Self-contained (for batch tasks)
 - `/cui-build-and-fix` command - Build + verify + fix + commit
 
 ## RELATED
@@ -200,7 +200,7 @@ Orchestrates agents and commands:
 - task-reviewer agent
 - task-breakdown-agent
 - task-executor agent
-- `/execute-task` command (self-contained)
+- `/cui-execute-task` command (self-contained)
 - `/cui-build-and-fix` command
 
 ## CONTINUOUS IMPROVEMENT RULE

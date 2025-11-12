@@ -75,7 +75,7 @@ Self-contained command that fixes build + verifies + commits.
 ### Step 4: Handle Code Review Comments
 
 ```
-SlashCommand: /respond-to-review-comments
+SlashCommand: /cui-respond-to-review-comments
 ```
 
 Self-contained Pattern 3 command: fetches comments → triages each → code change or explanation → verifies + commits.
@@ -87,7 +87,7 @@ Self-contained Pattern 3 command: fetches comments → triages each → code cha
 ### Step 5: Handle Sonar Issues
 
 ```
-SlashCommand: /fix-sonar-issues
+SlashCommand: /cui-fix-sonar-issues
 ```
 
 Self-contained Pattern 3 command: fetches Sonar issues → triages each → fixes or suppresses (with user approval) → verifies + commits.
@@ -186,8 +186,8 @@ Display all statistics in Step 7 summary.
 
 Simple orchestrator that delegates to self-contained commands:
 - `/cui-build-and-fix` - Fix build failures + verify + commit
-- `/respond-to-review-comments` - Handle review comments (Pattern 3: fetch → triage → respond)
-- `/fix-sonar-issues` - Handle Sonar issues (Pattern 3: fetch → triage → fix)
+- `/cui-respond-to-review-comments` - Handle review comments (Pattern 3: fetch → triage → respond)
+- `/cui-fix-sonar-issues` - Handle Sonar issues (Pattern 3: fetch → triage → fix)
 
 Each command is self-contained with own verify + commit cycle.
 
@@ -195,5 +195,5 @@ Each command is self-contained with own verify + commit cycle.
 
 - `/cui-update-command` - Update this command
 - `/cui-build-and-fix` - Build fixing command
-- `/respond-to-review-comments` - Review comment handling (Pattern 3)
-- `/fix-sonar-issues` - Sonar issue fixing (Pattern 3)
+- `/cui-respond-to-review-comments` - Review comment handling (Pattern 3)
+- `/cui-fix-sonar-issues` - Sonar issue fixing (Pattern 3)

@@ -18,7 +18,7 @@
   ],
   "commands": [
     "./commands/cui-review-technical-docs.md",
-    "./commands/review-single-asciidoc.md"
+    "./commands/cui-review-single-asciidoc.md"
   ],
   "skills": [
     "./skills/cui-documentation"

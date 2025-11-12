@@ -1,5 +1,5 @@
 ---
-name: review-single-asciidoc
+name: cui-review-single-asciidoc
 description: Validate and review a single AsciiDoc file with format, links, and content checks
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that orchestrates format validation, link verification, a
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /cui-update-command command-name=review-single-asciidoc update="[your improvement]"
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /cui-update-command command-name=cui-review-single-asciidoc update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Better coordination between validation agents
@@ -40,7 +40,7 @@ If missing or invalid:
   Required: file=path/to/document.adoc
   Received: {parameter_value}
 
-  Example: /review-single-asciidoc file=standards/java-core.adoc
+  Example: /cui-review-single-asciidoc file=standards/java-core.adoc
 ```
 Exit with error status.
 
@@ -240,12 +240,12 @@ Display all statistics in report.
 
 **Review single file:**
 ```
-/review-single-asciidoc file=standards/java-core.adoc
+/cui-review-single-asciidoc file=standards/java-core.adoc
 ```
 
 **Review and apply fixes:**
 ```
-/review-single-asciidoc file=standards/java-core.adoc apply_fixes=true
+/cui-review-single-asciidoc file=standards/java-core.adoc apply_fixes=true
 ```
 
 ## ARCHITECTURE
@@ -258,9 +258,9 @@ Display all statistics in report.
 **Three-Layer Pattern:**
 ```
 Layer 1: /cui-review-technical-docs (batch - all files)
-  └─> For each file: SlashCommand(/review-single-asciidoc)
+  └─> For each file: SlashCommand(/cui-review-single-asciidoc)
 
-Layer 2: /review-single-asciidoc (self-contained - one file)
+Layer 2: /cui-review-single-asciidoc (self-contained - one file)
   ├─> Task(asciidoc-format-validator)
   ├─> Task(asciidoc-link-verifier)
   └─> Task(asciidoc-content-reviewer)

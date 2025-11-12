@@ -496,11 +496,11 @@ For batch operations on collections, use the three-layer pattern: Batch Command 
 /review-technical-docs
   ├─> Glob for all *.adoc files
   ├─> For each file:
-  │    └─> SlashCommand(/review-single-asciidoc file.adoc)
+  │    └─> SlashCommand(/cui-review-single-asciidoc file.adoc)
   └─> Aggregate validation results
 
 # Layer 2: Self-Contained Command
-/review-single-asciidoc <file>
+/cui-review-single-asciidoc <file>
   ├─> Task(asciidoc-format-validator)  # Layer 3
   ├─> Task(asciidoc-link-verifier)     # Layer 3
   ├─> Task(asciidoc-content-reviewer)  # Layer 3
@@ -518,11 +518,11 @@ asciidoc-content-reviewer: reviews content only
 /cui-java-task-manager
   ├─> Parse task into implementation list
   ├─> For each implementation:
-  │    └─> SlashCommand(/java-implement-code class-task)
+  │    └─> SlashCommand(/cui-java-implement-code class-task)
   └─> Aggregate implementation results
 
 # Layer 2: Self-Contained Command
-/java-implement-code <task>
+/cui-java-implement-code <task>
   ├─> Task(java-code-implementer)  # Layer 3: just implements
   ├─> Task(maven-builder)          # Layer 3: just verifies
   ├─> Analyze build output

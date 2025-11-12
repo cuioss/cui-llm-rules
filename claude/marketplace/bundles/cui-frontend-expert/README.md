@@ -21,9 +21,9 @@ cui-frontend-expert/
 │   ├── javascript-coverage-analyzer.md
 │   └── jsdoc-violation-analyzer.md
 └── commands/            # User utilities (Layer 2)
-    ├── javascript-implement-code.md
-    ├── javascript-implement-tests.md
-    ├── javascript-coverage-report.md
+    ├── cui-javascript-implement-code.md
+    ├── cui-javascript-implement-tests.md
+    ├── cui-javascript-coverage-report.md
     ├── cui-javascript-task-manager.md
     ├── cui-javascript-refactor.md
     ├── cui-jsdoc-fix.md
@@ -57,9 +57,9 @@ cui-frontend-expert/
 ## Commands (Layer 2: User Utilities)
 
 ### Self-Contained Implementation Commands
-- **javascript-implement-code** - Self-contained command for code implementation with verification and iteration
-- **javascript-implement-tests** - Self-contained command for test implementation with verification and iteration
-- **javascript-coverage-report** - Coverage generation and analysis command
+- **cui-javascript-implement-code** - Self-contained command for code implementation with verification and iteration
+- **cui-javascript-implement-tests** - Self-contained command for test implementation with verification and iteration
+- **cui-javascript-coverage-report** - Coverage generation and analysis command
 
 ### Orchestration Commands
 - **cui-javascript-task-manager** - End-to-end task orchestration (implementation → testing → coverage)
@@ -93,12 +93,12 @@ This bundle follows the CUI marketplace three-layer architecture:
 
 ### Implement JavaScript Code
 ```bash
-/javascript-implement-code files="src/utils/validator.js" description="Implement email and phone validation"
+/cui-javascript-implement-code files="src/utils/validator.js" description="Implement email and phone validation"
 ```
 
 ### Implement Tests
 ```bash
-/javascript-implement-tests files="src/utils/validator.js" description="Implement comprehensive unit tests"
+/cui-javascript-implement-tests files="src/utils/validator.js" description="Implement comprehensive unit tests"
 ```
 
 ### Full Task Workflow
@@ -148,9 +148,9 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | maven-builder | npm-builder | Build execution |
 | java-coverage-analyzer | javascript-coverage-analyzer | Coverage analysis |
 | cui-log-record-documenter | jsdoc-violation-analyzer | Documentation analysis |
-| java-implement-code | javascript-implement-code | Self-contained implementation |
-| java-implement-tests | javascript-implement-tests | Self-contained testing |
-| java-coverage-report | javascript-coverage-report | Coverage generation/analysis |
+| java-implement-code | cui-javascript-implement-code | Self-contained implementation |
+| java-implement-tests | cui-javascript-implement-tests | Self-contained testing |
+| java-coverage-report | cui-javascript-coverage-report | Coverage generation/analysis |
 | cui-java-task-manager | cui-javascript-task-manager | End-to-end orchestration |
 | cui-java-refactor | cui-javascript-refactor | Systematic refactoring |
 | cui-javadoc-fix | cui-jsdoc-fix | Documentation fixing |
@@ -174,7 +174,7 @@ Skills include standards for Maven integration to ensure frontend code works wit
 
 2. **Use a command** for tasks:
    ```
-   /javascript-implement-code files="..." description="..."
+   /cui-javascript-implement-code files="..." description="..."
    ```
 
 3. **Orchestrate workflows** with task manager:

@@ -36,7 +36,7 @@ Analyze `description` parameter:
 ### Step 2: Implementation Phase
 
 ```
-SlashCommand: /javascript-implement-code
+SlashCommand: /cui-javascript-implement-code
 Parameters:
 - files: {files}
 - description: {description}
@@ -51,7 +51,7 @@ Self-contained command handles implementation + verification + iteration.
 ### Step 3: Unit Testing Phase
 
 ```
-SlashCommand: /javascript-implement-tests
+SlashCommand: /cui-javascript-implement-tests
 Parameters:
 - files: {files}
 - description: Implement unit tests for {files}
@@ -66,7 +66,7 @@ Self-contained command handles test implementation + verification.
 ### Step 4: Coverage Verification Phase
 
 ```
-SlashCommand: /javascript-coverage-report
+SlashCommand: /cui-javascript-coverage-report
 Parameters:
 - files: {files}
 - workspace: {workspace}
@@ -109,6 +109,6 @@ Continue cycling through Steps 2-4 until:
 
 ## RELATED
 
-- `/javascript-implement-code` - Self-contained implementation command (Layer 2)
-- `/javascript-implement-tests` - Self-contained test command (Layer 2)
-- `/javascript-coverage-report` - Coverage generation/analysis (Layer 2)
+- `/cui-javascript-implement-code` - Self-contained implementation command (Layer 2)
+- `/cui-javascript-implement-tests` - Self-contained test command (Layer 2)
+- `/cui-javascript-coverage-report` - Coverage generation/analysis (Layer 2)

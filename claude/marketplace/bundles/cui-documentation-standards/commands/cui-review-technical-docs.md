@@ -5,7 +5,7 @@ description: Execute comprehensive AsciiDoc review for all documentation files
 
 # Review Technical Docs Command
 
-Batch command for comprehensive AsciiDoc documentation review. Discovers all .adoc files and delegates to /review-single-asciidoc for each file, aggregating results.
+Batch command for comprehensive AsciiDoc documentation review. Discovers all .adoc files and delegates to /cui-review-single-asciidoc for each file, aggregating results.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -61,7 +61,7 @@ If no files found:
 
 **Delegate to Layer 2 self-contained command:**
 ```
-SlashCommand: /review-single-asciidoc file={file_path} apply_fixes={apply_fixes}
+SlashCommand: /cui-review-single-asciidoc file={file_path} apply_fixes={apply_fixes}
 ```
 
 **Collect results:**
@@ -71,7 +71,7 @@ SlashCommand: /review-single-asciidoc file={file_path} apply_fixes={apply_fixes}
 
 **Error handling:**
 ```
-If /review-single-asciidoc fails for a file:
+If /cui-review-single-asciidoc fails for a file:
   ⚠️ Review failed: {file_path}
   Error: {error_message}
 
@@ -158,7 +158,7 @@ Top Recommendations:
 ### Step 5: Handle Fixes (if apply_fixes=true)
 
 **If apply_fixes parameter was true:**
-- Fixes were applied by /review-single-asciidoc for each file
+- Fixes were applied by /cui-review-single-asciidoc for each file
 - Report files modified count
 - Display: "Fixes applied to {modified_files_count} files"
 
@@ -213,8 +213,8 @@ Display all statistics in final report.
 
 **Three-Layer Pattern (Layer 1 - Batch):**
 - This command discovers files and delegates to Layer 2
-- Uses SlashCommand (NOT Task) to invoke /review-single-asciidoc
-- Layer 2 (/review-single-asciidoc) orchestrates Layer 3 agents
+- Uses SlashCommand (NOT Task) to invoke /cui-review-single-asciidoc
+- Layer 2 (/cui-review-single-asciidoc) orchestrates Layer 3 agents
 - This enables: reusability, testability, parallel execution
 
 **Batch Processing:**
@@ -224,7 +224,7 @@ Display all statistics in final report.
 - Never abort entire batch due to single file failure
 
 **Delegation Pattern:**
-- Delegate to /review-single-asciidoc for EACH file
+- Delegate to /cui-review-single-asciidoc for EACH file
 - Let Layer 2 command handle agent orchestration
 - Don't invoke agents directly from this command
 - Collect structured results for aggregation
@@ -265,10 +265,10 @@ Display all statistics in final report.
 Layer 1: /cui-review-technical-docs (THIS COMMAND)
   ├─> Glob for all *.adoc files
   ├─> For each file:
-  │    └─> SlashCommand(/review-single-asciidoc file={path})
+  │    └─> SlashCommand(/cui-review-single-asciidoc file={path})
   └─> Aggregate results and report
 
-Layer 2: /review-single-asciidoc
+Layer 2: /cui-review-single-asciidoc
   ├─> Task(asciidoc-format-validator)
   ├─> Task(asciidoc-link-verifier)
   └─> Task(asciidoc-content-reviewer)
@@ -279,7 +279,7 @@ Layer 3: Focused agents
 
 **Why This Works:**
 - ✅ Commands can invoke other commands (SlashCommand available)
-- ✅ Layer 2 commands are reusable (users can call /review-single-asciidoc directly)
+- ✅ Layer 2 commands are reusable (users can call /cui-review-single-asciidoc directly)
 - ✅ Layer 3 agents are focused (no orchestration, no Task delegation)
 - ✅ Scalable (handles 1 or 1000 files same way)
 - ✅ Testable (test each layer independently)
@@ -288,7 +288,7 @@ Layer 3: Focused agents
 
 ## RELATED
 
-- `/review-single-asciidoc` - Self-contained single file review (Layer 2)
+- `/cui-review-single-asciidoc` - Self-contained single file review (Layer 2)
 - `asciidoc-format-validator` - Format validation agent (Layer 3)
 - `asciidoc-link-verifier` - Link verification agent (Layer 3)
 - `asciidoc-content-reviewer` - Content review agent (Layer 3)

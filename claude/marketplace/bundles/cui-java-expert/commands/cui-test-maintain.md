@@ -170,7 +170,7 @@ Options:
 **Apply test improvements based on scope**:
 
 ```
-SlashCommand: /java-implement-tests task="Implement test quality improvements for module: [module]
+SlashCommand: /cui-java-implement-tests task="Implement test quality improvements for module: [module]
 Scope: [scope parameter]
 Priority: [priority parameter]
 
@@ -503,7 +503,7 @@ Test maintenance is complete when:
 
 **Commands and Agents Orchestrated**:
 * Explore - Test quality analysis and module identification
-* /java-implement-tests - Test improvement implementation (Layer 2)
+* /cui-java-implement-tests - Test improvement implementation (Layer 2)
 * maven-builder - Build verification and coverage analysis
 
 **Related Commands**:
