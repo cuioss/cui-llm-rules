@@ -49,16 +49,13 @@ Re-run lint to check remaining issues.
 For each remaining violation:
 
 ```
-Task: javascript-code-implementer
-Parameters:
-- files: {violation.file}
-- description: |
-  Fix ESLint violation: {violation.message}
+SlashCommand: /javascript-implement-code task="Fix ESLint violation: {violation.message}
 
-  Rule: {violation.rule}
-  Line: {violation.line}
+Rule: {violation.rule}
+Line: {violation.line}
 
-  Apply appropriate fix following ESLint and CUI standards.
+Apply appropriate fix following ESLint and CUI standards.
+Verify build after changes." files="{violation.file}"
 ```
 
 ### Step 4: Verify Clean Lint
@@ -90,4 +87,4 @@ Lint Status: {CLEAN|PARTIAL}
 ## RELATED
 
 - `npm-builder` - Executes ESLint (Layer 3)
-- `javascript-code-implementer` - Fixes manual violations (Layer 3)
+- `/javascript-implement-code` - Fixes manual violations (Layer 2)

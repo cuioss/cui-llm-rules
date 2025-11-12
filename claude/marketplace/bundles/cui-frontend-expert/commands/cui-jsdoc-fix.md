@@ -48,17 +48,14 @@ Categorize by severity:
 For each violation (CRITICAL → WARNING):
 
 ```
-Task: javascript-code-implementer
-Parameters:
-- files: {violation.file}
-- description: |
-  Add JSDoc documentation for {violation.target}.
+SlashCommand: /javascript-implement-code task="Add JSDoc documentation for {violation.target}.
 
-  Type: {violation.type}
-  Line: {violation.line}
-  Fix suggestion: {violation.fix_suggestion}
+Type: {violation.type}
+Line: {violation.line}
+Fix suggestion: {violation.fix_suggestion}
 
-  Follow cui-jsdoc standards.
+Follow cui-jsdoc standards.
+Verify build after changes." files="{violation.file}"
 ```
 
 Track: `fixes_applied`, `fixes_failed`
@@ -93,5 +90,5 @@ Result: {summary}
 ## RELATED
 
 - `jsdoc-violation-analyzer` - Identifies violations (Layer 3)
-- `javascript-code-implementer` - Fixes violations (Layer 3)
+- `/javascript-implement-code` - Fixes violations (Layer 2)
 - `npm-builder` - Verifies fixes (Layer 3)

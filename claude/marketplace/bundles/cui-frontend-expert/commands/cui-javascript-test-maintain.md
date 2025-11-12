@@ -189,32 +189,26 @@ Test improvements: {count} ({HIGH/MEDIUM/LOW distribution})
 For each test improvement in priority order (HIGH → MEDIUM → LOW):
 
 ```
-Task:
-  subagent_type: javascript-test-implementer
-  description: Improve {test issue type}
-  prompt: |
-    Improve test quality using cui-javascript-maintenance test-quality-standards.md:
+SlashCommand: /javascript-implement-tests task="Improve test quality using cui-javascript-maintenance test-quality-standards.md:
 
-    Issue: {issue description}
-    Location: {test file}:{line}
-    Type: {issue type}
-    Priority: {priority}
+Issue: {issue description}
+Location: {test file}:{line}
+Type: {issue type}
+Priority: {priority}
 
-    Apply appropriate improvements:
-    - If complex setup: extract to helper functions or beforeEach
-    - If hardcoded data: create test factories or fixtures
-    - If missing async: add async/await handling
-    - If no cleanup: add afterEach cleanup
-    - If shared state: ensure test independence
-    - If framework violations: use proper patterns (AAA, describe blocks)
-    - If mock issues: implement proper mock management
-    - If coverage gaps: add tests for business logic
-    - If E2E issues: apply Cypress best practices
+Apply appropriate improvements:
+- If complex setup: extract to helper functions or beforeEach
+- If hardcoded data: create test factories or fixtures
+- If missing async: add async/await handling
+- If no cleanup: add afterEach cleanup
+- If shared state: ensure test independence
+- If framework violations: use proper patterns (AAA, describe blocks)
+- If mock issues: implement proper mock management
+- If coverage gaps: add tests for business logic
+- If E2E issues: apply Cypress best practices
 
-    **CRITICAL: Make NO production code changes.**
-    **If you discover production bugs, STOP and ask user for approval.**
-
-    Return implementation status.
+**CRITICAL: Make NO production code changes.**
+**If you discover production bugs, STOP and ask user for approval.**" files="{test file}"
 ```
 
 Track in `improvements_applied` counter.
@@ -524,14 +518,14 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-maintenance state
 Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Test quality standards and prioritization
 - **Explore agent** - Test quality analysis
-- **javascript-test-implementer agent** - Focused test improvements (Layer 3)
+- **`/javascript-implement-tests` command** - Self-contained test improvements (Layer 2)
 - **npm-builder agent** - Test execution and verification (Layer 3)
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Test quality standards this command implements
-- `javascript-test-implementer` agent - Test implementation and improvement
+- `/javascript-implement-tests` command - Test implementation and improvement (Layer 2)
 - `npm-builder` agent - Test execution and verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript-unit-testing` skill - Jest testing patterns

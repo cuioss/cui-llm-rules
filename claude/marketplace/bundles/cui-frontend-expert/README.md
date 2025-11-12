@@ -18,9 +18,7 @@ cui-frontend-expert/
 │   └── cui-cypress/
 ├── agents/              # Focused executors (Layer 3)
 │   ├── npm-builder.md
-│   ├── javascript-code-implementer.md
 │   ├── javascript-coverage-analyzer.md
-│   ├── javascript-test-implementer.md
 │   └── jsdoc-violation-analyzer.md
 └── commands/            # User utilities (Layer 2)
     ├── javascript-implement-code.md
@@ -51,12 +49,6 @@ cui-frontend-expert/
 
 ### Build Execution
 - **npm-builder** - Central agent for npm/npx builds with output capture, issue categorization, performance tracking
-
-### Code Implementation
-- **javascript-code-implementer** - Implements modern JavaScript tasks with full standards compliance (focused executor - no verification)
-
-### Test Implementation
-- **javascript-test-implementer** - Implements Jest/Vitest tests with full standards compliance (focused executor - no verification)
 
 ### Analysis
 - **javascript-coverage-analyzer** - Analyzes existing coverage reports (focused analyzer - no build execution)
@@ -154,8 +146,6 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | cui-java-expert | cui-frontend-expert | Purpose |
 |----------------|---------------------|---------|
 | maven-builder | npm-builder | Build execution |
-| java-code-implementer | javascript-code-implementer | Code implementation |
-| java-junit-implementer | javascript-test-implementer | Test implementation |
 | java-coverage-analyzer | javascript-coverage-analyzer | Coverage analysis |
 | cui-log-record-documenter | jsdoc-violation-analyzer | Documentation analysis |
 | java-implement-code | javascript-implement-code | Self-contained implementation |

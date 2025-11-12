@@ -10,8 +10,21 @@
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["javascript", "css", "frontend", "web-components", "testing", "standards"],
-  "agents": [],
-  "commands": [],
+  "agents": [
+    "./agents/javascript-coverage-analyzer.md",
+    "./agents/jsdoc-violation-analyzer.md",
+    "./agents/npm-builder.md"
+  ],
+  "commands": [
+    "./commands/cui-eslint-enforce.md",
+    "./commands/cui-javascript-refactor.md",
+    "./commands/cui-javascript-task-manager.md",
+    "./commands/cui-javascript-test-maintain.md",
+    "./commands/cui-jsdoc-fix.md",
+    "./commands/javascript-coverage-report.md",
+    "./commands/javascript-implement-code.md",
+    "./commands/javascript-implement-tests.md"
+  ],
   "skills": [
     "./skills/cui-css",
     "./skills/cui-cypress",
