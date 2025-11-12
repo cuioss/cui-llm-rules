@@ -24,7 +24,7 @@ The marketplace implements 4 bundle types:
 
 ### 2. Development Workflow
 
-**Bundle**: `cui-workflow`
+**Bundle**: `cui-task-workflow`
 
 **Purpose**: Complete development workflow from issue implementation to PR review and quality verification
 
@@ -97,7 +97,7 @@ bundles/{bundle-name}/
 
 ```json
 {
-  "name": "cui-workflow",
+  "name": "cui-task-workflow",
   "version": "1.0.0",
   "description": "Complete development workflow from issue implementation to PR review",
   "author": {"name": "CUI OSS Project"},
@@ -141,7 +141,7 @@ bundles/{bundle-name}/
 
 **Install bundle**:
 ```bash
-/plugin install cui-utility-commands@cui-llm-rules
+/plugin install cui-utilities@cui-llm-rules
 ```
 
 **Update**:

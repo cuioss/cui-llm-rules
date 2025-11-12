@@ -61,7 +61,7 @@ When you need to update an existing agent based on lessons learned or improvemen
 
 **Activate diagnostic patterns:**
 ```
-Skill: cui-utility-commands:cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 Skill: cui-plugin-development-tools:cui-marketplace-architecture
 ```
 

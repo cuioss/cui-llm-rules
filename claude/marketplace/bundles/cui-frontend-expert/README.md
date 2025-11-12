@@ -187,7 +187,7 @@ Skills include standards for Maven integration to ensure frontend code works wit
 - **cui-java-expert** - Java/Maven development (parallel structure)
 - **cui-maven** - Maven build and dependency management
 - **cui-documentation-standards** - AsciiDoc and technical documentation
-- **cui-workflow** - Git workflow and task management
+- **cui-task-workflow** - Git workflow and task management
 
 ---
 

@@ -52,7 +52,7 @@ Project setup and requirements engineering standards
 
 ### Workflow Bundles (4 bundles)
 
-#### cui-workflow
+#### cui-task-workflow
 Complete development workflow from issue implementation to PR review and quality verification
 - 5 agents (task-reviewer, task-breakdown-agent, task-executor, pr-review-responder, pr-quality-fixer)
 - 2 commands (cui-orchestrate-task-workflow, cui-handle-pull-request)
@@ -65,7 +65,7 @@ AsciiDoc and documentation standards enforcement
 Complete toolchain for creating and diagnosing Claude Code plugins
 - 5 commands
 
-#### cui-utility-commands
+#### cui-utilities
 Standalone utility commands for project setup, permissions, diagnostics, and documentation
 - 6 commands
 

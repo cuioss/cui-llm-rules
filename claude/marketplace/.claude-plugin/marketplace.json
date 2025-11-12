@@ -33,15 +33,15 @@
       "strict": false
     },
     {
-      "name": "cui-utility-commands",
+      "name": "cui-utilities",
       "description": "Standalone utility commands for project setup, permissions, diagnostics, and documentation",
-      "source": "./bundles/cui-utility-commands",
+      "source": "./bundles/cui-utilities",
       "strict": false
     },
     {
-      "name": "cui-workflow",
+      "name": "cui-task-workflow",
       "description": "Complete development workflow from issue implementation to PR review and quality verification",
-      "source": "./bundles/cui-workflow",
+      "source": "./bundles/cui-task-workflow",
       "strict": false
     },
     {

@@ -17,7 +17,7 @@ Comprehensive analysis of entire bundle including structure, skills, commands, a
 ## TOOL USAGE REQUIREMENTS
 
 ```
-Skill: cui-utility-commands:cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 ```
 
 **Optionally load marketplace architecture standards**:

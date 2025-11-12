@@ -195,8 +195,8 @@ Bundle Scores:
 - cui-documentation-standards: 90/100
 - cui-java-expert: 90/100
 - cui-plugin-development-tools: 88/100
-- cui-workflow: 88/100
-- cui-utility-commands: 85/100
+- cui-task-workflow: 88/100
+- cui-utilities: 85/100
 
 Average: 88.8/100
 

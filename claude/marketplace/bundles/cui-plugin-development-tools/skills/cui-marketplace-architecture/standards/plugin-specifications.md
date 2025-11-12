@@ -13,14 +13,14 @@ claude/marketplace/
 ├── .claude-plugin/
 │   └── marketplace.json           # Marketplace manifest
 ├── bundles/                        # Workflow bundles
-│   ├── cui-utility-commands/
+│   ├── cui-utilities/
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json       # Bundle manifest
 │   │   ├── README.md
 │   │   ├── agents/               # .md files
 │   │   ├── commands/             # .md files
 │   │   └── skills/               # directories
-│   └── cui-workflow/
+│   └── cui-task-workflow/
 └── skills/                         # Standalone skills
     └── cui-java-core/
         ├── SKILL.md
@@ -58,9 +58,9 @@ claude/marketplace/
       ]
     },
     {
-      "name": "cui-utility-commands",
+      "name": "cui-utilities",
       "description": "Standalone utility commands including git commit management",
-      "source": "./bundles/cui-utility-commands"
+      "source": "./bundles/cui-utilities"
     }
   ]
 }
@@ -79,7 +79,7 @@ claude/marketplace/
 
 ```json
 {
-  "name": "cui-workflow",
+  "name": "cui-task-workflow",
   "version": "1.0.0",
   "description": "Complete development workflow from issue implementation to PR review",
   "author": {"name": "CUI Team"},

@@ -66,7 +66,7 @@ This ensures the command evolves and becomes more effective with each execution.
 **CRITICAL**: Load non-prompting tool patterns:
 
 ```
-Skill: cui-utility-commands:cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 ```
 
 **Optionally load marketplace architecture standards**:

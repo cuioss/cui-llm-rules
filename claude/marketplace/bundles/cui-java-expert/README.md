@@ -251,9 +251,9 @@ None - this bundle is standalone and aggregates existing marketplace skills.
 
 This Java expertise bundle complements other CUI bundles:
 
-- **cui-utility-commands** - For research and utility commands
+- **cui-utilities** - For research and utility commands
 - **cui-maven** - For Maven build and POM maintenance
-- **cui-workflow** - For complete development workflow from issue implementation to PR review
+- **cui-task-workflow** - For complete development workflow from issue implementation to PR review
 - **cui-documentation-standards** - For JavaDoc and technical documentation
 
 ## Bundle Statistics
