@@ -62,7 +62,7 @@ Display status updates every 30 seconds.
 
 If build failed:
 ```
-SlashCommand: /cui-build-and-fix push
+SlashCommand: /cui-maven-build-and-fix push
 ```
 
 Self-contained command that fixes build + verifies + commits.
@@ -185,7 +185,7 @@ Display all statistics in Step 7 summary.
 ## ARCHITECTURE
 
 Simple orchestrator that delegates to self-contained commands:
-- `/cui-build-and-fix` - Fix build failures + verify + commit
+- `/cui-maven-build-and-fix` - Fix build failures + verify + commit
 - `/cui-respond-to-review-comments` - Handle review comments (Pattern 3: fetch → triage → respond)
 - `/cui-fix-sonar-issues` - Handle Sonar issues (Pattern 3: fetch → triage → fix)
 
@@ -194,6 +194,6 @@ Each command is self-contained with own verify + commit cycle.
 ## RELATED
 
 - `/cui-update-command` - Update this command
-- `/cui-build-and-fix` - Build fixing command
+- `/cui-maven-build-and-fix` - Build fixing command
 - `/cui-respond-to-review-comments` - Review comment handling (Pattern 3)
 - `/cui-fix-sonar-issues` - Sonar issue fixing (Pattern 3)

@@ -15,7 +15,7 @@ The marketplace provides production-ready, reusable components that AI assistant
 **Purpose**: Self-contained, production-ready bundles combining skills, agents, and commands for specific development domains
 
 **Active Bundles**:
-- **cui-java-expert**: Java development (skills: cui-java-core, cui-java-cdi, cui-java-unit-testing; agents: java-code-implementer, java-junit-implementer, java-coverage-reporter; commands: cui-java-task-manager)
+- **cui-java-expert**: Java development (skills: cui-java-core, cui-java-cdi, cui-java-unit-testing; agents: java-code-implementer, java-junit-implementer, java-coverage-reporter; commands: cui-orchestrate-java-task)
 - **cui-plugin-development-tools**: Claude Code marketplace development tools
 - **cui-utility-commands**: General-purpose utility commands and diagnostics
 - **cui-documentation-standards**: AsciiDoc documentation standards and review

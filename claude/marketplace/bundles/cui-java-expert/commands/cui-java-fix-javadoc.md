@@ -1,5 +1,5 @@
 ---
-name: cui-javadoc-fix
+name: cui-java-fix-javadoc
 description: Fix Javadoc errors and warnings from Maven builds with content preservation
 ---
 
@@ -9,7 +9,7 @@ Systematically identifies and fixes Javadoc errors and warnings from Maven build
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-javadoc-fix update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-fix-javadoc update="[your improvement]"` with:
 1. Improved error detection and categorization patterns
 2. Better fix strategies that preserve content
 3. More efficient verification workflows
@@ -446,22 +446,22 @@ All fix strategies follow content-preservation rules and minimal modification ap
 
 **Fix all Javadoc errors:**
 ```
-/cui-javadoc-fix
+/cui-java-fix-javadoc
 ```
 
 **Fix single module:**
 ```
-/cui-javadoc-fix module=auth-service
+/cui-java-fix-javadoc module=auth-service
 ```
 
 **Verify only (no fixes):**
 ```
-/cui-javadoc-fix verify-only
+/cui-java-fix-javadoc verify-only
 ```
 
 **Verify specific module:**
 ```
-/cui-javadoc-fix module=user-api verify-only
+/cui-java-fix-javadoc module=user-api verify-only
 ```
 
 ## ARCHITECTURE
@@ -477,4 +477,4 @@ Orchestrates agents and commands:
 - `cui-javadoc` skill - Javadoc standards and error reference
 - `maven-builder` agent - Build and verification
 - `/cui-java-implement-code` command - Code modifications
-- `/cui-java-refactor` command - Broader code refactoring
+- `/cui-java-refactor-code` command - Broader code refactoring

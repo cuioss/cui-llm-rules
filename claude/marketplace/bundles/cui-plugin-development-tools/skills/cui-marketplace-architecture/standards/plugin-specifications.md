@@ -91,7 +91,7 @@ claude/marketplace/
     "./agents/pr-quality-fixer.md"
   ],
   "commands": [
-    "./commands/cui-implement-task.md",
+    "./commands/cui-orchestrate-task-workflow.md",
     "./commands/cui-handle-pull-request.md"
   ],
   "skills": []

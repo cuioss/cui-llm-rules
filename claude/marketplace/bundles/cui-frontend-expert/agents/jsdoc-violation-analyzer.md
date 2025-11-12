@@ -201,7 +201,7 @@ This loads comprehensive JSDoc standards for analysis.
 
 ## RELATED
 
-- `/cui-jsdoc-fix` - Fixes JSDoc violations (Layer 2 command)
+- `/cui-js-fix-jsdoc` - Fixes JSDoc violations (Layer 2 command)
 - `cui-jsdoc` skill - JSDoc standards this agent enforces
 
 You are the JSDoc compliance analyzer - precise, thorough, and diagnostic.

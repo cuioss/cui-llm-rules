@@ -1,5 +1,5 @@
 ---
-name: cui-java-refactor
+name: cui-java-refactor-code
 description: Execute systematic Java refactoring with standards compliance verification
 ---
 
@@ -9,7 +9,7 @@ Orchestrates systematic Java code refactoring and maintenance workflow with comp
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-refactor update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-refactor-code update="[your improvement]"` with:
 1. Improved violation detection patterns
 2. Better module processing strategies
 3. More effective agent coordination
@@ -123,7 +123,7 @@ Task:
 **2.3 Coverage Baseline:**
 
 ```
-SlashCommand: /cui-java-coverage-report
+SlashCommand: /cui-java-generate-coverage
 Parameters: module={module if specified}
 ```
 
@@ -217,7 +217,7 @@ Track in `fixes_applied` counter.
 **5.3 Module Verification:**
 
 ```
-SlashCommand: /cui-build-and-fix
+SlashCommand: /cui-maven-build-and-fix
 Parameters: module={module-name}
 ```
 
@@ -228,7 +228,7 @@ Self-contained command that runs build, fixes issues, verifies tests, commits fi
 **5.4 Module Coverage Check:**
 
 ```
-SlashCommand: /cui-java-coverage-report
+SlashCommand: /cui-java-generate-coverage
 Parameters: module={module-name}
 ```
 
@@ -273,7 +273,7 @@ Task:
 **6.3 Coverage Verification:**
 
 ```
-SlashCommand: /cui-java-coverage-report
+SlashCommand: /cui-java-generate-coverage
 ```
 
 Compare final coverage to baseline, display coverage change, ensure no significant regression.
@@ -354,25 +354,25 @@ Bash: git reset --hard {initial_commit}
 
 ```
 # Full refactoring (all modules, all priorities)
-/cui-java-refactor
+/cui-java-refactor-code
 
 # Single module refactoring
-/cui-java-refactor module=auth-service
+/cui-java-refactor-code module=auth-service
 
 # Only high priority violations
-/cui-java-refactor priority=high
+/cui-java-refactor-code priority=high
 
 # Modernize code only
-/cui-java-refactor scope=modernize
+/cui-java-refactor-code scope=modernize
 
 # Remove unused code
-/cui-java-refactor scope=unused priority=medium
+/cui-java-refactor-code scope=unused priority=medium
 
 # Documentation improvements only
-/cui-java-refactor scope=documentation module=core-api
+/cui-java-refactor-code scope=documentation module=core-api
 
 # Combination
-/cui-java-refactor module=user-service scope=standards priority=high
+/cui-java-refactor-code module=user-service scope=standards priority=high
 ```
 
 ## ARCHITECTURE
@@ -382,15 +382,15 @@ Orchestrates agents and commands:
 - **Explore agent** - Codebase analysis for violation detection
 - **/cui-java-implement-code command** - Focused code fixes (Layer 2)
 - **maven-builder agent** - Build and verification (Layer 3)
-- **`/cui-build-and-fix` command** - Build verification and fixes
-- **`/cui-java-coverage-report` command** - Coverage analysis
+- **`/cui-maven-build-and-fix` command** - Build verification and fixes
+- **`/cui-java-generate-coverage` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-java-maintenance` skill - Standards this command implements
 - `/cui-java-implement-code` command - Implementation fixes
 - `maven-builder` agent - Build verification
-- `/cui-build-and-fix` command - Build and fix workflow
-- `/cui-java-coverage-report` command - Coverage analysis
+- `/cui-maven-build-and-fix` command - Build and fix workflow
+- `/cui-java-generate-coverage` command - Coverage analysis
 - `cui-java-core` skill - Implementation patterns
 - `cui-task-planning` skill - For refactoring task planning

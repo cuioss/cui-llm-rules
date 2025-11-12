@@ -16,14 +16,14 @@
     "./agents/logging-violation-analyzer.md"
   ],
   "commands": [
-    "./commands/cui-java-refactor.md",
-    "./commands/cui-java-task-manager.md",
-    "./commands/cui-javadoc-fix.md",
-    "./commands/cui-log-record-enforcer.md",
-    "./commands/cui-logger-maintain.md",
-    "./commands/cui-quarkus-native-optimize.md",
-    "./commands/cui-test-maintain.md",
-    "./commands/cui-java-coverage-report.md",
+    "./commands/cui-java-refactor-code.md",
+    "./commands/cui-orchestrate-java-task.md",
+    "./commands/cui-java-fix-javadoc.md",
+    "./commands/cui-java-enforce-logrecords.md",
+    "./commands/cui-java-maintain-logger.md",
+    "./commands/cui-optimize-quarkus-native.md",
+    "./commands/cui-java-maintain-tests.md",
+    "./commands/cui-java-generate-coverage.md",
     "./commands/cui-java-implement-code.md",
     "./commands/cui-java-implement-tests.md"
   ],

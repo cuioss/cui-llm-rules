@@ -53,7 +53,7 @@ Based on triager decision:
 ### Step 3: Verify and Commit
 
 ```
-SlashCommand: /cui-build-and-fix push
+SlashCommand: /cui-maven-build-and-fix push
 ```
 
 ### Step 4: Return Summary
@@ -71,7 +71,7 @@ SlashCommand: /cui-build-and-fix push
 - **Pattern 3**: Fetch + Triage + Delegate
 - **Self-Contained**: Handles entire fix workflow
 - **User Approval**: Ask before suppressing issues
-- **Verify + Commit**: Uses /cui-build-and-fix for final verification
+- **Verify + Commit**: Uses /cui-maven-build-and-fix for final verification
 
 ## ARCHITECTURE
 
@@ -80,5 +80,5 @@ SlashCommand: /cui-build-and-fix push
   ├─> Task(sonar-issue-fetcher) [fetches]
   ├─> For each: Task(sonar-issue-triager) [decides]
   ├─> Delegates fixes: SlashCommand(/java-implement-code)
-  └─> Verifies: SlashCommand(/cui-build-and-fix push)
+  └─> Verifies: SlashCommand(/cui-maven-build-and-fix push)
 ```

@@ -43,8 +43,8 @@
     },
     {
       "type": "command",
-      "name": "cui-requirements-maintain",
-      "path": "commands/cui-requirements-maintain.md",
+      "name": "cui-maintain-requirements",
+      "path": "commands/cui-maintain-requirements.md",
       "description": "Systematic workflow for maintaining requirements and specification documents with integrity verification"
     }
   ],

@@ -327,4 +327,4 @@ Action: Creating new section at end of file
 
 - `cui-java-core` skill - LogMessages documentation standards
 - `/review-technical-docs` command - AsciiDoc validation (call from orchestrating command if needed)
-- `cui-log-record-enforcer` command - Enforce LogRecord implementation standards
+- `cui-java-enforce-logrecords` command - Enforce LogRecord implementation standards

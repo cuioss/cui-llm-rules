@@ -1,5 +1,5 @@
 ---
-name: cui-implement-task
+name: cui-orchestrate-task-workflow
 description: Verify, plan, and implement issues through end-to-end workflow with agent coordination
 ---
 
@@ -68,7 +68,7 @@ Task:
 ### Step 4: Verify Build
 
 ```
-SlashCommand: /cui-build-and-fix
+SlashCommand: /cui-maven-build-and-fix
 ```
 
 Self-contained command that runs build, fixes issues if found, verifies, and commits fixes.
@@ -79,7 +79,7 @@ Self-contained command that runs build, fixes issues if found, verifies, and com
 
 **Pattern Decision: Determine if atomic or batch:**
 - If plan has 1 task (atomic): Use task-executor directly + verify
-- If plan has multiple tasks (batch): Delegate to /cui-execute-task for each
+- If plan has multiple tasks (batch): Delegate to /cui-execute-single-task for each
 
 **For atomic (single task):**
 ```
@@ -89,15 +89,15 @@ Task:
   prompt: Implement task: {task_description}
 ```
 
-Then verify with SlashCommand(/cui-build-and-fix).
+Then verify with SlashCommand(/cui-maven-build-and-fix).
 
 **For batch (multiple tasks):**
 ```
 For each task in plan:
-  SlashCommand: /cui-execute-task task="{task_description}"
+  SlashCommand: /cui-execute-single-task task="{task_description}"
 ```
 
-Each /cui-execute-task is self-contained (implements + verifies + iterates).
+Each /cui-execute-single-task is self-contained (implements + verifies + iterates).
 
 Track: tasks_completed, tasks_failed, tasks_skipped.
 
@@ -108,7 +108,7 @@ Check all tasks completed. Prompt for incomplete items.
 ### Step 7: Final Verification and Commit
 
 ```
-SlashCommand: /cui-build-and-fix push={push parameter}
+SlashCommand: /cui-maven-build-and-fix push={push parameter}
 ```
 
 Self-contained command: runs build, fixes issues if found, verifies, commits all changes, and pushes if push=true.
@@ -145,7 +145,7 @@ Display all statistics in final summary.
 
 **Command Orchestration:**
 - Delegate to self-contained commands for build/verify/commit operations
-- Pattern Decision: atomic tasks use task-executor + verify, batch uses /cui-execute-task per task
+- Pattern Decision: atomic tasks use task-executor + verify, batch uses /cui-execute-single-task per task
 - Wait for each operation to complete before next step
 - Handle failures gracefully
 
@@ -168,22 +168,22 @@ Display all statistics in final summary.
 
 **Interactive mode:**
 ```
-/cui-implement-task
+/cui-orchestrate-task-workflow
 ```
 
 **With issue:**
 ```
-/cui-implement-task issue=123
+/cui-orchestrate-task-workflow issue=123
 ```
 
 **Resume from task:**
 ```
-/cui-implement-task issue=123 continueFrom=5
+/cui-orchestrate-task-workflow issue=123 continueFrom=5
 ```
 
 **Auto-push:**
 ```
-/cui-implement-task issue=123 push
+/cui-orchestrate-task-workflow issue=123 push
 ```
 
 ## ARCHITECTURE
@@ -192,20 +192,20 @@ Orchestrates agents and commands:
 - task-reviewer agent - Issue validation
 - task-breakdown-agent - Planning
 - task-executor agent - Focused implementation (for atomic tasks)
-- `/cui-execute-task` command - Self-contained (for batch tasks)
-- `/cui-build-and-fix` command - Build + verify + fix + commit
+- `/cui-execute-single-task` command - Self-contained (for batch tasks)
+- `/cui-maven-build-and-fix` command - Build + verify + fix + commit
 
 ## RELATED
 
 - task-reviewer agent
 - task-breakdown-agent
 - task-executor agent
-- `/cui-execute-task` command (self-contained)
-- `/cui-build-and-fix` command
+- `/cui-execute-single-task` command (self-contained)
+- `/cui-maven-build-and-fix` command
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /cui-update-command command-name=cui-implement-task update="[your improvement]"
+**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /cui-update-command command-name=cui-orchestrate-task-workflow update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Agent coordination patterns and retry strategies

@@ -1,5 +1,5 @@
 ---
-name: cui-javascript-coverage-report
+name: cui-js-generate-coverage
 description: Self-contained command for coverage generation and analysis
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that generates test coverage reports and analyzes results
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-javascript-coverage-report`
+**This command should be improved using**: `/cui-update-command cui-js-generate-coverage`
 
 **Improvement areas**:
 - Enhanced report parsing for different test frameworks (Jest, Vitest, Mocha)

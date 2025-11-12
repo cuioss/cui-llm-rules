@@ -126,7 +126,7 @@ Commands that create plans should delegate to agents that load this skill.
 - **task-reviewer** - Validates task completeness
 
 **Commands:**
-- **cui-implement-task** - Orchestrates implementation using plans
+- **cui-orchestrate-task-workflow** - Orchestrates implementation using plans
 - Any command creating or consuming task lists
 
 **Skills:**

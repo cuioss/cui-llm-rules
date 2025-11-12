@@ -63,22 +63,22 @@ By combining these workflows, developers get a seamless experience from task ass
 
 #### Orchestrator Commands
 
-1. **/cui-implement-task** - Orchestrates complete issue implementation workflow
+1. **/cui-orchestrate-task-workflow** - Orchestrates complete issue implementation workflow
    - Delegates to task-reviewer, task-breakdown-agent
-   - Pattern Decision: atomic (direct) vs batch (delegates to /cui-execute-task)
-   - Uses /cui-build-and-fix for verification
+   - Pattern Decision: atomic (direct) vs batch (delegates to /cui-execute-single-task)
+   - Uses /cui-maven-build-and-fix for verification
    - Optionally commits and pushes
 
 2. **/cui-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
    - Waits for CI/Sonar checks
-   - Delegates to /cui-build-and-fix for build fixes
+   - Delegates to /cui-maven-build-and-fix for build fixes
    - Delegates to /cui-respond-to-review-comments for review handling
    - Delegates to /cui-fix-sonar-issues for quality fixes
    - Aggregates results from self-contained commands
 
 #### Self-Contained Commands (Pattern 1 & Pattern 3)
 
-3. **/cui-execute-task** - Implements and verifies single task (Pattern 1)
+3. **/cui-execute-single-task** - Implements and verifies single task (Pattern 1)
    - Uses task-executor agent for implementation
    - Uses maven-builder for verification
    - Iterates up to 3 cycles
@@ -130,7 +130,7 @@ This will make all agents and commands available in your Claude Code environment
 **Step 1: Implement a GitHub Issue**
 
 ```
-/cui-implement-task
+/cui-orchestrate-task-workflow
 
 Implement GitHub issue #42: Add OAuth2 token refresh capability
 ```
@@ -224,7 +224,7 @@ Fix all quality issues before requesting code review.
 ### Internal Component Dependencies
 - **task-reviewer** may invoke **research-best-practices** for validation
 - **task-breakdown-agent** invokes **research-best-practices** for industry standards
-- **cui-implement-task** command orchestrates: task-breakdown-agent → task-executor workflow
+- **cui-orchestrate-task-workflow** command orchestrates: task-breakdown-agent → task-executor workflow
 - **cui-handle-pull-request** command orchestrates: pr-review-responder → pr-quality-fixer workflow
 
 ## Workflow Stages
@@ -233,7 +233,7 @@ Fix all quality issues before requesting code review.
 Use task-breakdown-agent or task-reviewer to analyze requirements and create actionable plans.
 
 ### Stage 2: Implementation
-Use task-executor or cui-implement-task to execute the plan and implement features.
+Use task-executor or cui-orchestrate-task-workflow to execute the plan and implement features.
 
 ### Stage 3: Quality Verification
 Agents automatically run builds and quality checks during implementation.

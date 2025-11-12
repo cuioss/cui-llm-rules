@@ -277,14 +277,14 @@ Ensure coverage maintained or improved.
 
 This skill is designed to be used by:
 
-**`/cui-javascript-refactor` command:**
+**`/cui-js-refactor-code` command:**
 - Loads this skill for detection, prioritization, and verification
 - Orchestrates systematic refactoring workflow
 - Uses trigger criteria to identify issues
 - Uses prioritization to order work
 - Uses checklist to verify completeness
 
-**`/cui-javascript-test-maintain` command:**
+**`/cui-js-maintain-tests` command:**
 - Loads this skill for test quality improvement
 - Uses test-quality-standards.md for detection
 - Uses prioritization for test work ordering
@@ -327,7 +327,7 @@ This skill is designed to be used by:
 - ✅ Verification checklist (HOW to verify)
 - ✅ Test quality standards (HOW to test)
 - ❌ Implementation patterns (see cui-javascript)
-- ❌ Workflow orchestration (see /cui-javascript-refactor command)
+- ❌ Workflow orchestration (see /cui-js-refactor-code command)
 
 **Implementation skills (cui-javascript, etc.):**
 - ✅ Implementation patterns (HOW to implement)
@@ -447,6 +447,6 @@ If issues arise during maintenance:
 - cui-cypress - E2E testing standards
 
 **Related Commands:**
-- /cui-javascript-refactor - Systematic refactoring workflow
-- /cui-javascript-test-maintain - Test quality improvement workflow
+- /cui-js-refactor-code - Systematic refactoring workflow
+- /cui-js-maintain-tests - Test quality improvement workflow
 - /javascript-coverage-report - Coverage analysis

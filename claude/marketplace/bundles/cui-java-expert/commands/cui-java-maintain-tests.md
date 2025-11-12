@@ -1,5 +1,5 @@
 ---
-name: cui-test-maintain
+name: cui-java-maintain-tests
 description: Systematic workflow for maintaining and improving Java test quality
 ---
 
@@ -487,7 +487,7 @@ Test maintenance is complete when:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-test-maintain`
+**This command should be improved using**: `/cui-update-command cui-java-maintain-tests`
 
 **Improvement areas**:
 - Analysis efficiency optimization for large multi-module projects
@@ -507,5 +507,5 @@ Test maintenance is complete when:
 * maven-builder - Build verification and coverage analysis
 
 **Related Commands**:
-* /cui-java-refactor - For production code refactoring
-* /cui-logger-maintain - For logging standards maintenance
+* /cui-java-refactor-code - For production code refactoring
+* /cui-java-maintain-logger - For logging standards maintenance

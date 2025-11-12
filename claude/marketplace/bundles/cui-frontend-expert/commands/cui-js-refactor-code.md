@@ -1,5 +1,5 @@
 ---
-name: cui-javascript-refactor
+name: cui-js-refactor-code
 description: Execute systematic JavaScript refactoring with standards compliance verification
 ---
 
@@ -9,7 +9,7 @@ Orchestrates systematic JavaScript code refactoring and maintenance workflow wit
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-javascript-refactor update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-js-refactor-code update="[your improvement]"` with:
 1. Improved violation detection patterns
 2. Better file/workspace processing strategies
 3. More effective agent coordination
@@ -171,7 +171,7 @@ Display workspace name and violation count/distribution.
 For each violation in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /cui-javascript-implement-code task="Fix violation using cui-javascript standards.
+SlashCommand: /cui-js-implement-code task="Fix violation using cui-javascript standards.
 
 Violation: {description}
 Location: {file}:{line}
@@ -342,25 +342,25 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-refactor state
 
 ```
 # Full refactoring (all workspaces, all priorities)
-/cui-javascript-refactor
+/cui-js-refactor-code
 
 # Single workspace refactoring
-/cui-javascript-refactor workspace=frontend
+/cui-js-refactor-code workspace=frontend
 
 # Only high priority violations
-/cui-javascript-refactor priority=high
+/cui-js-refactor-code priority=high
 
 # Modernize code only
-/cui-javascript-refactor scope=modernize
+/cui-js-refactor-code scope=modernize
 
 # Remove unused code
-/cui-javascript-refactor scope=unused priority=medium
+/cui-js-refactor-code scope=unused priority=medium
 
 # Documentation improvements only
-/cui-javascript-refactor scope=documentation workspace=core
+/cui-js-refactor-code scope=documentation workspace=core
 
 # Combination
-/cui-javascript-refactor workspace=ui scope=standards priority=high
+/cui-js-refactor-code workspace=ui scope=standards priority=high
 ```
 
 ## ARCHITECTURE
@@ -368,14 +368,14 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-refactor state
 Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Standards for detection, prioritization, verification
 - **Explore agent** - Codebase analysis for violation detection
-- **`/cui-javascript-implement-code` command** - Self-contained code fixes (Layer 2)
+- **`/cui-js-implement-code` command** - Self-contained code fixes (Layer 2)
 - **npm-builder agent** - Build and verification
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Standards this command implements
-- `/cui-javascript-implement-code` command - Implementation fixes (Layer 2)
+- `/cui-js-implement-code` command - Implementation fixes (Layer 2)
 - `npm-builder` agent - Build verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript` skill - Implementation patterns

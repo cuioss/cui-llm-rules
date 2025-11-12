@@ -14,7 +14,7 @@
     "./agents/maven-builder.md"
   ],
   "commands": [
-    "./commands/cui-build-and-fix.md"
+    "./commands/cui-maven-build-and-fix.md"
   ],
   "skills": [
     "./skills/cui-maven-rules"

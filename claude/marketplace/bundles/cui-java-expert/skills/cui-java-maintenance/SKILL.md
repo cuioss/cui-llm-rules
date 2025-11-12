@@ -232,7 +232,7 @@ Verify all modules pass build and tests.
 
 This skill is designed to be used by:
 
-**`/cui-java-refactor` command:**
+**`/cui-java-refactor-code` command:**
 - Loads this skill for detection, prioritization, and verification
 - Orchestrates systematic refactoring workflow
 - Uses trigger criteria to identify issues
@@ -271,7 +271,7 @@ This skill is designed to be used by:
 - ✅ Prioritization framework (WHAT order)
 - ✅ Verification checklist (HOW to verify)
 - ❌ Implementation patterns (see cui-java-core)
-- ❌ Workflow orchestration (see /cui-java-refactor command)
+- ❌ Workflow orchestration (see /cui-java-refactor-code command)
 
 **Implementation skills (cui-java-core, etc.):**
 - ✅ Implementation patterns (HOW to implement)
@@ -387,5 +387,5 @@ If issues arise during maintenance:
 - cui-java-cdi - CDI standards
 
 **Related Commands:**
-- /cui-java-refactor - Systematic refactoring workflow
-- /cui-build-and-fix - Build verification and fixes
+- /cui-java-refactor-code - Systematic refactoring workflow
+- /cui-maven-build-and-fix - Build verification and fixes

@@ -515,7 +515,7 @@ asciidoc-content-reviewer: reviews content only
 ✅ CORRECT - Three-Layer Java Implementation:
 ```markdown
 # Layer 1: Batch Command (if multiple implementations)
-/cui-java-task-manager
+/cui-orchestrate-java-task
   ├─> Parse task into implementation list
   ├─> For each implementation:
   │    └─> SlashCommand(/cui-java-implement-code class-task)

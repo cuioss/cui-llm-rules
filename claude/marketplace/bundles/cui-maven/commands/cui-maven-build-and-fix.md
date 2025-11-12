@@ -1,5 +1,5 @@
 ---
-name: cui-build-and-fix
+name: cui-maven-build-and-fix
 description: Execute Maven build, analyze errors, delegate fixes to appropriate commands, and iterate until clean
 ---
 
@@ -9,7 +9,7 @@ Comprehensive project verification command that orchestrates Maven builds, analy
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-build-and-fix`
+**This command should be improved using**: `/cui-update-command cui-maven-build-and-fix`
 
 **Improvement areas**:
 - Improved issue categorization and routing strategies
@@ -110,7 +110,7 @@ Other Issues:
 ```
 
 **Route to fix strategies:**
-- Java issues → Delegate to /cui-java-task-manager
+- Java issues → Delegate to /cui-orchestrate-java-task
 - Dependency issues → Report to user (manual intervention)
 - Configuration errors → Report to user (manual intervention)
 
@@ -120,7 +120,7 @@ Other Issues:
 
 **Java Issues (compilation, test, javadoc):**
 ```
-SlashCommand: /cui-java-task-manager task="Fix {issue_category}: {issue_details}"
+SlashCommand: /cui-orchestrate-java-task task="Fix {issue_category}: {issue_details}"
 ```
 
 Parameters to pass:
@@ -136,7 +136,7 @@ Parameters to pass:
 
 **Error handling:**
 ```
-If /cui-java-task-manager fails:
+If /cui-orchestrate-java-task fails:
   ⚠️  Fix attempt failed: {issue_category}
   Error: {error_message}
 
@@ -242,8 +242,8 @@ Files modified: {files_modified_count}
 
 Next Steps:
 - Review remaining issues in: {output_file}
-- Run /cui-java-task-manager manually for specific fixes
-- Run /cui-build-and-fix again to retry
+- Run /cui-orchestrate-java-task manually for specific fixes
+- Run /cui-maven-build-and-fix again to retry
 ```
 
 **Do NOT commit if issues remain** (even if push=true)
@@ -283,7 +283,7 @@ If commit-changes fails:
   Error: {error_message}
 
   Note: Changes remain uncommitted in working directory.
-  You can commit manually or run /cui-build-and-fix push again.
+  You can commit manually or run /cui-maven-build-and-fix push again.
 ```
 
 ## STATISTICS TRACKING
@@ -303,7 +303,7 @@ Display all statistics in final report.
 **Command Orchestration:**
 - This command orchestrates maven-builder and fix commands
 - Uses Task tool to invoke maven-builder (agent)
-- Uses SlashCommand to invoke /cui-java-task-manager (command)
+- Uses SlashCommand to invoke /cui-orchestrate-java-task (command)
 - Commands CAN invoke other commands (Rule 6 compliant)
 
 **No Direct Fixes:**
@@ -334,22 +334,22 @@ Display all statistics in final report.
 
 **Basic build and fix:**
 ```
-/cui-build-and-fix
+/cui-maven-build-and-fix
 ```
 
 **Build, fix, and commit:**
 ```
-/cui-build-and-fix push
+/cui-maven-build-and-fix push
 ```
 
 **Custom Maven goals:**
 ```
-/cui-build-and-fix goals="clean test -Pcoverage"
+/cui-maven-build-and-fix goals="clean test -Pcoverage"
 ```
 
 **Build, fix with custom goals, and commit:**
 ```
-/cui-build-and-fix goals="clean verify" push
+/cui-maven-build-and-fix goals="clean verify" push
 ```
 
 ## ARCHITECTURE
@@ -357,10 +357,10 @@ Display all statistics in final report.
 **Pattern**: Command Orchestrator (delegates to both agents and commands)
 
 ```
-/cui-build-and-fix (THIS COMMAND)
+/cui-maven-build-and-fix (THIS COMMAND)
   ├─> Task(maven-builder) [agent: executes build, returns structured results]
   ├─> Analyze results and categorize issues
-  ├─> SlashCommand(/cui-java-task-manager) [command: delegates fixes]
+  ├─> SlashCommand(/cui-orchestrate-java-task) [command: delegates fixes]
   ├─> Task(maven-builder) [agent: verify fixes]
   ├─> Iterate until clean or max iterations
   └─> Task(commit-changes) [agent: commit if push=true and clean]
@@ -371,7 +371,7 @@ Display all statistics in final report.
 - ✅ Commands can invoke other commands (SlashCommand available)
 - ✅ No agent nesting (agents never call Task)
 - ✅ maven-builder is focused (just builds, no fixes)
-- ✅ /cui-java-task-manager orchestrates Java fixes
+- ✅ /cui-orchestrate-java-task orchestrates Java fixes
 - ✅ This command orchestrates the overall workflow
 
 **Reference**: See architecture-rules.md Rule 6 (Agent Delegation Constraints)
@@ -395,5 +395,5 @@ Display all statistics in final report.
 ## RELATED
 
 - `maven-builder` - Maven build execution agent (Layer 3)
-- `/cui-java-task-manager` - Java implementation orchestrator (Layer 1/2)
+- `/cui-orchestrate-java-task` - Java implementation orchestrator (Layer 1/2)
 - `commit-changes` - Git commit utility agent

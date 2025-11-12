@@ -14,7 +14,7 @@
     "./agents/research-best-practices.md"
   ],
   "commands": [
-    "./commands/cui-create-update-agents-md.md",
+    "./commands/cui-sync-agents-file.md",
     "./commands/cui-fix-intellij-diagnostics.md",
     "./commands/cui-manage-web-permissions.md",
     "./commands/cui-setup-project-permissions.md",

@@ -376,7 +376,7 @@ Task:
 **Configuration Structure in `.claude/run-configuration.md`:**
 
 ```markdown
-## cui-log-record-enforcer
+## cui-java-enforce-logrecords
 
 ### Module: {module-name}
 
@@ -397,7 +397,7 @@ Task:
 ```
 
 **Usage:**
-1. Read configuration for command key: `cui-log-record-enforcer`
+1. Read configuration for command key: `cui-java-enforce-logrecords`
 2. Find section for specified module
 3. Extract LogMessages class paths
 4. Extract LogMessages.adoc paths

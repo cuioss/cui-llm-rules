@@ -1,5 +1,5 @@
 ---
-name: cui-requirements-maintain
+name: cui-maintain-requirements
 description: Maintain and synchronize requirements and specifications with comprehensive validation
 ---
 
@@ -9,7 +9,7 @@ Systematic workflow for maintaining requirements and specification documents to 
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-requirements-maintain update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-maintain-requirements update="[your improvement]"` with:
 1. Improved requirements integrity detection patterns
 2. Better cross-reference verification strategies
 3. More efficient scenario workflow approaches
@@ -458,19 +458,19 @@ Display all statistics in final summary.
 
 ```
 # Complete maintenance
-/cui-requirements-maintain scope=full
+/cui-maintain-requirements scope=full
 
 # Requirements only
-/cui-requirements-maintain scope=requirements
+/cui-maintain-requirements scope=requirements
 
 # New feature documentation
-/cui-requirements-maintain scope=full scenario=new-feature
+/cui-maintain-requirements scope=full scenario=new-feature
 
 # Handle deprecation (will ask user for post-1.0)
-/cui-requirements-maintain scope=full scenario=deprecation
+/cui-maintain-requirements scope=full scenario=deprecation
 
 # After refactoring
-/cui-requirements-maintain scope=specifications scenario=refactoring
+/cui-maintain-requirements scope=specifications scenario=refactoring
 ```
 
 ## ARCHITECTURE
@@ -488,5 +488,5 @@ Orchestrates agents and skills:
 - `cui-requirements:requirements-maintenance` skill - Maintenance principles
 - `cui-requirements:requirements-documentation` skill - Requirements patterns
 - `cui-requirements:specification-documentation` skill - Specification patterns
-- `/cui-implement-task` command - End-to-end issue implementation
+- `/cui-orchestrate-task-workflow` command - End-to-end issue implementation
 - `/cui-handle-pull-request` command - PR workflow including documentation review

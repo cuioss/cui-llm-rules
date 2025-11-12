@@ -1,5 +1,5 @@
 ---
-name: cui-log-record-enforcer
+name: cui-java-enforce-logrecords
 description: Enforce CUI logging standards by validating LogRecord usage, testing coverage, and identifier organization
 ---
 
@@ -9,7 +9,7 @@ Comprehensive diagnostic and automation command that enforces CUI logging standa
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-log-record-enforcer update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-enforce-logrecords update="[your improvement]"` with:
 1. Better violation detection patterns for logging statements
 2. More efficient LogRecord usage analysis techniques
 3. Improved LogAssert verification strategies
@@ -49,7 +49,7 @@ If build fails, report to caller and stop execution.
 
 **Read configuration:**
 1. Read `.claude/run-configuration.md` for module-specific paths
-2. Look for section matching command key: `cui-log-record-enforcer`
+2. Look for section matching command key: `cui-java-enforce-logrecords`
 3. Extract LogMessages class locations for each module
 4. Extract LogMessages.adoc locations for each module
 
@@ -64,7 +64,7 @@ This loads:
 
 **Configuration structure:**
 ```markdown
-## cui-log-record-enforcer
+## cui-java-enforce-logrecords
 
 ### Module: [module-name]
 
@@ -352,17 +352,17 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 
 **Single-module project:**
 ```
-/cui-log-record-enforcer
+/cui-java-enforce-logrecords
 ```
 
 **Multi-module project, specific module:**
 ```
-/cui-log-record-enforcer module=oauth-sheriff-core
+/cui-java-enforce-logrecords module=oauth-sheriff-core
 ```
 
 **Multi-module project, all modules:**
 ```
-/cui-log-record-enforcer
+/cui-java-enforce-logrecords
 (will ask which module to analyze)
 ```
 

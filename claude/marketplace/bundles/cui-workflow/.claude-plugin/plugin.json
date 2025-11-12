@@ -22,8 +22,8 @@
   ],
   "commands": [
     "./commands/cui-handle-pull-request.md",
-    "./commands/cui-implement-task.md",
-    "./commands/cui-execute-task.md",
+    "./commands/cui-orchestrate-task-workflow.md",
+    "./commands/cui-execute-single-task.md",
     "./commands/cui-fix-sonar-issues.md",
     "./commands/cui-respond-to-review-comments.md"
   ],

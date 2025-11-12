@@ -1,5 +1,5 @@
 ---
-name: cui-java-task-manager
+name: cui-orchestrate-java-task
 description: Implements Java tasks end-to-end with automated testing and coverage verification
 ---
 
@@ -9,7 +9,7 @@ Orchestrates complete Java task implementation through code creation, unit testi
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-task-manager update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-orchestrate-java-task update="[your improvement]"` with:
 1. Improved agent coordination patterns and error recovery strategies
 2. Better coverage gap analysis and iterative fix workflows
 3. More effective parameter preparation for agent handoffs
@@ -89,10 +89,10 @@ This command handles test implementation AND verification internally (writes tes
 
 ### Step 4: Coverage Verification Phase
 
-Call self-contained command `/cui-java-coverage-report`:
+Call self-contained command `/cui-java-generate-coverage`:
 
 ```
-SlashCommand: /cui-java-coverage-report
+SlashCommand: /cui-java-generate-coverage
 Parameters: |
   types={types}
   module={module}
@@ -174,26 +174,26 @@ Display all statistics in final summary.
 
 **Full implementation:**
 ```
-/cui-java-task-manager types=UserService description="Implement user authentication with JWT tokens" module=auth-service
+/cui-orchestrate-java-task types=UserService description="Implement user authentication with JWT tokens" module=auth-service
 ```
 
 **Testing existing code:**
 ```
-/cui-java-task-manager types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
+/cui-orchestrate-java-task types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
 ```
 
 **Coverage verification:**
 ```
-/cui-java-task-manager types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
+/cui-orchestrate-java-task types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
 ```
 
 **Single-module project:**
 ```
-/cui-java-task-manager types=com.example.util.StringUtils description="Add string validation utilities"
+/cui-orchestrate-java-task types=com.example.util.StringUtils description="Add string validation utilities"
 ```
 
 ## RELATED
 
 - `/cui-java-implement-code` - Self-contained command for production code implementation + verification
 - `/cui-java-implement-tests` - Self-contained command for unit test implementation + verification
-- `/cui-java-coverage-report` - Self-contained command for coverage generation + analysis
+- `/cui-java-generate-coverage` - Self-contained command for coverage generation + analysis

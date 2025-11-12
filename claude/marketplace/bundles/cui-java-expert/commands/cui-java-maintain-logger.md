@@ -1,5 +1,5 @@
 ---
-name: cui-logger-maintain
+name: cui-java-maintain-logger
 description: Execute systematic logging standards maintenance with plan tracking and comprehensive test coverage
 ---
 
@@ -9,7 +9,7 @@ Systematically implements and maintains logging standards across modules while p
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-logger-maintain update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-maintain-logger update="[your improvement]"` with:
 1. Improved LogRecord discovery patterns
 2. Better business logic test integration strategies
 3. More efficient plan.md tracking workflows
@@ -377,16 +377,16 @@ Display all statistics in final summary.
 
 ```
 # Process all modules
-/cui-logger-maintain
+/cui-java-maintain-logger
 
 # Process single module
-/cui-logger-maintain module=auth-service
+/cui-java-maintain-logger module=auth-service
 
 # Generate/regenerate plan
-/cui-logger-maintain create-plan
+/cui-java-maintain-logger create-plan
 
 # Process module and regenerate plan
-/cui-logger-maintain module=user-api create-plan
+/cui-java-maintain-logger module=user-api create-plan
 ```
 
 ## ARCHITECTURE
@@ -403,5 +403,5 @@ Orchestrates agents and commands:
 - `cui-java-core` skill - Logging standards and maintenance reference
 - `/cui-java-implement-code` command - Code modifications
 - `maven-builder` agent - Build verification
-- `/cui-java-refactor` command - Broader code refactoring
-- `/cui-log-record-enforcer` command - Automated logging enforcement
+- `/cui-java-refactor-code` command - Broader code refactoring
+- `/cui-java-enforce-logrecords` command - Automated logging enforcement

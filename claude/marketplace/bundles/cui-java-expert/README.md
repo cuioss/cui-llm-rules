@@ -46,11 +46,11 @@ This bundle provides a complete Java development knowledge base by aggregating f
 
 ### Commands (5 commands)
 
-1. **cui-java-task-manager** - End-to-end Java task implementation orchestrator (delegates to self-contained commands)
-2. **cui-log-record-enforcer** - Enforces CUI logging standards (orchestrates violation analysis and fixes)
+1. **cui-orchestrate-java-task** - End-to-end Java task implementation orchestrator (delegates to self-contained commands)
+2. **cui-java-enforce-logrecords** - Enforces CUI logging standards (orchestrates violation analysis and fixes)
 3. **cui-java-implement-code** - Self-contained command: implements code + verifies + iterates
 4. **cui-java-implement-tests** - Self-contained command: writes tests + runs tests + iterates
-5. **cui-java-coverage-report** - Self-contained command: generates coverage + analyzes reports
+5. **cui-java-generate-coverage** - Self-contained command: generates coverage + analyzes reports
 
 ## Installation
 

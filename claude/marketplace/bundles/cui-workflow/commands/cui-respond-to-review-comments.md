@@ -53,7 +53,7 @@ Based on triager decision:
 ### Step 3: Verify and Commit (if code changed)
 
 ```
-SlashCommand: /cui-build-and-fix push
+SlashCommand: /cui-maven-build-and-fix push
 ```
 
 ### Step 4: Return Summary
@@ -72,7 +72,7 @@ SlashCommand: /cui-build-and-fix push
 - **Pattern 3**: Fetch + Triage + Delegate
 - **Self-Contained**: Handles entire response workflow
 - **Conditional Commit**: Only if code was changed
-- **Verify + Commit**: Uses /cui-build-and-fix for verification
+- **Verify + Commit**: Uses /cui-maven-build-and-fix for verification
 
 ## ARCHITECTURE
 
@@ -81,5 +81,5 @@ SlashCommand: /cui-build-and-fix push
   ├─> Task(review-comment-fetcher) [fetches]
   ├─> For each: Task(review-comment-triager) [decides]
   ├─> Delegates changes: SlashCommand(/java-implement-code) or direct Edit
-  └─> Verifies if needed: SlashCommand(/cui-build-and-fix push)
+  └─> Verifies if needed: SlashCommand(/cui-maven-build-and-fix push)
 ```

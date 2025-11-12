@@ -33,7 +33,7 @@ These utilities are independent tools that can be used across different CUI proj
 1. **create-update-agents-md** - agents.md generation
    - Creates or updates agents.md following OpenAI specification
    - Sources from CLAUDE.md, doc/ai-rules.md, or global standards
-   - Usage: `/cui-create-update-agents-md [push]`
+   - Usage: `/cui-sync-agents-file [push]`
 
 2. **fix-intellij-diagnostics** - IDE diagnostics fixer
    - Retrieves and fixes IDE diagnostics automatically
@@ -121,10 +121,10 @@ The agent will:
 ### Update agents.md
 ```bash
 # Create/update agents.md
-/cui-create-update-agents-md
+/cui-sync-agents-file
 
 # Update and commit/push
-/cui-create-update-agents-md push
+/cui-sync-agents-file push
 ```
 
 ### Verify Architecture Diagrams
