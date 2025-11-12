@@ -15,6 +15,12 @@
       "strict": false
     },
     {
+      "name": "cui-frontend-expert",
+      "description": "JavaScript, CSS, and web component standards for CUI applications",
+      "source": "./bundles/cui-frontend-expert",
+      "strict": false
+    },
+    {
       "name": "cui-documentation-standards",
       "description": "AsciiDoc and documentation standards enforcement for CUI projects",
       "source": "./bundles/cui-documentation-standards",
