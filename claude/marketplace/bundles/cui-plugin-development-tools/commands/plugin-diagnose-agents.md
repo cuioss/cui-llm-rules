@@ -79,28 +79,8 @@ Glob: pattern="*.md", path=".claude/agents"
 - Let user select which to analyze or change scope
 
 **Error Handling:**
-
-- **If Glob fails (directory not found):**
-  ```
-  ❌ Error: Directory not found: {path}
-
-  Suggestions:
-  - Verify path exists
-  - Check scope parameter (marketplace/global/project)
-  - For marketplace: ensure ~/git/cui-llm-rules is correct
-  ```
-  Exit with error status.
-
-- **If no agents found in scope:**
-  ```
-  ℹ️ No agents found in {scope} scope
-
-  Scopes searched:
-  - {list of directories checked}
-
-  Try a different scope or create agents first.
-  ```
-  Exit gracefully.
+- If Glob fails: Display error with path and suggestions, exit with error status
+- If no agents found: Display scopes searched and suggest trying different scope, exit gracefully
 
 ### Step 3: Analyze Agents (Parallel)
 
@@ -126,108 +106,61 @@ Task:
 **Collect results** from each agent as they complete.
 
 **Error Handling:**
+- If Task fails: Display warning with agent name and error, mark as "Analysis Failed", continue with remaining
+- If malformed response: Display warning, mark as "Malformed Response", continue
+- If timeout: Display warning, mark as "Timeout", continue
+- If partial success: Include successful analyses, add "Failed Analyses" section, report partial metrics
 
-- **If Task fails to launch:**
-  ```
-  ⚠️ Failed to analyze: {agent-name}
-  Error: {task_error_message}
-  ```
-  Continue with remaining agents. Mark this agent as "Analysis Failed" in report.
+### Step 4: Check Plugin References
 
-- **If agent returns malformed JSON:**
-  ```
-  ⚠️ Invalid response from: {agent-name}
-  Expected: JSON report
-  Received: {truncated_response}
-  ```
-  Mark agent as "Malformed Response" and continue.
+**For EACH agent discovered:**
 
-- **If agent analysis times out:**
-  ```
-  ⚠️ Analysis timeout: {agent-name}
-  ```
-  Mark agent as "Timeout" and continue with remaining agents.
-
-**Partial Success Handling:**
-
-If some agents fail but others succeed:
-- Include successful analyses in report
-- Add "Failed Analyses" section listing agents that couldn't be analyzed
-- Report partial metrics (based on successful analyses only)
-
-### Step 4: Aggregate Results
-
-**Combine findings from all agents:**
-
-```json
-{
-  "total_agents_analyzed": {count},
-  "agents_with_issues": {count},
-  "issue_summary": {
-    "critical": {total_count},
-    "warnings": {total_count},
-    "suggestions": {total_count}
-  },
-  "by_agent": {
-    "agent-name-1": {
-      "status": "Clean|Warnings|Critical",
-      "issues": {...},
-      "scores": {...}
-    },
-    ...
-  },
-  "overall_metrics": {
-    "avg_tool_fit": {score},
-    "avg_precision": {score},
-    "avg_compliance": {score},
-    "agents_excellent": {count},
-    "agents_good": {count},
-    "agents_fair": {count},
-    "agents_poor": {count}
-  }
-}
-```
-
-### Step 5: Generate Summary Report
-
-**Display:**
+Launch analyze-plugin-references agent to validate cross-references:
 
 ```
-==================================================
-Agents Doctor - Analysis Complete
-==================================================
+Task:
+  subagent_type: analyze-plugin-references
+  description: Check references in {agent-name}
+  prompt: |
+    Check all plugin references in this agent.
 
-Agents Analyzed: {total}
-- Clean: {count} ✅
-- With warnings: {count} ⚠️
-- With critical issues: {count} ❌
+    Parameters:
+    - path: {absolute_path_to_agent}
+    - auto-fix: true
 
-Issue Statistics:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
-- Total: {count}
-
-Quality Scores:
-- Average Tool Fit: {score}/100
-- Average Precision: {score}/100
-- Average Compliance: {score}/100
-
-By Agent:
-- {agent-1}: {status} | Tool Fit: {score} | Precision: {score} | Compliance: {score}
-- {agent-2}: {status} | Tool Fit: {score} | Precision: {score} | Compliance: {score}
-...
-
-Recommendations:
-{if critical issues}
-⚠️ CRITICAL: {count} agents need immediate attention
-- {agent-name}: {issue summary}
-{endif}
-
-{if all clean}
-✅ All agents are well-formed and follow best practices!
-{endif}
+    Return summary report with reference validation results.
 ```
+
+**CRITICAL**: Launch ALL reference checks in PARALLEL (single message, multiple Task calls).
+
+**Collect reference analysis results** from each agent as they complete.
+
+**Error Handling:**
+- If Task fails: Display warning with agent name and error, mark as "Reference Check Failed", continue
+- If unexpected format: Display warning, mark as "Reference Check Error", continue
+
+**Aggregate reference findings:**
+Track for each agent: references_found, references_correct, references_fixed, references_ambiguous.
+Aggregate totals: agents_checked, total_references, correct, fixed, issues.
+
+### Step 5: Aggregate Results
+
+**Combine findings from all agents (diagnosis + reference checks):**
+
+Track key metrics: total_agents_analyzed, agents_with_issues, issue counts (critical/warnings/suggestions), reference stats (total/correct/fixed/issues).
+Per-agent data: status, issues, scores (tool_fit/precision/compliance), reference counts.
+Overall metrics: average scores, agent quality distribution (excellent/good/fair/poor).
+
+### Step 6: Generate Summary Report
+
+**Display summary report with:**
+- Header: "Agents Doctor - Analysis Complete"
+- Agent counts by status (clean/warnings/critical)
+- Issue statistics (critical/warnings/suggestions totals)
+- Quality scores (avg tool_fit, precision, compliance)
+- Reference validation stats (total/correct/fixed/issues)
+- Per-agent summary line: status, scores, reference counts
+- Recommendations: critical issues requiring attention, reference issues with details, or success message if all clean
 
 **If --save-report flag is set:**
 - Write the complete report above to `agents-diagnosis-report.md` in project root
@@ -238,33 +171,10 @@ Recommendations:
 - Do NOT create any files
 
 **Error Handling for Report Writing:**
+- If file write fails: Display error with message and possible causes, note report was displayed, continue
+- If path doesn't exist: Display error with current directory, note report was displayed, continue
 
-- **If file write fails:**
-  ```
-  ❌ Failed to save report: agents-diagnosis-report.md
-  Error: {error_message}
-
-  Possible causes:
-  - Insufficient permissions
-  - Disk full
-  - File locked by another process
-
-  Report displayed above (not saved to file).
-  ```
-  Continue execution - report was already displayed.
-
-- **If path doesn't exist:**
-  ```
-  ❌ Cannot save report: project root not found
-
-  Current directory: {cwd}
-  Expected: valid project directory
-
-  Report displayed above (not saved to file).
-  ```
-  Continue execution with displayed report only.
-
-### Step 6: Categorize Issues for Fixing
+### Step 7: Categorize Issues for Fixing
 
 **Categorize all issues into Safe vs Risky:**
 
@@ -283,7 +193,7 @@ Recommendations:
 - Tool coverage gaps requiring workflow changes
 - Precision issues requiring scope reduction
 
-### Step 7: Apply Safe Fixes
+### Step 8: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
 
@@ -333,7 +243,7 @@ Edit: {agent-file}
 }
 ```
 
-### Step 8: Prompt for Risky Fixes
+### Step 9: Prompt for Risky Fixes
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
@@ -369,9 +279,9 @@ Apply this fix? [Y]es / [N]o / [S]kip all remaining
 }
 ```
 
-### Step 9: Verify Fixes
+### Step 10: Verify Fixes
 
-**When to execute**: After any fixes applied (Step 7 or Step 8)
+**When to execute**: After any fixes applied (Step 8 or Step 9)
 
 **Re-run analysis** on modified agents:
 ```
