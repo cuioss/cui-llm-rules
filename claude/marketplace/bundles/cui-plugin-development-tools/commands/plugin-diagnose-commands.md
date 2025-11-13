@@ -47,9 +47,30 @@ Skill: cui-plugin-development-tools:cui-marketplace-architecture
 
 This provides architecture rules and validation patterns for marketplace components that may be useful for understanding command design principles.
 
-### Step 2: Discover Commands
+### Step 2: Validate Parameters
 
-**Parse parameters** to determine scope.
+**Parse and validate all parameters:**
+
+**Scope validation:**
+- If scope specified: Verify it's one of `marketplace`, `global`, `project`
+- If invalid: Display error and abort
+- Default: `marketplace`
+
+**Command-name validation:**
+- If provided: Will filter to specific command in Step 3
+
+**Path validation:**
+- For `global` scope: Verify `~/.claude/commands/` exists
+- For `project` scope: Verify `.claude/commands/` exists
+- If path missing: Display error and abort
+
+**Flag validation:**
+- `auto-fix`: Default true, accepts true/false
+- `--save-report`: Default false, flag only
+
+### Step 3: Discover Commands
+
+**Using validated scope from Step 2:**
 
 **For marketplace scope (default):**
 ```
@@ -77,12 +98,11 @@ Glob: pattern="*.md", path=".claude/commands"
 - Separate standalone and bundle commands
 - Let user select which to analyze or change scope
 
-### Step 3: Analyze Commands (Parallel)
+### Step 4: Analyze Commands and Validate References (Parallel)
 
-**For EACH command discovered:**
+**For EACH command discovered, launch TWO agents in parallel:**
 
-Launch diagnose-command:
-
+**A. Command Analysis Agent:**
 ```
 Task:
   subagent_type: diagnose-command
@@ -96,11 +116,30 @@ Task:
     Return complete JSON report with all issues found.
 ```
 
-**CRITICAL**: Launch ALL commands in PARALLEL (single message, multiple Task calls).
+**B. Reference Validation Agent:**
+```
+Task:
+  subagent_type: analyze-plugin-references
+  description: Validate references in {command-name}
+  prompt: |
+    Analyze plugin references in this command.
 
-**Collect results** from each command as they complete.
+    Parameters:
+    - path: {absolute_path_to_command}
+    - auto-fix: false  # Collect issues only, don't modify
 
-### Step 4: Aggregate Results
+    Return complete reference analysis with all issues found.
+```
+
+**CRITICAL**: Launch ALL analyses in PARALLEL (single message with multiple Task calls for both agent types across all commands).
+
+**Error handling:**
+- If agent fails to launch or returns error: Collect failure info and continue with remaining agents
+- Report all failures in aggregate results
+
+**Collect results** from both agent types as they complete.
+
+### Step 5: Aggregate Results
 
 **Combine findings from all commands:**
 
@@ -114,12 +153,24 @@ Task:
     "warnings": {total_count},
     "suggestions": {total_count}
   },
+  "reference_summary": {
+    "total_references": {count},
+    "correct_references": {count},
+    "incorrect_references": {count},
+    "ambiguous_references": {count},
+    "commands_with_reference_issues": {count}
+  },
   "by_command": {
     "command-name-1": {
       "status": "Clean|Warnings|Critical",
       "classification": "ACCEPTABLE|LARGE|BLOATED",
       "issues": {...},
-      "scores": {...}
+      "scores": {...},
+      "references": {
+        "found": {count},
+        "correct": {count},
+        "issues": {count}
+      }
     },
     ...
   },
@@ -136,47 +187,15 @@ Task:
 }
 ```
 
-### Step 5: Generate Summary Report
+### Step 6: Generate Summary Report
 
-**Display:**
-
-```
-==================================================
-Commands Doctor - Analysis Complete
-==================================================
-
-Commands Analyzed: {total}
-- Acceptable (<400 lines): {count} ✅
-- Large (400-500 lines): {count} ⚠️
-- Bloated (>500 lines): {count} ❌ NEEDS RESTRUCTURING
-
-Issue Statistics:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
-- Total: {count}
-
-Quality Scores:
-- Average Bloat: {score}/100 (target <100)
-- Average Anti-Bloat Compliance: {score}/100
-- Average Structure: {score}/100
-- Average Quality: {score}/100
-
-By Command:
-- {cmd-1}: {classification} | {lines} lines | Bloat: {score} | Quality: {score}
-- {cmd-2}: {classification} | {lines} lines | Bloat: {score} | Quality: {score}
-...
-
-Recommendations:
-{if bloated commands}
-⚠️ CRITICAL: {count} commands are bloated and need restructuring
-- {command-name}: {lines} lines - Extract sections to skills
-{endif}
-
-{if all acceptable}
-✅ All commands are well-sized and follow anti-bloat rules!
-{endif}
-```
+**Display summary report with:**
+- Commands analyzed by size classification (Acceptable/Large/Bloated)
+- Issue statistics (Critical/Warnings/Suggestions)
+- Reference validation statistics (Total/Correct/Incorrect/Ambiguous)
+- Quality score averages (Bloat/Anti-Bloat/Structure/Quality)
+- Per-command breakdown with classification, lines, and scores
+- Recommendations for bloated commands or success message
 
 **If --save-report flag is set:**
 - Write the complete report above to `commands-diagnosis-report.md` in project root
@@ -186,7 +205,25 @@ Recommendations:
 - Display report only (as shown above)
 - Do NOT create any files
 
-### Step 6: Categorize Issues for Fixing
+### Step 7: Handle Reference Issues
+
+**When to execute:** If reference issues found (incorrect or ambiguous references > 0)
+
+**Display summary** of reference problems by command with line numbers and issue types.
+
+**Prompt user** with options: [F]ix automatically, [M]anual review, [S]kip reference fixes, [V]iew detailed reports
+
+**Handle responses:**
+- **Fix**: Re-run analyze-plugin-references with auto-fix=true for affected commands, then continue to Step 8
+- **Manual**: Re-run analyze-plugin-references with user prompts enabled, then continue to Step 8
+- **Skip**: Continue to Step 8
+- **View**: Display paths to all .reference-analysis.md files, then re-prompt with same options
+
+**Track statistics:**
+- `reference_fixes_applied`: Count of references auto-fixed
+- `reference_fixes_manual`: Count of references manually corrected
+
+### Step 8: Categorize Issues for Fixing
 
 **Categorize all issues into Safe vs Risky:**
 
@@ -205,7 +242,7 @@ Recommendations:
 - Parameter validation additions (requires understanding parameters)
 - Structural reorganization (requires understanding workflow)
 
-### Step 7: Apply Safe Fixes
+### Step 9: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
 
@@ -256,43 +293,22 @@ Edit: {command-file}
 }
 ```
 
-### Step 8: Prompt for Risky Fixes
+### Step 10: Prompt for Risky Fixes
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**For each risky fix, prompt user:**
+**For each risky fix:**
 
-```
-[PROMPT] Risky fix detected in {command-name}:
-
-Issue: {issue description}
-Location: {file path and line number}
-Proposed fix: {fix description}
-Impact: {explanation of changes needed}
-
-Apply this fix? [Y]es / [N]o / [S]kip all remaining
-```
+Prompt user with: Issue description, location, proposed fix, impact, and options [Y]es/[N]o/[S]kip all
 
 **Handle responses:**
-- **Yes**: Apply the fix using Edit tool
+- **Yes**: Apply fix using Edit tool
 - **No**: Skip this fix, continue to next
-- **Skip all remaining**: Exit fixing phase, proceed to verification
+- **Skip all**: Exit fixing phase, proceed to Step 11
 
-**Special handling for bloated commands (>500 lines):**
-```
-[PROMPT] Bloated command detected: {command-name} ({line_count} lines)
+**For bloated commands (>500 lines):**
 
-This command exceeds the 500-line limit and requires restructuring.
-
-Recommended action:
-1. Extract detailed content to skills using /plugin-create-skill
-2. Update command to reference skills instead of inline content
-
-This requires manual intervention. Options:
-[D]efer to manual fix / [A]ttempt automatic extraction / [S]kip
-
-Note: Automatic extraction is experimental and may require review.
-```
+Prompt user with restructuring recommendation and options: [D]efer/[A]ttempt extraction/[S]kip
 
 **Track risky fixes:**
 ```json
@@ -304,62 +320,28 @@ Note: Automatic extraction is experimental and may require review.
 }
 ```
 
-### Step 9: Verify Fixes
+### Step 11: Verify Fixes
 
-**When to execute**: After any fixes applied (Step 7 or Step 8)
+**When to execute**: After any fixes applied (Step 9 or Step 10)
 
-**Re-run analysis** on modified commands:
-```
-Task:
-  subagent_type: diagnose-command
-  description: Verify fixes for {command-name}
-  prompt: |
-    Re-analyze this command after fixes.
+**Re-run analysis** on modified commands using diagnose-command agent.
 
-    Parameters:
-    - command_path: {absolute_path_to_command}
-
-    Return complete JSON report.
-```
-
-**Compare before/after:**
-```json
-{
-  "verification": {
-    "commands_fixed": {count},
-    "issues_resolved": {count},
-    "issues_remaining": {count},
-    "new_issues": {count}  // Should be 0!
-  }
-}
-```
-
-**Report verification results:**
-```
-Verification Complete:
-✅ {issues_resolved} issues resolved
-{if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain (require manual intervention or /plugin-update-command)
-{endif}
-{if new_issues > 0}
-❌ {new_issues} NEW issues introduced (fixes need review!)
-{endif}
-{if bloated_commands_remain}
-⚠️ Bloated commands require extraction to skills:
-- Use /plugin-create-skill to extract content
-- Update command to reference skills
-{endif}
-```
+**Compare before/after** and generate verification summary using same format as Step 6:
+- Issues resolved count
+- Issues remaining (if any)
+- New issues introduced (should be 0)
+- Bloated commands still requiring extraction (if any)
 
 ## ARCHITECTURE
 
 This command is a simple orchestrator:
 - Discovers commands using Glob (non-prompting)
-- Launches diagnose-command in parallel
-- Aggregates and reports results with bloat metrics
+- Launches diagnose-command and analyze-plugin-references in parallel
+- Aggregates and reports results with bloat metrics and reference validation
 
-All analysis logic is in the specialized agent:
+All analysis logic is in specialized agents:
 - diagnose-command (comprehensive command analysis)
+- analyze-plugin-references (plugin reference validation)
 
 ## TOOL USAGE
 
