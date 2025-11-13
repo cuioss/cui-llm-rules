@@ -9,7 +9,7 @@ Comprehensive diagnostic and automation command that enforces CUI logging standa
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-enforce-logrecords update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-java-enforce-logrecords update="[your improvement]"` with:
 1. Better violation detection patterns for logging statements
 2. More efficient LogRecord usage analysis techniques
 3. Improved LogAssert verification strategies

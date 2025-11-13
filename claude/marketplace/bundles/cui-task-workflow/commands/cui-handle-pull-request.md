@@ -9,7 +9,7 @@ Comprehensive pull request workflow handling CI/Sonar checks, code review respon
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-handle-pull-request update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-handle-pull-request update="[your improvement]"` with:
 1. Improved strategies for CI/Sonar polling and timeout handling
 2. Better command orchestration patterns for review/quality workflows
 3. More effective error recovery strategies for build/check failures
@@ -193,7 +193,7 @@ Each command is self-contained with own verify + commit cycle.
 
 ## RELATED
 
-- `/cui-update-command` - Update this command
+- `/plugin-update-command` - Update this command
 - `/cui-maven-build-and-fix` - Build fixing command
 - `/cui-respond-to-review-comments` - Review comment handling (Pattern 3)
 - `/cui-fix-sonar-issues` - Sonar issue fixing (Pattern 3)

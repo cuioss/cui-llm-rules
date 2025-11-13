@@ -11,7 +11,7 @@ Focused agent that analyzes JavaScript files for JSDoc compliance violations and
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=js-doc-violation-analyzer update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=js-doc-violation-analyzer update="[your improvement]"` with:
 1. Better JSDoc violation detection patterns for modern JavaScript
 2. More accurate severity classification (critical vs warning)
 3. Enhanced missing documentation identification strategies

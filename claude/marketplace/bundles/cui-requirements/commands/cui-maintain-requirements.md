@@ -9,7 +9,7 @@ Systematic workflow for maintaining requirements and specification documents to 
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-maintain-requirements update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-maintain-requirements update="[your improvement]"` with:
 1. Improved requirements integrity detection patterns
 2. Better cross-reference verification strategies
 3. More efficient scenario workflow approaches

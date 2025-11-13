@@ -217,9 +217,9 @@ Projects should define a `pre-commit` profile in their POM:
 2. Update this README.md with component descriptions
 
 3. Test components:
-   - `/cui-diagnose-agents` for agents
-   - `/cui-diagnose-commands` for commands
-   - `/cui-diagnose-skills` for skills
+   - `/plugin-diagnose-agents` for agents
+   - `/plugin-diagnose-commands` for commands
+   - `/plugin-diagnose-skills` for skills
 
 4. Validate entire bundle:
    - `/cui-diagnose-bundle cui-maven`
@@ -239,9 +239,9 @@ Test the bundle:
 
 ```bash
 # Test individual components
-/cui-diagnose-agents scope=marketplace
-/cui-diagnose-commands scope=marketplace
-/cui-diagnose-skills scope=marketplace
+/plugin-diagnose-agents scope=marketplace
+/plugin-diagnose-commands scope=marketplace
+/plugin-diagnose-skills scope=marketplace
 
 # Test entire bundle integration
 /cui-diagnose-bundle cui-maven

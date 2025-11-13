@@ -221,6 +221,8 @@ Include test verification sections in specifications using the **Status Section 
 - Document test coverage metrics when available
 - Reference detailed testing specifications when they exist
 
+**Example coverage section in AsciiDoc:**
+```asciidoc
 === Coverage
 
 Test coverage metrics:

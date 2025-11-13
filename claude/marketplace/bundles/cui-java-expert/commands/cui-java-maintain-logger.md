@@ -9,7 +9,7 @@ Systematically implements and maintains logging standards across modules while p
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-maintain-logger update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-java-maintain-logger update="[your improvement]"` with:
 1. Improved LogRecord discovery patterns
 2. Better business logic test integration strategies
 3. More efficient plan.md tracking workflows

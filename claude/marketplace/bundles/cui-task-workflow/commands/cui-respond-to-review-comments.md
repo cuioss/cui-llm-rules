@@ -9,7 +9,7 @@ Fetches review comments, triages each one, and takes appropriate action (code ch
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-respond-to-review-comments update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-respond-to-review-comments update="[your improvement]"` with:
 1. Comment triage patterns - How to identify actionable vs informational comments, distinguish preference feedback from requirements, detect conflicting feedback
 2. Response strategy refinement - When to implement code changes vs explain design decisions vs suggest alternatives, handling subjective feedback
 3. Implementation approach improvements - Optimal delegation patterns (direct Edit vs SlashCommand), handling complex multi-file changes from single comments

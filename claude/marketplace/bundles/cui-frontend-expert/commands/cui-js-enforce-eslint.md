@@ -9,7 +9,7 @@ Orchestrates systematic ESLint violation fixing workflow with standards complian
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-js-enforce-eslint update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-enforce-eslint update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 

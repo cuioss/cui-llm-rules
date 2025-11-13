@@ -240,7 +240,7 @@ Then: scripts/asciidoc-validator.sh {target}
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better parameter validation, more comprehensive fix types, enhanced user feedback), **YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-auto-formatter update="[your improvement]"
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better parameter validation, more comprehensive fix types, enhanced user feedback), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=asciidoc-auto-formatter update="[your improvement]"
 
 Focus improvements on:
 1. Parameter validation logic and error messaging clarity

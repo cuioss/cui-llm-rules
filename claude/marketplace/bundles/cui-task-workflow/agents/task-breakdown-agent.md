@@ -374,7 +374,7 @@ After implementing each task:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=task-breakdown-agent update="[your improvement]"
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=task-breakdown-agent update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Task decomposition patterns and granularity strategies

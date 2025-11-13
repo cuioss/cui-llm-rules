@@ -427,7 +427,7 @@ After completing the task, return findings in this format:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=task-executor update="[your improvement]"
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=task-executor update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Better checklist parsing patterns and task plan format handling

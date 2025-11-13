@@ -380,7 +380,7 @@ When `reactor` parameter is provided with a module name:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=maven-builder update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=maven-builder update="[your improvement]"` with:
 1. Improved timeout behavior patterns and duration calculation strategies
 2. Better module path detection techniques for challenges or edge cases
 3. Enhanced output filtering patterns and error detection refinements

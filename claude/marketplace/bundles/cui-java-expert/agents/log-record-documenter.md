@@ -10,7 +10,7 @@ Analyzes Java LogMessages holder classes and creates or updates comprehensive As
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=log-record-documenter update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=log-record-documenter update="[your improvement]"` with:
 1. Improved LogRecord extraction patterns from Java code
 2. Better AsciiDoc table generation and formatting techniques
 3. More effective multi-holder section detection and isolation strategies

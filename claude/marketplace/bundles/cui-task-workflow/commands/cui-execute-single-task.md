@@ -9,7 +9,7 @@ Self-contained command that implements ONE task and verifies it.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Update this file using `/cui-update-command command-name=cui-execute-single-task update="[improvement]"` with discoveries.
+**CRITICAL:** Update this file using `/plugin-update-command command-name=cui-execute-single-task update="[improvement]"` with discoveries.
 
 ## PARAMETERS
 

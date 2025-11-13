@@ -46,13 +46,7 @@ For detailed security assessment methodology, see [domain-security-assessment.md
 
 ## Trust Level Taxonomy
 
-For complete trust level definitions and decision framework, see **[domain-security-assessment.md](domain-security-assessment.md)** section "Trust Levels".
-
-Domains in this list are classified using a 4-level taxonomy:
-- **Fully Trusted**: Official documentation, major tech companies, established foundations
-- **Generally Trusted**: Popular resources requiring verification before use
-- **Review Required**: Case-by-case assessment needed (see domain-security-assessment.md)
-- **High Scrutiny**: Thorough review required (see domain-security-assessment.md)
+Domains in this list are classified using a 4-level taxonomy. For complete trust level definitions, decision framework, and assessment criteria, see **[domain-security-assessment.md - Trust Levels](domain-security-assessment.md#trust-levels)**.
 
 ## Trusted Domains List
 

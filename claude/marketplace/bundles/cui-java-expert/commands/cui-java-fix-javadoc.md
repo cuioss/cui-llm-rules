@@ -9,7 +9,7 @@ Systematically identifies and fixes Javadoc errors and warnings from Maven build
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-fix-javadoc update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-java-fix-javadoc update="[your improvement]"` with:
 1. Improved error detection and categorization patterns
 2. Better fix strategies that preserve content
 3. More efficient verification workflows

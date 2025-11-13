@@ -11,7 +11,7 @@ Focused agent that analyzes all LOGGER statements in Java code and returns a str
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=logging-violation-analyzer update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=logging-violation-analyzer update="[your improvement]"` with improvements discovered.
 
 Focus improvements on:
 - Pattern detection accuracy for LOGGER statements

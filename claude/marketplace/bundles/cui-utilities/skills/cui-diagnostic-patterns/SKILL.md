@@ -141,7 +141,7 @@ Then reference patterns throughout their workflows:
 
 ### Diagnostic Commands: Enforcement Requirement
 
-**CRITICAL**: Diagnostic commands (`cui-diagnose-agents`, `cui-diagnose-commands`) must:
+**CRITICAL**: Diagnostic commands (`plugin-diagnose-agents`, `plugin-diagnose-commands`) must:
 1. Activate this skill themselves (to run without prompts)
 2. **Enforce** that agents and commands they diagnose also follow these patterns
 
@@ -226,8 +226,8 @@ When tool usage patterns need updates, modify files in `standards/` directory an
 ## Quality Gate
 
 **Diagnostic commands must enforce this skill:**
-- `cui-diagnose-agents` checks agents for compliance
-- `cui-diagnose-commands` checks commands for compliance
+- `plugin-diagnose-agents` checks agents for compliance
+- `plugin-diagnose-commands` checks commands for compliance
 - Both report violations as CRITICAL issues
 - Both provide remediation guidance
 

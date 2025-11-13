@@ -49,7 +49,7 @@ If filter parameters provided, filter results.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better issue filtering, more accurate severity classification, improved query optimization, enhanced data extraction), **YOU MUST immediately update this file** using /cui-update-agent agent-name=sonar-issue-fetcher update="[your improvement]"
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better issue filtering, more accurate severity classification, improved query optimization, enhanced data extraction), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=sonar-issue-fetcher update="[your improvement]"
 
 Focus improvements on:
 1. SonarQube API query construction and filter optimization

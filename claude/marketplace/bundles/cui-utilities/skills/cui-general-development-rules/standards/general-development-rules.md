@@ -328,11 +328,7 @@ This loads all core principles to guide your work.
 | Uncertain about requirements | Ask user |
 | Need current best practices | Use research-best-practices agent |
 | Would need to guess | Ask user |
-| Need to find files | Use Glob |
-| Need to read file | Use Read |
-| Need to search content | Use Grep |
-| Need to write file | Use Write |
-| Need to edit file | Use Edit |
+| File operations (find/read/search/write/edit) | See Principle 4 for complete tool selection guide |
 | Need to create document | Ask user first |
 | Need to add dependency | Ask user first |
 

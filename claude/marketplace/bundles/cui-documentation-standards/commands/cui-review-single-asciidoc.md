@@ -9,7 +9,7 @@ Self-contained command that orchestrates format validation, link verification, a
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /cui-update-command command-name=cui-review-single-asciidoc update="[your improvement]"
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /plugin-update-command command-name=cui-review-single-asciidoc update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Better coordination between validation agents

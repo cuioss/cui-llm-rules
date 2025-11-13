@@ -36,7 +36,7 @@ Analyze rule, severity, code pattern. Determine if fixable programmatically.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=sonar-issue-triager update="[your improvement]"` with improvements discovered during execution.
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=sonar-issue-triager update="[your improvement]"` with improvements discovered during execution.
 
 Focus improvements on:
 - Issue classification accuracy (fix vs suppress decisions)

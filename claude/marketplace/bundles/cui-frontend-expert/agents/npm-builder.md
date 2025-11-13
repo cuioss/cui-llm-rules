@@ -441,7 +441,7 @@ When executing Playwright tests:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=npm-builder update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=npm-builder update="[your improvement]"` with:
 1. Improved timeout behavior patterns and duration calculation strategies for npm/npx commands
 2. Better error detection patterns for npm, Playwright, ESLint, and other frontend tools
 3. Enhanced output filtering patterns and categorization refinements

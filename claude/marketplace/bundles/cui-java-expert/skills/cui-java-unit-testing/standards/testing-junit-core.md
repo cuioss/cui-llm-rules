@@ -130,21 +130,9 @@ class TokenValidatorTest {
 
 **Use JUnit 5 assertions exclusively - Hamcrest is forbidden.**
 
-All assertions must include meaningful, concise failure messages (20-60 characters):
+All assertions must include meaningful, concise failure messages (20-60 characters).
 
-```java
-// Good - Meaningful assertion messages
-assertTrue(result.isPresent(), "User should be found by valid ID");
-assertEquals(expected, actual, "Token should contain correct issuer");
-assertFalse(errors.isEmpty(), "Validation should detect invalid input");
-assertNotNull(response, "API should return non-null response");
-
-// Bad - Missing or meaningless messages
-assertTrue(result.isPresent()); // Missing context
-assertTrue(result.isPresent(), "Should be true"); // Meaningless
-```
-
-For detailed assertion message standards, patterns, and best practices, see [Test Quality Standards](testing-quality-standards.md#assertion-message-standards).
+For complete assertion message standards, patterns, examples, and anti-patterns, see [Test Quality Standards - Assertion Message Standards](testing-quality-standards.md#assertion-message-standards).
 
 ### Exception Testing
 
@@ -216,7 +204,23 @@ void shouldThrowExceptionOnInvalidInput() {
 * **PowerMock**: Do NOT use - refactor to use dependency injection or EasyMock
 * **Hamcrest**: Do NOT use - use JUnit 5 assertions exclusively
 
-For migration guidelines from forbidden libraries, see [Test Quality Standards](testing-quality-standards.md#testing-library-compliance).
+### Migration Guidelines
+
+When encountering forbidden libraries:
+
+**Mockito → CUI Framework**
+* Replace with dependency injection patterns
+* Use cui-test-mockwebserver-junit5 for HTTP mocking
+* Consider EasyMock for simple mocking needs
+
+**Hamcrest → JUnit 5 Assertions**
+* Convert matchers to JUnit 5 assertion methods
+* `assertThat(x, is(y))` → `assertEquals(y, x, "message")`
+* `assertThat(x, notNullValue())` → `assertNotNull(x, "message")`
+
+**Manual Data → CUI Generators**
+* Replace hardcoded values with `Generators.*` calls
+* See [Test Generator Framework](test-generator-framework.md) for details
 
 ## Best Practices
 

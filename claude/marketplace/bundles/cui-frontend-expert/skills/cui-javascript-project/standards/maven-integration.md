@@ -164,7 +164,7 @@ For projects generating bundled or minified JavaScript assets:
 
 ### Standard Versions
 
-**Node.js LTS** (see [project-structure.md](project-structure.md#environment-requirements) for exact version):
+**Node.js LTS** (see [project-structure.md](project-structure.md#node-js-version-requirements) for exact version):
 - Long Term Support release for stability
 - Consistent across all projects and environments
 - Full ES module support
@@ -843,7 +843,7 @@ Maven integration provides:
 - **Project flexibility** supporting various project types
 
 Key configuration points:
-- Node.js and npm versions (see [project-structure.md](project-structure.md#environment-requirements) for exact versions)
+- Node.js and npm versions (see [project-structure.md](project-structure.md#node-js-version-requirements) for exact versions)
 - Install directory: `target/` (or `~/.m2/frontend` for caching)
 - Phase mapping: validate (install), compile (format/lint), test (tests)
 - Environment variables: CI=true, NODE_ENV=test

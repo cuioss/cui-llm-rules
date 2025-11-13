@@ -315,66 +315,9 @@ class AuthenticationIntegrationTest {
 
 ## Value Object Testing Criteria
 
-### When to Apply ShouldHandleObjectContracts<T>
+For complete value object testing criteria including when to apply `ShouldHandleObjectContracts<T>`, when NOT to apply it, and common mistakes to avoid, see [Value Object Testing](testing-value-objects.md).
 
-**Apply to classes that**:
-
-* Implement custom equals()/hashCode() methods
-* Represent domain data with value semantics
-* Are used in collections or as map keys
-* Participate in caching or persistence operations
-* Are DTOs with structural equality requirements
-
-### When NOT to Apply
-
-**Do NOT apply to**:
-
-* **Enums**: Already have proper equals/hashCode from Java
-* **Utility classes**: Classes with only static methods
-* **Infrastructure classes**: Parsers, validators, builders, factories
-* **Classes without value semantics**: Services, controllers, managers
-* **Builder pattern classes**: Test the built object instead, not the builder
-
-### Common Mistakes
-
-❌ **Applying contracts to enums**:
-```java
-// WRONG - Enums don't need contract testing
-class UserRoleTest implements ShouldHandleObjectContracts<UserRole> {
-    // Unnecessary - Java enums already have correct equals/hashCode
-}
-```
-
-❌ **Testing infrastructure classes as value objects**:
-```java
-// WRONG - Parsers are not value objects
-class TokenParserTest implements ShouldHandleObjectContracts<TokenParser> {
-    // Parser is infrastructure, not a value object
-}
-```
-
-❌ **Mixing business logic with contract tests**:
-```java
-// WRONG - Don't mix concerns
-class UserDataTest implements ShouldHandleObjectContracts<UserData> {
-    @Test
-    void shouldValidateEmailFormat() {
-        // Business logic test in contract test class
-    }
-}
-
-// CORRECT - Separate concerns
-class UserDataContractTest implements ShouldHandleObjectContracts<UserData> {
-    // Only contract tests
-}
-
-class UserDataTest {
-    @Test
-    void shouldValidateEmailFormat() {
-        // Business logic tests separate
-    }
-}
-```
+**Key maintenance point**: Ensure all value objects with custom `equals()/hashCode()` have contract tests, while avoiding contract tests for enums, builders, and infrastructure classes.
 
 ## Test Quality Issue Detection
 
@@ -562,17 +505,9 @@ void shouldCreateUserWithValidData() {
 
 ### Quality Gates
 
-* **Maintain minimum 80% line coverage**
-* **Preserve existing coverage levels** - no regressions
-* **Identify untested critical paths**
-* **Document coverage gaps** with justification
+For complete coverage requirements and verification procedures, see [JUnit Core Testing Standards - Test Coverage](testing-junit-core.md#test-coverage) and [Quality Verification](testing-junit-core.md#quality-verification).
 
-### Coverage vs Quality
-
-**Remember**: Coverage percentage is not the goal. Quality tests that verify behavior are the goal. Prefer:
-
-* Meaningful tests with slightly lower coverage
-* Over meaningless tests with 100% coverage
+**Remember**: Coverage percentage is not the goal. Quality tests that verify behavior are the goal. Prefer meaningful tests with slightly lower coverage over meaningless tests with 100% coverage.
 
 ## Maintenance-Specific Notes
 

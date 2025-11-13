@@ -9,7 +9,7 @@ Retrieves diagnostics from IntelliJ IDE via MCP, analyzes issues, applies fixes,
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-fix-intellij-diagnostics`
+**This command should be improved using**: `/plugin-update-command cui-fix-intellij-diagnostics`
 
 **Improvement areas**:
 - Improved MCP diagnostics retrieval patterns and timeout handling

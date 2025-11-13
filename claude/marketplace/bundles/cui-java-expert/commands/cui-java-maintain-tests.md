@@ -487,7 +487,7 @@ Test maintenance is complete when:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-java-maintain-tests`
+**This command should be improved using**: `/plugin-update-command cui-java-maintain-tests`
 
 **Improvement areas**:
 - Analysis efficiency optimization for large multi-module projects

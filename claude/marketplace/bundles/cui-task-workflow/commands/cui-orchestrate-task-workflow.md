@@ -205,7 +205,7 @@ Orchestrates agents and commands:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /cui-update-command command-name=cui-orchestrate-task-workflow update="[your improvement]"
+**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /plugin-update-command command-name=cui-orchestrate-task-workflow update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Agent coordination patterns and retry strategies

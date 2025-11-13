@@ -9,7 +9,7 @@ Orchestrates systematic Java code refactoring and maintenance workflow with comp
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-refactor-code update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-java-refactor-code update="[your improvement]"` with:
 1. Improved violation detection patterns
 2. Better module processing strategies
 3. More effective agent coordination

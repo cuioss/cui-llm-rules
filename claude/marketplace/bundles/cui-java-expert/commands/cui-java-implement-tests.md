@@ -9,7 +9,7 @@ Self-contained command that implements JUnit tests with full standards complianc
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-java-implement-tests update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-java-implement-tests update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 

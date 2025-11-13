@@ -9,7 +9,7 @@ Batch command for comprehensive AsciiDoc documentation review. Discovers all .ad
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /cui-update-command command-name=cui-review-technical-docs update="[your improvement]"
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /plugin-update-command command-name=cui-review-technical-docs update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Improved file discovery patterns and filtering

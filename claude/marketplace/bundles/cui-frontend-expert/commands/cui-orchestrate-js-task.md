@@ -9,7 +9,7 @@ Orchestrates complete JavaScript task implementation through code creation, unit
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-orchestrate-js-task update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-orchestrate-js-task update="[your improvement]"` with:
 1. Task breakdown patterns - How to decompose JavaScript tasks into implementation + testing phases, recognizing when components need separate test utilities or fixtures
 2. Implementation strategy refinement - Best practices for handling async code, module imports, external dependencies, framework-specific patterns (Vue, React, etc.)
 3. Test implementation approaches - Unit test patterns for JavaScript, mocking strategies, fixture setup efficiency, achieving meaningful coverage vs line coverage

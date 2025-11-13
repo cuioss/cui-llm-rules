@@ -9,7 +9,7 @@ Analyzes WebFetch domains across global and project settings, researches domains
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-manage-web-permissions update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-manage-web-permissions update="[your improvement]"` with:
 1. Improved domain security research patterns and validation strategies
 2. Better permission consolidation and deduplication algorithms
 3. More effective domain categorization and trust assessment methods

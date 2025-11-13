@@ -183,7 +183,7 @@ Use template from Step 7 above.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /cui-update-agent agent-name=asciidoc-format-validator update="[your improvement]"
+**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=asciidoc-format-validator update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Format validation patterns not covered by current rules

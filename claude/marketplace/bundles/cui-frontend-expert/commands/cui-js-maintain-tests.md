@@ -9,7 +9,7 @@ Orchestrates systematic JavaScript test quality improvement workflow while ensur
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-js-maintain-tests update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-maintain-tests update="[your improvement]"` with:
 1. Improved test anti-pattern detection
 2. Better test improvement strategies
 3. More effective agent coordination

@@ -35,7 +35,7 @@ Determine comment type and required action.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=review-comment-triager update="[your improvement]"` with improvements discovered during execution.
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=review-comment-triager update="[your improvement]"` with improvements discovered during execution.
 
 Focus improvements on:
 - Comment classification accuracy (code_change vs explain vs ignore)

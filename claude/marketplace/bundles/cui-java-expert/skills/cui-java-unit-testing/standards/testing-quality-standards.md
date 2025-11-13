@@ -200,76 +200,13 @@ assertTrue(result.isPresent(),
 
 ## SonarQube Compliance
 
-### assertThrows Best Practices
+### Exception Testing
 
-**Rule**: Lambda expressions in `assertThrows` should contain only one statement that can throw the expected exception.
-
-**Violation**
-```java
-@Test
-void shouldThrowExceptionOnInvalidInput() {
-    assertThrows(IllegalArgumentException.class, () -> {
-        String input = "invalid";
-        service.validateInput(input);
-        service.processInput(input); // Multiple throwing statements
-    });
-}
-```
-
-**Compliant**
-```java
-@Test
-void shouldThrowExceptionOnInvalidInput() {
-    // given
-    String input = "invalid";
-    service.validateInput(input); // Setup outside lambda
-
-    // when/then
-    assertThrows(IllegalArgumentException.class,
-        () -> service.processInput(input), // Only one throwing statement
-        "Invalid input should trigger validation exception"
-    );
-}
-```
-
-**Key Principles**
-* Move setup code outside lambda expression
-* Keep only the single method call that should throw
-* Use helper methods for complex throwing operations
-* Maintain clear given/when/then structure
+For complete exception testing patterns including `assertThrows` best practices and SonarQube compliance, see [JUnit Core Testing Standards - Exception Testing](testing-junit-core.md#exception-testing).
 
 ## Testing Library Compliance
 
-### Allowed Libraries
-
-* **cui-test-libs**: All CUI testing utilities (required)
-* **junit-jupiter**: JUnit 5 for test execution and assertions
-* **awaitility**: Asynchronous testing and waiting conditions
-* **rest-assured**: REST API testing and validation
-
-### Forbidden Libraries
-
-* **Mockito**: Use CUI framework alternatives or EasyMock
-* **PowerMock**: Refactor to dependency injection or EasyMock
-* **Hamcrest**: Use JUnit 5 assertions exclusively
-
-### Migration Guidelines
-
-When encountering forbidden libraries:
-
-**Mockito → CUI Framework**
-* Replace with dependency injection patterns
-* Use cui-test-mockwebserver-junit5 for HTTP mocking
-* Consider EasyMock for simple mocking needs
-
-**Hamcrest → JUnit 5 Assertions**
-* Convert matchers to JUnit 5 assertion methods
-* `assertThat(x, is(y))` → `assertEquals(y, x, "message")`
-* `assertThat(x, notNullValue())` → `assertNotNull(x, "message")`
-
-**Manual Data → CUI Generators**
-* Replace hardcoded values with `Generators.*` calls
-* See [test-generator-framework.md](test-generator-framework.md) for details
+For complete testing library requirements, allowed/forbidden libraries, and migration guidelines, see [JUnit Core Testing Standards - Testing Library Requirements](testing-junit-core.md#testing-library-requirements).
 
 ## Performance Standards
 

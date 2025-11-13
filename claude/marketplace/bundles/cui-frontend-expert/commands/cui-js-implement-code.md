@@ -9,7 +9,7 @@ Self-contained command that implements JavaScript code with full standards compl
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-js-implement-code update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-implement-code update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 

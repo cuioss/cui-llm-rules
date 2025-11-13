@@ -9,7 +9,7 @@ Orchestrates systematic JSDoc violation fixing workflow with standards complianc
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-js-fix-jsdoc`
+**This command should be improved using**: `/plugin-update-command cui-js-fix-jsdoc`
 
 **Improvement areas**:
 - Enhanced violation detection for TypeScript JSDoc patterns

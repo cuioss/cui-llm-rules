@@ -9,7 +9,7 @@ Orchestrates systematic Quarkus native image optimization workflow with focus on
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-optimize-quarkus-native update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-optimize-quarkus-native update="[your improvement]"` with:
 1. Improved reflection analysis patterns
 2. Better optimization strategies
 3. More effective performance tracking

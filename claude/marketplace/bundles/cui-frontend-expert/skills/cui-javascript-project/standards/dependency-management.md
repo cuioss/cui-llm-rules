@@ -270,7 +270,7 @@ Ensure all tools support ES modules:
 - Babel with ES module support
 
 **Node.js requirements**:
-For complete Node.js version requirements, see **[project-structure.md](project-structure.md#environment-requirements)** section "Environment Requirements".
+For complete Node.js version requirements, see **[project-structure.md](project-structure.md#node-js-version-requirements)** section "Node.js Version Requirements".
 
 ## Package Categories
 

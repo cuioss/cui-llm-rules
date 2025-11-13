@@ -9,7 +9,7 @@ Orchestrates complete Java task implementation through code creation, unit testi
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-orchestrate-java-task update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-orchestrate-java-task update="[your improvement]"` with:
 1. Improved agent coordination patterns and error recovery strategies
 2. Better coverage gap analysis and iterative fix workflows
 3. More effective parameter preparation for agent handoffs

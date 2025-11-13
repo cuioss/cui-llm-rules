@@ -9,7 +9,7 @@ Comprehensive project verification command that orchestrates Maven builds, analy
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-maven-build-and-fix`
+**This command should be improved using**: `/plugin-update-command cui-maven-build-and-fix`
 
 **Improvement areas**:
 - Improved issue categorization and routing strategies
