@@ -269,11 +269,22 @@ REMOVE if link is dead and no context provided
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better zero-information detection, more accurate ambiguity identification, improved duplication analysis, enhanced quality scoring), **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=analyze-standards-file update="[your improvement]"`
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better zero-information detection, more accurate ambiguity identification, improved duplication analysis, enhanced quality scoring), **REPORT the improvement to your caller** with:
 
-Focus improvements on:
 1. Zero-information content detection patterns and heuristics
 2. Ambiguous language identification accuracy and specificity
 3. Internal duplication detection algorithms and thresholds
 4. Quality score calculation precision and weighting
 5. Cross-reference validation logic and completeness checking
+
+Return structured improvement suggestion in your analysis result:
+```
+IMPROVEMENT OPPORTUNITY DETECTED
+
+Area: [specific area from list above]
+Current limitation: [what doesn't work well]
+Suggested enhancement: [specific improvement]
+Expected impact: [benefit of change]
+```
+
+The caller can then invoke `/plugin-update-agent agent-name=analyze-standards-file` based on your report.

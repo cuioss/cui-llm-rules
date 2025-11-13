@@ -119,9 +119,10 @@ Tool Fit Score:
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
 - **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-agent agent-name={agent-name} update="[your improvement]"` with:
-- **WARNING**: If section exists but missing usage instruction, flag as CRITICAL issue
+- **WARNING**: If section exists with old self-invocation pattern, flag as CRITICAL Pattern 22 violation
 - **SUGGESTION**: Should list 3-5 specific improvement areas relevant to agent purpose
-- **Pattern**: Check format matches: `**CRITICAL:** Every time you execute this agent...YOU MUST immediately update this file** using /plugin-update-agent...`
+- **Correct Pattern**: Check format matches: `**CRITICAL:** Every time you execute this agent...REPORT the improvement to your caller...The caller can then invoke /plugin-update-agent...`
+- **Incorrect Pattern (Pattern 22 violation)**: `YOU MUST immediately update this file using /plugin-update-agent` (agents cannot self-invoke per Rule 6)
 
 **Check complexity (Pattern 17):**
 - Lines > 800: TOO COMPLEX (CRITICAL)
@@ -520,7 +521,7 @@ Rating:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=diagnose-agent update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent, **REPORT the improvement to your caller** with improvements discovered during analysis.
 
 Focus improvements on:
 - Tool coverage detection accuracy and scoring precision
@@ -528,6 +529,18 @@ Focus improvements on:
 - Pattern detection quality for common agent issues
 - Essential Rules synchronization checking
 - Content quality metrics (precision, duplication, ambiguity detection)
+
+Return structured improvement suggestion in your analysis result:
+```
+IMPROVEMENT OPPORTUNITY DETECTED
+
+Area: [specific area from list above]
+Current limitation: [what doesn't work well]
+Suggested enhancement: [specific improvement]
+Expected impact: [benefit of change]
+```
+
+The caller can then invoke `/plugin-update-agent agent-name=diagnose-agent` based on your report.
 
 ## METRICS TO TRACK
 

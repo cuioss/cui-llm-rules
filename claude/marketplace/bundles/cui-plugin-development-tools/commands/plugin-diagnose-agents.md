@@ -143,6 +143,54 @@ Task:
 Track for each agent: references_found, references_correct, references_fixed, references_ambiguous.
 Aggregate totals: agents_checked, total_references, correct, fixed, issues.
 
+### Step 4.5: Validate Architectural Constraints
+
+**For EACH agent discovered:**
+
+Check for architectural violations using pattern detection from Pattern 22 (agent-analysis-patterns.md).
+
+**A. Self-Invocation Detection:**
+
+Search agent content for patterns indicating agent is instructed to call commands:
+
+```
+Grep patterns to detect:
+- "YOU MUST.*using\s+/plugin-"
+- "YOU MUST.*using\s+/cui-"
+- "invoke\s+/plugin-"
+- "call\s+/plugin-"
+- "SlashCommand:\s*/plugin-"
+```
+
+Use Grep with these patterns across all discovered agents.
+
+**B. Categorize findings:**
+
+**CRITICAL Violation - Agent Self-Invocation (Pattern 22):**
+- Pattern: Agent instructed to invoke SlashCommand directly
+- Common location: CONTINUOUS IMPROVEMENT RULE sections
+- Issue: Violates Rule 6 - agents cannot invoke commands (SlashCommand tool unavailable at runtime)
+- Example: `YOU MUST immediately update this file using /plugin-update-agent`
+
+**Correct Pattern:**
+- Agent reports improvements to caller with structured suggestion
+- Caller invokes command based on agent's report
+- Agent returns improvement opportunity, not command invocation
+
+**C. Track architectural violations:**
+- `agents_with_self_invocation`: Count of agents with Pattern 22 violation
+- `self_invocation_details`: List of (agent_name, line_number, matched_pattern) tuples
+
+**D. Include in aggregate metrics:**
+
+Add to overall issue tracking:
+- Architectural violations as CRITICAL issues
+- Track separately from tool/structure issues for clarity
+
+**Error Handling:**
+- If Grep fails: Log warning, mark validation as "Pattern Check Failed", continue
+- If pattern matching errors: Display warning, continue with other validations
+
 ### Step 5: Aggregate Results
 
 **Combine findings from all agents (diagnosis + reference checks):**
@@ -159,8 +207,34 @@ Overall metrics: average scores, agent quality distribution (excellent/good/fair
 - Issue statistics (critical/warnings/suggestions totals)
 - Quality scores (avg tool_fit, precision, compliance)
 - Reference validation stats (total/correct/fixed/issues)
-- Per-agent summary line: status, scores, reference counts
-- Recommendations: critical issues requiring attention, reference issues with details, or success message if all clean
+- **Architectural violations (Pattern 22):** agents_with_self_invocation count
+- Per-agent summary line: status, scores, reference counts, architectural violations
+- Recommendations:
+  - Critical issues requiring attention
+  - Reference issues with details
+  - **Architectural violations with specific agent names and recommended fixes**
+  - Or success message if all clean
+
+**If architectural violations found (Pattern 22):**
+```
+⚠️ CRITICAL: {count} agents contain self-invocation instructions (Pattern 22)
+
+Agents with violations:
+- {agent-name}: Line {line} - Instructs agent to invoke /{command-name}
+- {agent-name}: Line {line} - Instructs agent to invoke /{command-name}
+
+❌ Issue: Agents CANNOT invoke commands (Rule 6 - SlashCommand tool unavailable at runtime)
+
+Recommended Fix:
+Update CONTINUOUS IMPROVEMENT RULE sections to:
+✅ REPORT improvements to caller (not invoke commands directly)
+✅ Return structured improvement suggestions
+✅ Let CALLER invoke /plugin-update-agent based on report
+
+Use /plugin-update-agent to fix each agent's CONTINUOUS IMPROVEMENT RULE section.
+
+Reference: agent-analysis-patterns.md Pattern 22
+```
 
 **If --save-report flag is set:**
 - Write the complete report above to `agents-diagnosis-report.md` in project root

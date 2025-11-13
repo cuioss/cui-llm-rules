@@ -350,11 +350,22 @@ For each skill pair with duplication:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better similarity detection, more accurate overlap calculation, improved harmful duplication identification, enhanced recommendation quality), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=analyze-cross-skill-duplication update="[your improvement]"
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better similarity detection, more accurate overlap calculation, improved harmful duplication identification, enhanced recommendation quality), **REPORT the improvement to your caller** with:
 
-Focus improvements on:
 1. Content similarity detection algorithms and accuracy
 2. Semantic overlap percentage calculation precision
 3. Harmful vs acceptable duplication classification logic
 4. Cross-skill consolidation recommendation quality
 5. Performance optimization for large skill sets
+
+Return structured improvement suggestion in your analysis result:
+```
+IMPROVEMENT OPPORTUNITY DETECTED
+
+Area: [specific area from list above]
+Current limitation: [what doesn't work well]
+Suggested enhancement: [specific improvement]
+Expected impact: [benefit of change]
+```
+
+The caller can then invoke `/plugin-update-agent agent-name=analyze-cross-skill-duplication` based on your report.

@@ -233,7 +233,7 @@ Compare across files:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=diagnose-skill update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with improvements discovered during analysis.
 
 Focus improvements on:
 1. YAML frontmatter validation logic and error detection
@@ -241,3 +241,15 @@ Focus improvements on:
 3. Cross-file integration analysis precision and conflict detection
 4. Issue severity categorization and prioritization
 5. Overall quality score calculation and rating thresholds
+
+Return structured improvement suggestion in your analysis result:
+```
+IMPROVEMENT OPPORTUNITY DETECTED
+
+Area: [specific area from list above]
+Current limitation: [what doesn't work well]
+Suggested enhancement: [specific improvement]
+Expected impact: [benefit of change]
+```
+
+The caller can then invoke `/plugin-update-agent agent-name=diagnose-skill` based on your report.

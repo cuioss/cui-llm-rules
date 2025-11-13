@@ -99,6 +99,30 @@ Skill: cui-marketplace-architecture
        - If user confirms Maven execution needed: abort with error
        - If user confirms non-Maven Bash usage: continue
 
+   - **CRITICAL Validation - CONTINUOUS IMPROVEMENT RULE Pattern**:
+     - After generating agent template, validate CONTINUOUS IMPROVEMENT RULE section:
+       ```
+       ⚠️  Pattern 22: Agent Self-Invocation Check
+
+       Per Rule 6: Agents CANNOT invoke commands (SlashCommand tool unavailable at runtime)
+
+       CONTINUOUS IMPROVEMENT RULE must instruct agent to:
+       ✅ REPORT improvement findings to caller
+       ✅ RETURN structured improvement suggestions
+       ❌ NOT invoke /plugin-update-agent or any slash command directly
+
+       Detection patterns (must NOT appear in agent):
+       - "YOU MUST.*using /plugin-"
+       - "invoke /plugin-"
+       - "call /plugin-"
+       - "SlashCommand: /plugin-"
+
+       Correct pattern: Agent reports improvements, CALLER invokes command
+
+       Reference: agent-analysis-patterns.md Pattern 22
+       ```
+     - This validation is applied post-generation in Step 5 to ensure template compliance
+
 **C. When should this agent be used?** (trigger conditions)
    - **Validation**: Must provide use cases
    - **Error**: If empty: "Usage conditions required" and retry
@@ -138,12 +162,24 @@ Create `{bundle}/agents/{agent-name}.md` with:
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name={agent-name} update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
 1. [Improvement area 1 specific to agent purpose]
 2. [Improvement area 2 specific to agent purpose]
 3. [Improvement area 3 specific to agent purpose]
 4. [Improvement area 4 specific to agent purpose]
 5. Any lessons learned about [agent domain] workflows
+
+Return structured improvement suggestion in your analysis result:
+```
+IMPROVEMENT OPPORTUNITY DETECTED
+
+Area: [specific area]
+Current limitation: [what doesn't work well]
+Suggested enhancement: [specific improvement]
+Expected impact: [benefit of change]
+```
+
+The caller can then invoke `/plugin-update-agent agent-name={agent-name}` based on your report.
 
 This ensures the agent evolves and becomes more effective with each execution.
 ```

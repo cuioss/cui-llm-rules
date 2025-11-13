@@ -16,12 +16,24 @@ Scans agent and command files to find references to other agents, commands, and 
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=analyze-plugin-references update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
 1. Better reference detection patterns (SlashCommand, Task subagent_type, Skill invocations, natural language)
 2. More accurate marketplace scanning strategies for finding correct references
 3. Improved auto-fix confidence scoring and validation logic
 4. Enhanced user prompting for ambiguous reference resolution
 5. Any lessons learned about plugin reference analysis workflows
+
+Return structured improvement suggestion in your analysis result:
+```
+IMPROVEMENT OPPORTUNITY DETECTED
+
+Area: [specific area from list above]
+Current limitation: [what doesn't work well]
+Suggested enhancement: [specific improvement]
+Expected impact: [benefit of change]
+```
+
+The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-references` based on your report.
 
 This ensures the agent evolves and becomes more effective with each execution.
 

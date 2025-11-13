@@ -178,6 +178,80 @@ tools: Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh)
 - `asciidoc-link-verifier.md` (lines 12, 72-77) - Correct implementation
 - `asciidoc-format-validator.md` (lines 12, 68-73) - Correct implementation
 
+## Pattern 22: Agent Self-Invocation Instructions
+
+**Problem:** Agent contains instructions telling it to invoke slash commands directly
+**Context:** CONTINUOUS IMPROVEMENT RULE sections that instruct agent to call `/plugin-update-agent` or other commands
+**Architecture Rule Violation:** Rule 6 - Agents CANNOT invoke commands (SlashCommand tool unavailable at runtime)
+
+**Examples of INCORRECT patterns:**
+
+```markdown
+❌ **CRITICAL:** Every time you execute this agent... **YOU MUST immediately update this file**
+   using `/plugin-update-agent agent-name={agent-name} update="[your improvement]"`
+
+❌ After analysis, invoke `/plugin-diagnose-agents` to verify changes
+
+❌ When improvements found, call `/plugin-update-command` to apply them
+```
+
+**Why This is Wrong:**
+1. **Architecture Constraint:** Agents do not have access to SlashCommand tool at runtime (Rule 6)
+2. **Impossible Instruction:** Creates instructions that cannot be executed
+3. **Violates Agent Design:** Agents must be focused executors that REPORT to caller
+4. **Breaks Layer Separation:** Agents (Layer 2) cannot invoke Commands (Layer 3)
+
+**CORRECT pattern - Agent Reports to Caller:**
+
+```markdown
+✅ ## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this agent and discover improvements:
+
+1. Document the improvement in your analysis result
+2. Report specific enhancement opportunity to caller
+3. Return structured improvement suggestion with:
+   - Improvement area description
+   - Current limitation
+   - Suggested enhancement
+   - Expected impact
+
+The CALLER can then invoke `/plugin-update-agent agent-name={agent-name}`
+based on your improvement report.
+```
+
+**Detection Patterns:**
+
+```bash
+# Grep patterns to detect violation:
+Grep: "YOU MUST.*(\/plugin-|\/cui-|SlashCommand)"
+Grep: "(invoke|call|execute|trigger|run)\s+/plugin-"
+Grep: "immediately.*update this file.*using\s+/"
+Grep: "SlashCommand:\s*/plugin-update"
+```
+
+**Fix Strategy:**
+1. Replace "YOU MUST invoke /command" with "REPORT improvement to caller"
+2. Change imperative command invocation to structured result return
+3. Add caller invocation example in documentation (not instruction)
+4. Verify agent workflow never attempts SlashCommand usage
+
+**Impact:**
+- **Critical:** Agent attempts impossible action at runtime
+- **Confusion:** Mixed messaging about agent capabilities
+- **Architecture:** Violates fundamental layer separation principle
+
+**Reference:**
+- Architecture Rule 6: Agent Delegation Constraints (architecture-rules.md)
+- `/plugin-create-agent` validation lines 65-101 (Task/Maven checks as precedent)
+
+**Priority:** CRITICAL (same as Pattern 1, 3, 5, 7, 9, 12)
+
+**Validation Location:**
+- `/plugin-diagnose-agents`: Step 4.5 - Architectural constraint validation
+- `/plugin-create-agent`: Step 3C - CONTINUOUS IMPROVEMENT RULE validation
+- `diagnose-agent` (sub-agent): Include in architectural compliance check
+
 ## Pattern Detection Priority
 
 ### CRITICAL (Must Fix Before Use):
@@ -187,6 +261,7 @@ tools: Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh)
 - Pattern 7: Orphaned Essential Rules
 - Pattern 9: Permission Pattern Violations
 - Pattern 12: Missing Description
+- Pattern 22: Agent Self-Invocation Instructions
 
 ### WARNING (Should Fix for Quality):
 - Pattern 2: Over-Permission
