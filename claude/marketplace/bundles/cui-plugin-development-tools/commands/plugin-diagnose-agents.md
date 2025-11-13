@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-agents
+name: plugin-diagnose-agents
 description: Analyze, verify, and fix agents for tool coverage, best practices, and structural issues
 ---
 
@@ -9,7 +9,7 @@ Orchestrates comprehensive analysis of agents by coordinating diagnose-agent for
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-agents update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-diagnose-agents update="[your improvement]"` with:
 1. Improved agent quality analysis patterns and tool fit detection
 2. Better methods for identifying tool coverage gaps and precision issues
 3. More effective compliance checking and structural validation approaches
@@ -357,7 +357,7 @@ Apply this fix? [Y]es / [N]o / [S]kip all remaining
 
 **Note**: For complex fixes like Task tool misuse or Maven anti-patterns:
 - Prompt should explain the architectural change required
-- Consider suggesting use of `/cui-update-agent` for complex refactoring
+- Consider suggesting use of `/plugin-update-agent` for complex refactoring
 
 **Track risky fixes:**
 ```json
@@ -404,7 +404,7 @@ Task:
 Verification Complete:
 ✅ {issues_resolved} issues resolved
 {if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain (require manual intervention or /cui-update-agent)
+⚠️ {issues_remaining} issues remain (require manual intervention or /plugin-update-agent)
 {endif}
 {if new_issues > 0}
 ❌ {new_issues} NEW issues introduced (fixes need review!)
@@ -429,10 +429,10 @@ All analysis logic is in the specialized agent:
 
 ## RELATED
 
-- `/cui-update-agent` - Apply fixes to agents
-- `/cui-diagnose-commands` - Diagnose commands
-- `/cui-diagnose-skills` - Diagnose skills
-- `/cui-diagnose-bundle` - Diagnose entire bundle
+- `/plugin-update-agent` - Apply fixes to agents
+- `/plugin-diagnose-commands` - Diagnose commands
+- `/plugin-diagnose-skills` - Diagnose skills
+- `/plugin-diagnose-bundle` - Diagnose entire bundle
 
 ## STANDARDS
 

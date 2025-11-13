@@ -1,5 +1,5 @@
 ---
-name: cui-update-command
+name: plugin-update-command
 description: Update a command with improvements, verify quality, and prevent duplication
 ---
 
@@ -9,7 +9,7 @@ Updates an existing slash command with proposed improvements while ensuring qual
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-update-command update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-update-command update="[your improvement]"` with:
 1. Improved validation patterns for proposed updates
 2. Better methods for detecting duplication across commands
 3. More effective strategies for ensuring update correctness
@@ -25,14 +25,14 @@ When you need to update an existing command based on lessons learned or improvem
 1. Validates the proposed update is sound and applicable
 2. Checks for duplication with existing command content and other commands
 3. Applies the update using appropriate tools
-4. Runs formal verification via `/cui-diagnose-commands`
+4. Runs formal verification via `/plugin-diagnose-commands`
 5. Reports results and any issues found
 
 ## PARAMETERS
 
 **Required Parameters** (will prompt if missing):
 
-- **command-name**: Name of command to update (e.g., `cui-add-skill-knowledge`)
+- **command-name**: Name of command to update (e.g., `plugin-add-skill-knowledge`)
 - **update-description**: Description of what to update and why
 
 **Optional Parameters**:
@@ -210,7 +210,7 @@ Use Edit tool to make targeted changes
 **Execute diagnosis command (unless --skip-diagnosis):**
 
 ```
-SlashCommand: /cui-diagnose-commands command-name={command-name}
+SlashCommand: /plugin-diagnose-commands command-name={command-name}
 ```
 
 **Parse diagnosis results:**
@@ -230,9 +230,9 @@ SlashCommand: /cui-diagnose-commands command-name={command-name}
 
 **If this update itself reveals an improvement to the update process:**
 
-Apply the CONTINUOUS IMPROVEMENT RULE to this command (`cui-update-command`):
+Apply the CONTINUOUS IMPROVEMENT RULE to this command (`plugin-update-command`):
 ```
-Edit: cui-update-command.md
+Edit: plugin-update-command.md
 Add to CONTINUOUS IMPROVEMENT RULE section
 ```
 
@@ -281,7 +281,7 @@ Quality Verification:
 
 Recommended actions:
 - Review issues above
-- Run /cui-diagnose-commands {command-name} for details
+- Run /plugin-diagnose-commands {command-name} for details
 - Consider reverting or fixing issues
 {endif}
 
@@ -326,7 +326,7 @@ Content found in {count} commands could be centralized:
 - **Read**: Load command file, read standards
 - **Edit**: Apply targeted updates to command
 - **Grep**: Search for duplication patterns across commands
-- **SlashCommand**: Run `/cui-diagnose-commands` for verification
+- **SlashCommand**: Run `/plugin-diagnose-commands` for verification
 - **Skill**: Load diagnostic patterns and architecture standards
 
 ## STATISTICS TRACKING
@@ -352,23 +352,23 @@ Track throughout workflow:
 ### Example 1: Add Error Handling
 
 ```bash
-/cui-update-command \
-  command-name=cui-add-skill-knowledge \
+/plugin-update-command \
+  command-name=plugin-add-skill-knowledge \
   update-description="Add error handling for marketplace path detection failure in Step 5"
 ```
 
 ### Example 2: Update CONTINUOUS IMPROVEMENT RULE
 
 ```bash
-/cui-update-command \
-  command-name=cui-create-bundle \
+/plugin-update-command \
+  command-name=plugin-create-bundle \
   update-description="Add to CONTINUOUS IMPROVEMENT RULE: Better validation for bundle directory structure"
 ```
 
 ### Example 3: Consolidate Duplicate Content
 
 ```bash
-/cui-update-command \
+/plugin-update-command \
   command-name=cui-setup-project-permissions \
   update-description="Remove duplicate permission validation logic (already in permission-management skill)"
 ```
@@ -376,7 +376,7 @@ Track throughout workflow:
 ### Example 4: Global Command Update
 
 ```bash
-/cui-update-command \
+/plugin-update-command \
   command-name=custom-deploy \
   scope=global \
   update-description="Add deployment verification step after push"
@@ -384,8 +384,8 @@ Track throughout workflow:
 
 ## RELATED
 
-- `/cui-diagnose-commands` - Formal command verification
-- `/cui-create-command` - Create new commands
-- `/cui-update-agent` - Update agents (similar workflow)
+- `/plugin-diagnose-commands` - Formal command verification
+- `/plugin-create-command` - Create new commands
+- `/plugin-update-agent` - Update agents (similar workflow)
 - Anti-bloat rules - Prevent command growth
 - Command quality standards - Quality requirements

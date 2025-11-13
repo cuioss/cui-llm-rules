@@ -349,7 +349,7 @@ css-utilities.md: "Use !important for utility classes"
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better duplication detection, more accurate coherence scoring, improved conflict identification, enhanced integration analysis), **YOU MUST immediately update this file** using /cui-update-agent agent-name=analyze-integrated-standards update="[your improvement]"
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better duplication detection, more accurate coherence scoring, improved conflict identification, enhanced integration analysis), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=analyze-integrated-standards update="[your improvement]"
 
 Focus improvements on:
 1. Cross-file duplication detection accuracy and pattern recognition

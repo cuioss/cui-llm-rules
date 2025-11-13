@@ -1,5 +1,5 @@
 ---
-name: cui-add-skill-knowledge
+name: plugin-add-skill-knowledge
 description: Add external knowledge document to a skill with duplication prevention
 ---
 
@@ -18,7 +18,7 @@ When you have valuable documentation (README files, external guides, technical s
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-add-skill-knowledge update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-add-skill-knowledge update="[your improvement]"` with:
 1. Improved knowledge integration patterns or transformation techniques
 2. Better methods for identifying semantic duplication
 3. More effective strategies for cross-referencing and deduplication
@@ -149,13 +149,13 @@ Display summary with statistics:
 
 ### Step 8: Verify Skill Quality
 
-Run `/cui-diagnose-skills {skill-name}` to verify skill structure, references, and standards organization.
+Run `/plugin-diagnose-skills {skill-name}` to verify skill structure, references, and standards organization.
 
 **Error handling:** If diagnosis fails, log error and display diagnostic output for review.
 
 ### Step 9: Verify Bundle Quality (If modifications span multiple skills)
 
-**Decision logic:** If duplicates were removed from skills outside the target skill, run `/cui-diagnose-bundle {bundle-name}` for each affected bundle.
+**Decision logic:** If duplicates were removed from skills outside the target skill, run `/plugin-diagnose-bundle {bundle-name}` for each affected bundle.
 
 **Error handling:** If diagnosis fails, log error and display diagnostic output for review.
 
@@ -178,14 +178,14 @@ Run `/cui-diagnose-skills {skill-name}` to verify skill structure, references, a
 ### Example 1: Basic Usage
 
 ```bash
-/cui-add-skill-knowledge
+/plugin-add-skill-knowledge
 # Will prompt for target-skill and source-knowledge
 ```
 
 ### Example 2: With Parameters
 
 ```bash
-/cui-add-skill-knowledge \
+/plugin-add-skill-knowledge \
   target-skill=claude/marketplace/bundles/cui-java-expert/skills/cui-java-unit-testing \
   source-knowledge=/Users/oliver/git/cui-test-juli-logger/README.adoc
 ```
@@ -193,7 +193,7 @@ Run `/cui-diagnose-skills {skill-name}` to verify skill structure, references, a
 ### Example 3: Custom Knowledge Name
 
 ```bash
-/cui-add-skill-knowledge \
+/plugin-add-skill-knowledge \
   target-skill=claude/marketplace/bundles/cui-java-expert/skills/cui-java-cdi \
   source-knowledge=/path/to/quarkus-guide.md \
   knowledge-name=quarkus-advanced-patterns
@@ -202,7 +202,7 @@ Run `/cui-diagnose-skills {skill-name}` to verify skill structure, references, a
 ### Example 4: Always-Load Knowledge
 
 ```bash
-/cui-add-skill-knowledge \
+/plugin-add-skill-knowledge \
   target-skill=claude/marketplace/skills/cui-frontend-development \
   source-knowledge=/path/to/web-components-spec.md \
   load-type=always
@@ -214,7 +214,7 @@ Run `/cui-diagnose-skills {skill-name}` to verify skill structure, references, a
 - **Read**: Read source knowledge and existing standards files
 - **Write**: Create new knowledge document
 - **Edit**: Update SKILL.md and remove duplicates
-- **SlashCommand**: Run `/cui-diagnose-skills` and `/cui-diagnose-bundle`
+- **SlashCommand**: Run `/plugin-diagnose-skills` and `/plugin-diagnose-bundle`
 
 ## STATISTICS TRACKING
 
@@ -228,5 +228,5 @@ Track throughout workflow:
 
 ## RELATED
 
-- `/cui-diagnose-skills` - Validates skill structure and quality
-- `/cui-create-skill` - Creates new skills
+- `/plugin-diagnose-skills` - Validates skill structure and quality
+- `/plugin-create-skill` - Creates new skills

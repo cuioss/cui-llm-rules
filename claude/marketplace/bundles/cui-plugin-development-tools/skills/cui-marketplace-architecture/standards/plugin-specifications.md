@@ -177,17 +177,17 @@ description: What this command does
 
 **Verify bundle**:
 ```bash
-/cui-diagnose-bundle {bundle-name}
+/plugin-diagnose-bundle {bundle-name}
 ```
 
 **Verify agents**:
 ```bash
-/cui-diagnose-agents
+/plugin-diagnose-agents
 ```
 
 **Verify skills**:
 ```bash
-/cui-diagnose-skills
+/plugin-diagnose-skills
 ```
 
 ## Common Issues

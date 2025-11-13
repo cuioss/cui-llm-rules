@@ -233,7 +233,7 @@ Compare across files:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=diagnose-skill update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=diagnose-skill update="[your improvement]"` with improvements discovered during analysis.
 
 Focus improvements on:
 1. YAML frontmatter validation logic and error detection

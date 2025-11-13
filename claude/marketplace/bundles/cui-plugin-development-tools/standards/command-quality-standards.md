@@ -53,7 +53,7 @@ description: Clear description  # What command does (50-200 chars recommended, m
 - **DO NOT**: Add new sections, examples, or explanations unless CRITICAL
 - **Exception**: Only add if fundamentally missing
 - **CONTINUOUS IMPROVEMENT RULE Exception**: The CONTINUOUS IMPROVEMENT RULE section is REQUIRED for >90% of commands/agents and is exempt from this rule. It enables iterative refinement and should NOT be flagged as bloat.
-  - **Required Format**: Must include explicit usage instruction: `using /cui-update-command command-name={command-name} update="[your improvement]"` with:
+  - **Required Format**: Must include explicit usage instruction: `using /plugin-update-command command-name={command-name} update="[your improvement]"` with:
   - **Required Elements**: List 3-5 specific improvement areas relevant to the command's purpose
   - **Validation**: Diagnosis must check format compliance, not just presence
 

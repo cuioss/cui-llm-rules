@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-commands
+name: plugin-diagnose-commands
 description: Analyze, verify, and fix slash commands for clarity, structure, and bloat
 ---
 
@@ -9,7 +9,7 @@ Orchestrates comprehensive analysis of slash commands by coordinating diagnose-c
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-commands update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-diagnose-commands update="[your improvement]"` with:
 1. Improved command bloat detection and size classification metrics
 2. Better methods for identifying structural issues and anti-bloat violations
 3. More effective quality scoring and command organization assessment techniques
@@ -285,7 +285,7 @@ Apply this fix? [Y]es / [N]o / [S]kip all remaining
 This command exceeds the 500-line limit and requires restructuring.
 
 Recommended action:
-1. Extract detailed content to skills using /cui-create-skill
+1. Extract detailed content to skills using /plugin-create-skill
 2. Update command to reference skills instead of inline content
 
 This requires manual intervention. Options:
@@ -339,14 +339,14 @@ Task:
 Verification Complete:
 ✅ {issues_resolved} issues resolved
 {if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain (require manual intervention or /cui-update-command)
+⚠️ {issues_remaining} issues remain (require manual intervention or /plugin-update-command)
 {endif}
 {if new_issues > 0}
 ❌ {new_issues} NEW issues introduced (fixes need review!)
 {endif}
 {if bloated_commands_remain}
 ⚠️ Bloated commands require extraction to skills:
-- Use /cui-create-skill to extract content
+- Use /plugin-create-skill to extract content
 - Update command to reference skills
 {endif}
 ```
@@ -369,11 +369,11 @@ All analysis logic is in the specialized agent:
 
 ## RELATED
 
-- `/cui-update-command` - Apply fixes to commands
-- `/cui-diagnose-agents` - Diagnose agents
-- `/cui-diagnose-skills` - Diagnose skills
-- `/cui-diagnose-bundle` - Diagnose entire bundle
-- `/cui-create-skill` - Extract bloated content to skills
+- `/plugin-update-command` - Apply fixes to commands
+- `/plugin-diagnose-agents` - Diagnose agents
+- `/plugin-diagnose-skills` - Diagnose skills
+- `/plugin-diagnose-bundle` - Diagnose entire bundle
+- `/plugin-create-skill` - Extract bloated content to skills
 
 ## STANDARDS
 

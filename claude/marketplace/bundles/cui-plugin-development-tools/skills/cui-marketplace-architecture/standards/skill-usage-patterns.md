@@ -287,8 +287,8 @@ IF agent uses standards:
 
 This pattern validation is integrated into:
 
-- **/cui-diagnose-agents**: Checks skill usage for each agent
-- **/cui-diagnose-bundle**: Aggregates agent scores
-- **/cui-create-agent**: Guides proper skill usage at creation
+- **/plugin-diagnose-agents**: Checks skill usage for each agent
+- **/plugin-diagnose-bundle**: Aggregates agent scores
+- **/plugin-create-agent**: Guides proper skill usage at creation
 
 All commands invoke `Skill: cui-marketplace-architecture` to load these usage patterns.

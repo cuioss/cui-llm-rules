@@ -37,7 +37,7 @@ Skill: cui-javadoc
 
 **Why**: Missing tools require user approval (breaks autonomy), extra tools mislead about capabilities.
 
-**Enforcement**: `/cui-diagnose-agents` verifies tool coverage.
+**Enforcement**: `/plugin-diagnose-agents` verifies tool coverage.
 
 **Tool Dependencies**:
 
@@ -156,7 +156,7 @@ All conditions must be boolean-evaluable:
 
 ## Validation
 
-### Tool: /cui-diagnose-agents
+### Tool: /plugin-diagnose-agents
 
 **Checks**:
 
@@ -169,9 +169,9 @@ All conditions must be boolean-evaluable:
 
 **Usage**:
 ```bash
-/cui-diagnose-agents           # Marketplace agents
-/cui-diagnose-agents global    # Global agents
-/cui-diagnose-agents project   # Project agents
+/plugin-diagnose-agents           # Marketplace agents
+/plugin-diagnose-agents global    # Global agents
+/plugin-diagnose-agents project   # Project agents
 ```
 
 **Auto-fixes**:
@@ -192,7 +192,7 @@ Before creating agent:
 * [ ] Step 0 activates skills via Skill tool
 * [ ] Only required tools configured (including Skill if using standards)
 * [ ] Structured response format defined
-* [ ] Tool Fit Score = 100% (verify with `/cui-diagnose-agents`)
+* [ ] Tool Fit Score = 100% (verify with `/plugin-diagnose-agents`)
 
 ## Common Anti-Patterns
 

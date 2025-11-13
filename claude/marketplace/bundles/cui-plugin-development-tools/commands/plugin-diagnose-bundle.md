@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-bundle
+name: plugin-diagnose-bundle
 description: Analyze and verify entire bundle for structure, integration, quality, and marketplace readiness
 ---
 
@@ -212,19 +212,19 @@ Delegate to specialized commands (pass auto-fix parameter):
 
 **Skills Analysis:**
 ```
-Run: /cui-diagnose-skills scope=bundle bundle-name=<name> auto-fix=<auto-fix>
+Run: /plugin-diagnose-skills scope=bundle bundle-name=<name> auto-fix=<auto-fix>
 ```
 **Error handling:** If command fails or not available, skip skills analysis and mark as "Not Analyzed" in report.
 
 **Commands Analysis:**
 ```
-Run: /cui-diagnose-commands scope=bundle bundle-name=<name> auto-fix=<auto-fix>
+Run: /plugin-diagnose-commands scope=bundle bundle-name=<name> auto-fix=<auto-fix>
 ```
 **Error handling:** If command fails or not available, skip commands analysis and mark as "Not Analyzed" in report.
 
 **Agents Analysis:**
 ```
-Run: /cui-diagnose-agents scope=bundle bundle-name=<name> auto-fix=<auto-fix>
+Run: /plugin-diagnose-agents scope=bundle bundle-name=<name> auto-fix=<auto-fix>
 ```
 **Error handling:** If command fails or not available, skip agents analysis and mark as "Not Analyzed" in report.
 
@@ -493,7 +493,7 @@ Track throughout workflow:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-diagnose-bundle`
+**This command should be improved using**: `/plugin-update-command plugin-diagnose-bundle`
 
 **Improvement areas**:
 - Enhanced quality scoring algorithm with weighted component impact
@@ -510,6 +510,6 @@ Bundle analysis delegates to specialized diagnostic commands which use their own
 - Agent standards - bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
 
 **Related Commands:**
-- /cui-diagnose-skills - For detailed skill analysis
-- /cui-diagnose-commands - For detailed command analysis
-- /cui-diagnose-agents - For detailed agent analysis
+- /plugin-diagnose-skills - For detailed skill analysis
+- /plugin-diagnose-commands - For detailed command analysis
+- /plugin-diagnose-agents - For detailed agent analysis

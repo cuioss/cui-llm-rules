@@ -1,5 +1,5 @@
 ---
-name: cui-create-command
+name: plugin-create-command
 description: Guide users through creating a well-structured slash command with comprehensive questionnaire
 ---
 
@@ -9,7 +9,7 @@ Interactive wizard for creating well-structured slash commands following command
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-create-command update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-create-command update="[your improvement]"` with:
 1. Improved questionnaire patterns for gathering command requirements
 2. Better validation strategies for command quality standards
 3. More effective command file generation templates
@@ -95,7 +95,7 @@ Create `{bundle}/commands/{command-name}.md` with:
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name={command-name} update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name={command-name} update="[your improvement]"` with:
 1. [Improvement area 1 specific to command purpose]
 2. [Improvement area 2 specific to command purpose]
 3. [Improvement area 3 specific to command purpose]
@@ -147,19 +147,19 @@ Statistics:
 
 Next steps:
 1. Review command file: {file-path}
-2. Run diagnosis: /cui-diagnose-commands command-name={command-name}
+2. Run diagnosis: /plugin-diagnose-commands command-name={command-name}
 3. Test command functionality
 ```
 
 ### Step 5: Run Command Diagnosis
 
 ```
-SlashCommand: /cui-diagnose-commands command-name={command-name}
+SlashCommand: /plugin-diagnose-commands command-name={command-name}
 ```
 
 **Error handling:**
 - **If diagnosis fails**: Display warning but don't abort (command was already created)
-- Report: "⚠️ Diagnosis failed: {error}. Command created but not validated. Run /cui-diagnose-commands {command-name} manually."
+- Report: "⚠️ Diagnosis failed: {error}. Command created but not validated. Run /plugin-diagnose-commands {command-name} manually."
 
 ## STATISTICS TRACKING
 
@@ -207,16 +207,16 @@ Display all statistics in final summary.
 
 **Create command:**
 ```
-/cui-create-command
+/plugin-create-command
 ```
 
 **Specific scope:**
 ```
-/cui-create-command scope=project
+/plugin-create-command scope=project
 ```
 
 ## RELATED
 
-- `/cui-diagnose-commands` - Validates command
-- `/cui-update-command` - Update existing commands
+- `/plugin-diagnose-commands` - Validates command
+- `/plugin-update-command` - Update existing commands
 - Command quality standards - bundles/cui-plugin-development-tools/standards/command-quality-standards.md

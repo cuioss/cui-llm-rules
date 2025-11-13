@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-skills
+name: plugin-diagnose-skills
 description: Analyze, verify, and fix skills for structure, YAML frontmatter, standards references, and integration quality
 ---
 
@@ -9,7 +9,7 @@ Orchestrates comprehensive analysis of skills by coordinating diagnose-skill age
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-skills update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-diagnose-skills update="[your improvement]"` with:
 1. Improved skill analysis detection patterns and quality metrics
 2. Better methods for identifying skill structural issues and YAML problems
 3. More effective cross-skill duplication detection and consolidation recommendations
@@ -397,9 +397,9 @@ All analysis logic is in specialized agents:
 
 ## RELATED
 
-- `/cui-diagnose-agents` - Diagnose agents
-- `/cui-diagnose-commands` - Diagnose commands
-- `/cui-diagnose-bundle` - Diagnose entire bundle
+- `/plugin-diagnose-agents` - Diagnose agents
+- `/plugin-diagnose-commands` - Diagnose commands
+- `/plugin-diagnose-bundle` - Diagnose entire bundle
 
 ## UNDERSTANDING DIAGNOSTIC RESULTS
 

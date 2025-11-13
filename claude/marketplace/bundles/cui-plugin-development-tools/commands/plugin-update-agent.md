@@ -1,5 +1,5 @@
 ---
-name: cui-update-agent
+name: plugin-update-agent
 description: Update an agent with improvements, verify quality, and prevent duplication
 ---
 
@@ -9,7 +9,7 @@ Updates an existing agent with proposed improvements while ensuring quality, cor
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-update-agent update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-update-agent update="[your improvement]"` with:
 1. Improved validation patterns for proposed agent updates
 2. Better methods for detecting tool coverage gaps
 3. More effective strategies for ensuring agent correctness
@@ -25,7 +25,7 @@ When you need to update an existing agent based on lessons learned or improvemen
 1. Validates the proposed update is sound and applicable
 2. Checks for duplication with existing agent content and other agents
 3. Applies the update using appropriate tools
-4. Runs formal verification via `/cui-diagnose-agents`
+4. Runs formal verification via `/plugin-diagnose-agents`
 5. Reports results and any issues found
 
 ## PARAMETERS
@@ -221,7 +221,7 @@ Use Edit tool to make targeted changes
 **Execute diagnosis command (unless --skip-diagnosis):**
 
 ```
-SlashCommand: /cui-diagnose-agents agent-name={agent-name}
+SlashCommand: /plugin-diagnose-agents agent-name={agent-name}
 ```
 
 **Parse diagnosis results:**
@@ -241,9 +241,9 @@ SlashCommand: /cui-diagnose-agents agent-name={agent-name}
 
 **If this update itself reveals an improvement to the agent update process:**
 
-Apply the CONTINUOUS IMPROVEMENT RULE to this command (`cui-update-agent`):
+Apply the CONTINUOUS IMPROVEMENT RULE to this command (`plugin-update-agent`):
 ```
-Edit: cui-update-agent.md
+Edit: plugin-update-agent.md
 Add to CONTINUOUS IMPROVEMENT RULE section
 ```
 
@@ -294,7 +294,7 @@ Quality Verification:
 
 Recommended actions:
 - Review issues above
-- Run /cui-diagnose-agents {agent-name} for details
+- Run /plugin-diagnose-agents {agent-name} for details
 - Consider reverting or fixing issues
 {endif}
 
@@ -340,7 +340,7 @@ Content found in {count} agents could be centralized:
 - **Read**: Load agent file, read standards
 - **Edit**: Apply targeted updates to agent
 - **Grep**: Search for duplication patterns across agents
-- **SlashCommand**: Run `/cui-diagnose-agents` for verification
+- **SlashCommand**: Run `/plugin-diagnose-agents` for verification
 - **Skill**: Load diagnostic patterns and architecture standards
 
 ## STATISTICS TRACKING
@@ -368,7 +368,7 @@ Track throughout workflow:
 ### Example 1: Add Error Handling
 
 ```bash
-/cui-update-agent \
+/plugin-update-agent \
   agent-name=pr-review-responder \
   update-description="Add error handling for gh command failures when fetching PR comments"
 ```
@@ -376,7 +376,7 @@ Track throughout workflow:
 ### Example 2: Update CONTINUOUS IMPROVEMENT RULE
 
 ```bash
-/cui-update-agent \
+/plugin-update-agent \
   agent-name=maven-project-builder \
   update-description="Add to CONTINUOUS IMPROVEMENT RULE: Better Maven wrapper detection patterns"
 ```
@@ -384,7 +384,7 @@ Track throughout workflow:
 ### Example 3: Improve Tool Usage
 
 ```bash
-/cui-update-agent \
+/plugin-update-agent \
   agent-name=task-executor \
   update-description="Replace Bash grep with Grep tool for non-prompting execution"
 ```
@@ -392,7 +392,7 @@ Track throughout workflow:
 ### Example 4: Global Agent Update
 
 ```bash
-/cui-update-agent \
+/plugin-update-agent \
   agent-name=custom-deployer \
   scope=global \
   update-description="Add deployment rollback logic on verification failure"
@@ -400,8 +400,8 @@ Track throughout workflow:
 
 ## RELATED
 
-- `/cui-diagnose-agents` - Formal agent verification
-- `/cui-create-agent` - Create new agents
-- `/cui-update-command` - Update commands (similar workflow)
+- `/plugin-diagnose-agents` - Formal agent verification
+- `/plugin-create-agent` - Create new agents
+- `/plugin-update-command` - Update commands (similar workflow)
 - Agent design principles - Architecture standards
 - Agent quality standards - Quality requirements

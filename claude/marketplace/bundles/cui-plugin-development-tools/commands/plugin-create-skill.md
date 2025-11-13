@@ -1,5 +1,5 @@
 ---
-name: cui-create-skill
+name: plugin-create-skill
 description: Guide users through creating a well-structured skill with standards organization and proper configuration
 ---
 
@@ -9,7 +9,7 @@ Interactive wizard that guides users through creating a new well-structured Clau
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-create-skill update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-create-skill update="[your improvement]"` with:
 1. Improved questionnaire patterns for gathering skill requirements
 2. Better validation strategies for architecture compliance
 3. More effective skill file generation templates
@@ -147,7 +147,7 @@ Statistics:
 Next steps:
 1. Review skill file: {file-path}
 2. Populate standards files in standards/ directory
-3. Run diagnosis: /cui-diagnose-skills skill-name={skill-name}
+3. Run diagnosis: /plugin-diagnose-skills skill-name={skill-name}
 4. Test skill activation
 ```
 
@@ -155,12 +155,12 @@ Next steps:
 
 Execute:
 ```
-SlashCommand: /cui-diagnose-skills skill-name={created-skill-name}
+SlashCommand: /plugin-diagnose-skills skill-name={created-skill-name}
 ```
 
 **Error handling:**
 - **If diagnosis fails**: Display warning but don't abort (skill was already created)
-- Report: "⚠️ Diagnosis failed: {error}. Skill created but not validated. Run /cui-diagnose-skills {skill-name} manually."
+- Report: "⚠️ Diagnosis failed: {error}. Skill created but not validated. Run /plugin-diagnose-skills {skill-name} manually."
 
 ## STATISTICS TRACKING
 
@@ -213,17 +213,17 @@ Display all statistics in Step 7 summary.
 
 **Create marketplace skill:**
 ```
-/cui-create-skill
+/plugin-create-skill
 ```
 
 **Create global skill:**
 ```
-/cui-create-skill scope=global
+/plugin-create-skill scope=global
 ```
 
 **Create project skill:**
 ```
-/cui-create-skill scope=project
+/plugin-create-skill scope=project
 ```
 
 ## ARCHITECTURE
@@ -231,7 +231,7 @@ Display all statistics in Step 7 summary.
 This command:
 - Uses interactive questionnaire pattern
 - References cui-marketplace-architecture skill for validation
-- Delegates diagnosis to /cui-diagnose-skills
+- Delegates diagnosis to /plugin-diagnose-skills
 - Generates minimal structure (no bloated templates)
 - Trusts AI to format content appropriately
 
@@ -244,7 +244,7 @@ Follows:
 
 ## RELATED
 
-- `/cui-diagnose-skills` - Validates created skill
+- `/plugin-diagnose-skills` - Validates created skill
 - `/cui-update-skill` - Update existing skills
-- `/cui-create-bundle` - Creates bundle for skills
+- `/plugin-create-bundle` - Creates bundle for skills
 - `cui-marketplace-architecture` skill - Architecture rules

@@ -11,18 +11,18 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["plugin", "development", "tools", "diagnose", "create"],
   "commands": [
-    "./commands/cui-add-skill-knowledge.md",
-    "./commands/cui-create-agent.md",
-    "./commands/cui-create-bundle.md",
-    "./commands/cui-create-command.md",
-    "./commands/cui-create-skill.md",
-    "./commands/cui-diagnose-agents.md",
-    "./commands/cui-diagnose-bundle.md",
-    "./commands/cui-diagnose-commands.md",
-    "./commands/cui-diagnose-marketplace.md",
-    "./commands/cui-diagnose-skills.md",
-    "./commands/cui-update-agent.md",
-    "./commands/cui-update-command.md"
+    "./commands/plugin-add-skill-knowledge.md",
+    "./commands/plugin-create-agent.md",
+    "./commands/plugin-create-bundle.md",
+    "./commands/plugin-create-command.md",
+    "./commands/plugin-create-skill.md",
+    "./commands/plugin-diagnose-agents.md",
+    "./commands/plugin-diagnose-bundle.md",
+    "./commands/plugin-diagnose-commands.md",
+    "./commands/plugin-diagnose-marketplace.md",
+    "./commands/plugin-diagnose-skills.md",
+    "./commands/plugin-update-agent.md",
+    "./commands/plugin-update-command.md"
   ],
   "skills": [
     "./skills/cui-marketplace-architecture"

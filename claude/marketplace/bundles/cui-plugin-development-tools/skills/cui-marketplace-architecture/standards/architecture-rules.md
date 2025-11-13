@@ -758,9 +758,9 @@ When fixing agents with embedded examples:
 ## Enforcement
 
 These rules are enforced through:
-- `/cui-create-skill` - Proactive prevention at creation
-- `/cui-diagnose-skills` - Reactive detection in existing skills
-- `/cui-diagnose-agents` - Check agent skill usage patterns
-- `/cui-diagnose-bundle` - Overall bundle compliance
+- `/plugin-create-skill` - Proactive prevention at creation
+- `/plugin-diagnose-skills` - Reactive detection in existing skills
+- `/plugin-diagnose-agents` - Check agent skill usage patterns
+- `/plugin-diagnose-bundle` - Overall bundle compliance
 
 All diagnostic commands invoke this skill to apply consistent validation rules.

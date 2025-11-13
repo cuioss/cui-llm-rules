@@ -269,7 +269,7 @@ REMOVE if link is dead and no context provided
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better zero-information detection, more accurate ambiguity identification, improved duplication analysis, enhanced quality scoring), **YOU MUST immediately update this file** using `/cui-update-agent agent-name=analyze-standards-file update="[your improvement]"`
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better zero-information detection, more accurate ambiguity identification, improved duplication analysis, enhanced quality scoring), **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=analyze-standards-file update="[your improvement]"`
 
 Focus improvements on:
 1. Zero-information content detection patterns and heuristics

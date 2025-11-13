@@ -50,7 +50,7 @@ The marketplace implements 4 bundle types:
 
 **Purpose**: Plugin development toolchain
 
-**Components**: /cui-create-agent, /cui-create-command, /cui-diagnose-* commands
+**Components**: /plugin-create-agent, /plugin-create-command, /cui-diagnose-* commands
 
 **Rationale**: Complete development lifecycle tooling
 

@@ -350,7 +350,7 @@ For each skill pair with duplication:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better similarity detection, more accurate overlap calculation, improved harmful duplication identification, enhanced recommendation quality), **YOU MUST immediately update this file** using /cui-update-agent agent-name=analyze-cross-skill-duplication update="[your improvement]"
+**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better similarity detection, more accurate overlap calculation, improved harmful duplication identification, enhanced recommendation quality), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=analyze-cross-skill-duplication update="[your improvement]"
 
 Focus improvements on:
 1. Content similarity detection algorithms and accuracy

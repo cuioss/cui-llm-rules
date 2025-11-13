@@ -118,10 +118,10 @@ Tool Fit Score:
 - **CONTINUOUS IMPROVEMENT RULE section** (REQUIRED for >90% of agents - flag as WARNING if missing unless agent is simple orchestrator with <150 lines)
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
-- **CRITICAL Check**: Must include explicit usage instruction: `using /cui-update-agent agent-name={agent-name} update="[your improvement]"` with:
+- **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-agent agent-name={agent-name} update="[your improvement]"` with:
 - **WARNING**: If section exists but missing usage instruction, flag as CRITICAL issue
 - **SUGGESTION**: Should list 3-5 specific improvement areas relevant to agent purpose
-- **Pattern**: Check format matches: `**CRITICAL:** Every time you execute this agent...YOU MUST immediately update this file** using /cui-update-agent...`
+- **Pattern**: Check format matches: `**CRITICAL:** Every time you execute this agent...YOU MUST immediately update this file** using /plugin-update-agent...`
 
 **Check complexity (Pattern 17):**
 - Lines > 800: TOO COMPLEX (CRITICAL)
@@ -520,7 +520,7 @@ Rating:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=diagnose-agent update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=diagnose-agent update="[your improvement]"` with improvements discovered during analysis.
 
 Focus improvements on:
 - Tool coverage detection accuracy and scoring precision

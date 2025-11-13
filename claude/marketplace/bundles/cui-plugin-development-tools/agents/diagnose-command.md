@@ -156,10 +156,10 @@ anti_bloat_score = (rules_followed / 8) * 100
 - **CONTINUOUS IMPROVEMENT RULE section** (REQUIRED for >90% of commands - flag as WARNING if missing unless command is simple orchestrator with <150 lines)
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
-- **CRITICAL Check**: Must include explicit usage instruction: `using /cui-update-command command-name={command-name} update="[your improvement]"` with:
+- **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-command command-name={command-name} update="[your improvement]"` with:
 - **WARNING**: If section exists but missing usage instruction, flag as CRITICAL issue
 - **SUGGESTION**: Should list 3-5 specific improvement areas relevant to command purpose
-- **Pattern**: Check format matches: `**CRITICAL:** Every time you execute this command...YOU MUST immediately update this file** using /cui-update-command...`
+- **Pattern**: Check format matches: `**CRITICAL:** Every time you execute this command...YOU MUST immediately update this file** using /plugin-update-command...`
 
 **Check parameter validation (Pattern 10):**
 - All parameters documented
@@ -399,7 +399,7 @@ Rating:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/cui-update-agent agent-name=diagnose-command update="[your improvement]"` with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=diagnose-command update="[your improvement]"` with improvements discovered during analysis.
 
 Focus improvements on:
 - Bloat detection accuracy and threshold calibration

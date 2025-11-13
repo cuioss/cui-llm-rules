@@ -236,9 +236,9 @@ Good components:
 
 Scoring used in:
 
-- **/cui-diagnose-skills**: Calculate skill self-containment score
-- **/cui-diagnose-agents**: Calculate agent skill usage score
-- **/cui-diagnose-bundle**: Calculate bundle architecture score
+- **/plugin-diagnose-skills**: Calculate skill self-containment score
+- **/plugin-diagnose-agents**: Calculate agent skill usage score
+- **/plugin-diagnose-bundle**: Calculate bundle architecture score
 - **Marketplace dashboard**: Overall marketplace health
 
 All commands invoke `Skill: cui-marketplace-architecture` to load consistent scoring criteria.

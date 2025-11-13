@@ -1,5 +1,5 @@
 ---
-name: cui-create-bundle
+name: plugin-create-bundle
 description: Create a new marketplace bundle with proper structure, plugin.json, and documentation
 ---
 
@@ -76,11 +76,11 @@ Trust AI to generate appropriate component README structure.
 
 For each component type user requested:
 
-**Skills**: Redirect to `/cui-create-skill scope={scope} bundle={bundle-name}`
+**Skills**: Redirect to `/plugin-create-skill scope={scope} bundle={bundle-name}`
 
-**Commands**: Redirect to `/cui-create-command scope={scope} bundle={bundle-name}`
+**Commands**: Redirect to `/plugin-create-command scope={scope} bundle={bundle-name}`
 
-**Agents**: Redirect to `/cui-create-agent scope={scope} bundle={bundle-name}`
+**Agents**: Redirect to `/plugin-create-agent scope={scope} bundle={bundle-name}`
 
 ### Step 5: Update plugin.json with Created Components
 
@@ -101,7 +101,7 @@ Show:
 
 Execute:
 ```
-SlashCommand: /cui-diagnose-bundle bundle-name={bundle-name}
+SlashCommand: /plugin-diagnose-bundle bundle-name={bundle-name}
 ```
 
 Review results and offer to fix any issues found.
@@ -133,17 +133,17 @@ Review results and offer to fix any issues found.
 
 **Create marketplace bundle:**
 ```
-/cui-create-bundle
+/plugin-create-bundle
 ```
 
 **Create global bundle:**
 ```
-/cui-create-bundle scope=global
+/plugin-create-bundle scope=global
 ```
 
 **Create project bundle:**
 ```
-/cui-create-bundle scope=project
+/plugin-create-bundle scope=project
 ```
 
 ## ARCHITECTURE
@@ -152,12 +152,12 @@ This command:
 - Creates minimal bundle structure
 - Delegates component creation to specialized commands
 - Generates concise documentation (no embedded templates)
-- Validates structure via /cui-diagnose-bundle
+- Validates structure via /plugin-diagnose-bundle
 - Trusts AI to format content appropriately
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/cui-update-command cui-create-bundle`
+**This command should be improved using**: `/plugin-update-command plugin-create-bundle`
 
 **Improvement areas**:
 - Enhanced questionnaire flow with better default suggestions
@@ -176,10 +176,10 @@ Follows:
 
 ## RELATED
 
-- `/cui-create-skill` - Create skills within bundle
-- `/cui-create-command` - Create commands within bundle
-- `/cui-create-agent` - Create agents within bundle
-- `/cui-diagnose-bundle` - Validate bundle structure
+- `/plugin-create-skill` - Create skills within bundle
+- `/plugin-create-command` - Create commands within bundle
+- `/plugin-create-agent` - Create agents within bundle
+- `/plugin-diagnose-bundle` - Validate bundle structure
 - `cui-marketplace-architecture` skill - Architecture rules
 
 ## IMPORTANT NOTES

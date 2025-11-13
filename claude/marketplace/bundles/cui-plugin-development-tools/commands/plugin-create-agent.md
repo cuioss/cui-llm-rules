@@ -1,5 +1,5 @@
 ---
-name: cui-create-agent
+name: plugin-create-agent
 description: Guide users through creating a well-structured agent following architectural best practices
 ---
 
@@ -9,7 +9,7 @@ Interactive wizard for creating well-structured Claude Code agents following mar
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-create-agent update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-create-agent update="[your improvement]"` with:
 1. Improved questionnaire patterns for gathering agent requirements
 2. Better validation strategies for architecture compliance
 3. More effective agent file generation templates
@@ -138,7 +138,7 @@ Create `{bundle}/agents/{agent-name}.md` with:
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-agent agent-name={agent-name} update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name={agent-name} update="[your improvement]"` with:
 1. [Improvement area 1 specific to agent purpose]
 2. [Improvement area 2 specific to agent purpose]
 3. [Improvement area 3 specific to agent purpose]
@@ -186,14 +186,14 @@ Statistics:
 
 Next steps:
 1. Review agent file: {file-path}
-2. Run diagnosis: /cui-diagnose-agents agent-name={agent-name}
+2. Run diagnosis: /plugin-diagnose-agents agent-name={agent-name}
 3. Test agent functionality
 ```
 
 ### Step 7: Run Agent Diagnosis
 
 ```
-SlashCommand: /cui-diagnose-agents agent-name={agent-name}
+SlashCommand: /plugin-diagnose-agents agent-name={agent-name}
 ```
 
 **Error handling:**
@@ -244,16 +244,16 @@ Display all statistics in final summary.
 
 **Create marketplace agent:**
 ```
-/cui-create-agent
+/plugin-create-agent
 ```
 
 **Create in specific scope:**
 ```
-/cui-create-agent scope=global
+/plugin-create-agent scope=global
 ```
 
 ## RELATED
 
-- `/cui-diagnose-agents` - Validates agent
-- `/cui-update-agent` - Update existing agents
+- `/plugin-diagnose-agents` - Validates agent
+- `/plugin-update-agent` - Update existing agents
 - `cui-marketplace-architecture` skill - Architecture rules

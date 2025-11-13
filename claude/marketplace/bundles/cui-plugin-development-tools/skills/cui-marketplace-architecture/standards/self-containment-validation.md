@@ -188,8 +188,8 @@ echo "FINAL SCORE: $score/100"
 
 This validation is integrated into:
 
-- **/cui-create-skill**: Proactive - prevents violations at creation time
-- **/cui-diagnose-skills**: Reactive - detects violations in existing skills
-- **/cui-diagnose-bundle**: Aggregates skill scores for bundle health
+- **/plugin-create-skill**: Proactive - prevents violations at creation time
+- **/plugin-diagnose-skills**: Reactive - detects violations in existing skills
+- **/plugin-diagnose-bundle**: Aggregates skill scores for bundle health
 
 All commands invoke `Skill: cui-marketplace-architecture` to load these validation procedures.

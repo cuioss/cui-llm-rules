@@ -1,5 +1,5 @@
 ---
-name: cui-diagnose-marketplace
+name: plugin-diagnose-marketplace
 description: Diagnose and fix marketplace plugin configuration errors and obsolete entries
 ---
 
@@ -46,7 +46,7 @@ When plugins are removed from marketplace, user's local cache still references t
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/cui-update-command command-name=cui-diagnose-marketplace update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-diagnose-marketplace update="[your improvement]"` with:
 1. Enhanced detection patterns for obsolete plugin references
 2. Improved schema validation for plugin.json manifests
 3. Better categorization of safe vs risky fixes
@@ -403,7 +403,7 @@ Configuration Status: {✓ HEALTHY | ⚠ NEEDS ATTENTION | ✗ ERRORS REMAIN}
 Next Steps:
 1. Restart Claude Code to apply plugin changes
 2. Review changes with git diff if needed
-3. Run /cui-diagnose-bundle for individual bundle checks
+3. Run /plugin-diagnose-bundle for individual bundle checks
 ```
 
 ## CRITICAL RULES
@@ -442,18 +442,18 @@ Next Steps:
 
 **Basic diagnostics with auto-fix (default):**
 ```
-/cui-diagnose-marketplace
+/plugin-diagnose-marketplace
 ```
 
 **Disable auto-fix (report only):**
 ```
-/cui-diagnose-marketplace auto-fix=false
+/plugin-diagnose-marketplace auto-fix=false
 ```
 
 **Note:** Safe issues are auto-fixed by default. Risky fixes always prompt for confirmation.
 
 ## RELATED
 
-- `/cui-diagnose-bundle` - Diagnose individual bundle structure and quality
-- `/cui-diagnose-skills` - Validate skill files and standards references
+- `/plugin-diagnose-bundle` - Diagnose individual bundle structure and quality
+- `/plugin-diagnose-skills` - Validate skill files and standards references
 - Plugin quality standards - bundles/cui-plugin-development-tools/standards/plugin-quality-standards.md (if exists)
