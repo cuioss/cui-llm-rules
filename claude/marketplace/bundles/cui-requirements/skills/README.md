@@ -4,29 +4,20 @@ This directory contains skills that provide comprehensive knowledge about requir
 
 ## Skills Overview
 
-### requirements-documentation
+### requirements-authoring
 
-Standards for creating and maintaining requirements documents following SMART principles. Covers:
+Comprehensive standards for creating and maintaining requirements and specification documents. Covers:
 
-- Requirements document structure and format
-- SMART requirements principles
-- Requirement numbering and ID schemes
-- Requirement prefix selection
-- Requirements maintenance and lifecycle
-- Traceability to specifications
+- **Requirements Format**: SMART principles, ID schemes, numbering, and structure
+- **Specification Structure**: Document organization, backtracking links, and traceability patterns
+- **Documentation Lifecycle**: Pre-implementation, during implementation, and post-implementation practices
+- **Quality Standards**: Clarity, completeness, consistency, and testability requirements
+- **Integrity Requirements**: No hallucinations, no duplications, verified links
+- **Maintenance Standards**: Adding, modifying, removing, and deprecating requirements
 
-### specification-documentation
+**When to use**: Creating or maintaining requirements and specification documents, ensuring documentation quality and integrity
 
-Standards for creating specification documents with proper structure and traceability. Covers:
-
-- Specification document structure and organization
-- Backtracking links to requirements
-- Implementation status tracking
-- Pre-implementation vs. post-implementation content
-- Linking specifications to source code and tests
-- Specification maintenance throughout project lifecycle
-
-### project-setup
+### setup
 
 Standards for setting up documentation in new CUI projects. Covers:
 
@@ -36,7 +27,9 @@ Standards for setting up documentation in new CUI projects. Covers:
 - Creating complete documentation foundation
 - Setting up traceability from project start
 
-### planning-documentation
+**When to use**: Starting a new project and establishing documentation structure
+
+### planning
 
 Standards for creating and maintaining project planning documents. Covers:
 
@@ -47,7 +40,9 @@ Standards for creating and maintaining project planning documents. Covers:
 - Managing implementation progress
 - Planning document maintenance
 
-### implementation-linkage
+**When to use**: Creating planning documents to track implementation tasks
+
+### traceability
 
 Standards for linking specifications to implementation code. Covers:
 
@@ -58,31 +53,42 @@ Standards for linking specifications to implementation code. Covers:
 - Managing documentation throughout implementation lifecycle
 - Maintaining holistic system view
 
+**When to use**: Linking specifications to implementation code and maintaining traceability
+
 ## Using These Skills
 
 These skills work together to provide comprehensive documentation guidance:
 
-1. **Starting a new project**: Use `project-setup` to establish documentation structure
-2. **Writing requirements**: Use `requirements-documentation` for SMART requirements
-3. **Creating specifications**: Use `specification-documentation` for detailed design
-4. **Planning implementation**: Use `planning-documentation` for task tracking
-5. **Connecting to code**: Use `implementation-linkage` for traceability
+1. **Starting a new project**: Use `setup` to establish documentation structure
+2. **Writing requirements and specifications**: Use `requirements-authoring` for creating and maintaining docs
+3. **Planning implementation**: Use `planning` for task tracking
+4. **Connecting to code**: Use `traceability` for linking specs to implementation
 
 ## Integration
 
 These skills integrate seamlessly with:
 
-- CUI documentation standards (AsciiDoc formatting, general documentation)
-- CUI Java standards (JavaDoc, code structure)
-- CUI testing standards (test documentation, verification)
+- **CUI Documentation Standards**: AsciiDoc formatting, general documentation
+- **CUI Java Standards**: JavaDoc, code structure
+- **CUI Testing Standards**: Test documentation, verification
+- **CUI Workflow Standards**: Git commits, PR workflows
 
 ## Documentation Lifecycle
 
 The skills support the complete documentation lifecycle:
 
-1. **Setup**: Establish structure with `project-setup`
-2. **Requirements**: Define needs with `requirements-documentation`
-3. **Specification**: Detail design with `specification-documentation`
-4. **Planning**: Track work with `planning-documentation`
-5. **Implementation**: Link code with `implementation-linkage`
-6. **Maintenance**: Keep current using all skills as needed
+1. **Setup**: Establish structure with `setup`
+2. **Authoring**: Create requirements and specifications with `requirements-authoring`
+3. **Planning**: Track work with `planning`
+4. **Implementation**: Link code with `traceability`
+5. **Maintenance**: Keep current using `requirements-authoring` and `traceability`
+
+## Architecture Benefits
+
+This refactored structure provides:
+
+- **No Duplication**: Each skill has distinct responsibility without overlapping content
+- **Clear Boundaries**: Easy to know which skill to use for each task
+- **Self-Contained**: Each skill provides complete guidance for its domain
+- **Easier Maintenance**: Changes are localized to appropriate skill
+- **Better Usability**: Four focused skills instead of seven overlapping ones

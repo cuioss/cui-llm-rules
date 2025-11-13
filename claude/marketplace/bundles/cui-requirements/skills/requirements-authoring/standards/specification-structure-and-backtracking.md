@@ -1,18 +1,8 @@
----
-name: cui-requirements:specification-documentation
-source_bundle: cui-requirements
-description: Standards for creating specification documents with proper structure, backtracking links, and traceability to requirements
-version: 1.0.0
-allowed-tools: []
----
+# Specification Structure and Backtracking Standards
 
-# Specification Documentation Standards
+Standards for creating specification documents with proper structure, backtracking links to requirements, and complete traceability.
 
-Standards for creating, structuring, and maintaining specification documents that provide detailed implementation guidance while maintaining complete traceability to requirements.
-
-## Core Principles
-
-### Specification Purpose
+## Specification Purpose
 
 Specification documents bridge the gap between requirements (what must be done) and implementation (how it's done). They provide:
 
@@ -21,7 +11,7 @@ Specification documents bridge the gap between requirements (what must be done) 
 - Standards and constraints for implementation
 - References to both requirements and implementation code
 
-### Key Differences from Requirements
+## Key Differences: Requirements vs. Specifications
 
 | Aspect | Requirements | Specifications |
 |--------|-------------|----------------|
@@ -30,13 +20,7 @@ Specification documents bridge the gap between requirements (what must be done) 
 | Level | High-level needs | Detailed technical design |
 | Changes | Infrequent, controlled | More frequent as design evolves |
 
-### Documentation Lifecycle
-
-1. **Pre-Implementation**: Specification contains detailed design, examples, and expected behavior
-2. **During Implementation**: Updated as design decisions are made
-3. **Post-Implementation**: Links to actual implementation, removes redundant details
-
-## Document Structure Standards
+## Document Structure
 
 ### Location and Naming
 
@@ -76,7 +60,6 @@ This specification is organized into the following documents:
 * link:specification/error-handling.adoc[Error Handling] - Error handling strategies
 * link:specification/testing.adoc[Testing] - Testing approach and standards
 * link:specification/security.adoc[Security] - Security considerations and implementation
-* link:specification/integration-patterns.adoc[Integration Patterns] - Integration examples
 ```
 
 ### Individual Specification Documents
@@ -216,46 +199,12 @@ For detailed behavior, refer to the implementation and associated JavaDoc.
 
 **DEPRECATED**: No longer applicable, replaced by different approach
 
-## Linking to Implementation
+## Example Specification Structure
 
-### Source Code Links
-
-**Java classes**:
-```asciidoc
-* link:../src/main/java/com/example/jwt/TokenValidator.java[TokenValidator]
-```
-
-**Test classes**:
-```asciidoc
-* link:../src/test/java/com/example/jwt/TokenValidatorTest.java[TokenValidatorTest]
-```
-
-**Multiple implementations**:
-```asciidoc
-The token validation functionality is implemented across:
-
-* link:../src/main/java/com/example/jwt/TokenValidator.java[TokenValidator] - Core validation logic
-* link:../src/main/java/com/example/jwt/SignatureValidator.java[SignatureValidator] - Signature verification
-* link:../src/main/java/com/example/jwt/ClaimValidator.java[ClaimValidator] - Claim validation
-```
-
-### Test References
-
-Always link to tests that verify the specification:
+### Pre-Implementation Specification
 
 ```asciidoc
-=== Verification
-
-The following test suites verify this specification:
-
-* link:../src/test/java/com/example/jwt/TokenValidatorTest.java[TokenValidatorTest] - Unit tests
-* link:../src/test/java/com/example/jwt/integration/TokenValidationIntegrationTest.java[TokenValidationIntegrationTest] - Integration tests
-```
-
-## Example Specification Document
-
-```asciidoc
-= JWT Token Processor - Token Validation Specification
+= JWT Token Processor - Token Validation
 :toc: left
 :toclevels: 3
 :toc-title: Table of Contents
@@ -267,133 +216,9 @@ link:../Specification.adoc[Back to Main Specification]
 == Token Validation Architecture
 _See Requirement link:../Requirements.adoc#JWT-1[JWT-1: Token Validation Framework]_
 
-=== Status: IMPLEMENTED
-
-The token validation architecture provides a comprehensive framework for validating JWT tokens according to RFC 7519.
-
-=== Implementation
-
-The following classes implement this specification:
-
-* link:../src/main/java/com/example/jwt/TokenValidator.java[TokenValidator] - Main validation orchestration
-* link:../src/main/java/com/example/jwt/TokenValidatorFactory.java[TokenValidatorFactory] - Validator creation
-
-For detailed implementation behavior, see the JavaDoc of these classes.
-
-=== Verification
-
-Test coverage is provided by:
-
-* link:../src/test/java/com/example/jwt/TokenValidatorTest.java[TokenValidatorTest]
-* link:../src/test/java/com/example/jwt/TokenValidatorFactoryTest.java[TokenValidatorFactoryTest]
-
-== Signature Validation
-_See Requirement link:../Requirements.adoc#JWT-1.1[JWT-1.1: Signature Validation]_
-
-=== Status: IMPLEMENTED
-
-Signature validation ensures token authenticity by verifying cryptographic signatures.
-
-=== Supported Algorithms
-
-The implementation supports the following signature algorithms:
-
-* RS256 (RSA with SHA-256)
-* RS384 (RSA with SHA-384)
-* RS512 (RSA with SHA-512)
-* HS256 (HMAC with SHA-256)
-* HS384 (HMAC with SHA-384)
-* HS512 (HMAC with SHA-512)
-
-=== Implementation
-
-Signature validation is implemented in:
-
-* link:../src/main/java/com/example/jwt/SignatureValidator.java[SignatureValidator]
-
-=== Verification
-
-Signature validation tests:
-
-* link:../src/test/java/com/example/jwt/SignatureValidatorTest.java[SignatureValidatorTest]
-
-== Claim Validation
-_See Requirement link:../Requirements.adoc#JWT-3[JWT-3: Claim Extraction]_
-
-=== Status: IMPLEMENTED
-
-The claim validation component extracts and validates JWT claims.
-
-=== Standard Claims
-
-The following standard JWT claims are supported:
-
-* `iss` (Issuer) - Token issuer identity
-* `sub` (Subject) - Token subject (user) identity
-* `aud` (Audience) - Token intended audience
-* `exp` (Expiration) - Token expiration timestamp
-* `iat` (Issued At) - Token issuance timestamp
-* `nbf` (Not Before) - Token validity start timestamp
-
-=== Custom Claims
-
-Custom claims can be accessed through the claim extraction API. Refer to the link:../src/main/java/com/example/jwt/ClaimExtractor.java[ClaimExtractor] JavaDoc for usage details.
-
-=== Implementation
-
-Claim handling is implemented in:
-
-* link:../src/main/java/com/example/jwt/ClaimValidator.java[ClaimValidator]
-* link:../src/main/java/com/example/jwt/ClaimExtractor.java[ClaimExtractor]
-
-=== Verification
-
-Claim validation tests:
-
-* link:../src/test/java/com/example/jwt/ClaimValidatorTest.java[ClaimValidatorTest]
-* link:../src/test/java/com/example/jwt/ClaimExtractorTest.java[ClaimExtractorTest]
-
-== Error Handling
-_See Requirement link:../Requirements.adoc#JWT-2[JWT-2: Token Parsing]_
-
-=== Status: IMPLEMENTED
-
-Validation errors are communicated through a structured exception hierarchy.
-
-=== Exception Types
-
-* `TokenValidationException` - Base exception for all validation failures
-* `SignatureValidationException` - Signature verification failures
-* `TokenExpiredException` - Expired token errors
-* `InvalidClaimException` - Claim validation failures
-* `MalformedTokenException` - Token parsing errors
-
-For detailed exception behavior, see link:../src/main/java/com/example/jwt/exceptions/package-info.java[exception package documentation].
-
-=== Implementation
-
-Exception classes are located in:
-
-* link:../src/main/java/com/example/jwt/exceptions/[exceptions package]
-
-=== Verification
-
-Error handling tests:
-
-* link:../src/test/java/com/example/jwt/exceptions/ExceptionTest.java[ExceptionTest]
-```
-
-## Pre-Implementation Specifications
-
-Before implementation, specifications should contain more detailed guidance:
-
-```asciidoc
-== Token Validation Architecture
-_See Requirement link:../Requirements.adoc#JWT-1[JWT-1: Token Validation Framework]_
-
 === Status: PLANNED
 
-The token validation architecture must provide a comprehensive framework for validating JWT tokens according to RFC 7519.
+The token validation architecture must provide comprehensive JWT validation according to RFC 7519.
 
 === Design Overview
 
@@ -410,15 +235,12 @@ The validation architecture consists of:
 ----
 public interface TokenValidator {
     ValidationResult validate(String token);
-
     ValidationResult validate(String token, ValidationOptions options);
 }
 
 public class ValidationResult {
     public boolean isValid();
-
     public Optional<TokenClaims> getClaims();
-
     public List<ValidationError> getErrors();
 }
 ----
@@ -430,25 +252,49 @@ public class ValidationResult {
 3. Validate standard claims (exp, nbf, iat)
 4. Extract and validate custom claims
 5. Return validation result with claims or errors
-
-=== Implementation Notes
-
-* Use constant-time comparison for signature validation
-* Cache public keys per issuer for performance
-* Log all validation failures for security audit
-* Support configurable clock skew tolerance
 ```
 
-## Post-Implementation Updates
+### Post-Implementation Specification
 
-After implementation, update specifications:
+```asciidoc
+= JWT Token Processor - Token Validation
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
 
-1. **Add status indicator**: Mark section as IMPLEMENTED
-2. **Add implementation links**: Link to actual classes
-3. **Add test links**: Link to test classes
-4. **Remove redundant details**: Keep only what adds value beyond JavaDoc
-5. **Remove code examples**: Replace with references to actual implementation
-6. **Keep architectural guidance**: Retain high-level design information
+link:../Specification.adoc[Back to Main Specification]
+
+== Token Validation Architecture
+_See Requirement link:../Requirements.adoc#JWT-1[JWT-1: Token Validation Framework]_
+
+=== Status: IMPLEMENTED
+
+The token validation architecture provides comprehensive JWT validation according to RFC 7519.
+
+=== Implementation
+
+The following classes implement this specification:
+
+* link:../src/main/java/com/example/jwt/TokenValidator.java[TokenValidator] - Main validation orchestration
+* link:../src/main/java/com/example/jwt/SignatureValidator.java[SignatureValidator] - Signature verification
+* link:../src/main/java/com/example/jwt/ClaimValidator.java[ClaimValidator] - Claim validation
+
+The implementation uses the jose4j library for cryptographic operations and provides a fluent API for configuration.
+
+For detailed behavior and API usage, refer to the JavaDoc of these classes.
+
+=== Verification
+
+Test coverage is provided by:
+
+* link:../src/test/java/com/example/jwt/TokenValidatorTest.java[TokenValidatorTest]
+* link:../src/test/java/com/example/jwt/SignatureValidatorTest.java[SignatureValidatorTest]
+* link:../src/test/java/com/example/jwt/ClaimValidatorTest.java[ClaimValidatorTest]
+
+Test coverage: 92% line coverage, 88% branch coverage.
+```
 
 ## Cross-Reference Standards
 
@@ -473,20 +319,12 @@ This specification is implemented in:
 * link:../src/main/java/com/example/Component.java[Component]
 ```
 
-### From Implementation to Specification
+### Back to Main Specification
 
-JavaDoc should reference specifications:
+All individual specification files must link back:
 
-```java
-/**
- * Implements token validation according to RFC 7519.
- * <p>
- * For architectural overview and requirements, see the
- * <a href="../../../../../../../doc/specification/token-validation.adoc">Token Validation Specification</a>.
- */
-public class TokenValidator {
-    // Implementation
-}
+```asciidoc
+link:../Specification.adoc[Back to Main Specification]
 ```
 
 ## Quality Standards
@@ -519,7 +357,7 @@ public class TokenValidator {
 - Tests are referenced for verification
 - Navigation between documents is seamless
 
-## Common Anti-Patterns to Avoid
+## Common Anti-Patterns
 
 ### Duplicating JavaDoc
 
@@ -544,17 +382,3 @@ public class TokenValidator {
 **Bad**: Specifying exact method names, parameters, and internal algorithms
 
 **Good**: Describing expected behavior, constraints, and integration points
-
-## Related Standards
-
-### Related Skills in Bundle
-
-- `cui-requirements:requirements-documentation` - Standards for creating requirements documents that specifications trace to
-- `cui-requirements:project-setup` - Standards for setting up specification documentation in new projects
-- `cui-requirements:planning-documentation` - Standards for creating planning documents linked to specifications
-- `cui-requirements:implementation-linkage` - Standards for linking specifications to implementation code
-
-### External Standards
-
-- AsciiDoc formatting standards (for document structure)
-- JavaDoc standards (for implementation documentation)

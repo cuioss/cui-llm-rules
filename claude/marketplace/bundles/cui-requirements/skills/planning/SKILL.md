@@ -1,5 +1,5 @@
 ---
-name: cui-requirements:planning-documentation
+name: cui-requirements:planning
 source_bundle: cui-requirements
 description: Standards for creating and maintaining project planning documentation with task tracking, status indicators, and traceability to requirements
 version: 1.0.0
@@ -605,11 +605,12 @@ _See Requirement JWT-5: Performance Requirements in link:Requirements.adoc[Requi
 
 ### Related Skills in Bundle
 
-- `cui-requirements:requirements-documentation` - Standards for requirements documentation that planning tasks trace to
-- `cui-requirements:specification-documentation` - Standards for specification documentation that provides detailed guidance
-- `cui-requirements:project-setup` - Standards for creating initial TODO structure during project setup
-- `cui-requirements:implementation-linkage` - Standards for linking planning tasks to implementation code
+- `cui-requirements:requirements-authoring` - Standards for requirements and specification documentation that planning tasks trace to
+- `cui-requirements:setup` - Standards for creating initial TODO structure during project setup
+- `cui-requirements:traceability` - Standards for linking planning tasks to implementation code
 
 ### External Standards
 
-- Git commit standards (for tracking task completion)
+- AsciiDoc formatting standards (for document structure and formatting)
+- Git commit standards (for tracking task completion in commits)
+- Project management best practices (for effective task organization and tracking)

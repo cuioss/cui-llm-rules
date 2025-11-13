@@ -1,5 +1,5 @@
 ---
-name: cui-requirements:project-setup
+name: cui-requirements:setup
 source_bundle: cui-requirements
 description: Standards for setting up requirements and specification documentation in new CUI projects with proper directory structure and initial documents
 version: 1.0.0
@@ -402,9 +402,9 @@ All log messages must follow the CUI logging standards:
 
 During initial project setup:
 
-1. Create documentation structure **before** significant implementation
+1. Create documentation structure **before** implementing core functional components (business logic, APIs, main features)
 2. Define requirements based on project goals
-3. Create high-level specifications
+3. Create specifications with architectural overview and design approach
 4. Use specifications to guide implementation planning
 
 ### During Implementation
@@ -487,7 +487,12 @@ After features are implemented:
 
 ### Minimal Setup (MVP)
 
-For rapid prototyping or small projects (projects with < 10 requirements, expected development time < 2 weeks, or proof-of-concept work):
+For rapid prototyping or small projects:
+
+**When to use minimal setup**:
+- Projects with < 10 requirements (limited scope doesn't justify separate specification documents)
+- Expected development time < 2 weeks (short timeline favors consolidated documentation)
+- Proof-of-concept work (exploratory projects where requirements may change significantly)
 
 ```
 doc/
@@ -495,11 +500,16 @@ doc/
 └── Specification.adoc (overview only)
 ```
 
-Expand as project grows.
+Expand to complete setup as project scope increases or transitions to production.
 
 ### Complete Setup (Recommended)
 
-For production projects (projects with 10+ requirements, multi-component architecture, or intended for production deployment):
+For production projects:
+
+**When to use complete setup**:
+- Projects with 10+ requirements (scope justifies organized separation of concerns)
+- Multi-component architecture (complexity requires detailed technical specifications)
+- Intended for production deployment (production systems require comprehensive documentation)
 
 ```
 doc/
@@ -519,10 +529,9 @@ doc/
 
 ### Related Skills in Bundle
 
-- `cui-requirements:requirements-documentation` - Detailed requirements documentation standards for Requirements.adoc content
-- `cui-requirements:specification-documentation` - Detailed specification documentation standards for Specification.adoc content
-- `cui-requirements:planning-documentation` - Standards for creating planning documents after setup
-- `cui-requirements:implementation-linkage` - Standards for linking documentation to implementation code
+- `cui-requirements:requirements-authoring` - Comprehensive standards for creating and maintaining requirements and specifications
+- `cui-requirements:planning` - Standards for creating planning documents after setup
+- `cui-requirements:traceability` - Standards for linking documentation to implementation code
 
 ### External Standards
 
