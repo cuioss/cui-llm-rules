@@ -205,6 +205,8 @@ Task:
 - Display report only (as shown above)
 - Do NOT create any files
 
+**IMPORTANT: Analysis report complete. Now proceed to fix workflow (Steps 7-11) if issues were found.**
+
 ### Step 7: Handle Reference Issues
 
 **When to execute:** If reference issues found (incorrect or ambiguous references > 0)
@@ -225,9 +227,22 @@ Task:
 
 ### Step 8: Categorize Issues for Fixing
 
-**Categorize all issues into Safe vs Risky:**
+**ALWAYS execute this step if any issues were found (warnings or suggestions).**
 
-**Safe fixes** (auto-apply when auto-fix=true):
+**Load fix workflow skill:**
+
+```
+Skill: cui-plugin-development-tools:cui-fix-workflow
+```
+
+**Categorize all issues into Safe vs Risky using patterns from cui-fix-workflow skill.**
+
+Read categorization patterns:
+```
+Read: standards/categorization-patterns.md (from cui-fix-workflow)
+```
+
+**Command-specific safe fix types:**
 - YAML frontmatter syntax errors
 - Missing YAML fields (add defaults: `name`, `description`)
 - Obsolete content removal (deprecated sections, outdated comments)
@@ -235,18 +250,18 @@ Task:
 - Formatting/whitespace normalization
 - Broken cross-references (remove or fix)
 
-**Risky fixes** (always prompt user):
-- Bloat resolution (>500 lines - requires extraction to skills)
-- Over-specification reduction (requires judgment on what's essential)
-- Duplication consolidation (requires understanding context)
-- Parameter validation additions (requires understanding parameters)
-- Structural reorganization (requires understanding workflow)
+**Command-specific risky fix categories:**
+1. **Bloat Issues** - Commands >500 lines requiring extraction to skills
+2. **Clarity Issues** - Over-specification, ambiguous instructions, duplication
+3. **Structural Issues** - Parameter validation gaps, workflow reorganization needs
 
 ### Step 9: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
 
-**For each safe fix:**
+**Follow safe fix patterns from cui-fix-workflow skill.**
+
+**Apply command-specific safe fixes using Edit tool:**
 
 **YAML syntax errors:**
 ```
@@ -280,7 +295,7 @@ Edit: {command-file}
 - Fix broken cross-references
 ```
 
-**Track fixes applied:**
+**Track fixes applied using tracking patterns from cui-fix-workflow:**
 ```json
 {
   "safe_fixes_applied": {count},
@@ -297,29 +312,49 @@ Edit: {command-file}
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**Group risky fixes by category:**
+**Follow prompting patterns from cui-fix-workflow skill.**
+
+Read prompting patterns:
+```
+Read: standards/prompting-patterns.md (from cui-fix-workflow)
+```
+
+**Group risky fixes by command-specific categories:**
 
 1. **Bloat Issues** (>500 lines, extraction needed)
 2. **Clarity Issues** (over-specification, unclear purpose)
 3. **Structural Issues** (reorganization, consolidation)
 
-**For each category with issues, use AskUserQuestion:**
+**Use AskUserQuestion with standard structure from prompting patterns:**
 
-Use the AskUserQuestion tool with this structure:
-- questions: Array with one question per category
-- question: "Apply fixes for {category} issues?"
-- header: "{Category}"
-- multiSelect: true
-- options: Array containing:
-  - For each specific issue: label="Fix: {specific-issue}", description="Impact: {what-changes}. Location: {file}:{line}. Size: {metric}"
-  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
+```
+AskUserQuestion:
+  questions: [
+    {
+      question: "Apply fixes for {Category} issues?",
+      header: "{Category}",
+      multiSelect: true,
+      options: [
+        {
+          label: "Fix: {specific-issue}",
+          description: "Impact: {what-changes}. Location: {file}:{line}. Size: {metric}"
+        },
+        ...
+        {
+          label: "Skip all {category} fixes",
+          description: "Continue without fixing this category"
+        }
+      ]
+    }
+  ]
+```
 
-**Process user selections:**
+**Process user selections following prompting patterns:**
 - For each selected fix: Apply using Edit tool, increment `risky_fixes_applied`
 - For unselected fixes: Skip, increment `risky_fixes_skipped`
 - If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
 
-**Track risky fixes:**
+**Track risky fixes using tracking patterns from cui-fix-workflow:**
 ```json
 {
   "risky_fixes_prompted": {count},
@@ -337,13 +372,53 @@ Use the AskUserQuestion tool with this structure:
 
 **When to execute**: After any fixes applied (Step 9 or Step 10)
 
-**Re-run analysis** on modified commands using diagnose-command agent.
+**Follow verification patterns from cui-fix-workflow skill.**
 
-**Compare before/after** and generate verification summary using same format as Step 6:
-- Issues resolved count
-- Issues remaining (if any)
-- New issues introduced (should be 0)
-- Bloated commands still requiring extraction (if any)
+Read verification patterns:
+```
+Read: standards/verification-patterns.md (from cui-fix-workflow)
+```
+
+**Re-run analysis on modified commands:**
+```
+Task:
+  subagent_type: diagnose-command
+  description: Verify fixes for {command-name}
+  prompt: |
+    Re-analyze this command after fixes applied.
+
+    Parameters:
+    - command_path: {absolute_path_to_command}
+
+    Return complete JSON report.
+```
+
+**Compare before/after using verification patterns:**
+```json
+{
+  "verification": {
+    "commands_fixed": {count},
+    "issues_resolved": {count},
+    "issues_remaining": {count},
+    "new_issues": {count}  // Should be 0!
+  }
+}
+```
+
+**Report verification results following verification patterns:**
+```
+==================================================
+Verification Complete
+==================================================
+
+✅ {issues_resolved} issues resolved
+{if issues_remaining > 0}
+⚠️ {issues_remaining} issues remain (require manual intervention or /plugin-update-command)
+{endif}
+{if new_issues > 0}
+❌ {new_issues} NEW issues introduced (fixes need review!)
+{endif}
+```
 
 ## ARCHITECTURE
 

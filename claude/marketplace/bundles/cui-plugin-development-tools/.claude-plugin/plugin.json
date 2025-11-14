@@ -25,6 +25,7 @@
     "./commands/plugin-update-command.md"
   ],
   "skills": [
+    "./skills/cui-fix-workflow",
     "./skills/cui-marketplace-architecture"
   ],
   "agents": [

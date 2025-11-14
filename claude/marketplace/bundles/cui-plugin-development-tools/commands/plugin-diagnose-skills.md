@@ -246,27 +246,43 @@ Consolidation Opportunities:
 - Display report only (as shown above)
 - Do NOT create any files
 
+**IMPORTANT: Analysis report complete. Now proceed to fix workflow (Steps 7-10) if issues were found.**
+
 ### Step 7: Categorize Issues for Fixing
 
-**Categorize all issues into Safe vs Risky:**
+**ALWAYS execute this step if any issues were found (warnings or suggestions).**
 
-**Safe fixes** (auto-apply when auto-fix=true):
+**Load fix workflow skill:**
+
+```
+Skill: cui-plugin-development-tools:cui-fix-workflow
+```
+
+**Categorize all issues into Safe vs Risky using patterns from cui-fix-workflow skill.**
+
+Read categorization patterns:
+```
+Read: standards/categorization-patterns.md (from cui-fix-workflow)
+```
+
+**Skill-specific safe fix types:**
 - YAML frontmatter syntax errors
 - Formatting/whitespace normalization
-- Missing YAML fields (add defaults: `description`, `audience`, `prerequisites`)
+- Missing YAML fields (add defaults: `description`, `allowed-tools`)
 - Broken file references (remove or comment out)
 
-**Risky fixes** (always prompt user):
-- Duplication consolidation (requires judgment on what to keep)
-- Missing standards files (create stub vs remove reference - user decides)
-- Zero-information content removal (may have context we don't understand)
-- Conflicting guidance resolution (requires domain expertise)
+**Skill-specific risky fix categories:**
+1. **Duplication Issues** - Content found in multiple places, consolidation needed
+2. **Integration Issues** - Orphaned files, workflow disconnection
+3. **Reference Problems** - Broken example references, unclear cross-references
 
 ### Step 8: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
 
-**For each safe fix:**
+**Follow safe fix patterns from cui-fix-workflow skill.**
+
+**Apply skill-specific safe fixes using Edit tool:**
 
 **YAML syntax errors:**
 ```
@@ -291,7 +307,7 @@ Edit: {skill-file}
 - Add comment: "<!-- Reference removed: file not found -->"
 ```
 
-**Track fixes applied:**
+**Track fixes applied using tracking patterns from cui-fix-workflow:**
 ```json
 {
   "safe_fixes_applied": {count},
@@ -307,29 +323,49 @@ Edit: {skill-file}
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**Group risky fixes by category:**
+**Follow prompting patterns from cui-fix-workflow skill.**
 
-1. **Duplication Issues** (content found in multiple places, consolidation needed)
-2. **Integration Issues** (orphaned files, workflow disconnection)
-3. **Reference Problems** (broken example references, unclear cross-references)
+Read prompting patterns:
+```
+Read: standards/prompting-patterns.md (from cui-fix-workflow)
+```
 
-**For each category with issues, use AskUserQuestion:**
+**Group risky fixes by skill-specific categories:**
 
-Use the AskUserQuestion tool with this structure:
-- questions: Array with one question per category
-- question: "Apply fixes for {category} issues?"
-- header: "{Category}"
-- multiSelect: true
-- options: Array containing:
-  - For each specific issue: label="Fix: {specific-issue}", description="Skill: {skill-name}. Impact: {what-changes}. Location: {file}:{line}"
-  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
+1. **Duplication Issues** - Content found in multiple places, consolidation needed
+2. **Integration Issues** - Orphaned files, workflow disconnection
+3. **Reference Problems** - Broken example references, unclear cross-references
 
-**Process user selections:**
+**Use AskUserQuestion with standard structure from prompting patterns:**
+
+```
+AskUserQuestion:
+  questions: [
+    {
+      question: "Apply fixes for {Category} issues?",
+      header: "{Category}",
+      multiSelect: true,
+      options: [
+        {
+          label: "Fix: {specific-issue}",
+          description: "Skill: {skill-name}. Impact: {what-changes}. Location: {file}:{line}"
+        },
+        ...
+        {
+          label: "Skip all {category} fixes",
+          description: "Continue without fixing this category"
+        }
+      ]
+    }
+  ]
+```
+
+**Process user selections following prompting patterns:**
 - For each selected fix: Apply using Edit tool, increment `risky_fixes_applied`
 - For unselected fixes: Skip, increment `risky_fixes_skipped`
 - If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
 
-**Track risky fixes:**
+**Track risky fixes using tracking patterns from cui-fix-workflow:**
 ```json
 {
   "risky_fixes_prompted": {count},
@@ -347,7 +383,14 @@ Use the AskUserQuestion tool with this structure:
 
 **When to execute**: After any fixes applied (Step 8 or Step 9)
 
-**Re-run analysis** on modified skills:
+**Follow verification patterns from cui-fix-workflow skill.**
+
+Read verification patterns:
+```
+Read: standards/verification-patterns.md (from cui-fix-workflow)
+```
+
+**Re-run analysis on modified skills:**
 ```
 Task:
   subagent_type: diagnose-skill
@@ -361,7 +404,7 @@ Task:
     Return complete JSON report.
 ```
 
-**Compare before/after:**
+**Compare before/after using verification patterns:**
 ```json
 {
   "verification": {
@@ -373,9 +416,12 @@ Task:
 }
 ```
 
-**Report verification results:**
+**Report verification results following verification patterns:**
 ```
-Verification Complete:
+==================================================
+Verification Complete
+==================================================
+
 ✅ {issues_resolved} issues resolved
 {if issues_remaining > 0}
 ⚠️ {issues_remaining} issues remain (require manual intervention)

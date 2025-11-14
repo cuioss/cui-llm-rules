@@ -248,11 +248,26 @@ Reference: agent-analysis-patterns.md Pattern 22
 - If file write fails: Display error with message and possible causes, note report was displayed, continue
 - If path doesn't exist: Display error with current directory, note report was displayed, continue
 
+**IMPORTANT: Analysis report complete. Now proceed to fix workflow (Steps 7-10) if issues were found.**
+
 ### Step 7: Categorize Issues for Fixing
 
-**Categorize all issues into Safe vs Risky:**
+**ALWAYS execute this step if any issues were found (warnings or suggestions).**
 
-**Safe fixes** (auto-apply when auto-fix=true):
+**Load fix workflow skill:**
+
+```
+Skill: cui-plugin-development-tools:cui-fix-workflow
+```
+
+**Categorize all issues into Safe vs Risky using patterns from cui-fix-workflow skill.**
+
+Read categorization patterns:
+```
+Read: standards/categorization-patterns.md (from cui-fix-workflow)
+```
+
+**Agent-specific safe fix types:**
 - YAML frontmatter syntax errors
 - Missing YAML fields (add defaults: `description`)
 - Remove unused tools from `allowed-tools` frontmatter
@@ -260,18 +275,18 @@ Reference: agent-analysis-patterns.md Pattern 22
 - Add missing CONTINUOUS IMPROVEMENT RULE template
 - Formatting/whitespace normalization
 
-**Risky fixes** (always prompt user):
-- Task tool misuse resolution (requires architectural redesign)
-- Maven anti-pattern fixes (requires workflow restructuring)
-- Ambiguous instruction clarification (judgment call on intent)
-- Tool coverage gaps requiring workflow changes
-- Precision issues requiring scope reduction
+**Agent-specific risky fix categories:**
+1. **Tool Violations** - Task tool misuse, missing tool declarations
+2. **Architectural Issues** - Pattern 22 violations, self-invocation instructions
+3. **Best Practice Violations** - Maven anti-patterns, ambiguous instructions, precision issues
 
 ### Step 8: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
 
-**For each safe fix:**
+**Follow safe fix patterns from cui-fix-workflow skill.**
+
+**Apply agent-specific safe fixes using Edit tool:**
 
 **YAML syntax errors:**
 ```
@@ -304,7 +319,7 @@ Edit: {agent-file}
 - Ensure proper markdown structure
 ```
 
-**Track fixes applied:**
+**Track fixes applied using tracking patterns from cui-fix-workflow:**
 ```json
 {
   "safe_fixes_applied": {count},
@@ -321,24 +336,44 @@ Edit: {agent-file}
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**Group risky fixes by category:**
+**Follow prompting patterns from cui-fix-workflow skill.**
 
-1. **Tool Violations** (Task tool misuse, missing critical tools)
-2. **Architectural Issues** (Maven anti-patterns, structural problems)
-3. **Best Practice Violations** (ambiguous instructions, precision issues)
+Read prompting patterns:
+```
+Read: standards/prompting-patterns.md (from cui-fix-workflow)
+```
 
-**For each category with issues, use AskUserQuestion:**
+**Group risky fixes by agent-specific categories:**
 
-Use the AskUserQuestion tool with this structure:
-- questions: Array with one question per category
-- question: "Apply fixes for {category} issues?"
-- header: "{Category}"
-- multiSelect: true
-- options: Array containing:
-  - For each specific issue: label="Fix: {specific-issue}", description="Agent: {agent-name}. Impact: {what-changes}. Location: {file}:{line}"
-  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
+1. **Tool Violations** - Task tool misuse, missing critical tools
+2. **Architectural Issues** - Pattern 22 violations, self-invocation instructions
+3. **Best Practice Violations** - Maven anti-patterns, ambiguous instructions, precision issues
 
-**Process user selections:**
+**Use AskUserQuestion with standard structure from prompting patterns:**
+
+```
+AskUserQuestion:
+  questions: [
+    {
+      question: "Apply fixes for {Category} issues?",
+      header: "{Category}",
+      multiSelect: true,
+      options: [
+        {
+          label: "Fix: {specific-issue}",
+          description: "Agent: {agent-name}. Impact: {what-changes}. Location: {file}:{line}"
+        },
+        ...
+        {
+          label: "Skip all {category} fixes",
+          description: "Continue without fixing this category"
+        }
+      ]
+    }
+  ]
+```
+
+**Process user selections following prompting patterns:**
 - For each selected fix: Apply using Edit tool (may require workflow changes), increment `risky_fixes_applied`
 - For unselected fixes: Skip, increment `risky_fixes_skipped`
 - If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
@@ -348,7 +383,7 @@ Use the AskUserQuestion tool with this structure:
 - Consider deferring to `/plugin-update-agent` for complex refactoring
 - Track deferred fixes separately
 
-**Track risky fixes:**
+**Track risky fixes using tracking patterns from cui-fix-workflow:**
 ```json
 {
   "risky_fixes_prompted": {count},
@@ -367,7 +402,14 @@ Use the AskUserQuestion tool with this structure:
 
 **When to execute**: After any fixes applied (Step 8 or Step 9)
 
-**Re-run analysis** on modified agents:
+**Follow verification patterns from cui-fix-workflow skill.**
+
+Read verification patterns:
+```
+Read: standards/verification-patterns.md (from cui-fix-workflow)
+```
+
+**Re-run analysis on modified agents:**
 ```
 Task:
   subagent_type: diagnose-agent
@@ -381,7 +423,7 @@ Task:
     Return complete JSON report.
 ```
 
-**Compare before/after:**
+**Compare before/after using verification patterns:**
 ```json
 {
   "verification": {
@@ -393,9 +435,12 @@ Task:
 }
 ```
 
-**Report verification results:**
+**Report verification results following verification patterns:**
 ```
-Verification Complete:
+==================================================
+Verification Complete
+==================================================
+
 ✅ {issues_resolved} issues resolved
 {if issues_remaining > 0}
 ⚠️ {issues_remaining} issues remain (require manual intervention or /plugin-update-agent)
