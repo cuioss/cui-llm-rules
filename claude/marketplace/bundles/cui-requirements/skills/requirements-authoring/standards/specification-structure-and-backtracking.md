@@ -189,6 +189,7 @@ The following classes implement this specification:
 For detailed behavior, refer to the implementation and associated JavaDoc.
 ```
 
+[#status-values]
 ### Status Values
 
 **PLANNED**: Specification written, implementation not started

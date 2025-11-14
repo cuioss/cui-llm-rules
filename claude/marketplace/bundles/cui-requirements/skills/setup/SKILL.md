@@ -142,6 +142,17 @@ For projects not covered by standard prefixes:
 - Analytics platform: `ANLYT-`
 - Notification service: `NOTIF-`
 
+**Cross-Domain Projects**:
+
+When a project spans multiple domains (e.g., "Security API" or "NiFi Integration"):
+- **Primary domain approach**: Choose the domain that best represents the project's core purpose
+  - Example: Security-focused API → Use `SEC-` with hierarchical structure: `SEC-API-1`
+  - Example: NiFi processor development → Use `NIFI-` with context: `NIFI-PROC-1`
+- **Composite approach**: For truly balanced multi-domain projects, create a composite prefix
+  - Example: Security + API project → `SECAPI-` or `SEC-API-`
+  - Example: Workflow + Integration → `WFINT-` or `WF-INT-`
+- **Document the choice**: Always explain the prefix rationale in Requirements.adoc to avoid confusion
+
 ### Hierarchical Prefixes
 
 For complex multi-component projects:

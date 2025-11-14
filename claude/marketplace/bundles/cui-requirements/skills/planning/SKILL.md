@@ -298,21 +298,19 @@ _See link:specification/testing.adoc#_integration_testing[Integration Testing Sp
 
 ## Example Planning Document
 
+This condensed example demonstrates all key patterns. Real planning documents typically expand on these patterns with project-specific tasks.
+
 ```asciidoc
 = JWT Token Processor TODO List
 :toc: left
 :toclevels: 3
-:toc-title: Table of Contents
 :sectnums:
-:source-highlighter: highlight.js
 
 == Overview
 
-This document lists the actionable tasks to fully implement the JWT Token Processor according to the specifications.
+This document lists actionable tasks to implement the JWT Token Processor per specifications.
 
-Project prefix: `JWT-`
-
-Status: In active development
+Project prefix: `JWT-` | Status: In active development
 
 == Implementation Tasks
 
@@ -320,8 +318,7 @@ Status: In active development
 
 ==== Token Validator
 _See Requirement JWT-1: Token Validation Framework in link:Requirements.adoc[Requirements]_
-
-_See link:specification/token-validation.adoc[Token Validation Specification] for implementation details_
+_See link:specification/token-validation.adoc[Token Validation Specification]_
 
 * [x] Implement TokenValidator interface
 * [x] Add signature validation support
@@ -332,12 +329,8 @@ _See link:specification/token-validation.adoc[Token Validation Specification] fo
 ==== Signature Validator
 _See Requirement JWT-1.1: Signature Validation in link:Requirements.adoc[Requirements]_
 
-* [x] Implement RS256 algorithm support
-* [x] Implement RS384 algorithm support
-* [x] Implement RS512 algorithm support
-* [ ] Implement HS256 algorithm support
-* [ ] Implement HS384 algorithm support
-* [ ] Implement HS512 algorithm support
+* [x] Implement RS256/RS384/RS512 algorithm support
+* [ ] Implement HS256/HS384/HS512 algorithm support
 * [ ] Add constant-time comparison
 * _Important: Constant-time comparison is critical for security_
 
@@ -354,36 +347,20 @@ _See Requirement JWT-3: Claim Extraction in link:Requirements.adoc[Requirements]
 ==== Configuration Properties
 _See Requirement JWT-7: Configuration Management in link:Requirements.adoc[Requirements]_
 
-_See link:specification/configuration.adoc[Configuration Specification] for implementation details_
-
 * [ ] Define configuration property structure
-* [ ] Add issuer configuration
-* [ ] Add algorithm configuration
-* [ ] Add clock skew tolerance configuration
+* [ ] Add issuer/algorithm/clock skew configuration
 * [ ] Add key provider configuration
-
-==== Configuration Validation
-* [ ] Validate required properties on startup
-* [ ] Provide clear error messages for invalid configuration
 * [ ] Support configuration profiles (dev, test, prod)
 
 === Error Handling
 
 ==== Exception Hierarchy
-_See Requirement JWT-2: Token Parsing in link:Requirements.adoc[Requirements]_
-
-_See link:specification/error-handling.adoc[Error Handling Specification] for implementation details_
+_See link:specification/error-handling.adoc[Error Handling Specification]_
 
 * [x] Create TokenValidationException base class
-* [x] Create SignatureValidationException
-* [x] Create TokenExpiredException
-* [ ] Create InvalidClaimException
-* [ ] Create MalformedTokenException
+* [x] Create SignatureValidationException and TokenExpiredException
+* [ ] Create InvalidClaimException and MalformedTokenException
 * [ ] Add structured error details to exceptions
-
-==== Error Logging
-* [ ] Log all validation failures
-* [ ] Include security context in error logs
 * [ ] Ensure sensitive data is not logged
 * _Important: Must follow CUI logging standards_
 
@@ -392,20 +369,15 @@ _See link:specification/error-handling.adoc[Error Handling Specification] for im
 ==== Security Hardening
 _See Requirement JWT-6: Security Requirements in link:Requirements.adoc[Requirements]_
 
-_See link:specification/security.adoc[Security Specification] for implementation details_
-
 * [x] Implement constant-time signature comparison
 * [ ] Add input validation for all external inputs
 * [ ] Implement rate limiting for validation requests
-* [ ] Add audit logging for security events
 * [~] Protect against timing attacks (signature done, need claim validation)
-* _Note: Rate limiting needs to be coordinated with API gateway configuration_
+* _Note: Rate limiting needs coordination with API gateway configuration_
 
 ==== Key Management
-* [ ] Implement public key provider interface
-* [ ] Add key caching with configurable TTL
-* [ ] Support key rotation
-* [ ] Add key revocation checking
+* [ ] Implement public key provider interface with caching
+* [ ] Support key rotation and revocation checking
 * [!] Integrate with HSM (blocked - waiting for HSM procurement)
 
 == Testing
@@ -413,43 +385,18 @@ _See link:specification/security.adoc[Security Specification] for implementation
 === Unit Testing
 _See link:specification/testing.adoc#_unit_testing[Unit Testing Specification]_
 
-==== Core Components
-* [x] Unit tests for TokenValidator
-* [x] Unit tests for SignatureValidator (RS algorithms)
+* [x] Unit tests for TokenValidator and SignatureValidator (RS algorithms)
 * [ ] Unit tests for SignatureValidator (HS algorithms)
-* [x] Unit tests for ClaimExtractor
-* [ ] Unit tests for configuration validation
-
-==== Edge Cases
-* [x] Test expired tokens
-* [x] Test malformed tokens
-* [x] Test invalid signatures
-* [ ] Test missing required claims
-* [ ] Test invalid claim types
-* [ ] Test clock skew scenarios
-
-==== Error Handling
+* [x] Test expired/malformed tokens and invalid signatures
+* [ ] Test missing claims, invalid claim types, and clock skew scenarios
 * [x] Test all exception types
-* [ ] Test error message clarity
 * [ ] Test error logging (without sensitive data)
 
 === Integration Testing
-_See link:specification/testing.adoc#_integration_testing[Integration Testing Specification]_
 
-==== End-to-End Flows
 * [ ] Test complete token validation flow
-* [ ] Test error handling across components
-* [ ] Test configuration loading and validation
-
-==== Performance Testing
 * [ ] Test validation performance (target: 95% under 50ms)
-* [ ] Test concurrent validation load
-* [ ] Test memory usage under load
-
-==== Security Testing
-* [ ] Verify constant-time operations
-* [ ] Test timing attack resistance
-* [ ] Verify no sensitive data in logs
+* [ ] Verify constant-time operations and timing attack resistance
 * [ ] Test rate limiting behavior
 
 === Test Coverage
@@ -459,46 +406,26 @@ _See link:specification/testing.adoc#_integration_testing[Integration Testing Sp
 
 == Documentation
 
-=== Code Documentation
-* [ ] Complete JavaDoc for all public APIs
-* [ ] Add code examples to JavaDoc
-* [ ] Document security considerations
-* [ ] Document configuration options
-
-=== User Documentation
-* [ ] Create user guide
-* [ ] Add configuration examples
-* [ ] Document common use cases
-* [ ] Add troubleshooting guide
-
-=== Specification Updates
+* [ ] Complete JavaDoc for all public APIs with code examples
+* [ ] Document security considerations and configuration options
+* [ ] Create user guide with configuration examples and troubleshooting
 * [x] Update specifications with implementation links
 * [ ] Mark implemented sections with status
-* [ ] Add test verification references
-* [ ] Remove redundant pre-implementation examples
 
 == Performance Optimization
 
-=== Validation Performance
 _See Requirement JWT-5: Performance Requirements in link:Requirements.adoc[Requirements]_
 
-* [ ] Profile validation performance
-* [ ] Optimize hot paths
+* [ ] Profile validation performance and optimize hot paths
 * [ ] Add caching for validated tokens
 * [ ] Benchmark against target (50ms for 95%)
 * _Decision needed: Redis vs Hazelcast for caching_
-
-=== Memory Optimization
-* [ ] Profile memory usage
-* [ ] Optimize object allocation
-* [ ] Implement object pooling if beneficial
 
 == Future Enhancements
 
 * [ ] Support additional signature algorithms (ES256, PS256)
 * [ ] Add JWE (encrypted token) support
 * [ ] Implement token refresh functionality
-* [ ] Add GraphQL integration
 ```
 
 ## Maintenance Standards
