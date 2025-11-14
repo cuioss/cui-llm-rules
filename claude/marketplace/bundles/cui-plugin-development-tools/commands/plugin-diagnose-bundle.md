@@ -33,6 +33,25 @@ This provides architecture rules and validation patterns for marketplace compone
 
 ## WORKFLOW INSTRUCTIONS
 
+## WORKFLOW OVERVIEW
+
+**This command has TWO phases - you MUST complete both:**
+
+**PHASE 1: Analysis (Steps 0-1)**
+- Validate parameters
+- Component inventory check
+- Delegate to component diagnose commands
+- Integration validation
+- Generate report
+
+**PHASE 2: Fix Workflow (Steps 2-5)**
+- Categorize bundle-level issues (safe vs risky)
+- Apply safe fixes automatically
+- Prompt user for risky fixes
+- Verify all fixes worked
+
+**CRITICAL: Do not stop after analysis. Continue to fix workflow.**
+
 ### Step 0: Parameter Validation
 
 **Validate bundle-name parameter:**
@@ -248,7 +267,7 @@ Cross-component checks:
 - If any integration check fails: Continue analysis but mark as "Integration Issues" in final report
 - If plugin.json missing or malformed: Mark as CRITICAL and abort bundle analysis
 
-### Step 2: Categorize Bundle-Level Issues for Fixing
+### Step 2: Categorize Bundle-Level Issues for Fixing ⚠️ PHASE 2 STARTS HERE
 
 **After component analysis and integration validation, categorize bundle-level issues:**
 
@@ -267,6 +286,8 @@ Cross-component checks:
 ### Step 3: Apply Bundle-Level Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**CRITICAL: If you reached the final report, you MUST execute this step if safe fixes exist. This is not optional.**
 
 **For each safe fix:**
 
@@ -468,6 +489,29 @@ Recommendations:
 **Default behavior (no flag):**
 - Display report only (as shown above)
 - Do NOT create any files
+
+==================================================
+⚠️ CRITICAL: ANALYSIS PHASE COMPLETE
+==================================================
+
+You have completed PHASE 1 (Analysis).
+
+**YOU MUST NOW PROCEED TO PHASE 2 (Fix Workflow)**
+
+DO NOT STOP HERE. The analysis is useless without fixes.
+
+If any bundle-level issues were found (warnings or suggestions):
+→ Continue to Step 2: Categorize Bundle-Level Issues
+→ Continue to Step 3: Apply Bundle-Level Safe Fixes
+→ Continue to Step 4: Prompt for Bundle-Level Risky Fixes
+→ Continue to Step 5: Verify Bundle-Level Fixes
+
+If zero bundle-level issues found:
+→ Skip to completion message
+
+Note: Component-level fixes are handled by delegated commands.
+
+==================================================
 
 ## CRITICAL RULES
 

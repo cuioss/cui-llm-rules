@@ -31,6 +31,23 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ## WORKFLOW
 
+## WORKFLOW OVERVIEW
+
+**This command has TWO phases - you MUST complete both:**
+
+**PHASE 1: Analysis (Steps 1-6)**
+- Discover components
+- Analyze each component
+- Generate report
+
+**PHASE 2: Fix Workflow (Steps 7-10)**
+- Categorize issues (safe vs risky)
+- Apply safe fixes automatically
+- Prompt user for risky fixes
+- Verify all fixes worked
+
+**CRITICAL: Do not stop after Step 6. Continue to Step 7.**
+
 ### Step 1: Activate Diagnostic Patterns
 
 **CRITICAL**: Load non-prompting tool patterns:
@@ -246,9 +263,28 @@ Consolidation Opportunities:
 - Display report only (as shown above)
 - Do NOT create any files
 
-**IMPORTANT: Analysis report complete. Now proceed to fix workflow (Steps 7-10) if issues were found.**
+==================================================
+⚠️ CRITICAL: ANALYSIS PHASE COMPLETE
+==================================================
 
-### Step 7: Categorize Issues for Fixing
+You have completed PHASE 1 (Analysis).
+
+**YOU MUST NOW PROCEED TO PHASE 2 (Fix Workflow)**
+
+DO NOT STOP HERE. The analysis is useless without fixes.
+
+If any issues were found (warnings or suggestions):
+→ Continue to Step 7: Categorize Issues
+→ Continue to Step 8: Apply Safe Fixes
+→ Continue to Step 9: Prompt for Risky Fixes
+→ Continue to Step 10: Verify Fixes
+
+If zero issues found:
+→ Skip to completion message
+
+==================================================
+
+### Step 7: Categorize Issues for Fixing ⚠️ PHASE 2 STARTS HERE
 
 **ALWAYS execute this step if any issues were found (warnings or suggestions).**
 
@@ -279,6 +315,8 @@ Read: standards/categorization-patterns.md (from cui-fix-workflow)
 ### Step 8: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**CRITICAL: If you reached Step 6, you MUST execute this step if safe fixes exist. This is not optional.**
 
 **Follow safe fix patterns from cui-fix-workflow skill.**
 

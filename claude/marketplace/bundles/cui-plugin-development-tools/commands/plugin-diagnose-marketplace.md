@@ -61,6 +61,27 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ## WORKFLOW
 
+## WORKFLOW OVERVIEW
+
+**This command has TWO phases - you MUST complete both:**
+
+**PHASE 1: Analysis (Steps 1-6)**
+- Load diagnostic standards
+- Initialize diagnostics
+- Validate marketplace.json
+- Check installed plugins registry
+- Check settings.json configuration
+- Validate bundle manifests
+- Report summary
+
+**PHASE 2: Fix Workflow (Steps 7-10)**
+- Categorize issues (safe vs risky)
+- Apply safe fixes automatically
+- Prompt user for risky fixes
+- Verify all fixes worked
+
+**CRITICAL: Do not stop after Step 6. Continue to Step 7.**
+
 ### Step 1: Load Diagnostic Standards
 
 **CRITICAL**: Load non-prompting tool patterns:
@@ -250,7 +271,28 @@ Issues by Category:
 {issues_list}
 ```
 
-### Step 7: Categorize Issues for Fixing
+==================================================
+⚠️ CRITICAL: ANALYSIS PHASE COMPLETE
+==================================================
+
+You have completed PHASE 1 (Analysis).
+
+**YOU MUST NOW PROCEED TO PHASE 2 (Fix Workflow)**
+
+DO NOT STOP HERE. The analysis is useless without fixes.
+
+If any issues were found (warnings or suggestions):
+→ Continue to Step 7: Categorize Issues
+→ Continue to Step 8: Apply Safe Fixes
+→ Continue to Step 9: Prompt for Risky Fixes
+→ Continue to Step 10: Verification
+
+If zero issues found:
+→ Skip to completion message
+
+==================================================
+
+### Step 7: Categorize Issues for Fixing ⚠️ PHASE 2 STARTS HERE
 
 **Categorize all issues into Safe vs Risky:**
 
@@ -272,6 +314,8 @@ Issues by Category:
 ### Step 8: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
+
+**CRITICAL: If you reached Step 6, you MUST execute this step if safe fixes exist. This is not optional.**
 
 **For each safe fix:**
 
