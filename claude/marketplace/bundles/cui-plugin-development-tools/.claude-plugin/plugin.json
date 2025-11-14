@@ -30,6 +30,7 @@
   "agents": [
     "./agents/analyze-cross-skill-duplication.md",
     "./agents/analyze-integrated-standards.md",
+    "./agents/analyze-plugin-references.md",
     "./agents/analyze-standards-file.md",
     "./agents/diagnose-agent.md",
     "./agents/diagnose-command.md",
