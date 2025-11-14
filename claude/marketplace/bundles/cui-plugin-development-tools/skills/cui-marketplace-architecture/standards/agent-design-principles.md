@@ -207,7 +207,7 @@ Before creating agent:
 
 ## Reference Template
 
-See `.claude/agents/maven-project-builder.md` for fully compliant implementation:
+Compliant agent implementations demonstrate:
 
 * ✅ Perfect Tool Fit (100%)
 * ✅ Proper skill loading (Step 0)

@@ -297,6 +297,42 @@ Cypress.Commands.add('getSessionContext', () => {
     };
   });
 });
+
+/**
+ * Retrieve and restore session from storage
+ * Restores authentication state and session data from localStorage/sessionStorage
+ * @param {string} sessionId - Session identifier to retrieve
+ * @returns {Cypress.Chainable} Cypress command chain
+ */
+Cypress.Commands.add('retrieveSession', (sessionId) => {
+  cy.window().then((win) => {
+    const sessionData = win.localStorage.getItem(`session_${sessionId}`);
+    if (sessionData) {
+      const session = JSON.parse(sessionData);
+      win.sessionContext = session;
+      return session;
+    }
+    throw new Error(`Session ${sessionId} not found`);
+  });
+});
+
+/**
+ * Logout current user and clear session
+ * Clears authentication state, session data, and returns to login page
+ * @returns {Cypress.Chainable} Cypress command chain
+ */
+Cypress.Commands.add('logout', () => {
+  cy.window().then((win) => {
+    win.sessionContext = {
+      isLoggedIn: false,
+      pageType: 'UNKNOWN',
+      user: null
+    };
+    win.localStorage.clear();
+    win.sessionStorage.clear();
+  });
+  cy.visit('/login');
+});
 ```
 
 ### Command Organization
