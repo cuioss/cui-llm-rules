@@ -515,14 +515,9 @@ void shouldProcessFakeData() {
 
 ### ❌ Committed Generator Seeds
 
-```java
-// WRONG - Never commit this!
-@EnableGeneratorController
-@GeneratorSeed(42L) // DO NOT COMMIT - defeats random testing
-class UserTest {
-    // Tests always run with same data
-}
-```
+⚠️ **Never commit @GeneratorSeed annotations!** They are for debugging only.
+
+See "@GeneratorSeed" section above for proper usage. Seeds must be removed before committing as they defeat the purpose of random testing.
 
 ### ❌ Not Using @EnableGeneratorController
 

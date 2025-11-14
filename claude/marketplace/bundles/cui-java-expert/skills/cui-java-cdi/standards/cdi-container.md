@@ -235,19 +235,14 @@ exit 0
 
 ### Runtime Security Configuration
 
-```bash
-# OWASP-compliant production deployment
-docker run -d \
-  --security-opt=no-new-privileges \
-  --cap-drop ALL \
-  --read-only \
-  --tmpfs /tmp:rw,noexec,nosuid,size=100m \
-  --memory="256m" \
-  --cpus="1.0" \
-  -v "./certificates/tls.key:/app/certificates/tls.key:ro" \
-  -v "./certificates/tls.crt:/app/certificates/tls.crt:ro" \
-  application:latest
-```
+For complete OWASP-compliant Docker deployment configuration with security options explained, see **[cdi-security.md](cdi-security.md)** section "OWASP-Compliant Deployment".
+
+**Key Security Requirements for Container Runtime**:
+- Use `--security-opt=no-new-privileges` to prevent privilege escalation
+- Drop all capabilities with `--cap-drop ALL` (principle of least privilege)
+- Enable read-only filesystem with `--read-only` and writable tmpfs mounts
+- Set resource limits (`--memory`, `--cpus`) to prevent DoS attacks
+- Mount certificates as read-only volumes
 
 ## Certificate Management
 

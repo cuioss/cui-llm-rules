@@ -319,6 +319,66 @@ For complete value object testing criteria including when to apply `ShouldHandle
 
 **Key maintenance point**: Ensure all value objects with custom `equals()/hashCode()` have contract tests, while avoiding contract tests for enums, builders, and infrastructure classes.
 
+## Comprehensive Test Quality Analysis Checklist
+
+This checklist provides a systematic approach for analyzing existing Java test quality and identifying improvement opportunities. Each category links to detailed guidance in this document.
+
+### Analysis Categories
+
+1. **AI Artifact Detection** → See [AI-Generated Code Artifacts](#ai-generated-code-artifacts)
+   - Method names exceeding 75 characters
+   - Excessive obvious comments that don't add value
+   - Verbose @DisplayName annotations
+   - Boilerplate AAA (Arrange-Act-Assert) comments
+
+2. **Unit Test Coverage Audit**
+   - Each type has dedicated unit test focusing exclusively on that class
+   - Comprehensive corner case and edge case coverage
+   - No test duplication across unit tests → See [Test Duplication](#test-duplication)
+
+3. **Forbidden Anti-Pattern Detection** → See [Forbidden Test Anti-Patterns](#forbidden-test-anti-patterns)
+   - Conditional logic: if-else, switch, ternary operators
+   - Optional.orElse() usage in assertions
+   - try-catch blocks in tests
+   - Missing assertThrows/assertDoesNotThrow for exception scenarios
+
+4. **Exception Handling Audit** → See [Proper Exception Handling](#proper-exception-handling)
+   - Throws declarations for checked exceptions
+   - assertThrows usage for expected exceptions
+   - assertDoesNotThrow for explicit no-exception verification
+
+5. **Non-Sensible Test Review** → See [Non-Sensible Tests](#non-sensible-tests)
+   - Meaningless constructor tests
+   - Framework behavior tests
+   - Getter/setter only tests without validation logic
+   - Reflection workarounds (CRITICAL - always indicates a bug) → See [Reflection Workarounds](#reflection-workarounds)
+
+6. **CUI Framework Audit**
+   - Manual data creation instead of Generators
+   - Missing @GeneratorsSource annotations
+   - Forbidden libraries: Mockito, Hamcrest, PowerMock
+
+7. **Value Object Review** → See [Value Object Testing Criteria](#value-object-testing-criteria)
+   - Objects with custom equals/hashCode implementations
+   - Domain data with value semantics
+   - Classes used in collections/maps
+   - Verify NO incorrect application to: enums, utilities, infrastructure objects
+
+8. **Test Duplication Detection** → See [Test Duplication](#test-duplication)
+   - Multiple unit tests testing the same method
+   - Integration tests repeating unit test scenarios
+
+9. **Test Classification** → See [Test Enhancement Prioritization](#test-enhancement-prioritization)
+   - HIGH Priority: Business logic, domain objects, API contracts, security components
+   - MEDIUM Priority: Value objects, configuration objects, domain enums
+   - LOW Priority: Infrastructure, HTTP clients, framework integration
+
+10. **Findings Documentation**
+    - Test file inventory with priority classification
+    - Violations by category with counts
+    - Enhancement recommendations prioritized by impact
+    - Estimated effort per improvement category
+
 ## Test Quality Issue Detection
 
 ### AI-Generated Code Artifacts
