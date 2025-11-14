@@ -329,30 +329,37 @@ Display progress:
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**For each risky fix, prompt user:**
+**Group risky fixes by category:**
 
-```
-[PROMPT] Risky fix detected:
+1. **Configuration Changes** (settings.json modifications with potential user impact)
+2. **Uncertain Removals** (entries that might still be in use)
 
-Issue: {issue description}
-Location: {file path}
-Proposed fix: {fix description}
-Impact: {explanation of potential impact}
+**For each category with issues, use AskUserQuestion:**
 
-Apply this fix? [Y]es / [N]o / [S]kip all remaining
-```
+Use the AskUserQuestion tool with this structure:
+- questions: Array with one question per category
+- question: "Apply fixes for {category} issues?"
+- header: "{Category}"
+- multiSelect: true
+- options: Array containing:
+  - For each specific issue: label="Fix: {specific-issue}", description="Impact: {what-changes}. File: {file}. Reason: {why-risky}"
+  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
 
-**Handle responses:**
-- **Yes**: Apply the fix using Edit tool
-- **No**: Skip this fix, continue to next
-- **Skip all remaining**: Exit fixing phase, proceed to verification
+**Process user selections:**
+- For each selected fix: Apply using Edit tool, increment `risky_fixes_applied`
+- For unselected fixes: Skip, increment `risky_fixes_skipped`
+- If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
 
 **Track risky fixes:**
 ```json
 {
   "risky_fixes_prompted": {count},
   "risky_fixes_applied": {count},
-  "risky_fixes_skipped": {count}
+  "risky_fixes_skipped": {count},
+  "fixes_by_category": {
+    "configuration": {applied: count, skipped: count},
+    "uncertain_removals": {applied: count, skipped: count}
+  }
 }
 ```
 

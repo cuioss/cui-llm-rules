@@ -307,29 +307,39 @@ Edit: {skill-file}
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**For each risky fix, prompt user:**
+**Group risky fixes by category:**
 
-```
-[PROMPT] Risky fix detected in {skill-name}:
+1. **Duplication Issues** (content found in multiple places, consolidation needed)
+2. **Integration Issues** (orphaned files, workflow disconnection)
+3. **Reference Problems** (broken example references, unclear cross-references)
 
-Issue: {issue description}
-Location: {file path and line number}
-Proposed fix: {fix description}
+**For each category with issues, use AskUserQuestion:**
 
-Apply this fix? [Y]es / [N]o / [S]kip all remaining
-```
+Use the AskUserQuestion tool with this structure:
+- questions: Array with one question per category
+- question: "Apply fixes for {category} issues?"
+- header: "{Category}"
+- multiSelect: true
+- options: Array containing:
+  - For each specific issue: label="Fix: {specific-issue}", description="Skill: {skill-name}. Impact: {what-changes}. Location: {file}:{line}"
+  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
 
-**Handle responses:**
-- **Yes**: Apply the fix using Edit tool
-- **No**: Skip this fix, continue to next
-- **Skip all remaining**: Exit fixing phase, proceed to verification
+**Process user selections:**
+- For each selected fix: Apply using Edit tool, increment `risky_fixes_applied`
+- For unselected fixes: Skip, increment `risky_fixes_skipped`
+- If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
 
 **Track risky fixes:**
 ```json
 {
   "risky_fixes_prompted": {count},
   "risky_fixes_applied": {count},
-  "risky_fixes_skipped": {count}
+  "risky_fixes_skipped": {count},
+  "fixes_by_category": {
+    "duplication": {applied: count, skipped: count},
+    "integration": {applied: count, skipped: count},
+    "references": {applied: count, skipped: count}
+  }
 }
 ```
 

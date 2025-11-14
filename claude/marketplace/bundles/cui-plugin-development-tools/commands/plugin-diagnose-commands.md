@@ -297,18 +297,27 @@ Edit: {command-file}
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**For each risky fix:**
+**Group risky fixes by category:**
 
-Prompt user with: Issue description, location, proposed fix, impact, and options [Y]es/[N]o/[S]kip all
+1. **Bloat Issues** (>500 lines, extraction needed)
+2. **Clarity Issues** (over-specification, unclear purpose)
+3. **Structural Issues** (reorganization, consolidation)
 
-**Handle responses:**
-- **Yes**: Apply fix using Edit tool
-- **No**: Skip this fix, continue to next
-- **Skip all**: Exit fixing phase, proceed to Step 11
+**For each category with issues, use AskUserQuestion:**
 
-**For bloated commands (>500 lines):**
+Use the AskUserQuestion tool with this structure:
+- questions: Array with one question per category
+- question: "Apply fixes for {category} issues?"
+- header: "{Category}"
+- multiSelect: true
+- options: Array containing:
+  - For each specific issue: label="Fix: {specific-issue}", description="Impact: {what-changes}. Location: {file}:{line}. Size: {metric}"
+  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
 
-Prompt user with restructuring recommendation and options: [D]efer/[A]ttempt extraction/[S]kip
+**Process user selections:**
+- For each selected fix: Apply using Edit tool, increment `risky_fixes_applied`
+- For unselected fixes: Skip, increment `risky_fixes_skipped`
+- If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
 
 **Track risky fixes:**
 ```json
@@ -316,7 +325,11 @@ Prompt user with restructuring recommendation and options: [D]efer/[A]ttempt ext
   "risky_fixes_prompted": {count},
   "risky_fixes_applied": {count},
   "risky_fixes_skipped": {count},
-  "bloat_fixes_deferred": {count}
+  "fixes_by_category": {
+    "bloat": {applied: count, skipped: count},
+    "clarity": {applied: count, skipped: count},
+    "structural": {applied: count, skipped: count}
+  }
 }
 ```
 

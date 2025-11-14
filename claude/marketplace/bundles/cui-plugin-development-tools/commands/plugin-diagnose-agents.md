@@ -321,27 +321,32 @@ Edit: {agent-file}
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**For each risky fix, prompt user:**
+**Group risky fixes by category:**
 
-```
-[PROMPT] Risky fix detected in {agent-name}:
+1. **Tool Violations** (Task tool misuse, missing critical tools)
+2. **Architectural Issues** (Maven anti-patterns, structural problems)
+3. **Best Practice Violations** (ambiguous instructions, precision issues)
 
-Issue: {issue description}
-Location: {file path and line number}
-Proposed fix: {fix description}
-Impact: {explanation of architectural/workflow changes needed}
+**For each category with issues, use AskUserQuestion:**
 
-Apply this fix? [Y]es / [N]o / [S]kip all remaining
-```
+Use the AskUserQuestion tool with this structure:
+- questions: Array with one question per category
+- question: "Apply fixes for {category} issues?"
+- header: "{Category}"
+- multiSelect: true
+- options: Array containing:
+  - For each specific issue: label="Fix: {specific-issue}", description="Agent: {agent-name}. Impact: {what-changes}. Location: {file}:{line}"
+  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
 
-**Handle responses:**
-- **Yes**: Apply the fix using Edit tool (may require significant workflow changes)
-- **No**: Skip this fix, continue to next
-- **Skip all remaining**: Exit fixing phase, proceed to verification
+**Process user selections:**
+- For each selected fix: Apply using Edit tool (may require workflow changes), increment `risky_fixes_applied`
+- For unselected fixes: Skip, increment `risky_fixes_skipped`
+- If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
 
-**Note**: For complex fixes like Task tool misuse or Maven anti-patterns:
-- Prompt should explain the architectural change required
-- Consider suggesting use of `/plugin-update-agent` for complex refactoring
+**Note**: For complex architectural changes:
+- Description should explain workflow restructuring required
+- Consider deferring to `/plugin-update-agent` for complex refactoring
+- Track deferred fixes separately
 
 **Track risky fixes:**
 ```json
@@ -349,7 +354,12 @@ Apply this fix? [Y]es / [N]o / [S]kip all remaining
   "risky_fixes_prompted": {count},
   "risky_fixes_applied": {count},
   "risky_fixes_skipped": {count},
-  "risky_fixes_deferred_to_update_agent": {count}
+  "risky_fixes_deferred_to_update_agent": {count},
+  "fixes_by_category": {
+    "tool_violations": {applied: count, skipped: count, deferred: count},
+    "architectural": {applied: count, skipped: count, deferred: count},
+    "best_practices": {applied: count, skipped: count, deferred: count}
+  }
 }
 ```
 

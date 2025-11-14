@@ -315,30 +315,39 @@ Edit: {bundle-path}/.claude-plugin/plugin.json
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**For each risky fix, prompt user:**
+**Group risky fixes by category:**
 
-```
-[PROMPT] Risky fix detected in bundle {bundle-name}:
+1. **Inventory Issues** (plugin.json structure, obsolete entries)
+2. **Structure Problems** (naming consistency, directory organization)
+3. **Integration Issues** (cross-bundle references, self-containment violations)
 
-Issue: {issue description}
-Location: {file path and context}
-Proposed fix: {fix description}
-Impact: {explanation of architectural/integration changes needed}
+**For each category with issues, use AskUserQuestion:**
 
-Apply this fix? [Y]es / [N]o / [S]kip all remaining
-```
+Use the AskUserQuestion tool with this structure:
+- questions: Array with one question per category
+- question: "Apply fixes for {category} issues in bundle {bundle-name}?"
+- header: "{Category}"
+- multiSelect: true
+- options: Array containing:
+  - For each specific issue: label="Fix: {specific-issue}", description="Impact: {what-changes}. Components affected: {component-list}. Location: {file}:{line}"
+  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
 
-**Handle responses:**
-- **Yes**: Apply the fix using Edit tool (may require multi-component changes)
-- **No**: Skip this fix, continue to next
-- **Skip all remaining**: Exit fixing phase, proceed to quality gates
+**Process user selections:**
+- For each selected fix: Apply using Edit tool (may require multi-component changes), increment `bundle_risky_fixes_applied`
+- For unselected fixes: Skip, increment `bundle_risky_fixes_skipped`
+- If "Skip all" selected: Skip entire category, increment `bundle_risky_fixes_skipped` by count
 
 **Track risky fixes:**
 ```json
 {
   "bundle_risky_fixes_prompted": {count},
   "bundle_risky_fixes_applied": {count},
-  "bundle_risky_fixes_skipped": {count}
+  "bundle_risky_fixes_skipped": {count},
+  "fixes_by_category": {
+    "inventory": {applied: count, skipped: count},
+    "structure": {applied: count, skipped: count},
+    "integration": {applied: count, skipped: count}
+  }
 }
 ```
 
