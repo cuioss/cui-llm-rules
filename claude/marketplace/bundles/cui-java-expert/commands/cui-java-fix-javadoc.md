@@ -237,7 +237,7 @@ Apply fixes systematically by category:
 For each simple, content-neutral fix:
 
 ```
-SlashCommand: /cui-java-implement-code task="Apply Javadoc fix:
+SlashCommand: /cui-java-expert:cui-java-implement-code task="Apply Javadoc fix:
     Apply minimal Javadoc fix to resolve error.
 
     Error Details:

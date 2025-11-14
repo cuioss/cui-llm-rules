@@ -101,7 +101,7 @@ Show:
 
 Execute:
 ```
-SlashCommand: /plugin-diagnose-bundle bundle-name={bundle-name}
+SlashCommand: /cui-plugin-development-tools:plugin-diagnose-bundle bundle-name={bundle-name}
 ```
 
 Review results and offer to fix any issues found.

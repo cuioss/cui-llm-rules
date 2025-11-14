@@ -62,7 +62,7 @@ Display status updates every 30 seconds.
 
 If build failed:
 ```
-SlashCommand: /cui-maven-build-and-fix push
+SlashCommand: /cui-maven:cui-maven-build-and-fix push
 ```
 
 Self-contained command that fixes build + verifies + commits.
@@ -75,7 +75,7 @@ Self-contained command that fixes build + verifies + commits.
 ### Step 4: Handle Code Review Comments
 
 ```
-SlashCommand: /cui-respond-to-review-comments
+SlashCommand: /cui-task-workflow:cui-respond-to-review-comments
 ```
 
 Self-contained Pattern 3 command: fetches comments → triages each → code change or explanation → verifies + commits.
@@ -87,7 +87,7 @@ Self-contained Pattern 3 command: fetches comments → triages each → code cha
 ### Step 5: Handle Sonar Issues
 
 ```
-SlashCommand: /cui-fix-sonar-issues
+SlashCommand: /cui-task-workflow:cui-fix-sonar-issues
 ```
 
 Self-contained Pattern 3 command: fetches Sonar issues → triages each → fixes or suppresses (with user approval) → verifies + commits.

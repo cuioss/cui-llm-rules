@@ -197,7 +197,7 @@ Apply fixes using /cui-java-implement-code command with patterns from cui-java-c
 **5.1 Logger Migration:**
 
 ```
-SlashCommand: /cui-java-implement-code task="Migrate logger to CuiLogger in {file}.
+SlashCommand: /cui-java-expert:cui-java-implement-code task="Migrate logger to CuiLogger in {file}.
 Replace logger with CuiLogger.
 Apply migration pattern from cui-java-core skill: logging-maintenance-reference.md#logger-migration
 
@@ -207,7 +207,7 @@ CRITICAL: Only modify logging code, no other changes."
 **5.2 LogRecord Implementation:**
 
 ```
-SlashCommand: /cui-java-implement-code task="Add LogRecord usage in {file}.
+SlashCommand: /cui-java-expert:cui-java-implement-code task="Add LogRecord usage in {file}.
 Convert direct logging to LogRecord.
 Apply implementation pattern from cui-java-core skill: logging-maintenance-reference.md#logrecord-implementation
 
@@ -219,7 +219,7 @@ CRITICAL: Only modify logging code."
 **5.3 LogMessages Creation/Update:**
 
 ```
-SlashCommand: /cui-java-implement-code task="Create/update LogMessages class for module {module}.
+SlashCommand: /cui-java-expert:cui-java-implement-code task="Create/update LogMessages class for module {module}.
 Use template from cui-java-core skill: logging-maintenance-reference.md#logmessages-structure
 
 CRITICAL: Only create/modify LogMessages, no other changes."

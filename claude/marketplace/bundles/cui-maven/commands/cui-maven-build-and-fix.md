@@ -120,7 +120,7 @@ Other Issues:
 
 **Java Issues (compilation, test, javadoc):**
 ```
-SlashCommand: /cui-orchestrate-java-task task="Fix {issue_category}: {issue_details}"
+SlashCommand: /cui-java-expert:cui-orchestrate-java-task task="Fix {issue_category}: {issue_details}"
 ```
 
 Parameters to pass:

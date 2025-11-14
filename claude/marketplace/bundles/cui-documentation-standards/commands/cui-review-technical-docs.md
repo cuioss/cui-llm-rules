@@ -61,7 +61,7 @@ If no files found:
 
 **Delegate to Layer 2 self-contained command:**
 ```
-SlashCommand: /cui-review-single-asciidoc file={file_path} apply_fixes={apply_fixes}
+SlashCommand: /cui-documentation-standards:cui-review-single-asciidoc file={file_path} apply_fixes={apply_fixes}
 ```
 
 **Collect results:**

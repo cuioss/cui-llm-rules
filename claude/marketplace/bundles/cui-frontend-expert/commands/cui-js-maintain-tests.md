@@ -76,7 +76,7 @@ Task:
 
 **2.2 Coverage Baseline:**
 ```
-SlashCommand: /javascript-coverage-report
+SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
 Parameters: workspace={workspace if specified}
 ```
 
@@ -189,7 +189,7 @@ Test improvements: {count} ({HIGH/MEDIUM/LOW distribution})
 For each test improvement in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /cui-js-implement-tests task="Improve test quality using cui-javascript-maintenance test-quality-standards.md:
+SlashCommand: /cui-frontend-expert:cui-js-implement-tests task="Improve test quality using cui-javascript-maintenance test-quality-standards.md:
 
 Issue: {issue description}
 Location: {test file}:{line}
@@ -256,7 +256,7 @@ Task:
 **5.4 Workspace Coverage Check:**
 
 ```
-SlashCommand: /javascript-coverage-report
+SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
 Parameters: workspace={workspace-name}
 ```
 
@@ -303,7 +303,7 @@ Task:
 
 **6.2 Coverage Verification:**
 ```
-SlashCommand: /javascript-coverage-report
+SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
 ```
 
 Compare final coverage to baseline:

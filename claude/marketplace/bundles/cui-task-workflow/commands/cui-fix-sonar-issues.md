@@ -53,7 +53,7 @@ Based on triager decision:
 ### Step 3: Verify and Commit
 
 ```
-SlashCommand: /cui-maven-build-and-fix push
+SlashCommand: /cui-maven:cui-maven-build-and-fix push
 ```
 
 ### Step 4: Return Summary

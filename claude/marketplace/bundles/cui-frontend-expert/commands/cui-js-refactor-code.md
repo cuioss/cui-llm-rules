@@ -101,7 +101,7 @@ Task:
 **2.3 Coverage Baseline:**
 
 ```
-SlashCommand: /javascript-coverage-report
+SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
 Parameters: workspace={workspace if specified}
 ```
 
@@ -171,7 +171,7 @@ Display workspace name and violation count/distribution.
 For each violation in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /cui-js-implement-code task="Fix violation using cui-javascript standards.
+SlashCommand: /cui-frontend-expert:cui-js-implement-code task="Fix violation using cui-javascript standards.
 
 Violation: {description}
 Location: {file}:{line}
@@ -202,7 +202,7 @@ Task:
 **5.4 Workspace Coverage Check:**
 
 ```
-SlashCommand: /javascript-coverage-report
+SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
 Parameters: workspace={workspace-name}
 ```
 
@@ -269,7 +269,7 @@ Task:
 **6.4 Coverage Verification:**
 
 ```
-SlashCommand: /javascript-coverage-report
+SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
 ```
 
 Display coverage change from baseline and ensure no significant regression.

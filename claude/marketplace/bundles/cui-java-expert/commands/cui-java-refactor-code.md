@@ -123,7 +123,7 @@ Task:
 **2.3 Coverage Baseline:**
 
 ```
-SlashCommand: /cui-java-generate-coverage
+SlashCommand: /cui-java-expert:cui-java-generate-coverage
 Parameters: module={module if specified}
 ```
 
@@ -199,7 +199,7 @@ Display current module, violations to fix, priority distribution.
 For each violation in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /cui-java-implement-code task="Fix {violation type}:
+SlashCommand: /cui-java-expert:cui-java-implement-code task="Fix {violation type}:
 Fix the following violation using cui-java-core standards:
 
 Violation: {violation description}
@@ -217,7 +217,7 @@ Track in `fixes_applied` counter.
 **5.3 Module Verification:**
 
 ```
-SlashCommand: /cui-maven-build-and-fix
+SlashCommand: /cui-maven:cui-maven-build-and-fix
 Parameters: module={module-name}
 ```
 
@@ -228,7 +228,7 @@ Self-contained command that runs build, fixes issues, verifies tests, commits fi
 **5.4 Module Coverage Check:**
 
 ```
-SlashCommand: /cui-java-generate-coverage
+SlashCommand: /cui-java-expert:cui-java-generate-coverage
 Parameters: module={module-name}
 ```
 
@@ -273,7 +273,7 @@ Task:
 **6.3 Coverage Verification:**
 
 ```
-SlashCommand: /cui-java-generate-coverage
+SlashCommand: /cui-java-expert:cui-java-generate-coverage
 ```
 
 Compare final coverage to baseline, display coverage change, ensure no significant regression.

@@ -68,7 +68,7 @@ Task:
 ### Step 4: Verify Build
 
 ```
-SlashCommand: /cui-maven-build-and-fix
+SlashCommand: /cui-maven:cui-maven-build-and-fix
 ```
 
 Self-contained command that runs build, fixes issues if found, verifies, and commits fixes.
@@ -94,7 +94,7 @@ Then verify with SlashCommand(/cui-maven-build-and-fix).
 **For batch (multiple tasks):**
 ```
 For each task in plan:
-  SlashCommand: /cui-execute-single-task task="{task_description}"
+  SlashCommand: /cui-task-workflow:cui-execute-single-task task="{task_description}"
 ```
 
 Each /cui-execute-single-task is self-contained (implements + verifies + iterates).
@@ -108,7 +108,7 @@ Check all tasks completed. Prompt for incomplete items.
 ### Step 7: Final Verification and Commit
 
 ```
-SlashCommand: /cui-maven-build-and-fix push={push parameter}
+SlashCommand: /cui-maven:cui-maven-build-and-fix push={push parameter}
 ```
 
 Self-contained command: runs build, fixes issues if found, verifies, commits all changes, and pushes if push=true.

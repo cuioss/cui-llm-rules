@@ -36,7 +36,7 @@ Analyze `description` parameter:
 ### Step 2: Implementation Phase
 
 ```
-SlashCommand: /cui-js-implement-code
+SlashCommand: /cui-frontend-expert:cui-js-implement-code
 Parameters:
 - files: {files}
 - description: {description}
@@ -51,7 +51,7 @@ Self-contained command handles implementation + verification + iteration.
 ### Step 3: Unit Testing Phase
 
 ```
-SlashCommand: /cui-js-implement-tests
+SlashCommand: /cui-frontend-expert:cui-js-implement-tests
 Parameters:
 - files: {files}
 - description: Implement unit tests for {files}
@@ -66,7 +66,7 @@ Self-contained command handles test implementation + verification.
 ### Step 4: Coverage Verification Phase
 
 ```
-SlashCommand: /cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
 Parameters:
 - files: {files}
 - workspace: {workspace}

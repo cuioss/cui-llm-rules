@@ -210,7 +210,7 @@ Use Edit tool to make targeted changes
 **Execute diagnosis command (unless --skip-diagnosis):**
 
 ```
-SlashCommand: /plugin-diagnose-commands command-name={command-name}
+SlashCommand: /cui-plugin-development-tools:plugin-diagnose-commands command-name={command-name}
 ```
 
 **Parse diagnosis results:**

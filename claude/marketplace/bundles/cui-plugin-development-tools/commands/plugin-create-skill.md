@@ -155,7 +155,7 @@ Next steps:
 
 Execute:
 ```
-SlashCommand: /plugin-diagnose-skills skill-name={created-skill-name}
+SlashCommand: /cui-plugin-development-tools:plugin-diagnose-skills skill-name={created-skill-name}
 ```
 
 **Error handling:**

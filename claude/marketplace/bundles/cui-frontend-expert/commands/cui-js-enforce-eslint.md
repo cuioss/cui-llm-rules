@@ -49,7 +49,7 @@ Re-run lint to check remaining issues.
 For each remaining violation:
 
 ```
-SlashCommand: /cui-js-implement-code task="Fix ESLint violation: {violation.message}
+SlashCommand: /cui-frontend-expert:cui-js-implement-code task="Fix ESLint violation: {violation.message}
 
 Rule: {violation.rule}
 Line: {violation.line}

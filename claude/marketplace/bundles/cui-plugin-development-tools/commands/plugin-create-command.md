@@ -154,7 +154,7 @@ Next steps:
 ### Step 5: Run Command Diagnosis
 
 ```
-SlashCommand: /plugin-diagnose-commands command-name={command-name}
+SlashCommand: /cui-plugin-development-tools:plugin-diagnose-commands command-name={command-name}
 ```
 
 **Error handling:**

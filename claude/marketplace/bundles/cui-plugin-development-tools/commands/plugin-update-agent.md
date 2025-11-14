@@ -221,7 +221,7 @@ Use Edit tool to make targeted changes
 **Execute diagnosis command (unless --skip-diagnosis):**
 
 ```
-SlashCommand: /plugin-diagnose-agents agent-name={agent-name}
+SlashCommand: /cui-plugin-development-tools:plugin-diagnose-agents agent-name={agent-name}
 ```
 
 **Parse diagnosis results:**

@@ -39,7 +39,7 @@ Analyze the `description` parameter to determine workflow entry point:
 Call self-contained command `/cui-java-implement-code`:
 
 ```
-SlashCommand: /cui-java-implement-code
+SlashCommand: /cui-java-expert:cui-java-implement-code
 Parameters: |
   types={types}
   description={description}
@@ -63,7 +63,7 @@ This command handles implementation AND verification internally (implements → 
 Analyze Step 2 results and call self-contained command `/cui-java-implement-tests`:
 
 ```
-SlashCommand: /cui-java-implement-tests
+SlashCommand: /cui-java-expert:cui-java-implement-tests
 Parameters: |
   types={types}
   description=Implement unit tests for {types}
@@ -92,7 +92,7 @@ This command handles test implementation AND verification internally (writes tes
 Call self-contained command `/cui-java-generate-coverage`:
 
 ```
-SlashCommand: /cui-java-generate-coverage
+SlashCommand: /cui-java-expert:cui-java-generate-coverage
 Parameters: |
   types={types}
   module={module}

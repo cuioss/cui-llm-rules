@@ -170,7 +170,7 @@ Options:
 **Apply test improvements based on scope**:
 
 ```
-SlashCommand: /cui-java-implement-tests task="Implement test quality improvements for module: [module]
+SlashCommand: /cui-java-expert:cui-java-implement-tests task="Implement test quality improvements for module: [module]
 Scope: [scope parameter]
 Priority: [priority parameter]
 

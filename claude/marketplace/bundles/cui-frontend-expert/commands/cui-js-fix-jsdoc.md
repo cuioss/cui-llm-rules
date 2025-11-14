@@ -48,7 +48,7 @@ Categorize by severity:
 For each violation (CRITICAL → WARNING):
 
 ```
-SlashCommand: /cui-js-implement-code task="Add JSDoc documentation for {violation.target}.
+SlashCommand: /cui-frontend-expert:cui-js-implement-code task="Add JSDoc documentation for {violation.target}.
 
 Type: {violation.type}
 Line: {violation.line}

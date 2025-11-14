@@ -229,7 +229,7 @@ Next steps:
 ### Step 7: Run Agent Diagnosis
 
 ```
-SlashCommand: /plugin-diagnose-agents agent-name={agent-name}
+SlashCommand: /cui-plugin-development-tools:plugin-diagnose-agents agent-name={agent-name}
 ```
 
 **Error handling:**
