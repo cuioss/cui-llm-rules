@@ -11,7 +11,11 @@ Focused agent that analyzes existing JaCoCo XML/HTML coverage reports and return
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=java-coverage-analyzer update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "JaCoCo XML parsing for multi-module projects")
+2. Current limitation (e.g., "Cannot aggregate coverage across Maven modules")
+3. Suggested enhancement (e.g., "Add multi-module report aggregation logic")
+4. Expected impact (e.g., "Would provide complete coverage picture for 80% of CUI projects")
 
 Focus improvements on:
 - Coverage report parsing accuracy and format handling
@@ -19,6 +23,8 @@ Focus improvements on:
 - Class-level granularity analysis and reporting
 - Uncovered method identification strategies
 - Performance optimization for large reports
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=java-coverage-analyzer` based on your report.
 
 ## YOUR TASK
 

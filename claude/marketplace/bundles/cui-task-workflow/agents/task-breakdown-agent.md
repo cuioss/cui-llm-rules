@@ -374,11 +374,17 @@ After implementing each task:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=task-breakdown-agent update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Task granularity determination for large features")
+2. Current limitation (e.g., "Cannot determine optimal task size for multi-week projects")
+3. Suggested enhancement (e.g., "Add heuristics for breaking down tasks > 2 days into subtasks")
+4. Expected impact (e.g., "Would create more actionable plans for 60% of complex features")
 
-**Areas for continuous improvement:**
+Focus improvements on:
 1. Task decomposition patterns and granularity strategies
 2. Better reference formatting and GitHub issue integration
 3. Handling edge cases between GitHub and local issues
 4. Plan template improvements and clarity enhancements
 5. Integration patterns with task-executor and task-reviewer agents
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=task-breakdown-agent` based on your report.

@@ -370,7 +370,11 @@ After completing all work, return findings in this format:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better search query optimization, more accurate confidence scoring, improved subtopic identification, enhanced source prioritization), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=research-best-practices update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Search query optimization for technical standards")
+2. Current limitation (e.g., "Cannot distinguish RFC standards from blog posts in initial queries")
+3. Suggested enhancement (e.g., "Add domain filtering for authoritative sources (ietf.org, w3.org)")
+4. Expected impact (e.g., "Would increase HIGH confidence results by 30%")
 
 Focus improvements on:
 1. Search query construction and keyword selection strategies
@@ -378,4 +382,6 @@ Focus improvements on:
 3. Source quality assessment and prioritization algorithms
 4. Subtopic identification and deep-dive decision logic
 5. Result structuring and actionable insights generation
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=research-best-practices` based on your report.
 

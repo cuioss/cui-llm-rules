@@ -178,11 +178,18 @@ tools: Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh)
 - `asciidoc-link-verifier.md` (lines 12, 72-77) - Correct implementation
 - `asciidoc-format-validator.md` (lines 12, 68-73) - Correct implementation
 
-## Pattern 22: Agent Self-Invocation Instructions
+## Pattern 22: Agent Self-Invocation Instructions (AGENTS ONLY)
+
+**CRITICAL:** This pattern applies to AGENTS only, NOT commands. See Pattern 21 in command-analysis-patterns.md for command self-improvement rules.
 
 **Problem:** Agent contains instructions telling it to invoke slash commands directly
 **Context:** CONTINUOUS IMPROVEMENT RULE sections that instruct agent to call `/plugin-update-agent` or other commands
 **Architecture Rule Violation:** Rule 6 - Agents CANNOT invoke commands (SlashCommand tool unavailable at runtime)
+
+**Commands are DIFFERENT:**
+- Commands (files in `.../commands/`) CAN and SHOULD self-update using `/plugin-update-command`
+- This Pattern 22 violation check should ONLY be applied to files in `.../agents/` directories
+- When analyzing files, check path to distinguish between commands and agents
 
 **Examples of INCORRECT patterns:**
 

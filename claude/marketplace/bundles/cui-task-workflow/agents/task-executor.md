@@ -427,11 +427,17 @@ After completing the task, return findings in this format:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=task-executor update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Acceptance criteria verification for test coverage")
+2. Current limitation (e.g., "Cannot verify coverage thresholds without re-running full build")
+3. Suggested enhancement (e.g., "Add incremental coverage check using JaCoCo XML parsing")
+4. Expected impact (e.g., "Would reduce verification time by 70% for large projects")
 
-**Areas for continuous improvement:**
+Focus improvements on:
 1. Better checklist parsing patterns and task plan format handling
 2. Acceptance criteria verification methods and validation strategies
 3. Error recovery strategies and build failure diagnosis
 4. Task plan format handling edge cases
 5. Integration with maven-builder and commit-changes agents
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=task-executor` based on your report.

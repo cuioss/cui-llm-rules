@@ -347,11 +347,17 @@ After completing all work, return findings in this format:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=task-reviewer update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Ambiguity detection in user requirements")
+2. Current limitation (e.g., "Cannot detect implicit assumptions in acceptance criteria")
+3. Suggested enhancement (e.g., "Add assumption detection heuristics for incomplete requirements")
+4. Expected impact (e.g., "Would identify 30% more clarity issues before execution")
 
-**Areas for continuous improvement:**
+Focus improvements on:
 1. Ambiguity detection patterns and quality criteria refinement
 2. Clarification question templates and effectiveness
 3. Research agent integration improvements
 4. GitHub issue update strategies and best practices
 5. Quality criteria validation and edge case handling
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=task-reviewer` based on your report.

@@ -11,7 +11,13 @@ Focused agent that analyzes JavaScript files for JSDoc compliance violations and
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=js-doc-violation-analyzer update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "JSDoc violation detection for async functions")
+2. Current limitation (e.g., "Does not validate @returns for Promise types")
+3. Suggested enhancement (e.g., "Add validation for @returns {Promise<Type>} patterns")
+4. Expected impact (e.g., "Would catch 20-30% more async function documentation gaps")
+
+Focus improvements on:
 1. Better JSDoc violation detection patterns for modern JavaScript
 2. More accurate severity classification (critical vs warning)
 3. Enhanced missing documentation identification strategies
@@ -19,7 +25,7 @@ Focused agent that analyzes JavaScript files for JSDoc compliance violations and
 5. More effective fix recommendation generation
 6. Any lessons learned about JSDoc standards analysis workflows
 
-This ensures the agent evolves and becomes more effective with each execution.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=js-doc-violation-analyzer` based on your report.
 
 ## YOUR TASK
 

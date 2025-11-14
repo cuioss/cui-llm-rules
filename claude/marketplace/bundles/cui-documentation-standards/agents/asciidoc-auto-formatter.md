@@ -240,7 +240,11 @@ Then: scripts/asciidoc-validator.sh {target}
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better parameter validation, more comprehensive fix types, enhanced user feedback), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=asciidoc-auto-formatter update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Xref syntax conversion accuracy")
+2. Current limitation (e.g., "Cannot convert nested cross-references in tables")
+3. Suggested enhancement (e.g., "Add table cell parsing for <<>> patterns")
+4. Expected impact (e.g., "Would fix 15-20% more xref violations in complex documents")
 
 Focus improvements on:
 1. Parameter validation logic and error messaging clarity
@@ -248,3 +252,5 @@ Focus improvements on:
 3. Dry-run preview accuracy and user feedback quality
 4. Integration with asciidoc-validator for post-fix verification
 5. Git integration patterns for file restoration and rollback
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-auto-formatter` based on your report.

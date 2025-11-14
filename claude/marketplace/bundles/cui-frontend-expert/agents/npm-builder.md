@@ -441,7 +441,13 @@ When executing Playwright tests:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=npm-builder update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Workspace detection for Nx monorepos")
+2. Current limitation (e.g., "Only supports standard npm workspaces array")
+3. Suggested enhancement (e.g., "Add nx.json workspace detection support")
+4. Expected impact (e.g., "Would enable workspace targeting in 40% more monorepo configurations")
+
+Focus improvements on:
 1. Improved timeout behavior patterns and duration calculation strategies for npm/npx commands
 2. Better error detection patterns for npm, Playwright, ESLint, and other frontend tools
 3. Enhanced output filtering patterns and categorization refinements
@@ -452,7 +458,7 @@ When executing Playwright tests:
 8. Enhanced working directory and environment variable handling
 9. Optimized tool usage patterns and non-prompting execution strategies
 
-This ensures the agent evolves and becomes more effective with each execution.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=npm-builder` based on your report.
 
 ## RESPONSE FORMAT EXAMPLES
 

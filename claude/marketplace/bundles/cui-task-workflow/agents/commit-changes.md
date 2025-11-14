@@ -275,7 +275,11 @@ After completing all work, return findings in this format:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better artifact detection, more accurate commit message generation, improved PR creation, enhanced error handling), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=commit-changes update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Commit message type inference")
+2. Current limitation (e.g., "Cannot distinguish feat from refactor for internal restructuring")
+3. Suggested enhancement (e.g., "Add heuristics for breaking/non-breaking API changes")
+4. Expected impact (e.g., "Would generate correct commit types in 85% of edge cases")
 
 Focus improvements on:
 1. Artifact detection patterns and cleanup accuracy
@@ -283,3 +287,5 @@ Focus improvements on:
 3. PR creation enhancements and template optimization
 4. Error handling for merge conflicts and permission issues
 5. User experience improvements and feedback clarity
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=commit-changes` based on your report.

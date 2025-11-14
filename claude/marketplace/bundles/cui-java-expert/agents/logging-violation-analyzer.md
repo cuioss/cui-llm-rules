@@ -11,7 +11,11 @@ Focused agent that analyzes all LOGGER statements in Java code and returns a str
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=logging-violation-analyzer update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "LOGGER pattern detection for Lombok @Slf4j")
+2. Current limitation (e.g., "Cannot detect violations in Lombok-generated logger fields")
+3. Suggested enhancement (e.g., "Add Grep pattern for @Slf4j annotation and infer violations")
+4. Expected impact (e.g., "Would catch violations in 40% more classes using Lombok logging")
 
 Focus improvements on:
 - Pattern detection accuracy for LOGGER statements
@@ -19,6 +23,8 @@ Focus improvements on:
 - Enhanced violation categorization logic
 - Better error handling for malformed code
 - Support for additional logging frameworks beyond SLF4J
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=logging-violation-analyzer` based on your report.
 
 ## YOUR TASK
 

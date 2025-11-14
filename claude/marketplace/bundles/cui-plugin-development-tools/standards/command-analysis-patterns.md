@@ -147,6 +147,49 @@ Common issues and patterns to detect when analyzing slash commands.
 **Example:** "Related Commands" section with xref links to non-existent files
 **Fix:** Remove section (zero information loss)
 
+## Pattern 21: Command Self-Improvement Pattern
+
+**Note:** Commands have DIFFERENT continuous improvement rules than agents.
+
+**Agent Rule (Pattern 22 in agent-analysis-patterns.md):**
+- Agents CANNOT self-invoke
+- Agents MUST report improvements to caller
+- Pattern 22 violation: Agent trying to call `/plugin-update-agent`
+
+**Command Rule (This pattern):**
+- Commands CAN and SHOULD self-update
+- Commands use `/plugin-update-command` to update themselves
+- This is NOT a violation - this is the CORRECT pattern for commands
+
+**Expected CONTINUOUS IMPROVEMENT RULE for commands:**
+
+```markdown
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better,
+or more efficient approach, **YOU MUST immediately update this file** using
+`/plugin-update-command command-name={command-name} update="[your improvement]"` with:
+1. [Specific improvement area relevant to command]
+2. [Another improvement area]
+3. [Another improvement area]
+...
+```
+
+**Detection:**
+- Check if file is in `.../commands/` directory (command) vs `.../agents/` (agent)
+- For commands: Verify CONTINUOUS IMPROVEMENT RULE uses self-update pattern
+- For commands: Flag as WARNING if using caller-reporting pattern instead
+
+**Why Commands Self-Update:**
+- Commands are user-facing workflows with autonomous evolution capability
+- Commands directly invoked by users (have SlashCommand tool access)
+- Self-updating ensures commands improve based on actual usage patterns
+
+**DO NOT confuse with Pattern 22:**
+- Pattern 22 applies to AGENTS only (agents in `.../agents/` directories)
+- Commands in `.../commands/` directories SHOULD self-update
+- This is a fundamental architectural difference
+
 ## Pattern Detection Priority
 
 ### CRITICAL (Must Fix Before Use):

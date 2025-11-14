@@ -10,14 +10,20 @@ Analyzes Java LogMessages holder classes and creates or updates comprehensive As
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=log-record-documenter update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Multi-holder section boundary detection")
+2. Current limitation (e.g., "Cannot isolate sections with non-standard headers")
+3. Suggested enhancement (e.g., "Add fuzzy matching for section headers using PREFIX patterns")
+4. Expected impact (e.g., "Would handle 90% of legacy documentation structures")
+
+Focus improvements on:
 1. Improved LogRecord extraction patterns from Java code
 2. Better AsciiDoc table generation and formatting techniques
 3. More effective multi-holder section detection and isolation strategies
 4. Enhanced validation of ID/Component/Message/Description accuracy
 5. Any lessons learned about LogMessages documentation workflows
 
-This ensures the agent evolves and becomes more effective with each execution.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=log-record-documenter` based on your report.
 
 ## PARAMETERS
 

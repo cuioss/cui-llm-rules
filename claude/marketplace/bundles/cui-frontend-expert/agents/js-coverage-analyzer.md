@@ -11,7 +11,13 @@ Focused agent that analyzes existing test coverage reports (Istanbul/NYC, Jest, 
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=js-coverage-analyzer update="[your improvement]"` with improvements discovered:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Coverage report parsing strategy for Jest")
+2. Current limitation (e.g., "Currently cannot detect partial branch coverage")
+3. Suggested enhancement (e.g., "Add parser for Istanbul uncovered branch patterns")
+4. Expected impact (e.g., "Would identify 15-20% more coverage gaps in complex conditionals")
+
+Focus improvements on:
 1. Better coverage report parsing strategies for different testing frameworks
 2. More accurate coverage threshold calculations and recommendations
 3. Enhanced low-coverage file identification patterns
@@ -19,7 +25,7 @@ Focused agent that analyzes existing test coverage reports (Istanbul/NYC, Jest, 
 5. More effective coverage trend analysis techniques
 6. Any lessons learned about JavaScript coverage analysis workflows
 
-This ensures the agent evolves and becomes more effective with each execution.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=js-coverage-analyzer` based on your report.
 
 ## YOUR TASK
 

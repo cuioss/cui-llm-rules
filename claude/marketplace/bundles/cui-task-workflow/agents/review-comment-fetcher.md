@@ -44,7 +44,11 @@ Use gh CLI to fetch PR review comments.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent, if you discover ways to improve it (better comment parsing, more accurate data extraction, improved error handling, enhanced JSON formatting), **YOU MUST immediately update this file** using /plugin-update-agent agent-name=review-comment-fetcher update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "GitHub API pagination handling")
+2. Current limitation (e.g., "Only fetches first 100 comments on large PRs")
+3. Suggested enhancement (e.g., "Add pagination support to retrieve all comments")
+4. Expected impact (e.g., "Would handle PRs with 500+ comments without data loss")
 
 Focus improvements on:
 1. GitHub API response parsing accuracy and completeness
@@ -52,3 +56,5 @@ Focus improvements on:
 3. Error handling for network issues and API failures
 4. JSON output structure optimization and consistency
 5. Performance optimization for large PR comment sets
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=review-comment-fetcher` based on your report.

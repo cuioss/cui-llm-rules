@@ -343,11 +343,17 @@ Use template from Step 7 above.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=asciidoc-content-reviewer update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Promotional language detection in technical specs")
+2. Current limitation (e.g., "Cannot distinguish factual descriptors from marketing in edge cases")
+3. Suggested enhancement (e.g., "Add context-aware decision tree for ambiguous descriptors")
+4. Expected impact (e.g., "Would reduce false positives by 30% while catching 10% more violations")
 
-**Areas for continuous improvement:**
+Focus improvements on:
 1. Tone detection accuracy and ULTRATHINK reasoning quality
 2. Fix application precision and user confirmation flow
 3. Pattern detection coverage for factual vs promotional language
 4. Metrics for ULTRATHINK effectiveness
 5. Context-aware analysis improvements for different document types
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-content-reviewer` based on your report.

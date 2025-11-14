@@ -380,7 +380,13 @@ When `reactor` parameter is provided with a module name:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-agent agent-name=maven-builder update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Module path detection for nested parents")
+2. Current limitation (e.g., "Fails to resolve -pl paths beyond 2-level nesting")
+3. Suggested enhancement (e.g., "Add recursive parent traversal for deep hierarchies")
+4. Expected impact (e.g., "Would resolve module paths in 90% of complex multi-module projects")
+
+Focus improvements on:
 1. Improved timeout behavior patterns and duration calculation strategies
 2. Better module path detection techniques for challenges or edge cases
 3. Enhanced output filtering patterns and error detection refinements
@@ -390,7 +396,7 @@ When `reactor` parameter is provided with a module name:
 7. Better reactor/module build handling for edge cases
 8. Optimized tool usage patterns and non-prompting execution strategies
 
-This ensures the agent evolves and becomes more effective with each execution.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=maven-builder` based on your report.
 
 ## RESPONSE FORMAT EXAMPLES
 

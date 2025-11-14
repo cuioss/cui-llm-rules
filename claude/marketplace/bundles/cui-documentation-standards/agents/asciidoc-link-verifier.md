@@ -261,11 +261,17 @@ Use template from Step 9 above.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=asciidoc-link-verifier update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "Link verification for relative paths")
+2. Current limitation (e.g., "Cannot resolve ../../../ paths beyond 3 levels")
+3. Suggested enhancement (e.g., "Add realpath resolution for arbitrarily deep relative paths")
+4. Expected impact (e.g., "Would correctly verify 95% of deep cross-references")
 
-**Areas for continuous improvement:**
+Focus improvements on:
 1. Link verification accuracy and false positive handling
 2. Anchor format detection and correction strategies
 3. User interaction patterns for link removal approval
 4. Script output parsing and validation improvements
 5. Cross-reference resolution logic enhancements
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-link-verifier` based on your report.

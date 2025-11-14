@@ -183,11 +183,17 @@ Use template from Step 7 above.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this agent and complete the workflow, YOU MUST immediately update this file** using /plugin-update-agent agent-name=asciidoc-format-validator update="[your improvement]"
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
+1. Improvement area description (e.g., "List formatting validation")
+2. Current limitation (e.g., "Does not detect missing blank lines in nested lists")
+3. Suggested enhancement (e.g., "Add nested list depth tracking for blank line validation")
+4. Expected impact (e.g., "Would catch 25% more list formatting violations")
 
-**Areas for continuous improvement:**
+Focus improvements on:
 1. Format validation patterns not covered by current rules
 2. Fix application accuracy and edge case handling
 3. Validator script output parsing improvements
 4. AsciiDoc format issue detection enhancements
 5. Report clarity and actionable recommendations
+
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-format-validator` based on your report.
