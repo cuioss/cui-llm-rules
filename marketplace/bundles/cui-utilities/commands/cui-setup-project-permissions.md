@@ -19,9 +19,6 @@ Verifies and fixes permissions in `.claude/settings.local.json` using permission
 7. Better user experience patterns for permission management
 8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
 
-**Recent Improvements:**
-- **2025-11-15**: Removed `move-to-global` parameter - marketplace permissions are now ALWAYS moved to global settings by default (the only correct behavior). Parameter created false choice when there's only one architecturally correct outcome.
-
 This ensures the command evolves and becomes more effective with each execution.
 
 ## PARAMETERS

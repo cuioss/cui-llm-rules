@@ -20,8 +20,6 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ## PARAMETERS
 
-**--update-command** - Automatically update cui-setup-project-permissions.md Step 3D with discovered wildcards
-
 **--dry-run** - Preview analysis without updating any files
 
 ## WORKFLOW
@@ -132,32 +130,41 @@ skill_prefixes = unique set of skill prefixes
 command_prefixes = unique set of command prefixes
 ```
 
-### Step 6: Generate Minimal Wildcard Set
+### Step 6: Generate Individual Bundle Wildcards
 
-**A. Generate Skill wildcards:**
+**CRITICAL:** Bundle name wildcards (e.g., `cui-*:*`) are NOT supported by Claude Code's permission system. The permission validation regex `^(plugin|bundle):[a-zA-Z0-9_-]+(:[a-zA-Z0-9_-]+)?(\*)?$` requires exact bundle names - wildcards cannot appear in the bundle name portion.
 
-For skills, the permission pattern is `Skill(bundle:skill-name)`, but since all bundles use the same prefix pattern (e.g., `cui-*`), we can use:
+**A. Generate Skill wildcards (one per bundle):**
+
+For each bundle that contains skills:
 ```
-Skill(cui-*:*)  # Covers all cui-* bundles and their skills
-```
-
-**B. Generate SlashCommand wildcards:**
-
-For commands, the permission pattern is `SlashCommand(/command-name)`:
-```
-For each prefix in command_prefixes:
-  SlashCommand(/{prefix}-*:*)
+Skill({bundle-name}:*)
 ```
 
 Examples:
-- `SlashCommand(/cui-*:*)` - Covers all cui-* commands
-- `SlashCommand(/plugin-*:*)` - Covers all plugin-* commands
-- `SlashCommand(/tools-*:*)` - Covers all tools-* commands
+- `Skill(cui-java-expert:*)` - All skills in cui-java-expert bundle
+- `Skill(cui-utilities:*)` - All skills in cui-utilities bundle
+- `Skill(cui-task-workflow:*)` - All skills in cui-task-workflow bundle
+
+Do NOT generate: `Skill(cui-*:*)` - Invalid pattern!
+
+**B. Generate SlashCommand wildcards (one per bundle with commands):**
+
+For each bundle that contains commands with parameterized names:
+```
+SlashCommand(/{bundle-name}:*)
+```
+
+Examples:
+- `SlashCommand(/cui-java-expert:*)` - All cui-java-expert commands
+- `SlashCommand(/cui-utilities:*)` - All cui-utilities commands
+- `SlashCommand(/plugin-*:*)` - Invalid! Use individual bundle names
+
+Note: Commands without parameters don't need `:*` suffix, but using it is harmless and ensures coverage.
 
 **C. Sort wildcards alphabetically:**
-- Skill wildcards first
-- SlashCommand wildcards second
-- Alphabetical within each group
+- Skill wildcards first (alphabetical by bundle name)
+- SlashCommand wildcards second (alphabetical by bundle name)
 
 Increment `wildcards_generated` for each pattern created.
 
@@ -200,15 +207,11 @@ Required Wildcard Permissions:
 Coverage Verification:
   ✓ {skills_found} skills covered by {skill_wildcard_count} Skill wildcards
   ✓ {commands_found} commands covered by {command_wildcard_count} SlashCommand wildcards
-
-{if --update-command}
-Next Step: Update cui-setup-project-permissions.md Step 3D
-{endif}
 ```
 
-### Step 8: Update cui-setup-project-permissions (if --update-command)
+### Step 8: Update cui-setup-project-permissions
 
-**Only execute if --update-command flag is set AND not in dry-run mode.**
+**Execute unless --dry-run mode is active.**
 
 **A. Read current cui-setup-project-permissions.md:**
 ```
@@ -263,18 +266,16 @@ Marketplace Coverage: 100%
 - All {commands_found} commands covered
 - {wildcards_generated} wildcard permissions required
 
-{if --update-command and not --dry-run}
+{if not --dry-run}
 ✅ cui-setup-project-permissions.md updated
-{endif}
-
-{if --dry-run}
+{else}
 ℹ️  Dry-run mode: No files modified
 {endif}
 
 Next Steps:
 1. Review generated wildcards above
-2. Ensure wildcards are in global settings (~/.claude/settings.json)
-3. Run /cui-setup-project-permissions to apply changes
+2. Run /cui-setup-project-permissions to apply changes to global settings
+3. Verify wildcards in ~/.claude/settings.json
 ```
 
 ## CRITICAL RULES
@@ -292,15 +293,16 @@ Next Steps:
 - Sort wildcards alphabetically for consistency
 
 **Wildcard Generation:**
-- Use `Skill(bundle-prefix-*:*)` pattern for skills
-- Use `SlashCommand(/command-prefix-*:*)` pattern for commands
+- Generate one `Skill({bundle-name}:*)` per bundle (exact bundle name required)
+- Generate one `SlashCommand(/{bundle-name}:*)` per bundle with commands
+- NEVER use wildcards in bundle names (e.g., `cui-*:*` is invalid)
+- Permission system requires exact bundle names per validation regex
 - Include `:*` suffix for parameterized commands/skills
-- Minimize number of wildcards (one per prefix)
 
 **Integration:**
-- Only update cui-setup-project-permissions when --update-command flag set
+- Always update cui-setup-project-permissions (unless --dry-run)
 - Never modify files in dry-run mode
-- Provide clear before/after for updates
+- Provide clear confirmation of updates
 - Maintain existing file structure
 
 **Error Handling:**
@@ -322,24 +324,14 @@ Display all statistics in final summary.
 
 ## USAGE EXAMPLES
 
-**Basic audit (report only):**
+**Standard usage (audit and update):**
 ```
 /tools-audit-permission-wildcards
-```
-
-**Audit and update cui-setup-project-permissions:**
-```
-/tools-audit-permission-wildcards --update-command
 ```
 
 **Preview without making changes:**
 ```
 /tools-audit-permission-wildcards --dry-run
-```
-
-**Audit and update (auto):**
-```
-/tools-audit-permission-wildcards --update-command
 ```
 
 ## RELATED
