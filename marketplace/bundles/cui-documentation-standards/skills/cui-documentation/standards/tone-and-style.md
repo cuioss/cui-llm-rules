@@ -392,8 +392,6 @@ Features:
 * Token validation according to RFC 7519
 * Integration with Quarkus via CDI extension
 * Configurable token cache (default: 10-minute TTL)
-
-For usage examples, see [Examples](examples/README.md).
 ```
 
 ### Example 2: Feature Description
