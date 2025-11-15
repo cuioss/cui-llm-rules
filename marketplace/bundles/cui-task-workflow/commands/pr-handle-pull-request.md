@@ -1,5 +1,5 @@
 ---
-name: wf-handle-pull-request
+name: pr-handle-pull-request
 description: Execute comprehensive PR workflow including CI/Sonar wait, review responses, and fixes
 ---
 
@@ -9,7 +9,7 @@ Comprehensive pull request workflow handling CI/Sonar checks, code review respon
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=wf-handle-pull-request update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=pr-handle-pull-request update="[your improvement]"` with:
 1. Improved strategies for CI/Sonar polling and timeout handling
 2. Better command orchestration patterns for review/quality workflows
 3. More effective error recovery strategies for build/check failures
@@ -75,7 +75,7 @@ Self-contained command that fixes build + verifies + commits.
 ### Step 4: Handle Code Review Comments
 
 ```
-SlashCommand: /cui-task-workflow:wf-respond-to-review-comments
+SlashCommand: /cui-task-workflow:pr-respond-to-review-comments
 ```
 
 Self-contained Pattern 3 command: fetches comments → triages each → code change or explanation → verifies + commits.
@@ -87,7 +87,7 @@ Self-contained Pattern 3 command: fetches comments → triages each → code cha
 ### Step 5: Handle Sonar Issues
 
 ```
-SlashCommand: /cui-task-workflow:wf-fix-sonar-issues
+SlashCommand: /cui-task-workflow:pr-fix-sonar-issues
 ```
 
 Self-contained Pattern 3 command: fetches Sonar issues → triages each → fixes or suppresses (with user approval) → verifies + commits.
@@ -169,25 +169,25 @@ Display all statistics in Step 7 summary.
 
 **Interactive:**
 ```
-/wf-handle-pull-request
+/pr-handle-pull-request
 ```
 
 **With PR number:**
 ```
-/wf-handle-pull-request pr=123
+/pr-handle-pull-request pr=123
 ```
 
 **With PR URL:**
 ```
-/wf-handle-pull-request pr=https://github.com/owner/repo/pull/123
+/pr-handle-pull-request pr=https://github.com/owner/repo/pull/123
 ```
 
 ## ARCHITECTURE
 
 Simple orchestrator that delegates to self-contained commands:
 - `/maven-build-and-fix` - Fix build failures + verify + commit
-- `/wf-respond-to-review-comments` - Handle review comments (Pattern 3: fetch → triage → respond)
-- `/wf-fix-sonar-issues` - Handle Sonar issues (Pattern 3: fetch → triage → fix)
+- `/pr-respond-to-review-comments` - Handle review comments (Pattern 3: fetch → triage → respond)
+- `/pr-fix-sonar-issues` - Handle Sonar issues (Pattern 3: fetch → triage → fix)
 
 Each command is self-contained with own verify + commit cycle.
 
@@ -195,5 +195,5 @@ Each command is self-contained with own verify + commit cycle.
 
 - `/plugin-update-command` - Update this command
 - `/maven-build-and-fix` - Build fixing command
-- `/wf-respond-to-review-comments` - Review comment handling (Pattern 3)
-- `/wf-fix-sonar-issues` - Sonar issue fixing (Pattern 3)
+- `/pr-respond-to-review-comments` - Review comment handling (Pattern 3)
+- `/pr-fix-sonar-issues` - Sonar issue fixing (Pattern 3)

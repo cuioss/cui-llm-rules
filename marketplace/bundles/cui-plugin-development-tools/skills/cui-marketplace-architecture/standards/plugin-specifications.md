@@ -92,7 +92,7 @@ marketplace/
   ],
   "commands": [
     "./commands/wf-orchestrate-task-workflow.md",
-    "./commands/wf-handle-pull-request.md"
+    "./commands/pr-handle-pull-request.md"
   ],
   "skills": []
 }

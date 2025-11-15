@@ -69,11 +69,11 @@ By combining these workflows, developers get a seamless experience from task ass
    - Uses /maven-build-and-fix for verification
    - Optionally commits and pushes
 
-2. **/wf-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
+2. **/pr-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
    - Waits for CI/Sonar checks
    - Delegates to /maven-build-and-fix for build fixes
-   - Delegates to /wf-respond-to-review-comments for review handling
-   - Delegates to /wf-fix-sonar-issues for quality fixes
+   - Delegates to /pr-respond-to-review-comments for review handling
+   - Delegates to /pr-fix-sonar-issues for quality fixes
    - Aggregates results from self-contained commands
 
 #### Self-Contained Commands (Pattern 1 & Pattern 3)
@@ -84,14 +84,14 @@ By combining these workflows, developers get a seamless experience from task ass
    - Iterates up to 3 cycles
    - Returns structured result
 
-4. **/wf-fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
+4. **/pr-fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
    - Fetches issues with sonar-issue-fetcher
    - Triages each with sonar-issue-triager
    - Delegates fixes based on triage decision
    - Includes user approval for suppressions
    - Verifies, commits, and pushes
 
-5. **/wf-respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
+5. **/pr-respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
    - Fetches comments with review-comment-fetcher
    - Triages each with review-comment-triager
    - Code changes or explanations based on triage
@@ -144,7 +144,7 @@ After implementation is complete, create a PR using standard git workflow or the
 **Step 3: Handle PR Review Comments**
 
 ```
-/wf-handle-pull-request
+/pr-handle-pull-request
 
 Handle the review comments on PR #156 for the OAuth2 feature.
 ```
@@ -225,7 +225,7 @@ Fix all quality issues before requesting code review.
 - **task-reviewer** may invoke **research-best-practices** for validation
 - **task-breakdown-agent** invokes **research-best-practices** for industry standards
 - **wf-orchestrate-task-workflow** command orchestrates: task-breakdown-agent → task-executor workflow
-- **wf-handle-pull-request** command orchestrates: pr-review-responder → pr-quality-fixer workflow
+- **pr-handle-pull-request** command orchestrates: pr-review-responder → pr-quality-fixer workflow
 
 ## Workflow Stages
 
@@ -242,7 +242,7 @@ Agents automatically run builds and quality checks during implementation.
 Create pull request using standard git workflow.
 
 ### Stage 5: Review Response
-Use pr-review-responder or wf-handle-pull-request to address reviewer feedback.
+Use pr-review-responder or pr-handle-pull-request to address reviewer feedback.
 
 ### Stage 6: Quality Fixing
 Use pr-quality-fixer to resolve any quality issues identified during review.
