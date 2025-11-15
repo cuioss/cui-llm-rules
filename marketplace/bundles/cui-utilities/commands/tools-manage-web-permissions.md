@@ -1,5 +1,5 @@
 ---
-name: cui-manage-web-permissions
+name: tools-manage-web-permissions
 description: Analyze and consolidate WebFetch domain permissions across projects with security research and validation
 ---
 
@@ -9,7 +9,7 @@ Analyzes WebFetch domains across global and project settings, researches domains
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-manage-web-permissions update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=tools-manage-web-permissions update="[your improvement]"` with:
 1. Improved domain security research patterns and validation strategies
 2. Better permission consolidation and deduplication algorithms
 3. More effective domain categorization and trust assessment methods
@@ -227,17 +227,17 @@ Display all statistics in Step 8 report.
 
 **Analyze all settings:**
 ```
-/cui-manage-web-permissions
+/tools-manage-web-permissions
 ```
 
 **Analyze global only:**
 ```
-/cui-manage-web-permissions scope=global
+/tools-manage-web-permissions scope=global
 ```
 
 **Analyze local only:**
 ```
-/cui-manage-web-permissions scope=local
+/tools-manage-web-permissions scope=local
 ```
 
 ## ARCHITECTURE
@@ -256,5 +256,5 @@ References:
 
 ## RELATED
 
-- `/cui-setup-project-permissions` - Manages all permission types
+- `/tools-setup-project-permissions` - Manages all permission types
 - `web-security-standards` skill - Domain security knowledge

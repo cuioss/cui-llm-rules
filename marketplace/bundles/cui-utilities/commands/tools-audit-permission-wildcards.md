@@ -13,7 +13,7 @@ Scans all marketplace bundles to discover skills and commands, analyzes their na
 1. Improved marketplace scanning patterns and skill/command discovery techniques
 2. Better naming pattern recognition and prefix extraction algorithms
 3. More effective wildcard generation and minimization strategies
-4. Enhanced integration patterns with cui-setup-project-permissions
+4. Enhanced integration patterns with tools-setup-project-permissions
 5. Any lessons learned about marketplace permission architecture
 
 This ensures the command evolves and becomes more effective with each execution.
@@ -120,7 +120,7 @@ Note: Skills without standard prefixes are referenced as `bundle:skill-name`, so
 For each command name, identify the prefix pattern:
 - Pattern: `/{prefix}-{rest}`
 - Examples:
-  - `/cui-setup-project-permissions` → prefix: `cui`
+  - `/cui-java-expert:cui-java-implement-code` → prefix: `cui`
   - `/plugin-create-bundle` → prefix: `plugin`
   - `/tools-audit-permission-wildcards` → prefix: `tools`
 
@@ -209,13 +209,13 @@ Coverage Verification:
   ✓ {commands_found} commands covered by {command_wildcard_count} SlashCommand wildcards
 ```
 
-### Step 8: Update cui-setup-project-permissions
+### Step 8: Update tools-setup-project-permissions
 
 **Execute unless --dry-run mode is active.**
 
-**A. Read current cui-setup-project-permissions.md:**
+**A. Read current tools-setup-project-permissions.md:**
 ```
-Read: marketplace/bundles/cui-utilities/commands/cui-setup-project-permissions.md
+Read: marketplace/bundles/cui-utilities/commands/tools-setup-project-permissions.md
 ```
 
 **B. Locate Step 3D section:**
@@ -238,13 +238,13 @@ Create new wildcard list based on analysis:
 
 **D. Update file:**
 ```
-Edit: marketplace/bundles/cui-utilities/commands/cui-setup-project-permissions.md
+Edit: marketplace/bundles/cui-utilities/commands/tools-setup-project-permissions.md
 Replace Step 3D content with generated content
 ```
 
 **E. Display update confirmation:**
 ```
-✅ Updated cui-setup-project-permissions.md Step 3D with {wildcards_generated} wildcards
+✅ Updated tools-setup-project-permissions.md Step 3D with {wildcards_generated} wildcards
 
 Updated wildcards:
 {list all wildcards}
@@ -267,14 +267,14 @@ Marketplace Coverage: 100%
 - {wildcards_generated} wildcard permissions required
 
 {if not --dry-run}
-✅ cui-setup-project-permissions.md updated
+✅ tools-setup-project-permissions.md updated
 {else}
 ℹ️  Dry-run mode: No files modified
 {endif}
 
 Next Steps:
 1. Review generated wildcards above
-2. Run /cui-setup-project-permissions to apply changes to global settings
+2. Run /tools-setup-project-permissions to apply changes to global settings
 3. Verify wildcards in ~/.claude/settings.json
 ```
 
@@ -300,7 +300,7 @@ Next Steps:
 - Include `:*` suffix for parameterized commands/skills
 
 **Integration:**
-- Always update cui-setup-project-permissions (unless --dry-run)
+- Always update tools-setup-project-permissions (unless --dry-run)
 - Never modify files in dry-run mode
 - Provide clear confirmation of updates
 - Maintain existing file structure
@@ -336,6 +336,6 @@ Display all statistics in final summary.
 
 ## RELATED
 
-- `/cui-setup-project-permissions` - Uses wildcards discovered by this command
+- `/tools-setup-project-permissions` - Uses wildcards discovered by this command
 - `/plugin-diagnose-marketplace` - Validates marketplace structure
 - Permission management skill - Permission architecture patterns

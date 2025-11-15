@@ -28,35 +28,40 @@ These utilities are independent tools that can be used across different CUI proj
    - Maintains complete reference trails
    - Invoked when user requests research, best practices, or topic investigation
 
-### Commands (5 commands)
+### Commands (6 commands)
 
-1. **create-update-agents-md** - agents.md generation
+1. **audit-permission-wildcards** - Marketplace wildcard analyzer
+   - Analyzes marketplace bundles to identify required permission wildcard patterns
+   - Generates minimal set of wildcards for all marketplace tools
+   - Usage: `/tools-audit-permission-wildcards [--dry-run]`
+
+2. **create-update-agents-md** - agents.md generation
    - Creates or updates agents.md following OpenAI specification
    - Sources from CLAUDE.md, doc/ai-rules.md, or global standards
-   - Usage: `/cui-sync-agents-file [push]`
+   - Usage: `/tools-sync-agents-file [push]`
 
-2. **fix-intellij-diagnostics** - IDE diagnostics fixer
+3. **fix-intellij-diagnostics** - IDE diagnostics fixer
    - Retrieves and fixes IDE diagnostics automatically
    - Suppresses only when no reasonable fix available
-   - Usage: `/cui-fix-intellij-diagnostics [file=<path>] [auto-fix=<boolean>] [push]`
+   - Usage: `/tools-fix-intellij-diagnostics [file=<path>] [auto-fix=<boolean>] [push]`
 
-3. **manage-web-permissions** - WebFetch domain manager
+4. **manage-web-permissions** - WebFetch domain manager
    - Analyzes domains across all projects
    - Consolidates safe domains to global settings
    - Performs security research on unknown domains
-   - Usage: `/cui-manage-web-permissions [auto] [project=<path>] [dry-run]`
+   - Usage: `/tools-manage-web-permissions [auto] [project=<path>] [dry-run]`
 
-4. **setup-project-permissions** - Permission setup and verification
+5. **setup-project-permissions** - Permission setup and verification
    - Fixes duplicates, suspicious permissions, path formats
    - Manages temp directory permissions
    - Ensures proper permission organization
-   - Usage: `/cui-setup-project-permissions [add=<permission>] [ensurePermissions=<list>] [dry-run] [auto-fix]`
+   - Usage: `/tools-setup-project-permissions [add=<permission>] [ensurePermissions=<list>] [dry-run] [auto-fix]`
 
-5. **verify-architecture-diagrams** - PlantUML diagram verification
+6. **verify-architecture-diagrams** - PlantUML diagram verification
    - Analyzes and updates PlantUML diagrams
    - Regenerates PNG images
    - Removes orphaned diagrams with approval
-   - Usage: `/cui-verify-architecture-diagrams [plantuml_dir] [push]`
+   - Usage: `/tools-verify-architecture-diagrams [plantuml_dir] [push]`
 
 ## Installation
 
@@ -85,55 +90,55 @@ The agent will:
 ### Setup Project Permissions
 ```bash
 # Basic verification and fixing
-/cui-setup-project-permissions
+/tools-setup-project-permissions
 
 # Add specific permission
-/cui-setup-project-permissions add="Edit(//~/git/new-project/**)"
+/tools-setup-project-permissions add="Edit(//~/git/new-project/**)"
 
 # Auto-fix safe issues
-/cui-setup-project-permissions auto-fix
+/tools-setup-project-permissions auto-fix
 ```
 
 ### Manage WebFetch Permissions
 ```bash
 # Analyze all projects and consolidate domains
-/cui-manage-web-permissions
+/tools-manage-web-permissions
 
 # Auto-consolidate safe domains
-/cui-manage-web-permissions auto
+/tools-manage-web-permissions auto
 
 # Preview changes without applying
-/cui-manage-web-permissions dry-run
+/tools-manage-web-permissions dry-run
 ```
 
 ### Fix IDE Diagnostics
 ```bash
 # Fix current file automatically
-/cui-fix-intellij-diagnostics
+/tools-fix-intellij-diagnostics
 
 # Fix specific file with manual approval
-/cui-fix-intellij-diagnostics file=src/main/java/MyClass.java auto-fix=false
+/tools-fix-intellij-diagnostics file=src/main/java/MyClass.java auto-fix=false
 
 # Fix and push changes
-/cui-fix-intellij-diagnostics push
+/tools-fix-intellij-diagnostics push
 ```
 
 ### Update agents.md
 ```bash
 # Create/update agents.md
-/cui-sync-agents-file
+/tools-sync-agents-file
 
 # Update and commit/push
-/cui-sync-agents-file push
+/tools-sync-agents-file push
 ```
 
 ### Verify Architecture Diagrams
 ```bash
 # Verify all diagrams in doc/plantuml
-/cui-verify-architecture-diagrams
+/tools-verify-architecture-diagrams
 
 # Verify and commit/push changes
-/cui-verify-architecture-diagrams push
+/tools-verify-architecture-diagrams push
 ```
 
 ## Dependencies

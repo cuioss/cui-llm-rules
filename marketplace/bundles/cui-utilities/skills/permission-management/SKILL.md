@@ -80,12 +80,12 @@ Apply lessons learned to avoid known pitfalls.
 ## Integration
 
 Commands using this skill:
-- `cui-setup-project-permissions` - Main permission management command
+- `tools-setup-project-permissions` - Main permission management command
 - Doctor commands validating permission requirements
 - Security audit commands
 
 ## Version
 
-Version: 1.0.0 (Initial extraction from cui-setup-project-permissions)
+Version: 1.0.0 (Initial extraction from tools-setup-project-permissions)
 
 Part of: cui-utilities bundle

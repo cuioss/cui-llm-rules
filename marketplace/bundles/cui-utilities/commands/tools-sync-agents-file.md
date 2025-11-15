@@ -1,5 +1,5 @@
 ---
-name: cui-sync-agents-file
+name: tools-sync-agents-file
 description: Create or update project-specific agents.md file following OpenAI specification
 ---
 

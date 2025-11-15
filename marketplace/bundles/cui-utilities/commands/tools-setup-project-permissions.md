@@ -1,5 +1,5 @@
 ---
-name: cui-setup-project-permissions
+name: tools-setup-project-permissions
 description: Verify and fix permissions in settings by removing duplicates, fixing formats, and ensuring proper organization
 ---
 
@@ -9,7 +9,7 @@ Verifies and fixes permissions in `.claude/settings.local.json` using permission
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-setup-project-permissions update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=tools-setup-project-permissions update="[your improvement]"` with:
 1. Improved permission validation patterns and syntax checking techniques
 2. Better methods for detecting and consolidating redundant permissions
 3. More effective consolidation strategies for global vs local permissions
@@ -94,9 +94,9 @@ Iterate through local permissions and identify:
    - `Skill(tools-*:*)` - Example: `Skill(tools-utils:*)`
 
 2. **Marketplace SlashCommands patterns:**
-   - `SlashCommand(/cui-*:*)` - Example: `SlashCommand(/cui-setup-project-permissions)`
+   - `SlashCommand(/cui-*:*)` - Example: `SlashCommand(/cui-java-expert:cui-java-implement-code)`
    - `SlashCommand(/plugin-*:*)` - Example: `SlashCommand(/plugin-diagnose-bundle)`
-   - `SlashCommand(/tools-*:*)` - Example: `SlashCommand(/tools-analyze)`
+   - `SlashCommand(/tools-*:*)` - Example: `SlashCommand(/tools-setup-project-permissions)`
 
 These are universal marketplace tools that should be globally available.
 
@@ -345,5 +345,5 @@ This command orchestrates permission management using:
 ## RELATED
 
 - `/tools-audit-permission-wildcards` - Analyzes marketplace to generate required wildcard permissions
-- `/cui-fix-intellij-diagnostics` - Uses ensurePermissions for MCP validation
+- `/tools-fix-intellij-diagnostics` - Uses ensurePermissions for MCP validation
 - Permission architecture defined in permission-management skill

@@ -1,5 +1,5 @@
 ---
-name: cui-verify-architecture-diagrams
+name: tools-verify-architecture-diagrams
 description: Analyze and update PlantUML diagrams to reflect current codebase state and regenerate PNG images
 ---
 
@@ -9,7 +9,7 @@ Analyze all PlantUML files in the specified directory (default: doc/plantuml), v
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-verify-architecture-diagrams update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=tools-verify-architecture-diagrams update="[your improvement]"` with:
 1. Improved PlantUML diagram analysis and comparison strategies
 2. Better PNG image quality verification techniques
 3. More effective diagram splitting criteria and approaches

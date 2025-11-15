@@ -1,5 +1,5 @@
 ---
-name: cui-fix-intellij-diagnostics
+name: tools-fix-intellij-diagnostics
 description: Retrieve and fix IDE diagnostics automatically, suppressing only when no reasonable fix is available
 ---
 
@@ -9,7 +9,7 @@ Retrieves diagnostics from IntelliJ IDE via MCP, analyzes issues, applies fixes,
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command cui-fix-intellij-diagnostics`
+**This command should be improved using**: `/plugin-update-command tools-fix-intellij-diagnostics`
 
 **Improvement areas**:
 - Improved MCP diagnostics retrieval patterns and timeout handling
@@ -206,17 +206,17 @@ Display all statistics in final report.
 
 **Check all open files:**
 ```
-/cui-fix-intellij-diagnostics
+/tools-fix-intellij-diagnostics
 ```
 
 **Check specific file:**
 ```
-/cui-fix-intellij-diagnostics file=src/main/java/Foo.java
+/tools-fix-intellij-diagnostics file=src/main/java/Foo.java
 ```
 
 **Auto-push:**
 ```
-/cui-fix-intellij-diagnostics file=Foo.java push
+/tools-fix-intellij-diagnostics file=Foo.java push
 ```
 
 ## ARCHITECTURE
