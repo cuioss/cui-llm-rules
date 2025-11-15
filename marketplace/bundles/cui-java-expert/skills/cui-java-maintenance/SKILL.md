@@ -388,4 +388,4 @@ If issues arise during maintenance:
 
 **Related Commands:**
 - /cui-java-refactor-code - Systematic refactoring workflow
-- /cui-maven-build-and-fix - Build verification and fixes
+- /maven-build-and-fix - Build verification and fixes

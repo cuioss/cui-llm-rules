@@ -217,7 +217,7 @@ Track in `fixes_applied` counter.
 **5.3 Module Verification:**
 
 ```
-SlashCommand: /cui-maven:cui-maven-build-and-fix
+SlashCommand: /cui-maven:maven-build-and-fix
 Parameters: module={module-name}
 ```
 
@@ -382,7 +382,7 @@ Orchestrates agents and commands:
 - **Explore agent** - Codebase analysis for violation detection
 - **/cui-java-implement-code command** - Focused code fixes (Layer 2)
 - **maven-builder agent** - Build and verification (Layer 3)
-- **`/cui-maven-build-and-fix` command** - Build verification and fixes
+- **`/maven-build-and-fix` command** - Build verification and fixes
 - **`/java-generate-coverage` command** - Coverage analysis
 
 ## RELATED
@@ -390,7 +390,7 @@ Orchestrates agents and commands:
 - `cui-java-maintenance` skill - Standards this command implements
 - `/java-implement-code` command - Implementation fixes
 - `maven-builder` agent - Build verification
-- `/cui-maven-build-and-fix` command - Build and fix workflow
+- `/maven-build-and-fix` command - Build and fix workflow
 - `/java-generate-coverage` command - Coverage analysis
 - `cui-java-core` skill - Implementation patterns
 - `cui-task-planning` skill - For refactoring task planning

@@ -68,7 +68,7 @@ Task:
 ### Step 4: Verify Build
 
 ```
-SlashCommand: /cui-maven:cui-maven-build-and-fix
+SlashCommand: /cui-maven:maven-build-and-fix
 ```
 
 Self-contained command that runs build, fixes issues if found, verifies, and commits fixes.
@@ -89,7 +89,7 @@ Task:
   prompt: Implement task: {task_description}
 ```
 
-Then verify with SlashCommand(/cui-maven-build-and-fix).
+Then verify with SlashCommand(/maven-build-and-fix).
 
 **For batch (multiple tasks):**
 ```
@@ -108,7 +108,7 @@ Check all tasks completed. Prompt for incomplete items.
 ### Step 7: Final Verification and Commit
 
 ```
-SlashCommand: /cui-maven:cui-maven-build-and-fix push={push parameter}
+SlashCommand: /cui-maven:maven-build-and-fix push={push parameter}
 ```
 
 Self-contained command: runs build, fixes issues if found, verifies, commits all changes, and pushes if push=true.
@@ -193,7 +193,7 @@ Orchestrates agents and commands:
 - task-breakdown-agent - Planning
 - task-executor agent - Focused implementation (for atomic tasks)
 - `/cui-execute-single-task` command - Self-contained (for batch tasks)
-- `/cui-maven-build-and-fix` command - Build + verify + fix + commit
+- `/maven-build-and-fix` command - Build + verify + fix + commit
 
 ## RELATED
 
@@ -201,7 +201,7 @@ Orchestrates agents and commands:
 - task-breakdown-agent
 - task-executor agent
 - `/cui-execute-single-task` command (self-contained)
-- `/cui-maven-build-and-fix` command
+- `/maven-build-and-fix` command
 
 ## CONTINUOUS IMPROVEMENT RULE
 

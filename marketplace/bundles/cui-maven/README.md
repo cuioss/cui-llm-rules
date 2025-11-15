@@ -18,7 +18,7 @@ Agents in this bundle:
 
 Commands in this bundle:
 
-- **/cui-maven-build-and-fix** - Self-contained command that executes Maven build, analyzes issues using maven-builder's STRUCTURED output, delegates fixes to appropriate commands (e.g., /java-orchestrate-task), iterates until clean, and optionally commits/pushes changes
+- **/maven-build-and-fix** - Self-contained command that executes Maven build, analyzes issues using maven-builder's STRUCTURED output, delegates fixes to appropriate commands (e.g., /java-orchestrate-task), iterates until clean, and optionally commits/pushes changes
 
 ### Skills
 
@@ -48,15 +48,15 @@ cd cui-llm-rules/marketplace/bundles
 
 ```bash
 # Run full build verification with automatic fix iteration
-/cui-maven-build-and-fix
+/maven-build-and-fix
 
 # Run build verification, fix issues, commit, and push
-/cui-maven-build-and-fix push
+/maven-build-and-fix push
 ```
 
 **Architecture** (Rule 6 compliant):
 
-The `/cui-maven-build-and-fix` command orchestrates the complete build workflow:
+The `/maven-build-and-fix` command orchestrates the complete build workflow:
 1. Executes maven-builder with STRUCTURED output mode
 2. Analyzes categorized issues (compilation_error, test_failure, javadoc_warning, etc.)
 3. Routes fixes to appropriate commands based on issue type
@@ -65,7 +65,7 @@ The `/cui-maven-build-and-fix` command orchestrates the complete build workflow:
 
 Example workflow:
 ```
-/cui-maven-build-and-fix (command)
+/maven-build-and-fix (command)
   ├─> Task(maven-builder) with outputMode: STRUCTURED
   ├─> Analyze structured issues
   ├─> For Java issues: SlashCommand(/java-orchestrate-task "fix {issue}")

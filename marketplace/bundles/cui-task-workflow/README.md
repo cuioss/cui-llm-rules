@@ -66,12 +66,12 @@ By combining these workflows, developers get a seamless experience from task ass
 1. **/cui-orchestrate-task-workflow** - Orchestrates complete issue implementation workflow
    - Delegates to task-reviewer, task-breakdown-agent
    - Pattern Decision: atomic (direct) vs batch (delegates to /cui-execute-single-task)
-   - Uses /cui-maven-build-and-fix for verification
+   - Uses /maven-build-and-fix for verification
    - Optionally commits and pushes
 
 2. **/cui-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
    - Waits for CI/Sonar checks
-   - Delegates to /cui-maven-build-and-fix for build fixes
+   - Delegates to /maven-build-and-fix for build fixes
    - Delegates to /cui-respond-to-review-comments for review handling
    - Delegates to /cui-fix-sonar-issues for quality fixes
    - Aggregates results from self-contained commands

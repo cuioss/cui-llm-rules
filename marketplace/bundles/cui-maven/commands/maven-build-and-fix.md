@@ -1,5 +1,5 @@
 ---
-name: cui-maven-build-and-fix
+name: maven-build-and-fix
 description: Execute Maven build, analyze errors, delegate fixes to appropriate commands, and iterate until clean
 ---
 
@@ -9,7 +9,7 @@ Comprehensive project verification command that orchestrates Maven builds, analy
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command cui-maven-build-and-fix`
+**This command should be improved using**: `/plugin-update-command maven-build-and-fix`
 
 **Improvement areas**:
 - Improved issue categorization and routing strategies
@@ -243,7 +243,7 @@ Files modified: {files_modified_count}
 Next Steps:
 - Review remaining issues in: {output_file}
 - Run /java-orchestrate-task manually for specific fixes
-- Run /cui-maven-build-and-fix again to retry
+- Run /maven-build-and-fix again to retry
 ```
 
 **Do NOT commit if issues remain** (even if push=true)
@@ -283,7 +283,7 @@ If commit-changes fails:
   Error: {error_message}
 
   Note: Changes remain uncommitted in working directory.
-  You can commit manually or run /cui-maven-build-and-fix push again.
+  You can commit manually or run /maven-build-and-fix push again.
 ```
 
 ## STATISTICS TRACKING
@@ -334,22 +334,22 @@ Display all statistics in final report.
 
 **Basic build and fix:**
 ```
-/cui-maven-build-and-fix
+/maven-build-and-fix
 ```
 
 **Build, fix, and commit:**
 ```
-/cui-maven-build-and-fix push
+/maven-build-and-fix push
 ```
 
 **Custom Maven goals:**
 ```
-/cui-maven-build-and-fix goals="clean test -Pcoverage"
+/maven-build-and-fix goals="clean test -Pcoverage"
 ```
 
 **Build, fix with custom goals, and commit:**
 ```
-/cui-maven-build-and-fix goals="clean verify" push
+/maven-build-and-fix goals="clean verify" push
 ```
 
 ## ARCHITECTURE
@@ -357,7 +357,7 @@ Display all statistics in final report.
 **Pattern**: Command Orchestrator (delegates to both agents and commands)
 
 ```
-/cui-maven-build-and-fix (THIS COMMAND)
+/maven-build-and-fix (THIS COMMAND)
   ├─> Task(maven-builder) [agent: executes build, returns structured results]
   ├─> Analyze results and categorize issues
   ├─> SlashCommand(/java-orchestrate-task) [command: delegates fixes]
