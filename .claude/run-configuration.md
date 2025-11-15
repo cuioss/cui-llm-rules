@@ -69,9 +69,23 @@ This project has access to globally-approved domains for common development reso
 
 ### Last Execution
 
-- Date: 2025-11-14
-- Result: No changes needed - permissions already optimal
+- Date: 2025-11-15
+- Result: Fixed malformed bash patterns and removed redundancies
 - Status: SUCCESS
+
+### Changes Applied
+
+**Local Settings Fixed:**
+- Removed 3 malformed bash patterns (bash loop fragments)
+- Removed 5 marketplace permissions (now covered by global wildcards):
+  - `Skill(cui-task-workflow:cui-git-workflow)`
+  - `Skill(cui-utilities:cui-diagnostic-patterns)`
+  - `Skill(cui-utilities:permission-management)`
+  - `SlashCommand(/plugin-create-command)`
+  - `SlashCommand(/cui-plugin-development-tools:plugin-diagnose-commands:*)`
+
+**Global Settings Fixed:**
+- Removed 1 redundant read permission: `Read(//~/git/cui-llm-rules/**)` (covered by `Read(//~/git/**)`)
 
 ### Permission Summary
 
@@ -81,7 +95,7 @@ This project has access to globally-approved domains for common development reso
 - Marketplace wildcards: Present and correct
 
 **Local Settings:**
-- Allow: 2 permissions (Edit/Write for cui-llm-rules project)
+- Allow: 2 permissions (Edit/Write for cui-llm-rules project only)
 - Ask: 1 permission (settings write protection)
 - Architecture: ✅ Follows global/local separation perfectly
 
@@ -101,6 +115,7 @@ Permission architecture follows best practices:
 - Global: Universal read, common tools, marketplace skills/commands
 - Local: Only project-specific Edit/Write permissions
 - Read permissions covered globally via `Read(//~/git/**)`
+- All marketplace skills/commands accessible via wildcards in global settings
 
 ---
 
