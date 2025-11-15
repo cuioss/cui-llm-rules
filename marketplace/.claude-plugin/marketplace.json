@@ -49,6 +49,12 @@
       "description": "Maven build and verification tools for CUI projects",
       "source": "./bundles/cui-maven",
       "strict": false
+    },
+    {
+      "name": "cui-requirements",
+      "description": "Requirements engineering and specification standards for CUI projects",
+      "source": "./bundles/cui-requirements",
+      "strict": false
     }
   ]
 }

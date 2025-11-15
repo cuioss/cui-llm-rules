@@ -15,6 +15,12 @@ Verifies and fixes permissions in `.claude/settings.local.json` using permission
 3. More effective consolidation strategies for global vs local permissions
 4. Enhanced path normalization and format fixing approaches
 5. Any lessons learned about permission architecture patterns
+6. Improvements to global settings write workflow and safety checks
+7. Better user experience patterns for permission management
+8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
+
+**Recent Improvements:**
+- **2025-11-15**: Removed `move-to-global` parameter - marketplace permissions are now ALWAYS moved to global settings by default (the only correct behavior). Parameter created false choice when there's only one architecturally correct outcome.
 
 This ensures the command evolves and becomes more effective with each execution.
 
@@ -26,7 +32,7 @@ This ensures the command evolves and becomes more effective with each execution.
 
 **dry-run** - Preview changes without applying
 
-**auto-fix** - Automatically apply safe fixes without prompting
+**auto-fix** - Automatically apply safe fixes without prompting (includes global settings updates)
 
 ## WORKFLOW
 
@@ -56,48 +62,124 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 
 **C. Validate JSON structure**
 
+**D. Ensure global marketplace wildcard permissions:**
+- Check for `Skill(cui-*:*)`, `Skill(plugin-*:*)`, `Skill(tools-*:*)` in global settings
+- Check for `SlashCommand(/cui-*:*)`, `SlashCommand(/plugin-*:*)`, `SlashCommand(/tools-*:*)` in global settings
+- Add missing wildcards automatically (no prompt - standard marketplace permissions)
+- Track: `marketplace_wildcards_added_to_global`
+
 ### Step 4: Handle ensurePermissions Parameter (if provided)
 
-**A. Check each required permission** against global + local
-
-**B. Categorize**:
-- GLOBALLY_APPROVED (no action needed)
-- LOCALLY_APPROVED (already configured)
-- MISSING (needs approval)
-
-**C. Detect over-permissions** (approved locally but not required)
-
-**D. Calculate Permission Fit Score**:
-```
-Score = (Approved Required / (Required + Over-Permissions)) * 100
-- 100%: Perfect
-- 90-99%: Good
-- 70-89%: Fair
-- <70%: Poor
-```
-
-**E. Prompt for fixes** or auto-fix if flag set
-
-**F. Exit if 100% fit score**, continue otherwise
+Check required permissions, calculate fit score, prompt for fixes if needed. Exit if 100% fit.
 
 ### Step 5: Handle add Parameter (if provided)
 
-**A. Validate using permission-validation-standards**
-
-**B. Check for duplicates**
-
-**C. Add to allow list** if valid and unique
+Validate using permission-validation-standards, check for duplicates, add if valid.
 
 ### Step 6: Detect Redundant Local Permissions
 
 Check each local permission against global permissions using patterns from permission-architecture standards.
 
-Report and remove redundant:
+**A. Check standard redundancies:**
 - Exact duplicates
 - Permissions covered by broader global permissions
 - Examples: `Read(//~/git/project/**)` covered by global `Read(//~/git/**)`
 
+**B. Detect marketplace permissions (should be global):**
+
+Iterate through local permissions and identify:
+
+1. **Marketplace Skills patterns:**
+   - `Skill(cui-*:*)` - Example: `Skill(cui-java-expert:*)`
+   - `Skill(plugin-*:*)` - Example: `Skill(plugin-tools:*)`
+   - `Skill(tools-*:*)` - Example: `Skill(tools-utils:*)`
+
+2. **Marketplace SlashCommands patterns:**
+   - `SlashCommand(/cui-*:*)` - Example: `SlashCommand(/cui-setup-project-permissions)`
+   - `SlashCommand(/plugin-*:*)` - Example: `SlashCommand(/plugin-diagnose-bundle)`
+   - `SlashCommand(/tools-*:*)` - Example: `SlashCommand(/tools-analyze)`
+
+These are universal marketplace tools that should be globally available.
+
+**C. Categorize and track:**
+- Add detected marketplace permissions to redundant list
+- Track count: `marketplace_permissions_removed`
+- Generate suggestion message: "These marketplace permissions should be in global settings (~/.claude/settings.json) to be available across all projects"
+
+**D. Remove from local settings:**
+- Remove all detected marketplace permissions from local allow list
+- Do not prompt user (safe automatic removal - should be global anyway)
+
 Suggest moving non-project-specific permissions to global.
+
+**E. Move Marketplace Permissions to Global (if detected):**
+
+If `marketplace_permissions_removed > 0`:
+
+1. **Display detected permissions:**
+   ```
+   Found {count} marketplace permissions in local settings.
+   These are universal tools that should be in global settings for all projects.
+
+   Detected permissions:
+   - {list of marketplace permissions}
+   ```
+
+2. **Determine action based on mode:**
+   - If `dry-run`: Display only, skip to Step 7 (no modifications)
+   - If `auto-fix`: Skip prompt, proceed to step 3 (automatic update)
+   - Otherwise: Prompt user using AskUserQuestion with options:
+     - "Add to global settings" (recommended)
+     - "Skip - don't add to global"
+
+3. **If proceeding (auto-fix or user approved):**
+
+   **A. Read and validate global settings:**
+   ```
+   - Load ~/.claude/settings.json
+   - Validate JSON structure
+   - Check permissions.allow array exists
+   ```
+
+   **B. Create backup:**
+   ```
+   - Store original global settings in memory
+   - For rollback if write fails
+   ```
+
+   **C. Merge permissions safely:**
+   ```
+   - For each marketplace permission detected:
+     - Check if already exists in global (exact match)
+     - If not exists: Add to global permissions.allow
+     - Track: marketplace_permissions_added_to_global (count)
+   - Sort global permissions.allow list alphabetically
+   ```
+
+   **D. Write to global settings:**
+   ```
+   - Write updated JSON to ~/.claude/settings.json
+   - Preserve formatting (2-space indent)
+   - Validate JSON after write
+   ```
+
+   **E. Handle errors:**
+   ```
+   - If write fails: Rollback (no changes to global)
+   - Log error message
+   - Continue with local cleanup
+   - Mark marketplace_permissions_moved_to_global = false
+   ```
+
+   **F. On success:**
+   ```
+   - Set marketplace_permissions_moved_to_global = true
+   - Track count: marketplace_permissions_added_to_global
+   ```
+
+4. **If user skips:**
+   - Set marketplace_permissions_moved_to_global = false
+   - Generate suggestion message (see Step 14 output)
 
 ### Step 7: Remove Duplicate Permissions
 
@@ -148,22 +230,17 @@ Sort alphabetically by type: Bash, Edit, Read, SlashCommand, Task, WebFetch, Web
 
 **A. Generate comprehensive summary**:
 ```
-╔════════════════════════════════════════════════════════════╗
-║          Permission Setup Summary                          ║
-╚════════════════════════════════════════════════════════════╝
+Permission Setup Summary
+========================
 
-Changes Made:
-- Added: {count} new permissions
-- Removed: {count} duplicates
-- Removed: {count} redundant (globally covered)
-- Removed: {count} suspicious
-- Fixed: {count} path formats
-- Moved: {count} temp permissions to deny
+Local Changes:
+- Added/Removed/Fixed: {counts}
+- Final: {allow_count} allow, {deny_count} deny, {ask_count} ask
 
-Final Counts:
-- Allow list: {count}
-- Deny list: {count}
-- Ask list: {count}
+Global Changes (if any):
+- Marketplace wildcards: {marketplace_wildcards_added_to_global}
+- Marketplace permissions: {marketplace_permissions_added_to_global}
+- Status: {moved_to_global_status}
 ```
 
 **B. Display detailed changes**
@@ -175,7 +252,13 @@ Final Counts:
 Update `.claude/run-configuration.md` with:
 - User-approved permissions
 - Execution timestamp
-- Change statistics
+- Change statistics for local settings
+- Global settings modifications (if any):
+  - Count of marketplace wildcards added (if any)
+  - Count of marketplace permissions added to global
+  - List of permissions added
+  - Success/failure status
+- User decisions (moved to global vs. skipped)
 
 ## CRITICAL RULES
 
@@ -184,18 +267,27 @@ Update `.claude/run-configuration.md` with:
 - Never move Write(.claude/settings.local.json) to allow
 - Always move system temp permissions to deny
 - Always validate permission syntax
+- **Never write to global settings without user approval** (unless auto-fix is set)
+- Create backup before modifying global settings
+- Rollback global changes on write failure
 
 **Data Integrity:**
 - Preserve JSON formatting (2-space indent)
 - Validate JSON structure before/after
 - Never lose existing permissions without user approval
 - Always sort lists consistently
+- **Validate global settings JSON before and after write**
+- **Check for duplicates before adding to global**
+- **Never corrupt global settings file** (atomic write with backup)
 
 **User Experience:**
 - Show clear summary of changes
 - Explain why permissions are suspicious
 - Track user-approved permissions
 - Provide detailed change breakdown
+- **Clearly indicate global vs local changes**
+- **Provide options for moving marketplace permissions to global**
+- **Explain consequences of moving to global** (available in all projects)
 
 ## USAGE EXAMPLES
 
@@ -224,6 +316,8 @@ Update `.claude/run-configuration.md` with:
 /setup-project-permissions ensurePermissions="Bash(grep:*),Bash(find:*)"
 ```
 
+**Note:** Marketplace permissions are always moved to global settings (with user confirmation prompt unless auto-fix is used).
+
 ## IMPORTANT NOTES
 
 **Settings Location:**
@@ -239,9 +333,8 @@ Update `.claude/run-configuration.md` with:
 - Project Edit/Write added automatically
 - Project scripts Bash added if scripts/ exists
 - Read NOT added (globally covered)
-- CUI standards NOT added (globally covered)
-- Skills NOT added (globally covered)
-- WebFetch domains NOT added (domain:* globally covered)
+- **Marketplace skills/commands NOT added** (should be in global settings via wildcards, not project-specific)
+- WebFetch domains NOT added (domain-specific permissions should be in global settings)
 
 ## ARCHITECTURE
 
