@@ -151,10 +151,10 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | java-implement-code | cui-js-implement-code | Self-contained implementation |
 | java-implement-tests | cui-js-implement-tests | Self-contained testing |
 | java-coverage-report | cui-js-generate-coverage | Coverage generation/analysis |
-| cui-orchestrate-java-task | cui-orchestrate-js-task | End-to-end orchestration |
-| cui-java-refactor-code | cui-js-refactor-code | Systematic refactoring |
-| cui-java-fix-javadoc | cui-js-fix-jsdoc | Documentation fixing |
-| cui-java-maintain-logger | cui-js-enforce-eslint | Standards enforcement |
+| java-orchestrate-task | cui-orchestrate-js-task | End-to-end orchestration |
+| java-refactor-code | cui-js-refactor-code | Systematic refactoring |
+| java-fix-javadoc | cui-js-fix-jsdoc | Documentation fixing |
+| java-maintain-logger | cui-js-enforce-eslint | Standards enforcement |
 
 ## Integration with Maven Projects
 

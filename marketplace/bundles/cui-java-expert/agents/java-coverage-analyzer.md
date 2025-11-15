@@ -82,5 +82,5 @@ Read and parse XML/HTML to extract:
 
 ## RELATED
 
-- `/cui-java-generate-coverage` - Generates coverage then analyzes (Layer 2)
+- `/java-generate-coverage` - Generates coverage then analyzes (Layer 2)
 - `maven-builder` - Generates coverage reports

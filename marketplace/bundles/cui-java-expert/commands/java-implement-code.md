@@ -1,5 +1,5 @@
 ---
-name: cui-java-implement-code
+name: java-implement-code
 description: Self-contained command for Java code implementation with verification and iteration
 ---
 
@@ -472,7 +472,7 @@ Summary:
 This is a Layer 2 self-contained command:
 
 ```
-/cui-java-implement-code (Layer 2: Single-item orchestration)
+/java-implement-code (Layer 2: Single-item orchestration)
   ├─> Implement code directly (no agent delegation)
   ├─> Task(maven-builder) [Layer 3: verifies builds]
   ├─> Analyze and iterate (max 3 cycles)
@@ -488,16 +488,16 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `maven-builder` - Build verification agent (Layer 3)
-- `/cui-orchestrate-java-task` - Orchestrates multiple implementations (Layer 1)
+- `/java-orchestrate-task` - Orchestrates multiple implementations (Layer 1)
 - `cui-java-core` - Core Java standards skill
 - `cui-java-cdi` - CDI/Quarkus standards skill
 
 ## USAGE EXAMPLES
 
 ```
-/cui-java-implement-code task="Add getUserById method to UserService"
+/java-implement-code task="Add getUserById method to UserService"
 
-/cui-java-implement-code task="Create TokenValidator service" types="TokenValidator" module="auth-service"
+/java-implement-code task="Create TokenValidator service" types="TokenValidator" module="auth-service"
 
-/cui-java-implement-code task="Fix compilation errors in UserRepository"
+/java-implement-code task="Fix compilation errors in UserRepository"
 ```

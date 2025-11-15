@@ -1,5 +1,5 @@
 ---
-name: cui-java-implement-tests
+name: java-implement-tests
 description: Self-contained command for JUnit test implementation with verification and iteration
 ---
 
@@ -497,7 +497,7 @@ Result: ⚠️ PARTIAL SUCCESS
 This is a Layer 2 self-contained command:
 
 ```
-/cui-java-implement-tests (Layer 2: Single-item orchestration)
+/java-implement-tests (Layer 2: Single-item orchestration)
   ├─> Implement tests directly (no agent delegation)
   ├─> Task(maven-builder) [Layer 3: executes tests]
   ├─> Analyze and iterate (max 3 cycles)
@@ -514,16 +514,16 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `maven-builder` - Test execution agent (Layer 3)
-- `/cui-orchestrate-java-task` - Orchestrates multiple test tasks (Layer 1)
+- `/java-orchestrate-task` - Orchestrates multiple test tasks (Layer 1)
 - `cui-java-unit-testing` - Testing standards skill
-- `/cui-java-implement-code` - Production code implementation (Layer 2)
+- `/java-implement-code` - Production code implementation (Layer 2)
 
 ## USAGE EXAMPLES
 
 ```
-/cui-java-implement-tests task="Test UserService.getUserById method"
+/java-implement-tests task="Test UserService.getUserById method"
 
-/cui-java-implement-tests task="Create comprehensive tests for TokenValidator" types="com.example.auth.TokenValidator" module="auth-service"
+/java-implement-tests task="Create comprehensive tests for TokenValidator" types="com.example.auth.TokenValidator" module="auth-service"
 
-/cui-java-implement-tests task="Fix failing tests in UserRepository"
+/java-implement-tests task="Fix failing tests in UserRepository"
 ```

@@ -1,5 +1,5 @@
 ---
-name: cui-java-generate-coverage
+name: java-generate-coverage
 description: Generate coverage with Maven and analyze results (self-contained command)
 ---
 
@@ -57,13 +57,13 @@ Return combined results from maven-builder and java-coverage-analyzer.
 ## USAGE
 
 ```
-/cui-java-generate-coverage
+/java-generate-coverage
 ```
 
 ## ARCHITECTURE
 
 ```
-/cui-java-generate-coverage
+/java-generate-coverage
   ├─> Task(maven-builder) [generates coverage]
   └─> Task(java-coverage-analyzer) [analyzes reports]
 ```

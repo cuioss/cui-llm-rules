@@ -18,7 +18,7 @@ Agents in this bundle:
 
 Commands in this bundle:
 
-- **/cui-maven-build-and-fix** - Self-contained command that executes Maven build, analyzes issues using maven-builder's STRUCTURED output, delegates fixes to appropriate commands (e.g., /cui-orchestrate-java-task), iterates until clean, and optionally commits/pushes changes
+- **/cui-maven-build-and-fix** - Self-contained command that executes Maven build, analyzes issues using maven-builder's STRUCTURED output, delegates fixes to appropriate commands (e.g., /java-orchestrate-task), iterates until clean, and optionally commits/pushes changes
 
 ### Skills
 
@@ -68,7 +68,7 @@ Example workflow:
 /cui-maven-build-and-fix (command)
   ├─> Task(maven-builder) with outputMode: STRUCTURED
   ├─> Analyze structured issues
-  ├─> For Java issues: SlashCommand(/cui-orchestrate-java-task "fix {issue}")
+  ├─> For Java issues: SlashCommand(/java-orchestrate-task "fix {issue}")
   ├─> Iterate until clean
   └─> Commit and push if requested
 ```

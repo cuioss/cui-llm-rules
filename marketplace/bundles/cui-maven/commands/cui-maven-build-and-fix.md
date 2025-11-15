@@ -110,7 +110,7 @@ Other Issues:
 ```
 
 **Route to fix strategies:**
-- Java issues → Delegate to /cui-orchestrate-java-task
+- Java issues → Delegate to /java-orchestrate-task
 - Dependency issues → Report to user (manual intervention)
 - Configuration errors → Report to user (manual intervention)
 
@@ -120,7 +120,7 @@ Other Issues:
 
 **Java Issues (compilation, test, javadoc):**
 ```
-SlashCommand: /cui-java-expert:cui-orchestrate-java-task task="Fix {issue_category}: {issue_details}"
+SlashCommand: /cui-java-expert:java-orchestrate-task task="Fix {issue_category}: {issue_details}"
 ```
 
 Parameters to pass:
@@ -136,7 +136,7 @@ Parameters to pass:
 
 **Error handling:**
 ```
-If /cui-orchestrate-java-task fails:
+If /java-orchestrate-task fails:
   ⚠️  Fix attempt failed: {issue_category}
   Error: {error_message}
 
@@ -242,7 +242,7 @@ Files modified: {files_modified_count}
 
 Next Steps:
 - Review remaining issues in: {output_file}
-- Run /cui-orchestrate-java-task manually for specific fixes
+- Run /java-orchestrate-task manually for specific fixes
 - Run /cui-maven-build-and-fix again to retry
 ```
 
@@ -303,7 +303,7 @@ Display all statistics in final report.
 **Command Orchestration:**
 - This command orchestrates maven-builder and fix commands
 - Uses Task tool to invoke maven-builder (agent)
-- Uses SlashCommand to invoke /cui-orchestrate-java-task (command)
+- Uses SlashCommand to invoke /java-orchestrate-task (command)
 - Commands CAN invoke other commands (Rule 6 compliant)
 
 **No Direct Fixes:**
@@ -360,7 +360,7 @@ Display all statistics in final report.
 /cui-maven-build-and-fix (THIS COMMAND)
   ├─> Task(maven-builder) [agent: executes build, returns structured results]
   ├─> Analyze results and categorize issues
-  ├─> SlashCommand(/cui-orchestrate-java-task) [command: delegates fixes]
+  ├─> SlashCommand(/java-orchestrate-task) [command: delegates fixes]
   ├─> Task(maven-builder) [agent: verify fixes]
   ├─> Iterate until clean or max iterations
   └─> Task(commit-changes) [agent: commit if push=true and clean]
@@ -371,7 +371,7 @@ Display all statistics in final report.
 - ✅ Commands can invoke other commands (SlashCommand available)
 - ✅ No agent nesting (agents never call Task)
 - ✅ maven-builder is focused (just builds, no fixes)
-- ✅ /cui-orchestrate-java-task orchestrates Java fixes
+- ✅ /java-orchestrate-task orchestrates Java fixes
 - ✅ This command orchestrates the overall workflow
 
 **Reference**: See architecture-rules.md Rule 6 (Agent Delegation Constraints)
@@ -395,5 +395,5 @@ Display all statistics in final report.
 ## RELATED
 
 - `maven-builder` - Maven build execution agent (Layer 3)
-- `/cui-orchestrate-java-task` - Java implementation orchestrator (Layer 1/2)
+- `/java-orchestrate-task` - Java implementation orchestrator (Layer 1/2)
 - `commit-changes` - Git commit utility agent

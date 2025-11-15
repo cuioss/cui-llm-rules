@@ -1,5 +1,5 @@
 ---
-name: cui-java-maintain-logger
+name: java-maintain-logger
 description: Execute systematic logging standards maintenance with plan tracking and comprehensive test coverage
 ---
 
@@ -192,12 +192,12 @@ Task:
 
 ### Step 5: Implementation Phase
 
-Apply fixes using /cui-java-implement-code command with patterns from cui-java-core skill:
+Apply fixes using /java-implement-code command with patterns from cui-java-core skill:
 
 **5.1 Logger Migration:**
 
 ```
-SlashCommand: /cui-java-expert:cui-java-implement-code task="Migrate logger to CuiLogger in {file}.
+SlashCommand: /cui-java-expert:java-implement-code task="Migrate logger to CuiLogger in {file}.
 Replace logger with CuiLogger.
 Apply migration pattern from cui-java-core skill: logging-maintenance-reference.md#logger-migration
 
@@ -207,7 +207,7 @@ CRITICAL: Only modify logging code, no other changes."
 **5.2 LogRecord Implementation:**
 
 ```
-SlashCommand: /cui-java-expert:cui-java-implement-code task="Add LogRecord usage in {file}.
+SlashCommand: /cui-java-expert:java-implement-code task="Add LogRecord usage in {file}.
 Convert direct logging to LogRecord.
 Apply implementation pattern from cui-java-core skill: logging-maintenance-reference.md#logrecord-implementation
 
@@ -219,7 +219,7 @@ CRITICAL: Only modify logging code."
 **5.3 LogMessages Creation/Update:**
 
 ```
-SlashCommand: /cui-java-expert:cui-java-implement-code task="Create/update LogMessages class for module {module}.
+SlashCommand: /cui-java-expert:java-implement-code task="Create/update LogMessages class for module {module}.
 Use template from cui-java-core skill: logging-maintenance-reference.md#logmessages-structure
 
 CRITICAL: Only create/modify LogMessages, no other changes."
@@ -377,16 +377,16 @@ Display all statistics in final summary.
 
 ```
 # Process all modules
-/cui-java-maintain-logger
+/java-maintain-logger
 
 # Process single module
-/cui-java-maintain-logger module=auth-service
+/java-maintain-logger module=auth-service
 
 # Generate/regenerate plan
-/cui-java-maintain-logger create-plan
+/java-maintain-logger create-plan
 
 # Process module and regenerate plan
-/cui-java-maintain-logger module=user-api create-plan
+/java-maintain-logger module=user-api create-plan
 ```
 
 ## ARCHITECTURE
@@ -394,14 +394,14 @@ Display all statistics in final summary.
 Orchestrates agents and commands:
 - **cui-java-core skill** - Logging standards and maintenance reference
 - **Explore agent** - Violation detection and business test location
-- **/cui-java-implement-code command** - Logging code modifications
+- **/java-implement-code command** - Logging code modifications
 - **maven-builder agent** - Build and test verification
 - **Bash** - LogRecord discovery script and plan.md updates (scripts from skill)
 
 ## RELATED
 
 - `cui-java-core` skill - Logging standards and maintenance reference
-- `/cui-java-implement-code` command - Code modifications
+- `/java-implement-code` command - Code modifications
 - `maven-builder` agent - Build verification
-- `/cui-java-refactor-code` command - Broader code refactoring
-- `/cui-java-enforce-logrecords` command - Automated logging enforcement
+- `/java-refactor-code` command - Broader code refactoring
+- `/java-enforce-logrecords` command - Automated logging enforcement

@@ -1,5 +1,5 @@
 ---
-name: cui-java-maintain-tests
+name: java-maintain-tests
 description: Systematic workflow for maintaining and improving Java test quality
 ---
 
@@ -170,7 +170,7 @@ Options:
 **Apply test improvements based on scope**:
 
 ```
-SlashCommand: /cui-java-expert:cui-java-implement-tests task="Implement test quality improvements for module: [module]
+SlashCommand: /cui-java-expert:java-implement-tests task="Implement test quality improvements for module: [module]
 Scope: [scope parameter]
 Priority: [priority parameter]
 
@@ -487,7 +487,7 @@ Test maintenance is complete when:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command cui-java-maintain-tests`
+**This command should be improved using**: `/plugin-update-command java-maintain-tests`
 
 **Improvement areas**:
 - Analysis efficiency optimization for large multi-module projects
@@ -503,9 +503,9 @@ Test maintenance is complete when:
 
 **Commands and Agents Orchestrated**:
 * Explore - Test quality analysis and module identification
-* /cui-java-implement-tests - Test improvement implementation (Layer 2)
+* /java-implement-tests - Test improvement implementation (Layer 2)
 * maven-builder - Build verification and coverage analysis
 
 **Related Commands**:
-* /cui-java-refactor-code - For production code refactoring
-* /cui-java-maintain-logger - For logging standards maintenance
+* /java-refactor-code - For production code refactoring
+* /java-maintain-logger - For logging standards maintenance

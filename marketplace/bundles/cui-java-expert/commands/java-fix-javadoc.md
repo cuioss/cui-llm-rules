@@ -1,5 +1,5 @@
 ---
-name: cui-java-fix-javadoc
+name: java-fix-javadoc
 description: Fix Javadoc errors and warnings from Maven builds with content preservation
 ---
 
@@ -237,7 +237,7 @@ Apply fixes systematically by category:
 For each simple, content-neutral fix:
 
 ```
-SlashCommand: /cui-java-expert:cui-java-implement-code task="Apply Javadoc fix:
+SlashCommand: /cui-java-expert:java-implement-code task="Apply Javadoc fix:
     Apply minimal Javadoc fix to resolve error.
 
     Error Details:
@@ -446,22 +446,22 @@ All fix strategies follow content-preservation rules and minimal modification ap
 
 **Fix all Javadoc errors:**
 ```
-/cui-java-fix-javadoc
+/java-fix-javadoc
 ```
 
 **Fix single module:**
 ```
-/cui-java-fix-javadoc module=auth-service
+/java-fix-javadoc module=auth-service
 ```
 
 **Verify only (no fixes):**
 ```
-/cui-java-fix-javadoc verify-only
+/java-fix-javadoc verify-only
 ```
 
 **Verify specific module:**
 ```
-/cui-java-fix-javadoc module=user-api verify-only
+/java-fix-javadoc module=user-api verify-only
 ```
 
 ## ARCHITECTURE
@@ -476,5 +476,5 @@ Orchestrates agents and commands:
 
 - `cui-javadoc` skill - Javadoc standards and error reference
 - `maven-builder` agent - Build and verification
-- `/cui-java-implement-code` command - Code modifications
-- `/cui-java-refactor-code` command - Broader code refactoring
+- `/java-implement-code` command - Code modifications
+- `/java-refactor-code` command - Broader code refactoring

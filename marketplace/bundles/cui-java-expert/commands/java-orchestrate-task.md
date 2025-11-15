@@ -1,5 +1,5 @@
 ---
-name: cui-orchestrate-java-task
+name: java-orchestrate-task
 description: Implements Java tasks end-to-end with automated testing and coverage verification
 ---
 
@@ -36,10 +36,10 @@ Analyze the `description` parameter to determine workflow entry point:
 
 ### Step 2: Implementation Phase
 
-Call self-contained command `/cui-java-implement-code`:
+Call self-contained command `/java-implement-code`:
 
 ```
-SlashCommand: /cui-java-expert:cui-java-implement-code
+SlashCommand: /cui-java-expert:java-implement-code
 Parameters: |
   types={types}
   description={description}
@@ -60,10 +60,10 @@ This command handles implementation AND verification internally (implements → 
 
 ### Step 3: Unit Testing Phase
 
-Analyze Step 2 results and call self-contained command `/cui-java-implement-tests`:
+Analyze Step 2 results and call self-contained command `/java-implement-tests`:
 
 ```
-SlashCommand: /cui-java-expert:cui-java-implement-tests
+SlashCommand: /cui-java-expert:java-implement-tests
 Parameters: |
   types={types}
   description=Implement unit tests for {types}
@@ -89,10 +89,10 @@ This command handles test implementation AND verification internally (writes tes
 
 ### Step 4: Coverage Verification Phase
 
-Call self-contained command `/cui-java-generate-coverage`:
+Call self-contained command `/java-generate-coverage`:
 
 ```
-SlashCommand: /cui-java-expert:cui-java-generate-coverage
+SlashCommand: /cui-java-expert:java-generate-coverage
 Parameters: |
   types={types}
   module={module}
@@ -174,26 +174,26 @@ Display all statistics in final summary.
 
 **Full implementation:**
 ```
-/cui-orchestrate-java-task types=UserService description="Implement user authentication with JWT tokens" module=auth-service
+/java-orchestrate-task types=UserService description="Implement user authentication with JWT tokens" module=auth-service
 ```
 
 **Testing existing code:**
 ```
-/cui-orchestrate-java-task types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
+/java-orchestrate-task types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
 ```
 
 **Coverage verification:**
 ```
-/cui-orchestrate-java-task types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
+/java-orchestrate-task types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
 ```
 
 **Single-module project:**
 ```
-/cui-orchestrate-java-task types=com.example.util.StringUtils description="Add string validation utilities"
+/java-orchestrate-task types=com.example.util.StringUtils description="Add string validation utilities"
 ```
 
 ## RELATED
 
-- `/cui-java-implement-code` - Self-contained command for production code implementation + verification
-- `/cui-java-implement-tests` - Self-contained command for unit test implementation + verification
-- `/cui-java-generate-coverage` - Self-contained command for coverage generation + analysis
+- `/java-implement-code` - Self-contained command for production code implementation + verification
+- `/java-implement-tests` - Self-contained command for unit test implementation + verification
+- `/java-generate-coverage` - Self-contained command for coverage generation + analysis

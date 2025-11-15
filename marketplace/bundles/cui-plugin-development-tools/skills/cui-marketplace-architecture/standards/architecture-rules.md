@@ -515,14 +515,14 @@ asciidoc-content-reviewer: reviews content only
 ✅ CORRECT - Three-Layer Java Implementation:
 ```markdown
 # Layer 1: Batch Command (if multiple implementations)
-/cui-orchestrate-java-task
+/java-orchestrate-task
   ├─> Parse task into implementation list
   ├─> For each implementation:
-  │    └─> SlashCommand(/cui-java-implement-code class-task)
+  │    └─> SlashCommand(/java-implement-code class-task)
   └─> Aggregate implementation results
 
 # Layer 2: Self-Contained Command
-/cui-java-implement-code <task>
+/java-implement-code <task>
   ├─> Task(java-code-implementer)  # Layer 3: just implements
   ├─> Task(maven-builder)          # Layer 3: just verifies
   ├─> Analyze build output
