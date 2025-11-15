@@ -17,7 +17,7 @@
   ],
   "commands": [
     "./commands/java-refactor-code.md",
-    "./commands/java-orchestrate-task.md",
+    "./commands/orchestrate-java-task.md",
     "./commands/java-fix-javadoc.md",
     "./commands/java-enforce-logrecords.md",
     "./commands/java-maintain-logger.md",

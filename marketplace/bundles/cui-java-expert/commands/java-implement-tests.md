@@ -514,7 +514,7 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `maven-builder` - Test execution agent (Layer 3)
-- `/java-orchestrate-task` - Orchestrates multiple test tasks (Layer 1)
+- `/orchestrate-java-task` - Orchestrates multiple test tasks (Layer 1)
 - `cui-java-unit-testing` - Testing standards skill
 - `/java-implement-code` - Production code implementation (Layer 2)
 

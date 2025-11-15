@@ -151,7 +151,7 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | java-implement-code | js-implement-code | Self-contained implementation |
 | java-implement-tests | js-implement-tests | Self-contained testing |
 | java-coverage-report | js-generate-coverage | Coverage generation/analysis |
-| java-orchestrate-task | orchestrate-js-task | End-to-end orchestration |
+| orchestrate-java-task | orchestrate-js-task | End-to-end orchestration |
 | java-refactor-code | js-refactor-code | Systematic refactoring |
 | java-fix-javadoc | js-fix-jsdoc | Documentation fixing |
 | java-maintain-logger | js-enforce-eslint | Standards enforcement |

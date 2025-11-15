@@ -46,7 +46,7 @@ This bundle provides a complete Java development knowledge base by aggregating f
 
 ### Commands (5 commands)
 
-1. **java-orchestrate-task** - End-to-end Java task implementation orchestrator (delegates to self-contained commands)
+1. **orchestrate-java-task** - End-to-end Java task implementation orchestrator (delegates to self-contained commands)
 2. **java-enforce-logrecords** - Enforces CUI logging standards (orchestrates violation analysis and fixes)
 3. **java-implement-code** - Self-contained command: implements code + verifies + iterates
 4. **java-implement-tests** - Self-contained command: writes tests + runs tests + iterates
