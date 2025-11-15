@@ -55,7 +55,7 @@ Project setup and requirements engineering standards
 #### cui-task-workflow
 Complete development workflow from issue implementation to PR review and quality verification
 - 5 agents (task-reviewer, task-breakdown-agent, task-executor, pr-review-responder, pr-quality-fixer)
-- 2 commands (cui-orchestrate-task-workflow, cui-handle-pull-request)
+- 2 commands (wf-orchestrate-task-workflow, wf-handle-pull-request)
 
 #### cui-documentation-standards
 AsciiDoc and documentation standards enforcement

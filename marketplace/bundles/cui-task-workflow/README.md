@@ -63,35 +63,35 @@ By combining these workflows, developers get a seamless experience from task ass
 
 #### Orchestrator Commands
 
-1. **/cui-orchestrate-task-workflow** - Orchestrates complete issue implementation workflow
+1. **/wf-orchestrate-task-workflow** - Orchestrates complete issue implementation workflow
    - Delegates to task-reviewer, task-breakdown-agent
-   - Pattern Decision: atomic (direct) vs batch (delegates to /cui-execute-single-task)
+   - Pattern Decision: atomic (direct) vs batch (delegates to /wf-execute-single-task)
    - Uses /maven-build-and-fix for verification
    - Optionally commits and pushes
 
-2. **/cui-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
+2. **/wf-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
    - Waits for CI/Sonar checks
    - Delegates to /maven-build-and-fix for build fixes
-   - Delegates to /cui-respond-to-review-comments for review handling
-   - Delegates to /cui-fix-sonar-issues for quality fixes
+   - Delegates to /wf-respond-to-review-comments for review handling
+   - Delegates to /wf-fix-sonar-issues for quality fixes
    - Aggregates results from self-contained commands
 
 #### Self-Contained Commands (Pattern 1 & Pattern 3)
 
-3. **/cui-execute-single-task** - Implements and verifies single task (Pattern 1)
+3. **/wf-execute-single-task** - Implements and verifies single task (Pattern 1)
    - Uses task-executor agent for implementation
    - Uses maven-builder for verification
    - Iterates up to 3 cycles
    - Returns structured result
 
-4. **/cui-fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
+4. **/wf-fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
    - Fetches issues with sonar-issue-fetcher
    - Triages each with sonar-issue-triager
    - Delegates fixes based on triage decision
    - Includes user approval for suppressions
    - Verifies, commits, and pushes
 
-5. **/cui-respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
+5. **/wf-respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
    - Fetches comments with review-comment-fetcher
    - Triages each with review-comment-triager
    - Code changes or explanations based on triage
@@ -130,7 +130,7 @@ This will make all agents and commands available in your Claude Code environment
 **Step 1: Implement a GitHub Issue**
 
 ```
-/cui-orchestrate-task-workflow
+/wf-orchestrate-task-workflow
 
 Implement GitHub issue #42: Add OAuth2 token refresh capability
 ```
@@ -144,7 +144,7 @@ After implementation is complete, create a PR using standard git workflow or the
 **Step 3: Handle PR Review Comments**
 
 ```
-/cui-handle-pull-request
+/wf-handle-pull-request
 
 Handle the review comments on PR #156 for the OAuth2 feature.
 ```
@@ -224,8 +224,8 @@ Fix all quality issues before requesting code review.
 ### Internal Component Dependencies
 - **task-reviewer** may invoke **research-best-practices** for validation
 - **task-breakdown-agent** invokes **research-best-practices** for industry standards
-- **cui-orchestrate-task-workflow** command orchestrates: task-breakdown-agent → task-executor workflow
-- **cui-handle-pull-request** command orchestrates: pr-review-responder → pr-quality-fixer workflow
+- **wf-orchestrate-task-workflow** command orchestrates: task-breakdown-agent → task-executor workflow
+- **wf-handle-pull-request** command orchestrates: pr-review-responder → pr-quality-fixer workflow
 
 ## Workflow Stages
 
@@ -233,7 +233,7 @@ Fix all quality issues before requesting code review.
 Use task-breakdown-agent or task-reviewer to analyze requirements and create actionable plans.
 
 ### Stage 2: Implementation
-Use task-executor or cui-orchestrate-task-workflow to execute the plan and implement features.
+Use task-executor or wf-orchestrate-task-workflow to execute the plan and implement features.
 
 ### Stage 3: Quality Verification
 Agents automatically run builds and quality checks during implementation.
@@ -242,7 +242,7 @@ Agents automatically run builds and quality checks during implementation.
 Create pull request using standard git workflow.
 
 ### Stage 5: Review Response
-Use pr-review-responder or cui-handle-pull-request to address reviewer feedback.
+Use pr-review-responder or wf-handle-pull-request to address reviewer feedback.
 
 ### Stage 6: Quality Fixing
 Use pr-quality-fixer to resolve any quality issues identified during review.

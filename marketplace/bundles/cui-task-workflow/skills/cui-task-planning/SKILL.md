@@ -239,7 +239,7 @@ This skill integrates with cui-task-workflow bundle components:
 - **task-reviewer** - Validates tasks against standards
 
 ### Commands
-- **cui-orchestrate-task-workflow** - Orchestrates work using plan standards
+- **wf-orchestrate-task-workflow** - Orchestrates work using plan standards
 - Any command that creates or consumes task lists
 
 ### Other Skills

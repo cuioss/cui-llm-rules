@@ -21,11 +21,11 @@
     "./agents/task-reviewer.md"
   ],
   "commands": [
-    "./commands/cui-handle-pull-request.md",
-    "./commands/cui-orchestrate-task-workflow.md",
-    "./commands/cui-execute-single-task.md",
-    "./commands/cui-fix-sonar-issues.md",
-    "./commands/cui-respond-to-review-comments.md"
+    "./commands/wf-handle-pull-request.md",
+    "./commands/wf-orchestrate-task-workflow.md",
+    "./commands/wf-execute-single-task.md",
+    "./commands/wf-fix-sonar-issues.md",
+    "./commands/wf-respond-to-review-comments.md"
   ],
   "skills": [
     "./skills/cui-git-workflow",
