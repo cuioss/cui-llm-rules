@@ -345,5 +345,6 @@ This command orchestrates permission management using:
 
 ## RELATED
 
+- `/tools-audit-permission-wildcards` - Analyzes marketplace to generate required wildcard permissions
 - `/cui-fix-intellij-diagnostics` - Uses ensurePermissions for MCP validation
 - Permission architecture defined in permission-management skill
