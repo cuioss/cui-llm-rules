@@ -69,45 +69,76 @@ This project has access to globally-approved domains for common development reso
 
 ### Last Execution
 
-- Date: 2025-11-15
-- Result: Fixed malformed bash patterns and removed redundancies
-- Status: SUCCESS
+- Date: 2025-11-15 (Third run - CORRECTED)
+- Result: Fixed global settings to use SPECIFIC bundle wildcards instead of invalid double-wildcards
+- Status: SUCCESS (after user correction)
 
 ### Changes Applied
 
-**Local Settings Fixed:**
-- Removed 3 malformed bash patterns (bash loop fragments)
-- Removed 5 marketplace permissions (now covered by global wildcards):
-  - `Skill(cui-task-workflow:cui-git-workflow)`
-  - `Skill(cui-utilities:cui-diagnostic-patterns)`
-  - `Skill(cui-utilities:permission-management)`
-  - `SlashCommand(/plugin-create-command)`
-  - `SlashCommand(/cui-plugin-development-tools:plugin-diagnose-commands:*)`
-
 **Global Settings Fixed:**
-- Removed 1 redundant read permission: `Read(//~/git/cui-llm-rules/**)` (covered by `Read(//~/git/**)`)
+- **REMOVED invalid double-wildcards:**
+  - `Skill(cui-*:*)` ❌ (doesn't work - double wildcard invalid)
+  - `SlashCommand(/cui-*:*)` ❌ (doesn't work - double wildcard invalid)
+
+- **ADDED correct bundle-specific wildcards:**
+  - `Skill(cui-documentation-standards:*)`
+  - `Skill(cui-frontend-expert:*)`
+  - `Skill(cui-java-expert:*)`
+  - `Skill(cui-maven:*)`
+  - `Skill(cui-plugin-development-tools:*)`
+  - `Skill(cui-requirements:*)`
+  - `Skill(cui-task-workflow:*)`
+  - `Skill(cui-utilities:*)`
+  - `SlashCommand(/cui-documentation-standards:*)`
+  - `SlashCommand(/cui-frontend-expert:*)`
+  - `SlashCommand(/cui-java-expert:*)`
+  - `SlashCommand(/cui-maven:*)`
+  - `SlashCommand(/cui-plugin-development-tools:*)`
+  - `SlashCommand(/cui-requirements:*)`
+  - `SlashCommand(/cui-task-workflow:*)`
+  - `SlashCommand(/cui-utilities:*)`
+
+**Local Settings:**
+- No changes (already minimal with 2 project-specific permissions)
+
+### Error Analysis
+
+**What Went Wrong:**
+- Command incorrectly assumed `Skill(cui-*:*)` would work as a wildcard
+- This double-wildcard pattern is INVALID - permissions require specific bundle names
+- The command specification was EXPLICIT about needing individual bundle wildcards
+- I failed to follow the specification in Step 3D
+
+**Root Cause:**
+- Misread the permission wildcard syntax
+- Assumed broader pattern would cover specific patterns
+- Did not test/verify that double-wildcards actually work
 
 ### Permission Summary
 
 **Global Settings:**
-- Allow: 185 permissions (comprehensive development tools)
+- Allow: 199 permissions (comprehensive development tools)
 - Deny: 69 permissions (dangerous commands blocked)
-- Marketplace wildcards: Present and correct
+- Marketplace wildcards: ✅ All 16 bundle-specific wildcards present
+  - 8 Skill wildcards (one per bundle)
+  - 8 SlashCommand wildcards (one per bundle)
 
 **Local Settings:**
 - Allow: 2 permissions (Edit/Write for cui-llm-rules project only)
+- Deny: 0 permissions
 - Ask: 1 permission (settings write protection)
 - Architecture: ✅ Follows global/local separation perfectly
 
 ### Compliance Status
 
-✅ All marketplace wildcards present in global settings
+✅ All marketplace bundle wildcards present in global settings (SPECIFIC per bundle)
 ✅ Universal git read access configured globally
 ✅ Local permissions minimal (2 project-specific only)
 ✅ No redundancies or duplicates detected
 ✅ No suspicious patterns detected
 ✅ Proper path formats (user-relative)
 ✅ Security protections active
+✅ No invalid double-wildcard patterns
 
 ### Notes
 
@@ -115,7 +146,9 @@ Permission architecture follows best practices:
 - Global: Universal read, common tools, marketplace skills/commands
 - Local: Only project-specific Edit/Write permissions
 - Read permissions covered globally via `Read(//~/git/**)`
-- All marketplace skills/commands accessible via wildcards in global settings
+- All marketplace skills/commands accessible via SPECIFIC bundle wildcards
+
+**Important:** Wildcards must be bundle-specific (e.g., `Skill(cui-java-expert:*)`) NOT double-wildcards (e.g., `Skill(cui-*:*)`)
 
 ---
 

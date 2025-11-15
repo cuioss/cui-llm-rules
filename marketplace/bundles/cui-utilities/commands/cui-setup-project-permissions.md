@@ -18,6 +18,7 @@ Verifies and fixes permissions in `.claude/settings.local.json` using permission
 6. Improvements to global settings write workflow and safety checks
 7. Better user experience patterns for permission management
 8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
+9. **CRITICAL LESSON - Wildcard Syntax Validation:** Double-wildcards like `Skill(cui-*:*)` or `SlashCommand(/cui-*:*)` are INVALID and do not work. Permissions require SPECIFIC bundle wildcards like `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, etc. Step 3D explicitly lists all 16 required bundle-specific wildcards (8 Skills + 8 SlashCommands). Never assume broader wildcard patterns work - always use exact bundle names with single wildcard for items within that bundle. Validate that global settings contain the specific bundle wildcards, not double-wildcard patterns.
 
 This ensures the command evolves and becomes more effective with each execution.
 
@@ -60,8 +61,9 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 **C. Validate JSON structure**
 
 **D. Ensure global marketplace wildcard permissions:**
-- Check for `Skill(cui-*:*)`, `Skill(plugin-*:*)`, `Skill(tools-*:*)` in global settings
-- Check for `SlashCommand(/cui-*:*)`, `SlashCommand(/plugin-*:*)`, `SlashCommand(/tools-*:*)` in global settings
+- Check for the following wildcards in global settings:
+  - Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(cui-maven:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
+  - SlashCommands: `SlashCommand(/cui-documentation-standards:*)`, `SlashCommand(/cui-frontend-expert:*)`, `SlashCommand(/cui-java-expert:*)`, `SlashCommand(/cui-maven:*)`, `SlashCommand(/cui-plugin-development-tools:*)`, `SlashCommand(/cui-requirements:*)`, `SlashCommand(/cui-task-workflow:*)`, `SlashCommand(/cui-utilities:*)`
 - Add missing wildcards automatically (no prompt - standard marketplace permissions)
 - Track: `marketplace_wildcards_added_to_global`
 
