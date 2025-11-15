@@ -172,7 +172,7 @@ Bundles must maintain clean architecture across all components.
 ✅ GOOD BUNDLE (cui-documentation-standards):
 - asciidoc-reviewer (agent) → uses Skill: cui-documentation
 - cui-documentation (skill) → self-contained
-- cui-review-technical-docs (command) → orchestrates agent
+- doc-review-technical-docs (command) → orchestrates agent
 
 ❌ BAD BUNDLE:
 - agent references ../../../../standards/external.adoc
@@ -493,14 +493,14 @@ For batch operations on collections, use the three-layer pattern: Batch Command 
 ✅ CORRECT - Three-Layer Documentation Review:
 ```markdown
 # Layer 1: Batch Command
-/review-technical-docs
+/doc-review-technical-docs
   ├─> Glob for all *.adoc files
   ├─> For each file:
-  │    └─> SlashCommand(/cui-review-single-asciidoc file.adoc)
+  │    └─> SlashCommand(/doc-review-single-asciidoc file.adoc)
   └─> Aggregate validation results
 
 # Layer 2: Self-Contained Command
-/cui-review-single-asciidoc <file>
+/doc-review-single-asciidoc <file>
   ├─> Task(asciidoc-format-validator)  # Layer 3
   ├─> Task(asciidoc-link-verifier)     # Layer 3
   ├─> Task(asciidoc-content-reviewer)  # Layer 3

@@ -40,7 +40,7 @@ The marketplace implements 4 bundle types:
 
 **Purpose**: AsciiDoc documentation enforcement
 
-**Components**: asciidoc-reviewer agent, cui-documentation skill, /cui-review-technical-docs command
+**Components**: asciidoc-reviewer agent, cui-documentation skill, /doc-review-technical-docs command
 
 **Rationale**: Domain-specific bundle where agent loads skill for standards
 

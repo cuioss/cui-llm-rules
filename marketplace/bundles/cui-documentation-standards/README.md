@@ -15,8 +15,8 @@ This bundle includes the following components:
 - **asciidoc-content-reviewer** - Reviews AsciiDoc content for quality, tone, and completeness (focused validator)
 
 ### Commands
-- **/review-technical-docs** - Layer 1 batch command that orchestrates review of all AsciiDoc files (Three-Layer Pattern)
-- **/cui-review-single-asciidoc** - Layer 2 self-contained command that validates a single AsciiDoc file by coordinating the three focused validator agents
+- **/doc-review-technical-docs** - Layer 1 batch command that orchestrates review of all AsciiDoc files (Three-Layer Pattern)
+- **/doc-review-single-asciidoc** - Layer 2 self-contained command that validates a single AsciiDoc file by coordinating the three focused validator agents
 
 ### Skills
 - **cui-documentation** - Documentation standards including AsciiDoc conventions, structure requirements, and quality guidelines
@@ -45,20 +45,20 @@ This will make all agents, commands, and skills available in your Claude Code en
 
 ### Example 1: Review All Technical Documentation (Three-Layer Pattern)
 
-Use the /review-technical-docs command for comprehensive batch review:
+Use the /doc-review-technical-docs command for comprehensive batch review:
 
 ```
-/review-technical-docs
+/doc-review-technical-docs
 
 Review all AsciiDoc documentation in the standards/ directory.
 ```
 
 **Architecture** (Pattern 2 - Three-Layer):
 ```
-/review-technical-docs (Layer 1: Batch)
+/doc-review-technical-docs (Layer 1: Batch)
   ├─> Glob *.adoc to find all files
   ├─> For each file:
-  │    └─> SlashCommand(/cui-review-single-asciidoc {file}) (Layer 2: Self-Contained)
+  │    └─> SlashCommand(/doc-review-single-asciidoc {file}) (Layer 2: Self-Contained)
   │         ├─> Task(asciidoc-format-validator) (Layer 3: Focused)
   │         ├─> Task(asciidoc-link-verifier) (Layer 3: Focused)
   │         └─> Task(asciidoc-content-reviewer) (Layer 3: Focused)
@@ -67,21 +67,21 @@ Review all AsciiDoc documentation in the standards/ directory.
 
 The command will:
 1. Identify all AsciiDoc files in scope
-2. Delegate to /cui-review-single-asciidoc for each file
+2. Delegate to /doc-review-single-asciidoc for each file
 3. Each file gets validated by three focused agents
 4. Aggregate and report all issues
 
 ### Example 2: Review Single Document
 
-Use the /cui-review-single-asciidoc command for focused document review:
+Use the /doc-review-single-asciidoc command for focused document review:
 
 ```
-/cui-review-single-asciidoc standards/java/java-core-standards.adoc
+/doc-review-single-asciidoc standards/java/java-core-standards.adoc
 ```
 
 **Architecture** (Pattern 1 - Self-Contained):
 ```
-/cui-review-single-asciidoc (Layer 2: Self-Contained)
+/doc-review-single-asciidoc (Layer 2: Self-Contained)
   ├─> Task(asciidoc-format-validator) - Check formatting and structure
   ├─> Task(asciidoc-link-verifier) - Verify cross-references and links
   ├─> Task(asciidoc-content-reviewer) - Review content quality
@@ -146,7 +146,7 @@ Apply formatting fixes to standards/java/java-core-standards.adoc (create backup
 Before committing documentation changes:
 
 ```
-/review-technical-docs
+/doc-review-technical-docs
 
 Review my changes to the CSS standards documentation for quality and compliance.
 ```
@@ -163,7 +163,7 @@ This ensures documentation changes meet CUI standards before submission.
 - No build tools required (documentation-only workflow)
 
 ### Internal Component Dependencies
-- **review-technical-docs** command invokes **asciidoc-reviewer** agent
+- **doc-review-technical-docs** command invokes **asciidoc-reviewer** agent
 - **asciidoc-reviewer** agent automatically loads **cui-documentation** skill for standards reference
 
 ### Standards Enforced

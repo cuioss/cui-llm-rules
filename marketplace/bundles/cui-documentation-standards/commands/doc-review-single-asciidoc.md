@@ -1,5 +1,5 @@
 ---
-name: cui-review-single-asciidoc
+name: doc-review-single-asciidoc
 description: Validate and review a single AsciiDoc file with format, links, and content checks
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that orchestrates format validation, link verification, a
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /plugin-update-command command-name=cui-review-single-asciidoc update="[your improvement]"
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /plugin-update-command command-name=doc-review-single-asciidoc update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Better coordination between validation agents
@@ -40,7 +40,7 @@ If missing or invalid:
   Required: file=path/to/document.adoc
   Received: {parameter_value}
 
-  Example: /cui-review-single-asciidoc file=standards/java-core.adoc
+  Example: /doc-review-single-asciidoc file=standards/java-core.adoc
 ```
 Exit with error status.
 
@@ -240,27 +240,27 @@ Display all statistics in report.
 
 **Review single file:**
 ```
-/cui-review-single-asciidoc file=standards/java-core.adoc
+/doc-review-single-asciidoc file=standards/java-core.adoc
 ```
 
 **Review and apply fixes:**
 ```
-/cui-review-single-asciidoc file=standards/java-core.adoc apply_fixes=true
+/doc-review-single-asciidoc file=standards/java-core.adoc apply_fixes=true
 ```
 
 ## ARCHITECTURE
 
 **Pattern**: Self-Contained Command (Layer 2)
-- Called by: `/cui-review-technical-docs` (Layer 1 batch command)
+- Called by: `/doc-review-technical-docs` (Layer 1 batch command)
 - Calls: Layer 3 focused agents (format-validator, link-verifier, content-reviewer)
 - Can be invoked: Directly by users OR by batch command
 
 **Three-Layer Pattern:**
 ```
-Layer 1: /cui-review-technical-docs (batch - all files)
-  └─> For each file: SlashCommand(/cui-review-single-asciidoc)
+Layer 1: /doc-review-technical-docs (batch - all files)
+  └─> For each file: SlashCommand(/doc-review-single-asciidoc)
 
-Layer 2: /cui-review-single-asciidoc (self-contained - one file)
+Layer 2: /doc-review-single-asciidoc (self-contained - one file)
   ├─> Task(asciidoc-format-validator)
   ├─> Task(asciidoc-link-verifier)
   └─> Task(asciidoc-content-reviewer)
@@ -271,7 +271,7 @@ Layer 3: Focused agents
 
 ## RELATED
 
-- `/cui-review-technical-docs` - Batch command for all AsciiDoc files
+- `/doc-review-technical-docs` - Batch command for all AsciiDoc files
 - `asciidoc-format-validator` - Format validation agent
 - `asciidoc-link-verifier` - Link verification agent
 - `asciidoc-content-reviewer` - Content review agent

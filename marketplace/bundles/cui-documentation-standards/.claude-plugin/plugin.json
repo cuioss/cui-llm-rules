@@ -17,8 +17,8 @@
     "./agents/asciidoc-link-verifier.md"
   ],
   "commands": [
-    "./commands/cui-review-technical-docs.md",
-    "./commands/cui-review-single-asciidoc.md"
+    "./commands/doc-review-technical-docs.md",
+    "./commands/doc-review-single-asciidoc.md"
   ],
   "skills": [
     "./skills/cui-documentation"
