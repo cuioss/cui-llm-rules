@@ -1,5 +1,5 @@
 ---
-name: cui-orchestrate-js-task
+name: orchestrate-js-task
 description: Implements JavaScript tasks end-to-end with automated testing and coverage verification
 ---
 
@@ -9,7 +9,7 @@ Orchestrates complete JavaScript task implementation through code creation, unit
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-orchestrate-js-task update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-js-task update="[your improvement]"` with:
 1. Task breakdown patterns - How to decompose JavaScript tasks into implementation + testing phases, recognizing when components need separate test utilities or fixtures
 2. Implementation strategy refinement - Best practices for handling async code, module imports, external dependencies, framework-specific patterns (Vue, React, etc.)
 3. Test implementation approaches - Unit test patterns for JavaScript, mocking strategies, fixture setup efficiency, achieving meaningful coverage vs line coverage
@@ -36,7 +36,7 @@ Analyze `description` parameter:
 ### Step 2: Implementation Phase
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-implement-code
+SlashCommand: /cui-frontend-expert:js-implement-code
 Parameters:
 - files: {files}
 - description: {description}
@@ -51,7 +51,7 @@ Self-contained command handles implementation + verification + iteration.
 ### Step 3: Unit Testing Phase
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-implement-tests
+SlashCommand: /cui-frontend-expert:js-implement-tests
 Parameters:
 - files: {files}
 - description: Implement unit tests for {files}
@@ -66,7 +66,7 @@ Self-contained command handles test implementation + verification.
 ### Step 4: Coverage Verification Phase
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:js-generate-coverage
 Parameters:
 - files: {files}
 - workspace: {workspace}
@@ -99,16 +99,16 @@ Continue cycling through Steps 2-4 until:
 
 **Full implementation:**
 ```
-/cui-orchestrate-js-task files="src/services/auth.js" description="Implement user authentication with JWT tokens" workspace="packages/core"
+/orchestrate-js-task files="src/services/auth.js" description="Implement user authentication with JWT tokens" workspace="packages/core"
 ```
 
 **Testing existing code:**
 ```
-/cui-orchestrate-js-task files="src/utils/formatter.js" description="Implement unit tests for formatter utilities"
+/orchestrate-js-task files="src/utils/formatter.js" description="Implement unit tests for formatter utilities"
 ```
 
 ## RELATED
 
-- `/cui-js-implement-code` - Self-contained implementation command (Layer 2)
-- `/cui-js-implement-tests` - Self-contained test command (Layer 2)
-- `/cui-js-generate-coverage` - Coverage generation/analysis (Layer 2)
+- `/js-implement-code` - Self-contained implementation command (Layer 2)
+- `/js-implement-tests` - Self-contained test command (Layer 2)
+- `/js-generate-coverage` - Coverage generation/analysis (Layer 2)

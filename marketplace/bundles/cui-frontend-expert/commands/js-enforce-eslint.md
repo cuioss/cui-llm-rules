@@ -1,5 +1,5 @@
 ---
-name: cui-js-enforce-eslint
+name: js-enforce-eslint
 description: Enforce ESLint standards by fixing violations systematically
 ---
 
@@ -9,7 +9,7 @@ Orchestrates systematic ESLint violation fixing workflow with standards complian
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-enforce-eslint update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-enforce-eslint update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -49,7 +49,7 @@ Re-run lint to check remaining issues.
 For each remaining violation:
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-implement-code task="Fix ESLint violation: {violation.message}
+SlashCommand: /cui-frontend-expert:js-implement-code task="Fix ESLint violation: {violation.message}
 
 Rule: {violation.rule}
 Line: {violation.line}
@@ -87,4 +87,4 @@ Lint Status: {CLEAN|PARTIAL}
 ## RELATED
 
 - `npm-builder` - Executes ESLint (Layer 3)
-- `/cui-js-implement-code` - Fixes manual violations (Layer 2)
+- `/js-implement-code` - Fixes manual violations (Layer 2)

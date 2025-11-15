@@ -16,14 +16,14 @@
     "./agents/npm-builder.md"
   ],
   "commands": [
-    "./commands/cui-js-enforce-eslint.md",
-    "./commands/cui-js-refactor-code.md",
-    "./commands/cui-orchestrate-js-task.md",
-    "./commands/cui-js-maintain-tests.md",
-    "./commands/cui-js-fix-jsdoc.md",
-    "./commands/cui-js-generate-coverage.md",
-    "./commands/cui-js-implement-code.md",
-    "./commands/cui-js-implement-tests.md"
+    "./commands/js-enforce-eslint.md",
+    "./commands/js-refactor-code.md",
+    "./commands/orchestrate-js-task.md",
+    "./commands/js-maintain-tests.md",
+    "./commands/js-fix-jsdoc.md",
+    "./commands/js-generate-coverage.md",
+    "./commands/js-implement-code.md",
+    "./commands/js-implement-tests.md"
   ],
   "skills": [
     "./skills/cui-css",

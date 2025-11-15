@@ -1,5 +1,5 @@
 ---
-name: cui-js-implement-tests
+name: js-implement-tests
 description: Self-contained command for JavaScript test implementation with verification and iteration
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements Jest/Vitest tests with full standards com
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-implement-tests update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-implement-tests update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -444,7 +444,7 @@ Result: ⚠️ PARTIAL SUCCESS
 This is a Layer 2 self-contained command:
 
 ```
-/cui-js-implement-tests (Layer 2: Single-item orchestration)
+/js-implement-tests (Layer 2: Single-item orchestration)
   ├─> Implement tests directly (no agent delegation)
   ├─> Task(npm-builder) [Layer 3: executes tests]
   ├─> Analyze and iterate (max 3 cycles)
@@ -461,16 +461,16 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `npm-builder` - Test execution agent (Layer 3)
-- `/cui-orchestrate-js-task` - Orchestrates multiple test tasks (Layer 1)
+- `/orchestrate-js-task` - Orchestrates multiple test tasks (Layer 1)
 - `cui-javascript-unit-testing` - Testing standards skill
 - `/javascript-implement-code` - Production code implementation (Layer 2)
 
 ## USAGE EXAMPLES
 
 ```
-/cui-js-implement-tests task="Test validateEmail and validatePhone functions" files="src/utils/validator.js"
+/js-implement-tests task="Test validateEmail and validatePhone functions" files="src/utils/validator.js"
 
-/cui-js-implement-tests task="Create comprehensive tests for auth service" files="src/services/auth.js" workspace="packages/core"
+/js-implement-tests task="Create comprehensive tests for auth service" files="src/services/auth.js" workspace="packages/core"
 
-/cui-js-implement-tests task="Fix failing tests in UserRepository"
+/js-implement-tests task="Fix failing tests in UserRepository"
 ```

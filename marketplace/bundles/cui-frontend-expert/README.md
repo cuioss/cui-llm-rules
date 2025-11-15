@@ -21,13 +21,13 @@ cui-frontend-expert/
 │   ├── js-coverage-analyzer.md
 │   └── js-doc-violation-analyzer.md
 └── commands/            # User utilities (Layer 2)
-    ├── cui-js-implement-code.md
-    ├── cui-js-implement-tests.md
-    ├── cui-js-generate-coverage.md
-    ├── cui-orchestrate-js-task.md
-    ├── cui-js-refactor-code.md
-    ├── cui-js-fix-jsdoc.md
-    └── cui-js-enforce-eslint.md
+    ├── js-implement-code.md
+    ├── js-implement-tests.md
+    ├── js-generate-coverage.md
+    ├── orchestrate-js-task.md
+    ├── js-refactor-code.md
+    ├── js-fix-jsdoc.md
+    └── js-enforce-eslint.md
 ```
 
 ## Skills (Layer 1: Knowledge + Standards)
@@ -57,17 +57,17 @@ cui-frontend-expert/
 ## Commands (Layer 2: User Utilities)
 
 ### Self-Contained Implementation Commands
-- **cui-js-implement-code** - Self-contained command for code implementation with verification and iteration
-- **cui-js-implement-tests** - Self-contained command for test implementation with verification and iteration
-- **cui-js-generate-coverage** - Coverage generation and analysis command
+- **js-implement-code** - Self-contained command for code implementation with verification and iteration
+- **js-implement-tests** - Self-contained command for test implementation with verification and iteration
+- **js-generate-coverage** - Coverage generation and analysis command
 
 ### Orchestration Commands
-- **cui-orchestrate-js-task** - End-to-end task orchestration (implementation → testing → coverage)
-- **cui-js-refactor-code** - Systematic refactoring with standards compliance verification
+- **orchestrate-js-task** - End-to-end task orchestration (implementation → testing → coverage)
+- **js-refactor-code** - Systematic refactoring with standards compliance verification
 
 ### Maintenance Commands
-- **cui-js-fix-jsdoc** - Fix JSDoc errors and warnings systematically
-- **cui-js-enforce-eslint** - Enforce ESLint standards by fixing violations
+- **js-fix-jsdoc** - Fix JSDoc errors and warnings systematically
+- **js-enforce-eslint** - Enforce ESLint standards by fixing violations
 
 ## Architecture Pattern
 
@@ -93,34 +93,34 @@ This bundle follows the CUI marketplace three-layer architecture:
 
 ### Implement JavaScript Code
 ```bash
-/cui-js-implement-code files="src/utils/validator.js" description="Implement email and phone validation"
+/js-implement-code files="src/utils/validator.js" description="Implement email and phone validation"
 ```
 
 ### Implement Tests
 ```bash
-/cui-js-implement-tests files="src/utils/validator.js" description="Implement comprehensive unit tests"
+/js-implement-tests files="src/utils/validator.js" description="Implement comprehensive unit tests"
 ```
 
 ### Full Task Workflow
 ```bash
-/cui-orchestrate-js-task files="src/services/auth.js" description="Implement JWT authentication service"
+/orchestrate-js-task files="src/services/auth.js" description="Implement JWT authentication service"
 ```
 This orchestrates: implementation → tests → coverage verification
 
 ### Systematic Refactoring
 ```bash
-/cui-js-refactor-code scope=modernize priority=high
+/js-refactor-code scope=modernize priority=high
 ```
 Modernizes JavaScript codebase (var → const/let, callbacks → async/await, etc.)
 
 ### Fix JSDoc Issues
 ```bash
-/cui-js-fix-jsdoc files="src/**/*.js"
+/js-fix-jsdoc files="src/**/*.js"
 ```
 
 ### Enforce ESLint
 ```bash
-/cui-js-enforce-eslint fix-mode=auto
+/js-enforce-eslint fix-mode=auto
 ```
 
 ## Key Differences from cui-java-expert
@@ -148,13 +148,13 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | maven-builder | npm-builder | Build execution |
 | java-coverage-analyzer | js-coverage-analyzer | Coverage analysis |
 | log-record-documenter | js-doc-violation-analyzer | Documentation analysis |
-| java-implement-code | cui-js-implement-code | Self-contained implementation |
-| java-implement-tests | cui-js-implement-tests | Self-contained testing |
-| java-coverage-report | cui-js-generate-coverage | Coverage generation/analysis |
-| java-orchestrate-task | cui-orchestrate-js-task | End-to-end orchestration |
-| java-refactor-code | cui-js-refactor-code | Systematic refactoring |
-| java-fix-javadoc | cui-js-fix-jsdoc | Documentation fixing |
-| java-maintain-logger | cui-js-enforce-eslint | Standards enforcement |
+| java-implement-code | js-implement-code | Self-contained implementation |
+| java-implement-tests | js-implement-tests | Self-contained testing |
+| java-coverage-report | js-generate-coverage | Coverage generation/analysis |
+| java-orchestrate-task | orchestrate-js-task | End-to-end orchestration |
+| java-refactor-code | js-refactor-code | Systematic refactoring |
+| java-fix-javadoc | js-fix-jsdoc | Documentation fixing |
+| java-maintain-logger | js-enforce-eslint | Standards enforcement |
 
 ## Integration with Maven Projects
 
@@ -174,12 +174,12 @@ Skills include standards for Maven integration to ensure frontend code works wit
 
 2. **Use a command** for tasks:
    ```
-   /cui-js-implement-code files="..." description="..."
+   /js-implement-code files="..." description="..."
    ```
 
 3. **Orchestrate workflows** with task manager:
    ```
-   /cui-orchestrate-js-task files="..." description="..."
+   /orchestrate-js-task files="..." description="..."
    ```
 
 ## Related Bundles

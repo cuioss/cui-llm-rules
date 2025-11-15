@@ -70,8 +70,8 @@ Standards for JavaScript test quality:
 ## Integration
 
 This skill is used by:
-- `/cui-js-refactor-code` - Systematic code refactoring workflow
-- `/cui-js-maintain-tests` - Test quality improvement workflow
+- `/js-refactor-code` - Systematic code refactoring workflow
+- `/js-maintain-tests` - Test quality improvement workflow
 - Code review processes
 - Maintenance planning
 

@@ -1,5 +1,5 @@
 ---
-name: cui-js-maintain-tests
+name: js-maintain-tests
 description: Execute systematic JavaScript test quality improvement with NO production code changes
 ---
 
@@ -9,7 +9,7 @@ Orchestrates systematic JavaScript test quality improvement workflow while ensur
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-maintain-tests update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-maintain-tests update="[your improvement]"` with:
 1. Improved test anti-pattern detection
 2. Better test improvement strategies
 3. More effective agent coordination
@@ -76,7 +76,7 @@ Task:
 
 **2.2 Coverage Baseline:**
 ```
-SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:js-generate-coverage
 Parameters: workspace={workspace if specified}
 ```
 
@@ -189,7 +189,7 @@ Test improvements: {count} ({HIGH/MEDIUM/LOW distribution})
 For each test improvement in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-implement-tests task="Improve test quality using cui-javascript-maintenance test-quality-standards.md:
+SlashCommand: /cui-frontend-expert:js-implement-tests task="Improve test quality using cui-javascript-maintenance test-quality-standards.md:
 
 Issue: {issue description}
 Location: {test file}:{line}
@@ -256,7 +256,7 @@ Task:
 **5.4 Workspace Coverage Check:**
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:js-generate-coverage
 Parameters: workspace={workspace-name}
 ```
 
@@ -303,7 +303,7 @@ Task:
 
 **6.2 Coverage Verification:**
 ```
-SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:js-generate-coverage
 ```
 
 Compare final coverage to baseline:
@@ -490,27 +490,27 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-maintenance state
 
 **Full test maintenance (all workspaces, all priorities):**
 ```
-/cui-js-maintain-tests
+/js-maintain-tests
 ```
 
 **Single workspace test maintenance:**
 ```
-/cui-js-maintain-tests workspace=frontend
+/js-maintain-tests workspace=frontend
 ```
 
 **Only high priority test improvements:**
 ```
-/cui-js-maintain-tests priority=high
+/js-maintain-tests priority=high
 ```
 
 **Medium and high priority improvements:**
 ```
-/cui-js-maintain-tests priority=medium
+/js-maintain-tests priority=medium
 ```
 
 **Specific workspace, high priority only:**
 ```
-/cui-js-maintain-tests workspace=core priority=high
+/js-maintain-tests workspace=core priority=high
 ```
 
 ## ARCHITECTURE
@@ -518,14 +518,14 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-maintenance state
 Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Test quality standards and prioritization
 - **Explore agent** - Test quality analysis
-- **`/cui-js-implement-tests` command** - Self-contained test improvements (Layer 2)
+- **`/js-implement-tests` command** - Self-contained test improvements (Layer 2)
 - **npm-builder agent** - Test execution and verification (Layer 3)
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Test quality standards this command implements
-- `/cui-js-implement-tests` command - Test implementation and improvement (Layer 2)
+- `/js-implement-tests` command - Test implementation and improvement (Layer 2)
 - `npm-builder` agent - Test execution and verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript-unit-testing` skill - Jest testing patterns

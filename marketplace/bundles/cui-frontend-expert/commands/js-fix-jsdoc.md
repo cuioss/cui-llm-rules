@@ -1,5 +1,5 @@
 ---
-name: cui-js-fix-jsdoc
+name: js-fix-jsdoc
 description: Fix JSDoc errors and warnings from build/lint with content preservation
 ---
 
@@ -9,7 +9,7 @@ Orchestrates systematic JSDoc violation fixing workflow with standards complianc
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command cui-js-fix-jsdoc`
+**This command should be improved using**: `/plugin-update-command js-fix-jsdoc`
 
 **Improvement areas**:
 - Enhanced violation detection for TypeScript JSDoc patterns
@@ -48,7 +48,7 @@ Categorize by severity:
 For each violation (CRITICAL → WARNING):
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-implement-code task="Add JSDoc documentation for {violation.target}.
+SlashCommand: /cui-frontend-expert:js-implement-code task="Add JSDoc documentation for {violation.target}.
 
 Type: {violation.type}
 Line: {violation.line}
@@ -90,5 +90,5 @@ Result: {summary}
 ## RELATED
 
 - `js-doc-violation-analyzer` - Identifies violations (Layer 3)
-- `/cui-js-implement-code` - Fixes violations (Layer 2)
+- `/js-implement-code` - Fixes violations (Layer 2)
 - `npm-builder` - Verifies fixes (Layer 3)

@@ -1,5 +1,5 @@
 ---
-name: cui-js-implement-code
+name: js-implement-code
 description: Self-contained command for JavaScript code implementation with verification and iteration
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements JavaScript code with full standards compl
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-implement-code update="[your improvement]"` with improvements discovered.
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-implement-code update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -490,7 +490,7 @@ Summary:
 This is a Layer 2 self-contained command:
 
 ```
-/cui-js-implement-code (Layer 2: Single-item orchestration)
+/js-implement-code (Layer 2: Single-item orchestration)
   ├─> Implement code directly (no agent delegation)
   ├─> Task(npm-builder) [Layer 3: verifies builds]
   ├─> Analyze and iterate (max 3 cycles)
@@ -506,16 +506,16 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `npm-builder` - Build verification agent (Layer 3)
-- `/cui-orchestrate-js-task` - Orchestrates multiple implementations (Layer 1)
+- `/orchestrate-js-task` - Orchestrates multiple implementations (Layer 1)
 - `cui-javascript` - Core JavaScript standards skill
 - `cui-jsdoc` - JSDoc documentation skill
 
 ## USAGE EXAMPLES
 
 ```
-/cui-js-implement-code task="Implement email and phone validation functions" files="src/utils/validator.js"
+/js-implement-code task="Implement email and phone validation functions" files="src/utils/validator.js"
 
-/cui-js-implement-code task="Create reusable Button component with variants" files="src/components/Button.js"
+/js-implement-code task="Create reusable Button component with variants" files="src/components/Button.js"
 
-/cui-js-implement-code task="Implement REST API client" files="src/services/api.js" workspace="packages/core"
+/js-implement-code task="Implement REST API client" files="src/services/api.js" workspace="packages/core"
 ```

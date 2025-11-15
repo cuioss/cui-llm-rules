@@ -1,5 +1,5 @@
 ---
-name: cui-js-refactor-code
+name: js-refactor-code
 description: Execute systematic JavaScript refactoring with standards compliance verification
 ---
 
@@ -9,7 +9,7 @@ Orchestrates systematic JavaScript code refactoring and maintenance workflow wit
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-js-refactor-code update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-refactor-code update="[your improvement]"` with:
 1. Improved violation detection patterns
 2. Better file/workspace processing strategies
 3. More effective agent coordination
@@ -101,7 +101,7 @@ Task:
 **2.3 Coverage Baseline:**
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:js-generate-coverage
 Parameters: workspace={workspace if specified}
 ```
 
@@ -171,7 +171,7 @@ Display workspace name and violation count/distribution.
 For each violation in priority order (HIGH → MEDIUM → LOW):
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-implement-code task="Fix violation using cui-javascript standards.
+SlashCommand: /cui-frontend-expert:js-implement-code task="Fix violation using cui-javascript standards.
 
 Violation: {description}
 Location: {file}:{line}
@@ -202,7 +202,7 @@ Task:
 **5.4 Workspace Coverage Check:**
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:js-generate-coverage
 Parameters: workspace={workspace-name}
 ```
 
@@ -269,7 +269,7 @@ Task:
 **6.4 Coverage Verification:**
 
 ```
-SlashCommand: /cui-frontend-expert:cui-js-generate-coverage
+SlashCommand: /cui-frontend-expert:js-generate-coverage
 ```
 
 Display coverage change from baseline and ensure no significant regression.
@@ -342,25 +342,25 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-refactor state
 
 ```
 # Full refactoring (all workspaces, all priorities)
-/cui-js-refactor-code
+/js-refactor-code
 
 # Single workspace refactoring
-/cui-js-refactor-code workspace=frontend
+/js-refactor-code workspace=frontend
 
 # Only high priority violations
-/cui-js-refactor-code priority=high
+/js-refactor-code priority=high
 
 # Modernize code only
-/cui-js-refactor-code scope=modernize
+/js-refactor-code scope=modernize
 
 # Remove unused code
-/cui-js-refactor-code scope=unused priority=medium
+/js-refactor-code scope=unused priority=medium
 
 # Documentation improvements only
-/cui-js-refactor-code scope=documentation workspace=core
+/js-refactor-code scope=documentation workspace=core
 
 # Combination
-/cui-js-refactor-code workspace=ui scope=standards priority=high
+/js-refactor-code workspace=ui scope=standards priority=high
 ```
 
 ## ARCHITECTURE
@@ -368,14 +368,14 @@ Bash: git reset --hard {initial_commit}  # Restore to pre-refactor state
 Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Standards for detection, prioritization, verification
 - **Explore agent** - Codebase analysis for violation detection
-- **`/cui-js-implement-code` command** - Self-contained code fixes (Layer 2)
+- **`/js-implement-code` command** - Self-contained code fixes (Layer 2)
 - **npm-builder agent** - Build and verification
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Standards this command implements
-- `/cui-js-implement-code` command - Implementation fixes (Layer 2)
+- `/js-implement-code` command - Implementation fixes (Layer 2)
 - `npm-builder` agent - Build verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript` skill - Implementation patterns
