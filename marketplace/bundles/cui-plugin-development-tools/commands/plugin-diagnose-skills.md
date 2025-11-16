@@ -70,10 +70,27 @@ This provides architecture rules and validation patterns for marketplace compone
 **Parse parameters** to determine scope.
 
 **For marketplace scope (default):**
+
+Launch marketplace-inventory agent:
 ```
-Glob: pattern="*/SKILL.md", path="~/git/cui-llm-rules/marketplace/skills"
-Glob: pattern="*/skills/*/SKILL.md", path="~/git/cui-llm-rules/marketplace/bundles"
+Task:
+  subagent_type: cui-plugin-development-tools:marketplace-inventory
+  description: Discover all marketplace skills
+  prompt: |
+    Scan the marketplace and return a complete inventory.
+
+    Parameters:
+    - scope: marketplace
+    - include-descriptions: false
+
+    Return JSON inventory with all bundles and their skills.
 ```
+
+Parse inventory response:
+- Extract `inventory.bundles[]` array
+- For each bundle, collect `bundle.skills[]` with `name` and `path` fields
+- Build flat list of skill paths from all bundles
+- Skill paths point to skill directories (not SKILL.md files)
 
 **For global scope:**
 ```

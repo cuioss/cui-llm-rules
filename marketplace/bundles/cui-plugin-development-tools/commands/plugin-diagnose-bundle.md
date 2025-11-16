@@ -96,30 +96,41 @@ bundle-name/
 
 #### 1.1: Discover Actual Components
 
-Use Glob to find all component files in the bundle:
+Launch marketplace-inventory agent to discover all bundle components:
 
-**Agents:**
 ```
-Glob: marketplace/bundles/{bundle-name}/agents/*.md
-```
-Extract filenames (without .md extension) to list: `discovered_agents`
+Task:
+  subagent_type: cui-plugin-development-tools:marketplace-inventory
+  description: Discover bundle components
+  prompt: |
+    Scan the marketplace and return inventory for specific bundle.
 
-**Commands:**
-```
-Glob: marketplace/bundles/{bundle-name}/commands/*.md
-```
-Extract filenames (without .md extension) to list: `discovered_commands`
+    Parameters:
+    - scope: marketplace
+    - include-descriptions: false
 
-**Skills:**
+    Return JSON inventory. Filter results for bundle: {bundle-name}
 ```
-Glob: marketplace/bundles/{bundle-name}/skills/*/SKILL.md
-```
-Extract parent directory names to list: `discovered_skills`
+
+Parse inventory response for the specific bundle:
+- Extract bundle object matching `{bundle-name}` from `inventory.bundles[]`
+- Extract `bundle.agents[]` - list of agent objects with `name` field
+- Extract `bundle.commands[]` - list of command objects with `name` field
+- Extract `bundle.skills[]` - list of skill objects with `name` field
+
+Build component name lists:
+- `discovered_agents` = [agent.name for agent in bundle.agents]
+- `discovered_commands` = [cmd.name for cmd in bundle.commands]
+- `discovered_skills` = [skill.name for skill in bundle.skills]
 
 **Track statistics:**
-- `discovered_agents_count`
-- `discovered_commands_count`
-- `discovered_skills_count`
+- `discovered_agents_count` = length of discovered_agents
+- `discovered_commands_count` = length of discovered_commands
+- `discovered_skills_count` = length of discovered_skills
+
+**Error handling:**
+- If Task fails: Display "Failed to discover bundle components" and exit
+- If bundle not found in inventory: Display "Bundle {bundle-name} not found in marketplace" and exit
 
 #### 1.2: Read plugin.json Registration
 

@@ -214,13 +214,31 @@ Increment `issues_found` for each obsolete entry.
 
 ### Step 5: Validate Bundle Manifests
 
-**A. Find all bundle plugin.json files:**
+**A. Discover all bundles using marketplace-inventory agent:**
+
 ```
-Glob: marketplace/bundles/*/.claude-plugin/plugin.json
+Task:
+  subagent_type: cui-plugin-development-tools:marketplace-inventory
+  description: Discover all marketplace bundles
+  prompt: |
+    Scan the marketplace and return a complete inventory.
+
+    Parameters:
+    - scope: marketplace
+    - include-descriptions: false
+
+    Return JSON inventory with all bundles.
 ```
 
-**B. Validate each manifest against schema:**
-- Read each plugin.json
+Parse inventory response:
+- Extract `inventory.bundles[]` array
+- For each bundle, get `bundle.name` and `bundle.path`
+- Build list of bundle names and paths
+
+**B. Validate each bundle's plugin.json manifest against schema:**
+
+For each bundle from inventory:
+- Read `{bundle.path}/.claude-plugin/plugin.json`
 - Check required fields: name, version, description
 - Check optional fields: author, license, homepage, repository, keywords
 - Detect invalid fields:
@@ -240,6 +258,10 @@ Glob: marketplace/bundles/*/.claude-plugin/plugin.json
 ```
 
 Increment `issues_found` for each schema violation.
+
+**Error handling:**
+- If Task fails: Display "Failed to discover marketplace bundles" and skip validation
+- If Read fails for plugin.json: Report "Missing or unreadable plugin.json" for that bundle
 
 ### Step 6: Report Summary
 

@@ -41,69 +41,54 @@ Track statistics:
 - `commands_found`: Total commands discovered
 - `wildcards_generated`: Number of wildcard patterns generated
 
-### Step 2: Discover All Bundles
+### Step 2: Discover Marketplace Inventory
 
-**A. Find all marketplace bundles:**
+**A. Launch marketplace-inventory agent:**
+
 ```
-Glob: marketplace/bundles/*/.claude-plugin/plugin.json
+Task:
+  subagent_type: cui-plugin-development-tools:marketplace-inventory
+  description: Discover all marketplace resources
+  prompt: |
+    Scan the marketplace and return a complete inventory.
+
+    Parameters:
+    - scope: marketplace
+    - include-descriptions: false
+
+    Return JSON inventory with all bundles, skills, commands, and agents.
 ```
 
-**B. Extract bundle names:**
-- Parse each path to get bundle directory name
-- Store in `bundles[]` array
-- Increment `bundles_scanned`
+**B. Parse inventory response:**
+
+Extract from returned JSON:
+- `inventory.bundles[]` - Array of bundle objects
+- For each bundle:
+  - `bundle.name` - Bundle name
+  - `bundle.skills[]` - Array of skill objects with `name` field
+  - `bundle.commands[]` - Array of command objects with `name` field
+
+**C. Build component lists:**
+
+```
+bundles = [bundle.name for bundle in inventory.bundles]
+skills_by_bundle = {bundle.name: [skill.name for skill in bundle.skills] for bundle in inventory.bundles}
+commands_by_bundle = {bundle.name: [cmd.name for cmd in bundle.commands] for bundle in inventory.bundles}
+skills = flatten(skills_by_bundle.values())
+commands = flatten(commands_by_bundle.values())
+```
+
+**D. Track statistics:**
+- `bundles_scanned` = length of bundles array
+- `skills_found` = length of skills array
+- `commands_found` = length of commands array
 
 **Error handling:**
-- If no bundles found: Display "No marketplace bundles found" and exit
-- If Glob fails: Display error and exit
+- If Task fails: Display "Failed to discover marketplace inventory" and exit
+- If inventory.bundles is empty: Display "No marketplace bundles found" and exit
+- If JSON parsing fails: Display error and exit
 
-### Step 3: Scan All Skills
-
-**A. Find all skill definition files:**
-```
-Glob: marketplace/bundles/*/skills/*/SKILL.md
-```
-
-**B. Extract skill names from YAML frontmatter:**
-- For each SKILL.md file found:
-  - Read first 10 lines to get YAML frontmatter
-  - Extract `name:` field value
-  - Add to `skills[]` array
-  - Increment `skills_found`
-
-**C. Categorize skills by bundle:**
-- Track which bundle each skill belongs to
-- Store as `skills_by_bundle[bundle_name] = [skill_names]`
-
-**Error handling:**
-- If Read fails: Log warning, skip file, continue
-- If no skills found: Continue (valid for bundles with only commands)
-
-### Step 4: Scan All Commands
-
-**A. Find all command files:**
-```
-Glob: marketplace/bundles/*/commands/*.md
-```
-
-Exclude README.md files.
-
-**B. Extract command names from YAML frontmatter:**
-- For each command file found:
-  - Read first 10 lines to get YAML frontmatter
-  - Extract `name:` field value
-  - Add to `commands[]` array
-  - Increment `commands_found`
-
-**C. Categorize commands by bundle:**
-- Track which bundle each command belongs to
-- Store as `commands_by_bundle[bundle_name] = [command_names]`
-
-**Error handling:**
-- If Read fails: Log warning, skip file, continue
-- If no commands found: Continue (valid for bundles with only skills)
-
-### Step 5: Analyze Naming Patterns
+### Step 3: Analyze Naming Patterns
 
 **A. Extract skill naming patterns:**
 
@@ -130,7 +115,7 @@ skill_prefixes = unique set of skill prefixes
 command_prefixes = unique set of command prefixes
 ```
 
-### Step 6: Generate Individual Bundle Wildcards
+### Step 4: Generate Individual Bundle Wildcards
 
 **CRITICAL:** Bundle name wildcards (e.g., `cui-*:*`) are NOT supported by Claude Code's permission system. The permission validation regex `^(plugin|bundle):[a-zA-Z0-9_-]+(:[a-zA-Z0-9_-]+)?(\*)?$` requires exact bundle names - wildcards cannot appear in the bundle name portion.
 
@@ -168,7 +153,7 @@ Note: Commands without parameters don't need `:*` suffix, but using it is harmle
 
 Increment `wildcards_generated` for each pattern created.
 
-### Step 7: Display Coverage Analysis
+### Step 5: Display Coverage Analysis
 
 **Generate comprehensive report:**
 
@@ -209,7 +194,7 @@ Coverage Verification:
   ✓ {commands_found} commands covered by {command_wildcard_count} SlashCommand wildcards
 ```
 
-### Step 8: Update tools-setup-project-permissions
+### Step 6: Update tools-setup-project-permissions
 
 **Execute unless --dry-run mode is active.**
 
@@ -254,7 +239,7 @@ Updated wildcards:
 - If Read fails: Display error, skip update, continue to summary
 - If Edit fails: Display error, offer to display wildcards for manual update
 
-### Step 9: Display Final Summary
+### Step 7: Display Final Summary
 
 ```
 ╔════════════════════════════════════════════════════════════╗

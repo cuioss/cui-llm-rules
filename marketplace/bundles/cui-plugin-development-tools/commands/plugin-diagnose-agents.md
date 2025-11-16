@@ -69,10 +69,26 @@ This provides architecture rules and validation patterns for marketplace compone
 **Parse parameters** to determine scope.
 
 **For marketplace scope (default):**
+
+Launch marketplace-inventory agent:
 ```
-Glob: pattern="*.md", path="~/git/cui-llm-rules/marketplace/agents"
-Glob: pattern="*/agents/*.md", path="~/git/cui-llm-rules/marketplace/bundles"
+Task:
+  subagent_type: cui-plugin-development-tools:marketplace-inventory
+  description: Discover all marketplace agents
+  prompt: |
+    Scan the marketplace and return a complete inventory.
+
+    Parameters:
+    - scope: marketplace
+    - include-descriptions: false
+
+    Return JSON inventory with all bundles and their agents.
 ```
+
+Parse inventory response:
+- Extract `inventory.bundles[]` array
+- For each bundle, collect `bundle.agents[]` with `name` and `path` fields
+- Build flat list of agent paths from all bundles
 
 **For global scope:**
 ```
@@ -96,7 +112,9 @@ Glob: pattern="*.md", path=".claude/agents"
 - Let user select which to analyze or change scope
 
 **Error Handling:**
-- If Glob fails: Display error with path and suggestions, exit with error status
+- If Task fails (marketplace scope): Display error with message, exit with error status
+- If inventory.bundles is empty: Display "No agents found in marketplace", suggest trying different scope
+- If Glob fails (global/project scope): Display error with path and suggestions, exit with error status
 - If no agents found: Display scopes searched and suggest trying different scope, exit gracefully
 
 ### Step 3: Analyze Agents (Parallel)
