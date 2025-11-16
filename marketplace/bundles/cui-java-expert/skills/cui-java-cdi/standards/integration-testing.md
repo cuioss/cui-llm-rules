@@ -220,21 +220,9 @@ class HealthCheckIntegrationTest extends BaseIntegrationTest {
 
 ### HTTPS Configuration
 
-Application **MUST** be configured for HTTPS-only operation:
+Application **MUST** be configured for HTTPS-only operation.
 
-```properties
-# HTTPS Configuration
-quarkus.http.ssl-port=8443
-quarkus.http.insecure-requests=disabled
-
-# TLS Configuration (Docker volume mount paths)
-quarkus.http.ssl.certificate.files=/app/certificates/localhost.crt
-quarkus.http.ssl.certificate.key-files=/app/certificates/localhost.key
-
-# Enhanced TLS Security
-quarkus.http.ssl.cipher-suites=TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256
-quarkus.http.ssl.protocols=TLSv1.3,TLSv1.2
-```
+For complete Quarkus PEM configuration including TLS certificates, cipher suites, and protocols, see [cdi-container.md](cdi-container.md) section "Quarkus PEM Configuration".
 
 ### Port Mapping Strategy
 

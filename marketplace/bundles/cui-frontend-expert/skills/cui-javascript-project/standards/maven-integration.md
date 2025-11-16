@@ -88,7 +88,7 @@ All JavaScript projects must use frontend-maven-plugin to manage Node.js install
 ### Configuration Parameters
 
 **nodeVersion**: Node.js LTS version to install
-- Required: `v20.12.2` (exact version - see project-structure.md for version management)
+- Required: Node.js `v20.12.2` LTS (exact version)
 - Ensures consistent Node.js across all environments
 - Downloaded automatically during build
 
@@ -164,7 +164,7 @@ For projects generating bundled or minified JavaScript assets:
 
 ### Standard Versions
 
-**Node.js LTS** (see [project-structure.md](project-structure.md#node-js-version-requirements) for exact version):
+**Node.js v20.12.2 LTS**:
 - Long Term Support release for stability
 - Consistent across all projects and environments
 - Full ES module support
@@ -555,39 +555,7 @@ Add WebJar packaging for NiFi integration:
 
 **Symptom**: npm install fails during Maven build
 
-**Common causes**:
-- Corrupted npm cache
-- Peer dependency conflicts
-- Outdated package-lock.json
-- Network timeouts
-
-**Solutions**:
-
-1. Clear npm cache:
-```bash
-rm -rf node_modules package-lock.json
-npm cache clean --force
-```
-
-2. Use legacy peer deps:
-```xml
-<configuration>
-  <arguments>install --legacy-peer-deps</arguments>
-</configuration>
-```
-
-3. Regenerate lock file:
-```bash
-rm package-lock.json
-npm install
-git add package-lock.json
-git commit -m "chore: regenerate package-lock.json"
-```
-
-4. Check for conflicting global packages:
-```bash
-npm list -g --depth=0
-```
+**Solution**: See [dependency-management.md](dependency-management.md) "npm Install Failures" section for comprehensive troubleshooting steps including cache clearing, legacy peer deps configuration for Maven, and lock file regeneration.
 
 ### Test Failures in CI
 

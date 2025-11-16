@@ -535,15 +535,7 @@ git commit -m "fix: remove node_modules from Git"
 
 **Cause**: Missing or outdated package-lock.json
 
-**Solution**:
-```bash
-# Generate fresh lock file
-rm package-lock.json
-npm install
-# Commit lock file
-git add package-lock.json
-git commit -m "chore: update package-lock.json"
-```
+**Solution**: See [dependency-management.md](dependency-management.md) "Inconsistent Dependencies Across Environments" section for complete troubleshooting steps.
 
 ### Issue: Wrong project structure for framework
 

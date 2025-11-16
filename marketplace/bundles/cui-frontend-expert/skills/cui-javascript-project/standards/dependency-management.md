@@ -462,21 +462,46 @@ For major version updates:
 
 ### npm Install Failures
 
-**Resolution steps**:
-1. Clear npm cache:
-   ```bash
-   npm cache clean --force
-   ```
+**Symptom**: npm install fails in development or during Maven build
 
-2. Delete and reinstall:
+**Common causes**:
+- Corrupted npm cache
+- Peer dependency conflicts
+- Outdated or corrupted package-lock.json
+- Network timeouts
+
+**Resolution steps**:
+
+1. Clear npm cache and reinstall:
    ```bash
    rm -rf node_modules package-lock.json
+   npm cache clean --force
    npm install
    ```
 
-3. Use legacy peer deps (if needed):
+2. Use legacy peer deps (if modern dependency resolution fails):
    ```bash
    npm install --legacy-peer-deps
+   ```
+
+   For Maven builds, configure in pom.xml:
+   ```xml
+   <configuration>
+     <arguments>install --legacy-peer-deps</arguments>
+   </configuration>
+   ```
+
+3. Regenerate lock file if corrupted:
+   ```bash
+   rm package-lock.json
+   npm install
+   git add package-lock.json
+   git commit -m "chore: regenerate package-lock.json"
+   ```
+
+4. Check for conflicting global packages:
+   ```bash
+   npm list -g --depth=0
    ```
 
 ### Dependency Conflicts
@@ -486,6 +511,22 @@ For major version updates:
 2. Use npm overrides to force specific versions
 3. Remove unused dependencies
 4. Check for duplicate installations: `npm ls <package-name>`
+
+### Inconsistent Dependencies Across Environments
+
+**Cause**: Missing or outdated package-lock.json
+
+**Solution**:
+```bash
+# Generate fresh lock file
+rm package-lock.json
+npm install
+# Commit lock file
+git add package-lock.json
+git commit -m "chore: update package-lock.json"
+```
+
+**Important**: Always commit package-lock.json to ensure consistent installs across all environments.
 
 ### Build Performance
 

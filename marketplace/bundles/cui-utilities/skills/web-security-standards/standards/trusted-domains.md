@@ -44,55 +44,158 @@ Domains on this list meet ALL of the following criteria:
 
 For detailed security assessment methodology, see [domain-security-assessment.md](domain-security-assessment.md).
 
-## Trust Level Taxonomy
-
-Domains in this list are classified using a 4-level taxonomy. For complete trust level definitions, decision framework, and assessment criteria, see **[domain-security-assessment.md - Trust Levels](domain-security-assessment.md#trust-levels)**.
-
 ## Trusted Domains List
 
-### Major Documentation Sites
+Domains in this list are classified by trust level (Fully Trusted, Generally Trusted, Review Required, High Scrutiny). For complete trust level definitions, decision framework, and assessment criteria, see **[domain-security-assessment.md](domain-security-assessment.md#trust-levels)**.
 
-Official documentation for widely-used technologies and frameworks:
+### AI and Claude Documentation
+
+First-party and official Claude/Anthropic documentation:
 
 - **docs.anthropic.com** - Claude AI documentation
   - Purpose: Claude API, Claude Code documentation
   - Trust Level: Fully Trusted (First-party documentation)
 
-- **docs.github.com** - GitHub documentation
-  - Purpose: Git, GitHub Actions, API documentation
-  - Trust Level: Fully Trusted (Major tech company)
+- **code.claude.com** - Claude Code documentation
+  - Purpose: Claude Code CLI documentation, guides
+  - Trust Level: Fully Trusted (First-party documentation)
+
+- **www.anthropic.com** - Anthropic company site
+  - Purpose: Claude announcements, company information
+  - Trust Level: Fully Trusted (First-party documentation)
+
+### Java and Jakarta EE Documentation
+
+Official Java, Jakarta EE, and related specifications:
 
 - **docs.oracle.com** - Oracle Java documentation
   - Purpose: Java API documentation, Java SE/EE specs
   - Trust Level: Fully Trusted (Official Java documentation)
 
+- **jakarta.ee** - Jakarta EE specifications
+  - Purpose: Jakarta EE specifications, API documentation
+  - Trust Level: Fully Trusted (Eclipse Foundation/Official specs)
+
+- **docs.redhat.com** - Red Hat documentation
+  - Purpose: Red Hat product documentation, guides
+  - Trust Level: Fully Trusted (Major enterprise vendor)
+
+### Frameworks and Build Tools
+
+Spring, Quarkus, Maven, and related framework documentation:
+
 - **docs.spring.io** - Spring Framework documentation
   - Purpose: Spring Boot, Spring Framework docs
   - Trust Level: Fully Trusted (Official framework documentation)
-
-- **maven.apache.org** - Apache Maven
-  - Purpose: Maven documentation, plugin repository
-  - Trust Level: Fully Trusted (Apache Foundation)
 
 - **quarkus.io** - Quarkus Framework
   - Purpose: Quarkus documentation and guides
   - Trust Level: Fully Trusted (Red Hat/Open Source)
 
+- **maven.apache.org** - Apache Maven
+  - Purpose: Maven documentation, plugin repository
+  - Trust Level: Fully Trusted (Apache Foundation)
+
+- **projectlombok.org** - Project Lombok
+  - Purpose: Lombok annotation library documentation
+  - Trust Level: Fully Trusted (Established open source project)
+
+### Testing and Code Quality
+
+Testing frameworks and code analysis tools:
+
 - **junit.org** - JUnit Testing Framework
   - Purpose: JUnit 5 documentation
   - Trust Level: Fully Trusted (Established testing framework)
 
-### Development Communities
+- **sonarcloud.io** - SonarCloud code analysis
+  - Purpose: Code quality analysis, security scanning
+  - Trust Level: Fully Trusted (SonarSource/Established tool)
 
-Platforms for developer knowledge sharing:
+### DevOps and Containerization
+
+Docker, infrastructure, and deployment documentation:
+
+- **docs.docker.com** - Docker documentation
+  - Purpose: Docker, containerization documentation
+  - Trust Level: Fully Trusted (Official Docker docs)
+
+### Security and Standards
+
+Security resources and standards organizations:
+
+- **cheatsheetseries.owasp.org** - OWASP Cheat Sheet Series
+  - Purpose: Security best practices, guidelines
+  - Trust Level: Fully Trusted (OWASP Foundation)
+
+- **www.keycloak.org** - Keycloak authentication
+  - Purpose: Keycloak identity and access management documentation
+  - Trust Level: Fully Trusted (Red Hat/CNCF project)
+
+### AI and ML Tools
+
+AI/ML platforms and tools documentation:
+
+- **www.llamaindex.ai** - LlamaIndex documentation
+  - Purpose: LlamaIndex framework for LLM applications
+  - Trust Level: Fully Trusted (Established AI framework)
+
+- **www.tabnine.com** - Tabnine AI code completion
+  - Purpose: AI-powered code completion documentation
+  - Trust Level: Fully Trusted (Established AI tool)
+
+### Code Hosting and Collaboration
+
+GitHub and related code hosting platforms:
 
 - **github.com** - Code hosting and collaboration
   - Purpose: Repository browsing, issue tracking, releases
   - Trust Level: Fully Trusted (Major platform)
   - Note: Verify specific repository authenticity
 
+- **docs.github.com** - GitHub documentation
+  - Purpose: Git, GitHub Actions, API documentation
+  - Trust Level: Fully Trusted (Major tech company)
+
+- **gist.github.com** - GitHub Gist
+  - Purpose: Code snippets, sharing
+  - Trust Level: Fully Trusted (GitHub platform)
+
+- **raw.githubusercontent.com** - GitHub raw content
+  - Purpose: Direct file access from repositories
+  - Trust Level: Fully Trusted (GitHub CDN)
+  - Note: Verify repository authenticity before fetching
+
+- **gitingest.com** - Repository analysis tool
+  - Purpose: Repository structure visualization
+  - Trust Level: Generally Trusted (Third-party GitHub tool)
+
+### Code Migration and Refactoring
+
+OpenRewrite and code transformation tools:
+
+- **docs.openrewrite.org** - OpenRewrite documentation
+  - Purpose: Automated code refactoring recipes
+  - Trust Level: Fully Trusted (Moderne/Open source)
+
+### GraalVM and Native Compilation
+
+GraalVM native image and JIT compilation:
+
+- **www.graalvm.org** - GraalVM documentation
+  - Purpose: GraalVM, native image compilation
+  - Trust Level: Fully Trusted (Oracle/Open source)
+
+### Developer Communities
+
+Platforms for developer knowledge sharing:
+
 - **stackoverflow.com** - Developer Q&A
   - Purpose: Programming questions and answers
+  - Trust Level: Fully Trusted (Stack Exchange network)
+
+- **ux.stackexchange.com** - UX Stack Exchange
+  - Purpose: User experience design Q&A
   - Trust Level: Fully Trusted (Stack Exchange network)
 
 - **medium.com** - Technical articles and tutorials
@@ -100,10 +203,13 @@ Platforms for developer knowledge sharing:
   - Trust Level: Generally Trusted
   - Note: Verify author reputation for critical information
 
-- **dev.to** - Developer community platform
-  - Purpose: Developer articles, tutorials, discussions
-  - Trust Level: Generally Trusted
-  - Note: Community-contributed content, verify accuracy
+### UX and Design
+
+User experience and usability resources:
+
+- **www.usertesting.com** - User testing platform
+  - Purpose: UX research, usability testing
+  - Trust Level: Generally Trusted (Established UX platform)
 
 ## Usage Guidelines
 

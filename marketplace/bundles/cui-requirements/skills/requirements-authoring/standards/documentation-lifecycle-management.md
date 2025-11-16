@@ -72,7 +72,7 @@ public class ValidationResult {
 
 ### Example Structure
 
-Pre-implementation specifications include: Status: PLANNED, Design Overview, Expected API, Validation Flow, and Implementation Notes. See `specification-structure-and-backtracking.md` for detailed format examples.
+Pre-implementation specifications include: Status: PLANNED, Design Overview, Expected API, Validation Flow, and Implementation Notes. See **[specification-structure-and-backtracking.md](specification-structure-and-backtracking.md#pre-implementation-specification)** for detailed format examples.
 
 ## During Implementation Phase
 
@@ -124,7 +124,7 @@ Key caching implemented with 5-minute TTL.
 
 ### Example Structure
 
-During-implementation specifications include: Status: IN PROGRESS, Implementation Links, Implementation Decisions, Design Overview (with notes on incomplete components), and Current API. See `specification-structure-and-backtracking.md` for detailed format examples.
+During-implementation specifications include: Status: IN PROGRESS, Implementation Links, Implementation Decisions, Design Overview (with notes on incomplete components), and Current API. See **[specification-structure-and-backtracking.md](specification-structure-and-backtracking.md#example-specification-structure)** for detailed format examples.
 
 ## Post-Implementation Phase
 
@@ -198,7 +198,7 @@ Test coverage: 92% line coverage, 88% branch coverage.
 
 ### Example Structure
 
-Post-implementation specifications include: Status: IMPLEMENTED, Implementation section (with links to all implementing classes), brief architectural context, reference to JavaDoc for detailed behavior, and Verification section (with test links and coverage metrics). See `specification-structure-and-backtracking.md` for detailed format examples.
+Post-implementation specifications include: Status: IMPLEMENTED, Implementation section (with links to all implementing classes), brief architectural context, reference to JavaDoc for detailed behavior, and Verification section (with test links and coverage metrics). See **[specification-structure-and-backtracking.md](specification-structure-and-backtracking.md#post-implementation-specification)** for detailed format examples.
 
 ## Transition Guidelines
 

@@ -140,6 +140,8 @@ networks:
     internal: false
 ```
 
+For detailed explanation of OWASP security options (`no-new-privileges`, `cap_drop`, `read_only`), see **[cdi-security.md](cdi-security.md)** section "OWASP-Compliant Deployment".
+
 ### Environment Configuration (.env)
 
 **Minimal Configuration Approach**:
