@@ -114,21 +114,34 @@ Found references:
 **B. Search marketplace for matching resource:**
 
 **Commands:**
-```bash
-Glob: marketplace/bundles/*/commands/{name}.md
-Glob: marketplace/bundles/{bundle}/commands/{name}.md  # if bundle specified
+```
+# Find all command files, then filter by name
+Glob: marketplace/bundles/**/commands/*.md
+
+# Filter results to match {name}.md
+# If bundle specified, filter to marketplace/bundles/{bundle}/commands/{name}.md
+# If unspecified, accept any bundle path matching */{name}.md
 ```
 
 **Agents:**
-```bash
-Glob: marketplace/bundles/*/agents/{name}.md
-Glob: marketplace/bundles/{bundle}/agents/{name}.md  # if bundle specified
+```
+# Find all agent files, then filter by name
+Glob: marketplace/bundles/**/agents/*.md
+
+# Filter results to match {name}.md
+# If bundle specified, filter to marketplace/bundles/{bundle}/agents/{name}.md
+# If unspecified, accept any bundle path matching */{name}.md
 ```
 
 **Skills:**
-```bash
-Glob: marketplace/bundles/*/skills/{name}/.
-Glob: marketplace/bundles/{bundle}/skills/{name}/.  # if bundle specified
+```
+# Find all skill directories
+Glob: marketplace/bundles/**/skills/*
+
+# Filter results to match skill name directory
+# Skills are directories, not files
+# If bundle specified, filter to marketplace/bundles/{bundle}/skills/{name}
+# If unspecified, accept any bundle path matching */skills/{name}
 ```
 
 **C. Categorize result:**
