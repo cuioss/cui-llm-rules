@@ -15,6 +15,43 @@ This skill provides comprehensive standards for:
 - **Prioritizing** maintenance work (impact-based framework)
 - **Verifying** standards compliance (comprehensive checklist)
 
+## Dependencies
+
+This skill provides **DETECTION** and **VERIFICATION** guidance for Java maintenance work.
+
+For **IMPLEMENTATION** guidance on how to fix identified issues, it references standards from other skills:
+
+**cui-java-core** - Core Java implementation standards
+- Package structure and organization
+- Class design and structure
+- Method design patterns
+- Null safety with JSpecify (@NullMarked, @Nullable)
+- Exception handling patterns
+- Naming conventions
+- Modern Java features (records, switch expressions, streams)
+- Lombok patterns (@Value, @Builder, @Delegate)
+- Logging implementation
+- DSL constants patterns
+- Referenced from: `refactoring-triggers.md`, `compliance-checklist.md`
+
+**cui-javadoc** - JavaDoc documentation standards
+- Class, method, and field documentation
+- Code examples in documentation
+- JavaDoc tag usage
+- Referenced from: `refactoring-triggers.md`, `compliance-checklist.md`
+
+**cui-java-unit-testing** - Testing standards and patterns
+- JUnit 5 patterns
+- Test structure and organization
+- Coverage requirements
+- Referenced from: `compliance-checklist.md`
+
+**Design Rationale:**
+- This skill focuses on **WHEN** and **WHAT** to fix (detection and verification)
+- Implementation skills provide **HOW** to implement fixes (patterns and examples)
+- This separation prevents massive duplication (~2,600+ lines) of implementation standards
+- Maintains clear separation of concerns: maintenance detection vs. code implementation
+
 ## When to Use This Skill
 
 Activate this skill when:

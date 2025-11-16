@@ -17,9 +17,11 @@ This section defines when and how to identify violations of Java coding standard
 **Package Structure Violations**: Non-standard package names or layer-based organization detected
 - **Action Required**: Restructure to feature-based packages per Package Structure Standards
 - **Standards Reference**: Package organization follows feature-based structure (not layer-based like controller/service/repository)
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Package Organization"
 
 **Class Structure Violations**: Single Responsibility Principle violations or inappropriate access modifiers
 - **Action Required**: Split classes or adjust access modifiers per Class Structure Standards
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Class Design"
 - **Detection**: Classes with multiple unrelated responsibilities, god classes, classes mixing concerns
 
 **Large Classes**: Classes exceeding reasonable size limits
@@ -32,6 +34,7 @@ This section defines when and how to identify violations of Java coding standard
 
 **Long Methods**: Methods over 60 lines, or methods with complex logic regardless of line count
 - **Action Required**: Extract methods per Method Design Standards
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Method Design"
 - **Guideline**: Target methods under 50 lines for better readability and maintainability
 - **Detection**: Methods with multiple levels of nesting, methods doing multiple things, methods with more than one clear responsibility
 - **Note**: Line count is secondary to single responsibility - a focused 70-line method may be acceptable, while a 45-line method doing multiple things requires refactoring
@@ -42,11 +45,13 @@ This section defines when and how to identify violations of Java coding standard
 
 **Too Many Parameters**: Methods with 3+ parameters without parameter objects
 - **Action Required**: Create parameter objects per Parameter Objects Standards
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Parameter Objects"
 - **Exception**: Parameters representing cohesive concepts (e.g., coordinates: x, y, z for geometric calculations; or primitive configuration: enabled, timeout, retryCount for simple settings)
 - **Detection**: Count method parameters using `grep -E "^\s*(public|private|protected).*\(([^)]*,){3,}" *.java`, or identify methods with similar parameter groups across multiple methods
 
 **Command-Query Separation Violations**: Methods that both query and modify state
 - **Action Required**: Separate into command and query methods per Method Design Standards
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Command-Query Separation"
 - **Detection**: Methods that return values AND modify state, getters with side effects
 
 ### When to Fix Null Safety Violations
@@ -55,11 +60,13 @@ This section defines when and how to identify violations of Java coding standard
 
 **Missing @NonNull Annotations**: Public API methods lack null safety documentation
 - **Action Required**: Add annotations per @NonNull Annotations Standards
+- **See**: cui-java-core skill, `standards/java-null-safety.md`
 - **Implementation**: Ensure methods guarantee non-null returns per Implementation Requirements
 - **Detection**: Public methods without @NonNull annotations, package-info.java missing @NullMarked
 
 **Inconsistent API Contracts**: Mix of nullable returns and Optional usage
 - **Action Required**: Choose consistent pattern per API Return Type Guidelines
+- **See**: cui-java-core skill, `standards/java-null-safety.md` section "Optional Usage"
 - **Standards**: Use @NonNull for guaranteed results, Optional<T> for potential absence
 - **Detection**: Some methods return null, others return Optional for same scenarios
 
@@ -74,6 +81,7 @@ This section defines when and how to identify violations of Java coding standard
 
 **Poor Naming Practices**: Unclear abbreviations or non-descriptive names detected
 - **Action Required**: Apply naming improvements per Naming Conventions Standards
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Naming Conventions"
 - **Focus**: Use meaningful and descriptive names following Java standards
 - **Detection**: Single-letter variables (except loop counters), unclear abbreviations, generic names like "data", "info", "manager"
 
@@ -83,6 +91,7 @@ This section defines when and how to identify violations of Java coding standard
 
 **Generic Exception Catching**: `catch (Exception e)` or `catch (RuntimeException e)` detected
 - **Action Required**: Use specific exceptions per Exception Handling Standards
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Exception Handling"
 - **Detection**: Catch blocks for generic Exception or RuntimeException types
 
 **Missing Error Messages**: Exceptions without meaningful messages
@@ -95,6 +104,7 @@ This section defines when and how to identify violations of Java coding standard
 
 **Catch and Rethrow Anti-Pattern**: Catching and throwing the same or very similar exception
 - **Action Required**: Remove unnecessary catch blocks or add meaningful context per Exception Handling Standards
+- **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Exception Handling"
 - **Detection**: Catch blocks that immediately rethrow same exception type
 
 ### When to Adopt Modern Java Features
@@ -103,14 +113,17 @@ This section defines when and how to identify violations of Java coding standard
 
 **Legacy Switch Statements**: Classic switch statements with breaks detected
 - **Action Required**: Convert to switch expressions per Switch Expressions Standards
+- **See**: cui-java-core skill, `standards/java-modern-features.md` section "Switch Expressions"
 - **Detection**: Switch statements with break keywords, fall-through cases
 
 **Verbose Object Creation**: Manual data classes without records
 - **Action Required**: Replace with records per Records Standards
+- **See**: cui-java-core skill, `standards/java-modern-features.md` section "Records"
 - **Detection**: Classes with only fields, constructor, getters, equals, hashCode, toString
 
 **Manual Stream Operations**: Imperative loops that could use streams
 - **Action Required**: Simplify with streams per Stream Processing Standards
+- **See**: cui-java-core skill, `standards/java-modern-features.md` section "Stream API"
 - **Detection**: Loops with filters, maps, or accumulations that could be replaced with streams
 - **Exception**: Simple loops where streams would reduce readability (e.g., single iteration with early return, nested streams >3 levels deep, complex stateful operations requiring mutable accumulation)
 
@@ -161,14 +174,17 @@ Do NOT remove when:
 
 **Inheritance Anti-Patterns**: Classes extending when they should delegate
 - **Action Required**: Replace with composition and `@Delegate` per Lombok Standards
+- **See**: cui-java-core skill, `standards/java-lombok-patterns.md` section "Delegation with @Delegate"
 - **Detection**: Deep inheritance hierarchies, classes extending just to reuse utility methods
 
 **Manual Builder Patterns**: Verbose builder implementations detected
 - **Action Required**: Replace with `@Builder` per Lombok Standards
+- **See**: cui-java-core skill, `standards/java-lombok-patterns.md` section "Builder Pattern with @Builder"
 - **Detection**: Manual builder classes with fluent APIs, builder classes with many setters
 
 **Boilerplate Immutable Objects**: Manual equals/hashCode/toString implementations
 - **Action Required**: Replace with `@Value` per Lombok Standards
+- **See**: cui-java-core skill, `standards/java-lombok-patterns.md` section "Immutable Objects with @Value"
 - **Detection**: Classes with manual implementations of equals, hashCode, toString for simple data carriers
 
 ### When to Enforce Documentation Standards
@@ -177,6 +193,7 @@ Do NOT remove when:
 
 **Missing Javadoc**: Public APIs without proper documentation
 - **Action Required**: Add documentation per Javadoc Standards
+- **See**: cui-javadoc skill, `standards/javadoc-core.md`
 - **Detection**: Public classes/methods without Javadoc, missing @param/@return tags
 
 **Outdated Documentation**: Comments not reflecting current code behavior
