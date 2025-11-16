@@ -54,6 +54,40 @@ This section defines when and how to identify violations of Java coding standard
 - **See**: cui-java-core skill, `standards/java-core-patterns.md` section "Command-Query Separation"
 - **Detection**: Methods that return values AND modify state, getters with side effects
 
+### When to Simplify Complex Logic
+
+**Triggers for Action**: Apply code simplification when:
+
+**High Cognitive Complexity**: Methods difficult to understand due to nested logic
+- **Action Required**: Simplify control flow, extract nested blocks into helper methods
+- **Threshold**: Cognitive Complexity >15 (SonarQube rule java:S3776)
+- **Detection**: Use SonarQube cognitive complexity metric, or manually identify: deeply nested conditions, multiple break/continue statements, recursive calls with complex conditions
+- **Note**: Cognitive complexity differs from cyclomatic complexity - it measures understandability, not just decision points
+- **Example Simplifications**: Replace nested if with guard clauses, extract complex conditions into named boolean methods, eliminate multiple levels of loops
+
+**Deep Nesting**: Methods with excessive indentation levels
+- **Action Required**: Use guard clauses, extract nested blocks, simplify control flow
+- **Threshold**: >3 levels of nesting (if/for/while/try within if/for/while/try)
+- **Detection**: Visual inspection of indentation, search for deeply indented blocks
+- **Preferred Pattern**: Early returns (guard clauses) instead of nested if statements
+- **Example**: Replace `if (valid) { if (allowed) { doWork(); } }` with `if (!valid) return; if (!allowed) return; doWork();`
+
+**Complex Boolean Expressions**: Conditions with multiple operators that are hard to parse
+- **Action Required**: Extract complex conditions into well-named boolean methods or variables
+- **Detection**: Conditions with 3+ boolean operators (&&, ||, !), conditions spanning multiple lines without clear grouping
+- **Example**: Replace `if (user != null && user.isActive() && !user.isSuspended() && user.hasPermission("ADMIN"))` with `if (isAdminUser(user))`
+
+**Over-Abstraction**: Unnecessary layers of indirection for simple operations
+- **Action Required**: Simplify or remove unnecessary abstraction layers
+- **Detection**: Single-use abstractions, interfaces with one implementation, utility methods called from only one place, wrapper classes adding no value
+- **Balance**: Ensure simplification doesn't violate SOLID principles or future extensibility needs
+- **Ask User**: When uncertain if abstraction serves future needs
+
+**Redundant Logic**: Code that can be simplified through Boolean algebra or is always true/false
+- **Action Required**: Simplify or remove redundant conditions
+- **Detection**: Conditions always evaluating to same value, double negatives, identical nested conditions, unnecessary else after return
+- **Examples**: `if (x) return true; else return false;` → `return x;` | `if (!(!condition))` → `if (condition)` | `if (x) { return; } else { doSomething(); }` → `if (x) return; doSomething();`
+
 ### When to Fix Null Safety Violations
 
 **Triggers for Action**: Apply null safety fixes when:
@@ -143,8 +177,8 @@ This section defines when and how to identify violations of Java coding standard
 
 #### Detection Strategy
 
-1. Use IDE warnings and inspections to identify unused elements
-2. Leverage static analysis tools (SonarQube, SpotBugs)
+1. Use IDE warnings and inspections to identify unused elements (see `/tools-fix-intellij-diagnostics` command for automated IDE diagnostics)
+2. Leverage SonarQube for static analysis (see `/pr-fix-sonar-issues` command for automated Sonar issue fixing)
 3. Manual code review for systematic identification
 4. Build tool analysis with Maven/Gradle plugins
 

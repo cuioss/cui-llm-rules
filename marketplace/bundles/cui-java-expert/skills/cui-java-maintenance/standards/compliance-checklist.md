@@ -91,6 +91,34 @@ This checklist ensures systematic verification of standards compliance after ref
   - Nested loops/conditionals extracted
   - Switch expressions instead of statements
 
+- [ ] **Cognitive Complexity**: Methods are understandable
+  - Cognitive complexity under 15 (SonarQube rule java:S3776)
+  - No deeply nested control structures
+  - Complex conditions extracted to named boolean methods
+  - Guard clauses used instead of deep nesting
+
+- [ ] **Nesting Depth**: Methods avoid excessive indentation
+  - Maximum 3 levels of nesting
+  - Guard clauses (early returns) used to reduce nesting
+  - Nested blocks extracted to helper methods when needed
+
+- [ ] **Boolean Logic Clarity**: Complex conditions are readable
+  - No conditions with 3+ boolean operators without extraction
+  - Complex conditions extracted to well-named boolean methods/variables
+  - Conditions clearly express business logic intent
+
+- [ ] **Appropriate Abstraction**: Code is neither over- nor under-abstracted
+  - No single-use abstractions without clear extensibility need
+  - No interfaces with only one implementation (unless justified)
+  - No wrapper classes adding no value
+  - Simplicity balanced with SOLID principles
+
+- [ ] **Logic Simplification**: Code uses simplest correct form
+  - No redundant boolean expressions (e.g., `if (x) return true; else return false;`)
+  - No unnecessary else-after-return patterns
+  - No double negatives without clear intent
+  - Boolean algebra applied where it improves clarity
+
 - [ ] **Command-Query Separation**: Methods either query or command, not both
   - Query methods return values, don't modify state
   - Command methods modify state, return void or status
