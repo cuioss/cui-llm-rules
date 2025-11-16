@@ -9,7 +9,14 @@ Self-contained command that implements ONE task and verifies it.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Update this file using `/plugin-update-command command-name=orchestrate-task update="[improvement]"` with discoveries.
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-task update="[improvement]"` with:
+1. Task execution patterns and error recovery strategies
+2. Build verification efficiency and issue categorization
+3. Parameter preparation and context handling
+4. Iteration strategies and convergence patterns
+5. Any lessons learned about single-task implementation workflows
+
+This ensures the command evolves and becomes more effective with each execution.
 
 ## PARAMETERS
 
@@ -50,7 +57,7 @@ Task:
 - Analyze issues from maven-builder STRUCTURED output
 - Categorize: compilation_error, test_failure, etc.
 - Return to Step 1 with refined task description
-- Max 3 iterations
+- Max 5 iterations
 
 **If build SUCCESS:**
 - Proceed to Step 4
@@ -72,7 +79,7 @@ Task:
 - **Pattern 1**: Self-contained (implements + verifies + iterates)
 - **Single Task**: Handle ONE task at a time
 - **No Commit**: Caller handles commit (this returns result for aggregation)
-- **Iteration Limit**: Max 3 cycles to prevent infinite loops
+- **Iteration Limit**: Max 5 iterations to prevent infinite loops
 - **Structured Results**: Enable batch orchestration
 
 ## ARCHITECTURE
@@ -81,7 +88,7 @@ Task:
 /orchestrate-task (Pattern 1 - self-contained)
   ├─> Task(task-executor) [implements]
   ├─> Task(maven-builder) [verifies]
-  ├─> Analyze and iterate (max 3 cycles)
+  ├─> Analyze and iterate (max 5 iterations)
   └─> Return structured result
 ```
 

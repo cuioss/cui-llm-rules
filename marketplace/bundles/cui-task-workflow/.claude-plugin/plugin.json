@@ -24,6 +24,7 @@
     "./commands/pr-handle-pull-request.md",
     "./commands/orchestrate-workflow.md",
     "./commands/orchestrate-task.md",
+    "./commands/orchestrate-language.md",
     "./commands/pr-fix-sonar-issues.md",
     "./commands/pr-respond-to-review-comments.md"
   ],

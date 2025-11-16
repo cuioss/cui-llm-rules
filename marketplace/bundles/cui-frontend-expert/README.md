@@ -24,7 +24,6 @@ cui-frontend-expert/
     ├── js-implement-code.md
     ├── js-implement-tests.md
     ├── js-generate-coverage.md
-    ├── orchestrate-js.md
     ├── js-refactor-code.md
     ├── js-fix-jsdoc.md
     └── js-enforce-eslint.md
@@ -61,9 +60,10 @@ cui-frontend-expert/
 - **js-implement-tests** - Self-contained command for test implementation with verification and iteration
 - **js-generate-coverage** - Coverage generation and analysis command
 
-### Orchestration Commands
-- **orchestrate-js** - End-to-end task orchestration (implementation → testing → coverage)
+### Refactoring Commands
 - **js-refactor-code** - Systematic refactoring with standards compliance verification
+
+**Note**: For end-to-end JavaScript task orchestration (implementation → testing → coverage), use `/orchestrate-language language=javascript` from the cui-task-workflow bundle.
 
 ### Maintenance Commands
 - **js-fix-jsdoc** - Fix JSDoc errors and warnings systematically
@@ -103,9 +103,9 @@ This bundle follows the CUI marketplace three-layer architecture:
 
 ### Full Task Workflow
 ```bash
-/orchestrate-js files="src/services/auth.js" description="Implement JWT authentication service"
+/orchestrate-language language=javascript targets="src/services/auth.js" description="Implement JWT authentication service"
 ```
-This orchestrates: implementation → tests → coverage verification
+This orchestrates: implementation → tests → coverage verification (uses npm-builder for iteration, Maven for final build)
 
 ### Systematic Refactoring
 ```bash
@@ -151,10 +151,11 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | java-implement-code | js-implement-code | Self-contained implementation |
 | java-implement-tests | js-implement-tests | Self-contained testing |
 | java-coverage-report | js-generate-coverage | Coverage generation/analysis |
-| orchestrate-java | orchestrate-js | End-to-end orchestration |
 | java-refactor-code | js-refactor-code | Systematic refactoring |
 | java-fix-javadoc | js-fix-jsdoc | Documentation fixing |
 | java-maintain-logger | js-enforce-eslint | Standards enforcement |
+
+**Note**: For end-to-end orchestration, both use `/orchestrate-language` from cui-task-workflow bundle (with language=java or language=javascript)
 
 ## Integration with Maven Projects
 
@@ -177,9 +178,9 @@ Skills include standards for Maven integration to ensure frontend code works wit
    /js-implement-code files="..." description="..."
    ```
 
-3. **Orchestrate workflows** with task manager:
+3. **Orchestrate workflows** with unified orchestrator:
    ```
-   /orchestrate-js files="..." description="..."
+   /orchestrate-language language=javascript targets="..." description="..."
    ```
 
 ## Related Bundles

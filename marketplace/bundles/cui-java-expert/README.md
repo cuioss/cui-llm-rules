@@ -44,13 +44,19 @@ This bundle provides a complete Java development knowledge base by aggregating f
 2. **logging-violation-analyzer** - Analyzes LOGGER statement violations (focused analyzer - no fixes)
 3. **log-record-documenter** - Documents LogRecord classes in AsciiDoc format (focused documenter)
 
-### Commands (5 commands)
+### Commands (9 commands)
 
-1. **orchestrate-java** - End-to-end Java task implementation orchestrator (delegates to self-contained commands)
-2. **java-enforce-logrecords** - Enforces CUI logging standards (orchestrates violation analysis and fixes)
-3. **java-implement-code** - Self-contained command: implements code + verifies + iterates
-4. **java-implement-tests** - Self-contained command: writes tests + runs tests + iterates
-5. **java-generate-coverage** - Self-contained command: generates coverage + analyzes reports
+1. **java-enforce-logrecords** - Enforces CUI logging standards (orchestrates violation analysis and fixes)
+2. **java-implement-code** - Self-contained command: implements code + verifies + iterates
+3. **java-implement-tests** - Self-contained command: writes tests + runs tests + iterates
+4. **java-generate-coverage** - Self-contained command: generates coverage + analyzes reports
+5. **java-fix-javadoc** - Fixes JavaDoc errors and warnings from Maven builds
+6. **java-maintain-logger** - Systematic logging standards maintenance
+7. **java-maintain-tests** - Systematic test quality improvement
+8. **java-optimize-quarkus-native** - Quarkus native image optimization
+9. **java-refactor-code** - Systematic Java refactoring with standards compliance
+
+**Note**: For end-to-end Java task orchestration (implementation → testing → coverage), use `/orchestrate-language language=java` from the cui-task-workflow bundle.
 
 ## Installation
 

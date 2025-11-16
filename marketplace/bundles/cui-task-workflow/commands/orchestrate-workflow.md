@@ -7,6 +7,18 @@ description: Verify, plan, and implement issues through end-to-end workflow with
 
 End-to-end issue implementation workflow coordinating multiple specialized agents for review, planning, building, and implementation.
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-workflow update="[your improvement]"` with:
+1. Agent coordination patterns and retry strategies
+2. Error recovery and failure handling optimization
+3. Task breakdown quality and granularity improvements
+4. Build verification efficiency and integration
+5. User interaction patterns and decision prompts
+6. Any lessons learned about end-to-end workflow orchestration
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## PARAMETERS
 
 **issue** - GitHub issue number or URL (optional, prompts if not provided)
@@ -71,7 +83,9 @@ Task:
 SlashCommand: /cui-maven:maven-build-and-fix
 ```
 
-Self-contained command that runs build, fixes issues if found, verifies, and commits fixes.
+Self-contained command that runs Maven build, fixes issues if found, verifies, and commits fixes.
+
+**Note:** Build verification always uses Maven, regardless of task language. JavaScript projects use `frontend-maven-plugin` for Maven integration.
 
 **Error handling:** If command fails, increment build_failures counter and prompt user "[R]etry/[A]bort".
 
@@ -111,7 +125,9 @@ Check all tasks completed. Prompt for incomplete items.
 SlashCommand: /cui-maven:maven-build-and-fix push={push parameter}
 ```
 
-Self-contained command: runs build, fixes issues if found, verifies, commits all changes, and pushes if push=true.
+Self-contained command: runs Maven build, fixes issues if found, verifies, commits all changes, and pushes if push=true.
+
+**Note:** Final build always uses Maven, regardless of task language (Java or JavaScript). This ensures full project integration and validates frontend-maven-plugin configuration for JavaScript projects.
 
 **Error handling:** If command fails during final verification, increment build_failures counter and prompt user "[F]ix manually/[R]etry/[A]bort".
 
@@ -201,15 +217,5 @@ Orchestrates agents and commands:
 - task-breakdown-agent
 - task-executor agent
 - `/orchestrate-task` command (self-contained)
+- `/orchestrate-language` command (language-specific orchestration)
 - `/maven-build-and-fix` command
-
-## CONTINUOUS IMPROVEMENT RULE
-
-**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /plugin-update-command command-name=orchestrate-workflow update="[your improvement]"
-
-**Areas for continuous improvement:**
-1. Agent coordination patterns and retry strategies
-2. Error recovery and failure handling optimization
-3. Task breakdown quality and granularity improvements
-4. Build verification efficiency and integration
-5. User interaction patterns and decision prompts

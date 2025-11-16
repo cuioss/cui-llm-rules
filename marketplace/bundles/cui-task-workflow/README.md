@@ -59,7 +59,7 @@ By combining these workflows, developers get a seamless experience from task ass
    - Returns {action, reason, suggested_implementation, explanation_text}
    - No changes, pure decision-making
 
-### Commands (5 commands)
+### Commands (6 commands)
 
 #### Orchestrator Commands
 
@@ -69,7 +69,14 @@ By combining these workflows, developers get a seamless experience from task ass
    - Uses /maven-build-and-fix for verification
    - Optionally commits and pushes
 
-2. **/pr-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
+2. **/orchestrate-language** - Unified Java/JavaScript task orchestration (implementation → testing → coverage)
+   - Supports both Java and JavaScript with auto-detection
+   - Java: Uses maven-builder for iteration, delegates to /java-implement-code, /java-implement-tests, /java-generate-coverage
+   - JavaScript: Uses npm-builder for iteration, delegates to /js-implement-code, /js-implement-tests, /js-generate-coverage
+   - Note: Final workflow-level build always uses Maven (frontend-maven-plugin for JavaScript)
+   - Iterates up to 5 cycles
+
+3. **/pr-handle-pull-request** - Simple orchestrator for PR workflow (Pattern 3)
    - Waits for CI/Sonar checks
    - Delegates to /maven-build-and-fix for build fixes
    - Delegates to /pr-respond-to-review-comments for review handling
@@ -78,20 +85,20 @@ By combining these workflows, developers get a seamless experience from task ass
 
 #### Self-Contained Commands (Pattern 1 & Pattern 3)
 
-3. **/orchestrate-task** - Implements and verifies single task (Pattern 1)
+4. **/orchestrate-task** - Implements and verifies single task (Pattern 1)
    - Uses task-executor agent for implementation
    - Uses maven-builder for verification
-   - Iterates up to 3 cycles
+   - Iterates up to 5 cycles
    - Returns structured result
 
-4. **/pr-fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
+5. **/pr-fix-sonar-issues** - Fetches, triages, and fixes Sonar issues (Pattern 3)
    - Fetches issues with sonar-issue-fetcher
    - Triages each with sonar-issue-triager
    - Delegates fixes based on triage decision
    - Includes user approval for suppressions
    - Verifies, commits, and pushes
 
-5. **/pr-respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
+6. **/pr-respond-to-review-comments** - Fetches, triages, and responds to review comments (Pattern 3)
    - Fetches comments with review-comment-fetcher
    - Triages each with review-comment-triager
    - Code changes or explanations based on triage
@@ -268,9 +275,9 @@ This workflow bundle depends on and complements other CUI bundles:
 
 ## Bundle Statistics
 
-- **Total Agents**: 6 (1 core + 3 issue implementation + 2 PR workflow)
-- **Total Commands**: 2 (1 issue implementation + 1 PR workflow)
-- **Total Skills**: 0 (uses skills from other bundles)
+- **Total Agents**: 8 (1 core + 3 issue implementation + 4 PR workflow)
+- **Total Commands**: 6 (3 orchestration + 3 self-contained)
+- **Total Skills**: 2 (cui-git-workflow, cui-task-planning)
 
 ## Migration Notes
 
