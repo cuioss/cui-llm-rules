@@ -214,24 +214,14 @@ Increment `issues_found` for each obsolete entry.
 
 ### Step 5: Validate Bundle Manifests
 
-**A. Discover all bundles using marketplace-inventory agent:**
+**A. Discover all bundles using plugin-inventory command:**
 
 ```
-Task:
-  subagent_type: cui-plugin-development-tools:marketplace-inventory
-  description: Discover all marketplace bundles
-  prompt: |
-    Scan the marketplace and return a complete inventory.
-
-    Parameters:
-    - scope: marketplace
-    - include-descriptions: false
-
-    Return JSON inventory with all bundles.
+SlashCommand: /plugin-inventory --json
 ```
 
-Parse inventory response:
-- Extract `inventory.bundles[]` array
+Parse JSON output:
+- Extract `bundles[]` array
 - For each bundle, get `bundle.name` and `bundle.path`
 - Build list of bundle names and paths
 

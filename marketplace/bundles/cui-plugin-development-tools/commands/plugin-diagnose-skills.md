@@ -71,31 +71,34 @@ This provides architecture rules and validation patterns for marketplace compone
 
 **For marketplace scope (default):**
 
-Launch marketplace-inventory agent:
+**Step 2a: Discover all bundles**
 ```
-Task:
-  subagent_type: cui-plugin-development-tools:marketplace-inventory
-  description: Discover all marketplace skills
-  prompt: |
-    Scan the marketplace and return a complete inventory.
-
-    Parameters:
-    - scope: marketplace
-    - include-descriptions: false
-
-    Return JSON inventory with all bundles and their skills.
+Glob: pattern="*/.claude-plugin/plugin.json", path="marketplace/bundles"
 ```
 
-Parse inventory response:
-- Extract `inventory.bundles[]` array
-- For each bundle, collect `bundle.skills[]` with `name` and `path` fields
-- Build flat list of skill paths from all bundles
-- Skill paths point to skill directories (not SKILL.md files)
+**Extract bundle paths:**
+- Each result has format: `marketplace/bundles/{bundle-name}/.claude-plugin/plugin.json`
+- Extract bundle name from path (directory before `.claude-plugin`)
+- Build list of bundle paths: `marketplace/bundles/{bundle-name}`
+
+**Step 2b: Discover skills in each bundle**
+
+For each bundle path discovered:
+```
+Glob: pattern="*/SKILL.md", path="{bundle_path}/skills"
+```
+
+**Extract skill paths:**
+- Each result has format: `{bundle_path}/skills/{skill-name}/SKILL.md`
+- Extract skill path: Remove `/SKILL.md` suffix
+- Build flat list of all skill directory paths from all bundles
 
 **For global scope:**
 ```
 Glob: pattern="*/SKILL.md", path="~/.claude/skills"
 ```
+
+**Extract skill paths** from SKILL.md file paths (remove `/SKILL.md` suffix).
 
 **For project scope:**
 ```

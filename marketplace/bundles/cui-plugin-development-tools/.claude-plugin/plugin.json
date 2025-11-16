@@ -21,6 +21,7 @@
     "./commands/plugin-diagnose-commands.md",
     "./commands/plugin-diagnose-marketplace.md",
     "./commands/plugin-diagnose-skills.md",
+    "./commands/plugin-inventory.md",
     "./commands/plugin-update-agent.md",
     "./commands/plugin-update-command.md"
   ],

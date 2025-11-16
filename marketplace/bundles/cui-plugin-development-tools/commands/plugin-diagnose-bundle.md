@@ -96,24 +96,14 @@ bundle-name/
 
 #### 1.1: Discover Actual Components
 
-Launch marketplace-inventory agent to discover all bundle components:
+Execute plugin-inventory command to discover all bundle components:
 
 ```
-Task:
-  subagent_type: cui-plugin-development-tools:marketplace-inventory
-  description: Discover bundle components
-  prompt: |
-    Scan the marketplace and return inventory for specific bundle.
-
-    Parameters:
-    - scope: marketplace
-    - include-descriptions: false
-
-    Return JSON inventory. Filter results for bundle: {bundle-name}
+SlashCommand: /plugin-inventory --json
 ```
 
-Parse inventory response for the specific bundle:
-- Extract bundle object matching `{bundle-name}` from `inventory.bundles[]`
+Parse JSON output for the specific bundle:
+- Extract bundle object matching `{bundle-name}` from `bundles[]` array
 - Extract `bundle.agents[]` - list of agent objects with `name` field
 - Extract `bundle.commands[]` - list of command objects with `name` field
 - Extract `bundle.skills[]` - list of skill objects with `name` field

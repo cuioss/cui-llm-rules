@@ -92,23 +92,13 @@ This provides architecture rules and validation patterns for marketplace compone
 
 **For marketplace scope (default):**
 
-Launch marketplace-inventory agent:
+Execute plugin-inventory command:
 ```
-Task:
-  subagent_type: cui-plugin-development-tools:marketplace-inventory
-  description: Discover all marketplace commands
-  prompt: |
-    Scan the marketplace and return a complete inventory.
-
-    Parameters:
-    - scope: marketplace
-    - include-descriptions: false
-
-    Return JSON inventory with all bundles and their commands.
+SlashCommand: /plugin-inventory --json
 ```
 
-Parse inventory response:
-- Extract `inventory.bundles[]` array
+Parse JSON output:
+- Extract `bundles[]` array from JSON response
 - For each bundle, collect `bundle.commands[]` with `name` and `path` fields
 - Build flat list of command paths from all bundles
 
