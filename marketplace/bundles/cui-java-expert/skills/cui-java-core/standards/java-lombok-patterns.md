@@ -167,7 +167,7 @@ public class ValidationResult {
 * API response/request objects
 * Configuration data classes
 
-**When to use records instead**: For detailed comparison of records vs Lombok @Value, see `java-modern-features.md` section "When to Use Records vs Lombok @Value".
+**When to use records instead**: For detailed comparison of records vs Lombok @Value, see [java-modern-features.md](java-modern-features.md) section "When to Use Records vs Lombok @Value".
 
 ## Additional Lombok Annotations
 

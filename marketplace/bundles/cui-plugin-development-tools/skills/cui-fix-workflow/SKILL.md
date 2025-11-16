@@ -46,14 +46,28 @@ Read: standards/categorization-patterns.md
 
 Use the safe vs risky categorization logic to classify all issues found.
 
-### Step 3: Apply Safe Fixes (if auto-fix=true)
+### Step 3: Load Tracking Patterns
+
+Read the tracking patterns for fix lifecycle management:
+
+```
+Read: standards/tracking-patterns.md
+```
+
+Use these JSON structures throughout the fix workflow to track:
+- Safe fixes applied
+- Risky fixes prompted
+- Risky fixes applied vs skipped
+- Verification results
+
+### Step 4: Apply Safe Fixes (if auto-fix=true)
 
 If auto-fix parameter is true AND safe fixes exist:
 - Apply component-specific safe fixes
 - Track fixes applied using tracking patterns
 - Use Edit tool for actual modifications
 
-### Step 4: Prompt for Risky Fixes
+### Step 5: Prompt for Risky Fixes
 
 If risky fixes exist (regardless of auto-fix setting):
 
@@ -65,7 +79,7 @@ Read: standards/prompting-patterns.md
 
 Use AskUserQuestion with the standard structure to present fixes to user.
 
-### Step 5: Verify Fixes
+### Step 6: Verify Fixes
 
 After any fixes applied:
 
