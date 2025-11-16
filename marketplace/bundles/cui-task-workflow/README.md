@@ -63,9 +63,9 @@ By combining these workflows, developers get a seamless experience from task ass
 
 #### Orchestrator Commands
 
-1. **/wf-orchestrate-task-workflow** - Orchestrates complete issue implementation workflow
+1. **/orchestrate-workflow** - Orchestrates complete issue implementation workflow
    - Delegates to task-reviewer, task-breakdown-agent
-   - Pattern Decision: atomic (direct) vs batch (delegates to /wf-execute-single-task)
+   - Pattern Decision: atomic (direct) vs batch (delegates to /orchestrate-task)
    - Uses /maven-build-and-fix for verification
    - Optionally commits and pushes
 
@@ -78,7 +78,7 @@ By combining these workflows, developers get a seamless experience from task ass
 
 #### Self-Contained Commands (Pattern 1 & Pattern 3)
 
-3. **/wf-execute-single-task** - Implements and verifies single task (Pattern 1)
+3. **/orchestrate-task** - Implements and verifies single task (Pattern 1)
    - Uses task-executor agent for implementation
    - Uses maven-builder for verification
    - Iterates up to 3 cycles
@@ -130,7 +130,7 @@ This will make all agents and commands available in your Claude Code environment
 **Step 1: Implement a GitHub Issue**
 
 ```
-/wf-orchestrate-task-workflow
+/orchestrate-workflow
 
 Implement GitHub issue #42: Add OAuth2 token refresh capability
 ```
@@ -224,7 +224,7 @@ Fix all quality issues before requesting code review.
 ### Internal Component Dependencies
 - **task-reviewer** may invoke **research-best-practices** for validation
 - **task-breakdown-agent** invokes **research-best-practices** for industry standards
-- **wf-orchestrate-task-workflow** command orchestrates: task-breakdown-agent → task-executor workflow
+- **orchestrate-workflow** command orchestrates: task-breakdown-agent → task-executor workflow
 - **pr-handle-pull-request** command orchestrates: pr-review-responder → pr-quality-fixer workflow
 
 ## Workflow Stages
@@ -233,7 +233,7 @@ Fix all quality issues before requesting code review.
 Use task-breakdown-agent or task-reviewer to analyze requirements and create actionable plans.
 
 ### Stage 2: Implementation
-Use task-executor or wf-orchestrate-task-workflow to execute the plan and implement features.
+Use task-executor or orchestrate-workflow to execute the plan and implement features.
 
 ### Stage 3: Quality Verification
 Agents automatically run builds and quality checks during implementation.

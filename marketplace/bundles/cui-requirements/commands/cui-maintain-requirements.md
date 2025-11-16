@@ -488,5 +488,5 @@ Orchestrates agents and skills:
 - `cui-requirements:requirements-maintenance` skill - Maintenance principles
 - `cui-requirements:requirements-documentation` skill - Requirements patterns
 - `cui-requirements:specification-documentation` skill - Specification patterns
-- `/wf-orchestrate-task-workflow` command - End-to-end issue implementation
+- `/orchestrate-workflow` command - End-to-end issue implementation
 - `/pr-handle-pull-request` command - PR workflow including documentation review

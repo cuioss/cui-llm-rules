@@ -506,7 +506,7 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `npm-builder` - Build verification agent (Layer 3)
-- `/orchestrate-js-task` - Orchestrates multiple implementations (Layer 1)
+- `/orchestrate-js` - Orchestrates multiple implementations (Layer 1)
 - `cui-javascript` - Core JavaScript standards skill
 - `cui-jsdoc` - JSDoc documentation skill
 

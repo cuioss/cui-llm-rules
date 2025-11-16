@@ -1,5 +1,5 @@
 ---
-name: wf-execute-single-task
+name: orchestrate-task
 description: Self-contained command that executes and verifies a single task
 ---
 
@@ -9,7 +9,7 @@ Self-contained command that implements ONE task and verifies it.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Update this file using `/plugin-update-command command-name=wf-execute-single-task update="[improvement]"` with discoveries.
+**CRITICAL:** Update this file using `/plugin-update-command command-name=orchestrate-task update="[improvement]"` with discoveries.
 
 ## PARAMETERS
 
@@ -78,7 +78,7 @@ Task:
 ## ARCHITECTURE
 
 ```
-/wf-execute-single-task (Pattern 1 - self-contained)
+/orchestrate-task (Pattern 1 - self-contained)
   ├─> Task(task-executor) [implements]
   ├─> Task(maven-builder) [verifies]
   ├─> Analyze and iterate (max 3 cycles)
@@ -89,16 +89,16 @@ Task:
 
 **Single task execution:**
 ```
-/wf-execute-single-task task="Add validation method to UserService"
+/orchestrate-task task="Add validation method to UserService"
 ```
 
 **With context:**
 ```
-/wf-execute-single-task task="Implement authentication filter" context="Use JWT tokens, integrate with existing SecurityContext"
+/orchestrate-task task="Implement authentication filter" context="Use JWT tokens, integrate with existing SecurityContext"
 ```
 
 ## RELATED
 
 - `task-executor` - Focused agent that implements the task
 - `maven-builder` - Focused agent that verifies build
-- `/wf-orchestrate-task-workflow` - Orchestrator that may delegate to this command
+- `/orchestrate-workflow` - Orchestrator that may delegate to this command

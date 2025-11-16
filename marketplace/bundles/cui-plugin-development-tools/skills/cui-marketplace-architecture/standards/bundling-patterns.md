@@ -29,7 +29,7 @@ The marketplace implements 4 bundle types:
 **Purpose**: Complete development workflow from issue implementation to PR review and quality verification
 
 **Components**:
-- Issue implementation: task-reviewer, task-breakdown-agent, task-executor agents; /wf-orchestrate-task-workflow command
+- Issue implementation: task-reviewer, task-breakdown-agent, task-executor agents; /orchestrate-workflow command
 - PR workflow: pr-review-responder, pr-quality-fixer agents; /pr-handle-pull-request command
 
 **Rationale**: Unified end-to-end development cycle workflow with high cohesion (issue → implementation → PR → review → quality)
@@ -107,7 +107,7 @@ bundles/{bundle-name}/
     "./agents/task-executor.md"
   ],
   "commands": [
-    "./commands/wf-orchestrate-task-workflow.md",
+    "./commands/orchestrate-workflow.md",
     "./commands/pr-handle-pull-request.md"
   ],
   "skills": []

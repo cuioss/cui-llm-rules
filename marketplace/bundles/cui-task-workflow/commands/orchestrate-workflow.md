@@ -1,5 +1,5 @@
 ---
-name: wf-orchestrate-task-workflow
+name: orchestrate-workflow
 description: Verify, plan, and implement issues through end-to-end workflow with agent coordination
 ---
 
@@ -79,7 +79,7 @@ Self-contained command that runs build, fixes issues if found, verifies, and com
 
 **Pattern Decision: Determine if atomic or batch:**
 - If plan has 1 task (atomic): Use task-executor directly + verify
-- If plan has multiple tasks (batch): Delegate to /wf-execute-single-task for each
+- If plan has multiple tasks (batch): Delegate to /orchestrate-task for each
 
 **For atomic (single task):**
 ```
@@ -94,10 +94,10 @@ Then verify with SlashCommand(/maven-build-and-fix).
 **For batch (multiple tasks):**
 ```
 For each task in plan:
-  SlashCommand: /cui-task-workflow:wf-execute-single-task task="{task_description}"
+  SlashCommand: /cui-task-workflow:orchestrate-task task="{task_description}"
 ```
 
-Each /wf-execute-single-task is self-contained (implements + verifies + iterates).
+Each /orchestrate-task is self-contained (implements + verifies + iterates).
 
 Track: tasks_completed, tasks_failed, tasks_skipped.
 
@@ -145,7 +145,7 @@ Display all statistics in final summary.
 
 **Command Orchestration:**
 - Delegate to self-contained commands for build/verify/commit operations
-- Pattern Decision: atomic tasks use task-executor + verify, batch uses /wf-execute-single-task per task
+- Pattern Decision: atomic tasks use task-executor + verify, batch uses /orchestrate-task per task
 - Wait for each operation to complete before next step
 - Handle failures gracefully
 
@@ -168,22 +168,22 @@ Display all statistics in final summary.
 
 **Interactive mode:**
 ```
-/wf-orchestrate-task-workflow
+/orchestrate-workflow
 ```
 
 **With issue:**
 ```
-/wf-orchestrate-task-workflow issue=123
+/orchestrate-workflow issue=123
 ```
 
 **Resume from task:**
 ```
-/wf-orchestrate-task-workflow issue=123 continueFrom=5
+/orchestrate-workflow issue=123 continueFrom=5
 ```
 
 **Auto-push:**
 ```
-/wf-orchestrate-task-workflow issue=123 push
+/orchestrate-workflow issue=123 push
 ```
 
 ## ARCHITECTURE
@@ -192,7 +192,7 @@ Orchestrates agents and commands:
 - task-reviewer agent - Issue validation
 - task-breakdown-agent - Planning
 - task-executor agent - Focused implementation (for atomic tasks)
-- `/wf-execute-single-task` command - Self-contained (for batch tasks)
+- `/orchestrate-task` command - Self-contained (for batch tasks)
 - `/maven-build-and-fix` command - Build + verify + fix + commit
 
 ## RELATED
@@ -200,12 +200,12 @@ Orchestrates agents and commands:
 - task-reviewer agent
 - task-breakdown-agent
 - task-executor agent
-- `/wf-execute-single-task` command (self-contained)
+- `/orchestrate-task` command (self-contained)
 - `/maven-build-and-fix` command
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /plugin-update-command command-name=wf-orchestrate-task-workflow update="[your improvement]"
+**CRITICAL: Every time you execute this command and discover a more precise, better, or more efficient approach, YOU MUST immediately update this file** using /plugin-update-command command-name=orchestrate-workflow update="[your improvement]"
 
 **Areas for continuous improvement:**
 1. Agent coordination patterns and retry strategies

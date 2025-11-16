@@ -1,5 +1,5 @@
 ---
-name: orchestrate-java-task
+name: orchestrate-java
 description: Implements Java tasks end-to-end with automated testing and coverage verification
 ---
 
@@ -9,7 +9,7 @@ Orchestrates complete Java task implementation through code creation, unit testi
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-java-task update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-java update="[your improvement]"` with:
 1. Improved agent coordination patterns and error recovery strategies
 2. Better coverage gap analysis and iterative fix workflows
 3. More effective parameter preparation for agent handoffs
@@ -174,22 +174,22 @@ Display all statistics in final summary.
 
 **Full implementation:**
 ```
-/orchestrate-java-task types=UserService description="Implement user authentication with JWT tokens" module=auth-service
+/orchestrate-java types=UserService description="Implement user authentication with JWT tokens" module=auth-service
 ```
 
 **Testing existing code:**
 ```
-/orchestrate-java-task types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
+/orchestrate-java types=OrderProcessor description="Implement unit tests for OrderProcessor" module=order-service
 ```
 
 **Coverage verification:**
 ```
-/orchestrate-java-task types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
+/orchestrate-java types=PaymentHandler description="Verify and fix test coverage for PaymentHandler"
 ```
 
 **Single-module project:**
 ```
-/orchestrate-java-task types=com.example.util.StringUtils description="Add string validation utilities"
+/orchestrate-java types=com.example.util.StringUtils description="Add string validation utilities"
 ```
 
 ## RELATED

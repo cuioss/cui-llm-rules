@@ -18,7 +18,7 @@
   "commands": [
     "./commands/js-enforce-eslint.md",
     "./commands/js-refactor-code.md",
-    "./commands/orchestrate-js-task.md",
+    "./commands/orchestrate-js.md",
     "./commands/js-maintain-tests.md",
     "./commands/js-fix-jsdoc.md",
     "./commands/js-generate-coverage.md",

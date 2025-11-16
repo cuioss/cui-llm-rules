@@ -24,7 +24,7 @@ cui-frontend-expert/
     ├── js-implement-code.md
     ├── js-implement-tests.md
     ├── js-generate-coverage.md
-    ├── orchestrate-js-task.md
+    ├── orchestrate-js.md
     ├── js-refactor-code.md
     ├── js-fix-jsdoc.md
     └── js-enforce-eslint.md
@@ -62,7 +62,7 @@ cui-frontend-expert/
 - **js-generate-coverage** - Coverage generation and analysis command
 
 ### Orchestration Commands
-- **orchestrate-js-task** - End-to-end task orchestration (implementation → testing → coverage)
+- **orchestrate-js** - End-to-end task orchestration (implementation → testing → coverage)
 - **js-refactor-code** - Systematic refactoring with standards compliance verification
 
 ### Maintenance Commands
@@ -103,7 +103,7 @@ This bundle follows the CUI marketplace three-layer architecture:
 
 ### Full Task Workflow
 ```bash
-/orchestrate-js-task files="src/services/auth.js" description="Implement JWT authentication service"
+/orchestrate-js files="src/services/auth.js" description="Implement JWT authentication service"
 ```
 This orchestrates: implementation → tests → coverage verification
 
@@ -151,7 +151,7 @@ Modernizes JavaScript codebase (var → const/let, callbacks → async/await, et
 | java-implement-code | js-implement-code | Self-contained implementation |
 | java-implement-tests | js-implement-tests | Self-contained testing |
 | java-coverage-report | js-generate-coverage | Coverage generation/analysis |
-| orchestrate-java-task | orchestrate-js-task | End-to-end orchestration |
+| orchestrate-java | orchestrate-js | End-to-end orchestration |
 | java-refactor-code | js-refactor-code | Systematic refactoring |
 | java-fix-javadoc | js-fix-jsdoc | Documentation fixing |
 | java-maintain-logger | js-enforce-eslint | Standards enforcement |
@@ -179,7 +179,7 @@ Skills include standards for Maven integration to ensure frontend code works wit
 
 3. **Orchestrate workflows** with task manager:
    ```
-   /orchestrate-js-task files="..." description="..."
+   /orchestrate-js files="..." description="..."
    ```
 
 ## Related Bundles

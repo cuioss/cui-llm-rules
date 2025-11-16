@@ -129,7 +129,7 @@ This skill integrates with cui-task-workflow bundle components:
 
 * **commit-changes agent** - Should load this skill to format commits properly
 * **task-executor agent** - Can reference for commit message generation
-* **wf-orchestrate-task-workflow command** - Uses commit-changes which should follow these standards
+* **orchestrate-workflow command** - Uses commit-changes which should follow these standards
 
 ## Quality Verification
 

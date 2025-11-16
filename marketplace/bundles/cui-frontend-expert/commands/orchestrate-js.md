@@ -1,5 +1,5 @@
 ---
-name: orchestrate-js-task
+name: orchestrate-js
 description: Implements JavaScript tasks end-to-end with automated testing and coverage verification
 ---
 
@@ -9,7 +9,7 @@ Orchestrates complete JavaScript task implementation through code creation, unit
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-js-task update="[your improvement]"` with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-js update="[your improvement]"` with:
 1. Task breakdown patterns - How to decompose JavaScript tasks into implementation + testing phases, recognizing when components need separate test utilities or fixtures
 2. Implementation strategy refinement - Best practices for handling async code, module imports, external dependencies, framework-specific patterns (Vue, React, etc.)
 3. Test implementation approaches - Unit test patterns for JavaScript, mocking strategies, fixture setup efficiency, achieving meaningful coverage vs line coverage
@@ -99,12 +99,12 @@ Continue cycling through Steps 2-4 until:
 
 **Full implementation:**
 ```
-/orchestrate-js-task files="src/services/auth.js" description="Implement user authentication with JWT tokens" workspace="packages/core"
+/orchestrate-js files="src/services/auth.js" description="Implement user authentication with JWT tokens" workspace="packages/core"
 ```
 
 **Testing existing code:**
 ```
-/orchestrate-js-task files="src/utils/formatter.js" description="Implement unit tests for formatter utilities"
+/orchestrate-js files="src/utils/formatter.js" description="Implement unit tests for formatter utilities"
 ```
 
 ## RELATED

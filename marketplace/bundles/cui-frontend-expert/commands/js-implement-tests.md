@@ -461,7 +461,7 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `npm-builder` - Test execution agent (Layer 3)
-- `/orchestrate-js-task` - Orchestrates multiple test tasks (Layer 1)
+- `/orchestrate-js` - Orchestrates multiple test tasks (Layer 1)
 - `cui-javascript-unit-testing` - Testing standards skill
 - `/javascript-implement-code` - Production code implementation (Layer 2)
 

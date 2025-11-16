@@ -91,7 +91,7 @@ marketplace/
     "./agents/pr-quality-fixer.md"
   ],
   "commands": [
-    "./commands/wf-orchestrate-task-workflow.md",
+    "./commands/orchestrate-workflow.md",
     "./commands/pr-handle-pull-request.md"
   ],
   "skills": []

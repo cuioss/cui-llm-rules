@@ -488,7 +488,7 @@ This is a Layer 2 self-contained command:
 ## RELATED
 
 - `maven-builder` - Build verification agent (Layer 3)
-- `/orchestrate-java-task` - Orchestrates multiple implementations (Layer 1)
+- `/orchestrate-java` - Orchestrates multiple implementations (Layer 1)
 - `cui-java-core` - Core Java standards skill
 - `cui-java-cdi` - CDI/Quarkus standards skill
 

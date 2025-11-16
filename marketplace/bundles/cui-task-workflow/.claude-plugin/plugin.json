@@ -22,8 +22,8 @@
   ],
   "commands": [
     "./commands/pr-handle-pull-request.md",
-    "./commands/wf-orchestrate-task-workflow.md",
-    "./commands/wf-execute-single-task.md",
+    "./commands/orchestrate-workflow.md",
+    "./commands/orchestrate-task.md",
     "./commands/pr-fix-sonar-issues.md",
     "./commands/pr-respond-to-review-comments.md"
   ],

@@ -126,7 +126,7 @@ Commands that create plans should delegate to agents that load this skill.
 - **task-reviewer** - Validates task completeness
 
 **Commands:**
-- **wf-orchestrate-task-workflow** - Orchestrates implementation using plans
+- **orchestrate-workflow** - Orchestrates implementation using plans
 - Any command creating or consuming task lists
 
 **Skills:**
