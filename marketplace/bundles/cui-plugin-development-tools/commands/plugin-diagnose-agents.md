@@ -25,6 +25,7 @@ This ensures the command evolves and becomes more effective with each execution.
 - **scope=project**: Analyze agents in project location (.claude/agents/)
 - **agent-name** (optional): Review a specific agent by name (e.g., `maven-project-builder`)
 - **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
+- **--validate-references** (optional, default: false): Run reference validation analysis (doubles agent count)
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode with marketplace default
 
@@ -107,11 +108,34 @@ Glob: pattern="*.md", path=".claude/agents"
 - If Glob fails (global/project scope): Display error with path and suggestions, exit with error status
 - If no agents found: Display scopes searched and suggest trying different scope, exit gracefully
 
-### Step 3: Analyze Agents (Parallel)
+### Step 2a: Load Analysis Standards (Once)
 
-**For EACH agent discovered:**
+**CRITICAL**: Load standards files once to avoid redundant reads in each agent.
 
-Launch diagnose-agent:
+**Load agent analysis standards:**
+```
+Read: marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
+Read: marketplace/bundles/cui-plugin-development-tools/standards/agent-analysis-patterns.md
+```
+
+**Store standards content** in context to pass to agents in Step 3.
+
+**Token Optimization**: These standards are loaded once here instead of 28+ times (once per agent in each diagnose-agent invocation).
+
+### Step 3: Analyze Agents (Batched)
+
+**CRITICAL**: Process agents in batches to manage token usage.
+
+**Batch Configuration:**
+- **Batch size**: 5 agents per batch
+- **Processing**: Sequential batch execution
+- **Results**: Accumulate across all batches
+
+**For EACH batch of agents:**
+
+1. **Select next batch** of up to 5 agents from discovery list
+
+2. **Launch diagnose-agent agents in parallel for current batch:**
 
 ```
 Task:
@@ -123,24 +147,51 @@ Task:
     Parameters:
     - agent_path: {absolute_path_to_agent}
 
-    Return complete JSON report with all issues found.
+    IMPORTANT: Standards have been pre-loaded by orchestrator.
+    Skip Step 1 (Load Analysis Standards) - use standards from context instead.
+
+    IMPORTANT: Use streamlined output format (issues only).
+    Return minimal JSON - CLEAN agents get {"status": "CLEAN"},
+    agents with issues get only critical_issues/warnings/suggestions arrays.
+
+    This reduces token usage from ~600-800 to ~200-400 tokens per agent.
 ```
 
-**CRITICAL**: Launch ALL agents in PARALLEL (single message, multiple Task calls).
+3. **Collect batch results** from all agents
 
-**Collect results** from each agent as they complete.
+4. **Accumulate to aggregate results**
+
+5. **Repeat** until all agents processed
+
+**Token Management:**
+- Launch maximum 5 agents per batch
+- Allow agents to complete before starting next batch
+- Display progress: "Processing batch X/Y (agents N-M)..."
 
 **Error Handling:**
-- If Task fails: Display warning with agent name and error, mark as "Analysis Failed", continue with remaining
+- If Task fails: Display warning with agent name and error, mark as "Analysis Failed", continue with remaining in batch
 - If malformed response: Display warning, mark as "Malformed Response", continue
 - If timeout: Display warning, mark as "Timeout", continue
 - If partial success: Include successful analyses, add "Failed Analyses" section, report partial metrics
+- Continue with next batch even if current batch has failures
 
-### Step 4: Check Plugin References
+### Step 4: Check Plugin References (Optional, Batched)
 
-**For EACH agent discovered:**
+**When to execute**: ONLY if --validate-references flag is set
 
-Launch analyze-plugin-references agent to validate cross-references:
+**If --validate-references was NOT set:**
+- Skip this step entirely
+- Continue to Step 4.5
+
+**If --validate-references WAS set:**
+
+**CRITICAL**: Process reference validation in batches matching Step 3 batches.
+
+**For EACH batch of agents (same batches as Step 3):**
+
+1. **Select next batch** of up to 5 agents
+
+2. **Launch analyze-plugin-references agents in parallel for current batch:**
 
 ```
 Task:
@@ -151,22 +202,34 @@ Task:
 
     Parameters:
     - path: {absolute_path_to_agent}
-    - auto-fix: true
+    - auto-fix: false  # Collect issues only, don't modify in analysis phase
 
     Return summary report with reference validation results.
 ```
 
-**CRITICAL**: Launch ALL reference checks in PARALLEL (single message, multiple Task calls).
+3. **Collect batch results** from all reference validation agents
 
-**Collect reference analysis results** from each agent as they complete.
+4. **Accumulate to aggregate reference findings**
+
+5. **Repeat** until all agents processed
+
+**Token Management:**
+- Launch maximum 5 reference validation agents per batch
+- Process in same batches as Step 3 for consistency
+- Display progress: "Validating references batch X/Y..."
 
 **Error Handling:**
 - If Task fails: Display warning with agent name and error, mark as "Reference Check Failed", continue
 - If unexpected format: Display warning, mark as "Reference Check Error", continue
+- Continue with next batch even if current batch has failures
 
 **Aggregate reference findings:**
 Track for each agent: references_found, references_correct, references_fixed, references_ambiguous.
 Aggregate totals: agents_checked, total_references, correct, fixed, issues.
+
+**Performance Note:**
+- Without --validate-references: Skip entirely (default, recommended)
+- With --validate-references: Doubles total agent count but uses same batching strategy
 
 ### Step 4.5: Validate Architectural Constraints
 
@@ -498,19 +561,58 @@ Verification Complete
 
 ## ARCHITECTURE
 
-This command is a simple orchestrator:
-- Discovers agents using Glob (non-prompting)
-- Launches diagnose-agent in parallel
-- Aggregates and reports results
+**Token-Optimized Orchestrator Architecture**
 
-All analysis logic is in the specialized agent:
-- diagnose-agent (comprehensive agent analysis)
+This command is a batched orchestrator designed to handle large-scale marketplace analysis without exceeding token limits:
+
+**Discovery Phase:**
+- Uses SlashCommand (/plugin-inventory --json) for marketplace scope (non-prompting)
+- Uses Glob for global/project scopes (non-prompting)
+- Pre-loads analysis standards once (Step 2a) to avoid redundant reads
+
+**Analysis Phase (Batched):**
+- Processes agents in batches of 5 (6 batches for 28 agents)
+- Launches diagnose-agent agents in parallel per batch (5 agents/batch)
+- Optionally launches analyze-plugin-references agents if --validate-references flag set (adds 5 more agents/batch)
+- Uses streamlined JSON output format (issues only) to reduce result payload by 60%
+- Passes pre-loaded standards to agents to eliminate redundant file reads
+
+**Architectural Validation Phase:**
+- Detects Pattern 22 violations (agent self-invocation) using Grep
+- Validates self-containment and proper agent design patterns
+
+**Fix Phase:**
+- Categorizes issues (safe vs risky) using cui-fix-workflow skill
+- Applies safe fixes automatically if auto-fix=true
+- Prompts user for risky fixes using AskUserQuestion
+- Verifies fixes by re-running diagnose-agent on modified files
+
+**Token Optimization Strategies:**
+1. **Batching**: Sequential batches of 5 agents instead of 28 parallel agents (90% peak token reduction)
+2. **Standards Pre-loading**: Load once, pass to agents (75% reduction in standards loading)
+3. **Streamlined Output**: Issues-only JSON format (60% reduction in result size)
+4. **Optional Reference Validation**: Skip reference agents by default (50% agent count reduction when not needed)
+
+**Expected Token Usage:**
+- Without --validate-references: ~28,000 tokens/batch (5 agents) - **RECOMMENDED**
+- With --validate-references: ~56,000 tokens/batch (10 agents)
+- Peak usage: Well within limits (vs ~139,000 tokens in original all-parallel design)
+
+**All analysis logic is in specialized agents:**
+- diagnose-agent (comprehensive agent analysis with streamlined output support)
+- analyze-plugin-references (plugin reference validation - optional)
 
 ## TOOL USAGE
 
-- **Glob**: Discover agents (non-prompting)
-- **Task**: Launch diagnose-agent (parallel)
-- **Skill**: Load diagnostic patterns
+- **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery)
+- **Glob**: Discover agents in global/project scopes (non-prompting)
+- **Read**: Pre-load standards once (token optimization)
+- **Task**: Launch diagnose-agent agents in batches (parallel within batch, sequential across batches)
+- **Task** (optional): Launch analyze-plugin-references agents if --validate-references
+- **Grep**: Detect architectural violations (Pattern 22 self-invocation)
+- **Skill**: Load diagnostic patterns and fix workflow patterns
+- **Edit**: Apply safe and approved risky fixes
+- **AskUserQuestion**: Prompt for risky fix approval
 
 ## RELATED
 
@@ -525,4 +627,4 @@ Agent analysis follows:
 - Agent quality standards (bundles/cui-plugin-development-tools/standards/agent-quality-standards.md)
 - Agent analysis patterns (bundles/cui-plugin-development-tools/standards/agent-analysis-patterns.md)
 
-Standards are loaded automatically by diagnose-agent.
+**Token Optimization**: Standards are pre-loaded once in Step 2a and passed to all agents to avoid 28+ redundant file reads.

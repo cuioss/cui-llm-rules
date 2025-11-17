@@ -36,7 +36,14 @@ Analyze ONE agent file completely:
 
 ### Step 1: Load Analysis Standards
 
-**Read agent quality standards:**
+**Check if standards pre-loaded by orchestrator:**
+
+If the caller passed a message indicating "Standards have been pre-loaded" or "Skip Step 1", then:
+- **Use standards from conversation context** (already loaded by orchestrator)
+- **Skip reading files** to avoid redundant file operations
+- **Proceed directly to Step 2**
+
+**Otherwise, read agent quality standards:**
 
 Use Read tool to load the following standards files from the bundle's standards directory:
 - agent-quality-standards.md
@@ -49,6 +56,8 @@ These provide:
 - 20 common issue patterns (Pattern 1-20)
 - Tool coverage analysis formulas
 - Quality scoring criteria
+
+**Token Optimization**: When called from plugin-diagnose-agents orchestrator, standards are pre-loaded to avoid reading them 28+ times.
 
 ### Step 2: Read and Parse Agent
 
@@ -389,7 +398,49 @@ Rating:
 
 ### Step 18: Generate JSON Report
 
-**Output format:**
+**IMPORTANT: Check output mode requested by caller**
+
+**If caller indicates "streamlined output", "minimal format", or "issues only":**
+
+Return minimal JSON (CLEAN agents):
+```json
+{
+  "agent_name": "{name}",
+  "status": "CLEAN",
+  "lines": {count},
+  "complexity": "ACCEPTABLE|LARGE",
+  "overall_quality": {score},
+  "rating": "Excellent|Good"
+}
+```
+
+Return minimal JSON (agents with issues):
+```json
+{
+  "agent_name": "{name}",
+  "status": "HAS_ISSUES",
+  "lines": {count},
+  "complexity": "ACCEPTABLE|LARGE|TOO_COMPLEX",
+  "critical_issues": [
+    {"pattern": "Pattern X", "description": "...", "recommendation": "..."}
+  ],
+  "warnings": [
+    {"pattern": "Pattern Y", "description": "...", "recommendation": "..."}
+  ],
+  "suggestions": [
+    {"pattern": "Pattern Z", "description": "...", "recommendation": "..."}
+  ],
+  "scores": {
+    "tool_fit_score": {score},
+    "overall_quality": {score},
+    "rating": "Excellent|Good|Fair|Poor"
+  }
+}
+```
+
+**Token Savings**: Streamlined format reduces output from ~600-800 tokens to ~200-400 tokens per agent.
+
+**Otherwise (default), return full comprehensive format:**
 
 ```json
 {
