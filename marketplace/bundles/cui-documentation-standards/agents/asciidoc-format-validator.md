@@ -196,4 +196,4 @@ Focus improvements on:
 4. AsciiDoc format issue detection enhancements
 5. Report clarity and actionable recommendations
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-format-validator` based on your report.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-format-validator update="[your improvement]"` based on your report.

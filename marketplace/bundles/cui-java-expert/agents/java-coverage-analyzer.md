@@ -24,7 +24,7 @@ Focus improvements on:
 - Uncovered method identification strategies
 - Performance optimization for large reports
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=java-coverage-analyzer` based on your report.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=java-coverage-analyzer update="[your improvement]"` based on your report.
 
 ## YOUR TASK
 

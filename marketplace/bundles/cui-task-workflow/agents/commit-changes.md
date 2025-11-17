@@ -1,15 +1,6 @@
 ---
 name: commit-changes
-description: |
-  Use this agent to commit the current state of the Repository. It can push and/or create a PR as well.
-
-  Examples:
-  - User: "Commit my changes"
-    Assistant: Invokes commit-changes agent to commit all changes
-  - User: "Commit my changes and push"
-    Assistant: Invokes commit-changes agent to commit all changes and push
-  - User: "Commit my changes with COMMIT_MESSAGE, push and create a pr"
-    Assistant: Invokes commit-changes agent to commit all changes with COMMIT_MESSAGE, push and create a PR
+description: Commits repository changes with conventional commit format. Supports push and PR creation with artifact cleanup.
 
 tools: Read, Glob, Bash(git:*), Bash(rm:*), Bash(gh:*), Skill
 model: sonnet
@@ -68,12 +59,10 @@ This agent accepts the following parameters extracted from user requests:
 2. Use Glob tool to locate artifacts:
    - Class files: `Glob(pattern="**/*.class", path=".")`
    - Temp files: `Glob(pattern="**/*.temp", path=".")`
-   - Backup files: `Glob(pattern="**/*.backup*", path=".")`
 3. Cross-reference with git status to identify newly added artifacts
 4. Focus on problematic patterns:
    - `*.class` files in src/ directories (should only be in target/)
    - `*.temp` temporary files
-   - `*.backup*` backup files
    - Files in `target/` or `build/` directories that were accidentally staged
 
 **Success Criteria**: All files analyzed, artifact list compiled
@@ -89,13 +78,12 @@ For each artifact identified:
 **Safe Deletions** (100% certain - delete automatically):
 - `*.class` files in `src/main/java` or `src/test/java` directories
 - `*.temp` files anywhere
-- `*.backup*` files in source directories
 - Action: Execute `rm <file>` and log deletion
 - Track count of deleted files
 
 **Uncertain Cases** (require user confirmation when ANY of these conditions are true):
 - Files >1MB in size (might be intentional binary assets)
-- Files with extensions not in safe list (.class, .temp, .backup*, .log, .cache)
+- Files with extensions not in safe list (.class, .temp, .log, .cache)
 - Files in `target/` or `build/` directories that are tracked by git (git status shows as staged "A")
 - Files matching artifact patterns but outside `src/`, `target/`, `build/` directories
 - Action: For each uncertain file, ask user: "Found potential artifact: {file_path} ({size}). Delete this file? [y/N]:"

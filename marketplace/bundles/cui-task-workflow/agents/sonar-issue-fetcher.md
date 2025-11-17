@@ -1,7 +1,7 @@
 ---
 name: sonar-issue-fetcher
 description: Fetches Sonar issues from SonarQube API with filtering (focused fetcher - no analysis)
-tools: Bash(gh:pr view), Bash(gh:pr list), mcp__sonarqube__search_sonar_issues_in_projects, mcp__sonarqube__show_rule
+tools: [Bash, mcp__sonarqube__search_sonar_issues_in_projects]
 model: sonnet
 ---
 

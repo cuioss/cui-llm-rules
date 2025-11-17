@@ -1,13 +1,6 @@
 ---
 name: analyze-standards-file
-description: |
-  Analyzes a single standards file for quality issues: zero-information content, duplication, ambiguity, and formatting problems.
-
-  Applies "minimize without information loss" principle to identify content that provides zero value.
-
-  Examples:
-  - Input: file_path=/path/to/standards/java-core.md, skill_path=/path/to/skill
-  - Output: Structured list of quality issues found in the file
+description: Analyzes standards files for quality issues using minimize-without-loss principle - zero-information content, duplication, ambiguity, and formatting problems.
 
 tools: Read, Grep
 model: sonnet

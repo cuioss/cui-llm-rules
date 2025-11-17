@@ -1,13 +1,6 @@
 ---
 name: analyze-cross-skill-duplication
-description: |
-  Analyzes content duplication BETWEEN different marketplace skills to identify consolidation opportunities and recommend skill composition patterns.
-
-  Performs pairwise comparison of all skills to detect duplicate content sections and suggests actions.
-
-  Examples:
-  - Input: skill_paths=[/path/to/skill1, /path/to/skill2, ...]
-  - Output: Cross-skill duplication report with recommendations
+description: Analyzes content duplication between marketplace skills via pairwise comparison. Identifies consolidation opportunities and recommends skill composition patterns.
 
 tools: Read, Glob
 model: sonnet

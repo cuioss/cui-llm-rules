@@ -1,15 +1,6 @@
 ---
 name: asciidoc-auto-formatter
-description: |
-  Auto-fixes common AsciiDoc formatting issues (blank lines before lists, xref syntax, headers, whitespace).
-
-  Specialized agent for automated formatting with safety features (dry-run, interactive mode).
-
-  Examples:
-  - User: "Auto-fix formatting issues in standards/"
-    Assistant: "I'll use the asciidoc-auto-formatter agent to fix formatting issues"
-  - User: "Preview formatting changes for Requirements.adoc"
-    Assistant: "I'll use the asciidoc-auto-formatter agent in dry-run mode"
+description: Auto-fixes common AsciiDoc formatting issues (blank lines before lists, xref syntax, headers, whitespace) with safety features (dry-run, interactive mode).
 
 tools: Read, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-formatter.sh), Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh), Glob, Skill
 model: sonnet

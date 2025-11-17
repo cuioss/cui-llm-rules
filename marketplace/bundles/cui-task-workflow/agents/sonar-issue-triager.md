@@ -49,4 +49,4 @@ Focus improvements on:
 - Suggested implementation guidance precision
 - Edge case handling for complex issues
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=sonar-issue-triager` based on your report.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=sonar-issue-triager update="[your improvement]"` based on your report.

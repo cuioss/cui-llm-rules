@@ -1,12 +1,6 @@
 ---
 name: diagnose-command
-description: |
-  Analyzes a single command or agent file for bloat, clarity, structure, and anti-bloat compliance.
-  Distinguishes between commands (can self-update) and agents (cannot self-invoke).
-
-  Examples:
-  - Input: command_path=/path/to/command.md or /path/to/agent.md
-  - Output: Comprehensive quality report with bloat analysis and Pattern 22 validation for agents only
+description: Analyzes command or agent files for bloat, clarity, structure, and anti-bloat compliance. Validates Pattern 22 (self-invocation rules) for agents.
 
 tools: Read
 model: sonnet

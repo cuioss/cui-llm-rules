@@ -96,12 +96,30 @@ Skill: skill-name
 4. Use Read with manual parsing to detect natural language references
 5. Compile list of all detected references with line numbers
 
-**CRITICAL - Task Reference Format Validation:**
-- Task invocations MUST use fully qualified agent names with bundle prefix
-- Format: `subagent_type: bundle-name:agent-name`
-- Example: `subagent_type: cui-plugin-development-tools:diagnose-skill` ✅
-- Invalid: `subagent_type: diagnose-skill` ❌ (missing bundle prefix)
-- This validation ensures agent invocations work correctly in all contexts
+**CRITICAL - Bundle Prefix Enforcement Rules (Architecture Rule 6):**
+
+**For AGENTS (detected by path containing /agents/):**
+- ❌ **Task invocations**: CRITICAL violation - agents CANNOT invoke other agents (Task tool unavailable at runtime)
+- ❌ **SlashCommand invocations**: CRITICAL violation - agents CANNOT invoke commands (SlashCommand tool unavailable)
+- ✅ **Skill invocations**: MUST use bundle prefix - Format: `Skill: bundle:skill-name`
+  - Example: `Skill: cui-java-expert:cui-java-core` ✅
+  - Invalid: `Skill: cui-java-core` ❌ (missing bundle prefix)
+
+**For COMMANDS (detected by path containing /commands/):**
+- ✅ **Task invocations**: MUST use bundle prefix - Format: `subagent_type: bundle:agent-name`
+  - Example: `subagent_type: cui-plugin-development-tools:diagnose-skill` ✅
+  - Invalid: `subagent_type: diagnose-skill` ❌ (missing bundle prefix)
+- ✅ **Skill invocations**: MUST use bundle prefix - Format: `Skill: bundle:skill-name`
+  - Example: `Skill: cui-java-expert:cui-java-core` ✅
+  - Invalid: `Skill: cui-java-core` ❌ (missing bundle prefix)
+- ✅ **SlashCommand invocations**: MUST NOT use bundle prefix - Format: `/command-name`
+  - Example: `/plugin-update-agent` ✅
+  - Invalid: `/cui-plugin-development-tools:plugin-update-agent` ❌ (unnecessary bundle prefix)
+
+**For SKILLS (detected by path containing /skills/):**
+- ✅ **Skill invocations**: MUST use bundle prefix - Format: `Skill: bundle:skill-name`
+- ❌ **Task invocations**: CRITICAL violation - skills CANNOT invoke agents (breaks abstraction)
+- ❌ **SlashCommand invocations**: CRITICAL violation - skills CANNOT invoke commands (breaks abstraction)
 
 **Output:**
 ```
@@ -128,10 +146,17 @@ Found references:
 **Commands:**
 ```
 # Search inventory.bundles[].commands[] for matching name
-# If bundle specified in reference: filter to that bundle's commands
-# If unspecified: search all bundles' commands
+# Parse reference to extract name without bundle prefix
+# Example: /cui-plugin-development-tools:plugin-update-agent -> plugin-update-agent
+# Example: /plugin-update-agent -> plugin-update-agent
+# Search all bundles' commands (bundle prefix ignored for SlashCommand)
 # Match on: command.name === {name}
 # Return: command.path
+
+# VALIDATION:
+# If reference contains bundle prefix (e.g., /bundle:command):
+#   - Mark as ⚠️ FIXABLE (unnecessary bundle prefix)
+#   - Auto-fix removes prefix: /cui-plugin-development-tools:plugin-update-agent -> /plugin-update-agent
 ```
 
 **Agents:**
@@ -142,12 +167,22 @@ Found references:
 # Match on: agent.name === {name}
 # Return: agent.path
 
-# CRITICAL VALIDATION: Task invocations without bundle prefix
-# If type is "Task subagent_type" AND bundle is NOT specified:
-#   - Mark as ⚠️ FIXABLE (missing bundle prefix)
-#   - Find matching agent in inventory
-#   - Construct correct reference: {agent.bundle}:{agent.name}
-#   - Example fix: "diagnose-skill" → "cui-plugin-development-tools:diagnose-skill"
+# CRITICAL VALIDATION BASED ON FILE TYPE:
+
+# If analyzing an AGENT file (/agents/ in path):
+#   - If type is "Task subagent_type": Mark as ❌ CRITICAL (agents cannot invoke agents)
+#   - If type is "SlashCommand": Mark as ❌ CRITICAL (agents cannot invoke commands)
+#   - NO auto-fix - architectural violation requiring manual refactoring
+
+# If analyzing a COMMAND file (/commands/ in path):
+#   - If type is "Task subagent_type" AND bundle NOT specified:
+#     - Mark as ⚠️ FIXABLE (missing bundle prefix)
+#     - Find matching agent in inventory
+#     - Construct correct reference: {agent.bundle}:{agent.name}
+#     - Example fix: "diagnose-skill" → "cui-plugin-development-tools:diagnose-skill"
+
+# If analyzing a SKILL file (/skills/ in path):
+#   - If type is "Task subagent_type": Mark as ❌ CRITICAL (skills cannot invoke agents)
 ```
 
 **Skills:**
@@ -157,21 +192,43 @@ Found references:
 # If unspecified: search all bundles' skills
 # Match on: skill.name === {name}
 # Return: skill.path (directory path)
+
+# CRITICAL VALIDATION BASED ON FILE TYPE:
+
+# For ALL file types (agents, commands, skills):
+#   - If type is "Skill" AND bundle NOT specified:
+#     - Mark as ⚠️ FIXABLE (missing bundle prefix)
+#     - Find matching skill in inventory
+#     - Construct correct reference: {skill.bundle}:{skill.name}
+#     - Example fix: "cui-java-core" → "cui-java-expert:cui-java-core"
+
+# If analyzing a SKILL file (/skills/ in path):
+#   - If type is "SlashCommand": Mark as ❌ CRITICAL (skills cannot invoke commands)
 ```
 
 **Performance Note:** Using pre-loaded inventory eliminates 3 Glob operations per reference validation (commands, agents, skills). For files with 10+ references, this saves 30+ file system scans.
 
 **C. Categorize result:**
-- ✅ **Correct**: Found exactly 1 match and reference path is accurate (including bundle prefix for Task invocations)
-- ⚠️ **Fixable - Missing Bundle Prefix**: Task invocation found exactly 1 match but missing bundle prefix (e.g., `diagnose-skill` should be `cui-plugin-development-tools:diagnose-skill`)
+- ✅ **Correct**: Found exactly 1 match and reference has proper bundle prefix (where required/prohibited)
+- ⚠️ **Fixable - Missing Bundle Prefix**: Found exactly 1 match but missing required bundle prefix
+  - Task invocations in commands: `diagnose-skill` → `cui-plugin-development-tools:diagnose-skill`
+  - Skill invocations (all file types): `cui-java-core` → `cui-java-expert:cui-java-core`
+- ⚠️ **Fixable - Unnecessary Bundle Prefix**: Found exactly 1 match but has unnecessary bundle prefix
+  - SlashCommand invocations: `/cui-plugin-development-tools:plugin-update-agent` → `/plugin-update-agent`
 - ⚠️ **Fixable - Incorrect Path**: Found exactly 1 match but reference path incorrect
-- ❌ **Ambiguous**: Found multiple matches
-- ❌ **Not Found**: Found 0 matches
+- ❌ **CRITICAL - Architectural Violation**: Reference violates architecture rules
+  - Agents using Task tool (cannot invoke other agents)
+  - Agents using SlashCommand tool (cannot invoke commands)
+  - Skills using Task tool (cannot invoke agents)
+  - Skills using SlashCommand tool (cannot invoke commands)
+- ❌ **Ambiguous**: Found multiple matches (requires user selection)
+- ❌ **Not Found**: Found 0 matches (resource doesn't exist)
 
 **Track statistics:**
 - `references_found`: Total references detected
 - `references_correct`: References that are already correct
 - `references_fixed`: References auto-fixed
+- `references_critical`: Architectural violations detected
 - `references_ambiguous`: References requiring user input
 
 ### Step 4: Auto-Fix or Prompt
@@ -192,12 +249,20 @@ Auto-fixing reference on line {line}:
 - Use Edit to replace old reference with correct reference
 - Increment `references_fixed`
 
-**C. Fixable references (auto-fix=false):**
+**C. Architectural violation references:**
+- Display: "❌ CRITICAL - Architectural violation on line {line}: {reference}"
+- Display: "{file_type} cannot use {tool_type} tool - violates Architecture Rule 6"
+- Display: "Required action: Manual refactoring needed"
+- Increment `references_critical`
+- Add to critical violations section in report
+- NO auto-fix - these require manual architectural refactoring
+
+**D. Fixable references (auto-fix=false):**
 - Display: "⚠️ Incorrect reference on line {line}: {reference}"
 - Display: "Suggested fix: {correct_reference}"
 - Increment `references_ambiguous` (for reporting)
 
-**D. Ambiguous references (multiple matches):**
+**E. Ambiguous references (multiple matches):**
 - Display: "❌ Ambiguous reference on line {line}: {reference}"
 - Display numbered list of options:
   ```
@@ -211,7 +276,7 @@ Auto-fixing reference on line {line}:
 - If Skip: Continue to next reference
 - Increment `references_fixed` if corrected
 
-**E. Not found references:**
+**F. Not found references:**
 - Display: "❌ Reference not found on line {line}: {reference}"
 - Display: "Resource does not exist in marketplace"
 - Increment `references_ambiguous` (for reporting)
@@ -235,6 +300,7 @@ Auto-fix: {auto-fix}
 - Total references found: {references_found}
 - Correct references: {references_correct}
 - Auto-fixed references: {references_fixed}
+- Critical architectural violations: {references_critical}
 - Ambiguous/unfixed references: {references_ambiguous}
 
 ## Details
@@ -244,6 +310,12 @@ Auto-fix: {auto-fix}
 
 ### Fixed References ({references_fixed})
 - Line {line}: {old_reference} → {new_reference}
+
+### Critical Architectural Violations ({references_critical})
+- Line {line}: {reference} - ❌ CRITICAL
+  - Violation: {file_type} cannot use {tool_type} tool
+  - Reason: Violates Architecture Rule 6 - {explanation}
+  - Action Required: Manual refactoring needed
 
 ### Issues ({references_ambiguous})
 - Line {line}: {reference} - {issue_description}
@@ -266,6 +338,7 @@ Statistics:
 - References found: {references_found}
 - Correct: {references_correct}
 - Fixed: {references_fixed}
+- Critical violations: {references_critical}
 - Issues: {references_ambiguous}
 
 Report: {report_path}
@@ -275,6 +348,7 @@ Report: {report_path}
 
 **Status messages:**
 - All correct: "✅ All references are valid!"
+- Critical violations: "❌ CRITICAL: {count} architectural violations require manual refactoring!"
 - Some fixed: "⚠️ Fixed {count} references. Review changes."
 - Issues remain: "❌ {count} issues require attention. See report."
 
@@ -315,14 +389,21 @@ Report: {report_path}
 - Must handle both qualified (bundle:name) and unqualified (name) references
 
 **Validation Logic:**
-- Reference is correct if: exists + path accurate
-- Reference is fixable if: found exactly 1 match (any path)
+- Reference is correct if: exists + path accurate + proper bundle prefix (where required)
+- Reference is fixable if: found exactly 1 match AND no architectural violation
+- Reference is critical if: architectural violation (agent using Task/SlashCommand, skill using Task/SlashCommand)
 - Reference is ambiguous if: found 2+ matches
 - Reference is invalid if: found 0 matches
+
+**Bundle Prefix Requirements:**
+- Task invocations in commands: REQUIRED (add if missing)
+- Skill invocations in all file types: REQUIRED (add if missing)
+- SlashCommand invocations: PROHIBITED (remove if present)
 
 **Auto-Fix Constraints:**
 - Only fix when auto-fix=true
 - Only fix when confidence=100% (exactly 1 match)
+- NEVER fix architectural violations (require manual refactoring)
 - Always preserve original line structure
 - Never fix ambiguous references without user input
 
@@ -334,8 +415,9 @@ Report: {report_path}
 
 **Reporting:**
 - Always generate report file
-- Include all statistics
-- Document every reference (correct, fixed, issue)
+- Include all statistics (including critical violations count)
+- Document every reference (correct, fixed, critical, issue)
+- Prioritize critical architectural violations at top of report
 - Provide actionable next steps
 
 **Error Handling:**

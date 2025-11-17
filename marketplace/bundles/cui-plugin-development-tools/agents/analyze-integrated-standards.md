@@ -1,15 +1,8 @@
 ---
 name: analyze-integrated-standards
-description: |
-  Analyzes ALL standards files together for cross-file quality issues: duplication, conflicts, gaps, and coherence.
+description: Analyzes standards files for cross-file quality: duplication, conflicts, gaps, and coherence. Calculates integrated content score (0-100).
 
-  Calculates integrated content score (0-100) based on cross-file quality.
-
-  Examples:
-  - Input: standards_files=[file1.md, file2.md, ...], skill_path=/path/to/skill
-  - Output: Cross-file quality assessment with integrated content score
-
-tools: Read
+tools: [Read]
 model: sonnet
 color: green
 ---
@@ -367,4 +360,4 @@ Suggested enhancement: [specific improvement]
 Expected impact: [benefit of change]
 ```
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=analyze-integrated-standards` based on your report.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=analyze-integrated-standards update="[your improvement]"` based on your report.
