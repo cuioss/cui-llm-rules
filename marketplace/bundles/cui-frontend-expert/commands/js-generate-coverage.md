@@ -9,7 +9,7 @@ Self-contained command that generates test coverage reports and analyzes results
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command js-generate-coverage`
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-generate-coverage update="[your improvement]"` with:
 
 **Improvement areas**:
 - Enhanced report parsing for different test frameworks (Jest, Vitest, Mocha)

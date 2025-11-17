@@ -555,39 +555,18 @@ Verification Complete
 
 ## ARCHITECTURE
 
-**Token-Optimized Orchestrator Architecture**
+This command is a batched orchestrator designed to handle large-scale marketplace analysis following patterns from the cui-marketplace-orchestration-patterns skill.
 
-This command is a batched orchestrator designed to handle large-scale marketplace analysis without exceeding token limits:
+**For detailed orchestration architecture, see:**
+```
+Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
+```
 
-**Discovery Phase:**
-- Uses SlashCommand (/plugin-inventory --type=agents --json) for marketplace scope (non-prompting, filtered)
-- Uses Glob for global/project scopes (non-prompting)
-- Pre-loads analysis standards once (Step 2a) to avoid redundant reads
-
-**Analysis Phase (Batched):**
-- Processes agents in batches of 5 (6 batches for 28 agents)
-- Launches both diagnose-agent and analyze-plugin-references agents in parallel per batch (10 agents/batch)
-- Uses streamlined JSON output format (issues only) to reduce result payload by 60%
-- Passes pre-loaded standards to agents to eliminate redundant file reads
-
-**Architectural Validation Phase:**
-- Detects Pattern 22 violations (agent self-invocation) using Grep
-- Validates self-containment and proper agent design patterns
-
-**Fix Phase:**
-- Categorizes issues (safe vs risky) using cui-fix-workflow skill
-- Applies safe fixes automatically if auto-fix=true
-- Prompts user for risky fixes using AskUserQuestion
-- Verifies fixes by re-running diagnose-agent on modified files
-
-**Token Optimization Strategies:**
-1. **Batching**: Sequential batches of 5 agents instead of 28 parallel agents (90% peak token reduction)
-2. **Standards Pre-loading**: Load once, pass to agents (75% reduction in standards loading)
-3. **Streamlined Output**: Issues-only JSON format (60% reduction in result size)
-
-**Expected Token Usage:**
-- ~56,000 tokens/batch (10 agents: 5 diagnose-agent + 5 analyze-plugin-references)
-- Peak usage: Well within limits (vs ~139,000 tokens in original all-parallel design)
+**Key Architecture Characteristics:**
+- Batched processing (5 agents per batch, 6 batches for 28 agents)
+- Token-optimized (standards pre-loading, streamlined output, filtered inventory)
+- Parallel execution within batches, sequential across batches
+- Two-phase workflow: Analysis → Fix
 
 **All analysis logic is in specialized agents:**
 - diagnose-agent (comprehensive agent analysis with streamlined output support)

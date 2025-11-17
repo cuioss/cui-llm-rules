@@ -157,7 +157,7 @@ This command:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command plugin-create-bundle`
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-create-bundle update="[your improvement]"` with:
 
 **Improvement areas**:
 - Enhanced questionnaire flow with better default suggestions

@@ -9,7 +9,7 @@ Orchestrates systematic JSDoc violation fixing workflow with standards complianc
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command js-fix-jsdoc`
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-fix-jsdoc update="[your improvement]"` with:
 
 **Improvement areas**:
 - Enhanced violation detection for TypeScript JSDoc patterns

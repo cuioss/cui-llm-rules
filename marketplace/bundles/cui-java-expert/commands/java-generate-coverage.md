@@ -9,7 +9,7 @@ Self-contained command that generates JaCoCo coverage reports using maven-builde
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command cui-java-generate-coverage`
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=java-generate-coverage update="[your improvement]"` with:
 
 **Improvement areas**:
 - Enhanced report parsing for multi-module project coverage aggregation

@@ -515,35 +515,18 @@ Verification Complete
 
 ## ARCHITECTURE
 
-**Token-Optimized Orchestrator Architecture**
+This command is a batched orchestrator designed to handle large-scale marketplace analysis following patterns from the cui-marketplace-orchestration-patterns skill.
 
-This command is a batched orchestrator designed to handle large-scale marketplace analysis without exceeding token limits:
+**For detailed orchestration architecture, see:**
+```
+Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
+```
 
-**Discovery Phase:**
-- Uses SlashCommand (/plugin-inventory --type=commands --json) for marketplace scope (non-prompting, filtered)
-- Uses Glob for global/project scopes (non-prompting)
-- Pre-loads analysis standards once (Step 3a) to avoid redundant reads
-
-**Analysis Phase (Batched):**
-- Processes commands in batches of 5
-- Launches both diagnose-command and analyze-plugin-references agents in parallel per batch (10 agents/batch)
-- Uses streamlined JSON output format (issues only) to reduce result payload by 60%
-- Passes pre-loaded standards to agents to eliminate redundant file reads
-
-**Fix Phase:**
-- Categorizes issues (safe vs risky) using cui-fix-workflow skill
-- Applies safe fixes automatically if auto-fix=true
-- Prompts user for risky fixes using AskUserQuestion
-- Verifies fixes by re-running diagnose-command on modified files
-
-**Token Optimization Strategies:**
-1. **Batching**: Sequential batches of 5 commands instead of 46 parallel agents (90% peak token reduction)
-2. **Standards Pre-loading**: Load once, pass to agents (75% reduction in standards loading)
-3. **Streamlined Output**: Issues-only JSON format (60% reduction in result size)
-
-**Expected Token Usage:**
-- ~60,000 tokens/batch (10 agents: 5 diagnose-command + 5 analyze-plugin-references)
-- Peak usage: Well within limits (vs ~415,000 tokens in original all-parallel design)
+**Key Architecture Characteristics:**
+- Batched processing (5 commands per batch, 9 batches for 45 commands)
+- Token-optimized (standards pre-loading, streamlined output, filtered inventory)
+- Parallel execution within batches, sequential across batches
+- Two-phase workflow: Analysis → Fix
 
 **All analysis logic is in specialized agents:**
 - diagnose-command (comprehensive command analysis with streamlined output support)
