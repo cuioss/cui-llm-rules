@@ -289,32 +289,14 @@ You have completed PHASE 1 (Analysis).
 
 DO NOT STOP HERE. The analysis is useless without fixes.
 
-If any issues were found (warnings or suggestions):
-→ Continue to Step 7: Categorize Issues
-→ Continue to Step 8: Apply Safe Fixes
-→ Continue to Step 9: Prompt for Risky Fixes
-→ Continue to Step 10: Verify Fixes
-
-If zero issues found:
-→ Skip to completion message
-
 ==================================================
 
-### Step 7: Categorize Issues for Fixing ⚠️ PHASE 2 STARTS HERE
+### Steps 7-10: Fix Workflow ⚠️ PHASE 2
 
-**ALWAYS execute this step if any issues were found (warnings or suggestions).**
-
-**Load fix workflow skill:**
+**For complete fix workflow (categorization, safe fixes, prompting, verification), see:**
 
 ```
 Skill: cui-plugin-development-tools:cui-fix-workflow
-```
-
-**Categorize all issues into Safe vs Risky using patterns from cui-fix-workflow skill.**
-
-Read categorization patterns:
-```
-Read: standards/categorization-patterns.md (from cui-fix-workflow)
 ```
 
 **Skill-specific safe fix types:**
@@ -328,162 +310,11 @@ Read: standards/categorization-patterns.md (from cui-fix-workflow)
 2. **Integration Issues** - Orphaned files, workflow disconnection
 3. **Reference Problems** - Broken example references, unclear cross-references
 
-### Step 8: Apply Safe Fixes
-
-**When to execute**: If auto-fix=true (default) AND safe fixes exist
-
-**CRITICAL: If you reached Step 6, you MUST execute this step if safe fixes exist. This is not optional.**
-
-**Follow safe fix patterns from cui-fix-workflow skill.**
-
-**Apply skill-specific safe fixes using Edit tool:**
-
-**YAML syntax errors:**
-```
-Edit: {skill-file}
-- Fix YAML frontmatter syntax
-- Add missing required fields with defaults
-- Correct field name typos (e.g., `tools` → `allowed-tools`)
-```
-
-**Formatting normalization:**
-```
-Edit: {skill-file}
-- Normalize whitespace and indentation
-- Ensure blank lines before lists (AsciiDoc requirement)
-- Fix heading hierarchy
-```
-
-**Broken references:**
-```
-Edit: {skill-file}
-- Remove or comment out references to non-existent files
-- Add comment: "<!-- Reference removed: file not found -->"
-```
-
-**Track fixes applied using tracking patterns from cui-fix-workflow:**
-```json
-{
-  "safe_fixes_applied": {count},
-  "by_type": {
-    "yaml_fixes": {count},
-    "formatting_fixes": {count},
-    "reference_fixes": {count}
-  }
-}
-```
-
-### Step 9: Prompt for Risky Fixes
-
-**When to execute**: If risky fixes exist (regardless of auto-fix setting)
-
-**Follow prompting patterns from cui-fix-workflow skill.**
-
-Read prompting patterns:
-```
-Read: standards/prompting-patterns.md (from cui-fix-workflow)
-```
-
-**Group risky fixes by skill-specific categories:**
-
-1. **Duplication Issues** - Content found in multiple places, consolidation needed
-2. **Integration Issues** - Orphaned files, workflow disconnection
-3. **Reference Problems** - Broken example references, unclear cross-references
-
-**Use AskUserQuestion with standard structure from prompting patterns:**
-
-```
-AskUserQuestion:
-  questions: [
-    {
-      question: "Apply fixes for {Category} issues?",
-      header: "{Category}",
-      multiSelect: true,
-      options: [
-        {
-          label: "Fix: {specific-issue}",
-          description: "Skill: {skill-name}. Impact: {what-changes}. Location: {file}:{line}"
-        },
-        ...
-        {
-          label: "Skip all {category} fixes",
-          description: "Continue without fixing this category"
-        }
-      ]
-    }
-  ]
-```
-
-**Process user selections following prompting patterns:**
-- For each selected fix: Apply using Edit tool, increment `risky_fixes_applied`
-- For unselected fixes: Skip, increment `risky_fixes_skipped`
-- If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
-
-**Track risky fixes using tracking patterns from cui-fix-workflow:**
-```json
-{
-  "risky_fixes_prompted": {count},
-  "risky_fixes_applied": {count},
-  "risky_fixes_skipped": {count},
-  "fixes_by_category": {
-    "duplication": {applied: count, skipped: count},
-    "integration": {applied: count, skipped: count},
-    "references": {applied: count, skipped: count}
-  }
-}
-```
-
-### Step 10: Verify Fixes
-
-**When to execute**: After any fixes applied (Step 8 or Step 9)
-
-**Follow verification patterns from cui-fix-workflow skill.**
-
-Read verification patterns:
-```
-Read: standards/verification-patterns.md (from cui-fix-workflow)
-```
-
-**Re-run analysis on modified skills:**
-```
-Task:
-  subagent_type: diagnose-skill
-  description: Verify fixes for {skill-name}
-  prompt: |
-    Re-analyze this skill after fixes.
-
-    Parameters:
-    - skill_path: {absolute_path_to_skill}
-
-    Return complete JSON report.
-```
-
-**Compare before/after using verification patterns:**
-```json
-{
-  "verification": {
-    "skills_fixed": {count},
-    "issues_resolved": {count},
-    "issues_remaining": {count},
-    "new_issues": {count}  // Should be 0!
-  }
-}
-```
-
-**Report verification results following verification patterns:**
-```
-==================================================
-Verification Complete
-==================================================
-
-✅ {issues_resolved} issues resolved
-{if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain (require manual intervention)
-{endif}
-{if new_issues > 0}
-❌ {new_issues} NEW issues introduced (fixes need review!)
-{endif}
-```
+**Fix workflow steps** (from cui-fix-workflow skill):
+1. **Step 7**: Categorize issues (safe vs risky)
+2. **Step 8**: Apply safe fixes automatically (if auto-fix=true)
+3. **Step 9**: Prompt for risky fixes using AskUserQuestion
+4. **Step 10**: Verify fixes by re-running diagnose-skill
 
 ## ARCHITECTURE
 
