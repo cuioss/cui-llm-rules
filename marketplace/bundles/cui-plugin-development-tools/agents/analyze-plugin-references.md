@@ -3,7 +3,6 @@ name: analyze-plugin-references
 description: Analyzes agents/commands for plugin references and validates/fixes incorrect cross-references
 tools:
   - Read
-  - Glob
   - Grep
   - Edit
   - AskUserQuestion
@@ -40,19 +39,23 @@ This ensures the agent evolves and becomes more effective with each execution.
 ## PARAMETERS
 
 **path** (required) - Path to agent or command file to analyze
+**marketplace_inventory** (required) - JSON inventory from /plugin-inventory --json containing all marketplace bundles, agents, commands, and skills
 **auto-fix** (optional, default: true) - Automatically fix references when confident
 
 ## WORKFLOW
 
-### Step 1: Validate Input File
+### Step 1: Validate Input Parameters
 
 **Actions:**
 1. Verify `path` parameter provided
-2. Read target file
-3. Verify file is agent or command (in agents/ or commands/ directory)
+2. Verify `marketplace_inventory` parameter provided (JSON object with bundles array)
+3. Read target file
+4. Verify file is agent or command (in agents/ or commands/ directory)
 
 **Error Handling:**
 - If path not provided: "ERROR: path parameter required"
+- If marketplace_inventory not provided: "ERROR: marketplace_inventory parameter required - pass JSON from /plugin-inventory --json"
+- If marketplace_inventory invalid: "ERROR: marketplace_inventory must be JSON object with 'bundles' array"
 - If file not found: "ERROR: File not found: {path}"
 - If not agent/command: "ERROR: File must be in agents/ or commands/ directory"
 
@@ -111,38 +114,38 @@ Found references:
 - Bundle: if specified (e.g., `bundle:name`)
 - Name: resource name
 
-**B. Search marketplace for matching resource:**
+**B. Search marketplace inventory for matching resource:**
+
+**Use pre-loaded marketplace_inventory JSON to find matches.**
 
 **Commands:**
 ```
-# Find all command files, then filter by name
-Glob: marketplace/bundles/**/commands/*.md
-
-# Filter results to match {name}.md
-# If bundle specified, filter to marketplace/bundles/{bundle}/commands/{name}.md
-# If unspecified, accept any bundle path matching */{name}.md
+# Search inventory.bundles[].commands[] for matching name
+# If bundle specified in reference: filter to that bundle's commands
+# If unspecified: search all bundles' commands
+# Match on: command.name === {name}
+# Return: command.path
 ```
 
 **Agents:**
 ```
-# Find all agent files, then filter by name
-Glob: marketplace/bundles/**/agents/*.md
-
-# Filter results to match {name}.md
-# If bundle specified, filter to marketplace/bundles/{bundle}/agents/{name}.md
-# If unspecified, accept any bundle path matching */{name}.md
+# Search inventory.bundles[].agents[] for matching name
+# If bundle specified in reference: filter to that bundle's agents
+# If unspecified: search all bundles' agents
+# Match on: agent.name === {name}
+# Return: agent.path
 ```
 
 **Skills:**
 ```
-# Find all skill directories
-Glob: marketplace/bundles/**/skills/*
-
-# Filter results to match skill name directory
-# Skills are directories, not files
-# If bundle specified, filter to marketplace/bundles/{bundle}/skills/{name}
-# If unspecified, accept any bundle path matching */skills/{name}
+# Search inventory.bundles[].skills[] for matching name
+# If bundle specified in reference: filter to that bundle's skills
+# If unspecified: search all bundles' skills
+# Match on: skill.name === {name}
+# Return: skill.path (directory path)
 ```
+
+**Performance Note:** Using pre-loaded inventory eliminates 3 Glob operations per reference validation (commands, agents, skills). For files with 10+ references, this saves 30+ file system scans.
 
 **C. Categorize result:**
 - ✅ **Correct**: Found exactly 1 match and reference path is accurate
@@ -266,12 +269,6 @@ Report: {report_path}
 - Load target file for analysis
 - Parse file content for natural language references
 
-**Glob:**
-- Find all commands: `marketplace/bundles/*/commands/*.md`
-- Find all agents: `marketplace/bundles/*/agents/*.md`
-- Find all skills: `marketplace/bundles/*/skills/*/.`
-- Search for specific resources by name/bundle
-
 **Grep:**
 - Search for SlashCommand patterns
 - Search for Task subagent_type patterns
@@ -291,6 +288,8 @@ Report: {report_path}
 **Write:**
 - Create analysis report file
 - Document all findings, fixes, and issues
+
+**Glob:** ~~REMOVED~~ - No longer needed. Marketplace inventory is provided as parameter.
 
 ## CRITICAL RULES
 
