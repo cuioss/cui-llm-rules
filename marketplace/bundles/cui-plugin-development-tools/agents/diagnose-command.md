@@ -35,7 +35,14 @@ Analyze ONE command or agent file completely:
 
 ### Step 1: Load Analysis Standards
 
-**Read command quality standards:**
+**Check if standards pre-loaded by orchestrator:**
+
+If the caller passed a message indicating "Standards have been pre-loaded" or "Skip Step 1", then:
+- **Use standards from conversation context** (already loaded by orchestrator)
+- **Skip reading files** to avoid redundant file operations
+- **Proceed directly to Step 2**
+
+**Otherwise, read command quality standards:**
 
 Use Read tool to load the following standards files from the bundle's standards directory:
 - command-quality-standards.md
@@ -48,6 +55,8 @@ These provide:
 - 20 common issue patterns (Pattern 1-20)
 - 8 anti-bloat rules (CRITICAL)
 - Bloat detection algorithm
+
+**Token Optimization**: When called from plugin-diagnose-commands orchestrator, standards are pre-loaded to avoid reading them 46+ times.
 
 ### Step 2: Read and Parse Command
 
@@ -302,7 +311,46 @@ Rating:
 
 ### Step 13: Generate JSON Report
 
-**Output format:**
+**IMPORTANT: Check output mode requested by caller**
+
+**If caller indicates "streamlined output", "minimal format", or "issues only":**
+
+Return minimal JSON (CLEAN commands):
+```json
+{
+  "command_name": "{name}",
+  "status": "CLEAN",
+  "classification": "ACCEPTABLE|LARGE",
+  "lines": {count}
+}
+```
+
+Return minimal JSON (commands with issues):
+```json
+{
+  "command_name": "{name}",
+  "status": "HAS_ISSUES",
+  "classification": "ACCEPTABLE|LARGE|BLOATED",
+  "lines": {count},
+  "critical_issues": [
+    {"pattern": "Pattern 11", "description": "Command bloated at XXX lines", "recommendation": "Extract sections to skills"}
+  ],
+  "warnings": [
+    {"pattern": "Pattern 12", "description": "Duplicate content in sections A, B", "recommendation": "Consolidate"}
+  ],
+  "suggestions": [
+    {"pattern": "Pattern 18", "description": "Inconsistent naming", "recommendation": "Standardize naming"}
+  ],
+  "scores": {
+    "overall_quality": {score},
+    "rating": "Excellent|Good|Fair|Poor"
+  }
+}
+```
+
+**Token Savings**: Streamlined format reduces output from ~2,000 tokens to ~200-800 tokens per command.
+
+**Otherwise (default), return full comprehensive format:**
 
 ```json
 {
