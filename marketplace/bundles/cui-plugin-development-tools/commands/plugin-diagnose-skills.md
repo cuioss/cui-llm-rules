@@ -71,27 +71,17 @@ This provides architecture rules and validation patterns for marketplace compone
 
 **For marketplace scope (default):**
 
-**Step 2a: Discover all bundles**
+Execute plugin-inventory command with type filter:
 ```
-Glob: pattern="*/.claude-plugin/plugin.json", path="marketplace/bundles"
-```
-
-**Extract bundle paths:**
-- Each result has format: `marketplace/bundles/{bundle-name}/.claude-plugin/plugin.json`
-- Extract bundle name from path (directory before `.claude-plugin`)
-- Build list of bundle paths: `marketplace/bundles/{bundle-name}`
-
-**Step 2b: Discover skills in each bundle**
-
-For each bundle path discovered:
-```
-Glob: pattern="*/SKILL.md", path="{bundle_path}/skills"
+SlashCommand: /plugin-inventory --type=skills --json
 ```
 
-**Extract skill paths:**
-- Each result has format: `{bundle_path}/skills/{skill-name}/SKILL.md`
-- Extract skill path: Remove `/SKILL.md` suffix
-- Build flat list of all skill directory paths from all bundles
+**Token Optimization:** Using --type=skills returns only skills, reducing JSON payload size.
+
+Parse JSON output:
+- Extract `bundles[]` array from JSON response
+- For each bundle, collect `bundle.skills[]` with `name` and `path` fields
+- Build flat list of skill paths from all bundles
 
 **For global scope:**
 ```

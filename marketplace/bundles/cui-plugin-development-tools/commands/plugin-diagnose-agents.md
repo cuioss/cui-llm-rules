@@ -560,7 +560,7 @@ Verification Complete
 This command is a batched orchestrator designed to handle large-scale marketplace analysis without exceeding token limits:
 
 **Discovery Phase:**
-- Uses SlashCommand (/plugin-inventory --json) for marketplace scope (non-prompting)
+- Uses SlashCommand (/plugin-inventory --type=agents --json) for marketplace scope (non-prompting, filtered)
 - Uses Glob for global/project scopes (non-prompting)
 - Pre-loads analysis standards once (Step 2a) to avoid redundant reads
 
@@ -595,7 +595,7 @@ This command is a batched orchestrator designed to handle large-scale marketplac
 
 ## TOOL USAGE
 
-- **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery)
+- **SlashCommand**: Execute /plugin-inventory --type=agents --json (marketplace discovery, filtered)
 - **Glob**: Discover agents in global/project scopes (non-prompting)
 - **Read**: Pre-load standards once (token optimization)
 - **Task**: Launch diagnose-agent and analyze-plugin-references agents in batches (parallel within batch, sequential across batches)
