@@ -1,42 +1,44 @@
-# Commands Remediation Plan
+# Commands Remediation Plan - Remaining Work
 
 **Generated**: 2025-11-17
-**Updated**: 2025-11-17 (Phases 1-2 complete)
-**Scope**: Marketplace commands diagnosis findings
+**Updated**: 2025-11-17 (Phases 1-3 complete)
+**Scope**: Marketplace commands diagnosis - remaining fixes
 **Remaining Issues**: 7 commands requiring fixes
-**Priority**: Execute in order listed (HIGH → MEDIUM → LOW)
+**Priority**: Execute in order listed (MEDIUM → HIGH)
 
 ---
 
-## Executive Summary
+## What's Been Completed
 
-**✅ COMPLETED (6 fixes)**:
-- Phase 1: Fixed 5 CONTINUOUS IMPROVEMENT RULE format issues
-- Phase 2: Investigated 3 broken references (all false positives)
-- Phase 3: Fixed 2 critical bloat issues (plugin-diagnose-agents, plugin-diagnose-commands)
-  - Created `cui-marketplace-orchestration-patterns` skill (92.5/100 quality)
-  - Reduced 39 lines total, improved architecture documentation
+**✅ Phase 1: CONTINUOUS IMPROVEMENT RULE Fixes (5 commands)**
+- java-generate-coverage, js-generate-coverage, plugin-create-bundle, js-fix-jsdoc, maven-build-and-fix
+- All upgraded to proper self-update format
 
-**⏳ REMAINING (7 fixes)**:
-- **4 LARGE/BLOATED commands** requiring optimization
-- **3 commands** with actual broken references (need investigation)
+**✅ Phase 2: Reference Investigation (3 commands)**
+- plugin-create-bundle, java-maintain-tests, java-implement-tests
+- All verified as false positives
 
-**Expected Impact**:
-- Bloat reduction: ~450 lines remaining across 4 commands
-- Fix broken runtime failures in 3 commands
+**✅ Phase 3: Critical Bloat Reduction (4 commands)**
+- plugin-diagnose-agents: 621→599 lines (22 saved)
+- plugin-diagnose-commands: 577→560 lines (17 saved)
+- plugin-diagnose-skills: 564→394 lines (170 saved)
+- plugin-diagnose-bundle: 569→456 lines (113 saved)
+- **Total: 322 lines removed, 1 skill created (cui-marketplace-orchestration-patterns)**
+- **Result: 0 BLOATED commands remaining in critical category**
 
 ---
 
-## MEDIUM PRIORITY: Moderate Bloat Issues (4 Commands)
+## Remaining Work
 
-### 3. js-maintain-tests (534 lines → ~444 lines)
+### MEDIUM PRIORITY: Moderate Bloat Issues (4 Commands)
+
+#### 1. js-maintain-tests (534 lines → ~444 lines)
 
 **Current State**: LARGE (bloat score: 134 - approaching BLOATED)
 
-**Issue**: Contains extractable test improvement categories (lines 413-449) and verification checklist.
+**Issue**: Contains extractable test improvement categories and verification checklist.
 
 **Remediation**:
-
 ```bash
 /plugin-update-command command-name=js-maintain-tests update="Extract TEST IMPROVEMENT CATEGORIES section (lines 413-449, ~70 lines) to cui-javascript-maintenance skill. Extract test quality verification checklist (lines 315-328) to same skill. Reference skill instead of inline documentation. Reduce from 534 to ~444 lines."
 ```
@@ -49,14 +51,13 @@
 
 ---
 
-### 4. java-implement-tests (530 lines → optimize structure)
+#### 2. java-implement-tests (530 lines → optimize structure)
 
 **Current State**: LARGE (bloat score: 133 - just over threshold)
 
 **Issue**: Well-structured command, just slightly over 500-line threshold.
 
 **Remediation**:
-
 ```bash
 /plugin-update-command command-name=java-implement-tests update="Minor optimization only - command is well-structured at 530 lines. Consider condensing verbose sections if possible, but major restructuring not required. Focus on removing any redundant explanations."
 ```
@@ -66,20 +67,19 @@
 **Files to Modify**:
 - `/marketplace/bundles/cui-java-expert/commands/java-implement-tests.md`
 
-**Note**: This is the lowest priority bloat fix - command quality is good.
+**Note**: Lowest priority bloat fix - command quality is good.
 
 ---
 
-### 5. plugin-diagnose-marketplace (523 lines → ~350 lines)
+#### 3. plugin-diagnose-marketplace (523 lines → ~350 lines)
 
 **Current State**: BLOATED (bloat score: 131)
 
 **Issue**: Verbose validation procedures, duplicate validation patterns across Steps 2-5, educational overview content.
 
 **Remediation**:
-
 ```bash
-# Step 1: Create validate-marketplace-config skill (if not exists from #3)
+# Step 1: Create validate-marketplace-config skill
 /plugin-create-skill bundle-name=cui-plugin-development-tools skill-name=validate-marketplace-config
 
 # Step 2: Update command
@@ -91,19 +91,18 @@
 **Files to Modify**:
 - `/marketplace/bundles/cui-plugin-development-tools/commands/plugin-diagnose-marketplace.md`
 
-**Skills to Create/Update**:
-- `validate-marketplace-config` (consolidate with validate-bundle-inventory if appropriate)
+**Skills to Create**:
+- `validate-marketplace-config`
 
 ---
 
-### 6. java-maintain-tests (512 lines → ~380 lines)
+#### 4. java-maintain-tests (512 lines → ~380 lines)
 
 **Current State**: BLOATED (bloat score: 128)
 
 **Issue**: Duplicate build verification steps, over-specified bug detection protocol, extractable test improvement procedures.
 
 **Remediation**:
-
 ```bash
 # Step 1: Create test-improvement-procedures skill
 /plugin-create-skill bundle-name=cui-java-expert skill-name=test-improvement-procedures
@@ -129,9 +128,9 @@
 
 ---
 
-## HIGH PRIORITY: Broken References (3 Commands)
+### HIGH PRIORITY: Broken References (3 Commands)
 
-### 7. tools-audit-permission-wildcards
+#### 5. tools-audit-permission-wildcards
 
 **Issue**: References `/cui-utilities:tools-check-file-permissions` (lines 71, 85) but command doesn't exist.
 
@@ -163,7 +162,7 @@
 
 ---
 
-### 8. doc-review-technical-docs
+#### 6. doc-review-technical-docs
 
 **Issue**: References `/cui-documentation-standards:doc-analyze-technical-quality` (line 27) and lists it in Related Resources (line 59), but this command/agent doesn't exist.
 
@@ -196,7 +195,7 @@
 
 ---
 
-### 9. maven-build-and-fix
+#### 7. maven-build-and-fix
 
 **Issue**: 3 reference problems:
 - Line 90: `java-code-analyzer` agent doesn't exist
@@ -204,7 +203,6 @@
 - Line 96: `/cui-maven-run-integration-tests` uses wrong format (should be `/cui-maven:maven-run-integration-tests`)
 
 **Remediation**:
-
 ```bash
 # Fix #1: Incorrect command reference format (easiest)
 /plugin-update-command command-name=maven-build-and-fix update="Fix line 96 reference format. Change '/cui-maven-run-integration-tests' to '/cui-maven:maven-run-integration-tests' (correct bundle:command format)."
@@ -221,59 +219,34 @@
 
 ---
 
-## ✅ COMPLETED: CONTINUOUS IMPROVEMENT RULE Format Fixes (5 Commands)
+## Execution Order
 
-All 5 commands with CONTINUOUS IMPROVEMENT RULE format issues have been fixed:
-- ✅ java-generate-coverage - Updated to imperative format with explicit command-name parameter
-- ✅ js-generate-coverage - Changed from caller-reporting to self-update pattern
-- ✅ plugin-create-bundle - Updated to proper parameter format
-- ✅ js-fix-jsdoc - Changed to imperative format with self-update instruction
-- ✅ maven-build-and-fix - Fixed to use self-update pattern
+**Recommended sequence**:
 
----
+### Phase 4: Moderate Bloat Reduction (4 commands)
+1. java-maintain-tests (#4) - Create 2 skills, reduce 132 lines
+2. plugin-diagnose-marketplace (#3) - Create 1 skill, reduce 173 lines
+3. js-maintain-tests (#1) - Update existing skill, reduce 90 lines
+4. java-implement-tests (#2) - Minor optimization only
 
-## Execution Status
-
-**✅ COMPLETED**:
-- ✅ Phase 1: Quick Wins - Fixed 5 CONTINUOUS IMPROVEMENT RULE format issues
-- ✅ Phase 2: Reference Investigation - Verified 3 broken references were false positives
-- ✅ Phase 3: Critical Bloat (4/4 COMPLETE):
-  - ✅ plugin-diagnose-agents (621→599 lines, created cui-marketplace-orchestration-patterns skill)
-  - ✅ plugin-diagnose-commands (577→560 lines, reused orchestration skill)
-  - ✅ plugin-diagnose-skills (564→394 lines, removed duplicate fix workflow)
-  - ✅ plugin-diagnose-bundle (569→456 lines, removed duplicate fix workflow)
-  - **Total Phase 3 reduction: 322 lines across 4 commands**
-
-**⏳ REMAINING**:
-- ⏳ Phase 4: Moderate Bloat (4 commands):
-  - plugin-diagnose-marketplace (#5) - Create 1 skill, reduce 173 lines
-  - java-maintain-tests (#6) - Create 2 skills, reduce 132 lines
-  - js-maintain-tests (#3) - Update existing skill, reduce 90 lines
-  - java-implement-tests (#4) - Minor optimization only
-- ⏳ Phase 5: Actual Broken References (3 commands):
-  - tools-audit-permission-wildcards (#7) - Needs investigation
-  - doc-review-technical-docs (#8) - Needs investigation
-  - maven-build-and-fix (#9) - Fix reference format
+### Phase 5: Broken References Investigation (3 commands)
+5. maven-build-and-fix (#7) - Fix reference format, investigate missing agents
+6. tools-audit-permission-wildcards (#5) - Investigate and fix
+7. doc-review-technical-docs (#6) - Investigate and fix or create missing agent
 
 ---
 
 ## Success Metrics
 
-**✅ COMPLETED SO FAR:**
-- **CONTINUOUS IMPROVEMENT RULE fixes**: 5 commands upgraded to proper self-update format
-- **Bloat reduction**: 322 lines removed from 4 critical commands
-- **New skills created**: 1 new skill (cui-marketplace-orchestration-patterns, 92.5/100 quality)
-- **False positive investigation**: 3 reference issues verified as non-issues
-- **All critical bloat issues resolved**: 4/4 commands now ACCEPTABLE or LARGE (none BLOATED)
+**Target After All Remaining Fixes:**
+- **Bloat reduction**: ~450 lines removed across 4 moderate bloat commands
+- **Average command size**: Commands reduced from avg 525 lines to avg 410 lines (22% reduction)
+- **Clean rate improvement**: From current ~55% clean to target ~70% clean
+- **Runtime failures fixed**: 3 commands with broken references repaired
+- **New skills created**: 3-5 additional reusable skills
+- **Total cumulative impact**: ~770 lines removed, 4-6 skills created
 
-**⏳ REMAINING TARGETS:**
-- **Bloat reduction**: ~450 lines remaining across 4 moderate bloat commands
-- **Average command size**: Target reduction from avg 525 lines to avg 410 lines (22% reduction)
-- **Clean rate improvement**: From 47% clean to current ~55% clean, target ~70% clean
-- **Runtime failures fixed**: 3 commands with actual broken references to repair
-- **New skills to create**: 2-4 additional reusable skills (for moderate bloat fixes)
-
-**Total effort remaining estimate**: 4-6 hours
+**Effort Estimate**: 4-6 hours remaining
 
 ---
 
@@ -282,7 +255,7 @@ All 5 commands with CONTINUOUS IMPROVEMENT RULE format issues have been fixed:
 - Always run `/plugin-diagnose-commands` after each fix to verify improvements
 - Test each command after modification to ensure functionality preserved
 - Commit changes incrementally with clear commit messages
-- Update this plan as you complete items (mark completed, update estimates)
+- Focus on moderate bloat first, then investigate broken references
 
 ---
 
