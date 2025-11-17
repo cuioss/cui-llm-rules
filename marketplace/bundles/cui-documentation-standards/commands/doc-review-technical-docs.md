@@ -172,7 +172,7 @@ Top Recommendations:
 
 ```
 Task:
-  subagent_type: commit-changes
+  subagent_type: cui-task-workflow:commit-changes
   description: Commit documentation fixes
   prompt: |
     Commit all modified AsciiDoc files.
@@ -292,4 +292,4 @@ Layer 3: Focused agents
 - `asciidoc-format-validator` - Format validation agent (Layer 3)
 - `asciidoc-link-verifier` - Link verification agent (Layer 3)
 - `asciidoc-content-reviewer` - Content review agent (Layer 3)
-- `commit-changes` - Commit utility agent
+- `cui-task-workflow:commit-changes` - Commit utility agent
