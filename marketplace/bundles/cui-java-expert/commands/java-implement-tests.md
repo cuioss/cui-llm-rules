@@ -165,43 +165,7 @@ If the description explicitly indicates the task is to **fix the build or failin
    - Exception testing with assertThrows
    - Multiple assertions when needed (with messages)
 
-6. **Document test plan**:
-
-**Example Test Plan Format:**
-```
-Test Plan for UserValidator:
-
-Test Class: UserValidatorTest
-- @EnableGeneratorController
-- @DisplayName("UserValidator Tests")
-
-Test Methods:
-
-1. shouldValidateCorrectEmail
-   - Arrange: Generate valid email using Generators.emailAddress()
-   - Act: Call validateEmail()
-   - Assert: Returns true
-   - Message: "Valid email should pass validation"
-
-2. shouldRejectInvalidEmail (Parameterized)
-   - @GeneratorsSource with invalid email patterns
-   - Count: 5 variants
-   - Assert: Returns false for each
-   - Message: "Invalid email format should fail validation"
-
-3. shouldThrowExceptionForNullEmail
-   - Arrange: null email
-   - Act/Assert: assertThrows(IllegalArgumentException.class)
-   - Message: "Null email should throw IllegalArgumentException"
-
-4. shouldValidateCorrectPhone
-   - Arrange: Generate valid phone using Generators.strings()
-   - Act: Call validatePhone()
-   - Assert: Returns true
-   - Message: "Valid phone number should pass validation"
-
-Coverage: All public methods, happy paths, error paths, null checks
-```
+6. **Document test plan**: List test class, methods (AAA pattern), parameterized tests, coverage areas
 
 ### Step 5: Implement Tests Step-by-Step
 

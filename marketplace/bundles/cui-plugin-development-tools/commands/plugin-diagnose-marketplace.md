@@ -5,44 +5,7 @@ description: Diagnose and fix marketplace plugin configuration errors and obsole
 
 # Diagnose Marketplace Command
 
-Comprehensive diagnostic tool for marketplace plugin configuration, detecting obsolete entries, schema violations, and configuration drift across marketplace.json, installed_plugins.json, and settings.json.
-
-## Overview
-
-This command diagnoses and fixes issues across **two configuration layers**:
-
-### 1. Marketplace Config (Repository)
-**Location**: `/marketplace/`
-**Purpose**: Defines WHAT plugins exist and WHERE they are
-**Scope**: Project-wide, version controlled, shared across users
-
-**Files**:
-- `marketplace/.claude-plugin/marketplace.json` - Available plugins in marketplace
-- `bundles/*/plugin.json` - Each bundle's metadata
-
-### 2. User Config (Local)
-**Location**: `~/.claude/`
-**Purpose**: User's personal settings - WHICH plugins are installed/enabled
-**Scope**: User-specific, local machine only, NOT version controlled
-
-**Files**:
-- `plugins/installed_plugins.json` - Installed plugins cache
-- `plugins/known_marketplaces.json` - Tracked marketplaces
-- `settings.json` - Permissions and enabled plugins
-
-### Why Both Layers Matter
-
-When plugins are removed from marketplace, user's local cache still references them, causing errors. This command checks and fixes **both layers** to ensure consistency.
-
-**Common Issues Detected**:
-
-| Issue Type | Layer | File | Example |
-|------------|-------|------|---------|
-| Obsolete plugin definitions | Marketplace | `marketplace.json` | Plugin references non-existent `/skills/` directory |
-| Orphaned installations | User Config | `installed_plugins.json` | Cached plugin no longer in marketplace |
-| Obsolete permissions | User Config | `settings.json` | `Skill(removed-plugin:*)` still allowed |
-| Obsolete enabled plugins | User Config | `settings.json` | `removed-plugin@marketplace: true` |
-| Invalid schema | Marketplace | `bundle/plugin.json` | Invalid fields like `displayName`, `category` |
+Validates marketplace configuration (marketplace.json, bundle plugin.json manifests) and user config (installed_plugins.json, settings.json), detecting obsolete entries, schema violations, and configuration drift.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -59,13 +22,11 @@ This ensures the command evolves and becomes more effective with each execution.
 
 - **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
 
-## WORKFLOW
-
 ## WORKFLOW OVERVIEW
 
 **This command has TWO phases - you MUST complete both:**
 
-**PHASE 1: Analysis (Steps 1-6)**
+**PHASE 1: Analysis (Steps 1-7)**
 - Load diagnostic standards
 - Initialize diagnostics
 - Validate marketplace.json
@@ -74,13 +35,13 @@ This ensures the command evolves and becomes more effective with each execution.
 - Validate bundle manifests
 - Report summary
 
-**PHASE 2: Fix Workflow (Steps 7-10)**
+**PHASE 2: Fix Workflow (Steps 8-11)**
 - Categorize issues (safe vs risky)
 - Apply safe fixes automatically
 - Prompt user for risky fixes
 - Verify all fixes worked
 
-**CRITICAL: Do not stop after Step 6. Continue to Step 7.**
+**CRITICAL: Do not stop after Step 7. Continue to Step 8.**
 
 ### Step 1: Load Diagnostic Standards
 
@@ -115,145 +76,57 @@ Display:
 Checking marketplace configuration...
 ```
 
-### Step 2: Validate marketplace.json
+### Step 3: Validate marketplace.json
 
-**A. Read marketplace definition:**
+**Read and verify marketplace definition:**
 ```
 Read: /Users/oliver/git/cui-llm-rules/marketplace/.claude-plugin/marketplace.json
 ```
 
-**B. Verify each plugin definition:**
-- Extract `plugins[]` array
-- For each plugin entry:
-  - Check `source` path exists (Glob)
-  - If source is relative (`./bundles/...`), verify bundle directory exists
-  - If source references `./skills/...`, flag as obsolete (skills should be in bundles)
+**Check each plugin in `plugins[]` array:**
+- Verify `source` path exists (missing bundles, obsolete skills references)
+- Validate required fields (name, description, source)
+- Report findings with ✓/✗ indicators
 
-**C. Detect issues:**
-- **Missing bundle**: `source` points to non-existent directory
-- **Obsolete skills reference**: Plugin defines standalone skills outside bundles
-- **Invalid structure**: Missing required fields (name, description, source)
+### Step 4: Check Installed Plugins Registry
 
-**D. Report findings:**
-```
-[INFO] Checking marketplace.json definitions...
-  ✓ cui-java-expert: Valid bundle
-  ✗ cui-old-skills: Source not found (./skills/cui-old-skills)
-  ✗ cui-frontend-skills: Obsolete skills reference
-```
-
-Increment `issues_found` for each problem detected.
-
-### Step 3: Check Installed Plugins Registry
-
-**A. Read installed plugins:**
+**Read and verify installed plugins:**
 ```
 Read: ~/.claude/plugins/installed_plugins.json
 ```
 
-**B. Verify each installed plugin:**
-- Extract `plugins` object keys
-- For each `plugin-name@marketplace`:
-  - Check if plugin exists in marketplace.json
-  - Check if `installPath` exists (Bash ls)
-  - Verify gitCommitSha is recent (optional warning)
+**Check each plugin in `plugins` object:**
+- Verify plugin exists in marketplace.json (orphaned plugins)
+- Check installPath exists
+- Report findings with ✓/✗/⚠ indicators
 
-**C. Detect issues:**
-- **Orphaned plugin**: Plugin in installed_plugins.json but NOT in marketplace.json
-- **Missing install path**: installPath directory doesn't exist
-- **Stale installation**: Very old gitCommitSha (>6 months warning)
+### Step 5: Check settings.json Configuration
 
-**D. Report findings:**
-```
-[INFO] Checking installed plugins registry...
-  ✓ cui-java-expert@cui-development-standards: Valid
-  ✗ cui-old-skills@cui-development-standards: Not in marketplace
-  ⚠ cui-maven@cui-development-standards: Old commit (6 months)
-```
-
-Increment `issues_found` for orphaned plugins.
-
-### Step 4: Check settings.json Configuration
-
-**A. Read user settings:**
+**Read and verify user settings:**
 ```
 Read: ~/.claude/settings.json
 ```
 
-**B. Verify Skill permissions in allowedToolUse:**
-- Extract `permissions.allow[]` array
-- Find all entries matching `Skill(plugin-name:*)`
-- For each Skill permission:
-  - Check if plugin exists in marketplace.json
-  - Flag obsolete if plugin no longer defined
+**Check permissions and enabled plugins:**
+- Verify `Skill(plugin-name:*)` permissions in `permissions.allow[]` (obsolete permissions)
+- Verify `enabledPlugins` entries (obsolete enabled plugins)
+- Cross-reference with marketplace.json
+- Report findings with ✓/✗ indicators
 
-**C. Verify enabledPlugins section:**
-- Extract `enabledPlugins` object keys
-- For each `plugin-name@marketplace`:
-  - Check if plugin exists in marketplace.json
-  - Flag if NOT found (obsolete enabled plugin)
+### Step 6: Validate Bundle Manifests
 
-**D. Detect issues:**
-- **Obsolete Skill permission**: `Skill(old-plugin:*)` but plugin not in marketplace
-- **Obsolete enabled plugin**: Entry in enabledPlugins but plugin removed from marketplace
-- **Inconsistency**: Plugin in enabledPlugins but NOT in installed_plugins
-
-**E. Report findings:**
-```
-[INFO] Checking settings.json configuration...
-  Permissions (allowedToolUse):
-    ✗ Skill(cui-old-skills:*): Obsolete permission
-    ✗ Skill(cui-frontend-skills:*): Obsolete permission
-
-  Enabled Plugins:
-    ✗ cui-old-skills@cui-development-standards: Plugin not found
-    ✓ cui-java-expert@cui-development-standards: Valid
-```
-
-Increment `issues_found` for each obsolete entry.
-
-### Step 5: Validate Bundle Manifests
-
-**A. Discover all bundles using plugin-inventory command:**
-
+**Discover and validate bundles:**
 ```
 SlashCommand: /plugin-inventory --json
 ```
 
-Parse JSON output:
-- Extract `bundles[]` array
-- For each bundle, get `bundle.name` and `bundle.path`
-- Build list of bundle names and paths
-
-**B. Validate each bundle's plugin.json manifest against schema:**
-
-For each bundle from inventory:
+**For each bundle:**
 - Read `{bundle.path}/.claude-plugin/plugin.json`
-- Check required fields: name, version, description
-- Check optional fields: author, license, homepage, repository, keywords
-- Detect invalid fields:
-  - `displayName` (not in schema)
-  - `category` (not in schema)
-  - `components` (not in schema - auto-discovered)
-  - `dependencies` (not in schema)
-  - `engines` (not in schema)
-  - `repository` as object instead of string
+- Validate schema (required: name, version, description)
+- Detect invalid fields (displayName, category, components, dependencies, engines, repository as object)
+- Report findings with ✓/✗ indicators
 
-**C. Report findings:**
-```
-[INFO] Validating bundle manifests...
-  ✓ cui-java-expert: Valid schema
-  ✗ cui-maven: Invalid fields (displayName, category, components, dependencies, engines)
-  ✗ cui-old-bundle: repository must be string, not object
-```
-
-Increment `issues_found` for each schema violation.
-
-**Error handling:**
-- If Task fails: Display "Failed to discover marketplace bundles" and skip validation
-- If Read fails for plugin.json: Report "Missing or unreadable plugin.json" for that bundle
-
-### Step 6: Report Summary
+### Step 7: Report Summary
 
 Display complete findings:
 ```
@@ -283,28 +156,9 @@ Issues by Category:
 {issues_list}
 ```
 
-==================================================
-⚠️ CRITICAL: ANALYSIS PHASE COMPLETE
-==================================================
+**CRITICAL**: If issues found, continue to PHASE 2 (Fix Workflow) - Steps 8-11.
 
-You have completed PHASE 1 (Analysis).
-
-**YOU MUST NOW PROCEED TO PHASE 2 (Fix Workflow)**
-
-DO NOT STOP HERE. The analysis is useless without fixes.
-
-If any issues were found (warnings or suggestions):
-→ Continue to Step 7: Categorize Issues
-→ Continue to Step 8: Apply Safe Fixes
-→ Continue to Step 9: Prompt for Risky Fixes
-→ Continue to Step 10: Verification
-
-If zero issues found:
-→ Skip to completion message
-
-==================================================
-
-### Step 7: Categorize Issues for Fixing ⚠️ PHASE 2 STARTS HERE
+### Step 8: Categorize Issues for Fixing ⚠️ PHASE 2 STARTS HERE
 
 **Categorize all issues into Safe vs Risky:**
 
@@ -323,133 +177,35 @@ If zero issues found:
 
 **Note**: Most marketplace diagnostics issues are safe to auto-fix because they involve removing obsolete/invalid entries.
 
-### Step 8: Apply Safe Fixes
+### Step 9: Apply Safe Fixes
 
 **When to execute**: If auto-fix=true (default) AND safe fixes exist
 
-**CRITICAL: If you reached Step 6, you MUST execute this step if safe fixes exist. This is not optional.**
+**Apply fixes using Edit tool:**
+- marketplace.json: Remove obsolete plugin definitions
+- installed_plugins.json: Remove orphaned entries
+- settings.json: Remove obsolete Skill() permissions and enabledPlugins
+- bundle plugin.json: Remove invalid schema fields, fix repository format
 
-**For each safe fix:**
+Track and display fixes applied with ✓ indicators.
 
-**Fix marketplace.json:**
-```
-Edit: marketplace/.claude-plugin/marketplace.json
-- Remove obsolete plugin definitions
-- Update plugins array
-```
-
-**Fix installed_plugins.json:**
-```
-Edit: ~/.claude/plugins/installed_plugins.json
-- Remove orphaned plugin entries from plugins object
-```
-
-**Fix settings.json:**
-```
-Edit: ~/.claude/settings.json
-- Remove obsolete Skill() permissions from permissions.allow array
-- Remove obsolete entries from enabledPlugins object
-```
-
-**Fix bundle plugin.json manifests:**
-```
-Edit: marketplace/bundles/{bundle-name}/.claude-plugin/plugin.json
-- Remove invalid schema fields (displayName, category, components, dependencies, engines)
-- Convert repository object to string format
-```
-
-**Track fixes applied:**
-```json
-{
-  "safe_fixes_applied": {count},
-  "by_type": {
-    "marketplace_json_fixes": {count},
-    "installed_plugins_fixes": {count},
-    "settings_json_fixes": {count},
-    "plugin_json_schema_fixes": {count}
-  }
-}
-```
-
-Display progress:
-```
-[INFO] Applying fixes...
-  ✓ Removed 2 obsolete plugins from marketplace.json
-  ✓ Removed 3 orphaned entries from installed_plugins.json
-  ✓ Removed 4 obsolete Skill permissions from settings.json
-  ✓ Removed 3 obsolete enabledPlugins from settings.json
-  ✓ Fixed cui-maven plugin.json schema
-```
-
-### Step 9: Prompt for Risky Fixes
+### Step 10: Prompt for Risky Fixes
 
 **When to execute**: If risky fixes exist (regardless of auto-fix setting)
 
-**Group risky fixes by category:**
+**Risky fix categories:**
+1. Configuration Changes (settings.json with potential user impact)
+2. Uncertain Removals (entries that might still be in use)
 
-1. **Configuration Changes** (settings.json modifications with potential user impact)
-2. **Uncertain Removals** (entries that might still be in use)
+Use AskUserQuestion with multiSelect for each category. For selected fixes, apply using Edit tool. Track applied vs skipped counts.
 
-**For each category with issues, use AskUserQuestion:**
+### Step 11: Verification
 
-Use the AskUserQuestion tool with this structure:
-- questions: Array with one question per category
-- question: "Apply fixes for {category} issues?"
-- header: "{Category}"
-- multiSelect: true
-- options: Array containing:
-  - For each specific issue: label="Fix: {specific-issue}", description="Impact: {what-changes}. File: {file}. Reason: {why-risky}"
-  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
+**When to execute**: After any fixes applied (Step 9 or Step 10)
 
-**Process user selections:**
-- For each selected fix: Apply using Edit tool, increment `risky_fixes_applied`
-- For unselected fixes: Skip, increment `risky_fixes_skipped`
-- If "Skip all" selected: Skip entire category, increment `risky_fixes_skipped` by count
+Re-run all checks from Steps 3-6. Report: issues resolved, issues remaining, any new issues (should be 0).
 
-**Track risky fixes:**
-```json
-{
-  "risky_fixes_prompted": {count},
-  "risky_fixes_applied": {count},
-  "risky_fixes_skipped": {count},
-  "fixes_by_category": {
-    "configuration": {applied: count, skipped: count},
-    "uncertain_removals": {applied: count, skipped: count}
-  }
-}
-```
-
-### Step 10: Verification
-
-**When to execute**: After any fixes applied (Step 8 or Step 9)
-
-**Re-run all checks from Steps 2-5**
-
-**Compare before/after:**
-```json
-{
-  "verification": {
-    "original_issues": {count},
-    "issues_resolved": {count},
-    "issues_remaining": {count},
-    "new_issues": {count}  // Should be 0!
-  }
-}
-```
-
-**Report verification results:**
-```
-Verification Complete:
-✅ {issues_resolved} issues resolved
-{if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain (require manual intervention)
-{endif}
-{if new_issues > 0}
-❌ {new_issues} NEW issues introduced (fixes need review!)
-{endif}
-```
-
-### Step 11: Display Final Summary
+### Step 12: Display Final Summary
 
 ```
 ╔════════════════════════════════════════════════════════════╗

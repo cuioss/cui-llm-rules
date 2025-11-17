@@ -95,7 +95,7 @@ If `workspace` parameter specified:
 
 ### Step 3: Test Quality Audit
 
-Analyze test files for quality issues using test-quality-standards.md:
+Analyze test files using cui-javascript-maintenance test-quality-standards.md:
 
 ```
 Task:
@@ -104,32 +104,11 @@ Task:
   description: Identify test quality issues
   prompt: |
     Analyze test files using cui-javascript-maintenance test-quality-standards.md.
-
     Workspace: {workspace or 'all workspaces'}
-
-    Identify test quality issues:
-    - Overly complex test setup (>20 lines)
-    - Hardcoded test data scattered in tests
-    - Missing async handling (no async/await)
-    - DOM testing without cleanup
-    - Test independence violations (shared state)
-    - Framework compliance issues (Jest, Testing Library)
-    - Mock management problems (not reset, over-mocking)
-    - Coverage gaps (< 80% for business logic)
-    - E2E test quality issues (if Cypress tests present)
-
-    Return structured list of findings with:
-    - Issue type
-    - Location (test file, test name, line)
-    - Description
-    - Suggested priority (HIGH/MEDIUM/LOW)
+    Return structured findings: issue type, location, description, priority (HIGH/MEDIUM/LOW)
 ```
 
-**Store findings** for prioritization step.
-
-**On analysis failure:**
-- Increment `analysis_failures` counter
-- Prompt user: "[R]etry / [A]bort"
+Store findings for prioritization. On analysis failure, prompt user: "[R]etry / [A]bort"
 
 ### Step 4: Prioritize Test Improvements
 
@@ -312,20 +291,7 @@ Compare final coverage to baseline:
 
 **6.3 Test Quality Verification:**
 
-Apply test quality checklist from cui-javascript-maintenance:
-
-For sample of improved test files:
-- Verify test independence
-- Verify async patterns
-- Verify mock management
-- Verify DOM cleanup
-- Verify descriptive names
-- Verify AAA pattern
-- Verify no implementation details tested
-- Verify proper queries (Testing Library)
-- Verify coverage improvement
-
-Report compliance status.
+Verify sample of improved test files using cui-javascript-maintenance quality checklist. Report compliance status.
 
 ### Step 7: Display Summary
 
@@ -412,79 +378,19 @@ Display all statistics in final summary.
 
 ## TEST IMPROVEMENT CATEGORIES
 
-### HIGH Priority - Business Logic Tests
-
-Critical functionality that must be tested comprehensively:
-- Component logic tests for core features
-- User interaction handlers and event processing
-- State management and data flow tests
-- API integration and data transformation
-- Form validation and submission logic
-- Security-sensitive functionality (authentication, authorization)
-- Payment processing and financial calculations
-
-**Coverage Target:** 90%+ line and branch coverage
-
-### MEDIUM Priority - Utility Functions
-
-Important functionality that should be tested:
-- Data transformation utilities
-- Validation functions
-- Custom hooks (React) or composables (Vue)
-- Service layer functions
-- Formatting utilities
-- Helper functions used across components
-
-**Coverage Target:** 80%+ line and branch coverage
-
-### LOW Priority - Configuration Tests
-
-Less critical tests:
-- Build configuration tests
-- Simple utility functions with obvious behavior
-- Framework-provided functionality
-- Third-party library wrappers
-- Trivial getters/setters
-
-**Coverage Target:** 60%+ line coverage acceptable
+Test priorities are applied in Step 4 using cui-javascript-maintenance prioritization framework:
+- **HIGH**: Business logic, critical functionality (90%+ coverage target)
+- **MEDIUM**: Utilities, helpers, custom hooks (80%+ coverage target)
+- **LOW**: Configuration, simple utilities (60%+ coverage acceptable)
 
 ## ERROR HANDLING
 
-**Test Failures:**
-- Display failed test details
-- Preserve test failure output
-- Do not proceed with improvements
-- Rollback if failures introduced
+**Test Failures**: Display details, do not proceed, rollback if introduced
+**Implementation Errors**: Log failure, skip on user request, continue with others
+**Coverage Regression**: Error if decreased, investigate, rollback changes
+**Production Bug Discovery**: Stop, document, get user approval, separate commit if fixed
 
-**Implementation Errors:**
-- Log specific improvement that failed
-- Skip individual improvements on user request
-- Continue with other improvements
-- Report failures in summary
-
-**Coverage Regression:**
-- Error if coverage decreases
-- Investigate cause immediately
-- Rollback changes causing regression
-
-**Production Bug Discovery:**
-- Stop immediately
-- Document bug
-- Get user approval before fixing
-- Create separate commit if fixed
-
-## ROLLBACK STRATEGY
-
-**Workspace-level rollback:**
-```
-Bash: git reset HEAD~1  # Rollback workspace commit
-Bash: git checkout -- {workspace test files}  # Restore test files
-```
-
-**Complete rollback:**
-```
-Bash: git reset --hard {initial_commit}  # Restore to pre-maintenance state
-```
+**Rollback**: Workspace-level (`git reset HEAD~1`) or complete (`git reset --hard {initial_commit}`)
 
 ## USAGE EXAMPLES
 
