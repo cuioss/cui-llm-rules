@@ -58,10 +58,11 @@ A well-formed agent must follow these 10 core practices:
 
 ### 10. Continuous Improvement Rule
 - **REQUIRED** for >90% of agents (exempt only for simple orchestrators <150 lines)
-- **Required Format**: Must include explicit usage instruction: `using /plugin-update-agent agent-name={agent-name} update="[your improvement]"` with:
+- **Required Format**: Agent must REPORT improvements to caller, with statement: `The CALLER can then invoke /plugin-update-agent agent-name={agent-name} based on your improvement report.`
 - **Required Elements**: List 3-5 specific improvement areas relevant to the agent's purpose
-- **Validation**: Diagnosis must check format compliance, not just presence
-- **Purpose**: Enables iterative refinement through self-documentation
+- **Architecture Constraint**: Agents CANNOT invoke commands directly (Pattern 22 - no SlashCommand tool access)
+- **Validation**: Diagnosis must check format compliance and verify no self-invocation instructions
+- **Purpose**: Enables iterative refinement through structured reporting to caller
 
 ## YAML Frontmatter Standards
 
