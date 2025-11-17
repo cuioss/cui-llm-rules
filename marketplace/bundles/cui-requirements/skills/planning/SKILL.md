@@ -45,26 +45,11 @@ Planning documents bridge requirements and specifications with actual implementa
 
 #### Separation of Concerns
 
-Planning documents focus on:
-
-- **What needs to be done** (task lists)
-- **Current status** (tracking progress)
-- **Traceability** (linking to requirements and specs)
-
-Planning documents do NOT include:
-
-- **How to implement** (belongs in specifications)
-- **Why it's needed** (belongs in requirements)
-- **Implementation details** (belongs in code and JavaDoc)
+Planning documents focus on task lists, status tracking, and traceability - not implementation details or rationale. See `standards/document-structure.md` for complete separation of concerns guidance.
 
 #### Living Documentation
 
-Planning documents are dynamic:
-
-- Updated frequently as work progresses
-- Tasks are added, completed, and refined
-- Status indicators change as implementation evolves
-- Not archived - reflects current project state
+Planning documents are dynamic and updated frequently as work progresses - they reflect current project state rather than being archived. See `standards/maintenance.md` for complete living documentation guidance and update frequency recommendations.
 
 ## When to Activate This Skill
 
