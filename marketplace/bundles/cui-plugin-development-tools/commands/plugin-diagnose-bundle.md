@@ -268,143 +268,30 @@ Cross-component checks:
 - If any integration check fails: Continue analysis but mark as "Integration Issues" in final report
 - If plugin.json missing or malformed: Mark as CRITICAL and abort bundle analysis
 
-### Step 2: Categorize Bundle-Level Issues for Fixing ⚠️ PHASE 2 STARTS HERE
+### Steps 2-5: Fix Workflow ⚠️ PHASE 2
 
-**After component analysis and integration validation, categorize bundle-level issues:**
+**For complete fix workflow (categorization, safe fixes, prompting, verification), see:**
 
-**Safe fixes** (auto-apply when auto-fix=true):
+```
+Skill: cui-plugin-development-tools:cui-fix-workflow
+```
+
+**Bundle-specific safe fix types:**
 - Broken cross-references (remove or fix invalid references)
 - Naming inconsistencies (standardize component names)
 - Missing README sections (add standard structure)
 - plugin.json formatting issues
 
-**Risky fixes** (always prompt user):
-- External dependency removal (requires understanding dependency purpose)
-- Structural reorganization (requires understanding architecture)
-- Integration issue resolution requiring component changes
-- Self-containment violations requiring architectural changes
+**Bundle-specific risky fix categories:**
+1. **Inventory Issues** - plugin.json structure, obsolete entries
+2. **Structure Problems** - Naming consistency, directory organization
+3. **Integration Issues** - Cross-bundle references, self-containment violations
 
-### Step 3: Apply Bundle-Level Safe Fixes
-
-**When to execute**: If auto-fix=true (default) AND safe fixes exist
-
-**CRITICAL: If you reached the final report, you MUST execute this step if safe fixes exist. This is not optional.**
-
-**For each safe fix:**
-
-**Broken cross-references:**
-```
-Edit: {component-file}
-- Remove or comment out invalid references
-- Update references to use correct paths
-```
-
-**Naming inconsistencies:**
-```
-Edit: {component-file}
-- Standardize component names to match bundle conventions
-- Update references to reflect naming changes
-```
-
-**Missing README sections:**
-```
-Edit: {bundle-path}/README.md
-- Add missing standard sections (Installation, Usage, Components)
-- Ensure proper structure and formatting
-```
-
-**plugin.json formatting:**
-```
-Edit: {bundle-path}/.claude-plugin/plugin.json
-- Format JSON with proper indentation
-- Ensure proper field ordering
-```
-
-**Track fixes applied:**
-```json
-{
-  "bundle_safe_fixes_applied": {count},
-  "by_type": {
-    "cross_reference_fixes": {count},
-    "naming_fixes": {count},
-    "readme_fixes": {count},
-    "plugin_json_formatting": {count}
-  }
-}
-```
-
-### Step 4: Prompt for Bundle-Level Risky Fixes
-
-**When to execute**: If risky fixes exist (regardless of auto-fix setting)
-
-**Group risky fixes by category:**
-
-1. **Inventory Issues** (plugin.json structure, obsolete entries)
-2. **Structure Problems** (naming consistency, directory organization)
-3. **Integration Issues** (cross-bundle references, self-containment violations)
-
-**For each category with issues, use AskUserQuestion:**
-
-Use the AskUserQuestion tool with this structure:
-- questions: Array with one question per category
-- question: "Apply fixes for {category} issues in bundle {bundle-name}?"
-- header: "{Category}"
-- multiSelect: true
-- options: Array containing:
-  - For each specific issue: label="Fix: {specific-issue}", description="Impact: {what-changes}. Components affected: {component-list}. Location: {file}:{line}"
-  - Final option: label="Skip all {category} fixes", description="Continue without fixing this category"
-
-**Process user selections:**
-- For each selected fix: Apply using Edit tool (may require multi-component changes), increment `bundle_risky_fixes_applied`
-- For unselected fixes: Skip, increment `bundle_risky_fixes_skipped`
-- If "Skip all" selected: Skip entire category, increment `bundle_risky_fixes_skipped` by count
-
-**Track risky fixes:**
-```json
-{
-  "bundle_risky_fixes_prompted": {count},
-  "bundle_risky_fixes_applied": {count},
-  "bundle_risky_fixes_skipped": {count},
-  "fixes_by_category": {
-    "inventory": {applied: count, skipped: count},
-    "structure": {applied: count, skipped: count},
-    "integration": {applied: count, skipped: count}
-  }
-}
-```
-
-### Step 5: Verify Bundle-Level Fixes
-
-**When to execute**: After any bundle-level fixes applied (Step 3 or Step 4)
-
-**Re-run integration validation:**
-- Check cross-references are valid
-- Verify naming consistency
-- Validate self-containment
-- Check plugin.json structure
-
-**Compare before/after:**
-```json
-{
-  "bundle_verification": {
-    "integration_issues_resolved": {count},
-    "integration_issues_remaining": {count},
-    "new_issues": {count}  // Should be 0!
-  }
-}
-```
-
-**Report verification results:**
-```
-Bundle Verification Complete:
-✅ {integration_issues_resolved} integration issues resolved
-{if integration_issues_remaining > 0}
-⚠️ {integration_issues_remaining} issues remain (require manual intervention)
-{endif}
-{if new_issues > 0}
-❌ {new_issues} NEW issues introduced (fixes need review!)
-{endif}
-```
+**Fix workflow steps** (from cui-fix-workflow skill):
+1. **Step 2**: Categorize issues (safe vs risky)
+2. **Step 3**: Apply safe fixes automatically (if auto-fix=true)
+3. **Step 4**: Prompt for risky fixes using AskUserQuestion
+4. **Step 5**: Verify fixes by re-running integration validation
 
 ### Quality Gates
 
