@@ -25,7 +25,6 @@ This ensures the command evolves and becomes more effective with each execution.
 - **scope=project**: Analyze commands in .claude/commands/
 - **command-name** (optional): Review specific command
 - **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
-- **--validate-references** (optional, default: false): Run reference validation analysis (doubles agent count)
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode
 
@@ -85,7 +84,6 @@ This provides architecture rules and validation patterns for marketplace compone
 
 **Flag validation:**
 - `auto-fix`: Default true, accepts true/false
-- `--validate-references`: Default false, flag only (enables reference validation agents)
 - `--save-report`: Default false, flag only
 
 ### Step 3: Discover Commands
@@ -144,9 +142,7 @@ Read: marketplace/bundles/cui-plugin-development-tools/standards/command-analysi
 
 **Batch Configuration:**
 - **Batch size**: 5 commands per batch
-- **Agent count per batch**:
-  - Without --validate-references: 5 agents (diagnose-command only)
-  - With --validate-references: 10 agents (5 diagnose-command + 5 analyze-plugin-references)
+- **Agent count per batch**: 10 agents (5 diagnose-command + 5 analyze-plugin-references)
 - **Processing**: Sequential batch execution
 - **Results**: Accumulate across all batches
 
@@ -177,7 +173,7 @@ Read: marketplace/bundles/cui-plugin-development-tools/standards/command-analysi
        This reduces token usage from ~2,000 to ~200-800 tokens per command.
    ```
 
-   **B. Reference Validation Agent (for each command in batch - ONLY if --validate-references flag set):**
+   **B. Reference Validation Agent (for each command in batch):**
    ```
    Task:
      subagent_type: analyze-plugin-references
@@ -199,14 +195,13 @@ Read: marketplace/bundles/cui-plugin-development-tools/standards/command-analysi
 5. **Repeat** until all commands processed
 
 **Token Management:**
-- Without --validate-references: 5 agents per batch (optimal)
-- With --validate-references: 10 agents per batch (doubles token usage but still manageable)
+- Launch 10 agents per batch (5 diagnose-command + 5 analyze-plugin-references)
 - Allow agents to complete before starting next batch
 - Display progress: "Processing batch X/Y (commands N-M)..."
 
-**Performance Note:**
-- Default mode (no --validate-references): Analyzes 46 commands in ~10 batches
-- With --validate-references: Same batches but 2× agents per batch
+**Performance:**
+- Analyzes 46 commands in ~10 batches
+- ~60,000 tokens/batch (well within limits)
 
 **Error handling:**
 - If agent fails to launch or returns error: Collect failure info and continue with remaining agents in batch
@@ -303,13 +298,7 @@ If zero issues found:
 
 ### Step 7: Handle Reference Issues ⚠️ PHASE 2 STARTS HERE
 
-**When to execute:** ONLY if --validate-references flag was set AND reference issues found (incorrect or ambiguous references > 0)
-
-**If --validate-references was NOT set:**
-- Skip this step entirely
-- Continue to Step 8
-
-**If --validate-references WAS set and issues found:**
+**When to execute:** If reference issues found (incorrect or ambiguous references > 0)
 
 **Display summary** of reference problems by command with line numbers and issue types.
 
@@ -534,9 +523,8 @@ This command is a batched orchestrator designed to handle large-scale marketplac
 - Pre-loads analysis standards once (Step 3a) to avoid redundant reads
 
 **Analysis Phase (Batched):**
-- Processes commands in batches of 5 (configurable)
-- Launches diagnose-command agents in parallel per batch (5 agents/batch)
-- Optionally launches analyze-plugin-references agents if --validate-references flag set (adds 5 more agents/batch)
+- Processes commands in batches of 5
+- Launches both diagnose-command and analyze-plugin-references agents in parallel per batch (10 agents/batch)
 - Uses streamlined JSON output format (issues only) to reduce result payload by 60%
 - Passes pre-loaded standards to agents to eliminate redundant file reads
 
@@ -550,24 +538,21 @@ This command is a batched orchestrator designed to handle large-scale marketplac
 1. **Batching**: Sequential batches of 5 commands instead of 46 parallel agents (90% peak token reduction)
 2. **Standards Pre-loading**: Load once, pass to agents (75% reduction in standards loading)
 3. **Streamlined Output**: Issues-only JSON format (60% reduction in result size)
-4. **Optional Reference Validation**: Skip reference agents by default (50% agent count reduction)
 
 **Expected Token Usage:**
-- Without --validate-references: ~30,000 tokens/batch (5 agents)
-- With --validate-references: ~60,000 tokens/batch (10 agents)
+- ~60,000 tokens/batch (10 agents: 5 diagnose-command + 5 analyze-plugin-references)
 - Peak usage: Well within limits (vs ~415,000 tokens in original all-parallel design)
 
 **All analysis logic is in specialized agents:**
 - diagnose-command (comprehensive command analysis with streamlined output support)
-- analyze-plugin-references (plugin reference validation - optional)
+- analyze-plugin-references (plugin reference validation)
 
 ## TOOL USAGE
 
 - **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery)
 - **Glob**: Discover commands in global/project scopes (non-prompting)
 - **Read**: Pre-load standards once (token optimization)
-- **Task**: Launch diagnose-command agents in batches (parallel within batch, sequential across batches)
-- **Task** (optional): Launch analyze-plugin-references agents if --validate-references
+- **Task**: Launch diagnose-command and analyze-plugin-references agents in batches (parallel within batch, sequential across batches)
 - **Skill**: Load diagnostic patterns and fix workflow patterns
 - **Edit**: Apply safe and approved risky fixes
 - **AskUserQuestion**: Prompt for risky fix approval

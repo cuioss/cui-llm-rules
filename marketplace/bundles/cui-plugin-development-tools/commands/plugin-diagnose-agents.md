@@ -25,7 +25,6 @@ This ensures the command evolves and becomes more effective with each execution.
 - **scope=project**: Analyze agents in project location (.claude/agents/)
 - **agent-name** (optional): Review a specific agent by name (e.g., `maven-project-builder`)
 - **auto-fix** (optional, default: true): Automatically fix safe issues; prompt for risky fixes
-- **--validate-references** (optional, default: false): Run reference validation analysis (doubles agent count)
 - **--save-report** (optional): Write Markdown report to project root. Default: false (display only, no file created)
 - **No parameters**: Interactive mode with marketplace default
 
@@ -175,15 +174,7 @@ Task:
 - If partial success: Include successful analyses, add "Failed Analyses" section, report partial metrics
 - Continue with next batch even if current batch has failures
 
-### Step 4: Check Plugin References (Optional, Batched)
-
-**When to execute**: ONLY if --validate-references flag is set
-
-**If --validate-references was NOT set:**
-- Skip this step entirely
-- Continue to Step 4.5
-
-**If --validate-references WAS set:**
+### Step 4: Check Plugin References (Batched)
 
 **CRITICAL**: Process reference validation in batches matching Step 3 batches.
 
@@ -227,9 +218,10 @@ Task:
 Track for each agent: references_found, references_correct, references_fixed, references_ambiguous.
 Aggregate totals: agents_checked, total_references, correct, fixed, issues.
 
-**Performance Note:**
-- Without --validate-references: Skip entirely (default, recommended)
-- With --validate-references: Doubles total agent count but uses same batching strategy
+**Performance:**
+- Analyzes 28 agents in ~6 batches
+- 10 agents per batch (5 diagnose-agent + 5 analyze-plugin-references)
+- ~56,000 tokens/batch (well within limits)
 
 ### Step 4.5: Validate Architectural Constraints
 
@@ -572,8 +564,7 @@ This command is a batched orchestrator designed to handle large-scale marketplac
 
 **Analysis Phase (Batched):**
 - Processes agents in batches of 5 (6 batches for 28 agents)
-- Launches diagnose-agent agents in parallel per batch (5 agents/batch)
-- Optionally launches analyze-plugin-references agents if --validate-references flag set (adds 5 more agents/batch)
+- Launches both diagnose-agent and analyze-plugin-references agents in parallel per batch (10 agents/batch)
 - Uses streamlined JSON output format (issues only) to reduce result payload by 60%
 - Passes pre-loaded standards to agents to eliminate redundant file reads
 
@@ -591,24 +582,21 @@ This command is a batched orchestrator designed to handle large-scale marketplac
 1. **Batching**: Sequential batches of 5 agents instead of 28 parallel agents (90% peak token reduction)
 2. **Standards Pre-loading**: Load once, pass to agents (75% reduction in standards loading)
 3. **Streamlined Output**: Issues-only JSON format (60% reduction in result size)
-4. **Optional Reference Validation**: Skip reference agents by default (50% agent count reduction when not needed)
 
 **Expected Token Usage:**
-- Without --validate-references: ~28,000 tokens/batch (5 agents) - **RECOMMENDED**
-- With --validate-references: ~56,000 tokens/batch (10 agents)
+- ~56,000 tokens/batch (10 agents: 5 diagnose-agent + 5 analyze-plugin-references)
 - Peak usage: Well within limits (vs ~139,000 tokens in original all-parallel design)
 
 **All analysis logic is in specialized agents:**
 - diagnose-agent (comprehensive agent analysis with streamlined output support)
-- analyze-plugin-references (plugin reference validation - optional)
+- analyze-plugin-references (plugin reference validation)
 
 ## TOOL USAGE
 
 - **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery)
 - **Glob**: Discover agents in global/project scopes (non-prompting)
 - **Read**: Pre-load standards once (token optimization)
-- **Task**: Launch diagnose-agent agents in batches (parallel within batch, sequential across batches)
-- **Task** (optional): Launch analyze-plugin-references agents if --validate-references
+- **Task**: Launch diagnose-agent and analyze-plugin-references agents in batches (parallel within batch, sequential across batches)
 - **Grep**: Detect architectural violations (Pattern 22 self-invocation)
 - **Skill**: Load diagnostic patterns and fix workflow patterns
 - **Edit**: Apply safe and approved risky fixes
