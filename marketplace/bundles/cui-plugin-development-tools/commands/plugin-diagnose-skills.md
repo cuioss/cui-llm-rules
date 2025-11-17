@@ -130,12 +130,18 @@ Task:
     Parameters:
     - skill_path: {absolute_path_to_skill}
 
-    Return complete JSON report with all issues found.
+    IMPORTANT: Use streamlined output format (issues only).
+    Return minimal JSON - CLEAN skills get {"status": "CLEAN"},
+    skills with issues get only critical_issues/warnings/suggestions arrays.
+
+    This reduces token usage from ~300-400 to ~100-200 tokens per skill.
 ```
 
 **CRITICAL**: Launch ALL agents in PARALLEL (single message, multiple Task calls).
 
 **Collect results** from each agent as they complete.
+
+**Token Optimization**: Streamlined output reduces response payload by ~60% (from ~8,100-10,800 to ~2,700-5,400 tokens for 27 skills).
 
 ### Step 4: Aggregate Results
 
@@ -491,16 +497,22 @@ Verification Complete
 
 ## ARCHITECTURE
 
-This command is a simple orchestrator:
+This command is a parallel orchestrator with token optimizations:
 - Discovers skills using Glob (non-prompting)
 - Launches diagnose-skill agents in parallel (for each skill)
+- Uses streamlined JSON output format (issues only) to reduce token usage
 - Optionally launches analyze-cross-skill-duplication (when --check-cross-duplication flag set)
 - Aggregates and reports results
+
+**Token Optimization:**
+- Streamlined output reduces response payload by ~60%
+- Current scale (27 skills) is manageable without batching (~33,000 tokens peak)
+- If marketplace grows to 40+ skills, batching should be added (similar to plugin-diagnose-commands/agents)
 
 All analysis logic is in specialized agents:
 - **analyze-standards-file**: Single file quality analysis
 - **analyze-integrated-standards**: Cross-file quality within a skill
-- **diagnose-skill**: Skill orchestrator (coordinates above two agents)
+- **diagnose-skill**: Skill orchestrator (coordinates above two agents, supports streamlined output)
 - **analyze-cross-skill-duplication**: Cross-skill duplication detection (optional, O(n²))
 
 ## TOOL USAGE

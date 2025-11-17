@@ -150,7 +150,48 @@ Compare across files:
 
 ### Step 6: Generate Comprehensive Report
 
-**Output format:**
+**IMPORTANT: Check output mode requested by caller**
+
+**If caller indicates "streamlined output", "minimal format", or "issues only":**
+
+Return minimal JSON (CLEAN skills):
+```json
+{
+  "skill_name": "{name}",
+  "status": "CLEAN",
+  "total_files": {count},
+  "architecture_score": {score},
+  "overall_quality": {score},
+  "rating": "Excellent|Good"
+}
+```
+
+Return minimal JSON (skills with issues):
+```json
+{
+  "skill_name": "{name}",
+  "status": "HAS_ISSUES",
+  "total_files": {count},
+  "critical_issues": [
+    {"file": "file.md", "issue": "...", "recommendation": "..."}
+  ],
+  "warnings": [
+    {"file": "file.md", "issue": "...", "recommendation": "..."}
+  ],
+  "suggestions": [
+    {"file": "file.md", "issue": "...", "recommendation": "..."}
+  ],
+  "scores": {
+    "architecture_score": {score},
+    "overall_quality": {score},
+    "rating": "Excellent|Good|Fair|Poor"
+  }
+}
+```
+
+**Token Savings**: Streamlined format reduces output from ~300-400 tokens to ~100-200 tokens per skill.
+
+**Otherwise (default), return full comprehensive format:**
 
 ```json
 {
