@@ -3,16 +3,29 @@ name: cui-requirements:planning
 source_bundle: cui-requirements
 description: Standards for creating and maintaining project planning documentation with task tracking, status indicators, and traceability to requirements
 version: 1.0.0
-allowed-tools: []
+allowed-tools: [Read]
 ---
 
 # Planning Documentation Standards
 
 Standards for creating, structuring, and maintaining project planning documents that track implementation tasks while maintaining traceability to requirements and specifications.
 
-## Core Principles
+## What This Skill Provides
 
-### Planning Document Purpose
+### Comprehensive Planning Standards
+
+This skill provides complete standards for:
+
+- **Document structure** - Location, naming, header format, and core sections
+- **Task organization** - Hierarchical structure and grouping strategies
+- **Status tracking** - Status indicators, task details, and lifecycle management
+- **Traceability** - Linking tasks to requirements and specifications
+- **Maintenance** - Keeping planning documents current and high-quality
+- **Examples** - Complete working examples demonstrating all patterns
+
+### Core Principles
+
+#### Planning Document Purpose
 
 Planning documents bridge requirements and specifications with actual implementation work by:
 
@@ -21,7 +34,7 @@ Planning documents bridge requirements and specifications with actual implementa
 - Maintaining traceability from tasks to requirements
 - Providing visibility into project status
 
-### Separation of Concerns
+#### Separation of Concerns
 
 Planning documents focus on:
 
@@ -35,7 +48,7 @@ Planning documents do NOT include:
 - **Why it's needed** (belongs in requirements)
 - **Implementation details** (belongs in code and JavaDoc)
 
-### Living Documentation
+#### Living Documentation
 
 Planning documents are dynamic:
 
@@ -44,491 +57,119 @@ Planning documents are dynamic:
 - Status indicators change as implementation evolves
 - Not archived - reflects current project state
 
-## Document Structure Standards
+## When to Activate This Skill
 
-### Location and Naming
+Activate this skill when:
 
-**Primary planning document**: `doc/TODO.adoc`
+- **Creating new planning documents** - Setting up TODO.adoc for a new project
+- **Organizing tasks** - Structuring implementation work hierarchically
+- **Tracking progress** - Marking task status and maintaining current state
+- **Maintaining traceability** - Linking tasks to requirements and specifications
+- **Reviewing planning quality** - Ensuring planning documents follow standards
 
-**Additional planning documents** (if needed):
-- `doc/ROADMAP.adoc` - Long-term planning
-- `doc/BACKLOG.adoc` - Future work items
+## Workflow
 
-### Document Header
+### Step 1: Load Document Structure Standards
 
-```asciidoc
-= [Project Name] TODO List
-:toc: left
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
+When creating or reviewing planning document structure:
+
+```
+Read: standards/document-structure.md
 ```
 
-### Core Sections
+This standard covers:
+- Document location and naming conventions
+- Header format with proper AsciiDoc configuration
+- Core sections every planning document needs
+- Separation of concerns between planning, requirements, and specifications
 
-Every planning document should include:
+### Step 2: Load Task Organization Standards
 
-1. **Overview**: Purpose and scope of the document
-2. **Implementation Tasks**: Organized by functional area
-3. **Testing Tasks**: Test implementation requirements
-4. **Additional Sections**: As needed (Security, Documentation, Performance, etc.)
+When organizing tasks hierarchically:
 
-## Task Organization Standards
-
-### Hierarchical Structure
-
-Organize tasks by functional area:
-
-```asciidoc
-== Implementation Tasks
-
-=== Core Components
-
-==== [Component Name]
-_See Requirement [REQ-ID]: [Requirement Name] in link:Requirements.adoc[Requirements]_
-
-* [ ] [Task description]
-* [ ] [Task description]
-
-==== [Another Component]
-_See Requirement [REQ-ID]: [Requirement Name] in link:Requirements.adoc[Requirements]_
-
-* [ ] [Task description]
-* [ ] [Task description]
-
-=== Feature Implementation
-
-==== [Feature Name]
-_See Requirement [REQ-ID]: [Requirement Name] in link:Requirements.adoc[Requirements]_
-
-* [ ] [Task description]
-* [ ] [Task description]
+```
+Read: standards/task-organization.md
 ```
 
-### Task Grouping Strategies
+This standard covers:
+- Hierarchical task structure using AsciiDoc headings
+- Grouping strategies (by component, feature, layer, or phase)
+- Testing task organization
+- Choosing the right grouping strategy for your project
 
-**By component**:
-```asciidoc
-=== Token Validation Component
-=== Configuration Component
-=== Error Handling Component
+### Step 3: Load Status Tracking Standards
+
+When tracking task status and lifecycle:
+
+```
+Read: standards/status-tracking.md
 ```
 
-**By feature**:
-```asciidoc
-=== User Authentication Feature
-=== API Integration Feature
-=== Reporting Feature
+This standard covers:
+- Status indicator syntax and meaning
+- Status usage examples for all states
+- Implementation note patterns
+- Task lifecycle (adding, completing, refactoring)
+
+### Step 4: Load Traceability Standards
+
+When linking tasks to requirements:
+
+```
+Read: standards/traceability.md
 ```
 
-**By layer**:
-```asciidoc
-=== Data Layer
-=== Business Logic Layer
-=== API Layer
-=== UI Layer
+This standard covers:
+- Linking task groups to requirements
+- Linking task groups to specifications
+- Handling multiple requirement references
+- Traceability benefits for impact analysis and verification
+
+### Step 5: Load Maintenance Standards
+
+When maintaining planning documents:
+
+```
+Read: standards/maintenance.md
 ```
 
-**By phase**:
-```asciidoc
-=== Phase 1: Core Infrastructure
-=== Phase 2: Feature Implementation
-=== Phase 3: Polish and Optimization
+This standard covers:
+- Keeping documents current with update frequency guidance
+- Archive strategy (don't archive, leave completed tasks)
+- Quality standards (clarity, completeness, traceability, maintainability)
+- Common anti-patterns to avoid
+
+### Step 6: Load Examples (Optional)
+
+When you need concrete examples:
+
+```
+Read: standards/examples.md
 ```
 
-## Task Status Standards
+This standard provides:
+- Complete example planning document
+- All patterns demonstrated in context
+- Key pattern highlights and explanations
 
-### Status Indicators
+## Standards Organization
 
-Use standard checkbox notation:
+All planning standards are organized in the `standards/` directory:
 
-- `[ ]` - Task not started or in progress
-- `[x]` - Task completed
-- `[~]` - Task partially completed
-- `[!]` - Task blocked or has issues
+- `document-structure.md` - Document location, header, and core sections
+- `task-organization.md` - Hierarchical structure and grouping strategies
+- `status-tracking.md` - Status indicators, notes, and task lifecycle
+- `traceability.md` - Linking to requirements and specifications
+- `maintenance.md` - Keeping planning documents current and high-quality
+- `examples.md` - Complete working example demonstrating all patterns
 
-### Status Usage
+## Tool Access
 
-**Not started/In progress** `[ ]`:
-```asciidoc
-* [ ] Implement token validation
-* [ ] Add signature verification
-```
+This skill requires:
 
-**Completed** `[x]`:
-```asciidoc
-* [x] Implement token parsing
-* [x] Add claim extraction
-```
+- **Read**: To load standards files
 
-**Partially completed** `[~]`:
-```asciidoc
-* [~] Implement error handling (basic errors done, need edge cases)
-```
-
-**Blocked** `[!]`:
-```asciidoc
-* [!] Add Redis caching (waiting for Redis infrastructure)
-```
-
-### Task Details
-
-Add notes and context where helpful:
-
-```asciidoc
-* [ ] Implement JWT validation
-  ** Must support RS256 and HS256 algorithms
-  ** Need to decide on key rotation strategy
-* _Note: Key rotation design needs review with security team_
-* _Important: This blocks API authentication implementation_
-```
-
-## Traceability Standards
-
-### Linking to Requirements
-
-Every task group must reference its source requirement:
-
-```asciidoc
-==== Token Validation
-_See Requirement JWT-1: Token Validation Framework in link:Requirements.adoc[Requirements]_
-
-* [ ] Implement TokenValidator interface
-* [ ] Add signature validation
-* [ ] Add expiration checking
-```
-
-### Linking to Specifications
-
-Task groups can also reference detailed specifications:
-
-```asciidoc
-==== Token Validation
-_See Requirement JWT-1: Token Validation Framework in link:Requirements.adoc[Requirements]_
-
-_See link:specification/token-validation.adoc[Token Validation Specification] for implementation details_
-
-* [ ] Implement TokenValidator interface
-* [ ] Add signature validation
-* [ ] Add expiration checking
-```
-
-### Multiple References
-
-When tasks relate to multiple requirements or specs:
-
-```asciidoc
-==== Security Hardening
-_See Requirements:_
-
-* _JWT-1: Token Validation Framework in link:Requirements.adoc[Requirements]_
-* _SEC-1: Security Standards in link:Requirements.adoc[Requirements]_
-
-_See link:specification/security.adoc[Security Specification] for implementation details_
-
-* [ ] Implement constant-time signature comparison
-* [ ] Add input validation
-* [ ] Implement rate limiting
-```
-
-## Testing Task Organization
-
-### Dedicated Testing Section
-
-Always include a testing section:
-
-```asciidoc
-== Testing
-
-=== Unit Testing
-_See link:specification/testing.adoc#_unit_testing[Unit Testing Specification]_
-
-==== Core Components
-* [ ] Unit tests for TokenValidator
-* [ ] Unit tests for SignatureValidator
-* [ ] Unit tests for ClaimExtractor
-
-==== Edge Cases
-* [ ] Test expired tokens
-* [ ] Test malformed tokens
-* [ ] Test invalid signatures
-
-=== Integration Testing
-_See link:specification/testing.adoc#_integration_testing[Integration Testing Specification]_
-
-==== End-to-End Flows
-* [ ] Test complete token validation flow
-* [ ] Test error handling across components
-* [ ] Test performance under load
-
-==== External Integration
-* [ ] Test integration with Redis cache
-* [ ] Test integration with key provider service
-```
-
-## Implementation Notes Standards
-
-### Note Types
-
-**General notes**:
-```asciidoc
-* _Note: Consider caching validated tokens for performance_
-```
-
-**Important information**:
-```asciidoc
-* _Important: This must be completed before phase 2 can start_
-```
-
-**Blockers**:
-```asciidoc
-* _Blocked: Waiting for security review approval_
-```
-
-**Dependencies**:
-```asciidoc
-* _Depends on: Completion of task XYZ in section ABC_
-```
-
-**Decisions needed**:
-```asciidoc
-* _Decision needed: Choose between Redis and Hazelcast for caching_
-```
-
-## Example Planning Document
-
-This condensed example demonstrates all key patterns. Real planning documents typically expand on these patterns with project-specific tasks.
-
-```asciidoc
-= JWT Token Processor TODO List
-:toc: left
-:toclevels: 3
-:sectnums:
-
-== Overview
-
-This document lists actionable tasks to implement the JWT Token Processor per specifications.
-
-Project prefix: `JWT-` | Status: In active development
-
-== Implementation Tasks
-
-=== Core Components
-
-==== Token Validator
-_See Requirement JWT-1: Token Validation Framework in link:Requirements.adoc[Requirements]_
-_See link:specification/token-validation.adoc[Token Validation Specification]_
-
-* [x] Implement TokenValidator interface
-* [x] Add signature validation support
-* [ ] Add expiration timestamp checking
-* [ ] Implement clock skew tolerance
-* _Note: Clock skew tolerance should be configurable, default to 60 seconds_
-
-==== Signature Validator
-_See Requirement JWT-1.1: Signature Validation in link:Requirements.adoc[Requirements]_
-
-* [x] Implement RS256/RS384/RS512 algorithm support
-* [ ] Implement HS256/HS384/HS512 algorithm support
-* [ ] Add constant-time comparison
-* _Important: Constant-time comparison is critical for security_
-
-==== Claim Extractor
-_See Requirement JWT-3: Claim Extraction in link:Requirements.adoc[Requirements]_
-
-* [x] Extract standard claims (iss, sub, aud, exp, iat, nbf)
-* [x] Extract custom claims by name
-* [ ] Add type conversion for claim values
-* [ ] Handle missing optional claims gracefully
-
-=== Configuration
-
-==== Configuration Properties
-_See Requirement JWT-7: Configuration Management in link:Requirements.adoc[Requirements]_
-
-* [ ] Define configuration property structure
-* [ ] Add issuer/algorithm/clock skew configuration
-* [ ] Add key provider configuration
-* [ ] Support configuration profiles (dev, test, prod)
-
-=== Error Handling
-
-==== Exception Hierarchy
-_See link:specification/error-handling.adoc[Error Handling Specification]_
-
-* [x] Create TokenValidationException base class
-* [x] Create SignatureValidationException and TokenExpiredException
-* [ ] Create InvalidClaimException and MalformedTokenException
-* [ ] Add structured error details to exceptions
-* [ ] Ensure sensitive data is not logged
-* _Important: Must follow CUI logging standards_
-
-=== Security
-
-==== Security Hardening
-_See Requirement JWT-6: Security Requirements in link:Requirements.adoc[Requirements]_
-
-* [x] Implement constant-time signature comparison
-* [ ] Add input validation for all external inputs
-* [ ] Implement rate limiting for validation requests
-* [~] Protect against timing attacks (signature done, need claim validation)
-* _Note: Rate limiting needs coordination with API gateway configuration_
-
-==== Key Management
-* [ ] Implement public key provider interface with caching
-* [ ] Support key rotation and revocation checking
-* [!] Integrate with HSM (blocked - waiting for HSM procurement)
-
-== Testing
-
-=== Unit Testing
-_See link:specification/testing.adoc#_unit_testing[Unit Testing Specification]_
-
-* [x] Unit tests for TokenValidator and SignatureValidator (RS algorithms)
-* [ ] Unit tests for SignatureValidator (HS algorithms)
-* [x] Test expired/malformed tokens and invalid signatures
-* [ ] Test missing claims, invalid claim types, and clock skew scenarios
-* [x] Test all exception types
-* [ ] Test error logging (without sensitive data)
-
-=== Integration Testing
-
-* [ ] Test complete token validation flow
-* [ ] Test validation performance (target: 95% under 50ms)
-* [ ] Verify constant-time operations and timing attack resistance
-* [ ] Test rate limiting behavior
-
-=== Test Coverage
-* [x] Achieve 80% line coverage on core components
-* [ ] Achieve 90% branch coverage on validation logic
-* [ ] Achieve 100% coverage on security-critical paths
-
-== Documentation
-
-* [ ] Complete JavaDoc for all public APIs with code examples
-* [ ] Document security considerations and configuration options
-* [ ] Create user guide with configuration examples and troubleshooting
-* [x] Update specifications with implementation links
-* [ ] Mark implemented sections with status
-
-== Performance Optimization
-
-_See Requirement JWT-5: Performance Requirements in link:Requirements.adoc[Requirements]_
-
-* [ ] Profile validation performance and optimize hot paths
-* [ ] Add caching for validated tokens
-* [ ] Benchmark against target (50ms for 95%)
-* _Decision needed: Redis vs Hazelcast for caching_
-
-== Future Enhancements
-
-* [ ] Support additional signature algorithms (ES256, PS256)
-* [ ] Add JWE (encrypted token) support
-* [ ] Implement token refresh functionality
-```
-
-## Maintenance Standards
-
-### Keeping Documents Current
-
-**Update frequency**: Update planning documents whenever:
-- Tasks are completed
-- New tasks are discovered
-- Tasks are blocked or unblocked
-- Implementation priorities change
-
-**Regular reviews**: Review planning documents:
-- At start of each development sprint/cycle
-- When major milestones are reached
-- When project scope changes
-
-### Task Lifecycle
-
-**Adding tasks**:
-1. Identify the appropriate section
-2. Link to relevant requirement or specification
-3. Provide clear, actionable description
-4. Mark with appropriate status
-5. Add notes for context if needed
-
-**Completing tasks**:
-1. Change status from `[ ]` to `[x]`
-2. Verify implementation meets requirements
-3. Update related specifications if needed
-4. Don't remove completed tasks - leave for project history
-
-**Refactoring tasks**:
-1. Break down tasks that are too large
-2. Merge tasks that are too granular
-3. Reorganize sections as understanding improves
-4. Maintain traceability links throughout
-
-### Archive Strategy
-
-**Don't archive** planning documents - they serve as project history
-
-**Completed tasks** remain in place with `[x]` status
-
-**New features** get new sections or documents
-
-## Quality Standards
-
-### Clarity
-
-- Tasks are clear and actionable
-- Status indicators are current and accurate
-- Notes provide helpful context
-- Organization is logical and navigable
-
-### Completeness
-
-- All implementation areas are covered
-- Testing is comprehensively planned
-- Documentation tasks are included
-- Dependencies are identified
-
-### Traceability
-
-- Every task group links to requirements or specifications
-- Navigation between documents is seamless
-- Related tasks are grouped together
-- Blockers and dependencies are explicit
-
-### Maintainability
-
-- Document is updated as work progresses
-- Completed tasks are marked
-- Structure adapts to project evolution
-- Remains a useful reference throughout project lifecycle
-
-## Common Anti-Patterns to Avoid
-
-### Overly Detailed Tasks
-
-**Bad**: Breaking tasks down to individual method implementations
-
-**Good**: Grouping related work into cohesive tasks
-
-### Missing Traceability
-
-**Bad**: Task lists without links to requirements
-
-**Good**: Every task group references its source requirement
-
-### Stale Status
-
-**Bad**: Leaving planning document unchanged for weeks
-
-**Good**: Updating status as work progresses
-
-### Implementation Details
-
-**Bad**: Including code snippets and detailed algorithms
-
-**Good**: Referencing specifications for implementation guidance
-
-## Related Standards
+## Related Skills
 
 ### Related Skills in Bundle
 
@@ -538,6 +179,6 @@ _See Requirement JWT-5: Performance Requirements in link:Requirements.adoc[Requi
 
 ### External Standards
 
-- AsciiDoc formatting standards (for document structure and formatting)
-- Git commit standards (for tracking task completion in commits)
-- Project management best practices (for effective task organization and tracking)
+- AsciiDoc formatting standards - For document structure and formatting
+- Git commit standards - For tracking task completion in commits
+- Project management best practices - For effective task organization and tracking
