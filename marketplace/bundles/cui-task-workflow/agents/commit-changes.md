@@ -288,4 +288,4 @@ Focus improvements on:
 4. Error handling for merge conflicts and permission issues
 5. User experience improvements and feedback clarity
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=commit-changes` based on your report.
+The caller can then invoke the update tool using `/plugin-update-agent agent-name=commit-changes update="[your improvement]"` to apply your suggested enhancement.

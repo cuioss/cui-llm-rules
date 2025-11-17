@@ -1,6 +1,6 @@
 ---
 name: research-best-practices
-description: Performs comprehensive web research when user asks to research a topic, find best practices, investigate recommendations, do deep research, or gather information about a subject from online sources. Triggers on queries like "research X", "research on X", "best practices for X", "find information about X", "investigate X", "do research about X", "web research for X", "what are best practices for X", or similar research requests.
+description: Performs comprehensive web research to find best practices, recommendations, and information about a specified topic using multiple online sources.
 
 examples:
 - User: "Research on TOPIC"

@@ -25,7 +25,7 @@ Focus improvements on:
 5. More effective coverage trend analysis techniques
 6. Any lessons learned about JavaScript coverage analysis workflows
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=js-coverage-analyzer` based on your report.
+The caller can then invoke the update tool using `/plugin-update-agent agent-name=js-coverage-analyzer update="[your improvement]"` to apply your suggested enhancement.
 
 ## YOUR TASK
 

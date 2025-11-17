@@ -1,17 +1,6 @@
 ---
 name: task-breakdown-agent
-description: |
-  Plans / manages the implementation of an issue by providing a plan with actionable tasks.
-
-  Examples:
-  - User: "Plan the issue issue-4/"
-    Assistant: "I'll use the task-breakdown-agent agent to plan issue-4/"
-
-  - User: "Plan the issue #4"
-    Assistant: "I'll use the task-breakdown-agent agent to plan #4"
-
-  - User: "Plan the issue https://github.com/cuioss/cui-java-tools/issues/4"
-    Assistant: "I'll use the task-breakdown-agent agent to plan the GitHub issue"
+description: Plans issue implementation by creating actionable task breakdown with acceptance criteria and sequential execution order.
 tools: Read, Write, Bash(gh:*), Glob, Skill
 model: sonnet
 color: blue

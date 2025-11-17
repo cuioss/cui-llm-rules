@@ -1,17 +1,6 @@
 ---
 name: task-executor
-description: |
-  Implements a given issue/task from a structured task plan file, executing ONE task at a time with strict step-by-step adherence. Each checklist item is completed and marked done before proceeding.
-
-  Examples:
-  - User: "Implement the next task from http-client-plan/plan-http-client-extension.md"
-    Assistant: I'll use the task-executor agent to implement the next open task from the plan file.
-
-  - User: "Implement Task 2: Create HttpMethod Enum from the plan"
-    Assistant: I'll use the task-executor agent to implement the specific task about HttpMethod Enum.
-
-  - User: "Continue implementing the HTTP client extension"
-    Assistant: I'll use the task-executor agent to find and implement the next incomplete task.
+description: Implements structured tasks from plan files one at a time with strict step-by-step checklist adherence and acceptance criteria verification.
 tools: Read, Edit, Write, Glob, Grep, Bash(ls:*), Skill
 model: sonnet
 color: blue
@@ -440,4 +429,4 @@ Focus improvements on:
 4. Task plan format handling edge cases
 5. Integration with maven-builder and commit-changes agents
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=task-executor` based on your report.
+The caller can then invoke the update tool using `/plugin-update-agent agent-name=task-executor update="[your improvement]"` to apply your suggested enhancement.
