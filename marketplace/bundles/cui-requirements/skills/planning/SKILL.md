@@ -12,6 +12,15 @@ Standards for creating, structuring, and maintaining project planning documents 
 
 ## What This Skill Provides
 
+### Format Note
+
+**Important**: This skill's standards files are in **Markdown** (`.md`) format as required for marketplace bundles. However, the standards themselves describe how to create **AsciiDoc** (`.adoc`) planning documents in target projects.
+
+- **Transport format** (marketplace): Markdown (`.md`) - these standards files
+- **Target format** (projects): AsciiDoc (`.adoc`) - TODO.adoc, ROADMAP.adoc, etc.
+
+Code examples within the standards show AsciiDoc syntax because they demonstrate what users should write in their project's planning documents.
+
 ### Comprehensive Planning Standards
 
 This skill provides complete standards for:
