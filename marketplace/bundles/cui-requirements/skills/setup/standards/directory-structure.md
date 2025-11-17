@@ -44,7 +44,7 @@ Common specification documents include:
 - **integration-patterns.adoc**: Integration examples and patterns
 - **internationalization.adoc**: i18n/l10n requirements and implementation
 
-Projects may include additional specification documents based on their specific needs.
+Projects can include additional specification documents as needed based on their specific requirements.
 
 ## Minimal vs. Complete Setup
 

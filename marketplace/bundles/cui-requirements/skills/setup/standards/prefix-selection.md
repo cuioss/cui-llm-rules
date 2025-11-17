@@ -19,7 +19,7 @@ The requirement prefix serves as:
 
 **Uniqueness**: Must be unique within your organization
 
-**Relevance**: Should be meaningful and domain-appropriate
+**Relevance**: Must be meaningful and domain-appropriate
 
 ## Selection Process
 

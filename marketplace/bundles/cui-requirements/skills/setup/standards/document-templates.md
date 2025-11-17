@@ -2,6 +2,7 @@
 
 Standard templates for initial requirements documentation in CUI projects.
 
+[[requirements-template]]
 ## Requirements.adoc Template
 
 ```asciidoc
@@ -69,6 +70,7 @@ Project prefix: `[PREFIX]-`
 * [Logging requirement 2]
 ```
 
+[[specification-template]]
 ## Specification.adoc Template
 
 ```asciidoc
@@ -102,6 +104,7 @@ Additional documentation:
 * link:LogMessages.adoc[Log Messages] - Logging standards and implementation
 ```
 
+[[individual-specification-template]]
 ## Individual Specification Template
 
 ```asciidoc
@@ -142,6 +145,7 @@ _See Requirement link:../Requirements.adoc#PREFIX-M[PREFIX-M: Another Requiremen
 [Additional specification content]
 ```
 
+[[logmessages-template]]
 ## LogMessages.adoc Template
 
 ```asciidoc

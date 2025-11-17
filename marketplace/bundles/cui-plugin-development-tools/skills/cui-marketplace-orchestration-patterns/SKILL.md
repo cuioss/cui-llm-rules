@@ -2,6 +2,7 @@
 name: cui-marketplace-orchestration-patterns
 description: Agent coordination and batch processing patterns
 bundle: cui-plugin-development-tools
+allowed-tools: [Read, Grep, Task]
 ---
 
 # CUI Marketplace Orchestration Patterns Skill

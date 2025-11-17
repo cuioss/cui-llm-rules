@@ -13,7 +13,7 @@ During initial project setup:
 
 ## Documentation-First Approach
 
-New projects should establish their documentation structure before implementing core functional components (i.e., before writing business logic, APIs, or main feature code). This ensures:
+New projects must establish their documentation structure before implementing core functional components (i.e., before writing business logic, APIs, or main feature code). This ensures:
 
 - Clear understanding of project goals and scope through documented and approved requirements
 - Traceability from the start

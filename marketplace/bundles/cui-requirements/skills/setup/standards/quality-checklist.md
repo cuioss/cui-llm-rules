@@ -2,6 +2,8 @@
 
 Verification checklist for requirements documentation setup.
 
+Use this checklist to verify that your requirements documentation structure has been set up correctly. Check each item as you verify it.
+
 ## Documentation Structure
 
 - [ ] `doc/` directory exists at project root
