@@ -167,7 +167,23 @@ public class ValidationResult {
 * API response/request objects
 * Configuration data classes
 
-**When to use records instead**: For detailed comparison of records vs Lombok @Value, see [java-modern-features.md](java-modern-features.md) section "When to Use Records vs Lombok @Value".
+### Records vs Lombok @Value
+
+**Use Records when:**
+* Working with Java 17+ projects (records are built-in language feature)
+* Simple immutable data carriers without custom behavior
+* Pattern matching is beneficial (Java 21+)
+* Want minimal boilerplate with no dependencies
+* Need sealed type hierarchies (Java 17+)
+
+**Use Lombok @Value when:**
+* Project uses Java 11 (records require Java 17+)
+* Need Builder pattern (`@Value` + `@Builder`)
+* Need custom implementations (Lombok allows more customization)
+* Already using Lombok extensively in the project
+* Need `@Singular` for collection builders
+
+**Migration strategy**: See [java-modern-features.md](java-modern-features.md) for detailed migration guidance from Lombok @Value to records.
 
 ## Additional Lombok Annotations
 

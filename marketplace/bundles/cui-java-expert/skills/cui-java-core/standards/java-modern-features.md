@@ -101,7 +101,44 @@ public record Range(int start, int end) {
 
 ### When to Use Records vs Lombok @Value
 
-For comprehensive comparison of records vs Lombok @Value including decision criteria and migration strategies, see [java-lombok-patterns.md](java-lombok-patterns.md) section "Lombok vs Records".
+For comprehensive comparison of records vs Lombok @Value including decision criteria, see [java-lombok-patterns.md](java-lombok-patterns.md) section "Records vs Lombok @Value".
+
+**Migration from Lombok @Value to Records**:
+
+```java
+// Before: Lombok @Value
+@Value
+@Builder
+public class UserDto {
+    String id;
+    String name;
+    String email;
+}
+
+// After: Java Record with builder pattern
+public record UserDto(String id, String name, String email) {
+    // Optional: Add builder if needed
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String id;
+        private String name;
+        private String email;
+
+        public Builder id(String id) { this.id = id; return this; }
+        public Builder name(String name) { this.name = name; return this; }
+        public Builder email(String email) { this.email = email; return this; }
+
+        public UserDto build() {
+            return new UserDto(id, name, email);
+        }
+    }
+}
+```
+
+**Note**: Records are simpler but Lombok @Value + @Builder provides more features out-of-the-box. Choose based on project needs and Java version constraints.
 
 ## Switch Expressions
 

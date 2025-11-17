@@ -277,6 +277,8 @@ For comprehensive testing of logging in unit tests, see the dedicated testing gu
 
 See: `cui-java-unit-testing` skill → `standards/testing-juli-logger.md`
 
+**Note**: The `cui-java-unit-testing` skill is part of the `cui-java-expert` marketplace bundle. If the skill is not available, implement basic logger testing using JUnit assertions with `java.util.logging.Handler` for log message verification.
+
 **Quick example**:
 
 ```java
