@@ -33,12 +33,18 @@ Provides a centralized, reusable inventory service for discovering all marketpla
 - `global` - Scan ~/.claude/
 - `project` - Scan .claude/ (relative to current working directory)
 
+**--type** (optional) - Filter to specific resource type(s)
+- `agents` - Return only agents
+- `commands` - Return only commands
+- `skills` - Return only skills
+- If not specified: Return all resource types (default)
+
 **--json** (optional) - Output in JSON format instead of human-readable format
 **--include-descriptions** (optional) - Extract and include descriptions from YAML frontmatter (slower)
 
 ## WORKFLOW
 
-### Step 1: Determine Scan Path
+### Step 1: Parse Parameters
 
 **Parse scope parameter:**
 - marketplace → Base path: `marketplace/bundles`
@@ -46,6 +52,16 @@ Provides a centralized, reusable inventory service for discovering all marketpla
 - project → Base path: `.claude`
 
 **Default:** Use marketplace if no scope provided
+
+**Parse --type parameter:**
+- Extract requested type(s): agents, commands, or skills
+- If not provided: scan_all = true
+- If provided: scan_all = false, scan_agents/scan_commands/scan_skills = true/false based on type
+
+**Token Optimization:** Skipping unneeded resource types reduces:
+- Discovery operations (fewer Glob calls)
+- Result payload (smaller JSON output)
+- Processing time
 
 ### Step 2: Discover All Bundles
 
@@ -64,6 +80,8 @@ Glob: pattern="*/.claude-plugin/plugin.json", path="{base_path}"
 
 ### Step 3: For Each Bundle, Discover Agents
 
+**When to execute:** If scan_all = true OR --type=agents specified
+
 **For each bundle discovered:**
 
 ```
@@ -74,7 +92,11 @@ Glob: pattern="*.md", path="{bundle_path}/agents"
 
 **Build agent list:** Store bundle name, agent name, and full path
 
+**If skipped:** Set agents = [] for this bundle
+
 ### Step 4: For Each Bundle, Discover Commands
+
+**When to execute:** If scan_all = true OR --type=commands specified
 
 **For each bundle discovered:**
 
@@ -86,7 +108,11 @@ Glob: pattern="*.md", path="{bundle_path}/commands"
 
 **Build command list:** Store bundle name, command name, and full path
 
+**If skipped:** Set commands = [] for this bundle
+
 ### Step 5: For Each Bundle, Discover Skills
+
+**When to execute:** If scan_all = true OR --type=skills specified
 
 **For each bundle discovered:**
 
@@ -102,6 +128,8 @@ Glob: pattern="*/SKILL.md", path="{bundle_path}/skills"
 - Skill path is: `{bundle_path}/skills/{skill-name}` (directory containing SKILL.md)
 
 **Build skill list:** Store bundle name, skill name, and skill directory path
+
+**If skipped:** Set skills = [] for this bundle
 
 ### Step 6: Optionally Extract Descriptions
 
@@ -224,21 +252,33 @@ Total Resources: {count}
 ```bash
 /plugin-inventory
 ```
-Scans marketplace/bundles/, displays human-readable summary
+Scans marketplace/bundles/, displays human-readable summary of all resources
 
-### Example 2: JSON Output
+### Example 2: Commands Only (JSON)
 ```bash
-/plugin-inventory --json
+/plugin-inventory --type=commands --json
 ```
-Outputs complete JSON structure for programmatic use
+Returns only commands in JSON format (used by plugin-diagnose-commands)
 
-### Example 3: Global Scope
+### Example 3: Agents Only (JSON)
+```bash
+/plugin-inventory --type=agents --json
+```
+Returns only agents in JSON format (used by plugin-diagnose-agents)
+
+### Example 4: Skills Only (JSON)
+```bash
+/plugin-inventory --type=skills --json
+```
+Returns only skills in JSON format (used by plugin-diagnose-skills)
+
+### Example 5: Global Scope
 ```bash
 /plugin-inventory scope=global
 ```
 Scans ~/.claude/ instead of marketplace
 
-### Example 4: With Descriptions
+### Example 6: With Descriptions
 ```bash
 /plugin-inventory --include-descriptions --json
 ```

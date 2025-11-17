@@ -92,10 +92,12 @@ This provides architecture rules and validation patterns for marketplace compone
 
 **For marketplace scope (default):**
 
-Execute plugin-inventory command:
+Execute plugin-inventory command with type filter:
 ```
-SlashCommand: /plugin-inventory --json
+SlashCommand: /plugin-inventory --type=commands --json
 ```
+
+**Token Optimization:** Using --type=commands returns only commands, reducing JSON payload size.
 
 Parse JSON output:
 - Extract `bundles[]` array from JSON response
