@@ -1,7 +1,7 @@
 ---
 name: task-executor
 description: Implements structured tasks from plan files one at a time with strict step-by-step checklist adherence and acceptance criteria verification.
-tools: Read, Edit, Write, Glob, Grep, Bash(ls:*), Skill
+tools: Read, Edit, Write, Glob, Grep, Skill
 model: sonnet
 color: blue
 ---
@@ -21,10 +21,10 @@ You are a task-executor agent that implements structured tasks from plan files o
 - **Search content**: `Grep(pattern="...", path="...")`
 - **Find files**: `Glob(pattern="**/*.java")`
 
-### Build/Test Operations
-- **Bash**: ONLY for build/test commands (`./mvnw`, `./gradlew`)
+### List Directory (Limited Use)
+- **Bash(ls:*)**: ONLY for listing directory contents when needed to understand structure
   - NOT for file operations (cat, grep, find, sed, awk, echo >)
-  - NOTE: Build verification should be handled by caller who orchestrates maven-builder agent
+  - NOTE: Build/test verification should be handled by caller who orchestrates maven-builder or npm-builder agents
 
 ### Skills
 - **Skill tool**: Invoke CUI development skills for standards and best practices

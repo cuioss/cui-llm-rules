@@ -14,7 +14,8 @@ Orchestrates comprehensive analysis of skills by coordinating diagnose-skill age
 2. Better methods for identifying skill structural issues and YAML problems
 3. More effective cross-skill duplication detection and consolidation recommendations
 4. Enhanced marketplace architecture validation techniques
-5. Any lessons learned about skill design patterns and self-containment principles
+5. Improved plugin reference validation and correction strategies
+6. Any lessons learned about skill design patterns and self-containment principles
 
 This ensures the command evolves and becomes more effective with each execution.
 
@@ -35,18 +36,18 @@ This ensures the command evolves and becomes more effective with each execution.
 
 **This command has TWO phases - you MUST complete both:**
 
-**PHASE 1: Analysis (Steps 1-6)**
+**PHASE 1: Analysis (Steps 1-7)**
 - Discover components
 - Analyze each component
 - Generate report
 
-**PHASE 2: Fix Workflow (Steps 7-10)**
+**PHASE 2: Fix Workflow (Steps 8-11)**
 - Categorize issues (safe vs risky)
 - Apply safe fixes automatically
 - Prompt user for risky fixes
 - Verify all fixes worked
 
-**CRITICAL: Do not stop after Step 6. Continue to Step 7.**
+**CRITICAL: Do not stop after Step 7. Continue to Step 8.**
 
 ### Step 1: Activate Diagnostic Patterns
 
@@ -133,9 +134,50 @@ Task:
 
 **Token Optimization**: Streamlined output reduces response payload by ~60% (from ~8,100-10,800 to ~2,700-5,400 tokens for 27 skills).
 
-### Step 4: Aggregate Results
+### Step 4: Check Plugin References (Parallel)
 
-**Combine findings from all skills:**
+**CRITICAL**: Validate all plugin references in parallel with skill analysis.
+
+**For EACH skill discovered:**
+
+Launch analyze-plugin-references agent:
+
+```
+Task:
+  subagent_type: cui-plugin-development-tools:analyze-plugin-references
+  description: Check references in {skill-name}
+  prompt: |
+    Check all plugin references in this skill.
+
+    Parameters:
+    - path: {absolute_path_to_skill_SKILL.md}
+    - marketplace_inventory: {json_inventory_from_step_2}
+    - auto-fix: true  # Auto-fix deterministic reference issues (missing/incorrect bundle prefixes)
+
+    IMPORTANT: marketplace_inventory is the JSON output from Step 2's /plugin-inventory --json call.
+    Use this to validate references without re-discovering marketplace resources.
+
+    Return summary report with reference validation results.
+```
+
+**CRITICAL**: Launch ALL reference validation agents in PARALLEL (single message, multiple Task calls) alongside diagnose-skill agents.
+
+**Collect results** from each agent as they complete.
+
+**Aggregate reference findings:**
+Track for each skill: references_found, references_correct, references_fixed, references_ambiguous.
+Aggregate totals: skills_checked, total_references, correct, fixed, issues.
+
+**Error Handling:**
+- If Task fails: Display warning with skill name and error, mark as "Reference Check Failed", continue
+- If unexpected format: Display warning, mark as "Reference Check Error", continue
+- Continue even if some reference checks fail
+
+**Performance Note**: Running reference validation in parallel with diagnose-skill (Step 3) optimizes token usage - both agent types process simultaneously rather than sequentially.
+
+### Step 5: Aggregate Results
+
+**Combine findings from all skills (diagnosis + reference checks):**
 
 ```json
 {
@@ -146,11 +188,23 @@ Task:
     "warnings": {total_count},
     "suggestions": {total_count}
   },
+  "reference_validation": {
+    "skills_checked": {count},
+    "total_references": {count},
+    "references_correct": {count},
+    "references_fixed": {count},
+    "references_with_issues": {count}
+  },
   "by_skill": {
     "skill-name-1": {
       "status": "Clean|Warnings|Critical",
       "issues": {...},
-      "scores": {...}
+      "scores": {...},
+      "references": {
+        "found": {count},
+        "correct": {count},
+        "issues": {count}
+      }
     },
     ...
   },
@@ -165,7 +219,7 @@ Task:
 }
 ```
 
-### Step 5: Detect Cross-Skill Duplication (Optional)
+### Step 6: Detect Cross-Skill Duplication (Optional)
 
 **When to Execute**: When `--check-cross-duplication` flag is provided
 
@@ -204,7 +258,7 @@ Task:
 - Agent compares skills with OTHER SKILLS only (not with /standards/ directory)
 - Distinguishes intentional overlap (different domains) from harmful duplication
 
-### Step 6: Generate Summary Report
+### Step 7: Generate Summary Report
 
 **Display:**
 
@@ -228,9 +282,15 @@ Quality Scores:
 - Average Architecture: {score}/100
 - Average Integrated Content: {score}/100
 
+Reference Validation:
+- Skills checked: {skills_checked}
+- Total references: {total_references}
+- Correct: {references_correct}
+- Issues found: {references_with_issues}
+
 By Skill:
-- {skill-1}: {status} | Arch: {score} | Content: {score}
-- {skill-2}: {status} | Arch: {score} | Content: {score}
+- {skill-1}: {status} | Arch: {score} | Content: {score} | Refs: {correct}/{found}
+- {skill-2}: {status} | Arch: {score} | Content: {score} | Refs: {correct}/{found}
 ...
 
 Recommendations:
@@ -291,7 +351,7 @@ DO NOT STOP HERE. The analysis is useless without fixes.
 
 ==================================================
 
-### Steps 7-10: Fix Workflow ⚠️ PHASE 2
+### Steps 8-11: Fix Workflow ⚠️ PHASE 2
 
 **For complete fix workflow (categorization, safe fixes, prompting, verification), see:**
 
@@ -311,10 +371,10 @@ Skill: cui-plugin-development-tools:cui-fix-workflow
 3. **Reference Problems** - Broken example references, unclear cross-references
 
 **Fix workflow steps** (from cui-fix-workflow skill):
-1. **Step 7**: Categorize issues (safe vs risky)
-2. **Step 8**: Apply safe fixes automatically (if auto-fix=true)
-3. **Step 9**: Prompt for risky fixes using AskUserQuestion
-4. **Step 10**: Verify fixes by re-running diagnose-skill
+1. **Step 8**: Categorize issues (safe vs risky)
+2. **Step 9**: Apply safe fixes automatically (if auto-fix=true)
+3. **Step 10**: Prompt for risky fixes using AskUserQuestion
+4. **Step 11**: Verify fixes by re-running diagnose-skill
 
 ## ARCHITECTURE
 

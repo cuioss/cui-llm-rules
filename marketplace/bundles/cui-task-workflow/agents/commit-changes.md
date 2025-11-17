@@ -25,9 +25,21 @@ This agent accepts the following parameters extracted from user requests:
 
 ## Essential Rules
 
-- Git commit format: `<type>(<scope>): <subject>` with optional body/footer - types: feat, fix, docs, style, refactor, perf, test, chore; subject: imperative, lowercase, no period, max 50 chars (from: Git Commit Standards)
-- Commit message quality: subject line must clearly describe what changed and why, focusing on user-facing impact rather than implementation details (from: Git Commit Standards)
-- Clean working tree: remove build artifacts before committing - check target/, .DS_Store, *.iml, and IDE-specific files (from: Repository Best Practices)
+**Rule: Git Commit Format**
+- Source: Git Commit Standards
+- Format: `<type>(<scope>): <subject>` with optional body/footer
+- Types: feat, fix, docs, style, refactor, perf, test, chore
+- Subject: imperative, lowercase, no period, max 50 chars
+
+**Rule: Commit Message Quality**
+- Source: Git Commit Standards
+- Subject line must clearly describe what changed and why
+- Focus on user-facing impact rather than implementation details
+
+**Rule: Clean Working Tree**
+- Source: Repository Best Practices
+- Remove build artifacts before committing
+- Check: target/, .DS_Store, *.iml, and IDE-specific files
 
 ## WORKFLOW (FOLLOW EXACTLY)
 

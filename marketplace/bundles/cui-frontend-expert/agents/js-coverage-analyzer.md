@@ -25,7 +25,7 @@ Focus improvements on:
 5. More effective coverage trend analysis techniques
 6. Any lessons learned about JavaScript coverage analysis workflows
 
-The caller can then invoke the update tool using `/plugin-update-agent agent-name=js-coverage-analyzer update="[your improvement]"` to apply your suggested enhancement.
+The caller can then invoke `/plugin-update-agent agent-name=js-coverage-analyzer update="[your improvement]"` based on your report.
 
 ## YOUR TASK
 

@@ -196,7 +196,7 @@ Task:
     Parameters:
     - path: {absolute_path_to_agent}
     - marketplace_inventory: {json_inventory_from_step_2}
-    - auto-fix: false  # Collect issues only, don't modify in analysis phase
+    - auto-fix: true  # Auto-fix deterministic reference issues (missing/incorrect bundle prefixes)
 
     IMPORTANT: marketplace_inventory is the JSON output from Step 2's /plugin-inventory --json call.
     Use this to validate references without re-discovering marketplace resources.
