@@ -10,7 +10,7 @@ Step-by-step workflow for establishing requirements documentation in new CUI pro
 mkdir -p doc/specification
 ```
 
-See xref:directory-structure.md[Directory Structure Standards] for complete directory layout standards.
+See [Directory Structure Standards](directory-structure.md) for complete directory layout standards.
 
 ### Step 2: Select Requirement Prefix
 
@@ -18,7 +18,7 @@ See xref:directory-structure.md[Directory Structure Standards] for complete dire
 - Choose from recommended prefixes or create custom
 - Document prefix selection
 
-See xref:prefix-selection.md[Prefix Selection Standards] for detailed prefix selection guidance.
+See [Prefix Selection Standards](prefix-selection.md) for detailed prefix selection guidance.
 
 ### Step 3: Create Requirements.adoc
 
@@ -27,7 +27,7 @@ See xref:prefix-selection.md[Prefix Selection Standards] for detailed prefix sel
 - Replace `PREFIX` with selected prefix
 - Fill in initial requirements based on project scope
 
-See xref:document-templates.md#requirements-template[Requirements Template] for template.
+See [Requirements Template](document-templates.md#requirements-template) for template.
 
 ### Step 4: Create Specification.adoc
 
@@ -36,7 +36,7 @@ See xref:document-templates.md#requirements-template[Requirements Template] for 
 - Adjust specification document list based on project needs
 - Add backtracking links to requirements
 
-See xref:document-templates.md#specification-template[Specification Template] for template.
+See [Specification Template](document-templates.md#specification-template) for template.
 
 ### Step 5: Create Individual Specification Documents
 
@@ -45,7 +45,7 @@ See xref:document-templates.md#specification-template[Specification Template] fo
 - Add backtracking links to requirements
 - Fill in specification details as available
 
-See xref:document-templates.md#individual-specification-template[Individual Specification Template] for template.
+See [Individual Specification Template](document-templates.md#individual-specification-template) for template.
 
 ### Step 6: Create LogMessages.adoc
 
@@ -53,7 +53,7 @@ See xref:document-templates.md#individual-specification-template[Individual Spec
 - Define initial log message structure
 - Reference logging standards
 
-See xref:document-templates.md#logmessages-template[LogMessages Template] for template.
+See [LogMessages Template](document-templates.md#logmessages-template) for template.
 
 ### Step 7: Verify Structure
 
@@ -62,7 +62,7 @@ See xref:document-templates.md#logmessages-template[LogMessages Template] for te
 - Ensure consistent prefix usage
 - Test document navigation
 
-See xref:quality-checklist.md[Quality Checklist] for complete verification checklist.
+See [Quality Checklist](quality-checklist.md) for complete verification checklist.
 
 ## Common Setup Issues
 

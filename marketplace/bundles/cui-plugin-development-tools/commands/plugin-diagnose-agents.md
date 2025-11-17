@@ -140,7 +140,7 @@ Read: marketplace/bundles/cui-plugin-development-tools/standards/agent-analysis-
 
 ```
 Task:
-  subagent_type: diagnose-agent
+  subagent_type: cui-plugin-development-tools:diagnose-agent
   description: Analyze {agent-name}
   prompt: |
     Analyze this agent comprehensively.
@@ -188,7 +188,7 @@ Task:
 
 ```
 Task:
-  subagent_type: analyze-plugin-references
+  subagent_type: cui-plugin-development-tools:analyze-plugin-references
   description: Check references in {agent-name}
   prompt: |
     Check all plugin references in this agent.
@@ -519,7 +519,7 @@ Read: standards/verification-patterns.md (from cui-fix-workflow)
 **Re-run analysis on modified agents:**
 ```
 Task:
-  subagent_type: diagnose-agent
+  subagent_type: cui-plugin-development-tools:diagnose-agent
   description: Verify fixes for {agent-name}
   prompt: |
     Re-analyze this agent after fixes.

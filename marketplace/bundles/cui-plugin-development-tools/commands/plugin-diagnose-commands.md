@@ -157,7 +157,7 @@ Read: marketplace/bundles/cui-plugin-development-tools/standards/command-analysi
    **A. Command Analysis Agent (for each command in batch - ALWAYS run):**
    ```
    Task:
-     subagent_type: diagnose-command
+     subagent_type: cui-plugin-development-tools:diagnose-command
      description: Analyze {command-name}
      prompt: |
        Analyze this command comprehensively.
@@ -178,7 +178,7 @@ Read: marketplace/bundles/cui-plugin-development-tools/standards/command-analysi
    **B. Reference Validation Agent (for each command in batch):**
    ```
    Task:
-     subagent_type: analyze-plugin-references
+     subagent_type: cui-plugin-development-tools:analyze-plugin-references
      description: Validate references in {command-name}
      prompt: |
        Analyze plugin references in this command.
@@ -479,7 +479,7 @@ Read: standards/verification-patterns.md (from cui-fix-workflow)
 **Re-run analysis on modified commands:**
 ```
 Task:
-  subagent_type: diagnose-command
+  subagent_type: cui-plugin-development-tools:diagnose-command
   description: Verify fixes for {command-name}
   prompt: |
     Re-analyze this command after fixes applied.

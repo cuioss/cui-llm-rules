@@ -91,10 +91,17 @@ Skill: skill-name
 
 **Actions:**
 1. Use Grep to search for SlashCommand patterns: `SlashCommand:\s*/[^\s]+`
-2. Use Grep to search for Task patterns: `subagent_type[:\s]+[\"']?([a-z-]+)`
+2. Use Grep to search for Task patterns: `subagent_type[:\s]+[\"']?([a-z:-]+)[\"']?`
 3. Use Grep to search for Skill patterns: `Skill:\s*[^\s]+`
 4. Use Read with manual parsing to detect natural language references
 5. Compile list of all detected references with line numbers
+
+**CRITICAL - Task Reference Format Validation:**
+- Task invocations MUST use fully qualified agent names with bundle prefix
+- Format: `subagent_type: bundle-name:agent-name`
+- Example: `subagent_type: cui-plugin-development-tools:diagnose-skill` ✅
+- Invalid: `subagent_type: diagnose-skill` ❌ (missing bundle prefix)
+- This validation ensures agent invocations work correctly in all contexts
 
 **Output:**
 ```
@@ -134,6 +141,13 @@ Found references:
 # If unspecified: search all bundles' agents
 # Match on: agent.name === {name}
 # Return: agent.path
+
+# CRITICAL VALIDATION: Task invocations without bundle prefix
+# If type is "Task subagent_type" AND bundle is NOT specified:
+#   - Mark as ⚠️ FIXABLE (missing bundle prefix)
+#   - Find matching agent in inventory
+#   - Construct correct reference: {agent.bundle}:{agent.name}
+#   - Example fix: "diagnose-skill" → "cui-plugin-development-tools:diagnose-skill"
 ```
 
 **Skills:**
@@ -148,8 +162,9 @@ Found references:
 **Performance Note:** Using pre-loaded inventory eliminates 3 Glob operations per reference validation (commands, agents, skills). For files with 10+ references, this saves 30+ file system scans.
 
 **C. Categorize result:**
-- ✅ **Correct**: Found exactly 1 match and reference path is accurate
-- ⚠️ **Fixable**: Found exactly 1 match but reference path incorrect
+- ✅ **Correct**: Found exactly 1 match and reference path is accurate (including bundle prefix for Task invocations)
+- ⚠️ **Fixable - Missing Bundle Prefix**: Task invocation found exactly 1 match but missing bundle prefix (e.g., `diagnose-skill` should be `cui-plugin-development-tools:diagnose-skill`)
+- ⚠️ **Fixable - Incorrect Path**: Found exactly 1 match but reference path incorrect
 - ❌ **Ambiguous**: Found multiple matches
 - ❌ **Not Found**: Found 0 matches
 

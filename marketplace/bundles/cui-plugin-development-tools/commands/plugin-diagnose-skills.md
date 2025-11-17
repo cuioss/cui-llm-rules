@@ -112,7 +112,7 @@ Launch diagnose-skill agent:
 
 ```
 Task:
-  subagent_type: diagnose-skill
+  subagent_type: cui-plugin-development-tools:diagnose-skill
   description: Analyze {skill-name}
   prompt: |
     Analyze this skill comprehensively.
@@ -179,7 +179,7 @@ Task:
 
 ```
 Task:
-  subagent_type: analyze-cross-skill-duplication
+  subagent_type: cui-plugin-development-tools:analyze-cross-skill-duplication
   description: Detect cross-skill duplication
   prompt: |
     Analyze content duplication between all marketplace skills.
