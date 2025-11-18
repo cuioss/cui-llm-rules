@@ -56,14 +56,13 @@ This ensures the command evolves and becomes more effective with each execution.
 Skill: cui-utilities:cui-diagnostic-patterns
 ```
 
-**Optionally load marketplace architecture standards**:
+**CRITICAL: Load marketplace architecture standards**:
 
-You may optionally load the marketplace architecture skill for additional architectural context:
 ```
 Skill: cui-plugin-development-tools:cui-marketplace-architecture
 ```
 
-This provides architecture rules and validation patterns for marketplace components that may be useful for understanding command design principles.
+This skill provides command quality standards and analysis patterns used throughout the diagnosis workflow. All agents will reference these standards from the loaded skill context.
 
 ### Step 2: Validate Parameters
 
@@ -123,20 +122,6 @@ Glob: pattern="*.md", path=".claude/commands"
 - Display numbered list of all commands found
 - Separate standalone and bundle commands
 - Let user select which to analyze or change scope
-
-### Step 3a: Load Analysis Standards (Once)
-
-**CRITICAL**: Load standards files once to avoid redundant reads in each agent.
-
-**Load command analysis standards:**
-```
-Read: marketplace/bundles/cui-plugin-development-tools/standards/command-quality-standards.md
-Read: marketplace/bundles/cui-plugin-development-tools/standards/command-analysis-patterns.md
-```
-
-**Store standards content** in context to pass to agents in Step 4.
-
-**Token Optimization**: These standards are loaded once here instead of 46+ times (once per command in each diagnose-command agent).
 
 ### Step 4: Analyze Commands (Batched)
 
@@ -556,9 +541,9 @@ Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
 
 ## STANDARDS
 
-Command analysis follows:
-- Command quality standards (bundles/cui-plugin-development-tools/standards/command-quality-standards.md)
-- Command analysis patterns (bundles/cui-plugin-development-tools/standards/command-analysis-patterns.md)
+Command analysis follows standards from the cui-marketplace-architecture skill:
+- Command quality standards
+- Command analysis patterns
 - 8 anti-bloat rules (CRITICAL for preventing bloat)
 
-**Token Optimization**: Standards are pre-loaded once in Step 3a and passed to all agents to avoid 46+ redundant file reads.
+**Architecture Compliance**: Standards are loaded via skill activation in Step 1, following proper marketplace architecture patterns.

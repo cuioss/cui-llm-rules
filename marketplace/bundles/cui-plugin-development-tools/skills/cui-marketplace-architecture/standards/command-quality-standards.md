@@ -240,4 +240,4 @@ skill-name/SKILL.md
     └── quality-standards.md
 ```
 
-Command references skill: `Skill: bundle:skill-name`
+Command references skill: `Skill: bundle-name:skill-name`
