@@ -94,4 +94,4 @@ Focus improvements on:
 4. JSON output structure optimization and consistency
 5. Performance optimization for large PR comment sets
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=review-comment-fetcher` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=review-comment-fetcher update="[improvement]"` based on your report.

@@ -383,5 +383,5 @@ Focus improvements on:
 4. Subtopic identification and deep-dive decision logic
 5. Result structuring and actionable insights generation
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=research-best-practices` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=research-best-practices update="[improvement]"` based on your report.
 

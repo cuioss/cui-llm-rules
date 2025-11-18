@@ -348,4 +348,4 @@ Focus improvements on:
 4. Plan template improvements and clarity enhancements
 5. Integration patterns with task-executor and task-reviewer agents
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=task-breakdown-agent` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=task-breakdown-agent update="[improvement]"` based on your report.

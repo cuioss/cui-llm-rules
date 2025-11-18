@@ -223,7 +223,9 @@ Standards for writing clear, maintainable technical documentation in CUI project
 
 **Available Documentation Scripts**:
 
-This skill includes four utility scripts in the `scripts/` directory:
+This skill includes four utility scripts in the `scripts/` directory.
+
+**IMPORTANT**: The usage examples below show **manual/command-line execution** paths. **Agents must use the absolute-style path pattern** documented in the "Script Paths and Access Patterns" section below.
 
 1. **`asciidoc-validator.sh`** - Format validation script
    - Validates AsciiDoc format compliance
@@ -301,15 +303,28 @@ This skill includes four utility scripts in the `scripts/` directory:
 
 **Validation Workflow**:
 
+**For Agents**:
 1. Run format validation:
    ```bash
-   scripts/asciidoc-validator.sh target_file_or_directory 2>&1
+   ./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh {file_or_directory} 2>&1
    ```
 
 2. Run link verification:
    ```bash
    mkdir -p target/asciidoc-reviewer
-   python3 scripts/verify-adoc-links.py --file target.adoc --report target/asciidoc-reviewer/links.md 2>&1
+   python3 ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py --file {file} --report target/asciidoc-reviewer/links.md 2>&1
+   ```
+
+**For Manual/Command-Line Use**:
+1. Run format validation:
+   ```bash
+   ./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh target_file_or_directory 2>&1
+   ```
+
+2. Run link verification:
+   ```bash
+   mkdir -p target/asciidoc-reviewer
+   python3 ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py --file target.adoc --report target/asciidoc-reviewer/links.md 2>&1
    ```
 
 3. **Distinguish link validation results**:
@@ -325,14 +340,46 @@ This skill includes four utility scripts in the `scripts/` directory:
 
 5. Re-run validation to confirm fixes
 
-**Script Paths**:
-- All scripts are located in the skill directory at: `scripts/`
-  - `scripts/asciidoc-validator.sh` - Validation
-  - `scripts/verify-adoc-links.py` - Link verification
-  - `scripts/asciidoc-formatter.sh` - Auto-formatting
-  - `scripts/documentation-stats.sh` - Metrics generation
-- When running from project root, use relative path from current working directory
-- Scripts require execution from a location where relative paths to AsciiDoc files are correct
+**Script Paths and Access Patterns**:
+
+**For Agents (CRITICAL - Pattern 21)**:
+
+Agents **MUST** use the absolute-style path pattern when accessing skill scripts:
+
+```yaml
+# Agent frontmatter - Tool declaration
+tools: Read, Edit, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh), Glob, Skill
+```
+
+```bash
+# Agent workflow - Script execution
+./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh {file_path} 2>&1
+```
+
+**Why this pattern:**
+- Agent threads have cwd reset between Bash calls (architecture constraint)
+- `./.claude/skills/` is an absolute-style path from the project root
+- Skills install to `./.claude/skills/{skill-name}/` directory
+- This pattern works portably across all projects
+
+**Available scripts**:
+- `asciidoc-validator.sh` - Format validation
+- `verify-adoc-links.py` - Link verification
+- `asciidoc-formatter.sh` - Auto-formatting
+- `documentation-stats.sh` - Metrics generation
+
+**For Manual/Command-Line Use**:
+
+When running scripts manually from terminal, use relative paths from your current directory:
+```bash
+# From project root
+./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh path/to/file.adoc
+
+# From skill directory
+scripts/asciidoc-validator.sh ../../path/to/file.adoc
+```
+
+**Reference**: See Pattern 21 in `cui-marketplace-architecture/standards/agent-analysis-patterns.md` for complete architectural documentation of skill script access patterns.
 
 ### Step 6: Document Changes and Commit
 

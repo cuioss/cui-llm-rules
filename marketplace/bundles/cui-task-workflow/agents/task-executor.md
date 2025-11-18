@@ -1,7 +1,7 @@
 ---
 name: task-executor
 description: Executes plan file tasks sequentially with checklist tracking and acceptance verification.
-tools: Read, Edit, Write, Glob, Grep, Skill
+tools: Read, Edit, Write, Glob, Grep, Bash(ls:*), Skill
 model: sonnet
 color: blue
 ---
@@ -429,4 +429,4 @@ Focus improvements on:
 4. Task plan format handling edge cases
 5. Integration with maven-builder and commit-changes agents
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=task-executor` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=task-executor update="[improvement]"` based on your report.

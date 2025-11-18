@@ -274,4 +274,4 @@ Focus improvements on:
 4. Script output parsing and validation improvements
 5. Cross-reference resolution logic enhancements
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-link-verifier` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=asciidoc-link-verifier update="[improvement]"` based on your report.

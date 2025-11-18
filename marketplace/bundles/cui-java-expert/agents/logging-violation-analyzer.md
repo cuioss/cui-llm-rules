@@ -24,7 +24,7 @@ Focus improvements on:
 - Better error handling for malformed code
 - Support for additional logging frameworks beyond SLF4J
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=logging-violation-analyzer ` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=logging-violation-analyzer update="[improvement]"` based on your report.
 
 ## YOUR TASK
 

@@ -458,7 +458,7 @@ Focus improvements on:
 8. Enhanced working directory and environment variable handling
 9. Optimized tool usage patterns and non-prompting execution strategies
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=npm-builder` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=npm-builder update="[improvement]"` based on your report.
 
 ## RESPONSE FORMAT EXAMPLES
 

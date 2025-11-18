@@ -48,7 +48,7 @@ Focus improvements on:
 - JSON response format consistency
 - Edge case handling for ambiguous comments
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=review-comment-triager` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=review-comment-triager update="[improvement]"` based on your report.
 
 ## CRITICAL RULES
 

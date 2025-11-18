@@ -244,4 +244,4 @@ Focus improvements on:
 4. Integration with asciidoc-validator for post-fix verification
 5. Git integration patterns for file restoration and rollback
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-auto-formatter` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=asciidoc-auto-formatter update="[improvement]"` based on your report.

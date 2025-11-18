@@ -361,4 +361,4 @@ Suggested enhancement: [specific improvement]
 Expected impact: [benefit of change]
 ```
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=analyze-cross-skill-duplication` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=analyze-cross-skill-duplication update="[improvement]"` based on your report.

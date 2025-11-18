@@ -1,15 +1,6 @@
 ---
 name: asciidoc-content-reviewer
-description: |
-  Reviews AsciiDoc content for quality: correctness, clarity, tone, style, and completeness.
-
-  Uses ULTRATHINK reasoning for deep tone/style analysis.
-
-  Specialized agent for content review only.
-
-  Examples:
-  - User: "Review content quality of Requirements.adoc"
-    Assistant: "I'll use the asciidoc-content-reviewer agent to analyze content, tone, and style"
+description: Reviews AsciiDoc content for quality: correctness, clarity, tone, style, and completeness using ULTRATHINK reasoning.
 
 tools: Read, Edit, Glob, Skill
 model: sonnet
@@ -356,4 +347,4 @@ Focus improvements on:
 4. Metrics for ULTRATHINK effectiveness
 5. Context-aware analysis improvements for different document types
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-content-reviewer` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=asciidoc-content-reviewer update="[improvement]"` based on your report.

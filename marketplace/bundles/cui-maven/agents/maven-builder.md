@@ -396,7 +396,7 @@ Focus improvements on:
 7. Better reactor/module build handling for edge cases
 8. Optimized tool usage patterns and non-prompting execution strategies
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=maven-builder` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=maven-builder update="[improvement]"` based on your report.
 
 ## RESPONSE FORMAT EXAMPLES
 

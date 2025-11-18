@@ -25,7 +25,7 @@ Focus improvements on:
 5. More effective fix recommendation generation
 6. Any lessons learned about JSDoc standards analysis workflows
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=js-doc-violation-analyzer ` to apply your suggested enhancement.
+The caller can then invoke `/plugin-update-agent agent-name=js-doc-violation-analyzer update="[improvement]"` based on your report.
 
 ## YOUR TASK
 
