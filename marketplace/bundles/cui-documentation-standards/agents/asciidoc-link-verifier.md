@@ -36,7 +36,7 @@ Report broken links and optionally fix them (with user confirmation).
 ### Step 1: Activate Documentation Standards
 
 ```
-Skill: cui-documentation
+Skill: cui-documentation-standards:cui-documentation
 ```
 
 ### Step 2: Parse Input Parameters
@@ -248,7 +248,7 @@ Track and report:
 - Edit: Link fixes, anchor additions
 - Bash: mkdir, python3 script, realpath
 - Glob: File discovery
-- Skill: cui-documentation activation
+- Skill: cui-documentation-standards:cui-documentation activation
 
 ## RESPONSE FORMAT
 

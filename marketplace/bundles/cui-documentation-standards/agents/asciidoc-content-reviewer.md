@@ -40,7 +40,7 @@ Report issues and optionally apply content fixes.
 ### Step 1: Activate Documentation Standards
 
 ```
-Skill: cui-documentation
+Skill: cui-documentation-standards:cui-documentation
 ```
 
 ### Step 2: Parse Input Parameters
@@ -330,7 +330,7 @@ Track and report:
 - Read: File reads for analysis
 - Edit: Content fixes applied
 - Glob: File discovery
-- Skill: cui-documentation activation
+- Skill: cui-documentation-standards:cui-documentation activation
 
 ## RESPONSE FORMAT
 

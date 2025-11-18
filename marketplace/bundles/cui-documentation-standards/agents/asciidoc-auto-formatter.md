@@ -30,7 +30,7 @@ Operate safely with optional preview mode. Changes tracked in git version contro
 ### Step 1: Activate Documentation Standards
 
 ```
-Skill: cui-documentation
+Skill: cui-documentation-standards:cui-documentation
 ```
 
 ### Step 2: Parse Input Parameters
@@ -206,7 +206,7 @@ After applying fixes, recommend running validation:
 ```
 Formatting complete. Run validation to confirm:
 
-Skill: cui-documentation
+Skill: cui-documentation-standards:cui-documentation
 Then: scripts/asciidoc-validator.sh {target}
 ```
 

@@ -36,7 +36,7 @@ Analyze JavaScript files for JSDoc violations. You are a focused analyzer - iden
 ### Step 1: Load JSDoc Standards
 
 ```
-Skill: cui-jsdoc
+Skill: cui-frontend-expert:cui-jsdoc
 ```
 
 This loads comprehensive JSDoc standards for analysis.

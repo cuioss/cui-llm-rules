@@ -30,7 +30,7 @@ Report issues and optionally apply format fixes.
 ### Step 1: Activate Documentation Standards
 
 ```
-Skill: cui-documentation
+Skill: cui-documentation-standards:cui-documentation
 ```
 
 ### Step 2: Parse Input Parameters
@@ -163,7 +163,7 @@ Track and report:
 - Edit: Format fixes applied
 - Bash: Validator script executions
 - Glob: File discovery
-- Skill: cui-documentation activation
+- Skill: cui-documentation-standards:cui-documentation activation
 
 ## RESPONSE FORMAT
 

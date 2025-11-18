@@ -114,13 +114,13 @@ Acceptance Criteria: {list}
 **When task involves Java development:**
 
 ```
-Skill: cui-java-core
+Skill: cui-java-expert:cui-java-core
 ```
 
 **When task involves writing tests:**
 
 ```
-Skill: cui-java-unit-testing
+Skill: cui-java-expert:cui-java-unit-testing
 ```
 
 **When task involves JavaDoc:**

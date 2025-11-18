@@ -19,7 +19,7 @@ Analyze a given issue (from GitHub URL, issue number, or local directory) and cr
 **Load comprehensive task planning standards:**
 
 ```
-Skill: cui-task-planning
+Skill: cui-task-workflow:cui-task-planning
 ```
 
 This loads issue planning format standards including:
