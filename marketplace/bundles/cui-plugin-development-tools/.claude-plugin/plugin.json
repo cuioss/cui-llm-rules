@@ -26,7 +26,8 @@
   ],
   "skills": [
     "./skills/cui-fix-workflow",
-    "./skills/cui-marketplace-architecture"
+    "./skills/cui-marketplace-architecture",
+    "./skills/cui-marketplace-orchestration-patterns"
   ],
   "agents": [
     "./agents/analyze-cross-skill-duplication.md",
