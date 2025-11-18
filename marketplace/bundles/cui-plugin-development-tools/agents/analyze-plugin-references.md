@@ -17,7 +17,7 @@ Scans agent and command files to find references to other agents, commands, and 
 
 **CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
 1. Better reference detection patterns (SlashCommand, Task subagent_type, Skill invocations, natural language)
-2. More accurate marketplace scanning strategies for finding correct references
+2. More accurate context verification to reduce false positives
 3. Improved auto-fix confidence scoring and validation logic
 4. Enhanced user prompting for ambiguous reference resolution
 5. Any lessons learned about plugin reference analysis workflows
@@ -178,6 +178,88 @@ Found references:
   Actual text: "use the test-runner agent"
 ```
 
+### Step 2a: Verify Context to Eliminate False Positives
+
+**CRITICAL:** Before validating references, verify each match is an actual runtime invocation, not documentation.
+
+**For EACH reference found in Step 2:**
+
+**Actions:**
+1. **Read context around flagged line** (±2 lines before and after):
+   ```
+   Read: {path}, offset={line-2}, limit=5
+   ```
+
+2. **Check for false positive indicators:**
+
+   **❌ FALSE POSITIVE - Documentation/Examples:**
+   - Line in code block (preceded by ``` or heavy indentation)
+   - Example pattern in documentation: `Grep: pattern="SlashCommand:..."`
+   - Comment explaining format: `# Example: /plugin-update-agent`
+   - CONTINUOUS IMPROVEMENT RULE instructions: "The caller can then invoke..."
+   - Architecture rules documentation: "Pattern: subagent_type:"
+   - Template/format specifications: `Line {line}: {reference}`
+   - Lines starting with: `- **Example**:`, `- Pattern:`, `# Search for`, `## Examples`
+
+   **✅ ACTUAL INVOCATION - Runtime Usage:**
+   - In workflow steps: "Step 3: Use SlashCommand to invoke..."
+   - In Task delegation: "Task:" followed by "subagent_type: bundle:agent"
+   - In Skill activation: "Skill: bundle:skill-name" (not in examples section)
+   - In direct execution instructions (not explaining patterns)
+
+3. **Determine classification:**
+   - If FALSE POSITIVE: **Remove from references list**, log as "Filtered: Line {line} - Documentation/Example"
+   - If ACTUAL INVOCATION: **Keep in references list** for validation
+
+4. **Track statistics:**
+   - `references_detected`: Raw Grep matches
+   - `references_filtered`: False positives removed
+   - `references_found`: Actual invocations (after filtering)
+
+**Examples of False Positives to Filter:**
+
+```
+❌ Line 105: Grep: pattern="subagent_type[:\s]+[\"']?([a-z:-]+)[\"']?"
+   Context: Documentation showing Grep pattern syntax
+   Action: FILTER - This is pattern documentation
+
+❌ Line 204: # Example: /plugin-update-agent -> plugin-update-agent
+   Context: Comment explaining reference format
+   Action: FILTER - This is a comment example
+
+❌ Line 363: The caller can then invoke `/plugin-update-agent agent-name=...`
+   Context: CONTINUOUS IMPROVEMENT RULE explaining caller responsibility
+   Action: FILTER - This is instruction documentation
+
+❌ Line 189: - **Correct Pattern**: Commands SHOULD use... `/plugin-update-command`
+   Context: Architecture rules explaining patterns
+   Action: FILTER - This is pattern definition
+
+✅ Line 74: Skill: cui-marketplace-architecture
+   Context: Step 2: Load Analysis Standards
+            Skill: cui-marketplace-architecture
+            This loads all necessary agent analysis standards
+   Action: KEEP - This is actual Skill invocation in workflow
+```
+
+**Output:**
+```
+Verification Results:
+- References detected (raw Grep): {references_detected}
+- References filtered (false positives): {references_filtered}
+- References found (actual invocations): {references_found}
+
+Verified references:
+- Line 74: [Skill] cui-marketplace-architecture ✅
+  Context: "Step 2: Load Analysis Standards"
+- Line 112: [Skill] cui-java-core ✅
+  Context: "Step 5: Validate patterns"
+
+Filtered references (not actual invocations):
+- Line 105: [Task] subagent_type pattern - Documentation/Example
+- Line 204: [SlashCommand] /plugin-update-agent - Comment example
+```
+
 ### Step 3: Validate Each Reference
 
 **For each detected reference:**
@@ -282,7 +364,9 @@ Found references:
 - ❌ **Not Found**: Found 0 matches (resource doesn't exist)
 
 **Track statistics:**
-- `references_found`: Total references detected
+- `references_detected`: Raw Grep matches (before verification)
+- `references_filtered`: False positives removed in Step 2a
+- `references_found`: Actual invocations (after filtering)
 - `references_correct`: References that are already correct
 - `references_fixed`: References auto-fixed
 - `references_critical`: Architectural violations detected
@@ -354,13 +438,20 @@ Auto-fix: {auto-fix}
 
 ## Summary
 
-- Total references found: {references_found}
+- Raw references detected: {references_detected}
+- False positives filtered: {references_filtered}
+- Actual references found: {references_found}
 - Correct references: {references_correct}
 - Auto-fixed references: {references_fixed}
 - Critical architectural violations: {references_critical}
 - Ambiguous/unfixed references: {references_ambiguous}
 
 ## Details
+
+### Filtered False Positives ({references_filtered})
+Documentation/examples excluded from analysis:
+- Line {line}: {pattern} - {reason}
+  Context: {surrounding_text}
 
 ### Correct References ({references_correct})
 - Line {line}: {reference} ✅
@@ -444,6 +535,8 @@ Report: {report_path}
 - Must detect natural language references ("use the X agent")
 - Must extract line numbers for all references
 - Must handle both qualified (bundle:name) and unqualified (name) references
+- **MUST verify context to eliminate false positives** (Step 2a)
+- **MUST distinguish runtime invocations from documentation/examples**
 
 **Validation Logic:**
 - Reference is correct if: exists + path accurate + proper bundle prefix (where required)

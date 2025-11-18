@@ -289,4 +289,4 @@ Full inventory with descriptions in JSON format
 - `/plugin-diagnose-agents` - Uses inventory to discover agents
 - `/plugin-diagnose-commands` - Uses inventory to discover commands
 - `/plugin-diagnose-skills` - Uses inventory to discover skills
-- `/plugin-diagnose-bundle` - Uses inventory to validate bundle structure
+- `/plugin-diagnose-metadata` - Uses inventory to validate bundle metadata

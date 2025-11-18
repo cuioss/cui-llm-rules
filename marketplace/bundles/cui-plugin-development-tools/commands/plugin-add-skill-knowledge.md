@@ -155,7 +155,7 @@ Run `/plugin-diagnose-skills {skill-name}` to verify skill structure, references
 
 ### Step 9: Verify Bundle Quality (If modifications span multiple skills)
 
-**Decision logic:** If duplicates were removed from skills outside the target skill, run `/plugin-diagnose-bundle {bundle-name}` for each affected bundle.
+**Decision logic:** If duplicates were removed from skills outside the target skill, run `/plugin-diagnose-skills` for each affected bundle.
 
 **Error handling:** If diagnosis fails, log error and display diagnostic output for review.
 
@@ -214,7 +214,7 @@ Run `/plugin-diagnose-skills {skill-name}` to verify skill structure, references
 - **Read**: Read source knowledge and existing standards files
 - **Write**: Create new knowledge document
 - **Edit**: Update SKILL.md and remove duplicates
-- **SlashCommand**: Run `/plugin-diagnose-skills` and `/plugin-diagnose-bundle`
+- **SlashCommand**: Run `/plugin-diagnose-skills` and `/plugin-diagnose-metadata`
 
 ## STATISTICS TRACKING
 

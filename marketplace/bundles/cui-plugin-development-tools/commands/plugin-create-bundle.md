@@ -97,14 +97,14 @@ Show:
   - Test bundle
   - Run bundle diagnosis
 
-### Step 7: Run Bundle Diagnosis
+### Step 7: Run Metadata Validation
 
 Execute:
 ```
-SlashCommand: /cui-plugin-development-tools:plugin-diagnose-bundle bundle-name={bundle-name}
+SlashCommand: /cui-plugin-development-tools:plugin-diagnose-metadata
 ```
 
-Review results and offer to fix any issues found.
+Review results and offer to fix any metadata issues found.
 
 ## CRITICAL RULES
 
@@ -152,7 +152,7 @@ This command:
 - Creates minimal bundle structure
 - Delegates component creation to specialized commands
 - Generates concise documentation (no embedded templates)
-- Validates structure via /plugin-diagnose-bundle
+- Validates metadata via /plugin-diagnose-metadata
 - Trusts AI to format content appropriately
 
 ## CONTINUOUS IMPROVEMENT RULE
@@ -179,7 +179,7 @@ Follows:
 - `/plugin-create-skill` - Create skills within bundle
 - `/plugin-create-command` - Create commands within bundle
 - `/plugin-create-agent` - Create agents within bundle
-- `/plugin-diagnose-bundle` - Validate bundle structure
+- `/plugin-diagnose-metadata` - Validate bundle metadata
 - `cui-marketplace-architecture` skill - Architecture rules
 
 ## IMPORTANT NOTES

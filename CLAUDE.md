@@ -46,6 +46,8 @@ When performing comprehensive documentation review/rework:
 ### Content Requirements
 - **No Duplication**: Eliminate duplicate information across documents; use cross-references instead
 - **Current State Only**: Document present requirements only - remove transitional, status, or deprecation information
+- **No Version History**: NEVER add version history, changelogs, "RECENT IMPROVEMENTS", "RECENT CHANGES", or dated update sections to any documentation
+- **No Timestamps**: NEVER add dates, version numbers, or timestamps to document content
 - **Source Attribution**: Always link to authoritative sources when referencing best practices or external standards
 - **Standards Linking**: Cross-reference related standards documents using `xref:` syntax
 

@@ -541,7 +541,7 @@ Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
 - `/plugin-update-agent` - Apply fixes to agents
 - `/plugin-diagnose-commands` - Diagnose commands
 - `/plugin-diagnose-skills` - Diagnose skills
-- `/plugin-diagnose-bundle` - Diagnose entire bundle
+- `/plugin-diagnose-metadata` - Validate bundle metadata (plugin.json, marketplace.json)
 
 ## STANDARDS
 

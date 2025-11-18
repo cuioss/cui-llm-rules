@@ -501,7 +501,7 @@ This command is a bundle-by-bundle orchestrator designed to prevent token overlo
 
 - `/plugin-diagnose-agents` - Diagnose agents
 - `/plugin-diagnose-commands` - Diagnose commands
-- `/plugin-diagnose-bundle` - Diagnose entire bundle
+- `/plugin-diagnose-metadata` - Validate bundle metadata (plugin.json, marketplace.json)
 
 ## UNDERSTANDING DIAGNOSTIC RESULTS
 
