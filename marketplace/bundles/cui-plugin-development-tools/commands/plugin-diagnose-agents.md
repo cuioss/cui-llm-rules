@@ -253,7 +253,43 @@ Grep patterns to detect:
 
 Use Grep with these patterns across agents in current bundle.
 
-**B. Categorize findings:**
+**B. Verify Flagged Violations (MANDATORY):**
+
+**CRITICAL**: Before reporting violations, re-verify each flagged file to eliminate false positives.
+
+**For each file flagged by Grep in Step A:**
+
+1. **Read exact flagged lines with context**:
+   ```
+   Read: {agent_file_path}
+   ```
+   Focus on lines matching patterns from Step A, include ±2 lines context.
+
+2. **Distinguish runtime invocations from documentation**:
+
+   **✅ ACTUAL VIOLATIONS (runtime invocations)**:
+   - Direct tool usage: `SlashCommand: /plugin-update-agent`
+   - Agent configuration: `subagent_type: cui-utilities:research`
+   - Task launches: `Task:` followed by subagent_type
+   - In workflow steps describing actual execution
+
+   **❌ FALSE POSITIVES (documentation text - DO NOT REPORT)**:
+   - Pattern examples: "Pattern: subagent_type:" or "e.g., 'Task:'"
+   - CONTINUOUS IMPROVEMENT RULE instructions: "The caller can then invoke `/plugin-update-agent`"
+   - Documentation explaining how callers use commands: "Caller invokes /command-name"
+   - Tool search patterns: "Search for tool mentions (e.g., 'Task:')"
+   - Architecture descriptions: "When you need to use Task tool"
+
+3. **Only report verified violations**:
+   - Discard flagged lines that are documentation/examples
+   - Keep only actual runtime invocations
+   - Track: `violations_flagged_by_grep`, `violations_verified`, `false_positives_filtered`
+
+**Error Handling:**
+- If Read fails: Log warning, mark as "Verification Failed", exclude from violation count
+- If context unclear: Include in manual review list rather than auto-reporting as violation
+
+**C. Categorize findings:**
 
 **CRITICAL Violation - Agent Self-Invocation (Pattern 22):**
 - Pattern: Agent instructed to invoke SlashCommand directly

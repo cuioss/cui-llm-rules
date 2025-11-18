@@ -209,6 +209,42 @@ Task:
 Track for each skill: references_found, references_correct, references_fixed, references_ambiguous.
 Bundle totals: skills_checked, total_references, correct, fixed, issues.
 
+**Step 4b.1: Verify Reference Violations (MANDATORY)**
+
+**CRITICAL**: Before accepting reference violations, re-verify flagged issues to eliminate false positives.
+
+**For each skill flagged with reference violations in Step 4b:**
+
+1. **Read exact flagged lines with context**:
+   ```
+   Read: {skill_SKILL.md_file_path}
+   ```
+   Focus on lines flagged by analyze-plugin-references, include ±2 lines context.
+
+2. **Distinguish runtime invocations from documentation**:
+
+   **✅ ACTUAL VIOLATIONS (runtime invocations)**:
+   - Direct tool usage: `SlashCommand: /plugin-update-command`
+   - Agent configuration: `subagent_type: cui-utilities:research`
+   - Task launches: `Task:` followed by subagent_type
+   - In workflow steps describing actual execution
+
+   **❌ FALSE POSITIVES (documentation text - DO NOT REPORT)**:
+   - Pattern examples: "Pattern: subagent_type:" or "e.g., 'Task:'"
+   - CONTINUOUS IMPROVEMENT RULE instructions: "The caller can then invoke `/plugin-update-agent`"
+   - Documentation explaining how callers use commands: "Caller invokes /command-name"
+   - Tool search patterns: "Search for tool mentions (e.g., 'Task:')"
+   - Architecture descriptions: "When you need to use Task tool"
+
+3. **Only report verified violations**:
+   - Discard flagged lines that are documentation/examples
+   - Keep only actual runtime invocations
+   - Track: `violations_flagged`, `violations_verified`, `false_positives_filtered`
+
+**Error Handling:**
+- If Read fails: Log warning, mark as "Verification Failed", exclude from violation count
+- If context unclear: Include in manual review list rather than auto-reporting as violation
+
 **Step 4c: Aggregate Results for Bundle**
 
 **Combine findings for this bundle's skills:**
