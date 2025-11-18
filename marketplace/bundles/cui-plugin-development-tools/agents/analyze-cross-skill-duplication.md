@@ -185,7 +185,7 @@ For each skill pair with duplication:
 
 ### Step 7: Generate Cross-Skill Duplication Report
 
-**Output format**:
+## RESPONSE FORMAT
 
 ```json
 {

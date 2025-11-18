@@ -52,6 +52,24 @@ These provide:
 
 **Token Optimization**: When called from plugin-diagnose-commands orchestrator, standards are pre-loaded to avoid reading them 46+ times.
 
+### Step 1.5: Validate Input Parameter
+
+**Validate command_path parameter:**
+1. Check that `command_path` is provided (not empty)
+2. Validate path format:
+   - Must be absolute path
+   - Must end with `.md` extension
+3. Verify file exists (will be confirmed when Read is attempted in Step 2)
+
+**Expected formats:**
+- Command files: `/path/to/commands/{name}.md`
+- Agent files: `/path/to/agents/{name}.md`
+
+**Error handling:**
+- If command_path is empty: Report error "command_path parameter required"
+- If path doesn't end with .md: Report warning "Expected .md file, got {extension}"
+- If Read fails in Step 2: Report error "File not found: {command_path}"
+
 ### Step 2: Read and Parse Command
 
 **Read the command file:**
@@ -162,8 +180,8 @@ anti_bloat_score = (rules_followed / 8) * 100
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
 
 **CRITICAL: Detect file type first (commands vs agents):**
-- If `command_path` contains `/commands/` → This is a COMMAND (can self-update)
-- If `command_path` contains `/agents/` → This is an AGENT (cannot self-invoke)
+- **When `command_path` contains `/commands/`** (path matches pattern `*/commands/*.md`) → This is a COMMAND (can self-update)
+- **When `command_path` contains `/agents/`** (path matches pattern `*/agents/*.md`) → This is an AGENT (cannot self-invoke)
 
 **For COMMANDS (files in .../commands/):**
 - **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-command command-name={command-name} update="[your improvement]"` with:

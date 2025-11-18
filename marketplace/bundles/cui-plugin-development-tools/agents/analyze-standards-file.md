@@ -50,14 +50,16 @@ Scan for content that provides ZERO value:
 - If link points outside skill OR file doesn't exist → **Zero-information content**
 
 **Pattern 2: Empty Sections**
-- Sections with only headers and no content
+- Sections with only headers and no content (<10 words excluding header)
 - Placeholder text like "TBD", "TODO", "Coming soon"
 - **Impact**: Confuses readers, adds noise
+- **Threshold**: Sections with <10 substantive words = empty
 
 **Pattern 3: Redundant Boilerplate**
-- Generic introductions saying nothing specific
+- Generic introductions saying nothing specific (<20 words of substance)
 - "This document describes..." with no actual description
 - **Impact**: Wastes reader time
+- **Threshold**: Introductions <20 substantive words = redundant boilerplate
 
 **Pattern 4: Dead Links/References**
 - URLs returning 404 or pointing to removed resources
@@ -76,9 +78,10 @@ Scan for content that provides ZERO value:
 Scan for repeated information within THIS file:
 
 **Pattern 1: Repeated Explanations**
-- Same concept explained multiple times
+- Same concept explained multiple times (>30% word overlap)
 - Copy-pasted examples
 - **Solution**: Keep best version, remove duplicates
+- **Threshold**: Sections with >30% matching words = substantial duplication
 
 **Pattern 2: Redundant Code Examples**
 - Multiple examples showing identical pattern
@@ -103,9 +106,10 @@ Scan for vague guidance:
 - **Solution**: Replace with specific requirements or remove
 
 **Pattern 2: Vague Requirements**
-- "Keep functions small" (how small?)
-- "Use meaningful names" (what makes a name meaningful?)
+- "Keep functions small" (how small?) → Flag if no numeric threshold provided
+- "Use meaningful names" (what makes a name meaningful?) → Flag if no criteria/examples provided
 - **Solution**: Add specific thresholds/examples
+- **Threshold**: Requirements without measurable criteria or concrete examples = vague
 
 **Pattern 3: Conflicting Advice**
 - "Prefer X" followed by "Y is also good"
@@ -159,8 +163,10 @@ Grep: pattern="^```java$", path={file_path}, output_mode=count
 - Related content grouped together
 
 **Check 3: Length**
-- File > 500 lines indicates potential bloat - split if it contains 3+ unrelated topic domains (e.g., combining testing + logging + security standards in one file)
-- File < 50 lines may indicate content too sparse to warrant separate file - consider consolidating with related standard unless it represents complete, focused domain
+- File >500 lines indicates potential bloat - split if it contains 3+ unrelated topic domains (e.g., combining testing + logging + security standards in one file)
+- File <50 lines may indicate content too sparse to warrant separate file - consider consolidating with related standard unless it represents complete, focused domain
+- Sections >500 words without subsections = excessive, needs breakdown
+- **Thresholds**: >500 lines = bloat risk, <50 lines = too sparse, sections >500 words = needs subsections
 
 ### Step 7: Generate Issue Report
 
