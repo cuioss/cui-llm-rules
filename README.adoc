@@ -7,37 +7,30 @@ Claude Code marketplace bundles providing comprehensive development standards an
 
 == Installation
 
-=== Install All Bundles
-
-Install the complete marketplace (recommended):
-
-[source,bash]
-----
-git clone https://github.com/cuioss/cui-llm-rules.git
-----
-
-For Claude Code, add to your global or project settings:
+Add the CUI marketplace to Claude Code settings (global or project):
 
 [source,json]
 ----
 {
   "marketplaces": [
     {
-      "path": "/path/to/cui-llm-rules/marketplace"
+      "url": "https://github.com/cuioss/cui-llm-rules/marketplace"
     }
   ]
 }
 ----
 
-=== Install Individual Bundles
-
-Install specific bundles via Claude Code (requires marketplace setup):
+Then use Claude Code's built-in plugin tooling to install bundles:
 
 [source,bash]
 ----
+# Install specific bundles
 /plugin install cui-java-expert
 /plugin install cui-frontend-expert
 /plugin install cui-maven
+
+# Or install all bundles at once
+/plugin install cui-java-expert cui-frontend-expert cui-maven cui-task-workflow cui-documentation-standards cui-utilities cui-plugin-development-tools cui-requirements
 ----
 
 == What This Provides
@@ -285,7 +278,6 @@ List all marketplace components:
 
 === Guidelines
 
-. Follow CUI coding standards
 . Use professional, technical tone
 . Provide working, tested examples
 . Maintain high quality scores (≥75/100)
@@ -315,15 +307,3 @@ See xref:marketplace/bundles/cui-plugin-development-tools/README.md[Plugin Devel
 . Check command descriptions and examples
 . Use `/plugin-inventory` to discover components
 . Report issues at https://github.com/cuioss/cui-llm-rules/issues
-
-== License
-
-MIT License - See link:LICENSE[LICENSE] file for details.
-
-== Version
-
-* **Repository Version**: 1.0.0
-* **Total Bundles**: 8
-* **Total Components**: 80 (28 skills + 27 agents + 45 commands)
-* **Status**: Production Ready ✅
-* **Last Updated**: 2025-11-18
