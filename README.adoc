@@ -9,29 +9,14 @@ Claude Code marketplace bundles providing comprehensive development standards an
 
 Add the CUI marketplace to Claude Code settings (global or project):
 
-[source,json]
-----
-{
-  "marketplaces": [
-    {
-      "url": "https://github.com/cuioss/cui-llm-rules/marketplace"
-    }
-  ]
-}
-----
-
-Then use Claude Code's built-in plugin tooling to install bundles:
-
 [source,bash]
 ----
-# Install specific bundles
-/plugin install cui-java-expert
-/plugin install cui-frontend-expert
-/plugin install cui-maven
-
-# Or install all bundles at once
-/plugin install cui-java-expert cui-frontend-expert cui-maven cui-task-workflow cui-documentation-standards cui-utilities cui-plugin-development-tools cui-requirements
+/plugin
+->   3. Add marketplace
+->   "https://github.com/cuioss/cui-llm-rules/marketplace"
 ----
+
+Then use Claude Code's built-in plugin tooling to install bundles.
 
 == What This Provides
 
