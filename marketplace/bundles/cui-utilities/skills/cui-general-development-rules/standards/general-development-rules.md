@@ -286,6 +286,131 @@ Agent: "I need collection utilities for {feature}. I recommend adding Google Gua
 Should I add Guava as a dependency?"
 ```
 
+### Principle 7: Execute SlashCommand Workflows
+
+**Rule:** When a SlashCommand expands, you MUST execute its workflow steps using actual tools.
+
+**How SlashCommand Works:**
+
+SlashCommand is fundamentally different from Task and Skill tools:
+
+| Tool | Behavior | Your Role |
+|------|----------|-----------|
+| **Task** | Launches autonomous agent | Wait for agent's results |
+| **Skill** | Loads standards/context | Reference loaded standards |
+| **SlashCommand** | Expands workflow instructions | **EXECUTE the workflow steps** |
+
+**When you call:**
+```
+SlashCommand: /plugin-update-command command-name=foo update="fix bar"
+```
+
+**What happens:**
+1. ✅ System shows: `<command-message>plugin-update-command is running…</command-message>`
+2. ✅ Workflow expands with Step 1, Step 2, Step 3, etc.
+3. ❌ **CRITICAL:** You must NOW EXECUTE these steps - don't just read and stop!
+
+**How to Execute:**
+
+**Step 1: Read the First Step**
+```
+### Step 1: Validate Parameters
+Check that command-name is provided...
+```
+
+**Step 2: Execute It Using Actual Tools**
+```
+Glob: pattern="foo.md", path="marketplace/bundles/*/commands"
+# Check result
+# Set variables
+# Continue to next step
+```
+
+**Step 3: Complete All Steps Sequentially**
+- Execute Step 1 fully
+- Then execute Step 2
+- Continue through all steps
+- Display final results
+
+**Common Mistakes:**
+
+**❌ WRONG (Reading without executing):**
+```
+Agent sees: SlashCommand expands with 10 workflow steps
+Agent thinks: "Okay, I see the workflow"
+Agent does: Nothing - just stops
+RESULT: Command doesn't execute, user sees no changes
+```
+
+**✅ CORRECT (Executing the workflow):**
+```
+Agent sees: SlashCommand expands with 10 workflow steps
+Agent does Step 1: Glob to find command file
+Agent does Step 2: Skill to load standards
+Agent does Step 3: Read the command file
+... executes all 10 steps ...
+Agent displays: Final results
+RESULT: Command fully executed, changes applied
+```
+
+**Sequential Execution Required:**
+
+**❌ NEVER run SlashCommands in parallel:**
+```
+SlashCommand: /command-1
+SlashCommand: /command-2
+SlashCommand: /command-3
+# All three expand, but you can't execute 3 workflows simultaneously
+```
+
+**✅ ALWAYS run SlashCommands sequentially:**
+```
+SlashCommand: /command-1
+... execute all steps of command-1 ...
+... wait for completion ...
+
+SlashCommand: /command-2
+... execute all steps of command-2 ...
+... wait for completion ...
+```
+
+**Examples:**
+
+**Executing /plugin-update-command:**
+
+1. SlashCommand expands → See Step 1: "Validate Parameters"
+2. Execute Step 1:
+   ```
+   Glob: pattern="plugin-diagnose-commands.md", path="marketplace/bundles/*/commands"
+   # Result: /Users/.../commands/plugin-diagnose-commands.md
+   ```
+3. Execute Step 2: "Load Standards"
+   ```
+   Skill: cui-diagnostic-patterns
+   Skill: cui-marketplace-architecture
+   ```
+4. Execute Step 3: "Read Current Command"
+   ```
+   Read: file_path="/Users/.../plugin-diagnose-commands.md"
+   ```
+5. ... continue through all steps ...
+6. Execute Step 10: Display final report
+
+**Verification:**
+
+After executing a SlashCommand workflow, you should have:
+- ✅ Concrete results from each step (file paths, data, confirmations)
+- ✅ Tool calls made for file operations (Read, Edit, Glob, etc.)
+- ✅ Final output displayed to user
+- ✅ Changes applied (if applicable)
+
+**If you only have:**
+- ❌ Knowledge of what the workflow does
+- ❌ No actual tool calls made
+- ❌ No concrete results
+
+**Then you FAILED to execute - you only READ the workflow!**
+
 ## Workflow Integration
 
 ### When Starting Any Development Work
