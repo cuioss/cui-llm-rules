@@ -9,7 +9,7 @@ Creates or updates project-specific agents.md following OpenAI specification.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** with:
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=tools-sync-agents-file update="[your improvement]"` with:
 1. Improved agents.md structure patterns or validation techniques
 2. Better methods for extracting project requirements
 3. More effective ways to analyze OpenAI agents.md format
@@ -101,8 +101,7 @@ Before proceeding with the main workflow, verify:
    - Use Read tool on `./doc/ai-rules.md`
    - If exists:
      - Store content as PRIMARY content source
-     - Flag for deletion at end of process
-     - Skip to Step 4.3
+     - Skip to Step 4.3 (Note: file removed in Step 7)
 
 4.2. If no project doc/ai-rules.md, check global standards
    - Check if creating new agents.md (from Step 2)
@@ -149,11 +148,6 @@ Before proceeding with the main workflow, verify:
 6.1. Review for quality
    - Read the generated agents.md using Read tool
    - Check against OpenAI structure requirements (Step 1)
-   - Verify content is:
-     - Concise (no unnecessary verbosity)
-     - Correct (factually accurate for this project)
-     - Unambiguous (clear instructions/guidelines)
-     - Duplication-free (no repeated information)
 
 6.2. Structural validation
    - Verify all required sections from OpenAI spec present
@@ -224,13 +218,11 @@ Before proceeding with the main workflow, verify:
 
 - **ALLOWED modifications**:
   - `agents.md` (create or update)
-  - `doc/ai-rules.md` (MANDATORY deletion if exists - always remove to complete migration)
-  - `CLAUDE.md` (update references from `doc/ai-rules.md` to `agents.md`)
-  - Other project documentation files (update references from `doc/ai-rules.md` to `agents.md`)
+  - `doc/ai-rules.md` (removed if exists - see Step 7)
+  - `CLAUDE.md` (update references to `agents.md`)
+  - Other project documentation files (update references to `agents.md`)
 - **NEVER modify** `~/git/cui-llm-rules/standards/ai-rules.md` (read-only baseline)
 - **NEVER create** additional documentation files beyond agents.md
-- **ONLY modify** files to update/remove references to `doc/ai-rules.md`
-- **CRITICAL**: `doc/ai-rules.md` MUST be removed if it exists (not optional)
 
 ### Content Quality Standards
 
@@ -253,7 +245,6 @@ Before proceeding with the main workflow, verify:
 - **IF** user selects CLAUDE.md: Use as PRIMARY source
 - **IF** no project sources: Use global standards as BASELINE only
 - **ALWAYS** combine with project analysis results
-- **CRITICAL**: doc/ai-rules.md MUST be deleted if it exists (regardless of whether used as source)
 
 ### Pre/Post Condition Enforcement
 

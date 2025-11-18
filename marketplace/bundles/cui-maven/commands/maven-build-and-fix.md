@@ -75,18 +75,7 @@ Task:
 }
 ```
 
-**Error handling:**
-```
-If maven-builder fails to execute:
-  ❌ Error: Maven build execution failed
-  Error: {error_message}
-
-  Options:
-  - [R]etry build
-  - [A]bort command
-
-  Do NOT proceed with fix attempts.
-```
+**Error handling:** If maven-builder fails, display error and prompt: "[R]etry/[A]bort". Do NOT proceed with fix attempts.
 
 ### Step 3: Analyze Build Results
 
@@ -134,19 +123,7 @@ Parameters to pass:
 - Changes made
 - Fix status (success/partial/failure)
 
-**Error handling:**
-```
-If /java-orchestrate-task fails:
-  ⚠️  Fix attempt failed: {issue_category}
-  Error: {error_message}
-
-  Options:
-  - [R]etry fix
-  - [S]kip this category
-  - [A]bort command
-
-  Track failure for final report.
-```
+**Error handling:** If /java-orchestrate-task fails, display error and prompt: "[R]etry/[S]kip/[A]bort". Track failure for final report.
 
 ### Step 5: Verify Fixes (Re-build)
 
@@ -183,28 +160,13 @@ If iteration_count >= max_iterations:
 
 ### Step 6: Report Success (Clean Build)
 
-**Display success report:**
-```
-╔════════════════════════════════════════════════════════════╗
-║          Build and Fix - SUCCESS                           ║
-╚════════════════════════════════════════════════════════════╝
-
-✅ Build Status: CLEAN
-
-Build Details:
+**Display report** (status: SUCCESS, build: CLEAN):
 - Maven goals: {goals}
-- Output file: {output_file}
 - Build duration: {duration}
-
-Issues Resolved:
-- Compilation errors: {count_fixed}
-- Test failures: {count_fixed}
-- JavaDoc warnings: {count_fixed}
-- Total issues fixed: {total_fixed}
-
-Iterations: {iteration_count}
-Files modified: {files_modified_count}
-```
+- Issues fixed: {total_fixed} (compilation: {count}, test: {count}, javadoc: {count})
+- Iterations: {iteration_count}
+- Files modified: {files_modified_count}
+- Output: {output_file}
 
 **If push parameter is true:**
 - Proceed to Step 8 (Commit Changes)
@@ -214,37 +176,16 @@ Files modified: {files_modified_count}
 
 ### Step 7: Report Partial Success (Issues Remaining)
 
-**Display partial success report:**
-```
-╔════════════════════════════════════════════════════════════╗
-║          Build and Fix - PARTIAL SUCCESS                   ║
-╚════════════════════════════════════════════════════════════╝
-
-⚠️  Build Status: ISSUES REMAIN
-
-Build Details:
+**Display report** (status: PARTIAL, issues remain):
 - Maven goals: {goals}
-- Output file: {output_file}
 - Build duration: {duration}
-- Max iterations reached: {max_iterations}
-
-Progress:
-- Issues resolved: {issues_resolved}
-- Issues remaining: {issues_remaining}
-- Iterations completed: {iteration_count}
-
-Remaining Issues by Type:
-- Compilation errors: {count}
-- Test failures: {count}
-- JavaDoc warnings: {count}
-
-Files modified: {files_modified_count}
-
-Next Steps:
-- Review remaining issues in: {output_file}
-- Run /java-orchestrate-task manually for specific fixes
-- Run /maven-build-and-fix again to retry
-```
+- Max iterations: {max_iterations}
+- Issues resolved/remaining: {issues_resolved}/{issues_remaining}
+- Remaining by type: compilation ({count}), test ({count}), javadoc ({count})
+- Iterations: {iteration_count}
+- Files modified: {files_modified_count}
+- Output: {output_file}
+- Next: Review {output_file}, run /java-orchestrate-task, or retry /maven-build-and-fix
 
 **Do NOT commit if issues remain** (even if push=true)
 
@@ -276,15 +217,7 @@ Task:
     Push to remote repository.
 ```
 
-**Error handling:**
-```
-If commit-changes fails:
-  ❌ Error: Commit failed
-  Error: {error_message}
-
-  Note: Changes remain uncommitted in working directory.
-  You can commit manually or run /maven-build-and-fix push again.
-```
+**Error handling:** If commit-changes fails, changes remain uncommitted. User can commit manually or retry with push flag.
 
 ## STATISTICS TRACKING
 
@@ -375,22 +308,6 @@ Display all statistics in final report.
 - ✅ This command orchestrates the overall workflow
 
 **Reference**: See architecture-rules.md Rule 6 (Agent Delegation Constraints)
-
-## MIGRATION NOTES
-
-**Renamed from /cui-build-and-verify:**
-- Old name implied passive verification
-- New name reflects active fix-and-iterate workflow
-- Better describes what command actually does
-
-**Removed maven-project-builder agent:**
-- Old workflow: command → maven-project-builder → maven-builder (FAILED - agents can't delegate)
-- New workflow: command → maven-builder + fix commands (SUCCESS - commands can orchestrate)
-- Orchestration moved from agent to this command
-
-**Related Migration:**
-- commit 6e3e026: Removed maven-project-builder agent
-- This commit: Implements new orchestration pattern
 
 ## RELATED
 

@@ -204,6 +204,8 @@ Before creating agent:
 | "If file is too large..." | "If file size > 10MB..." |
 | `Read: ~/git/cui-llm-rules/standards/java.adoc` | `Skill: cui-java-core` |
 | tools: Read, Edit<br>(workflow uses Skill) | tools: Read, Edit, Skill |
+| Prompt: "Retry/Abort" | Prompt: "[R]etry/[A]bort" (brackets indicate keyboard shortcuts) |
+| Options: "Fix/Suppress/Skip" | Options: "[F]ix/[S]uppress/[S]kip" (brackets indicate hotkeys) |
 
 ## Reference Template
 

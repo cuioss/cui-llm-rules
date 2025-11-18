@@ -111,17 +111,19 @@ Glob: pattern="*.md", path=".claude/agents"
 
 ### Step 2a: Load Analysis Standards (Once)
 
-**CRITICAL**: Load standards files once to avoid redundant reads in each agent.
+list java**CRITICAL**: Activate marketplace architecture skill to load agent analysis standards.
 
-**Load agent analysis standards:**
+**Activate skill:**
 ```
-Read: marketplace/bundles/cui-plugin-development-tools/standards/agent-quality-standards.md
-Read: marketplace/bundles/cui-plugin-development-tools/standards/agent-analysis-patterns.md
+Skill: cui-plugin-development-tools:cui-marketplace-architecture
 ```
 
-**Store standards content** in context to pass to agents in Step 3.
+This loads all necessary agent analysis standards including:
+- agent-quality-standards.md - Quality criteria and best practices
+- agent-analysis-patterns.md - Common issues and detection patterns
+- architecture-rules.md - Architectural compliance requirements
 
-**Token Optimization**: These standards are loaded once here instead of 28+ times (once per agent in each diagnose-agent invocation).
+**Token Optimization**: Skill activation provides standards automatically without explicit file reads, avoiding 28+ redundant Read operations.
 
 ### Step 3: Analyze Agents (Batched)
 

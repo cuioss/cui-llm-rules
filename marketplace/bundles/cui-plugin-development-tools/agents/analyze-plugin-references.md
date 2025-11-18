@@ -88,11 +88,57 @@ Skill: skill-name
 ```
 
 **Actions:**
-1. Use Grep to search for SlashCommand patterns: `SlashCommand:\s*/[^\s]+`
-2. Use Grep to search for Task patterns: `subagent_type[:\s]+[\"']?([a-z:-]+)[\"']?`
-3. Use Grep to search for Skill patterns: `Skill:\s*[^\s]+`
-4. Use Read with manual parsing to detect natural language references
-5. Compile list of all detected references with line numbers
+
+**CRITICAL: Each detected reference MUST be validated against actual file content to prevent hallucination.**
+
+1. **Use Grep to search for SlashCommand patterns:**
+   ```
+   Grep: pattern="SlashCommand:\s*/[^\s]+", output_mode="content", -n=true
+   ```
+   - Extract line number and matched text
+   - **TAG as type: "SlashCommand"**
+   - For each match: Read the specific line to verify exact text
+   - Parse reference from verified line text (e.g., `/plugin-update-agent`)
+
+2. **Use Grep to search for Task patterns:**
+   ```
+   Grep: pattern="subagent_type[:\s]+[\"']?([a-z:-]+)[\"']?", output_mode="content", -n=true
+   ```
+   - Extract line number and matched text
+   - **TAG as type: "Task"**
+   - For each match: Read the specific line to verify exact text
+   - Parse reference from verified line text (e.g., `diagnose-skill` or `bundle:agent-name`)
+
+3. **Use Grep to search for Skill patterns:**
+   ```
+   Grep: pattern="Skill:\s*[^\s]+", output_mode="content", -n=true
+   ```
+   - Extract line number and matched text
+   - **TAG as type: "Skill"**
+   - For each match: Read the specific line to verify exact text
+   - Parse reference from verified line text (e.g., `cui-java-expert:cui-java-core`)
+
+4. **Use Read with manual parsing to detect natural language references**
+   - TAG as type: "Natural"
+
+5. **Validation and Error Handling:**
+   - For each Grep match:
+     - Read the specific line using line number
+     - Verify the pattern match actually appears in that line
+     - If mismatch detected: Log error and skip reference
+     - If format unexpected: Log error with actual vs expected format
+   - Only include verified references in final list
+
+6. **Compile list with explicit type tags and actual line text:**
+   ```
+   Found references:
+   - Line 74: [Skill] Skill: cui-requirements:requirements-maintenance
+     Actual text: "Skill: cui-requirements:requirements-maintenance"
+   - Line 105: [SlashCommand] /java-implement-code
+     Actual text: "SlashCommand: /java-implement-code"
+   - Line 142: [Task] subagent_type: "cui-plugin-development-tools:diagnose-skill"
+     Actual text: 'subagent_type: "cui-plugin-development-tools:diagnose-skill"'
+   ```
 
 **CRITICAL - Bundle Prefix Enforcement Rules (Architecture Rule 6):**
 
@@ -122,27 +168,37 @@ Skill: skill-name
 **Output:**
 ```
 Found references:
-- Line 45: SlashCommand: /cui-java-expert:cui-java-implement-code
-- Line 89: Task subagent_type: "code-reviewer"
-- Line 112: Skill: cui-marketplace-architecture
-- Line 203: "use the test-runner agent"
+- Line 45: [SlashCommand] /cui-java-expert:cui-java-implement-code
+  Actual text: "SlashCommand: /cui-java-expert:cui-java-implement-code"
+- Line 89: [Task] code-reviewer
+  Actual text: 'subagent_type: "code-reviewer"'
+- Line 112: [Skill] cui-marketplace-architecture
+  Actual text: "Skill: cui-marketplace-architecture"
+- Line 203: [Natural] "use the test-runner agent"
+  Actual text: "use the test-runner agent"
 ```
 
 ### Step 3: Validate Each Reference
 
 **For each detected reference:**
 
-**A. Parse reference components:**
-- Type: command, agent, or skill
-- Bundle: if specified (e.g., `bundle:name`)
-- Name: resource name
+**A. Parse reference components using type tag:**
+- **Type tag**: [SlashCommand], [Task], [Skill], or [Natural] (from Step 2)
+- **Reference text**: Actual verified text from file
+- **Bundle**: if specified (e.g., `bundle:name`)
+- **Name**: resource name
+
+**CRITICAL: Use type tag to determine validation logic - prevents confusing Skill with SlashCommand.**
 
 **B. Search marketplace inventory for matching resource:**
 
 **Use pre-loaded marketplace_inventory JSON to find matches.**
 
-**Commands:**
+**Commands (ONLY for type tag [SlashCommand]):**
 ```
+# CRITICAL: Only process if type tag is [SlashCommand]
+# Do NOT process [Skill] or [Task] references here
+
 # Search inventory.bundles[].commands[] for matching name
 # Parse reference to extract name without bundle prefix
 # Example: /cui-plugin-development-tools:plugin-update-agent -> plugin-update-agent
@@ -157,8 +213,11 @@ Found references:
 #   - Auto-fix removes prefix: /cui-plugin-development-tools:plugin-update-agent -> /plugin-update-agent
 ```
 
-**Agents:**
+**Agents (ONLY for type tag [Task]):**
 ```
+# CRITICAL: Only process if type tag is [Task]
+# Do NOT process [Skill] or [SlashCommand] references here
+
 # Search inventory.bundles[].agents[] for matching name
 # If bundle specified in reference: filter to that bundle's agents
 # If unspecified: search all bundles' agents
@@ -168,40 +227,40 @@ Found references:
 # CRITICAL VALIDATION BASED ON FILE TYPE:
 
 # If analyzing an AGENT file (/agents/ in path):
-#   - If type is "Task subagent_type": Mark as ❌ CRITICAL (agents cannot invoke agents)
-#   - If type is "SlashCommand": Mark as ❌ CRITICAL (agents cannot invoke commands)
+#   - Mark as ❌ CRITICAL (agents cannot invoke agents via Task tool)
 #   - NO auto-fix - architectural violation requiring manual refactoring
 
 # If analyzing a COMMAND file (/commands/ in path):
-#   - If type is "Task subagent_type" AND bundle NOT specified:
+#   - If bundle NOT specified:
 #     - Mark as ⚠️ FIXABLE (missing bundle prefix)
 #     - Find matching agent in inventory
 #     - Construct correct reference: {agent.bundle}:{agent.name}
 #     - Example fix: "diagnose-skill" → "cui-plugin-development-tools:diagnose-skill"
 
 # If analyzing a SKILL file (/skills/ in path):
-#   - If type is "Task subagent_type": Mark as ❌ CRITICAL (skills cannot invoke agents)
+#   - Mark as ❌ CRITICAL (skills cannot invoke agents via Task tool)
+#   - NO auto-fix - architectural violation requiring manual refactoring
 ```
 
-**Skills:**
+**Skills (ONLY for type tag [Skill]):**
 ```
+# CRITICAL: Only process if type tag is [Skill]
+# Do NOT process [Task] or [SlashCommand] references here
+
 # Search inventory.bundles[].skills[] for matching name
 # If bundle specified in reference: filter to that bundle's skills
 # If unspecified: search all bundles' skills
 # Match on: skill.name === {name}
 # Return: skill.path (directory path)
 
-# CRITICAL VALIDATION BASED ON FILE TYPE:
+# VALIDATION:
 
 # For ALL file types (agents, commands, skills):
-#   - If type is "Skill" AND bundle NOT specified:
+#   - If bundle NOT specified:
 #     - Mark as ⚠️ FIXABLE (missing bundle prefix)
 #     - Find matching skill in inventory
 #     - Construct correct reference: {skill.bundle}:{skill.name}
 #     - Example fix: "cui-java-core" → "cui-java-expert:cui-java-core"
-
-# If analyzing a SKILL file (/skills/ in path):
-#   - If type is "SlashCommand": Mark as ❌ CRITICAL (skills cannot invoke commands)
 ```
 
 **Performance Note:** Using pre-loaded inventory eliminates 3 Glob operations per reference validation (commands, agents, skills). For files with 10+ references, this saves 30+ file system scans.

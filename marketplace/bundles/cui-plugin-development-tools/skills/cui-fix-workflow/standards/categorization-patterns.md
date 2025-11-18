@@ -217,15 +217,55 @@ These fixes ALWAYS require user confirmation:
 - How to restructure to fix architectural violations?
 - What new components need to be created?
 
+## NEVER "Simplify" - Functional UI Elements
+
+**CRITICAL**: These patterns are NOT over-specification and must NEVER be "simplified":
+
+### Bracketed Keyboard Shortcuts
+
+**What they are:**
+- User prompts with brackets indicating hotkeys: `"[R]etry/[A]bort"`
+- Options with bracketed letters: `"[F]ix/[S]uppress/[S]kip"`
+- Interactive choice indicators: `"[Y]es/[N]o/[C]ancel"`
+
+**Why they must be preserved:**
+- Brackets indicate which key to press for each option
+- Removing brackets removes functional UI guidance
+- This is **user interface design**, not redundancy
+- Users need to know that pressing "R" selects "Retry"
+
+**Examples:**
+
+| ❌ WRONG "Simplification" | ✅ CORRECT (Preserve) |
+|--------------------------|----------------------|
+| Prompt: "Retry/Abort" | Prompt: "[R]etry/[A]bort" |
+| Options: "Fix/Suppress/Skip" | Options: "[F]ix/[S]uppress/[S]kip" |
+| "Continue or Stop" | "[C]ontinue/[S]top" |
+
+**Detection pattern:**
+- If line contains prompt/option pattern `"[A-Z][a-z]+/[A-Z][a-z]+"` with brackets
+- This is **functional UI**, NOT bloat
+
+### Other Functional Patterns to Preserve
+
+- ASCII box borders used for visual separation in terminal output
+- Emoji indicators for status (✅, ❌, ⚠️) used for quick visual scanning
+- Indentation patterns that indicate hierarchy or grouping
+- Code formatting examples showing exact syntax
+
 ## Categorization Algorithm
 
 For each issue found:
 
-1. **Check if issue type is in safe category list**
-   - If yes: Categorize as SAFE
+1. **Check if issue is functional UI element (see NEVER Simplify above)**
+   - If yes: Categorize as NOT AN ISSUE
    - If no: Continue to step 2
 
-2. **Check if issue involves any of:**
+2. **Check if issue type is in safe category list**
+   - If yes: Categorize as SAFE
+   - If no: Continue to step 3
+
+3. **Check if issue involves any of:**
    - Content judgment (what to keep/remove)
    - Domain expertise
    - Structural changes
@@ -234,7 +274,7 @@ For each issue found:
 
    If yes: Categorize as RISKY
 
-3. **Default**: When in doubt, categorize as RISKY
+4. **Default**: When in doubt, categorize as RISKY
    - Better to prompt unnecessarily than break something
 
 ## Tracking Structure

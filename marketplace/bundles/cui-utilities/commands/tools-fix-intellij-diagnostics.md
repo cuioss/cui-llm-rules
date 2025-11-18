@@ -9,7 +9,7 @@ Retrieves diagnostics from IntelliJ IDE via MCP, analyzes issues, applies fixes,
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command tools-fix-intellij-diagnostics`
+**This command should be improved using**: `/plugin-update-command command-name=tools-fix-intellij-diagnostics update="[your improvement]"`
 
 **Improvement areas**:
 - Improved MCP diagnostics retrieval patterns and timeout handling
@@ -22,7 +22,7 @@ Retrieves diagnostics from IntelliJ IDE via MCP, analyzes issues, applies fixes,
 
 **file** - Specific file to check (optional, checks all open files if not provided)
 
-**push** - Auto-push after fixes (optional flag)
+**push** - Auto-push after fixes (optional boolean flag, default: false)
 
 ## CRITICAL: File Must Be Active in IDE
 
