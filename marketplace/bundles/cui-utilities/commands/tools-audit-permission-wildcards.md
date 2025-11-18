@@ -133,25 +133,49 @@ Examples:
 
 Do NOT generate: `Skill(cui-*:*)` - Invalid pattern!
 
-**B. Generate SlashCommand wildcards (one per bundle with commands):**
+**B. Generate SlashCommand bundle wildcards (one per bundle with commands):**
 
-For each bundle that contains commands with parameterized names:
+For each bundle that contains commands:
 ```
 SlashCommand(/{bundle-name}:*)
 ```
 
 Examples:
-- `SlashCommand(/cui-java-expert:*)` - All cui-java-expert commands
-- `SlashCommand(/cui-utilities:*)` - All cui-utilities commands
-- `SlashCommand(/plugin-*:*)` - Invalid! Use individual bundle names
+- `SlashCommand(/cui-java-expert:*)` - All cui-java-expert commands (bundle-qualified form)
+- `SlashCommand(/cui-utilities:*)` - All cui-utilities commands (bundle-qualified form)
+- `SlashCommand(/plugin-*:*)` - Invalid! Cannot wildcard bundle names
 
-Note: Commands without parameters don't need `:*` suffix, but using it is harmless and ensures coverage.
+Note: These patterns match bundle-qualified invocations like `/cui-java-expert:java-implement-code`.
 
-**C. Sort wildcards alphabetically:**
+**C. Generate short-form SlashCommand permissions (one per command):**
+
+**CRITICAL:** Commands can be invoked in two ways:
+- Short form: `/plugin-inventory` (requires individual permission)
+- Bundle-qualified: `/cui-plugin-development-tools:plugin-inventory` (covered by bundle wildcard)
+
+Bundle wildcards (Step 4B) only match bundle-qualified invocations. Short-form invocations require individual permissions.
+
+For each command discovered across all bundles:
+```
+SlashCommand(/{command-name}:*)
+```
+
+Examples:
+- `SlashCommand(/plugin-inventory:*)` - Matches `/plugin-inventory --json`
+- `SlashCommand(/java-implement-code:*)` - Matches `/java-implement-code "task"`
+- `SlashCommand(/doc-review-single-asciidoc:*)` - Matches `/doc-review-single-asciidoc file.adoc`
+
+**Why both are needed:**
+- Bundle wildcard `SlashCommand(/cui-plugin-development-tools:*)` matches `/cui-plugin-development-tools:plugin-inventory`
+- Short-form permission `SlashCommand(/plugin-inventory:*)` matches `/plugin-inventory --json`
+- Without the short-form permission, users get prompted when using convenient short-form invocations
+
+**D. Sort wildcards alphabetically:**
 - Skill wildcards first (alphabetical by bundle name)
-- SlashCommand wildcards second (alphabetical by bundle name)
+- SlashCommand bundle wildcards second (alphabetical by bundle name)
+- SlashCommand short-form permissions third (alphabetical by command name)
 
-Increment `wildcards_generated` for each pattern created.
+Increment `wildcards_generated` for each pattern created (both bundle wildcards AND short-form permissions).
 
 ### Step 5: Display Coverage Analysis
 
@@ -183,15 +207,20 @@ Naming Pattern Analysis:
     - Command prefixes: {list unique command prefixes}
 
 Required Wildcard Permissions:
-  Skills:
+  Skills (Bundle Wildcards):
     {list Skill wildcard patterns}
 
-  SlashCommands:
-    {list SlashCommand wildcard patterns}
+  SlashCommands (Bundle Wildcards):
+    {list SlashCommand bundle wildcard patterns}
+
+  SlashCommands (Short-Form Permissions):
+    {list SlashCommand short-form patterns}
 
 Coverage Verification:
   ✓ {skills_found} skills covered by {skill_wildcard_count} Skill wildcards
-  ✓ {commands_found} commands covered by {command_wildcard_count} SlashCommand wildcards
+  ✓ {commands_found} commands covered by {command_bundle_wildcard_count} SlashCommand bundle wildcards
+  ✓ {commands_found} commands require {commands_found} SlashCommand short-form permissions
+  ✓ Total permissions: {total_permission_count}
 ```
 
 ### Step 6: Update tools-setup-project-permissions
@@ -212,13 +241,21 @@ Find the section starting with:
 
 **C. Generate updated content:**
 
-Create new wildcard list based on analysis:
+Create new permission list based on analysis (both bundle wildcards AND short-form permissions):
 ```
 **D. Ensure global marketplace wildcard permissions:**
-- Check for {list Skill wildcards} in global settings
-- Check for {list SlashCommand wildcards} in global settings
-- Add missing wildcards automatically (no prompt - standard marketplace permissions)
-- Track: `marketplace_wildcards_added_to_global`
+
+**Bundle Wildcards:**
+- Skills: {list Skill wildcard patterns}
+- SlashCommands: {list SlashCommand bundle wildcard patterns}
+
+**Short-Form Command Permissions:**
+- {list SlashCommand short-form patterns}
+
+**Validation:**
+- Check for all patterns above in global settings
+- Add missing permissions automatically (no prompt - standard marketplace permissions)
+- Track: `marketplace_wildcards_added_to_global`, `marketplace_shortform_added_to_global`
 ```
 
 **D. Update file:**

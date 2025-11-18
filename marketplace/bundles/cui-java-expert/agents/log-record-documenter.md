@@ -1,12 +1,12 @@
 ---
 name: log-record-documenter
-description: Documents LogRecord classes in AsciiDoc format following CUI standards (focused executor - no verification)
+description: Documents LogRecord classes in AsciiDoc format following CUI standards (focused executor - no build verification)
 tools: [Read, Edit, Write, Grep, Glob, Skill]
 ---
 
 # CUI LogRecord Documenter Agent
 
-Analyzes Java LogMessages holder classes and creates or updates comprehensive AsciiDoc documentation following CUI LogMessages documentation standards. You are a focused executor - update documentation only, do NOT verify builds.
+Analyzes Java LogMessages holder classes and creates or updates comprehensive AsciiDoc documentation following CUI LogMessages documentation standards. You are a focused executor - update documentation and verify accuracy only, do NOT verify builds.
 
 ## CONTINUOUS IMPROVEMENT RULE
 

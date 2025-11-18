@@ -422,13 +422,13 @@ Return minimal JSON (agents with issues):
   "lines": {count},
   "complexity": "ACCEPTABLE|LARGE|TOO_COMPLEX",
   "critical_issues": [
-    {"pattern": "Pattern X", "description": "...", "recommendation": "..."}
+    {"pattern": "Pattern 1: Missing Critical Tools", "description": "...", "recommendation": "..."}
   ],
   "warnings": [
-    {"pattern": "Pattern Y", "description": "...", "recommendation": "..."}
+    {"pattern": "Pattern 17: Agent Too Complex", "description": "...", "recommendation": "..."}
   ],
   "suggestions": [
-    {"pattern": "Pattern Z", "description": "...", "recommendation": "..."}
+    {"pattern": "Pattern 15: Missing Response Format", "description": "...", "recommendation": "..."}
   ],
   "scores": {
     "tool_fit_score": {score},
@@ -437,6 +437,15 @@ Return minimal JSON (agents with issues):
   }
 }
 ```
+
+**CRITICAL: Pattern Naming Rules**
+
+Always use FULL pattern names including descriptive title from agent-analysis-patterns.md:
+- ✅ CORRECT: "Pattern 22: Agent Self-Invocation Instructions" (number + full descriptive name)
+- ✅ CORRECT: "Agent Self-Invocation Instructions" (descriptive name alone also acceptable)
+- ❌ WRONG: "Pattern 22" (number only - not user-friendly or meaningful)
+
+Pattern names are defined in agent-analysis-patterns.md (cui-marketplace-architecture skill).
 
 **Token Savings**: Streamlined format reduces output from ~600-800 tokens to ~200-400 tokens per agent.
 

@@ -69,86 +69,96 @@ This project has access to globally-approved domains for common development reso
 
 ### Last Execution
 
-- Date: 2025-11-15 (Third run - CORRECTED)
-- Result: Fixed global settings to use SPECIFIC bundle wildcards instead of invalid double-wildcards
-- Status: SUCCESS (after user correction)
+- Date: 2025-11-18 (Fifth run - Critical architecture fix)
+- Result: Fixed critical permission architecture issues
+- Status: SUCCESS
 
 ### Changes Applied
 
-**Global Settings Fixed:**
-- **REMOVED invalid double-wildcards:**
-  - `Skill(cui-*:*)` ❌ (doesn't work - double wildcard invalid)
-  - `SlashCommand(/cui-*:*)` ❌ (doesn't work - double wildcard invalid)
+**Global Settings Updated:**
+- **ADDED 44 short-form SlashCommand permissions:**
+  - All marketplace commands now work in both invocation forms
+  - Short form: `/plugin-inventory`, `/java-implement-code`, etc.
+  - Bundle-qualified: `/cui-java-expert:java-implement-code`, etc.
+- **REMOVED 1 invalid permission:**
+  - `SlashCommand(/plugin-*:*)` - Invalid pattern (cannot wildcard command names)
 
-- **ADDED correct bundle-specific wildcards:**
-  - `Skill(cui-documentation-standards:*)`
-  - `Skill(cui-frontend-expert:*)`
-  - `Skill(cui-java-expert:*)`
-  - `Skill(cui-maven:*)`
-  - `Skill(cui-plugin-development-tools:*)`
-  - `Skill(cui-requirements:*)`
-  - `Skill(cui-task-workflow:*)`
-  - `Skill(cui-utilities:*)`
-  - `SlashCommand(/cui-documentation-standards:*)`
-  - `SlashCommand(/cui-frontend-expert:*)`
-  - `SlashCommand(/cui-java-expert:*)`
-  - `SlashCommand(/cui-maven:*)`
-  - `SlashCommand(/cui-plugin-development-tools:*)`
-  - `SlashCommand(/cui-requirements:*)`
-  - `SlashCommand(/cui-task-workflow:*)`
-  - `SlashCommand(/cui-utilities:*)`
+**Local Settings Updated:**
+- **REMOVED 1 redundant marketplace permission:**
+  - `SlashCommand(/plugin-inventory:*)` - Now covered by global settings
+- **ADDED 5 project-specific permissions:**
+  - `Edit(//~/git/cui-llm-rules/**)` - Project editing
+  - `Write(//~/git/cui-llm-rules/**)` - Project file creation
+  - `Read(//marketplace/**)` - Marketplace bundle access
+  - `Read(//.claude/**)` - Claude configuration access
+  - `Read(//standards/**)` - Standards documentation access
+- **KEPT 2 existing project-specific permissions:**
+  - `Bash(claude-code:*)` - Claude Code CLI operations
+  - `WebFetch(domain:formulae.brew.sh)` - Homebrew formula documentation
 
-**Local Settings:**
-- No changes (already minimal with 2 project-specific permissions)
+### Critical Issue Discovered & Fixed
 
-### Error Analysis
+**Problem:** Bundle wildcards like `SlashCommand(/cui-java-expert:*)` ONLY match bundle-qualified invocations (e.g., `/cui-java-expert:java-implement-code`). They do NOT match short-form invocations (e.g., `/java-implement-code`).
 
-**What Went Wrong:**
-- Command incorrectly assumed `Skill(cui-*:*)` would work as a wildcard
-- This double-wildcard pattern is INVALID - permissions require specific bundle names
-- The command specification was EXPLICIT about needing individual bundle wildcards
-- I failed to follow the specification in Step 3D
+**Impact:** Most marketplace commands were inaccessible via short-form invocation, requiring users to use verbose bundle-qualified forms.
 
-**Root Cause:**
-- Misread the permission wildcard syntax
-- Assumed broader pattern would cover specific patterns
-- Did not test/verify that double-wildcards actually work
+**Solution:** Added explicit short-form permissions for all 44 marketplace commands to ensure both invocation methods work.
 
 ### Permission Summary
 
 **Global Settings:**
-- Allow: 199 permissions (comprehensive development tools)
+- Allow: 242 permissions (+43 from previous run)
+  - 142 Bash commands (comprehensive development tools)
+  - 8 Skill bundle wildcards
+  - 8 SlashCommand bundle wildcards
+  - 44 SlashCommand short-form permissions ✨ NEW
+  - 3 Read patterns (universal git access)
+  - 30 WebFetch domains
+  - 2 project-specific Bash scripts
+  - 5 legacy SlashCommand permissions
 - Deny: 69 permissions (dangerous commands blocked)
-- Marketplace wildcards: ✅ All 16 bundle-specific wildcards present
-  - 8 Skill wildcards (one per bundle)
-  - 8 SlashCommand wildcards (one per bundle)
 
 **Local Settings:**
-- Allow: 2 permissions (Edit/Write for cui-llm-rules project only)
+- Allow: 7 permissions (project-specific only)
+  - 1 Bash permission: `claude-code:*`
+  - 2 Edit/Write permissions: `cui-llm-rules/**`
+  - 3 Read permissions: `marketplace/**`, `.claude/**`, `standards/**`
+  - 1 WebFetch permission: `formulae.brew.sh`
 - Deny: 0 permissions
-- Ask: 1 permission (settings write protection)
-- Architecture: ✅ Follows global/local separation perfectly
+- Ask: 0 permissions
 
 ### Compliance Status
 
-✅ All marketplace bundle wildcards present in global settings (SPECIFIC per bundle)
+✅ All marketplace bundle wildcards present in global settings (8 skills + 8 commands)
+✅ All marketplace short-form permissions present (44 commands) ✨ NEW
 ✅ Universal git read access configured globally
-✅ Local permissions minimal (2 project-specific only)
+✅ Project-specific Edit/Write permissions configured locally
 ✅ No redundancies or duplicates detected
 ✅ No suspicious patterns detected
 ✅ Proper path formats (user-relative)
 ✅ Security protections active
-✅ No invalid double-wildcard patterns
+✅ Invalid patterns removed
 
-### Notes
+### Architecture Notes
 
-Permission architecture follows best practices:
-- Global: Universal read, common tools, marketplace skills/commands
-- Local: Only project-specific Edit/Write permissions
-- Read permissions covered globally via `Read(//~/git/**)`
-- All marketplace skills/commands accessible via SPECIFIC bundle wildcards
+**Command Invocation Forms:**
+Commands can be invoked in TWO ways:
+1. **Short form:** `/plugin-inventory`, `/java-implement-code`
+2. **Bundle-qualified:** `/cui-plugin-development-tools:plugin-inventory`, `/cui-java-expert:java-implement-code`
 
-**Important:** Wildcards must be bundle-specific (e.g., `Skill(cui-java-expert:*)`) NOT double-wildcards (e.g., `Skill(cui-*:*)`)
+**Permission Requirements:**
+- Bundle wildcards: `SlashCommand(/cui-java-expert:*)` → Covers bundle-qualified invocations ONLY
+- Short-form permissions: `SlashCommand(/java-implement-code:*)` → Covers short-form invocations ONLY
+- **BOTH are required** for full functionality
+
+**Invalid Patterns:**
+- `SlashCommand(/plugin-*:*)` - INVALID (cannot wildcard command names)
+- `Skill(cui-*:*)` - INVALID (cannot wildcard bundle names)
+
+**Valid Patterns:**
+- `SlashCommand(/cui-java-expert:*)` - Valid (bundle wildcard)
+- `SlashCommand(/plugin-inventory:*)` - Valid (short-form permission)
+- `Skill(cui-java-expert:*)` - Valid (skill bundle wildcard)
 
 ---
 

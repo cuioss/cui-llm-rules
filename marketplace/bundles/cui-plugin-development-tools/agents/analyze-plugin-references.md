@@ -190,7 +190,23 @@ Found references:
    Read: {path}, offset={line-2}, limit=5
    ```
 
-2. **Check for false positive indicators:**
+2. **MANDATORY: Verify pattern actually exists in line content:**
+   - Extract the actual line text from Read output
+   - Check if the Grep pattern match ACTUALLY appears in the line text
+   - If pattern does NOT appear in line: **DISCARD - Hallucination/Grep error**
+
+   **Examples of pattern verification:**
+   ```
+   Grep matched line 104 with pattern "subagent_type"
+   Read line 104: "- File B says 'prefer Y'"
+   Verification: "subagent_type" NOT in line text → DISCARD as false positive
+
+   Grep matched line 74 with pattern "Skill: cui-marketplace"
+   Read line 74: "Skill: cui-marketplace-architecture"
+   Verification: Pattern found → PROCEED to context check
+   ```
+
+3. **Check for false positive indicators:**
 
    **❌ FALSE POSITIVE - Documentation/Examples:**
    - Line in code block (preceded by ``` or heavy indentation)
@@ -207,11 +223,12 @@ Found references:
    - In Skill activation: "Skill: bundle:skill-name" (not in examples section)
    - In direct execution instructions (not explaining patterns)
 
-3. **Determine classification:**
-   - If FALSE POSITIVE: **Remove from references list**, log as "Filtered: Line {line} - Documentation/Example"
+4. **Determine classification:**
+   - If pattern not in line text: **DISCARD** immediately as Grep hallucination
+   - If FALSE POSITIVE context: **Remove from references list**, log as "Filtered: Line {line} - Documentation/Example"
    - If ACTUAL INVOCATION: **Keep in references list** for validation
 
-4. **Track statistics:**
+5. **Track statistics:**
    - `references_detected`: Raw Grep matches
    - `references_filtered`: False positives removed
    - `references_found`: Actual invocations (after filtering)
@@ -219,26 +236,37 @@ Found references:
 **Examples of False Positives to Filter:**
 
 ```
+❌ Line 104: Grep matched "subagent_type" pattern
+   Read line 104: "- File B says 'prefer Y'"
+   Verification: Pattern NOT in line text
+   Action: DISCARD - Grep hallucination/error
+
 ❌ Line 105: Grep: pattern="subagent_type[:\s]+[\"']?([a-z:-]+)[\"']?"
-   Context: Documentation showing Grep pattern syntax
+   Read line 105: "Grep: pattern=\"subagent_type...\""
+   Verification: Pattern found in line
+   Context check: Documentation showing Grep pattern syntax
    Action: FILTER - This is pattern documentation
 
 ❌ Line 204: # Example: /plugin-update-agent -> plugin-update-agent
-   Context: Comment explaining reference format
+   Verification: Pattern found in line
+   Context check: Comment explaining reference format
    Action: FILTER - This is a comment example
 
 ❌ Line 363: The caller can then invoke `/plugin-update-agent agent-name=...`
-   Context: CONTINUOUS IMPROVEMENT RULE explaining caller responsibility
+   Verification: Pattern found in line
+   Context check: CONTINUOUS IMPROVEMENT RULE explaining caller responsibility
    Action: FILTER - This is instruction documentation
 
 ❌ Line 189: - **Correct Pattern**: Commands SHOULD use... `/plugin-update-command`
-   Context: Architecture rules explaining patterns
+   Verification: Pattern found in line
+   Context check: Architecture rules explaining patterns
    Action: FILTER - This is pattern definition
 
 ✅ Line 74: Skill: cui-marketplace-architecture
-   Context: Step 2: Load Analysis Standards
-            Skill: cui-marketplace-architecture
-            This loads all necessary agent analysis standards
+   Verification: Pattern found in line
+   Context check: Step 2: Load Analysis Standards
+                  Skill: cui-marketplace-architecture
+                  This loads all necessary agent analysis standards
    Action: KEEP - This is actual Skill invocation in workflow
 ```
 

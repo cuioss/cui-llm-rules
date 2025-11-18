@@ -345,13 +345,13 @@ Return minimal JSON (commands with issues):
   "classification": "ACCEPTABLE|LARGE|BLOATED",
   "lines": {count},
   "critical_issues": [
-    {"pattern": "Pattern 11", "description": "Command bloated at XXX lines", "recommendation": "Extract sections to skills"}
+    {"pattern": "Pattern 11: Command Bloat (> 500 lines)", "description": "Command bloated at XXX lines", "recommendation": "Extract sections to skills"}
   ],
   "warnings": [
-    {"pattern": "Pattern 12", "description": "Duplicate content in sections A, B", "recommendation": "Consolidate"}
+    {"pattern": "Pattern 12: Duplicate Content", "description": "Duplicate content in sections A, B", "recommendation": "Consolidate"}
   ],
   "suggestions": [
-    {"pattern": "Pattern 18", "description": "Inconsistent naming", "recommendation": "Standardize naming"}
+    {"pattern": "Pattern 18: Description Too Short", "description": "Inconsistent naming", "recommendation": "Standardize naming"}
   ],
   "scores": {
     "overall_quality": {score},
@@ -359,6 +359,15 @@ Return minimal JSON (commands with issues):
   }
 }
 ```
+
+**CRITICAL: Pattern Naming Rules**
+
+Always use FULL pattern names including descriptive title from command-analysis-patterns.md:
+- ✅ CORRECT: "Pattern 21: Command Self-Improvement Validation" (number + full descriptive name)
+- ✅ CORRECT: "Command Self-Improvement Validation" (descriptive name alone also acceptable)
+- ❌ WRONG: "Pattern 21" (number only - not user-friendly or meaningful)
+
+Pattern names are defined in command-analysis-patterns.md (cui-marketplace-architecture skill).
 
 **Token Savings**: Streamlined format reduces output from ~2,000 tokens to ~200-800 tokens per command.
 

@@ -13,6 +13,16 @@ Focused agent that analyzes ONE Sonar issue and decides whether to fix or suppre
 
 Analyze one Sonar issue, read code context, decide action (fix vs suppress), return structured decision.
 
+## INPUT PARAMETERS
+
+The caller must provide:
+- **issue_key**: Sonar issue identifier (e.g., "AX-Tpxb--iU5OvuD2FLy")
+- **file_path**: Relative path to file containing the issue
+- **line_number**: Line number where issue occurs
+- **rule_key**: Sonar rule identifier (e.g., "java:S1234")
+- **severity**: Issue severity (INFO, LOW, MEDIUM, HIGH, BLOCKER)
+- **message**: Sonar issue description/message
+
 ## WORKFLOW
 
 ### Step 1: Read Code Context
@@ -25,14 +35,49 @@ Analyze rule, severity, code pattern. Determine if fixable programmatically.
 
 ### Step 3: Return Decision
 
+Return structured decision in JSON format (see RESPONSE FORMAT section below).
+
+## RESPONSE FORMAT
+
+**ALWAYS return ONLY the JSON object below, no additional text:**
+
 ```json
 {
   "action": "fix|suppress",
   "reason": "explanation of decision",
-  "suggested_implementation": "which command/approach to use",
-  "suppression_string": "// NOSONAR rule-key - reason"
+  "suggested_implementation": "which command/approach to use (if action=fix)",
+  "suppression_string": "// NOSONAR rule-key - reason (if action=suppress)"
 }
 ```
+
+**Field Requirements:**
+- `action`: MUST be either "fix" or "suppress"
+- `reason`: Clear explanation of why this action was chosen
+- `suggested_implementation`: Required if action="fix", describes how to fix
+- `suppression_string`: Required if action="suppress", exact comment to add
+
+## ERROR HANDLING
+
+**If file not found or unreadable:**
+```json
+{
+  "action": "suppress",
+  "reason": "File not accessible - cannot analyze context",
+  "suppression_string": "// NOSONAR - file not accessible for analysis"
+}
+```
+
+**If code context unparseable or unknown rule:**
+```json
+{
+  "action": "suppress",
+  "reason": "Unable to determine correct fix approach - manual review recommended",
+  "suppression_string": "// NOSONAR - requires manual review"
+}
+```
+
+**If parameters missing:**
+Return error indicating which required parameter is missing.
 
 ## CONTINUOUS IMPROVEMENT RULE
 

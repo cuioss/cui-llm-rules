@@ -1,7 +1,7 @@
 ---
 name: task-executor
 description: Executes plan file tasks sequentially with checklist tracking and acceptance verification.
-tools: Read, Edit, Write, Glob, Grep, Bash(ls:*), Skill
+tools: Read, Edit, Write, Glob, Grep, Bash(ls:*), Skill, AskUserQuestion
 model: sonnet
 color: blue
 ---

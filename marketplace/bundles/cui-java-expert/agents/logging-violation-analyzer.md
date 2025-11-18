@@ -67,6 +67,12 @@ For each LOGGER statement, determine:
 
 ### Step 5: Return Structured Results
 
+Return JSON structure as defined in RESPONSE FORMAT section below.
+
+## RESPONSE FORMAT
+
+**ALWAYS return ONLY the JSON object below, no additional text:**
+
 ```json
 {
   "total_statements": count,
@@ -88,6 +94,13 @@ For each LOGGER statement, determine:
   }
 }
 ```
+
+**Field Requirements:**
+- `total_statements`: Total LOGGER statements analyzed across all files
+- `violations`: Array of violation objects (empty array if no violations found)
+- `summary.missing_log_record`: Count of INFO/WARN/ERROR/FATAL without LogRecord
+- `summary.incorrect_log_record`: Count of DEBUG/TRACE with LogRecord
+- `summary.compliant`: Count of compliant logging statements
 
 ## CRITICAL RULES
 

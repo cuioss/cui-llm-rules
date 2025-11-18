@@ -18,7 +18,7 @@ Verifies and fixes permissions in `.claude/settings.local.json` using permission
 6. Improvements to global settings write workflow and safety checks
 7. Better user experience patterns for permission management
 8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
-9. **CRITICAL LESSON - Wildcard Syntax Validation:** Double-wildcards like `Skill(cui-*:*)` or `SlashCommand(/cui-*:*)` are INVALID and do not work. Permissions require SPECIFIC bundle wildcards like `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, etc. Step 3D explicitly lists all 16 required bundle-specific wildcards (8 Skills + 8 SlashCommands). Never assume broader wildcard patterns work - always use exact bundle names with single wildcard for items within that bundle. Validate that global settings contain the specific bundle wildcards, not double-wildcard patterns.
+9. **CRITICAL LESSON - Command Invocation Forms:** Commands can be invoked in TWO ways: (a) Short form: `/plugin-inventory` and (b) Bundle-qualified: `/cui-plugin-development-tools:plugin-inventory`. Bundle wildcards like `SlashCommand(/cui-plugin-development-tools:*)` ONLY match bundle-qualified invocations. Short-form invocations require INDIVIDUAL permissions like `SlashCommand(/plugin-inventory:*)`. Step 3D lists BOTH bundle wildcards (16 patterns) AND short-form permissions (44 patterns) to cover all invocation methods. The pattern `SlashCommand(/plugin-*:*)` is INVALID - you cannot wildcard command names, only use `:*` after exact bundle/command names.
 
 This ensures the command evolves and becomes more effective with each execution.
 
@@ -60,12 +60,63 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 
 **C. Validate JSON structure**
 
-**D. Ensure global marketplace wildcard permissions:**
-- Check for the following wildcards in global settings:
-  - Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(cui-maven:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
-  - SlashCommands: `SlashCommand(/cui-documentation-standards:*)`, `SlashCommand(/cui-frontend-expert:*)`, `SlashCommand(/cui-java-expert:*)`, `SlashCommand(/cui-maven:*)`, `SlashCommand(/cui-plugin-development-tools:*)`, `SlashCommand(/cui-requirements:*)`, `SlashCommand(/cui-task-workflow:*)`, `SlashCommand(/cui-utilities:*)`
-- Add missing wildcards automatically (no prompt - standard marketplace permissions)
-- Track: `marketplace_wildcards_added_to_global`
+**D. Ensure global marketplace permissions:**
+
+**Bundle Wildcards:**
+- Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(cui-maven:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
+- SlashCommands: `SlashCommand(/cui-documentation-standards:*)`, `SlashCommand(/cui-frontend-expert:*)`, `SlashCommand(/cui-java-expert:*)`, `SlashCommand(/cui-maven:*)`, `SlashCommand(/cui-plugin-development-tools:*)`, `SlashCommand(/cui-requirements:*)`, `SlashCommand(/cui-task-workflow:*)`, `SlashCommand(/cui-utilities:*)`
+
+**Short-Form Command Permissions:**
+- `SlashCommand(/cui-maintain-requirements:*)`
+- `SlashCommand(/doc-review-single-asciidoc:*)`
+- `SlashCommand(/doc-review-technical-docs:*)`
+- `SlashCommand(/java-enforce-logrecords:*)`
+- `SlashCommand(/java-fix-javadoc:*)`
+- `SlashCommand(/java-generate-coverage:*)`
+- `SlashCommand(/java-implement-code:*)`
+- `SlashCommand(/java-implement-tests:*)`
+- `SlashCommand(/java-maintain-logger:*)`
+- `SlashCommand(/java-maintain-tests:*)`
+- `SlashCommand(/java-optimize-quarkus-native:*)`
+- `SlashCommand(/java-refactor-code:*)`
+- `SlashCommand(/js-enforce-eslint:*)`
+- `SlashCommand(/js-fix-jsdoc:*)`
+- `SlashCommand(/js-generate-coverage:*)`
+- `SlashCommand(/js-implement-code:*)`
+- `SlashCommand(/js-implement-tests:*)`
+- `SlashCommand(/js-maintain-tests:*)`
+- `SlashCommand(/js-refactor-code:*)`
+- `SlashCommand(/maven-build-and-fix:*)`
+- `SlashCommand(/orchestrate-language:*)`
+- `SlashCommand(/orchestrate-task:*)`
+- `SlashCommand(/orchestrate-workflow:*)`
+- `SlashCommand(/plugin-add-skill-knowledge:*)`
+- `SlashCommand(/plugin-create-agent:*)`
+- `SlashCommand(/plugin-create-bundle:*)`
+- `SlashCommand(/plugin-create-command:*)`
+- `SlashCommand(/plugin-create-skill:*)`
+- `SlashCommand(/plugin-diagnose-agents:*)`
+- `SlashCommand(/plugin-diagnose-commands:*)`
+- `SlashCommand(/plugin-diagnose-metadata:*)`
+- `SlashCommand(/plugin-diagnose-skills:*)`
+- `SlashCommand(/plugin-inventory:*)`
+- `SlashCommand(/plugin-update-agent:*)`
+- `SlashCommand(/plugin-update-command:*)`
+- `SlashCommand(/pr-fix-sonar-issues:*)`
+- `SlashCommand(/pr-handle-pull-request:*)`
+- `SlashCommand(/pr-respond-to-review-comments:*)`
+- `SlashCommand(/tools-audit-permission-wildcards:*)`
+- `SlashCommand(/tools-fix-intellij-diagnostics:*)`
+- `SlashCommand(/tools-manage-web-permissions:*)`
+- `SlashCommand(/tools-setup-project-permissions:*)`
+- `SlashCommand(/tools-sync-agents-file:*)`
+- `SlashCommand(/tools-verify-architecture-diagrams:*)`
+
+**Validation:**
+- Check for all patterns above in global settings
+- Add missing permissions automatically (no prompt - standard marketplace permissions)
+- Remove invalid patterns like `SlashCommand(/plugin-*:*)` if present
+- Track: `marketplace_wildcards_added_to_global`, `marketplace_shortform_added_to_global`
 
 ### Step 4: Handle ensurePermissions Parameter (if provided)
 
