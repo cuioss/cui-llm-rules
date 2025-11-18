@@ -198,7 +198,7 @@ For detailed configuration examples and complete reference, see the individual s
 
 ### Key Requirements Summary
 
-- **Node.js Version**: See standards/project-structure.md (managed by frontend-maven-plugin)
+- **Node.js Version**: See `project-structure.md` for version requirements (managed by frontend-maven-plugin)
 - **Package.json**: Must include `"type": "module"` for ES module support
 - **Required npm scripts**: lint, format, test, test:ci-strict, quality
 - **Maven Integration**: Map npm scripts to validate/compile/test phases

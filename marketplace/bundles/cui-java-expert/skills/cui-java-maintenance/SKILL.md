@@ -141,7 +141,7 @@ When implementing fixes, load relevant implementation skills:
 
 **For code implementation:**
 ```
-Skill: cui-java-core
+Skill: cui-java-expert:cui-java-core
 ```
 Provides actual implementation patterns for:
 - Core patterns and null safety
@@ -151,19 +151,19 @@ Provides actual implementation patterns for:
 
 **For documentation work:**
 ```
-Skill: cui-javadoc
+Skill: cui-java-expert:cui-javadoc
 ```
 Provides Javadoc standards and patterns.
 
 **For testing work:**
 ```
-Skill: cui-java-unit-testing
+Skill: cui-java-expert:cui-java-unit-testing
 ```
 Provides testing standards and patterns.
 
 **For CDI work:**
 ```
-Skill: cui-java-cdi
+Skill: cui-java-expert:cui-java-cdi
 ```
 Provides CDI aspects and container standards.
 

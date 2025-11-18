@@ -121,7 +121,7 @@ When implementing fixes, load relevant implementation skills:
 
 **For code implementation:**
 ```
-Skill: cui-javascript
+Skill: cui-frontend-expert:cui-javascript
 ```
 Provides actual implementation patterns for:
 - Core patterns and modern JavaScript
@@ -130,25 +130,25 @@ Provides actual implementation patterns for:
 
 **For linting work:**
 ```
-Skill: cui-javascript-linting
+Skill: cui-frontend-expert:cui-javascript-linting
 ```
 Provides ESLint configuration and rules.
 
 **For documentation work:**
 ```
-Skill: cui-jsdoc
+Skill: cui-frontend-expert:cui-jsdoc
 ```
 Provides JSDoc standards and patterns.
 
 **For testing work:**
 ```
-Skill: cui-javascript-unit-testing
+Skill: cui-frontend-expert:cui-javascript-unit-testing
 ```
 Provides Jest testing standards and patterns.
 
 **For E2E testing:**
 ```
-Skill: cui-cypress
+Skill: cui-frontend-expert:cui-cypress
 ```
 Provides Cypress E2E testing standards.
 

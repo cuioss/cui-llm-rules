@@ -415,7 +415,7 @@ The validation engine supports three modes:
 * **Lenient**: Allows expired tokens for testing
 * **Custom**: User-defined validation rules
 
-Performance: Validates 50,000 tokens/second (benchmark details in [Benchmark Results](../benchmarking/results.md)).
+Performance: Validates 50,000 tokens/second (example: benchmark details could be in benchmarks/results.md).
 ```
 
 ## Quality Checklist

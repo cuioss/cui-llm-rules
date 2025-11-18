@@ -115,13 +115,15 @@ Token validation requires the following steps:
 
 ✅ **Good - Cross-Referenced:**
 ```markdown
-<!-- In jwt-validation.md -->
+<!-- Example: Hypothetical files showing cross-referencing pattern -->
+
+<!-- In jwt-validation.md (example file) -->
 Token validation follows the [standard validation process](token-validation-core.md).
 
-<!-- In oauth2-validation.md -->
+<!-- In oauth2-validation.md (example file) -->
 OAuth2 tokens follow the [standard validation process](token-validation-core.md) with additional OAuth2-specific checks.
 
-<!-- In token-validation-core.md -->
+<!-- In token-validation-core.md (example file) -->
 Standard token validation requires:
 1. Parse the token
 2. Verify signature
@@ -241,14 +243,15 @@ You have authority to adapt structure when necessary:
 
 **Example README Structure:**
 ```markdown
+<!-- Example README.md showing hypothetical file structure -->
 # Token Validation Standards
 
 This directory contains standards for token validation:
 
-* [Core Validation](token-validation-core.md) - Common validation requirements
-* [JWT Validation](jwt-validation.md) - JWT-specific validation
-* [OAuth2 Validation](oauth2-validation.md) - OAuth2-specific validation
-* [Testing Standards](validation-testing.md) - Testing requirements
+* [Core Validation](token-validation-core.md) - Common validation requirements (example file)
+* [JWT Validation](jwt-validation.md) - JWT-specific validation (example file)
+* [OAuth2 Validation](oauth2-validation.md) - OAuth2-specific validation (example file)
+* [Testing Standards](validation-testing.md) - Testing requirements (example file)
 ```
 
 ## Review Process Standards
