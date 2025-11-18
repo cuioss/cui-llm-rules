@@ -245,25 +245,6 @@ Record each tool invocation:
 
 Include in final report with total invocations per tool.
 
-## LESSONS LEARNED REPORTING
-
-If during execution you discover insights that could improve future executions:
-
-**When to report lessons learned:**
-- Better task decomposition strategies discovered (e.g., "breaking tasks by component instead of by feature improved clarity", "separating test tasks from implementation tasks reduced checklist length", "identifying shared utilities first prevented duplication")
-- New issue patterns that require different planning approaches (e.g., "microservice issues benefit from per-service task grouping", "refactoring issues need separate analysis/implementation/verification tasks")
-- Improved reference formats that make plans clearer
-- Edge cases in issue formats (GitHub, local, etc.)
-- Workflow improvements for plan generation
-
-**Include in final report**:
-- **Discovery**: What was discovered during this execution
-- **Why it matters**: How this affects plan quality or execution
-- **Suggested improvement**: What should change in this agent
-- **Impact**: How this would help future planning tasks
-
-**Purpose**: Allow users to manually improve this agent based on real execution experience, without agent self-modification.
-
 ## RESPONSE FORMAT
 
 After completing all work, return findings in this format:
@@ -286,15 +267,6 @@ Created implementation plan for [issue name/number] with [N] actionable tasks.
 - Write: [count] invocations
 - Bash: [count] invocations
 - Glob: [count] invocations
-
-**Lessons Learned** (for future improvement):
-[If any insights discovered:]
-- Discovery: [what was discovered]
-- Why it matters: [explanation]
-- Suggested improvement: [what should change]
-- Impact: [how this would help]
-
-[If no lessons learned: "None - execution followed expected patterns"]
 
 **Details**:
 - Issue analyzed: [issue identifier]

@@ -28,15 +28,22 @@ Your task is to analyze an issue (from files or GitHub) and ensure it is ready f
 
 ## WORKFLOW (FOLLOW EXACTLY)
 
-### Step 1: Load Issue Information
+### Step 1: Validate Input and Load Issue Information
 
-**Objective**: Retrieve the issue content for analysis.
+**Objective**: Validate parameters and retrieve the issue content for analysis.
+
+**Parameter Validation**:
+1. Check issue reference is provided (file path, GitHub issue number, or directory)
+2. Validate format:
+   - File path: Must end with .md or .adoc
+   - GitHub issue: Must be number (e.g., "4" or "#4") or URL
+   - Directory: Must be valid path
 
 **Actions**:
-1. Determine issue source:
-   - If file path provided → Use Read tool to load file content
-   - If GitHub issue number provided → Use Bash tool: `gh issue view {number} --json title,body,labels,milestone --jq '.'`
-   - If directory path provided → Use Read tool to scan for issue-related files
+1. Determine issue source based on input format:
+   - **When input matches file pattern** (ends with .md or .adoc) → Use Read tool to load file content
+   - **When input is numeric or starts with #** (GitHub issue number) → Use Bash tool: `gh issue view {number} --json title,body,labels,milestone --jq '.'`
+   - **When input is directory path** (no file extension) → Use Read tool to scan for issue-related files (*.md, *-plan.md)
 
 2. Load issue description, referenced documents, and linked specifications
 
@@ -79,9 +86,8 @@ Your task is to analyze an issue (from files or GitHub) and ensure it is ready f
 **Objective**: Resolve any unclear aspects identified in Step 2.
 
 **Decision Point**:
-- Are there unclear aspects?
-  - **NO** → Proceed to Step 4
-  - **YES** → Continue with research/clarification
+- **When all 6 analysis questions have specific answers** (no gaps, unknowns, or ambiguities) → Proceed to Step 4
+- **When any analysis question lacks specific answer** (has gaps, unknowns, or ambiguities) → Continue with research/clarification
 
 **Actions for unclear aspects**:
 
@@ -113,8 +119,8 @@ Your task is to analyze an issue (from files or GitHub) and ensure it is ready f
 2. Rate confidence: 0-100%
 
 **Decision Point**:
-- 100% confident → Step 5
-- <100% → Identify unclear aspects, return Step 2
+- **When can answer: What exact changes to make? How to verify each criterion? What could go wrong?** → Proceed to Step 5
+- **When cannot answer any of above questions** → Identify specific unclear aspects, return to Step 2
 
 **Tools**: None (self-assessment)
 
@@ -157,11 +163,12 @@ Your task is to analyze an issue (from files or GitHub) and ensure it is ready f
 **Actions**:
 
 **For file-based issues**:
-1. If updating existing files:
+1. **When file already exists at identified path** (verified via Read in Step 1):
    - Use Edit tool to make precise changes
    - Preserve existing structure and formatting
-2. If creating new files:
-   - Use Write tool to create new documentation
+2. **When new documentation file is needed** (file does not exist at expected path):
+   - Use Write tool to create new documentation file
+   - Follow standard issue documentation format
 
 **For GitHub issues**:
 1. Use Bash tool: `gh issue edit {number} --body "$(cat <<'EOF'
@@ -207,9 +214,8 @@ EOF
 3. Count total issues found
 
 **Decision Point**:
-- Issues found > 0?
-  - **YES** → Return to Step 6 to fix issues
-  - **NO** → Quality criteria met, proceed to Step 8
+- **When any quality criterion shows Fail** (count of issues > 0) → Return to Step 6 to fix identified issues
+- **When all 6 quality criteria show Pass** (0 issues found) → Quality criteria met, proceed to Step 8
 
 **Loop Condition**: Continue Step 6 → Step 7 loop until all quality criteria pass
 
@@ -223,17 +229,15 @@ EOF
 
 **Objective**: If issue involves AsciiDoc files, document for caller to handle review.
 
-**Condition**: Issue contains or references .adoc files
-
 **Actions**:
-1. Check if any .adoc files are involved in the issue
+1. Check if any .adoc files are involved in the issue (search issue content for ".adoc" pattern)
 
-2. If YES:
+2. **When .adoc pattern found in issue content**:
    - Document list of .adoc files detected
    - Return this in final report (AsciiDoc Files Detected field)
    - Caller can delegate to /review-technical-docs if needed
 
-3. If NO:
+3. **When no .adoc pattern found in issue content**:
    - Mark as "None" in AsciiDoc Files Detected field
 
 **Tools**: None (detection only)
@@ -360,4 +364,4 @@ Focus improvements on:
 4. GitHub issue update strategies and best practices
 5. Quality criteria validation and edge case handling
 
-The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=task-reviewer` based on your report.
+The caller can then invoke `/plugin-update-agent agent-name=task-reviewer update="[your improvement]"` based on your report.

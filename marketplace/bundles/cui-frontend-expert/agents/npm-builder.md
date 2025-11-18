@@ -1,6 +1,6 @@
 ---
 name: npm-builder
-description: Central agent for executing npm/npx builds with output capture, issue categorization, and performance tracking
+description: Executes npm/npx builds with output capture, issue categorization, and performance tracking
 tools: Read, Write, Bash(npm:*), Bash(npx:*), Grep
 model: sonnet
 color: green

@@ -293,4 +293,4 @@ Suggested enhancement: [specific improvement]
 Expected impact: [benefit of change]
 ```
 
-The caller can then invoke the update tool using `/plugin-update-agent agent-name=diagnose-skill update="[your improvement]"` to apply your suggested enhancement.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=diagnose-skill` based on your report.

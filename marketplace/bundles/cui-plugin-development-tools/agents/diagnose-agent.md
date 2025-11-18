@@ -7,7 +7,7 @@ description: |
   - Input: agent_path=/path/to/agent.md
   - Output: Comprehensive agent quality report with issues categorized by severity
 
-tools: Read
+tools: Read, Glob
 model: sonnet
 color: blue
 ---

@@ -23,7 +23,7 @@ Focus improvements on:
 4. Enhanced validation of ID/Component/Message/Description accuracy
 5. Any lessons learned about LogMessages documentation workflows
 
-The caller can then invoke the update tool using `/plugin-update-agent agent-name=log-record-documenter update="[your improvement]"` to apply your suggested enhancement.
+The caller can then invoke the update tool using `/plugin-update-agent agent-name=log-record-documenter ` to apply your suggested enhancement.
 
 ## PARAMETERS
 

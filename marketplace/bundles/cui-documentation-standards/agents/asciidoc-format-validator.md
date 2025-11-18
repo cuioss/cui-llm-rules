@@ -1,13 +1,6 @@
 ---
 name: asciidoc-format-validator
-description: |
-  Validates AsciiDoc files for format compliance (section headers, lists, blank lines).
-
-  Specialized agent for format validation only.
-
-  Examples:
-  - User: "Validate AsciiDoc format for Requirements.adoc"
-    Assistant: "I'll use the asciidoc-format-validator agent to check format compliance"
+description: Validates AsciiDoc files for format compliance (section headers, lists, blank lines) using validation scripts
 
 tools: Read, Edit, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh), Glob, Skill
 model: sonnet
@@ -196,4 +189,4 @@ Focus improvements on:
 4. AsciiDoc format issue detection enhancements
 5. Report clarity and actionable recommendations
 
-The caller can then invoke `/plugin-update-agent agent-name=asciidoc-format-validator update="[your improvement]"` based on your report.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-format-validator` based on your report.

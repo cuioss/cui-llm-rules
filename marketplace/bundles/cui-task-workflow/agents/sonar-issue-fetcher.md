@@ -127,4 +127,4 @@ Focus improvements on:
 4. Error handling for API failures and network issues
 5. JSON output structure optimization and field completeness
 
-The caller can then invoke the update tool using `/plugin-update-agent agent-name=sonar-issue-fetcher update="[your improvement]"` to apply your suggested enhancement.
+The caller can then invoke the update tool using `/plugin-update-agent agent-name=sonar-issue-fetcher ` to apply your suggested enhancement.

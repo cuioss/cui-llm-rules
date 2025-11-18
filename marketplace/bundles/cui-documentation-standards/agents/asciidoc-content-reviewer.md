@@ -356,4 +356,4 @@ Focus improvements on:
 4. Metrics for ULTRATHINK effectiveness
 5. Context-aware analysis improvements for different document types
 
-The caller can then invoke `/plugin-update-agent agent-name=asciidoc-content-reviewer update="[your improvement]"` based on your report.
+The caller can then invoke `/cui-plugin-development-tools:plugin-update-agent agent-name=asciidoc-content-reviewer` based on your report.
