@@ -14,7 +14,7 @@ This bundle provides general-purpose utility tools for:
 
 These utilities are independent tools that can be used across different CUI projects and workflows.
 
-> **Note**: Maven build verification has been moved to the **cui-maven** bundle. Use `/cui-build-and-verify` from that bundle for Maven-related build tasks.
+> **Note**: Maven build verification has been moved to the **cui-maven** bundle. Use `/maven-build-and-fix` from that bundle for Maven-related build tasks.
 
 ## Components Included
 

@@ -9,11 +9,11 @@ Complete toolchain for creating and diagnosing Claude Code plugins. This bundle 
 This bundle includes the following components:
 
 ### Commands
-- **create-agent** - Scaffolds new agent with proper structure and documentation (includes Rule 6 validation - prevents Task tool in agents)
-- **create-command** - Scaffolds new command with standard format
-- **diagnose-agents** - Validates agent structure, AGENT.md format, and integration (includes Checks 6-7 for Rule 6/7 violations)
-- **diagnose-commands** - Validates command structure, markdown format, and metadata
-- **diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
+- **plugin-create-agent** - Scaffolds new agent with proper structure and documentation (includes Rule 6 validation - prevents Task tool in agents)
+- **plugin-create-command** - Scaffolds new command with standard format
+- **plugin-diagnose-agents** - Validates agent structure, AGENT.md format, and integration (includes Checks 6-7 for Rule 6/7 violations)
+- **plugin-diagnose-commands** - Validates command structure, markdown format, and metadata
+- **plugin-diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
 
 ### Agents (Rule 6 compliant)
 - **diagnose-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
@@ -32,10 +32,10 @@ This will make all commands available in your Claude Code environment.
 
 ### Example 1: Create New Agent
 
-Use create-agent to scaffold a new agent with proper structure:
+Use plugin-create-agent to scaffold a new agent with proper structure:
 
 ```
-/create-agent
+/plugin-create-agent
 
 Create a new agent named "http-client-tester" for testing HTTP client implementations.
 ```
@@ -50,10 +50,10 @@ The command will:
 
 ### Example 2: Create New Command
 
-Use create-command to scaffold a new command:
+Use plugin-create-command to scaffold a new command:
 
 ```
-/create-command
+/plugin-create-command
 
 Create a command "analyze-dependencies" for analyzing Maven dependency trees.
 ```
@@ -68,10 +68,10 @@ The command will:
 
 ### Example 3: Diagnose Agent Issues
 
-Use diagnose-agents to validate agent quality before publishing:
+Use plugin-diagnose-agents to validate agent quality before publishing:
 
 ```
-/diagnose-agents
+/plugin-diagnose-agents
 
 Diagnose all agents in the marketplace/agents/ directory.
 ```
@@ -92,9 +92,9 @@ The command will:
 Before publishing a plugin bundle, validate all components:
 
 ```
-/diagnose-agents
-/diagnose-commands
-/diagnose-skills
+/plugin-diagnose-agents
+/plugin-diagnose-commands
+/plugin-diagnose-skills
 
 Validate all components in my new plugin bundle at /path/to/my-bundle/
 ```
@@ -112,7 +112,7 @@ After diagnosis identifies issues, fix and re-check:
 
 ```
 # Fix identified issues in agent documentation
-/diagnose-agents
+/plugin-diagnose-agents
 
 Re-validate the http-client-tester agent after documentation fixes.
 ```

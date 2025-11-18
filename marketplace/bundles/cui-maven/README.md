@@ -120,10 +120,9 @@ cui-maven/
 ├── .claude-plugin/
 │   └── plugin.json          # Bundle manifest
 ├── agents/
-│   ├── maven-builder.md             # Build execution agent
-│   └── maven-project-builder.md     # Verification & fixing agent
+│   └── maven-builder.md     # Build execution agent
 ├── commands/
-│   └── cui-build-and-verify.md    # Build verification command
+│   └── maven-build-and-fix.md    # Build verification command
 ├── skills/
 │   └── cui-maven-rules/     # Maven standards skill
 │       ├── SKILL.md         # Skill definition
@@ -136,7 +135,7 @@ cui-maven/
 
 ### Design Principles
 
-- **Agent Delegation**: maven-project-builder delegates to maven-builder for build execution (single responsibility)
+- **Focused Agent**: maven-builder handles all build execution with configurable output modes (single responsibility)
 - **Automated Quality Checks**: Enforce quality gates through build verification
 - **Iterative Fix Workflow**: Automatically fix issues and re-run builds until clean
 - **Execution Time Tracking**: Monitor and update build duration expectations (handled by maven-builder)
@@ -222,7 +221,7 @@ Projects should define a `pre-commit` profile in their POM:
    - `/plugin-diagnose-skills` for skills
 
 4. Validate entire bundle:
-   - `/cui-diagnose-bundle cui-maven`
+   - `/plugin-diagnose-bundle cui-maven`
 
 ### Quality Standards
 
@@ -244,7 +243,7 @@ Test the bundle:
 /plugin-diagnose-skills scope=marketplace
 
 # Test entire bundle integration
-/cui-diagnose-bundle cui-maven
+/plugin-diagnose-bundle cui-maven
 ```
 
 ## Workflow Examples
@@ -252,33 +251,32 @@ Test the bundle:
 ### Basic Build Verification
 
 ```bash
-# User: "Can you run the full build?"
-# System invokes: maven-project-builder agent
-# maven-project-builder:
-#   1. Activates cui-maven-rules skill
-#   2. Delegates to maven-builder agent with outputMode="DEFAULT"
-#   3. maven-builder:
+# User invokes: /maven-build-and-fix
+# Command workflow:
+#   1. Invokes maven-builder agent with outputMode="STRUCTURED"
+#   2. maven-builder:
 #      - Reads .claude/run-configuration.md
 #      - Executes ./mvnw -Ppre-commit clean install
 #      - Captures output to timestamped file
-#      - Extracts errors/warnings with line numbers
+#      - Categorizes errors/warnings (compilation, tests, javadoc, etc.)
 #      - Tracks execution duration (updates if >10% change)
-#      - Returns: status, output file, errors/warnings
-#   4. Analyzes errors/warnings from maven-builder
-#   5. Fixes all issues (compilation, tests, JavaDoc, code warnings)
-#   6. Handles OpenRewrite markers
-#   7. Re-runs build (maven-builder) until clean
-#   8. Reports results
+#      - Returns: structured categorized issues
+#   3. Analyzes categorized issues
+#   4. Routes fixes to appropriate commands (e.g., /java-fix-javadoc)
+#   5. Re-runs maven-builder until build is clean
+#   6. Reports results
 ```
 
 ### Build with Automatic Commit
 
 ```bash
-# User: "/cui-build-and-verify push"
-# System:
-#   1. Delegates to maven-project-builder agent (full build)
-#   2. Delegates to commit-changes agent (commit and push)
-#   3. Reports consolidated results
+# User: "/maven-build-and-fix push"
+# Command workflow:
+#   1. Executes full build verification (maven-builder)
+#   2. Fixes all issues and re-runs until clean
+#   3. Commits changes via commit-changes agent
+#   4. Pushes to remote repository
+#   5. Reports consolidated results
 ```
 
 ### OpenRewrite Marker Handling
@@ -375,18 +373,18 @@ To contribute to this bundle:
   - Automatic duration tracking
   - Output capture to timestamped files
   - Non-prompting execution with simple redirection
-- **UPDATED**: maven-project-builder now delegates to maven-builder
-  - Removed direct Maven execution
-  - Focuses on analysis and fixing
+- **UPDATED**: `/maven-build-and-fix` command now uses maven-builder
+  - Delegates to maven-builder agent for build execution
+  - Focuses on issue analysis and routing fixes
   - Cleaner separation of concerns
-- **UPDATED**: task-executor documentation to prefer maven-builder/maven-project-builder
+- **UPDATED**: task-executor documentation to use maven-builder
 - **UPDATED**: Bundle README with delegation architecture
 
 ### Version 0.1.0 (Initial Release)
 
 - Initial bundle structure created
-- Created maven-project-builder agent consolidating Maven build functionality
-- Moved cui-build-and-verify command from cui-utilities
+- Created maven-builder agent for Maven build execution
+- Created maven-build-and-fix command for build verification
 - Created cui-maven-rules skill with complete Maven standards
 - Ready for comprehensive Maven workflow support
 
@@ -403,12 +401,12 @@ For issues, questions, or contributions:
 ## Related Bundles
 
 - **cui-utilities**: General utility commands and research capabilities
-- **cui-java-expert**: Java development standards bundle (maven-project-builder uses cui-javadoc skill for JavaDoc validation)
+- **cui-java-expert**: Java development standards bundle (maven-build-and-fix uses cui-javadoc skill for JavaDoc validation)
 
 ## Acknowledgments
 
 This bundle consolidates Maven-related functionality previously distributed across:
-- cui-utilities (cui-build-and-verify command)
+- cui-utilities (build verification commands)
 - standards/process (pom-maintenance.adoc)
 - standards/javascript (maven-integration-standards.adoc)
 

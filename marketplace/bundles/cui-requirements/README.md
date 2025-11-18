@@ -56,11 +56,10 @@ This bundle provides Claude Code with expert knowledge in creating, structuring,
 
 | Skill | Description |
 |-------|-------------|
-| `cui-requirements:requirements-documentation` | Standards for creating and maintaining requirements documents with SMART principles |
-| `cui-requirements:specification-documentation` | Standards for specification documents with proper structure and backtracking |
-| `cui-requirements:project-setup` | Standards for setting up documentation in new projects |
-| `cui-requirements:planning-documentation` | Standards for planning documents and task tracking |
-| `cui-requirements:implementation-linkage` | Standards for linking specifications to implementation code |
+| `requirements-authoring` | Standards for creating and maintaining requirements and specification documents with SMART principles, proper structure, and traceability |
+| `setup` | Standards for setting up documentation structure and initial documents in new projects |
+| `planning` | Standards for planning documents, task tracking, and status indicators |
+| `traceability` | Standards for maintaining bidirectional traceability between requirements, specifications, and implementation code |
 
 ## Key Features
 
