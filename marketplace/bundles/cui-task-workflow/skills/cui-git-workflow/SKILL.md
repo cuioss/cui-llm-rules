@@ -91,7 +91,7 @@ The `commit-changes` agent should load this skill to format commits:
 ### Step 1: Load Git Standards
 
 ```
-Skill: cui-git-workflow
+Skill: cui-task-workflow:cui-git-workflow
 ```
 
 This loads conventional commits format and guidelines.
@@ -111,7 +111,7 @@ Apply standards to generate commit message with:
 ### Step 1: Load Standards
 
 ```
-Skill: cui-git-workflow
+Skill: cui-task-workflow:cui-git-workflow
 ```
 
 ### Step 2: Validate Commit

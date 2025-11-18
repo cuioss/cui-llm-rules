@@ -86,7 +86,7 @@ This provides:
 
 **Tool Usage Patterns:**
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 ```
 - Detailed file operation patterns
 - Non-prompting tool usage
@@ -94,7 +94,7 @@ Skill: cui-diagnostic-patterns
 
 **Research Execution:**
 ```
-Task: research-best-practices
+Task: cui-utilities:research-best-practices
 ```
 - Comprehensive web research
 - Finding current best practices for technologies/frameworks
@@ -127,7 +127,7 @@ standards/
 ## Step 0: Load Development Guidelines
 
 ```
-Skill: cui-general-development-rules
+Skill: cui-utilities:cui-general-development-rules
 ```
 
 This loads core development principles including when to ask users, research requirements, and tool usage standards.
@@ -138,7 +138,7 @@ Before implementing, research current best practices:
 
 ```
 Task:
-  subagent_type: research-best-practices
+  subagent_type: cui-utilities:research-best-practices
   prompt: Research best practices for {feature/technology}
 ```
 ```
@@ -149,7 +149,7 @@ Task:
 ## Step 1: Load Development Rules
 
 ```
-Skill: cui-general-development-rules
+Skill: cui-utilities:cui-general-development-rules
 ```
 
 This ensures I follow core principles for tool usage, asking users when uncertain, and proper file operations.
@@ -159,7 +159,7 @@ This ensures I follow core principles for tool usage, asking users when uncertai
 For detailed file operation patterns:
 
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 ```
 ```
 

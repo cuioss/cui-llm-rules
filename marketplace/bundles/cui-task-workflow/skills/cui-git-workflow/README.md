@@ -57,7 +57,7 @@ This skill provides comprehensive standards for formatting git commit messages f
 ### Step 1: Load Git Standards
 
 ```
-Skill: cui-git-workflow
+Skill: cui-task-workflow:cui-git-workflow
 ```
 
 ### Step 2: Format Commits

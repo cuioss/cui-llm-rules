@@ -179,7 +179,7 @@ standards/
 ## Step 0: Load Task Planning Standards
 
 ```
-Skill: cui-task-planning
+Skill: cui-task-workflow:cui-task-planning
 ```
 
 This loads comprehensive task planning standards for issue implementation.
@@ -199,7 +199,7 @@ Follow issue-planning-standards.md to generate plan-issue-X.md with:
 ## Step 1: Load Task Planning Standards
 
 ```
-Skill: cui-task-planning
+Skill: cui-task-workflow:cui-task-planning
 ```
 
 ## Step 2: Structure Project Planning Document
@@ -217,7 +217,7 @@ Follow project-planning-standards.md to create doc/TODO.adoc with:
 ## Step 1: Load Task Planning Standards
 
 ```
-Skill: cui-task-planning
+Skill: cui-task-workflow:cui-task-planning
 ```
 
 ## Step 2: Create Refactoring Task List

@@ -105,11 +105,49 @@ Glob: pattern="*/SKILL.md", path=".claude/skills"
 - Display numbered list of all skills found
 - Let user select which to analyze or change scope
 
-### Step 3: Analyze Skills (Parallel)
+### Step 3: Group Skills by Bundle
 
-**For EACH skill discovered:**
+**CRITICAL**: Organize skills by bundle for sequential processing.
 
-Launch diagnose-skill agent:
+**Parse inventory from Step 2:**
+- Extract `bundles[]` array from inventory JSON
+- For each bundle, identify bundle name and collect all skills with their paths
+- Create bundle-to-skills mapping
+
+**Sort bundles:**
+1. **First**: `cui-plugin-development-tools` (always first)
+2. **Then**: All other bundles alphabetically by name
+
+**Example bundle order:**
+```
+1. cui-plugin-development-tools
+2. cui-documentation-standards
+3. cui-frontend-expert
+4. cui-java-expert
+5. cui-maven
+6. cui-task-workflow
+7. cui-utilities
+```
+
+**Display processing plan:**
+```
+Processing {total_bundles} bundles in order:
+1. cui-plugin-development-tools ({skill_count} skills)
+2. {bundle-name} ({skill_count} skills)
+...
+```
+
+### Step 4: Process Each Bundle Sequentially
+
+**CRITICAL**: Complete ALL steps for one bundle before moving to the next.
+
+**For EACH bundle in sorted order:**
+
+Display: `Processing bundle: {bundle_name} ({skill_count} skills)`
+
+**Step 4a: Analyze Bundle Skills**
+
+For all skills in current bundle:
 
 ```
 Task:
@@ -128,19 +166,18 @@ Task:
     This reduces token usage from ~300-400 to ~100-200 tokens per skill.
 ```
 
-**CRITICAL**: Launch ALL agents in PARALLEL (single message, multiple Task calls).
+**Launch skill analysis agents in parallel** (single message, multiple Task calls) for all skills in current bundle.
 
-**Collect results** from each agent as they complete.
+**Collect results** for this bundle's skills.
 
-**Token Optimization**: Streamlined output reduces response payload by ~60% (from ~8,100-10,800 to ~2,700-5,400 tokens for 27 skills).
+**Error Handling:**
+- If Task fails: Display warning with skill name and error, mark as "Analysis Failed", continue
+- If malformed response: Display warning, mark as "Malformed Response", continue
+- If timeout: Display warning, mark as "Timeout", continue
 
-### Step 4: Check Plugin References (Parallel)
+**Step 4b: Check Plugin References for Bundle**
 
-**CRITICAL**: Validate all plugin references in parallel with skill analysis.
-
-**For EACH skill discovered:**
-
-Launch analyze-plugin-references agent:
+For all skills in current bundle:
 
 ```
 Task:
@@ -160,111 +197,38 @@ Task:
     Return summary report with reference validation results.
 ```
 
-**CRITICAL**: Launch ALL reference validation agents in PARALLEL (single message, multiple Task calls) alongside diagnose-skill agents.
+**Launch reference validation agents in parallel** (single message, multiple Task calls) for all skills in current bundle.
 
-**Collect results** from each agent as they complete.
-
-**Aggregate reference findings:**
-Track for each skill: references_found, references_correct, references_fixed, references_ambiguous.
-Aggregate totals: skills_checked, total_references, correct, fixed, issues.
+**Collect results** for this bundle's reference validation.
 
 **Error Handling:**
 - If Task fails: Display warning with skill name and error, mark as "Reference Check Failed", continue
 - If unexpected format: Display warning, mark as "Reference Check Error", continue
-- Continue even if some reference checks fail
 
-**Performance Note**: Running reference validation in parallel with diagnose-skill (Step 3) optimizes token usage - both agent types process simultaneously rather than sequentially.
+**Aggregate reference findings for this bundle:**
+Track for each skill: references_found, references_correct, references_fixed, references_ambiguous.
+Bundle totals: skills_checked, total_references, correct, fixed, issues.
 
-### Step 5: Aggregate Results
+**Step 4c: Aggregate Results for Bundle**
 
-**Combine findings from all skills (diagnosis + reference checks):**
+**Combine findings for this bundle's skills:**
 
-```json
-{
-  "total_skills_analyzed": {count},
-  "skills_with_issues": {count},
-  "issue_summary": {
-    "critical": {total_count},
-    "warnings": {total_count},
-    "suggestions": {total_count}
-  },
-  "reference_validation": {
-    "skills_checked": {count},
-    "total_references": {count},
-    "references_correct": {count},
-    "references_fixed": {count},
-    "references_with_issues": {count}
-  },
-  "by_skill": {
-    "skill-name-1": {
-      "status": "Clean|Warnings|Critical",
-      "issues": {...},
-      "scores": {...},
-      "references": {
-        "found": {count},
-        "correct": {count},
-        "issues": {count}
-      }
-    },
-    ...
-  },
-  "overall_metrics": {
-    "avg_architecture_score": {score},
-    "avg_integrated_content_score": {score},
-    "skills_excellent": {count},
-    "skills_good": {count},
-    "skills_fair": {count},
-    "skills_poor": {count}
-  }
-}
-```
+Track bundle metrics:
+- `bundle_name`: Current bundle name
+- `total_skills_analyzed`: Count for this bundle
+- `skills_with_issues`: Count for this bundle
+- Issue counts: `critical`, `warnings`, `suggestions`
+- Reference stats: `total_references`, `correct`, `fixed`, `issues`
+- Quality scores: averages for architecture, integrated content
+- Per-skill data: status, issues, scores, reference counts
 
-### Step 6: Detect Cross-Skill Duplication (Optional)
+**Step 4d: Generate Bundle Summary Report**
 
-**When to Execute**: When `--check-cross-duplication` flag is provided
-
-**Purpose**: Identify content duplication BETWEEN different skills to recommend consolidation or skill invocation.
-
-**Prepare skill paths**:
-- Collect all skill paths from Step 2 (from discovered SKILL.md files)
-- Pass as array to cross-skill analyzer
-
-**Launch analyze-cross-skill-duplication agent**:
-
-```
-Task:
-  subagent_type: cui-plugin-development-tools:analyze-cross-skill-duplication
-  description: Detect cross-skill duplication
-  prompt: |
-    Analyze content duplication between all marketplace skills.
-
-    Parameters:
-    - skill_paths: [{array of absolute skill paths}]
-
-    Return complete JSON report with:
-    - Duplicate skill pairs with similarity percentages
-    - Specific duplicate sections with locations
-    - Consolidation recommendations
-    - Skill composition suggestions (Skill: invocations)
-```
-
-**Collect cross-skill analysis results**:
-- Receive JSON report from agent
-- Include in aggregated findings for summary report (Step 6)
-
-**Notes**:
-- This is an expensive O(n²) operation comparing all skill pairs
-- Only run when needed: before releases, monthly reviews, after adding skills
-- Agent compares skills with OTHER SKILLS only (not with /standards/ directory)
-- Distinguishes intentional overlap (different domains) from harmful duplication
-
-### Step 7: Generate Summary Report
-
-**Display:**
+**Display bundle summary:**
 
 ```
 ==================================================
-Skill Doctor - Analysis Complete
+Bundle: {bundle_name}
 ==================================================
 
 Skills Analyzed: {total}
@@ -276,88 +240,33 @@ Issue Statistics:
 - Critical: {count}
 - Warnings: {count}
 - Suggestions: {count}
-- Total: {count}
 
 Quality Scores:
 - Average Architecture: {score}/100
 - Average Integrated Content: {score}/100
 
 Reference Validation:
-- Skills checked: {skills_checked}
 - Total references: {total_references}
-- Correct: {references_correct}
-- Issues found: {references_with_issues}
+- Correct: {correct}
+- Fixed: {fixed}
+- Issues: {issues}
 
-By Skill:
+Per-Skill Summary:
 - {skill-1}: {status} | Arch: {score} | Content: {score} | Refs: {correct}/{found}
 - {skill-2}: {status} | Arch: {score} | Content: {score} | Refs: {correct}/{found}
 ...
-
-Recommendations:
-{if critical issues}
-⚠️ CRITICAL: {count} skills need immediate attention
-- {skill-name}: {issue summary}
-{endif}
-
-{if all clean}
-✅ All skills are well-formed and high quality!
-{endif}
-
-{if --check-cross-duplication flag set}
-==================================================
-Cross-Skill Duplication Analysis
-==================================================
-
-Duplicate Pairs Found: {count}
-- High similarity (>80%): {count} ⚠️
-- Moderate similarity (70-80%): {count} ℹ️
-
-Top Duplication Issues:
-1. {skill-a} ↔ {skill-b}: {similarity}% overlap
-   - Duplicate section: {section-name}
-   - Recommendation: {recommendation}
-
-2. {skill-c} ↔ {skill-d}: {similarity}% overlap
-   - Duplicate section: {section-name}
-   - Recommendation: {recommendation}
-
-Consolidation Opportunities:
-- {opportunity-1}
-- {opportunity-2}
-
-{if no cross-skill duplication}
-✅ No significant content duplication detected between skills!
-{endif}
-{endif}
 ```
 
-**If --save-report flag is set:**
-- Write the complete report above to `skills-diagnosis-report.md` in project root
-- Inform user: "Report saved to: skills-diagnosis-report.md"
+**Step 4e: Categorize Issues for Bundle ⚠️ FIX PHASE STARTS**
 
-**Default behavior (no flag):**
-- Display report only (as shown above)
-- Do NOT create any files
+**If any issues found in this bundle:**
 
-==================================================
-⚠️ CRITICAL: ANALYSIS PHASE COMPLETE
-==================================================
-
-You have completed PHASE 1 (Analysis).
-
-**YOU MUST NOW PROCEED TO PHASE 2 (Fix Workflow)**
-
-DO NOT STOP HERE. The analysis is useless without fixes.
-
-==================================================
-
-### Steps 8-11: Fix Workflow ⚠️ PHASE 2
-
-**For complete fix workflow (categorization, safe fixes, prompting, verification), see:**
-
+**Load fix workflow skill (once, if not already loaded):**
 ```
 Skill: cui-plugin-development-tools:cui-fix-workflow
 ```
+
+**Categorize issues for this bundle into Safe vs Risky:**
 
 **Skill-specific safe fix types:**
 - YAML frontmatter syntax errors
@@ -370,37 +279,187 @@ Skill: cui-plugin-development-tools:cui-fix-workflow
 2. **Integration Issues** - Orphaned files, workflow disconnection
 3. **Reference Problems** - Broken example references, unclear cross-references
 
-**Fix workflow steps** (from cui-fix-workflow skill):
-1. **Step 8**: Categorize issues (safe vs risky)
-2. **Step 9**: Apply safe fixes automatically (if auto-fix=true)
-3. **Step 10**: Prompt for risky fixes using AskUserQuestion
-4. **Step 11**: Verify fixes by re-running diagnose-skill
+**Step 4f: Apply Safe Fixes for Bundle**
+
+**When to execute**: If auto-fix=true (default) AND safe fixes exist in this bundle
+
+Apply safe fixes for skills in this bundle using Edit tool.
+
+Track: `bundle_safe_fixes_applied`, `by_type` (yaml, formatting, broken_references)
+
+**Step 4g: Prompt for Risky Fixes for Bundle**
+
+**When to execute**: If risky fixes exist in this bundle
+
+Use AskUserQuestion for risky fixes in this bundle.
+
+Group by categories: Duplication Issues, Integration Issues, Reference Problems
+
+Track: `bundle_risky_fixes_prompted`, `bundle_risky_fixes_applied`, `bundle_risky_fixes_skipped`
+
+**Step 4h: Verify Fixes for Bundle**
+
+**When to execute**: After any fixes applied in this bundle
+
+Re-run analysis on modified skills in this bundle.
+
+Track verification: `bundle_issues_resolved`, `bundle_issues_remaining`, `bundle_new_issues`
+
+**Display bundle verification results:**
+```
+==================================================
+Bundle {bundle_name} - Fixes Verified
+==================================================
+
+✅ {issues_resolved} issues resolved
+{if issues_remaining > 0}
+⚠️ {issues_remaining} issues remain
+{endif}
+```
+
+**Step 4i: Repeat for Next Bundle**
+
+**CRITICAL**: Return to Step 4 for the next bundle in sorted order.
+
+Only proceed to Step 5 when ALL bundles have been processed (analysis + fixes).
+
+### Step 5: Generate Overall Summary Report
+
+**Execute ONLY after all bundles have been processed.**
+
+**Aggregate cross-bundle metrics:**
+- Total skills analyzed across all bundles
+- Total issues found/resolved across all bundles
+- Bundle-by-bundle breakdown
+- Overall quality metrics
+
+**Display final summary:**
+```
+==================================================
+Skill Doctor - All Bundles Complete
+==================================================
+
+Bundles Processed: {total_bundles}
+Total Skills: {total_skills}
+
+Overall Statistics:
+- Skills clean: {count} ✅
+- Skills with warnings: {count} ⚠️
+- Skills with critical issues: {count} ❌
+
+Total Issues:
+- Critical: {count}
+- Warnings: {count}
+- Suggestions: {count}
+
+Fixes Applied:
+- Safe fixes: {count}
+- Risky fixes: {count}
+- Issues resolved: {count}
+
+By Bundle:
+- cui-plugin-development-tools: {skills} skills | {issues} issues | {fixes} fixed
+- {bundle-2}: {skills} skills | {issues} issues | {fixes} fixed
+...
+
+{if all clean}
+✅ All skills across all bundles are well-formed and high quality!
+{endif}
+```
+
+**If --save-report flag is set:**
+- Write complete cross-bundle report to `skills-diagnosis-report.md`
+- Inform user: "Report saved to: skills-diagnosis-report.md"
+
+### Step 6: Detect Cross-Skill Duplication (Optional)
+
+**When to Execute**: When `--check-cross-duplication` flag is provided
+
+**Execute AFTER Step 5 (all bundles processed)**
+
+**Purpose**: Identify content duplication BETWEEN different skills across ALL bundles.
+
+**Launch analyze-cross-skill-duplication agent**:
+
+```
+Task:
+  subagent_type: cui-plugin-development-tools:analyze-cross-skill-duplication
+  description: Detect cross-skill duplication
+  prompt: |
+    Analyze content duplication between all marketplace skills.
+
+    Parameters:
+    - skill_paths: [{array of absolute skill paths from ALL bundles}]
+
+    Return complete JSON report with duplication findings.
+```
+
+**Display cross-skill duplication report**:
+```
+==================================================
+Cross-Skill Duplication Analysis (All Bundles)
+==================================================
+
+Duplicate Pairs Found: {count}
+- High similarity (>80%): {count} ⚠️
+- Moderate similarity (70-80%): {count} ℹ️
+
+Top Duplication Issues:
+1. {skill-a} ↔ {skill-b}: {similarity}% overlap
+   - Recommendation: {recommendation}
+
+{if no cross-skill duplication}
+✅ No significant content duplication detected!
+{endif}
+```
+
+**Notes**:
+- This is an expensive O(n²) operation comparing all skill pairs across all bundles
+- Only run when needed: before releases, monthly reviews, after adding skills
+
 
 ## ARCHITECTURE
 
-This command is a parallel orchestrator with token optimizations:
-- Discovers skills using Glob (non-prompting)
-- Launches diagnose-skill agents in parallel (for each skill)
-- Uses streamlined JSON output format (issues only) to reduce token usage
-- Optionally launches analyze-cross-skill-duplication (when --check-cross-duplication flag set)
-- Aggregates and reports results
+This command is a bundle-by-bundle orchestrator designed to prevent token overload by processing marketplace resources sequentially by bundle.
 
-**Token Optimization:**
-- Streamlined output reduces response payload by ~60%
-- Current scale (27 skills) is manageable without batching (~33,000 tokens peak)
-- If marketplace grows to 40+ skills, batching should be added (similar to plugin-diagnose-commands/agents)
+**Key Architecture Characteristics:**
+- **Bundle-by-bundle processing**: Process one bundle completely before moving to next
+- **Bundle ordering**: cui-plugin-development-tools first, then alphabetically
+- **Complete workflow per bundle**: Analysis → Reference validation → Categorize → Fix → Verify
+- **Token-optimized**: Streamlined output, scoped processing
+- **Parallel execution within bundle**: All skills for a bundle run in parallel
+- **Sequential across bundles**: Next bundle only starts after previous is complete
+- **Optional cross-skill duplication**: Runs AFTER all bundles (Step 6) when flag provided
 
-All analysis logic is in specialized agents:
+**Processing Flow:**
+1. Discover all bundles and sort (cui-plugin-development-tools first, then alphabetical)
+2. For each bundle:
+   - Analyze all skills in bundle (parallel)
+   - Validate all references in bundle (parallel)
+   - Aggregate bundle results
+   - Generate bundle report
+   - Categorize issues for bundle
+   - Apply safe fixes for bundle
+   - Prompt for risky fixes for bundle
+   - Verify fixes for bundle
+3. Generate overall cross-bundle summary
+4. Optional: Detect cross-skill duplication across ALL skills (when --check-cross-duplication flag set)
+
+**All analysis logic is in specialized agents:**
 - **analyze-standards-file**: Single file quality analysis
 - **analyze-integrated-standards**: Cross-file quality within a skill
 - **diagnose-skill**: Skill orchestrator (coordinates above two agents, supports streamlined output)
-- **analyze-cross-skill-duplication**: Cross-skill duplication detection (optional, O(n²))
+- **analyze-plugin-references**: Plugin reference validation
+- **analyze-cross-skill-duplication**: Cross-skill duplication detection (optional, O(n²), runs after all bundles)
 
 ## TOOL USAGE
 
-- **Glob**: Discover skills (non-prompting)
-- **Task**: Launch diagnose-skill agents (parallel)
-- **Skill**: Load diagnostic patterns
+- **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery with complete inventory)
+- **Glob**: Discover skills in global/project scopes (non-prompting)
+- **Skill**: Load diagnostic patterns, marketplace architecture, and fix workflow patterns
+- **Task**: Launch diagnose-skill and analyze-plugin-references agents (parallel within bundle)
+- **Edit**: Apply safe and approved risky fixes
+- **AskUserQuestion**: Prompt for risky fix approval per bundle
 
 ## RELATED
 

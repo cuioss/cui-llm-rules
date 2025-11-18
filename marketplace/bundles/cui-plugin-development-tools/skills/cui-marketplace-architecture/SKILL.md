@@ -58,6 +58,26 @@ Standards for marketplace component architecture ensuring self-contained skills,
      Read: standards/bundling-patterns.md
      ```
 
+   - If analyzing agents for quality patterns:
+     ```
+     Read: standards/agent-analysis-patterns.md
+     ```
+
+   - If analyzing commands for quality patterns:
+     ```
+     Read: standards/command-analysis-patterns.md
+     ```
+
+   - If defining agent quality metrics:
+     ```
+     Read: standards/agent-quality-standards.md
+     ```
+
+   - If defining command quality metrics:
+     ```
+     Read: standards/command-quality-standards.md
+     ```
+
 ### Step 2: Apply Architecture Rules
 
 **When to Execute**: During component creation or validation

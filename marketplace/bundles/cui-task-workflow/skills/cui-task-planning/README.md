@@ -101,7 +101,7 @@ Standards are designed for:
 ### Step 1: Load Task Planning Standards
 
 ```
-Skill: cui-task-planning
+Skill: cui-task-workflow:cui-task-planning
 ```
 
 ### Step 2: Determine Use Case

@@ -131,7 +131,7 @@ When this skill is activated, it loads all tool usage patterns. Agents and comma
 Any agent or command that performs file operations should activate this skill:
 
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 ```
 
 Then reference patterns throughout their workflows:

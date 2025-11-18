@@ -167,49 +167,7 @@ AskUserQuestion:
 
 ## Tracking Structure
 
-Track prompting and user responses:
-
-```json
-{
-  "risky_fixes_prompted": {count},
-  "risky_fixes_applied": {count},
-  "risky_fixes_skipped": {count},
-  "fixes_by_category": {
-    "duplication": {
-      "prompted": {count},
-      "applied": {count},
-      "skipped": {count}
-    },
-    "integration": {
-      "prompted": {count},
-      "applied": {count},
-      "skipped": {count}
-    },
-    "references": {
-      "prompted": {count},
-      "applied": {count},
-      "skipped": {count}
-    }
-  },
-  "applied_fixes": [
-    {
-      "category": "duplication",
-      "issue": "Duplicate content in two files",
-      "component": "cui-java-core",
-      "location": "standards/java-modern-features.md:104"
-    }
-  ],
-  "skipped_fixes": [
-    {
-      "category": "integration",
-      "issue": "Orphaned file not referenced",
-      "component": "cui-css",
-      "location": "examples/legacy-example.md"
-    }
-  ],
-  "skipped_categories": ["references"]
-}
-```
+Track prompting and user responses using the JSON structures defined in **tracking-patterns.md**. See that file for the complete risky fixes tracking schema including prompted/applied/skipped counts and detailed fix listings.
 
 ## Error Handling
 

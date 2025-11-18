@@ -279,33 +279,7 @@ For each issue found:
 
 ## Tracking Structure
 
-Track categorization results:
-
-```json
-{
-  "total_issues": {count},
-  "safe_fixes": {
-    "count": {count},
-    "by_type": {
-      "yaml_fixes": {count},
-      "formatting_fixes": {count},
-      "reference_fixes": {count},
-      "obsolete_content": {count}
-    }
-  },
-  "risky_fixes": {
-    "count": {count},
-    "by_category": {
-      "duplication": {count},
-      "integration": {count},
-      "references": {count},
-      "zero_information": {count},
-      "conflicts": {count},
-      "architectural": {count}
-    }
-  }
-}
-```
+Track categorization results using the JSON structures defined in **tracking-patterns.md**. See that file for the complete categorization tracking schema.
 
 ## Component-Specific Variations
 

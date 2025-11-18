@@ -205,20 +205,6 @@ Before completing the task:
    - [ ] %s used for substitutions
    - [ ] No System.out or System.err
 
-6. **Run build and tests**:
-   ```
-   Task:
-     subagent_type: maven-builder
-     description: Build and verify project
-     prompt: |
-       Execute Maven build to verify all tests pass and code compiles correctly.
-
-       Parameters:
-       - command: clean verify
-
-       CRITICAL: Wait for build to complete. Inspect results and respond to any failures.
-   ```
-
 ### Step 7: Report Results
 
 Provide summary of:

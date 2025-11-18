@@ -65,7 +65,7 @@ Agent asks: "What error handling approach would you prefer?
 
 ```
 Task:
-  subagent_type: research-best-practices
+  subagent_type: cui-utilities:research-best-practices
   description: Research {topic} best practices
   prompt: |
     Research current best practices for {specific topic}.
@@ -94,14 +94,14 @@ Task:
 **Researching Java Testing Practices:**
 ```
 Task:
-  subagent_type: research-best-practices
+  subagent_type: cui-utilities:research-best-practices
   prompt: Research best practices for Java unit testing with JUnit 5
 ```
 
 **Researching CDI Patterns:**
 ```
 Task:
-  subagent_type: research-best-practices
+  subagent_type: cui-utilities:research-best-practices
   prompt: Research current CDI (Contexts and Dependency Injection) best practices for Quarkus applications
 ```
 
@@ -164,7 +164,7 @@ CUI projects typically use 80% line/branch coverage."
 
 For complete tool usage patterns, see the **cui-diagnostic-patterns skill**:
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 ```
 
 This skill provides:
@@ -386,8 +386,8 @@ SlashCommand: /command-2
    ```
 3. Execute Step 2: "Load Standards"
    ```
-   Skill: cui-diagnostic-patterns
-   Skill: cui-marketplace-architecture
+   Skill: cui-utilities:cui-diagnostic-patterns
+   Skill: cui-plugin-development-tools:cui-marketplace-architecture
    ```
 4. Execute Step 3: "Read Current Command"
    ```
@@ -418,7 +418,7 @@ After executing a SlashCommand workflow, you should have:
 **Step 0: Load General Development Rules**
 
 ```
-Skill: cui-general-development-rules
+Skill: cui-utilities:cui-general-development-rules
 ```
 
 This loads all core principles to guide your work.
@@ -432,7 +432,7 @@ This loads all core principles to guide your work.
 **Step 2: Plan File Operations**
 
 - Use proper tools (Principle 4)
-- For patterns, reference: `Skill: cui-diagnostic-patterns`
+- For patterns, reference: `Skill: cui-utilities:cui-diagnostic-patterns`
 
 **Step 3: Check Document Needs**
 
@@ -462,13 +462,13 @@ This loads all core principles to guide your work.
 **research-best-practices agent** - For comprehensive web research:
 ```
 Task:
-  subagent_type: research-best-practices
+  subagent_type: cui-utilities:research-best-practices
   prompt: Research {topic}
 ```
 
 **cui-diagnostic-patterns skill** - For detailed tool usage patterns:
 ```
-Skill: cui-diagnostic-patterns
+Skill: cui-utilities:cui-diagnostic-patterns
 ```
 
 ## Anti-Patterns

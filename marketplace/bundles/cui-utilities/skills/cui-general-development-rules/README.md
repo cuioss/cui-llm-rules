@@ -77,7 +77,7 @@ All CUI development work follows these rules:
 ### Step 0: Load Development Guidelines
 
 ```
-Skill: cui-general-development-rules
+Skill: cui-utilities:cui-general-development-rules
 ```
 
 This loads core principles for when to ask users, research requirements, and proper tool usage.
@@ -158,7 +158,7 @@ Following cui-general-development-rules: Research current best practices.
 Launching research-best-practices agent to find latest best practices for {technology}.
 
 Task:
-  subagent_type: research-best-practices
+  subagent_type: cui-utilities:research-best-practices
   prompt: Research best practices for {technology/framework}
 ```
 

@@ -25,67 +25,34 @@ Defines the patterns for verifying that fixes were applied correctly and didn't 
 
 ### For Skills
 
-Re-run diagnose-skill agent on modified skills:
-
-```
-Task:
-  subagent_type: diagnose-skill
-  description: Verify fixes for {skill-name}
-  prompt: |
-    Re-analyze this skill after fixes applied.
-
-    Parameters:
-    - skill_path: {absolute_path_to_skill}
-
-    Return complete JSON report with all issues found.
-```
+After modifying a skill, re-run the diagnose-skill analysis agent to verify:
+- Pass the absolute path to the modified skill
+- Request complete JSON report with all issues found
+- Compare results with pre-fix analysis
 
 ### For Agents
 
-Re-run diagnose-agent agent on modified agents:
-
-```
-Task:
-  subagent_type: diagnose-agent
-  description: Verify fixes for {agent-name}
-  prompt: |
-    Re-analyze this agent after fixes applied.
-
-    Parameters:
-    - agent_path: {absolute_path_to_agent}
-
-    Return complete JSON report with all issues found.
-```
+After modifying an agent, re-run the diagnose-agent analysis agent to verify:
+- Pass the absolute path to the modified agent
+- Request complete JSON report with all issues found
+- Compare results with pre-fix analysis
 
 ### For Commands
 
-Re-run diagnose-command agent on modified commands:
-
-```
-Task:
-  subagent_type: diagnose-command
-  description: Verify fixes for {command-name}
-  prompt: |
-    Re-analyze this command after fixes applied.
-
-    Parameters:
-    - command_path: {absolute_path_to_command}
-
-    Return complete JSON report with all issues found.
-```
+After modifying a command, re-run the diagnose-command analysis agent to verify:
+- Pass the absolute path to the modified command
+- Request complete JSON report with all issues found
+- Compare results with pre-fix analysis
 
 ## Parallel Re-Analysis
 
 When multiple components were modified:
 
-**Launch all re-analysis agents in PARALLEL** (single message, multiple Task calls) for efficiency.
-
-```
-# Example: 3 skills modified
-Task: subagent_type=diagnose-skill, skill_path=skill-1
-Task: subagent_type=diagnose-skill, skill_path=skill-2
-Task: subagent_type=diagnose-skill, skill_path=skill-3
-```
+**Launch all re-analysis agents in PARALLEL** for efficiency:
+- Invoke diagnosis agents concurrently in a single message
+- Each agent analyzes one modified component
+- Collect all results before comparing metrics
+- Example: If 3 skills were modified, launch 3 diagnose-skill agents in parallel
 
 ## Before/After Comparison
 

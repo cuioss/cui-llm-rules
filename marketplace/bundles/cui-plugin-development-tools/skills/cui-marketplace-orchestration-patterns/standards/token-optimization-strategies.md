@@ -25,8 +25,7 @@ Step 3b: Process Commands in Batches
 For each batch of 5 commands:
   Task: diagnose-command
     prompt: |
-      Analyze command X using these standards:
-      [Insert pre-loaded standards here]
+      Analyze command X using pre-loaded standards from memory.
 ```
 
 ### Benefits
