@@ -1,8 +1,8 @@
 ---
 name: diagnose-command
-description: Analyzes command or agent files for bloat, clarity, structure, and anti-bloat compliance. Validates Pattern 22 (self-invocation rules) for agents.
+description: Analyzes command/agent files for bloat, quality, and anti-bloat compliance. Validates Pattern 22 for agents.
 
-tools: Read
+tools: [Read]
 model: sonnet
 color: green
 ---

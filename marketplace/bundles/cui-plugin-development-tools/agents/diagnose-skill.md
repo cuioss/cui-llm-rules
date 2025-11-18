@@ -7,7 +7,7 @@ description: |
   - Input: skill_path=/path/to/skill
   - Output: Comprehensive skill quality report with issues categorized by severity
 
-tools: Read, Grep, Glob
+tools: [Read, Grep, Glob]
 model: sonnet
 color: orange
 ---
@@ -274,7 +274,7 @@ Return minimal JSON (skills with issues):
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with improvements discovered during analysis.
+**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with improvements discovered during analysis. The caller can update this agent using `/plugin-update-agent agent-name=diagnose-skill update="[improvement]"`.
 
 Focus improvements on:
 1. YAML frontmatter validation logic and error detection
@@ -293,4 +293,3 @@ Suggested enhancement: [specific improvement]
 Expected impact: [benefit of change]
 ```
 
-The caller can then invoke `/plugin-update-agent agent-name=diagnose-skill update="[improvement]"` based on your report.

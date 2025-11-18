@@ -1,13 +1,6 @@
 ---
 name: asciidoc-link-verifier
-description: |
-  Verifies links and cross-references in AsciiDoc files (file links, anchors, xrefs).
-
-  Specialized agent for link verification only.
-
-  Examples:
-  - User: "Verify links in Requirements.adoc"
-    Assistant: "I'll use the asciidoc-link-verifier agent to check all links and cross-references"
+description: Verifies links and cross-references in AsciiDoc files (file links, anchors, xrefs). Specialized agent for link verification only.
 
 tools: Read, Edit, Bash(mkdir:*), Bash(python3:*), Bash(realpath:*), Glob, Skill
 model: sonnet
