@@ -70,12 +70,12 @@ This provides architecture rules and validation patterns for marketplace compone
 
 **For marketplace scope (default):**
 
-Execute plugin-inventory command with type filter:
+Execute plugin-inventory command to get complete marketplace inventory:
 ```
-SlashCommand: /plugin-inventory --type=agents --json
+SlashCommand: /plugin-inventory --json
 ```
 
-**Token Optimization:** Using --type=agents returns only agents, reducing JSON payload size.
+**CRITICAL:** Must get complete inventory (agents, commands, AND skills) because analyze-plugin-references agents need skill data to validate Skill invocations.
 
 Parse JSON output:
 - Extract `bundles[]` array from JSON response
@@ -111,7 +111,7 @@ Glob: pattern="*.md", path=".claude/agents"
 
 ### Step 2a: Load Analysis Standards (Once)
 
-list java**CRITICAL**: Activate marketplace architecture skill to load agent analysis standards.
+**CRITICAL**: Activate marketplace architecture skill to load agent analysis standards.
 
 **Activate skill:**
 ```
@@ -197,7 +197,10 @@ Task:
 
     Parameters:
     - path: {absolute_path_to_agent}
-    - marketplace_inventory: {json_inventory_from_step_2}
+    - marketplace_inventory: {complete_json_inventory_from_step_2}
+
+    IMPORTANT: marketplace_inventory must contain COMPLETE inventory (agents, commands, AND skills) from Step 2's /plugin-inventory --json call.
+    This complete data is required to validate Skill invocations and cross-references between all resource types.
     - auto-fix: true  # Auto-fix deterministic reference issues (missing/incorrect bundle prefixes)
 
     IMPORTANT: marketplace_inventory is the JSON output from Step 2's /plugin-inventory --json call.

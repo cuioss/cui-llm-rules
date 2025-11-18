@@ -91,12 +91,12 @@ This skill provides command quality standards and analysis patterns used through
 
 **For marketplace scope (default):**
 
-Execute plugin-inventory command with type filter:
+Execute plugin-inventory command to get complete marketplace inventory:
 ```
-SlashCommand: /plugin-inventory --type=commands --json
+SlashCommand: /plugin-inventory --json
 ```
 
-**Token Optimization:** Using --type=commands returns only commands, reducing JSON payload size.
+**CRITICAL:** Must get complete inventory (agents, commands, AND skills) because analyze-plugin-references agents need skill data to validate Skill invocations.
 
 Parse JSON output:
 - Extract `bundles[]` array from JSON response
@@ -170,11 +170,11 @@ Glob: pattern="*.md", path=".claude/commands"
 
        Parameters:
        - path: {absolute_path_to_command}
-       - marketplace_inventory: {json_inventory_from_step_2}
+       - marketplace_inventory: {complete_json_inventory_from_step_3}
        - auto-fix: true  # Auto-fix deterministic reference issues (missing/incorrect bundle prefixes)
 
-       IMPORTANT: marketplace_inventory is the JSON output from Step 2's /plugin-inventory --json call.
-       Use this to validate references without re-discovering marketplace resources.
+       IMPORTANT: marketplace_inventory must contain COMPLETE inventory (agents, commands, AND skills) from Step 3's /plugin-inventory --json call.
+       This complete data is required to validate Skill invocations and cross-references between all resource types.
 
        Return complete reference analysis with all issues found.
    ```
