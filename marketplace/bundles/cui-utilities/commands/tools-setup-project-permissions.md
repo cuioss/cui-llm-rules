@@ -99,7 +99,6 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 - `SlashCommand(/plugin-diagnose-commands:*)`
 - `SlashCommand(/plugin-diagnose-metadata:*)`
 - `SlashCommand(/plugin-diagnose-skills:*)`
-- `SlashCommand(/plugin-inventory:*)`
 - `SlashCommand(/plugin-update-agent:*)`
 - `SlashCommand(/plugin-update-command:*)`
 - `SlashCommand(/pr-fix-sonar-issues:*)`

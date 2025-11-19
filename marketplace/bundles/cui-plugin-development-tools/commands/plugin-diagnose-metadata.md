@@ -81,18 +81,26 @@ This provides architecture rules and validation patterns for marketplace compone
 Discovering marketplace bundles...
 ```
 
-**Run plugin-inventory to discover all bundles:**
+**Run plugin-inventory-scanner agent to discover all bundles:**
 ```
-SlashCommand: /plugin-inventory --json
+Task:
+  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
+  description: Scan marketplace for all resources
+  prompt: |
+    Scan the marketplace directory structure and return complete inventory.
+
+    scope: marketplace
+    resourceTypes: null
+    includeDescriptions: false
 ```
 
-Parse JSON output:
+Parse JSON output from agent:
 - Extract `bundles[]` array
 - For each bundle: Extract name, path, agents[], commands[], skills[]
 - Track `bundles_discovered` count
 
 **Error handling:**
-- If SlashCommand fails: Display "Failed to discover bundles: {error}" and abort
+- If agent fails: Display "Failed to discover bundles: {error}" and abort
 - If JSON parse fails: Display "Invalid inventory format" and abort
 
 ### Step 2: Validate All Bundle Metadata
@@ -395,7 +403,7 @@ Configuration Status: {✓ HEALTHY | ⚠ NEEDS ATTENTION | ✗ ERRORS REMAIN}
 ## CRITICAL RULES
 
 **Discovery:**
-- Use /plugin-inventory as source of truth for component discovery
+- Use cui-plugin-development-tools:plugin-inventory-scanner agent as source of truth for component discovery
 - Never use Bash for file discovery - only Glob for validation
 
 **Validation:**
@@ -418,7 +426,7 @@ Configuration Status: {✓ HEALTHY | ⚠ NEEDS ATTENTION | ✗ ERRORS REMAIN}
 - Continue processing even if individual bundles fail
 
 **Error Handling:**
-- If plugin-inventory fails: Abort (can't proceed without discovery)
+- If plugin-inventory-scanner agent fails: Abort (can't proceed without discovery)
 - If individual bundle Read fails: Log error, skip bundle, continue
 - If Edit fails: Log error, mark fix as failed, continue
 - Non-blocking failures for individual bundles
@@ -432,7 +440,7 @@ Configuration Status: {✓ HEALTHY | ⚠ NEEDS ATTENTION | ✗ ERRORS REMAIN}
 ## STATISTICS TRACKING
 
 Track throughout workflow:
-- `bundles_discovered`: Count from plugin-inventory
+- `bundles_discovered`: Count from plugin-inventory-scanner agent
 - `bundles_analyzed`: Bundles successfully examined
 - `plugin_json_issues`: Component + schema issues found
 - `marketplace_json_issues`: Registry issues found
@@ -460,7 +468,7 @@ Display all statistics in final summary.
 
 ## RELATED COMMANDS
 
-- `/plugin-inventory` - Discovers all marketplace resources (used internally)
+- `cui-plugin-development-tools:plugin-inventory-scanner` agent - Discovers all marketplace resources (used internally)
 - `/plugin-diagnose-skills` - Validates skill quality and standards
 - `/plugin-diagnose-commands` - Validates command quality and structure
 - `/plugin-diagnose-agents` - Validates agent quality and tool usage

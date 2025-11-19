@@ -38,7 +38,7 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
 ## PARAMETERS
 
 **path** (required) - Path to agent or command file to analyze
-**marketplace_inventory** (required) - JSON inventory from /plugin-inventory --json containing all marketplace bundles, agents, commands, and skills
+**marketplace_inventory** (required) - JSON inventory from cui-plugin-development-tools:plugin-inventory-scanner agent containing all marketplace bundles, agents, commands, and skills
 **auto-fix** (optional, default: true) - Automatically fix references when confident
 
 ## WORKFLOW
@@ -53,7 +53,7 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
 
 **Error Handling:**
 - If path not provided: "ERROR: path parameter required"
-- If marketplace_inventory not provided: "ERROR: marketplace_inventory parameter required - pass JSON from /plugin-inventory --json"
+- If marketplace_inventory not provided: "ERROR: marketplace_inventory parameter required - pass JSON from cui-plugin-development-tools:plugin-inventory-scanner agent"
 - If marketplace_inventory invalid: "ERROR: marketplace_inventory must be JSON object with 'bundles' array"
 - If file not found: "ERROR: File not found: {path}"
 - If not agent/command: "ERROR: File must be in agents/ or commands/ directory"

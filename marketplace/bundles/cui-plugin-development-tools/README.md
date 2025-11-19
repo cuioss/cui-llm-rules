@@ -18,7 +18,6 @@ This bundle includes the following components:
 - **plugin-diagnose-commands** - Validates command structure, markdown format, and metadata
 - **plugin-diagnose-metadata** - Diagnose and fix all metadata files (bundle plugin.json and marketplace.json)
 - **plugin-diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
-- **plugin-inventory** - Discovers and catalogs all marketplace resources with names and paths
 - **plugin-maintain-readme** - Analyze and update all README files to reflect current marketplace state
 - **plugin-update-agent** - Update an agent with improvements, verify quality, and prevent duplication
 - **plugin-update-command** - Update a command with improvements, verify quality, and prevent duplication
@@ -32,6 +31,7 @@ This bundle includes the following components:
 - **diagnose-agent** - Analyzes agent files for bloat, quality, and anti-bloat compliance
 - **diagnose-command** - Analyzes command/agent files for bloat, quality, and anti-bloat compliance
 - **diagnose-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
+- **plugin-inventory-scanner** - Scans marketplace directories and returns structured inventory of bundles, agents, commands, and skills (focused scanner - file discovery only)
 
 ### Skills
 - **cui-fix-workflow** - Common fix workflow patterns for diagnosis commands including categorization, safe fixes, prompting, and verification

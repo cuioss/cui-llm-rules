@@ -75,18 +75,26 @@ Skill: cui-utilities:cui-diagnostic-patterns
 Loading marketplace inventory...
 ```
 
-**Run plugin-inventory to discover all bundles:**
+**Run plugin-inventory-scanner agent to discover all bundles:**
 ```
-SlashCommand: /plugin-inventory --json --include-descriptions
+Task:
+  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
+  description: Scan marketplace with descriptions
+  prompt: |
+    Scan the marketplace directory structure and return complete inventory with descriptions.
+
+    scope: marketplace
+    resourceTypes: null
+    includeDescriptions: true
 ```
 
-Parse JSON output:
+Parse JSON output from agent:
 - Extract `bundles[]` array
 - For each bundle: Extract name, path, agents[], commands[], skills[] with descriptions
 - Track `bundles_discovered` count
 
 **Error handling:**
-- If SlashCommand fails: Display "Failed to load inventory: {error}" and abort
+- If agent fails: Display "Failed to load inventory: {error}" and abort
 - If JSON parse fails: Display "Invalid inventory format" and abort
 
 ### Step 2: For Each Bundle, Analyze README.md
@@ -352,8 +360,8 @@ Documentation Status: {✓ UP-TO-DATE | ⚠ PARTIAL | ✗ ERRORS}
 ## CRITICAL RULES
 
 **Discovery:**
-- Use /plugin-inventory as source of truth for actual components
-- Use --include-descriptions to get component descriptions from YAML frontmatter
+- Use cui-plugin-development-tools:plugin-inventory-scanner agent as source of truth for actual components
+- Use includeDescriptions=true to get component descriptions from YAML frontmatter
 - Never fabricate component names or descriptions
 
 **Analysis:**
@@ -390,7 +398,7 @@ Documentation Status: {✓ UP-TO-DATE | ⚠ PARTIAL | ✗ ERRORS}
 ## STATISTICS TRACKING
 
 Track throughout workflow:
-- `bundles_discovered`: Count from plugin-inventory
+- `bundles_discovered`: Count from plugin-inventory-scanner agent
 - `bundles_analyzed`: Bundles successfully examined
 - `readmes_updated`: Total README files modified
 - `components_added`: Missing components added to READMEs
@@ -411,7 +419,7 @@ Processes all bundle READMEs and project root README.adoc automatically.
 
 ## RELATED COMMANDS
 
-- `/plugin-inventory` - Discovers all marketplace resources (used internally)
+- `cui-plugin-development-tools:plugin-inventory-scanner` agent - Discovers all marketplace resources (used internally)
 - `/plugin-diagnose-metadata` - Validates metadata consistency
 - `/plugin-create-bundle` - Creates bundles with initial README
 - `/doc-review-technical-docs` - Reviews documentation quality

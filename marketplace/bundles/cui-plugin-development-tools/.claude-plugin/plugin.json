@@ -20,7 +20,6 @@
     "./commands/plugin-diagnose-commands.md",
     "./commands/plugin-diagnose-metadata.md",
     "./commands/plugin-diagnose-skills.md",
-    "./commands/plugin-inventory.md",
     "./commands/plugin-update-agent.md",
     "./commands/plugin-update-command.md"
   ],
@@ -37,6 +36,7 @@
     "./agents/architectural-validator.md",
     "./agents/diagnose-agent.md",
     "./agents/diagnose-command.md",
-    "./agents/diagnose-skill.md"
+    "./agents/diagnose-skill.md",
+    "./agents/plugin-inventory-scanner.md"
   ]
 }

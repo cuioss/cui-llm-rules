@@ -150,8 +150,8 @@ Note: These patterns match bundle-qualified invocations like `/cui-java-expert:j
 **C. Generate short-form SlashCommand permissions (one per command):**
 
 **CRITICAL:** Commands can be invoked in two ways:
-- Short form: `/plugin-inventory` (requires individual permission)
-- Bundle-qualified: `/cui-plugin-development-tools:plugin-inventory` (covered by bundle wildcard)
+- Short form: `/plugin-create-bundle` (requires individual permission)
+- Bundle-qualified: `/cui-plugin-development-tools:plugin-create-bundle` (covered by bundle wildcard)
 
 Bundle wildcards (Step 4B) only match bundle-qualified invocations. Short-form invocations require individual permissions.
 
@@ -161,13 +161,13 @@ SlashCommand(/{command-name}:*)
 ```
 
 Examples:
-- `SlashCommand(/plugin-inventory:*)` - Matches `/plugin-inventory --json`
+- `SlashCommand(/plugin-create-bundle:*)` - Matches `/plugin-create-bundle name=example`
 - `SlashCommand(/java-implement-code:*)` - Matches `/java-implement-code "task"`
 - `SlashCommand(/doc-review-single-asciidoc:*)` - Matches `/doc-review-single-asciidoc file.adoc`
 
 **Why both are needed:**
-- Bundle wildcard `SlashCommand(/cui-plugin-development-tools:*)` matches `/cui-plugin-development-tools:plugin-inventory`
-- Short-form permission `SlashCommand(/plugin-inventory:*)` matches `/plugin-inventory --json`
+- Bundle wildcard `SlashCommand(/cui-plugin-development-tools:*)` matches `/cui-plugin-development-tools:plugin-create-bundle`
+- Short-form permission `SlashCommand(/plugin-create-bundle:*)` matches `/plugin-create-bundle name=example`
 - Without the short-form permission, users get prompted when using convenient short-form invocations
 
 **D. Sort wildcards alphabetically:**

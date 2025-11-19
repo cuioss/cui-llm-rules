@@ -86,11 +86,17 @@ Loading entire inventory (90 commands, 54 skills, 30 agents) when only analyzing
 
 ### Solution: Type-Filtered Inventory
 
-```bash
-/plugin-inventory --type commands
+```
+Task:
+  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
+  prompt: |
+    resourceTypes: ["commands"]
 # Returns only commands (45 items)
 
-/plugin-inventory --type skills
+Task:
+  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
+  prompt: |
+    resourceTypes: ["skills"]
 # Returns only skills (54 items)
 ```
 
