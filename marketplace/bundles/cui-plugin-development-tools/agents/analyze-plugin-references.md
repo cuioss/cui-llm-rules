@@ -71,15 +71,25 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
 1. **Parse file content to identify documentation patterns:**
    - Read file content (already loaded in Step 1)
    - Process line-by-line to build exclusion set
+   - Check file extension: If .md file, apply all filters; if .yaml/.json/.yml, skip code block filtering
 
-2. **Track Example/Usage sections (high priority):**
+2. **Track code blocks in .md files:**
+   ```
+   - If file extension is .md:
+     - If line matches: ^``` → toggle in_code_block flag
+     - While in_code_block == true → add line number to excluded_lines
+   - Rationale: Code blocks in .md files are documentation/examples, not actual config
+   - Note: Actual runtime config is in separate .yaml or .json files
+   ```
+
+3. **Track Example/Usage sections (high priority):**
    ```
    - If line matches: ^#{2,3}\s+(Example|Usage|Demonstration) → set in_example = true
    - While in example section → add all lines to excluded_lines
    - If new header at same/higher level → set in_example = false
    ```
 
-3. **Track workflow step Markdown documentation patterns:**
+4. **Track workflow step Markdown documentation patterns:**
    ```
    - If line matches pattern: ^#{2,3}\s+Step\s+\d+: → set in_workflow_step = true
    - While in workflow step:
@@ -87,7 +97,7 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
    - If new header at same/higher level → set in_workflow_step = false
    ```
 
-4. **Track pseudo-YAML documentation in .md files:**
+5. **Track pseudo-YAML documentation in .md files:**
    ```
    - If line is exactly "Task:" or "Agent:" or "Command:" (standalone labels)
    - Check next lines: if indented (starts with spaces/tabs)
@@ -95,7 +105,7 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
    - Stop when non-indented line encountered
    ```
 
-5. **Track CONTINUOUS IMPROVEMENT RULE instructions:**
+6. **Track CONTINUOUS IMPROVEMENT RULE instructions:**
    ```
    - If line contains "caller can then invoke" or "invoke `/plugin-update"
    - Add to excluded_lines (these are instructions, not actual invocations)
@@ -603,6 +613,7 @@ Auto-fix: {auto-fix}
 
 ### Pre-Filtered Documentation Lines (Step 1.5)
 Excluded {grep_matches_prefiltered} potential matches in:
+- Code blocks in .md files (``` ... ```) - ALL code blocks filtered as documentation
 - Example/usage/demonstration sections (## Example, ## Usage)
 - Workflow step Markdown patterns (## Step N: with - **Label**: format)
 - Markdown bold label lines (- **Action**: ..., - **Tool**: ..., - **Purpose**: ...)

@@ -111,20 +111,31 @@ Validate against commands that previously generated false positives:
 **Changes**: Added Step 1.5 to analyze-plugin-references.md
 
 **Pre-Filter Patterns Implemented:**
-1. Example/Usage/Demonstration sections (## Example, ## Usage headers)
-2. Workflow step Markdown documentation (## Step N: with `- **Label**:` format)
-3. Markdown bold label lines (`- **Action**: ...`, `- **Tool**: ...`, `- **Purpose**: ...`)
-4. Pseudo-YAML documentation (standalone `Task:`/`Agent:`/`Command:` with indented fields in .md files)
-5. CONTINUOUS IMPROVEMENT RULE instructions (caller invocation documentation)
+1. File type detection (.md vs .yaml/.json/.yml)
+2. **Code blocks in .md files** (``` ... ```) - Filters ALL code blocks as documentation
+3. Example/Usage/Demonstration sections (## Example, ## Usage headers)
+4. Workflow step Markdown documentation (## Step N: with `- **Label**:` format)
+5. Markdown bold label lines (`- **Action**: ...`, `- **Tool**: ...`, `- **Purpose**: ...`)
+6. Pseudo-YAML documentation (standalone `Task:`/`Agent:`/`Command:` with indented fields in .md files)
+7. CONTINUOUS IMPROVEMENT RULE instructions (caller invocation documentation)
 
 **Key Design Decisions:**
-- **Conservative approach**: Did NOT filter all code blocks, as code blocks can contain actual YAML/JSON config
-- **Targeted patterns**: Only filters clearly-documented patterns that cannot be actual invocations
+- **Code block filtering restored**: ALL code blocks in .md files are filtered as documentation
+  - Rationale: Code blocks in .md command/agent files show examples/workflows, not actual runtime config
+  - Actual runtime config would be in separate .yaml or .json files
+  - This catches the majority of false positives (lines 30, 118, 212, 232 in plugin-create-agent.md)
+- **File type aware**: Only applies code block filtering to .md files, skips for .yaml/.json/.yml
+- **Targeted patterns**: Filters clearly-documented patterns that cannot be actual invocations
 - **Two-stage filtering**: Pre-filter (Step 1.5) + Context verification (Step 2a) for comprehensive coverage
 - **Statistics tracking**: Added metrics to measure pre-filter effectiveness
 
 **Files Modified:**
-- `marketplace/bundles/cui-plugin-development-tools/agents/analyze-plugin-references.md` (+112 lines, -12 lines)
+- `marketplace/bundles/cui-plugin-development-tools/agents/analyze-plugin-references.md` (+127 lines, -16 lines)
+
+**Critical Fix Applied:**
+- **Issue Found**: Initial implementation removed code block filtering, missing most false positives
+- **Root Cause**: Assumed code blocks could contain actual config, but in .md files they're always documentation
+- **Fix**: Restored code block filtering for .md files only (Step 2 in pre-filter logic)
 
 ## Acceptance Criteria
 

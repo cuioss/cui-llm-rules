@@ -1,7 +1,7 @@
 ---
 name: plugin-inventory-scanner
 description: Scans marketplace directories and returns structured inventory of bundles, agents, commands, and skills (focused scanner - file discovery only)
-tools: [Glob, Read, Grep]
+tools: [Glob, Read, Grep, Skill]
 model: sonnet
 ---
 
@@ -46,7 +46,23 @@ The caller can then invoke `/plugin-update-agent agent-name=plugin-inventory-sca
 
 ## WORKFLOW
 
-### Step 1: Parse and Validate Parameters
+### Step 1: Load Diagnostic Patterns
+
+**CRITICAL**: Load non-prompting tool usage patterns to ensure correct file operations.
+
+```
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+This skill provides patterns for:
+- File discovery using Glob (Pattern 1)
+- Directory existence checks using Glob (Pattern 2 - Directory Existence)
+- File existence checks using Read/Glob (Pattern 2 - File Existence)
+- Error handling strategies
+
+**All subsequent steps must follow these patterns.**
+
+### Step 2: Parse and Validate Parameters
 
 **Parse scope parameter:**
 - `marketplace` → Base path: `marketplace/bundles` (relative to cwd)
@@ -64,13 +80,16 @@ The caller can then invoke `/plugin-update-agent agent-name=plugin-inventory-sca
 - Result payload (smaller JSON output)
 - Processing time
 
-**Validate base path exists:**
+**Validate base path exists (use Pattern 2 from cui-diagnostic-patterns):**
 ```
 Glob: pattern="*", path="{base_path}"
 ```
-- If no results: FAIL with error "Base path not found: {base_path}"
+- Glob succeeds (even if empty result) → directory exists
+- Glob fails/errors → directory doesn't exist → FAIL with "Base path not found: {base_path}"
 
-### Step 2: Discover All Bundles
+**Reference**: Pattern 2 - Directory Existence from file-operations.md (loaded via skill)
+
+### Step 3: Discover All Bundles
 
 **Use Glob to find all bundles by their plugin.json files:**
 
@@ -87,7 +106,7 @@ Glob: pattern="*/.claude-plugin/plugin.json", path="{base_path}"
 
 **If no bundles found:** Return empty inventory with warning
 
-### Step 3: For Each Bundle, Discover Agents
+### Step 4: For Each Bundle, Discover Agents
 
 **When to execute:** If `scan_all = true` OR `resourceTypes` includes "agents"
 
@@ -108,7 +127,7 @@ Glob: pattern="*.md", path="{bundle_path}/agents"
 
 **If skipped:** Set agents = [] for this bundle
 
-### Step 4: For Each Bundle, Discover Commands
+### Step 5: For Each Bundle, Discover Commands
 
 **When to execute:** If `scan_all = true` OR `resourceTypes` includes "commands"
 
@@ -129,7 +148,7 @@ Glob: pattern="*.md", path="{bundle_path}/commands"
 
 **If skipped:** Set commands = [] for this bundle
 
-### Step 5: For Each Bundle, Discover Skills
+### Step 6: For Each Bundle, Discover Skills
 
 **When to execute:** If `scan_all = true` OR `resourceTypes` includes "skills"
 
@@ -154,7 +173,7 @@ Glob: pattern="*/SKILL.md", path="{bundle_path}/skills"
 
 **If skipped:** Set skills = [] for this bundle
 
-### Step 6: Optionally Extract Descriptions
+### Step 7: Optionally Extract Descriptions
 
 **If `includeDescriptions = true`:**
 
@@ -183,7 +202,7 @@ Extract description from YAML frontmatter and include in results.
 - If Grep finds no match: description = null, continue
 - Never fail the entire scan due to description extraction errors
 
-### Step 7: Build JSON Response
+### Step 8: Build JSON Response
 
 **Always return JSON structure** (agents return structured data for programmatic consumption):
 
@@ -238,7 +257,7 @@ Extract description from YAML frontmatter and include in results.
 - Per-bundle: Count agents, commands, skills, total
 - Overall: Sum across all bundles
 
-### Step 8: Return Response
+### Step 9: Return Response
 
 Return the complete JSON structure as the agent's final output.
 
@@ -250,13 +269,16 @@ Return the complete JSON structure as the agent's final output.
 
 ## CRITICAL RULES
 
-**Discovery:**
-- **ALWAYS use Glob** for file/directory discovery
+**Tool Usage (follows cui-diagnostic-patterns skill):**
+- **ALWAYS use Glob** for file/directory discovery (Pattern 1)
+- **NEVER use Read** on directories or wildcards
 - **NEVER use Bash** for find, ls, or test operations
+- Follow Pattern 2 (Directory Existence) for directory checks
+- Follow Pattern 2 (File Existence) for file checks
+
+**Discovery:**
 - Handle missing directories gracefully (empty arrays)
 - Continue scanning even if individual bundles fail
-
-**Validation:**
 - Only use paths returned by Glob - never fabricate names
 - Verify each extracted name matches an actual Glob result
 - Skip invalid entries rather than failing entire scan
