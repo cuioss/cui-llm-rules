@@ -1,6 +1,6 @@
 ---
 name: analyze-plugin-references
-description: Analyzes agents/commands for plugin references and validates/fixes incorrect cross-references with 80% false positive reduction via Markdown pre-filtering
+description: Analyzes agents/commands for plugin references and validates/fixes incorrect cross-references with hybrid pre-filtering to reduce false positives
 tools:
   - Read
   - Grep
@@ -14,7 +14,7 @@ model: sonnet
 
 Scans agent and command files to find references to other agents, commands, and skills, then validates that references point to existing resources with correct paths. Optionally auto-fixes incorrect references.
 
-**Key Feature:** Pre-filters Markdown documentation patterns (workflow steps, examples, code blocks) BEFORE Grep execution, reducing false positive rate by ~80% and improving performance by eliminating unnecessary context verification operations.
+**Key Feature:** Hybrid pre-filtering approach - filters clear documentation patterns (Example sections, Markdown bold labels, pseudo-YAML) while preserving code blocks for context verification to avoid false negatives. Reduces false positive processing by ~30-40% while maintaining accuracy.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -45,15 +45,33 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
 
 ## WORKFLOW
 
-### Step 1: Validate Input Parameters
+### Step 1: Validate Tool Availability and Input Parameters
+
+**CRITICAL: Verify Required Tools Available**
 
 **Actions:**
+1. **Verify required tools available BEFORE execution:**
+   - Check `Grep` tool available
+   - Check `Read` tool available
+   - Check `Edit` tool available
+   - If any required tool missing: **ABORT with error**
+
+**Tool Availability Error:**
+```
+ERROR: Required tools not available
+
+This agent requires: Grep, Read, Edit
+Cannot execute without these tools.
+```
+
+**Validate Input Parameters:**
 1. Verify `path` parameter provided
 2. Verify `marketplace_inventory` parameter provided (JSON object with bundles array)
 3. Read target file
 4. Verify file is agent or command (in agents/ or commands/ directory)
 
 **Error Handling:**
+- If required tools unavailable: Abort with error above
 - If path not provided: "ERROR: path parameter required"
 - If marketplace_inventory not provided: "ERROR: marketplace_inventory parameter required - pass JSON from cui-plugin-development-tools:plugin-inventory-scanner agent"
 - If marketplace_inventory invalid: "ERROR: marketplace_inventory must be JSON object with 'bundles' array"
@@ -71,25 +89,17 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
 1. **Parse file content to identify documentation patterns:**
    - Read file content (already loaded in Step 1)
    - Process line-by-line to build exclusion set
-   - Check file extension: If .md file, apply all filters; if .yaml/.json/.yml, skip code block filtering
 
-2. **Track code blocks in .md files:**
-   ```
-   - If file extension is .md:
-     - If line matches: ^``` → toggle in_code_block flag
-     - While in_code_block == true → add line number to excluded_lines
-   - Rationale: Code blocks in .md files are documentation/examples, not actual config
-   - Note: Actual runtime config is in separate .yaml or .json files
-   ```
+**IMPORTANT**: Code blocks are NOT filtered during pre-filtering because they contain both actual workflow invocations and documentation. Context verification (Step 2a) handles code block content.
 
-3. **Track Example/Usage sections (high priority):**
+2. **Track Example/Usage sections:**
    ```
    - If line matches: ^#{2,3}\s+(Example|Usage|Demonstration) → set in_example = true
    - While in example section → add all lines to excluded_lines
    - If new header at same/higher level → set in_example = false
    ```
 
-4. **Track workflow step Markdown documentation patterns:**
+3. **Track workflow step Markdown documentation patterns:**
    ```
    - If line matches pattern: ^#{2,3}\s+Step\s+\d+: → set in_workflow_step = true
    - While in workflow step:
@@ -97,7 +107,7 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
    - If new header at same/higher level → set in_workflow_step = false
    ```
 
-5. **Track pseudo-YAML documentation in .md files:**
+4. **Track pseudo-YAML documentation in .md files:**
    ```
    - If line is exactly "Task:" or "Agent:" or "Command:" (standalone labels)
    - Check next lines: if indented (starts with spaces/tabs)
@@ -105,7 +115,7 @@ The caller can then invoke `/plugin-update-agent agent-name=analyze-plugin-refer
    - Stop when non-indented line encountered
    ```
 
-6. **Track CONTINUOUS IMPROVEMENT RULE instructions:**
+5. **Track CONTINUOUS IMPROVEMENT RULE instructions:**
    ```
    - If line contains "caller can then invoke" or "invoke `/plugin-update"
    - Add to excluded_lines (these are instructions, not actual invocations)
@@ -124,9 +134,16 @@ Pre-filter analysis:
 
 **Performance Impact:**
 - Before: Grep finds 38 matches → 38 context verifications → 38 filtered as false positives
-- After: Pre-filter excludes ~80% of documentation → Grep finds ~8 matches → 8 context verifications → ~0-2 false positives
+- After (Hybrid Approach): Pre-filter excludes ~30-40% of documentation → Grep finds ~23-26 matches → Context verification filters remaining false positives
+- Code blocks NOT pre-filtered to avoid false negatives (missing actual invocations)
 
 ### Step 2: Extract All References
+
+**CRITICAL TOOL REQUIREMENT:**
+- **MUST use Grep TOOL** (available in your tools list) for all pattern searches
+- **DO NOT use MCP search_in_files_content** or any other search tools
+- The Grep tool provides accurate line numbers, context, and supports regex patterns required for this workflow
+- Grep tool syntax: `Grep(pattern="...", path="...", output_mode="content", -n=true)`
 
 **Detection Patterns:**
 
@@ -160,9 +177,16 @@ Skill: skill-name
 
 **CRITICAL: Each detected reference MUST be validated against actual file content to prevent hallucination.**
 
-1. **Use Grep to search for SlashCommand patterns:**
+**CRITICAL: Use the Grep TOOL (not MCP search_in_files_content) for all pattern searches. The Grep tool is specifically designed for this workflow and provides correct line numbers and context.**
+
+1. **Use Grep TOOL to search for SlashCommand patterns:**
    ```
-   Grep: pattern="SlashCommand:\s*/[^\s]+", output_mode="content", -n=true
+   Tool: Grep
+   Parameters:
+     pattern: "SlashCommand:\s*/[^\s]+"
+     path: {file_path}
+     output_mode: "content"
+     -n: true
    ```
    - Extract line number and matched text
    - **FILTER:** Skip matches where line_number is in excluded_lines (from Step 1.5)
@@ -170,9 +194,14 @@ Skill: skill-name
    - For each match: Read the specific line to verify exact text
    - Parse reference from verified line text (e.g., `/plugin-update-agent`)
 
-2. **Use Grep to search for Task patterns:**
+2. **Use Grep TOOL to search for Task patterns:**
    ```
-   Grep: pattern="subagent_type[:\s]+[\"']?([a-z:-]+)[\"']?", output_mode="content", -n=true
+   Tool: Grep
+   Parameters:
+     pattern: "subagent_type[:\s]+[\"']?([a-z:-]+)[\"']?"
+     path: {file_path}
+     output_mode: "content"
+     -n: true
    ```
    - Extract line number and matched text
    - **FILTER:** Skip matches where line_number is in excluded_lines (from Step 1.5)
@@ -180,9 +209,14 @@ Skill: skill-name
    - For each match: Read the specific line to verify exact text
    - Parse reference from verified line text (e.g., `diagnose-skill` or `bundle:agent-name`)
 
-3. **Use Grep to search for Skill patterns:**
+3. **Use Grep TOOL to search for Skill patterns:**
    ```
-   Grep: pattern="Skill:\s*[^\s]+", output_mode="content", -n=true
+   Tool: Grep
+   Parameters:
+     pattern: "Skill:\s*[^\s]+"
+     path: {file_path}
+     output_mode: "content"
+     -n: true
    ```
    - Extract line number and matched text
    - **FILTER:** Skip matches where line_number is in excluded_lines (from Step 1.5)
@@ -287,13 +321,26 @@ Found references:
 3. **Check for false positive indicators:**
 
    **❌ FALSE POSITIVE - Documentation/Examples:**
-   - Line in code block (preceded by ``` or heavy indentation)
+   - Line in code block showing EXAMPLES or USAGE (preceded by ``` under "## USAGE EXAMPLES" or "## EXAMPLES" headers)
    - Example pattern in documentation: `Grep: pattern="SlashCommand:..."`
    - Comment explaining format: `# Example: /plugin-update-agent`
    - CONTINUOUS IMPROVEMENT RULE instructions: "The caller can then invoke..."
    - Architecture rules documentation: "Pattern: subagent_type:"
    - Template/format specifications: `Line {line}: {reference}`
    - Lines starting with: `- **Example**:`, `- Pattern:`, `# Search for`, `## Examples`
+   - **Documentation sections (by header):**
+     * Under "## RELATED" header: Command/agent/skill reference lists (e.g., `- /plugin-update-agent - Update existing agents`)
+     * Under "## SEE ALSO" header: Reference documentation lists
+     * Under "## USAGE" or "## USAGE EXAMPLES" header: Usage documentation (already caught by Step 1.5 pre-filter)
+     * Under "This command:" or "This agent:" description lists: Descriptive documentation (e.g., `- Delegates diagnosis to /plugin-diagnose-skills`)
+   - **Validation rule documentation:**
+     * Under "Detection patterns (must NOT appear)" lists: Anti-pattern examples (e.g., `- "SlashCommand: /plugin-"`)
+     * Under "must NOT" or "should NOT" validation rules: Negative examples showing what to avoid
+     * Lines with ❌ prefix explaining patterns to avoid (e.g., `❌ NOT invoke /plugin-update-agent`)
+   - **User-facing messages:**
+     * Display/Report instructions: References in error messages or user guidance (e.g., `Display: "Use /plugin-update-agent"`)
+     * Template strings with references: Messages showing what user should run (e.g., `"Run /plugin-diagnose-skills manually"`)
+     * "Next steps:" lists: Post-execution guidance telling user what commands to run (e.g., `3. Run diagnosis: /plugin-diagnose-skills`)
    - **Markdown workflow documentation patterns:**
      * Markdown list with bold labels: `- **Action**: Skill:...`, `- **Skill**: Skill:...`, `- **Purpose**:...`, `- **Reason**:...`
      * Workflow step headers: `Step N: Load Standards` followed by `- **label**: value` lists
@@ -306,6 +353,7 @@ Found references:
    **✅ ACTUAL INVOCATION - Runtime Usage:**
    - In .yaml or .json configuration files: All references are actual invocations
    - In .md files within code blocks: References in ```yaml``` or ```json``` blocks are actual code
+   - In workflow steps (### Step N: headers): Code blocks containing direct Skill:/SlashCommand:/Task: invocations
    - In workflow steps with execution context: "Execute:" or "Run:" followed by actual tool invocation
    - In direct execution instructions (not explaining patterns or documenting structure)
 
@@ -361,6 +409,30 @@ Found references:
                   Format: Markdown pseudo-YAML describing task structure
    File format: .md (Markdown), not .yaml (actual configuration)
    Action: FILTER - This is Markdown workflow description, not actual YAML
+
+❌ Line 294: - `/plugin-update-agent` - Update existing agents
+   Verification: Pattern found in line
+   Context check: Under "## RELATED" header at end of command file
+                  Format: Markdown list of related resources
+   Action: FILTER - This is RELATED section documentation, not actual invocation
+
+❌ Line 118: - "SlashCommand: /plugin-"
+   Verification: Pattern found in line
+   Context check: Under "Detection patterns (must NOT appear):" list
+                  Explaining what patterns should be avoided in agent files
+   Action: FILTER - This is anti-pattern documentation, not actual invocation
+
+❌ Line 112: ❌ NOT invoke /plugin-update-agent or any slash command directly
+   Verification: Pattern found in line
+   Context check: Line starts with ❌ explaining what NOT to do
+                  Part of validation rule documentation
+   Action: FILTER - This is negative validation rule, not actual invocation
+
+❌ Line 163: - Report: "⚠️ Diagnosis failed: {error}. Run /plugin-diagnose-skills manually."
+   Verification: Pattern found in line
+   Context check: Inside Display/Report instruction showing error message template
+                  Message tells USER what command to run, not actual invocation
+   Action: FILTER - This is user-facing error message, not actual invocation
 
 ✅ Line 74: Skill: cui-marketplace-architecture
    Verification: Pattern found in line
@@ -613,12 +685,13 @@ Auto-fix: {auto-fix}
 
 ### Pre-Filtered Documentation Lines (Step 1.5)
 Excluded {grep_matches_prefiltered} potential matches in:
-- Code blocks in .md files (``` ... ```) - ALL code blocks filtered as documentation
 - Example/usage/demonstration sections (## Example, ## Usage)
 - Workflow step Markdown patterns (## Step N: with - **Label**: format)
 - Markdown bold label lines (- **Action**: ..., - **Tool**: ..., - **Purpose**: ...)
 - Pseudo-YAML documentation (standalone Task:/Agent:/Command: with indented fields)
 - CONTINUOUS IMPROVEMENT RULE instructions (caller invocation instructions)
+
+**Note**: Code blocks are NOT pre-filtered because they contain both actual workflow invocations and documentation examples. Context verification (Step 2a) distinguishes between these cases.
 
 ### Additional False Positives (Step 2a - Context Verification)
 {references_filtered} matches required detailed context verification:

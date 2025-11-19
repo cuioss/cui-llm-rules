@@ -6,6 +6,30 @@
 
 Bash commands trigger user prompts. Non-prompting tools execute automatically.
 
+## CRITICAL: Tool Availability Requirements
+
+**If required tools are not available: FAIL IMMEDIATELY.**
+
+When an agent's frontmatter lists tools:
+```yaml
+tools:
+  - Read
+  - Grep
+  - Edit
+```
+
+These tools MUST be available. If not:
+1. **DO NOT use workarounds** (Bash commands, alternative tools)
+2. **ABORT with error:**
+   ```
+   ERROR: Required tools not available
+
+   This agent requires: Read, Grep, Edit
+   Cannot execute without these tools.
+   ```
+
+No circumvention. No silent failures. Fail hard and loud.
+
 ## Tool Selection Guide
 
 | Operation | ❌ Don't Use (Prompts) | ✅ Use (No Prompts) | Pattern Reference |
