@@ -123,7 +123,9 @@ Display: `Processing {total_bundles} bundles in order: {bundle_list}`
 
 ### Step 5: Process Each Bundle Sequentially
 
-**CRITICAL**: Complete ALL steps for one bundle before moving to the next.
+**CRITICAL**: Complete ALL steps (5a-5j) for one bundle before moving to the next.
+
+**⚠️ MANDATORY COMPLETION CHECK**: You MUST NOT skip Steps 5c-5j. Jumping directly to Step 6 (summary) without completing the fix workflow produces incomplete, invalid results.
 
 **For EACH bundle in sorted order:**
 
@@ -179,7 +181,9 @@ Task:
     Return complete reference analysis with all issues found.
 ```
 
-**Launch reference validation agents in parallel** (single message, multiple Task calls) for all commands in current bundle.
+**Launch reference validation agents in parallel** (single message, multiple Task calls) for **ALL commands in current bundle**.
+
+**⚠️ CRITICAL**: You MUST validate references for ALL commands in the bundle, not a partial subset. Validating only 4 of 13 commands violates the workflow.
 
 **Collect results** for this bundle's reference validation. On errors: Display warning, mark status, continue processing.
 
@@ -209,6 +213,15 @@ Per-command: classification, line count, quality score, refs (correct/found).
 
 **Steps 5e-5i: Apply Fix Workflow for Bundle ⚠️ FIX PHASE STARTS**
 
+**⚠️ ANTI-SKIP PROTECTION**: Steps 5e-5i are MANDATORY if any issues were found. Skipping these steps means:
+- Reference fixes claimed by agents are not verified
+- Safe fixes are not applied
+- Risky fixes are not prompted
+- No verification that fixes actually worked
+- Invalid/incomplete diagnosis results
+
+**EXPLICIT STOP POINT**: If you have NOT completed Steps 5a-5d above, STOP and complete them first. Do not proceed to fix workflow until analysis and reference validation are complete for the entire bundle.
+
 **If any issues found in this bundle:**
 
 Load and apply fix workflow from skill:
@@ -232,7 +245,51 @@ Follow the skill's workflow: Categorize → Handle References → Apply Safe Fix
 
 Track: `bundle_safe_fixes_applied`, `bundle_reference_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
 
-**Step 5j: Repeat for Next Bundle**
+**Step 5i-verification: POST-FIX VERIFICATION (MANDATORY)**
+
+**⚠️ CRITICAL**: After applying ANY fixes (Steps 5e-5i), you MUST verify actual file changes occurred:
+
+```
+Bash: git status
+```
+
+**Verification requirements:**
+1. If reference fixes were "applied" by agents: `git status` MUST show modified .md files
+2. If safe fixes were applied: `git status` MUST show modified files
+3. If NO files show as modified but agents reported fixes: **FIXES FAILED** - agents did not actually edit files
+4. Count actual modified files and compare to fix count
+
+**Report verification:**
+```
+POST-FIX VERIFICATION:
+- Fixes claimed: {total_fixes_from_agents}
+- Files actually modified: {git_status_count}
+- Verification: {PASS if counts match / FAIL if mismatch}
+```
+
+**If verification FAILS:**
+- Report: "⚠️ WARNING: Agents claimed {X} fixes but only {Y} files were modified"
+- Do NOT proceed to next bundle
+- Investigate why fixes were not applied
+
+**Step 5j: MANDATORY Bundle Completion Check**
+
+**⚠️ BEFORE proceeding to next bundle, verify ALL of the following are complete:**
+
+- [ ] Step 5a: All commands analyzed (not partial subset)
+- [ ] Step 5b: All commands reference-validated (not partial subset)
+- [ ] Step 5c: Results aggregated for bundle
+- [ ] Step 5d: Bundle summary displayed
+- [ ] Step 5e: Issues categorized (if any issues found)
+- [ ] Step 5f: Reference issues handled (if any found)
+- [ ] Step 5g: Safe fixes applied (if auto-fix=true and safe issues found)
+- [ ] Step 5h: Risky fixes prompted (if any risky issues found)
+- [ ] Step 5i: Fixes verified (if any fixes applied)
+- [ ] Step 5i-verification: Git status checked (if any fixes applied)
+
+**If ANY checkbox above is unchecked: STOP. Complete that step before proceeding.**
+
+**Only after ALL steps complete: Proceed to next bundle**
 
 **CRITICAL**: Return to Step 5 for the next bundle in sorted order.
 

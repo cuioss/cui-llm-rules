@@ -57,14 +57,21 @@ This ensures the command evolves and becomes more effective with each execution.
 Skill: cui-utilities:cui-diagnostic-patterns
 ```
 
-**Optionally load marketplace architecture standards**:
+**Load marketplace architecture standards**:
 
-You may optionally load the marketplace architecture skill for additional architectural context:
 ```
 Skill: cui-plugin-development-tools:cui-marketplace-architecture
 ```
 
-This provides architecture rules and validation patterns for marketplace components that may be useful for understanding skill design principles.
+This provides architecture rules and validation patterns for marketplace components.
+
+**Load bundle orchestration compliance patterns (MANDATORY)**:
+
+```
+Skill: cui-plugin-development-tools:bundle-orchestration-compliance
+```
+
+This enforces mandatory completion checklists, anti-skip protections, and post-fix verification requirements for bundle-by-bundle workflows.
 
 ### Step 2: Discover Skills
 
@@ -122,7 +129,9 @@ Display: `Processing {total_bundles} bundles in order: {bundle_list}`
 
 ### Step 4: Process Each Bundle Sequentially
 
-**CRITICAL**: Complete ALL steps for one bundle before moving to the next.
+**CRITICAL**: Complete ALL steps (4a-4i) for one bundle before moving to the next.
+
+**⚠️ MANDATORY COMPLETION CHECK**: You MUST NOT skip Steps 4c-4i. Jumping directly to Step 5 (summary) without completing the fix workflow produces incomplete, invalid results.
 
 **For EACH bundle in sorted order:**
 
@@ -175,7 +184,9 @@ Task:
     Return summary report with reference validation results.
 ```
 
-**Launch reference validation agents in parallel** (single message, multiple Task calls) for all skills in current bundle.
+**Launch reference validation agents in parallel** (single message, multiple Task calls) for **ALL skills in current bundle**.
+
+**⚠️ CRITICAL**: You MUST validate references for ALL skills in the bundle, not a partial subset. Validating only some skills violates the workflow.
 
 **Collect results** for this bundle's reference validation. On errors: Display warning, mark status, continue processing.
 
@@ -204,6 +215,15 @@ Per-skill: status, scores (Arch/Content), refs (correct/found).
 
 **Steps 4e-4h: Apply Fix Workflow for Bundle ⚠️ FIX PHASE STARTS**
 
+**⚠️ ANTI-SKIP PROTECTION**: Steps 4e-4h are MANDATORY if any issues were found. Skipping these steps means:
+- Reference fixes claimed by agents are not verified
+- Safe fixes are not applied
+- Risky fixes are not prompted
+- No verification that fixes actually worked
+- Invalid/incomplete diagnosis results
+
+**EXPLICIT STOP POINT**: If you have NOT completed Steps 4a-4d above, STOP and complete them first. Do not proceed to fix workflow until analysis, reference validation, and aggregation are complete for the entire bundle.
+
 **If any issues found in this bundle:**
 
 Load and apply fix workflow from skill:
@@ -212,6 +232,11 @@ Skill: cui-plugin-development-tools:cui-fix-workflow
 ```
 
 Follow the skill's workflow: Categorize → Apply Safe Fixes → Prompt for Risky Fixes → Verify Fixes.
+
+**If NO issues found:**
+- Skip Steps 4e-4h (no fixes needed)
+- Mark as N/A in completion checklist
+- Proceed to Step 4h-verification
 
 **Skill-specific configuration for categorization:**
 
@@ -225,7 +250,53 @@ Follow the skill's workflow: Categorize → Apply Safe Fixes → Prompt for Risk
 
 Track: `bundle_safe_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
 
-**Step 4i: Repeat for Next Bundle**
+**Step 4h-verification: POST-FIX VERIFICATION (MANDATORY)**
+
+**⚠️ CRITICAL**: After applying ANY fixes (Steps 4e-4h), you MUST verify actual file changes occurred.
+
+**Execute:**
+```
+Bash: git status
+```
+
+**Verification checks:**
+1. If reference fixes were "applied" by agents: `git status` MUST show modified .md files
+2. If safe fixes were applied: `git status` MUST show modified files
+3. If NO files show as modified but agents reported fixes: **FIXES FAILED** - agents did not actually edit files
+4. Count actual modified files and compare to fix count
+
+**Report verification:**
+```
+POST-FIX VERIFICATION:
+- Fixes claimed: {total_fixes_from_agents}
+- Files actually modified: {git_status_count}
+- Verification: {PASS if counts match / FAIL if mismatch}
+```
+
+**If verification FAILS:**
+- Report: "⚠️ WARNING: Agents claimed {X} fixes but only {Y} files were modified"
+- Do NOT proceed to next bundle
+- Investigate why fixes were not applied
+
+**If NO fixes applied:**
+- Mark as N/A: "✓ Step 4h-verification: Git status checked (N/A - no fixes applied)"
+
+**Step 4i: MANDATORY Bundle Completion Check**
+
+**⚠️ BEFORE proceeding to next bundle, verify ALL of the following are complete:**
+
+- [ ] **Step 4a**: All skills analyzed (not partial subset)
+- [ ] **Step 4b**: All skills reference-validated (not partial subset)
+- [ ] **Step 4c**: Results aggregated for bundle
+- [ ] **Step 4d**: Bundle summary displayed
+- [ ] **Steps 4e-4h**: Fix workflow complete (if any issues found) OR marked N/A (if no issues)
+- [ ] **Step 4h-verification**: Git status checked (if any fixes applied) OR marked N/A (if no fixes)
+
+**If ANY checkbox above is unchecked: STOP. Complete that step before proceeding.**
+
+**Only after ALL steps complete: Proceed to next bundle**
+
+**Step 4j: Repeat for Next Bundle**
 
 **CRITICAL**: Return to Step 4 for the next bundle in sorted order.
 
