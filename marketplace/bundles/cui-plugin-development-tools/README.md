@@ -9,14 +9,34 @@ Complete toolchain for creating and diagnosing Claude Code plugins. This bundle 
 This bundle includes the following components:
 
 ### Commands
+- **plugin-add-skill-knowledge** - Add external knowledge document to a skill with duplication prevention
 - **plugin-create-agent** - Scaffolds new agent with proper structure and documentation (includes Rule 6 validation - prevents Task tool in agents)
+- **plugin-create-bundle** - Create a new marketplace bundle with proper structure, plugin.json, and documentation
 - **plugin-create-command** - Scaffolds new command with standard format
+- **plugin-create-skill** - Guide users through creating a well-structured skill with standards organization and proper configuration
 - **plugin-diagnose-agents** - Validates agent structure, AGENT.md format, and integration (includes Checks 6-7 for Rule 6/7 violations)
 - **plugin-diagnose-commands** - Validates command structure, markdown format, and metadata
+- **plugin-diagnose-metadata** - Diagnose and fix all metadata files (bundle plugin.json and marketplace.json)
 - **plugin-diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
+- **plugin-inventory** - Discovers and catalogs all marketplace resources with names and paths
+- **plugin-maintain-readme** - Analyze and update all README files to reflect current marketplace state
+- **plugin-update-agent** - Update an agent with improvements, verify quality, and prevent duplication
+- **plugin-update-command** - Update a command with improvements, verify quality, and prevent duplication
 
 ### Agents (Rule 6 compliant)
+- **analyze-cross-skill-duplication** - Analyzes content duplication between marketplace skills via pairwise comparison
+- **analyze-integrated-standards** - Analyzes standards files for cross-file quality: duplication, conflicts, gaps, and coherence
+- **analyze-plugin-references** - Analyzes agents/commands for plugin references and validates/fixes incorrect cross-references
+- **analyze-standards-file** - Analyzes standards files for quality issues using minimize-without-loss principle
+- **architectural-validator** - Validates agents/commands for architectural constraint violations (Pattern 22 self-invocation, etc.)
+- **diagnose-agent** - Analyzes agent files for bloat, quality, and anti-bloat compliance
+- **diagnose-command** - Analyzes command/agent files for bloat, quality, and anti-bloat compliance
 - **diagnose-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
+
+### Skills
+- **cui-fix-workflow** - Common fix workflow patterns for diagnosis commands including categorization, safe fixes, prompting, and verification
+- **cui-marketplace-architecture** - Architecture rules and validation patterns for Claude Code marketplace components ensuring self-contained skills, proper skill usage, and clean reference patterns
+- **cui-marketplace-orchestration-patterns** - Agent coordination and batch processing patterns
 
 ## Installation Instructions
 

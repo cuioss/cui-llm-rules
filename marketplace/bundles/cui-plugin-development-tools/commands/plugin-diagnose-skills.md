@@ -118,24 +118,7 @@ Glob: pattern="*/SKILL.md", path=".claude/skills"
 1. **First**: `cui-plugin-development-tools` (always first)
 2. **Then**: All other bundles alphabetically by name
 
-**Example bundle order:**
-```
-1. cui-plugin-development-tools
-2. cui-documentation-standards
-3. cui-frontend-expert
-4. cui-java-expert
-5. cui-maven
-6. cui-task-workflow
-7. cui-utilities
-```
-
-**Display processing plan:**
-```
-Processing {total_bundles} bundles in order:
-1. cui-plugin-development-tools ({skill_count} skills)
-2. {bundle-name} ({skill_count} skills)
-...
-```
+Display: `Processing {total_bundles} bundles in order: {bundle_list}`
 
 ### Step 4: Process Each Bundle Sequentially
 
@@ -168,12 +151,7 @@ Task:
 
 **Launch skill analysis agents in parallel** (single message, multiple Task calls) for all skills in current bundle.
 
-**Collect results** for this bundle's skills.
-
-**Error Handling:**
-- If Task fails: Display warning with skill name and error, mark as "Analysis Failed", continue
-- If malformed response: Display warning, mark as "Malformed Response", continue
-- If timeout: Display warning, mark as "Timeout", continue
+**Collect results** for this bundle's skills. On errors: Display warning, mark status, continue processing.
 
 **Step 4b: Check Plugin References for Bundle**
 
@@ -199,51 +177,9 @@ Task:
 
 **Launch reference validation agents in parallel** (single message, multiple Task calls) for all skills in current bundle.
 
-**Collect results** for this bundle's reference validation.
+**Collect results** for this bundle's reference validation. On errors: Display warning, mark status, continue processing.
 
-**Error Handling:**
-- If Task fails: Display warning with skill name and error, mark as "Reference Check Failed", continue
-- If unexpected format: Display warning, mark as "Reference Check Error", continue
-
-**Aggregate reference findings for this bundle:**
-Track for each skill: references_found, references_correct, references_fixed, references_ambiguous.
-Bundle totals: skills_checked, total_references, correct, fixed, issues.
-
-**Step 4b.1: Verify Reference Violations (MANDATORY)**
-
-**CRITICAL**: Before accepting reference violations, re-verify flagged issues to eliminate false positives.
-
-**For each skill flagged with reference violations in Step 4b:**
-
-1. **Read exact flagged lines with context**:
-   ```
-   Read: {skill_SKILL.md_file_path}
-   ```
-   Focus on lines flagged by analyze-plugin-references, include ±2 lines context.
-
-2. **Distinguish runtime invocations from documentation**:
-
-   **✅ ACTUAL VIOLATIONS (runtime invocations)**:
-   - Direct tool usage: `SlashCommand: /plugin-update-command`
-   - Agent configuration: `subagent_type: cui-utilities:research`
-   - Task launches: `Task:` followed by subagent_type
-   - In workflow steps describing actual execution
-
-   **❌ FALSE POSITIVES (documentation text - DO NOT REPORT)**:
-   - Pattern examples: "Pattern: subagent_type:" or "e.g., 'Task:'"
-   - CONTINUOUS IMPROVEMENT RULE instructions: "The caller can then invoke `/plugin-update-agent`"
-   - Documentation explaining how callers use commands: "Caller invokes /command-name"
-   - Tool search patterns: "Search for tool mentions (e.g., 'Task:')"
-   - Architecture descriptions: "When you need to use Task tool"
-
-3. **Only report verified violations**:
-   - Discard flagged lines that are documentation/examples
-   - Keep only actual runtime invocations
-   - Track: `violations_flagged`, `violations_verified`, `false_positives_filtered`
-
-**Error Handling:**
-- If Read fails: Log warning, mark as "Verification Failed", exclude from violation count
-- If context unclear: Include in manual review list rather than auto-reporting as violation
+**Aggregate reference findings:** Track per-skill (found/correct/fixed/ambiguous) and bundle totals (checked/total/correct/fixed/issues).
 
 **Step 4c: Aggregate Results for Bundle**
 
@@ -262,96 +198,32 @@ Track bundle metrics:
 
 **Display bundle summary:**
 
-```
-==================================================
-Bundle: {bundle_name}
-==================================================
+Show: Bundle name, skills analyzed (clean/warnings/critical), issue counts, quality averages, reference stats.
 
-Skills Analyzed: {total}
-- Clean: {count} ✅
-- With warnings: {count} ⚠️
-- With critical issues: {count} ❌
+Per-skill: status, scores (Arch/Content), refs (correct/found).
 
-Issue Statistics:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
-
-Quality Scores:
-- Average Architecture: {score}/100
-- Average Integrated Content: {score}/100
-
-Reference Validation:
-- Total references: {total_references}
-- Correct: {correct}
-- Fixed: {fixed}
-- Issues: {issues}
-
-Per-Skill Summary:
-- {skill-1}: {status} | Arch: {score} | Content: {score} | Refs: {correct}/{found}
-- {skill-2}: {status} | Arch: {score} | Content: {score} | Refs: {correct}/{found}
-...
-```
-
-**Step 4e: Categorize Issues for Bundle ⚠️ FIX PHASE STARTS**
+**Steps 4e-4h: Apply Fix Workflow for Bundle ⚠️ FIX PHASE STARTS**
 
 **If any issues found in this bundle:**
 
-**Load fix workflow skill (once, if not already loaded):**
+Load and apply fix workflow from skill:
 ```
 Skill: cui-plugin-development-tools:cui-fix-workflow
 ```
 
-**Categorize issues for this bundle into Safe vs Risky:**
+Follow the skill's workflow: Categorize → Apply Safe Fixes → Prompt for Risky Fixes → Verify Fixes.
 
-**Skill-specific safe fix types:**
-- YAML frontmatter syntax errors
+**Skill-specific configuration for categorization:**
+
+**Safe fix types:**
+- YAML frontmatter syntax errors, missing fields
 - Formatting/whitespace normalization
-- Missing YAML fields (add defaults: `description`, `allowed-tools`)
-- Broken file references (remove or comment out)
+- Broken file references
 
-**Skill-specific risky fix categories:**
-1. **Duplication Issues** - Content found in multiple places, consolidation needed
-2. **Integration Issues** - Orphaned files, workflow disconnection
-3. **Reference Problems** - Broken example references, unclear cross-references
+**Risky fix categories:**
+- Duplication Issues, Integration Issues, Reference Problems
 
-**Step 4f: Apply Safe Fixes for Bundle**
-
-**When to execute**: If auto-fix=true (default) AND safe fixes exist in this bundle
-
-Apply safe fixes for skills in this bundle using Edit tool.
-
-Track: `bundle_safe_fixes_applied`, `by_type` (yaml, formatting, broken_references)
-
-**Step 4g: Prompt for Risky Fixes for Bundle**
-
-**When to execute**: If risky fixes exist in this bundle
-
-Use AskUserQuestion for risky fixes in this bundle.
-
-Group by categories: Duplication Issues, Integration Issues, Reference Problems
-
-Track: `bundle_risky_fixes_prompted`, `bundle_risky_fixes_applied`, `bundle_risky_fixes_skipped`
-
-**Step 4h: Verify Fixes for Bundle**
-
-**When to execute**: After any fixes applied in this bundle
-
-Re-run analysis on modified skills in this bundle.
-
-Track verification: `bundle_issues_resolved`, `bundle_issues_remaining`, `bundle_new_issues`
-
-**Display bundle verification results:**
-```
-==================================================
-Bundle {bundle_name} - Fixes Verified
-==================================================
-
-✅ {issues_resolved} issues resolved
-{if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain
-{endif}
-```
+Track: `bundle_safe_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
 
 **Step 4i: Repeat for Next Bundle**
 
@@ -458,44 +330,21 @@ Top Duplication Issues:
 
 This command is a bundle-by-bundle orchestrator designed to prevent token overload by processing marketplace resources sequentially by bundle.
 
-**Key Architecture Characteristics:**
-- **Bundle-by-bundle processing**: Process one bundle completely before moving to next
-- **Bundle ordering**: cui-plugin-development-tools first, then alphabetically
-- **Complete workflow per bundle**: Analysis → Reference validation → Categorize → Fix → Verify
-- **Token-optimized**: Streamlined output, scoped processing
-- **Parallel execution within bundle**: All skills for a bundle run in parallel
-- **Sequential across bundles**: Next bundle only starts after previous is complete
-- **Optional cross-skill duplication**: Runs AFTER all bundles (Step 6) when flag provided
+**Key Characteristics:**
+- Bundle-by-bundle processing with cui-plugin-development-tools first, then alphabetically
+- Complete workflow per bundle: Analysis → Reference validation → Fix → Verify
+- Token-optimized: Streamlined output, scoped processing
+- Parallel execution within bundle, sequential across bundles
+- Optional cross-skill duplication detection (Step 6, O(n²), when --check-cross-duplication flag set)
 
-**Processing Flow:**
-1. Discover all bundles and sort (cui-plugin-development-tools first, then alphabetical)
-2. For each bundle:
-   - Analyze all skills in bundle (parallel)
-   - Validate all references in bundle (parallel)
-   - Aggregate bundle results
-   - Generate bundle report
-   - Categorize issues for bundle
-   - Apply safe fixes for bundle
-   - Prompt for risky fixes for bundle
-   - Verify fixes for bundle
-3. Generate overall cross-bundle summary
-4. Optional: Detect cross-skill duplication across ALL skills (when --check-cross-duplication flag set)
-
-**All analysis logic is in specialized agents:**
-- **analyze-standards-file**: Single file quality analysis
-- **analyze-integrated-standards**: Cross-file quality within a skill
-- **diagnose-skill**: Skill orchestrator (coordinates above two agents, supports streamlined output)
-- **analyze-plugin-references**: Plugin reference validation
-- **analyze-cross-skill-duplication**: Cross-skill duplication detection (optional, O(n²), runs after all bundles)
+**Analysis delegated to specialized agents:**
+- diagnose-skill (skill orchestrator with streamlined output)
+- analyze-plugin-references (reference validation)
+- analyze-cross-skill-duplication (optional cross-skill duplication)
 
 ## TOOL USAGE
 
-- **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery with complete inventory)
-- **Glob**: Discover skills in global/project scopes (non-prompting)
-- **Skill**: Load diagnostic patterns, marketplace architecture, and fix workflow patterns
-- **Task**: Launch diagnose-skill and analyze-plugin-references agents (parallel within bundle)
-- **Edit**: Apply safe and approved risky fixes
-- **AskUserQuestion**: Prompt for risky fix approval per bundle
+**SlashCommand** (/plugin-inventory), **Glob** (skill discovery), **Skill** (diagnostic/architecture patterns), **Task** (agent orchestration), **Edit** (fixes), **AskUserQuestion** (risky fix approval).
 
 ## RELATED
 
@@ -505,43 +354,9 @@ This command is a bundle-by-bundle orchestrator designed to prevent token overlo
 
 ## UNDERSTANDING DIAGNOSTIC RESULTS
 
-### Marketplace Self-Containment Principle
+**Marketplace Self-Containment**: Skills MUST be self-contained - content similarity to `/standards/` is expected, but references to `/standards/` directory are CRITICAL violations.
 
-**IMPORTANT**: Marketplace skills MUST be self-contained and CANNOT reference the `/standards/` directory.
-
-**Why**:
-- Skills may be distributed independently
-- Skills may be installed globally outside the cui-llm-rules repo
-- External dependencies break portability and marketplace distribution
-
-**This means**:
-- ✅ Skills having similar content to `/standards/` is EXPECTED and CORRECT
-- ✅ Skills must contain all standards within their own `standards/` directory
-- ❌ Skills should NOT reference `~/git/cui-llm-rules/standards/`
-- ❌ Skills should NOT use relative paths like `../../../../standards/`
-
-**What diagnostics check**:
-- Duplication WITHIN the skill's own files (flagged as warning/suggestion)
-- Prohibited references TO `/standards/` directory (flagged as CRITICAL violation)
-- NOT similarity with `/standards/` content (this is expected)
-
-### Issue Severity Levels
-
-**CRITICAL**:
-- Invalid YAML or missing required fields
-- Broken file references (files don't exist)
-- Prohibited references to `/standards/` directory or repo paths
-- Critical conflicts between standards files
-
-**WARNING**:
-- Harmful duplication within skill's own files
-- Zero-information content
-- Contradictory guidance
-
-**SUGGESTION**:
-- Contextual duplication that may be acceptable
-- Minor formatting improvements
-- Missing cross-references between skill's own files
+**Severity Levels**: CRITICAL (invalid YAML, broken references, prohibited `/standards/` references), WARNING (harmful duplication, zero-information content), SUGGESTION (minor improvements).
 
 ## STANDARDS
 

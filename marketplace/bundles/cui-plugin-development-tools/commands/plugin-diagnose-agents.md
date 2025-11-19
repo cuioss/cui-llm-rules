@@ -94,20 +94,11 @@ Glob: pattern="*.md", path=".claude/agents"
 
 **Extract agent names** from file paths.
 
-**If specific agent name provided:**
-- Filter list to matching agent only
-- If no match found: Display error and exit
+**If specific agent name provided:** Filter list to matching agent only; display error and exit if no match found.
 
-**If no parameters (interactive mode):**
-- Display numbered list of all agents found
-- Separate standalone and bundle agents
-- Let user select which to analyze or change scope
+**If no parameters (interactive mode):** Display numbered list, separate standalone/bundle agents, let user select.
 
-**Error Handling:**
-- If Task fails (marketplace scope): Display error with message, exit with error status
-- If inventory.bundles is empty: Display "No agents found in marketplace", suggest trying different scope
-- If Glob fails (global/project scope): Display error with path and suggestions, exit with error status
-- If no agents found: Display scopes searched and suggest trying different scope, exit gracefully
+**Error Handling:** Display descriptive errors and suggest alternatives for discovery failures; exit gracefully if no agents found.
 
 ### Step 2a: Load Analysis Standards (Once)
 
@@ -138,24 +129,7 @@ This loads all necessary agent analysis standards including:
 1. **First**: `cui-plugin-development-tools` (always first)
 2. **Then**: All other bundles alphabetically by name
 
-**Example bundle order:**
-```
-1. cui-plugin-development-tools
-2. cui-documentation-standards
-3. cui-frontend-expert
-4. cui-java-expert
-5. cui-maven
-6. cui-task-workflow
-7. cui-utilities
-```
-
-**Display processing plan:**
-```
-Processing {total_bundles} bundles in order:
-1. cui-plugin-development-tools ({agent_count} agents)
-2. {bundle-name} ({agent_count} agents)
-...
-```
+Display: `Processing {total_bundles} bundles in order: {bundle_list}`
 
 ### Step 4: Process Each Bundle Sequentially
 
@@ -191,12 +165,7 @@ Task:
 
 **Launch agents in parallel** (single message, multiple Task calls) for all agents in current bundle.
 
-**Collect results** for this bundle's agents.
-
-**Error Handling:**
-- If Task fails: Display warning with agent name and error, mark as "Analysis Failed", continue with remaining agents
-- If malformed response: Display warning, mark as "Malformed Response", continue
-- If timeout: Display warning, mark as "Timeout", continue
+**Collect results** for this bundle's agents. On errors: Display warning, mark status, continue processing.
 
 **Step 4b: Check Plugin References for Bundle**
 
@@ -222,93 +191,31 @@ Task:
 
 **Launch reference validation agents in parallel** (single message, multiple Task calls) for all agents in current bundle.
 
-**Collect results** for this bundle's reference validation.
+**Collect results** for this bundle's reference validation. On errors: Display warning, mark status, continue processing.
 
-**Error Handling:**
-- If Task fails: Display warning with agent name and error, mark as "Reference Check Failed", continue
-- If unexpected format: Display warning, mark as "Reference Check Error", continue
-
-**Aggregate reference findings for this bundle:**
-Track for each agent: references_found, references_correct, references_fixed, references_ambiguous.
-Bundle totals: agents_checked, total_references, correct, fixed, issues.
+**Aggregate reference findings:** Track per-agent (found/correct/fixed/ambiguous) and bundle totals (checked/total/correct/fixed/issues).
 
 **Step 4c: Validate Architectural Constraints for Bundle**
 
-For each agent in current bundle:
-
-Check for architectural violations using pattern detection from Pattern 22 (agent-analysis-patterns.md).
-
-**A. Self-Invocation Detection:**
-
-Search agent content for patterns indicating agent is instructed to call commands:
+Validate architectural constraints using the architectural-validator agent:
 
 ```
-Grep patterns to detect:
-- "YOU MUST.*using\s+/plugin-"
-- "YOU MUST.*using\s+/cui-"
-- "invoke\s+/plugin-"
-- "call\s+/plugin-"
-- "SlashCommand:\s*/plugin-"
+Task:
+  subagent_type: cui-plugin-development-tools:architectural-validator
+  description: Validate architectural constraints for {bundle_name}
+  prompt: |
+    Validate architectural constraints for agents in this bundle.
+
+    Parameters:
+    - file_paths: {array_of_agent_paths_in_bundle}
+    - validation_type: "self-invocation"
+
+    Return validation results with verified violations only (false positives filtered).
 ```
 
-Use Grep with these patterns across agents in current bundle.
+**Parse validation results:** Extract `summary.files_with_violations`, `violations_by_file`, track violation counts and details for bundle metrics.
 
-**B. Verify Flagged Violations (MANDATORY):**
-
-**CRITICAL**: Before reporting violations, re-verify each flagged file to eliminate false positives.
-
-**For each file flagged by Grep in Step A:**
-
-1. **Read exact flagged lines with context**:
-   ```
-   Read: {agent_file_path}
-   ```
-   Focus on lines matching patterns from Step A, include ±2 lines context.
-
-2. **Distinguish runtime invocations from documentation**:
-
-   **✅ ACTUAL VIOLATIONS (runtime invocations)**:
-   - Direct tool usage: `SlashCommand: /plugin-update-agent`
-   - Agent configuration: `subagent_type: cui-utilities:research`
-   - Task launches: `Task:` followed by subagent_type
-   - In workflow steps describing actual execution
-
-   **❌ FALSE POSITIVES (documentation text - DO NOT REPORT)**:
-   - Pattern examples: "Pattern: subagent_type:" or "e.g., 'Task:'"
-   - CONTINUOUS IMPROVEMENT RULE instructions: "The caller can then invoke `/plugin-update-agent`"
-   - Documentation explaining how callers use commands: "Caller invokes /command-name"
-   - Tool search patterns: "Search for tool mentions (e.g., 'Task:')"
-   - Architecture descriptions: "When you need to use Task tool"
-
-3. **Only report verified violations**:
-   - Discard flagged lines that are documentation/examples
-   - Keep only actual runtime invocations
-   - Track: `violations_flagged_by_grep`, `violations_verified`, `false_positives_filtered`
-
-**Error Handling:**
-- If Read fails: Log warning, mark as "Verification Failed", exclude from violation count
-- If context unclear: Include in manual review list rather than auto-reporting as violation
-
-**C. Categorize findings:**
-
-**CRITICAL Violation - Agent Self-Invocation (Pattern 22):**
-- Pattern: Agent instructed to invoke SlashCommand directly
-- Common location: CONTINUOUS IMPROVEMENT RULE sections
-- Issue: Violates Rule 6 - agents cannot invoke commands (SlashCommand tool unavailable at runtime)
-- Example: `YOU MUST immediately update this file using /plugin-update-agent`
-
-**Correct Pattern:**
-- Agent reports improvements to caller with structured suggestion
-- Caller invokes command based on agent's report
-- Agent returns improvement opportunity, not command invocation
-
-**C. Track architectural violations for this bundle:**
-- `agents_with_self_invocation`: Count of agents with Pattern 22 violation
-- `self_invocation_details`: List of (agent_name, line_number, matched_pattern) tuples
-
-**Error Handling:**
-- If Grep fails: Log warning, mark validation as "Pattern Check Failed", continue
-- If pattern matching errors: Display warning, continue with other validations
+On errors: Log warning, mark as "Architectural Check Failed", continue processing.
 
 **Step 4d: Aggregate Results for Bundle**
 
@@ -325,117 +232,35 @@ Track bundle metrics:
 
 **Display bundle summary:**
 
-```
-==================================================
-Bundle: {bundle_name}
-==================================================
+Show: Bundle name, agents analyzed (clean/warnings/critical), issue counts, quality averages, reference stats, architectural violations.
 
-Agents Analyzed: {total}
-- Clean: {count} ✅
-- With warnings: {count} ⚠️
-- With critical issues: {count} ❌
+Per-agent: status, scores (TF/P/C), refs (correct/found).
 
-Issue Statistics:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
+If Pattern 22 violations: Display warning with agent names, line numbers, and fix guidance.
 
-Quality Scores:
-- Average Tool Fit: {score}/100
-- Average Precision: {score}/100
-- Average Compliance: {score}/100
-
-Reference Validation:
-- Total references: {total_references}
-- Correct: {references_correct}
-- Fixed: {references_fixed}
-- Issues: {references_with_issues}
-
-Architectural Violations:
-- Self-invocation violations (Pattern 22): {agents_with_self_invocation}
-
-Per-Agent Summary:
-- {agent-1}: {status} | TF: {score} | P: {score} | C: {score} | Refs: {correct}/{found}
-- {agent-2}: {status} | TF: {score} | P: {score} | C: {score} | Refs: {correct}/{found}
-...
-```
-
-**If architectural violations found (Pattern 22):**
-```
-⚠️ CRITICAL: {count} agents in {bundle_name} contain self-invocation instructions
-
-Agents with violations:
-- {agent-name}: Line {line} - Instructs agent to invoke /{command-name}
-
-❌ Issue: Agents CANNOT invoke commands (Rule 6 - SlashCommand tool unavailable at runtime)
-
-Recommended Fix:
-Update CONTINUOUS IMPROVEMENT RULE sections to REPORT improvements to caller.
-
-Reference: agent-analysis-patterns.md Pattern 22
-```
-
-**Step 4f: Categorize Issues for Bundle ⚠️ FIX PHASE STARTS
+**Steps 4f-4i: Apply Fix Workflow for Bundle ⚠️ FIX PHASE STARTS**
 
 **If any issues found in this bundle:**
 
-**Load fix workflow skill (once, if not already loaded):**
+Load and apply fix workflow from skill:
 ```
 Skill: cui-plugin-development-tools:cui-fix-workflow
 ```
 
-**Categorize issues for this bundle into Safe vs Risky:**
+Follow the skill's workflow: Categorize → Apply Safe Fixes → Prompt for Risky Fixes → Verify Fixes.
 
-**Agent-specific safe fix types:**
-- YAML frontmatter syntax errors
-- Missing YAML fields (add defaults: `description`)
-- Remove unused tools from `allowed-tools` frontmatter
-- Add missing tools to `allowed-tools` based on workflow usage
+**Agent-specific configuration for categorization:**
+
+**Safe fix types:**
+- YAML frontmatter syntax errors, missing fields
+- Add/remove tools in `allowed-tools` based on workflow
 - Add missing CONTINUOUS IMPROVEMENT RULE template
 - Formatting/whitespace normalization
 
-**Agent-specific risky fix categories:**
-1. **Tool Violations** - Task tool misuse, missing tool declarations
-2. **Architectural Issues** - Pattern 22 violations, self-invocation instructions
-3. **Best Practice Violations** - Maven anti-patterns, ambiguous instructions, precision issues
+**Risky fix categories:**
+- Tool Violations, Architectural Issues, Best Practice Violations
 
-**Step 4g: Apply Safe Fixes for Bundle
-
-**When to execute**: If auto-fix=true (default) AND safe fixes exist in this bundle
-
-**Apply safe fixes for agents in this bundle using Edit tool:**
-
-Track fixes: `bundle_safe_fixes_applied`, `by_type` (yaml, tools, continuous_improvement, formatting)
-
-**Step 4h: Prompt for Risky Fixes for Bundle
-
-**When to execute**: If risky fixes exist in this bundle
-
-**Use AskUserQuestion for risky fixes in this bundle:**
-
-Group by categories: Tool Violations, Architectural Issues, Best Practice Violations
-
-Track: `bundle_risky_fixes_prompted`, `bundle_risky_fixes_applied`, `bundle_risky_fixes_skipped`
-
-**Step 4i: Verify Fixes for Bundle
-
-**When to execute**: After any fixes applied in this bundle
-
-**Re-run analysis on modified agents in this bundle:**
-
-Track verification: `bundle_issues_resolved`, `bundle_issues_remaining`, `bundle_new_issues`
-
-**Display bundle verification results:**
-```
-==================================================
-Bundle {bundle_name} - Fixes Verified
-==================================================
-
-✅ {issues_resolved} issues resolved
-{if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain
-{endif}
-```
+Track: `bundle_safe_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
 
 **Step 4j: Repeat for Next Bundle**
 
@@ -500,41 +325,20 @@ This command is a bundle-by-bundle orchestrator designed to prevent token overlo
 Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
 ```
 
-**Key Architecture Characteristics:**
-- **Bundle-by-bundle processing**: Process one bundle completely before moving to next
-- **Bundle ordering**: cui-plugin-development-tools first, then alphabetically
-- **Complete workflow per bundle**: Analysis → Reference validation → Fix → Verify
-- **Token-optimized**: Standards pre-loading, streamlined output, scoped processing
-- **Parallel execution within bundle**: All agents for a bundle run in parallel
-- **Sequential across bundles**: Next bundle only starts after previous is complete
+**Key Characteristics:**
+- Bundle-by-bundle processing with cui-plugin-development-tools first, then alphabetically
+- Complete workflow per bundle: Analysis → Reference validation → Architectural validation → Fix → Verify
+- Token-optimized: Standards pre-loading, streamlined output, scoped processing
+- Parallel execution within bundle, sequential across bundles
 
-**Processing Flow:**
-1. Discover all bundles and sort (cui-plugin-development-tools first, then alphabetical)
-2. For each bundle:
-   - Analyze all agents in bundle (parallel)
-   - Validate all references in bundle (parallel)
-   - Validate architectural constraints
-   - Aggregate bundle results
-   - Generate bundle report
-   - Categorize issues for bundle
-   - Apply safe fixes for bundle
-   - Prompt for risky fixes for bundle
-   - Verify fixes for bundle
-3. Generate overall cross-bundle summary
-
-**All analysis logic is in specialized agents:**
-- diagnose-agent (comprehensive agent analysis with streamlined output support)
-- analyze-plugin-references (plugin reference validation)
+**Analysis delegated to specialized agents:**
+- diagnose-agent (comprehensive agent analysis)
+- analyze-plugin-references (reference validation)
+- architectural-validator (constraint validation)
 
 ## TOOL USAGE
 
-- **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery with complete inventory)
-- **Glob**: Discover agents in global/project scopes (non-prompting)
-- **Skill**: Load diagnostic patterns, marketplace architecture, and fix workflow patterns
-- **Task**: Launch diagnose-agent and analyze-plugin-references agents (parallel within bundle)
-- **Grep**: Detect architectural violations (Pattern 22 self-invocation)
-- **Edit**: Apply safe and approved risky fixes
-- **AskUserQuestion**: Prompt for risky fix approval per bundle
+**SlashCommand** (/plugin-inventory), **Glob** (agent discovery), **Skill** (diagnostic/architecture patterns), **Task** (agent orchestration), **Edit** (fixes), **AskUserQuestion** (risky fix approval).
 
 ## RELATED
 

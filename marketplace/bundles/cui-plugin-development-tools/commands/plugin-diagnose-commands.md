@@ -66,24 +66,7 @@ This skill provides command quality standards and analysis patterns used through
 
 ### Step 2: Validate Parameters
 
-**Parse and validate all parameters:**
-
-**Scope validation:**
-- If scope specified: Verify it's one of `marketplace`, `global`, `project`
-- If invalid: Display error and abort
-- Default: `marketplace`
-
-**Command-name validation:**
-- If provided: Will filter to specific command in Step 3
-
-**Path validation:**
-- For `global` scope: Verify `~/.claude/commands/` exists
-- For `project` scope: Verify `.claude/commands/` exists
-- If path missing: Display error and abort
-
-**Flag validation:**
-- `auto-fix`: Default true, accepts true/false
-- `--save-report`: Default false, flag only
+**Validate scope** (marketplace/global/project, default: marketplace), **command-name** filter, **paths** (verify directories exist), **flags** (auto-fix default true, --save-report default false).
 
 ### Step 3: Discover Commands
 
@@ -136,24 +119,7 @@ Glob: pattern="*.md", path=".claude/commands"
 1. **First**: `cui-plugin-development-tools` (always first)
 2. **Then**: All other bundles alphabetically by name
 
-**Example bundle order:**
-```
-1. cui-plugin-development-tools
-2. cui-documentation-standards
-3. cui-frontend-expert
-4. cui-java-expert
-5. cui-maven
-6. cui-task-workflow
-7. cui-utilities
-```
-
-**Display processing plan:**
-```
-Processing {total_bundles} bundles in order:
-1. cui-plugin-development-tools ({command_count} commands)
-2. {bundle-name} ({command_count} commands)
-...
-```
+Display: `Processing {total_bundles} bundles in order: {bundle_list}`
 
 ### Step 5: Process Each Bundle Sequentially
 
@@ -189,12 +155,7 @@ Task:
 
 **Launch command analysis agents in parallel** (single message, multiple Task calls) for all commands in current bundle.
 
-**Collect results** for this bundle's commands.
-
-**Error Handling:**
-- If Task fails: Display warning with command name and error, mark as "Analysis Failed", continue
-- If malformed response: Display warning, mark as "Malformed Response", continue
-- If timeout: Display warning, mark as "Timeout", continue
+**Collect results** for this bundle's commands. On errors: Display warning, mark status, continue processing.
 
 **Step 5b: Check Plugin References for Bundle**
 
@@ -220,51 +181,9 @@ Task:
 
 **Launch reference validation agents in parallel** (single message, multiple Task calls) for all commands in current bundle.
 
-**Collect results** for this bundle's reference validation.
+**Collect results** for this bundle's reference validation. On errors: Display warning, mark status, continue processing.
 
-**Error Handling:**
-- If Task fails: Display warning with command name and error, mark as "Reference Check Failed", continue
-- If unexpected format: Display warning, mark as "Reference Check Error", continue
-
-**Aggregate reference findings for this bundle:**
-Track for each command: references_found, references_correct, references_fixed, references_ambiguous.
-Bundle totals: commands_checked, total_references, correct, fixed, issues.
-
-**Step 5b.1: Verify Reference Violations (MANDATORY)**
-
-**CRITICAL**: Before accepting reference violations, re-verify flagged issues to eliminate false positives.
-
-**For each command flagged with reference violations in Step 5b:**
-
-1. **Read exact flagged lines with context**:
-   ```
-   Read: {command_file_path}
-   ```
-   Focus on lines flagged by analyze-plugin-references, include ±2 lines context.
-
-2. **Distinguish runtime invocations from documentation**:
-
-   **✅ ACTUAL VIOLATIONS (runtime invocations)**:
-   - Direct tool usage: `SlashCommand: /plugin-update-command`
-   - Agent configuration: `subagent_type: cui-utilities:research`
-   - Task launches: `Task:` followed by subagent_type
-   - In workflow steps describing actual execution
-
-   **❌ FALSE POSITIVES (documentation text - DO NOT REPORT)**:
-   - Pattern examples: "Pattern: subagent_type:" or "e.g., 'Task:'"
-   - CONTINUOUS IMPROVEMENT RULE instructions: "The caller can then invoke `/plugin-update-command`"
-   - Documentation explaining how callers use commands: "Caller invokes /command-name"
-   - Tool search patterns: "Search for tool mentions (e.g., 'Task:')"
-   - Architecture descriptions: "When you need to use Task tool"
-
-3. **Only report verified violations**:
-   - Discard flagged lines that are documentation/examples
-   - Keep only actual runtime invocations
-   - Track: `violations_flagged`, `violations_verified`, `false_positives_filtered`
-
-**Error Handling:**
-- If Read fails: Log warning, mark as "Verification Failed", exclude from violation count
-- If context unclear: Include in manual review list rather than auto-reporting as violation
+**Aggregate reference findings:** Track per-command (found/correct/fixed/ambiguous) and bundle totals (checked/total/correct/fixed/issues).
 
 **Step 5c: Aggregate Results for Bundle**
 
@@ -284,108 +203,34 @@ Track bundle metrics:
 
 **Display bundle summary:**
 
-```
-==================================================
-Bundle: {bundle_name}
-==================================================
+Show: Bundle name, commands analyzed (acceptable/large/bloated), issue counts, quality averages, reference stats.
 
-Commands Analyzed: {total}
-- Acceptable size: {count} ✅
-- Large: {count} ⚠️
-- Bloated: {count} ❌
+Per-command: classification, line count, quality score, refs (correct/found).
 
-Issue Statistics:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
-
-Quality Scores:
-- Average Bloat Score: {score}/100
-- Average Anti-Bloat Compliance: {score}/100
-- Average Structure: {score}/100
-- Average Quality: {score}/100
-
-Reference Validation:
-- Total references: {total_references}
-- Correct: {correct}
-- Incorrect: {incorrect}
-- Ambiguous: {ambiguous}
-
-Per-Command Summary:
-- {command-1}: {classification} | {lines} lines | Quality: {score} | Refs: {correct}/{found}
-- {command-2}: {classification} | {lines} lines | Quality: {score} | Refs: {correct}/{found}
-...
-```
-
-**Step 5e: Categorize Issues for Bundle ⚠️ FIX PHASE STARTS**
+**Steps 5e-5i: Apply Fix Workflow for Bundle ⚠️ FIX PHASE STARTS**
 
 **If any issues found in this bundle:**
 
-**Load fix workflow skill (once, if not already loaded):**
+Load and apply fix workflow from skill:
 ```
 Skill: cui-plugin-development-tools:cui-fix-workflow
 ```
 
-**Categorize issues for this bundle into Safe vs Risky:**
+Follow the skill's workflow: Categorize → Handle References → Apply Safe Fixes → Prompt for Risky Fixes → Verify Fixes.
 
-**Command-specific safe fix types:**
-- YAML frontmatter syntax errors
-- Missing YAML fields (add defaults: `name`, `description`)
+**Command-specific configuration for categorization:**
+
+**Safe fix types:**
+- YAML frontmatter syntax errors, missing fields
 - Obsolete content removal
 - Add missing CONTINUOUS IMPROVEMENT RULE template
 - Formatting/whitespace normalization
 - Broken cross-references
 
-**Command-specific risky fix categories:**
-1. **Bloat Issues** - Commands >500 lines requiring extraction to skills
-2. **Clarity Issues** - Over-specification, ambiguous instructions, duplication
-3. **Structural Issues** - Parameter validation gaps, workflow reorganization needs
+**Risky fix categories:**
+- Bloat Issues (>500 lines), Clarity Issues, Structural Issues
 
-**Step 5f: Handle Reference Issues for Bundle**
-
-**When to execute**: If reference issues found in this bundle
-
-Display summary of reference problems for this bundle.
-
-Prompt user with options: [F]ix automatically, [M]anual review, [S]kip
-
-Track: `bundle_reference_fixes_applied`, `bundle_reference_fixes_manual`
-
-**Step 5g: Apply Safe Fixes for Bundle**
-
-**When to execute**: If auto-fix=true (default) AND safe fixes exist in this bundle
-
-Apply safe fixes for commands in this bundle using Edit tool.
-
-Track: `bundle_safe_fixes_applied`, `by_type` (yaml, obsolete_content, continuous_improvement, formatting)
-
-**When to execute**: If risky fixes exist in this bundle
-
-Use AskUserQuestion for risky fixes in this bundle.
-
-Group by categories: Bloat Issues, Clarity Issues, Structural Issues
-
-Track: `bundle_risky_fixes_prompted`, `bundle_risky_fixes_applied`, `bundle_risky_fixes_skipped`
-
-**Step 5i: Verify Fixes for Bundle**
-
-**When to execute**: After any fixes applied in this bundle
-
-Re-run analysis on modified commands in this bundle.
-
-Track verification: `bundle_issues_resolved`, `bundle_issues_remaining`, `bundle_new_issues`
-
-**Display bundle verification results:**
-```
-==================================================
-Bundle {bundle_name} - Fixes Verified
-==================================================
-
-✅ {issues_resolved} issues resolved
-{if issues_remaining > 0}
-⚠️ {issues_remaining} issues remain
-{endif}
-```
+Track: `bundle_safe_fixes_applied`, `bundle_reference_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
 
 **Step 5j: Repeat for Next Bundle**
 
@@ -453,40 +298,19 @@ This command is a bundle-by-bundle orchestrator designed to prevent token overlo
 Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
 ```
 
-**Key Architecture Characteristics:**
-- **Bundle-by-bundle processing**: Process one bundle completely before moving to next
-- **Bundle ordering**: cui-plugin-development-tools first, then alphabetically
-- **Complete workflow per bundle**: Analysis → Reference validation → Categorize → Fix → Verify
-- **Token-optimized**: Standards pre-loading, streamlined output, scoped processing
-- **Parallel execution within bundle**: All commands for a bundle run in parallel
-- **Sequential across bundles**: Next bundle only starts after previous is complete
+**Key Characteristics:**
+- Bundle-by-bundle processing with cui-plugin-development-tools first, then alphabetically
+- Complete workflow per bundle: Analysis → Reference validation → Fix → Verify
+- Token-optimized: Standards pre-loading, streamlined output, scoped processing
+- Parallel execution within bundle, sequential across bundles
 
-**Processing Flow:**
-1. Discover all bundles and sort (cui-plugin-development-tools first, then alphabetical)
-2. For each bundle:
-   - Analyze all commands in bundle (parallel)
-   - Validate all references in bundle (parallel)
-   - Aggregate bundle results
-   - Generate bundle report
-   - Handle reference issues for bundle
-   - Categorize issues for bundle
-   - Apply safe fixes for bundle
-   - Prompt for risky fixes for bundle
-   - Verify fixes for bundle
-3. Generate overall cross-bundle summary
-
-**All analysis logic is in specialized agents:**
-- diagnose-command (comprehensive command analysis with streamlined output support)
-- analyze-plugin-references (plugin reference validation)
+**Analysis delegated to specialized agents:**
+- diagnose-command (comprehensive command analysis with streamlined output)
+- analyze-plugin-references (reference validation)
 
 ## TOOL USAGE
 
-- **SlashCommand**: Execute /plugin-inventory --json (marketplace discovery with complete inventory)
-- **Glob**: Discover commands in global/project scopes (non-prompting)
-- **Skill**: Load diagnostic patterns, marketplace architecture, and fix workflow patterns
-- **Task**: Launch diagnose-command and analyze-plugin-references agents (parallel within bundle)
-- **Edit**: Apply safe and approved risky fixes
-- **AskUserQuestion**: Prompt for risky fix approval and reference issue handling per bundle
+**SlashCommand** (/plugin-inventory), **Glob** (command discovery), **Skill** (diagnostic/architecture patterns), **Task** (agent orchestration), **Edit** (fixes), **AskUserQuestion** (risky fix and reference approval).
 
 ## RELATED
 

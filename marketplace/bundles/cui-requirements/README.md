@@ -52,6 +52,10 @@ This bundle provides Claude Code with expert knowledge in creating, structuring,
 - Managing documentation throughout implementation lifecycle
 - Maintaining holistic system view across documentation levels
 
+## Commands Included
+
+- **cui-maintain-requirements** - Comprehensive command for creating and maintaining requirements documentation
+
 ## Skills Included
 
 | Skill | Description |

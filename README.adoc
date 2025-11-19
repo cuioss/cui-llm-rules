@@ -20,11 +20,11 @@ Then use Claude Code's built-in plugin tooling to install bundles.
 
 == What This Provides
 
-This repository contains **8 production-ready bundles** with **80 total components**:
+This repository contains **8 production-ready bundles** with **95 total components**:
 
 * **28 skills** - Development standards and best practices
-* **27 agents** - Specialized task automation
-* **45 commands** - Interactive workflows
+* **28 agents** - Specialized task automation
+* **39 commands** - Interactive workflows
 
 === Bundle Overview
 
@@ -58,7 +58,7 @@ This repository contains **8 production-ready bundles** with **80 total componen
 
 |xref:marketplace/bundles/cui-plugin-development-tools/README.md[cui-plugin-development-tools]
 |Claude Code marketplace development tools
-|3 |7 |13
+|3 |8 |13
 
 |xref:marketplace/bundles/cui-requirements/README.md[cui-requirements]
 |Requirements and planning documentation standards
