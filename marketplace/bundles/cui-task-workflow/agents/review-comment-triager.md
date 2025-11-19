@@ -2,7 +2,7 @@
 name: review-comment-triager
 description: Analyzes single review comment and decides action (focused triager - no implementation)
 tools: Read
-model: sonnet
+model: haiku
 ---
 
 # Review Comment Triager Agent

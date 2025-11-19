@@ -2,6 +2,7 @@
 name: log-record-documenter
 description: Documents LogRecord classes in AsciiDoc format following CUI standards (focused executor - no build verification)
 tools: [Read, Edit, Write, Grep, Glob, Skill]
+model: sonnet
 ---
 
 # CUI LogRecord Documenter Agent

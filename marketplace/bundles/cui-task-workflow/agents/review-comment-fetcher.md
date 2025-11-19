@@ -2,7 +2,7 @@
 name: review-comment-fetcher
 description: Fetches GitHub PR review comments (focused fetcher - no analysis)
 tools: Bash(gh:*)
-model: sonnet
+model: haiku
 ---
 
 # Review Comment Fetcher Agent

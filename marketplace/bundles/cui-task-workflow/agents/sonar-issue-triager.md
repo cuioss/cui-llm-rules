@@ -2,7 +2,7 @@
 name: sonar-issue-triager
 description: Analyzes single Sonar issue and decides fix vs suppress (focused triager - no implementation)
 tools: Read
-model: sonnet
+model: haiku
 ---
 
 # Sonar Issue Triager Agent

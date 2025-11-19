@@ -2,7 +2,7 @@
 name: java-coverage-analyzer
 description: Analyzes existing JaCoCo coverage reports (focused analyzer - no build execution)
 tools: Read, Glob, Skill
-model: sonnet
+model: haiku
 ---
 
 # Java Coverage Analyzer Agent

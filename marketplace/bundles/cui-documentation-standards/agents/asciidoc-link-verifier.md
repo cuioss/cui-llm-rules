@@ -3,7 +3,7 @@ name: asciidoc-link-verifier
 description: Verifies links and cross-references in AsciiDoc files (file links, anchors, xrefs). Specialized agent for link verification only.
 
 tools: Read, Edit, Bash(mkdir:*), Bash(python3:*), Bash(realpath:*), Glob, Skill
-model: sonnet
+model: haiku
 color: purple
 ---
 

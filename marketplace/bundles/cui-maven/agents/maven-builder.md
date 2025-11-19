@@ -2,7 +2,7 @@
 name: maven-builder
 description: Central agent for executing Maven builds with output capture, issue categorization, and performance tracking
 tools: Read, Write, Bash(./mvnw:*), Grep, Skill
-model: sonnet
+model: haiku
 color: blue
 ---
 

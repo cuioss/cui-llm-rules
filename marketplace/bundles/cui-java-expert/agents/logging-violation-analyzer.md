@@ -2,7 +2,7 @@
 name: logging-violation-analyzer
 description: Analyzes LOGGER usage and returns structured violation list (focused analyzer - no fixes)
 tools: Grep, Glob, Skill
-model: sonnet
+model: haiku
 ---
 
 # Logging Violation Analyzer Agent

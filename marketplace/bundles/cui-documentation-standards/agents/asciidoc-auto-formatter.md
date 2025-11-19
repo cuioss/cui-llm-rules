@@ -3,7 +3,7 @@ name: asciidoc-auto-formatter
 description: Auto-fixes common AsciiDoc formatting issues (blank lines before lists, xref syntax, headers, whitespace) with safety features (dry-run, interactive mode).
 
 tools: Read, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-formatter.sh), Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh), Glob, Skill
-model: sonnet
+model: haiku
 color: green
 ---
 

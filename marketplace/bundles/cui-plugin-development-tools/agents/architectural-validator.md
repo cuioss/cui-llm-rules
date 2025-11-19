@@ -2,6 +2,7 @@
 name: architectural-validator
 description: Validates agents/commands for architectural constraint violations (Pattern 22 self-invocation, etc.)
 allowed-tools: [Read, Grep]
+model: haiku
 ---
 
 # Architectural Validator Agent

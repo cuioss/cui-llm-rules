@@ -2,7 +2,7 @@
 name: sonar-issue-fetcher
 description: Fetches Sonar issues from SonarQube API with filtering (focused fetcher - no analysis)
 tools: [Bash, mcp__sonarqube__search_sonar_issues_in_projects]
-model: sonnet
+model: haiku
 ---
 
 # Sonar Issue Fetcher Agent
