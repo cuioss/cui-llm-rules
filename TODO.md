@@ -1,85 +1,145 @@
-# Command Diagnosis TODO
+# TODO: Reduce False Positives in Reference Validation
 
-## CRITICAL - Missing/Invalid YAML Frontmatter
+## Priority: HIGH
 
-- [ ] doc-review-technical-docs.md - Add complete YAML frontmatter (name, description)
-- [ ] doc-review-single-asciidoc.md - Add 'name' field to YAML
-- [ ] js-maintain-tests.md - Add 'description' field to YAML
-- [ ] java-refactor-code.md - Add 'description' field to YAML
-- [ ] js-fix-jsdoc.md - Add 'model' field to YAML
-- [ ] java-implement-code.md - Add 'parameters' field to YAML
+## Problem Statement
 
-## CRITICAL - Architectural Violations
+The `analyze-plugin-references` agent currently generates significant false positives when validating plugin references in Markdown command files. During diagnosis of the cui-plugin-development-tools bundle (13 commands), agents reported filtering ~38 false positives from Markdown workflow documentation patterns.
 
-- [ ] plugin-diagnose-metadata.md:89 - Fix reference to cui-requirements:cui-maintain-requirements (it's a COMMAND not AGENT)
-- [ ] plugin-diagnose-skills.md:85 - Fix reference to non-existent "diagnose-skill" agent
+**Impact**:
+- Wastes computational resources on unnecessary context verification
+- Increases token usage by ~30+ verification operations per file
+- Slows down reference validation workflow
+- Reported by 7 out of 13 reference validation agents as top improvement opportunity
 
-## CRITICAL - BLOATED Commands (>500 lines, needs restructuring)
+## Affected Files
 
-- [ ] plugin-inventory.md (663 lines) - Extract to skills, fix wrong CONTINUOUS IMPROVEMENT pattern
-- [ ] plugin-verify-marketplace.md (585 lines) - Extract to skills, fix wrong CONTINUOUS IMPROVEMENT pattern
-- [ ] plugin-diagnose-skills.md (563 lines) - Extract to skills
-- [ ] plugin-update-agent.md (556 lines) - Extract to skills, remove duplicate content
+**Bundle**: `marketplace/bundles/cui-plugin-development-tools/commands/`
 
-## ~~WARNING - Missing CONTINUOUS IMPROVEMENT RULE~~
+### High False Positive Rate (100% of matches were false positives):
+- `plugin-create-agent.md` - 7 false positives filtered
+- `plugin-create-skill.md` - 8 false positives filtered
+- `plugin-diagnose-metadata.md` - 5 false positives filtered
+- `plugin-diagnose-skills.md` - 6 false positives filtered
+- `plugin-update-agent.md` - 7 false positives filtered
+- `plugin-update-command.md` - 8 false positives filtered
 
-**FALSE POSITIVE - All 31 analyzed commands have this section**
-Verified: All commands in cui-plugin-development-tools, cui-frontend-expert, cui-java-expert, and cui-documentation-standards have CONTINUOUS IMPROVEMENT RULE sections
+### Mixed Results (some false positives, some true issues):
+- `plugin-create-bundle.md` - 1 false positive filtered
+- `plugin-create-command.md` - 2 true issues found (no false positives)
+- `plugin-add-skill-knowledge.md` - 1 true issue found (no false positives)
+- `plugin-diagnose-agents.md` - 7 true issues found (no false positives)
+- `plugin-diagnose-commands.md` - 4 true issues found (no false positives)
+- `plugin-maintain-readme.md` - 1 true issue found (no false positives)
+- `plugin-update-command.md` - 1 true issue found (mixed with false positives)
 
-## WARNING - Wrong CONTINUOUS IMPROVEMENT Pattern (2 commands)
+**Total**: ~38 false positives across 13 command files in cui-plugin-development-tools bundle alone.
 
-- [ ] plugin-inventory.md - Change from caller-reporting to self-update pattern
-- [ ] plugin-verify-marketplace.md - Change from caller-reporting to self-update pattern
-- [ ] js-maintain-tests.md - Change from caller-reporting to self-update pattern
+**Scope**: This issue affects ALL marketplace command files with Markdown workflow documentation patterns. The problem will recur across all 8 bundles (45 commands total) during reference validation.
 
-## WARNING - LARGE Commands (400-500 lines, monitor for bloat)
+## Current Limitation
 
-- [ ] plugin-create-bundle.md (447 lines)
-- [ ] plugin-maintain-readme.md (445 lines)
-- [ ] plugin-diagnose-agents.md (489 lines)
-- [ ] plugin-update-command.md (434 lines)
-- [ ] java-implement-code.md (487 lines)
+The agent uses Grep to find potential plugin references (Task:, SlashCommand:, Skill:), but Markdown workflow documentation frequently contains these patterns in non-invocation contexts:
 
-## WARNING - Duplicate Content
+**Common False Positive Patterns:**
+```markdown
+## Step 3: Invoke Agent
+- **Action**: Task: subagent_type="diagnose-command"
+- **Tool**: SlashCommand: /plugin-diagnose-agents
+- **Purpose**: Skill: cui-marketplace-architecture
+```
 
-- [ ] plugin-diagnose-agents.md
-- [ ] plugin-diagnose-commands.md
-- [ ] plugin-maintain-readme.md
-- [ ] plugin-update-agent.md
-- [ ] plugin-update-command.md
-- [ ] java-implement-code.md
-- [ ] java-fix-javadoc.md
-- [ ] java-implement-tests.md
+These are documentation examples, not actual runtime invocations, but currently trigger Grep matches requiring manual context verification.
 
-## WARNING - Over-specification
+## Proposed Solution
 
-- [ ] plugin-diagnose-commands.md
-- [ ] js-enforce-eslint.md
-- [ ] js-fix-jsdoc.md
-- [ ] java-implement-code.md
-- [ ] java-fix-javadoc.md
+Add pre-filtering logic to `analyze-plugin-references` agent to exclude Markdown workflow documentation patterns BEFORE detailed context verification:
 
-## WARNING - Missing Error Handling
+### Filter Rules:
+1. **Skip Markdown workflow steps**: Lines under headers matching `## Step N:` or `### Step N:`
+2. **Skip Markdown list labels**: Lines with bold labels: `- **Action**:`, `- **Tool**:`, `- **Purpose**:`, `- **Parameters**:`
+3. **Skip indented pseudo-YAML**: Indented YAML-like content under "Task:" in .md files (not actual YAML frontmatter)
+4. **Skip code blocks**: Lines within triple-backtick code fences
+5. **Skip example sections**: Lines under headers containing "Example", "Usage", "Demonstration"
 
-- [ ] js-enforce-eslint.md
-- [ ] js-generate-coverage.md
-- [ ] java-implement-code.md
-- [ ] java-refactor-code.md
+### Implementation Strategy:
+- Add pre-filtering step BEFORE Grep invocation
+- Use Read tool to identify documentation sections
+- Build exclusion line ranges
+- Apply Grep with line filters
+- Only perform detailed context verification on remaining matches
 
-## WARNING - Ambiguous Instructions
+## Expected Impact
 
-- [ ] doc-review-single-asciidoc.md
-- [ ] doc-review-technical-docs.md
-- [ ] js-fix-jsdoc.md
-- [ ] js-maintain-tests.md
-- [ ] java-implement-code.md
-- [ ] java-refactor-code.md
+- **False positive reduction**: ~80% reduction in Markdown command files
+- **Performance improvement**: Save 30+ context verification operations per file
+- **Token savings**: Reduce token usage by ~40% for reference validation step
+- **Accuracy improvement**: Higher signal-to-noise ratio in detected issues
 
-## WARNING - Missing Parameter Validation
+## Files to Modify
 
-- [ ] doc-review-single-asciidoc.md
-- [ ] doc-review-technical-docs.md
-- [ ] js-enforce-eslint.md
-- [ ] js-fix-jsdoc.md
-- [ ] js-generate-coverage.md
-- [ ] java-refactor-code.md
+### Primary Target:
+- `marketplace/bundles/cui-plugin-development-tools/agents/analyze-plugin-references.md`
+  - Add "Step 1.5: Pre-filter Markdown Documentation Patterns" before Grep invocation
+  - Update reference detection workflow to apply exclusion rules
+  - Document new filter patterns in agent description
+
+### Testing Scope:
+Validate against commands that previously generated false positives:
+- `plugin-create-agent.md` (all 7 matches were false positives)
+- `plugin-create-skill.md` (all 8 matches were false positives)
+- `plugin-diagnose-skills.md` (all 6 matches were false positives)
+- `plugin-update-agent.md` (all 7 matches were false positives)
+- `plugin-update-command.md` (all 8 matches were false positives)
+
+## Implementation Steps
+
+1. ✅ **Read analyze-plugin-references agent** to understand current detection logic
+2. ✅ **Design pre-filter algorithm** for Markdown documentation patterns
+3. ✅ **Update agent workflow** to add pre-filtering step (Step 1.5) before Grep
+4. ✅ **Update Step 2** to integrate pre-filter exclusions
+5. ✅ **Update Step 2a** to acknowledge pre-filtering already applied
+6. ✅ **Update statistics tracking** to include pre-filter metrics
+7. ✅ **Update report generation** to show pre-filter performance
+8. ✅ **Update agent description** to document new filtering capability
+9. ⏳ **Test against known false positives** - Deferred (requires full workflow execution)
+10. ⏳ **Verify no true positives filtered** - Deferred (requires full workflow execution)
+
+## Implementation Complete
+
+**Date**: 2025-01-19
+**Changes**: Added Step 1.5 to analyze-plugin-references.md
+
+**Pre-Filter Patterns Implemented:**
+1. Example/Usage/Demonstration sections (## Example, ## Usage headers)
+2. Workflow step Markdown documentation (## Step N: with `- **Label**:` format)
+3. Markdown bold label lines (`- **Action**: ...`, `- **Tool**: ...`, `- **Purpose**: ...`)
+4. Pseudo-YAML documentation (standalone `Task:`/`Agent:`/`Command:` with indented fields in .md files)
+5. CONTINUOUS IMPROVEMENT RULE instructions (caller invocation documentation)
+
+**Key Design Decisions:**
+- **Conservative approach**: Did NOT filter all code blocks, as code blocks can contain actual YAML/JSON config
+- **Targeted patterns**: Only filters clearly-documented patterns that cannot be actual invocations
+- **Two-stage filtering**: Pre-filter (Step 1.5) + Context verification (Step 2a) for comprehensive coverage
+- **Statistics tracking**: Added metrics to measure pre-filter effectiveness
+
+**Files Modified:**
+- `marketplace/bundles/cui-plugin-development-tools/agents/analyze-plugin-references.md` (+112 lines, -12 lines)
+
+## Acceptance Criteria
+
+- [x] Pre-filtering logic implemented in analyze-plugin-references.md
+- [ ] False positive rate reduced by ≥80% on test commands (requires full workflow test)
+- [ ] No true positives incorrectly filtered (requires full workflow test)
+- [ ] Token usage for reference validation reduced by ~40% (requires full workflow test)
+- [x] Agent description updated to document filtering
+- [ ] Tested on all cui-plugin-development-tools commands (13 total) - **Next Step**
+
+## Related Issues
+
+- **Agent Bug**: Edit tool calls from analyze-plugin-references not actually modifying files (separate issue)
+- **Reference Validation**: 20 detected issues across cui-plugin-development-tools bundle need manual fixing after agent bug resolved
+
+## Notes
+
+This improvement was consistently reported by multiple agents during the `/plugin-diagnose-commands` execution. The pattern recognition is solid - the agents correctly identified these as false positives through context verification, but pre-filtering would eliminate the need for that verification in the first place.
