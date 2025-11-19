@@ -328,11 +328,17 @@ Filtered references (not actual invocations):
 # CRITICAL: Only process if type tag is [Task]
 # Do NOT process [Skill] or [SlashCommand] references here
 
+# Parse reference to extract components:
+#   - If contains ':' → bundle = before ':', name = after ':'
+#   - If no ':' → bundle = null, name = entire reference
+# Example: "cui-plugin-development-tools:diagnose-agent" → bundle="cui-plugin-development-tools", name="diagnose-agent"
+# Example: "diagnose-skill" → bundle=null, name="diagnose-skill"
+
 # Search inventory.bundles[].agents[] for matching name
 # If bundle specified in reference: filter to that bundle's agents
 # If unspecified: search all bundles' agents
 # Match on: agent.name === {name}
-# Return: agent.path
+# Return: agent.path, agent.bundle
 
 # CRITICAL VALIDATION BASED ON FILE TYPE:
 
@@ -341,9 +347,15 @@ Filtered references (not actual invocations):
 #   - NO auto-fix - architectural violation requiring manual refactoring
 
 # If analyzing a COMMAND file (/commands/ in path):
+#   - Parse reference to extract bundle and name
+#   - Find matching agent in inventory
+#   - If bundle IS specified in reference:
+#     - Check if bundle matches agent.bundle from inventory
+#     - If matches: Mark as ✅ CORRECT
+#     - If mismatch: Mark as ⚠️ FIXABLE (incorrect bundle prefix)
+#       - Example fix: "wrong-bundle:diagnose-skill" → "cui-plugin-development-tools:diagnose-skill"
 #   - If bundle NOT specified:
 #     - Mark as ⚠️ FIXABLE (missing bundle prefix)
-#     - Find matching agent in inventory
 #     - Construct correct reference: {agent.bundle}:{agent.name}
 #     - Example fix: "diagnose-skill" → "cui-plugin-development-tools:diagnose-skill"
 
@@ -357,18 +369,30 @@ Filtered references (not actual invocations):
 # CRITICAL: Only process if type tag is [Skill]
 # Do NOT process [Task] or [SlashCommand] references here
 
+# Parse reference to extract components:
+#   - If contains ':' → bundle = before ':', name = after ':'
+#   - If no ':' → bundle = null, name = entire reference
+# Example: "cui-java-expert:cui-java-core" → bundle="cui-java-expert", name="cui-java-core"
+# Example: "cui-java-core" → bundle=null, name="cui-java-core"
+
 # Search inventory.bundles[].skills[] for matching name
 # If bundle specified in reference: filter to that bundle's skills
 # If unspecified: search all bundles' skills
 # Match on: skill.name === {name}
-# Return: skill.path (directory path)
+# Return: skill.path (directory path), skill.bundle
 
 # VALIDATION:
 
 # For ALL file types (agents, commands, skills):
+#   - Parse reference to extract bundle and name
+#   - Find matching skill in inventory
+#   - If bundle IS specified in reference:
+#     - Check if bundle matches skill.bundle from inventory
+#     - If matches: Mark as ✅ CORRECT
+#     - If mismatch: Mark as ⚠️ FIXABLE (incorrect bundle prefix)
+#       - Example fix: "wrong-bundle:cui-java-core" → "cui-java-expert:cui-java-core"
 #   - If bundle NOT specified:
 #     - Mark as ⚠️ FIXABLE (missing bundle prefix)
-#     - Find matching skill in inventory
 #     - Construct correct reference: {skill.bundle}:{skill.name}
 #     - Example fix: "cui-java-core" → "cui-java-expert:cui-java-core"
 ```
