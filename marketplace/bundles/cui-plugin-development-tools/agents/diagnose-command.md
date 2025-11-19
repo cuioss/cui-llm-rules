@@ -133,7 +133,7 @@ bloat_score = (current_lines / 400) * 100
 **Rule 1: Never Add, Only Fix**
 - Command doesn't unnecessarily grow with each edit
 - No "just-in-case" content
-- **Exception**: CONTINUOUS IMPROVEMENT RULE section is REQUIRED and exempt (check for its presence)
+- **Exception**: CONTINUOUS IMPROVEMENT RULE section is REQUIRED and exempt from bloat rules (presence will be checked in Step 6)
 
 **Rule 2: Consolidate, Don't Duplicate**
 - No repeated content across sections
@@ -175,7 +175,18 @@ anti_bloat_score = (rules_followed / 8) * 100
 - Workflow/steps section
 - Tool usage requirements
 - Decision points (Pattern 3)
-- **CONTINUOUS IMPROVEMENT RULE section** (REQUIRED for >90% of commands - flag as WARNING if missing unless command is simple orchestrator with <150 lines)
+
+**Check for CONTINUOUS IMPROVEMENT RULE section:**
+
+**DETECTION PATTERN** (search the entire file content):
+1. Search for text "CONTINUOUS IMPROVEMENT" (case-insensitive) anywhere in the file
+2. OR search for heading pattern matching `^##+ CONTINUOUS IMPROVEMENT` (any heading level)
+3. If found: Mark as PRESENT
+4. If NOT found: Mark as MISSING
+
+**REQUIREMENT**:
+- **REQUIRED for >90% of commands** - Flag as WARNING if missing (unless command is simple orchestrator with <150 lines)
+- Section typically appears near end of command file, after examples/related sections
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
 

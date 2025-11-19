@@ -223,6 +223,17 @@ Display all statistics in final summary.
 /plugin-verify-marketplace bundle=cui-frontend-expert fail-fast=false
 ```
 
+## CONTINUOUS IMPROVEMENT RULE
+
+**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=plugin-verify-marketplace update="[your improvement]"` with:
+1. Better validation logic for detecting structural issues
+2. More accurate error detection and reporting
+3. Improved orchestration efficiency across diagnostic commands
+4. Enhanced fail-fast vs comprehensive mode handling
+5. Any lessons learned about marketplace verification patterns
+
+This ensures the command evolves and becomes more effective with each execution.
+
 ## RELATED
 
 - `cui-plugin-development-tools:plugin-inventory-scanner` agent - Scans marketplace structure
