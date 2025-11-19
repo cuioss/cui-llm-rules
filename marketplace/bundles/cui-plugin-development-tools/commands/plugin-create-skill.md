@@ -71,7 +71,7 @@ Ask user to select:
 Load and apply marketplace architecture standards:
 
 ```
-Skill: cui-marketplace-architecture
+Skill: cui-plugin-development-tools:cui-marketplace-architecture
 ```
 
 Verify:

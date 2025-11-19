@@ -27,7 +27,7 @@ This ensures the command evolves and becomes more effective with each execution.
 ### Step 1: Load Architecture Standards
 
 ```
-Skill: cui-marketplace-architecture
+Skill: cui-plugin-development-tools:cui-marketplace-architecture
 ```
 
 ### Step 2: Interactive Questionnaire
