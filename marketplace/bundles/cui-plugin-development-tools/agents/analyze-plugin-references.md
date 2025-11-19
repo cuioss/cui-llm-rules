@@ -217,12 +217,20 @@ Found references:
    - Architecture rules documentation: "Pattern: subagent_type:"
    - Template/format specifications: `Line {line}: {reference}`
    - Lines starting with: `- **Example**:`, `- Pattern:`, `# Search for`, `## Examples`
+   - **Markdown workflow documentation patterns:**
+     * Markdown list with bold labels: `- **Action**: Skill:...`, `- **Skill**: Skill:...`, `- **Purpose**:...`, `- **Reason**:...`
+     * Workflow step headers: `Step N: Load Standards` followed by `- **label**: value` lists
+     * Markdown pseudo-YAML: `Task:` followed by indented fields in .md files (not actual YAML)
+     * Documentation fields: Lines with `Description:`, `Parameters:`, `Purpose:` under `Task:` in .md files
+   - **File format context:**
+     * .md (Markdown) files: References in workflow documentation sections are descriptions, not invocations
+     * .md files without code blocks (```yaml```, ```json```): Plain text references are documentation
 
    **✅ ACTUAL INVOCATION - Runtime Usage:**
-   - In workflow steps: "Step 3: Use SlashCommand to invoke..."
-   - In Task delegation: "Task:" followed by "subagent_type: bundle:agent"
-   - In Skill activation: "Skill: bundle:skill-name" (not in examples section)
-   - In direct execution instructions (not explaining patterns)
+   - In .yaml or .json configuration files: All references are actual invocations
+   - In .md files within code blocks: References in ```yaml``` or ```json``` blocks are actual code
+   - In workflow steps with execution context: "Execute:" or "Run:" followed by actual tool invocation
+   - In direct execution instructions (not explaining patterns or documenting structure)
 
 4. **Determine classification:**
    - If pattern not in line text: **DISCARD** immediately as Grep hallucination
@@ -263,11 +271,24 @@ Found references:
    Context check: Architecture rules explaining patterns
    Action: FILTER - This is pattern definition
 
+❌ Line 23: - **Action**: Skill: cui-marketplace-architecture
+   Verification: Pattern found in line
+   Context check: Markdown list under "Step 2: Load Analysis Standards"
+                  Format: "- **{label}**: {value}" (Markdown documentation list)
+   File format: .md (Markdown command definition file)
+   Action: FILTER - This is Markdown workflow documentation, not actual invocation
+
+❌ Line 31: Task:\n  subagent_type: "plugin-diagnose-agents"
+   Verification: Pattern found in line
+   Context check: Indented under "Task:" label in Markdown workflow section
+                  Format: Markdown pseudo-YAML describing task structure
+   File format: .md (Markdown), not .yaml (actual configuration)
+   Action: FILTER - This is Markdown workflow description, not actual YAML
+
 ✅ Line 74: Skill: cui-marketplace-architecture
    Verification: Pattern found in line
-   Context check: Step 2: Load Analysis Standards
-                  Skill: cui-marketplace-architecture
-                  This loads all necessary agent analysis standards
+   Context check: Direct Skill invocation in workflow execution step
+   File format: .yaml or in ```yaml``` code block
    Action: KEEP - This is actual Skill invocation in workflow
 ```
 
