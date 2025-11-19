@@ -3,7 +3,7 @@ name: asciidoc-format-validator
 description: Validates AsciiDoc files for format compliance (section headers, lists, blank lines) using validation scripts
 
 tools: Read, Edit, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh), Glob, Skill
-model: haiku
+model: sonnet
 color: purple
 ---
 

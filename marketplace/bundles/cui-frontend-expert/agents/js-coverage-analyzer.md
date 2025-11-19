@@ -2,7 +2,7 @@
 name: js-coverage-analyzer
 description: Analyzes existing test coverage reports (focused analyzer - no build execution)
 tools: Read, Glob, Grep
-model: haiku
+model: sonnet
 ---
 
 # JavaScript Coverage Analyzer Agent

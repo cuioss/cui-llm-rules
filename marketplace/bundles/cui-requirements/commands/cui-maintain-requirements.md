@@ -91,7 +91,7 @@ This loads comprehensive requirements standards including:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Locate requirements and specification documents
   prompt: |
     Locate all requirements and specification documents in project.
@@ -120,7 +120,7 @@ Verify standards loaded from skills, confirm understanding of:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Identify requirements maintenance needs
   prompt: |
     Analyze requirements documents for issues.
@@ -164,7 +164,7 @@ Task:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Check specification links
   prompt: |
     Verify requirements link to specifications correctly.
@@ -186,7 +186,7 @@ Task:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Identify specification maintenance needs
   prompt: |
     Analyze specification documents for issues.
@@ -229,7 +229,7 @@ Task:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Validate all xref: links
   prompt: |
     Verify all cross-references resolve correctly.
@@ -247,7 +247,7 @@ Task:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Verify implementation references
   prompt: |
     Validate all code references in documentation.
@@ -289,7 +289,7 @@ For each requirement and specification:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Detect duplicate content
   prompt: |
     Identify duplicate information across documents.

@@ -2,7 +2,7 @@
 name: plugin-inventory-scanner
 description: Scans marketplace directories and returns structured inventory of bundles, agents, commands, and skills (focused scanner - file discovery only)
 tools: [Glob, Read, Grep]
-model: haiku
+model: sonnet
 ---
 
 # Plugin Inventory Scanner Agent
@@ -264,7 +264,6 @@ Return the complete JSON structure as the agent's final output.
 **Performance:**
 - Default mode (`includeDescriptions=false`): Fast scan using Glob only
 - With `includeDescriptions=true`: Slower, uses Read/Grep per resource
-- Use haiku model for fast, cost-effective file discovery
 
 **Error Handling:**
 - If base path doesn't exist: FAIL with clear error message

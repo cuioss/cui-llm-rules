@@ -190,7 +190,7 @@ For each error, analyze context to plan minimal fix:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Analyze Javadoc error contexts
   prompt: |
     Analyze the context for each Javadoc error to determine minimal fix.

@@ -129,7 +129,7 @@ For each module, run systematic violation detection using Explore agent:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Audit logger configuration
   prompt: |
     Identify logging configuration violations in module {module}.
@@ -144,7 +144,7 @@ Task:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Audit LogRecord usage
   prompt: |
     Check LogRecord usage compliance in module {module}.
@@ -159,7 +159,7 @@ Task:
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Review LogMessages structure
   prompt: |
     Review LogMessages class structure in module {module}.
@@ -178,7 +178,7 @@ Verify doc/LogMessages.adoc exists and matches implementation.
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Detect duplicate log messages
   prompt: |
     Identify duplicate logging patterns in module {module}.
@@ -234,7 +234,7 @@ Create or update doc/LogMessages.adoc following standard format.
 ```
 Task:
   subagent_type: Explore
-  model: haiku
+  model: sonnet
   description: Find business logic test for LogRecord
   prompt: |
     Find the appropriate business logic test for LogRecord {logrecord_name}.

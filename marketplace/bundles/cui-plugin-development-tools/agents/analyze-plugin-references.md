@@ -7,7 +7,7 @@ tools:
   - Edit
   - AskUserQuestion
   - Write
-model: haiku
+model: sonnet
 ---
 
 # Analyze Plugin References Agent

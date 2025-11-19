@@ -2,7 +2,7 @@
 name: js-doc-violation-analyzer
 description: Analyzes JSDoc compliance and returns structured violation list (focused analyzer - no fixes)
 tools: Read, Grep, Glob, Skill
-model: haiku
+model: sonnet
 ---
 
 # JSDoc Violation Analyzer Agent
