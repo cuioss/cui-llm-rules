@@ -72,35 +72,37 @@ These provide:
 
 ### Step 2: Analyze File Structure
 
-**Use the analyze-markdown-file.sh script for reliable metrics:**
+**CRITICAL: Execute the analysis script FIRST (before any Read operations):**
+
+1. **Call the script** (required first step):
 ```bash
 marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {command_path}
 ```
 
-This script returns JSON with:
-- **metrics.line_count** - Exact line count (matches `wc -l`)
-- **metrics.word_count** - Word count
-- **frontmatter.present** - Whether YAML frontmatter exists
-- **frontmatter.content** - The frontmatter block
-- **continuous_improvement_rule.present** - Whether CI RULE exists
-- **continuous_improvement_rule.line_number** - Line where it appears
-- **continuous_improvement_rule.content** - The section content
+2. **Parse the JSON output** and extract:
+   - `metrics.line_count` → Store as TOTAL_LINES (use for all bloat calculations)
+   - `metrics.word_count` → Store for reference
+   - `frontmatter.present` → Store for Step 3 validation
+   - `frontmatter.content` → Parse YAML for name/description
+   - `continuous_improvement_rule.present` → Store for Step 6 validation
+   - `continuous_improvement_rule.content` → Analyze format if present
 
-**Extract from JSON:**
-1. **line_count** - Use for bloat calculations
-2. **frontmatter** - Use for YAML validation
-3. **continuous_improvement_rule.present** - Use for Step 6 validation
-4. Store these values for later steps
+3. **CRITICAL**: Use ONLY the `line_count` from the script for bloat classification:
+   - If line_count > 500: BLOATED
+   - If line_count > 400: LARGE
+   - If line_count <= 400: ACCEPTABLE
 
-**Then read the file for detailed content analysis:**
+4. **Then read file for content analysis** (after script execution):
 ```
 Read: {command_path}
 ```
 
-**Count additional metrics from content:**
-- Section count (## headings)
-- Workflow step count
-- Example count
+5. **Count additional metrics from Read content:**
+   - Section count (## headings)
+   - Workflow step count
+   - Example count
+
+**Why script first?**: The script provides deterministic metrics (matches wc -l exactly). Do NOT estimate or count lines from Read output.
 
 ### Step 3: Validate YAML Frontmatter (Patterns 16, 17, 18)
 
