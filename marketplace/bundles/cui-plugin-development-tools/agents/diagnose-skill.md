@@ -7,7 +7,7 @@ description: |
   - Input: skill_path=/path/to/skill
   - Output: Comprehensive skill quality report with issues categorized by severity
 
-tools: [Read, Glob, Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)]
+tools: Read, Glob, Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)
 model: sonnet
 color: orange
 ---
