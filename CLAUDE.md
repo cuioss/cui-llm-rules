@@ -69,3 +69,4 @@ When performing comprehensive documentation review/rework:
 
 - This is a documentation-only repository with no build system, compilation, or testing
 - Uses standard git workflow on main branch
+- Allways use target-directory for documents or scripts you create on the fly. Do not use temp or proliferate within working-directory. Allways use proper tools  like Edit, Read, Write, NEVER use stuff like echo, cat and such
