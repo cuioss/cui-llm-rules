@@ -34,9 +34,9 @@ Analyze ONE skill completely:
 
 **CRITICAL: Execute the analysis script FIRST:**
 
-1. **Call analyze-skill-structure.sh:**
-```bash
-./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh {skill_path}
+1. **Call analyze-skill-structure.sh using Bash tool:**
+```
+Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh {skill_path}
 ```
 
 2. **Parse the JSON output** and extract:

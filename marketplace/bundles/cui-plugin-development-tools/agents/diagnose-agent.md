@@ -63,9 +63,9 @@ These provide:
 
 **CRITICAL: Execute the analysis scripts FIRST (before any Read operations):**
 
-1. **Call analyze-markdown-file.sh:**
-```bash
-./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {agent_path}
+1. **Call analyze-markdown-file.sh using Bash tool:**
+```
+Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {agent_path}
 ```
 
 2. **Parse the JSON output** and extract:
@@ -86,9 +86,9 @@ These provide:
    - `continuous_improvement_rule.format` → Should be "caller-reporting" for agents (NEW)
    - `continuous_improvement_rule.pattern_22_violation` → Critical if true (NEW)
 
-3. **Call analyze-tool-coverage.sh:**
-```bash
-./.claude/skills/cui-marketplace-architecture/scripts/analyze-tool-coverage.sh {agent_path}
+3. **Call analyze-tool-coverage.sh using Bash tool:**
+```
+Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-tool-coverage.sh {agent_path}
 ```
 
 4. **Parse the tool coverage JSON output** and extract:

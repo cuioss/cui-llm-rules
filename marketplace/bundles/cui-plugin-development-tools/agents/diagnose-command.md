@@ -74,9 +74,9 @@ These provide:
 
 **CRITICAL: Execute the analysis script FIRST (before any Read operations):**
 
-1. **Call the script** (required first step):
-```bash
-./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {command_path}
+1. **Call the script using Bash tool** (required first step):
+```
+Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {command_path}
 ```
 
 2. **Parse the JSON output** and extract:
