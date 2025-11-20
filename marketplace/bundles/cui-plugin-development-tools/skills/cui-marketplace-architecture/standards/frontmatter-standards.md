@@ -427,12 +427,106 @@ tools: Read, Write, Bash
 
 ### Permission Patterns
 
-For Bash tool with wildcards:
+#### Skill Script Mounting
 
-1. **Script paths**: Must use `./.claude/skills/{skill-name}/scripts/{script}.sh:*` format
-2. **Command wildcards**: Use `:*` suffix for prefix matching (e.g., `git:*`, `npm:*`)
-3. **No security**: These are convenience, not enforced security boundaries
-4. **Settings sync**: Permissions must also be in `.claude/settings.json` and `~/.claude/settings.json`
+**CRITICAL CONCEPT**: Skills are mounted at runtime from their physical location to `./.claude/skills/`.
+
+**Physical Location**:
+```
+marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh
+```
+
+**Runtime Mount Point**:
+```
+./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh
+```
+
+**Why This Matters**:
+1. Agents/commands use **runtime paths** in frontmatter (`./.claude/skills/...`)
+2. Claude Code mounts skills when loaded
+3. This is NOT a relative path to "fix" - it's the correct runtime mount point
+4. Do NOT use physical marketplace paths in frontmatter
+
+#### Bash Tool Script Permissions
+
+When using Bash tool to execute scripts located in skills:
+
+✅ **CORRECT frontmatter declaration**:
+```yaml
+tools: Read, Glob, Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)
+```
+
+❌ **INCORRECT** (physical path):
+```yaml
+tools: Read, Bash(./marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)
+```
+
+❌ **INCORRECT** (absolute path):
+```yaml
+tools: Read, Bash(/Users/oliver/git/cui-llm-rules/marketplace/bundles/.../scripts/analyze-skill-structure.sh:*)
+```
+
+#### Settings.json Permission Requirements
+
+**CRITICAL**: Permissions must be declared in **both** global and project-level settings.
+
+**Why Both Are Required**:
+- Global settings (`~/.claude/settings.json`): Base permissions
+- Project settings (`.claude/settings.json`): Can restrict or augment global permissions
+- If script permission missing from either, agents cannot execute scripts
+
+**Global Settings** (`~/.claude/settings.json`):
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)",
+      "Bash(./marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)",
+      "Bash(/Users/username/git/project/marketplace/bundles/.../scripts/analyze-skill-structure.sh:*)"
+    ]
+  }
+}
+```
+
+**Project Settings** (`.claude/settings.json`):
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)",
+      "Bash(./marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)",
+      "Bash(/Users/username/git/project/marketplace/bundles/.../scripts/analyze-skill-structure.sh:*)"
+    ]
+  }
+}
+```
+
+**Why Multiple Path Formats**:
+1. `./.claude/skills/...` - Runtime mount point (used by agents at runtime)
+2. `./marketplace/bundles/...` - Relative physical path (main conversation)
+3. `/Users/.../marketplace/bundles/...` - Absolute physical path (validation/testing)
+
+All three formats are needed to ensure scripts work in all contexts.
+
+#### Command Wildcards
+
+For general bash commands (not scripts):
+
+✅ **CORRECT**:
+```yaml
+tools: Bash(git:*), Bash(npm:*), Bash(mvn:*)
+```
+
+**Wildcard Behavior**:
+- `:*` suffix enables prefix matching
+- `git:*` permits all git subcommands: `git status`, `git commit`, etc.
+- `npm:*` permits all npm commands: `npm install`, `npm run test`, etc.
+
+#### Security Notes
+
+1. **Convenience, Not Security**: Bash permission patterns are prefix matches, not enforced security boundaries
+2. **Can Be Bypassed**: Users can work around these restrictions
+3. **Purpose**: Convenience layer to prevent accidental operations, not foolproof isolation
 
 ## Quality Checklist
 
