@@ -1,0 +1,6 @@
+= Test Document
+
+== Section One
+Some text directly before list:
+* List item 1
+* List item 2

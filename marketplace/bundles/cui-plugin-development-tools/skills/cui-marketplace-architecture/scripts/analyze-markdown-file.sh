@@ -7,6 +7,45 @@
 
 set -euo pipefail
 
+# Help function
+show_help() {
+    cat << EOF
+Usage: analyze-markdown-file.sh <file_path>
+
+Description:
+  Analyzes agent/command markdown files for structure, bloat classification,
+  YAML frontmatter validity, and continuous improvement patterns.
+
+Arguments:
+  file_path    Path to the agent/command .md file to analyze (required)
+
+Output:
+  JSON object with comprehensive file analysis:
+  - Basic metrics (lines, words, characters)
+  - Bloat classification (ACCEPTABLE/LARGE/BLOATED)
+  - File type detection (agent/command)
+  - YAML frontmatter validation
+  - Section structure analysis
+  - Continuous improvement rule detection
+  - Parameter documentation detection
+
+Exit Codes:
+  0 - Success
+  1 - Invalid arguments or file not found
+  2 - Analysis error
+
+Examples:
+  analyze-markdown-file.sh marketplace/bundles/cui-java-expert/agents/log-record-documenter.md
+  analyze-markdown-file.sh marketplace/bundles/cui-task-workflow/commands/orchestrate-language.md
+EOF
+    exit 0
+}
+
+# Check for help flag
+if [ $# -eq 1 ] && { [ "$1" == "--help" ] || [ "$1" == "-h" ]; }; then
+    show_help
+fi
+
 # Check arguments
 if [ $# -ne 1 ]; then
     echo '{"error": "Usage: analyze-markdown-file.sh <file_path>"}' >&2
