@@ -5,7 +5,32 @@ description: Verify and fix permissions in settings by removing duplicates, fixi
 
 # Setup Project Permissions Command
 
-Verifies and fixes permissions in `.claude/settings.local.json` using permission management standards from the `permission-management` skill.
+Verifies and fixes permissions in `.claude/settings.json` (project-level settings) using permission management standards from the `permission-management` skill.
+
+## Project-Level vs Global Settings
+
+**Focus: Project-Level Settings** (`.claude/settings.json`)
+
+This command focuses on **project-level settings** for version-controlled projects like the CUI marketplace:
+
+**When to use project-level** (`.claude/settings.json`):
+- ✅ Team projects (version controlled, committed to git)
+- ✅ Project-specific scripts (e.g., skill scripts in `marketplace/bundles/.../scripts/`)
+- ✅ Project-specific permissions everyone needs
+- ✅ Shareable configuration across team
+
+**When to use global** (`~/.claude/settings.json`):
+- ✅ Personal tools (work across all projects)
+- ✅ Common development tools (git, npm, docker)
+- ✅ User-specific preferences
+- ✅ Universal read access patterns
+
+**Settings Hierarchy**:
+1. Global (`~/.claude/settings.json`) - Base permissions for all projects
+2. Project (`.claude/settings.json`) - Project-specific, team-shared (committed)
+3. Local (`.claude/settings.local.json`) - Personal overrides (not committed)
+
+**CRITICAL**: Project-level settings can restrict global permissions. For agents to access tools, permissions must be in **both** global AND project-level settings.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -54,13 +79,38 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 
 **A. Load global permissions** from `~/.claude/settings.json`
 
-**B. Locate and load local settings**:
-- `./.claude/settings.local.json` (project-specific)
-- `~/.claude/settings.local.json` (fallback)
+**B. Load project-level settings**:
+- `./.claude/settings.json` (project-level, version-controlled)
+- If not found, check `./.claude/settings.local.json` (legacy fallback)
 
 **C. Validate JSON structure**
 
-**D. Ensure global marketplace permissions:**
+**D. Ensure skill script permissions** (if working in marketplace project):
+
+**CRITICAL**: Skill scripts require permissions at runtime mount point `./.claude/skills/{skill-name}/scripts/`.
+
+For each script in `marketplace/bundles/*/skills/*/scripts/*.sh`:
+
+1. **Generate three path formats**:
+   - Runtime mount: `Bash(./.claude/skills/{skill-name}/scripts/{script}.sh:*)`
+   - Relative physical: `Bash(./marketplace/bundles/{bundle}/skills/{skill-name}/scripts/{script}.sh:*)`
+   - Absolute physical: `Bash(/full/path/to/marketplace/bundles/.../scripts/{script}.sh:*)`
+
+2. **Add all three formats** to project-level settings if missing
+   - Why three formats? Scripts are accessed different ways:
+     - `./.claude/skills/...` - Agents at runtime (skill mounting)
+     - `./marketplace/bundles/...` - Main conversation (relative path)
+     - `/full/path/...` - Testing/validation (absolute path)
+
+3. **Track**: `skill_script_permissions_added`
+
+**Example skill scripts** (cui-marketplace-architecture):
+- `analyze-markdown-file.sh`
+- `analyze-tool-coverage.sh`
+- `analyze-skill-structure.sh`
+- `scan-marketplace-inventory.sh`
+
+**E. Ensure global marketplace permissions:**
 
 **Bundle Wildcards:**
 - Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(cui-maven:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
@@ -367,23 +417,86 @@ Update `.claude/run-configuration.md` with:
 
 **Note:** Marketplace permissions are always moved to global settings (with user confirmation prompt unless auto-fix is used).
 
+## Why Focus on Project-Level Settings?
+
+**For version-controlled projects like CUI marketplace, project-level settings are preferred because:**
+
+1. **Team Collaboration**:
+   - Committed to git (`settings.json`)
+   - Everyone gets same permissions automatically
+   - No manual setup for new team members
+   - Consistent development environment
+
+2. **Skill Script Permissions**:
+   - Scripts in `marketplace/bundles/*/skills/*/scripts/` are project-specific
+   - All developers need access to these scripts
+   - Must include all three path formats (runtime mount, relative, absolute)
+   - Example: `analyze-markdown-file.sh`, `analyze-skill-structure.sh`
+
+3. **Project-Specific Tools**:
+   - Project scripts in `scripts/` directory
+   - Project-specific bash commands
+   - Testing frameworks and tools
+   - Build configurations
+
+4. **Settings Hierarchy Protection**:
+   - Global settings provide baseline (read access, common tools)
+   - Project settings add project-specific needs
+   - Local settings for personal experiments only
+   - **Critical**: Project settings can restrict global settings (permissions must be in both)
+
+5. **Maintenance Benefits**:
+   - Single source of truth (project settings.json)
+   - Changes propagate to entire team via git
+   - Easier to debug permission issues
+   - Version history via git commits
+
+**Global settings remain important for**:
+- Cross-project tools (`git:*`, `npm:*`, `docker:*`)
+- Universal read access (`Read(//~/git/**)`)
+- Marketplace bundle wildcards (`Skill(cui-*:*)`, `SlashCommand(/cui-*:*)`)
+- Personal development preferences
+
+**Key Insight**: Project-level settings complement global settings, they don't replace them. For agents to work, permissions often need to be in **BOTH** levels because project settings can restrict global permissions.
+
 ## IMPORTANT NOTES
 
-**Settings Location:**
-1. `./.claude/settings.local.json` (project-specific, preferred)
-2. `~/.claude/settings.local.json` (global fallback)
+**Settings Location Priority:**
+1. **`./.claude/settings.json`** - Project-level (version-controlled, team-shared) **← PRIMARY FOCUS**
+2. `./.claude/settings.local.json` - Personal overrides (not committed)
+3. `~/.claude/settings.json` - Global user settings (all projects)
 
-**Global/Local Architecture:**
-- Global: Universal read access, common tools, all skills
-- Local: Project-specific Edit/Write only (2-3 permissions typical)
-- Read covered globally via `Read(//~/git/**)`
+**Project-Level Settings Philosophy:**
 
-**Default Permissions:**
-- Project Edit/Write added automatically
-- Project scripts Bash added if scripts/ exists
-- Read NOT added (globally covered)
-- **Marketplace skills/commands NOT added** (should be in global settings via wildcards, not project-specific)
-- WebFetch domains NOT added (domain-specific permissions should be in global settings)
+For version-controlled projects (like CUI marketplace):
+- ✅ **Project-level settings** (`.claude/settings.json`) - Committed to git
+  - Skill scripts permissions (three path formats)
+  - Project-specific tools everyone needs
+  - Team-shared configuration
+  - Example: marketplace analysis scripts
+
+- ✅ **Global settings** (`~/.claude/settings.json`) - Personal, cross-project
+  - Universal read access: `Read(//~/git/**)`
+  - Common dev tools: `Bash(git:*)`, `Bash(npm:*)`
+  - Marketplace bundle wildcards: `Skill(cui-*:*)`, `SlashCommand(/cui-*:*)`
+  - Personal preferences
+
+- ⚙️ **Local settings** (`.claude/settings.local.json`) - Personal overrides only
+  - NOT committed to git
+  - Temporary experiments
+  - User-specific modifications
+
+**CRITICAL Permission Hierarchy**:
+- Project-level settings can **restrict** global permissions
+- For agents to work: Permissions must be in **BOTH** global AND project-level
+- Skill script permissions **MUST** be in project-level (team needs them)
+
+**Default Permissions Added to Project-Level:**
+- ✅ Project Edit/Write: `Edit(//~/git/{repo}/**)`, `Write(//~/git/{repo}/**)`
+- ✅ Project scripts: `Bash(~/git/{repo}/scripts/**)` (if scripts/ exists)
+- ✅ Skill scripts: Three path formats for each `.sh` in `marketplace/bundles/*/skills/*/scripts/`
+- ❌ Read: NOT added (globally covered via `Read(//~/git/**)`)
+- ❌ Marketplace wildcards: NOT added to project (should be in global only)
 
 ## ARCHITECTURE
 
