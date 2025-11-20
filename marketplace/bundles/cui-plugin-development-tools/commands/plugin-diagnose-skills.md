@@ -226,29 +226,24 @@ Per-skill: status, scores (Arch/Content), refs (correct/found).
 
 **If any issues found in this bundle:**
 
-Load and apply fix workflow from skill:
+Load and apply fix workflow:
 ```
-Skill: cui-plugin-development-tools:cui-fix-workflow
+Skill: cui-plugin-development-tools:diagnose-reporting-templates
 ```
 
-Follow the skill's workflow: Categorize → Apply Safe Fixes → Prompt for Risky Fixes → Verify Fixes.
+Use "Fix Workflow Pattern" to:
+1. Categorize issues as safe vs risky
+2. Auto-apply safe fixes
+3. Prompt for risky fix approval
+4. Verify fixes resolved issues
 
-**If NO issues found:**
-- Skip Steps 4e-4h (no fixes needed)
-- Mark as N/A in completion checklist
-- Proceed to Step 4h-verification
+**Skill-specific safe fixes**: YAML frontmatter errors, missing fields, formatting, broken file references
 
-**Skill-specific configuration for categorization:**
-
-**Safe fix types:**
-- YAML frontmatter syntax errors, missing fields
-- Formatting/whitespace normalization
-- Broken file references
-
-**Risky fix categories:**
-- Duplication Issues, Integration Issues, Reference Problems
+**Skill-specific risky fixes**: Duplication issues, integration issues, reference problems
 
 Track: `bundle_safe_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
+
+**If NO issues found**: Skip Steps 4e-4h (mark N/A), proceed to Step 4h-verification
 
 **Step 4h-verification: POST-FIX VERIFICATION (MANDATORY)**
 
@@ -312,39 +307,17 @@ Only proceed to Step 5 when ALL bundles have been processed (analysis + fixes).
 - Bundle-by-bundle breakdown
 - Overall quality metrics
 
-**Display final summary:**
+**Display final summary using template:**
+
 ```
-==================================================
-Skill Doctor - All Bundles Complete
-==================================================
-
-Bundles Processed: {total_bundles}
-Total Skills: {total_skills}
-
-Overall Statistics:
-- Skills clean: {count} ✅
-- Skills with warnings: {count} ⚠️
-- Skills with critical issues: {count} ❌
-
-Total Issues:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
-
-Fixes Applied:
-- Safe fixes: {count}
-- Risky fixes: {count}
-- Issues resolved: {count}
-
-By Bundle:
-- cui-plugin-development-tools: {skills} skills | {issues} issues | {fixes} fixed
-- {bundle-2}: {skills} skills | {issues} issues | {fixes} fixed
-...
-
-{if all clean}
-✅ All skills across all bundles are well-formed and high quality!
-{endif}
+Skill: cui-plugin-development-tools:diagnose-reporting-templates
 ```
+
+Use "Summary Report Template" with:
+- Component Type: "Skill"
+- Components: "skills"
+
+Populate with aggregated metrics from all bundles.
 
 **If --save-report flag is set:**
 - Write complete cross-bundle report to `skills-diagnosis-report.md`
@@ -399,19 +372,14 @@ Top Duplication Issues:
 
 ## ARCHITECTURE
 
-This command is a bundle-by-bundle orchestrator designed to prevent token overload by processing marketplace resources sequentially by bundle.
+Bundle-by-bundle orchestrator for token efficiency. See: `Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns`
 
-**Key Characteristics:**
-- Bundle-by-bundle processing with cui-plugin-development-tools first, then alphabetically
-- Complete workflow per bundle: Analysis → Reference validation → Fix → Verify
-- Token-optimized: Streamlined output, scoped processing
-- Parallel execution within bundle, sequential across bundles
-- Optional cross-skill duplication detection (Step 6, O(n²), when --check-cross-duplication flag set)
+**Workflow**: Analysis → Reference validation → Fix → Verify → [Optional: Cross-duplication detection]
 
-**Analysis delegated to specialized agents:**
-- diagnose-skill (skill orchestrator with streamlined output)
-- analyze-plugin-references (reference validation)
-- analyze-cross-skill-duplication (optional cross-skill duplication)
+**Delegates to**:
+- diagnose-skill (comprehensive analysis)
+- analyze-plugin-references (validation)
+- analyze-cross-skill-duplication (optional, O(n²))
 
 ## TOOL USAGE
 

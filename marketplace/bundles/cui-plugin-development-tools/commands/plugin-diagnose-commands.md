@@ -224,24 +224,21 @@ Per-command: classification, line count, quality score, refs (correct/found).
 
 **If any issues found in this bundle:**
 
-Load and apply fix workflow from skill:
+Load and apply fix workflow:
 ```
-Skill: cui-plugin-development-tools:cui-fix-workflow
+Skill: cui-plugin-development-tools:diagnose-reporting-templates
 ```
 
-Follow the skill's workflow: Categorize → Handle References → Apply Safe Fixes → Prompt for Risky Fixes → Verify Fixes.
+Use "Fix Workflow Pattern" to:
+1. Categorize issues as safe vs risky
+2. Handle reference fixes
+3. Auto-apply safe fixes
+4. Prompt for risky fix approval
+5. Verify fixes resolved issues
 
-**Command-specific configuration for categorization:**
+**Command-specific safe fixes**: YAML frontmatter errors, missing fields, obsolete content removal, CONTINUOUS IMPROVEMENT RULE template, formatting, broken cross-references
 
-**Safe fix types:**
-- YAML frontmatter syntax errors, missing fields
-- Obsolete content removal
-- Add missing CONTINUOUS IMPROVEMENT RULE template
-- Formatting/whitespace normalization
-- Broken cross-references
-
-**Risky fix categories:**
-- Bloat Issues (>500 lines), Clarity Issues, Structural Issues
+**Command-specific risky fixes**: Bloat issues (>500 lines), clarity issues, structural issues
 
 Track: `bundle_safe_fixes_applied`, `bundle_reference_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
 
@@ -306,40 +303,17 @@ Only proceed to Step 6 when ALL bundles have been processed (analysis + fixes).
 - Bundle-by-bundle breakdown
 - Overall quality metrics
 
-**Display final summary:**
+**Display final summary using template:**
+
 ```
-==================================================
-Commands Doctor - All Bundles Complete
-==================================================
-
-Bundles Processed: {total_bundles}
-Total Commands: {total_commands}
-
-Overall Statistics:
-- Acceptable size: {count} ✅
-- Large: {count} ⚠️
-- Bloated: {count} ❌
-
-Total Issues:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
-
-Fixes Applied:
-- Safe fixes: {count}
-- Risky fixes: {count}
-- Reference fixes: {count}
-- Issues resolved: {count}
-
-By Bundle:
-- cui-plugin-development-tools: {commands} commands | {bloated} bloated | {issues} issues | {fixes} fixed
-- {bundle-2}: {commands} commands | {bloated} bloated | {issues} issues | {fixes} fixed
-...
-
-{if all clean}
-✅ All commands across all bundles are well-structured!
-{endif}
+Skill: cui-plugin-development-tools:diagnose-reporting-templates
 ```
+
+Use "Summary Report Template" with:
+- Component Type: "Commands"
+- Components: "commands"
+
+Populate with aggregated metrics from all bundles (include bloat classification stats).
 
 **If --save-report flag is set:**
 - Write complete cross-bundle report to `commands-diagnosis-report.md`
@@ -348,22 +322,13 @@ By Bundle:
 
 ## ARCHITECTURE
 
-This command is a bundle-by-bundle orchestrator designed to prevent token overload by processing marketplace resources sequentially by bundle.
+Bundle-by-bundle orchestrator for token efficiency. See: `Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns`
 
-**For detailed orchestration architecture, see:**
-```
-Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
-```
+**Workflow**: Analysis → Reference validation → Fix → Verify
 
-**Key Characteristics:**
-- Bundle-by-bundle processing with cui-plugin-development-tools first, then alphabetically
-- Complete workflow per bundle: Analysis → Reference validation → Fix → Verify
-- Token-optimized: Standards pre-loading, streamlined output, scoped processing
-- Parallel execution within bundle, sequential across bundles
-
-**Analysis delegated to specialized agents:**
-- diagnose-command (comprehensive command analysis with streamlined output)
-- analyze-plugin-references (reference validation)
+**Delegates to**:
+- diagnose-command (comprehensive analysis)
+- analyze-plugin-references (validation)
 
 ## TOOL USAGE
 

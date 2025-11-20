@@ -262,30 +262,24 @@ If Pattern 22 violations: Display warning with agent names, line numbers, and fi
 
 **If any issues found in this bundle:**
 
-Load and apply fix workflow from skill:
+Load and apply fix workflow:
 ```
-Skill: cui-plugin-development-tools:cui-fix-workflow
+Skill: cui-plugin-development-tools:diagnose-reporting-templates
 ```
 
-Follow the skill's workflow: Categorize → Apply Safe Fixes → Prompt for Risky Fixes → Verify Fixes.
+Use "Fix Workflow Pattern" to:
+1. Categorize issues as safe vs risky
+2. Auto-apply safe fixes
+3. Prompt for risky fix approval
+4. Verify fixes resolved issues
 
-**If NO issues found:**
-- Skip Steps 4f-4i (no fixes needed)
-- Mark as N/A in completion checklist
-- Proceed to Step 4i-verification
+**Agent-specific safe fixes**: YAML frontmatter errors, missing fields, tool list updates, CONTINUOUS IMPROVEMENT RULE template, formatting
 
-**Agent-specific configuration for categorization:**
-
-**Safe fix types:**
-- YAML frontmatter syntax errors, missing fields
-- Add/remove tools in `allowed-tools` based on workflow
-- Add missing CONTINUOUS IMPROVEMENT RULE template
-- Formatting/whitespace normalization
-
-**Risky fix categories:**
-- Tool Violations, Architectural Issues, Best Practice Violations
+**Agent-specific risky fixes**: Tool violations, architectural issues, best practice violations
 
 Track: `bundle_safe_fixes_applied`, `bundle_risky_fixes_applied`, `bundle_issues_resolved`
+
+**If NO issues found**: Skip Steps 4f-4i (mark N/A), proceed to Step 4i-verification
 
 **Step 4i-verification: POST-FIX VERIFICATION (MANDATORY)**
 
@@ -347,39 +341,17 @@ Only proceed to Step 5 when ALL bundles have been processed (analysis + fixes).
 - Bundle-by-bundle breakdown
 - Overall quality metrics
 
-**Display final summary:**
+**Display final summary using template:**
+
 ```
-==================================================
-Agents Doctor - All Bundles Complete
-==================================================
-
-Bundles Processed: {total_bundles}
-Total Agents: {total_agents}
-
-Overall Statistics:
-- Agents clean: {count} ✅
-- Agents with warnings: {count} ⚠️
-- Agents with critical issues: {count} ❌
-
-Total Issues:
-- Critical: {count}
-- Warnings: {count}
-- Suggestions: {count}
-
-Fixes Applied:
-- Safe fixes: {count}
-- Risky fixes: {count}
-- Issues resolved: {count}
-
-By Bundle:
-- cui-plugin-development-tools: {agents} agents | {issues} issues | {fixes} fixed
-- {bundle-2}: {agents} agents | {issues} issues | {fixes} fixed
-...
-
-{if all clean}
-✅ All agents across all bundles are high quality!
-{endif}
+Skill: cui-plugin-development-tools:diagnose-reporting-templates
 ```
+
+Use "Summary Report Template" with:
+- Component Type: "Agents"
+- Components: "agents"
+
+Populate with aggregated metrics from all bundles.
 
 **If --save-report flag is set:**
 - Write complete cross-bundle report to `agents-diagnosis-report.md`
@@ -387,23 +359,14 @@ By Bundle:
 
 ## ARCHITECTURE
 
-This command is a bundle-by-bundle orchestrator designed to prevent token overload by processing marketplace resources sequentially by bundle.
+Bundle-by-bundle orchestrator for token efficiency. See: `Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns`
 
-**For detailed orchestration architecture, see:**
-```
-Skill: cui-plugin-development-tools:cui-marketplace-orchestration-patterns
-```
+**Workflow**: Analysis → Reference validation → Architectural validation → Fix → Verify
 
-**Key Characteristics:**
-- Bundle-by-bundle processing with cui-plugin-development-tools first, then alphabetically
-- Complete workflow per bundle: Analysis → Reference validation → Architectural validation → Fix → Verify
-- Token-optimized: Standards pre-loading, streamlined output, scoped processing
-- Parallel execution within bundle, sequential across bundles
-
-**Analysis delegated to specialized agents:**
-- diagnose-agent (comprehensive agent analysis)
-- analyze-plugin-references (reference validation)
-- architectural-validator (constraint validation)
+**Delegates to**:
+- diagnose-agent (comprehensive analysis)
+- analyze-plugin-references (validation)
+- architectural-validator (constraints)
 
 ## TOOL USAGE
 

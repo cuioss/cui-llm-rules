@@ -238,126 +238,31 @@ If zero issues found:
 
 ==================================================
 
-### Step 4: Categorize Issues ⚠️ PHASE 2 STARTS HERE
+### Steps 4-7: Apply Fix Workflow ⚠️ PHASE 2 STARTS HERE
 
-**For complete fix workflow patterns, reference:**
+Load and apply fix workflow:
 ```
-Skill: cui-plugin-development-tools:cui-fix-workflow
+Skill: cui-plugin-development-tools:diagnose-reporting-templates
 ```
 
-**Categorize all issues into Safe vs Risky:**
+Use "Fix Workflow Pattern" with metadata-specific configuration:
 
-**Safe fixes** (auto-apply when auto-fix=true):
-- Update component inventory arrays in bundle plugin.json to match discovered components
-- Remove invalid schema fields from bundle plugin.json (displayName, category, components, dependencies, engines)
+**Metadata-specific safe fixes** (auto-apply when auto-fix=true):
+- Update component inventory arrays in bundle plugin.json
+- Remove invalid schema fields (displayName, category, components, dependencies, engines)
 - Convert repository object to string in bundle plugin.json
-- Remove obsolete plugin definitions from marketplace.json (where source doesn't exist)
-- Fix malformed plugin entries in marketplace.json (add missing required fields if inferrable)
+- Remove obsolete plugin definitions from marketplace.json
+- Fix malformed plugin entries in marketplace.json
 
-**Risky fixes** (always prompt user):
-- Remove plugins from marketplace.json that might still be in development
-- Add new bundle registrations to marketplace.json (user should verify bundle is ready)
+**Metadata-specific risky fixes** (always prompt):
+- Add new bundle registrations to marketplace.json
+- Remove plugins that might be in development
 - Structural changes affecting multiple bundles
-- Any fix where automatic resolution is ambiguous
 
-Build categorized issue lists with fix actions.
-
-### Step 5: Apply Safe Fixes
-
-**When to execute**: If auto-fix=true (default) AND safe fixes exist
-
-**For each safe fix:**
-
-**A. Component Inventory Fixes:** Use Edit to update agents/commands/skills arrays in plugin.json with discovered component names.
-
-**B. Schema Compliance Fixes:** Use Edit to remove invalid fields (displayName, category, components, dependencies, engines) and convert repository object to string if needed.
-
-**C. Marketplace Registry Fixes:** Use Edit to remove obsolete plugin entries from marketplace.json.
-
-**Track fixes:**
-- Increment `total_fixes` for each successful Edit
-- Log failed edits but continue
-
-**Display:**
-```
-[FIX] Applied safe fixes:
-  ✓ Updated component inventory: {bundle-name}
-  ✓ Removed invalid schema field: {bundle-name}/displayName
-  ✓ Removed obsolete marketplace entry: {plugin-name}
-
-Safe fixes applied: {safe_fix_count}
-```
-
-**Error handling:**
-- If Edit fails: Log error, mark fix as failed, continue with next fix
-- Report failed fixes at end
-
-### Step 6: Prompt for Risky Fixes
-
-**When to execute**: If risky fixes exist (regardless of auto-fix setting)
-
-**Risky fix categories:**
-1. **Marketplace Additions** - Add missing bundle registrations
-2. **Uncertain Removals** - Remove entries that might be in development
-3. **Structural Changes** - Changes affecting multiple bundles
-
-**Use AskUserQuestion for each category:**
-```
-AskUserQuestion:
-  questions:
-    - question: "Found {count} bundles not registered in marketplace.json. Add them?"
-      header: "Add Bundles"
-      multiSelect: false
-      options:
-        - label: "Add all missing bundles"
-          description: "Register all discovered bundles in marketplace.json"
-        - label: "Review each individually"
-          description: "Prompt for each bundle separately"
-        - label: "Skip"
-          description: "Don't add any bundles"
-```
-
-**For selected fixes:**
-- Apply using Edit tool
-- Track applied vs skipped counts
-- Display results with ✓/⊘ indicators
-
-### Step 7: Verification
-
-**When to execute**: After any fixes applied (Step 5 or Step 6)
-
-**Re-run all validations:**
-1. Re-run Steps 2-3 (bundle metadata, marketplace registry)
-2. Compare results with initial analysis
-3. Identify:
-   - Issues resolved: initial_issues - current_issues
-   - Issues remaining: current_issues
-   - New issues (should be 0)
-
-**Display verification:**
-```
-╔════════════════════════════════════════════════════════════╗
-║          Verification Results                              ║
-╚════════════════════════════════════════════════════════════╝
-
-Issues resolved: {resolved_count}
-Issues remaining: {remaining_count}
-New issues: {new_count} (should be 0)
-
-{if remaining_count > 0:
-  "Remaining Issues:"
-  {list remaining issues}
-}
-
-{if new_count > 0:
-  "⚠️ WARNING: New issues detected after fixes"
-  {list new issues}
-}
-```
-
-**Error handling:**
-- If new issues detected: Display warning but don't abort
-- If verification fails: Report error, display last known state
+**Verification** (after fixes):
+1. Re-run Steps 2-3 validations
+2. Compare with initial analysis
+3. Report: issues_resolved, issues_remaining, new_issues (should be 0)
 
 ### Step 8: Display Final Summary
 
