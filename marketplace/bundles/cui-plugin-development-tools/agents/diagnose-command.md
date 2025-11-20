@@ -54,21 +54,10 @@ These provide:
 
 ### Step 1.5: Validate Input Parameter
 
-**Validate command_path parameter:**
-1. Check that `command_path` is provided (not empty)
-2. Validate path format:
-   - Must be absolute path
-   - Must end with `.md` extension
-3. Verify file exists (will be confirmed when Read is attempted in Step 2)
-
-**Expected formats:**
-- Command files: `/path/to/commands/{name}.md`
-- Agent files: `/path/to/agents/{name}.md`
-
-**Error handling:**
-- If command_path is empty: Report error "command_path parameter required"
-- If path doesn't end with .md: Report warning "Expected .md file, got {extension}"
-- If Read fails in Step 2: Report error "File not found: {command_path}"
+**Validate command_path:**
+- Must be non-empty absolute path ending in .md
+- File existence verified by script in Step 2
+- Error if invalid: "command_path must be absolute .md file path"
 
 ### Step 2: Analyze File Structure
 
@@ -115,46 +104,24 @@ Read: {command_path}
 
 **ENFORCEMENT**: Using values other than script output = CRITICAL ERROR
 
-### Step 3: Validate YAML Frontmatter (Patterns 16, 17, 18)
+### Step 3: Bloat Detection (Pattern 11)
 
-**Use script results from Step 2:**
-- `frontmatter.yaml_valid` - YAML syntax validation (Pattern 17)
-- `frontmatter.name_present` - Required name field check (Pattern 16)
-- `frontmatter.description_present` - Required description field check (Pattern 16)
-- `frontmatter.yaml_errors[]` - List of detected YAML issues
-
-**Additional validation from content:**
-- Inconsistent naming (Pattern 18) - Compare name field with filename
-- Wrong field names - Check for common mistakes (e.g., `tools` in skills instead of `allowed-tools`)
-
-**Issues detected by script:**
-- Missing required fields (Pattern 16) - automatically detected
-- Invalid YAML syntax (Pattern 17) - automatically detected
-- Empty frontmatter - automatically detected
-
-### Step 4: Bloat Detection (Pattern 11)
-
-**Use bloat classification from Step 2 script output:**
-- `bloat.classification`: BLOATED (>500 lines, CRITICAL) | LARGE (400-500 lines, WARNING) | ACCEPTABLE (<400 lines)
-- `bloat.score`: (line_count / 400) * 100
-  - Score > 125: CRITICAL bloat (>500 lines)
-  - Score 100-125: WARNING bloat (400-500 lines)
-  - Score < 100: ACCEPTABLE
+**Use bloat data from script** (classification and score already calculated)
 
 **If BLOATED or LARGE, identify extractable content:**
-- Repeated workflow patterns
-- Detailed technical procedures
-- Reference documentation
-- Standards that could be in skills
+- Repeated workflow patterns → Extract to skill
+- Detailed technical procedures → Extract to skill
+- Reference documentation → Link to external docs
+- Standards content → Move to standards files
 
-### Step 5: Anti-Bloat Compliance (8 Rules)
+### Step 4: Anti-Bloat Compliance (8 Rules)
 
 **Check each rule:**
 
 **Rule 1: Never Add, Only Fix**
 - Command doesn't unnecessarily grow with each edit
 - No "just-in-case" content
-- **Exception**: CONTINUOUS IMPROVEMENT RULE section is REQUIRED and exempt from bloat rules (presence will be checked in Step 6)
+- **Exception**: CONTINUOUS IMPROVEMENT RULE section is REQUIRED and exempt from bloat rules (presence will be checked in Step 5)
 
 **Rule 2: Consolidate, Don't Duplicate**
 - No repeated content across sections
@@ -189,63 +156,36 @@ Read: {command_path}
 anti_bloat_score = (rules_followed / 8) * 100
 ```
 
-### Step 6: Structure Validation
+### Step 5: Structure Validation
 
-**Check required sections:**
-- Parameters section (Pattern 10)
-- Workflow/steps section
-- Tool usage requirements
-- Decision points (Pattern 3)
-
-**Check for CONTINUOUS IMPROVEMENT RULE section:**
-
-Use the result from Step 2's analyze-markdown-file.sh script:
-- If `continuous_improvement_rule.present` is `true`: PASS
-- If `false`: FAIL (unless command is simple orchestrator with <150 lines)
-
-**REQUIREMENT**:
-- **REQUIRED for >90% of commands** - Flag as WARNING if missing
+**Check structure (use script results):**
+- Required sections: Parameters, Workflow, Tool usage, Decision points
+- CONTINUOUS IMPROVEMENT RULE present (`continuous_improvement_rule.present` - REQUIRED for >90% of commands)
+- Parameter documentation (`parameters.has_section`, `parameters.documented[]`)
+- Workflow structure: Numbered steps, decision points, error handling
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
 
-**Use script results from Step 2:**
-- `file_type` - Automatically detected as "command" or "agent" (NEW)
-- `continuous_improvement_rule.format` - Detected as "self-update" or "caller-reporting" (NEW)
-- `continuous_improvement_rule.pattern_22_violation` - true if agent with self-update pattern (NEW)
+**Use script detection** (`file_type`, `continuous_improvement_rule.format`, `pattern_22_violation`):
 
-**For COMMANDS (file_type = "command"):**
-- **Expected format**: "self-update" (commands should self-update)
-- **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-command command-name={command-name} update="[your improvement]"`
-- **SUGGESTION**: Should list 3-5 specific improvement areas relevant to command purpose
-- **Correct Pattern**: Commands SHOULD use self-update pattern: `**CRITICAL:** Every time you execute this command...YOU MUST immediately update this file using /plugin-update-command...`
-- **WARNING**: If `continuous_improvement_rule.format` is "caller-reporting" instead of "self-update", suggest restoring self-update capability
-- **DO NOT apply Pattern 22 to commands** - commands are designed to self-update
+**COMMANDS (file_type = "command"):**
+- Expected format: "self-update" (commands self-update via /plugin-update-command)
+- Must include explicit usage instruction with command name
+- Should list 3-5 improvement areas
+- WARNING if format is "caller-reporting" (should be self-update)
 
-**For AGENTS (file_type = "agent"):**
-- **Expected format**: "caller-reporting" (Pattern 22)
-- **CRITICAL Check**: Must include explicit usage instruction mentioning the update mechanism
-- **SUGGESTION**: Should list 3-5 specific improvement areas relevant to agent purpose
-- **Correct Pattern (Pattern 22)**: Agents MUST use caller-reporting pattern: `**CRITICAL:** Every time you execute this agent...REPORT the improvement to your caller...The caller can then invoke /plugin-update-agent...`
-- **CRITICAL Pattern 22 violation**: If `continuous_improvement_rule.pattern_22_violation` is true, report CRITICAL issue - agent uses self-invocation pattern (agents CANNOT self-invoke)
+**AGENTS (file_type = "agent"):**
+- Expected format: "caller-reporting" (Pattern 22 - agents report to caller)
+- Must include explicit usage instruction mentioning /plugin-update-agent
+- Should list 3-5 improvement areas
+- CRITICAL if `pattern_22_violation` is true (agent cannot self-invoke)
 
-**Check parameter validation (Pattern 10):**
+**Parameter validation:**
+- Verify all parameters documented with Required/Optional status
+- Check default values specified for optional parameters
+- Validate validation logic present
 
-**Use script results from Step 2:**
-- `parameters.has_section` - Check if INPUT PARAMETERS section exists (NEW)
-- `parameters.documented[]` - List of documented parameters with required/optional status (NEW)
-
-**Validation:**
-- All parameters should be documented in INPUT PARAMETERS section
-- Each parameter should specify if Required or Optional
-- Default values should be specified for optional parameters
-- Validation logic present
-
-**Check workflow structure:**
-- Steps are numbered/ordered
-- Clear decision points
-- Error handling specified (Pattern 6)
-
-### Step 7: Content Quality Analysis
+### Step 6: Content Quality Analysis
 
 **Duplication detection (Pattern 12):**
 - Find repeated content within command
@@ -267,7 +207,7 @@ Use the result from Step 2's analyze-markdown-file.sh script:
 - Detect vague instructions
 - Count ambiguous phrases
 
-### Step 8: Workflow Analysis
+### Step 7: Workflow Analysis
 
 **Check for overlapping steps (Pattern 2):**
 - Detect redundant workflow steps
@@ -285,7 +225,7 @@ Use the result from Step 2's analyze-markdown-file.sh script:
 - Check if metrics are tracked
 - Verify reporting completeness
 
-### Step 9: Documentation Noise (Pattern 20)
+### Step 8: Documentation Noise (Pattern 20)
 
 **Detect broken external links:**
 - URLs that don't work
@@ -295,72 +235,41 @@ Use the result from Step 2's analyze-markdown-file.sh script:
 - Sections with only links
 - Content that adds no information
 
-### Step 10: Calculate Bloat Metrics
+### Step 9: Calculate Bloat Metrics
 
-**Before/After Analysis:**
-If this is a known command, calculate:
-- Historical line growth
-- Bloat trend
-- Anti-bloat compliance trend
+**Use bloat score from script** (already calculated in Step 2)
 
-**Restructuring Recommendations:**
-If BLOATED (>500 lines):
+**If BLOATED (>500 lines), provide restructuring recommendations:**
 - Identify sections to extract to skills
 - Calculate expected line reduction
 - Provide extraction strategy
 
-### Step 11: Generate Issue Report
+### Step 10: Generate Issue Report
 
-**Categorize all issues:**
+**Categorize all issues by severity:**
 
 **CRITICAL (Must Fix):**
-- Command bloat >500 lines (Pattern 11)
-- Missing/invalid YAML (Patterns 16, 17)
-- No parameter validation (Pattern 10)
-- Missing error handling for critical tools (Pattern 6)
+- Bloat >500 lines, Missing/invalid YAML, No parameter validation, Missing critical error handling
 
 **WARNINGS (Should Fix):**
-- Command large >400 lines (Pattern 11)
-- Duplicate content (Pattern 12)
-- Over-specification (Pattern 13)
-- Obsolete content (Pattern 15)
-- Overlapping steps (Pattern 2)
-- Ambiguous prompts (Pattern 1)
+- Large >400 lines, Duplicate content, Over-specification, Obsolete content, Overlapping steps, Ambiguous prompts
 
 **SUGGESTIONS (Nice to Have):**
-- Inconsistent naming (Pattern 18)
-- Missing config persistence (Pattern 8)
-- Unclear step purpose (Pattern 9)
-- Documentation noise (Pattern 20)
+- Inconsistent naming, Missing config persistence, Unclear step purpose, Documentation noise
 
-### Step 12: Calculate Final Scores
+### Step 11: Calculate Final Scores
 
-**Bloat Score:** Use `bloat.score` from Step 2 script output (already calculated)
+**Bloat Score:** Use `bloat.score` from Step 2 script
 
-**Anti-Bloat Compliance:** (calculated in Step 5)
+**Calculate other scores:**
+- Anti-Bloat Compliance: (rules_followed / 8) * 100 (from Step 4)
+- Structure Score: 100 - (missing_sections * 15) - (validation_gaps * 10)
+- Content Quality: 100 - (duplication_pct * 2) - (over_spec_count * 5) - (obsolete_count * 10)
+- Overall Quality: (anti_bloat * 0.4) + (structure * 0.3) + (quality * 0.3)
 
-**Structure Score:**
-```
-structure = 100 - (missing_sections * 15) - (validation_gaps * 10)
-```
+**Rating Scale:** 90-100: Excellent | 75-89: Good | 60-74: Fair | <60: Poor
 
-**Content Quality Score:**
-```
-quality = 100 - (duplication_pct * 2) - (over_spec_count * 5) - (obsolete_count * 10)
-```
-
-**Overall Quality:**
-```
-Overall = (anti_bloat * 0.4) + (structure * 0.3) + (quality * 0.3)
-
-Rating:
-- 90-100: Excellent
-- 75-89: Good
-- 60-74: Fair (needs improvement)
-- < 60: Poor (needs major rework)
-```
-
-### Step 13: Generate JSON Report
+### Step 12: Generate JSON Report
 
 **IMPORTANT: Check output mode requested by caller**
 
@@ -410,114 +319,57 @@ Pattern names are defined in command-analysis-patterns.md (cui-marketplace-archi
 
 **Token Savings**: Streamlined format reduces output from ~2,000 tokens to ~200-800 tokens per command.
 
-**Otherwise (default), return full comprehensive format:**
+**Otherwise (default), return comprehensive format:**
 
 ```json
 {
-  "command_path": "{command_path}",
-  "command_name": "{name from YAML}",
-  "analysis_timestamp": "{ISO timestamp}",
+  "command_name": "{name}",
+  "lines": {count},
+  "classification": "ACCEPTABLE|LARGE|BLOATED",
 
   "structural_validation": {
     "status": "PASS|FAIL",
     "yaml_valid": true|false,
-    "required_fields_present": true|false,
-    "lines": {count},
     "sections": {count},
     "issues": [...]
   },
-
   "bloat_analysis": {
-    "classification": "ACCEPTABLE|LARGE|BLOATED",
     "bloat_score": {score},
-    "extractable_content": [...],
     "restructuring_needed": true|false,
-    "expected_reduction": {lines},
     "issues": [...]
   },
-
   "anti_bloat_compliance": {
-    "total_rules": 8,
-    "rules_followed": {count},
     "compliance_score": {score},
     "violations": [...]
   },
-
-  "structure": {
-    "has_parameters": true|false,
-    "has_workflow": true|false,
-    "has_tool_usage": true|false,
-    "parameter_validation": true|false,
-    "error_handling": true|false,
-    "structure_score": {score},
-    "issues": [...]
-  },
-
-  "content_quality": {
-    "duplication_percentage": {percentage},
-    "over_specification_count": {count},
-    "obsolete_sections": {count},
-    "ambiguous_phrases": {count},
-    "quality_score": {score},
-    "issues": [...]
-  },
-
-  "workflow": {
-    "overlapping_steps": [...],
-    "missing_cleanup": [...],
-    "missing_error_handling": [...],
-    "statistics_tracking": true|false,
-    "issues": [...]
-  },
-
-  "documentation": {
-    "broken_links": [...],
-    "noise_sections": [...],
-    "issues": [...]
-  },
-
+  "structure": { "structure_score": {score}, "issues": [...] },
+  "content_quality": { "quality_score": {score}, "issues": [...] },
+  "workflow": { "issues": [...] },
+  "documentation": { "issues": [...] },
   "scores": {
     "bloat_score": {score},
     "anti_bloat_compliance": {score},
     "structure_score": {score},
-    "quality_score": {score},
+    "content_quality": {score},
     "overall_quality": {score},
     "rating": "Excellent|Good|Fair|Poor"
   },
-
-  "issue_summary": {
-    "critical": {count},
-    "warnings": {count},
-    "suggestions": {count},
-    "total": {count}
-  },
-
-  "recommendations": [
-    "CRITICAL: Command is bloated (XXX lines). Extract Y, Z sections to skills.",
-    "Consolidate duplicate content in sections A and B",
-    "Remove obsolete section C",
-    ...
-  ],
-
-  "anti_bloat_metrics": {
-    "target_change": "0 to -10%",
-    "actual_change": "{percentage}",
-    "meets_target": true|false
-  }
+  "issue_summary": { "critical": {count}, "warnings": {count}, "suggestions": {count} },
+  "recommendations": [...]
 }
 ```
 
+**Note:** Full JSON schema with all fields available in command-quality-standards.md
+
 ## CRITICAL RULES
 
-- **LOAD STANDARDS FIRST** - Always read command-quality-standards.md and command-analysis-patterns.md
-- **BLOAT IS CRITICAL** - >500 lines = CRITICAL issue, must restructure
+- **LOAD STANDARDS FIRST** - Read command-quality-standards.md and command-analysis-patterns.md unless pre-loaded
+- **USE SCRIPT METRICS** - All line counts, bloat scores, sections from analyze-markdown-file.sh (NEVER recalculate)
+- **BLOAT IS CRITICAL** - >500 lines = CRITICAL issue requiring restructuring
 - **ANTI-BLOAT MANDATORY** - Check all 8 anti-bloat rules
-- **CALCULATE BLOAT METRICS** - Track line counts and provide reduction targets
-- **RESTRUCTURING STRATEGY** - If bloated, provide concrete extraction plan
-- **JSON OUTPUT ONLY** - Return only the JSON report, no extra text
+- **JSON OUTPUT ONLY** - Return only JSON report (streamlined format if caller requests)
 - **NO FILE MODIFICATIONS** - This agent only analyzes, never edits
-- **COMPLETE ANALYSIS** - Run all validation steps
-- **MEASURE IMPACT** - Calculate before/after metrics for any recommended changes
+- **COMPLETE ANALYSIS** - Run all validation steps and report improvement opportunities
 
 ## CONTINUOUS IMPROVEMENT RULE
 
