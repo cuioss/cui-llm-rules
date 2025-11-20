@@ -77,22 +77,14 @@ This enforces mandatory completion checklists, anti-skip protections, and post-f
 
 **For marketplace scope (default):**
 
-Execute plugin-inventory-scanner agent to get complete marketplace inventory:
+Execute scan-marketplace-inventory.sh script to get complete marketplace inventory:
 ```
-Task:
-  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
-  description: Scan marketplace for all resources
-  prompt: |
-    Scan the marketplace directory structure and return complete inventory.
-
-    scope: marketplace
-    resourceTypes: null
-    includeDescriptions: false
+Bash: ./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace
 ```
 
 **CRITICAL:** Must get complete inventory (agents, commands, AND skills) because analyze-plugin-references agents need skill data to validate Skill invocations.
 
-Parse JSON output from agent:
+Parse JSON output from script:
 - Extract `bundles[]` array from JSON response
 - For each bundle, collect `bundle.agents[]` with `name` and `path` fields
 - Build flat list of agent paths from all bundles

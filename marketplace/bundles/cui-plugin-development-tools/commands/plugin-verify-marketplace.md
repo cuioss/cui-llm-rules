@@ -33,18 +33,10 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ### Step 1: Run Inventory Scan
 
-Execute plugin-inventory-scanner agent to collect marketplace state once and reuse across all diagnostics:
+Execute scan-marketplace-inventory.sh script to collect marketplace state once and reuse across all diagnostics:
 
 ```
-Task:
-  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
-  description: Scan marketplace for all resources
-  prompt: |
-    Scan the marketplace directory structure and return complete inventory.
-
-    scope: marketplace
-    resourceTypes: null
-    includeDescriptions: false
+Bash: ./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace
 ```
 
 **Capture inventory results** for passing to subsequent commands to avoid redundant file scanning.
@@ -236,7 +228,7 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ## RELATED
 
-- `cui-plugin-development-tools:plugin-inventory-scanner` agent - Scans marketplace structure
+- `scan-marketplace-inventory.sh` script - Scans marketplace structure
 - `/plugin-diagnose-skills` - Validates skills
 - `/plugin-diagnose-agents` - Validates agents
 - `/plugin-diagnose-commands` - Validates commands
