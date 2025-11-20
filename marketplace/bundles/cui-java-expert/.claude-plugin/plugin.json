@@ -1,0 +1,36 @@
+{
+  "name": "cui-java-expert",
+  "version": "1.0.0",
+  "description": "Comprehensive Java development expertise bundle aggregating core Java patterns, CDI/Quarkus, and unit testing standards",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["java", "cdi", "quarkus", "testing", "standards", "patterns"],
+  "agents": [
+    "./agents/log-record-documenter.md",
+    "./agents/java-coverage-analyzer.md",
+    "./agents/logging-violation-analyzer.md"
+  ],
+  "commands": [
+    "./commands/java-refactor-code.md",
+    "./commands/java-fix-javadoc.md",
+    "./commands/java-enforce-logrecords.md",
+    "./commands/java-maintain-logger.md",
+    "./commands/java-optimize-quarkus-native.md",
+    "./commands/java-maintain-tests.md",
+    "./commands/java-generate-coverage.md",
+    "./commands/java-implement-code.md",
+    "./commands/java-implement-tests.md"
+  ],
+  "skills": [
+    "./skills/cui-java-cdi",
+    "./skills/cui-java-core",
+    "./skills/cui-java-maintenance",
+    "./skills/cui-java-unit-testing",
+    "./skills/cui-javadoc"
+  ]
+}

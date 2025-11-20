@@ -1,0 +1,26 @@
+{
+  "name": "cui-documentation-standards",
+  "version": "1.0.0",
+  "description": "AsciiDoc and documentation standards enforcement for CUI projects",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["documentation", "asciidoc", "standards", "review"],
+  "agents": [
+    "./agents/asciidoc-auto-formatter.md",
+    "./agents/asciidoc-content-reviewer.md",
+    "./agents/asciidoc-format-validator.md",
+    "./agents/asciidoc-link-verifier.md"
+  ],
+  "commands": [
+    "./commands/doc-review-technical-docs.md",
+    "./commands/doc-review-single-asciidoc.md"
+  ],
+  "skills": [
+    "./skills/cui-documentation"
+  ]
+}

@@ -1,4 +1,4 @@
-# Command Configuration
+/# Command Configuration
 
 ## docs-technical-adoc-review
 
@@ -69,37 +69,96 @@ This project has access to globally-approved domains for common development reso
 
 ### Last Execution
 
-- Date: 2025-11-04
+- Date: 2025-11-18 (Fifth run - Critical architecture fix)
+- Result: Fixed critical permission architecture issues
 - Status: SUCCESS
-- Changes Applied: YES
 
-### Changes Summary
+### Changes Applied
 
-**Removed (17 permissions):**
-- 11 suspicious Bash patterns (shell loop constructs)
-- 2 redundant Read permissions (covered by global `Read(//~/git/**)`)
-- 3 absolute paths using `/Users/oliver/` instead of `~/`
-- 1 duplicate Skill permission
+**Global Settings Updated:**
+- **ADDED 44 short-form SlashCommand permissions:**
+  - All marketplace commands now work in both invocation forms
+  - Short form: `/plugin-inventory`, `/java-implement-code`, etc.
+  - Bundle-qualified: `/cui-java-expert:java-implement-code`, etc.
+- **REMOVED 1 invalid permission:**
+  - `SlashCommand(/plugin-*:*)` - Invalid pattern (cannot wildcard command names)
 
-**Added (1 permission):**
-- `Write(.claude/settings.local.json)` to ask list (security requirement)
+**Local Settings Updated:**
+- **REMOVED 1 redundant marketplace permission:**
+  - `SlashCommand(/plugin-inventory:*)` - Now covered by global settings
+- **ADDED 5 project-specific permissions:**
+  - `Edit(//~/git/cui-llm-rules/**)` - Project editing
+  - `Write(//~/git/cui-llm-rules/**)` - Project file creation
+  - `Read(//marketplace/**)` - Marketplace bundle access
+  - `Read(//.claude/**)` - Claude configuration access
+  - `Read(//standards/**)` - Standards documentation access
+- **KEPT 2 existing project-specific permissions:**
+  - `Bash(claude-code:*)` - Claude Code CLI operations
+  - `WebFetch(domain:formulae.brew.sh)` - Homebrew formula documentation
 
-**Final Permission Count:**
-- Allow: 19 (down from 36)
-- Deny: 0
-- Ask: 1 (up from 0)
+### Critical Issue Discovered & Fixed
 
-### Issues Fixed
+**Problem:** Bundle wildcards like `SlashCommand(/cui-java-expert:*)` ONLY match bundle-qualified invocations (e.g., `/cui-java-expert:java-implement-code`). They do NOT match short-form invocations (e.g., `/java-implement-code`).
 
-1. **Suspicious Bash Patterns**: Removed invalid bash loop constructs that should be shell scripts
-2. **Redundant Permissions**: Removed Read permissions already covered by global settings
-3. **Path Format Issues**: Cleaned up absolute paths
-4. **Duplicates**: Removed duplicate Skill(cui-marketplace-architecture)
-5. **Security**: Added Write(.claude/settings.local.json) to ask list
+**Impact:** Most marketplace commands were inaccessible via short-form invocation, requiring users to use verbose bundle-qualified forms.
 
-### User-Approved Permissions
+**Solution:** Added explicit short-form permissions for all 44 marketplace commands to ensure both invocation methods work.
 
-(None currently - all suspicious permissions removed)
+### Permission Summary
+
+**Global Settings:**
+- Allow: 242 permissions (+43 from previous run)
+  - 142 Bash commands (comprehensive development tools)
+  - 8 Skill bundle wildcards
+  - 8 SlashCommand bundle wildcards
+  - 44 SlashCommand short-form permissions ✨ NEW
+  - 3 Read patterns (universal git access)
+  - 30 WebFetch domains
+  - 2 project-specific Bash scripts
+  - 5 legacy SlashCommand permissions
+- Deny: 69 permissions (dangerous commands blocked)
+
+**Local Settings:**
+- Allow: 7 permissions (project-specific only)
+  - 1 Bash permission: `claude-code:*`
+  - 2 Edit/Write permissions: `cui-llm-rules/**`
+  - 3 Read permissions: `marketplace/**`, `.claude/**`, `standards/**`
+  - 1 WebFetch permission: `formulae.brew.sh`
+- Deny: 0 permissions
+- Ask: 0 permissions
+
+### Compliance Status
+
+✅ All marketplace bundle wildcards present in global settings (8 skills + 8 commands)
+✅ All marketplace short-form permissions present (44 commands) ✨ NEW
+✅ Universal git read access configured globally
+✅ Project-specific Edit/Write permissions configured locally
+✅ No redundancies or duplicates detected
+✅ No suspicious patterns detected
+✅ Proper path formats (user-relative)
+✅ Security protections active
+✅ Invalid patterns removed
+
+### Architecture Notes
+
+**Command Invocation Forms:**
+Commands can be invoked in TWO ways:
+1. **Short form:** `/plugin-inventory`, `/java-implement-code`
+2. **Bundle-qualified:** `/cui-plugin-development-tools:plugin-inventory`, `/cui-java-expert:java-implement-code`
+
+**Permission Requirements:**
+- Bundle wildcards: `SlashCommand(/cui-java-expert:*)` → Covers bundle-qualified invocations ONLY
+- Short-form permissions: `SlashCommand(/java-implement-code:*)` → Covers short-form invocations ONLY
+- **BOTH are required** for full functionality
+
+**Invalid Patterns:**
+- `SlashCommand(/plugin-*:*)` - INVALID (cannot wildcard command names)
+- `Skill(cui-*:*)` - INVALID (cannot wildcard bundle names)
+
+**Valid Patterns:**
+- `SlashCommand(/cui-java-expert:*)` - Valid (bundle wildcard)
+- `SlashCommand(/plugin-inventory:*)` - Valid (short-form permission)
+- `Skill(cui-java-expert:*)` - Valid (skill bundle wildcard)
 
 ---
 
