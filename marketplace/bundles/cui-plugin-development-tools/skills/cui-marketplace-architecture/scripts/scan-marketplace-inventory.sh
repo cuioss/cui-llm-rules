@@ -32,7 +32,7 @@ Options:
                                Values: marketplace, global, project
 
   --resource-types <types>     Resource types to include (default: all)
-                               Values: agents, commands, skills, or comma-separated
+                               Values: agents, commands, skills, scripts, or comma-separated
 
   --include-descriptions       Extract descriptions from YAML frontmatter
                                (default: false, faster without descriptions)
@@ -43,6 +43,7 @@ Examples:
   $(basename "$0")
   $(basename "$0") --scope marketplace
   $(basename "$0") --resource-types agents,commands
+  $(basename "$0") --resource-types scripts
   $(basename "$0") --include-descriptions
 
 Exit codes:
@@ -135,11 +136,13 @@ fi
 INCLUDE_AGENTS=false
 INCLUDE_COMMANDS=false
 INCLUDE_SKILLS=false
+INCLUDE_SCRIPTS=false
 
 if [ "$RESOURCE_TYPES" = "all" ]; then
     INCLUDE_AGENTS=true
     INCLUDE_COMMANDS=true
     INCLUDE_SKILLS=true
+    INCLUDE_SCRIPTS=true
 else
     # Parse comma-separated list
     IFS=',' read -ra TYPES <<< "$RESOURCE_TYPES"
@@ -155,9 +158,12 @@ else
             skills)
                 INCLUDE_SKILLS=true
                 ;;
+            scripts)
+                INCLUDE_SCRIPTS=true
+                ;;
             *)
                 echo "ERROR: Invalid resource type: $type" >&2
-                echo "Valid values: agents, commands, skills" >&2
+                echo "Valid values: agents, commands, skills, scripts" >&2
                 exit 1
                 ;;
         esac
@@ -234,6 +240,7 @@ BUNDLE_COUNT=0
 TOTAL_AGENTS=0
 TOTAL_COMMANDS=0
 TOTAL_SKILLS=0
+TOTAL_SCRIPTS=0
 TOTAL_RESOURCES=0
 
 for bundle_dir in "${BUNDLE_DIRS[@]}"; do
@@ -380,16 +387,65 @@ for bundle_dir in "${BUNDLE_DIRS[@]}"; do
       \"skills\": $SKILLS_JSON"
 
     # ========================================================================
+    # DISCOVER SCRIPTS
+    # ========================================================================
+
+    SCRIPTS_JSON="[]"
+    SCRIPT_COUNT=0
+
+    if [ "$INCLUDE_SCRIPTS" = true ] && [ -d "$bundle_dir/skills" ]; then
+        SCRIPTS_JSON="["
+        first_script=true
+
+        while IFS= read -r -d '' script_file; do
+            # Extract script info
+            script_name=$(basename "$script_file" .sh)
+            script_dir=$(dirname "$script_file")
+            skill_dir=$(dirname "$script_dir")
+            skill_name=$(basename "$skill_dir")
+
+            if [ "$first_script" = false ]; then
+                SCRIPTS_JSON="${SCRIPTS_JSON},"
+            fi
+            first_script=false
+
+            # Generate three path formats
+            relative_path="${script_file#$PWD/}"
+            runtime_mount="./.claude/skills/$skill_name/scripts/$script_name.sh"
+
+            SCRIPTS_JSON="${SCRIPTS_JSON}
+        {
+          \"name\": \"$script_name\",
+          \"skill\": \"$skill_name\",
+          \"path_formats\": {
+            \"runtime\": \"$runtime_mount\",
+            \"relative\": \"$relative_path\",
+            \"absolute\": \"$script_file\"
+          }
+        }"
+
+            SCRIPT_COUNT=$((SCRIPT_COUNT + 1))
+        done < <(find "$bundle_dir/skills" -type f -name "*.sh" -path "*/scripts/*.sh" -print0 2>/dev/null)
+
+        SCRIPTS_JSON="${SCRIPTS_JSON}
+      ]"
+    fi
+
+    BUNDLES_JSON="${BUNDLES_JSON},
+      \"scripts\": $SCRIPTS_JSON"
+
+    # ========================================================================
     # BUNDLE STATISTICS
     # ========================================================================
 
-    BUNDLE_TOTAL=$((AGENT_COUNT + COMMAND_COUNT + SKILL_COUNT))
+    BUNDLE_TOTAL=$((AGENT_COUNT + COMMAND_COUNT + SKILL_COUNT + SCRIPT_COUNT))
 
     BUNDLES_JSON="${BUNDLES_JSON},
       \"statistics\": {
         \"agents\": $AGENT_COUNT,
         \"commands\": $COMMAND_COUNT,
         \"skills\": $SKILL_COUNT,
+        \"scripts\": $SCRIPT_COUNT,
         \"total_resources\": $BUNDLE_TOTAL
       }
     }"
@@ -398,13 +454,14 @@ for bundle_dir in "${BUNDLE_DIRS[@]}"; do
     TOTAL_AGENTS=$((TOTAL_AGENTS + AGENT_COUNT))
     TOTAL_COMMANDS=$((TOTAL_COMMANDS + COMMAND_COUNT))
     TOTAL_SKILLS=$((TOTAL_SKILLS + SKILL_COUNT))
+    TOTAL_SCRIPTS=$((TOTAL_SCRIPTS + SCRIPT_COUNT))
     BUNDLE_COUNT=$((BUNDLE_COUNT + 1))
 done
 
 BUNDLES_JSON="${BUNDLES_JSON}
   ]"
 
-TOTAL_RESOURCES=$((TOTAL_AGENTS + TOTAL_COMMANDS + TOTAL_SKILLS))
+TOTAL_RESOURCES=$((TOTAL_AGENTS + TOTAL_COMMANDS + TOTAL_SKILLS + TOTAL_SCRIPTS))
 
 # ============================================================================
 # OUTPUT JSON
@@ -420,6 +477,7 @@ cat <<EOF
     "total_agents": $TOTAL_AGENTS,
     "total_commands": $TOTAL_COMMANDS,
     "total_skills": $TOTAL_SKILLS,
+    "total_scripts": $TOTAL_SCRIPTS,
     "total_resources": $TOTAL_RESOURCES
   }
 }

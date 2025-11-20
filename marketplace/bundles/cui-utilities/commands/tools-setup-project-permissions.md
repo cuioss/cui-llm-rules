@@ -89,26 +89,35 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 
 **CRITICAL**: Skill scripts require permissions at runtime mount point `./.claude/skills/{skill-name}/scripts/`.
 
-For each script in `marketplace/bundles/*/skills/*/scripts/*.sh`:
+1. **Discover scripts using inventory script**:
+   ```bash
+   ./marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --resource-types scripts
+   ```
 
-1. **Generate three path formats**:
-   - Runtime mount: `Bash(./.claude/skills/{skill-name}/scripts/{script}.sh:*)`
-   - Relative physical: `Bash(./marketplace/bundles/{bundle}/skills/{skill-name}/scripts/{script}.sh:*)`
-   - Absolute physical: `Bash(/full/path/to/marketplace/bundles/.../scripts/{script}.sh:*)`
+2. **Parse JSON output** to extract script information:
+   - Each script object contains:
+     - `name`: Script filename (without .sh)
+     - `skill`: Parent skill name
+     - `path_formats.runtime`: Runtime mount path
+     - `path_formats.relative`: Relative physical path
+     - `path_formats.absolute`: Absolute physical path
 
-2. **Add all three formats** to project-level settings if missing
-   - Why three formats? Scripts are accessed different ways:
-     - `./.claude/skills/...` - Agents at runtime (skill mounting)
-     - `./marketplace/bundles/...` - Main conversation (relative path)
-     - `/full/path/...` - Testing/validation (absolute path)
+3. **For each discovered script**:
+   - Generate three Bash permission patterns:
+     - `Bash({path_formats.runtime}:*)` - Agents at runtime (skill mounting)
+     - `Bash({path_formats.relative}:*)` - Main conversation (relative path)
+     - `Bash({path_formats.absolute}:*)` - Testing/validation (absolute path)
 
-3. **Track**: `skill_script_permissions_added`
+4. **Add missing permissions** to project-level settings:
+   - Check if each permission already exists
+   - Add if missing
+   - Why three formats? Scripts are accessed different ways by agents, conversation, and tests
 
-**Example skill scripts** (cui-marketplace-architecture):
-- `analyze-markdown-file.sh`
-- `analyze-tool-coverage.sh`
-- `analyze-skill-structure.sh`
-- `scan-marketplace-inventory.sh`
+5. **Track**: `skill_script_permissions_added`
+
+**Example output** (7 scripts discovered):
+- cui-documentation: `asciidoc-formatter.sh`, `asciidoc-validator.sh`, `documentation-stats.sh`
+- cui-marketplace-architecture: `analyze-markdown-file.sh`, `analyze-tool-coverage.sh`, `analyze-skill-structure.sh`, `scan-marketplace-inventory.sh`
 
 **E. Ensure global marketplace permissions:**
 
