@@ -7,7 +7,7 @@ description: |
   - Input: skill_path=/path/to/skill
   - Output: Comprehensive skill quality report with issues categorized by severity
 
-tools: [Read, Grep, Glob]
+tools: [Read, Grep, Glob, Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh:*)]
 model: sonnet
 color: orange
 ---
@@ -32,41 +32,45 @@ Analyze ONE skill completely:
 
 ### Step 1: Validate Skill Structure
 
-**Read SKILL.md:**
+**CRITICAL: Execute the analysis script FIRST:**
+
+1. **Call analyze-skill-structure.sh:**
+```bash
+./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh {skill_path}
 ```
-Read: {skill_path}/SKILL.md
-```
 
-**Extract frontmatter** (lines between `---` markers)
+2. **Parse the JSON output** and extract:
+   - `skill_exists` → Check if SKILL.md found
+   - `frontmatter.present` → Check if YAML frontmatter exists
+   - `frontmatter.yaml_valid` → YAML syntax validation (automatically detected)
+   - `frontmatter.name_present` → Required name field check (automatically detected)
+   - `frontmatter.description_present` → Required description field check (automatically detected)
+   - `frontmatter.allowed_tools_present` → Required allowed-tools field for skills (automatically detected)
+   - `frontmatter.yaml_errors[]` → List of YAML syntax issues (automatically detected)
+   - `frontmatter.wrong_tool_field` → true if uses `tools` instead of `allowed-tools` (automatically detected)
+   - `frontmatter.content` → YAML content for reference
 
-**Validate YAML:**
-- Check for `name` field (required)
-- Check for `description` field (required)
-- Check for `allowed-tools` field (correct field name for skills)
-- Validate YAML syntax
-
-**Record issues:**
-- Missing required fields
-- Invalid YAML syntax
-- Wrong tool field (`tools` instead of `allowed-tools`)
+**Issues automatically detected by script:**
+- Missing SKILL.md file (skill_exists = false)
+- Missing YAML frontmatter (frontmatter.present = false)
+- Invalid YAML syntax (yaml_valid = false, check yaml_errors[])
+- Missing required fields (name_present/description_present/allowed_tools_present = false)
+- Wrong tool field name (wrong_tool_field = true)
 
 ### Step 2: Discover Standards Files
 
-**Extract standards references from SKILL.md:**
-```
-Grep: pattern="Read: standards/", path={skill_path}/SKILL.md, output_mode=content, -n=true
-```
+**Use script results from Step 1 (analyze-skill-structure.sh):**
+- `standards_files.referenced[]` → List of standards files referenced in SKILL.md (automatically extracted)
+- `standards_files.existing[]` → List of standards files that exist in standards/ directory (automatically discovered)
+- `standards_files.unreferenced[]` → Standards files that exist but aren't referenced in SKILL.md (automatically detected)
+- `standards_files.missing[]` → Referenced files that don't exist (automatically detected)
+- `standards_files.count` → Total count of existing standards files
 
-**Parse each match** to extract standards file names.
+**Issues automatically detected by script:**
+- **CRITICAL**: Referenced files that don't exist (check standards_files.missing[])
+- **WARNING**: Standards files that exist but aren't referenced (check standards_files.unreferenced[])
 
-**Verify files exist:**
-```
-Glob: pattern="standards/*", path={skill_path}
-```
-
-**Record issues:**
-- Referenced files that don't exist
-- Standards files that exist but aren't referenced
+**Why scripts first?**: The analyze-skill-structure.sh script provides deterministic discovery of all standards files. Do NOT recalculate - use script values directly.
 
 ### Step 3: Analyze Each Standards File
 

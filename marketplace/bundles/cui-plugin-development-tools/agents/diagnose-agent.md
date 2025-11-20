@@ -7,7 +7,7 @@ description: |
   - Input: agent_path=/path/to/agent.md
   - Output: Comprehensive agent quality report with issues categorized by severity
 
-tools: Read, Glob
+tools: [Read, Glob, Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh:*), Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-tool-coverage.sh:*)]
 model: sonnet
 color: blue
 ---
@@ -59,84 +59,140 @@ These provide:
 
 **Token Optimization**: When called from plugin-diagnose-agents orchestrator, standards are pre-loaded to avoid reading them 28+ times.
 
-### Step 2: Read and Parse Agent
+### Step 2: Analyze File Structure and Tool Coverage
 
-**Read the agent file:**
+**CRITICAL: Execute the analysis scripts FIRST (before any Read operations):**
+
+1. **Call analyze-markdown-file.sh:**
+```bash
+./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {agent_path}
+```
+
+2. **Parse the JSON output** and extract:
+   - `metrics.line_count` → Store as TOTAL_LINES
+   - `metrics.word_count` → Store for reference
+   - `bloat.classification` → Store bloat classification
+   - `bloat.score` → Store bloat score
+   - `frontmatter.present` → Store for validation
+   - `frontmatter.yaml_valid` → YAML syntax validation (NEW)
+   - `frontmatter.name_present` → Required name field (NEW)
+   - `frontmatter.description_present` → Required description field (NEW)
+   - `frontmatter.yaml_errors[]` → List YAML issues (NEW)
+   - `frontmatter.content` → Parse YAML for tools array
+   - `file_type` → Should be "agent" (NEW)
+   - `structure.section_count` → Count of sections (NEW)
+   - `structure.sections[]` → List of section names (NEW)
+   - `continuous_improvement_rule.present` → Check for CI rule
+   - `continuous_improvement_rule.format` → Should be "caller-reporting" for agents (NEW)
+   - `continuous_improvement_rule.pattern_22_violation` → Critical if true (NEW)
+
+3. **Call analyze-tool-coverage.sh:**
+```bash
+./.claude/skills/cui-marketplace-architecture/scripts/analyze-tool-coverage.sh {agent_path}
+```
+
+4. **Parse the tool coverage JSON output** and extract:
+   - `tool_coverage.declared_tools[]` → Tools in frontmatter
+   - `tool_coverage.used_tools[]` → Tools used in workflow
+   - `tool_coverage.missing_tools[]` → Used but not declared
+   - `tool_coverage.unused_tools[]` → Declared but not used
+   - `tool_coverage.tool_fit_score` → Coverage score (0-100)
+   - `tool_coverage.rating` → Excellent/Good/Needs improvement/Poor
+   - `critical_violations.has_task_tool` → Task in frontmatter (Pattern 22 violation)
+   - `critical_violations.has_task_calls` → Task delegation in workflow
+   - `critical_violations.maven_calls[]` → Maven anti-pattern detection
+   - `critical_violations.backup_file_patterns[]` → Backup file creation patterns
+
+5. **Then read file for content analysis:**
 ```
 Read: {agent_path}
 ```
 
-**Extract components:**
-- YAML frontmatter (between `---` markers)
-- Agent description
-- Workflow sections
-- Tool usage instructions
-- Essential Rules (if present)
+6. **Extract additional components from content:**
+   - Agent description
+   - Workflow sections (use structure.sections from script)
+   - Tool usage instructions
+   - Essential Rules (if present)
 
-**Count metrics:**
-- Total lines
-- Section count
-- Workflow step count
+**Why scripts first?**: The scripts provide deterministic metrics and tool coverage analysis. Do NOT recalculate - use script values directly.
 
 ### Step 3: Validate YAML Frontmatter (Patterns 3, 4)
 
-**Required fields:**
-- `name` - Agent name
-- `description` - Brief description (50-200 characters, not words)
-- `tools` - Array of tools (correct field name for agents)
+**Use script results from Step 2:**
+- `frontmatter.yaml_valid` - YAML syntax validation
+- `frontmatter.name_present` - Required name field check
+- `frontmatter.description_present` - Required description field check
+- `frontmatter.yaml_errors[]` - List of detected YAML issues
 
-**Issues to detect:**
-- Missing required fields
-- Invalid YAML syntax
-- Wrong field name (`allowed-tools` instead of `tools`)
-- Description too long (> 200 characters) or too short (< 50 characters)
+**Additional validation from content:**
+- Wrong field name - Check if `allowed-tools` used instead of `tools` (agents use `tools`, skills use `allowed-tools`)
+- Description length - Should be 50-200 characters (not words)
+
+**Issues automatically detected by script:**
+- Missing required fields (Pattern 3) - automatically detected
+- Invalid YAML syntax (Pattern 4) - automatically detected
+- Empty frontmatter - automatically detected
 
 ### Step 4: Analyze Tool Coverage (Patterns 1, 2, 16)
 
-**Extract tools from frontmatter:**
-Parse the `tools` field array.
+**Use script results from Step 2 (analyze-tool-coverage.sh):**
+- `tool_coverage.declared_tools[]` - Tools in frontmatter (automatically extracted)
+- `tool_coverage.used_tools[]` - Tools used in workflow (automatically detected)
+- `tool_coverage.missing_tools[]` - Used but not declared (Pattern 1)
+- `tool_coverage.unused_tools[]` - Declared but not used (Pattern 2)
+- `tool_coverage.tool_fit_score` - Coverage score 0-100 (automatically calculated)
+- `tool_coverage.rating` - Excellent/Good/Needs improvement/Poor
 
-**Parse workflow for actual tool usage:**
-Search for tool mentions in workflow (e.g., "Read:", "Glob:", "Task:")
+**Tool Fit Score Rating:**
+- Excellent (100%): Perfect tool fit
+- Good (80-99%): Minor tool mismatches
+- Needs improvement (50-79%): Significant tool issues (WARNING)
+- Poor (<50%): Critical tool coverage issues (CRITICAL)
 
-**Calculate Tool Fit Score:**
-```
-mentioned_tools = tools found in workflow text
-declared_tools = tools in frontmatter
+**Critical Violations (automatically detected):**
+- `critical_violations.has_task_tool` - Task in frontmatter (Pattern 22 violation)
+- `critical_violations.has_task_calls` - Task delegation in workflow
+- `critical_violations.maven_calls[]` - Direct Maven calls (anti-pattern)
+- `critical_violations.backup_file_patterns[]` - Backup file creation
 
-coverage = (tools used AND declared) / (tools used OR declared) * 100
-
-Tool Fit Score:
-- 90-100: Excellent fit
-- 75-89: Good fit
-- 60-74: Needs improvement
-- < 60: Poor fit (CRITICAL)
-```
-
-**Issues to detect:**
-- Missing critical tools (Pattern 1)
-- Over-permission (Pattern 2)
-- Low Tool Fit Score (Pattern 16)
+**Issues automatically detected by script:**
+- Missing critical tools (Pattern 1) - in missing_tools array
+- Over-permission (Pattern 2) - in unused_tools array
+- Low Tool Fit Score (Pattern 16) - score < 60 is CRITICAL
 
 ### Step 5: Structural Validation
 
-**Check required sections:**
-- Task description (Pattern 19)
-- Workflow/steps section
-- Response format specification (Pattern 15)
-- **CONTINUOUS IMPROVEMENT RULE section** (REQUIRED for >90% of agents - flag as WARNING if missing unless agent is simple orchestrator with <150 lines)
+**Use script results from Step 2:**
+- `structure.sections[]` - List of ## section names (automatically extracted)
+- `continuous_improvement_rule.present` - Check if CI rule exists
+- `continuous_improvement_rule.format` - "self-update" or "caller-reporting" (automatically detected)
+- `continuous_improvement_rule.pattern_22_violation` - true if agent uses self-update pattern (CRITICAL)
+- `bloat.classification` - ACCEPTABLE/LARGE/BLOATED (automatically calculated)
+- `bloat.score` - Bloat score 0-100
+
+**Check required sections (using structure.sections[]):**
+- Task description (Pattern 19) - typically in intro or description
+- Workflow/steps section - look for "Step" sections in structure.sections[]
+- Response format specification (Pattern 15) - typically "Output Format" or "Response Format" section
+- **CONTINUOUS IMPROVEMENT RULE section** - check `continuous_improvement_rule.present`
+  - REQUIRED for >90% of agents
+  - Flag as WARNING if missing unless agent is simple orchestrator with TOTAL_LINES < 150
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
-- **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-agent agent-name={agent-name} update="[your improvement]"` with:
-- **WARNING**: If section exists with old self-invocation pattern, flag as CRITICAL Pattern 22 violation
+- **Use `continuous_improvement_rule.format` from script:**
+  - Should be "caller-reporting" for agents (Pattern 22)
+  - If "self-update" → check `continuous_improvement_rule.pattern_22_violation`
+  - If `pattern_22_violation` is true → **CRITICAL** Pattern 22 violation
+- **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-agent agent-name={agent-name} update="[your improvement]"`
 - **SUGGESTION**: Should list 3-5 specific improvement areas relevant to agent purpose
-- **Correct Pattern**: Check format matches: `**CRITICAL:** Every time you execute this agent...REPORT the improvement to your caller...The caller can then invoke /plugin-update-agent...`
+- **Correct Pattern**: `**CRITICAL:** Every time you execute this agent...REPORT the improvement to your caller...The caller can then invoke /plugin-update-agent...`
 - **Incorrect Pattern (Pattern 22 violation)**: `YOU MUST immediately update this file using /plugin-update-agent` (agents cannot self-invoke per Rule 6)
 
-**Check complexity (Pattern 17):**
-- Lines > 800: TOO COMPLEX (CRITICAL)
-- Lines > 600: LARGE (WARNING)
-- Lines < 600: ACCEPTABLE
+**Check complexity (Pattern 17) - use bloat.classification from script:**
+- `bloat.classification` = "BLOATED" → TOO COMPLEX (CRITICAL)
+- `bloat.classification` = "LARGE" → LARGE (WARNING)
+- `bloat.classification` = "ACCEPTABLE" → ACCEPTABLE
+- Also report `bloat.score` for reference
 
 ### Step 6: Best Practices Compliance
 
@@ -241,27 +297,23 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 
 ### Step 12: Task Tool Misuse Detection (CRITICAL)
 
-**Check for Task tool in agent frontmatter:**
-- Parse `tools:` array in YAML
-- If contains `Task` = CRITICAL VIOLATION
+**Use script results from Step 2 (analyze-tool-coverage.sh):**
+- `critical_violations.has_task_tool` - Task in frontmatter tools array (automatically detected)
+- `critical_violations.has_task_calls` - Task delegation calls in workflow (automatically detected)
 
-**Scan workflow for Task(...) calls:**
-- Search agent body for `Task(` patterns
-- Any Task delegation calls = CRITICAL VIOLATION
+**Issues automatically detected by script:**
+- If `critical_violations.has_task_tool` is true → **CRITICAL**: Task in tools array
+- If `critical_violations.has_task_calls` is true → **CRITICAL**: Task(...) delegation calls in workflow
 
-**Check description for orchestration language:**
+**Additional manual check:**
+- Check description for orchestration language without actual Task usage
 - Words like "delegates", "orchestrates", "coordinates" = architectural smell
-- Suggests agent attempting orchestration instead of focused execution
+- If found but neither has_task_tool nor has_task_calls → **WARNING**: Misleading description
 
 **Why This Is Critical:**
 - Platform limitation: Task tool unavailable to agents at runtime
 - Guaranteed runtime failure
 - Architectural violation (Rule 6)
-
-**Issues to flag:**
-- **CRITICAL**: `Task` in tools array
-- **CRITICAL**: `Task(...)` calls in workflow
-- **WARNING**: Orchestration language in description without actual Task usage
 
 **Recommendations:**
 - Remove Task from tools list
@@ -271,24 +323,25 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 
 ### Step 13: Maven Anti-Pattern Detection (CRITICAL)
 
-**Check agent name:**
-- If agent name = "maven-builder" → Skip this check (exception)
+**Use script results from Step 2 (analyze-tool-coverage.sh):**
+- `critical_violations.maven_calls[]` - List of Maven call patterns detected (automatically detected)
 
-**For all other agents, scan workflow for Maven calls:**
-- Search for `Bash(./mvnw` patterns
-- Search for `Bash(mvn ` patterns
-- Any Maven execution = CRITICAL VIOLATION
+**Check agent name exception:**
+- If agent name (from frontmatter) = "maven-builder" → Skip this check (exception)
+
+**For all other agents:**
+- Check if `critical_violations.maven_calls[]` is non-empty
+- Each entry contains the problematic Maven call pattern found
+
+**Issues automatically detected by script:**
+- If `maven_calls[]` is non-empty → **CRITICAL**: Maven execution in non-maven-builder agent
+- Report each pattern found (e.g., "Bash(./mvnw", "Bash(mvn ")
 
 **Why This Is Critical:**
 - Bypasses centralized build execution (Rule 7)
 - Duplicates build configuration and error handling
 - Prevents performance tracking
 - Should delegate to maven-builder agent via caller command
-
-**Issues to flag:**
-- **CRITICAL**: `Bash(./mvnw` in non-maven-builder agent
-- **CRITICAL**: `Bash(mvn ` in non-maven-builder agent
-- **SUGGESTION**: Agent has Bash tool but no problematic patterns
 
 **Recommendations:**
 - Remove Maven calls from agent
@@ -298,29 +351,27 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 
 ### Step 14: Backup File Creation Detection (CRITICAL)
 
+**Use script results from Step 2 (analyze-tool-coverage.sh):**
+- `critical_violations.backup_file_patterns[]` - List of backup file patterns detected (automatically detected)
+
 **Context:**
 - Working in git context - git provides version control
 - Backup files (.bak, .backup, etc.) are unnecessary and create clutter
 - Anti-pattern from non-version-controlled environments
 
-**Scan workflow for backup file creation patterns:**
-- Search for `.bak` file references
-- Search for `.backup` file references
-- Search for `cp` commands creating backup files (e.g., `cp "$file" "${file}.bak"`)
-- Search for backup parameters (`create_backup`, `backup=true`, `--no-backup` flags)
-- Search for backup-related documentation ("creates backup", "backup file", etc.)
+**Patterns automatically detected by script:**
+- `.bak` file references
+- `.backup` file references
+- `cp` commands creating backup files (e.g., `cp "$file" "${file}.bak"`)
+- Backup parameters (`create_backup`, `backup=true`, `--no-backup` flags)
+- Backup-related documentation patterns
 
-**Patterns to detect:**
-```
-- cp {file} {file}.bak
-- cp "$file" "${file}.bak"
-- cp {file} {file}.backup*
-- create_backup: true
-- backup=true
-- --no-backup flag (indicates backup capability exists)
-- .bak extension references
-- .backup extension references
-```
+**Issues automatically detected by script:**
+- If `backup_file_patterns[]` is non-empty → Report each pattern found
+- Each entry contains the line and pattern that matched
+- **CRITICAL**: Bash commands creating .bak/.backup files
+- **CRITICAL**: Parameters enabling backup file creation
+- **WARNING**: Documentation mentioning backup file creation (may be explanatory vs actual creation)
 
 **Why This Is Critical:**
 - Git already provides version control and history
@@ -328,12 +379,6 @@ precision = 100 - (ambiguous_phrases * 5) - (vague_sections * 10)
 - Backup files may accidentally get committed
 - Inconsistent with modern version control practices
 - Should rely on git for rollback/recovery
-
-**Issues to flag:**
-- **CRITICAL**: Bash commands creating .bak files
-- **CRITICAL**: Bash commands creating .backup files
-- **CRITICAL**: Parameters enabling backup file creation
-- **WARNING**: Documentation mentioning backup file creation (may be explanatory vs actual creation)
 
 **Recommendations:**
 - Remove all backup file creation logic

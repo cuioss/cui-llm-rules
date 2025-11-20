@@ -85,9 +85,19 @@ These provide:
    - `bloat.classification` → Store bloat classification (ACCEPTABLE/LARGE/BLOATED)
    - `bloat.score` → Store bloat score
    - `frontmatter.present` → Store for Step 3 validation
-   - `frontmatter.content` → Parse YAML for name/description
+   - `frontmatter.yaml_valid` → Validate YAML syntax (NEW)
+   - `frontmatter.name_present` → Check required name field (NEW)
+   - `frontmatter.description_present` → Check required description field (NEW)
+   - `frontmatter.yaml_errors[]` → List YAML issues (NEW)
+   - `frontmatter.content` → Parse YAML for additional fields
+   - `file_type` → Identify as command or agent (NEW)
+   - `structure.section_count` → Count of ## sections (NEW)
+   - `structure.sections[]` → List of section names (NEW)
    - `continuous_improvement_rule.present` → Store for Step 6 validation
-   - `continuous_improvement_rule.content` → Analyze format if present
+   - `continuous_improvement_rule.format` → self-update|caller-reporting (NEW)
+   - `continuous_improvement_rule.pattern_22_violation` → true if agent with self-update (NEW)
+   - `parameters.has_section` → Check for INPUT PARAMETERS section (NEW)
+   - `parameters.documented[]` → List of documented parameters (NEW)
 
 3. **CRITICAL**: Use ONLY the bloat classification from the script:
    - Script returns: BLOATED (>500 lines), LARGE (400-500 lines), ACCEPTABLE (<400 lines)
@@ -108,15 +118,20 @@ Read: {command_path}
 
 ### Step 3: Validate YAML Frontmatter (Patterns 16, 17, 18)
 
-**Required fields:**
-- `name` - Command name
-- `description` - Brief description
+**Use script results from Step 2:**
+- `frontmatter.yaml_valid` - YAML syntax validation (Pattern 17)
+- `frontmatter.name_present` - Required name field check (Pattern 16)
+- `frontmatter.description_present` - Required description field check (Pattern 16)
+- `frontmatter.yaml_errors[]` - List of detected YAML issues
 
-**Issues to detect:**
-- Missing required fields (Pattern 16)
-- Invalid YAML syntax (Pattern 17)
-- Inconsistent naming (Pattern 18)
-- Wrong field names
+**Additional validation from content:**
+- Inconsistent naming (Pattern 18) - Compare name field with filename
+- Wrong field names - Check for common mistakes (e.g., `tools` in skills instead of `allowed-tools`)
+
+**Issues detected by script:**
+- Missing required fields (Pattern 16) - automatically detected
+- Invalid YAML syntax (Pattern 17) - automatically detected
+- Empty frontmatter - automatically detected
 
 ### Step 4: Bloat Detection (Pattern 11)
 
@@ -194,26 +209,36 @@ Use the result from Step 2's analyze-markdown-file.sh script:
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
 
-**CRITICAL: Detect file type first (commands vs agents):**
-- **When `command_path` contains `/commands/`** (path matches pattern `*/commands/*.md`) → This is a COMMAND (can self-update)
-- **When `command_path` contains `/agents/`** (path matches pattern `*/agents/*.md`) → This is an AGENT (cannot self-invoke)
+**Use script results from Step 2:**
+- `file_type` - Automatically detected as "command" or "agent" (NEW)
+- `continuous_improvement_rule.format` - Detected as "self-update" or "caller-reporting" (NEW)
+- `continuous_improvement_rule.pattern_22_violation` - true if agent with self-update pattern (NEW)
 
-**For COMMANDS (files in .../commands/):**
-- **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-command command-name={command-name} update="[your improvement]"` with:
+**For COMMANDS (file_type = "command"):**
+- **Expected format**: "self-update" (commands should self-update)
+- **CRITICAL Check**: Must include explicit usage instruction: `using /plugin-update-command command-name={command-name} update="[your improvement]"`
 - **SUGGESTION**: Should list 3-5 specific improvement areas relevant to command purpose
 - **Correct Pattern**: Commands SHOULD use self-update pattern: `**CRITICAL:** Every time you execute this command...YOU MUST immediately update this file using /plugin-update-command...`
-- **WARNING**: If command uses caller-reporting pattern instead of self-update, suggest restoring self-update capability
+- **WARNING**: If `continuous_improvement_rule.format` is "caller-reporting" instead of "self-update", suggest restoring self-update capability
 - **DO NOT apply Pattern 22 to commands** - commands are designed to self-update
 
-**For AGENTS (files in .../agents/):**
+**For AGENTS (file_type = "agent"):**
+- **Expected format**: "caller-reporting" (Pattern 22)
 - **CRITICAL Check**: Must include explicit usage instruction mentioning the update mechanism
 - **SUGGESTION**: Should list 3-5 specific improvement areas relevant to agent purpose
 - **Correct Pattern (Pattern 22)**: Agents MUST use caller-reporting pattern: `**CRITICAL:** Every time you execute this agent...REPORT the improvement to your caller...The caller can then invoke /plugin-update-agent...`
-- **CRITICAL Pattern 22 violation**: If agent uses self-invocation pattern: `YOU MUST immediately update this file using /plugin-update-agent` (agents CANNOT self-invoke)
+- **CRITICAL Pattern 22 violation**: If `continuous_improvement_rule.pattern_22_violation` is true, report CRITICAL issue - agent uses self-invocation pattern (agents CANNOT self-invoke)
 
 **Check parameter validation (Pattern 10):**
-- All parameters documented
-- Default values specified
+
+**Use script results from Step 2:**
+- `parameters.has_section` - Check if INPUT PARAMETERS section exists (NEW)
+- `parameters.documented[]` - List of documented parameters with required/optional status (NEW)
+
+**Validation:**
+- All parameters should be documented in INPUT PARAMETERS section
+- Each parameter should specify if Required or Optional
+- Default values should be specified for optional parameters
 - Validation logic present
 
 **Check workflow structure:**
