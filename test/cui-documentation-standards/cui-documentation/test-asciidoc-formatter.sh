@@ -156,6 +156,30 @@ test_error_handling() {
         echo -e "${RED}FAIL${NC} (accepted invalid type)"
         TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
+
+    TESTS_RUN=$((TESTS_RUN + 1))
+    echo -n "Test: nonexistent-path-handled ... "
+
+    if ! "$SCRIPT_UNDER_TEST" /nonexistent/path >/dev/null 2>&1; then
+        echo -e "${GREEN}PASS${NC}"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+    else
+        echo -e "${RED}FAIL${NC}"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+    fi
+}
+
+# Test multiple fix types
+test_multiple_fix_types() {
+    echo ""
+    echo "=== Testing multiple fix types ==="
+    echo ""
+
+    run_test "lists-fix-type" "$SCRIPT_UNDER_TEST" -n -t lists "$TEST_FIXTURES_DIR"
+    run_test "xref-fix-type" "$SCRIPT_UNDER_TEST" -n -t xref "$TEST_FIXTURES_DIR"
+    run_test "headers-fix-type" "$SCRIPT_UNDER_TEST" -n -t headers "$TEST_FIXTURES_DIR"
+    run_test "whitespace-fix-type" "$SCRIPT_UNDER_TEST" -n -t whitespace "$TEST_FIXTURES_DIR"
+    run_test "all-fix-types" "$SCRIPT_UNDER_TEST" -n -t all "$TEST_FIXTURES_DIR"
 }
 
 # Main execution
@@ -168,6 +192,7 @@ main() {
     test_dry_run
     test_blank_line_fix
     test_directory_processing
+    test_multiple_fix_types
     test_real_standards
     test_error_handling
 
