@@ -2,7 +2,7 @@
 name: diagnose-command
 description: Analyzes command/agent files for bloat, quality, and anti-bloat compliance. Validates Pattern 22 for agents.
 
-tools: [Read, Grep]
+tools: [Read, Bash(marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh:*)]
 model: sonnet
 color: green
 ---
@@ -70,44 +70,35 @@ These provide:
 - If path doesn't end with .md: Report warning "Expected .md file, got {extension}"
 - If Read fails in Step 2: Report error "File not found: {command_path}"
 
-### Step 2: Read and Parse Command
+### Step 2: Analyze File Structure
 
-**Read the command file:**
+**Use the analyze-markdown-file.sh script for reliable metrics:**
+```bash
+marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {command_path}
+```
+
+This script returns JSON with:
+- **metrics.line_count** - Exact line count (matches `wc -l`)
+- **metrics.word_count** - Word count
+- **frontmatter.present** - Whether YAML frontmatter exists
+- **frontmatter.content** - The frontmatter block
+- **continuous_improvement_rule.present** - Whether CI RULE exists
+- **continuous_improvement_rule.line_number** - Line where it appears
+- **continuous_improvement_rule.content** - The section content
+
+**Extract from JSON:**
+1. **line_count** - Use for bloat calculations
+2. **frontmatter** - Use for YAML validation
+3. **continuous_improvement_rule.present** - Use for Step 6 validation
+4. Store these values for later steps
+
+**Then read the file for detailed content analysis:**
 ```
 Read: {command_path}
 ```
 
-**Extract components:**
-- YAML frontmatter (between `---` markers)
-- Command description
-- Parameters section
-- Workflow sections
-- Examples
-
-**Count metrics:**
-
-**HOW TO COUNT TOTAL LINES:**
-1. **Use Grep to count lines**: `Grep: pattern="^" path={command_path} output_mode="count"`
-   - Pattern "^" matches start of every line
-   - The count at the top of output is the total line count
-2. Extract the number from the first line of Grep output
-3. **THIS IS THE TOTAL LINE COUNT** - use for all bloat calculations
-4. Then read the file for content analysis: `Read: {command_path}`
-
-**Example**:
-```
-Grep: pattern="^" path=/path/to/js-implement-code.md output_mode="count"
-Output:
-521
-Found 0 total occurrences across 0 files.
-
-Extract: TOTAL_LINES = 521 ✅
-
-Use for bloat calculation: 521/400 = 130% = BLOATED
-```
-
-**Other metrics:**
-- Section count
+**Count additional metrics from content:**
+- Section count (## headings)
 - Workflow step count
 - Example count
 
@@ -199,15 +190,12 @@ anti_bloat_score = (rules_followed / 8) * 100
 
 **Check for CONTINUOUS IMPROVEMENT RULE section:**
 
-**DETECTION PATTERN** (search the entire file content):
-1. Search for text "CONTINUOUS IMPROVEMENT" (case-insensitive) anywhere in the file
-2. OR search for heading pattern matching `^##+ CONTINUOUS IMPROVEMENT` (any heading level)
-3. If found: Mark as PRESENT
-4. If NOT found: Mark as MISSING
+Use the result from Step 2's analyze-markdown-file.sh script:
+- If `continuous_improvement_rule.present` is `true`: PASS
+- If `false`: FAIL (unless command is simple orchestrator with <150 lines)
 
 **REQUIREMENT**:
-- **REQUIRED for >90% of commands** - Flag as WARNING if missing (unless command is simple orchestrator with <150 lines)
-- Section typically appears near end of command file, after examples/related sections
+- **REQUIRED for >90% of commands** - Flag as WARNING if missing
 
 **Validate CONTINUOUS IMPROVEMENT RULE format (if present):**
 
