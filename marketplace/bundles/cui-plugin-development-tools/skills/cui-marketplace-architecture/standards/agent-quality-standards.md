@@ -72,9 +72,11 @@ A well-formed agent must follow these 10 core practices:
 ---
 name: agent-name              # Unique identifier (lowercase, hyphens, max 64 chars)
 description: Clear description # What agent does and when to use it (50-200 chars recommended, max 1024)
-tools: [Read, Write, Edit, Bash, Grep, Glob, Task]  # Required tools
+tools: Read, Write, Edit, Bash, Grep, Glob  # Required tools (comma-separated format)
 ---
 ```
+
+**Note**: See `frontmatter-standards.md` for complete frontmatter format specifications.
 
 ### Optional Fields
 
@@ -205,7 +207,7 @@ If agent has "Essential Rules" section:
 Agents may include permission patterns for Bash commands:
 
 ```yaml
-tools: [Bash(git:*), Bash(npm:*), Bash(mvn:*)]
+tools: Read, Bash(git:*), Bash(npm:*), Bash(mvn:*)
 ```
 
 ### Validation Rules:

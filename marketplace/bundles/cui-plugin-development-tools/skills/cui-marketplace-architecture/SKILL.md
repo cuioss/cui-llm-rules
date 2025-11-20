@@ -1,7 +1,7 @@
 ---
 name: cui-marketplace-architecture
 description: Architecture rules and validation patterns for Claude Code marketplace components ensuring self-contained skills, proper skill usage, and clean reference patterns
-allowed-tools: [Read, Grep, Glob]
+allowed-tools: Read, Grep, Glob
 ---
 
 # CUI Marketplace Architecture Skill
@@ -81,6 +81,11 @@ Standards for marketplace component architecture ensuring self-contained skills,
    - If creating/validating analysis scripts:
      ```
      Read: standards/script-development.md
+     ```
+
+   - If validating or fixing YAML frontmatter:
+     ```
+     Read: standards/frontmatter-standards.md
      ```
 
 ### Step 2: Apply Architecture Rules
@@ -210,3 +215,4 @@ All marketplace components must pass:
 * Command quality standards: standards/command-quality-standards.md
 * Bundling patterns: standards/bundling-patterns.md
 * Script development: standards/script-development.md
+* Frontmatter standards: standards/frontmatter-standards.md
