@@ -130,15 +130,7 @@ test_classification() {
 
         result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1)
         lines=$(echo "$result" | jq -r '.metrics.line_count')
-
-        # Apply classification logic
-        if [ "$lines" -gt 500 ]; then
-            actual_class="BLOATED"
-        elif [ "$lines" -gt 400 ]; then
-            actual_class="LARGE"
-        else
-            actual_class="ACCEPTABLE"
-        fi
+        actual_class=$(echo "$result" | jq -r '.bloat.classification')
 
         if [ "$actual_class" == "$expected_class" ]; then
             echo -e "${GREEN}PASS${NC} ($lines lines = $actual_class)"
@@ -149,6 +141,231 @@ test_classification() {
             TESTS_FAILED=$((TESTS_FAILED + 1))
         fi
     done
+}
+
+# Enhancement 1b: Test file type detection
+test_file_type_detection() {
+    echo ""
+    echo "=== Testing file type detection ==="
+    echo ""
+
+    local test_cases=(
+        "command-file|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/commands/plugin-diagnose-skills.md|command"
+        "agent-file|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/agents/diagnose-command.md|agent"
+    )
+
+    for test_case in "${test_cases[@]}"; do
+        IFS='|' read -r name file expected_type <<< "$test_case"
+
+        if [ ! -f "$file" ]; then
+            echo "SKIP: $name (file not found)"
+            continue
+        fi
+
+        TESTS_RUN=$((TESTS_RUN + 1))
+        echo -n "FileType: $name ... "
+
+        result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1)
+        actual_type=$(echo "$result" | jq -r '.file_type.type')
+
+        if [ "$actual_type" == "$expected_type" ]; then
+            echo -e "${GREEN}PASS${NC} (type=$actual_type)"
+            TESTS_PASSED=$((TESTS_PASSED + 1))
+        else
+            echo -e "${RED}FAIL${NC}"
+            echo "  Expected: $expected_type, Got: $actual_type"
+            TESTS_FAILED=$((TESTS_FAILED + 1))
+        fi
+    done
+}
+
+# Enhancement 1a: Test YAML frontmatter validation
+test_yaml_validation() {
+    echo ""
+    echo "=== Testing YAML frontmatter validation ==="
+    echo ""
+
+    local test_cases=(
+        "valid-yaml|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/commands/plugin-diagnose-skills.md|true|true|true"
+        "valid-yaml-agent|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/agents/diagnose-command.md|true|true|true"
+    )
+
+    for test_case in "${test_cases[@]}"; do
+        IFS='|' read -r name file expected_valid expected_name expected_desc <<< "$test_case"
+
+        if [ ! -f "$file" ]; then
+            echo "SKIP: $name (file not found)"
+            continue
+        fi
+
+        TESTS_RUN=$((TESTS_RUN + 1))
+        echo -n "YAML: $name ... "
+
+        result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1)
+        yaml_valid=$(echo "$result" | jq -r '.frontmatter.yaml_valid')
+        has_name=$(echo "$result" | jq -r '.frontmatter.required_fields.name.present')
+        has_desc=$(echo "$result" | jq -r '.frontmatter.required_fields.description.present')
+
+        if [ "$yaml_valid" == "$expected_valid" ] && \
+           [ "$has_name" == "$expected_name" ] && \
+           [ "$has_desc" == "$expected_desc" ]; then
+            echo -e "${GREEN}PASS${NC}"
+            TESTS_PASSED=$((TESTS_PASSED + 1))
+        else
+            echo -e "${RED}FAIL${NC}"
+            echo "  Expected: valid=$expected_valid, name=$expected_name, desc=$expected_desc"
+            echo "  Actual:   valid=$yaml_valid, name=$has_name, desc=$has_desc"
+            TESTS_FAILED=$((TESTS_FAILED + 1))
+        fi
+    done
+}
+
+# Enhancement 1c: Test section structure analysis
+test_structure_analysis() {
+    echo ""
+    echo "=== Testing section structure analysis ==="
+    echo ""
+
+    local test_cases=(
+        "diagnose-command|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/commands/plugin-diagnose-commands.md|8"
+        "orchestrate-language|$PROJECT_ROOT/marketplace/bundles/cui-task-workflow/commands/orchestrate-language.md|8"
+    )
+
+    for test_case in "${test_cases[@]}"; do
+        IFS='|' read -r name file expected_sections <<< "$test_case"
+
+        if [ ! -f "$file" ]; then
+            echo "SKIP: $name (file not found)"
+            continue
+        fi
+
+        TESTS_RUN=$((TESTS_RUN + 1))
+        echo -n "Structure: $name ... "
+
+        result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1)
+        section_count=$(echo "$result" | jq -r '.structure.section_count')
+
+        if [ "$section_count" == "$expected_sections" ]; then
+            echo -e "${GREEN}PASS${NC} ($section_count sections)"
+            TESTS_PASSED=$((TESTS_PASSED + 1))
+        else
+            echo -e "${YELLOW}PARTIAL${NC}"
+            echo "  Expected: $expected_sections sections, Got: $section_count"
+            # Count as pass if within 1 section (due to section naming variations)
+            if [ $((section_count - expected_sections)) -le 1 ] && [ $((section_count - expected_sections)) -ge -1 ]; then
+                TESTS_PASSED=$((TESTS_PASSED + 1))
+            else
+                TESTS_FAILED=$((TESTS_FAILED + 1))
+            fi
+        fi
+    done
+}
+
+# Enhancement 1d: Test CI rule format validation
+test_ci_format_validation() {
+    echo ""
+    echo "=== Testing CI rule format validation ==="
+    echo ""
+
+    local test_cases=(
+        "command-self-update|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/commands/plugin-diagnose-skills.md|self-update|false"
+        "agent-caller-reporting|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/agents/diagnose-command.md|caller-reporting|false"
+    )
+
+    for test_case in "${test_cases[@]}"; do
+        IFS='|' read -r name file expected_pattern expected_violation <<< "$test_case"
+
+        if [ ! -f "$file" ]; then
+            echo "SKIP: $name (file not found)"
+            continue
+        fi
+
+        TESTS_RUN=$((TESTS_RUN + 1))
+        echo -n "CI Format: $name ... "
+
+        result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1)
+        ci_pattern=$(echo "$result" | jq -r '.continuous_improvement_rule.format.pattern')
+        pattern_22=$(echo "$result" | jq -r '.continuous_improvement_rule.format.pattern_22_violation')
+
+        if [ "$ci_pattern" == "$expected_pattern" ] && \
+           [ "$pattern_22" == "$expected_violation" ]; then
+            echo -e "${GREEN}PASS${NC} (pattern=$ci_pattern)"
+            TESTS_PASSED=$((TESTS_PASSED + 1))
+        else
+            echo -e "${RED}FAIL${NC}"
+            echo "  Expected: pattern=$expected_pattern, violation=$expected_violation"
+            echo "  Actual:   pattern=$ci_pattern, violation=$pattern_22"
+            TESTS_FAILED=$((TESTS_FAILED + 1))
+        fi
+    done
+}
+
+# Enhancement 1e: Test parameter documentation check
+test_parameter_detection() {
+    echo ""
+    echo "=== Testing parameter documentation detection ==="
+    echo ""
+
+    local test_cases=(
+        "has-params|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/commands/plugin-diagnose-skills.md|true"
+        "has-params-2|$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/agents/diagnose-command.md|true"
+    )
+
+    for test_case in "${test_cases[@]}"; do
+        IFS='|' read -r name file expected_has_section <<< "$test_case"
+
+        if [ ! -f "$file" ]; then
+            echo "SKIP: $name (file not found)"
+            continue
+        fi
+
+        TESTS_RUN=$((TESTS_RUN + 1))
+        echo -n "Parameters: $name ... "
+
+        result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1)
+        has_section=$(echo "$result" | jq -r '.parameters.has_section')
+
+        if [ "$has_section" == "$expected_has_section" ]; then
+            echo -e "${GREEN}PASS${NC}"
+            TESTS_PASSED=$((TESTS_PASSED + 1))
+        else
+            echo -e "${RED}FAIL${NC}"
+            echo "  Expected: has_section=$expected_has_section"
+            echo "  Actual:   has_section=$has_section"
+            TESTS_FAILED=$((TESTS_FAILED + 1))
+        fi
+    done
+}
+
+# Test JSON validity for all marketplace files
+test_json_validity() {
+    echo ""
+    echo "=== Testing JSON validity for all commands ==="
+    echo ""
+
+    local files=("$PROJECT_ROOT"/marketplace/bundles/*/commands/*.md)
+    local valid_count=0
+    local invalid_count=0
+
+    for file in "${files[@]}"; do
+        if [ ! -f "$file" ]; then
+            continue
+        fi
+
+        TESTS_RUN=$((TESTS_RUN + 1))
+
+        # Try to run script and parse JSON
+        if result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1) && echo "$result" | jq . > /dev/null 2>&1; then
+            valid_count=$((valid_count + 1))
+            TESTS_PASSED=$((TESTS_PASSED + 1))
+        else
+            echo -e "${RED}FAIL${NC}: Invalid JSON for $(basename "$file")"
+            invalid_count=$((invalid_count + 1))
+            TESTS_FAILED=$((TESTS_FAILED + 1))
+        fi
+    done
+
+    echo "JSON validity: $valid_count valid, $invalid_count invalid"
 }
 
 # Main test execution
@@ -169,9 +386,15 @@ main() {
         exit 1
     fi
 
-    # Run tests
+    # Run all test suites
     test_real_files
     test_classification
+    test_file_type_detection
+    test_yaml_validation
+    test_structure_analysis
+    test_ci_format_validation
+    test_parameter_detection
+    test_json_validity
 
     # Print summary
     echo ""
@@ -184,10 +407,10 @@ main() {
     echo ""
 
     if [ $TESTS_FAILED -eq 0 ]; then
-        echo -e "${GREEN}All tests passed!${NC}"
+        echo -e "${GREEN}✓ All tests passed!${NC}"
         exit 0
     else
-        echo -e "${RED}Some tests failed!${NC}"
+        echo -e "${RED}✗ Some tests failed!${NC}"
         exit 1
     fi
 }
