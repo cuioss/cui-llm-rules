@@ -34,14 +34,14 @@ Analyze ONE skill completely:
 
 **MANDATORY FIRST STEP - Execute analysis script:**
 
-1. **Use Bash tool** (NO Read before this):
+1. **Call analyze-skill-structure.sh using Bash tool** (ABSOLUTELY NO Read/Glob operations before this):
 ```
 Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh {skill_path}
 ```
 
-2. **STOP if script fails** - verify JSON output received
+2. **STOP if script fails** - verify actual JSON output received from script execution
 
-3. **STORE values from JSON** (NEVER recalculate):
+3. **MANDATORY: Extract and STORE these values from script JSON** - DO NOT simulate, recalculate, or manually check:
    ```
    SKILL_EXISTS = skill_exists
    YAML_PRESENT = frontmatter.present
@@ -58,13 +58,22 @@ Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-struct
    FILE_COUNT = standards_files.count
    ```
 
-4. **USE SCRIPT VALUES in all analysis**:
-   - Report SKILL_EXISTS (not manual check)
-   - Report YAML_VALID (not manual validation)
-   - Use REFERENCED_FILES, EXISTING_FILES, MISSING_FILES from script
-   - DO NOT manually scan for standards files
+4. **CRITICAL RULE: Use script values exclusively for structure validation**:
+   - skill_exists = SKILL_EXISTS from script (NOT manual check of SKILL.md)
+   - yaml_valid = YAML_VALID from script (NOT manual YAML parsing)
+   - standards files = EXISTING_FILES from script (NOT Glob/Read)
+   - missing files = MISSING_FILES from script (NOT manual comparison)
+   - **Any manual checking/simulation instead of script values is a CRITICAL ERROR**
 
-**ENFORCEMENT**: Manual file discovery instead of script values = CRITICAL ERROR
+5. **VERIFICATION CHECKPOINT**: Confirm you have actual script JSON output
+   - If you see "Script Values Used (analyze-skill-structure.sh simulation)" in your output → **CRITICAL ERROR**
+   - You MUST see actual Bash tool invocation and JSON response
+   - **Simulation is NEVER acceptable**
+
+**ENFORCEMENT**:
+- Manual file discovery instead of script = CRITICAL ERROR
+- Simulating script output = CRITICAL ERROR
+- Reading SKILL.md before calling script = CRITICAL ERROR
 
 ### Step 2: Discover Standards Files
 
