@@ -2,7 +2,7 @@
 name: diagnose-command
 description: Analyzes command/agent files for bloat, quality, and anti-bloat compliance. Validates Pattern 22 for agents.
 
-tools: [Read, Bash(marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh:*)]
+tools: [Read, Bash(./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh:*)]
 model: sonnet
 color: green
 ---
@@ -76,7 +76,7 @@ These provide:
 
 1. **Call the script** (required first step):
 ```bash
-marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {command_path}
+./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {command_path}
 ```
 
 2. **Parse the JSON output** and extract:
