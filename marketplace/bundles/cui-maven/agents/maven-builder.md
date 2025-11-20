@@ -1,7 +1,7 @@
 ---
 name: maven-builder
 description: Central agent for executing Maven builds with output capture, issue categorization, and performance tracking
-tools: Read, Write, Bash(./mvnw:*), Grep, Skill
+tools: Read, Bash(./mvnw:*), Grep, Skill
 model: sonnet
 color: blue
 ---
@@ -82,18 +82,52 @@ Extract and validate the following parameters from the user's request:
 
 1. Create timestamped filename: `build-output-{YYYY-MM-DD-HHmmss}.log`
 2. Target directory: `target/` in project root
-3. Ensure target directory exists (create if needed with `mkdir -p target`)
-4. Full output path: `target/build-output-{timestamp}.log`
+3. Full output path: `target/build-output-{timestamp}.log`
+
+**Note**: Directory creation handled in Step 4.5 if clean goal present, otherwise Maven creates it.
+
+### Step 4.5: Execute Clean Goal Separately (if present)
+
+**Detect and extract clean goal:**
+
+1. Parse the constructed command from Step 2 for 'clean' goal
+2. If 'clean' is NOT present, skip to Step 5
+3. If 'clean' IS present:
+   - Remove 'clean' from maven_goals for later execution
+   - Store modified goals as `{maven_goals_no_clean}`
+
+**Execute clean separately:**
+
+Run clean goal first to ensure target/ directory exists before output redirection:
+
+```bash
+./mvnw clean {-pl module if module specified}
+```
+
+- Run WITHOUT output redirection (clean output not needed for analysis)
+- Use standard timeout: 30000ms (30 seconds is sufficient for clean)
+- Wait for completion (NOT background execution)
+- If clean fails: Report error and stop (don't proceed to main build)
+
+**Rationale**: Running clean first ensures:
+- Target directory is created by Maven itself
+- Output file parent directory exists BEFORE shell redirection in Step 5
+- Clean output is not mixed with build output
+- Redirection succeeds reliably every time
 
 ### Step 5: Execute Maven Build
 
 **Command Execution:**
-1. Run from project root: `{constructed_command} > target/build-output-{timestamp}.log 2>&1`
-2. Redirect all output (stdout and stderr) directly to file
-3. Timeout: `last-execution-duration * 1.25` ms (25% safety margin)
-4. Use Bash tool timeout parameter: `<parameter name="timeout">{calculated_ms}</parameter>`
-5. Wait for completion (NOT background execution)
-6. Record actual execution time (start to finish) **ONLY for successful builds**
+
+1. Construct final command based on clean goal handling:
+   - If clean was run in Step 4.5: `./mvnw {maven_goals_no_clean} {-pl ...} {-rf ...}`
+   - If clean was NOT detected: `./mvnw {maven_goals} {-pl ...} {-rf ...}`
+2. Run from project root: `{final_command} > target/build-output-{timestamp}.log 2>&1`
+3. Redirect all output (stdout and stderr) directly to file
+4. Timeout: `last-execution-duration * 1.25` ms (25% safety margin)
+5. Use Bash tool timeout parameter: `<parameter name="timeout">{calculated_ms}</parameter>`
+6. Wait for completion (NOT background execution)
+7. Record actual execution time (start to finish) **ONLY for successful builds**
 
 **Why simple redirection instead of tee:**
 - Avoids user permission prompts (maintains non-prompting execution)
