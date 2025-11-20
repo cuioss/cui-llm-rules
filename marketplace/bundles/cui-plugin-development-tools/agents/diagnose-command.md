@@ -2,7 +2,7 @@
 name: diagnose-command
 description: Analyzes command/agent files for bloat, quality, and anti-bloat compliance. Validates Pattern 22 for agents.
 
-tools: [Read]
+tools: [Read, Grep]
 model: sonnet
 color: green
 ---
@@ -85,7 +85,28 @@ Read: {command_path}
 - Examples
 
 **Count metrics:**
-- Total lines
+
+**HOW TO COUNT TOTAL LINES:**
+1. **Use Grep to count lines**: `Grep: pattern="^" path={command_path} output_mode="count"`
+   - Pattern "^" matches start of every line
+   - The count at the top of output is the total line count
+2. Extract the number from the first line of Grep output
+3. **THIS IS THE TOTAL LINE COUNT** - use for all bloat calculations
+4. Then read the file for content analysis: `Read: {command_path}`
+
+**Example**:
+```
+Grep: pattern="^" path=/path/to/js-implement-code.md output_mode="count"
+Output:
+521
+Found 0 total occurrences across 0 files.
+
+Extract: TOTAL_LINES = 521 ✅
+
+Use for bloat calculation: 521/400 = 130% = BLOATED
+```
+
+**Other metrics:**
 - Section count
 - Workflow step count
 - Example count
