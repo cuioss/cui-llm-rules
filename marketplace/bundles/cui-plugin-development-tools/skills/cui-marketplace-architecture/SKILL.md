@@ -78,6 +78,11 @@ Standards for marketplace component architecture ensuring self-contained skills,
      Read: standards/command-quality-standards.md
      ```
 
+   - If creating/validating analysis scripts:
+     ```
+     Read: standards/script-development.md
+     ```
+
 ### Step 2: Apply Architecture Rules
 
 **When to Execute**: During component creation or validation
@@ -199,4 +204,9 @@ All marketplace components must pass:
 * Architecture overview: standards/architecture-overview.md
 * Plugin specifications: standards/plugin-specifications.md
 * Agent design principles: standards/agent-design-principles.md
+* Agent analysis patterns: standards/agent-analysis-patterns.md
+* Agent quality standards: standards/agent-quality-standards.md
+* Command analysis patterns: standards/command-analysis-patterns.md
+* Command quality standards: standards/command-quality-standards.md
 * Bundling patterns: standards/bundling-patterns.md
+* Script development: standards/script-development.md
