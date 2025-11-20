@@ -26,6 +26,18 @@ LINE_COUNT=$(wc -l < "$FILE_PATH" | tr -d ' ')
 WORD_COUNT=$(wc -w < "$FILE_PATH" | tr -d ' ')
 CHAR_COUNT=$(wc -c < "$FILE_PATH" | tr -d ' ')
 
+# Calculate bloat classification and score
+if [ "$LINE_COUNT" -gt 500 ]; then
+    CLASSIFICATION="BLOATED"
+elif [ "$LINE_COUNT" -gt 400 ]; then
+    CLASSIFICATION="LARGE"
+else
+    CLASSIFICATION="ACCEPTABLE"
+fi
+
+# Bloat score: (line_count / 400) * 100
+BLOAT_SCORE=$(awk "BEGIN {printf \"%.1f\", ($LINE_COUNT / 400.0) * 100}")
+
 # Extract YAML frontmatter (between first two --- markers)
 FRONTMATTER=""
 if head -1 "$FILE_PATH" | grep -q "^---$"; then
@@ -77,6 +89,10 @@ cat <<EOF
     "line_count": $LINE_COUNT,
     "word_count": $WORD_COUNT,
     "char_count": $CHAR_COUNT
+  },
+  "bloat": {
+    "classification": "$CLASSIFICATION",
+    "score": $BLOAT_SCORE
   },
   "frontmatter": {
     "present": $([ -n "$FRONTMATTER" ] && echo "true" || echo "false"),

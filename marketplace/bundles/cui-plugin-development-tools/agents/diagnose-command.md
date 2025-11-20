@@ -82,15 +82,17 @@ These provide:
 2. **Parse the JSON output** and extract:
    - `metrics.line_count` → Store as TOTAL_LINES (use for all bloat calculations)
    - `metrics.word_count` → Store for reference
+   - `bloat.classification` → Store bloat classification (ACCEPTABLE/LARGE/BLOATED)
+   - `bloat.score` → Store bloat score
    - `frontmatter.present` → Store for Step 3 validation
    - `frontmatter.content` → Parse YAML for name/description
    - `continuous_improvement_rule.present` → Store for Step 6 validation
    - `continuous_improvement_rule.content` → Analyze format if present
 
-3. **CRITICAL**: Use ONLY the `line_count` from the script for bloat classification:
-   - If line_count > 500: BLOATED
-   - If line_count > 400: LARGE
-   - If line_count <= 400: ACCEPTABLE
+3. **CRITICAL**: Use ONLY the bloat classification from the script:
+   - Script returns: BLOATED (>500 lines), LARGE (400-500 lines), ACCEPTABLE (<400 lines)
+   - Bloat score formula: (line_count / 400) * 100
+   - Do NOT recalculate - use script values directly
 
 4. **Then read file for content analysis** (after script execution):
 ```
@@ -118,27 +120,18 @@ Read: {command_path}
 
 ### Step 4: Bloat Detection (Pattern 11)
 
-**Calculate line count and classify:**
-```
-Lines > 500: BLOATED (CRITICAL)
-Lines > 400: LARGE (WARNING)
-Lines < 400: ACCEPTABLE
-```
+**Use bloat classification from Step 2 script output:**
+- `bloat.classification`: BLOATED (>500 lines, CRITICAL) | LARGE (400-500 lines, WARNING) | ACCEPTABLE (<400 lines)
+- `bloat.score`: (line_count / 400) * 100
+  - Score > 125: CRITICAL bloat (>500 lines)
+  - Score 100-125: WARNING bloat (400-500 lines)
+  - Score < 100: ACCEPTABLE
 
 **If BLOATED or LARGE, identify extractable content:**
 - Repeated workflow patterns
 - Detailed technical procedures
 - Reference documentation
 - Standards that could be in skills
-
-**Calculate bloat score:**
-```
-bloat_score = (current_lines / 400) * 100
-
-> 125: CRITICAL bloat (>500 lines)
-100-125: WARNING bloat (400-500 lines)
-< 100: ACCEPTABLE
-```
 
 ### Step 5: Anti-Bloat Compliance (8 Rules)
 
@@ -318,7 +311,7 @@ If BLOATED (>500 lines):
 
 ### Step 12: Calculate Final Scores
 
-**Bloat Score:** (calculated in Step 4)
+**Bloat Score:** Use `bloat.score` from Step 2 script output (already calculated)
 
 **Anti-Bloat Compliance:** (calculated in Step 5)
 
