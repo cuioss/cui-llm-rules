@@ -32,30 +32,39 @@ Analyze ONE skill completely:
 
 ### Step 1: Validate Skill Structure
 
-**CRITICAL: Execute the analysis script FIRST:**
+**MANDATORY FIRST STEP - Execute analysis script:**
 
-1. **Call analyze-skill-structure.sh using Bash tool:**
+1. **Use Bash tool** (NO Read before this):
 ```
 Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-skill-structure.sh {skill_path}
 ```
 
-2. **Parse the JSON output** and extract:
-   - `skill_exists` → Check if SKILL.md found
-   - `frontmatter.present` → Check if YAML frontmatter exists
-   - `frontmatter.yaml_valid` → YAML syntax validation (automatically detected)
-   - `frontmatter.name_present` → Required name field check (automatically detected)
-   - `frontmatter.description_present` → Required description field check (automatically detected)
-   - `frontmatter.allowed_tools_present` → Required allowed-tools field for skills (automatically detected)
-   - `frontmatter.yaml_errors[]` → List of YAML syntax issues (automatically detected)
-   - `frontmatter.wrong_tool_field` → true if uses `tools` instead of `allowed-tools` (automatically detected)
-   - `frontmatter.content` → YAML content for reference
+2. **STOP if script fails** - verify JSON output received
 
-**Issues automatically detected by script:**
-- Missing SKILL.md file (skill_exists = false)
-- Missing YAML frontmatter (frontmatter.present = false)
-- Invalid YAML syntax (yaml_valid = false, check yaml_errors[])
-- Missing required fields (name_present/description_present/allowed_tools_present = false)
-- Wrong tool field name (wrong_tool_field = true)
+3. **STORE values from JSON** (NEVER recalculate):
+   ```
+   SKILL_EXISTS = skill_exists
+   YAML_PRESENT = frontmatter.present
+   YAML_VALID = frontmatter.yaml_valid
+   NAME_PRESENT = frontmatter.name_present
+   DESC_PRESENT = frontmatter.description_present
+   TOOLS_PRESENT = frontmatter.allowed_tools_present
+   WRONG_FIELD = frontmatter.wrong_tool_field
+   YAML_ERRORS = frontmatter.yaml_errors[]
+   REFERENCED_FILES = standards_files.referenced[]
+   EXISTING_FILES = standards_files.existing[]
+   MISSING_FILES = standards_files.missing[]
+   UNREFERENCED_FILES = standards_files.unreferenced[]
+   FILE_COUNT = standards_files.count
+   ```
+
+4. **USE SCRIPT VALUES in all analysis**:
+   - Report SKILL_EXISTS (not manual check)
+   - Report YAML_VALID (not manual validation)
+   - Use REFERENCED_FILES, EXISTING_FILES, MISSING_FILES from script
+   - DO NOT manually scan for standards files
+
+**ENFORCEMENT**: Manual file discovery instead of script values = CRITICAL ERROR
 
 ### Step 2: Discover Standards Files
 

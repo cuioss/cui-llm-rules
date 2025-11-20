@@ -61,60 +61,70 @@ These provide:
 
 ### Step 2: Analyze File Structure and Tool Coverage
 
-**CRITICAL: Execute the analysis scripts FIRST (before any Read operations):**
+**MANDATORY FIRST STEPS - Execute both analysis scripts:**
 
-1. **Call analyze-markdown-file.sh using Bash tool:**
+**Script 1: Structural Analysis**
+
+1. **Use Bash tool** (NO Read before this):
 ```
 Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {agent_path}
 ```
 
-2. **Parse the JSON output** and extract:
-   - `metrics.line_count` → Store as TOTAL_LINES
-   - `metrics.word_count` → Store for reference
-   - `bloat.classification` → Store bloat classification
-   - `bloat.score` → Store bloat score
-   - `frontmatter.present` → Store for validation
-   - `frontmatter.yaml_valid` → YAML syntax validation (NEW)
-   - `frontmatter.name_present` → Required name field (NEW)
-   - `frontmatter.description_present` → Required description field (NEW)
-   - `frontmatter.yaml_errors[]` → List YAML issues (NEW)
-   - `frontmatter.content` → Parse YAML for tools array
-   - `file_type` → Should be "agent" (NEW)
-   - `structure.section_count` → Count of sections (NEW)
-   - `structure.sections[]` → List of section names (NEW)
-   - `continuous_improvement_rule.present` → Check for CI rule
-   - `continuous_improvement_rule.format` → Should be "caller-reporting" for agents (NEW)
-   - `continuous_improvement_rule.pattern_22_violation` → Critical if true (NEW)
+2. **STOP if script fails** - verify JSON output received
 
-3. **Call analyze-tool-coverage.sh using Bash tool:**
+3. **STORE values from JSON** (NEVER recalculate):
+   ```
+   TOTAL_LINES = metrics.line_count
+   BLOAT_CLASS = bloat.classification
+   BLOAT_SCORE = bloat.score
+   FILE_TYPE = file_type.type (must be "agent")
+   YAML_VALID = frontmatter.yaml_valid
+   NAME_PRESENT = frontmatter.required_fields.name.present
+   DESC_PRESENT = frontmatter.required_fields.description.present
+   SECTION_NAMES = structure.sections[]
+   CI_PRESENT = continuous_improvement_rule.present
+   CI_FORMAT = continuous_improvement_rule.format.pattern (must be "caller-reporting")
+   PATTERN_22_VIOL = continuous_improvement_rule.format.pattern_22_violation
+   ```
+
+**Script 2: Tool Coverage Analysis**
+
+4. **Use Bash tool:**
 ```
 Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-tool-coverage.sh {agent_path}
 ```
 
-4. **Parse the tool coverage JSON output** and extract:
-   - `tool_coverage.declared_tools[]` → Tools in frontmatter
-   - `tool_coverage.used_tools[]` → Tools used in workflow
-   - `tool_coverage.missing_tools[]` → Used but not declared
-   - `tool_coverage.unused_tools[]` → Declared but not used
-   - `tool_coverage.tool_fit_score` → Coverage score (0-100)
-   - `tool_coverage.rating` → Excellent/Good/Needs improvement/Poor
-   - `critical_violations.has_task_tool` → Task in frontmatter (Pattern 22 violation)
-   - `critical_violations.has_task_calls` → Task delegation in workflow
-   - `critical_violations.maven_calls[]` → Maven anti-pattern detection
-   - `critical_violations.backup_file_patterns[]` → Backup file creation patterns
+5. **STOP if script fails** - verify JSON output received
 
-5. **Then read file for content analysis:**
+6. **STORE tool coverage values** (NEVER recalculate):
+   ```
+   DECLARED_TOOLS = tool_coverage.declared_tools[]
+   USED_TOOLS = tool_coverage.used_tools[]
+   MISSING_TOOLS = tool_coverage.missing_tools[]
+   UNUSED_TOOLS = tool_coverage.unused_tools[]
+   TOOL_FIT_SCORE = tool_coverage.tool_fit_score
+   TOOL_RATING = tool_coverage.rating
+   HAS_TASK_TOOL = critical_violations.has_task_tool
+   HAS_TASK_CALLS = critical_violations.has_task_calls
+   MAVEN_CALLS = critical_violations.maven_calls[]
+   BACKUP_PATTERNS = critical_violations.backup_file_patterns[]
+   ```
+
+7. **USE SCRIPT VALUES in all analysis**:
+   - Report TOTAL_LINES, BLOAT_CLASS, BLOAT_SCORE from script
+   - Report TOOL_FIT_SCORE and TOOL_RATING from script
+   - Use MISSING_TOOLS, UNUSED_TOOLS from script (not manual detection)
+   - Use HAS_TASK_TOOL, MAVEN_CALLS, BACKUP_PATTERNS from script
+
+8. **Then Read file ONLY for content quality**:
 ```
 Read: {agent_path}
 ```
+   - Analyze duplication, ambiguity, quality
+   - DO NOT count lines, tools, or calculate scores
+   - All metrics from scripts
 
-6. **Extract additional components from content:**
-   - Agent description
-   - Workflow sections (use structure.sections from script)
-   - Tool usage instructions
-   - Essential Rules (if present)
-
-**Why scripts first?**: The scripts provide deterministic metrics and tool coverage analysis. Do NOT recalculate - use script values directly.
+**ENFORCEMENT**: Manual calculation instead of script values = CRITICAL ERROR
 
 ### Step 3: Validate YAML Frontmatter (Patterns 3, 4)
 

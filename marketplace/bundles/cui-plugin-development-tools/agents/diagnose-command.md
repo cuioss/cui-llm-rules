@@ -72,49 +72,48 @@ These provide:
 
 ### Step 2: Analyze File Structure
 
-**CRITICAL: Execute the analysis script FIRST (before any Read operations):**
+**MANDATORY FIRST STEP - Execute analysis script:**
 
-1. **Call the script using Bash tool** (required first step):
+1. **Use Bash tool to call analyze-markdown-file.sh** (NO Read operations before this):
 ```
 Bash: ./.claude/skills/cui-marketplace-architecture/scripts/analyze-markdown-file.sh {command_path}
 ```
 
-2. **Parse the JSON output** and extract:
-   - `metrics.line_count` → Store as TOTAL_LINES (use for all bloat calculations)
-   - `metrics.word_count` → Store for reference
-   - `bloat.classification` → Store bloat classification (ACCEPTABLE/LARGE/BLOATED)
-   - `bloat.score` → Store bloat score
-   - `frontmatter.present` → Store for Step 3 validation
-   - `frontmatter.yaml_valid` → Validate YAML syntax (NEW)
-   - `frontmatter.name_present` → Check required name field (NEW)
-   - `frontmatter.description_present` → Check required description field (NEW)
-   - `frontmatter.yaml_errors[]` → List YAML issues (NEW)
-   - `frontmatter.content` → Parse YAML for additional fields
-   - `file_type` → Identify as command or agent (NEW)
-   - `structure.section_count` → Count of ## sections (NEW)
-   - `structure.sections[]` → List of section names (NEW)
-   - `continuous_improvement_rule.present` → Store for Step 6 validation
-   - `continuous_improvement_rule.format` → self-update|caller-reporting (NEW)
-   - `continuous_improvement_rule.pattern_22_violation` → true if agent with self-update (NEW)
-   - `parameters.has_section` → Check for INPUT PARAMETERS section (NEW)
-   - `parameters.documented[]` → List of documented parameters (NEW)
+2. **STOP if script fails** - verify JSON output received
 
-3. **CRITICAL**: Use ONLY the bloat classification from the script:
-   - Script returns: BLOATED (>500 lines), LARGE (400-500 lines), ACCEPTABLE (<400 lines)
-   - Bloat score formula: (line_count / 400) * 100
-   - Do NOT recalculate - use script values directly
+3. **Extract and STORE these values from script JSON** (NEVER recalculate):
+   ```
+   TOTAL_LINES = metrics.line_count
+   BLOAT_CLASS = bloat.classification
+   BLOAT_SCORE = bloat.score
+   FILE_TYPE = file_type.type
+   YAML_VALID = frontmatter.yaml_valid
+   NAME_PRESENT = frontmatter.required_fields.name.present
+   DESC_PRESENT = frontmatter.required_fields.description.present
+   SECTION_COUNT = structure.section_count
+   SECTION_NAMES = structure.sections[]
+   WORKFLOW_STEPS = structure.workflow_steps
+   CI_PRESENT = continuous_improvement_rule.present
+   CI_FORMAT = continuous_improvement_rule.format.pattern
+   PATTERN_22_VIOL = continuous_improvement_rule.format.pattern_22_violation
+   PARAMS_PRESENT = parameters.has_section
+   ```
 
-4. **Then read file for content analysis** (after script execution):
+4. **USE SCRIPT VALUES in all subsequent analysis**:
+   - Report TOTAL_LINES (not line count from Read)
+   - Report BLOAT_CLASS and BLOAT_SCORE (not your calculation)
+   - Use SECTION_NAMES from script (not manual count)
+   - Use CI_FORMAT from script (not your detection)
+
+5. **Then Read file ONLY for content quality analysis**:
 ```
 Read: {command_path}
 ```
+   - Analyze duplication, ambiguity, quality
+   - DO NOT count lines, sections, or metrics
+   - All metrics come from script JSON
 
-5. **Count additional metrics from Read content:**
-   - Section count (## headings)
-   - Workflow step count
-   - Example count
-
-**Why script first?**: The script provides deterministic metrics (matches wc -l exactly). Do NOT estimate or count lines from Read output.
+**ENFORCEMENT**: Using values other than script output = CRITICAL ERROR
 
 ### Step 3: Validate YAML Frontmatter (Patterns 16, 17, 18)
 
