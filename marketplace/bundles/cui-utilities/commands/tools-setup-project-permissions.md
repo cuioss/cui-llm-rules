@@ -43,7 +43,7 @@ This command focuses on **project-level settings** for version-controlled projec
 6. Improvements to global settings write workflow and safety checks
 7. Better user experience patterns for permission management
 8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
-9. **CRITICAL LESSON - Command Invocation Forms:** Commands can be invoked in TWO ways: (a) Short form: `/plugin-inventory` and (b) Bundle-qualified: `/cui-plugin-development-tools:plugin-inventory`. Bundle wildcards like `SlashCommand(/cui-plugin-development-tools:*)` ONLY match bundle-qualified invocations. Short-form invocations require INDIVIDUAL permissions like `SlashCommand(/plugin-inventory:*)`. Step 3D lists BOTH bundle wildcards (16 patterns) AND short-form permissions (44 patterns) to cover all invocation methods. The pattern `SlashCommand(/plugin-*:*)` is INVALID - you cannot wildcard command names, only use `:*` after exact bundle/command names.
+9. **CRITICAL LESSON - Command Invocation Forms:** Commands can be invoked in TWO ways: (a) Short form: `/plugin-diagnose-agents` and (b) Bundle-qualified: `/cui-plugin-development-tools:plugin-diagnose-agents`. Bundle wildcards like `SlashCommand(/cui-plugin-development-tools:*)` ONLY match bundle-qualified invocations. Short-form invocations require INDIVIDUAL permissions like `SlashCommand(/plugin-diagnose-agents:*)`. Step 3D lists BOTH bundle wildcards (16 patterns) AND short-form permissions (44 patterns) to cover all invocation methods. The pattern `SlashCommand(/plugin-*:*)` is INVALID - you cannot wildcard command names, only use `:*` after exact bundle/command names.
 
 This ensures the command evolves and becomes more effective with each execution.
 
@@ -175,6 +175,37 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 - Add missing permissions automatically (no prompt - standard marketplace permissions)
 - Remove invalid patterns like `SlashCommand(/plugin-*:*)` if present
 - Track: `marketplace_wildcards_added_to_global`, `marketplace_shortform_added_to_global`
+
+**F. Handle Timestamped Build Output Files:**
+
+**Problem:** When maven-builder agent creates timestamped log files (e.g., `build-output-2025-11-20-174411.log`), each unique timestamp requires separate Bash permission approval, leading to:
+- Accumulation of individual timestamped entries in settings
+- Repeated permission prompts for each build execution
+- Settings file bloat with redundant permissions
+
+**Solution:** Use wildcard permissions to cover all timestamped variants:
+
+1. **Detect timestamped build output permissions** in allow list:
+   - Pattern: `Bash(/path/to/project/target/build-output-YYYY-MM-DD-HHMMSS.log)`
+   - Pattern: `Bash(target/build-output-YYYY-MM-DD-HHMMSS.log)`
+   - Pattern: `Bash(**/target/build-output-*.log)` (already correct wildcard)
+
+2. **Consolidate to wildcard permissions:**
+   - Replace multiple timestamped entries with:
+     - `Bash(/absolute/path/to/project/**/target/build-output-*.log)` (absolute paths)
+     - `Bash(**/target/build-output-*.log)` (relative paths)
+
+3. **Remove individual timestamped entries:**
+   - Track removed: `timestamped_build_outputs_consolidated`
+   - Example cleanup: Remove 5+ individual timestamps, replace with 2 wildcards
+
+**Benefits:**
+- Single wildcard covers all future builds
+- No more permission prompts for each build
+- Cleaner settings file
+- Works for nested module builds (e.g., `oauth-sheriff-core/target/build-output-*.log`)
+
+**Track:** `timestamped_build_outputs_consolidated`, `build_output_wildcards_added`
 
 ### Step 4: Handle ensurePermissions Parameter (if provided)
 

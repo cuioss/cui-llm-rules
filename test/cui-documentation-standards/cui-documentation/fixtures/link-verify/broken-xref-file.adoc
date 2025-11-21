@@ -1,0 +1,9 @@
+= Broken Xref File
+
+== Links
+
+This links to nonexistent file: xref:nonexistent.adoc[Missing File]
+
+This also broken: xref:../missing/file.adoc[Another Missing]
+
+This is valid: xref:target-file.adoc[Valid Target]

@@ -223,26 +223,6 @@ test_real_agents() {
     else
         echo "SKIP: diagnose-command.md not found"
     fi
-
-    # Test with plugin-inventory-scanner agent
-    file="$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/agents/plugin-inventory-scanner.md"
-    if [ -f "$file" ]; then
-        TESTS_RUN=$((TESTS_RUN + 1))
-        echo -n "Real agent: plugin-inventory-scanner ... "
-
-        result=$("$SCRIPT_UNDER_TEST" "$file" 2>&1)
-        score=$(echo "$result" | jq -r '.tool_coverage.tool_fit_score')
-
-        if (( $(awk "BEGIN {print ($score >= 80)}") )); then
-            echo -e "${GREEN}PASS${NC} (score=$score)"
-            TESTS_PASSED=$((TESTS_PASSED + 1))
-        else
-            echo -e "${RED}FAIL${NC} (score=$score)"
-            TESTS_FAILED=$((TESTS_FAILED + 1))
-        fi
-    else
-        echo "SKIP: plugin-inventory-scanner.md not found"
-    fi
 }
 
 test_json_validity() {

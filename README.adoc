@@ -256,7 +256,7 @@ List all marketplace components:
 
 [source,bash]
 ----
-/plugin-inventory
+./marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh
 ----
 
 == Contributing
@@ -290,5 +290,5 @@ See xref:marketplace/bundles/cui-plugin-development-tools/README.md[Plugin Devel
 
 . Review relevant bundle documentation
 . Check command descriptions and examples
-. Use `/plugin-inventory` to discover components
+. Use `scan-marketplace-inventory.sh` script to discover components
 . Report issues at https://github.com/cuioss/cui-llm-rules/issues

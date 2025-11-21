@@ -1,0 +1,9 @@
+= Deprecated Syntax
+
+== Old Style Links
+
+This uses deprecated syntax: <<target-file.adoc#,Link Text>>
+
+Another deprecated: <<../path/file.adoc#,Another Link>>
+
+Modern syntax: xref:target-file.adoc[Correct Way]

@@ -29,16 +29,10 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ```
 Skill: cui-utilities:cui-diagnostic-patterns
-```
-
-**Optionally load marketplace architecture standards**:
-
-You may optionally load the marketplace architecture skill for additional architectural context:
-```
 Skill: cui-plugin-development-tools:cui-marketplace-architecture
 ```
 
-This provides architecture rules and validation patterns for marketplace components that may be useful for understanding metadata structure and plugin configuration.
+**CRITICAL**: The cui-marketplace-architecture skill MUST be loaded for script access validation patterns.
 
 ✅ Use `Glob`, `Read`, `Edit`, `SlashCommand` (never Bash alternatives)
 
@@ -83,7 +77,7 @@ Discovering marketplace bundles...
 
 **Run scan-marketplace-inventory.sh script to discover all bundles:**
 ```
-Bash: ./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace
+Bash: marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace
 ```
 
 Parse JSON output from script:

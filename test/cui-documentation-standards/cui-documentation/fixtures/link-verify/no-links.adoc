@@ -1,0 +1,13 @@
+= No Links
+
+== Section One
+
+This file has no links at all.
+
+== Section Two
+
+Just regular text content.
+
+No anchors referenced.
+No external URLs.
+No xrefs.

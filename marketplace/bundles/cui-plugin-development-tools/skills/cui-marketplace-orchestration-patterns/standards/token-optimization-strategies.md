@@ -86,17 +86,12 @@ Loading entire inventory (90 commands, 54 skills, 30 agents) when only analyzing
 
 ### Solution: Type-Filtered Inventory
 
-```
-Task:
-  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
-  prompt: |
-    resourceTypes: ["commands"]
+```bash
+# Use the scan-marketplace-inventory.sh script with filtering
+Bash(./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --resource-types commands --output-format json)
 # Returns only commands (45 items)
 
-Task:
-  subagent_type: cui-plugin-development-tools:plugin-inventory-scanner
-  prompt: |
-    resourceTypes: ["skills"]
+Bash(./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --resource-types skills --output-format json)
 # Returns only skills (54 items)
 ```
 

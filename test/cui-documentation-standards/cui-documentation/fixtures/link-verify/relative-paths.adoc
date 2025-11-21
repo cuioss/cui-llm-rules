@@ -1,0 +1,11 @@
+= Relative Paths
+
+== Links
+
+Relative: xref:target-file.adoc[Target]
+
+Same dir: xref:./target-file.adoc[Same Dir]
+
+Subdirectory: xref:subdirectory/nested.adoc[Nested]
+
+Self-reference: xref:#links[Same File Anchor]

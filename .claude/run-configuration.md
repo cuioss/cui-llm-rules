@@ -78,14 +78,14 @@ This project has access to globally-approved domains for common development reso
 **Global Settings Updated:**
 - **ADDED 44 short-form SlashCommand permissions:**
   - All marketplace commands now work in both invocation forms
-  - Short form: `/plugin-inventory`, `/java-implement-code`, etc.
+  - Short form: `/plugin-diagnose-agents`, `/java-implement-code`, etc.
   - Bundle-qualified: `/cui-java-expert:java-implement-code`, etc.
 - **REMOVED 1 invalid permission:**
   - `SlashCommand(/plugin-*:*)` - Invalid pattern (cannot wildcard command names)
 
 **Local Settings Updated:**
 - **REMOVED 1 redundant marketplace permission:**
-  - `SlashCommand(/plugin-inventory:*)` - Now covered by global settings
+  - `SlashCommand(/plugin-diagnose-agents:*)` - Now covered by global settings
 - **ADDED 5 project-specific permissions:**
   - `Edit(//~/git/cui-llm-rules/**)` - Project editing
   - `Write(//~/git/cui-llm-rules/**)` - Project file creation
@@ -143,8 +143,8 @@ This project has access to globally-approved domains for common development reso
 
 **Command Invocation Forms:**
 Commands can be invoked in TWO ways:
-1. **Short form:** `/plugin-inventory`, `/java-implement-code`
-2. **Bundle-qualified:** `/cui-plugin-development-tools:plugin-inventory`, `/cui-java-expert:java-implement-code`
+1. **Short form:** `/plugin-diagnose-agents`, `/java-implement-code`
+2. **Bundle-qualified:** `/cui-plugin-development-tools:plugin-diagnose-agents`, `/cui-java-expert:java-implement-code`
 
 **Permission Requirements:**
 - Bundle wildcards: `SlashCommand(/cui-java-expert:*)` → Covers bundle-qualified invocations ONLY
@@ -157,7 +157,7 @@ Commands can be invoked in TWO ways:
 
 **Valid Patterns:**
 - `SlashCommand(/cui-java-expert:*)` - Valid (bundle wildcard)
-- `SlashCommand(/plugin-inventory:*)` - Valid (short-form permission)
+- `SlashCommand(/plugin-diagnose-agents:*)` - Valid (short-form permission)
 - `Skill(cui-java-expert:*)` - Valid (skill bundle wildcard)
 
 ---
