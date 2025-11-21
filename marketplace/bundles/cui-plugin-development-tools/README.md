@@ -10,17 +10,15 @@ This bundle includes the following components:
 
 ### Commands
 - **plugin-add-skill-knowledge** - Add external knowledge document to a skill with duplication prevention
-- **plugin-create-agent** - Scaffolds new agent with proper structure and documentation (includes Rule 6 validation - prevents Task tool in agents)
-- **plugin-create-bundle** - Create a new marketplace bundle with proper structure, plugin.json, and documentation
-- **plugin-create-command** - Scaffolds new command with standard format
-- **plugin-create-skill** - Guide users through creating a well-structured skill with standards organization and proper configuration
 - **plugin-diagnose-agents** - Validates agent structure, AGENT.md format, and integration (includes Checks 6-7 for Rule 6/7 violations)
 - **plugin-diagnose-commands** - Validates command structure, markdown format, and metadata
 - **plugin-diagnose-metadata** - Diagnose and fix all metadata files (bundle plugin.json and marketplace.json)
+- **plugin-diagnose-scripts** - Analyze, verify, and fix marketplace scripts for structure, testing, and documentation compliance
 - **plugin-diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
 - **plugin-maintain-readme** - Analyze and update all README files to reflect current marketplace state
 - **plugin-update-agent** - Update an agent with improvements, verify quality, and prevent duplication
 - **plugin-update-command** - Update a command with improvements, verify quality, and prevent duplication
+- **plugin-verify-marketplace** - Execute full marketplace verification by running all diagnostic commands sequentially
 
 ### Agents (Rule 6 compliant)
 - **analyze-cross-skill-duplication** - Analyzes content duplication between marketplace skills via pairwise comparison
@@ -33,9 +31,12 @@ This bundle includes the following components:
 - **diagnose-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
 
 ### Skills
+- **bundle-orchestration-compliance** - Bundle-by-bundle orchestration compliance patterns with mandatory completion checklists, anti-skip protections, and verification requirements
 - **cui-fix-workflow** - Common fix workflow patterns for diagnosis commands including categorization, safe fixes, prompting, and verification
-- **cui-marketplace-architecture** - Architecture rules and validation patterns for Claude Code marketplace components ensuring self-contained skills, proper skill usage, and clean reference patterns
-- **cui-marketplace-orchestration-patterns** - Agent coordination and batch processing patterns
+- **diagnose-reporting-templates** - Common reporting templates for plugin-diagnose-* orchestrator commands
+- **marketplace-inventory** - Scans and reports complete marketplace inventory (bundles, agents, commands, skills, scripts)
+- **plugin-architecture** - Architecture principles, skill patterns, and design guidance for building goal-based Claude Code marketplace components
+- **plugin-create** - Create new marketplace components (agents, commands, skills, bundles) with proper structure and standards compliance
 
 ## Installation Instructions
 
@@ -51,39 +52,41 @@ This will make all commands available in your Claude Code environment.
 
 ### Example 1: Create New Agent
 
-Use plugin-create-agent to scaffold a new agent with proper structure:
+Use the plugin-create skill to create a new agent with proper structure:
 
+```markdown
+Skill: cui-plugin-development-tools:plugin-create
+
+Execute the create-agent workflow to create a new agent named "http-client-tester"
+for testing HTTP client implementations.
 ```
-/plugin-create-agent
 
-Create a new agent named "http-client-tester" for testing HTTP client implementations.
-```
-
-The command will:
-- Create agent directory structure
-- Generate AGENT.md with standard sections
-- Add required metadata (name, description, tags)
-- Include usage instructions template
-- Provide implementation guidance
-- Create example prompt templates
+The workflow will:
+- Guide you through interactive questionnaire
+- Check for existing similar components (duplication detection)
+- Generate agent file with proper frontmatter and structure
+- Validate against Rule 6 (no Task tool), Rule 7 (Maven restrictions), and Pattern 22 (no self-invocation)
+- Display creation summary with statistics
+- Recommend running diagnostics
 
 ### Example 2: Create New Command
 
-Use plugin-create-command to scaffold a new command:
+Use the plugin-create skill to create a new command:
 
+```markdown
+Skill: cui-plugin-development-tools:plugin-create
+
+Execute the create-command workflow to create a command "analyze-dependencies"
+for analyzing Maven dependency trees.
 ```
-/plugin-create-command
 
-Create a command "analyze-dependencies" for analyzing Maven dependency trees.
-```
-
-The command will:
-- Create command markdown file
-- Add standard frontmatter metadata
-- Include description and usage sections
-- Add parameter documentation template
-- Provide example invocations
-- Link to related agents
+The workflow will:
+- Guide you through interactive questionnaire
+- Check for existing similar components
+- Generate command file with standard sections (WORKFLOW, USAGE EXAMPLES, etc.)
+- Validate command structure
+- Display creation summary with statistics
+- Recommend running diagnostics
 
 ### Example 3: Diagnose Agent Issues
 
