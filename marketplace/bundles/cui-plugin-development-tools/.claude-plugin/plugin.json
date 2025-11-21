@@ -19,14 +19,20 @@
     "./commands/plugin-diagnose-agents.md",
     "./commands/plugin-diagnose-commands.md",
     "./commands/plugin-diagnose-metadata.md",
+    "./commands/plugin-diagnose-scripts.md",
     "./commands/plugin-diagnose-skills.md",
+    "./commands/plugin-maintain-readme.md",
     "./commands/plugin-update-agent.md",
-    "./commands/plugin-update-command.md"
+    "./commands/plugin-update-command.md",
+    "./commands/plugin-verify-marketplace.md"
   ],
   "skills": [
+    "./skills/bundle-orchestration-compliance",
     "./skills/cui-fix-workflow",
     "./skills/cui-marketplace-architecture",
-    "./skills/cui-marketplace-orchestration-patterns"
+    "./skills/cui-marketplace-orchestration-patterns",
+    "./skills/diagnose-reporting-templates",
+    "./skills/marketplace-inventory"
   ],
   "agents": [
     "./agents/analyze-cross-skill-duplication.md",
@@ -36,7 +42,6 @@
     "./agents/architectural-validator.md",
     "./agents/diagnose-agent.md",
     "./agents/diagnose-command.md",
-    "./agents/diagnose-skill.md",
-    "./agents/plugin-inventory-scanner.md"
+    "./agents/diagnose-skill.md"
   ]
 }

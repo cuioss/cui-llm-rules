@@ -88,6 +88,11 @@ Standards for marketplace component architecture ensuring self-contained skills,
      Read: standards/frontmatter-standards.md
      ```
 
+   - If using skills with bundled scripts or validating {baseDir} usage:
+     ```
+     Read: standards/skill-script-bundling.md
+     ```
+
 ### Step 2: Apply Architecture Rules
 
 **When to Execute**: During component creation or validation
@@ -189,6 +194,25 @@ In ## References section:
 ❌ ../../../../standards/external.adoc (prohibited)
 ```
 
+### Pattern 4: Skills with Bundled Scripts
+
+For skills that bundle and execute scripts, use the `{baseDir}` pattern:
+
+```markdown
+# In SKILL.md
+bash {baseDir}/scripts/script-name.sh --params
+```
+
+Commands and agents invoke the skill (not the script directly):
+
+```markdown
+# In COMMAND.md or AGENT.md
+Skill: bundle-name:skill-name
+```
+
+**For complete details on {baseDir} usage, script bundling, and tool requirements:**
+- Load: `standards/skill-script-bundling.md`
+
 ## Quality Verification
 
 All marketplace components must pass:
@@ -201,10 +225,12 @@ All marketplace components must pass:
 ## References
 
 * Claude Code Plugin System: https://docs.claude.com/en/docs/claude-code/plugins
+* Claude Skills Deep Dive (baseDir pattern): https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/
 * Architecture rules: standards/architecture-rules.md
 * Reference patterns: standards/reference-patterns.md
 * Self-containment validation: standards/self-containment-validation.md
 * Skill usage patterns: standards/skill-usage-patterns.md
+* Skill script bundling: standards/skill-script-bundling.md
 * Scoring criteria: standards/scoring-criteria.md
 * Architecture overview: standards/architecture-overview.md
 * Plugin specifications: standards/plugin-specifications.md

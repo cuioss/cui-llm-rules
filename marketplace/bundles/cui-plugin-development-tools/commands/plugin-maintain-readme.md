@@ -75,12 +75,12 @@ Skill: cui-utilities:cui-diagnostic-patterns
 Loading marketplace inventory...
 ```
 
-**Run scan-marketplace-inventory.sh script to discover all bundles:**
+**Invoke marketplace-inventory skill to discover all bundles:**
 ```
-Bash: ./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace --include-descriptions true
+Skill: cui-plugin-development-tools:marketplace-inventory
 ```
 
-Parse JSON output from script:
+Parse JSON output from skill:
 - Extract `bundles[]` array
 - For each bundle: Extract name, path, agents[], commands[], skills[] with descriptions
 - Track `bundles_discovered` count
@@ -352,8 +352,8 @@ Documentation Status: {✓ UP-TO-DATE | ⚠ PARTIAL | ✗ ERRORS}
 ## CRITICAL RULES
 
 **Discovery:**
-- Use scan-marketplace-inventory.sh script as source of truth for actual components
-- Use --include-descriptions true to get component descriptions from YAML frontmatter
+- Use marketplace-inventory skill as source of truth for actual components
+- Skill provides component descriptions from YAML frontmatter
 - Never fabricate component names or descriptions
 
 **Analysis:**
@@ -390,7 +390,7 @@ Documentation Status: {✓ UP-TO-DATE | ⚠ PARTIAL | ✗ ERRORS}
 ## STATISTICS TRACKING
 
 Track throughout workflow:
-- `bundles_discovered`: Count from scan-marketplace-inventory.sh script
+- `bundles_discovered`: Count from marketplace-inventory skill
 - `bundles_analyzed`: Bundles successfully examined
 - `readmes_updated`: Total README files modified
 - `components_added`: Missing components added to READMEs
@@ -411,7 +411,7 @@ Processes all bundle READMEs and project root README.adoc automatically.
 
 ## RELATED COMMANDS
 
-- `scan-marketplace-inventory.sh` script - Discovers all marketplace resources (used internally)
+- `marketplace-inventory` skill - Discovers all marketplace resources (used internally)
 - `/plugin-diagnose-metadata` - Validates metadata consistency
 - `/plugin-create-bundle` - Creates bundles with initial README
 - `/doc-review-technical-docs` - Reviews documentation quality

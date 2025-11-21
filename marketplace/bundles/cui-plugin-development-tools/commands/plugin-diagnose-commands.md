@@ -74,14 +74,14 @@ This skill provides command quality standards and analysis patterns used through
 
 **For marketplace scope (default):**
 
-Execute scan-marketplace-inventory.sh script to get complete marketplace inventory:
+Invoke marketplace-inventory skill to get complete marketplace inventory:
 ```
-Bash: ./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace
+Skill: cui-plugin-development-tools:marketplace-inventory
 ```
 
 **CRITICAL:** Must get complete inventory (agents, commands, AND skills) because analyze-plugin-references agents need skill data to validate Skill invocations.
 
-Parse JSON output from script:
+Parse JSON output from skill:
 - Extract `bundles[]` array from JSON response
 - For each bundle, collect `bundle.commands[]` with `name` and `path` fields
 - Build flat list of command paths from all bundles
@@ -175,7 +175,7 @@ Task:
     - marketplace_inventory: {complete_json_inventory_from_step_3}
     - auto-fix: true  # Auto-fix deterministic reference issues (missing/incorrect bundle prefixes)
 
-    IMPORTANT: marketplace_inventory must contain COMPLETE inventory (agents, commands, AND skills) from Step 3's /plugin-inventory --json call.
+    IMPORTANT: marketplace_inventory must contain COMPLETE inventory (agents, commands, AND skills) from Step 3's marketplace-inventory skill invocation.
     This complete data is required to validate Skill invocations and cross-references between all resource types.
 
     Return complete reference analysis with all issues found.
@@ -332,7 +332,7 @@ Bundle-by-bundle orchestrator for token efficiency. See: `Skill: cui-plugin-deve
 
 ## TOOL USAGE
 
-**SlashCommand** (/plugin-inventory), **Glob** (command discovery), **Skill** (diagnostic/architecture patterns), **Task** (agent orchestration), **Edit** (fixes), **AskUserQuestion** (risky fix and reference approval).
+**Skill** (marketplace-inventory, diagnostic/architecture patterns), **Glob** (command discovery), **Task** (agent orchestration), **Edit** (fixes), **AskUserQuestion** (risky fix and reference approval).
 
 ## RELATED
 

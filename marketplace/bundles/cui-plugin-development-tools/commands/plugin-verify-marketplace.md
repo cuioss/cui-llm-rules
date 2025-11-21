@@ -33,10 +33,10 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ### Step 1: Run Inventory Scan
 
-Execute scan-marketplace-inventory.sh script to collect marketplace state once and reuse across all diagnostics:
+Invoke marketplace-inventory skill to collect marketplace state once and reuse across all diagnostics:
 
 ```
-Bash: ./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace
+Skill: cui-plugin-development-tools:marketplace-inventory
 ```
 
 **Capture inventory results** for passing to subsequent commands to avoid redundant file scanning.
@@ -228,7 +228,7 @@ This ensures the command evolves and becomes more effective with each execution.
 
 ## RELATED
 
-- `scan-marketplace-inventory.sh` script - Scans marketplace structure
+- `marketplace-inventory` skill - Scans marketplace structure
 - `/plugin-diagnose-skills` - Validates skills
 - `/plugin-diagnose-agents` - Validates agents
 - `/plugin-diagnose-commands` - Validates commands

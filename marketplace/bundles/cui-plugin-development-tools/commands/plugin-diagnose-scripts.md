@@ -75,12 +75,12 @@ This enforces mandatory completion checklists, anti-skip protections, and post-f
 
 **For marketplace scope (default):**
 
-Execute scan-marketplace-inventory.sh script to get complete marketplace inventory including scripts:
+Invoke marketplace-inventory skill to get complete marketplace inventory including scripts:
 ```
-Bash: ./.claude/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --scope marketplace --resource-types scripts
+Skill: cui-plugin-development-tools:marketplace-inventory
 ```
 
-Parse JSON output from script:
+Parse JSON output from skill:
 - Extract `bundles[]` array from JSON response
 - For each bundle, collect `bundle.scripts[]` with `name`, `path`, `skill_name`, and `runtime_mount` fields
 - Build flat list of script paths from all bundles
@@ -183,12 +183,12 @@ Bundle-by-bundle orchestrator for token efficiency. See: `Skill: cui-plugin-deve
 **Workflow**: Discovery → Documentation verification → Test verification → Test execution → Fix → Verify
 
 **Delegates to**:
-- scan-marketplace-inventory.sh (script discovery)
+- marketplace-inventory skill (script discovery)
 - Individual test scripts (validation)
 
 ## TOOL USAGE
 
-**Bash** (scan-marketplace-inventory.sh, test execution, script validation), **Read** (SKILL.md verification), **Grep** (script name search in SKILL.md), **Skill** (diagnostic/architecture patterns), **Edit** (fixes), **AskUserQuestion** (risky fix approval).
+**Skill** (marketplace-inventory, diagnostic/architecture patterns), **Bash** (test execution, script validation), **Read** (SKILL.md verification), **Grep** (script name search in SKILL.md), **Edit** (fixes), **AskUserQuestion** (risky fix approval).
 
 ## RELATED
 
