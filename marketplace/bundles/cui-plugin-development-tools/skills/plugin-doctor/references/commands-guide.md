@@ -8,11 +8,16 @@ Commands are user-facing orchestrators invoked via slash commands (e.g., `/plugi
 
 **Key Characteristics**:
 - Invoked by users via `/command-name` (no bundle prefix)
-- Orchestrate agents via Task tool (`subagent_type="bundle:agent-name"`)
-- Invoke skills via Skill tool (`Skill: bundle:skill-name`)
-- MUST be concise orchestrators (NOT contain inline implementation logic)
-- MUST delegate complex operations to agents
-- Target: < 500 lines (CRITICAL bloat threshold)
+- **MUST delegate to skills** via Skill tool (`Skill: bundle:skill-name`)
+- Skills contain workflow logic; scripts contain computational logic
+- MUST be **thin orchestrators** (minimal wrapper, NOT implementation)
+- Target: **< 100 lines** (ideal) or **< 150 lines** (acceptable)
+- **CRITICAL bloat threshold**: > 200 lines requires immediate refactoring
+
+**Architecture Pattern**: Command → Skill → Script
+- **Command**: Parameters, skill invocation, workflow selection (~50-100 lines)
+- **Skill**: Workflow orchestration, tool coordination (~200-800 lines)
+- **Script**: Computational logic, deterministic operations (Python/Bash)
 
 ## Required Frontmatter Structure
 
@@ -37,9 +42,88 @@ Parameter documentation.
 Step-by-step workflow.
 ```
 
-## The 8 Anti-Bloat Rules
+## The 9 Anti-Bloat Rules
 
-Commands MUST follow these 8 anti-bloat rules to remain concise orchestrators.
+Commands MUST follow these 9 anti-bloat rules to remain thin orchestrators.
+
+### Rule 0: Delegate to Skills (FOUNDATIONAL)
+
+**CRITICAL**: Commands MUST delegate ALL workflow logic to skills. Commands are thin wrappers.
+
+**Command Architecture**:
+```
+Command (thin wrapper)
+    ↓ delegates to
+Skill (workflow orchestration)
+    ↓ executes
+Script (computational logic)
+```
+
+**What Commands Should Contain** (~50-100 lines):
+- Parameter documentation
+- Skill invocation with workflow selection
+- Brief usage examples
+
+**What Commands Should NOT Contain**:
+- Step-by-step workflow logic (belongs in skill)
+- Analysis algorithms (belongs in script)
+- File processing loops (belongs in skill/script)
+- Validation rules (belongs in skill/script)
+- Output formatting logic (belongs in skill)
+
+**Good** (thin wrapper):
+```markdown
+# My Command
+
+Brief description.
+
+## Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `--dry-run` | Preview only |
+
+## Workflow
+
+Activate `bundle:my-skill` and execute the **My Workflow** workflow.
+
+Pass parameter: `dry_run` = true if `--dry-run` specified.
+
+## Related
+
+- `bundle:my-skill` - Contains the workflow logic
+```
+
+**Bad** (bloated with logic):
+```markdown
+# My Command
+
+## Workflow
+
+### Step 1: Initialize
+Display banner...
+
+### Step 2: Discover Files
+Glob pattern...
+For each file:
+  Parse content...
+
+### Step 3: Analyze
+For each item:
+  Check rule 1...
+  Check rule 2...
+  [100 more lines of logic]
+
+### Step 4: Generate Report
+Format output...
+[50 more lines]
+```
+
+**Rationale**:
+- Skills are reusable across commands
+- Scripts are testable independently
+- Commands remain simple entry points
+- Logic changes don't require command updates
 
 ### Rule 1: Delegate to Agents (NOT Inline Logic)
 
@@ -327,18 +411,20 @@ Skill: cui-java-expert:cui-java-core
 
 ## Bloat Detection
 
-**Classification** (commands have LOWER thresholds than agents):
-- **NORMAL**: < 300 lines (healthy command size)
-- **LARGE**: 300-400 lines (approaching bloat)
-- **BLOATED**: 400-500 lines (excessive, review needed)
-- **CRITICAL**: > 500 lines (severe bloat, MUST refactor immediately)
+**Classification** (commands are THIN orchestrators):
+- **IDEAL**: < 100 lines (proper thin wrapper)
+- **ACCEPTABLE**: 100-150 lines (minor workflow logic OK)
+- **BLOATED**: 150-200 lines (too much logic, needs refactoring)
+- **CRITICAL**: > 200 lines (severe bloat, MUST refactor immediately)
 
-**Target**: Keep commands < 300 lines (NORMAL).
+**Target**: Keep commands < 100 lines (IDEAL).
 
-**Why Lower Threshold?**
-- Commands are orchestrators (should be simple)
-- Complex logic belongs in agents
-- Commands just coordinate, don't implement
+**Why Such Low Threshold?**
+- Commands are thin orchestrators (minimal wrapper)
+- **ALL workflow logic belongs in skills**
+- **ALL computational logic belongs in scripts**
+- Commands ONLY: parse parameters → invoke skill → display results
+- If command > 100 lines: logic should move to skill
 
 ## Command Structure Requirements
 
@@ -702,9 +788,11 @@ Extract standards to:
 ## Summary Checklist
 
 **Before marking command as "quality approved"**:
-- ✅ File size < 300 lines (NORMAL) or < 500 lines (acceptable)
-- ✅ Rule 1: Delegates to agents (no inline logic)
-- ✅ Rule 2: Uses Task tool for complex operations
+- ✅ **Rule 0**: Thin wrapper delegating to skill (< 100 lines ideal, < 150 acceptable)
+- ✅ **Rule 0**: No workflow logic in command (all in skill)
+- ✅ File size < 150 lines (ACCEPTABLE) - CRITICAL if > 200 lines
+- ✅ Rule 1: Delegates to agents for complex operations (if agents used)
+- ✅ Rule 2: Uses Task tool for complex operations (if agents used)
 - ✅ Rule 3: No duplicate agent logic
 - ✅ Rule 4: Clear PARAMETERS section
 - ✅ Rule 5: Bundle-by-bundle orchestration (if multi-component)
@@ -714,4 +802,13 @@ Extract standards to:
 - ✅ Proper bundle prefix usage (SlashCommand no prefix, Task/Skill have prefix)
 - ✅ CONTINUOUS IMPROVEMENT RULE present
 - ✅ Clear section structure (PURPOSE, PARAMETERS, WORKFLOW)
-- ✅ Concise orchestration (not implementation)
+- ✅ Thin orchestration (parameters + skill invocation only)
+
+**Quick Bloat Check**:
+```bash
+wc -l command.md
+# < 100: IDEAL (proper thin wrapper)
+# 100-150: ACCEPTABLE (minor logic OK)
+# 150-200: BLOATED (refactor needed)
+# > 200: CRITICAL (must refactor immediately)
+```
