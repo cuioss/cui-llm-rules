@@ -18,7 +18,6 @@
     "./commands/plugin-verify.md"
   ],
   "skills": [
-    "./skills/diagnose-reporting-templates",
     "./skills/marketplace-inventory",
     "./skills/plugin-architecture",
     "./skills/plugin-create",

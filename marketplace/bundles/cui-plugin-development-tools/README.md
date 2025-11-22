@@ -26,7 +26,7 @@ This bundle follows the **goal-based organization** pattern where components are
 | `/plugin-maintain` | Maintain marketplace health (update, add-knowledge, readme, refactor) |
 | `/plugin-verify` | Run comprehensive marketplace verification |
 
-### Skills (7)
+### Skills (6)
 
 | Skill | Description |
 |-------|-------------|
@@ -35,7 +35,6 @@ This bundle follows the **goal-based organization** pattern where components are
 | `plugin-diagnose` | Diagnostic workflows for quality analysis |
 | `plugin-fix` | Fix workflows with categorization and verification |
 | `plugin-maintain` | Maintenance workflows (update, readme, refactor) |
-| `diagnose-reporting-templates` | Common reporting templates for diagnostic output |
 | `marketplace-inventory` | Scan and report complete marketplace inventory |
 
 ### Agents

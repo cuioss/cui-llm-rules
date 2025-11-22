@@ -236,7 +236,7 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 Skill: cui-utilities:cui-diagnostic-patterns
 Skill: cui-plugin-development-tools:marketplace-inventory
 Skill: cui-plugin-development-tools:bundle-orchestration-compliance
-Skill: cui-plugin-development-tools:diagnose-reporting-templates
+Read {baseDir}/references/reporting-templates.md
 Skill: cui-java-expert:cui-java-core
 Skill: cui-frontend-expert:cui-javascript
 # ... loads 10 more skills upfront
@@ -526,7 +526,7 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 ### Step 7: Generate Report (If --save-report)
 
 If --save-report flag:
-  Skill: cui-plugin-development-tools:diagnose-reporting-templates
+  Read {baseDir}/references/reporting-templates.md
   # Only loaded when actually generating report
 ```
 

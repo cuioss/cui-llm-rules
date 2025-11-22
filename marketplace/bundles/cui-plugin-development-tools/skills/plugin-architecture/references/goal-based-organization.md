@@ -140,7 +140,7 @@ Current structure organized by WHAT it operates on:
 - marketplace-inventory → plugin-diagnose (internal utility)
 - cui-fix-workflow → plugin-fix (main skill)
 - bundle-orchestration-compliance → plugin-maintain (reference)
-- diagnose-reporting-templates → plugin-diagnose (templates)
+- diagnose-reporting-templates → plugin-diagnose/references/reporting-templates.md (DONE)
 
 ## Target Goal-Based Structure
 

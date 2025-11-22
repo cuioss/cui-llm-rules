@@ -1,15 +1,10 @@
----
-name: diagnose-reporting-templates
-description: Common reporting templates for plugin-diagnose-* orchestrator commands
----
+# Diagnose Reporting Templates
 
-# Diagnose Command Reporting Templates
-
-This skill provides common templates used by all plugin-diagnose-* orchestrator commands to ensure consistent reporting format and reduce duplication.
+Common templates for consistent reporting across all diagnostic workflows.
 
 ## Summary Report Template
 
-Use this template for final cross-bundle summary reports in all diagnose commands.
+Use this template for final cross-bundle summary reports.
 
 ### Template Format
 
@@ -48,8 +43,6 @@ By Bundle:
 
 ### Variables
 
-Replace these variables when using the template:
-
 - `{Component Type}` → "Agents", "Commands", "Skills", or "Metadata"
 - `{Components}` (plural capitalized) → "Agents", "Commands", "Skills", or "Bundles"
 - `{components}` (plural lowercase) → "agents", "commands", "skills", or "bundles"
@@ -60,27 +53,7 @@ Replace these variables when using the template:
 - `{issues}` → Issue count for bundle
 - `{fixes}` → Fix count for bundle
 
-### Usage in Commands
-
-In your diagnose command's final summary step:
-
-```markdown
-**Display final summary using template:**
-
-```
-Skill: cui-plugin-development-tools:diagnose-reporting-templates
-```
-
-Use "Summary Report Template" with variables:
-- Component Type: "Agents"
-- Components: "agents"
-
-Populate with aggregated metrics from all bundles processed.
-```
-
 ### Example Output
-
-For plugin-diagnose-agents:
 
 ```
 ==================================================
@@ -115,9 +88,9 @@ By Bundle:
 
 ## Fix Workflow Pattern
 
-Common workflow pattern for categorizing and applying fixes across all diagnose commands.
+Common workflow pattern for categorizing and applying fixes.
 
-### Step X: Categorize Issues
+### Issue Categorization
 
 **Safe fixes** (auto-apply without prompting):
 - Formatting corrections (whitespace, indentation)
@@ -135,7 +108,9 @@ Common workflow pattern for categorizing and applying fixes across all diagnose 
 - Renaming files or major refactoring
 - Deleting deprecated but still-used content
 
-### Step X+1: Apply Safe Fixes
+### Fix Application Steps
+
+**Step 1: Apply Safe Fixes**
 
 For each safe issue:
 1. Apply fix using Edit tool
@@ -143,7 +118,7 @@ For each safe issue:
 3. Log to console: "✅ Fixed: {description}"
 4. Track file path for verification
 
-### Step X+2: Handle Risky Fixes
+**Step 2: Handle Risky Fixes**
 
 For each risky issue:
 1. Use AskUserQuestion to present fix description and get approval
@@ -154,49 +129,17 @@ For each risky issue:
 3. If rejected:
    - Skip fix
    - Increment counter: `risky_fixes_skipped`
-   - Log: "⏭️  Skipped: {description}"
+   - Log: "⏭️ Skipped: {description}"
 
-### Step X+3: Verify Fixes
+**Step 3: Verify Fixes**
 
 After all fixes applied:
-1. Re-run diagnostic agent on each modified file
+1. Re-run diagnostic on each modified file
 2. Verify issues resolved:
    - Compare before/after issue lists
    - Check no new issues introduced
    - Confirm expected issue count reduction
 3. Report verification results:
    - `{fixes_succeeded}` - Fixes that resolved issues
-   - `{fixes_failed}` - Fixes that didn't resolve issues or introduced new ones
+   - `{fixes_failed}` - Fixes that didn't resolve issues
    - `{new_issues}` - Any new issues detected after fixes
-
-### Usage in Commands
-
-Reference this pattern in your diagnose command's fix workflow phase:
-
-```markdown
-### Step 7: Categorize and Apply Fixes
-
-**Follow fix workflow pattern:**
-
-```
-Skill: cui-plugin-development-tools:diagnose-reporting-templates
-```
-
-Use "Fix Workflow Pattern" to:
-1. Categorize issues as safe vs risky
-2. Auto-apply safe fixes
-3. Prompt for risky fix approval
-4. Verify all fixes resolved issues
-
-Track metrics: `safe_fixes_applied`, `risky_fixes_applied`, `risky_fixes_skipped`
-```
-
-## Benefits
-
-**Consistency**: All diagnose commands produce identical report formats
-
-**Maintainability**: Update templates in one place, affects all commands
-
-**Reduced Duplication**: Eliminates 200+ lines of duplicated template code
-
-**Token Efficiency**: Commands reference templates instead of embedding full examples
