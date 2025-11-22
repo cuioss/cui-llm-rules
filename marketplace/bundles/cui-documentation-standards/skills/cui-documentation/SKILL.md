@@ -1,502 +1,469 @@
 ---
 name: cui-documentation
-description: General documentation standards for README, AsciiDoc, and technical documentation
-allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
+description: General documentation standards for README, AsciiDoc, and technical documentation with validation, formatting, link verification, and content review workflows
+allowed-tools: Read, Edit, Write, Bash, Grep, Glob, Skill
 ---
 
 # CUI Documentation Skill
 
-Standards for writing clear, maintainable technical documentation in CUI projects.
+Standards and workflows for writing clear, maintainable technical documentation in CUI projects.
 
 **Note**: This skill covers general documentation. For code documentation, use:
 - `cui-javadoc` for Java code documentation
 - `cui-frontend-development/jsdoc-standards.md` for JavaScript documentation
 
-## Workflow
-
-### Step 1: Load Applicable Documentation Standards
-
-**CRITICAL**: Load current documentation standards based on context.
-
-1. **Always load core documentation standards**:
-   ```
-   Read: standards/documentation-core.md
-   ```
-
-2. **Conditional loading based on context**:
-
-   - If creating or editing README files:
-     ```
-     Read: standards/readme-structure.md
-     ```
-
-   - If working with AsciiDoc files:
-     ```
-     Read: standards/asciidoc-formatting.md
-     ```
-
-   - If reviewing tone, style, or language (or comprehensive reviews):
-     ```
-     Read: standards/tone-and-style.md
-     ```
-
-   - If organizing, restructuring, or reviewing documentation structure:
-     ```
-     Read: standards/organization-standards.md
-     ```
-
-3. **Extract key requirements from all loaded standards**
-
-4. **Store in working memory** for use during task execution
-
-### Step 2: Analyze Existing Documentation
-
-**When to Execute**: After loading standards
-
-**What to Analyze**:
-
-1. **General Documentation Quality**:
-   - Check tone and style (see documentation-core.md for requirements)
-   - Verify no marketing language or promotional wording
-   - Validate factual descriptions with sources
-   - Review technical precision
-   - Check for conciseness and clarity
-
-2. **Tone and Style** (if tone-and-style.md loaded):
-   - Identify marketing language and subjective claims
-   - Check for qualification patterns ("production-proven", "extensively tested")
-   - Verify no transitional markers (status indicators, TODO items)
-   - Ensure objective vs subjective language compliance
-   - Review for promotional wording and self-praise
-   - Validate all claims are verifiable or attributed
-
-3. **Organization and Structure** (if organization-standards.md loaded):
-   - Verify document follows single-aspect principle
-   - Check document size (50-400 lines)
-   - Validate file naming (kebab-case)
-   - Identify duplicate content across documents
-   - Check for transitional/status markers
-   - Assess cross-reference integrity
-   - Review logical document organization
-
-4. **AsciiDoc Format** (if .adoc files):
-   - Verify document header with required attributes
-   - Check cross-reference syntax (`xref:` format)
-   - **CRITICAL**: Validate blank lines before all lists
-   - Review code block formatting with language specification
-   - Check section hierarchy and numbering
-
-5. **README Structure** (if README files):
-   - Verify title and description
-   - Check Maven coordinates placement
-   - Review core concepts section
-   - Validate usage examples completeness
-   - Check configuration documentation
-   - Review best practices section
-
-6. **Content Quality**:
-   - Only existing code/features documented
-   - All references verified to exist
-   - RFC references must be relevant (see documentation-core.md for verification requirements)
-   - Consistent terminology used
-   - Code examples from unit tests
-   - All public APIs documented
-
-### Step 3: Apply Documentation Standards
-
-**When to Execute**: During documentation creation or review
-
-**What to Apply**:
-
-1. **Core Documentation Principles**:
-   - Professional, neutral, objective tone
-   - No marketing or promotional language
-   - Technical precision with verifiable sources
-   - Concise, clear language
-   - Document only existing features
-   - Use linking instead of duplication
-
-2. **AsciiDoc Formatting** (if .adoc files):
-
-   **README Files** (README.adoc, */README.adoc):
-   - Use `:toc: macro` (NOT `:toc: left`)
-   - Place `toc::[]` manually where TOC should appear
-   - Example header:
-     ```asciidoc
-     = Module Name
-     :toc: macro
-     :toclevels: 3
-     :sectnums:
-     :source-highlighter: highlight.js
-
-     Brief module description.
-
-     toc::[]
-
-     == Core Concepts
-     ```
-
-   **General Documentation Files** (not READMEs):
-   - Use `:toc: left` for automatic left sidebar TOC
-   - Do NOT use `:toc: macro`
-   - Example header:
-     ```asciidoc
-     = Document Title
-     :toc: left
-     :toclevels: 3
-     :toc-title: Table of Contents
-     :sectnums:
-     :source-highlighter: highlight.js
-     ```
-
-   **All AsciiDoc Files**:
-   - Use `xref:path/to/file.adoc[Link Text]` for cross-references
-   - **ALWAYS** add blank line before lists
-   - Specify language in code blocks
-   - Follow proper section hierarchy
-
-3. **README Structure** (if README files):
-   - Title and brief description
-   - Maven coordinates immediately after description
-   - Core Concepts section
-   - Detailed Component Documentation with links to source
-   - Usage Examples (complete, working code)
-   - Configuration section
-   - Best Practices
-   - Technical Details
-   - Related Documentation
-
-4. **Code Examples**:
-   - Must be complete and compilable (see documentation-core.md for requirements)
-   - Include all necessary imports
-   - Show proper error handling
-   - Follow project coding standards
-   - Be verified by unit tests
-   - Use clear variable names
-   - Include comments for complex steps
-   - Configuration placeholders must be clearly identified
-
-### Step 4: Verify Documentation Quality
-
-**When to Execute**: After creating or updating documentation
-
-**Quality Checks**:
-
-1. **Tone and Style Verification**:
-   - [ ] Professional, neutral tone
-   - [ ] No marketing language
-   - [ ] Factual descriptions
-   - [ ] Technical precision
-   - [ ] Concise language
-
-2. **AsciiDoc Format Verification** (if .adoc):
-   - [ ] Document header complete
-   - [ ] Cross-references use `xref:` syntax
-   - [ ] Blank lines before all lists
-   - [ ] Code blocks have language specification
-   - [ ] Section hierarchy correct
-
-3. **README Structure Verification** (if README):
-   - [ ] Title and description present
-   - [ ] Maven coordinates included
-   - [ ] Core concepts documented
-   - [ ] Usage examples complete
-   - [ ] Configuration documented
-   - [ ] Best practices included
-
-4. **Content Quality Verification**:
-   - [ ] Only existing features documented
-   - [ ] All references verified
-   - [ ] Consistent terminology
-   - [ ] Code examples from tests
-   - [ ] All public APIs documented
-
-5. **Build Verification** (if applicable):
-   ```bash
-   # Verify documentation builds successfully
-   mvn clean install -DskipTests
-   ```
-
-### Step 5: Automated Validation (AsciiDoc)
-
-**When to Execute**: After creating or updating AsciiDoc files
-
-**Available Documentation Scripts**:
-
-This skill includes four utility scripts in the `scripts/` directory.
-
-**IMPORTANT**: The usage examples below show **manual/command-line execution** paths. **Agents must use the absolute-style path pattern** documented in the "Script Paths and Access Patterns" section below.
-
-1. **`asciidoc-validator.sh`** - Format validation script
-   - Validates AsciiDoc format compliance
-   - Checks for blank lines before lists
-   - Verifies section header formatting
-   - Detects list syntax issues
-   - Multiple output formats (console, JSON, XML, JUnit)
-
-   Usage:
-   ```bash
-   # Validate a single file
-   scripts/asciidoc-validator.sh path/to/file.adoc
-
-   # Validate all files in a directory
-   scripts/asciidoc-validator.sh directory/
-
-   # CI/CD integration with JUnit output
-   scripts/asciidoc-validator.sh -f junit -s error directory/
-   ```
-
-2. **`verify-adoc-links.py`** - Link verification script
-   - Validates cross-reference links
-   - Checks for broken file references
-   - Verifies anchor existence
-   - Detects deprecated syntax
-
-   Usage:
-   ```bash
-   # Verify links in a single file
-   python3 scripts/verify-adoc-links.py --file path/to/file.adoc --report target/links.md
-
-   # Verify links in directory (non-recursive)
-   python3 scripts/verify-adoc-links.py --directory directory/ --report target/links.md
-
-   # Verify links recursively
-   python3 scripts/verify-adoc-links.py --directory directory/ --recursive --report target/links.md
-   ```
-
-3. **`asciidoc-formatter.sh`** - Auto-formatting script
-   - Auto-fixes common AsciiDoc formatting issues
-   - Adds blank lines before lists
-   - Converts deprecated `<<>>` syntax to `xref:`
-   - Fixes header attributes and whitespace
-   - Safe operation with backups and dry-run mode
-
-   Usage:
-   ```bash
-   # Preview changes without modifying files
-   scripts/asciidoc-formatter.sh -n path/to/file.adoc
-
-   # Auto-fix all issues in a directory
-   scripts/asciidoc-formatter.sh directory/
-
-   # Fix only specific issue types
-   scripts/asciidoc-formatter.sh -t lists directory/
-   ```
-
-4. **`documentation-stats.sh`** - Documentation metrics script
-   - Generates comprehensive documentation statistics
-   - Tracks lines, words, sections, cross-references
-   - Multiple output formats (console, JSON, CSV, markdown)
-   - Useful for documentation health tracking
-
-   Usage:
-   ```bash
-   # Basic statistics for current directory
-   scripts/documentation-stats.sh
-
-   # Generate JSON report
-   scripts/documentation-stats.sh -f json directory/ > stats.json
-
-   # Detailed markdown report
-   scripts/documentation-stats.sh -f markdown -d > metrics.md
-   ```
-
-**Validation Workflow**:
-
-**For Agents**:
-1. Run format validation:
-   ```bash
-   ./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh {file_or_directory} 2>&1
-   ```
-
-2. Run link verification:
-   ```bash
-   mkdir -p target/asciidoc-reviewer
-   python3 ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py --file {file} --report target/asciidoc-reviewer/links.md 2>&1
-   ```
-
-**For Manual/Command-Line Use**:
-1. Run format validation:
-   ```bash
-   ./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh target_file_or_directory 2>&1
-   ```
-
-2. Run link verification:
-   ```bash
-   mkdir -p target/asciidoc-reviewer
-   python3 ./.claude/skills/cui-documentation/scripts/verify-adoc-links.py --file target.adoc --report target/asciidoc-reviewer/links.md 2>&1
-   ```
-
-3. **Distinguish link validation results**:
-   - **Syntax Valid + Target Exists**: ✅ Link is correct
-   - **Syntax Valid + Target Missing**: ❌ Reference to non-existent file
-     - Common cause: Documentation for planned/future features
-     - Action: Either create the target document or remove the reference
-     - Do NOT leave references to non-existent files
-   - **Syntax Invalid**: ❌ Malformed cross-reference
-     - Fix syntax to use proper `xref:path[text]` format
-
-4. Review validation output and fix issues
-
-5. Re-run validation to confirm fixes
-
-**Script Paths and Access Patterns**:
-
-**For Agents (CRITICAL - Pattern 21)**:
-
-Agents **MUST** use the absolute-style path pattern when accessing skill scripts:
-
-```yaml
-# Agent frontmatter - Tool declaration
-tools: Read, Edit, Bash(./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh), Glob, Skill
+## Available Workflows
+
+This skill provides four specialized workflows:
+
+| Workflow | Purpose | Script Used |
+|----------|---------|-------------|
+| **format-document** | Auto-fix AsciiDoc formatting issues | `asciidoc-formatter.sh` |
+| **validate-format** | Validate AsciiDoc format compliance | `asciidoc-validator.sh` |
+| **verify-links** | Verify links and cross-references | `verify-adoc-links.py` |
+| **review-content** | Review content quality and tone | `review-content.py` |
+
+## Workflow: format-document
+
+Auto-fix common AsciiDoc formatting issues with safety features.
+
+### What It Fixes
+
+- Add blank lines before lists
+- Convert deprecated `<<>>` syntax to `xref:`
+- Fix header attributes
+- Remove trailing whitespace
+
+### Parameters
+
+- `target` (required): File path or directory path
+- `dry_run` (optional, default: true): Preview changes without modifying
+- `fix_types` (optional, default: "all"): Types of fixes: "lists", "xref", "headers", "whitespace", "all"
+
+### Steps
+
+**Step 1: Load Documentation Standards**
+
+Read {baseDir}/standards/asciidoc-formatting.md
+
+**Step 2: Discover Files**
+
+If target is a file:
+- Verify file exists and has `.adoc` extension
+
+If target is a directory:
+- Use Glob: `{directory}/*.adoc` (non-recursive)
+- Filter out `target/` directories
+
+**Step 3: Run Auto-Formatter**
+
+Build command with options:
+```bash
+OPTIONS=""
+if [dry_run == true]; then OPTIONS="$OPTIONS -n"; fi
+if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 ```
+
+Execute:
+```bash
+bash {baseDir}/scripts/asciidoc-formatter.sh $OPTIONS {target} 2>&1
+```
+
+**Step 4: Parse Output**
+
+Extract statistics:
+- Files processed
+- Files modified
+- Issues fixed
+- Fix details per file
+
+**Step 5: Report Results**
+
+**Dry-run mode (preview):**
+```
+Format Preview for {target}
+Files that would be modified: {count}
+Changes that would be applied: {list}
+To apply: run with dry_run=false
+```
+
+**Apply mode:**
+```
+Format Fixes Applied to {target}
+Files modified: {count}
+Issues fixed: {count}
+Changes applied: {list}
+```
+
+**Step 6: Validation (if changes applied)**
+
+If dry_run=false, run validation to confirm:
+```bash
+bash {baseDir}/scripts/asciidoc-validator.sh {target} 2>&1
+```
+
+---
+
+## Workflow: validate-format
+
+Validate AsciiDoc files for format compliance.
+
+### What It Checks
+
+- Section headers with blank lines
+- Proper list formatting
+- Blank lines before/after lists
+- Code block formatting
+
+### Parameters
+
+- `target` (required): File path or directory path
+- `apply_fixes` (optional, default: false): Apply automatic fixes
+
+### Steps
+
+**Step 1: Load Documentation Standards**
+
+Read {baseDir}/standards/asciidoc-formatting.md
+
+**Step 2: Discover Files**
+
+If target is a file:
+- Verify file exists and has `.adoc` extension
+
+If target is a directory:
+- Use Glob: `{directory}/*.adoc` (non-recursive)
+
+**Step 3: Run Format Validation**
+
+Execute:
+```bash
+bash {baseDir}/scripts/asciidoc-validator.sh {target} 2>&1
+```
+
+**Step 4: Parse Output**
+
+Extract warnings matching `Line [0-9]+`:
+- Categorize issues by type
+- Track by file and line number
+
+**Step 5: Apply Fixes (if requested)**
+
+If apply_fixes=true:
+- For each issue, read file context (±5 lines)
+- Use Edit tool to fix the issue
+- Track fixes applied
+
+**Step 6: Re-Validate (if fixes applied)**
+
+Re-run validator and compare:
+- Before: {total_issues}
+- After: {remaining_issues}
+- Fixed: {fixed_count}
+
+**Step 7: Generate Report**
+
+```
+## AsciiDoc Format Validation Complete
+
+**Status**: ✅ PASS | ⚠️ WARNINGS | ❌ FAILURES
+
+**Summary**: Validated {file_count} file(s)
+
+**Metrics**:
+- Files validated: {count}
+- Format issues found: {count}
+- Issues fixed: {count}
+- Issues remaining: {count}
+
+**Issues by Category**:
+- Blank line after header: {count}
+- Blank line before list: {count}
+- Other format violations: {count}
+
+**Details by File**:
+### {file_1}
+- Line {N}: {issue description}
+- Status: ✅ Clean | ⚠️ Issues remaining
+```
+
+---
+
+## Workflow: verify-links
+
+Verify all links and cross-references in AsciiDoc files.
+
+### What It Verifies
+
+- Cross-reference file links (xref:)
+- Internal anchor references (<<anchor>>)
+- Link formats and syntax
+
+### Parameters
+
+- `target` (required): File path or directory path
+- `fix_links` (optional, default: false): Fix broken links
+
+### Steps
+
+**Step 1: Load Documentation Standards**
+
+Read {baseDir}/standards/asciidoc-formatting.md
+
+**Step 2: Discover Files**
+
+If target is a file:
+- Verify file exists and has `.adoc` extension
+
+If target is a directory:
+- Use Glob: `{directory}/*.adoc` (non-recursive)
+
+**Step 3: Setup Report Directory**
 
 ```bash
-# Agent workflow - Script execution
-./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh {file_path} 2>&1
+mkdir -p target/asciidoc-link-verifier
 ```
 
-**Why this pattern:**
-- Agent threads have cwd reset between Bash calls (architecture constraint)
-- `./.claude/skills/` is an absolute-style path from the project root
-- Skills install to `./.claude/skills/{skill-name}/` directory
-- This pattern works portably across all projects
+**Step 4: Run Link Verification**
 
-**Available scripts**:
-- `asciidoc-validator.sh` - Format validation
-- `verify-adoc-links.py` - Link verification
-- `asciidoc-formatter.sh` - Auto-formatting
-- `documentation-stats.sh` - Metrics generation
-
-**For Manual/Command-Line Use**:
-
-When running scripts manually from terminal, use relative paths from your current directory:
+Execute:
 ```bash
-# From project root
-./.claude/skills/cui-documentation/scripts/asciidoc-validator.sh path/to/file.adoc
-
-# From skill directory
-scripts/asciidoc-validator.sh ../../path/to/file.adoc
+python3 {baseDir}/scripts/verify-adoc-links.py --file {file_path} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
-**Reference**: See Pattern 21 in `cui-marketplace-architecture/standards/agent-analysis-patterns.md` for complete architectural documentation of skill script access patterns.
-
-### Step 6: Document Changes and Commit
-
-**When to Execute**: After verification passes
-
-**Commit Standards**:
-- Follow standard commit message format
-- Reference related issues
-- Document significant documentation changes
-- Add co-authored-by line for Claude Code
-
-## Common Documentation Patterns
-
-### AsciiDoc Document Header
-```asciidoc
-= Document Title
-:toc: left
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
-
-== Purpose
-Brief description of the document's purpose.
-
-== Related Documentation
-* xref:other-document.adoc[Other Document]
-* xref:../category/document.adoc[Category Document]
+For directories:
+```bash
+python3 {baseDir}/scripts/verify-adoc-links.py --directory {directory} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
-### README Structure Example
-```asciidoc
-= Module Name
+**Step 5: Parse Report**
 
-Concise description of the module's purpose and key features.
+Read `target/asciidoc-link-verifier/links.md` and extract:
+- Broken file links
+- Broken anchors
+- Format violations
 
-== Maven Coordinates
+**Step 6: Manual Verification (CRITICAL)**
 
-[source, xml]
-----
-<dependency>
-    <groupId>group.id</groupId>
-    <artifactId>artifact-id</artifactId>
-</dependency>
-----
+For each "broken" link reported:
+1. Extract target path
+2. Resolve absolute path: `realpath {relative_target_path}`
+3. Verify with Read tool
+4. If file EXISTS but script reported broken: Report false positive
+5. If file NOT FOUND: Confirm broken
 
-== Core Concepts
+**Step 7: Fix Internal Anchors (if approved)**
 
-=== Feature One
+For missing anchors:
+1. Search for matching section header
+2. Add anchor ID: `[#anchor-id]` before header
+3. Use Edit tool
 
-* Capability details
-* Integration points
-* Key benefits
+**Step 8: Generate Report**
 
-== Usage Examples
+```
+## AsciiDoc Link Verification Complete
 
-=== Basic Usage
-[source,java]
-----
-// Complete code example
-----
+**Status**: ✅ PASS | ⚠️ WARNINGS | ❌ FAILURES
 
-== Configuration
+**Summary**: Verified links in {file_count} file(s)
 
-=== Property Configuration
-[source,properties]
-----
-# Configuration examples
-----
+**Metrics**:
+- Files verified: {count}
+- Broken file links: {count}
+- Broken anchors: {count}
+- Issues fixed: {count}
+
+**Details by File**:
+### {file_1}
+- Line {N}: xref to {target} - {status}
+- Line {N}: anchor <<{id}>> - {status}
 ```
 
-### Code Block with Language
-```asciidoc
-[source,java]
-----
-@Test
-void shouldValidateToken() {
-    // Test implementation
+---
+
+## Workflow: review-content
+
+Review AsciiDoc content for quality: correctness, clarity, tone, style, and completeness.
+
+### What It Reviews
+
+- **Correctness**: Factual claims, RFC citations, verifiable statements
+- **Clarity**: Concise, unambiguous, clear explanations
+- **Tone & Style**: Professional, technical, no marketing language
+- **Consistency**: Terminology, formatting patterns
+- **Completeness**: No missing sections, TODOs, or gaps
+
+### Parameters
+
+- `target` (required): File path or directory path
+- `apply_fixes` (optional, default: false): Apply content fixes
+
+### Steps
+
+**Step 1: Load Documentation Standards**
+
+Read {baseDir}/standards/tone-and-style.md
+Read {baseDir}/standards/documentation-core.md
+
+**Step 2: Discover Files**
+
+If target is a file:
+- Verify file exists and has `.adoc` extension
+
+If target is a directory:
+- Use Glob: `{directory}/*.adoc` (non-recursive)
+
+**Step 3: Run Content Analysis**
+
+Execute:
+```bash
+python3 {baseDir}/scripts/review-content.py --file {file_path} 2>&1
+```
+
+For directories:
+```bash
+python3 {baseDir}/scripts/review-content.py --directory {directory} 2>&1
+```
+
+**Step 4: Parse JSON Output**
+
+Script returns structured JSON:
+```json
+{
+  "status": "success",
+  "data": {
+    "files_analyzed": N,
+    "average_quality_score": N,
+    "issues": [
+      {
+        "file": "path",
+        "line": N,
+        "type": "tone|correctness|completeness",
+        "severity": "critical|high|medium|low",
+        "message": "description"
+      }
+    ]
+  }
 }
-----
 ```
 
-## Error Prevention
+**Step 5: Apply Deep Analysis**
 
-### Common Documentation Issues
+For each issue from script, apply Claude judgment:
+- Is the marketing language truly promotional or factual?
+- Can claims be verified from context?
+- Are TODOs appropriate (e.g., in development docs)?
 
-1. **Missing Blank Line Before List**: AsciiDoc grammar requires blank line
-2. **Wrong Cross-Reference Syntax**: Use `xref:` not `link:`
-3. **Missing Language Specification**: Always specify language in code blocks
-4. **Marketing Language**: Use neutral, factual descriptions
-5. **Incomplete Code Examples**: Provide complete, compilable examples
+**Step 6: Categorize by Priority**
 
-### Quality Violations
+**Priority 1 - CRITICAL:**
+- Unverified factual claims
+- Marketing/promotional language
+- Transitional markers in specification docs
 
-1. **Promotional Tone**: "Our amazing feature" → "Feature X provides..."
-2. **Incomplete Header**: Missing required document attributes
-3. **Invalid References**: Links to non-existent files
-4. **Speculative Documentation**: Documenting planned features
-5. **Duplicate Content**: Copy-paste instead of cross-reference
+**Priority 2 - HIGH:**
+- Clarity problems
+- Tone issues
+- Consistency violations
 
-## Quality Verification
+**Priority 3 - MEDIUM:**
+- Minor wording improvements
+
+**Step 7: Apply Fixes (if requested)**
+
+If apply_fixes=true:
+- For Priority 1 and 2 issues
+- Read file context
+- Use Edit tool for fixes
+- Ask user before major changes
+
+**Step 8: Generate Report**
+
+```
+## AsciiDoc Content Review Complete
+
+**Status**: ✅ PASS | ⚠️ WARNINGS | ❌ FAILURES
+
+**Summary**: Reviewed {file_count} file(s)
+
+**Quality Score**: {average_score}/100
+
+**Metrics**:
+- Files reviewed: {count}
+- Tone issues: {count}
+- Correctness issues: {count}
+- Completeness issues: {count}
+
+**Issues by Priority**:
+- CRITICAL: {count}
+- HIGH: {count}
+- MEDIUM: {count}
+
+**Details by File**:
+### {file_1}
+
+**Tone Issues:**
+- Line {N}: {description}
+  - Current: "{text}"
+  - Suggested: "{improved}"
+
+**Correctness Issues:**
+- Line {N}: {description}
+
+**Completeness Issues:**
+- Line {N}: {description}
+```
+
+---
+
+## Standards References
+
+All documentation standards are in the `standards/` directory:
+
+| Reference | Purpose | When to Load |
+|-----------|---------|--------------|
+| `documentation-core.md` | Core documentation principles | Always |
+| `asciidoc-formatting.md` | AsciiDoc format rules | Format/validation workflows |
+| `tone-and-style.md` | Tone and style requirements | Content review workflow |
+| `readme-structure.md` | README structure patterns | README files |
+| `organization-standards.md` | Document organization | Structure reviews |
+
+## Script Reference
+
+All scripts are in the `scripts/` directory:
+
+| Script | Purpose | Output |
+|--------|---------|--------|
+| `asciidoc-formatter.sh` | Auto-fix formatting | Console output |
+| `asciidoc-validator.sh` | Validate format | Console output |
+| `verify-adoc-links.py` | Verify links | Markdown report |
+| `review-content.py` | Content quality | JSON |
+| `documentation-stats.sh` | Statistics | Multiple formats |
+
+## Usage from Commands
+
+Commands invoke this skill and its workflows:
+
+```markdown
+# In command file
+Skill: cui-documentation-standards:cui-documentation
+
+# Then specify workflow
+Execute workflow: format-document
+Parameters:
+  target: "standards/"
+  dry_run: true
+```
+
+## Quality Verification Checklist
 
 All documentation must pass:
-- [x] Professional, neutral tone
-- [x] Proper AsciiDoc formatting
-- [x] Complete code examples
-- [x] Verified references
-- [x] Consistent terminology
-- [x] No marketing language
-- [x] Documents only existing features
 
-## References
-
-All documentation standards are located in the `standards/` directory:
-
-* **Core documentation principles**: [standards/documentation-core.md](standards/documentation-core.md)
-* **Tone and style requirements**: [standards/tone-and-style.md](standards/tone-and-style.md)
-* **Organization and structure**: [standards/organization-standards.md](standards/organization-standards.md)
-* **AsciiDoc formatting guidelines**: [standards/asciidoc-formatting.md](standards/asciidoc-formatting.md)
-* **README structure patterns**: [standards/readme-structure.md](standards/readme-structure.md)
+- [ ] Professional, neutral tone (no marketing language)
+- [ ] Proper AsciiDoc formatting
+- [ ] Complete code examples
+- [ ] Verified references
+- [ ] Consistent terminology
+- [ ] Documents only existing features
+- [ ] All links valid

@@ -5,114 +5,83 @@ description: Execute comprehensive AsciiDoc review for all documentation files
 
 # Review Technical Docs Command
 
-Batch command for comprehensive AsciiDoc documentation review. Discovers all .adoc files and delegates to /doc-review-single-asciidoc for each file, aggregating results.
+Thin orchestrator for batch AsciiDoc review. Discovers files and invokes workflows.
 
-## CONTINUOUS IMPROVEMENT RULE
+## Parameters
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /plugin-update-command command-name=doc-review-technical-docs update="[your improvement]"
+- **path** (optional): Root path to search (default: current directory)
+- **apply_fixes** (optional): Apply automatic fixes (default: false)
+- **push** (optional): Commit and push after fixes (default: false)
 
-**Areas for continuous improvement:**
-1. Improved file discovery patterns and filtering
-2. Better result aggregation and summary generation
-3. More effective parallel execution strategies
-4. Enhanced error handling for partial failures
-5. Any lessons learned about batch documentation review workflows
+## Workflow
 
-## PARAMETERS
+### Step 1: Show Usage (if no context)
 
-- **path** (optional): Root path to search for .adoc files (default: current directory)
-- **apply_fixes** (optional): Apply automatic fixes where possible (default: false)
-- **push** (optional): Auto-commit and push after fixes (default: false)
-
-## WORKFLOW
-
-### Step 1: Discover AsciiDoc Files
-
-**Use Glob to find all .adoc files:**
 ```
-Glob: pattern="**/*.adoc", path={path parameter or current directory}
-```
+/doc-review-technical-docs [path=<directory>] [apply_fixes=true] [push]
 
-**Filter results:**
-- Exclude `target/` directories
-- Exclude hidden directories (starting with `.`)
-- Exclude `node_modules/` if present
+Parameters:
+  path        - Optional: Directory to search (default: .)
+  apply_fixes - Optional: Apply automatic fixes
+  push        - Optional: Commit and push changes
 
-**Validate discovery:**
-```
-If no files found:
-  ℹ️ No AsciiDoc files found in: {path}
-
-  Try:
-  - Check path parameter
-  - Verify .adoc files exist
-  - Check file permissions
-
-  Exit gracefully.
+Examples:
+  /doc-review-technical-docs
+  /doc-review-technical-docs path=standards/
+  /doc-review-technical-docs apply_fixes=true
+  /doc-review-technical-docs apply_fixes=true push
 ```
 
-**Sort files:**
-- Alphabetically by path
-- Enables consistent reporting order
+### Step 2: Discover AsciiDoc Files
 
-### Step 2: Review Files (Batch Pattern)
-
-**For EACH file discovered:**
-
-**Delegate to Layer 2 self-contained command:**
 ```
-SlashCommand: /cui-documentation-standards:doc-review-single-asciidoc file={file_path} apply_fixes={apply_fixes}
+Glob: pattern="{path}/**/*.adoc"
+
+Filter:
+- Exclude target/
+- Exclude hidden directories
+- Exclude node_modules/
 ```
 
-**Collect results:**
-- Parse structured result from each command execution
-- Track file-by-file status
-- Aggregate issue counts
+If no files found: Report and exit
 
-**Error handling:**
+### Step 3: Load Documentation Skill
+
 ```
-If /doc-review-single-asciidoc fails for a file:
-  ⚠️ Review failed: {file_path}
-  Error: {error_message}
-
-  Options:
-  - [C]ontinue with remaining files
-  - [R]etry this file
-  - [A]bort entire review
-
-  Track failure in failed_files list.
+Skill: cui-documentation-standards:cui-documentation
 ```
 
-**Partial Success:**
-- Continue processing remaining files after single file failure
-- Report failed files in final summary
-- Aggregate results from successful reviews only
+### Step 4: Review Each File
 
-### Step 3: Aggregate Results
+For each discovered file, execute:
 
-**Calculate totals across all files:**
+**4.1: Format Validation**
+Execute workflow: validate-format
+- target: {file}
+- apply_fixes: {apply_fixes}
+
+**4.2: Link Verification**
+Execute workflow: verify-links
+- target: {file}
+
+**4.3: Content Review**
+Execute workflow: review-content
+- target: {file}
+
+Collect results per file.
+
+### Step 5: Aggregate Results
+
 ```
-total_files = files_discovered count
-files_reviewed = successful_reviews count
-files_failed = failed_reviews count
-files_clean = files with 0 issues
-files_with_issues = files with issues > 0
-
-total_issues = sum of all file issue counts
-format_issues_total = sum of format issues across files
-link_issues_total = sum of link issues across files
-content_issues_total = sum of content issues across files
+total_files = discovered file count
+total_issues = sum of all issues
+format_issues_total = sum of format issues
+link_issues_total = sum of link issues
+content_issues_total = sum of content issues
 ```
 
-**Categorize files by status:**
-- **Clean** (✅): 0 issues found
-- **Minor Issues** (⚠️): 1-5 issues found
-- **Major Issues** (❌): 6+ issues found
-- **Failed** (💥): Review execution failed
+### Step 6: Generate Report
 
-### Step 4: Generate Comprehensive Report
-
-**Display batch summary:**
 ```
 ╔════════════════════════════════════════════════════════════╗
 ║          Documentation Review Report                       ║
@@ -120,7 +89,6 @@ content_issues_total = sum of content issues across files
 
 Files Discovered: {total_files}
 Files Reviewed: {files_reviewed}
-Files Failed: {files_failed}
 
 Overall Statistics:
 - Clean files: {files_clean} ✅
@@ -133,163 +101,34 @@ Issues by Category:
 - Content issues: {content_issues_total}
 
 Files by Status:
-✅ Clean ({files_clean}):
-{list of clean files}
-
-⚠️  Minor Issues ({minor_issues_count}):
-{list of files with 1-5 issues and issue counts}
-
-❌ Major Issues ({major_issues_count}):
-{list of files with 6+ issues and issue counts}
-
-{if files_failed > 0}
-💥 Failed Reviews ({files_failed}):
-{list of failed files with error messages}
-{endif}
-
-{if total_issues > 0}
-Top Recommendations:
-1. {most common issue type}: affects {file_count} files
-2. {second most common}: affects {file_count} files
-3. {third most common}: affects {file_count} files
-{endif}
+✅ Clean: {list}
+⚠️ Issues: {list with counts}
 ```
 
-### Step 5: Handle Fixes (if apply_fixes=true)
+### Step 7: Commit Changes (if push flag)
 
-**If apply_fixes parameter was true:**
-- Fixes were applied by /doc-review-single-asciidoc for each file
-- Report files modified count
-- Display: "Fixes applied to {modified_files_count} files"
-
-**If apply_fixes parameter was false:**
-- No modifications made
-- Display: "Run with apply_fixes=true to auto-fix issues"
-
-### Step 6: Commit Changes (if push flag)
-
-**If push parameter is true AND files were modified:**
+If push=true AND files modified:
 
 ```
-Task:
-  subagent_type: cui-task-workflow:commit-changes
-  description: Commit documentation fixes
-  prompt: |
-    Commit all modified AsciiDoc files.
+Skill: cui-task-workflow:cui-git-workflow
 
-    Commit message: "docs: fix AsciiDoc issues across {modified_files_count} files
-
-    - Format issues: {format_issues_fixed}
-    - Link issues: {link_issues_fixed}
-    - Content issues: {content_issues_fixed}
-
-    Total issues resolved: {total_issues_fixed}"
-
-    Push to remote.
+Execute workflow: commit
+- message: "docs: fix AsciiDoc issues across {modified_count} files"
+- push: true
 ```
 
-**Error handling:**
-- If commit fails: Display error but don't rollback fixes
-- Files remain modified in working directory
-- User can commit manually
+## Architecture
 
-## STATISTICS TRACKING
+**Pattern**: Thin Orchestrator Command (<100 lines)
+- Discovers files via Glob
+- Delegates ALL validation to cui-documentation skill workflows
+- No business logic in command
 
-Track throughout workflow:
-- `total_files`: Files discovered
-- `files_reviewed`: Successfully reviewed files
-- `files_failed`: Failed review executions
-- `files_clean`: Files with 0 issues
-- `files_with_issues`: Files with 1+ issues
-- `total_issues`: Sum of all issues across all files
-- `format_issues_total`: Total format issues
-- `link_issues_total`: Total link issues
-- `content_issues_total`: Total content issues
-- `modified_files_count`: Files modified (if apply_fixes=true)
+**Skill Dependencies**:
+- cui-documentation-standards:cui-documentation - Validation workflows
+- cui-task-workflow:cui-git-workflow - Commit workflow (optional)
 
-Display all statistics in final report.
+## Related
 
-## CRITICAL RULES
-
-**Three-Layer Pattern (Layer 1 - Batch):**
-- This command discovers files and delegates to Layer 2
-- Uses SlashCommand (NOT Task) to invoke /doc-review-single-asciidoc
-- Layer 2 (/doc-review-single-asciidoc) orchestrates Layer 3 agents
-- This enables: reusability, testability, parallel execution
-
-**Batch Processing:**
-- Process all files even if some fail
-- Aggregate results from successful reviews
-- Report failures separately
-- Never abort entire batch due to single file failure
-
-**Delegation Pattern:**
-- Delegate to /doc-review-single-asciidoc for EACH file
-- Let Layer 2 command handle agent orchestration
-- Don't invoke agents directly from this command
-- Collect structured results for aggregation
-
-**Error Resilience:**
-- Continue on single file failure
-- Track and report all failures
-- Provide partial results
-- Enable user decisions on retry/skip/abort
-
-## USAGE EXAMPLES
-
-**Review all docs in current directory:**
-```
-/doc-review-technical-docs
-```
-
-**Review specific directory:**
-```
-/doc-review-technical-docs path=standards/
-```
-
-**Review and apply fixes:**
-```
-/doc-review-technical-docs apply_fixes=true
-```
-
-**Review, fix, and commit:**
-```
-/doc-review-technical-docs apply_fixes=true push
-```
-
-## ARCHITECTURE
-
-**Pattern**: Three-Layer Batch Command (Layer 1)
-
-```
-Layer 1: /doc-review-technical-docs (THIS COMMAND)
-  ├─> Glob for all *.adoc files
-  ├─> For each file:
-  │    └─> SlashCommand(/doc-review-single-asciidoc file={path})
-  └─> Aggregate results and report
-
-Layer 2: /doc-review-single-asciidoc
-  ├─> Task(asciidoc-format-validator)
-  ├─> Task(asciidoc-link-verifier)
-  └─> Task(asciidoc-content-reviewer)
-
-Layer 3: Focused agents
-  └─> Execute specific validation only
-```
-
-**Why This Works:**
-- ✅ Commands can invoke other commands (SlashCommand available)
-- ✅ Layer 2 commands are reusable (users can call /doc-review-single-asciidoc directly)
-- ✅ Layer 3 agents are focused (no orchestration, no Task delegation)
-- ✅ Scalable (handles 1 or 1000 files same way)
-- ✅ Testable (test each layer independently)
-
-**Reference**: See architecture-rules.md Rule 8 (Three-Layer Pattern)
-
-## RELATED
-
-- `/doc-review-single-asciidoc` - Self-contained single file review (Layer 2)
-- `asciidoc-format-validator` - Format validation agent (Layer 3)
-- `asciidoc-link-verifier` - Link verification agent (Layer 3)
-- `asciidoc-content-reviewer` - Content review agent (Layer 3)
-- `cui-task-workflow:commit-changes` - Commit utility agent
+- `/doc-review-single-asciidoc` - Single file review command
+- `cui-documentation` skill - Provides all validation workflows

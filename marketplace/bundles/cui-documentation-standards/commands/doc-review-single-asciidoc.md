@@ -5,144 +5,71 @@ description: Validate and review a single AsciiDoc file with format, links, and 
 
 # Review Single AsciiDoc Command
 
-Self-contained command that orchestrates format validation, link verification, and content review for a single AsciiDoc file.
+Thin orchestrator for single file AsciiDoc review. Invokes cui-documentation skill workflows.
 
-## CONTINUOUS IMPROVEMENT RULE
+## Parameters
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using /plugin-update-command command-name=doc-review-single-asciidoc update="[your improvement]"
+- **file** (required): Path to AsciiDoc file to review
+- **apply_fixes** (optional): Apply automatic fixes (default: false)
 
-**Areas for continuous improvement:**
-1. Better coordination between validation agents
-2. More effective issue aggregation and reporting
-3. Enhanced error recovery strategies
-4. Improved fix suggestions based on issue patterns
-5. Any lessons learned about single-file AsciiDoc review workflows
+## Workflow
 
-## PARAMETERS
+### Step 1: Parse and Validate Parameters
 
-- **file** (required): Path to AsciiDoc file to review (e.g., `standards/java-core.adoc`)
-- **apply_fixes** (optional): Apply automatic fixes where possible (default: false)
-
-## WORKFLOW
-
-### Step 1: Validate Input
-
-**Check file parameter:**
-- Must be provided (required)
-- Must have `.adoc` extension
-- Must exist (use Read to verify)
-
-**Error handling:**
 ```
-If missing or invalid:
-  ❌ Error: Invalid file parameter
-
-  Required: file=path/to/document.adoc
-  Received: {parameter_value}
-
-  Example: /doc-review-single-asciidoc file=standards/java-core.adoc
-```
-Exit with error status.
-
-### Step 2: Format Validation (Layer 3 Agent)
-
-**Launch asciidoc-format-validator:**
-```
-Task:
-  subagent_type: asciidoc-format-validator
-  description: Validate format of {file}
-  prompt: |
-    Validate AsciiDoc format compliance for file: {file}
-
-    Parameters:
-    - target: {file}
-    - apply_fixes: {apply_fixes parameter value}
-
-    Return all format issues found.
+If file not provided:
+  Show usage and exit
 ```
 
-**Collect results:**
-- Format issues count
-- Issue categories (blank lines, headers, lists, etc.)
-- Suggested fixes
-
-**Error handling:**
-- If agent fails: Set format_status = "ERROR", format_issues = ["Agent execution failed"]
-- If agent succeeds: Parse results, extract issue count and details
-- Continue to next step regardless (partial results acceptable)
-
-### Step 3: Link Verification (Layer 3 Agent)
-
-**Launch asciidoc-link-verifier:**
+**Usage:**
 ```
-Task:
-  subagent_type: asciidoc-link-verifier
-  description: Verify links in {file}
-  prompt: |
-    Verify all xref links and external references in file: {file}
+/doc-review-single-asciidoc file=<path>
 
-    Parameters:
-    - target: {file}
+Parameters:
+  file        - Required: Path to .adoc file
+  apply_fixes - Optional: true to apply fixes (default: false)
 
-    Return all broken links and invalid references.
+Examples:
+  /doc-review-single-asciidoc file=standards/java-core.adoc
+  /doc-review-single-asciidoc file=README.adoc apply_fixes=true
 ```
 
-**Collect results:**
-- Broken links count
-- Invalid xref targets
-- External link issues
+### Step 2: Load Documentation Skill
 
-**Error handling:**
-- If agent fails: Set link_status = "ERROR", link_issues = ["Agent execution failed"]
-- If agent succeeds: Parse results, extract broken link count and details
-- Continue to next step regardless (partial results acceptable)
-
-### Step 4: Content Review (Layer 3 Agent)
-
-**Launch asciidoc-content-reviewer:**
 ```
-Task:
-  subagent_type: asciidoc-content-reviewer
-  description: Review content of {file}
-  prompt: |
-    Review content quality for file: {file}
-
-    Parameters:
-    - target: {file}
-
-    Check: clarity, completeness, consistency, organization.
-    Return all content quality issues.
+Skill: cui-documentation-standards:cui-documentation
 ```
 
-**Collect results:**
-- Content issues count
-- Issue categories (clarity, completeness, consistency)
-- Improvement suggestions
+### Step 3: Execute Validation Workflows
 
-**Error handling:**
-- If agent fails: Set content_status = "ERROR", content_issues = ["Agent execution failed"]
-- If agent succeeds: Parse results, extract issue count and details
-- Continue to next step regardless (partial results acceptable)
+Execute three workflows in sequence:
 
-### Step 5: Aggregate Results
+**3.1: Format Validation**
 
-**Calculate totals:**
-```
-total_issues = format_issues_count + link_issues_count + content_issues_count
-overall_status = "CLEAN" if total_issues == 0 else "ISSUES_FOUND"
+Execute workflow: validate-format
+- target: {file}
+- apply_fixes: {apply_fixes}
 
-If any agent status == "ERROR":
-  overall_status = "PARTIAL"
-```
+Collect: format_status, format_issues
 
-**Categorize by severity:**
-- CRITICAL: Broken links, invalid xrefs, missing required sections
-- WARNING: Format issues, minor content problems
-- SUGGESTION: Style improvements, optional enhancements
+**3.2: Link Verification**
 
-### Step 6: Generate Report
+Execute workflow: verify-links
+- target: {file}
+- fix_links: {apply_fixes}
 
-**Display comprehensive results:**
+Collect: link_status, link_issues
+
+**3.3: Content Review**
+
+Execute workflow: review-content
+- target: {file}
+- apply_fixes: {apply_fixes}
+
+Collect: content_status, content_issues
+
+### Step 4: Generate Report
+
 ```
 ════════════════════════════════════════════════════════════
 Single File Review: {file}
@@ -153,125 +80,31 @@ Total Issues: {total_issues}
 
 Format Validation: {format_status}
 - Issues found: {format_issues_count}
-- Categories: {format_categories}
 
 Link Verification: {link_status}
 - Broken links: {link_issues_count}
-- Invalid xrefs: {invalid_xref_count}
 
 Content Review: {content_status}
+- Quality score: {quality_score}/100
 - Issues found: {content_issues_count}
-- Categories: {content_categories}
 
 Summary:
-- ✅ Clean: {aspect_count where status == CLEAN}
-- ⚠️  Issues: {aspect_count where status == ISSUES_FOUND}
-- ❌ Errors: {aspect_count where status == ERROR}
-
-{if total_issues > 0}
-Recommendations:
-{aggregated_recommendations}
-{endif}
+- ✅ Clean: {clean_aspects}
+- ⚠️ Issues: {aspects_with_issues}
 ```
 
-### Step 7: Return Structured Result
+## Architecture
 
-**For caller aggregation (Layer 1 batch command):**
-```json
-{
-  "file": "{file}",
-  "status": "{overall_status}",
-  "total_issues": {total_issues},
-  "format": {
-    "status": "{format_status}",
-    "issues_count": {format_issues_count},
-    "details": [...]
-  },
-  "links": {
-    "status": "{link_status}",
-    "issues_count": {link_issues_count},
-    "details": [...]
-  },
-  "content": {
-    "status": "{content_status}",
-    "issues_count": {content_issues_count},
-    "details": [...]
-  }
-}
-```
+**Pattern**: Thin Orchestrator Command (<100 lines)
+- Delegates ALL logic to cui-documentation skill workflows
+- No business logic in command
+- Uses Skill directive for workflow invocation
 
-## STATISTICS TRACKING
+**Skill Dependency**: cui-documentation-standards:cui-documentation
+- Provides: validate-format, verify-links, review-content workflows
+- Scripts: asciidoc-validator.sh, verify-adoc-links.py, review-content.py
 
-Track throughout workflow:
-- `format_issues_count`: Format validation issues
-- `link_issues_count`: Broken links and invalid xrefs
-- `content_issues_count`: Content quality issues
-- `total_issues`: Sum of all issues
-- `agents_executed`: Count of agents successfully executed
-- `agent_failures`: Count of agent execution failures
-
-Display all statistics in report.
-
-## CRITICAL RULES
-
-**Single File Focus:**
-- This command handles EXACTLY ONE file
-- No directory recursion
-- No file discovery
-- Caller provides explicit file path
-
-**Layer 3 Agents:**
-- All three agents are focused executors (format, links, content)
-- Each returns results without orchestration
-- This command (Layer 2) orchestrates and aggregates
-
-**Error Resilience:**
-- Continue execution even if one agent fails
-- Report partial results
-- Mark failed aspects clearly in report
-- Never abort entire review due to single agent failure
-
-**Structured Results:**
-- Return JSON-like structure for caller aggregation
-- Enable Layer 1 batch commands to aggregate multiple files
-- Consistent result format across all files
-
-## USAGE EXAMPLES
-
-**Review single file:**
-```
-/doc-review-single-asciidoc file=standards/java-core.adoc
-```
-
-**Review and apply fixes:**
-```
-/doc-review-single-asciidoc file=standards/java-core.adoc apply_fixes=true
-```
-
-## ARCHITECTURE
-
-**Pattern**: Self-Contained Command (Layer 2)
-- Called by: `/doc-review-technical-docs` (Layer 1 batch command)
-- Calls: Layer 3 focused agents (format-validator, link-verifier, content-reviewer)
-- Can be invoked: Directly by users OR by batch command
-
-**Three-Layer Pattern:**
-```
-Layer 1: /doc-review-technical-docs (batch - all files)
-  └─> For each file: SlashCommand(/doc-review-single-asciidoc)
-
-Layer 2: /doc-review-single-asciidoc (self-contained - one file)
-  ├─> Task(asciidoc-format-validator)
-  ├─> Task(asciidoc-link-verifier)
-  └─> Task(asciidoc-content-reviewer)
-
-Layer 3: Focused agents
-  └─> Execute specific validation only
-```
-
-## RELATED
+## Related
 
 - `/doc-review-technical-docs` - Batch command for all AsciiDoc files
-- `asciidoc-format-validator` - Format validation agent
-- `asciidoc-link-verifier` - Link verification agent
-- `asciidoc-content-reviewer` - Content review agent
+- `cui-documentation` skill - Provides all validation workflows
