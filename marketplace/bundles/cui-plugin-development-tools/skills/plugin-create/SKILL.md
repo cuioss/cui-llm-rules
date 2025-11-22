@@ -237,14 +237,14 @@ Statistics:
 
 Next steps:
 1. Review agent file: {file-path}
-2. Run diagnosis: /plugin-diagnose-agents agent-name={agent-name}
+2. Run diagnosis: /plugin-doctor agents agent-name={agent-name}
 3. Test agent functionality
 ```
 
 #### Step 7: Run Agent Diagnosis
 
 ```
-SlashCommand: /cui-plugin-development-tools:plugin-diagnose-agents agent-name={agent-name}
+SlashCommand: /cui-plugin-development-tools:plugin-doctor agents agent-name={agent-name}
 ```
 
 If diagnosis fails: Display warning but don't abort (agent already created).
@@ -369,7 +369,7 @@ Same format as agent workflow.
 #### Step 7: Run Command Diagnosis
 
 ```
-SlashCommand: /cui-plugin-development-tools:plugin-diagnose-commands command-name={command-name}
+SlashCommand: /cui-plugin-development-tools:plugin-doctor commands command-name={command-name}
 ```
 
 ### Workflow 3: create-skill
@@ -536,14 +536,14 @@ Statistics:
 Next steps:
 1. Review skill file: {file-path}
 2. Populate standards files in standards/ directory
-3. Run diagnosis: /plugin-diagnose-skills skill-name={skill-name}
+3. Run diagnosis: /plugin-doctor skills skill-name={skill-name}
 4. Test skill activation
 ```
 
 #### Step 7: Run Skill Diagnosis
 
 ```
-SlashCommand: /cui-plugin-development-tools:plugin-diagnose-skills skill-name={skill-name}
+SlashCommand: /cui-plugin-development-tools:plugin-doctor skills skill-name={skill-name}
 ```
 
 ### Workflow 4: create-bundle
@@ -692,15 +692,15 @@ Statistics:
 
 Next steps:
 1. Review bundle: {bundle-path}
-2. Add more components: Use /cui-create-{skill|command|agent}
+2. Add more components: Use /plugin-create
 3. Test bundle
-4. Run diagnosis: /plugin-diagnose-metadata
+4. Run diagnosis: /plugin-doctor metadata
 ```
 
 #### Step 6: Run Metadata Validation
 
 ```
-SlashCommand: /cui-plugin-development-tools:plugin-diagnose-metadata
+SlashCommand: /cui-plugin-development-tools:plugin-doctor metadata
 ```
 
 Review results and offer to fix any metadata issues found.
