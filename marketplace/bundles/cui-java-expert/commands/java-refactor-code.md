@@ -1,4 +1,4 @@
----
+/---
 name: java-refactor-code
 description: Execute systematic Java refactoring with standards compliance verification
 ---

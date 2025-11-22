@@ -71,18 +71,26 @@ When you invoke this command, I will:
 
 ## Fix Categorization
 
-**Safe Fixes** (applied automatically):
+**Safe Fixes** (applied automatically, NO prompts):
 - Missing frontmatter fields
 - Invalid YAML syntax
 - Unused tools in frontmatter
 - Trailing whitespace
 
-**Risky Fixes** (require confirmation):
+**Risky Fixes** (require confirmation via prompt):
 - Rule 6 violations (Task tool in agents)
 - Rule 7 violations (Maven usage)
 - Pattern 22 violations (self-invocation)
 - Structural changes
 - Content removal
+
+## Non-Prompting Behavior
+
+This command delegates to `cui-plugin-development-tools:plugin-doctor` skill which is designed to run without user prompts for safe operations:
+
+- **Safe fixes**: Applied automatically WITHOUT any user prompts
+- **Risky fixes**: ONLY these require confirmation
+- **All analysis**: Non-prompting (uses pre-approved tools and paths)
 
 ## Examples
 

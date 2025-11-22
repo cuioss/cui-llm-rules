@@ -1,7 +1,10 @@
 ---
 name: marketplace-inventory
 description: Scans and reports complete marketplace inventory (bundles, agents, commands, skills, scripts)
-allowed-tools: Read, Bash, Glob
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
 ---
 
 # Marketplace Inventory Skill
@@ -82,6 +85,19 @@ If the script fails:
 - Check that the working directory is the repository root
 - Verify marketplace/bundles/ directory exists
 - Ensure script has execute permissions
+
+## Non-Prompting Requirements
+
+This skill is designed to run without user prompts. Required permissions:
+
+**Script Execution:**
+- `Bash(bash:*)` - Bash interpreter
+- `Bash({baseDir}/scripts/scan-marketplace-inventory.sh:*)` - Inventory scanner
+
+**Ensuring Non-Prompting:**
+- Script invocation uses `{baseDir}/scripts/` which resolves to skill's mounted path
+- Script only reads marketplace directory structure (no writes)
+- All output is JSON to stdout
 
 ## References
 

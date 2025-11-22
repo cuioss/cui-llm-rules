@@ -1,7 +1,8 @@
 ---
 name: plugin-architecture
 description: Architecture principles, skill patterns, and design guidance for building goal-based Claude Code marketplace components
-allowed-tools: Read
+allowed-tools:
+  - Read
 ---
 
 # Plugin Architecture Skill
@@ -539,6 +540,20 @@ All references are in `references/` directory:
 - examples/goal-based-skill-example.md
 - examples/workflow-command-example.md
 - examples/pattern-usage-examples.md
+
+---
+
+## Non-Prompting Requirements
+
+This skill is designed to run without user prompts. Required permissions:
+
+**File Operations:**
+- `Read({baseDir}/references/**)` - Read reference documentation
+
+**Ensuring Non-Prompting:**
+- All file reads use `{baseDir}/references/` which resolves to skill's mounted path
+- Pure reference skill with no writes or executions
+- Only the Read tool is used (no prompting scenarios)
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: plugin-create
 description: Create new marketplace components (agents, commands, skills, bundles) with proper structure and standards compliance
-allowed-tools: Read, Write, Bash, AskUserQuestion, Skill
+tools: Read, Write, Bash, AskUserQuestion, Skill
 ---
 
 # Plugin Create Skill

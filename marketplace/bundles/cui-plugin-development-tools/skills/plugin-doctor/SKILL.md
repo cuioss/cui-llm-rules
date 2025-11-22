@@ -1,7 +1,15 @@
 ---
 name: plugin-doctor
 description: Diagnose and fix quality issues in marketplace components with automated safe fixes and prompted risky fixes
-allowed-tools: Read, Edit, Write, Bash, AskUserQuestion, Glob, Grep, Skill
+allowed-tools:
+  - Read
+  - Edit
+  - Write
+  - Bash
+  - AskUserQuestion
+  - Glob
+  - Grep
+  - Skill
 ---
 
 # Plugin Doctor Skill
@@ -481,6 +489,35 @@ Agents MUST report to caller, not self-invoke commands.
 
 ---
 
+## Non-Prompting Requirements
+
+This skill is designed to run without user prompts for safe operations. Required permissions:
+
+**Skill Invocations (covered by bundle wildcards):**
+- `Skill(cui-utilities:*)` - cui-diagnostic-patterns
+- `Skill(cui-plugin-development-tools:*)` - plugin-architecture, marketplace-inventory
+
+**Script Execution (covered by project permissions):**
+- `Bash(python3:*)` - Python interpreter
+- `Bash({baseDir}/scripts/*.sh:*)` - Analysis scripts
+- `Bash({baseDir}/scripts/*.py:*)` - Python analysis scripts
+
+**File Operations (covered by project permissions):**
+- `Read(//marketplace/**)` - Read marketplace files
+- `Edit(//marketplace/**)` - Apply fixes to components
+- `Glob(//marketplace/**)` - Discover components
+
+**Prompting Behavior:**
+- **Safe fixes**: Applied automatically WITHOUT prompts (no AskUserQuestion)
+- **Risky fixes**: ONLY these require AskUserQuestion confirmation
+- All other operations (read, analyze, glob) are non-prompting
+
+**Ensuring Non-Prompting for Safe Operations:**
+- All file reads/edits use relative paths within marketplace/
+- Script invocation uses `{baseDir}/scripts/` which resolves to skill's mounted path
+- Skill invocations use bundle-qualified names covered by `Skill({bundle}:*)` wildcards
+- AskUserQuestion is ONLY used for risky fix confirmations
+
 ## Notes
 
 - **Unified workflow**: Diagnose → Auto-Fix → Prompt Risky → Verify
@@ -488,3 +525,4 @@ Agents MUST report to caller, not self-invoke commands.
 - **Stdlib-only scripts**: No external dependencies
 - **Backup before modify**: apply-fix.py creates backups
 - **User control**: Risky fixes require explicit approval
+- **Non-prompting safe fixes**: Safe fixes never prompt - applied automatically
