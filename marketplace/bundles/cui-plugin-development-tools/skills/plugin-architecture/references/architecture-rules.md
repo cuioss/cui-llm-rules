@@ -306,8 +306,7 @@ commands/
 
 These rules are enforced through:
 - **Creation Time**: `/plugin-create` command ensures compliance for new components
-- **Validation**: `/plugin-diagnose` command detects violations in existing components
-- **Fix Workflow**: `/plugin-fix` command corrects architectural violations
+- **Validation & Fix**: `/plugin-doctor` command detects and fixes violations in existing components
 
 All diagnostic and creation workflows reference this skill to apply consistent architecture rules.
 

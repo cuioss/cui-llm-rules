@@ -9,11 +9,10 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["plugin", "development", "tools", "diagnose", "create", "fix", "maintain"],
+  "keywords": ["plugin", "development", "tools", "doctor", "create", "maintain"],
   "commands": [
     "./commands/plugin-create.md",
-    "./commands/plugin-diagnose.md",
-    "./commands/plugin-fix.md",
+    "./commands/plugin-doctor.md",
     "./commands/plugin-maintain.md",
     "./commands/plugin-verify.md"
   ],
@@ -21,8 +20,7 @@
     "./skills/marketplace-inventory",
     "./skills/plugin-architecture",
     "./skills/plugin-create",
-    "./skills/plugin-diagnose",
-    "./skills/plugin-fix",
+    "./skills/plugin-doctor",
     "./skills/plugin-maintain"
   ],
   "agents": []

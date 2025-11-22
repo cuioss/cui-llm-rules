@@ -17,12 +17,12 @@ Run comprehensive marketplace verification checking all components.
 
 When you invoke this command, I will:
 
-1. **Load plugin-diagnose skill**:
+1. **Load plugin-doctor skill**:
    ```
-   Skill: cui-plugin-development-tools:plugin-diagnose
+   Skill: cui-plugin-development-tools:plugin-doctor
    ```
 
-2. **Invoke validate-marketplace workflow**:
+2. **Invoke doctor-* workflows for all component types**:
    - Diagnoses all agents, commands, skills, metadata, and scripts
    - Reports comprehensive health status
    - Categorizes all issues found
@@ -32,7 +32,7 @@ When you invoke this command, I will:
    - Issue counts by severity
    - Recommendations for fixes
 
-4. **Offer fix option**: "Run /plugin-fix to apply fixes"
+4. **Offer doctor option**: "Run /plugin-doctor {type} to diagnose and fix specific components"
 
 ## Parameter Validation
 
@@ -52,18 +52,18 @@ Scripts: X issues (Y critical)
 
 Total: X issues across Y components
 
-Run /plugin-fix to apply fixes
+Run /plugin-doctor {type} to diagnose and fix
 ```
 
 ## Examples
 
 ```
 User: /plugin-verify
-Result: Invokes plugin-diagnose:validate-marketplace
+Result: Invokes plugin-doctor workflows for all component types
         Displays comprehensive health report for entire marketplace
 ```
 
 ## Related
 
-- `/plugin-diagnose` - Diagnose specific component types
-- `/plugin-fix` - Apply fixes to verified issues
+- `/plugin-doctor` - Diagnose and fix specific component types
+- `/plugin-create` - Create new components

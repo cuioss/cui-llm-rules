@@ -95,6 +95,6 @@ Result: Shows usage with all task types
 
 ## Related
 
-- `/plugin-diagnose` - Find issues in components
+- `/plugin-doctor` - Diagnose and fix issues in components
 - `/plugin-create` - Create new components
 - `/plugin-verify` - Verify marketplace health

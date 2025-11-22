@@ -9,31 +9,28 @@ Complete toolchain for creating, diagnosing, fixing, and maintaining Claude Code
 This bundle follows the **goal-based organization** pattern where components are organized by user goals rather than technical types:
 
 - **CREATE** - Create new components
-- **DIAGNOSE** - Find and understand issues
-- **FIX** - Apply fixes to issues
+- **DOCTOR** - Diagnose and fix issues (unified workflow)
 - **MAINTAIN** - Keep marketplace healthy
 - **VERIFY** - Validate complete marketplace
 
 ## Components
 
-### Commands (5 goal-based thin orchestrators)
+### Commands (4 goal-based thin orchestrators)
 
 | Command | Description |
 |---------|-------------|
 | `/plugin-create` | Create new marketplace component (agent, command, skill, or bundle) |
-| `/plugin-diagnose` | Find and understand quality issues in marketplace components |
-| `/plugin-fix` | Apply fixes to issues identified by /plugin-diagnose |
+| `/plugin-doctor` | Diagnose and fix quality issues with automated safe fixes and prompted risky fixes |
 | `/plugin-maintain` | Maintain marketplace health (update, add-knowledge, readme, refactor) |
 | `/plugin-verify` | Run comprehensive marketplace verification |
 
-### Skills (6)
+### Skills (5)
 
 | Skill | Description |
 |-------|-------------|
 | `plugin-architecture` | Architecture principles, skill patterns, and design guidance |
 | `plugin-create` | Workflows for creating new marketplace components |
-| `plugin-diagnose` | Diagnostic workflows for quality analysis |
-| `plugin-fix` | Fix workflows with categorization and verification |
+| `plugin-doctor` | Unified diagnose → auto-fix → prompt risky → verify workflow |
 | `plugin-maintain` | Maintenance workflows (update, readme, refactor) |
 | `marketplace-inventory` | Scan and report complete marketplace inventory |
 
@@ -65,32 +62,31 @@ The workflow guides you through:
 - Validation against architecture rules
 - Summary with next steps
 
-### Diagnose Issues
+### Doctor Components (Diagnose + Fix)
 
 ```
-# Diagnose specific component
-/plugin-diagnose agent=my-agent
-/plugin-diagnose command=my-command
-/plugin-diagnose skill=my-skill
+# Doctor specific component
+/plugin-doctor agent=my-agent
+/plugin-doctor command=my-command
+/plugin-doctor skill=my-skill
 
-# Diagnose all components of a type
-/plugin-diagnose agents
-/plugin-diagnose commands
-/plugin-diagnose skills
+# Doctor all components of a type
+/plugin-doctor agents
+/plugin-doctor commands
+/plugin-doctor skills
 
-# Diagnose entire marketplace
-/plugin-diagnose marketplace
+# Doctor entire marketplace
+/plugin-doctor marketplace
+
+# Diagnosis only (no fixes)
+/plugin-doctor agents --no-fix
 ```
 
-### Fix Issues
-
-```
-# After running /plugin-diagnose
-/plugin-fix
-
-# Applies safe fixes automatically
-# Prompts for risky fixes requiring confirmation
-```
+The doctor workflow:
+1. **Diagnose**: Analyze components for issues
+2. **Auto-fix**: Apply safe fixes automatically
+3. **Prompt**: Ask for confirmation on risky fixes
+4. **Verify**: Confirm fixes resolved issues
 
 ### Maintain Components
 

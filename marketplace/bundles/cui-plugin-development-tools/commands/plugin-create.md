@@ -64,5 +64,5 @@ Result: Error: Invalid type 'invalid'. Use: agent, command, skill, or bundle
 
 ## Related
 
-- `/plugin-diagnose` - Find issues in components
+- `/plugin-doctor` - Diagnose and fix issues in components
 - `/plugin-maintain` - Update existing components
