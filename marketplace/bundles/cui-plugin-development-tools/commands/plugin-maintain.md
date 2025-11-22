@@ -31,7 +31,7 @@ Update components, add knowledge, maintain READMEs, and refactor structure.
 /plugin-maintain
 ```
 
-## Workflow
+## WORKFLOW
 
 When you invoke this command, I will:
 
@@ -54,7 +54,7 @@ When you invoke this command, I will:
 
 4. **Display results** to user
 
-## Parameter Validation
+## PARAMETERS
 
 **Required**: `task_type` (update|add-knowledge|readme|refactor|orchestration)
 
@@ -92,6 +92,17 @@ Result: Invokes plugin-maintain:refactor-structure
 User: /plugin-maintain
 Result: Shows usage with all task types
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+After executing this command, if you discover any opportunities to improve it, invoke:
+
+`/plugin-maintain command-name=plugin-maintain update="[improvement description]"`
+
+Common improvements:
+- More efficient maintenance workflows
+- Better knowledge integration patterns
+- Improved README generation
 
 ## Related
 

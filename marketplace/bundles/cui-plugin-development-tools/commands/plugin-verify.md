@@ -13,7 +13,7 @@ Run comprehensive marketplace verification checking all components.
 /plugin-verify
 ```
 
-## Workflow
+## WORKFLOW
 
 When you invoke this command, I will:
 
@@ -34,7 +34,7 @@ When you invoke this command, I will:
 
 4. **Offer doctor option**: "Run /plugin-doctor {type} to diagnose and fix specific components"
 
-## Parameter Validation
+## PARAMETERS
 
 **Required**: None
 **Optional**: None
@@ -62,6 +62,17 @@ User: /plugin-verify
 Result: Invokes plugin-doctor workflows for all component types
         Displays comprehensive health report for entire marketplace
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+After executing this command, if you discover any opportunities to improve it, invoke:
+
+`/plugin-maintain command-name=plugin-verify update="[improvement description]"`
+
+Common improvements:
+- More comprehensive verification checks
+- Better report formatting
+- Additional component types to verify
 
 ## Related
 

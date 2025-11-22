@@ -16,7 +16,7 @@ Create new agents, commands, skills, or bundles following marketplace standards.
 /plugin-create bundle
 ```
 
-## Workflow
+## WORKFLOW
 
 When you invoke this command, I will:
 

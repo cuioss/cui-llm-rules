@@ -74,6 +74,8 @@ All 5 workflows follow the same pattern:
 - Trailing whitespace
 - Missing blank lines
 - Missing foundation skill loading (plugin-architecture, cui-diagnostic-patterns)
+- Incorrect section header case (e.g., `## Workflow` → `## WORKFLOW`)
+- Missing CONTINUOUS IMPROVEMENT RULE section (commands only)
 
 **Risky Fixes** (require confirmation):
 - Rule 6 violations (Task tool in agents)
@@ -236,7 +238,32 @@ Bash: python3 {baseDir}/scripts/validate-references.py {cmd_path}
 
 This is NOT a command fix - it's a skill fix. Commands don't load foundation skills directly; their skills do.
 
-### Step 4-5: Categorize, Fix, Verify, Report
+### Step 4: Categorize and Fix
+
+**Safe fixes** (auto-apply unless --no-fix):
+- Incorrect section header case (`## Workflow` → `## WORKFLOW`, `## Parameter Validation` → `## PARAMETERS`)
+- Missing CONTINUOUS IMPROVEMENT RULE section
+
+**Auto-fix pattern for section headers**:
+Search for `## Workflow`, `## Parameter Validation`, `## Parameters` and replace with uppercase versions.
+
+**Auto-fix pattern for missing CONTINUOUS IMPROVEMENT RULE**:
+```markdown
+## CONTINUOUS IMPROVEMENT RULE
+
+After executing this command, if you discover any opportunities to improve it, invoke:
+
+\`/plugin-maintain command-name={command-name} update="[improvement description]"\`
+
+Common improvements:
+- More efficient workflow patterns
+- Better error handling or user prompts
+- Clearer parameter documentation
+```
+
+Insert before `## Related` section (or at end if no Related section).
+
+### Step 5: Verify and Report
 
 Same pattern as doctor-agents with command-specific thresholds.
 

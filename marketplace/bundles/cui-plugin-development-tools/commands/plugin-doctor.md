@@ -32,7 +32,7 @@ Analyze marketplace components for quality issues and apply fixes in a single wo
 /plugin-doctor
 ```
 
-## Workflow
+## WORKFLOW
 
 When you invoke this command, I will:
 
@@ -55,7 +55,7 @@ When you invoke this command, I will:
 
 4. **Display results** with fixes applied and verification status
 
-## Parameter Validation
+## PARAMETERS
 
 **Required**: One of:
 - `scope`: agents|commands|skills|metadata|scripts|marketplace
@@ -102,6 +102,18 @@ Result: Diagnosis only, shows issues without applying fixes
 User: /plugin-doctor
 Result: Shows usage with all scope options
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+After executing this command, if you discover any opportunities to improve it, invoke:
+
+`/plugin-maintain command-name=plugin-doctor update="[improvement description]"`
+
+Common improvements:
+- More efficient workflow patterns
+- Better error handling or user prompts
+- Clearer parameter documentation
+- Additional fix categorizations
 
 ## Related
 
