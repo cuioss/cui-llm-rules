@@ -83,15 +83,16 @@ All 5 workflows follow the same pattern:
 
 ### Phase 3: Apply Fixes
 
-1. **Auto-Apply Safe Fixes**
-   ```bash
-   Bash: echo '{fix_json}' | python3 {baseDir}/scripts/apply-fix.py - {dir}
-   ```
-   - Apply each safe fix automatically
+1. **Auto-Apply Safe Fixes (NO PROMPT)**
+
+   **CRITICAL**: Safe fixes are applied automatically WITHOUT user confirmation.
+   Do NOT use AskUserQuestion for safe fixes.
+
+   - Apply each safe fix immediately using Edit tool
    - Track success/failure
    - Log: "✅ Fixed: {description}"
 
-2. **Prompt for Risky Fixes**
+2. **Prompt for Risky Fixes ONLY**
    ```
    AskUserQuestion:
      question: "Apply fix for {issue}?"
@@ -100,6 +101,8 @@ All 5 workflows follow the same pattern:
        - label: "No" description: "Skip this fix"
        - label: "Skip All" description: "Skip remaining risky fixes"
    ```
+
+   **Only risky fixes prompt** - safe fixes never prompt.
 
 ### Phase 4: Verify and Report
 

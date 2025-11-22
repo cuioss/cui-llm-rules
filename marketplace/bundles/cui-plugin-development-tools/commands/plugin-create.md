@@ -37,7 +37,7 @@ When you invoke this command, I will:
 
 4. **Display result** to user
 
-## Parameter Validation
+## PARAMETERS
 
 **Required**: `component_type` (agent|command|skill|bundle)
 **Optional**: None
@@ -61,6 +61,17 @@ Result: Asks "Which component type? (agent/command/skill/bundle)"
 User: /plugin-create invalid
 Result: Error: Invalid type 'invalid'. Use: agent, command, skill, or bundle
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+After executing this command, if you discover opportunities to improve it, invoke:
+
+`/plugin-maintain command=plugin-create update="[improvement description]"`
+
+Common improvements:
+- Better user prompts or error messages
+- Clearer workflow steps
+- Additional validation
 
 ## Related
 
