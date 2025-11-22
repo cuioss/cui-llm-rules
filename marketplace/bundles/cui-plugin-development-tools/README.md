@@ -2,167 +2,136 @@
 
 ## Purpose
 
-Complete toolchain for creating and diagnosing Claude Code plugins. This bundle provides essential commands for plugin developers to create new components (agents, commands, skills) and diagnose issues with existing plugins, ensuring high-quality marketplace contributions.
+Complete toolchain for creating, diagnosing, fixing, and maintaining Claude Code marketplace components. This bundle provides goal-based commands and skills for plugin developers to manage the full lifecycle of marketplace components (commands, skills, bundles).
 
-## Components Included
+## Architecture
 
-This bundle includes the following components:
+This bundle follows the **goal-based organization** pattern where components are organized by user goals rather than technical types:
 
-### Commands
-- **plugin-add-skill-knowledge** - Add external knowledge document to a skill with duplication prevention
-- **plugin-diagnose-agents** - Validates agent structure, AGENT.md format, and integration (includes Checks 6-7 for Rule 6/7 violations)
-- **plugin-diagnose-commands** - Validates command structure, markdown format, and metadata
-- **plugin-diagnose-metadata** - Diagnose and fix all metadata files (bundle plugin.json and marketplace.json)
-- **plugin-diagnose-scripts** - Analyze, verify, and fix marketplace scripts for structure, testing, and documentation compliance
-- **plugin-diagnose-skills** - Validates skill structure, SKILL.md format, and documentation
-- **plugin-maintain-readme** - Analyze and update all README files to reflect current marketplace state
-- **plugin-update-agent** - Update an agent with improvements, verify quality, and prevent duplication
-- **plugin-update-command** - Update a command with improvements, verify quality, and prevent duplication
-- **plugin-verify-marketplace** - Execute full marketplace verification by running all diagnostic commands sequentially
+- **CREATE** - Create new components
+- **DIAGNOSE** - Find and understand issues
+- **FIX** - Apply fixes to issues
+- **MAINTAIN** - Keep marketplace healthy
+- **VERIFY** - Validate complete marketplace
 
-### Agents (Rule 6 compliant)
-- **analyze-cross-skill-duplication** - Analyzes content duplication between marketplace skills via pairwise comparison
-- **analyze-integrated-standards** - Analyzes standards files for cross-file quality: duplication, conflicts, gaps, and coherence
-- **analyze-plugin-references** - Analyzes agents/commands for plugin references and validates/fixes incorrect cross-references
-- **analyze-standards-file** - Analyzes standards files for quality issues using minimize-without-loss principle
-- **architectural-validator** - Validates agents/commands for architectural constraint violations (Pattern 22 self-invocation, etc.)
-- **diagnose-agent** - Analyzes agent files for bloat, quality, and anti-bloat compliance
-- **diagnose-command** - Analyzes command/agent files for bloat, quality, and anti-bloat compliance
-- **diagnose-skill** - Analyzes single skill using Read, Grep, Glob (no Task tool - inlined validation logic)
+## Components
 
-### Skills
-- **bundle-orchestration-compliance** - Bundle-by-bundle orchestration compliance patterns with mandatory completion checklists, anti-skip protections, and verification requirements
-- **cui-fix-workflow** - Common fix workflow patterns for diagnosis commands including categorization, safe fixes, prompting, and verification
-- **diagnose-reporting-templates** - Common reporting templates for plugin-diagnose-* orchestrator commands
-- **marketplace-inventory** - Scans and reports complete marketplace inventory (bundles, agents, commands, skills, scripts)
-- **plugin-architecture** - Architecture principles, skill patterns, and design guidance for building goal-based Claude Code marketplace components
-- **plugin-create** - Create new marketplace components (agents, commands, skills, bundles) with proper structure and standards compliance
+### Commands (5 goal-based thin orchestrators)
 
-## Installation Instructions
+| Command | Description |
+|---------|-------------|
+| `/plugin-create` | Create new marketplace component (agent, command, skill, or bundle) |
+| `/plugin-diagnose` | Find and understand quality issues in marketplace components |
+| `/plugin-fix` | Apply fixes to issues identified by /plugin-diagnose |
+| `/plugin-maintain` | Maintain marketplace health (update, add-knowledge, readme, refactor) |
+| `/plugin-verify` | Run comprehensive marketplace verification |
 
-To install this plugin bundle, run:
+### Skills (7)
+
+| Skill | Description |
+|-------|-------------|
+| `plugin-architecture` | Architecture principles, skill patterns, and design guidance |
+| `plugin-create` | Workflows for creating new marketplace components |
+| `plugin-diagnose` | Diagnostic workflows for quality analysis |
+| `plugin-fix` | Fix workflows with categorization and verification |
+| `plugin-maintain` | Maintenance workflows (update, readme, refactor) |
+| `diagnose-reporting-templates` | Common reporting templates for diagnostic output |
+| `marketplace-inventory` | Scan and report complete marketplace inventory |
+
+### Agents
+
+None - All agent functionality has been consolidated into skills following the goal-based architecture pattern.
+
+## Installation
 
 ```
 /plugin install cui-plugin-development-tools
 ```
 
-This will make all commands available in your Claude Code environment.
-
 ## Usage Examples
 
-### Example 1: Create New Agent
-
-Use the plugin-create skill to create a new agent with proper structure:
-
-```markdown
-Skill: cui-plugin-development-tools:plugin-create
-
-Execute the create-agent workflow to create a new agent named "http-client-tester"
-for testing HTTP client implementations.
-```
-
-The workflow will:
-- Guide you through interactive questionnaire
-- Check for existing similar components (duplication detection)
-- Generate agent file with proper frontmatter and structure
-- Validate against Rule 6 (no Task tool), Rule 7 (Maven restrictions), and Pattern 22 (no self-invocation)
-- Display creation summary with statistics
-- Recommend running diagnostics
-
-### Example 2: Create New Command
-
-Use the plugin-create skill to create a new command:
-
-```markdown
-Skill: cui-plugin-development-tools:plugin-create
-
-Execute the create-command workflow to create a command "analyze-dependencies"
-for analyzing Maven dependency trees.
-```
-
-The workflow will:
-- Guide you through interactive questionnaire
-- Check for existing similar components
-- Generate command file with standard sections (WORKFLOW, USAGE EXAMPLES, etc.)
-- Validate command structure
-- Display creation summary with statistics
-- Recommend running diagnostics
-
-### Example 3: Diagnose Agent Issues
-
-Use plugin-diagnose-agents to validate agent quality before publishing:
+### Create a New Component
 
 ```
-/plugin-diagnose-agents
-
-Diagnose all agents in the marketplace/agents/ directory.
+/plugin-create agent
+/plugin-create command
+/plugin-create skill
+/plugin-create bundle
 ```
 
-The command will:
-- Scan all agent directories
-- Validate AGENT.md structure
-- Check required metadata presence
-- Verify documentation completeness
-- **Check 6: Task Tool Misuse Detection** - Validates agents don't use Task tool (Rule 6 violation)
-- **Check 7: Maven Anti-Pattern Detection** - Validates only maven-builder uses Bash(./mvnw:*) (Rule 7)
-- Identify missing sections
-- Report formatting issues
-- Suggest improvements
+The workflow guides you through:
+- Interactive questionnaire for component details
+- Duplication detection against existing components
+- Generation with proper structure and frontmatter
+- Validation against architecture rules
+- Summary with next steps
 
-### Example 4: Validate Plugin Bundle
-
-Before publishing a plugin bundle, validate all components:
+### Diagnose Issues
 
 ```
-/plugin-diagnose-agents
-/plugin-diagnose-commands
-/plugin-diagnose-skills
+# Diagnose specific component
+/plugin-diagnose agent=my-agent
+/plugin-diagnose command=my-command
+/plugin-diagnose skill=my-skill
 
-Validate all components in my new plugin bundle at /path/to/my-bundle/
+# Diagnose all components of a type
+/plugin-diagnose agents
+/plugin-diagnose commands
+/plugin-diagnose skills
+
+# Diagnose entire marketplace
+/plugin-diagnose marketplace
 ```
 
-This comprehensive check ensures:
-- All components follow marketplace standards
-- Documentation is complete and well-formatted
-- Metadata is correctly specified
-- Structure matches expected patterns
-- No common issues exist
-
-### Example 5: Fix Agent Documentation
-
-After diagnosis identifies issues, fix and re-check:
+### Fix Issues
 
 ```
-# Fix identified issues in agent documentation
-/plugin-diagnose-agents
+# After running /plugin-diagnose
+/plugin-fix
 
-Re-validate the http-client-tester agent after documentation fixes.
+# Applies safe fixes automatically
+# Prompts for risky fixes requiring confirmation
 ```
 
-Iterative development cycle ensures quality.
+### Maintain Components
+
+```
+# Update components
+/plugin-maintain update agent=my-agent
+/plugin-maintain update command=my-command
+
+# Add knowledge to skill
+/plugin-maintain add-knowledge skill=my-skill source=url
+
+# Update READMEs
+/plugin-maintain readme
+/plugin-maintain readme bundle=my-bundle
+
+# Refactor structure
+/plugin-maintain refactor
+```
+
+### Verify Marketplace
+
+```
+/plugin-verify
+
+# Runs comprehensive health check across all components
+# Reports issues by severity
+# Offers fix option
+```
 
 ## Dependencies
 
-### Inter-Bundle Dependencies
-- None - This bundle is self-contained and has no dependencies on other plugin bundles
+- **Inter-Bundle Dependencies**: None - self-contained
+- **External Dependencies**: None - works with filesystem access only
 
-### External Dependencies
-- No build tools or external dependencies required
-- Works with filesystem access for reading/writing component files
+## Standards Enforced
 
-### Use Cases
-This bundle is designed for:
-- **Plugin developers** creating new marketplace components
-- **Marketplace maintainers** verifying component quality
-- **Teams** building custom internal agents/commands/skills
-- **Quality assurance** ensuring components meet standards before publication
+The diagnostic and creation workflows validate:
 
-### Standards Enforced
-The diagnostic commands validate:
-- Directory structure conventions
-- AGENT.md / SKILL.md / command.md format
-- Required metadata fields (name, description, tags)
-- Documentation section completeness
-- Markdown formatting quality
-- Cross-reference validity
-- Example quality and clarity
+- **Architecture Rules**: Self-containment, {baseDir} pattern, progressive disclosure
+- **Goal-Based Organization**: Commands organized by user goals
+- **Thin Orchestrator Pattern**: Commands <100 lines, delegate to skills
+- **Skill Patterns**: Proper workflow structure, script automation, references
+- **Quality Standards**: Frontmatter format, documentation completeness, cross-references
