@@ -5,18 +5,11 @@ description: Execute Maven build, analyze errors, delegate fixes to appropriate 
 
 # Build and Fix Command
 
-Comprehensive project verification command that orchestrates Maven builds, analyzes errors, delegates fixes to appropriate commands, and iterates until the project builds cleanly. Renamed from `/cui-build-and-verify` to reflect its active fix-and-iterate workflow.
+Orchestrates Maven builds, analyzes errors, delegates fixes to appropriate commands, and iterates until the project builds cleanly.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=maven-build-and-fix update="[your improvement]"` with:
-
-**Improvement areas**:
-- Improved issue categorization and routing strategies
-- Better error analysis and fix delegation patterns
-- Enhanced iteration logic and convergence detection
-- More effective command orchestration and result aggregation
-- Improved performance tracking and reporting
+**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=maven-build-and-fix update="[your improvement]"` with improvements discovered.
 
 ## PARAMETERS
 
@@ -27,290 +20,118 @@ Comprehensive project verification command that orchestrates Maven builds, analy
 
 ### Step 1: Parse Parameters
 
-**Extract parameters:**
+Extract parameters:
 - `push`: boolean flag for auto-commit (default: false)
 - `goals`: Maven goals string (default: `-Ppre-commit clean install`)
 
-**Validate:**
-- Goals string must not include `./mvnw` prefix (added automatically by maven-builder)
-- Push flag must be boolean
+### Step 2: Execute Maven Build
 
-### Step 2: Initial Build Execution
-
-**Invoke maven-builder agent:**
+**Execute build and capture output:**
+```bash
+./mvnw {goals} > target/build-output-$(date +%Y%m%d-%H%M%S).log 2>&1
 ```
-Task:
-  subagent_type: maven-builder
-  description: Execute Maven build
-  prompt: |
-    Execute Maven build with goals: {goals}
 
-    Return structured results with:
-    - Build status (SUCCESS/FAILURE)
-    - Categorized issues (compilation_error, test_failure, javadoc_warning, etc.)
-    - File locations and line numbers
-    - Error messages
+Store the log path as `{output_file}`.
+
+### Step 3: Analyze Build Output
+
+**Load skill and execute workflow:**
+```
+Skill: cui-maven:cui-maven-rules
+Execute workflow: Parse Maven Build Output
+```
+
+**Parse the build log:**
+```bash
+python3 {baseDir}/scripts/parse-maven-output.py \
+    --log {output_file} \
+    --mode structured
 ```
 
 **Collect structured results:**
 ```json
 {
-  "status": "SUCCESS|FAILURE",
-  "output_file": "target/build-output-{timestamp}.log",
-  "issues": [
-    {
-      "type": "compilation_error|test_failure|javadoc_warning|...",
-      "file": "path/to/File.java",
-      "line": 123,
-      "message": "error message",
-      "severity": "ERROR|WARNING"
+  "status": "success|error",
+  "data": {
+    "build_status": "SUCCESS|FAILURE",
+    "issues": [...],
+    "summary": {
+      "compilation_errors": 0,
+      "test_failures": 0,
+      "javadoc_warnings": 0,
+      "dependency_errors": 0
     }
-  ],
-  "summary": {
-    "compilation_errors": count,
-    "test_failures": count,
-    "javadoc_warnings": count,
-    "other_warnings": count
   }
 }
 ```
 
-**Error handling:** If maven-builder fails, display error and prompt: "[R]etry/[A]bort". Do NOT proceed with fix attempts.
+### Step 4: Route Issues to Fix Commands
 
-### Step 3: Analyze Build Results
-
-**If status == SUCCESS and issues count == 0:**
+**If build_status == SUCCESS and total_issues == 0:**
 - Skip to Step 6 (Report Success)
 
-**If status == FAILURE or issues count > 0:**
-- Continue to Step 4 (Fix Issues)
+**For each issue category, delegate:**
 
-**Categorize issues by type:**
-```
-Java Issues:
-- compilation_error: Java compilation failures
-- test_failure: JUnit test failures
-- javadoc_warning: JavaDoc documentation issues
-
-Other Issues:
-- dependency_conflict: Maven dependency issues
-- resource_error: Missing resource files
-- configuration_error: POM/Maven config issues
-```
-
-**Route to fix strategies:**
-- Java issues → Delegate to /java-orchestrate-task
-- Dependency issues → Report to user (manual intervention)
-- Configuration errors → Report to user (manual intervention)
-
-### Step 4: Delegate Fixes (Iteration Loop)
-
-**For each issue category with fixes available:**
-
-**Java Issues (compilation, test, javadoc):**
-```
-SlashCommand: /cui-java-expert:java-orchestrate-task task="Fix {issue_category}: {issue_details}"
-```
-
-Parameters to pass:
-- Issue type (compilation_error, test_failure, javadoc_warning)
-- Affected files list
-- Error messages
-- Line numbers
-
-**Collect fix results:**
-- Files modified
-- Changes made
-- Fix status (success/partial/failure)
-
-**Error handling:** If /java-orchestrate-task fails, display error and prompt: "[R]etry/[S]kip/[A]bort". Track failure for final report.
+| Issue Type | Fix Command |
+|------------|-------------|
+| `compilation_error` | `/java-implement-code files="{file}" task="Fix: {message}"` |
+| `test_failure` | `/java-implement-tests files="{file}" task="Fix: {message}"` |
+| `javadoc_warning` | `/java-fix-javadoc files="{file}"` |
+| `dependency_error` | Report to user (manual POM fix required) |
 
 ### Step 5: Verify Fixes (Re-build)
 
-**After all fix attempts, re-run maven-builder:**
-```
-Task:
-  subagent_type: maven-builder
-  description: Verify fixes
-  prompt: |
-    Execute Maven build with goals: {goals}
-
-    Verify that previous issues are resolved.
-    Return structured results.
+**After fix attempts, re-run build:**
+```bash
+./mvnw {goals} > target/build-output-verify-$(date +%Y%m%d-%H%M%S).log 2>&1
 ```
 
-**Compare results:**
-- Issues remaining vs issues resolved
-- New issues introduced (regression check)
-- Overall status improvement
+**Re-analyze with script:**
+```bash
+python3 {baseDir}/scripts/parse-maven-output.py \
+    --log {verify_output_file} \
+    --mode structured
+```
 
 **Iteration decision:**
+- If issues_remaining > 0 AND iteration_count < 5: Repeat Step 4
+- If issues_remaining == 0: Proceed to Step 6
+- If iteration_count >= 5: Proceed to Step 7 (Partial Success)
+
+### Step 6: Report Success
+
 ```
-If issues_remaining > 0 AND iteration_count < max_iterations:
-  → Repeat Step 4 (Delegate Fixes)
+BUILD SUCCESS
 
-If issues_remaining == 0:
-  → Proceed to Step 6 (Report Success)
-
-If iteration_count >= max_iterations:
-  → Proceed to Step 7 (Report Partial Success)
+Maven goals: {goals}
+Build duration: {duration}
+Issues fixed: {total_fixed}
+Iterations: {iteration_count}
+Files modified: {count}
+Output: {output_file}
 ```
 
-**Max iterations:** 5 (configurable)
+**If push=true:** Invoke `/cui-task-workflow:commit-changes`
 
-### Step 6: Report Success (Clean Build)
+### Step 7: Report Partial Success
 
-**Display report** (status: SUCCESS, build: CLEAN):
-- Maven goals: {goals}
-- Build duration: {duration}
-- Issues fixed: {total_fixed} (compilation: {count}, test: {count}, javadoc: {count})
-- Iterations: {iteration_count}
-- Files modified: {files_modified_count}
-- Output: {output_file}
+```
+BUILD PARTIAL
 
-**If push parameter is true:**
-- Proceed to Step 8 (Commit Changes)
+Maven goals: {goals}
+Max iterations reached: 5
+Issues resolved: {resolved}/{total}
+Remaining: compilation({n}), test({n}), javadoc({n})
+Output: {output_file}
 
-**Otherwise:**
-- End command
-
-### Step 7: Report Partial Success (Issues Remaining)
-
-**Display report** (status: PARTIAL, issues remain):
-- Maven goals: {goals}
-- Build duration: {duration}
-- Max iterations: {max_iterations}
-- Issues resolved/remaining: {issues_resolved}/{issues_remaining}
-- Remaining by type: compilation ({count}), test ({count}), javadoc ({count})
-- Iterations: {iteration_count}
-- Files modified: {files_modified_count}
-- Output: {output_file}
-- Next: Review {output_file}, run /java-orchestrate-task, or retry /maven-build-and-fix
+Next: Review output file and run fix commands manually
+```
 
 **Do NOT commit if issues remain** (even if push=true)
 
-### Step 8: Commit Changes (Optional)
-
-**If push parameter is true AND build is clean:**
-
-```
-Task:
-  subagent_type: commit-changes
-  description: Commit build fixes
-  prompt: |
-    Commit all changes from build fix iterations.
-
-    Generate commit message describing:
-    - Issues fixed (compilation, test, javadoc)
-    - Files modified
-    - Iteration count
-
-    Format: "fix(build): resolve {issue_count} build issues
-
-    - Compilation errors: {count}
-    - Test failures: {count}
-    - JavaDoc warnings: {count}
-
-    Iterations: {count}
-    Files modified: {files_modified_count}"
-
-    Push to remote repository.
-```
-
-**Error handling:** If commit-changes fails, changes remain uncommitted. User can commit manually or retry with push flag.
-
-## STATISTICS TRACKING
-
-Track throughout workflow:
-- `iteration_count`: Number of build-fix cycles
-- `issues_resolved`: Total issues fixed
-- `issues_remaining`: Issues not resolved
-- `files_modified_count`: Files changed during fixes
-- `build_duration_total`: Cumulative build time
-- `fix_attempts_count`: Number of fix delegation calls
-
-Display all statistics in final report.
-
-## CRITICAL RULES
-
-**Command Orchestration:**
-- This command orchestrates maven-builder and fix commands
-- Uses Task tool to invoke maven-builder (agent)
-- Uses SlashCommand to invoke /java-orchestrate-task (command)
-- Commands CAN invoke other commands (Rule 6 compliant)
-
-**No Direct Fixes:**
-- This command NEVER fixes code directly
-- Always delegates to appropriate fix commands
-- Analyzes and routes issues only
-- Orchestration, not implementation
-
-**Iteration Logic:**
-- Max 5 iterations to prevent infinite loops
-- Each iteration: build → analyze → fix → verify
-- Stop when clean OR max iterations reached
-- Report partial success if issues remain
-
-**Commit Strategy:**
-- ONLY commit if build is CLEAN
-- ONLY commit if push parameter is true
-- If issues remain: do NOT commit (even with push=true)
-- Preserve partial progress for inspection
-
-**Error Resilience:**
-- Continue fix attempts even if one category fails
-- Track all failures for final report
-- Allow user decisions (retry/skip/abort)
-- Never rollback partial progress automatically
-
-## USAGE EXAMPLES
-
-**Basic build and fix:**
-```
-/maven-build-and-fix
-```
-
-**Build, fix, and commit:**
-```
-/maven-build-and-fix push
-```
-
-**Custom Maven goals:**
-```
-/maven-build-and-fix goals="clean test -Pcoverage"
-```
-
-**Build, fix with custom goals, and commit:**
-```
-/maven-build-and-fix goals="clean verify" push
-```
-
-## ARCHITECTURE
-
-**Pattern**: Command Orchestrator (delegates to both agents and commands)
-
-```
-/maven-build-and-fix (THIS COMMAND)
-  ├─> Task(maven-builder) [agent: executes build, returns structured results]
-  ├─> Analyze results and categorize issues
-  ├─> SlashCommand(/java-orchestrate-task) [command: delegates fixes]
-  ├─> Task(maven-builder) [agent: verify fixes]
-  ├─> Iterate until clean or max iterations
-  └─> Task(commit-changes) [agent: commit if push=true and clean]
-```
-
-**Why This Works:**
-- ✅ Commands can invoke agents (Task tool available)
-- ✅ Commands can invoke other commands (SlashCommand available)
-- ✅ No agent nesting (agents never call Task)
-- ✅ maven-builder is focused (just builds, no fixes)
-- ✅ /java-orchestrate-task orchestrates Java fixes
-- ✅ This command orchestrates the overall workflow
-
-**Reference**: See architecture-rules.md Rule 6 (Agent Delegation Constraints)
-
 ## RELATED
 
-- `maven-builder` - Maven build execution agent (Layer 3)
-- `/java-orchestrate-task` - Java implementation orchestrator (Layer 1/2)
-- `commit-changes` - Git commit utility agent
+- Skill: `cui-maven:cui-maven-rules` - Parse Maven Build Output workflow
+- Command: `/java-implement-code` - Fix compilation errors
+- Command: `/java-implement-tests` - Fix test failures
+- Command: `/java-fix-javadoc` - Fix JavaDoc warnings

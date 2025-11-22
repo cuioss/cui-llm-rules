@@ -1,7 +1,7 @@
 ---
 name: cui-maven-rules
 description: Complete Maven standards covering build processes, POM maintenance, dependency management, and Maven integration for CUI projects
-allowed-tools: Read, Grep
+allowed-tools: Read, Grep, Bash(python3:*)
 ---
 
 # CUI Maven Rules
@@ -85,6 +85,91 @@ After loading the appropriate standards:
 3. Apply quality gates and verification criteria as specified
 4. Ensure all changes align with CUI Maven best practices
 
+---
+
+## Workflow: Parse Maven Build Output
+
+**Pattern**: Pattern 4 (Command Chain Execution)
+
+This workflow parses Maven build output logs and categorizes issues for systematic fix orchestration.
+
+### When to Use
+
+Use this workflow when:
+- Analyzing Maven build output for errors and warnings
+- Categorizing build issues for orchestrated fixing
+- Filtering out OpenRewrite-related messages
+- Generating structured issue reports
+
+### Step 1: Execute Script
+
+**Parse the build log file:**
+
+```bash
+python3 {baseDir}/scripts/parse-maven-output.py \
+    --log <path-to-log-file> \
+    --mode <output-mode>
+```
+
+**Output Modes:**
+- `default` - Summary with all errors and warnings (human-readable)
+- `errors` - Only errors (no warnings)
+- `structured` - Full JSON output for machine processing
+- `no-openrewrite` - Errors/warnings excluding OpenRewrite messages
+
+### Step 2: Process Results
+
+**JSON Output Contract (structured mode):**
+
+```json
+{
+  "status": "success|error",
+  "data": {
+    "build_status": "SUCCESS|FAILURE",
+    "issues": [
+      {
+        "type": "compilation_error|test_failure|dependency_error|javadoc_warning|other",
+        "file": "path/to/File.java",
+        "line": 45,
+        "column": 20,
+        "message": "error message",
+        "severity": "ERROR|WARNING",
+        "suggestions": ["fix suggestion 1", "fix suggestion 2"]
+      }
+    ],
+    "summary": {
+      "compilation_errors": 0,
+      "test_failures": 0,
+      "javadoc_warnings": 0,
+      "dependency_errors": 0,
+      "total_issues": 0
+    }
+  },
+  "metrics": {
+    "duration_ms": 21635,
+    "tests_run": 13,
+    "tests_failed": 0
+  }
+}
+```
+
+### Step 3: Route to Appropriate Fix Commands
+
+Based on issue category, delegate to appropriate commands:
+
+| Issue Type | Fix Command |
+|------------|-------------|
+| `compilation_error` | `/java-implement-code` |
+| `test_failure` | `/java-implement-tests` |
+| `javadoc_warning` | `/java-fix-javadoc` |
+| `dependency_error` | Manual POM fix |
+
+### Script Location
+
+`{baseDir}/scripts/parse-maven-output.py`
+
+---
+
 ## Standards Organization
 
 All standards are organized in the `standards/` directory:
@@ -97,6 +182,7 @@ All standards are organized in the `standards/` directory:
 This skill requires:
 - **Read**: To load standards files
 - **Grep**: To search for patterns in standards
+- **Bash(python3:*)**: To execute parse-maven-output.py script
 
 ## Usage Pattern
 
@@ -109,17 +195,17 @@ When this skill is activated, it loads all Maven-related standards into the agen
 5. **Integrating tools**: Configuring frontend-maven-plugin, SonarQube properties
 6. **Updating wrappers**: Following Maven wrapper update procedures
 
-## Integration with Agents
+## Integration with Commands
 
-### maven-project-builder Agent
+### maven-build-and-fix Command
 
-The `maven-project-builder` agent activates this skill at workflow start (Step 0) to:
+The `/maven-build-and-fix` command activates this skill to:
 - Load build verification standards
 - Understand quality gate criteria
 - Know how to handle OpenRewrite markers
 - Follow JavaDoc fix requirements
 - Apply acceptable warning rules
-- Track execution duration properly
+- Parse build output for issue categorization
 
 The skill provides the authoritative standards that guide all build-related decisions and fixes.
 
@@ -173,7 +259,7 @@ When standards need updates, modify the files in the `standards/` directory and 
 
 ## Version
 
-Version: 0.1.0 (Initial release)
+Version: 0.2.0 (Added Parse Maven Build Output workflow)
 
 Part of: cui-maven bundle
 

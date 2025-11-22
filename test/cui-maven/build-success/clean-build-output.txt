@@ -1,0 +1,98 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] cui-parent                                                         [pom]
+[INFO] cui-core                                                           [jar]
+[INFO] cui-util                                                           [jar]
+[INFO] cui-webapp                                                         [war]
+[INFO]
+[INFO] ----------------------< de.cuioss:cui-parent >----------------------
+[INFO] Building cui-parent 1.0.0                                          [1/4]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ cui-parent ---
+[INFO]
+[INFO] ----------------------< de.cuioss:cui-core >------------------------
+[INFO] Building cui-core 1.0.0                                            [2/4]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ cui-core ---
+[INFO] Deleting /Users/dev/project/modules/cui-core/target
+[INFO]
+[INFO] --- maven-resources-plugin:3.3.0:resources (default-resources) @ cui-core ---
+[INFO] Copying 5 resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ cui-core ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 42 source files to /Users/dev/project/modules/cui-core/target/classes
+[INFO]
+[INFO] --- maven-resources-plugin:3.3.0:testResources (default-testResources) @ cui-core ---
+[INFO] Copying 3 resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:testCompile (default-testCompile) @ cui-core ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 28 source files to /Users/dev/project/modules/cui-core/target/test-classes
+[INFO]
+[INFO] --- maven-surefire-plugin:3.0.0:test (default-test) @ cui-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running de.cuioss.core.ServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.234 s - in de.cuioss.core.ServiceTest
+[INFO] Running de.cuioss.core.UtilityTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.156 s - in de.cuioss.core.UtilityTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- maven-jar-plugin:3.3.0:jar (default-jar) @ cui-core ---
+[INFO] Building jar: /Users/dev/project/modules/cui-core/target/cui-core-1.0.0.jar
+[INFO]
+[INFO] --- maven-install-plugin:3.1.0:install (default-install) @ cui-core ---
+[INFO] Installing /Users/dev/project/modules/cui-core/pom.xml to /Users/dev/.m2/repository/de/cuioss/cui-core/1.0.0/cui-core-1.0.0.pom
+[INFO] Installing /Users/dev/project/modules/cui-core/target/cui-core-1.0.0.jar to /Users/dev/.m2/repository/de/cuioss/cui-core/1.0.0/cui-core-1.0.0.jar
+[INFO]
+[INFO] ----------------------< de.cuioss:cui-util >------------------------
+[INFO] Building cui-util 1.0.0                                            [3/4]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ cui-util ---
+[INFO] Deleting /Users/dev/project/modules/cui-util/target
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ cui-util ---
+[INFO] Compiling 15 source files to /Users/dev/project/modules/cui-util/target/classes
+[INFO]
+[INFO] --- maven-surefire-plugin:3.0.0:test (default-test) @ cui-util ---
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- maven-jar-plugin:3.3.0:jar (default-jar) @ cui-util ---
+[INFO] Building jar: /Users/dev/project/modules/cui-util/target/cui-util-1.0.0.jar
+[INFO]
+[INFO] ----------------------< de.cuioss:cui-webapp >----------------------
+[INFO] Building cui-webapp 1.0.0                                          [4/4]
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO]
+[INFO] --- maven-war-plugin:3.3.2:war (default-war) @ cui-webapp ---
+[INFO] Packaging webapp
+[INFO] Building war: /Users/dev/project/modules/cui-webapp/target/cui-webapp-1.0.0.war
+[INFO]
+[INFO] --- maven-install-plugin:3.1.0:install (default-install) @ cui-webapp ---
+[INFO] Installing /Users/dev/project/modules/cui-webapp/target/cui-webapp-1.0.0.war to /Users/dev/.m2/repository/de/cuioss/cui-webapp/1.0.0/cui-webapp-1.0.0.war
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for cui-parent 1.0.0:
+[INFO]
+[INFO] cui-parent ......................................... SUCCESS [  0.156 s]
+[INFO] cui-core ........................................... SUCCESS [ 12.345 s]
+[INFO] cui-util ........................................... SUCCESS [  5.678 s]
+[INFO] cui-webapp ......................................... SUCCESS [  3.456 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  21.635 s
+[INFO] Finished at: 2025-10-31T14:30:22+01:00
+[INFO] ------------------------------------------------------------------------

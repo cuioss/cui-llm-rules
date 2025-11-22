@@ -1,175 +1,110 @@
 # CUI Maven Tools
 
-Comprehensive Maven build, verification, and POM maintenance tools for CUI projects.
+Maven build, verification, and POM maintenance tools for CUI projects.
 
-## Overview
+## Purpose
 
-This bundle provides complete Maven workflow support for CUI projects, including build verification, quality gate enforcement, POM maintenance standards, and Maven best practices. It ensures consistent build processes, proper dependency management, and comprehensive quality checks across all CUI Maven-based projects.
+This bundle provides comprehensive Maven workflow support including build verification, quality gate enforcement, POM maintenance standards, and automated issue categorization. All agent functionality has been absorbed into skill workflows with Python scripts for deterministic analysis.
 
-## Components
+## Components Included
 
-### Agents
+### Skills (1 skill with workflow)
 
-Agents in this bundle:
+1. **cui-maven-rules** - Complete Maven standards covering build processes, POM maintenance, dependency management, and Maven integration
+   - **Workflow: Parse Maven Build Output** - Parse and categorize Maven build errors/warnings
 
-- **maven-builder** - Central focused agent for executing Maven builds with configurable output modes (STRUCTURED for intelligent routing, DEFAULT for logs), performance tracking, and error categorization. Only agent allowed to execute Maven commands (Rule 7).
+### Scripts (1 automation script)
 
-### Commands
+| Script | Location | Purpose |
+|--------|----------|---------|
+| `parse-maven-output.py` | cui-maven-rules | Parse Maven build logs, categorize issues |
 
-Commands in this bundle:
+### Commands (1 goal-based orchestrator)
 
-- **/maven-build-and-fix** - Self-contained command that executes Maven build, analyzes issues using maven-builder's STRUCTURED output, delegates fixes to appropriate commands (e.g., /java-orchestrate-task), iterates until clean, and optionally commits/pushes changes
-
-### Skills
-
-Skills in this bundle:
-
-- **cui-maven-rules** - Complete Maven standards covering build processes, POM maintenance, dependency management, and Maven integration
-
-## Installation
-
-This bundle is part of the CUI marketplace and can be installed via:
-
-```bash
-# Clone the repository (if not already done)
-git clone https://github.com/cuioss/cui-llm-rules.git
-
-# Navigate to marketplace bundles
-cd cui-llm-rules/marketplace/bundles
-
-# The bundle is at: cui-maven/
-```
-
-## Usage
-
-### For Users
-
-**Commands**: Invoke commands directly in Claude Code:
-
-```bash
-# Run full build verification with automatic fix iteration
-/maven-build-and-fix
-
-# Run build verification, fix issues, commit, and push
-/maven-build-and-fix push
-```
-
-**Architecture** (Rule 6 compliant):
-
-The `/maven-build-and-fix` command orchestrates the complete build workflow:
-1. Executes maven-builder with STRUCTURED output mode
-2. Analyzes categorized issues (compilation_error, test_failure, javadoc_warning, etc.)
-3. Routes fixes to appropriate commands based on issue type
-4. Iterates until build is clean
-5. Optionally commits and pushes changes
-
-Example workflow:
-```
-/maven-build-and-fix (command)
-  ├─> Task(maven-builder) with outputMode: STRUCTURED
-  ├─> Analyze structured issues
-  ├─> For Java issues: SlashCommand(/java-orchestrate-task "fix {issue}")
-  ├─> Iterate until clean
-  └─> Commit and push if requested
-```
-
-The `maven-builder` agent is used by commands for:
-- Executing Maven builds (only agent with Bash(./mvnw:*) permission - Rule 7)
-- Returning structured categorized results for intelligent routing
-- Performance tracking and output filtering
-
-Example usage from commands:
-```
-Task:
-  subagent_type: maven-builder
-  prompt: |
-    command: "clean verify"
-    outputMode: "STRUCTURED"
-```
-
-**Skills**: The `cui-maven-rules` skill is automatically loaded by agents that need Maven standards.
-
-### For Developers
-
-To add components to this bundle:
-
-**Create an agent**:
-```
-/cui-create-agent scope=marketplace
-# Select "cui-maven" as the bundle
-```
-
-**Create a command**:
-```
-/cui-create-command scope=marketplace
-# Select "cui-maven" as the bundle
-```
-
-**Create a skill**:
-```
-/cui-create-skill scope=marketplace
-# Select "cui-maven" as the bundle
-```
+1. **maven-build-and-fix** - Executes Maven build, analyzes issues, delegates fixes to appropriate commands, iterates until clean
 
 ## Architecture
 
-### Bundle Structure
-
 ```
 cui-maven/
-├── .claude-plugin/
-│   └── plugin.json          # Bundle manifest
-├── agents/
-│   └── maven-builder.md     # Build execution agent
-├── commands/
-│   └── maven-build-and-fix.md    # Build verification command
-├── skills/
-│   └── cui-maven-rules/     # Maven standards skill
-│       ├── SKILL.md         # Skill definition
-│       ├── standards/       # Standards files
-│       │   ├── pom-maintenance.md
-│       │   └── maven-integration.md
-│       └── README.md        # Skill documentation
-└── README.md                # This file
+├── commands/                # 1 goal-based orchestrator
+│   └── maven-build-and-fix.md
+└── skills/
+    └── cui-maven-rules/     # Standards + workflow
+        ├── SKILL.md         # Workflow: Parse Maven Build Output
+        ├── scripts/
+        │   └── parse-maven-output.py
+        └── standards/
+            ├── pom-maintenance.md
+            └── maven-integration.md
 ```
 
-### Design Principles
+## Workflow Pattern
 
-- **Focused Agent**: maven-builder handles all build execution with configurable output modes (single responsibility)
-- **Automated Quality Checks**: Enforce quality gates through build verification
-- **Iterative Fix Workflow**: Automatically fix issues and re-run builds until clean
-- **Execution Time Tracking**: Monitor and update build duration expectations (handled by maven-builder)
-- **Comprehensive Standards**: Cover all aspects of Maven usage in CUI projects
-- **Integration with OpenRewrite**: Leverage automated POM cleanup recipes
-- **JavaDoc Enforcement**: Mandatory JavaDoc warning fixes using CUI standards
+Commands are thin orchestrators that invoke skill workflows:
 
-### Key Features
+```
+/maven-build-and-fix
+  ├─> Bash: ./mvnw {goals} > target/build-output.log 2>&1
+  ├─> Skill(cui-maven-rules) workflow: Parse Maven Build Output
+  ├─> Route issues to fix commands:
+  │   ├─> /java-implement-code (compilation errors)
+  │   ├─> /java-implement-tests (test failures)
+  │   └─> /java-fix-javadoc (javadoc warnings)
+  └─> Iterate until clean or max iterations
+```
 
-#### Build Verification
-- Execute Maven builds with pre-commit profile
-- Analyze all output for errors, warnings, and issues
-- Fix compilation errors, test failures, code warnings automatically
-- Handle OpenRewrite TODO markers with auto-suppression
-- Mandatory JavaDoc warning fixes
-- Track execution duration with 10% change threshold
+## Usage Examples
 
-#### POM Maintenance
-- BOM (Bill of Materials) management standards
-- Dependency version management with properties
-- Scope optimization guidance
-- Maven wrapper updates
-- OpenRewrite integration for automated cleanup
+### Basic Build and Fix
 
-#### Quality Gates
-- Build success verification
-- Dependency analysis
-- Test execution and coverage
-- Format checking integration
-- Linting compliance
+```
+/maven-build-and-fix
+```
+
+### Build with Custom Goals
+
+```
+/maven-build-and-fix goals="clean verify -Pcoverage"
+```
+
+### Build, Fix, and Commit
+
+```
+/maven-build-and-fix push
+```
+
+## Issue Categorization
+
+The parse-maven-output.py script categorizes issues:
+
+| Issue Type | Description | Fix Route |
+|------------|-------------|-----------|
+| `compilation_error` | Java compilation failures | `/java-implement-code` |
+| `test_failure` | JUnit test failures | `/java-implement-tests` |
+| `javadoc_warning` | JavaDoc documentation issues | `/java-fix-javadoc` |
+| `dependency_error` | Maven dependency issues | Manual POM fix |
+| `deprecation_warning` | Deprecated API usage | Manual code update |
+| `unchecked_warning` | Generic type issues | Manual code update |
+
+## Bundle Statistics
+
+- **Commands**: 1 (thin orchestrator)
+- **Skills**: 1 (with Parse Maven Build Output workflow)
+- **Scripts**: 1 (Python automation)
+- **Agents**: 0 (all absorbed into skill workflows)
 
 ## Dependencies
 
-Currently no dependencies on other bundles.
+### Inter-Bundle Dependencies
+
+- **cui-java-expert** - For `/java-implement-code`, `/java-implement-tests`, `/java-fix-javadoc`
+- **cui-task-workflow** - For commit functionality when `push` flag is used
+
+### External Dependencies
+
+- Python 3 for automation scripts
+- Maven wrapper (`./mvnw`) in project root
 
 ## Configuration
 
@@ -185,231 +120,17 @@ Maven projects can configure build behavior in `.claude/run-configuration.md`:
 ### Last Execution Duration
 - **Duration**: 120000ms (2 minutes)
 - **Last Updated**: 2025-10-29
-
-### Acceptable Warnings
-- `[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources`
-- `[WARNING] Parameter 'session' is deprecated`
 ```
 
 ### Build Profiles
 
-Projects should define a `pre-commit` profile in their POM:
-
-```xml
-<profile>
-  <id>pre-commit</id>
-  <build>
-    <!-- Quality checks, tests, coverage, etc. -->
-  </build>
-</profile>
-```
-
-## Development
-
-### Adding New Components
-
-1. Use creation wizards:
-   - `/cui-create-agent` for agents
-   - `/cui-create-command` for commands
-   - `/cui-create-skill` for skills
-
-2. Update this README.md with component descriptions
-
-3. Test components:
-   - `/plugin-diagnose-agents` for agents
-   - `/plugin-diagnose-commands` for commands
-   - `/plugin-diagnose-skills` for skills
-
-4. Validate entire bundle:
-   - `/plugin-diagnose-bundle cui-maven`
-
-### Quality Standards
-
-All components must meet:
-- ✅ Proper YAML frontmatter
-- ✅ Clear documentation
-- ✅ Appropriate tool access
-- ✅ Integration with other components
-- ✅ Zero critical issues in diagnosis
-
-### Testing
-
-Test the bundle:
-
-```bash
-# Test individual components
-/plugin-diagnose-agents scope=marketplace
-/plugin-diagnose-commands scope=marketplace
-/plugin-diagnose-skills scope=marketplace
-
-# Test entire bundle integration
-/plugin-diagnose-bundle cui-maven
-```
-
-## Workflow Examples
-
-### Basic Build Verification
-
-```bash
-# User invokes: /maven-build-and-fix
-# Command workflow:
-#   1. Invokes maven-builder agent with outputMode="STRUCTURED"
-#   2. maven-builder:
-#      - Reads .claude/run-configuration.md
-#      - Executes ./mvnw -Ppre-commit clean install
-#      - Captures output to timestamped file
-#      - Categorizes errors/warnings (compilation, tests, javadoc, etc.)
-#      - Tracks execution duration (updates if >10% change)
-#      - Returns: structured categorized issues
-#   3. Analyzes categorized issues
-#   4. Routes fixes to appropriate commands (e.g., /java-fix-javadoc)
-#   5. Re-runs maven-builder until build is clean
-#   6. Reports results
-```
-
-### Build with Automatic Commit
-
-```bash
-# User: "/maven-build-and-fix push"
-# Command workflow:
-#   1. Executes full build verification (maven-builder)
-#   2. Fixes all issues and re-runs until clean
-#   3. Commits changes via commit-changes agent
-#   4. Pushes to remote repository
-#   5. Reports consolidated results
-```
-
-### OpenRewrite Marker Handling
-
-```bash
-# During build, agent:
-#   1. Searches for /*~~(TODO: markers in source code
-#   2. Auto-suppresses LogRecord and Exception warnings
-#   3. Asks user for other marker types
-#   4. Removes markers from source
-#   5. Re-runs build to verify
-#   6. Reports if markers persist after 3 iterations
-```
-
-## Contributing
-
-To contribute to this bundle:
-
-1. Create components using creation wizards
-2. Follow CUI coding standards
-3. Add comprehensive documentation
-4. Test thoroughly
-5. Run quality checks
-6. Submit for review
-
-## Troubleshooting
-
-### Common Issues
-
-**Build timeouts**:
-- Check `.claude/run-configuration.md` for current duration
-- Agent uses 25% safety margin (duration * 1.25)
-- Update duration if builds consistently take longer
-
-**JavaDoc warnings persist**:
-- Agent MUST fix all JavaDoc warnings (not optional)
-- Uses cui-javadoc skill standards for fixes
-- Never add JavaDoc warnings to acceptable list
-
-**OpenRewrite markers multiply**:
-- Agent searches with Grep after EVERY build
-- Auto-suppresses LogRecord/Exception markers
-- Reports if markers persist after 3 fix iterations
-
-**Components not discovered**:
-- Check YAML frontmatter is valid
-- Verify file naming conventions
-- Ensure bundle is in correct location
-
-**Tool access issues**:
-- Review tool permissions in component frontmatter
-- Check for missing approvals
-- Use appropriate tool restrictions
-
-## Standards Covered
-
-### Maven Build Standards
-- Pre-commit profile configuration
-- Build success criteria
-- Quality gate enforcement
-- Execution time tracking
-
-### POM Maintenance Standards
-- BOM (Bill of Materials) management
-- Dependency management with properties
-- Version naming conventions
-- Scope optimization
-- OpenRewrite integration
-- Maven wrapper updates
-
-### Maven Integration Standards
-- Frontend-maven-plugin configuration
-- JavaScript tooling integration
-- SonarQube integration
-- Coverage reporting
-- CI/CD integration
-
-### Quality Standards
-- Compilation error handling
-- Test failure resolution
-- Code warning fixes
-- JavaDoc mandatory fixes
-- OpenRewrite marker handling
-- Acceptable warning management
-
-## Version History
-
-### Version 0.2.0 (Current)
-
-- **NEW**: Created maven-builder agent - central build execution agent
-  - Configurable build commands
-  - Multiple output modes (FILE, DEFAULT, ERRORS, NO_OPEN_REWRITE)
-  - Module and reactor build support
-  - Automatic duration tracking
-  - Output capture to timestamped files
-  - Non-prompting execution with simple redirection
-- **UPDATED**: `/maven-build-and-fix` command now uses maven-builder
-  - Delegates to maven-builder agent for build execution
-  - Focuses on issue analysis and routing fixes
-  - Cleaner separation of concerns
-- **UPDATED**: task-executor documentation to use maven-builder
-- **UPDATED**: Bundle README with delegation architecture
-
-### Version 0.1.0 (Initial Release)
-
-- Initial bundle structure created
-- Created maven-builder agent for Maven build execution
-- Created maven-build-and-fix command for build verification
-- Created cui-maven-rules skill with complete Maven standards
-- Ready for comprehensive Maven workflow support
+Projects should define a `pre-commit` profile in their POM for quality checks.
 
 ## License
 
-MIT
+Apache-2.0
 
 ## Support
 
-For issues, questions, or contributions:
 - Repository: https://github.com/cuioss/cui-llm-rules
 - Bundle: marketplace/bundles/cui-maven/
-
-## Related Bundles
-
-- **cui-utilities**: General utility commands and research capabilities
-- **cui-java-expert**: Java development standards bundle (maven-build-and-fix uses cui-javadoc skill for JavaDoc validation)
-
-## Acknowledgments
-
-This bundle consolidates Maven-related functionality previously distributed across:
-- cui-utilities (build verification commands)
-- standards/process (pom-maintenance.adoc)
-- standards/javascript (maven-integration-standards.adoc)
-
----
-
-*Generated by /cui-create-bundle - CUI Plugin Development Tools*

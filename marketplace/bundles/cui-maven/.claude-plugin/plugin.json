@@ -1,6 +1,6 @@
 {
   "name": "cui-maven",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Maven build, verification, and POM maintenance tools for CUI projects",
   "author": {
     "name": "CUI OSS Project",
@@ -10,9 +10,6 @@
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["maven", "build", "verification", "pom", "quality-gates"],
-  "agents": [
-    "./agents/maven-builder.md"
-  ],
   "commands": [
     "./commands/maven-build-and-fix.md"
   ],

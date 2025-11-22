@@ -1,0 +1,71 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] cui-parent                                                         [pom]
+[INFO] cui-core                                                           [jar]
+[INFO]
+[INFO] ----------------------< de.cuioss:cui-core >------------------------
+[INFO] Building cui-core 1.0.0                                            [1/2]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ cui-core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:testCompile (default-testCompile) @ cui-core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO]
+[INFO] --- maven-surefire-plugin:3.0.0:test (default-test) @ cui-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running de.cuioss.core.ServiceTest
+[ERROR] Tests run: 5, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.234 s <<< FAILURE! - in de.cuioss.core.ServiceTest
+[ERROR] de.cuioss.core.ServiceTest.testCalculation -- Time elapsed: 0.045 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <42> but was: <41>
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:195)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+	at de.cuioss.core.ServiceTest.testCalculation(ServiceTest.java:34)
+
+[ERROR] de.cuioss.core.ServiceTest.testValidation -- Time elapsed: 0.023 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:40)
+	at de.cuioss.core.ServiceTest.testValidation(ServiceTest.java:67)
+
+[INFO] Running de.cuioss.core.UtilityTest
+[ERROR] Tests run: 8, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.156 s <<< FAILURE! - in de.cuioss.core.UtilityTest
+[ERROR] de.cuioss.core.UtilityTest.testAsyncOperation -- Time elapsed: 2.012 s <<< ERROR!
+java.util.concurrent.TimeoutException: Test timed out after 2000 milliseconds
+	at org.junit.jupiter.engine.execution.ExecutableInvoker.invoke(ExecutableInvoker.java:88)
+	at de.cuioss.core.UtilityTest.testAsyncOperation(UtilityTest.java:89)
+
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Failures:
+[ERROR]   ServiceTest.testCalculation:34 expected: <42> but was: <41>
+[ERROR]   ServiceTest.testValidation:67 expected: <true> but was: <false>
+[ERROR] Errors:
+[ERROR]   UtilityTest.testAsyncOperation:89 >> TimeoutException
+[INFO]
+[ERROR] Tests run: 13, Failures: 2, Errors: 1, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for cui-parent 1.0.0:
+[INFO]
+[INFO] cui-parent ......................................... SUCCESS [  0.123 s]
+[INFO] cui-core ........................................... FAILURE [  8.456 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.579 s
+[INFO] Finished at: 2025-10-31T14:45:22+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.0.0:test (default-test) on project cui-core: There are test failures.
+[ERROR]
+[ERROR] Please refer to /Users/dev/project/modules/cui-core/target/surefire-reports for the individual test results.
+[ERROR] -> [Help 1]

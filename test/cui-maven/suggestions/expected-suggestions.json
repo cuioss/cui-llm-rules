@@ -1,0 +1,46 @@
+{
+  "compilation_cannot_find_symbol": {
+    "input_message": "cannot find symbol: class NonExistentClass",
+    "expected_suggestions": [
+      "Check if the class/method exists and is properly imported",
+      "Verify the spelling of the symbol name",
+      "Ensure the dependency containing this class is declared in pom.xml",
+      "Check if the class is in the correct package"
+    ]
+  },
+  "compilation_incompatible_types": {
+    "input_message": "incompatible types: String cannot be converted to int",
+    "expected_suggestions": [
+      "Add explicit type cast if conversion is safe",
+      "Use appropriate conversion methods (e.g., Integer.parseInt(), String.valueOf())",
+      "Check method return types and variable declarations",
+      "Ensure generic types match expected types"
+    ]
+  },
+  "dependency_not_found": {
+    "input_message": "Could not find artifact com.example:missing-library:jar:2.0.0",
+    "expected_suggestions": [
+      "Verify the groupId, artifactId, and version are correct",
+      "Check if the artifact requires a specific repository",
+      "Try running 'mvn -U clean install' to force update snapshots",
+      "Install the artifact locally if it's a local dependency"
+    ]
+  },
+  "test_failure": {
+    "input_message": "Tests run: 5, Failures: 2, Errors: 0",
+    "expected_suggestions": [
+      "Check the surefire-reports directory for detailed failure information",
+      "Run 'mvn test -Dtest=ClassName' to run specific test class",
+      "Use 'mvn test -X' for debug output",
+      "Check if test data or mocks need updating"
+    ]
+  },
+  "javadoc_missing_param": {
+    "input_message": "warning: no @param for configKey",
+    "expected_suggestions": [
+      "Add @param tag for the specified parameter",
+      "Verify parameter name matches the method signature",
+      "Use IDE quick-fix to generate missing Javadoc"
+    ]
+  }
+}

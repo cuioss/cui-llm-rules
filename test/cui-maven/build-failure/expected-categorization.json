@@ -1,0 +1,110 @@
+{
+  "compilation_error_expected": {
+    "status": "error",
+    "data": {
+      "exit_code": 1,
+      "issues": [
+        {
+          "type": "compilation_error",
+          "file": "src/main/java/de/cuioss/core/Service.java",
+          "line": 45,
+          "column": 20,
+          "message": "cannot find symbol",
+          "severity": "ERROR"
+        },
+        {
+          "type": "compilation_error",
+          "file": "src/main/java/de/cuioss/core/Service.java",
+          "line": 67,
+          "column": 15,
+          "message": "incompatible types: String cannot be converted to int",
+          "severity": "ERROR"
+        },
+        {
+          "type": "compilation_error",
+          "file": "src/main/java/de/cuioss/core/Handler.java",
+          "line": 123,
+          "column": 5,
+          "message": "illegal start of expression",
+          "severity": "ERROR"
+        },
+        {
+          "type": "compilation_error",
+          "file": "src/main/java/de/cuioss/core/Manager.java",
+          "line": 89,
+          "column": 1,
+          "message": "class, interface, or enum expected",
+          "severity": "ERROR"
+        }
+      ],
+      "summary": {
+        "compilation_errors": 4,
+        "test_failures": 0,
+        "javadoc_warnings": 0,
+        "dependency_errors": 0,
+        "total_issues": 4
+      }
+    }
+  },
+  "test_failure_expected": {
+    "status": "error",
+    "data": {
+      "exit_code": 1,
+      "issues": [
+        {
+          "type": "test_failure",
+          "file": "de/cuioss/core/ServiceTest.java",
+          "line": 34,
+          "method": "testCalculation",
+          "message": "expected: <42> but was: <41>",
+          "severity": "ERROR"
+        },
+        {
+          "type": "test_failure",
+          "file": "de/cuioss/core/ServiceTest.java",
+          "line": 67,
+          "method": "testValidation",
+          "message": "expected: <true> but was: <false>",
+          "severity": "ERROR"
+        },
+        {
+          "type": "test_error",
+          "file": "de/cuioss/core/UtilityTest.java",
+          "line": 89,
+          "method": "testAsyncOperation",
+          "message": "TimeoutException",
+          "severity": "ERROR"
+        }
+      ],
+      "summary": {
+        "compilation_errors": 0,
+        "test_failures": 2,
+        "test_errors": 1,
+        "javadoc_warnings": 0,
+        "dependency_errors": 0,
+        "total_issues": 3
+      }
+    }
+  },
+  "dependency_error_expected": {
+    "status": "error",
+    "data": {
+      "exit_code": 1,
+      "issues": [
+        {
+          "type": "dependency_error",
+          "artifact": "com.example:missing-library:jar:2.0.0",
+          "message": "Could not find artifact com.example:missing-library:jar:2.0.0 in central",
+          "severity": "ERROR"
+        }
+      ],
+      "summary": {
+        "compilation_errors": 0,
+        "test_failures": 0,
+        "javadoc_warnings": 0,
+        "dependency_errors": 1,
+        "total_issues": 1
+      }
+    }
+  }
+}
