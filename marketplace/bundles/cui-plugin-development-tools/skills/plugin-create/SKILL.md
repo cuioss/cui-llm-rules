@@ -1,7 +1,7 @@
 ---
 name: plugin-create
 description: Create new marketplace components (agents, commands, skills, bundles) with proper structure and standards compliance
-allowed-tools: Read, Write, Bash, AskUserQuestion
+allowed-tools: Read, Write, Bash, AskUserQuestion, Skill
 ---
 
 # Plugin Create Skill
@@ -50,6 +50,15 @@ This skill provides 4 workflows, one for each component type. All workflows foll
 - `bundle` - Target bundle (optional, will prompt if not provided)
 
 **Steps**:
+
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
 
 #### Step 1: Load Architecture Standards
 
@@ -248,6 +257,15 @@ If diagnosis fails: Display warning but don't abort (agent already created).
 
 **Steps**:
 
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
+
 #### Step 1: Load Command Standards
 
 ```
@@ -361,6 +379,15 @@ SlashCommand: /cui-plugin-development-tools:plugin-diagnose-commands command-nam
 - `bundle` - Target bundle (optional, will prompt if not provided)
 
 **Steps**:
+
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
 
 #### Step 1: Load Skill Standards
 
@@ -525,6 +552,15 @@ SlashCommand: /cui-plugin-development-tools:plugin-diagnose-skills skill-name={s
 - `scope` - Where to create (marketplace/global/project, default: marketplace)
 
 **Steps**:
+
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
 
 #### Step 1: Interactive Questionnaire
 

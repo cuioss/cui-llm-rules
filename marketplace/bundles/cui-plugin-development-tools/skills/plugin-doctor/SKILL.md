@@ -73,6 +73,7 @@ All 5 workflows follow the same pattern:
 - Unused tools in frontmatter
 - Trailing whitespace
 - Missing blank lines
+- Missing foundation skill loading (plugin-architecture, cui-diagnostic-patterns)
 
 **Risky Fixes** (require confirmation):
 - Rule 6 violations (Task tool in agents)
@@ -218,6 +219,22 @@ Bash: python3 {baseDir}/scripts/validate-references.py {cmd_path}
 - Bloat: CRITICAL if >100 lines (commands are thin orchestrators)
 - Verify proper Skill invocation format
 - Check parameter documentation
+- **Foundation skill loading via invoked skills** (see below)
+
+### Step 3b: Verify Foundation Skills in Invoked Skills
+
+**Commands are thin orchestrators** - they delegate to skills via `Skill:` invocation.
+
+**Check criteria**:
+1. Extract skill invocations from command (e.g., `Skill: cui-plugin-development-tools:plugin-create`)
+2. For each invoked skill, verify it loads foundation skills (plugin-architecture, cui-diagnostic-patterns)
+3. Report if invoked skill is missing foundation skills (fix the skill, not the command)
+
+**If invoked skill missing foundation skills**:
+- Report: "Command invokes skill '{skill}' which is missing foundation skill loading"
+- Recommendation: "Run `/plugin-doctor skill-name={skill}` to fix the skill"
+
+This is NOT a command fix - it's a skill fix. Commands don't load foundation skills directly; their skills do.
 
 ### Step 4-5: Categorize, Fix, Verify, Report
 
@@ -262,8 +279,51 @@ Bash: python3 {baseDir}/scripts/validate-references.py {skill_dir}/SKILL.md
 - {baseDir} pattern usage
 - No missing referenced files
 - No unreferenced files
+- **Foundation skill loading** (see below)
 
-### Step 4-5: Categorize, Fix, Verify, Report
+### Step 3b: Validate Foundation Skill Loading
+
+**CRITICAL**: Skills with workflows MUST load foundation skills.
+
+**Required foundation skills**:
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+**Check criteria**:
+1. Search SKILL.md for `Skill: cui-plugin-development-tools:plugin-architecture`
+2. Search SKILL.md for `Skill: cui-utilities:cui-diagnostic-patterns`
+3. **Exempt skills** (skip check):
+   - `plugin-architecture` (is itself the architecture skill)
+   - `marketplace-inventory` (pure Pattern 1 script automation, no component operations)
+   - Skills with `allowed-tools: Read` only (pure reference libraries)
+
+**If missing**: Flag as safe fix (auto-apply).
+
+### Step 4: Categorize and Fix
+
+**Safe fixes** (auto-apply unless --no-fix):
+- Missing frontmatter fields
+- Unused tools in frontmatter
+- Invalid YAML syntax
+- **Missing foundation skill loading** (add Step 0 to each workflow)
+
+**Auto-fix pattern for missing foundation skills**:
+```markdown
+#### Step 0: Load Foundation Skills
+
+\`\`\`
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+\`\`\`
+
+These provide architecture principles and non-prompting tool usage patterns.
+```
+
+Insert this before the first step of each workflow section (after `### Steps` line).
+
+### Step 5: Verify and Report
 
 Same pattern with skill-specific checks.
 

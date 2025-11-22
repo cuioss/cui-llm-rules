@@ -61,6 +61,15 @@ All scripts are stdlib-only with JSON output:
 
 ### Steps
 
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
+
 #### Step 1: Load Reference Guide
 
 ```
@@ -123,6 +132,15 @@ Report results including:
 
 ### Steps
 
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
+
 #### Step 1: Load Reference Guide
 
 ```
@@ -183,6 +201,15 @@ Add reference based on load_type:
 
 ### Steps
 
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
+
 #### Step 1: Load Reference Guide
 
 ```
@@ -234,6 +261,15 @@ Report:
 - `dry_run` (optional): Preview changes without applying (default: true)
 
 ### Steps
+
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
 
 #### Step 1: Load Reference Guide
 
@@ -292,6 +328,15 @@ Report any issues introduced.
 - `verify` (optional): Verify compliance after update (default: true)
 
 ### Steps
+
+#### Step 0: Load Foundation Skills
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+Skill: cui-utilities:cui-diagnostic-patterns
+```
+
+These provide architecture principles and non-prompting tool usage patterns.
 
 #### Step 1: Load Reference Guide
 
