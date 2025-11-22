@@ -598,6 +598,213 @@ chmod +x {script_path}
 - ✅ Proper shebang (`#!/bin/bash` or `#!/usr/bin/env python3`)
 - ✅ Exit codes (0 for success, 1 for error)
 
+## Lessons Learned (Consolidated Best Practices)
+
+Proven insights from developing marketplace scripts across multiple plans.
+
+### Stdlib-Only Implementation Patterns
+
+**PyYAML Replacement**:
+Initial scripts often import `yaml` package. Replace with custom parser:
+
+```python
+def parse_simple_yaml(content):
+    """Parse simple YAML frontmatter (key:value pairs only).
+
+    Handles:
+    - key: value pairs
+    - Array syntax detection (validates but rejects [])
+    - Improper indentation detection
+    """
+    result = {}
+    for line in content.strip().split('\n'):
+        if ':' in line:
+            key, value = line.split(':', 1)
+            result[key.strip()] = value.strip()
+    return result
+```
+
+**Key Insight**: Simple YAML parsing is sufficient for frontmatter - don't need full YAML library.
+
+### Shell Script Pitfalls
+
+**Counting with `set -euo pipefail`**:
+
+❌ **Wrong** (causes duplicate output or failures):
+```bash
+set -euo pipefail
+COUNT=$(grep -c "pattern" file || echo "0")  # Fallback runs even on success
+```
+
+✅ **Correct**:
+```bash
+set -euo pipefail
+if [ -z "$VAR" ]; then
+    COUNT=0
+else
+    COUNT=$(printf "%s" "$VAR" | wc -l)
+fi
+```
+
+**Variable Construction - Newlines**:
+
+❌ **Wrong** (literal string, not newline):
+```bash
+ITEMS="item1\nitem2"  # Creates literal "\n"
+```
+
+✅ **Correct** (actual newline):
+```bash
+ITEMS="item1"$'\n'"item2"  # Creates actual newline
+```
+
+**JSON Building with Pipes**:
+
+❌ **Wrong** (trailing newline breaks JSON):
+```bash
+echo "$VAR" | jq -Rs .
+```
+
+✅ **Correct** (no trailing newline):
+```bash
+printf "%s" "$VAR" | jq -Rs .
+```
+
+**Frontmatter vs Content Analysis**:
+
+Always separate frontmatter from body content to avoid false matches:
+
+```bash
+# Extract body only (skip frontmatter)
+BODY=$(awk '/^---$/{if(++count==2) {getline; body=1}} body' "$FILE")
+```
+
+### Test-Driven Development
+
+**Create test fixtures BEFORE implementation**:
+1. Define expected inputs and outputs
+2. Create fixture files for edge cases
+3. Write test script skeleton
+4. Implement script to pass tests
+
+**Fixture Coverage**:
+- Valid inputs (happy path)
+- Invalid inputs (error handling)
+- Edge cases (empty, malformed, boundary values)
+- Rule violations (Rule 6, Rule 7, Pattern 22)
+
+**Example fixture structure**:
+```
+test/{bundle}/{skill}/fixtures/{script-name}/
+├── valid-input.md           # Happy path
+├── invalid-frontmatter.md   # Error case
+├── empty-file.md            # Edge case
+├── rule-6-violation.md      # Architectural rule
+└── expected-output.json     # Expected results
+```
+
+### Script Architecture Patterns
+
+**Handler Dictionary Pattern** (for multiple operation types):
+
+```python
+FIX_HANDLERS = {
+    "missing_frontmatter": handle_missing_frontmatter,
+    "invalid_yaml": handle_invalid_yaml,
+    "unused_tools": handle_unused_tools,
+    "rule_6_violation": handle_rule_6_violation,
+}
+
+def apply_fix(fix_type, file_path, **kwargs):
+    handler = FIX_HANDLERS.get(fix_type)
+    if not handler:
+        return {"error": f"Unknown fix type: {fix_type}"}
+    return handler(file_path, **kwargs)
+```
+
+**Backup Before Modify**:
+
+```python
+import shutil
+from pathlib import Path
+
+def apply_fix_with_backup(file_path, fix_func):
+    backup_path = Path(file_path).with_suffix('.bak')
+    shutil.copy2(file_path, backup_path)
+    try:
+        result = fix_func(file_path)
+        backup_path.unlink()  # Remove backup on success
+        return result
+    except Exception as e:
+        shutil.copy2(backup_path, file_path)  # Restore on failure
+        backup_path.unlink()
+        return {"error": str(e)}
+```
+
+### JSON Output Consistency
+
+**Standard JSON Contract**:
+```json
+{
+  "status": "success|error",
+  "data": {
+    "primary_result": "...",
+    "secondary_info": []
+  },
+  "errors": [],
+  "metrics": {
+    "items_processed": 0,
+    "duration_ms": 0
+  }
+}
+```
+
+**Script Chaining** (enabled by consistent JSON):
+```bash
+# Extract → Categorize → Apply → Verify
+python3 extract-issues.py file.md | \
+  python3 categorize-fixes.py | \
+  python3 apply-fix.py | \
+  python3 verify-fix.py
+```
+
+### Validation Script Integration
+
+**Architectural Rule Enforcement**:
+Scripts should validate architectural rules automatically:
+
+- **Rule 6**: Agents cannot use Task tool
+- **Rule 7**: Only maven-builder can use Maven
+- **Pattern 22**: Agents must report to caller, not self-invoke
+
+```python
+def check_rule_6(content, component_type):
+    """Agents CANNOT use Task tool."""
+    if component_type != "agent":
+        return None
+    if "Task" in extract_tools(content):
+        return {
+            "rule": "Rule 6",
+            "severity": "error",
+            "message": "Agents cannot use Task tool"
+        }
+    return None
+```
+
+### Proven Pattern Combinations
+
+**Pattern 3 + Pattern 1** (Search-Analyze-Report + Script Automation):
+- Scripts handle deterministic validation logic
+- SKILL.md orchestrates workflows and interprets results
+- JSON output enables structured reporting
+- Successfully used across diagnose, fix, and maintain skills
+
+**Key Benefits**:
+- Easier testing (standard unit tests for scripts)
+- Separation of concerns (logic vs orchestration)
+- Portability (scripts work anywhere with Python/Bash)
+- Chaining (JSON output enables pipeline processing)
+
 ## Summary
 
 **Scripts are**:
