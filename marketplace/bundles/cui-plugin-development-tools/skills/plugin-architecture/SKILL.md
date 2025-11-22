@@ -271,6 +271,33 @@ Read {baseDir}/references/reference-patterns.md
 Read {baseDir}/references/frontmatter-standards.md
 ```
 
+### 10. Script Standards (Executable Automation)
+**File**: `references/script-standards.md`
+
+**Load When**:
+- Creating new scripts (Python/Bash)
+- Documenting scripts in SKILL.md
+- Writing script tests
+- Understanding stdlib-only requirements
+- Implementing JSON output format
+
+**Contents**:
+- Script location (`{skill-dir}/scripts/`)
+- Documentation requirements in SKILL.md
+- Test file requirements and structure
+- Help output requirements (`--help` flag)
+- Stdlib-only requirement (Python/Bash)
+- JSON output format
+- Executable permissions and shebang
+- Error handling patterns
+- Common issues and fixes
+- Script quality checklist
+
+**Load Command**:
+```
+Read {baseDir}/references/script-standards.md
+```
+
 ## Examples
 
 ### Example 1: Goal-Based Skill
@@ -432,6 +459,11 @@ Read {baseDir}/references/architecture-rules.md
 Read {baseDir}/references/reference-patterns.md
 ```
 
+**Creating scripts**:
+```
+Read {baseDir}/references/script-standards.md
+```
+
 **Learning by example**:
 ```
 Read {baseDir}/references/examples/goal-based-skill-example.md
@@ -503,6 +535,7 @@ All references are in `references/` directory:
 - token-optimization.md
 - reference-patterns.md
 - frontmatter-standards.md
+- script-standards.md
 - examples/goal-based-skill-example.md
 - examples/workflow-command-example.md
 - examples/pattern-usage-examples.md

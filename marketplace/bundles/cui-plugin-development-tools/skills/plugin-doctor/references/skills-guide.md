@@ -172,9 +172,9 @@ Read {baseDir}/references/second-guide.md  # ONLY for Workflow 2
 - commands-guide.md: ~500 lines
 - skills-guide.md: ~500 lines
 - metadata-guide.md: ~400 lines
-- scripts-guide.md: ~400 lines
+- script-standards.md: ~600 lines (in plugin-architecture)
 
-Total: ~2,300 lines across 5 guides, but only ONE loaded per workflow.
+Total: ~2,500 lines across 5 guides, but only ONE loaded per workflow.
 
 ## {baseDir} Pattern
 

@@ -1,6 +1,6 @@
-# Script Quality Standards
+# Script Standards
 
-Standards for marketplace scripts including documentation requirements in SKILL.md, test coverage, help output, and stdlib-only dependency requirements.
+Comprehensive standards for marketplace scripts including location, documentation requirements, testing, help output, stdlib-only dependencies, JSON output format, and error handling.
 
 ## Overview
 

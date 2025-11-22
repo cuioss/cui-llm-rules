@@ -31,7 +31,7 @@ Each workflow performs the complete cycle: discover → analyze → categorize �
 | doctor-commands | `commands-guide.md` | `fix-catalog.md` |
 | doctor-skills | `skills-guide.md` | `fix-catalog.md` |
 | doctor-metadata | `metadata-guide.md` | `fix-catalog.md` |
-| doctor-scripts | `scripts-guide.md` | `fix-catalog.md` |
+| doctor-scripts | `plugin-architecture:script-standards.md` | `fix-catalog.md` |
 
 **Context Efficiency**: ~800 lines per workflow vs ~4,000 lines if loading everything.
 
@@ -403,7 +403,8 @@ Glob: pattern="**/plugin.json", path="marketplace/bundles"
 
 ```
 Skill: cui-utilities:cui-diagnostic-patterns
-Read {baseDir}/references/scripts-guide.md
+Skill: cui-plugin-development-tools:plugin-architecture
+Read plugin-architecture:{baseDir}/references/script-standards.md
 Read {baseDir}/references/fix-catalog.md
 ```
 
@@ -443,12 +444,14 @@ Same pattern with script-specific checks.
 
 ### References ({baseDir}/references/)
 
-**Diagnosis References** (5):
+**Diagnosis References** (4):
 - `agents-guide.md` - Agent quality standards
 - `commands-guide.md` - Command quality standards
 - `skills-guide.md` - Skill structure standards
 - `metadata-guide.md` - plugin.json schema
-- `scripts-guide.md` - Script documentation standards
+
+**External Standards** (from plugin-architecture):
+- `script-standards.md` - Script documentation, testing, and quality standards
 
 **Fix References** (4):
 - `fix-catalog.md` - Fix categorization rules
