@@ -1,7 +1,7 @@
 {
   "name": "cui-plugin-development-tools",
   "version": "1.0.0",
-  "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
+  "description": "Complete toolchain for creating, diagnosing, fixing, and maintaining Claude Code marketplace components",
   "author": {
     "name": "CUI OSS Project",
     "email": "contact@cuioss.de"
@@ -9,37 +9,22 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["plugin", "development", "tools", "diagnose", "create"],
+  "keywords": ["plugin", "development", "tools", "diagnose", "create", "fix", "maintain"],
   "commands": [
-    "./commands/plugin-add-skill-knowledge.md",
-    "./commands/plugin-diagnose-agents.md",
-    "./commands/plugin-diagnose-commands.md",
-    "./commands/plugin-diagnose-metadata.md",
-    "./commands/plugin-diagnose-scripts.md",
-    "./commands/plugin-diagnose-skills.md",
-    "./commands/plugin-maintain-readme.md",
-    "./commands/plugin-update-agent.md",
-    "./commands/plugin-update-command.md",
-    "./commands/plugin-verify-marketplace.md"
+    "./commands/plugin-create.md",
+    "./commands/plugin-diagnose.md",
+    "./commands/plugin-fix.md",
+    "./commands/plugin-maintain.md",
+    "./commands/plugin-verify.md"
   ],
   "skills": [
-    "./skills/bundle-orchestration-compliance",
-    "./skills/cui-fix-workflow",
-    "./skills/cui-marketplace-architecture",
-    "./skills/cui-marketplace-orchestration-patterns",
     "./skills/diagnose-reporting-templates",
     "./skills/marketplace-inventory",
     "./skills/plugin-architecture",
-    "./skills/plugin-create"
+    "./skills/plugin-create",
+    "./skills/plugin-diagnose",
+    "./skills/plugin-fix",
+    "./skills/plugin-maintain"
   ],
-  "agents": [
-    "./agents/analyze-cross-skill-duplication.md",
-    "./agents/analyze-integrated-standards.md",
-    "./agents/analyze-plugin-references.md",
-    "./agents/analyze-standards-file.md",
-    "./agents/architectural-validator.md",
-    "./agents/diagnose-agent.md",
-    "./agents/diagnose-command.md",
-    "./agents/diagnose-skill.md"
-  ]
+  "agents": []
 }

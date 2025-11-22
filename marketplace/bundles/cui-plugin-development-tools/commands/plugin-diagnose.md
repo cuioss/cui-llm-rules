@@ -1,5 +1,5 @@
 ---
-name: diagnose
+name: plugin-diagnose
 description: Find and understand quality issues in marketplace components
 ---
 
@@ -11,22 +11,22 @@ Analyze marketplace components for quality issues, bloat, and standards violatio
 
 ```
 # Diagnose all components of a type
-/diagnose agents
-/diagnose commands
-/diagnose skills
-/diagnose metadata
-/diagnose scripts
+/plugin-diagnose agents
+/plugin-diagnose commands
+/plugin-diagnose skills
+/plugin-diagnose metadata
+/plugin-diagnose scripts
 
 # Diagnose single component
-/diagnose agent=my-agent
-/diagnose command=my-command
-/diagnose skill=my-skill
+/plugin-diagnose agent=my-agent
+/plugin-diagnose command=my-command
+/plugin-diagnose skill=my-skill
 
 # Diagnose entire marketplace
-/diagnose marketplace
+/plugin-diagnose marketplace
 
 # Show usage
-/diagnose
+/plugin-diagnose
 ```
 
 ## Workflow
@@ -53,7 +53,7 @@ When you invoke this command, I will:
 
 4. **Display results** with issue categorization
 
-5. **Offer fix option**: "Run /fix to apply fixes"
+5. **Offer fix option**: "Run /plugin-fix to apply fixes"
 
 ## Parameter Validation
 
@@ -69,24 +69,24 @@ When you invoke this command, I will:
 ## Examples
 
 ```
-User: /diagnose agents
+User: /plugin-diagnose agents
 Result: Invokes plugin-diagnose:diagnose-agents (all agents)
 
-User: /diagnose agent=my-agent
+User: /plugin-diagnose agent=my-agent
 Result: Invokes plugin-diagnose:diagnose-agents (single agent)
 
-User: /diagnose marketplace
+User: /plugin-diagnose marketplace
 Result: Invokes plugin-diagnose:validate-marketplace
 
-User: /diagnose
+User: /plugin-diagnose
 Result: Shows usage with all scope options
 
-User: /diagnose invalid
+User: /plugin-diagnose invalid
 Result: Error: Invalid scope. Use: agents, commands, skills, metadata, scripts, or marketplace
 ```
 
 ## Related
 
-- `/fix` - Apply fixes to diagnosed issues
-- `/create` - Create new components
-- `/verify` - Run full marketplace verification
+- `/plugin-fix` - Apply fixes to diagnosed issues
+- `/plugin-create` - Create new components
+- `/plugin-verify` - Run full marketplace verification

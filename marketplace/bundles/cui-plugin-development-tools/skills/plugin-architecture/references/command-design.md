@@ -25,13 +25,13 @@ Design principles for goal-based commands that act as thin orchestrators routing
 Commands organized by user goals, not component types:
 
 ```markdown
-# ✅ GOOD: Goal-based
+# ✅ GOOD: Goal-based with bundle prefix
 commands/
-├── create.md          # CREATE any component type
-├── diagnose.md        # DIAGNOSE any scope
-├── fix.md             # FIX identified issues
-├── maintain.md        # MAINTAIN marketplace health
-└── verify.md          # VERIFY complete marketplace
+├── plugin-create.md     # CREATE any component type
+├── plugin-diagnose.md   # DIAGNOSE any scope
+├── plugin-fix.md        # FIX identified issues
+├── plugin-maintain.md   # MAINTAIN marketplace health
+└── plugin-verify.md     # VERIFY complete marketplace
 
 # ❌ BAD: Component-centric
 commands/
@@ -78,8 +78,8 @@ Ask user for next action or additional input
 
 ```markdown
 # Simple, single-value parameter
-/create agent
-/diagnose marketplace
+/plugin-create agent
+/plugin-diagnose marketplace
 ```
 
 **Pattern**:
@@ -95,9 +95,9 @@ Step 1: Parse Command Parameter
 
 ```markdown
 # Key-value pairs
-/diagnose agent=my-agent
-/diagnose agents
-/maintain update component=my-agent
+/plugin-diagnose agent=my-agent
+/plugin-diagnose agents
+/plugin-maintain update component=my-agent
 ```
 
 **Pattern**:
@@ -112,8 +112,8 @@ Step 1: Parse Parameters
 
 ```markdown
 # Boolean flags
-/diagnose marketplace --fix
-/verify --verbose
+/plugin-diagnose marketplace --fix
+/plugin-verify --verbose
 ```
 
 **Pattern**:
@@ -265,11 +265,11 @@ For each component (with progress):
 
 ## Command Examples
 
-### Example 1: create Command
+### Example 1: plugin-create Command
 
 ```markdown
 ---
-name: create
+name: plugin-create
 description: Create new marketplace component (agent, command, skill, or bundle)
 ---
 
@@ -278,10 +278,10 @@ description: Create new marketplace component (agent, command, skill, or bundle)
 ## Usage
 
 ```
-/create agent
-/create command
-/create skill
-/create bundle
+/plugin-create agent
+/plugin-create command
+/plugin-create skill
+/plugin-create bundle
 ```
 
 ## Workflow
@@ -301,11 +301,11 @@ Workflow: create-{component_type}
 Show created file path and next steps
 ```
 
-### Example 2: diagnose Command
+### Example 2: plugin-diagnose Command
 
 ```markdown
 ---
-name: diagnose
+name: plugin-diagnose
 description: Find and understand quality issues in marketplace components
 ---
 
@@ -314,10 +314,10 @@ description: Find and understand quality issues in marketplace components
 ## Usage
 
 ```
-/diagnose agent=my-agent
-/diagnose agents
-/diagnose marketplace
-/diagnose marketplace --fix
+/plugin-diagnose agent=my-agent
+/plugin-diagnose agents
+/plugin-diagnose marketplace
+/plugin-diagnose marketplace --fix
 ```
 
 ## Workflow

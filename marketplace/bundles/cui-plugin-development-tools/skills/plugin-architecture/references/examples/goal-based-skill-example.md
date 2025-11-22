@@ -423,7 +423,7 @@ All scripts return JSON for structured parsing:
 
 ```
 # Command invokes skill
-/diagnose agent=my-agent
+/plugin-diagnose agent=my-agent
 
 # Command workflow:
 Step 1: Parse parameters → component_path="my-agent.md", component_type="agent"

@@ -1,5 +1,5 @@
 ---
-name: create
+name: plugin-create
 description: Create new marketplace component (agent, command, skill, or bundle)
 ---
 
@@ -10,10 +10,10 @@ Create new agents, commands, skills, or bundles following marketplace standards.
 ## Usage
 
 ```
-/create agent
-/create command
-/create skill
-/create bundle
+/plugin-create agent
+/plugin-create command
+/plugin-create skill
+/plugin-create bundle
 ```
 
 ## Workflow
@@ -49,20 +49,20 @@ When you invoke this command, I will:
 ## Examples
 
 ```
-User: /create agent
+User: /plugin-create agent
 Result: Invokes plugin-create:create-agent workflow
 
-User: /create command
+User: /plugin-create command
 Result: Invokes plugin-create:create-command workflow
 
-User: /create
+User: /plugin-create
 Result: Asks "Which component type? (agent/command/skill/bundle)"
 
-User: /create invalid
+User: /plugin-create invalid
 Result: Error: Invalid type 'invalid'. Use: agent, command, skill, or bundle
 ```
 
 ## Related
 
-- `/diagnose` - Find issues in components
-- `/maintain` - Update existing components
+- `/plugin-diagnose` - Find issues in components
+- `/plugin-maintain` - Update existing components

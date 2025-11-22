@@ -1,16 +1,16 @@
 ---
-name: fix
+name: plugin-fix
 description: Fix identified quality issues in marketplace components
 ---
 
 # Fix Marketplace Issues
 
-Apply fixes to quality issues identified by /diagnose command.
+Apply fixes to quality issues identified by /plugin-diagnose command.
 
 ## Usage
 
 ```
-/fix
+/plugin-fix
 ```
 
 ## Workflow
@@ -18,8 +18,8 @@ Apply fixes to quality issues identified by /diagnose command.
 When you invoke this command, I will:
 
 1. **Check for previous diagnosis**:
-   - If recent /diagnose was run: Use those results
-   - If no recent diagnosis: Prompt user to run /diagnose first
+   - If recent /plugin-diagnose was run: Use those results
+   - If no recent diagnosis: Prompt user to run /plugin-diagnose first
 
 2. **Load plugin-fix skill**:
    ```
@@ -36,11 +36,11 @@ When you invoke this command, I will:
 
 ## Parameter Validation
 
-**Required**: None (uses context from previous /diagnose)
+**Required**: None (uses context from previous /plugin-diagnose)
 **Optional**: None
 
 **Error Handling**:
-- No previous diagnosis → Prompt to run /diagnose first
+- No previous diagnosis → Prompt to run /plugin-diagnose first
 
 ## Fix Categorization
 
@@ -58,17 +58,17 @@ When you invoke this command, I will:
 ## Examples
 
 ```
-User: /diagnose agents
+User: /plugin-diagnose agents
 [Results shown with 5 issues]
-User: /fix
+User: /plugin-fix
 Result: Applies 3 safe fixes, prompts for 2 risky fixes
 
-User: /fix
-[No recent /diagnose]
-Result: Error: No recent diagnosis found. Run /diagnose first.
+User: /plugin-fix
+[No recent /plugin-diagnose]
+Result: Error: No recent diagnosis found. Run /plugin-diagnose first.
 ```
 
 ## Related
 
-- `/diagnose` - Find issues before fixing
-- `/verify` - Verify marketplace after fixes
+- `/plugin-diagnose` - Find issues before fixing
+- `/plugin-verify` - Verify marketplace after fixes

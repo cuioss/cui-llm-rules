@@ -16,19 +16,19 @@ This example demonstrates a goal-based command that acts as a thin orchestrator,
 - Contain knowledge/standards (use skills)
 - Duplicate workflow logic (invoke skills)
 
-## diagnose Command
+## plugin-diagnose Command
 
 ### File Location
 
 ```
-marketplace/bundles/cui-plugin-development-tools/commands/diagnose.md
+marketplace/bundles/cui-plugin-development-tools/commands/plugin-diagnose.md
 ```
 
 ### Command Structure
 
 ```markdown
 ---
-name: diagnose
+name: plugin-diagnose
 description: Find and understand quality issues in marketplace components
 ---
 
@@ -40,26 +40,26 @@ Interactive command to analyze marketplace components and identify issues.
 
 **Diagnose specific component**:
 ```
-/diagnose agent=my-agent
-/diagnose command=my-command
-/diagnose skill=my-skill
+/plugin-diagnose agent=my-agent
+/plugin-diagnose command=my-command
+/plugin-diagnose skill=my-skill
 ```
 
 **Diagnose all components of a type**:
 ```
-/diagnose agents
-/diagnose commands
-/diagnose skills
+/plugin-diagnose agents
+/plugin-diagnose commands
+/plugin-diagnose skills
 ```
 
 **Diagnose entire marketplace**:
 ```
-/diagnose marketplace
+/plugin-diagnose marketplace
 ```
 
 **Diagnose with auto-fix**:
 ```
-/diagnose marketplace --fix
+/plugin-diagnose marketplace --fix
 ```
 
 ## Workflow
@@ -379,7 +379,7 @@ Results formatted for readability:
 
 ```
 # 1 unified command
-/diagnose {scope}
+/plugin-diagnose {scope}
 
 # Parses scope, routes to appropriate workflow
 # All diagnostic logic in plugin-diagnose skill
@@ -397,42 +397,42 @@ Results formatted for readability:
 
 **Test 1: Single Component**
 ```
-Input: /diagnose agent=my-agent
+Input: /plugin-diagnose agent=my-agent
 Expected: Detailed analysis of my-agent.md
 Verify: Report shows component-specific issues
 ```
 
 **Test 2: All of Type**
 ```
-Input: /diagnose agents
+Input: /plugin-diagnose agents
 Expected: Aggregated report for all agents
 Verify: Statistics and top issues shown
 ```
 
 **Test 3: Marketplace**
 ```
-Input: /diagnose marketplace
+Input: /plugin-diagnose marketplace
 Expected: Complete marketplace health report
 Verify: Bundle scores and overall health shown
 ```
 
 **Test 4: Auto-Fix**
 ```
-Input: /diagnose marketplace --fix
+Input: /plugin-diagnose marketplace --fix
 Expected: Diagnosis + automatic safe fixes
 Verify: Fix report shows what was applied
 ```
 
 **Test 5: Ambiguous Input**
 ```
-Input: /diagnose
+Input: /plugin-diagnose
 Expected: User prompted for scope
 Verify: Options presented clearly
 ```
 
 ## Summary
 
-The diagnose command demonstrates:
+The plugin-diagnose command demonstrates:
 - **Thin orchestration**: No complex logic in command
 - **Goal-based**: Unified interface for diagnostic goal
 - **Smart routing**: Parameters determine workflow

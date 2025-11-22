@@ -1,5 +1,5 @@
 ---
-name: maintain
+name: plugin-maintain
 description: Maintain marketplace health through updates and refactoring
 ---
 
@@ -11,24 +11,24 @@ Update components, add knowledge, maintain READMEs, and refactor structure.
 
 ```
 # Update components
-/maintain update agent=my-agent
-/maintain update command=my-command
+/plugin-maintain update agent=my-agent
+/plugin-maintain update command=my-command
 
 # Add knowledge to skill
-/maintain add-knowledge skill=my-skill source=url
+/plugin-maintain add-knowledge skill=my-skill source=url
 
 # Maintain READMEs
-/maintain readme                    # All bundles
-/maintain readme bundle=my-bundle   # Single bundle
+/plugin-maintain readme                    # All bundles
+/plugin-maintain readme bundle=my-bundle   # Single bundle
 
 # Refactor structure
-/maintain refactor
+/plugin-maintain refactor
 
 # Apply orchestration compliance
-/maintain orchestration command=my-command
+/plugin-maintain orchestration command=my-command
 
 # Show usage
-/maintain
+/plugin-maintain
 ```
 
 ## Workflow
@@ -74,27 +74,27 @@ When you invoke this command, I will:
 ## Examples
 
 ```
-User: /maintain update agent=my-agent
+User: /plugin-maintain update agent=my-agent
 Result: Invokes plugin-maintain:update-component
 
-User: /maintain add-knowledge skill=my-skill source=https://example.com/doc
+User: /plugin-maintain add-knowledge skill=my-skill source=https://example.com/doc
 Result: Invokes plugin-maintain:add-knowledge
 
-User: /maintain readme
+User: /plugin-maintain readme
 Result: Invokes plugin-maintain:update-readme (all bundles)
 
-User: /maintain readme bundle=my-bundle
+User: /plugin-maintain readme bundle=my-bundle
 Result: Invokes plugin-maintain:update-readme (single bundle)
 
-User: /maintain refactor
+User: /plugin-maintain refactor
 Result: Invokes plugin-maintain:refactor-structure
 
-User: /maintain
+User: /plugin-maintain
 Result: Shows usage with all task types
 ```
 
 ## Related
 
-- `/diagnose` - Find issues in components
-- `/create` - Create new components
-- `/verify` - Verify marketplace health
+- `/plugin-diagnose` - Find issues in components
+- `/plugin-create` - Create new components
+- `/plugin-verify` - Verify marketplace health

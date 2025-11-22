@@ -233,18 +233,18 @@ plugin-verify-marketplace
 
 ### After: 5 Goal-Based Commands
 ```
-create              (replaces 4 create-* commands)
-diagnose            (replaces 5 diagnose-* commands)
-fix                 (new - extracted from diagnose commands)
-maintain            (replaces 4 update/maintain commands)
-verify              (marketplace health check)
+plugin-create       (replaces 4 create-* commands)
+plugin-diagnose     (replaces 5 diagnose-* commands)
+plugin-fix          (new - extracted from diagnose commands)
+plugin-maintain     (replaces 4 update/maintain commands)
+plugin-verify       (marketplace health check)
 ```
 
 ### Command Design Example: diagnose.md
 
 ```markdown
 ---
-name: diagnose
+name: plugin-diagnose
 description: Find and understand quality issues in marketplace components
 ---
 
@@ -256,26 +256,26 @@ Interactive command to analyze marketplace components and identify issues.
 
 **Diagnose specific component**:
 ```
-/diagnose agent=my-agent
-/diagnose command=my-command
-/diagnose skill=my-skill
+/plugin-diagnose agent=my-agent
+/plugin-diagnose command=my-command
+/plugin-diagnose skill=my-skill
 ```
 
 **Diagnose all components of a type**:
 ```
-/diagnose agents
-/diagnose commands
-/diagnose skills
+/plugin-diagnose agents
+/plugin-diagnose commands
+/plugin-diagnose skills
 ```
 
 **Diagnose entire marketplace**:
 ```
-/diagnose marketplace
+/plugin-diagnose marketplace
 ```
 
 **Diagnose with auto-fix**:
 ```
-/diagnose marketplace --fix
+/plugin-diagnose marketplace --fix
 ```
 
 ## Workflow
@@ -501,7 +501,7 @@ All scripts return JSON for structured parsing.
 
 ### 1. User-Centric Organization
 - **Before**: "Which diagnose command do I use? diagnose-agents or diagnose-commands?"
-- **After**: "I want to diagnose → Use /diagnose command with appropriate parameters"
+- **After**: "I want to diagnose → Use /plugin-diagnose command with appropriate parameters"
 
 ### 2. Massive Simplification
 - **Before**: 8 agents + 14 commands + 6 skills = 28 files
@@ -534,7 +534,7 @@ All scripts return JSON for structured parsing.
 
 **Step 1: Command invocation** (minimal context)
 ```
-/diagnose agent=my-agent
+/plugin-diagnose agent=my-agent
 ```
 
 **Step 2: Command loads** (~100 lines)

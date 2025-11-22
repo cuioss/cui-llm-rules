@@ -1,5 +1,5 @@
 ---
-name: verify
+name: plugin-verify
 description: Verify complete marketplace health
 ---
 
@@ -10,7 +10,7 @@ Run comprehensive marketplace verification checking all components.
 ## Usage
 
 ```
-/verify
+/plugin-verify
 ```
 
 ## Workflow
@@ -32,7 +32,7 @@ When you invoke this command, I will:
    - Issue counts by severity
    - Recommendations for fixes
 
-4. **Offer fix option**: "Run /fix to apply fixes"
+4. **Offer fix option**: "Run /plugin-fix to apply fixes"
 
 ## Parameter Validation
 
@@ -52,18 +52,18 @@ Scripts: X issues (Y critical)
 
 Total: X issues across Y components
 
-Run /fix to apply fixes
+Run /plugin-fix to apply fixes
 ```
 
 ## Examples
 
 ```
-User: /verify
+User: /plugin-verify
 Result: Invokes plugin-diagnose:validate-marketplace
         Displays comprehensive health report for entire marketplace
 ```
 
 ## Related
 
-- `/diagnose` - Diagnose specific component types
-- `/fix` - Apply fixes to verified issues
+- `/plugin-diagnose` - Diagnose specific component types
+- `/plugin-fix` - Apply fixes to verified issues

@@ -143,7 +143,7 @@ This ensures the command evolves and becomes more effective with each execution.
 **options** - Additional options (optional)
 ```
 
-Usage: `/diagnose my-agent --fix`
+Usage: `/plugin-diagnose my-agent --fix`
 
 ### Pattern 2: Named Parameters
 
@@ -155,7 +155,7 @@ Usage: `/diagnose my-agent --fix`
 **verbose** - Show detailed output (true/false, default: false)
 ```
 
-Usage: `/diagnose name=my-agent scope=agent verbose=true`
+Usage: `/plugin-diagnose name=my-agent scope=agent verbose=true`
 
 ### Pattern 3: Flag Parameters
 
@@ -167,7 +167,7 @@ Usage: `/diagnose name=my-agent scope=agent verbose=true`
 **--dry-run** - Preview changes without applying (flag, default: false)
 ```
 
-Usage: `/fix my-agent --dry-run`
+Usage: `/plugin-fix my-agent --dry-run`
 
 ### Pattern 4: No Parameters
 
@@ -177,7 +177,7 @@ Usage: `/fix my-agent --dry-run`
 None - Command operates on current context
 ```
 
-Usage: `/verify`
+Usage: `/plugin-verify`
 
 ## Workflow Patterns
 
@@ -348,7 +348,7 @@ Validate component against rules
 Command → Skill Workflow → Display Results
 ```
 
-Example: `/create agent` → plugin-create skill, create-agent workflow
+Example: `/plugin-create agent` → plugin-create skill, create-agent workflow
 
 ### Pattern 2: Conditional Orchestration
 
@@ -356,7 +356,7 @@ Example: `/create agent` → plugin-create skill, create-agent workflow
 Command → Parse Parameters → Route to Different Workflows → Display
 ```
 
-Example: `/diagnose scope=X` → plugin-diagnose skill, different workflow per scope
+Example: `/plugin-diagnose scope=X` → plugin-diagnose skill, different workflow per scope
 
 ### Pattern 3: Sequential Orchestration
 
@@ -364,7 +364,7 @@ Example: `/diagnose scope=X` → plugin-diagnose skill, different workflow per s
 Command → Workflow 1 → Workflow 2 → Workflow 3 → Display
 ```
 
-Example: `/maintain readme` → scan → update → validate → display
+Example: `/plugin-maintain readme` → scan → update → validate → display
 
 ### Pattern 4: Agent Delegation
 
@@ -398,7 +398,7 @@ Execute diagnosis workflow
 If diagnosis fails:
   Show warning: "⚠️ Diagnosis failed: {error}"
   Note: "Component created but not validated"
-  Suggest: "Run /diagnose {name} manually"
+  Suggest: "Run /plugin-diagnose {name} manually"
   Continue (don't abort entire command)
 ```
 
