@@ -341,21 +341,14 @@ WARN Level:
 - After corrections (verify changes compile)
 - After renumbering (final verification)
 
-**Standard Build Command:**
+**Use cui-maven-rules skill workflow:**
 ```
-Task:
-  subagent_type: cui-maven:maven-builder
-  description: Verify build
-  prompt: |
-    Execute Maven build to verify codebase state.
-
-    Parameters:
-    - command: clean verify
-    - outputMode: DEFAULT
-    {- module: [module-name] (if specified)}
-
-    Build must succeed with zero errors.
-    Return detailed status with any errors/warnings found.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean verify
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **Success Criteria:**

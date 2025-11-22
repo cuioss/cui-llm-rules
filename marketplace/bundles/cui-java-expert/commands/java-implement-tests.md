@@ -5,7 +5,7 @@ description: Self-contained command for JUnit test implementation with verificat
 
 # Java Implement Tests Command
 
-Self-contained command that implements JUnit tests with full standards compliance, verifies with maven-builder, and iterates until tests pass.
+Self-contained command that implements JUnit tests with full standards compliance, verifies with Maven builds, and iterates until tests pass.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -73,17 +73,12 @@ If the description explicitly indicates the task is to **fix the build or failin
 
 2. **Execute build verification**:
    ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify build precondition
-     prompt: |
-       Execute Maven build to verify clean starting point.
-
-       Goals: clean test
-       Module: {module if specified}
-       Output mode: STRUCTURED
-
-       Return structured results including all errors, warnings, and test failures.
+   Skill: cui-maven:cui-maven-rules
+   Workflow: Execute Maven Build
+   Parameters:
+     goals: clean test
+     module: {module if specified}
+     output_mode: structured
    ```
 
 3. **Analyze build result**:
@@ -256,17 +251,12 @@ Reference patterns from loaded `cui-java-unit-testing` skill:
 
 2. **Execute tests**:
    ```
-   Task:
-     subagent_type: maven-builder
-     description: Run tests
-     prompt: |
-       Execute Maven build to run tests.
-
-       Goals: test
-       Module: {module if specified}
-       Output mode: STRUCTURED
-
-       Return structured results including test execution results.
+   Skill: cui-maven:cui-maven-rules
+   Workflow: Execute Maven Build
+   Parameters:
+     goals: test
+     module: {module if specified}
+     output_mode: structured
    ```
 
 3. **Analyze test result**:
@@ -425,7 +415,7 @@ Result: ⚠️ PARTIAL SUCCESS
 - NEVER use prohibited testing libraries
 
 **Test Verification:**
-- ALWAYS verify tests with maven-builder
+- ALWAYS verify tests with Maven build
 - ALWAYS use "test" goal at minimum
 - ANALYZE test failures (test bug vs production bug)
 - FIX test bugs and iterate (max 3 iterations)
@@ -454,7 +444,7 @@ Result: ⚠️ PARTIAL SUCCESS
 - **Glob**: Find pom.xml files, identify modules, locate test files
 - **Grep**: Verify types exist, search for patterns, find dependencies
 - **Skill**: Load cui-java-unit-testing (loads all applicable testing standards)
-- **Task**: Invoke maven-builder agent for test verification
+- **Bash**: Execute Maven builds for test verification
 
 ## ARCHITECTURE
 
@@ -463,21 +453,21 @@ This is a Layer 2 self-contained command:
 ```
 /java-implement-tests (Layer 2: Single-item orchestration)
   ├─> Implement tests directly (no agent delegation)
-  ├─> Task(maven-builder) [Layer 3: executes tests]
+  ├─> Skill(cui-maven:cui-maven-rules) workflow: Execute Maven Build
   ├─> Analyze and iterate (max 3 cycles)
   └─> Return result
 ```
 
 **Key Design:**
 - Self-contained: Implements tests directly without agent delegation
-- Verification: Uses maven-builder for test execution (Rule 7 compliance)
+- Verification: Uses cui-maven-rules skill for test execution
 - Iteration: Max 3 test-fix cycles
 - Can be invoked by users OR Layer 1 batch commands
 - Production bug detection: Documents production issues without fixing them
 
 ## RELATED
 
-- `maven-builder` - Test execution agent (Layer 3)
+- `cui-maven:cui-maven-rules` skill - Maven standards and output parsing
 - `/orchestrate-java` - Orchestrates multiple test tasks (Layer 1)
 - `cui-java-unit-testing` - Testing standards skill
 - `/java-implement-code` - Production code implementation (Layer 2)

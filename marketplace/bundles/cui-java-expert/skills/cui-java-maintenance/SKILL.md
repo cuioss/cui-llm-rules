@@ -404,7 +404,7 @@ Return structured analysis with prioritized action items.
 
 If issues arise during maintenance:
 
-1. **Build failures**: Use maven-builder agent to diagnose and fix
+1. **Build failures**: Use Bash + parse-maven-output.py to diagnose and fix
 2. **Test failures**: Review test output and fix broken tests
 3. **Coverage regressions**: Add tests for uncovered code paths
 4. **Static analysis issues**: Address SonarQube findings systematically

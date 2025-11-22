@@ -183,7 +183,7 @@ Provide summary of:
 
 ### Coverage Verification
 
-- [ ] Run coverage profile using maven-builder agent with -Pcoverage
+- [ ] Run coverage profile using `./mvnw clean test -Pcoverage`
 - [ ] Coverage meets minimum requirements (80% line/branch)
 - [ ] Critical paths have 100% coverage
 - [ ] No coverage regressions from previous state

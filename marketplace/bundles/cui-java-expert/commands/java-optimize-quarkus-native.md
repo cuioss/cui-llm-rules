@@ -56,17 +56,12 @@ Execute pre-optimization checklist to establish baseline:
 
 **2.1 Build Verification:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Verify baseline build
-  prompt: |
-    Build and install project to verify baseline functionality.
-
-    Parameters:
-    - command: clean install
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Ensure all tests pass before proceeding.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **On build failure:**
@@ -76,22 +71,18 @@ Task:
 
 **2.2 Native Image Baseline:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Build native image baseline
-  prompt: |
-    Build native image to verify Quarkus native compilation works and establish baseline metrics.
-
-    Parameters:
-    - command: clean package -Dnative
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion (may take several minutes).
-    Record and report:
-    - Build time
-    - Native executable size
-    - Any compilation warnings or errors
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean package -Dnative
+  module: {module if specified}
+  output_mode: structured
 ```
+
+Record metrics from build output:
+- Build time
+- Native executable size
+- Any compilation warnings or errors
 
 **On native build failure:**
 - Display native compilation errors
@@ -169,32 +160,22 @@ Apply deployment processor optimizations following standards:
 
 **4.3 Verification After Each Change:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Test compilation
-  prompt: |
-    Compile module to verify deployment processor changes.
-
-    Parameters:
-    - command: clean compile
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Fix any compilation errors immediately.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean compile
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **4.4 Quality Verification:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Run quality checks
-  prompt: |
-    Run pre-commit quality verification without tests.
-
-    Parameters:
-    - command: -Ppre-commit clean verify -DskipTests
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Fix any quality issues.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: {module if specified}
+  output_mode: errors
 ```
 
 ### Step 5: Phase 3 - Application Class Optimization
@@ -223,32 +204,22 @@ Apply application class optimizations following standards:
 
 **5.3 Module Compilation:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Compile module
-  prompt: |
-    Compile module to verify reflection annotations.
-
-    Parameters:
-    - command: clean compile
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Fix any compilation errors.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean compile
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **5.4 Full Module Build:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Full module build
-  prompt: |
-    Build and install module with optimized reflection.
-
-    Parameters:
-    - command: clean install
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Ensure all tests pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  module: {module if specified}
+  output_mode: structured
 ```
 
 **On test failure:**
@@ -262,52 +233,38 @@ Task:
 
 **6.1 Reflection Verification Tests:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Run reflection tests
-  prompt: |
-    Run all reflection-related tests.
-
-    Parameters:
-    - command: test -Dtest="*Reflection*Test"
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Verify all reflection tests pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: test -Dtest="*Reflection*Test"
+  module: {module if specified}
+  output_mode: structured
 ```
 
 **6.2 Full Test Suite:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Run full test suite
-  prompt: |
-    Run complete test suite with optimized reflection.
-
-    Parameters:
-    - command: clean install
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Ensure all tests pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  module: {module if specified}
+  output_mode: structured
 ```
 
 **6.3 Native Image Compilation:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Build native image
-  prompt: |
-    Build native executable using GraalVM with optimized reflection.
-
-    Parameters:
-    - command: clean package -Dnative
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion (may take several minutes).
-    Record and report:
-    - Build time
-    - Native executable size
-    - Any compilation warnings or errors
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean package -Dnative
+  module: {module if specified}
+  output_mode: structured
 ```
+
+Record metrics from build output:
+- Build time
+- Native executable size
+- Any compilation warnings or errors
 
 **6.4 Performance Metrics Comparison:**
 
@@ -336,32 +293,22 @@ IMPROVEMENTS:
 
 **7.1 Final Quality Verification:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Run quality checks
-  prompt: |
-    Run pre-commit quality verification without tests.
-
-    Parameters:
-    - command: -Ppre-commit clean verify -DskipTests
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Fix all quality issues before committing.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **7.2 Final Build Verification:**
 ```
-Task:
-  subagent_type: maven-builder
-  description: Final build verification
-  prompt: |
-    Run final build and test verification.
-
-    Parameters:
-    - command: clean install
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Wait for completion. Ensure all tests and quality checks pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  module: {module if specified}
+  output_mode: structured
 ```
 
 ### Step 8: Documentation and Commit

@@ -11,33 +11,15 @@ This process defines WHEN and WHAT to optimize in Quarkus applications for nativ
 Before starting any native optimization work:
 
 1. [ ] **Baseline Verification**: Ensure application builds and tests pass
-   ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify baseline build
-     prompt: |
-       Build and install project to verify baseline functionality.
-
-       Parameters:
-       - command: clean install
-
-       CRITICAL: Wait for completion. Ensure all tests pass before proceeding.
+   ```bash
+   ./mvnw clean install > target/baseline-build.log 2>&1
    ```
 
 2. [ ] **Native Image Compatibility**: Verify project supports native compilation
+   ```bash
+   ./mvnw clean package -Dnative > target/native-baseline.log 2>&1
    ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify native image build
-     prompt: |
-       Build native image to verify Quarkus native compilation works.
-
-       Parameters:
-       - command: clean package -Dnative
-
-       CRITICAL: Wait for completion (may take several minutes).
-       Record build time and image size for baseline metrics.
-   ```
+   Record build time and image size for baseline metrics.
 
 3. [ ] **Performance Baseline**: Record current metrics (build time, image size, startup time)
 
@@ -160,32 +142,12 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 **CRITICAL**: When registering CDI beans in the deployment processor, remove duplicate `@RegisterForReflection` annotations from the bean classes to avoid conflicts.
 
 **Verification Commands**:
-```
+```bash
 # Test compilation after each change
-Task:
-  subagent_type: maven-builder
-  description: Test compilation
-  prompt: |
-    Compile module to verify changes.
-
-    Parameters:
-    - command: clean compile
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Fix any compilation errors.
+./mvnw clean compile -pl [module-name] > target/compile-verify.log 2>&1
 
 # Run quality verification
-Task:
-  subagent_type: maven-builder
-  description: Run quality checks
-  prompt: |
-    Run pre-commit quality verification without tests.
-
-    Parameters:
-    - command: -Ppre-commit clean verify -DskipTests
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Fix any quality issues.
+./mvnw -Ppre-commit clean verify -DskipTests -pl [module-name] > target/quality-verify.log 2>&1
 ```
 
 **Success Criteria**:
@@ -238,45 +200,15 @@ Task:
 - **Framework Integration**: Some frameworks require specific reflection access
 
 **Verification Process**:
-```
+```bash
 # Compile module
-Task:
-  subagent_type: maven-builder
-  description: Compile module
-  prompt: |
-    Compile module to verify reflection annotations.
-
-    Parameters:
-    - command: clean compile
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Fix any compilation errors.
+./mvnw clean compile -pl [module-name] > target/app-compile.log 2>&1
 
 # Test reflection optimization
-Task:
-  subagent_type: maven-builder
-  description: Test reflection configuration
-  prompt: |
-    Run specific reflection tests to verify optimization.
-
-    Parameters:
-    - command: clean test -Dtest=[ReflectionTest]
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Verify reflection tests pass.
+./mvnw clean test -Dtest=[ReflectionTest] -pl [module-name] > target/reflection-tests.log 2>&1
 
 # Full module verification
-Task:
-  subagent_type: maven-builder
-  description: Full module build
-  prompt: |
-    Build and install module with optimized reflection.
-
-    Parameters:
-    - command: clean install
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Ensure all tests pass.
+./mvnw clean install -pl [module-name] > target/module-install.log 2>&1
 ```
 
 **Success Criteria**:
@@ -308,30 +240,20 @@ Task:
 **Commands**:
 ```
 # Run reflection verification tests
-Task:
-  subagent_type: maven-builder
-  description: Run reflection tests
-  prompt: |
-    Run all reflection-related tests.
-
-    Parameters:
-    - command: test -Dtest="*Reflection*Test"
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Verify all reflection tests pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: test -Dtest="*Reflection*Test"
+  module: [module-name]
+  output_mode: structured
 
 # Run full test suite
-Task:
-  subagent_type: maven-builder
-  description: Run full test suite
-  prompt: |
-    Run complete test suite with optimized reflection.
-
-    Parameters:
-    - command: clean install
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Ensure all tests pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  module: [module-name]
+  output_mode: structured
 ```
 
 #### 3.2 Native Image Compatibility Testing
@@ -341,19 +263,14 @@ Task:
 **What to Test**:
 - [ ] **Native Compilation**: Verify native image builds successfully
   ```
-  Task:
-    subagent_type: maven-builder
-    description: Build native image
-    prompt: |
-      Build native executable using GraalVM.
-
-      Parameters:
-      - command: clean package -Dnative
-      - module: [module-name]
-
-      CRITICAL: Wait for completion (may take several minutes).
-      Record build time and executable size metrics.
+  Skill: cui-maven:cui-maven-rules
+  Workflow: Execute Maven Build
+  Parameters:
+    goals: clean package -Dnative
+    module: [module-name]
+    output_mode: structured
   ```
+  Record build time and executable size metrics after completion.
 
 - [ ] **Runtime Testing**: Test application functionality in native mode
 - [ ] **Performance Metrics**: Compare before/after metrics:
@@ -377,31 +294,23 @@ Task:
 **Mandatory Checks**:
 ```
 # Quality verification (mandatory)
-Task:
-  subagent_type: maven-builder
-  description: Run quality checks
-  prompt: |
-    Run pre-commit quality verification without tests.
-
-    Parameters:
-    - command: -Ppre-commit clean verify -DskipTests
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Fix all quality issues before committing.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: [module-name]
+  output_mode: structured
 
 # Final verification (mandatory)
-Task:
-  subagent_type: maven-builder
-  description: Final build verification
-  prompt: |
-    Run final build and test verification.
-
-    Parameters:
-    - command: clean install
-    - module: [module-name]
-
-    CRITICAL: Wait for completion. Ensure all tests and quality checks pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  module: [module-name]
+  output_mode: structured
 ```
+
+Fix all quality issues before committing. Ensure all tests and quality checks pass.
 
 **Success Criteria**:
 - All quality checks pass

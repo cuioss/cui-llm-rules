@@ -138,61 +138,22 @@ Both goals are required for proper integration test execution:
 
 ### Normal Development Build
 
-```
+```bash
 # Runs only unit tests, excludes integration tests
-Task:
-  subagent_type: maven-builder
-  description: Run unit tests only
-  prompt: |
-    Execute unit tests only, excluding integration tests.
-
-    Parameters:
-    - command: clean test
-
-    CRITICAL: Wait for completion. Inspect results and fix any failures.
+./mvnw clean test > target/unit-tests.log 2>&1
 
 # Full build without integration tests
-Task:
-  subagent_type: maven-builder
-  description: Build without integration tests
-  prompt: |
-    Execute full build excluding integration tests.
-
-    Parameters:
-    - command: clean verify
-
-    CRITICAL: Wait for completion. Inspect results and fix any failures.
+./mvnw clean verify > target/build-verify.log 2>&1
 ```
 
 ### Integration Test Execution
 
-```
+```bash
 # Run only integration tests (skips unit tests)
-Task:
-  subagent_type: maven-builder
-  description: Run integration tests
-  prompt: |
-    Execute integration tests using the integration-tests profile.
-
-    Parameters:
-    - command: clean verify -Pintegration-tests
-
-    CRITICAL: Wait for completion. Inspect results and fix any failures.
+./mvnw clean verify -Pintegration-tests > target/integration-tests.log 2>&1
 
 # Run integration tests for specific modules
-Task:
-  subagent_type: maven-builder
-  description: Run integration tests for specific modules
-  prompt: |
-    Execute integration tests for specific modules only.
-
-    Parameters:
-    - command: clean verify -Pintegration-tests
-    - module: module1
-
-    Note: For multiple modules, run separate builds or modify command.
-
-    CRITICAL: Wait for completion. Inspect results and fix any failures.
+./mvnw clean verify -Pintegration-tests -pl module1 > target/module-integration.log 2>&1
 ```
 
 ## CI/CD Integration
@@ -211,34 +172,14 @@ Ensure both scenarios work correctly:
 1. **Normal Build**: Should only run unit tests
 2. **Integration Profile**: Should skip unit tests and only run integration tests
 
-```
+```bash
 # Verify unit tests run, integration tests excluded
-Task:
-  subagent_type: maven-builder
-  description: Verify unit test execution
-  prompt: |
-    Run unit tests to verify integration tests are excluded.
-    Check output for *Test classes running, no *IT classes.
-
-    Parameters:
-    - command: clean test
-
-    CRITICAL: Wait for completion. Verify output shows only *Test classes,
-    no *IT or *ITCase classes executed.
+# Check output for *Test classes running, no *IT classes
+./mvnw clean test > target/verify-unit-tests.log 2>&1
 
 # Verify integration tests run, unit tests skipped
-Task:
-  subagent_type: maven-builder
-  description: Verify integration test execution
-  prompt: |
-    Run integration tests to verify unit tests are skipped.
-    Check output for *IT/*ITCase classes running, *Test classes skipped.
-
-    Parameters:
-    - command: clean verify -Pintegration-tests
-
-    CRITICAL: Wait for completion. Verify output shows only *IT/*ITCase classes,
-    *Test classes show as skipped.
+# Check output for *IT/*ITCase classes running, *Test classes skipped
+./mvnw clean verify -Pintegration-tests > target/verify-integration.log 2>&1
 ```
 
 ## Common Pitfalls
@@ -265,7 +206,7 @@ command: clean test -Pintegration-tests
 command: clean verify -Pintegration-tests
 ```
 
-**Note**: When using maven-builder agent, pass goals without ./mvnw prefix.
+**Note**: Execute Maven commands using `./mvnw` with goals directly.
 
 ### ❌ Missing Failsafe Executions
 

@@ -5,7 +5,7 @@ description: Generate coverage with Maven and analyze results (self-contained co
 
 # Java Coverage Report Command
 
-Thin orchestrator that generates JaCoCo coverage reports using maven-builder agent and analyzes results using cui-java-unit-testing skill workflow.
+Thin orchestrator that generates JaCoCo coverage reports and analyzes results using cui-java-unit-testing skill workflow.
 
 ## Parameters
 
@@ -22,14 +22,14 @@ Skill: cui-java-expert:cui-java-unit-testing
 
 ### Step 2: Generate Coverage
 
+**Execute Maven coverage build:**
 ```
-Task:
-  subagent_type: cui-maven:maven-builder
-  description: Generate coverage
-  prompt: |
-    Execute Maven build with goals: clean test -Pcoverage
-
-    Generate JaCoCo coverage reports.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test -Pcoverage
+  module: {module if specified}
+  output_mode: structured
 ```
 
 ### Step 3: Analyze Coverage
@@ -40,21 +40,19 @@ Execute workflow: Analyze Coverage
 
 Or run script directly:
 ```bash
-{baseDir}/scripts/analyze-coverage.py --file target/site/jacoco/jacoco.xml --threshold {threshold}
+python3 {baseDir}/scripts/analyze-coverage.py --file target/site/jacoco/jacoco.xml --threshold {threshold}
 ```
 
 ### Step 4: Generate Report
 
 ```
-╔════════════════════════════════════════════════════════════╗
-║              Coverage Analysis Report                      ║
-╚════════════════════════════════════════════════════════════╝
+COVERAGE ANALYSIS REPORT
 
 Build Status: {build_status}
 
 Overall Coverage:
-- Line Coverage: {line_coverage}% {status_emoji}
-- Branch Coverage: {branch_coverage}% {status_emoji}
+- Line Coverage: {line_coverage}%
+- Branch Coverage: {branch_coverage}%
 - Method Coverage: {method_coverage}%
 
 Threshold: {threshold}%
@@ -70,13 +68,13 @@ Next Steps:
 ## Architecture
 
 **Pattern**: Thin Orchestrator Command (<100 lines)
-- Invokes maven-builder agent for coverage generation
+- Uses cui-maven-rules skill for Maven execution
 - Delegates analysis to cui-java-unit-testing skill workflow
 - No business logic in command
 
 ```
 /java-generate-coverage
-  ├─> Task(maven-builder) [generates coverage]
+  ├─> Skill(cui-maven:cui-maven-rules) workflow: Execute Maven Build
   └─> Skill(cui-java-unit-testing) workflow: Analyze Coverage
 ```
 
@@ -90,4 +88,4 @@ Next Steps:
 ## Related
 
 - `cui-java-unit-testing` skill - Coverage analysis workflow
-- `maven-builder` agent - Coverage generation
+- `cui-maven:cui-maven-rules` skill - Maven standards (optional for output parsing)

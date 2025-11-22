@@ -239,21 +239,13 @@ For complete testing library requirements, allowed/forbidden libraries, and migr
 
 ### Coverage Verification
 
-Use maven-builder agent to verify coverage:
+Execute coverage verification with Maven:
 
+```bash
+./mvnw clean verify -Pcoverage > target/coverage-verify.log 2>&1
 ```
-Task:
-  subagent_type: maven-builder
-  description: Verify test coverage
-  prompt: |
-    Execute tests with coverage analysis using the coverage profile.
 
-    Parameters:
-    - command: clean verify -Pcoverage
-
-    CRITICAL: Wait for build to complete. Inspect coverage results and ensure
-    minimum 80% line/branch coverage is met. Address any coverage gaps.
-```
+Inspect coverage results and ensure minimum 80% line/branch coverage is met. Address any coverage gaps.
 
 ### Coverage Quality
 

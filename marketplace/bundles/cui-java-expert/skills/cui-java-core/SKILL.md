@@ -378,7 +378,7 @@ Map<String, List<User>> usersByRole = users.stream()
 6. Implement methods with proper null safety
 7. Use modern Java features (records for DTOs, switch expressions, streams)
 8. Write unit tests verifying behavior
-9. Run build using maven-builder agent
+9. Run build using ./mvnw and parse output if needed
 
 ### Task: Refactor existing code to standards
 

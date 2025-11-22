@@ -93,14 +93,12 @@ This loads comprehensive maintenance standards including:
 **2.1 Build Verification:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Verify build before refactoring
-  prompt: |
-    Execute Maven build with pre-commit profile.
-    Parameters: -Ppre-commit clean verify -DskipTests
-    Module: {module if specified, otherwise all}
-    Build must pass before proceeding.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **On build failure:** Display errors, prompt user "[F]ix manually and retry / [A]bort", track in `pre_verification_failures`.
@@ -108,14 +106,12 @@ Task:
 **2.2 Test Execution:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Execute test suite
-  prompt: |
-    Execute complete test suite to verify baseline functionality.
-    Parameters: clean test
-    Module: {module if specified, otherwise all}
-    All tests must pass before refactoring begins.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test
+  module: {module if specified}
+  output_mode: structured
 ```
 
 **On test failure:** Display failures, prompt user "[F]ix manually and retry / [A]bort", track in `pre_verification_failures`.
@@ -249,25 +245,21 @@ After all modules processed:
 **6.1 Complete Build:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Final build verification
-  prompt: |
-    Execute complete build to verify all changes.
-    Parameters: clean verify
-    Full build must pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean verify
+  output_mode: errors
 ```
 
 **6.2 Full Test Suite:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Final test verification
-  prompt: |
-    Execute complete test suite.
-    Parameters: clean test
-    All tests must pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test
+  output_mode: structured
 ```
 
 **6.3 Coverage Verification:**
@@ -330,7 +322,7 @@ Display all statistics in final summary.
 
 ## ERROR HANDLING
 
-**Build/Test Failures:** Display detailed errors, attempt automatic fixes via maven-builder, prompt for manual intervention if needed, track failures for reporting.
+**Build/Test Failures:** Display detailed errors, parse output using parse-maven-output.py, prompt for manual intervention if needed, track failures for reporting.
 
 **Implementation Errors:** Log specific violation that failed, skip individual violations on user request, continue with other violations, report failures in summary.
 
@@ -377,11 +369,12 @@ Bash: git reset --hard {initial_commit}
 
 ## ARCHITECTURE
 
-Orchestrates agents and commands:
+Orchestrates skill workflows and commands:
 - **cui-java-maintenance skill** - Standards for detection, prioritization, verification
 - **Explore agent** - Codebase analysis for violation detection
 - **/cui-java-implement-code command** - Focused code fixes (Layer 2)
-- **maven-builder agent** - Build and verification (Layer 3)
+- **Bash** - Maven build execution
+- **cui-maven:cui-maven-rules skill** - Build output parsing
 - **`/maven-build-and-fix` command** - Build verification and fixes
 - **`/java-generate-coverage` command** - Coverage analysis
 
@@ -389,7 +382,7 @@ Orchestrates agents and commands:
 
 - `cui-java-maintenance` skill - Standards this command implements
 - `/java-implement-code` command - Implementation fixes
-- `maven-builder` agent - Build verification
+- `cui-maven:cui-maven-rules` skill - Maven standards and output parsing
 - `/maven-build-and-fix` command - Build and fix workflow
 - `/java-generate-coverage` command - Coverage analysis
 - `cui-java-core` skill - Implementation patterns

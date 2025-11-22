@@ -1,7 +1,7 @@
 ---
 name: cui-maven-rules
 description: Complete Maven standards covering build processes, POM maintenance, dependency management, and Maven integration for CUI projects
-allowed-tools: Read, Grep, Bash(python3:*)
+allowed-tools: Read, Grep, Bash(./mvnw:*), Bash(python3:*)
 ---
 
 # CUI Maven Rules
@@ -84,6 +84,93 @@ After loading the appropriate standards:
 2. Follow the patterns and guidelines from the loaded standards
 3. Apply quality gates and verification criteria as specified
 4. Ensure all changes align with CUI Maven best practices
+
+---
+
+## Workflow: Execute Maven Build
+
+**Pattern**: Pattern 4 (Command Chain Execution)
+
+This workflow executes Maven builds and returns structured results. Use this workflow whenever Maven builds are needed.
+
+### When to Use
+
+Use this workflow when:
+- Running Maven builds (clean, compile, test, verify, install, package)
+- Executing builds with specific profiles (-Ppre-commit, -Pcoverage, -Pintegration-tests)
+- Building specific modules (-pl module-name)
+- Building native images (-Dnative)
+
+### Parameters
+
+- **goals** (required): Maven goals to execute (e.g., "clean install", "clean verify -DskipTests")
+- **module** (optional): Specific module to build (-pl flag)
+- **profile** (optional): Maven profile to activate (-P flag)
+- **output_mode** (optional): How to process output - "default", "errors", "structured" (default: "structured")
+
+### Step 1: Execute Maven Build
+
+```bash
+./mvnw {goals} {-pl module if specified} {-P profile if specified} > target/maven-build.log 2>&1
+```
+
+**Examples:**
+```bash
+# Basic build
+./mvnw clean install > target/maven-build.log 2>&1
+
+# Module-specific build
+./mvnw clean install -pl auth-service > target/maven-build.log 2>&1
+
+# With profile
+./mvnw clean verify -Ppre-commit > target/maven-build.log 2>&1
+
+# Coverage build
+./mvnw clean test -Pcoverage > target/maven-build.log 2>&1
+
+# Native image
+./mvnw clean package -Dnative > target/maven-build.log 2>&1
+```
+
+### Step 2: Parse Build Output
+
+```bash
+python3 {baseDir}/scripts/parse-maven-output.py \
+    --log target/maven-build.log \
+    --mode {output_mode}
+```
+
+### Step 3: Return Results
+
+Return structured JSON with:
+- Build status (SUCCESS/FAILURE)
+- Categorized issues (compilation_error, test_failure, javadoc_warning, dependency_error)
+- Summary counts
+- Metrics (duration, tests run/failed)
+
+### Usage from Commands
+
+Commands invoke this workflow as:
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  module: auth-service (optional)
+  profile: pre-commit (optional)
+  output_mode: structured (optional)
+```
+
+### Issue Routing
+
+Based on returned issue categories, route to appropriate fix commands:
+
+| Issue Type | Fix Command |
+|------------|-------------|
+| `compilation_error` | `/java-implement-code` |
+| `test_failure` | `/java-implement-tests` |
+| `javadoc_warning` | `/java-fix-javadoc` |
+| `dependency_error` | Manual POM fix |
 
 ---
 
@@ -182,6 +269,7 @@ All standards are organized in the `standards/` directory:
 This skill requires:
 - **Read**: To load standards files
 - **Grep**: To search for patterns in standards
+- **Bash(./mvnw:*)**: To execute Maven builds
 - **Bash(python3:*)**: To execute parse-maven-output.py script
 
 ## Usage Pattern
@@ -259,7 +347,7 @@ When standards need updates, modify the files in the `standards/` directory and 
 
 ## Version
 
-Version: 0.2.0 (Added Parse Maven Build Output workflow)
+Version: 0.3.0 (Added Execute Maven Build workflow)
 
 Part of: cui-maven bundle
 

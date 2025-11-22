@@ -5,7 +5,7 @@ description: Self-contained command for Java code implementation with verificati
 
 # Java Implement Code Command
 
-Self-contained command that implements Java code with full standards compliance, verifies with maven-builder, and iterates until clean.
+Self-contained command that implements Java code with full standards compliance, verifies with Maven builds, and iterates until clean.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -73,17 +73,12 @@ If the description explicitly indicates the task is to **fix the build** (e.g., 
 
 2. **Execute build verification**:
    ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify build precondition
-     prompt: |
-       Execute Maven build to verify clean starting point.
-
-       Goals: clean compile
-       Module: {module if specified}
-       Output mode: STRUCTURED
-
-       Return structured results including all errors and warnings.
+   Skill: cui-maven:cui-maven-rules
+   Workflow: Execute Maven Build
+   Parameters:
+     goals: clean compile
+     module: {module if specified}
+     output_mode: errors
    ```
 
 3. **Analyze build result**:
@@ -242,17 +237,12 @@ For each step in the plan:
 
 2. **Execute build**:
    ```
-   Task:
-     subagent_type: maven-builder
-     description: Verify implementation build
-     prompt: |
-       Execute Maven build to verify implementation.
-
-       Goals: clean compile test
-       Module: {module if specified}
-       Output mode: STRUCTURED
-
-       Return structured results including all errors and warnings.
+   Skill: cui-maven:cui-maven-rules
+   Workflow: Execute Maven Build
+   Parameters:
+     goals: clean compile test
+     module: {module if specified}
+     output_mode: structured
    ```
 
 3. **Analyze build result**:
@@ -432,7 +422,7 @@ Summary:
 - ALWAYS apply patterns consistently
 
 **Post-Implementation Build Verification (Step 7):**
-- ALWAYS verify with maven-builder
+- ALWAYS verify with Maven build
 - ALWAYS use "clean compile test" at minimum
 - NEVER proceed with build errors
 - NEVER proceed with build warnings
@@ -465,7 +455,7 @@ Summary:
 - **Glob**: Find related files, pom.xml locations
 - **Grep**: Search for types, patterns, dependencies
 - **Skill**: Load cui-java-core (always) and cui-java-cdi (when needed)
-- **Task**: Invoke maven-builder agent for build verification
+- **Bash**: Execute Maven builds for verification
 
 ## ARCHITECTURE
 
@@ -474,20 +464,20 @@ This is a Layer 2 self-contained command:
 ```
 /java-implement-code (Layer 2: Single-item orchestration)
   ├─> Implement code directly (no agent delegation)
-  ├─> Task(maven-builder) [Layer 3: verifies builds]
+  ├─> Skill(cui-maven:cui-maven-rules) workflow: Execute Maven Build
   ├─> Analyze and iterate (max 3 cycles)
   └─> Return result
 ```
 
 **Key Design:**
 - Self-contained: Implements code directly without agent delegation
-- Verification: Uses maven-builder for builds (Rule 7 compliance)
+- Verification: Uses cui-maven-rules skill for Maven builds
 - Iteration: Max 3 build-fix cycles
 - Can be invoked by users OR Layer 1 batch commands
 
 ## RELATED
 
-- `maven-builder` - Build verification agent (Layer 3)
+- `cui-maven:cui-maven-rules` skill - Maven standards and output parsing
 - `/orchestrate-java` - Orchestrates multiple implementations (Layer 1)
 - `cui-java-core` - Core Java standards skill
 - `cui-java-cdi` - CDI/Quarkus standards skill

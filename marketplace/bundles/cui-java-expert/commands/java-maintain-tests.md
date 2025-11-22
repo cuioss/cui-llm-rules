@@ -59,13 +59,26 @@ This loads all CUI testing standards including:
 **Execute build verification to establish baseline**:
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Pre-maintenance build verification
-  prompt: |
-    Execute three-phase verification: quality build, test execution, coverage analysis.
-    Record coverage metrics for regression detection.
-    If ANY build fails, STOP and report failures.
+# Phase 1: Quality build
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  output_mode: errors
+
+# Phase 2: Test execution
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test
+  output_mode: structured
+
+# Phase 3: Coverage analysis
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test -Pcoverage
+  output_mode: structured
 ```
 
 **Outcome**: Baseline established, ready for maintenance.
@@ -158,14 +171,27 @@ If bugs discovered, STOP and report."
 **Verify improvements for current module**:
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Verify test improvements for [module]
-  prompt: |
-    Execute three-phase verification for module: [module]
-    Scope to module using -pl [module] flag.
-    Verify minimum 80% coverage maintained.
-    DO NOT proceed to next module if ANY build fails.
+# Three-phase verification for module
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: [module]
+  output_mode: errors
+
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test
+  module: [module]
+  output_mode: structured
+
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test -Pcoverage
+  module: [module]
+  output_mode: structured
 ```
 
 **Outcome**: Module improvements verified, ready to commit.
@@ -220,13 +246,24 @@ Current module: [name]
 **After all modules processed, verify entire project**:
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Final comprehensive verification
-  prompt: |
-    Execute three-phase verification across all modules (no -pl flag).
-    Report final metrics: tests improved, coverage change, violations removed.
-    Verify no inter-module conflicts.
+# Final comprehensive verification across all modules
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  output_mode: errors
+
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test
+  output_mode: structured
+
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test -Pcoverage
+  output_mode: structured
 ```
 
 **Outcome**: Full project verification complete.
@@ -287,7 +324,7 @@ Applies value object testing to business logic and value objects only.
 
 ## ERROR HANDLING
 
-**Build/test failures**: maven-builder agent handles error analysis and reporting. Do NOT proceed until resolved.
+**Build/test failures**: Parse Maven output using parse-maven-output.py for error analysis. Do NOT proceed until resolved.
 
 **Production bugs discovered**: STOP immediately, ask user approval before fixing production code (Step 4 protocol).
 
@@ -337,11 +374,12 @@ Test maintenance is complete when:
 
 **Skills Used**:
 * cui-java-unit-testing - Complete testing standards and patterns
+* cui-maven:cui-maven-rules - Maven standards and output parsing
 
-**Commands and Agents Orchestrated**:
+**Commands Orchestrated**:
 * Explore - Test quality analysis and module identification
 * /java-implement-tests - Test improvement implementation (Layer 2)
-* maven-builder - Build verification and coverage analysis
+* Bash - Maven build execution with output parsing
 
 **Related Commands**:
 * /java-refactor-code - For production code refactoring

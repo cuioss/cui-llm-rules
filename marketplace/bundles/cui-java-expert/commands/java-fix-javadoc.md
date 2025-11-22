@@ -86,18 +86,12 @@ This loads comprehensive Javadoc standards including:
 **2.1 Run Maven Build with Javadoc:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Build with Javadoc validation
-  prompt: |
-    Execute Maven build with pre-commit profile to identify Javadoc errors.
-
-    Parameters:
-    - command: -Ppre-commit clean verify -DskipTests
-    - module: {module if specified, otherwise all}
-
-    CRITICAL: Capture all Javadoc warnings and errors from build output.
-    Return structured results including all Javadoc issues.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: {module if specified}
+  output_mode: structured
 ```
 
 **On build failure (non-Javadoc):**
@@ -278,7 +272,12 @@ After each fix:
 After batch of fixes (every 10 fixes or per file):
 
 ```
-Bash: ./mvnw javadoc:javadoc {-pl module if specified}
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: javadoc:javadoc
+  module: {module if specified}
+  output_mode: errors
 ```
 
 Check if errors resolved without introducing new ones.
@@ -294,17 +293,12 @@ Check if errors resolved without introducing new ones.
 **5.1 Complete Build Verification:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Final Javadoc verification
-  prompt: |
-    Execute complete build with Javadoc validation.
-
-    Parameters:
-    - command: -Ppre-commit clean verify -DskipTests
-    - module: {module if specified, otherwise all}
-
-    Verify all Javadoc errors are resolved.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **On remaining errors:**
@@ -466,15 +460,16 @@ All fix strategies follow content-preservation rules and minimal modification ap
 
 ## ARCHITECTURE
 
-Orchestrates agents and commands:
+Orchestrates skill workflows and commands:
 - **cui-javadoc skill** - Standards and error reference
-- **maven-builder agent** - Build execution and error capture (Layer 3)
+- **Bash** - Maven build execution
+- **cui-maven:cui-maven-rules skill** - Build output parsing
 - **Explore agent** - Error context analysis
 - **/cui-java-implement-code command** - Apply Javadoc fixes (Layer 2)
 
 ## RELATED
 
 - `cui-javadoc` skill - Javadoc standards and error reference
-- `maven-builder` agent - Build and verification
+- `cui-maven:cui-maven-rules` skill - Maven standards and output parsing
 - `/java-implement-code` command - Code modifications
 - `/java-refactor-code` command - Broader code refactoring

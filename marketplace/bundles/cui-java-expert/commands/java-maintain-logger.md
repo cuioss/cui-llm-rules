@@ -81,14 +81,12 @@ This loads comprehensive logging standards including:
 **2.1 Build Verification:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Verify build before maintenance
-  prompt: |
-    Execute Maven build with pre-commit profile.
-    Parameters: -Ppre-commit clean verify -DskipTests
-    Module: {module if specified, otherwise all}
-    Build must pass before proceeding.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean verify -DskipTests
+  module: {module if specified}
+  output_mode: errors
 ```
 
 **On build failure:** Prompt user "[F]ix build first / [A]bort", track in `pre_verification_failures`.
@@ -254,12 +252,12 @@ Then add LogAsserts to existing test (see cui-java-core skill for LogAsserts pat
 **6.1 Module Build Verification:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Verify module after changes
-  prompt: |
-    Execute: clean test -pl {module}
-    All tests must pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test
+  module: {module}
+  output_mode: structured
 ```
 
 **On failure:** Analyze cause, apply bug handling protocol if non-logging.
@@ -274,12 +272,12 @@ For each LogRecord in module:
 **6.3 Full Build Verification:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Final module verification
-  prompt: |
-    Execute: -Ppre-commit clean install -pl {module}
-    Complete build must pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean install
+  module: {module}
+  output_mode: errors
 ```
 
 **6.4 Module Commit:**
@@ -311,12 +309,11 @@ Proceed to next module.
 **7.1 Complete Build:**
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Final build verification all modules
-  prompt: |
-    Execute: -Ppre-commit clean install
-    Full build must pass.
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: -Ppre-commit clean install
+  output_mode: errors
 ```
 
 **7.2 Final plan.md Update:** Update with completion timestamp.
@@ -391,17 +388,18 @@ Display all statistics in final summary.
 
 ## ARCHITECTURE
 
-Orchestrates agents and commands:
+Orchestrates skill workflows and commands:
 - **cui-java-core skill** - Logging standards and maintenance reference
 - **Explore agent** - Violation detection and business test location
 - **/java-implement-code command** - Logging code modifications
-- **maven-builder agent** - Build and test verification
+- **Bash** - Maven builds for verification
+- **cui-maven:cui-maven-rules skill** - Build output parsing
 - **Bash** - LogRecord discovery script and plan.md updates (scripts from skill)
 
 ## RELATED
 
 - `cui-java-core` skill - Logging standards and maintenance reference
 - `/java-implement-code` command - Code modifications
-- `maven-builder` agent - Build verification
+- `cui-maven:cui-maven-rules` skill - Maven standards and output parsing
 - `/java-refactor-code` command - Broader code refactoring
 - `/java-enforce-logrecords` command - Automated logging enforcement

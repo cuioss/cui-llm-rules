@@ -113,7 +113,7 @@ Commands are thin orchestrators that invoke skill workflows:
 
 ```
 /java-generate-coverage
-  ├─> Task(maven-builder) [generates coverage]
+  ├─> Bash: ./mvnw [generates coverage]
   └─> Skill(cui-java-unit-testing) workflow: Analyze Coverage
 
 /java-enforce-logrecords
@@ -206,7 +206,7 @@ package de.cuioss.example;
 
 ### Inter-Bundle Dependencies
 
-- **cui-maven** - For Maven build operations (maven-builder agent)
+- **cui-maven** - For Maven build operations (cui-maven-rules skill with parse-maven-output.py)
 
 ### External Dependencies
 

@@ -285,12 +285,19 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 **Module Handling:**
 - ALWAYS verify module parameter for multi-module projects
 - Ask user if module unset and project is multi-module
-- Use module parameter in all maven-builder agent calls
+- Use module parameter in all Maven build commands
 
 **Build Verification Protocol:**
 - Execute at Steps 2, 8, and 11
-- Use maven-builder agent with `clean verify` command
-- Parameters: command=clean verify, outputMode=DEFAULT, module={if specified}
+- Use cui-maven-rules skill workflow:
+  ```
+  Skill: cui-maven:cui-maven-rules
+  Workflow: Execute Maven Build
+  Parameters:
+    goals: clean verify
+    module: {module if specified}
+    output_mode: errors
+  ```
 - Success criteria: Exit code 0, zero errors, zero test failures
 - On failure: Report details (errors, test failures) and stop execution
 - See: `logging-enforcement-patterns.md` → Pattern 15
@@ -322,7 +329,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 **Agent Coordination:**
 - Use /java-implement-code for production code changes
 - Use /java-implement-tests for LogAssert test implementation
-- Use maven-builder for all build verifications
+- Use Bash + parse-maven-output.py for all build verifications
 - Execute commands in batches (grouped by change type)
 
 **Identifier Management:**
@@ -367,4 +374,4 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Standards: `logging-standards.md`, `logmessages-documentation.md`, `logging-enforcement-patterns.md`
 - Command: `/java-implement-code` - Fix production code
 - Command: `/java-implement-tests` - Add tests
-- Agent: `cui-maven:maven-builder` - Build verification
+- Skill: `cui-maven:cui-maven-rules` - Maven standards and build output parsing

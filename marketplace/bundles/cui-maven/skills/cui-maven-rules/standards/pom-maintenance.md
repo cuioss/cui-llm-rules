@@ -1,20 +1,14 @@
-= POM Maintenance Process
-:toc: left
-:toclevels: 3
-:toc-title: Table of Contents
-:sectnums:
-:source-highlighter: highlight.js
+# POM Maintenance Process
 
-
-== Purpose
+## Purpose
 
 This document defines the comprehensive process for maintaining and optimizing Maven POM files across Java projects. It provides systematic approaches for dependency management, BOM utilization, version optimization, and POM quality improvements while adhering to Maven best practices and enterprise standards.
 
-== Related Documentation
+## Related Documentation
 
-* [Maven Integration Standards](maven-integration.md) - JavaScript/Maven integration patterns
+- [Maven Integration Standards](maven-integration.md) - JavaScript/Maven integration patterns
 
-== Pre-Maintenance Checklist
+## Pre-Maintenance Checklist
 
 **Requirements**: Execute the following verification steps before starting POM maintenance:
 
@@ -25,11 +19,11 @@ This document defines the comprehensive process for maintaining and optimizing M
 5. [ ] **Maven Wrapper Update**: Check and update Maven wrapper to latest version
 6. [ ] **Module Inventory**: List all modules and their relationships for systematic processing
 
-== Maven Wrapper Maintenance
+## Maven Wrapper Maintenance
 
 **Purpose**: Ensure consistent Maven version across all development environments and CI/CD pipelines.
 
-=== Update Process
+### Update Process
 
 **Requirements**:
 
@@ -39,27 +33,27 @@ This document defines the comprehensive process for maintaining and optimizing M
 4. **Script-Only Mode**: Use script-only mode (default since 3.2.0) to avoid binary files in repository
 5. **Commit Changes**: Create separate commit for wrapper updates
 
-=== Best Practices
+### Best Practices
 
-* Update wrapper before starting major POM maintenance
-* Use consistent wrapper version across all organization projects
-* Include wrapper scripts in version control
-* Document Maven version requirements in README
+- Update wrapper before starting major POM maintenance
+- Use consistent wrapper version across all organization projects
+- Include wrapper scripts in version control
+- Document Maven version requirements in README
 
-== BOM (Bill of Materials) Management
+## BOM (Bill of Materials) Management
 
 **Overview**: Centralized dependency version management through BOM POMs ensures consistency and reduces version conflicts across multi-module projects.
 
-=== BOM Structure Requirements
+### BOM Structure Requirements
 
 **Mandatory Elements**:
 
-* **Packaging Type**: Use `<packaging>pom</packaging>`
-* **Dependency Management**: All versions defined in `<dependencyManagement>` section
-* **No Direct Dependencies**: BOMs should not contain `<dependencies>` section
-* **Property-Based Versions**: All versions defined using properties
+- **Packaging Type**: Use `<packaging>pom</packaging>`
+- **Dependency Management**: All versions defined in `<dependencyManagement>` section
+- **No Direct Dependencies**: BOMs should not contain `<dependencies>` section
+- **Property-Based Versions**: All versions defined using properties
 
-=== BOM Usage Rules
+### BOM Usage Rules
 
 **If a project provides a BOM**:
 
@@ -68,10 +62,9 @@ This document defines the comprehensive process for maintaining and optimizing M
 3. **No Version Overrides**: Child modules must not override BOM-defined versions
 4. **Single Source of Truth**: BOM is the only place for version definitions
 
-=== BOM Implementation Pattern
+### BOM Implementation Pattern
 
-[source,xml]
-----
+```xml
 <!-- In CUI project BOM POM -->
 <properties>
     <version.quarkus>3.5.0</version.quarkus>
@@ -96,10 +89,9 @@ This document defines the comprehensive process for maintaining and optimizing M
         </dependency>
     </dependencies>
 </dependencyManagement>
-----
+```
 
-[source,xml]
-----
+```xml
 <!-- In consuming CUI module -->
 <dependencyManagement>
     <dependencies>
@@ -112,27 +104,28 @@ This document defines the comprehensive process for maintaining and optimizing M
         </dependency>
     </dependencies>
 </dependencyManagement>
-----
+```
 
-== Dependency Management Standards
+## Dependency Management Standards
 
 **Overview**: Proper dependency management ensures build reproducibility, reduces conflicts, and simplifies maintenance.
 
-=== General Requirements
+### General Requirements
 
 1. **Use Dependency Management**: ALL dependency declarations must use `<dependencyManagement>` for version control
 2. **Property-Based Versions**: ALL versions (dependencies and plugins) must use properties
 3. **Version Reuse**: ALWAYS reuse versions from parent POMs or imported BOMs - double-check before adding new versions
 
-=== Property Naming Conventions
+### Property Naming Conventions
 
 See **Property Organization** section below for complete property naming examples including:
+
 - Dependency version properties (`version.*` prefix)
 - Maven plugin versions (`maven.*.plugin.version` pattern)
 - Non-maven plugin versions (`*.maven.plugin.version` pattern)
 - Configuration properties
 
-=== Dependency Aggregation Rules
+### Dependency Aggregation Rules
 
 **Consolidation Criteria**:
 
@@ -140,7 +133,7 @@ See **Property Organization** section below for complete property naming example
 2. **Partial Usage**: If at least one sub-module does not use a parent-provided dependency, it must be moved to ALL sub-modules that need it
 3. **Verification Process**: Before consolidation, verify usage across all modules using `./mvnw dependency:analyze`
 
-=== Dependency Verification Process
+### Dependency Verification Process
 
 **For each dependency, analyze**:
 
@@ -150,11 +143,11 @@ See **Property Organization** section below for complete property naming example
 
 Note: Version updates are handled by Dependabot - focus on structure and usage only.
 
-== Scope Optimization
+## Scope Optimization
 
 **Overview**: Proper scope assignment reduces build size, improves security, and clarifies dependency purposes.
 
-=== Scope Analysis Process
+### Scope Analysis Process
 
 **For each dependency, evaluate**:
 
@@ -163,22 +156,22 @@ Note: Version updates are handled by Dependabot - focus on structure and usage o
 3. **compile → test**: Is this only used in test code?
 4. **provided → test**: Is this provided dependency only used in tests?
 
-=== Scope Guidelines
+### Scope Guidelines
 
 **Scope Assignment Rules**:
 
-* **compile**: Required for compilation and runtime, not provided by container
-* **provided**: Required for compilation but provided by runtime (e.g., servlet-api, lombok)
-* **runtime**: Not needed for compilation but required at runtime (e.g., JDBC drivers)
-* **test**: Only needed for test compilation and execution
-* **import**: Only for BOM imports in `<dependencyManagement>`
-* **system**: AVOID - indicates design problem
+- **compile**: Required for compilation and runtime, not provided by container
+- **provided**: Required for compilation but provided by runtime (e.g., servlet-api, lombok)
+- **runtime**: Not needed for compilation but required at runtime (e.g., JDBC drivers)
+- **test**: Only needed for test compilation and execution
+- **import**: Only for BOM imports in `<dependencyManagement>`
+- **system**: AVOID - indicates design problem
 
-== OpenRewrite Integration
+## OpenRewrite Integration
 
 **Purpose**: Automated POM cleanup and standardization using OpenRewrite recipes.
 
-=== Execution Process
+### Execution Process
 
 1. **Initial Run**: `./mvnw -Prewrite-maven-clean rewrite:run`
 2. **Error Resolution**: Fix all reported errors before proceeding
@@ -186,18 +179,18 @@ Note: Version updates are handled by Dependabot - focus on structure and usage o
 4. **Dry Run Verification**: Use `./mvnw rewrite:dryRun` to preview changes
 5. **Recipe Application**: Apply specific recipes for targeted improvements
 
-=== Common Recipes
+### Common Recipes
 
 **Recommended Recipes**:
 
-* **ManageDependencies**: Move versions to dependencyManagement
-* **UpgradeDependencyVersion**: Update to newer versions with semantic versioning
-* **RemoveUnusedImports**: Clean up unnecessary dependencies
-* **OrderPomElements**: Standardize POM element ordering
+- **ManageDependencies**: Move versions to dependencyManagement
+- **UpgradeDependencyVersion**: Update to newer versions with semantic versioning
+- **RemoveUnusedImports**: Clean up unnecessary dependencies
+- **OrderPomElements**: Standardize POM element ordering
 
-== Maintenance Workflow
+## Maintenance Workflow
 
-=== Analysis Phase
+### Analysis Phase
 
 1. **Execute OpenRewrite**: `./mvnw -Prewrite-maven-clean rewrite:run` - fix all errors and warnings
 2. **Dependency Analysis**: `./mvnw dependency:analyze` - identify issues
@@ -207,31 +200,29 @@ Note: Version updates are handled by Dependabot - focus on structure and usage o
 6. **Scope Review**: Identify misaligned dependency scopes
 7. **Module Dependencies**: Map inter-module dependencies
 
-=== Implementation Phase
+### Implementation Phase
 
-==== Step 1: OpenRewrite Cleanup
+#### Step 1: OpenRewrite Cleanup
 
-[source,bash]
-----
+```bash
 # Execute rewrite with cleanup profile
 ./mvnw -Prewrite-maven-clean rewrite:run
 
 # Review and fix all errors
 # Address critical warnings
-----
+```
 
-==== Step 2: Maven Wrapper Update
+#### Step 2: Maven Wrapper Update
 
-[source,bash]
-----
+```bash
 # Update to latest Maven version
 ./mvnw wrapper:wrapper -Dmaven=3.9.6
 
 # Verify update
 ./mvnw --version
-----
+```
 
-==== Step 3: BOM Implementation
+#### Step 3: BOM Implementation
 
 **If project has a BOM**:
 
@@ -240,21 +231,21 @@ Note: Version updates are handled by Dependabot - focus on structure and usage o
 3. Remove version overrides from child modules
 4. Verify with `./mvnw dependency:tree`
 
-==== Step 4: Dependency Management
+#### Step 4: Dependency Management
 
 1. **Property Extraction**: Convert all hardcoded versions to properties
 2. **Version Reuse**: Check parent/imported BOMs before adding versions
 3. **Consolidation**: Move common dependencies to appropriate parent level
 4. **Unused Removal**: Remove dependencies identified as unused
 
-==== Step 5: Scope Optimization
+#### Step 5: Scope Optimization
 
 1. **Analyze Each Dependency**: Review actual usage and runtime requirements
 2. **Apply Scope Changes**: Update scopes based on analysis
 3. **Test Impact**: `./mvnw clean verify` after scope changes
 4. **Document Changes**: Note significant scope changes in commit message
 
-=== Verification Phase
+### Verification Phase
 
 Execute these verification steps to ensure POM maintenance was successful:
 
@@ -264,67 +255,66 @@ Execute these verification steps to ensure POM maintenance was successful:
 4. **Tree Verification**: `./mvnw dependency:tree`
 5. **Module Testing**: `./mvnw clean verify -pl <module>`
 
-== Multi-Module Considerations
+## Multi-Module Considerations
 
-=== Parent POM Management
+### Parent POM Management
 
 **Requirements**:
 
-* Place truly universal dependencies in parent `<dependencies>`
-* Use `<dependencyManagement>` for version control only
-* Define all plugin versions in `<pluginManagement>`
-* Maintain clear separation between aggregation and inheritance
+- Place truly universal dependencies in parent `<dependencies>`
+- Use `<dependencyManagement>` for version control only
+- Define all plugin versions in `<pluginManagement>`
+- Maintain clear separation between aggregation and inheritance
 
-=== Module Dependency Rules
+### Module Dependency Rules
 
 1. **Build Order**: Let Maven Reactor determine order through dependencies
 2. **Inter-Module Versions**: Use `${project.version}` for internal dependencies
 3. **Selective Building**: Use `-pl`, `--also-make`, `--also-make-dependents` flags
 4. **Dependency Declaration**: Explicitly declare all direct dependencies
 
-== Version Management
+## Version Management
 
-=== Property Organization
+### Property Organization
 
-[source,xml]
-----
+```xml
 <properties>
     <!-- Project version -->
     <revision>1.0.0-SNAPSHOT</revision>
-    
+
     <!-- CUI dependency versions - use version.cui.* prefix -->
     <version.cui.core.ui.model>2.3.0</version.cui.core.ui.model>
     <version.cui.java.tools>2.5.1</version.cui.java.tools>
     <version.cui.test.generator>2.4.0</version.cui.test.generator>
-    
+
     <!-- External dependency versions - use version.* prefix -->
     <version.quarkus>3.5.0</version.quarkus>
     <version.junit.jupiter>5.9.3</version.junit.jupiter>
     <version.lombok>1.18.38</version.lombok>
-    
+
     <!-- Maven plugin versions - use maven.*.plugin.version pattern -->
     <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
     <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
     <maven.dependency.plugin.version>3.8.1</maven.dependency.plugin.version>
-    
+
     <!-- Non-maven plugin versions - use *.maven.plugin.version pattern -->
     <jacoco.maven.plugin.version>0.8.13</jacoco.maven.plugin.version>
     <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
-    
+
     <!-- Configuration properties -->
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler-plugin.release>21</maven.compiler-plugin.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 </properties>
-----
+```
 
-=== Version Update Policy
+### Version Update Policy
 
 **Important**: Dependency version updates are managed automatically by Dependabot and are NOT part of this maintenance process. Focus on structure, organization, and optimization rather than version currency.
 
-== Common Issues and Solutions
+## Common Issues and Solutions
 
-=== Issue: Dependency Conflicts
+### Issue: Dependency Conflicts
 
 **Solution**:
 
@@ -333,7 +323,7 @@ Execute these verification steps to ensure POM maintenance was successful:
 3. Use `<exclusions>` for unwanted transitive dependencies
 4. Verify resolution with enforcer plugin
 
-=== Issue: Unused Dependencies
+### Issue: Unused Dependencies
 
 **Solution**:
 
@@ -342,7 +332,7 @@ Execute these verification steps to ensure POM maintenance was successful:
 3. Handle false positives with plugin configuration
 4. Remove truly unused dependencies
 
-=== Issue: Version Duplication
+### Issue: Version Duplication
 
 **Solution**:
 
@@ -351,7 +341,7 @@ Execute these verification steps to ensure POM maintenance was successful:
 3. Reference properties consistently
 4. Use OpenRewrite recipes for automation
 
-=== Issue: Scope Misalignment
+### Issue: Scope Misalignment
 
 **Solution**:
 
@@ -360,7 +350,7 @@ Execute these verification steps to ensure POM maintenance was successful:
 3. Update scopes appropriately
 4. Test thoroughly after changes
 
-== Quality Gates
+## Quality Gates
 
 **Mandatory Checks**:
 
@@ -370,7 +360,7 @@ Execute these verification steps to ensure POM maintenance was successful:
 4. [ ] All tests pass: `./mvnw clean verify`
 5. [ ] No OpenRewrite errors: `./mvnw -Prewrite-maven-clean rewrite:run`
 
-== Best Practices Summary
+## Best Practices Summary
 
 1. **Always** run OpenRewrite before starting manual maintenance
 2. **Always** update Maven wrapper to latest stable version
@@ -383,14 +373,14 @@ Execute these verification steps to ensure POM maintenance was successful:
 9. **Always** document significant changes in commit messages
 10. **Never** manually update dependency versions during maintenance (handled by Dependabot)
 
-== See Also
+## See Also
 
 **Maven Documentation**:
 
-* link:https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html[Maven Dependency Mechanism]
-* link:https://maven.apache.org/enforcer/maven-enforcer-plugin/[Maven Enforcer Plugin]
-* link:https://maven.apache.org/plugins/maven-dependency-plugin/[Maven Dependency Plugin]
+- [Maven Dependency Mechanism](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html)
+- [Maven Enforcer Plugin](https://maven.apache.org/enforcer/maven-enforcer-plugin/)
+- [Maven Dependency Plugin](https://maven.apache.org/plugins/maven-dependency-plugin/)
 
 **Related Standards**:
 
-* Maven Integration Standards (see maven-integration.md in this skill)
+- Maven Integration Standards (see maven-integration.md in this skill)
