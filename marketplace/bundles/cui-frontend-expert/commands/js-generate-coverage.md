@@ -27,23 +27,37 @@ Self-contained command that generates test coverage reports and analyzes results
 
 ### Step 1: Generate Coverage
 
+**Execute npm coverage command:**
+```bash
+npm run test:coverage > target/npm-coverage-output.log 2>&1
+# Or with workspace:
+npm run test:coverage --workspace={workspace} > target/npm-coverage-output.log 2>&1
 ```
-Task: npm-builder
-Parameters:
-- command: run test:coverage  (or run test -- --coverage)
-- outputMode: FILE
-- workspace: {if specified}
 
-Generate coverage reports in coverage/ directory.
+**Parse build output (if needed):**
+```bash
+python3 {baseDir}/skills/cui-javascript-project/scripts/parse-npm-output.py \
+    --log target/npm-coverage-output.log --mode structured
 ```
+
+This generates coverage reports in coverage/ directory.
 
 ### Step 2: Analyze Coverage
 
+**Load skill and execute workflow:**
 ```
-Task: js-coverage-analyzer
-Analyze existing coverage reports in coverage/ directory.
-Return structured coverage data.
+Skill: cui-frontend-expert:cui-javascript-unit-testing
+Execute workflow: Analyze Coverage
 ```
+
+Or run script directly:
+```bash
+python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/coverage-summary.json
+# Or for LCOV format:
+python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/lcov.info --format lcov
+```
+
+Script returns structured JSON with overall_coverage, by_file, and low_coverage_files.
 
 ### Step 3: Return Coverage Results
 
@@ -60,5 +74,6 @@ Return structured coverage data.
 
 ## RELATED
 
-- `npm-builder` - Generates coverage (Layer 3)
-- `js-coverage-analyzer` - Analyzes reports (Layer 3)
+- Skill: `cui-frontend-expert:cui-javascript-unit-testing` - Analyze Coverage workflow
+- Skill: `cui-frontend-expert:cui-javascript-project` - Parse npm Build Output workflow
+- Command: `/js-implement-tests` - Add tests for low-coverage areas

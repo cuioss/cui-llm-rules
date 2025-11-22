@@ -2,194 +2,166 @@
 
 Frontend development standards and tools for CUI projects - modern JavaScript, CSS, and web development.
 
-## Structure
+## Purpose
+
+This bundle provides comprehensive frontend development expertise by aggregating eight foundational frontend skills with integrated automation workflows. All agent functionality has been absorbed into skill workflows with Python scripts for deterministic analysis.
+
+## Components Included
+
+### Skills (8 skills with workflows)
+
+1. **cui-javascript** - Core JavaScript development standards
+   - ES modules and modern patterns
+   - Async programming and code quality
+   - Best practices for CUI projects
+
+2. **cui-javascript-unit-testing** - Jest unit testing standards
+   - Configuration, test structure, testing patterns
+   - Coverage requirements (80% threshold)
+   - **Workflow: Analyze Coverage** - Parse Jest/Istanbul coverage reports
+
+3. **cui-javascript-project** - Project structure and build standards
+   - Directory layouts, package.json configuration
+   - Dependency management, Maven integration
+   - **Workflow: Parse npm Build Output** - Categorize build errors/warnings
+
+4. **cui-jsdoc** - JSDoc documentation standards
+   - Documentation patterns for functions, classes, modules
+   - Web component documentation (Lit)
+   - **Workflow: Analyze JSDoc Violations** - Detect documentation gaps
+
+5. **cui-javascript-linting** - ESLint, Prettier, Stylelint configuration
+   - Flat config setup and rule management
+   - Build integration standards
+
+6. **cui-javascript-maintenance** - JavaScript code maintenance standards
+   - Refactoring patterns and priorities
+   - Code quality metrics
+
+7. **cui-cypress** - E2E testing with Cypress
+   - Test organization and best practices
+   - Build integration patterns
+
+8. **cui-css** - CSS development standards
+   - Responsive design patterns
+   - Quality tooling and linting
+
+### Scripts (3 automation scripts)
+
+| Script | Location | Purpose |
+|--------|----------|---------|
+| `analyze-js-coverage.py` | cui-javascript-unit-testing | Parse Jest/Istanbul coverage reports |
+| `analyze-jsdoc-violations.py` | cui-jsdoc | Detect JSDoc compliance violations |
+| `parse-npm-output.py` | cui-javascript-project | Categorize npm build output |
+
+### Commands (7 goal-based orchestrators)
+
+1. **js-implement-code** - Self-contained command: implements code + verifies + iterates
+2. **js-implement-tests** - Self-contained command: writes tests + runs tests + iterates
+3. **js-generate-coverage** - Self-contained command: generates coverage + analyzes reports
+4. **js-fix-jsdoc** - Fixes JSDoc violations systematically
+5. **js-enforce-eslint** - Enforces ESLint standards by fixing violations
+6. **js-maintain-tests** - Systematic test quality improvement
+7. **js-refactor-code** - Systematic JavaScript refactoring with standards compliance
+
+**Note**: For end-to-end JavaScript task orchestration (implementation -> testing -> coverage), use `/orchestrate-language language=javascript` from the cui-task-workflow bundle.
+
+## Architecture
 
 ```
 cui-frontend-expert/
-├── plugin.json
-├── README.md
-├── skills/              # Frontend standards (Layer 1)
-│   ├── cui-javascript/
-│   ├── cui-javascript-unit-testing/
-│   ├── cui-javascript-linting/
-│   ├── cui-javascript-project/
-│   ├── cui-jsdoc/
-│   ├── cui-css/
-│   └── cui-cypress/
-├── agents/              # Focused executors (Layer 3)
-│   ├── npm-builder.md
-│   ├── js-coverage-analyzer.md
-│   └── js-doc-violation-analyzer.md
-└── commands/            # User utilities (Layer 2)
-    ├── js-implement-code.md
-    ├── js-implement-tests.md
-    ├── js-generate-coverage.md
-    ├── js-refactor-code.md
-    ├── js-fix-jsdoc.md
-    └── js-enforce-eslint.md
+├── commands/                # 7 goal-based orchestrators
+│   ├── js-implement-code.md
+│   ├── js-implement-tests.md
+│   ├── js-generate-coverage.md
+│   ├── js-fix-jsdoc.md
+│   ├── js-enforce-eslint.md
+│   ├── js-maintain-tests.md
+│   └── js-refactor-code.md
+└── skills/
+    ├── cui-javascript/          # Core JS standards
+    ├── cui-javascript-unit-testing/  # Testing + coverage workflow
+    │   ├── SKILL.md             # Workflow: Analyze Coverage
+    │   └── scripts/
+    │       └── analyze-js-coverage.py
+    ├── cui-javascript-project/  # Project + build workflow
+    │   ├── SKILL.md             # Workflow: Parse npm Build Output
+    │   └── scripts/
+    │       └── parse-npm-output.py
+    ├── cui-jsdoc/               # JSDoc + violations workflow
+    │   ├── SKILL.md             # Workflow: Analyze JSDoc Violations
+    │   └── scripts/
+    │       └── analyze-jsdoc-violations.py
+    ├── cui-javascript-linting/
+    ├── cui-javascript-maintenance/
+    ├── cui-cypress/
+    └── cui-css/
 ```
 
-## Skills (Layer 1: Knowledge + Standards)
+## Workflow Pattern
 
-### Core JavaScript
-- **cui-javascript** - Modern JavaScript patterns, async programming, code quality standards
-- **cui-javascript-project** - Project structure, dependency management, Maven integration
-- **cui-javascript-linting** - ESLint, Prettier, Stylelint configuration and standards
+Commands are thin orchestrators that invoke skill workflows:
 
-### Testing
-- **cui-javascript-unit-testing** - Jest/Vitest patterns, coverage standards, test organization
-- **cui-cypress** - E2E testing with Cypress, test organization, build integration
+```
+/js-generate-coverage
+  ├─> Bash: npm run test:coverage
+  └─> Skill(cui-javascript-unit-testing) workflow: Analyze Coverage
 
-### Documentation & Styling
-- **cui-jsdoc** - JSDoc documentation standards and patterns
-- **cui-css** - CSS development standards, responsive design, quality tooling
-
-## Agents (Layer 3: Focused Executors)
-
-### Build Execution
-- **npm-builder** - Central agent for npm/npx builds with output capture, issue categorization, performance tracking
-
-### Analysis
-- **js-coverage-analyzer** - Analyzes existing coverage reports (focused analyzer - no build execution)
-- **js-doc-violation-analyzer** - Analyzes JSDoc compliance and returns structured violation list (focused analyzer - no fixes)
-
-## Commands (Layer 2: User Utilities)
-
-### Self-Contained Implementation Commands
-- **js-implement-code** - Self-contained command for code implementation with verification and iteration
-- **js-implement-tests** - Self-contained command for test implementation with verification and iteration
-- **js-generate-coverage** - Coverage generation and analysis command
-
-### Refactoring Commands
-- **js-refactor-code** - Systematic refactoring with standards compliance verification
-
-**Note**: For end-to-end JavaScript task orchestration (implementation → testing → coverage), use `/orchestrate-language language=javascript` from the cui-task-workflow bundle.
-
-### Maintenance Commands
-- **js-fix-jsdoc** - Fix JSDoc errors and warnings systematically
-- **js-enforce-eslint** - Enforce ESLint standards by fixing violations
-
-## Architecture Pattern
-
-This bundle follows the CUI marketplace three-layer architecture:
-
-**Layer 1 (Skills)**: Self-contained standards with progressive loading
-- All standards content in `skill/standards/` directory
-- No external file references
-- Conditional loading based on context
-
-**Layer 2 (Commands)**: User-invoked orchestration utilities
-- Orchestrate Layer 3 agents via Task tool
-- Handle verification and iteration
-- Make control flow decisions
-
-**Layer 3 (Agents)**: Focused task executors
-- Do ONE specific task
-- Return results to Layer 2 caller
-- NO Task delegation (agents cannot call other agents)
-- NO build verification (agents implement/analyze only)
+/js-fix-jsdoc
+  ├─> Skill(cui-jsdoc) workflow: Analyze JSDoc Violations
+  ├─> [fixes via /js-implement-code]
+  └─> Bash: npm run lint (verification)
+```
 
 ## Usage Examples
 
-### Implement JavaScript Code
-```bash
-/js-implement-code files="src/utils/validator.js" description="Implement email and phone validation"
+### Coverage Analysis
+
+```
+/js-generate-coverage workspace=my-workspace
 ```
 
-### Implement Tests
-```bash
-/js-implement-tests files="src/utils/validator.js" description="Implement comprehensive unit tests"
-```
+### JSDoc Fix
 
-### Full Task Workflow
-```bash
-/orchestrate-language language=javascript targets="src/services/auth.js" description="Implement JWT authentication service"
 ```
-This orchestrates: implementation → tests → coverage verification (uses npm-builder for iteration, Maven for final build)
-
-### Systematic Refactoring
-```bash
-/js-refactor-code scope=modernize priority=high
-```
-Modernizes JavaScript codebase (var → const/let, callbacks → async/await, etc.)
-
-### Fix JSDoc Issues
-```bash
 /js-fix-jsdoc files="src/**/*.js"
 ```
 
-### Enforce ESLint
-```bash
+### ESLint Enforcement
+
+```
 /js-enforce-eslint fix-mode=auto
 ```
 
-## Key Differences from cui-java-expert
+### Code Implementation
 
-### Build Tool
-- **cui-java-expert**: maven-builder (Maven/Java builds)
-- **cui-frontend-expert**: npm-builder (npm/npx builds)
+```
+/js-implement-code files="src/utils/validator.js" description="Implement email validation"
+```
 
-### Testing Frameworks
-- **cui-java-expert**: JUnit 5, test-generator framework
-- **cui-frontend-expert**: Jest, Vitest, Cypress
+## Bundle Statistics
 
-### Documentation
-- **cui-java-expert**: Javadoc with AsciiDoc patterns
-- **cui-frontend-expert**: JSDoc with Markdown
+- **Commands**: 7 (thin orchestrators)
+- **Skills**: 8 (with integrated workflows)
+- **Scripts**: 3 (Python automation)
+- **Agents**: 0 (all absorbed into skill workflows)
 
-### Standards
-- **cui-java-expert**: Java core patterns, Lombok, CDI, Quarkus
-- **cui-frontend-expert**: Modern JavaScript, async patterns, ES6+, web components
+## Dependencies
 
-## Parallel Structure with cui-java-expert
+### Inter-Bundle Dependencies
 
-| cui-java-expert | cui-frontend-expert | Purpose |
-|----------------|---------------------|---------|
-| maven-builder | npm-builder | Build execution |
-| java-coverage-analyzer | js-coverage-analyzer | Coverage analysis |
-| log-record-documenter | js-doc-violation-analyzer | Documentation analysis |
-| java-implement-code | js-implement-code | Self-contained implementation |
-| java-implement-tests | js-implement-tests | Self-contained testing |
-| java-coverage-report | js-generate-coverage | Coverage generation/analysis |
-| java-refactor-code | js-refactor-code | Systematic refactoring |
-| java-fix-javadoc | js-fix-jsdoc | Documentation fixing |
-| java-maintain-logger | js-enforce-eslint | Standards enforcement |
+- **cui-task-workflow** - For `/orchestrate-language` end-to-end orchestration
 
-**Note**: For end-to-end orchestration, both use `/orchestrate-language` from cui-task-workflow bundle (with language=java or language=javascript)
+### External Dependencies
 
-## Integration with Maven Projects
+- Python 3 for automation scripts
+- Node.js and npm for JavaScript builds
 
-JavaScript frontend code is typically built within Maven projects using:
-- frontend-maven-plugin for npm integration
-- Generated artifacts in target/classes/static/ or similar
-- Part of Maven build lifecycle
+## License
 
-Skills include standards for Maven integration to ensure frontend code works within Maven-based Java projects.
+Apache-2.0
 
-## Getting Started
+## Support
 
-1. **Load a skill** to access standards:
-   ```
-   Skill: cui-javascript
-   ```
-
-2. **Use a command** for tasks:
-   ```
-   /js-implement-code files="..." description="..."
-   ```
-
-3. **Orchestrate workflows** with unified orchestrator:
-   ```
-   /orchestrate-language language=javascript targets="..." description="..."
-   ```
-
-## Related Bundles
-
-- **cui-java-expert** - Java/Maven development (parallel structure)
-- **cui-maven** - Maven build and dependency management
-- **cui-documentation-standards** - AsciiDoc and technical documentation
-- **cui-task-workflow** - Git workflow and task management
-
----
-
-*Part of the CUI Development Standards marketplace architecture*
+- Repository: https://github.com/cuioss/cui-llm-rules
+- Bundle: marketplace/bundles/cui-frontend-expert/

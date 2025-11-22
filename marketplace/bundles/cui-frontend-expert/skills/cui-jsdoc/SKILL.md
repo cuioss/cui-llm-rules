@@ -97,3 +97,83 @@ Works with:
 - **cui-javascript-unit-testing** skill - Test documentation
 - ESLint for automated validation
 - JSDoc CLI for documentation generation
+
+## Workflows
+
+### Workflow: Analyze JSDoc Violations
+
+Analyzes JavaScript files for JSDoc compliance violations and returns structured results for command orchestration.
+
+**When to use**: To identify missing or incomplete JSDoc documentation across files or directories.
+
+**Steps**:
+
+1. **Run violation analysis script**
+   ```bash
+   # Analyze entire directory
+   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/
+
+   # Analyze single file
+   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --file src/utils/formatter.js
+
+   # Analyze only for missing JSDoc (skip syntax checks)
+   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/ --scope missing
+
+   # Analyze only JSDoc syntax issues
+   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/ --scope syntax
+   ```
+
+2. **Process violation results**
+   - Review violations categorized by severity:
+     - **CRITICAL**: Exported/public API without JSDoc
+     - **WARNING**: Internal function without JSDoc, missing @param/@returns
+     - **SUGGESTION**: Missing optional tags (@example, @fileoverview)
+   - Note `fix_suggestion` for each violation
+
+3. **Prioritize fixes**
+   - Fix CRITICAL violations first (exported functions/classes)
+   - Address WARNING violations next
+   - SUGGESTION items are optional improvements
+
+**JSON Output Contract**:
+```json
+{
+  "status": "violations_found",
+  "data": {
+    "violations": [
+      {
+        "file": "src/utils/validator.js",
+        "line": 45,
+        "type": "missing_jsdoc",
+        "severity": "CRITICAL",
+        "target": "function validateEmail",
+        "message": "Exported function missing JSDoc documentation",
+        "fix_suggestion": "Add JSDoc block with @param and @returns tags"
+      }
+    ],
+    "files_analyzed": ["src/utils/validator.js", "..."]
+  },
+  "metrics": {
+    "total_files": 15,
+    "files_with_violations": 6,
+    "critical": 5,
+    "warnings": 12,
+    "suggestions": 3,
+    "total_violations": 20
+  }
+}
+```
+
+**Violation types detected**:
+- `missing_jsdoc` - Function/class entirely missing JSDoc
+- `missing_class_doc` - Class without documentation
+- `missing_constructor_doc` - Constructor with parameters undocumented
+- `missing_param` - @param tag missing for parameter
+- `missing_param_type` - Type annotation missing in @param
+- `missing_returns` - @returns tag missing for return value
+- `missing_fileoverview` - No @fileoverview at file level
+
+**Scope options**:
+- `all` - Check for missing JSDoc and syntax issues (default)
+- `missing` - Only check for missing JSDoc documentation
+- `syntax` - Only check JSDoc syntax and completeness

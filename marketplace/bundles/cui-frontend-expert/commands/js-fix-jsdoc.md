@@ -27,14 +27,22 @@ Orchestrates systematic JSDoc violation fixing workflow with standards complianc
 
 ### Step 1: Identify JSDoc Violations
 
+**Load skill and execute workflow:**
 ```
-Task: js-doc-violation-analyzer
-Parameters:
-- files: {files or '**/*.js'}
-- scope: all
+Skill: cui-frontend-expert:cui-jsdoc
+Execute workflow: Analyze JSDoc Violations
+```
 
-Returns structured violation list.
+Or run script directly:
+```bash
+# Analyze directory
+python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/
+
+# Analyze specific file
+python3 {baseDir}/scripts/analyze-jsdoc-violations.py --file {files}
 ```
+
+Script returns structured JSON with violations categorized by severity (CRITICAL, WARNING, SUGGESTION).
 
 ### Step 2: Prioritize Violations
 
@@ -62,13 +70,15 @@ Track: `fixes_applied`, `fixes_failed`
 
 ### Step 4: Verify Build
 
+**Execute lint command:**
+```bash
+npm run lint > target/npm-lint-output.log 2>&1
 ```
-Task: npm-builder
-Parameters:
-- command: run lint (or run build)
-- outputMode: DEFAULT
 
-Verify no JSDoc errors remain.
+**Parse output to verify no JSDoc errors remain:**
+```bash
+python3 {baseDir}/skills/cui-javascript-project/scripts/parse-npm-output.py \
+    --log target/npm-lint-output.log --mode errors
 ```
 
 ### Step 5: Return Summary
@@ -89,6 +99,6 @@ Result: {summary}
 
 ## RELATED
 
-- `js-doc-violation-analyzer` - Identifies violations (Layer 3)
-- `/js-implement-code` - Fixes violations (Layer 2)
-- `npm-builder` - Verifies fixes (Layer 3)
+- Skill: `cui-frontend-expert:cui-jsdoc` - Analyze JSDoc Violations workflow
+- Skill: `cui-frontend-expert:cui-javascript-project` - Parse npm Build Output workflow
+- Command: `/js-implement-code` - Fixes violations

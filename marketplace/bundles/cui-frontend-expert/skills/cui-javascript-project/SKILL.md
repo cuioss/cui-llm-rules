@@ -204,3 +204,80 @@ For detailed configuration examples and complete reference, see the individual s
 - **Maven Integration**: Map npm scripts to validate/compile/test phases
 - **Security**: Implement audit scripts and respond to vulnerabilities within 30 days
 - **Version Control**: Always commit package-lock.json, never commit node_modules/
+
+## Workflows
+
+### Workflow: Parse npm Build Output
+
+Parses npm/npx build output logs and categorizes issues for command orchestration. This workflow analyzes existing build output files - build execution itself is handled by the calling command.
+
+**When to use**: After npm/npx build execution to categorize errors, warnings, and test failures.
+
+**Steps**:
+
+1. **Run npm output parser script**
+   ```bash
+   # Default mode: errors + warnings
+   python3 {baseDir}/scripts/parse-npm-output.py --log target/npm-output-2024-01-15.log
+
+   # Errors only mode
+   python3 {baseDir}/scripts/parse-npm-output.py --log build.log --mode errors
+
+   # Structured mode (full categorization with file locations)
+   python3 {baseDir}/scripts/parse-npm-output.py --log test-output.log --mode structured
+   ```
+
+2. **Process parsed results**
+   - Check `status` field: "success" or "failure"
+   - Review categorized issues by type:
+     - **compilation_error**: SyntaxError, TypeError, ReferenceError, TypeScript errors
+     - **test_failure**: Jest/Vitest failures (✘, FAIL markers)
+     - **lint_error**: ESLint, Prettier, StyleLint issues
+     - **dependency_error**: Module not found, npm 404 errors
+     - **playwright_error**: Browser/page/selector timeouts
+     - **npm_error**: npm ERR! messages
+     - **other**: General errors/warnings
+
+3. **Use categorized issues for fixes**
+   - Route compilation errors to code implementation
+   - Route test failures to test implementation
+   - Route lint errors to linting fix commands
+
+**JSON Output Contract** (structured mode):
+```json
+{
+  "status": "failure",
+  "data": {
+    "output_file": "target/npm-output-2024-01-15.log",
+    "issues": [
+      {
+        "type": "lint_error",
+        "file": "src/components/Button.js",
+        "line": 15,
+        "column": 3,
+        "message": "'PropTypes' is defined but never used",
+        "severity": "ERROR",
+        "log_line": 45
+      }
+    ]
+  },
+  "metrics": {
+    "compilation_errors": 0,
+    "test_failures": 0,
+    "lint_errors": 2,
+    "dependency_errors": 0,
+    "playwright_errors": 0,
+    "npm_errors": 0,
+    "total_errors": 5,
+    "total_warnings": 3,
+    "total_issues": 8
+  }
+}
+```
+
+**Output modes**:
+- `default` - Status + errors + warnings with line numbers
+- `errors` - Status + errors only (no warnings)
+- `structured` - Full categorized issue list with file locations
+
+**Note**: This workflow parses output only. Build execution uses `npm run <script>` commands via Bash tool, with output redirected to a log file for parsing.

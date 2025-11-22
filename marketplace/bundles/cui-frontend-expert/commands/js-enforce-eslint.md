@@ -21,25 +21,24 @@ Orchestrates systematic ESLint violation fixing workflow with standards complian
 
 ### Step 1: Run ESLint
 
+**Execute lint command:**
+```bash
+npm run lint > target/npm-lint-output.log 2>&1
+# Or with workspace:
+npm run lint --workspace={workspace} > target/npm-lint-output.log 2>&1
 ```
-Task: npm-builder
-Parameters:
-- command: run lint (or npx eslint .)
-- outputMode: STRUCTURED
-- workspace: {if specified}
 
-Get structured lint violations.
+**Parse output for structured violations:**
+```bash
+python3 {baseDir}/skills/cui-javascript-project/scripts/parse-npm-output.py \
+    --log target/npm-lint-output.log --mode structured
 ```
 
 ### Step 2: Auto-Fix (if fix-mode=auto)
 
-```
-Task: npm-builder
-Parameters:
-- command: run lint -- --fix
-- outputMode: DEFAULT
-
-Let ESLint auto-fix violations.
+**Execute lint with --fix:**
+```bash
+npm run lint -- --fix > target/npm-lint-fix-output.log 2>&1
 ```
 
 Re-run lint to check remaining issues.
@@ -60,13 +59,15 @@ Verify build after changes." files="{violation.file}"
 
 ### Step 4: Verify Clean Lint
 
+**Execute final lint check:**
+```bash
+npm run lint > target/npm-lint-verify.log 2>&1
 ```
-Task: npm-builder
-Parameters:
-- command: run lint
-- outputMode: DEFAULT
 
-Verify zero violations.
+**Parse output to verify zero violations:**
+```bash
+python3 {baseDir}/skills/cui-javascript-project/scripts/parse-npm-output.py \
+    --log target/npm-lint-verify.log --mode errors
 ```
 
 ### Step 5: Return Summary
@@ -86,5 +87,6 @@ Lint Status: {CLEAN|PARTIAL}
 
 ## RELATED
 
-- `npm-builder` - Executes ESLint (Layer 3)
-- `/js-implement-code` - Fixes manual violations (Layer 2)
+- Skill: `cui-frontend-expert:cui-javascript-project` - Parse npm Build Output workflow
+- Skill: `cui-frontend-expert:cui-javascript-linting` - ESLint standards
+- Command: `/js-implement-code` - Fixes manual violations

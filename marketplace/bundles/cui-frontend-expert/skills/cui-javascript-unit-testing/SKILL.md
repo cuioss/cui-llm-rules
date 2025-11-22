@@ -140,3 +140,62 @@ When writing Jest tests in CUI projects:
 6. **Organize logically** - Group related tests with describe blocks
 7. **Use descriptive names** - Test names explain expected behavior
 8. **Setup properly** - Use jest.setup.js and jest.setup-dom.js for global config
+
+## Workflows
+
+### Workflow: Analyze Coverage
+
+Analyzes existing test coverage reports (Jest/Istanbul JSON or LCOV format) and returns structured coverage data.
+
+**When to use**: After running tests with coverage to identify low-coverage areas and uncovered code.
+
+**Steps**:
+
+1. **Locate coverage report**
+   - Look for `coverage/coverage-summary.json` (JSON format - preferred)
+   - Or `coverage/lcov.info` (LCOV format - more detailed)
+
+2. **Run coverage analysis script**
+   ```bash
+   python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/coverage-summary.json
+   # Or for LCOV format:
+   python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/lcov.info --format lcov
+   # With custom threshold:
+   python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/coverage-summary.json --threshold 80
+   ```
+
+3. **Process results**
+   - Review `overall_coverage` metrics (lines, statements, functions, branches)
+   - Identify files in `low_coverage_files` array (below threshold)
+   - Note files with CRITICAL severity (< 50% coverage)
+   - Check `uncovered_lines` for specific areas needing tests
+
+**JSON Output Contract**:
+```json
+{
+  "status": "success",
+  "data": {
+    "report_format": "JSON",
+    "overall_coverage": {
+      "line_coverage": 85.5,
+      "statement_coverage": 84.8,
+      "function_coverage": 90.1,
+      "branch_coverage": 78.2
+    },
+    "by_file": [...],
+    "low_coverage_files": [
+      {"file": "src/utils.js", "coverage": 45.2, "severity": "CRITICAL", "uncovered_lines": [12, 34]}
+    ]
+  },
+  "metrics": {
+    "total_files": 45,
+    "files_with_good_coverage": 38,
+    "files_with_low_coverage": 7,
+    "threshold": 80
+  }
+}
+```
+
+**Error handling**:
+- Script returns `status: "error"` if report not found
+- Supported formats: JSON (coverage-summary.json), LCOV (lcov.info)

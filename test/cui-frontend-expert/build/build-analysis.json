@@ -1,0 +1,75 @@
+{
+  "status": "failure",
+  "data": {
+    "exit_code": 1,
+    "phase": "lint",
+    "errors": [
+      {
+        "category": "lint",
+        "rule": "no-unused-vars",
+        "severity": "error",
+        "file": "/Users/dev/project/src/utils/formatter.js",
+        "line": 12,
+        "column": 5,
+        "message": "'unusedVar' is defined but never used"
+      },
+      {
+        "category": "lint",
+        "rule": "semi",
+        "severity": "error",
+        "file": "/Users/dev/project/src/utils/formatter.js",
+        "line": 25,
+        "column": 1,
+        "message": "Missing semicolon"
+      },
+      {
+        "category": "lint",
+        "rule": "no-console",
+        "severity": "warning",
+        "file": "/Users/dev/project/src/utils/formatter.js",
+        "line": 34,
+        "column": 10,
+        "message": "Unexpected console statement"
+      },
+      {
+        "category": "lint",
+        "rule": "no-unused-vars",
+        "severity": "error",
+        "file": "/Users/dev/project/src/services/api.js",
+        "line": 8,
+        "column": 1,
+        "message": "'axios' is defined but never used"
+      },
+      {
+        "category": "lint",
+        "rule": "comma-dangle",
+        "severity": "error",
+        "file": "/Users/dev/project/src/services/api.js",
+        "line": 45,
+        "column": 23,
+        "message": "Missing trailing comma"
+      },
+      {
+        "category": "lint",
+        "rule": "indent",
+        "severity": "error",
+        "file": "/Users/dev/project/src/services/api.js",
+        "line": 67,
+        "column": 5,
+        "message": "Expected indentation of 4 spaces"
+      }
+    ],
+    "summary": {
+      "total_errors": 5,
+      "total_warnings": 1,
+      "fixable_errors": 2,
+      "fixable_warnings": 0
+    }
+  },
+  "metrics": {
+    "phases_completed": ["clean"],
+    "phases_failed": ["lint"],
+    "phases_skipped": ["test", "compile"],
+    "duration_ms": 1234
+  }
+}
