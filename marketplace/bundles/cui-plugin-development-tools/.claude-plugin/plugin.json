@@ -13,7 +13,7 @@
   "commands": [
     "./commands/plugin-create.md",
     "./commands/plugin-doctor.md",
-    "./commands/plugin-maintain.md",
+    "./commands/plugin-maintain.md"
   ],
   "skills": [
     "./skills/marketplace-inventory",
