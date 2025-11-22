@@ -27,6 +27,13 @@ This ensures the command evolves and becomes more effective with each execution.
 
 **push** - Auto-push after successful implementation (optional flag)
 
+## PREREQUISITES
+
+Load the task-planning skill:
+```
+Skill: cui-task-workflow:cui-task-planning
+```
+
 ## WORKFLOW
 
 ### Step 1: Validate and Get Issue
@@ -42,30 +49,32 @@ This ensures the command evolves and becomes more effective with each execution.
 
 **Error handling:** If issue cannot be determined or is invalid, abort with clear error message.
 
-### Step 2: Review Issue with task-reviewer Agent
+### Step 2: Review Issue (Skill Review Workflow)
 
-```
-Task:
-  subagent_type: task-reviewer
-  description: Review issue for implementation
-  prompt: Review issue {issue} for correctness, completeness, ambiguities
-```
+Use **cui-task-planning** Review workflow:
+
+1. Load issue content: `gh issue view {number} --json title,body,labels`
+2. Apply deep analysis for completeness and correctness
+3. Identify gaps and ambiguities
+4. Update documentation if needed
 
 **Handle results:**
 - SUCCESS: Continue to Step 3
 - PARTIAL: Prompt user "[C]ontinue/[R]etry review/[A]bort" - increment retry_attempts if retry chosen
 - FAILURE: Prompt user "[R]etry review/[A]bort" - increment retry_attempts if retry chosen
 
-**Error handling:** If task-reviewer agent fails to execute, increment agent_failures counter and prompt user "[R]etry/[A]bort".
+**Error handling:** If review fails, increment agent_failures counter and prompt user "[R]etry/[A]bort".
 
-### Step 3: Plan Implementation with task-breakdown-agent
+### Step 3: Plan Implementation (Skill Plan Workflow)
 
-```
-Task:
-  subagent_type: task-breakdown-agent
-  description: Break down issue into tasks
-  prompt: Analyze issue and create implementation plan with task breakdown
-```
+Use **cui-task-planning** Plan workflow:
+
+1. Load planning standards: `Read {skillBaseDir}/standards/issue-planning-standards.md`
+2. Run analysis script:
+   ```bash
+   python3 {skillBaseDir}/scripts/create-task-breakdown.py {issue-file}
+   ```
+3. Generate plan document following standards
 
 **Store tasks list for iteration.**
 
@@ -75,7 +84,7 @@ Task:
   - If out of bounds: Display error "continueFrom={continueFrom} exceeds total tasks ({total_tasks})" and abort
   - If valid: Set starting task index to continueFrom
 
-**Error handling:** If task-breakdown-agent fails to execute, increment agent_failures counter and prompt user "[R]etry/[A]bort".
+**Error handling:** If planning fails, increment agent_failures counter and prompt user "[R]etry/[A]bort".
 
 ### Step 4: Verify Build
 
@@ -92,16 +101,16 @@ Self-contained command that runs Maven build, fixes issues if found, verifies, a
 ### Step 5: Implement Tasks
 
 **Pattern Decision: Determine if atomic or batch:**
-- If plan has 1 task (atomic): Use task-executor directly + verify
+- If plan has 1 task (atomic): Execute using skill Execute workflow + verify
 - If plan has multiple tasks (batch): Delegate to /orchestrate-task for each
 
 **For atomic (single task):**
-```
-Task:
-  subagent_type: task-executor
-  description: Implement task
-  prompt: Implement task: {task_description}
-```
+
+Use **cui-task-planning** Execute workflow:
+1. Parse task for references and checklist items
+2. Read all referenced files
+3. Execute checklist items sequentially using Edit, Write tools
+4. Mark items complete
 
 Then verify with SlashCommand(/maven-build-and-fix).
 
@@ -204,18 +213,23 @@ Display all statistics in final summary.
 
 ## ARCHITECTURE
 
-Orchestrates agents and commands:
-- task-reviewer agent - Issue validation
-- task-breakdown-agent - Planning
-- task-executor agent - Focused implementation (for atomic tasks)
+Orchestrates skills and commands:
+- **cui-task-planning** skill - Review, Plan, and Execute workflows
 - `/orchestrate-task` command - Self-contained (for batch tasks)
 - `/maven-build-and-fix` command - Build + verify + fix + commit
 
+```
+/orchestrate-workflow (orchestrator)
+  ├─> Skill(cui-task-planning) Review workflow [validates issue]
+  ├─> Skill(cui-task-planning) Plan workflow [creates task breakdown]
+  ├─> For atomic: Skill(cui-task-planning) Execute workflow [implements]
+  ├─> For batch: SlashCommand(/orchestrate-task) per task
+  └─> SlashCommand(/maven-build-and-fix) [final verification]
+```
+
 ## RELATED
 
-- task-reviewer agent
-- task-breakdown-agent
-- task-executor agent
-- `/orchestrate-task` command (self-contained)
+- **cui-task-planning** skill - Review, Plan, Execute workflows
+- `/orchestrate-task` command (self-contained single task)
 - `/orchestrate-language` command (language-specific orchestration)
 - `/maven-build-and-fix` command

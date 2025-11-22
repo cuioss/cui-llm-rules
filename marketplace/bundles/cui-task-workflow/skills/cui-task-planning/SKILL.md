@@ -1,279 +1,331 @@
 ---
 name: cui-task-planning
-description: Comprehensive task planning and tracking standards for project planning, issue implementation, and refactoring workflows
-allowed-tools: []
-standards:
-  - standards/task-planning-core.md
-  - standards/project-planning-standards.md
-  - standards/issue-planning-standards.md
-  - standards/refactoring-planning-standards.md
+description: Comprehensive task planning and tracking with plan creation, execution, and review workflows
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(gh:*), Skill, AskUserQuestion
 ---
 
 # CUI Task Planning Skill
 
-Comprehensive standards for creating, organizing, and tracking tasks across all planning scenarios in CUI projects.
+Comprehensive task planning, execution, and review workflows for CUI projects. Provides three core workflows: **plan** (create task breakdowns), **execute** (implement tasks), and **review** (verify implementation readiness).
 
 ## What This Skill Provides
 
-This skill provides unified task planning standards for three distinct use cases:
+### Workflows (NEW - Absorbs Agent Functionality)
 
-### 1. Project Planning (Long-Term)
-- Project-wide TODO lists (doc/TODO.adoc)
-- Roadmap and backlog tracking
-- Hierarchical organization by component/feature/phase
-- Extended status indicators (partial, blocked)
-- Strong requirements traceability
-- **Use when:** Planning entire projects over months/years
+1. **Plan Workflow** - Creates actionable task breakdowns from issues
+   - Analyzes GitHub issues or local issue files
+   - Generates structured plan documents with acceptance criteria
+   - Replaces: task-breakdown-agent
 
-### 2. Issue Planning (Short-Term)
-- Single-issue implementation plans (plan-issue-X.md)
-- Sequential task execution
-- Clear acceptance criteria per task
-- Agent-friendly format for task-executor
-- GitHub issue integration
-- **Use when:** Implementing single GitHub issues or features
+2. **Execute Workflow** - Implements tasks from plan files
+   - Executes checklist items sequentially
+   - Tracks progress with status updates
+   - Replaces: task-executor agent
 
-### 3. Refactoring Planning (Ongoing)
-- Categorized improvement tracking (Refactorings.adoc)
-- Task identifiers for commit messages (C1, P2, S3, etc.)
-- Priority assignment (High/Medium/Low)
-- Technical debt reduction
-- Performance/security enhancements
-- **Use when:** Tracking ongoing code improvements
+3. **Review Workflow** - Reviews issues for implementation readiness
+   - Validates completeness, correctness, clarity
+   - Updates documentation to achieve 100% clarity
+   - Replaces: task-reviewer agent
+
+### Standards Documentation
+
+Unified task planning standards for three planning scenarios:
+
+- **Project Planning** - Long-term project TODO lists
+- **Issue Planning** - Single-issue implementation plans
+- **Refactoring Planning** - Categorized improvement tracking
 
 ## When to Activate This Skill
 
-Use this skill when:
-
-**Creating Plans:**
+**For Planning:**
+- Breaking down GitHub issues into actionable tasks
+- Creating implementation plans
 - Generating project TODO lists
-- Breaking down GitHub issues into tasks
-- Organizing refactoring efforts
-- Planning feature implementations
-- Tracking technical debt
 
-**Reviewing Plans:**
-- Validating plan structure
-- Ensuring proper traceability
-- Checking status indicators
-- Verifying task completeness
+**For Execution:**
+- Implementing tasks from plan files
+- Tracking checklist progress
+- Verifying acceptance criteria
 
-**Working with Agents:**
-- task-breakdown-agent creating issue plans
-- task-executor implementing from plans
-- Any agent that generates or consumes task lists
+**For Review:**
+- Validating issue documentation
+- Ensuring implementation readiness
+- Fixing ambiguities in requirements
 
-## Workflow
+## Workflows
 
-### Step 0: Determine Use Case
+### Workflow 1: Plan (Create Task Breakdown)
 
-**Decision tree:**
+**Purpose:** Analyze an issue and create a detailed implementation plan with actionable tasks.
 
-```
-What am I planning?
-│
-├─> Entire project or major feature?
-│   └─> Use Project Planning (doc/TODO.adoc)
-│       Read: standards/project-planning-standards.md
-│
-├─> Single GitHub issue?
-│   └─> Use Issue Planning (plan-issue-X.md)
-│       Read: standards/issue-planning-standards.md
-│
-└─> Code improvements/refactoring?
-    └─> Use Refactoring Planning (Refactorings.adoc)
-        Read: standards/refactoring-planning-standards.md
-```
+**Input:** Issue reference (GitHub URL, issue number, or local file path)
 
-### Step 1: Load Core Concepts
+**Steps:**
 
-**Always load core standards first:**
+1. **Load Planning Standards**
+   ```
+   Read {baseDir}/standards/issue-planning-standards.md
+   ```
 
-```
-Read: standards/task-planning-core.md
-```
+2. **Identify Issue Source**
+   - GitHub URL → Use `gh issue view {number} --repo {owner/repo}`
+   - Issue number → Use `gh issue view {number}`
+   - Local file → Use Read tool
 
-This provides:
-- Status indicator definitions ([ ], [x], [~], [!])
-- Task element structure
-- Traceability patterns
-- Quality standards
-- Format guidelines (AsciiDoc vs Markdown)
+3. **Analyze Issue Content**
+   Run analysis script:
+   ```
+   python3 {baseDir}/scripts/create-task-breakdown.py {issue-file}
+   ```
 
-### Step 2: Load Use-Case-Specific Standards
+   Script outputs JSON with task structure:
+   ```json
+   {
+     "issue": {"title": "...", "source": "..."},
+     "tasks": [
+       {
+         "id": 1,
+         "name": "...",
+         "goal": "...",
+         "references": [...],
+         "acceptance_criteria": [...],
+         "dependencies": []
+       }
+     ],
+     "total_tasks": N
+   }
+   ```
 
-**Based on use case from Step 0:**
+4. **Generate Plan Document**
+   Use output to create plan-issue-X.md following template in standards.
 
-**For Project Planning:**
-```
-Read: standards/project-planning-standards.md
-```
+5. **Return Completion Report**
+   Include: tasks identified, plan location, metrics.
 
-Get standards for:
-- doc/TODO.adoc structure
-- Hierarchical organization
-- 4 status indicators
-- Requirements traceability
-- Testing organization
-- Long-term maintenance
+**Output:** Plan file at `plan-{issue-name}.md`
 
-**For Issue Planning:**
-```
-Read: standards/issue-planning-standards.md
-```
+---
 
-Get standards for:
-- plan-issue-X.md format
-- Sequential task structure
-- Goal statements
-- Acceptance criteria
-- Verification checklists
-- Agent-friendly format
+### Workflow 2: Execute (Implement Tasks)
 
-**For Refactoring Planning:**
-```
-Read: standards/refactoring-planning-standards.md
-```
+**Purpose:** Execute tasks from a plan file sequentially, tracking progress.
 
-Get standards for:
-- Category-based organization (C, P, S, T, D, DOC, F)
-- Task identifier format
-- Priority assignment
-- Description + Rationale structure
-- Commit message integration
+**Input:** Plan file path and optional task identifier
 
-### Step 3: Apply Standards
+**Steps:**
 
-Use loaded standards to:
+1. **Parse Plan File**
+   ```
+   python3 {baseDir}/scripts/track-task-progress.py {plan-file}
+   ```
 
-1. **Structure tasks** according to use case format
-2. **Apply status indicators** consistently
-3. **Maintain traceability** to requirements/specs/issues
-4. **Verify completeness** using quality checklists
-5. **Track progress** appropriately for use case
+   Script outputs JSON with progress state:
+   ```json
+   {
+     "current_task": {"id": N, "name": "...", "status": "in_progress"},
+     "next_task": {"id": N+1, "name": "...", "status": "pending"},
+     "progress": {
+       "total_tasks": N,
+       "completed": N,
+       "completion_percentage": N
+     }
+   }
+   ```
+
+2. **Identify Target Task**
+   - If task specified → Find that task
+   - Otherwise → Find first incomplete task
+
+3. **Read References**
+   For each reference in task:
+   - Load file using Read tool
+   - Synthesize understanding
+   - If unclear → Use AskUserQuestion
+
+4. **Execute Checklist Items (Sequential)**
+   For each checklist item:
+   - Determine item type (implement, test, document, verify)
+   - Execute using appropriate tools (Edit, Write, etc.)
+   - Mark item done: `[ ]` → `[x]` using Edit tool
+
+5. **Verify Acceptance Criteria**
+   ```
+   python3 {baseDir}/scripts/validate-acceptance.py {plan-file} --task {id}
+   ```
+
+6. **Return Completion Report**
+   Include: task completed, files modified, acceptance status.
+
+**Output:** Updated plan file with checked items
+
+---
+
+### Workflow 3: Review (Verify Implementation Readiness)
+
+**Purpose:** Review an issue for completeness, correctness, and clarity before implementation.
+
+**Input:** Issue reference (file path or GitHub issue number)
+
+**Steps:**
+
+1. **Load Issue Content**
+   - File → Use Read tool
+   - GitHub issue → Use `gh issue view {number} --json title,body,labels`
+
+2. **Deep Analysis**
+   Apply ULTRATHINK reasoning to analyze:
+   - What is the problem/requirement?
+   - What is the proposed solution?
+   - What are acceptance criteria? (Must have testable conditions)
+   - What are technical constraints?
+   - What are dependencies?
+   - What are edge cases?
+
+3. **Identify Gaps**
+   Check for:
+   - Ambiguous requirements
+   - Missing acceptance criteria
+   - Undefined scope boundaries
+   - Unspecified error handling
+
+4. **Research/Clarification (Conditional)**
+   - If researchable → Note for caller
+   - If requires user input → Use AskUserQuestion
+
+5. **Update Documentation**
+   - For files → Use Edit tool
+   - For GitHub → Use `gh issue edit {number} --body "..."`
+
+6. **Quality Review Loop**
+   Verify 6 quality criteria:
+   - Consistency: Zero contradictions
+   - Correctness: All paths exist, versions valid
+   - Unambiguous: Zero vague terms
+   - No duplication: Zero semantic repeats
+   - Complete: Has criteria, constraints, dependencies, edge cases
+   - Actionable: Steps have file path + action verb + outcome
+
+7. **Return Completion Report**
+   Include: issues found, changes made, quality assessment.
+
+**Output:** Updated issue documentation with 100% clarity
+
+---
 
 ## Standards Organization
 
 ```
-standards/
-  task-planning-core.md              # Core concepts (status, traceability, formats)
-  project-planning-standards.md      # Long-term project planning
-  issue-planning-standards.md        # Short-term issue implementation
-  refactoring-planning-standards.md  # Categorized improvement tracking
+{baseDir}/
+├── SKILL.md                     # This file (workflows + overview)
+├── standards/                   # Planning standards (loaded on-demand)
+│   ├── task-planning-core.md
+│   ├── project-planning-standards.md
+│   ├── issue-planning-standards.md
+│   └── refactoring-planning-standards.md
+├── scripts/                     # Automation scripts (JSON output)
+│   ├── create-task-breakdown.py
+│   ├── track-task-progress.py
+│   └── validate-acceptance.py
+└── references/                  # Detailed guides (loaded on-demand)
+    ├── planning-guide.md
+    ├── execution-guide.md
+    └── review-guide.md
 ```
 
-**Hierarchical design:**
-- Core concepts apply to ALL use cases
-- Specialized standards extend core for specific contexts
-- No duplication - each standard covers distinct aspects
+## Scripts
 
-## Tool Access
+### create-task-breakdown.py
 
-**No special tools required** - This skill uses standard Read tool to load markdown standards.
+**Purpose:** Analyze issue content and generate task breakdown structure.
 
-## Usage Examples
-
-### Example 1: task-breakdown-agent Creating Issue Plan
-
-```markdown
-## Step 0: Load Task Planning Standards
-
-```
-Skill: cui-task-workflow:cui-task-planning
+**Usage:**
+```bash
+python3 {baseDir}/scripts/create-task-breakdown.py <issue-file> [--output <file>]
 ```
 
-This loads comprehensive task planning standards for issue implementation.
+**Input:** Issue file (markdown or JSON)
+**Output:** JSON with tasks array
 
-## Step 1: Apply Issue Planning Format
+### track-task-progress.py
 
-Follow issue-planning-standards.md to generate plan-issue-X.md with:
-- Sequential tasks (Task 1, Task 2, ...)
-- Goal statements
-- Acceptance criteria
-- Verification checklists
+**Purpose:** Parse plan file and determine current progress.
+
+**Usage:**
+```bash
+python3 {baseDir}/scripts/track-task-progress.py <plan-file>
 ```
 
-### Example 2: Creating Project TODO
+**Input:** Plan markdown file
+**Output:** JSON with progress state
 
-```markdown
-## Step 1: Load Task Planning Standards
+### validate-acceptance.py
 
+**Purpose:** Validate acceptance criteria for completed tasks.
+
+**Usage:**
+```bash
+python3 {baseDir}/scripts/validate-acceptance.py <plan-file> [--task <id>]
 ```
-Skill: cui-task-workflow:cui-task-planning
+
+**Input:** Plan file and optional task ID
+**Output:** JSON with validation results
+
+## Standards (Load On-Demand)
+
+### Task Planning Core
 ```
+Read {baseDir}/standards/task-planning-core.md
+```
+- Status indicator definitions
+- Task element structure
+- Traceability patterns
+- Quality standards
 
-## Step 2: Structure Project Planning Document
+### Issue Planning Standards
+```
+Read {baseDir}/standards/issue-planning-standards.md
+```
+- plan-issue-X.md format
+- Sequential task structure
+- Acceptance criteria format
+- Agent-friendly structure
 
-Follow project-planning-standards.md to create doc/TODO.adoc with:
+### Project Planning Standards
+```
+Read {baseDir}/standards/project-planning-standards.md
+```
+- doc/TODO.adoc structure
 - Hierarchical organization
 - Requirements traceability
-- Extended status indicators ([~], [!])
-- Testing section
+
+### Refactoring Planning Standards
 ```
-
-### Example 3: Organizing Refactoring Tasks
-
-```markdown
-## Step 1: Load Task Planning Standards
-
+Read {baseDir}/standards/refactoring-planning-standards.md
 ```
-Skill: cui-task-workflow:cui-task-planning
-```
-
-## Step 2: Create Refactoring Task List
-
-Follow refactoring-planning-standards.md to organize tasks:
-- Categories: C (Code), P (Performance), S (Security), etc.
-- Task identifiers: C1, C2, P1, P2, etc.
+- Category-based organization
+- Task identifier format
 - Priority assignment
-- Commit message integration
-```
 
-## Integration with cui-task-workflow Bundle
+## Integration
 
-This skill integrates with cui-task-workflow bundle components:
+### Commands Using This Skill
+- **/orchestrate-workflow** - Full workflow orchestration
+- **/orchestrate-task** - Single task execution
 
-### Agents
-- **task-breakdown-agent** - Loads this skill to generate issue plans
-- **task-executor** - Consumes plans created using these standards
-- **task-reviewer** - Validates tasks against standards
-
-### Commands
-- **orchestrate-workflow** - Orchestrates work using plan standards
-- Any command that creates or consumes task lists
-
-### Other Skills
-- **cui-git-workflow** - Commit message format works with task identifiers
-- Works alongside other workflow skills
-
-## Cross-References
-
-### To cui-requirements Bundle
-
-The cui-requirements bundle has a **planning-documentation** skill that covers similar project planning concepts. Key differences:
-
-- **planning-documentation** (cui-requirements) - Focuses on requirements/specification traceability context
-- **cui-task-planning** (cui-task-workflow) - Focuses on implementation/execution context
-
-Both are valid and serve different audiences. Use planning-documentation when working in requirements context, use cui-task-planning when working in implementation/workflow context.
-
-### To standards/process/refactoring-process.adoc
-
-The refactoring-process.adoc file documents the refactoring workflow process. Parts of it will become a command. This skill provides the **task structure standards** used within that process.
+### Related Skills
+- **cui-git-workflow** - Commit message format for task completion
+- **cui-java-core** / **cui-javascript** - Standards during execution
 
 ## Quality Verification
 
-Standards in this skill ensure:
-
-- [x] Self-contained (no external references except URLs)
-- [x] All content in standards/ directory
-- [x] Markdown format for compatibility
-- [x] Comprehensive coverage of three use cases
-- [x] Practical examples included
-- [x] Clear decision guidance
-- [x] Agent-friendly structure
+- [x] Self-contained with {baseDir} pattern
+- [x] Progressive disclosure (standards loaded on-demand)
+- [x] Scripts output JSON for machine processing
+- [x] All 3 agent functionalities absorbed
+- [x] Clear workflow definitions
+- [x] Standards documentation maintained
 
 ## References
 
-- Conventional Commits: https://www.conventionalcommits.org/ (for commit message integration)
+- Conventional Commits: https://www.conventionalcommits.org/
 - Task Management Best Practices: https://www.atlassian.com/agile/project-management/user-stories

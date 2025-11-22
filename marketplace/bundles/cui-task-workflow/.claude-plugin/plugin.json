@@ -1,6 +1,6 @@
 {
   "name": "cui-task-workflow",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Complete development workflow from issue implementation to PR review and quality verification",
   "author": {
     "name": "CUI OSS Project",
@@ -9,17 +9,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["workflow", "issue", "pull-request", "pr", "task", "implementation", "review", "quality", "commit", "git"],
-  "agents": [
-    "./agents/commit-changes.md",
-    "./agents/review-comment-fetcher.md",
-    "./agents/review-comment-triager.md",
-    "./agents/sonar-issue-fetcher.md",
-    "./agents/sonar-issue-triager.md",
-    "./agents/task-breakdown-agent.md",
-    "./agents/task-executor.md",
-    "./agents/task-reviewer.md"
-  ],
+  "keywords": ["workflow", "issue", "pull-request", "pr", "task", "implementation", "review", "quality", "commit", "git", "sonar"],
   "commands": [
     "./commands/pr-handle-pull-request.md",
     "./commands/orchestrate-workflow.md",
@@ -30,6 +20,8 @@
   ],
   "skills": [
     "./skills/cui-git-workflow",
-    "./skills/cui-task-planning"
+    "./skills/cui-task-planning",
+    "./skills/pr-workflow",
+    "./skills/sonar-workflow"
   ]
 }

@@ -186,14 +186,23 @@ Display all statistics in Step 7 summary.
 
 Simple orchestrator that delegates to self-contained commands:
 - `/maven-build-and-fix` - Fix build failures + verify + commit
-- `/pr-respond-to-review-comments` - Handle review comments (Pattern 3: fetch → triage → respond)
-- `/pr-fix-sonar-issues` - Handle Sonar issues (Pattern 3: fetch → triage → fix)
+- `/pr-respond-to-review-comments` - Handle review comments (uses pr-workflow skill)
+- `/pr-fix-sonar-issues` - Handle Sonar issues (uses sonar-workflow skill)
 
 Each command is self-contained with own verify + commit cycle.
+
+```
+/pr-handle-pull-request (orchestrator)
+  ├─> SlashCommand(/maven-build-and-fix) [fixes build]
+  ├─> SlashCommand(/pr-respond-to-review-comments) [review comments via pr-workflow skill]
+  └─> SlashCommand(/pr-fix-sonar-issues) [Sonar issues via sonar-workflow skill]
+```
 
 ## RELATED
 
 - `/plugin-update-command` - Update this command
 - `/maven-build-and-fix` - Build fixing command
-- `/pr-respond-to-review-comments` - Review comment handling (Pattern 3)
-- `/pr-fix-sonar-issues` - Sonar issue fixing (Pattern 3)
+- `/pr-respond-to-review-comments` - Review comment handling (uses pr-workflow skill)
+- `/pr-fix-sonar-issues` - Sonar issue fixing (uses sonar-workflow skill)
+- **pr-workflow** skill - PR comment fetch and triage
+- **sonar-workflow** skill - Sonar issue fetch and triage

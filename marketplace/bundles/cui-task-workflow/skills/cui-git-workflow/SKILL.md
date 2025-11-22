@@ -1,149 +1,203 @@
 ---
 name: cui-git-workflow
-description: Git commit standards following conventional commits for CUI projects
-allowed-tools: []
-standards:
-  - standards/git-commit-standards.md
+description: Git commit workflow with conventional commits, artifact cleanup, and optional push/PR creation
+allowed-tools: Read, Glob, Bash(git:*), Bash(rm:*), Bash(gh:*), Skill
 ---
 
 # CUI Git Workflow Skill
 
-Provides standardized git commit format following conventional commits specification for all CUI LLM projects.
+Provides git commit workflow following conventional commits specification. Includes artifact cleanup, commit formatting, and optional push/PR creation.
 
 ## What This Skill Provides
 
-This skill provides comprehensive git commit standards including:
+### Commit Workflow (Absorbs commit-changes Agent)
 
-* **Commit message format** - Type, scope, subject, body, footer structure
-* **Commit types** - feat, fix, docs, style, refactor, perf, test, chore
-* **Examples** - Basic commits, task-based commits, breaking changes
-* **Key practices** - Atomic commits, meaningful messages, issue references
-* **Guidelines** - Subject lines, body format, footer conventions
-* **Anti-patterns** - Common mistakes to avoid
+Complete git commit workflow:
+- Artifact detection and cleanup
+- Commit message generation following conventional commits
+- Optional push to remote
+- Optional PR creation
+
+### Commit Standards
+
+- **Format:** `<type>(<scope>): <subject>`
+- **Types:** feat, fix, docs, style, refactor, perf, test, chore
+- **Quality:** imperative mood, lowercase, no period, max 50 chars
 
 ## When to Activate This Skill
 
-Use this skill when:
+- Committing changes to repository
+- Generating commit messages from diffs
+- Cleaning build artifacts before commit
+- Creating pull requests after commit
 
-* Creating git commits programmatically
-* Validating commit message format
-* Generating commit messages from changes
-* Providing commit message guidance to users
-* Implementing commit-related agents or commands
+## Workflow: Commit Changes
 
-## Workflow
+**Purpose:** Commit all uncommitted changes following Git Commit Standards.
 
-### Step 1: Load Git Commit Standards
+**Input Parameters:**
+- **message** (optional): Custom commit message
+- **push** (optional): Push after committing
+- **create-pr** (optional): Create PR after pushing
 
+### Steps
+
+**Step 1: Load Commit Standards**
 ```
-Read: standards/git-commit-standards.md
-```
-
-This provides:
-* Conventional commits format specification
-* Commit type definitions and usage
-* Subject, body, and footer guidelines
-* Practical examples for different scenarios
-* Best practices and anti-patterns
-* Verification checklist
-
-### Step 2: Apply Standards
-
-Use the loaded standards to:
-
-1. **Format commit messages** following `<type>(<scope>): <subject>` pattern
-2. **Select appropriate type** from: feat, fix, docs, style, refactor, perf, test, chore
-3. **Write clear subjects** in imperative mood, lowercase, max 50 chars
-4. **Include body** when explaining complex changes or context
-5. **Add footers** for breaking changes and issue references
-
-### Step 3: Validate Compliance
-
-Check commit messages against:
-
-* Type from approved list
-* Subject format (imperative, lowercase, no period)
-* Subject length (≤50 chars ideal, 72 absolute max)
-* Body wrapping (72 characters)
-* Footer format (BREAKING CHANGE, issue refs)
-* Atomic commit principle
-
-## Standards Organization
-
-```
-standards/
-  git-commit-standards.md       # Complete commit message standards
+Read {baseDir}/standards/git-commit-standards.md
 ```
 
-Single comprehensive standards file covering all aspects of git commit formatting and best practices.
-
-## Tool Access
-
-**No special tools required** - This skill uses standard Read tool to load markdown standards.
-
-## Usage Examples
-
-### Example 1: commit-changes Agent
-
-The `commit-changes` agent should load this skill to format commits:
-
-```markdown
-### Step 1: Load Git Standards
-
-```
-Skill: cui-task-workflow:cui-git-workflow
+**Step 2: Check for Uncommitted Changes**
+```bash
+git status --porcelain
 ```
 
-This loads conventional commits format and guidelines.
+If no changes → Report "No changes to commit"
 
-### Step 2: Format Commit Message
+**Step 3: Analyze Changes for Artifacts**
 
-Apply standards to generate commit message with:
-- Appropriate type (feat/fix/docs/etc)
-- Clear, imperative subject
-- Optional body with context
-- Issue references in footer
+Use Glob to detect artifacts:
+```
+Glob pattern="**/*.class"
+Glob pattern="**/*.temp"
 ```
 
-### Example 2: Commit Message Validator
+Artifact patterns to clean:
+- `*.class` files in `src/` directories
+- `*.temp` temporary files
+- Files in `target/` or `build/` accidentally staged
 
-```markdown
-### Step 1: Load Standards
+**Step 4: Clean Artifacts**
 
+**Safe Deletions (automatic):**
+- `*.class` in `src/main/java` or `src/test/java`
+- `*.temp` anywhere
+- Delete using `rm <file>`
+
+**Uncertain Cases (ask user):**
+- Files >1MB
+- Files outside safe list
+- Files in `target/` that are tracked
+
+**Step 5: Generate Commit Message**
+
+If custom message provided:
+- Validate format
+- Use provided message
+
+If no message:
+- Analyze diff using script:
+  ```
+  python3 {baseDir}/scripts/format-commit-message.py --analyze <diff-file>
+  ```
+- Generate message following standards
+
+**Multi-type priority:** fix > feat > perf > refactor > docs > style > test > chore
+
+**Step 6: Stage and Commit**
+```bash
+git add .
+git commit -m "$(cat <<'EOF'
+{commit_message}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
 ```
-Skill: cui-task-workflow:cui-git-workflow
+
+**Step 7: Push (Optional)**
+
+If `push` parameter:
+```bash
+git push
 ```
 
-### Step 2: Validate Commit
+**Step 8: Create PR (Optional)**
 
-Check commit message against:
-- Type validation
-- Subject format
-- Length limits
-- Footer format
+If `create-pr` parameter:
+```bash
+gh pr create --title "{title}" --body "$(cat <<'EOF'
+## Summary
+{summary}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
 ```
 
-## Integration with Workflow Bundle
+### Output
 
-This skill integrates with cui-task-workflow bundle components:
+```json
+{
+  "status": "success",
+  "commit_hash": "abc123",
+  "commit_message": "feat(http): add retry configuration",
+  "files_changed": 5,
+  "artifacts_cleaned": 2,
+  "pushed": true,
+  "pr_url": "https://github.com/..."
+}
+```
 
-* **commit-changes agent** - Should load this skill to format commits properly
-* **task-executor agent** - Can reference for commit message generation
-* **orchestrate-workflow command** - Uses commit-changes which should follow these standards
+## Scripts
+
+### format-commit-message.py
+
+**Purpose:** Format commit message or analyze diff for suggestions.
+
+**Usage:**
+```bash
+# Format mode
+python3 {baseDir}/scripts/format-commit-message.py --type feat --scope http --subject "add retry config"
+
+# Analysis mode
+python3 {baseDir}/scripts/format-commit-message.py --analyze <diff-file>
+```
+
+**Output:** JSON with formatted message and validation
+
+## Standards (Load On-Demand)
+
+### Git Commit Standards
+```
+Read {baseDir}/standards/git-commit-standards.md
+```
+
+Provides:
+- Conventional commits format specification
+- Commit type definitions and usage
+- Subject, body, and footer guidelines
+- Best practices and anti-patterns
+
+## Critical Rules
+
+**Artifacts:** NEVER commit `*.class`, `*.temp`, `*.backup*`
+**Permissions:** NEVER push without `push` param, NEVER create PR without `create-pr` param
+**Standards:** Follow conventional commits format, add Co-Authored-By footer
+**Safety:** Ask user if uncertain about file deletion
+
+## Integration
+
+### Commands Using This Skill
+- **/orchestrate-workflow** - Commits after task completion
+- **/orchestrate-task** - Commits individual task changes
+
+### Related Skills
+- **cui-task-planning** - Task completion triggers commit
 
 ## Quality Verification
 
-Standards in this skill ensure:
-
-- [x] Self-contained (no external references)
-- [x] All content in standards/ directory
-- [x] Only external URLs for references
-- [x] Markdown format for compatibility
-- [x] Comprehensive coverage of git commits
-- [x] Practical examples included
+- [x] Self-contained with {baseDir} pattern
+- [x] Progressive disclosure (standards loaded on-demand)
+- [x] Script outputs JSON for machine processing
+- [x] commit-changes agent functionality absorbed
+- [x] Clear workflow definition
+- [x] Standards documentation maintained
 
 ## References
 
-* Conventional Commits: https://www.conventionalcommits.org/
-* Git Commit Best Practices: https://cbea.ms/git-commit/
-* Angular Commit Guidelines: https://github.com/angular/angular/blob/main/CONTRIBUTING.md#commit
+- Conventional Commits: https://www.conventionalcommits.org/
+- Git Commit Best Practices: https://cbea.ms/git-commit/
+- Angular Commit Guidelines: https://github.com/angular/angular/blob/main/CONTRIBUTING.md#commit

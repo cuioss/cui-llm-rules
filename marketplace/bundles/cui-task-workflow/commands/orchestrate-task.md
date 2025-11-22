@@ -23,38 +23,38 @@ This ensures the command evolves and becomes more effective with each execution.
 - **task**: Task description (what to implement)
 - **context**: (Optional) Additional context or constraints
 
+## PREREQUISITES
+
+Load the task-planning skill:
+```
+Skill: cui-task-workflow:cui-task-planning
+```
+
 ## WORKFLOW
 
-### Step 1: Execute Task
+### Step 1: Execute Task (Skill Execute Workflow)
 
-```
-Task:
-  subagent_type: task-executor
-  description: Execute task
-  prompt: |
-    Execute the following task: {task}
+Use **cui-task-planning** Execute workflow:
 
-    Additional context: {context or "None"}
+1. Parse task for references and checklist items
+2. Read all referenced files
+3. Execute checklist items sequentially using Edit, Write tools
+4. Mark items complete in plan if plan file provided
 
-    Implement the required changes following CUI standards.
-    Return implementation details to caller.
-```
+Implementation is done directly by this command following CUI standards.
 
 ### Step 2: Verify Implementation
 
 ```
-Task:
-  subagent_type: maven-builder
-  description: Verify task implementation
-  prompt: |
-    Execute Maven build with goals: clean verify
-    Return structured results (outputMode: STRUCTURED).
+SlashCommand: /cui-maven:maven-build-and-fix
 ```
+
+Self-contained command that runs Maven build and fixes issues if found.
 
 ### Step 3: Analyze Results and Iterate
 
 **If build FAILURE or issues found:**
-- Analyze issues from maven-builder STRUCTURED output
+- Analyze issues from maven-builder output
 - Categorize: compilation_error, test_failure, etc.
 - Return to Step 1 with refined task description
 - Max 5 iterations
@@ -81,13 +81,14 @@ Task:
 - **No Commit**: Caller handles commit (this returns result for aggregation)
 - **Iteration Limit**: Max 5 iterations to prevent infinite loops
 - **Structured Results**: Enable batch orchestration
+- **Skill-Based**: Uses cui-task-planning skill for execution guidance
 
 ## ARCHITECTURE
 
 ```
 /orchestrate-task (Pattern 1 - self-contained)
-  ├─> Task(task-executor) [implements]
-  ├─> Task(maven-builder) [verifies]
+  ├─> Skill(cui-task-planning) Execute workflow [implements]
+  ├─> SlashCommand(/maven-build-and-fix) [verifies]
   ├─> Analyze and iterate (max 5 iterations)
   └─> Return structured result
 ```
@@ -106,6 +107,6 @@ Task:
 
 ## RELATED
 
-- `task-executor` - Focused agent that implements the task
-- `maven-builder` - Focused agent that verifies build
+- **cui-task-planning** skill - Provides execution workflow guidance
+- `/maven-build-and-fix` - Build verification command
 - `/orchestrate-workflow` - Orchestrator that may delegate to this command

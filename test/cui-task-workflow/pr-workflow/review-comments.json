@@ -1,0 +1,52 @@
+{
+  "pr_number": 123,
+  "comments": [
+    {
+      "id": "RC_001",
+      "author": "senior-dev",
+      "body": "This method is too long. Please extract the validation logic into a separate private method.",
+      "path": "src/main/java/de/cuioss/http/HttpClient.java",
+      "line": 145,
+      "resolved": false,
+      "type": "code_change"
+    },
+    {
+      "id": "RC_002",
+      "author": "security-reviewer",
+      "body": "Consider adding input validation here to prevent SQL injection. The userId parameter should be sanitized.",
+      "path": "src/main/java/de/cuioss/service/UserService.java",
+      "line": 67,
+      "resolved": false,
+      "type": "code_change"
+    },
+    {
+      "id": "RC_003",
+      "author": "maintainer",
+      "body": "Why did you choose to use a record here instead of a class? Can you explain the reasoning?",
+      "path": "src/main/java/de/cuioss/http/RetryConfig.java",
+      "line": 15,
+      "resolved": false,
+      "type": "explanation"
+    },
+    {
+      "id": "RC_004",
+      "author": "bot",
+      "body": "This PR has been approved for merge.",
+      "path": null,
+      "line": null,
+      "resolved": true,
+      "type": "ignore"
+    },
+    {
+      "id": "RC_005",
+      "author": "team-lead",
+      "body": "Looks good overall! Just a minor nit: the variable name `x` should be more descriptive.",
+      "path": "src/main/java/de/cuioss/util/Parser.java",
+      "line": 89,
+      "resolved": false,
+      "type": "code_change"
+    }
+  ],
+  "total_comments": 5,
+  "unresolved_comments": 4
+}

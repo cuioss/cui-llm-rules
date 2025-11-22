@@ -1,0 +1,50 @@
+{
+  "triage_results": [
+    {
+      "issue_key": "AX-001",
+      "action": "fix",
+      "reason": "Resource leak is a critical bug that can cause memory issues",
+      "suggested_implementation": "Wrap InputStream in try-with-resources block or use InputStreamUtils.close() in finally clause",
+      "command_to_use": "/java-implement-code",
+      "priority": "high"
+    },
+    {
+      "issue_key": "AX-002",
+      "action": "fix",
+      "reason": "String duplication is easy to fix and improves maintainability",
+      "suggested_implementation": "Extract 'application/json' to private static final String CONTENT_TYPE_JSON = \"application/json\";",
+      "command_to_use": "/java-implement-code",
+      "priority": "medium"
+    },
+    {
+      "issue_key": "AX-003",
+      "action": "fix",
+      "reason": "Potential SQL injection vulnerability - security critical",
+      "suggested_implementation": "Replace string concatenation with parameterized query or use PreparedStatement",
+      "command_to_use": "/java-implement-code",
+      "priority": "critical"
+    },
+    {
+      "issue_key": "AX-004",
+      "action": "fix",
+      "reason": "Unused field is trivial to remove",
+      "suggested_implementation": "Delete the unused 'logger' field declaration",
+      "command_to_use": "/java-implement-code",
+      "priority": "low"
+    },
+    {
+      "issue_key": "AX-005",
+      "action": "suppress",
+      "reason": "TODO comment is intentional placeholder for future work documented in issue #45",
+      "suppression_string": "// NOSONAR java:S1135 - TODO tracked in issue #45"
+    }
+  ],
+  "summary": {
+    "to_fix": 4,
+    "to_suppress": 1,
+    "critical_priority": 1,
+    "high_priority": 1,
+    "medium_priority": 1,
+    "low_priority": 1
+  }
+}

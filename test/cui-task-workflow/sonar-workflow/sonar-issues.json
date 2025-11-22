@@ -1,0 +1,72 @@
+{
+  "project_key": "cuioss_cui-http-client",
+  "pull_request_id": "123",
+  "issues": [
+    {
+      "key": "AX-001",
+      "type": "BUG",
+      "severity": "BLOCKER",
+      "file": "src/main/java/de/cuioss/http/HttpClient.java",
+      "line": 145,
+      "rule": "java:S2095",
+      "message": "Use try-with-resources or close this 'InputStream' in a 'finally' clause.",
+      "effort": "10min"
+    },
+    {
+      "key": "AX-002",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "file": "src/main/java/de/cuioss/http/HttpClient.java",
+      "line": 89,
+      "rule": "java:S1192",
+      "message": "Define a constant instead of duplicating this literal 'application/json' 4 times.",
+      "effort": "5min"
+    },
+    {
+      "key": "AX-003",
+      "type": "VULNERABILITY",
+      "severity": "CRITICAL",
+      "file": "src/main/java/de/cuioss/service/UserService.java",
+      "line": 67,
+      "rule": "java:S3649",
+      "message": "Make sure that string concatenation is required here and is done safely.",
+      "effort": "30min"
+    },
+    {
+      "key": "AX-004",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "file": "src/main/java/de/cuioss/util/Parser.java",
+      "line": 23,
+      "rule": "java:S1068",
+      "message": "Remove this unused 'logger' private field.",
+      "effort": "2min"
+    },
+    {
+      "key": "AX-005",
+      "type": "CODE_SMELL",
+      "severity": "INFO",
+      "file": "src/main/java/de/cuioss/config/ConfigLoader.java",
+      "line": 45,
+      "rule": "java:S1135",
+      "message": "Complete the task associated to this 'TODO' comment.",
+      "effort": "15min"
+    }
+  ],
+  "statistics": {
+    "total_issues_fetched": 5,
+    "issues_after_filtering": 5,
+    "by_severity": {
+      "BLOCKER": 1,
+      "CRITICAL": 1,
+      "MAJOR": 1,
+      "MINOR": 1,
+      "INFO": 1
+    },
+    "by_type": {
+      "BUG": 1,
+      "VULNERABILITY": 1,
+      "CODE_SMELL": 3
+    }
+  }
+}

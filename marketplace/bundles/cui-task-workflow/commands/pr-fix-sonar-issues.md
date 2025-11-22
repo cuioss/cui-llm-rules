@@ -25,30 +25,39 @@ This ensures the command evolves to handle increasingly complex Sonar issue scen
 - Sonar analysis complete
 - Caller has ensured prerequisites met
 
+## PREREQUISITES
+
+Load the sonar-workflow skill:
+```
+Skill: cui-task-workflow:sonar-workflow
+```
+
 ## WORKFLOW
 
-### Step 1: Fetch Issues
+### Step 1: Fetch Issues (Skill Workflow 1)
 
-```
-Task:
-  subagent_type: sonar-issue-fetcher
-  description: Fetch Sonar issues
-  prompt: Fetch all Sonar issues for current PR
-```
+Use **sonar-workflow** Fetch Issues workflow:
+1. Determine PR context: `gh pr view --json number`
+2. Use MCP tool to fetch issues:
+   ```
+   mcp__sonarqube__search_sonar_issues_in_projects(
+     projects: ["{project_key}"],
+     pullRequestId: "{pr_number}"
+   )
+   ```
 
-### Step 2: Triage and Fix Each Issue
+### Step 2: Triage and Fix Each Issue (Skill Workflow 2)
 
-For each issue:
-```
-Task:
-  subagent_type: sonar-issue-triager
-  description: Triage issue {key}
-  prompt: Analyze issue and decide fix vs suppress
-```
+For each issue, use **sonar-workflow** Fix Issues workflow:
 
-Based on triager decision:
-- **If fix**: `SlashCommand(/java-implement-code "fix {issue}")`
-- **If suppress**: `AskUserQuestion` for approval, then add suppression
+1. Run triage script:
+   ```bash
+   python3 {skillBaseDir}/scripts/triage-issue.py --issue '{json}'
+   ```
+
+2. Based on script decision:
+   - **If fix**: `SlashCommand(/java-implement-code "fix {issue}")`
+   - **If suppress**: `AskUserQuestion` for approval, then add suppression comment
 
 ### Step 3: Verify and Commit
 
@@ -72,13 +81,14 @@ SlashCommand: /cui-maven:maven-build-and-fix push
 - **Self-Contained**: Handles entire fix workflow
 - **User Approval**: Ask before suppressing issues
 - **Verify + Commit**: Uses /maven-build-and-fix for final verification
+- **Skill-Based**: Uses sonar-workflow skill for fetch and triage logic
 
 ## ARCHITECTURE
 
 ```
 /pr-fix-sonar-issues (Pattern 3 orchestrator)
-  ├─> Task(sonar-issue-fetcher) [fetches]
-  ├─> For each: Task(sonar-issue-triager) [decides]
+  ├─> Skill(sonar-workflow) Fetch workflow [fetches via MCP]
+  ├─> For each: Skill(sonar-workflow) triage script [decides]
   ├─> Delegates fixes: SlashCommand(/java-implement-code)
   └─> Verifies: SlashCommand(/maven-build-and-fix push)
 ```

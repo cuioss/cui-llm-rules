@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+"""
+Triage a single Sonar issue.
+
+Analyzes issue and determines whether to fix or suppress.
+
+Usage:
+    triage-issue.py --issue <json>
+    triage-issue.py --help
+
+Options:
+    --issue      JSON string with issue data
+    --help       Show this help message
+
+Input JSON format:
+    {
+        "key": "...",
+        "type": "BUG|CODE_SMELL|VULNERABILITY",
+        "severity": "BLOCKER|CRITICAL|MAJOR|MINOR|INFO",
+        "file": "...",
+        "line": N,
+        "rule": "java:S1234",
+        "message": "..."
+    }
+
+Output:
+    JSON object with triage decision:
+    {
+        "issue_key": "...",
+        "action": "fix|suppress",
+        "reason": "...",
+        "priority": "critical|high|medium|low",
+        "suggested_implementation": "...",
+        "suppression_string": "..."
+    }
+"""
+
+import argparse
+import json
+import re
+import sys
+
+
+# Rules that are typically suppressable (false positives or intentional)
+SUPPRESSABLE_RULES = {
+    "java:S1135": "TODO comments - tracked in issue management",
+    "java:S1068": "Unused fields - may be for reflection/serialization",
+    "java:S1172": "Unused parameters - may be for API compatibility",
+    "java:S106": "System.out - acceptable in CLI/test code",
+    "java:S2139": "Logger vs exception - design decision",
+}
+
+# Severity to priority mapping
+SEVERITY_PRIORITY = {
+    "BLOCKER": "critical",
+    "CRITICAL": "high",
+    "MAJOR": "medium",
+    "MINOR": "low",
+    "INFO": "low"
+}
+
+# Type to priority boost
+TYPE_BOOST = {
+    "VULNERABILITY": 1,  # Boost priority
+    "BUG": 0,
+    "CODE_SMELL": -1  # Lower priority
+}
+
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Triage a single Sonar issue"
+    )
+    parser.add_argument(
+        "--issue",
+        required=True,
+        help="JSON string with issue data"
+    )
+    return parser.parse_args()
+
+
+def get_fix_suggestion(rule: str, message: str, file: str, line: int) -> str:
+    """Generate fix suggestion based on rule."""
+    suggestions = {
+        "java:S2095": "Wrap resource in try-with-resources block",
+        "java:S1192": "Extract duplicated string to constant",
+        "java:S3649": "Use parameterized query instead of string concatenation",
+        "java:S1068": "Remove unused field or add @SuppressWarnings with reason",
+        "java:S1135": "Complete TODO or track in issue management system",
+        "java:S106": "Replace System.out with CuiLogger",
+        "java:S1481": "Remove unused local variable",
+        "java:S1854": "Remove useless assignment",
+        "java:S1144": "Remove unused private method",
+    }
+
+    rule_id = rule.split(":")[-1] if ":" in rule else rule
+    full_rule = f"java:{rule_id}" if not rule.startswith("java:") else rule
+
+    suggestion = suggestions.get(full_rule, f"Review and fix: {message}")
+    return f"{suggestion} at {file}:{line}"
+
+
+def get_suppression_string(rule: str, reason: str) -> str:
+    """Generate suppression string for the issue."""
+    return f"// NOSONAR {rule} - {reason}"
+
+
+def calculate_priority(severity: str, issue_type: str) -> str:
+    """Calculate priority based on severity and type."""
+    base_priority = SEVERITY_PRIORITY.get(severity, "low")
+    boost = TYPE_BOOST.get(issue_type, 0)
+
+    priority_levels = ["low", "medium", "high", "critical"]
+    current_idx = priority_levels.index(base_priority)
+    new_idx = max(0, min(len(priority_levels) - 1, current_idx + boost))
+
+    return priority_levels[new_idx]
+
+
+def should_suppress(rule: str, file: str, issue_type: str) -> tuple:
+    """Determine if issue should be suppressed."""
+    # Check suppressable rules
+    if rule in SUPPRESSABLE_RULES:
+        return True, SUPPRESSABLE_RULES[rule]
+
+    # Test files often have acceptable exceptions
+    if "/test/" in file or "Test.java" in file:
+        if rule in ["java:S106", "java:S2699"]:
+            return True, "Test code - acceptable pattern"
+
+    return False, None
+
+
+def triage_issue(issue: dict) -> dict:
+    """Triage a single issue and return decision."""
+    key = issue.get("key", "unknown")
+    issue_type = issue.get("type", "CODE_SMELL")
+    severity = issue.get("severity", "MAJOR")
+    file = issue.get("file", "unknown")
+    line = issue.get("line", 0)
+    rule = issue.get("rule", "unknown")
+    message = issue.get("message", "")
+
+    # Check if should suppress
+    suppress, suppress_reason = should_suppress(rule, file, issue_type)
+
+    if suppress:
+        return {
+            "issue_key": key,
+            "action": "suppress",
+            "reason": suppress_reason,
+            "priority": "low",
+            "suggested_implementation": None,
+            "suppression_string": get_suppression_string(rule, suppress_reason),
+            "status": "success"
+        }
+
+    # Calculate priority and suggest fix
+    priority = calculate_priority(severity, issue_type)
+    fix_suggestion = get_fix_suggestion(rule, message, file, line)
+
+    return {
+        "issue_key": key,
+        "action": "fix",
+        "reason": f"{issue_type} with {severity} severity should be fixed",
+        "priority": priority,
+        "suggested_implementation": fix_suggestion,
+        "suppression_string": None,
+        "command_to_use": "/java-implement-code" if file.endswith(".java") else None,
+        "status": "success"
+    }
+
+
+def main():
+    """Main entry point."""
+    args = parse_args()
+
+    try:
+        issue = json.loads(args.issue)
+    except json.JSONDecodeError as e:
+        print(json.dumps({
+            "error": f"Invalid JSON input: {e}",
+            "status": "failure"
+        }, indent=2))
+        return 1
+
+    result = triage_issue(issue)
+
+    print(json.dumps(result, indent=2))
+
+    return 0 if result.get("status") == "success" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
