@@ -5,26 +5,26 @@ description: Generate coverage with Maven and analyze results (self-contained co
 
 # Java Coverage Report Command
 
-Self-contained command that generates JaCoCo coverage reports using maven-builder and analyzes results using java-coverage-analyzer.
+Thin orchestrator that generates JaCoCo coverage reports using maven-builder agent and analyzes results using cui-java-unit-testing skill workflow.
 
-## CONTINUOUS IMPROVEMENT RULE
+## Parameters
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=java-generate-coverage update="[your improvement]"` with:
+- **threshold** (optional): Coverage threshold percentage (default: 80)
+- **module** (optional): Specific module to analyze (default: all)
 
-**Improvement areas**:
-- Enhanced report parsing for multi-module project coverage aggregation
-- Better visualization of coverage trends across modules
-- Improved low-coverage detection with historical comparison
-- Expanded analysis of uncovered critical paths and business logic
-- Advanced filtering and threshold customization per module type
+## Workflow
 
-## WORKFLOW
+### Step 1: Load Testing Skill
 
-### Step 1: Generate Coverage
+```
+Skill: cui-java-expert:cui-java-unit-testing
+```
+
+### Step 2: Generate Coverage
 
 ```
 Task:
-  subagent_type: maven-builder
+  subagent_type: cui-maven:maven-builder
   description: Generate coverage
   prompt: |
     Execute Maven build with goals: clean test -Pcoverage
@@ -32,43 +32,62 @@ Task:
     Generate JaCoCo coverage reports.
 ```
 
-### Step 2: Analyze Coverage
+### Step 3: Analyze Coverage
 
-```
-Task:
-  subagent_type: java-coverage-analyzer
-  description: Analyze coverage reports
-  prompt: |
-    Analyze JaCoCo coverage reports in target/site/jacoco/
+Execute workflow: Analyze Coverage
+- report_path: target/site/jacoco/jacoco.xml
+- threshold: {threshold}
 
-    Return structured coverage data.
-```
-
-### Step 3: Return Results
-
-Return combined results from maven-builder and java-coverage-analyzer.
-
-## CRITICAL RULES
-
-- **Self-Contained**: Generates AND analyzes coverage
-- **Uses Task**: Invokes agents (maven-builder, java-coverage-analyzer)
-- **No SlashCommand**: Single-item focus, no command delegation
-
-## USAGE
-
-```
-/java-generate-coverage
+Or run script directly:
+```bash
+{baseDir}/scripts/analyze-coverage.py --file target/site/jacoco/jacoco.xml --threshold {threshold}
 ```
 
-## ARCHITECTURE
+### Step 4: Generate Report
+
+```
+╔════════════════════════════════════════════════════════════╗
+║              Coverage Analysis Report                      ║
+╚════════════════════════════════════════════════════════════╝
+
+Build Status: {build_status}
+
+Overall Coverage:
+- Line Coverage: {line_coverage}% {status_emoji}
+- Branch Coverage: {branch_coverage}% {status_emoji}
+- Method Coverage: {method_coverage}%
+
+Threshold: {threshold}%
+Status: {PASS|FAIL}
+
+Low Coverage Classes:
+{list of classes below threshold}
+
+Next Steps:
+{recommendations based on results}
+```
+
+## Architecture
+
+**Pattern**: Thin Orchestrator Command (<100 lines)
+- Invokes maven-builder agent for coverage generation
+- Delegates analysis to cui-java-unit-testing skill workflow
+- No business logic in command
 
 ```
 /java-generate-coverage
   ├─> Task(maven-builder) [generates coverage]
-  └─> Task(java-coverage-analyzer) [analyzes reports]
+  └─> Skill(cui-java-unit-testing) workflow: Analyze Coverage
 ```
 
-## RELATED
+## Usage
 
-- `maven-builder` - Coverage generation (Layer 3)
-- `java-coverage-analyzer` - Report analysis (Layer 3)
+```
+/java-generate-coverage
+/java-generate-coverage threshold=90
+```
+
+## Related
+
+- `cui-java-unit-testing` skill - Coverage analysis workflow
+- `maven-builder` agent - Coverage generation

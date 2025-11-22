@@ -413,6 +413,178 @@ If encountering issues:
 4. **Build failures**: Check modern Java feature compatibility with target Java version
 5. **Complex refactoring**: Break into smaller steps, focus on one standard at a time
 
+---
+
+## Workflow: Analyze Logging Violations
+
+Analyze LOGGER usage in Java files and detect violations of CUI logging standards.
+
+### Parameters
+
+- **target** (required): File or directory to analyze
+- **output_format** (optional): "json" or "report" (default: json)
+
+### Steps
+
+1. **Discover Java Files**
+   ```
+   Glob: pattern="{target}/**/*.java"
+   ```
+   Or use provided file path directly.
+
+2. **Run Violation Analysis Script**
+   ```bash
+   {baseDir}/scripts/analyze-logging-violations.py --directory {target}
+   ```
+
+3. **Parse Results**
+   The script returns JSON with:
+   - `total_statements`: Count of LOGGER calls analyzed
+   - `violations`: List of violations with file, line, type
+   - `summary`: Counts by violation type
+
+4. **Generate Report**
+   ```
+   ╔════════════════════════════════════════════════════════════╗
+   ║           Logging Violations Report                        ║
+   ╚════════════════════════════════════════════════════════════╝
+
+   Files Analyzed: {count}
+   Total LOGGER Statements: {total}
+
+   Violations Found: {violation_count}
+   - Missing LogRecord (INFO/WARN/ERROR/FATAL): {missing_count}
+   - Incorrect LogRecord (DEBUG/TRACE): {incorrect_count}
+
+   Violations by File:
+   {file}: {count} violations
+     Line {line}: {level} - {violation_type}
+
+   Compliance Rate: {rate}%
+   ```
+
+### CUI Logging Rules
+
+- **INFO/WARN/ERROR/FATAL** MUST use LogRecord
+- **DEBUG/TRACE** must NOT use LogRecord (direct string only)
+- Exception parameter always comes first
+- Use %s for all string substitutions
+
+### JSON Output Contract
+
+```json
+{
+  "status": "success",
+  "data": {
+    "total_statements": 50,
+    "violations": [
+      {
+        "file": "src/main/java/MyClass.java",
+        "line": 42,
+        "level": "INFO",
+        "violation_type": "MISSING_LOG_RECORD",
+        "current_usage": "direct_string",
+        "expected_usage": "log_record",
+        "code_snippet": "LOGGER.info(\"message\")"
+      }
+    ],
+    "summary": {
+      "missing_log_record": 5,
+      "incorrect_log_record": 2,
+      "compliant": 43
+    }
+  },
+  "metrics": {
+    "files_analyzed": 10,
+    "compliance_rate": 86.0
+  }
+}
+```
+
+---
+
+## Workflow: Document LogRecord
+
+Generate AsciiDoc documentation for LogMessages holder classes.
+
+### Parameters
+
+- **holder_class** (required): Path to LogMessages Java class
+- **output_file** (optional): Path to output AsciiDoc file
+- **analyze_only** (optional): Only analyze without generating (default: false)
+
+### Steps
+
+1. **Validate Holder Class**
+   ```
+   Glob: pattern="{holder_class}"
+   ```
+   Fail fast if file doesn't exist.
+
+2. **Run Documentation Script**
+   ```bash
+   {baseDir}/scripts/document-logrecord.py --holder {holder_class} --output {output_file}
+   ```
+
+3. **Parse Results**
+   The script returns JSON with:
+   - `generated_files`: List of files created/updated
+   - `documentation`: Metadata about LogRecords found
+   - `tables_generated`: Number of level tables created
+   - `rows_updated`: Total LogRecord entries documented
+
+4. **Generate Summary**
+   ```
+   ╔════════════════════════════════════════════════════════════╗
+   ║     LogMessages Documentation Complete                     ║
+   ╚════════════════════════════════════════════════════════════╝
+
+   Holder Class: {holder_class}
+   Documentation: {output_file}
+   Prefix: {prefix}
+
+   LogRecords Documented:
+   - INFO Level: {count} messages
+   - WARN Level: {count} messages
+   - ERROR Level: {count} messages
+   - FATAL Level: {count} messages
+   Total: {total} messages
+   ```
+
+### Documentation Format
+
+Generated AsciiDoc follows CUI standards:
+- 4-column tables: ID, Component, Message, Description
+- Column widths: `[cols="1,1,2,2", options="header"]`
+- Separate tables per log level
+- Sorted by identifier within each level
+- ID format: `{PREFIX}-{NNN}` with leading zeros
+
+### JSON Output Contract
+
+```json
+{
+  "status": "success",
+  "data": {
+    "generated_files": ["doc/LogMessages.adoc"],
+    "documentation": {
+      "holder_class": "MyLogMessages.java",
+      "prefix": "AUTH",
+      "info_messages": 5,
+      "warn_messages": 3,
+      "error_messages": 4,
+      "fatal_messages": 1,
+      "total_messages": 13
+    },
+    "tables_generated": 4,
+    "rows_updated": 13
+  },
+  "errors": []
+}
+```
+
+---
+
 ## References
 
 **Core Standards (always loaded):**

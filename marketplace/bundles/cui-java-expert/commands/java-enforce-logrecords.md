@@ -84,24 +84,23 @@ This loads:
 
 ### Step 4: Find and Analyze Logging Violations
 
-**Delegate to logging-violation-analyzer agent:**
+**Use cui-java-core skill workflow:**
 
-```
-Task:
-  subagent_type: cui-java-expert:logging-violation-analyzer
-  description: Analyze logging violations
-  prompt: |
-    Analyze all LOGGER statements in {module or project root}.
-    Return structured violation list.
+Execute workflow: Analyze Logging Violations
+- target: {module path or project root}
+
+Or run script directly:
+```bash
+{baseDir}/scripts/analyze-logging-violations.py --directory {target}
 ```
 
-**Agent returns structured violations:**
+**Script returns structured violations:**
 - File locations and line numbers
 - Violation types (MISSING_LOG_RECORD, INCORRECT_LOG_RECORD_USAGE)
 - Current vs expected usage
 - Summary counts
 
-This replaces manual Grep analysis with focused agent that applies CUI logging standards validation.
+This uses the cui-java-core skill workflow for structured logging standards validation.
 
 ### Step 5: Verify LogRecord Usage and Test Coverage
 
@@ -220,32 +219,26 @@ See: `logging-enforcement-patterns.md` → Patterns 13-14 (Identifier Validation
 For each LogMessages class that was modified:
 1. Determine fully qualified class name from file path
 2. Locate corresponding LogMessages.adoc file (from configuration in Step 3)
-3. Invoke log-record-documenter agent
+3. Execute documentation workflow
 
-**Execute documentation update:**
+**Execute documentation update using cui-java-core skill workflow:**
 
-```
-Task:
-  subagent_type: cui-java-expert:log-record-documenter
-  description: Update LogMessages documentation
-  prompt: |
-    Update the LogMessages documentation to reflect code changes.
+Execute workflow: Document LogRecord
+- holder_class: {path-to-java-file}
+- output_file: {path-to-adoc-file}
 
-    Parameters:
-    - holderClass: {fully-qualified-class-name}
-    - logMessagesAdoc: {path-to-adoc-file}
-
-    Analyze the LogMessages class and update the AsciiDoc documentation
-    following CUI standards.
+Or run script directly:
+```bash
+{baseDir}/scripts/document-logrecord.py --holder {holder_class} --output {output_file}
 ```
 
 **Verification:**
-- Check documenter agent completed successfully
+- Check script completed successfully
 - Verify AsciiDoc file was updated
 - Ensure all LogRecords are documented
 
 **Error handling:**
-- If documenter fails: Report warning but continue (documentation is secondary to code correctness)
+- If script fails: Report warning but continue (documentation is secondary to code correctness)
 - If AsciiDoc path not found: Skip documentation update and report warning
 
 ### Step 11: Final Verification and Report
@@ -309,8 +302,8 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Update configuration for future executions
 
 **Violation Detection:**
-- Use logging-violation-analyzer agent for structured violation analysis
-- Agent handles: finding statements, determining LogRecord usage, applying rules
+- Use cui-java-core skill workflow: Analyze Logging Violations
+- Script handles: finding statements, determining LogRecord usage, applying rules
 - Receive structured violations with file locations and types
 - Process violation data for batched fixes
 
@@ -368,10 +361,10 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 
 ## RELATED
 
-- Skill: `cui-java-expert:cui-java-core` - Logging standards and enforcement patterns
+- Skill: `cui-java-expert:cui-java-core` - Logging standards, enforcement patterns, and workflows
+  - Workflow: Analyze Logging Violations - Detect LOGGER usage violations
+  - Workflow: Document LogRecord - Generate AsciiDoc documentation
 - Standards: `logging-standards.md`, `logmessages-documentation.md`, `logging-enforcement-patterns.md`
-- Agent: `cui-java-expert:logging-violation-analyzer` - Analyze LOGGER statement violations (focused analyzer)
-- Command: `/java-implement-code` - Fix production code (Layer 2)
-- Command: `/java-implement-tests` - Add tests (Layer 2)
-- Agent: `cui-java-expert:log-record-documenter` - Update LogMessages documentation (focused documenter)
+- Command: `/java-implement-code` - Fix production code
+- Command: `/java-implement-tests` - Add tests
 - Agent: `cui-maven:maven-builder` - Build verification

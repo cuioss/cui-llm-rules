@@ -286,6 +286,85 @@ If encountering issues:
 4. **Maven build issues**: Check surefire/failsafe configuration
 5. **Integration test problems**: Verify profile configuration and naming conventions
 
+---
+
+## Workflow: Analyze Coverage
+
+Analyze existing JaCoCo coverage reports and extract coverage metrics.
+
+### Parameters
+
+- **report_path** (required): Path to JaCoCo XML report or directory containing reports
+- **threshold** (optional): Coverage threshold for low-coverage detection (default: 80%)
+
+### Steps
+
+1. **Locate Coverage Reports**
+   ```
+   Glob: pattern="{report_path}/**/jacoco.xml"
+   ```
+   Or use provided file path directly.
+
+2. **Run Coverage Analysis Script**
+   ```bash
+   {baseDir}/scripts/analyze-coverage.py --file {report_path} --threshold {threshold}
+   ```
+
+3. **Parse Results**
+   The script returns JSON with:
+   - `overall_coverage`: Line, branch, instruction, method, class percentages
+   - `by_package`: Coverage breakdown per package
+   - `low_coverage_classes`: Classes below threshold
+   - `uncovered_lines`: Specific lines missing coverage
+
+4. **Generate Report**
+   ```
+   ╔════════════════════════════════════════════════════════════╗
+   ║              Coverage Analysis Report                      ║
+   ╚════════════════════════════════════════════════════════════╝
+
+   Overall Coverage:
+   - Line Coverage: {line_coverage}% {status_emoji}
+   - Branch Coverage: {branch_coverage}% {status_emoji}
+   - Method Coverage: {method_coverage}%
+
+   Threshold: {threshold}%
+   Status: {PASS|FAIL}
+
+   Low Coverage Classes:
+   {list of classes below threshold with uncovered methods}
+
+   Recommendations:
+   {prioritized list of classes to test}
+   ```
+
+### JSON Output Contract
+
+```json
+{
+  "status": "success",
+  "data": {
+    "overall_coverage": {
+      "line_coverage": 85.5,
+      "branch_coverage": 78.2,
+      "instruction_coverage": 82.1,
+      "method_coverage": 90.0,
+      "class_coverage": 100.0
+    },
+    "by_package": [...],
+    "low_coverage_classes": [...],
+    "uncovered_lines": [...]
+  },
+  "metrics": {
+    "file_analyzed": "target/site/jacoco/jacoco.xml",
+    "threshold": 80,
+    "meets_threshold": true
+  }
+}
+```
+
+---
+
 ## References
 
 * Core Testing Standards: standards/testing-junit-core.md
