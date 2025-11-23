@@ -51,16 +51,18 @@ Activate when:
 2. **SKILL.md** - Full instructions (~400-800 lines)
 3. **References** - Detailed content (thousands of lines, loaded when needed)
 
-### {baseDir} Pattern
+### Relative Path Pattern
 
-**Principle**: All resource paths use `{baseDir}` for portability across installations.
+**Principle**: All resource paths use relative paths from the skill directory for portability across installations.
 
 **Examples**:
 ```
-Read {baseDir}/references/core-principles.md
-bash {baseDir}/scripts/analyzer.py
-Load template: {baseDir}/assets/template.html
+Read references/core-principles.md
+bash scripts/analyzer.py
+Load template: assets/template.html
 ```
+
+When a skill is loaded, Claude knows its installation directory and resolves relative paths from there.
 
 ## Available References
 
@@ -72,12 +74,12 @@ Load references progressively based on current task. **Never load all references
 **Load When**:
 - Starting any marketplace component development
 - Learning Claude Skills fundamentals
-- Understanding {baseDir} pattern
+- Understanding relative path pattern
 - Reviewing progressive disclosure strategy
 
 **Contents**:
 - Skills as prompt modifiers
-- {baseDir} pattern for portability
+- Relative path pattern for portability
 - Progressive disclosure strategy
 - Resource organization (scripts/, references/, assets/)
 - Tool permissions scoping
@@ -87,7 +89,7 @@ Load references progressively based on current task. **Never load all references
 
 **Load Command**:
 ```
-Read {baseDir}/references/core-principles.md
+Read references/core-principles.md
 ```
 
 ### 2. Skill Patterns (NEW - Implementation Patterns)
@@ -115,7 +117,7 @@ Read {baseDir}/references/core-principles.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/skill-patterns.md
+Read references/skill-patterns.md
 ```
 
 ### 3. Goal-Based Organization (NEW - Architecture Paradigm)
@@ -137,7 +139,7 @@ Read {baseDir}/references/skill-patterns.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/goal-based-organization.md
+Read references/goal-based-organization.md
 ```
 
 ### 4. Architecture Rules (Core Requirements)
@@ -155,12 +157,12 @@ Read {baseDir}/references/goal-based-organization.md
 - Rule 3: Reference categorization (internal, external, skill)
 - Rule 4: Progressive disclosure requirement
 - Rule 5: Goal-based organization requirement
-- {baseDir} pattern requirements
+- relative path pattern requirements
 - Validation criteria
 
 **Load Command**:
 ```
-Read {baseDir}/references/architecture-rules.md
+Read references/architecture-rules.md
 ```
 
 ### 5. Skill Design (Workflow-Focused)
@@ -182,7 +184,7 @@ Read {baseDir}/references/architecture-rules.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/skill-design.md
+Read references/skill-design.md
 ```
 
 ### 6. Command Design (Thin Orchestrators)
@@ -204,7 +206,7 @@ Read {baseDir}/references/skill-design.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/command-design.md
+Read references/command-design.md
 ```
 
 ### 7. Token Optimization (Context Management)
@@ -226,22 +228,22 @@ Read {baseDir}/references/command-design.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/token-optimization.md
+Read references/token-optimization.md
 ```
 
-### 8. Reference Patterns ({baseDir} Usage)
+### 8. Reference Patterns (relative paths Usage)
 **File**: `references/reference-patterns.md`
 
 **Load When**:
 - Understanding allowed reference types
-- Implementing {baseDir} pattern
+- Implementing relative path pattern
 - Validating reference compliance
 - Testing portability
 
 **Contents**:
-- Pattern 1: {baseDir}/references/ for documentation
-- Pattern 2: {baseDir}/scripts/ for automation
-- Pattern 3: {baseDir}/assets/ for templates
+- Pattern 1: relative paths/references/ for documentation
+- Pattern 2: relative paths/scripts/ for automation
+- Pattern 3: relative paths/assets/ for templates
 - Pattern 4: External URLs (allowed)
 - Pattern 5: Skill dependencies (Skill:)
 - Portability testing guidance
@@ -249,7 +251,7 @@ Read {baseDir}/references/token-optimization.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/reference-patterns.md
+Read references/reference-patterns.md
 ```
 
 ### 9. Frontmatter Standards (Component Metadata)
@@ -269,7 +271,7 @@ Read {baseDir}/references/reference-patterns.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/frontmatter-standards.md
+Read references/frontmatter-standards.md
 ```
 
 ### 10. Script Standards (Executable Automation)
@@ -296,7 +298,7 @@ Read {baseDir}/references/frontmatter-standards.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/script-standards.md
+Read references/script-standards.md
 ```
 
 ## Examples
@@ -313,13 +315,13 @@ Read {baseDir}/references/script-standards.md
 - plugin-diagnose skill structure
 - 5 workflows for different diagnostic goals
 - Progressive disclosure demonstration
-- {baseDir} usage throughout
+- relative paths usage throughout
 - Script contracts (JSON output)
 - Reference loading patterns
 
 **Load Command**:
 ```
-Read {baseDir}/references/examples/goal-based-skill-example.md
+Read references/examples/goal-based-skill-example.md
 ```
 
 ### Example 2: Thin Orchestrator Command
@@ -339,7 +341,7 @@ Read {baseDir}/references/examples/goal-based-skill-example.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/examples/workflow-command-example.md
+Read references/examples/workflow-command-example.md
 ```
 
 ### Example 3: Pattern Usage
@@ -358,7 +360,7 @@ Read {baseDir}/references/examples/workflow-command-example.md
 
 **Load Command**:
 ```
-Read {baseDir}/references/examples/pattern-usage-examples.md
+Read references/examples/pattern-usage-examples.md
 ```
 
 ## Usage Workflow
@@ -380,15 +382,15 @@ Determine what you're trying to accomplish:
 **Example**:
 ```
 # Creating a new skill
-Read {baseDir}/references/core-principles.md
-Read {baseDir}/references/skill-patterns.md
-Read {baseDir}/references/skill-design.md
+Read references/core-principles.md
+Read references/skill-patterns.md
+Read references/skill-design.md
 ```
 
 ### Step 3: Apply Principles
 
 Follow the guidance in loaded references:
-- Use {baseDir} for all resource paths
+- Use relative paths for all resource paths
 - Implement progressive disclosure
 - Choose appropriate skill pattern
 - Follow architecture rules
@@ -398,7 +400,7 @@ Follow the guidance in loaded references:
 
 Ensure component follows architecture requirements:
 - Self-contained (no external file references)
-- Uses {baseDir} pattern
+- Uses relative path pattern
 - Implements progressive disclosure
 - Follows chosen skill pattern
 - Meets quality standards
@@ -429,46 +431,46 @@ When fixing components, this skill provides:
 
 **Starting any work**:
 ```
-Read {baseDir}/references/core-principles.md
+Read references/core-principles.md
 ```
 
 **Creating skill**:
 ```
-Read {baseDir}/references/skill-patterns.md
-Read {baseDir}/references/skill-design.md
+Read references/skill-patterns.md
+Read references/skill-design.md
 ```
 
 **Creating command**:
 ```
-Read {baseDir}/references/command-design.md
+Read references/command-design.md
 ```
 
 **Understanding architecture**:
 ```
-Read {baseDir}/references/goal-based-organization.md
-Read {baseDir}/references/architecture-rules.md
+Read references/goal-based-organization.md
+Read references/architecture-rules.md
 ```
 
 **Optimizing performance**:
 ```
-Read {baseDir}/references/token-optimization.md
+Read references/token-optimization.md
 ```
 
 **Validating compliance**:
 ```
-Read {baseDir}/references/architecture-rules.md
-Read {baseDir}/references/reference-patterns.md
+Read references/architecture-rules.md
+Read references/reference-patterns.md
 ```
 
 **Creating scripts**:
 ```
-Read {baseDir}/references/script-standards.md
+Read references/script-standards.md
 ```
 
 **Learning by example**:
 ```
-Read {baseDir}/references/examples/goal-based-skill-example.md
-Read {baseDir}/references/examples/workflow-command-example.md
+Read references/examples/goal-based-skill-example.md
+Read references/examples/workflow-command-example.md
 ```
 
 ## Key Principles Summary
@@ -479,8 +481,8 @@ Organize by user goals (CREATE, DIAGNOSE, FIX, MAINTAIN, LEARN), not component t
 ### 2. Progressive Disclosure
 Minimize upfront information, load details on-demand.
 
-### 3. {baseDir} Pattern
-Always use `{baseDir}` for resource paths - never hardcode paths.
+### 3. relative paths Pattern
+Always use `relative paths` for resource paths - never hardcode paths.
 
 ### 4. Self-Containment
 Skills contain all content within their directory structure.
@@ -507,7 +509,7 @@ Build complex capabilities from simple, focused skills.
 
 Components using this skill should demonstrate:
 - [ ] Self-contained (no external file references)
-- [ ] {baseDir} pattern used throughout
+- [ ] relative path pattern used throughout
 - [ ] Progressive disclosure implemented
 - [ ] Appropriate skill pattern chosen
 - [ ] Goal-based organization followed
@@ -548,10 +550,10 @@ All references are in `references/` directory:
 This skill is designed to run without user prompts. Required permissions:
 
 **File Operations:**
-- `Read({baseDir}/references/**)` - Read reference documentation
+- `Read(relative paths/references/**)` - Read reference documentation
 
 **Ensuring Non-Prompting:**
-- All file reads use `{baseDir}/references/` which resolves to skill's mounted path
+- All file reads use `relative paths/references/` which resolves to skill's mounted path
 - Pure reference skill with no writes or executions
 - Only the Read tool is used (no prompting scenarios)
 

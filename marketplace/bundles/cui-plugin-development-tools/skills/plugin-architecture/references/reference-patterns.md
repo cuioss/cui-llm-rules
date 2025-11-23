@@ -1,33 +1,33 @@
 # Reference Patterns
 
-Classification of allowed vs prohibited reference types in marketplace components, emphasizing the `{baseDir}` pattern for portability.
+Classification of allowed vs prohibited reference types in marketplace components, using relative paths for portability.
 
-## The {baseDir} Pattern
+## The Relative Path Pattern
 
-**Critical Principle**: All resource paths in skills must use `{baseDir}` for portability across installation contexts.
+**Critical Principle**: All resource paths in skills use relative paths from the skill directory for portability across installation contexts.
 
-**Why {baseDir}**:
+**Why Relative Paths**:
 - Skills installed in different locations (global, project, bundle)
-- `{baseDir}` resolves to skill's installation directory at runtime
+- Claude resolves relative paths from the skill's installation directory
 - Makes skills portable and distributable
 
-**Resolves To**:
+**Installation Contexts**:
 - Global: `~/.claude/skills/my-skill/`
 - Project: `.claude/skills/my-skill/`
 - Bundle: `marketplace/bundles/{bundle}/skills/my-skill/`
 
-## Pattern 1: Internal References ({baseDir}/references/)
+## Pattern 1: Internal References (references/)
 
 **Purpose**: Documentation and knowledge loaded on-demand.
 
 **Format**:
 ```markdown
-Read {baseDir}/references/filename.md
-Read {baseDir}/references/subdirectory/filename.md
+Read references/filename.md
+Read references/subdirectory/filename.md
 ```
 
 **Rules**:
-- Must use `{baseDir}` prefix
+- Use relative path from skill directory
 - Must be relative path within references/ directory
 - File must exist in skill's references/ directory
 - No `../` sequences allowed
@@ -35,16 +35,14 @@ Read {baseDir}/references/subdirectory/filename.md
 
 **Examples**:
 ```markdown
-✅ Read {baseDir}/references/quality-standards.md
-✅ Read {baseDir}/references/testing/junit-patterns.md
-✅ Read {baseDir}/references/cdi/cdi-aspects.md
-✅ Read {baseDir}/references/examples/good-example.md
+✅ Read references/quality-standards.md
+✅ Read references/testing/junit-patterns.md
+✅ Read references/cdi/cdi-aspects.md
+✅ Read references/examples/good-example.md
 ```
 
 **Prohibited**:
 ```markdown
-❌ Read: references/file.md                    # Missing {baseDir}
-❌ Read: standards/file.md                     # Old pattern (use references/)
 ❌ Read: ../../../../other-skill/file.md       # Escape sequences
 ❌ Read: ~/git/cui-llm-rules/standards/file.md # Absolute path
 ```
@@ -52,45 +50,42 @@ Read {baseDir}/references/subdirectory/filename.md
 **Validation**:
 ```bash
 # Extract all Read: statements
-grep "Read {baseDir}/references/" skill/SKILL.md
+grep "Read references/" skill/SKILL.md
 
 # Verify each file exists
 for file in $(extracted_paths); do
-  # Remove {baseDir}/ prefix and check existence
-  test -f "skill/${file#\{baseDir\}/}" || echo "MISSING: $file"
+  test -f "skill/${file}" || echo "MISSING: $file"
 done
 ```
 
-## Pattern 2: Script Execution ({baseDir}/scripts/)
+## Pattern 2: Script Execution (scripts/)
 
 **Purpose**: Executable automation scripts (Python, Bash) for deterministic logic.
 
 **Format**:
 ```markdown
-bash {baseDir}/scripts/script-name.sh {args}
-python {baseDir}/scripts/script-name.py {args}
-python3 {baseDir}/scripts/script-name.py {args}
+bash scripts/script-name.sh {args}
+python scripts/script-name.py {args}
+python3 scripts/script-name.py {args}
 ```
 
 **Rules**:
-- Must use `{baseDir}` prefix
+- Use relative path from skill directory
 - Scripts must exist in skill's scripts/ directory
 - Use `bash`, `python`, or `python3` command
 - Pass arguments as needed
 
 **Examples**:
 ```markdown
-✅ bash {baseDir}/scripts/analyzer.sh {input_file}
-✅ python3 {baseDir}/scripts/validate.py {component_path}
-✅ bash {baseDir}/scripts/generate-report.sh {findings_json}
+✅ bash scripts/analyzer.sh {input_file}
+✅ python3 scripts/validate.py {component_path}
+✅ bash scripts/generate-report.sh {findings_json}
 ```
 
 **Prohibited**:
 ```markdown
-❌ bash ./scripts/analyzer.sh                  # Missing {baseDir}
-❌ bash scripts/analyzer.sh                    # Missing {baseDir}
 ❌ python ~/project/scripts/analyzer.py        # Absolute path
-❌ ./scripts/analyzer.sh                       # Relative execution
+❌ ./scripts/analyzer.sh                       # Explicit relative (unnecessary)
 ```
 
 **Script Output**:
@@ -98,33 +93,32 @@ python3 {baseDir}/scripts/script-name.py {args}
 - Scripts should return exit code 0 for success, non-zero for failure
 - Output to stdout, errors to stderr
 
-## Pattern 3: Asset Templates ({baseDir}/assets/)
+## Pattern 3: Asset Templates (assets/)
 
 **Purpose**: Templates and binary files used as input to scripts or for generation.
 
 **Format**:
 ```markdown
-Load template: {baseDir}/assets/template-name.ext
-Read {baseDir}/assets/config-example.json
+Load template: assets/template-name.ext
+Read assets/config-example.json
 ```
 
 **Rules**:
-- Must use `{baseDir}` prefix
+- Use relative path from skill directory
 - Assets must exist in skill's assets/ directory
 - Typically used with "Load template:" or similar context
 - Can be any file type (templates, configs, images)
 
 **Examples**:
 ```markdown
-✅ Load template: {baseDir}/assets/template.html
-✅ Read {baseDir}/assets/config-example.json
-✅ Use template: {baseDir}/assets/templates/basic.txt
-✅ Load image: {baseDir}/assets/diagram.png
+✅ Load template: assets/template.html
+✅ Read assets/config-example.json
+✅ Use template: assets/templates/basic.txt
+✅ Load image: assets/diagram.png
 ```
 
 **Prohibited**:
 ```markdown
-❌ Load template: ./assets/template.html      # Missing {baseDir}
 ❌ Use: ~/git/project/assets/template.html    # Absolute path
 ❌ Load: ../other-skill/assets/template.html  # Cross-skill access
 ```
@@ -213,8 +207,8 @@ Follow architecture rules from loaded skill
 
 **Prohibited**:
 ```markdown
-❌ Read {baseDir}/../other-skill/SKILL.md     # Direct file access
-❌ bash {baseDir}/../other-skill/scripts/*.sh # Cross-skill script
+❌ Read ../other-skill/SKILL.md     # Direct file access
+❌ bash ../other-skill/scripts/*.sh # Cross-skill script
 ```
 
 ## Prohibited Patterns
@@ -233,7 +227,7 @@ Follow architecture rules from loaded skill
 - Breaks when skill installed elsewhere
 - Fails in distribution
 
-**Fix**: Use appropriate pattern (Skill: for other skills, {baseDir} for own resources).
+**Fix**: Use appropriate pattern (Skill: for other skills, relative paths for own resources).
 
 ### ❌ Absolute Paths
 **Problem**: Machine-specific, user-specific, not portable.
@@ -249,31 +243,14 @@ Follow architecture rules from loaded skill
 - Machine-specific file system
 - Not portable across installations
 
-**Fix**: Use {baseDir} pattern or Skill: invocation.
-
-### ❌ Missing {baseDir}
-**Problem**: Relative paths work in development but break in distribution.
-
-```markdown
-❌ Read: references/file.md
-❌ bash ./scripts/analyzer.sh
-❌ bash scripts/analyzer.sh
-❌ Load: assets/template.html
-```
-
-**Why Wrong**:
-- Works in development (current directory)
-- Breaks when skill installed elsewhere
-- Not explicitly portable
-
-**Fix**: Always use {baseDir} prefix.
+**Fix**: Use relative paths or Skill: invocation.
 
 ### ❌ Cross-Skill File Access
 **Problem**: Breaks skill encapsulation, couples skills together.
 
 ```markdown
-❌ Read {baseDir}/../cui-other-skill/references/file.md
-❌ bash {baseDir}/../other-skill/scripts/script.sh
+❌ Read ../cui-other-skill/references/file.md
+❌ bash ../other-skill/scripts/script.sh
 ```
 
 **Why Wrong**:
@@ -291,26 +268,26 @@ Follow architecture rules from loaded skill
 **1. Global Installation**:
 ```bash
 cp -r my-skill ~/.claude/skills/
-# Test that {baseDir} resolves to ~/.claude/skills/my-skill/
+# Test that relative paths resolve from ~/.claude/skills/my-skill/
 ```
 
 **2. Project Installation**:
 ```bash
 cp -r my-skill .claude/skills/
-# Test that {baseDir} resolves to .claude/skills/my-skill/
+# Test that relative paths resolve from .claude/skills/my-skill/
 ```
 
 **3. Bundle Installation**:
 ```bash
 # Skill already in bundle
-# Test that {baseDir} resolves to marketplace/bundles/{bundle}/skills/my-skill/
+# Test that relative paths resolve from marketplace/bundles/{bundle}/skills/my-skill/
 ```
 
 ### Validation Checklist
 
-- [ ] All `Read:` statements use {baseDir} pattern
-- [ ] All script executions use {baseDir} pattern
-- [ ] All asset references use {baseDir} pattern
+- [ ] All `Read:` statements use relative paths
+- [ ] All script executions use relative paths
+- [ ] All asset references use relative paths
 - [ ] No `../` escape sequences found
 - [ ] No absolute paths found
 - [ ] No hardcoded paths found
@@ -326,22 +303,17 @@ grep -r "Read: \.\." skill/              # Escape sequences
 grep -r "bash \.\." skill/               # Escape sequences
 grep -r "Read: ~" skill/                 # Absolute paths
 grep -r "Read: /" skill/ | grep -v http # Absolute paths (exclude URLs)
-
-# Check for missing {baseDir}
-grep -r "Read: references/" skill/       # Should use {baseDir}/references/
-grep -r "bash ./scripts/" skill/         # Should use {baseDir}/scripts/
-grep -r "bash scripts/" skill/           # Should use {baseDir}/scripts/
 ```
 
 ## Reference Summary
 
-**Pattern 1**: `Read {baseDir}/references/file.md` - On-demand documentation
-**Pattern 2**: `bash {baseDir}/scripts/script.sh` - Executable automation
-**Pattern 3**: `Load {baseDir}/assets/template.html` - Templates and binaries
+**Pattern 1**: `Read references/file.md` - On-demand documentation
+**Pattern 2**: `bash scripts/script.sh` - Executable automation
+**Pattern 3**: `Load assets/template.html` - Templates and binaries
 **Pattern 4**: `* URL: https://example.com` - External documentation
 **Pattern 5**: `Skill: skill-name` - Other skill invocation
 
-**Key Principle**: Always use `{baseDir}` for all internal resources to ensure portability.
+**Key Principle**: Always use relative paths for all internal resources to ensure portability.
 
 ## Examples
 
@@ -362,16 +334,16 @@ Skill: cui-utilities:cui-general-development-rules  # Pattern 5
 
 ## Step 2: Load Reference Documentation
 
-Read {baseDir}/references/core-principles.md        # Pattern 1
-Read {baseDir}/references/examples/example-1.md     # Pattern 1
+Read references/core-principles.md        # Pattern 1
+Read references/examples/example-1.md     # Pattern 1
 
 ## Step 3: Execute Analysis Script
 
-bash {baseDir}/scripts/analyzer.sh {input_file}     # Pattern 2
+bash scripts/analyzer.sh {input_file}     # Pattern 2
 
 ## Step 4: Generate Output
 
-Load template: {baseDir}/assets/report-template.md  # Pattern 3
+Load template: assets/report-template.md  # Pattern 3
 Fill template with analysis results
 Write output to {output_file}
 
@@ -383,6 +355,6 @@ Write output to {output_file}
 
 ## Related References
 
-- Core Principles: {baseDir}/references/core-principles.md
-- Architecture Rules: {baseDir}/references/architecture-rules.md
-- Skill Design: {baseDir}/references/skill-design.md
+- Core Principles: references/core-principles.md
+- Architecture Rules: references/architecture-rules.md
+- Skill Design: references/skill-design.md

@@ -20,7 +20,7 @@ skill: marketplace-inventory
 
 ## Step 1: Scan Marketplace Structure
 
-bash {baseDir}/scripts/scan-inventory.sh --scope marketplace --format json
+bash scripts/scan-inventory.sh --scope marketplace --format json
 
 Script outputs:
 ```json
@@ -38,7 +38,7 @@ Script outputs:
 
 ## Step 2: Interpret Inventory
 
-Load interpretation rules: Read {baseDir}/references/inventory-classification.md
+Load interpretation rules: Read references/inventory-classification.md
 
 Classify components by:
 - Complexity (simple, standard, complex)
@@ -99,7 +99,7 @@ Write to {component_path}
 
 ### Marketplace Scenario: Reference Pattern Validator
 
-**Use Case**: Find all file references and validate {baseDir} usage.
+**Use Case**: Find all file references and validate relative path usage.
 
 **Why Pattern 3**:
 - Discovery phase (find references with Grep)
@@ -122,10 +122,10 @@ Finds all Read/Bash/Python references across marketplace
 For each matching line:
   Read containing file
   Extract reference path
-  Load validation rules: Read {baseDir}/references/reference-compliance.md
+  Load validation rules: Read references/reference-compliance.md
 
   Check for violations:
-  - Missing {baseDir} in internal references
+  - Path issues in internal references
   - Prohibited ../../../../ escape sequences
   - Absolute paths instead of relative
 
@@ -133,9 +133,9 @@ For each matching line:
 
 ## Step 3: Generate Violation Report
 
-bash {baseDir}/scripts/aggregate-violations.py {findings_json}
+bash scripts/aggregate-violations.py {findings_json}
 
-Load template: Read {baseDir}/assets/report-template.md
+Load template: Read assets/report-template.md
 
 Output:
 - Total references found
@@ -166,7 +166,7 @@ skill: bundle-verifier
 
 ## Stage 1: Structure Validation
 
-bash {baseDir}/scripts/validate-structure.sh {bundle_path}
+bash scripts/validate-structure.sh {bundle_path}
 
 Verifies:
 - plugin.json exists
@@ -177,7 +177,7 @@ If structure invalid: STOP with error report
 
 ## Stage 2: Metadata Validation
 
-bash {baseDir}/scripts/validate-metadata.sh {bundle_path}/plugin.json
+bash scripts/validate-metadata.sh {bundle_path}/plugin.json
 
 Validates:
 - JSON syntax
@@ -188,7 +188,7 @@ If metadata invalid: STOP with error report
 
 ## Stage 3: Dependency Check
 
-bash {baseDir}/scripts/check-dependencies.sh {bundle_path}
+bash scripts/check-dependencies.sh {bundle_path}
 
 Verifies:
 - All referenced skills exist
@@ -196,7 +196,7 @@ Verifies:
 - All cross-references valid
 
 If dependencies missing: Load recovery guide
-Read {baseDir}/references/dependency-resolution.md
+Read references/dependency-resolution.md
 
 ## Final Report
 
@@ -240,7 +240,7 @@ Based on component_type, ask:
   Options: [Relevant patterns for type]
 
 Load pattern guidance:
-Read {baseDir}/references/patterns/{selected_pattern}.md
+Read references/patterns/{selected_pattern}.md
 
 ## Step 3: Gather Component Details
 
@@ -252,7 +252,7 @@ Ask user:
 
 ## Step 4: Validate Choices
 
-bash {baseDir}/scripts/validate-component-config.sh "{config_json}"
+bash scripts/validate-component-config.sh "{config_json}"
 
 Shows:
   - Proposed file structure
@@ -264,7 +264,7 @@ Shows:
 Ask user: "Create component with this configuration?"
 
 If confirmed:
-  Load template: Read {baseDir}/assets/templates/{component_type}-{pattern}.md
+  Load template: Read assets/templates/{component_type}-{pattern}.md
   Fill template with user values
   Create component files
 
@@ -306,7 +306,7 @@ Extract:
 
 ## Step 2: Generate Test Values
 
-bash {baseDir}/scripts/generate-test-cases.py {script_path}
+bash scripts/generate-test-cases.py {script_path}
 
 Outputs:
 ```json
@@ -320,7 +320,7 @@ Outputs:
 ## Step 3: Select Template
 
 Based on script type (bash/python):
-  template = {baseDir}/assets/templates/test-{script_type}.sh
+  template = assets/templates/test-{script_type}.sh
 
 Load: Read {template}
 
@@ -358,7 +358,7 @@ skill: quality-auditor
 
 ## Phase 1: Broad Quality Scan
 
-bash {baseDir}/scripts/quick-scan.sh --scope marketplace
+bash scripts/quick-scan.sh --scope marketplace
 
 Fast scan outputs:
 ```json
@@ -389,10 +389,10 @@ Select top 10 for deep analysis
 ## Phase 3: Iterative Deep Dive
 
 For each of top 10 (one at a time):
-  bash {baseDir}/scripts/deep-analyze.py {component_path}
+  bash scripts/deep-analyze.py {component_path}
 
   Load detailed criteria:
-  Read {baseDir}/references/quality-standards.md
+  Read references/quality-standards.md
 
   Generate comprehensive report:
   - Line-by-line analysis
@@ -432,7 +432,7 @@ skill: duplication-detector
 
 ## Step 1: Scan Bundle 1 Content
 
-bash {baseDir}/scripts/extract-content-blocks.sh marketplace/bundles/cui-java-expert
+bash scripts/extract-content-blocks.sh marketplace/bundles/cui-java-expert
 
 Outputs content fingerprints:
 ```json
@@ -447,7 +447,7 @@ Outputs content fingerprints:
 
 ## Step 2: Scan Bundle 2 Content
 
-bash {baseDir}/scripts/extract-content-blocks.sh marketplace/bundles/cui-frontend-expert
+bash scripts/extract-content-blocks.sh marketplace/bundles/cui-frontend-expert
 
 Outputs content fingerprints
 
@@ -457,7 +457,7 @@ Repeat for remaining bundles
 
 ## Step 4: Aggregate All Content
 
-bash {baseDir}/scripts/find-duplicates.py \
+bash scripts/find-duplicates.py \
   bundle1_blocks.json \
   bundle2_blocks.json \
   bundle3_blocks.json \
@@ -483,7 +483,7 @@ Outputs:
 ## Step 5: Synthesize Recommendations
 
 Load synthesis rules:
-Read {baseDir}/references/consolidation-strategies.md
+Read references/consolidation-strategies.md
 
 Generate consolidation plan:
 - Which content to extract
@@ -514,7 +514,7 @@ skill: quality-gate
 
 ## Validation Stage 1: YAML Syntax
 
-bash {baseDir}/scripts/check-yaml-syntax.sh {component_path}
+bash scripts/check-yaml-syntax.sh {component_path}
 
 Validates:
 - Frontmatter delimiters correct
@@ -525,10 +525,10 @@ Validates:
 
 ## Validation Stage 2: Frontmatter Standards
 
-bash {baseDir}/scripts/check-frontmatter-standards.sh {component_path}
+bash scripts/check-frontmatter-standards.sh {component_path}
 
 Load standards:
-Read {baseDir}/references/frontmatter-standards.md
+Read references/frontmatter-standards.md
 
 Checks:
 - Tools format (comma-separated)
@@ -539,10 +539,10 @@ Checks:
 
 ## Validation Stage 3: Reference Compliance
 
-bash {baseDir}/scripts/check-references.sh {component_path}
+bash scripts/check-references.sh {component_path}
 
 Validates:
-- All {baseDir} usage correct
+- All relative paths correct
 - No prohibited escape sequences
 - No absolute paths
 
@@ -550,7 +550,7 @@ Validates:
 
 ## Validation Stage 4: Link Verification
 
-bash {baseDir}/scripts/verify-links.sh {component_path}
+bash scripts/verify-links.sh {component_path}
 
 Checks:
 - All internal file references resolve
@@ -607,7 +607,7 @@ This skill provides reference material only. No execution logic.
 ## Available References
 
 ### Core Concepts
-- **core-principles.md**: Skills as prompt modifiers, {baseDir} pattern, progressive disclosure
+- **core-principles.md**: Skills as prompt modifiers, relative path pattern, progressive disclosure
 - **goal-based-organization.md**: Goal-centric vs component-centric design
 
 ### Implementation Guidance
@@ -617,7 +617,7 @@ This skill provides reference material only. No execution logic.
 
 ### Standards
 - **architecture-rules.md**: 5 core architectural rules
-- **reference-patterns.md**: {baseDir} usage patterns and anti-patterns
+- **reference-patterns.md**: relative path patterns and anti-patterns
 - **frontmatter-standards.md**: YAML frontmatter specifications
 
 ### Examples
@@ -629,7 +629,7 @@ This skill provides reference material only. No execution logic.
 
 Load specific reference when needed:
 ```
-Read {baseDir}/references/core-principles.md
+Read references/core-principles.md
 ```
 
 ## Progressive Disclosure
@@ -686,7 +686,7 @@ Pattern 3 (Search-Analyze-Report):
   Step 2: Analyze each violation
 
 Pattern 1 (Script Automation):
-  Step 3: bash {baseDir}/scripts/generate-fixes.py {violations_json}
+  Step 3: bash scripts/generate-fixes.py {violations_json}
   Script outputs fix commands
 
 Pattern 2 (Read-Process-Write):
@@ -725,7 +725,7 @@ Pattern 3 (Search-Analyze-Report):
 
 ## Anti-Patterns: What NOT to Do
 
-### Anti-Pattern 1: Missing {baseDir}
+### Anti-Pattern 1: Improper Path Reference
 
 **Problem**:
 ```markdown
@@ -737,8 +737,8 @@ bash ./scripts/analyzer.sh
 
 **Fix**:
 ```markdown
-Read {baseDir}/references/standards.md
-bash {baseDir}/scripts/analyzer.sh
+Read references/standards.md
+bash scripts/analyzer.sh
 ```
 
 ### Anti-Pattern 2: Monolithic SKILL.md
@@ -829,7 +829,7 @@ SKILL.md contains:
 
 ```markdown
 SKILL.md:
-  Step 1: bash {baseDir}/scripts/parse-and-validate.py {input_json}
+  Step 1: bash scripts/parse-and-validate.py {input_json}
   Step 2: Interpret script output (structured JSON)
 
 scripts/parse-and-validate.py:
@@ -843,11 +843,11 @@ scripts/parse-and-validate.py:
 **Problem**:
 ```markdown
 # At start of workflow
-Read {baseDir}/references/ref1.md
-Read {baseDir}/references/ref2.md
-Read {baseDir}/references/ref3.md
-Read {baseDir}/references/ref4.md
-Read {baseDir}/references/ref5.md
+Read references/ref1.md
+Read references/ref2.md
+Read references/ref3.md
+Read references/ref4.md
+Read references/ref5.md
 # 2500 lines loaded before knowing what workflow needs
 ```
 
@@ -858,10 +858,10 @@ Read {baseDir}/references/ref5.md
 ```markdown
 # Load only what this workflow needs
 If workflow = "create-agent":
-  Read {baseDir}/references/agent-patterns.md
+  Read references/agent-patterns.md
 
 If workflow = "validate-component":
-  Read {baseDir}/references/validation-rules.md
+  Read references/validation-rules.md
 ```
 
 ---
@@ -909,7 +909,7 @@ If workflow = "validate-component":
 2. **Combine patterns**: Most real workflows use 2-3 patterns together
 3. **Use scripts for logic**: Pattern 1 for deterministic operations
 4. **Progressive disclosure**: Pattern 10 for reference material
-5. **Avoid anti-patterns**: No {baseDir} missing, no monolithic SKILL.md, no loading all references
+5. **Avoid anti-patterns**: No path issues, no monolithic SKILL.md, no loading all references
 
 **Pattern Usage in Marketplace**:
 - plugin-architecture: Pattern 10 (Reference Library)
@@ -919,6 +919,6 @@ If workflow = "validate-component":
 - plugin-maintain: Pattern 8 + Pattern 9 (Context Aggregation + Validation)
 
 **References**:
-- Full pattern details: {baseDir}/references/skill-patterns.md
-- Design principles: {baseDir}/references/skill-design.md
-- Core concepts: {baseDir}/references/core-principles.md
+- Full pattern details: references/skill-patterns.md
+- Design principles: references/skill-design.md
+- Core concepts: references/core-principles.md

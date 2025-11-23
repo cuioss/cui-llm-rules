@@ -4,24 +4,24 @@ Core architectural principles for Claude Code marketplace components following g
 
 ## Rule 1: Skills Must Be Self-Contained
 
-All skills must contain ALL content within their own directory structure using the `{baseDir}` pattern.
+All skills must contain ALL content within their own directory structure using the relative paths pattern.
 
 **Rationale**: Skills may be distributed independently, installed globally, or bundled. External dependencies break portability and marketplace distribution.
 
 **Requirements**:
 - All content in skill directory (references/, scripts/, assets/)
-- All resource paths use `{baseDir}` pattern
+- All resource paths use relative paths pattern
 - No references escaping skill directory (`../../../`)
 - No absolute paths (`~/git/cui-llm-rules/`)
 - External references only via URLs or `Skill:` invocations
 
 **Examples**:
 
-✅ CORRECT ({baseDir} pattern):
+✅ CORRECT (relative path pattern):
 ```markdown
-Read {baseDir}/references/java-core-patterns.md
-bash {baseDir}/scripts/analyzer.py {input_file}
-Load template: {baseDir}/assets/template.html
+Read references/java-core-patterns.md
+bash scripts/analyzer.py {input_file}
+Load template: assets/template.html
 Skill: cui-java-unit-testing
 ```
 
@@ -29,10 +29,10 @@ Skill: cui-java-unit-testing
 ```markdown
 Read: ../../../../standards/java/java-core.adoc
 Read: ~/git/cui-llm-rules/standards/logging.adoc
-bash ./scripts/analyzer.py  # Missing {baseDir}
+bash ./scripts/analyzer.py  # Unnecessary ./ prefix
 ```
 
-**{baseDir} Benefits**:
+**Relative Path Benefits**:
 - Portable across installation contexts (global, project, bundle)
 - Works when skill distributed independently
 - No machine-specific or user-specific paths
@@ -95,22 +95,22 @@ Only specific reference types allowed in skills and commands.
 ### 1. Internal Resources (skills only)
 **Format**:
 ```markdown
-Read {baseDir}/references/file.md
-bash {baseDir}/scripts/analyzer.py
-Load: {baseDir}/assets/template.html
+Read references/file.md
+bash scripts/analyzer.py
+Load: assets/template.html
 ```
 
 **Rules**:
-- Must use `{baseDir}` pattern
+- Must use relative paths pattern
 - File must exist in skill directory
 - No `../` sequences
 - Path separator is forward slash `/`
 
 **Examples**:
 ```markdown
-✅ Read {baseDir}/references/quality-standards.md
-✅ bash {baseDir}/scripts/validate.sh {input}
-✅ Load template: {baseDir}/assets/report-template.json
+✅ Read references/quality-standards.md
+✅ bash scripts/validate.sh {input}
+✅ Load template: assets/report-template.json
 ```
 
 ### 2. External URLs (all components)
@@ -167,11 +167,11 @@ Read: ~/git/cui-llm-rules/standards/java-core.adoc
 - User-specific
 - Not portable
 
-❌ **Missing {baseDir}**:
+❌ **Improper Path Reference**:
 ```markdown
-bash ./scripts/analyzer.py  # Should use {baseDir}/scripts/
+bash ./scripts/analyzer.py  # Should use scripts/analyzer.py
 ```
-- Breaks when skill installed elsewhere
+- Unnecessary ./ prefix, just use relative path directly
 
 ## Rule 4: Progressive Disclosure
 
@@ -200,7 +200,7 @@ description: Brief summary for skill selection
 ## Step 1: Analyze Code
 
 For detailed quality standards, load reference:
-Read {baseDir}/references/quality-standards.md
+Read references/quality-standards.md
 
 # Only loads when Step 1 executes
 ```
@@ -216,12 +216,12 @@ Read {baseDir}/references/quality-standards.md
 ```markdown
 ## Step 1: Load Core Principles
 
-Read {baseDir}/references/core-principles.md
+Read references/core-principles.md
 
 ## Step 2: Apply Specific Pattern
 
 If using Pattern 1:
-  Read {baseDir}/references/pattern-1-details.md
+  Read references/pattern-1-details.md
 
 # Each reference loads only when needed
 ```
@@ -313,7 +313,7 @@ All diagnostic and creation workflows reference this skill to apply consistent a
 ## Summary
 
 **Core Principles**:
-1. Self-containment with {baseDir} pattern
+1. Self-containment with relative path pattern
 2. Skill invocation over direct file access
 3. Proper reference categorization
 4. Progressive disclosure for context efficiency

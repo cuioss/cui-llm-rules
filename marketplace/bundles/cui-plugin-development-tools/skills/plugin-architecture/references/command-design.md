@@ -421,6 +421,6 @@ Parameters: {issues from Step 2}
 
 ## Related References
 
-- Skill Design: {baseDir}/references/skill-design.md
-- Skill Patterns: {baseDir}/references/skill-patterns.md
-- Goal-Based Organization: {baseDir}/references/goal-based-organization.md
+- Skill Design: references/skill-design.md
+- Skill Patterns: references/skill-patterns.md
+- Goal-Based Organization: references/goal-based-organization.md

@@ -26,15 +26,15 @@ Th# Goal-Based Marketplace Structure Analysis
 - `references/`: Detailed documentation loaded on-demand
 - `assets/`: Templates and binary files
 
-### 5. {baseDir} Pattern (Critical)
-**Pattern**: All resource references use `{baseDir}` for portability
+### 5. Relative Path Pattern (Critical)
+**Pattern**: All resource references use relative paths for portability
 
-> "Use `{baseDir}` for paths, never hardcode absolute paths."
+> "Use relative paths for paths, never hardcode absolute paths."
 
 Examples:
 ```bash
-bash {baseDir}/scripts/analyzer.sh
-Read {baseDir}/references/detailed-guide.md
+bash scripts/analyzer.sh
+Read references/detailed-guide.md
 ```
 
 ## Current Structure Analysis: Component-Centric (Wrong)
@@ -341,30 +341,30 @@ Analyzes a single component (agent/command/skill) for quality issues.
 **Process**:
 1. Load quality standards (if not preloaded)
    ```
-   Read {baseDir}/references/quality-standards.md
-   Read {baseDir}/references/analysis-patterns.md
+   Read references/quality-standards.md
+   Read references/analysis-patterns.md
    ```
 
 2. Analyze structure
    ```
-   bash {baseDir}/scripts/analyze-structure.sh {component_path} {component_type}
+   bash scripts/analyze-structure.sh {component_path} {component_type}
    ```
 
 3. Analyze tool coverage (for agents/commands)
    ```
-   bash {baseDir}/scripts/analyze-tools.sh {component_path}
+   bash scripts/analyze-tools.sh {component_path}
    ```
 
 4. Validate references
    ```
-   bash {baseDir}/scripts/validate-references.sh {component_path}
+   bash scripts/validate-references.sh {component_path}
    ```
 
 5. Apply quality standards checks
 
 6. Generate report
    ```
-   Read {baseDir}/assets/report-templates.json
+   Read assets/report-templates.json
    ```
 
 **Output**: Structured quality report with issues categorized by severity
@@ -379,12 +379,12 @@ Analyzes all components of a specific type.
 **Process**:
 1. Discover components
    ```
-   bash {baseDir}/scripts/scan-inventory.sh --type {component_type} --scope {scope}
+   bash scripts/scan-inventory.sh --type {component_type} --scope {scope}
    ```
 
 2. Pre-load standards once (token optimization)
    ```
-   Read {baseDir}/references/quality-standards.md
+   Read references/quality-standards.md
    ```
 
 3. Analyze each component in batches of 5
@@ -404,7 +404,7 @@ Complete marketplace health check.
 **Process**:
 1. Scan complete inventory
    ```
-   bash {baseDir}/scripts/scan-inventory.sh --scope marketplace
+   bash scripts/scan-inventory.sh --scope marketplace
    ```
 
 2. Pre-load all standards
@@ -436,7 +436,7 @@ Validates all references in a component.
 1. Extract all references (Read:, Skill:, URLs)
 2. Validate each reference exists/accessible
 3. Check for prohibited patterns (../../../../, absolute paths)
-4. Verify {baseDir} usage in skills
+4. Verify relative path usage in skills
 5. Report violations
 
 **Output**: Reference validation report
@@ -492,9 +492,9 @@ All scripts return JSON for structured parsing.
 
 ## References
 
-* Quality standards: {baseDir}/references/quality-standards.md
-* Analysis patterns: {baseDir}/references/analysis-patterns.md
-* Issue catalog: {baseDir}/references/issue-catalog.md
+* Quality standards: references/quality-standards.md
+* Analysis patterns: references/analysis-patterns.md
+* Issue catalog: references/issue-catalog.md
 ```
 
 ## Benefits of Goal-Based Structure
@@ -556,7 +556,7 @@ Workflow descriptions and instructions
 
 **Step 5: Reference loaded on-demand** (~2000 lines)
 ```
-Read {baseDir}/references/quality-standards.md
+Read references/quality-standards.md
 (Only when workflow needs it)
 ```
 
@@ -574,9 +574,9 @@ Read {baseDir}/references/quality-standards.md
 **Wrong**: Separate skills for each variant
 **Right**: Single skill with multiple workflows for variants
 
-### 3. {baseDir} for All Resources
+### 3. relative paths for All Resources
 **Wrong**: Hardcoded paths, ./.claude/skills/...
-**Right**: {baseDir}/scripts/..., {baseDir}/references/...
+**Right**: scripts/..., references/...
 
 ### 4. Scripts = Deterministic Logic
 **Wrong**: Complex logic in markdown workflows

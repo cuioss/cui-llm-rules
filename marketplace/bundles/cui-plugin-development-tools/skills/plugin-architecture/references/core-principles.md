@@ -94,37 +94,37 @@ such as SQL injection or XSS vulnerabilities, and maybe check if inputs are sani
 
 **Size Limit**: Keep SKILL.md under 5,000 words (~800 lines) to prevent overwhelming context.
 
-## The {baseDir} Pattern
+## The Relative Path Pattern
 
-**Critical Principle**: Use `{baseDir}` variable for all resource paths. Never hardcode absolute paths.
+**Critical Principle**: Use relative paths from the skill directory for all resource paths. Never hardcode absolute paths.
 
-### Why {baseDir} Matters
+### Why Relative Paths Matter
 
 Skills can be installed in different locations:
 - User settings: `~/.claude/skills/`
 - Project directory: `.claude/skills/`
 - Plugin bundles: `marketplace/bundles/{bundle}/skills/`
 
-Using `{baseDir}` ensures the skill works in all contexts.
+Using relative paths ensures the skill works in all contexts. When a skill is loaded, Claude knows its installation directory and resolves relative paths from there.
 
-### {baseDir} Resolution
+### Relative Path Usage
 
-The `{baseDir}` variable resolves to the skill's installation directory at runtime.
+All paths in SKILL.md are relative to the skill's directory.
 
 **Examples**:
 ```markdown
-Read {baseDir}/config.json
-bash {baseDir}/scripts/analyzer.py
-python {baseDir}/scripts/processor.py input.txt
-Load template: {baseDir}/assets/template.html
+Read references/guide.md
+bash scripts/analyzer.py
+python scripts/processor.py input.txt
+Load template: assets/template.html
 ```
 
-### {baseDir} Best Practices
+### Relative Path Best Practices
 
 **Always**:
-- Use `{baseDir}` for scripts: `bash {baseDir}/scripts/script.sh`
-- Use `{baseDir}` for references: `Read {baseDir}/references/guide.md`
-- Use `{baseDir}` for assets: `Load: {baseDir}/assets/template.html`
+- Use relative paths for scripts: `bash scripts/script.sh`
+- Use relative paths for references: `Read references/guide.md`
+- Use relative paths for assets: `Load: assets/template.html`
 
 **Never**:
 - Hardcode absolute paths: `~/git/project/scripts/script.sh`
@@ -138,7 +138,7 @@ Test skills in different installation contexts:
 2. Project installation: `.claude/skills/my-skill/`
 3. Bundle installation: `marketplace/bundles/{bundle}/skills/my-skill/`
 
-Verify {baseDir} resolves correctly in each context.
+Verify relative paths resolve correctly in each context.
 
 ## Resource Organization
 
@@ -169,7 +169,7 @@ my-skill/
 **references/**:
 - Text content loaded into Claude's context on-demand
 - Detailed documentation, large pattern libraries, checklists
-- Loaded via `Read {baseDir}/references/file.md`
+- Loaded via `Read references/file.md`
 - Can be any size (loaded progressively)
 
 **assets/**:
@@ -227,7 +227,7 @@ my-skill/
 ## Step 1: Analyze Code
 
 For detailed quality standards, load reference:
-Read {baseDir}/references/quality-standards.md
+Read references/quality-standards.md
 
 # Only loads when Step 1 executes, not upfront
 ```
@@ -266,7 +266,7 @@ description: Analyzes code for quality issues using on-demand quality standards
 
 ## Step 1: Load Quality Standards
 
-Read {baseDir}/references/quality-standards.md
+Read references/quality-standards.md
 
 # Loaded only when skill executes, not during selection
 ```
@@ -343,7 +343,7 @@ When this skill is invoked, only the listed tools are pre-approved.
 ```markdown
 ## Step 2: Analyze File Structure
 
-bash {baseDir}/scripts/analyze-structure.sh {file_path}
+bash scripts/analyze-structure.sh {file_path}
 
 # Script outputs JSON
 # Claude interprets the JSON and makes decisions
@@ -383,7 +383,7 @@ bash {baseDir}/scripts/analyze-structure.sh {file_path}
 **Error Handling**: Return error status in JSON, don't fail silently
 **Documentation**: Include script usage in SKILL.md
 **Testing**: Write unit tests for scripts
-**Portability**: Use {baseDir} in script paths
+**Portability**: Use relative paths in script paths
 
 ## Dual-Message Pattern
 
@@ -454,8 +454,8 @@ System scans multiple sources and aggregates skills:
 - Load references on-demand
 - Keep SKILL.md under 800 lines
 
-### 2. {baseDir} for Portability
-- Always use `{baseDir}` for paths
+### 2. Relative Paths for Portability
+- Always use relative paths
 - Never hardcode absolute paths
 - Test in different installation contexts
 
@@ -496,7 +496,7 @@ Never use absolute paths or relative traversal (`../../../../`).
 
 **Why**: Breaks when skill installed in different location.
 
-**Fix**: Use `{baseDir}` pattern.
+**Fix**: Use relative paths.
 
 ### ❌ Eager Loading
 Loading all references in SKILL.md upfront.

@@ -8,7 +8,7 @@ Scripts are executable files (shell scripts, Python scripts) providing determini
 
 **Key Characteristics**:
 - Located in `{skill-dir}/scripts/` directory
-- Invoked via `Bash: {baseDir}/scripts/script-name.sh` from SKILL.md
+- Invoked via `Bash: scripts/script-name.sh` from SKILL.md
 - Stdlib-only (no external dependencies)
 - JSON output format (for machine parsing)
 - Executable permissions required
@@ -30,7 +30,7 @@ marketplace/bundles/cui-plugin-development-tools/skills/plugin-diagnose/
 
 **Invocation from SKILL.md**:
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {file_path} agent
+Bash: scripts/analyze-markdown-file.sh {file_path} agent
 ```
 
 ## Documentation Requirements in SKILL.md
@@ -50,14 +50,14 @@ Bash: {baseDir}/scripts/analyze-markdown-file.sh {file_path} agent
 ```markdown
 ## External Resources
 
-### Scripts (in {baseDir}/scripts/)
+### Scripts (in scripts/)
 
 **1. script-name.sh**: Brief purpose statement
 - **Input**: parameter1 (type), parameter2 (type)
 - **Output**: JSON with {field_names}
 - **Usage**:
   ```bash
-  Bash: {baseDir}/scripts/script-name.sh {param1} {param2}
+  Bash: scripts/script-name.sh {param1} {param2}
   ```
 - **Example Output**:
   ```json
@@ -72,14 +72,14 @@ Bash: {baseDir}/scripts/analyze-markdown-file.sh {file_path} agent
 
 **Real Example** (from plugin-diagnose SKILL.md):
 ```markdown
-### Scripts (in {baseDir}/scripts/)
+### Scripts (in scripts/)
 
 **1. analyze-markdown-file.sh**: Analyzes file structure, frontmatter, bloat, Rule 6/7/Pattern 22 violations
 - **Input**: file path, component type (agent|command|skill)
 - **Output**: JSON with structural analysis
 - **Usage**:
   ```bash
-  Bash: {baseDir}/scripts/analyze-markdown-file.sh {file_path} agent
+  Bash: scripts/analyze-markdown-file.sh {file_path} agent
   ```
 
 **2. analyze-tool-coverage.sh**: Analyzes tool coverage and fit for agents/commands
@@ -87,7 +87,7 @@ Bash: {baseDir}/scripts/analyze-markdown-file.sh {file_path} agent
 - **Output**: JSON with tool analysis (score, missing, unused, critical violations)
 - **Usage**:
   ```bash
-  Bash: {baseDir}/scripts/analyze-tool-coverage.sh {file_path}
+  Bash: scripts/analyze-tool-coverage.sh {file_path}
   ```
 
 **3. analyze-skill-structure.sh**: Analyzes skill directory structure and file references
@@ -95,7 +95,7 @@ Bash: {baseDir}/scripts/analyze-markdown-file.sh {file_path} agent
 - **Output**: JSON with structure analysis (score, missing files, unreferenced files)
 - **Usage**:
   ```bash
-  Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
+  Bash: scripts/analyze-skill-structure.sh {skill_dir}
   ```
 
 **4. validate-references.py**: Python script for reference pre-filtering and extraction
@@ -103,7 +103,7 @@ Bash: {baseDir}/scripts/analyze-markdown-file.sh {file_path} agent
 - **Output**: JSON with detected references and pre-filter statistics
 - **Usage**:
   ```bash
-  Bash: python3 {baseDir}/scripts/validate-references.py {file_path}
+  Bash: python3 scripts/validate-references.py {file_path}
   ```
 ```
 
@@ -277,7 +277,7 @@ fi
 
 **Test**:
 ```bash
-Bash: {baseDir}/scripts/script-name.sh --help
+Bash: scripts/script-name.sh --help
 ```
 
 **Verify**:
@@ -415,13 +415,13 @@ exit 1
 
 **Set Permissions**:
 ```bash
-chmod +x {baseDir}/scripts/script-name.sh
-chmod +x {baseDir}/scripts/script-name.py
+chmod +x scripts/script-name.sh
+chmod +x scripts/script-name.py
 ```
 
 **Verify**:
 ```bash
-ls -l {baseDir}/scripts/
+ls -l scripts/
 # Should show: -rwxr-xr-x (executable flag set)
 ```
 
@@ -523,7 +523,7 @@ Create test file following Test File Structure template.
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/script-name.sh --help
+Bash: scripts/script-name.sh --help
 # Should print help and exit 0
 ```
 

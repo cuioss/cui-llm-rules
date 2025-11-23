@@ -151,9 +151,9 @@ ANALYSIS: my-agent.md
 ## Issues Found (3)
 
 ### High Severity (1)
-- Line 45: Missing {baseDir} in script reference
+- Line 45: Path issue in script reference
   bash ./scripts/analyzer.sh
-  Fix: bash {baseDir}/scripts/analyzer.sh
+  Fix: bash scripts/analyzer.sh
 
 ### Medium Severity (2)
 - Line 67: Prohibited escape sequence
@@ -164,7 +164,7 @@ ANALYSIS: my-agent.md
   Add 'Skill' to allowed-tools list
 
 ## Recommendations
-1. Update script references to use {baseDir} pattern
+1. Update script references to use relative path pattern
 2. Replace external file refs with skill invocations
 3. Add Skill to allowed-tools for standards loading
 
@@ -191,7 +191,7 @@ ANALYSIS: All Agents (15 total)
 [...]
 
 ## Top Issues
-1. Missing {baseDir} in scripts (5 occurrences)
+1. Path issue in scripts (5 occurrences)
 2. Prohibited reference patterns (4 occurrences)
 3. Missing skill invocations (3 occurrences)
 
@@ -220,7 +220,7 @@ MARKETPLACE HEALTH REPORT
 - Low: 15
 
 ### Top Issues Across Marketplace
-1. Missing {baseDir} in scripts (12 occurrences)
+1. Path issue in scripts (12 occurrences)
 2. Prohibited reference patterns (8 occurrences)
 3. Missing progressive disclosure (6 occurrences)
 
@@ -233,7 +233,7 @@ MARKETPLACE HEALTH REPORT
 
 ### Recommendations
 1. Fix critical issues first (3 components affected)
-2. Update {baseDir} usage across 12 components
+2. Update path usage across 12 components
 3. Replace prohibited patterns in 8 components
 ```
 
@@ -273,7 +273,7 @@ Display fix results:
 FIXES APPLIED
 
 ## Safe Fixes (12 applied automatically)
-✅ Updated 12 {baseDir} references
+✅ Fixed 12 path references
 ✅ Fixed 5 YAML frontmatter issues
 ✅ Corrected 3 reference patterns
 

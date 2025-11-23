@@ -58,12 +58,12 @@ Analyzes a single component (agent/command/skill) for quality issues.
 #### Step 1: Load Quality Standards (if not preloaded)
 
 If standards_preloaded = false:
-  Read {baseDir}/references/quality-standards.md
-  Read {baseDir}/references/analysis-patterns.md
+  Read references/quality-standards.md
+  Read references/analysis-patterns.md
 
 #### Step 2: Analyze Structure
 
-bash {baseDir}/scripts/analyze-structure.sh {component_path} {component_type}
+bash scripts/analyze-structure.sh {component_path} {component_type}
 
 Script outputs JSON:
 ```json
@@ -81,34 +81,34 @@ Script outputs JSON:
 #### Step 3: Analyze Tool Coverage (for agents/commands)
 
 If component_type = "agent" or "command":
-  bash {baseDir}/scripts/analyze-tools.sh {component_path}
+  bash scripts/analyze-tools.sh {component_path}
 
 Script outputs JSON with tool usage analysis.
 
 #### Step 4: Validate References
 
-bash {baseDir}/scripts/validate-references.sh {component_path}
+bash scripts/validate-references.sh {component_path}
 
 Checks for:
 - Prohibited patterns (../../../../, absolute paths)
-- Missing {baseDir} usage
+- Missing relative path
 - Invalid skill references
 
 #### Step 5: Apply Quality Standards Checks
 
 Load detailed analysis patterns:
-Read {baseDir}/references/analysis-patterns.md
+Read references/analysis-patterns.md
 
 Apply standards-based checks:
 - Workflow clarity
 - Progressive disclosure
-- {baseDir} usage
+- Relative path usage
 - Proper skill invocations
 
 #### Step 6: Generate Report
 
 Load report template:
-Read {baseDir}/assets/report-templates.json
+Read assets/report-templates.json
 
 Format structured report with:
 - Component name and type
@@ -128,8 +128,8 @@ Format structured report with:
     {
       "severity": "high",
       "type": "missing-baseDir",
-      "message": "Script reference missing {baseDir}: bash ./scripts/analyzer.sh",
-      "recommendation": "Use: bash {baseDir}/scripts/analyzer.sh",
+      "message": "Script path issue: bash ./scripts/analyzer.sh",
+      "recommendation": "Use: bash scripts/analyzer.sh",
       "line": 45
     }
   ],
@@ -149,7 +149,7 @@ Analyzes all components of a specific type.
 
 #### Step 1: Discover Components
 
-bash {baseDir}/scripts/scan-inventory.sh --type {component_type} --scope {scope}
+bash scripts/scan-inventory.sh --type {component_type} --scope {scope}
 
 Script outputs JSON:
 ```json
@@ -167,8 +167,8 @@ Script outputs JSON:
 
 #### Step 2: Pre-load Standards Once (token optimization)
 
-Read {baseDir}/references/quality-standards.md
-Read {baseDir}/references/analysis-patterns.md
+Read references/quality-standards.md
+Read references/analysis-patterns.md
 
 #### Step 3: Analyze Each Component in Batches
 
@@ -211,15 +211,15 @@ Complete marketplace health check.
 
 #### Step 1: Scan Complete Inventory
 
-bash {baseDir}/scripts/scan-inventory.sh --scope marketplace
+bash scripts/scan-inventory.sh --scope marketplace
 
 Returns all bundles, agents, commands, skills.
 
 #### Step 2: Pre-load All Standards
 
-Read {baseDir}/references/quality-standards.md
-Read {baseDir}/references/analysis-patterns.md
-Read {baseDir}/references/issue-catalog.md
+Read references/quality-standards.md
+Read references/analysis-patterns.md
+Read references/issue-catalog.md
 
 #### Step 3: Analyze All Bundles in Parallel Batches
 
@@ -258,7 +258,7 @@ MARKETPLACE HEALTH REPORT
 - Low: 15
 
 ### Top Issues
-1. Missing {baseDir} in scripts (12 occurrences)
+1. Path issues in scripts (12 occurrences)
 2. Prohibited reference patterns (8 occurrences)
 3. Missing progressive disclosure (6 occurrences)
 
@@ -290,7 +290,7 @@ Parse component file for:
 For each reference:
   - Check type (internal, script, asset, skill, URL)
   - Validate against allowed patterns
-  - Check {baseDir} usage for internal refs
+  - Check relative path usage for internal refs
   - Verify file existence for internal refs
 
 #### Step 3: Check for Prohibited Patterns
@@ -298,9 +298,9 @@ For each reference:
 Search for:
 - `../../../../` (escape sequences)
 - `~/` or absolute paths
-- Missing `{baseDir}` in internal refs
+- Missing relative paths in internal refs
 
-bash {baseDir}/scripts/validate-references.sh {component_path}
+bash scripts/validate-references.sh {component_path}
 
 #### Step 4: Report Violations
 
@@ -314,7 +314,7 @@ bash {baseDir}/scripts/validate-references.sh {component_path}
       "line": 45,
       "type": "missing-baseDir",
       "reference": "bash ./scripts/analyzer.sh",
-      "fix": "bash {baseDir}/scripts/analyzer.sh"
+      "fix": "bash scripts/analyzer.sh"
     }
   ]
 }
@@ -333,7 +333,7 @@ Detects duplicate content across components.
 
 #### Step 1: Scan All Components in Scope
 
-bash {baseDir}/scripts/scan-inventory.sh --scope {scope}
+bash scripts/scan-inventory.sh --scope {scope}
 
 #### Step 2: Extract Content Blocks
 
@@ -413,7 +413,7 @@ All scripts return JSON for structured parsing:
 
 1. **Goal-Based Organization**: Skill serves DIAGNOSE goal with multiple workflows
 2. **Progressive Disclosure**: References loaded on-demand based on workflow
-3. **{baseDir} Pattern**: All resource paths use {baseDir}
+3. **Relative Path Pattern**: All resource use relative paths
 4. **Script Automation (Pattern 1)**: Deterministic logic in scripts, Claude interprets
 5. **Workflow Composition**: Workflows build on each other (Workflow 2 uses Workflow 1)
 6. **Token Optimization**: Pre-load standards once for batch processing (Workflow 2, 3)

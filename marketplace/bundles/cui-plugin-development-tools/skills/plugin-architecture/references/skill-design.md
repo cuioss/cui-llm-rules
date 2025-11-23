@@ -211,17 +211,17 @@ Workflow: validate-marketplace
 ## Workflow 1: basic-analysis
 
 Step 1: Load core standards
-Read {baseDir}/references/core-standards.md
+Read references/core-standards.md
 
 [Basic analysis steps]
 
 ## Workflow 2: deep-analysis
 
 Step 1: Load core standards
-Read {baseDir}/references/core-standards.md
+Read references/core-standards.md
 
 Step 2: Load detailed patterns
-Read {baseDir}/references/advanced-patterns.md
+Read references/advanced-patterns.md
 
 [Detailed analysis steps]
 ```
@@ -238,7 +238,7 @@ Step 1: Quick Scan
 
 Step 2: Load Details for Issues
 If issues found in Step 1:
-  Read {baseDir}/references/detailed-patterns.md
+  Read references/detailed-patterns.md
 
 Step 3: Deep Analysis
 [Only executes if Step 1 found issues]
@@ -427,9 +427,9 @@ allowed-tools: [Read]
 This skill provides reference material only. No execution.
 
 Load specific reference when needed:
-- Read {baseDir}/references/core-principles.md
-- Read {baseDir}/references/skill-patterns.md
-- Read {baseDir}/references/goal-based-organization.md
+- Read references/core-principles.md
+- Read references/skill-patterns.md
+- Read references/goal-based-organization.md
 
 Never load all references at once. Load only what's needed for current task.
 ```
@@ -465,6 +465,6 @@ allowed-tools: [Read, Bash, Glob, Grep, Skill]
 
 ## Related References
 
-- Core Principles: {baseDir}/references/core-principles.md
-- Skill Patterns: {baseDir}/references/skill-patterns.md
-- Command Design: {baseDir}/references/command-design.md
+- Core Principles: references/core-principles.md
+- Skill Patterns: references/skill-patterns.md
+- Command Design: references/command-design.md

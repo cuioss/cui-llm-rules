@@ -29,7 +29,7 @@ skill-name/
 **SKILL.md Pattern**:
 ```markdown
 ## Step 1: Analyze Input
-bash {baseDir}/scripts/analyzer.py {input_file}
+bash scripts/analyzer.py {input_file}
 
 ## Step 2: Interpret Results
 The script outputs JSON with this structure:
@@ -40,7 +40,7 @@ The script outputs JSON with this structure:
 }
 
 Apply the following interpretation rules:
-- Load detailed rules: Read {baseDir}/references/interpretation-guide.md
+- Load detailed rules: Read references/interpretation-guide.md
 ```
 
 **Key Characteristics**:
@@ -87,7 +87,7 @@ Apply transformations:
 3. Generate new content
 
 ## Step 3: Write Output
-Load template: Read {baseDir}/assets/template.txt
+Load template: Read assets/template.txt
 Fill template with processed content
 Write to {output_file}
 ```
@@ -134,12 +134,12 @@ Grep: pattern="{search_pattern}", output_mode="files_with_matches"
 ## Step 2: Analyze Matches
 For each matching file:
   Read file
-  Apply analysis criteria: Read {baseDir}/references/analysis-criteria.md
+  Apply analysis criteria: Read references/analysis-criteria.md
   Categorize findings
 
 ## Step 3: Generate Report
-bash {baseDir}/scripts/aggregate-findings.py {findings_json}
-Format report using: Read {baseDir}/assets/report-template.json
+bash scripts/aggregate-findings.py {findings_json}
+Format report using: Read assets/report-template.json
 ```
 
 **Key Characteristics**:
@@ -179,16 +179,16 @@ skill-name/
 **SKILL.md Pattern**:
 ```markdown
 ## Stage 1: Setup
-bash {baseDir}/scripts/stage1-setup.sh
+bash scripts/stage1-setup.sh
 Verify setup successful before proceeding
 
 ## Stage 2: Build
-bash {baseDir}/scripts/stage2-build.sh
+bash scripts/stage2-build.sh
 Capture output and check for errors
 
 ## Stage 3: Verify
-bash {baseDir}/scripts/stage3-verify.sh
-If verification fails: Read {baseDir}/references/failure-recovery.md
+bash scripts/stage3-verify.sh
+If verification fails: Read references/failure-recovery.md
 ```
 
 **Key Characteristics**:
@@ -236,11 +236,11 @@ Ask user about:
 - Requirement C
 
 ## Step 2: Validate Choices
-bash {baseDir}/scripts/validate-choices.sh "{choices_json}"
+bash scripts/validate-choices.sh "{choices_json}"
 
 ## Step 3: Show Preview
 Based on choices, load template:
-Read {baseDir}/assets/templates/{selected_template}.txt
+Read assets/templates/{selected_template}.txt
 Show preview to user
 
 ## Step 4: Confirm and Create
@@ -290,12 +290,12 @@ skill-name/
 Based on user requirements, select appropriate template
 
 ## Step 2: Generate Values
-bash {baseDir}/scripts/generate-values.py {requirements_json}
+bash scripts/generate-values.py {requirements_json}
 or
-Apply generation rules from: Read {baseDir}/references/field-specifications.md
+Apply generation rules from: Read references/field-specifications.md
 
 ## Step 3: Fill Template
-Load: Read {baseDir}/assets/templates/{template_type}.txt
+Load: Read assets/templates/{template_type}.txt
 Replace placeholders with generated values
 
 ## Step 4: Output Result
@@ -338,7 +338,7 @@ skill-name/
 **SKILL.md Pattern**:
 ```markdown
 ## Phase 1: Broad Scan
-bash {baseDir}/scripts/scan-all.sh {target_directory}
+bash scripts/scan-all.sh {target_directory}
 Identifies candidates for deep analysis
 
 ## Phase 2: Prioritize Candidates
@@ -347,8 +347,8 @@ Select top N for deep analysis
 
 ## Phase 3: Deep Analysis (Iterative)
 For each high-priority candidate:
-  bash {baseDir}/scripts/deep-analyze.py {candidate_path}
-  Load criteria: Read {baseDir}/references/deep-analysis-criteria.md
+  bash scripts/deep-analyze.py {candidate_path}
+  Load criteria: Read references/deep-analysis-criteria.md
   Generate detailed report
 
 Continue until context limit or all analyzed
@@ -391,16 +391,16 @@ skill-name/
 **SKILL.md Pattern**:
 ```markdown
 ## Step 1: Gather from Source 1
-bash {baseDir}/scripts/source1-scanner.sh
+bash scripts/source1-scanner.sh
 
 ## Step 2: Gather from Source 2
-bash {baseDir}/scripts/source2-scanner.sh
+bash scripts/source2-scanner.sh
 
 ## Step 3: Aggregate Data
-bash {baseDir}/scripts/aggregate.py {source1_output} {source2_output}
+bash scripts/aggregate.py {source1_output} {source2_output}
 
 ## Step 4: Synthesize Understanding
-Apply synthesis rules: Read {baseDir}/references/synthesis-rules.md
+Apply synthesis rules: Read references/synthesis-rules.md
 Generate comprehensive report
 ```
 
@@ -442,18 +442,18 @@ skill-name/
 **SKILL.md Pattern**:
 ```markdown
 ## Validation Stage 1: Syntax
-bash {baseDir}/scripts/check-syntax.sh {target}
+bash scripts/check-syntax.sh {target}
 Must pass before continuing
 
 ## Validation Stage 2: Style
-bash {baseDir}/scripts/check-style.sh {target}
-Load standards: Read {baseDir}/references/validation-standards.md
+bash scripts/check-style.sh {target}
+Load standards: Read references/validation-standards.md
 
 ## Validation Stage 3: Security
-bash {baseDir}/scripts/check-security.sh {target}
+bash scripts/check-security.sh {target}
 
 ## Validation Stage 4: Quality
-bash {baseDir}/scripts/check-quality.sh {target}
+bash scripts/check-quality.sh {target}
 
 ## Final Report
 Aggregate all validation results
@@ -516,7 +516,7 @@ This skill provides reference material only. No execution.
 ## Usage
 
 Load specific reference when needed:
-Read {baseDir}/references/{topic}.md
+Read references/{topic}.md
 
 ## Progressive Disclosure
 
@@ -574,7 +574,7 @@ When implementing a skill using these patterns:
 - [ ] Implement scripts (if pattern uses scripts)
 - [ ] Create templates/assets (if pattern uses them)
 - [ ] Write reference documentation (if pattern uses references)
-- [ ] Use {baseDir} for all resource paths
+- [ ] Use relative paths for all resource paths
 - [ ] Keep SKILL.md under 800 lines
 - [ ] Test progressive disclosure (references loaded on-demand)
 - [ ] Validate allowed-tools list (minimal permissions)
