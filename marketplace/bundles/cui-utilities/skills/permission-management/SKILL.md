@@ -37,7 +37,7 @@ Comprehensive permission management patterns for Claude Code settings, including
 - Marketplace inventory analysis
 - Bundle-based wildcard generation
 - Short-form command permissions
-- Script permission path formats
+- {baseDir} architecture compliance
 
 ### Historical Lessons
 - Production issues discovered and resolved
@@ -118,11 +118,12 @@ echo '<inventory-json>' | python3 {baseDir}/scripts/generate-permission-wildcard
 ```
 
 The script analyzes inventory and outputs:
-- Statistics (bundles, skills, commands, scripts, wildcards)
+- Statistics (bundles, skills, commands, wildcards)
 - Skill bundle wildcards: `Skill({bundle-name}:*)`
 - Command bundle wildcards: `SlashCommand(/{bundle-name}:*)`
 - Command short-form permissions: `SlashCommand(/{command-name}:*)`
-- Script permissions (3 formats per script): runtime, relative, absolute
+
+**Note:** Script permissions are NOT generated. The `{baseDir}` pattern in SKILL.md handles script portability automatically - Claude resolves `{baseDir}` at runtime to the skill's mounted directory.
 
 #### Step 4: Display Results
 
@@ -137,7 +138,6 @@ Statistics:
 - Bundles scanned: {bundles_scanned}
 - Skills found: {skills_found}
 - Commands found: {commands_found}
-- Scripts found: {scripts_found}
 - Wildcards generated: {wildcards_generated}
 
 Bundle Summary:
@@ -153,8 +153,7 @@ Required Wildcard Permissions:
   SlashCommands (Short-Form Permissions):
     {list from script output}
 
-  Script Permissions:
-    {list from script output}
+Note: Script permissions are handled by {baseDir} architecture - no permissions needed.
 
 Coverage Verification:
   {coverage info from script output}
@@ -190,9 +189,9 @@ Edit: marketplace/bundles/cui-utilities/commands/tools-setup-project-permissions
 ╚════════════════════════════════════════════════════════════╝
 
 Marketplace Coverage: 100%
-- All {skills_found} skills covered
-- All {commands_found} commands covered
-- All {scripts_found} scripts covered
+- All {skills_found} skills covered by bundle wildcards
+- All {commands_found} commands covered (bundle + short-form)
+- Scripts handled by {baseDir} architecture (no permissions needed)
 
 {if not dry-run}
 ✅ tools-setup-project-permissions.md updated
@@ -255,9 +254,9 @@ This skill is designed to run without user prompts. Required permissions:
 - Generate one `Skill({bundle-name}:*)` per bundle with skills
 - Generate one `SlashCommand(/{bundle-name}:*)` per bundle with commands
 - Generate one `SlashCommand(/{command-name}:*)` per command (short-form)
-- Generate three `Bash(...)` patterns per script (runtime, relative, absolute)
 - NEVER use wildcards in bundle names (e.g., `cui-*:*` is invalid)
 - Permission validation regex requires exact bundle names
+- **Script permissions are NOT generated** - the `{baseDir}` pattern handles this automatically
 
 **Script Invocation:**
 - Always use `{baseDir}/scripts/` for script paths

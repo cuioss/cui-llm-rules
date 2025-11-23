@@ -69,53 +69,58 @@ This project has access to globally-approved domains for common development reso
 
 ### Last Execution
 
-- Date: 2025-11-18 (Fifth run - Critical architecture fix)
-- Result: Fixed critical permission architecture issues
+- Date: 2025-11-22 (Sixth run - {baseDir} architecture compliance)
+- Result: Fixed architecture violations, added global marketplace permissions
 - Status: SUCCESS
 
 ### Changes Applied
 
 **Global Settings Updated:**
-- **ADDED 44 short-form SlashCommand permissions:**
-  - All marketplace commands now work in both invocation forms
-  - Short form: `/plugin-diagnose-agents`, `/java-implement-code`, etc.
-  - Bundle-qualified: `/cui-java-expert:java-implement-code`, etc.
-- **REMOVED 1 invalid permission:**
-  - `SlashCommand(/plugin-*:*)` - Invalid pattern (cannot wildcard command names)
+- **ADDED 51 marketplace permissions:**
+  - 8 Skill bundle wildcards: `Skill(cui-documentation-standards:*)`, etc.
+  - 8 SlashCommand bundle wildcards: `SlashCommand(/cui-java-expert:*)`, etc.
+  - 35 SlashCommand short-form permissions: `/java-implement-code:*`, etc.
 
 **Local Settings Updated:**
-- **REMOVED 1 redundant marketplace permission:**
-  - `SlashCommand(/plugin-diagnose-agents:*)` - Now covered by global settings
-- **ADDED 5 project-specific permissions:**
+- **REMOVED 4 incorrect permissions:**
+  - `Skill(cui-diagnostic-patterns)` - Should be global, not local
+  - `Skill(cui-utilities:permission-management)` - Should be global, not local
+  - `Skill(cui-plugin-development-tools:marketplace-inventory)` - Should be global, not local
+  - `Bash(bash /Users/.../scan-marketplace-inventory.sh:*)` - Violates {baseDir} pattern
+- **KEPT 7 project-specific permissions:**
+  - `Bash(claude-code:*)` - Claude Code CLI operations
   - `Edit(//~/git/cui-llm-rules/**)` - Project editing
   - `Write(//~/git/cui-llm-rules/**)` - Project file creation
   - `Read(//marketplace/**)` - Marketplace bundle access
   - `Read(//.claude/**)` - Claude configuration access
   - `Read(//standards/**)` - Standards documentation access
-- **KEPT 2 existing project-specific permissions:**
-  - `Bash(claude-code:*)` - Claude Code CLI operations
   - `WebFetch(domain:formulae.brew.sh)` - Homebrew formula documentation
 
-### Critical Issue Discovered & Fixed
+### Critical Architecture Lesson
 
-**Problem:** Bundle wildcards like `SlashCommand(/cui-java-expert:*)` ONLY match bundle-qualified invocations (e.g., `/cui-java-expert:java-implement-code`). They do NOT match short-form invocations (e.g., `/java-implement-code`).
+**Problem:** Previous approach incorrectly tried to add script permissions for 9 scripts × 3 path formats = 27 Bash permissions per project.
 
-**Impact:** Most marketplace commands were inaccessible via short-form invocation, requiring users to use verbose bundle-qualified forms.
+**Why This Was Wrong:**
+- The `{baseDir}` pattern handles script portability automatically
+- Scripts are invoked via `bash {baseDir}/scripts/script.sh` in SKILL.md
+- Claude resolves `{baseDir}` to the skill's mounted directory at runtime
+- No hardcoded absolute paths should ever be in settings
 
-**Solution:** Added explicit short-form permissions for all 44 marketplace commands to ensure both invocation methods work.
+**Correct Architecture:**
+- Skills use `{baseDir}/scripts/` pattern (see plugin-architecture skill)
+- `{baseDir}` resolves to: `~/.claude/skills/my-skill/` (global), `.claude/skills/my-skill/` (project), or `marketplace/bundles/{bundle}/skills/my-skill/` (bundle)
+- Script permissions are NOT needed in settings - the skill system handles this
 
 ### Permission Summary
 
 **Global Settings:**
-- Allow: 242 permissions (+43 from previous run)
-  - 142 Bash commands (comprehensive development tools)
+- Allow: 226 permissions
+  - 145 Bash commands (comprehensive development tools)
   - 8 Skill bundle wildcards
   - 8 SlashCommand bundle wildcards
-  - 44 SlashCommand short-form permissions ✨ NEW
-  - 3 Read patterns (universal git access)
+  - 35 SlashCommand short-form permissions
   - 30 WebFetch domains
-  - 2 project-specific Bash scripts
-  - 5 legacy SlashCommand permissions
+  - WebSearch
 - Deny: 69 permissions (dangerous commands blocked)
 
 **Local Settings:**
@@ -129,36 +134,24 @@ This project has access to globally-approved domains for common development reso
 
 ### Compliance Status
 
-✅ All marketplace bundle wildcards present in global settings (8 skills + 8 commands)
-✅ All marketplace short-form permissions present (44 commands) ✨ NEW
-✅ Universal git read access configured globally
-✅ Project-specific Edit/Write permissions configured locally
-✅ No redundancies or duplicates detected
-✅ No suspicious patterns detected
-✅ Proper path formats (user-relative)
-✅ Security protections active
-✅ Invalid patterns removed
+✅ All marketplace bundle wildcards in global settings (8 skills + 8 commands)
+✅ All short-form command permissions in global settings (35 commands)
+✅ No {baseDir} architecture violations
+✅ No hardcoded script paths
+✅ Minimal project-specific permissions
+✅ Proper separation of global vs local concerns
 
 ### Architecture Notes
 
-**Command Invocation Forms:**
-Commands can be invoked in TWO ways:
-1. **Short form:** `/plugin-diagnose-agents`, `/java-implement-code`
-2. **Bundle-qualified:** `/cui-plugin-development-tools:plugin-diagnose-agents`, `/cui-java-expert:java-implement-code`
+**{baseDir} Pattern (Critical):**
+- All skill scripts use `{baseDir}/scripts/` in SKILL.md
+- Claude resolves `{baseDir}` at runtime based on installation location
+- NEVER add individual script path permissions to settings
+- See: `plugin-architecture` skill for full details
 
-**Permission Requirements:**
-- Bundle wildcards: `SlashCommand(/cui-java-expert:*)` → Covers bundle-qualified invocations ONLY
-- Short-form permissions: `SlashCommand(/java-implement-code:*)` → Covers short-form invocations ONLY
-- **BOTH are required** for full functionality
-
-**Invalid Patterns:**
-- `SlashCommand(/plugin-*:*)` - INVALID (cannot wildcard command names)
-- `Skill(cui-*:*)` - INVALID (cannot wildcard bundle names)
-
-**Valid Patterns:**
-- `SlashCommand(/cui-java-expert:*)` - Valid (bundle wildcard)
-- `SlashCommand(/plugin-diagnose-agents:*)` - Valid (short-form permission)
-- `Skill(cui-java-expert:*)` - Valid (skill bundle wildcard)
+**Permission Separation:**
+- **Global**: Bash commands, Skills, SlashCommands, WebFetch domains
+- **Local**: Edit/Write for specific project, project-specific Read patterns
 
 ---
 

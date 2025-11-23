@@ -6,6 +6,10 @@ Purpose: Analyze marketplace inventory and generate Claude Code permission wildc
 Input: Marketplace inventory JSON (from scan-marketplace-inventory.sh) via stdin or --input file
 Output: JSON with generated permissions, statistics, and coverage analysis
 
+Note: Script permissions are NOT generated. The {baseDir} pattern in SKILL.md handles
+script invocation automatically - Claude resolves {baseDir} at runtime to the skill's
+mounted directory. No hardcoded script paths should be in settings files.
+
 Usage:
   cat inventory.json | python3 generate-permission-wildcards.py
   python3 generate-permission-wildcards.py --input inventory.json
@@ -34,11 +38,6 @@ def parse_args() -> argparse.Namespace:
         choices=["json", "text"],
         default="json",
         help="Output format (default: json)"
-    )
-    parser.add_argument(
-        "--base-path",
-        type=str,
-        help="Override base path for absolute script permissions"
     )
     return parser.parse_args()
 
@@ -102,41 +101,12 @@ def generate_command_shortform_permissions(bundles: list[dict]) -> list[str]:
     return sorted(permissions)
 
 
-def generate_script_permissions(bundles: list[dict], base_path_override: str | None = None) -> list[dict]:
-    """
-    Generate Bash permissions for each script in three formats:
-    - runtime: ./.claude/skills/{skill}/scripts/{script}.sh
-    - relative: ./marketplace/bundles/{bundle}/skills/{skill}/scripts/{script}.sh
-    - absolute: /full/path/...
-
-    Returns list of dicts with script info and all three permission formats.
-    """
-    script_permissions = []
-
+def count_scripts(bundles: list[dict]) -> int:
+    """Count total scripts in bundles (for reporting only, no permissions generated)."""
+    total = 0
     for bundle in bundles:
-        for script in bundle.get("scripts", []):
-            path_formats = script.get("path_formats", {})
-
-            # Use override base path if provided
-            absolute_path = path_formats.get("absolute", "")
-            if base_path_override and absolute_path:
-                # Replace the base path portion
-                relative = path_formats.get("relative", "")
-                if relative:
-                    absolute_path = f"{base_path_override}/{relative}"
-
-            script_permissions.append({
-                "name": script["name"],
-                "skill": script.get("skill", "unknown"),
-                "bundle": bundle["name"],
-                "permissions": {
-                    "runtime": f"Bash({path_formats.get('runtime', '')}:*)",
-                    "relative": f"Bash(./{path_formats.get('relative', '')}:*)",
-                    "absolute": f"Bash({absolute_path}:*)"
-                }
-            })
-
-    return sorted(script_permissions, key=lambda x: x["name"])
+        total += len(bundle.get("scripts", []))
+    return total
 
 
 def analyze_naming_patterns(bundles: list[dict]) -> dict[str, Any]:
@@ -185,8 +155,11 @@ def build_bundle_summary(bundles: list[dict]) -> list[dict]:
     return summaries
 
 
-def generate_all_permissions(inventory: dict[str, Any], base_path_override: str | None = None) -> dict[str, Any]:
-    """Main function to generate all permission wildcards from inventory."""
+def generate_all_permissions(inventory: dict[str, Any]) -> dict[str, Any]:
+    """Main function to generate all permission wildcards from inventory.
+
+    Note: Script permissions are NOT generated. The {baseDir} pattern handles this automatically.
+    """
     bundles = inventory.get("bundles", [])
 
     if not bundles:
@@ -201,22 +174,19 @@ def generate_all_permissions(inventory: dict[str, Any], base_path_override: str 
             }
         }
 
-    # Generate all permission types
+    # Generate permission wildcards (Skills and SlashCommands only)
     skill_wildcards = generate_skill_wildcards(bundles)
     command_bundle_wildcards = generate_command_bundle_wildcards(bundles)
     command_shortform = generate_command_shortform_permissions(bundles)
-    script_perms = generate_script_permissions(bundles, base_path_override)
 
     # Calculate statistics
     stats = inventory.get("statistics", {})
-    total_scripts = stats.get("total_scripts", 0)
-    script_permission_count = total_scripts * 3  # 3 formats per script
+    total_scripts = count_scripts(bundles)
 
     wildcards_generated = (
         len(skill_wildcards) +
         len(command_bundle_wildcards) +
-        len(command_shortform) +
-        script_permission_count
+        len(command_shortform)
     )
 
     # Analyze patterns
@@ -224,15 +194,6 @@ def generate_all_permissions(inventory: dict[str, Any], base_path_override: str 
 
     # Build bundle summary
     bundle_summary = build_bundle_summary(bundles)
-
-    # Flatten script permissions for easy consumption
-    script_permissions_flat = []
-    for sp in script_perms:
-        script_permissions_flat.extend([
-            sp["permissions"]["runtime"],
-            sp["permissions"]["relative"],
-            sp["permissions"]["absolute"]
-        ])
 
     return {
         "statistics": {
@@ -244,8 +205,7 @@ def generate_all_permissions(inventory: dict[str, Any], base_path_override: str 
             "breakdown": {
                 "skill_bundle_wildcards": len(skill_wildcards),
                 "command_bundle_wildcards": len(command_bundle_wildcards),
-                "command_shortform_permissions": len(command_shortform),
-                "script_permissions": script_permission_count
+                "command_shortform_permissions": len(command_shortform)
             }
         },
         "naming_patterns": patterns,
@@ -253,14 +213,12 @@ def generate_all_permissions(inventory: dict[str, Any], base_path_override: str 
         "permissions": {
             "skill_wildcards": skill_wildcards,
             "command_bundle_wildcards": command_bundle_wildcards,
-            "command_shortform": command_shortform,
-            "script_permissions": script_perms,
-            "script_permissions_flat": sorted(script_permissions_flat)
+            "command_shortform": command_shortform
         },
         "coverage": {
             "skills_covered": f"{stats.get('total_skills', 0)} skills covered by {len(skill_wildcards)} bundle wildcards",
             "commands_covered": f"{stats.get('total_commands', 0)} commands covered by {len(command_bundle_wildcards)} bundle wildcards + {len(command_shortform)} short-form permissions",
-            "scripts_covered": f"{total_scripts} scripts covered by {script_permission_count} permissions (3 formats each)"
+            "scripts_note": f"{total_scripts} scripts - handled by {{baseDir}} architecture (no permissions needed)"
         }
     }
 
@@ -287,7 +245,6 @@ def format_text_output(result: dict[str, Any]) -> str:
     lines.append(f"  Skill bundle wildcards: {breakdown.get('skill_bundle_wildcards', 0)}")
     lines.append(f"  Command bundle wildcards: {breakdown.get('command_bundle_wildcards', 0)}")
     lines.append(f"  Command short-form permissions: {breakdown.get('command_shortform_permissions', 0)}")
-    lines.append(f"  Script permissions: {breakdown.get('script_permissions', 0)}")
     lines.append("")
 
     patterns = result.get("naming_patterns", {})
@@ -314,19 +271,16 @@ def format_text_output(result: dict[str, Any]) -> str:
         lines.append(f"  {p}")
     lines.append("")
 
-    lines.append("SCRIPT PERMISSIONS (3 formats each):")
-    for sp in perms.get("script_permissions", []):
-        lines.append(f"  {sp['name']} ({sp['skill']}):")
-        lines.append(f"    {sp['permissions']['runtime']}")
-        lines.append(f"    {sp['permissions']['relative']}")
-        lines.append(f"    {sp['permissions']['absolute']}")
+    lines.append("SCRIPTS:")
+    lines.append("  Scripts are handled by {baseDir} architecture - no permissions needed.")
+    lines.append("  Claude resolves {baseDir} at runtime to skill's mounted directory.")
     lines.append("")
 
     coverage = result.get("coverage", {})
     lines.append("COVERAGE:")
     lines.append(f"  {coverage.get('skills_covered', '')}")
     lines.append(f"  {coverage.get('commands_covered', '')}")
-    lines.append(f"  {coverage.get('scripts_covered', '')}")
+    lines.append(f"  {coverage.get('scripts_note', '')}")
     lines.append("")
 
     return "\n".join(lines)
@@ -339,8 +293,8 @@ def main():
     # Load inventory
     inventory = load_inventory(args.input)
 
-    # Generate permissions
-    result = generate_all_permissions(inventory, args.base_path)
+    # Generate permissions (Skills and SlashCommands only - scripts use {baseDir})
+    result = generate_all_permissions(inventory)
 
     # Output
     if args.format == "json":

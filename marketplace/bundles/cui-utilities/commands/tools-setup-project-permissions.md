@@ -43,7 +43,8 @@ This command focuses on **project-level settings** for version-controlled projec
 6. Improvements to global settings write workflow and safety checks
 7. Better user experience patterns for permission management
 8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
-9. **CRITICAL LESSON - Command Invocation Forms:** Commands can be invoked in TWO ways: (a) Short form: `/plugin-diagnose-agents` and (b) Bundle-qualified: `/cui-plugin-development-tools:plugin-diagnose-agents`. Bundle wildcards like `SlashCommand(/cui-plugin-development-tools:*)` ONLY match bundle-qualified invocations. Short-form invocations require INDIVIDUAL permissions like `SlashCommand(/plugin-diagnose-agents:*)`. Step 3D lists BOTH bundle wildcards (16 patterns) AND short-form permissions (44 patterns) to cover all invocation methods. The pattern `SlashCommand(/plugin-*:*)` is INVALID - you cannot wildcard command names, only use `:*` after exact bundle/command names.
+9. **CRITICAL LESSON - Command Invocation Forms:** Commands can be invoked in TWO ways: (a) Short form: `/plugin-diagnose-agents` and (b) Bundle-qualified: `/cui-plugin-development-tools:plugin-diagnose-agents`. Bundle wildcards like `SlashCommand(/cui-plugin-development-tools:*)` ONLY match bundle-qualified invocations. Short-form invocations require INDIVIDUAL permissions like `SlashCommand(/plugin-diagnose-agents:*)`. Step 3E lists BOTH bundle wildcards (16 patterns) AND short-form permissions (35 patterns) to cover all invocation methods. The pattern `SlashCommand(/plugin-*:*)` is INVALID - you cannot wildcard command names, only use `:*` after exact bundle/command names.
+10. **CRITICAL LESSON - {baseDir} Architecture:** Script permissions do NOT need to be added to settings files. The `{baseDir}` pattern in SKILL.md handles script portability automatically. Claude resolves `{baseDir}` at runtime to the skill's mounted directory (`~/.claude/skills/`, `.claude/skills/`, or `marketplace/bundles/.../skills/`). NEVER add hardcoded script paths to settings - this violates the architecture and creates unmaintainable permission bloat. See `plugin-architecture` skill for full details.
 
 This ensures the command evolves and becomes more effective with each execution.
 
@@ -85,47 +86,13 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 
 **C. Validate JSON structure**
 
-**D. Ensure skill script permissions** (if working in marketplace project):
-
-**CRITICAL**: Skill scripts require permissions at runtime mount point `./.claude/skills/{skill-name}/scripts/`.
-
-1. **Discover scripts using inventory script**:
-   ```bash
-   ./marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh --resource-types scripts
-   ```
-
-2. **Parse JSON output** to extract script information:
-   - Each script object contains:
-     - `name`: Script filename (without .sh)
-     - `skill`: Parent skill name
-     - `path_formats.runtime`: Runtime mount path
-     - `path_formats.relative`: Relative physical path
-     - `path_formats.absolute`: Absolute physical path
-
-3. **For each discovered script**:
-   - Generate three Bash permission patterns:
-     - `Bash({path_formats.runtime}:*)` - Agents at runtime (skill mounting)
-     - `Bash({path_formats.relative}:*)` - Main conversation (relative path)
-     - `Bash({path_formats.absolute}:*)` - Testing/validation (absolute path)
-
-4. **Add missing permissions** to project-level settings:
-   - Check if each permission already exists
-   - Add if missing
-   - Why three formats? Scripts are accessed different ways by agents, conversation, and tests
-
-5. **Track**: `skill_script_permissions_added`
-
-**Example output** (7 scripts discovered):
-- cui-documentation: `asciidoc-formatter.sh`, `asciidoc-validator.sh`, `documentation-stats.sh`
-- cui-marketplace-architecture: `analyze-markdown-file.sh`, `analyze-tool-coverage.sh`, `analyze-skill-structure.sh`, `scan-marketplace-inventory.sh`
-
-**E. Ensure global marketplace permissions:**
+**D. Ensure global marketplace permissions:**
 
 **Bundle Wildcards:**
 - Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(cui-maven:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
 - SlashCommands: `SlashCommand(/cui-documentation-standards:*)`, `SlashCommand(/cui-frontend-expert:*)`, `SlashCommand(/cui-java-expert:*)`, `SlashCommand(/cui-maven:*)`, `SlashCommand(/cui-plugin-development-tools:*)`, `SlashCommand(/cui-requirements:*)`, `SlashCommand(/cui-task-workflow:*)`, `SlashCommand(/cui-utilities:*)`
 
-**Short-Form Command Permissions:**
+**Short-Form Command Permissions (35 commands):**
 - `SlashCommand(/cui-maintain-requirements:*)`
 - `SlashCommand(/doc-review-single-asciidoc:*)`
 - `SlashCommand(/doc-review-technical-docs:*)`
@@ -149,17 +116,9 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 - `SlashCommand(/orchestrate-language:*)`
 - `SlashCommand(/orchestrate-task:*)`
 - `SlashCommand(/orchestrate-workflow:*)`
-- `SlashCommand(/plugin-add-skill-knowledge:*)`
-- `SlashCommand(/plugin-create-agent:*)`
-- `SlashCommand(/plugin-create-bundle:*)`
-- `SlashCommand(/plugin-create-command:*)`
-- `SlashCommand(/plugin-create-skill:*)`
-- `SlashCommand(/plugin-diagnose-agents:*)`
-- `SlashCommand(/plugin-diagnose-commands:*)`
-- `SlashCommand(/plugin-diagnose-metadata:*)`
-- `SlashCommand(/plugin-diagnose-skills:*)`
-- `SlashCommand(/plugin-update-agent:*)`
-- `SlashCommand(/plugin-update-command:*)`
+- `SlashCommand(/plugin-create:*)`
+- `SlashCommand(/plugin-doctor:*)`
+- `SlashCommand(/plugin-maintain:*)`
 - `SlashCommand(/pr-fix-sonar-issues:*)`
 - `SlashCommand(/pr-handle-pull-request:*)`
 - `SlashCommand(/pr-respond-to-review-comments:*)`
@@ -176,7 +135,7 @@ Check `.claude/run-configuration.md` for setup-project-permissions section conta
 - Remove invalid patterns like `SlashCommand(/plugin-*:*)` if present
 - Track: `marketplace_wildcards_added_to_global`, `marketplace_shortform_added_to_global`
 
-**F. Handle Timestamped Build Output Files:**
+**E. Handle Timestamped Build Output Files:**
 
 **Problem:** When maven-builder agent creates timestamped log files (e.g., `build-output-2025-11-20-174411.log`), each unique timestamp requires separate Bash permission approval, leading to:
 - Accumulation of individual timestamped entries in settings
@@ -467,11 +426,11 @@ Update `.claude/run-configuration.md` with:
    - No manual setup for new team members
    - Consistent development environment
 
-2. **Skill Script Permissions**:
-   - Scripts in `marketplace/bundles/*/skills/*/scripts/` are project-specific
-   - All developers need access to these scripts
-   - Must include all three path formats (runtime mount, relative, absolute)
-   - Example: `analyze-markdown-file.sh`, `analyze-skill-structure.sh`
+2. **Skill Scripts (Handled by {baseDir})**:
+   - Scripts in `marketplace/bundles/*/skills/*/scripts/` use `{baseDir}` pattern
+   - Claude resolves `{baseDir}` to skill's mounted location at runtime
+   - NO script permissions needed in settings - architecture handles this automatically
+   - See `plugin-architecture` skill for full details
 
 3. **Project-Specific Tools**:
    - Project scripts in `scripts/` directory
@@ -494,7 +453,8 @@ Update `.claude/run-configuration.md` with:
 **Global settings remain important for**:
 - Cross-project tools (`git:*`, `npm:*`, `docker:*`)
 - Universal read access (`Read(//~/git/**)`)
-- Marketplace bundle wildcards (`Skill(cui-*:*)`, `SlashCommand(/cui-*:*)`)
+- Marketplace bundle wildcards (`Skill(cui-documentation-standards:*)`, etc.)
+- SlashCommand permissions (both bundle and short-form)
 - Personal development preferences
 
 **Key Insight**: Project-level settings complement global settings, they don't replace them. For agents to work, permissions often need to be in **BOTH** levels because project settings can restrict global permissions.
@@ -510,15 +470,15 @@ Update `.claude/run-configuration.md` with:
 
 For version-controlled projects (like CUI marketplace):
 - ✅ **Project-level settings** (`.claude/settings.json`) - Committed to git
-  - Skill scripts permissions (three path formats)
-  - Project-specific tools everyone needs
+  - Project Edit/Write permissions
+  - Project-specific Read patterns (marketplace/, .claude/, standards/)
   - Team-shared configuration
-  - Example: marketplace analysis scripts
 
 - ✅ **Global settings** (`~/.claude/settings.json`) - Personal, cross-project
   - Universal read access: `Read(//~/git/**)`
   - Common dev tools: `Bash(git:*)`, `Bash(npm:*)`
-  - Marketplace bundle wildcards: `Skill(cui-*:*)`, `SlashCommand(/cui-*:*)`
+  - Marketplace bundle wildcards: `Skill(cui-documentation-standards:*)`, etc.
+  - SlashCommand permissions (bundle + short-form)
   - Personal preferences
 
 - ⚙️ **Local settings** (`.claude/settings.local.json`) - Personal overrides only
@@ -529,14 +489,13 @@ For version-controlled projects (like CUI marketplace):
 **CRITICAL Permission Hierarchy**:
 - Project-level settings can **restrict** global permissions
 - For agents to work: Permissions must be in **BOTH** global AND project-level
-- Skill script permissions **MUST** be in project-level (team needs them)
 
 **Default Permissions Added to Project-Level:**
 - ✅ Project Edit/Write: `Edit(//~/git/{repo}/**)`, `Write(//~/git/{repo}/**)`
 - ✅ Project scripts: `Bash(~/git/{repo}/scripts/**)` (if scripts/ exists)
-- ✅ Skill scripts: Three path formats for each `.sh` in `marketplace/bundles/*/skills/*/scripts/`
 - ❌ Read: NOT added (globally covered via `Read(//~/git/**)`)
 - ❌ Marketplace wildcards: NOT added to project (should be in global only)
+- ❌ Skill scripts: NOT added - handled by `{baseDir}` architecture automatically
 
 ## ARCHITECTURE
 
