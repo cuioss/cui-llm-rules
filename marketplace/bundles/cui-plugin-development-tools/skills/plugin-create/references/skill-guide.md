@@ -45,9 +45,9 @@ plugin-architecture/
 - Faster skill activation
 - Users load only what they need
 
-### Principle 2: {baseDir} Pattern
+### Principle 2: Relative Path Pattern
 
-All resource paths use `{baseDir}` for portability.
+All resource paths use relative paths for portability.
 
 ❌ **Wrong** (hardcoded):
 ```markdown
@@ -55,10 +55,10 @@ Read: ~/.claude/skills/my-skill/references/guide.md
 bash ./scripts/analyzer.py
 ```
 
-✅ **Correct** ({baseDir}):
+✅ **Correct** (relative paths):
 ```markdown
-Read {baseDir}/references/guide.md
-bash {baseDir}/scripts/analyzer.py
+Read references/guide.md
+bash scripts/analyzer.py
 ```
 
 **Why**: Skills can be installed in multiple contexts:
@@ -323,7 +323,7 @@ Provides JUnit 5 testing patterns and standards.
 ## Usage
 
 Load specific reference when needed:
-Read {baseDir}/standards/test-structure.md
+Read standards/test-structure.md
 ```
 
 Cost: ~400-800 lines
@@ -334,9 +334,9 @@ Detailed content:
 ```markdown
 Load only what current task needs:
 
-Read {baseDir}/standards/test-structure.md  # When organizing tests
-Read {baseDir}/standards/assertions.md      # When writing assertions
-Read {baseDir}/standards/mocking.md         # When mocking dependencies
+Read standards/test-structure.md  # When organizing tests
+Read standards/assertions.md      # When writing assertions
+Read standards/mocking.md         # When mocking dependencies
 ```
 
 Cost: ~200-600 lines each (loaded individually)
@@ -349,12 +349,12 @@ Cost: ~200-600 lines each (loaded individually)
 
 ### Step 1: Load All Standards
 
-Read {baseDir}/standards/test-structure.md
-Read {baseDir}/standards/assertions.md
-Read {baseDir}/standards/mocking.md
-Read {baseDir}/standards/coverage.md
-Read {baseDir}/standards/generators.md
-Read {baseDir}/standards/integration.md
+Read standards/test-structure.md
+Read standards/assertions.md
+Read standards/mocking.md
+Read standards/coverage.md
+Read standards/generators.md
+Read standards/integration.md
 
 [Loaded 3500 lines before knowing what's needed]
 ```
@@ -366,9 +366,9 @@ Read {baseDir}/standards/integration.md
 ### Step 1: Load Relevant Standards
 
 Based on task, load specific reference:
-- Organizing tests? → Read {baseDir}/standards/test-structure.md
-- Writing assertions? → Read {baseDir}/standards/assertions.md
-- Mocking? → Read {baseDir}/standards/mocking.md
+- Organizing tests? → Read standards/test-structure.md
+- Writing assertions? → Read standards/assertions.md
+- Mocking? → Read standards/mocking.md
 
 [Load only what's needed - 400 lines instead of 3500]
 ```
@@ -531,7 +531,7 @@ Before creating skill, verify:
 - [ ] Frontmatter uses comma-separated format (not arrays)
 - [ ] SKILL.md is 400-800 lines (not bloated)
 - [ ] References organized in appropriate directory
-- [ ] All resource paths use {baseDir} pattern
+- [ ] All resource paths use relative paths
 - [ ] No hardcoded paths
 - [ ] Progressive disclosure implemented
 - [ ] No CONTINUOUS IMPROVEMENT RULE
@@ -546,11 +546,11 @@ Before creating skill, verify:
 
 ✅ **Correct**: 500-line SKILL.md with references catalog
 
-### Pitfall 2: Missing {baseDir}
+### Pitfall 2: Improper Path Reference
 
 ❌ **Wrong**: `Read: standards/file.md`
 
-✅ **Correct**: `Read {baseDir}/standards/file.md`
+✅ **Correct**: `Read standards/file.md`
 
 ### Pitfall 3: Loading All References
 
@@ -613,9 +613,9 @@ Determine what logging guidance is needed.
 ### Step 2: Load Relevant Standards
 
 Based on task:
-- **Adding logs** → Read {baseDir}/standards/logging-patterns.md
-- **Testing logs** → Read {baseDir}/standards/testing-guide.md
-- **Organizing identifiers** → Read {baseDir}/standards/logrecord-organization.md
+- **Adding logs** → Read standards/logging-patterns.md
+- **Testing logs** → Read standards/testing-guide.md
+- **Organizing identifiers** → Read standards/logrecord-organization.md
 
 ### Step 3: Apply Standards
 
@@ -640,7 +640,7 @@ No other tools needed (pure reference skill).
 
 Skills are self-contained when:
 - [ ] All standards in standards/ directory
-- [ ] All paths use {baseDir} pattern
+- [ ] All paths use relative paths
 - [ ] No external file references
 - [ ] No cross-skill duplication
 ```

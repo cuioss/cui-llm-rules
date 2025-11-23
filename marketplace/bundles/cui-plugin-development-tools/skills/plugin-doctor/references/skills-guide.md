@@ -11,7 +11,7 @@ Skills are knowledge repositories that provide standards, workflows, and reusabl
 - Contain SKILL.md with frontmatter and workflows
 - May include external resources (scripts/, references/, assets/)
 - Support progressive disclosure (load resources on-demand)
-- Follow {baseDir} pattern for portable resource paths
+- Use relative paths for portable resource paths
 
 ## Skill Directory Structure
 
@@ -61,7 +61,7 @@ allowed-tools: Read, Bash, Glob, Grep, Skill
 
 **Validation**:
 ```bash
-Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
+Bash: scripts/analyze-skill-structure.sh {skill_dir}
 # Check: skill_md.exists = true
 # Check: skill_md.yaml_valid = true
 ```
@@ -75,11 +75,11 @@ Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
 **Without Progressive Disclosure**:
 ```yaml
 # SKILL.md loads all references upfront:
-Read {baseDir}/references/standard1.md    # 500 lines
-Read {baseDir}/references/standard2.md    # 500 lines
-Read {baseDir}/references/standard3.md    # 500 lines
-Read {baseDir}/references/standard4.md    # 500 lines
-Read {baseDir}/references/standard5.md    # 500 lines
+Read references/standard1.md    # 500 lines
+Read references/standard2.md    # 500 lines
+Read references/standard3.md    # 500 lines
+Read references/standard4.md    # 500 lines
+Read references/standard5.md    # 500 lines
 # Total: 2,500 lines loaded immediately
 ```
 
@@ -93,13 +93,13 @@ Read {baseDir}/references/standard5.md    # 500 lines
 
 ### Step 2: Load Agents Standards (Progressive Disclosure)
 
-Read {baseDir}/references/agents-guide.md  # 500 lines, ONLY for this workflow
+Read references/agents-guide.md  # 500 lines, ONLY for this workflow
 
 ## Workflow 2: Diagnose Commands
 
 ### Step 2: Load Commands Standards (Progressive Disclosure)
 
-Read {baseDir}/references/commands-guide.md  # 500 lines, ONLY for this workflow
+Read references/commands-guide.md  # 500 lines, ONLY for this workflow
 ```
 
 **Benefit**: ~1,300 lines loaded per workflow (SKILL.md + ONE reference) instead of 3,300 lines (SKILL.md + ALL references).
@@ -137,7 +137,7 @@ Skill: cui-utilities:cui-diagnostic-patterns
 
 ### Step 2: Load Standards (Progressive Disclosure)
 
-Read {baseDir}/references/first-guide.md  # ONLY for Workflow 1
+Read references/first-guide.md  # ONLY for Workflow 1
 
 ### Step 3-10: Execute Workflow
 
@@ -151,7 +151,7 @@ Read {baseDir}/references/first-guide.md  # ONLY for Workflow 1
 
 ### Step 2: Load Standards (Progressive Disclosure)
 
-Read {baseDir}/references/second-guide.md  # ONLY for Workflow 2
+Read references/second-guide.md  # ONLY for Workflow 2
 
 ### Step 3-10: Execute Workflow
 
@@ -176,35 +176,35 @@ Read {baseDir}/references/second-guide.md  # ONLY for Workflow 2
 
 Total: ~2,500 lines across 5 guides, but only ONE loaded per workflow.
 
-## {baseDir} Pattern
+## Relative Path Pattern
 
-**CRITICAL**: Skills MUST use `{baseDir}` for all internal resource references.
+**CRITICAL**: Skills MUST use relative paths for all internal resource references.
 
-### Why {baseDir}?
+### Why Relative Paths?
 
 **Portability**: Skills can be:
 - Installed in marketplace: `marketplace/bundles/{bundle}/skills/{skill}`
 - Installed globally: `~/.claude/skills/{skill}`
 - Installed in project: `.claude/skills/{skill}`
 
-`{baseDir}` resolves to skill directory regardless of installation location.
+Relative paths resolve from the skill directory regardless of installation location.
 
 ### Usage
 
 **Scripts**:
 ```bash
-Bash: {baseDir}/scripts/analyze-structure.sh {file_path}
-Bash: python3 {baseDir}/scripts/validate-refs.py {component}
+Bash: scripts/analyze-structure.sh {file_path}
+Bash: python3 scripts/validate-refs.py {component}
 ```
 
 **References**:
 ```markdown
-Read {baseDir}/references/coding-standards.md
+Read references/coding-standards.md
 ```
 
 **Assets**:
 ```markdown
-See architecture diagram: {baseDir}/assets/architecture.png
+See architecture diagram: assets/architecture.png
 ```
 
 ### Prohibited Patterns
@@ -228,9 +228,9 @@ Bash: ../../../../scripts/script.sh
 Bash: marketplace/bundles/my-bundle/skills/my-skill/scripts/script.sh
 ```
 
-**✅ Correct**: Always use `{baseDir}`:
+**✅ Correct**: Use relative paths:
 ```bash
-Bash: {baseDir}/scripts/script.sh
+Bash: scripts/script.sh
 ```
 
 ## Structure Score
@@ -260,15 +260,15 @@ Perfect score: 100 (all criteria met)
 
 **Detection**:
 ```bash
-Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
+Bash: scripts/analyze-skill-structure.sh {skill_dir}
 # Check: standards_files.missing_files array
 ```
 
 **Example**:
 ```markdown
 # SKILL.md references:
-Read {baseDir}/references/guide1.md
-Bash: {baseDir}/scripts/script1.sh
+Read references/guide1.md
+Bash: scripts/script1.sh
 
 # But these files don't exist:
 skill-dir/references/guide1.md  # ❌ Missing
@@ -285,7 +285,7 @@ skill-dir/scripts/script1.sh    # ❌ Missing
 
 **Detection**:
 ```bash
-Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
+Bash: scripts/analyze-skill-structure.sh {skill_dir}
 # Check: standards_files.unreferenced_files array
 ```
 
@@ -563,7 +563,7 @@ Skill: bundle:shared-skill
 
 # After: External reference
 Both skills load:
-Read {baseDir}/references/shared-standards.md
+Read references/shared-standards.md
 ```
 
 **Option 3: Cross-Reference**
@@ -592,14 +592,14 @@ Skill: bundle:skill-a
 ```markdown
 ## External Resources
 
-### Scripts (in {baseDir}/scripts/)
+### Scripts (in scripts/)
 
 **1. analyze-structure.sh**: Analyzes file structure and bloat
 - **Input**: file path, component type (agent|command|skill)
 - **Output**: JSON with structural analysis
 - **Usage**:
   ```bash
-  Bash: {baseDir}/scripts/analyze-structure.sh {file_path} agent
+  Bash: scripts/analyze-structure.sh {file_path} agent
   ```
 
 **2. validate-references.py**: Validates plugin references (Python)
@@ -607,7 +607,7 @@ Skill: bundle:skill-a
 - **Output**: JSON with detected references and pre-filter statistics
 - **Usage**:
   ```bash
-  Bash: python3 {baseDir}/scripts/validate-references.py {component_path}
+  Bash: python3 scripts/validate-references.py {component_path}
   ```
 ```
 
@@ -666,8 +666,8 @@ allowed-tools: Read
 Provides comprehensive reference documentation (no execution logic).
 
 ## References
-- {baseDir}/references/pattern1.md
-- {baseDir}/references/pattern2.md
+- references/pattern1.md
+- references/pattern2.md
 - [10 reference files]
 ```
 
@@ -693,7 +693,7 @@ Provides validation scripts for deterministic checks.
 ## Workflow: Validate Component
 
 ### Step 1: Run Validation Script
-Bash: {baseDir}/scripts/validate.sh {component_path}
+Bash: scripts/validate.sh {component_path}
 
 ### Step 2: Parse Results
 [Parse JSON output and categorize issues]
@@ -718,10 +718,10 @@ allowed-tools: Read, Skill
 ## Standards Categories
 
 ### Category 1: Core Standards
-Read {baseDir}/references/core-standards.md
+Read references/core-standards.md
 
 ### Category 2: Advanced Standards
-Read {baseDir}/references/advanced-standards.md
+Read references/advanced-standards.md
 ```
 
 **Example**: cui-java-core skill (Java core development standards)
@@ -736,7 +736,7 @@ Read {baseDir}/references/advanced-standards.md
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
+Bash: scripts/analyze-skill-structure.sh {skill_dir}
 # Check: skill_md.exists = false
 ```
 
@@ -751,7 +751,7 @@ Create SKILL.md with proper frontmatter and content.
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
+Bash: scripts/analyze-skill-structure.sh {skill_dir}
 # Check: skill_md.yaml_valid = false
 ```
 
@@ -769,7 +769,7 @@ Correct YAML syntax:
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
+Bash: scripts/analyze-skill-structure.sh {skill_dir}
 # Check: standards_files.missing_files array
 # Check: standards_files.unreferenced_files array
 ```
@@ -787,13 +787,13 @@ Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
 
 **Diagnosis**:
 Manual review of SKILL.md:
-- Check if all Read {baseDir}/references/* at top
+- Check if all Read references/* at top
 - Check if workflows load specific references
 
 **Fix**:
 Refactor to progressive disclosure pattern (see Progressive Disclosure section).
 
-### Issue 5: Absolute Paths (Not {baseDir})
+### Issue 5: Absolute Paths
 
 **Symptoms**:
 - References use absolute paths
@@ -801,14 +801,14 @@ Refactor to progressive disclosure pattern (see Progressive Disclosure section).
 
 **Diagnosis**:
 ```bash
-Bash: python3 {baseDir}/scripts/validate-references.py {skill_dir}/SKILL.md
+Bash: python3 scripts/validate-references.py {skill_dir}/SKILL.md
 # Check for absolute paths in references array
 ```
 
 **Fix**:
-Replace absolute/relative paths with {baseDir}:
+Use relative paths instead of absolute paths:
 - ❌ `/Users/oliver/git/project/scripts/script.sh`
-- ✅ `{baseDir}/scripts/script.sh`
+- ✅ `scripts/script.sh`
 
 ## Summary Checklist
 
@@ -818,7 +818,7 @@ Replace absolute/relative paths with {baseDir}:
 - ✅ No missing files (all referenced files exist)
 - ✅ No unreferenced files (all files referenced or removed)
 - ✅ Progressive disclosure implemented (references loaded on-demand)
-- ✅ {baseDir} pattern used for all internal references
+- ✅ Relative paths used for all internal references
 - ✅ Scripts documented in SKILL.md (if any)
 - ✅ Scripts executable with --help support (if any)
 - ✅ Standards file quality follows minimize-without-loss principle

@@ -32,7 +32,7 @@ When activated, this skill scans the marketplace and returns structured JSON inv
 Run the marketplace inventory scanner script:
 
 ```bash
-bash {baseDir}/scripts/scan-marketplace-inventory.sh --scope marketplace
+bash scripts/scan-marketplace-inventory.sh --scope marketplace
 ```
 
 The script will:
@@ -92,14 +92,14 @@ This skill is designed to run without user prompts. Required permissions:
 
 **Script Execution:**
 - `Bash(bash:*)` - Bash interpreter
-- `Bash({baseDir}/scripts/scan-marketplace-inventory.sh:*)` - Inventory scanner
+- `Bash(scripts/scan-marketplace-inventory.sh:*)` - Inventory scanner
 
 **Ensuring Non-Prompting:**
-- Script invocation uses `{baseDir}/scripts/` which resolves to skill's mounted path
+- Script invocation uses `scripts/` which resolves to skill's mounted path
 - Script only reads marketplace directory structure (no writes)
 - All output is JSON to stdout
 
 ## References
 
-- Script location: {baseDir}/scripts/scan-marketplace-inventory.sh
+- Script location: scripts/scan-marketplace-inventory.sh
 - Marketplace root: marketplace/bundles/

@@ -23,7 +23,7 @@ Safe fixes are mechanical transformations that:
 
 ```bash
 echo '{"type": "fix-type", "file": "path/to/file.md"}' | \
-  {baseDir}/scripts/apply-fix.py - /path/to/bundle
+  scripts/apply-fix.py - /path/to/bundle
 ```
 
 Output:

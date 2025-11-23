@@ -157,11 +157,11 @@ Analyzes existing test coverage reports (Jest/Istanbul JSON or LCOV format) and 
 
 2. **Run coverage analysis script**
    ```bash
-   python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/coverage-summary.json
+   python3 scripts/analyze-js-coverage.py --report coverage/coverage-summary.json
    # Or for LCOV format:
-   python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/lcov.info --format lcov
+   python3 scripts/analyze-js-coverage.py --report coverage/lcov.info --format lcov
    # With custom threshold:
-   python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/coverage-summary.json --threshold 80
+   python3 scripts/analyze-js-coverage.py --report coverage/coverage-summary.json --threshold 80
    ```
 
 3. **Process results**

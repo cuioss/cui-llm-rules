@@ -44,7 +44,7 @@ Complete git commit workflow:
 
 **Step 1: Load Commit Standards**
 ```
-Read {baseDir}/standards/git-commit-standards.md
+Read standards/git-commit-standards.md
 ```
 
 **Step 2: Check for Uncommitted Changes**
@@ -88,7 +88,7 @@ If custom message provided:
 If no message:
 - Analyze diff using script:
   ```
-  python3 {baseDir}/scripts/format-commit-message.py --analyze <diff-file>
+  python3 scripts/format-commit-message.py --analyze <diff-file>
   ```
 - Generate message following standards
 
@@ -150,10 +150,10 @@ EOF
 **Usage:**
 ```bash
 # Format mode
-python3 {baseDir}/scripts/format-commit-message.py --type feat --scope http --subject "add retry config"
+python3 scripts/format-commit-message.py --type feat --scope http --subject "add retry config"
 
 # Analysis mode
-python3 {baseDir}/scripts/format-commit-message.py --analyze <diff-file>
+python3 scripts/format-commit-message.py --analyze <diff-file>
 ```
 
 **Output:** JSON with formatted message and validation
@@ -162,7 +162,7 @@ python3 {baseDir}/scripts/format-commit-message.py --analyze <diff-file>
 
 ### Git Commit Standards
 ```
-Read {baseDir}/standards/git-commit-standards.md
+Read standards/git-commit-standards.md
 ```
 
 Provides:
@@ -189,7 +189,7 @@ Provides:
 
 ## Quality Verification
 
-- [x] Self-contained with {baseDir} pattern
+- [x] Self-contained with relative path pattern
 - [x] Progressive disclosure (standards loaded on-demand)
 - [x] Script outputs JSON for machine processing
 - [x] commit-changes agent functionality absorbed

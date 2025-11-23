@@ -278,7 +278,7 @@ Create report with this structure:
 ### Step 3: Generate Report
 
 Load report template from skill:
-Read {baseDir}/assets/templates/report.md
+Read assets/templates/report.md
 Fill template with findings
 ```
 

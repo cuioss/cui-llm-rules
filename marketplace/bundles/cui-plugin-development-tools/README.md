@@ -125,7 +125,7 @@ The doctor workflow:
 
 The diagnostic and creation workflows validate:
 
-- **Architecture Rules**: Self-containment, {baseDir} pattern, progressive disclosure
+- **Architecture Rules**: Self-containment, relative path pattern, progressive disclosure
 - **Goal-Based Organization**: Commands organized by user goals
 - **Thin Orchestrator Pattern**: Commands <100 lines, delegate to skills
 - **Skill Patterns**: Proper workflow structure, script automation, references

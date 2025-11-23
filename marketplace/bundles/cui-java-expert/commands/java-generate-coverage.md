@@ -40,7 +40,7 @@ Execute workflow: Analyze Coverage
 
 Or run script directly:
 ```bash
-python3 {baseDir}/scripts/analyze-coverage.py --file target/site/jacoco/jacoco.xml --threshold {threshold}
+python3 scripts/analyze-coverage.py --file target/site/jacoco/jacoco.xml --threshold {threshold}
 ```
 
 ### Step 4: Generate Report

@@ -111,16 +111,16 @@ Analyzes JavaScript files for JSDoc compliance violations and returns structured
 1. **Run violation analysis script**
    ```bash
    # Analyze entire directory
-   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/
+   python3 scripts/analyze-jsdoc-violations.py --directory src/
 
    # Analyze single file
-   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --file src/utils/formatter.js
+   python3 scripts/analyze-jsdoc-violations.py --file src/utils/formatter.js
 
    # Analyze only for missing JSDoc (skip syntax checks)
-   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/ --scope missing
+   python3 scripts/analyze-jsdoc-violations.py --directory src/ --scope missing
 
    # Analyze only JSDoc syntax issues
-   python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/ --scope syntax
+   python3 scripts/analyze-jsdoc-violations.py --directory src/ --scope syntax
    ```
 
 2. **Process violation results**

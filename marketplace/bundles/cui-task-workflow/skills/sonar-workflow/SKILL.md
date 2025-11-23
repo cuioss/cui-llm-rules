@@ -59,7 +59,7 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 
    Or use script for structure:
    ```
-   python3 {baseDir}/scripts/fetch-sonar-issues.py --project {key} [--pr {id}]
+   python3 scripts/fetch-sonar-issues.py --project {key} [--pr {id}]
    ```
 
 3. **Return Structured List**
@@ -104,7 +104,7 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 2. **Triage Each Issue**
    For each issue:
    ```
-   python3 {baseDir}/scripts/triage-issue.py --issue '{json}'
+   python3 scripts/triage-issue.py --issue '{json}'
    ```
 
    Script outputs decision:
@@ -167,7 +167,7 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 
 **Usage:**
 ```bash
-python3 {baseDir}/scripts/fetch-sonar-issues.py --project <key> [--pr <id>] [--severities <list>]
+python3 scripts/fetch-sonar-issues.py --project <key> [--pr <id>] [--severities <list>]
 ```
 
 **Output:** JSON with MCP instruction and expected structure
@@ -178,7 +178,7 @@ python3 {baseDir}/scripts/fetch-sonar-issues.py --project <key> [--pr <id>] [--s
 
 **Usage:**
 ```bash
-python3 {baseDir}/scripts/triage-issue.py --issue '{"key":"...", "rule":"...", ...}'
+python3 scripts/triage-issue.py --issue '{"key":"...", "rule":"...", ...}'
 ```
 
 **Output:** JSON with action decision
@@ -187,7 +187,7 @@ python3 {baseDir}/scripts/triage-issue.py --issue '{"key":"...", "rule":"...", .
 
 ### Sonar Fix Guide
 ```
-Read {baseDir}/references/sonar-fix-guide.md
+Read references/sonar-fix-guide.md
 ```
 
 Provides:
@@ -237,7 +237,7 @@ Provides:
 
 ## Quality Verification
 
-- [x] Self-contained with {baseDir} pattern
+- [x] Self-contained with relative path pattern
 - [x] Progressive disclosure (references loaded on-demand)
 - [x] Scripts output JSON for machine processing
 - [x] Both fetcher and triager agents absorbed

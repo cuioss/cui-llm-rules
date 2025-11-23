@@ -132,7 +132,7 @@ Add to Step 1:
 ```markdown
 **Load orchestration compliance:**
 ```
-Read: {baseDir}/references/orchestration-compliance.md
+Read: references/orchestration-compliance.md
 ```
 ```
 
@@ -226,7 +226,7 @@ Skill: cui-utilities:cui-diagnostic-patterns
 
 **Orchestration compliance:**
 ```
-Read: {baseDir}/references/orchestration-compliance.md
+Read: references/orchestration-compliance.md
 ```
 ```
 

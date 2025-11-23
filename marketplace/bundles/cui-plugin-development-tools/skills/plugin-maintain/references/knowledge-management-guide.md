@@ -15,7 +15,7 @@ External knowledge should:
 Before adding knowledge, check for duplication:
 
 ```bash
-{baseDir}/scripts/check-duplication.py {skill_path} {content_file}
+scripts/check-duplication.py {skill_path} {content_file}
 ```
 
 **Output Fields**:
@@ -81,7 +81,7 @@ Load only when explicitly requested:
 **When needed**: Load {topic} knowledge.
 
 ```
-Read: {baseDir}/references/{knowledge-name}.md
+Read: references/{knowledge-name}.md
 ```
 
 Use when: {Brief description}
@@ -96,7 +96,7 @@ Load when specific condition met:
 
 **If** {condition}:
 ```
-Read: {baseDir}/references/{knowledge-name}.md
+Read: references/{knowledge-name}.md
 ```
 ```
 
@@ -108,7 +108,7 @@ Load as part of standard workflow:
 ### Step X: Load Core Standards
 
 ```
-Read: {baseDir}/references/{knowledge-name}.md
+Read: references/{knowledge-name}.md
 ```
 ```
 
@@ -151,7 +151,7 @@ Add to SKILL.md in appropriate location:
 Load when: {condition or "on-demand"}
 
 ```
-Read: {baseDir}/references/{knowledge-name}.md
+Read: references/{knowledge-name}.md
 ```
 ```
 
@@ -176,7 +176,7 @@ When 40-70% overlap:
 ### Cross-Reference Format
 
 ```markdown
-See [{topic}]({baseDir}/references/{file}.md) for details on {specific topic}.
+See [{topic}](references/{file}.md) for details on {specific topic}.
 ```
 
 ## Marketplace-Wide Scanning

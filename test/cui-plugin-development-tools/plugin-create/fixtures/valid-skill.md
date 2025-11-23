@@ -28,9 +28,9 @@ Determine what standards are needed for the current task.
 
 ### Step 2: Load Relevant Standards
 Based on the task:
-- **Testing** → Read {baseDir}/standards/testing.md
-- **Validation** → Read {baseDir}/standards/validation.md
-- **Patterns** → Read {baseDir}/standards/patterns.md
+- **Testing** → Read standards/testing.md
+- **Validation** → Read standards/validation.md
+- **Patterns** → Read standards/patterns.md
 
 ### Step 3: Apply Standards
 Follow guidance from loaded standards.
@@ -53,6 +53,6 @@ standards/
 
 Skills are self-contained when:
 - [ ] All standards in standards/ directory
-- [ ] All paths use {baseDir} pattern
+- [ ] All paths use relative paths
 - [ ] No external file references
 - [ ] No cross-skill duplication

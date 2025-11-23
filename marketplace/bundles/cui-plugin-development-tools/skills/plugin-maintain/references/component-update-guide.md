@@ -15,7 +15,7 @@ Updates should:
 Before any update, analyze the component:
 
 ```bash
-{baseDir}/scripts/analyze-component.py {component_path}
+scripts/analyze-component.py {component_path}
 ```
 
 **Output Fields**:
@@ -79,7 +79,7 @@ Before any update, analyze the component:
 Apply updates via JSON input:
 
 ```bash
-echo '{"updates": [...]}' | {baseDir}/scripts/update-component.py {component_path}
+echo '{"updates": [...]}' | scripts/update-component.py {component_path}
 ```
 
 ### Update Types
@@ -187,7 +187,7 @@ echo '{"updates": [...]}' | {baseDir}/scripts/update-component.py {component_pat
 ### Re-Analysis
 
 ```bash
-{baseDir}/scripts/analyze-component.py {component_path}
+scripts/analyze-component.py {component_path}
 ```
 
 Compare:

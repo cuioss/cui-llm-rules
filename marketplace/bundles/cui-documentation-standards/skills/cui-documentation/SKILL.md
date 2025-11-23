@@ -44,7 +44,7 @@ Auto-fix common AsciiDoc formatting issues with safety features.
 
 **Step 1: Load Documentation Standards**
 
-Read {baseDir}/standards/asciidoc-formatting.md
+Read standards/asciidoc-formatting.md
 
 **Step 2: Discover Files**
 
@@ -66,7 +66,7 @@ if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 
 Execute:
 ```bash
-bash {baseDir}/scripts/asciidoc-formatter.sh $OPTIONS {target} 2>&1
+bash scripts/asciidoc-formatter.sh $OPTIONS {target} 2>&1
 ```
 
 **Step 4: Parse Output**
@@ -99,7 +99,7 @@ Changes applied: {list}
 
 If dry_run=false, run validation to confirm:
 ```bash
-bash {baseDir}/scripts/asciidoc-validator.sh {target} 2>&1
+bash scripts/asciidoc-validator.sh {target} 2>&1
 ```
 
 ---
@@ -124,7 +124,7 @@ Validate AsciiDoc files for format compliance.
 
 **Step 1: Load Documentation Standards**
 
-Read {baseDir}/standards/asciidoc-formatting.md
+Read standards/asciidoc-formatting.md
 
 **Step 2: Discover Files**
 
@@ -138,7 +138,7 @@ If target is a directory:
 
 Execute:
 ```bash
-bash {baseDir}/scripts/asciidoc-validator.sh {target} 2>&1
+bash scripts/asciidoc-validator.sh {target} 2>&1
 ```
 
 **Step 4: Parse Output**
@@ -208,7 +208,7 @@ Verify all links and cross-references in AsciiDoc files.
 
 **Step 1: Load Documentation Standards**
 
-Read {baseDir}/standards/asciidoc-formatting.md
+Read standards/asciidoc-formatting.md
 
 **Step 2: Discover Files**
 
@@ -228,12 +228,12 @@ mkdir -p target/asciidoc-link-verifier
 
 Execute:
 ```bash
-python3 {baseDir}/scripts/verify-adoc-links.py --file {file_path} --report target/asciidoc-link-verifier/links.md 2>&1
+python3 scripts/verify-adoc-links.py --file {file_path} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
 For directories:
 ```bash
-python3 {baseDir}/scripts/verify-adoc-links.py --directory {directory} --report target/asciidoc-link-verifier/links.md 2>&1
+python3 scripts/verify-adoc-links.py --directory {directory} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
 **Step 5: Parse Report**
@@ -303,8 +303,8 @@ Review AsciiDoc content for quality: correctness, clarity, tone, style, and comp
 
 **Step 1: Load Documentation Standards**
 
-Read {baseDir}/standards/tone-and-style.md
-Read {baseDir}/standards/documentation-core.md
+Read standards/tone-and-style.md
+Read standards/documentation-core.md
 
 **Step 2: Discover Files**
 
@@ -318,12 +318,12 @@ If target is a directory:
 
 Execute:
 ```bash
-python3 {baseDir}/scripts/review-content.py --file {file_path} 2>&1
+python3 scripts/review-content.py --file {file_path} 2>&1
 ```
 
 For directories:
 ```bash
-python3 {baseDir}/scripts/review-content.py --directory {directory} 2>&1
+python3 scripts/review-content.py --directory {directory} 2>&1
 ```
 
 **Step 4: Parse JSON Output**

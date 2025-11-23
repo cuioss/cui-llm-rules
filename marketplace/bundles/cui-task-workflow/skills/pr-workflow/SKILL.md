@@ -45,7 +45,7 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 
 2. **Fetch Comments**
    ```
-   python3 {baseDir}/scripts/fetch-pr-comments.py [--pr {number}]
+   python3 scripts/fetch-pr-comments.py [--pr {number}]
    ```
 
    Script outputs JSON:
@@ -87,7 +87,7 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 2. **Triage Each Comment**
    For each unresolved comment:
    ```
-   python3 {baseDir}/scripts/triage-comment.py --comment '{json}'
+   python3 scripts/triage-comment.py --comment '{json}'
    ```
 
    Script outputs decision:
@@ -149,7 +149,7 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 
 **Usage:**
 ```bash
-python3 {baseDir}/scripts/fetch-pr-comments.py [--pr <number>]
+python3 scripts/fetch-pr-comments.py [--pr <number>]
 ```
 
 **Requirements:** gh CLI installed and authenticated
@@ -162,7 +162,7 @@ python3 {baseDir}/scripts/fetch-pr-comments.py [--pr <number>]
 
 **Usage:**
 ```bash
-python3 {baseDir}/scripts/triage-comment.py --comment '{"id":"...", "body":"...", ...}'
+python3 scripts/triage-comment.py --comment '{"id":"...", "body":"...", ...}'
 ```
 
 **Output:** JSON with action decision
@@ -171,7 +171,7 @@ python3 {baseDir}/scripts/triage-comment.py --comment '{"id":"...", "body":"..."
 
 ### Review Response Guide
 ```
-Read {baseDir}/references/review-response-guide.md
+Read references/review-response-guide.md
 ```
 
 Provides:
@@ -202,7 +202,7 @@ Provides:
 
 ## Quality Verification
 
-- [x] Self-contained with {baseDir} pattern
+- [x] Self-contained with relative path pattern
 - [x] Progressive disclosure (references loaded on-demand)
 - [x] Scripts output JSON for machine processing
 - [x] Both fetcher and triager agents absorbed

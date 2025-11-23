@@ -44,7 +44,7 @@ This command focuses on **project-level settings** for version-controlled projec
 7. Better user experience patterns for permission management
 8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
 9. **CRITICAL LESSON - Command Invocation Forms:** Commands can be invoked in TWO ways: (a) Short form: `/plugin-diagnose-agents` and (b) Bundle-qualified: `/cui-plugin-development-tools:plugin-diagnose-agents`. Bundle wildcards like `SlashCommand(/cui-plugin-development-tools:*)` ONLY match bundle-qualified invocations. Short-form invocations require INDIVIDUAL permissions like `SlashCommand(/plugin-diagnose-agents:*)`. Step 3E lists BOTH bundle wildcards (16 patterns) AND short-form permissions (35 patterns) to cover all invocation methods. The pattern `SlashCommand(/plugin-*:*)` is INVALID - you cannot wildcard command names, only use `:*` after exact bundle/command names.
-10. **CRITICAL LESSON - {baseDir} Architecture:** Script permissions do NOT need to be added to settings files. The `{baseDir}` pattern in SKILL.md handles script portability automatically. Claude resolves `{baseDir}` at runtime to the skill's mounted directory (`~/.claude/skills/`, `.claude/skills/`, or `marketplace/bundles/.../skills/`). NEVER add hardcoded script paths to settings - this violates the architecture and creates unmaintainable permission bloat. See `plugin-architecture` skill for full details.
+10. **CRITICAL LESSON - {baseDir} Architecture:** Script permissions do NOT need to be added to settings files. The relative paths pattern in SKILL.md handles script portability automatically. Claude resolves relative paths at runtime to the skill's mounted directory (`~/.claude/skills/`, `.claude/skills/`, or `marketplace/bundles/.../skills/`). NEVER add hardcoded script paths to settings - this violates the architecture and creates unmaintainable permission bloat. See `plugin-architecture` skill for full details.
 
 This ensures the command evolves and becomes more effective with each execution.
 
@@ -426,9 +426,9 @@ Update `.claude/run-configuration.md` with:
    - No manual setup for new team members
    - Consistent development environment
 
-2. **Skill Scripts (Handled by {baseDir})**:
-   - Scripts in `marketplace/bundles/*/skills/*/scripts/` use `{baseDir}` pattern
-   - Claude resolves `{baseDir}` to skill's mounted location at runtime
+2. **Skill Scripts (Handled by relative paths)**:
+   - Scripts in `marketplace/bundles/*/skills/*/scripts/` use relative paths pattern
+   - Claude resolves relative paths to skill's mounted location at runtime
    - NO script permissions needed in settings - architecture handles this automatically
    - See `plugin-architecture` skill for full details
 
@@ -495,7 +495,7 @@ For version-controlled projects (like CUI marketplace):
 - ✅ Project scripts: `Bash(~/git/{repo}/scripts/**)` (if scripts/ exists)
 - ❌ Read: NOT added (globally covered via `Read(//~/git/**)`)
 - ❌ Marketplace wildcards: NOT added to project (should be in global only)
-- ❌ Skill scripts: NOT added - handled by `{baseDir}` architecture automatically
+- ❌ Skill scripts: NOT added - handled by relative paths architecture automatically
 
 ## ARCHITECTURE
 

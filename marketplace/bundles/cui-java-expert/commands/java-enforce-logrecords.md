@@ -91,7 +91,7 @@ Execute workflow: Analyze Logging Violations
 
 Or run script directly:
 ```bash
-{baseDir}/scripts/analyze-logging-violations.py --directory {target}
+scripts/analyze-logging-violations.py --directory {target}
 ```
 
 **Script returns structured violations:**
@@ -229,7 +229,7 @@ Execute workflow: Document LogRecord
 
 Or run script directly:
 ```bash
-{baseDir}/scripts/document-logrecord.py --holder {holder_class} --output {output_file}
+scripts/document-logrecord.py --holder {holder_class} --output {output_file}
 ```
 
 **Verification:**

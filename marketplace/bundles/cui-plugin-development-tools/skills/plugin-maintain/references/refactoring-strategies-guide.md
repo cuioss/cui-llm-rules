@@ -98,7 +98,7 @@ After: cui-logging skill referenced by all commands
 Analyze components in refactoring scope:
 
 ```bash
-{baseDir}/scripts/analyze-component.py {component_path}
+scripts/analyze-component.py {component_path}
 ```
 
 Collect metrics for:

@@ -58,7 +58,7 @@ All 5 workflows follow the same pattern:
 
 2. **Load Component Reference** (progressive disclosure)
    ```
-   Read {baseDir}/references/{component}-guide.md
+   Read references/{component}-guide.md
    ```
 
 3. **Discover Components** (based on scope parameter)
@@ -68,9 +68,9 @@ All 5 workflows follow the same pattern:
 
 4. **Analyze Each Component** (using scripts)
    ```bash
-   Bash: {baseDir}/scripts/analyze-markdown-file.sh {path} {type}
-   Bash: {baseDir}/scripts/analyze-tool-coverage.sh {path}
-   Bash: python3 {baseDir}/scripts/validate-references.py {path}
+   Bash: scripts/analyze-markdown-file.sh {path} {type}
+   Bash: scripts/analyze-tool-coverage.sh {path}
+   Bash: python3 scripts/validate-references.py {path}
    ```
 
 ### Phase 2: Categorize Issues
@@ -119,12 +119,12 @@ All 5 workflows follow the same pattern:
 
 1. **Verify Fixes**
    ```bash
-   Bash: {baseDir}/scripts/verify-fix.sh {type} {path}
+   Bash: scripts/verify-fix.sh {type} {path}
    ```
 
 2. **Generate Summary**
    ```
-   Read {baseDir}/references/reporting-templates.md
+   Read references/reporting-templates.md
    ```
    Use summary template with metrics.
 
@@ -142,8 +142,8 @@ All 5 workflows follow the same pattern:
 ```
 Skill: cui-utilities:cui-diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
-Read {baseDir}/references/agents-guide.md
-Read {baseDir}/references/fix-catalog.md
+Read references/agents-guide.md
+Read references/fix-catalog.md
 ```
 
 ### Step 2: Discover Agents
@@ -163,9 +163,9 @@ Glob: pattern="*.md", path="{scope_path}/agents"
 For each agent file:
 
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {agent_path} agent
-Bash: {baseDir}/scripts/analyze-tool-coverage.sh {agent_path}
-Bash: python3 {baseDir}/scripts/validate-references.py {agent_path}
+Bash: scripts/analyze-markdown-file.sh {agent_path} agent
+Bash: scripts/analyze-tool-coverage.sh {agent_path}
+Bash: python3 scripts/validate-references.py {agent_path}
 ```
 
 **Check against agents-guide.md**:
@@ -210,8 +210,8 @@ Display summary using reporting-templates.md format.
 ```
 Skill: cui-utilities:cui-diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
-Read {baseDir}/references/commands-guide.md
-Read {baseDir}/references/fix-catalog.md
+Read references/commands-guide.md
+Read references/fix-catalog.md
 ```
 
 ### Step 2: Discover Commands
@@ -221,8 +221,8 @@ Same pattern as doctor-agents.
 ### Step 3: Analyze Each Command
 
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {cmd_path} command
-Bash: python3 {baseDir}/scripts/validate-references.py {cmd_path}
+Bash: scripts/analyze-markdown-file.sh {cmd_path} command
+Bash: python3 scripts/validate-references.py {cmd_path}
 ```
 
 **Check against commands-guide.md**:
@@ -328,8 +328,8 @@ Same pattern as doctor-agents with command-specific thresholds.
 ```
 Skill: cui-utilities:cui-diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
-Read {baseDir}/references/skills-guide.md
-Read {baseDir}/references/fix-catalog.md
+Read references/skills-guide.md
+Read references/fix-catalog.md
 ```
 
 ### Step 2: Discover Skills
@@ -342,15 +342,15 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 ### Step 3: Analyze Each Skill
 
 ```bash
-Bash: {baseDir}/scripts/analyze-skill-structure.sh {skill_dir}
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {skill_dir}/SKILL.md skill
-Bash: python3 {baseDir}/scripts/validate-references.py {skill_dir}/SKILL.md
+Bash: scripts/analyze-skill-structure.sh {skill_dir}
+Bash: scripts/analyze-markdown-file.sh {skill_dir}/SKILL.md skill
+Bash: python3 scripts/validate-references.py {skill_dir}/SKILL.md
 ```
 
 **Check against skills-guide.md**:
 - Structure score >= 70 (good) or >= 90 (excellent)
 - Progressive disclosure compliance
-- {baseDir} pattern usage
+- Relative path usage
 - No missing referenced files
 - No unreferenced files
 - **Foundation skill loading** (see below)
@@ -413,8 +413,8 @@ Same pattern with skill-specific checks.
 
 ```
 Skill: cui-utilities:cui-diagnostic-patterns
-Read {baseDir}/references/metadata-guide.md
-Read {baseDir}/references/fix-catalog.md
+Read references/metadata-guide.md
+Read references/fix-catalog.md
 ```
 
 ### Step 2: Discover plugin.json Files
@@ -451,8 +451,8 @@ Glob: pattern="**/plugin.json", path="marketplace/bundles"
 ```
 Skill: cui-utilities:cui-diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
-Read plugin-architecture:{baseDir}/references/script-standards.md
-Read {baseDir}/references/fix-catalog.md
+Read plugin-architecture:references/script-standards.md
+Read references/fix-catalog.md
 ```
 
 ### Step 2: Discover Scripts
@@ -476,7 +476,7 @@ Same pattern with script-specific checks.
 
 ## External Resources
 
-### Scripts ({baseDir}/scripts/)
+### Scripts (scripts/)
 
 | Script | Purpose |
 |--------|---------|
@@ -489,7 +489,7 @@ Same pattern with script-specific checks.
 | `apply-fix.py` | Apply single fix with backup |
 | `verify-fix.sh` | Verify fix resolved issue |
 
-### References ({baseDir}/references/)
+### References (references/)
 
 **Diagnosis References** (4):
 - `agents-guide.md` - Agent quality standards
@@ -509,7 +509,7 @@ Same pattern with script-specific checks.
 **Reporting** (1):
 - `reporting-templates.md` - Summary report templates
 
-### Assets ({baseDir}/assets/)
+### Assets (assets/)
 
 - `fix-templates.json` - Fix templates and rules
 
@@ -538,8 +538,8 @@ This skill is designed to run without user prompts for safe operations. Required
 
 **Script Execution (covered by project permissions):**
 - `Bash(python3:*)` - Python interpreter
-- `Bash({baseDir}/scripts/*.sh:*)` - Analysis scripts
-- `Bash({baseDir}/scripts/*.py:*)` - Python analysis scripts
+- `Bash(scripts/*.sh:*)` - Analysis scripts
+- `Bash(scripts/*.py:*)` - Python analysis scripts
 
 **File Operations (covered by project permissions):**
 - `Read(//marketplace/**)` - Read marketplace files
@@ -553,7 +553,7 @@ This skill is designed to run without user prompts for safe operations. Required
 
 **Ensuring Non-Prompting for Safe Operations:**
 - All file reads/edits use relative paths within marketplace/
-- Script invocation uses `{baseDir}/scripts/` which resolves to skill's mounted path
+- Script invocation uses `scripts/` which resolves to skill's mounted path
 - Skill invocations use bundle-qualified names covered by `Skill({bundle}:*)` wildcards
 - AskUserQuestion is ONLY used for risky fix confirmations
 

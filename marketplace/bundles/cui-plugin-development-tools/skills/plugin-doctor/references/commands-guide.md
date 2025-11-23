@@ -320,7 +320,7 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 Skill: cui-utilities:cui-diagnostic-patterns
 Skill: cui-plugin-development-tools:marketplace-inventory
 Skill: cui-plugin-development-tools:bundle-orchestration-compliance
-Read {baseDir}/references/reporting-templates.md
+Read references/reporting-templates.md
 Skill: cui-java-expert:cui-java-core
 Skill: cui-frontend-expert:cui-javascript
 # ... loads 10 more skills upfront
@@ -612,7 +612,7 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 ### Step 7: Generate Report (If --save-report)
 
 If --save-report flag:
-  Read {baseDir}/references/reporting-templates.md
+  Read references/reporting-templates.md
   # Only loaded when actually generating report
 ```
 
@@ -670,7 +670,7 @@ Common improvements:
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {command_path} command
+Bash: scripts/analyze-markdown-file.sh {command_path} command
 # Check: bloat.classification = "CRITICAL"
 # Check: metrics.line_count > 500
 ```
@@ -711,7 +711,7 @@ Parse validation results.
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {command_path} command
+Bash: scripts/analyze-markdown-file.sh {command_path} command
 # Check: parameters.has_section = false
 ```
 
@@ -761,7 +761,7 @@ Add POST-FIX VERIFICATION step (see Rule 7).
 
 **Diagnosis**:
 ```bash
-Bash: python3 {baseDir}/scripts/validate-references.py {command_path}
+Bash: python3 scripts/validate-references.py {command_path}
 # Check references array for incorrect formats
 ```
 

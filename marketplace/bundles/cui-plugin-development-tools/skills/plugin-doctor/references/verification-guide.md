@@ -13,7 +13,7 @@ Verification confirms:
 ## Using verify-fix.sh
 
 ```bash
-{baseDir}/scripts/verify-fix.sh {fix_type} {component_path}
+scripts/verify-fix.sh {fix_type} {component_path}
 ```
 
 **Output**:

@@ -37,7 +37,7 @@ Comprehensive permission management patterns for Claude Code settings, including
 - Marketplace inventory analysis
 - Bundle-based wildcard generation
 - Short-form command permissions
-- {baseDir} architecture compliance
+- relative path architecture compliance
 
 ### Historical Lessons
 - Production issues discovered and resolved
@@ -61,9 +61,9 @@ Activate when:
 #### Step 1: Load Permission Standards
 
 ```
-Read: {baseDir}/standards/permission-validation-standards.md
-Read: {baseDir}/standards/permission-architecture.md
-Read: {baseDir}/standards/permission-anti-patterns.md
+Read: standards/permission-validation-standards.md
+Read: standards/permission-architecture.md
+Read: standards/permission-anti-patterns.md
 ```
 
 #### Step 2: Apply Standards
@@ -77,7 +77,7 @@ Use loaded standards for:
 #### Step 3: Reference Best Practices
 
 ```
-Read: {baseDir}/best-practices/lessons-learned.md
+Read: best-practices/lessons-learned.md
 ```
 
 Apply lessons learned to avoid known pitfalls.
@@ -114,7 +114,7 @@ The skill returns JSON with all marketplace resources (bundles, agents, commands
 Pass the inventory JSON to the wildcard generator script:
 
 ```bash
-echo '<inventory-json>' | python3 {baseDir}/scripts/generate-permission-wildcards.py --format json
+echo '<inventory-json>' | python3 scripts/generate-permission-wildcards.py --format json
 ```
 
 The script analyzes inventory and outputs:
@@ -123,7 +123,7 @@ The script analyzes inventory and outputs:
 - Command bundle wildcards: `SlashCommand(/{bundle-name}:*)`
 - Command short-form permissions: `SlashCommand(/{command-name}:*)`
 
-**Note:** Script permissions are NOT generated. The `{baseDir}` pattern in SKILL.md handles script portability automatically - Claude resolves `{baseDir}` at runtime to the skill's mounted directory.
+**Note:** Script permissions are NOT generated. The relative paths pattern in SKILL.md handles script portability automatically - Claude resolves relative paths at runtime to the skill's mounted directory.
 
 #### Step 4: Display Results
 
@@ -153,7 +153,7 @@ Required Wildcard Permissions:
   SlashCommands (Short-Form Permissions):
     {list from script output}
 
-Note: Script permissions are handled by {baseDir} architecture - no permissions needed.
+Note: Script permissions are handled by relative path architecture - no permissions needed.
 
 Coverage Verification:
   {coverage info from script output}
@@ -191,7 +191,7 @@ Edit: marketplace/bundles/cui-utilities/commands/tools-setup-project-permissions
 Marketplace Coverage: 100%
 - All {skills_found} skills covered by bundle wildcards
 - All {commands_found} commands covered (bundle + short-form)
-- Scripts handled by {baseDir} architecture (no permissions needed)
+- Scripts handled by relative path architecture (no permissions needed)
 
 {if not dry-run}
 ✅ tools-setup-project-permissions.md updated
@@ -209,14 +209,14 @@ Next Steps:
 
 ## Scripts
 
-- `{baseDir}/scripts/generate-permission-wildcards.py` - Analyzes inventory JSON and generates permission wildcards
+- `scripts/generate-permission-wildcards.py` - Analyzes inventory JSON and generates permission wildcards
 
 ## Standards Organization
 
-- `{baseDir}/standards/permission-validation-standards.md` - Validation patterns, syntax rules, categorization
-- `{baseDir}/standards/permission-architecture.md` - Global/Local separation, universal access patterns
-- `{baseDir}/standards/permission-anti-patterns.md` - Security patterns, suspicious permission detection
-- `{baseDir}/best-practices/lessons-learned.md` - Historical issues, evolution, established practices
+- `standards/permission-validation-standards.md` - Validation patterns, syntax rules, categorization
+- `standards/permission-architecture.md` - Global/Local separation, universal access patterns
+- `standards/permission-anti-patterns.md` - Security patterns, suspicious permission detection
+- `best-practices/lessons-learned.md` - Historical issues, evolution, established practices
 
 ## Integration
 
@@ -236,7 +236,7 @@ This skill is designed to run without user prompts. Required permissions:
 
 **Script Execution (covered by project permissions):**
 - `Bash(python3:*)` - Python interpreter
-- `Bash({baseDir}/scripts/generate-permission-wildcards.py:*)` - Wildcard generator
+- `Bash(scripts/generate-permission-wildcards.py:*)` - Wildcard generator
 
 **File Operations (covered by project permissions):**
 - `Read(//marketplace/**)` - Read marketplace files
@@ -244,7 +244,7 @@ This skill is designed to run without user prompts. Required permissions:
 
 **Ensuring Non-Prompting:**
 - All file reads use relative paths within marketplace/
-- Script invocation uses `{baseDir}/scripts/` which resolves to skill's mounted path
+- Script invocation uses `scripts/` which resolves to skill's mounted path
 - Skill invocations use bundle-qualified names covered by `Skill({bundle}:*)` wildcards
 - Python3 execution covered by standard `Bash(python3:*)` permission
 
@@ -256,10 +256,10 @@ This skill is designed to run without user prompts. Required permissions:
 - Generate one `SlashCommand(/{command-name}:*)` per command (short-form)
 - NEVER use wildcards in bundle names (e.g., `cui-*:*` is invalid)
 - Permission validation regex requires exact bundle names
-- **Script permissions are NOT generated** - the `{baseDir}` pattern handles this automatically
+- **Script permissions are NOT generated** - the relative paths pattern handles this automatically
 
 **Script Invocation:**
-- Always use `{baseDir}/scripts/` for script paths
+- Always use `scripts/` for script paths
 - Pass inventory as stdin to Python script
 - Script handles all pattern analysis and wildcard generation
 

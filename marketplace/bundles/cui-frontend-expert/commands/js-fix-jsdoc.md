@@ -36,10 +36,10 @@ Execute workflow: Analyze JSDoc Violations
 Or run script directly:
 ```bash
 # Analyze directory
-python3 {baseDir}/scripts/analyze-jsdoc-violations.py --directory src/
+python3 scripts/analyze-jsdoc-violations.py --directory src/
 
 # Analyze specific file
-python3 {baseDir}/scripts/analyze-jsdoc-violations.py --file {files}
+python3 scripts/analyze-jsdoc-violations.py --file {files}
 ```
 
 Script returns structured JSON with violations categorized by severity (CRITICAL, WARNING, SUGGESTION).
@@ -77,7 +77,7 @@ npm run lint > target/npm-lint-output.log 2>&1
 
 **Parse output to verify no JSDoc errors remain:**
 ```bash
-python3 {baseDir}/skills/cui-javascript-project/scripts/parse-npm-output.py \
+python3 skills/cui-javascript-project/scripts/parse-npm-output.py \
     --log target/npm-lint-output.log --mode errors
 ```
 

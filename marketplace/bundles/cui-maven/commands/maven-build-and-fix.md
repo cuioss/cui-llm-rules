@@ -43,7 +43,7 @@ Execute workflow: Parse Maven Build Output
 
 **Parse the build log:**
 ```bash
-python3 {baseDir}/scripts/parse-maven-output.py \
+python3 scripts/parse-maven-output.py \
     --log {output_file} \
     --mode structured
 ```
@@ -88,7 +88,7 @@ python3 {baseDir}/scripts/parse-maven-output.py \
 
 **Re-analyze with script:**
 ```bash
-python3 {baseDir}/scripts/parse-maven-output.py \
+python3 scripts/parse-maven-output.py \
     --log {verify_output_file} \
     --mode structured
 ```

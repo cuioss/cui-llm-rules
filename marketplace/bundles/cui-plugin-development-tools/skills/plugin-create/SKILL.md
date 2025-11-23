@@ -63,7 +63,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Architecture Standards
 
 ```
-Read {baseDir}/references/agent-guide.md
+Read references/agent-guide.md
 ```
 
 This provides agent design principles, tool selection guidelines, and architecture rules.
@@ -144,7 +144,7 @@ Track `validations_performed` counter.
 
 **Generate frontmatter:**
 ```
-bash {baseDir}/scripts/generate-frontmatter.py "agent" "{answers_json}"
+bash scripts/generate-frontmatter.py "agent" "{answers_json}"
 ```
 
 Where answers_json contains:
@@ -159,7 +159,7 @@ Where answers_json contains:
 
 **Load template:**
 ```
-Read {baseDir}/assets/templates/agent-template.md
+Read assets/templates/agent-template.md
 ```
 
 **Fill template** with:
@@ -204,7 +204,7 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```
-bash {baseDir}/scripts/validate-component.py "{file_path}" "agent"
+bash scripts/validate-component.py "{file_path}" "agent"
 ```
 
 Validation checks:
@@ -269,7 +269,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Command Standards
 
 ```
-Read {baseDir}/references/command-guide.md
+Read references/command-guide.md
 ```
 
 This provides command design principles, quality standards, and orchestration patterns.
@@ -315,12 +315,12 @@ Same pattern as agent workflow, using Glob/Grep to find similar commands.
 
 **Generate frontmatter:**
 ```
-bash {baseDir}/scripts/generate-frontmatter.py "command" "{answers_json}"
+bash scripts/generate-frontmatter.py "command" "{answers_json}"
 ```
 
 **Load template:**
 ```
-Read {baseDir}/assets/templates/command-template.md
+Read assets/templates/command-template.md
 ```
 
 **Fill template** with:
@@ -354,7 +354,7 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```
-bash {baseDir}/scripts/validate-component.py "{file_path}" "command"
+bash scripts/validate-component.py "{file_path}" "command"
 ```
 
 Validation checks:
@@ -392,7 +392,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Skill Standards
 
 ```
-Read {baseDir}/references/skill-guide.md
+Read references/skill-guide.md
 ```
 
 This provides skill patterns, resource organization, and progressive disclosure guidance.
@@ -446,12 +446,12 @@ bash mkdir -p {bundle}/skills/{skill-name}/standards
 
 Generate frontmatter:
 ```
-bash {baseDir}/scripts/generate-frontmatter.py "skill" "{answers_json}"
+bash scripts/generate-frontmatter.py "skill" "{answers_json}"
 ```
 
 Load template:
 ```
-Read {baseDir}/assets/templates/skill-template.md
+Read assets/templates/skill-template.md
 ```
 
 Fill template with:
@@ -506,7 +506,7 @@ Track `files_created` and `standards_files_created` counters.
 #### Step 5: Validate Generated Component
 
 ```
-bash {baseDir}/scripts/validate-component.py "{skill_path}/SKILL.md" "skill"
+bash scripts/validate-component.py "{skill_path}/SKILL.md" "skill"
 ```
 
 Validation checks:
@@ -730,7 +730,7 @@ This skill uses the following scripts:
 
 **Usage**:
 ```bash
-{baseDir}/scripts/validate-component.py <file_path> <component_type>
+scripts/validate-component.py <file_path> <component_type>
 ```
 
 **Output**: JSON with validation results
@@ -740,7 +740,7 @@ This skill uses the following scripts:
 
 **Usage**:
 ```bash
-{baseDir}/scripts/generate-frontmatter.py <component_type> <answers_json>
+scripts/generate-frontmatter.py <component_type> <answers_json>
 ```
 
 **Output**: Formatted YAML frontmatter string
@@ -776,7 +776,7 @@ This skill uses the following templates in assets/templates/:
 
 **Progressive Disclosure**:
 - Load reference guides on-demand (never load all at once)
-- Use {baseDir} for all resource paths
+- Use relative paths for all resources
 
 ## Quality Standards
 

@@ -135,7 +135,7 @@ Use this workflow when:
 ### Step 2: Parse Build Output
 
 ```bash
-python3 {baseDir}/scripts/parse-maven-output.py \
+python3 scripts/parse-maven-output.py \
     --log target/maven-build.log \
     --mode {output_mode}
 ```
@@ -193,7 +193,7 @@ Use this workflow when:
 **Parse the build log file:**
 
 ```bash
-python3 {baseDir}/scripts/parse-maven-output.py \
+python3 scripts/parse-maven-output.py \
     --log <path-to-log-file> \
     --mode <output-mode>
 ```
@@ -253,7 +253,7 @@ Based on issue category, delegate to appropriate commands:
 
 ### Script Location
 
-`{baseDir}/scripts/parse-maven-output.py`
+`scripts/parse-maven-output.py`
 
 ---
 

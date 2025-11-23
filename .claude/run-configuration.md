@@ -69,7 +69,7 @@ This project has access to globally-approved domains for common development reso
 
 ### Last Execution
 
-- Date: 2025-11-22 (Sixth run - {baseDir} architecture compliance)
+- Date: 2025-11-22 (Sixth run - relative path architecture compliance)
 - Result: Fixed architecture violations, added global marketplace permissions
 - Status: SUCCESS
 
@@ -86,7 +86,7 @@ This project has access to globally-approved domains for common development reso
   - `Skill(cui-diagnostic-patterns)` - Should be global, not local
   - `Skill(cui-utilities:permission-management)` - Should be global, not local
   - `Skill(cui-plugin-development-tools:marketplace-inventory)` - Should be global, not local
-  - `Bash(bash /Users/.../scan-marketplace-inventory.sh:*)` - Violates {baseDir} pattern
+  - `Bash(bash /Users/.../scan-marketplace-inventory.sh:*)` - Violates relative path pattern
 - **KEPT 7 project-specific permissions:**
   - `Bash(claude-code:*)` - Claude Code CLI operations
   - `Edit(//~/git/cui-llm-rules/**)` - Project editing
@@ -101,14 +101,14 @@ This project has access to globally-approved domains for common development reso
 **Problem:** Previous approach incorrectly tried to add script permissions for 9 scripts × 3 path formats = 27 Bash permissions per project.
 
 **Why This Was Wrong:**
-- The `{baseDir}` pattern handles script portability automatically
-- Scripts are invoked via `bash {baseDir}/scripts/script.sh` in SKILL.md
-- Claude resolves `{baseDir}` to the skill's mounted directory at runtime
+- The relative path pattern handles script portability automatically
+- Scripts are invoked via `bash scripts/script.sh` in SKILL.md
+- Claude resolves relative paths to the skill's mounted directory at runtime
 - No hardcoded absolute paths should ever be in settings
 
 **Correct Architecture:**
-- Skills use `{baseDir}/scripts/` pattern (see plugin-architecture skill)
-- `{baseDir}` resolves to: `~/.claude/skills/my-skill/` (global), `.claude/skills/my-skill/` (project), or `marketplace/bundles/{bundle}/skills/my-skill/` (bundle)
+- Skills use `scripts/` pattern (see plugin-architecture skill)
+- relative paths resolves to: `~/.claude/skills/my-skill/` (global), `.claude/skills/my-skill/` (project), or `marketplace/bundles/{bundle}/skills/my-skill/` (bundle)
 - Script permissions are NOT needed in settings - the skill system handles this
 
 ### Permission Summary
@@ -136,16 +136,16 @@ This project has access to globally-approved domains for common development reso
 
 ✅ All marketplace bundle wildcards in global settings (8 skills + 8 commands)
 ✅ All short-form command permissions in global settings (35 commands)
-✅ No {baseDir} architecture violations
+✅ No relative path architecture violations
 ✅ No hardcoded script paths
 ✅ Minimal project-specific permissions
 ✅ Proper separation of global vs local concerns
 
 ### Architecture Notes
 
-**{baseDir} Pattern (Critical):**
-- All skill scripts use `{baseDir}/scripts/` in SKILL.md
-- Claude resolves `{baseDir}` at runtime based on installation location
+**Relative Path Pattern (Critical):**
+- All skill scripts use `scripts/` in SKILL.md
+- Claude resolves relative paths at runtime based on installation location
 - NEVER add individual script path permissions to settings
 - See: `plugin-architecture` skill for full details
 

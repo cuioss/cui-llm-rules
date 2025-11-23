@@ -36,7 +36,7 @@ npm run test:coverage --workspace={workspace} > target/npm-coverage-output.log 2
 
 **Parse build output (if needed):**
 ```bash
-python3 {baseDir}/skills/cui-javascript-project/scripts/parse-npm-output.py \
+python3 skills/cui-javascript-project/scripts/parse-npm-output.py \
     --log target/npm-coverage-output.log --mode structured
 ```
 
@@ -52,9 +52,9 @@ Execute workflow: Analyze Coverage
 
 Or run script directly:
 ```bash
-python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/coverage-summary.json
+python3 scripts/analyze-js-coverage.py --report coverage/coverage-summary.json
 # Or for LCOV format:
-python3 {baseDir}/scripts/analyze-js-coverage.py --report coverage/lcov.info --format lcov
+python3 scripts/analyze-js-coverage.py --report coverage/lcov.info --format lcov
 ```
 
 Script returns structured JSON with overall_coverage, by_file, and low_coverage_files.

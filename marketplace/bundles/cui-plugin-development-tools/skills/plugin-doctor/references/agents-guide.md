@@ -251,7 +251,7 @@ If you discover improvements, invoke `/plugin-update-agent` directly to update y
 ```markdown
 ### Step 2: Load Quality Standards
 
-Read {baseDir}/references/java-quality-standards.md
+Read references/java-quality-standards.md
 ```
 
 ### 2. Use Skill Dependencies
@@ -352,7 +352,7 @@ Move deterministic validation logic to external scripts:
 # Agent workflow:
 ### Step 3: Analyze Structure
 
-Bash: {baseDir}/scripts/analyze-structure.sh {file_path}
+Bash: scripts/analyze-structure.sh {file_path}
 # Parse JSON output
 # Apply AI reasoning to categorize issues
 # Determine fix strategy
@@ -365,12 +365,12 @@ Load external resources on-demand:
 ```markdown
 ### Step 2: Load Standards (Progressive Disclosure)
 
-Read {baseDir}/references/coding-standards.md
+Read references/coding-standards.md
 
 # Do NOT load all references upfront:
-# ❌ Read {baseDir}/references/standard1.md
-# ❌ Read {baseDir}/references/standard2.md
-# ❌ Read {baseDir}/references/standard3.md
+# ❌ Read references/standard1.md
+# ❌ Read references/standard2.md
+# ❌ Read references/standard3.md
 ```
 
 ### 4. Proper Error Handling
@@ -462,7 +462,7 @@ Use appropriate tools for tasks:
 **Diagnosis**:
 ```bash
 # Run tool coverage analysis
-Bash: {baseDir}/scripts/analyze-tool-coverage.sh {agent_path}
+Bash: scripts/analyze-tool-coverage.sh {agent_path}
 
 # Check JSON output:
 # - tool_coverage.missing_tools: Tools used but not declared
@@ -483,7 +483,7 @@ Bash: {baseDir}/scripts/analyze-tool-coverage.sh {agent_path}
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {agent_path} agent
+Bash: scripts/analyze-markdown-file.sh {agent_path} agent
 # Check: rules.rule_6_violation = true
 ```
 
@@ -500,7 +500,7 @@ Bash: {baseDir}/scripts/analyze-markdown-file.sh {agent_path} agent
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {agent_path} agent
+Bash: scripts/analyze-markdown-file.sh {agent_path} agent
 # Check: rules.rule_7_violation = true
 ```
 
@@ -522,7 +522,7 @@ Bash: {baseDir}/scripts/analyze-markdown-file.sh {agent_path} agent
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {agent_path} agent
+Bash: scripts/analyze-markdown-file.sh {agent_path} agent
 # Check: continuous_improvement_rule.format.pattern_22_violation = true
 ```
 
@@ -537,7 +537,7 @@ Update CONTINUOUS IMPROVEMENT RULE to use caller-reporting pattern (see Pattern 
 
 **Diagnosis**:
 ```bash
-Bash: {baseDir}/scripts/analyze-markdown-file.sh {agent_path} agent
+Bash: scripts/analyze-markdown-file.sh {agent_path} agent
 # Check: bloat.classification = "BLOATED" or "CRITICAL"
 ```
 

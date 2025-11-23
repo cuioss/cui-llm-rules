@@ -15,7 +15,7 @@ READMEs should:
 Generate README content for a bundle:
 
 ```bash
-{baseDir}/scripts/generate-readme.sh {bundle_path}
+scripts/generate-readme.sh {bundle_path}
 ```
 
 **Output Fields**:

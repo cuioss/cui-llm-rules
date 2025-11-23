@@ -64,7 +64,7 @@ Unified task planning standards for three planning scenarios:
 
 1. **Load Planning Standards**
    ```
-   Read {baseDir}/standards/issue-planning-standards.md
+   Read standards/issue-planning-standards.md
    ```
 
 2. **Identify Issue Source**
@@ -75,7 +75,7 @@ Unified task planning standards for three planning scenarios:
 3. **Analyze Issue Content**
    Run analysis script:
    ```
-   python3 {baseDir}/scripts/create-task-breakdown.py {issue-file}
+   python3 scripts/create-task-breakdown.py {issue-file}
    ```
 
    Script outputs JSON with task structure:
@@ -116,7 +116,7 @@ Unified task planning standards for three planning scenarios:
 
 1. **Parse Plan File**
    ```
-   python3 {baseDir}/scripts/track-task-progress.py {plan-file}
+   python3 scripts/track-task-progress.py {plan-file}
    ```
 
    Script outputs JSON with progress state:
@@ -150,7 +150,7 @@ Unified task planning standards for three planning scenarios:
 
 5. **Verify Acceptance Criteria**
    ```
-   python3 {baseDir}/scripts/validate-acceptance.py {plan-file} --task {id}
+   python3 scripts/validate-acceptance.py {plan-file} --task {id}
    ```
 
 6. **Return Completion Report**
@@ -215,7 +215,7 @@ Unified task planning standards for three planning scenarios:
 ## Standards Organization
 
 ```
-{baseDir}/
+cui-task-planning/
 ├── SKILL.md                     # This file (workflows + overview)
 ├── standards/                   # Planning standards (loaded on-demand)
 │   ├── task-planning-core.md
@@ -240,7 +240,7 @@ Unified task planning standards for three planning scenarios:
 
 **Usage:**
 ```bash
-python3 {baseDir}/scripts/create-task-breakdown.py <issue-file> [--output <file>]
+python3 scripts/create-task-breakdown.py <issue-file> [--output <file>]
 ```
 
 **Input:** Issue file (markdown or JSON)
@@ -252,7 +252,7 @@ python3 {baseDir}/scripts/create-task-breakdown.py <issue-file> [--output <file>
 
 **Usage:**
 ```bash
-python3 {baseDir}/scripts/track-task-progress.py <plan-file>
+python3 scripts/track-task-progress.py <plan-file>
 ```
 
 **Input:** Plan markdown file
@@ -264,7 +264,7 @@ python3 {baseDir}/scripts/track-task-progress.py <plan-file>
 
 **Usage:**
 ```bash
-python3 {baseDir}/scripts/validate-acceptance.py <plan-file> [--task <id>]
+python3 scripts/validate-acceptance.py <plan-file> [--task <id>]
 ```
 
 **Input:** Plan file and optional task ID
@@ -274,7 +274,7 @@ python3 {baseDir}/scripts/validate-acceptance.py <plan-file> [--task <id>]
 
 ### Task Planning Core
 ```
-Read {baseDir}/standards/task-planning-core.md
+Read standards/task-planning-core.md
 ```
 - Status indicator definitions
 - Task element structure
@@ -283,7 +283,7 @@ Read {baseDir}/standards/task-planning-core.md
 
 ### Issue Planning Standards
 ```
-Read {baseDir}/standards/issue-planning-standards.md
+Read standards/issue-planning-standards.md
 ```
 - plan-issue-X.md format
 - Sequential task structure
@@ -292,7 +292,7 @@ Read {baseDir}/standards/issue-planning-standards.md
 
 ### Project Planning Standards
 ```
-Read {baseDir}/standards/project-planning-standards.md
+Read standards/project-planning-standards.md
 ```
 - doc/TODO.adoc structure
 - Hierarchical organization
@@ -300,7 +300,7 @@ Read {baseDir}/standards/project-planning-standards.md
 
 ### Refactoring Planning Standards
 ```
-Read {baseDir}/standards/refactoring-planning-standards.md
+Read standards/refactoring-planning-standards.md
 ```
 - Category-based organization
 - Task identifier format
@@ -318,7 +318,7 @@ Read {baseDir}/standards/refactoring-planning-standards.md
 
 ## Quality Verification
 
-- [x] Self-contained with {baseDir} pattern
+- [x] Self-contained with relative path pattern
 - [x] Progressive disclosure (standards loaded on-demand)
 - [x] Scripts output JSON for machine processing
 - [x] All 3 agent functionalities absorbed

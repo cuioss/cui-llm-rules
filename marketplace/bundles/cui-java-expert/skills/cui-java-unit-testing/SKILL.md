@@ -307,7 +307,7 @@ Analyze existing JaCoCo coverage reports and extract coverage metrics.
 
 2. **Run Coverage Analysis Script**
    ```bash
-   {baseDir}/scripts/analyze-coverage.py --file {report_path} --threshold {threshold}
+   scripts/analyze-coverage.py --file {report_path} --threshold {threshold}
    ```
 
 3. **Parse Results**

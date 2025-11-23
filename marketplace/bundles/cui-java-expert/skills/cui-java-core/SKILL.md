@@ -434,7 +434,7 @@ Analyze LOGGER usage in Java files and detect violations of CUI logging standard
 
 2. **Run Violation Analysis Script**
    ```bash
-   {baseDir}/scripts/analyze-logging-violations.py --directory {target}
+   scripts/analyze-logging-violations.py --directory {target}
    ```
 
 3. **Parse Results**
@@ -523,7 +523,7 @@ Generate AsciiDoc documentation for LogMessages holder classes.
 
 2. **Run Documentation Script**
    ```bash
-   {baseDir}/scripts/document-logrecord.py --holder {holder_class} --output {output_file}
+   scripts/document-logrecord.py --holder {holder_class} --output {output_file}
    ```
 
 3. **Parse Results**

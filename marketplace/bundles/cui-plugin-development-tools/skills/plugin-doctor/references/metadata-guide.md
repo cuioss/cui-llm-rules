@@ -440,7 +440,7 @@ Update to semantic versioning format (MAJOR.MINOR.PATCH).
 
 **Usage**:
 ```bash
-Bash: {baseDir}/scripts/scan-marketplace-inventory.sh {bundle_dir}
+Bash: scripts/scan-marketplace-inventory.sh {bundle_dir}
 ```
 
 **Output**:

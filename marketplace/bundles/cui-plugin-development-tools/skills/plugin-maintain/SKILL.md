@@ -48,7 +48,7 @@ All scripts are stdlib-only with JSON output:
 
 | Asset | Purpose |
 |-------|---------|
-| `readme-template.md` | Template for README generation (`{baseDir}/assets/readme-template.md`) |
+| `readme-template.md` | Template for README generation (`assets/readme-template.md`) |
 
 ## Workflow 1: update-component
 
@@ -73,7 +73,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Reference Guide
 
 ```
-Read: {baseDir}/references/component-update-guide.md
+Read: references/component-update-guide.md
 ```
 
 #### Step 2: Analyze Current State
@@ -81,7 +81,7 @@ Read: {baseDir}/references/component-update-guide.md
 Run component analysis:
 
 ```bash
-{baseDir}/scripts/analyze-component.py {component_path}
+scripts/analyze-component.py {component_path}
 ```
 
 Parse JSON output to understand:
@@ -103,7 +103,7 @@ Check that proposed improvements:
 Use `update-component.py` or Edit tool to apply changes:
 
 ```bash
-echo '{"updates": [...]}' | {baseDir}/scripts/update-component.py {component_path}
+echo '{"updates": [...]}' | scripts/update-component.py {component_path}
 ```
 
 Or use Edit tool for precise modifications.
@@ -144,7 +144,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Reference Guide
 
 ```
-Read: {baseDir}/references/knowledge-management-guide.md
+Read: references/knowledge-management-guide.md
 ```
 
 #### Step 2: Validate Skill
@@ -161,7 +161,7 @@ If file: Read the file
 #### Step 4: Check for Duplication
 
 ```bash
-{baseDir}/scripts/check-duplication.py {skill_path} {content_file}
+scripts/check-duplication.py {skill_path} {content_file}
 ```
 
 Parse JSON output:
@@ -213,7 +213,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Reference Guide
 
 ```
-Read: {baseDir}/references/readme-maintenance-guide.md
+Read: references/readme-maintenance-guide.md
 ```
 
 #### Step 2: Generate README Content
@@ -221,7 +221,7 @@ Read: {baseDir}/references/readme-maintenance-guide.md
 For each bundle:
 
 ```bash
-{baseDir}/scripts/generate-readme.sh {bundle_path}
+scripts/generate-readme.sh {bundle_path}
 ```
 
 Parse JSON output for:
@@ -274,7 +274,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Reference Guide
 
 ```
-Read: {baseDir}/references/refactoring-strategies-guide.md
+Read: references/refactoring-strategies-guide.md
 ```
 
 #### Step 2: Analyze Current Structure
@@ -282,7 +282,7 @@ Read: {baseDir}/references/refactoring-strategies-guide.md
 For each component in scope:
 
 ```bash
-{baseDir}/scripts/analyze-component.py {component_path}
+scripts/analyze-component.py {component_path}
 ```
 
 Identify:
@@ -341,7 +341,7 @@ These provide architecture principles and non-prompting tool usage patterns.
 #### Step 1: Load Reference Guide
 
 ```
-Read: {baseDir}/references/orchestration-compliance.md
+Read: references/orchestration-compliance.md
 ```
 
 This contains:
