@@ -180,6 +180,27 @@ For comprehensive documentation on each bundle, see their individual README file
 
 See also: xref:marketplace/README.md[Marketplace Overview]
 
+== Skill Script Permissions
+
+Many skills use bundled scripts (Python/Bash) for build parsing, coverage analysis, and validation. These require permissions in your global settings.
+
+=== First-Time Setup
+
+Run once after installing the marketplace:
+
+[source,bash]
+----
+/tools-setup-project-permissions
+----
+
+This command reads `.claude/scripts.local.json` and adds the necessary `Bash(python3 ...)` and `Bash(bash ...)` permissions to `~/.claude/settings.json`.
+
+=== When Scripts Don't Execute
+
+If a skill script fails with a permission error, the `script-runner` skill will auto-generate `.claude/scripts.local.json`. Then re-run `/tools-setup-project-permissions` to sync permissions.
+
+NOTE: `.claude/scripts.local.json` is machine-specific (absolute paths) and git-ignored.
+
 == Architecture
 
 === Bundle Structure
