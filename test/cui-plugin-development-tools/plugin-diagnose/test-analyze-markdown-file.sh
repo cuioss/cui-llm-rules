@@ -118,21 +118,27 @@ test_rule6_violation() {
         "true"
 }
 
-test_version_section() {
+test_forbidden_metadata() {
     echo ""
-    echo "=== Testing version section detection ==="
+    echo "=== Testing forbidden metadata detection ==="
     echo ""
 
-    run_test "version-section-detected" \
+    run_test "forbidden-metadata-detected" \
         "$FIXTURES_DIR/version-section-violation.md" \
         "agent" \
-        ".quality.has_version_section" \
+        ".quality.has_forbidden_metadata" \
         "true"
 
-    run_test "no-version-section-in-valid-agent" \
+    run_test "forbidden-sections-lists-version-and-license" \
+        "$FIXTURES_DIR/version-section-violation.md" \
+        "agent" \
+        ".quality.forbidden_sections" \
+        "Version,License"
+
+    run_test "no-forbidden-metadata-in-valid-agent" \
         "$FIXTURES_DIR/valid-agent.md" \
         "agent" \
-        ".quality.has_version_section" \
+        ".quality.has_forbidden_metadata" \
         "false"
 }
 
@@ -167,7 +173,7 @@ main() {
     test_valid_agent
     test_bloated_command
     test_rule6_violation
-    test_version_section
+    test_forbidden_metadata
 
     # Print summary
     echo ""

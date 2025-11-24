@@ -212,10 +212,6 @@ package de.cuioss.example;
 
 - Python 3 for automation scripts
 
-## License
-
-Apache-2.0
-
 ## Support
 
 - Repository: https://github.com/cuioss/cui-llm-rules

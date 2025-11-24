@@ -136,10 +136,6 @@ Commands are thin orchestrators that invoke skill workflows:
 - Python 3 for link verification and content review
 - Shell (bash) for formatting and validation scripts
 
-## License
-
-Apache-2.0
-
 ## Support
 
 - Repository: https://github.com/cuioss/cui-llm-rules

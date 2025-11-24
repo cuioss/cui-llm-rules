@@ -126,10 +126,6 @@ Maven projects can configure build behavior in `.claude/run-configuration.md`:
 
 Projects should define a `pre-commit` profile in their POM for quality checks.
 
-## License
-
-Apache-2.0
-
 ## Support
 
 - Repository: https://github.com/cuioss/cui-llm-rules

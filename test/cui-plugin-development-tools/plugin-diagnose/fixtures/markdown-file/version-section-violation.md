@@ -1,6 +1,6 @@
 ---
 name: test-agent
-description: Test agent with version section
+description: Test agent with forbidden metadata sections
 tools: Read, Grep
 ---
 
@@ -8,7 +8,7 @@ You are a test agent.
 
 ## YOUR TASK
 
-Test the version section detection.
+Test the forbidden metadata section detection.
 
 ## WORKFLOW
 
@@ -19,4 +19,6 @@ Test the version section detection.
 
 Version: 1.0.0
 
-Part of: test-bundle
+## License
+
+Apache-2.0

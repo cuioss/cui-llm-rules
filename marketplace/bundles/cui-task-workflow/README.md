@@ -177,10 +177,6 @@ cui-task-workflow/
 - **Skills**: 4 (with 8 Python scripts total)
 - **Agents**: 0 (all absorbed into skills)
 
-## License
-
-Apache-2.0
-
 ## Support
 
 - Repository: https://github.com/cuioss/cui-llm-rules

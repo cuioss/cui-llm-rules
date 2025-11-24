@@ -157,10 +157,6 @@ Commands are thin orchestrators that invoke skill workflows:
 - Python 3 for automation scripts
 - Node.js and npm for JavaScript builds
 
-## License
-
-Apache-2.0
-
 ## Support
 
 - Repository: https://github.com/cuioss/cui-llm-rules

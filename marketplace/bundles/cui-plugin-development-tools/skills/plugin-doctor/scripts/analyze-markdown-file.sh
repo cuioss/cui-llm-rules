@@ -24,7 +24,8 @@ Output: JSON with structural analysis including:
   - bloat.classification: NORMAL, LARGE, BLOATED, or CRITICAL
   - execution_patterns: EXECUTION MODE, workflow tree, MANDATORY markers
   - rules: Rule 6 and Rule 7 violation detection
-  - quality.has_version_section: Forbidden version section detection
+  - quality.has_forbidden_metadata: Forbidden metadata sections (Version, License, etc.)
+  - quality.forbidden_sections: List of detected forbidden section names
 
 Exit codes:
   0 - Success
@@ -186,11 +187,14 @@ if [ "$COMPONENT_TYPE" == "agent" ] && [ "$HAS_TOOLS" == "true" ]; then
     fi
 fi
 
-# Check for forbidden version sections (## Version, ## Version History)
+# Check for forbidden metadata sections (version, license, changelog, author)
 # These are artifacts that should not appear in marketplace components
-HAS_VERSION_SECTION="false"
-if grep -qE "^## Version( History)?$" "$FILE_PATH"; then
-    HAS_VERSION_SECTION="true"
+# License is repo-wide (Apache-2.0), version/changelog violate no-history rule
+HAS_FORBIDDEN_METADATA="false"
+FORBIDDEN_SECTIONS=""
+if grep -qE "^## (Version|Version History|License|Changelog|Change Log|Author|Revision History)$" "$FILE_PATH"; then
+    HAS_FORBIDDEN_METADATA="true"
+    FORBIDDEN_SECTIONS=$(grep -oE "^## (Version|Version History|License|Changelog|Change Log|Author|Revision History)$" "$FILE_PATH" | sed 's/^## //' | tr '\n' ',' | sed 's/,$//')
 fi
 
 # Output JSON
@@ -246,7 +250,8 @@ cat <<EOF
     "rule_7_violation": $RULE_7_VIOLATION
   },
   "quality": {
-    "has_version_section": $HAS_VERSION_SECTION
+    "has_forbidden_metadata": $HAS_FORBIDDEN_METADATA,
+    "forbidden_sections": "$FORBIDDEN_SECTIONS"
   }
 }
 EOF
