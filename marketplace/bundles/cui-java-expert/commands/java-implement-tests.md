@@ -35,11 +35,16 @@ Self-contained command that implements JUnit tests with full standards complianc
    - Track results: `types_found`, `types_missing`
 
 2. **Analyze description for completeness**:
-   - Check for specific test scenarios described
-   - Verify clarity on what behaviors to test
-   - Identify edge cases mentioned
-   - Check for ambiguous language ("maybe", "probably", "could")
-   - Verify coverage expectations are clear
+   ```
+   Skill: cui-utilities:script-runner
+   Script: cui-java-expert:cui-java-core/verify-implementation-params
+   Parameters:
+     description: "{task}"
+   ```
+
+   Parse JSON output - verify test scenarios are specific, edge cases explicit, coverage clear
+
+   Reference: xref:../skills/cui-java-core/standards/implementation-verification.md[Implementation Parameter Verification]
 
 3. **Verify module parameter** (if multi-module):
    - Use Glob to find pom.xml files
@@ -66,25 +71,22 @@ If the description explicitly indicates the task is to **fix the build or failin
 
 **Build Verification:**
 
-1. **Determine build scope**:
-   - If multi-module and module specified: build only that module
-   - If multi-module and module unset: build all modules
-   - If single-module: build entire project
-
-2. **Execute build verification**:
+1. **Execute clean test using cui-maven**:
    ```
    Skill: cui-maven:cui-maven-rules
-   Workflow: Execute Maven Build
+   Workflow: verify-clean-build
    Parameters:
      goals: clean test
      module: {module if specified}
-     output_mode: structured
    ```
 
-3. **Analyze build result**:
-   - If SUCCESS with 0 issues: Proceed to Step 3
-   - If FAILURE or any issues: Return error to user
-   - Codebase MUST compile cleanly and all existing tests must pass
+   This workflow will execute Maven, parse output, return status
+
+2. **Analyze result**:
+   - If status == "clean": Proceed to Step 3
+   - If has errors/warnings/test failures: Return BUILD PRECONDITION FAILED
+
+Reference: xref:../skills/cui-java-core/standards/build-precondition-pattern.md[Build Precondition Pattern]
 
 **Critical Rule**: Do not proceed if build has ANY errors, warnings, or test failures. Return immediately to user.
 

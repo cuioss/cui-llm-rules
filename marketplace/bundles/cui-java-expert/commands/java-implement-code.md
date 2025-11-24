@@ -35,10 +35,19 @@ Self-contained command that implements Java code with full standards compliance,
    - Track results: `types_found`, `types_to_create`
 
 2. **Analyze description for clarity**:
-   - Check for ambiguous language ("maybe", "possibly", "could")
-   - Verify all requirements are specific and measurable
-   - Identify any missing information
-   - List assumptions that need confirmation
+   ```
+   Skill: cui-utilities:script-runner
+   Script: cui-java-expert:cui-java-core/verify-implementation-params
+   Parameters:
+     description: "{task}"
+   ```
+
+   Parse JSON output:
+   - If verification_passed: false → Return clarification questions to user
+   - Check ambiguities, missing_information, vague_scope
+   - If clarity_score < 80: Request clarification
+
+   Reference: xref:../skills/cui-java-core/standards/implementation-verification.md[Implementation Parameter Verification]
 
 3. **Verify module parameter** (if multi-module):
    - Use Glob to find pom.xml files
@@ -55,36 +64,39 @@ Self-contained command that implements Java code with full standards compliance,
 
 **SPECIAL CASE: Fix Build Mode**
 
-If the description explicitly indicates the task is to **fix the build** (e.g., "fix compilation errors", "resolve build failures", "fix the build"):
+If description indicates task is to **fix the build**:
 - Skip Step 2 (Build Precondition) - broken build IS the task
-- Proceed directly to Step 3 (Analyze Code Context)
-- Step 4 verification becomes primary check that fix worked
+- Execute build to capture errors, analyze and fix iteratively (max 3 iterations)
+- Return "BUILD FIXED" status
 
 **Detection keywords**: "fix build", "fix compilation", "resolve build errors", "build is broken", "doesn't compile"
+
+Reference: xref:../skills/cui-java-core/standards/fix-build-mode.md[Fix Build Mode]
 
 ### Step 2: Verify Build Precondition
 
 **Build Verification:**
 
-1. **Determine build scope**:
-   - If multi-module project: identify module containing changes
-   - If single module: build entire project
-   - Use Glob to find pom.xml locations if needed
-
-2. **Execute build verification**:
+1. **Execute clean compile using cui-maven**:
    ```
    Skill: cui-maven:cui-maven-rules
-   Workflow: Execute Maven Build
+   Workflow: verify-clean-build
    Parameters:
      goals: clean compile
      module: {module if specified}
-     output_mode: errors
    ```
 
-3. **Analyze build result**:
-   - If SUCCESS with 0 issues: Proceed to Step 3
-   - If FAILURE or any issues: Return error to user
-   - Codebase MUST compile cleanly before implementation
+   This workflow will:
+   - Execute Maven build with output capture
+   - Parse build log using verify-clean-build.py script
+   - Return status: clean|has-errors|has-warnings
+
+2. **Analyze result**:
+   - If status == "clean": Proceed to Step 3
+   - If status == "has-errors" or "has-warnings": Return BUILD PRECONDITION FAILED to user
+   - Include all errors/warnings in response
+
+Reference: xref:../skills/cui-java-core/standards/build-precondition-pattern.md[Build Precondition Pattern]
 
 **Critical Rule**: Do not proceed if build has ANY errors or warnings. Return immediately to user.
 
