@@ -6,8 +6,8 @@ Purpose: Analyze marketplace inventory and generate Claude Code permission wildc
 Input: Marketplace inventory JSON (from scan-marketplace-inventory.sh) via stdin or --input file
 Output: JSON with generated permissions, statistics, and coverage analysis
 
-Note: Script permissions are NOT generated. The {baseDir} pattern in SKILL.md handles
-script invocation automatically - Claude resolves {baseDir} at runtime to the skill's
+Note: Script permissions are NOT generated. The relative path pattern in SKILL.md handles
+script invocation automatically - Claude resolves relative paths at runtime to the skill's
 mounted directory. No hardcoded script paths should be in settings files.
 
 Usage:
@@ -158,7 +158,7 @@ def build_bundle_summary(bundles: list[dict]) -> list[dict]:
 def generate_all_permissions(inventory: dict[str, Any]) -> dict[str, Any]:
     """Main function to generate all permission wildcards from inventory.
 
-    Note: Script permissions are NOT generated. The {baseDir} pattern handles this automatically.
+    Note: Script permissions are NOT generated. The relative path pattern handles this automatically.
     """
     bundles = inventory.get("bundles", [])
 
@@ -218,7 +218,7 @@ def generate_all_permissions(inventory: dict[str, Any]) -> dict[str, Any]:
         "coverage": {
             "skills_covered": f"{stats.get('total_skills', 0)} skills covered by {len(skill_wildcards)} bundle wildcards",
             "commands_covered": f"{stats.get('total_commands', 0)} commands covered by {len(command_bundle_wildcards)} bundle wildcards + {len(command_shortform)} short-form permissions",
-            "scripts_note": f"{total_scripts} scripts - handled by {{baseDir}} architecture (no permissions needed)"
+            "scripts_note": f"{total_scripts} scripts - handled by relative path architecture (no permissions needed)"
         }
     }
 
@@ -272,8 +272,8 @@ def format_text_output(result: dict[str, Any]) -> str:
     lines.append("")
 
     lines.append("SCRIPTS:")
-    lines.append("  Scripts are handled by {baseDir} architecture - no permissions needed.")
-    lines.append("  Claude resolves {baseDir} at runtime to skill's mounted directory.")
+    lines.append("  Scripts are handled by relative path architecture - no permissions needed.")
+    lines.append("  Claude resolves relative paths at runtime to skill's mounted directory.")
     lines.append("")
 
     coverage = result.get("coverage", {})
@@ -293,7 +293,7 @@ def main():
     # Load inventory
     inventory = load_inventory(args.input)
 
-    # Generate permissions (Skills and SlashCommands only - scripts use {baseDir})
+    # Generate permissions (Skills and SlashCommands only - scripts use relative paths)
     result = generate_all_permissions(inventory)
 
     # Output

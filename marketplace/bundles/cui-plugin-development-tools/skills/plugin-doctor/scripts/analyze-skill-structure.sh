@@ -44,20 +44,14 @@ UNREFERENCED_FILES=""
 
 if [ "$SKILL_EXISTS" = "true" ]; then
     # Find file references in SKILL.md
-    # Pattern 1: Read {baseDir}/path/to/file.md
-    # Pattern 2: bash {baseDir}/scripts/script.sh
-    # Pattern 3: Direct references like scripts/*.sh or references/*.md
+    # Pattern: Direct relative paths like scripts/*.sh, references/*.md, assets/*.*
+    # Note: Skills use relative paths from their directory (the old placeholder pattern is deprecated)
 
     CONTENT=$(cat "$SKILL_MD")
 
-    # Extract {baseDir}/... patterns
-    REFS_BASEDIR=$(echo "$CONTENT" | grep -o '{baseDir}/[a-zA-Z0-9_/-]*\.[a-z]*' | sed 's/{baseDir}\///' | sort -u || echo "")
-
     # Extract direct file references (scripts/*.sh, references/*.md, assets/*.*)
-    REFS_DIRECT=$(echo "$CONTENT" | grep -o '\(scripts\|references\|assets\)/[a-zA-Z0-9_.-]*\.[a-z]*' | sort -u || echo "")
-
-    # Combine all references
-    REFERENCED_FILES=$(echo -e "$REFS_BASEDIR\n$REFS_DIRECT" | sort -u | grep -v "^$")
+    # This is the standard pattern - skills use relative paths from their directory
+    REFERENCED_FILES=$(echo "$CONTENT" | grep -o '\(scripts\|references\|assets\)/[a-zA-Z0-9_.-]*\.[a-z]*' | sort -u || echo "")
 
     # Check each referenced file exists
     while IFS= read -r ref; do
