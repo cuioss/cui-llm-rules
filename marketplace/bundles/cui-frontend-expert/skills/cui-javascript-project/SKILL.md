@@ -9,6 +9,8 @@ allowed-tools:
 
 # JavaScript Project Structure and Build Standards
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 ## Overview
 
 This skill provides comprehensive standards for JavaScript project setup, structure, dependencies, and Maven integration in CUI projects. It covers directory layouts, package.json configuration, semantic versioning strategies, security management, ES module configuration, and frontend-maven-plugin integration for reproducible builds.

@@ -6,6 +6,8 @@ allowed-tools: Read, Edit, Write, Bash(gh:*), Grep, Glob, mcp__sonarqube__search
 
 # Sonar Workflow Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, and implementing fixes or suppressions.
 
 ## What This Skill Provides

@@ -6,6 +6,8 @@ allowed-tools: Read, Edit, Write, Bash(gh:*), Grep, Glob
 
 # PR Workflow Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Handles PR review comment workflows - fetching comments, triaging them, and generating appropriate responses.
 
 ## What This Skill Provides

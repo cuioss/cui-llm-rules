@@ -9,6 +9,8 @@ allowed-tools:
 
 # JavaScript Development Standards
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 ## Overview
 
 This skill provides comprehensive JavaScript development standards for CUI projects, covering modern JavaScript features (ES2022+), code quality practices, async programming patterns, and tooling configuration.

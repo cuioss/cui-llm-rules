@@ -9,6 +9,8 @@ allowed-tools:
 
 # JavaScript Unit Testing Standards
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 ## Overview
 
 This skill provides comprehensive Jest unit testing standards for CUI JavaScript projects, covering Jest configuration, test organization, component testing patterns, mocking strategies, and coverage requirements.

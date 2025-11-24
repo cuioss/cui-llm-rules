@@ -6,6 +6,8 @@ allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 
 # CUI Java Unit Testing Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Standards and patterns for writing high-quality unit tests in CUI Java projects using JUnit 5, the CUI test generator framework, and value object contract testing.
 
 ## Workflow

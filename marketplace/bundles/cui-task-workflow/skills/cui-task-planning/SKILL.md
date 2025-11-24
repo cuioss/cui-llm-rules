@@ -6,6 +6,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(gh:*), Skill, AskUserQuestion
 
 # CUI Task Planning Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Comprehensive task planning, execution, and review workflows for CUI projects. Provides three core workflows: **plan** (create task breakdowns), **execute** (implement tasks), and **review** (verify implementation readiness).
 
 ## What This Skill Provides

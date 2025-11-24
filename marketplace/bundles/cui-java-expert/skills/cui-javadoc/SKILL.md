@@ -6,6 +6,8 @@ allowed-tools: [Read, Edit, Write, Grep, Glob]
 
 # CUI JavaDoc Documentation Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Standards for writing high-quality JavaDoc documentation in CUI Java projects, ensuring consistency, completeness, and maintainability.
 
 ## Workflow

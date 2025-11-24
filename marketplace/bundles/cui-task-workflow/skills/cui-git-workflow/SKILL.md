@@ -6,6 +6,8 @@ allowed-tools: Read, Glob, Bash(git:*), Bash(rm:*), Bash(gh:*), Skill
 
 # CUI Git Workflow Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Provides git commit workflow following conventional commits specification. Includes artifact cleanup, commit formatting, and optional push/PR creation.
 
 ## What This Skill Provides

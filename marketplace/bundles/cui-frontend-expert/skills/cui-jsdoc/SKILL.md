@@ -9,6 +9,8 @@ allowed-tools:
 
 # JSDoc Documentation Standards
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 ## Overview
 
 Provides JSDoc documentation standards for CUI JavaScript projects covering functions, classes, modules, types, and web components.

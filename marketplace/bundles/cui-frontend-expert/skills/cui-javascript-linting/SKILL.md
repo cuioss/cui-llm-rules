@@ -9,6 +9,8 @@ allowed-tools:
 
 # JavaScript Linting and Formatting Standards
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 ## Overview
 
 This skill provides comprehensive ESLint, Prettier, and StyleLint configuration standards for CUI JavaScript projects, covering modern ESLint v9 flat configuration, Prettier formatting automation, comprehensive rule management, build integration, and CSS-in-JS linting for web components.

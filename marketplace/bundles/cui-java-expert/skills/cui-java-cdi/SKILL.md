@@ -6,6 +6,8 @@ allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 
 # CUI Java CDI Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Standards and patterns for CDI and Quarkus development in CUI projects. This skill provides comprehensive guidance on CDI dependency injection, Quarkus container configuration, testing practices, and native image optimization.
 
 ## Workflow

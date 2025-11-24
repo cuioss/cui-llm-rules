@@ -6,6 +6,8 @@ allowed-tools: [Read, Grep, Glob]
 
 # CUI Java Maintenance Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Standards for systematic Java code maintenance including violation detection, prioritization frameworks, and compliance verification.
 
 ## Purpose

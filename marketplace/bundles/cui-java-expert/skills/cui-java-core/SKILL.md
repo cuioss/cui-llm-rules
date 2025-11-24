@@ -6,6 +6,8 @@ allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 
 # CUI Java Core Development Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 Foundational Java development standards for all CUI projects, covering core patterns, null safety, Lombok usage, modern Java features, and the CUI logging framework.
 
 ## Workflow

@@ -21,6 +21,8 @@ standards:
 
 # Cypress E2E Testing Standards Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 ## Overview
 
 This skill provides comprehensive standards for Cypress End-to-End (E2E) testing in CUI projects. It extends base JavaScript testing standards with framework-specific adaptations designed for browser-based test automation scenarios.

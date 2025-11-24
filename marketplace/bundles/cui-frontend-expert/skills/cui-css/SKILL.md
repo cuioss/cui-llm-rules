@@ -9,6 +9,8 @@ allowed-tools:
 
 # CSS Development Standards
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
 ## Overview
 
 Provides modern CSS development standards for CUI projects, covering fundamentals, responsive design patterns, performance optimization, accessibility, and build tooling.
