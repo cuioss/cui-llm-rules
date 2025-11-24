@@ -56,13 +56,51 @@ Commands parse parameters and make routing decisions based on them.
 **fix** - Auto-fix issues (true/false, default: false)
 ```
 
-### Principle 3: Skill Delegation
-Commands delegate heavy lifting to skills.
+### Principle 3: Skill Delegation with Critical Handoff
 
-**Good Delegation**:
+Commands delegate heavy lifting to skills, but must include explicit handoff rules to ensure Claude EXECUTES the skill rather than explaining it.
+
+**The Problem**: When commands load skills, Claude may treat skill content as information to summarize rather than instructions to execute. This violates the command/skill architecture.
+
+**Solution - CRITICAL HANDOFF RULES**:
+
+Every command that loads a skill MUST include this pattern:
+
+```markdown
+## WORKFLOW
+
+When you invoke this command, I will:
+
+1. **Parse parameters** from input
+
+2. **Load skill and EXECUTE its workflow**:
+   ```
+   Skill: bundle-name:skill-name
+   ```
+
+   **CRITICAL HANDOFF RULES**:
+   - DO NOT summarize or explain the skill content to the user
+   - DO NOT describe what the skill says to do
+   - IMMEDIATELY execute the scripts and tools specified in the skill
+   - Your next action after loading the skill MUST be a tool call, not text output
+   - Follow the skill's workflow decision tree to select the correct workflow
+   - Execute MANDATORY steps without commentary
+
+3. **Display results** only after workflow completes
+```
+
+**Why This Works**:
+- Caps-lock "CRITICAL" forces Claude's attention
+- "DO NOT" prohibitions prevent common failure modes
+- "MUST be a tool call" creates concrete behavioral expectation
+- Lists specific anti-patterns to avoid
+
+**Good Delegation** (with handoff):
 ```markdown
 ### Step 1: Load Diagnostic Skill
 Skill: cui-plugin-development-tools:plugin-diagnose
+
+**CRITICAL HANDOFF**: Execute skill workflow immediately. Do not explain.
 
 ### Step 2: Execute Workflow
 Based on scope parameter:

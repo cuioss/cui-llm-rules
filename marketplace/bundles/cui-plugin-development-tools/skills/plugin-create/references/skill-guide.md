@@ -193,7 +193,19 @@ allowed-tools: Read  # or other tools if needed
 
 # Skill Name
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below.
+
 [Brief overview statement]
+
+## Workflow Decision Tree  (for execution skills)
+
+**MANDATORY**: Select workflow based on input and execute IMMEDIATELY.
+
+### If [condition A]
+→ **EXECUTE** Workflow 1 (jump to that section)
+
+### If [condition B]
+→ **EXECUTE** Workflow 2 (jump to that section)
 
 ## What This Skill Provides
 
@@ -221,6 +233,63 @@ OR
 
 [How to verify skill is working correctly]
 ```
+
+### EXECUTION MODE Directive
+
+**Purpose**: Tell Claude to EXECUTE the skill instructions rather than explaining them.
+
+**Required For**: All skills that have workflows to execute (diagnostic skills, automation skills).
+
+**Not Required For**: Pure reference skills (Pattern 10) that only provide documentation.
+
+**Pattern**:
+```markdown
+# Skill Name
+
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below.
+```
+
+**Why This Works**:
+- Placed immediately after title (high visibility)
+- "You are now executing" - action mode
+- "DO NOT explain" - prohibits common failure
+- "IMMEDIATELY begin" - forces action
+
+### MANDATORY Markers
+
+Use MANDATORY markers to ensure critical steps are executed:
+
+```markdown
+### Step 2: Run Diagnostic Script
+
+**MANDATORY**: Execute this script NOW before proceeding:
+```bash
+python3 scripts/analyze.py {target}
+```
+
+Do not continue to Step 3 until this completes successfully.
+```
+
+**When to Use**:
+- Script execution steps
+- Validation gates
+- Required tool invocations
+- Steps that must not be skipped
+
+### Resource Mode Labeling
+
+For skills with scripts and references, label each resource's mode:
+
+| Resource | Mode | Purpose |
+|----------|------|---------|
+| `analyze.py` | **EXECUTE** | Run to analyze components |
+| `README.md` | READ | Read for context if needed |
+| `patterns.md` | REFERENCE | Consult when specific pattern needed |
+
+**Mode Definitions**:
+- **EXECUTE**: Run this script/tool immediately as part of workflow
+- **READ**: Load this file's content into context
+- **REFERENCE**: Consult on-demand when specific information needed
 
 ### Minimal SKILL.md
 
@@ -526,17 +595,28 @@ standards/
 
 Before creating skill, verify:
 
+**Frontmatter**:
 - [ ] Name is kebab-case and descriptive
 - [ ] Description is <100 chars
-- [ ] Frontmatter uses comma-separated format (not arrays)
+- [ ] Uses `allowed-tools:` (not `tools:`) - comma-separated format
+
+**Structure**:
 - [ ] SKILL.md is 400-800 lines (not bloated)
 - [ ] References organized in appropriate directory
 - [ ] All resource paths use relative paths
 - [ ] No hardcoded paths
 - [ ] Progressive disclosure implemented
-- [ ] No CONTINUOUS IMPROVEMENT RULE
-- [ ] Tool access documented
 - [ ] Directory structure follows patterns
+
+**Execution Patterns** (for non-reference skills):
+- [ ] Has **EXECUTION MODE** directive after title
+- [ ] Has **Workflow Decision Tree** for routing
+- [ ] Critical steps marked with **MANDATORY**
+- [ ] Resources labeled with EXECUTE/READ/REFERENCE modes
+
+**Content**:
+- [ ] No CONTINUOUS IMPROVEMENT RULE (skills don't have this)
+- [ ] Tool access documented
 
 ## Common Pitfalls
 
@@ -575,6 +655,17 @@ Before creating skill, verify:
 ❌ **Wrong**: Skill has CONTINUOUS IMPROVEMENT RULE
 
 ✅ **Correct**: Skills don't have this (only agents/commands)
+
+### Pitfall 7: Missing Execution Directive
+
+❌ **Wrong**: Skill loaded by command, Claude explains it instead of executing
+
+✅ **Correct**: Skill has EXECUTION MODE directive that forces action:
+```markdown
+# Skill Name
+
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions. IMMEDIATELY begin the workflow below.
+```
 
 ## Example: Creating Standards Skill
 

@@ -111,6 +111,27 @@ elif [ "$LINE_COUNT" -gt 300 ]; then
     BLOAT_CLASS="LARGE"
 fi
 
+# Check for EXECUTION MODE directive (required for executable skills)
+HAS_EXECUTION_MODE="false"
+if grep -qi "EXECUTION MODE" "$FILE_PATH"; then
+    HAS_EXECUTION_MODE="true"
+fi
+
+# Check for Workflow Decision Tree (for skills)
+HAS_WORKFLOW_TREE="false"
+if grep -qi "Workflow Decision Tree" "$FILE_PATH"; then
+    HAS_WORKFLOW_TREE="true"
+fi
+
+# Check for MANDATORY markers
+MANDATORY_COUNT=$(grep -c "\\*\\*MANDATORY\\*\\*" "$FILE_PATH" 2>/dev/null || echo "0")
+
+# Check for CRITICAL HANDOFF RULES (required for commands loading skills)
+HAS_HANDOFF_RULES="false"
+if grep -qi "CRITICAL HANDOFF" "$FILE_PATH"; then
+    HAS_HANDOFF_RULES="true"
+fi
+
 # Check Rule 6: Task tool prohibition in agents
 RULE_6_VIOLATION="false"
 if [ "$COMPONENT_TYPE" == "agent" ] && [ "$HAS_TOOLS" == "true" ]; then
@@ -173,6 +194,12 @@ cat <<EOF
   },
   "bloat": {
     "classification": "$BLOAT_CLASS"
+  },
+  "execution_patterns": {
+    "has_execution_mode": $HAS_EXECUTION_MODE,
+    "has_workflow_tree": $HAS_WORKFLOW_TREE,
+    "mandatory_marker_count": $MANDATORY_COUNT,
+    "has_handoff_rules": $HAS_HANDOFF_RULES
   },
   "rules": {
     "rule_6_violation": $RULE_6_VIOLATION,

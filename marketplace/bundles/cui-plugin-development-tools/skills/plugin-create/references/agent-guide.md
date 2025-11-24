@@ -23,7 +23,36 @@ Comprehensive guide for creating well-structured Claude Code agents following ma
 
 ## Agent Design Principles
 
-### Principle 1: Focused Executors
+### Principle 1: MANDATORY Markers for Critical Steps
+
+Agent workflows must use MANDATORY markers to ensure critical steps are executed, not skipped.
+
+**Why**: When agents are launched via Task tool, Claude may treat instructions as suggestions. MANDATORY markers force attention to essential steps.
+
+**Pattern**:
+```markdown
+### Step 2: Run Diagnostic Script
+
+**MANDATORY**: Execute this script NOW before proceeding:
+```bash
+python3 scripts/analyze.py {target}
+```
+
+Do not continue to Step 3 until this completes successfully.
+```
+
+**When to Use MANDATORY**:
+- Script execution steps
+- Validation gates
+- Required tool invocations
+- Steps that must not be skipped
+
+**Avoid Overuse**:
+- Don't mark every step MANDATORY
+- Reserve for truly critical steps
+- 2-3 MANDATORY markers per workflow is typical
+
+### Principle 2: Focused Executors
 Agents do ONE task well. Don't create "swiss army knife" agents.
 
 **Good** (Focused):
@@ -63,6 +92,23 @@ Grep for patterns, Read matching files
 ### Step 3: Generate Report
 Format findings as JSON
 ```
+
+## Resource Mode Labeling
+
+Agents with scripts and references should clearly label each resource's mode:
+
+| Resource | Mode | Purpose |
+|----------|------|---------|
+| `analyze.py` | **EXECUTE** | Run to analyze components |
+| `README.md` | READ | Read for context if needed |
+| `patterns.md` | REFERENCE | Consult when specific pattern needed |
+
+**Mode Definitions**:
+- **EXECUTE**: Run this script/tool immediately as part of workflow
+- **READ**: Load this file's content into context
+- **REFERENCE**: Consult on-demand when specific information needed
+
+This prevents ambiguity about whether to "run" or "read" a resource.
 
 ## Tool Selection Guidelines
 
