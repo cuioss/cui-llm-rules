@@ -118,6 +118,24 @@ test_rule6_violation() {
         "true"
 }
 
+test_version_section() {
+    echo ""
+    echo "=== Testing version section detection ==="
+    echo ""
+
+    run_test "version-section-detected" \
+        "$FIXTURES_DIR/version-section-violation.md" \
+        "agent" \
+        ".quality.has_version_section" \
+        "true"
+
+    run_test "no-version-section-in-valid-agent" \
+        "$FIXTURES_DIR/valid-agent.md" \
+        "agent" \
+        ".quality.has_version_section" \
+        "false"
+}
+
 # ============================================================================
 # MAIN TEST EXECUTION
 # ============================================================================
@@ -149,6 +167,7 @@ main() {
     test_valid_agent
     test_bloated_command
     test_rule6_violation
+    test_version_section
 
     # Print summary
     echo ""

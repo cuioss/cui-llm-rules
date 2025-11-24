@@ -354,12 +354,3 @@ Standards in this skill are authoritative for:
 
 When standards need updates, modify the files in the `standards/` directory and the skill will automatically reflect the changes when next activated.
 
-## Version
-
-Version: 0.3.0 (Added Execute Maven Build workflow)
-
-Part of: cui-maven bundle
-
----
-
-*This skill consolidates Maven standards from multiple sources into a single, comprehensive knowledge base for CUI Maven workflows.*

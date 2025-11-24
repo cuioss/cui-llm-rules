@@ -24,6 +24,7 @@ Output: JSON with structural analysis including:
   - bloat.classification: NORMAL, LARGE, BLOATED, or CRITICAL
   - execution_patterns: EXECUTION MODE, workflow tree, MANDATORY markers
   - rules: Rule 6 and Rule 7 violation detection
+  - quality.has_version_section: Forbidden version section detection
 
 Exit codes:
   0 - Success
@@ -156,7 +157,7 @@ if grep -qi "Workflow Decision Tree" "$FILE_PATH"; then
 fi
 
 # Check for MANDATORY markers
-MANDATORY_COUNT=$(grep -c "\\*\\*MANDATORY\\*\\*" "$FILE_PATH" 2>/dev/null || echo "0")
+MANDATORY_COUNT=$(grep -c "\\*\\*MANDATORY\\*\\*" "$FILE_PATH" 2>/dev/null | tr -d '\n' || echo "0")
 
 # Check for CRITICAL HANDOFF RULES (required for commands loading skills)
 HAS_HANDOFF_RULES="false"
@@ -183,6 +184,13 @@ if [ "$COMPONENT_TYPE" == "agent" ] && [ "$HAS_TOOLS" == "true" ]; then
             RULE_7_VIOLATION="true"
         fi
     fi
+fi
+
+# Check for forbidden version sections (## Version, ## Version History)
+# These are artifacts that should not appear in marketplace components
+HAS_VERSION_SECTION="false"
+if grep -qE "^## Version( History)?$" "$FILE_PATH"; then
+    HAS_VERSION_SECTION="true"
 fi
 
 # Output JSON
@@ -236,6 +244,9 @@ cat <<EOF
   "rules": {
     "rule_6_violation": $RULE_6_VIOLATION,
     "rule_7_violation": $RULE_7_VIOLATION
+  },
+  "quality": {
+    "has_version_section": $HAS_VERSION_SECTION
   }
 }
 EOF

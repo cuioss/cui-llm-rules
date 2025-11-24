@@ -278,7 +278,3 @@ At workflow end:
 - **plugin-fix skill** - Fix application patterns
 - **component-update-guide.md** - Component updates
 
-## Version History
-
-Consolidated from bundle-orchestration-compliance skill.
-Part of plugin-maintain skill.

@@ -231,12 +231,3 @@ When tool usage patterns need updates, modify files in `standards/` directory an
 - Both report violations as CRITICAL issues
 - Both provide remediation guidance
 
-## Version
-
-Version: 1.0.0 (Initial release)
-
-Part of: cui-utilities bundle
-
----
-
-*This skill eliminates user prompts from all agents and commands by providing comprehensive non-prompting tool usage patterns for file operations.*

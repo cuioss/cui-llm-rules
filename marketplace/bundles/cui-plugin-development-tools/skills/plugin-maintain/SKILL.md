@@ -441,6 +441,3 @@ Each workflow handles errors:
 - **plugin-fix skill** - Apply fixes to diagnosed issues
 - **plugin-create skill** - Create new components
 
-## Version
-
-Part of cui-plugin-development-tools bundle.

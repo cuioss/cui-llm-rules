@@ -302,14 +302,3 @@ For more information on CUI standards:
 - [CUI AsciiDoc Standards](../../standards/documentation/asciidoc-standards.adoc) - AsciiDoc formatting standards
 - [CUI General Documentation Standards](../../standards/documentation/general-standard.adoc) - Core documentation principles
 
-## Version
-
-Current version: 1.0.0
-
-## Author
-
-CUI Development Team
-
-## License
-
-Part of CUI development standards

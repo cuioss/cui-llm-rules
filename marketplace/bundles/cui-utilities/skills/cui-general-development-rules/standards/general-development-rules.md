@@ -544,12 +544,3 @@ Following these rules ensures:
 - **cui-task-workflow skills** - Development workflow integration
 - **cui-plugin-development-tools skills** - Creating components following these principles
 
-## Version
-
-Version: 1.0.0 (Migrated from standards/process/general.adoc)
-
-Part of: cui-utilities bundle
-
----
-
-*These rules apply to ALL development work in CUI projects. Load this skill at the start of any development activity to ensure compliance with core principles.*
