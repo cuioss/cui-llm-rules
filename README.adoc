@@ -305,11 +305,9 @@ See xref:marketplace/bundles/cui-plugin-development-tools/README.md[Plugin Devel
 
 * Individual bundle READMEs in `marketplace/bundles/*/README.md`
 * Marketplace overview: `marketplace/README.md`
-* This project: `CLAUDE.md` (project-specific Claude instructions)
 
 === Getting Help
 
 . Review relevant bundle documentation
 . Check command descriptions and examples
-. Use `scan-marketplace-inventory.sh` script to discover components
 . Report issues at https://github.com/cuioss/cui-llm-rules/issues
