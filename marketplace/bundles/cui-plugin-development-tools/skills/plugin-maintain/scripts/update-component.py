@@ -14,6 +14,47 @@ import sys
 from pathlib import Path
 
 
+def show_help():
+    """Display help message."""
+    help_text = """
+Usage: echo '{"updates": [...]}' | update-component.py <component_path>
+
+Applies updates to a component file with backup support.
+
+Arguments:
+  component_path    Path to the component file to update
+
+Input (JSON via stdin):
+  {"updates": [
+    {"type": "frontmatter", "field": "description", "value": "New description"},
+    {"type": "section", "section": "Workflow", "content": "New content"},
+    {"type": "replace", "old": "old text", "new": "new text"},
+    {"type": "append", "text": "Content to append"}
+  ]}
+
+Update types:
+  - frontmatter: Update or add a frontmatter field
+  - section: Update or add a markdown section
+  - replace: Replace first occurrence of text
+  - append: Append content to end of file
+
+Output: JSON with update results including:
+  - success: Boolean
+  - updates_applied: Count of successful updates
+  - changes: Array of change descriptions
+  - backup_created: Path to backup file
+
+Exit codes:
+  0 - Updates applied successfully
+  1 - Error (file not found, invalid JSON)
+
+Examples:
+  echo '{"updates": [{"type": "frontmatter", "field": "name", "value": "new-name"}]}' | update-component.py ./agents/my-agent.md
+"""
+    print(help_text.strip())
+    sys.exit(0)
+
+
 def parse_frontmatter(content: str) -> tuple[dict | None, int, int]:
     """Parse YAML frontmatter. Returns (dict, start_line, end_line)."""
     if not content.startswith('---'):
@@ -192,9 +233,12 @@ def apply_updates(component_path: str, updates: list) -> dict:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        show_help()
+
     if len(sys.argv) < 2:
         print(json.dumps({
-            'error': 'Usage: echo \'{"updates": [...]}\' | update-component.py <component_path>'
+            'error': 'Usage: echo \'{"updates": [...]}\' | update-component.py <component_path>. Use --help for details.'
         }))
         sys.exit(1)
 

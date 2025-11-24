@@ -9,6 +9,38 @@ Output: Formatted YAML frontmatter
 import sys
 import json
 
+
+def show_help():
+    """Display help message."""
+    help_text = """
+Usage: generate-frontmatter.py <component_type> <answers_json>
+
+Generates YAML frontmatter for marketplace components.
+
+Arguments:
+  component_type  Type of component: agent, command, or skill
+  answers_json    JSON string with component configuration
+
+Required JSON fields by type:
+  agent:   name, description, tools (array or comma-separated)
+  command: name, description
+  skill:   name, description (optional: allowed-tools, requirements)
+
+Output: Formatted YAML frontmatter with --- delimiters
+
+Exit codes:
+  0 - Success (frontmatter printed)
+  1 - Error (invalid type, missing fields, invalid JSON)
+
+Examples:
+  generate-frontmatter.py agent '{"name": "my-agent", "description": "Does things", "tools": ["Read", "Write"]}'
+  generate-frontmatter.py command '{"name": "my-cmd", "description": "A command"}'
+  generate-frontmatter.py skill '{"name": "my-skill", "description": "A skill"}'
+"""
+    print(help_text.strip())
+    sys.exit(0)
+
+
 def generate_agent_frontmatter(answers):
     """Generate frontmatter for agent component."""
     frontmatter = {
@@ -108,8 +140,11 @@ def generate_frontmatter(component_type, answers_json):
     return format_frontmatter(frontmatter_dict)
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        show_help()
+
     if len(sys.argv) != 3:
-        print("Error: Usage: generate-frontmatter.py <component_type> <answers_json>", file=sys.stderr)
+        print("Error: Usage: generate-frontmatter.py <component_type> <answers_json>. Use --help for details.", file=sys.stderr)
         sys.exit(1)
 
     component_type = sys.argv[1]

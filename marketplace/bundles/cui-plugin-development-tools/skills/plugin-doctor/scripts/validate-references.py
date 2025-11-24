@@ -14,6 +14,41 @@ from pathlib import Path
 from typing import Dict, List, Set
 
 
+def show_help():
+    """Display help message."""
+    help_text = """
+Usage: validate-references.py <file_path>
+
+Validates plugin references in agent/command/skill markdown files.
+Uses pre-filtering to reduce false positives from documentation examples.
+
+Arguments:
+  file_path    Path to the markdown file to analyze
+
+Output: JSON with detected references including:
+  - file_type: Detected component type (agent, command, skill)
+  - total_lines: Total lines in file
+  - references: Array of detected references with type, line, and raw_text
+  - pre_filter.excluded_lines_count: Lines excluded by pre-filtering
+  - pre_filter.exclusion_rate: Percentage of lines excluded
+
+Reference types detected:
+  - SlashCommand: /command-name invocations
+  - Task: subagent_type declarations
+  - Skill: Skill: bundle:skill-name invocations
+
+Exit codes:
+  0 - Success
+  1 - Error (missing argument, file not found)
+
+Examples:
+  validate-references.py marketplace/bundles/cui-java-expert/agents/java-analyzer.md
+  validate-references.py ./commands/my-command.md
+"""
+    print(help_text.strip())
+    sys.exit(0)
+
+
 def detect_file_type(file_path: str) -> str:
     """Detect if file is agent, command, or skill."""
     if "/agents/" in file_path:
@@ -173,8 +208,11 @@ def extract_references(content: str, excluded_lines: Set[int]) -> List[Dict]:
 
 def main():
     if len(sys.argv) < 2:
-        print(json.dumps({"error": "File path required"}), file=sys.stderr)
+        print(json.dumps({"error": "File path required. Use --help for usage."}), file=sys.stderr)
         sys.exit(1)
+
+    if sys.argv[1] in ("-h", "--help"):
+        show_help()
 
     file_path = sys.argv[1]
 

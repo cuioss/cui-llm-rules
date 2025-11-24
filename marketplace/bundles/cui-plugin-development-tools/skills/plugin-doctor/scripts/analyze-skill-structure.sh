@@ -5,10 +5,38 @@
 
 set -euo pipefail
 
+# --help support
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") <skill_dir>
+
+Analyzes skill directory structure and validates file references.
+
+Arguments:
+  skill_dir    Path to the skill directory containing SKILL.md
+
+Output: JSON with structure analysis including:
+  - skill_md.exists: Whether SKILL.md exists
+  - skill_md.yaml_valid: Whether frontmatter is valid YAML
+  - standards_files.missing_files: Files referenced but not found
+  - standards_files.unreferenced_files: Files existing but not referenced
+  - structure_score: Quality score 0-100
+
+Exit codes:
+  0 - Success
+  1 - Error (missing argument, directory not found)
+
+Examples:
+  $(basename "$0") marketplace/bundles/cui-java-expert/skills/cui-java-core
+  $(basename "$0") ./skills/my-skill
+EOF
+    exit 0
+fi
+
 SKILL_DIR="${1:-}"
 
 if [ -z "$SKILL_DIR" ]; then
-    echo '{"error": "Skill directory required"}' >&2
+    echo '{"error": "Skill directory required. Use --help for usage."}' >&2
     exit 1
 fi
 

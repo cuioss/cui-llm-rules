@@ -13,6 +13,43 @@ import sys
 from pathlib import Path
 
 
+def show_help():
+    """Display help message."""
+    help_text = """
+Usage: analyze-component.py <component_path>
+
+Analyzes a marketplace component for quality and improvement opportunities.
+
+Arguments:
+  component_path    Path to the component file (agent, command, or SKILL.md)
+
+Analysis performed:
+  - Frontmatter validation (presence, required fields)
+  - Section completeness check
+  - Bloat detection (line count thresholds)
+  - Duplicate content detection
+  - Tool compliance (Rule 6 violations)
+
+Output: JSON with analysis results including:
+  - component_type: Detected type (agent, command, skill)
+  - quality_score: Score 0-100
+  - issues: Array of detected problems with severity
+  - suggestions: Array of improvement recommendations
+  - stats: Line counts and section counts
+
+Exit codes:
+  0 - Analysis completed
+  1 - Error (missing argument)
+
+Examples:
+  analyze-component.py ./agents/my-agent.md
+  analyze-component.py ./commands/my-command.md
+  analyze-component.py ./skills/my-skill/SKILL.md
+"""
+    print(help_text.strip())
+    sys.exit(0)
+
+
 def parse_frontmatter(content: str) -> tuple[dict | None, str]:
     """Parse YAML frontmatter from content. Returns (frontmatter_dict, body)."""
     if not content.startswith('---'):
@@ -260,8 +297,11 @@ def analyze_component(component_path: str) -> dict:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        show_help()
+
     if len(sys.argv) < 2:
-        print(json.dumps({'error': 'Usage: analyze-component.py <component_path>'}))
+        print(json.dumps({'error': 'Usage: analyze-component.py <component_path>. Use --help for details.'}))
         sys.exit(1)
 
     component_path = sys.argv[1]

@@ -5,11 +5,43 @@
 
 set -euo pipefail
 
+# --help support
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") <file_path> [component_type]
+
+Analyzes markdown file structure, frontmatter, and compliance with standards.
+
+Arguments:
+  file_path       Path to the markdown file to analyze
+  component_type  Optional: agent, command, skill, or auto (default: auto)
+
+Output: JSON with structural analysis including:
+  - file_type: Detected component type
+  - metrics.line_count: Total lines in file
+  - frontmatter: Presence and validity of YAML frontmatter
+  - continuous_improvement_rule: CI rule presence and pattern
+  - bloat.classification: NORMAL, LARGE, BLOATED, or CRITICAL
+  - execution_patterns: EXECUTION MODE, workflow tree, MANDATORY markers
+  - rules: Rule 6 and Rule 7 violation detection
+
+Exit codes:
+  0 - Success
+  1 - Error (missing argument, file not found)
+
+Examples:
+  $(basename "$0") marketplace/bundles/cui-java-expert/agents/java-analyzer.md agent
+  $(basename "$0") ./commands/my-command.md command
+  $(basename "$0") ./skills/my-skill/SKILL.md
+EOF
+    exit 0
+fi
+
 FILE_PATH="${1:-}"
 COMPONENT_TYPE="${2:-auto}"
 
 if [ -z "$FILE_PATH" ]; then
-    echo '{"error": "File path required"}' >&2
+    echo '{"error": "File path required. Use --help for usage."}' >&2
     exit 1
 fi
 

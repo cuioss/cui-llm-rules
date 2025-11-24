@@ -14,6 +14,45 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 
+def show_help():
+    """Display help message."""
+    help_text = """
+Usage: check-duplication.py <skill_path> <content_file>
+
+Checks for duplicate knowledge when adding content to a skill.
+
+Arguments:
+  skill_path      Path to the skill directory
+  content_file    Path to the new content file to check
+
+Duplication detection:
+  - Compares normalized text (no code blocks, markdown stripped)
+  - Identifies sections with >60% similarity
+  - Overall similarity threshold: 30% triggers detection
+
+Output: JSON with duplication analysis including:
+  - duplication_detected: Boolean
+  - duplication_percentage: Highest overlap percentage
+  - duplicate_files: Array of existing files with overlap
+  - recommendation: proceed, consolidate, or skip
+
+Recommendations:
+  - proceed: <30% overlap, safe to add
+  - consolidate: 40-70% overlap, merge with existing
+  - skip: >70% overlap, content already exists
+
+Exit codes:
+  0 - Analysis completed
+  1 - Error (missing arguments)
+
+Examples:
+  check-duplication.py ./skills/my-skill ./new-content.md
+  check-duplication.py marketplace/bundles/cui-java-expert/skills/cui-java-core ./fetched.md
+"""
+    print(help_text.strip())
+    sys.exit(0)
+
+
 def normalize_text(text: str) -> str:
     """Normalize text for comparison."""
     # Remove code blocks
@@ -170,9 +209,12 @@ def check_duplication(skill_path: str, content_file: str) -> dict:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        show_help()
+
     if len(sys.argv) < 3:
         print(json.dumps({
-            'error': 'Usage: check-duplication.py <skill_path> <content_file>'
+            'error': 'Usage: check-duplication.py <skill_path> <content_file>. Use --help for details.'
         }))
         sys.exit(1)
 

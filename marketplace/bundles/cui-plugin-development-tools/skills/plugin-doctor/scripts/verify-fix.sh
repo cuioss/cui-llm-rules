@@ -5,11 +5,49 @@
 
 set -euo pipefail
 
+# --help support
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") <fix_type> <component_path>
+
+Verifies that a fix was successfully applied by re-running relevant diagnostics.
+
+Arguments:
+  fix_type        Type of fix to verify (see supported types below)
+  component_path  Path to the component file that was fixed
+
+Supported fix types:
+  missing-frontmatter    Verify frontmatter was added
+  missing-name-field     Verify name field was added
+  missing-description-field  Verify description field was added
+  missing-tools-field    Verify tools field was added
+  array-syntax-tools     Verify array syntax was converted
+  rule-6-violation       Verify Task tool was removed
+  trailing-whitespace    Verify trailing whitespace was removed
+  pattern-22-violation   Verify self-update patterns were removed
+  unused-tool-declared   Verify unused tools were removed
+
+Output: JSON with verification result including:
+  - verified: Whether verification completed
+  - issue_resolved: Whether the issue was actually fixed
+  - details: Human-readable explanation
+
+Exit codes:
+  0 - Verification completed (check issue_resolved for result)
+  1 - Error (missing arguments, file not found)
+
+Examples:
+  $(basename "$0") rule-6-violation ./agents/my-agent.md
+  $(basename "$0") trailing-whitespace ./commands/my-command.md
+EOF
+    exit 0
+fi
+
 FIX_TYPE="${1:-}"
 COMPONENT_PATH="${2:-}"
 
 if [ -z "$FIX_TYPE" ]; then
-    echo '{"verified": false, "error": "Fix type required"}' >&2
+    echo '{"verified": false, "error": "Fix type required. Use --help for usage."}' >&2
     exit 1
 fi
 

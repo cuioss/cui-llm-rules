@@ -5,10 +5,40 @@
 
 set -euo pipefail
 
+# --help support
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") <file_path>
+
+Analyzes tool declarations vs actual usage in agents and commands.
+
+Arguments:
+  file_path    Path to the agent or command markdown file
+
+Output: JSON with tool coverage analysis including:
+  - tool_coverage.declared_count: Number of tools declared in frontmatter
+  - tool_coverage.used_count: Number of declared tools actually used
+  - tool_coverage.missing_tools: Tools used but not declared
+  - tool_coverage.unused_tools: Tools declared but not used
+  - tool_coverage.tool_fit_score: Score 0-100
+  - tool_coverage.rating: Excellent, Good, Needs improvement, or Poor
+  - critical_violations: Rule 6 (Task tool), Rule 7 (Maven), backup patterns
+
+Exit codes:
+  0 - Success
+  1 - Error (missing argument, file not found, no frontmatter)
+
+Examples:
+  $(basename "$0") marketplace/bundles/cui-java-expert/agents/java-analyzer.md
+  $(basename "$0") ./agents/my-agent.md
+EOF
+    exit 0
+fi
+
 FILE_PATH="${1:-}"
 
 if [ -z "$FILE_PATH" ]; then
-    echo '{"error": "File path required"}' >&2
+    echo '{"error": "File path required. Use --help for usage."}' >&2
     exit 1
 fi
 

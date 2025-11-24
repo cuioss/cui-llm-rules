@@ -10,6 +10,48 @@ import sys
 import json
 import re
 
+
+def show_help():
+    """Display help message."""
+    help_text = """
+Usage: validate-component.py <file_path> <component_type>
+
+Validates marketplace component structure and compliance.
+
+Arguments:
+  file_path       Path to the component markdown file
+  component_type  Type: agent, command, or skill
+
+Validation checks:
+  Frontmatter:
+    - Presence and valid YAML syntax
+    - Required fields: name, description
+    - Tools field for agents (comma-separated, not array)
+    - Rule 6: Agents cannot use Task tool
+
+  Content structure:
+    - Required sections per component type
+    - CONTINUOUS IMPROVEMENT RULE presence
+    - Pattern 22 (self-invocation) detection for agents
+
+Output: JSON with validation results including:
+  - valid: Boolean overall validity
+  - errors: Array of critical issues
+  - warnings: Array of non-critical issues
+
+Exit codes:
+  0 - Validation passed (valid=true)
+  1 - Validation failed or error
+
+Examples:
+  validate-component.py ./agents/my-agent.md agent
+  validate-component.py ./commands/my-command.md command
+  validate-component.py ./skills/my-skill/SKILL.md skill
+"""
+    print(help_text.strip())
+    sys.exit(0)
+
+
 def parse_simple_yaml(yaml_text):
     """Parse simple YAML (key: value pairs only) without external dependencies."""
     result = {}
@@ -384,12 +426,15 @@ def validate_component(file_path, component_type):
     }
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        show_help()
+
     if len(sys.argv) != 3:
         print(json.dumps({
             "valid": False,
             "errors": [{
                 "type": "usage_error",
-                "message": "Usage: validate-component.py <file_path> <component_type>"
+                "message": "Usage: validate-component.py <file_path> <component_type>. Use --help for details."
             }],
             "warnings": []
         }))

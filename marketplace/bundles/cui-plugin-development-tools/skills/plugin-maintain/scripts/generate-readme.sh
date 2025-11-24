@@ -7,10 +7,40 @@
 
 set -euo pipefail
 
+# --help support
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    cat <<EOF
+Usage: $(basename "$0") <bundle_path>
+
+Generates a README.md file content from bundle inventory.
+
+Arguments:
+  bundle_path    Path to the bundle directory (must contain .claude-plugin/plugin.json)
+
+Output: JSON with generated README including:
+  - bundle_name: Name from plugin.json
+  - readme_generated: Whether generation succeeded
+  - components.commands: Number of commands found
+  - components.agents: Number of agents found
+  - components.skills: Number of skills found
+  - readme_content: Generated markdown content
+  - commands/agents/skills: Arrays with name and description for each
+
+Exit codes:
+  0 - Success
+  1 - Error (missing argument, directory/plugin.json not found)
+
+Examples:
+  $(basename "$0") marketplace/bundles/cui-java-expert
+  $(basename "$0") ./bundles/my-bundle
+EOF
+    exit 0
+fi
+
 BUNDLE_PATH="${1:-}"
 
 if [ -z "$BUNDLE_PATH" ]; then
-    echo '{"error": "Usage: generate-readme.sh <bundle_path>"}'
+    echo '{"error": "Bundle path required. Use --help for usage."}'
     exit 1
 fi
 
