@@ -73,9 +73,13 @@ Unified task planning standards for three planning scenarios:
    - Local file → Use Read tool
 
 3. **Analyze Issue Content**
-   Run analysis script:
+   Resolve and run analysis script:
    ```
-   python3 scripts/create-task-breakdown.py {issue-file}
+   Skill: cui-utilities:script-runner
+   Resolve: cui-task-workflow:cui-task-planning/scripts/create-task-breakdown.py
+   ```
+   ```bash
+   python3 {resolved_path} {issue-file}
    ```
 
    Script outputs JSON with task structure:
@@ -116,7 +120,11 @@ Unified task planning standards for three planning scenarios:
 
 1. **Parse Plan File**
    ```
-   python3 scripts/track-task-progress.py {plan-file}
+   Skill: cui-utilities:script-runner
+   Resolve: cui-task-workflow:cui-task-planning/scripts/track-task-progress.py
+   ```
+   ```bash
+   python3 {resolved_path} {plan-file}
    ```
 
    Script outputs JSON with progress state:
@@ -150,7 +158,11 @@ Unified task planning standards for three planning scenarios:
 
 5. **Verify Acceptance Criteria**
    ```
-   python3 scripts/validate-acceptance.py {plan-file} --task {id}
+   Skill: cui-utilities:script-runner
+   Resolve: cui-task-workflow:cui-task-planning/scripts/validate-acceptance.py
+   ```
+   ```bash
+   python3 {resolved_path} {plan-file} --task {id}
    ```
 
 6. **Return Completion Report**

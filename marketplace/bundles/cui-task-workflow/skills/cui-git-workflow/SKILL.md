@@ -86,9 +86,13 @@ If custom message provided:
 - Use provided message
 
 If no message:
-- Analyze diff using script:
+- Resolve and analyze diff using script:
   ```
-  python3 scripts/format-commit-message.py --analyze <diff-file>
+  Skill: cui-utilities:script-runner
+  Resolve: cui-task-workflow:cui-git-workflow/scripts/format-commit-message.py
+  ```
+  ```bash
+  python3 {resolved_path} --analyze <diff-file>
   ```
 - Generate message following standards
 

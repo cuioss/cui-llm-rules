@@ -111,10 +111,15 @@ The skill returns JSON with all marketplace resources (bundles, agents, commands
 
 #### Step 3: Generate Permission Wildcards
 
-Pass the inventory JSON to the wildcard generator script:
+Resolve script path:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-utilities:permission-management/scripts/generate-permission-wildcards.py
+```
 
+Pass the inventory JSON to the wildcard generator script:
 ```bash
-echo '<inventory-json>' | python3 scripts/generate-permission-wildcards.py --format json
+echo '<inventory-json>' | python3 {resolved_path} --format json
 ```
 
 The script analyzes inventory and outputs:

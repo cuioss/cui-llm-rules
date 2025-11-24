@@ -134,8 +134,15 @@ Use this workflow when:
 
 ### Step 2: Parse Build Output
 
+Resolve script path:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-maven:cui-maven-rules/scripts/parse-maven-output.py
+```
+
+Execute:
 ```bash
-python3 scripts/parse-maven-output.py \
+python3 {resolved_path} \
     --log target/maven-build.log \
     --mode {output_mode}
 ```

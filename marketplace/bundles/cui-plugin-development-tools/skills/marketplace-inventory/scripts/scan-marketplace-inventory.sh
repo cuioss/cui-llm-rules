@@ -398,8 +398,10 @@ for bundle_dir in "${BUNDLE_DIRS[@]}"; do
         first_script=true
 
         while IFS= read -r -d '' script_file; do
-            # Extract script info
-            script_name=$(basename "$script_file" .sh)
+            # Extract script info - handle both .sh and .py extensions
+            script_basename=$(basename "$script_file")
+            script_name="${script_basename%.*}"
+            script_ext="${script_basename##*.}"
             script_dir=$(dirname "$script_file")
             skill_dir=$(dirname "$script_dir")
             skill_name=$(basename "$skill_dir")
@@ -411,12 +413,19 @@ for bundle_dir in "${BUNDLE_DIRS[@]}"; do
 
             # Generate three path formats
             relative_path="${script_file#$PWD/}"
-            runtime_mount="./.claude/skills/$skill_name/scripts/$script_name.sh"
+            runtime_mount="./.claude/skills/$skill_name/scripts/$script_basename"
+
+            # Determine script type
+            script_type="bash"
+            if [ "$script_ext" = "py" ]; then
+                script_type="python"
+            fi
 
             SCRIPTS_JSON="${SCRIPTS_JSON}
         {
           \"name\": \"$script_name\",
           \"skill\": \"$skill_name\",
+          \"type\": \"$script_type\",
           \"path_formats\": {
             \"runtime\": \"$runtime_mount\",
             \"relative\": \"$relative_path\",
@@ -425,7 +434,7 @@ for bundle_dir in "${BUNDLE_DIRS[@]}"; do
         }"
 
             SCRIPT_COUNT=$((SCRIPT_COUNT + 1))
-        done < <(find "$bundle_dir/skills" -type f -name "*.sh" -path "*/scripts/*.sh" -print0 2>/dev/null)
+        done < <(find "$bundle_dir/skills" -type f \( -name "*.sh" -o -name "*.py" \) -path "*/scripts/*" -print0 2>/dev/null)
 
         SCRIPTS_JSON="${SCRIPTS_JSON}
       ]"

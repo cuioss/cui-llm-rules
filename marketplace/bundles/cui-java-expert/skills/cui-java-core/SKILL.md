@@ -432,18 +432,24 @@ Analyze LOGGER usage in Java files and detect violations of CUI logging standard
    ```
    Or use provided file path directly.
 
-2. **Run Violation Analysis Script**
-   ```bash
-   scripts/analyze-logging-violations.py --directory {target}
+2. **Resolve Script Path**
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-java-expert:cui-java-core/scripts/analyze-logging-violations.py
    ```
 
-3. **Parse Results**
+3. **Run Violation Analysis Script**
+   ```bash
+   python3 {resolved_path} --directory {target}
+   ```
+
+4. **Parse Results**
    The script returns JSON with:
    - `total_statements`: Count of LOGGER calls analyzed
    - `violations`: List of violations with file, line, type
    - `summary`: Counts by violation type
 
-4. **Generate Report**
+5. **Generate Report**
    ```
    ╔════════════════════════════════════════════════════════════╗
    ║           Logging Violations Report                        ║
@@ -521,12 +527,18 @@ Generate AsciiDoc documentation for LogMessages holder classes.
    ```
    Fail fast if file doesn't exist.
 
-2. **Run Documentation Script**
-   ```bash
-   scripts/document-logrecord.py --holder {holder_class} --output {output_file}
+2. **Resolve Script Path**
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-java-expert:cui-java-core/scripts/document-logrecord.py
    ```
 
-3. **Parse Results**
+3. **Run Documentation Script**
+   ```bash
+   python3 {resolved_path} --holder {holder_class} --output {output_file}
+   ```
+
+4. **Parse Results**
    The script returns JSON with:
    - `generated_files`: List of files created/updated
    - `documentation`: Metadata about LogRecords found

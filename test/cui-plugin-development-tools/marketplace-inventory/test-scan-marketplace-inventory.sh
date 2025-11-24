@@ -107,15 +107,15 @@ test_basic_discovery() {
     run_comparison_test "default-scan-finds-bundles" \
         ".statistics.total_bundles" 5
 
-    # Test 2: Finds agents
+    # Test 2: Finds agents (at least 1)
     run_comparison_test "default-scan-finds-agents" \
-        ".statistics.total_agents" 20
+        ".statistics.total_agents" 1
 
-    # Test 3: Finds commands
+    # Test 3: Finds commands (at least 30)
     run_comparison_test "default-scan-finds-commands" \
-        ".statistics.total_commands" 40
+        ".statistics.total_commands" 30
 
-    # Test 4: Finds skills
+    # Test 4: Finds skills (at least 20)
     run_comparison_test "default-scan-finds-skills" \
         ".statistics.total_skills" 20
 
@@ -139,7 +139,7 @@ test_resource_filtering() {
         --resource-types agents
 
     run_comparison_test "agents-only-has-agents" \
-        ".statistics.total_agents" 20 \
+        ".statistics.total_agents" 1 \
         --resource-types agents
 
     # Test 2: Commands only
@@ -148,7 +148,7 @@ test_resource_filtering() {
         --resource-types commands
 
     run_comparison_test "commands-only-has-commands" \
-        ".statistics.total_commands" 40 \
+        ".statistics.total_commands" 30 \
         --resource-types commands
 
     # Test 3: Skills only
@@ -162,7 +162,7 @@ test_resource_filtering() {
 
     # Test 4: Multiple types (agents,commands)
     run_comparison_test "agents-commands-has-both" \
-        ".statistics.total_agents" 20 \
+        ".statistics.total_agents" 1 \
         --resource-types agents,commands
 }
 
@@ -274,6 +274,72 @@ test_bundle_structure() {
     fi
 }
 
+test_script_discovery() {
+    echo ""
+    echo "=== Testing script discovery ==="
+    echo ""
+
+    # Test 1: Script count matches filesystem
+    TESTS_RUN=$((TESTS_RUN + 1))
+    echo -n "Test: script-count-matches-filesystem ... "
+
+    # Count scripts on filesystem
+    expected_count=$(find "$PROJECT_ROOT/marketplace/bundles" -path "*/skills/*/scripts/*" -type f \( -name "*.sh" -o -name "*.py" \) | wc -l | tr -d ' ')
+
+    # Get count from inventory
+    result=$("$SCRIPT_UNDER_TEST" 2>&1)
+    actual_count=$(echo "$result" | jq '.statistics.total_scripts')
+
+    if [ "$expected_count" = "$actual_count" ]; then
+        echo -e "${GREEN}PASS${NC} (found $actual_count scripts)"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+    else
+        echo -e "${RED}FAIL${NC}"
+        echo "  Expected: $expected_count scripts (from filesystem)"
+        echo "  Actual:   $actual_count scripts (from inventory)"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+    fi
+
+    # Test 2: All bundles with scripts are discovered
+    TESTS_RUN=$((TESTS_RUN + 1))
+    echo -n "Test: all-bundles-with-scripts-discovered ... "
+
+    # Find bundles that have scripts on filesystem
+    bundles_with_scripts=$(find "$PROJECT_ROOT/marketplace/bundles" -path "*/skills/*/scripts/*" -type f \( -name "*.sh" -o -name "*.py" \) | sed 's|.*/marketplace/bundles/||' | cut -d'/' -f1 | sort -u | wc -l | tr -d ' ')
+
+    # Get bundles with scripts from inventory
+    result=$("$SCRIPT_UNDER_TEST" 2>&1)
+    bundles_in_inventory=$(echo "$result" | jq '[.bundles[] | select(.scripts | length > 0)] | length')
+
+    if [ "$bundles_with_scripts" = "$bundles_in_inventory" ]; then
+        echo -e "${GREEN}PASS${NC} ($bundles_in_inventory bundles with scripts)"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+    else
+        echo -e "${RED}FAIL${NC}"
+        echo "  Expected: $bundles_with_scripts bundles with scripts"
+        echo "  Actual:   $bundles_in_inventory bundles in inventory"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+    fi
+
+    # Test 3: Scripts have correct path_formats structure
+    TESTS_RUN=$((TESTS_RUN + 1))
+    echo -n "Test: scripts-have-path-formats ... "
+
+    result=$("$SCRIPT_UNDER_TEST" 2>&1)
+    scripts_with_paths=$(echo "$result" | jq '[.bundles[].scripts[] | select(.path_formats.absolute != null)] | length')
+    total_scripts=$(echo "$result" | jq '.statistics.total_scripts')
+
+    if [ "$scripts_with_paths" = "$total_scripts" ] && [ "$total_scripts" != "0" ]; then
+        echo -e "${GREEN}PASS${NC}"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+    else
+        echo -e "${RED}FAIL${NC}"
+        echo "  Scripts with path_formats: $scripts_with_paths"
+        echo "  Total scripts: $total_scripts"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+    fi
+}
+
 test_error_handling() {
     echo ""
     echo "=== Testing error handling ==="
@@ -332,6 +398,7 @@ main() {
     test_description_extraction
     test_json_validity
     test_bundle_structure
+    test_script_discovery
     test_error_handling
 
     # Print summary

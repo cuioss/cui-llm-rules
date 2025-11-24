@@ -67,10 +67,20 @@ All 5 workflows follow the same pattern:
    - project scope: Glob .claude/{component}/
 
 4. **Analyze Each Component** (using scripts)
+
+   Resolve script paths via script-runner:
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
+   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.sh
+   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
+   ```
+
+   Execute with resolved paths:
    ```bash
-   Bash: scripts/analyze-markdown-file.sh {path} {type}
-   Bash: scripts/analyze-tool-coverage.sh {path}
-   Bash: python3 scripts/validate-references.py {path}
+   bash {resolved_analyze_markdown} {path} {type}
+   bash {resolved_analyze_tool_coverage} {path}
+   python3 {resolved_validate_references} {path}
    ```
 
 ### Phase 2: Categorize Issues
@@ -118,8 +128,16 @@ All 5 workflows follow the same pattern:
 ### Phase 4: Verify and Report
 
 1. **Verify Fixes**
+
+   Resolve script path:
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-fix.sh
+   ```
+
+   Execute:
    ```bash
-   Bash: scripts/verify-fix.sh {type} {path}
+   bash {resolved_path} {type} {path}
    ```
 
 2. **Generate Summary**
@@ -160,12 +178,20 @@ Glob: pattern="*.md", path="{scope_path}/agents"
 
 ### Step 3: Analyze Each Agent
 
-For each agent file:
+For each agent file, first resolve script paths:
 
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
+```
+
+Then execute:
 ```bash
-Bash: scripts/analyze-markdown-file.sh {agent_path} agent
-Bash: scripts/analyze-tool-coverage.sh {agent_path}
-Bash: python3 scripts/validate-references.py {agent_path}
+bash {resolved_analyze_markdown} {agent_path} agent
+bash {resolved_analyze_tool_coverage} {agent_path}
+python3 {resolved_validate_references} {agent_path}
 ```
 
 **Check against agents-guide.md**:
@@ -191,7 +217,7 @@ Bash: python3 scripts/validate-references.py {agent_path}
 ### Step 5: Verify and Report
 
 ```bash
-Bash: git status --short
+git status --short
 ```
 
 Display summary using reporting-templates.md format.
@@ -220,9 +246,17 @@ Same pattern as doctor-agents.
 
 ### Step 3: Analyze Each Command
 
+First resolve script paths:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
+```
+
+Then execute:
 ```bash
-Bash: scripts/analyze-markdown-file.sh {cmd_path} command
-Bash: python3 scripts/validate-references.py {cmd_path}
+bash {resolved_analyze_markdown} {cmd_path} command
+python3 {resolved_validate_references} {cmd_path}
 ```
 
 **Check against commands-guide.md**:
@@ -341,10 +375,19 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 
 ### Step 3: Analyze Each Skill
 
+First resolve script paths:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-skill-structure.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
+```
+
+Then execute:
 ```bash
-Bash: scripts/analyze-skill-structure.sh {skill_dir}
-Bash: scripts/analyze-markdown-file.sh {skill_dir}/SKILL.md skill
-Bash: python3 scripts/validate-references.py {skill_dir}/SKILL.md
+bash {resolved_analyze_skill_structure} {skill_dir}
+bash {resolved_analyze_markdown} {skill_dir}/SKILL.md skill
+python3 {resolved_validate_references} {skill_dir}/SKILL.md
 ```
 
 **Check against skills-guide.md**:
@@ -536,10 +579,10 @@ This skill is designed to run without user prompts for safe operations. Required
 - `Skill(cui-utilities:*)` - cui-diagnostic-patterns
 - `Skill(cui-plugin-development-tools:*)` - plugin-architecture, marketplace-inventory
 
-**Script Execution (covered by project permissions):**
-- `Bash(python3:*)` - Python interpreter
-- `Bash(scripts/*.sh:*)` - Analysis scripts
-- `Bash(scripts/*.py:*)` - Python analysis scripts
+**Script Execution (resolved via script-runner):**
+- Scripts resolved via `cui-utilities:script-runner` skill
+- Absolute paths stored in `.claude/scripts.local.json`
+- Permissions managed by `tools-setup-project-permissions`
 
 **File Operations (covered by project permissions):**
 - `Read(//marketplace/**)` - Read marketplace files
@@ -553,7 +596,7 @@ This skill is designed to run without user prompts for safe operations. Required
 
 **Ensuring Non-Prompting for Safe Operations:**
 - All file reads/edits use relative paths within marketplace/
-- Script invocation uses `scripts/` which resolves to skill's mounted path
+- Script paths resolved via script-runner to absolute paths in `.claude/scripts.local.json`
 - Skill invocations use bundle-qualified names covered by `Skill({bundle}:*)` wildcards
 - AskUserQuestion is ONLY used for risky fix confirmations
 

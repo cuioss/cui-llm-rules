@@ -156,12 +156,19 @@ Analyzes existing test coverage reports (Jest/Istanbul JSON or LCOV format) and 
    - Or `coverage/lcov.info` (LCOV format - more detailed)
 
 2. **Run coverage analysis script**
+   Resolve script path:
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-frontend-expert:cui-javascript-unit-testing/scripts/analyze-js-coverage.py
+   ```
+
+   Execute:
    ```bash
-   python3 scripts/analyze-js-coverage.py --report coverage/coverage-summary.json
+   python3 {resolved_path} --report coverage/coverage-summary.json
    # Or for LCOV format:
-   python3 scripts/analyze-js-coverage.py --report coverage/lcov.info --format lcov
+   python3 {resolved_path} --report coverage/lcov.info --format lcov
    # With custom threshold:
-   python3 scripts/analyze-js-coverage.py --report coverage/coverage-summary.json --threshold 80
+   python3 {resolved_path} --report coverage/coverage-summary.json --threshold 80
    ```
 
 3. **Process results**

@@ -45,7 +45,11 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 
 2. **Fetch Comments**
    ```
-   python3 scripts/fetch-pr-comments.py [--pr {number}]
+   Skill: cui-utilities:script-runner
+   Resolve: cui-task-workflow:pr-workflow/scripts/fetch-pr-comments.py
+   ```
+   ```bash
+   python3 {resolved_path} [--pr {number}]
    ```
 
    Script outputs JSON:
@@ -87,7 +91,11 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 2. **Triage Each Comment**
    For each unresolved comment:
    ```
-   python3 scripts/triage-comment.py --comment '{json}'
+   Skill: cui-utilities:script-runner
+   Resolve: cui-task-workflow:pr-workflow/scripts/triage-comment.py
+   ```
+   ```bash
+   python3 {resolved_path} --comment '{json}'
    ```
 
    Script outputs decision:

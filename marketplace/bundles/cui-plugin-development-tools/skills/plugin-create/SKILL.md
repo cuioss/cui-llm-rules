@@ -144,7 +144,11 @@ Track `validations_performed` counter.
 
 **Generate frontmatter:**
 ```
-bash scripts/generate-frontmatter.py "agent" "{answers_json}"
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
+```
+```bash
+python3 {resolved_path} "agent" "{answers_json}"
 ```
 
 Where answers_json contains:
@@ -204,7 +208,11 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```
-bash scripts/validate-component.py "{file_path}" "agent"
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
+```
+```bash
+python3 {resolved_path} "{file_path}" "agent"
 ```
 
 Validation checks:
@@ -315,7 +323,11 @@ Same pattern as agent workflow, using Glob/Grep to find similar commands.
 
 **Generate frontmatter:**
 ```
-bash scripts/generate-frontmatter.py "command" "{answers_json}"
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
+```
+```bash
+python3 {resolved_path} "command" "{answers_json}"
 ```
 
 **Load template:**
@@ -354,7 +366,11 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```
-bash scripts/validate-component.py "{file_path}" "command"
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
+```
+```bash
+python3 {resolved_path} "{file_path}" "command"
 ```
 
 Validation checks:
@@ -446,7 +462,11 @@ bash mkdir -p {bundle}/skills/{skill-name}/standards
 
 Generate frontmatter:
 ```
-bash scripts/generate-frontmatter.py "skill" "{answers_json}"
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
+```
+```bash
+python3 {resolved_path} "skill" "{answers_json}"
 ```
 
 Load template:
@@ -506,7 +526,11 @@ Track `files_created` and `standards_files_created` counters.
 #### Step 5: Validate Generated Component
 
 ```
-bash scripts/validate-component.py "{skill_path}/SKILL.md" "skill"
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
+```
+```bash
+python3 {resolved_path} "{skill_path}/SKILL.md" "skill"
 ```
 
 Validation checks:

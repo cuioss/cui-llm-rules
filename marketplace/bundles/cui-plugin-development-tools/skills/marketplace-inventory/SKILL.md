@@ -29,10 +29,23 @@ When activated, this skill scans the marketplace and returns structured JSON inv
 
 ### Step 1: Execute Inventory Scan
 
-Run the marketplace inventory scanner script:
+Run the marketplace inventory scanner script using the resolved path:
 
+**For skill scripts, use the script-runner skill to resolve the path:**
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.sh
+```
+
+Then execute:
 ```bash
-bash scripts/scan-marketplace-inventory.sh --scope marketplace
+bash {resolved_path} --scope marketplace
+```
+
+**Alternative (direct execution from marketplace checkout):**
+If working directly in the marketplace repository, execute:
+```bash
+bash marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.sh --scope marketplace
 ```
 
 The script will:
@@ -92,10 +105,11 @@ This skill is designed to run without user prompts. Required permissions:
 
 **Script Execution:**
 - `Bash(bash:*)` - Bash interpreter
-- `Bash(scripts/scan-marketplace-inventory.sh:*)` - Inventory scanner
+- Script permissions synced via `/tools-setup-project-permissions` from `.claude/scripts.local.json`
 
 **Ensuring Non-Prompting:**
-- Script invocation uses `scripts/` which resolves to skill's mounted path
+- Use script-runner skill to resolve absolute paths, or use direct path in marketplace checkout
+- Permissions for skill scripts are managed globally via script-runner discovery
 - Script only reads marketplace directory structure (no writes)
 - All output is JSON to stdout
 

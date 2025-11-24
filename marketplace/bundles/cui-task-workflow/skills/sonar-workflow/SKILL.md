@@ -59,7 +59,11 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 
    Or use script for structure:
    ```
-   python3 scripts/fetch-sonar-issues.py --project {key} [--pr {id}]
+   Skill: cui-utilities:script-runner
+   Resolve: cui-task-workflow:sonar-workflow/scripts/fetch-sonar-issues.py
+   ```
+   ```bash
+   python3 {resolved_path} --project {key} [--pr {id}]
    ```
 
 3. **Return Structured List**
@@ -104,7 +108,11 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 2. **Triage Each Issue**
    For each issue:
    ```
-   python3 scripts/triage-issue.py --issue '{json}'
+   Skill: cui-utilities:script-runner
+   Resolve: cui-task-workflow:sonar-workflow/scripts/triage-issue.py
+   ```
+   ```bash
+   python3 {resolved_path} --issue '{json}'
    ```
 
    Script outputs decision:

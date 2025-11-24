@@ -216,15 +216,22 @@ Parses npm/npx build output logs and categorizes issues for command orchestratio
 **Steps**:
 
 1. **Run npm output parser script**
+   Resolve script path:
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-frontend-expert:cui-javascript-project/scripts/parse-npm-output.py
+   ```
+
+   Execute:
    ```bash
    # Default mode: errors + warnings
-   python3 scripts/parse-npm-output.py --log target/npm-output-2024-01-15.log
+   python3 {resolved_path} --log target/npm-output-2024-01-15.log
 
    # Errors only mode
-   python3 scripts/parse-npm-output.py --log build.log --mode errors
+   python3 {resolved_path} --log build.log --mode errors
 
    # Structured mode (full categorization with file locations)
-   python3 scripts/parse-npm-output.py --log test-output.log --mode structured
+   python3 {resolved_path} --log test-output.log --mode structured
    ```
 
 2. **Process parsed results**

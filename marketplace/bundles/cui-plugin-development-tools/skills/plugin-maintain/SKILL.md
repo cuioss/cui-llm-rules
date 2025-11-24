@@ -80,8 +80,12 @@ Read: references/component-update-guide.md
 
 Run component analysis:
 
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-maintain/scripts/analyze-component.py
+```
 ```bash
-scripts/analyze-component.py {component_path}
+python3 {resolved_path} {component_path}
 ```
 
 Parse JSON output to understand:
@@ -102,8 +106,12 @@ Check that proposed improvements:
 
 Use `update-component.py` or Edit tool to apply changes:
 
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-maintain/scripts/update-component.py
+```
 ```bash
-echo '{"updates": [...]}' | scripts/update-component.py {component_path}
+echo '{"updates": [...]}' | python3 {resolved_path} {component_path}
 ```
 
 Or use Edit tool for precise modifications.
@@ -160,8 +168,12 @@ If file: Read the file
 
 #### Step 4: Check for Duplication
 
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-maintain/scripts/check-duplication.py
+```
 ```bash
-scripts/check-duplication.py {skill_path} {content_file}
+python3 {resolved_path} {skill_path} {content_file}
 ```
 
 Parse JSON output:
@@ -220,8 +232,12 @@ Read: references/readme-maintenance-guide.md
 
 For each bundle:
 
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-maintain/scripts/generate-readme.sh
+```
 ```bash
-scripts/generate-readme.sh {bundle_path}
+bash {resolved_path} {bundle_path}
 ```
 
 Parse JSON output for:

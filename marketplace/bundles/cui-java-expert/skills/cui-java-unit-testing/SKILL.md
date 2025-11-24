@@ -305,19 +305,25 @@ Analyze existing JaCoCo coverage reports and extract coverage metrics.
    ```
    Or use provided file path directly.
 
-2. **Run Coverage Analysis Script**
-   ```bash
-   scripts/analyze-coverage.py --file {report_path} --threshold {threshold}
+2. **Resolve Script Path**
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-java-expert:cui-java-unit-testing/scripts/analyze-coverage.py
    ```
 
-3. **Parse Results**
+3. **Run Coverage Analysis Script**
+   ```bash
+   python3 {resolved_path} --file {report_path} --threshold {threshold}
+   ```
+
+4. **Parse Results**
    The script returns JSON with:
    - `overall_coverage`: Line, branch, instruction, method, class percentages
    - `by_package`: Coverage breakdown per package
    - `low_coverage_classes`: Classes below threshold
    - `uncovered_lines`: Specific lines missing coverage
 
-4. **Generate Report**
+5. **Generate Report**
    ```
    ╔════════════════════════════════════════════════════════════╗
    ║              Coverage Analysis Report                      ║

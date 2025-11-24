@@ -64,9 +64,15 @@ if [dry_run == true]; then OPTIONS="$OPTIONS -n"; fi
 if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 ```
 
+Resolve script path:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-formatter.sh
+```
+
 Execute:
 ```bash
-bash scripts/asciidoc-formatter.sh $OPTIONS {target} 2>&1
+bash {resolved_path} $OPTIONS {target} 2>&1
 ```
 
 **Step 4: Parse Output**
@@ -97,9 +103,13 @@ Changes applied: {list}
 
 **Step 6: Validation (if changes applied)**
 
-If dry_run=false, run validation to confirm:
+If dry_run=false, resolve and run validation:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
+```
 ```bash
-bash scripts/asciidoc-validator.sh {target} 2>&1
+bash {resolved_path} {target} 2>&1
 ```
 
 ---
@@ -136,9 +146,13 @@ If target is a directory:
 
 **Step 3: Run Format Validation**
 
-Execute:
+Resolve and execute:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
+```
 ```bash
-bash scripts/asciidoc-validator.sh {target} 2>&1
+bash {resolved_path} {target} 2>&1
 ```
 
 **Step 4: Parse Output**
@@ -226,14 +240,20 @@ mkdir -p target/asciidoc-link-verifier
 
 **Step 4: Run Link Verification**
 
+Resolve script path:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-documentation-standards:cui-documentation/scripts/verify-adoc-links.py
+```
+
 Execute:
 ```bash
-python3 scripts/verify-adoc-links.py --file {file_path} --report target/asciidoc-link-verifier/links.md 2>&1
+python3 {resolved_path} --file {file_path} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
 For directories:
 ```bash
-python3 scripts/verify-adoc-links.py --directory {directory} --report target/asciidoc-link-verifier/links.md 2>&1
+python3 {resolved_path} --directory {directory} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
 **Step 5: Parse Report**
@@ -316,14 +336,20 @@ If target is a directory:
 
 **Step 3: Run Content Analysis**
 
+Resolve script path:
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-documentation-standards:cui-documentation/scripts/review-content.py
+```
+
 Execute:
 ```bash
-python3 scripts/review-content.py --file {file_path} 2>&1
+python3 {resolved_path} --file {file_path} 2>&1
 ```
 
 For directories:
 ```bash
-python3 scripts/review-content.py --directory {directory} 2>&1
+python3 {resolved_path} --directory {directory} 2>&1
 ```
 
 **Step 4: Parse JSON Output**
