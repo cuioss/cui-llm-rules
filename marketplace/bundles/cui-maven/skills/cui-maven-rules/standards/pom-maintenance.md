@@ -6,7 +6,7 @@ This document defines the comprehensive process for maintaining and optimizing M
 
 ## Related Documentation
 
-- [Maven Integration Standards](maven-integration.md) - JavaScript/Maven integration patterns
+- [Maven Build Execution Standards](maven-build-execution.md) - Build execution, module targeting, reactor builds
 
 ## Pre-Maintenance Checklist
 
@@ -383,4 +383,4 @@ Execute these verification steps to ensure POM maintenance was successful:
 
 **Related Standards**:
 
-- Maven Integration Standards (see maven-integration.md in this skill)
+- Maven Build Execution Standards (see maven-build-execution.md in this skill)
