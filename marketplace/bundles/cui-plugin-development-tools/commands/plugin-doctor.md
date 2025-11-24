@@ -41,19 +41,20 @@ When you invoke this command, I will:
    - Detect single vs all components
    - Check for --no-fix flag
 
-2. **Load plugin-doctor skill**:
+2. **Load plugin-doctor skill and EXECUTE its workflow**:
    ```
    Skill: cui-plugin-development-tools:plugin-doctor
    ```
 
-3. **Execute doctor workflow**:
-   - **Diagnose**: Analyze components using scripts
-   - **Categorize**: Separate safe vs risky issues
-   - **Auto-Fix**: Apply safe fixes automatically
-   - **Prompt**: Ask for confirmation on risky fixes
-   - **Verify**: Confirm fixes resolved issues
+   **CRITICAL HANDOFF RULES**:
+   - DO NOT summarize or explain the skill content to the user
+   - DO NOT describe what the skill says to do
+   - IMMEDIATELY execute the scripts and tools specified in the skill
+   - Your next action after loading the skill MUST be a tool call (Bash, Read, Glob), not text output
+   - Follow the skill's "Workflow Decision Tree" to select the correct workflow
+   - Execute MANDATORY steps without commentary
 
-4. **Display results** with fixes applied and verification status
+3. **Display results** only after workflow completion - show fixes applied and verification status
 
 ## PARAMETERS
 

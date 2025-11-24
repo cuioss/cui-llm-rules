@@ -24,18 +24,20 @@ When you invoke this command, I will:
    - If type provided: Validate it's one of [agent, command, skill, bundle]
    - If no type: Ask user which component type to create
 
-2. **Load plugin-create skill**:
+2. **Load plugin-create skill and EXECUTE its workflow**:
    ```
    Skill: cui-plugin-development-tools:plugin-create
    ```
 
-3. **Invoke appropriate workflow**:
-   - `agent` → create-agent workflow
-   - `command` → create-command workflow
-   - `skill` → create-skill workflow
-   - `bundle` → create-bundle workflow
+   **CRITICAL HANDOFF RULES**:
+   - DO NOT summarize or explain the skill content to the user
+   - DO NOT describe what the skill says to do
+   - IMMEDIATELY execute the workflow for the specified component type
+   - Your next action after loading the skill MUST be a tool call, not text output
+   - Follow the skill's workflow steps with MANDATORY markers
+   - Execute without commentary until workflow completion
 
-4. **Display result** to user
+3. **Display result** only after creation workflow completes
 
 ## PARAMETERS
 

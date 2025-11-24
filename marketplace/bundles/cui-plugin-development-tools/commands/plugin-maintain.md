@@ -40,19 +40,20 @@ When you invoke this command, I will:
    - Extract component target and parameters
    - Validate parameter syntax
 
-2. **Load plugin-maintain skill**:
+2. **Load plugin-maintain skill and EXECUTE its workflow**:
    ```
    Skill: cui-plugin-development-tools:plugin-maintain
    ```
 
-3. **Invoke appropriate workflow**:
-   - `update agent=X` or `update command=X` → update-component workflow
-   - `add-knowledge skill=X source=Y` → add-knowledge workflow
-   - `readme` or `readme bundle=X` → update-readme workflow
-   - `refactor` → refactor-structure workflow
-   - `orchestration command=X` → apply-orchestration workflow
+   **CRITICAL HANDOFF RULES**:
+   - DO NOT summarize or explain the skill content to the user
+   - DO NOT describe what the skill says to do
+   - IMMEDIATELY execute the workflow for the specified task type
+   - Your next action after loading the skill MUST be a tool call, not text output
+   - Follow the skill's workflow decision tree based on task type
+   - Execute MANDATORY steps without commentary
 
-4. **Display results** to user
+3. **Display results** only after maintenance workflow completes
 
 ## PARAMETERS
 

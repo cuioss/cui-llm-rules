@@ -14,11 +14,37 @@ allowed-tools:
 
 # Plugin Doctor Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the component type.
+
 Comprehensive diagnostic and fix skill for marketplace components. Combines diagnosis, automated safe fixes, prompted risky fixes, and verification into a single workflow.
 
 ## Purpose
 
 Provides unified doctor workflows following the pattern: **Diagnose → Auto-Fix Safe → Prompt Risky → Verify**
+
+## Workflow Decision Tree
+
+**MANDATORY**: Select workflow based on input and execute IMMEDIATELY.
+
+### If scope = "agents" or agent-name specified
+→ **EXECUTE** Workflow 1: doctor-agents (jump to that section)
+
+### If scope = "commands" or command-name specified
+→ **EXECUTE** Workflow 2: doctor-commands (jump to that section)
+
+### If scope = "skills" or skill-name specified
+→ **EXECUTE** Workflow 3: doctor-skills (jump to that section)
+
+### If scope = "metadata"
+→ **EXECUTE** Workflow 4: doctor-metadata (jump to that section)
+
+### If scope = "scripts" or script-name specified
+→ **EXECUTE** Workflow 5: doctor-scripts (jump to that section)
+
+### If scope = "marketplace" (full marketplace health check)
+→ **EXECUTE** all 5 workflows in sequence
+
+---
 
 **5 Doctor Workflows** (one per component type):
 1. **doctor-agents**: Analyze and fix agent issues
@@ -49,26 +75,27 @@ All 5 workflows follow the same pattern:
 
 ### Phase 1: Discover and Analyze
 
-1. **Load Prerequisites**
+1. **MANDATORY - Load Prerequisites**
+
+   **EXECUTE** these skill loads before proceeding:
    ```
    Skill: cui-utilities:cui-diagnostic-patterns
    Skill: cui-plugin-development-tools:plugin-architecture
    Skill: cui-plugin-development-tools:marketplace-inventory
    ```
 
-2. **Load Component Reference** (progressive disclosure)
-   ```
-   Read references/{component}-guide.md
-   ```
+2. **MANDATORY - Load Component Reference** (progressive disclosure)
+
+   **READ**: `references/{component}-guide.md`
 
 3. **Discover Components** (based on scope parameter)
    - marketplace scope: Use marketplace-inventory
    - global scope: Glob ~/.claude/{component}/
    - project scope: Glob .claude/{component}/
 
-4. **Analyze Each Component** (using scripts)
+4. **MANDATORY - Analyze Each Component** (using scripts)
 
-   Resolve script paths via script-runner:
+   **EXECUTE** script resolution first:
    ```
    Skill: cui-utilities:script-runner
    Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
@@ -76,7 +103,7 @@ All 5 workflows follow the same pattern:
    Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
    ```
 
-   Execute with resolved paths:
+   **EXECUTE** with resolved paths:
    ```bash
    bash {resolved_analyze_markdown} {path} {type}
    bash {resolved_analyze_tool_coverage} {path}
@@ -521,35 +548,35 @@ Same pattern with script-specific checks.
 
 ### Scripts (scripts/)
 
-| Script | Purpose |
-|--------|---------|
-| `analyze-markdown-file.sh` | Structural analysis, bloat, Rule 6/7/Pattern 22 |
-| `analyze-tool-coverage.sh` | Tool fit score, missing/unused tools |
-| `analyze-skill-structure.sh` | Skill directory structure validation |
-| `validate-references.py` | Reference extraction and validation |
-| `extract-fixable-issues.py` | Filter fixable issues from analysis |
-| `categorize-fixes.py` | Categorize as safe/risky |
-| `apply-fix.py` | Apply single fix with backup |
-| `verify-fix.sh` | Verify fix resolved issue |
+| Script | Mode | Purpose |
+|--------|------|---------|
+| `analyze-markdown-file.sh` | **EXECUTE** | Structural analysis, bloat, Rule 6/7/Pattern 22 |
+| `analyze-tool-coverage.sh` | **EXECUTE** | Tool fit score, missing/unused tools |
+| `analyze-skill-structure.sh` | **EXECUTE** | Skill directory structure validation |
+| `validate-references.py` | **EXECUTE** | Reference extraction and validation |
+| `extract-fixable-issues.py` | **EXECUTE** | Filter fixable issues from analysis |
+| `categorize-fixes.py` | **EXECUTE** | Categorize as safe/risky |
+| `apply-fix.py` | **EXECUTE** | Apply single fix with backup |
+| `verify-fix.sh` | **EXECUTE** | Verify fix resolved issue |
 
 ### References (references/)
 
-**Diagnosis References** (4):
+**Diagnosis References** (4) - **READ** before analyzing:
 - `agents-guide.md` - Agent quality standards
 - `commands-guide.md` - Command quality standards
 - `skills-guide.md` - Skill structure standards
 - `metadata-guide.md` - plugin.json schema
 
-**External Standards** (from plugin-architecture):
+**External Standards** (from plugin-architecture) - **READ** for script analysis:
 - `script-standards.md` - Script documentation, testing, and quality standards
 
-**Fix References** (4):
+**Fix References** (4) - **READ** before applying fixes:
 - `fix-catalog.md` - Fix categorization rules
 - `safe-fixes-guide.md` - Safe fix patterns
 - `risky-fixes-guide.md` - Risky fix patterns
 - `verification-guide.md` - Verification procedures
 
-**Reporting** (1):
+**Reporting** (1) - **REFERENCE** for output formatting:
 - `reporting-templates.md` - Summary report templates
 
 ### Assets (assets/)

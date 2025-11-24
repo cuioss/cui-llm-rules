@@ -7,6 +7,8 @@ allowed-tools:
 
 # Plugin Architecture Skill
 
+**REFERENCE MODE**: This skill provides reference material. Load specific references on-demand based on current task. Do not load all references at once.
+
 Pure reference skill providing architecture principles, skill patterns, and design guidance for building goal-based Claude Code marketplace components.
 
 ## What This Skill Provides
@@ -301,6 +303,32 @@ Read references/frontmatter-standards.md
 Read references/script-standards.md
 ```
 
+### 11. Execution Directive (Skill Execution Patterns)
+**File**: `references/execution-directive.md`
+
+**Load When**:
+- Creating execution skills (Pattern 1-9)
+- Ensuring Claude executes rather than explains
+- Adding MANDATORY/CRITICAL markers
+- Designing command handoff patterns
+- Distinguishing EXECUTE vs READ vs REFERENCE modes
+
+**Contents**:
+- Execution Mode directive standard
+- MANDATORY/CRITICAL marker usage
+- Execution vs Reference clarity patterns
+- Workflow decision tree patterns
+- Command handoff pattern
+- Imperative language guidelines
+- Code-first pattern
+- Validation checklist pattern
+- Anti-patterns to avoid
+
+**Load Command**:
+```
+Read references/execution-directive.md
+```
+
 ## Examples
 
 ### Example 1: Goal-Based Skill
@@ -462,6 +490,11 @@ Read references/architecture-rules.md
 Read references/reference-patterns.md
 ```
 
+**Ensuring execution (not explanation)**:
+```
+Read references/execution-directive.md
+```
+
 **Creating scripts**:
 ```
 Read references/script-standards.md
@@ -539,6 +572,7 @@ All references are in `references/` directory:
 - reference-patterns.md
 - frontmatter-standards.md
 - script-standards.md
+- execution-directive.md
 - examples/goal-based-skill-example.md
 - examples/workflow-command-example.md
 - examples/pattern-usage-examples.md

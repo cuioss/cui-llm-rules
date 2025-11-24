@@ -6,6 +6,8 @@ tools: Read, Write, Bash, AskUserQuestion, Skill
 
 # Plugin Create Skill
 
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the appropriate workflow based on the component type parameter.
+
 Interactive wizard for creating well-structured Claude Code marketplace components following architecture best practices.
 
 ## What This Skill Provides
