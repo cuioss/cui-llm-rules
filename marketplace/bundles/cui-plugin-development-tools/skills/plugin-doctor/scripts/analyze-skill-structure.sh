@@ -49,11 +49,69 @@ if [ "$SKILL_EXISTS" = "true" ]; then
 
     CONTENT=$(cat "$SKILL_MD")
 
-    # Extract direct file references (scripts/*.sh, references/*.md, assets/*.*)
-    # This is the standard pattern - skills use relative paths from their directory
-    REFERENCED_FILES=$(echo "$CONTENT" | grep -o '\(scripts\|references\|assets\)/[a-zA-Z0-9_.-]*\.[a-z]*' | sort -u || echo "")
+    # Step 1: Extract ALL potential file references from the FULL content
+    # We'll filter later based on whether files actually exist
+    # Support nested paths like references/examples/file.md
+    # First extract all potential references, including those in code blocks
+    ALL_REFS=$(echo "$CONTENT" | \
+        grep -oE '([a-zA-Z0-9_-]+:)?(scripts|references|assets)(/[a-zA-Z0-9_.-]+)+\.[a-z]+' || echo "")
 
-    # Check each referenced file exists
+    # Filter out cross-skill references (those with prefix like bundle-name:references/)
+    # Keep only local references (no colon prefix)
+    LOCAL_REFS=$(echo "$ALL_REFS" | \
+        grep -v '^[a-zA-Z0-9_-]*:' | \
+        sort -u || echo "")
+
+    # Step 2: For "missing files" detection, also extract refs from content WITHOUT code blocks
+    # This helps identify example paths in code blocks that shouldn't be flagged as missing
+    CONTENT_NO_CODEBLOCKS=$(echo "$CONTENT" | awk '
+        /^```/ { in_codeblock = !in_codeblock; next }
+        !in_codeblock { print }
+    ')
+
+    REFS_OUTSIDE_CODEBLOCKS=$(echo "$CONTENT_NO_CODEBLOCKS" | \
+        grep -oE '(scripts|references|assets)(/[a-zA-Z0-9_.-]+)+\.[a-z]+' | \
+        sort -u || echo "")
+
+    # REFERENCED_FILES = all local refs (both inside and outside code blocks)
+    # This is used for "unreferenced files" detection (files that exist but aren't mentioned)
+    REFERENCED_FILES="$LOCAL_REFS"
+
+    # Step 3: Also detect table-format references like | `script.py` |
+    # These are common in External Resources tables
+    # Support nested paths like `references/examples/file.md`
+    TABLE_REFS=$(echo "$CONTENT_NO_CODEBLOCKS" | \
+        grep -oE '\`(scripts|references|assets)(/[a-zA-Z0-9_.-]+)+\.[a-z]+\`' | \
+        sed 's/`//g' | \
+        sort -u || echo "")
+
+    # Also detect backtick references like `analyze-data.sh` in tables (filename only)
+    # Match against scripts/references/assets directories
+    FILENAME_REFS=""
+    for subdir in "scripts" "references" "assets"; do
+        SUBDIR_PATH="$SKILL_DIR/$subdir"
+        if [ -d "$SUBDIR_PATH" ]; then
+            while IFS= read -r filepath; do
+                if [ -z "$filepath" ] || [ ! -f "$filepath" ]; then
+                    continue
+                fi
+                FILENAME=$(basename "$filepath")
+                # Check if this filename appears in backticks in the content
+                if echo "$CONTENT_NO_CODEBLOCKS" | grep -q "\`$FILENAME\`"; then
+                    RELATIVE_PATH="${filepath#$SKILL_DIR/}"
+                    FILENAME_REFS="${FILENAME_REFS}${RELATIVE_PATH}"$'\n'
+                fi
+            done <<< "$(find "$SUBDIR_PATH" -type f 2>/dev/null || echo "")"
+        fi
+    done
+
+    # Combine all reference types
+    REFERENCED_FILES=$(printf "%s\n%s\n%s" "$REFERENCED_FILES" "$TABLE_REFS" "$FILENAME_REFS" | grep -v '^$' | sort -u || echo "")
+
+    # Check for missing files - only flag as missing if:
+    # 1. Referenced OUTSIDE code blocks (real references, not examples)
+    # 2. File doesn't exist
+    # Files referenced only inside code blocks are examples and shouldn't be flagged
     while IFS= read -r ref; do
         if [ -z "$ref" ]; then
             continue
@@ -61,7 +119,10 @@ if [ "$SKILL_EXISTS" = "true" ]; then
 
         FILE_PATH="$SKILL_DIR/$ref"
         if [ ! -f "$FILE_PATH" ]; then
-            MISSING_FILES="${MISSING_FILES}${ref}"$'\n'
+            # Only flag as missing if referenced outside code blocks
+            if echo "$REFS_OUTSIDE_CODEBLOCKS" | grep -qF "$ref"; then
+                MISSING_FILES="${MISSING_FILES}${ref}"$'\n'
+            fi
         fi
     done <<< "$REFERENCED_FILES"
 
