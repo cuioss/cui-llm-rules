@@ -40,33 +40,27 @@ Examples:
 Skill: cui-documentation-standards:cui-documentation
 ```
 
-### Step 3: Execute Validation Workflows
+### Step 3: Execute Comprehensive Review
 
-Execute three workflows in sequence:
+**Use comprehensive-review workflow** for orchestrated validation:
 
-**3.1: Format Validation**
-
-Execute workflow: validate-format
+Execute workflow: comprehensive-review
 - target: {file}
+- stop_on_error: true
 - apply_fixes: {apply_fixes}
+- skip_content: false
 
-Collect: format_status, format_issues
+This workflow handles:
+- Phase 1: Format validation (fail-fast)
+- Phase 2: Link verification with false-positive detection and manual Read verification
+- Phase 3: Content review with ULTRATHINK tone analysis
 
-**3.2: Link Verification**
+References:
+- standards/orchestration-workflow.md
+- standards/link-verification-protocol.md
+- standards/content-review-framework.md
 
-Execute workflow: verify-links
-- target: {file}
-- fix_links: {apply_fixes}
-
-Collect: link_status, link_issues
-
-**3.3: Content Review**
-
-Execute workflow: review-content
-- target: {file}
-- apply_fixes: {apply_fixes}
-
-Collect: content_status, content_issues
+Collect: format_status, link_status, content_status, all_issues
 
 ### Step 4: Generate Report
 
@@ -101,8 +95,9 @@ Summary:
 - Uses Skill directive for workflow invocation
 
 **Skill Dependency**: cui-documentation-standards:cui-documentation
-- Provides: validate-format, verify-links, review-content workflows
-- Scripts: asciidoc-validator.sh, verify-adoc-links.py, review-content.py
+- Provides: comprehensive-review workflow (orchestrates validate-format, verify-links, review-content)
+- Scripts: asciidoc-validator.sh, verify-adoc-links.py, verify-links-false-positives.py, analyze-content-tone.py
+- Standards: orchestration-workflow.md, link-verification-protocol.md, content-review-framework.md
 
 ## Related
 

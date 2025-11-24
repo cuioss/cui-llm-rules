@@ -51,24 +51,29 @@ If no files found: Report and exit
 Skill: cui-documentation-standards:cui-documentation
 ```
 
-### Step 4: Review Each File
+### Step 4: Execute Comprehensive Review
 
-For each discovered file, execute:
+**Use comprehensive-review workflow** on the directory:
 
-**4.1: Format Validation**
-Execute workflow: validate-format
-- target: {file}
+Execute workflow: comprehensive-review
+- target: {path}
+- stop_on_error: false (continue through all files)
 - apply_fixes: {apply_fixes}
+- skip_content: false
 
-**4.2: Link Verification**
-Execute workflow: verify-links
-- target: {file}
+This workflow handles:
+- File discovery (*.adoc, non-recursive)
+- Phase 1: Format validation for all files
+- Phase 2: Link verification with false-positive detection and manual Read verification
+- Phase 3: Content review with ULTRATHINK tone analysis
+- Aggregated results across all files
 
-**4.3: Content Review**
-Execute workflow: review-content
-- target: {file}
+References:
+- standards/orchestration-workflow.md
+- standards/link-verification-protocol.md
+- standards/content-review-framework.md
 
-Collect results per file.
+Collect: aggregated results with per-file and overall statistics
 
 ### Step 5: Aggregate Results
 
@@ -125,8 +130,13 @@ Execute workflow: commit
 - No business logic in command
 
 **Skill Dependencies**:
-- cui-documentation-standards:cui-documentation - Validation workflows
+- cui-documentation-standards:cui-documentation - comprehensive-review workflow (orchestrates all validation)
 - cui-task-workflow:cui-git-workflow - Commit workflow (optional)
+
+**Standards Referenced**:
+- orchestration-workflow.md - Comprehensive review orchestration
+- link-verification-protocol.md - Manual Read verification before link removal
+- content-review-framework.md - ULTRATHINK-based tone analysis
 
 ## Related
 
