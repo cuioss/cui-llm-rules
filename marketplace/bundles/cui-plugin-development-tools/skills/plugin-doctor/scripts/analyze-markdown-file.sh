@@ -40,6 +40,7 @@ YAML_VALID="false"
 HAS_NAME="false"
 HAS_DESC="false"
 HAS_TOOLS="false"
+TOOLS_FIELD_TYPE="none"
 
 if head -1 "$FILE_PATH" | grep -q "^---$"; then
     FRONTMATTER_PRESENT="true"
@@ -59,8 +60,14 @@ if head -1 "$FILE_PATH" | grep -q "^---$"; then
     if echo "$FRONTMATTER" | grep -q "^description:"; then
         HAS_DESC="true"
     fi
+    # Check tools field - agents use "tools:", skills use "allowed-tools:"
     if echo "$FRONTMATTER" | grep -q "^tools:"; then
         HAS_TOOLS="true"
+        TOOLS_FIELD_TYPE="tools"
+    fi
+    if echo "$FRONTMATTER" | grep -q "^allowed-tools:"; then
+        HAS_TOOLS="true"
+        TOOLS_FIELD_TYPE="allowed-tools"
     fi
 fi
 
@@ -146,7 +153,8 @@ cat <<EOF
         "present": $HAS_DESC
       },
       "tools": {
-        "present": $HAS_TOOLS
+        "present": $HAS_TOOLS,
+        "field_type": "$TOOLS_FIELD_TYPE"
       }
     }
   },

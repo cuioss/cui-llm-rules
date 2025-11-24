@@ -7,7 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-SCRIPT_UNDER_TEST="$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/skills/plugin-diagnose/scripts/analyze-markdown-file.sh"
+SCRIPT_UNDER_TEST="$PROJECT_ROOT/marketplace/bundles/cui-plugin-development-tools/skills/plugin-doctor/scripts/analyze-markdown-file.sh"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures/markdown-file"
 
 # Colors for output
