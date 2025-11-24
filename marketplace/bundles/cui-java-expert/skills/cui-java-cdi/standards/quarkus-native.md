@@ -12,12 +12,12 @@ Before starting any native optimization work:
 
 1. [ ] **Baseline Verification**: Ensure application builds and tests pass
    ```bash
-   ./mvnw clean install > target/baseline-build.log 2>&1
+   ./mvnw -l target/baseline-build.log clean install
    ```
 
 2. [ ] **Native Image Compatibility**: Verify project supports native compilation
    ```bash
-   ./mvnw clean package -Dnative > target/native-baseline.log 2>&1
+   ./mvnw -l target/native-baseline.log clean package -Dnative
    ```
    Record build time and image size for baseline metrics.
 
@@ -144,10 +144,10 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 **Verification Commands**:
 ```bash
 # Test compilation after each change
-./mvnw clean compile -pl [module-name] > target/compile-verify.log 2>&1
+./mvnw -l target/compile-verify.log clean compile -pl [module-name]
 
 # Run quality verification
-./mvnw -Ppre-commit clean verify -DskipTests -pl [module-name] > target/quality-verify.log 2>&1
+./mvnw -l target/quality-verify.log -Ppre-commit clean verify -DskipTests -pl [module-name]
 ```
 
 **Success Criteria**:
@@ -202,13 +202,13 @@ find . -name "*Processor.java" -exec grep -l "ReflectiveClassBuildItem" {} \;
 **Verification Process**:
 ```bash
 # Compile module
-./mvnw clean compile -pl [module-name] > target/app-compile.log 2>&1
+./mvnw -l target/app-compile.log clean compile -pl [module-name]
 
 # Test reflection optimization
-./mvnw clean test -Dtest=[ReflectionTest] -pl [module-name] > target/reflection-tests.log 2>&1
+./mvnw -l target/reflection-tests.log clean test -Dtest=[ReflectionTest] -pl [module-name]
 
 # Full module verification
-./mvnw clean install -pl [module-name] > target/module-install.log 2>&1
+./mvnw -l target/module-install.log clean install -pl [module-name]
 ```
 
 **Success Criteria**:

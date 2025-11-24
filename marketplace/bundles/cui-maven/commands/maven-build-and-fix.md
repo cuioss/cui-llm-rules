@@ -26,12 +26,19 @@ Extract parameters:
 
 ### Step 2: Execute Maven Build
 
-**Execute build and capture output:**
+**Execute clean first (if goals contain clean):**
 ```bash
-./mvnw {goals} > target/build-output-$(date +%Y%m%d-%H%M%S).log 2>&1
+./mvnw clean
+```
+
+**Then execute build with log capture:**
+```bash
+./mvnw -l target/build-output.log {goals_without_clean}
 ```
 
 Store the log path as `{output_file}`.
+
+NOTE: Clean runs separately to avoid deleting `target/` after log file creation. The `-l` flag avoids shell redirection operators which require additional permissions.
 
 ### Step 3: Analyze Build Output
 
@@ -81,9 +88,9 @@ python3 scripts/parse-maven-output.py \
 
 ### Step 5: Verify Fixes (Re-build)
 
-**After fix attempts, re-run build:**
+**After fix attempts, re-run build (no clean needed - just verify):**
 ```bash
-./mvnw {goals} > target/build-output-verify-$(date +%Y%m%d-%H%M%S).log 2>&1
+./mvnw -l target/build-output-verify.log {goals_without_clean}
 ```
 
 **Re-analyze with script:**

@@ -276,7 +276,7 @@ class TokenValidatorTest {
 Execute coverage verification with Maven:
 
 ```bash
-./mvnw clean verify -Pcoverage > target/coverage-verify.log 2>&1
+./mvnw -l target/coverage-verify.log clean verify -Pcoverage
 ```
 
 Inspect coverage results and ensure minimum 80% line/branch coverage is met. Address any coverage gaps.

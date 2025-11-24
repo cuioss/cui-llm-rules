@@ -111,25 +111,27 @@ Use this workflow when:
 ### Step 1: Execute Maven Build
 
 ```bash
-./mvnw {goals} {-pl module if specified} {-P profile if specified} > target/maven-build.log 2>&1
+./mvnw -l target/maven-build.log {goals} {-pl module if specified} {-P profile if specified}
 ```
+
+NOTE: Using Maven's `-l` (log file) flag instead of shell redirection (`> file 2>&1`) avoids permission issues with `Bash(./mvnw:*)`.
 
 **Examples:**
 ```bash
 # Basic build
-./mvnw clean install > target/maven-build.log 2>&1
+./mvnw -l target/maven-build.log clean install
 
 # Module-specific build
-./mvnw clean install -pl auth-service > target/maven-build.log 2>&1
+./mvnw -l target/maven-build.log clean install -pl auth-service
 
 # With profile
-./mvnw clean verify -Ppre-commit > target/maven-build.log 2>&1
+./mvnw -l target/maven-build.log clean verify -Ppre-commit
 
 # Coverage build
-./mvnw clean test -Pcoverage > target/maven-build.log 2>&1
+./mvnw -l target/maven-build.log clean test -Pcoverage
 
 # Native image
-./mvnw clean package -Dnative > target/maven-build.log 2>&1
+./mvnw -l target/maven-build.log clean package -Dnative
 ```
 
 ### Step 2: Parse Build Output

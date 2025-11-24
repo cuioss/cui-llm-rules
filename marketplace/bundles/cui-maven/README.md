@@ -45,7 +45,7 @@ Commands are thin orchestrators that invoke skill workflows:
 
 ```
 /maven-build-and-fix
-  ├─> Bash: ./mvnw {goals} > target/build-output.log 2>&1
+  ├─> Bash: ./mvnw -l target/build-output.log {goals}
   ├─> Skill(cui-maven-rules) workflow: Parse Maven Build Output
   ├─> Route issues to fix commands:
   │   ├─> /java-implement-code (compilation errors)

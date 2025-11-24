@@ -140,20 +140,20 @@ Both goals are required for proper integration test execution:
 
 ```bash
 # Runs only unit tests, excludes integration tests
-./mvnw clean test > target/unit-tests.log 2>&1
+./mvnw -l target/unit-tests.log clean test
 
 # Full build without integration tests
-./mvnw clean verify > target/build-verify.log 2>&1
+./mvnw -l target/build-verify.log clean verify
 ```
 
 ### Integration Test Execution
 
 ```bash
 # Run only integration tests (skips unit tests)
-./mvnw clean verify -Pintegration-tests > target/integration-tests.log 2>&1
+./mvnw -l target/integration-tests.log clean verify -Pintegration-tests
 
 # Run integration tests for specific modules
-./mvnw clean verify -Pintegration-tests -pl module1 > target/module-integration.log 2>&1
+./mvnw -l target/module-integration.log clean verify -Pintegration-tests -pl module1
 ```
 
 ## CI/CD Integration
@@ -175,11 +175,11 @@ Ensure both scenarios work correctly:
 ```bash
 # Verify unit tests run, integration tests excluded
 # Check output for *Test classes running, no *IT classes
-./mvnw clean test > target/verify-unit-tests.log 2>&1
+./mvnw -l target/verify-unit-tests.log clean test
 
 # Verify integration tests run, unit tests skipped
 # Check output for *IT/*ITCase classes running, *Test classes skipped
-./mvnw clean verify -Pintegration-tests > target/verify-integration.log 2>&1
+./mvnw -l target/verify-integration.log clean verify -Pintegration-tests
 ```
 
 ## Common Pitfalls
