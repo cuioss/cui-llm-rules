@@ -588,7 +588,15 @@ Skill: cui-utilities:cui-diagnostic-patterns
 
 These provide architecture principles and non-prompting tool usage patterns.
 
-#### Step 1: Interactive Questionnaire
+#### Step 1: Load Bundle Standards
+
+```
+Read references/bundle-guide.md
+```
+
+This provides bundle structure requirements, plugin.json configuration, naming conventions, and validation guidelines.
+
+#### Step 2: Interactive Questionnaire
 
 Ask user for:
 
@@ -618,7 +626,14 @@ Ask user for:
 
 Track `questions_answered` counter.
 
-#### Step 2: Create Bundle Structure
+#### Step 3: Create Bundle Structure
+
+**Load bundle structure template:**
+```
+Read assets/templates/bundle-structure.json
+```
+
+Use this template for directories and plugin.json structure.
 
 **Create directories:**
 ```
@@ -627,7 +642,7 @@ bash mkdir -p {scope}/bundles/{bundle-name}/{skills,commands,agents}
 
 **Generate plugin.json:**
 
-Create plugin.json with:
+Create plugin.json using template from bundle-structure.json:
 ```json
 {
   "name": "bundle-name",
@@ -668,7 +683,7 @@ Write: {scope}/bundles/{bundle-name}/agents/README.md
 
 Track `files_created` counter.
 
-#### Step 3: Create Initial Components
+#### Step 4: Create Initial Components
 
 For each component type user requested:
 
@@ -690,13 +705,13 @@ For each component type user requested:
 # Pass scope and bundle-name parameters
 ```
 
-#### Step 4: Update plugin.json
+#### Step 5: Update plugin.json
 
 After components created, read plugin.json and update components array with created items.
 
 Track `components_created` counter.
 
-#### Step 5: Display Summary
+#### Step 6: Display Summary
 
 ```
 ╔════════════════════════════════════════════════════════════╗
@@ -723,7 +738,7 @@ Next steps:
 4. Run diagnosis: /plugin-doctor metadata
 ```
 
-#### Step 6: Run Metadata Validation
+#### Step 7: Run Metadata Validation
 
 ```
 SlashCommand: /cui-plugin-development-tools:plugin-doctor metadata
