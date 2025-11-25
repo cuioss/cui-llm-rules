@@ -31,7 +31,7 @@ Extract action from user input. Map common phrases:
 ```
 Skill: cui-maven:cui-pom-maintenance
 Workflow: {action}
-Parameters: module, auto_fix, dry_run (as applicable)
+Parameters: module, auto_fix (as applicable)
 ```
 
 **Action routing:**
