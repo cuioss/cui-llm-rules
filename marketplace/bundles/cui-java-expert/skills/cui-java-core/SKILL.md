@@ -599,6 +599,101 @@ Generated AsciiDoc follows CUI standards:
 
 ---
 
+## Workflow: Verify Implementation Readiness
+
+Verify that implementation task description is clear and the build is clean before starting implementation work.
+
+### Parameters
+
+- **description** (required): The task description to validate
+- **require_clean_build** (optional): Whether to verify build is clean (default: true)
+- **module** (optional): Module name for module-specific builds
+
+### Steps
+
+1. **Validate Task Description**
+   ```
+   Skill: cui-utilities:script-runner
+   Script: cui-java-expert:cui-java-core/verify-implementation-params
+   Parameters:
+     description: "{description}"
+   ```
+
+   Parse JSON output:
+   - `verification_passed`: boolean indicating if description is adequate
+   - `clarity_score`: numeric score (0-100)
+   - `missing_information`: list of missing details
+   - `ambiguities`: list of unclear aspects
+   - `vague_scope`: boolean indicating unclear scope
+
+   **If verification_passed is false:**
+   - Return clarification questions to user
+   - Highlight missing_information items
+   - Request clarification for ambiguities
+   - DO NOT proceed with implementation
+
+2. **Verify Build Precondition** (if require_clean_build is true)
+
+   **Execute clean build:**
+   ```
+   Skill: cui-maven:cui-maven-rules
+   Workflow: verify-clean-build
+   Parameters:
+     goals: clean compile
+     module: {module if specified}
+   ```
+
+   This workflow:
+   - Executes Maven build with output capture
+   - Parses build log using verify-clean-build.py script
+   - Returns status: clean|has-errors|has-warnings
+
+   **On build errors:**
+   - Check task description for "fix build" keywords
+   - If NOT a fix-build task → Report errors and stop
+   - If IS a fix-build task → Skip precondition (broken build IS the task)
+
+   Reference: xref:standards/build-precondition-pattern.md[Build Precondition Pattern]
+
+3. **Return Readiness Status**
+
+   Generate JSON response:
+   ```json
+   {
+     "ready_to_implement": true|false,
+     "task_clarity": {
+       "passed": true|false,
+       "score": 85,
+       "issues": []
+     },
+     "build_status": {
+       "clean": true|false,
+       "errors": [],
+       "warnings": []
+     },
+     "recommendations": []
+   }
+   ```
+
+### Script Contracts
+
+**verify-implementation-params** (via script-runner):
+- **Input**: JSON with `description` field
+- **Output**: JSON with verification results
+- **Location**: `cui-java-expert:cui-java-core/verify-implementation-params`
+
+**verify-clean-build** (via cui-maven workflow):
+- **Input**: Maven goals, optional module
+- **Output**: JSON with build status
+- **Workflow**: `cui-maven:cui-maven-rules` → `verify-clean-build`
+
+### Related Standards
+
+- Build Precondition Pattern: standards/build-precondition-pattern.md
+- Fix-Build Mode: standards/fix-build-mode.md
+
+---
+
 ## References
 
 **Core Standards (always loaded):**
@@ -612,3 +707,5 @@ Generated AsciiDoc follows CUI standards:
 * DSL Constants: standards/dsl-constants.md
 * LogMessages Documentation: standards/logmessages-documentation.md
 * CUI HTTP Client: standards/cui-http.md
+* Build Precondition: standards/build-precondition-pattern.md
+* Fix-Build Mode: standards/fix-build-mode.md
