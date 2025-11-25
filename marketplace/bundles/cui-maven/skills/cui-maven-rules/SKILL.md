@@ -457,35 +457,59 @@ Use this workflow when:
 
 ### Parameters
 
-- **parsed_output** (required): Path to parsed Maven output JSON (from parse-maven-output.py)
-- **config** (optional): Path to acceptable warnings config (default: `.claude/run-configuration.json`)
+- **warnings** (required): JSON array of warning objects from parse-maven-output.py
+- **acceptable_warnings** (optional): JSON object with acceptable patterns from run-configuration.json
 
-### Step 1: Execute Check Script
+### Step 1: Load Acceptable Patterns
+
+Use `cui-utilities:json-file-operations` to read patterns from run-configuration:
+
+```bash
+python3 cui-utilities/json-file-operations/scripts/manage-json-file.py \
+    read-field .claude/run-configuration.json \
+    --field "maven.acceptable_warnings"
+```
+
+If file doesn't exist or field is missing, use empty object `{}`.
+
+### Step 2: Extract Warnings from Parsed Output
+
+From the parse-maven-output.py result, extract the `data.issues` array.
+
+### Step 3: Categorize Warnings
+
+Pass warnings and patterns to the categorization script:
 
 ```bash
 python3 scripts/check-acceptable-warnings.py \
-    --parsed-output {parsed_output} \
-    --config {config}
+    --warnings '{issues_json}' \
+    --acceptable-warnings '{patterns_json}'
+```
+
+Or via stdin:
+```bash
+echo '{"warnings": [...], "acceptable_warnings": {...}}' | \
+    python3 scripts/check-acceptable-warnings.py
 ```
 
 **Output**: JSON with categorized warnings:
 
 ```json
 {
-  "status": "success",
-  "data": {
-    "total_warnings": 15,
-    "acceptable": 3,
-    "fixable": 10,
-    "unknown": 2,
-    "acceptable_warnings": [...],
-    "fixable_warnings": [...],
-    "unknown_warnings": [...]
+  "success": true,
+  "total": 15,
+  "acceptable": 3,
+  "fixable": 10,
+  "unknown": 2,
+  "categorized": {
+    "acceptable": [...],
+    "fixable": [...],
+    "unknown": [...]
   }
 }
 ```
 
-### Step 2: Process Results
+### Step 4: Process Results
 
 **Exit Codes:**
 - **0**: No fixable or unknown warnings (build clean)
@@ -514,9 +538,9 @@ Unknown warnings in output have `requires_classification: true` flag. Agent shou
 2. Either add to acceptable patterns (if infrastructure-related)
 3. Or fix the warning
 
-### Config File Format
+### Acceptable Warnings Format
 
-The script reads patterns from JSON config (`.claude/run-configuration.json`):
+Patterns are stored in `.claude/run-configuration.json` at path `maven.acceptable_warnings`:
 
 ```json
 {
@@ -535,11 +559,12 @@ The script reads patterns from JSON config (`.claude/run-configuration.json`):
 }
 ```
 
-Use the `cui-utilities:claude-run-configuration` skill to validate and manage this file.
+Use `cui-utilities:claude-run-configuration` to validate the file structure.
+Use `cui-utilities:json-file-operations` to read/write patterns.
 
 ### Script Location
 
-`scripts/check-acceptable-warnings.py`
+`scripts/check-acceptable-warnings.py` - Pure categorization logic, no file I/O.
 
 ---
 

@@ -1,51 +1,48 @@
 #!/usr/bin/env python3
 """
-Check build warnings against acceptable warnings list.
+Categorize build warnings against acceptable patterns.
 
-Compares warnings from parsed Maven output against the acceptable warnings
-configuration and categorizes them as acceptable, fixable, or unknown.
+Pure categorization logic - no file I/O. Receives data via stdin or arguments.
 
 Usage:
-    python3 check-acceptable-warnings.py --parsed-output <json-file> --config <config-file>
-    python3 check-acceptable-warnings.py --help
+    # Via stdin (JSON object with warnings and patterns)
+    echo '{"warnings": [...], "patterns": [...]}' | python3 check-acceptable-warnings.py
+
+    # Via arguments
+    python3 check-acceptable-warnings.py --warnings '[...]' --patterns '[...]'
 
 Input:
-    Expects pre-parsed JSON from parse-maven-output.py (not raw log file)
+    warnings: Array of warning objects from parse-maven-output.py
+        [{"type": "...", "message": "...", "severity": "WARNING"}, ...]
 
-Config Format:
-    Reads from .claude/run-configuration.json with structure:
-    {
-        "maven": {
-            "acceptable_warnings": {
-                "patterns": ["pattern1", "pattern2"],
-                "transitive_dependency": ["[WARNING] The POM for ..."],
-                "plugin_compatibility": ["[WARNING] Using platform encoding..."],
-                "platform_specific": ["[WARNING] Bootstrap class path..."]
-            }
-        }
-    }
+    patterns: Array of acceptable warning patterns (strings)
+        ["pattern1", "pattern2", ...]
 
 Output:
-    JSON with categorized warnings:
     {
-        "status": "success",
-        "data": {
-            "total_warnings": 15,
-            "acceptable": 3,
-            "fixable": 10,
-            "unknown": 2,
-            "fixable_warnings": [...],
-            "unknown_warnings": [...]
+        "success": true,
+        "total": 15,
+        "acceptable": 3,
+        "fixable": 10,
+        "unknown": 2,
+        "categorized": {
+            "acceptable": [...],
+            "fixable": [...],
+            "unknown": [...]
         }
     }
+
+Integration:
+    This script is called by the cui-maven-rules skill workflow.
+    Patterns are loaded via cui-utilities:json-file-operations from
+    .claude/run-configuration.json at path maven.acceptable_warnings.
 """
 
 import argparse
 import json
 import re
 import sys
-from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 
 # Warning types that are ALWAYS fixable (never acceptable)
@@ -57,113 +54,30 @@ ALWAYS_FIXABLE_TYPES = [
 ]
 
 
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Check build warnings against acceptable warnings list",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-    # Check warnings against JSON config
-    python3 check-acceptable-warnings.py \\
-        --parsed-output build-result.json \\
-        --config .claude/run-configuration.json
-
-    # Use default config location
-    python3 check-acceptable-warnings.py \\
-        --parsed-output build-result.json
-        """,
-    )
-    parser.add_argument(
-        "--parsed-output",
-        type=str,
-        required=True,
-        help="Path to parsed Maven output JSON (from parse-maven-output.py)"
-    )
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=".claude/run-configuration.json",
-        help="Path to acceptable warnings config (default: .claude/run-configuration.json)"
-    )
-    return parser.parse_args()
-
-
-def load_parsed_output(path: str) -> dict:
-    """Load and validate parsed Maven output JSON."""
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-        # Validate structure
-        if "data" not in data or "issues" not in data.get("data", {}):
-            return {
-                "error": "Invalid parsed output format: missing data.issues"
-            }
-
-        return data
-    except FileNotFoundError:
-        return {"error": f"Parsed output file not found: {path}"}
-    except json.JSONDecodeError as e:
-        return {"error": f"Invalid JSON in parsed output: {e}"}
-
-
-def load_acceptable_patterns(config_path: str) -> List[str]:
-    """
-    Load acceptable warning patterns from JSON config file.
-
-    Reads from .claude/run-configuration.json looking for maven.acceptable_warnings.
-    Aggregates patterns from all subcategories.
-    """
-    patterns = []
-
-    try:
-        with open(config_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        # Config file doesn't exist - no acceptable warnings
-        return []
-    except json.JSONDecodeError:
-        # Invalid JSON - treat as no patterns
-        return []
-
-    # Navigate to maven.acceptable_warnings
-    maven_config = data.get('maven', {})
-    acceptable = maven_config.get('acceptable_warnings', {})
-
-    # Collect patterns from all subcategories
-    for key, value in acceptable.items():
-        if isinstance(value, list):
-            for pattern in value:
-                if isinstance(pattern, str):
-                    # Strip [WARNING] prefix if present for matching
-                    clean_pattern = pattern
-                    if clean_pattern.startswith('[WARNING]'):
-                        clean_pattern = clean_pattern[9:].strip()
-                    patterns.append(clean_pattern)
-
-    return patterns
-
-
-def is_acceptable(warning_message: str, patterns: list) -> bool:
+def is_acceptable(warning_message: str, patterns: List[str]) -> bool:
     """Check if a warning matches any acceptable pattern."""
     for pattern in patterns:
-        # Exact match
-        if pattern in warning_message:
+        # Strip [WARNING] prefix if present
+        clean_pattern = pattern
+        if clean_pattern.startswith('[WARNING]'):
+            clean_pattern = clean_pattern[9:].strip()
+
+        # Exact match (substring)
+        if clean_pattern in warning_message:
             return True
 
         # Try as regex pattern
         try:
-            if re.search(pattern, warning_message, re.IGNORECASE):
+            if re.search(clean_pattern, warning_message, re.IGNORECASE):
                 return True
         except re.error:
-            # Invalid regex, treat as literal
+            # Invalid regex, treat as literal only
             pass
 
     return False
 
 
-def categorize_warning(warning: dict, acceptable_patterns: list) -> str:
+def categorize_warning(warning: dict, patterns: List[str]) -> str:
     """
     Categorize a warning as 'acceptable', 'fixable', or 'unknown'.
 
@@ -177,7 +91,7 @@ def categorize_warning(warning: dict, acceptable_patterns: list) -> str:
         return "fixable"
 
     # Check against acceptable patterns
-    if is_acceptable(message, acceptable_patterns):
+    if is_acceptable(message, patterns):
         return "acceptable"
 
     # Known warning types are fixable
@@ -201,76 +115,172 @@ def categorize_warning(warning: dict, acceptable_patterns: list) -> str:
     return "fixable"
 
 
-def check_warnings(parsed_output: dict, acceptable_patterns: list) -> dict:
+def categorize_warnings(warnings: List[dict], patterns: List[str]) -> dict:
     """
-    Check all warnings and categorize them.
+    Categorize all warnings.
 
-    Returns categorized results.
+    Args:
+        warnings: List of warning objects with type, message, severity
+        patterns: List of acceptable warning patterns
+
+    Returns:
+        Categorized results with counts and warning lists
     """
-    issues = parsed_output.get("data", {}).get("issues", [])
-
     # Filter to warnings only (not errors)
-    warnings = [i for i in issues if i.get("severity") == "WARNING"]
+    warning_items = [w for w in warnings if w.get("severity") == "WARNING"]
 
     acceptable = []
     fixable = []
     unknown = []
 
-    for warning in warnings:
-        category = categorize_warning(warning, acceptable_patterns)
+    for warning in warning_items:
+        category = categorize_warning(warning, patterns)
 
         if category == "acceptable":
             acceptable.append(warning)
         elif category == "fixable":
             fixable.append(warning)
         else:
-            unknown.append(warning)
+            unknown.append({
+                **warning,
+                "requires_classification": True
+            })
 
     return {
-        "status": "success",
-        "data": {
-            "total_warnings": len(warnings),
-            "acceptable": len(acceptable),
-            "fixable": len(fixable),
-            "unknown": len(unknown),
-            "acceptable_warnings": acceptable,
-            "fixable_warnings": fixable,
-            "unknown_warnings": [
-                {
-                    **w,
-                    "requires_classification": True
-                }
-                for w in unknown
-            ]
+        "success": True,
+        "total": len(warning_items),
+        "acceptable": len(acceptable),
+        "fixable": len(fixable),
+        "unknown": len(unknown),
+        "categorized": {
+            "acceptable": acceptable,
+            "fixable": fixable,
+            "unknown": unknown
         }
     }
 
 
+def flatten_patterns(acceptable_warnings: dict) -> List[str]:
+    """
+    Flatten acceptable_warnings object into a list of patterns.
+
+    Handles structure like:
+    {
+        "transitive_dependency": ["pattern1"],
+        "plugin_compatibility": ["pattern2"],
+        "platform_specific": ["pattern3"]
+    }
+    """
+    patterns = []
+    if isinstance(acceptable_warnings, dict):
+        for key, value in acceptable_warnings.items():
+            if isinstance(value, list):
+                patterns.extend(str(p) for p in value if p)
+    elif isinstance(acceptable_warnings, list):
+        patterns.extend(str(p) for p in acceptable_warnings if p)
+    return patterns
+
+
+def output_error(error: str) -> None:
+    """Output error as JSON."""
+    result = {"success": False, "error": error}
+    print(json.dumps(result, indent=2))
+    sys.exit(1)
+
+
 def main():
     """Main entry point."""
-    args = parse_args()
+    parser = argparse.ArgumentParser(
+        description="Categorize build warnings against acceptable patterns",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    # Via stdin
+    echo '{"warnings": [...], "patterns": [...]}' | python3 %(prog)s
 
-    # Load parsed Maven output
-    parsed_output = load_parsed_output(args.parsed_output)
-    if "error" in parsed_output:
-        result = {
-            "status": "error",
-            "error": "load_failed",
-            "message": parsed_output["error"]
-        }
-        print(json.dumps(result, indent=2))
-        sys.exit(1)
+    # Via arguments
+    python3 %(prog)s --warnings '[{"type":"other","message":"test","severity":"WARNING"}]' --patterns '["test"]'
 
-    # Load acceptable patterns
-    acceptable_patterns = load_acceptable_patterns(args.config)
+    # With acceptable_warnings object (will be flattened)
+    python3 %(prog)s --warnings '[...]' --acceptable-warnings '{"transitive_dependency": ["pattern1"]}'
+        """
+    )
+    parser.add_argument(
+        "--warnings",
+        type=str,
+        help="JSON array of warning objects"
+    )
+    parser.add_argument(
+        "--patterns",
+        type=str,
+        help="JSON array of acceptable patterns"
+    )
+    parser.add_argument(
+        "--acceptable-warnings",
+        type=str,
+        dest="acceptable_warnings",
+        help="JSON object with categorized patterns (will be flattened)"
+    )
 
-    # Check and categorize warnings
-    result = check_warnings(parsed_output, acceptable_patterns)
+    args = parser.parse_args()
+
+    # Determine input source
+    warnings = None
+    patterns = []
+
+    if args.warnings:
+        # From arguments
+        try:
+            warnings = json.loads(args.warnings)
+        except json.JSONDecodeError as e:
+            output_error(f"Invalid JSON in --warnings: {e}")
+
+        if args.patterns:
+            try:
+                patterns = json.loads(args.patterns)
+            except json.JSONDecodeError as e:
+                output_error(f"Invalid JSON in --patterns: {e}")
+        elif args.acceptable_warnings:
+            try:
+                acceptable = json.loads(args.acceptable_warnings)
+                patterns = flatten_patterns(acceptable)
+            except json.JSONDecodeError as e:
+                output_error(f"Invalid JSON in --acceptable-warnings: {e}")
+    else:
+        # From stdin
+        if sys.stdin.isatty():
+            output_error("No input provided. Use --warnings/--patterns or pipe JSON to stdin.")
+
+        try:
+            input_data = json.load(sys.stdin)
+        except json.JSONDecodeError as e:
+            output_error(f"Invalid JSON from stdin: {e}")
+
+        warnings = input_data.get("warnings", [])
+
+        # Support both "patterns" array and "acceptable_warnings" object
+        if "patterns" in input_data:
+            patterns = input_data["patterns"]
+        elif "acceptable_warnings" in input_data:
+            patterns = flatten_patterns(input_data["acceptable_warnings"])
+
+    # Validate inputs
+    if warnings is None:
+        output_error("No warnings provided")
+
+    if not isinstance(warnings, list):
+        output_error("warnings must be an array")
+
+    if not isinstance(patterns, list):
+        output_error("patterns must be an array")
+
+    # Categorize warnings
+    result = categorize_warnings(warnings, patterns)
 
     print(json.dumps(result, indent=2))
 
     # Exit with non-zero if there are fixable or unknown warnings
-    if result["data"]["fixable"] > 0 or result["data"]["unknown"] > 0:
+    if result["fixable"] > 0 or result["unknown"] > 0:
         sys.exit(1)
 
     sys.exit(0)

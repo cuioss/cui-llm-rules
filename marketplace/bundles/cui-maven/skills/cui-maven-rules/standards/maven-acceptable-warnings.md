@@ -149,14 +149,15 @@ deprecated for plugin
 
 ## Build Integration
 
-During build verification:
+During build verification, use the workflow from `cui-maven-rules` SKILL.md:
 
-1. Parse all `[WARNING]` lines from output
-2. For each warning, check against acceptable list
-3. If matched, skip (acceptable warning)
-4. If NOT matched:
-   - Check if fixable category → FIX IT
-   - If infrastructure → ASK USER to add to acceptable
+1. **Load patterns**: Use `cui-utilities:json-file-operations` to read `maven.acceptable_warnings`
+2. **Parse build output**: Use `parse-maven-output.py` to extract issues
+3. **Categorize**: Pass warnings and patterns to `check-acceptable-warnings.py`
+4. **Process results**:
+   - `acceptable`: Skip (matches patterns)
+   - `fixable`: Route to appropriate fix command
+   - `unknown`: Ask user to classify (add to config or fix)
 
 ## JavaDoc Warning Handling
 
