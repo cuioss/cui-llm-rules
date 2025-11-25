@@ -75,13 +75,6 @@ Examples:
 - `cleanup` - Remove stale/duplicate content
 - `update` - Refresh metadata and cross-references
 
-### Deprecated Commands
-
-> **Note**: These commands still work but are deprecated. Use `/doc-doctor` instead.
-
-- `/doc-review-single-asciidoc` → Use `/doc-doctor target=<file>`
-- `/doc-review-technical-docs` → Use `/doc-doctor target=<directory>`
-
 ### Skills (1 skill with 9 workflows)
 
 **cui-documentation** - Documentation standards skill:
@@ -148,12 +141,10 @@ Located in `cui-documentation/assets/templates/`:
 
 ```
 cui-documentation-standards/
-├── commands/                     # 3 goal-based commands + 2 deprecated
-│   ├── doc-doctor.md             # NEW: Unified diagnostic
-│   ├── doc-create.md             # NEW: Create from templates
-│   ├── doc-maintain.md           # NEW: Maintenance operations
-│   ├── doc-review-single-asciidoc.md  # DEPRECATED
-│   └── doc-review-technical-docs.md   # DEPRECATED
+├── commands/                     # 3 goal-based commands
+│   ├── doc-doctor.md             # Unified diagnostic
+│   ├── doc-create.md             # Create from templates
+│   └── doc-maintain.md           # Maintenance operations
 └── skills/
     └── cui-documentation/        # Skill with 9 workflows
         ├── SKILL.md
@@ -173,31 +164,9 @@ MAINTAIN: /doc-maintain → cui-documentation → sync/cleanup/refresh
 
 All commands are thin orchestrators (<150 lines) that delegate to skill workflows.
 
-## Migration Guide
-
-### From /doc-review-single-asciidoc
-
-```
-# Before
-/doc-review-single-asciidoc file=standards/java.adoc
-
-# After
-/doc-doctor target=standards/java.adoc depth=thorough
-```
-
-### From /doc-review-technical-docs
-
-```
-# Before
-/doc-review-technical-docs path=standards/
-
-# After
-/doc-doctor target=standards/ depth=thorough
-```
-
 ## Bundle Statistics
 
-- **Commands**: 3 active + 2 deprecated
+- **Commands**: 3
 - **Skills**: 1 (with 9 workflows)
 - **Templates**: 3
 - **Scripts**: 6
