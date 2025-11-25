@@ -74,7 +74,7 @@ Loads:
 
 ### Step 2: Read User-Approved Permissions
 
-Check `.claude/run-configuration.md` for setup-project-permissions section containing user-approved suspicious permissions.
+Check `.claude/run-configuration.json` path `commands.setup-project-permissions.user_approved_permissions` for user-approved suspicious permissions.
 
 ### Step 3: Read Global and Local Permissions
 
@@ -396,19 +396,36 @@ Global Changes (if any):
 
 **C. Apply changes** (unless dry-run mode)
 
-### Step 15: Update run-configuration.md
+### Step 15: Update run-configuration.json
 
-Update `.claude/run-configuration.md` with:
-- User-approved permissions
-- Execution timestamp
-- Change statistics for local settings
-- Global settings modifications (if any):
-  - Count of marketplace wildcards added (if any)
-  - Count of marketplace permissions added to global
-  - Script permissions synced (added/removed counts)
-  - List of permissions added
-  - Success/failure status
-- User decisions (moved to global vs. skipped)
+Update `.claude/run-configuration.json` at path `commands.setup-project-permissions`:
+
+```json
+{
+  "commands": {
+    "setup-project-permissions": {
+      "user_approved_permissions": ["...approved permissions..."],
+      "last_execution": {
+        "date": "YYYY-MM-DD",
+        "status": "SUCCESS|FAILED",
+        "result": "Description of changes"
+      },
+      "changes_applied": {
+        "global_added": ["marketplace wildcards", "permissions"],
+        "local_removed": ["removed permissions"],
+        "local_kept": ["kept permissions"]
+      },
+      "lessons_learned": ["any important findings"]
+    }
+  }
+}
+```
+
+Update fields:
+- `user_approved_permissions`: User-approved suspicious permissions
+- `last_execution`: Execution timestamp and status
+- `changes_applied`: Change statistics for local and global settings
+- `lessons_learned`: User decisions and important findings
 
 ## CRITICAL RULES
 

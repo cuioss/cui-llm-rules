@@ -18,6 +18,15 @@ These utilities are independent tools that can be used across different CUI proj
 
 ## Components Included
 
+### Skills (6 skills)
+
+1. **cui-diagnostic-patterns** - Tool usage patterns for non-prompting file operations
+2. **cui-general-development-rules** - Core development principles for CUI projects
+3. **file-management** - JSON file operations for .claude/ configuration and memory files
+4. **permission-management** - Permission validation and settings management
+5. **script-runner** - Script resolution and execution with portable notation
+6. **web-security-standards** - Trusted domains and security assessment patterns
+
 ### Agents (1 agent)
 
 1. **research-best-practices** - Web research and best practices investigation
@@ -28,7 +37,7 @@ These utilities are independent tools that can be used across different CUI proj
    - Maintains complete reference trails
    - Invoked when user requests research, best practices, or topic investigation
 
-### Commands (6 commands)
+### Commands (7 commands)
 
 1. **audit-permission-wildcards** - Marketplace wildcard analyzer
    - Analyzes marketplace bundles to identify required permission wildcard patterns
@@ -62,6 +71,11 @@ These utilities are independent tools that can be used across different CUI proj
    - Regenerates PNG images
    - Removes orphaned diagrams with approval
    - Usage: `/tools-verify-architecture-diagrams [plantuml_dir] [push]`
+
+7. **discover-skill-scripts** - Script discovery and registration
+   - Discovers all skill scripts from installed plugins
+   - Generates `.claude/scripts.local.json` with path mappings
+   - Usage: `/tools-discover-skill-scripts`
 
 ## Installation
 

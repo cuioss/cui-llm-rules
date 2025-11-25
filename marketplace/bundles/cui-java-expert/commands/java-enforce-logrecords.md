@@ -28,8 +28,8 @@ This ensures the command evolves and becomes more effective with each execution.
 
 **Determine project structure:**
 
-1. Check if `.claude/run-configuration.md` exists
-2. If exists, search for multi-module indicators (e.g., multiple module sections)
+1. Check if `.claude/run-configuration.json` exists
+2. If exists, check for multiple modules in `commands.java-enforce-logrecords.modules`
 3. If parameter unset:
    - Single-module: Proceed with entire project
    - Multi-module: List available modules and ask user which to analyze
@@ -48,10 +48,10 @@ If build fails, report to caller and stop execution.
 ### Step 3: Load Configuration and Logging Standards
 
 **Read configuration:**
-1. Read `.claude/run-configuration.md` for module-specific paths
-2. Look for section matching command key: `java-enforce-logrecords`
-3. Extract LogMessages class locations for each module
-4. Extract LogMessages.adoc locations for each module
+1. Read `.claude/run-configuration.json`
+2. Access JSON path: `commands.java-enforce-logrecords.modules.{module-name}`
+3. Extract `logmessages_classes` array
+4. Extract `logmessages_documentation` array
 
 **Load logging standards:**
 ```
@@ -62,25 +62,30 @@ This loads:
 - `standards/logging-standards.md` - LogRecord usage rules
 - `standards/logmessages-documentation.md` - Documentation requirements
 
-**Configuration structure:**
-```markdown
-## java-enforce-logrecords
-
-### Module: [module-name]
-
-#### LogMessages Classes
-- Package: com.example.auth → Class: AuthenticationLogMessages
-- Package: com.example.token → Class: TokenLogMeLgMessagessages
-
-#### LogMessages Documentation
-- doc/LogMessages.adoc
+**Configuration structure (JSON):**
+```json
+{
+  "commands": {
+    "java-enforce-logrecords": {
+      "modules": {
+        "{module-name}": {
+          "logmessages_classes": [
+            {"package": "com.example.auth", "class": "AuthenticationLogMessages"},
+            {"package": "com.example.token", "class": "TokenLogMessages"}
+          ],
+          "logmessages_documentation": ["doc/LogMessages.adoc"]
+        }
+      }
+    }
+  }
+}
 ```
 
 **If configuration missing or incomplete:**
 - Attempt to locate LogMessages classes using Glob: `**/*LogMessages.java`
 - Attempt to locate LogMessages.adoc using Glob: `**/LogMessages.adoc`
 - If still uncertain (confidence < 100%), ask user for help
-- Store results in configuration for future runs
+- Store results in `.claude/run-configuration.json` at path `commands.java-enforce-logrecords.modules.{module}`
 
 ### Step 4: Find and Analyze Logging Violations
 
@@ -303,8 +308,8 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - See: `logging-enforcement-patterns.md` → Pattern 15
 
 **Configuration Management:**
-- Read `.claude/run-configuration.md` for module-specific paths
-- Store LogMessages class and documentation locations
+- Read `.claude/run-configuration.json` path: `commands.java-enforce-logrecords.modules`
+- Store LogMessages class and documentation locations in JSON structure
 - Ask user for help if locations uncertain (< 100% confidence)
 - Update configuration for future executions
 

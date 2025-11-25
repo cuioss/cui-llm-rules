@@ -110,16 +110,22 @@ The parse-maven-output.py script categorizes issues:
 
 ### Project Configuration
 
-Maven projects can configure build behavior in `.claude/run-configuration.md`:
+Maven projects can configure build behavior in `.claude/run-configuration.json`:
 
-```markdown
-# Command Configuration
-
-## ./mvnw -Ppre-commit clean install
-
-### Last Execution Duration
-- **Duration**: 120000ms (2 minutes)
-- **Last Updated**: 2025-10-29
+```json
+{
+  "version": 1,
+  "maven": {
+    "./mvnw -Ppre-commit clean install": {
+      "last_execution": {
+        "duration_ms": 120000,
+        "duration_human": "2 minutes",
+        "last_updated": "2025-10-29"
+      },
+      "acceptable_warnings": []
+    }
+  }
+}
 ```
 
 ### Build Profiles

@@ -274,67 +274,167 @@ Based on issue category, delegate to appropriate commands:
 
 ---
 
-## Workflow: Handle OpenRewrite Markers
+## Workflow: Find Module Path
 
-**Pattern**: Pattern 3 (Search-Analyze-Report)
+**Pattern**: Pattern 4 (Command Chain Execution)
 
-This workflow searches for OpenRewrite TODO markers in source code and handles suppression based on marker type.
+This workflow finds Maven module paths from artifactId using `find-module-path.py` for use with module-targeted builds.
+
+### When to Use
+
+Use this workflow when:
+- Need to build a specific module by name
+- Need to resolve artifactId to module path for `-pl` argument
+- Validating a module path exists
+
+### Parameters
+
+- **artifact_id** (option 1): ArtifactId to search for
+- **module_path** (option 2): Explicit module path to validate
+- **root** (optional): Project root directory (default: current directory)
+
+### Step 1: Execute Find Script
+
+**Search by artifactId:**
+```bash
+python3 scripts/find-module-path.py \
+    --artifact-id {artifact_id}
+```
+
+**Validate explicit path:**
+```bash
+python3 scripts/find-module-path.py \
+    --module-path {module_path}
+```
+
+### Step 2: Process Results
+
+**Success Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "artifact_id": "auth-service",
+    "module_path": "services/auth-service",
+    "pom_file": "services/auth-service/pom.xml",
+    "parent_modules": ["services"],
+    "maven_pl_argument": "-pl services/auth-service"
+  }
+}
+```
+
+Use `maven_pl_argument` directly in Maven commands.
+
+**Ambiguous ArtifactId Response:**
+```json
+{
+  "status": "error",
+  "error": "ambiguous_artifact_id",
+  "message": "Multiple modules found for artifactId 'auth-service'. Select one.",
+  "choices": ["services/auth-service", "legacy/auth-service"]
+}
+```
+
+When ambiguous, present choices to user or caller, then use `--module-path` with selected choice.
+
+### Exit Codes
+
+- **0**: Module found successfully
+- **1**: Error (not found, ambiguous, invalid path)
+
+### Multi-Module Resolution
+
+The script only matches `<artifactId>` in module definition context (direct child of `<project>`). It ignores:
+- Dependencies (`<dependency><artifactId>`)
+- Plugins (`<plugin><artifactId>`)
+- Parent references (`<parent><artifactId>`)
+
+### Script Location
+
+`scripts/find-module-path.py`
+
+---
+
+## Workflow: Search OpenRewrite Markers
+
+**Pattern**: Pattern 4 (Command Chain Execution)
+
+This workflow searches for OpenRewrite TODO markers in source code using `search-openrewrite-markers.py` and categorizes them for handling.
 
 ### When to Use
 
 Use this workflow when:
 - Build completes but OpenRewrite markers remain in source files
-- Need to suppress known false-positive markers
+- Need to find and categorize markers before suppression
 - Iterating on build to clear marker warnings
 
 ### Parameters
 
 - **source_dir** (optional): Directory to search (default: `src`)
+- **extensions** (optional): File extensions to search (default: `.java`)
 
-### Step 1: Search for Markers
+### Step 1: Execute Search Script
 
-```
-Grep: pattern="/\*~~\(TODO:" path="{source_dir}" output_mode="files_with_matches"
-```
-
-If no files found, workflow completes successfully (no markers).
-
-### Step 2: Analyze Markers
-
-For each file with markers:
-1. Read file content
-2. Extract marker messages with line numbers
-3. Categorize by recipe type:
-   - **CuiLogRecordPatternRecipe** → LogRecord warning
-   - **InvalidExceptionUsageRecipe** → Exception warning
-   - **Other** → Unknown type
-
-### Step 3: Handle by Type
-
-**LogRecord warnings (AUTO-SUPPRESS):**
-```java
-// cui-rewrite:disable CuiLogRecordPatternRecipe
-LOGGER.info(INFO.SOME_MESSAGE, param);
+```bash
+python3 scripts/search-openrewrite-markers.py \
+    --source-dir {source_dir} \
+    --extensions {extensions}
 ```
 
-**Exception warnings (AUTO-SUPPRESS):**
-```java
-// cui-rewrite:disable InvalidExceptionUsageRecipe
-catch (SomeException e) {
+**Output**: JSON with categorized markers:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "total_markers": 5,
+    "files_affected": 3,
+    "recipe_summary": {"CuiLogRecordPatternRecipe": 2, "SomeOtherRecipe": 1},
+    "by_category": {
+      "auto_suppress": [...],
+      "ask_user": [...]
+    },
+    "auto_suppress_count": 3,
+    "ask_user_count": 2,
+    "markers": [...]
+  }
+}
 ```
 
-**Other types (ASK USER):**
-Present marker to user with:
-- File and line number
-- Marker message
+### Step 2: Process by Category
+
+**auto_suppress markers** (CuiLogRecordPatternRecipe, InvalidExceptionUsageRecipe):
+- Apply suppression comment from marker's `suppression_comment` field
+- No user interaction needed
+
+**ask_user markers** (other recipes):
+- Present to user with file, line, message
 - Options: Suppress, Ignore, Manual fix
 
-### Step 4: Verify After Changes
+### Step 3: Apply Suppressions
 
-After suppression changes:
-- Re-run Maven build
-- Verify markers are gone
-- If markers persist after 3 iterations, report failure
+For each marker to suppress, add the suppression comment before the affected line:
+
+```java
+// cui-rewrite:disable RecipeName
+<affected line>
+```
+
+### Step 4: Verify
+
+Re-run the search to confirm markers are handled. Exit codes:
+- **0**: No markers or all auto-suppressible
+- **1**: Markers requiring user action exist
+
+### Auto-Suppress Recipes
+
+The script automatically categorizes these recipes for auto-suppression:
+- `CuiLogRecordPatternRecipe` - LogRecord warnings
+- `InvalidExceptionUsageRecipe` - Exception handling patterns
+
+### Script Location
+
+`scripts/search-openrewrite-markers.py`
 
 ### Reference
 
@@ -342,73 +442,124 @@ See `standards/maven-openrewrite-handling.md` for full documentation.
 
 ---
 
-## Workflow: Manage Acceptable Warnings
+## Workflow: Check Acceptable Warnings
+
+**Pattern**: Pattern 4 (Command Chain Execution)
+
+This workflow checks build warnings against the acceptable warnings list using `check-acceptable-warnings.py` and categorizes them for action.
+
+### When to Use
+
+Use this workflow when:
+- After parsing Maven build output, need to filter acceptable from fixable warnings
+- Determining which warnings require attention
+- Generating a report of actionable warnings
+
+### Parameters
+
+- **parsed_output** (required): Path to parsed Maven output JSON (from parse-maven-output.py)
+- **config** (optional): Path to acceptable warnings config (default: `.claude/run-configuration.md`)
+
+### Step 1: Execute Check Script
+
+```bash
+python3 scripts/check-acceptable-warnings.py \
+    --parsed-output {parsed_output} \
+    --config {config}
+```
+
+**Output**: JSON with categorized warnings:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "total_warnings": 15,
+    "acceptable": 3,
+    "fixable": 10,
+    "unknown": 2,
+    "acceptable_warnings": [...],
+    "fixable_warnings": [...],
+    "unknown_warnings": [...]
+  }
+}
+```
+
+### Step 2: Process Results
+
+**Exit Codes:**
+- **0**: No fixable or unknown warnings (build clean)
+- **1**: Fixable or unknown warnings exist (action needed)
+
+**Warning Categories:**
+
+| Category | Action |
+|----------|--------|
+| `acceptable` | Ignore - matches config patterns |
+| `fixable` | Route to appropriate fix command |
+| `unknown` | Requires classification (add to config or fix) |
+
+### Always Fixable Types
+
+These warning types are NEVER acceptable (script enforces this):
+- `javadoc_warning` - Always fix
+- `compilation_error` - Always fix
+- `deprecation_warning` - Always fix
+- `unchecked_warning` - Always fix
+
+### Unknown Warning Handling
+
+Unknown warnings in output have `requires_classification: true` flag. Agent should:
+1. Analyze warning message
+2. Either add to acceptable patterns (if infrastructure-related)
+3. Or fix the warning
+
+### Config File Format
+
+The script reads patterns from markdown config (`.claude/run-configuration.md`):
+
+```markdown
+## Acceptable Warnings
+
+### Transitive Dependency Warnings
+- `[WARNING] The POM for com.example:lib:jar:1.0 is missing`
+- `[WARNING] Using platform encoding UTF-8`
+```
+
+### Script Location
+
+`scripts/check-acceptable-warnings.py`
+
+---
+
+## Workflow: Manage Acceptable Warnings Config
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-This workflow manages the acceptable warnings list in `.claude/run-configuration.json`.
+This workflow manages the acceptable warnings configuration in `.claude/run-configuration.md`.
 
 ### When to Use
 
 Use this workflow when:
 - Adding infrastructure warnings to acceptable list
 - Removing resolved warnings from acceptable list
-- Listing current acceptable warnings
+- Reviewing current acceptable warnings
 
-### Parameters
+### Adding a Pattern
 
-- **action** (required): `add`, `remove`, or `list`
-- **pattern** (optional): Warning pattern to add/remove
-- **command** (optional): Maven command key (default: `./mvnw clean install`)
-- **config_file** (optional): Config file path (default: `.claude/run-configuration.json`)
+1. Read `.claude/run-configuration.md`
+2. Find or create `## Acceptable Warnings` section
+3. Add pattern under appropriate subsection:
+   - `### Transitive Dependency Warnings`
+   - `### Plugin Compatibility`
+   - `### Platform Specific`
 
-### Step 1: Read Configuration
+Format: `- \`[WARNING] pattern text\``
 
-```
-Read: {config_file}
-```
+### Removing a Pattern
 
-Access JSON path: `maven.{command}.acceptable_warnings`
-
-If file doesn't exist, create with initial structure:
-```json
-{
-  "version": 1,
-  "maven": {
-    "{command}": {
-      "acceptable_warnings": []
-    }
-  }
-}
-```
-
-### Step 2: Process Action
-
-**Action: list**
-- Return `acceptable_warnings` array for the command
-
-**Action: add**
-- Validate pattern is not a JavaDoc warning (NEVER acceptable)
-- Validate pattern matches infrastructure warning criteria
-- Add to `acceptable_warnings` array:
-  ```json
-  {
-    "pattern": "{pattern}",
-    "category": "{transitive_dependency|plugin_compatibility|platform_specific}",
-    "reason": "{why this is acceptable}",
-    "added": "{YYYY-MM-DD}"
-  }
-  ```
-
-**Action: remove**
-- Find entry with matching pattern
-- Remove from `acceptable_warnings` array
-
-### Step 3: Write Configuration
-
-If add/remove action:
-- Write updated JSON to config file
-- Return confirmation with updated array
+1. Read `.claude/run-configuration.md`
+2. Find and remove the pattern line
 
 ### Infrastructure Warning Criteria
 
@@ -443,7 +594,12 @@ This skill requires:
 - **Read**: To load standards files
 - **Grep**: To search for patterns in standards
 - **Bash(./mvnw:*)**: To execute Maven builds
-- **Bash(python3:*)**: To execute parse-maven-output.py script
+- **Bash(python3:*)**: To execute scripts:
+  - `execute-maven-build.py` - Atomic Maven build execution
+  - `parse-maven-output.py` - Build output parsing
+  - `check-acceptable-warnings.py` - Warning categorization
+  - `search-openrewrite-markers.py` - OpenRewrite marker search
+  - `find-module-path.py` - Module path resolution
 
 ## Usage Pattern
 

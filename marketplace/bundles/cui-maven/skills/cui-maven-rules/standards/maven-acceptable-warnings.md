@@ -50,28 +50,43 @@ These warnings MUST be fixed and NEVER added to acceptable list:
 
 ## Configuration File Format
 
-Acceptable warnings are stored in `.claude/run-configuration.md`:
+Acceptable warnings are stored in `.claude/run-configuration.json`:
 
-```markdown
-# Maven Build Configuration
+```json
+{
+  "version": 1,
+  "maven": {
+    "./mvnw -Ppre-commit clean install": {
+      "last_execution": {
+        "duration_ms": 120000,
+        "duration_human": "2 minutes",
+        "last_updated": "2025-11-25"
+      },
+      "acceptable_warnings": [
+        {
+          "pattern": "[WARNING] Overriding managed version 2.0.0 for slf4j-api",
+          "category": "transitive_dependency",
+          "reason": "Parent BOM locks SLF4J version for consistency",
+          "added": "2025-11-25"
+        },
+        {
+          "pattern": "[WARNING] Parameter 'session' is deprecated",
+          "category": "plugin_compatibility",
+          "reason": "Plugin version locked by parent POM",
+          "added": "2025-11-25"
+        }
+      ]
+    }
+  }
+}
+```
 
-## ./mvnw -Ppre-commit clean install
+### JSON Path Access
 
-### Last Execution Duration
-- **Duration**: 120000ms (2 minutes)
-- **Last Updated**: 2025-11-25
-
-### Acceptable Warnings
-
-#### Transitive Dependency Conflicts
-- `[WARNING] Overriding managed version 2.0.0 for slf4j-api`
-  - **Reason**: Parent BOM locks SLF4J version for consistency
-  - **Added**: 2025-11-25
-
-#### Plugin Compatibility
-- `[WARNING] Parameter 'session' is deprecated`
-  - **Reason**: Plugin version locked by parent POM
-  - **Added**: 2025-11-25
+To read acceptable warnings for a command:
+```
+Path: maven.{command}.acceptable_warnings
+Example: maven["./mvnw -Ppre-commit clean install"].acceptable_warnings
 ```
 
 ## Adding Acceptable Warnings

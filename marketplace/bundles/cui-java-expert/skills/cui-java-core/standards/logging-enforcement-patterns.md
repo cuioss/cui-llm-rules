@@ -366,34 +366,38 @@ Parameters:
 
 ### Pattern 16: Module-Specific Configuration
 
-**Configuration Structure in `.claude/run-configuration.md`:**
+**Configuration Structure in `.claude/run-configuration.json`:**
 
-```markdown
-## cui-java-enforce-logrecords
-
-### Module: {module-name}
-
-#### LogMessages Classes
-- Package: com.example.auth → Class: AuthenticationLogMessages
-- Package: com.example.token → Class: TokenLogMessages
-
-#### LogMessages Documentation
-- doc/LogMessages.adoc
-
-### Module: {another-module}
-
-#### LogMessages Classes
-- Package: com.example.data → Class: DataLogMessages
-
-#### LogMessages Documentation
-- modules/{another-module}/doc/LogMessages.adoc
+```json
+{
+  "version": 1,
+  "commands": {
+    "java-enforce-logrecords": {
+      "modules": {
+        "{module-name}": {
+          "logmessages_classes": [
+            {"package": "com.example.auth", "class": "AuthenticationLogMessages"},
+            {"package": "com.example.token", "class": "TokenLogMessages"}
+          ],
+          "logmessages_documentation": ["doc/LogMessages.adoc"]
+        },
+        "{another-module}": {
+          "logmessages_classes": [
+            {"package": "com.example.data", "class": "DataLogMessages"}
+          ],
+          "logmessages_documentation": ["modules/{another-module}/doc/LogMessages.adoc"]
+        }
+      }
+    }
+  }
+}
 ```
 
 **Usage:**
-1. Read configuration for command key: `cui-java-enforce-logrecords`
-2. Find section for specified module
-3. Extract LogMessages class paths
-4. Extract LogMessages.adoc paths
+1. Read `.claude/run-configuration.json`
+2. Access JSON path: `commands.java-enforce-logrecords.modules.{module-name}`
+3. Extract `logmessages_classes` array
+4. Extract `logmessages_documentation` array
 5. If missing, attempt auto-discovery and ask user to confirm
 
 ### Pattern 17: Auto-Discovery Fallback
@@ -417,8 +421,8 @@ Parameters:
    - < 100% confident: Ask user to confirm paths
 
 4. **Store in configuration:**
-   - Update `.claude/run-configuration.md`
-   - Add discovered paths for future runs
+   - Update `.claude/run-configuration.json`
+   - Add discovered paths to `commands.java-enforce-logrecords.modules.{module}`
 
 ## Quality Checklist
 

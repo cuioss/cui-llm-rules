@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "commands": {
+    "docs-technical-adoc-review": {
+      "skipped_files": [],
+      "skipped_directories": [
+        "target/",
+        "node_modules/",
+        ".git/"
+      ],
+      "acceptable_warnings": [],
+      "last_execution": {
+        "date": "2025-10-23",
+        "run_number": 2,
+        "directories_processed": 1,
+        "files_reviewed": 5,
+        "issues_fixed": 24,
+        "status": "SUCCESS",
+        "parallel_agents": 0
+      },
+      "lessons_learned": []
+    },
+    "manage-webfetch-domains": {
+      "local_domains": [
+        {
+          "domain": "blog.sonatype.com",
+          "purpose": "Sonatype security blog for dependency security best practices"
+        },
+        {
+          "domain": "docs.sonarsource.com",
+          "purpose": "SonarQube/SonarCloud documentation"
+        },
+        {
+          "domain": "www.martinkanters.dev",
+          "purpose": "Martin Kanters' blog on Java and security topics"
+        },
+        {
+          "domain": "www.sonatype.com",
+          "purpose": "Sonatype documentation and resources"
+        }
+      ],
+      "last_updated": "2025-11-04",
+      "notes": [
+        "Security improvement: Removed WebFetch(domain:*) from global settings and replaced with explicit domain permissions for better security control and auditability"
+      ]
+    },
+    "setup-project-permissions": {
+      "user_approved_permissions": [],
+      "last_execution": {
+        "date": "2025-11-22",
+        "run_number": 6,
+        "result": "Fixed architecture violations, added global marketplace permissions",
+        "status": "SUCCESS"
+      },
+      "changes_applied": {
+        "global_added": [
+          "8 Skill bundle wildcards",
+          "8 SlashCommand bundle wildcards",
+          "35 SlashCommand short-form permissions"
+        ],
+        "local_removed": [
+          "Skill(cui-diagnostic-patterns)",
+          "Skill(cui-utilities:permission-management)",
+          "Skill(cui-plugin-development-tools:marketplace-inventory)",
+          "Bash(bash /Users/.../scan-marketplace-inventory.sh:*)"
+        ],
+        "local_kept": [
+          "Bash(claude-code:*)",
+          "Edit(//~/git/cui-llm-rules/**)",
+          "Write(//~/git/cui-llm-rules/**)",
+          "Read(//marketplace/**)",
+          "Read(//.claude/**)",
+          "Read(//standards/**)",
+          "WebFetch(domain:formulae.brew.sh)"
+        ]
+      },
+      "lessons_learned": [
+        "The relative path pattern handles script portability automatically",
+        "Scripts are invoked via 'bash scripts/script.sh' in SKILL.md",
+        "Claude resolves relative paths to the skill's mounted directory at runtime",
+        "No hardcoded absolute paths should ever be in settings",
+        "Script permissions are NOT needed in settings - the skill system handles this"
+      ],
+      "permission_summary": {
+        "global": {
+          "allow_count": 226,
+          "deny_count": 69,
+          "details": {
+            "bash_commands": 145,
+            "skill_bundle_wildcards": 8,
+            "slashcommand_bundle_wildcards": 8,
+            "slashcommand_short_form": 35,
+            "webfetch_domains": 30,
+            "websearch": 1
+          }
+        },
+        "local": {
+          "allow_count": 7,
+          "deny_count": 0,
+          "ask_count": 0
+        }
+      },
+      "compliance_status": {
+        "marketplace_bundle_wildcards_in_global": true,
+        "short_form_commands_in_global": true,
+        "no_relative_path_violations": true,
+        "no_hardcoded_script_paths": true,
+        "minimal_project_specific_permissions": true,
+        "proper_global_local_separation": true
+      }
+    }
+  },
+  "maven": {},
+  "agent_decisions": {
+    "pr-quality-fixer": {
+      "status": "keep-monolithic",
+      "decision_date": "2025-10-30",
+      "rationale": "Agent handles complex PR quality workflow with interdependent steps",
+      "responsibilities": [
+        "Retrieve and resolve Sonar code quality issues",
+        "Analyze code coverage gaps",
+        "Generate JUnit tests for uncovered code",
+        "Coordinate build verification and commit workflow"
+      ],
+      "line_count": 716,
+      "future_consideration": "When specific aspects require independent invocation or the workflow needs more flexibility, consider extracting specialized agents for: Sonar issue resolution only, Coverage analysis and test generation, Build verification and quality gate checking"
+    },
+    "asciidoc-reviewer": {
+      "status": "refactored",
+      "completion_date": "2025-10-30",
+      "original_lines": 704,
+      "result": {
+        "orchestrator": {
+          "file": "asciidoc-reviewer.md",
+          "lines": 328
+        },
+        "specialists": [
+          {
+            "file": "asciidoc-format-validator.md",
+            "lines": 182,
+            "purpose": "Format compliance checking"
+          },
+          {
+            "file": "asciidoc-link-verifier.md",
+            "lines": 260,
+            "purpose": "Link and cross-reference verification"
+          },
+          {
+            "file": "asciidoc-content-reviewer.md",
+            "lines": 342,
+            "purpose": "Content quality review"
+          }
+        ]
+      },
+      "benefits": [
+        "Users can invoke specialized agents directly for focused reviews",
+        "Each agent has clear single responsibility",
+        "Improved maintainability and testability",
+        "Better tool coverage tracking per concern"
+      ]
+    }
+  }
+}

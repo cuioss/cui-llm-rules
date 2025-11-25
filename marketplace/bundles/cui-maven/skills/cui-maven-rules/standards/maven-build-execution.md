@@ -209,22 +209,34 @@ Track build durations for accurate timeout calculation:
 2. Update tracking when duration changes by >10%
 3. Failed builds have unpredictable durations and should not update tracking
 
-**Storage**: Use `.claude/run-configuration.md` for duration tracking:
+**Storage**: Use `.claude/run-configuration.json` for duration tracking:
 
-```markdown
-# Maven Build Configuration
+```json
+{
+  "version": 1,
+  "maven": {
+    "./mvnw -Ppre-commit clean install": {
+      "last_execution": {
+        "duration_ms": 120000,
+        "duration_human": "2 minutes",
+        "last_updated": "2025-10-31"
+      }
+    },
+    "./mvnw clean install -pl auth-module": {
+      "last_execution": {
+        "duration_ms": 45000,
+        "duration_human": "45 seconds",
+        "last_updated": "2025-10-31"
+      }
+    }
+  }
+}
+```
 
-## ./mvnw -Ppre-commit clean install
-
-### Last Execution Duration
-- **Duration**: 120000ms (2 minutes)
-- **Last Updated**: 2025-10-31
-
-## ./mvnw clean install -pl auth-module
-
-### Last Execution Duration
-- **Duration**: 45000ms (45 seconds)
-- **Last Updated**: 2025-10-31
+**JSON Path Access**:
+```
+Path: maven.{command}.last_execution.duration_ms
+Example: maven["./mvnw -Ppre-commit clean install"].last_execution.duration_ms
 ```
 
 ## Build Output Modes

@@ -12,7 +12,7 @@ target/
 
 # But allow project skills and run configuration to be shared
 !.claude/skills/
-!.claude/run-configuration.md
+!.claude/run-configuration.json
 
 # Ignore user-specific settings
 .claude/settings.local.json
