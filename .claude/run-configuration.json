@@ -12,18 +12,14 @@
       "last_execution": {
         "date": "2025-10-23",
         "status": "SUCCESS"
-      },
-      "lessons_learned": []
+      }
     },
     "setup-project-permissions": {
       "user_approved_permissions": [],
       "last_execution": {
         "date": "2025-11-22",
         "status": "SUCCESS"
-      },
-      "lessons_learned": [
-        "Script permissions are NOT needed in settings - the skill system handles this"
-      ]
+      }
     }
   },
   "maven": {
