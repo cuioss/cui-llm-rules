@@ -1,16 +1,16 @@
 ---
 name: claude-lessons-learned
 description: Lessons learned storage and retrieval for commands and agents
-allowed-tools: Read, Write, Edit, Glob, Grep
+allowed-tools: Read, Write, Edit
 ---
 
 # Claude Lessons Learned Skill
 
-Centralized storage for lessons learned from command and agent executions in `.claude/lessons-learned/`.
+Centralized storage for lessons learned from command and agent executions in `.claude/lessons-learned.json`.
 
 ## What This Skill Provides
 
-- Structured storage for lessons learned by component
+- Single file storage for all lessons learned
 - Query and retrieval of lessons for specific components
 - Lesson categorization (bug, improvement, pattern, anti-pattern)
 - Component-to-lesson mapping
@@ -24,39 +24,33 @@ Activate this skill when:
 
 ---
 
-## Directory Structure
+## File Location
 
 ```
-.claude/lessons-learned/
-├── commands/           # Lessons for commands
-│   └── {command-name}.json
-├── agents/             # Lessons for agents
-│   └── {agent-name}.json
-└── skills/             # Lessons for skills
-    └── {skill-name}.json
+.claude/lessons-learned.json
 ```
 
 ---
 
-## Lesson File Format
+## File Format
 
-Each component has a JSON file with accumulated lessons:
+Single JSON file with all lessons organized by component:
 
 ```json
 {
-  "component": {
-    "type": "command|agent|skill",
-    "name": "component-name",
-    "bundle": "bundle-name"
-  },
+  "version": 1,
   "lessons": [
     {
       "id": "2025-11-25-001",
+      "component": {
+        "type": "command|agent|skill",
+        "name": "component-name",
+        "bundle": "bundle-name"
+      },
       "date": "2025-11-25",
       "category": "bug|improvement|pattern|anti-pattern",
       "summary": "Brief description",
       "detail": "Full explanation of the lesson",
-      "context": "What triggered this lesson",
       "applied": false
     }
   ]
@@ -80,42 +74,37 @@ Each component has a JSON file with accumulated lessons:
 
 Record a lesson learned after command/agent execution.
 
-### Step 1: Determine Component Path
+### Step 1: Read or Initialize File
 
-```
-component_type: command|agent|skill
-component_name: the component name (e.g., "maven-build-and-fix")
-file_path: .claude/lessons-learned/{component_type}s/{component_name}.json
-```
-
-### Step 2: Read Existing or Create New
-
-If file exists, read and parse. Otherwise create structure:
+If `.claude/lessons-learned.json` exists, read it. Otherwise create:
 
 ```json
 {
-  "component": {
-    "type": "{component_type}",
-    "name": "{component_name}",
-    "bundle": "{bundle-name}"
-  },
+  "version": 1,
   "lessons": []
 }
 ```
 
+### Step 2: Generate Lesson ID
+
+Format: `{YYYY-MM-DD}-{NNN}`
+
+Find highest sequence for today's date, increment or start at 001.
+
 ### Step 3: Add Lesson Entry
 
-Generate ID: `{date}-{sequence}` (e.g., `2025-11-25-001`)
-
-Add to lessons array:
 ```json
 {
-  "id": "{generated-id}",
-  "date": "{today}",
-  "category": "{category}",
-  "summary": "{brief summary}",
-  "detail": "{full explanation}",
-  "context": "{what triggered this}",
+  "id": "2025-11-25-001",
+  "component": {
+    "type": "command",
+    "name": "maven-build-and-fix",
+    "bundle": "cui-maven"
+  },
+  "date": "2025-11-25",
+  "category": "bug",
+  "summary": "Brief description",
+  "detail": "Full explanation",
   "applied": false
 }
 ```
@@ -130,22 +119,23 @@ Write JSON with proper formatting (2-space indent).
 
 **Pattern**: Direct File Operation
 
-Query lessons for a component or across all components.
-
-### Query Single Component
+### Query All Lessons
 
 ```bash
-# Read component lessons file
-cat .claude/lessons-learned/commands/{component-name}.json
+cat .claude/lessons-learned.json
 ```
 
-### Query All Unapplied Lessons
+### Query for Specific Component
 
-Use Glob to find all lesson files, then filter for `"applied": false`.
+Read file, filter where `component.name` matches.
+
+### Query Unapplied Lessons
+
+Read file, filter where `"applied": false`.
 
 ### Query by Category
 
-Read all files and filter by category field.
+Read file, filter where `category` matches target.
 
 ---
 
@@ -153,21 +143,12 @@ Read all files and filter by category field.
 
 **Pattern**: Direct File Operation
 
-After applying a lesson to component documentation, mark it applied.
+After applying a lesson to component documentation:
 
-### Step 1: Read Lesson File
-
-```bash
-cat .claude/lessons-learned/{type}s/{component-name}.json
-```
-
-### Step 2: Update Applied Flag
-
-Find lesson by ID and set `"applied": true`.
-
-### Step 3: Write File
-
-Write updated JSON.
+1. Read `.claude/lessons-learned.json`
+2. Find lesson by ID
+3. Set `"applied": true`
+4. Write file
 
 ---
 
@@ -191,10 +172,10 @@ The `/plugin-apply-lessons-learned` command uses this skill to:
 
 ## .gitignore
 
-The lessons-learned directory should be gitignored:
+The lessons-learned file should be gitignored:
 
 ```
-.claude/lessons-learned/
+.claude/lessons-learned.json
 ```
 
 Lessons are project-specific runtime knowledge.

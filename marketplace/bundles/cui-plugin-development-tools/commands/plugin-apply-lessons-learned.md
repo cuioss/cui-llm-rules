@@ -5,7 +5,7 @@ description: Apply accumulated lessons learned to component documentation
 
 # Apply Lessons Learned
 
-Read lessons learned from `.claude/lessons-learned/` and apply them to component documentation.
+Read lessons learned from `.claude/lessons-learned.json` and apply them to component documentation.
 
 ## Usage
 
@@ -39,8 +39,9 @@ When you invoke this command, I will:
    ```
 
 3. **Query unapplied lessons**:
-   - For specific component: Read `.claude/lessons-learned/{type}s/{name}.json`
-   - For --all: Glob `.claude/lessons-learned/**/*.json` and filter `"applied": false`
+   - Read `.claude/lessons-learned.json`
+   - For specific component: Filter by `component.name`
+   - For --all: Filter all where `"applied": false`
    - For --list: Display lessons without applying
 
 4. **For each unapplied lesson**:
@@ -67,7 +68,7 @@ When you invoke this command, I will:
       - Maintain document structure and formatting
 
    e. **Mark lesson applied**:
-      - Update lesson file with `"applied": true`
+      - Update lesson in `.claude/lessons-learned.json` with `"applied": true`
 
 5. **Report results**:
    - Number of lessons applied per component
@@ -88,7 +89,7 @@ When you invoke this command, I will:
 **Error Handling**:
 - No parameters → Display usage
 - Component not found → Error with suggestion
-- No lessons file → Skip (no lessons recorded)
+- No lessons file → Report "no lessons recorded"
 - No unapplied lessons → Report "nothing to apply"
 
 ## Examples
