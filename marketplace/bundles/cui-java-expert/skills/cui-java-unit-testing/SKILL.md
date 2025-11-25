@@ -185,7 +185,7 @@ Provide summary of:
 
 ### Coverage Verification
 
-- [ ] Run coverage profile using `./mvnw clean test -Pcoverage`
+- [ ] Generate coverage using cui-maven:cui-maven-rules workflow with jacoco
 - [ ] Coverage meets minimum requirements (80% line/branch)
 - [ ] Critical paths have 100% coverage
 - [ ] No coverage regressions from previous state
