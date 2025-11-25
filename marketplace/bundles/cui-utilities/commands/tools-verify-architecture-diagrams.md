@@ -9,14 +9,13 @@ Analyze all PlantUML files in the specified directory (default: doc/plantuml), v
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=tools-verify-architecture-diagrams update="[your improvement]"` with:
-1. Improved PlantUML diagram analysis and comparison strategies
-2. Better PNG image quality verification techniques
-3. More effective diagram splitting criteria and approaches
-4. Enhanced codebase-to-diagram synchronization patterns
-5. Any lessons learned about PlantUML diagram maintenance workflows
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "tools-verify-architecture-diagrams", bundle: "cui-utilities"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## Parameters
 - `plantuml_dir` (optional): Path to PlantUML directory, defaults to "doc/plantuml"

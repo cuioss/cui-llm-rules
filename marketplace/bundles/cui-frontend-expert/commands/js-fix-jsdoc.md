@@ -9,14 +9,13 @@ Orchestrates systematic JSDoc violation fixing workflow with standards complianc
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-fix-jsdoc update="[your improvement]"` with:
+If you discover issues or improvements during execution, record them:
 
-**Improvement areas**:
-- Enhanced violation detection for TypeScript JSDoc patterns
-- Better prioritization based on API surface and public exports
-- Improved fix suggestions leveraging type inference
-- Expanded content preservation during complex documentation updates
-- Advanced integration with ESLint JSDoc plugins and rules
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "js-fix-jsdoc", bundle: "cui-frontend-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

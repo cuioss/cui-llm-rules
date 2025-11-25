@@ -361,14 +361,13 @@ Test maintenance is complete when:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command java-maintain-tests`
+If you discover issues or improvements during execution, record them:
 
-**Improvement areas**:
-- Analysis efficiency optimization for large multi-module projects
-- Enhanced bug detection patterns and production code isolation
-- Expanded value object contract detection heuristics
-- Improved coverage regression analysis and reporting
-- Additional test classification categories and priority refinement
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "java-maintain-tests", bundle: "cui-java-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## REFERENCES
 

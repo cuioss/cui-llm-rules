@@ -121,6 +121,7 @@ All 5 workflows follow the same pattern:
 - Missing foundation skill loading (plugin-architecture, cui-diagnostic-patterns)
 - Incorrect section header case (e.g., `## Workflow` → `## WORKFLOW`)
 - Missing CONTINUOUS IMPROVEMENT RULE section (commands only)
+- Legacy CONTINUOUS IMPROVEMENT RULE (uses /plugin-update-* or /plugin-maintain instead of claude-lessons-learned)
 
 **Risky Fixes** (require confirmation):
 - Rule 6 violations (Task tool in agents)
@@ -226,7 +227,7 @@ python3 {resolved_validate_references} {agent_path}
 - Tool fit score >= 70% (good) or >= 90% (excellent)
 - No Rule 6 violations (agents CANNOT use Task tool)
 - No Rule 7 violations (only maven-builder can use Maven)
-- No Pattern 22 violations (must report to caller, not self-invoke)
+- No Pattern 22 violations (must use claude-lessons-learned skill, not self-invoke)
 - Bloat: NORMAL (<300), LARGE (300-500), BLOATED (500-800), CRITICAL (>800)
 
 ### Step 4: Categorize and Fix
@@ -328,6 +329,7 @@ This is NOT a command fix - it's a skill fix. Commands don't load foundation ski
 **Safe fixes** (auto-apply unless --no-fix):
 - Incorrect section header case (`## Workflow` → `## WORKFLOW`, `## Parameter Validation` → `## PARAMETERS`)
 - Missing CONTINUOUS IMPROVEMENT RULE section
+- Legacy CONTINUOUS IMPROVEMENT RULE (uses /plugin-update-* or /plugin-maintain instead of claude-lessons-learned)
 
 **Risky fixes** (require confirmation):
 - **Rule 0 violations** (command contains workflow logic instead of skill delegation)
@@ -342,17 +344,19 @@ Search for `## Workflow`, `## Parameter Validation`, `## Parameters` and replace
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-After executing this command, if you discover any opportunities to improve it, invoke:
+If you discover issues or improvements during execution, record them:
 
-\`/plugin-maintain command-name={command-name} update="[improvement description]"\`
-
-Common improvements:
-- More efficient workflow patterns
-- Better error handling or user prompts
-- Clearer parameter documentation
+1. **Activate skill**: \`Skill: cui-utilities:claude-lessons-learned\`
+2. **Record lesson** with:
+   - Component: \`{type: "command", name: "{command-name}", bundle: "{bundle}"}\`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 ```
 
 Insert before `## Related` section (or at end if no Related section).
+
+**Auto-fix pattern for legacy CONTINUOUS IMPROVEMENT RULE**:
+If CONTINUOUS IMPROVEMENT RULE section contains `/plugin-update-command`, `/plugin-maintain`, or `/plugin-apply-lessons-learned`, replace entire section with the new pattern above.
 
 **Rule 0 violation reporting** (no auto-fix - requires manual refactoring):
 ```
@@ -594,8 +598,8 @@ Agents CANNOT use Task tool (unavailable at runtime).
 ### Rule 7: Maven Execution Restriction
 Only maven-builder agent may execute Maven commands.
 
-### Pattern 22: Agent Reporting Requirement
-Agents MUST report to caller, not self-invoke commands.
+### Pattern 22: Agent Lessons Learned Requirement
+Agents MUST record lessons via claude-lessons-learned skill, not self-invoke commands.
 
 ---
 

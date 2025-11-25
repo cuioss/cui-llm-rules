@@ -9,7 +9,13 @@ Self-contained command that implements Jest/Vitest tests with full standards com
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-implement-tests update="[your improvement]"` with improvements discovered.
+If you discover issues or improvements during execution, record them:
+
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "js-implement-tests", bundle: "cui-frontend-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

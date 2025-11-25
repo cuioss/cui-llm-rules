@@ -9,14 +9,13 @@ Systematic workflow for maintaining requirements and specification documents to 
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-maintain-requirements update="[your improvement]"` with:
-1. Improved requirements integrity detection patterns
-2. Better cross-reference verification strategies
-3. More efficient scenario workflow approaches
-4. Enhanced duplicate detection methods
-5. Any lessons learned about requirements maintenance
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "cui-maintain-requirements", bundle: "cui-requirements"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

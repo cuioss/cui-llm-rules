@@ -9,7 +9,13 @@ Self-contained command that implements Java code with full standards compliance,
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-java-implement-code update="[your improvement]"` with improvements discovered.
+If you discover issues or improvements during execution, record them:
+
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "java-implement-code", bundle: "cui-java-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

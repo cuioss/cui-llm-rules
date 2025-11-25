@@ -150,25 +150,25 @@ description: One sentence description (<100 chars)
 
 ## CONTINUOUS IMPROVEMENT RULE for Commands
 
-Commands CAN invoke slash commands (unlike agents).
+Commands record lessons learned via the `claude-lessons-learned` skill.
 
 **Pattern for Commands**:
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name={command-name} update="[your improvement]"` with:
-1. [Improvement area 1]
-2. [Improvement area 2]
-3. [Improvement area 3]
-4. [Improvement area 4]
-5. Any lessons learned about [domain] workflows
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 ```
 
-**Key Difference from Agents**:
-- Commands: **YOU MUST invoke** `/plugin-update-command`
-- Agents: **REPORT to caller** (can't invoke commands)
+**Key Points**:
+- Only activate skill when you have lessons to record
+- Lessons are stored in `.claude/lessons-learned.json`
+- Categories: bug, improvement, pattern, anti-pattern
 
 ## Parameter Patterns
 
@@ -638,7 +638,7 @@ Before creating command, verify:
 - [ ] Name is kebab-case with verb (create-agent, run-tests, diagnose-code)
 - [ ] Description is <100 chars
 - [ ] Frontmatter has only name and description (no tools)
-- [ ] CONTINUOUS IMPROVEMENT RULE uses self-update pattern
+- [ ] CONTINUOUS IMPROVEMENT RULE uses claude-lessons-learned skill
 - [ ] All required sections present
 - [ ] Workflow is numbered steps
 - [ ] Parameters documented (if any)
@@ -661,7 +661,7 @@ Before creating command, verify:
 
 ❌ **Wrong**: No continuous improvement section
 
-✅ **Correct**: Includes CONTINUOUS IMPROVEMENT RULE with self-update
+✅ **Correct**: Includes CONTINUOUS IMPROVEMENT RULE with claude-lessons-learned skill
 
 ### Pitfall 3: No Parameter Validation
 

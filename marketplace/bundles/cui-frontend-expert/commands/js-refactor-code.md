@@ -9,14 +9,13 @@ Orchestrates systematic JavaScript code refactoring and maintenance workflow wit
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-refactor-code update="[your improvement]"` with:
-1. Improved violation detection patterns
-2. Better file/workspace processing strategies
-3. More effective agent coordination
-4. Enhanced verification workflows
-5. Any lessons learned about systematic refactoring
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "js-refactor-code", bundle: "cui-frontend-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

@@ -9,14 +9,13 @@ Retrieves diagnostics from IntelliJ IDE via MCP, analyzes issues, applies fixes,
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**This command should be improved using**: `/plugin-update-command command-name=tools-fix-intellij-diagnostics update="[your improvement]"`
+If you discover issues or improvements during execution, record them:
 
-**Improvement areas**:
-- Improved MCP diagnostics retrieval patterns and timeout handling
-- Better issue categorization and fix strategies
-- More effective suppression patterns for unfixable issues
-- Enhanced build verification and re-check strategies
-- Any lessons learned about IntelliJ MCP integration
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "tools-fix-intellij-diagnostics", bundle: "cui-utilities"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

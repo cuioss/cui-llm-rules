@@ -182,22 +182,13 @@ Agent template MUST use pattern:
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
-1. [Improvement area 1 specific to agent purpose]
-2. [Improvement area 2 specific to agent purpose]
-...
+If you discover issues or improvements during execution, record them:
 
-Return structured improvement suggestion in your analysis result:
-```
-IMPROVEMENT OPPORTUNITY DETECTED
-
-Area: [specific area]
-Current limitation: [what doesn't work well]
-Suggested enhancement: [specific improvement]
-Expected impact: [benefit of change]
-```
-
-The caller can then invoke `/plugin-update-agent agent-name={agent-name}` based on your report.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "agent", name: "{agent-name}", bundle: "{bundle}"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 ```
 
 **Write file:**
@@ -220,7 +211,7 @@ python3 {resolved_path} "{file_path}" "agent"
 Validation checks:
 - Frontmatter format correct (comma-separated tools)
 - No Task tool present
-- CONTINUOUS IMPROVEMENT RULE uses REPORT pattern (not self-invocation)
+- CONTINUOUS IMPROVEMENT RULE uses claude-lessons-learned skill pattern
 - All required sections present
 
 If validation fails: Display errors and prompt "[R]etry generation/[A]bort"
@@ -351,11 +342,13 @@ Read assets/templates/command-template.md
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name={command-name} update="[your improvement]"` with:
-1. [Improvement area 1]
-...
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 ```
 
 **Write file:**
@@ -378,7 +371,7 @@ python3 {resolved_path} "{file_path}" "command"
 Validation checks:
 - Frontmatter format correct
 - All required sections present (WORKFLOW, USAGE EXAMPLES)
-- CONTINUOUS IMPROVEMENT RULE uses self-update pattern
+- CONTINUOUS IMPROVEMENT RULE uses claude-lessons-learned skill pattern
 
 #### Step 6: Display Summary
 
@@ -806,8 +799,8 @@ This skill uses the following templates in assets/templates/:
 - Only maven-builder agent can execute Maven (Rule 7)
 
 **CONTINUOUS IMPROVEMENT RULE**:
-- Agents: REPORT improvements to caller (can't invoke commands)
-- Commands: INVOKE /plugin-update-command (can use SlashCommand)
+- Agents: Use claude-lessons-learned skill to record lessons (report to caller)
+- Commands: Use claude-lessons-learned skill to record lessons
 - Skills: No CONTINUOUS IMPROVEMENT RULE
 
 **Validation**:

@@ -114,15 +114,13 @@ Result: Shows usage with all scope options
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-After executing this command, if you discover any opportunities to improve it, invoke:
+If you discover issues or improvements during execution, record them:
 
-`/plugin-maintain command-name=plugin-doctor update="[improvement description]"`
-
-Common improvements:
-- More efficient workflow patterns
-- Better error handling or user prompts
-- Clearer parameter documentation
-- Additional fix categorizations
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "plugin-doctor", bundle: "cui-plugin-development-tools"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## Related
 

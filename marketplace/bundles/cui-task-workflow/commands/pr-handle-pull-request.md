@@ -9,14 +9,13 @@ Comprehensive pull request workflow handling CI/Sonar checks, code review respon
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=pr-handle-pull-request update="[your improvement]"` with:
-1. Improved strategies for CI/Sonar polling and timeout handling
-2. Better command orchestration patterns for review/quality workflows
-3. More effective error recovery strategies for build/check failures
-4. Enhanced decision point prompts for user control
-5. Any lessons learned about PR workflow automation
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "pr-handle-pull-request", bundle: "cui-task-workflow"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 
@@ -200,7 +199,6 @@ Each command is self-contained with own verify + commit cycle.
 
 ## RELATED
 
-- `/plugin-update-command` - Update this command
 - `/maven-build-and-fix` - Build fixing command
 - `/pr-respond-to-review-comments` - Review comment handling (uses pr-workflow skill)
 - `/pr-fix-sonar-issues` - Sonar issue fixing (uses sonar-workflow skill)

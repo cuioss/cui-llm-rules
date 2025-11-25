@@ -9,14 +9,13 @@ Comprehensive diagnostic and automation command that enforces CUI logging standa
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=java-enforce-logrecords update="[your improvement]"` with:
-1. Better violation detection patterns for logging statements
-2. More efficient LogRecord usage analysis techniques
-3. Improved LogAssert verification strategies
-4. Enhanced identifier renumbering algorithms
-5. Any lessons learned about logging standards enforcement workflows
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "java-enforce-logrecords", bundle: "cui-java-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

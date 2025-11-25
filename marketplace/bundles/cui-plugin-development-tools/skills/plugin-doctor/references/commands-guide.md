@@ -639,26 +639,24 @@ If --save-report flag:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-Commands MUST include standard self-update pattern:
+Commands MUST include standard lessons-learned pattern:
 
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-After executing this command, if you discover any opportunities to improve it, invoke:
+If you discover issues or improvements during execution, record them:
 
-`/plugin-update-command command-name={this-command} update="[improvement description]"`
-
-Common improvements:
-- More efficient agent orchestration patterns
-- Better error handling or user prompts
-- Clearer workflow steps or parameter documentation
-- Performance optimizations
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 ```
 
-**Key Differences from Agent Pattern**:
-- Commands CAN self-update (they HAVE access to SlashCommand tool)
-- Commands invoke `/plugin-update-command` directly
-- No "report to caller" needed (command is top-level orchestrator)
+**Key Points**:
+- Only activate skill when you have lessons to record
+- Lessons are stored in `.claude/lessons-learned.json`
+- Categories: bug, improvement, pattern, anti-pattern
 
 ## Common Issues and Fixes
 

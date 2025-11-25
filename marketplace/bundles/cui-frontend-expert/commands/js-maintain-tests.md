@@ -9,14 +9,13 @@ Orchestrates systematic JavaScript test quality improvement workflow while ensur
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-maintain-tests update="[your improvement]"` with:
-1. Improved test anti-pattern detection
-2. Better test improvement strategies
-3. More effective agent coordination
-4. Enhanced verification workflows
-5. Any lessons learned about test maintenance
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "js-maintain-tests", bundle: "cui-frontend-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

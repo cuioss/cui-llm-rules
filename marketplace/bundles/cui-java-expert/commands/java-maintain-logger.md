@@ -9,14 +9,13 @@ Systematically implements and maintains logging standards across modules while p
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=cui-java-maintain-logger update="[your improvement]"` with:
-1. Improved LogRecord discovery patterns
-2. Better business logic test integration strategies
-3. More efficient plan.md tracking workflows
-4. Enhanced duplicate detection methods
-5. Any lessons learned about logging maintenance
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "java-maintain-logger", bundle: "cui-java-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

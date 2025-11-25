@@ -9,15 +9,13 @@ Orchestrates complete task implementation through code creation, unit testing, a
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-language update="[your improvement]"` with:
-1. Improved agent coordination patterns and error recovery strategies
-2. Better coverage gap analysis and iterative fix workflows
-3. More effective parameter preparation for agent handoffs
-4. Enhanced detection of production vs. test code issues
-5. Language-specific patterns and tooling improvements
-6. Any lessons learned about task implementation workflows
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "orchestrate-language", bundle: "cui-task-workflow"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

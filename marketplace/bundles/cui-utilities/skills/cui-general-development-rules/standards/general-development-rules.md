@@ -302,11 +302,11 @@ SlashCommand is fundamentally different from Task and Skill tools:
 
 **When you call:**
 ```
-SlashCommand: /plugin-update-command command-name=foo update="fix bar"
+SlashCommand: /plugin-doctor agents
 ```
 
 **What happens:**
-1. ✅ System shows: `<command-message>plugin-update-command is running…</command-message>`
+1. ✅ System shows: `<command-message>plugin-doctor is running…</command-message>`
 2. ✅ Workflow expands with Step 1, Step 2, Step 3, etc.
 3. ❌ **CRITICAL:** You must NOW EXECUTE these steps - don't just read and stop!
 
@@ -376,25 +376,24 @@ SlashCommand: /command-2
 
 **Examples:**
 
-**Executing /plugin-update-command:**
+**Executing /plugin-doctor:**
 
-1. SlashCommand expands → See Step 1: "Validate Parameters"
+1. SlashCommand expands → See Step 1: "Parse scope"
 2. Execute Step 1:
    ```
-   Glob: pattern="plugin-diagnose-commands.md", path="marketplace/bundles/*/commands"
-   # Result: /Users/.../commands/plugin-diagnose-commands.md
+   # Detect component type (agents/commands/skills)
+   # Set scope to "agents"
    ```
-3. Execute Step 2: "Load Standards"
+3. Execute Step 2: "Load plugin-doctor skill"
    ```
-   Skill: cui-utilities:cui-diagnostic-patterns
-   Skill: cui-plugin-development-tools:cui-marketplace-architecture
+   Skill: cui-plugin-development-tools:plugin-doctor
    ```
-4. Execute Step 3: "Read Current Command"
+4. Execute Step 3: Execute diagnosis scripts
    ```
-   Read: file_path="/Users/.../plugin-diagnose-commands.md"
+   Bash: analyze-skill-structure.sh...
    ```
 5. ... continue through all steps ...
-6. Execute Step 10: Display final report
+6. Execute final step: Display diagnosis results
 
 **Verification:**
 

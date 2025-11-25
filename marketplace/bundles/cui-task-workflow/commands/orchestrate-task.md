@@ -9,14 +9,13 @@ Self-contained command that implements ONE task and verifies it.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-task update="[improvement]"` with:
-1. Task execution patterns and error recovery strategies
-2. Build verification efficiency and issue categorization
-3. Parameter preparation and context handling
-4. Iteration strategies and convergence patterns
-5. Any lessons learned about single-task implementation workflows
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "orchestrate-task", bundle: "cui-task-workflow"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

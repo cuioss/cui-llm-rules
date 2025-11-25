@@ -9,15 +9,13 @@ End-to-end issue implementation workflow coordinating multiple specialized agent
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=orchestrate-workflow update="[your improvement]"` with:
-1. Agent coordination patterns and retry strategies
-2. Error recovery and failure handling optimization
-3. Task breakdown quality and granularity improvements
-4. Build verification efficiency and integration
-5. User interaction patterns and decision prompts
-6. Any lessons learned about end-to-end workflow orchestration
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "orchestrate-workflow", bundle: "cui-task-workflow"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

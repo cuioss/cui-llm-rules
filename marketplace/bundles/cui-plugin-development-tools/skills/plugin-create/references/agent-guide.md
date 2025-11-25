@@ -185,9 +185,9 @@ tools: Read, Bash  # ✅ ONLY this agent may call Maven
 - Caller orchestrates maven-builder agent if build needed
 - Don't build inside analysis agents
 
-### Pattern 22: Agents Must REPORT Improvements, Not Invoke Commands
+### Pattern 22: Agents Record Lessons via claude-lessons-learned Skill
 
-**Why**: Agents can't use SlashCommand tool (unavailable at runtime).
+**Why**: Centralized lesson storage enables systematic improvement across all components.
 
 **Error Pattern**:
 ```markdown
@@ -201,19 +201,15 @@ tools: Read, Bash  # ✅ ONLY this agent may call Maven
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 
-**REPORT the improvement to your caller** with structured suggestion:
+If you discover issues or improvements during execution, record them:
 
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "agent", name: "{agent-name}", bundle: "{bundle}"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 ```
-IMPROVEMENT OPPORTUNITY DETECTED
-Area: [specific area]
-Current limitation: [what doesn't work well]
-Suggested enhancement: [specific improvement]
-Expected impact: [benefit]
-```
-
-The caller can then invoke `/plugin-update-agent agent-name={name}` based on your report.
-```
-✅ CORRECT - Agent reports, caller invokes
+✅ CORRECT - Agent records lesson only when there's something to record
 
 ## Model Selection Guidelines
 
@@ -298,17 +294,13 @@ Purpose statement explaining what this agent does.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
-1. [Improvement area 1]
-2. [Improvement area 2]
-3. [Improvement area 3]
-4. [Improvement area 4]
-5. Any lessons learned about [domain] workflows
+If you discover issues or improvements during execution, record them:
 
-Return structured improvement suggestion in your analysis result:
-[Template for reporting]
-
-The caller can then invoke `/plugin-update-agent agent-name={name}` based on your report.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "agent", name: "{agent_name}", bundle: "{bundle}"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## Workflow
 
@@ -406,14 +398,13 @@ Analyzes codebase for common quality issues including complexity, duplication, a
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
-1. Enhanced pattern detection for code smells
-2. Better complexity calculation algorithms
-3. More accurate duplication detection
-4. Improved report formatting and clarity
-5. Any lessons learned about code analysis workflows
+If you discover issues or improvements during execution, record them:
 
-[Report template...]
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "agent", name: "code-quality-analyzer", bundle: "..."}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## Workflow
 
@@ -463,14 +454,13 @@ Executes test suite for project and reports pass/fail status with details.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
-1. Better test failure parsing and categorization
-2. More informative error messages
-3. Enhanced test coverage reporting
-4. Improved performance for large test suites
-5. Any lessons learned about test execution workflows
+If you discover issues or improvements during execution, record them:
 
-[Report template...]
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "agent", name: "test-runner", bundle: "..."}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## Workflow
 
@@ -512,7 +502,7 @@ Before creating agent, verify:
 - [ ] Tools list is comma-separated (not array)
 - [ ] No Task tool included
 - [ ] If Bash tool: Not calling Maven (unless maven-builder)
-- [ ] CONTINUOUS IMPROVEMENT RULE uses REPORT pattern
+- [ ] CONTINUOUS IMPROVEMENT RULE uses claude-lessons-learned skill
 - [ ] Workflow has numbered steps
 - [ ] Tool usage documented
 - [ ] Critical rules specified
@@ -551,7 +541,7 @@ tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch
 
 ✅ **Correct**: Only list tools actually used
 
-### Pitfall 4: Self-Invocation
+### Pitfall 4: Legacy Self-Update Pattern
 
 ❌ **Wrong**:
 ```markdown
@@ -562,8 +552,9 @@ tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch
 ✅ **Correct**:
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
-**REPORT improvements to caller**
-Caller invokes `/plugin-update-agent`
+If you discover issues or improvements during execution, record them:
+1. Activate skill: cui-utilities:claude-lessons-learned
+2. Record lesson with component info and category
 ```
 
 ## References

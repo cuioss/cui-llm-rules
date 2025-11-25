@@ -34,19 +34,13 @@ This command focuses on **project-level settings** for version-controlled projec
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=tools-setup-project-permissions update="[your improvement]"` with:
-1. Improved permission validation patterns and syntax checking techniques
-2. Better methods for detecting and consolidating redundant permissions
-3. More effective consolidation strategies for global vs local permissions
-4. Enhanced path normalization and format fixing approaches
-5. Any lessons learned about permission architecture patterns
-6. Improvements to global settings write workflow and safety checks
-7. Better user experience patterns for permission management
-8. Optimizations for marketplace permission management (e.g., using wildcards instead of scanning)
-9. **CRITICAL LESSON - Command Invocation Forms:** Commands can be invoked in TWO ways: (a) Short form: `/plugin-diagnose-agents` and (b) Bundle-qualified: `/cui-plugin-development-tools:plugin-diagnose-agents`. Bundle wildcards like `SlashCommand(/cui-plugin-development-tools:*)` ONLY match bundle-qualified invocations. Short-form invocations require INDIVIDUAL permissions like `SlashCommand(/plugin-diagnose-agents:*)`. Step 3E lists BOTH bundle wildcards (16 patterns) AND short-form permissions (35 patterns) to cover all invocation methods. The pattern `SlashCommand(/plugin-*:*)` is INVALID - you cannot wildcard command names, only use `:*` after exact bundle/command names.
-10. **CRITICAL LESSON - Script Permissions via script-runner:** Skill scripts require explicit permissions because relative paths resolve from cwd, not skill directory. The `script-runner` skill discovers scripts and generates permissions in `.claude/scripts.local.json`. This command syncs those permissions to global settings. See Step 3F for script permission sync workflow.
+If you discover issues or improvements during execution, record them:
 
-This ensures the command evolves and becomes more effective with each execution.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "tools-setup-project-permissions", bundle: "cui-utilities"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 

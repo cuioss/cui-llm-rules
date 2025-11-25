@@ -370,18 +370,11 @@ After completing all work, return findings in this format:
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this agent and discover a more precise, better, or more efficient approach, **REPORT the improvement to your caller** with:
-1. Improvement area description (e.g., "Search query optimization for technical standards")
-2. Current limitation (e.g., "Cannot distinguish RFC standards from blog posts in initial queries")
-3. Suggested enhancement (e.g., "Add domain filtering for authoritative sources (ietf.org, w3.org)")
-4. Expected impact (e.g., "Would increase HIGH confidence results by 30%")
+If you discover issues or improvements during execution, record them:
 
-Focus improvements on:
-1. Search query construction and keyword selection strategies
-2. Confidence level calculation accuracy and criteria refinement
-3. Source quality assessment and prioritization algorithms
-4. Subtopic identification and deep-dive decision logic
-5. Result structuring and actionable insights generation
-
-The caller can then invoke `/plugin-update-agent agent-name=research-best-practices update="[improvement]"` based on your report.
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "agent", name: "research-best-practices", bundle: "cui-utilities"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 

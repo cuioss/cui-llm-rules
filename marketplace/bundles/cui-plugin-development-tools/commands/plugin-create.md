@@ -66,14 +66,13 @@ Result: Error: Invalid type 'invalid'. Use: agent, command, skill, or bundle
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-After executing this command, if you discover opportunities to improve it, invoke:
+If you discover issues or improvements during execution, record them:
 
-`/plugin-maintain command=plugin-create update="[improvement description]"`
-
-Common improvements:
-- Better user prompts or error messages
-- Clearer workflow steps
-- Additional validation
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "plugin-create", bundle: "cui-plugin-development-tools"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## Related
 

@@ -9,14 +9,13 @@ Self-contained command that generates test coverage reports and analyzes results
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-**CRITICAL:** Every time you execute this command and discover a more precise, better, or more efficient approach, **YOU MUST immediately update this file** using `/plugin-update-command command-name=js-generate-coverage update="[your improvement]"` with:
+If you discover issues or improvements during execution, record them:
 
-**Improvement areas**:
-- Enhanced report parsing for different test frameworks (Jest, Vitest, Mocha)
-- Better monorepo workspace coverage aggregation
-- Improved low-coverage detection with component-specific thresholds
-- Expanded analysis of uncovered user interaction paths
-- Advanced filtering by file patterns and module boundaries
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "js-generate-coverage", bundle: "cui-frontend-expert"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## PARAMETERS
 
