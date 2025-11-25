@@ -24,7 +24,7 @@ warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 
 MEMORY_BASE = Path('.claude/memory')
-CATEGORIES = ['context', 'decisions', 'interfaces', 'handoffs']
+CATEGORIES = ['context', 'handoffs']
 ARCHIVE_DIR = 'archive'
 
 
@@ -383,8 +383,6 @@ def main():
         epilog="""
 Categories:
   context     - Session context snapshots (short-lived)
-  decisions   - Architectural decisions (long-lived)
-  interfaces  - Interface contracts (medium-lived)
   handoffs    - Pending handoff state (until completed)
 
 Examples:
@@ -392,16 +390,16 @@ Examples:
   %(prog)s init
 
   # Save context snapshot
-  %(prog)s save --category context --identifier "feature-auth" --content '{"decisions": ["Use JWT"]}'
+  %(prog)s save --category context --identifier "feature-auth" --content '{"notes": "Working on auth"}'
 
   # Load memory file
-  %(prog)s load --category decisions --identifier "auth-approach"
+  %(prog)s load --category handoffs --identifier "task-42"
 
   # List context files from last 7 days
   %(prog)s list --category context --since 7d
 
   # Find files matching pattern
-  %(prog)s query --pattern "auth*" --category decisions
+  %(prog)s query --pattern "auth*" --category context
 
   # Cleanup old context files
   %(prog)s cleanup --category context --older-than 7d

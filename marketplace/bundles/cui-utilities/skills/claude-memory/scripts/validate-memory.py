@@ -68,7 +68,7 @@ def validate_memory(data: Dict) -> List[Dict]:
 
             # Validate category value
             if 'category' in data['meta']:
-                valid_categories = ['context', 'decisions', 'interfaces', 'handoffs']
+                valid_categories = ['context', 'handoffs']
                 cat = data['meta']['category']
                 checks.append({
                     "check": "category_valid",
@@ -112,11 +112,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Validate memory file
+  # Validate context file
   %(prog)s .claude/memory/context/2025-11-25-auth.json
 
-  # Validate decisions file
-  %(prog)s .claude/memory/decisions/auth-implementation.json
+  # Validate handoffs file
+  %(prog)s .claude/memory/handoffs/task-42.json
 """
     )
 

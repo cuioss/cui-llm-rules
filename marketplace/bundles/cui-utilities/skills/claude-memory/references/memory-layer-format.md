@@ -7,13 +7,9 @@ File format specifications for `.claude/memory/` session persistence.
 ```
 .claude/memory/
 ├── context/         # Session context snapshots
-├── decisions/       # Architectural decisions
-├── interfaces/      # Interface contracts
 ├── handoffs/        # Pending handoff state
 └── archive/         # Archived files
     ├── context/
-    ├── decisions/
-    ├── interfaces/
     └── handoffs/
 ```
 
@@ -25,7 +21,7 @@ All memory files use a metadata envelope:
 {
   "meta": {
     "created": "2025-11-25T10:30:00Z",
-    "category": "context|decisions|interfaces|handoffs",
+    "category": "context|handoffs",
     "summary": "feature-auth",
     "session_id": "optional-session-id"
   },
@@ -40,7 +36,7 @@ All memory files use a metadata envelope:
 | Field | Type | Description |
 |-------|------|-------------|
 | created | string | ISO 8601 timestamp with Z suffix |
-| category | string | One of: context, decisions, interfaces, handoffs |
+| category | string | One of: context, handoffs |
 | summary | string | Human-readable identifier |
 
 ### Optional Meta Fields
@@ -66,61 +62,8 @@ Session context snapshots. Short-lived, typically cleaned up after days.
 {
   "meta": { ... },
   "content": {
-    "decisions": ["Use JWT for auth", "Store sessions in Redis"],
-    "interfaces": {
-      "AuthService": {"methods": ["login", "logout"]}
-    },
     "pending": ["Implement token refresh"],
     "notes": "Working on authentication feature"
-  }
-}
-```
-
-### decisions
-
-Architectural decisions. Long-lived, typically permanent.
-
-**File naming**: `{summary}.json`
-
-**Example**: `auth-implementation.json`
-
-**Content structure**:
-```json
-{
-  "meta": { ... },
-  "content": {
-    "decision": "Use JWT tokens for authentication",
-    "rationale": "Stateless, scalable, standard",
-    "alternatives_considered": ["Session cookies", "OAuth only"],
-    "constraints": ["Must work offline", "Mobile support"],
-    "status": "accepted|superseded|deprecated"
-  }
-}
-```
-
-### interfaces
-
-Interface contracts. Medium-lived, updated as interfaces evolve.
-
-**File naming**: `{module-name}.json`
-
-**Example**: `auth-module.json`
-
-**Content structure**:
-```json
-{
-  "meta": { ... },
-  "content": {
-    "module": "auth",
-    "types": {
-      "User": {"id": "string", "email": "string"},
-      "AuthResult": {"success": "boolean", "token": "string?"}
-    },
-    "functions": {
-      "login": {"params": ["email", "password"], "returns": "AuthResult"},
-      "logout": {"params": ["token"], "returns": "void"}
-    },
-    "events": ["user.logged_in", "user.logged_out"]
   }
 }
 ```
@@ -172,8 +115,8 @@ Retrieves memory file content.
 
 ```bash
 python3 scripts/manage-memory.py load \
-  --category decisions \
-  --identifier "auth-implementation"
+  --category handoffs \
+  --identifier "task-42"
 ```
 
 ### List
@@ -193,7 +136,7 @@ Finds files by pattern.
 ```bash
 python3 scripts/manage-memory.py query \
   --pattern "auth*" \
-  --category decisions
+  --category context
 ```
 
 ### Cleanup
@@ -223,8 +166,6 @@ python3 scripts/manage-memory.py archive \
 | Category | Typical Lifetime | Cleanup Strategy |
 |----------|-----------------|------------------|
 | context | Days | Auto-cleanup after 7d |
-| decisions | Permanent | Manual archive when superseded |
-| interfaces | Weeks/Months | Update in place |
 | handoffs | Until completed | Archive on completion |
 
 ## .gitignore
@@ -235,4 +176,4 @@ The memory directory should be gitignored:
 .claude/memory/
 ```
 
-Context and handoffs are session-specific. Decisions and interfaces may be shared but are typically regenerated.
+Context and handoffs are session-specific and should not be committed.

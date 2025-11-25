@@ -11,7 +11,7 @@ Memory layer operations for `.claude/memory/` session persistence.
 ## What This Skill Provides
 
 - CRUD operations for `.claude/memory/` files
-- Category-based organization (context, decisions, interfaces, handoffs)
+- Category-based organization (context, handoffs)
 - Timestamp-based file naming for context files
 - Age-based cleanup and archival
 - Memory file format validation
@@ -19,10 +19,8 @@ Memory layer operations for `.claude/memory/` session persistence.
 ## When to Activate This Skill
 
 Activate this skill when:
-- Persisting session context or decisions
+- Persisting session context
 - Managing handoff state between sessions
-- Recording architectural decisions
-- Documenting interface contracts
 - Cleaning up old memory files
 
 ---
@@ -32,8 +30,6 @@ Activate this skill when:
 | Category | Purpose | Typical Lifetime |
 |----------|---------|------------------|
 | `context` | Session context snapshots | Short (days) |
-| `decisions` | Architectural decisions | Long (permanent) |
-| `interfaces` | Interface contracts | Medium (weeks) |
 | `handoffs` | Pending handoff state | Short (until completed) |
 
 ---
@@ -80,16 +76,16 @@ Parse JSON output and handle accordingly.
 python3 scripts/manage-memory.py init
 
 # Save context snapshot
-python3 scripts/manage-memory.py save --category context --identifier "feature-auth" --content '{"decisions": ["Use JWT"]}'
+python3 scripts/manage-memory.py save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
 
 # Load memory file
-python3 scripts/manage-memory.py load --category decisions --identifier "auth-approach"
+python3 scripts/manage-memory.py load --category handoffs --identifier "task-42"
 
 # List context files from last 7 days
 python3 scripts/manage-memory.py list --category context --since 7d
 
 # Find files matching pattern
-python3 scripts/manage-memory.py query --pattern "auth*" --category decisions
+python3 scripts/manage-memory.py query --pattern "auth*" --category context
 
 # Cleanup old context files
 python3 scripts/manage-memory.py cleanup --category context --older-than 7d
@@ -139,7 +135,7 @@ All memory files use a metadata envelope:
 {
   "meta": {
     "created": "2025-11-25T10:30:00Z",
-    "category": "context|decisions|interfaces|handoffs",
+    "category": "context|handoffs",
     "summary": "feature-auth",
     "session_id": "optional-session-id"
   },
@@ -154,7 +150,7 @@ All memory files use a metadata envelope:
 | Field | Type | Description |
 |-------|------|-------------|
 | created | string | ISO 8601 timestamp with Z suffix |
-| category | string | One of: context, decisions, interfaces, handoffs |
+| category | string | One of: context, handoffs |
 | summary | string | Human-readable identifier |
 
 ---
