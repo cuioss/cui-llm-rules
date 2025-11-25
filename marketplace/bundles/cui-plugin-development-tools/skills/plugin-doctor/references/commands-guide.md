@@ -81,13 +81,13 @@ Brief description.
 
 | Parameter | Description |
 |-----------|-------------|
-| `--dry-run` | Preview only |
+| `scope` | Target scope for command |
 
 ## Workflow
 
 Activate `bundle:my-skill` and execute the **My Workflow** workflow.
 
-Pass parameter: `dry_run` = true if `--dry-run` specified.
+Pass parameters as specified by user.
 
 ## Related
 

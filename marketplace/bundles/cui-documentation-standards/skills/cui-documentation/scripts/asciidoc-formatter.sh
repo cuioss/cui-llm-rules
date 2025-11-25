@@ -9,7 +9,6 @@ EXIT_ERROR=1
 
 # Default values
 target_path="."
-dry_run=false
 backup=true
 interactive=false
 fix_types=("all")
@@ -39,7 +38,6 @@ usage() {
   echo "Options:"
   echo "  -t, --type TYPE      Fix types: all, lists, xref, headers, whitespace"
   echo "                       Can be specified multiple times"
-  echo "  -n, --dry-run        Show what would be fixed without modifying files"
   echo "  -i, --interactive    Ask before applying each fix"
   echo "  -b, --no-backup      Don't create backup files"
   echo "  -v, --verbose        Show detailed progress"
@@ -54,7 +52,7 @@ usage() {
   echo ""
   echo "Examples:"
   echo "  $0                                    # Format all .adoc files in current directory"
-  echo "  $0 -n docs/                          # Dry run on docs directory"
+  echo "  $0 docs/                             # Format all files in docs directory"
   echo "  $0 -t lists -t xref file.adoc       # Fix only lists and xrefs in specific file"
   echo "  $0 -i --no-backup                   # Interactive mode without backups"
   exit 0
@@ -72,11 +70,7 @@ while [[ $# -gt 0 ]]; do
       fix_types+=("$2")
       shift 2
       ;;
-    -n|--dry-run)
-      dry_run=true
-      shift
-      ;;
-    -i|--interactive)
+-i|--interactive)
       interactive=true
       shift
       ;;
@@ -125,7 +119,7 @@ is_fix_enabled() {
 # Function to create backup
 create_backup() {
   local file="$1"
-  if [ "$backup" = true ] && [ "$dry_run" = false ]; then
+  if [ "$backup" = true ]; then
     cp "$file" "${file}.bak"
     [ "$verbose" = true ] && echo "Created backup: ${file}.bak"
   fi
@@ -366,34 +360,24 @@ process_file() {
   if [ "$file_modified" = true ]; then
     ((files_modified++))
     
-    if [ "$interactive" = true ]; then
+if [ "$interactive" = true ]; then
       echo -e "\n${YELLOW}Proposed changes for $file:${NC}"
       show_diff "$file" "$current_file"
       echo -n "Apply these changes? [y/N] "
       read -r response
-      
+
       if [[ "$response" =~ ^[Yy]$ ]]; then
-        if [ "$dry_run" = false ]; then
-          create_backup "$file"
-          mv "$current_file" "$file"
-          echo -e "${GREEN}✓ Applied fixes to $file${NC}"
-        else
-          echo -e "${BLUE}Would apply fixes to $file${NC}"
-        fi
+        create_backup "$file"
+        mv "$current_file" "$file"
+        echo -e "${GREEN}✓ Applied fixes to $file${NC}"
       else
         echo "Skipped"
         rm -f "$current_file"
       fi
     else
-      if [ "$dry_run" = true ]; then
-        echo -e "${BLUE}Would fix: $file${NC}"
-        show_diff "$file" "$current_file"
-        rm -f "$current_file"
-      else
-        create_backup "$file"
-        mv "$current_file" "$file"
-        echo -e "${GREEN}✓ Fixed: $file${NC}"
-      fi
+      create_backup "$file"
+      mv "$current_file" "$file"
+      echo -e "${GREEN}✓ Fixed: $file${NC}"
     fi
   else
     [ "$verbose" = true ] && echo "  No issues found"
@@ -406,7 +390,6 @@ process_file() {
 # Main execution
 echo -e "${BLUE}AsciiDoc Formatter${NC}"
 echo "=================="
-[ "$dry_run" = true ] && echo "(DRY RUN - no files will be modified)"
 echo ""
 
 # Find and process files
@@ -432,10 +415,5 @@ echo "--------"
 echo "Files processed: $files_processed"
 echo "Files modified: $files_modified"
 echo "Issues fixed: $issues_fixed"
-
-if [ "$dry_run" = true ] && [ $files_modified -gt 0 ]; then
-  echo ""
-  echo "Run without --dry-run to apply these fixes"
-fi
 
 exit $EXIT_SUCCESS

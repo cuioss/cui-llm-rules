@@ -379,8 +379,8 @@ Auto-fixes common AsciiDoc formatting issues:
 
 **Usage:**
 ```bash
-# Preview changes without modifying files (dry-run)
-scripts/asciidoc-formatter.sh -n path/to/file.adoc
+# Auto-fix all issues in a file
+scripts/asciidoc-formatter.sh path/to/file.adoc
 
 # Auto-fix all issues in a directory
 scripts/asciidoc-formatter.sh directory/
@@ -394,9 +394,9 @@ scripts/asciidoc-formatter.sh -i path/to/file.adoc
 
 **Safe Operation:**
 * Creates backup files by default (`.bak` extension)
-* Use `-n` for dry-run to preview changes
 * Use `-i` for interactive confirmation of each fix
 * Use `-t` to target specific fix types
+* All files are under git control for easy rollback
 
 #### 3. Link Verification Script (`verify-adoc-links.py`)
 

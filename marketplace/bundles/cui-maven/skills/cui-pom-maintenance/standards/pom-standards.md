@@ -172,7 +172,7 @@ For each dependency:
 | Build | `./mvnw clean install` | SUCCESS |
 | Dependencies | `./mvnw dependency:analyze` | No warnings |
 | Enforcer | `./mvnw enforcer:enforce` | No violations |
-| OpenRewrite | `./mvnw -Prewrite-maven-clean rewrite:dryRun` | No changes |
+| OpenRewrite | `./mvnw -Prewrite-maven-clean rewrite:run` | No changes needed |
 
 ### Prohibited Patterns
 

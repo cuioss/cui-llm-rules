@@ -330,7 +330,7 @@ Parameters:
 Skill: cui-maven:cui-maven-rules
 Workflow: Execute Maven Build
 Parameters:
-  goals: rewrite:dryRun
+  goals: rewrite:run
   profile: rewrite-maven-clean
   module: {module}
 ```

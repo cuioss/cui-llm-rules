@@ -276,7 +276,6 @@ Report:
 **Parameters**:
 - `scope` (required): What to refactor - component, bundle, or marketplace
 - `strategy` (required): Refactoring strategy to apply
-- `dry_run` (optional): Preview changes without applying (default: true)
 
 ### Steps
 
@@ -317,14 +316,7 @@ Based on strategy:
 - **extract**: Move shared content to skill
 - **reorganize**: Restructure directory layout
 
-#### Step 4: Preview Changes
-
-If `dry_run=true`:
-- Display planned changes
-- Show before/after structure
-- Ask for confirmation
-
-#### Step 5: Apply Refactoring
+#### Step 4: Apply Refactoring
 
 Execute refactoring plan:
 - Rename/move files
@@ -332,7 +324,7 @@ Execute refactoring plan:
 - Modify plugin.json entries
 - Run verification
 
-#### Step 6: Verify Results
+#### Step 5: Verify Results
 
 Run plugin-diagnose on affected components.
 Report any issues introduced.

@@ -58,33 +58,35 @@ test_help() {
     run_test "h-flag-works" "$SCRIPT_UNDER_TEST" -h
 }
 
-# Test dry-run mode
-test_dry_run() {
+# Test backup mode
+test_backup() {
     echo ""
-    echo "=== Testing dry-run mode ==="
+    echo "=== Testing backup mode ==="
     echo ""
 
     local test_file="$TEST_FIXTURES_DIR/missing-blank-line.adoc"
 
-    # Copy original
+    # Copy original for restoration
     cp "$test_file" "$test_file.original"
 
-    # Run in dry-run mode
+    # Run formatter (creates backup by default)
     TESTS_RUN=$((TESTS_RUN + 1))
-    echo -n "Test: dry-run-no-modification ... "
+    echo -n "Test: backup-created ... "
 
-    "$SCRIPT_UNDER_TEST" -n "$test_file" >/dev/null 2>&1
+    "$SCRIPT_UNDER_TEST" "$test_file" >/dev/null 2>&1
 
-    # Verify file wasn't modified
-    if diff -q "$test_file" "$test_file.original" >/dev/null 2>&1; then
+    # Verify backup was created
+    if [ -f "$test_file.bak" ]; then
         echo -e "${GREEN}PASS${NC}"
         TESTS_PASSED=$((TESTS_PASSED + 1))
     else
-        echo -e "${RED}FAIL${NC} (file was modified in dry-run mode)"
+        echo -e "${RED}FAIL${NC} (backup not created)"
         TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
 
-    rm "$test_file.original"
+    # Restore original
+    mv "$test_file.original" "$test_file"
+    rm -f "$test_file.bak"
 }
 
 # Test blank line fixes
@@ -93,8 +95,8 @@ test_blank_line_fix() {
     echo "=== Testing blank line fixes ==="
     echo ""
 
-    # Just verify the script can run on a test file
-    run_test "formatter-runs-on-file" "$SCRIPT_UNDER_TEST" -n -t lists "$TEST_FIXTURES_DIR/missing-blank-line.adoc"
+# Just verify the script can run on a test file (use --no-backup to avoid modifying test fixtures)
+    run_test "formatter-runs-on-file" "$SCRIPT_UNDER_TEST" --no-backup -t lists "$TEST_FIXTURES_DIR/missing-blank-line.adoc"
 }
 
 # Test directory processing
@@ -103,10 +105,10 @@ test_directory_processing() {
     echo "=== Testing directory processing ==="
     echo ""
 
-    TESTS_RUN=$((TESTS_RUN + 1))
+TESTS_RUN=$((TESTS_RUN + 1))
     echo -n "Test: processes-directory ... "
 
-    if "$SCRIPT_UNDER_TEST" -n "$TEST_FIXTURES_DIR" >/dev/null 2>&1; then
+    if "$SCRIPT_UNDER_TEST" --no-backup "$TEST_FIXTURES_DIR" >/dev/null 2>&1; then
         echo -e "${GREEN}PASS${NC}"
         TESTS_PASSED=$((TESTS_PASSED + 1))
     else
@@ -128,10 +130,10 @@ test_real_standards() {
         return
     fi
 
-    TESTS_RUN=$((TESTS_RUN + 1))
-    echo -n "Test: real-standards-dry-run ... "
+TESTS_RUN=$((TESTS_RUN + 1))
+    echo -n "Test: real-standards-format ... "
 
-    if "$SCRIPT_UNDER_TEST" -n "$standards_dir" >/dev/null 2>&1; then
+    if "$SCRIPT_UNDER_TEST" --no-backup "$standards_dir" >/dev/null 2>&1; then
         echo -e "${GREEN}PASS${NC}"
         TESTS_PASSED=$((TESTS_PASSED + 1))
     else
@@ -175,11 +177,11 @@ test_multiple_fix_types() {
     echo "=== Testing multiple fix types ==="
     echo ""
 
-    run_test "lists-fix-type" "$SCRIPT_UNDER_TEST" -n -t lists "$TEST_FIXTURES_DIR"
-    run_test "xref-fix-type" "$SCRIPT_UNDER_TEST" -n -t xref "$TEST_FIXTURES_DIR"
-    run_test "headers-fix-type" "$SCRIPT_UNDER_TEST" -n -t headers "$TEST_FIXTURES_DIR"
-    run_test "whitespace-fix-type" "$SCRIPT_UNDER_TEST" -n -t whitespace "$TEST_FIXTURES_DIR"
-    run_test "all-fix-types" "$SCRIPT_UNDER_TEST" -n -t all "$TEST_FIXTURES_DIR"
+run_test "lists-fix-type" "$SCRIPT_UNDER_TEST" --no-backup -t lists "$TEST_FIXTURES_DIR"
+    run_test "xref-fix-type" "$SCRIPT_UNDER_TEST" --no-backup -t xref "$TEST_FIXTURES_DIR"
+    run_test "headers-fix-type" "$SCRIPT_UNDER_TEST" --no-backup -t headers "$TEST_FIXTURES_DIR"
+    run_test "whitespace-fix-type" "$SCRIPT_UNDER_TEST" --no-backup -t whitespace "$TEST_FIXTURES_DIR"
+    run_test "all-fix-types" "$SCRIPT_UNDER_TEST" --no-backup -t all "$TEST_FIXTURES_DIR"
 }
 
 # Main execution
@@ -188,8 +190,8 @@ main() {
     echo "Test Suite: asciidoc-formatter.sh"
     echo "========================================"
 
-    test_help
-    test_dry_run
+test_help
+    test_backup
     test_blank_line_fix
     test_directory_processing
     test_multiple_fix_types

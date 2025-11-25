@@ -201,11 +201,10 @@ Usage: `/plugin-diagnose name=my-agent scope=agent verbose=true`
 ## PARAMETERS
 
 **target** - What to analyze (required)
-**--fix** - Automatically fix issues (flag, default: false)
-**--dry-run** - Preview changes without applying (flag, default: false)
+**--fix** - Automatically fix issues (flag, default: true)
 ```
 
-Usage: `/plugin-fix my-agent --dry-run`
+Usage: `/plugin-fix my-agent`
 
 ### Pattern 4: No Parameters
 
@@ -613,7 +612,6 @@ Applies automated fixes to component issues.
 ## PARAMETERS
 
 **target** - Component to fix (required)
-**dry-run** - Preview without applying (flag, default: false)
 
 ## WORKFLOW
 
@@ -624,12 +622,9 @@ Find issues in target component
 ### Step 2: Categorize Issues
 Separate auto-fixable vs manual issues
 
-### Step 3: Preview or Apply
-If dry-run:
-  Show what would be fixed
-Else:
-  Load plugin-fix skill
-  Apply automated fixes
+### Step 3: Apply Fixes
+Load plugin-fix skill
+Apply automated fixes
 
 ### Step 4: Verify
 Re-run diagnosis

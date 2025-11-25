@@ -38,7 +38,6 @@ Auto-fix common AsciiDoc formatting issues with safety features.
 ### Parameters
 
 - `target` (required): File path or directory path
-- `dry_run` (optional, default: true): Preview changes without modifying
 - `fix_types` (optional, default: "all"): Types of fixes: "lists", "xref", "headers", "whitespace", "all"
 
 ### Steps
@@ -61,7 +60,6 @@ If target is a directory:
 Build command with options:
 ```bash
 OPTIONS=""
-if [dry_run == true]; then OPTIONS="$OPTIONS -n"; fi
 if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 ```
 
@@ -86,15 +84,6 @@ Extract statistics:
 
 **Step 5: Report Results**
 
-**Dry-run mode (preview):**
-```
-Format Preview for {target}
-Files that would be modified: {count}
-Changes that would be applied: {list}
-To apply: run with dry_run=false
-```
-
-**Apply mode:**
 ```
 Format Fixes Applied to {target}
 Files modified: {count}
@@ -102,9 +91,9 @@ Issues fixed: {count}
 Changes applied: {list}
 ```
 
-**Step 6: Validation (if changes applied)**
+**Step 6: Validation (after changes applied)**
 
-If dry_run=false, resolve and run validation:
+Resolve and run validation:
 ```
 Skill: cui-utilities:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
@@ -719,7 +708,6 @@ Skill: cui-documentation-standards:cui-documentation
 Execute workflow: format-document
 Parameters:
   target: "standards/"
-  dry_run: true
 ```
 
 ## Quality Verification Checklist
