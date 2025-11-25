@@ -373,6 +373,145 @@ Analyze existing JaCoCo coverage reports and extract coverage metrics.
 
 ---
 
+## Workflow: Analyze Test Coverage
+
+Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements.
+
+### Parameters
+
+- **report_path** (optional): Path to JaCoCo XML report (default: target/site/jacoco/jacoco.xml)
+- **module** (optional): Module name for module-specific analysis
+- **priority_filter** (optional): Filter gaps by priority: high, medium, low, all (default: all)
+
+### Steps
+
+1. **Verify Coverage Report Exists**
+   ```
+   Glob: pattern="{report_path}"
+   ```
+
+   If report doesn't exist, run Maven with jacoco:
+   ```
+   Skill: cui-maven:cui-maven-rules
+   Workflow: verify-clean-build
+   Parameters:
+     goals: clean test jacoco:report
+     module: {module if specified}
+   ```
+
+2. **Analyze Coverage Gaps**
+   ```
+   Skill: cui-utilities:script-runner
+   Script: cui-java-expert:cui-java-unit-testing/analyze-coverage-gaps
+   Parameters:
+     report_path: "{report_path}"
+     priority_filter: "{priority_filter}"
+   ```
+
+   Parse JSON output:
+   - `overall_coverage`: Line, branch, method coverage percentages
+   - `gaps_by_priority`: Gaps categorized as high, medium, low priority
+   - `recommendations`: Actionable test improvement suggestions
+   - `untested_public_methods`: List of public APIs without coverage
+
+3. **Analyze Gap Priorities**
+
+   **High Priority Gaps** (requires immediate attention):
+   - Uncovered public methods
+   - Security/validation code without tests
+   - Error handling paths not tested
+   - Classes with >10 uncovered lines
+
+   **Medium Priority Gaps**:
+   - Uncovered branches in tested methods
+   - Package-private methods without tests
+   - Minor utility methods
+
+   **Low Priority Gaps**:
+   - Trivial getters/setters
+   - Generated code
+   - Defensive null checks already covered
+
+4. **Generate Actionable Report**
+
+   ```
+   ╔════════════════════════════════════════════════════════════╗
+   ║           Test Coverage Gap Analysis                       ║
+   ╚════════════════════════════════════════════════════════════╝
+
+   Overall Coverage:
+   - Line Coverage: {line}% (target: 80%)
+   - Branch Coverage: {branch}% (target: 70%)
+   - Method Coverage: {method}% (target: 100% public)
+
+   High Priority Gaps: {high_count}
+   {list of high priority untested code with file:line}
+
+   Medium Priority Gaps: {medium_count}
+   {list of medium priority gaps}
+
+   Low Priority Gaps: {low_count}
+
+   Recommendations:
+   1. Add tests for {class}::{method} - uncovered public API
+   2. Add branch tests for {class}::{method} - missing error path
+   3. Add tests for {class} - only {coverage}% coverage
+   ```
+
+5. **Return Structured Results**
+
+   Generate JSON response for programmatic use:
+   ```json
+   {
+     "coverage_status": "meets_threshold|below_threshold",
+     "overall": {
+       "line": 85.5,
+       "branch": 72.0,
+       "method": 90.0
+     },
+     "gaps_by_priority": {
+       "high": [...],
+       "medium": [...],
+       "low": [...]
+     },
+     "recommendations": [
+       {
+         "priority": "high",
+         "class": "TokenValidator",
+         "method": "validateExpiry",
+         "reason": "uncovered_public_method",
+         "file": "src/main/java/auth/TokenValidator.java",
+         "lines": [45, 46, 47]
+       }
+     ]
+   }
+   ```
+
+### Script Contracts
+
+**analyze-coverage-gaps** (via script-runner):
+- **Input**: JSON with `report_path` and optional `priority_filter`
+- **Output**: JSON with coverage gaps prioritized by impact
+- **Location**: `cui-java-expert:cui-java-unit-testing/analyze-coverage-gaps`
+
+### Maven Integration
+
+To generate coverage reports with tests:
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: verify-clean-build
+Parameters:
+  goals: clean test jacoco:report
+  module: {module if specified}
+```
+
+### Related Standards
+
+- Coverage Analysis Pattern: standards/coverage-analysis-pattern.md
+- Testing Quality Standards: standards/testing-quality-standards.md
+
+---
+
 ## References
 
 * Core Testing Standards: standards/testing-junit-core.md
@@ -381,3 +520,4 @@ Analyze existing JaCoCo coverage reports and extract coverage metrics.
 * MockWebServer Testing: standards/testing-mockwebserver.md
 * Integration Testing: standards/integration-testing.md
 * JULi Logger Testing: standards/testing-juli-logger.md
+* Coverage Analysis: standards/coverage-analysis-pattern.md
