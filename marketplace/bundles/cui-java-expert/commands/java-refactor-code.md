@@ -90,31 +90,37 @@ This loads comprehensive maintenance standards including:
 
 ### Step 2: Pre-Maintenance Verification
 
-**2.1 Build Verification:**
+**2.1 Build Precondition Check:**
 
 ```
 Skill: cui-maven:cui-maven-rules
-Workflow: Execute Maven Build
+Workflow: verify-clean-build
 Parameters:
-  goals: -Ppre-commit clean verify -DskipTests
+  goals: clean compile
   module: {module if specified}
-  output_mode: errors
 ```
 
+This workflow executes Maven build, parses output with verify-clean-build.py, and returns status.
+
 **On build failure:** Display errors, prompt user "[F]ix manually and retry / [A]bort", track in `pre_verification_failures`.
+
+Reference: xref:../skills/cui-java-core/standards/build-precondition-pattern.md[Build Precondition Pattern]
 
 **2.2 Test Execution:**
 
 ```
 Skill: cui-maven:cui-maven-rules
-Workflow: Execute Maven Build
+Workflow: verify-clean-build
 Parameters:
   goals: clean test
   module: {module if specified}
-  output_mode: structured
 ```
 
+This verifies all existing tests pass before refactoring begins.
+
 **On test failure:** Display failures, prompt user "[F]ix manually and retry / [A]bort", track in `pre_verification_failures`.
+
+**CRITICAL:** Never refactor on broken code - build and tests must be clean before starting.
 
 **2.3 Coverage Baseline:**
 
@@ -246,20 +252,18 @@ After all modules processed:
 
 ```
 Skill: cui-maven:cui-maven-rules
-Workflow: Execute Maven Build
+Workflow: verify-clean-build
 Parameters:
   goals: clean verify
-  output_mode: errors
 ```
 
 **6.2 Full Test Suite:**
 
 ```
 Skill: cui-maven:cui-maven-rules
-Workflow: Execute Maven Build
+Workflow: verify-clean-build
 Parameters:
   goals: clean test
-  output_mode: structured
 ```
 
 **6.3 Coverage Verification:**
