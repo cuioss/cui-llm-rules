@@ -107,70 +107,57 @@ Use this workflow when:
 - **goals** (required): Maven goals to execute (e.g., "clean install", "clean verify -DskipTests")
 - **module** (optional): Specific module to build (-pl flag)
 - **profile** (optional): Maven profile to activate (-P flag)
+- **timeout** (optional): Build timeout in milliseconds (default: 120000)
 - **output_mode** (optional): How to process output - "default", "errors", "structured" (default: "structured")
 
-### Step 1: Generate Timestamped Log Filename
+### Step 1: Execute Maven Build
 
-Generate a unique log filename with timestamp:
-
-```
-Format: target/build-output-{YYYY-MM-DD-HHmmss}.log
-Example: target/build-output-2025-11-25-143022.log
-```
-
-### Step 2: Pre-Create Log File (CRITICAL)
-
-**MANDATORY**: Use the Write tool to create an empty log file BEFORE calling Maven:
-
-```
-Write: target/build-output-{timestamp}.log
-Content: ""  (empty string)
-```
-
-**Why**: When using `-l` with `clean` goal, Maven's clean phase deletes `target/` before Maven can create the log file. Pre-creating ensures the directory and file exist.
-
-### Step 3: Execute Maven Build
+Use `execute-maven-build.py` which handles log file pre-creation, timestamping, and Maven execution atomically:
 
 ```bash
-./mvnw -l target/build-output-{timestamp}.log {goals} {-pl module if specified} {-P profile if specified}
+python3 scripts/execute-maven-build.py \
+    --goals "{goals}" \
+    --profile {profile} \
+    --module {module} \
+    --timeout {timeout}
 ```
 
-NOTE: Using Maven's `-l` (log file) flag instead of shell redirection (`> file 2>&1`) avoids permission issues with `Bash(./mvnw:*)`.
+**Output**: JSON with `log_file`, `exit_code`, `duration_ms`, `command_executed`
 
 **Examples:**
 ```bash
 # Basic build
-./mvnw -l target/build-output-2025-11-25-143022.log clean install
+python3 scripts/execute-maven-build.py --goals "clean install"
 
 # Module-specific build
-./mvnw -l target/build-output-2025-11-25-143022.log clean install -pl auth-service
+python3 scripts/execute-maven-build.py --goals "clean install" --module auth-service
 
 # With profile
-./mvnw -l target/build-output-2025-11-25-143022.log clean verify -Ppre-commit
+python3 scripts/execute-maven-build.py --goals "clean verify" --profile pre-commit
 
 # Coverage build
-./mvnw -l target/build-output-2025-11-25-143022.log clean test -Pcoverage
+python3 scripts/execute-maven-build.py --goals "clean test" --profile coverage
 
-# Native image
-./mvnw -l target/build-output-2025-11-25-143022.log clean package -Dnative
+# Native image with extended timeout
+python3 scripts/execute-maven-build.py --goals "clean package -Dnative" --timeout 600000
 ```
 
-### Step 4: Parse Build Output
+The script:
+- Generates timestamped log filename automatically
+- Pre-creates log file (handles `clean` goal correctly)
+- Executes Maven and captures exit code
+- Prints `[EXEC] <command>` to stderr for visibility
+- Returns structured JSON result
 
-Resolve script path:
-```
-Skill: cui-utilities:script-runner
-Resolve: cui-maven:cui-maven-rules/scripts/parse-maven-output.py
-```
+### Step 2: Parse Build Output
 
-Execute:
 ```bash
-python3 {resolved_path} \
-    --log target/build-output-{timestamp}.log \
+python3 scripts/parse-maven-output.py \
+    --log {log_file from step 1} \
     --mode {output_mode}
 ```
 
-### Step 5: Return Results
+### Step 3: Return Results
 
 Return structured JSON with:
 - Build status (SUCCESS/FAILURE)
@@ -359,7 +346,7 @@ See `standards/maven-openrewrite-handling.md` for full documentation.
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-This workflow manages the acceptable warnings list in `.claude/run-configuration.md`.
+This workflow manages the acceptable warnings list in `.claude/run-configuration.json`.
 
 ### When to Use
 
@@ -372,7 +359,8 @@ Use this workflow when:
 
 - **action** (required): `add`, `remove`, or `list`
 - **pattern** (optional): Warning pattern to add/remove
-- **config_file** (optional): Config file path (default: `.claude/run-configuration.md`)
+- **command** (optional): Maven command key (default: `./mvnw clean install`)
+- **config_file** (optional): Config file path (default: `.claude/run-configuration.json`)
 
 ### Step 1: Read Configuration
 
@@ -380,27 +368,47 @@ Use this workflow when:
 Read: {config_file}
 ```
 
-If file doesn't exist, create with initial structure.
+Access JSON path: `maven.{command}.acceptable_warnings`
+
+If file doesn't exist, create with initial structure:
+```json
+{
+  "version": 1,
+  "maven": {
+    "{command}": {
+      "acceptable_warnings": []
+    }
+  }
+}
+```
 
 ### Step 2: Process Action
 
 **Action: list**
-- Extract and return all warnings in acceptable list
+- Return `acceptable_warnings` array for the command
 
 **Action: add**
 - Validate pattern is not a JavaDoc warning (NEVER acceptable)
 - Validate pattern matches infrastructure warning criteria
-- Add to acceptable warnings section
+- Add to `acceptable_warnings` array:
+  ```json
+  {
+    "pattern": "{pattern}",
+    "category": "{transitive_dependency|plugin_compatibility|platform_specific}",
+    "reason": "{why this is acceptable}",
+    "added": "{YYYY-MM-DD}"
+  }
+  ```
 
 **Action: remove**
-- Find matching pattern
-- Remove from acceptable warnings section
+- Find entry with matching pattern
+- Remove from `acceptable_warnings` array
 
 ### Step 3: Write Configuration
 
 If add/remove action:
-- Write updated configuration
-- Return confirmation
+- Write updated JSON to config file
+- Return confirmation with updated array
 
 ### Infrastructure Warning Criteria
 
