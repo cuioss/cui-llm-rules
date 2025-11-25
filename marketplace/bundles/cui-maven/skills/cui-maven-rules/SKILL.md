@@ -1,90 +1,63 @@
 ---
 name: cui-maven-rules
-description: Complete Maven standards covering build processes, POM maintenance, dependency management, and Maven integration for CUI projects
+description: Maven build execution, output parsing, and issue routing for CUI projects
 allowed-tools: Read, Grep, Bash(./mvnw:*), Bash(python3:*)
 ---
 
 # CUI Maven Rules
 
-Comprehensive Maven standards for CUI projects covering build verification, POM maintenance, dependency management, Maven wrapper updates, and integration with build tools.
+Maven build execution skill for CUI projects. Handles build commands, output parsing, error categorization, and issue routing.
 
 ## What This Skill Provides
 
-### Maven Build Standards
-- Pre-commit profile configuration and execution
-- Build success criteria and verification
-- Quality gate enforcement
-- Execution time tracking and optimization
-- Error and warning analysis
+### Build Execution
+- Maven goal execution with profiles and module targeting
+- Log capture and timestamped output
+- Build timeout management
+- Exit code and status determination
+
+### Output Parsing
+- Compilation error extraction
+- Test failure categorization
+- JavaDoc warning detection
+- Dependency error identification
 - OpenRewrite marker handling
 
-### POM Maintenance Standards
-- BOM (Bill of Materials) management
-- Dependency management with properties
-- Version naming conventions (version.*, maven.*.plugin.version)
-- Scope optimization (compile, provided, runtime, test)
-- OpenRewrite integration for automated cleanup
-- Maven wrapper updates and maintenance
+### Issue Routing
+- Categorized issue reports (JSON structured)
+- Fix command recommendations
+- Acceptable warning filtering
 
-### Maven Build Execution Standards
-- Module builds with `-pl`, `--also-make`, `--also-make-dependents`
-- Reactor build order and dependency resolution
-- Build timeout calculation and management
-- Maven phase integration (validate, compile, test, etc.)
-- SonarQube integration and coverage reporting
-- CI/CD build environment standards
+## When to Activate
 
-### Quality Standards
-- Compilation error resolution
-- Test failure handling
-- Code warning fixes
-- JavaDoc mandatory fixes
-- Dependency analysis
-- Acceptable warning management
+Activate when:
+- Executing Maven builds
+- Parsing Maven build output
+- Routing build issues to fix commands
+- Checking acceptable warnings
+- Finding module paths
 
-## When to Activate This Skill
+**For POM maintenance** (dependencies, BOMs, scopes):
+```
+Skill: cui-maven:cui-pom-maintenance
+```
 
-Activate this skill when:
-- Building Maven projects with quality checks
-- Analyzing Maven build output
-- Fixing Maven build errors or warnings
-- Executing module or reactor builds
-- Maintaining POM files
-- Managing dependencies or BOMs
-- Updating Maven wrappers
-- Setting up CI/CD Maven builds
-- Troubleshooting Maven issues
+## Standards Reference
 
-## Workflow
+**Load for build execution context:**
+```
+Read standards/maven-build-execution.md
+```
 
-### Step 1: Load Maven Standards
+**Load for OpenRewrite handling:**
+```
+Read standards/maven-openrewrite-handling.md
+```
 
-**CRITICAL**: Load Maven standards based on the task context.
-
-1. **For build execution tasks** (running builds, module targeting, reactor builds):
-   ```
-   Read: standards/maven-build-execution.md
-   ```
-
-2. **For POM maintenance tasks** (editing POM files, managing dependencies, updating BOMs):
-   ```
-   Read: standards/pom-maintenance.md
-   ```
-
-3. **For comprehensive Maven work** (build verification, complete project setup):
-   ```
-   Read: standards/maven-build-execution.md
-   Read: standards/pom-maintenance.md
-   ```
-
-### Step 2: Apply Standards to Task
-
-After loading the appropriate standards:
-
-1. Extract key requirements relevant to your specific task
-2. Follow the patterns and guidelines from the loaded standards
-3. Apply quality gates and verification criteria as specified
-4. Ensure all changes align with CUI Maven best practices
+**Load for warning classification:**
+```
+Read standards/maven-acceptable-warnings.md
+```
 
 ---
 
@@ -632,95 +605,33 @@ See `standards/maven-acceptable-warnings.md` for full documentation.
 
 ## Standards Organization
 
-All standards are organized in the `standards/` directory:
+Standards in `standards/` directory:
 
-- `maven-build-execution.md` - Build execution, module targeting, reactor builds, timeout management, output handling
-- `pom-maintenance.md` - Comprehensive POM maintenance process, BOM management, dependency management, scope optimization
-- `maven-openrewrite-handling.md` - OpenRewrite marker search, categorization, and suppression patterns
-- `maven-acceptable-warnings.md` - Infrastructure vs fixable warning classification, acceptable list management
+- `maven-build-execution.md` - Build execution, module targeting, reactor builds, timeout management
+- `maven-openrewrite-handling.md` - OpenRewrite marker search, categorization, suppression
+- `maven-acceptable-warnings.md` - Warning classification, acceptable list management
 
 ## Tool Access
 
-This skill requires:
-- **Read**: To load standards files
-- **Grep**: To search for patterns in standards
-- **Bash(./mvnw:*)**: To execute Maven builds
-- **Bash(python3:*)**: To execute scripts:
-  - `execute-maven-build.py` - Atomic Maven build execution
-  - `parse-maven-output.py` - Build output parsing
+- **Read**: Load standards files
+- **Grep**: Search patterns
+- **Bash(./mvnw:*)**: Execute Maven builds
+- **Bash(python3:*)**: Execute scripts:
+  - `execute-maven-build.py` - Atomic build execution
+  - `parse-maven-output.py` - Output parsing
   - `check-acceptable-warnings.py` - Warning categorization
-  - `search-openrewrite-markers.py` - OpenRewrite marker search
+  - `search-openrewrite-markers.py` - Marker search
   - `find-module-path.py` - Module path resolution
 
-## Usage Pattern
+## Integration
 
-When this skill is activated, it loads all Maven-related standards into the agent's context. Agents can then reference these standards when:
+### Commands Using This Skill
 
-1. **Executing builds**: Module targeting, reactor builds, timeout management, output handling
-2. **Fixing issues**: Knowing how to handle errors, warnings, JavaDoc issues, OpenRewrite markers
-3. **Maintaining POMs**: Following BOM patterns, property naming, dependency management rules
-4. **Optimizing dependencies**: Applying scope rules, consolidation criteria
-5. **Configuring CI/CD**: Quality profiles, non-interactive builds, environment setup
-6. **Updating wrappers**: Following Maven wrapper update procedures
+- `/maven-build-and-fix` - Iterative build and fix loop
 
-## Integration with Commands
+### Related Skills
 
-### maven-build-and-fix Command
-
-The `/maven-build-and-fix` command activates this skill to:
-- Load build verification standards
-- Understand quality gate criteria
-- Know how to handle OpenRewrite markers
-- Follow JavaDoc fix requirements
-- Apply acceptable warning rules
-- Parse build output for issue categorization
-
-The skill provides the authoritative standards that guide all build-related decisions and fixes.
-
-## Standards Coverage
-
-### Build Execution
-- ✅ Module builds with `-pl`, `--also-make`, `--also-make-dependents`
-- ✅ Reactor builds with `-rf` (resume from)
-- ✅ Timeout calculation (duration * 1.25 safety margin)
-- ✅ Output capture with Maven's `-l` flag
-- ✅ Build status determination (exit code + output content)
-- ✅ Quality profiles (pre-commit, coverage, integration-tests)
-
-### Build Process
-- ✅ Pre-commit profile execution
-- ✅ Build success criteria (exit code, BUILD SUCCESS text, no ERROR lines)
-- ✅ Output analysis patterns
-- ✅ Iteration workflow
-
-### Issue Handling
-- ✅ Compilation error fixes
-- ✅ Test failure resolution
-- ✅ Code warning handling
-- ✅ JavaDoc mandatory fixes (NEVER optional)
-- ✅ OpenRewrite marker auto-suppression (LogRecord, Exception)
-- ✅ Acceptable warning management
-
-### POM Maintenance
-- ✅ BOM implementation patterns
-- ✅ Property naming conventions
-- ✅ Dependency aggregation rules
-- ✅ Scope optimization guidelines
-- ✅ Version management (handled by Dependabot)
-- ✅ OpenRewrite recipe execution
-
-## Related Skills
-
-- **cui-javadoc**: JavaDoc standards used for mandatory JavaDoc fixes
-- **cui-java-unit-testing**: Testing standards referenced in build verification
-
-## Maintenance Notes
-
-Standards in this skill are authoritative for:
-- All Maven build processes in CUI projects
-- All POM maintenance activities
-- All Maven-related quality checks
-- All Maven integration configurations
-
-When standards need updates, modify the files in the `standards/` directory and the skill will automatically reflect the changes when next activated.
+- `cui-maven:cui-pom-maintenance` - POM maintenance (dependencies, BOMs, scopes)
+- `cui-java-expert:cui-javadoc` - JavaDoc standards
+- `cui-java-expert:cui-java-unit-testing` - Test standards
 

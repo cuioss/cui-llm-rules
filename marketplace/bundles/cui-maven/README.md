@@ -1,118 +1,127 @@
 # CUI Maven Tools
 
-Maven build, verification, and POM maintenance tools for CUI projects.
+Maven build execution, POM maintenance, and quality verification for CUI projects.
 
 ## Purpose
 
-This bundle provides comprehensive Maven workflow support including build verification, quality gate enforcement, POM maintenance standards, and automated issue categorization. All agent functionality has been absorbed into skill workflows with Python scripts for deterministic analysis.
+This bundle provides comprehensive Maven workflow support including build execution, output parsing, issue routing, POM maintenance, and quality verification. Skills use Python scripts for deterministic analysis.
 
-## Components Included
+## Components
 
-### Skills (1 skill with workflow)
+### Skills
 
-1. **cui-maven-rules** - Complete Maven standards covering build processes, POM maintenance, dependency management, and Maven integration
-   - **Workflow: Parse Maven Build Output** - Parse and categorize Maven build errors/warnings
+| Skill | Purpose |
+|-------|---------|
+| `cui-maven-rules` | Build execution, output parsing, issue routing |
+| `cui-pom-maintenance` | POM maintenance, BOM optimization, scope analysis |
 
-### Scripts (1 automation script)
+### Commands
 
-| Script | Location | Purpose |
-|--------|----------|---------|
-| `parse-maven-output.py` | cui-maven-rules | Parse Maven build logs, categorize issues |
+| Command | Purpose |
+|---------|---------|
+| `/maven-build-and-fix` | Iterative build and fix loop |
+| `/maven-pom-maintenance` | POM maintenance orchestration |
 
-### Commands (1 goal-based orchestrator)
+### Agents
 
-1. **maven-build-and-fix** - Executes Maven build, analyzes issues, delegates fixes to appropriate commands, iterates until clean
+| Agent | Purpose |
+|-------|---------|
+| `maven-builder` | Autonomous single-build execution (haiku model) |
 
 ## Architecture
 
 ```
 cui-maven/
-├── commands/                # 1 goal-based orchestrator
-│   └── maven-build-and-fix.md
+├── agents/
+│   └── maven-builder.md          # Autonomous build agent
+├── commands/
+│   ├── maven-build-and-fix.md    # Build-fix loop orchestrator
+│   └── maven-pom-maintenance.md  # POM maintenance orchestrator
 └── skills/
-    └── cui-maven-rules/     # Standards + workflow
-        ├── SKILL.md         # Workflow: Parse Maven Build Output
-        ├── scripts/
-        │   └── parse-maven-output.py
+    ├── cui-maven-rules/          # Build execution skill
+    │   ├── SKILL.md
+    │   ├── scripts/
+    │   │   ├── execute-maven-build.py
+    │   │   ├── parse-maven-output.py
+    │   │   ├── check-acceptable-warnings.py
+    │   │   ├── search-openrewrite-markers.py
+    │   │   └── find-module-path.py
+    │   └── standards/
+    │       ├── maven-build-execution.md
+    │       ├── maven-openrewrite-handling.md
+    │       └── maven-acceptable-warnings.md
+    └── cui-pom-maintenance/      # POM maintenance skill
+        ├── SKILL.md
         └── standards/
-            ├── pom-maintenance.md
-            └── maven-integration.md
+            └── pom-standards.md
 ```
 
-## Workflow Pattern
+## Usage
 
-Commands are thin orchestrators that invoke skill workflows:
-
-```
-/maven-build-and-fix
-  ├─> Bash: ./mvnw -l target/build-output.log {goals}
-  ├─> Skill(cui-maven-rules) workflow: Parse Maven Build Output
-  ├─> Route issues to fix commands:
-  │   ├─> /java-implement-code (compilation errors)
-  │   ├─> /java-implement-tests (test failures)
-  │   └─> /java-fix-javadoc (javadoc warnings)
-  └─> Iterate until clean or max iterations
-```
-
-## Usage Examples
-
-### Basic Build and Fix
+### Build and Fix Loop
 
 ```
 /maven-build-and-fix
+/maven-build-and-fix goals="clean verify" profile="coverage"
+/maven-build-and-fix push=true
 ```
 
-### Build with Custom Goals
+### POM Maintenance
 
 ```
-/maven-build-and-fix goals="clean verify -Pcoverage"
+/maven-pom-maintenance action=analyze
+/maven-pom-maintenance action=optimize
+/maven-pom-maintenance action=openrewrite
+/maven-pom-maintenance action=wrapper
+/maven-pom-maintenance action=verify
 ```
 
-### Build, Fix, and Commit
+### Direct Skill Usage
 
 ```
-/maven-build-and-fix push
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean install
+  profile: pre-commit
+  module: auth-service
 ```
 
-## Issue Categorization
+```
+Skill: cui-maven:cui-pom-maintenance
+Workflow: Analyze POM Issues
+Parameters:
+  module: auth-service
+  scope: all
+```
 
-The parse-maven-output.py script categorizes issues:
+## Issue Routing
 
-| Issue Type | Description | Fix Route |
-|------------|-------------|-----------|
-| `compilation_error` | Java compilation failures | `/java-implement-code` |
-| `test_failure` | JUnit test failures | `/java-implement-tests` |
-| `javadoc_warning` | JavaDoc documentation issues | `/java-fix-javadoc` |
-| `dependency_error` | Maven dependency issues | Manual POM fix |
-| `deprecation_warning` | Deprecated API usage | Manual code update |
-| `unchecked_warning` | Generic type issues | Manual code update |
+Build issues are categorized and routed to fix commands:
 
-## Bundle Statistics
-
-- **Commands**: 1 (thin orchestrator)
-- **Skills**: 1 (with Parse Maven Build Output workflow)
-- **Scripts**: 1 (Python automation)
-- **Agents**: 0 (all absorbed into skill workflows)
+| Issue Type | Fix Command |
+|------------|-------------|
+| `compilation_error` | `/java-implement-code` |
+| `test_failure` | `/java-implement-tests` |
+| `javadoc_warning` | `/java-fix-javadoc` |
+| `dependency_error` | Manual POM fix |
 
 ## Dependencies
 
-### Inter-Bundle Dependencies
+### Inter-Bundle
 
-- **cui-java-expert** - For `/java-implement-code`, `/java-implement-tests`, `/java-fix-javadoc`
-- **cui-task-workflow** - For commit functionality when `push` flag is used
+- **cui-java-expert** - For fix commands (`/java-implement-code`, `/java-implement-tests`, `/java-fix-javadoc`)
+- **cui-task-workflow** - For commit functionality
+- **cui-utilities** - For `claude-run-configuration` skill
 
-### External Dependencies
+### External
 
-- Python 3 for automation scripts
+- Python 3 (stdlib only)
 - Maven wrapper (`./mvnw`) in project root
 
 ## Configuration
 
-### Project Configuration
-
-Maven projects configure build behavior via the `cui-utilities:claude-run-configuration` skill.
-
-**Read acceptable warnings:**
+Acceptable warnings configured via `cui-utilities:claude-run-configuration`:
 
 ```
 Skill: cui-utilities:claude-run-configuration
@@ -120,8 +129,7 @@ Workflow: Read Configuration
 Field: maven.acceptable_warnings
 ```
 
-**Configuration structure:**
-
+Structure:
 ```json
 {
   "maven": {
@@ -133,14 +141,3 @@ Field: maven.acceptable_warnings
   }
 }
 ```
-
-Use the `cui-utilities:claude-run-configuration` skill for all configuration access.
-
-### Build Profiles
-
-Projects should define a `pre-commit` profile in their POM for quality checks.
-
-## Support
-
-- Repository: https://github.com/cuioss/cui-llm-rules
-- Bundle: marketplace/bundles/cui-maven/
