@@ -3,6 +3,11 @@
 **/**.iml
 **/**.DS_Store
 
+# Eclipse IDE files
+**/.project
+**/.classpath
+**/.settings/
+
 # Build output
 target/
 
