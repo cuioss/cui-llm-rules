@@ -144,9 +144,11 @@ def parse_build_log(log_path: str) -> Dict[str, Any]:
     except IOError as e:
         return {
             'status': 'error',
-            'message': f'Failed to read log file: {e}',
-            'errors': [],
-            'warnings': []
+            'data': {
+                'message': f'Failed to read log file: {e}',
+                'errors': [],
+                'warnings': []
+            }
         }
 
     errors = []
@@ -181,38 +183,24 @@ def parse_build_log(log_path: str) -> Dict[str, Any]:
 
     # Determine status
     if errors:
-        status = 'has-errors'
+        build_status = 'has-errors'
     elif warnings:
-        status = 'has-warnings'
+        build_status = 'has-warnings'
     else:
-        status = 'clean'
+        build_status = 'clean'
 
+    # Return in wrapper format expected by tests
     return {
-        'status': status,
-        'errors': errors,
-        'warnings': warnings,
-        'summary': {
-            'error_count': len(errors),
-            'warning_count': len(warnings)
+        'status': build_status,
+        'data': {
+            'errors': errors,
+            'warnings': warnings,
+            'summary': {
+                'error_count': len(errors),
+                'warning_count': len(warnings)
+            }
         }
     }
-
-
-def extract_exit_code_from_log(log_path: str) -> Optional[int]:
-    """Try to extract Maven exit code from log."""
-    try:
-        with open(log_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-            # Look for BUILD SUCCESS or BUILD FAILURE
-            if 'BUILD SUCCESS' in content:
-                return 0
-            elif 'BUILD FAILURE' in content:
-                return 1
-    except IOError:
-        pass
-
-    return None
 
 
 def main():
@@ -222,32 +210,21 @@ def main():
         epilog="""
 Examples:
   # Parse build log
-  %(prog)s --log target/build-output.log
-
-  # Parse with exit code
-  %(prog)s --log target/build-output.log --exit-code 0
+  %(prog)s --log-file target/build-output.log
 
   # Output to file
-  %(prog)s --log target/build-output.log --output verification.json
+  %(prog)s --log-file target/build-output.log --output verification.json
 
 Output:
   {
     "status": "clean|has-errors|has-warnings",
-    "errors": [
-      {
-        "file": "src/main/java/com/example/Foo.java",
-        "line": 45,
-        "column": 12,
-        "message": "cannot find symbol",
-        "type": "symbol_error",
-        "symbol": "Optional",
-        "context": "..."
+    "data": {
+      "errors": [...],
+      "warnings": [...],
+      "summary": {
+        "error_count": 0,
+        "warning_count": 0
       }
-    ],
-    "warnings": [...],
-    "summary": {
-      "error_count": 0,
-      "warning_count": 0
     }
   }
 
@@ -259,16 +236,10 @@ Status Values:
     )
 
     parser.add_argument(
-        '--log',
+        '--log-file',
         type=str,
         required=True,
         help='Path to Maven build log file'
-    )
-
-    parser.add_argument(
-        '--exit-code',
-        type=int,
-        help='Maven process exit code (0=success, 1=failure)'
     )
 
     parser.add_argument(
@@ -286,16 +257,7 @@ Status Values:
     args = parser.parse_args()
 
     # Parse log
-    result = parse_build_log(args.log)
-
-    # Add exit code if provided
-    if args.exit_code is not None:
-        result['exit_code'] = args.exit_code
-    else:
-        # Try to extract from log
-        extracted_code = extract_exit_code_from_log(args.log)
-        if extracted_code is not None:
-            result['exit_code'] = extracted_code
+    result = parse_build_log(args.log_file)
 
     # Output
     indent = 2 if args.pretty else None

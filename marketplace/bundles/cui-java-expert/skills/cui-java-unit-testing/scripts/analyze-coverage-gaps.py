@@ -42,6 +42,7 @@ def parse_jacoco_report(report_path: str) -> Dict[str, Any]:
     total_method_missed = 0
 
     gaps = []
+    untested_public_methods = []
 
     # Process each package
     for package in root.findall('.//package'):
@@ -101,6 +102,12 @@ def parse_jacoco_report(report_path: str) -> Dict[str, Any]:
                 # If method not covered at all
                 if not method_covered:
                     uncovered_methods.append(method_name)
+                    # Track untested public methods
+                    untested_public_methods.append({
+                        'class': class_name.split('.')[-1],
+                        'method': method_name,
+                        'file': file_path
+                    })
 
                 # Aggregate to class level
                 class_line_covered += method_line_covered
@@ -181,7 +188,8 @@ def parse_jacoco_report(report_path: str) -> Dict[str, Any]:
 
     return {
         'summary': summary,
-        'gaps': gaps
+        'gaps': gaps,
+        'untested_public_methods': untested_public_methods
     }
 
 
@@ -242,6 +250,41 @@ def determine_priority_reasons(class_name: str, methods: List[str],
     return reasons
 
 
+def categorize_gaps_by_priority(gaps: List[Dict], priority_filter: Optional[str] = None) -> Dict[str, List[Dict]]:
+    """Categorize gaps by priority level."""
+    categorized = {
+        'high': [],
+        'medium': [],
+        'low': []
+    }
+
+    for gap in gaps:
+        priority = gap.get('priority', 'low')
+        if priority in categorized:
+            gap_entry = {
+                'class': gap['class'].split('.')[-1],
+                'method': gap['uncovered_methods'][0] if gap['uncovered_methods'] else None,
+                'file': gap['file'],
+                'lines': gap['uncovered_lines'][:5] if gap['uncovered_lines'] else [],
+                'reason': gap['reasons'][0] if gap['reasons'] else 'uncovered code'
+            }
+            categorized[priority].append(gap_entry)
+
+    # Apply filter if specified
+    if priority_filter and priority_filter != 'all':
+        filtered = {'high': [], 'medium': [], 'low': []}
+        if priority_filter == 'high':
+            filtered['high'] = categorized['high']
+        elif priority_filter == 'medium':
+            filtered['high'] = categorized['high']
+            filtered['medium'] = categorized['medium']
+        elif priority_filter == 'low':
+            filtered['low'] = categorized['low']
+        return filtered
+
+    return categorized
+
+
 def generate_recommendations(gaps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Generate actionable test recommendations based on gaps."""
     recommendations = []
@@ -252,20 +295,25 @@ def generate_recommendations(gaps: List[Dict[str, Any]]) -> List[Dict[str, Any]]
         # Recommendations for uncovered methods
         for method in gap['uncovered_methods']:
             recommendations.append({
-                'gap': f"{class_name}.{method}",
-                'strategy': f"Add test exercising {method} method with happy path and error cases",
                 'priority': gap['priority'],
-                'file': gap['file']
+                'class': class_name,
+                'method': method,
+                'reason': 'uncovered_public_method',
+                'file': gap['file'],
+                'strategy': f"Add test exercising {method} method with happy path and error cases"
             })
 
         # Recommendations for uncovered branches
         if gap['uncovered_branches']:
             for branch in gap['uncovered_branches'][:3]:  # Top 3
                 recommendations.append({
-                    'gap': f"{class_name} line {branch['line']} branch",
-                    'strategy': f"Add test covering untested branch at line {branch['line']}",
                     'priority': gap['priority'],
-                    'file': gap['file']
+                    'class': class_name,
+                    'method': None,
+                    'reason': 'uncovered_branch',
+                    'file': gap['file'],
+                    'lines': [branch['line']],
+                    'strategy': f"Add test covering untested branch at line {branch['line']}"
                 })
 
         # Recommendations for uncovered line clusters
@@ -279,10 +327,13 @@ def generate_recommendations(gaps: List[Dict[str, Any]]) -> List[Dict[str, Any]]
                     line_desc = f"lines {cluster[0]}-{cluster[-1]}"
 
                 recommendations.append({
-                    'gap': f"{class_name} {line_desc}",
-                    'strategy': f"Add test covering {line_desc}",
                     'priority': gap['priority'],
-                    'file': gap['file']
+                    'class': class_name,
+                    'method': None,
+                    'reason': 'uncovered_lines',
+                    'file': gap['file'],
+                    'lines': cluster,
+                    'strategy': f"Add test covering {line_desc}"
                 })
 
     # Sort by priority (high first)
@@ -330,33 +381,21 @@ Examples:
   # Analyze coverage report
   %(prog)s --report target/site/jacoco/jacoco.xml
 
+  # Filter by priority
+  %(prog)s --report target/site/jacoco/jacoco.xml --priority high
+
   # With custom thresholds
   %(prog)s --report target/site/jacoco/jacoco.xml --threshold-line 85 --threshold-branch 75
 
-  # Output to file
-  %(prog)s --report target/site/jacoco/jacoco.xml --output gaps.json
-
 Output:
   {
-    "summary": {
-      "line_coverage": 75.5,
-      "branch_coverage": 68.2,
-      "method_coverage": 82.3,
-      "meets_thresholds": false,
-      "gaps_count": 5
-    },
-    "gaps": [
-      {
-        "file": "src/main/java/com/example/Validator.java",
-        "class": "com.example.Validator",
-        "uncovered_lines": [45, 46, 52],
-        "uncovered_branches": [...],
-        "uncovered_methods": ["validateEmail"],
-        "priority": "high",
-        "reasons": ["method(s) uncovered", "validation logic"]
-      }
-    ],
-    "recommendations": [...]
+    "status": "success",
+    "data": {
+      "overall_coverage": {"line": 75.5, "branch": 68.2, "method": 82.3},
+      "gaps_by_priority": {"high": [...], "medium": [...], "low": [...]},
+      "untested_public_methods": [...],
+      "recommendations": [...]
+    }
   }
 
 Priority Levels:
@@ -371,6 +410,14 @@ Priority Levels:
         type=str,
         required=True,
         help='Path to JaCoCo XML report (jacoco.xml)'
+    )
+
+    parser.add_argument(
+        '--priority',
+        type=str,
+        choices=['high', 'medium', 'low', 'all'],
+        default='all',
+        help='Filter gaps by priority level (default: all)'
     )
 
     parser.add_argument(
@@ -402,24 +449,46 @@ Priority Levels:
     args = parser.parse_args()
 
     # Parse report
-    result = parse_jacoco_report(args.report)
+    parsed = parse_jacoco_report(args.report)
 
     # Check for parse errors
-    if 'error' in result:
-        print(f"Error: {result['error']}", file=sys.stderr)
+    if 'error' in parsed:
+        result = {
+            'status': 'error',
+            'data': {'message': parsed['error']}
+        }
+        print(json.dumps(result), file=sys.stderr)
         sys.exit(1)
 
     # Check thresholds
     meets_thresholds = check_thresholds(
-        result['summary'],
+        parsed['summary'],
         args.threshold_line,
         args.threshold_branch
     )
-    result['summary']['meets_thresholds'] = meets_thresholds
 
     # Generate recommendations
-    recommendations = generate_recommendations(result['gaps'])
-    result['recommendations'] = recommendations
+    recommendations = generate_recommendations(parsed['gaps'])
+
+    # Categorize gaps by priority
+    gaps_by_priority = categorize_gaps_by_priority(parsed['gaps'], args.priority)
+
+    # Build result in expected format
+    result = {
+        'status': 'success',
+        'data': {
+            'overall_coverage': {
+                'line': parsed['summary']['line_coverage'],
+                'branch': parsed['summary']['branch_coverage'],
+                'method': parsed['summary']['method_coverage']
+            },
+            'gaps_by_priority': gaps_by_priority,
+            'untested_public_methods': parsed.get('untested_public_methods', []),
+            'recommendations': recommendations,
+            'meets_thresholds': meets_thresholds,
+            'gaps_count': parsed['summary']['gaps_count']
+        }
+    }
 
     # Output
     indent = 2 if args.pretty else None

@@ -220,19 +220,26 @@ def verify_parameters(description: str) -> Dict[str, Any]:
     suggestions = generate_suggestions(ambiguities, missing_info, vague_scope)
     clarity_score = calculate_clarity_score(description, ambiguities, missing_info, vague_scope)
 
-    result = {
+    # Check for vague scope issues
+    has_vague_scope = len(vague_scope) > 0 or len(description.split()) < 5
+
+    data = {
         'clarity_score': clarity_score,
-        'verification_passed': clarity_score >= 80,
+        'verification_passed': clarity_score >= 60 and not has_vague_scope,
         'total_issues': len(ambiguities) + len(missing_info) + len(vague_scope),
         'ambiguities': ambiguities,
         'missing_information': missing_info,
-        'vague_scope': vague_scope,
+        'vague_scope': has_vague_scope,
         'suggestions': suggestions,
         'description_length': len(description),
         'description_word_count': len(description.split())
     }
 
-    return result
+    # Return in wrapper format expected by tests
+    return {
+        'status': 'success',
+        'data': data
+    }
 
 
 def main():
@@ -317,7 +324,7 @@ Clarity Score:
         print(output_json)
 
     # Exit with status based on verification
-    sys.exit(0 if result['verification_passed'] else 1)
+    sys.exit(0 if result['data']['verification_passed'] else 1)
 
 
 if __name__ == '__main__':
