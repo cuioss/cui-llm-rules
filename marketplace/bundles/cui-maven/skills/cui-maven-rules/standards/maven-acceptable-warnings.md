@@ -48,36 +48,37 @@ These warnings MUST be fixed and NEVER added to acceptable list:
    - Potential null pointer issues
    - Resource leak warnings
 
-## Configuration File Format
+## Configuration Access
 
-Acceptable warnings are stored in `.claude/run-configuration.json`:
+Access acceptable warnings via the configuration skill:
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: maven.acceptable_warnings
+```
+
+**Configuration structure:**
 
 ```json
 {
-  "version": 1,
-  "maven": {
-    "acceptable_warnings": {
-      "transitive_dependency": [
-        "Overriding managed version 2.0.0 for slf4j-api"
-      ],
-      "plugin_compatibility": [
-        "Parameter 'session' is deprecated"
-      ],
-      "platform_specific": []
-    }
-  }
+  "transitive_dependency": [
+    "Overriding managed version 2.0.0 for slf4j-api"
+  ],
+  "plugin_compatibility": [
+    "Parameter 'session' is deprecated"
+  ],
+  "platform_specific": []
 }
 ```
 
-### JSON Path Access
+### Categories
 
-To read acceptable warnings:
-```
-Path: maven.acceptable_warnings
-Categories: transitive_dependency, plugin_compatibility, platform_specific
-```
+- `transitive_dependency` - Dependency-related warnings
+- `plugin_compatibility` - Plugin compatibility warnings
+- `platform_specific` - Platform-specific warnings
 
-Use the `cui-utilities:claude-run-configuration` skill to validate and the `cui-utilities:json-file-operations` skill to manage entries.
+Use the `cui-utilities:claude-run-configuration` skill for all configuration access.
 
 ## Adding Acceptable Warnings
 

@@ -74,7 +74,13 @@ Loads:
 
 ### Step 2: Read User-Approved Permissions
 
-Check `.claude/run-configuration.json` path `commands.setup-project-permissions.user_approved_permissions` for user-approved suspicious permissions.
+Activate `cui-utilities:claude-run-configuration` skill to read user-approved suspicious permissions:
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: commands.setup-project-permissions.user_approved_permissions
+```
 
 ### Step 3: Read Global and Local Permissions
 
@@ -398,30 +404,15 @@ Global Changes (if any):
 
 ### Step 15: Update run-configuration.json
 
-Update `.claude/run-configuration.json` at path `commands.setup-project-permissions`:
+Activate `cui-utilities:claude-run-configuration` skill to record execution results:
 
-```json
-{
-  "commands": {
-    "setup-project-permissions": {
-      "user_approved_permissions": ["...approved permissions..."],
-      "last_execution": {
-        "date": "YYYY-MM-DD",
-        "status": "SUCCESS|FAILED",
-        "result": "Description of changes"
-      },
-      "changes_applied": {
-        "global_added": ["marketplace wildcards", "permissions"],
-        "local_removed": ["removed permissions"],
-        "local_kept": ["kept permissions"]
-      },
-      "lessons_learned": ["any important findings"]
-    }
-  }
-}
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Update Execution Status
+Command: setup-project-permissions
 ```
 
-Update fields:
+Update fields at path `commands.setup-project-permissions`:
 - `user_approved_permissions`: User-approved suspicious permissions
 - `last_execution`: Execution timestamp and status
 - `changes_applied`: Change statistics for local and global settings

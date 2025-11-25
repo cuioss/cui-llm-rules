@@ -458,7 +458,7 @@ Use this workflow when:
 ### Parameters
 
 - **warnings** (required): JSON array of warning objects from parse-maven-output.py
-- **acceptable_warnings** (optional): JSON object with acceptable patterns from run-configuration.json
+- **acceptable_warnings** (optional): JSON object with acceptable patterns (obtained via claude-run-configuration skill)
 
 ### Step 1: Load Acceptable Patterns
 
@@ -540,26 +540,29 @@ Unknown warnings in output have `requires_classification: true` flag. Agent shou
 
 ### Acceptable Warnings Format
 
-Patterns are stored in `.claude/run-configuration.json` at path `maven.acceptable_warnings`:
+Read patterns using the configuration skill:
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: maven.acceptable_warnings
+```
+
+**Expected structure:**
 
 ```json
 {
-  "version": 1,
-  "maven": {
-    "acceptable_warnings": {
-      "transitive_dependency": [
-        "The POM for com.example:lib:jar:1.0 is missing"
-      ],
-      "plugin_compatibility": [
-        "Using platform encoding UTF-8"
-      ],
-      "platform_specific": []
-    }
-  }
+  "transitive_dependency": [
+    "The POM for com.example:lib:jar:1.0 is missing"
+  ],
+  "plugin_compatibility": [
+    "Using platform encoding UTF-8"
+  ],
+  "platform_specific": []
 }
 ```
 
-Use `cui-utilities:claude-run-configuration` skill to read, write, and validate configuration.
+Use `cui-utilities:claude-run-configuration` skill for all configuration access.
 
 ### Script Location
 
@@ -571,7 +574,7 @@ Use `cui-utilities:claude-run-configuration` skill to read, write, and validate 
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-This workflow manages the acceptable warnings configuration in `.claude/run-configuration.json`.
+This workflow manages the acceptable warnings configuration via `cui-utilities:claude-run-configuration` skill.
 
 ### When to Use
 

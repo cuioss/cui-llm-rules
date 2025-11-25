@@ -209,11 +209,29 @@ Track build durations for accurate timeout calculation:
 2. Update tracking when duration changes by >10%
 3. Failed builds have unpredictable durations and should not update tracking
 
-**Storage**: Use `.claude/run-configuration.json` for duration tracking:
+**Storage**: Use `cui-utilities:claude-run-configuration` skill for duration tracking.
+
+**Read last execution duration:**
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: commands.{command-id}.last_execution.duration_ms
+```
+
+**Update after successful build:**
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Update Configuration
+Field: commands.{command-id}.last_execution
+Value: {"date": "2025-11-25", "status": "SUCCESS", "duration_ms": 120000, "duration_human": "2 minutes"}
+```
+
+**Configuration structure reference:**
 
 ```json
 {
-  "version": 1,
   "commands": {
     "maven-pre-commit": {
       "last_execution": {
@@ -233,14 +251,6 @@ Track build durations for accurate timeout calculation:
   }
 }
 ```
-
-**JSON Path Access**:
-```
-Path: commands.{command-id}.last_execution.duration_ms
-Example: commands.maven-pre-commit.last_execution.duration_ms
-```
-
-Use the `cui-utilities:claude-run-configuration` skill to validate and `cui-utilities:json-file-operations` to access fields.
 
 ## Build Output Modes
 

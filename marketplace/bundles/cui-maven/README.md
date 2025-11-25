@@ -110,11 +110,20 @@ The parse-maven-output.py script categorizes issues:
 
 ### Project Configuration
 
-Maven projects can configure build behavior in `.claude/run-configuration.json`:
+Maven projects configure build behavior via the `cui-utilities:claude-run-configuration` skill.
+
+**Read acceptable warnings:**
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: maven.acceptable_warnings
+```
+
+**Configuration structure:**
 
 ```json
 {
-  "version": 1,
   "maven": {
     "acceptable_warnings": {
       "transitive_dependency": [],
@@ -125,7 +134,7 @@ Maven projects can configure build behavior in `.claude/run-configuration.json`:
 }
 ```
 
-Use the `cui-utilities:claude-run-configuration` skill to validate configuration and `cui-utilities:json-file-operations` to manage entries.
+Use the `cui-utilities:claude-run-configuration` skill for all configuration access.
 
 ### Build Profiles
 

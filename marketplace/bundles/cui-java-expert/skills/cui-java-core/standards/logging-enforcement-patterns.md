@@ -366,36 +366,29 @@ Parameters:
 
 ### Pattern 16: Module-Specific Configuration
 
-**Configuration Structure in `.claude/run-configuration.json`:**
+**Read module configuration using skill:**
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: commands.java-enforce-logrecords.modules.{module-name}
+```
+
+**Expected configuration structure:**
 
 ```json
 {
-  "version": 1,
-  "commands": {
-    "java-enforce-logrecords": {
-      "modules": {
-        "{module-name}": {
-          "logmessages_classes": [
-            {"package": "com.example.auth", "class": "AuthenticationLogMessages"},
-            {"package": "com.example.token", "class": "TokenLogMessages"}
-          ],
-          "logmessages_documentation": ["doc/LogMessages.adoc"]
-        },
-        "{another-module}": {
-          "logmessages_classes": [
-            {"package": "com.example.data", "class": "DataLogMessages"}
-          ],
-          "logmessages_documentation": ["modules/{another-module}/doc/LogMessages.adoc"]
-        }
-      }
-    }
-  }
+  "logmessages_classes": [
+    {"package": "com.example.auth", "class": "AuthenticationLogMessages"},
+    {"package": "com.example.token", "class": "TokenLogMessages"}
+  ],
+  "logmessages_documentation": ["doc/LogMessages.adoc"]
 }
 ```
 
 **Usage:**
-1. Read `.claude/run-configuration.json`
-2. Access JSON path: `commands.java-enforce-logrecords.modules.{module-name}`
+1. Activate `cui-utilities:claude-run-configuration` skill with Read Configuration workflow
+2. Access field: `commands.java-enforce-logrecords.modules.{module-name}`
 3. Extract `logmessages_classes` array
 4. Extract `logmessages_documentation` array
 5. If missing, attempt auto-discovery and ask user to confirm
@@ -420,9 +413,13 @@ Parameters:
    - 100% confident: Proceed with discovered paths
    - < 100% confident: Ask user to confirm paths
 
-4. **Store in configuration:**
-   - Update `.claude/run-configuration.json`
-   - Add discovered paths to `commands.java-enforce-logrecords.modules.{module}`
+4. **Store in configuration using skill:**
+   ```
+   Skill: cui-utilities:claude-run-configuration
+   Workflow: Update Configuration
+   Field: commands.java-enforce-logrecords.modules.{module}
+   Value: {discovered configuration object}
+   ```
 
 ## Quality Checklist
 
