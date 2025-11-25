@@ -56,26 +56,14 @@ Acceptable warnings are stored in `.claude/run-configuration.json`:
 {
   "version": 1,
   "maven": {
-    "./mvnw -Ppre-commit clean install": {
-      "last_execution": {
-        "duration_ms": 120000,
-        "duration_human": "2 minutes",
-        "last_updated": "2025-11-25"
-      },
-      "acceptable_warnings": [
-        {
-          "pattern": "[WARNING] Overriding managed version 2.0.0 for slf4j-api",
-          "category": "transitive_dependency",
-          "reason": "Parent BOM locks SLF4J version for consistency",
-          "added": "2025-11-25"
-        },
-        {
-          "pattern": "[WARNING] Parameter 'session' is deprecated",
-          "category": "plugin_compatibility",
-          "reason": "Plugin version locked by parent POM",
-          "added": "2025-11-25"
-        }
-      ]
+    "acceptable_warnings": {
+      "transitive_dependency": [
+        "Overriding managed version 2.0.0 for slf4j-api"
+      ],
+      "plugin_compatibility": [
+        "Parameter 'session' is deprecated"
+      ],
+      "platform_specific": []
     }
   }
 }
@@ -83,11 +71,13 @@ Acceptable warnings are stored in `.claude/run-configuration.json`:
 
 ### JSON Path Access
 
-To read acceptable warnings for a command:
+To read acceptable warnings:
 ```
-Path: maven.{command}.acceptable_warnings
-Example: maven["./mvnw -Ppre-commit clean install"].acceptable_warnings
+Path: maven.acceptable_warnings
+Categories: transitive_dependency, plugin_compatibility, platform_specific
 ```
+
+Use the `cui-utilities:claude-run-configuration` skill to validate and the `cui-utilities:json-file-operations` skill to manage entries.
 
 ## Adding Acceptable Warnings
 
@@ -110,13 +100,13 @@ Before adding a warning to acceptable list:
 
 ### Add Workflow
 
-```
-Skill: cui-maven:cui-maven-rules
-Workflow: Manage Acceptable Warnings
-Parameters:
-  action: add
-  pattern: "[WARNING] Overriding managed version..."
-  reason: "Parent BOM locks version"
+Use the `cui-utilities:json-file-operations` skill:
+
+```bash
+python3 scripts/manage-json-file.py add-entry \
+    .claude/run-configuration.json \
+    --field "maven.acceptable_warnings.transitive_dependency" \
+    --value '"Overriding managed version 2.0.0 for slf4j-api"'
 ```
 
 ## Removing Acceptable Warnings
@@ -128,12 +118,13 @@ Remove warnings from acceptable list when:
 
 ### Remove Workflow
 
-```
-Skill: cui-maven:cui-maven-rules
-Workflow: Manage Acceptable Warnings
-Parameters:
-  action: remove
-  pattern: "[WARNING] Overriding managed version..."
+Use the `cui-utilities:json-file-operations` skill:
+
+```bash
+python3 scripts/manage-json-file.py remove-entry \
+    .claude/run-configuration.json \
+    --field "maven.acceptable_warnings.transitive_dependency" \
+    --value '"Overriding managed version 2.0.0 for slf4j-api"'
 ```
 
 ## Pattern Matching

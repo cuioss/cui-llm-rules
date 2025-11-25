@@ -12,6 +12,19 @@ Usage:
 Input:
     Expects pre-parsed JSON from parse-maven-output.py (not raw log file)
 
+Config Format:
+    Reads from .claude/run-configuration.json with structure:
+    {
+        "maven": {
+            "acceptable_warnings": {
+                "patterns": ["pattern1", "pattern2"],
+                "transitive_dependency": ["[WARNING] The POM for ..."],
+                "plugin_compatibility": ["[WARNING] Using platform encoding..."],
+                "platform_specific": ["[WARNING] Bootstrap class path..."]
+            }
+        }
+    }
+
 Output:
     JSON with categorized warnings:
     {
@@ -32,7 +45,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 
 # Warning types that are ALWAYS fixable (never acceptable)
@@ -51,10 +64,10 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    # Check warnings against config
+    # Check warnings against JSON config
     python3 check-acceptable-warnings.py \\
         --parsed-output build-result.json \\
-        --config .claude/run-configuration.md
+        --config .claude/run-configuration.json
 
     # Use default config location
     python3 check-acceptable-warnings.py \\
@@ -70,8 +83,8 @@ Examples:
     parser.add_argument(
         "--config",
         type=str,
-        default=".claude/run-configuration.md",
-        help="Path to acceptable warnings config (default: .claude/run-configuration.md)"
+        default=".claude/run-configuration.json",
+        help="Path to acceptable warnings config (default: .claude/run-configuration.json)"
     )
     return parser.parse_args()
 
@@ -95,49 +108,39 @@ def load_parsed_output(path: str) -> dict:
         return {"error": f"Invalid JSON in parsed output: {e}"}
 
 
-def load_acceptable_patterns(config_path: str) -> list:
+def load_acceptable_patterns(config_path: str) -> List[str]:
     """
-    Load acceptable warning patterns from config file.
+    Load acceptable warning patterns from JSON config file.
 
-    Parses markdown format looking for patterns in "Acceptable Warnings" section.
+    Reads from .claude/run-configuration.json looking for maven.acceptable_warnings.
+    Aggregates patterns from all subcategories.
     """
     patterns = []
 
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+            data = json.load(f)
     except FileNotFoundError:
         # Config file doesn't exist - no acceptable warnings
         return []
+    except json.JSONDecodeError:
+        # Invalid JSON - treat as no patterns
+        return []
 
-    # Find "Acceptable Warnings" section
-    in_acceptable_section = False
+    # Navigate to maven.acceptable_warnings
+    maven_config = data.get('maven', {})
+    acceptable = maven_config.get('acceptable_warnings', {})
 
-    for line in content.split('\n'):
-        # Check for section headers
-        if re.match(r'^#{1,4}\s+Acceptable\s+Warnings', line, re.IGNORECASE):
-            in_acceptable_section = True
-            continue
-
-        # End of section (next header)
-        if in_acceptable_section and re.match(r'^#{1,4}\s+', line):
-            if not re.match(r'^#{1,4}\s+(Transitive|Plugin|Platform)', line, re.IGNORECASE):
-                in_acceptable_section = False
-                continue
-
-        # Extract patterns (lines starting with - ` or - [WARNING])
-        if in_acceptable_section:
-            # Pattern: - `[WARNING] ...`
-            match = re.match(r'^-\s+`\[WARNING\]\s*(.+?)`', line)
-            if match:
-                patterns.append(match.group(1).strip())
-                continue
-
-            # Pattern: - [WARNING] ...
-            match = re.match(r'^-\s+\[WARNING\]\s*(.+)', line)
-            if match:
-                patterns.append(match.group(1).strip())
-                continue
+    # Collect patterns from all subcategories
+    for key, value in acceptable.items():
+        if isinstance(value, list):
+            for pattern in value:
+                if isinstance(pattern, str):
+                    # Strip [WARNING] prefix if present for matching
+                    clean_pattern = pattern
+                    if clean_pattern.startswith('[WARNING]'):
+                        clean_pattern = clean_pattern[9:].strip()
+                    patterns.append(clean_pattern)
 
     return patterns
 

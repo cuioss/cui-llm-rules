@@ -116,17 +116,16 @@ Maven projects can configure build behavior in `.claude/run-configuration.json`:
 {
   "version": 1,
   "maven": {
-    "./mvnw -Ppre-commit clean install": {
-      "last_execution": {
-        "duration_ms": 120000,
-        "duration_human": "2 minutes",
-        "last_updated": "2025-10-29"
-      },
-      "acceptable_warnings": []
+    "acceptable_warnings": {
+      "transitive_dependency": [],
+      "plugin_compatibility": [],
+      "platform_specific": []
     }
   }
 }
 ```
+
+Use the `cui-utilities:claude-run-configuration` skill to validate configuration and `cui-utilities:json-file-operations` to manage entries.
 
 ### Build Profiles
 

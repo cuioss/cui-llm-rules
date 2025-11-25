@@ -214,20 +214,21 @@ Track build durations for accurate timeout calculation:
 ```json
 {
   "version": 1,
-  "maven": {
-    "./mvnw -Ppre-commit clean install": {
+  "commands": {
+    "maven-pre-commit": {
       "last_execution": {
+        "date": "2025-11-25",
+        "status": "SUCCESS",
         "duration_ms": 120000,
-        "duration_human": "2 minutes",
-        "last_updated": "2025-10-31"
+        "duration_human": "2 minutes"
       }
-    },
-    "./mvnw clean install -pl auth-module": {
-      "last_execution": {
-        "duration_ms": 45000,
-        "duration_human": "45 seconds",
-        "last_updated": "2025-10-31"
-      }
+    }
+  },
+  "maven": {
+    "acceptable_warnings": {
+      "transitive_dependency": [],
+      "plugin_compatibility": [],
+      "platform_specific": []
     }
   }
 }
@@ -235,9 +236,11 @@ Track build durations for accurate timeout calculation:
 
 **JSON Path Access**:
 ```
-Path: maven.{command}.last_execution.duration_ms
-Example: maven["./mvnw -Ppre-commit clean install"].last_execution.duration_ms
+Path: commands.{command-id}.last_execution.duration_ms
+Example: commands.maven-pre-commit.last_execution.duration_ms
 ```
+
+Use the `cui-utilities:claude-run-configuration` skill to validate and `cui-utilities:json-file-operations` to access fields.
 
 ## Build Output Modes
 
