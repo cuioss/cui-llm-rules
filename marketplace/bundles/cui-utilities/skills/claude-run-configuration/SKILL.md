@@ -12,7 +12,7 @@ Run configuration handling for `.claude/run-configuration.json` command configur
 
 - Read and update run configuration entries
 - Track command execution history
-- Manage lessons learned and acceptable warnings
+- Manage acceptable warnings and skip lists
 - Validate run configuration format
 - Schema documentation for configuration structure
 
@@ -20,8 +20,8 @@ Run configuration handling for `.claude/run-configuration.json` command configur
 
 Activate this skill when:
 - Recording command execution results
-- Updating lessons learned from command runs
 - Managing acceptable warnings lists
+- Managing skipped files/directories
 - Validating run configuration structure
 - Working with `.claude/run-configuration.json`
 
@@ -38,8 +38,9 @@ Activate this skill when:
         "date": "2025-11-25",
         "status": "SUCCESS|FAILURE"
       },
-      "lessons_learned": ["Array of lessons"],
-      "acceptable_warnings": []
+      "acceptable_warnings": [],
+      "skipped_files": [],
+      "skipped_directories": []
     }
   },
   "maven": {
@@ -88,15 +89,7 @@ Record command execution results.
 ```bash
 python3 json-file-operations/scripts/manage-json-file.py update-field .claude/run-configuration.json \
   --field "commands.<command-name>.last_execution" \
-  --value '{"date": "2025-11-25", "status": "SUCCESS", "run_number": 1}'
-```
-
-### Step 2: Add Lesson Learned (optional)
-
-```bash
-python3 json-file-operations/scripts/manage-json-file.py add-entry .claude/run-configuration.json \
-  --field "commands.<command-name>.lessons_learned" \
-  --value '"New lesson from this execution"'
+  --value '{"date": "2025-11-25", "status": "SUCCESS"}'
 ```
 
 ---
@@ -139,10 +132,10 @@ Per-command configuration and history.
 | Field | Type | Description |
 |-------|------|-------------|
 | last_execution | object | Most recent execution details |
-| lessons_learned | array | Accumulated lessons from executions |
 | acceptable_warnings | array | Warnings to ignore |
 | skipped_files | array | Files to skip in processing |
 | skipped_directories | array | Directories to skip |
+| user_approved_permissions | array | Permissions approved by user |
 
 ### maven
 
@@ -182,7 +175,10 @@ Script characteristics:
 
 ### With cui-task-workflow Bundle
 - Commands record execution history to run configuration
-- Lessons learned accumulate across executions
+
+### With claude-lessons-learned Skill
+- Lessons learned are stored separately in `.claude/lessons-learned/`
+- Run configuration tracks execution state only
 
 ---
 

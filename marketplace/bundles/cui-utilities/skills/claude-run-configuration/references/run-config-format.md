@@ -6,9 +6,10 @@ JSON schema specification for `.claude/run-configuration.json`.
 
 The run configuration file stores:
 - Command execution history
-- Lessons learned from command runs
 - Acceptable warnings and skip lists
 - Maven build configurations
+
+> **Note**: Lessons learned are stored separately in `.claude/lessons-learned/`. See the `claude-lessons-learned` skill.
 
 ## Schema
 
@@ -21,7 +22,6 @@ The run configuration file stores:
         "date": "2025-11-25",
         "status": "SUCCESS|FAILURE"
       },
-      "lessons_learned": ["Array of lessons"],
       "skipped_files": ["file1.txt"],
       "skipped_directories": ["dir/"],
       "acceptable_warnings": [],
@@ -60,7 +60,6 @@ Each command entry can have:
 | Field | Type | Description |
 |-------|------|-------------|
 | last_execution | object | Most recent execution details |
-| lessons_learned | array | Accumulated lessons from executions |
 | acceptable_warnings | array | Warning patterns to ignore |
 | skipped_files | array | Files to skip in processing |
 | skipped_directories | array | Directories to skip |
@@ -102,7 +101,7 @@ Use dot notation for field access:
 | `commands` | All commands |
 | `commands.my-cmd` | Specific command |
 | `commands.my-cmd.last_execution.date` | Execution date |
-| `commands.my-cmd.lessons_learned[0]` | First lesson |
+| `commands.my-cmd.skipped_files[0]` | First skipped file |
 | `maven.acceptable_warnings` | Maven warnings |
 
 ---
@@ -118,9 +117,7 @@ Use dot notation for field access:
         "date": "2025-11-25",
         "status": "SUCCESS"
       },
-      "lessons_learned": [
-        "Script permissions are NOT needed in settings"
-      ]
+      "user_approved_permissions": []
     },
     "docs-technical-adoc-review": {
       "last_execution": {
@@ -128,6 +125,7 @@ Use dot notation for field access:
         "status": "SUCCESS"
       },
       "skipped_files": ["CHANGELOG.adoc"],
+      "skipped_directories": ["target/", "node_modules/"],
       "acceptable_warnings": []
     }
   },
