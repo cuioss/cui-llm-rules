@@ -5,79 +5,50 @@ description: Execute Maven build, analyze errors, delegate fixes to appropriate 
 
 # Build and Fix Command
 
-Orchestrates Maven builds, analyzes errors, delegates fixes to appropriate commands, and iterates until the project builds cleanly.
-
-## CONTINUOUS IMPROVEMENT RULE
-
-**CRITICAL:** Every time you execute this command, **YOU MUST immediately update this file** using `/plugin-update-command command-name=maven-build-and-fix update="[your improvement]"` with improvements discovered.
+Thin orchestrator that delegates Maven builds to cui-maven-rules skill, routes issues to fix commands, and iterates until clean.
 
 ## PARAMETERS
 
-- **push** (optional): Auto-commit and push changes after successful clean build
 - **goals** (optional): Maven goals to execute (default: `-Ppre-commit clean install`)
+- **push** (optional): Auto-commit changes after successful clean build (default: false)
+- **module** (optional): Specific module to build (-pl flag)
 
 ## WORKFLOW
 
-### Step 1: Parse Parameters
+### Step 1: Load Skill and Parse Parameters
 
-Extract parameters:
-- `push`: boolean flag for auto-commit (default: false)
-- `goals`: Maven goals string (default: `-Ppre-commit clean install`)
-
-### Step 2: Execute Maven Build
-
-**Execute clean first (if goals contain clean):**
-```bash
-./mvnw clean
-```
-
-**Then execute build with log capture:**
-```bash
-./mvnw -l target/build-output.log {goals_without_clean}
-```
-
-Store the log path as `{output_file}`.
-
-NOTE: Clean runs separately to avoid deleting `target/` after log file creation. The `-l` flag avoids shell redirection operators which require additional permissions.
-
-### Step 3: Analyze Build Output
-
-**Load skill and execute workflow:**
 ```
 Skill: cui-maven:cui-maven-rules
-Execute workflow: Parse Maven Build Output
 ```
 
-**Parse the build log:**
-```bash
-python3 scripts/parse-maven-output.py \
-    --log {output_file} \
-    --mode structured
+Extract parameters from user input:
+- `goals`: String (default: `-Ppre-commit clean install`)
+- `push`: Boolean (default: false)
+- `module`: String (optional)
+
+### Step 2: Execute Maven Build via Skill Workflow
+
+Invoke skill workflow:
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: {goals}
+  module: {module} (if specified)
+  output_mode: structured
 ```
 
-**Collect structured results:**
-```json
-{
-  "status": "success|error",
-  "data": {
-    "build_status": "SUCCESS|FAILURE",
-    "issues": [...],
-    "summary": {
-      "compilation_errors": 0,
-      "test_failures": 0,
-      "javadoc_warnings": 0,
-      "dependency_errors": 0
-    }
-  }
-}
-```
+The skill handles:
+- Clean goal separation (if needed)
+- Log capture with `-l` flag
+- Output parsing via script
 
-### Step 4: Route Issues to Fix Commands
+### Step 3: Check Results and Route Issues
 
 **If build_status == SUCCESS and total_issues == 0:**
-- Skip to Step 6 (Report Success)
+- Skip to Step 5 (Report Success)
 
-**For each issue category, delegate:**
+**Route issues to fix commands (max 5 iterations):**
 
 | Issue Type | Fix Command |
 |------------|-------------|
@@ -86,59 +57,62 @@ python3 scripts/parse-maven-output.py \
 | `javadoc_warning` | `/java-fix-javadoc files="{file}"` |
 | `dependency_error` | Report to user (manual POM fix required) |
 
-### Step 5: Verify Fixes (Re-build)
+### Step 4: Verify Fixes (Iterate)
 
-**After fix attempts, re-run build (no clean needed - just verify):**
-```bash
-./mvnw -l target/build-output-verify.log {goals_without_clean}
+After fix attempts, repeat Step 2 (without clean):
 ```
-
-**Re-analyze with script:**
-```bash
-python3 scripts/parse-maven-output.py \
-    --log {verify_output_file} \
-    --mode structured
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: {goals_without_clean}
+  module: {module}
+  output_mode: structured
 ```
 
 **Iteration decision:**
-- If issues_remaining > 0 AND iteration_count < 5: Repeat Step 4
-- If issues_remaining == 0: Proceed to Step 6
-- If iteration_count >= 5: Proceed to Step 7 (Partial Success)
+- If issues_remaining > 0 AND iteration < 5: Repeat Step 3
+- If issues_remaining == 0: Proceed to Step 5
+- If iteration >= 5: Proceed to Step 6
 
-### Step 6: Report Success
+### Step 5: Report Success
 
 ```
 BUILD SUCCESS
 
 Maven goals: {goals}
-Build duration: {duration}
-Issues fixed: {total_fixed}
 Iterations: {iteration_count}
-Files modified: {count}
-Output: {output_file}
+Issues fixed: {total_fixed}
+Output: target/maven-build.log
 ```
 
 **If push=true:** Invoke `/cui-task-workflow:commit-changes`
 
-### Step 7: Report Partial Success
+### Step 6: Report Partial Success
 
 ```
 BUILD PARTIAL
 
-Maven goals: {goals}
-Max iterations reached: 5
+Max iterations: 5
 Issues resolved: {resolved}/{total}
 Remaining: compilation({n}), test({n}), javadoc({n})
-Output: {output_file}
+Output: target/maven-build.log
 
 Next: Review output file and run fix commands manually
 ```
 
 **Do NOT commit if issues remain** (even if push=true)
 
+## CRITICAL RULES
+
+- NEVER execute `./mvnw` directly - always use skill workflow
+- All build logic lives in cui-maven-rules skill
+- This command only orchestrates: parse → delegate → iterate → report
+- Maximum 5 iterations to prevent infinite loops
+- Dependency errors require manual user intervention
+
 ## RELATED
 
-- Skill: `cui-maven:cui-maven-rules` - Parse Maven Build Output workflow
+- Skill: `cui-maven:cui-maven-rules` - Execute Maven Build workflow
 - Command: `/java-implement-code` - Fix compilation errors
 - Command: `/java-implement-tests` - Fix test failures
 - Command: `/java-fix-javadoc` - Fix JavaDoc warnings

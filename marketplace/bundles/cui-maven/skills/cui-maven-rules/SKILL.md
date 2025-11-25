@@ -267,12 +267,147 @@ Based on issue category, delegate to appropriate commands:
 
 ---
 
+## Workflow: Handle OpenRewrite Markers
+
+**Pattern**: Pattern 3 (Search-Analyze-Report)
+
+This workflow searches for OpenRewrite TODO markers in source code and handles suppression based on marker type.
+
+### When to Use
+
+Use this workflow when:
+- Build completes but OpenRewrite markers remain in source files
+- Need to suppress known false-positive markers
+- Iterating on build to clear marker warnings
+
+### Parameters
+
+- **source_dir** (optional): Directory to search (default: `src`)
+
+### Step 1: Search for Markers
+
+```
+Grep: pattern="/\*~~\(TODO:" path="{source_dir}" output_mode="files_with_matches"
+```
+
+If no files found, workflow completes successfully (no markers).
+
+### Step 2: Analyze Markers
+
+For each file with markers:
+1. Read file content
+2. Extract marker messages with line numbers
+3. Categorize by recipe type:
+   - **CuiLogRecordPatternRecipe** → LogRecord warning
+   - **InvalidExceptionUsageRecipe** → Exception warning
+   - **Other** → Unknown type
+
+### Step 3: Handle by Type
+
+**LogRecord warnings (AUTO-SUPPRESS):**
+```java
+// cui-rewrite:disable CuiLogRecordPatternRecipe
+LOGGER.info(INFO.SOME_MESSAGE, param);
+```
+
+**Exception warnings (AUTO-SUPPRESS):**
+```java
+// cui-rewrite:disable InvalidExceptionUsageRecipe
+catch (SomeException e) {
+```
+
+**Other types (ASK USER):**
+Present marker to user with:
+- File and line number
+- Marker message
+- Options: Suppress, Ignore, Manual fix
+
+### Step 4: Verify After Changes
+
+After suppression changes:
+- Re-run Maven build
+- Verify markers are gone
+- If markers persist after 3 iterations, report failure
+
+### Reference
+
+See `standards/maven-openrewrite-handling.md` for full documentation.
+
+---
+
+## Workflow: Manage Acceptable Warnings
+
+**Pattern**: Pattern 2 (Read-Process-Write)
+
+This workflow manages the acceptable warnings list in `.claude/run-configuration.md`.
+
+### When to Use
+
+Use this workflow when:
+- Adding infrastructure warnings to acceptable list
+- Removing resolved warnings from acceptable list
+- Listing current acceptable warnings
+
+### Parameters
+
+- **action** (required): `add`, `remove`, or `list`
+- **pattern** (optional): Warning pattern to add/remove
+- **config_file** (optional): Config file path (default: `.claude/run-configuration.md`)
+
+### Step 1: Read Configuration
+
+```
+Read: {config_file}
+```
+
+If file doesn't exist, create with initial structure.
+
+### Step 2: Process Action
+
+**Action: list**
+- Extract and return all warnings in acceptable list
+
+**Action: add**
+- Validate pattern is not a JavaDoc warning (NEVER acceptable)
+- Validate pattern matches infrastructure warning criteria
+- Add to acceptable warnings section
+
+**Action: remove**
+- Find matching pattern
+- Remove from acceptable warnings section
+
+### Step 3: Write Configuration
+
+If add/remove action:
+- Write updated configuration
+- Return confirmation
+
+### Infrastructure Warning Criteria
+
+Only these warning types can be added to acceptable list:
+- Transitive dependency version conflicts (beyond project control)
+- Plugin compatibility warnings (locked by parent POM)
+- Platform-specific warnings (OS, JVM version)
+
+**NEVER acceptable:**
+- JavaDoc warnings (ALWAYS fix)
+- Compilation warnings (ALWAYS fix)
+- Deprecation warnings (ALWAYS fix unless from external dependency)
+
+### Reference
+
+See `standards/maven-acceptable-warnings.md` for full documentation.
+
+---
+
 ## Standards Organization
 
 All standards are organized in the `standards/` directory:
 
 - `maven-build-execution.md` - Build execution, module targeting, reactor builds, timeout management, output handling
 - `pom-maintenance.md` - Comprehensive POM maintenance process, BOM management, dependency management, scope optimization
+- `maven-openrewrite-handling.md` - OpenRewrite marker search, categorization, and suppression patterns
+- `maven-acceptable-warnings.md` - Infrastructure vs fixable warning classification, acceptable list management
 
 ## Tool Access
 
