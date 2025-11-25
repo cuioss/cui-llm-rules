@@ -36,24 +36,17 @@ Activate this skill when:
     "<command-name>": {
       "last_execution": {
         "date": "2025-11-25",
-        "status": "SUCCESS|FAILURE",
-        "run_number": 1
+        "status": "SUCCESS|FAILURE"
       },
       "lessons_learned": ["Array of lessons"],
       "acceptable_warnings": []
     }
   },
   "maven": {
-    "<maven-command>": {
-      "last_execution": { ... },
-      "acceptable_warnings": [ ... ]
-    }
-  },
-  "agent_decisions": {
-    "<agent-name>": {
-      "status": "keep-monolithic|refactored",
-      "decision_date": "2025-10-30",
-      "rationale": "Why this decision was made"
+    "acceptable_warnings": {
+      "transitive_dependency": [],
+      "plugin_compatibility": [],
+      "platform_specific": []
     }
   }
 }
@@ -153,22 +146,13 @@ Per-command configuration and history.
 
 ### maven
 
-Maven-specific build configurations.
+Maven build configurations.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| last_execution | object | Build timing information |
-| acceptable_warnings | array | Warning patterns to accept |
+| acceptable_warnings | object | Warning patterns by category |
 
-### agent_decisions
-
-Agent architecture decisions.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| status | string | Current state (keep-monolithic, refactored) |
-| decision_date | string | When decision was made |
-| rationale | string | Reasoning for decision |
+Categories: `transitive_dependency`, `plugin_compatibility`, `platform_specific`
 
 ---
 

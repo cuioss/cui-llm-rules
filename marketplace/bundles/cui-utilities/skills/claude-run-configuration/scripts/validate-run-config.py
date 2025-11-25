@@ -94,15 +94,6 @@ def validate_run_config(data: Dict) -> List[Dict]:
             "message": msg
         })
 
-    # Check agent_decisions section if present
-    if 'agent_decisions' in data:
-        passed, msg = check_field_type(data, 'agent_decisions', dict)
-        checks.append({
-            "check": "agent_decisions_object",
-            "passed": passed,
-            "message": msg
-        })
-
     return checks
 
 

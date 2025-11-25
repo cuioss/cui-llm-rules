@@ -187,7 +187,7 @@ Add comments explaining why non-obvious permissions exist.
 
 **Example:**
 ```json
-// Legacy: Direct AsciiDoc script access (prefer using asciidoc-link-verifier agent instead)
+// Legacy script access (prefer using skill workflows instead)
 {"tool": "Bash", "pattern": "python3 ~/git/cui-llm-rules/scripts/verify-adoc-links.py:*"},
 
 // Required for custom build wrapper script
@@ -348,19 +348,16 @@ Don't assume tool consistency across projects. Support both wrapper and system v
 **Challenge:**
 Project had custom validation scripts that Claude needed to run.
 
-**Solution (Preferred - Marketplace Bundle):**
-```json
-// Documentation scripts via marketplace bundle agents
-// Use specialized agents instead of direct script permissions
+**Solution (Preferred - Marketplace Bundle Skills):**
+
+Use skill workflows instead of direct script permissions:
+
+```
+Skill: cui-documentation-standards:cui-documentation
+Workflow: Verify Links
 ```
 
-Agents available:
-- `asciidoc-format-validator` - Format validation
-- `asciidoc-auto-formatter` - Auto-fix formatting
-- `asciidoc-link-verifier` - Link verification
-
-Agents have built-in access to scripts at:
-`./.claude/skills/cui-documentation/scripts/`
+Skills have built-in access to their bundled scripts.
 
 **Alternative Solution (Direct Script Access):**
 ```json
@@ -370,11 +367,10 @@ Agents have built-in access to scripts at:
 ```
 
 **Lesson:**
-- Prefer marketplace bundle agents over direct script permissions
-- Agents provide better integration with standards and workflows
+- Prefer marketplace skill workflows over direct script permissions
+- Skills provide better integration with standards and workflows
 - Use absolute paths for custom scripts when direct access needed
 - Document why custom scripts need permissions
-- Consider migrating scripts to marketplace bundles for reusability
 
 ### Bundle Development Workflow
 

@@ -9,7 +9,6 @@ The run configuration file stores:
 - Lessons learned from command runs
 - Acceptable warnings and skip lists
 - Maven build configurations
-- Agent architecture decisions
 
 ## Schema
 
@@ -20,46 +19,20 @@ The run configuration file stores:
     "<command-name>": {
       "last_execution": {
         "date": "2025-11-25",
-        "status": "SUCCESS|FAILURE",
-        "run_number": 1,
-        "result": "Optional description"
+        "status": "SUCCESS|FAILURE"
       },
       "lessons_learned": ["Array of lessons"],
       "skipped_files": ["file1.txt"],
       "skipped_directories": ["dir/"],
       "acceptable_warnings": [],
-      "user_approved_permissions": [],
-      "changes_applied": {
-        "global_added": [],
-        "local_removed": [],
-        "local_kept": []
-      }
+      "user_approved_permissions": []
     }
   },
   "maven": {
-    "<maven-command>": {
-      "last_execution": {
-        "duration_ms": 120000,
-        "duration_human": "2 minutes",
-        "last_updated": "2025-11-25"
-      },
-      "acceptable_warnings": [
-        {
-          "pattern": "[WARNING] ...",
-          "category": "transitive_dependency|deprecation|other",
-          "reason": "Why this is acceptable",
-          "added": "2025-11-25"
-        }
-      ]
-    }
-  },
-  "agent_decisions": {
-    "<agent-name>": {
-      "status": "keep-monolithic|refactored",
-      "decision_date": "2025-10-30",
-      "rationale": "Why this decision was made",
-      "responsibilities": ["List of responsibilities"],
-      "future_consideration": "Optional notes"
+    "acceptable_warnings": {
+      "transitive_dependency": [],
+      "plugin_compatibility": [],
+      "platform_specific": []
     }
   }
 }
@@ -77,7 +50,6 @@ The run configuration file stores:
 | Section | Purpose |
 |---------|---------|
 | maven | Maven build configurations |
-| agent_decisions | Agent architecture decisions |
 
 ---
 
@@ -93,7 +65,6 @@ Each command entry can have:
 | skipped_files | array | Files to skip in processing |
 | skipped_directories | array | Directories to skip |
 | user_approved_permissions | array | Permissions approved by user |
-| changes_applied | object | Record of configuration changes |
 
 ### last_execution Fields
 
@@ -101,50 +72,24 @@ Each command entry can have:
 |-------|------|-------------|
 | date | string | ISO date of execution |
 | status | string | SUCCESS or FAILURE |
-| run_number | integer | Execution counter |
-| result | string | Optional result description |
 
 ---
 
 ## Maven Section
 
-Each maven command entry can have:
+Maven acceptable warnings configuration.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| last_execution | object | Build timing information |
-| acceptable_warnings | array | Warning patterns to accept |
+| acceptable_warnings | object | Warning patterns by category |
 
-### Maven last_execution Fields
+### acceptable_warnings Categories
 
-| Field | Type | Description |
-|-------|------|-------------|
-| duration_ms | integer | Build duration in milliseconds |
-| duration_human | string | Human-readable duration |
-| last_updated | string | Date of last update |
-
-### Maven acceptable_warnings Entry
-
-| Field | Type | Description |
-|-------|------|-------------|
-| pattern | string | Warning text pattern |
-| category | string | transitive_dependency, deprecation, other |
-| reason | string | Why this warning is acceptable |
-| added | string | Date warning was accepted |
-
----
-
-## Agent Decisions Section
-
-Each agent decision entry can have:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| status | string | keep-monolithic or refactored |
-| decision_date | string | When decision was made |
-| rationale | string | Reasoning for decision |
-| responsibilities | array | List of agent responsibilities |
-| future_consideration | string | Optional notes for future |
+| Category | Description |
+|----------|-------------|
+| transitive_dependency | Dependency-related warnings |
+| plugin_compatibility | Plugin compatibility warnings |
+| platform_specific | Platform-specific warnings |
 
 ---
 
@@ -158,7 +103,7 @@ Use dot notation for field access:
 | `commands.my-cmd` | Specific command |
 | `commands.my-cmd.last_execution.date` | Execution date |
 | `commands.my-cmd.lessons_learned[0]` | First lesson |
-| `maven.build.acceptable_warnings` | Maven warnings |
+| `maven.acceptable_warnings` | Maven warnings |
 
 ---
 
@@ -171,31 +116,26 @@ Use dot notation for field access:
     "setup-project-permissions": {
       "last_execution": {
         "date": "2025-11-25",
-        "status": "SUCCESS",
-        "run_number": 5
+        "status": "SUCCESS"
       },
       "lessons_learned": [
-        "Always validate permissions before adding",
-        "Check for duplicates in global settings"
+        "Script permissions are NOT needed in settings"
       ]
     },
     "docs-technical-adoc-review": {
       "last_execution": {
         "date": "2025-11-24",
-        "status": "SUCCESS",
-        "run_number": 3
+        "status": "SUCCESS"
       },
       "skipped_files": ["CHANGELOG.adoc"],
       "acceptable_warnings": []
     }
   },
   "maven": {
-    "build": {
-      "last_execution": {
-        "duration_ms": 45000,
-        "duration_human": "45 seconds",
-        "last_updated": "2025-11-25"
-      }
+    "acceptable_warnings": {
+      "transitive_dependency": [],
+      "plugin_compatibility": [],
+      "platform_specific": []
     }
   }
 }

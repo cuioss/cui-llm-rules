@@ -415,7 +415,6 @@ Command: setup-project-permissions
 Update fields at path `commands.setup-project-permissions`:
 - `user_approved_permissions`: User-approved suspicious permissions
 - `last_execution`: Execution timestamp and status
-- `changes_applied`: Change statistics for local and global settings
 - `lessons_learned`: User decisions and important findings
 
 ## CRITICAL RULES
