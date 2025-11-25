@@ -380,7 +380,7 @@ Map<String, List<User>> usersByRole = users.stream()
 6. Implement methods with proper null safety
 7. Use modern Java features (records for DTOs, switch expressions, streams)
 8. Write unit tests verifying behavior
-9. Run build using ./mvnw and parse output if needed
+9. Verify build using cui-maven:cui-maven-rules workflow
 
 ### Task: Refactor existing code to standards
 
@@ -391,7 +391,7 @@ Map<String, List<User>> usersByRole = users.stream()
 5. Replace classic patterns with modern features (records, switch expressions)
 6. Add null checks at API boundaries
 7. Update tests to verify compliance
-8. Run build and verify no regressions
+8. Verify build using cui-maven:cui-maven-rules workflow
 
 ### Task: Add comprehensive logging
 
