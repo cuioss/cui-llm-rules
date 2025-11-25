@@ -589,3 +589,28 @@ Read references/quality-standards.md
 ### 6. Progressive Disclosure Always
 **Wrong**: Front-load all information in frontmatter/SKILL.md
 **Right**: Minimal → Specific → Detailed as needed
+
+## Related Patterns
+
+### Minimal Wrapper Pattern
+For implementing goal-based agents and commands as thin orchestrators, see:
+- **xref:minimal-wrapper-pattern.md[Minimal Wrapper Pattern]** - Context isolation strategy using thin wrappers (< 150 lines) that delegate to skills
+
+**Integration**: Goal-based organization defines WHAT to build (user goals); minimal wrapper pattern defines HOW to build it (thin orchestration with skill delegation).
+
+**Example**:
+```
+Goal: CREATE (from goal-based organization)
+  ↓
+Agent: java-create-agent (< 150 lines, minimal wrapper pattern)
+  ↓
+Skill: cui-java-core (600 lines, business logic)
+```
+
+### Command Design
+For designing thin orchestrator commands, see:
+- **xref:command-design.md[Command Design]** - Thin orchestrator pattern for self-contained commands
+
+### Skill Design
+For designing workflow-focused skills, see:
+- **xref:skill-design.md[Skill Design]** - Workflow-focused design principles

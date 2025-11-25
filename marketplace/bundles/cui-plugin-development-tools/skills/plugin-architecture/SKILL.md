@@ -329,6 +329,36 @@ Read references/script-standards.md
 Read references/execution-directive.md
 ```
 
+### 12. Minimal Wrapper Pattern (Context Isolation Strategy)
+**File**: `references/minimal-wrapper-pattern.md`
+
+**Load When**:
+- Designing agents or commands as thin orchestrators
+- Solving context handling challenges
+- Understanding agent-to-skill delegation
+- Migrating from fat agents (> 150 lines)
+- Implementing context isolation strategy
+- Learning line budget guidelines for wrappers
+
+**Contents**:
+- Problem: Context pollution with pure skill-based architecture
+- Solution: Thin wrappers (< 150 lines) that delegate to skills
+- Why agent→skill works but agent→agent doesn't
+- Implementation patterns for commands and agents
+- Line budget guidelines (150 line maximum)
+- Skill invocation patterns (commands, agents, chained)
+- Anti-patterns (fat wrappers, duplicate logic, agent-to-agent)
+- Correct patterns (thin orchestration, single source of truth)
+- Integration with goal-based organization
+- Migration guide from fat agents to minimal wrappers
+- Quality checklist for wrapper compliance
+- Real-world before/after examples
+
+**Load Command**:
+```
+Read references/minimal-wrapper-pattern.md
+```
+
 ## Examples
 
 ### Example 1: Goal-Based Skill
@@ -500,6 +530,11 @@ Read references/execution-directive.md
 Read references/script-standards.md
 ```
 
+**Designing thin wrappers**:
+```
+Read references/minimal-wrapper-pattern.md
+```
+
 **Learning by example**:
 ```
 Read references/examples/goal-based-skill-example.md
@@ -573,6 +608,7 @@ All references are in `references/` directory:
 - frontmatter-standards.md
 - script-standards.md
 - execution-directive.md
+- minimal-wrapper-pattern.md
 - examples/goal-based-skill-example.md
 - examples/workflow-command-example.md
 - examples/pattern-usage-examples.md
