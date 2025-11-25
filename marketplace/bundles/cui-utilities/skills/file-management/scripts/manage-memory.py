@@ -14,9 +14,13 @@ import os
 import re
 import shutil
 import sys
-from datetime import datetime, timedelta
+import warnings
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Suppress deprecation warnings in output
+warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 
 MEMORY_BASE = Path('.claude/memory')
@@ -63,7 +67,7 @@ def create_memory_envelope(category: str, identifier: str, content: Any, session
     """Create memory file with metadata envelope."""
     return {
         "meta": {
-            "created": datetime.utcnow().isoformat() + 'Z',
+            "created": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
             "category": category,
             "summary": identifier,
             "session_id": session_id
@@ -158,7 +162,7 @@ def cmd_save(args) -> int:
 
         # Generate timestamped filename for context category
         if args.category == 'context':
-            date_prefix = datetime.utcnow().strftime('%Y-%m-%d')
+            date_prefix = datetime.now(timezone.utc).strftime('%Y-%m-%d')
             identifier = f"{date_prefix}-{args.identifier}"
         else:
             identifier = args.identifier
@@ -231,7 +235,7 @@ def cmd_list(args) -> int:
                 if args.since:
                     try:
                         duration = parse_duration(args.since)
-                        cutoff = datetime.utcnow() - duration
+                        cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - duration
                         created_str = info.get('created', '')
                         if created_str:
                             created = datetime.fromisoformat(created_str.rstrip('Z'))
@@ -300,7 +304,7 @@ def cmd_cleanup(args) -> int:
             return 1
 
         duration = parse_duration(args.older_than)
-        cutoff = datetime.utcnow() - duration
+        cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - duration
 
         removed = []
         categories = [args.category] if args.category else CATEGORIES
@@ -358,7 +362,7 @@ def cmd_archive(args) -> int:
 
         # If file exists in archive, add timestamp
         if dest_path.exists():
-            timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+            timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
             dest_path = archive_path / f"{source_path.stem}_{timestamp}.json"
 
         shutil.move(str(source_path), str(dest_path))
