@@ -11,10 +11,9 @@ Orchestrates POM maintenance by routing to appropriate skill workflows based on 
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `action` | `analyze` | Workflow to execute: `analyze`, `optimize`, `openrewrite`, `wrapper`, `verify` |
+| `action` | `analyze` | Workflow: `analyze`, `optimize`, `openrewrite`, `wrapper`, `verify` |
 | `module` | (none) | Specific module to target |
-| `auto_fix` | `false` | Auto-fix safe issues (optimize action only) |
-| `dry_run` | `false` | Preview changes only (openrewrite action only) |
+| `auto_fix` | `true` | Auto-fix safe issues (optimize action) |
 
 ## WORKFLOW
 

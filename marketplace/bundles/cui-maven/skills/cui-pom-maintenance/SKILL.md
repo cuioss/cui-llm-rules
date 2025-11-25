@@ -126,7 +126,7 @@ Applies dependency optimizations based on analysis results.
 ### Parameters
 
 - **issues** (required): Issues from Analyze workflow
-- **auto_fix** (optional): Auto-fix safe issues (default: false)
+- **auto_fix** (optional): Auto-fix safe issues (default: true)
 
 ### Step 1: Load Standards
 
@@ -187,7 +187,6 @@ Executes OpenRewrite POM cleanup recipes.
 
 ### Parameters
 
-- **dry_run** (optional): Preview changes only (default: false)
 - **module** (optional): Specific module
 
 ### Step 1: Execute OpenRewrite
@@ -200,8 +199,6 @@ Parameters:
   profile: rewrite-maven-clean
   module: {module}
 ```
-
-If dry_run=true, use `rewrite:dryRun` instead.
 
 ### Step 2: Parse Results
 
