@@ -14,7 +14,7 @@ Standards and workflows for writing clear, maintainable technical documentation 
 
 ## Available Workflows
 
-This skill provides five specialized workflows:
+This skill provides nine specialized workflows:
 
 | Workflow | Purpose | Script Used |
 |----------|---------|-------------|
@@ -23,6 +23,10 @@ This skill provides five specialized workflows:
 | **verify-links** | Verify links and cross-references | `verify-adoc-links.py`, `verify-links-false-positives.py` |
 | **review-content** | Review content quality and tone | `analyze-content-tone.py` |
 | **comprehensive-review** | Orchestrate all review workflows | All scripts (format → links → content) |
+| **create-from-template** | Create new document from template | Templates in assets/ |
+| **sync-with-code** | Sync documentation with code changes | Analysis + Edit |
+| **cleanup-stale** | Remove stale/duplicate documentation | Glob + Read + analysis |
+| **refresh-metadata** | Update metadata and cross-references | Read + Edit |
 
 ## Workflow: format-document
 
@@ -663,6 +667,309 @@ Overall status:
 - verify-links: {time}ms
 - review-content: {time}ms
 - Total: {time}ms
+```
+
+---
+
+## Workflow: create-from-template
+
+Create new AsciiDoc documents from predefined templates.
+
+### What It Creates
+
+- Standard specification documents
+- README files
+- How-to guides
+
+### Parameters
+
+- `type` (required): standard|readme|guide
+- `name` (required): Document name (used in title and filename)
+- `path` (optional): Output path (default: inferred from type)
+
+### Steps
+
+**Step 1: Validate Parameters**
+
+```
+If type not in [standard, readme, guide]:
+  Error: "Invalid type. Use: standard, readme, guide"
+
+If name is empty:
+  Error: "Name is required"
+```
+
+**Step 2: Determine Output Path**
+
+```
+If path not specified:
+  standard → standards/{name}.adoc
+  readme   → {name}/README.adoc or README.adoc
+  guide    → docs/{name}.adoc
+```
+
+**Step 3: Load Template**
+
+Read template from assets/templates/:
+- standard → assets/templates/standard-template.adoc
+- readme   → assets/templates/readme-template.adoc
+- guide    → assets/templates/guide-template.adoc
+
+**Step 4: Substitute Placeholders**
+
+Replace template placeholders:
+- `{{TITLE}}` → Formatted name
+- `{{PROJECT_NAME}}` → Name
+- `{{GUIDE_TITLE}}` → Formatted guide title
+- `{{DESCRIPTION}}` → Empty (user fills in)
+- `{{SHORT_DESCRIPTION}}` → Empty (user fills in)
+- `{{PURPOSE}}` → Empty (user fills in)
+
+**Step 5: Write File**
+
+Use Write tool to create file at output path.
+
+**Step 6: Validate Created File**
+
+Execute validate-format workflow on new file.
+
+**Step 7: Report Result**
+
+```
+Document Created: {output_path}
+Type: {type}
+Status: ✅ Valid format
+
+Next steps:
+1. Edit {output_path} to fill in content
+2. Run /doc-doctor target={output_path} to validate
+```
+
+---
+
+## Workflow: sync-with-code
+
+Analyze code changes and update documentation to stay in sync.
+
+### What It Does
+
+- Detects code structure changes
+- Identifies documentation drift
+- Suggests or applies updates
+
+### Parameters
+
+- `target` (required): Documentation file or directory
+- `code_path` (optional): Code directory to analyze (default: src/)
+
+### Steps
+
+**Step 1: Analyze Code Structure**
+
+```
+Use Glob to find code files:
+  {code_path}/**/*.java
+  {code_path}/**/*.js
+  {code_path}/**/*.ts
+
+Extract:
+- Public classes/interfaces
+- Public methods
+- Configuration patterns
+```
+
+**Step 2: Analyze Documentation**
+
+```
+Read target documentation files
+Extract:
+- Documented classes/methods
+- Code examples
+- Configuration references
+```
+
+**Step 3: Identify Drift**
+
+Compare code vs documentation:
+- Missing documentation for new code
+- Outdated documentation for changed code
+- Documentation for removed code
+
+**Step 4: Generate Sync Report**
+
+```
+Documentation Sync Analysis
+═══════════════════════════════════════
+
+Code analyzed: {file_count} files
+Documentation analyzed: {doc_count} files
+
+Drift Detected:
+- New code needing docs: {count}
+- Outdated documentation: {count}
+- Stale documentation: {count}
+
+Details:
+{list of specific drift items}
+
+Recommendations:
+{specific actions to sync}
+```
+
+**Step 5: Apply Updates (if requested)**
+
+For each drift item:
+- Ask user for confirmation
+- Use Edit tool to update documentation
+- Re-validate after changes
+
+---
+
+## Workflow: cleanup-stale
+
+Identify and remove stale or duplicate documentation.
+
+### What It Does
+
+- Finds duplicate content across files
+- Identifies orphaned documentation
+- Suggests cleanup actions
+
+### Parameters
+
+- `target` (required): Directory to analyze
+
+### Steps
+
+**Step 1: Discover Documentation**
+
+```
+Use Glob: {target}/**/*.adoc
+Exclude: target/, node_modules/
+```
+
+**Step 2: Analyze Content**
+
+For each file:
+- Extract title and sections
+- Calculate content hash
+- Track cross-references
+
+**Step 3: Identify Candidates**
+
+**Duplicates:**
+- Files with >80% similar content
+- Identical sections across files
+
+**Orphaned:**
+- Files not referenced from anywhere
+- Files with broken incoming links
+
+**Stale:**
+- Files with TODO markers older than threshold
+- Files not updated in extended period
+
+**Step 4: Generate Cleanup Report**
+
+```
+Documentation Cleanup Analysis
+═══════════════════════════════════════
+
+Files analyzed: {count}
+
+Candidates for Cleanup:
+- Potential duplicates: {count}
+- Orphaned files: {count}
+- Stale content: {count}
+
+Duplicates:
+{file1} ↔ {file2}: {similarity}%
+
+Orphaned:
+{file}: No incoming references
+
+Stale:
+{file}: Contains {N} TODOs
+
+Recommendations:
+1. {specific action}
+```
+
+**Step 5: Execute Cleanup (with confirmation)**
+
+For each approved removal:
+1. Update files that reference removed content
+2. Remove or consolidate file
+3. Re-validate cross-references
+
+---
+
+## Workflow: refresh-metadata
+
+Update metadata, fix cross-references, and refresh table of contents.
+
+### What It Does
+
+- Updates document metadata
+- Fixes broken cross-references
+- Regenerates table of contents
+
+### Parameters
+
+- `target` (required): File or directory
+
+### Steps
+
+**Step 1: Discover Files**
+
+```
+If target is file:
+  files = [target]
+If target is directory:
+  Use Glob: {target}/**/*.adoc
+```
+
+**Step 2: Analyze Metadata**
+
+For each file:
+- Check header attributes (:toc:, :sectnums:, etc.)
+- Identify missing or outdated metadata
+
+**Step 3: Analyze Cross-References**
+
+```
+Execute verify-links workflow
+Collect: broken internal references
+```
+
+**Step 4: Fix Cross-References**
+
+For each broken reference:
+1. Search for target content by title/anchor
+2. If found at new location: Update reference
+3. If not found: Report for manual review
+
+**Step 5: Update Metadata**
+
+Using Edit tool:
+- Ensure standard header attributes present
+- Fix attribute formatting
+
+**Step 6: Generate Report**
+
+```
+Metadata Refresh Complete
+═══════════════════════════════════════
+
+Files processed: {count}
+
+Updates Applied:
+- Metadata fixed: {count}
+- Cross-references fixed: {count}
+- Headers updated: {count}
+
+Manual Review Needed:
+- {file}: {reason}
 ```
 
 ---

@@ -3,6 +3,10 @@ name: doc-review-single-asciidoc
 description: Validate and review a single AsciiDoc file with format, links, and content checks
 ---
 
+> **DEPRECATED**: This command is deprecated. Use `/doc-doctor` instead.
+> - For single file: `/doc-doctor target=<file>`
+> - For thorough review: `/doc-doctor target=<file> depth=thorough`
+
 # Review Single AsciiDoc Command
 
 Thin orchestrator for single file AsciiDoc review. Invokes cui-documentation skill workflows.

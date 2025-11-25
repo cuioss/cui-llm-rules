@@ -3,6 +3,10 @@ name: doc-review-technical-docs
 description: Execute comprehensive AsciiDoc review for all documentation files
 ---
 
+> **DEPRECATED**: This command is deprecated. Use `/doc-doctor` instead.
+> - For batch review: `/doc-doctor target=<directory>`
+> - For thorough review: `/doc-doctor target=<directory> depth=thorough`
+
 # Review Technical Docs Command
 
 Thin orchestrator for batch AsciiDoc review. Discovers files and invokes workflows.

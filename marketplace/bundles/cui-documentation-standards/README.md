@@ -1,50 +1,110 @@
 # CUI Documentation Standards
 
-AsciiDoc and documentation standards enforcement for CUI projects. This bundle provides comprehensive tools for validating, formatting, and reviewing technical documentation.
+AsciiDoc and documentation standards enforcement for CUI projects. This bundle provides comprehensive tools for creating, validating, and maintaining technical documentation.
 
 ## Purpose
 
-This bundle ensures documentation quality through:
+This bundle covers the full documentation lifecycle through three goal-based commands:
 
-1. **Format Validation** - Validate AsciiDoc structure, headers, lists, and code blocks
-2. **Auto-Formatting** - Fix common formatting issues automatically
-3. **Link Verification** - Verify cross-references and external links
-4. **Content Review** - Analyze tone, clarity, and content quality
+1. **CREATE** - Generate new documentation from templates
+2. **DOCTOR** - Diagnose documentation issues (format, links, content)
+3. **MAINTAIN** - Keep documentation healthy (sync, cleanup, update)
 
 ## Components Included
 
-### Commands (2 goal-based orchestrators)
+### Commands (3 goal-based orchestrators)
 
-1. **/doc-review-single-asciidoc** - Review a single AsciiDoc file
-   - Validates format compliance
-   - Verifies links and cross-references
-   - Reviews content quality
-   - Returns comprehensive report
+| Command | Purpose | Use When |
+|---------|---------|----------|
+| **/doc-create** | Create new documentation | Starting a new doc |
+| **/doc-doctor** | Diagnose issues | Validating documentation |
+| **/doc-maintain** | Maintain documentation | Keeping docs healthy |
 
-2. **/doc-review-technical-docs** - Batch review all AsciiDoc files
-   - Discovers all .adoc files in directory
-   - Reviews each file with all validations
-   - Aggregates results into summary report
-   - Optionally commits fixes
+#### /doc-doctor (Diagnose)
 
-### Skills (1 skill with 4 workflows)
+Unified diagnostic command replacing the deprecated review commands.
 
-**cui-documentation** - Documentation standards skill with workflows:
+```
+/doc-doctor [target=<path>] [depth=quick|standard|thorough]
 
-| Workflow | Purpose | Script Used |
-|----------|---------|-------------|
-| **format-document** | Auto-fix formatting issues | `asciidoc-formatter.sh` |
-| **validate-format** | Validate format compliance | `asciidoc-validator.sh` |
-| **verify-links** | Verify links and xrefs | `verify-adoc-links.py` |
-| **review-content** | Review content quality | `review-content.py` |
+Examples:
+  /doc-doctor                              # Current directory, standard depth
+  /doc-doctor target=standards/            # Specific directory
+  /doc-doctor target=README.adoc           # Single file
+  /doc-doctor depth=thorough               # Full review including content
+```
 
-### Scripts (5 in cui-documentation skill)
+**Depth levels:**
+- `quick` - Format validation only
+- `standard` - Format + link verification (default)
+- `thorough` - Format + links + content review
 
-- `asciidoc-formatter.sh` - Auto-fix formatting (lists, xrefs, headers)
-- `asciidoc-validator.sh` - Validate AsciiDoc format compliance
-- `verify-adoc-links.py` - Verify cross-references and links
-- `review-content.py` - Analyze content quality and tone
-- `documentation-stats.sh` - Generate documentation metrics
+#### /doc-create (Create)
+
+Create new documents from templates.
+
+```
+/doc-create type=<type> name=<name> [path=<path>]
+
+Examples:
+  /doc-create type=standard name=java-logging
+  /doc-create type=readme name=MyProject
+  /doc-create type=guide name=setup-guide
+```
+
+**Document types:**
+- `standard` - Technical specification (→ standards/{name}.adoc)
+- `readme` - Project README (→ README.adoc)
+- `guide` - How-to guide (→ docs/{name}.adoc)
+
+#### /doc-maintain (Maintain)
+
+Maintenance operations for existing documentation.
+
+```
+/doc-maintain action=<action> [target=<path>]
+
+Examples:
+  /doc-maintain action=update              # Refresh metadata
+  /doc-maintain action=sync target=docs/   # Sync with code
+  /doc-maintain action=cleanup             # Remove stale content
+```
+
+**Actions:**
+- `sync` - Sync documentation with code changes
+- `cleanup` - Remove stale/duplicate content
+- `update` - Refresh metadata and cross-references
+
+### Deprecated Commands
+
+> **Note**: These commands still work but are deprecated. Use `/doc-doctor` instead.
+
+- `/doc-review-single-asciidoc` → Use `/doc-doctor target=<file>`
+- `/doc-review-technical-docs` → Use `/doc-doctor target=<directory>`
+
+### Skills (1 skill with 9 workflows)
+
+**cui-documentation** - Documentation standards skill:
+
+| Workflow | Purpose |
+|----------|---------|
+| **format-document** | Auto-fix formatting issues |
+| **validate-format** | Validate format compliance |
+| **verify-links** | Verify links and xrefs |
+| **review-content** | Review content quality |
+| **comprehensive-review** | Orchestrate all review workflows |
+| **create-from-template** | Create document from template |
+| **sync-with-code** | Sync docs with code changes |
+| **cleanup-stale** | Remove stale documentation |
+| **refresh-metadata** | Update metadata and xrefs |
+
+### Templates (3)
+
+Located in `cui-documentation/assets/templates/`:
+
+- `standard-template.adoc` - Technical specification template
+- `readme-template.adoc` - Project README template
+- `guide-template.adoc` - How-to guide template
 
 ## Installation
 
@@ -54,86 +114,104 @@ This bundle ensures documentation quality through:
 
 ## Usage Examples
 
-### Review Single File
+### Quick Validation
 
 ```
-/doc-review-single-asciidoc file=standards/java-core.adoc
+/doc-doctor depth=quick
 ```
 
-### Review All Documentation
+### Full Documentation Review
 
 ```
-/doc-review-technical-docs
+/doc-doctor depth=thorough
 ```
 
-### Review with Fixes
+### Create New Standard
 
 ```
-/doc-review-technical-docs apply_fixes=true
+/doc-create type=standard name=new-feature
 ```
 
-### Review, Fix, and Commit
+### Sync Documentation After Code Changes
 
 ```
-/doc-review-technical-docs apply_fixes=true push
+/doc-maintain action=sync target=docs/
+```
+
+### Clean Up Stale Documentation
+
+```
+/doc-maintain action=cleanup
 ```
 
 ## Architecture
 
 ```
 cui-documentation-standards/
-├── commands/                # 2 goal-based orchestrators
-│   ├── doc-review-single-asciidoc.md
-│   └── doc-review-technical-docs.md
+├── commands/                     # 3 goal-based commands + 2 deprecated
+│   ├── doc-doctor.md             # NEW: Unified diagnostic
+│   ├── doc-create.md             # NEW: Create from templates
+│   ├── doc-maintain.md           # NEW: Maintenance operations
+│   ├── doc-review-single-asciidoc.md  # DEPRECATED
+│   └── doc-review-technical-docs.md   # DEPRECATED
 └── skills/
-    └── cui-documentation/   # Expanded skill with 4 workflows
-        ├── SKILL.md         # 4 workflows: format, validate, verify, review
-        ├── scripts/         # 5 automation scripts
-        │   ├── asciidoc-formatter.sh
-        │   ├── asciidoc-validator.sh
-        │   ├── verify-adoc-links.py
-        │   ├── review-content.py
-        │   └── documentation-stats.sh
-        └── standards/       # Documentation standards
-            ├── documentation-core.md
-            ├── asciidoc-formatting.md
-            ├── tone-and-style.md
-            ├── readme-structure.md
-            └── organization-standards.md
+    └── cui-documentation/        # Skill with 9 workflows
+        ├── SKILL.md
+        ├── assets/
+        │   └── templates/        # Document templates
+        ├── scripts/              # Automation scripts
+        └── standards/            # Documentation standards
 ```
 
-## Workflow Pattern
-
-Commands are thin orchestrators that invoke skill workflows:
+## Goal-Based Command Pattern
 
 ```
-/doc-review-single-asciidoc file=X
-  └─> Skill: cui-documentation
-      ├─> workflow: validate-format (asciidoc-validator.sh)
-      ├─> workflow: verify-links (verify-adoc-links.py)
-      └─> workflow: review-content (review-content.py)
+CREATE:   /doc-create   → cui-documentation → create-from-template
+DOCTOR:   /doc-doctor   → cui-documentation → comprehensive-review
+MAINTAIN: /doc-maintain → cui-documentation → sync/cleanup/refresh
+```
 
-/doc-review-technical-docs
-  └─> For each .adoc file:
-      └─> Skill: cui-documentation (all workflows)
+All commands are thin orchestrators (<150 lines) that delegate to skill workflows.
+
+## Migration Guide
+
+### From /doc-review-single-asciidoc
+
+```
+# Before
+/doc-review-single-asciidoc file=standards/java.adoc
+
+# After
+/doc-doctor target=standards/java.adoc depth=thorough
+```
+
+### From /doc-review-technical-docs
+
+```
+# Before
+/doc-review-technical-docs path=standards/
+
+# After
+/doc-doctor target=standards/ depth=thorough
 ```
 
 ## Bundle Statistics
 
-- **Commands**: 2 (thin orchestrators, <100 lines each)
-- **Skills**: 1 (with 4 workflows)
-- **Scripts**: 5 (shell and Python)
-- **Agents**: 0 (all absorbed into skill)
+- **Commands**: 3 active + 2 deprecated
+- **Skills**: 1 (with 9 workflows)
+- **Templates**: 3
+- **Scripts**: 6
 
 ## Dependencies
 
 ### Inter-Bundle Dependencies
 
 - **cui-task-workflow** (optional) - For commit workflow in batch processing
+- **cui-utilities** (optional) - For script-runner workflow
 
 ### External Dependencies
 
-- Python 3 for link verification and content review
+- Python 3 for link verification and content analysis
 - Shell (bash) for formatting and validation scripts
 
 ## Support
