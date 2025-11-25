@@ -14,10 +14,10 @@ All Maven builds use the Maven Wrapper from the project root:
 ./mvnw {goals} {options}
 ```
 
-**Output Capture**: Use Maven's `-l` (log file) flag for output capture:
+**Output Capture**: Use Maven's `-l` (log file) flag for output capture with timestamped filenames:
 
 ```bash
-./mvnw -l target/build-output.log clean install
+./mvnw -l target/build-output-2025-11-25-143022.log clean install
 ```
 
 **Rationale**: Using `-l` instead of shell redirection (`> file 2>&1`) avoids permission issues with `Bash(./mvnw:*)` patterns.
@@ -34,19 +34,56 @@ All Maven builds use the Maven Wrapper from the project root:
 | `-Ppre-commit clean install` | Pre-commit quality checks |
 | `-Pcoverage clean verify` | Coverage analysis build |
 
-### Handling Clean Goal with Log Capture
+### Log File Handling (CRITICAL)
 
-**Problem**: When using `-l target/build.log` with `clean`, the `clean` phase deletes `target/` before log file creation.
+**Problem**: When using `-l target/build.log` with `clean`, the `clean` phase deletes `target/` before Maven can create the log file, causing build failures.
 
-**Solution**: Separate clean from logged build:
+**Solution**: ALWAYS pre-create the log file before executing Maven:
+
+#### Step 1: Generate Timestamped Filename
+
+```
+Format: target/build-output-{YYYY-MM-DD-HHmmss}.log
+Example: target/build-output-2025-11-25-143022.log
+```
+
+#### Step 2: Pre-Create Log File
+
+**MANDATORY**: Use the Write tool to create an empty log file BEFORE calling Maven:
+
+```
+Write: target/build-output-{timestamp}.log
+Content: ""  (empty string)
+```
+
+This ensures:
+- The `target/` directory exists
+- The log file exists before `clean` runs
+- Maven can append to the file throughout the build
+
+#### Step 3: Execute Maven Build
 
 ```bash
-# Execute clean first (no log needed)
-./mvnw clean
-
-# Then execute build with log capture
-./mvnw -l target/build-output.log install
+./mvnw -l target/build-output-{timestamp}.log {goals}
 ```
+
+#### Complete Workflow Example
+
+```
+1. Generate timestamp: 2025-11-25-143022
+2. Write empty file: target/build-output-2025-11-25-143022.log
+3. Execute: ./mvnw -l target/build-output-2025-11-25-143022.log -Ppre-commit clean install
+4. Parse output from: target/build-output-2025-11-25-143022.log
+```
+
+**Why Pre-Create Instead of Separate Clean?**
+
+| Approach | Problems |
+|----------|----------|
+| Separate `./mvnw clean` then `./mvnw install` | Two builds, inconsistent state, doubled execution time |
+| Pre-create log file | Single build, reliable, clean works correctly |
+
+**NEVER** execute Maven with `-l` flag without pre-creating the log file first.
 
 ## Module Builds
 

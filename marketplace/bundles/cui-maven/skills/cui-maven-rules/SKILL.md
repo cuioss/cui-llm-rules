@@ -109,10 +109,30 @@ Use this workflow when:
 - **profile** (optional): Maven profile to activate (-P flag)
 - **output_mode** (optional): How to process output - "default", "errors", "structured" (default: "structured")
 
-### Step 1: Execute Maven Build
+### Step 1: Generate Timestamped Log Filename
+
+Generate a unique log filename with timestamp:
+
+```
+Format: target/build-output-{YYYY-MM-DD-HHmmss}.log
+Example: target/build-output-2025-11-25-143022.log
+```
+
+### Step 2: Pre-Create Log File (CRITICAL)
+
+**MANDATORY**: Use the Write tool to create an empty log file BEFORE calling Maven:
+
+```
+Write: target/build-output-{timestamp}.log
+Content: ""  (empty string)
+```
+
+**Why**: When using `-l` with `clean` goal, Maven's clean phase deletes `target/` before Maven can create the log file. Pre-creating ensures the directory and file exist.
+
+### Step 3: Execute Maven Build
 
 ```bash
-./mvnw -l target/maven-build.log {goals} {-pl module if specified} {-P profile if specified}
+./mvnw -l target/build-output-{timestamp}.log {goals} {-pl module if specified} {-P profile if specified}
 ```
 
 NOTE: Using Maven's `-l` (log file) flag instead of shell redirection (`> file 2>&1`) avoids permission issues with `Bash(./mvnw:*)`.
@@ -120,22 +140,22 @@ NOTE: Using Maven's `-l` (log file) flag instead of shell redirection (`> file 2
 **Examples:**
 ```bash
 # Basic build
-./mvnw -l target/maven-build.log clean install
+./mvnw -l target/build-output-2025-11-25-143022.log clean install
 
 # Module-specific build
-./mvnw -l target/maven-build.log clean install -pl auth-service
+./mvnw -l target/build-output-2025-11-25-143022.log clean install -pl auth-service
 
 # With profile
-./mvnw -l target/maven-build.log clean verify -Ppre-commit
+./mvnw -l target/build-output-2025-11-25-143022.log clean verify -Ppre-commit
 
 # Coverage build
-./mvnw -l target/maven-build.log clean test -Pcoverage
+./mvnw -l target/build-output-2025-11-25-143022.log clean test -Pcoverage
 
 # Native image
-./mvnw -l target/maven-build.log clean package -Dnative
+./mvnw -l target/build-output-2025-11-25-143022.log clean package -Dnative
 ```
 
-### Step 2: Parse Build Output
+### Step 4: Parse Build Output
 
 Resolve script path:
 ```
@@ -146,11 +166,11 @@ Resolve: cui-maven:cui-maven-rules/scripts/parse-maven-output.py
 Execute:
 ```bash
 python3 {resolved_path} \
-    --log target/maven-build.log \
+    --log target/build-output-{timestamp}.log \
     --mode {output_mode}
 ```
 
-### Step 3: Return Results
+### Step 5: Return Results
 
 Return structured JSON with:
 - Build status (SUCCESS/FAILURE)
