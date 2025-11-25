@@ -277,7 +277,49 @@ Reference patterns from loaded `cui-java-unit-testing` skill:
 - Return partial success with production issues noted
 - Tests are standards-compliant and will pass once production code fixed
 
-### Step 8: Return Test Implementation Results
+### Step 8: Analyze Test Coverage
+
+**Coverage Analysis:**
+
+1. **Generate coverage report**:
+   ```
+   Skill: cui-maven:cui-maven-rules
+   Workflow: verify-clean-build
+   Parameters:
+     goals: clean test jacoco:report
+     module: {module if specified}
+   ```
+
+2. **Analyze coverage gaps**:
+   ```
+   Skill: cui-utilities:script-runner
+   Script: cui-java-expert:cui-java-unit-testing/analyze-coverage-gaps
+   Parameters:
+     report_path: "target/site/jacoco/jacoco.xml"
+     priority_filter: "high"
+   ```
+
+3. **Review results**:
+   - Parse JSON output for overall_coverage and gaps_by_priority
+   - Check if meets thresholds (80% line, 70% branch)
+   - Identify any high-priority gaps (untested public methods)
+
+4. **Address critical gaps** (if found):
+   - If high-priority gaps exist: Add tests for uncovered public methods
+   - Return to Step 5 to implement additional tests
+   - Re-run coverage analysis
+   - Maximum 2 iterations for gap filling
+
+5. **Accept coverage** if:
+   - All high-priority gaps covered (100% public method coverage)
+   - Overall line coverage >= 80% OR user-approved lower threshold
+   - Overall branch coverage >= 70% OR user-approved lower threshold
+
+Reference: xref:../skills/cui-java-unit-testing/standards/coverage-analysis-pattern.md[Coverage Analysis Pattern]
+
+**Coverage Report Storage**: The JaCoCo report is in `target/site/jacoco/` for future reference.
+
+### Step 9: Return Test Implementation Results
 
 **Only return to user after:**
 - Test implementation is complete
