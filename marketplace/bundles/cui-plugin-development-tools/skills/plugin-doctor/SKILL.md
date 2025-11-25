@@ -124,7 +124,8 @@ All 5 workflows follow the same pattern:
 
 **Risky Fixes** (require confirmation):
 - Rule 6 violations (Task tool in agents)
-- Rule 7 violations (Maven usage)
+- Rule 7 violations (Direct Maven usage - should use cui-maven skill)
+- Rule 8 violations (Hardcoded script paths - should use script-runner)
 - Pattern 22 violations (self-invocation)
 - Structural changes
 - Content removal

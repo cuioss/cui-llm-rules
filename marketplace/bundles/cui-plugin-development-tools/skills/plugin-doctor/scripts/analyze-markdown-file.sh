@@ -23,7 +23,10 @@ Output: JSON with structural analysis including:
   - continuous_improvement_rule: CI rule presence and pattern
   - bloat.classification: NORMAL, LARGE, BLOATED, or CRITICAL
   - execution_patterns: EXECUTION MODE, workflow tree, MANDATORY markers
-  - rules: Rule 6 and Rule 7 violation detection
+  - rules: Rule 6, Rule 7, and Rule 8 violation detection
+    * Rule 6: Task tool in agents
+    * Rule 7: Direct Maven usage (should use cui-maven skill)
+    * Rule 8: Hardcoded script paths (should use script-runner)
   - quality.has_forbidden_metadata: Forbidden metadata sections (Version, License, etc.)
   - quality.forbidden_sections: List of detected forbidden section names
 
@@ -175,15 +178,26 @@ if [ "$COMPONENT_TYPE" == "agent" ] && [ "$HAS_TOOLS" == "true" ]; then
     fi
 fi
 
-# Check Rule 7: Maven execution restriction
+# Check Rule 7: Maven execution restriction (expanded to all components)
 RULE_7_VIOLATION="false"
-if [ "$COMPONENT_TYPE" == "agent" ] && [ "$HAS_TOOLS" == "true" ]; then
-    AGENT_NAME=$(basename "$FILE_PATH" .md)
-    if [ "$AGENT_NAME" != "maven-builder" ]; then
-        # Check if agent uses Maven via Bash
-        if grep -q "Bash.*maven\|Bash.*mvn\|Bash.*./mvnw" "$FILE_PATH"; then
+# Check for direct mvn usage (should use cui-maven skill instead)
+if grep -qE "mvn |maven |./mvnw " "$FILE_PATH"; then
+    # Exclude maven-specific bundles/skills
+    if ! echo "$FILE_PATH" | grep -q "cui-maven"; then
+        # Check if it's just documentation/comments
+        if ! grep -E "mvn |maven |./mvnw " "$FILE_PATH" | grep -q "^[[:space:]]*#\|^[[:space:]]*//"; then
             RULE_7_VIOLATION="true"
         fi
+    fi
+fi
+
+# Check Rule 8: Script-runner usage (no hardcoded paths)
+RULE_8_VIOLATION="false"
+# Check for hardcoded script paths (should use script-runner with portable notation)
+if grep -qE "python3 .*/scripts/|bash .*/scripts/|{[^}]+}/scripts/" "$FILE_PATH"; then
+    # Check if it's using script-runner skill (acceptable)
+    if ! grep -q "Skill:.*script-runner" "$FILE_PATH"; then
+        RULE_8_VIOLATION="true"
     fi
 fi
 
@@ -247,7 +261,8 @@ cat <<EOF
   },
   "rules": {
     "rule_6_violation": $RULE_6_VIOLATION,
-    "rule_7_violation": $RULE_7_VIOLATION
+    "rule_7_violation": $RULE_7_VIOLATION,
+    "rule_8_violation": $RULE_8_VIOLATION
   },
   "quality": {
     "has_forbidden_metadata": $HAS_FORBIDDEN_METADATA,

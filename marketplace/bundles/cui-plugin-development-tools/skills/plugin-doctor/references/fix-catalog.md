@@ -189,20 +189,39 @@ Risky fixes require user confirmation because they involve judgment calls or may
 
 ### 4. rule-7-violation
 
-**Description**: Non-maven-builder agent uses Maven directly.
+**Description**: Component uses Maven directly instead of cui-maven skill.
 
-**Detection**: Agent other than maven-builder has Maven/mvn patterns
+**Detection**: Direct `mvn`, `maven`, or `./mvnw` usage in commands/skills/agents (excluding cui-maven bundle)
 
 **Fix Strategy**:
-- Remove direct Maven invocations
-- Add reference to maven-builder agent delegation
+- Replace direct Maven invocations with cui-maven skill calls
+- Use workflow: `Skill: cui-maven:cui-maven-rules` with appropriate workflow name
+- Example: Replace `mvn clean compile` with workflow: verify-clean-build
 
 **Why Risky**:
-- Changes build behavior
+- Changes build execution mechanism
 - May break functionality if not properly migrated
 - User should verify build still works
+- Requires cui-maven skill to be available
 
-### 5. pattern-22-violation
+### 5. rule-8-violation
+
+**Description**: Component uses hardcoded script paths instead of script-runner.
+
+**Detection**: Direct script invocations with hardcoded paths (e.g., `python3 /path/to/script.py`, `bash {bundle}/scripts/foo.sh`)
+
+**Fix Strategy**:
+- Replace hardcoded paths with script-runner skill calls
+- Use portable notation: `Skill: cui-utilities:script-runner` with `Script: bundle:skill/script-name`
+- Example: Replace `python3 {cui-java-core}/scripts/verify.py` with `Script: cui-java-expert:cui-java-core/verify`
+
+**Why Risky**:
+- Changes script resolution mechanism
+- May break if script-runner configuration is incorrect
+- User should verify scripts.local.json is up to date
+- Requires cui-utilities:script-runner skill
+
+### 6. pattern-22-violation
 
 **Description**: Agent uses self-update pattern instead of caller reporting.
 
@@ -217,7 +236,7 @@ Risky fixes require user confirmation because they involve judgment calls or may
 - May require rethinking improvement workflow
 - User should understand new pattern
 
-### 6. backup-file-pattern
+### 7. backup-file-pattern
 
 **Description**: Content references backup file patterns (.bak, .backup, etc.).
 
