@@ -100,13 +100,14 @@ Before adding a warning to acceptable list:
 
 ### Add Workflow
 
-Use the `cui-utilities:json-file-operations` skill:
+Activate `cui-utilities:claude-run-configuration` skill:
 
-```bash
-python3 scripts/manage-json-file.py add-entry \
-    .claude/run-configuration.json \
-    --field "maven.acceptable_warnings.transitive_dependency" \
-    --value '"Overriding managed version 2.0.0 for slf4j-api"'
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Update Configuration
+Action: add-entry
+Field: maven.acceptable_warnings.transitive_dependency
+Value: "Overriding managed version 2.0.0 for slf4j-api"
 ```
 
 ## Removing Acceptable Warnings
@@ -118,13 +119,14 @@ Remove warnings from acceptable list when:
 
 ### Remove Workflow
 
-Use the `cui-utilities:json-file-operations` skill:
+Activate `cui-utilities:claude-run-configuration` skill:
 
-```bash
-python3 scripts/manage-json-file.py remove-entry \
-    .claude/run-configuration.json \
-    --field "maven.acceptable_warnings.transitive_dependency" \
-    --value '"Overriding managed version 2.0.0 for slf4j-api"'
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Update Configuration
+Action: remove-entry
+Field: maven.acceptable_warnings.transitive_dependency
+Value: "Overriding managed version 2.0.0 for slf4j-api"
 ```
 
 ## Pattern Matching
@@ -151,7 +153,7 @@ deprecated for plugin
 
 During build verification, use the workflow from `cui-maven-rules` SKILL.md:
 
-1. **Load patterns**: Use `cui-utilities:json-file-operations` to read `maven.acceptable_warnings`
+1. **Load patterns**: Activate `cui-utilities:claude-run-configuration` to read `maven.acceptable_warnings`
 2. **Parse build output**: Use `parse-maven-output.py` to extract issues
 3. **Categorize**: Pass warnings and patterns to `check-acceptable-warnings.py`
 4. **Process results**:

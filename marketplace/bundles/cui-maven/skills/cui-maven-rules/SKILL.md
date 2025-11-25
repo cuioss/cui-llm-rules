@@ -462,12 +462,12 @@ Use this workflow when:
 
 ### Step 1: Load Acceptable Patterns
 
-Use `cui-utilities:json-file-operations` to read patterns from run-configuration:
+Activate `cui-utilities:claude-run-configuration` skill to read patterns:
 
-```bash
-python3 cui-utilities/json-file-operations/scripts/manage-json-file.py \
-    read-field .claude/run-configuration.json \
-    --field "maven.acceptable_warnings"
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: maven.acceptable_warnings
 ```
 
 If file doesn't exist or field is missing, use empty object `{}`.
@@ -559,8 +559,7 @@ Patterns are stored in `.claude/run-configuration.json` at path `maven.acceptabl
 }
 ```
 
-Use `cui-utilities:claude-run-configuration` to validate the file structure.
-Use `cui-utilities:json-file-operations` to read/write patterns.
+Use `cui-utilities:claude-run-configuration` skill to read, write, and validate configuration.
 
 ### Script Location
 
@@ -583,31 +582,31 @@ Use this workflow when:
 
 ### Adding a Pattern
 
-Use the `cui-utilities:json-file-operations` skill:
+Activate `cui-utilities:claude-run-configuration` skill:
 
-```bash
-python3 scripts/manage-json-file.py add-entry \
-    .claude/run-configuration.json \
-    --field "maven.acceptable_warnings.transitive_dependency" \
-    --value '"The POM for com.example:lib is missing"'
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Update Configuration
+Action: add-entry
+Field: maven.acceptable_warnings.transitive_dependency
+Value: "The POM for com.example:lib is missing"
 ```
 
-Or manually edit `.claude/run-configuration.json`:
-1. Navigate to `maven.acceptable_warnings`
-2. Add pattern to appropriate array:
-   - `transitive_dependency` - For dependency resolution warnings
-   - `plugin_compatibility` - For plugin version warnings
-   - `platform_specific` - For OS/JVM warnings
+Pattern categories:
+- `transitive_dependency` - For dependency resolution warnings
+- `plugin_compatibility` - For plugin version warnings
+- `platform_specific` - For OS/JVM warnings
 
 ### Removing a Pattern
 
-Use the `cui-utilities:json-file-operations` skill:
+Activate `cui-utilities:claude-run-configuration` skill:
 
-```bash
-python3 scripts/manage-json-file.py remove-entry \
-    .claude/run-configuration.json \
-    --field "maven.acceptable_warnings.transitive_dependency" \
-    --value '"The POM for com.example:lib is missing"'
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Update Configuration
+Action: remove-entry
+Field: maven.acceptable_warnings.transitive_dependency
+Value: "The POM for com.example:lib is missing"
 ```
 
 ### Infrastructure Warning Criteria
