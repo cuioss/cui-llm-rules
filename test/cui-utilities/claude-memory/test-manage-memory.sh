@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-SCRIPT="$PROJECT_ROOT/marketplace/bundles/cui-utilities/skills/file-management/scripts/manage-memory.py"
+SCRIPT="$PROJECT_ROOT/marketplace/bundles/cui-utilities/skills/claude-memory/scripts/manage-memory.py"
 TEMP_DIR=$(mktemp -d)
 
 # Cleanup on exit

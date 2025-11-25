@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-SCRIPT="$PROJECT_ROOT/marketplace/bundles/cui-utilities/skills/file-management/scripts/manage-json-file.py"
+SCRIPT="$PROJECT_ROOT/marketplace/bundles/cui-utilities/skills/json-file-operations/scripts/manage-json-file.py"
 FIXTURES="$SCRIPT_DIR/fixtures"
 TEMP_DIR=$(mktemp -d)
 

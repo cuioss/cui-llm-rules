@@ -18,14 +18,16 @@ These utilities are independent tools that can be used across different CUI proj
 
 ## Components Included
 
-### Skills (6 skills)
+### Skills (8 skills)
 
 1. **cui-diagnostic-patterns** - Tool usage patterns for non-prompting file operations
 2. **cui-general-development-rules** - Core development principles for CUI projects
-3. **file-management** - JSON file operations for .claude/ configuration and memory files
-4. **permission-management** - Permission validation and settings management
-5. **script-runner** - Script resolution and execution with portable notation
-6. **web-security-standards** - Trusted domains and security assessment patterns
+3. **json-file-operations** - Generic JSON file CRUD with path notation support
+4. **claude-memory** - Memory layer operations for .claude/memory/ session persistence
+5. **claude-run-configuration** - Run configuration handling for .claude/run-configuration.json
+6. **permission-management** - Permission validation and settings management
+7. **script-runner** - Script resolution and execution with portable notation
+8. **web-security-standards** - Trusted domains and security assessment patterns
 
 ### Agents (1 agent)
 
