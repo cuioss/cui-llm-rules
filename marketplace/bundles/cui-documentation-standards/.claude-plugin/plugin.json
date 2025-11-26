@@ -1,6 +1,6 @@
 {
   "name": "cui-documentation-standards",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "AsciiDoc and documentation standards enforcement for CUI projects",
   "author": {
     "name": "CUI OSS Project",
@@ -11,10 +11,13 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["documentation", "asciidoc", "standards", "review", "validation", "formatting"],
   "commands": [
-    "./commands/doc-review-technical-docs.md",
-    "./commands/doc-review-single-asciidoc.md"
+    "./commands/doc-doctor.md",
+    "./commands/doc-create.md",
+    "./commands/doc-maintain.md"
   ],
   "skills": [
-    "./skills/cui-documentation"
+    "./skills/cui-documentation",
+    "./skills/adr-management",
+    "./skills/interface-management"
   ]
 }

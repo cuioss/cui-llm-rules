@@ -75,9 +75,9 @@ Examples:
 - `cleanup` - Remove stale/duplicate content
 - `update` - Refresh metadata and cross-references
 
-### Skills (1 skill with 9 workflows)
+### Skills (3 skills)
 
-**cui-documentation** - Documentation standards skill:
+**cui-documentation** - Documentation standards skill (9 workflows):
 
 | Workflow | Purpose |
 |----------|---------|
@@ -91,9 +91,29 @@ Examples:
 | **cleanup-stale** | Remove stale documentation |
 | **refresh-metadata** | Update metadata and xrefs |
 
-### Templates (3)
+**adr-management** - Architectural Decision Records skill (5 workflows):
 
-Located in `cui-documentation/assets/templates/`:
+| Workflow | Purpose |
+|----------|---------|
+| **list-adrs** | List all ADRs with filtering |
+| **create-adr** | Create new ADR from template |
+| **read-adr** | Read ADR content by number |
+| **update-adr** | Update ADR status |
+| **delete-adr** | Delete ADR with confirmation |
+
+**interface-management** - Interface specifications skill (5 workflows):
+
+| Workflow | Purpose |
+|----------|---------|
+| **list-interfaces** | List all interfaces with filtering |
+| **create-interface** | Create new interface from template |
+| **read-interface** | Read interface content |
+| **update-interface** | Update interface content |
+| **delete-interface** | Delete interface with confirmation |
+
+### Templates
+
+Located in skill `templates/` directories:
 
 - `standard-template.adoc` - Technical specification template
 - `readme-template.adoc` - Project README template
@@ -146,12 +166,20 @@ cui-documentation-standards/
 │   ├── doc-create.md             # Create from templates
 │   └── doc-maintain.md           # Maintenance operations
 └── skills/
-    └── cui-documentation/        # Skill with 9 workflows
+    ├── cui-documentation/        # Core documentation skill (9 workflows)
+    │   ├── SKILL.md
+    │   ├── references/           # Documentation standards (lookup)
+    │   ├── workflows/            # Operational procedures
+    │   ├── templates/            # Document templates
+    │   └── scripts/              # Automation scripts
+    ├── adr-management/           # ADR management skill (5 workflows)
+    │   ├── SKILL.md
+    │   ├── scripts/
+    │   └── templates/
+    └── interface-management/     # Interface spec skill (5 workflows)
         ├── SKILL.md
-        ├── references/           # Documentation standards (lookup)
-        ├── workflows/            # Operational procedures
-        ├── templates/            # Document templates
-        └── scripts/              # Automation scripts
+        ├── scripts/
+        └── templates/
 ```
 
 ## Goal-Based Command Pattern
@@ -167,9 +195,9 @@ All commands are thin orchestrators (<150 lines) that delegate to skill workflow
 ## Bundle Statistics
 
 - **Commands**: 3
-- **Skills**: 1 (with 9 workflows)
-- **Templates**: 3
-- **Scripts**: 6
+- **Skills**: 3 (with 19 total workflows)
+- **Templates**: 5+
+- **Scripts**: 8+
 
 ## Dependencies
 
