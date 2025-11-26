@@ -22,10 +22,15 @@ skill-name/
 ├── scripts/              (Optional: executable scripts for deterministic logic)
 │   ├── script1.sh
 │   └── script2.py
-├── references/           (Optional: reference documentation loaded on-demand)
+├── references/           (Optional: lookup material - WHAT rules to apply)
 │   ├── guide1.md
 │   └── guide2.md
-└── assets/               (Optional: images, diagrams, templates)
+├── workflows/            (Optional: operational procedures - HOW to execute)
+│   ├── process1.md
+│   └── process2.md
+├── templates/            (Optional: output templates for generation)
+│   └── template1.adoc
+└── assets/               (Optional: images, diagrams, other files)
     └── diagram.png
 ```
 
@@ -34,8 +39,24 @@ skill-name/
 
 **Optional but Recommended**:
 - `scripts/`: Deterministic validation logic (stdlib-only)
-- `references/`: Standards documentation (progressive disclosure)
-- `assets/`: Supporting files (images, templates)
+- `references/`: Lookup material, standards, rules (progressive disclosure)
+- `workflows/`: Operational procedures, step-by-step guides
+- `templates/`: Output templates for document generation
+- `assets/`: Supporting files (images, diagrams)
+
+### Content Organization Principle
+
+**Each directory serves ONE purpose**:
+
+| Directory | Purpose | Content Type |
+|-----------|---------|--------------|
+| `references/` | WHAT rules to apply | Criteria, standards, patterns |
+| `workflows/` | HOW to execute | Procedures, steps, decision trees |
+| `templates/` | Output structures | Boilerplate with placeholders |
+
+**Avoid mixing content types** within a single directory. If `standards/` contains both rules AND procedures, split into `references/` and `workflows/`.
+
+Use `doctor-skill-content` workflow to analyze and reorganize skill content.
 
 ## SKILL.md Frontmatter
 

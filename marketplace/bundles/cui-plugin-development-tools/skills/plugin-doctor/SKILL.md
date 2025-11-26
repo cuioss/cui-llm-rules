@@ -42,16 +42,20 @@ Provides unified doctor workflows following the pattern: **Diagnose → Auto-Fix
 → **EXECUTE** Workflow 5: doctor-scripts (jump to that section)
 
 ### If scope = "marketplace" (full marketplace health check)
-→ **EXECUTE** all 5 workflows in sequence
+→ **EXECUTE** all 5 component workflows in sequence
+
+### If scope = "skill-content" or skill-path specified with content analysis
+→ **EXECUTE** Workflow 6: doctor-skill-content (jump to that section)
 
 ---
 
-**5 Doctor Workflows** (one per component type):
+**6 Doctor Workflows**:
 1. **doctor-agents**: Analyze and fix agent issues
 2. **doctor-commands**: Analyze and fix command issues
 3. **doctor-skills**: Analyze and fix skill issues
 4. **doctor-metadata**: Analyze and fix plugin.json issues
 5. **doctor-scripts**: Analyze and fix script issues
+6. **doctor-skill-content**: Analyze and reorganize skill content files
 
 Each workflow performs the complete cycle: discover → analyze → categorize → fix → verify.
 
@@ -549,6 +553,213 @@ Same pattern with script-specific checks.
 
 ---
 
+## Workflow 6: doctor-skill-content
+
+Comprehensive analysis and refactoring of skill subdirectory content (references/, workflows/, templates/).
+
+### Parameters
+
+- `skill-path` (required): Path to skill directory
+- `--no-fix` (optional): Analysis only, no reorganization
+- `--skip-quality` (optional): Skip Phase 3 quality analysis
+
+### Overview
+
+This workflow analyzes all markdown files within a skill's subdirectories for proper organization, quality, and consistency. It uses LLM-based semantic analysis for classification and quality assessment.
+
+**Phases**:
+1. **Inventory** - Discover all files (SCRIPT)
+2. **Classify** - Categorize each file as reference/workflow/template (LLM)
+3. **Analyze** - Content quality analysis (LLM)
+4. **Reorganize** - Move files to correct directories (LLM + Bash)
+5. **Verify** - Link verification (SCRIPT)
+6. **Report** - Generate findings report (LLM)
+
+### Step 1: Load Prerequisites
+
+```
+Skill: cui-utilities:cui-diagnostic-patterns
+Skill: cui-plugin-development-tools:plugin-architecture
+Read references/content-classification-guide.md
+Read references/content-quality-guide.md
+```
+
+### Step 2: Phase 1 - Inventory (SCRIPT)
+
+Resolve and execute inventory script:
+
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/scan-skill-inventory.sh
+```
+
+```bash
+bash {resolved_path} --skill-path {skill_path}
+```
+
+Parse JSON output to get:
+- List of directories and files
+- Line counts per file
+- Extension statistics
+
+### Step 3: Phase 2 - Classify (LLM)
+
+For each `.md` file discovered in subdirectories:
+
+1. **Read file content**
+2. **Apply classification criteria** from `content-classification-guide.md`
+3. **Determine category**: reference | workflow | template | mixed
+4. **Record confidence level**: high | medium | low
+
+**Classification Output** (for each file):
+```
+File: {relative_path}
+Classification: {category}
+Confidence: {level}
+Reasoning:
+  - {observation 1}
+  - {observation 2}
+Current Location: {directory}
+Correct Location: {references/|workflows/|templates/}
+Needs Move: {yes|no}
+Needs Splitting: {yes|no}
+```
+
+### Step 4: Phase 3 - Analyze Quality (LLM)
+
+Skip if `--skip-quality` specified.
+
+Read ALL content files into context and analyze:
+
+**Completeness**:
+- TODO markers, placeholder text
+- Missing examples, incomplete sections
+
+**Duplication**:
+- Same content across files
+- Near-identical sections
+
+**Consistency**:
+- Terminology variations
+- Style inconsistencies
+
+**Contradictions**:
+- Conflicting rules
+- Examples violating stated rules
+
+**Output**: Quality report with scores per dimension.
+
+### Step 5: Phase 4 - Reorganize (LLM + Bash)
+
+Based on Phase 2 classification results:
+
+**Safe Reorganizations** (auto-apply unless --no-fix):
+- Move file to correct directory (same name)
+- Rename to remove redundant suffix (e.g., `-protocol`, `-framework`)
+
+```bash
+mv {old_path} {new_path}
+```
+
+**Risky Reorganizations** (require confirmation):
+- Split mixed-content file into multiple files
+- Delete duplicate file
+- Merge similar files
+
+```
+AskUserQuestion:
+  question: "Split {file} into reference and workflow components?"
+  options:
+    - label: "Yes" description: "Split file"
+    - label: "No" description: "Keep as-is"
+```
+
+**After moves**: Update cross-references in all affected files:
+1. Grep for old paths in SKILL.md and all content files
+2. Update references using Edit tool
+
+### Step 6: Phase 5 - Verify Links (SCRIPT)
+
+Resolve and execute validation:
+
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
+```
+
+```bash
+python3 {resolved_path} {skill_path}/SKILL.md
+```
+
+For each content file, verify:
+- Internal cross-references valid
+- SKILL.md references point to existing files
+
+### Step 7: Phase 6 - Report (LLM)
+
+Generate comprehensive report:
+
+```markdown
+# Skill Content Analysis Report
+
+**Skill**: {skill_name}
+**Path**: {skill_path}
+**Date**: {timestamp}
+
+## Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Files | {count} |
+| Total Lines | {count} |
+| Content Quality Score | {score}/100 |
+| Reorganizations Applied | {count} |
+| Links Verified | {count} |
+
+## File Classification
+
+| File | Current Dir | Classification | Confidence | Action |
+|------|-------------|----------------|------------|--------|
+| {file} | {dir} | {type} | {level} | {action} |
+
+## Quality Analysis
+
+### Completeness
+{findings}
+
+### Duplication
+{findings}
+
+### Consistency
+{findings}
+
+### Contradictions
+{findings}
+
+## Reorganizations Applied
+
+### Safe (Auto-Applied)
+- ✅ {description}
+
+### Risky (User Confirmed)
+- ✅ {description}
+- ❌ Skipped: {description}
+
+## Link Verification
+
+| Status | Count |
+|--------|-------|
+| ✅ Valid | {count} |
+| ⚠️ Updated | {count} |
+| ❌ Broken | {count} |
+
+## Recommendations
+
+1. {recommendation}
+```
+
+---
+
 ## External Resources
 
 ### Scripts (scripts/)
@@ -558,6 +769,7 @@ Same pattern with script-specific checks.
 | `analyze-markdown-file.sh` | **EXECUTE** | Structural analysis, bloat, Rule 6/7/Pattern 22 |
 | `analyze-tool-coverage.sh` | **EXECUTE** | Tool fit score, missing/unused tools |
 | `analyze-skill-structure.sh` | **EXECUTE** | Skill directory structure validation |
+| `scan-skill-inventory.sh` | **EXECUTE** | Skill content inventory for doctor-skill-content |
 | `validate-references.py` | **EXECUTE** | Reference extraction and validation |
 | `extract-fixable-issues.py` | **EXECUTE** | Filter fixable issues from analysis |
 | `categorize-fixes.py` | **EXECUTE** | Categorize as safe/risky |
@@ -566,11 +778,13 @@ Same pattern with script-specific checks.
 
 ### References (references/)
 
-**Diagnosis References** (4) - **READ** before analyzing:
+**Diagnosis References** (6) - **READ** before analyzing:
 - `agents-guide.md` - Agent quality standards
 - `commands-guide.md` - Command quality standards
 - `skills-guide.md` - Skill structure standards
 - `metadata-guide.md` - plugin.json schema
+- `content-classification-guide.md` - Content type classification criteria (for doctor-skill-content)
+- `content-quality-guide.md` - Content quality analysis dimensions (for doctor-skill-content)
 
 **External Standards** (from plugin-architecture) - **READ** for script analysis:
 - `script-standards.md` - Script documentation, testing, and quality standards
