@@ -196,7 +196,7 @@ Risky fixes require user confirmation because they involve judgment calls or may
 **Fix Strategy**:
 - Replace direct Maven invocations with cui-maven skill calls
 - Use workflow: `Skill: cui-maven:cui-maven-rules` with appropriate workflow name
-- Example: Replace `mvn clean compile` with workflow: verify-clean-build
+- Example: Replace `mvn clean compile` with workflow: Execute Maven Build
 
 **Why Risky**:
 - Changes build execution mechanism

@@ -165,11 +165,9 @@ exit_code=$?
 
 [source,bash]
 ----
-python3 verify-clean-build.py \
+python3 parse-maven-output.py \
   --log target/build-errors-before.log \
-  --exit-code $exit_code \
-  --output target/errors-before.json \
-  --pretty
+  --mode structured
 ----
 
 **Expected output:**
@@ -274,10 +272,9 @@ Fix: Change to getId() or add getUserId() method
 mvn clean compile -l target/build-errors-after.log
 exit_code=$?
 
-python3 verify-clean-build.py \
+python3 parse-maven-output.py \
   --log target/build-errors-after.log \
-  --exit-code $exit_code \
-  --output target/errors-after.json
+  --mode structured
 ----
 
 **Decision point:**

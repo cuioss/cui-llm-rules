@@ -22,10 +22,13 @@ Output: JSON with structural analysis including:
   - frontmatter: Presence and validity of YAML frontmatter
   - continuous_improvement_rule: CI rule presence and pattern
   - bloat.classification: NORMAL, LARGE, BLOATED, or CRITICAL
+    * Agents: <300 NORMAL, 300-500 LARGE, 500-800 BLOATED, >800 CRITICAL
+    * Commands: <100 NORMAL, 100-150 LARGE, 150-200 BLOATED, >200 CRITICAL
+    * Skills: <400 NORMAL, 400-800 LARGE, 800-1200 BLOATED, >1200 CRITICAL
   - execution_patterns: EXECUTION MODE, workflow tree, MANDATORY markers
   - rules: Rule 6, Rule 7, and Rule 8 violation detection
-    * Rule 6: Task tool in agents
-    * Rule 7: Direct Maven usage (should use cui-maven skill)
+    * Rule 6: Task tool in agents (checked in frontmatter)
+    * Rule 7: Direct Maven usage in executable context (Bash:, code blocks)
     * Rule 8: Hardcoded script paths (should use script-runner)
   - quality.has_forbidden_metadata: Forbidden metadata sections (Version, License, etc.)
   - quality.forbidden_sections: List of detected forbidden section names
@@ -138,14 +141,39 @@ if grep -qi "^## PARAMETERS\|^### Parameters" "$FILE_PATH"; then
     HAS_PARAM_SECTION="true"
 fi
 
-# Bloat classification based on line count
+# Bloat classification based on line count and component type
+# Different thresholds for different component types:
+# - Agents: <300 NORMAL, 300-500 LARGE, 500-800 BLOATED, >800 CRITICAL
+# - Commands: <100 NORMAL, 100-150 LARGE, 150-200 BLOATED, >200 CRITICAL (thin wrappers)
+# - Skills: <400 NORMAL, 400-800 LARGE, 800-1200 BLOATED, >1200 CRITICAL (multi-workflow)
 BLOAT_CLASS="NORMAL"
-if [ "$LINE_COUNT" -gt 800 ]; then
-    BLOAT_CLASS="CRITICAL"
-elif [ "$LINE_COUNT" -gt 500 ]; then
-    BLOAT_CLASS="BLOATED"
-elif [ "$LINE_COUNT" -gt 300 ]; then
-    BLOAT_CLASS="LARGE"
+if [ "$COMPONENT_TYPE" == "command" ]; then
+    # Commands should be thin wrappers - stricter thresholds
+    if [ "$LINE_COUNT" -gt 200 ]; then
+        BLOAT_CLASS="CRITICAL"
+    elif [ "$LINE_COUNT" -gt 150 ]; then
+        BLOAT_CLASS="BLOATED"
+    elif [ "$LINE_COUNT" -gt 100 ]; then
+        BLOAT_CLASS="LARGE"
+    fi
+elif [ "$COMPONENT_TYPE" == "skill" ]; then
+    # Skills may have multiple workflows - more permissive thresholds
+    if [ "$LINE_COUNT" -gt 1200 ]; then
+        BLOAT_CLASS="CRITICAL"
+    elif [ "$LINE_COUNT" -gt 800 ]; then
+        BLOAT_CLASS="BLOATED"
+    elif [ "$LINE_COUNT" -gt 400 ]; then
+        BLOAT_CLASS="LARGE"
+    fi
+else
+    # Agents and unknown types - standard thresholds
+    if [ "$LINE_COUNT" -gt 800 ]; then
+        BLOAT_CLASS="CRITICAL"
+    elif [ "$LINE_COUNT" -gt 500 ]; then
+        BLOAT_CLASS="BLOATED"
+    elif [ "$LINE_COUNT" -gt 300 ]; then
+        BLOAT_CLASS="LARGE"
+    fi
 fi
 
 # Check for EXECUTION MODE directive (required for executable skills)
@@ -180,12 +208,15 @@ fi
 
 # Check Rule 7: Maven execution restriction (expanded to all components)
 RULE_7_VIOLATION="false"
-# Check for direct mvn usage (should use cui-maven skill instead)
+# Check for direct mvn usage in executable context (should use cui-maven skill instead)
+# Only flag if found in: Bash: commands, code blocks with bash/shell, or actual command invocations
+# Exclude: documentation text mentioning Maven, rule descriptions, comments
 if grep -qE "mvn |maven |./mvnw " "$FILE_PATH"; then
     # Exclude maven-specific bundles/skills
     if ! echo "$FILE_PATH" | grep -q "cui-maven"; then
-        # Check if it's just documentation/comments
-        if ! grep -E "mvn |maven |./mvnw " "$FILE_PATH" | grep -q "^[[:space:]]*#\|^[[:space:]]*//"; then
+        # Check for actual command invocations (Bash:, ```bash, backtick commands)
+        # Pattern: "Bash:" prefix, code block commands, or shell invocation patterns
+        if grep -E "^Bash:.*mvn|^Bash:.*maven|^Bash:.*\./mvnw|\`.*mvn |\`.*\./mvnw |^\s+mvn |^\s+\./mvnw " "$FILE_PATH" | grep -qv "Rule 7\|should use\|instead of\|violation"; then
             RULE_7_VIOLATION="true"
         fi
     fi

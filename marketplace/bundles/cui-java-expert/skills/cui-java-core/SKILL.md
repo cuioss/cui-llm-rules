@@ -637,16 +637,17 @@ Verify that implementation task description is clear and the build is clean befo
    **Execute clean build:**
    ```
    Skill: cui-maven:cui-maven-rules
-   Workflow: verify-clean-build
+   Workflow: Execute Maven Build
    Parameters:
      goals: clean compile
      module: {module if specified}
+     output_mode: structured
    ```
 
    This workflow:
    - Executes Maven build with output capture
-   - Parses build log using verify-clean-build.py script
-   - Returns status: clean|has-errors|has-warnings
+   - Parses build log using parse-maven-output.py script
+   - Returns status: SUCCESS|FAILURE with categorized issues
 
    **On build errors:**
    - Check task description for "fix build" keywords
@@ -682,10 +683,10 @@ Verify that implementation task description is clear and the build is clean befo
 - **Output**: JSON with verification results
 - **Location**: `cui-java-expert:cui-java-core/verify-implementation-params`
 
-**verify-clean-build** (via cui-maven workflow):
-- **Input**: Maven goals, optional module
-- **Output**: JSON with build status
-- **Workflow**: `cui-maven:cui-maven-rules` → `verify-clean-build`
+**Execute Maven Build** (via cui-maven workflow):
+- **Input**: Maven goals, optional module, output_mode
+- **Output**: JSON with build status and categorized issues
+- **Workflow**: `cui-maven:cui-maven-rules` → `Execute Maven Build`
 
 ### Related Standards
 

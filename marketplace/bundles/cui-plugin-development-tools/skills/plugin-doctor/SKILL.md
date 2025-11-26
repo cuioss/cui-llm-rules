@@ -232,7 +232,10 @@ python3 {resolved_validate_references} {agent_path}
 - No Rule 6 violations (agents CANNOT use Task tool)
 - No Rule 7 violations (only maven-builder can use Maven)
 - No Pattern 22 violations (must use claude-lessons-learned skill, not self-invoke)
-- Bloat: NORMAL (<300), LARGE (300-500), BLOATED (500-800), CRITICAL (>800)
+- Bloat thresholds (component-type specific):
+  - Agents: NORMAL (<300), LARGE (300-500), BLOATED (500-800), CRITICAL (>800)
+  - Commands: NORMAL (<100), LARGE (100-150), BLOATED (150-200), CRITICAL (>200)
+  - Skills: NORMAL (<400), LARGE (400-800), BLOATED (800-1200), CRITICAL (>1200)
 
 ### Step 4: Categorize and Fix
 
@@ -245,7 +248,7 @@ python3 {resolved_validate_references} {agent_path}
 - Rule 6 violations (requires architectural refactoring)
 - Rule 7 violations (Maven usage restriction)
 - Pattern 22 violations (self-invocation)
-- Bloat issues (>500 lines)
+- Bloat issues (agents >500 lines)
 
 ### Step 5: Verify and Report
 

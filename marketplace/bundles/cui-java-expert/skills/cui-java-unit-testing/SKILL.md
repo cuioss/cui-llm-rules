@@ -393,10 +393,11 @@ Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements
    If report doesn't exist, run Maven with jacoco:
    ```
    Skill: cui-maven:cui-maven-rules
-   Workflow: verify-clean-build
+   Workflow: Execute Maven Build
    Parameters:
      goals: clean test jacoco:report
      module: {module if specified}
+     output_mode: structured
    ```
 
 2. **Analyze Coverage Gaps**
@@ -499,10 +500,11 @@ Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements
 To generate coverage reports with tests:
 ```
 Skill: cui-maven:cui-maven-rules
-Workflow: verify-clean-build
+Workflow: Execute Maven Build
 Parameters:
   goals: clean test jacoco:report
   module: {module if specified}
+  output_mode: structured
 ```
 
 ### Related Standards

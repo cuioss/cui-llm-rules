@@ -99,7 +99,7 @@ Analyze build log for errors and warnings:
 
 [source]
 ----
-Use verify-clean-build.py script:
+Use cui-maven parse-maven-output.py script:
 
 Input: target/build-output.log
 Output: JSON with status and issues
@@ -302,26 +302,28 @@ Step 4: Verify build still clean
 Step 5: Run tests
 ----
 
-=== verify-clean-build Workflow
+=== Execute Maven Build Workflow
 
-Reference this standard in cui-java-core SKILL.md:
+Reference cui-maven skill for build execution:
 
 [source,yaml]
 ----
-workflow: verify-clean-build
-parameters:
-  - module: string (optional)
-  - build_phase: enum (compile, test) default: compile
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean compile
+  module: {module if specified}
+  output_mode: structured
 
 steps:
   1. Determine build scope (module vs project)
   2. Execute Maven clean + phase
-  3. Parse build output (verify-clean-build.py)
-  4. Return status: clean|has-errors|has-warnings
+  3. Parse build output (parse-maven-output.py)
+  4. Return status: SUCCESS|FAILURE with categorized issues
 
 references:
   - standards/build-precondition-pattern.md
-  - scripts/verify-clean-build.py
+  - cui-maven:cui-maven-rules skill
 ----
 
 == Error Categories
@@ -412,7 +414,7 @@ references:
 
 == Script Contract
 
-=== verify-clean-build.py
+=== parse-maven-output.py (cui-maven skill)
 
 **Purpose:** Parse Maven build log to extract errors and warnings
 
@@ -576,9 +578,9 @@ description: Fix compilation errors in TokenValidator class
 3. Execute build to capture errors
    mvn clean compile -l target/errors.log
 
-4. Parse errors with verify-clean-build.py
+4. Parse errors with parse-maven-output.py (cui-maven skill)
    {
-     "status": "has-errors",
+     "status": "error",
      "errors": [
        {
          "file": "src/main/java/.../TokenValidator.java",

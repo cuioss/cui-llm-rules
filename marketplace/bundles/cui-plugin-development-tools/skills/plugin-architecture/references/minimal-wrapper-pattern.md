@@ -301,10 +301,11 @@ Parameters:
 
 Step 3: Verify Build
 Skill: cui-maven:cui-maven-rules
-Workflow: verify-clean-build
+Workflow: Execute Maven Build
 Parameters:
   goals: "clean test"
   module: {module}
+  output_mode: structured
 ```
 
 **Characteristics:**
@@ -548,11 +549,11 @@ Skill (business logic - 600 lines):
 Skill: cui-java-core (600 lines)
   Step 3: Verify Build
     Skill: cui-maven:cui-maven-rules
-    Workflow: verify-clean-build
+    Workflow: Execute Maven Build
 
   Step 7: Run Tests
     Skill: cui-maven:cui-maven-rules
-    Workflow: execute-tests
+    Workflow: Execute Maven Build
 
   Step 9: Analyze Coverage
     Skill: cui-java-unit-testing
