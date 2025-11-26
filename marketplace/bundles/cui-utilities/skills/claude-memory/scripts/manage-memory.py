@@ -10,9 +10,7 @@ Output: JSON to stdout with operation results.
 
 import argparse
 import json
-import os
 import re
-import shutil
 import sys
 import warnings
 from datetime import datetime, timedelta, timezone
@@ -25,7 +23,6 @@ warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 MEMORY_BASE = Path('.claude/memory')
 CATEGORIES = ['context', 'handoffs']
-ARCHIVE_DIR = 'archive'
 
 
 def parse_duration(duration_str: str) -> timedelta:
@@ -120,29 +117,6 @@ def output_error(operation: str, error: str) -> None:
     """Output error result as JSON to stderr."""
     result = {"success": False, "operation": operation, "error": error}
     print(json.dumps(result, indent=2), file=sys.stderr)
-
-
-def cmd_init(args) -> int:
-    """Initialize memory directory structure."""
-    try:
-        created = []
-        for category in CATEGORIES:
-            cat_path = MEMORY_BASE / category
-            if not cat_path.exists():
-                cat_path.mkdir(parents=True)
-                created.append(str(cat_path))
-
-        # Create archive directory
-        archive_path = MEMORY_BASE / ARCHIVE_DIR
-        if not archive_path.exists():
-            archive_path.mkdir(parents=True)
-            created.append(str(archive_path))
-
-        output_success("init", created=created, base_path=str(MEMORY_BASE))
-        return 0
-    except Exception as e:
-        output_error("init", str(e))
-        return 1
 
 
 def cmd_save(args) -> int:
@@ -340,42 +314,6 @@ def cmd_cleanup(args) -> int:
         return 1
 
 
-def cmd_archive(args) -> int:
-    """Move memory file to archive."""
-    try:
-        if not args.category:
-            output_error("archive", "Category required")
-            return 1
-        if not args.identifier:
-            output_error("archive", "Identifier required")
-            return 1
-
-        source_path = get_memory_path(args.category, args.identifier)
-        if not source_path.exists():
-            output_error("archive", f"File not found: {source_path}")
-            return 1
-
-        # Create archive path preserving category structure
-        archive_path = MEMORY_BASE / ARCHIVE_DIR / args.category
-        archive_path.mkdir(parents=True, exist_ok=True)
-        dest_path = archive_path / source_path.name
-
-        # If file exists in archive, add timestamp
-        if dest_path.exists():
-            timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
-            dest_path = archive_path / f"{source_path.stem}_{timestamp}.json"
-
-        shutil.move(str(source_path), str(dest_path))
-
-        output_success("archive",
-                       source=str(source_path),
-                       destination=str(dest_path))
-        return 0
-    except Exception as e:
-        output_error("archive", str(e))
-        return 1
-
-
 def main():
     parser = argparse.ArgumentParser(
         description='Manage .claude/memory/ layer for session persistence',
@@ -386,10 +324,7 @@ Categories:
   handoffs    - Pending handoff state (until completed)
 
 Examples:
-  # Initialize memory structure
-  %(prog)s init
-
-  # Save context snapshot
+  # Save context snapshot (directories created on-the-fly)
   %(prog)s save --category context --identifier "feature-auth" --content '{"notes": "Working on auth"}'
 
   # Load memory file
@@ -403,17 +338,10 @@ Examples:
 
   # Cleanup old context files
   %(prog)s cleanup --category context --older-than 7d
-
-  # Archive completed handoff
-  %(prog)s archive --category handoffs --identifier "task-42"
 """
     )
 
     subparsers = parser.add_subparsers(dest='command', help='Operation to perform')
-
-    # init command
-    p_init = subparsers.add_parser('init', help='Initialize memory directory structure')
-    p_init.set_defaults(func=cmd_init)
 
     # save command
     p_save = subparsers.add_parser('save', help='Save content to memory file')
@@ -446,12 +374,6 @@ Examples:
     p_cleanup.add_argument('--category', choices=CATEGORIES, help='Filter by category')
     p_cleanup.add_argument('--older-than', dest='older_than', help='Remove files older than (e.g., 7d, 24h)')
     p_cleanup.set_defaults(func=cmd_cleanup)
-
-    # archive command
-    p_archive = subparsers.add_parser('archive', help='Move memory file to archive')
-    p_archive.add_argument('--category', choices=CATEGORIES, help='Memory category')
-    p_archive.add_argument('--identifier', help='File identifier')
-    p_archive.set_defaults(func=cmd_archive)
 
     args = parser.parse_args()
 

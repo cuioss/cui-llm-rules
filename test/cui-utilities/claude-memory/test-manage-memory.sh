@@ -40,19 +40,20 @@ run_test() {
 # Change to temp directory for tests
 cd "$TEMP_DIR"
 
-# Test: init creates directory structure
-test_init() {
-    result=$(python3 "$SCRIPT" init 2>&1)
+# Test: save creates directories on-the-fly
+test_save_creates_dirs() {
+    # No init needed - save should create directories
+    result=$(python3 "$SCRIPT" save --category context --identifier "test-feature" --content '{"notes": "Testing"}' 2>&1)
 
-    if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and len(d['created'])>=4 else 1)" 2>/dev/null; then
-        # Verify directories exist
-        if [ -d ".claude/memory/context" ] && [ -d ".claude/memory/decisions" ] && [ -d ".claude/memory/interfaces" ] && [ -d ".claude/memory/handoffs" ]; then
-            pass "init creates directory structure"
+    if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and 'context' in d['path'] else 1)" 2>/dev/null; then
+        # Verify directory was created
+        if [ -d ".claude/memory/context" ]; then
+            pass "save creates directories on-the-fly"
         else
-            fail "init creates directory structure" "all category directories" "missing directories"
+            fail "save creates directories on-the-fly" "directory created" "directory missing"
         fi
     else
-        fail "init creates directory structure" "success=true with 4+ created" "$result"
+        fail "save creates directories on-the-fly" "success=true with context path" "$result"
     fi
 }
 
@@ -64,17 +65,6 @@ test_save_context() {
         pass "save to context category"
     else
         fail "save to context category" "success=true with context path" "$result"
-    fi
-}
-
-# Test: save to decisions category
-test_save_decisions() {
-    result=$(python3 "$SCRIPT" save --category decisions --identifier "auth-approach" --content '{"decision": "Use JWT", "rationale": "Stateless"}' 2>&1)
-
-    if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and 'decisions' in d['path'] else 1)" 2>/dev/null; then
-        pass "save to decisions category"
-    else
-        fail "save to decisions category" "success=true with decisions path" "$result"
     fi
 }
 
@@ -92,9 +82,9 @@ test_save_handoffs() {
 # Test: load memory file
 test_load() {
     # First save
-    python3 "$SCRIPT" save --category decisions --identifier "load-test" --content '{"value": 123}' > /dev/null 2>&1
+    python3 "$SCRIPT" save --category handoffs --identifier "load-test" --content '{"value": 123}' > /dev/null 2>&1
 
-    result=$(python3 "$SCRIPT" load --category decisions --identifier "load-test" 2>&1)
+    result=$(python3 "$SCRIPT" load --category handoffs --identifier "load-test" 2>&1)
 
     if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and d['content']['value']==123 else 1)" 2>/dev/null; then
         pass "load memory file"
@@ -105,11 +95,11 @@ test_load() {
 
 # Test: load verifies meta envelope
 test_load_has_meta() {
-    python3 "$SCRIPT" save --category decisions --identifier "meta-test" --content '{"test": true}' > /dev/null 2>&1
+    python3 "$SCRIPT" save --category handoffs --identifier "meta-test" --content '{"test": true}' > /dev/null 2>&1
 
-    result=$(python3 "$SCRIPT" load --category decisions --identifier "meta-test" 2>&1)
+    result=$(python3 "$SCRIPT" load --category handoffs --identifier "meta-test" 2>&1)
 
-    if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and 'created' in d['meta'] and d['meta']['category']=='decisions' else 1)" 2>/dev/null; then
+    if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and 'created' in d['meta'] and d['meta']['category']=='handoffs' else 1)" 2>/dev/null; then
         pass "load includes meta envelope"
     else
         fail "load includes meta envelope" "meta with created and category" "$result"
@@ -119,10 +109,10 @@ test_load_has_meta() {
 # Test: list files in category
 test_list_category() {
     # Save a few files
-    python3 "$SCRIPT" save --category decisions --identifier "list-test-1" --content '{}' > /dev/null 2>&1
-    python3 "$SCRIPT" save --category decisions --identifier "list-test-2" --content '{}' > /dev/null 2>&1
+    python3 "$SCRIPT" save --category handoffs --identifier "list-test-1" --content '{}' > /dev/null 2>&1
+    python3 "$SCRIPT" save --category handoffs --identifier "list-test-2" --content '{}' > /dev/null 2>&1
 
-    result=$(python3 "$SCRIPT" list --category decisions 2>&1)
+    result=$(python3 "$SCRIPT" list --category handoffs 2>&1)
 
     if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and d['count']>=2 else 1)" 2>/dev/null; then
         pass "list files in category"
@@ -144,33 +134,15 @@ test_list_all() {
 
 # Test: query by pattern
 test_query_pattern() {
-    python3 "$SCRIPT" save --category decisions --identifier "query-auth-test" --content '{}' > /dev/null 2>&1
-    python3 "$SCRIPT" save --category decisions --identifier "query-data-test" --content '{}' > /dev/null 2>&1
+    python3 "$SCRIPT" save --category handoffs --identifier "query-auth-test" --content '{}' > /dev/null 2>&1
+    python3 "$SCRIPT" save --category handoffs --identifier "query-data-test" --content '{}' > /dev/null 2>&1
 
-    result=$(python3 "$SCRIPT" query --pattern "query-auth*" --category decisions 2>&1)
+    result=$(python3 "$SCRIPT" query --pattern "query-auth*" --category handoffs 2>&1)
 
     if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and d['count']>=1 else 1)" 2>/dev/null; then
         pass "query by pattern"
     else
         fail "query by pattern" "count>=1" "$result"
-    fi
-}
-
-# Test: archive moves file
-test_archive() {
-    python3 "$SCRIPT" save --category handoffs --identifier "archive-test" --content '{"done": true}' > /dev/null 2>&1
-
-    result=$(python3 "$SCRIPT" archive --category handoffs --identifier "archive-test" 2>&1)
-
-    if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d['success'] and 'archive' in d['destination'] else 1)" 2>/dev/null; then
-        # Verify original is gone
-        if [ ! -f ".claude/memory/handoffs/archive-test.json" ]; then
-            pass "archive moves file"
-        else
-            fail "archive moves file" "original removed" "original still exists"
-        fi
-    else
-        fail "archive moves file" "success with archive destination" "$result"
     fi
 }
 
@@ -200,7 +172,7 @@ EOF
 
 # Test: load non-existent file error
 test_load_not_found() {
-    result=$(python3 "$SCRIPT" load --category decisions --identifier "nonexistent" 2>&1 || true)
+    result=$(python3 "$SCRIPT" load --category handoffs --identifier "nonexistent" 2>&1 || true)
 
     if echo "$result" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if not d['success'] else 1)" 2>/dev/null; then
         pass "load non-existent file returns error"
@@ -238,16 +210,14 @@ echo "Testing manage-memory.py"
 echo "========================================"
 echo ""
 
-run_test test_init
+run_test test_save_creates_dirs
 run_test test_save_context
-run_test test_save_decisions
 run_test test_save_handoffs
 run_test test_load
 run_test test_load_has_meta
 run_test test_list_category
 run_test test_list_all
 run_test test_query_pattern
-run_test test_archive
 run_test test_cleanup
 run_test test_load_not_found
 run_test test_invalid_category

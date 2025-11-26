@@ -13,7 +13,7 @@ Memory layer operations for `.claude/memory/` session persistence.
 - CRUD operations for `.claude/memory/` files
 - Category-based organization (context, handoffs)
 - Timestamp-based file naming for context files
-- Age-based cleanup and archival
+- Age-based cleanup
 - Memory file format validation
 
 ## When to Activate This Skill
@@ -42,8 +42,8 @@ Manage the `.claude/memory/` layer for session persistence.
 
 ### Parameters
 
-- **operation** (required): One of `init`, `save`, `load`, `list`, `query`, `cleanup`, `archive`
-- **category** (optional): One of `context`, `decisions`, `interfaces`, `handoffs`
+- **operation** (required): One of `save`, `load`, `list`, `query`, `cleanup`
+- **category** (optional): One of `context`, `handoffs`
 - **identifier** (optional): File identifier or summary name
 - **content** (optional): JSON content for save operations
 
@@ -61,21 +61,16 @@ Parse JSON output and handle accordingly.
 
 | Operation | Description | Required Params |
 |-----------|-------------|-----------------|
-| `init` | Create memory directory structure | None |
-| `save` | Save memory file | category, identifier, content |
+| `save` | Save memory file (creates directories on-the-fly) | category, identifier, content |
 | `load` | Load memory file | category, identifier |
 | `list` | List files in category | category (optional) |
 | `query` | Find files by pattern | pattern |
 | `cleanup` | Remove old files | --older-than |
-| `archive` | Move to archive | category, identifier |
 
 ### Example Usage
 
 ```bash
-# Initialize memory structure
-python3 scripts/manage-memory.py init
-
-# Save context snapshot
+# Save context snapshot (directories created on-the-fly)
 python3 scripts/manage-memory.py save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
 
 # Load memory file
@@ -89,9 +84,6 @@ python3 scripts/manage-memory.py query --pattern "auth*" --category context
 
 # Cleanup old context files
 python3 scripts/manage-memory.py cleanup --category context --older-than 7d
-
-# Archive completed handoff
-python3 scripts/manage-memory.py archive --category handoffs --identifier "task-42"
 ```
 
 ---
