@@ -148,10 +148,10 @@ cui-documentation-standards/
 └── skills/
     └── cui-documentation/        # Skill with 9 workflows
         ├── SKILL.md
-        ├── assets/
-        │   └── templates/        # Document templates
-        ├── scripts/              # Automation scripts
-        └── standards/            # Documentation standards
+        ├── references/           # Documentation standards (lookup)
+        ├── workflows/            # Operational procedures
+        ├── templates/            # Document templates
+        └── scripts/              # Automation scripts
 ```
 
 ## Goal-Based Command Pattern
