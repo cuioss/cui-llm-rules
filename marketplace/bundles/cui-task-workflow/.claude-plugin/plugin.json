@@ -1,7 +1,7 @@
 {
   "name": "cui-task-workflow",
-  "version": "0.9.0",
-  "description": "Complete development workflow from issue implementation to PR review and quality verification",
+  "version": "1.0.0",
+  "description": "Goal-based development workflow from task implementation to PR quality verification",
   "author": {
     "name": "CUI OSS Project",
     "email": "contact@cuioss.de"
@@ -9,19 +9,16 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["workflow", "issue", "pull-request", "pr", "task", "implementation", "review", "quality", "commit", "git", "sonar"],
+  "keywords": ["workflow", "task", "pr", "implementation", "quality", "handoff", "orchestration"],
   "commands": [
-    "./commands/pr-handle-pull-request.md",
-    "./commands/orchestrate-workflow.md",
-    "./commands/orchestrate-task.md",
-    "./commands/orchestrate-language.md",
-    "./commands/pr-fix-sonar-issues.md",
-    "./commands/pr-respond-to-review-comments.md"
+    "./commands/task-implement.md",
+    "./commands/pr-doctor.md"
   ],
   "skills": [
     "./skills/cui-git-workflow",
     "./skills/cui-task-planning",
     "./skills/pr-workflow",
-    "./skills/sonar-workflow"
+    "./skills/sonar-workflow",
+    "./skills/workflow-patterns"
   ]
 }

@@ -1,91 +1,68 @@
 # CUI Task Workflow
 
-Complete development workflow from issue implementation to PR review and quality verification. This bundle provides end-to-end tools for the entire development cycle: analyzing requirements, implementing features, handling pull request reviews, and ensuring code quality.
+Goal-based development workflow from task implementation to PR quality verification.
 
 ## Purpose
 
-This bundle integrates two critical workflow stages:
+Complete development workflow with two simple commands:
+1. **IMPLEMENT** - Transform tasks into verified code
+2. **DOCTOR** - Diagnose and fix PR issues
 
-1. **Issue Implementation** - Transform GitHub issues and requirements into fully implemented, tested, and verified code changes
-2. **PR Workflow** - Handle pull request reviews, respond to feedback, and automatically fix quality issues
+## Commands
 
-By combining these workflows, developers get a seamless experience from task assignment through code review to final merge.
+### /task-implement (IMPLEMENT)
+Implement GitHub issues or standalone tasks with full verification.
 
-## Components Included
+**Modes**:
+- FULL: Review → Plan → Execute (GitHub issues)
+- PLAN: Plan → Execute (task descriptions)
+- QUICK: Execute only (immediate implementation)
 
-### Commands (6 goal-based orchestrators)
+**Examples**:
+```
+/task-implement task=123
+/task-implement task="Add validation" quick
+/task-implement task=456 push
+```
 
-#### Full Workflow Commands
+### /pr-doctor (DOCTOR)
+Diagnose and fix PR issues (build, reviews, Sonar).
 
-1. **/orchestrate-workflow** - Complete issue implementation workflow
-   - Reviews issue for clarity (uses cui-task-planning skill)
-   - Creates task breakdown plan (uses cui-task-planning skill)
-   - Executes tasks sequentially (uses cui-task-planning skill)
-   - Verifies with /maven-build-and-fix
-   - Optionally commits and pushes
+**Checks**:
+- build: Fix compilation errors
+- reviews: Respond to review comments
+- sonar: Fix quality issues
+- all: Complete PR workflow
 
-2. **/orchestrate-language** - Unified Java/JavaScript task orchestration
-   - Supports both Java and JavaScript with auto-detection
-   - Java: Delegates to /java-implement-code, /java-implement-tests, /java-generate-coverage
-   - JavaScript: Delegates to /js-implement-code, /js-implement-tests, /js-generate-coverage
-   - Iterates up to 5 cycles for coverage improvement
+**Examples**:
+```
+/pr-doctor pr=123
+/pr-doctor checks=sonar
+/pr-doctor auto-fix
+```
 
-3. **/pr-handle-pull-request** - Complete PR workflow orchestrator
-   - Waits for CI/Sonar checks
-   - Delegates to /maven-build-and-fix for build fixes
-   - Delegates to /pr-respond-to-review-comments for review handling
-   - Delegates to /pr-fix-sonar-issues for quality fixes
+## Skills
 
-#### Self-Contained Commands
+5 specialized skills provide all business logic:
+- **cui-task-planning** - Review, Plan, Execute workflows
+- **pr-workflow** - Fetch Comments, Handle Review
+- **sonar-workflow** - Fetch Issues, Fix Issues
+- **cui-git-workflow** - Commit workflow
+- **workflow-patterns** - Handoff protocols
 
-4. **/orchestrate-task** - Single task implementation
-   - Executes one task (uses cui-task-planning skill)
-   - Verifies with /maven-build-and-fix
-   - Iterates up to 5 cycles
-   - Returns structured result
+## Benefits
 
-5. **/pr-fix-sonar-issues** - Sonar issue handling
-   - Fetches issues via MCP tool (uses sonar-workflow skill)
-   - Triages each issue with Python script (uses sonar-workflow skill)
-   - Delegates fixes or adds suppressions with user approval
-   - Verifies and commits
+**Before**: 6 commands, 1,161 lines
+**After**: 2 commands, 270 lines
+**Reduction**: 77% code reduction
 
-6. **/pr-respond-to-review-comments** - Review comment handling
-   - Fetches comments via gh CLI (uses pr-workflow skill)
-   - Triages each comment with Python script (uses pr-workflow skill)
-   - Makes code changes or posts explanations
-   - Verifies and commits if code changed
+**Simplified Architecture**:
+```
+User Goal → One Command → Skills → Result
 
-### Skills (5 skills with workflows and scripts)
-
-1. **workflow-patterns** - Orchestration patterns for agent coordination
-   - Handoff protocol (minimal, standard, full templates)
-   - Context compression strategies
-   - Integration validation patterns
-   - Token budget guidelines
-   - Wave-based processing patterns
-
-2. **cui-task-planning** - Task planning and execution workflows
-   - **Plan workflow** - Creates actionable task breakdowns from issues
-   - **Execute workflow** - Implements tasks from plan files
-   - **Review workflow** - Validates issue documentation for clarity
-   - Scripts: create-task-breakdown.py, track-task-progress.py, validate-acceptance.py
-
-3. **cui-git-workflow** - Git commit workflow
-   - **Commit workflow** - Commits with conventional commits format
-   - Artifact detection and cleanup
-   - Optional push and PR creation
-   - Script: format-commit-message.py
-
-4. **pr-workflow** - PR review comment handling
-   - **Fetch Comments workflow** - Retrieves PR comments via gh CLI
-   - **Handle Review workflow** - Triages and responds to comments
-   - Scripts: fetch-pr-comments.py, triage-comment.py
-
-5. **sonar-workflow** - Sonar issue handling
-   - **Fetch Issues workflow** - Retrieves issues via SonarQube MCP
-   - **Fix Issues workflow** - Triages and resolves issues
-   - Scripts: fetch-sonar-issues.py, triage-issue.py
+IMPLEMENT: /task-implement (116 lines)
+DOCTOR:    /pr-doctor     (142 lines)
+```
 
 ## Installation
 
@@ -93,76 +70,14 @@ By combining these workflows, developers get a seamless experience from task ass
 /plugin install cui-task-workflow
 ```
 
-## Usage Examples
-
-### Complete Development Workflow
-
-**Step 1: Implement a GitHub Issue**
-
-```
-/orchestrate-workflow issue=42
-```
-
-The command will analyze requirements, create a task plan, execute implementation, and verify builds.
-
-**Step 2: Handle PR Review Comments**
-
-```
-/pr-handle-pull-request pr=156
-```
-
-The command will fetch comments, implement changes, verify quality, and push updates.
-
-### Individual Operations
-
-**Break down an issue:**
-```
-/orchestrate-workflow issue=42
-# Creates plan-issue-42.md with task breakdown
-```
-
-**Execute single task:**
-```
-/orchestrate-task task="Add validation method to UserService"
-```
-
-**Fix Sonar issues:**
-```
-/pr-fix-sonar-issues
-# Fetches, triages, fixes/suppresses all issues
-```
-
-**Respond to review comments:**
-```
-/pr-respond-to-review-comments
-# Fetches, triages, responds to all comments
-```
-
-## Dependencies
-
-### Inter-Bundle Dependencies
-- **cui-maven** (required) - Commands use /maven-build-and-fix for verification
-- **cui-utilities** (required) - claude-memory skill for session persistence
-- **cui-java-expert** (optional) - For Java implementation delegation
-- **cui-frontend-expert** (optional) - For JavaScript implementation delegation
-
-### External Dependencies
-- GitHub CLI (`gh`) for issue and PR operations
-- Maven wrapper (`./mvnw`) for build verification
-- SonarQube MCP tool for Sonar issue fetching
-
 ## Architecture
 
 ```
 cui-task-workflow/
 ├── README.md           # This file
-├── commands/           # 6 goal-based orchestrators
-│   ├── orchestrate-workflow.md
-│   ├── orchestrate-task.md
-│   ├── orchestrate-language.md
-│   ├── pr-handle-pull-request.md
-│   ├── pr-fix-sonar-issues.md
-│   └── pr-respond-to-review-comments.md
+├── commands/           # 2 goal-based commands
+│   ├── task-implement.md
+│   └── pr-doctor.md
 └── skills/             # 5 skills with workflows
     ├── workflow-patterns/
     │   ├── SKILL.md    # Orchestration patterns overview
@@ -184,11 +99,24 @@ cui-task-workflow/
         └── scripts/    # 2 Python scripts
 ```
 
+## Dependencies
+
+### Inter-Bundle Dependencies
+- **cui-maven** (required) - Commands use /maven-build-and-fix for verification
+- **cui-utilities** (required) - claude-memory skill for session persistence
+- **cui-java-expert** (optional) - For Java implementation delegation
+- **cui-frontend-expert** (optional) - For JavaScript implementation delegation
+
+### External Dependencies
+- GitHub CLI (`gh`) for issue and PR operations
+- Maven wrapper (`./mvnw`) for build verification
+- SonarQube MCP tool for Sonar issue fetching
+
 ## Bundle Statistics
 
-- **Commands**: 6 (thin orchestrators, <100 lines each)
+- **Commands**: 2 (minimal wrappers, ~130 lines each)
 - **Skills**: 5 (workflow-patterns + 4 with 8 Python scripts total)
-- **Agents**: 0 (all absorbed into skills)
+- **Total Lines**: 258 command lines (77% reduction from 1,161)
 
 ## Support
 
