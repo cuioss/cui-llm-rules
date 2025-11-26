@@ -1,6 +1,6 @@
-# Handoff Protocol Guide
+# Handoff Integration Guide
 
-Structured state transfer between agents, skills, and workflow stages in cui-task-workflow.
+How to integrate the handoff protocol into commands and skills.
 
 ## The Problem: Context Loss
 

@@ -156,7 +156,6 @@ The command will fetch comments, implement changes, verify quality, and push upd
 ```
 cui-task-workflow/
 ├── README.md           # This file
-├── HANDOFF-GUIDE.md    # Handoff protocol integration guide
 ├── commands/           # 6 goal-based orchestrators
 │   ├── orchestrate-workflow.md
 │   ├── orchestrate-task.md

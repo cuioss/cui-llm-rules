@@ -123,6 +123,7 @@ See `references/wave-processing.md` for detailed guidance.
 | Reference | Purpose |
 |-----------|---------|
 | `handoff-protocol.md` | Complete handoff protocol documentation |
+| `handoff-integration-guide.md` | Step-by-step guide for adding handoff to commands |
 | `context-compression.md` | Context compression strategies |
 | `integration-validation.md` | Integration validation patterns |
 | `token-budget-guidelines.md` | Token budget allocation |
