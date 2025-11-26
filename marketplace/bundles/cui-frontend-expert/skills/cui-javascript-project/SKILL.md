@@ -209,84 +209,32 @@ For detailed configuration examples and complete reference, see the individual s
 
 ## Workflows
 
-### Workflow: Parse npm Build Output
+### Workflow: npm Build Execution and Parsing
 
-Parses npm/npx build output logs and categorizes issues for command orchestration. This workflow analyzes existing build output files - build execution itself is handled by the calling command.
+For npm/npx build execution and output parsing, use the **cui-npm-rules** skill:
 
-**When to use**: After npm/npx build execution to categorize errors, warnings, and test failures.
-
-**Steps**:
-
-1. **Run npm output parser script**
-   Resolve script path:
-   ```
-   Skill: cui-utilities:script-runner
-   Resolve: cui-frontend-expert:cui-javascript-project/scripts/parse-npm-output.py
-   ```
-
-   Execute:
-   ```bash
-   # Default mode: errors + warnings
-   python3 {resolved_path} --log target/npm-output-2024-01-15.log
-
-   # Errors only mode
-   python3 {resolved_path} --log build.log --mode errors
-
-   # Structured mode (full categorization with file locations)
-   python3 {resolved_path} --log test-output.log --mode structured
-   ```
-
-2. **Process parsed results**
-   - Check `status` field: "success" or "failure"
-   - Review categorized issues by type:
-     - **compilation_error**: SyntaxError, TypeError, ReferenceError, TypeScript errors
-     - **test_failure**: Jest/Vitest failures (✘, FAIL markers)
-     - **lint_error**: ESLint, Prettier, StyleLint issues
-     - **dependency_error**: Module not found, npm 404 errors
-     - **playwright_error**: Browser/page/selector timeouts
-     - **npm_error**: npm ERR! messages
-     - **other**: General errors/warnings
-
-3. **Use categorized issues for fixes**
-   - Route compilation errors to code implementation
-   - Route test failures to test implementation
-   - Route lint errors to linting fix commands
-
-**JSON Output Contract** (structured mode):
-```json
-{
-  "status": "failure",
-  "data": {
-    "output_file": "target/npm-output-2024-01-15.log",
-    "issues": [
-      {
-        "type": "lint_error",
-        "file": "src/components/Button.js",
-        "line": 15,
-        "column": 3,
-        "message": "'PropTypes' is defined but never used",
-        "severity": "ERROR",
-        "log_line": 45
-      }
-    ]
-  },
-  "metrics": {
-    "compilation_errors": 0,
-    "test_failures": 0,
-    "lint_errors": 2,
-    "dependency_errors": 0,
-    "playwright_errors": 0,
-    "npm_errors": 0,
-    "total_errors": 5,
-    "total_warnings": 3,
-    "total_issues": 8
-  }
-}
+```
+Skill: cui-frontend-expert:cui-npm-rules
 ```
 
-**Output modes**:
-- `default` - Status + errors + warnings with line numbers
-- `errors` - Status + errors only (no warnings)
-- `structured` - Full categorized issue list with file locations
+The cui-npm-rules skill provides:
+- **Execute npm Build** workflow - Atomic build execution with log capture
+- **Parse npm Build Output** workflow - Issue categorization and routing
 
-**Note**: This workflow parses output only. Build execution uses `npm run <script>` commands via Bash tool, with output redirected to a log file for parsing.
+**When to use cui-npm-rules**:
+- Running npm/npx builds (test, lint, build, etc.)
+- Parsing npm build output for errors and warnings
+- Categorizing build issues for orchestrated fixing
+- Workspace-targeted builds in monorepos
+
+**Example usage**:
+```
+Skill: cui-frontend-expert:cui-npm-rules
+Workflow: Execute npm Build
+Parameters:
+  command: run test
+  workspace: e-2-e-playwright
+  output_mode: structured
+```
+
+See cui-npm-rules skill documentation for complete workflow details.

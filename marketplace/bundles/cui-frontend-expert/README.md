@@ -4,11 +4,11 @@ Frontend development standards and tools for CUI projects - modern JavaScript, C
 
 ## Purpose
 
-This bundle provides comprehensive frontend development expertise by aggregating eight foundational frontend skills with integrated automation workflows. All agent functionality has been absorbed into skill workflows with Python scripts for deterministic analysis.
+This bundle provides comprehensive frontend development expertise by aggregating nine foundational frontend skills with integrated automation workflows and a specialized build execution agent.
 
 ## Components Included
 
-### Skills (8 skills with workflows)
+### Skills (9 skills with workflows)
 
 1. **cui-javascript** - Core JavaScript development standards
    - ES modules and modern patterns
@@ -23,36 +23,52 @@ This bundle provides comprehensive frontend development expertise by aggregating
 3. **cui-javascript-project** - Project structure and build standards
    - Directory layouts, package.json configuration
    - Dependency management, Maven integration
+   - References cui-npm-rules for build execution
+
+4. **cui-npm-rules** - npm/npx build execution and output parsing
+   - Atomic build execution with log management
+   - npm vs npx automatic detection
+   - Workspace targeting for monorepos
+   - **Workflow: Execute npm Build** - Run npm/npx with full parameter support
    - **Workflow: Parse npm Build Output** - Categorize build errors/warnings
 
-4. **cui-jsdoc** - JSDoc documentation standards
+5. **cui-jsdoc** - JSDoc documentation standards
    - Documentation patterns for functions, classes, modules
    - Web component documentation (Lit)
    - **Workflow: Analyze JSDoc Violations** - Detect documentation gaps
 
-5. **cui-javascript-linting** - ESLint, Prettier, Stylelint configuration
+6. **cui-javascript-linting** - ESLint, Prettier, Stylelint configuration
    - Flat config setup and rule management
    - Build integration standards
 
-6. **cui-javascript-maintenance** - JavaScript code maintenance standards
+7. **cui-javascript-maintenance** - JavaScript code maintenance standards
    - Refactoring patterns and priorities
    - Code quality metrics
 
-7. **cui-cypress** - E2E testing with Cypress
+8. **cui-cypress** - E2E testing with Cypress
    - Test organization and best practices
    - Build integration patterns
 
-8. **cui-css** - CSS development standards
+9. **cui-css** - CSS development standards
    - Responsive design patterns
    - Quality tooling and linting
 
-### Scripts (3 automation scripts)
+### Agents (1 build execution agent)
+
+**npm-builder** - Autonomous npm/npx build agent
+- Project structure detection (single-package vs monorepo)
+- Workspace validation
+- Delegates to cui-npm-rules skill for execution
+- Returns structured build results
+
+### Scripts (4 automation scripts)
 
 | Script | Location | Purpose |
 |--------|----------|---------|
+| `execute-npm-build.py` | cui-npm-rules | Atomic npm/npx build execution |
+| `parse-npm-output.py` | cui-npm-rules | Categorize npm build output |
 | `analyze-js-coverage.py` | cui-javascript-unit-testing | Parse Jest/Istanbul coverage reports |
 | `analyze-jsdoc-violations.py` | cui-jsdoc | Detect JSDoc compliance violations |
-| `parse-npm-output.py` | cui-javascript-project | Categorize npm build output |
 
 ### Commands (7 goal-based orchestrators)
 
@@ -70,6 +86,8 @@ This bundle provides comprehensive frontend development expertise by aggregating
 
 ```
 cui-frontend-expert/
+├── agents/                  # Build execution agents
+│   └── npm-builder.md       # Autonomous npm/npx build agent
 ├── commands/                # 7 goal-based orchestrators
 │   ├── js-implement-code.md
 │   ├── js-implement-tests.md
@@ -84,10 +102,15 @@ cui-frontend-expert/
     │   ├── SKILL.md             # Workflow: Analyze Coverage
     │   └── scripts/
     │       └── analyze-js-coverage.py
-    ├── cui-javascript-project/  # Project + build workflow
-    │   ├── SKILL.md             # Workflow: Parse npm Build Output
-    │   └── scripts/
-    │       └── parse-npm-output.py
+    ├── cui-javascript-project/  # Project structure + dependencies
+    │   └── SKILL.md             # References cui-npm-rules for builds
+    ├── cui-npm-rules/           # npm/npx build execution
+    │   ├── SKILL.md             # Workflows: Execute npm Build, Parse npm Build Output
+    │   ├── scripts/
+    │   │   ├── execute-npm-build.py
+    │   │   └── parse-npm-output.py
+    │   └── standards/
+    │       └── npm-build-execution.md
     ├── cui-jsdoc/               # JSDoc + violations workflow
     │   ├── SKILL.md             # Workflow: Analyze JSDoc Violations
     │   └── scripts/
@@ -96,6 +119,22 @@ cui-frontend-expert/
     ├── cui-javascript-maintenance/
     ├── cui-cypress/
     └── cui-css/
+```
+
+### Build Execution Pattern
+
+Similar to cui-maven with maven-builder agent and cui-maven-rules skill:
+
+```
+npm-builder agent (Layer 3)
+  ├─> Detects project structure (single-package vs monorepo)
+  ├─> Validates workspace configuration
+  └─> Delegates to cui-npm-rules skill
+
+cui-npm-rules skill
+  ├─> execute-npm-build.py - Atomic build execution
+  ├─> parse-npm-output.py - Output parsing and categorization
+  └─> standards/npm-build-execution.md - Build standards
 ```
 
 ## Workflow Pattern
