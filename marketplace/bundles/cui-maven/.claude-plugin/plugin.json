@@ -11,9 +11,14 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["maven", "build", "verification", "pom", "quality-gates"],
   "commands": [
-    "./commands/maven-build-and-fix.md"
+    "./commands/maven-build-and-fix.md",
+    "./commands/maven-pom-maintenance.md"
   ],
   "skills": [
-    "./skills/cui-maven-rules"
+    "./skills/cui-maven-rules",
+    "./skills/cui-pom-maintenance"
+  ],
+  "agents": [
+    "./agents/maven-builder.md"
   ]
 }
