@@ -498,6 +498,6 @@ done
 
 == References
 
-* xref:link-verification-protocol.md[Link Verification Protocol]
-* xref:content-review-framework.md[Content Review Framework]
+* xref:link-verification.md[Link Verification Protocol]
+* xref:content-review.md[Content Review Framework]
 * xref:../README.adoc[CUI Documentation Standards Overview]

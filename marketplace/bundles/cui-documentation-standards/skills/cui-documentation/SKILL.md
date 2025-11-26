@@ -23,7 +23,7 @@ This skill provides nine specialized workflows:
 | **verify-links** | Verify links and cross-references | `verify-adoc-links.py`, `verify-links-false-positives.py` |
 | **review-content** | Review content quality and tone | `analyze-content-tone.py` |
 | **comprehensive-review** | Orchestrate all review workflows | All scripts (format → links → content) |
-| **create-from-template** | Create new document from template | Templates in assets/ |
+| **create-from-template** | Create new document from template | Templates in templates/ |
 | **sync-with-code** | Sync documentation with code changes | Analysis + Edit |
 | **cleanup-stale** | Remove stale/duplicate documentation | Glob + Read + analysis |
 | **refresh-metadata** | Update metadata and cross-references | Read + Edit |
@@ -48,7 +48,7 @@ Auto-fix common AsciiDoc formatting issues with safety features.
 
 **Step 1: Load Documentation Standards**
 
-Read standards/asciidoc-formatting.md
+Read references/asciidoc-formatting.md
 
 **Step 2: Discover Files**
 
@@ -128,7 +128,7 @@ Validate AsciiDoc files for format compliance.
 
 **Step 1: Load Documentation Standards**
 
-Read standards/asciidoc-formatting.md
+Read references/asciidoc-formatting.md
 
 **Step 2: Discover Files**
 
@@ -216,7 +216,7 @@ Verify all links and cross-references in AsciiDoc files.
 
 **Step 1: Load Documentation Standards**
 
-Read standards/asciidoc-formatting.md
+Read references/asciidoc-formatting.md
 
 **Step 2: Discover Files**
 
@@ -317,8 +317,8 @@ Review AsciiDoc content for quality: correctness, clarity, tone, style, and comp
 
 **Step 1: Load Documentation Standards**
 
-Read standards/tone-and-style.md
-Read standards/documentation-core.md
+Read references/tone-and-style.md
+Read references/documentation-core.md
 
 **Step 2: Discover Files**
 
@@ -461,9 +461,9 @@ Provides consolidated report with aggregated results.
 
 **Step 1: Load Documentation Standards**
 
-Read standards/orchestration-workflow.md
-Read standards/link-verification-protocol.md
-Read standards/content-review-framework.md
+Read workflows/review-orchestration.md
+Read workflows/link-verification.md
+Read workflows/content-review.md
 
 **Step 2: Discover Files**
 
@@ -710,10 +710,10 @@ If path not specified:
 
 **Step 3: Load Template**
 
-Read template from assets/templates/:
-- standard → assets/templates/standard-template.adoc
-- readme   → assets/templates/readme-template.adoc
-- guide    → assets/templates/guide-template.adoc
+Read template from templates/:
+- standard → templates/standard-template.adoc
+- readme   → templates/readme-template.adoc
+- guide    → templates/guide-template.adoc
 
 **Step 4: Substitute Placeholders**
 
@@ -974,20 +974,27 @@ Manual Review Needed:
 
 ---
 
-## Standards References
+## Reference Documents
 
-All documentation standards are in the `standards/` directory:
+All reference material is in the `references/` directory (lookup material - WHAT rules to apply):
 
 | Reference | Purpose | When to Load |
 |-----------|---------|--------------|
 | `documentation-core.md` | Core documentation principles | Always |
 | `asciidoc-formatting.md` | AsciiDoc format rules | Format/validation workflows |
 | `tone-and-style.md` | Tone and style requirements | Content review workflow |
-| `link-verification-protocol.md` | Link verification protocol with manual Read verification | Link workflows |
-| `content-review-framework.md` | ULTRATHINK-based tone analysis framework | Content review workflow |
-| `orchestration-workflow.md` | Comprehensive review orchestration | comprehensive-review workflow |
 | `readme-structure.md` | README structure patterns | README files |
 | `organization-standards.md` | Document organization | Structure reviews |
+
+## Workflow Documents
+
+All workflow procedures are in the `workflows/` directory (operational procedures - HOW to execute):
+
+| Workflow | Purpose | When to Load |
+|----------|---------|--------------|
+| `link-verification.md` | Link verification protocol with manual Read verification | Link workflows |
+| `content-review.md` | ULTRATHINK-based tone analysis framework | Content review workflow |
+| `review-orchestration.md` | Comprehensive review orchestration | comprehensive-review workflow |
 
 ## Script Reference
 

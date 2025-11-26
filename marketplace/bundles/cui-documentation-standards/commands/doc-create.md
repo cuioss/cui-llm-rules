@@ -111,7 +111,7 @@ Next steps:
 
 **Skill Dependency**: cui-documentation-standards:cui-documentation
 - Provides: create-from-template workflow
-- Templates: assets/templates/standard-template.adoc, readme-template.adoc, guide-template.adoc
+- Templates: templates/standard-template.adoc, readme-template.adoc, guide-template.adoc
 
 ## Related
 

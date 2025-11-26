@@ -429,7 +429,7 @@ workflow: verify-links
 steps:
   1. Run verify-adoc-links.py script
   2. Classify with verify-links-false-positives.py
-  3. Manual verification (link-verification-protocol.md)
+  3. Manual verification (link-verification.md)
   4. User confirmation for removals
   5. Re-validation
   6. Report generation
