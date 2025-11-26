@@ -694,6 +694,231 @@ Verify that implementation task description is clear and the build is clean befo
 
 ---
 
+## Workflow: Fix Compilation Errors
+
+Fix Java compilation errors iteratively until build succeeds.
+
+### Parameters
+
+- **max_iterations** (optional): Maximum fix attempts (default: 3)
+- **module** (optional): Module to build
+
+### When to Use
+
+Use this workflow when:
+- Build fails with compilation errors
+- Called from agents for autonomous error fixing
+- Part of implement/refactor workflows that need build verification
+
+### Step 1: Execute Build
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean compile
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 2: Parse and Categorize Errors
+
+From the build result, extract `data.issues` where `type == "compilation_error"`.
+
+**Categorize by error type:**
+- **missing_import**: Cannot find symbol (import)
+- **type_mismatch**: Incompatible types
+- **missing_method**: Cannot find symbol (method)
+- **syntax_error**: Syntax errors
+- **null_safety**: Null-related errors
+- **access_modifier**: Access control errors
+
+### Step 3: Load Relevant Standards
+
+Based on error categories:
+- **Type errors** → Load `standards/java-null-safety.md`
+- **Pattern errors** → Load `standards/java-core-patterns.md`
+- **Lombok errors** → Load `standards/java-lombok-patterns.md`
+- **Modern syntax** → Load `standards/java-modern-features.md`
+
+### Step 4: Fix Each Error
+
+For each error:
+1. Read the affected file
+2. Analyze error in context
+3. Apply fix using Edit tool
+4. Track files modified
+
+**Fix Priority Order:**
+1. Missing imports (usually quick)
+2. Type mismatches
+3. Missing methods/symbols
+4. Syntax errors
+5. Access modifiers
+
+### Step 5: Verify Build
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: compile
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 6: Iterate if Needed
+
+If errors remain and `iteration < max_iterations`:
+- Return to Step 2 with updated error list
+- Track iteration count
+
+If `iteration >= max_iterations`:
+- Return partial result with remaining errors
+
+### Output Contract
+
+```json
+{
+  "status": "success|partial|failed",
+  "iterations": 2,
+  "fixed": 5,
+  "remaining": 0,
+  "files_modified": ["src/main/java/MyClass.java"],
+  "errors_by_type": {
+    "missing_import": 3,
+    "type_mismatch": 2
+  },
+  "build_status": "SUCCESS|FAILURE"
+}
+```
+
+### Error Handling
+
+- If error is in generated code → Skip (cannot fix)
+- If error requires architectural change → Report, don't attempt fix
+- If same error persists after fix attempt → Report as unfixable
+
+---
+
+## Workflow: Implement Feature
+
+Implement Java feature with standards compliance and build verification.
+
+### Parameters
+
+- **description** (required): What to implement
+- **target_class** (optional): Target class path
+- **module** (optional): Target module
+
+### When to Use
+
+Use this workflow when:
+- Implementing new Java functionality
+- Called from agents for autonomous feature implementation
+- Adding new methods, classes, or services
+
+### Step 1: Verify Readiness
+
+```
+Workflow: Verify Implementation Readiness
+Parameters:
+  description: {description}
+  require_clean_build: true
+  module: {module if specified}
+```
+
+If not ready, return clarification questions.
+
+### Step 2: Load All Core Standards
+
+```
+Read: standards/java-core-patterns.md
+Read: standards/java-null-safety.md
+Read: standards/java-lombok-patterns.md
+Read: standards/java-modern-features.md
+Read: standards/logging-standards.md
+```
+
+### Step 3: Analyze Target Location
+
+If `target_class` provided:
+- Read the target file
+- Analyze existing structure, imports, patterns
+
+If creating new class:
+- Determine package from description
+- Check for existing package-info.java (@NullMarked)
+
+### Step 4: Generate Implementation
+
+Apply standards from Step 2:
+- @NullMarked in package-info.java
+- Appropriate Lombok annotations
+- CuiLogger configuration
+- Modern Java features where applicable
+- Proper null safety (Optional for returns, requireNonNull for params)
+
+### Step 5: Apply Implementation
+
+Use Edit tool (existing file) or Write tool (new file):
+- Write class with full standards compliance
+- Include necessary imports
+- Add LogMessages class if logging needed
+
+### Step 6: Verify Build
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean compile
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 7: Fix Errors if Needed
+
+If build fails:
+```
+Workflow: Fix Compilation Errors
+Parameters:
+  max_iterations: 2
+  module: {module if specified}
+```
+
+### Output Contract
+
+```json
+{
+  "status": "success|partial|failed",
+  "implementation": {
+    "files_created": ["src/main/java/MyService.java"],
+    "files_modified": ["src/main/java/package-info.java"],
+    "lines_added": 85
+  },
+  "standards_applied": [
+    "java-core-patterns",
+    "java-null-safety",
+    "java-lombok-patterns",
+    "logging-standards"
+  ],
+  "build_status": "SUCCESS"
+}
+```
+
+### Implementation Checklist
+
+Before returning success:
+- [ ] @NullMarked in package-info.java
+- [ ] CuiLogger (not SLF4J)
+- [ ] LogMessages class if logging used
+- [ ] Appropriate Lombok annotations
+- [ ] Modern Java features applied
+- [ ] Build compiles successfully
+
+---
+
 ## References
 
 **Core Standards (always loaded):**

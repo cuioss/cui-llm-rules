@@ -369,6 +369,145 @@ If encountering issues:
 4. **Complex APIs to document**: Break down into steps, provide comprehensive examples
 5. **Deprecated API migration**: Document clear migration path with code examples
 
+---
+
+## Workflow: Fix JavaDoc Errors
+
+Fix JavaDoc errors and warnings iteratively until build succeeds.
+
+### Parameters
+
+- **max_iterations** (optional): Maximum fix attempts (default: 3)
+- **module** (optional): Module to build
+
+### When to Use
+
+Use this workflow when:
+- JavaDoc build has errors or warnings
+- Called from agents for autonomous error fixing
+- Part of pre-commit or CI workflows
+
+### Step 1: Execute JavaDoc Build
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: javadoc:javadoc
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 2: Parse and Categorize Errors
+
+From the build result, extract `data.issues` where `type == "javadoc_warning"`.
+
+**Categorize by error type:**
+- **missing_tag**: Missing @param, @return, @throws tags
+- **broken_link**: Invalid {@link} or @see reference
+- **unclosed_tag**: Unclosed HTML tags (<p>, <li>, etc.)
+- **malformed_html**: Malformed HTML in documentation
+- **unknown_tag**: Unrecognized JavaDoc tag
+- **duplicate_tag**: Duplicate @param or @throws
+
+### Step 3: Load Error Reference
+
+```
+Read: standards/javadoc-error-reference.md
+```
+
+This provides quick fix patterns for each error type.
+
+### Step 4: Apply Minimal Fixes
+
+**CRITICAL**: Apply content-preserving fixes only.
+
+For each error:
+1. Read the affected file
+2. Locate the JavaDoc comment
+3. Apply minimal fix from error reference
+4. Preserve existing documentation content
+
+**Fix Priority Order:**
+1. Unclosed tags (syntax errors)
+2. Broken links (reference errors)
+3. Missing tags (completeness)
+4. Malformed HTML (formatting)
+
+**Minimal Fix Examples:**
+- Unclosed `<p>`: Add `</p>` or convert to `<p>`
+- Broken link: Fix package/class path or remove link
+- Missing @param: Add placeholder `@param name description`
+- Missing @return: Add `@return description`
+
+### Step 5: Verify Build
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: javadoc:javadoc
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 6: Iterate if Needed
+
+If errors remain and `iteration < max_iterations`:
+- Return to Step 2 with updated error list
+- Track iteration count
+
+If `iteration >= max_iterations`:
+- Return partial result with remaining errors
+
+### Output Contract
+
+```json
+{
+  "status": "success|partial|failed",
+  "iterations": 2,
+  "fixed": 8,
+  "remaining": 0,
+  "files_modified": ["src/main/java/MyClass.java"],
+  "errors_by_type": {
+    "unclosed_tag": 3,
+    "broken_link": 2,
+    "missing_tag": 3
+  },
+  "build_status": "SUCCESS|FAILURE"
+}
+```
+
+### Error Handling
+
+- If error is in generated code → Skip (cannot fix)
+- If fix requires content changes → Report, apply minimal fix only
+- If same error persists after fix → Report as unfixable
+- If error is ambiguous → Use safest fix (remove problematic element)
+
+### Fix Decision Tree
+
+```
+Is this an unclosed HTML tag?
+├── Yes → Add closing tag
+│
+Is this a broken {@link}?
+├── Yes → Is class/method resolvable?
+│   ├── Yes → Fix the path
+│   └── No → Convert to {@code}
+│
+Is this a missing @param/@return/@throws?
+├── Yes → Add minimal placeholder tag
+│
+Is this malformed HTML?
+├── Yes → Apply minimal HTML fix or remove
+│
+Other error?
+└── Report as "requires manual review"
+```
+
+---
+
 ## References
 
 * Core JavaDoc Standards: standards/javadoc-core.md

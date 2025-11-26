@@ -512,6 +512,285 @@ Parameters:
 
 ---
 
+## Workflow: Fix Test Failures
+
+Fix failing unit tests iteratively until all pass.
+
+### Parameters
+
+- **max_iterations** (optional): Maximum fix attempts (default: 3)
+- **module** (optional): Module to test
+- **fix_production_code** (optional): Allow production code fixes (default: false)
+
+### When to Use
+
+Use this workflow when:
+- Tests are failing and need to be fixed
+- Called from agents for autonomous test fixing
+- Part of implement workflows that need test verification
+
+### Step 1: Execute Tests
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean test
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 2: Parse and Categorize Test Failures
+
+From the build result, extract `data.issues` where `type == "test_failure"`.
+
+**Categorize by failure type:**
+- **assertion**: Assertion failures (expected vs actual)
+- **null_pointer**: NullPointerException in test or production code
+- **exception**: Unexpected exception thrown
+- **setup_error**: Test setup/teardown errors (@BeforeEach, @AfterEach)
+- **timeout**: Test timeout exceeded
+- **missing_dependency**: Missing mock or dependency
+
+### Step 3: Load Testing Standards
+
+```
+Read: standards/testing-junit-core.md
+Read: standards/testing-quality-standards.md
+```
+
+If tests use generators:
+```
+Read: standards/test-generator-framework.md
+```
+
+### Step 4: Analyze Each Failure
+
+For each failure:
+1. Read the test file
+2. Read the production code being tested
+3. Analyze failure cause
+4. Determine fix location (test or production if allowed)
+
+### Step 5: Apply Fixes
+
+**Test-only fixes** (when fix_production_code is false):
+- Fix incorrect assertions
+- Fix test setup/teardown
+- Add missing mocks
+- Fix generator usage
+- Update expected values
+
+**Production fixes** (when fix_production_code is true):
+- Fix null handling
+- Fix incorrect logic
+- Add missing validation
+
+Use Edit tool for all modifications.
+
+### Step 6: Verify Tests Pass
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: test
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 7: Iterate if Needed
+
+If failures remain and `iteration < max_iterations`:
+- Return to Step 2 with updated failure list
+- Track iteration count
+
+If `iteration >= max_iterations`:
+- Return partial result with remaining failures
+
+### Output Contract
+
+```json
+{
+  "status": "success|partial|failed",
+  "iterations": 2,
+  "fixed": 5,
+  "remaining": 0,
+  "requires_production_fix": false,
+  "files_modified": ["src/test/java/MyTest.java"],
+  "failures_by_type": {
+    "assertion": 3,
+    "null_pointer": 2
+  },
+  "test_status": "SUCCESS|FAILURE"
+}
+```
+
+### Error Handling
+
+- If failure requires architectural change → Report, don't attempt fix
+- If production fix needed but not allowed → Report with `requires_production_fix: true`
+- If same failure persists after fix → Report as unfixable
+- If failure is in generated test code → Skip
+
+---
+
+## Workflow: Implement Tests
+
+Implement unit tests for a class with coverage verification.
+
+### Parameters
+
+- **target_class** (required): Class to test (path or fully qualified name)
+- **coverage_target** (optional): Target coverage % (default: 80)
+- **module** (optional): Module context
+
+### When to Use
+
+Use this workflow when:
+- Implementing tests for new or existing code
+- Called from agents for autonomous test creation
+- Adding test coverage for untested classes
+
+### Step 1: Analyze Target Class
+
+```
+Glob: pattern="**/{target_class}.java"
+Read: {target_class_path}
+```
+
+Identify:
+- Package and class name
+- Public methods requiring tests
+- Dependencies (constructor params, injected fields)
+- Value object characteristics (equals/hashCode/toString)
+- Exception throwing methods
+
+### Step 2: Load Testing Standards (Conditional)
+
+**Always load core standards:**
+```
+Read: standards/testing-junit-core.md
+```
+
+**If target is a value object:**
+```
+Read: standards/testing-value-objects.md
+```
+
+**If project uses generators** (check for existing test patterns):
+```
+Read: standards/test-generator-framework.md
+```
+
+### Step 3: Check Existing Tests
+
+```
+Glob: pattern="**/{target_class}Test.java"
+```
+
+If test class exists:
+- Read existing tests
+- Identify methods not yet tested
+- Determine coverage gaps
+
+### Step 4: Generate Test Class
+
+Apply standards from Step 2:
+- @EnableGeneratorController if using generators
+- @DisplayName for class and methods
+- AAA pattern for all tests
+- Meaningful assertion messages
+- ShouldHandleObjectContracts if value object
+
+**Test Method Coverage:**
+- One test per public method minimum
+- Additional tests for edge cases
+- Exception tests for validation
+
+### Step 5: Write Test File
+
+If new file:
+```
+Write: src/test/java/{package}/{target_class}Test.java
+```
+
+If extending existing:
+```
+Edit: {existing_test_file}
+```
+
+### Step 6: Verify Tests Pass
+
+```
+Skill: cui-maven:cui-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: test -Dtest={target_class}Test
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 7: Fix Failures if Needed
+
+If tests fail:
+```
+Workflow: Fix Test Failures
+Parameters:
+  max_iterations: 2
+  module: {module if specified}
+  fix_production_code: false
+```
+
+### Step 8: Verify Coverage
+
+```
+Workflow: Analyze Coverage
+Parameters:
+  report_path: target/site/jacoco/jacoco.xml
+  threshold: {coverage_target}
+```
+
+If coverage below target:
+- Identify uncovered methods
+- Add additional tests
+- Re-verify
+
+### Output Contract
+
+```json
+{
+  "status": "success|partial|failed",
+  "test_class": "src/test/java/MyClassTest.java",
+  "tests_generated": 8,
+  "tests_passed": 8,
+  "coverage": {
+    "line": 85.0,
+    "branch": 72.0,
+    "meets_target": true
+  },
+  "standards_applied": [
+    "testing-junit-core",
+    "test-generator-framework",
+    "testing-value-objects"
+  ]
+}
+```
+
+### Test Generation Checklist
+
+Before returning success:
+- [ ] Test class has @EnableGeneratorController (if using generators)
+- [ ] All tests follow AAA pattern
+- [ ] All assertions have meaningful messages
+- [ ] @DisplayName on class and methods
+- [ ] No @GeneratorSeed committed
+- [ ] Value object contracts implemented (if applicable)
+- [ ] All tests pass
+- [ ] Coverage meets target
+
+---
+
 ## References
 
 * Core Testing Standards: standards/testing-junit-core.md
