@@ -329,6 +329,71 @@ Read standards/refactoring-planning-standards.md
 ### Related Skills
 - **cui-git-workflow** - Commit message format for task completion
 - **cui-java-core** / **cui-javascript** - Standards during execution
+- **cui-utilities:claude-memory** - Plan persistence across sessions
+- **cui-task-workflow:workflow-patterns** - Handoff templates for Execute workflow
+
+---
+
+## Memory Integration
+
+### Save Plan to Memory (After Plan Creation)
+
+After creating a plan, persist to memory layer for session recovery:
+
+```bash
+python3 manage-memory.py save \
+  --category context \
+  --identifier "{task-summary}" \
+  --content '{"plan_file": "{plan-path}", "tasks": [...], "current_task": 1}'
+```
+
+This enables resuming interrupted planning sessions.
+
+### Resume Plan from Memory (On Session Start)
+
+When starting a session, check for recent plans:
+
+```bash
+python3 manage-memory.py list --category context --since 7d
+```
+
+If matching plan found, offer to resume:
+- Load plan file from memory reference
+- Continue from last incomplete task
+- Use AskUserQuestion to confirm resumption
+
+### Generate Handoff for Execute Workflow
+
+When transitioning from Plan to Execute workflow, generate a handoff structure:
+
+```json
+{
+  "handoff": {
+    "from": "plan-workflow",
+    "to": "execute-workflow",
+    "task": {
+      "id": 1,
+      "name": "{task-name}",
+      "status": "pending"
+    },
+    "artifacts": {
+      "files": ["{plan-file}"],
+      "interfaces": [],
+      "decisions": ["{decisions-from-planning}"]
+    },
+    "context": {
+      "dependencies": ["{task-dependencies}"],
+      "constraints": ["{constraints}"]
+    },
+    "next": {
+      "action": "Execute first task",
+      "focus": "{first-task-goal}"
+    }
+  }
+}
+```
+
+Reference: `workflow-patterns/templates/handoff-standard.json`
 
 ## Quality Verification
 

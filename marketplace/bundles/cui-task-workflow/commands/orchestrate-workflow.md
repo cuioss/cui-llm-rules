@@ -27,12 +27,28 @@ If you discover issues or improvements during execution, record them:
 
 ## PREREQUISITES
 
-Load the task-planning skill:
+Load required skills:
 ```
 Skill: cui-task-workflow:cui-task-planning
+Skill: cui-utilities:claude-memory
+Skill: cui-task-workflow:workflow-patterns
 ```
 
 ## WORKFLOW
+
+### Step 0: Check Memory for Pending Workflow
+
+**Auto-detect pending workflow from memory:**
+
+```bash
+python3 manage-memory.py list --category handoffs
+```
+
+If pending handoff found for this issue:
+1. Display: "Found pending workflow state from previous session"
+2. Use AskUserQuestion: "[R]esume from checkpoint / [S]tart fresh / [A]bort"
+3. If Resume: Load handoff state and set `continueFrom` accordingly
+4. If Start fresh: Delete old handoff and proceed normally
 
 ### Step 1: Validate and Get Issue
 
@@ -122,11 +138,59 @@ Each /orchestrate-task is self-contained (implements + verifies + iterates).
 
 Track: tasks_completed, tasks_failed, tasks_skipped.
 
+**Save Progress to Memory (Between Tasks):**
+
+After each task completes, save workflow state:
+
+```bash
+python3 manage-memory.py save \
+  --category handoffs \
+  --identifier "workflow-{issue}" \
+  --content '{"issue": {issue}, "current_task": {N}, "completed": [...], "pending": [...]}'
+```
+
+This enables resuming from interruption.
+
+**Generate Handoff Between Tasks:**
+
+Use `workflow-patterns/templates/handoff-standard.json` format:
+
+```json
+{
+  "handoff": {
+    "from": "task-{N}",
+    "to": "task-{N+1}",
+    "task": {"status": "completed", "progress": "100%"},
+    "artifacts": {"files": ["{modified_files}"], "decisions": ["{decisions}"]},
+    "next": {"action": "Execute next task", "focus": "{next_task_goal}"}
+  }
+}
+```
+
 ### Step 6: Verify Completion
 
 Check all tasks completed. Prompt for incomplete items.
 
-### Step 7: Final Verification and Commit
+### Step 7: Cleanup Memory
+
+**On successful completion:**
+
+Delete workflow handoff state (no longer needed):
+
+```bash
+python3 manage-memory.py cleanup --category handoffs --pattern "workflow-{issue}*"
+```
+
+**Optionally save summary to context:**
+
+```bash
+python3 manage-memory.py save \
+  --category context \
+  --identifier "completed-{issue}" \
+  --content '{"issue": {issue}, "tasks_completed": N, "summary": "..."}'
+```
+
+### Step 8: Final Verification and Commit
 
 ```
 SlashCommand: /cui-maven:maven-build-and-fix push={push parameter}
@@ -138,7 +202,7 @@ Self-contained command: runs Maven build, fixes issues if found, verifies, commi
 
 **Error handling:** If command fails during final verification, increment build_failures counter and prompt user "[F]ix manually/[R]etry/[A]bort".
 
-### Step 8: Display Summary
+### Step 9: Display Summary
 
 ```
 ╔════════════════════════════════════════════════════════════╗
@@ -228,6 +292,8 @@ Orchestrates skills and commands:
 ## RELATED
 
 - **cui-task-planning** skill - Review, Plan, Execute workflows
+- **cui-utilities:claude-memory** skill - Workflow state persistence
+- **cui-task-workflow:workflow-patterns** skill - Handoff templates
 - `/orchestrate-task` command (self-contained single task)
 - `/orchestrate-language` command (language-specific orchestration)
 - `/maven-build-and-fix` command
