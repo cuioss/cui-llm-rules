@@ -22,6 +22,9 @@ Analyze marketplace components for quality issues and apply fixes in a single wo
 /plugin-doctor command=my-command
 /plugin-doctor skill=my-skill
 
+# Doctor skill content (cross-file analysis)
+/plugin-doctor skill-content path/to/skill
+
 # Doctor entire marketplace
 /plugin-doctor marketplace
 
@@ -59,11 +62,13 @@ When you invoke this command, I will:
 ## PARAMETERS
 
 **Required**: One of:
-- `scope`: agents|commands|skills|metadata|scripts|marketplace
+- `scope`: agents|commands|skills|metadata|scripts|skill-content|marketplace
 - `component=name`: agent=X, command=X, or skill=X
+- `skill-content <path>`: Analyze skill content files (cross-file analysis)
 
 **Optional**:
 - `--no-fix`: Diagnosis only, skip fix phase
+- `--skip-quality`: Skip Phase 3 quality analysis (skill-content only)
 
 **Error Handling**:
 - No scope → Display usage with examples
@@ -101,6 +106,9 @@ Result: Diagnoses all agents, auto-fixes safe issues, prompts for risky fixes
 
 User: /plugin-doctor skill=my-skill
 Result: Diagnoses single skill, applies fixes, verifies
+
+User: /plugin-doctor skill-content marketplace/bundles/cui-java-expert/skills/cui-java-core
+Result: Cross-file content analysis - duplication, extraction candidates, terminology
 
 User: /plugin-doctor marketplace
 Result: Comprehensive health check across all component types
