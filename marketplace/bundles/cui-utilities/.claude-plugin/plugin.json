@@ -9,7 +9,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["utilities", "research", "project-setup", "permissions", "diagnostics", "documentation", "architecture"],
+  "keywords": ["utilities", "research", "project-setup", "permissions", "diagnostics", "documentation", "architecture", "toon"],
   "agents": [
     "./agents/research-best-practices.md"
   ],
@@ -25,6 +25,7 @@
     "./skills/cui-diagnostic-patterns",
     "./skills/cui-general-development-rules",
     "./skills/permission-management",
+    "./skills/toon-usage",
     "./skills/web-security-standards"
   ]
 }

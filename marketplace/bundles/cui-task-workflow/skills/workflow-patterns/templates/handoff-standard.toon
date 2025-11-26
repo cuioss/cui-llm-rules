@@ -1,0 +1,14 @@
+from_agent: java-quality-agent
+to_agent: java-implement-agent
+
+context:
+  task: Fix code quality issues
+  files_analyzed: 15
+
+issues[2]{file,line,severity,rule,message}:
+Example.java,42,BLOCKER,S2095,Use try-with-resources
+Service.java,89,MAJOR,S1192,Define constant
+
+instructions[2]:
+- Start with BLOCKER severity
+- Run tests after fixes

@@ -1,0 +1,7 @@
+from_agent: quality-agent
+to_agent: fix-agent
+
+items[3]{file,line}:
+A.java,42
+B.java,89
+C.java,15

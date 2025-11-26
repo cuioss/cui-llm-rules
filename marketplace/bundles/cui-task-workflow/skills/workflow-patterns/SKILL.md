@@ -30,13 +30,15 @@ Activate this skill when:
 
 Structured state transfer between agents/skills prevents information loss and maintains context boundaries.
 
+**Format**: Handoffs use TOON (Token-Oriented Object Notation) format for 30-60% token reduction vs JSON. See `cui-utilities:toon-usage` skill for TOON format reference.
+
 ### Handoff Levels
 
 | Level | Use Case | Template |
 |-------|----------|----------|
-| Minimal | Simple task completion | `templates/handoff-minimal.json` |
-| Standard | Multi-step workflows | `templates/handoff-standard.json` |
-| Full | Complex orchestration | `templates/handoff-full.json` |
+| Minimal | Simple task completion | `templates/handoff-minimal.toon` |
+| Standard | Multi-step workflows | `templates/handoff-standard.toon` |
+| Full | Complex orchestration | `templates/handoff-full.toon` |
 
 See `references/handoff-protocol.md` for detailed guidance.
 
@@ -110,11 +112,13 @@ See `references/wave-processing.md` for detailed guidance.
 
 ## Templates
 
+All templates use TOON format for token efficiency:
+
 | Template | Purpose |
 |----------|---------|
-| `handoff-minimal.json` | Simple task completion handoff |
-| `handoff-standard.json` | Multi-step workflow handoff |
-| `handoff-full.json` | Complex orchestration handoff |
+| `handoff-minimal.toon` | Simple task completion handoff |
+| `handoff-standard.toon` | Multi-step workflow handoff |
+| `handoff-full.toon` | Complex orchestration handoff |
 
 ---
 
@@ -132,6 +136,11 @@ See `references/wave-processing.md` for detailed guidance.
 ---
 
 ## Integration Points
+
+### With toon-usage Skill
+- Handoff templates use TOON format for token efficiency
+- See `cui-utilities:toon-usage` for TOON specification and usage patterns
+- TOON provides 30-60% token reduction vs JSON for uniform arrays
 
 ### With claude-memory Skill
 - Handoffs can reference memory files via `context_references`

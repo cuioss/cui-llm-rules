@@ -48,7 +48,7 @@ Diagnose and fix PR issues (build, reviews, Sonar).
 - **pr-workflow** - Fetch Comments, Handle Review
 - **sonar-workflow** - Fetch Issues, Fix Issues
 - **cui-git-workflow** - Commit workflow
-- **workflow-patterns** - Handoff protocols
+- **workflow-patterns** - Handoff protocols (uses TOON format for 50% token reduction)
 
 ## Benefits
 
@@ -81,7 +81,7 @@ cui-task-workflow/
 └── skills/             # 5 skills with workflows
     ├── workflow-patterns/
     │   ├── SKILL.md    # Orchestration patterns overview
-    │   ├── templates/  # Handoff JSON templates
+    │   ├── templates/  # Handoff TOON templates (token-efficient format)
     │   └── references/ # Protocol documentation
     ├── cui-task-planning/
     │   ├── SKILL.md    # Plan, Execute, Review workflows

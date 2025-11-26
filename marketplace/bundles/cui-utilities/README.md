@@ -18,7 +18,7 @@ These utilities are independent tools that can be used across different CUI proj
 
 ## Components Included
 
-### Skills (8 skills)
+### Skills (9 skills)
 
 1. **cui-diagnostic-patterns** - Tool usage patterns for non-prompting file operations
 2. **cui-general-development-rules** - Core development principles for CUI projects
@@ -27,7 +27,8 @@ These utilities are independent tools that can be used across different CUI proj
 5. **claude-run-configuration** - Run configuration handling for .claude/run-configuration.json
 6. **permission-management** - Permission validation and settings management
 7. **script-runner** - Script resolution and execution with portable notation
-8. **web-security-standards** - Trusted domains and security assessment patterns
+8. **toon-usage** - TOON format specification and usage patterns for agent communication (50% token reduction)
+9. **web-security-standards** - Trusted domains and security assessment patterns
 
 ### Agents (1 agent)
 
