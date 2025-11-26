@@ -1,10 +1,26 @@
 # Content Quality Guide
 
-Quality analysis dimensions for LLM-based content review in skill subdirectories.
+Quality analysis dimensions for LLM-hybrid content review in skill subdirectories.
 
 ## Purpose
 
-Provides criteria for Claude to analyze content quality across four dimensions: completeness, duplication, consistency, and contradictions.
+Provides criteria for cross-file content analysis using a hybrid approach:
+- **Scripts**: Pre-filter and structure data (hashing, similarity calculation, pattern detection)
+- **LLM**: Semantic analysis for classification and recommendations
+- **Scripts**: Verify LLM claims against actual content
+
+## Analysis Approach: LLM-Hybrid
+
+| Task | Handler | Why |
+|------|---------|-----|
+| File inventory | Script | Deterministic |
+| Section extraction | Script | Regex-based parsing |
+| Exact duplication (100% match) | Script | Hash comparison |
+| Near-duplication (40-95% similar) | **LLM** | Semantic judgment needed |
+| True dup vs similar concepts | **LLM** | Context-aware classification |
+| Terminology inconsistencies | **LLM** | Domain knowledge needed |
+| Extraction recommendations | **LLM** | Requires understanding intent |
+| Verification of LLM claims | Script | Cross-check against content |
 
 ## Analysis Dimensions
 
@@ -59,66 +75,153 @@ Completeness Issues:
 
 ---
 
-## Dimension 2: Duplication Analysis
+## Dimension 2: Duplication Analysis (Cross-File)
 
-### What to Check
+### Script Pre-Processing
 
-**Exact Duplication**:
-- Identical paragraphs across files
-- Copy-pasted sections
-- Same examples in multiple locations
+Run `analyze-cross-file-content.py` first to get structured analysis:
 
-**Semantic Duplication**:
-- Same concept explained differently
-- Overlapping guidance with different wording
-- Multiple files covering same topic
+```bash
+python3 analyze-cross-file-content.py --skill-path {skill_path}
+```
 
-**Near-Duplication**:
-- 80%+ similar sections
-- Slight variations of same content
-- Outdated copies of updated content
+**Script Output Categories**:
 
-### Detection Approach
+| Category | Script Responsibility | LLM Responsibility |
+|----------|----------------------|-------------------|
+| `exact_duplicates` | Hash-verified 100% matches | Report directly (no LLM needed) |
+| `similarity_candidates` | 40-95% similar pairs | Classify: true_dup / similar_concept / false_positive |
 
-1. Compare section headers across files
-2. Compare paragraph content (fuzzy matching)
-3. Identify shared concepts/terminology
-4. Check for same examples used multiple places
+### Exact Duplicates (Script-Detected)
+
+Script uses SHA256 hashing on normalized content (markdown/code stripped, whitespace normalized).
+
+**Output from script**:
+```json
+{
+  "exact_duplicates": [
+    {
+      "hash": "abc123...",
+      "occurrences": [
+        {"file": "file-a.md", "section": "X", "lines": "10-20"},
+        {"file": "file-b.md", "section": "Y", "lines": "30-40"}
+      ],
+      "line_count": 10,
+      "recommendation": "consolidate"
+    }
+  ]
+}
+```
+
+**Action**: Report directly, consolidate without LLM judgment.
+
+### Similarity Candidates (LLM Analysis Required)
+
+Script calculates similarity using `difflib.SequenceMatcher` (40-95% threshold).
+
+**For each similarity_candidate, LLM must**:
+1. Read both content blocks
+2. Classify:
+   - `true_duplicate` - Same content, should consolidate
+   - `similar_concept` - Related but different, cross-reference OK
+   - `false_positive` - Unrelated despite textual similarity
+3. Recommend action:
+   - `consolidate` - Merge into single authoritative location
+   - `cross_reference` - Keep both, add links between them
+   - `keep_both` - Intentionally different content
+
+### LLM Classification Criteria
+
+**true_duplicate** indicators:
+- Same rules/requirements stated
+- Same examples with minor formatting differences
+- Same step sequences
+
+**similar_concept** indicators:
+- Same topic but different perspectives
+- Overview vs detailed treatment
+- Different contexts for same pattern
+
+**false_positive** indicators:
+- Common technical terms causing false match
+- Boilerplate/template text
+- Different subjects with similar phrasing
 
 ### Output Format
 
+**Exact (from script)**:
 ```
-Duplication Found:
-  Source: {file1}:{lines}
-  Target: {file2}:{lines}
+Exact Duplicate:
+  Hash: {hash}
+  Locations: {file1}:{lines}, {file2}:{lines}
+  Line count: {N}
+  Action: Consolidate (auto-detected)
+```
+
+**Similarity (LLM classified)**:
+```
+Similarity Candidate:
+  Source: {file1}:{section}:{lines}
+  Target: {file2}:{section}:{lines}
   Similarity: {percentage}%
-  Type: {exact|semantic|near}
-  Recommendation: {consolidate|cross-reference|delete duplicate}
+  Classification: {true_duplicate|similar_concept|false_positive}
+  Recommendation: {consolidate|cross_reference|keep_both}
 ```
 
 ### Resolution Strategies
 
-| Type | Action |
-|------|--------|
-| Exact | Delete duplicate, add cross-reference |
-| Semantic | Consolidate into authoritative location |
-| Near | Review for outdated content, merge |
+| Classification | Action |
+|----------------|--------|
+| Exact duplicate | Consolidate to authoritative location, delete other |
+| true_duplicate | Same as exact - consolidate |
+| similar_concept | Add cross-references between files |
+| false_positive | No action needed |
 
 ---
 
-## Dimension 3: Consistency Analysis
+## Dimension 3: Consistency Analysis (Cross-File)
 
-### What to Check
+### Script Pre-Processing
 
-**Terminology Consistency**:
-- Same concept with different names
-- Abbreviations vs full terms
-- Capitalization variations
+The `analyze-cross-file-content.py` script extracts terminology and detects variants:
 
-**Common Inconsistencies**:
-- "cross-reference" vs "xref" vs "internal link"
-- "workflow" vs "process" vs "procedure"
-- "must" vs "should" vs "may" (RFC 2119)
+**Script Output**:
+```json
+{
+  "terminology_variants": [
+    {
+      "concept": "cross-reference",
+      "variants": [
+        {"term": "cross-reference", "files": ["a.md"], "count": 12},
+        {"term": "xref", "files": ["b.md", "c.md"], "count": 8}
+      ],
+      "recommendation": "standardize on 'cross-reference'"
+    }
+  ]
+}
+```
+
+**Known Synonym Groups** (script detects these):
+- `cross-reference`, `xref`, `internal link`, `cross-ref`
+- `workflow`, `process`, `procedure`, `protocol`
+- `must`, `shall`, `required`, `mandatory` (RFC 2119)
+- `should`, `recommended`, `advisable`
+- `may`, `optional`, `can`
+- `skill`, `plugin`, `component`
+- `agent`, `assistant`, `bot`
+- `command`, `slash command`, `directive`
+
+### LLM Analysis for Terminology
+
+**For each terminology_variant, LLM must**:
+1. Review the variants and their usage contexts
+2. Determine if standardization is needed
+3. Recommend preferred term based on:
+   - Most common usage in codebase
+   - Industry/domain standards
+   - Clarity and precision
+
+### What Else to Check (LLM-Only)
 
 **Formatting Consistency**:
 - Header level usage
@@ -132,18 +235,18 @@ Duplication Found:
 
 ### Output Format
 
+**Terminology (from script + LLM)**:
 ```
-Consistency Issues:
-  Category: terminology
-  Term variations:
-    - "{term1}" used in: {file1}, {file2}
-    - "{term2}" used in: {file3}, {file4}
-  Recommendation: Standardize on "{preferred_term}"
+Terminology Variant:
+  Concept: {concept}
+  Variants found:
+    - "{term1}" in: {file1}, {file2} (count: N)
+    - "{term2}" in: {file3}, {file4} (count: N)
+  LLM Recommendation: Standardize on "{preferred_term}"
+  Action: {standardize|keep_variants}
 ```
 
 ### Terminology Standardization
-
-For detected inconsistencies, recommend standard term:
 
 | Variations Found | Recommended Standard |
 |------------------|---------------------|
@@ -256,15 +359,147 @@ Quality Score = (Completeness + (100 - Duplication) + Consistency + (100 - Contr
 
 ---
 
+## Dimension 5: Extraction Analysis (Cross-File)
+
+### Script Pre-Processing
+
+The `analyze-cross-file-content.py` script detects extraction candidates:
+
+**Script Output**:
+```json
+{
+  "extraction_candidates": [
+    {
+      "type": "template",
+      "pattern": "placeholder_structure",
+      "file": "guide.md",
+      "section": "Report Format",
+      "lines": "100-120",
+      "detected_placeholders": ["{{PROJECT}}", "{{VERSION}}"],
+      "recommendation": "extract_to_templates"
+    },
+    {
+      "type": "workflow",
+      "pattern": "step_sequence",
+      "file": "guide.md",
+      "section": "Setup Process",
+      "lines": "200-250",
+      "step_count": 5,
+      "recommendation": "extract_to_workflows"
+    }
+  ]
+}
+```
+
+### Detection Patterns
+
+**Template Patterns** (script detects):
+- `{{PLACEHOLDER}}` - Double-brace placeholders
+- `{placeholder}` - Single-brace placeholders
+- `[INSERT NAME]` - Bracket insert markers
+- `<PLACEHOLDER>` - Angle bracket markers
+
+**Workflow Patterns** (script detects):
+- `### Step N` - Numbered step headers
+- `### Phase N` - Numbered phase headers
+- `1. **Action**:` - Numbered bold-labeled actions (3+ required)
+
+### LLM Analysis for Extraction
+
+**For each extraction_candidate, LLM must**:
+1. Review the detected patterns in context
+2. Determine if extraction improves organization:
+   - Would it reduce duplication?
+   - Would it enable reuse?
+   - Is content general enough to extract?
+3. Recommend action:
+   - `extract_to_templates` - Content is reusable template
+   - `extract_to_workflows` - Content is reusable workflow
+   - `keep_inline` - Content is context-specific, don't extract
+
+### Output Format
+
+```
+Extraction Candidate:
+  File: {file}
+  Section: {section}
+  Lines: {start}-{end}
+  Type: {template|workflow}
+  Pattern: {placeholder_structure|step_sequence}
+  Detected: {placeholders/step_count}
+  LLM Recommendation: {extract_to_templates|extract_to_workflows|keep_inline}
+  Reasoning: {why extract or keep inline}
+```
+
+### Extraction Guidelines
+
+| Pattern Type | Extract If | Keep Inline If |
+|--------------|-----------|----------------|
+| Template | Used in 2+ places, general-purpose | Context-specific, one-time use |
+| Workflow | Reusable process, clear steps | Integrated narrative, explanatory |
+
+---
+
+## Verification of LLM Findings
+
+After LLM analysis, run `verify-cross-file-findings.py` to validate claims:
+
+```bash
+echo '{llm_findings_json}' | python3 verify-cross-file-findings.py --analysis {script_analysis_json}
+```
+
+**Verification Output**:
+```json
+{
+  "verified": [...],      // LLM claims confirmed by script
+  "rejected": [...],      // LLM claims that couldn't be verified
+  "warnings": [...],      // Potential issues
+  "summary": {
+    "verification_rate": 95.0,
+    "verified_count": 19,
+    "rejected_count": 1
+  }
+}
+```
+
+**Reject claims** that can't be verified against actual content.
+
+---
+
 ## Integration with doctor-skill-content Workflow
 
 This guide is loaded in **Phase 3: Analyze Content Quality**.
 
-```
-Read references/content-quality-guide.md
-Read ALL skill content files
-Apply analysis dimensions
-Generate quality report
-```
+### Step-by-Step Integration
 
-The LLM applies these criteria to all discovered content files and produces findings for each dimension.
+1. **Run cross-file analysis script**:
+   ```bash
+   python3 analyze-cross-file-content.py --skill-path {skill_path} > analysis.json
+   ```
+
+2. **Report exact duplicates directly** (no LLM needed):
+   - Parse `exact_duplicates` from JSON
+   - Generate consolidation recommendations
+
+3. **LLM analyzes candidates**:
+   - Read `similarity_candidates` and classify each
+   - Read `extraction_candidates` and recommend actions
+   - Read `terminology_variants` and recommend standardization
+
+4. **LLM performs single-file quality checks**:
+   - Completeness (TODO markers, missing examples)
+   - Contradictions (conflicting rules)
+
+5. **Verify LLM findings**:
+   ```bash
+   echo '{llm_output}' | python3 verify-cross-file-findings.py --analysis analysis.json
+   ```
+
+6. **Generate quality report** with verified findings only.
+
+### Token Optimization
+
+The LLM-hybrid approach reduces token usage:
+- Script handles 100% matches without LLM
+- Only 40-95% similarity pairs need LLM review
+- Verification catches hallucinated findings

@@ -628,29 +628,78 @@ Needs Move: {yes|no}
 Needs Splitting: {yes|no}
 ```
 
-### Step 4: Phase 3 - Analyze Quality (LLM)
+### Step 4: Phase 3 - Analyze Quality (LLM-Hybrid)
 
 Skip if `--skip-quality` specified.
 
-Read ALL content files into context and analyze:
+**Step 4a: Run Cross-File Analysis Script**
+
+Resolve and execute cross-file analysis:
+
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-cross-file-content.py
+```
+
+```bash
+python3 {resolved_path} --skill-path {skill_path}
+```
+
+Parse JSON output for:
+- `exact_duplicates`: Report directly (no LLM needed - hash-verified matches)
+- `similarity_candidates`: Queue for LLM semantic analysis
+- `extraction_candidates`: Queue for LLM extraction recommendations
+- `terminology_variants`: Queue for LLM consistency analysis
+
+**Step 4b: LLM Semantic Analysis**
+
+For each `similarity_candidate` (40-95% similarity):
+1. Read both content blocks from file locations
+2. Classify: `true_duplicate` | `similar_concept` | `false_positive`
+3. Recommend: `consolidate` | `cross_reference` | `keep_both`
+
+For each `extraction_candidate`:
+1. Review detected patterns (placeholders, step sequences)
+2. Recommend: `extract_to_templates` | `extract_to_workflows` | `keep_inline`
+
+For each `terminology_variant`:
+1. Review variant terms and their files
+2. Recommend standardization term or keep variants
+
+**Step 4c: Single-File Quality Analysis**
+
+Read each content file and analyze:
 
 **Completeness**:
 - TODO markers, placeholder text
 - Missing examples, incomplete sections
 
-**Duplication**:
-- Same content across files
-- Near-identical sections
-
-**Consistency**:
-- Terminology variations
-- Style inconsistencies
-
 **Contradictions**:
 - Conflicting rules
 - Examples violating stated rules
 
-**Output**: Quality report with scores per dimension.
+**Step 4d: Verify LLM Findings**
+
+Resolve and execute verification:
+
+```
+Skill: cui-utilities:script-runner
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-cross-file-findings.py
+```
+
+Pipe LLM findings JSON to verification:
+```bash
+echo '{llm_findings_json}' | python3 {resolved_path} --analysis {cross_file_analysis_json}
+```
+
+**Reject any LLM claims that can't be verified** against actual content.
+
+**Output**: Verified quality report with:
+- Exact duplicates (auto-detected)
+- Verified similarity findings
+- Verified extraction candidates
+- Verified terminology issues
+- Single-file quality scores
 
 ### Step 5: Phase 4 - Reorganize (LLM + Bash)
 
@@ -773,6 +822,8 @@ Generate comprehensive report:
 | `analyze-tool-coverage.sh` | **EXECUTE** | Tool fit score, missing/unused tools |
 | `analyze-skill-structure.sh` | **EXECUTE** | Skill directory structure validation |
 | `scan-skill-inventory.sh` | **EXECUTE** | Skill content inventory for doctor-skill-content |
+| `analyze-cross-file-content.py` | **EXECUTE** | Cross-file duplication, similarity, extraction analysis |
+| `verify-cross-file-findings.py` | **EXECUTE** | Verify LLM cross-file claims against actual content |
 | `validate-references.py` | **EXECUTE** | Reference extraction and validation |
 | `extract-fixable-issues.py` | **EXECUTE** | Filter fixable issues from analysis |
 | `categorize-fixes.py` | **EXECUTE** | Categorize as safe/risky |
