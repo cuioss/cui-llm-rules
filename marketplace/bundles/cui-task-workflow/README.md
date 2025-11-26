@@ -56,26 +56,33 @@ By combining these workflows, developers get a seamless experience from task ass
    - Makes code changes or posts explanations
    - Verifies and commits if code changed
 
-### Skills (4 skills with workflows and scripts)
+### Skills (5 skills with workflows and scripts)
 
-1. **cui-task-planning** - Task planning and execution workflows
+1. **workflow-patterns** - Orchestration patterns for agent coordination
+   - Handoff protocol (minimal, standard, full templates)
+   - Context compression strategies
+   - Integration validation patterns
+   - Token budget guidelines
+   - Wave-based processing patterns
+
+2. **cui-task-planning** - Task planning and execution workflows
    - **Plan workflow** - Creates actionable task breakdowns from issues
    - **Execute workflow** - Implements tasks from plan files
    - **Review workflow** - Validates issue documentation for clarity
    - Scripts: create-task-breakdown.py, track-task-progress.py, validate-acceptance.py
 
-2. **cui-git-workflow** - Git commit workflow
+3. **cui-git-workflow** - Git commit workflow
    - **Commit workflow** - Commits with conventional commits format
    - Artifact detection and cleanup
    - Optional push and PR creation
    - Script: format-commit-message.py
 
-3. **pr-workflow** - PR review comment handling
+4. **pr-workflow** - PR review comment handling
    - **Fetch Comments workflow** - Retrieves PR comments via gh CLI
    - **Handle Review workflow** - Triages and responds to comments
    - Scripts: fetch-pr-comments.py, triage-comment.py
 
-4. **sonar-workflow** - Sonar issue handling
+5. **sonar-workflow** - Sonar issue handling
    - **Fetch Issues workflow** - Retrieves issues via SonarQube MCP
    - **Fix Issues workflow** - Triages and resolves issues
    - Scripts: fetch-sonar-issues.py, triage-issue.py
@@ -135,6 +142,7 @@ The command will fetch comments, implement changes, verify quality, and push upd
 
 ### Inter-Bundle Dependencies
 - **cui-maven** (required) - Commands use /maven-build-and-fix for verification
+- **cui-utilities** (required) - claude-memory skill for session persistence
 - **cui-java-expert** (optional) - For Java implementation delegation
 - **cui-frontend-expert** (optional) - For JavaScript implementation delegation
 
@@ -147,6 +155,8 @@ The command will fetch comments, implement changes, verify quality, and push upd
 
 ```
 cui-task-workflow/
+├── README.md           # This file
+├── HANDOFF-GUIDE.md    # Handoff protocol integration guide
 ├── commands/           # 6 goal-based orchestrators
 │   ├── orchestrate-workflow.md
 │   ├── orchestrate-task.md
@@ -154,7 +164,11 @@ cui-task-workflow/
 │   ├── pr-handle-pull-request.md
 │   ├── pr-fix-sonar-issues.md
 │   └── pr-respond-to-review-comments.md
-└── skills/             # 4 skills with workflows
+└── skills/             # 5 skills with workflows
+    ├── workflow-patterns/
+    │   ├── SKILL.md    # Orchestration patterns overview
+    │   ├── templates/  # Handoff JSON templates
+    │   └── references/ # Protocol documentation
     ├── cui-task-planning/
     │   ├── SKILL.md    # Plan, Execute, Review workflows
     │   ├── scripts/    # 3 Python scripts
@@ -174,7 +188,7 @@ cui-task-workflow/
 ## Bundle Statistics
 
 - **Commands**: 6 (thin orchestrators, <100 lines each)
-- **Skills**: 4 (with 8 Python scripts total)
+- **Skills**: 5 (workflow-patterns + 4 with 8 Python scripts total)
 - **Agents**: 0 (all absorbed into skills)
 
 ## Support
