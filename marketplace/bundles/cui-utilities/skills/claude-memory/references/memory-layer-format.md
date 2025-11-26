@@ -7,10 +7,7 @@ File format specifications for `.claude/memory/` session persistence.
 ```
 .claude/memory/
 ├── context/         # Session context snapshots
-├── handoffs/        # Pending handoff state
-└── archive/         # Archived files
-    ├── context/
-    └── handoffs/
+└── handoffs/        # Pending handoff state
 ```
 
 ## Memory File Envelope
@@ -70,7 +67,7 @@ Session context snapshots. Short-lived, typically cleaned up after days.
 
 ### handoffs
 
-Pending handoff state. Short-lived, archived when completed.
+Pending handoff state. Short-lived, deleted when completed.
 
 **File naming**: `{task-id}.json`
 
@@ -98,7 +95,7 @@ Pending handoff state. Short-lived, archived when completed.
 
 ### Save
 
-Creates or updates a memory file.
+Creates or updates a memory file. Directories are created on-the-fly.
 
 ```bash
 python3 scripts/manage-memory.py save \
@@ -149,16 +146,6 @@ python3 scripts/manage-memory.py cleanup \
   --older-than 7d
 ```
 
-### Archive
-
-Moves file to archive.
-
-```bash
-python3 scripts/manage-memory.py archive \
-  --category handoffs \
-  --identifier "task-42"
-```
-
 ---
 
 ## Lifecycle Recommendations
@@ -166,14 +153,4 @@ python3 scripts/manage-memory.py archive \
 | Category | Typical Lifetime | Cleanup Strategy |
 |----------|-----------------|------------------|
 | context | Days | Auto-cleanup after 7d |
-| handoffs | Until completed | Archive on completion |
-
-## .gitignore
-
-The memory directory should be gitignored:
-
-```
-.claude/memory/
-```
-
-Context and handoffs are session-specific and should not be committed.
+| handoffs | Until completed | Delete on completion |
