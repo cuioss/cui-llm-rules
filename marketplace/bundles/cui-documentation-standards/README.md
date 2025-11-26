@@ -205,13 +205,3 @@ All commands are thin orchestrators (<150 lines) that delegate to skill workflow
 
 - **cui-task-workflow** (optional) - For commit workflow in batch processing
 - **cui-utilities** (optional) - For script-runner workflow
-
-### External Dependencies
-
-- Python 3 for link verification and content analysis
-- Shell (bash) for formatting and validation scripts
-
-## Support
-
-- Repository: https://github.com/cuioss/cui-llm-rules
-- Bundle: marketplace/bundles/cui-documentation-standards/
