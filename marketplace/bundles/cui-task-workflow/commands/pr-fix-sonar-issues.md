@@ -49,11 +49,7 @@ Use **sonar-workflow** Fetch Issues workflow:
 
 For each issue, use **sonar-workflow** Fix Issues workflow:
 
-1. Run triage script:
-   ```bash
-   python3 {skillBaseDir}/scripts/triage-issue.py --issue '{json}'
-   ```
-
+1. The skill runs its triage script to decide fix vs suppress
 2. Based on script decision:
    - **If fix**: `SlashCommand(/java-implement-code "fix {issue}")`
    - **If suppress**: `AskUserQuestion` for approval, then add suppression comment

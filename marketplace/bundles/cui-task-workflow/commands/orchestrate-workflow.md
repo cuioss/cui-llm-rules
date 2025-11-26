@@ -83,12 +83,8 @@ Use **cui-task-planning** Review workflow:
 
 Use **cui-task-planning** Plan workflow:
 
-1. Load planning standards: `Read {skillBaseDir}/standards/issue-planning-standards.md`
-2. Run analysis script:
-   ```bash
-   python3 {skillBaseDir}/scripts/create-task-breakdown.py {issue-file}
-   ```
-3. Generate plan document following standards
+1. The skill loads planning standards and runs its task breakdown script
+2. Generate plan document following standards
 
 **Store tasks list for iteration.**
 

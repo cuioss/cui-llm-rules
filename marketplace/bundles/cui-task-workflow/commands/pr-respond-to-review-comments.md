@@ -36,20 +36,13 @@ Skill: cui-task-workflow:pr-workflow
 
 Use **pr-workflow** Fetch Comments workflow:
 1. Determine PR number: `gh pr view --json number --jq '.number'`
-2. Run fetch script:
-   ```bash
-   python3 {skillBaseDir}/scripts/fetch-pr-comments.py [--pr {number}]
-   ```
+2. The skill runs its fetch script to retrieve comments
 
 ### Step 2: Triage and Respond to Each Comment (Skill Workflow 2)
 
 For each unresolved comment, use **pr-workflow** Handle Review workflow:
 
-1. Run triage script:
-   ```bash
-   python3 {skillBaseDir}/scripts/triage-comment.py --comment '{json}'
-   ```
-
+1. The skill runs its triage script to classify the comment
 2. Based on script decision:
    - **If code_change**: Delegate to appropriate command or direct Edit
    - **If explain**: Post explanation comment via `gh pr comment {pr} --body "..."`
