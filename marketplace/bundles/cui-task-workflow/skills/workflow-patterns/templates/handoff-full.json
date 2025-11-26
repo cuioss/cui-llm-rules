@@ -1,0 +1,62 @@
+{
+  "handoff": {
+    "meta": {
+      "from": "{source_agent}",
+      "to": "{target_agent}",
+      "timestamp": "{ISO_8601_timestamp}",
+      "session_id": "{optional_session_id}",
+      "wave": "{wave_number_if_applicable}"
+    },
+    "task": {
+      "id": "{task_identifier}",
+      "description": "{task_description}",
+      "status": "completed|blocked|partial",
+      "progress": "{percentage_or_fraction}",
+      "completed": ["{completed_subtasks}"],
+      "pending": ["{remaining_subtasks}"]
+    },
+    "artifacts": {
+      "files": {
+        "created": ["{new_files}"],
+        "modified": ["{changed_files}"],
+        "deleted": ["{removed_files}"]
+      },
+      "interfaces": {
+        "exposed": ["{interfaces_this_component_exposes}"],
+        "consumed": ["{interfaces_this_component_uses}"]
+      },
+      "contracts": {
+        "api": ["{api_contracts}"],
+        "types": ["{type_definitions}"],
+        "events": ["{event_schemas}"]
+      },
+      "decisions": [
+        {
+          "decision": "{what_was_decided}",
+          "rationale": "{why}",
+          "alternatives": ["{considered_alternatives}"]
+        }
+      ]
+    },
+    "context": {
+      "architecture": "{relevant_architectural_context}",
+      "dependencies": ["{external_dependencies_with_versions}"],
+      "constraints": ["{hard_constraints}"],
+      "assumptions": ["{assumptions_made}"],
+      "risks": ["{identified_risks}"]
+    },
+    "validation": {
+      "tests_required": ["{tests_that_should_be_written}"],
+      "integration_points": ["{points_needing_integration_validation}"],
+      "known_issues": ["{issues_to_address}"]
+    },
+    "next": {
+      "action": "{what_target_should_do}",
+      "focus": "{specific_focus_area}",
+      "priority": "high|medium|low",
+      "blockers": ["{known_blockers}"],
+      "context_budget": "{available_tokens_for_target}"
+    },
+    "memory_refs": ["{references_to_memory_layer_files}"]
+  }
+}

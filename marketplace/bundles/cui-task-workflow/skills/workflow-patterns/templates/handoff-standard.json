@@ -1,0 +1,27 @@
+{
+  "handoff": {
+    "from": "{source_agent}",
+    "to": "{target_agent}",
+    "timestamp": "{ISO_8601_timestamp}",
+    "task": {
+      "description": "{task_description}",
+      "status": "completed|blocked|partial",
+      "progress": "{percentage_or_fraction}"
+    },
+    "artifacts": {
+      "files": ["{created_or_modified_files}"],
+      "interfaces": ["{interface_definitions}"],
+      "decisions": ["{architectural_decisions_made}"]
+    },
+    "context": {
+      "dependencies": ["{external_dependencies}"],
+      "constraints": ["{constraints_discovered}"],
+      "notes": "{implementation_notes}"
+    },
+    "next": {
+      "action": "{what_target_should_do}",
+      "focus": "{specific_focus_area}",
+      "blockers": ["{known_blockers}"]
+    }
+  }
+}
