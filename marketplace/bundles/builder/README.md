@@ -44,6 +44,11 @@ This bundle consolidates build execution, output parsing, and issue routing for 
 - `/gradle-build-and-fix` - Execute Gradle build and fix issues iteratively
 - `/gradle-dependency-maintenance` - Gradle dependency maintenance
 
+### npm Commands
+
+- `/npm-build-and-fix` - Execute npm build and fix issues iteratively
+- `/npm-package-maintenance` - Package.json maintenance and auditing
+
 ## Common Features
 
 All build tools share:
