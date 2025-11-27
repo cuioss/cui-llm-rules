@@ -1,5 +1,5 @@
 ---
-name: cui-npm-rules
+name: builder-npm-rules
 description: npm/npx build execution, output parsing, and issue routing for CUI JavaScript projects
 allowed-tools:
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
   - Bash(python3:*)
 ---
 
-# CUI npm Build Rules
+# Builder npm Build Rules
 
 npm/npx build execution skill for CUI JavaScript projects. Handles build commands, output parsing, error categorization, and issue routing.
 
@@ -137,7 +137,7 @@ Return structured JSON with:
 
 Commands invoke this workflow as:
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 Workflow: Execute npm Build
 Parameters:
   command: run test

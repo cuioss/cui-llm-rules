@@ -1,0 +1,20 @@
+{
+  "name": "builder-npm",
+  "version": "0.9.0",
+  "description": "npm/npx build execution, output parsing, and issue routing for JavaScript projects",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["npm", "npx", "build", "verification", "javascript"],
+  "commands": [],
+  "skills": [
+    "./skills/builder-npm-rules"
+  ],
+  "agents": [
+    "./agents/npm-builder.md"
+  ]
+}

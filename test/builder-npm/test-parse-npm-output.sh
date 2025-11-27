@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-SCRIPT_PATH="$PROJECT_ROOT/marketplace/bundles/cui-frontend-expert/skills/cui-npm-rules/scripts/parse-npm-output.py"
+SCRIPT_PATH="$PROJECT_ROOT/marketplace/bundles/builder-npm/skills/builder-npm-rules/scripts/parse-npm-output.py"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures"
 
 # Test counters

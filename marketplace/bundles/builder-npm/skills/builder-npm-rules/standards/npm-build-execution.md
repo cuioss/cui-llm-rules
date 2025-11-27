@@ -278,7 +278,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e
 ### Command Usage Pattern
 
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 Workflow: Execute npm Build
 Parameters:
   command: run test

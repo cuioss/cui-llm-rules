@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run all test suites for cui-frontend-expert/cui-npm-rules
+# Run all test suites for builder-npm
 
 set -e
 
@@ -18,7 +18,7 @@ PASSED_SUITES=0
 FAILED_SUITES=0
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}CUI Frontend Expert Test Suite${NC}"
+echo -e "${BLUE}Builder npm Test Suite${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 # Function to run a test suite

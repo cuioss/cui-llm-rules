@@ -1,4 +1,4 @@
-# CUI npm Build Rules
+# Builder npm Build Rules
 
 Build execution and output parsing skill for npm/npx commands in CUI JavaScript projects.
 
@@ -20,9 +20,9 @@ This skill follows the same pattern as `builder-maven:builder-maven-rules`:
 npm-builder agent (Layer 3)
   ├─> Detects project structure
   ├─> Validates workspace configuration
-  └─> Delegates to cui-npm-rules skill
+  └─> Delegates to builder-npm-rules skill
 
-cui-npm-rules skill
+builder-npm-rules skill
   ├─> execute-npm-build.py - Atomic build execution
   ├─> parse-npm-output.py - Output parsing and categorization
   └─> standards/npm-build-execution.md - Build standards
@@ -33,7 +33,7 @@ cui-npm-rules skill
 ### From Commands
 
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 Workflow: Execute npm Build
 Parameters:
   command: run test
@@ -147,7 +147,7 @@ This skill is used by:
 
 ## Comparison with Maven
 
-| Aspect | builder-maven-rules | cui-npm-rules |
+| Aspect | builder-maven-rules | builder-npm-rules |
 |--------|----------------|---------------|
 | **Build tool** | ./mvnw | npm/npx |
 | **Execution script** | execute-maven-build.py | execute-npm-build.py |
@@ -169,7 +169,7 @@ python3 parse-npm-output.py --log target/npm-output.log
 
 **After** (using skill):
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 Workflow: Execute npm Build
 Parameters:
   command: run test
@@ -178,7 +178,7 @@ Parameters:
 
 ### From cui-javascript-project
 
-The `parse-npm-output.py` script was moved from `cui-javascript-project` to `cui-npm-rules`. Update references:
+The `parse-npm-output.py` script was moved from `cui-javascript-project` to `builder-npm-rules`. Update references:
 
 **Before:**
 ```
@@ -188,6 +188,6 @@ Resolve: cui-frontend-expert:cui-javascript-project/scripts/parse-npm-output.py
 
 **After:**
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 Workflow: Parse npm Build Output
 ```

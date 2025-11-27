@@ -211,17 +211,17 @@ For detailed configuration examples and complete reference, see the individual s
 
 ### Workflow: npm Build Execution and Parsing
 
-For npm/npx build execution and output parsing, use the **cui-npm-rules** skill:
+For npm/npx build execution and output parsing, use the **builder-npm-rules** skill:
 
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 ```
 
-The cui-npm-rules skill provides:
+The builder-npm-rules skill provides:
 - **Execute npm Build** workflow - Atomic build execution with log capture
 - **Parse npm Build Output** workflow - Issue categorization and routing
 
-**When to use cui-npm-rules**:
+**When to use builder-npm-rules**:
 - Running npm/npx builds (test, lint, build, etc.)
 - Parsing npm build output for errors and warnings
 - Categorizing build issues for orchestrated fixing
@@ -229,7 +229,7 @@ The cui-npm-rules skill provides:
 
 **Example usage**:
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 Workflow: Execute npm Build
 Parameters:
   command: run test
@@ -237,4 +237,4 @@ Parameters:
   output_mode: structured
 ```
 
-See cui-npm-rules skill documentation for complete workflow details.
+See builder-npm-rules skill documentation for complete workflow details.

@@ -23,9 +23,9 @@ This bundle provides comprehensive frontend development expertise by aggregating
 3. **cui-javascript-project** - Project structure and build standards
    - Directory layouts, package.json configuration
    - Dependency management, Maven integration
-   - References cui-npm-rules for build execution
+   - References builder-npm-rules for build execution
 
-4. **cui-npm-rules** - npm/npx build execution and output parsing
+4. **builder-npm-rules** - npm/npx build execution and output parsing
    - Atomic build execution with log management
    - npm vs npx automatic detection
    - Workspace targeting for monorepos
@@ -58,15 +58,15 @@ This bundle provides comprehensive frontend development expertise by aggregating
 **npm-builder** - Autonomous npm/npx build agent
 - Project structure detection (single-package vs monorepo)
 - Workspace validation
-- Delegates to cui-npm-rules skill for execution
+- Delegates to builder-npm-rules skill for execution
 - Returns structured build results
 
 ### Scripts (4 automation scripts)
 
 | Script | Location | Purpose |
 |--------|----------|---------|
-| `execute-npm-build.py` | cui-npm-rules | Atomic npm/npx build execution |
-| `parse-npm-output.py` | cui-npm-rules | Categorize npm build output |
+| `execute-npm-build.py` | builder-npm-rules | Atomic npm/npx build execution |
+| `parse-npm-output.py` | builder-npm-rules | Categorize npm build output |
 | `analyze-js-coverage.py` | cui-javascript-unit-testing | Parse Jest/Istanbul coverage reports |
 | `analyze-jsdoc-violations.py` | cui-jsdoc | Detect JSDoc compliance violations |
 
@@ -103,8 +103,8 @@ cui-frontend-expert/
     │   └── scripts/
     │       └── analyze-js-coverage.py
     ├── cui-javascript-project/  # Project structure + dependencies
-    │   └── SKILL.md             # References cui-npm-rules for builds
-    ├── cui-npm-rules/           # npm/npx build execution
+    │   └── SKILL.md             # References builder-npm-rules for builds
+    ├── builder-npm-rules/           # npm/npx build execution
     │   ├── SKILL.md             # Workflows: Execute npm Build, Parse npm Build Output
     │   ├── scripts/
     │   │   ├── execute-npm-build.py
@@ -129,9 +129,9 @@ Similar to builder-maven with maven-builder agent and builder-maven-rules skill:
 npm-builder agent (Layer 3)
   ├─> Detects project structure (single-package vs monorepo)
   ├─> Validates workspace configuration
-  └─> Delegates to cui-npm-rules skill
+  └─> Delegates to builder-npm-rules skill
 
-cui-npm-rules skill
+builder-npm-rules skill
   ├─> execute-npm-build.py - Atomic build execution
   ├─> parse-npm-output.py - Output parsing and categorization
   └─> standards/npm-build-execution.md - Build standards

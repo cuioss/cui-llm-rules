@@ -41,7 +41,7 @@ Glob: **/package.json
 
 **Load skill and pass parameters:**
 ```
-Skill: cui-frontend-expert:cui-npm-rules
+Skill: builder-npm:builder-npm-rules
 ```
 
 **Pass context to skill:**
@@ -68,6 +68,6 @@ Return the structured output from the skill as the agent result.
 
 ## RELATED
 
-- Skill: `cui-frontend-expert:cui-npm-rules` - Build execution
+- Skill: `builder-npm:builder-npm-rules` - Build execution
 - Command: `/js-implement-code` - Uses npm-builder for verification
 - Command: `/js-implement-tests` - Uses npm-builder for verification
