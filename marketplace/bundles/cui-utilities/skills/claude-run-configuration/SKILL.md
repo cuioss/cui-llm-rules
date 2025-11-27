@@ -55,13 +55,62 @@ Activate this skill when:
 
 ---
 
+## Workflow: Initialize Configuration
+
+**Pattern**: Command Chain Execution
+
+**CRITICAL**: Always ensure the file exists before reading or updating. Use the init script to create it with proper base structure.
+
+### Step 1: Initialize Configuration File
+
+```bash
+python3 scripts/init-run-config.py
+```
+
+This creates `.claude/run-configuration.json` with base structure if it doesn't exist.
+
+**Options:**
+- `--project-dir /path/to/project` - Initialize in specific directory
+- `--force` - Overwrite existing file
+
+**Base Structure Created:**
+```json
+{
+  "version": 1,
+  "commands": {},
+  "maven": {
+    "acceptable_warnings": {
+      "transitive_dependency": [],
+      "plugin_compatibility": [],
+      "platform_specific": []
+    }
+  }
+}
+```
+
+### Alternative: Manual Initialization
+
+If the script is not available, create manually:
+
+```bash
+test -f .claude/run-configuration.json || \
+  python3 json-file-operations/scripts/manage-json-file.py write .claude/run-configuration.json \
+    --value '{"version": 1, "commands": {}, "maven": {"acceptable_warnings": {"transitive_dependency": [], "plugin_compatibility": [], "platform_specific": []}}}'
+```
+
+---
+
 ## Workflow: Read Configuration
 
 **Pattern**: Command Chain Execution
 
 Read run configuration or specific command entry.
 
-### Using json-file-operations
+### Step 1: Ensure File Exists
+
+First, run the **Initialize Configuration** workflow to ensure the file exists.
+
+### Step 2: Read Using json-file-operations
 
 ```bash
 # Read entire configuration
@@ -84,12 +133,48 @@ python3 json-file-operations/scripts/manage-json-file.py read-field .claude/run-
 
 Record command execution results.
 
-### Step 1: Update Last Execution
+### Step 1: Ensure File Exists
+
+First, run the **Initialize Configuration** workflow to ensure the file exists with base structure.
+
+### Step 2: Ensure Command Entry Exists
+
+Before updating nested fields, ensure the command entry exists:
+
+```bash
+# Create command entry if it doesn't exist (update-field auto-creates intermediate objects)
+python3 json-file-operations/scripts/manage-json-file.py update-field .claude/run-configuration.json \
+  --field "commands.<command-name>" \
+  --value '{}'
+```
+
+**Note**: Skip this step if the command entry already exists.
+
+### Step 3: Update Last Execution
 
 ```bash
 python3 json-file-operations/scripts/manage-json-file.py update-field .claude/run-configuration.json \
   --field "commands.<command-name>.last_execution" \
-  --value '{"date": "2025-11-25", "status": "SUCCESS"}'
+  --value '{"date": "2025-11-25", "status": "SUCCESS", "duration_ms": 12345}'
+```
+
+### Complete Example
+
+```bash
+# Step 1: Initialize if not exists
+test -f .claude/run-configuration.json || \
+  python3 json-file-operations/scripts/manage-json-file.py write .claude/run-configuration.json \
+    --value '{"version": 1, "commands": {}, "maven": {"acceptable_warnings": {"transitive_dependency": [], "plugin_compatibility": [], "platform_specific": []}}}'
+
+# Step 2: Create command entry
+python3 json-file-operations/scripts/manage-json-file.py update-field .claude/run-configuration.json \
+  --field "commands.verify-integration-tests" \
+  --value '{}'
+
+# Step 3: Update execution status
+python3 json-file-operations/scripts/manage-json-file.py update-field .claude/run-configuration.json \
+  --field "commands.verify-integration-tests.last_execution" \
+  --value '{"date": "2025-11-27", "status": "SUCCESS", "duration_ms": 231584}'
 ```
 
 ---
@@ -153,6 +238,7 @@ Categories: `transitive_dependency`, `plugin_compatibility`, `platform_specific`
 
 | Script | Purpose |
 |--------|---------|
+| `init-run-config.py` | Initialize run configuration with base structure |
 | `validate-run-config.py` | Run configuration format validation |
 
 Script characteristics:
