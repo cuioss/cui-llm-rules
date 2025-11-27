@@ -11,12 +11,8 @@
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["maven", "gradle", "npm", "build", "compilation", "testing"],
   "commands": [
-    "./commands/maven-build-and-fix.md",
-    "./commands/maven-pom-maintenance.md",
-    "./commands/gradle-build-and-fix.md",
-    "./commands/gradle-dependency-maintenance.md",
-    "./commands/npm-build-and-fix.md",
-    "./commands/npm-package-maintenance.md"
+    "./commands/builder-build-and-fix.md",
+    "./commands/builder-maintenance.md"
   ],
   "skills": [
     "./skills/environment-detection",

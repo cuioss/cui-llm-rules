@@ -38,20 +38,10 @@ This bundle consolidates build execution, output parsing, and issue routing for 
 
 ## Commands
 
-### Maven Commands
+- `/builder-build-and-fix` - Execute build and fix issues iteratively (auto-detects build system)
+- `/builder-maintenance` - Dependency and package maintenance (auto-detects build system)
 
-- `/maven-build-and-fix` - Execute Maven build and fix issues iteratively
-- `/maven-pom-maintenance` - POM dependency and BOM maintenance
-
-### Gradle Commands
-
-- `/gradle-build-and-fix` - Execute Gradle build and fix issues iteratively
-- `/gradle-dependency-maintenance` - Gradle dependency maintenance
-
-### npm Commands
-
-- `/npm-build-and-fix` - Execute npm build and fix issues iteratively
-- `/npm-package-maintenance` - Package.json maintenance and auditing
+Both commands accept a `system` parameter (maven, gradle, npm) to override auto-detection.
 
 ## Common Features
 
