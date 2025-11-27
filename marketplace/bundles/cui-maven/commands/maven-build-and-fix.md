@@ -22,7 +22,21 @@ Orchestrates Maven builds, routes issues to fix commands, iterates until clean.
 
 Extract from user input. Apply defaults for missing values.
 
-### Step 2: Build Loop (max 5 iterations)
+### Step 2: Load Previous Execution Data
+
+Read previous execution duration for timeout calculation:
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Read Configuration
+Field: commands.maven-build-and-fix.last_execution
+```
+
+**Calculate timeout:**
+- If previous duration exists: `timeout = duration_ms * 1.25` (25% safety margin)
+- If no previous data: use default timeout (120000ms for standard builds)
+
+### Step 3: Build Loop (max 5 iterations)
 
 ```
 Skill: cui-maven:cui-maven-rules
@@ -30,7 +44,7 @@ Workflow: Execute Maven Build
 Parameters: goals, profile, module, output_mode=structured
 ```
 
-**On SUCCESS with 0 issues:** Proceed to Step 3 (Report)
+**On SUCCESS with 0 issues:** Proceed to Step 4 (Record Results)
 
 **On issues:** Route to fix commands, then re-run build (without `clean`):
 
@@ -43,10 +57,28 @@ Parameters: goals, profile, module, output_mode=structured
 
 **Iteration limits:**
 - issues_remaining > 0 AND iteration < 5 → re-run fixes
-- issues_remaining == 0 → Report success
-- iteration >= 5 → Report partial
+- issues_remaining == 0 → Proceed to Step 4
+- iteration >= 5 → Report partial (skip Step 4)
 
-### Step 3: Report Results
+### Step 4: Record Execution Results
+
+On successful build (0 issues), record execution data:
+
+```
+Skill: cui-utilities:claude-run-configuration
+Workflow: Update Configuration
+Field: commands.maven-build-and-fix.last_execution
+Value: {
+  "date": "{current-date}",
+  "status": "SUCCESS",
+  "duration_ms": {total-duration},
+  "duration_human": "{formatted-duration}"
+}
+```
+
+**Note:** Only record duration for successful builds. Failed builds have unpredictable durations.
+
+### Step 5: Report Results
 
 **Success:**
 ```
@@ -71,6 +103,7 @@ Do NOT commit if issues remain.
 ## RELATED
 
 - Skill: `cui-maven:cui-maven-rules` - Build execution and parsing
+- Skill: `cui-utilities:claude-run-configuration` - Execution history and timeout calculation
 - Command: `/java-implement-code` - Compilation fixes
 - Command: `/java-implement-tests` - Test fixes
 - Command: `/java-fix-javadoc` - JavaDoc fixes
