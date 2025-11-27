@@ -1,4 +1,8 @@
 = Valid All Link Types
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
 :toc: left
 
 == Introduction
@@ -14,7 +18,7 @@ Link to explicit anchor: <<explicit-anchor>>
 
 Link to section header: <<introduction>>
 
-Link with label: <<explicit-anchor,See the anchor>>
+Link with label: xref:explicit-anchor[See the anchor]
 
 [#modern-anchor]
 === Modern Anchor Syntax

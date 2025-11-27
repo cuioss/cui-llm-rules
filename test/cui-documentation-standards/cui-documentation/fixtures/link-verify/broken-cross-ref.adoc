@@ -1,4 +1,9 @@
 = Broken Cross Reference
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:source-highlighter: highlight.js
 
 == Valid Section
 
@@ -8,6 +13,6 @@ This is valid.
 
 Link to nonexistent anchor: <<nonexistent-anchor>>
 
-Link to another missing anchor: <<missing-anchor,With Label>>
+Link to another missing anchor: xref:missing-anchor[With Label]
 
 Valid link: <<valid-section>>

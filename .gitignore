@@ -11,6 +11,10 @@
 # Build output
 target/
 
+# Python cache
+**/__pycache__/
+*.pyc
+
 # Claude Code configuration
 # Claude Code files
 .claude/*
