@@ -90,16 +90,13 @@ setup_test_lessons() {
 
     # Lesson 1: Bug in maven-build-and-fix (unapplied)
     cat > "$LESSONS_DIR/2025-11-27-001.md" <<'EOF'
----
-id: 2025-11-27-001
-component:
-  type: command
-  name: maven-build-and-fix
-  bundle: cui-maven
-date: 2025-11-27
-category: bug
-applied: false
----
+id=2025-11-27-001
+component.type=command
+component.name=maven-build-and-fix
+component.bundle=cui-maven
+date=2025-11-27
+category=bug
+applied=false
 
 # Paths with spaces cause failures
 
@@ -110,16 +107,13 @@ EOF
 
     # Lesson 2: Improvement in maven-build-and-fix (unapplied)
     cat > "$LESSONS_DIR/2025-11-27-002.md" <<'EOF'
----
-id: 2025-11-27-002
-component:
-  type: command
-  name: maven-build-and-fix
-  bundle: cui-maven
-date: 2025-11-27
-category: improvement
-applied: false
----
+id=2025-11-27-002
+component.type=command
+component.name=maven-build-and-fix
+component.bundle=cui-maven
+date=2025-11-27
+category=improvement
+applied=false
 
 # Add progress indicator
 
@@ -130,16 +124,13 @@ EOF
 
     # Lesson 3: Pattern in cui-maven-rules (applied)
     cat > "$LESSONS_DIR/2025-11-27-003.md" <<'EOF'
----
-id: 2025-11-27-003
-component:
-  type: skill
-  name: cui-maven-rules
-  bundle: cui-maven
-date: 2025-11-27
-category: pattern
-applied: true
----
+id=2025-11-27-003
+component.type=skill
+component.name=cui-maven-rules
+component.bundle=cui-maven
+date=2025-11-27
+category=pattern
+applied=true
 
 # Validate inputs early
 
@@ -150,16 +141,13 @@ EOF
 
     # Lesson 4: Bug in java-create (unapplied)
     cat > "$LESSONS_DIR/2025-11-26-001.md" <<'EOF'
----
-id: 2025-11-26-001
-component:
-  type: command
-  name: java-create
-  bundle: cui-java-expert
-date: 2025-11-26
-category: bug
-applied: false
----
+id=2025-11-26-001
+component.type=command
+component.name=java-create
+component.bundle=cui-java-expert
+date=2025-11-26
+category=bug
+applied=false
 
 # Missing package validation
 
@@ -170,16 +158,13 @@ EOF
 
     # Lesson 5: Anti-pattern in java-refactor (applied)
     cat > "$LESSONS_DIR/2025-11-25-001.md" <<'EOF'
----
-id: 2025-11-25-001
-component:
-  type: command
-  name: java-refactor
-  bundle: cui-java-expert
-date: 2025-11-25
-category: anti-pattern
-applied: true
----
+id=2025-11-25-001
+component.type=command
+component.name=java-refactor
+component.bundle=cui-java-expert
+date=2025-11-25
+category=anti-pattern
+applied=true
 
 # Don't modify during iteration
 

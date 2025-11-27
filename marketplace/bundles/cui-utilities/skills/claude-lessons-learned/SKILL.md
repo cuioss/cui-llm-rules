@@ -36,25 +36,24 @@ Activate this skill when:
   ...
 ```
 
-Each lesson is stored as an individual Markdown file with YAML frontmatter.
+Each lesson is stored as an individual Markdown file with simple key=value metadata.
 
 ---
 
 ## File Format
 
-Individual Markdown files with YAML frontmatter for metadata:
+Individual Markdown files with simple key=value metadata.
+
+Metadata uses key=value pairs with dot notation for nested objects, separated from content by a blank line:
 
 ```markdown
----
-id: 2025-11-27-001
-component:
-  type: command
-  name: maven-build-and-fix
-  bundle: cui-maven
-date: 2025-11-27
-category: bug
-applied: false
----
+id=2025-11-27-001
+component.type=command
+component.name=maven-build-and-fix
+component.bundle=cui-maven
+date=2025-11-27
+category=bug
+applied=false
 
 # Brief Summary Title
 
@@ -73,7 +72,6 @@ Bash: ls "${file_path}"
 
 - Affected: maven-build-and-fix command
 - Similar issue in: java-refactor-code
-```
 ```
 
 ### Lesson Categories
@@ -115,16 +113,13 @@ Format: `{YYYY-MM-DD}-{NNN}.md`
 Write lesson to `.claude/lessons-learned/{id}.md`:
 
 ```markdown
----
-id: 2025-11-27-001
-component:
-  type: command
-  name: maven-build-and-fix
-  bundle: cui-maven
-date: 2025-11-27
-category: bug
-applied: false
----
+id=2025-11-27-001
+component.type=command
+component.name=maven-build-and-fix
+component.bundle=cui-maven
+date=2025-11-27
+category=bug
+applied=false
 
 # Brief Summary
 
@@ -139,7 +134,7 @@ Full explanation of the lesson.
 ```
 ```
 
-Use Write tool to create the file with proper frontmatter and content.
+Use Write tool to create the file with proper metadata and content.
 
 ---
 
@@ -147,7 +142,7 @@ Use Write tool to create the file with proper frontmatter and content.
 
 **Pattern**: Command Chain Execution
 
-Use the `query-lessons.py` script to filter lessons by frontmatter criteria.
+Use the `query-lessons.py` script to filter lessons by metadata criteria.
 
 ### Query All Lessons
 
@@ -185,7 +180,7 @@ python3 scripts/query-lessons.py --bundle cui-maven
 python3 scripts/query-lessons.py --component maven-build-and-fix --applied false
 ```
 
-**Output**: JSON array of matching lessons with frontmatter and content.
+**Output**: JSON array of matching lessons with metadata and content.
 
 ---
 
@@ -196,15 +191,15 @@ python3 scripts/query-lessons.py --component maven-build-and-fix --applied false
 After applying a lesson to component documentation:
 
 1. Find lesson file: `.claude/lessons-learned/{lesson-id}.md`
-2. Edit frontmatter: Change `applied: false` to `applied: true`
-3. Use Edit tool to update the frontmatter only
+2. Edit metadata: Change `applied=false` to `applied=true`
+3. Use Edit tool to update the metadata only
 
 **Example**:
 ```bash
 # For lesson 2025-11-27-001.md
 Edit .claude/lessons-learned/2025-11-27-001.md
-old_string: "applied: false"
-new_string: "applied: true"
+old_string: "applied=false"
+new_string: "applied=true"
 ```
 
 ---
@@ -227,23 +222,11 @@ The `/plugin-apply-lessons-learned` command uses this skill to:
 
 ---
 
-## Dependencies
-
-**Python Libraries**:
-- `python-frontmatter` - YAML frontmatter parsing for query script
-
-Install with:
-```bash
-pip install python-frontmatter
-```
-
----
-
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `query-lessons.py` | Query and filter lessons by frontmatter criteria |
+| `query-lessons.py` | Query and filter lessons by metadata criteria (uses only Python standard library) |
 | `test-query-lessons.sh` | Test suite for query script |
 
 ---

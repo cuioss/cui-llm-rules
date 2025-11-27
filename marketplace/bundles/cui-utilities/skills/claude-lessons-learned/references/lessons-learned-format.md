@@ -26,26 +26,23 @@ Each lesson is stored as an individual Markdown file.
 
 ## File Structure
 
-### Frontmatter (YAML)
+### Metadata (key=value)
 
-Required metadata at top of file:
+Required metadata at top of file using simple key=value pairs with dot notation for nested objects:
 
-```yaml
----
-id: 2025-11-27-001
-component:
-  type: command|agent|skill
-  name: component-name
-  bundle: bundle-name
-date: 2025-11-27
-category: bug|improvement|pattern|anti-pattern
-applied: false
----
+```
+id=2025-11-27-001
+component.type=command|agent|skill
+component.name=component-name
+component.bundle=bundle-name
+date=2025-11-27
+category=bug|improvement|pattern|anti-pattern
+applied=false
 ```
 
 ### Content (Markdown)
 
-After frontmatter, standard Markdown content:
+After a blank line separator, standard Markdown content:
 
 ```markdown
 # Brief Summary Title
@@ -78,23 +75,17 @@ Steps to address the issue.
 
 ---
 
-## Required Frontmatter Fields
+## Required Metadata Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | string | Unique identifier: `{YYYY-MM-DD}-{NNN}` |
-| component | object | Component this lesson applies to |
-| date | string | ISO date when lesson was recorded |
-| category | string | One of: bug, improvement, pattern, anti-pattern |
-| applied | boolean | Whether lesson has been applied to component |
-
-### Component Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| type | string | One of: command, agent, skill |
-| name | string | Component name |
-| bundle | string | Parent bundle name |
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| id | string | Unique identifier: `{YYYY-MM-DD}-{NNN}` | `id=2025-11-27-001` |
+| component.type | string | One of: command, agent, skill | `component.type=command` |
+| component.name | string | Component name | `component.name=maven-build-and-fix` |
+| component.bundle | string | Parent bundle name | `component.bundle=cui-maven` |
+| date | string | ISO date when lesson was recorded | `date=2025-11-27` |
+| category | string | One of: bug, improvement, pattern, anti-pattern | `category=bug` |
+| applied | boolean | Whether lesson has been applied to component | `applied=false` |
 
 ---
 
@@ -107,16 +98,13 @@ Defects or errors discovered during execution.
 **Example File**: `.claude/lessons-learned/2025-11-27-001.md`
 
 ```markdown
----
-id: 2025-11-27-001
-component:
-  type: command
-  name: maven-build-and-fix
-  bundle: cui-maven
-date: 2025-11-27
-category: bug
-applied: false
----
+id=2025-11-27-001
+component.type=command
+component.name=maven-build-and-fix
+component.bundle=cui-maven
+date=2025-11-27
+category=bug
+applied=false
 
 # Command fails with spaces in paths
 
@@ -155,16 +143,13 @@ Enhancement opportunities identified during execution.
 **Example File**: `.claude/lessons-learned/2025-11-27-002.md`
 
 ```markdown
----
-id: 2025-11-27-002
-component:
-  type: agent
-  name: maven-builder
-  bundle: cui-maven
-date: 2025-11-27
-category: improvement
-applied: false
----
+id=2025-11-27-002
+component.type=agent
+component.name=maven-builder
+component.bundle=cui-maven
+date=2025-11-27
+category=improvement
+applied=false
 
 # Add progress indicator for long operations
 
@@ -197,16 +182,13 @@ Successful patterns worth documenting.
 **Example File**: `.claude/lessons-learned/2025-11-27-003.md`
 
 ```markdown
----
-id: 2025-11-27-003
-component:
-  type: skill
-  name: cui-maven-rules
-  bundle: cui-maven
-date: 2025-11-27
-category: pattern
-applied: true
----
+id=2025-11-27-003
+component.type=skill
+component.name=cui-maven-rules
+component.bundle=cui-maven
+date=2025-11-27
+category=pattern
+applied=true
 
 # Validate inputs early
 
@@ -253,16 +235,13 @@ Patterns to avoid that caused problems.
 **Example File**: `.claude/lessons-learned/2025-11-27-004.md`
 
 ```markdown
----
-id: 2025-11-27-004
-component:
-  type: command
-  name: java-refactor-code
-  bundle: cui-java-expert
-date: 2025-11-27
-category: anti-pattern
-applied: false
----
+id=2025-11-27-004
+component.type=command
+component.name=java-refactor-code
+component.bundle=cui-java-expert
+date=2025-11-27
+category=anti-pattern
+applied=false
 
 # Don't modify files during glob iteration
 
@@ -420,7 +399,8 @@ Code blocks showing:
 If you have existing lessons in `.claude/lessons-learned.json`:
 
 1. For each JSON lesson, create `{id}.md` file
-2. Use frontmatter for metadata (id, component, date, category, applied)
-3. Use Markdown for content (summary as H1, detail as text)
-4. Add code examples in proper code blocks
-5. Delete or archive old JSON file
+2. Use key=value format for metadata (id, component.type, component.name, component.bundle, date, category, applied)
+3. Add blank line separator between metadata and content
+4. Use Markdown for content (summary as H1, detail as text)
+5. Add code examples in proper code blocks
+6. Delete or archive old JSON file
