@@ -1,0 +1,30 @@
+{
+  "name": "builder-gradle",
+  "version": "0.9.0",
+  "description": "Gradle build, verification, and dependency maintenance tools for CUI projects",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": [
+    "gradle",
+    "build",
+    "verification",
+    "dependencies",
+    "quality-gates"
+  ],
+  "commands": [
+    "./commands/gradle-build-and-fix.md",
+    "./commands/gradle-dependency-maintenance.md"
+  ],
+  "skills": [
+    "./skills/builder-gradle-rules",
+    "./skills/builder-gradle-dependencies"
+  ],
+  "agents": [
+    "./agents/gradle-builder.md"
+  ]
+}
