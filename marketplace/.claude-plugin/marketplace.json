@@ -45,9 +45,9 @@
       "strict": false
     },
     {
-      "name": "cui-maven",
+      "name": "builder-maven",
       "description": "Maven build and verification tools for CUI projects",
-      "source": "./bundles/cui-maven",
+      "source": "./bundles/builder-maven",
       "strict": false
     },
     {

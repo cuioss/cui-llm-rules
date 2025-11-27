@@ -390,7 +390,7 @@ Use this workflow when:
 ### Step 1: Execute JavaDoc Build
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: javadoc:javadoc
@@ -443,7 +443,7 @@ For each error:
 ### Step 5: Verify Build
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: javadoc:javadoc

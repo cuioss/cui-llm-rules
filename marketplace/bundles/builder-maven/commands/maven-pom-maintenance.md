@@ -29,7 +29,7 @@ Extract action from user input. Map common phrases:
 ### Step 2: Delegate to Skill Workflow
 
 ```
-Skill: cui-maven:cui-pom-maintenance
+Skill: builder-maven:builder-pom-maintenance
 Workflow: {action}
 Parameters: module, auto_fix (as applicable)
 ```
@@ -112,12 +112,12 @@ Full POM maintenance sequence:
 ## CRITICAL RULES
 
 - NEVER execute `./mvnw` directly - use skill workflows
-- All POM standards in cui-pom-maintenance skill
+- All POM standards in builder-pom-maintenance skill
 - This command only orchestrates: parse → delegate → report
 - Dependency version updates handled by Dependabot (not this command)
 
 ## RELATED
 
-- Skill: `cui-maven:cui-pom-maintenance` - POM maintenance workflows
-- Skill: `cui-maven:cui-maven-rules` - Maven build execution
+- Skill: `builder-maven:builder-pom-maintenance` - POM maintenance workflows
+- Skill: `builder-maven:builder-maven-rules` - Maven build execution
 - Command: `/maven-build-and-fix` - Build error fixing

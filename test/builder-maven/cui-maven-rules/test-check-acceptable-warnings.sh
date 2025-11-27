@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-SCRIPT="$PROJECT_ROOT/marketplace/bundles/cui-maven/skills/cui-maven-rules/scripts/check-acceptable-warnings.py"
+SCRIPT="$PROJECT_ROOT/marketplace/bundles/builder-maven/skills/builder-maven-rules/scripts/check-acceptable-warnings.py"
 
 # Colors for output
 RED='\033[0;31m'

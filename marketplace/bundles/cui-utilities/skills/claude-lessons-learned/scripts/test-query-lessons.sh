@@ -93,7 +93,7 @@ setup_test_lessons() {
 id=2025-11-27-001
 component.type=command
 component.name=maven-build-and-fix
-component.bundle=cui-maven
+component.bundle=builder-maven
 date=2025-11-27
 category=bug
 applied=false
@@ -110,7 +110,7 @@ EOF
 id=2025-11-27-002
 component.type=command
 component.name=maven-build-and-fix
-component.bundle=cui-maven
+component.bundle=builder-maven
 date=2025-11-27
 category=improvement
 applied=false
@@ -122,12 +122,12 @@ applied=false
 Show progress for long operations.
 EOF
 
-    # Lesson 3: Pattern in cui-maven-rules (applied)
+    # Lesson 3: Pattern in builder-maven-rules (applied)
     cat > "$LESSONS_DIR/2025-11-27-003.md" <<'EOF'
 id=2025-11-27-003
 component.type=skill
-component.name=cui-maven-rules
-component.bundle=cui-maven
+component.name=builder-maven-rules
+component.bundle=builder-maven
 date=2025-11-27
 category=pattern
 applied=true
@@ -235,8 +235,8 @@ else
 fi
 
 # Test 6: Filter by bundle
-log_test "Filter by bundle (cui-maven)"
-output=$(python3 "$QUERY_SCRIPT" --lessons-dir "$LESSONS_DIR" --bundle cui-maven)
+log_test "Filter by bundle (builder-maven)"
+output=$(python3 "$QUERY_SCRIPT" --lessons-dir "$LESSONS_DIR" --bundle builder-maven)
 if assert_json_valid "$output" && assert_count 3 "$output"; then
     pass
 else

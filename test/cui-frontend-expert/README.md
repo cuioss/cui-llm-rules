@@ -96,7 +96,7 @@ Fixture files contain realistic npm/npx output for parser testing:
 
 ## Testing Pattern
 
-Tests follow the cui-maven testing pattern:
+Tests follow the builder-maven testing pattern:
 
 1. **Setup** - Create temporary directory, set up PATH with mocks
 2. **Execute** - Run script with test parameters
@@ -146,9 +146,9 @@ Exit codes:
 - 0 - All tests passed
 - 1 - One or more tests failed
 
-## Comparison with cui-maven Tests
+## Comparison with builder-maven Tests
 
-| Aspect | cui-maven | cui-frontend-expert |
+| Aspect | builder-maven | cui-frontend-expert |
 |--------|-----------|---------------------|
 | **Mock tool** | mvnw | npm/npx |
 | **Mock scripts** | mvnw-success.sh, mvnw-failure.sh | npm-success.sh, npm-failure.sh, etc. |

@@ -208,12 +208,12 @@ fi
 
 # Check Rule 7: Maven execution restriction (expanded to all components)
 RULE_7_VIOLATION="false"
-# Check for direct mvn usage in executable context (should use cui-maven skill instead)
+# Check for direct mvn usage in executable context (should use builder-maven skill instead)
 # Only flag if found in: Bash: commands, code blocks with bash/shell, or actual command invocations
 # Exclude: documentation text mentioning Maven, rule descriptions, comments
 if grep -qE "mvn |maven |./mvnw " "$FILE_PATH"; then
     # Exclude maven-specific bundles/skills
-    if ! echo "$FILE_PATH" | grep -q "cui-maven"; then
+    if ! echo "$FILE_PATH" | grep -q "builder-maven"; then
         # Check for actual command invocations (Bash:, ```bash, backtick commands)
         # Pattern: "Bash:" prefix, code block commands, or shell invocation patterns
         if grep -E "^Bash:.*mvn|^Bash:.*maven|^Bash:.*\./mvnw|\`.*mvn |\`.*\./mvnw |^\s+mvn |^\s+\./mvnw " "$FILE_PATH" | grep -qv "Rule 7\|should use\|instead of\|violation"; then

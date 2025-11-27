@@ -152,7 +152,7 @@ deprecated for plugin
 
 ## Build Integration
 
-During build verification, use the workflow from `cui-maven-rules` SKILL.md:
+During build verification, use the workflow from `builder-maven-rules` SKILL.md:
 
 1. **Load patterns**: Activate `cui-utilities:claude-run-configuration` to read `maven.acceptable_warnings`
 2. **Parse build output**: Use `parse-maven-output.py` to extract issues

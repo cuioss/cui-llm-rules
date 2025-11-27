@@ -1,5 +1,5 @@
 {
-  "name": "cui-maven",
+  "name": "builder-maven",
   "version": "0.9.0",
   "description": "Maven build, verification, and POM maintenance tools for CUI projects",
   "author": {
@@ -15,8 +15,8 @@
     "./commands/maven-pom-maintenance.md"
   ],
   "skills": [
-    "./skills/cui-maven-rules",
-    "./skills/cui-pom-maintenance"
+    "./skills/builder-maven-rules",
+    "./skills/builder-pom-maintenance"
   ],
   "agents": [
     "./agents/maven-builder.md"

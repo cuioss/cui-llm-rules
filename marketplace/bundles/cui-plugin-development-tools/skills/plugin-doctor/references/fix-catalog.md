@@ -189,20 +189,20 @@ Risky fixes require user confirmation because they involve judgment calls or may
 
 ### 4. rule-7-violation
 
-**Description**: Component uses Maven directly instead of cui-maven skill.
+**Description**: Component uses Maven directly instead of builder-maven skill.
 
-**Detection**: Direct `mvn`, `maven`, or `./mvnw` usage in commands/skills/agents (excluding cui-maven bundle)
+**Detection**: Direct `mvn`, `maven`, or `./mvnw` usage in commands/skills/agents (excluding builder-maven bundle)
 
 **Fix Strategy**:
-- Replace direct Maven invocations with cui-maven skill calls
-- Use workflow: `Skill: cui-maven:cui-maven-rules` with appropriate workflow name
+- Replace direct Maven invocations with builder-maven skill calls
+- Use workflow: `Skill: builder-maven:builder-maven-rules` with appropriate workflow name
 - Example: Replace `mvn clean compile` with workflow: Execute Maven Build
 
 **Why Risky**:
 - Changes build execution mechanism
 - May break functionality if not properly migrated
 - User should verify build still works
-- Requires cui-maven skill to be available
+- Requires builder-maven skill to be available
 
 ### 5. rule-8-violation
 

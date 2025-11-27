@@ -14,7 +14,7 @@ This bundle provides general-purpose utility tools for:
 
 These utilities are independent tools that can be used across different CUI projects and workflows.
 
-> **Note**: Maven build verification has been moved to the **cui-maven** bundle. Use `/maven-build-and-fix` from that bundle for Maven-related build tasks.
+> **Note**: Maven build verification has been moved to the **builder-maven** bundle. Use `/maven-build-and-fix` from that bundle for Maven-related build tasks.
 
 ## Components Included
 
@@ -173,7 +173,7 @@ None - this bundle is standalone and can be used independently.
 ## Related Bundles
 
 These utilities complement but don't depend on other bundles:
-- `cui-maven` - Maven build verification and POM maintenance
+- `builder-maven` - Maven build verification and POM maintenance
 - `cui-documentation-standards` - For documentation review (separate from diagram verification)
 - `cui-plugin-development-tools` - For plugin creation tools
 - `cui-task-workflow` - May use research-best-practices agent for industry standards research

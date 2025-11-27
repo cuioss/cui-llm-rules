@@ -50,7 +50,7 @@ Metadata uses key=value pairs with dot notation for nested objects, separated fr
 id=2025-11-27-001
 component.type=command
 component.name=maven-build-and-fix
-component.bundle=cui-maven
+component.bundle=builder-maven
 date=2025-11-27
 category=bug
 applied=false
@@ -116,7 +116,7 @@ Write lesson to `.claude/lessons-learned/{id}.md`:
 id=2025-11-27-001
 component.type=command
 component.name=maven-build-and-fix
-component.bundle=cui-maven
+component.bundle=builder-maven
 date=2025-11-27
 category=bug
 applied=false
@@ -171,7 +171,7 @@ python3 scripts/query-lessons.py --category bug
 ### Query by Bundle
 
 ```bash
-python3 scripts/query-lessons.py --bundle cui-maven
+python3 scripts/query-lessons.py --bundle builder-maven
 ```
 
 ### Combine Filters

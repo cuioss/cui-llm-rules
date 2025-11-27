@@ -102,7 +102,7 @@ cui-task-workflow/
 ## Dependencies
 
 ### Inter-Bundle Dependencies
-- **cui-maven** (required) - Commands use /maven-build-and-fix for verification
+- **builder-maven** (required) - Commands use /maven-build-and-fix for verification
 - **cui-utilities** (required) - claude-memory skill for session persistence
 - **cui-java-expert** (optional) - For Java implementation delegation
 - **cui-frontend-expert** (optional) - For JavaScript implementation delegation

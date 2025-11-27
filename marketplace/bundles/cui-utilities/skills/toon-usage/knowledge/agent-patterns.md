@@ -494,4 +494,4 @@ When TOON migration is complete, template files will be available at:
 When TOON migration is complete, test fixtures will be available at:
 - `test/cui-task-workflow/sonar-workflow/sonar-issues.toon`
 - `test/cui-frontend-expert/coverage/coverage-analysis.toon`
-- `test/cui-maven/build-failure/expected-categorization.toon`
+- `test/builder-maven/build-failure/expected-categorization.toon`

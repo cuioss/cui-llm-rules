@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_PATH="${SCRIPT_DIR}/../../marketplace/bundles/cui-maven/skills/cui-maven-rules/scripts/parse-maven-output.py"
+SCRIPT_PATH="${SCRIPT_DIR}/../../marketplace/bundles/builder-maven/skills/builder-maven-rules/scripts/parse-maven-output.py"
 FIXTURES_DIR="${SCRIPT_DIR}/fixtures"
 
 # Colors for output

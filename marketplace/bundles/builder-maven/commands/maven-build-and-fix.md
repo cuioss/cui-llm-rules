@@ -39,7 +39,7 @@ Field: commands.maven-build-and-fix.last_execution
 ### Step 3: Build Loop (max 5 iterations)
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters: goals, profile, module, output_mode=structured
 ```
@@ -102,7 +102,7 @@ Do NOT commit if issues remain.
 
 ## RELATED
 
-- Skill: `cui-maven:cui-maven-rules` - Build execution and parsing
+- Skill: `builder-maven:builder-maven-rules` - Build execution and parsing
 - Skill: `cui-utilities:claude-run-configuration` - Execution history and timeout calculation
 - Command: `/java-implement-code` - Compilation fixes
 - Command: `/java-implement-tests` - Test fixes

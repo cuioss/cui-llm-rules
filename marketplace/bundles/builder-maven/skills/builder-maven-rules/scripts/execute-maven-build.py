@@ -56,7 +56,7 @@ Examples:
     python3 execute-maven-build.py --goals "clean verify" --timeout 300000
 
     # Using mock for testing
-    python3 execute-maven-build.py --goals "clean install" --mvnw test/cui-maven/mocks/mvnw-success.sh
+    python3 execute-maven-build.py --goals "clean install" --mvnw test/builder-maven/mocks/mvnw-success.sh
         """,
     )
     parser.add_argument(

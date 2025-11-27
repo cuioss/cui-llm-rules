@@ -1,5 +1,5 @@
 ---
-name: cui-maven-rules
+name: builder-maven-rules
 description: Maven build execution, output parsing, and issue routing for CUI projects
 allowed-tools: Read, Grep, Bash(./mvnw:*), Bash(python3:*)
 ---
@@ -39,7 +39,7 @@ Activate when:
 
 **For POM maintenance** (dependencies, BOMs, scopes):
 ```
-Skill: cui-maven:cui-pom-maintenance
+Skill: builder-maven:builder-pom-maintenance
 ```
 
 ## Standards Reference
@@ -142,7 +142,7 @@ Return structured JSON with:
 
 Commands invoke this workflow as:
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean install
@@ -631,7 +631,7 @@ Standards in `standards/` directory:
 
 ### Related Skills
 
-- `cui-maven:cui-pom-maintenance` - POM maintenance (dependencies, BOMs, scopes)
+- `builder-maven:builder-pom-maintenance` - POM maintenance (dependencies, BOMs, scopes)
 - `cui-java-expert:cui-javadoc` - JavaDoc standards
 - `cui-java-expert:cui-java-unit-testing` - Test standards
 

@@ -99,7 +99,7 @@ Analyze build log for errors and warnings:
 
 [source]
 ----
-Use cui-maven parse-maven-output.py script:
+Use builder-maven parse-maven-output.py script:
 
 Input: target/build-output.log
 Output: JSON with status and issues
@@ -304,11 +304,11 @@ Step 5: Run tests
 
 === Execute Maven Build Workflow
 
-Reference cui-maven skill for build execution:
+Reference builder-maven skill for build execution:
 
 [source,yaml]
 ----
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile
@@ -323,7 +323,7 @@ steps:
 
 references:
   - standards/build-precondition-pattern.md
-  - cui-maven:cui-maven-rules skill
+  - builder-maven:builder-maven-rules skill
 ----
 
 == Error Categories
@@ -414,7 +414,7 @@ references:
 
 == Script Contract
 
-=== parse-maven-output.py (cui-maven skill)
+=== parse-maven-output.py (builder-maven skill)
 
 **Purpose:** Parse Maven build log to extract errors and warnings
 
@@ -578,7 +578,7 @@ description: Fix compilation errors in TokenValidator class
 3. Execute build to capture errors
    mvn clean compile -l target/errors.log
 
-4. Parse errors with parse-maven-output.py (cui-maven skill)
+4. Parse errors with parse-maven-output.py (builder-maven skill)
    {
      "status": "error",
      "errors": [

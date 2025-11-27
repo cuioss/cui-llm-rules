@@ -80,7 +80,7 @@ Reintroduce agents and commands as **thin orchestration wrappers** that:
 │  • Integration with other skills                            │
 │                                                              │
 │  Skills can call other skills:                             │
-│    Skill(cui-maven:cui-maven-rules)                        │
+│    Skill(builder-maven:builder-maven-rules)                        │
 │    Skill(cui-utilities:script-runner)                      │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -300,7 +300,7 @@ Parameters:
 # Inside cui-java-core skill:
 
 Step 3: Verify Build
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: "clean test"
@@ -466,8 +466,8 @@ Agent reads Maven log, parses errors, categorizes... (100 lines)
 
 **Solution:**
 ```markdown
-# GOOD: Agent delegates to cui-maven skill
-Agent: Skill: cui-maven:cui-maven-rules
+# GOOD: Agent delegates to builder-maven skill
+Agent: Skill: builder-maven:builder-maven-rules
        Workflow: parse-build-output
 ```
 
@@ -507,9 +507,9 @@ Step 3: Format and Return (20 lines)
 
 Agent: java-create-agent (120 lines)
   ├─→ Skill: cui-java-core (600 lines)
-  │   └─→ Skill: cui-maven:cui-maven-rules (400 lines)
+  │   └─→ Skill: builder-maven:builder-maven-rules (400 lines)
   └─→ Skill: cui-java-unit-testing (500 lines)
-      └─→ Skill: cui-maven:cui-maven-rules (400 lines)
+      └─→ Skill: builder-maven:builder-maven-rules (400 lines)
 ```
 
 **Why Good:**
@@ -548,11 +548,11 @@ Skill (business logic - 600 lines):
 
 Skill: cui-java-core (600 lines)
   Step 3: Verify Build
-    Skill: cui-maven:cui-maven-rules
+    Skill: builder-maven:builder-maven-rules
     Workflow: Execute Maven Build
 
   Step 7: Run Tests
-    Skill: cui-maven:cui-maven-rules
+    Skill: builder-maven:builder-maven-rules
     Workflow: Execute Maven Build
 
   Step 9: Analyze Coverage

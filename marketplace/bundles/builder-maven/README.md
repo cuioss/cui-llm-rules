@@ -12,8 +12,8 @@ This bundle provides comprehensive Maven workflow support including build execut
 
 | Skill | Purpose |
 |-------|---------|
-| `cui-maven-rules` | Build execution, output parsing, issue routing |
-| `cui-pom-maintenance` | POM maintenance, BOM optimization, scope analysis |
+| `builder-maven-rules` | Build execution, output parsing, issue routing |
+| `builder-pom-maintenance` | POM maintenance, BOM optimization, scope analysis |
 
 ### Commands
 
@@ -31,14 +31,14 @@ This bundle provides comprehensive Maven workflow support including build execut
 ## Architecture
 
 ```
-cui-maven/
+builder-maven/
 ├── agents/
 │   └── maven-builder.md          # Autonomous build agent
 ├── commands/
 │   ├── maven-build-and-fix.md    # Build-fix loop orchestrator
 │   └── maven-pom-maintenance.md  # POM maintenance orchestrator
 └── skills/
-    ├── cui-maven-rules/          # Build execution skill
+    ├── builder-maven-rules/          # Build execution skill
     │   ├── SKILL.md
     │   ├── scripts/
     │   │   ├── execute-maven-build.py
@@ -50,7 +50,7 @@ cui-maven/
     │       ├── maven-build-execution.md
     │       ├── maven-openrewrite-handling.md
     │       └── maven-acceptable-warnings.md
-    └── cui-pom-maintenance/      # POM maintenance skill
+    └── builder-pom-maintenance/      # POM maintenance skill
         ├── SKILL.md
         └── standards/
             └── pom-standards.md
@@ -79,7 +79,7 @@ cui-maven/
 ### Direct Skill Usage
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean install
@@ -88,7 +88,7 @@ Parameters:
 ```
 
 ```
-Skill: cui-maven:cui-pom-maintenance
+Skill: builder-maven:builder-pom-maintenance
 Workflow: Analyze POM Issues
 Parameters:
   module: auth-service

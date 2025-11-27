@@ -40,7 +40,7 @@ This repository contains **8 production-ready bundles** with **95 total componen
 |JavaScript/frontend development standards and tooling
 |8 |3 |7
 
-|xref:marketplace/bundles/cui-maven/README.md[cui-maven]
+|xref:marketplace/bundles/builder-maven/README.md[builder-maven]
 |Maven build and verification tools
 |1 |1 |1
 
@@ -116,7 +116,7 @@ See xref:marketplace/bundles/cui-frontend-expert/README.md[cui-frontend-expert b
 /maven-build-and-fix push
 ----
 
-See xref:marketplace/bundles/cui-maven/README.md[cui-maven bundle] for details.
+See xref:marketplace/bundles/builder-maven/README.md[builder-maven bundle] for details.
 
 === Documentation
 
@@ -171,7 +171,7 @@ For comprehensive documentation on each bundle, see their individual README file
 
 * xref:marketplace/bundles/cui-java-expert/README.md[Java Expert Bundle] - Java development standards, logging, CDI, testing
 * xref:marketplace/bundles/cui-frontend-expert/README.md[Frontend Expert Bundle] - JavaScript, CSS, Cypress, linting, project structure
-* xref:marketplace/bundles/cui-maven/README.md[Maven Bundle] - Build verification, POM maintenance, quality gates
+* xref:marketplace/bundles/builder-maven/README.md[Maven Bundle] - Build verification, POM maintenance, quality gates
 * xref:marketplace/bundles/cui-task-workflow/README.md[Task Workflow Bundle] - Issue implementation, PR handling, Sonar integration
 * xref:marketplace/bundles/cui-documentation-standards/README.md[Documentation Standards Bundle] - AsciiDoc formatting, validation, linking
 * xref:marketplace/bundles/cui-utilities/README.md[Utilities Bundle] - Research, permissions, diagnostics, architecture diagrams

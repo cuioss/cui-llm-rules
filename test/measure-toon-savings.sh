@@ -19,7 +19,7 @@ FILES=(
     "cui-task-workflow/pr-workflow/triage-results|Triage Results (PR)"
     "cui-frontend-expert/coverage/coverage-analysis|Coverage (Frontend)"
     "cui-java-expert/coverage/coverage-analysis|Coverage (Java)"
-    "cui-maven/build-failure/expected-categorization|Build Categorization"
+    "builder-maven/build-failure/expected-categorization|Build Categorization"
     "cui-frontend-expert/build/build-analysis|Build Analysis"
 )
 

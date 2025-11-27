@@ -13,7 +13,7 @@ Read lessons learned from `.claude/lessons-learned/*.md` and apply them to compo
 # Apply lessons to specific component
 /plugin-apply-lessons-learned command=maven-build-and-fix
 /plugin-apply-lessons-learned agent=maven-builder
-/plugin-apply-lessons-learned skill=cui-maven-rules
+/plugin-apply-lessons-learned skill=builder-maven-rules
 
 # Apply all unapplied lessons across components
 /plugin-apply-lessons-learned --all

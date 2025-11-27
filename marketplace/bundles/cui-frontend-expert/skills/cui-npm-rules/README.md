@@ -4,7 +4,7 @@ Build execution and output parsing skill for npm/npx commands in CUI JavaScript 
 
 ## Purpose
 
-This skill provides centralized npm/npx build execution logic, similar to how `cui-maven-rules` handles Maven builds. It handles:
+This skill provides centralized npm/npx build execution logic, similar to how `builder-maven-rules` handles Maven builds. It handles:
 
 - Atomic build execution with automatic log file management
 - npm vs npx command detection
@@ -14,7 +14,7 @@ This skill provides centralized npm/npx build execution logic, similar to how `c
 
 ## Architecture
 
-This skill follows the same pattern as `cui-maven:cui-maven-rules`:
+This skill follows the same pattern as `builder-maven:builder-maven-rules`:
 
 ```
 npm-builder agent (Layer 3)
@@ -147,7 +147,7 @@ This skill is used by:
 
 ## Comparison with Maven
 
-| Aspect | cui-maven-rules | cui-npm-rules |
+| Aspect | builder-maven-rules | cui-npm-rules |
 |--------|----------------|---------------|
 | **Build tool** | ./mvnw | npm/npx |
 | **Execution script** | execute-maven-build.py | execute-npm-build.py |

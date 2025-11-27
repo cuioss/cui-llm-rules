@@ -152,9 +152,9 @@ Complete test documentation available in:
 - [test/cui-frontend-expert/README.md](README.md) - Full test suite documentation
 - Test scripts include inline comments explaining each test
 
-## Comparison with cui-maven
+## Comparison with builder-maven
 
-| Aspect | cui-maven | cui-frontend-expert |
+| Aspect | builder-maven | cui-frontend-expert |
 |--------|-----------|---------------------|
 | **Test coverage** | 100% | 41% (9/22 passing) |
 | **Mock pattern** | ✅ Working | ⚠️ Needs fixes |
@@ -166,7 +166,7 @@ Complete test documentation available in:
 
 🟡 **Test infrastructure complete, tests need refinement**
 
-All necessary mocks, fixtures, and test scripts are in place. The framework follows the cui-maven pattern correctly. The failing tests reveal actual issues in either:
+All necessary mocks, fixtures, and test scripts are in place. The framework follows the builder-maven pattern correctly. The failing tests reveal actual issues in either:
 1. Test expectations (can adjust)
 2. Script behavior (may need fixes)
 

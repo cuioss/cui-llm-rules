@@ -174,7 +174,7 @@ Task:
 
 ## Dependencies
 
-- **cui-maven** - For Maven build operations (cui-maven-rules skill)
+- **builder-maven** - For Maven build operations (builder-maven-rules skill)
 - Python 3 for automation scripts
 
 ## Support

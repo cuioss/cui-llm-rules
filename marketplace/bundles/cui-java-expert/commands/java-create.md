@@ -109,7 +109,7 @@ Task:
 ### Step 5: Verify Build
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile

@@ -341,9 +341,9 @@ WARN Level:
 - After corrections (verify changes compile)
 - After renumbering (final verification)
 
-**Use cui-maven-rules skill workflow:**
+**Use builder-maven-rules skill workflow:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean verify

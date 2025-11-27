@@ -71,7 +71,7 @@ print(f"Found 'tools:' {total_matches} times across {len(match_counts)} files")
 ```python
 # Search for multiple skill references using regex OR
 matches = Grep(
-    pattern="Skill: cui-javadoc|Skill: cui-maven-rules|Skill: cui-java-core",
+    pattern="Skill: cui-javadoc|Skill: builder-maven-rules|Skill: cui-java-core",
     path="/bundle/path/agents",
     output_mode="files_with_matches"
 )

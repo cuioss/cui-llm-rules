@@ -82,7 +82,7 @@ Steps to address the issue.
 | id | string | Unique identifier: `{YYYY-MM-DD}-{NNN}` | `id=2025-11-27-001` |
 | component.type | string | One of: command, agent, skill | `component.type=command` |
 | component.name | string | Component name | `component.name=maven-build-and-fix` |
-| component.bundle | string | Parent bundle name | `component.bundle=cui-maven` |
+| component.bundle | string | Parent bundle name | `component.bundle=builder-maven` |
 | date | string | ISO date when lesson was recorded | `date=2025-11-27` |
 | category | string | One of: bug, improvement, pattern, anti-pattern | `category=bug` |
 | applied | boolean | Whether lesson has been applied to component | `applied=false` |
@@ -101,7 +101,7 @@ Defects or errors discovered during execution.
 id=2025-11-27-001
 component.type=command
 component.name=maven-build-and-fix
-component.bundle=cui-maven
+component.bundle=builder-maven
 date=2025-11-27
 category=bug
 applied=false
@@ -146,7 +146,7 @@ Enhancement opportunities identified during execution.
 id=2025-11-27-002
 component.type=agent
 component.name=maven-builder
-component.bundle=cui-maven
+component.bundle=builder-maven
 date=2025-11-27
 category=improvement
 applied=false
@@ -184,8 +184,8 @@ Successful patterns worth documenting.
 ```markdown
 id=2025-11-27-003
 component.type=skill
-component.name=cui-maven-rules
-component.bundle=cui-maven
+component.name=builder-maven-rules
+component.bundle=builder-maven
 date=2025-11-27
 category=pattern
 applied=true
@@ -223,7 +223,7 @@ Before processing:
 
 ## Applied To
 
-- cui-maven-rules skill ✓
+- builder-maven-rules skill ✓
 - cui-java-core skill ✓
 - cui-documentation skill ✓
 ```
@@ -342,7 +342,7 @@ python3 scripts/query-lessons.py --type command
 ### Filter by Bundle
 
 ```bash
-python3 scripts/query-lessons.py --bundle cui-maven
+python3 scripts/query-lessons.py --bundle builder-maven
 ```
 
 ### Combine Filters

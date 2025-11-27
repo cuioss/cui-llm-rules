@@ -4,7 +4,7 @@ Gradle build, verification, and dependency maintenance tools for CUI projects.
 
 ## Overview
 
-This bundle provides comprehensive Gradle build automation with automatic error fixing, dependency management, and quality verification. The API mirrors the `cui-maven` bundle for easy adoption.
+This bundle provides comprehensive Gradle build automation with automatic error fixing, dependency management, and quality verification. The API mirrors the `builder-maven` bundle for easy adoption.
 
 ## Components
 
@@ -61,15 +61,15 @@ This bundle provides comprehensive Gradle build automation with automatic error 
 
 ## API Comparison with Maven
 
-The API is designed to be parallel to `cui-maven`:
+The API is designed to be parallel to `builder-maven`:
 
 | Maven | Gradle | Notes |
 |-------|--------|-------|
 | `/maven-build-and-fix` | `/gradle-build-and-fix` | Same parameters (goals→tasks) |
 | `/maven-pom-maintenance` | `/gradle-dependency-maintenance` | Same actions |
 | `maven-builder` agent | `gradle-builder` agent | Same behavior |
-| `cui-maven:cui-maven-rules` | `builder-gradle:builder-gradle-rules` | Same workflows |
-| `cui-maven:cui-pom-maintenance` | `builder-gradle:builder-gradle-dependencies` | Same workflows |
+| `builder-maven:builder-maven-rules` | `builder-gradle:builder-gradle-rules` | Same workflows |
+| `builder-maven:builder-pom-maintenance` | `builder-gradle:builder-gradle-dependencies` | Same workflows |
 
 ### Parameter Mapping
 

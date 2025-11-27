@@ -41,7 +41,7 @@ Glob: **/pom.xml
 
 **Load skill and pass parameters:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 ```
 
 **Pass context to skill:**
@@ -68,5 +68,5 @@ Return the structured output from the skill as the agent result.
 
 ## RELATED
 
-- Skill: `cui-maven:cui-maven-rules` - Build execution
+- Skill: `builder-maven:builder-maven-rules` - Build execution
 - Command: `/maven-build-and-fix` - Iterative build-and-fix

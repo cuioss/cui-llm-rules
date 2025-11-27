@@ -123,7 +123,7 @@ cui-frontend-expert/
 
 ### Build Execution Pattern
 
-Similar to cui-maven with maven-builder agent and cui-maven-rules skill:
+Similar to builder-maven with maven-builder agent and builder-maven-rules skill:
 
 ```
 npm-builder agent (Layer 3)

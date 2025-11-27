@@ -1,5 +1,5 @@
 ---
-name: cui-pom-maintenance
+name: builder-pom-maintenance
 description: POM maintenance standards and workflows for dependency management, BOM optimization, and scope analysis
 allowed-tools: Read, Grep, Bash(./mvnw:*), Skill
 ---
@@ -66,7 +66,7 @@ Analyzes POM files for issues and improvement opportunities.
 ### Step 1: Run Dependency Analysis
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: dependency:analyze
@@ -77,7 +77,7 @@ Parameters:
 ### Step 2: Run Dependency Tree
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: dependency:tree
@@ -153,7 +153,7 @@ For each safe fix:
 2. Verify with incremental build
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: compile
@@ -192,7 +192,7 @@ Executes OpenRewrite POM cleanup recipes.
 ### Step 1: Execute OpenRewrite
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: rewrite:run
@@ -210,7 +210,7 @@ Check for:
 ### Step 3: Verify Build
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean verify
@@ -297,7 +297,7 @@ Validates POM quality through multiple checks.
 ### Step 1: Clean Build
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean install
@@ -307,7 +307,7 @@ Parameters:
 ### Step 2: Dependency Analysis
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: dependency:analyze
@@ -317,7 +317,7 @@ Parameters:
 ### Step 3: Enforcer Check
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: enforcer:enforce
@@ -327,7 +327,7 @@ Parameters:
 ### Step 4: OpenRewrite Validation
 
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: rewrite:run
@@ -352,9 +352,9 @@ Parameters:
 
 ## Integration
 
-### With cui-maven-rules Skill
+### With builder-maven-rules Skill
 
-All Maven executions delegate to `cui-maven:cui-maven-rules`:
+All Maven executions delegate to `builder-maven:builder-maven-rules`:
 - Build execution
 - Output parsing
 - Error categorization
@@ -371,10 +371,10 @@ The `/maven-pom-maintenance` command orchestrates these workflows:
 - **Read**: Load standards
 - **Grep**: Search POM patterns
 - **Bash(./mvnw:*)**: Direct wrapper commands (version check only)
-- **Skill**: Delegate to cui-maven-rules
+- **Skill**: Delegate to builder-maven-rules
 
 ## Related
 
-- Skill: `cui-maven:cui-maven-rules` - Maven build execution
+- Skill: `builder-maven:builder-maven-rules` - Maven build execution
 - Command: `/maven-pom-maintenance` - POM maintenance orchestration
 - Standards: `standards/pom-standards.md` - POM quality standards

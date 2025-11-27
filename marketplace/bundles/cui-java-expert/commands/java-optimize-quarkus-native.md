@@ -55,7 +55,7 @@ Execute pre-optimization checklist to establish baseline:
 
 **2.1 Build Verification:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean install
@@ -70,7 +70,7 @@ Parameters:
 
 **2.2 Native Image Baseline:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean package -Dnative
@@ -159,7 +159,7 @@ Apply deployment processor optimizations following standards:
 
 **4.3 Verification After Each Change:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile
@@ -169,7 +169,7 @@ Parameters:
 
 **4.4 Quality Verification:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: -Ppre-commit clean verify -DskipTests
@@ -203,7 +203,7 @@ Apply application class optimizations following standards:
 
 **5.3 Module Compilation:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile
@@ -213,7 +213,7 @@ Parameters:
 
 **5.4 Full Module Build:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean install
@@ -232,7 +232,7 @@ Parameters:
 
 **6.1 Reflection Verification Tests:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: test -Dtest="*Reflection*Test"
@@ -242,7 +242,7 @@ Parameters:
 
 **6.2 Full Test Suite:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean install
@@ -252,7 +252,7 @@ Parameters:
 
 **6.3 Native Image Compilation:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean package -Dnative
@@ -292,7 +292,7 @@ IMPROVEMENTS:
 
 **7.1 Final Quality Verification:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: -Ppre-commit clean verify -DskipTests
@@ -302,7 +302,7 @@ Parameters:
 
 **7.2 Final Build Verification:**
 ```
-Skill: cui-maven:cui-maven-rules
+Skill: builder-maven:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean install

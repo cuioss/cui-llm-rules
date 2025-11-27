@@ -13,7 +13,7 @@ Usage:
   query-lessons.py --component maven-build-and-fix
   query-lessons.py --applied false
   query-lessons.py --category bug
-  query-lessons.py --bundle cui-maven
+  query-lessons.py --bundle builder-maven
   query-lessons.py --component maven-build-and-fix --applied false
 
 Exit Codes:
