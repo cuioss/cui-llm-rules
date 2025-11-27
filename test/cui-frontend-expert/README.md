@@ -35,4 +35,4 @@ Test fixtures for JSDoc validation:
 
 ## Related Test Suites
 
-For npm/npx build execution tests, see [test/builder/](../builder-npm/).
+For npm/npx build execution tests, see [test/builder/](../builder/).
