@@ -21,3 +21,6 @@ target/
 
 # Ignore user-specific settings
 .claude/settings.local.json
+
+# Ignore lessons-learned (runtime knowledge, project-specific)
+.claude/lessons-learned/*.md

@@ -1,19 +1,21 @@
 ---
 name: claude-lessons-learned
 description: Lessons learned storage and retrieval for commands and agents
-allowed-tools: Read, Write, Edit
+allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
 # Claude Lessons Learned Skill
 
-Centralized storage for lessons learned from command and agent executions in `.claude/lessons-learned.json`.
+Centralized storage for lessons learned from command and agent executions using individual Markdown files.
 
 ## What This Skill Provides
 
-- Single file storage for all lessons learned
+- Individual Markdown file storage for each lesson
 - Query and retrieval of lessons for specific components
 - Lesson categorization (bug, improvement, pattern, anti-pattern)
 - Component-to-lesson mapping
+- Git-friendly format with clear diffs
+- Rich content support (code blocks, links, formatting)
 
 ## When to Activate This Skill
 
@@ -24,37 +26,54 @@ Activate this skill when:
 
 ---
 
-## File Location
+## Storage Location
 
 ```
-.claude/lessons-learned.json
+.claude/lessons-learned/
+  2025-11-27-001.md
+  2025-11-27-002.md
+  2025-11-26-001.md
+  ...
 ```
+
+Each lesson is stored as an individual Markdown file with YAML frontmatter.
 
 ---
 
 ## File Format
 
-Single JSON file with all lessons organized by component:
+Individual Markdown files with YAML frontmatter for metadata:
 
-```json
-{
-  "version": 1,
-  "lessons": [
-    {
-      "id": "2025-11-25-001",
-      "component": {
-        "type": "command|agent|skill",
-        "name": "component-name",
-        "bundle": "bundle-name"
-      },
-      "date": "2025-11-25",
-      "category": "bug|improvement|pattern|anti-pattern",
-      "summary": "Brief description",
-      "detail": "Full explanation of the lesson",
-      "applied": false
-    }
-  ]
-}
+```markdown
+---
+id: 2025-11-27-001
+component:
+  type: command
+  name: maven-build-and-fix
+  bundle: cui-maven
+date: 2025-11-27
+category: bug
+applied: false
+---
+
+# Brief Summary Title
+
+## Detail
+
+Full explanation of the lesson with rich formatting support.
+
+## Example
+
+```bash
+# Code examples
+Bash: ls "${file_path}"
+```
+
+## Related
+
+- Affected: maven-build-and-fix command
+- Similar issue in: java-refactor-code
+```
 ```
 
 ### Lesson Categories
@@ -74,68 +93,99 @@ Single JSON file with all lessons organized by component:
 
 Record a lesson learned after command/agent execution.
 
-### Step 1: Read or Initialize File
+### Step 1: Create Directory (if needed)
 
-If `.claude/lessons-learned.json` exists, read it. Otherwise create:
+If `.claude/lessons-learned/` doesn't exist, create it:
 
-```json
-{
-  "version": 1,
-  "lessons": []
-}
+```bash
+mkdir -p .claude/lessons-learned
 ```
 
-### Step 2: Generate Lesson ID
+### Step 2: Generate Lesson ID and Filename
 
-Format: `{YYYY-MM-DD}-{NNN}`
+Format: `{YYYY-MM-DD}-{NNN}.md`
 
-Find highest sequence for today's date, increment or start at 001.
+1. List existing files in `.claude/lessons-learned/`
+2. Find highest sequence number for today's date
+3. Increment or start at 001
+4. Example: `2025-11-27-001.md`
 
-### Step 3: Add Lesson Entry
+### Step 3: Create Markdown File
 
-```json
-{
-  "id": "2025-11-25-001",
-  "component": {
-    "type": "command",
-    "name": "maven-build-and-fix",
-    "bundle": "cui-maven"
-  },
-  "date": "2025-11-25",
-  "category": "bug",
-  "summary": "Brief description",
-  "detail": "Full explanation",
-  "applied": false
-}
+Write lesson to `.claude/lessons-learned/{id}.md`:
+
+```markdown
+---
+id: 2025-11-27-001
+component:
+  type: command
+  name: maven-build-and-fix
+  bundle: cui-maven
+date: 2025-11-27
+category: bug
+applied: false
+---
+
+# Brief Summary
+
+## Detail
+
+Full explanation of the lesson.
+
+## Example
+
+```bash
+# Code examples if applicable
+```
 ```
 
-### Step 4: Write File
-
-Write JSON with proper formatting (2-space indent).
+Use Write tool to create the file with proper frontmatter and content.
 
 ---
 
 ## Workflow: Query Lessons
 
-**Pattern**: Direct File Operation
+**Pattern**: Command Chain Execution
+
+Use the `query-lessons.py` script to filter lessons by frontmatter criteria.
 
 ### Query All Lessons
 
 ```bash
-cat .claude/lessons-learned.json
+python3 scripts/query-lessons.py --all
 ```
 
 ### Query for Specific Component
 
-Read file, filter where `component.name` matches.
+```bash
+python3 scripts/query-lessons.py --component maven-build-and-fix
+```
 
 ### Query Unapplied Lessons
 
-Read file, filter where `"applied": false`.
+```bash
+python3 scripts/query-lessons.py --applied false
+```
 
 ### Query by Category
 
-Read file, filter where `category` matches target.
+```bash
+python3 scripts/query-lessons.py --category bug
+```
+
+### Query by Bundle
+
+```bash
+python3 scripts/query-lessons.py --bundle cui-maven
+```
+
+### Combine Filters
+
+```bash
+python3 scripts/query-lessons.py --component maven-build-and-fix --applied false
+```
+
+**Output**: JSON array of matching lessons with frontmatter and content.
 
 ---
 
@@ -145,10 +195,17 @@ Read file, filter where `category` matches target.
 
 After applying a lesson to component documentation:
 
-1. Read `.claude/lessons-learned.json`
-2. Find lesson by ID
-3. Set `"applied": true`
-4. Write file
+1. Find lesson file: `.claude/lessons-learned/{lesson-id}.md`
+2. Edit frontmatter: Change `applied: false` to `applied: true`
+3. Use Edit tool to update the frontmatter only
+
+**Example**:
+```bash
+# For lesson 2025-11-27-001.md
+Edit .claude/lessons-learned/2025-11-27-001.md
+old_string: "applied: false"
+new_string: "applied: true"
+```
 
 ---
 
@@ -170,12 +227,33 @@ The `/plugin-apply-lessons-learned` command uses this skill to:
 
 ---
 
+## Dependencies
+
+**Python Libraries**:
+- `python-frontmatter` - YAML frontmatter parsing for query script
+
+Install with:
+```bash
+pip install python-frontmatter
+```
+
+---
+
+## Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `query-lessons.py` | Query and filter lessons by frontmatter criteria |
+| `test-query-lessons.sh` | Test suite for query script |
+
+---
+
 ## .gitignore
 
-The lessons-learned file should be gitignored:
+The lessons-learned directory should be gitignored:
 
 ```
-.claude/lessons-learned.json
+.claude/lessons-learned/*.md
 ```
 
 Lessons are project-specific runtime knowledge.

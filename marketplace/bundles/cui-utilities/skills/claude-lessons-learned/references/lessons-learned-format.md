@@ -1,62 +1,91 @@
 # Lessons Learned Format
 
-JSON schema specification for `.claude/lessons-learned.json`.
+Markdown file specification for `.claude/lessons-learned/*.md`.
 
 ## Purpose
 
-The lessons learned file stores:
+Individual lesson files store:
 - Runtime insights from command/agent executions
 - Categorized learnings (bugs, improvements, patterns, anti-patterns)
 - Application status for each lesson
+- Rich content with code examples, links, and formatting
 
-## File Location
+## Storage Location
 
 ```
-.claude/lessons-learned.json
+.claude/lessons-learned/
+  2025-11-27-001.md
+  2025-11-27-002.md
+  2025-11-26-001.md
+  ...
 ```
 
-## Schema
+Each lesson is stored as an individual Markdown file.
 
-```json
-{
-  "version": 1,
-  "lessons": [
-    {
-      "id": "2025-11-25-001",
-      "component": {
-        "type": "command|agent|skill",
-        "name": "component-name",
-        "bundle": "bundle-name"
-      },
-      "date": "2025-11-25",
-      "category": "bug|improvement|pattern|anti-pattern",
-      "summary": "Brief description",
-      "detail": "Full explanation of the lesson",
-      "applied": false
-    }
-  ]
-}
+---
+
+## File Structure
+
+### Frontmatter (YAML)
+
+Required metadata at top of file:
+
+```yaml
+---
+id: 2025-11-27-001
+component:
+  type: command|agent|skill
+  name: component-name
+  bundle: bundle-name
+date: 2025-11-27
+category: bug|improvement|pattern|anti-pattern
+applied: false
+---
 ```
 
-## Required Fields
+### Content (Markdown)
 
-### Root Object
+After frontmatter, standard Markdown content:
+
+```markdown
+# Brief Summary Title
+
+## Detail
+
+Full explanation with rich formatting:
+- Code blocks
+- Lists
+- Links
+- Tables
+
+## Example
+
+```bash
+# Code examples
+Bash: ls "${file_path}"
+```
+
+## Solution
+
+Steps to address the issue.
+
+## Related
+
+- Links to related lessons
+- Affected components
+- Similar issues
+```
+
+---
+
+## Required Frontmatter Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| version | integer | Schema version (currently 1) |
-| lessons | array | Array of lesson objects |
-
-### Lesson Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | string | Unique identifier: `{date}-{sequence}` |
+| id | string | Unique identifier: `{YYYY-MM-DD}-{NNN}` |
 | component | object | Component this lesson applies to |
 | date | string | ISO date when lesson was recorded |
 | category | string | One of: bug, improvement, pattern, anti-pattern |
-| summary | string | Brief one-line description |
-| detail | string | Full explanation |
 | applied | boolean | Whether lesson has been applied to component |
 
 ### Component Object
@@ -75,68 +104,202 @@ The lessons learned file stores:
 
 Defects or errors discovered during execution.
 
-**Example:**
-```json
-{
-  "id": "2025-11-25-001",
-  "component": {"type": "command", "name": "maven-build-and-fix", "bundle": "cui-maven"},
-  "date": "2025-11-25",
-  "category": "bug",
-  "summary": "Command fails when directory contains spaces",
-  "detail": "The glob pattern expansion doesn't handle paths with spaces. Need to quote paths in Bash calls.",
-  "applied": false
-}
+**Example File**: `.claude/lessons-learned/2025-11-27-001.md`
+
+```markdown
+---
+id: 2025-11-27-001
+component:
+  type: command
+  name: maven-build-and-fix
+  bundle: cui-maven
+date: 2025-11-27
+category: bug
+applied: false
+---
+
+# Command fails with spaces in paths
+
+## Detail
+
+The glob pattern expansion doesn't handle paths with spaces correctly.
+When processing files in directories with spaces, Bash tool calls fail
+with "No such file or directory" errors.
+
+## Root Cause
+
+Unquoted path variables being passed to Bash commands.
+
+## Solution
+
+Always quote path variables in Bash tool calls:
+
+```bash
+# Before (fails)
+Bash: ls ${file_path}
+
+# After (works)
+Bash: ls "${file_path}"
+```
+
+## Affected Commands
+
+- `/maven-build-and-fix` - All Bash calls
+- `/java-refactor-code` - File iteration
 ```
 
 ### improvement
 
 Enhancement opportunities identified during execution.
 
-**Example:**
-```json
-{
-  "id": "2025-11-25-002",
-  "component": {"type": "agent", "name": "maven-builder", "bundle": "cui-maven"},
-  "date": "2025-11-25",
-  "category": "improvement",
-  "summary": "Add progress indicator for long operations",
-  "detail": "When processing many files, user has no visibility into progress. Could add periodic status updates.",
-  "applied": false
-}
+**Example File**: `.claude/lessons-learned/2025-11-27-002.md`
+
+```markdown
+---
+id: 2025-11-27-002
+component:
+  type: agent
+  name: maven-builder
+  bundle: cui-maven
+date: 2025-11-27
+category: improvement
+applied: false
+---
+
+# Add progress indicator for long operations
+
+## Detail
+
+When processing many files (>50), user has no visibility into progress.
+Long operations appear frozen.
+
+## Proposed Enhancement
+
+Add periodic status updates:
+- Every 50 files: "Processed 150/300 files (50%)"
+- Estimated time remaining
+
+## Implementation
+
+```markdown
+### Step 3: Process Files
+
+For each file:
+  1. Process file
+  2. If count % 50 == 0: Print progress
+```
 ```
 
 ### pattern
 
 Successful patterns worth documenting.
 
-**Example:**
-```json
-{
-  "id": "2025-11-25-003",
-  "component": {"type": "skill", "name": "cui-maven-rules", "bundle": "cui-maven"},
-  "date": "2025-11-25",
-  "category": "pattern",
-  "summary": "Validate inputs before processing",
-  "detail": "Early validation of file existence and format prevents confusing errors later. Check all inputs in first workflow step.",
-  "applied": false
-}
+**Example File**: `.claude/lessons-learned/2025-11-27-003.md`
+
+```markdown
+---
+id: 2025-11-27-003
+component:
+  type: skill
+  name: cui-maven-rules
+  bundle: cui-maven
+date: 2025-11-27
+category: pattern
+applied: true
+---
+
+# Validate inputs early
+
+## Detail
+
+Validating inputs (file existence, format, permissions) in the first
+workflow step prevents confusing error messages later in execution.
+
+This pattern has proven valuable across multiple skills:
+- Clearer error messages for users
+- Faster failure (fail-fast principle)
+- Easier debugging
+
+## Example
+
+```markdown
+### Step 1: Validate Inputs
+
+Before processing:
+1. Check file exists: `[ -f "$file_path" ]`
+2. Check file readable: `[ -r "$file_path" ]`
+3. Check file format: Parse and validate structure
+4. Check dependencies available
+```
+
+## Benefits
+
+| Approach | Error Location | Error Message | Debug Time |
+|----------|----------------|---------------|------------|
+| Late validation | Step 5 of 8 | Generic parser error | 10+ min |
+| Early validation | Step 1 of 8 | "File not found: X" | <1 min |
+
+## Applied To
+
+- cui-maven-rules skill ✓
+- cui-java-core skill ✓
+- cui-documentation skill ✓
 ```
 
 ### anti-pattern
 
 Patterns to avoid that caused problems.
 
-**Example:**
-```json
-{
-  "id": "2025-11-25-004",
-  "component": {"type": "command", "name": "java-refactor-code", "bundle": "cui-java-expert"},
-  "date": "2025-11-25",
-  "category": "anti-pattern",
-  "summary": "Don't modify files during iteration",
-  "detail": "Modifying files while iterating over a glob result causes missed files or double-processing. Collect file list first, then process.",
-  "applied": false
-}
+**Example File**: `.claude/lessons-learned/2025-11-27-004.md`
+
+```markdown
+---
+id: 2025-11-27-004
+component:
+  type: command
+  name: java-refactor-code
+  bundle: cui-java-expert
+date: 2025-11-27
+category: anti-pattern
+applied: false
+---
+
+# Don't modify files during glob iteration
+
+## Detail
+
+Modifying files while iterating over a glob result causes:
+- Missed files (if new files match pattern)
+- Double-processing (if filenames change)
+- Inconsistent results
+
+## Problem Example
+
+```bash
+# Bad - modifies during iteration
+for file in $(glob "*.java"); do
+  # Refactor might rename file, causing issues
+  refactor_file "$file"
+done
+```
+
+## Solution
+
+Collect file list first, then process:
+
+```bash
+# Good - collect then process
+files=($(glob "*.java"))
+for file in "${files[@]}"; do
+  refactor_file "$file"
+done
+```
+
+## Impact
+
+- Discovered after 3 bug reports
+- Caused incomplete refactoring in 2 projects
+- Fix applied to all Java refactor commands
 ```
 
 ---
@@ -145,91 +308,119 @@ Patterns to avoid that caused problems.
 
 Lesson IDs follow pattern: `{YYYY-MM-DD}-{NNN}`
 
-- Date: ISO date of lesson recording
+- Date: ISO date of lesson recording (YYYY-MM-DD)
 - Sequence: 3-digit sequence number starting at 001
 
-**Example:** `2025-11-25-001`, `2025-11-25-002`
+**Examples**:
+- `2025-11-27-001` (first lesson on Nov 27, 2025)
+- `2025-11-27-002` (second lesson on Nov 27, 2025)
+- `2025-11-26-001` (first lesson on Nov 26, 2025)
 
-When adding a lesson:
-1. Read existing lessons
-2. Find highest sequence number for today's date
-3. Increment or start at 001
+**Filename**: `{id}.md`
+- `2025-11-27-001.md`
+- `2025-11-27-002.md`
 
----
+### Algorithm
 
-## Example Complete File
-
-```json
-{
-  "version": 1,
-  "lessons": [
-    {
-      "id": "2025-11-25-001",
-      "component": {
-        "type": "command",
-        "name": "maven-build-and-fix",
-        "bundle": "cui-maven"
-      },
-      "date": "2025-11-25",
-      "category": "bug",
-      "summary": "Javadoc warnings not captured in some modules",
-      "detail": "Multi-module builds with inherited javadoc config don't always emit warnings to stdout. Need to check target/reports as well.",
-      "applied": false
-    },
-    {
-      "id": "2025-11-24-001",
-      "component": {
-        "type": "command",
-        "name": "maven-build-and-fix",
-        "bundle": "cui-maven"
-      },
-      "date": "2025-11-24",
-      "category": "pattern",
-      "summary": "Run verify phase for complete validation",
-      "detail": "Using 'mvn verify' instead of 'mvn package' catches integration test failures and plugin validation issues.",
-      "applied": true
-    },
-    {
-      "id": "2025-11-23-001",
-      "component": {
-        "type": "agent",
-        "name": "maven-builder",
-        "bundle": "cui-maven"
-      },
-      "date": "2025-11-23",
-      "category": "improvement",
-      "summary": "Report warning count in summary",
-      "detail": "Include count of warnings by category in final report for better visibility.",
-      "applied": false
-    }
-  ]
-}
-```
+When adding a new lesson:
+1. Get current date: `2025-11-27`
+2. List files in `.claude/lessons-learned/`
+3. Find files matching `2025-11-27-*.md`
+4. Find highest sequence number (e.g., `002`)
+5. Increment: `003`
+6. Create: `2025-11-27-003.md`
 
 ---
 
 ## Querying Patterns
 
+Use the `query-lessons.py` script to filter lessons.
+
 ### Filter by Component
 
-```javascript
-lessons.filter(l => l.component.name === "maven-build-and-fix")
+```bash
+python3 scripts/query-lessons.py --component maven-build-and-fix
 ```
 
 ### Filter Unapplied
 
-```javascript
-lessons.filter(l => !l.applied)
+```bash
+python3 scripts/query-lessons.py --applied false
 ```
 
 ### Filter by Category
 
-```javascript
-lessons.filter(l => l.category === "bug")
+```bash
+python3 scripts/query-lessons.py --category bug
 ```
 
 ### Filter by Component Type
 
-```javascript
-lessons.filter(l => l.component.type === "command")
+```bash
+python3 scripts/query-lessons.py --type command
 ```
+
+### Filter by Bundle
+
+```bash
+python3 scripts/query-lessons.py --bundle cui-maven
+```
+
+### Combine Filters
+
+```bash
+python3 scripts/query-lessons.py --component maven-build-and-fix --applied false
+```
+
+---
+
+## Content Guidelines
+
+### Title (H1)
+
+Brief, actionable summary (50 chars or less):
+- ✅ "Command fails with spaces in paths"
+- ✅ "Add progress indicator"
+- ❌ "There is a bug in the command that causes it to fail"
+
+### Detail Section
+
+Full explanation with:
+- What happened
+- Why it happened
+- Impact
+
+### Example/Solution Section
+
+Code blocks showing:
+- Before/After
+- Problem/Solution
+- Implementation
+
+### Related Section
+
+- Affected components
+- Similar issues
+- Cross-references
+
+---
+
+## Best Practices
+
+1. **Be Specific**: Include concrete examples, not vague descriptions
+2. **Show Code**: Use code blocks for technical details
+3. **Link Context**: Reference related lessons and components
+4. **Update Status**: Mark `applied: true` when integrated into docs
+5. **Rich Format**: Use Markdown features (tables, lists, code blocks)
+
+---
+
+## Migration from JSON
+
+If you have existing lessons in `.claude/lessons-learned.json`:
+
+1. For each JSON lesson, create `{id}.md` file
+2. Use frontmatter for metadata (id, component, date, category, applied)
+3. Use Markdown for content (summary as H1, detail as text)
+4. Add code examples in proper code blocks
+5. Delete or archive old JSON file

@@ -5,7 +5,7 @@ description: Apply accumulated lessons learned to component documentation
 
 # Apply Lessons Learned
 
-Read lessons learned from `.claude/lessons-learned.json` and apply them to component documentation.
+Read lessons learned from `.claude/lessons-learned/*.md` and apply them to component documentation.
 
 ## Usage
 
@@ -39,9 +39,9 @@ When you invoke this command, I will:
    ```
 
 3. **Query unapplied lessons**:
-   - Read `.claude/lessons-learned.json`
+   - Use `query-lessons.py` script to filter lesson files
    - For specific component: Filter by `component.name`
-   - For --all: Filter all where `"applied": false`
+   - For --all: Filter all where `applied: false`
    - For --list: Display lessons without applying
 
 4. **For each unapplied lesson**:
@@ -68,7 +68,7 @@ When you invoke this command, I will:
       - Maintain document structure and formatting
 
    e. **Mark lesson applied**:
-      - Update lesson in `.claude/lessons-learned.json` with `"applied": true`
+      - Edit lesson file frontmatter: Change `applied: false` to `applied: true`
 
 5. **Report results**:
    - Number of lessons applied per component
