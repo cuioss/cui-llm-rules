@@ -52,47 +52,47 @@ Load this skill FIRST to understand component patterns, frontmatter standards, a
 ### Directory Structure Support
 
 **plan-init skill** (init phase):
-- [ ] Create `cui-task-workflow/skills/plan-init/` directory
-- [ ] Create SKILL.md with create operation and type routing (see [api.md](api.md))
-- [ ] Create plan-init/ directory with init implementations
-- [ ] Create README.md with skill documentation
+- [x] Create `cui-task-workflow/skills/plan-init/` directory
+- [x] Create SKILL.md with create operation and type routing (see [api.md](api.md))
+- [x] Create plan-init/ directory with init implementations
+- [x] Create README.md with skill documentation
 
 **plan-refine skill** (refine phase):
-- [ ] Create `cui-task-workflow/skills/plan-refine/` directory
-- [ ] Create SKILL.md with analyze, plan-tasks, identify-docs operations
-- [ ] Create README.md with skill documentation
+- [x] Create `cui-task-workflow/skills/plan-refine/` directory
+- [x] Create SKILL.md with analyze, plan-tasks, identify-docs operations
+- [x] Create README.md with skill documentation
 
 **plan-implement skill** (implement phase):
-- [ ] Create `cui-task-workflow/skills/plan-implement/` directory
-- [ ] Create SKILL.md with execute-tasks, delegate, track-progress operations
-- [ ] Create README.md with skill documentation
+- [x] Create `cui-task-workflow/skills/plan-implement/` directory
+- [x] Create SKILL.md with execute-tasks, delegate, track-progress operations
+- [x] Create README.md with skill documentation
 
 **plan-verify skill** (verify phase):
-- [ ] Create `cui-task-workflow/skills/plan-verify/` directory
-- [ ] Create SKILL.md with run-build, check-quality, review-docs operations
-- [ ] Create README.md with skill documentation
+- [x] Create `cui-task-workflow/skills/plan-verify/` directory
+- [x] Create SKILL.md with run-build, check-quality, review-docs operations
+- [x] Create README.md with skill documentation
 
 **plan-finalize skill** (finalize phase):
-- [ ] Create `cui-task-workflow/skills/plan-finalize/` directory
-- [ ] Create SKILL.md with commit, create-pr, pr-workflow operations
-- [ ] Create README.md with skill documentation
+- [x] Create `cui-task-workflow/skills/plan-finalize/` directory
+- [x] Create SKILL.md with commit, create-pr, pr-workflow operations
+- [x] Create README.md with skill documentation
 
 **plan-files skill** (persistence layer):
-- [ ] Create `cui-task-workflow/skills/plan-files/` directory
-- [ ] Create SKILL.md with persistence operations (see [api.md](api.md#skill-plan-files))
-  - [ ] create-directory - Create plan directory structure
-  - [ ] read-plan - Read plan.md (tasks, phases, status)
-  - [ ] read-config - Read config.md (technology, build system, etc.)
-  - [ ] get-references - Read references.md (ADRs, interfaces, files)
-  - [ ] write-plan - Write/update plan.md
-  - [ ] write-config - Write config.md
-  - [ ] write-references - Write/update references.md
-  - [ ] update-progress - Mark tasks complete, update phase table
-- [ ] Create README.md with skill documentation
+- [x] Create `cui-task-workflow/skills/plan-files/` directory
+- [x] Create SKILL.md with persistence operations (see [api.md](api.md#skill-plan-files))
+  - [x] create-directory - Create plan directory structure
+  - [x] read-plan - Read plan.md (tasks, phases, status)
+  - [x] read-config - Read config.md (technology, build system, etc.)
+  - [x] get-references - Read references.md (ADRs, interfaces, files)
+  - [x] write-plan - Write/update plan.md
+  - [x] write-config - Write config.md
+  - [x] write-references - Write/update references.md
+  - [x] update-progress - Mark tasks complete, update phase table
+- [x] Create README.md with skill documentation
 
 **Shared templates**:
-- [ ] Create `cui-task-workflow/skills/plan-init/standards/` directory
-- [ ] Create plan-template.md (see [templates-workflow.md](templates-workflow.md))
+- [x] Create `cui-task-workflow/skills/plan-init/standards/` directory
+- [x] Create plan-template.md (see [templates-workflow.md](templates-workflow.md))
 - [ ] Create references-template.md (see [persistence.md](plan-files/persistence.md))
 
 ### Init Phase Support (plan-init skill)
@@ -100,246 +100,246 @@ Load this skill FIRST to understand component patterns, frontmatter standards, a
 See [plan-types.md](plan-types.md) for init phase router design.
 
 **Init Phase Router**:
-- [ ] Implement init phase decision tree in plan-init skill
-  - [ ] Detect from command parameters (task, issue, type)
-  - [ ] Auto-detect from environment (branch name, build files)
-  - [ ] Prompt user if plan type cannot be determined
-- [ ] Implement progressive disclosure (load one init implementation per plan)
+- [x] Implement init phase decision tree in plan-init skill
+  - [x] Detect from command parameters (task, issue, type)
+  - [x] Auto-detect from environment (branch name, build files)
+  - [x] Prompt user if plan type cannot be determined
+- [x] Implement progressive disclosure (load one init implementation per plan)
 
 **Implementation Init** (see [plan-init/implementation.md](plan-init/implementation.md)):
-- [ ] Branch detection and validation
-  - [ ] Get current branch via `git branch --show-current`
-  - [ ] Validate not on main/master for implementation work
-  - [ ] Propose current if feature/fix/task/claude branch
-- [ ] Issue detection and analysis
-  - [ ] Parse from branch name: `feature/PROJ-123-desc` → `PROJ-123`
-  - [ ] Fetch issue details from GitHub/GitLab/Jira
-  - [ ] Pre-populate plan with issue content
-- [ ] Build system detection
-  - [ ] Scan for pom.xml → maven
-  - [ ] Scan for build.gradle → gradle
-  - [ ] Scan for package.json → npm/npx
-- [ ] Technology derivation from build system
-- [ ] Default values: compatibility=deprecations, commit-strategy=fine-granular, finalizing=pr-workflow
-- [ ] **Output**: 5-phase plan structure
+- [x] Branch detection and validation
+  - [x] Get current branch via `git branch --show-current`
+  - [x] Validate not on main/master for implementation work
+  - [x] Propose current if feature/fix/task/claude branch
+- [x] Issue detection and analysis
+  - [x] Parse from branch name: `feature/PROJ-123-desc` → `PROJ-123`
+  - [x] Fetch issue details from GitHub/GitLab/Jira
+  - [x] Pre-populate plan with issue content
+- [x] Build system detection
+  - [x] Scan for pom.xml → maven
+  - [x] Scan for build.gradle → gradle
+  - [x] Scan for package.json → npm/npx
+- [x] Technology derivation from build system
+- [x] Default values: compatibility=deprecations, commit-strategy=fine-granular, finalizing=pr-workflow
+- [x] **Output**: 5-phase plan structure
 
 **Simple Init** (see [plan-init/simple.md](plan-init/simple.md)):
-- [ ] Branch selection (current or main/master, no validation)
-- [ ] Default values: build-system=none, technology=none, finalizing=commit-only
-- [ ] Minimal user interaction (quick confirmation only)
-- [ ] **Output**: 3-phase plan structure
+- [x] Branch selection (current or main/master, no validation)
+- [x] Default values: build-system=none, technology=none, finalizing=commit-only
+- [x] Minimal user interaction (quick confirmation only)
+- [x] **Output**: 3-phase plan structure
 
 **Configuration Persistence** (both init types):
-- [ ] Write configuration block to plan.md header
-- [ ] Write complete phase structure to plan.md
-- [ ] Update references.md with issue and branch (Implementation only)
+- [x] Write configuration block to plan.md header
+- [x] Write complete phase structure to plan.md
+- [x] Update references.md with issue and branch (Implementation only)
 
 **User Confirmation Workflow**:
-- [ ] Present detected/defaulted configuration
-- [ ] Allow property overrides
-- [ ] Iterate on user feedback
+- [x] Present detected/defaulted configuration
+- [x] Allow property overrides
+- [x] Iterate on user feedback
 
 **Create Operation** (plan-init skill):
-- [ ] Implement create operation (Bash + Write tools)
-  - [ ] Create plan directory with `mkdir -p .claude/plans/{task-name}/` (see [persistence.md](plan-files/persistence.md))
-  - [ ] Route to appropriate init implementation based on type
-  - [ ] Generate config.md with build and workflow configuration (see [persistence.md](plan-files/persistence.md))
-  - [ ] Generate plan.md (tasks-only) from init output (see [templates-workflow.md](templates-workflow.md))
-  - [ ] Initialize Phase Progress Table
-  - [ ] Set helper fields (current_phase based on init output, current_task: task-1)
-  - [ ] Create references.md with initial structure (see [persistence.md](plan-files/persistence.md))
+- [x] Implement create operation (Bash + Write tools)
+  - [x] Create plan directory with `mkdir -p .claude/plans/{task-name}/` (see [persistence.md](plan-files/persistence.md))
+  - [x] Route to appropriate init implementation based on type
+  - [x] Generate config.md with build and workflow configuration (see [persistence.md](plan-files/persistence.md))
+  - [x] Generate plan.md (tasks-only) from init output (see [templates-workflow.md](templates-workflow.md))
+  - [x] Initialize Phase Progress Table
+  - [x] Set helper fields (current_phase based on init output, current_task: task-1)
+  - [x] Create references.md with initial structure (see [persistence.md](plan-files/persistence.md))
 
 ### Refine Phase Support (plan-refine skill)
 
 See [plan-refine/refine.md](plan-refine/refine.md) for complete specification.
 
 **Skill Structure**:
-- [ ] Create `cui-task-workflow/skills/plan-refine/` directory
-- [ ] Create SKILL.md with analyze, plan-tasks, identify-docs operations
-- [ ] Create standards/implementation-requirements-template.md
-- [ ] Create README.md with skill documentation
+- [x] Create `cui-task-workflow/skills/plan-refine/` directory
+- [x] Create SKILL.md with analyze, plan-tasks, identify-docs operations
+- [x] Create standards/implementation-requirements-template.md
+- [x] Create README.md with skill documentation
 
 **Analyze Operation** (see [refine.md](plan-refine/refine.md#step-2-analyze-requirements)):
-- [ ] Read plan.md for task description and context
-- [ ] Break down requirements into implementable components
-- [ ] Map dependencies between components
-- [ ] Estimate complexity per component
-- [ ] Present analysis to user via `AskUserQuestion` for confirmation
+- [x] Read plan.md for task description and context
+- [x] Break down requirements into implementable components
+- [x] Map dependencies between components
+- [x] Estimate complexity per component
+- [x] Present analysis to user via `AskUserQuestion` for confirmation
 
 **Plan-Tasks Operation** (see [refine.md](plan-refine/refine.md#step-3-plan-implementation-tasks)):
-- [ ] Generate implementation tasks per component
-- [ ] Add standard checklists per technology (Java/JavaScript)
-- [ ] Define acceptance criteria from requirements
-- [ ] Order tasks by dependencies
-- [ ] Present task list to user via `AskUserQuestion` for review
-- [ ] Support task modification (add/remove/reorder)
-- [ ] Support granularity adjustment (split/merge)
-- [ ] Add tasks to plan.md implement phase
-- [ ] Update Phase Progress Table
+- [x] Generate implementation tasks per component
+- [x] Add standard checklists per technology (Java/JavaScript)
+- [x] Define acceptance criteria from requirements
+- [x] Order tasks by dependencies
+- [x] Present task list to user via `AskUserQuestion` for review
+- [x] Support task modification (add/remove/reorder)
+- [x] Support granularity adjustment (split/merge)
+- [x] Add tasks to plan.md implement phase
+- [x] Update Phase Progress Table
 
 **Identify-Docs Operation** (see [refine.md](plan-refine/refine.md#step-4-identify-documentation-needs)):
-- [ ] Check if ADRs needed for architectural decisions
-- [ ] Check if interface specs needed for new APIs
-- [ ] Prompt user via `AskUserQuestion` for decisions
-- [ ] Delegate to `adr-management` skill for ADR creation/linking
-- [ ] Delegate to `interface-management` skill for interface creation/linking
-- [ ] Update references.md with documentation needs
+- [x] Check if ADRs needed for architectural decisions
+- [x] Check if interface specs needed for new APIs
+- [x] Prompt user via `AskUserQuestion` for decisions
+- [x] Delegate to `adr-management` skill for ADR creation/linking
+- [x] Delegate to `interface-management` skill for interface creation/linking
+- [x] Update references.md with documentation needs
 
 **Implementation Requirements Artifact** (see [template](plan-refine/implementation-requirements-template.md)):
-- [ ] Generate `implementation-requirements.md` on phase transition
-- [ ] Include component summary with complexity estimates
-- [ ] Include task details with implementation guidance
-- [ ] Include dependency graph visualization
-- [ ] Include references summary (ADRs, interfaces, code)
-- [ ] Include quality gates and commit strategy
+- [x] Generate `implementation-requirements.md` on phase transition
+- [x] Include component summary with complexity estimates
+- [x] Include task details with implementation guidance
+- [x] Include dependency graph visualization
+- [x] Include references summary (ADRs, interfaces, code)
+- [x] Include quality gates and commit strategy
 
 ### Implement Phase Support (plan-implement skill)
 
-- [ ] Implement execute-tasks operation
-  - [ ] Read current tasks from plan.md
-  - [ ] Execute tasks sequentially
-  - [ ] Mark tasks complete as they finish
-- [ ] Implement delegate operation
-  - [ ] Route to java-implement-agent for Java tasks
-  - [ ] Route to js-implement-agent for JavaScript tasks
-  - [ ] Pass task context and references
-- [ ] Implement track-progress operation
-  - [ ] Update plan.md with task completion
-  - [ ] Update references.md with created files
-  - [ ] Update Phase Progress Table
+- [x] Implement execute-tasks operation
+  - [x] Read current tasks from plan.md
+  - [x] Execute tasks sequentially
+  - [x] Mark tasks complete as they finish
+- [x] Implement delegate operation
+  - [x] Route to java-implement-agent for Java tasks
+  - [x] Route to js-implement-agent for JavaScript tasks
+  - [x] Pass task context and references
+- [x] Implement track-progress operation
+  - [x] Update plan.md with task completion
+  - [x] Update references.md with created files
+  - [x] Update Phase Progress Table
 
 ### Verify Phase Support (plan-verify skill)
 
-- [ ] Implement run-build operation
-  - [ ] Delegate to `maven-builder` or `npm-builder` agent
-  - [ ] Report build results
-- [ ] Implement check-quality operation
-  - [ ] Run linter/static analysis
-  - [ ] Check Sonar issues if applicable
-  - [ ] Report quality score
-- [ ] Implement review-docs operation
-  - [ ] Verify JavaDoc/JSDoc complete
-  - [ ] Check ADR/interface docs exist
-  - [ ] Update README if needed
+- [x] Implement run-build operation
+  - [x] Delegate to `maven-builder` or `npm-builder` agent
+  - [x] Report build results
+- [x] Implement check-quality operation
+  - [x] Run linter/static analysis
+  - [x] Check Sonar issues if applicable
+  - [x] Report quality score
+- [x] Implement review-docs operation
+  - [x] Verify JavaDoc/JSDoc complete
+  - [x] Check ADR/interface docs exist
+  - [x] Update README if needed
 
 ### Finalize Phase Support (plan-finalize skill)
 
-- [ ] Implement commit operation
-  - [ ] Stage all changes
-  - [ ] Create commit with descriptive message
-  - [ ] Push to remote branch
-- [ ] Implement create-pr operation
-  - [ ] Create PR with summary
-  - [ ] Link to issue
-  - [ ] Add reviewers
-- [ ] Implement pr-workflow operation
-  - [ ] Delegate to `/pr-fix` for issue handling
-  - [ ] Address review comments
-  - [ ] Track PR status
+- [x] Implement commit operation
+  - [x] Stage all changes
+  - [x] Create commit with descriptive message
+  - [x] Push to remote branch
+- [x] Implement create-pr operation
+  - [x] Create PR with summary
+  - [x] Link to issue
+  - [x] Add reviewers
+- [x] Implement pr-workflow operation
+  - [x] Delegate to `/pr-fix` for issue handling
+  - [x] Address review comments
+  - [x] Track PR status
 
 ### plan-files Skill (Persistence Layer)
 
 All file operations are delegated to the `plan-files` skill. Phase skills call plan-files for all file I/O.
 
 **Core Operations** (see [api.md](api.md#skill-plan-files)):
-- [ ] Implement create-directory operation (Bash tool)
-  - [ ] Create plan directory with `mkdir -p .claude/plans/{task-name}/`
-- [ ] Implement read-plan operation (Read tool)
-  - [ ] Read and parse plan.md (tasks-only)
-  - [ ] Extract current phase and tasks
-  - [ ] Return structured task data
-- [ ] Implement read-config operation (Read tool)
-  - [ ] Read and parse config.md
-  - [ ] Return technology, build-system, compatibility, etc.
-- [ ] Implement get-references operation (Read tool)
-  - [ ] Read and parse references.md
-  - [ ] Return ADRs, interfaces, files, external docs
-- [ ] Implement write-plan operation (Write/Edit tool)
-  - [ ] Create or update plan.md
-  - [ ] Add new tasks to appropriate phase
-  - [ ] Modify existing tasks
-  - [ ] Update Phase Progress Table when tasks added
-- [ ] Implement write-config operation (Write tool)
-  - [ ] Create config.md with build and workflow settings
-- [ ] Implement write-references operation (Write/Edit tool)
-  - [ ] Create or update references.md
-  - [ ] Add/modify file, ADR, interface references
-- [ ] Implement update-progress operation (Edit tool)
-  - [ ] Mark tasks complete (`[ ]` → `[x]`)
-  - [ ] Update checklist items
-  - [ ] Update Phase Progress Table
+- [x] Implement create-directory operation (Bash tool)
+  - [x] Create plan directory with `mkdir -p .claude/plans/{task-name}/`
+- [x] Implement read-plan operation (Read tool)
+  - [x] Read and parse plan.md (tasks-only)
+  - [x] Extract current phase and tasks
+  - [x] Return structured task data
+- [x] Implement read-config operation (Read tool)
+  - [x] Read and parse config.md
+  - [x] Return technology, build-system, compatibility, etc.
+- [x] Implement get-references operation (Read tool)
+  - [x] Read and parse references.md
+  - [x] Return ADRs, interfaces, files, external docs
+- [x] Implement write-plan operation (Write/Edit tool)
+  - [x] Create or update plan.md
+  - [x] Add new tasks to appropriate phase
+  - [x] Modify existing tasks
+  - [x] Update Phase Progress Table when tasks added
+- [x] Implement write-config operation (Write tool)
+  - [x] Create config.md with build and workflow settings
+- [x] Implement write-references operation (Write/Edit tool)
+  - [x] Create or update references.md
+  - [x] Add/modify file, ADR, interface references
+- [x] Implement update-progress operation (Edit tool)
+  - [x] Mark tasks complete (`[ ]` → `[x]`)
+  - [x] Update checklist items
+  - [x] Update Phase Progress Table
 
 **Validation Operations**:
-- [ ] Implement validate operation (Read tool + validation)
-  - [ ] Validate plan.md structure
-  - [ ] Validate config.md completeness
-  - [ ] Validate references.md completeness
-  - [ ] Check all tasks have acceptance criteria
-  - [ ] Calculate quality score
+- [x] Implement validate operation (Read tool + validation)
+  - [x] Validate plan.md structure
+  - [x] Validate config.md completeness
+  - [x] Validate references.md completeness
+  - [x] Check all tasks have acceptance criteria
+  - [x] Calculate quality score
 
 ### Phase Management (via plan-files skill)
 
 Phase management operations delegate file I/O to `plan-files` skill:
 
-- [ ] Implement phase transition operation (see [api.md#phase-transition](api.md))
-  - [ ] Verify current phase completed (via `plan-files.read-plan`)
-  - [ ] Mark previous phase as completed (via `plan-files.update-progress`)
-  - [ ] Mark next phase as in_progress (via `plan-files.update-progress`)
-  - [ ] Update Current Phase field
-  - [ ] Update Current Task to first task of new phase
-  - [ ] Update Phase Progress Table
-- [ ] Implement task progress update operation (see [api.md#task-progress](api.md))
-  - [ ] Mark task complete in plan.md (via `plan-files.update-progress`)
-  - [ ] Update checklist items
-  - [ ] Update Phase Progress Table
-  - [ ] Check if all phase tasks completed
-  - [ ] Auto-trigger phase transition if phase complete
-- [ ] Implement phase transition rules (see [templates-workflow.md](templates-workflow.md))
-  - [ ] Sequential enforcement (init→refine→implement→verify→finalize)
-  - [ ] Completion validation (all tasks `[x]` before transition)
-  - [ ] Error handling for invalid transitions
+- [x] Implement phase transition operation (see [api.md#phase-transition](api.md))
+  - [x] Verify current phase completed (via `plan-files.read-plan`)
+  - [x] Mark previous phase as completed (via `plan-files.update-progress`)
+  - [x] Mark next phase as in_progress (via `plan-files.update-progress`)
+  - [x] Update Current Phase field
+  - [x] Update Current Task to first task of new phase
+  - [x] Update Phase Progress Table
+- [x] Implement task progress update operation (see [api.md#task-progress](api.md))
+  - [x] Mark task complete in plan.md (via `plan-files.update-progress`)
+  - [x] Update checklist items
+  - [x] Update Phase Progress Table
+  - [x] Check if all phase tasks completed
+  - [x] Auto-trigger phase transition if phase complete
+- [x] Implement phase transition rules (see [templates-workflow.md](templates-workflow.md))
+  - [x] Sequential enforcement (init→refine→implement→verify→finalize)
+  - [x] Completion validation (all tasks `[x]` before transition)
+  - [x] Error handling for invalid transitions
 
 ### Reference Management (via plan-files skill)
 
 Reference operations are handled by `plan-files` skill with delegation to documentation skills:
 
-- [ ] Implement get-references operation (via `plan-files.get-references`) (see [api.md](api.md))
-  - [ ] Retrieve issue and branch references
-  - [ ] Retrieve file references
-  - [ ] Retrieve external doc references
-  - [ ] Retrieve dependency references
-  - [ ] Delegate ADR retrieval to `adr-management` skill
-  - [ ] Delegate interface retrieval to `interface-management` skill
-- [ ] Implement manage-references operation (via `plan-files.write-references`) (see [api.md#manage-references](api.md))
-  - [ ] Add/update/remove file references
-  - [ ] Add/update/remove ADR references
-  - [ ] Add/update/remove interface references
-  - [ ] Add/update/remove external doc references
-  - [ ] Add/update/remove dependency references
-- [ ] Implement ADR verification via `adr-management` skill (see [architecture.md](architecture.md))
-  - [ ] Check ADR exists before adding reference
-  - [ ] Optionally create ADR if missing
-- [ ] Implement interface verification via `interface-management` skill (see [architecture.md](architecture.md))
-  - [ ] Check interface exists before adding reference
-  - [ ] Optionally create interface if missing
+- [x] Implement get-references operation (via `plan-files.get-references`) (see [api.md](api.md))
+  - [x] Retrieve issue and branch references
+  - [x] Retrieve file references
+  - [x] Retrieve external doc references
+  - [x] Retrieve dependency references
+  - [x] Delegate ADR retrieval to `adr-management` skill
+  - [x] Delegate interface retrieval to `interface-management` skill
+- [x] Implement manage-references operation (via `plan-files.write-references`) (see [api.md#manage-references](api.md))
+  - [x] Add/update/remove file references
+  - [x] Add/update/remove ADR references
+  - [x] Add/update/remove interface references
+  - [x] Add/update/remove external doc references
+  - [x] Add/update/remove dependency references
+- [x] Implement ADR verification via `adr-management` skill (see [architecture.md](architecture.md))
+  - [x] Check ADR exists before adding reference
+  - [x] Optionally create ADR if missing
+- [x] Implement interface verification via `interface-management` skill (see [architecture.md](architecture.md))
+  - [x] Check interface exists before adding reference
+  - [x] Optionally create interface if missing
 
 ### Templates and Error Handling
-- [ ] Create plan.md template with 5 phases (see [templates-workflow.md](templates-workflow.md))
-- [ ] Create references.md template with 6 section types (see [persistence.md](plan-files/persistence.md))
-- [ ] Add error handling for all operations
-  - [ ] File not found errors
-  - [ ] Invalid structure errors
-  - [ ] Phase transition violations
-  - [ ] Reference not found errors
-- [ ] Add TOON error handoff responses (see [api.md](api.md))
+- [x] Create plan.md template with 5 phases (see [templates-workflow.md](templates-workflow.md))
+- [x] Create references.md template with 6 section types (see [persistence.md](plan-files/persistence.md))
+- [x] Add error handling for all operations
+  - [x] File not found errors
+  - [x] Invalid structure errors
+  - [x] Phase transition violations
+  - [x] Reference not found errors
+- [x] Add TOON error handoff responses (see [api.md](api.md))
 
 ### Quality Verification (Phase 1 Skills)
-- [ ] Run `/plugin-doctor` for `plan-init` skill
-- [ ] Run `/plugin-doctor` for `plan-refine` skill
-- [ ] Run `/plugin-doctor` for `plan-implement` skill
-- [ ] Run `/plugin-doctor` for `plan-verify` skill
-- [ ] Run `/plugin-doctor` for `plan-finalize` skill
-- [ ] Run `/plugin-doctor` for `plan-files` skill
+- [x] Run `/plugin-doctor` for `plan-init` skill
+- [x] Run `/plugin-doctor` for `plan-refine` skill
+- [x] Run `/plugin-doctor` for `plan-implement` skill
+- [x] Run `/plugin-doctor` for `plan-verify` skill
+- [x] Run `/plugin-doctor` for `plan-finalize` skill
+- [x] Run `/plugin-doctor` for `plan-files` skill
 
 ---
 
