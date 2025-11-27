@@ -1,7 +1,5 @@
 # plan-finalize Handoff Protocol
 
-**Purpose**: External interface specifications for the finalize phase skill
-
 **Scope**: Phase transitions, orchestrator communication, error patterns only. Internal delegations are documented in the main specification.
 
 ---

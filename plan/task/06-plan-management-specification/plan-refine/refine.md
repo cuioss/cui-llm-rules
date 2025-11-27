@@ -1,7 +1,5 @@
 # Refine Phase Specification
 
-**Purpose**: Refine phase implementation for analyzing requirements and planning implementation tasks
-
 **Input**: Plan from init phase with configuration and initial structure
 
 **Output**: Detailed implementation tasks with acceptance criteria and references
@@ -65,8 +63,6 @@ Fetch issue details via skill delegation:
 
 ### Step 2: Analyze Requirements
 
-**Purpose**: Break down the task into implementable components.
-
 **Analysis Process**:
 1. Identify functional components
 2. Determine technical boundaries
@@ -105,8 +101,6 @@ Select (1-3):
 
 ### Step 3: Plan Implementation Tasks
 
-**Purpose**: Create detailed tasks for the implement phase.
-
 **Task Generation Process**:
 1. For each component, generate implementation tasks
 2. Add standard checklist items per technology
@@ -118,7 +112,6 @@ Select (1-3):
 ### Task N: {Task Name}
 
 **Phase**: implement
-**Status**: [ ]
 **Goal**: {What success looks like}
 
 **References**:
@@ -204,8 +197,6 @@ Select (1-4):
 
 ### Step 4: Identify Documentation Needs
 
-**Purpose**: Determine if ADRs or interface specifications are needed.
-
 **Analysis Triggers**:
 
 | Trigger | Document Type | Action |
@@ -283,7 +274,6 @@ See [Implementation Requirements Template](#implementation-requirements-template
 ## Phase: refine (in_progress)
 
 ### Task 1: Analyze Requirements
-**Status**: [ ]
 **Goal**: Break down task into implementable components
 
 **Checklist**:
@@ -293,7 +283,6 @@ See [Implementation Requirements Template](#implementation-requirements-template
 - [ ] Confirm analysis with user
 
 ### Task 2: Plan Implementation Tasks
-**Status**: [ ]
 **Goal**: Create detailed task list for implement phase
 
 **Checklist**:
@@ -304,7 +293,6 @@ See [Implementation Requirements Template](#implementation-requirements-template
 - [ ] Review with user
 
 ### Task 3: Identify Documentation Needs
-**Status**: [ ]
 **Goal**: Determine ADRs and interfaces needed
 
 **Checklist**:

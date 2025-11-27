@@ -149,7 +149,6 @@ The `plan-files` skill is the **dedicated persistence layer**. All phase skills 
 ### Task 1: Setup project structure
 
 **Phase**: init
-**Status**: [ ]
 
 **Checklist**:
 - [ ] Create base directories
@@ -159,7 +158,6 @@ The `plan-files` skill is the **dedicated persistence layer**. All phase skills 
 ### Task 1: Setup project structure
 
 **Phase**: init
-**Status**: [x]
 
 **Checklist**:
 - [x] Create base directories
@@ -192,7 +190,6 @@ The `plan-files` skill is the **dedicated persistence layer**. All phase skills 
 
 ### Task 6a: Add token refresh logic   ← NEW TASK
 **Phase**: implement
-**Status**: [ ]
 **Goal**: Implement refresh token rotation
 
 **Acceptance Criteria**:
@@ -321,8 +318,6 @@ def check_phase_completion(phase_tasks):
 
 ### /task-plan Command
 
-**Location**: `cui-task-workflow/commands/task-plan.md`
-
 **Responsibilities**:
 - Parse user parameters
 - Determine current phase from plan
@@ -387,8 +382,6 @@ When user provides plan directory (continue workflow):
 
 ### /task-implement Command
 
-**Location**: `cui-task-workflow/commands/task-implement.md`
-
 **Responsibilities**:
 - Accept plan directory parameter
 - Delegate to plan-implement skill
@@ -446,8 +439,6 @@ Parameters:
 
 ### With adr-management Skill
 
-**Purpose**: Verify ADR references exist before adding to plan
-
 **Integration Points**:
 1. **During Reference Addition**:
    - plan-files skill checks if ADR exists
@@ -481,8 +472,6 @@ title: JWT Authentication Strategy
 
 ### With interface-management Skill
 
-**Purpose**: Verify interface references exist before adding to plan
-
 **Integration Points**:
 1. **During Reference Addition**:
    - plan-files skill checks if interface exists
@@ -515,8 +504,6 @@ title: Authentication Service Interface
 ```
 
 ### With task-execute Skill
-
-**Purpose**: Update plan progress during task execution
 
 **Integration Points**:
 1. **During Task Execution**:

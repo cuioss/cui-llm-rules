@@ -1,7 +1,5 @@
 # Implementation Init
 
-**Purpose**: Init phase implementation for full development workflows
-
 **Output**: 5-phase plan (init→refine→implement→verify→finalize)
 
 **Use Cases**:
@@ -491,7 +489,6 @@ Select (1-7):
 ```markdown
 # Configuration
 
-**Created**: {date}
 **Plan Type**: implementation
 
 ---
@@ -534,7 +531,6 @@ Select (1-7):
 **Configuration**: See [config.md](./config.md)
 **References**: See [references.md](./references.md)
 
-**Status**: in_progress
 **Current Phase**: init
 **Current Task**: task-1
 ```
@@ -558,7 +554,6 @@ Select (1-7):
 ## Phase: init (in_progress)
 
 ### Task 1: Detect Environment
-**Status**: [ ]
 **Goal**: Gather information from command parameters and environment
 
 **Checklist**:
@@ -568,7 +563,6 @@ Select (1-7):
 - [ ] Determine technology stack from environment-detection results
 
 ### Task 2: Fetch Issue Details
-**Status**: [ ]
 **Goal**: Retrieve and analyze issue information (if URL provided)
 
 **Checklist**:
@@ -578,7 +572,6 @@ Select (1-7):
 - [ ] Pre-populate plan with issue content
 
 ### Task 3: Validate Configuration
-**Status**: [ ]
 **Goal**: Ensure configuration is complete and valid
 
 **Checklist**:
@@ -588,7 +581,6 @@ Select (1-7):
 - [ ] Check for conflicting settings
 
 ### Task 4: User Confirmation
-**Status**: [ ]
 **Goal**: Present configuration and get user approval
 
 **Checklist**:
@@ -598,7 +590,6 @@ Select (1-7):
 - [ ] Confirm final configuration
 
 ### Task 5: Persist and Transition
-**Status**: [ ]
 **Goal**: Save configuration and move to refine phase
 
 **Checklist**:
@@ -630,7 +621,6 @@ This init produces the complete phase structure for the plan. When init complete
 ## Phase: init (in_progress)
 
 ### Task 1: Detect Environment
-**Status**: [ ]
 **Goal**: Gather information from command parameters and environment
 
 **Checklist**:
@@ -640,7 +630,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Determine technology stack from environment-detection results
 
 ### Task 2: Fetch Issue Details
-**Status**: [ ]
 **Goal**: Retrieve and analyze issue information
 
 **Checklist**:
@@ -650,7 +639,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Pre-populate plan with issue content
 
 ### Task 3: Validate Configuration
-**Status**: [ ]
 **Goal**: Ensure configuration is complete and valid
 
 **Checklist**:
@@ -659,7 +647,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Validate environment-detection results
 
 ### Task 4: User Confirmation
-**Status**: [ ]
 **Goal**: Present configuration and get user approval
 
 **Checklist**:
@@ -668,7 +655,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Confirm final configuration
 
 ### Task 5: Persist and Transition
-**Status**: [ ]
 **Goal**: Save configuration and move to refine phase
 
 **Checklist**:
@@ -682,7 +668,6 @@ This init produces the complete phase structure for the plan. When init complete
 ## Phase: refine (pending)
 
 ### Task 1: Analyze Requirements
-**Status**: [ ]
 **Goal**: Break down task into implementable units
 
 **Checklist**:
@@ -691,7 +676,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Define acceptance criteria per task
 
 ### Task 2: Plan Implementation Tasks
-**Status**: [ ]
 **Goal**: Create detailed task list for implement phase
 
 **Checklist**:
@@ -700,7 +684,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Estimate complexity
 
 ### Task 3: Identify Documentation Needs
-**Status**: [ ]
 **Goal**: Determine ADRs and interfaces needed
 
 **Checklist**:
@@ -716,7 +699,6 @@ This init produces the complete phase structure for the plan. When init complete
 
 **Template per task**:
 ### Task N: {Task Title}
-**Status**: [ ]
 **Goal**: {Goal description}
 
 **Acceptance Criteria**:
@@ -736,7 +718,6 @@ This init produces the complete phase structure for the plan. When init complete
 ## Phase: verify (pending)
 
 ### Task 1: Run Full Build
-**Status**: [ ]
 **Goal**: Ensure all code compiles and tests pass
 
 **Checklist**:
@@ -745,7 +726,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Verify coverage thresholds
 
 ### Task 2: Code Quality Check
-**Status**: [ ]
 **Goal**: Verify code meets quality standards
 
 **Checklist**:
@@ -754,7 +734,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Review Sonar issues (if applicable)
 
 ### Task 3: Manual Testing
-**Status**: [ ]
 **Goal**: Verify functionality works as expected
 
 **Checklist**:
@@ -763,7 +742,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Document test results
 
 ### Task 4: Documentation Review
-**Status**: [ ]
 **Goal**: Ensure documentation is complete
 
 **Checklist**:
@@ -776,7 +754,6 @@ This init produces the complete phase structure for the plan. When init complete
 ## Phase: finalize (pending)
 
 ### Task 1: Commit Changes
-**Status**: [ ]
 **Goal**: Create final commit(s) per commit strategy
 
 **Checklist**:
@@ -785,7 +762,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Push to remote branch
 
 ### Task 2: Create/Update Pull Request
-**Status**: [ ]
 **Goal**: Prepare PR for review
 
 **Checklist**:
@@ -794,7 +770,6 @@ This init produces the complete phase structure for the plan. When init complete
 - [ ] Add reviewers
 
 ### Task 3: PR Workflow
-**Status**: [ ]
 **Goal**: Handle PR feedback and fixes
 
 **Checklist**:
@@ -810,7 +785,6 @@ This init produces the complete phase structure for the plan. When init complete
 ```markdown
 # Configuration
 
-**Created**: 2025-01-15
 **Plan Type**: implementation
 
 ---

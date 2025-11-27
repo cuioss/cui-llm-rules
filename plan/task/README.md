@@ -1,9 +1,5 @@
 # Architectural Redesign: Task Workflow Integration with Handoff-Based Communication
 
-**Date**: 2025-11-26
-**Author**: Claude (Sonnet 4.5)
-**Purpose**: Complete architectural redesign of cui-task-workflow and cui-java-expert integration
-
 ## Overview
 
 This directory contains comprehensive analysis and design documents for redesigning the interplay between task-management (cui-task-workflow) and implementation bundles (cui-java-expert, cui-frontend-expert).
@@ -112,30 +108,50 @@ AFTER:  Command → [TOON HANDOFF] → Skill/Agent → [TOON HANDOFF] → Result
 #### [06-plan-management-specification/](06-plan-management-specification/)
 **Modular plan management abstraction layer specification with phase-based workflow and reference management**
 
-**Modular Structure** (6 focused documents):
+**Architecture**: One skill per phase, with plan-files as shared persistence layer
+
+**Phase Skills** (6 directories):
+- **[plan-init/](06-plan-management-specification/plan-init/)** - Create plan, environment detection, type routing
+  - [implementation.md](06-plan-management-specification/plan-init/implementation.md) - Full dev workflow (5 phases)
+  - [simple.md](06-plan-management-specification/plan-init/simple.md) - Lightweight workflow (3 phases)
+  - [handoff.md](06-plan-management-specification/plan-init/handoff.md) - External interface specifications
+- **[plan-refine/](06-plan-management-specification/plan-refine/)** - Analyze requirements, plan tasks, identify docs
+  - [refine.md](06-plan-management-specification/plan-refine/refine.md) - Main refine phase workflow
+  - [implementation-requirements-template.md](06-plan-management-specification/plan-refine/implementation-requirements-template.md) - Runtime artifact template
+  - [handoff.md](06-plan-management-specification/plan-refine/handoff.md) - External interface specifications
+- **[plan-implement/](06-plan-management-specification/plan-implement/)** - Execute tasks, delegate to language agents
+  - [implement.md](06-plan-management-specification/plan-implement/implement.md) - Main implement phase workflow
+  - [handoff.md](06-plan-management-specification/plan-implement/handoff.md) - External interface specifications
+- **[plan-verify/](06-plan-management-specification/plan-verify/)** - Run builds, quality checks, documentation review
+  - [verify.md](06-plan-management-specification/plan-verify/verify.md) - Main verify phase workflow
+  - [handoff.md](06-plan-management-specification/plan-verify/handoff.md) - External interface specifications
+- **[plan-finalize/](06-plan-management-specification/plan-finalize/)** - Commit changes, create PR, handle reviews
+  - [finalize.md](06-plan-management-specification/plan-finalize/finalize.md) - Main finalize phase workflow
+  - [handoff.md](06-plan-management-specification/plan-finalize/handoff.md) - External interface specifications
+- **[plan-files/](06-plan-management-specification/plan-files/)** - Shared persistence layer for all phases
+  - [plan-files.md](06-plan-management-specification/plan-files/plan-files.md) - Persistence operations
+  - [persistence.md](06-plan-management-specification/plan-files/persistence.md) - File format specifications
+  - [handoff.md](06-plan-management-specification/plan-files/handoff.md) - External interface specifications
+
+**Top-Level Documents**:
 - **[README.md](06-plan-management-specification/README.md)** - Overview and navigation
 - **[architecture.md](06-plan-management-specification/architecture.md)** - Abstraction layer design and patterns
-- **[persistence.md](06-plan-management-specification/persistence.md)** - File structure and directory organization
+- **[plan-types.md](06-plan-management-specification/plan-types.md)** - Init phase router and selection logic
 - **[templates-workflow.md](06-plan-management-specification/templates-workflow.md)** - Plan templates and phase-based workflow
 - **[api.md](06-plan-management-specification/api.md)** - Complete skill API with TOON handoff interfaces
 - **[decomposition.md](06-plan-management-specification/decomposition.md)** - Implementation details and checklist
+- **[plan.md](06-plan-management-specification/plan.md)** - Implementation plan with task checklist
 
 **Key Features**:
+- **One skill per phase**: plan-init, plan-refine, plan-implement, plan-verify, plan-finalize
+- **Shared persistence**: plan-files skill handles all file I/O operations
 - **Directory Structure**: `.claude/plans/{task-name}/` with `plan.md` and `references.md`
-- **Plan file abstraction pattern** (similar to adr-management and interface-management)
 - **Phase-based workflow**: 5 sequential phases (init, refine, implement, verify, finalize)
-- **Helper fields**: current_phase, current_task for simplified model interaction
-- **Phase transition rules**: Sequential execution with automatic validation
-- **Reference Management**: Centralized tracking of files, ADRs, interfaces, issues, branches, external docs
-- **Skill Integration**: Seamless integration with adr-management and interface-management skills
-- **8 Operations**: create, read, update, refine, validate, phase-transition, task-progress, manage-references
+- **Handoff separation**: External interfaces in handoff.md, internal delegations in main specs
+- **Reference Management**: Centralized tracking of files, ADRs, interfaces, issues, branches
 - **TOON handoff interfaces** for all operations (30-60% token reduction)
 
-**Why Modular**:
-- Each document focuses on single concern (architecture, persistence, templates, API, implementation)
-- Cross-references prevent duplication
-- Easier navigation and maintenance
-- Clear separation between design and implementation
+**Document Count**: 7 top-level + 17 phase-specific = 24 documents
 
 ### 5. Specific Implementation
 
@@ -361,19 +377,6 @@ See [05-specific-workflow-java-implementation.md](05-specific-workflow-java-impl
 4. **Start Phase 1**: Begin with handoff infrastructure
 5. **Iterate**: Test → Fix → Refine → Repeat
 
-## Document Statistics
-
-- **Total Documents**: 10 (5 architectural + 1 modular specification with 6 sub-documents, minus 1 archived)
-- **Core Documents**: 5 (analyses, architecture, patterns, examples)
-- **Plan Management Specification**: 6 modular documents (README, architecture, persistence, templates-workflow, api, decomposition)
-- **Total Lines**: ~9,000 lines (including modular specification: ~3,400 lines)
-- **ASCII Diagrams**: 15+
-- **Handoff Examples**: 28+
-- **Code Examples**: 38+
-- **Workflow Patterns**: 10
-- **Phase-Based Workflows**: 1 (plan management with 5 phases)
-- **Reference Management Operations**: 8 (all operations with TOON handoff interfaces)
-
 ## Conclusion
 
 This architectural redesign transforms isolated bundles into an **integrated, TOON handoff-based orchestration system** that provides:
@@ -397,9 +400,3 @@ AFTER:  Command → [TOON HANDOFF] → Skill/Agent → [TOON HANDOFF] → Result
 - ✅ 7 components (down from 9 in original design)
 
 **Result**: A scalable, maintainable, and token-efficient architecture that serves as the foundation for all future development workflows across any programming language.
-
----
-
-**Created**: 2025-11-26
-**Location**: `/Users/oliver/git/cui-llm-rules/target/task/`
-**Status**: ✅ Complete and ready for implementation

@@ -43,8 +43,6 @@ Phase Skills                    Persistence Skill
 
 The `plan-files` skill is the **dedicated persistence layer** for all plan file operations. All phase skills delegate file I/O to this skill.
 
-**Purpose**: Centralize all file operations for plan management
-
 **Operations**:
 | Operation | Purpose | Tool |
 |-----------|---------|------|
@@ -58,8 +56,6 @@ The `plan-files` skill is the **dedicated persistence layer** for all plan file 
 | update-progress | Mark tasks complete, update phase table | Edit |
 
 ### Operation: Create Directory
-
-**Purpose**: Create plan directory structure
 
 ```toon
 # Input
@@ -80,8 +76,6 @@ artifacts:
 ---
 
 ### Operation: Read Plan
-
-**Purpose**: Read and parse plan.md (tasks-only)
 
 ```toon
 # Input
@@ -117,8 +111,6 @@ task-8,Implement RefreshTokenService,in_progress
 
 ### Operation: Read Config
 
-**Purpose**: Read configuration from config.md
-
 ```toon
 # Input
 from: caller
@@ -146,8 +138,6 @@ configuration:
 
 ### Operation: Get References
 
-**Purpose**: Read references from references.md
-
 ```toon
 # Input
 from: caller
@@ -174,8 +164,6 @@ references:
 
 ### Operation: Write Config
 
-**Purpose**: Write configuration to config.md (called by plan-init)
-
 ```toon
 # Input
 from: plan-init-skill
@@ -197,8 +185,6 @@ configuration:
 ---
 
 ### Operation: Update Progress
-
-**Purpose**: Update task/phase progress in plan.md
 
 ```toon
 # Input
@@ -229,8 +215,6 @@ plan_status:
 The `plan-init` skill handles plan creation with type-specific init workflows. **Delegates all file I/O to `plan-files` skill.**
 
 #### Operation: Create Plan
-
-**Purpose**: Create a new plan directory with plan.md, config.md, and references.md files
 
 **Type Routing**: Routes to init implementation based on plan type:
 - `implementation` → [plan-init/implementation.md](plan-init/implementation.md) → 5-phase plan
@@ -332,8 +316,6 @@ The `plan-refine` skill handles the refine phase: analyzing requirements, planni
 
 ### Operation: Analyze Requirements
 
-**Purpose**: Break down task requirements into implementable units
-
 ### Input (TOON Handoff)
 
 ```toon
@@ -395,8 +377,6 @@ The `plan-implement` skill handles the implement phase: executing implementation
 
 ### Operation: Execute Tasks
 
-**Purpose**: Execute implementation tasks with appropriate language agents
-
 ### Input (TOON Handoff)
 
 ```toon
@@ -455,8 +435,6 @@ The `plan-verify` skill handles the verify phase: running builds, quality checks
 
 ### Operation: Run Verification
 
-**Purpose**: Verify implementation with builds, tests, and quality checks
-
 ### Input (TOON Handoff)
 
 ```toon
@@ -513,8 +491,6 @@ Delegates all file operations to `plan-files` skill:
 The `plan-finalize` skill handles the finalize phase: committing changes, creating PRs, and handling PR workflow.
 
 ### Operation: Finalize and PR
-
-**Purpose**: Commit changes and create/update pull request
 
 ### Input (TOON Handoff)
 
@@ -586,8 +562,6 @@ These operations are for plan-level changes (not file I/O). They delegate file o
 
 ### Operation: Refine Plan
 
-**Purpose**: Iteratively refine existing plan based on feedback
-
 ### Input (TOON Handoff)
 
 ```toon
@@ -643,8 +617,6 @@ Delegates to `plan-files` skill for file modifications:
 ---
 
 ### Operation: Validate Plan
-
-**Purpose**: Validate plan structure and completeness (both plan.md and references.md)
 
 ### Input (TOON Handoff)
 
@@ -711,8 +683,6 @@ Uses `plan-files` skill for reading (no modifications):
 ---
 
 ### Operation: Phase Transition
-
-**Purpose**: Transition to the next phase when current phase is completed
 
 ### Input (TOON Handoff)
 
@@ -790,8 +760,6 @@ Delegates all file operations to `plan-files` skill:
 ---
 
 ### Operation: Task Progress Update
-
-**Purpose**: Update task and checklist progress, handle phase completion
 
 ### Input (TOON Handoff)
 
@@ -882,8 +850,6 @@ Delegates all file operations to `plan-files` skill:
 ---
 
 ### Operation: Manage References
-
-**Purpose**: Add, update, or remove references (files, ADRs, interfaces, external docs)
 
 ### Input (TOON Handoff)
 

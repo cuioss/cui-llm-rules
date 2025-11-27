@@ -1,7 +1,5 @@
 # Simple Init
 
-**Purpose**: Init phase implementation for lightweight workflows
-
 **Output**: 3-phase plan (init→execute→finalize)
 
 **Use Cases**:
@@ -326,7 +324,6 @@ Then show property-specific selection (see property sections above).
 ```markdown
 # Task Plan: {task_title}
 
-**Status**: in_progress
 **Current Phase**: init
 **Current Task**: task-1
 **Plan Type**: Simple
@@ -353,7 +350,6 @@ Then show property-specific selection (see property sections above).
 ## Phase: init (in_progress)
 
 ### Task 1: Quick Setup
-**Status**: [ ]
 **Goal**: Minimal configuration with defaults
 
 **Checklist**:
@@ -362,7 +358,6 @@ Then show property-specific selection (see property sections above).
 - [ ] Confirm task description
 
 ### Task 2: Persist and Proceed
-**Status**: [ ]
 **Goal**: Save minimal configuration and transition
 
 **Checklist**:
@@ -391,7 +386,6 @@ This init produces a streamlined phase structure (3 phases vs 5 for Implementati
 ## Phase: init (in_progress)
 
 ### Task 1: Quick Setup
-**Status**: [ ]
 **Goal**: Minimal configuration with defaults
 
 **Checklist**:
@@ -400,7 +394,6 @@ This init produces a streamlined phase structure (3 phases vs 5 for Implementati
 - [ ] Confirm task description
 
 ### Task 2: Persist and Proceed
-**Status**: [ ]
 **Goal**: Save minimal configuration and transition
 
 **Checklist**:
@@ -416,7 +409,6 @@ This init produces a streamlined phase structure (3 phases vs 5 for Implementati
 
 **Template per task**:
 ### Task N: {Task Title}
-**Status**: [ ]
 **Goal**: {Goal description}
 
 **Checklist**:
@@ -429,7 +421,6 @@ This init produces a streamlined phase structure (3 phases vs 5 for Implementati
 ## Phase: finalize (pending)
 
 ### Task 1: Review Changes
-**Status**: [ ]
 **Goal**: Verify all changes are complete
 
 **Checklist**:
@@ -438,7 +429,6 @@ This init produces a streamlined phase structure (3 phases vs 5 for Implementati
 - [ ] Confirm task completion
 
 ### Task 2: Commit
-**Status**: [ ]
 **Goal**: Commit changes to repository
 
 **Checklist**:

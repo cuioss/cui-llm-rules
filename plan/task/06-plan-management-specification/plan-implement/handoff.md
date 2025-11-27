@@ -1,7 +1,5 @@
 # plan-implement Handoff Protocol
 
-**Purpose**: External interface specifications for the implement phase skill
-
 **Scope**: Phase transitions, orchestrator communication, error patterns only. Internal delegations are documented in the main specification.
 
 ---

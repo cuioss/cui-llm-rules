@@ -1,8 +1,5 @@
 # Specific Workflow: Java Task Implementation with Handoffs
 
-**Date**: 2025-11-26
-**Purpose**: Concrete example of complete task implementation workflow with handoff-based communication
-
 ## Overview
 
 This document provides a **complete, step-by-step example** of implementing a Java task using the handoff-based architecture, showing all components, handoffs, and interactions.

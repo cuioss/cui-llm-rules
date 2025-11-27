@@ -1,8 +1,5 @@
 # Current Structure Analysis: cui-java-expert
 
-**Date**: 2025-11-26
-**Purpose**: Document the current structure, patterns, and issues in cui-java-expert bundle
-
 ## Overview
 
 cui-java-expert is an **agent-first architecture bundle** providing comprehensive Java development expertise with **9 autonomous agents**, 6 orchestration commands, and 5 skills containing all business logic and standards.
@@ -43,7 +40,6 @@ cui-java-expert/
 ### Execution Agents (6 agents - modify code)
 
 #### java-implement-agent (65 lines)
-**Purpose**: Autonomous Java feature implementation
 
 **Pattern**: Minimal wrapper agent ✅
 ```
@@ -68,7 +64,6 @@ Agent: java-implement-agent (65 lines)
 - ❌ Direct skill invocation (not handoff-based)
 
 #### java-implement-tests-agent (72 lines)
-**Purpose**: Autonomous test implementation
 
 **Pattern**: Minimal wrapper agent ✅
 ```
@@ -80,7 +75,6 @@ Agent: java-implement-tests-agent (72 lines)
 **Similar pattern to java-implement-agent**
 
 #### java-fix-build-agent (58 lines)
-**Purpose**: Fix compilation errors iteratively
 
 **Pattern**: Minimal wrapper agent ✅
 ```
@@ -94,7 +88,6 @@ Agent: java-fix-build-agent (58 lines)
 - ✅ Clean delegation
 
 #### java-fix-tests-agent (61 lines)
-**Purpose**: Fix test failures iteratively
 
 **Pattern**: Minimal wrapper agent ✅
 ```
@@ -104,7 +97,6 @@ Agent: java-fix-tests-agent (61 lines)
 ```
 
 #### java-fix-javadoc-agent (54 lines)
-**Purpose**: Fix JavaDoc errors
 
 **Pattern**: Minimal wrapper agent ✅ (uses haiku model)
 ```
@@ -116,7 +108,6 @@ Agent: java-fix-javadoc-agent (54 lines)
 **Model**: haiku (cost optimization for simple fixes)
 
 #### java-refactor-agent (68 lines)
-**Purpose**: Code refactoring with standards
 
 **Pattern**: Minimal wrapper agent ✅
 ```
@@ -128,7 +119,6 @@ Agent: java-refactor-agent (68 lines)
 ### Analysis Agents (3 agents - read-only)
 
 #### java-coverage-agent (52 lines)
-**Purpose**: Coverage analysis and gap identification
 
 **Pattern**: Minimal wrapper agent ✅ (uses haiku model)
 ```
@@ -140,7 +130,6 @@ Agent: java-coverage-agent (52 lines)
 **Model**: haiku (cost optimization for read-only)
 
 #### java-quality-agent (56 lines)
-**Purpose**: Quality analysis and standards checking
 
 **Pattern**: Minimal wrapper agent ✅ (uses haiku model)
 ```
@@ -152,7 +141,6 @@ Agent: java-quality-agent (56 lines)
 **Model**: haiku (cost optimization for read-only)
 
 #### java-verify-agent (49 lines)
-**Purpose**: Standards verification
 
 **Pattern**: Minimal wrapper agent ✅ (uses haiku model)
 ```
@@ -189,7 +177,6 @@ Agent: java-verify-agent (49 lines)
 ### Orchestration Commands (3 commands)
 
 #### /java-analyze-all (88 lines)
-**Purpose**: Parallel analysis using multiple agents
 
 **Pattern**: Command orchestrates parallel agents via Task tool
 
@@ -212,7 +199,6 @@ Agent: java-verify-agent (49 lines)
 - ❌ No wave-based processing pattern
 
 #### /java-full-workflow (172 lines)
-**Purpose**: Complete implement→test→verify workflow
 
 **Pattern**: Sequential agent coordination ⚠️
 
@@ -240,7 +226,6 @@ Agent: java-verify-agent (49 lines)
 - ❌ Agent results not propagated via handoff
 
 #### /java-create (95 lines)
-**Purpose**: Interactive wizard for component creation
 
 **Pattern**: Wizard-style with AskUserQuestion
 
@@ -256,17 +241,14 @@ Agent: java-verify-agent (49 lines)
 ### Specialized Commands (3 commands)
 
 #### /java-enforce-logrecords (127 lines)
-**Purpose**: Logging standards enforcement workflow
 
 **Complex domain-specific workflow**
 
 #### /java-maintain-logger (134 lines)
-**Purpose**: Logger maintenance workflow with plan tracking
 
 **Complex domain-specific workflow**
 
 #### /java-optimize-quarkus-native (156 lines)
-**Purpose**: Quarkus native image optimization
 
 **Complex domain-specific workflow**
 
@@ -287,7 +269,6 @@ Agent: java-verify-agent (49 lines)
 ## Skills Analysis
 
 ### cui-java-core (Execution Skill)
-**Purpose**: Core Java standards and workflows
 
 **Workflows**:
 1. Fix Compilation Errors (iterative)
@@ -318,7 +299,6 @@ Agent: java-verify-agent (49 lines)
 - ❌ Workflows don't return structured handoffs
 
 ### cui-java-unit-testing (Execution Skill)
-**Purpose**: Testing standards and workflows
 
 **Workflows**:
 1. Fix Test Failures (iterative)
@@ -342,7 +322,6 @@ Agent: java-verify-agent (49 lines)
 - ✅ Generator framework
 
 ### cui-javadoc (Execution Skill)
-**Purpose**: JavaDoc standards and workflows
 
 **Workflows**:
 1. Fix JavaDoc Errors (iterative)
@@ -364,7 +343,6 @@ Agent: java-verify-agent (49 lines)
 - ✅ Comprehensive standards
 
 ### cui-java-cdi (Reference Skill)
-**Purpose**: CDI and Quarkus standards
 
 **No workflows** - Pure reference skill (Pattern 10)
 
@@ -385,7 +363,6 @@ Agent: java-verify-agent (49 lines)
 - ✅ Comprehensive CDI knowledge
 
 ### cui-java-maintenance (Reference Skill)
-**Purpose**: Maintenance and refactoring standards
 
 **Standards**:
 - maintenance-prioritization.md

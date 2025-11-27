@@ -1,8 +1,5 @@
 # Generic Workflow Patterns for Handoff-Based Task Implementation
 
-**Date**: 2025-11-26
-**Purpose**: Define reusable workflow patterns for handoff-based orchestration across all language bundles
-
 ## Overview
 
 This document defines **generic, reusable workflow patterns** that apply to **any language bundle** (Java, JavaScript, Python, etc.) using the **handoff-based communication protocol**.
@@ -107,7 +104,6 @@ memory:
 ## Pattern 1: Task Implementation Workflow
 
 **Orchestrator**: `/task-implement` command (cui-task-workflow)
-**Purpose**: Generic task implementation with language-specific delegation
 **Mode**: Adaptive (FULL/PLAN/QUICK)
 **Format**: TOON handoffs throughout
 
@@ -247,7 +243,6 @@ next_alternatives[2]:
 ## Pattern 2: Task Review Workflow
 
 **Executor**: `task-review` skill (cui-task-workflow)
-**Purpose**: Verify task readiness before implementation
 **Mode**: Read-only analysis
 
 ### Workflow Steps
@@ -337,7 +332,6 @@ next_focus: Implementation strategy
 ## Pattern 3: Build Verification Workflow
 
 **Orchestrator**: `build-verify-agent` (cui-task-workflow)
-**Purpose**: Generic build verification with tool-specific delegation
 **Mode**: Iterative fixing
 
 ### Workflow Steps
@@ -446,7 +440,6 @@ next_focus: Missing imports
 ## Pattern 4: Quality Analysis Workflow
 
 **Orchestrator**: `task-orchestrator-agent` (cui-task-workflow)
-**Purpose**: Parallel quality analysis
 **Mode**: Wave-based parallel execution
 
 ### Workflow Steps (Wave-Based)
@@ -524,7 +517,6 @@ next_focus: TokenValidator.validate() branches
 ## Pattern 5: PR Management Workflow
 
 **Orchestrator**: `pr-fix-agent` (cui-task-workflow)
-**Purpose**: Diagnose and fix PR issues
 **Mode**: Conditional workflow
 
 ### Workflow Steps
@@ -581,7 +573,6 @@ next_focus: TokenValidator.validate() branches
 ### Pattern 6: Language Implementation Workflow
 
 **Executor**: `{language}-implement-agent` (language bundle)
-**Purpose**: Language-specific feature implementation
 **Delegation**: Language-specific skill
 
 **Generic Structure** (applies to all languages):

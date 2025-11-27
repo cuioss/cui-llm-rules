@@ -1,8 +1,5 @@
 # Plan Management Specification
 
-**Date**: 2025-11-27
-**Purpose**: Define the plan management abstraction layer for task implementation workflows
-
 ## Overview
 
 This specification defines the **plan management abstraction layer** that provides a consistent interface for creating, reading, updating, and managing task plan files. This abstraction follows the same pattern as `adr-management` and `interface-management` skills in the codebase.
@@ -193,9 +190,3 @@ For file structure details, see [Persistence](plan-files/persistence.md). For ph
 For API integration, refer to [API Specification](api.md) for all TOON handoff interfaces.
 
 For implementation guidance, see [Decomposition](decomposition.md) for usage examples and [Implementation Plan](plan.md) for the task checklist.
-
----
-
-**Created**: 2025-11-27
-**Location**: `/Users/oliver/git/cui-llm-rules/target/task/06-plan-management-specification/`
-**Status**: ✅ Modular specification complete

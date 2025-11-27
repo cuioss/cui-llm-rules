@@ -2,14 +2,48 @@
 
 Tasks for implementing the plan management system. See related documents for details:
 
+## CRITICAL RULES
+
+### Before Starting Implementation
+
+```
+Skill: cui-plugin-development-tools:plugin-architecture
+```
+
+Load this skill FIRST to understand component patterns, frontmatter standards, and architecture rules.
+
+### Execution Rules
+
+1. **Execute tasks ONE-AFTER-ANOTHER** - Do not parallelize implementation tasks
+2. **After each task completion** - Mark the checkbox as done `[x]`
+3. **Run /plugin-doctor after each component** - Verify before proceeding
+4. **Do not skip verification steps** - Each phase has validation tasks
+
+**Core Documents**:
 - [Plan Types](plan-types.md) - Init phase router and configuration
-- [Refine Phase](plan-refine/refine.md) - Refine phase specification
-- [Implementation Requirements Template](plan-refine/implementation-requirements-template.md) - Runtime artifact template
 - [Architecture](architecture.md) - Abstraction layer design
 - [Persistence](plan-files/persistence.md) - File structure and directory organization
+- [plan-files Skill](plan-files/plan-files.md) - Persistence layer operations
 - [Templates & Workflow](templates-workflow.md) - Plan templates and phase-based workflow
 - [API Specification](api.md) - Complete skill API with TOON handoffs
 - [Decomposition](decomposition.md) - Implementation details and usage examples
+
+**Phase Specifications**:
+- [Init - Implementation](plan-init/implementation.md) - Full dev workflow (5 phases)
+- [Init - Simple](plan-init/simple.md) - Lightweight workflow (3 phases)
+- [Refine Phase](plan-refine/refine.md) - Requirement analysis and task planning
+- [Implementation Requirements Template](plan-refine/implementation-requirements-template.md) - Runtime artifact template
+- [Implement Phase](plan-implement/implement.md) - Task execution and delegation
+- [Verify Phase](plan-verify/verify.md) - Build, quality, and documentation verification
+- [Finalize Phase](plan-finalize/finalize.md) - Commit, PR creation, and review workflow
+
+**TOON Handoff Protocols**:
+- [plan-init Handoff](plan-init/handoff.md)
+- [plan-refine Handoff](plan-refine/handoff.md)
+- [plan-implement Handoff](plan-implement/handoff.md)
+- [plan-verify Handoff](plan-verify/handoff.md)
+- [plan-finalize Handoff](plan-finalize/handoff.md)
+- [plan-files Handoff](plan-files/handoff.md)
 
 ---
 
@@ -299,6 +333,14 @@ Reference operations are handled by `plan-files` skill with delegation to docume
   - [ ] Reference not found errors
 - [ ] Add TOON error handoff responses (see [api.md](api.md))
 
+### Quality Verification (Phase 1 Skills)
+- [ ] Run `/plugin-doctor` for `plan-init` skill
+- [ ] Run `/plugin-doctor` for `plan-refine` skill
+- [ ] Run `/plugin-doctor` for `plan-implement` skill
+- [ ] Run `/plugin-doctor` for `plan-verify` skill
+- [ ] Run `/plugin-doctor` for `plan-finalize` skill
+- [ ] Run `/plugin-doctor` for `plan-files` skill
+
 ---
 
 ## Phase 2: Update Commands
@@ -329,6 +371,10 @@ Reference operations are handled by `plan-files` skill with delegation to docume
 - [ ] Remove direct file I/O from command
 - [ ] Test command-skill integration
 
+### Quality Verification (Phase 2 Commands)
+- [ ] Run `/plugin-doctor` for `task-plan` command
+- [ ] Run `/plugin-doctor` for `task-implement` command
+
 ---
 
 ## Phase 3: Update Related Skills
@@ -347,6 +393,10 @@ Reference operations are handled by `plan-files` skill with delegation to docume
 - [ ] Validate references.md via `plan-files.get-references`
 - [ ] Remove direct plan file I/O
 - [ ] Test skill-skill integration
+
+### Quality Verification (Phase 3 Skills)
+- [ ] Run `/plugin-doctor` for `task-execute` skill
+- [ ] Run `/plugin-doctor` for `task-review` skill (if updated)
 
 ---
 

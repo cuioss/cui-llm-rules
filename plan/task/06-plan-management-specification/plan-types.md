@@ -177,7 +177,6 @@ Both init implementations persist to the same locations.
 ```markdown
 # Task Plan: {task_title}
 
-**Status**: in_progress
 **Current Phase**: {next_phase_after_init}
 **Current Task**: task-1
 **Plan Type**: {Implementation|Simple}

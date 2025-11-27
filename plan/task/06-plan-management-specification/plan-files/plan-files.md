@@ -1,7 +1,5 @@
 # plan-files Skill Specification
 
-**Purpose**: Dedicated persistence layer for all plan file operations
-
 **Role**: Centralized file I/O for plan management - all phase skills delegate file operations here
 
 **Use Cases**:
@@ -40,7 +38,7 @@ Phase Skills                    Persistence Skill
 
 | Operation | Purpose | Tool | Input | Output |
 |-----------|---------|------|-------|--------|
-| create-directory | Create plan directory | Bash | task_name | directory path |
+| create-directory | Create plan directory | Bash, AskUserQuestion | task_name | directory path, status |
 | read-plan | Read plan.md | Read | directory | phases, tasks, status |
 | read-config | Read config.md | Read | directory | configuration |
 | get-references | Read references.md | Read | directory | references |
@@ -53,9 +51,7 @@ Phase Skills                    Persistence Skill
 
 ## Operation: create-directory
 
-**Purpose**: Create plan directory structure
-
-**Tool**: `Bash`
+**Tool**: `Bash`, `Read`, `AskUserQuestion`
 
 **Input**:
 ```toon
@@ -68,11 +64,50 @@ next_action: Create plan directory
 ```
 
 **Implementation**:
+
+### Step 1: Check Existence
+
+```bash
+# Check if directory already exists
+test -d .claude/plans/{task-name}/ && echo "exists" || echo "not-exists"
+```
+
+### Step 2: Handle Existing Directory
+
+If directory exists, prompt user:
+
+```toon
+from: plan-files-skill
+to: user-interaction
+handoff_id: exists-001
+
+prompt: |
+  Plan directory `.claude/plans/{task-name}/` already exists.
+
+  Options:
+  1. **Use existing** - Resume with existing plan
+  2. **Create new** - Create with suffix (e.g., jwt-auth-2)
+  3. **Replace** - Delete existing and create fresh
+
+response_type: selection
+options[3]: use-existing, create-new, replace
+```
+
+**User Response Handling**:
+
+| Selection | Action |
+|-----------|--------|
+| `use-existing` | Return existing directory, set `status: resumed` |
+| `create-new` | Generate unique name with suffix, create new directory |
+| `replace` | Delete existing, create fresh directory |
+
+### Step 3: Create Directory (if needed)
+
 ```bash
 mkdir -p .claude/plans/{task-name}/
 ```
 
-**Output**:
+**Output (New Directory)**:
 ```toon
 from: plan-files-skill
 to: plan-init-skill
@@ -83,16 +118,44 @@ artifacts:
 status: created
 ```
 
+**Output (Existing Directory - Use)**:
+```toon
+from: plan-files-skill
+to: plan-init-skill
+handoff_id: mkdir-002
+
+artifacts:
+  plan_directory: .claude/plans/jwt-auth/
+status: resumed
+existing_plan: true
+
+plan_status:
+  current_phase: implement
+  current_task: task-6
+```
+
+**Output (Existing Directory - New Name)**:
+```toon
+from: plan-files-skill
+to: plan-init-skill
+handoff_id: mkdir-002
+
+artifacts:
+  plan_directory: .claude/plans/jwt-auth-2/
+  original_name: jwt-auth
+status: created
+name_modified: true
+```
+
 **Validation**:
 - Task name must be kebab-case
 - Maximum 50 characters
 - No special characters except hyphen
+- Suffix format: `-{number}` (e.g., `-2`, `-3`)
 
 ---
 
 ## Operation: read-plan
-
-**Purpose**: Read and parse plan.md (tasks-only file)
 
 **Tool**: `Read`
 
@@ -149,8 +212,6 @@ task-8,Implement RefreshTokenService,in_progress
 
 ## Operation: read-config
 
-**Purpose**: Read configuration from config.md
-
 **Tool**: `Read`
 
 **Input**:
@@ -188,8 +249,6 @@ configuration:
 ---
 
 ## Operation: get-references
-
-**Purpose**: Read references from references.md
 
 **Tool**: `Read`
 
@@ -241,8 +300,6 @@ references:
 
 ## Operation: write-plan
 
-**Purpose**: Create or update plan.md
-
 **Tool**: `Write` (create) or `Edit` (update)
 
 **Input**:
@@ -283,8 +340,6 @@ artifacts:
 ---
 
 ## Operation: write-config
-
-**Purpose**: Create config.md with build and workflow configuration
 
 **Tool**: `Write`
 
@@ -327,8 +382,6 @@ artifacts:
 ---
 
 ## Operation: write-references
-
-**Purpose**: Create or update references.md
 
 **Tool**: `Write` (create) or `Edit` (update)
 
@@ -376,8 +429,6 @@ references_summary:
 
 ## Operation: update-progress
 
-**Purpose**: Update task/phase progress in plan.md
-
 **Tool**: `Edit`
 
 **Input**:
@@ -408,14 +459,12 @@ update:
 ```markdown
 # Before:
 ### Task 8: Implement RefreshTokenService
-**Status**: [ ]
 **Checklist**:
 - [ ] Create service class
 - [ ] Add rotation logic
 
 # After:
 ### Task 8: Implement RefreshTokenService
-**Status**: [x]
 **Checklist**:
 - [x] Create service class
 - [x] Add rotation logic
@@ -461,8 +510,6 @@ next_focus: Transition to verify phase
 
 ### validate-plan
 
-**Purpose**: Validate plan.md structure and completeness
-
 **Implementation**:
 1. Check required headers present
 2. Check Phase Progress Table exists
@@ -479,16 +526,12 @@ next_focus: Transition to verify phase
 
 ### validate-config
 
-**Purpose**: Validate config.md completeness
-
 **Implementation**:
 1. Check all required fields present
 2. Validate field values against allowed values
 3. Check branch and issue format
 
 ### validate-references
-
-**Purpose**: Validate references.md completeness
 
 **Implementation**:
 1. Check issue and branch present

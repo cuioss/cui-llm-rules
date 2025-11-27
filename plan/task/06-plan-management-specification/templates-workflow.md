@@ -10,8 +10,6 @@ Plans are organized into **5 sequential phases** that must be completed in order
 
 #### 1. init - Initialization
 
-**Purpose**: Setup and initial planning
-
 **Typical Tasks**:
 - Read and understand requirements
 - Define initial approach
@@ -26,8 +24,6 @@ Plans are organized into **5 sequential phases** that must be completed in order
 - Ready to refine details
 
 #### 2. refine - Iterative Refinement
-
-**Purpose**: Refine plan until ready to implement
 
 **Detailed Specification**: See [plan-refine/refine.md](plan-refine/refine.md) for complete workflow
 
@@ -46,8 +42,6 @@ Plans are organized into **5 sequential phases** that must be completed in order
 
 #### 3. implement - Implementation
 
-**Purpose**: Create/modify code and configuration
-
 **Typical Tasks**:
 - Implement features
 - Create classes/functions
@@ -63,8 +57,6 @@ Plans are organized into **5 sequential phases** that must be completed in order
 - Ready for testing
 
 #### 4. verify - Testing & Verification
-
-**Purpose**: Test and verify implementation
 
 **Typical Tasks**:
 - Write unit tests
@@ -82,8 +74,6 @@ Plans are organized into **5 sequential phases** that must be completed in order
 - Ready for finalization
 
 #### 5. finalize - Documentation & Completion
-
-**Purpose**: Complete documentation and prepare for PR
 
 **Typical Tasks**:
 - Update user documentation
@@ -130,7 +120,6 @@ Complete template for plan.md file (tasks-only):
 **Configuration**: See [config.md](./config.md)
 **References**: See [references.md](./references.md)
 
-**Status**: [pending|in_progress|completed]
 **Current Phase**: [init|refine|implement|verify|finalize]
 **Current Task**: [Task ID or "none"]
 
@@ -153,7 +142,6 @@ Complete template for plan.md file (tasks-only):
 ### Task 1: [Setup task name]
 
 **Phase**: init
-**Status**: [x]
 **Goal**: [What success looks like]
 
 **Acceptance Criteria**:
@@ -168,7 +156,6 @@ Complete template for plan.md file (tasks-only):
 ### Task 2: [Naming task]
 
 **Phase**: init
-**Status**: [x]
 **Goal**: [Define naming conventions]
 
 **Acceptance Criteria**:
@@ -185,7 +172,6 @@ Complete template for plan.md file (tasks-only):
 ### Task 3: [Refinement task]
 
 **Phase**: refine
-**Status**: [x]
 **Goal**: [Refine approach based on feedback]
 
 **Acceptance Criteria**:
@@ -198,7 +184,6 @@ Complete template for plan.md file (tasks-only):
 ### Task 4: [Validation task]
 
 **Phase**: refine
-**Status**: [ ]
 **Goal**: [Validate approach]
 
 **Acceptance Criteria**:
@@ -217,7 +202,6 @@ Complete template for plan.md file (tasks-only):
 ### Task 5: [Implementation task]
 
 **Phase**: implement
-**Status**: [ ]
 **Goal**: [Implement feature X]
 
 **Acceptance Criteria**:
@@ -238,7 +222,6 @@ Complete template for plan.md file (tasks-only):
 ### Task N: [Testing task]
 
 **Phase**: verify
-**Status**: [ ]
 **Goal**: [Test feature X]
 
 **Acceptance Criteria**:
@@ -258,7 +241,6 @@ Complete template for plan.md file (tasks-only):
 ### Task M: [Documentation task]
 
 **Phase**: finalize
-**Status**: [ ]
 **Goal**: [Document feature]
 
 **Acceptance Criteria**:
@@ -298,8 +280,6 @@ The plan management system uses **3 levels** of status tracking:
 - `in_progress` - Currently implementing tasks
 - `completed` - All phases and tasks completed and verified
 
-**Location**: Top of plan.md (`**Status**: pending`)
-
 **Updates**: Automatically when phases progress
 
 #### 2. Phase-Level Status
@@ -309,7 +289,6 @@ The plan management system uses **3 levels** of status tracking:
 - `in_progress` - Phase active, tasks being worked on
 - `completed` - All tasks in phase completed
 
-**Location**:
 - Phase Progress Table
 - Phase section headers (`## Phase: implement (in_progress)`)
 
@@ -321,8 +300,6 @@ The plan management system uses **3 levels** of status tracking:
 - `[ ]` - Task pending (not started or in progress)
 - `[x]` - Task completed
 
-**Location**: Task definition (`**Status**: [x]`)
-
 **Updates**: Manually by user or automatically by task-plan skill
 
 ### Helper Fields
@@ -331,11 +308,7 @@ To simplify model interaction, the plan includes helper fields that track curren
 
 #### Current Phase
 
-**Purpose**: Tracks which phase is currently active
-
 **Values**: `init|refine|implement|verify|finalize`
-
-**Location**: Top of plan.md (`**Current Phase**: implement`)
 
 **Updates**: Automatically when phase transitions occur
 
@@ -343,21 +316,15 @@ To simplify model interaction, the plan includes helper fields that track curren
 
 #### Current Task
 
-**Purpose**: Tracks which task is currently being worked on
-
 **Values**:
 - Task ID (e.g., `task-3`, `task-8`)
 - `"none"` if no task active
-
-**Location**: Top of plan.md (`**Current Task**: task-3`)
 
 **Updates**: Automatically when tasks start/complete
 
 **Usage**: Quick reference for "what are we working on?"
 
 #### Phase Progress Table
-
-**Purpose**: Quick overview of all phases
 
 **Format**:
 ```markdown
@@ -369,8 +336,6 @@ To simplify model interaction, the plan includes helper fields that track curren
 | verify | pending | 3 | 0/3 |
 | finalize | pending | 2 | 0/2 |
 ```
-
-**Location**: After Overview section in plan.md
 
 **Updates**: Automatically by all plan management operations
 
@@ -432,7 +397,6 @@ To simplify model interaction, the plan includes helper fields that track curren
 ### Task N: [Task Name]
 
 **Phase**: [phase-name]
-**Status**: [ ] or [x]
 **Goal**: [What success looks like]
 
 **Acceptance Criteria**:

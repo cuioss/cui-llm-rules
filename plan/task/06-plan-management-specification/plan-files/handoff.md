@@ -1,7 +1,5 @@
 # plan-files Handoff Protocol
 
-**Purpose**: External interface specifications for the persistence layer skill
-
 **Scope**: Public API for all phase skills. This skill is internal infrastructure, so "external" means the interface exposed to phase skills.
 
 ---

@@ -1,7 +1,5 @@
 # Finalize Phase Specification
 
-**Purpose**: Complete the implementation workflow by committing changes, creating/updating PRs, and handling PR review feedback
-
 **Input**: Plan from verify phase with passing builds and quality checks
 
 **Output**: Committed code with PR created/updated and ready for merge
@@ -88,8 +86,6 @@ Based on commit_strategy:
 
 ### Step 2: Clean Build Artifacts
 
-**Purpose**: Ensure no temporary files are committed.
-
 **Artifact Detection**:
 ```
 Glob patterns to exclude:
@@ -123,8 +119,6 @@ next_action: Identify files to exclude from commit
 - **Never delete**: Source files, test files, documentation
 
 ### Step 3: Generate Commit Message
-
-**Purpose**: Create conventional commit message following standards.
 
 **Commit Message Generation by Strategy**:
 
@@ -195,8 +189,6 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 `fix` > `feat` > `perf` > `refactor` > `docs` > `style` > `test` > `chore`
 
 ### Step 4: Stage and Commit
-
-**Purpose**: Create git commit(s) with generated messages.
 
 **Pre-Commit Checks**:
 ```bash
@@ -274,8 +266,6 @@ next_action: Stage and commit files
 
 ### Step 5: Push to Remote
 
-**Purpose**: Push committed changes to remote repository.
-
 **Pre-Push Validation**:
 ```bash
 # Verify branch exists on remote (or needs creation)
@@ -322,8 +312,6 @@ next_action: Push to remote
 ```
 
 ### Step 6: Create or Update PR
-
-**Purpose**: Create new PR or update existing one.
 
 **PR Detection**:
 ```bash
@@ -419,8 +407,6 @@ next_action: Create pull request
 
 ### Step 7: Handle PR Workflow (Review Loop)
 
-**Purpose**: Process review feedback and iterate until approved.
-
 **Workflow Loop**:
 ```
 1. Wait for review
@@ -496,8 +482,6 @@ git push
 ```
 
 ### Step 8: Update Progress and Complete
-
-**Purpose**: Mark finalize phase complete and update plan.
 
 **Update Plan Progress**:
 ```toon
