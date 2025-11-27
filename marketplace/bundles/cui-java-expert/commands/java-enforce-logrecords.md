@@ -309,7 +309,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Execute at Steps 2, 8, and 11
 - Use builder-maven-rules skill workflow:
   ```
-  Skill: builder-maven:builder-maven-rules
+  Skill: builder:builder-maven-rules
   Workflow: Execute Maven Build
   Parameters:
     goals: clean verify
@@ -393,4 +393,4 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Standards: `logging-standards.md`, `logmessages-documentation.md`, `logging-enforcement-patterns.md`
 - Command: `/java-implement-code` - Fix production code
 - Command: `/java-implement-tests` - Add tests
-- Skill: `builder-maven:builder-maven-rules` - Maven standards and build output parsing
+- Skill: `builder:builder-maven-rules` - Maven standards and build output parsing

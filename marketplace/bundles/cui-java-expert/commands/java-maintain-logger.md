@@ -80,7 +80,7 @@ This loads comprehensive logging standards including:
 **2.1 Build Verification:**
 
 ```
-Skill: builder-maven:builder-maven-rules
+Skill: builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: -Ppre-commit clean verify -DskipTests
@@ -251,7 +251,7 @@ Then add LogAsserts to existing test (see cui-java-core skill for LogAsserts pat
 **6.1 Module Build Verification:**
 
 ```
-Skill: builder-maven:builder-maven-rules
+Skill: builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean test
@@ -271,7 +271,7 @@ For each LogRecord in module:
 **6.3 Full Build Verification:**
 
 ```
-Skill: builder-maven:builder-maven-rules
+Skill: builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: -Ppre-commit clean install
@@ -308,7 +308,7 @@ Proceed to next module.
 **7.1 Complete Build:**
 
 ```
-Skill: builder-maven:builder-maven-rules
+Skill: builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: -Ppre-commit clean install
@@ -392,13 +392,13 @@ Orchestrates skill workflows and commands:
 - **Explore agent** - Violation detection and business test location
 - **/java-implement-code command** - Logging code modifications
 - **Bash** - Maven builds for verification
-- **builder-maven:builder-maven-rules skill** - Build output parsing
+- **builder:builder-maven-rules skill** - Build output parsing
 - **Bash** - LogRecord discovery script and plan.md updates (scripts from skill)
 
 ## RELATED
 
 - `cui-java-core` skill - Logging standards and maintenance reference
 - `/java-implement-code` command - Code modifications
-- `builder-maven:builder-maven-rules` skill - Maven standards and output parsing
+- `builder:builder-maven-rules` skill - Maven standards and output parsing
 - `/java-refactor-code` command - Broader code refactoring
 - `/java-enforce-logrecords` command - Automated logging enforcement

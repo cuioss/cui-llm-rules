@@ -161,7 +161,7 @@ Bash: maven package
 # ❌ Bash: ./mvnw test
 
 # Use maven-builder agent:
-# ✅ Task: subagent_type="builder-maven:maven-builder"
+# ✅ Task: subagent_type="builder:maven-builder"
 #    Parameters: goals="test", capture_output=true
 ```
 
@@ -510,7 +510,7 @@ Bash: scripts/analyze-markdown-file.sh {agent_path} agent
 # ❌ Bash: ./mvnw test
 
 # With maven-builder invocation:
-# ✅ Task: subagent_type="builder-maven:maven-builder"
+# ✅ Task: subagent_type="builder:maven-builder"
 #    Parameters: goals="test"
 ```
 

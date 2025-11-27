@@ -214,7 +214,7 @@ For detailed configuration examples and complete reference, see the individual s
 For npm/npx build execution and output parsing, use the **builder-npm-rules** skill:
 
 ```
-Skill: builder-npm:builder-npm-rules
+Skill: builder:builder-npm-rules
 ```
 
 The builder-npm-rules skill provides:
@@ -229,7 +229,7 @@ The builder-npm-rules skill provides:
 
 **Example usage**:
 ```
-Skill: builder-npm:builder-npm-rules
+Skill: builder:builder-npm-rules
 Workflow: Execute npm Build
 Parameters:
   command: run test

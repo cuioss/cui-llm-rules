@@ -102,7 +102,7 @@ Task:
 ### Step 6: Final Build Verification
 
 ```
-Skill: builder-maven:builder-maven-rules
+Skill: builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean verify

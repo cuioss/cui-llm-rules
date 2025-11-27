@@ -2,7 +2,7 @@
 
 Test fixtures and data files for cui-frontend-expert bundle.
 
-> **Note**: The npm/npx build execution tests have been moved to `test/builder-npm/`.
+> **Note**: The npm/npx build execution tests have been moved to `test/builder/`.
 
 ## Structure
 
@@ -35,4 +35,4 @@ Test fixtures for JSDoc validation:
 
 ## Related Test Suites
 
-For npm/npx build execution tests, see [test/builder-npm/](../builder-npm/).
+For npm/npx build execution tests, see [test/builder/](../builder-npm/).

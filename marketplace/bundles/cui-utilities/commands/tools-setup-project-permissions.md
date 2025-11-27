@@ -89,8 +89,8 @@ Field: commands.setup-project-permissions.user_approved_permissions
 **D. Ensure global marketplace permissions:**
 
 **Bundle Wildcards:**
-- Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(builder-maven:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
-- SlashCommands: `SlashCommand(/cui-documentation-standards:*)`, `SlashCommand(/cui-frontend-expert:*)`, `SlashCommand(/cui-java-expert:*)`, `SlashCommand(/builder-maven:*)`, `SlashCommand(/cui-plugin-development-tools:*)`, `SlashCommand(/cui-requirements:*)`, `SlashCommand(/cui-task-workflow:*)`, `SlashCommand(/cui-utilities:*)`
+- Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(builder:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
+- SlashCommands: `SlashCommand(/cui-documentation-standards:*)`, `SlashCommand(/cui-frontend-expert:*)`, `SlashCommand(/cui-java-expert:*)`, `SlashCommand(/builder:*)`, `SlashCommand(/cui-plugin-development-tools:*)`, `SlashCommand(/cui-requirements:*)`, `SlashCommand(/cui-task-workflow:*)`, `SlashCommand(/cui-utilities:*)`
 
 **Short-Form Command Permissions (35 commands):**
 - `SlashCommand(/cui-maintain-requirements:*)`

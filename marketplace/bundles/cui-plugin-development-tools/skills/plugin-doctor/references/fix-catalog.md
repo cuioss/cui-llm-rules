@@ -195,7 +195,7 @@ Risky fixes require user confirmation because they involve judgment calls or may
 
 **Fix Strategy**:
 - Replace direct Maven invocations with builder-maven skill calls
-- Use workflow: `Skill: builder-maven:builder-maven-rules` with appropriate workflow name
+- Use workflow: `Skill: builder:builder-maven-rules` with appropriate workflow name
 - Example: Replace `mvn clean compile` with workflow: Execute Maven Build
 
 **Why Risky**:

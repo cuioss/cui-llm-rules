@@ -45,21 +45,9 @@
       "strict": false
     },
     {
-      "name": "builder-maven",
-      "description": "Maven build and verification tools for CUI projects",
-      "source": "./bundles/builder-maven",
-      "strict": false
-    },
-    {
-      "name": "builder-gradle",
-      "description": "Gradle build and verification tools for CUI projects",
-      "source": "./bundles/builder-gradle",
-      "strict": false
-    },
-    {
-      "name": "builder-npm",
-      "description": "npm/npx build execution and output parsing for JavaScript projects",
-      "source": "./bundles/builder-npm",
+      "name": "builder",
+      "description": "Unified build tools for Maven, Gradle, and npm projects",
+      "source": "./bundles/builder",
       "strict": false
     },
     {

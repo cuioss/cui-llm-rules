@@ -308,7 +308,7 @@ Reference builder-maven skill for build execution:
 
 [source,yaml]
 ----
-Skill: builder-maven:builder-maven-rules
+Skill: builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile
@@ -323,7 +323,7 @@ steps:
 
 references:
   - standards/build-precondition-pattern.md
-  - builder-maven:builder-maven-rules skill
+  - builder:builder-maven-rules skill
 ----
 
 == Error Categories

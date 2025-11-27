@@ -1,0 +1,31 @@
+{
+  "name": "builder",
+  "version": "1.0.0",
+  "description": "Unified build tools for Maven, Gradle, and npm projects",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["maven", "gradle", "npm", "build", "compilation", "testing"],
+  "commands": [
+    "./commands/maven-build-and-fix.md",
+    "./commands/maven-pom-maintenance.md",
+    "./commands/gradle-build-and-fix.md",
+    "./commands/gradle-dependency-maintenance.md"
+  ],
+  "skills": [
+    "./skills/builder-maven-rules",
+    "./skills/builder-pom-maintenance",
+    "./skills/builder-gradle-rules",
+    "./skills/builder-gradle-dependencies",
+    "./skills/builder-npm-rules"
+  ],
+  "agents": [
+    "./agents/maven-builder.md",
+    "./agents/gradle-builder.md",
+    "./agents/npm-builder.md"
+  ]
+}
