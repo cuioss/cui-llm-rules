@@ -3,6 +3,11 @@
 **/**.iml
 **/**.DS_Store
 
+# Eclipse IDE files
+**/.project
+**/.classpath
+**/.settings/
+
 # Build output
 target/
 
@@ -12,7 +17,10 @@ target/
 
 # But allow project skills and run configuration to be shared
 !.claude/skills/
-!.claude/run-configuration.md
+!.claude/run-configuration.json
 
 # Ignore user-specific settings
 .claude/settings.local.json
+
+# Ignore lessons-learned (runtime knowledge, project-specific)
+.claude/lessons-learned/*.md

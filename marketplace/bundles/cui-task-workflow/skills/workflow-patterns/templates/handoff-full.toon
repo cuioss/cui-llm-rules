@@ -1,0 +1,39 @@
+from_agent: analysis-agent
+to_agent: implementation-agent
+
+session:
+  id: 2025-11-26-001
+  started: 2025-11-26T10:00:00Z
+  branch: feature/toon-migration
+
+context:
+  task: Implement TOON format support
+  priority: high
+  estimated_effort: 2h
+
+blockers[1]{type,description,severity}:
+DEPENDENCY,Requires toon-usage skill,CRITICAL
+
+findings[5]{file,line,severity,type,message,effort}:
+HandoffTemplate.java,45,BLOCKER,BUG,Resource leak,10min
+AgentBase.java,78,CRITICAL,VULNERABILITY,SQL injection risk,30min
+MemoryStore.java,123,MAJOR,CODE_SMELL,Duplicate code,15min
+Parser.java,56,MINOR,CODE_SMELL,Complex method,5min
+Config.java,89,INFO,CODE_SMELL,TODO comment,2min
+
+statistics:
+  total_findings: 5
+  by_severity{BLOCKER,CRITICAL,MAJOR,MINOR,INFO}: 1,1,1,1,1
+  by_type{BUG,VULNERABILITY,CODE_SMELL}: 1,1,3
+  estimated_total_effort: 62min
+
+instructions[4]:
+- Start with BLOCKER and CRITICAL issues
+- Run tests after each fix
+- Update documentation if API changes
+- Verify no regression in existing tests
+
+next_steps[3]:
+- Fix resource leak in HandoffTemplate
+- Address SQL injection in AgentBase
+- Refactor duplicate code in MemoryStore

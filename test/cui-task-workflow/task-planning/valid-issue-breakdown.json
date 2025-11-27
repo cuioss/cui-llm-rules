@@ -1,0 +1,81 @@
+{
+  "issue": {
+    "number": 4,
+    "title": "Add Retry Logic to HTTP Client",
+    "url": "https://github.com/cuioss/cui-http/issues/4"
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "name": "Add RetryConfig Record",
+      "description": "Create configuration record for retry behavior",
+      "goal": "Create RetryConfig record with fields: maxAttempts, initialDelay, multiplier",
+      "references": [
+        {
+          "type": "issue_section",
+          "location": "Configuration Requirements (lines 15-23)"
+        },
+        {
+          "type": "specification",
+          "path": "/doc/http-client/05-resilient-adapter.adoc",
+          "lines": "45-78"
+        }
+      ],
+      "acceptance_criteria": [
+        "RetryConfig record exists with all specified fields",
+        "Builder pattern implemented",
+        "Test coverage >= 80%",
+        "JavaDoc present on all public methods"
+      ],
+      "dependencies": []
+    },
+    {
+      "id": 2,
+      "name": "Implement Retry Logic in ResilientHttpAdapter",
+      "description": "Add retry mechanism to the HTTP adapter",
+      "goal": "Implement exponential backoff retry with jitter in ResilientHttpAdapter",
+      "references": [
+        {
+          "type": "issue_section",
+          "location": "Retry Algorithm (lines 30-45)"
+        },
+        {
+          "type": "code",
+          "path": "src/main/java/de/cuioss/http/ResilientHttpAdapter.java"
+        }
+      ],
+      "acceptance_criteria": [
+        "Retry logic correctly implements exponential backoff",
+        "Jitter added to prevent thundering herd",
+        "Maximum attempts configurable",
+        "Test coverage >= 80%"
+      ],
+      "dependencies": [1]
+    },
+    {
+      "id": 3,
+      "name": "Add Integration Tests",
+      "description": "Create integration tests for retry functionality",
+      "goal": "Verify retry behavior works correctly with real HTTP scenarios",
+      "references": [
+        {
+          "type": "test_pattern",
+          "path": "src/test/java/de/cuioss/http/ResilientHttpAdapterTest.java"
+        }
+      ],
+      "acceptance_criteria": [
+        "Integration tests verify retry count",
+        "Tests verify backoff timing",
+        "Tests verify jitter randomness",
+        "All tests pass"
+      ],
+      "dependencies": [1, 2]
+    }
+  ],
+  "total_tasks": 3,
+  "plan_metadata": {
+    "created_by": "task-breakdown-agent",
+    "date": "2025-11-22",
+    "issue_source": "GitHub"
+  }
+}

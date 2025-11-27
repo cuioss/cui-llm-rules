@@ -1,0 +1,119 @@
+{
+  "error_patterns": [
+    {
+      "pattern": "cannot find symbol",
+      "category": "compilation_error",
+      "suggestions": [
+        "Check if the class/method exists and is properly imported",
+        "Verify the spelling of the symbol name",
+        "Ensure the dependency containing this class is declared in pom.xml",
+        "Check if the class is in the correct package"
+      ]
+    },
+    {
+      "pattern": "incompatible types",
+      "category": "compilation_error",
+      "suggestions": [
+        "Add explicit type cast if conversion is safe",
+        "Use appropriate conversion methods (e.g., Integer.parseInt(), String.valueOf())",
+        "Check method return types and variable declarations",
+        "Ensure generic types match expected types"
+      ]
+    },
+    {
+      "pattern": "illegal start of expression",
+      "category": "compilation_error",
+      "suggestions": [
+        "Check for missing semicolons or braces",
+        "Verify proper syntax for the statement",
+        "Look for misplaced keywords or operators",
+        "Ensure the statement is in a valid context"
+      ]
+    },
+    {
+      "pattern": "class, interface, or enum expected",
+      "category": "compilation_error",
+      "suggestions": [
+        "Check for extra closing braces",
+        "Verify import statements are at the top of the file",
+        "Ensure code is within a class definition",
+        "Look for mismatched braces in the file"
+      ]
+    },
+    {
+      "pattern": "Could not resolve dependencies",
+      "category": "dependency_error",
+      "suggestions": [
+        "Run 'mvn dependency:resolve' to see detailed errors",
+        "Check if the artifact exists in Maven Central or configured repositories",
+        "Verify the version number is correct",
+        "Ensure all required repositories are configured in pom.xml or settings.xml"
+      ]
+    },
+    {
+      "pattern": "Could not find artifact",
+      "category": "dependency_error",
+      "suggestions": [
+        "Verify the groupId, artifactId, and version are correct",
+        "Check if the artifact requires a specific repository",
+        "Try running 'mvn -U clean install' to force update snapshots",
+        "Install the artifact locally if it's a local dependency"
+      ]
+    },
+    {
+      "pattern": "Tests run:.*Failures:",
+      "category": "test_failure",
+      "suggestions": [
+        "Check the surefire-reports directory for detailed failure information",
+        "Run 'mvn test -Dtest=ClassName' to run specific test class",
+        "Use 'mvn test -X' for debug output",
+        "Check if test data or mocks need updating"
+      ]
+    },
+    {
+      "pattern": "no @param for",
+      "category": "javadoc_warning",
+      "suggestions": [
+        "Add @param tag for the specified parameter",
+        "Verify parameter name matches the method signature",
+        "Use IDE quick-fix to generate missing Javadoc"
+      ]
+    },
+    {
+      "pattern": "no @return",
+      "category": "javadoc_warning",
+      "suggestions": [
+        "Add @return tag describing the return value",
+        "Check if method signature actually returns a value",
+        "Use IDE quick-fix to generate missing Javadoc"
+      ]
+    },
+    {
+      "pattern": "@param name .* is unknown",
+      "category": "javadoc_warning",
+      "suggestions": [
+        "Remove the orphaned @param tag",
+        "Check if parameter was renamed without updating Javadoc",
+        "Verify method signature matches Javadoc tags"
+      ]
+    },
+    {
+      "pattern": "\\[deprecation\\]",
+      "category": "deprecation_warning",
+      "suggestions": [
+        "Replace deprecated API with recommended alternative",
+        "Check Javadoc for deprecation notes and migration path",
+        "Use @SuppressWarnings(\"deprecation\") only as last resort"
+      ]
+    },
+    {
+      "pattern": "\\[unchecked\\]",
+      "category": "unchecked_warning",
+      "suggestions": [
+        "Add proper generic type parameters",
+        "Use @SuppressWarnings(\"unchecked\") with justification comment",
+        "Consider using type-safe alternatives"
+      ]
+    }
+  ]
+}

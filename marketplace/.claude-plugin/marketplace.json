@@ -1,0 +1,60 @@
+{
+  "name": "cui-development-standards",
+  "owner": {
+    "name": "CUI OSS Project"
+  },
+  "metadata": {
+    "description": "Comprehensive marketplace of CUI development standards, skills, and best practices for AI-assisted development",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "cui-java-expert",
+      "description": "Comprehensive Java development expertise bundle aggregating core Java patterns, CDI/Quarkus, and unit testing standards",
+      "source": "./bundles/cui-java-expert",
+      "strict": false
+    },
+    {
+      "name": "cui-frontend-expert",
+      "description": "JavaScript, CSS, and web component standards for CUI applications",
+      "source": "./bundles/cui-frontend-expert",
+      "strict": false
+    },
+    {
+      "name": "cui-documentation-standards",
+      "description": "AsciiDoc and documentation standards enforcement for CUI projects",
+      "source": "./bundles/cui-documentation-standards",
+      "strict": false
+    },
+    {
+      "name": "cui-plugin-development-tools",
+      "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
+      "source": "./bundles/cui-plugin-development-tools",
+      "strict": false
+    },
+    {
+      "name": "cui-utilities",
+      "description": "Standalone utility commands for project setup, permissions, diagnostics, and documentation",
+      "source": "./bundles/cui-utilities",
+      "strict": false
+    },
+    {
+      "name": "cui-task-workflow",
+      "description": "Complete development workflow from issue implementation to PR review and quality verification",
+      "source": "./bundles/cui-task-workflow",
+      "strict": false
+    },
+    {
+      "name": "builder",
+      "description": "Unified build tools for Maven, Gradle, and npm projects",
+      "source": "./bundles/builder",
+      "strict": false
+    },
+    {
+      "name": "cui-requirements",
+      "description": "Requirements engineering and specification standards for CUI projects",
+      "source": "./bundles/cui-requirements",
+      "strict": false
+    }
+  ]
+}

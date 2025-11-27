@@ -1,0 +1,72 @@
+{
+  "plan_file": "plan-issue-4.md",
+  "tasks": [
+    {
+      "task_id": 1,
+      "name": "Add RetryConfig Record",
+      "status": "completed",
+      "checklist": [
+        {"item": "Read and understand all references above", "done": true},
+        {"item": "If unclear, ask user for clarification", "done": true},
+        {"item": "Implement RetryConfig record with fields: maxAttempts, initialDelay, multiplier", "done": true},
+        {"item": "Implement unit tests for RetryConfig builder", "done": true},
+        {"item": "Add JavaDoc with usage examples", "done": true},
+        {"item": "Run maven-project-builder agent", "done": true},
+        {"item": "Analyze results and fix any issues", "done": true},
+        {"item": "Commit changes", "done": true}
+      ],
+      "files_created": [
+        "src/main/java/de/cuioss/http/RetryConfig.java"
+      ],
+      "files_modified": [],
+      "tests_added": 5,
+      "acceptance_verified": true
+    },
+    {
+      "task_id": 2,
+      "name": "Implement Retry Logic in ResilientHttpAdapter",
+      "status": "in_progress",
+      "checklist": [
+        {"item": "Read and understand all references above", "done": true},
+        {"item": "If unclear, ask user for clarification", "done": true},
+        {"item": "Implement retry logic with exponential backoff", "done": true},
+        {"item": "Add jitter to prevent thundering herd", "done": false},
+        {"item": "Make maximum attempts configurable", "done": false},
+        {"item": "Implement unit tests", "done": false},
+        {"item": "Run maven-project-builder agent", "done": false},
+        {"item": "Commit changes", "done": false}
+      ],
+      "files_created": [],
+      "files_modified": [
+        "src/main/java/de/cuioss/http/ResilientHttpAdapter.java"
+      ],
+      "tests_added": 0,
+      "acceptance_verified": false
+    },
+    {
+      "task_id": 3,
+      "name": "Add Integration Tests",
+      "status": "pending",
+      "checklist": [
+        {"item": "Read and understand all references above", "done": false},
+        {"item": "Create integration tests for retry count", "done": false},
+        {"item": "Create tests for backoff timing", "done": false},
+        {"item": "Create tests for jitter randomness", "done": false},
+        {"item": "Run all tests and verify passing", "done": false},
+        {"item": "Commit changes", "done": false}
+      ],
+      "files_created": [],
+      "files_modified": [],
+      "tests_added": 0,
+      "acceptance_verified": false
+    }
+  ],
+  "summary": {
+    "total_tasks": 3,
+    "completed": 1,
+    "in_progress": 1,
+    "pending": 1,
+    "total_checklist_items": 20,
+    "completed_checklist_items": 11
+  }
+}

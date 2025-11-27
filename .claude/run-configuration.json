@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "commands": {
+    "docs-technical-adoc-review": {
+      "skipped_files": [],
+      "skipped_directories": [
+        "target/",
+        "node_modules/",
+        ".git/"
+      ],
+      "acceptable_warnings": [],
+      "last_execution": {
+        "date": "2025-10-23",
+        "status": "SUCCESS"
+      }
+    },
+    "setup-project-permissions": {
+      "user_approved_permissions": [],
+      "last_execution": {
+        "date": "2025-11-22",
+        "status": "SUCCESS"
+      }
+    }
+  },
+  "maven": {
+    "acceptable_warnings": {
+      "transitive_dependency": [],
+      "plugin_compatibility": [],
+      "platform_specific": []
+    }
+  }
+}

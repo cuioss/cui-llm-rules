@@ -1,0 +1,13 @@
+= Broken Cross Reference
+
+== Valid Section
+
+This is valid.
+
+== Test Section
+
+Link to nonexistent anchor: <<nonexistent-anchor>>
+
+Link to another missing anchor: <<missing-anchor,With Label>>
+
+Valid link: <<valid-section>>

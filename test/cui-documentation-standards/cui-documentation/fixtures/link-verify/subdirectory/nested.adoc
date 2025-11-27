@@ -1,0 +1,9 @@
+= Nested File
+
+== Content
+
+This is in a subdirectory.
+
+Link to parent: xref:../target-file.adoc[Parent File]
+
+Link to nested section: <<content>>

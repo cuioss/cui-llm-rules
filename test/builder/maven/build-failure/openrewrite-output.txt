@@ -1,0 +1,39 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] cui-parent                                                         [pom]
+[INFO] cui-core                                                           [jar]
+[INFO]
+[INFO] ----------------------< de.cuioss:cui-core >------------------------
+[INFO] Building cui-core 1.0.0                                            [1/2]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- rewrite-maven-plugin:5.21.0:run (default-cli) @ cui-core ---
+[WARNING] Changes have been made to src/main/java/de/cuioss/core/Service.java by:
+[WARNING]     org.openrewrite.java.format.AutoFormat
+[WARNING]     org.openrewrite.java.cleanup.FinalizeLocalVariables
+[WARNING] Changes have been made to src/main/java/de/cuioss/core/Handler.java by:
+[WARNING]     org.openrewrite.java.format.AutoFormat
+[INFO] Run 'mvn rewrite:diff' to see what changes would be made.
+[INFO] Run 'mvn rewrite:dryRun' to see what changes would be made to sources.
+[WARNING] /Users/dev/project/modules/cui-core/src/main/java/de/cuioss/core/Config.java:[67,12] [deprecation] oldMethod() in LegacyService has been deprecated
+[WARNING] /Users/dev/project/modules/cui-core/src/main/java/de/cuioss/core/Utility.java:[78,8] [unchecked] unchecked conversion
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ cui-core ---
+[INFO] Compiling 42 source files to /Users/dev/project/modules/cui-core/target/classes
+[INFO]
+[INFO] --- maven-surefire-plugin:3.0.0:test (default-test) @ cui-core ---
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for cui-parent 1.0.0:
+[INFO]
+[INFO] cui-parent ......................................... SUCCESS [  0.123 s]
+[INFO] cui-core ........................................... SUCCESS [ 25.456 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  25.579 s
+[INFO] Finished at: 2025-10-31T15:00:22+01:00
+[INFO] ------------------------------------------------------------------------

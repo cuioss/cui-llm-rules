@@ -1,0 +1,26 @@
+{
+  "name": "cui-plugin-development-tools",
+  "version": "1.0.0",
+  "description": "Complete toolchain for creating, diagnosing, fixing, and maintaining Claude Code marketplace components",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["plugin", "development", "tools", "doctor", "create", "maintain"],
+  "commands": [
+    "./commands/plugin-create.md",
+    "./commands/plugin-doctor.md",
+    "./commands/plugin-maintain.md"
+  ],
+  "skills": [
+    "./skills/marketplace-inventory",
+    "./skills/plugin-architecture",
+    "./skills/plugin-create",
+    "./skills/plugin-doctor",
+    "./skills/plugin-maintain"
+  ],
+  "agents": []
+}

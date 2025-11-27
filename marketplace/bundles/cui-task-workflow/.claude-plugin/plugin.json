@@ -1,0 +1,24 @@
+{
+  "name": "cui-task-workflow",
+  "version": "1.0.0",
+  "description": "Goal-based development workflow from task implementation to PR quality verification",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["workflow", "task", "pr", "implementation", "quality", "handoff", "orchestration"],
+  "commands": [
+    "./commands/task-implement.md",
+    "./commands/pr-doctor.md"
+  ],
+  "skills": [
+    "./skills/cui-git-workflow",
+    "./skills/cui-task-planning",
+    "./skills/pr-workflow",
+    "./skills/sonar-workflow",
+    "./skills/workflow-patterns"
+  ]
+}

@@ -1,0 +1,21 @@
+= Code Blocks
+
+== Links in Code
+
+This link is not in code: https://real-link.com
+
+Code block with links:
+----
+This contains <<fake-anchor>>
+And https://fake-url.com
+And xref:fake.adoc[Fake Link]
+----
+
+This link is real again: <<links-in-code>>
+
+Another code block:
+....
+More <<fake-links>>
+....
+
+Real link after: https://another-real.com

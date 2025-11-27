@@ -1,0 +1,937 @@
+---
+name: cui-java-core
+description: Core Java development standards for CUI projects including coding patterns, null safety, Lombok, modern features, and logging
+allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
+---
+
+# CUI Java Core Development Skill
+
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
+
+Foundational Java development standards for all CUI projects, covering core patterns, null safety, Lombok usage, modern Java features, and the CUI logging framework.
+
+## Workflow
+
+### Step 1: Load Core Java Standards
+
+**CRITICAL**: Load all foundational Java standards (always required for Java development).
+
+```
+Read: standards/java-core-patterns.md
+Read: standards/java-null-safety.md
+Read: standards/java-lombok-patterns.md
+Read: standards/java-modern-features.md
+Read: standards/logging-standards.md
+```
+
+These standards are fundamental to all CUI Java development and should be loaded together for consistent, comprehensive guidance.
+
+### Step 2: Load Additional Knowledge (Optional)
+
+**When needed**: Load domain-specific knowledge on demand.
+
+**DSL-Style Constants** (load when needed):
+```
+Read: standards/dsl-constants.md
+```
+
+Use when: Implementing LogMessages classes, creating structured constant hierarchies, or needing guidance on organizing related constants with nested static classes and the @UtilityClass pattern.
+
+**LogMessages Documentation** (load when needed):
+```
+Read: standards/logmessages-documentation.md
+```
+
+Use when: Writing or maintaining AsciiDoc documentation for LogMessages classes, or needing guidance on documenting log message standards.
+
+**CUI HTTP Client** (load when needed):
+```
+Read: standards/cui-http.md
+```
+
+Use when: Working with HTTP client code, implementing HTTP request/response handling, or needing guidance on the HttpResult pattern, retry logic, ETag caching, or HTTP error handling.
+
+**Logging Enforcement Patterns** (reference only - for tooling):
+```
+Read: standards/logging-enforcement-patterns.md
+```
+
+Use when: Building validation tools or linters for logging standards. This file contains enforcement patterns and validation rules intended for tooling integration rather than direct application during development.
+
+**Logging Maintenance Reference** (load when needed):
+```
+Read: standards/logging-maintenance-reference.md
+```
+
+Use when: Maintaining or migrating existing code to CUI logging standards. Provides detection criteria for logging violations, migration patterns from legacy logging (slf4j, log4j, System.out), troubleshooting guide for LogAsserts failures, and testing requirements specific to maintenance work. Different from logging-standards.md which is for writing NEW code.
+
+### Step 3: Extract Key Requirements
+
+From all loaded standards, extract and organize:
+
+1. **Core Patterns**:
+   - Code organization (packages, classes, methods)
+   - Naming conventions
+   - Exception handling patterns
+   - Best practices for immutability and collections
+   - Parameter object guidelines
+
+2. **Null Safety**:
+   - @NullMarked package configuration
+   - API return type patterns (non-null vs Optional)
+   - Implementation requirements
+   - Nullable parameter handling
+
+3. **Lombok Patterns**:
+   - @Delegate for delegation over inheritance
+   - @Builder for complex objects
+   - @Value for immutable objects
+   - When to use each annotation
+
+4. **Modern Features**:
+   - Records for data carriers
+   - Switch expressions
+   - Stream processing patterns
+   - Text blocks and pattern matching
+   - Optional enhancements
+
+5. **Logging**:
+   - CuiLogger configuration
+   - LogRecord usage and organization
+   - Log level guidelines
+   - Exception logging patterns
+
+### Step 4: Analyze Existing Code (if applicable)
+
+If working with existing Java code:
+
+1. **Assess standards compliance**:
+   - Check null-safety annotations (@NullMarked in package-info.java)
+   - Verify logger configuration (CuiLogger, not SLF4J)
+   - Review Lombok usage (appropriate annotations)
+   - Check for modern Java features (records, switch expressions)
+   - Review exception handling patterns
+
+2. **Identify improvement opportunities**:
+   - Missing null-safety annotations
+   - Legacy logging (System.out, SLF4J annotations)
+   - Inefficient patterns (deep inheritance, god classes)
+   - Missing modern features (classic switch, manual data classes)
+   - Verbose boilerplate that Lombok could handle
+
+3. **Check code organization**:
+   - Package structure (feature-based)
+   - Class responsibilities (Single Responsibility Principle)
+   - Method sizes (< 50 lines preferred)
+   - Parameter counts (≤ 3 preferred)
+
+### Step 5: Write/Refactor Java Code According to Standards
+
+When writing or refactoring Java code:
+
+1. **Apply core patterns**:
+   - Organize packages by feature
+   - Keep classes focused and small
+   - Use meaningful names throughout
+   - Handle exceptions appropriately
+   - Prefer immutability
+   - Use parameter objects for 3+ parameters
+
+2. **Implement null safety**:
+   - Add @NullMarked to package-info.java
+   - Never use @Nullable for return types (use Optional instead)
+   - Add defensive null checks at API boundaries
+   - Use Objects.requireNonNull() for validation
+   - Document null-safety contracts
+
+3. **Use Lombok appropriately**:
+   - @Delegate for composition over inheritance
+   - @Builder for classes with 3+ parameters or optional parameters
+   - @Value for immutable value objects and DTOs
+   - @UtilityClass for utility classes
+   - Consider records vs @Value for simple data carriers
+
+4. **Apply modern Java features**:
+   - Use records for simple immutable data carriers
+   - Replace classic switch with switch expressions
+   - Use streams for complex data transformations
+   - Apply text blocks for multi-line strings
+   - Use pattern matching for instanceof
+   - Leverage modern collection factories (List.of(), Set.of())
+
+5. **Implement CUI logging**:
+   - Declare logger: `private static final CuiLogger LOGGER = new CuiLogger(YourClass.class);`
+   - Create LogMessages class for structured logging
+   - Use LogRecord for INFO/WARN/ERROR/FATAL
+   - Exception parameter always comes first
+   - Use %s for all string substitutions
+   - Organize identifiers by log level ranges
+
+### Step 6: Verify Standards Compliance
+
+Before completing the task:
+
+1. **Core patterns check**:
+   - [ ] Classes follow Single Responsibility Principle
+   - [ ] Methods are short and focused (< 50 lines)
+   - [ ] Meaningful names used throughout
+   - [ ] Exception handling is appropriate
+   - [ ] Immutability used where possible
+   - [ ] No magic numbers or god classes
+
+2. **Null safety check**:
+   - [ ] @NullMarked in package-info.java
+   - [ ] No @Nullable used for return types
+   - [ ] Optional used for "no result" scenarios
+   - [ ] Defensive null checks at API boundaries
+   - [ ] Unit tests verify non-null contracts
+
+3. **Lombok check**:
+   - [ ] @Builder used for complex construction
+   - [ ] @Value used for immutable objects
+   - [ ] @Delegate used for composition
+   - [ ] No @Slf4j or logging annotations (use CuiLogger)
+
+4. **Modern features check**:
+   - [ ] Records used for simple data carriers
+   - [ ] Switch expressions used instead of statements
+   - [ ] Streams used appropriately
+   - [ ] Text blocks used for multi-line strings
+   - [ ] Modern collection factories used
+
+5. **Logging check**:
+   - [ ] CuiLogger used (not SLF4J/Log4j)
+   - [ ] Logger is private static final named LOGGER
+   - [ ] LogRecord used for important messages
+   - [ ] Exception parameter comes first
+   - [ ] %s used for substitutions
+   - [ ] No System.out or System.err
+
+### Step 7: Report Results
+
+Provide summary of:
+
+1. **Standards applied**: Which core Java standards were followed
+2. **Code improvements**: Changes made to align with standards
+3. **Null safety**: Package-level @NullMarked and Optional usage
+4. **Lombok usage**: Which annotations were applied and why
+5. **Modern features**: Records, switch expressions, streams implemented
+6. **Logging**: CuiLogger and LogRecord implementation
+7. **Build verification**: Confirm successful build and test execution
+
+## Common Patterns and Examples
+
+### Complete Class Example
+
+```java
+// package-info.java
+@NullMarked
+package de.cuioss.portal.authentication;
+
+import org.jspecify.annotations.NullMarked;
+
+// TokenValidator.java
+import de.cuioss.tools.logging.CuiLogger;
+import static de.cuioss.portal.authentication.TokenLogMessages.INFO;
+import static de.cuioss.portal.authentication.TokenLogMessages.ERROR;
+
+@Value
+@Builder
+public class TokenValidator {
+    private static final CuiLogger LOGGER = new CuiLogger(TokenValidator.class);
+
+    String issuer;
+    @Builder.Default
+    Duration validity = Duration.ofHours(1);
+
+    public ValidationResult validate(String token) {
+        Objects.requireNonNull(token, "token must not be null");
+
+        try {
+            String userId = extractUserId(token);
+            boolean isValid = performValidation(token);
+
+            if (isValid) {
+                LOGGER.info(INFO.VALIDATION_SUCCESS, userId);
+                return ValidationResult.valid();
+            }
+
+            LOGGER.error(ERROR.VALIDATION_FAILED, userId, "Invalid signature");
+            return ValidationResult.invalid("Invalid signature");
+
+        } catch (TokenException e) {
+            LOGGER.error(e, ERROR.VALIDATION_FAILED, "unknown", e.getMessage());
+            throw new ValidationException("Validation failed", e);
+        }
+    }
+
+    public Optional<UserInfo> extractUserInfo(String token) {
+        return parseToken(token).map(this::extractUser);
+    }
+}
+```
+
+### LogMessages Example
+
+```java
+@UtilityClass
+public final class TokenLogMessages {
+    public static final String PREFIX = "TOKEN";
+
+    @UtilityClass
+    public static final class INFO {
+        public static final LogRecord VALIDATION_SUCCESS = LogRecordModel.builder()
+            .template("Token validated successfully for user %s")
+            .prefix(PREFIX)
+            .identifier(1)
+            .build();
+    }
+
+    @UtilityClass
+    public static final class ERROR {
+        public static final LogRecord VALIDATION_FAILED = LogRecordModel.builder()
+            .template("Token validation failed for user %s: %s")
+            .prefix(PREFIX)
+            .identifier(200)
+            .build();
+    }
+}
+```
+
+### Record with Validation Example
+
+```java
+public record TokenConfig(String issuer, Duration validity, Set<String> requiredClaims) {
+    public TokenConfig {
+        Objects.requireNonNull(issuer, "issuer must not be null");
+        Objects.requireNonNull(validity, "validity must not be null");
+        if (validity.isNegative() || validity.isZero()) {
+            throw new IllegalArgumentException("Validity must be positive");
+        }
+        requiredClaims = Set.copyOf(requiredClaims);  // Defensive copy
+    }
+
+    public static TokenConfig defaultConfig() {
+        return new TokenConfig(
+            "https://auth.example.com",
+            Duration.ofHours(1),
+            Set.of("sub", "exp")
+        );
+    }
+}
+```
+
+### Delegation Example
+
+```java
+public class CachedTokenValidator implements TokenValidator {
+    @Delegate
+    private final TokenValidator delegate;
+    private final Cache<String, ValidationResult> cache;
+
+    public CachedTokenValidator(TokenValidator delegate) {
+        this.delegate = delegate;
+        this.cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .build();
+    }
+
+    @Override
+    public ValidationResult validate(String token) {
+        return cache.get(token, () -> delegate.validate(token));
+    }
+}
+```
+
+### Switch Expression Example
+
+```java
+ValidationResult validate(Token token) {
+    return switch (token.getType()) {
+        case JWT -> jwtValidator.validate(token);
+        case OAUTH2 -> oauth2Validator.validate(token);
+        case LEGACY -> ValidationResult.invalid("Legacy tokens not supported");
+    };
+}
+```
+
+### Stream Processing Example
+
+```java
+List<String> activeUserNames = users.stream()
+    .filter(User::isActive)
+    .map(User::getName)
+    .sorted()
+    .toList();
+
+Map<String, List<User>> usersByRole = users.stream()
+    .collect(Collectors.groupingBy(User::getRole));
+```
+
+## Common Development Tasks
+
+### Task: Create a new service class
+
+1. Load all core Java standards
+2. Add @NullMarked to package-info.java
+3. Define class with appropriate Lombok annotations (@Value/@Builder if immutable)
+4. Declare CuiLogger
+5. Create LogMessages class following DSL pattern
+6. Implement methods with proper null safety
+7. Use modern Java features (records for DTOs, switch expressions, streams)
+8. Write unit tests verifying behavior
+9. Verify build using builder:builder-maven-rules workflow
+
+### Task: Refactor existing code to standards
+
+1. Load all core Java standards
+2. Add @NullMarked to package-info.java if missing
+3. Replace SLF4J/Log4j with CuiLogger
+4. Apply Lombok where appropriate (@Builder, @Value, @Delegate)
+5. Replace classic patterns with modern features (records, switch expressions)
+6. Add null checks at API boundaries
+7. Update tests to verify compliance
+8. Verify build using builder:builder-maven-rules workflow
+
+### Task: Add comprehensive logging
+
+1. Load logging standards and DSL constants standards
+2. Create LogMessages class with DSL-style nested structure
+3. Define LogRecord for each important message
+4. Organize by log level (INFO, WARN, ERROR, FATAL)
+5. Use correct identifier ranges
+6. Apply static imports in service classes
+7. Use LogRecord with proper exception handling
+8. Add test verification for log messages
+9. Verify no System.out or System.err usage
+
+## Error Handling
+
+If encountering issues:
+
+1. **Null pointer exceptions**: Review null-safety implementation, add @NullMarked and defensive checks
+2. **Lombok not working**: Check Lombok dependency, IDE plugin, and annotation placement
+3. **Logger errors**: Verify CuiLogger setup, check exception parameter order and %s usage
+4. **Build failures**: Check modern Java feature compatibility with target Java version
+5. **Complex refactoring**: Break into smaller steps, focus on one standard at a time
+
+---
+
+## Workflow: Analyze Logging Violations
+
+Analyze LOGGER usage in Java files and detect violations of CUI logging standards.
+
+### Parameters
+
+- **target** (required): File or directory to analyze
+- **output_format** (optional): "json" or "report" (default: json)
+
+### Steps
+
+1. **Discover Java Files**
+   ```
+   Glob: pattern="{target}/**/*.java"
+   ```
+   Or use provided file path directly.
+
+2. **Resolve Script Path**
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-java-expert:cui-java-core/scripts/analyze-logging-violations.py
+   ```
+
+3. **Run Violation Analysis Script**
+   ```bash
+   python3 {resolved_path} --directory {target}
+   ```
+
+4. **Parse Results**
+   The script returns JSON with:
+   - `total_statements`: Count of LOGGER calls analyzed
+   - `violations`: List of violations with file, line, type
+   - `summary`: Counts by violation type
+
+5. **Generate Report**
+   ```
+   ╔════════════════════════════════════════════════════════════╗
+   ║           Logging Violations Report                        ║
+   ╚════════════════════════════════════════════════════════════╝
+
+   Files Analyzed: {count}
+   Total LOGGER Statements: {total}
+
+   Violations Found: {violation_count}
+   - Missing LogRecord (INFO/WARN/ERROR/FATAL): {missing_count}
+   - Incorrect LogRecord (DEBUG/TRACE): {incorrect_count}
+
+   Violations by File:
+   {file}: {count} violations
+     Line {line}: {level} - {violation_type}
+
+   Compliance Rate: {rate}%
+   ```
+
+### CUI Logging Rules
+
+- **INFO/WARN/ERROR/FATAL** MUST use LogRecord
+- **DEBUG/TRACE** must NOT use LogRecord (direct string only)
+- Exception parameter always comes first
+- Use %s for all string substitutions
+
+### JSON Output Contract
+
+```json
+{
+  "status": "success",
+  "data": {
+    "total_statements": 50,
+    "violations": [
+      {
+        "file": "src/main/java/MyClass.java",
+        "line": 42,
+        "level": "INFO",
+        "violation_type": "MISSING_LOG_RECORD",
+        "current_usage": "direct_string",
+        "expected_usage": "log_record",
+        "code_snippet": "LOGGER.info(\"message\")"
+      }
+    ],
+    "summary": {
+      "missing_log_record": 5,
+      "incorrect_log_record": 2,
+      "compliant": 43
+    }
+  },
+  "metrics": {
+    "files_analyzed": 10,
+    "compliance_rate": 86.0
+  }
+}
+```
+
+---
+
+## Workflow: Document LogRecord
+
+Generate AsciiDoc documentation for LogMessages holder classes.
+
+### Parameters
+
+- **holder_class** (required): Path to LogMessages Java class
+- **output_file** (optional): Path to output AsciiDoc file
+- **analyze_only** (optional): Only analyze without generating (default: false)
+
+### Steps
+
+1. **Validate Holder Class**
+   ```
+   Glob: pattern="{holder_class}"
+   ```
+   Fail fast if file doesn't exist.
+
+2. **Resolve Script Path**
+   ```
+   Skill: cui-utilities:script-runner
+   Resolve: cui-java-expert:cui-java-core/scripts/document-logrecord.py
+   ```
+
+3. **Run Documentation Script**
+   ```bash
+   python3 {resolved_path} --holder {holder_class} --output {output_file}
+   ```
+
+4. **Parse Results**
+   The script returns JSON with:
+   - `generated_files`: List of files created/updated
+   - `documentation`: Metadata about LogRecords found
+   - `tables_generated`: Number of level tables created
+   - `rows_updated`: Total LogRecord entries documented
+
+4. **Generate Summary**
+   ```
+   ╔════════════════════════════════════════════════════════════╗
+   ║     LogMessages Documentation Complete                     ║
+   ╚════════════════════════════════════════════════════════════╝
+
+   Holder Class: {holder_class}
+   Documentation: {output_file}
+   Prefix: {prefix}
+
+   LogRecords Documented:
+   - INFO Level: {count} messages
+   - WARN Level: {count} messages
+   - ERROR Level: {count} messages
+   - FATAL Level: {count} messages
+   Total: {total} messages
+   ```
+
+### Documentation Format
+
+Generated AsciiDoc follows CUI standards:
+- 4-column tables: ID, Component, Message, Description
+- Column widths: `[cols="1,1,2,2", options="header"]`
+- Separate tables per log level
+- Sorted by identifier within each level
+- ID format: `{PREFIX}-{NNN}` with leading zeros
+
+### JSON Output Contract
+
+```json
+{
+  "status": "success",
+  "data": {
+    "generated_files": ["doc/LogMessages.adoc"],
+    "documentation": {
+      "holder_class": "MyLogMessages.java",
+      "prefix": "AUTH",
+      "info_messages": 5,
+      "warn_messages": 3,
+      "error_messages": 4,
+      "fatal_messages": 1,
+      "total_messages": 13
+    },
+    "tables_generated": 4,
+    "rows_updated": 13
+  },
+  "errors": []
+}
+```
+
+---
+
+## Workflow: Verify Implementation Readiness
+
+Verify that implementation task description is clear and the build is clean before starting implementation work.
+
+### Parameters
+
+- **description** (required): The task description to validate
+- **require_clean_build** (optional): Whether to verify build is clean (default: true)
+- **module** (optional): Module name for module-specific builds
+
+### Steps
+
+1. **Validate Task Description**
+   ```
+   Skill: cui-utilities:script-runner
+   Script: cui-java-expert:cui-java-core/verify-implementation-params
+   Parameters:
+     description: "{description}"
+   ```
+
+   Parse JSON output:
+   - `verification_passed`: boolean indicating if description is adequate
+   - `clarity_score`: numeric score (0-100)
+   - `missing_information`: list of missing details
+   - `ambiguities`: list of unclear aspects
+   - `vague_scope`: boolean indicating unclear scope
+
+   **If verification_passed is false:**
+   - Return clarification questions to user
+   - Highlight missing_information items
+   - Request clarification for ambiguities
+   - DO NOT proceed with implementation
+
+2. **Verify Build Precondition** (if require_clean_build is true)
+
+   **Execute clean build:**
+   ```
+   Skill: builder:builder-maven-rules
+   Workflow: Execute Maven Build
+   Parameters:
+     goals: clean compile
+     module: {module if specified}
+     output_mode: structured
+   ```
+
+   This workflow:
+   - Executes Maven build with output capture
+   - Parses build log using parse-maven-output.py script
+   - Returns status: SUCCESS|FAILURE with categorized issues
+
+   **On build errors:**
+   - Check task description for "fix build" keywords
+   - If NOT a fix-build task → Report errors and stop
+   - If IS a fix-build task → Skip precondition (broken build IS the task)
+
+   Reference: xref:standards/build-precondition-pattern.md[Build Precondition Pattern]
+
+3. **Return Readiness Status**
+
+   Generate JSON response:
+   ```json
+   {
+     "ready_to_implement": true|false,
+     "task_clarity": {
+       "passed": true|false,
+       "score": 85,
+       "issues": []
+     },
+     "build_status": {
+       "clean": true|false,
+       "errors": [],
+       "warnings": []
+     },
+     "recommendations": []
+   }
+   ```
+
+### Script Contracts
+
+**verify-implementation-params** (via script-runner):
+- **Input**: JSON with `description` field
+- **Output**: JSON with verification results
+- **Location**: `cui-java-expert:cui-java-core/verify-implementation-params`
+
+**Execute Maven Build** (via builder-maven workflow):
+- **Input**: Maven goals, optional module, output_mode
+- **Output**: JSON with build status and categorized issues
+- **Workflow**: `builder:builder-maven-rules` → `Execute Maven Build`
+
+### Related Standards
+
+- Build Precondition Pattern: standards/build-precondition-pattern.md
+- Fix-Build Mode: standards/fix-build-mode.md
+
+---
+
+## Workflow: Fix Compilation Errors
+
+Fix Java compilation errors iteratively until build succeeds.
+
+### Parameters
+
+- **max_iterations** (optional): Maximum fix attempts (default: 3)
+- **module** (optional): Module to build
+
+### When to Use
+
+Use this workflow when:
+- Build fails with compilation errors
+- Called from agents for autonomous error fixing
+- Part of implement/refactor workflows that need build verification
+
+### Step 1: Execute Build
+
+```
+Skill: builder:builder-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean compile
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 2: Parse and Categorize Errors
+
+From the build result, extract `data.issues` where `type == "compilation_error"`.
+
+**Categorize by error type:**
+- **missing_import**: Cannot find symbol (import)
+- **type_mismatch**: Incompatible types
+- **missing_method**: Cannot find symbol (method)
+- **syntax_error**: Syntax errors
+- **null_safety**: Null-related errors
+- **access_modifier**: Access control errors
+
+### Step 3: Load Relevant Standards
+
+Based on error categories:
+- **Type errors** → Load `standards/java-null-safety.md`
+- **Pattern errors** → Load `standards/java-core-patterns.md`
+- **Lombok errors** → Load `standards/java-lombok-patterns.md`
+- **Modern syntax** → Load `standards/java-modern-features.md`
+
+### Step 4: Fix Each Error
+
+For each error:
+1. Read the affected file
+2. Analyze error in context
+3. Apply fix using Edit tool
+4. Track files modified
+
+**Fix Priority Order:**
+1. Missing imports (usually quick)
+2. Type mismatches
+3. Missing methods/symbols
+4. Syntax errors
+5. Access modifiers
+
+### Step 5: Verify Build
+
+```
+Skill: builder:builder-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: compile
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 6: Iterate if Needed
+
+If errors remain and `iteration < max_iterations`:
+- Return to Step 2 with updated error list
+- Track iteration count
+
+If `iteration >= max_iterations`:
+- Return partial result with remaining errors
+
+### Output Contract
+
+```json
+{
+  "status": "success|partial|failed",
+  "iterations": 2,
+  "fixed": 5,
+  "remaining": 0,
+  "files_modified": ["src/main/java/MyClass.java"],
+  "errors_by_type": {
+    "missing_import": 3,
+    "type_mismatch": 2
+  },
+  "build_status": "SUCCESS|FAILURE"
+}
+```
+
+### Error Handling
+
+- If error is in generated code → Skip (cannot fix)
+- If error requires architectural change → Report, don't attempt fix
+- If same error persists after fix attempt → Report as unfixable
+
+---
+
+## Workflow: Implement Feature
+
+Implement Java feature with standards compliance and build verification.
+
+### Parameters
+
+- **description** (required): What to implement
+- **target_class** (optional): Target class path
+- **module** (optional): Target module
+
+### When to Use
+
+Use this workflow when:
+- Implementing new Java functionality
+- Called from agents for autonomous feature implementation
+- Adding new methods, classes, or services
+
+### Step 1: Verify Readiness
+
+```
+Workflow: Verify Implementation Readiness
+Parameters:
+  description: {description}
+  require_clean_build: true
+  module: {module if specified}
+```
+
+If not ready, return clarification questions.
+
+### Step 2: Load All Core Standards
+
+```
+Read: standards/java-core-patterns.md
+Read: standards/java-null-safety.md
+Read: standards/java-lombok-patterns.md
+Read: standards/java-modern-features.md
+Read: standards/logging-standards.md
+```
+
+### Step 3: Analyze Target Location
+
+If `target_class` provided:
+- Read the target file
+- Analyze existing structure, imports, patterns
+
+If creating new class:
+- Determine package from description
+- Check for existing package-info.java (@NullMarked)
+
+### Step 4: Generate Implementation
+
+Apply standards from Step 2:
+- @NullMarked in package-info.java
+- Appropriate Lombok annotations
+- CuiLogger configuration
+- Modern Java features where applicable
+- Proper null safety (Optional for returns, requireNonNull for params)
+
+### Step 5: Apply Implementation
+
+Use Edit tool (existing file) or Write tool (new file):
+- Write class with full standards compliance
+- Include necessary imports
+- Add LogMessages class if logging needed
+
+### Step 6: Verify Build
+
+```
+Skill: builder:builder-maven-rules
+Workflow: Execute Maven Build
+Parameters:
+  goals: clean compile
+  module: {module if specified}
+  output_mode: structured
+```
+
+### Step 7: Fix Errors if Needed
+
+If build fails:
+```
+Workflow: Fix Compilation Errors
+Parameters:
+  max_iterations: 2
+  module: {module if specified}
+```
+
+### Output Contract
+
+```json
+{
+  "status": "success|partial|failed",
+  "implementation": {
+    "files_created": ["src/main/java/MyService.java"],
+    "files_modified": ["src/main/java/package-info.java"],
+    "lines_added": 85
+  },
+  "standards_applied": [
+    "java-core-patterns",
+    "java-null-safety",
+    "java-lombok-patterns",
+    "logging-standards"
+  ],
+  "build_status": "SUCCESS"
+}
+```
+
+### Implementation Checklist
+
+Before returning success:
+- [ ] @NullMarked in package-info.java
+- [ ] CuiLogger (not SLF4J)
+- [ ] LogMessages class if logging used
+- [ ] Appropriate Lombok annotations
+- [ ] Modern Java features applied
+- [ ] Build compiles successfully
+
+---
+
+## References
+
+**Core Standards (always loaded):**
+* Core Patterns: standards/java-core-patterns.md
+* Null Safety: standards/java-null-safety.md
+* Lombok Patterns: standards/java-lombok-patterns.md
+* Modern Features: standards/java-modern-features.md
+* Logging: standards/logging-standards.md
+
+**Optional Standards (load when needed):**
+* DSL Constants: standards/dsl-constants.md
+* LogMessages Documentation: standards/logmessages-documentation.md
+* CUI HTTP Client: standards/cui-http.md
+* Build Precondition: standards/build-precondition-pattern.md
+* Fix-Build Mode: standards/fix-build-mode.md

@@ -1,0 +1,44 @@
+{
+  "task_id": 1,
+  "task_name": "Add RetryConfig Record",
+  "criteria": [
+    {
+      "id": "AC1",
+      "description": "RetryConfig record exists with all specified fields",
+      "verification_method": "grep",
+      "verification_target": "src/main/java/de/cuioss/http/RetryConfig.java",
+      "verification_pattern": "record RetryConfig.*maxAttempts.*initialDelay.*multiplier",
+      "status": "passed",
+      "details": "Found: record RetryConfig(int maxAttempts, Duration initialDelay, double multiplier)"
+    },
+    {
+      "id": "AC2",
+      "description": "Builder pattern implemented",
+      "verification_method": "grep",
+      "verification_target": "src/main/java/de/cuioss/http/RetryConfig.java",
+      "verification_pattern": "@Builder",
+      "status": "passed",
+      "details": "Found Lombok @Builder annotation on class"
+    },
+    {
+      "id": "AC3",
+      "description": "Test coverage >= 80%",
+      "verification_method": "coverage_report",
+      "verification_target": "target/site/jacoco/jacoco.xml",
+      "verification_threshold": 80,
+      "status": "passed",
+      "details": "Actual coverage: 92.3%"
+    },
+    {
+      "id": "AC4",
+      "description": "JavaDoc present on all public methods",
+      "verification_method": "javadoc_check",
+      "verification_target": "src/main/java/de/cuioss/http/RetryConfig.java",
+      "status": "passed",
+      "details": "All public methods have JavaDoc with @param, @return tags"
+    }
+  ],
+  "overall_status": "all_passed",
+  "criteria_met": ["AC1", "AC2", "AC3", "AC4"],
+  "criteria_failed": []
+}

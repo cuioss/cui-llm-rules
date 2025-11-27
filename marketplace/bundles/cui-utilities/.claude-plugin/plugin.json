@@ -1,0 +1,31 @@
+{
+  "name": "cui-utilities",
+  "version": "1.0.0",
+  "description": "Standalone utility tools including research agents and commands for CUI project development and maintenance",
+  "author": {
+    "name": "CUI OSS Project",
+    "email": "contact@cuioss.de"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/cuioss/cui-llm-rules",
+  "repository": "https://github.com/cuioss/cui-llm-rules.git",
+  "keywords": ["utilities", "research", "project-setup", "permissions", "diagnostics", "documentation", "architecture", "toon"],
+  "agents": [
+    "./agents/research-best-practices.md"
+  ],
+  "commands": [
+    "./commands/tools-audit-permission-wildcards.md",
+    "./commands/tools-fix-intellij-diagnostics.md",
+    "./commands/tools-manage-web-permissions.md",
+    "./commands/tools-setup-project-permissions.md",
+    "./commands/tools-sync-agents-file.md",
+    "./commands/tools-verify-architecture-diagrams.md"
+  ],
+  "skills": [
+    "./skills/cui-diagnostic-patterns",
+    "./skills/cui-general-development-rules",
+    "./skills/permission-management",
+    "./skills/toon-usage",
+    "./skills/web-security-standards"
+  ]
+}

@@ -1,0 +1,44 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] cui-parent                                                         [pom]
+[INFO] cui-core                                                           [jar]
+[INFO]
+[INFO] ----------------------< de.cuioss:cui-core >------------------------
+[INFO] Building cui-core 1.0.0                                            [1/2]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ cui-core ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 42 source files to /Users/dev/project/modules/cui-core/target/classes
+[WARNING] /Users/dev/project/modules/cui-core/src/main/java/de/cuioss/core/Service.java:[45,12] [deprecation] oldMethod() in LegacyService has been deprecated
+[WARNING] /Users/dev/project/modules/cui-core/src/main/java/de/cuioss/core/Utility.java:[78,8] [unchecked] unchecked conversion
+[INFO]
+[INFO] --- maven-resources-plugin:3.3.0:resources (default-resources) @ cui-core ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 5 resources
+[INFO]
+[INFO] --- maven-javadoc-plugin:3.5.0:jar (attach-javadocs) @ cui-core ---
+[WARNING] Javadoc Warnings
+[WARNING] /Users/dev/project/modules/cui-core/src/main/java/de/cuioss/core/Config.java:67: warning: no @param for configKey
+[WARNING] /Users/dev/project/modules/cui-core/src/main/java/de/cuioss/core/Handler.java:89: warning: no @return
+[WARNING] /Users/dev/project/modules/cui-core/src/main/java/de/cuioss/core/Manager.java:112: warning: @param name "item" is unknown
+[INFO]
+[INFO] --- maven-surefire-plugin:3.0.0:test (default-test) @ cui-core ---
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- maven-jar-plugin:3.3.0:jar (default-jar) @ cui-core ---
+[INFO] Building jar: /Users/dev/project/modules/cui-core/target/cui-core-1.0.0.jar
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for cui-parent 1.0.0:
+[INFO]
+[INFO] cui-parent ......................................... SUCCESS [  0.123 s]
+[INFO] cui-core ........................................... SUCCESS [ 15.456 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15.579 s
+[INFO] Finished at: 2025-10-31T14:35:22+01:00
+[INFO] ------------------------------------------------------------------------

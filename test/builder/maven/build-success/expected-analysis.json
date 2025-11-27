@@ -1,0 +1,64 @@
+{
+  "status": "success",
+  "data": {
+    "exit_code": 0,
+    "issues": [
+      {
+        "type": "deprecation_warning",
+        "file": "src/main/java/de/cuioss/core/Service.java",
+        "line": 45,
+        "column": 12,
+        "message": "[deprecation] oldMethod() in LegacyService has been deprecated",
+        "severity": "WARNING"
+      },
+      {
+        "type": "unchecked_warning",
+        "file": "src/main/java/de/cuioss/core/Utility.java",
+        "line": 78,
+        "column": 8,
+        "message": "[unchecked] unchecked conversion",
+        "severity": "WARNING"
+      },
+      {
+        "type": "javadoc_warning",
+        "file": "src/main/java/de/cuioss/core/Config.java",
+        "line": 67,
+        "column": null,
+        "message": "no @param for configKey",
+        "severity": "WARNING"
+      },
+      {
+        "type": "javadoc_warning",
+        "file": "src/main/java/de/cuioss/core/Handler.java",
+        "line": 89,
+        "column": null,
+        "message": "no @return",
+        "severity": "WARNING"
+      },
+      {
+        "type": "javadoc_warning",
+        "file": "src/main/java/de/cuioss/core/Manager.java",
+        "line": 112,
+        "column": null,
+        "message": "@param name \"item\" is unknown",
+        "severity": "WARNING"
+      }
+    ],
+    "summary": {
+      "compilation_errors": 0,
+      "test_failures": 0,
+      "javadoc_warnings": 3,
+      "deprecation_warnings": 1,
+      "unchecked_warnings": 1,
+      "dependency_errors": 0,
+      "other_warnings": 1,
+      "total_issues": 6
+    }
+  },
+  "metrics": {
+    "duration_ms": 15579,
+    "modules_built": 2,
+    "tests_run": 13,
+    "tests_failed": 0
+  }
+}

@@ -1,0 +1,31 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ----< de.cuioss:cui-core >--------------------------------------------
+[INFO] Building cui-core 1.0.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ cui-core ---
+[INFO] Deleting /Users/dev/project/modules/cui-core/target
+[INFO]
+[INFO] --- maven-resources-plugin:3.3.0:resources (default-resources) @ cui-core ---
+[INFO] Copying 5 resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ cui-core ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 42 source files to /Users/dev/project/modules/cui-core/target/classes
+[INFO]
+[INFO] --- maven-surefire-plugin:3.0.0:test (default-test) @ cui-core ---
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- maven-jar-plugin:3.3.0:jar (default-jar) @ cui-core ---
+[INFO] Building jar: /Users/dev/project/modules/cui-core/target/cui-core-1.0.0.jar
+[INFO]
+[INFO] --- maven-install-plugin:3.1.0:install (default-install) @ cui-core ---
+[INFO] Installing /Users/dev/project/modules/cui-core/target/cui-core-1.0.0.jar to /Users/dev/.m2/repository/de/cuioss/cui-core/1.0.0/cui-core-1.0.0.jar
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.345 s
+[INFO] Finished at: 2025-10-31T15:05:22+01:00
+[INFO] ------------------------------------------------------------------------
