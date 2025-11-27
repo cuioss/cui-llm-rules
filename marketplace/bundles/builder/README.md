@@ -12,6 +12,10 @@ This bundle consolidates build execution, output parsing, and issue routing for 
 
 ## Skills
 
+### Environment
+
+- **environment-detection** - Detect and cache build systems (maven, gradle, npm)
+
 ### Maven
 
 - **builder-maven-rules** - Maven build execution and output parsing

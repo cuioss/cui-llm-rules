@@ -19,6 +19,7 @@
     "./commands/npm-package-maintenance.md"
   ],
   "skills": [
+    "./skills/environment-detection",
     "./skills/builder-maven-rules",
     "./skills/builder-pom-maintenance",
     "./skills/builder-gradle-rules",
