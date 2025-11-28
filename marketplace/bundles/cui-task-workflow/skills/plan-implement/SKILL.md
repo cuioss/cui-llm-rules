@@ -153,11 +153,15 @@ status: completed
 
 ## Integration
 
+### Command Integration
+- **/plan-execute** - Primary command invoking this skill via phase-management
+
 ### Skills Used
 - **plan-files** - All file I/O operations
 - **java-implement-agent** - Java implementation
 - **npm-builder** - JavaScript implementation
 - **cui-git-workflow** - Commit operations
+- **phase-management** - Orchestration (invokes this skill)
 
 ### Related Skills
 - **plan-init** - Init phase

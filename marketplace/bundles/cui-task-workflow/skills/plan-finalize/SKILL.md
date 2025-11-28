@@ -162,10 +162,14 @@ Options: Fix issues / Request exception / Proceed anyway
 
 ## Integration
 
+### Command Integration
+- **/plan-execute** - Primary command invoking this skill via phase-management
+
 ### Skills Used
 - **plan-files** - All file I/O operations
 - **cui-git-workflow** - Git commit operations
 - **pr-workflow** - PR automation and Sonar fixes
+- **phase-management** - Orchestration (invokes this skill)
 
 ### Related Skills
 - **plan-init** - Init phase

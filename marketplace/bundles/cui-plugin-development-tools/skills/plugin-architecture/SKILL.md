@@ -359,6 +359,59 @@ Read references/execution-directive.md
 Read references/minimal-wrapper-pattern.md
 ```
 
+### 13. User-Facing Output (Display Standards)
+**File**: `references/user-facing-output.md`
+
+**Load When**:
+- Designing skill/command output
+- Filtering internal operations from user display
+- Creating status messages and progress indicators
+- Implementing phase transitions
+- Reviewing output for anti-patterns
+
+**Contents**:
+- Core concept: Show status, not process
+- Structured status output pattern
+- Phase transition message format
+- Configuration display pattern
+- Progress tables pattern
+- Issue detection output pattern
+- Final metrics display pattern
+- Anti-patterns: What NOT to display (step numbers, skill loading, tool execution, diffs)
+- Output filtering rules (MUST/MUST NOT/MAY display)
+- Output by component type (commands, skills, agents)
+- Implementation checklist
+
+**Load Command**:
+```
+Read references/user-facing-output.md
+```
+
+### 14. AskUserQuestion Patterns (User Interaction)
+**File**: `references/askuserquestion-patterns.md`
+
+**Load When**:
+- Designing interactive workflows with user input
+- Using AskUserQuestion tool in skills/commands
+- Handling free-text input via "Other" option
+- Avoiding common interaction anti-patterns
+
+**Contents**:
+- Tool characteristics and schema
+- Pattern 1: Selection with free-text alternative
+- Pattern 2: Confirmation with customization
+- Pattern 3: Type selection
+- Pattern 4: Multi-select features
+- Anti-patterns (redundant options, follow-up questions, expecting customization)
+- Best practices for question design
+- Known limitations (fixed "Type something." label)
+- Workarounds for UI constraints
+
+**Load Command**:
+```
+Read references/askuserquestion-patterns.md
+```
+
 ## Examples
 
 ### Example 1: Goal-Based Skill
@@ -535,6 +588,16 @@ Read references/script-standards.md
 Read references/minimal-wrapper-pattern.md
 ```
 
+**Designing user output**:
+```
+Read references/user-facing-output.md
+```
+
+**Designing user interactions**:
+```
+Read references/askuserquestion-patterns.md
+```
+
 **Learning by example**:
 ```
 Read references/examples/goal-based-skill-example.md
@@ -609,6 +672,8 @@ All references are in `references/` directory:
 - script-standards.md
 - execution-directive.md
 - minimal-wrapper-pattern.md
+- user-facing-output.md
+- askuserquestion-patterns.md
 - examples/goal-based-skill-example.md
 - examples/workflow-command-example.md
 - examples/pattern-usage-examples.md

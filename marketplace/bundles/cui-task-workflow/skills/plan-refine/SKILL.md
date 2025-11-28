@@ -162,10 +162,14 @@ Options: Define scope / Remove component / Mark as TODO
 
 ## Integration
 
+### Command Integration
+- **/plan-manage** - Primary command invoking this skill via phase-management (action=refine)
+
 ### Skills Used
 - **plan-files** - All file I/O operations
 - **adr-management** - ADR creation and verification
 - **interface-management** - Interface creation and verification
+- **phase-management** - Orchestration (invokes this skill)
 
 ### Related Skills
 - **plan-init** - Previous phase

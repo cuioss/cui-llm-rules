@@ -18,16 +18,16 @@ The init phase determines the entire plan workflow. Each **plan type** is an **i
 **MANDATORY**: Select init implementation based on input and execute IMMEDIATELY.
 
 ### If type = "implementation" or issue provided
-→ **EXECUTE** [Implementation Init](plan-init/implementation.md)
+→ **EXECUTE** Implementation Init (see `plan-init` skill)
 
 ### If type = "simple" or no-workflow flag
-→ **EXECUTE** [Simple Init](plan-init/simple.md)
+→ **EXECUTE** Simple Init (see `plan-init` skill)
 
 ### If build files detected (pom.xml, package.json, etc.)
-→ **EXECUTE** [Implementation Init](plan-init/implementation.md)
+→ **EXECUTE** Implementation Init (see `plan-init` skill)
 
 ### If on feature/fix/task branch
-→ **EXECUTE** [Implementation Init](plan-init/implementation.md)
+→ **EXECUTE** Implementation Init (see `plan-init` skill)
 
 ### If nothing indicates implementation
 → **ASK USER** for plan type selection
@@ -38,15 +38,15 @@ The init phase determines the entire plan workflow. Each **plan type** is an **i
 
 | Plan Type | Init Output | Phases Produced | Finalizing |
 |-----------|-------------|-----------------|------------|
-| [Implementation](plan-init/implementation.md) | Full dev workflow | 5 (init→refine→implement→verify→finalize) | PR via `/pr-fix` |
-| [Simple](plan-init/simple.md) | Lightweight workflow | 3 (init→execute→finalize) | Commit only |
+| Implementation | Full dev workflow | 5 (init→refine→implement→verify→finalize) | PR via `/pr-fix` |
+| Simple | Lightweight workflow | 3 (init→execute→finalize) | Commit only |
 
 ---
 
 ## Init Phase Execution Model
 
 ```
-/task-plan invoked
+/plan-manage action=init invoked (routes via phase-management)
         │
         ▼
 ┌─────────────────────────────────────────────────────────────┐
@@ -98,7 +98,7 @@ The init phase (regardless of type) is responsible for:
 
 ## Plan Type Selection Logic
 
-### When `/task-plan` is Called
+### When `/plan-manage action=init` is Called (via phase-management)
 
 ```python
 def determine_plan_type(params, environment):
@@ -220,7 +220,7 @@ Both init implementations persist to the same locations.
 | Commit Strategy | No | `fine-granular` |
 | Finalizing | No | `pr-workflow` |
 
-**Full details**: [plan-init/implementation.md](plan-init/implementation.md)
+**Implemented in**: `plan-init` skill (see `standards/implementation-init.md`)
 
 ### Simple Init Properties
 
@@ -233,7 +233,7 @@ Both init implementations persist to the same locations.
 | Commit Strategy | No | `fine-granular` |
 | Finalizing | No | `commit-only` |
 
-**Full details**: [plan-init/simple.md](plan-init/simple.md)
+**Implemented in**: `plan-init` skill (see `standards/simple-init.md`)
 
 ---
 
@@ -253,26 +253,21 @@ Both init implementations persist to the same locations.
 
 ---
 
-## External Resources
+## Related Documents
 
-### Init Implementations (plan-init/)
-
-| File | Purpose | Init Tasks | Phases Produced |
-|------|---------|------------|-----------------|
-| `implementation.md` | Full dev workflow | 5 | 5 |
-| `simple.md` | Lightweight workflow | 2 | 3 |
-
-### Related Documents
-
-- [Refine Phase](plan-refine/refine.md) - Refine phase specification (follows init)
-- [Implement Phase](plan-implement/implement.md) - Implement phase specification (follows refine)
-- [Verify Phase](plan-verify/verify.md) - Verify phase specification (follows implement)
-- [Finalize Phase](plan-finalize/finalize.md) - Finalize phase specification (follows verify)
-- [Architecture](architecture.md) - Overall abstraction design
-- [Persistence](plan-files/persistence.md) - File format specifications
+- [Architecture](architecture.md) - Two-command architecture design
 - [Templates & Workflow](templates-workflow.md) - Phase-based workflow
 - [API Specification](api.md) - Skill API with create operation
-- [Implementation Plan](plan.md) - Implementation tasks
+- [Phase Management](phase-management.md) - Orchestration skill specification
+- [Migration Plan](updated-plan/migration.md) - Implementation checklist
+
+**Command Specifications**:
+- [plan-manage.md](updated-plan/plan-manage.md) - Management command (includes init action)
+- [plan-execute.md](updated-plan/plan-execute.md) - Execution command
+
+**Implemented Skills** (in `cui-task-workflow/skills/`):
+- `plan-init` - Init phase with implementation and simple workflows
+- `plan-refine`, `plan-implement`, `plan-verify`, `plan-finalize`, `plan-files`
 
 ---
 

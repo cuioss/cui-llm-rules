@@ -183,9 +183,13 @@ resolution: Verify URL, check permissions, or continue without
 
 ## Integration
 
+### Command Integration
+- **/plan-manage** - Primary command invoking this skill via phase-management (action=init)
+
 ### Skills Used
 - **plan-files** - All file I/O operations
 - **builder:environment-detection** - Build system detection (optional)
+- **phase-management** - Orchestration (invokes this skill)
 
 ### Related Skills
 - **plan-refine** - Next phase (implementation)

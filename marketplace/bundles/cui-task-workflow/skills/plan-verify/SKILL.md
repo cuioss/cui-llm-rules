@@ -167,12 +167,16 @@ Options: Fix issues / View details / Request exception
 
 ## Integration
 
+### Command Integration
+- **/plan-execute** - Primary command invoking this skill via phase-management
+
 ### Skills Used
 - **plan-files** - All file I/O operations
 - **maven-builder** - Java build verification
 - **npm-builder** - JavaScript build verification
 - **java-quality-agent** - Java quality analysis
 - **java-fix-javadoc-agent** - JavaDoc verification
+- **phase-management** - Orchestration (invokes this skill)
 
 ### Related Skills
 - **plan-init** - Init phase

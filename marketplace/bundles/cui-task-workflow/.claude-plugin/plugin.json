@@ -12,13 +12,22 @@
   "keywords": ["workflow", "task", "pr", "implementation", "quality", "handoff", "orchestration"],
   "commands": [
     "./commands/task-implement.md",
-    "./commands/pr-doctor.md"
+    "./commands/pr-doctor.md",
+    "./commands/plan-manage.md",
+    "./commands/plan-execute.md"
   ],
   "skills": [
     "./skills/cui-git-workflow",
     "./skills/cui-task-planning",
     "./skills/pr-workflow",
     "./skills/sonar-workflow",
-    "./skills/workflow-patterns"
+    "./skills/workflow-patterns",
+    "./skills/phase-management",
+    "./skills/plan-files",
+    "./skills/plan-init",
+    "./skills/plan-refine",
+    "./skills/plan-implement",
+    "./skills/plan-verify",
+    "./skills/plan-finalize"
   ]
 }

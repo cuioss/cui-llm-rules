@@ -6,6 +6,17 @@ This document defines the plan.md template structure, phase-based workflow, and 
 
 Plans are organized into **5 sequential phases** that must be completed in order. This provides structured progression from planning through implementation to completion.
 
+### Command-Phase Mapping
+
+The five phases are handled by two distinct commands:
+
+| Command | Phases Handled | Purpose |
+|---------|----------------|---------|
+| `/plan-manage` | init, refine | Plan creation and refinement |
+| `/plan-execute` | implement, verify, finalize | Plan execution |
+
+This separation ensures clear workflow boundaries between planning and execution.
+
 ### Phase Definitions
 
 #### 1. init - Initialization
@@ -25,14 +36,12 @@ Plans are organized into **5 sequential phases** that must be completed in order
 
 #### 2. refine - Iterative Refinement
 
-**Detailed Specification**: See [plan-refine/refine.md](plan-refine/refine.md) for complete workflow
-
 **Operations**:
 - Analyze requirements into components
 - Plan implementation tasks with acceptance criteria
 - Identify documentation needs (ADRs, interfaces)
 
-**Output Artifact**: `implementation-requirements.md` - See [template](plan-refine/implementation-requirements-template.md)
+**Output Artifact**: `implementation-requirements.md`
 
 **Completion Criteria**:
 - All tasks have acceptance criteria
@@ -469,12 +478,16 @@ The template and workflow system provides:
 ---
 
 **Related Documents**:
-- [Plan Types](plan-types.md) - Init phase router
-- [Refine Phase](plan-refine/refine.md) - Refine phase specification
-- [Implement Phase](plan-implement/implement.md) - Implement phase specification
-- [Verify Phase](plan-verify/verify.md) - Verify phase specification
-- [Finalize Phase](plan-finalize/finalize.md) - Finalize phase specification
-- [Architecture](architecture.md) - Abstraction layer design
-- [Persistence](plan-files/persistence.md) - File structure and references.md format
+- [Architecture](architecture.md) - Two-command architecture design
+- [Plan Types](plan-types.md) - Init phase router and configuration
+- [Phase Management](phase-management.md) - Orchestration skill specification
 - [API Specification](api.md) - Operations that use these templates
 - [Decomposition](decomposition.md) - Implementation guidance
+
+**Command Specifications**:
+- [plan-manage.md](updated-plan/plan-manage.md) - Management command (list, cleanup, init, refine)
+- [plan-execute.md](updated-plan/plan-execute.md) - Execution command (implement, verify, finalize)
+
+**Implemented Skills** (in `cui-task-workflow/skills/`):
+- `phase-management` (orchestration)
+- `plan-init`, `plan-refine`, `plan-implement`, `plan-verify`, `plan-finalize`, `plan-files`

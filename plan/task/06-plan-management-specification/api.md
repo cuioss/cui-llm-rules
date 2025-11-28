@@ -4,10 +4,13 @@ Complete skill API with all operations and TOON handoff interfaces for plan mana
 
 ## Overview
 
-Plan management uses **one skill per phase** plus a **dedicated persistence skill**:
+Plan management uses **two commands**, **one orchestration skill**, **one skill per phase**, and a **dedicated persistence skill**:
 
-| Skill | Purpose | Key Operations |
-|-------|---------|----------------|
+| Component | Purpose | Key Operations |
+|-----------|---------|----------------|
+| [/plan-manage](#command-plan-manage) | **Management command** | list, cleanup, init, refine |
+| [/plan-execute](#command-plan-execute) | **Execution command** | execute implement/verify/finalize phases |
+| [phase-management](#skill-phase-management) | **Orchestration** | Manage Plans workflow, Execute Plans workflow |
 | [plan-files](#skill-plan-files) | **Persistence** | read-plan, read-config, get-references, write-plan, write-config, write-references |
 | [plan-init](#skill-plan-init) | Init phase | create, detect-environment, configure |
 | [plan-refine](#skill-plan-refine) | Refine phase | analyze, plan-tasks, identify-docs |
@@ -17,18 +20,14 @@ Plan management uses **one skill per phase** plus a **dedicated persistence skil
 
 **Architecture**:
 ```
-Phase Skills                    Persistence Skill
-┌─────────────┐                ┌──────────────┐
-│ plan-init   │──────────────▶│              │
-├─────────────┤                │              │
-│ plan-refine │──────────────▶│  plan-files  │──▶ .claude/plans/
-├─────────────┤                │              │
-│ plan-impl   │──────────────▶│              │
-├─────────────┤                │              │
-│ plan-verify │──────────────▶│              │
-├─────────────┤                │              │
-│ plan-final  │──────────────▶└──────────────┘
-└─────────────┘
+Commands                       Orchestration              Phase Skills                    Persistence
+┌──────────────┐              ┌───────────────┐          ┌─────────────┐                ┌──────────────┐
+│ /plan-manage │──(Manage)───▶│               │──────────▶│ plan-init   │──────────────▶│              │
+│              │              │    phase-     │──────────▶│ plan-refine │──────────────▶│  plan-files  │──▶ .claude/plans/
+└──────────────┘              │  management   │──────────▶│ plan-impl   │──────────────▶│              │
+┌──────────────┐              │               │──────────▶│ plan-verify │──────────────▶│              │
+│ /plan-execute│──(Execute)──▶│               │──────────▶│ plan-final  │──────────────▶└──────────────┘
+└──────────────┘              └───────────────┘           └─────────────┘
 ```
 
 **Communication Protocol**: All operations use TOON handoff format for input/output
@@ -36,6 +35,165 @@ Phase Skills                    Persistence Skill
 **File System**: All file I/O goes through `plan-files` skill
 
 **Phase Flow**: Each phase skill handles its logic, delegates file operations to `plan-files`
+
+---
+
+## Command: plan-manage
+
+Plan lifecycle management command. Handles creation, listing, cleanup, and refinement.
+
+**Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `action` | optional | Explicit action: `list`, `cleanup`, `init`, `refine` |
+| `task` | optional | Task description (for init) |
+| `issue` | optional | GitHub issue URL (for init) |
+| `plan` | optional | Path to specific plan directory |
+
+**Actions**:
+- `list` (default): Display all plans with numbered selection
+- `cleanup`: List and remove completed plans
+- `init`: Create new plan (checks for existing init-phase plans)
+- `refine`: Refine requirements (select from refine-phase plans)
+
+See [updated-plan/plan-manage.md](updated-plan/plan-manage.md) for full specification.
+
+---
+
+## Command: plan-execute
+
+Plan execution command. Handles implementation, verification, and finalization phases.
+
+**Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `plan` | optional | Path to specific plan directory |
+| `phase` | optional | Force specific phase: `implement`, `verify`, `finalize` |
+
+**Behavior**:
+- Default: Shows executable plans (implement/verify/finalize phases) with numbered selection
+- With plan: Executes current phase of specified plan
+- Rejects init/refine phase plans with redirect to `/plan-manage`
+
+See [updated-plan/plan-execute.md](updated-plan/plan-execute.md) for full specification.
+
+---
+
+## Skill: phase-management
+
+The `phase-management` skill is the **orchestration layer** for plan management. It provides two workflows:
+
+### Workflow: Manage Plans (for /plan-manage)
+
+| Operation | Purpose | Python Script |
+|-----------|---------|---------------|
+| list-plans | Find and display all plans | `discover-plans.py` |
+| cleanup-plans | Find and remove completed plans | `discover-plans.py --filter=completed` |
+| init-plan | Create new plan (with existing check) | - |
+| refine-plan | Refine requirements | - |
+
+### Workflow: Execute Plans (for /plan-execute)
+
+| Operation | Purpose | Python Script |
+|-----------|---------|---------------|
+| discover-executable | Find executable plans | `discover-plans.py --filter=implement,verify,finalize` |
+| route-phase | Determine target phase skill | `route-phase.py` |
+| transition-phase | Handle phase completion | `transition-phase.py` |
+| get-status | Return comprehensive plan status | `get-status.py` |
+
+**Operations**:
+| Operation | Purpose | Python Script |
+|-----------|---------|---------------|
+| discover-plans | Find plans in workspace | `discover-plans.py` |
+| route-phase | Determine target phase skill | `route-phase.py` |
+| transition-phase | Handle phase completion | `transition-phase.py` |
+| get-status | Return comprehensive plan status | `get-status.py` |
+
+### Operation: Discover Plans
+
+```toon
+# Input
+from: task-command
+to: phase-management-skill
+handoff_id: discover-001
+
+next_action: Find all plans in workspace
+
+# Output
+plans_found[2]{name,path,current_phase,status}:
+jwt-auth,.claude/plans/jwt-auth/,implement,in_progress
+feature-x,.claude/plans/feature-x/,refine,in_progress
+
+recommendation:
+  action: select
+  message: Multiple plans found. Select one to continue.
+```
+
+### Operation: Route Phase
+
+```toon
+# Input
+from: task-command
+to: phase-management-skill
+handoff_id: route-001
+
+artifacts:
+  plan_directory: .claude/plans/jwt-auth/
+  current_phase: implement
+  explicit_phase: null  # Optional override
+
+# Output
+routing:
+  target_skill: plan-implement
+  phase: implement
+  reason: Current phase is implement
+```
+
+### Operation: Transition Phase
+
+```toon
+# Input
+from: phase-skill
+to: phase-management-skill
+handoff_id: transition-001
+
+artifacts:
+  plan_directory: .claude/plans/jwt-auth/
+  completed_phase: implement
+
+# Output
+transition:
+  from_phase: implement
+  to_phase: verify
+  is_complete: false
+  next_skill: plan-verify
+```
+
+### Operation: Get Status
+
+```toon
+# Input
+from: task-command
+to: phase-management-skill
+handoff_id: status-001
+
+artifacts:
+  plan_directory: .claude/plans/jwt-auth/
+
+# Output
+plan_status:
+  name: jwt-auth
+  current_phase: implement
+  current_task: task-8
+  overall_progress: 45%
+
+phases[5]{name,status,completed}:
+init,completed,3/3
+refine,completed,2/2
+implement,in_progress,2/5
+verify,pending,0/3
+finalize,pending,0/2
+```
 
 ---
 
@@ -217,13 +375,13 @@ The `plan-init` skill handles plan creation with type-specific init workflows. *
 #### Operation: Create Plan
 
 **Type Routing**: Routes to init implementation based on plan type:
-- `implementation` → [plan-init/implementation.md](plan-init/implementation.md) → 5-phase plan
-- `simple` → [plan-init/simple.md](plan-init/simple.md) → 3-phase plan
+- `implementation` → 5-phase plan (see `plan-init` skill)
+- `simple` → 3-phase plan (see `plan-init` skill)
 
 ### Input (TOON Handoff)
 
 ```toon
-from: task-plan-command
+from: phase-management-skill
 to: plan-init-skill
 handoff_id: create-001
 workflow: plan-creation
@@ -246,7 +404,7 @@ next_action: Create structured plan with references
 
 ```toon
 from: plan-init-skill
-to: task-plan-command
+to: phase-management-skill
 handoff_id: create-002
 workflow: plan-creation
 
@@ -297,7 +455,7 @@ Delegates all file operations to `plan-files` skill:
 3. `plan-files.write-plan` → Write `plan.md` (tasks-only)
 4. `plan-files.write-references` → Write `references.md`
 
-See [persistence.md](plan-files/persistence.md) for file format specifications.
+See [done/plan-files/persistence.md](done/plan-files/persistence.md) for file format specifications.
 
 ---
 
@@ -305,14 +463,12 @@ See [persistence.md](plan-files/persistence.md) for file format specifications.
 
 The `plan-refine` skill handles the refine phase: analyzing requirements, planning implementation tasks, and identifying documentation needs.
 
-**Detailed Specification**: See [plan-refine/refine.md](plan-refine/refine.md) for complete workflow
-
 **Operations**:
 - `analyze` - Break down requirements into components
 - `plan-tasks` - Create detailed implementation tasks
 - `identify-docs` - Determine ADR/interface needs
 
-**Output Artifact**: `implementation-requirements.md` - See [template](plan-refine/implementation-requirements-template.md)
+**Output Artifact**: `implementation-requirements.md`
 
 ### Operation: Analyze Requirements
 
@@ -565,8 +721,8 @@ These operations are for plan-level changes (not file I/O). They delegate file o
 ### Input (TOON Handoff)
 
 ```toon
-from: task-plan-command
-to: task-plan-skill
+from: phase-management-skill
+to: plan-refine-skill
 handoff_id: refine-001
 workflow: plan-refinement
 
@@ -587,8 +743,8 @@ next_action: Update plan with refinements
 ### Output (TOON Handoff)
 
 ```toon
-from: task-plan-skill
-to: task-plan-command
+from: plan-refine-skill
+to: phase-management-skill
 handoff_id: refine-002
 workflow: plan-refinement
 
@@ -621,8 +777,8 @@ Delegates to `plan-files` skill for file modifications:
 ### Input (TOON Handoff)
 
 ```toon
-from: task-plan-command
-to: task-plan-skill
+from: phase-management-skill
+to: plan-verify-skill
 handoff_id: validate-001
 workflow: plan-validation
 
@@ -641,8 +797,8 @@ next_action: Validate plan and references quality
 ### Output (TOON Handoff)
 
 ```toon
-from: task-plan-skill
-to: task-plan-command
+from: plan-verify-skill
+to: phase-management-skill
 handoff_id: validate-002
 workflow: plan-validation
 
@@ -687,7 +843,7 @@ Uses `plan-files` skill for reading (no modifications):
 ### Input (TOON Handoff)
 
 ```toon
-from: task-execute-skill
+from: plan-execute-skill
 to: task-plan-skill
 handoff_id: phase-001
 workflow: phase-transition
@@ -707,7 +863,7 @@ next_action: Transition to implementation phase
 
 ```toon
 from: task-plan-skill
-to: task-execute-skill
+to: plan-execute-skill
 handoff_id: phase-002
 workflow: phase-transition
 
@@ -764,7 +920,7 @@ Delegates all file operations to `plan-files` skill:
 ### Input (TOON Handoff)
 
 ```toon
-from: task-execute-skill
+from: plan-execute-skill
 to: task-plan-skill
 handoff_id: progress-001
 workflow: task-progress
@@ -785,7 +941,7 @@ next_action: Mark task complete and check phase status
 
 ```toon
 from: task-plan-skill
-to: task-execute-skill
+to: plan-execute-skill
 handoff_id: progress-002
 workflow: task-progress
 
@@ -854,8 +1010,8 @@ Delegates all file operations to `plan-files` skill:
 ### Input (TOON Handoff)
 
 ```toon
-from: task-plan-command
-to: task-plan-skill
+from: phase-skill
+to: plan-files-skill
 handoff_id: ref-001
 workflow: reference-management
 
@@ -884,8 +1040,8 @@ next_action: Update references file
 ### Output (TOON Handoff)
 
 ```toon
-from: task-plan-skill
-to: task-plan-command
+from: plan-files-skill
+to: phase-skill
 handoff_id: ref-002
 workflow: reference-management
 
@@ -972,77 +1128,93 @@ Delegates file operations to `plan-files` skill:
 
 ## Integration Points
 
-### With /task-plan Command
+### With /plan-manage Command
 
-**Command Responsibility**:
-- Parse user parameters (task, plan, output)
-- Determine operation (create, refine)
-- Generate TOON handoff
-- Delegate to task-plan skill
-- Format results for user
+The `/plan-manage` command delegates to `phase-management` skill's "Manage Plans" workflow.
 
-**Skill Responsibility**:
-- All file I/O operations
-- Plan structure generation
-- Content parsing and validation
-- Error handling
-
-**Example Flow**:
+**Example Flow - List Plans**:
 ```
-User: /task-plan task="Add JWT auth" issue="https://github.com/org/repo/issues/123"
+User: /plan-manage
   ↓
-/task-plan command
-  ↓ (TOON handoff: create)
-task-plan skill
-  ↓ (Bash: mkdir -p .claude/plans/jwt-auth/)
-  ↓ (Write: plan.md)
-  ↓ (Write: references.md)
+/plan-manage command
+  ↓ (Manage Plans workflow)
+phase-management skill
+  ↓ (list-plans operation)
+discover-plans.py
+  ↓
+Displays numbered list, prompts user selection
+```
+
+**Example Flow - Create Plan**:
+```
+User: /plan-manage action=init task="Add JWT auth"
+  ↓
+/plan-manage command
+  ↓ (Manage Plans workflow → init-plan)
+phase-management skill
+  ↓ (checks for existing init-phase plans)
+discover-plans.py --filter=init
+  ↓ (if none found, creates new)
+plan-init skill
+  ↓ (creates)
 .claude/plans/jwt-auth/
   ├── plan.md
+  ├── config.md
   └── references.md
-  ↓ (TOON handoff: created)
-/task-plan command
   ↓
-User: "Created plan at .claude/plans/jwt-auth/"
+Prompts: "Continue with refine phase? (yes/no)"
 ```
 
-### With /task-implement Command
-
-**Command Responsibility**:
-- Accept plan directory parameter
-- Generate TOON handoff
-- Delegate plan reading to skill
-- Use parsed plan for orchestration
-
-**Skill Responsibility**:
-- Read plan.md and references.md
-- Parse Markdown structure
-- Extract tasks, metadata, and references
-- Return structured data
-
-**Example Flow**:
+**Example Flow - Cleanup**:
 ```
-User: /task-implement plan=".claude/plans/jwt-auth/"
+User: /plan-manage action=cleanup
   ↓
-/task-implement command
-  ↓ (TOON handoff: read)
-task-plan skill
-  ↓ (Read: plan.md)
-  ↓ (Read: references.md)
-.claude/plans/jwt-auth/
-  ├── plan.md
-  └── references.md
-  ↓ (parsed content)
-task-plan skill
-  ↓ (TOON handoff: parsed)
-/task-implement command
-  ↓ (orchestrate implementation)
+/plan-manage command
+  ↓ (Manage Plans workflow → cleanup-plans)
+phase-management skill
+  ↓
+discover-plans.py --filter=completed
+  ↓
+Lists completed plans, prompts for deletion confirmation
+```
+
+### With /plan-execute Command
+
+The `/plan-execute` command delegates to `phase-management` skill's "Execute Plans" workflow.
+
+**Example Flow - Select and Execute**:
+```
+User: /plan-execute
+  ↓
+/plan-execute command
+  ↓ (Execute Plans workflow)
+phase-management skill
+  ↓ (discover-executable operation)
+discover-plans.py --filter=implement,verify,finalize
+  ↓
+Displays executable plans, prompts selection
+  ↓ (user selects)
+plan-implement/verify/finalize skill
+  ↓ (executes phase)
+```
+
+**Example Flow - Direct Execute**:
+```
+User: /plan-execute plan="jwt-auth"
+  ↓
+/plan-execute command
+  ↓ (Execute Plans workflow → route-phase)
+phase-management skill
+  ↓ (validates phase is executable)
+  ↓ (routes to current phase skill)
+plan-implement skill
+  ↓ (executes tasks)
 Language agents, build verification, etc.
 ```
 
-### With task-execute Skill
+### With plan-execute Skill
 
-**Skill Responsibility** (task-execute):
+**Skill Responsibility** (plan-execute):
 - Track task progress
 - Mark checklist items complete
 - Delegate updates to task-plan skill
@@ -1054,13 +1226,13 @@ Language agents, build verification, etc.
 
 **Example Flow**:
 ```
-task-execute skill
+plan-execute skill
   ↓ (TOON handoff: update task 1 complete)
 task-plan skill
   ↓ (Edit: plan.md, mark [x])
 .claude/plans/jwt-auth/plan.md
   ↓ (TOON handoff: updated)
-task-execute skill
+plan-execute skill
 ```
 
 ---
@@ -1085,7 +1257,7 @@ error:
   details: .claude/plans/jwt-auth/ does not exist
 
 alternatives[2]:
-- Create new plan with /task-plan
+- Create new plan with /task
 - Check directory path and try again
 ```
 
@@ -1176,12 +1348,16 @@ alternatives[3]:
 ## Related Documents
 
 - [Plan Types](plan-types.md) - Init phase router and configuration
-- [Refine Phase](plan-refine/refine.md) - Refine phase specification
-- [Implement Phase](plan-implement/implement.md) - Implement phase specification
-- [Verify Phase](plan-verify/verify.md) - Verify phase specification
-- [Finalize Phase](plan-finalize/finalize.md) - Finalize phase specification
-- [Implementation Requirements Template](plan-refine/implementation-requirements-template.md) - Runtime artifact template
-- [Architecture](architecture.md) - Abstraction layer design and patterns
-- [Persistence](plan-files/persistence.md) - File structure and reference management
+- [Architecture](architecture.md) - Two-command architecture design
 - [Templates & Workflow](templates-workflow.md) - Plan templates and phase-based workflow
 - [Decomposition](decomposition.md) - Implementation details and integration
+- [Phase Management](phase-management.md) - Orchestration skill with both workflows
+- [Migration Plan](updated-plan/migration.md) - Implementation checklist
+
+**Command Specifications** (in `updated-plan/`):
+- [plan-manage.md](updated-plan/plan-manage.md) - Full /plan-manage specification
+- [plan-execute.md](updated-plan/plan-execute.md) - Full /plan-execute specification
+
+**Implemented Skills** (in `cui-task-workflow/skills/`):
+- `phase-management` (orchestration)
+- `plan-init`, `plan-refine`, `plan-implement`, `plan-verify`, `plan-finalize`, `plan-files`
