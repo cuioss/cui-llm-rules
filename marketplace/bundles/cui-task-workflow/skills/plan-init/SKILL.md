@@ -30,6 +30,12 @@ Read standards/simple-init.md
 ```
 Contains: Lightweight 3-phase workflow, minimal configuration
 
+### Plugin Development Init
+```
+Read standards/plugin-development.md
+```
+Contains: 3-phase workflow with mandatory `/plugin-doctor` verification for marketplace components
+
 ---
 
 ## Operation: create
@@ -48,6 +54,13 @@ Contains: Lightweight 3-phase workflow, minimal configuration
 def determine_plan_type(params, environment):
     if params.type: return params.type
     if params.issue: return "implementation"
+    # Plugin development detection
+    if 'marketplace/bundles' in params.task: return "plugin-development"
+    if any(kw in params.task.lower() for kw in ['agent', 'command', 'skill', 'plugin', 'component']):
+        if 'create' in params.task.lower() or 'update' in params.task.lower() or 'modify' in params.task.lower():
+            return "plugin-development"
+    if branch.startswith(('plugin/', 'component/')): return "plugin-development"
+    # Standard implementation detection
     if environment.has_build_files(): return "implementation"
     if branch.startswith(('feature/', 'fix/', 'task/', 'claude/')): return "implementation"
     return ask_user_plan_type()
@@ -59,13 +72,15 @@ def determine_plan_type(params, environment):
 ### Step 2: Ask User (if needed)
 
 AskUserQuestion with options:
-1. Implementation (5-phase workflow)
-2. Simple (3-phase workflow)
+1. Implementation (5-phase workflow) - Code development with build/test verification
+2. Simple (3-phase workflow) - Documentation, config, quick fixes
+3. Plugin-Development (3-phase workflow) - Marketplace components with `/plugin-doctor` verification
 
 ### Step 3: Load Init Implementation
 
 **For implementation**: `Read standards/implementation-init.md`
 **For simple**: `Read standards/simple-init.md`
+**For plugin-development**: `Read standards/plugin-development.md`
 
 ### Step 4: Detect Environment
 

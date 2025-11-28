@@ -125,6 +125,24 @@ For multiple related projects, use separate local settings per project:
 
 Do NOT combine in global settings - keeps permissions scoped appropriately.
 
+### Pattern 4: Plan File Permissions
+
+For projects using the plan management system (`.claude/plans/`), add plan file permissions to enable uninterrupted plan execution:
+```json
+{
+  "permissions": {
+    "allow": [
+      "Edit(.claude/plans/**)",
+      "Write(.claude/plans/**)"
+    ]
+  }
+}
+```
+
+**Why needed**: Plan files are frequently updated during execution (progress tracking, task completion). Without these permissions, each update prompts for user confirmation, disrupting the continuous execution flow.
+
+**Note**: Plan files are NOT git-tracked (excluded by `.gitignore` via `.claude/*` pattern). They are session working documents.
+
 ## Anti-Patterns to Avoid
 
 ### ❌ Duplicating Read Permissions Locally

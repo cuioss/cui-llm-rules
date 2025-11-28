@@ -35,6 +35,15 @@ The init phase determines the entire plan workflow:
 ### If type = "simple" or no-workflow flag
 → **EXECUTE** Simple Init (3-phase workflow)
 
+### If type = "plugin-development" or marketplace component work detected
+→ **EXECUTE** Plugin Development Init (3-phase workflow with verification)
+
+### If task involves marketplace/bundles/ paths
+→ **EXECUTE** Plugin Development Init
+
+### If task mentions creating/modifying agents, commands, or skills
+→ **EXECUTE** Plugin Development Init
+
 ### If build files detected (pom.xml, package.json, etc.)
 → **EXECUTE** Implementation Init
 
@@ -50,6 +59,7 @@ The init phase determines the entire plan workflow:
 |-----------|-----------------|----------|
 | Implementation | 5 (init→refine→implement→verify→finalize) | Code development |
 | Simple | 3 (init→execute→finalize) | Documentation, config |
+| Plugin-Development | 3 (init→execute→finalize) | Marketplace components with `/plugin-doctor` verification |
 
 ## Property Specifications
 
@@ -76,6 +86,19 @@ The init phase determines the entire plan workflow:
 | Commit Strategy | No | `fine-granular` |
 | Finalizing | No | `commit-only` |
 
+### Plugin-Development Properties
+
+| Property | Required | Default |
+|----------|----------|---------|
+| Branch | Yes | Current or main |
+| Target Bundle | Yes | Auto-detect from path |
+| Component Types | Yes | Auto-detect (agents, commands, skills) |
+| Build System | No | `none` |
+| Technology | No | `none` |
+| Compatibility | No | `breaking` |
+| Commit Strategy | No | `fine-granular` |
+| Finalizing | No | `commit-only` |
+
 ## Phase Structure Templates
 
 ### Implementation (5 phases)
@@ -89,6 +112,16 @@ The init phase determines the entire plan workflow:
 - init: 2 tasks (detect, confirm)
 - execute: dynamic (based on task description)
 - finalize: 2 tasks (commit, verify)
+
+### Plugin-Development (3 phases)
+- init: 2 tasks (detect environment, confirm configuration)
+- execute: dynamic (based on components to add/modify) + verification sub-tasks
+- finalize: 3 tasks (verify all components, commit, verify completion)
+
+**Execute Phase Special Rules**:
+- Each component task MUST include verification checklist item: `/plugin-doctor {type}={name}`
+- After all implementation tasks, add explicit verification tasks for each component
+- Finalize phase includes mandatory full verification pass
 
 ## Property Edit Prompts
 

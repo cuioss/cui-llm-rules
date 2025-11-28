@@ -39,10 +39,12 @@ Also: `Read {plan_directory}/implementation-requirements.md`
 
 **Selection Logic**:
 1. If task_id specified → Find that task
-2. If in_progress task exists → Resume (AskUserQuestion: Continue/Restart/Skip)
+2. If in_progress task exists → Auto-resume (no user prompt)
 3. Else → First pending task respecting dependencies
 
 **Dependency Check**: All dependencies must be `completed`
+
+**Note**: Do not prompt for task selection. Auto-select and auto-resume. Only prompt if a genuine decision is needed (e.g., dependency conflict).
 
 ### Step 3: Load Task References
 
@@ -137,17 +139,22 @@ Options: Complete dependency / Skip check / Choose different task
 
 When all implement tasks complete:
 
-AskUserQuestion:
-- Proceed to verify phase
-- Review implementation
-- Add additional tasks
+1. Update progress for last task:
+   ```
+   Skill: cui-task-workflow:plan-files
+   operation: update-progress
+   task_id: {last-task}
+   status: completed
+   ```
 
-```
-Skill: cui-task-workflow:plan-files
-operation: update-progress
-task_id: {last-task}
-status: completed
-```
+2. **Auto-transition** to verify phase (no user prompt needed)
+   - Plans execute continuously until complete or blocked
+   - Do NOT ask user to confirm phase transition
+
+**Only prompt user when**:
+- An error blocks progress
+- A decision is genuinely required (e.g., multiple valid approaches)
+- User has explicitly requested confirmation points
 
 ---
 

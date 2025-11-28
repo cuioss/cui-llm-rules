@@ -367,7 +367,11 @@ Verify `Write(.claude/settings.local.json)` is in ask list (not allow or deny) f
 - `Write(//~/git/{repo-name}/**)` - Create project files
 - **Skip Read** - covered by global `Read(//~/git/**)`
 
-**C. Add project scripts** (if scripts/ exists):
+**C. Add plan file permissions** (always):
+- `Edit(.claude/plans/**)` - Edit plan files without prompts
+- `Write(.claude/plans/**)` - Create plan files without prompts
+
+**D. Add project scripts** (if scripts/ exists):
 - `Bash(~/git/{repo-name}/scripts/**)` - Execute project scripts
 
 ### Step 13: Sort Permission Lists
@@ -545,6 +549,7 @@ For version-controlled projects (like CUI marketplace):
 
 **Default Permissions Added to Project-Level:**
 - ✅ Project Edit/Write: `Edit(//~/git/{repo}/**)`, `Write(//~/git/{repo}/**)`
+- ✅ Plan files: `Edit(.claude/plans/**)`, `Write(.claude/plans/**)` - Plan management without prompts
 - ✅ Project scripts: `Bash(~/git/{repo}/scripts/**)` (if scripts/ exists)
 - ❌ Read: NOT added (globally covered via `Read(//~/git/**)`)
 - ❌ Marketplace wildcards: NOT added to project (should be in global only)

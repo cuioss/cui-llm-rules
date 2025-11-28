@@ -8,6 +8,8 @@ tools: Read, Skill, Bash, AskUserQuestion
 
 Manage plan lifecycle: list all plans, create new plans, refine requirements, and cleanup completed plans.
 
+**CRITICAL CONSTRAINT**: This command creates and manages **plans only**. NEVER implement tasks directly. All task descriptions MUST result in plan files in `.claude/plans/` - not actual implementation. After plan creation, STOP and wait for `/plan-execute`.
+
 ## PARAMETERS
 
 | Parameter | Type | Description |
@@ -117,6 +119,16 @@ Shows completed plans for selective or batch deletion with confirmation.
 # Cleanup completed plans
 /plan-manage action=cleanup
 ```
+
+## CONTINUOUS IMPROVEMENT RULE
+
+If you discover issues or improvements during execution, record them:
+
+1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+2. **Record lesson** with:
+   - Component: `{type: "command", name: "plan-manage", bundle: "cui-task-workflow"}`
+   - Category: bug | improvement | pattern | anti-pattern
+   - Summary and detail of the finding
 
 ## RELATED
 

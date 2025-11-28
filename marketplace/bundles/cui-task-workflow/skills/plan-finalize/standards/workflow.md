@@ -73,6 +73,8 @@ Verified Implementation from Verify Phase
 | phase-specific | Single commit for all phase changes |
 | complete | Single commit for all work |
 
+**Important**: Only implementation code is committed (source files, tests, docs). Plan files (`.claude/plans/`) are NOT committed - they are excluded by `.gitignore` and are session working documents.
+
 ## PR Description Template
 
 ```markdown

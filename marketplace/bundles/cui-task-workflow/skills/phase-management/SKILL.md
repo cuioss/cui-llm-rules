@@ -8,6 +8,13 @@ allowed-tools: Read, Glob, Bash, Skill, AskUserQuestion
 
 **EXECUTION MODE**: Execute requested operation immediately. Do not explain or summarize.
 
+**CRITICAL CONSTRAINT - NO IMPLEMENTATION WITHOUT PLAN**:
+- This skill creates and manages **plans only** - it NEVER implements tasks directly
+- When user provides a task description, you MUST create plan files in `.claude/plans/` first
+- NEVER write code, create components, or modify files outside `.claude/plans/`
+- After plan creation, STOP and wait for user to invoke `/plan-execute`
+- If you find yourself about to implement something, STOP - you are violating this constraint
+
 **Role**: Orchestration layer for plan-based task workflows. Routes to phase skills based on plan state. Does NOT execute phase work - delegates to phase-specific skills.
 
 ## Standards (Load On-Demand)
@@ -188,9 +195,14 @@ Else:
 After phase skill returns:
 1. Run `Operation: transition-phase` with completed phase
 2. If plan complete: Display completion summary, suggest `/plan-manage action=cleanup`
-3. Else: Display progress, ask "Continue with {next_phase} phase? [Y/n]"
-4. If confirmed: Loop back to Step 3
-5. If declined: Display progress summary, exit
+3. Else: **Auto-continue** to next phase (no user prompt needed)
+   - Display brief progress status
+   - Loop back to Step 3
+
+**Note**: Do NOT prompt user to continue between phases or between tasks. Plans execute continuously until:
+- Plan is complete
+- An error requires user decision
+- User explicitly interrupts
 
 ---
 

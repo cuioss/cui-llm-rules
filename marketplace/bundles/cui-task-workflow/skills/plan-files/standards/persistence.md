@@ -228,18 +228,19 @@ Use `interface-management` skill to:
 
 ## Version Control
 
-**Recommendation**: Git-track plan directories
+**Plans are NOT tracked in git** - they are working session artifacts excluded by `.gitignore`.
 
-**.gitignore Consideration**:
-```
-# Track plans
-!.claude/plans/
+The `.claude/*` pattern in `.gitignore` excludes plan directories. This is intentional:
+- Plans are session-specific working documents
+- Plan progress updates would create noise in git history
+- Implementation code (not plans) is what gets committed
+- Plans can be cleaned up after completion via `/plan-manage action=cleanup`
 
-# Optionally ignore temp files
-.claude/plans/*/temp-*.md
-```
+**What IS committed**:
+- Source code changes made during implement phase
+- Test files created during implement phase
+- Documentation updates (ADRs, interfaces, READMEs)
 
-**Commit Message Format**:
-```
-docs(plan): update jwt-auth plan with phase 2 tasks
-```
+**What is NOT committed**:
+- `.claude/plans/` directories and contents
+- Plan progress tracking (plan.md, config.md, references.md)
