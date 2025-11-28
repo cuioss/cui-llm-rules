@@ -8,6 +8,14 @@ allowed-tools: Read, Glob, Bash, Skill, AskUserQuestion
 
 **EXECUTION MODE**: Execute requested operation immediately. Do not explain or summarize.
 
+**OUTPUT RULES**:
+- Do NOT narrate internal process (e.g., "I'll resolve the script path", "Let me run the discovery")
+- Do NOT show skill loading messages or tool invocations to users
+- Do NOT display raw JSON output from scripts - format it as structured status
+- Do NOT show full script paths - scripts are internal implementation details
+- DO show only final results in structured format (see output examples in operations)
+- Work silently until you have results to display
+
 **CRITICAL CONSTRAINT - NO IMPLEMENTATION WITHOUT PLAN**:
 - This skill creates and manages **plans only** - it NEVER implements tasks directly
 - When user provides a task description, you MUST create plan files in `.claude/plans/` first

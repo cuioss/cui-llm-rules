@@ -11,6 +11,12 @@ allowed-tools:
 
 # Script Runner Skill
 
+**OUTPUT RULES** (for calling skills):
+- This skill returns paths silently - calling skills should NOT display the resolution process
+- Do NOT show "resolving script path" or "reading scripts.local.json" messages
+- Do NOT display the returned absolute path to users - it's an internal detail
+- The calling skill should use the path silently and only show the final result
+
 Resolves skill script paths using portable notation and manages script permissions.
 
 ## Problem
