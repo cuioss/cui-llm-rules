@@ -94,18 +94,14 @@ Else (default "list"):
 2. If no completed plans: Display message, exit
 3. Display numbered list of completed plans
 4. Prompt for selection (all/numbers/cancel)
-5. Show what will be deleted (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/delete-plan.py
-   Args: .claude/plans/{plan-name}/ --dry-run
+5. Show what will be deleted:
+   ```bash
+   python3 {delete-plan.py path} .claude/plans/{plan-name}/ --dry-run
    ```
 6. Confirm deletion via AskUserQuestion
-7. Execute deletion (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/delete-plan.py
-   Args: .claude/plans/{plan-name}/
+7. Execute deletion:
+   ```bash
+   python3 {delete-plan.py path} .claude/plans/{plan-name}/
    ```
 8. Report results
 
@@ -222,12 +218,11 @@ Lists all plans with current phase and status.
 
 **Steps**:
 
-1. **Run discovery script** (via script-runner for silent execution):
+1. **Run discovery script**:
+   ```bash
+   python3 {path-from-scripts.local.json} .claude/plans/
    ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
-   Args: .claude/plans/
-   ```
+   Parse JSON output internally - do NOT display raw output.
 
 2. **Format output for display**:
    ```
@@ -262,11 +257,9 @@ Finds completed plans for cleanup.
 
 **Steps**:
 
-1. **Run filtered discovery** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
-   Args: .claude/plans/ --filter=completed
+1. **Run filtered discovery**:
+   ```bash
+   python3 {discover-plans.py path} .claude/plans/ --filter=completed
    ```
 
 2. **Return list of completed plans**
@@ -288,11 +281,9 @@ Creates a new plan, checking for existing init-phase plans first.
 
 **Steps**:
 
-1. **Check for existing init-phase plans** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
-   Args: .claude/plans/ --filter=init
+1. **Check for existing init-phase plans**:
+   ```bash
+   python3 {discover-plans.py path} .claude/plans/ --filter=init
    ```
 
 2. **If init-phase plans exist**:
@@ -325,11 +316,9 @@ Finds plans ready for refinement or refines a specific plan.
 
 **Steps**:
 
-1. **If plan_name not provided** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
-   Args: .claude/plans/ --filter=init,refine
+1. **If plan_name not provided**:
+   ```bash
+   python3 {discover-plans.py path} .claude/plans/ --filter=init,refine
    ```
 
 2. **Return list of refinable plans** or specific plan
@@ -352,11 +341,9 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
 
 **Steps**:
 
-1. **Run filtered discovery** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
-   Args: .claude/plans/ --filter=implement,execute,verify,finalize
+1. **Run filtered discovery**:
+   ```bash
+   python3 {discover-plans.py path} .claude/plans/ --filter=implement,execute,verify,finalize
    ```
 
 2. **Exclude completed plans from results**
@@ -390,11 +377,9 @@ Finds available plans in the workspace.
 
 **Steps**:
 
-1. **Run discovery script** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
-   Args: {search_path}
+1. **Run discovery script**:
+   ```bash
+   python3 {discover-plans.py path} {search_path}
    ```
 
 2. **Parse JSON output**:
@@ -432,11 +417,9 @@ Determines which phase skill to invoke based on plan state.
    plan_directory: {plan_directory}
    ```
 
-2. **Run routing script** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/route-phase.py
-   Args: {current_phase} {explicit_phase}
+2. **Run routing script**:
+   ```bash
+   python3 {route-phase.py path} {current_phase} {explicit_phase}
    ```
 
 3. **Parse JSON output**:
@@ -481,11 +464,9 @@ Handles phase completion and transition to next phase.
    plan_directory: {plan_directory}
    ```
 
-2. **Run transition script** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/transition-phase.py
-   Args: {plan_directory} {completed_phase}
+2. **Run transition script**:
+   ```bash
+   python3 {transition-phase.py path} {plan_directory} {completed_phase}
    ```
 
 3. **Parse JSON output**:
@@ -544,11 +525,9 @@ Returns comprehensive plan status for display.
 
 **Steps**:
 
-1. **Run status script** (via script-runner):
-   ```
-   Skill: cui-utilities:script-runner
-   Run: cui-task-workflow:phase-management/scripts/get-status.py
-   Args: {plan_directory}
+1. **Run status script**:
+   ```bash
+   python3 {get-status.py path} {plan_directory}
    ```
 
 2. **Parse JSON output**:
@@ -589,7 +568,7 @@ configuration:
 
 ## Scripts
 
-Python scripts for deterministic operations (output JSON). Use script-runner's **Run workflow** for silent execution.
+Python scripts for deterministic operations (output JSON).
 
 ### Script Notation
 
@@ -605,14 +584,15 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 
 ### Running Scripts
 
-Use script-runner's Run workflow for silent execution (hides paths and raw output from users):
-```
-Skill: cui-utilities:script-runner
-Run: cui-task-workflow:phase-management/scripts/{script-name}
-Args: {arguments}
-```
+**Direct execution** - Read path from cache and execute in one step:
+1. Read `.claude/scripts.local.json` (one-time at skill start)
+2. Look up script notation to get absolute path
+3. Execute directly via Bash
 
-The Run workflow resolves the path, executes the script, and returns parsed JSON directly.
+**IMPORTANT OUTPUT HANDLING**:
+- Do NOT display raw JSON output from scripts to users
+- Parse the JSON internally and format as structured status (see Output sections)
+- The Bash call will be visible, but keep the displayed description user-friendly
 
 ### Script Details
 

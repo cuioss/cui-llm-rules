@@ -1,24 +1,19 @@
 ---
 name: script-runner
-description: Resolves and executes skill scripts using portable notation. Use when skills need to run bundled scripts - handles path resolution from bundle:skill/scripts/name notation to absolute paths, with lazy discovery and permission generation.
+description: Resolves skill script paths using portable notation. Handles path resolution from bundle:skill/scripts/name notation to absolute paths, with lazy discovery and permission generation.
 allowed-tools:
   - Read
   - Write
   - Glob
-  - Bash
   - Skill
   - AskUserQuestion
 ---
 
 # Script Runner Skill
 
-**OUTPUT RULES** (for calling skills):
-- This skill returns paths silently - calling skills should NOT display the resolution process
-- Do NOT show "resolving script path" or "reading scripts.local.json" messages
-- Do NOT display the returned absolute path to users - it's an internal detail
-- The calling skill should use the path silently and only show the final result
-
 Resolves skill script paths using portable notation and manages script permissions.
+
+**Note**: This skill only resolves paths. Skills that need to execute scripts should read `.claude/scripts.local.json` directly for best performance (avoids skill loading overhead).
 
 ## Problem
 
@@ -87,46 +82,6 @@ Resolves a script notation to its absolute path. Triggers discovery if cache is 
 #### Output
 
 Return the absolute path string for use in Bash commands.
-
----
-
-### Workflow: Run
-
-Resolves and executes a script silently, returning only parsed results. Use this when you want to hide script execution details from users.
-
-#### Input
-
-- `notation`: Script notation string
-- `args`: Arguments to pass to the script (optional)
-
-#### Steps
-
-1. **Resolve path** using Resolve workflow (silently)
-
-2. **Determine script type** from notation extension:
-   - `.py` → `python3 {path} {args}`
-   - `.sh` → `bash {path} {args}`
-
-3. **Execute script** via Bash (this tool call will be visible, but path is resolved)
-
-4. **Parse output**:
-   - If JSON: Parse and return structured data
-   - If plain text: Return as-is
-
-5. **Handle errors**: If script fails, return error structure
-
-#### Output
-
-Return the parsed result directly - calling skill receives structured data, not raw script output.
-
-**Example usage in other skills**:
-```
-Skill: cui-utilities:script-runner
-Run: cui-task-workflow:phase-management/scripts/discover-plans.py
-Args: .claude/plans/
-```
-
-Returns parsed JSON object directly, not raw stdout.
 
 ---
 
