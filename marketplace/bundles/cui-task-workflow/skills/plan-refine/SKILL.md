@@ -8,6 +8,12 @@ allowed-tools: Read, Write, Edit, Skill, AskUserQuestion
 
 **EXECUTION MODE**: Execute refine operations immediately. Do not explain or summarize.
 
+**OUTPUT RULES**:
+- Do NOT narrate internal process or tool invocations
+- Do NOT display raw script output - format as structured status
+- DO show task analysis results and requirement confirmations
+- Work silently until you have results to display
+
 **Role**: Second phase skill in the plan management system. Breaks down requirements into implementable tasks with acceptance criteria. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

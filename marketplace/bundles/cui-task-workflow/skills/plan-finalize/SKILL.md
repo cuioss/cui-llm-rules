@@ -8,6 +8,12 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 **EXECUTION MODE**: Execute finalization tasks immediately. Do not explain or summarize.
 
+**OUTPUT RULES**:
+- Do NOT narrate internal process or tool invocations
+- Do NOT display raw script output - format as structured status
+- DO show commit status, PR creation results, and completion summary
+- Work silently until you have results to display
+
 **Role**: Fifth and final phase skill in the plan management system. Commits changes, creates PRs, and handles workflow automation. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

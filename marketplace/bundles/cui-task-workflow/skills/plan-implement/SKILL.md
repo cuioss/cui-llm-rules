@@ -8,6 +8,12 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 **EXECUTION MODE**: Execute implementation tasks immediately. Do not explain or summarize.
 
+**OUTPUT RULES**:
+- Do NOT narrate internal process or tool invocations
+- Do NOT display raw script output - format as structured status
+- DO show task progress and completion status
+- Work silently until you have results to display
+
 **Role**: Third phase skill in the plan management system. Executes tasks from the refine phase, delegating to appropriate language agents. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

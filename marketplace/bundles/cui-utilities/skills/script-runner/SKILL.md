@@ -5,6 +5,7 @@ allowed-tools:
   - Read
   - Write
   - Glob
+  - Bash
   - Skill
   - AskUserQuestion
 ---
@@ -86,6 +87,46 @@ Resolves a script notation to its absolute path. Triggers discovery if cache is 
 #### Output
 
 Return the absolute path string for use in Bash commands.
+
+---
+
+### Workflow: Run
+
+Resolves and executes a script silently, returning only parsed results. Use this when you want to hide script execution details from users.
+
+#### Input
+
+- `notation`: Script notation string
+- `args`: Arguments to pass to the script (optional)
+
+#### Steps
+
+1. **Resolve path** using Resolve workflow (silently)
+
+2. **Determine script type** from notation extension:
+   - `.py` → `python3 {path} {args}`
+   - `.sh` → `bash {path} {args}`
+
+3. **Execute script** via Bash (this tool call will be visible, but path is resolved)
+
+4. **Parse output**:
+   - If JSON: Parse and return structured data
+   - If plain text: Return as-is
+
+5. **Handle errors**: If script fails, return error structure
+
+#### Output
+
+Return the parsed result directly - calling skill receives structured data, not raw script output.
+
+**Example usage in other skills**:
+```
+Skill: cui-utilities:script-runner
+Run: cui-task-workflow:phase-management/scripts/discover-plans.py
+Args: .claude/plans/
+```
+
+Returns parsed JSON object directly, not raw stdout.
 
 ---
 

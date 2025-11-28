@@ -94,18 +94,18 @@ Else (default "list"):
 2. If no completed plans: Display message, exit
 3. Display numbered list of completed plans
 4. Prompt for selection (all/numbers/cancel)
-5. Show what will be deleted (see Scripts section for resolve pattern):
+5. Show what will be deleted (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/delete-plan.py
-   ```
-   ```bash
-   python3 {resolved_path} .claude/plans/{plan-name}/ --dry-run
+   Run: cui-task-workflow:phase-management/scripts/delete-plan.py
+   Args: .claude/plans/{plan-name}/ --dry-run
    ```
 6. Confirm deletion via AskUserQuestion
-7. Execute deletion:
-   ```bash
-   python3 {resolved_path} .claude/plans/{plan-name}/
+7. Execute deletion (via script-runner):
+   ```
+   Skill: cui-utilities:script-runner
+   Run: cui-task-workflow:phase-management/scripts/delete-plan.py
+   Args: .claude/plans/{plan-name}/
    ```
 8. Report results
 
@@ -222,13 +222,11 @@ Lists all plans with current phase and status.
 
 **Steps**:
 
-1. **Run discovery script**:
+1. **Run discovery script** (via script-runner for silent execution):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/discover-plans.py
-   ```
-   ```bash
-   python3 {resolved_path} .claude/plans/
+   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
+   Args: .claude/plans/
    ```
 
 2. **Format output for display**:
@@ -264,13 +262,11 @@ Finds completed plans for cleanup.
 
 **Steps**:
 
-1. **Run filtered discovery**:
+1. **Run filtered discovery** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/discover-plans.py
-   ```
-   ```bash
-   python3 {resolved_path} .claude/plans/ --filter=completed
+   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
+   Args: .claude/plans/ --filter=completed
    ```
 
 2. **Return list of completed plans**
@@ -292,13 +288,11 @@ Creates a new plan, checking for existing init-phase plans first.
 
 **Steps**:
 
-1. **Check for existing init-phase plans**:
+1. **Check for existing init-phase plans** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/discover-plans.py
-   ```
-   ```bash
-   python3 {resolved_path} .claude/plans/ --filter=init
+   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
+   Args: .claude/plans/ --filter=init
    ```
 
 2. **If init-phase plans exist**:
@@ -331,13 +325,11 @@ Finds plans ready for refinement or refines a specific plan.
 
 **Steps**:
 
-1. **If plan_name not provided**:
+1. **If plan_name not provided** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/discover-plans.py
-   ```
-   ```bash
-   python3 {resolved_path} .claude/plans/ --filter=init,refine
+   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
+   Args: .claude/plans/ --filter=init,refine
    ```
 
 2. **Return list of refinable plans** or specific plan
@@ -360,13 +352,11 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
 
 **Steps**:
 
-1. **Run filtered discovery**:
+1. **Run filtered discovery** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/discover-plans.py
-   ```
-   ```bash
-   python3 {resolved_path} .claude/plans/ --filter=implement,execute,verify,finalize
+   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
+   Args: .claude/plans/ --filter=implement,execute,verify,finalize
    ```
 
 2. **Exclude completed plans from results**
@@ -400,13 +390,11 @@ Finds available plans in the workspace.
 
 **Steps**:
 
-1. **Run discovery script**:
+1. **Run discovery script** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/discover-plans.py
-   ```
-   ```bash
-   python3 {resolved_path} {search_path}
+   Run: cui-task-workflow:phase-management/scripts/discover-plans.py
+   Args: {search_path}
    ```
 
 2. **Parse JSON output**:
@@ -444,13 +432,11 @@ Determines which phase skill to invoke based on plan state.
    plan_directory: {plan_directory}
    ```
 
-2. **Run routing script**:
+2. **Run routing script** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/route-phase.py
-   ```
-   ```bash
-   python3 {resolved_path} {current_phase} {explicit_phase}
+   Run: cui-task-workflow:phase-management/scripts/route-phase.py
+   Args: {current_phase} {explicit_phase}
    ```
 
 3. **Parse JSON output**:
@@ -495,13 +481,11 @@ Handles phase completion and transition to next phase.
    plan_directory: {plan_directory}
    ```
 
-2. **Run transition script**:
+2. **Run transition script** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/transition-phase.py
-   ```
-   ```bash
-   python3 {resolved_path} {plan_directory} {completed_phase}
+   Run: cui-task-workflow:phase-management/scripts/transition-phase.py
+   Args: {plan_directory} {completed_phase}
    ```
 
 3. **Parse JSON output**:
@@ -560,13 +544,11 @@ Returns comprehensive plan status for display.
 
 **Steps**:
 
-1. **Run status script**:
+1. **Run status script** (via script-runner):
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-task-workflow:phase-management/scripts/get-status.py
-   ```
-   ```bash
-   python3 {resolved_path} {plan_directory}
+   Run: cui-task-workflow:phase-management/scripts/get-status.py
+   Args: {plan_directory}
    ```
 
 2. **Parse JSON output**:
@@ -607,7 +589,7 @@ configuration:
 
 ## Scripts
 
-Python scripts for deterministic operations (output JSON). Use script-runner for portable path resolution.
+Python scripts for deterministic operations (output JSON). Use script-runner's **Run workflow** for silent execution.
 
 ### Script Notation
 
@@ -621,15 +603,16 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 | `get-status.py` | `cui-task-workflow:phase-management/scripts/get-status.py` | Aggregate status |
 | `delete-plan.py` | `cui-task-workflow:phase-management/scripts/delete-plan.py` | Delete plan safely |
 
-### Resolving Scripts
+### Running Scripts
 
-Before running any script, resolve the path:
+Use script-runner's Run workflow for silent execution (hides paths and raw output from users):
 ```
 Skill: cui-utilities:script-runner
-Resolve: cui-task-workflow:phase-management/scripts/{script-name}
+Run: cui-task-workflow:phase-management/scripts/{script-name}
+Args: {arguments}
 ```
 
-Then use `{resolved_path}` in bash commands.
+The Run workflow resolves the path, executes the script, and returns parsed JSON directly.
 
 ### Script Details
 

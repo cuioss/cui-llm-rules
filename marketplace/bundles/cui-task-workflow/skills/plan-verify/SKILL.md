@@ -8,6 +8,12 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 **EXECUTION MODE**: Execute verification tasks immediately. Do not explain or summarize.
 
+**OUTPUT RULES**:
+- Do NOT narrate internal process or tool invocations
+- Do NOT display raw script output - format as structured status
+- DO show verification results (build, tests, quality)
+- Work silently until you have results to display
+
 **Role**: Fourth phase skill in the plan management system. Verifies implementation quality through builds, tests, quality checks, and documentation review. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

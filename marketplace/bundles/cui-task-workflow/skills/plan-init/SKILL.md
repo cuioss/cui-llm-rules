@@ -8,6 +8,12 @@ allowed-tools: Read, Write, Bash, Skill, AskUserQuestion
 
 **EXECUTION MODE**: Execute plan creation immediately. Do not explain or summarize.
 
+**OUTPUT RULES**:
+- Do NOT narrate internal process or tool invocations
+- Do NOT display raw script output - format as structured status
+- DO show configuration confirmations and plan creation results
+- Work silently until you have results to display
+
 **Role**: First phase skill in the plan management system. Handles plan creation with type-specific init workflows. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)
