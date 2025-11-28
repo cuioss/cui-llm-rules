@@ -1,7 +1,7 @@
 ---
 name: claude-lessons-learned
 description: Lessons learned storage and retrieval for commands and agents
-allowed-tools: Read, Write, Edit, Glob, Bash
+allowed-tools: Read, Glob, Bash
 ---
 
 # Claude Lessons Learned Skill
@@ -87,60 +87,54 @@ Bash: ls "${file_path}"
 
 ## Workflow: Record Lesson
 
-**Pattern**: Direct File Operation
+**Pattern**: Script Automation
 
-Record a lesson learned after command/agent execution.
+Record a lesson learned after command/agent execution using `write-lesson.py`.
 
-### Step 1: Create Directory (if needed)
-
-If `.claude/lessons-learned/` doesn't exist, create it:
+### Usage
 
 ```bash
-mkdir -p .claude/lessons-learned
+python3 scripts/write-lesson.py \
+  --component-type {command|agent|skill} \
+  --component-name NAME \
+  --component-bundle BUNDLE \
+  --category {bug|improvement|pattern|anti-pattern} \
+  --title "Brief summary title" \
+  --detail "Full explanation of the lesson" \
+  [--example "Code example"] \
+  [--related "Related components"] \
+  [--lessons-dir DIR]
 ```
 
-### Step 2: Generate Lesson ID and Filename
-
-Format: `{YYYY-MM-DD}-{NNN}.md`
-
-1. List existing files in `.claude/lessons-learned/`
-2. Find highest sequence number for today's date
-3. Increment or start at 001
-4. Example: `2025-11-27-001.md`
-
-### Step 3: Create Markdown File
-
-Write lesson to `.claude/lessons-learned/{id}.md`:
-
-```markdown
-id=2025-11-27-001
-component.type=command
-component.name=maven-build-and-fix
-component.bundle=builder-maven
-date=2025-11-27
-category=bug
-applied=false
-
-# Brief Summary
-
-## Detail
-
-Full explanation of the lesson.
-
-## Example
+### Example
 
 ```bash
-# Code examples if applicable
-```
+python3 scripts/write-lesson.py \
+  --component-type command \
+  --component-name maven-build-and-fix \
+  --component-bundle builder-maven \
+  --category bug \
+  --title "Build fails on special characters in paths" \
+  --detail "The build command fails when file paths contain special characters like spaces or quotes. Always quote path variables."
 ```
 
-Use Write tool to create the file with proper metadata and content.
+### Output
+
+```json
+{
+  "success": true,
+  "operation": "write-lesson",
+  "file": ".claude/lessons-learned/2025-11-28-001.md",
+  "id": "2025-11-28-001",
+  "component": "builder-maven:maven-build-and-fix"
+}
+```
 
 ---
 
 ## Workflow: Query Lessons
 
-**Pattern**: Command Chain Execution
+**Pattern**: Script Automation
 
 Use the `query-lessons.py` script to filter lessons by metadata criteria.
 
@@ -186,20 +180,44 @@ python3 scripts/query-lessons.py --component maven-build-and-fix --applied false
 
 ## Workflow: Mark Lesson Applied
 
-**Pattern**: Direct File Operation
+**Pattern**: Script Automation
 
-After applying a lesson to component documentation:
+After applying a lesson to component documentation, mark it as applied using `update-lesson.py`.
 
-1. Find lesson file: `.claude/lessons-learned/{lesson-id}.md`
-2. Edit metadata: Change `applied=false` to `applied=true`
-3. Use Edit tool to update the metadata only
+### Usage
 
-**Example**:
 ```bash
-# For lesson 2025-11-27-001.md
-Edit .claude/lessons-learned/2025-11-27-001.md
-old_string: "applied=false"
-new_string: "applied=true"
+python3 scripts/update-lesson.py \
+  --file .claude/lessons-learned/{lesson-id}.md \
+  --set applied=true
+```
+
+### Example
+
+```bash
+python3 scripts/update-lesson.py \
+  --file .claude/lessons-learned/2025-11-28-001.md \
+  --set applied=true
+```
+
+### Update Multiple Fields
+
+```bash
+python3 scripts/update-lesson.py \
+  --file .claude/lessons-learned/2025-11-28-001.md \
+  --set applied=true \
+  --set category=pattern
+```
+
+### Output
+
+```json
+{
+  "success": true,
+  "operation": "update-lesson",
+  "file": ".claude/lessons-learned/2025-11-28-001.md",
+  "updated_fields": ["applied"]
+}
 ```
 
 ---
@@ -224,10 +242,12 @@ The `/plugin-apply-lessons-learned` command uses this skill to:
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `query-lessons.py` | Query and filter lessons by metadata criteria (uses only Python standard library) |
-| `test-query-lessons.sh` | Test suite for query script |
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `write-lesson.py` | Create new lesson file with metadata | `python3 scripts/write-lesson.py --help` |
+| `update-lesson.py` | Update metadata in existing lesson | `python3 scripts/update-lesson.py --help` |
+| `query-lessons.py` | Query and filter lessons by criteria | `python3 scripts/query-lessons.py --help` |
+| `test-lessons-scripts.py` | Test suite for write/update scripts | `python3 scripts/test-lessons-scripts.py` |
 
 ---
 

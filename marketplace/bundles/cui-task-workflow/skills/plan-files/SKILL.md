@@ -1,7 +1,7 @@
 ---
 name: plan-files
 description: Centralized file I/O for plan management - all phase skills delegate file operations here. Provides create-directory, read-plan, read-config, get-references, write-plan, write-config, write-references, and update-progress operations.
-allowed-tools: Read, Write, Edit, Bash, AskUserQuestion
+allowed-tools: Read, Bash, AskUserQuestion
 ---
 
 # Plan Files Skill
@@ -64,21 +64,11 @@ Contains: Directory structure, naming conventions, file formats
 
 **Steps**:
 
-1. **Read**: `Read {plan_directory}/plan.md`
-2. **Parse**:
-   - Current Phase: `**Current Phase**:`
-   - Current Task: `**Current Task**:`
-   - Phase Progress Table
-   - Tasks: `### Task N:`
-3. **Return**:
+1. **Parse via script**:
+   ```bash
+   python3 scripts/parse-plan.py {plan_directory}/plan.md
    ```
-   plan_status:
-     current_phase: {init|refine|implement|verify|finalize}
-     current_task: {task-id or "none"}
-     overall_status: {pending|in_progress|completed}
-   phases[5]: {name,status,tasks,completed}
-   tasks_current_phase[N]: {id,name,status}
-   ```
+2. **Return**: JSON with plan status, phases, and tasks
 
 ---
 
@@ -88,24 +78,11 @@ Contains: Directory structure, naming conventions, file formats
 
 **Steps**:
 
-1. **Read**: `Read {plan_directory}/config.md`
-2. **Parse**:
-   - Plan Type: `**Plan Type**:`
-   - Build Configuration table
-   - Workflow Configuration table
-   - Context table
-3. **Return**:
+1. **Parse via script**:
+   ```bash
+   python3 scripts/parse-config.py {plan_directory}/config.md
    ```
-   configuration:
-     plan_type: {implementation|simple}
-     technology: {java|javascript|mixed|none}
-     build_system: {maven|gradle|npm|npx|none}
-     compatibility: {breaking|deprecations}
-     commit_strategy: {fine-granular|phase-specific|complete}
-     finalizing: {commit-only|pr-workflow}
-     branch: {branch-name}
-     issue: {issue-reference or "none"}
-   ```
+2. **Return**: JSON with configuration values
 
 ---
 
@@ -115,109 +92,170 @@ Contains: Directory structure, naming conventions, file formats
 
 **Steps**:
 
-1. **Read**: `Read {plan_directory}/references.md`
-2. **Parse**:
-   - Issue section
-   - Related Files
-   - ADRs section
-   - Interfaces section
-   - External Documentation
-   - Dependencies
-3. **Return**:
+1. **Parse via script**:
+   ```bash
+   python3 scripts/parse-references.py {plan_directory}/references.md
    ```
-   references:
-     issue: {url, title}
-     branch: {branch-name}
-     adrs[N]: {identifiers}
-     interfaces[N]: {identifiers}
-     implementation_files[N]: {paths}
-     external_docs[N]: {names}
-     dependencies[N]: {specs}
-   ```
+2. **Return**: JSON with references data
 
 ---
 
 ## Operation: write-plan
 
-**Input**: `plan_directory`, `plan_content`
+**Pattern**: Script Automation
 
-**Steps**:
+**Input**: `plan_directory`, `title`, `current_phase`, `current_task`, `phases`
 
-1. **Generate markdown** from template:
-   ```
-   Read templates/plan-template.md
-   ```
-2. **Populate** with plan_content:
-   - title, current_phase, current_task
-   - phases array with tasks
-3. **Write**: `Write {plan_directory}/plan.md`
+**Usage**:
 
-**Output**: `status: created|updated`, `plan_file`
+```bash
+python3 scripts/write-plan.py \
+  --plan-dir {plan_directory} \
+  --title "Task Title" \
+  --current-phase init \
+  --current-task task-1 \
+  --phases-json '[{"name":"init","status":"in_progress","tasks":3}]'
+```
+
+**With detailed tasks**:
+
+```bash
+python3 scripts/write-plan.py \
+  --plan-dir {plan_directory} \
+  --title "Feature Implementation" \
+  --current-phase init \
+  --current-task task-1 \
+  --phases-json '[
+    {"name":"init","status":"in_progress","tasks":[
+      {"name":"Setup","phase":"init","goal":"Setup environment","checklist":["Install deps","Configure tools"]}
+    ]},
+    {"name":"implement","status":"pending","tasks":5}
+  ]'
+```
+
+**Output**: JSON with `file`, `title`, `current_phase`
 
 ---
 
 ## Operation: write-config
 
-**Input**: `plan_directory`, `configuration`
+**Pattern**: Script Automation
 
-**Steps**:
+**Input**: `plan_directory`, configuration values
 
-1. **Generate markdown** from template:
-   ```
-   Read templates/config-template.md
-   ```
-2. **Populate** with configuration
-3. **Write**: `Write {plan_directory}/config.md`
+**Usage**:
 
-**Output**: `status: created`, `config_file`
+```bash
+python3 scripts/write-config.py \
+  --plan-dir {plan_directory} \
+  --plan-type implementation \
+  --technology java \
+  --build-system maven \
+  --compatibility deprecations \
+  --commit-strategy phase-specific \
+  --finalizing pr-workflow \
+  [--branch feature/my-branch] \
+  [--issue "#123"]
+```
+
+**Valid enum values**:
+- `plan-type`: implementation, simple
+- `technology`: java, javascript, mixed, none
+- `build-system`: maven, gradle, npm, npx, none
+- `compatibility`: breaking, deprecations
+- `commit-strategy`: fine-granular, phase-specific, complete
+- `finalizing`: commit-only, pr-workflow
+
+**Output**: JSON with `file`, `plan_type`, `technology`, `build_system`
 
 ---
 
 ## Operation: write-references
 
-**Input**: `plan_directory`, `action` (add|update|remove), `reference_type`, `reference_data`
+**Pattern**: Script Automation
 
-**Steps**:
+**Input**: `plan_directory`, `action`, `section`, `value`
 
-1. **Read current** (if exists): `Read {plan_directory}/references.md`
-2. **Apply action**:
-   - add: Locate section, add entry
-   - update: Locate entry, modify
-   - remove: Locate entry, delete
-3. **Write**: Use Edit (existing) or Write (new) with template:
-   ```
-   Read templates/references-template.md
-   ```
+**Usage**:
 
-**Output**: `status: created|updated`, `references_file`, `changes[N]`
+```bash
+# Set branch
+python3 scripts/write-references.py \
+  --plan-dir {plan_directory} \
+  --action set \
+  --section branch \
+  --value "feature/my-branch"
+
+# Set issue
+python3 scripts/write-references.py \
+  --plan-dir {plan_directory} \
+  --action set \
+  --section issue \
+  --value '{"id":"#123","title":"Issue Title","url":"https://..."}'
+
+# Add implementation file
+python3 scripts/write-references.py \
+  --plan-dir {plan_directory} \
+  --action add \
+  --section implementation_files \
+  --value "src/main/java/Foo.java"
+
+# Add ADR reference
+python3 scripts/write-references.py \
+  --plan-dir {plan_directory} \
+  --action add \
+  --section adrs \
+  --value "ADR-0015: Use Strategy Pattern"
+
+# Remove file
+python3 scripts/write-references.py \
+  --plan-dir {plan_directory} \
+  --action remove \
+  --section implementation_files \
+  --value "src/main/java/OldFile.java"
+```
+
+**Valid actions**: add, update, remove, set
+
+**Valid sections**: issue, branch, adrs, interfaces, implementation_files, external_docs, dependencies
+
+**Output**: JSON with `file`, `created`, `changes`
 
 ---
 
 ## Operation: update-progress
 
-**Input**: `plan_directory`, `task_id`, `status`, `checklist_items` (optional)
+**Pattern**: Script Automation
 
-**Steps**:
+**Input**: `plan_directory`, `phase`, `task_id`, `complete_items`
 
-1. **Read**: `Read {plan_directory}/plan.md`
-2. **Locate task**: `### Task N:`
-3. **Update checklist**: `[ ] → [x]` for specified items
-4. **Update Phase Progress Table**: Count completed tasks
-5. **Update current task**: Find next incomplete
-6. **Check phase completion**: If all `[x]`, update phase status
-7. **Write updates**: Use Edit tool
+**Usage**:
 
-**Output**:
+```bash
+python3 scripts/update-progress.py \
+  --plan-dir {plan_directory} \
+  --phase init \
+  --task-id 1 \
+  --complete-items "Check current git branch,Detect build system"
 ```
-plan_status:
-  current_phase: {phase}
-  current_task: {next-task-id}
-  phase_complete: true|false
-phase_status:
-  tasks_total: N
-  tasks_completed: N
-  completion_percentage: N
-  phase_ready_for_transition: true|false
+
+**Output**: JSON with progress status:
+```json
+{
+  "success": true,
+  "operation": "update-progress",
+  "file": ".claude/plans/my-task/plan.md",
+  "phase": "init",
+  "task_id": "1",
+  "items_completed": 2,
+  "phase_status": {
+    "total": 5,
+    "completed": 2,
+    "status": "in_progress",
+    "phase_complete": false
+  },
+  "next_task": "task-1"
+}
 ```
 
 ---
@@ -228,11 +266,16 @@ Python scripts for deterministic operations (output JSON):
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
+| `write-plan.py` | Create/update plan.md | `python3 scripts/write-plan.py --help` |
+| `write-config.py` | Create config.md | `python3 scripts/write-config.py --help` |
+| `write-references.py` | Create/update references.md | `python3 scripts/write-references.py --help` |
+| `update-progress.py` | Update checklist progress | `python3 scripts/update-progress.py --help` |
 | `parse-plan.py` | Parse plan.md | `python3 scripts/parse-plan.py {path}` |
 | `parse-config.py` | Parse config.md | `python3 scripts/parse-config.py {path}` |
 | `parse-references.py` | Parse references.md | `python3 scripts/parse-references.py {path}` |
 | `calculate-progress.py` | Progress metrics | `python3 scripts/calculate-progress.py {path}` |
 | `validate-plan.py` | Validate directory | `python3 scripts/validate-plan.py {dir}` |
+| `test-plan-scripts.py` | Test suite | `python3 scripts/test-plan-scripts.py` |
 
 ---
 
