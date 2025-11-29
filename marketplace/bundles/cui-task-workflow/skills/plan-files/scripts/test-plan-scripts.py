@@ -229,11 +229,11 @@ def test_write_references_creates_file():
         assert result['success'] is True
         assert result['created'] is True
 
-        file_path = plan_dir / 'references.md'
+        file_path = plan_dir / 'references.toon'
         assert file_path.exists()
 
         content = file_path.read_text()
-        assert '**Branch**: `feature/test`' in content
+        assert 'branch: feature/test' in content
 
 
 def test_write_references_adds_implementation_file():
@@ -259,7 +259,7 @@ def test_write_references_adds_implementation_file():
 
         assert returncode == 0
 
-        content = (plan_dir / 'references.md').read_text()
+        content = (plan_dir / 'references.toon').read_text()
         assert '- src/main/java/Foo.java' in content
 
 
@@ -290,7 +290,7 @@ def test_write_references_removes_item():
             '--value', 'FileA.java'
         ])
 
-        content = (plan_dir / 'references.md').read_text()
+        content = (plan_dir / 'references.toon').read_text()
         assert '- FileA.java' not in content
         assert '- FileB.java' in content
 

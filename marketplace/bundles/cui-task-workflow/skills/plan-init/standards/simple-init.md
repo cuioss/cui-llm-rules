@@ -17,7 +17,7 @@ When creating a simple plan, generate this structure:
 # Task Plan: {task_title}
 
 **Configuration**: See [config.toon](./config.toon)
-**References**: See [references.md](./references.md)
+**References**: See [references.toon](./references.toon)
 
 **Current Phase**: init
 **Current Task**: task-1

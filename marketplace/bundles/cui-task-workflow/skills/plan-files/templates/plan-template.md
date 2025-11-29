@@ -1,7 +1,7 @@
 # Task Plan: {task_title}
 
-**Configuration**: See [config.md](./config.md)
-**References**: See [references.md](./references.md)
+**Configuration**: See [config.toon](./config.toon)
+**References**: See [references.toon](./references.toon)
 
 **Current Phase**: init
 **Current Task**: task-1
@@ -95,7 +95,7 @@
 **Checklist**:
 - [ ] Write config.md with build and workflow configuration
 - [ ] Write plan.md (tasks-only)
-- [ ] Update references.md with issue/branch
+- [ ] Update references.toon with issue/branch
 - [ ] Transition to refine phase
 
 ---

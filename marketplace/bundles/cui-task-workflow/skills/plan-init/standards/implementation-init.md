@@ -16,7 +16,7 @@ When creating an implementation plan, generate this structure:
 # Task Plan: {task_title}
 
 **Configuration**: See [config.toon](./config.toon)
-**References**: See [references.md](./references.md)
+**References**: See [references.toon](./references.toon)
 
 **Current Phase**: init
 **Current Task**: task-1
@@ -111,7 +111,7 @@ When creating an implementation plan, generate this structure:
 **Checklist**:
 - [ ] Write config.toon with build and workflow configuration
 - [ ] Write plan.md (tasks-only)
-- [ ] Update references.md with issue/branch
+- [ ] Update references.toon with issue/branch
 - [ ] Transition to refine phase
 
 ---

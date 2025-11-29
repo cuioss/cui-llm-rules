@@ -184,7 +184,7 @@ Files are stored in `.plan/` directory:
     └── {task-name}/
         ├── plan.md
         ├── config.toon
-        └── references.md
+        └── references.toon
 ```
 
 ---

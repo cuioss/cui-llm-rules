@@ -392,8 +392,8 @@ plan_type: simple
 artifacts:
   plan_directory: <plan-storage>/feature-auth/
   plan_file: <plan-storage>/feature-auth/plan.md
-  config_file: <plan-storage>/feature-auth/config.md
-  references_file: <plan-storage>/feature-auth/references.md
+  config_file: <plan-storage>/feature-auth/config.toon
+  references_file: <plan-storage>/feature-auth/references.toon
 
 plan_status:
   current_phase: init

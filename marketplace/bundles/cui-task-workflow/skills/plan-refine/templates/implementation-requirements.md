@@ -101,7 +101,7 @@ Task 3: {name}  Task 4: {name}  Task 5: {name}
 
 ## References
 
-**Source**: `{plan-directory}/references.md`
+**Source**: `{plan-directory}/references.toon`
 
 All references are managed via skill operations. **Do NOT access files directly.**
 

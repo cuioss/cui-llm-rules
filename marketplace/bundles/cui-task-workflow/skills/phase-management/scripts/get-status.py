@@ -89,35 +89,27 @@ def parse_plan_md(plan_file: Path) -> dict:
     }
 
 
-def parse_config_md(config_file: Path) -> dict:
-    """Parse config.md for configuration information."""
+def parse_config_toon(config_file: Path) -> dict:
+    """Parse config.toon for configuration information (TOON format)."""
     if not config_file.exists():
         return {}
 
     content = config_file.read_text()
 
     config = {}
-
-    # Extract plan type
-    type_match = re.search(r'\*\*Plan Type\*\*:\s*(\w+)', content)
-    if type_match:
-        config['plan_type'] = type_match.group(1)
-
-    # Extract from Build Configuration table
-    build_table = re.search(r'\|\s*Property\s*\|\s*Value\s*\|.*?\n\|[-\s|]+\n((?:\|[^\n]+\n)+)', content)
-    if build_table:
-        for row in build_table.group(1).strip().split('\n'):
-            cols = [c.strip() for c in row.split('|')[1:-1]]
-            if len(cols) >= 2:
-                key = cols[0].lower().replace(' ', '_')
-                value = cols[1]
-                config[key] = value
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if ':' in line and not line.endswith(':'):
+            key, value = line.split(':', 1)
+            config[key.strip().lower().replace(' ', '_')] = value.strip()
 
     return config
 
 
-def parse_references_md(references_file: Path) -> dict:
-    """Parse references.md for reference information."""
+def parse_references_toon(references_file: Path) -> dict:
+    """Parse references.toon for reference information (TOON format)."""
     if not references_file.exists():
         return {}
 
@@ -125,26 +117,32 @@ def parse_references_md(references_file: Path) -> dict:
 
     refs = {}
 
-    # Extract issue
-    issue_match = re.search(r'\*\*Issue\*\*:\s*\[([^\]]+)\]\(([^)]+)\)', content)
-    if issue_match:
-        refs['issue'] = {
-            'title': issue_match.group(1),
-            'url': issue_match.group(2)
-        }
+    # Parse scalars from TOON
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if ':' in line and not line.endswith(':') and '[' not in line:
+            key, value = line.split(':', 1)
+            key = key.strip().lower()
+            value = value.strip()
+            if value and value != '(not set)':
+                if key == 'issue':
+                    refs['issue_id'] = value
+                elif key == 'issue_url':
+                    refs.setdefault('issue', {})['url'] = value
+                elif key == 'issue_title':
+                    refs.setdefault('issue', {})['title'] = value
+                elif key == 'branch':
+                    refs['branch'] = value
 
-    # Extract branch
-    branch_match = re.search(r'\*\*Branch\*\*:\s*`([^`]+)`', content)
-    if branch_match:
-        refs['branch'] = branch_match.group(1)
-
-    # Count ADRs
+    # Count ADRs from content
     adrs = re.findall(r'ADR-\d+', content)
     if adrs:
         refs['adrs'] = list(set(adrs))
 
-    # Count interfaces
-    interfaces = re.findall(r'IF-\d+', content)
+    # Count interfaces from content
+    interfaces = re.findall(r'IF-[A-Z]+-\d+', content)
     if interfaces:
         refs['interfaces'] = list(set(interfaces))
 
@@ -190,8 +188,8 @@ def get_status(plan_directory: str) -> dict:
         }
 
     plan_file = plan_dir / 'plan.md'
-    config_file = plan_dir / 'config.md'
-    references_file = plan_dir / 'references.md'
+    config_file = plan_dir / 'config.toon'
+    references_file = plan_dir / 'references.toon'
 
     # Parse plan.md
     plan_data = parse_plan_md(plan_file)
@@ -203,11 +201,11 @@ def get_status(plan_directory: str) -> dict:
             }
         }
 
-    # Parse config.md
-    config_data = parse_config_md(config_file)
+    # Parse config.toon (TOON format)
+    config_data = parse_config_toon(config_file)
 
-    # Parse references.md
-    refs_data = parse_references_md(references_file)
+    # Parse references.toon (TOON format)
+    refs_data = parse_references_toon(references_file)
 
     # Calculate progress
     overall_progress = calculate_overall_progress(plan_data.get('phases', []))

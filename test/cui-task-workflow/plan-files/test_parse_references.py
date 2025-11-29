@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for parse-references.py script."""
+"""Tests for parse-references.py script (TOON format)."""
 
 import sys
 from pathlib import Path
@@ -13,107 +13,131 @@ SCRIPT_PATH = get_script_path('cui-task-workflow', 'plan-files', 'parse-referenc
 
 
 # =============================================================================
-# Test Fixtures
+# Test Fixtures (TOON format)
 # =============================================================================
 
-BASIC_REFERENCES = """# Task References
+BASIC_REFERENCES = """# Plan References
 
----
+issue: #123
+issue_url: https://github.com/org/repo/issues/123
+issue_title: Implement JWT Authentication
+branch: feature/jwt-auth
+base_branch: main
 
-## Loaded Standards
+implementation_files[3]:
+- src/main/java/JwtService.java
+- src/main/java/TokenValidator.java
+- src/main/java/SecurityConfig.java
 
-- [Java Core](../../standards/java/core.adoc)
-- [CDI Standards](../../standards/java/cdi.adoc)
-- [Testing Standards](../../standards/testing/core.adoc)
+config_files[1]:
+- src/main/resources/application.properties
 
-## Related ADRs
+test_files[2]:
+- src/test/java/JwtServiceTest.java
+- src/test/java/TokenValidatorTest.java
 
-- [ADR-001](../adr/ADR-001-jwt-implementation.md) - Status: accepted
-- [ADR-002](../adr/ADR-002-token-storage.md) - Status: proposed
+adrs[2]{id,path,status}:
+ADR-001,../adr/ADR-001-jwt-implementation.md,accepted
+ADR-002,../adr/ADR-002-token-storage.md,proposed
 
-## Related Interfaces
+interfaces[2]{name,path}:
+IF-AUTH-001,../interfaces/IF-AUTH-001-authentication.md
+IF-AUTH-002,../interfaces/IF-AUTH-002-authorization.md
 
-- [IF-AUTH-001](../interfaces/IF-AUTH-001-authentication.md)
-- [IF-AUTH-002](../interfaces/IF-AUTH-002-authorization.md)
+external_docs[2]{name,url}:
+JWT Introduction,https://jwt.io/introduction
+RFC 7519,https://tools.ietf.org/html/rfc7519
 
-## Related Files
+dependencies[1]:
+- io.jsonwebtoken:jjwt:0.11.5
 
-- [JwtService.java](src/main/java/com/example/JwtService.java) - Main JWT service
-- [SecurityConfig.java](src/main/java/com/example/SecurityConfig.java) - Security configuration
-
-## External Links
-
-- [JWT Introduction](https://jwt.io/introduction)
-- [RFC 7519](https://tools.ietf.org/html/rfc7519)
+related_plans[0]:
 """
 
-EMPTY_REFERENCES = """# Task References
+EMPTY_REFERENCES = """# Plan References
 
----
+issue: (not set)
+issue_url: (not set)
+issue_title: (not set)
+branch: (not set)
+base_branch: main
 
-No references loaded yet.
+implementation_files[0]:
+
+config_files[0]:
+
+test_files[0]:
+
+adrs[0]{id,path,status}:
+
+interfaces[0]{name,path}:
+
+external_docs[0]{name,url}:
+
+dependencies[0]:
+
+related_plans[0]:
 """
 
-STANDARDS_ONLY = """# Task References
+FILES_ONLY = """# Plan References
 
-## Standards
+issue: (not set)
+issue_url: (not set)
+issue_title: (not set)
+branch: feature/test
+base_branch: main
 
-- [JavaScript Core](../../standards/javascript/core.adoc)
-- [CSS Standards](../../standards/css/core.adoc)
+implementation_files[2]:
+- src/main/java/Foo.java
+- src/main/java/Bar.java
+
+config_files[0]:
+
+test_files[1]:
+- src/test/java/FooTest.java
+
+adrs[0]{id,path,status}:
+
+interfaces[0]{name,path}:
+
+external_docs[0]{name,url}:
+
+dependencies[0]:
+
+related_plans[0]:
 """
 
-ADR_NO_STATUS = """# Task References
+ALL_TYPES = """# Plan References
 
-## ADRs
+issue: #456
+issue_url: https://github.com/org/repo/issues/456
+issue_title: Feature Request
+branch: feature/all-types
+base_branch: main
 
-- [ADR-001](../adr/ADR-001.md)
-- [ADR-002](../adr/ADR-002.md)
-"""
+implementation_files[1]:
+- src/main/java/Service.java
 
-ALL_TYPES = """# Task References
+config_files[1]:
+- config.yaml
 
-## Standards
+test_files[1]:
+- src/test/java/ServiceTest.java
 
-- [Standard 1](path1.adoc)
+adrs[1]{id,path,status}:
+ADR-001,../adr/ADR-001.md,accepted
 
-## ADRs
+interfaces[1]{name,path}:
+IF-001,../interfaces/IF-001.md
 
-- [ADR-001](adr1.md) - Status: accepted
+external_docs[1]{name,url}:
+Documentation,https://docs.example.com
 
-## Interfaces
+dependencies[1]:
+- com.example:library:1.0.0
 
-- [IF-001](if1.md)
-
-## Related Files
-
-- [File.java](File.java) - Description
-
-## External Links
-
-- [Link](https://example.com)
-"""
-
-ALTERNATIVE_NAMES = """# Task References
-
-## Loaded Standards
-
-- [Standard 1](path1.adoc)
-
-## Related ADR
-
-- [ADR-001](adr1.md)
-
-## Related Interface
-
-- [IF-001](if1.md)
-
-## Related File
-
-- [File.java](File.java)
-
-## External References
-
-- [Link](https://example.com)
+related_plans[1]:
+- jwt-auth
 """
 
 
@@ -122,18 +146,31 @@ ALTERNATIVE_NAMES = """# Task References
 # =============================================================================
 
 def test_parse_basic_references():
-    """Test parsing a references file with all sections."""
-    temp_file = create_temp_file(BASIC_REFERENCES)
+    """Test parsing a TOON references file with all sections."""
+    temp_file = create_temp_file(BASIC_REFERENCES, suffix='.toon')
     try:
         result = run_script(SCRIPT_PATH, str(temp_file))
         assert result.success, f"Script failed: {result.stderr}"
         data = result.json()
 
-        # Check standards
-        assert len(data['standards']) == 3
-        assert data['standards'][0]['name'] == 'Java Core'
-        assert data['standards'][0]['path'] == '../../standards/java/core.adoc'
-        assert data['standards'][0]['type'] == 'standard'
+        # Check issue
+        assert data['issue']['id'] == '#123'
+        assert data['issue']['url'] == 'https://github.com/org/repo/issues/123'
+        assert data['issue']['title'] == 'Implement JWT Authentication'
+
+        # Check branch
+        assert data['branch'] == 'feature/jwt-auth'
+        assert data['base_branch'] == 'main'
+
+        # Check implementation files
+        assert len(data['implementation_files']) == 3
+        assert 'src/main/java/JwtService.java' in data['implementation_files']
+
+        # Check config files
+        assert len(data['config_files']) == 1
+
+        # Check test files
+        assert len(data['test_files']) == 2
 
         # Check ADRs
         assert len(data['adrs']) == 2
@@ -145,94 +182,89 @@ def test_parse_basic_references():
         assert len(data['interfaces']) == 2
         assert data['interfaces'][0]['name'] == 'IF-AUTH-001'
 
-        # Check related files
-        assert len(data['related_files']) == 2
-        assert data['related_files'][0]['name'] == 'JwtService.java'
-        assert data['related_files'][0]['description'] == 'Main JWT service'
-
         # Check external links
         assert len(data['external_links']) == 2
         assert data['external_links'][0]['name'] == 'JWT Introduction'
         assert data['external_links'][0]['url'] == 'https://jwt.io/introduction'
 
+        # Check dependencies
+        assert len(data['dependencies']) == 1
+
         # Check summary
-        assert data['summary']['total_references'] == 11
-        assert data['summary']['standards_count'] == 3
+        assert data['summary']['implementation_files_count'] == 3
         assert data['summary']['adrs_count'] == 2
+
+        # Check format
+        assert data['format'] == 'toon'
     finally:
         temp_file.unlink()
 
 
 def test_parse_empty_references():
-    """Test parsing an empty references file."""
-    temp_file = create_temp_file(EMPTY_REFERENCES)
+    """Test parsing an empty TOON references file."""
+    temp_file = create_temp_file(EMPTY_REFERENCES, suffix='.toon')
     try:
         result = run_script(SCRIPT_PATH, str(temp_file))
         assert result.success
         data = result.json()
 
-        assert len(data['standards']) == 0
+        # Issue should be empty (not set values filtered)
+        assert data['issue']['id'] == ''
+        assert data['issue']['url'] == ''
+
+        # Lists should be empty
+        assert len(data['implementation_files']) == 0
         assert len(data['adrs']) == 0
         assert len(data['interfaces']) == 0
-        assert len(data['related_files']) == 0
         assert len(data['external_links']) == 0
         assert data['summary']['total_references'] == 0
 
         # Check validation
-        assert data['validation']['has_standards'] is False
+        assert data['validation']['has_implementation_files'] is False
         assert data['validation']['has_adrs'] is False
     finally:
         temp_file.unlink()
 
 
-def test_parse_standards_only():
-    """Test parsing a file with only standards."""
-    temp_file = create_temp_file(STANDARDS_ONLY)
+def test_parse_files_only():
+    """Test parsing a TOON file with only files."""
+    temp_file = create_temp_file(FILES_ONLY, suffix='.toon')
     try:
         result = run_script(SCRIPT_PATH, str(temp_file))
         assert result.success
         data = result.json()
 
-        assert len(data['standards']) == 2
-        assert data['standards'][0]['name'] == 'JavaScript Core'
-        assert data['validation']['has_standards'] is True
+        assert len(data['implementation_files']) == 2
+        assert len(data['test_files']) == 1
+        assert data['validation']['has_implementation_files'] is True
+        assert data['validation']['has_test_files'] is True
         assert data['validation']['has_adrs'] is False
-    finally:
-        temp_file.unlink()
-
-
-def test_parse_adr_without_status():
-    """Test parsing ADRs without status."""
-    temp_file = create_temp_file(ADR_NO_STATUS)
-    try:
-        result = run_script(SCRIPT_PATH, str(temp_file))
-        assert result.success
-        data = result.json()
-
-        assert len(data['adrs']) == 2
-        assert data['adrs'][0]['status'] == 'unknown'
-        assert data['adrs'][1]['status'] == 'unknown'
     finally:
         temp_file.unlink()
 
 
 def test_all_references_combined():
     """Test that all_references contains all items."""
-    temp_file = create_temp_file(ALL_TYPES)
+    temp_file = create_temp_file(ALL_TYPES, suffix='.toon')
     try:
         result = run_script(SCRIPT_PATH, str(temp_file))
         assert result.success
         data = result.json()
 
-        # all_references should contain all 5 items
-        assert len(data['all_references']) == 5
+        # related_files combines implementation, config, test files
+        assert len(data['related_files']) == 3
+
+        # all_references contains files + adrs + interfaces + external
+        # 3 files + 1 adr + 1 interface + 1 external = 6
+        assert len(data['all_references']) == 6
 
         # Check types are preserved
         types = [r['type'] for r in data['all_references']]
-        assert 'standard' in types
+        assert 'implementation' in types
+        assert 'config' in types
+        assert 'test' in types
         assert 'adr' in types
         assert 'interface' in types
-        assert 'file' in types
         assert 'external' in types
     finally:
         temp_file.unlink()
@@ -240,7 +272,7 @@ def test_all_references_combined():
 
 def test_file_not_found():
     """Test error handling for missing file."""
-    result = run_script(SCRIPT_PATH, '/nonexistent/path/references.md')
+    result = run_script(SCRIPT_PATH, '/nonexistent/path/references.toon')
     assert not result.success
     assert result.returncode == 1
 
@@ -249,22 +281,22 @@ def test_file_not_found():
     assert data['error']['type'] == 'file_not_found'
 
 
-def test_parse_alternative_section_names():
-    """Test parsing with alternative section naming."""
-    temp_file = create_temp_file(ALTERNATIVE_NAMES)
-    try:
-        result = run_script(SCRIPT_PATH, str(temp_file))
+def test_directory_input():
+    """Test that script accepts directory and finds references.toon."""
+    import tempfile
+    import os
+
+    # Create temp directory with references.toon
+    with tempfile.TemporaryDirectory() as tmpdir:
+        refs_file = Path(tmpdir) / 'references.toon'
+        refs_file.write_text(FILES_ONLY)
+
+        result = run_script(SCRIPT_PATH, tmpdir)
         assert result.success
         data = result.json()
 
-        # Should still parse with singular/alternative names
-        assert len(data['standards']) == 1
-        assert len(data['adrs']) == 1
-        assert len(data['interfaces']) == 1
-        assert len(data['related_files']) == 1
-        assert len(data['external_links']) == 1
-    finally:
-        temp_file.unlink()
+        assert len(data['implementation_files']) == 2
+        assert data['branch'] == 'feature/test'
 
 
 # =============================================================================
@@ -276,10 +308,9 @@ if __name__ == '__main__':
     runner.add_tests([
         test_parse_basic_references,
         test_parse_empty_references,
-        test_parse_standards_only,
-        test_parse_adr_without_status,
+        test_parse_files_only,
         test_all_references_combined,
         test_file_not_found,
-        test_parse_alternative_section_names,
+        test_directory_input,
     ])
     sys.exit(runner.run())

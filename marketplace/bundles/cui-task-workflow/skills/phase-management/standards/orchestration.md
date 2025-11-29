@@ -86,8 +86,8 @@ Aggregate status from multiple sources via plan-files skill:
 
 ```markdown
 1. Read plan.md → current_phase, current_task, phase_progress
-2. Read config.md → plan_type, technology, build_system
-3. Read references.md → issue, adrs, interfaces
+2. Read config.toon → plan_type, technology, build_system
+3. Read references.toon → issue, adrs, interfaces
 
 Combine into comprehensive status object.
 ```

@@ -107,7 +107,7 @@ def validate_plan_file(plan_file: Path) -> dict:
 
 
 def validate_config_file(config_file: Path) -> dict:
-    """Validate config.md structure and content."""
+    """Validate config.toon structure and content (TOON format)."""
     errors = []
     warnings = []
 
@@ -120,30 +120,34 @@ def validate_config_file(config_file: Path) -> dict:
 
     content = config_file.read_text()
 
-    # Check for plan type
-    if not re.search(r'\*\*Plan Type\*\*:', content):
-        errors.append({'code': 'MISSING_PLAN_TYPE', 'message': 'Config missing Plan Type'})
-    else:
-        plan_type_match = re.search(r'\*\*Plan Type\*\*:\s*(\w+)', content)
-        if plan_type_match:
-            plan_type = plan_type_match.group(1).lower()
-            if plan_type not in ['implementation', 'simple']:
-                errors.append({
-                    'code': 'INVALID_PLAN_TYPE',
-                    'message': f"Invalid plan type: '{plan_type}'. Use: implementation, simple"
-                })
+    # Parse TOON format - key: value pairs
+    config = {}
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if ':' in line:
+            key, value = line.split(':', 1)
+            config[key.strip().lower()] = value.strip()
 
-    # Check for context section
-    if not re.search(r'##\s*Context', content, re.IGNORECASE):
-        errors.append({'code': 'MISSING_CONTEXT', 'message': 'Config missing Context section'})
+    # Check for plan type
+    if 'plan_type' not in config:
+        errors.append({'code': 'MISSING_PLAN_TYPE', 'message': 'Config missing plan_type'})
+    else:
+        plan_type = config['plan_type'].lower()
+        if plan_type not in ['implementation', 'simple', 'plugin-development']:
+            errors.append({
+                'code': 'INVALID_PLAN_TYPE',
+                'message': f"Invalid plan type: '{plan_type}'. Use: implementation, simple, plugin-development"
+            })
 
     # Check for branch
-    if not re.search(r'\|\s*Branch\s*\|', content, re.IGNORECASE):
-        errors.append({'code': 'MISSING_BRANCH', 'message': 'Config missing Branch in Context'})
+    if 'branch' not in config or not config['branch']:
+        errors.append({'code': 'MISSING_BRANCH', 'message': 'Config missing branch'})
 
-    # Check for build configuration (optional but recommended)
-    if not re.search(r'##\s*Build Configuration', content, re.IGNORECASE):
-        warnings.append({'code': 'MISSING_BUILD_CONFIG', 'message': 'Config missing Build Configuration section'})
+    # Check for technology (optional but recommended)
+    if 'technology' not in config:
+        warnings.append({'code': 'MISSING_TECHNOLOGY', 'message': 'Config missing technology field'})
 
     return {
         'valid': len(errors) == 0,
@@ -153,7 +157,7 @@ def validate_config_file(config_file: Path) -> dict:
 
 
 def validate_references_file(references_file: Path) -> dict:
-    """Validate references.md structure."""
+    """Validate references.toon structure (TOON format)."""
     errors = []
     warnings = []
 
@@ -162,24 +166,22 @@ def validate_references_file(references_file: Path) -> dict:
         return {
             'valid': True,
             'errors': [],
-            'warnings': [{'code': 'REFERENCES_NOT_FOUND', 'message': 'No references.md file (optional)'}]
+            'warnings': [{'code': 'REFERENCES_NOT_FOUND', 'message': 'No references.toon file (optional)'}]
         }
 
     content = references_file.read_text()
 
-    # Check for broken links (basic validation)
-    links = re.findall(r'\[([^\]]+)\]\(([^)]+)\)', content)
-    for name, path in links:
-        if not path.startswith('http') and not path.startswith('#'):
-            # Local path - check if reasonable
-            if path.startswith('..') or path.startswith('./'):
-                # Relative path - can't fully validate without context
-                pass
-            elif not Path(path).suffix:
-                warnings.append({
-                    'code': 'SUSPICIOUS_LINK',
-                    'message': f"Link '{name}' has no file extension: {path}"
-                })
+    # Parse TOON format for basic validation
+    has_branch = False
+    for line in content.splitlines():
+        line = line.strip()
+        if line.startswith('branch:'):
+            value = line.split(':', 1)[1].strip()
+            if value and value != '(not set)':
+                has_branch = True
+
+    if not has_branch:
+        warnings.append({'code': 'MISSING_BRANCH', 'message': 'References missing branch value'})
 
     return {
         'valid': len(errors) == 0,
@@ -208,24 +210,24 @@ def validate_plan_directory(plan_dir: Path) -> dict:
 
     # Validate individual files
     plan_result = validate_plan_file(plan_dir / 'plan.md')
-    config_result = validate_config_file(plan_dir / 'config.md')
-    references_result = validate_references_file(plan_dir / 'references.md')
+    config_result = validate_config_file(plan_dir / 'config.toon')
+    references_result = validate_references_file(plan_dir / 'references.toon')
 
     # Aggregate results
     all_errors = (
         [{'file': 'plan.md', **e} for e in plan_result['errors']] +
-        [{'file': 'config.md', **e} for e in config_result['errors']] +
-        [{'file': 'references.md', **e} for e in references_result['errors']]
+        [{'file': 'config.toon', **e} for e in config_result['errors']] +
+        [{'file': 'references.toon', **e} for e in references_result['errors']]
     )
 
     all_warnings = (
         [{'file': 'plan.md', **w} for w in plan_result['warnings']] +
-        [{'file': 'config.md', **w} for w in config_result['warnings']] +
-        [{'file': 'references.md', **w} for w in references_result['warnings']]
+        [{'file': 'config.toon', **w} for w in config_result['warnings']] +
+        [{'file': 'references.toon', **w} for w in references_result['warnings']]
     )
 
     # Check for required files
-    required_files = ['plan.md', 'config.md']
+    required_files = ['plan.md', 'config.toon']
     missing_files = [f for f in required_files if not (plan_dir / f).exists()]
 
     overall_valid = (
@@ -243,12 +245,12 @@ def validate_plan_directory(plan_dir: Path) -> dict:
                 'exists': (plan_dir / 'plan.md').exists(),
                 'valid': plan_result['valid']
             },
-            'config.md': {
-                'exists': (plan_dir / 'config.md').exists(),
+            'config.toon': {
+                'exists': (plan_dir / 'config.toon').exists(),
                 'valid': config_result['valid']
             },
-            'references.md': {
-                'exists': (plan_dir / 'references.md').exists(),
+            'references.toon': {
+                'exists': (plan_dir / 'references.toon').exists(),
                 'valid': references_result['valid']
             }
         },

@@ -170,8 +170,8 @@ def generate_plan_content(
     content_parts = [
         f"# Task Plan: {title}",
         "",
-        "**Configuration**: See [config.md](./config.md)",
-        "**References**: See [references.md](./references.md)",
+        "**Configuration**: See [config.toon](./config.toon)",
+        "**References**: See [references.toon](./references.toon)",
         "",
         f"**Current Phase**: {current_phase}",
         f"**Current Task**: {current_task}",

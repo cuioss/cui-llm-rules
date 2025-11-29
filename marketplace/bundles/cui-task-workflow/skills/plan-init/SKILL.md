@@ -191,7 +191,7 @@ artifacts:
   plan_directory: {plan-storage}/{task-name}/
   plan_file: {plan-storage}/{task-name}/plan.md
   config_file: {plan-storage}/{task-name}/config.toon
-  references_file: {plan-storage}/{task-name}/references.md
+  references_file: {plan-storage}/{task-name}/references.toon
 plan_status:
   current_phase: refine|execute
   current_task: task-1
