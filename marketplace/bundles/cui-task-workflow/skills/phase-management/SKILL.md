@@ -150,19 +150,31 @@ Else (default "list"):
 **ACTION: init-plan**
 1. Requires task_description or issue_url (from command parameter or "Other" input from list-plans)
 2. Delegate to `Skill: cui-task-workflow:plan-init` with task_description/issue_url
-3. On success, prompt: "Continue with refine phase?"
-4. If yes, execute refine-plan operation
+3. On success, **auto-continue** to refine phase (no user prompt)
+4. Execute refine-plan operation automatically
 
 **Note**: init-plan is always invoked with a task description. Users provide this via:
 - Command parameter: `/plan-manage action=init task="..."`
 - "Other" input from list-plans action
 
+**Auto-Continue Behavior**: Init automatically transitions to refine without prompting. The entire init→refine flow executes continuously, only stopping when:
+- A genuine question requires user input (e.g., ambiguous requirements)
+- User explicitly interrupts
+
 **ACTION: refine-plan**
 1. If plan_name provided: Verify plan exists
 2. Else: Run discover-plans --filter=init,refine
-3. Display numbered list for selection
-4. Delegate to `Skill: cui-task-workflow:plan-refine`
-5. On completion, report status
+3. If single plan found: Auto-select and proceed (no prompt)
+4. If multiple plans: Display numbered list for selection
+5. Delegate to `Skill: cui-task-workflow:plan-refine`
+6. Skill executes all refine operations continuously
+7. On completion, report status and transition to execute phase
+
+**Auto-Continue Behavior**: Refine phase executes continuously without user prompts except:
+- Analysis review (only if analysis.md is created for complex tasks)
+- Component analysis confirmation (brief approval)
+- Task list approval (brief approval)
+All other operations proceed automatically.
 
 **ACTION: edit-plan**
 Handles plan editing based on current phase:

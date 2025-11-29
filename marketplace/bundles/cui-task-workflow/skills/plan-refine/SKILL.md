@@ -16,6 +16,12 @@ allowed-tools: Read, Write, Edit, Skill, AskUserQuestion
 
 **Role**: Second phase skill in the plan management system. Breaks down requirements into implementable tasks with acceptance criteria. Delegates all file I/O to `plan-files` skill.
 
+**AUTO-CONTINUE BEHAVIOR**: Execute all refine operations continuously without unnecessary user prompts. Only stop for:
+- Analysis review (if analysis.md is created for complex tasks)
+- Component analysis confirmation (brief approval of identified components)
+- Task list approval (brief approval of generated tasks)
+Do NOT prompt between operations or for routine confirmations.
+
 ## Standards (Load On-Demand)
 
 ### Workflow
@@ -29,6 +35,99 @@ Contains: Phase overview, operations, component analysis, task planning, documen
 | Template | Purpose |
 |----------|---------|
 | `templates/implementation-requirements.md` | Implementation requirements artifact |
+| `templates/analysis.md` | Strategic analysis document (optional) |
+
+---
+
+## Operation: detect-complexity
+
+**Input**: `plan_directory`
+
+**Purpose**: Evaluate task complexity to determine if strategic analysis.md is needed before component breakdown.
+
+**Detection Criteria**:
+
+| Question | If YES → Create analysis.md |
+|----------|----------------------------|
+| Are multiple skills/components affected? | Yes |
+| Are there breaking changes? | Yes |
+| Are there architectural decisions (not just code changes)? | Yes |
+| Are there complex dependencies to understand first? | Yes |
+| Are there risks that need documentation? | Yes |
+
+**Decision Logic**: If ALL answers are NO → Skip analysis.md and proceed directly to component breakdown. If ANY answer is YES → Create analysis.md.
+
+**Steps**:
+
+1. **Read plan context**:
+   ```
+   Skill: cui-task-workflow:plan-files
+   operation: read-plan, read-config
+   ```
+
+2. **Evaluate complexity factors**:
+   - Check task scope (single vs multiple components)
+   - Check for breaking change indicators
+   - Check for architectural keywords (design, architecture, pattern, migration)
+   - Check for dependency complexity
+   - Check for risk indicators
+
+3. **Return decision** (do NOT prompt user - auto-decide):
+
+**Output**:
+```
+complexity_assessment:
+  needs_analysis: true|false
+  complexity_factors:
+    - {factor1}
+    - {factor2}
+  recommendation: "Create analysis.md" | "Skip to component breakdown"
+```
+
+**Auto-Continue**: This operation does NOT prompt the user. It makes the decision automatically and proceeds.
+
+---
+
+## Operation: create-analysis
+
+**Input**: `plan_directory`, `complexity_factors`
+
+**Purpose**: Create and populate analysis.md for complex tasks.
+
+**Steps**:
+
+1. **Read template**: `Read templates/analysis.md`
+
+2. **Explore codebase** to gather information for each section:
+   - Current State: Search for existing implementations
+   - Affected Components: Identify files/modules that will change
+   - Design Decisions: Document key choices being made
+   - Breaking Changes: Identify any compatibility impacts
+   - Risks: Assess potential issues
+
+3. **Write analysis.md**: `Write {plan_directory}/analysis.md`
+
+4. **Present to user for review** (AskUserQuestion):
+   - Show analysis summary
+   - Options: Approve / Edit / Add details
+   - This is the ONLY user prompt in the analysis flow
+
+5. **Update references**:
+   ```
+   Skill: cui-task-workflow:plan-files
+   operation: write-references
+   action: add
+   section: implementation_files
+   value: {plan_directory}/analysis.md
+   ```
+
+**Output**:
+```
+analysis_created:
+  file: {plan_directory}/analysis.md
+  sections_populated: [current_state, affected_components, design_decisions, risks, success_criteria]
+  user_approved: true
+```
 
 ---
 
@@ -38,15 +137,22 @@ Contains: Phase overview, operations, component analysis, task planning, documen
 
 **Steps**:
 
-1. **Read context**:
+1. **Detect complexity first**:
+   ```
+   Execute Operation: detect-complexity
+   ```
+   - If `needs_analysis: true` → Execute Operation: create-analysis before continuing
+   - If `needs_analysis: false` → Skip to step 2
+
+2. **Read context**:
    ```
    Skill: cui-task-workflow:plan-files
    operation: read-plan, read-config, get-references
    ```
 
-2. **Fetch issue** (if URL): `gh issue view {number} --json title,body,labels`
+3. **Fetch issue** (if URL): `gh issue view {number} --json title,body,labels`
 
-3. **Identify components**:
+4. **Identify components**:
    - Functional components (features, APIs, services)
    - Technical boundaries (modules, packages, layers)
    - Dependencies between components

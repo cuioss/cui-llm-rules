@@ -11,6 +11,9 @@ Plan from Init Phase
 ┌─────────────────────────────────────────────────────┐
 │ REFINE PHASE                                        │
 │                                                     │
+│   0. Detect complexity (auto-decide)                │
+│      ├─ Complex → Create analysis.md                │
+│      └─ Simple → Skip to step 2                     │
 │   1. Read context (plan, config, issue)             │
 │   2. Analyze requirements → components              │
 │   3. Plan implementation tasks                      │
@@ -23,13 +26,64 @@ Plan from Init Phase
     Implement Phase
 ```
 
+**Auto-Continue Behavior**: The refine phase executes continuously without user prompts except:
+- Analysis review (only if analysis.md is created)
+- Component analysis confirmation
+- Task list approval
+
 ## Operations Summary
 
 | Operation | Description | Output |
 |-----------|-------------|--------|
+| **detect-complexity** | Evaluate if strategic analysis needed | needs_analysis: boolean |
+| **create-analysis** | Create and populate analysis.md | analysis.md file |
 | **analyze** | Break down requirements into components | Component list with relationships |
 | **plan-tasks** | Create detailed implementation tasks | Tasks with acceptance criteria |
 | **identify-docs** | Determine documentation needs | ADR and interface references |
+
+---
+
+## Step 0: Detect Complexity
+
+**Purpose**: Automatically determine if the task requires strategic analysis before component breakdown.
+
+**Detection Criteria**:
+
+| Question | If YES → analysis.md |
+|----------|---------------------|
+| Are multiple skills/components affected? | Create analysis |
+| Are there breaking changes? | Create analysis |
+| Are there architectural decisions (not just code changes)? | Create analysis |
+| Are there complex dependencies to understand first? | Create analysis |
+| Are there risks that need documentation? | Create analysis |
+
+**Decision Logic**:
+- ALL answers NO → Skip to component breakdown (standard flow)
+- ANY answer YES → Create analysis.md first
+
+**Auto-Decision**: This step does NOT prompt the user. It evaluates automatically and proceeds.
+
+---
+
+## Conditional: Create Analysis (if needed)
+
+When `needs_analysis: true`:
+
+1. **Create analysis.md** from `templates/analysis.md`
+2. **Explore codebase** to populate sections:
+   - Current State: Existing implementations
+   - Affected Components: Files/modules that will change
+   - Design Decisions: Key choices being made
+   - Breaking Changes: Compatibility impacts (if any)
+   - Risks: Potential issues and mitigations
+   - Success Criteria: Measurable outcomes
+3. **Present to user for review** (single prompt):
+   - Options: Approve / Edit / Add details
+4. **Add to references** as implementation file
+5. **Continue** to component analysis
+
+When `needs_analysis: false`:
+- Skip directly to component analysis (no prompt)
 
 ## Component Analysis
 

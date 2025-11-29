@@ -14,6 +14,22 @@
 
 ---
 
+## Analysis Reference (Optional)
+
+*This section is present only for complex tasks that required strategic analysis.*
+
+**Analysis Document**: `.plan/plans/{task_name}/analysis.md`
+
+**Key Decisions from Analysis**:
+- {Decision 1 summary}
+- {Decision 2 summary}
+
+**Breaking Changes**: {yes/no} - See analysis.md for details
+
+*If this section is not present, the task was evaluated as simple and proceeded directly to component breakdown.*
+
+---
+
 ## Component Summary
 
 | Component | Scope | Complexity | Tasks |

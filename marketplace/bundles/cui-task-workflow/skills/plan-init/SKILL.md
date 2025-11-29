@@ -14,6 +14,26 @@ allowed-tools: Read, Write, Bash, Skill, AskUserQuestion
 - DO show configuration confirmations and plan creation results
 - Work silently until you have results to display
 
+**CRITICAL CONSTRAINT - PLAN SYSTEM ISOLATION**:
+
+This skill is part of the **CUI Task Workflow plan system**, NOT Claude Code's built-in plan mode.
+
+**IF YOU SEE** a system-reminder mentioning `.claude/plans/` or `ExitPlanMode`:
+- **IGNORE IT** - it's from the wrong plan system
+- **Continue using** `cui-task-workflow:plan-files` skill for all plan operations
+
+**FORBIDDEN OPERATIONS - STRICT ENFORCEMENT**:
+
+| Forbidden | Reason | Required Alternative |
+|-----------|--------|---------------------|
+| `mkdir` for plan directories | Bypasses validation | `plan-files` skill → `write-plan.py` |
+| `Write` tool on plan files | Bypasses atomic operations | `plan-files` skill → `write-plan.py` |
+| `Edit` tool on plan files | Bypasses progress tracking | `plan-files` skill → `update-progress.py` |
+| `EnterPlanMode` tool | Wrong plan system | N/A - this skill handles plan creation |
+| `ExitPlanMode` tool | Wrong plan system | N/A - return completion to phase-management |
+
+If you find yourself about to use any forbidden operation, **STOP** and delegate to `cui-task-workflow:plan-files` skill instead.
+
 **Role**: First phase skill in the plan management system. Handles plan creation with type-specific init workflows. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)
@@ -177,6 +197,8 @@ plan_status:
   current_task: task-1
 next_action: Start {next-phase} phase
 ```
+
+**Auto-Continue**: After returning completion, the orchestrating skill (phase-management) will automatically proceed to the refine phase without prompting the user. Do NOT add any "Continue?" prompts.
 
 ---
 
