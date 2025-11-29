@@ -29,29 +29,110 @@ The init phase determines the entire plan workflow:
 
 **MANDATORY**: Select init implementation based on input and execute IMMEDIATELY.
 
-### If type = "implementation" or issue provided
+### Quick Decision Guide
+
+| Task Characteristic | Template | Reason |
+|---------------------|----------|--------|
+| Updates to `marketplace/bundles/` | Plugin-Development | Built-in `/plugin-doctor` verification |
+| Creates/modifies agents, commands, skills | Plugin-Development | Marketplace-aware workflow |
+| Involves maven/gradle/npm builds | Implementation | Requires build/test verification |
+| Has GitHub issue reference | Implementation | Full tracking workflow |
+| Pure documentation updates | Simple | Minimal overhead |
+| Configuration file changes | Simple | No build verification needed |
+| Quick fixes without tests | Simple | Streamlined execution |
+
+### Decision Tree Rules
+
+**1. If type = "implementation" or issue provided**
 → **EXECUTE** Implementation Init (5-phase workflow)
 
-### If type = "simple" or no-workflow flag
+**2. If type = "simple" or no-workflow flag**
 → **EXECUTE** Simple Init (3-phase workflow)
 
-### If type = "plugin-development" or marketplace component work detected
+**3. If type = "plugin-development" or marketplace component work detected**
 → **EXECUTE** Plugin Development Init (3-phase workflow with verification)
 
-### If task involves marketplace/bundles/ paths
+**4. If task involves marketplace/bundles/ paths**
 → **EXECUTE** Plugin Development Init
 
-### If task mentions creating/modifying agents, commands, or skills
+**5. If task mentions creating/modifying agents, commands, or skills**
 → **EXECUTE** Plugin Development Init
 
-### If build files detected (pom.xml, package.json, etc.)
+**6. If build files detected (pom.xml, package.json, etc.) AND task involves code**
 → **EXECUTE** Implementation Init
 
-### If on feature/fix/task/claude branch
+**7. If on feature/fix/task/claude branch AND task involves code**
 → **EXECUTE** Implementation Init
 
-### If nothing indicates implementation
+**8. If nothing indicates implementation**
 → **ASK USER** for plan type selection
+
+### Key Decision Factors
+
+**Use Plugin-Development when**:
+- Task path includes `marketplace/bundles/`
+- Task description mentions skill, command, agent, or plugin modifications
+- Task involves marketplace component verification needs
+- Changes affect skill SKILL.md files or command *.md files
+
+**Use Implementation when**:
+- Task requires maven, gradle, or npm build execution
+- Task involves Java, JavaScript, or other compiled code
+- Task has a GitHub issue for tracking
+- Task requires unit test execution or coverage verification
+
+**Use Simple when**:
+- Task is pure documentation (AsciiDoc, Markdown, README)
+- Task involves configuration files without code impact
+- Task is a quick fix that doesn't need build verification
+- Task doesn't involve any build system
+
+### Config Property Guidance
+
+| Scenario | compatibility | finalizing |
+|----------|---------------|------------|
+| API changes | `breaking` | `pr-workflow` |
+| File path changes | `breaking` | `commit-only` or `pr-workflow` |
+| New features (backward-compatible) | `deprecations` | `pr-workflow` |
+| Marketplace updates | `breaking` | `commit-only` |
+| Documentation only | `breaking` | `commit-only` |
+
+**Note**: `finalizing: commit-only` is appropriate when `/plugin-doctor` handles verification (plugin-development plans) or when external review isn't needed.
+
+### Examples
+
+**Example 1: Marketplace Skill Update**
+```
+Task: "Update plan-init skill to improve template selection"
+Path contains: marketplace/bundles/cui-task-workflow/skills/plan-init
+Decision: Plugin-Development (marketplace component)
+Config: compatibility=breaking, finalizing=commit-only
+```
+
+**Example 2: Java Feature Implementation**
+```
+Task: "Add JWT validation to authentication service"
+Build files: pom.xml detected
+Decision: Implementation (requires maven build/test)
+Config: compatibility=deprecations, finalizing=pr-workflow
+```
+
+**Example 3: Documentation Update**
+```
+Task: "Update README with new installation steps"
+Build files: none relevant
+Path: docs/ or README.md
+Decision: Simple (no build verification needed)
+Config: compatibility=breaking, finalizing=commit-only
+```
+
+**Example 4: Cross-Cutting Change**
+```
+Task: "Rename .claude/ directory to .cui/ across all skills"
+Path contains: marketplace/bundles/
+Decision: Plugin-Development (marketplace-wide change)
+Config: compatibility=breaking (paths change), finalizing=commit-only
+```
 
 ## Available Plan Types
 

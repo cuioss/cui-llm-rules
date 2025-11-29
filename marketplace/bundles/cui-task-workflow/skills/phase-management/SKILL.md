@@ -344,6 +344,12 @@ Creates a new plan, checking for existing init-phase plans first.
 
 **Input**: `task_description`, `issue_url` (optional)
 
+**Template Selection**: The `plan-init` skill determines the appropriate plan template based on task characteristics. See `plan-init/standards/workflow.md` for:
+- Quick decision guide (table mapping task types to templates)
+- Key decision factors for each template type
+- Config property guidance (compatibility, finalizing)
+- Examples for marketplace, implementation, and documentation tasks
+
 **Steps**:
 
 1. **Check for existing init-phase plans**:
