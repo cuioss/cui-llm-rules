@@ -89,59 +89,22 @@ Return the absolute path string for use in Bash commands.
 
 Discovers all skill scripts from installed plugins and generates the scripts cache.
 
+**Script**: `cui-utilities:script-runner/scripts/generate-scripts-local.py`
+
 #### Steps
 
-1. **Invoke marketplace-inventory skill**:
-   ```
-   Skill: cui-plugin-development-tools:marketplace-inventory
-   ```
-
-   This returns JSON with all bundles, skills, and scripts.
-
-2. **Parse inventory for scripts**:
-
-   For each bundle in inventory:
-   - Get bundle name and install path
-   - For each skill with scripts:
-     - Build notation: `{bundle}:{skill}/scripts/{script-name}`
-     - Record absolute path: `{install-path}/skills/{skill}/scripts/{script-name}`
-     - Determine type: `bash` for `.sh`, `python3` for `.py`
-
-3. **Generate permission patterns**:
-
-   For each skill with scripts, generate ONE permission per skill directory:
-   - Bash scripts: `Bash(bash {install-path}/skills/{skill}/scripts/*.sh:*)`
-   - Python scripts: `Bash(python3 {install-path}/skills/{skill}/scripts/*.py:*)`
-
-4. **Identify marketplace**:
-
-   Extract marketplace name from plugin keys (e.g., `cui-java-expert@cui-development-standards` → `cui-development-standards`)
-
-5. **Write scripts.local.json**:
-   ```
-   Write .claude/scripts.local.json
+1. **Run discovery script**:
+   ```bash
+   python3 scripts/generate-scripts-local.py --marketplace-root {workspace-root}
    ```
 
-   Format:
-   ```json
-   {
-     "version": 1,
-     "discovered_at": "2025-11-24T10:30:00Z",
-     "marketplace": "cui-development-standards",
-     "scripts": {
-       "bundle:skill/scripts/name.sh": {
-         "absolute": "/full/path/to/scripts/name.sh",
-         "type": "bash"
-       }
-     },
-     "permissions": [
-       "Bash(bash /full/path/to/skill/scripts/*.sh:*)",
-       "Bash(python3 /full/path/to/skill/scripts/*.py:*)"
-     ]
-   }
-   ```
+   This script:
+   - Invokes `scan-marketplace-inventory.sh` to get all bundles, skills, and scripts
+   - Builds portable notation for each script: `{bundle}:{skill}/scripts/{script-name}`
+   - Generates permission patterns (one per skill directory)
+   - Writes `.claude/scripts.local.json` atomically
 
-6. **Check .gitignore**:
+2. **Check .gitignore**:
    ```
    Read .gitignore
    ```
@@ -158,10 +121,36 @@ Discovers all skill scripts from installed plugins and generates the scripts cac
 
 #### Output
 
-Confirmation message with statistics:
-- Scripts discovered: N
-- Permissions generated: M
-- Cache location: .claude/scripts.local.json
+JSON response from script:
+```json
+{
+  "success": true,
+  "file": ".claude/scripts.local.json",
+  "scripts_discovered": 87,
+  "permissions_generated": 45,
+  "marketplace": "cui-development-standards"
+}
+```
+
+#### Generated File Format
+
+```json
+{
+  "version": 1,
+  "discovered_at": "2025-11-24T10:30:00Z",
+  "marketplace": "cui-development-standards",
+  "scripts": {
+    "bundle:skill/scripts/name.sh": {
+      "absolute": "/full/path/to/scripts/name.sh",
+      "type": "bash"
+    }
+  },
+  "permissions": [
+    "Bash(bash /full/path/to/skill/scripts:*)",
+    "Bash(python3 /full/path/to/skill/scripts:*)"
+  ]
+}
+```
 
 ---
 
