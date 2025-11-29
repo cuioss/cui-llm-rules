@@ -7,7 +7,7 @@ Phase Skills                    Persistence Skill
 ┌─────────────┐                ┌──────────────┐
 │ plan-init   │──────────────▶│              │
 ├─────────────┤                │              │
-│ plan-refine │──────────────▶│  plan-files  │──▶ .cui/plans/
+│ plan-refine │──────────────▶│  plan-files  │──▶ .plan/plans/
 ├─────────────┤                │              │
 │ plan-impl   │──────────────▶│              │
 ├─────────────┤                │              │
@@ -37,7 +37,7 @@ Phase Skills                    Persistence Skill
 ## File Structure
 
 ```
-.cui/plans/{task-name}/
+.plan/plans/{task-name}/
 ├── plan.md           # Task plan with phases and checklists
 ├── config.md         # Configuration (build, workflow, context)
 ├── references.md     # References (issue, ADRs, interfaces, files)

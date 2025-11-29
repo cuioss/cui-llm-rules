@@ -4,7 +4,7 @@ Create or update references.md.
 
 Creates or modifies references file with sections for issue, branch, ADRs,
 interfaces, implementation files, external docs, and dependencies.
-Uses atomic file operations to write to .cui/plans/ directory.
+Uses atomic file operations to write to .plan/plans/ directory.
 
 Output: JSON with changes made.
 """
@@ -201,31 +201,31 @@ def main():
         epilog="""
 Examples:
   # Set issue
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --action set \\
            --section issue \\
            --value '{"id":"#123","title":"My Issue","url":"https://github.com/..."}'
 
   # Set branch
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --action set \\
            --section branch \\
            --value "feature/my-feature"
 
   # Add implementation file
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --action add \\
            --section implementation_files \\
            --value "src/main/java/Foo.java"
 
   # Add ADR reference
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --action add \\
            --section adrs \\
            --value "ADR-0015: Use Strategy Pattern"
 
   # Remove file
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --action remove \\
            --section implementation_files \\
            --value "src/main/java/OldFile.java"

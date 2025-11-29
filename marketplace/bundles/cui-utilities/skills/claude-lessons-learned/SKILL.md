@@ -29,7 +29,7 @@ Activate this skill when:
 ## Storage Location
 
 ```
-.cui/lessons-learned/
+.plan/lessons-learned/
   2025-11-27-001.md
   2025-11-27-002.md
   2025-11-26-001.md
@@ -124,7 +124,7 @@ python3 scripts/write-lesson.py \
 {
   "success": true,
   "operation": "write-lesson",
-  "file": ".cui/lessons-learned/2025-11-28-001.md",
+  "file": ".plan/lessons-learned/2025-11-28-001.md",
   "id": "2025-11-28-001",
   "component": "builder-maven:maven-build-and-fix"
 }
@@ -188,7 +188,7 @@ After applying a lesson to component documentation, mark it as applied using `up
 
 ```bash
 python3 scripts/update-lesson.py \
-  --file .cui/lessons-learned/{lesson-id}.md \
+  --file .plan/lessons-learned/{lesson-id}.md \
   --set applied=true
 ```
 
@@ -196,7 +196,7 @@ python3 scripts/update-lesson.py \
 
 ```bash
 python3 scripts/update-lesson.py \
-  --file .cui/lessons-learned/2025-11-28-001.md \
+  --file .plan/lessons-learned/2025-11-28-001.md \
   --set applied=true
 ```
 
@@ -204,7 +204,7 @@ python3 scripts/update-lesson.py \
 
 ```bash
 python3 scripts/update-lesson.py \
-  --file .cui/lessons-learned/2025-11-28-001.md \
+  --file .plan/lessons-learned/2025-11-28-001.md \
   --set applied=true \
   --set category=pattern
 ```
@@ -215,7 +215,7 @@ python3 scripts/update-lesson.py \
 {
   "success": true,
   "operation": "update-lesson",
-  "file": ".cui/lessons-learned/2025-11-28-001.md",
+  "file": ".plan/lessons-learned/2025-11-28-001.md",
   "updated_fields": ["applied"]
 }
 ```
@@ -256,7 +256,7 @@ The `/plugin-apply-lessons-learned` command uses this skill to:
 The lessons-learned directory should be gitignored:
 
 ```
-.cui/lessons-learned/*.md
+.plan/lessons-learned/*.md
 ```
 
 Lessons are project-specific runtime knowledge.

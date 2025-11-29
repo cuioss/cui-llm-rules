@@ -148,7 +148,7 @@ Contains: Phase overview, finalizing modes, commit strategy, PR template, comple
 
 4. **Archive plan** (optional):
    ```bash
-   mv {plan_directory} .cui/plans/archive/{task-name}-{date}/
+   mv {plan_directory} .plan/plans/archive/{task-name}-{date}/
    ```
 
 ---

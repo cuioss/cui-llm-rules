@@ -1,12 +1,12 @@
 ---
 name: claude-run-configuration
-description: Run configuration handling for .cui/run-configuration.json
+description: Run configuration handling for .plan/run-configuration.json
 allowed-tools: Read, Write, Edit, Bash
 ---
 
 # Claude Run Configuration Skill
 
-Run configuration handling for `.cui/run-configuration.json` command configurations and execution history.
+Run configuration handling for `.plan/run-configuration.json` command configurations and execution history.
 
 ## What This Skill Provides
 
@@ -23,7 +23,7 @@ Activate this skill when:
 - Managing acceptable warnings lists
 - Managing skipped files/directories
 - Validating run configuration structure
-- Working with `.cui/run-configuration.json`
+- Working with `.plan/run-configuration.json`
 
 ---
 
@@ -67,7 +67,7 @@ Activate this skill when:
 python3 scripts/init-run-config.py
 ```
 
-This creates `.cui/run-configuration.json` with base structure if it doesn't exist.
+This creates `.plan/run-configuration.json` with base structure if it doesn't exist.
 
 **Options:**
 - `--project-dir /path/to/project` - Initialize in specific directory
@@ -93,8 +93,8 @@ This creates `.cui/run-configuration.json` with base structure if it doesn't exi
 If the script is not available, create manually:
 
 ```bash
-test -f .cui/run-configuration.json || \
-  python3 json-file-operations/scripts/manage-json-file.py write .cui/run-configuration.json \
+test -f .plan/run-configuration.json || \
+  python3 json-file-operations/scripts/manage-json-file.py write .plan/run-configuration.json \
     --value '{"version": 1, "commands": {}, "maven": {"acceptable_warnings": {"transitive_dependency": [], "plugin_compatibility": [], "platform_specific": []}}}'
 ```
 
@@ -114,14 +114,14 @@ First, run the **Initialize Configuration** workflow to ensure the file exists.
 
 ```bash
 # Read entire configuration
-python3 json-file-operations/scripts/manage-json-file.py read .cui/run-configuration.json
+python3 json-file-operations/scripts/manage-json-file.py read .plan/run-configuration.json
 
 # Read specific command entry
-python3 json-file-operations/scripts/manage-json-file.py read-field .cui/run-configuration.json \
+python3 json-file-operations/scripts/manage-json-file.py read-field .plan/run-configuration.json \
   --field "commands.setup-project-permissions"
 
 # Read last execution
-python3 json-file-operations/scripts/manage-json-file.py read-field .cui/run-configuration.json \
+python3 json-file-operations/scripts/manage-json-file.py read-field .plan/run-configuration.json \
   --field "commands.setup-project-permissions.last_execution"
 ```
 
@@ -143,7 +143,7 @@ Before updating nested fields, ensure the command entry exists:
 
 ```bash
 # Create command entry if it doesn't exist (update-field auto-creates intermediate objects)
-python3 json-file-operations/scripts/manage-json-file.py update-field .cui/run-configuration.json \
+python3 json-file-operations/scripts/manage-json-file.py update-field .plan/run-configuration.json \
   --field "commands.<command-name>" \
   --value '{}'
 ```
@@ -153,7 +153,7 @@ python3 json-file-operations/scripts/manage-json-file.py update-field .cui/run-c
 ### Step 3: Update Last Execution
 
 ```bash
-python3 json-file-operations/scripts/manage-json-file.py update-field .cui/run-configuration.json \
+python3 json-file-operations/scripts/manage-json-file.py update-field .plan/run-configuration.json \
   --field "commands.<command-name>.last_execution" \
   --value '{"date": "2025-11-25", "status": "SUCCESS", "duration_ms": 12345}'
 ```
@@ -162,17 +162,17 @@ python3 json-file-operations/scripts/manage-json-file.py update-field .cui/run-c
 
 ```bash
 # Step 1: Initialize if not exists
-test -f .cui/run-configuration.json || \
-  python3 json-file-operations/scripts/manage-json-file.py write .cui/run-configuration.json \
+test -f .plan/run-configuration.json || \
+  python3 json-file-operations/scripts/manage-json-file.py write .plan/run-configuration.json \
     --value '{"version": 1, "commands": {}, "maven": {"acceptable_warnings": {"transitive_dependency": [], "plugin_compatibility": [], "platform_specific": []}}}'
 
 # Step 2: Create command entry
-python3 json-file-operations/scripts/manage-json-file.py update-field .cui/run-configuration.json \
+python3 json-file-operations/scripts/manage-json-file.py update-field .plan/run-configuration.json \
   --field "commands.verify-integration-tests" \
   --value '{}'
 
 # Step 3: Update execution status
-python3 json-file-operations/scripts/manage-json-file.py update-field .cui/run-configuration.json \
+python3 json-file-operations/scripts/manage-json-file.py update-field .plan/run-configuration.json \
   --field "commands.verify-integration-tests.last_execution" \
   --value '{"date": "2025-11-27", "status": "SUCCESS", "duration_ms": 231584}'
 ```
@@ -188,7 +188,7 @@ Validate run configuration format and structure.
 ### Step 1: Execute Validation
 
 ```bash
-python3 scripts/validate-run-config.py .cui/run-configuration.json
+python3 scripts/validate-run-config.py .plan/run-configuration.json
 ```
 
 ### Step 2: Process Result
@@ -263,7 +263,7 @@ Script characteristics:
 - Commands record execution history to run configuration
 
 ### With claude-lessons-learned Skill
-- Lessons learned are stored separately in `.cui/lessons-learned/`
+- Lessons learned are stored separately in `.plan/lessons-learned/`
 - Run configuration tracks execution state only
 
 ---

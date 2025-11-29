@@ -10,8 +10,8 @@ allowed-tools: Bash
 
 ## What This Skill Provides
 
-- CUI base directory configuration (`.cui/` by default)
-- Path construction helpers for CUI files
+- Workflow base directory configuration (`.plan/` by default)
+- Path construction helpers for workflow files
 - Atomic file write (temp file + rename pattern)
 - Directory creation (mkdir -p equivalent)
 - JSON success/error output helpers
@@ -20,11 +20,11 @@ allowed-tools: Bash
 
 ## When to Use
 
-Import `file_ops` module in Python scripts that write to `.cui/` directories:
+Import `file_ops` module in Python scripts that write to `.plan/` directories:
 - Lessons learned scripts
 - Plan file scripts
 - Memory management scripts
-- Any script requiring atomic writes to CUI directories
+- Any script requiring atomic writes to workflow directories
 
 ## Module: file_ops.py
 
@@ -32,24 +32,24 @@ Import `file_ops` module in Python scripts that write to `.cui/` directories:
 
 ### Functions
 
-**CUI Directory Functions**
+**Base Directory Functions**
 
-**1. get_cui_base_dir()**
-- **Purpose**: Get the base directory for CUI workflow files
+**1. get_base_dir()**
+- **Purpose**: Get the base directory for workflow files
 - **Input**: None
-- **Output**: `Path` - base directory (default: `.cui`)
+- **Output**: `Path` - base directory (default: `.plan`)
 
-**2. set_cui_base_dir(path)**
-- **Purpose**: Override the base directory for CUI workflow files
+**2. set_base_dir(path)**
+- **Purpose**: Override the base directory for workflow files
 - **Input**: `path` (str/Path) - new base directory
 - **Output**: None
-- **Note**: Primarily for testing; production uses `.cui` default
+- **Note**: Primarily for testing; production uses `.plan` default
 
-**3. cui_path(*parts)**
-- **Purpose**: Construct a path within the CUI base directory
+**3. base_path(*parts)**
+- **Purpose**: Construct a path within the workflow base directory
 - **Input**: `*parts` - path components to join
-- **Output**: `Path` - full path including CUI base directory
-- **Example**: `cui_path('plans', 'my-task', 'plan.md')` → `.cui/plans/my-task/plan.md`
+- **Output**: `Path` - full path including workflow base directory
+- **Example**: `base_path('plans', 'my-task', 'plan.md')` → `.plan/plans/my-task/plan.md`
 
 **File Operations**
 
@@ -110,7 +110,7 @@ import sys
 sys.path.insert(0, '/path/to/file-operations-base/scripts')
 from file_ops import (
     atomic_write_file,
-    cui_path,
+    base_path,
     output_success,
     output_error,
     generate_markdown_metadata
@@ -118,8 +118,8 @@ from file_ops import (
 
 def main():
     try:
-        # Construct path within .cui directory
-        filepath = cui_path('lessons-learned', '2025-11-28-001.md')
+        # Construct path within .plan directory
+        filepath = base_path('lessons-learned', '2025-11-28-001.md')
 
         # Generate metadata
         metadata = generate_markdown_metadata({
@@ -158,22 +158,22 @@ if __name__ == '__main__':
 
 ```python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'file-operations-base' / 'scripts'))
-from file_ops import atomic_write_file, cui_path, output_success, output_error
+from file_ops import atomic_write_file, base_path, output_success, output_error
 ```
 
 ### With plan-files
 
 ```python
 sys.path.insert(0, str(Path(__file__).resolve().parents[4] / 'cui-utilities' / 'skills' / 'file-operations-base' / 'scripts'))
-from file_ops import atomic_write_file, cui_path, output_success, output_error
+from file_ops import atomic_write_file, base_path, output_success, output_error
 ```
 
 ## Directory Structure
 
-Files are stored in `.cui/` directory:
+Files are stored in `.plan/` directory:
 
 ```
-.cui/                          # CUI workflow artifacts
+.plan/                         # Workflow artifacts
 ├── run-configuration.json     # Command execution tracking
 ├── lessons-learned/           # Knowledge capture
 │   └── *.md

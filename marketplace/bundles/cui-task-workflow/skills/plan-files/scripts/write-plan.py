@@ -3,7 +3,7 @@
 Create or update plan.md from structured input.
 
 Creates a plan file with phase progress table and task sections.
-Uses atomic file operations to write to .cui/plans/ directory.
+Uses atomic file operations to write to .plan/plans/ directory.
 
 Output: JSON with created/updated file path.
 """
@@ -216,14 +216,14 @@ def main():
         epilog="""
 Examples:
   # Create simple plan
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --title "My Task" \\
            --current-phase init \\
            --current-task task-1 \\
            --phases-json '[{"name":"init","status":"in_progress","tasks":3}]'
 
   # Create plan with detailed tasks
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --title "Feature Implementation" \\
            --current-phase init \\
            --current-task task-1 \\

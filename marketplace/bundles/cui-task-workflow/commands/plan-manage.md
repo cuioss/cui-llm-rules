@@ -8,7 +8,7 @@ tools: Read, Skill, Bash, AskUserQuestion
 
 Manage plan lifecycle: list all plans, create new plans, refine requirements, and cleanup completed plans.
 
-**CRITICAL CONSTRAINT**: This command creates and manages **plans only**. NEVER implement tasks directly. All task descriptions MUST result in plan files in `.cui/plans/` - not actual implementation. After plan creation, STOP and wait for `/plan-execute`.
+**CRITICAL CONSTRAINT**: This command creates and manages **plans only**. NEVER implement tasks directly. All task descriptions MUST result in plan files in `.plan/plans/` - not actual implementation. After plan creation, STOP and wait for `/plan-execute`.
 
 ## PARAMETERS
 
@@ -57,9 +57,9 @@ Shows:
 Available Plans:
 
 1. jwt-authentication [implement] - 3/12 tasks complete
-   Path: .cui/plans/jwt-authentication/
+   Path: .plan/plans/jwt-authentication/
 2. user-profile-api [refine] - Requirements analysis
-   Path: .cui/plans/user-profile-api/
+   Path: .plan/plans/user-profile-api/
 
 0. Create new plan
 

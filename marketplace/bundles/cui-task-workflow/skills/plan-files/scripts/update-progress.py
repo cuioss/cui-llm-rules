@@ -271,13 +271,13 @@ def main():
         epilog="""
 Examples:
   # Complete specific checklist items
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --phase init \\
            --task-id 1 \\
            --complete-items "Check current git branch,Detect build system"
 
   # Complete items and set task status
-  %(prog)s --plan-dir .cui/plans/my-task \\
+  %(prog)s --plan-dir .plan/plans/my-task \\
            --phase implement \\
            --task-id 3 \\
            --complete-items "Implement feature,Add tests" \\

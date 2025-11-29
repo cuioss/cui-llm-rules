@@ -8,7 +8,7 @@ TOON provides 30-60% token reduction for agent handoffs and memory persistence c
 
 **Scope**: Internal cui-llm-rules marketplace operations only:
 - Agent-to-agent handoffs
-- Memory persistence (`.cui/memory/`)
+- Memory persistence (`.plan/memory/`)
 - Inter-agent data exchange
 - Test fixtures for agent workflows
 
@@ -143,7 +143,7 @@ current_task:
   started: 2025-11-26T10:45:00Z
 ```
 
-**Storage**: `.cui/memory/task-history.toon`
+**Storage**: `.plan/memory/task-history.toon`
 
 **Use Cases**:
 - Multi-session workflows
@@ -177,7 +177,7 @@ summary:
   total_issues_found: 45
 ```
 
-**Storage**: `.cui/memory/analysis-state.toon`
+**Storage**: `.plan/memory/analysis-state.toon`
 
 **Use Cases**:
 - Large codebase analysis

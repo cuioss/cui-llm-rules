@@ -1,6 +1,6 @@
 # Run Configuration Format
 
-JSON schema specification for `.cui/run-configuration.json`.
+JSON schema specification for `.plan/run-configuration.json`.
 
 ## Purpose
 
@@ -9,7 +9,7 @@ The run configuration file stores:
 - Acceptable warnings and skip lists
 - Maven build configurations
 
-> **Note**: Lessons learned are stored separately in `.cui/lessons-learned/`. See the `claude-lessons-learned` skill.
+> **Note**: Lessons learned are stored separately in `.plan/lessons-learned/`. See the `claude-lessons-learned` skill.
 
 ## Schema
 

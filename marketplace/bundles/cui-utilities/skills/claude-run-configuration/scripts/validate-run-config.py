@@ -2,7 +2,7 @@
 """
 Validate run-configuration.json format and structure integrity.
 
-Validates .cui/run-configuration.json against expected schema
+Validates .plan/run-configuration.json against expected schema
 and reports detailed check results.
 
 Output: JSON to stdout with validation results.
@@ -122,10 +122,10 @@ def main():
         epilog="""
 Examples:
   # Validate run configuration
-  %(prog)s .cui/run-configuration.json
+  %(prog)s .plan/run-configuration.json
 
   # Validate specific project's config
-  %(prog)s /path/to/project/.cui/run-configuration.json
+  %(prog)s /path/to/project/.plan/run-configuration.json
 """
     )
 

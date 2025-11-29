@@ -27,7 +27,7 @@ Activate this skill when:
 
 ## Cached Attributes
 
-Stored in `.cui/run-configuration.json` under `build`:
+Stored in `.plan/run-configuration.json` under `build`:
 
 | Attribute | Example | Description |
 |-----------|---------|-------------|

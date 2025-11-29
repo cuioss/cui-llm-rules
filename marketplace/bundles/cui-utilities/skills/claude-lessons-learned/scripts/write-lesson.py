@@ -3,7 +3,7 @@
 Create new lesson MD files for the lessons-learned system.
 
 Creates a new lesson file with proper metadata and content structure.
-Uses atomic file operations to write to .cui/ directory.
+Uses atomic file operations to write to .plan/ directory.
 
 Output: JSON with created file path and lesson ID.
 """
@@ -20,7 +20,7 @@ SCRIPT_DIR = Path(__file__).parent
 FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
 
-from file_ops import atomic_write_file, cui_path, output_success, output_error
+from file_ops import atomic_write_file, base_path, output_success, output_error
 
 
 def generate_lesson_id(lessons_dir: Path) -> str:
@@ -166,16 +166,16 @@ Examples:
     parser.add_argument('--related', default='',
                         help='Optional related components')
     parser.add_argument('--lessons-dir', default=None,
-                        help='Directory for lesson files (default: .cui/lessons-learned)')
+                        help='Directory for lesson files (default: .plan/lessons-learned)')
 
     args = parser.parse_args()
 
     try:
-        # Use cui_path for default, or explicit path if provided
+        # Use base_path for default, or explicit path if provided
         if args.lessons_dir:
             lessons_dir = Path(args.lessons_dir)
         else:
-            lessons_dir = cui_path('lessons-learned')
+            lessons_dir = base_path('lessons-learned')
 
         # Generate unique ID
         lesson_id = generate_lesson_id(lessons_dir)

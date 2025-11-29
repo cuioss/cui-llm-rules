@@ -229,7 +229,7 @@ Output JSON structure:
     {
       "name": "plan-name",
       "title": "Plan Title",
-      "path": ".cui/plans/plan-name/",
+      "path": ".plan/plans/plan-name/",
       "phase": "implement",
       "task": "task-6",
       "status": "in_progress"
@@ -237,7 +237,7 @@ Output JSON structure:
   ],
   "count": 1,
   "recommendation": "plan-name",
-  "search_path": ".cui/plans/",
+  "search_path": ".plan/plans/",
   "filter_applied": "implement",
   "filtered_count": 1
 }
@@ -253,8 +253,8 @@ Filter examples:
     parser.add_argument(
         'search_path',
         nargs='?',
-        default='.cui/plans/',
-        help='Path to search for plans (default: .cui/plans/)'
+        default='.plan/plans/',
+        help='Path to search for plans (default: .plan/plans/)'
     )
     parser.add_argument(
         '--filter',

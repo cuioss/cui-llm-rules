@@ -655,7 +655,7 @@ If you discover issues or improvements during execution, record them:
 
 **Key Points**:
 - Only activate skill when you have lessons to record
-- Lessons are stored in `.cui/lessons-learned/*.md` (individual Markdown files)
+- Lessons are stored in `.plan/lessons-learned/*.md` (individual Markdown files)
 - Categories: bug, improvement, pattern, anti-pattern
 
 ## Common Issues and Fixes

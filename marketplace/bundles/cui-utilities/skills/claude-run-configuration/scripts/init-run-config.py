@@ -2,7 +2,7 @@
 """
 Initialize run-configuration.json with base structure if it doesn't exist.
 
-Creates .cui/run-configuration.json with the required base structure
+Creates .plan/run-configuration.json with the required base structure
 for tracking command execution history and configurations.
 
 Output: JSON to stdout with initialization result.
@@ -20,7 +20,7 @@ SCRIPT_DIR = Path(__file__).parent
 FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
 
-from file_ops import cui_path
+from file_ops import base_path
 
 
 DEFAULT_STRUCTURE = {
@@ -101,8 +101,8 @@ Examples:
 
     try:
         project_dir = Path(args.project_dir).resolve()
-        # Use cui_path for default location
-        config_path = project_dir / cui_path('run-configuration.json')
+        # Use base_path for default location
+        config_path = project_dir / base_path('run-configuration.json')
 
         if config_path.exists() and not args.force:
             output_success(

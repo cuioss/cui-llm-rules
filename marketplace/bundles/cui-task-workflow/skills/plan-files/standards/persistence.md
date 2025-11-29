@@ -4,14 +4,14 @@
 
 ### Location
 
-**Primary Location**: `.cui/plans/`
+**Primary Location**: `.plan/plans/`
 
 ### Organization
 
 Each plan uses a dedicated subdirectory:
 
 ```
-.cui/plans/
+.plan/plans/
   └── {task-name}/
       ├── plan.md                        # Tasks only (phases, tasks, status)
       ├── config.md                      # Configuration from init phase
@@ -230,7 +230,7 @@ Use `interface-management` skill to:
 
 **Plans are NOT tracked in git** - they are working session artifacts excluded by `.gitignore`.
 
-The `.cui/*` pattern in `.gitignore` excludes plan directories. This is intentional:
+The `.plan/*` pattern in `.gitignore` excludes plan directories. This is intentional:
 - Plans are session-specific working documents
 - Plan progress updates would create noise in git history
 - Implementation code (not plans) is what gets committed
@@ -242,5 +242,5 @@ The `.cui/*` pattern in `.gitignore` excludes plan directories. This is intentio
 - Documentation updates (ADRs, interfaces, READMEs)
 
 **What is NOT committed**:
-- `.cui/plans/` directories and contents
+- `.plan/plans/` directories and contents
 - Plan progress tracking (plan.md, config.md, references.md)

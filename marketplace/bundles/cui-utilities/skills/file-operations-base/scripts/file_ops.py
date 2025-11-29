@@ -3,7 +3,7 @@
 Base file operations module for CUI workflow scripts.
 
 Provides atomic file operations, metadata parsing, JSON output helpers,
-and base directory configuration for CUI files.
+and base directory configuration for workflow files.
 Stdlib-only - no external dependencies.
 
 Usage:
@@ -14,9 +14,9 @@ Usage:
         output_error,
         parse_markdown_metadata,
         generate_markdown_metadata,
-        get_cui_base_dir,
-        set_cui_base_dir,
-        cui_path
+        get_base_dir,
+        set_base_dir,
+        base_path
     )
 """
 
@@ -28,47 +28,47 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 
-# Default base directory for CUI workflow files
-_CUI_BASE_DIR = Path('.cui')
+# Default base directory for workflow files
+_BASE_DIR = Path('.plan')
 
 
-def get_cui_base_dir() -> Path:
-    """Get the base directory for CUI workflow files.
+def get_base_dir() -> Path:
+    """Get the base directory for workflow files.
 
     Returns:
-        Path object for the CUI base directory (default: .cui)
+        Path object for the workflow base directory (default: .plan)
     """
-    return _CUI_BASE_DIR
+    return _BASE_DIR
 
 
-def set_cui_base_dir(path: Path | str) -> None:
-    """Override the base directory for CUI workflow files.
+def set_base_dir(path: Path | str) -> None:
+    """Override the base directory for workflow files.
 
     Args:
         path: New base directory path
 
     Note:
         This is primarily for testing purposes. In production,
-        the default .cui directory should be used.
+        the default .plan directory should be used.
     """
-    global _CUI_BASE_DIR
-    _CUI_BASE_DIR = Path(path)
+    global _BASE_DIR
+    _BASE_DIR = Path(path)
 
 
-def cui_path(*parts: str) -> Path:
-    """Construct a path within the CUI base directory.
+def base_path(*parts: str) -> Path:
+    """Construct a path within the workflow base directory.
 
     Args:
         *parts: Path components to join
 
     Returns:
-        Full path including the CUI base directory
+        Full path including the workflow base directory
 
     Example:
-        >>> cui_path('plans', 'my-task', 'plan.md')
-        PosixPath('.cui/plans/my-task/plan.md')
+        >>> base_path('plans', 'my-task', 'plan.md')
+        PosixPath('.plan/plans/my-task/plan.md')
     """
-    return _CUI_BASE_DIR.joinpath(*parts)
+    return _BASE_DIR.joinpath(*parts)
 
 
 def atomic_write_file(path: str | Path, content: str) -> None:
@@ -301,11 +301,11 @@ if __name__ == '__main__':
     # Quick self-test when run directly
     print("file_ops.py - File Operations Base Module")
     print("=" * 50)
-    print(f"\nCUI Base Directory: {get_cui_base_dir()}")
+    print(f"\nWorkflow Base Directory: {get_base_dir()}")
     print("\nAvailable functions:")
-    print("- get_cui_base_dir() -> Path")
-    print("- set_cui_base_dir(path)")
-    print("- cui_path(*parts) -> Path")
+    print("- get_base_dir() -> Path")
+    print("- set_base_dir(path)")
+    print("- base_path(*parts) -> Path")
     print("- atomic_write_file(path, content)")
     print("- ensure_directory(path)")
     print("- output_success(operation, **kwargs)")

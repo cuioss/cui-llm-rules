@@ -23,8 +23,8 @@ These utilities are independent tools that can be used across different CUI proj
 1. **cui-diagnostic-patterns** - Tool usage patterns for non-prompting file operations
 2. **cui-general-development-rules** - Core development principles for CUI projects
 3. **json-file-operations** - Generic JSON file CRUD with path notation support
-4. **claude-memory** - Memory layer operations for .cui/memory/ session persistence
-5. **claude-run-configuration** - Run configuration handling for .cui/run-configuration.json
+4. **claude-memory** - Memory layer operations for .plan/memory/ session persistence
+5. **claude-run-configuration** - Run configuration handling for .plan/run-configuration.json
 6. **permission-management** - Permission validation and settings management
 7. **script-runner** - Script resolution and execution with portable notation
 8. **toon-usage** - TOON format specification and usage patterns for agent communication (50% token reduction)

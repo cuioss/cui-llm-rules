@@ -1,11 +1,11 @@
 # Memory Layer Format
 
-File format specifications for `.cui/memory/` session persistence.
+File format specifications for `.plan/memory/` session persistence.
 
 ## Directory Structure
 
 ```
-.cui/memory/
+.plan/memory/
 ├── context/         # Session context snapshots
 └── handoffs/        # Pending handoff state
 ```
