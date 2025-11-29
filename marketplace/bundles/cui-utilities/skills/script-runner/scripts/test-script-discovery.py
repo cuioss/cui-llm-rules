@@ -37,17 +37,17 @@ def load_scripts_local(path: Path) -> dict:
 
 
 def discover_marketplace_scripts(marketplace_root: Path) -> list[dict]:
-    """Run scan-marketplace-inventory.sh and return all discovered scripts."""
+    """Run scan-marketplace-inventory.py and return all discovered scripts."""
     script_path = (
         marketplace_root /
-        "marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.sh"
+        "marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py"
     )
 
     if not script_path.exists():
         raise FileNotFoundError(f"Inventory script not found: {script_path}")
 
     result = subprocess.run(
-        ["bash", str(script_path), "--resource-types", "scripts"],
+        ["python3", str(script_path), "--resource-types", "scripts"],
         cwd=str(marketplace_root),
         capture_output=True,
         text=True
@@ -136,7 +136,7 @@ def main():
     if not args.scripts_local.is_absolute():
         args.scripts_local = args.marketplace_root / args.scripts_local
 
-    print(f"Testing script discovery...")
+    print("Testing script discovery...")
     print(f"  scripts.local.json: {args.scripts_local}")
     print(f"  marketplace root: {args.marketplace_root}")
     print()

@@ -28,21 +28,21 @@ from pathlib import Path
 
 def discover_marketplace_scripts(marketplace_root: Path) -> tuple[list[dict], str]:
     """
-    Run scan-marketplace-inventory.sh and return all discovered scripts.
+    Run scan-marketplace-inventory.py and return all discovered scripts.
 
     Returns:
         (scripts_list, marketplace_name)
     """
     script_path = (
         marketplace_root /
-        "marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.sh"
+        "marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py"
     )
 
     if not script_path.exists():
         raise FileNotFoundError(f"Inventory script not found: {script_path}")
 
     result = subprocess.run(
-        ["bash", str(script_path), "--resource-types", "scripts"],
+        ["python3", str(script_path), "--resource-types", "scripts"],
         cwd=str(marketplace_root),
         capture_output=True,
         text=True

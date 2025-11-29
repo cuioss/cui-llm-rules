@@ -219,7 +219,7 @@ Handles plan editing based on current phase:
 
 Invoked by `/plan-execute` command. Handles execution phases: implement/execute, verify, finalize.
 
-**Note**: `implement` is used by Implementation plans (5-phase), `execute` is used by Simple plans (3-phase).
+**Note**: `implement` is used by Implementation plans (5-phase), `execute` is used by Simple plans (3-phase) and Plugin-Development plans (4-phase).
 
 **Input Parameters**:
 - `plan_name` (optional): Plan name to execute
@@ -780,7 +780,7 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
   - Phases: `init`, `refine`, `implement`, `execute`, `verify`, `finalize`
   - Statuses: `completed`, `in_progress`, `pending`
   - Multiple: comma-separated (e.g., `--filter=implement,execute,verify,finalize`)
-- **Note**: `implement` is for Implementation plans (5-phase), `execute` is for Simple plans (3-phase)
+- **Note**: `implement` is for Implementation plans (5-phase), `execute` is for Simple plans (3-phase) and Plugin-Development plans (4-phase)
 - **Usage** (after resolving):
   ```bash
   python3 {resolved_path} {plan-storage}/

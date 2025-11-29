@@ -25,8 +25,10 @@ import sys
 from pathlib import Path
 
 # Valid filter values
-# Note: 'execute' is used by Simple plan type (3-phase: init→execute→finalize)
-# while 'implement' is used by Implementation plan type (5-phase: init→refine→implement→verify→finalize)
+# Note: Three plan types exist:
+# - Implementation (5-phase): init→refine→implement→verify→finalize
+# - Plugin-Development (4-phase): init→refine→execute→finalize
+# - Simple (3-phase): init→execute→finalize
 VALID_PHASES = {'init', 'refine', 'implement', 'execute', 'verify', 'finalize'}
 VALID_STATUSES = {'completed', 'in_progress', 'pending'}
 VALID_FILTERS = VALID_PHASES | VALID_STATUSES

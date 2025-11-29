@@ -9,7 +9,7 @@ allowed-tools:
 
 # Marketplace Inventory Skill
 
-Provides complete marketplace inventory scanning capabilities using the scan-marketplace-inventory.sh script.
+Provides complete marketplace inventory scanning capabilities using the scan-marketplace-inventory.py script.
 
 ## Purpose
 
@@ -34,18 +34,18 @@ Run the marketplace inventory scanner script using the resolved path:
 **For skill scripts, use the script-runner skill to resolve the path:**
 ```
 Skill: cui-utilities:script-runner
-Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.sh
+Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py
 ```
 
 Then execute:
 ```bash
-bash {resolved_path} --scope marketplace
+python3 {resolved_path} --scope marketplace
 ```
 
 **Alternative (direct execution from marketplace checkout):**
 If working directly in the marketplace repository, execute:
 ```bash
-bash marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.sh --scope marketplace
+python3 marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py --scope marketplace
 ```
 
 The script will:
@@ -115,5 +115,5 @@ This skill is designed to run without user prompts. Required permissions:
 
 ## References
 
-- Script location: scripts/scan-marketplace-inventory.sh
+- Script location: scripts/scan-marketplace-inventory.py
 - Marketplace root: marketplace/bundles/

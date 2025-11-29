@@ -140,7 +140,7 @@ Config: compatibility=breaking (paths change), finalizing=commit-only
 |-----------|-----------------|----------|
 | Implementation | 5 (init→refine→implement→verify→finalize) | Code development |
 | Simple | 3 (init→execute→finalize) | Documentation, config |
-| Plugin-Development | 3 (init→execute→finalize) | Marketplace components with `/plugin-doctor` verification |
+| Plugin-Development | 4 (init→refine→execute→finalize) | Marketplace components with `/plugin-doctor` verification |
 
 ## Property Specifications
 
@@ -194,10 +194,21 @@ Config: compatibility=breaking (paths change), finalizing=commit-only
 - execute: dynamic (based on task description)
 - finalize: 2 tasks (commit, verify)
 
-### Plugin-Development (3 phases)
+### Plugin-Development (4 phases)
 - init: 2 tasks (detect environment, confirm configuration)
+- refine: 4 tasks (assess complexity, strategic analysis, component breakdown, generate implementation-requirements.md)
 - execute: dynamic (based on components to add/modify) + verification sub-tasks
 - finalize: 3 tasks (verify all components, commit, verify completion)
+
+**Refine Phase Artifacts** (same as Implementation plan):
+- `analysis.md` (optional) - Created for complex tasks with design decisions
+- `implementation-requirements.md` - Always created with task details and guidance
+
+**Refine Phase Purpose**:
+- Assess complexity and decide if analysis.md is needed
+- Document design decisions and trade-offs (if complex)
+- Analyze existing components for patterns and conventions
+- Generate implementation-requirements.md with detailed tasks
 
 **Execute Phase Special Rules**:
 - Each component task MUST include verification checklist item: `/plugin-doctor {type}={name}`

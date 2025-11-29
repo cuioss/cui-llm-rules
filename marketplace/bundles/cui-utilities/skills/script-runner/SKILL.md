@@ -36,7 +36,7 @@ This skill provides:
 bundle:skill/scripts/name.ext
 
 Examples:
-- cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.sh
+- cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py
 - cui-utilities:permission-management/scripts/generate-permission-wildcards.py
 ```
 
@@ -99,7 +99,7 @@ Discovers all skill scripts from installed plugins and generates the scripts cac
    ```
 
    This script:
-   - Invokes `scan-marketplace-inventory.sh` to get all bundles, skills, and scripts
+   - Invokes `scan-marketplace-inventory.py` to get all bundles, skills, and scripts
    - Builds portable notation for each script: `{bundle}:{skill}/scripts/{script-name}`
    - Generates permission patterns (one per skill directory)
    - Writes `.claude/scripts.local.json` atomically
@@ -160,18 +160,18 @@ Skills that need to run scripts should:
 
 1. **Document the notation** in their SKILL.md:
    ```markdown
-   Script: `cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.sh`
+   Script: `cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py`
    ```
 
 2. **Invoke script-runner to resolve**:
    ```
    Skill: cui-utilities:script-runner
-   Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.sh
+   Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py
    ```
 
 3. **Use the returned absolute path**:
    ```bash
-   bash {resolved_path} --scope marketplace
+   python3 {resolved_path} --scope marketplace
    ```
 
 Or simply read `.claude/scripts.local.json` directly and use the absolute path.

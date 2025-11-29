@@ -14,23 +14,25 @@ import json
 import sys
 
 # Phase order (strict sequence)
-# Note: Two plan types exist:
+# Note: Three plan types exist:
 # - Implementation (5-phase): init → refine → implement → verify → finalize
-# - Simple/Plugin-Development (3-phase): init → execute → finalize
-# The 'execute' phase is equivalent to 'implement' for Simple plans
+# - Plugin-Development (4-phase): init → refine → execute → finalize
+# - Simple (3-phase): init → execute → finalize
+# The 'execute' phase is equivalent to 'implement' for Simple/Plugin-Development plans
 PHASE_ORDER_IMPLEMENTATION = ['init', 'refine', 'implement', 'verify', 'finalize']
+PHASE_ORDER_PLUGIN_DEVELOPMENT = ['init', 'refine', 'execute', 'finalize']
 PHASE_ORDER_SIMPLE = ['init', 'execute', 'finalize']
 
 # Combined for validation (all valid phases)
 ALL_VALID_PHASES = {'init', 'refine', 'implement', 'execute', 'verify', 'finalize'}
 
 # Phase to skill mapping
-# Note: 'execute' (Simple plans) routes to same skill as 'implement'
+# Note: 'execute' (Simple/Plugin-Development plans) routes to same skill as 'implement'
 PHASE_SKILL_MAP = {
     'init': 'plan-init',
     'refine': 'plan-refine',
     'implement': 'plan-implement',
-    'execute': 'plan-implement',  # Simple/Plugin-Development plans
+    'execute': 'plan-implement',  # Simple (3-phase) and Plugin-Development (4-phase) plans
     'verify': 'plan-verify',
     'finalize': 'plan-finalize'
 }
@@ -213,9 +215,10 @@ Output JSON structure:
 
 Plan types:
 - Implementation (5-phase): init -> refine -> implement -> verify -> finalize
-- Simple/Plugin-Development (3-phase): init -> execute -> finalize
+- Plugin-Development (4-phase): init -> refine -> execute -> finalize
+- Simple (3-phase): init -> execute -> finalize
 
-Note: 'execute' (Simple plans) routes to the same skill as 'implement'
+Note: 'execute' (Simple/Plugin-Development plans) routes to the same skill as 'implement'
 """
     )
     parser.add_argument('current_phase', help='Current phase from plan.md')
