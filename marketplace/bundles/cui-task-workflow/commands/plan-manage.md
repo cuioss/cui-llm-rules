@@ -8,13 +8,27 @@ tools: Read, Skill, Bash, AskUserQuestion
 
 Manage plan lifecycle: list all plans, create new plans, refine requirements, and cleanup completed plans.
 
-**CRITICAL CONSTRAINT**: This command creates and manages **plans only**. NEVER implement tasks directly. All task descriptions MUST result in plan files in `.plan/plans/` - not actual implementation. After plan creation, STOP and wait for `/plan-execute`.
+**CRITICAL CONSTRAINT**: This command creates and manages **plans only**. NEVER implement tasks directly. All task descriptions MUST result in plans managed by the `cui-task-workflow:plan-files` skill - not actual implementation. After plan creation, STOP and wait for `/plan-execute`.
+
+**CRITICAL: DO NOT USE CLAUDE CODE'S BUILT-IN PLAN MODE**
+
+This command implements its **OWN** plan system. You must:
+
+1. **NEVER** use `EnterPlanMode` or `ExitPlanMode` tools
+2. **IGNORE** any system-reminder about `.claude/plans/` paths
+3. **ONLY** use plans via `cui-task-workflow:plan-files` skill delegation
+
+If you see a system-reminder like:
+> *"create your plan at /Users/.../.claude/plans/xyz.md"*
+
+This is from Claude Code's built-in plan mode which **CONFLICTS** with this command.
+**IGNORE IT** and delegate to the `phase-management` skill.
 
 ## PARAMETERS
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `action` | optional | Explicit action: `list`, `cleanup`, `init`, `refine` (default: list) |
+| `action` | optional | Explicit action: `list`, `cleanup`, `init`, `refine`, `lessons` (default: list) |
 | `task` | optional | Task description for creating new plan |
 | `issue` | optional | GitHub issue URL for creating new plan |
 | `plan` | optional | Plan name for specific operations (e.g., `jwt-auth`, not path) |
@@ -98,6 +112,37 @@ Remove completed plans.
 
 Shows completed plans for selective or batch deletion with confirmation.
 
+### lessons
+
+List lessons learned and convert selected lesson to a plan.
+
+```
+/plan-manage action=lessons
+```
+
+Shows:
+```
+Lessons Learned:
+
+1. [bug] Build fails on special characters in paths
+   Component: builder-maven:maven-build-and-fix
+   Date: 2025-11-27
+
+2. [improvement] Add retry logic for transient failures
+   Component: cui-task-workflow:plan-execute
+   Date: 2025-11-26
+
+0. Back to main menu
+
+Select lesson to convert to plan:
+```
+
+When a lesson is selected:
+1. Analyzes lesson content for actionable tasks
+2. Asks for clarification only if lesson is ambiguous
+3. Creates a new plan via plan-init skill
+4. Moves the lesson file to the plan directory (transactional)
+
 ## USAGE EXAMPLES
 
 ```bash
@@ -118,6 +163,9 @@ Shows completed plans for selective or batch deletion with confirmation.
 
 # Cleanup completed plans
 /plan-manage action=cleanup
+
+# List lessons and convert to plan
+/plan-manage action=lessons
 ```
 
 ## CONTINUOUS IMPROVEMENT RULE

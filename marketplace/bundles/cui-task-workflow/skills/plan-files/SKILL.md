@@ -287,6 +287,7 @@ Python scripts for deterministic operations (output JSON):
 | `write-config.py` | Create config.toon | `python3 scripts/write-config.py --help` |
 | `write-references.py` | Create/update references.md | `python3 scripts/write-references.py --help` |
 | `update-progress.py` | Update checklist progress | `python3 scripts/update-progress.py --help` |
+| `copy-lesson-to-plan.py` | Move lesson file to plan | `python3 scripts/copy-lesson-to-plan.py --help` |
 | `parse-plan.py` | Parse plan.md | `python3 scripts/parse-plan.py {path}` |
 | `parse-config.py` | Parse config.toon or config.md | `python3 scripts/parse-config.py {dir}` |
 | `parse-references.py` | Parse references.md | `python3 scripts/parse-references.py {path}` |
