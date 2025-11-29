@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Manage the .claude/memory/ layer for session persistence.
+Manage the .cui/memory/ layer for session persistence.
 
 Provides CRUD operations for memory files organized by category:
 context, decisions, interfaces, handoffs.
@@ -17,11 +17,19 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+# Import file operations from base module
+SCRIPT_DIR = Path(__file__).parent
+FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
+sys.path.insert(0, str(FILE_OPS_DIR))
+
+from file_ops import cui_path
+
 # Suppress deprecation warnings in output
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 
-MEMORY_BASE = Path('.claude/memory')
+# Get memory base path from cui_path
+MEMORY_BASE = cui_path('memory')
 CATEGORIES = ['context', 'handoffs']
 
 
@@ -316,7 +324,7 @@ def cmd_cleanup(args) -> int:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Manage .claude/memory/ layer for session persistence',
+        description='Manage .cui/memory/ layer for session persistence',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Categories:

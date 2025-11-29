@@ -2,7 +2,7 @@
 """
 Validate memory file format and structure integrity.
 
-Validates .claude/memory/ files against expected schema
+Validates .cui/memory/ files against expected schema
 and reports detailed check results.
 
 Output: JSON to stdout with validation results.
@@ -113,10 +113,10 @@ def main():
         epilog="""
 Examples:
   # Validate context file
-  %(prog)s .claude/memory/context/2025-11-25-auth.json
+  %(prog)s .cui/memory/context/2025-11-25-auth.json
 
   # Validate handoffs file
-  %(prog)s .claude/memory/handoffs/task-42.json
+  %(prog)s .cui/memory/handoffs/task-42.json
 """
     )
 

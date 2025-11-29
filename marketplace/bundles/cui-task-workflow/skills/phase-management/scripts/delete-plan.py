@@ -12,7 +12,7 @@ Output: JSON with deletion result.
 Safety checks:
     - Validates plan directory exists
     - Validates plan.md exists (confirms it's a plan)
-    - Only deletes within .claude/plans/ hierarchy
+    - Only deletes within .cui/plans/ hierarchy
     - Supports dry-run mode
 """
 
@@ -50,10 +50,10 @@ def validate_plan_directory(plan_dir: Path) -> dict:
         errors.append(f"No plan.md found in directory: {plan_dir}")
         return {'valid': False, 'errors': errors}
 
-    # Safety: ensure path contains .claude/plans/
+    # Safety: ensure path contains .cui/plans/
     plan_str = str(plan_dir.resolve())
-    if '.claude/plans/' not in plan_str and '.claude\\plans\\' not in plan_str:
-        errors.append(f"Directory is not within .claude/plans/ hierarchy: {plan_dir}")
+    if '.cui/plans/' not in plan_str and '.claude\\plans\\' not in plan_str:
+        errors.append(f"Directory is not within .cui/plans/ hierarchy: {plan_dir}")
         return {'valid': False, 'errors': errors}
 
     return {'valid': True, 'errors': []}
@@ -175,7 +175,7 @@ Output JSON structure (success):
 {
   "success": true,
   "plan_name": "my-plan",
-  "plan_directory": ".claude/plans/my-plan/",
+  "plan_directory": ".cui/plans/my-plan/",
   "deleted": {
     "files": 5,
     "directories": 2,

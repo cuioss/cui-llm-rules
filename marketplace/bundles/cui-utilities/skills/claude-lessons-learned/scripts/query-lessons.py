@@ -31,6 +31,13 @@ import sys
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
+# Import file operations from base module for cui_path
+SCRIPT_DIR = Path(__file__).parent
+FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
+sys.path.insert(0, str(FILE_OPS_DIR))
+
+from file_ops import cui_path
+
 
 def parse_metadata(metadata_text: str) -> Dict[str, Any]:
     """
@@ -181,11 +188,17 @@ Examples:
     parser.add_argument(
         "--lessons-dir",
         type=Path,
-        default=Path(".claude/lessons-learned"),
-        help="Directory containing lesson files (default: .claude/lessons-learned)"
+        default=None,
+        help="Directory containing lesson files (default: .cui/lessons-learned)"
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    # Use cui_path for default
+    if args.lessons_dir is None:
+        args.lessons_dir = cui_path('lessons-learned')
+
+    return args
 
 
 def read_lesson(file_path: Path) -> Optional[Dict[str, Any]]:

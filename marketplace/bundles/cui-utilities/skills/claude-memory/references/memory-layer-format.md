@@ -1,11 +1,11 @@
 # Memory Layer Format
 
-File format specifications for `.claude/memory/` session persistence.
+File format specifications for `.cui/memory/` session persistence.
 
 ## Directory Structure
 
 ```
-.claude/memory/
+.cui/memory/
 ├── context/         # Session context snapshots
 └── handoffs/        # Pending handoff state
 ```

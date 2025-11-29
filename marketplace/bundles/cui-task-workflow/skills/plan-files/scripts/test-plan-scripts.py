@@ -138,7 +138,7 @@ def test_write_plan_with_detailed_tasks():
 # write-config.py tests
 
 def test_write_config_creates_file():
-    """Test write-config.py creates config file."""
+    """Test write-config.py creates config file in TOON format."""
     with tempfile.TemporaryDirectory() as tmpdir:
         plan_dir = Path(tmpdir) / 'plan'
 
@@ -156,14 +156,15 @@ def test_write_config_creates_file():
 
         result = json.loads(stdout)
         assert result['success'] is True
+        assert result.get('format') == 'toon'
 
-        file_path = plan_dir / 'config.md'
+        file_path = plan_dir / 'config.toon'
         assert file_path.exists()
 
         content = file_path.read_text()
-        assert '**Plan Type**: implementation' in content
-        assert '| Technology | java |' in content
-        assert '| Build System | maven |' in content
+        assert 'plan_type: implementation' in content
+        assert 'technology: java' in content
+        assert 'build_system: maven' in content
 
 
 def test_write_config_with_context():
@@ -185,9 +186,9 @@ def test_write_config_with_context():
 
         assert returncode == 0
 
-        content = (plan_dir / 'config.md').read_text()
-        assert '| Branch | feature/test |' in content
-        assert '| Issue | #123 |' in content
+        content = (plan_dir / 'config.toon').read_text()
+        assert 'branch: feature/test' in content
+        assert 'issue: #123' in content
 
 
 def test_write_config_validates_enums():

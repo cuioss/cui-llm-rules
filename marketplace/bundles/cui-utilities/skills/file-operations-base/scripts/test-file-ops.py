@@ -22,7 +22,10 @@ from file_ops import (
     parse_markdown_metadata,
     generate_markdown_metadata,
     update_markdown_metadata,
-    get_metadata_content_split
+    get_metadata_content_split,
+    get_cui_base_dir,
+    set_cui_base_dir,
+    cui_path
 )
 
 
@@ -316,6 +319,82 @@ def test_roundtrip_metadata():
     assert parsed == original, "Roundtrip should preserve data"
 
 
+def test_get_cui_base_dir_default():
+    """Test get_cui_base_dir returns default .cui path."""
+    # Reset to default first
+    set_cui_base_dir('.cui')
+
+    result = get_cui_base_dir()
+
+    assert result == Path('.cui'), "Default should be .cui"
+
+
+def test_set_cui_base_dir_changes_default():
+    """Test set_cui_base_dir changes the base directory."""
+    # Save original
+    original = get_cui_base_dir()
+
+    try:
+        set_cui_base_dir('/custom/path')
+        result = get_cui_base_dir()
+        assert result == Path('/custom/path'), "Should be changed to custom path"
+    finally:
+        # Restore original
+        set_cui_base_dir(original)
+
+
+def test_set_cui_base_dir_accepts_string():
+    """Test set_cui_base_dir accepts string argument."""
+    original = get_cui_base_dir()
+
+    try:
+        set_cui_base_dir('/string/path')
+        result = get_cui_base_dir()
+        assert isinstance(result, Path), "Should return Path object"
+        assert result == Path('/string/path'), "Should be correct path"
+    finally:
+        set_cui_base_dir(original)
+
+
+def test_cui_path_basic():
+    """Test cui_path constructs path within base directory."""
+    set_cui_base_dir('.cui')
+
+    result = cui_path('plans', 'my-task', 'plan.md')
+
+    assert result == Path('.cui/plans/my-task/plan.md'), "Should construct full path"
+
+
+def test_cui_path_single_part():
+    """Test cui_path with single path part."""
+    set_cui_base_dir('.cui')
+
+    result = cui_path('config.json')
+
+    assert result == Path('.cui/config.json'), "Should construct single-level path"
+
+
+def test_cui_path_no_parts():
+    """Test cui_path with no parts returns base directory."""
+    set_cui_base_dir('.cui')
+
+    result = cui_path()
+
+    assert result == Path('.cui'), "Should return base directory"
+
+
+def test_cui_path_respects_custom_base():
+    """Test cui_path uses custom base directory."""
+    original = get_cui_base_dir()
+
+    try:
+        set_cui_base_dir('/custom/base')
+        result = cui_path('plans', 'task')
+        assert result == Path('/custom/base/plans/task'), "Should use custom base"
+    finally:
+        set_cui_base_dir(original)
+
+
 def main():
     """Run all tests."""
     print("=" * 50)
@@ -367,6 +446,19 @@ def main():
     # Integration tests
     print("\nIntegration:")
     runner.run_test("roundtrip metadata", test_roundtrip_metadata)
+
+    # CUI base directory tests
+    print("\nget_cui_base_dir/set_cui_base_dir:")
+    runner.run_test("default value", test_get_cui_base_dir_default)
+    runner.run_test("changes default", test_set_cui_base_dir_changes_default)
+    runner.run_test("accepts string", test_set_cui_base_dir_accepts_string)
+
+    # cui_path tests
+    print("\ncui_path:")
+    runner.run_test("basic", test_cui_path_basic)
+    runner.run_test("single part", test_cui_path_single_part)
+    runner.run_test("no parts", test_cui_path_no_parts)
+    runner.run_test("respects custom base", test_cui_path_respects_custom_base)
 
     return runner.summary()
 

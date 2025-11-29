@@ -2,7 +2,7 @@
 """
 Initialize run-configuration.json with base structure if it doesn't exist.
 
-Creates .claude/run-configuration.json with the required base structure
+Creates .cui/run-configuration.json with the required base structure
 for tracking command execution history and configurations.
 
 Output: JSON to stdout with initialization result.
@@ -14,6 +14,13 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+
+# Import file operations from base module
+SCRIPT_DIR = Path(__file__).parent
+FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
+sys.path.insert(0, str(FILE_OPS_DIR))
+
+from file_ops import cui_path
 
 
 DEFAULT_STRUCTURE = {
@@ -94,7 +101,8 @@ Examples:
 
     try:
         project_dir = Path(args.project_dir).resolve()
-        config_path = project_dir / '.claude' / 'run-configuration.json'
+        # Use cui_path for default location
+        config_path = project_dir / cui_path('run-configuration.json')
 
         if config_path.exists() and not args.force:
             output_success(

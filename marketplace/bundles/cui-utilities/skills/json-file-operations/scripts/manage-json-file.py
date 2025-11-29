@@ -2,8 +2,8 @@
 """
 Manage JSON configuration files with field-level operations.
 
-Provides read, write, and update operations for .claude/ JSON files
-using JSON path notation for field access.
+Provides read, write, and update operations for JSON files (both .claude/
+and .cui/ directories) using JSON path notation for field access.
 
 Output: JSON to stdout with operation results.
 """
@@ -374,19 +374,22 @@ def main():
         epilog="""
 Examples:
   # Read entire file
-  %(prog)s read .claude/run-configuration.json
+  %(prog)s read .cui/run-configuration.json
 
   # Read specific field
-  %(prog)s read-field .claude/run-configuration.json --field "commands.setup-project-permissions"
+  %(prog)s read-field .cui/run-configuration.json --field "commands.setup-project-permissions"
 
   # Update field
-  %(prog)s update-field .claude/run-configuration.json --field "commands.my-cmd.status" --value '"SUCCESS"'
+  %(prog)s update-field .cui/run-configuration.json --field "commands.my-cmd.status" --value '"SUCCESS"'
 
   # Add to array
-  %(prog)s add-entry .claude/run-configuration.json --field "commands.my-cmd.lessons" --value '"New lesson"'
+  %(prog)s add-entry .cui/run-configuration.json --field "commands.my-cmd.lessons" --value '"New lesson"'
 
   # Remove field
-  %(prog)s remove-entry .claude/run-configuration.json --field "commands.old-cmd"
+  %(prog)s remove-entry .cui/run-configuration.json --field "commands.old-cmd"
+
+  # Also works with .claude/ (for settings)
+  %(prog)s read .claude/settings.json
 """
     )
 

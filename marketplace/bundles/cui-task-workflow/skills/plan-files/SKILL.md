@@ -44,7 +44,7 @@ Contains: Directory structure, naming conventions, file formats
 1. **Validate** - Lowercase with hyphens, no special characters
 2. **Check existence**:
    ```bash
-   test -d .claude/plans/{task_name}/ && echo "exists" || echo "not-exists"
+   test -d .cui/plans/{task_name}/ && echo "exists" || echo "not-exists"
    ```
 3. **Handle existing** (AskUserQuestion):
    - Use existing (resume)
@@ -52,7 +52,7 @@ Contains: Directory structure, naming conventions, file formats
    - Replace (delete and recreate)
 4. **Create**:
    ```bash
-   mkdir -p .claude/plans/{task_name}/
+   mkdir -p .cui/plans/{task_name}/
    ```
 
 **Output**: `status: created|resumed`, `plan_directory`, `existing_plan: true|false`
@@ -261,7 +261,7 @@ python3 scripts/update-progress.py \
 {
   "success": true,
   "operation": "update-progress",
-  "file": ".claude/plans/my-task/plan.md",
+  "file": ".cui/plans/my-task/plan.md",
   "phase": "init",
   "task_id": "1",
   "items_completed": 2,

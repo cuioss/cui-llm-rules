@@ -1,15 +1,17 @@
 ---
 name: file-operations-base
-description: Base module providing reusable file operations patterns for .claude directory scripts
+description: Base module providing reusable file operations patterns for CUI workflow scripts
 allowed-tools: Bash
 ---
 
 # File Operations Base Skill
 
-**Role**: Shared Python module providing atomic file operations, metadata parsing, and JSON output helpers for `.claude/` directory scripts.
+**Role**: Shared Python module providing atomic file operations, metadata parsing, JSON output helpers, and base directory configuration for CUI workflow scripts.
 
 ## What This Skill Provides
 
+- CUI base directory configuration (`.cui/` by default)
+- Path construction helpers for CUI files
 - Atomic file write (temp file + rename pattern)
 - Directory creation (mkdir -p equivalent)
 - JSON success/error output helpers
@@ -18,11 +20,11 @@ allowed-tools: Bash
 
 ## When to Use
 
-Import `file_ops` module in Python scripts that write to `.claude/` directories:
+Import `file_ops` module in Python scripts that write to `.cui/` directories:
 - Lessons learned scripts
 - Plan file scripts
 - Memory management scripts
-- Any script requiring atomic writes
+- Any script requiring atomic writes to CUI directories
 
 ## Module: file_ops.py
 
@@ -30,38 +32,73 @@ Import `file_ops` module in Python scripts that write to `.claude/` directories:
 
 ### Functions
 
-**1. atomic_write_file(path, content)**
+**CUI Directory Functions**
+
+**1. get_cui_base_dir()**
+- **Purpose**: Get the base directory for CUI workflow files
+- **Input**: None
+- **Output**: `Path` - base directory (default: `.cui`)
+
+**2. set_cui_base_dir(path)**
+- **Purpose**: Override the base directory for CUI workflow files
+- **Input**: `path` (str/Path) - new base directory
+- **Output**: None
+- **Note**: Primarily for testing; production uses `.cui` default
+
+**3. cui_path(*parts)**
+- **Purpose**: Construct a path within the CUI base directory
+- **Input**: `*parts` - path components to join
+- **Output**: `Path` - full path including CUI base directory
+- **Example**: `cui_path('plans', 'my-task', 'plan.md')` → `.cui/plans/my-task/plan.md`
+
+**File Operations**
+
+**4. atomic_write_file(path, content)**
 - **Purpose**: Write file atomically using temp file + rename
 - **Input**: `path` (str/Path), `content` (str)
 - **Output**: None (raises on error)
 - **Pattern**: Creates temp file, writes, renames to target
 
-**2. ensure_directory(path)**
+**5. ensure_directory(path)**
 - **Purpose**: Create directory and parents if needed
 - **Input**: `path` (str/Path) - file or directory path
 - **Output**: None
 - **Note**: If path looks like file, creates parent directory
 
-**3. output_success(operation, **kwargs)**
+**JSON Output Helpers**
+
+**6. output_success(operation, **kwargs)**
 - **Purpose**: Print JSON success output to stdout
 - **Input**: `operation` (str), additional kwargs
 - **Output**: Prints JSON to stdout
 
-**4. output_error(operation, error)**
+**7. output_error(operation, error)**
 - **Purpose**: Print JSON error output to stderr
 - **Input**: `operation` (str), `error` (str)
 - **Output**: Prints JSON to stderr
 
-**5. parse_markdown_metadata(content)**
+**Metadata Functions**
+
+**8. parse_markdown_metadata(content)**
 - **Purpose**: Parse key=value metadata from markdown
 - **Input**: `content` (str) - full file content
 - **Output**: `dict` - metadata key-value pairs
 - **Format**: Supports `key=value` and `key.subkey=value` (dot notation)
 
-**6. generate_markdown_metadata(data)**
+**9. generate_markdown_metadata(data)**
 - **Purpose**: Generate key=value metadata block
 - **Input**: `data` (dict) - metadata to serialize
 - **Output**: `str` - formatted metadata block
+
+**10. update_markdown_metadata(content, updates)**
+- **Purpose**: Update specific metadata fields in markdown content
+- **Input**: `content` (str), `updates` (dict)
+- **Output**: `str` - updated content
+
+**11. get_metadata_content_split(content)**
+- **Purpose**: Split markdown content into metadata and body
+- **Input**: `content` (str)
+- **Output**: `tuple[str, str]` - (metadata_block, body_content)
 
 ---
 
@@ -73,17 +110,16 @@ import sys
 sys.path.insert(0, '/path/to/file-operations-base/scripts')
 from file_ops import (
     atomic_write_file,
-    ensure_directory,
+    cui_path,
     output_success,
     output_error,
-    parse_markdown_metadata,
     generate_markdown_metadata
 )
 
 def main():
     try:
-        # Ensure directory exists
-        ensure_directory('.claude/lessons-learned/')
+        # Construct path within .cui directory
+        filepath = cui_path('lessons-learned', '2025-11-28-001.md')
 
         # Generate metadata
         metadata = generate_markdown_metadata({
@@ -92,11 +128,11 @@ def main():
             'applied': 'false'
         })
 
-        # Write atomically
+        # Write atomically (creates directories automatically)
         content = f"{metadata}\n# Lesson Title\n\nContent here..."
-        atomic_write_file('.claude/lessons-learned/2025-11-28-001.md', content)
+        atomic_write_file(filepath, content)
 
-        output_success('write-lesson', file='.claude/lessons-learned/2025-11-28-001.md')
+        output_success('write-lesson', file=str(filepath))
     except Exception as e:
         output_error('write-lesson', str(e))
         sys.exit(1)
@@ -122,14 +158,33 @@ if __name__ == '__main__':
 
 ```python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'file-operations-base' / 'scripts'))
-from file_ops import atomic_write_file, output_success, output_error
+from file_ops import atomic_write_file, cui_path, output_success, output_error
 ```
 
 ### With plan-files
 
 ```python
 sys.path.insert(0, str(Path(__file__).resolve().parents[4] / 'cui-utilities' / 'skills' / 'file-operations-base' / 'scripts'))
-from file_ops import atomic_write_file, output_success, output_error
+from file_ops import atomic_write_file, cui_path, output_success, output_error
+```
+
+## Directory Structure
+
+Files are stored in `.cui/` directory:
+
+```
+.cui/                          # CUI workflow artifacts
+├── run-configuration.json     # Command execution tracking
+├── lessons-learned/           # Knowledge capture
+│   └── *.md
+├── memory/                    # Session state
+│   ├── context/*.json
+│   └── handoffs/*.json
+└── plans/                     # Task plans
+    └── {task-name}/
+        ├── plan.md
+        ├── config.toon
+        └── references.md
 ```
 
 ---

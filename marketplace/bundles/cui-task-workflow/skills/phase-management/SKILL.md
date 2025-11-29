@@ -18,19 +18,19 @@ allowed-tools: Read, Glob, Bash, Skill, AskUserQuestion
 
 **CRITICAL CONSTRAINT - NO IMPLEMENTATION WITHOUT PLAN**:
 - This skill creates and manages **plans only** - it NEVER implements tasks directly
-- When user provides a task description, you MUST create plan files in `.claude/plans/` first
-- NEVER write code, create components, or modify files outside `.claude/plans/`
+- When user provides a task description, you MUST create plan files in `.cui/plans/` first
+- NEVER write code, create components, or modify files outside `.cui/plans/`
 - After plan creation, STOP and wait for user to invoke `/plan-execute`
 - If you find yourself about to implement something, STOP - you are violating this constraint
 
 **CRITICAL CONSTRAINT - NO EDIT/WRITE TOOLS FOR PLAN FILES**:
-- NEVER use Edit or Write tools directly on `.claude/plans/` files
-- Edit/Write tools ALWAYS prompt for `.claude/` directory (security feature that cannot be bypassed)
+- NEVER use Edit or Write tools directly on `.cui/plans/` files
+- Edit/Write tools ALWAYS prompt for `.cui/` directory (security feature that cannot be bypassed)
 - ALWAYS delegate file modifications to `plan-files` skill which uses Python scripts via Bash
 - For progress updates: delegate to `plan-files` skill → `update-progress.py`
 - For plan creation: delegate to `plan-files` skill → `write-plan.py`
 - For config changes: delegate to `plan-files` skill → `write-config.py`
-- Python scripts via Bash can write to `.claude/` without prompts
+- Python scripts via Bash can write to `.cui/` without prompts
 
 **Role**: Orchestration layer for plan-based task workflows. Routes to phase skills based on plan state. Does NOT execute phase work - delegates to phase-specific skills.
 
@@ -105,12 +105,12 @@ Else (default "list"):
 4. Prompt for selection (all/numbers/cancel)
 5. Show what will be deleted:
    ```bash
-   python3 {delete-plan.py path} .claude/plans/{plan-name}/ --dry-run
+   python3 {delete-plan.py path} .cui/plans/{plan-name}/ --dry-run
    ```
 6. Confirm deletion via AskUserQuestion
 7. Execute deletion:
    ```bash
-   python3 {delete-plan.py path} .claude/plans/{plan-name}/
+   python3 {delete-plan.py path} .cui/plans/{plan-name}/
    ```
 8. Report results
 
@@ -229,7 +229,7 @@ Lists all plans with current phase and status.
 
 1. **Run discovery script**:
    ```bash
-   python3 {path-from-scripts.local.json} .claude/plans/
+   python3 {path-from-scripts.local.json} .cui/plans/
    ```
    Parse JSON output internally - do NOT display raw output.
 
@@ -238,9 +238,9 @@ Lists all plans with current phase and status.
    Available Plans:
 
    1. jwt-authentication [implement] - 3/12 tasks complete
-      Path: .claude/plans/jwt-authentication/
+      Path: .cui/plans/jwt-authentication/
    2. user-profile-api [refine] - Requirements analysis
-      Path: .claude/plans/user-profile-api/
+      Path: .cui/plans/user-profile-api/
 
    0. Create new plan
    ```
@@ -268,7 +268,7 @@ Finds completed plans for cleanup.
 
 1. **Run filtered discovery**:
    ```bash
-   python3 {discover-plans.py path} .claude/plans/ --filter=completed
+   python3 {discover-plans.py path} .cui/plans/ --filter=completed
    ```
 
 2. **Return list of completed plans**
@@ -292,7 +292,7 @@ Creates a new plan, checking for existing init-phase plans first.
 
 1. **Check for existing init-phase plans**:
    ```bash
-   python3 {discover-plans.py path} .claude/plans/ --filter=init
+   python3 {discover-plans.py path} .cui/plans/ --filter=init
    ```
 
 2. **If init-phase plans exist**:
@@ -327,7 +327,7 @@ Finds plans ready for refinement or refines a specific plan.
 
 1. **If plan_name not provided**:
    ```bash
-   python3 {discover-plans.py path} .claude/plans/ --filter=init,refine
+   python3 {discover-plans.py path} .cui/plans/ --filter=init,refine
    ```
 
 2. **Return list of refinable plans** or specific plan
@@ -352,7 +352,7 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
 
 1. **Run filtered discovery**:
    ```bash
-   python3 {discover-plans.py path} .claude/plans/ --filter=implement,execute,verify,finalize
+   python3 {discover-plans.py path} .cui/plans/ --filter=implement,execute,verify,finalize
    ```
 
 2. **Exclude completed plans from results**
@@ -362,9 +362,9 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
    Executable Plans:
 
    1. jwt-authentication [implement] - Task 3/12: "Add token validation"
-      Path: .claude/plans/jwt-authentication/
+      Path: .cui/plans/jwt-authentication/
    2. user-profile-api [verify] - Build verification pending
-      Path: .claude/plans/user-profile-api/
+      Path: .cui/plans/user-profile-api/
 
    0. Exit (use /plan-manage to create or refine plans)
    ```
@@ -382,7 +382,7 @@ executable_plans[N]{name,path,phase,current_task}:
 
 Finds available plans in the workspace.
 
-**Input**: `search_path` (optional, default: `.claude/plans/`)
+**Input**: `search_path` (optional, default: `.cui/plans/`)
 
 **Steps**:
 
@@ -605,8 +605,8 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 
 ### Script Details
 
-**1. discover-plans.py**: Finds plans in `.claude/plans/` directory
-- **Input**: search_path (optional, default: `.claude/plans/`), --filter (optional)
+**1. discover-plans.py**: Finds plans in `.cui/plans/` directory
+- **Input**: search_path (optional, default: `.cui/plans/`), --filter (optional)
 - **Output**: JSON with plans array, recommendation, and filter info
 - **Filter Options**:
   - Phases: `init`, `refine`, `implement`, `execute`, `verify`, `finalize`
@@ -615,10 +615,10 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Note**: `implement` is for Implementation plans (5-phase), `execute` is for Simple plans (3-phase)
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .claude/plans/
-  python3 {resolved_path} .claude/plans/ --filter=init
-  python3 {resolved_path} .claude/plans/ --filter=implement,execute,verify,finalize
-  python3 {resolved_path} .claude/plans/ --filter=completed
+  python3 {resolved_path} .cui/plans/
+  python3 {resolved_path} .cui/plans/ --filter=init
+  python3 {resolved_path} .cui/plans/ --filter=implement,execute,verify,finalize
+  python3 {resolved_path} .cui/plans/ --filter=completed
   ```
 
 **2. route-phase.py**: Maps current phase to target skill
@@ -635,7 +635,7 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Output**: JSON with from_phase, to_phase, is_complete
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .claude/plans/my-task/ implement
+  python3 {resolved_path} .cui/plans/my-task/ implement
   ```
 
 **4. get-status.py**: Aggregates comprehensive plan status
@@ -643,7 +643,7 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Output**: JSON with plan_status, phase_progress, current_focus
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .claude/plans/my-task/
+  python3 {resolved_path} .cui/plans/my-task/
   ```
 
 **5. delete-plan.py**: Safely deletes a plan directory
@@ -652,11 +652,11 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Safety Checks**:
   - Validates directory exists
   - Requires plan.md to confirm it's a plan
-  - Only allows deletion within `.claude/plans/` hierarchy
+  - Only allows deletion within `.cui/plans/` hierarchy
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .claude/plans/my-task/
-  python3 {resolved_path} .claude/plans/my-task/ --dry-run
+  python3 {resolved_path} .cui/plans/my-task/
+  python3 {resolved_path} .cui/plans/my-task/ --dry-run
   ```
 
 ---

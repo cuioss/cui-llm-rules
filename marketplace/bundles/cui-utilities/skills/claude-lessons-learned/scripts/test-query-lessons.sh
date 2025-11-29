@@ -23,7 +23,7 @@ TESTS_FAILED=0
 
 # Test directory
 TEST_DIR=$(mktemp -d)
-LESSONS_DIR="$TEST_DIR/.claude/lessons-learned"
+LESSONS_DIR="$TEST_DIR/.cui/lessons-learned"
 
 # Script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

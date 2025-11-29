@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Base file operations module for .claude directory scripts.
+Base file operations module for CUI workflow scripts.
 
-Provides atomic file operations, metadata parsing, and JSON output helpers.
+Provides atomic file operations, metadata parsing, JSON output helpers,
+and base directory configuration for CUI files.
 Stdlib-only - no external dependencies.
 
 Usage:
@@ -12,7 +13,10 @@ Usage:
         output_success,
         output_error,
         parse_markdown_metadata,
-        generate_markdown_metadata
+        generate_markdown_metadata,
+        get_cui_base_dir,
+        set_cui_base_dir,
+        cui_path
     )
 """
 
@@ -22,6 +26,49 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+
+# Default base directory for CUI workflow files
+_CUI_BASE_DIR = Path('.cui')
+
+
+def get_cui_base_dir() -> Path:
+    """Get the base directory for CUI workflow files.
+
+    Returns:
+        Path object for the CUI base directory (default: .cui)
+    """
+    return _CUI_BASE_DIR
+
+
+def set_cui_base_dir(path: Path | str) -> None:
+    """Override the base directory for CUI workflow files.
+
+    Args:
+        path: New base directory path
+
+    Note:
+        This is primarily for testing purposes. In production,
+        the default .cui directory should be used.
+    """
+    global _CUI_BASE_DIR
+    _CUI_BASE_DIR = Path(path)
+
+
+def cui_path(*parts: str) -> Path:
+    """Construct a path within the CUI base directory.
+
+    Args:
+        *parts: Path components to join
+
+    Returns:
+        Full path including the CUI base directory
+
+    Example:
+        >>> cui_path('plans', 'my-task', 'plan.md')
+        PosixPath('.cui/plans/my-task/plan.md')
+    """
+    return _CUI_BASE_DIR.joinpath(*parts)
 
 
 def atomic_write_file(path: str | Path, content: str) -> None:
@@ -254,7 +301,11 @@ if __name__ == '__main__':
     # Quick self-test when run directly
     print("file_ops.py - File Operations Base Module")
     print("=" * 50)
+    print(f"\nCUI Base Directory: {get_cui_base_dir()}")
     print("\nAvailable functions:")
+    print("- get_cui_base_dir() -> Path")
+    print("- set_cui_base_dir(path)")
+    print("- cui_path(*parts) -> Path")
     print("- atomic_write_file(path, content)")
     print("- ensure_directory(path)")
     print("- output_success(operation, **kwargs)")

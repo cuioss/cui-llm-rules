@@ -3,7 +3,7 @@
 Create config.toon from structured input.
 
 Creates a configuration file in TOON format with build and workflow settings.
-Uses atomic file operations to avoid prompts when writing to .claude/ directory.
+Uses atomic file operations to write to .cui/plans/ directory.
 
 Output: JSON with created file path.
 """
@@ -100,7 +100,7 @@ def main():
         epilog="""
 Examples:
   # Create Java/Maven config
-  %(prog)s --plan-dir .claude/plans/my-task \\
+  %(prog)s --plan-dir .cui/plans/my-task \\
            --plan-type implementation \\
            --technology java \\
            --build-system maven \\
@@ -109,7 +109,7 @@ Examples:
            --finalizing pr-workflow
 
   # Create JavaScript/npm config with context
-  %(prog)s --plan-dir .claude/plans/my-task \\
+  %(prog)s --plan-dir .cui/plans/my-task \\
            --plan-type simple \\
            --technology javascript \\
            --build-system npm \\

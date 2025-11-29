@@ -367,8 +367,8 @@ Verify `Write(.claude/settings.local.json)` is in ask list (not allow or deny) f
 - **Skip Read** - covered by global `Read(//~/git/**)`
 
 **C. Add plan file permissions** (to BOTH global AND local):
-- `Edit(.claude/plans/**)` - Edit plan files without prompts
-- `Write(.claude/plans/**)` - Create plan files without prompts
+- `Edit(.cui/plans/**)` - Edit plan files without prompts
+- `Write(.cui/plans/**)` - Create plan files without prompts
 - **CRITICAL**: Must be in BOTH settings files for permissions to work
 
 **D. Add project scripts** (if scripts/ exists):
@@ -549,14 +549,14 @@ For version-controlled projects (like CUI marketplace):
 
 **Default Permissions Added to Project-Level:**
 - ✅ Project Edit/Write: `Edit(//~/git/{repo}/**)`, `Write(//~/git/{repo}/**)`
-- ✅ Plan files: `Edit(.claude/plans/**)`, `Write(.claude/plans/**)` - Plan management without prompts
+- ✅ Plan files: `Edit(.cui/plans/**)`, `Write(.cui/plans/**)` - Plan management without prompts
 - ✅ Project scripts: `Bash(~/git/{repo}/scripts/**)` (if scripts/ exists)
 - ❌ Read: NOT added (globally covered via `Read(//~/git/**)`)
 - ❌ Marketplace wildcards: NOT added to project (should be in global only)
 - ❌ Skill scripts: Synced from `.claude/scripts.local.json` to global settings (see Step 3F)
 
 **Default Permissions Added to Global Settings:**
-- ✅ Plan files: `Edit(.claude/plans/**)`, `Write(.claude/plans/**)` - Must be in BOTH for uninterrupted plan execution
+- ✅ Plan files: `Edit(.cui/plans/**)`, `Write(.cui/plans/**)` - Must be in BOTH for uninterrupted plan execution
 
 ## ARCHITECTURE
 

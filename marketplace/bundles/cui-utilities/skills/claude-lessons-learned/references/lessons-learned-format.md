@@ -1,6 +1,6 @@
 # Lessons Learned Format
 
-Markdown file specification for `.claude/lessons-learned/*.md`.
+Markdown file specification for `.cui/lessons-learned/*.md`.
 
 ## Purpose
 
@@ -13,7 +13,7 @@ Individual lesson files store:
 ## Storage Location
 
 ```
-.claude/lessons-learned/
+.cui/lessons-learned/
   2025-11-27-001.md
   2025-11-27-002.md
   2025-11-26-001.md
@@ -95,7 +95,7 @@ Steps to address the issue.
 
 Defects or errors discovered during execution.
 
-**Example File**: `.claude/lessons-learned/2025-11-27-001.md`
+**Example File**: `.cui/lessons-learned/2025-11-27-001.md`
 
 ```markdown
 id=2025-11-27-001
@@ -140,7 +140,7 @@ Bash: ls "${file_path}"
 
 Enhancement opportunities identified during execution.
 
-**Example File**: `.claude/lessons-learned/2025-11-27-002.md`
+**Example File**: `.cui/lessons-learned/2025-11-27-002.md`
 
 ```markdown
 id=2025-11-27-002
@@ -179,7 +179,7 @@ For each file:
 
 Successful patterns worth documenting.
 
-**Example File**: `.claude/lessons-learned/2025-11-27-003.md`
+**Example File**: `.cui/lessons-learned/2025-11-27-003.md`
 
 ```markdown
 id=2025-11-27-003
@@ -232,7 +232,7 @@ Before processing:
 
 Patterns to avoid that caused problems.
 
-**Example File**: `.claude/lessons-learned/2025-11-27-004.md`
+**Example File**: `.cui/lessons-learned/2025-11-27-004.md`
 
 ```markdown
 id=2025-11-27-004
@@ -303,7 +303,7 @@ Lesson IDs follow pattern: `{YYYY-MM-DD}-{NNN}`
 
 When adding a new lesson:
 1. Get current date: `2025-11-27`
-2. List files in `.claude/lessons-learned/`
+2. List files in `.cui/lessons-learned/`
 3. Find files matching `2025-11-27-*.md`
 4. Find highest sequence number (e.g., `002`)
 5. Increment: `003`
@@ -396,7 +396,7 @@ Code blocks showing:
 
 ## Migration from JSON
 
-If you have existing lessons in `.claude/lessons-learned.json`:
+If you have existing lessons in `.cui/lessons-learned.json`:
 
 1. For each JSON lesson, create `{id}.md` file
 2. Use key=value format for metadata (id, component.type, component.name, component.bundle, date, category, applied)

@@ -1,7 +1,7 @@
 # Implementation Requirements: {task_title}
 
 **Generated**: {date}
-**Plan**: .claude/plans/{task_name}/
+**Plan**: .cui/plans/{task_name}/
 **Phase Transition**: refine → implement
 
 ---
@@ -85,7 +85,7 @@ Task 3: {name}  Task 4: {name}  Task 5: {name}
 
 ## References
 
-**Source**: `.claude/plans/{task_name}/references.md`
+**Source**: `.cui/plans/{task_name}/references.md`
 
 All references are managed via skill operations. **Do NOT access files directly.**
 

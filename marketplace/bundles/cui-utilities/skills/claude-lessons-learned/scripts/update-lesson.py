@@ -58,10 +58,10 @@ def main():
         epilog="""
 Examples:
   # Mark lesson as applied
-  %(prog)s --file .claude/lessons-learned/2025-11-28-001.md --set applied=true
+  %(prog)s --file .cui/lessons-learned/2025-11-28-001.md --set applied=true
 
   # Update multiple fields
-  %(prog)s --file .claude/lessons-learned/2025-11-28-001.md \\
+  %(prog)s --file .cui/lessons-learned/2025-11-28-001.md \\
            --set applied=true --set category=pattern
 
   # Update component info

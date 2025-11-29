@@ -1,16 +1,16 @@
 ---
 name: claude-memory
-description: Memory layer operations for .claude/memory/ session persistence
+description: Memory layer operations for .cui/memory/ session persistence
 allowed-tools: Read, Write, Edit, Bash, Glob
 ---
 
 # Claude Memory Skill
 
-Memory layer operations for `.claude/memory/` session persistence.
+Memory layer operations for `.cui/memory/` session persistence.
 
 ## What This Skill Provides
 
-- CRUD operations for `.claude/memory/` files
+- CRUD operations for `.cui/memory/` files
 - Category-based organization (context, handoffs)
 - Timestamp-based file naming for context files
 - Age-based cleanup
@@ -38,7 +38,7 @@ Activate this skill when:
 
 **Pattern**: Command Chain Execution
 
-Manage the `.claude/memory/` layer for session persistence.
+Manage the `.cui/memory/` layer for session persistence.
 
 ### Parameters
 
