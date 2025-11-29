@@ -1,11 +1,11 @@
 # Memory Layer Format
 
-File format specifications for `.plan/memory/` session persistence.
+File format specifications for memory layer session persistence (via `file-operations-base` skill).
 
 ## Directory Structure
 
 ```
-.plan/memory/
+{memory-storage}/
 ├── context/         # Session context snapshots
 └── handoffs/        # Pending handoff state
 ```

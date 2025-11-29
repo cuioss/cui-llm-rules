@@ -50,9 +50,9 @@ Shows:
 Executable Plans:
 
 1. jwt-authentication [implement] - Task 3/12: "Add token validation"
-   Path: .plan/plans/jwt-authentication/
+   Path: {plan-storage}/jwt-authentication/
 2. user-profile-api [verify] - Build verification pending
-   Path: .plan/plans/user-profile-api/
+   Path: {plan-storage}/user-profile-api/
 
 0. Exit (use /plan-manage to create or refine plans)
 

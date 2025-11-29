@@ -188,10 +188,10 @@ reference_data: {issue-url, issue-title, branch}
 ```
 plan_type: {implementation|simple}
 artifacts:
-  plan_directory: .plan/plans/{task-name}/
-  plan_file: .plan/plans/{task-name}/plan.md
-  config_file: .plan/plans/{task-name}/config.toon
-  references_file: .plan/plans/{task-name}/references.md
+  plan_directory: {plan-storage}/{task-name}/
+  plan_file: {plan-storage}/{task-name}/plan.md
+  config_file: {plan-storage}/{task-name}/config.toon
+  references_file: {plan-storage}/{task-name}/references.md
 plan_status:
   current_phase: refine|execute
   current_task: task-1

@@ -14,7 +14,7 @@ Generic JSON file operations with JSON path notation support for field-level acc
 - Field-level access using JSON path notation
 - Array and object manipulation
 - Atomic writes with validation
-- Works with any JSON file (including .claude/ and .plan/ directories)
+- Works with any JSON file (including configuration directories)
 
 ## When to Activate This Skill
 

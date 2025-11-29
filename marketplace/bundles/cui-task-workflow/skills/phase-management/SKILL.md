@@ -138,12 +138,12 @@ Else (default "list"):
 4. Prompt for selection (all/numbers/cancel)
 5. Show what will be deleted:
    ```bash
-   python3 {delete-plan.py path} .plan/plans/{plan-name}/ --dry-run
+   python3 {delete-plan.py path} {plan-directory}/ --dry-run
    ```
 6. Confirm deletion via AskUserQuestion
 7. Execute deletion:
    ```bash
-   python3 {delete-plan.py path} .plan/plans/{plan-name}/
+   python3 {delete-plan.py path} {plan-directory}/
    ```
 8. Report results
 
@@ -285,7 +285,7 @@ Lists all plans with current phase and status.
 
 1. **Run discovery script**:
    ```bash
-   python3 {path-from-scripts.local.json} .plan/plans/
+   python3 {path-from-scripts.local.json} {plan-storage}/
    ```
    Parse JSON output internally - do NOT display raw output.
 
@@ -294,9 +294,9 @@ Lists all plans with current phase and status.
    Available Plans:
 
    1. jwt-authentication [implement] - 3/12 tasks complete
-      Path: .plan/plans/jwt-authentication/
+      Path: {plan-storage}/jwt-authentication/
    2. user-profile-api [refine] - Requirements analysis
-      Path: .plan/plans/user-profile-api/
+      Path: {plan-storage}/user-profile-api/
 
    0. Create new plan
    ```
@@ -324,7 +324,7 @@ Finds completed plans for cleanup.
 
 1. **Run filtered discovery**:
    ```bash
-   python3 {discover-plans.py path} .plan/plans/ --filter=completed
+   python3 {discover-plans.py path} {plan-storage}/ --filter=completed
    ```
 
 2. **Return list of completed plans**
@@ -348,7 +348,7 @@ Creates a new plan, checking for existing init-phase plans first.
 
 1. **Check for existing init-phase plans**:
    ```bash
-   python3 {discover-plans.py path} .plan/plans/ --filter=init
+   python3 {discover-plans.py path} {plan-storage}/ --filter=init
    ```
 
 2. **If init-phase plans exist**:
@@ -383,7 +383,7 @@ Finds plans ready for refinement or refines a specific plan.
 
 1. **If plan_name not provided**:
    ```bash
-   python3 {discover-plans.py path} .plan/plans/ --filter=init,refine
+   python3 {discover-plans.py path} {plan-storage}/ --filter=init,refine
    ```
 
 2. **Return list of refinable plans** or specific plan
@@ -514,7 +514,7 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
 
 1. **Run filtered discovery**:
    ```bash
-   python3 {discover-plans.py path} .plan/plans/ --filter=implement,execute,verify,finalize
+   python3 {discover-plans.py path} {plan-storage}/ --filter=implement,execute,verify,finalize
    ```
 
 2. **Exclude completed plans from results**
@@ -524,9 +524,9 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
    Executable Plans:
 
    1. jwt-authentication [implement] - Task 3/12: "Add token validation"
-      Path: .plan/plans/jwt-authentication/
+      Path: {plan-storage}/jwt-authentication/
    2. user-profile-api [verify] - Build verification pending
-      Path: .plan/plans/user-profile-api/
+      Path: {plan-storage}/user-profile-api/
 
    0. Exit (use /plan-manage to create or refine plans)
    ```
@@ -544,7 +544,7 @@ executable_plans[N]{name,path,phase,current_task}:
 
 Finds available plans in the workspace.
 
-**Input**: `search_path` (optional, default: `.plan/plans/`)
+**Input**: `search_path` (optional, default: plan storage directory)
 
 **Steps**:
 
@@ -767,8 +767,8 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 
 ### Script Details
 
-**1. discover-plans.py**: Finds plans in `.plan/plans/` directory
-- **Input**: search_path (optional, default: `.plan/plans/`), --filter (optional)
+**1. discover-plans.py**: Finds plans in plan storage directory
+- **Input**: search_path (optional, default: plan storage directory), --filter (optional)
 - **Output**: JSON with plans array, recommendation, and filter info
 - **Filter Options**:
   - Phases: `init`, `refine`, `implement`, `execute`, `verify`, `finalize`
@@ -777,10 +777,10 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Note**: `implement` is for Implementation plans (5-phase), `execute` is for Simple plans (3-phase)
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .plan/plans/
-  python3 {resolved_path} .plan/plans/ --filter=init
-  python3 {resolved_path} .plan/plans/ --filter=implement,execute,verify,finalize
-  python3 {resolved_path} .plan/plans/ --filter=completed
+  python3 {resolved_path} {plan-storage}/
+  python3 {resolved_path} {plan-storage}/ --filter=init
+  python3 {resolved_path} {plan-storage}/ --filter=implement,execute,verify,finalize
+  python3 {resolved_path} {plan-storage}/ --filter=completed
   ```
 
 **2. route-phase.py**: Maps current phase to target skill
@@ -797,7 +797,7 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Output**: JSON with from_phase, to_phase, is_complete
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .plan/plans/my-task/ implement
+  python3 {resolved_path} {plan-directory}/ implement
   ```
 
 **4. get-status.py**: Aggregates comprehensive plan status
@@ -805,7 +805,7 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Output**: JSON with plan_status, phase_progress, current_focus
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .plan/plans/my-task/
+  python3 {resolved_path} {plan-directory}/
   ```
 
 **5. delete-plan.py**: Safely deletes a plan directory
@@ -814,11 +814,11 @@ All scripts use portable notation: `cui-task-workflow:phase-management/scripts/{
 - **Safety Checks**:
   - Validates directory exists
   - Requires plan.md to confirm it's a plan
-  - Only allows deletion within `.plan/plans/` hierarchy
+  - Only allows deletion within plan storage hierarchy
 - **Usage** (after resolving):
   ```bash
-  python3 {resolved_path} .plan/plans/my-task/
-  python3 {resolved_path} .plan/plans/my-task/ --dry-run
+  python3 {resolved_path} {plan-directory}/
+  python3 {resolved_path} {plan-directory}/ --dry-run
   ```
 
 ---

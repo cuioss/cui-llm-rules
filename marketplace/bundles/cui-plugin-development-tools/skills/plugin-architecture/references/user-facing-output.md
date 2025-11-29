@@ -55,9 +55,9 @@ Plan created successfully:
 
 plan_type: simple
 artifacts:
-  plan_directory: .plan/plans/feature-auth/
-  plan_file: .plan/plans/feature-auth/plan.md
-  config_file: .plan/plans/feature-auth/config.md
+  plan_directory: <plan-storage>/feature-auth/
+  plan_file: <plan-storage>/feature-auth/plan.md
+  config_file: <plan-storage>/feature-auth/config.md
 plan_status:
   current_phase: init
   current_task: task-1
@@ -178,24 +178,24 @@ Configuration ready for review.
 
 **Bad:**
 ```
-Bash(test -d .plan/plans/analyze-task/ && echo "exists" || echo "not-exists")
+Bash(test -d <plan-storage>/analyze-task/ && echo "exists" || echo "not-exists")
   not-exists
-Bash(mkdir -p .plan/plans/analyze-task/)
+Bash(mkdir -p <plan-storage>/analyze-task/)
   (No content)
-Write(.plan/plans/analyze-task/config.md)
-  Wrote 36 lines to .plan/plans/analyze-task/config.md
+Write(<plan-storage>/analyze-task/config.md)
+  Wrote 36 lines to <plan-storage>/analyze-task/config.md
 ```
 
 **Good:**
 ```
-Created plan directory: .plan/plans/analyze-task/
+Created plan directory: <plan-storage>/analyze-task/
 ```
 
 ### 4. Line-by-Line Edit Diffs
 
 **Bad:**
 ```
-Update(.plan/plans/analyze-task/plan.md)
+Update(<plan-storage>/analyze-task/plan.md)
   Updated with 2 additions and 2 removals
     33    **Checklist**:
     34    - [x] Check current git branch
@@ -233,7 +233,7 @@ Plan files created.
 
 **Bad:**
 ```
-Bash(python3 /Users/oliver/git/cui-llm-rules/marketplace/bundles/cui-task-workflow/skills/phase-management/scripts/discover-plans.py .plan/plans/)
+Bash(python3 {discover-plans.py} <plan-storage>/)
 ```
 
 **Good:**
@@ -308,7 +308,7 @@ Analysis complete:
 - Auto-fixed: 2
 - Manual review: 1
 
-See details: .plan/reports/analysis.md
+See details: <plan-storage>/reports/analysis.md
 ```
 
 ---
@@ -370,9 +370,9 @@ Used when a phase or task completes:
 Phase completed: init
 
 artifacts:
-  plan_directory: .plan/plans/feature-auth/
-  plan_file: .plan/plans/feature-auth/plan.md
-  config_file: .plan/plans/feature-auth/config.md
+  plan_directory: <plan-storage>/feature-auth/
+  plan_file: <plan-storage>/feature-auth/plan.md
+  config_file: <plan-storage>/feature-auth/config.md
 
 plan_status:
   current_phase: execute
@@ -390,10 +390,10 @@ Plan created successfully:
 
 plan_type: simple
 artifacts:
-  plan_directory: .plan/plans/feature-auth/
-  plan_file: .plan/plans/feature-auth/plan.md
-  config_file: .plan/plans/feature-auth/config.md
-  references_file: .plan/plans/feature-auth/references.md
+  plan_directory: <plan-storage>/feature-auth/
+  plan_file: <plan-storage>/feature-auth/plan.md
+  config_file: <plan-storage>/feature-auth/config.md
+  references_file: <plan-storage>/feature-auth/references.md
 
 plan_status:
   current_phase: init
@@ -449,7 +449,7 @@ action_required: Fix import or add dependency
 |---------|---------|
 | Current state | `current_phase: execute` |
 | Completed items | `tasks_completed: 3/5` |
-| Created artifacts | `plan_file: .plan/plans/x/plan.md` |
+| Created artifacts | `plan_file: <plan-storage>/x/plan.md` |
 | Measurable outcomes | `coverage: 92%` |
 | Next action | `next_action: Run verification` |
 | Errors needing action | `ERROR: Build failed` |

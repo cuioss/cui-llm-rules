@@ -5,7 +5,7 @@ description: Apply accumulated lessons learned to component documentation
 
 # Apply Lessons Learned
 
-Read lessons learned from `.plan/lessons-learned/*.md` and apply them to component documentation.
+Read lessons learned via `claude-lessons-learned` skill and apply them to component documentation.
 
 ## Usage
 

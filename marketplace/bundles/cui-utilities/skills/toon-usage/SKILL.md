@@ -26,7 +26,7 @@ Pure reference skill providing TOON (Token-Oriented Object Notation) format spec
 
 Activate when:
 - **Creating agent handoffs** - Need TOON format for inter-agent communication
-- **Designing memory persistence** - Need structured data storage in .plan/memory/
+- **Designing memory persistence** - Need structured data storage in memory layer
 - **Converting JSON to TOON** - Need conversion examples and patterns
 - **Optimizing token usage** - Need token-efficient data representation
 - **Understanding TOON syntax** - Need technical reference for TOON format
@@ -59,7 +59,7 @@ TOON (Token-Oriented Object Notation) is a compact, human-readable encoding of t
 
 **TOON is ONLY for internal cui-llm-rules marketplace operations**:
 - Agent-to-agent handoffs
-- Memory persistence (.plan/memory/)
+- Memory persistence (memory layer)
 - Inter-agent data exchange
 - Test fixtures for agent workflows
 
@@ -222,7 +222,7 @@ B.java,89,MEDIUM
 
 ### Memory Persistence
 
-**Purpose**: Structured session data storage in `.plan/memory/`.
+**Purpose**: Structured session data storage in memory layer.
 
 **Use Cases**:
 - Task history tracking

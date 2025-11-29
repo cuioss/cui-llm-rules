@@ -27,7 +27,7 @@ Activate this skill when:
 
 ## Cached Attributes
 
-Stored in `.plan/run-configuration.json` under `build`:
+Stored via `claude-run-configuration` skill under `build`:
 
 | Attribute | Example | Description |
 |-----------|---------|-------------|

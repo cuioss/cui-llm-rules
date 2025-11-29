@@ -71,9 +71,9 @@ Shows:
 Available Plans:
 
 1. jwt-authentication [implement] - 3/12 tasks complete
-   Path: .plan/plans/jwt-authentication/
+   Path: {plan-storage}/jwt-authentication/
 2. user-profile-api [refine] - Requirements analysis
-   Path: .plan/plans/user-profile-api/
+   Path: {plan-storage}/user-profile-api/
 
 0. Create new plan
 

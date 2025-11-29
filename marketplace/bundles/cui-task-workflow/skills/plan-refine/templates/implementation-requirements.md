@@ -1,7 +1,7 @@
 # Implementation Requirements: {task_title}
 
 **Generated**: {date}
-**Plan**: .plan/plans/{task_name}/
+**Plan**: {plan-directory}/
 **Phase Transition**: refine → implement
 
 ---
@@ -18,7 +18,7 @@
 
 *This section is present only for complex tasks that required strategic analysis.*
 
-**Analysis Document**: `.plan/plans/{task_name}/analysis.md`
+**Analysis Document**: `{plan-directory}/analysis.md`
 
 **Key Decisions from Analysis**:
 - {Decision 1 summary}
@@ -101,7 +101,7 @@ Task 3: {name}  Task 4: {name}  Task 5: {name}
 
 ## References
 
-**Source**: `.plan/plans/{task_name}/references.md`
+**Source**: `{plan-directory}/references.md`
 
 All references are managed via skill operations. **Do NOT access files directly.**
 
