@@ -170,7 +170,7 @@ plan_type: {implementation|simple}
 artifacts:
   plan_directory: .claude/plans/{task-name}/
   plan_file: .claude/plans/{task-name}/plan.md
-  config_file: .claude/plans/{task-name}/config.md
+  config_file: .claude/plans/{task-name}/config.toon
   references_file: .claude/plans/{task-name}/references.md
 plan_status:
   current_phase: refine|execute
