@@ -28,3 +28,7 @@ target/
 
 # Ignore lessons-learned (runtime knowledge, project-specific)
 .claude/lessons-learned/*.md
+
+# Workflow artifacts (plans, lessons, memory, run-config)
+.plan/
+
