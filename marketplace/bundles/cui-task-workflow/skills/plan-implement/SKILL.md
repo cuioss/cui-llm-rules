@@ -56,6 +56,32 @@ Also: `Read {plan_directory}/implementation-requirements.md`
 
 Read all references for the task. If unclear, use AskUserQuestion for clarification.
 
+### Step 3b: Check for Pre-Implemented Work
+
+**CRITICAL**: Before executing, check if task deliverables already exist.
+
+**Detection**:
+- Check if referenced files/components exist
+- Verify they meet acceptance criteria
+- Compare expected vs actual state
+
+**If pre-implemented** (deliverables exist and meet criteria):
+1. Verify each acceptance criterion is satisfied
+2. **STILL call update-progress** for each checklist item:
+   ```
+   Skill: cui-task-workflow:plan-files
+   operation: update-progress
+   phase: {phase}
+   task_id: {task_id}
+   complete_items: "{item1},{item2},..."
+   ```
+3. Skip to Step 7 (Update Progress for task completion)
+
+**If not pre-implemented** (work needed):
+- Continue to Step 4
+
+**Important**: Even for pre-implemented tasks, progress MUST be updated. The plan.md is the source of truth for status - not the codebase.
+
 ### Step 4: Execute Checklist Items
 
 For each item:
@@ -145,13 +171,17 @@ Options: Complete dependency / Skip check / Choose different task
 
 When all implement tasks complete:
 
-1. Update progress for last task:
+1. **CRITICAL**: Update progress for ALL completed tasks:
    ```
    Skill: cui-task-workflow:plan-files
    operation: update-progress
-   task_id: {last-task}
-   status: completed
+   phase: implement
+   task_id: {task_id}
+   complete_items: "{all_checklist_items}"
+   set_status: completed
    ```
+
+   **Note**: This must be called for EVERY task, including pre-implemented ones. The plan.md Phase Progress table drives status detection in `discover-plans.py`.
 
 2. **Auto-transition** to verify phase (no user prompt needed)
    - Plans execute continuously until complete or blocked
@@ -161,6 +191,8 @@ When all implement tasks complete:
 - An error blocks progress
 - A decision is genuinely required (e.g., multiple valid approaches)
 - User has explicitly requested confirmation points
+
+**Anti-Pattern**: Using TodoWrite or manual tracking instead of update-progress. This leaves plan.md out of sync with actual progress.
 
 ---
 
