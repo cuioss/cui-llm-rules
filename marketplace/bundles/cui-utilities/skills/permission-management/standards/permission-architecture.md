@@ -1,5 +1,32 @@
 # Permission Architecture
 
+## Settings File Hierarchy
+
+Claude Code uses a three-level settings hierarchy:
+
+1. **Global Settings** (`~/.claude/settings.json`) - User-wide defaults
+2. **Project Settings** (`.claude/settings.json`) - Version-controlled project settings
+3. **Local Settings** (`.claude/settings.local.json`) - Personal/untracked overrides
+
+### Resolution Priority
+
+**For reading/discovery:**
+- Project settings (`.claude/settings.json`) takes precedence over local settings
+- If `.claude/settings.json` exists, it is used; otherwise `.claude/settings.local.json` is used
+- Global settings always apply as baseline
+
+**For writing:**
+- If `.claude/settings.json` exists, write to it (version-controlled)
+- Otherwise, write to `.claude/settings.local.json` (personal)
+
+### When to Use Each File
+
+| File | Use Case | Git Tracked |
+|------|----------|-------------|
+| `~/.claude/settings.json` | Universal permissions for all projects | N/A |
+| `.claude/settings.json` | Team-shared project permissions | Yes |
+| `.claude/settings.local.json` | Personal overrides, temporary permissions | No |
+
 ## Global vs Local Separation
 
 **Global Permissions** (`~/.claude/settings.json`):
@@ -9,14 +36,19 @@
 - `WebFetch(domain:<specific-domain>)` - Trusted domains for web access
 - All common Bash commands (git, mvn, grep, find, etc.)
 
-**Local Permissions** (`.claude/settings.local.json`):
-- Project-specific ONLY
-- `Edit(//~/git/{current-project}/**)` - Project editing
-- `Write(//~/git/{current-project}/**)` - Project file creation
-- `Bash(~/git/{current-project}/scripts/**)` - Project scripts (if applicable)
-- **Typically 2-3 permissions per project**
+**Project Permissions** (`.claude/settings.json`):
+- Version-controlled, shared with team
+- Project-specific Edit/Write permissions
+- Project-specific script execution permissions
+- Custom domain permissions for project needs
 
-**Key Principle:** Local settings should ONLY contain project-specific Write/Edit permissions. All Read permissions for git repos are globally covered.
+**Local Permissions** (`.claude/settings.local.json`):
+- Personal overrides not shared with team
+- Temporary/experimental permissions
+- Individual developer preferences
+- **Use when**: testing new permissions, personal tooling
+
+**Key Principle:** Use `.claude/settings.json` for team-shared permissions, `.claude/settings.local.json` for personal overrides.
 
 ## Universal Access Pattern
 
@@ -125,21 +157,7 @@ For multiple related projects, use separate local settings per project:
 
 Do NOT combine in global settings - keeps permissions scoped appropriately.
 
-### Pattern 4: Plan File Permissions
 
-For projects using the plan management system (`.claude/plans/`), add plan file permissions to enable uninterrupted plan execution:
-```json
-{
-  "permissions": {
-    "allow": [
-      "Edit(.claude/plans/**)",
-      "Write(.claude/plans/**)"
-    ]
-  }
-}
-```
-
-**Why needed**: Plan files are frequently updated during execution (progress tracking, task completion). Without these permissions, each update prompts for user confirmation, disrupting the continuous execution flow.
 
 **Note**: Plan files are NOT git-tracked (excluded by `.gitignore` via `.claude/*` pattern). They are session working documents.
 

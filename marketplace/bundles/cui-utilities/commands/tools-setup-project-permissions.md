@@ -92,19 +92,19 @@ Field: commands.setup-project-permissions.user_approved_permissions
 - Skills: `Skill(cui-documentation-standards:*)`, `Skill(cui-frontend-expert:*)`, `Skill(cui-java-expert:*)`, `Skill(builder:*)`, `Skill(cui-plugin-development-tools:*)`, `Skill(cui-requirements:*)`, `Skill(cui-task-workflow:*)`, `Skill(cui-utilities:*)`
 - SlashCommands: `SlashCommand(/cui-documentation-standards:*)`, `SlashCommand(/cui-frontend-expert:*)`, `SlashCommand(/cui-java-expert:*)`, `SlashCommand(/builder:*)`, `SlashCommand(/cui-plugin-development-tools:*)`, `SlashCommand(/cui-requirements:*)`, `SlashCommand(/cui-task-workflow:*)`, `SlashCommand(/cui-utilities:*)`
 
-**Short-Form Command Permissions (35 commands):**
+**Short-Form Command Permissions (34 commands):**
+- `SlashCommand(/builder-build-and-fix:*)`
+- `SlashCommand(/builder-maintenance:*)`
 - `SlashCommand(/cui-maintain-requirements:*)`
-- `SlashCommand(/doc-review-single-asciidoc:*)`
-- `SlashCommand(/doc-review-technical-docs:*)`
+- `SlashCommand(/doc-create:*)`
+- `SlashCommand(/doc-doctor:*)`
+- `SlashCommand(/doc-maintain:*)`
+- `SlashCommand(/java-analyze-all:*)`
+- `SlashCommand(/java-create:*)`
 - `SlashCommand(/java-enforce-logrecords:*)`
-- `SlashCommand(/java-fix-javadoc:*)`
-- `SlashCommand(/java-generate-coverage:*)`
-- `SlashCommand(/java-implement-code:*)`
-- `SlashCommand(/java-implement-tests:*)`
+- `SlashCommand(/java-full-workflow:*)`
 - `SlashCommand(/java-maintain-logger:*)`
-- `SlashCommand(/java-maintain-tests:*)`
 - `SlashCommand(/java-optimize-quarkus-native:*)`
-- `SlashCommand(/java-refactor-code:*)`
 - `SlashCommand(/js-enforce-eslint:*)`
 - `SlashCommand(/js-fix-jsdoc:*)`
 - `SlashCommand(/js-generate-coverage:*)`
@@ -112,17 +112,16 @@ Field: commands.setup-project-permissions.user_approved_permissions
 - `SlashCommand(/js-implement-tests:*)`
 - `SlashCommand(/js-maintain-tests:*)`
 - `SlashCommand(/js-refactor-code:*)`
-- `SlashCommand(/maven-build-and-fix:*)`
-- `SlashCommand(/orchestrate-language:*)`
-- `SlashCommand(/orchestrate-task:*)`
-- `SlashCommand(/orchestrate-workflow:*)`
+- `SlashCommand(/plan-execute:*)`
+- `SlashCommand(/plan-manage:*)`
+- `SlashCommand(/plugin-apply-lessons-learned:*)`
 - `SlashCommand(/plugin-create:*)`
 - `SlashCommand(/plugin-doctor:*)`
 - `SlashCommand(/plugin-maintain:*)`
-- `SlashCommand(/pr-fix-sonar-issues:*)`
-- `SlashCommand(/pr-handle-pull-request:*)`
-- `SlashCommand(/pr-respond-to-review-comments:*)`
+- `SlashCommand(/pr-doctor:*)`
+- `SlashCommand(/task-implement:*)`
 - `SlashCommand(/tools-audit-permission-wildcards:*)`
+- `SlashCommand(/tools-discover-skill-scripts:*)`
 - `SlashCommand(/tools-fix-intellij-diagnostics:*)`
 - `SlashCommand(/tools-manage-web-permissions:*)`
 - `SlashCommand(/tools-setup-project-permissions:*)`
@@ -367,9 +366,10 @@ Verify `Write(.claude/settings.local.json)` is in ask list (not allow or deny) f
 - `Write(//~/git/{repo-name}/**)` - Create project files
 - **Skip Read** - covered by global `Read(//~/git/**)`
 
-**C. Add plan file permissions** (always):
+**C. Add plan file permissions** (to BOTH global AND local):
 - `Edit(.claude/plans/**)` - Edit plan files without prompts
 - `Write(.claude/plans/**)` - Create plan files without prompts
+- **CRITICAL**: Must be in BOTH settings files for permissions to work
 
 **D. Add project scripts** (if scripts/ exists):
 - `Bash(~/git/{repo-name}/scripts/**)` - Execute project scripts
@@ -554,6 +554,9 @@ For version-controlled projects (like CUI marketplace):
 - ❌ Read: NOT added (globally covered via `Read(//~/git/**)`)
 - ❌ Marketplace wildcards: NOT added to project (should be in global only)
 - ❌ Skill scripts: Synced from `.claude/scripts.local.json` to global settings (see Step 3F)
+
+**Default Permissions Added to Global Settings:**
+- ✅ Plan files: `Edit(.claude/plans/**)`, `Write(.claude/plans/**)` - Must be in BOTH for uninterrupted plan execution
 
 ## ARCHITECTURE
 
