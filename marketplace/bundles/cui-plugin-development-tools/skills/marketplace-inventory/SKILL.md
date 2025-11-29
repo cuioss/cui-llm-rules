@@ -88,9 +88,60 @@ Return this JSON output to the invoking command for further processing.
 
 ## Script Parameters
 
-**--scope marketplace** (required)
-- Scans the marketplace/bundles directory
-- Returns complete marketplace inventory
+### --scope (optional)
+
+Directory scope to scan. Default: `marketplace`
+
+| Value | Description |
+|-------|-------------|
+| `marketplace` | Scans marketplace/bundles/ directory |
+| `global` | Scans ~/.claude directory |
+| `project` | Scans .claude directory in current working directory |
+
+**Example**:
+```bash
+python3 {resolved_path} --scope marketplace
+python3 {resolved_path} --scope project
+```
+
+### --resource-types (optional)
+
+Filter which resource types to include in the inventory. Default: `all`
+
+| Value | Description |
+|-------|-------------|
+| `all` | Include all resource types (default) |
+| `agents` | Include only agents |
+| `commands` | Include only commands |
+| `skills` | Include only skills |
+| `scripts` | Include only scripts |
+
+Multiple types can be combined with commas:
+```bash
+python3 {resolved_path} --resource-types agents,skills
+```
+
+### --include-descriptions (optional flag)
+
+When specified, extracts description fields from YAML frontmatter of each resource file.
+
+**Example**:
+```bash
+python3 {resolved_path} --include-descriptions
+```
+
+**Output with descriptions**:
+```json
+{
+  "agents": [
+    {
+      "name": "java-implement-agent",
+      "path": "marketplace/bundles/cui-java-expert/agents/java-implement-agent.md",
+      "description": "Implements Java code following CUI standards"
+    }
+  ]
+}
+```
 
 ## Error Handling
 
