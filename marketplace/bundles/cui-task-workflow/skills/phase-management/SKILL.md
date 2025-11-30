@@ -291,6 +291,43 @@ After phase skill returns:
 
 ---
 
+## MANDATORY: Progress Enforcement
+
+**CRITICAL**: Phase skills MUST update progress via `update-progress.py`. This section enforces compliance.
+
+### Expected Progress Update Pattern
+
+Phase skills must call update-progress after EVERY checklist item:
+```bash
+python3 {update-progress.py} --plan-dir {plan_directory} --phase {phase} --task-id {task_id} --complete-items "{item_text}"
+```
+
+### Verification After Phase Skill Returns
+
+**Before transitioning phases**, the orchestrator verifies progress via `transition-phase.py`:
+
+1. **transition-phase.py automatically validates** that all checklist items are `[x]`
+2. **If validation fails**, transition returns `incomplete_phase` error with:
+   - `tasks_total`: Total checklist items in phase
+   - `tasks_completed`: Items marked `[x]`
+   - `tasks_remaining`: Count of incomplete items
+   - `incomplete_items`: List of specific incomplete item texts
+
+3. **On incomplete_phase error**:
+   - Display the incomplete items to help identify what was missed
+   - Do NOT proceed to next phase
+   - Return control to phase skill to complete missing items
+
+### Anti-Patterns (Orchestration Layer)
+
+| Anti-Pattern | Problem | Required Action |
+|--------------|---------|-----------------|
+| Skipping transition-phase.py | Progress not validated | Always call transition-phase before phase change |
+| Ignoring incomplete_phase error | Out-of-sync plan.md | Display error, return to phase skill |
+| Manual phase advancement | Bypasses validation | Use transition-phase.py only |
+
+---
+
 ## Operation: list-plans
 
 Lists all plans with current phase and status.
