@@ -14,6 +14,20 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 - DO show commit status, PR creation results, and completion summary
 - Work silently until you have results to display
 
+**MANDATORY PROGRESS TRACKING**:
+
+After EVERY finalization task, you MUST call update-progress:
+```
+python3 {update-progress.py} --plan-dir {plan_directory} --phase finalize --task-id {task_id} --complete-items "{item_text}"
+```
+
+**NEVER skip this step**. The plan.md is the source of truth. Plan completion WILL FAIL if checklist items are not marked as `[x]`.
+
+**Anti-Patterns** (DO NOT DO):
+- Committing without updating progress
+- Creating PR without marking progress
+- Assuming git operations auto-update plan.md
+
 **Role**: Fifth and final phase skill in the plan management system. Commits changes, creates PRs, and handles workflow automation. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

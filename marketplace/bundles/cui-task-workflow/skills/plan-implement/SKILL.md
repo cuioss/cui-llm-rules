@@ -14,6 +14,21 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 - DO show task progress and completion status
 - Work silently until you have results to display
 
+**MANDATORY PROGRESS TRACKING**:
+
+After EVERY checklist item completion, you MUST call update-progress:
+```
+python3 {update-progress.py} --plan-dir {plan_directory} --phase {phase} --task-id {task_id} --complete-items "{item_text}"
+```
+
+**NEVER skip this step** - even for pre-implemented work. The plan.md is the source of truth. Phase transitions WILL FAIL with `incomplete_phase` error if checklist items are not marked as `[x]`.
+
+**Anti-Patterns** (DO NOT DO):
+- Using TodoWrite instead of update-progress
+- Completing multiple items without updating progress
+- Assuming pre-implemented work doesn't need progress updates
+- Marking task complete without marking all checklist items first
+
 **Role**: Third phase skill in the plan management system. Executes tasks from the refine phase, delegating to appropriate language agents. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

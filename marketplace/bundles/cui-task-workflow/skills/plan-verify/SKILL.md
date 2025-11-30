@@ -14,6 +14,20 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 - DO show verification results (build, tests, quality)
 - Work silently until you have results to display
 
+**MANDATORY PROGRESS TRACKING**:
+
+After EVERY verification task, you MUST call update-progress:
+```
+python3 {update-progress.py} --plan-dir {plan_directory} --phase verify --task-id {task_id} --complete-items "{item_text}"
+```
+
+**NEVER skip this step**. The plan.md is the source of truth. Phase transitions WILL FAIL with `incomplete_phase` error if checklist items are not marked as `[x]`.
+
+**Anti-Patterns** (DO NOT DO):
+- Completing verification without updating progress
+- Assuming successful verification auto-updates plan.md
+- Skipping progress updates for "quick" verifications
+
 **Role**: Fourth phase skill in the plan management system. Verifies implementation quality through builds, tests, quality checks, and documentation review. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

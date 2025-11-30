@@ -22,6 +22,20 @@ allowed-tools: Read, Write, Edit, Skill, AskUserQuestion
 - Task list approval (brief approval of generated tasks)
 Do NOT prompt between operations or for routine confirmations.
 
+**MANDATORY PROGRESS TRACKING**:
+
+After completing each refine task, you MUST call update-progress:
+```
+python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id {task_id} --complete-items "{item_text}"
+```
+
+**NEVER skip this step**. The plan.md is the source of truth. Phase transitions WILL FAIL with `incomplete_phase` error if checklist items are not marked as `[x]`.
+
+**Anti-Patterns** (DO NOT DO):
+- Completing analysis without updating progress
+- Generating tasks without marking progress
+- Assuming plan.md auto-updates on operations
+
 ## Standards (Load On-Demand)
 
 ### Workflow
