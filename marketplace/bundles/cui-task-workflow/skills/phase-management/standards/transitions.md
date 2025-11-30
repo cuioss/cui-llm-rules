@@ -2,40 +2,67 @@
 
 Standards for phase transitions in plan-based workflows.
 
-## Phase Order
+## Phase Order by Plan Type
 
-Phases must be completed in strict sequential order:
+Phase sequences vary by plan type. All follow strict sequential order.
+
+### Implementation Plan (5 phases)
 
 ```
 init → refine → implement → verify → finalize → [complete]
 ```
 
+Used for: Feature implementations, bug fixes with code changes, GitHub issues.
+
+### Plugin-Development Plan (4 phases)
+
+```
+init → refine → execute → finalize → [complete]
+```
+
+Used for: Marketplace components (skills, commands, agents), documentation updates.
+
+### Simple Plan (3 phases)
+
+```
+init → execute → finalize → [complete]
+```
+
+Used for: Quick tasks, documentation-only changes, configuration updates.
+
 ## Phase Definitions
 
-| Phase | Index | Purpose | Completion Criteria |
-|-------|-------|---------|---------------------|
-| init | 0 | Create plan, detect environment | All init tasks complete |
-| refine | 1 | Analyze requirements, plan tasks | All refine tasks complete |
-| implement | 2 | Execute implementation tasks | All implement tasks complete |
-| verify | 3 | Build, test, quality checks | All verify tasks complete |
-| finalize | 4 | Commit, PR, documentation | All finalize tasks complete |
+| Phase | Purpose | Plan Types | Completion Criteria |
+|-------|---------|------------|---------------------|
+| init | Create plan, detect environment | All | All init tasks complete |
+| refine | Analyze requirements, plan tasks | Implementation, Plugin-Development | All refine tasks complete |
+| implement | Execute implementation tasks | Implementation only | All implement tasks complete |
+| execute | Execute tasks (no verify step) | Plugin-Development, Simple | All execute tasks complete |
+| verify | Build, test, quality checks | Implementation only | All verify tasks complete |
+| finalize | Commit, PR, documentation | All | All finalize tasks complete |
+
+**Note**: `implement` and `execute` serve similar purposes but differ in workflow:
+- `implement` → followed by `verify` (separate verification phase)
+- `execute` → directly to `finalize` (verification inline)
 
 ## Transition Rules
 
-### Rule 1: Sequential Only
+### Rule 1: Sequential Only (Plan-Type Aware)
 
-Phases can only transition to the next phase in sequence.
+Phases can only transition to the next phase in the plan type's sequence.
 
-**Allowed**:
-- init → refine
-- refine → implement
-- implement → verify
-- verify → finalize
-- finalize → [complete]
+**Implementation Plan Transitions**:
+- init → refine → implement → verify → finalize → [complete]
 
-**NOT Allowed**:
-- init → implement (skipping refine)
-- refine → verify (skipping implement)
+**Plugin-Development Plan Transitions**:
+- init → refine → execute → finalize → [complete]
+
+**Simple Plan Transitions**:
+- init → execute → finalize → [complete]
+
+**NOT Allowed** (examples):
+- init → implement (skipping refine, except Simple plans)
+- refine → verify (skipping implement/execute)
 - Any backward transition
 
 ### Rule 2: Completion Required
@@ -127,37 +154,35 @@ After finalize phase completes:
 }
 ```
 
-## Simple Plan Type
-
-Simple plans have fewer phases:
-
-```
-init → execute → finalize → [complete]
-```
-
-Transition rules still apply - sequential order, completion required.
-
 ## Script Implementation
 
-The `transition-phase.py` script implements these rules:
+The `transition-phase.py` script implements these rules with plan-type awareness:
 
 ```python
-PHASE_ORDER = ['init', 'refine', 'implement', 'verify', 'finalize']
+PHASE_ORDERS = {
+    'implementation': ['init', 'refine', 'implement', 'verify', 'finalize'],
+    'plugin-development': ['init', 'refine', 'execute', 'finalize'],
+    'simple': ['init', 'execute', 'finalize']
+}
 
-def get_next_phase(completed_phase):
-    """Get next phase in sequence."""
+def get_next_phase(plan_type, completed_phase):
+    """Get next phase in sequence for plan type."""
+    phase_order = PHASE_ORDERS.get(plan_type, PHASE_ORDERS['implementation'])
     try:
-        index = PHASE_ORDER.index(completed_phase)
-        if index == len(PHASE_ORDER) - 1:
+        index = phase_order.index(completed_phase)
+        if index == len(phase_order) - 1:
             return None  # Plan complete
-        return PHASE_ORDER[index + 1]
+        return phase_order[index + 1]
     except ValueError:
         return None  # Invalid phase
 
-def validate_transition(current_phase, completed_phase):
-    """Validate transition is allowed."""
+def validate_transition(plan_type, current_phase, completed_phase):
+    """Validate transition is allowed for plan type."""
+    phase_order = PHASE_ORDERS.get(plan_type, PHASE_ORDERS['implementation'])
     if current_phase != completed_phase:
         return False, "Can only complete current phase"
+    if completed_phase not in phase_order:
+        return False, f"Phase '{completed_phase}' not valid for {plan_type} plan"
     return True, None
 ```
 

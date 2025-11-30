@@ -198,19 +198,31 @@ result: "Plan: {task-name}, Branch: {branch}"
 
 **Output**:
 ```
-plan_type: {implementation|simple}
+plan_type: {implementation|simple|plugin-development}
 artifacts:
   plan_directory: {plan-storage}/{task-name}/
   plan_file: {plan-storage}/{task-name}/plan.md
   config_file: {plan-storage}/{task-name}/config.toon
   references_file: {plan-storage}/{task-name}/references.toon
 plan_status:
-  current_phase: refine|execute
+  current_phase: init
+  next_phase: {refine|execute}
   current_task: task-1
-next_action: Start {next-phase} phase
+next_action: Start {next_phase} phase
 ```
 
-**Auto-Continue**: After returning completion, the orchestrating skill (phase-management) will automatically proceed to the refine phase without prompting the user. Do NOT add any "Continue?" prompts.
+**Next Phase by Plan Type**:
+| Plan Type | next_phase | Reason |
+|-----------|------------|--------|
+| `implementation` | refine | Requires requirements analysis before implementation |
+| `plugin-development` | refine | Requires component analysis before execution |
+| `simple` | execute | Skips refine phase for quick tasks |
+
+**Auto-Continue**: After returning completion, the orchestrating skill (phase-management) will automatically proceed to the **next_phase** based on plan type:
+- Implementation/Plugin-Development plans → refine phase
+- Simple plans → execute phase (skips refine)
+
+Do NOT add any "Continue?" prompts - the flow executes continuously.
 
 ---
 

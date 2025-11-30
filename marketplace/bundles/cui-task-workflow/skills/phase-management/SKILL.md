@@ -150,14 +150,30 @@ Else (default "list"):
 **ACTION: init-plan**
 1. Requires task_description or issue_url (from command parameter or "Other" input from list-plans)
 2. Delegate to `Skill: cui-task-workflow:plan-init` with task_description/issue_url
-3. On success, **auto-continue** to refine phase (no user prompt)
-4. Execute refine-plan operation automatically
+3. On success, **read plan_type** from config.toon:
+   ```
+   Skill: cui-task-workflow:plan-files
+   operation: read-config
+   plan_directory: {returned plan_directory}
+   ```
+4. **Determine next phase** based on plan_type:
+   - `simple` → execute (skip refine phase)
+   - `implementation` → refine
+   - `plugin-development` → refine
+5. **Auto-continue** to the determined next phase (no user prompt)
+6. Execute the appropriate operation:
+   - If next_phase is `refine` → Execute refine-plan operation
+   - If next_phase is `execute` → Invoke `/plan-execute plan={name}`
 
 **Note**: init-plan is always invoked with a task description. Users provide this via:
 - Command parameter: `/plan-manage action=init task="..."`
 - "Other" input from list-plans action
 
-**Auto-Continue Behavior**: Init automatically transitions to refine without prompting. The entire init→refine flow executes continuously, only stopping when:
+**Auto-Continue Behavior**: Init automatically transitions to the appropriate next phase without prompting:
+- Simple plans → execute phase (3-phase flow: init→execute→finalize)
+- Implementation/Plugin-Development plans → refine phase (4-5 phase flows)
+
+The flow executes continuously, only stopping when:
 - A genuine question requires user input (e.g., ambiguous requirements)
 - User explicitly interrupts
 
