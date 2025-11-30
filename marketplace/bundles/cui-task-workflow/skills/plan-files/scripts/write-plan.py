@@ -90,6 +90,10 @@ def generate_task_section(task: dict, task_num: int) -> str:
                 elif text.startswith('[ ] '):
                     checked = False
                     text = text[4:]  # Remove "[ ] " prefix
+                elif text.startswith('x '):
+                    # Handle bare "x " prefix as checked item
+                    checked = True
+                    text = text[2:]  # Remove "x " prefix
             elif isinstance(item, dict):
                 checked = item.get('done', False)
                 text = item.get('text', '')
