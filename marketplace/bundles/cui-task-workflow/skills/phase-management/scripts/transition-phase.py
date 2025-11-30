@@ -90,23 +90,30 @@ def parse_phase_tasks(plan_content: str, phase: str) -> dict:
             'found': False,
             'tasks_total': 0,
             'tasks_completed': 0,
-            'all_complete': False
+            'all_complete': False,
+            'incomplete_items': []
         }
 
     phase_content = phase_match.group(1)
 
-    # Count all checklist items
-    all_items = re.findall(r'[-*]\s+\[[x ]\]', phase_content, re.IGNORECASE)
-    completed_items = re.findall(r'[-*]\s+\[x\]', phase_content, re.IGNORECASE)
+    # Find all checklist items with their text
+    all_item_matches = re.findall(r'[-*]\s+\[([x ])\]\s*([^\n]+)', phase_content, re.IGNORECASE)
 
-    total = len(all_items)
-    completed = len(completed_items)
+    total = len(all_item_matches)
+    completed = sum(1 for mark, _ in all_item_matches if mark.lower() == 'x')
+
+    # Extract incomplete items (those with [ ] not [x])
+    incomplete_items = [
+        text.strip() for mark, text in all_item_matches
+        if mark == ' '
+    ]
 
     return {
         'found': True,
         'tasks_total': total,
         'tasks_completed': completed,
-        'all_complete': total > 0 and completed == total
+        'all_complete': total > 0 and completed == total,
+        'incomplete_items': incomplete_items
     }
 
 
@@ -180,7 +187,8 @@ def transition_phase(plan_directory: str, completed_phase: str) -> dict:
                 'message': f"Phase '{completed_phase}' has incomplete tasks",
                 'tasks_total': phase_status['tasks_total'],
                 'tasks_completed': phase_status['tasks_completed'],
-                'tasks_remaining': phase_status['tasks_total'] - phase_status['tasks_completed']
+                'tasks_remaining': phase_status['tasks_total'] - phase_status['tasks_completed'],
+                'incomplete_items': phase_status['incomplete_items']
             }
         }
 
