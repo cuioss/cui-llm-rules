@@ -341,6 +341,13 @@ Examples:
         # Update current task pointer
         content = update_current_task_pointer(content, next_task)
 
+        # Update current phase pointer if --phase differs from header
+        current_phase_match = re.search(r'\*\*Current Phase\*\*:\s*(\w+)', content)
+        if current_phase_match:
+            current_phase_in_header = current_phase_match.group(1)
+            if current_phase_in_header != args.phase:
+                content = update_current_phase_pointer(content, args.phase)
+
         # Write updated content
         atomic_write_file(file_path, content)
 

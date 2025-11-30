@@ -396,6 +396,69 @@ def test_update_progress_file_not_found():
         assert result['success'] is False
 
 
+def test_update_progress_updates_current_phase_header():
+    """Test update-progress.py updates Current Phase header when phase differs.
+
+    Bug: update_current_phase_pointer() is defined but never called, causing
+    the **Current Phase** header to remain stale when updating tasks in a
+    different phase than what's shown in the header.
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        plan_dir = Path(tmpdir) / 'plan'
+
+        # Create plan with init phase as current, but also has execute phase tasks
+        phases_json = json.dumps([
+            {
+                "name": "init",
+                "status": "completed",
+                "tasks": [{
+                    "name": "Setup",
+                    "phase": "init",
+                    "goal": "Setup",
+                    "checklist": ["[x] Done"]
+                }]
+            },
+            {
+                "name": "execute",
+                "status": "in_progress",
+                "tasks": [{
+                    "name": "Implement",
+                    "phase": "execute",
+                    "goal": "Implement feature",
+                    "checklist": ["Task A", "Task B"]
+                }]
+            }
+        ])
+
+        run_script(WRITE_PLAN, [
+            '--plan-dir', str(plan_dir),
+            '--title', 'Test',
+            '--current-phase', 'init',  # Header says init
+            '--current-task', 'task-1',
+            '--phases-json', phases_json
+        ])
+
+        # Verify initial state - Current Phase is init
+        content_before = (plan_dir / 'plan.md').read_text()
+        assert '**Current Phase**: init' in content_before, "Initial phase should be init"
+
+        # Now update progress in execute phase (different from header)
+        returncode, _, stderr = run_script(UPDATE_PROGRESS, [
+            '--plan-dir', str(plan_dir),
+            '--phase', 'execute',  # Updating execute phase
+            '--task-id', '1',
+            '--complete-items', 'Task A'
+        ])
+
+        assert returncode == 0, f"Script failed: {stderr}"
+
+        # The Current Phase header should now be updated to 'execute'
+        content_after = (plan_dir / 'plan.md').read_text()
+        assert '**Current Phase**: execute' in content_after, \
+            f"Current Phase header should be updated to 'execute' when updating execute phase tasks. " \
+            f"Got: {content_after[:500]}"
+
+
 def main():
     """Run all tests."""
     print("=" * 50)
@@ -427,6 +490,7 @@ def main():
     runner.run_test("completes items", test_update_progress_completes_items)
     runner.run_test("updates table", test_update_progress_updates_table)
     runner.run_test("file not found", test_update_progress_file_not_found)
+    runner.run_test("updates current phase header", test_update_progress_updates_current_phase_header)
 
     return runner.summary()
 
