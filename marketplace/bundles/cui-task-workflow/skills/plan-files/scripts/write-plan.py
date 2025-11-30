@@ -83,6 +83,13 @@ def generate_task_section(task: dict, task_num: int) -> str:
             if isinstance(item, str):
                 text = item
                 checked = False
+                # Parse existing checkbox marker from string
+                if text.startswith('[x] '):
+                    checked = True
+                    text = text[4:]  # Remove "[x] " prefix
+                elif text.startswith('[ ] '):
+                    checked = False
+                    text = text[4:]  # Remove "[ ] " prefix
             elif isinstance(item, dict):
                 checked = item.get('done', False)
                 text = item.get('text', '')
