@@ -174,16 +174,81 @@ PLAN_REFINE_MISMATCH = """# Task Plan: Test
 - [x] Done
 """
 
+# Plugin-development plan (4-phase: init -> refine -> execute -> finalize)
+PLAN_PLUGIN_DEV_EXECUTE_COMPLETE = """# Task Plan: Test Plugin Dev
+
+**Current Phase**: execute
+**Current Task**: none
+
+## Phase Progress
+
+| Phase | Status | Tasks | Completed |
+|-------|--------|-------|-----------|
+| init | completed | 1 | 1/1 |
+| refine | completed | 1 | 1/1 |
+| execute | in_progress | 1 | 1/1 |
+| finalize | pending | 1 | 0/1 |
+
+## Phase: execute (in_progress)
+
+### Task 1: Implement
+
+**Phase**: execute
+**Goal**: Implementation
+
+**Checklist**:
+- [x] Done
+"""
+
+CONFIG_PLUGIN_DEV = """# Plan Configuration
+
+plan_type: plugin-development
+branch: test-branch
+"""
+
+# Simple plan (3-phase: init -> execute -> finalize)
+PLAN_SIMPLE_EXECUTE_COMPLETE = """# Task Plan: Test Simple
+
+**Current Phase**: execute
+**Current Task**: none
+
+## Phase Progress
+
+| Phase | Status | Tasks | Completed |
+|-------|--------|-------|-----------|
+| init | completed | 1 | 1/1 |
+| execute | in_progress | 1 | 1/1 |
+| finalize | pending | 1 | 0/1 |
+
+## Phase: execute (in_progress)
+
+### Task 1: Do Task
+
+**Phase**: execute
+**Goal**: Execute task
+
+**Checklist**:
+- [x] Done
+"""
+
+CONFIG_SIMPLE = """# Plan Configuration
+
+plan_type: simple
+branch: test-branch
+"""
+
 
 # =============================================================================
 # Test Helpers
 # =============================================================================
 
-def create_plan_dir(base_dir: Path, content: str) -> Path:
-    """Create a plan directory with plan.md."""
+def create_plan_dir(base_dir: Path, content: str, config: str = None) -> Path:
+    """Create a plan directory with plan.md and optional config.toon."""
     plan_dir = base_dir / 'test-plan'
     plan_dir.mkdir(parents=True, exist_ok=True)
     (plan_dir / 'plan.md').write_text(content)
+    if config:
+        (plan_dir / 'config.toon').write_text(config)
     return plan_dir
 
 
@@ -395,6 +460,163 @@ def test_all_standard_transitions():
 
 
 # =============================================================================
+# Tests - Plugin-Development Plan Type (4-phase)
+# =============================================================================
+
+def test_plugin_dev_execute_to_finalize():
+    """Test plugin-development plan transitions from execute to finalize."""
+    temp_dir = create_temp_dir()
+    try:
+        plan_dir = create_plan_dir(temp_dir, PLAN_PLUGIN_DEV_EXECUTE_COMPLETE, CONFIG_PLUGIN_DEV)
+
+        result = run_script(SCRIPT_PATH, str(plan_dir), 'execute')
+        assert result.success, f"Script failed: {result.stderr}"
+        data = result.json()
+
+        assert data['transition']['from_phase'] == 'execute'
+        assert data['transition']['to_phase'] == 'finalize'
+        assert data['transition']['success'] is True
+        assert data['plan_status']['plan_type'] == 'plugin-development'
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+def test_plugin_dev_rejects_implement_phase():
+    """Test plugin-development plan rejects 'implement' as invalid phase."""
+    temp_dir = create_temp_dir()
+    try:
+        # Create plan that claims to be in 'implement' phase but is plugin-development type
+        plan_content = """# Task Plan: Test
+
+**Current Phase**: implement
+**Current Task**: none
+
+## Phase Progress
+
+| Phase | Status | Tasks | Completed |
+|-------|--------|-------|-----------|
+| implement | in_progress | 1 | 1/1 |
+
+## Phase: implement (in_progress)
+
+### Task 1: Test
+
+**Phase**: implement
+**Goal**: Test
+
+**Checklist**:
+- [x] Done
+"""
+        plan_dir = create_plan_dir(temp_dir, plan_content, CONFIG_PLUGIN_DEV)
+
+        result = run_script(SCRIPT_PATH, str(plan_dir), 'implement')
+        assert not result.success, "Expected failure for invalid phase"
+        data = result.json()
+
+        assert 'error' in data
+        assert data['error']['type'] == 'invalid_phase'
+        assert 'plugin-development' in str(data['error'])
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+def test_plugin_dev_rejects_verify_phase():
+    """Test plugin-development plan rejects 'verify' as invalid phase."""
+    temp_dir = create_temp_dir()
+    try:
+        plan_content = """# Task Plan: Test
+
+**Current Phase**: verify
+**Current Task**: none
+
+## Phase Progress
+
+| Phase | Status | Tasks | Completed |
+|-------|--------|-------|-----------|
+| verify | in_progress | 1 | 1/1 |
+
+## Phase: verify (in_progress)
+
+### Task 1: Test
+
+**Phase**: verify
+**Goal**: Test
+
+**Checklist**:
+- [x] Done
+"""
+        plan_dir = create_plan_dir(temp_dir, plan_content, CONFIG_PLUGIN_DEV)
+
+        result = run_script(SCRIPT_PATH, str(plan_dir), 'verify')
+        assert not result.success, "Expected failure for invalid phase"
+        data = result.json()
+
+        assert 'error' in data
+        assert data['error']['type'] == 'invalid_phase'
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+# =============================================================================
+# Tests - Simple Plan Type (3-phase)
+# =============================================================================
+
+def test_simple_execute_to_finalize():
+    """Test simple plan transitions from execute to finalize."""
+    temp_dir = create_temp_dir()
+    try:
+        plan_dir = create_plan_dir(temp_dir, PLAN_SIMPLE_EXECUTE_COMPLETE, CONFIG_SIMPLE)
+
+        result = run_script(SCRIPT_PATH, str(plan_dir), 'execute')
+        assert result.success, f"Script failed: {result.stderr}"
+        data = result.json()
+
+        assert data['transition']['from_phase'] == 'execute'
+        assert data['transition']['to_phase'] == 'finalize'
+        assert data['transition']['success'] is True
+        assert data['plan_status']['plan_type'] == 'simple'
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+def test_simple_rejects_refine_phase():
+    """Test simple plan rejects 'refine' as invalid phase."""
+    temp_dir = create_temp_dir()
+    try:
+        plan_content = """# Task Plan: Test
+
+**Current Phase**: refine
+**Current Task**: none
+
+## Phase Progress
+
+| Phase | Status | Tasks | Completed |
+|-------|--------|-------|-----------|
+| refine | in_progress | 1 | 1/1 |
+
+## Phase: refine (in_progress)
+
+### Task 1: Test
+
+**Phase**: refine
+**Goal**: Test
+
+**Checklist**:
+- [x] Done
+"""
+        plan_dir = create_plan_dir(temp_dir, plan_content, CONFIG_SIMPLE)
+
+        result = run_script(SCRIPT_PATH, str(plan_dir), 'refine')
+        assert not result.success, "Expected failure for invalid phase"
+        data = result.json()
+
+        assert 'error' in data
+        assert data['error']['type'] == 'invalid_phase'
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -411,5 +633,12 @@ if __name__ == '__main__':
         test_transition_output_structure,
         test_transition_help_output,
         test_all_standard_transitions,
+        # Plugin-development plan tests
+        test_plugin_dev_execute_to_finalize,
+        test_plugin_dev_rejects_implement_phase,
+        test_plugin_dev_rejects_verify_phase,
+        # Simple plan tests
+        test_simple_execute_to_finalize,
+        test_simple_rejects_refine_phase,
     ])
     sys.exit(runner.run())

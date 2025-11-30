@@ -74,6 +74,24 @@ def test_route_finalize_phase():
     assert data['phase_status']['pending_phases'] == []
 
 
+def test_route_execute_phase():
+    """Test routing execute phase to plan-implement skill.
+
+    Note: 'execute' is used by both Simple (3-phase) and Plugin-Development (4-phase) plans.
+    Without plan directory context, script cannot distinguish between them.
+    """
+    result = run_script(SCRIPT_PATH, 'execute')
+    assert result.success
+    data = result.json()
+
+    # Core routing must work correctly
+    assert data['routing']['target_skill'] == 'plan-implement'
+    assert data['routing']['skill_full_name'] == 'cui-task-workflow:plan-implement'
+    # Phase index in simple plan (execute is phase 2 of 3: init, execute, finalize)
+    assert data['phase_status']['phase_index'] == 1
+    assert 'finalize' in data['phase_status']['pending_phases']
+
+
 # =============================================================================
 # Tests - Phase Override
 # =============================================================================
@@ -148,7 +166,7 @@ def test_help_output():
     """Test --help output."""
     result = run_script(SCRIPT_PATH, '--help')
     assert result.returncode == 0
-    assert 'Phase order:' in result.stdout
+    assert 'Plan types:' in result.stdout
     assert 'init' in result.stdout
     assert 'finalize' in result.stdout
 
@@ -201,6 +219,7 @@ if __name__ == '__main__':
         test_route_implement_phase,
         test_route_verify_phase,
         test_route_finalize_phase,
+        test_route_execute_phase,
         test_override_same_phase,
         test_override_skip_fails,
         test_override_backward_fails,

@@ -63,44 +63,30 @@ PLAN_MD_FULL = """# Task Plan: JWT Authentication
 - [ ] Document
 """
 
-CONFIG_MD = """# Configuration
+CONFIG_TOON = """# Configuration
 
-**Plan Type**: implementation
-
-## Build Configuration
-
-| Property | Value |
-|----------|-------|
-| Technology | java |
-| Build System | maven |
-| Compatibility | deprecations |
-
-## Workflow Configuration
-
-| Property | Value |
-|----------|-------|
-| Commit Strategy | fine-granular |
-| Finalizing | pr-workflow |
+plan_type: implementation
+technology: java
+build_system: maven
+compatibility: deprecations
+commit_strategy: fine-granular
+finalizing: pr-workflow
 """
 
-REFERENCES_MD = """# References
+REFERENCES_TOON = """# References
 
-## Issue and Branch
+issue: 123
+issue_url: https://github.com/org/repo/issues/123
+issue_title: Add JWT Authentication
+branch: feature/jwt-auth
+base_branch: main
 
-**Issue**: [#123: Add JWT Authentication](https://github.com/org/repo/issues/123)
-**Branch**: `feature/jwt-auth`
-**Base Branch**: `main`
-
-## Related Documents
-
-### ADRs
-
+adrs[]:
 - ADR-001: Token Format Selection
 - ADR-002: Security Considerations
 
-### Interfaces
-
-- IF-001: AuthenticationService
+interfaces[]:
+- IF-AUTH-001: AuthenticationService
 """
 
 PLAN_COMPLETED = """# Task Plan: Completed
@@ -141,8 +127,8 @@ def create_full_plan_dir(base_dir: Path) -> Path:
     plan_dir = base_dir / 'jwt-auth'
     plan_dir.mkdir(parents=True, exist_ok=True)
     (plan_dir / 'plan.md').write_text(PLAN_MD_FULL)
-    (plan_dir / 'config.md').write_text(CONFIG_MD)
-    (plan_dir / 'references.md').write_text(REFERENCES_MD)
+    (plan_dir / 'config.toon').write_text(CONFIG_TOON)
+    (plan_dir / 'references.toon').write_text(REFERENCES_TOON)
     return plan_dir
 
 
@@ -192,7 +178,7 @@ def test_full_status_aggregation():
         # Check references
         assert data['references']['issue'] is not None
         assert 'ADR-001' in data['references']['adrs']
-        assert 'IF-001' in data['references']['interfaces']
+        assert 'IF-AUTH-001' in data['references']['interfaces']
     finally:
         shutil.rmtree(temp_dir)
 
@@ -365,9 +351,9 @@ def test_partial_config_data():
         plan_dir = temp_dir / 'partial'
         plan_dir.mkdir()
         (plan_dir / 'plan.md').write_text(PLAN_MINIMAL)
-        (plan_dir / 'config.md').write_text("""# Configuration
+        (plan_dir / 'config.toon').write_text("""# Configuration
 
-**Plan Type**: simple
+plan_type: simple
 """)
 
         result = run_script(SCRIPT_PATH, str(plan_dir))
@@ -388,11 +374,9 @@ def test_partial_references_data():
         plan_dir = temp_dir / 'partial'
         plan_dir.mkdir()
         (plan_dir / 'plan.md').write_text(PLAN_MINIMAL)
-        (plan_dir / 'references.md').write_text("""# References
+        (plan_dir / 'references.toon').write_text("""# References
 
-## Issue and Branch
-
-**Branch**: `feature/test`
+branch: feature/test
 """)
 
         result = run_script(SCRIPT_PATH, str(plan_dir))

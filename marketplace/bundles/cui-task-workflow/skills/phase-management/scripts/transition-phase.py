@@ -15,29 +15,68 @@ import re
 import sys
 from pathlib import Path
 
-# Phase order (strict sequence)
-PHASE_ORDER = ['init', 'refine', 'implement', 'verify', 'finalize']
+# Phase orders for each plan type
+# Implementation (5-phase): Full development workflow with verify phase
+PHASE_ORDER_IMPLEMENTATION = ['init', 'refine', 'implement', 'verify', 'finalize']
 
-# Simple plan phases (alternative workflow)
-SIMPLE_PHASE_ORDER = ['init', 'execute', 'finalize']
+# Plugin-Development (4-phase): Development without verify phase
+PHASE_ORDER_PLUGIN_DEV = ['init', 'refine', 'execute', 'finalize']
+
+# Simple (3-phase): Quick tasks without refine phase
+PHASE_ORDER_SIMPLE = ['init', 'execute', 'finalize']
+
+# Map plan types to phase orders
+PLAN_TYPE_PHASES = {
+    'implementation': PHASE_ORDER_IMPLEMENTATION,
+    'plugin-development': PHASE_ORDER_PLUGIN_DEV,
+    'simple': PHASE_ORDER_SIMPLE,
+}
 
 
-def detect_plan_type(plan_content: str) -> str:
-    """Detect if plan is 'implementation' or 'simple' type."""
-    # Check for refine or implement phases (only in implementation type)
-    if '## Phase: refine' in plan_content or '## Phase: implement' in plan_content:
+def parse_config_toon(config_file: Path) -> dict:
+    """Parse config.toon for plan configuration (TOON format)."""
+    if not config_file.exists():
+        return {}
+
+    content = config_file.read_text()
+
+    config = {}
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if ':' in line and not line.endswith(':'):
+            key, value = line.split(':', 1)
+            config[key.strip().lower().replace(' ', '_')] = value.strip()
+
+    return config
+
+
+def get_plan_type(plan_dir: Path, plan_content: str) -> str:
+    """Get plan type from config.toon, with fallback to content detection."""
+    # First, try to read from config.toon
+    config_file = plan_dir / 'config.toon'
+    config = parse_config_toon(config_file)
+    plan_type = config.get('plan_type', '').lower()
+
+    if plan_type in PLAN_TYPE_PHASES:
+        return plan_type
+
+    # Fallback: detect from plan content (for backwards compatibility)
+    if '## Phase: refine' in plan_content and '## Phase: implement' in plan_content:
         return 'implementation'
-    if '## Phase: execute' in plan_content:
+    if '## Phase: execute' in plan_content and '## Phase: refine' not in plan_content:
         return 'simple'
+    if '## Phase: execute' in plan_content:
+        return 'plugin-development'
+
     # Default to implementation
     return 'implementation'
 
 
 def get_phase_order(plan_type: str) -> list:
     """Get phase order based on plan type."""
-    if plan_type == 'simple':
-        return SIMPLE_PHASE_ORDER
-    return PHASE_ORDER
+    return PLAN_TYPE_PHASES.get(plan_type, PHASE_ORDER_IMPLEMENTATION)
 
 
 def parse_phase_tasks(plan_content: str, phase: str) -> dict:
@@ -93,8 +132,8 @@ def transition_phase(plan_directory: str, completed_phase: str) -> dict:
 
     plan_content = plan_file.read_text()
 
-    # Detect plan type and get phase order
-    plan_type = detect_plan_type(plan_content)
+    # Get plan type from config.toon (or fallback to content detection)
+    plan_type = get_plan_type(plan_dir, plan_content)
     phases = get_phase_order(plan_type)
 
     # Validate completed phase is valid
@@ -227,7 +266,10 @@ Output JSON structure (plan complete):
 }
 
 Phase order (implementation): init -> refine -> implement -> verify -> finalize
+Phase order (plugin-development): init -> refine -> execute -> finalize
 Phase order (simple): init -> execute -> finalize
+
+Note: Plan type is read from config.toon (plan_type field). Falls back to content detection.
 """
     )
     parser.add_argument('plan_directory', help='Path to plan directory')
