@@ -56,6 +56,17 @@ Contains: Phase overview, finalizing modes, commit strategy, PR template, comple
 
 4. **Report status**: Commit hash, message, branch, files changed
 
+5. **Log commit**:
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: finalize
+   task: task-1
+   action: "Committed changes"
+   result: "commit {short_hash}: {message}"
+   ```
+
 ---
 
 ## Operation: create-pr
@@ -97,6 +108,17 @@ Contains: Phase overview, finalizing modes, commit strategy, PR template, comple
 4. **Link issue**: `gh pr edit {number} --add-issue {issue-number}`
 
 5. **Add reviewers** (if configured): `gh pr edit {number} --add-reviewer {list}`
+
+6. **Log PR creation** (if PR created):
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: finalize
+   task: task-2
+   action: "Created pull request"
+   result: "PR #{number}: {title}"
+   ```
 
 ---
 
@@ -151,6 +173,17 @@ Contains: Phase overview, finalizing modes, commit strategy, PR template, comple
    mv {plan_directory} {plan-storage}/archive/{task-name}-{date}/
    ```
 
+5. **Log plan completion**:
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: finalize
+   task: task-3
+   action: "Plan completed successfully"
+   result: "All {count} tasks completed"
+   ```
+
 ---
 
 ## Error Handling
@@ -176,6 +209,7 @@ Options: Fix issues / Request exception / Proceed anyway
 - **cui-git-workflow** - Git commit operations
 - **pr-workflow** - PR automation and Sonar fixes
 - **phase-management** - Orchestration (invokes this skill)
+- **work-log** - Logging significant actions
 
 ### Related Skills
 - **plan-init** - Init phase

@@ -117,6 +117,17 @@ Task:
   prompt: Execute Task {N}: {name}, Goal: {goal}, Criteria: {list}
 ```
 
+**After agent completes**:
+```
+Skill: cui-task-workflow:work-log
+operation: log-entry
+plan_directory: {plan_directory}
+phase: implement
+task: {task_id}
+action: "Implemented {task_name}"
+result: "{created/modified files}"
+```
+
 ### Step 6: Verify Acceptance Criteria
 
 Present verification table. If criterion fails:
@@ -137,6 +148,17 @@ Skill: cui-task-workflow:plan-files
 operation: write-references
 action: add
 reference_type: file
+```
+
+**Log task completion**:
+```
+Skill: cui-task-workflow:work-log
+operation: log-entry
+plan_directory: {plan_directory}
+phase: implement
+task: {task_id}
+action: "Completed task {task_id}: {task_name}"
+result: "Acceptance criteria met"
 ```
 
 ### Step 8: Commit (Based on Strategy)
@@ -207,6 +229,7 @@ When all implement tasks complete:
 - **npm-builder** - JavaScript implementation
 - **cui-git-workflow** - Commit operations
 - **phase-management** - Orchestration (invokes this skill)
+- **work-log** - Logging significant actions
 
 ### Related Skills
 - **plan-init** - Init phase

@@ -57,6 +57,17 @@ Contains: Phase overview, standard tasks, build verification, quality analysis, 
    - Success → Report and proceed
    - Failure → AskUserQuestion: Fix/View log/Override/Abort
 
+4. **Log build verification**:
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: verify
+   task: task-1
+   action: "Ran build verification"
+   result: "Build passed, tests: {count}, coverage: {pct}%"
+   ```
+
 ---
 
 ## Operation: verify-quality
@@ -83,6 +94,17 @@ Contains: Phase overview, standard tasks, build verification, quality analysis, 
 3. **Handle result**:
    - Passed → Report and proceed
    - Critical issues → AskUserQuestion: Fix/View details/Accept/Abort
+
+4. **Log quality analysis**:
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: verify
+   task: task-2
+   action: "Ran quality analysis"
+   result: "{count} issues, {severity breakdown}"
+   ```
 
 ---
 
@@ -183,6 +205,7 @@ Options: Fix issues / View details / Request exception
 - **java-quality-agent** - Java quality analysis
 - **java-fix-javadoc-agent** - JavaDoc verification
 - **phase-management** - Orchestration (invokes this skill)
+- **work-log** - Logging significant actions
 
 ### Related Skills
 - **plan-init** - Init phase

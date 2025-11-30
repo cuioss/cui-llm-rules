@@ -129,6 +129,17 @@ analysis_created:
   user_approved: true
 ```
 
+6. **Log analysis creation**:
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: refine
+   task: task-1
+   action: "Completed strategic analysis"
+   result: "analysis.md created"
+   ```
+
 ---
 
 ## Operation: analyze
@@ -191,6 +202,17 @@ analysis_created:
    operation: write-plan
    ```
 
+5. **Log task planning**:
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: refine
+   task: task-2
+   action: "Generated implementation tasks"
+   result: "{count} tasks planned"
+   ```
+
 **Output**: `tasks[N]: {id, name, complexity, dependencies, acceptance_criteria}`
 
 ---
@@ -241,6 +263,17 @@ After all refine tasks complete:
 
 3. **Write**: `Write {plan_directory}/implementation-requirements.md`
 
+4. **Log requirements generation**:
+   ```
+   Skill: cui-task-workflow:work-log
+   operation: log-entry
+   plan_directory: {plan_directory}
+   phase: refine
+   task: task-3
+   action: "Created implementation requirements"
+   result: "implementation-requirements.md"
+   ```
+
 ---
 
 ## Phase Transition
@@ -282,6 +315,7 @@ Options: Define scope / Remove component / Mark as TODO
 - **adr-management** - ADR creation and verification
 - **interface-management** - Interface creation and verification
 - **phase-management** - Orchestration (invokes this skill)
+- **work-log** - Logging significant actions
 
 ### Related Skills
 - **plan-init** - Previous phase

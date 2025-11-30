@@ -182,7 +182,19 @@ reference_type: issue
 reference_data: {issue-url, issue-title, branch}
 ```
 
-### Step 11: Return Completion
+### Step 11: Log Plan Creation
+
+```
+Skill: cui-task-workflow:work-log
+operation: log-entry
+plan_directory: {directory}
+phase: init
+task: task-1
+action: "Created {plan_type} plan"
+result: "Plan: {task-name}, Branch: {branch}"
+```
+
+### Step 12: Return Completion
 
 **Output**:
 ```
@@ -233,6 +245,7 @@ resolution: Verify URL, check permissions, or continue without
 - **plan-files** - All file I/O operations
 - **builder:environment-detection** - Build system detection (optional)
 - **phase-management** - Orchestration (invokes this skill)
+- **work-log** - Logging significant actions
 
 ### Related Skills
 - **plan-refine** - Next phase (implementation)
