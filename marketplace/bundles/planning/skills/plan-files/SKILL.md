@@ -346,3 +346,31 @@ alternatives:
 - [x] Python scripts for deterministic operations
 - [x] Standards in standards/
 - [x] Templates in templates/
+
+---
+
+## Continuous Improvement
+
+**MANDATORY**: When executing scripts from this skill, unexpected behavior or errors MUST be documented as lessons learned immediately.
+
+### When to Document
+
+File a lesson learned when a script:
+- Returns unexpected output
+- Fails to update files as expected
+- Requires a workaround to achieve the desired result
+- Has unclear or misleading documentation
+
+### How to Document
+
+Use the `general-tools:manage-lessons-learned` skill:
+```bash
+python3 {write-lesson.py path} --component "planning:plan-files" --category {bug|improvement|anti-pattern} --title "Brief description" --detail "What happened, why, workaround, suggested fix"
+```
+
+**Categories**:
+- `bug`: Script is broken or produces wrong results
+- `improvement`: Script works but could be better
+- `anti-pattern`: Script was misused or documentation unclear
+
+**Why This Matters**: Script errors indicate gaps in validation, documentation, or implementation. Documented lessons improve future sessions and identify systemic issues.
