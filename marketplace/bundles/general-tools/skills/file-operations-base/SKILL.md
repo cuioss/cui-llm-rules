@@ -189,6 +189,71 @@ Files are stored in `.plan/` directory:
 
 ---
 
+## Cross-Domain Access Pattern
+
+When scripts in one domain (e.g., `planning:plan-files`) need to access resources in another domain (e.g., `general-tools:manage-lessons-learned`), follow the **ID-based access pattern**.
+
+### Principle
+
+**Scripts take IDs, not paths, for cross-domain resources.** The script resolves the ID to a path internally using `base_path()`.
+
+### Why This Matters
+
+- **Encapsulation**: Each domain owns its file structure; other domains should not construct paths
+- **Maintainability**: Path format changes only require updating the owning domain's script
+- **Testability**: ID-based APIs are easier to mock and test
+- **Error clarity**: Scripts can provide domain-specific error messages for invalid IDs
+
+### Correct Pattern
+
+```python
+# Script in planning domain needs to access lesson from lessons-learned domain
+# CORRECT: Accept ID, resolve path internally
+
+def copy_lesson_to_plan(lesson_id: str, plan_dir: Path) -> dict:
+    # Resolve ID to path internally
+    lesson_file = base_path("lessons-learned", f"{lesson_id}.md")
+
+    if not lesson_file.exists():
+        return {"success": False, "error": f"Lesson not found: {lesson_id}"}
+
+    # Proceed with copy...
+```
+
+### Incorrect Pattern (Anti-Pattern)
+
+```python
+# WRONG: Orchestrator constructs path and passes it to script
+
+# In orchestrator (phase-management SKILL.md):
+python3 {script} --lesson-file {lesson.file}  # BAD: orchestrator builds path
+
+# In script:
+def copy_lesson_to_plan(lesson_file: Path, plan_dir: Path):  # BAD: accepts path
+    pass
+```
+
+### When to Use ID-Based Access
+
+| Scenario | Use ID-Based | Reason |
+|----------|--------------|--------|
+| Cross-domain resource access | Yes | Scripts own their domain's paths |
+| Same-domain resource access | Optional | Same skill owns both paths |
+| User-specified file | No | User explicitly provides path |
+| Configuration files | No | Paths defined in config are explicit |
+
+### Implementation Checklist
+
+When creating scripts that access cross-domain resources:
+
+1. [ ] Accept resource ID (e.g., `--lesson-id`) not path
+2. [ ] Import `base_path` from file_ops
+3. [ ] Resolve path internally: `base_path("domain-dir", f"{id}.md")`
+4. [ ] Return clear error if resource not found
+5. [ ] Document the expected ID format in help text
+
+---
+
 ## Quality Checklist
 
 - [x] Self-contained with relative paths

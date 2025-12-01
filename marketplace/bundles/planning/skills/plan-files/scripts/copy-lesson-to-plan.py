@@ -26,17 +26,33 @@ sys.path.insert(0, str(FILE_OPS_DIR))
 from file_ops import atomic_write_file, output_success, output_error, base_path
 
 
-def copy_lesson_to_plan(lesson_file: Path, plan_dir: Path, dry_run: bool = False) -> dict:
+def resolve_lesson_path(lesson_id: str) -> Path:
+    """Resolve lesson ID to file path using base_path.
+
+    Args:
+        lesson_id: Lesson identifier (e.g., "2025-12-01-004")
+
+    Returns:
+        Path to the lesson file
+    """
+    filename = f"{lesson_id}.md"
+    return base_path("lessons-learned", filename)
+
+
+def copy_lesson_to_plan(lesson_id: str, plan_dir: Path, dry_run: bool = False) -> dict:
     """Copy lesson file to plan directory and remove original.
 
     Args:
-        lesson_file: Path to the lesson file
+        lesson_id: Lesson identifier (resolved internally to file path)
         plan_dir: Path to the plan directory
         dry_run: If True, only simulate the operation
 
     Returns:
         dict with operation result
     """
+    # Resolve lesson ID to file path
+    lesson_file = resolve_lesson_path(lesson_id)
+
     # Validate lesson file exists
     if not lesson_file.exists():
         return {
@@ -104,9 +120,11 @@ def copy_lesson_to_plan(lesson_file: Path, plan_dir: Path, dry_run: bool = False
         }
 
     # Step 2: Verify content was written correctly
+    # Note: atomic_write_file adds trailing newline if missing, so compare normalized
     try:
         written_content = dest_file.read_text(encoding='utf-8')
-        if written_content != lesson_content:
+        # Normalize by stripping trailing whitespace for comparison
+        if written_content.rstrip() != lesson_content.rstrip():
             # Content mismatch - abort without removing original
             return {
                 "success": False,
@@ -147,12 +165,20 @@ def copy_lesson_to_plan(lesson_file: Path, plan_dir: Path, dry_run: bool = False
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Copy lesson file to plan directory (transactional move)'
+        description='Copy lesson file to plan directory (transactional move)',
+        epilog='''
+Examples:
+  # Copy lesson by ID (resolves path internally)
+  %(prog)s --lesson-id 2025-12-01-004 --plan-dir .plan/plans/my-task
+
+  # Dry run to see what would happen
+  %(prog)s --lesson-id 2025-12-01-004 --plan-dir .plan/plans/my-task --dry-run
+'''
     )
     parser.add_argument(
-        '--lesson-file',
+        '--lesson-id',
         required=True,
-        help='Path to the lesson file to copy'
+        help='Lesson identifier (e.g., 2025-12-01-004) - path resolved internally'
     )
     parser.add_argument(
         '--plan-dir',
@@ -167,15 +193,28 @@ def main():
 
     args = parser.parse_args()
 
-    lesson_file = Path(args.lesson_file).resolve()
     plan_dir = Path(args.plan_dir).resolve()
 
-    result = copy_lesson_to_plan(lesson_file, plan_dir, args.dry_run)
+    result = copy_lesson_to_plan(args.lesson_id, plan_dir, args.dry_run)
 
     if result.get("success"):
-        output_success(result)
+        # Extract fields for output_success (expects operation name as first arg)
+        output_success(
+            'copy-lesson-to-plan',
+            dry_run=result.get('dry_run', False),
+            would_copy=result.get('would_copy'),
+            would_create=result.get('would_create'),
+            would_remove=result.get('would_remove'),
+            source=result.get('source'),
+            destination=result.get('destination'),
+            original_removed=result.get('original_removed'),
+            original_preserved=result.get('original_preserved'),
+            content_size=result.get('content_size'),
+            warning=result.get('warning')
+        )
     else:
-        output_error(result.get("error", "Unknown error"), result)
+        output_error('copy-lesson-to-plan', result.get("error", "Unknown error"))
+        sys.exit(1)
 
 
 if __name__ == '__main__':

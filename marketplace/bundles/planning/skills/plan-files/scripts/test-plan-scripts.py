@@ -57,14 +57,22 @@ WRITE_PLAN = SCRIPT_DIR / 'write-plan.py'
 WRITE_CONFIG = SCRIPT_DIR / 'write-config.py'
 WRITE_REFERENCES = SCRIPT_DIR / 'write-references.py'
 UPDATE_PROGRESS = SCRIPT_DIR / 'update-progress.py'
+COPY_LESSON_TO_PLAN = SCRIPT_DIR / 'copy-lesson-to-plan.py'
 
 
-def run_script(script_path: Path, args: list[str]) -> tuple[int, str, str]:
-    """Run a script and return (returncode, stdout, stderr)."""
+def run_script(script_path: Path, args: list[str], cwd: Path = None) -> tuple[int, str, str]:
+    """Run a script and return (returncode, stdout, stderr).
+
+    Args:
+        script_path: Path to the script to run
+        args: Command line arguments
+        cwd: Optional working directory (for scripts using relative base_path)
+    """
     result = subprocess.run(
         [sys.executable, str(script_path)] + args,
         capture_output=True,
-        text=True
+        text=True,
+        cwd=str(cwd) if cwd else None
     )
     return result.returncode, result.stdout, result.stderr
 
@@ -503,6 +511,136 @@ def test_update_progress_updates_current_phase_header():
             f"Got: {content_after[:500]}"
 
 
+# copy-lesson-to-plan.py tests
+
+def test_copy_lesson_resolves_id_to_path():
+    """Test copy-lesson-to-plan.py resolves lesson ID to correct path."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Set up the .plan structure (base_path uses relative .plan)
+        base_dir = Path(tmpdir)
+        lessons_dir = base_dir / '.plan' / 'lessons-learned'
+        lessons_dir.mkdir(parents=True)
+
+        plan_dir = base_dir / '.plan' / 'plans' / 'test-plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create plan.md (required by copy-lesson-to-plan)
+        (plan_dir / 'plan.md').write_text('# Test Plan\n')
+
+        # Create a lesson file
+        lesson_id = '2025-12-01-001'
+        lesson_file = lessons_dir / f'{lesson_id}.md'
+        lesson_content = 'id=2025-12-01-001\n\n# Test Lesson\n\nSome content.'
+        lesson_file.write_text(lesson_content)
+
+        # Run the script with --dry-run, using cwd so base_path resolves correctly
+        returncode, stdout, stderr = run_script(COPY_LESSON_TO_PLAN, [
+            '--lesson-id', lesson_id,
+            '--plan-dir', str(plan_dir),
+            '--dry-run'
+        ], cwd=base_dir)
+
+        assert returncode == 0, f"Script failed: {stderr}"
+
+        result = json.loads(stdout)
+        assert result['success'] is True
+        assert result['dry_run'] is True
+        # The resolved path should contain the lesson ID
+        assert lesson_id in result['would_copy'], \
+            f"Should resolve {lesson_id} to correct path. Got: {result['would_copy']}"
+
+
+def test_copy_lesson_invalid_id_returns_error():
+    """Test copy-lesson-to-plan.py returns error for non-existent lesson ID."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        lessons_dir = base_dir / '.plan' / 'lessons-learned'
+        lessons_dir.mkdir(parents=True)
+
+        plan_dir = base_dir / '.plan' / 'plans' / 'test-plan'
+        plan_dir.mkdir(parents=True)
+        (plan_dir / 'plan.md').write_text('# Test Plan\n')
+
+        # Try to copy a non-existent lesson (cwd set so base_path resolves)
+        returncode, _, stderr = run_script(COPY_LESSON_TO_PLAN, [
+            '--lesson-id', 'nonexistent-id',
+            '--plan-dir', str(plan_dir)
+        ], cwd=base_dir)
+
+        assert returncode != 0, "Should fail for non-existent lesson"
+
+        result = json.loads(stderr)
+        assert result['success'] is False
+        assert 'not found' in result['error'].lower()
+
+
+def test_copy_lesson_copies_to_plan_directory():
+    """Test copy-lesson-to-plan.py copies lesson to plan directory."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        lessons_dir = base_dir / '.plan' / 'lessons-learned'
+        lessons_dir.mkdir(parents=True)
+
+        plan_dir = base_dir / '.plan' / 'plans' / 'test-plan'
+        plan_dir.mkdir(parents=True)
+        (plan_dir / 'plan.md').write_text('# Test Plan\n')
+
+        # Create lesson
+        lesson_id = '2025-12-01-002'
+        lesson_file = lessons_dir / f'{lesson_id}.md'
+        lesson_content = 'id=2025-12-01-002\n\n# Test Lesson\n\nContent here.'
+        lesson_file.write_text(lesson_content)
+
+        returncode, stdout, stderr = run_script(COPY_LESSON_TO_PLAN, [
+            '--lesson-id', lesson_id,
+            '--plan-dir', str(plan_dir)
+        ], cwd=base_dir)
+
+        assert returncode == 0, f"Script failed: {stderr}"
+
+        result = json.loads(stdout)
+        assert result['success'] is True
+
+        # Check destination file exists
+        dest_file = plan_dir / 'lesson-source.md'
+        assert dest_file.exists(), "Lesson should be copied to plan directory"
+        assert dest_file.read_text().strip() == lesson_content.strip()
+
+
+def test_copy_lesson_removes_original():
+    """Test copy-lesson-to-plan.py removes original lesson file after copy."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        lessons_dir = base_dir / '.plan' / 'lessons-learned'
+        lessons_dir.mkdir(parents=True)
+
+        plan_dir = base_dir / '.plan' / 'plans' / 'test-plan'
+        plan_dir.mkdir(parents=True)
+        (plan_dir / 'plan.md').write_text('# Test Plan\n')
+
+        # Create lesson
+        lesson_id = '2025-12-01-003'
+        lesson_file = lessons_dir / f'{lesson_id}.md'
+        lesson_content = 'id=2025-12-01-003\n\n# Lesson To Move'
+        lesson_file.write_text(lesson_content)
+
+        assert lesson_file.exists(), "Lesson file should exist before copy"
+
+        returncode, stdout, stderr = run_script(COPY_LESSON_TO_PLAN, [
+            '--lesson-id', lesson_id,
+            '--plan-dir', str(plan_dir)
+        ], cwd=base_dir)
+
+        assert returncode == 0, f"Script failed: {stderr}"
+
+        result = json.loads(stdout)
+        assert result['success'] is True
+        assert result.get('original_removed') is True
+
+        # Original should be removed
+        assert not lesson_file.exists(), "Original lesson file should be removed after copy"
+
+
 def main():
     """Run all tests."""
     print("=" * 50)
@@ -536,6 +674,13 @@ def main():
     runner.run_test("updates table", test_update_progress_updates_table)
     runner.run_test("file not found", test_update_progress_file_not_found)
     runner.run_test("updates current phase header", test_update_progress_updates_current_phase_header)
+
+    # copy-lesson-to-plan.py tests
+    print("\ncopy-lesson-to-plan.py:")
+    runner.run_test("resolves ID to path", test_copy_lesson_resolves_id_to_path)
+    runner.run_test("invalid ID returns error", test_copy_lesson_invalid_id_returns_error)
+    runner.run_test("copies to plan directory", test_copy_lesson_copies_to_plan_directory)
+    runner.run_test("removes original", test_copy_lesson_removes_original)
 
     return runner.summary()
 

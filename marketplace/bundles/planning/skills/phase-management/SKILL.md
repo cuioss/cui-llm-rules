@@ -533,7 +533,7 @@ Converts a selected lesson into a new plan.
 5. **Move lesson to plan directory**:
    ```bash
    python3 {copy-lesson-to-plan.py path} \
-     --lesson-file {lesson.file} \
+     --lesson-id {lesson.metadata.id} \
      --plan-dir {plan_directory}
    ```
    Script path from: `planning:plan-files/scripts/copy-lesson-to-plan.py`
