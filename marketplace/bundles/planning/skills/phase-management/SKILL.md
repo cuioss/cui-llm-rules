@@ -143,12 +143,11 @@ Else (default "list"):
    ```bash
    python3 {archive-plan.py path} {plan-directory}/ --dry-run
    ```
-6. Confirm archiving via AskUserQuestion
-7. Execute archiving:
+6. Execute archiving:
    ```bash
    python3 {archive-plan.py path} {plan-directory}/
    ```
-8. Report results (plans moved to `.plan/archived-plans/{date}-{name}/`)
+7. Report results (plans moved to `.plan/archived-plans/{date}-{name}/`)
 
 **ACTION: init-plan**
 1. Requires task_description or issue_url (from command parameter or "Other" input from list-plans)
