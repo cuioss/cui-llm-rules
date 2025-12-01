@@ -192,7 +192,7 @@ Use `--set KEY=VALUE` to update metadata fields:
 
 ```bash
 python3 scripts/update-lesson.py \
-  --file {lessons-storage}/{lesson-id}.md \
+  --lesson-id 2025-11-28-001 \
   --set applied=true
 ```
 
@@ -202,15 +202,15 @@ Use `--set-detail`, `--set-example`, or `--set-related` to replace section conte
 
 ```bash
 python3 scripts/update-lesson.py \
-  --file {lessons-storage}/{lesson-id}.md \
+  --lesson-id 2025-11-28-001 \
   --set-detail "New detailed description of the issue"
 
 python3 scripts/update-lesson.py \
-  --file {lessons-storage}/{lesson-id}.md \
+  --lesson-id 2025-11-28-001 \
   --set-example "# New code example"
 
 python3 scripts/update-lesson.py \
-  --file {lessons-storage}/{lesson-id}.md \
+  --lesson-id 2025-11-28-001 \
   --set-related "component-a, component-b"
 ```
 
@@ -218,7 +218,7 @@ python3 scripts/update-lesson.py \
 
 ```bash
 python3 scripts/update-lesson.py \
-  --file {lessons-storage}/2025-11-28-001.md \
+  --lesson-id 2025-11-28-001 \
   --set applied=true \
   --set category=pattern \
   --set-detail "Updated description with more context"
@@ -230,7 +230,7 @@ python3 scripts/update-lesson.py \
 {
   "success": true,
   "operation": "update-lesson",
-  "file": "{lessons-storage}/2025-11-28-001.md",
+  "file": ".plan/lessons-learned/2025-11-28-001.md",
   "updated_fields": ["applied", "category"],
   "updated_sections": ["Detail"]
 }

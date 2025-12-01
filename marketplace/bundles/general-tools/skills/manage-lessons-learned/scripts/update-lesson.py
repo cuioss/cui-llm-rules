@@ -22,8 +22,26 @@ from file_ops import (
     atomic_write_file,
     output_success,
     output_error,
-    update_markdown_metadata
+    update_markdown_metadata,
+    base_path
 )
+
+
+def resolve_lesson_path(lesson_id: str) -> Path:
+    """Resolve lesson ID to file path using base_path.
+
+    Uses ID-based access pattern: takes lesson ID and resolves file path
+    internally via base_path. This ensures orchestrators don't construct
+    paths to resources in other domains.
+
+    Args:
+        lesson_id: Lesson identifier (e.g., "2025-12-01-004")
+
+    Returns:
+        Path to the lesson file
+    """
+    filename = f"{lesson_id}.md"
+    return base_path("lessons-learned", filename)
 
 
 def parse_key_value(kv_string: str) -> tuple[str, str]:
@@ -114,28 +132,31 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Mark lesson as applied
-  %(prog)s --file .plan/lessons-learned/2025-11-28-001.md --set applied=true
+  # Update lesson by ID
+  %(prog)s --lesson-id 2025-11-28-001 --set applied=true
 
   # Update multiple fields
-  %(prog)s --file .plan/lessons-learned/2025-11-28-001.md \\
-           --set applied=true --set category=pattern
+  %(prog)s --lesson-id 2025-11-28-001 --set applied=true --set category=pattern
 
   # Update component info
-  %(prog)s --file lesson.md --set component.name=new-name
+  %(prog)s --lesson-id 2025-11-28-001 --set component.name=new-name
 
   # Update content sections
-  %(prog)s --file lesson.md --set-detail "New detailed description"
-  %(prog)s --file lesson.md --set-example "New example code"
-  %(prog)s --file lesson.md --set-related "component-a, component-b"
+  %(prog)s --lesson-id 2025-11-28-001 --set-detail "New detailed description"
+  %(prog)s --lesson-id 2025-11-28-001 --set-example "New example code"
+  %(prog)s --lesson-id 2025-11-28-001 --set-related "component-a, component-b"
 
   # Combine metadata and section updates
-  %(prog)s --file lesson.md --set applied=true --set-detail "Updated description"
+  %(prog)s --lesson-id 2025-11-28-001 --set applied=true --set-detail "Updated description"
 """
     )
 
-    parser.add_argument('--file', required=True,
-                        help='Path to lesson file to update')
+    # Mutually exclusive group for file identification
+    file_group = parser.add_mutually_exclusive_group(required=True)
+    file_group.add_argument('--lesson-id',
+                            help='Lesson identifier (e.g., 2025-11-28-001) - path resolved internally')
+    file_group.add_argument('--file',
+                            help=argparse.SUPPRESS)  # Internal use for testing only
     parser.add_argument('--set', action='append', dest='updates',
                         metavar='KEY=VALUE',
                         help='Metadata field to update (can be specified multiple times)')
@@ -153,11 +174,18 @@ Examples:
         parser.error('At least one of --set, --set-detail, --set-example, or --set-related is required')
 
     try:
-        file_path = Path(args.file)
+        # Resolve file path from --lesson-id or --file
+        if args.lesson_id:
+            file_path = resolve_lesson_path(args.lesson_id)
+        else:
+            file_path = Path(args.file)
 
         # Verify file exists
         if not file_path.exists():
-            output_error('update-lesson', f"File not found: {file_path}")
+            if args.lesson_id:
+                output_error('update-lesson', f"Lesson not found: {args.lesson_id} (expected at {file_path})")
+            else:
+                output_error('update-lesson', f"File not found: {file_path}")
             return 1
 
         # Read existing content
