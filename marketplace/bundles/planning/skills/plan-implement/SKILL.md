@@ -29,6 +29,31 @@ python3 {update-progress.py} --plan-dir {plan_directory} --phase {phase} --task-
 - Assuming pre-implemented work doesn't need progress updates
 - Marking task complete without marking all checklist items first
 
+**MANDATORY WORK-LOG**:
+
+After completing significant actions, you MUST log via work-log skill:
+```
+Skill: planning:work-log
+operation: log-entry
+plan_directory: {plan_directory}
+phase: implement
+task: {task_id}
+action: "{what was done}"
+result: "{outcome or artifact}"
+```
+
+**Entry Budget**: 1-3 entries per task.
+
+**Log Points**:
+- File creation/modification: action="Created/Updated {description}", result="path/to/file"
+- Key design decision: action="Chose {approach}", result="{rationale}"
+- Test creation: action="Added tests for {component}", result="path/to/test"
+
+**Anti-Patterns** (DO NOT DO):
+- Completing tasks without any work-log entries
+- Logging every file read or search
+- Vague actions without specific file paths
+
 **CRITICAL CONSTRAINT - NO EDIT/WRITE TOOLS FOR PLAN FILES**:
 - NEVER use Edit or Write tools directly on plan files (plan.md, config.toon, references.toon)
 - **WHY**: Edit/Write tools ALWAYS trigger user permission prompts for `.plan/` directories - this is a security feature that CANNOT be bypassed regardless of settings.json permissions

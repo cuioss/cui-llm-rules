@@ -346,6 +346,44 @@ python3 {update-progress.py} --plan-dir {plan_directory} --phase {phase} --task-
 
 ---
 
+## MANDATORY: Work-Log Enforcement
+
+**CRITICAL**: Phase skills MUST log significant actions via work-log skill. This creates an audit trail of what was done during plan execution.
+
+### Expected Work-Log Pattern
+
+Phase skills must invoke work-log for:
+- File creations/modifications (action: "Created X", result: "path/to/file")
+- Key decisions with rationale (action: "Chose X over Y", result: "reason")
+- Verification results (action: "Ran tests", result: "12/12 passed")
+
+### Minimum Entries Per Phase
+
+| Phase | Minimum Entries | Typical Log Points |
+|-------|-----------------|-------------------|
+| init | 1 | Plan creation |
+| refine | 1-2 | Analysis complete, requirements generated |
+| implement/execute | 1-3 per task | File modifications, key decisions |
+| verify | 1-2 | Build result, test result |
+| finalize | 1-2 | Commit created, PR submitted |
+
+### Verification (Soft Enforcement)
+
+After phase skill returns, check work-log.toon:
+1. If file missing: Log warning "No work-log entries for {phase} phase"
+2. If entries < minimum: Log warning "Only {n} entries for {phase} phase"
+3. Allow phase transition regardless (soft enforcement)
+
+### Anti-Patterns (Orchestration Layer)
+
+| Anti-Pattern | Problem | Required Action |
+|--------------|---------|-----------------|
+| No work-log calls in phase | No audit trail | Phase skills must log significant actions |
+| Logging every checklist item | Noise, redundant with progress | Log outcomes, not steps |
+| Missing result in log entry | Incomplete audit | Always include artifact/outcome |
+
+---
+
 ## Operation: list-plans
 
 Lists all plans with current phase and status.

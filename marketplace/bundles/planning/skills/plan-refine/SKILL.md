@@ -36,6 +36,29 @@ python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-i
 - Generating tasks without marking progress
 - Assuming plan.md auto-updates on operations
 
+**MANDATORY WORK-LOG**:
+
+After completing significant actions, you MUST log via work-log skill:
+```
+Skill: planning:work-log
+operation: log-entry
+plan_directory: {plan_directory}
+phase: refine
+task: {task_id}
+action: "{what was done}"
+result: "{outcome or artifact}"
+```
+
+**Entry Budget**: 1-2 entries for refine phase.
+
+**Log Points**:
+- Analysis complete (if analysis.md created): action="Completed strategic analysis", result="analysis.md"
+- Requirements generated: action="Generated implementation tasks", result="{count} tasks planned"
+
+**Anti-Patterns** (DO NOT DO):
+- Completing refine without any work-log entries
+- Logging each component analysis step
+
 **CRITICAL CONSTRAINT - NO EDIT/WRITE TOOLS FOR PLAN FILES**:
 - NEVER use Edit or Write tools directly on plan files (plan.md, config.toon, references.toon)
 - **WHY**: Edit/Write tools ALWAYS trigger user permission prompts for `.plan/` directories - this is a security feature that CANNOT be bypassed regardless of settings.json permissions

@@ -28,6 +28,30 @@ python3 {update-progress.py} --plan-dir {plan_directory} --phase finalize --task
 - Creating PR without marking progress
 - Assuming git operations auto-update plan.md
 
+**MANDATORY WORK-LOG**:
+
+After completing significant actions, you MUST log via work-log skill:
+```
+Skill: planning:work-log
+operation: log-entry
+plan_directory: {plan_directory}
+phase: finalize
+task: {task_id}
+action: "{what was done}"
+result: "{outcome or artifact}"
+```
+
+**Entry Budget**: 1-2 entries for finalize phase.
+
+**Log Points**:
+- Commit created: action="Created commit", result="{commit hash}: {message summary}"
+- PR submitted (if applicable): action="Created pull request", result="PR #{number}: {title}"
+- Plan completed: action="Marked plan complete", result="All phases completed"
+
+**Anti-Patterns** (DO NOT DO):
+- Completing finalize without logging commit
+- Not logging PR creation
+
 **Role**: Fifth and final phase skill in the plan management system. Commits changes, creates PRs, and handles workflow automation. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

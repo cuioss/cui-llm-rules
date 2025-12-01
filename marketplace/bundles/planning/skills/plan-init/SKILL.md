@@ -34,6 +34,28 @@ This skill is part of the **CUI Task Workflow plan system**, NOT Claude Code's b
 
 If you find yourself about to use any forbidden operation, **STOP** and delegate to `planning:plan-files` skill instead.
 
+**MANDATORY WORK-LOG**:
+
+After completing significant actions, you MUST log via work-log skill:
+```
+Skill: planning:work-log
+operation: log-entry
+plan_directory: {plan_directory}
+phase: init
+task: {task_id}
+action: "{what was done}"
+result: "{outcome or artifact}"
+```
+
+**Entry Budget**: 1 entry for init phase (plan creation).
+
+**Log Points**:
+- Plan creation: action="Created {plan_type} plan", result="Plan: {name}, Branch: {branch}"
+
+**Anti-Patterns** (DO NOT DO):
+- Completing init without logging plan creation
+- Logging configuration detection steps (use progress tracking)
+
 **Role**: First phase skill in the plan management system. Handles plan creation with type-specific init workflows. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)

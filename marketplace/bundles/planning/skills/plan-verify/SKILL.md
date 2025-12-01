@@ -28,6 +28,30 @@ python3 {update-progress.py} --plan-dir {plan_directory} --phase verify --task-i
 - Assuming successful verification auto-updates plan.md
 - Skipping progress updates for "quick" verifications
 
+**MANDATORY WORK-LOG**:
+
+After completing significant actions, you MUST log via work-log skill:
+```
+Skill: planning:work-log
+operation: log-entry
+plan_directory: {plan_directory}
+phase: verify
+task: {task_id}
+action: "{what was done}"
+result: "{outcome or artifact}"
+```
+
+**Entry Budget**: 1-2 entries for verify phase.
+
+**Log Points**:
+- Build verification: action="Ran build", result="SUCCESS" or "FAILED: {reason}"
+- Test verification: action="Ran tests", result="{passed}/{total} passed, {coverage}% coverage"
+- Issue resolution: action="Fixed {issue}", result="path/to/fix"
+
+**Anti-Patterns** (DO NOT DO):
+- Completing verify without logging build/test results
+- Not logging verification failures
+
 **Role**: Fourth phase skill in the plan management system. Verifies implementation quality through builds, tests, quality checks, and documentation review. Delegates all file I/O to `plan-files` skill.
 
 ## Standards (Load On-Demand)
