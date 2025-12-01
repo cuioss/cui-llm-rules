@@ -113,7 +113,7 @@ Analyzes JavaScript files for JSDoc compliance violations and returns structured
 1. **Run violation analysis script**
    Resolve script path:
    ```
-   Skill: cui-utilities:script-runner
+   Skill: general-tools:script-runner
    Resolve: cui-frontend-expert:cui-jsdoc/scripts/analyze-jsdoc-violations.py
    ```
 

@@ -11,7 +11,7 @@ Self-contained command that generates test coverage reports and analyzes results
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "js-generate-coverage", bundle: "cui-frontend-expert"}`
    - Category: bug | improvement | pattern | anti-pattern

@@ -52,7 +52,7 @@ Apply defaults based on detected system:
 ### Step 3: Load Previous Execution Data
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Read Configuration
 Field: commands.builder-build-and-fix.{system}.last_execution
 ```
@@ -99,7 +99,7 @@ Field: commands.builder-build-and-fix.{system}.last_execution
 On successful build (0 issues):
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Field: commands.builder-build-and-fix.{system}.last_execution
 Value: {
@@ -116,7 +116,7 @@ Value: {
 BUILD SUCCESS ({system})
 Goals: {goals} | Iterations: {n} | Fixed: {n}
 ```
-If `push=true`: Invoke `/cui-task-workflow:commit-changes`
+If `push=true`: Invoke `/planning:commit-changes`
 
 **Partial (max iterations reached):**
 ```

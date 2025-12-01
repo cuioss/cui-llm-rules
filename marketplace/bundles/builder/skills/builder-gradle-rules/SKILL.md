@@ -220,7 +220,7 @@ python3 scripts/search-openrewrite-markers.py \
 - `acceptable_warnings` (optional): JSON object with acceptable patterns
 
 **Steps**:
-1. Load acceptable patterns via `cui-utilities:claude-run-configuration` skill
+1. Load acceptable patterns via `general-tools:manage-run-configuration` skill
    - Read from field: `gradle.acceptable_warnings`
 2. Execute categorization:
    ```bash
@@ -261,11 +261,11 @@ python3 scripts/search-openrewrite-markers.py \
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-**Operation**: Add/Remove patterns via `cui-utilities:claude-run-configuration` skill
+**Operation**: Add/Remove patterns via `general-tools:manage-run-configuration` skill
 
 **Add Pattern**:
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Action: add-entry
 Field: gradle.acceptable_warnings.dependency_resolution
@@ -274,7 +274,7 @@ Value: "Could not resolve com.example:lib"
 
 **Remove Pattern**:
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Action: remove-entry
 Field: gradle.acceptable_warnings.dependency_resolution

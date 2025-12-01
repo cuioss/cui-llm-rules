@@ -160,7 +160,7 @@ Analyzes existing test coverage reports (Jest/Istanbul JSON or LCOV format) and 
 2. **Run coverage analysis script**
    Resolve script path:
    ```
-   Skill: cui-utilities:script-runner
+   Skill: general-tools:script-runner
    Resolve: cui-frontend-expert:cui-javascript-unit-testing/scripts/analyze-js-coverage.py
    ```
 

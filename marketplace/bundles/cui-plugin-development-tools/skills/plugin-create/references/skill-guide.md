@@ -162,9 +162,9 @@ plugin-architecture/
 
 **Purpose**: Provide analysis tools and patterns
 
-**Example**: `cui-diagnostic-patterns`
+**Example**: `diagnostic-patterns`
 ```
-cui-diagnostic-patterns/
+diagnostic-patterns/
 ├── SKILL.md
 ├── scripts/
 │   ├── analyze.py

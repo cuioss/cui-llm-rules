@@ -185,7 +185,7 @@ tools: Read, Bash  # ✅ ONLY this agent may call Maven
 - Caller orchestrates maven-builder agent if build needed
 - Don't build inside analysis agents
 
-### Pattern 22: Agents Record Lessons via claude-lessons-learned Skill
+### Pattern 22: Agents Record Lessons via manage-lessons-learned Skill
 
 **Why**: Centralized lesson storage enables systematic improvement across all components.
 
@@ -203,7 +203,7 @@ tools: Read, Bash  # ✅ ONLY this agent may call Maven
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "agent", name: "{agent-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -296,7 +296,7 @@ Purpose statement explaining what this agent does.
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "agent", name: "{agent_name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -400,7 +400,7 @@ Analyzes codebase for common quality issues including complexity, duplication, a
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "agent", name: "code-quality-analyzer", bundle: "..."}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -456,7 +456,7 @@ Executes test suite for project and reports pass/fail status with details.
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "agent", name: "test-runner", bundle: "..."}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -502,7 +502,7 @@ Before creating agent, verify:
 - [ ] Tools list is comma-separated (not array)
 - [ ] No Task tool included
 - [ ] If Bash tool: Not calling Maven (unless maven-builder)
-- [ ] CONTINUOUS IMPROVEMENT RULE uses claude-lessons-learned skill
+- [ ] CONTINUOUS IMPROVEMENT RULE uses manage-lessons-learned skill
 - [ ] Workflow has numbered steps
 - [ ] Tool usage documented
 - [ ] Critical rules specified
@@ -553,12 +553,12 @@ tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch
 ```markdown
 ## CONTINUOUS IMPROVEMENT RULE
 If you discover issues or improvements during execution, record them:
-1. Activate skill: cui-utilities:claude-lessons-learned
+1. Activate skill: general-tools:manage-lessons-learned
 2. Record lesson with component info and category
 ```
 
 ## References
 
 - Architecture Rules: See plugin-architecture skill
-- Tool Selection: See cui-diagnostic-patterns skill
+- Tool Selection: See diagnostic-patterns skill
 - Agent Patterns: See plugin-architecture skill references

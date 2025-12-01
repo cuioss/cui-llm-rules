@@ -57,7 +57,7 @@ This skill provides 4 workflows, one for each component type. All workflows foll
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -146,7 +146,7 @@ Track `validations_performed` counter.
 
 **Generate frontmatter:**
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
 ```
 ```bash
@@ -184,7 +184,7 @@ Agent template MUST use pattern:
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "agent", name: "{agent-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -201,7 +201,7 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
 ```
 ```bash
@@ -211,7 +211,7 @@ python3 {resolved_path} "{file_path}" "agent"
 Validation checks:
 - Frontmatter format correct (comma-separated tools)
 - No Task tool present
-- CONTINUOUS IMPROVEMENT RULE uses claude-lessons-learned skill pattern
+- CONTINUOUS IMPROVEMENT RULE uses manage-lessons-learned skill pattern
 - All required sections present
 
 If validation fails: Display errors and prompt "[R]etry generation/[A]bort"
@@ -262,7 +262,7 @@ If diagnosis fails: Display warning but don't abort (agent already created).
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -316,7 +316,7 @@ Same pattern as agent workflow, using Glob/Grep to find similar commands.
 
 **Generate frontmatter:**
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
 ```
 ```bash
@@ -344,7 +344,7 @@ Read assets/templates/command-template.md
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -361,7 +361,7 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
 ```
 ```bash
@@ -371,7 +371,7 @@ python3 {resolved_path} "{file_path}" "command"
 Validation checks:
 - Frontmatter format correct
 - All required sections present (WORKFLOW, USAGE EXAMPLES)
-- CONTINUOUS IMPROVEMENT RULE uses claude-lessons-learned skill pattern
+- CONTINUOUS IMPROVEMENT RULE uses manage-lessons-learned skill pattern
 
 #### Step 6: Display Summary
 
@@ -395,7 +395,7 @@ SlashCommand: /cui-plugin-development-tools:plugin-doctor commands command-name=
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -457,7 +457,7 @@ bash mkdir -p {bundle}/skills/{skill-name}/standards
 
 Generate frontmatter:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
 ```
 ```bash
@@ -521,7 +521,7 @@ Track `files_created` and `standards_files_created` counters.
 #### Step 5: Validate Generated Component
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
 ```
 ```bash
@@ -576,7 +576,7 @@ SlashCommand: /cui-plugin-development-tools:plugin-doctor skills skill-name={ski
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -799,8 +799,8 @@ This skill uses the following templates in assets/templates/:
 - Only maven-builder agent can execute Maven (Rule 7)
 
 **CONTINUOUS IMPROVEMENT RULE**:
-- Agents: Use claude-lessons-learned skill to record lessons (report to caller)
-- Commands: Use claude-lessons-learned skill to record lessons
+- Agents: Use manage-lessons-learned skill to record lessons (report to caller)
+- Commands: Use manage-lessons-learned skill to record lessons
 - Skills: No CONTINUOUS IMPROVEMENT RULE
 
 **Validation**:

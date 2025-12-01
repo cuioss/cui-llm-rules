@@ -11,7 +11,7 @@ Comprehensive diagnostic and automation command that enforces CUI logging standa
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "java-enforce-logrecords", bundle: "cui-java-expert"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -27,9 +27,9 @@ If you discover issues or improvements during execution, record them:
 
 **Determine project structure:**
 
-1. Activate `cui-utilities:claude-run-configuration` skill to check for module configuration:
+1. Activate `general-tools:manage-run-configuration` skill to check for module configuration:
    ```
-   Skill: cui-utilities:claude-run-configuration
+   Skill: general-tools:manage-run-configuration
    Workflow: Read Configuration
    Field: commands.java-enforce-logrecords.modules
    ```
@@ -52,9 +52,9 @@ If build fails, report to caller and stop execution.
 ### Step 3: Load Configuration and Logging Standards
 
 **Read configuration:**
-1. Activate `cui-utilities:claude-run-configuration` skill:
+1. Activate `general-tools:manage-run-configuration` skill:
    ```
-   Skill: cui-utilities:claude-run-configuration
+   Skill: general-tools:manage-run-configuration
    Workflow: Read Configuration
    Field: commands.java-enforce-logrecords.modules.{module-name}
    ```
@@ -93,9 +93,9 @@ This loads:
 - Attempt to locate LogMessages classes using Glob: `**/*LogMessages.java`
 - Attempt to locate LogMessages.adoc using Glob: `**/LogMessages.adoc`
 - If still uncertain (confidence < 100%), ask user for help
-- Store results using `cui-utilities:claude-run-configuration` skill:
+- Store results using `general-tools:manage-run-configuration` skill:
   ```
-  Skill: cui-utilities:claude-run-configuration
+  Skill: general-tools:manage-run-configuration
   Workflow: Update Configuration
   Field: commands.java-enforce-logrecords.modules.{module}
   ```
@@ -321,7 +321,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - See: `logging-enforcement-patterns.md` → Pattern 15
 
 **Configuration Management:**
-- Use `cui-utilities:claude-run-configuration` skill for all configuration access
+- Use `general-tools:manage-run-configuration` skill for all configuration access
 - Read path: `commands.java-enforce-logrecords.modules`
 - Store LogMessages class and documentation locations in JSON structure
 - Ask user for help if locations uncertain (< 100% confidence)

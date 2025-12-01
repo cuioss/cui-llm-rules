@@ -5,7 +5,7 @@ description: Apply accumulated lessons learned to component documentation
 
 # Apply Lessons Learned
 
-Read lessons learned via `claude-lessons-learned` skill and apply them to component documentation.
+Read lessons learned via `manage-lessons-learned` skill and apply them to component documentation.
 
 ## Usage
 
@@ -35,7 +35,7 @@ When you invoke this command, I will:
 
 2. **Load lessons learned skill**:
    ```
-   Skill: cui-utilities:claude-lessons-learned
+   Skill: general-tools:manage-lessons-learned
    ```
 
 3. **Query unapplied lessons**:
@@ -168,6 +168,6 @@ Add to warnings or "avoid" sections:
 
 ## Related
 
-- `cui-utilities:claude-lessons-learned` - Skill for lesson storage/retrieval
+- `general-tools:manage-lessons-learned` - Skill for lesson storage/retrieval
 - `/plugin-maintain` - General component maintenance
 - `/plugin-doctor` - Diagnose component issues

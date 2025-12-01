@@ -200,4 +200,4 @@ Before completing requirements/specification work:
 **External:**
 - cui-documentation:cui-documentation - AsciiDoc formatting
 - cui-java-expert:cui-javadoc - JavaDoc requirement references
-- cui-workflow:cui-git-workflow - Committing requirement changes
+- planning:git-workflow - Committing requirement changes

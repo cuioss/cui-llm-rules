@@ -221,7 +221,7 @@ At workflow start:
 
 **Required patterns:**
 ```
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 **Orchestration compliance:**

@@ -83,7 +83,7 @@ All 5 workflows follow the same pattern:
 
    **EXECUTE** these skill loads before proceeding:
    ```
-   Skill: cui-utilities:cui-diagnostic-patterns
+   Skill: general-tools:diagnostic-patterns
    Skill: cui-plugin-development-tools:plugin-architecture
    Skill: cui-plugin-development-tools:marketplace-inventory
    ```
@@ -101,7 +101,7 @@ All 5 workflows follow the same pattern:
 
    **EXECUTE** script resolution first:
    ```
-   Skill: cui-utilities:script-runner
+   Skill: general-tools:script-runner
    Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
    Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.sh
    Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
@@ -122,10 +122,10 @@ All 5 workflows follow the same pattern:
 - Unused tools in frontmatter
 - Trailing whitespace
 - Missing blank lines
-- Missing foundation skill loading (plugin-architecture, cui-diagnostic-patterns)
+- Missing foundation skill loading (plugin-architecture, diagnostic-patterns)
 - Incorrect section header case (e.g., `## Workflow` → `## WORKFLOW`)
 - Missing CONTINUOUS IMPROVEMENT RULE section (commands only)
-- Legacy CONTINUOUS IMPROVEMENT RULE (uses /plugin-update-* or /plugin-maintain instead of claude-lessons-learned)
+- Legacy CONTINUOUS IMPROVEMENT RULE (uses /plugin-update-* or /plugin-maintain instead of manage-lessons-learned)
 
 **Risky Fixes** (require confirmation):
 - Rule 6 violations (Task tool in agents)
@@ -164,7 +164,7 @@ All 5 workflows follow the same pattern:
 
    Resolve script path:
    ```
-   Skill: cui-utilities:script-runner
+   Skill: general-tools:script-runner
    Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-fix.sh
    ```
 
@@ -191,7 +191,7 @@ All 5 workflows follow the same pattern:
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/agents-guide.md
 Read references/fix-catalog.md
@@ -214,7 +214,7 @@ Glob: pattern="*.md", path="{scope_path}/agents"
 For each agent file, first resolve script paths:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.sh
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
@@ -231,7 +231,7 @@ python3 {resolved_validate_references} {agent_path}
 - Tool fit score >= 70% (good) or >= 90% (excellent)
 - No Rule 6 violations (agents CANNOT use Task tool)
 - No Rule 7 violations (only maven-builder can use Maven)
-- No Pattern 22 violations (must use claude-lessons-learned skill, not self-invoke)
+- No Pattern 22 violations (must use manage-lessons-learned skill, not self-invoke)
 - Bloat thresholds (component-type specific):
   - Agents: NORMAL (<300), LARGE (300-500), BLOATED (500-800), CRITICAL (>800)
   - Commands: NORMAL (<100), LARGE (100-150), BLOATED (150-200), CRITICAL (>200)
@@ -270,7 +270,7 @@ Display summary using reporting-templates.md format.
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/commands-guide.md
 Read references/fix-catalog.md
@@ -284,7 +284,7 @@ Same pattern as doctor-agents.
 
 First resolve script paths:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
 ```
@@ -322,7 +322,7 @@ python3 {resolved_validate_references} {cmd_path}
 
 **Check criteria**:
 1. Extract skill invocations from command (e.g., `Skill: cui-plugin-development-tools:plugin-create`)
-2. For each invoked skill, verify it loads foundation skills (plugin-architecture, cui-diagnostic-patterns)
+2. For each invoked skill, verify it loads foundation skills (plugin-architecture, diagnostic-patterns)
 3. Report if invoked skill is missing foundation skills (fix the skill, not the command)
 
 **If invoked skill missing foundation skills**:
@@ -336,7 +336,7 @@ This is NOT a command fix - it's a skill fix. Commands don't load foundation ski
 **Safe fixes** (auto-apply unless --no-fix):
 - Incorrect section header case (`## Workflow` → `## WORKFLOW`, `## Parameter Validation` → `## PARAMETERS`)
 - Missing CONTINUOUS IMPROVEMENT RULE section
-- Legacy CONTINUOUS IMPROVEMENT RULE (uses /plugin-update-* or /plugin-maintain instead of claude-lessons-learned)
+- Legacy CONTINUOUS IMPROVEMENT RULE (uses /plugin-update-* or /plugin-maintain instead of manage-lessons-learned)
 
 **Risky fixes** (require confirmation):
 - **Rule 0 violations** (command contains workflow logic instead of skill delegation)
@@ -353,7 +353,7 @@ Search for `## Workflow`, `## Parameter Validation`, `## Parameters` and replace
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: \`Skill: cui-utilities:claude-lessons-learned\`
+1. **Activate skill**: \`Skill: general-tools:manage-lessons-learned\`
 2. **Record lesson** with:
    - Component: \`{type: "command", name: "{command-name}", bundle: "{bundle}"}\`
    - Category: bug | improvement | pattern | anti-pattern
@@ -399,7 +399,7 @@ Same pattern as doctor-agents with command-specific thresholds.
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/skills-guide.md
 Read references/fix-catalog.md
@@ -416,7 +416,7 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 
 First resolve script paths:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-skill-structure.sh
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
@@ -444,12 +444,12 @@ python3 {resolved_validate_references} {skill_dir}/SKILL.md
 **Required foundation skills**:
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 **Check criteria**:
 1. Search SKILL.md for `Skill: cui-plugin-development-tools:plugin-architecture`
-2. Search SKILL.md for `Skill: cui-utilities:cui-diagnostic-patterns`
+2. Search SKILL.md for `Skill: general-tools:diagnostic-patterns`
 3. **Exempt skills** (skip check):
    - `plugin-architecture` (is itself the architecture skill)
    - `marketplace-inventory` (pure Pattern 1 script automation, no component operations)
@@ -471,7 +471,7 @@ Skill: cui-utilities:cui-diagnostic-patterns
 
 \`\`\`
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 \`\`\`
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -494,7 +494,7 @@ Same pattern with skill-specific checks.
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 Read references/metadata-guide.md
 Read references/fix-catalog.md
 ```
@@ -531,7 +531,7 @@ Glob: pattern="**/plugin.json", path="marketplace/bundles"
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read plugin-architecture:references/script-standards.md
 Read references/fix-catalog.md
@@ -581,7 +581,7 @@ This workflow analyzes all markdown files within a skill's subdirectories for pr
 ### Step 1: Load Prerequisites
 
 ```
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/content-classification-guide.md
 Read references/content-quality-guide.md
@@ -592,7 +592,7 @@ Read references/content-quality-guide.md
 Resolve and execute inventory script:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/scan-skill-inventory.sh
 ```
 
@@ -637,7 +637,7 @@ Skip if `--skip-quality` specified.
 Resolve and execute cross-file analysis:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-cross-file-content.py
 ```
 
@@ -683,7 +683,7 @@ Read each content file and analyze:
 Resolve and execute verification:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-cross-file-findings.py
 ```
 
@@ -735,7 +735,7 @@ AskUserQuestion:
 Resolve and execute validation:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
 ```
 
@@ -867,7 +867,7 @@ Agents CANNOT use Task tool (unavailable at runtime).
 Only maven-builder agent may execute Maven commands.
 
 ### Pattern 22: Agent Lessons Learned Requirement
-Agents MUST record lessons via claude-lessons-learned skill, not self-invoke commands.
+Agents MUST record lessons via manage-lessons-learned skill, not self-invoke commands.
 
 ---
 
@@ -876,11 +876,11 @@ Agents MUST record lessons via claude-lessons-learned skill, not self-invoke com
 This skill is designed to run without user prompts for safe operations. Required permissions:
 
 **Skill Invocations (covered by bundle wildcards):**
-- `Skill(cui-utilities:*)` - cui-diagnostic-patterns
+- `Skill(general-tools:*)` - diagnostic-patterns
 - `Skill(cui-plugin-development-tools:*)` - plugin-architecture, marketplace-inventory
 
 **Script Execution (resolved via script-runner):**
-- Scripts resolved via `cui-utilities:script-runner` skill
+- Scripts resolved via `general-tools:script-runner` skill
 - Absolute paths stored in `.claude/scripts.local.json`
 - Permissions managed by `tools-setup-project-permissions`
 

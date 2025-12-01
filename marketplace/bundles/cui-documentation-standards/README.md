@@ -203,5 +203,5 @@ All commands are thin orchestrators (<150 lines) that delegate to skill workflow
 
 ### Inter-Bundle Dependencies
 
-- **cui-task-workflow** (optional) - For commit workflow in batch processing
-- **cui-utilities** (optional) - For script-runner workflow
+- **planning** (optional) - For commit workflow in batch processing
+- **general-tools** (optional) - For script-runner workflow

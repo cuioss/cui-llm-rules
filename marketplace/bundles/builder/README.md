@@ -89,4 +89,4 @@ Parameters:
 
 - **cui-java-expert** - Java development standards
 - **cui-frontend-expert** - JavaScript development standards
-- **cui-task-workflow** - PR and issue workflows
+- **planning** - PR and issue workflows

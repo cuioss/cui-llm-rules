@@ -69,7 +69,7 @@ if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 
 Resolve script path:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-formatter.sh
 ```
 
@@ -99,7 +99,7 @@ Changes applied: {list}
 
 Resolve and run validation:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
 ```
 ```bash
@@ -142,7 +142,7 @@ If target is a directory:
 
 Resolve and execute:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
 ```
 ```bash
@@ -236,7 +236,7 @@ mkdir -p target/asciidoc-link-verifier
 
 Resolve script path:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/verify-adoc-links.py
 ```
 
@@ -332,7 +332,7 @@ If target is a directory:
 
 Resolve script path:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/review-content.py
 ```
 
@@ -512,7 +512,7 @@ After running verify-adoc-links.py, classify results:
 
 Resolve and execute classification:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/verify-links-false-positives.py
 ```
 ```bash
@@ -555,7 +555,7 @@ Parameters:
 
 Resolve and execute tone analysis:
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:cui-documentation/scripts/analyze-content-tone.py
 ```
 ```bash

@@ -212,14 +212,14 @@ Risky fixes require user confirmation because they involve judgment calls or may
 
 **Fix Strategy**:
 - Replace hardcoded paths with script-runner skill calls
-- Use portable notation: `Skill: cui-utilities:script-runner` with `Script: bundle:skill/script-name`
+- Use portable notation: `Skill: general-tools:script-runner` with `Script: bundle:skill/script-name`
 - Example: Replace `python3 {cui-java-core}/scripts/verify.py` with `Script: cui-java-expert:cui-java-core/verify`
 
 **Why Risky**:
 - Changes script resolution mechanism
 - May break if script-runner configuration is incorrect
 - User should verify scripts.local.json is up to date
-- Requires cui-utilities:script-runner skill
+- Requires general-tools:script-runner skill
 
 ### 6. pattern-22-violation
 

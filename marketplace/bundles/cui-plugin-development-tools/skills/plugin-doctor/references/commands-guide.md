@@ -304,7 +304,7 @@ Generate summary.
 ```markdown
 ### Step 1: Load Diagnostic Patterns
 
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 
 ### Step 2: Load Inventory
 
@@ -317,7 +317,7 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 ```markdown
 ### Step 1: Load All Prerequisites
 
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 Skill: cui-plugin-development-tools:marketplace-inventory
 Skill: cui-plugin-development-tools:bundle-orchestration-compliance
 Read references/reporting-templates.md
@@ -601,7 +601,7 @@ Aggregate results for bundle.
 ```markdown
 ### Step 1: Load Core Skills
 
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 
 ### Step 2: Discover Components
 
@@ -646,7 +646,7 @@ Commands MUST include standard lessons-learned pattern:
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: cui-utilities:claude-lessons-learned`
+1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -655,7 +655,7 @@ If you discover issues or improvements during execution, record them:
 
 **Key Points**:
 - Only activate skill when you have lessons to record
-- Lessons are stored via `claude-lessons-learned` skill (individual Markdown files)
+- Lessons are stored via `manage-lessons-learned` skill (individual Markdown files)
 - Categories: bug, improvement, pattern, anti-pattern
 
 ## Common Issues and Fixes

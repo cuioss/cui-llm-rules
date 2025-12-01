@@ -33,7 +33,7 @@ Run the marketplace inventory scanner script using the resolved path:
 
 **For skill scripts, use the script-runner skill to resolve the path:**
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py
 ```
 

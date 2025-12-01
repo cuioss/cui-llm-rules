@@ -369,7 +369,7 @@ Parameters:
 **Read module configuration using skill:**
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Read Configuration
 Field: commands.java-enforce-logrecords.modules.{module-name}
 ```
@@ -387,7 +387,7 @@ Field: commands.java-enforce-logrecords.modules.{module-name}
 ```
 
 **Usage:**
-1. Activate `cui-utilities:claude-run-configuration` skill with Read Configuration workflow
+1. Activate `general-tools:manage-run-configuration` skill with Read Configuration workflow
 2. Access field: `commands.java-enforce-logrecords.modules.{module-name}`
 3. Extract `logmessages_classes` array
 4. Extract `logmessages_documentation` array
@@ -415,7 +415,7 @@ Field: commands.java-enforce-logrecords.modules.{module-name}
 
 4. **Store in configuration using skill:**
    ```
-   Skill: cui-utilities:claude-run-configuration
+   Skill: general-tools:manage-run-configuration
    Workflow: Update Configuration
    Field: commands.java-enforce-logrecords.modules.{module}
    Value: {discovered configuration object}

@@ -80,7 +80,7 @@ This bundle provides comprehensive frontend development expertise by aggregating
 6. **js-maintain-tests** - Systematic test quality improvement
 7. **js-refactor-code** - Systematic JavaScript refactoring with standards compliance
 
-**Note**: For end-to-end JavaScript task orchestration (implementation -> testing -> coverage), use `/orchestrate-language language=javascript` from the cui-task-workflow bundle.
+**Note**: For end-to-end JavaScript task orchestration (implementation -> testing -> coverage), use `/orchestrate-language language=javascript` from the planning bundle.
 
 ## Architecture
 
@@ -189,7 +189,7 @@ Commands are thin orchestrators that invoke skill workflows:
 
 ### Inter-Bundle Dependencies
 
-- **cui-task-workflow** - For `/orchestrate-language` end-to-end orchestration
+- **planning** - For `/orchestrate-language` end-to-end orchestration
 
 ### External Dependencies
 

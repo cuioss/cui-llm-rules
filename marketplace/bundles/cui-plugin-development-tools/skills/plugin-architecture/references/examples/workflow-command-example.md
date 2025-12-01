@@ -228,8 +228,8 @@ MARKETPLACE HEALTH REPORT
 1. cui-java-expert: 92/100 ✅
 2. cui-frontend-expert: 88/100 ✅
 3. cui-plugin-development-tools: 82/100 ✅
-4. cui-task-workflow: 78/100 ⚠️
-5. cui-utilities: 95/100 ✅
+4. planning: 78/100 ⚠️
+5. general-tools: 95/100 ✅
 
 ### Recommendations
 1. Fix critical issues first (3 components affected)

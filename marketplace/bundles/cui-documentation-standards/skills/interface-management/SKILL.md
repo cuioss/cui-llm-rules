@@ -43,7 +43,7 @@ List all interfaces with optional type filtering.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:interface-management/scripts/manage-interface.py
 ```
 
@@ -85,7 +85,7 @@ Create a new interface specification with automatic numbering.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:interface-management/scripts/manage-interface.py
 ```
 
@@ -141,7 +141,7 @@ Read interface content by number.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:interface-management/scripts/manage-interface.py
 ```
 
@@ -170,7 +170,7 @@ Update interface field content.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:interface-management/scripts/manage-interface.py
 ```
 
@@ -198,7 +198,7 @@ Delete interface with confirmation.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:interface-management/scripts/manage-interface.py
 ```
 
@@ -288,4 +288,4 @@ Examples:
 ## References
 
 - [cui-documentation SKILL](../cui-documentation/SKILL.md) - Format validation
-- [script-runner SKILL](../../cui-utilities/skills/script-runner/SKILL.md) - Script path resolution
+- [script-runner SKILL](../../general-tools/skills/script-runner/SKILL.md) - Script path resolution

@@ -436,7 +436,7 @@ Analyze LOGGER usage in Java files and detect violations of CUI logging standard
 
 2. **Resolve Script Path**
    ```
-   Skill: cui-utilities:script-runner
+   Skill: general-tools:script-runner
    Resolve: cui-java-expert:cui-java-core/scripts/analyze-logging-violations.py
    ```
 
@@ -531,7 +531,7 @@ Generate AsciiDoc documentation for LogMessages holder classes.
 
 2. **Resolve Script Path**
    ```
-   Skill: cui-utilities:script-runner
+   Skill: general-tools:script-runner
    Resolve: cui-java-expert:cui-java-core/scripts/document-logrecord.py
    ```
 
@@ -613,7 +613,7 @@ Verify that implementation task description is clear and the build is clean befo
 
 1. **Validate Task Description**
    ```
-   Skill: cui-utilities:script-runner
+   Skill: general-tools:script-runner
    Script: cui-java-expert:cui-java-core/verify-implementation-params
    Parameters:
      description: "{description}"

@@ -43,7 +43,7 @@ List all ADRs with optional status filtering.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
 ```
 
@@ -85,7 +85,7 @@ Create a new ADR with automatic numbering.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
 ```
 
@@ -141,7 +141,7 @@ Read ADR content by number.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
 ```
 
@@ -169,7 +169,7 @@ Update ADR status through lifecycle.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
 ```
 
@@ -197,7 +197,7 @@ Delete ADR with confirmation.
 **Step 1: Resolve Script Path**
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
 ```
 
@@ -286,4 +286,4 @@ Examples:
 ## References
 
 - [cui-documentation SKILL](../cui-documentation/SKILL.md) - Format validation
-- [script-runner SKILL](../../cui-utilities/skills/script-runner/SKILL.md) - Script path resolution
+- [script-runner SKILL](../../general-tools/skills/script-runner/SKILL.md) - Script path resolution

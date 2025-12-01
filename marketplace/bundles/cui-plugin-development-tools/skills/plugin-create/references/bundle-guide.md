@@ -226,9 +226,9 @@ cui-java-expert/
 
 **Purpose**: Provide commands and agents for tasks
 
-**Example**: `cui-utilities`
+**Example**: `general-tools`
 ```
-cui-utilities/
+general-tools/
 ├── plugin.json
 ├── README.md
 ├── commands/
@@ -381,7 +381,7 @@ Don't repeat component documentation. Link to component files:
 
 or
 
-- Bundle name: `cui-utilities`
+- Bundle name: `general-tools`
 - Display name: "CUI Utilities"
 
 ## Component Organization
@@ -600,7 +600,7 @@ bundle/
 
 **Small Bundle** (5-10 components):
 ```
-cui-utilities/
+general-tools/
 ├── 2 agents
 ├── 3 commands
 └── 2 skills

@@ -27,7 +27,7 @@ Activate this skill when:
 
 ## Cached Attributes
 
-Stored via `claude-run-configuration` skill under `build`:
+Stored via `manage-run-configuration` skill under `build`:
 
 | Attribute | Example | Description |
 |-----------|---------|-------------|
@@ -49,7 +49,7 @@ Returns build environment info, using cached values when available.
 Read from run-configuration:
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Read Configuration
 Field: build
 ```
@@ -92,12 +92,12 @@ python3 scripts/detect-build-systems.py --project-dir .
 Store in run-configuration:
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Field: build.available_systems
 Value: "{available_systems}"
 
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Field: build.default_system
 Value: "{default_system}"
@@ -132,12 +132,12 @@ python3 scripts/detect-build-systems.py --project-dir .
 ### Step 2: Update Cache
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Field: build.available_systems
 Value: "{available_systems}"
 
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Field: build.default_system
 Value: "{default_system}"
@@ -296,7 +296,7 @@ Script characteristics:
 
 ## Related
 
-- Skill: `cui-utilities:claude-run-configuration` - Cache storage
+- Skill: `general-tools:manage-run-configuration` - Cache storage
 - Skill: `builder:builder-maven-rules` - Maven builds
 - Skill: `builder:builder-gradle-rules` - Gradle builds
 - Skill: `builder:builder-npm-rules` - npm builds

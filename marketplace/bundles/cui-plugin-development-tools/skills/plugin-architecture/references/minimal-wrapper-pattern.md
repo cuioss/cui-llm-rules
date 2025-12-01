@@ -81,7 +81,7 @@ Reintroduce agents and commands as **thin orchestration wrappers** that:
 │                                                              │
 │  Skills can call other skills:                             │
 │    Skill(builder:builder-maven-rules)                        │
-│    Skill(cui-utilities:script-runner)                      │
+│    Skill(general-tools:script-runner)                      │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```

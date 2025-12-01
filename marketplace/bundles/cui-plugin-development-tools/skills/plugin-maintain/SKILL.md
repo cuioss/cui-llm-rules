@@ -67,7 +67,7 @@ All scripts are stdlib-only with JSON output:
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -83,7 +83,7 @@ Read: references/component-update-guide.md
 Run component analysis:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-maintain/scripts/analyze-component.py
 ```
 ```bash
@@ -109,7 +109,7 @@ Check that proposed improvements:
 Use `update-component.py` or Edit tool to apply changes:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-maintain/scripts/update-component.py
 ```
 ```bash
@@ -146,7 +146,7 @@ Report results including:
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -171,7 +171,7 @@ If file: Read the file
 #### Step 4: Check for Duplication
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-maintain/scripts/check-duplication.py
 ```
 ```bash
@@ -219,7 +219,7 @@ Add reference based on load_type:
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -235,7 +235,7 @@ Read: references/readme-maintenance-guide.md
 For each bundle:
 
 ```
-Skill: cui-utilities:script-runner
+Skill: general-tools:script-runner
 Resolve: cui-plugin-development-tools:plugin-maintain/scripts/generate-readme.sh
 ```
 ```bash
@@ -283,7 +283,7 @@ Report:
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -343,7 +343,7 @@ Report any issues introduced.
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: cui-utilities:cui-diagnostic-patterns
+Skill: general-tools:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.

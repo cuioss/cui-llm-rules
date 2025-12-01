@@ -431,14 +431,14 @@ Use this workflow when:
 ### Parameters
 
 - **warnings** (required): JSON array of warning objects from parse-maven-output.py
-- **acceptable_warnings** (optional): JSON object with acceptable patterns (obtained via claude-run-configuration skill)
+- **acceptable_warnings** (optional): JSON object with acceptable patterns (obtained via manage-run-configuration skill)
 
 ### Step 1: Load Acceptable Patterns
 
-Activate `cui-utilities:claude-run-configuration` skill to read patterns:
+Activate `general-tools:manage-run-configuration` skill to read patterns:
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Read Configuration
 Field: maven.acceptable_warnings
 ```
@@ -516,7 +516,7 @@ Unknown warnings in output have `requires_classification: true` flag. Agent shou
 Read patterns using the configuration skill:
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Read Configuration
 Field: maven.acceptable_warnings
 ```
@@ -535,7 +535,7 @@ Field: maven.acceptable_warnings
 }
 ```
 
-Use `cui-utilities:claude-run-configuration` skill for all configuration access.
+Use `general-tools:manage-run-configuration` skill for all configuration access.
 
 ### Script Location
 
@@ -547,7 +547,7 @@ Use `cui-utilities:claude-run-configuration` skill for all configuration access.
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-This workflow manages the acceptable warnings configuration via `cui-utilities:claude-run-configuration` skill.
+This workflow manages the acceptable warnings configuration via `general-tools:manage-run-configuration` skill.
 
 ### When to Use
 
@@ -558,10 +558,10 @@ Use this workflow when:
 
 ### Adding a Pattern
 
-Activate `cui-utilities:claude-run-configuration` skill:
+Activate `general-tools:manage-run-configuration` skill:
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Action: add-entry
 Field: maven.acceptable_warnings.transitive_dependency
@@ -575,10 +575,10 @@ Pattern categories:
 
 ### Removing a Pattern
 
-Activate `cui-utilities:claude-run-configuration` skill:
+Activate `general-tools:manage-run-configuration` skill:
 
 ```
-Skill: cui-utilities:claude-run-configuration
+Skill: general-tools:manage-run-configuration
 Workflow: Update Configuration
 Action: remove-entry
 Field: maven.acceptable_warnings.transitive_dependency

@@ -655,8 +655,8 @@ Components using this skill should demonstrate:
 - Claude Code Plugin Documentation: https://docs.claude.com/en/docs/claude-code/plugins
 
 ### Related Skills
-- cui-utilities:cui-general-development-rules - Core development principles
-- cui-utilities:cui-diagnostic-patterns - Tool usage patterns
+- general-tools:general-development-rules - Core development principles
+- general-tools:diagnostic-patterns - Tool usage patterns
 
 ### Internal References (Load On-Demand)
 All references are in `references/` directory:

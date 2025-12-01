@@ -176,7 +176,7 @@ Skill: bundle-name:skill-name  # For bundled skills
 ✅ Skill: cui-java-core
 ✅ Skill: cui-java-unit-testing
 ✅ Skill: cui-javadoc
-✅ Skill: cui-utilities:cui-diagnostic-patterns
+✅ Skill: general-tools:diagnostic-patterns
 ✅ Skill: cui-plugin-development-tools:plugin-architecture
 ```
 
@@ -330,7 +330,7 @@ allowed-tools: [Read, Bash, Skill]
 
 ## Step 1: Load Prerequisites
 
-Skill: cui-utilities:cui-general-development-rules  # Pattern 5
+Skill: general-tools:general-development-rules  # Pattern 5
 
 ## Step 2: Load Reference Documentation
 

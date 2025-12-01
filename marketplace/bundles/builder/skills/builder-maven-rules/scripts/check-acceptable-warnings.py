@@ -34,7 +34,7 @@ Output:
 
 Integration:
     This script is called by the builder-maven-rules skill workflow.
-    Patterns are loaded via cui-utilities:json-file-operations from
+    Patterns are loaded via general-tools:json-file-operations from
     .plan/run-configuration.json at path maven.acceptable_warnings.
 """
 
