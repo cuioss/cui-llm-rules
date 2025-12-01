@@ -58,7 +58,7 @@ This skill uses the **CUI Task Workflow plan system**, NOT Claude Code's built-i
 | `mkdir` for plan directories | Bypasses validation | `plan-init` skill → `plan-files` skill |
 | `Write` tool on plan files | Bypasses atomic operations | `plan-files` skill → `write-plan.py` |
 | `Edit` tool on plan files | Bypasses progress tracking | `plan-files` skill → `update-progress.py` |
-| `rm` on plan directories | Bypasses safety checks | `phase-management` → `delete-plan.py` |
+| `rm` on plan directories | Bypasses safety checks | `phase-management` → `archive-plan.py` |
 | `EnterPlanMode` tool | Wrong plan system | Use `/plan-manage` command |
 | `ExitPlanMode` tool | Wrong plan system | Delegate to `plan-init` skill |
 
@@ -139,16 +139,16 @@ Else (default "list"):
 2. If no completed plans: Display message, exit
 3. Display numbered list of completed plans
 4. Prompt for selection (all/numbers/cancel)
-5. Show what will be deleted:
+5. Show what will be archived:
    ```bash
-   python3 {delete-plan.py path} {plan-directory}/ --dry-run
+   python3 {archive-plan.py path} {plan-directory}/ --dry-run
    ```
-6. Confirm deletion via AskUserQuestion
-7. Execute deletion:
+6. Confirm archiving via AskUserQuestion
+7. Execute archiving:
    ```bash
-   python3 {delete-plan.py path} {plan-directory}/
+   python3 {archive-plan.py path} {plan-directory}/
    ```
-8. Report results
+8. Report results (plans moved to `.plan/archived-plans/{date}-{name}/`)
 
 **ACTION: init-plan**
 1. Requires task_description or issue_url (from command parameter or "Other" input from list-plans)
@@ -846,7 +846,7 @@ All scripts use portable notation: `planning:phase-management/scripts/{script-na
 | `route-phase.py` | `planning:phase-management/scripts/route-phase.py` | Map phase to skill |
 | `transition-phase.py` | `planning:phase-management/scripts/transition-phase.py` | Get next phase |
 | `get-status.py` | `planning:phase-management/scripts/get-status.py` | Aggregate status |
-| `delete-plan.py` | `planning:phase-management/scripts/delete-plan.py` | Delete plan safely |
+| `archive-plan.py` | `planning:phase-management/scripts/archive-plan.py` | Archive plan safely |
 
 ### Running Scripts
 
@@ -903,13 +903,14 @@ All scripts use portable notation: `planning:phase-management/scripts/{script-na
   python3 {resolved_path} {plan-directory}/
   ```
 
-**5. delete-plan.py**: Safely deletes a plan directory
+**5. archive-plan.py**: Safely archives a plan directory
 - **Input**: plan_directory, --dry-run (optional)
-- **Output**: JSON with deletion result
-- **Safety Checks**:
-  - Validates directory exists
-  - Requires plan.md to confirm it's a plan
-  - Only allows deletion within plan storage hierarchy
+- **Output**: JSON with archive result
+- **Behavior**:
+  - Moves plan to `.plan/archived-plans/{yyyy-mm-dd}-{plan-name}/`
+  - Creates archive directory if needed
+  - Validates directory exists and contains plan.md
+  - Only allows archiving from plan storage hierarchy
 - **Usage** (after resolving):
   ```bash
   python3 {resolved_path} {plan-directory}/
