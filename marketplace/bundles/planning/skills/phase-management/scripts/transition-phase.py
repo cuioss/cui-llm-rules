@@ -15,6 +15,14 @@ import re
 import sys
 from pathlib import Path
 
+# Import file operations from base module
+SCRIPT_DIR = Path(__file__).resolve().parent
+MARKETPLACE_DIR = SCRIPT_DIR.parents[4]
+FILE_OPS_DIR = MARKETPLACE_DIR / 'bundles' / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'
+sys.path.insert(0, str(FILE_OPS_DIR))
+
+from file_ops import atomic_write_file
+
 # Phase orders for each plan type
 # Implementation (5-phase): Full development workflow with verify phase
 PHASE_ORDER_IMPLEMENTATION = ['init', 'refine', 'implement', 'verify', 'finalize']
@@ -123,6 +131,70 @@ def get_current_phase_from_plan(plan_content: str) -> str:
     return match.group(1) if match else ''
 
 
+def find_first_task_in_phase(plan_content: str, phase: str) -> str:
+    """Find the first task identifier in a phase.
+
+    Args:
+        plan_content: Plan file content
+        phase: Phase name to search
+
+    Returns:
+        Task identifier (e.g., "task-1") or "none" if no tasks found
+    """
+    # Find phase section
+    phase_pattern = rf'## Phase: {re.escape(phase)}.*?(?=\n## |\Z)'
+    phase_match = re.search(phase_pattern, plan_content, re.DOTALL)
+
+    if not phase_match:
+        return "none"
+
+    phase_content = phase_match.group(0)
+
+    # Find first task header
+    task_match = re.search(r'### Task (\d+):', phase_content)
+    if task_match:
+        return f"task-{task_match.group(1)}"
+
+    return "none"
+
+
+def update_plan_phase_pointer(plan_file: Path, plan_content: str, new_phase: str,
+                               new_task: str = None) -> str:
+    """Update the Current Phase and Current Task pointers in plan.md.
+
+    Args:
+        plan_file: Path to plan.md file
+        plan_content: Current plan content
+        new_phase: New phase to set
+        new_task: New task to set (if None, finds first task in new phase)
+
+    Returns:
+        Updated plan content
+    """
+    # Update Current Phase pointer
+    updated_content = re.sub(
+        r'\*\*Current Phase\*\*:.*',
+        f'**Current Phase**: {new_phase}',
+        plan_content
+    )
+
+    # Determine new task
+    if new_task is None:
+        new_task = find_first_task_in_phase(plan_content, new_phase)
+
+    # Update Current Task pointer
+    updated_content = re.sub(
+        r'\*\*Current Task\*\*:.*',
+        f'**Current Task**: {new_task}',
+        updated_content
+    )
+
+    # Write atomically
+    atomic_write_file(plan_file, updated_content)
+
+    return updated_content
+
+
 def transition_phase(plan_directory: str, completed_phase: str) -> dict:
     """Determine next phase transition."""
     plan_dir = Path(plan_directory)
@@ -197,7 +269,7 @@ def transition_phase(plan_directory: str, completed_phase: str) -> dict:
     is_last_phase = phase_index == len(phases) - 1
 
     if is_last_phase:
-        # Plan complete
+        # Plan complete - no phase pointer update needed
         return {
             'transition': {
                 'from_phase': completed_phase,
@@ -210,11 +282,16 @@ def transition_phase(plan_directory: str, completed_phase: str) -> dict:
                 'plan_type': plan_type,
                 'phases_completed': phases
             },
-            'next_action': 'Plan completed - archive or close'
+            'next_action': 'Plan completed - archive or close',
+            'updated': False  # No update needed for completion
         }
 
-    # Normal transition
+    # Normal transition - update plan.md phase pointer
     next_phase = phases[phase_index + 1]
+    first_task = find_first_task_in_phase(plan_content, next_phase)
+
+    # Update plan.md with new phase and task
+    update_plan_phase_pointer(plan_file, plan_content, next_phase, first_task)
 
     return {
         'transition': {
@@ -230,7 +307,8 @@ def transition_phase(plan_directory: str, completed_phase: str) -> dict:
             'phases_completed': phases[:phase_index + 1],
             'phases_remaining': phases[phase_index + 1:]
         },
-        'next_action': f'Execute {next_phase} phase tasks'
+        'next_action': f'Execute {next_phase} phase tasks',
+        'updated': True
     }
 
 
