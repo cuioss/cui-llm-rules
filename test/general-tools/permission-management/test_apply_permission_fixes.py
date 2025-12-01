@@ -64,7 +64,8 @@ class TestRemoveDuplicates(ScriptTestCase):
         # Verify file was updated
         settings = json.loads(settings_file.read_text())
         allow_list = settings['permissions']['allow']
-        self.assertEqual(len(allow_list), 2)
+        # 2 original + 2 defaults (Edit(.plan/**), Write(.plan/**))
+        self.assertEqual(len(allow_list), 4)
         self.assertEqual(allow_list.count('Bash(git:*)'), 1)
         self.assertEqual(allow_list.count('Bash(npm:*)'), 1)
 

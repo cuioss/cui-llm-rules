@@ -212,9 +212,222 @@ Next Steps:
 
 ---
 
+### Workflow: Setup Project Permissions
+
+Orchestrates permission setup and cleanup for project settings files.
+
+**Parameters**:
+- `global_settings`: Path to global settings (~/.claude/settings.json)
+- `local_settings`: Path to local/project settings
+- `marketplace_json`: Path to marketplace.json
+- `dry_run`: Boolean, show changes without applying
+
+---
+
+#### Operation: analyze-settings
+
+High-level analysis of settings files for permission issues.
+
+**Workflow**: Runs detect-redundant and detect-suspicious operations and consolidates results.
+
+**Input**:
+```
+global_settings: ~/.claude/settings.json
+local_settings: .claude/settings.json
+```
+
+**Output JSON**:
+```json
+{
+  "redundant_issues": {...},
+  "suspicious_issues": {...},
+  "total_issues": 5,
+  "recommendations": [
+    "Remove 3 redundant permissions from local settings",
+    "Review 2 suspicious permissions in global settings"
+  ]
+}
+```
+
+**Usage**: Entry point for permission analysis. Consolidates multiple detection results.
+
+---
+
+#### Operation: sync-script-permissions
+
+Generate and sync script permissions from marketplace inventory.
+
+**Script**: `generate-permission-wildcards.py`
+
+**Input**:
+```bash
+echo '{inventory_json}' | python3 {script} --format json
+```
+
+**Output JSON**:
+```json
+{
+  "statistics": {
+    "bundles_scanned": 6,
+    "skills_found": 24,
+    "commands_found": 15
+  },
+  "skill_wildcards": ["Skill(builder:*)", "Skill(planning:*)"],
+  "command_wildcards": ["SlashCommand(/builder:*)", "SlashCommand(/planning:*)"]
+}
+```
+
+**Usage**: Generate required permission wildcards from marketplace inventory.
+
+---
+
+#### Operation: detect-redundant
+
+Detect permissions in local settings that duplicate global settings.
+
+**Script**: `detect-redundant-permissions.py`
+
+**Input**:
+```bash
+python3 {script} --global-settings {global_path} --local-settings {local_path}
+```
+
+**Output JSON**:
+```json
+{
+  "redundant": [
+    {"permission": "Bash(git:*)", "reason": "Exact duplicate", "type": "exact_duplicate"}
+  ],
+  "marketplace_in_local": [
+    {"permission": "Skill(builder:*)", "reason": "Should be in global", "type": "marketplace_permission"}
+  ],
+  "summary": {
+    "redundant_count": 1,
+    "marketplace_in_local_count": 1
+  }
+}
+```
+
+**Usage**: Call before fixing to identify redundancies between global and local settings.
+
+---
+
+#### Operation: detect-suspicious
+
+Detect permissions matching anti-patterns (security risks).
+
+**Script**: `detect-suspicious-permissions.py`
+
+**Input**:
+```bash
+python3 {script} --settings {settings_path} [--approved-file {run_config_path}]
+```
+
+**Output JSON**:
+```json
+{
+  "suspicious": [
+    {"permission": "Write(/tmp/**)", "reason": "System temp access", "severity": "medium"}
+  ],
+  "already_approved": ["Bash(sudo:*)"],
+  "summary": {
+    "total_suspicious": 1,
+    "by_severity": {"high": 0, "medium": 1, "low": 0}
+  }
+}
+```
+
+**Usage**: Call to identify security anti-patterns. User-approved permissions are excluded.
+
+---
+
+#### Operation: consolidate-build-outputs
+
+Replace timestamped build output permissions with wildcards.
+
+**Script**: `consolidate-build-outputs.py`
+
+**Input**:
+```bash
+python3 {script} --settings {settings_path} [--dry-run]
+```
+
+**Output JSON**:
+```json
+{
+  "consolidated": 3,
+  "removed": ["Read(target/build-output-2025-11-20-174411.log)"],
+  "wildcards_added": ["Read(target/build-output-*.log)"],
+  "applied": true
+}
+```
+
+**Usage**: Call to clean up timestamped build output permissions that accumulate.
+
+---
+
+#### Operation: ensure-marketplace-wildcards
+
+Ensure marketplace bundle wildcards exist in global settings.
+
+**Script**: `ensure-marketplace-wildcards.py`
+
+**Input**:
+```bash
+python3 {script} --settings {settings_path} --marketplace-json {marketplace_path} [--dry-run]
+```
+
+**Output JSON**:
+```json
+{
+  "added": ["Skill(cui-java-expert:*)", "SlashCommand(/planning:*)"],
+  "already_present": 5,
+  "total": 7
+}
+```
+
+**Usage**: Call to ensure all marketplace bundles have corresponding wildcard permissions.
+
+---
+
+#### Operation: apply-fixes
+
+Apply safe fixes: duplicate removal, path normalization, sorting, default permissions.
+
+**Script**: `apply-permission-fixes.py`
+
+**Input**:
+```bash
+python3 {script} --settings {settings_path} [--dry-run]
+```
+
+**Output JSON**:
+```json
+{
+  "duplicates_removed": 2,
+  "paths_fixed": 1,
+  "defaults_added": ["Edit(.plan/**)", "Write(.plan/**)"],
+  "sorted": true,
+  "changes_made": true,
+  "applied": true
+}
+```
+
+**Usage**: Call as final step to clean up and normalize settings.
+
+---
+
 ## Scripts
 
-- `scripts/generate-permission-wildcards.py` - Analyzes inventory JSON and generates permission wildcards
+| Script | Purpose |
+|--------|---------|
+| `generate-permission-wildcards.py` | Analyzes inventory JSON and generates permission wildcards |
+| `apply-permissions.py` | Applies permission changes to settings files |
+| `detect-redundant-permissions.py` | Detects redundant permissions between global/local |
+| `detect-suspicious-permissions.py` | Detects security anti-patterns in permissions |
+| `consolidate-build-outputs.py` | Consolidates timestamped build output permissions |
+| `ensure-marketplace-wildcards.py` | Ensures marketplace wildcards exist |
+| `apply-permission-fixes.py` | Applies safe fixes (dedup, sort, defaults) |
 
 ## Standards Organization
 
