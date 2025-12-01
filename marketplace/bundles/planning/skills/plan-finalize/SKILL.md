@@ -206,10 +206,11 @@ Contains: Phase overview, finalizing modes, commit strategy, PR template, comple
 
 3. **Generate completion report** (see `standards/workflow.md` for template)
 
-4. **Archive plan** (optional):
+4. **Archive plan** (optional - delegate to phase-management):
    ```bash
-   mv {plan_directory} {plan-storage}/archive/{task-name}-{date}/
+   python3 {archive-plan.py path} {plan_directory}/
    ```
+   Note: Archives to `.plan/archived-plans/{date}-{task-name}/`
 
 5. **Log plan completion**:
    ```

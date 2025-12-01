@@ -392,9 +392,9 @@ Lists all plans with current phase and status.
 
 **Steps**:
 
-1. **Run discovery script**:
+1. **Run discovery script** (no path argument - script has default):
    ```bash
-   python3 {path-from-scripts.local.json} {plan-storage}/
+   python3 {discover-plans.py path}
    ```
    Parse JSON output internally - do NOT display raw output.
 
@@ -403,9 +403,7 @@ Lists all plans with current phase and status.
    Available Plans:
 
    1. jwt-authentication [implement] - 3/12 tasks complete
-      Path: {plan-storage}/jwt-authentication/
    2. user-profile-api [refine] - Requirements analysis
-      Path: {plan-storage}/user-profile-api/
 
    0. Create new plan
    ```
@@ -431,9 +429,9 @@ Finds completed plans for cleanup.
 
 **Steps**:
 
-1. **Run filtered discovery**:
+1. **Run filtered discovery** (no path argument - uses default):
    ```bash
-   python3 {discover-plans.py path} {plan-storage}/ --filter=completed
+   python3 {discover-plans.py path} --filter=completed
    ```
 
 2. **Return list of completed plans**
@@ -461,9 +459,9 @@ Creates a new plan, checking for existing init-phase plans first.
 
 **Steps**:
 
-1. **Check for existing init-phase plans**:
+1. **Check for existing init-phase plans** (no path argument - uses default):
    ```bash
-   python3 {discover-plans.py path} {plan-storage}/ --filter=init
+   python3 {discover-plans.py path} --filter=init
    ```
 
 2. **If init-phase plans exist**:
@@ -496,9 +494,9 @@ Finds plans ready for refinement or refines a specific plan.
 
 **Steps**:
 
-1. **If plan_name not provided**:
+1. **If plan_name not provided** (no path argument - uses default):
    ```bash
-   python3 {discover-plans.py path} {plan-storage}/ --filter=init,refine
+   python3 {discover-plans.py path} --filter=init,refine
    ```
 
 2. **Return list of refinable plans** or specific plan
@@ -645,9 +643,9 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
 
 **Steps**:
 
-1. **Run filtered discovery**:
+1. **Run filtered discovery** (no path argument - uses default):
    ```bash
-   python3 {discover-plans.py path} {plan-storage}/ --filter=implement,execute,verify,finalize
+   python3 {discover-plans.py path} --filter=implement,execute,verify,finalize
    ```
 
 2. **Exclude completed plans from results**
@@ -657,9 +655,7 @@ Finds plans ready for execution (implement/execute/verify/finalize phases).
    Executable Plans:
 
    1. jwt-authentication [implement] - Task 3/12: "Add token validation"
-      Path: {plan-storage}/jwt-authentication/
    2. user-profile-api [verify] - Build verification pending
-      Path: {plan-storage}/user-profile-api/
 
    0. Exit (use /plan-manage to create or refine plans)
    ```
@@ -908,12 +904,12 @@ All scripts use portable notation: `planning:phase-management/scripts/{script-na
   - Statuses: `completed`, `in_progress`, `pending`
   - Multiple: comma-separated (e.g., `--filter=implement,execute,verify,finalize`)
 - **Note**: `implement` is for Implementation plans (5-phase), `execute` is for Simple plans (3-phase) and Plugin-Development plans (4-phase)
-- **Usage** (after resolving):
+- **Usage** (no path argument - script has default):
   ```bash
-  python3 {resolved_path} {plan-storage}/
-  python3 {resolved_path} {plan-storage}/ --filter=init
-  python3 {resolved_path} {plan-storage}/ --filter=implement,execute,verify,finalize
-  python3 {resolved_path} {plan-storage}/ --filter=completed
+  python3 {resolved_path}
+  python3 {resolved_path} --filter=init
+  python3 {resolved_path} --filter=implement,execute,verify,finalize
+  python3 {resolved_path} --filter=completed
   ```
 
 **2. route-phase.py**: Maps current phase to target skill

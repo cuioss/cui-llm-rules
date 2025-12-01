@@ -222,10 +222,10 @@ result: "Plan: {task-name}, Branch: {branch}"
 ```
 plan_type: {implementation|simple|plugin-development}
 artifacts:
-  plan_directory: {plan-storage}/{task-name}/
-  plan_file: {plan-storage}/{task-name}/plan.md
-  config_file: {plan-storage}/{task-name}/config.toon
-  references_file: {plan-storage}/{task-name}/references.toon
+  plan_directory: {plan_directory}
+  plan_file: {plan_directory}/plan.md
+  config_file: {plan_directory}/config.toon
+  references_file: {plan_directory}/references.toon
 plan_status:
   current_phase: init
   next_phase: {refine|execute}
