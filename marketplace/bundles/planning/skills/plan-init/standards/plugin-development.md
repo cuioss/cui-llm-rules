@@ -218,14 +218,7 @@ For each component added/modified, add a verification task:
 
 ## Completion Criteria
 
-All phases must be completed and all tasks marked with `[x]` before plan is complete.
-
-**Plugin-Development Specific Requirements**:
-- [ ] All added/modified components verified with `/plugin-doctor`
-- [ ] No Rule 6 violations (Task tool in agents)
-- [ ] No Rule 7 violations (Maven usage)
-- [ ] No Rule 0 violations (thin wrapper commands)
-- [ ] All components have proper frontmatter
+Plan is complete when all phase tasks are marked `[x]`.
 ```
 
 ## Config Format (TOON)

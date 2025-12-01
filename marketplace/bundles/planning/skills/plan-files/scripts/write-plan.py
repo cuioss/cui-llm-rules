@@ -208,15 +208,7 @@ def generate_plan_content(
     content_parts.extend([
         "## Completion Criteria",
         "",
-        "All phases must be completed and all tasks marked with `[x]` before plan is complete.",
-        "",
-        "**Final Verification**:",
-        "- [ ] All phases completed",
-        "- [ ] All acceptance criteria met",
-        "- [ ] All tests passing",
-        "- [ ] Build successful",
-        "- [ ] Documentation updated",
-        "- [ ] PR merged (if applicable)",
+        "Plan is complete when all phase tasks are marked `[x]`.",
         ""
     ])
 

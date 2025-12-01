@@ -108,7 +108,7 @@ When creating a simple plan, generate this structure:
 
 ## Completion Criteria
 
-All phases must be completed and all tasks marked with `[x]` before plan is complete.
+Plan is complete when all phase tasks are marked `[x]`.
 ```
 
 ## Config Format (TOON)
