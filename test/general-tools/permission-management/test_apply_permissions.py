@@ -289,15 +289,15 @@ class TestSyncScriptPermissions(ScriptTestCase):
         claude_dir = self.temp_dir / '.claude'
         claude_dir.mkdir()
 
-        # Create scripts.local.json
+        # Create scripts.local.json with new wildcard format (scripts/*:*)
         scripts_file = claude_dir / 'scripts.local.json'
         scripts_file.write_text(json.dumps({
             "version": 1,
             "marketplace": "test-marketplace",
             "scripts": {},
             "permissions": [
-                "Bash(python3 /path/to/scripts/*.py:*)",
-                "Bash(bash /path/to/scripts/*.sh:*)"
+                "Bash(python3 /path/to/scripts/*:*)",
+                "Bash(bash /path/to/scripts/*:*)"
             ]
         }))
 
@@ -328,18 +328,18 @@ class TestSyncScriptPermissions(ScriptTestCase):
         claude_dir = self.temp_dir / '.claude'
         claude_dir.mkdir()
 
-        # Create scripts.local.json with new permissions
+        # Create scripts.local.json with new wildcard format (scripts/*:*)
         scripts_file = claude_dir / 'scripts.local.json'
         scripts_file.write_text(json.dumps({
             "version": 1,
             "marketplace": "test-marketplace",
             "scripts": {},
             "permissions": [
-                "Bash(python3 /new/path/marketplace/bundles/test/scripts/*.py:*)"
+                "Bash(python3 /new/path/marketplace/bundles/test/scripts/*:*)"
             ]
         }))
 
-        # Create project settings with old marketplace permissions
+        # Create project settings with old marketplace permissions (mixed legacy formats)
         settings_file = claude_dir / 'settings.json'
         settings_file.write_text(json.dumps({
             "permissions": {
@@ -371,6 +371,56 @@ class TestSyncScriptPermissions(ScriptTestCase):
         # Should have git:* and the new script permission
         self.assertEqual(len(settings['permissions']['allow']), 2)
         self.assertIn('Bash(git:*)', settings['permissions']['allow'])
+
+    def test_sync_removes_current_wildcard_format(self):
+        """Sync should remove old permissions using current scripts/*:* format."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+
+        # Create scripts.local.json with updated permissions
+        scripts_file = claude_dir / 'scripts.local.json'
+        scripts_file.write_text(json.dumps({
+            "version": 1,
+            "marketplace": "test-marketplace",
+            "scripts": {},
+            "permissions": [
+                "Bash(python3 /updated/marketplace/bundles/skill-a/scripts/*:*)"
+            ]
+        }))
+
+        # Create project settings with old permissions using scripts/*:* format
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": [
+                    "Bash(git:*)",
+                    "Bash(python3 /old/marketplace/bundles/skill-a/scripts/*:*)",
+                    "Bash(bash /old/marketplace/bundles/skill-b/scripts/*:*)"
+                ],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            '--action', 'sync-scripts',
+            '--scripts-file', str(scripts_file),
+            '--target', 'project',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertTrue(data['success'])
+        self.assertEqual(data['removed'], 2)  # Both old scripts/*:* permissions removed
+        self.assertEqual(data['added'], 1)
+
+        settings = json.loads(settings_file.read_text())
+        # Should have git:* and the new script permission
+        self.assertEqual(len(settings['permissions']['allow']), 2)
+        self.assertIn('Bash(git:*)', settings['permissions']['allow'])
+        self.assertIn('Bash(python3 /updated/marketplace/bundles/skill-a/scripts/*:*)', settings['permissions']['allow'])
 
 
 class TestSettingsFilePriority(ScriptTestCase):

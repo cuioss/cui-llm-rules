@@ -121,9 +121,9 @@ def generate_scripts_local(scripts: list[dict], marketplace_name: str) -> dict:
     permissions = []
     for skill_dir, types in sorted(skill_paths.items()):
         if types["has_bash"]:
-            permissions.append(f"Bash(bash {skill_dir}:*)")
+            permissions.append(f"Bash(bash {skill_dir}/*:*)")
         if types["has_python"]:
-            permissions.append(f"Bash(python3 {skill_dir}:*)")
+            permissions.append(f"Bash(python3 {skill_dir}/*:*)")
 
     return {
         "version": 1,

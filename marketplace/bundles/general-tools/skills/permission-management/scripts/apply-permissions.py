@@ -183,15 +183,16 @@ def sync_script_permissions(scripts_file: str, target: str = "global") -> dict:
     allow_list = settings["permissions"]["allow"]
 
     # Find and remove old script permissions for this marketplace
+    # Pattern can be:
+    #   - Legacy: scripts/*.sh, scripts/*.py
+    #   - Current: scripts/*:* (wildcard for any script with any args)
     old_script_permissions = [
         p for p in allow_list
-        if ("scripts/*.sh" in p or "scripts/*.py" in p) and marketplace.replace("-", "") in p.replace("-", "").lower()
-    ]
-
-    # More precise: remove permissions containing /marketplace/bundles/
-    old_script_permissions = [
-        p for p in allow_list
-        if "/marketplace/bundles/" in p and ("scripts/*.sh" in p or "scripts/*.py" in p)
+        if "/marketplace/bundles/" in p and (
+            "scripts/*.sh" in p or
+            "scripts/*.py" in p or
+            "scripts/*:*" in p
+        )
     ]
 
     for old_perm in old_script_permissions:
