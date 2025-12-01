@@ -12,6 +12,7 @@ Output: JSON with transition info (from_phase, to_phase, is_complete).
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 MARKETPLACE_DIR = SCRIPT_DIR.parents[4]
 FILE_OPS_DIR = MARKETPLACE_DIR / 'bundles' / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'
+PLAN_FILES_SCRIPTS = MARKETPLACE_DIR / 'bundles' / 'planning' / 'skills' / 'plan-files' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
 
 from file_ops import atomic_write_file
@@ -158,6 +160,61 @@ def find_first_task_in_phase(plan_content: str, phase: str) -> str:
     return "none"
 
 
+def collect_modified_files(plan_dir: Path, base_branch: str = 'main') -> dict:
+    """Collect modified files from git diff and add to references.toon.
+
+    Called during phase transition from implement/execute to capture
+    all files modified during the implementation phase.
+
+    Args:
+        plan_dir: Path to plan directory
+        base_branch: Base branch to compare against (default: 'main')
+
+    Returns:
+        Collection result dict or None if collection failed
+    """
+    collect_script = PLAN_FILES_SCRIPTS / 'collect-modified-files.py'
+
+    if not collect_script.exists():
+        return {'skipped': True, 'reason': 'collect-modified-files.py not found'}
+
+    try:
+        result = subprocess.run(
+            ['python3', str(collect_script),
+             '--plan-dir', str(plan_dir),
+             '--base-branch', base_branch],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            return json.loads(result.stdout)
+        else:
+            return {'skipped': True, 'reason': result.stderr or 'Collection failed'}
+
+    except subprocess.TimeoutExpired:
+        return {'skipped': True, 'reason': 'Collection timed out'}
+    except json.JSONDecodeError:
+        return {'skipped': True, 'reason': 'Invalid JSON from collection script'}
+    except Exception as e:
+        return {'skipped': True, 'reason': str(e)}
+
+
+def get_base_branch_from_references(plan_dir: Path) -> str:
+    """Get base branch from references.toon."""
+    ref_file = plan_dir / 'references.toon'
+    if not ref_file.exists():
+        return 'main'
+
+    content = ref_file.read_text()
+    for line in content.splitlines():
+        if line.strip().startswith('base_branch:'):
+            return line.split(':', 1)[1].strip() or 'main'
+
+    return 'main'
+
+
 def update_plan_phase_pointer(plan_file: Path, plan_content: str, new_phase: str,
                                new_task: str = None) -> str:
     """Update the Current Phase and Current Task pointers in plan.md.
@@ -290,10 +347,17 @@ def transition_phase(plan_directory: str, completed_phase: str) -> dict:
     next_phase = phases[phase_index + 1]
     first_task = find_first_task_in_phase(plan_content, next_phase)
 
+    # Collect modified files when transitioning from implement/execute phases
+    # This captures all files changed during the implementation work
+    file_collection = None
+    if completed_phase in ('implement', 'execute'):
+        base_branch = get_base_branch_from_references(plan_dir)
+        file_collection = collect_modified_files(plan_dir, base_branch)
+
     # Update plan.md with new phase and task
     update_plan_phase_pointer(plan_file, plan_content, next_phase, first_task)
 
-    return {
+    result = {
         'transition': {
             'from_phase': completed_phase,
             'to_phase': next_phase,
@@ -310,6 +374,12 @@ def transition_phase(plan_directory: str, completed_phase: str) -> dict:
         'next_action': f'Execute {next_phase} phase tasks',
         'updated': True
     }
+
+    # Include file collection results if collection was performed
+    if file_collection is not None:
+        result['file_collection'] = file_collection
+
+    return result
 
 
 def main():

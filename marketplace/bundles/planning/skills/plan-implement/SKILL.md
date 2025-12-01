@@ -256,7 +256,29 @@ When all implement tasks complete:
 
    **Note**: This must be called for EVERY task, including pre-implemented ones. The plan.md Phase Progress table drives status detection in `discover-plans.py`.
 
-2. **Auto-transition** to verify phase (no user prompt needed)
+2. **Automatic File Collection** (handled by `transition-phase.py`):
+
+   When transitioning from implement/execute phases, the `transition-phase.py` script automatically:
+   - Runs `collect-modified-files.py` to capture all files changed since base branch
+   - Categorizes files into `implementation_files`, `test_files`, `config_files`
+   - Updates `references.toon` with the collected files
+
+   This ensures references.toon accurately reflects all work done during implementation without manual tracking.
+
+   **Collection Output** (included in transition result):
+   ```json
+   "file_collection": {
+     "files_found": 15,
+     "files_added": 12,
+     "added_by_category": {
+       "implementation_files": 8,
+       "test_files": 3,
+       "config_files": 1
+     }
+   }
+   ```
+
+3. **Auto-transition** to verify phase (no user prompt needed)
    - Plans execute continuously until complete or blocked
    - Do NOT ask user to confirm phase transition
 
