@@ -345,41 +345,38 @@ python3 {update-progress.py} --plan-dir {plan_directory} --phase {phase} --task-
 
 ---
 
-## MANDATORY: Work-Log Enforcement
+## Work-Log via Explicit Task Checklists
 
-**CRITICAL**: Phase skills MUST log significant actions via work-log skill. This creates an audit trail of what was done during plan execution.
+Work-log entries are created through **explicit checklist items** in plan-type templates, not implicit rules.
 
-### Expected Work-Log Pattern
+### How It Works
 
-Phase skills must invoke work-log for:
-- File creations/modifications (action: "Created X", result: "path/to/file")
-- Key decisions with rationale (action: "Chose X over Y", result: "reason")
-- Verification results (action: "Ran tests", result: "12/12 passed")
+Each task in plan-type templates (see `plan-init/standards/`) includes:
+```markdown
+**Checklist**:
+- [ ] Functional item 1
+- [ ] Functional item 2
+- [ ] **Log**: Record completion in work-log
+```
 
-### Minimum Entries Per Phase
+This makes work-logging:
+- **Visible**: Appears in every generated plan.md
+- **Trackable**: Part of the checklist completion
+- **Self-enforcing**: Can't miss it when checking off items
 
-| Phase | Minimum Entries | Typical Log Points |
-|-------|-----------------|-------------------|
-| init | 1 | Plan creation |
-| refine | 1-2 | Analysis complete, requirements generated |
-| implement/execute | 1-3 per task | File modifications, key decisions |
-| verify | 1-2 | Build result, test result |
-| finalize | 1-2 | Commit created, PR submitted |
+### Work-Log Best Practices
 
-### Verification (Soft Enforcement)
+When completing the `**Log**: Record completion in work-log` checklist item:
+- Log outcomes, not steps (e.g., "Build passed" not "Running build")
+- Include artifacts/results (e.g., "Created analysis.md", "12/12 tests passed")
+- Log key decisions with rationale when choices were made
 
-After phase skill returns, check work-log.toon:
-1. If file missing: Log warning "No work-log entries for {phase} phase"
-2. If entries < minimum: Log warning "Only {n} entries for {phase} phase"
-3. Allow phase transition regardless (soft enforcement)
+### Reference
 
-### Anti-Patterns (Orchestration Layer)
-
-| Anti-Pattern | Problem | Required Action |
-|--------------|---------|-----------------|
-| No work-log calls in phase | No audit trail | Phase skills must log significant actions |
-| Logging every checklist item | Noise, redundant with progress | Log outcomes, not steps |
-| Missing result in log entry | Incomplete audit | Always include artifact/outcome |
+See `plan-init/standards/` for complete task templates with explicit log items:
+- `simple-init.md` - 3-phase workflow
+- `implementation-init.md` - 5-phase workflow
+- `plugin-development.md` - 4-phase workflow
 
 ---
 

@@ -57,6 +57,7 @@ When creating a plugin-development plan, generate this structure:
 - [ ] Identify target bundle(s) in marketplace/bundles/
 - [ ] List components to add or modify
 - [ ] Verify plugin.json exists for target bundle
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Confirm Configuration
 
@@ -72,6 +73,7 @@ When creating a plugin-development plan, generate this structure:
 - [ ] List components to be created/modified
 - [ ] Confirm component naming conventions
 - [ ] Transition to refine phase
+- [ ] **Log**: Record completion in work-log
 
 ---
 
@@ -95,6 +97,7 @@ When creating a plugin-development plan, generate this structure:
 - [ ] Evaluate: Breaking changes or migrations involved?
 - [ ] Evaluate: Cross-cutting concerns across components?
 - [ ] Decision: Create analysis.md OR skip to component breakdown
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Strategic Analysis (if complex)
 
@@ -113,6 +116,7 @@ When creating a plugin-development plan, generate this structure:
 - [ ] Record design decisions with alternatives considered
 - [ ] Identify breaking changes (if any)
 - [ ] Document risks and mitigations
+- [ ] **Log**: Record completion in work-log
 
 ### Task 3: Component Breakdown
 
@@ -129,6 +133,7 @@ When creating a plugin-development plan, generate this structure:
 - [ ] Analyze file structure and organization patterns
 - [ ] Review script patterns (if applicable)
 - [ ] Document conventions to follow
+- [ ] **Log**: Record completion in work-log
 
 ### Task 4: Generate Implementation Requirements
 
@@ -145,6 +150,7 @@ When creating a plugin-development plan, generate this structure:
 - [ ] Add acceptance criteria for each task
 - [ ] Include verification task for each component
 - [ ] Update plan.md with execute phase tasks
+- [ ] **Log**: Record completion in work-log
 
 ---
 
@@ -176,6 +182,7 @@ For each component added/modified, add a verification task:
 - [ ] For each added/modified skill: `/plugin-doctor skill={name}`
 - [ ] Address any reported issues
 - [ ] Re-run until clean
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Commit Changes
 
@@ -190,6 +197,7 @@ For each component added/modified, add a verification task:
 - [ ] Stage all changes
 - [ ] Create commit with descriptive message
 - [ ] Push to branch (if remote)
+- [ ] **Log**: Record completion in work-log
 
 ### Task 3: Verify Completion
 
@@ -204,6 +212,7 @@ For each component added/modified, add a verification task:
 - [ ] Verify all components created/modified
 - [ ] Verify plugin.json updated if needed
 - [ ] Mark plan complete
+- [ ] **Log**: Record completion in work-log
 
 ---
 
@@ -308,6 +317,7 @@ When generating execute phase tasks for plugin development:
 - [ ] Add required frontmatter (name, description, allowed-tools)
 - [ ] Implement required sections
 - [ ] **Verify**: `/plugin-doctor {component-type}={component-name}`
+- [ ] **Log**: Record completion in work-log
 ```
 
 ### For Modifying Existing Components
@@ -327,6 +337,7 @@ When generating execute phase tasks for plugin development:
 - [ ] Apply required modifications
 - [ ] Preserve existing valid structure
 - [ ] **Verify**: `/plugin-doctor {component-type}={component-name}`
+- [ ] **Log**: Record completion in work-log
 ```
 
 ## Verification Task Template
@@ -349,6 +360,7 @@ Add this task after each implementation task:
 - [ ] Review any reported issues
 - [ ] Fix issues if found
 - [ ] Re-verify until clean
+- [ ] **Log**: Record completion in work-log
 ```
 
 ## Key Differences from Simple and Implementation

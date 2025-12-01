@@ -52,6 +52,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Detect build system (pom.xml, package.json, etc.)
 - [ ] Parse issue from parameters or branch name
 - [ ] Determine technology stack
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Fetch Issue Details
 
@@ -68,6 +69,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Extract acceptance criteria
 - [ ] Identify related issues/dependencies
 - [ ] Pre-populate plan with issue content
+- [ ] **Log**: Record completion in work-log
 
 ### Task 3: Validate Configuration
 
@@ -83,6 +85,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Confirm issue reference (or explicit skip)
 - [ ] Validate build system detection
 - [ ] Check for conflicting settings
+- [ ] **Log**: Record completion in work-log
 
 ### Task 4: User Confirmation
 
@@ -98,6 +101,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Highlight warnings or recommendations
 - [ ] Allow property overrides
 - [ ] Confirm final configuration
+- [ ] **Log**: Record completion in work-log
 
 ### Task 5: Persist and Transition
 
@@ -113,6 +117,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Write plan.md (tasks-only)
 - [ ] Update references.toon with issue/branch
 - [ ] Transition to refine phase
+- [ ] **Log**: Record completion in work-log
 
 ---
 
@@ -132,6 +137,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Identify implementation components
 - [ ] Map component dependencies
 - [ ] Estimate complexity per component
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Plan Implementation Tasks
 
@@ -147,6 +153,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Add acceptance criteria per task
 - [ ] Order by dependencies
 - [ ] Add tasks to implement phase
+- [ ] **Log**: Record completion in work-log
 
 ### Task 3: Identify Documentation Needs
 
@@ -162,6 +169,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Check if interface specs needed for new APIs
 - [ ] Create/link ADRs via adr-management skill
 - [ ] Create/link interfaces via interface-management skill
+- [ ] **Log**: Record completion in work-log
 
 ---
 
@@ -187,6 +195,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Run build (maven/npm)
 - [ ] Fix any build failures
 - [ ] Verify test coverage
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Code Quality Check
 
@@ -201,6 +210,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Run linter/static analysis
 - [ ] Fix violations
 - [ ] Review Sonar issues (if applicable)
+- [ ] **Log**: Record completion in work-log
 
 ### Task 3: Manual Testing
 
@@ -215,6 +225,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Test happy path scenarios
 - [ ] Test edge cases
 - [ ] Document test results
+- [ ] **Log**: Record completion in work-log
 
 ### Task 4: Documentation Review
 
@@ -229,6 +240,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Verify JavaDoc/JSDoc complete
 - [ ] Update README if needed
 - [ ] Check ADR/interface docs
+- [ ] **Log**: Record completion in work-log
 
 ---
 
@@ -247,6 +259,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Stage all changes
 - [ ] Create commit with descriptive message
 - [ ] Push to remote branch
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Create Pull Request
 
@@ -261,6 +274,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Create PR with summary
 - [ ] Link to issue
 - [ ] Add reviewers
+- [ ] **Log**: Record completion in work-log
 
 ### Task 3: PR Workflow
 
@@ -275,6 +289,7 @@ When creating an implementation plan, generate this structure:
 - [ ] Execute /pr-fix if configured
 - [ ] Address review comments
 - [ ] Request re-review if needed
+- [ ] **Log**: Record completion in work-log
 
 ---
 

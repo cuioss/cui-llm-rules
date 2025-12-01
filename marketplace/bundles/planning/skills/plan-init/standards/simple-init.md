@@ -49,6 +49,7 @@ When creating a simple plan, generate this structure:
 - [ ] Check current git branch
 - [ ] Understand task scope
 - [ ] Identify files to modify
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Confirm Configuration
 
@@ -62,6 +63,7 @@ When creating a simple plan, generate this structure:
 - [ ] Display quick summary
 - [ ] Confirm or edit settings
 - [ ] Transition to execute phase
+- [ ] **Log**: Record completion in work-log
 
 ---
 
@@ -86,6 +88,7 @@ When creating a simple plan, generate this structure:
 - [ ] Stage all changes
 - [ ] Create commit with descriptive message
 - [ ] Push to branch (if remote)
+- [ ] **Log**: Record completion in work-log
 
 ### Task 2: Verify Completion
 
@@ -99,6 +102,7 @@ When creating a simple plan, generate this structure:
 - [ ] Verify all changes applied
 - [ ] Check no issues remaining
 - [ ] Mark plan complete
+- [ ] **Log**: Record completion in work-log
 
 ---
 
