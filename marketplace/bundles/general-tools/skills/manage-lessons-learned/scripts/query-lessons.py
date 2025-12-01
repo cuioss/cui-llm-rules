@@ -215,7 +215,6 @@ def read_lesson(file_path: Path) -> Optional[Dict[str, Any]]:
         metadata, content = extract_metadata(file_path)
         return {
             "filename": file_path.name,
-            "file": str(file_path.resolve()),
             "metadata": metadata,
             "content": content
         }
