@@ -135,6 +135,50 @@ def test_write_plan_with_detailed_tasks():
         assert '- [ ] Configure tools' in content
 
 
+def test_write_plan_with_string_acceptance_criteria():
+    """Test write-plan.py handles string acceptance_criteria (not list).
+
+    Bug: When acceptance_criteria is a string instead of a list,
+    iterating with 'for c in criteria' iterates character-by-character,
+    producing one list item per character.
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        plan_dir = Path(tmpdir) / 'plan'
+
+        # Use a string instead of a list for acceptance_criteria
+        phases_json = json.dumps([{
+            "name": "execute",
+            "status": "in_progress",
+            "tasks": [{
+                "name": "Fix Bug",
+                "phase": "execute",
+                "goal": "Fix the bug",
+                "acceptance_criteria": "Build passes without errors",  # String, not list!
+                "checklist": ["Write test", "Fix code"]
+            }]
+        }])
+
+        returncode, stdout, _ = run_script(WRITE_PLAN, [
+            '--plan-dir', str(plan_dir),
+            '--title', 'Bug Fix Plan',
+            '--current-phase', 'execute',
+            '--current-task', 'task-1',
+            '--phases-json', phases_json
+        ])
+
+        assert returncode == 0
+
+        content = (plan_dir / 'plan.md').read_text()
+
+        # The acceptance criteria should be a single item, not char-by-char
+        assert '- Build passes without errors' in content, \
+            f"acceptance_criteria string should be treated as single item. Content:\n{content}"
+
+        # Should NOT have character-by-character entries like "- B", "- u", etc.
+        assert '- B\n' not in content, "Should not iterate string char-by-char"
+        assert '- u\n' not in content, "Should not iterate string char-by-char"
+
+
 # write-config.py tests
 
 def test_write_config_creates_file():
@@ -472,6 +516,7 @@ def main():
     print("write-plan.py:")
     runner.run_test("creates file", test_write_plan_creates_file)
     runner.run_test("with detailed tasks", test_write_plan_with_detailed_tasks)
+    runner.run_test("with string acceptance_criteria", test_write_plan_with_string_acceptance_criteria)
 
     # write-config.py tests
     print("\nwrite-config.py:")

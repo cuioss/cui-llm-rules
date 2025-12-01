@@ -107,7 +107,7 @@ def get_script_path(bundle: str, skill: str, script: str) -> Path:
     Get the path to a marketplace script.
 
     Args:
-        bundle: Bundle name (e.g., 'cui-task-workflow')
+        bundle: Bundle name (e.g., 'planning')
         skill: Skill name (e.g., 'plan-files')
         script: Script filename (e.g., 'parse-plan.py')
 
@@ -183,7 +183,7 @@ class ScriptTestCase(TestCase):
 
     Example:
         class TestParseConfig(ScriptTestCase):
-            bundle = 'cui-task-workflow'
+            bundle = 'planning'
             skill = 'plan-files'
             script = 'parse-config.py'
 

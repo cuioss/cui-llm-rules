@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
-SCRIPT_PATH = get_script_path('cui-task-workflow', 'phase-management', 'route-phase.py')
+SCRIPT_PATH = get_script_path('planning', 'phase-management', 'route-phase.py')
 
 
 # =============================================================================
@@ -24,7 +24,7 @@ def test_route_init_phase():
 
     assert data['routing']['current_phase'] == 'init'
     assert data['routing']['target_skill'] == 'plan-init'
-    assert data['routing']['skill_full_name'] == 'cui-task-workflow:plan-init'
+    assert data['routing']['skill_full_name'] == 'planning:plan-init'
     assert data['phase_status']['phase_index'] == 0
     assert data['phase_status']['completed_phases'] == []
     assert 'refine' in data['phase_status']['pending_phases']
@@ -86,7 +86,7 @@ def test_route_execute_phase():
 
     # Core routing must work correctly
     assert data['routing']['target_skill'] == 'plan-implement'
-    assert data['routing']['skill_full_name'] == 'cui-task-workflow:plan-implement'
+    assert data['routing']['skill_full_name'] == 'planning:plan-implement'
     # Phase index in simple plan (execute is phase 2 of 3: init, execute, finalize)
     assert data['phase_status']['phase_index'] == 1
     assert 'finalize' in data['phase_status']['pending_phases']

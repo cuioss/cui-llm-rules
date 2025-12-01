@@ -25,13 +25,13 @@ from conftest import (
 )
 
 
-SCRIPT_PATH = get_script_path('cui-utilities', 'permission-management', 'apply-permissions.py')
+SCRIPT_PATH = get_script_path('general-tools', 'permission-management', 'apply-permissions.py')
 
 
 class TestAnalyzeSettings(ScriptTestCase):
     """Test the analyze action."""
 
-    bundle = 'cui-utilities'
+    bundle = 'general-tools'
     skill = 'permission-management'
     script = 'apply-permissions.py'
 
@@ -112,7 +112,7 @@ class TestAnalyzeSettings(ScriptTestCase):
 class TestAddPermission(ScriptTestCase):
     """Test the add action."""
 
-    bundle = 'cui-utilities'
+    bundle = 'general-tools'
     skill = 'permission-management'
     script = 'apply-permissions.py'
 
@@ -191,7 +191,7 @@ class TestAddPermission(ScriptTestCase):
 class TestRemovePermission(ScriptTestCase):
     """Test the remove action."""
 
-    bundle = 'cui-utilities'
+    bundle = 'general-tools'
     skill = 'permission-management'
     script = 'apply-permissions.py'
 
@@ -247,7 +247,7 @@ class TestRemovePermission(ScriptTestCase):
 class TestEnsurePermissions(ScriptTestCase):
     """Test the ensure action."""
 
-    bundle = 'cui-utilities'
+    bundle = 'general-tools'
     skill = 'permission-management'
     script = 'apply-permissions.py'
 
@@ -280,7 +280,7 @@ class TestEnsurePermissions(ScriptTestCase):
 class TestSyncScriptPermissions(ScriptTestCase):
     """Test the sync-scripts action."""
 
-    bundle = 'cui-utilities'
+    bundle = 'general-tools'
     skill = 'permission-management'
     script = 'apply-permissions.py'
 
@@ -376,7 +376,7 @@ class TestSyncScriptPermissions(ScriptTestCase):
 class TestSettingsFilePriority(ScriptTestCase):
     """Test that settings.json is preferred over settings.local.json for writes."""
 
-    bundle = 'cui-utilities'
+    bundle = 'general-tools'
     skill = 'permission-management'
     script = 'apply-permissions.py'
 

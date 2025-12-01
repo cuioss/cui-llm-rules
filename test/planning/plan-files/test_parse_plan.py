@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, create_temp_file, TestRunner, get_script_path
 
 # Script under test
-SCRIPT_PATH = get_script_path('cui-task-workflow', 'plan-files', 'parse-plan.py')
+SCRIPT_PATH = get_script_path('planning', 'plan-files', 'parse-plan.py')
 
 
 # =============================================================================

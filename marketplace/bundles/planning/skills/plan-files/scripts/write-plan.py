@@ -73,6 +73,9 @@ def generate_task_section(task: dict, task_num: int) -> str:
 
     if criteria:
         lines.append("**Acceptance Criteria**:")
+        # Handle string as single item (avoid char-by-char iteration)
+        if isinstance(criteria, str):
+            criteria = [criteria]
         for c in criteria:
             lines.append(f"- {c}")
         lines.append("")

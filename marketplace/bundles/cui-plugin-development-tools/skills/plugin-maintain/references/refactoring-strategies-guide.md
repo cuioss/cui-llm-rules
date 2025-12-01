@@ -165,19 +165,25 @@ When renaming/moving:
 1. Update entries in plugin.json
 2. Remove old entries
 3. Add new entries
+4. **CRITICAL**: Update `marketplace/.claude-plugin/marketplace.json` (central plugin registry)
 
 ## Verification
 
 After refactoring:
 
-1. **Run Diagnosis**: Check for issues
+1. **Run Tests**: Execute tests for renamed components
+   - Update test file references (bundle/skill names)
+   - Run tests to verify they still pass
+   - Fix any broken imports or paths
+
+2. **Run Diagnosis**: Check for issues
    ```
    /plugin-diagnose-{type}
    ```
 
-2. **Test Functionality**: Verify components work
-3. **Check References**: All cross-references valid
-4. **Validate Structure**: Directory structure correct
+3. **Test Functionality**: Verify components work
+4. **Check References**: All cross-references valid
+5. **Validate Structure**: Directory structure correct
 
 ## Consolidation Patterns
 

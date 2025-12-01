@@ -3,7 +3,7 @@
 Tests for discover-plans.py --filter functionality.
 
 Run with:
-    python3 -m pytest test/cui-task-workflow/phase-management/test_discover_plans_filter.py -v
+    python3 -m pytest test/planning/phase-management/test_discover_plans_filter.py -v
 """
 
 import json
@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 
 # Add the script directory to path for imports
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'cui-task-workflow' / 'skills' / 'phase-management' / 'scripts'
+SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'planning' / 'skills' / 'phase-management' / 'scripts'
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from importlib import import_module

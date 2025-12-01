@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 # Script location
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'cui-task-workflow' / 'skills' / 'phase-management' / 'scripts'
+SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'planning' / 'skills' / 'phase-management' / 'scripts'
 SCRIPT_PATH = SCRIPT_DIR / 'delete-plan.py'
 
 

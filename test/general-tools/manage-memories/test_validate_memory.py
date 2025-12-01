@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
-SCRIPT_PATH = get_script_path('cui-utilities', 'claude-memory', 'validate-memory.py')
+SCRIPT_PATH = get_script_path('general-tools', 'manage-memories', 'validate-memory.py')
 
 
 # =============================================================================

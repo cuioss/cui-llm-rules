@@ -5,6 +5,10 @@ Copy a lesson file to a plan directory and remove the original.
 Performs a transactional move: copies to destination, verifies content,
 then removes original only after successful verification.
 
+Uses ID-based access pattern: takes lesson ID and resolves file path
+internally via base_path. This ensures orchestrators don't construct
+paths to resources in other domains.
+
 Output: JSON with operation status.
 """
 
@@ -19,7 +23,7 @@ MARKETPLACE_DIR = SCRIPT_DIR.parents[4]  # marketplace/bundles/planning/skills/p
 FILE_OPS_DIR = MARKETPLACE_DIR / 'bundles' / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
 
-from file_ops import atomic_write_file, output_success, output_error
+from file_ops import atomic_write_file, output_success, output_error, base_path
 
 
 def copy_lesson_to_plan(lesson_file: Path, plan_dir: Path, dry_run: bool = False) -> dict:
