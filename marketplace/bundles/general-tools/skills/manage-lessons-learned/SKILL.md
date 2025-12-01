@@ -180,13 +180,15 @@ python3 scripts/query-lessons.py --component maven-build-and-fix --applied false
 
 ---
 
-## Workflow: Mark Lesson Applied
+## Workflow: Update Lesson
 
 **Pattern**: Script Automation
 
-After applying a lesson to component documentation, mark it as applied using `update-lesson.py`.
+Update lesson metadata or content sections using `update-lesson.py`.
 
-### Usage
+### Update Metadata
+
+Use `--set KEY=VALUE` to update metadata fields:
 
 ```bash
 python3 scripts/update-lesson.py \
@@ -194,21 +196,32 @@ python3 scripts/update-lesson.py \
   --set applied=true
 ```
 
-### Example
+### Update Content Sections
+
+Use `--set-detail`, `--set-example`, or `--set-related` to replace section content:
 
 ```bash
 python3 scripts/update-lesson.py \
-  --file {lessons-storage}/2025-11-28-001.md \
-  --set applied=true
+  --file {lessons-storage}/{lesson-id}.md \
+  --set-detail "New detailed description of the issue"
+
+python3 scripts/update-lesson.py \
+  --file {lessons-storage}/{lesson-id}.md \
+  --set-example "# New code example"
+
+python3 scripts/update-lesson.py \
+  --file {lessons-storage}/{lesson-id}.md \
+  --set-related "component-a, component-b"
 ```
 
-### Update Multiple Fields
+### Combine Metadata and Content Updates
 
 ```bash
 python3 scripts/update-lesson.py \
   --file {lessons-storage}/2025-11-28-001.md \
   --set applied=true \
-  --set category=pattern
+  --set category=pattern \
+  --set-detail "Updated description with more context"
 ```
 
 ### Output
@@ -218,7 +231,8 @@ python3 scripts/update-lesson.py \
   "success": true,
   "operation": "update-lesson",
   "file": "{lessons-storage}/2025-11-28-001.md",
-  "updated_fields": ["applied"]
+  "updated_fields": ["applied", "category"],
+  "updated_sections": ["Detail"]
 }
 ```
 
@@ -247,7 +261,7 @@ The `/plugin-apply-lessons-learned` command uses this skill to:
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `write-lesson.py` | Create new lesson file with metadata | `python3 scripts/write-lesson.py --help` |
-| `update-lesson.py` | Update metadata in existing lesson | `python3 scripts/update-lesson.py --help` |
+| `update-lesson.py` | Update metadata or content sections | `python3 scripts/update-lesson.py --help` |
 | `query-lessons.py` | Query and filter lessons by criteria | `python3 scripts/query-lessons.py --help` |
 | `test-lessons-scripts.py` | Test suite for write/update scripts | `python3 scripts/test-lessons-scripts.py` |
 
