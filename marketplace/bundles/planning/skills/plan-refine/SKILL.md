@@ -223,6 +223,11 @@ analysis_created:
    - Dependency mapping
    - Options: Proceed / Modify / Re-analyze
 
+5. **Update progress** (after user approval):
+   ```bash
+   python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id task-1 --complete-items "Analyze requirements"
+   ```
+
 **Output**: `components[N]: {name, scope, complexity, dependencies}`
 
 ---
@@ -262,6 +267,11 @@ analysis_created:
    result: "{count} tasks planned"
    ```
 
+6. **Update progress**:
+   ```bash
+   python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id task-2 --complete-items "Plan implementation tasks"
+   ```
+
 **Output**: `tasks[N]: {id, name, complexity, dependencies, acceptance_criteria}`
 
 ---
@@ -292,6 +302,11 @@ analysis_created:
    operation: write-references
    action: add
    reference_type: adr|interface
+   ```
+
+6. **Update progress**:
+   ```bash
+   python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id task-3 --complete-items "Identify documentation needs"
    ```
 
 **Output**: `adrs_linked[N]`, `interfaces_linked[N]`
