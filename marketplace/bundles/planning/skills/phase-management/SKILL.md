@@ -538,7 +538,23 @@ Converts a selected lesson into a new plan.
    ```
    Script path from: `planning:plan-files/scripts/copy-lesson-to-plan.py`
 
-6. **Return result**
+6. **Read plan_type** from config.toon:
+   ```
+   Skill: planning:plan-files
+   operation: read-config
+   plan_directory: {plan_directory}
+   ```
+
+7. **Determine next phase** based on plan_type:
+   - `simple` → execute (skip refine phase)
+   - `implementation` → refine
+   - `plugin-development` → refine
+
+8. **Auto-continue** to the determined next phase (no user prompt)
+
+9. Execute the appropriate operation:
+   - If next_phase is `refine` → Execute refine-plan operation
+   - If next_phase is `execute` → Invoke `/plan-execute plan={name}`
 
 **Output** (success):
 ```
@@ -547,7 +563,7 @@ lesson_converted:
   plan_created: {plan_directory}
   lesson_moved: true
 
-next_action: Run /plan-execute plan={plan-name} or /plan-manage action=refine plan={plan-name}
+Auto-continues to {next_phase} phase based on plan_type.
 ```
 
 **Output** (ambiguity resolved):
@@ -559,6 +575,8 @@ clarification_provided:
 lesson_converted:
   lesson_id: {id}
   plan_created: {plan_directory}
+
+Auto-continues to {next_phase} phase based on plan_type.
 ```
 
 ---
