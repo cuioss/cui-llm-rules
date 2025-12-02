@@ -24,6 +24,7 @@
   "skills": [
     "./skills/diagnostic-patterns",
     "./skills/general-development-rules",
+    "./skills/manage-handoff",
     "./skills/permission-management",
     "./skills/toon-usage",
     "./skills/web-security-standards"
