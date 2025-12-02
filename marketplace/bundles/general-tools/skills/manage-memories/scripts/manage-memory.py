@@ -30,7 +30,7 @@ warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 # Get memory base path from base_path
 MEMORY_BASE = base_path('memory')
-CATEGORIES = ['context', 'handoffs']
+CATEGORIES = ['context']
 
 
 def parse_duration(duration_str: str) -> timedelta:
@@ -329,14 +329,13 @@ def main():
         epilog="""
 Categories:
   context     - Session context snapshots (short-lived)
-  handoffs    - Pending handoff state (until completed)
 
 Examples:
   # Save context snapshot (directories created on-the-fly)
   %(prog)s save --category context --identifier "feature-auth" --content '{"notes": "Working on auth"}'
 
   # Load memory file
-  %(prog)s load --category handoffs --identifier "task-42"
+  %(prog)s load --category context --identifier "2025-12-02-feature-auth"
 
   # List context files from last 7 days
   %(prog)s list --category context --since 7d

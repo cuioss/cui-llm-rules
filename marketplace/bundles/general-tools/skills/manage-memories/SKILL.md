@@ -11,7 +11,7 @@ Memory layer operations for persistent session storage (via `file-operations-bas
 ## What This Skill Provides
 
 - CRUD operations for memory storage files
-- Category-based organization (context, handoffs)
+- Category-based organization
 - Timestamp-based file naming for context files
 - Age-based cleanup
 - Memory file format validation
@@ -20,7 +20,6 @@ Memory layer operations for persistent session storage (via `file-operations-bas
 
 Activate this skill when:
 - Persisting session context
-- Managing handoff state between sessions
 - Cleaning up old memory files
 
 ---
@@ -30,7 +29,6 @@ Activate this skill when:
 | Category | Purpose | Typical Lifetime |
 |----------|---------|------------------|
 | `context` | Session context snapshots | Short (days) |
-| `handoffs` | Pending handoff state | Short (until completed) |
 
 ---
 
@@ -74,7 +72,7 @@ Parse JSON output and handle accordingly.
 python3 scripts/manage-memory.py save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
 
 # Load memory file
-python3 scripts/manage-memory.py load --category handoffs --identifier "task-42"
+python3 scripts/manage-memory.py load --category context --identifier "2025-12-02-feature-auth"
 
 # List context files from last 7 days
 python3 scripts/manage-memory.py list --category context --since 7d

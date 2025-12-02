@@ -68,7 +68,7 @@ def validate_memory(data: Dict) -> List[Dict]:
 
             # Validate category value
             if 'category' in data['meta']:
-                valid_categories = ['context', 'handoffs']
+                valid_categories = ['context']
                 cat = data['meta']['category']
                 checks.append({
                     "check": "category_valid",
@@ -114,9 +114,6 @@ def main():
 Examples:
   # Validate context file
   %(prog)s .plan/memory/context/2025-11-25-auth.json
-
-  # Validate handoffs file
-  %(prog)s .plan/memory/handoffs/task-42.json
 """
     )
 

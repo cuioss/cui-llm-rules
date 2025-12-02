@@ -6,8 +6,7 @@ File format specifications for memory layer session persistence (via `file-opera
 
 ```
 {memory-storage}/
-├── context/         # Session context snapshots
-└── handoffs/        # Pending handoff state
+└── context/         # Session context snapshots
 ```
 
 ## Memory File Envelope
@@ -18,7 +17,7 @@ All memory files use a metadata envelope:
 {
   "meta": {
     "created": "2025-11-25T10:30:00Z",
-    "category": "context|handoffs",
+    "category": "context",
     "summary": "feature-auth",
     "session_id": "optional-session-id"
   },
@@ -33,7 +32,7 @@ All memory files use a metadata envelope:
 | Field | Type | Description |
 |-------|------|-------------|
 | created | string | ISO 8601 timestamp with Z suffix |
-| category | string | One of: context, handoffs |
+| category | string | Currently: context |
 | summary | string | Human-readable identifier |
 
 ### Optional Meta Fields
@@ -61,30 +60,6 @@ Session context snapshots. Short-lived, typically cleaned up after days.
   "content": {
     "pending": ["Implement token refresh"],
     "notes": "Working on authentication feature"
-  }
-}
-```
-
-### handoffs
-
-Pending handoff state. Short-lived, deleted when completed.
-
-**File naming**: `{task-id}.json`
-
-**Example**: `task-42.json`
-
-**Content structure**:
-```json
-{
-  "meta": { ... },
-  "content": {
-    "task": "Implement user authentication",
-    "progress": "70%",
-    "completed": ["Login form", "Token generation"],
-    "pending": ["Logout", "Session refresh"],
-    "blockers": [],
-    "next_steps": ["Implement logout endpoint"],
-    "context_references": ["2025-11-25-feature-auth"]
   }
 }
 ```
@@ -153,4 +128,3 @@ python3 scripts/manage-memory.py cleanup \
 | Category | Typical Lifetime | Cleanup Strategy |
 |----------|-----------------|------------------|
 | context | Days | Auto-cleanup after 7d |
-| handoffs | Until completed | Delete on completion |

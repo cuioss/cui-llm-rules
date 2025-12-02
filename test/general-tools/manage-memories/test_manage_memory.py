@@ -94,32 +94,23 @@ def test_save_context():
         assert 'context' in data.get('path', ''), "Path should contain context"
 
 
-def test_save_handoffs():
-    """Test save to handoffs category."""
-    with TempDirContext():
-        result = run_memory_script(
-            'save', '--category', 'handoffs',
-            '--identifier', 'task-42',
-            '--content', '{"task": "Auth feature", "progress": "50%"}'
-        )
-        data = parse_json(result.stdout)
-
-        assert data.get('success') is True, "Should succeed"
-        assert 'handoffs' in data.get('path', ''), "Path should contain handoffs"
-
-
 def test_load():
     """Test load memory file."""
-    with TempDirContext():
-        # First save
-        run_memory_script(
-            'save', '--category', 'handoffs',
-            '--identifier', 'load-test',
-            '--content', '{"value": 123}'
-        )
+    with TempDirContext() as temp_dir:
+        # First save - context category adds date prefix, so create file directly
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
+        memory_dir.mkdir(parents=True)
+        (memory_dir / 'load-test.json').write_text('''{
+  "meta": {
+    "created": "2025-12-02T10:00:00Z",
+    "category": "context",
+    "summary": "load-test"
+  },
+  "content": {"value": 123}
+}''')
 
         result = run_memory_script(
-            'load', '--category', 'handoffs',
+            'load', '--category', 'context',
             '--identifier', 'load-test'
         )
         data = parse_json(result.stdout)
@@ -130,15 +121,21 @@ def test_load():
 
 def test_load_has_meta():
     """Test load includes meta envelope."""
-    with TempDirContext():
-        run_memory_script(
-            'save', '--category', 'handoffs',
-            '--identifier', 'meta-test',
-            '--content', '{"test": true}'
-        )
+    with TempDirContext() as temp_dir:
+        # Create file directly to avoid date prefix
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
+        memory_dir.mkdir(parents=True)
+        (memory_dir / 'meta-test.json').write_text('''{
+  "meta": {
+    "created": "2025-12-02T10:00:00Z",
+    "category": "context",
+    "summary": "meta-test"
+  },
+  "content": {"test": true}
+}''')
 
         result = run_memory_script(
-            'load', '--category', 'handoffs',
+            'load', '--category', 'context',
             '--identifier', 'meta-test'
         )
         data = parse_json(result.stdout)
@@ -146,25 +143,25 @@ def test_load_has_meta():
         assert data.get('success') is True, "Should succeed"
         meta = data.get('meta', {})
         assert 'created' in meta, "Meta should have created"
-        assert meta.get('category') == 'handoffs', "Meta category should be handoffs"
+        assert meta.get('category') == 'context', "Meta category should be context"
 
 
 def test_list_category():
     """Test list files in category."""
-    with TempDirContext():
-        # Save a few files
-        run_memory_script(
-            'save', '--category', 'handoffs',
-            '--identifier', 'list-test-1',
-            '--content', '{}'
-        )
-        run_memory_script(
-            'save', '--category', 'handoffs',
-            '--identifier', 'list-test-2',
-            '--content', '{}'
-        )
+    with TempDirContext() as temp_dir:
+        # Create files directly to avoid date prefix issues
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
+        memory_dir.mkdir(parents=True)
+        (memory_dir / 'list-test-1.json').write_text('''{
+  "meta": {"created": "2025-12-02T10:00:00Z", "category": "context", "summary": "list-test-1"},
+  "content": {}
+}''')
+        (memory_dir / 'list-test-2.json').write_text('''{
+  "meta": {"created": "2025-12-02T10:00:00Z", "category": "context", "summary": "list-test-2"},
+  "content": {}
+}''')
 
-        result = run_memory_script('list', '--category', 'handoffs')
+        result = run_memory_script('list', '--category', 'context')
         data = parse_json(result.stdout)
 
         assert data.get('success') is True, "Should succeed"
@@ -176,7 +173,7 @@ def test_list_all():
     with TempDirContext():
         # Create at least one file
         run_memory_script(
-            'save', '--category', 'handoffs',
+            'save', '--category', 'context',
             '--identifier', 'list-all-test',
             '--content', '{}'
         )
@@ -189,21 +186,22 @@ def test_list_all():
 
 def test_query_pattern():
     """Test query by pattern."""
-    with TempDirContext():
-        run_memory_script(
-            'save', '--category', 'handoffs',
-            '--identifier', 'query-auth-test',
-            '--content', '{}'
-        )
-        run_memory_script(
-            'save', '--category', 'handoffs',
-            '--identifier', 'query-data-test',
-            '--content', '{}'
-        )
+    with TempDirContext() as temp_dir:
+        # Create files directly to avoid date prefix issues
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
+        memory_dir.mkdir(parents=True)
+        (memory_dir / 'query-auth-test.json').write_text('''{
+  "meta": {"created": "2025-12-02T10:00:00Z", "category": "context", "summary": "query-auth-test"},
+  "content": {}
+}''')
+        (memory_dir / 'query-data-test.json').write_text('''{
+  "meta": {"created": "2025-12-02T10:00:00Z", "category": "context", "summary": "query-data-test"},
+  "content": {}
+}''')
 
         result = run_memory_script(
             'query', '--pattern', 'query-auth*',
-            '--category', 'handoffs'
+            '--category', 'context'
         )
         data = parse_json(result.stdout)
 
@@ -241,7 +239,7 @@ def test_load_not_found():
     """Test load non-existent file returns error."""
     with TempDirContext():
         result = run_memory_script(
-            'load', '--category', 'handoffs',
+            'load', '--category', 'context',
             '--identifier', 'nonexistent'
         )
         # Script may output to stderr for errors
@@ -290,7 +288,6 @@ if __name__ == '__main__':
     runner.add_tests([
         test_save_creates_dirs,
         test_save_context,
-        test_save_handoffs,
         test_load,
         test_load_has_meta,
         test_list_category,
