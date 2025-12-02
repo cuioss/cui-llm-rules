@@ -165,6 +165,11 @@ alternatives[3]:
 - Skip to next task
 ```
 
+## References
+
+- [standards/protocol.md](standards/protocol.md) - Full handoff protocol specification
+- [references/architecture.md](references/architecture.md) - Interaction patterns and use cases (optional)
+
 ## Related
 
 - [file-operations-base](../file-operations-base/) - Base file operations and TOON parser
