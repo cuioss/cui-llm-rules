@@ -172,5 +172,5 @@ alternatives[3]:
 
 ## Related
 
-- [file-operations-base](../file-operations-base/) - Base file operations and TOON parser
-- [manage-memories](../manage-memories/) - Session context snapshots (different lifecycle)
+- [phase-management](../phase-management/) - Plan phase transitions using handoffs
+- [plan-execute](../plan-execute/) - Plan execution with handoff-based state transfer

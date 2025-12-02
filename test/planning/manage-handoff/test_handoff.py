@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Get script path
-SCRIPT_PATH = get_script_path('general-tools', 'manage-handoff', 'handoff.py')
+SCRIPT_PATH = get_script_path('planning', 'manage-handoff', 'handoff.py')
 
 # Import toon_parser for output parsing
 TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'

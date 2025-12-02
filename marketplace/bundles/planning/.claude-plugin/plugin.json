@@ -31,6 +31,7 @@
     "./skills/plan-type-javascript",
     "./skills/plan-init",
     "./skills/plan-refine",
-    "./skills/plan-execute"
+    "./skills/plan-execute",
+    "./skills/manage-handoff"
   ]
 }

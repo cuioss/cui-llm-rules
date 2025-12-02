@@ -21,10 +21,11 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-# Import from file-operations-base and toon-usage
+# Import from general-tools bundle (file-operations-base and toon-usage)
 SCRIPT_DIR = Path(__file__).parent
-FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
-TOON_DIR = SCRIPT_DIR.parent.parent / 'toon-usage' / 'scripts'
+GENERAL_TOOLS_DIR = SCRIPT_DIR.parent.parent.parent.parent / 'general-tools' / 'skills'
+FILE_OPS_DIR = GENERAL_TOOLS_DIR / 'file-operations-base' / 'scripts'
+TOON_DIR = GENERAL_TOOLS_DIR / 'toon-usage' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
 sys.path.insert(0, str(TOON_DIR))
 
