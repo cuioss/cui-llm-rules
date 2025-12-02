@@ -1,33 +1,21 @@
 #!/usr/bin/env python3
-"""Tests for scan-marketplace-inventory.sh script.
+"""Tests for scan-marketplace-inventory.py script.
 
 Migrated from test-scan-marketplace-inventory.sh - tests marketplace inventory
 scanning including basic discovery, resource filtering, description extraction,
 JSON validity, bundle structure, script discovery, and error handling.
 """
 
-import subprocess
 import sys
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import TestRunner
+from conftest import TestRunner, run_script, get_script_path
 
 # Script under test
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-SCRIPT_PATH = PROJECT_ROOT / 'marketplace' / 'bundles' / 'cui-plugin-development-tools' / 'skills' / 'marketplace-inventory' / 'scripts' / 'scan-marketplace-inventory.sh'
-
-
-def run_bash_script(script_path, *args, cwd=None):
-    """Run a bash script and return result."""
-    result = subprocess.run(
-        ['bash', str(script_path), *args],
-        capture_output=True,
-        text=True,
-        cwd=cwd or PROJECT_ROOT
-    )
-    return result
+SCRIPT_PATH = get_script_path('cui-plugin-development-tools', 'marketplace-inventory', 'scan-marketplace-inventory.py')
 
 
 def parse_json(output):
@@ -42,7 +30,7 @@ def parse_json(output):
 
 def test_default_scan_finds_bundles():
     """Test default scan finds at least 5 bundles."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -52,7 +40,7 @@ def test_default_scan_finds_bundles():
 
 def test_default_scan_finds_agents():
     """Test default scan finds at least 1 agent."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -62,7 +50,7 @@ def test_default_scan_finds_agents():
 
 def test_default_scan_finds_commands():
     """Test default scan finds at least 30 commands."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -72,7 +60,7 @@ def test_default_scan_finds_commands():
 
 def test_default_scan_finds_skills():
     """Test default scan finds at least 20 skills."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -82,7 +70,7 @@ def test_default_scan_finds_skills():
 
 def test_default_scope_is_marketplace():
     """Test default scope is marketplace."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -96,7 +84,7 @@ def test_default_scope_is_marketplace():
 
 def test_agents_only_no_commands():
     """Test agents-only filter has no commands."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'agents')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -106,7 +94,7 @@ def test_agents_only_no_commands():
 
 def test_agents_only_no_skills():
     """Test agents-only filter has no skills."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'agents')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -116,7 +104,7 @@ def test_agents_only_no_skills():
 
 def test_agents_only_has_agents():
     """Test agents-only filter has agents."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'agents')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -126,7 +114,7 @@ def test_agents_only_has_agents():
 
 def test_commands_only_no_agents():
     """Test commands-only filter has no agents."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'commands')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'commands')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -136,7 +124,7 @@ def test_commands_only_no_agents():
 
 def test_commands_only_has_commands():
     """Test commands-only filter has commands."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'commands')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'commands')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -146,7 +134,7 @@ def test_commands_only_has_commands():
 
 def test_skills_only_no_agents():
     """Test skills-only filter has no agents."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'skills')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'skills')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -156,7 +144,7 @@ def test_skills_only_no_agents():
 
 def test_skills_only_has_skills():
     """Test skills-only filter has skills."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'skills')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'skills')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -166,7 +154,7 @@ def test_skills_only_has_skills():
 
 def test_multiple_types_has_both():
     """Test multiple types filter has both agents and commands."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'agents,commands')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents,commands')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -180,7 +168,7 @@ def test_multiple_types_has_both():
 
 def test_no_descriptions_returns_null():
     """Test default mode has no description fields."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -196,7 +184,7 @@ def test_no_descriptions_returns_null():
 
 def test_with_descriptions_extracts_desc():
     """Test --include-descriptions extracts descriptions."""
-    result = run_bash_script(SCRIPT_PATH, '--include-descriptions')
+    result = run_script(SCRIPT_PATH, '--include-descriptions')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -216,7 +204,7 @@ def test_with_descriptions_extracts_desc():
 
 def test_default_produces_valid_json():
     """Test default mode produces valid JSON."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     try:
@@ -227,7 +215,7 @@ def test_default_produces_valid_json():
 
 def test_with_descriptions_produces_valid_json():
     """Test --include-descriptions produces valid JSON."""
-    result = run_bash_script(SCRIPT_PATH, '--include-descriptions')
+    result = run_script(SCRIPT_PATH, '--include-descriptions')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     try:
@@ -238,7 +226,7 @@ def test_with_descriptions_produces_valid_json():
 
 def test_filtered_produces_valid_json():
     """Test filtered mode produces valid JSON."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'agents')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     try:
@@ -253,7 +241,7 @@ def test_filtered_produces_valid_json():
 
 def test_bundles_have_required_fields():
     """Test bundles have required fields."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -286,7 +274,7 @@ def test_script_count_matches_filesystem():
     expected_count = len([l for l in find_result.stdout.strip().split('\n') if l])
 
     # Get count from inventory
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -297,7 +285,7 @@ def test_script_count_matches_filesystem():
 
 def test_scripts_have_path_formats():
     """Test scripts have path_formats structure."""
-    result = run_bash_script(SCRIPT_PATH)
+    result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -320,13 +308,13 @@ def test_scripts_have_path_formats():
 
 def test_invalid_scope_returns_error():
     """Test invalid scope returns error."""
-    result = run_bash_script(SCRIPT_PATH, '--scope', 'invalid')
+    result = run_script(SCRIPT_PATH, '--scope', 'invalid')
     assert result.returncode != 0, "Invalid scope should return error"
 
 
 def test_invalid_resource_type_returns_error():
     """Test invalid resource type returns error."""
-    result = run_bash_script(SCRIPT_PATH, '--resource-types', 'invalid')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'invalid')
     assert result.returncode != 0, "Invalid resource type should return error"
 
 

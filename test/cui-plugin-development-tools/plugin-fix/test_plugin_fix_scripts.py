@@ -25,23 +25,13 @@ FIXTURES_DIR = Path(__file__).parent / 'fixtures'
 EXTRACT_SCRIPT = PLUGIN_DOCTOR_DIR / 'scripts' / 'extract-fixable-issues.py'
 CATEGORIZE_SCRIPT = PLUGIN_DOCTOR_DIR / 'scripts' / 'categorize-fixes.py'
 APPLY_SCRIPT = PLUGIN_DOCTOR_DIR / 'scripts' / 'apply-fix.py'
-VERIFY_SCRIPT = PLUGIN_DOCTOR_DIR / 'scripts' / 'verify-fix.sh'
+VERIFY_SCRIPT = PLUGIN_DOCTOR_DIR / 'scripts' / 'verify-fix.py'
 
 
 def parse_json(output):
     """Parse JSON from output."""
     import json
     return json.loads(output)
-
-
-def run_bash_script(script_path, *args):
-    """Run a bash script and return result."""
-    result = subprocess.run(
-        ['bash', str(script_path), *args],
-        capture_output=True,
-        text=True
-    )
-    return result
 
 
 # =============================================================================
@@ -331,7 +321,7 @@ def test_verify_frontmatter_on_perfect_file():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(VERIFY_SCRIPT, 'missing-frontmatter', str(fixture))
+    result = run_script(VERIFY_SCRIPT, 'missing-frontmatter', str(fixture))
     data = parse_json(result.stdout)
 
     resolved = data.get('issue_resolved', False)
@@ -344,7 +334,7 @@ def test_verify_frontmatter_on_broken_file():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(VERIFY_SCRIPT, 'missing-frontmatter', str(fixture))
+    result = run_script(VERIFY_SCRIPT, 'missing-frontmatter', str(fixture))
     data = parse_json(result.stdout)
 
     resolved = data.get('issue_resolved', False)
@@ -357,7 +347,7 @@ def test_verify_array_syntax_on_good_file():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(VERIFY_SCRIPT, 'array-syntax-tools', str(fixture))
+    result = run_script(VERIFY_SCRIPT, 'array-syntax-tools', str(fixture))
     data = parse_json(result.stdout)
 
     resolved = data.get('issue_resolved', False)
@@ -370,7 +360,7 @@ def test_verify_rule6_on_good_file():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(VERIFY_SCRIPT, 'rule-6-violation', str(fixture))
+    result = run_script(VERIFY_SCRIPT, 'rule-6-violation', str(fixture))
     data = parse_json(result.stdout)
 
     resolved = data.get('issue_resolved', False)
@@ -383,7 +373,7 @@ def test_verify_rule6_on_violating_file():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(VERIFY_SCRIPT, 'rule-6-violation', str(fixture))
+    result = run_script(VERIFY_SCRIPT, 'rule-6-violation', str(fixture))
     data = parse_json(result.stdout)
 
     resolved = data.get('issue_resolved', False)
@@ -392,7 +382,7 @@ def test_verify_rule6_on_violating_file():
 
 def test_verify_missing_file_error():
     """Test verify handles missing file."""
-    result = run_bash_script(VERIFY_SCRIPT, 'missing-frontmatter', '/nonexistent/file.md')
+    result = run_script(VERIFY_SCRIPT, 'missing-frontmatter', '/nonexistent/file.md')
 
     combined = result.stdout.lower() + result.stderr.lower()
     assert 'not found' in combined or 'error' in combined, "Should indicate file not found"

@@ -102,15 +102,15 @@ All 5 workflows follow the same pattern:
    **EXECUTE** script resolution first:
    ```
    Skill: general-tools:script-runner
-   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
-   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.sh
+   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
+   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py
    Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
    ```
 
    **EXECUTE** with resolved paths:
    ```bash
-   bash {resolved_analyze_markdown} {path} {type}
-   bash {resolved_analyze_tool_coverage} {path}
+   python3 {resolved_analyze_markdown} {path} {type}
+   python3 {resolved_analyze_tool_coverage} {path}
    python3 {resolved_validate_references} {path}
    ```
 
@@ -165,12 +165,12 @@ All 5 workflows follow the same pattern:
    Resolve script path:
    ```
    Skill: general-tools:script-runner
-   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-fix.sh
+   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-fix.py
    ```
 
    Execute:
    ```bash
-   bash {resolved_path} {type} {path}
+   python3 {resolved_path} {type} {path}
    ```
 
 2. **Generate Summary**
@@ -215,15 +215,15 @@ For each agent file, first resolve script paths:
 
 ```
 Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
 ```
 
 Then execute:
 ```bash
-bash {resolved_analyze_markdown} {agent_path} agent
-bash {resolved_analyze_tool_coverage} {agent_path}
+python3 {resolved_analyze_markdown} {agent_path} agent
+python3 {resolved_analyze_tool_coverage} {agent_path}
 python3 {resolved_validate_references} {agent_path}
 ```
 
@@ -285,13 +285,13 @@ Same pattern as doctor-agents.
 First resolve script paths:
 ```
 Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
 ```
 
 Then execute:
 ```bash
-bash {resolved_analyze_markdown} {cmd_path} command
+python3 {resolved_analyze_markdown} {cmd_path} command
 python3 {resolved_validate_references} {cmd_path}
 ```
 
@@ -417,15 +417,15 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 First resolve script paths:
 ```
 Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-skill-structure.sh
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-skill-structure.py
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
 Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
 ```
 
 Then execute:
 ```bash
-bash {resolved_analyze_skill_structure} {skill_dir}
-bash {resolved_analyze_markdown} {skill_dir}/SKILL.md skill
+python3 {resolved_analyze_skill_structure} {skill_dir}
+python3 {resolved_analyze_markdown} {skill_dir}/SKILL.md skill
 python3 {resolved_validate_references} {skill_dir}/SKILL.md
 ```
 
@@ -593,11 +593,11 @@ Resolve and execute inventory script:
 
 ```
 Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/scan-skill-inventory.sh
+Resolve: cui-plugin-development-tools:plugin-doctor/scripts/scan-skill-inventory.py
 ```
 
 ```bash
-bash {resolved_path} --skill-path {skill_path}
+python3 {resolved_path} --skill-path {skill_path}
 ```
 
 Parse JSON output to get:
@@ -818,17 +818,17 @@ Generate comprehensive report:
 
 | Script | Mode | Purpose |
 |--------|------|---------|
-| `analyze-markdown-file.sh` | **EXECUTE** | Structural analysis, bloat, Rule 6/7/Pattern 22 |
-| `analyze-tool-coverage.sh` | **EXECUTE** | Tool fit score, missing/unused tools |
-| `analyze-skill-structure.sh` | **EXECUTE** | Skill directory structure validation |
-| `scan-skill-inventory.sh` | **EXECUTE** | Skill content inventory for doctor-skill-content |
+| `analyze-markdown-file.py` | **EXECUTE** | Structural analysis, bloat, Rule 6/7/Pattern 22 |
+| `analyze-tool-coverage.py` | **EXECUTE** | Tool fit score, missing/unused tools |
+| `analyze-skill-structure.py` | **EXECUTE** | Skill directory structure validation |
+| `scan-skill-inventory.py` | **EXECUTE** | Skill content inventory for doctor-skill-content |
 | `analyze-cross-file-content.py` | **EXECUTE** | Cross-file duplication, similarity, extraction analysis |
 | `verify-cross-file-findings.py` | **EXECUTE** | Verify LLM cross-file claims against actual content |
 | `validate-references.py` | **EXECUTE** | Reference extraction and validation |
 | `extract-fixable-issues.py` | **EXECUTE** | Filter fixable issues from analysis |
 | `categorize-fixes.py` | **EXECUTE** | Categorize as safe/risky |
 | `apply-fix.py` | **EXECUTE** | Apply single fix with backup |
-| `verify-fix.sh` | **EXECUTE** | Verify fix resolved issue |
+| `verify-fix.py` | **EXECUTE** | Verify fix resolved issue |
 
 ### References (references/)
 

@@ -1,32 +1,20 @@
 #!/usr/bin/env python3
-"""Tests for analyze-markdown-file.sh script.
+"""Tests for analyze-markdown-file.py script.
 
 Migrated from test-analyze-markdown-file.sh - tests markdown file analysis
 including frontmatter validation, bloat classification, and rule violations.
 """
 
-import subprocess
 import sys
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import TestRunner
+from conftest import TestRunner, run_script, get_script_path
 
 # Script under test
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-SCRIPT_PATH = PROJECT_ROOT / 'marketplace' / 'bundles' / 'cui-plugin-development-tools' / 'skills' / 'plugin-doctor' / 'scripts' / 'analyze-markdown-file.sh'
+SCRIPT_PATH = get_script_path('cui-plugin-development-tools', 'plugin-doctor', 'analyze-markdown-file.py')
 FIXTURES_DIR = Path(__file__).parent / 'fixtures' / 'markdown-file'
-
-
-def run_bash_script(script_path, *args):
-    """Run a bash script and return result."""
-    result = subprocess.run(
-        ['bash', str(script_path), *args],
-        capture_output=True,
-        text=True
-    )
-    return result
 
 
 def parse_json(output):
@@ -48,7 +36,7 @@ def test_valid_agent_has_frontmatter():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -62,7 +50,7 @@ def test_valid_agent_yaml_valid():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -76,7 +64,7 @@ def test_valid_agent_has_ci_rule():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -90,7 +78,7 @@ def test_valid_agent_no_rule6_violation():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -108,7 +96,7 @@ def test_bloated_command_classification():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'command')
+    result = run_script(SCRIPT_PATH, str(fixture), 'command')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -128,7 +116,7 @@ def test_rule6_violation_detected():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -146,7 +134,7 @@ def test_forbidden_metadata_detected():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -160,7 +148,7 @@ def test_forbidden_sections_lists_version_and_license():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -174,7 +162,7 @@ def test_no_forbidden_metadata_in_valid_agent():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture), 'agent')
+    result = run_script(SCRIPT_PATH, str(fixture), 'agent')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)

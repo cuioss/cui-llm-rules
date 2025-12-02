@@ -1,33 +1,22 @@
 #!/usr/bin/env python3
-"""Tests for analyze-skill-structure.sh script (plugin-doctor version).
+"""Tests for analyze-skill-structure.py script (plugin-doctor version).
 
 Migrated from test-analyze-skill-structure.sh - tests skill structure analysis
 with improved reference detection including table-format refs, code block examples,
 and cross-skill references.
 """
 
-import subprocess
 import sys
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import TestRunner
+from conftest import TestRunner, run_script, get_script_path
 
 # Script under test
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-SCRIPT_PATH = PROJECT_ROOT / 'marketplace' / 'bundles' / 'cui-plugin-development-tools' / 'skills' / 'plugin-doctor' / 'scripts' / 'analyze-skill-structure.sh'
+SCRIPT_PATH = get_script_path('cui-plugin-development-tools', 'plugin-doctor', 'analyze-skill-structure.py')
 FIXTURES_DIR = Path(__file__).parent / 'fixtures' / 'skill-structure'
-
-
-def run_bash_script(script_path, *args):
-    """Run a bash script and return result."""
-    result = subprocess.run(
-        ['bash', str(script_path), *args],
-        capture_output=True,
-        text=True
-    )
-    return result
 
 
 def parse_json(output):
@@ -46,7 +35,7 @@ def test_table_refs_no_unreferenced_files():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -60,7 +49,7 @@ def test_table_refs_no_missing_files():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -74,7 +63,7 @@ def test_table_refs_perfect_score():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -92,7 +81,7 @@ def test_code_block_no_false_positive_missing():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -106,7 +95,7 @@ def test_code_block_no_unreferenced():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -120,7 +109,7 @@ def test_code_block_perfect_score():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -138,7 +127,7 @@ def test_cross_skill_no_false_positive_missing():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -152,7 +141,7 @@ def test_cross_skill_no_unreferenced():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -166,7 +155,7 @@ def test_cross_skill_perfect_score():
     if not test_dir.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(test_dir))
+    result = run_script(SCRIPT_PATH, str(test_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -184,7 +173,7 @@ def test_real_plugin_architecture_skill():
     if not skill_dir.exists():
         return  # Skip if not found
 
-    result = run_bash_script(SCRIPT_PATH, str(skill_dir))
+    result = run_script(SCRIPT_PATH, str(skill_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -198,7 +187,7 @@ def test_real_plugin_doctor_skill():
     if not skill_dir.exists():
         return  # Skip if not found
 
-    result = run_bash_script(SCRIPT_PATH, str(skill_dir))
+    result = run_script(SCRIPT_PATH, str(skill_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -212,7 +201,7 @@ def test_real_plugin_create_skill():
     if not skill_dir.exists():
         return  # Skip if not found
 
-    result = run_bash_script(SCRIPT_PATH, str(skill_dir))
+    result = run_script(SCRIPT_PATH, str(skill_dir))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)

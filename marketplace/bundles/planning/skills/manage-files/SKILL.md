@@ -1,0 +1,196 @@
+---
+name: manage-files
+description: Generic file I/O operations for plan directories
+allowed-tools: Read, Glob, Bash
+---
+
+# Manage Files Skill
+
+Generic file operations for plan directories. Provides basic CRUD operations for any file within a plan directory.
+
+## What This Skill Provides
+
+- Generic file read/write/remove operations
+- Directory listing and creation
+- File existence checking
+- No content validation (caller provides complete content)
+
+## When to Activate This Skill
+
+Activate this skill when:
+- Reading or writing arbitrary files in a plan directory
+- Creating subdirectories within a plan
+- Listing plan contents
+- Checking if files exist
+
+**Note**: For domain-specific operations (config.toon, references.toon, status.toon), use the dedicated manage-* skills instead.
+
+---
+
+## Storage Location
+
+Files are stored in plan directories:
+
+```
+.plan/plans/{plan_id}/
+  task.md
+  config.toon
+  references.toon
+  status.toon
+  requirements/
+  specifications/
+  tasks/
+```
+
+---
+
+## Operations
+
+### read
+
+Read file content from a plan directory.
+
+```bash
+python3 scripts/manage-files.py read \
+  --plan-id {plan_id} \
+  --file task.md
+```
+
+**Output**: Raw file content (no wrapping)
+
+### write
+
+Write content to a file in a plan directory.
+
+```bash
+python3 scripts/manage-files.py write \
+  --plan-id {plan_id} \
+  --file task.md \
+  --content "# Task Title\n\nTask description..."
+```
+
+Or with stdin:
+```bash
+cat content.md | python3 scripts/manage-files.py write \
+  --plan-id {plan_id} \
+  --file task.md \
+  --stdin
+```
+
+**Output**: Confirmation message to stderr, exit code 0 on success
+
+### remove
+
+Remove a file from a plan directory.
+
+```bash
+python3 scripts/manage-files.py remove \
+  --plan-id {plan_id} \
+  --file old-file.md
+```
+
+**Output**: Confirmation message to stderr, exit code 0 on success
+
+### list
+
+List files in a plan directory.
+
+```bash
+python3 scripts/manage-files.py list \
+  --plan-id {plan_id} \
+  [--dir subdir]
+```
+
+**Output**: Simple file listing, one per line
+
+### exists
+
+Check if a file exists.
+
+```bash
+python3 scripts/manage-files.py exists \
+  --plan-id {plan_id} \
+  --file config.toon
+```
+
+**Output**: Exit code 0 if exists, 1 if not
+
+### mkdir
+
+Create a subdirectory in a plan directory.
+
+```bash
+python3 scripts/manage-files.py mkdir \
+  --plan-id {plan_id} \
+  --dir requirements
+```
+
+**Output**: Confirmation message to stderr, exit code 0 on success
+
+---
+
+## Scripts
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `manage-files.py` | All file operations via subcommands | `python3 scripts/manage-files.py {command} --help` |
+
+---
+
+## Key Design Principles
+
+1. **plan_id only** - Never pass full paths, script resolves base via `base_path()`
+2. **Relative file paths** - `--file` accepts relative paths within plan dir (e.g., `requirements/REQ-001.toon`)
+3. **Generic file operations** - Not domain-specific (no parse-plan, write-config)
+4. **Plain output** - `read` returns raw content; mutations return minimal status
+5. **No validation** - Caller provides complete content; no content validation
+
+---
+
+## Validation Rules
+
+| Check | Validation |
+|-------|------------|
+| plan_id format | kebab-case, no special chars |
+| file path | No `..`, no absolute paths |
+| directory | Must exist (unless mkdir) |
+| content | Non-empty for write |
+
+---
+
+## Error Handling
+
+```toon
+status: error
+plan_id: my-feature
+file: nonexistent.md
+error: file_not_found
+message: File does not exist
+
+suggestions[2]:
+- Check file name spelling
+- Use list subcommand to see available files
+```
+
+---
+
+## Integration Points
+
+### With Domain Skills
+
+Domain-specific skills (manage-config, manage-references, manage-lifecycle) may use this skill for basic file operations, or import shared libraries directly.
+
+### With Orchestration Skills
+
+Plan orchestration skills (plan-init, plan-refine, plan-execute) use this skill for generic file I/O.
+
+---
+
+## Relationship to Domain Skills
+
+| Skill | Manages | Use manage-files for |
+|-------|---------|---------------------|
+| manage-config | config.toon | N/A (use manage-config) |
+| manage-references | references.toon | N/A (use manage-references) |
+| manage-lifecycle | status.toon | N/A (use manage-lifecycle) |
+| manage-files | any file | Generic read/write/list |

@@ -18,7 +18,7 @@ Link to explicit anchor: <<explicit-anchor>>
 
 Link to section header: <<introduction>>
 
-Link with label: xref:explicit-anchor[See the anchor]
+Link with label: xref:#explicit-anchor[See the anchor]
 
 [#modern-anchor]
 === Modern Anchor Syntax

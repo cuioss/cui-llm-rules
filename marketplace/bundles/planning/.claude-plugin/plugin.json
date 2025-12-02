@@ -21,8 +21,6 @@
     "./skills/cui-task-planning",
     "./skills/pr-workflow",
     "./skills/sonar-workflow",
-    "./skills/phase-management",
-    "./skills/plan-files",
     "./skills/analysis-api",
     "./skills/plan-type-simple",
     "./skills/plan-type-plugin",
@@ -32,8 +30,14 @@
     "./skills/plan-refine",
     "./skills/plan-execute",
     "./skills/manage-handoff",
-    "./skills/plan-requirements",
-    "./skills/plan-specifications",
-    "./skills/plan-task-manager"
+    "./skills/manage-requirements",
+    "./skills/manage-specifications",
+    "./skills/manage-tasks",
+    "./skills/manage-files",
+    "./skills/manage-config",
+    "./skills/manage-references",
+    "./skills/manage-lifecycle",
+    "./skills/manage-log",
+    "./skills/manage-lessons"
   ]
 }

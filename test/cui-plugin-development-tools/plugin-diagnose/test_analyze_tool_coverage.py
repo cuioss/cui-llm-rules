@@ -1,32 +1,20 @@
 #!/usr/bin/env python3
-"""Tests for analyze-tool-coverage.sh script.
+"""Tests for analyze-tool-coverage.py script.
 
 Migrated from test-analyze-tool-coverage.sh - tests tool coverage analysis
 including perfect coverage, unused tools, missing tools, and critical violations.
 """
 
-import subprocess
 import sys
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import TestRunner
+from conftest import TestRunner, run_script, get_script_path
 
 # Script under test
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-SCRIPT_PATH = PROJECT_ROOT / 'marketplace' / 'bundles' / 'cui-plugin-development-tools' / 'skills' / 'plugin-doctor' / 'scripts' / 'analyze-tool-coverage.sh'
+SCRIPT_PATH = get_script_path('cui-plugin-development-tools', 'plugin-doctor', 'analyze-tool-coverage.py')
 FIXTURES_DIR = Path(__file__).parent / 'fixtures' / 'tool-coverage'
-
-
-def run_bash_script(script_path, *args):
-    """Run a bash script and return result."""
-    result = subprocess.run(
-        ['bash', str(script_path), *args],
-        capture_output=True,
-        text=True
-    )
-    return result
 
 
 def parse_json(output):
@@ -45,7 +33,7 @@ def test_perfect_coverage_score():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -59,7 +47,7 @@ def test_perfect_coverage_rating():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -73,7 +61,7 @@ def test_perfect_coverage_missing_count():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -87,7 +75,7 @@ def test_perfect_coverage_unused_count():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -105,7 +93,7 @@ def test_unused_tools_count():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -119,7 +107,7 @@ def test_unused_tools_declared_count():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -133,7 +121,7 @@ def test_unused_tools_used_count():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -151,7 +139,7 @@ def test_missing_tools_count():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -165,7 +153,7 @@ def test_missing_tools_declared_count():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -183,7 +171,7 @@ def test_critical_has_task_tool():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -197,7 +185,7 @@ def test_critical_has_task_calls():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -211,7 +199,7 @@ def test_critical_maven_calls_detected():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
@@ -225,7 +213,7 @@ def test_critical_backup_patterns_detected():
     if not fixture.exists():
         return  # Skip if fixture not available
 
-    result = run_bash_script(SCRIPT_PATH, str(fixture))
+    result = run_script(SCRIPT_PATH, str(fixture))
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
