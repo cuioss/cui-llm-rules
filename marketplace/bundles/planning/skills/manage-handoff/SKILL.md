@@ -10,11 +10,19 @@ Provides structured handoff communication for:
 - Cross-component state transfer
 - Session resumption and recovery
 
+## Storage
+
+Handoffs are stored **plan-locally** in `.plan/plans/{plan_id}/handoffs/`. This ensures:
+- All plan artifacts in one place
+- Automatic cleanup when plan is deleted
+- No orphaned handoffs
+- Simple filename structure (no plan_id prefix)
+
 ## Operations
 
 ### save
 
-Save a handoff to the memory layer.
+Save a handoff to the plan's handoff directory.
 
 **Parameters:**
 - `plan_id` (required): Plan identifier
@@ -51,11 +59,10 @@ python3 scripts/handoff.py load \
 
 ### list
 
-List handoffs with optional filtering.
+List handoffs for a specific plan.
 
 **Parameters:**
-- `plan_id` (optional): Filter by plan ID
-- `since` (optional): Filter by age (e.g., `7d`, `24h`, `30m`)
+- `plan_id` (required): Plan identifier
 - `status` (optional): Filter by status (`pending`, `in_progress`, `completed`, `failed`, `blocked`)
 
 **Example:**
@@ -68,24 +75,12 @@ python3 scripts/handoff.py list --plan_id jwt-auth --status completed
 Get a specific handoff by filename.
 
 **Parameters:**
+- `plan_id` (required): Plan identifier
 - `file` (required): Handoff filename
 
 **Example:**
 ```bash
-python3 scripts/handoff.py get --file jwt-auth-init-complete-20251202T103000Z.toon
-```
-
-### cleanup
-
-Remove old handoffs based on age.
-
-**Parameters:**
-- `older-than` (optional): Age threshold (default: `7d`)
-- `plan_id` (optional): Filter by plan ID
-
-**Example:**
-```bash
-python3 scripts/handoff.py cleanup --older-than 7d
+python3 scripts/handoff.py get --plan_id jwt-auth --file init-complete-20251202T103000Z.toon
 ```
 
 ## Handoff Protocol
@@ -123,14 +118,17 @@ See [standards/protocol.md](standards/protocol.md) for the full handoff protocol
 - [error.toon](templates/error.toon) - Error with alternatives
 - [completion.toon](templates/completion.toon) - Successful completion
 
-## Storage
+## File Structure
 
-Handoffs are stored in `.plan/memory/handoffs/` with filename format:
+Handoffs are stored in the plan's directory:
 ```
-{plan_id}-{step}-{timestamp}.toon
+.plan/plans/{plan_id}/handoffs/
+├── init-complete-20251202T103000Z.toon
+├── configure-complete-20251202T104500Z.toon
+└── verify-error-20251202T110000Z.toon
 ```
 
-Example: `jwt-auth-init-complete-20251202T103000Z.toon`
+Filename format: `{step}-{timestamp}.toon`
 
 ## Integration
 

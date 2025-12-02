@@ -8,8 +8,8 @@ Handoffs travel through an orchestrator that makes routing decisions based on st
 
 ```
 ┌─────────────┐                              ┌─────────────────────┐
-│  Phase A    │ ─── save(handoff) ─────────► │  .plan/memory/      │
-│  (init)     │                              │  handoffs/          │
+│  Phase A    │ ─── save(handoff) ─────────► │  .plan/plans/       │
+│  (init)     │                              │  jwt-auth/handoffs/ │
 └─────────────┘                              └─────────────────────┘
        │
        │ returns handoff (small)
@@ -26,6 +26,8 @@ Handoffs travel through an orchestrator that makes routing decisions based on st
 │ (configure) │     (large context)    │  jwt-auth/          │
 └─────────────┘                        └─────────────────────┘
 ```
+
+Handoffs are stored plan-locally in `.plan/plans/{plan_id}/handoffs/`, keeping all plan artifacts together.
 
 The orchestrator receives the handoff content to make routing decisions (check status, read alternatives, determine next phase). Large context is loaded on-demand by the receiving phase using `plan_id`.
 
@@ -126,6 +128,8 @@ next_focus: Determine technology from requirements
 | Traceability | from/to/plan_id fields for debugging |
 | Recovery | Persisted handoffs enable session resumption |
 | Type safety | Validation of required fields |
+| Automatic cleanup | Handoffs deleted when plan is deleted |
+| Cohesion | All plan artifacts in one directory |
 
 ## Related
 

@@ -3,13 +3,13 @@
 Handoff management script for workflow state transfer between components.
 
 Provides CRUD operations for handoffs using the TOON protocol.
+Handoffs are stored plan-locally in .plan/plans/{plan_id}/handoffs/
 
 Usage:
     python3 handoff.py save --plan_id <id> --step <step> --content '<toon>'
     python3 handoff.py load --plan_id <id> --step <step>
-    python3 handoff.py list [--plan_id <id>] [--since 7d] [--status <status>]
-    python3 handoff.py get --file <filename>
-    python3 handoff.py cleanup [--older-than 7d] [--plan_id <id>]
+    python3 handoff.py list --plan_id <id> [--status <status>]
+    python3 handoff.py get --plan_id <id> --file <filename>
 
 Output: TOON format
 """
@@ -18,7 +18,7 @@ import argparse
 import os
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Import from general-tools bundle (file-operations-base and toon-usage)
@@ -37,10 +37,18 @@ from toon_parser import parse_toon, serialize_toon, ToonParseError
 # Constants
 # =============================================================================
 
-HANDOFF_DIR = 'memory/handoffs'
 VALID_STATUSES = {'pending', 'in_progress', 'completed', 'failed', 'blocked'}
 REQUIRED_FIELDS = {'from', 'to', 'plan_id'}
 REQUIRED_TASK_FIELDS = {'status'}
+
+
+# =============================================================================
+# Path Helpers
+# =============================================================================
+
+def get_handoff_dir(plan_id: str) -> Path:
+    """Get the handoff directory for a specific plan."""
+    return get_base_dir() / 'plans' / plan_id / 'handoffs'
 
 
 # =============================================================================
@@ -88,45 +96,12 @@ def generate_timestamp() -> str:
     return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
-def generate_filename(plan_id: str, step: str) -> str:
-    """Generate handoff filename with timestamp."""
+def generate_filename(step: str) -> str:
+    """Generate handoff filename with timestamp (no plan_id prefix)."""
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
-    # Sanitize plan_id and step for filename
-    safe_plan_id = re.sub(r'[^\w\-]', '-', plan_id)
+    # Sanitize step for filename
     safe_step = re.sub(r'[^\w\-]', '-', step)
-    return f"{safe_plan_id}-{safe_step}-{timestamp}.toon"
-
-
-def parse_duration(duration_str: str) -> timedelta:
-    """Parse duration string like '7d', '24h', '30m'."""
-    match = re.match(r'^(\d+)([dhm])$', duration_str)
-    if not match:
-        raise ValueError(f"Invalid duration format: {duration_str}. Use format like '7d', '24h', '30m'")
-
-    value = int(match.group(1))
-    unit = match.group(2)
-
-    if unit == 'd':
-        return timedelta(days=value)
-    elif unit == 'h':
-        return timedelta(hours=value)
-    elif unit == 'm':
-        return timedelta(minutes=value)
-
-    raise ValueError(f"Unknown duration unit: {unit}")
-
-
-def parse_timestamp_from_filename(filename: str) -> datetime | None:
-    """Extract timestamp from handoff filename."""
-    # Format: {plan_id}-{step}-{timestamp}.toon
-    # Timestamp format: YYYYMMDDTHHMMSSZ
-    match = re.search(r'-(\d{8}T\d{6}Z)\.toon$', filename)
-    if match:
-        try:
-            return datetime.strptime(match.group(1), '%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
-        except ValueError:
-            return None
-    return None
+    return f"{safe_step}-{timestamp}.toon"
 
 
 # =============================================================================
@@ -159,7 +134,7 @@ def output_error(error_type: str, message: str, **kwargs) -> None:
 # =============================================================================
 
 def cmd_save(args):
-    """Save a handoff to the memory layer."""
+    """Save a handoff to the plan's handoff directory."""
     # Parse the handoff content
     try:
         data = parse_toon(args.content)
@@ -181,9 +156,9 @@ def cmd_save(args):
         output_error('validation_error', 'Invalid handoff structure', missing_fields=errors)
         return
 
-    # Generate filename and path
-    filename = generate_filename(args.plan_id, args.step)
-    handoff_path = get_base_dir() / HANDOFF_DIR / filename
+    # Generate filename and path (plan-local)
+    filename = generate_filename(args.step)
+    handoff_path = get_handoff_dir(args.plan_id) / filename
 
     # Ensure directory exists
     ensure_directory(handoff_path)
@@ -201,14 +176,14 @@ def cmd_save(args):
 
 def cmd_load(args):
     """Load most recent handoff by plan_id and step."""
-    handoff_dir = get_base_dir() / HANDOFF_DIR
+    handoff_dir = get_handoff_dir(args.plan_id)
 
     if not handoff_dir.exists():
         output_error('not_found', f'No handoffs found for plan_id={args.plan_id}, step={args.step}')
         return
 
-    # Find matching files
-    pattern = f"{args.plan_id}-{args.step}-*.toon"
+    # Find matching files (filename no longer has plan_id prefix)
+    pattern = f"{args.step}-*.toon"
     matches = sorted(handoff_dir.glob(pattern), reverse=True)
 
     if not matches:
@@ -228,8 +203,8 @@ def cmd_load(args):
 
 
 def cmd_list(args):
-    """List handoffs with optional filtering."""
-    handoff_dir = get_base_dir() / HANDOFF_DIR
+    """List handoffs for a specific plan."""
+    handoff_dir = get_handoff_dir(args.plan_id)
 
     if not handoff_dir.exists():
         output_success('list', counts={'total': 0}, handoffs=[])
@@ -238,26 +213,7 @@ def cmd_list(args):
     # Get all handoff files
     files = list(handoff_dir.glob('*.toon'))
 
-    # Filter by plan_id if specified
-    if args.plan_id:
-        files = [f for f in files if f.name.startswith(f"{args.plan_id}-")]
-
-    # Filter by age if specified
-    if args.since:
-        try:
-            max_age = parse_duration(args.since)
-            cutoff = datetime.now(timezone.utc) - max_age
-            filtered = []
-            for f in files:
-                ts = parse_timestamp_from_filename(f.name)
-                if ts and ts >= cutoff:
-                    filtered.append(f)
-            files = filtered
-        except ValueError as e:
-            output_error('invalid_argument', str(e))
-            return
-
-    # Load and filter by status if specified
+    # Load and optionally filter by status
     handoffs = []
     status_counts = {'pending': 0, 'in_progress': 0, 'completed': 0, 'failed': 0, 'blocked': 0}
 
@@ -274,17 +230,11 @@ def cmd_list(args):
             if args.status and task_status != args.status:
                 continue
 
-            # Extract parts from filename
-            parts = f.stem.rsplit('-', 2)
-            if len(parts) >= 3:
-                plan_id = '-'.join(parts[:-2])
-                step = parts[-2]
-            else:
-                plan_id = data.get('plan_id', 'unknown')
-                step = 'unknown'
+            # Extract step from filename (format: {step}-{timestamp}.toon)
+            parts = f.stem.rsplit('-', 1)
+            step = parts[0] if len(parts) >= 1 else 'unknown'
 
             handoffs.append({
-                'plan_id': plan_id,
                 'step': step,
                 'status': task_status,
                 'timestamp': data.get('timestamp', ''),
@@ -305,7 +255,7 @@ def cmd_list(args):
 
 def cmd_get(args):
     """Get a specific handoff by filename."""
-    handoff_path = get_base_dir() / HANDOFF_DIR / args.file
+    handoff_path = get_handoff_dir(args.plan_id) / args.file
 
     if not handoff_path.exists():
         output_error('not_found', f'Handoff file not found: {args.file}')
@@ -319,52 +269,6 @@ def cmd_get(args):
         return
 
     output_success('get', file=args.file, handoff=data)
-
-
-def cmd_cleanup(args):
-    """Remove old handoffs based on age."""
-    handoff_dir = get_base_dir() / HANDOFF_DIR
-
-    if not handoff_dir.exists():
-        output_success('cleanup', removed_count=0, removed=[])
-        return
-
-    # Parse the age threshold
-    try:
-        max_age = parse_duration(args.older_than)
-    except ValueError as e:
-        output_error('invalid_argument', str(e))
-        return
-
-    cutoff = datetime.now(timezone.utc) - max_age
-
-    # Get all handoff files
-    files = list(handoff_dir.glob('*.toon'))
-
-    # Filter by plan_id if specified
-    if args.plan_id:
-        files = [f for f in files if f.name.startswith(f"{args.plan_id}-")]
-
-    # Find and remove old files
-    removed = []
-    for f in files:
-        ts = parse_timestamp_from_filename(f.name)
-        if ts and ts < cutoff:
-            age_days = (datetime.now(timezone.utc) - ts).days
-            try:
-                f.unlink()
-                # Extract plan_id from filename
-                parts = f.stem.rsplit('-', 2)
-                plan_id = '-'.join(parts[:-2]) if len(parts) >= 3 else 'unknown'
-                removed.append({
-                    'file': f.name,
-                    'plan_id': plan_id,
-                    'age': f'{age_days}d'
-                })
-            except OSError:
-                pass  # Skip files we can't remove
-
-    output_success('cleanup', removed_count=len(removed), removed=removed)
 
 
 # =============================================================================
@@ -391,20 +295,14 @@ def main():
     load_parser.add_argument('--step', required=True, help='Step name')
 
     # list command
-    list_parser = subparsers.add_parser('list', help='List handoffs')
-    list_parser.add_argument('--plan_id', help='Filter by plan ID')
-    list_parser.add_argument('--since', help='Filter by age (e.g., 7d, 24h)')
+    list_parser = subparsers.add_parser('list', help='List handoffs for a plan')
+    list_parser.add_argument('--plan_id', required=True, help='Plan identifier')
     list_parser.add_argument('--status', choices=list(VALID_STATUSES), help='Filter by status')
 
     # get command
     get_parser = subparsers.add_parser('get', help='Get specific handoff')
+    get_parser.add_argument('--plan_id', required=True, help='Plan identifier')
     get_parser.add_argument('--file', required=True, help='Handoff filename')
-
-    # cleanup command
-    cleanup_parser = subparsers.add_parser('cleanup', help='Remove old handoffs')
-    cleanup_parser.add_argument('--older-than', dest='older_than', default='7d',
-                                help='Remove handoffs older than (e.g., 7d, 24h)')
-    cleanup_parser.add_argument('--plan_id', help='Filter by plan ID')
 
     args = parser.parse_args()
 
@@ -413,8 +311,7 @@ def main():
         'save': cmd_save,
         'load': cmd_load,
         'list': cmd_list,
-        'get': cmd_get,
-        'cleanup': cmd_cleanup
+        'get': cmd_get
     }
 
     commands[args.command](args)

@@ -74,16 +74,21 @@ class TestContext:
     """Context manager for test with temp directory.
 
     Uses PLAN_BASE_DIR environment variable to communicate base dir to subprocess.
+    Creates a plan directory structure for plan-local handoff storage.
     """
 
-    def __init__(self):
+    def __init__(self, plan_id='test-plan'):
         self.temp_dir = None
         self.original_env = None
+        self.plan_id = plan_id
 
     def __enter__(self):
         self.temp_dir = Path(tempfile.mkdtemp())
         self.original_env = os.environ.get('PLAN_BASE_DIR')
         os.environ['PLAN_BASE_DIR'] = str(self.temp_dir)
+        # Create plan directory (handoffs dir created on first save)
+        plan_dir = self.temp_dir / 'plans' / self.plan_id
+        plan_dir.mkdir(parents=True, exist_ok=True)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -92,6 +97,10 @@ class TestContext:
         else:
             os.environ['PLAN_BASE_DIR'] = self.original_env
         shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    @property
+    def handoff_dir(self):
+        return self.temp_dir / 'plans' / self.plan_id / 'handoffs'
 
 
 def run_handoff(*args):
@@ -112,7 +121,7 @@ def parse_output(result):
 
 def test_save_valid_handoff():
     """Test saving a valid handoff."""
-    with TestContext():
+    with TestContext(plan_id='jwt-auth') as ctx:
         result = run_handoff('save',
             '--plan_id', 'jwt-auth',
             '--step', 'init-complete',
@@ -125,12 +134,15 @@ def test_save_valid_handoff():
         assert data['operation'] == 'save'
         assert 'file' in data
         assert data['file'].endswith('.toon')
-        assert 'jwt-auth' in data['file']
+        # Filename no longer has plan_id prefix
+        assert data['file'].startswith('init-complete-')
+        # File should be in plan-local directory
+        assert (ctx.handoff_dir / data['file']).exists()
 
 
 def test_save_error_handoff():
     """Test saving an error handoff."""
-    with TestContext():
+    with TestContext(plan_id='build-fix'):
         result = run_handoff('save',
             '--plan_id', 'build-fix',
             '--step', 'verify-error',
@@ -146,7 +158,7 @@ def test_save_invalid_missing_fields():
     """Test validation error for missing required fields."""
     with TestContext():
         result = run_handoff('save',
-            '--plan_id', 'test',
+            '--plan_id', 'test-plan',
             '--step', 'init',
             '--content', INVALID_HANDOFF_MISSING_FIELDS
         )
@@ -161,7 +173,7 @@ def test_save_invalid_status():
     """Test validation error for invalid task.status."""
     with TestContext():
         result = run_handoff('save',
-            '--plan_id', 'test',
+            '--plan_id', 'test-plan',
             '--step', 'init',
             '--content', INVALID_HANDOFF_BAD_STATUS
         )
@@ -178,7 +190,7 @@ def test_save_invalid_status():
 
 def test_load_existing_handoff():
     """Test loading an existing handoff."""
-    with TestContext():
+    with TestContext(plan_id='jwt-auth'):
         # First save a handoff
         run_handoff('save',
             '--plan_id', 'jwt-auth',
@@ -202,7 +214,7 @@ def test_load_existing_handoff():
 
 def test_load_nonexistent_handoff():
     """Test loading a handoff that doesn't exist."""
-    with TestContext():
+    with TestContext(plan_id='nonexistent'):
         result = run_handoff('load',
             '--plan_id', 'nonexistent',
             '--step', 'missing'
@@ -216,15 +228,15 @@ def test_load_nonexistent_handoff():
 
 def test_load_most_recent():
     """Test that load returns the most recent handoff."""
-    with TestContext():
+    with TestContext(plan_id='test-plan'):
         # Save two handoffs with same plan_id and step
         run_handoff('save',
-            '--plan_id', 'test',
+            '--plan_id', 'test-plan',
             '--step', 'step1',
             '--content', """
 from: skill-a
 to: skill-b
-plan_id: test
+plan_id: test-plan
 task:
   status: pending
 version: 1
@@ -233,12 +245,12 @@ version: 1
 
         # Save another one (will be more recent)
         run_handoff('save',
-            '--plan_id', 'test',
+            '--plan_id', 'test-plan',
             '--step', 'step1',
             '--content', """
 from: skill-a
 to: skill-b
-plan_id: test
+plan_id: test-plan
 task:
   status: completed
 version: 2
@@ -246,7 +258,7 @@ version: 2
         )
 
         # Load should return the most recent (version 2)
-        result = run_handoff('load', '--plan_id', 'test', '--step', 'step1')
+        result = run_handoff('load', '--plan_id', 'test-plan', '--step', 'step1')
         assert result.success
 
         data = parse_output(result)
@@ -259,8 +271,8 @@ version: 2
 
 def test_list_empty():
     """Test listing when no handoffs exist."""
-    with TestContext():
-        result = run_handoff('list')
+    with TestContext(plan_id='empty-plan'):
+        result = run_handoff('list', '--plan_id', 'empty-plan')
         assert result.success
 
         data = parse_output(result)
@@ -269,40 +281,26 @@ def test_list_empty():
 
 
 def test_list_all():
-    """Test listing all handoffs."""
-    with TestContext():
-        # Save a few handoffs
-        run_handoff('save', '--plan_id', 'plan1', '--step', 'init', '--content', VALID_HANDOFF)
-        run_handoff('save', '--plan_id', 'plan2', '--step', 'init', '--content', VALID_HANDOFF)
+    """Test listing all handoffs for a plan."""
+    with TestContext(plan_id='multi-plan'):
+        # Save a few handoffs to the same plan
+        run_handoff('save', '--plan_id', 'multi-plan', '--step', 'init', '--content', VALID_HANDOFF)
+        run_handoff('save', '--plan_id', 'multi-plan', '--step', 'configure', '--content', VALID_HANDOFF)
 
-        result = run_handoff('list')
+        result = run_handoff('list', '--plan_id', 'multi-plan')
         assert result.success
 
         data = parse_output(result)
         assert data['counts']['total'] == 2
 
 
-def test_list_filter_by_plan_id():
-    """Test filtering list by plan_id."""
-    with TestContext():
-        run_handoff('save', '--plan_id', 'plan-a', '--step', 'init', '--content', VALID_HANDOFF)
-        run_handoff('save', '--plan_id', 'plan-b', '--step', 'init', '--content', VALID_HANDOFF)
-
-        result = run_handoff('list', '--plan_id', 'plan-a')
-        assert result.success
-
-        data = parse_output(result)
-        assert data['counts']['total'] == 1
-        assert data['handoffs'][0]['plan_id'] == 'plan-a'
-
-
 def test_list_filter_by_status():
     """Test filtering list by status."""
-    with TestContext():
-        run_handoff('save', '--plan_id', 'plan1', '--step', 'init', '--content', VALID_HANDOFF)  # completed
-        run_handoff('save', '--plan_id', 'plan2', '--step', 'init', '--content', ERROR_HANDOFF)  # failed
+    with TestContext(plan_id='status-plan'):
+        run_handoff('save', '--plan_id', 'status-plan', '--step', 'init', '--content', VALID_HANDOFF)  # completed
+        run_handoff('save', '--plan_id', 'status-plan', '--step', 'verify', '--content', ERROR_HANDOFF)  # failed
 
-        result = run_handoff('list', '--status', 'failed')
+        result = run_handoff('list', '--plan_id', 'status-plan', '--status', 'failed')
         assert result.success
 
         data = parse_output(result)
@@ -315,7 +313,7 @@ def test_list_filter_by_status():
 
 def test_get_existing_file():
     """Test getting a specific handoff by filename."""
-    with TestContext():
+    with TestContext(plan_id='jwt-auth'):
         # Save a handoff
         save_result = run_handoff('save',
             '--plan_id', 'jwt-auth',
@@ -325,8 +323,8 @@ def test_get_existing_file():
         save_data = parse_output(save_result)
         filename = save_data['file']
 
-        # Get it by filename
-        result = run_handoff('get', '--file', filename)
+        # Get it by filename (now requires plan_id)
+        result = run_handoff('get', '--plan_id', 'jwt-auth', '--file', filename)
         assert result.success
 
         data = parse_output(result)
@@ -337,8 +335,8 @@ def test_get_existing_file():
 
 def test_get_nonexistent_file():
     """Test getting a file that doesn't exist."""
-    with TestContext():
-        result = run_handoff('get', '--file', 'nonexistent-file.toon')
+    with TestContext(plan_id='test-plan'):
+        result = run_handoff('get', '--plan_id', 'test-plan', '--file', 'nonexistent-file.toon')
         assert not result.success
 
         data = parse_output(result)
@@ -347,57 +345,15 @@ def test_get_nonexistent_file():
 
 
 # =============================================================================
-# Test: Cleanup Command
-# =============================================================================
-
-def test_cleanup_removes_old_files():
-    """Test that cleanup removes old files (simulated via directory manipulation)."""
-    with TestContext() as ctx:
-        # Save a handoff
-        run_handoff('save', '--plan_id', 'old-plan', '--step', 'init', '--content', VALID_HANDOFF)
-
-        # Manually rename to simulate old timestamp
-        handoff_dir = ctx.temp_dir / 'memory' / 'handoffs'
-        files = list(handoff_dir.glob('*.toon'))
-        if files:
-            old_file = files[0]
-            # Rename to have an old timestamp (more than 7 days ago)
-            new_name = 'old-plan-init-20200101T000000Z.toon'
-            old_file.rename(handoff_dir / new_name)
-
-        # Run cleanup
-        result = run_handoff('cleanup', '--older-than', '1d')
-        assert result.success
-
-        data = parse_output(result)
-        assert data['status'] == 'success'
-        assert data['removed_count'] == 1
-
-
-def test_cleanup_preserves_recent_files():
-    """Test that cleanup preserves recent files."""
-    with TestContext():
-        # Save a handoff (will have current timestamp)
-        run_handoff('save', '--plan_id', 'recent-plan', '--step', 'init', '--content', VALID_HANDOFF)
-
-        # Run cleanup with 7 day threshold
-        result = run_handoff('cleanup', '--older-than', '7d')
-        assert result.success
-
-        data = parse_output(result)
-        assert data['removed_count'] == 0
-
-
-# =============================================================================
 # Test: Edge Cases
 # =============================================================================
 
-def test_special_characters_in_plan_id():
-    """Test handling of special characters in plan_id."""
-    with TestContext():
+def test_special_characters_in_step():
+    """Test handling of special characters in step name."""
+    with TestContext(plan_id='test-plan'):
         result = run_handoff('save',
-            '--plan_id', 'feature/auth-impl',
-            '--step', 'init',
+            '--plan_id', 'test-plan',
+            '--step', 'init/complete',
             '--content', VALID_HANDOFF
         )
         assert result.success
@@ -409,26 +365,50 @@ def test_special_characters_in_plan_id():
 
 def test_auto_generated_timestamp():
     """Test that timestamp is auto-generated if not provided."""
-    with TestContext():
+    with TestContext(plan_id='test-plan'):
         handoff_without_timestamp = """
 from: skill-a
 to: skill-b
-plan_id: test
+plan_id: test-plan
 
 task:
   status: pending
 """
         result = run_handoff('save',
-            '--plan_id', 'test',
+            '--plan_id', 'test-plan',
             '--step', 'init',
             '--content', handoff_without_timestamp
         )
         assert result.success
 
         # Load and verify timestamp was added
-        load_result = run_handoff('load', '--plan_id', 'test', '--step', 'init')
+        load_result = run_handoff('load', '--plan_id', 'test-plan', '--step', 'init')
         load_data = parse_output(load_result)
         assert 'timestamp' in load_data['handoff']
+
+
+def test_plan_isolation():
+    """Test that handoffs are isolated per plan."""
+    with TestContext(plan_id='plan-a') as ctx:
+        # Create second plan directory
+        plan_b_dir = ctx.temp_dir / 'plans' / 'plan-b'
+        plan_b_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save to plan-a
+        run_handoff('save', '--plan_id', 'plan-a', '--step', 'init', '--content', VALID_HANDOFF)
+
+        # Save to plan-b
+        run_handoff('save', '--plan_id', 'plan-b', '--step', 'init', '--content', VALID_HANDOFF)
+
+        # List plan-a should only show 1
+        result_a = run_handoff('list', '--plan_id', 'plan-a')
+        data_a = parse_output(result_a)
+        assert data_a['counts']['total'] == 1
+
+        # List plan-b should only show 1
+        result_b = run_handoff('list', '--plan_id', 'plan-b')
+        data_b = parse_output(result_b)
+        assert data_b['counts']['total'] == 1
 
 
 # =============================================================================
@@ -450,16 +430,13 @@ if __name__ == '__main__':
         # List command
         test_list_empty,
         test_list_all,
-        test_list_filter_by_plan_id,
         test_list_filter_by_status,
         # Get command
         test_get_existing_file,
         test_get_nonexistent_file,
-        # Cleanup command
-        test_cleanup_removes_old_files,
-        test_cleanup_preserves_recent_files,
         # Edge cases
-        test_special_characters_in_plan_id,
+        test_special_characters_in_step,
         test_auto_generated_timestamp,
+        test_plan_isolation,
     ])
     sys.exit(runner.run())

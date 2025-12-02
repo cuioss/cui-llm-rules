@@ -214,26 +214,30 @@ deliverables:
 
 ### Location
 
+Handoffs are stored **plan-locally**:
+
 ```
-.plan/memory/handoffs/
+.plan/plans/{plan_id}/handoffs/
 ```
+
+This ensures all plan artifacts are in one place and handoffs are automatically cleaned up when the plan is deleted.
 
 ### Naming Convention
 
 ```
-{plan_id}-{step}-{timestamp}.toon
+{step}-{timestamp}.toon
 ```
 
-- `plan_id`: Plan identifier (sanitized for filesystem)
 - `step`: Step name (e.g., `init-complete`, `verify-error`)
 - `timestamp`: ISO timestamp without punctuation (`YYYYMMDDTHHMMSSZ`)
 
 ### Examples
 
 ```
-jwt-auth-init-complete-20251202T103000Z.toon
-jwt-auth-configure-complete-20251202T104500Z.toon
-jwt-auth-verify-error-20251202T110000Z.toon
+.plan/plans/jwt-auth/handoffs/
+├── init-complete-20251202T103000Z.toon
+├── configure-complete-20251202T104500Z.toon
+└── verify-error-20251202T110000Z.toon
 ```
 
 ## Design Rationale
