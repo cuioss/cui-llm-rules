@@ -123,9 +123,13 @@ All agents return JSON with status, data, and metrics. Explicit error paths and 
 
 ### Testing
 
-- Test suite located in `/test/` directory
-- Python pytest tests for script functionality
-- Tests cover plan file parsing, validation, phase management
+See [test/README.md](test/README.md) for full documentation.
+
+```bash
+python3 test/run-tests.py                                          # all tests
+python3 test/run-tests.py test/planning/                           # directory
+python3 test/run-tests.py test/planning/plan-files/test_parse_plan.py  # single file
+```
 
 ### Development Notes
 

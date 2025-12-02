@@ -5,11 +5,9 @@ This directory contains tests for Python scripts in the marketplace bundles. Tes
 ## Quick Start
 
 ```bash
-# Run a single test file
-python3 test/cui-task-workflow/plan-files/test_parse_plan.py
-
-# Run all tests in a directory
-for f in test/cui-task-workflow/plan-files/test_*.py; do python3 "$f"; done
+python3 test/run-tests.py                                          # all tests
+python3 test/run-tests.py test/planning/                           # directory
+python3 test/run-tests.py test/planning/plan-files/test_parse_plan.py  # single file
 ```
 
 ## Directory Structure
