@@ -132,9 +132,16 @@ Choose organization that best fits your project:
 
 ## Status Indicators
 
-For complete status indicator definitions and rationale, see [task-planning-core.md](task-planning-core.md) section "Status Indicators".
+Project planning uses all four status markers:
 
-Project planning is the only use case that uses all four status markers: `[ ]` (Pending), `[x]` (Completed), `[~]` (Partially Completed), and `[!]` (Blocked). Issue and refactoring planning use only the two basic markers.
+| Marker | Status | Usage |
+|--------|--------|-------|
+| `[ ]` | Pending | Task not yet started |
+| `[x]` | Completed | Task finished |
+| `[~]` | Partially Completed | Task in progress or partially done |
+| `[!]` | Blocked | Task blocked by external dependency |
+
+**Note**: Project planning is the only use case that uses all four status markers. Issue and refactoring planning use only the two basic markers (`[ ]`, `[x]`).
 
 ## Traceability Requirements
 
@@ -326,6 +333,4 @@ The examples throughout this document demonstrate the complete TODO.adoc structu
 
 ## Related Standards
 
-- task-planning-core.md - Core concepts and status indicators
-- issue-planning-standards.md - Short-term issue planning
-- refactoring-planning-standards.md - Refactoring task tracking
+- [refactoring-planning-standards.md](refactoring-planning-standards.md) - Refactoring task tracking

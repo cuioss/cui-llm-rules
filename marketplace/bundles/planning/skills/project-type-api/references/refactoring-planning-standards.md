@@ -215,9 +215,14 @@ C5. Refactor UserService
 
 ## Status Indicators
 
-For complete status indicator definitions and rationale, see [task-planning-core.md](task-planning-core.md) section "Status Indicators".
+Refactoring planning uses only the two basic status markers:
 
-Refactoring planning uses only the two basic status markers: `[ ]` (Pending) and `[x]` (Completed). Extended markers (`[~]`, `[!]`) are NOT used - refactoring tasks are tracked as simple pending/complete workflows.
+| Marker | Status | Usage |
+|--------|--------|-------|
+| `[ ]` | Pending | Task not yet started |
+| `[x]` | Completed | Task finished |
+
+**Note**: Extended markers (`[~]`, `[!]`) are NOT used in refactoring planning. Tasks are tracked as simple pending/complete workflows.
 
 ## Priority Assignment
 
@@ -445,10 +450,11 @@ Keep completed tasks for:
 
 ### Task Granularity
 
-For comprehensive task granularity guidance, see [task-planning-core.md](task-planning-core.md) section "Task Granularity". When applying this guidance to refactoring planning, ensure tasks are:
+When creating refactoring tasks, ensure they are:
 - Completable in reasonable time (hours to days)
 - Focused on specific refactoring operations
 - Not so broad they span multiple refactoring categories
+- Clear enough to understand scope and verify completion
 
 ### Clear Descriptions
 
@@ -476,6 +482,4 @@ Before adding refactoring task, verify:
 
 ## Related Standards
 
-- task-planning-core.md - Core concepts and status indicators
-- project-planning-standards.md - Long-term project planning
-- issue-planning-standards.md - Short-term issue planning
+- [project-planning-standards.md](project-planning-standards.md) - Long-term project planning

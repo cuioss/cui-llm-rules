@@ -18,7 +18,7 @@
   ],
   "skills": [
     "./skills/git-workflow",
-    "./skills/cui-task-planning",
+    "./skills/project-type-api",
     "./skills/pr-workflow",
     "./skills/sonar-workflow",
     "./skills/analysis-api",
