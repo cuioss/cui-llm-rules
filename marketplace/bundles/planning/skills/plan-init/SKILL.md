@@ -58,31 +58,28 @@ result: "{outcome or artifact}"
 
 **Role**: First phase skill in the plan management system. Handles plan creation with type-specific init workflows. Delegates all file I/O to `plan-files` skill.
 
-## Standards (Load On-Demand)
+## Plan-Type Skills (Load On-Demand)
 
-### Workflow
+### Workflow Reference
 ```
 Read standards/workflow.md
 ```
-Contains: Decision tree, plan types, property specifications, edit prompts
+Contains: Decision tree, property specifications, edit prompts
 
-### Implementation Init
-```
-Read standards/implementation-init.md
-```
-Contains: Full 5-phase workflow, phase structure template
+### Plan-Type Skills
 
-### Simple Init
-```
-Read standards/simple-init.md
-```
-Contains: Lightweight 3-phase workflow, minimal configuration
+| Plan Type | Skill | Phases | Use Case |
+|-----------|-------|--------|----------|
+| simple | `Skill: planning:plan-type-simple` | 3 | Documentation, config, quick fixes |
+| java | `Skill: planning:plan-type-java` | 5 | Java/Maven/Gradle code tasks |
+| javascript | `Skill: planning:plan-type-javascript` | 5 | JavaScript/npm code tasks |
+| plugin-development | `Skill: planning:plan-type-plugin` | 4 | Marketplace components |
 
-### Plugin Development Init
-```
-Read standards/plugin-development.md
-```
-Contains: 3-phase workflow with mandatory `/plugin-doctor` verification for marketplace components
+**Usage**: After determining plan type, load the corresponding skill to get:
+- Phase structure (Operation: get-phase-structure)
+- Config template (Operation: get-config-template)
+- References template (Operation: get-references-template)
+- Next phase mapping (Operation: get-next-phase)
 
 ---
 
@@ -90,7 +87,7 @@ Contains: 3-phase workflow with mandatory `/plugin-doctor` verification for mark
 
 **Input**:
 - `task`: Task description
-- `type`: (optional) implementation|simple
+- `type`: (optional) java|javascript|simple|plugin-development
 - `issue`: (optional) Issue URL or identifier
 - `branch`: (optional) Target branch
 
@@ -101,16 +98,17 @@ Contains: 3-phase workflow with mandatory `/plugin-doctor` verification for mark
 ```python
 def determine_plan_type(params, environment):
     if params.type: return params.type
-    if params.issue: return "implementation"
     # Plugin development detection
     if 'marketplace/bundles' in params.task: return "plugin-development"
     if any(kw in params.task.lower() for kw in ['agent', 'command', 'skill', 'plugin', 'component']):
         if 'create' in params.task.lower() or 'update' in params.task.lower() or 'modify' in params.task.lower():
             return "plugin-development"
     if branch.startswith(('plugin/', 'component/')): return "plugin-development"
-    # Standard implementation detection
-    if environment.has_build_files(): return "implementation"
-    if branch.startswith(('feature/', 'fix/', 'task/', 'claude/')): return "implementation"
+    # Technology-specific detection based on build files
+    if environment.has_file('pom.xml') or environment.has_file('build.gradle'): return "java"
+    if environment.has_file('package.json'): return "javascript"
+    if params.issue: return ask_user_plan_type()  # Ask if issue but no build files
+    if branch.startswith(('feature/', 'fix/', 'task/', 'claude/')): return ask_user_plan_type()
     return ask_user_plan_type()
 ```
 
@@ -120,15 +118,26 @@ def determine_plan_type(params, environment):
 ### Step 2: Ask User (if needed)
 
 AskUserQuestion with options:
-1. Implementation (5-phase workflow) - Code development with build/test verification
-2. Simple (3-phase workflow) - Documentation, config, quick fixes
-3. Plugin-Development (3-phase workflow) - Marketplace components with `/plugin-doctor` verification
+1. Java (5-phase workflow) - Java/Maven/Gradle with build/test verification
+2. JavaScript (5-phase workflow) - JavaScript/npm with build/test verification
+3. Simple (3-phase workflow) - Documentation, config, quick fixes
+4. Plugin-Development (4-phase workflow) - Marketplace components with `/plugin-doctor` verification
 
-### Step 3: Load Init Implementation
+### Step 3: Load Plan-Type Skill and Get Phase Structure
 
-**For implementation**: `Read standards/implementation-init.md`
-**For simple**: `Read standards/simple-init.md`
-**For plugin-development**: `Read standards/plugin-development.md`
+**For java**: `Skill: planning:plan-type-java`
+**For javascript**: `Skill: planning:plan-type-javascript`
+**For simple**: `Skill: planning:plan-type-simple`
+**For plugin-development**: `Skill: planning:plan-type-plugin`
+
+**Query the skill for phase structure**:
+```
+operation: get-phase-structure
+plan_id: {plan_directory}
+task_title: {task_title}
+```
+
+The skill returns the complete phase structure (phases, tasks, checklists) ready to write to plan.md.
 
 ### Step 4: Detect Environment
 
@@ -180,18 +189,18 @@ plan_directory: {directory}
 configuration: {all-properties}
 ```
 
-### Step 9: Write Plan Structure
+### Step 9: Write Plan Structure (from plan-type skill)
+
+Write the phase structure returned by the plan-type skill to plan.md:
 
 ```
 Skill: planning:plan-files
 operation: write-plan
 plan_directory: {directory}
-plan_content:
-  title: {task-title}
-  current_phase: init
-  current_task: task-1
-  phases: {phase-structure}
+plan_content: {phase-structure from Step 3}
 ```
+
+The plan-type skill provided the complete structure; this step writes it to plan.md via scripts.
 
 ### Step 10: Write Initial References
 
@@ -220,7 +229,7 @@ result: "Plan: {task-name}, Branch: {branch}"
 
 **Output**:
 ```
-plan_type: {implementation|simple|plugin-development}
+plan_type: {java|javascript|simple|plugin-development}
 artifacts:
   plan_directory: {plan_directory}
   plan_file: {plan_directory}/plan.md
@@ -236,12 +245,13 @@ next_action: Start {next_phase} phase
 **Next Phase by Plan Type**:
 | Plan Type | next_phase | Reason |
 |-----------|------------|--------|
-| `implementation` | refine | Requires requirements analysis before implementation |
+| `java` | refine | Requires requirements analysis before implementation |
+| `javascript` | refine | Requires requirements analysis before implementation |
 | `plugin-development` | refine | Requires component analysis before execution |
 | `simple` | execute | Skips refine phase for quick tasks |
 
 **Auto-Continue**: After returning completion, the orchestrating skill (phase-management) will automatically proceed to the **next_phase** based on plan type:
-- Implementation/Plugin-Development plans → refine phase
+- Java/JavaScript/Plugin-Development plans → refine phase
 - Simple plans → execute phase (skips refine)
 
 Do NOT add any "Continue?" prompts - the flow executes continuously.
@@ -281,11 +291,15 @@ resolution: Verify URL, check permissions, or continue without
 - **phase-management** - Orchestration (invokes this skill)
 - **work-log** - Logging significant actions
 
+### Plan-Type Skills
+- **plan-type-simple** - 3-phase workflow definitions
+- **plan-type-plugin** - 4-phase plugin workflow definitions
+- **plan-type-java** - 5-phase Java implementation workflow definitions
+- **plan-type-javascript** - 5-phase JavaScript implementation workflow definitions
+
 ### Related Skills
 - **plan-refine** - Next phase (implementation)
-- **plan-implement** - Implement phase
-- **plan-verify** - Verify phase
-- **plan-finalize** - Finalize phase
+- **plan-execute** - Execution phases (implement/verify/finalize)
 
 ---
 

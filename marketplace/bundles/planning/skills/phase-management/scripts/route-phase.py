@@ -27,14 +27,14 @@ PHASE_ORDER_SIMPLE = ['init', 'execute', 'finalize']
 ALL_VALID_PHASES = {'init', 'refine', 'implement', 'execute', 'verify', 'finalize'}
 
 # Phase to skill mapping
-# Note: 'execute' (Simple/Plugin-Development plans) routes to same skill as 'implement'
+# Note: All execution phases (implement/execute/verify/finalize) route to plan-execute
 PHASE_SKILL_MAP = {
     'init': 'plan-init',
     'refine': 'plan-refine',
-    'implement': 'plan-implement',
-    'execute': 'plan-implement',  # Simple (3-phase) and Plugin-Development (4-phase) plans
-    'verify': 'plan-verify',
-    'finalize': 'plan-finalize'
+    'implement': 'plan-execute',
+    'execute': 'plan-execute',  # Simple (3-phase) and Plugin-Development (4-phase) plans
+    'verify': 'plan-execute',
+    'finalize': 'plan-execute'
 }
 
 
@@ -199,8 +199,8 @@ Output JSON structure:
   "routing": {
     "current_phase": "execute",
     "target_phase": "execute",
-    "target_skill": "plan-implement",
-    "skill_full_name": "planning:plan-implement"
+    "target_skill": "plan-execute",
+    "skill_full_name": "planning:plan-execute"
   },
   "phase_status": {
     "completed_phases": ["init"],
@@ -218,7 +218,7 @@ Plan types:
 - Plugin-Development (4-phase): init -> refine -> execute -> finalize
 - Simple (3-phase): init -> execute -> finalize
 
-Note: 'execute' (Simple/Plugin-Development plans) routes to the same skill as 'implement'
+Note: All execution phases (implement/execute/verify/finalize) route to plan-execute
 """
     )
     parser.add_argument('current_phase', help='Current phase from plan.md')

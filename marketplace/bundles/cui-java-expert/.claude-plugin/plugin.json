@@ -34,6 +34,7 @@
     "./skills/cui-java-core",
     "./skills/cui-java-maintenance",
     "./skills/cui-java-unit-testing",
-    "./skills/cui-javadoc"
+    "./skills/cui-javadoc",
+    "./skills/java-analysis"
   ]
 }

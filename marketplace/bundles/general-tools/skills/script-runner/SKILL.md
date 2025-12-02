@@ -1,10 +1,11 @@
 ---
 name: script-runner
-description: Resolves skill script paths using portable notation. Handles path resolution from bundle:skill/scripts/name notation to absolute paths, with lazy discovery and permission generation.
+description: Resolves skill script paths using portable notation. Handles path resolution from bundle:skill/scripts/name notation to absolute paths, with lazy discovery, permission generation, and error handling with lessons-learned capture.
 allowed-tools:
   - Read
   - Write
   - Glob
+  - Bash
   - Skill
   - AskUserQuestion
 ---
@@ -29,6 +30,7 @@ This skill provides:
 2. **Path resolution**: Converts notation to absolute paths
 3. **Lazy discovery**: Auto-discovers on first use or when cache is stale
 4. **Permission generation**: Creates ready-to-use permission patterns
+5. **Error handling**: Captures lessons learned when scripts fail
 
 ## Notation Format
 
@@ -149,6 +151,74 @@ JSON response from script:
     "Bash(bash /full/path/to/skill/scripts:*)",
     "Bash(python3 /full/path/to/skill/scripts:*)"
   ]
+}
+```
+
+---
+
+### Workflow: Error Handling
+
+Captures lessons learned when script execution fails. This workflow should be invoked by any skill that executes scripts.
+
+#### When to Use
+
+When a script execution fails (exit code != 0), the executing skill should:
+1. Capture the error context
+2. Prompt the user to create a lesson learned
+3. If user confirms, invoke `write-lesson.py` with pre-filled context
+
+#### Steps
+
+1. **Capture error context** after script failure:
+   ```
+   Collect:
+   - script: Full script path that was executed
+   - exit_code: The non-zero exit code
+   - error_output: stderr/stdout from the failed execution
+   - plan_context: Current plan name (if within a plan workflow)
+   ```
+
+2. **Prompt user**:
+   ```
+   AskUserQuestion: "Script {script-name} failed (exit {exit_code}). Create lesson learned? [y/n]"
+   ```
+
+3. **If user confirms**, invoke write-lesson.py:
+   ```bash
+   python3 {path-to-write-lesson.py} --from-error '{
+     "script": "{script-path}",
+     "exit_code": {exit_code},
+     "error_output": "{error_output}",
+     "plan_context": "{plan-name}"
+   }'
+   ```
+
+   **Script**: `general-tools:manage-lessons-learned/scripts/write-lesson.py`
+
+4. **Continue** with normal error handling flow (retry, fail task, etc.)
+
+#### Integration Pattern
+
+Skills that execute scripts should include this error handling pattern:
+
+```markdown
+**On Script Failure**:
+- [ ] Capture error context (script, exit code, output)
+- [ ] Prompt: "Create lesson learned?"
+- [ ] If yes: Run write-lesson.py --from-error with context
+- [ ] Continue with error handling
+```
+
+#### Output
+
+When lesson is created:
+```json
+{
+  "success": true,
+  "operation": "write-lesson",
+  "file": ".plan/lessons-learned/2025-12-01-001.md",
+  "id": "2025-12-01-001",
+  "component": "planning:plan-files"
 }
 ```
 

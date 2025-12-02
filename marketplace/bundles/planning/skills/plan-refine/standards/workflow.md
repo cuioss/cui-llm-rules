@@ -97,9 +97,16 @@ Analyze requirements to identify:
 
 For each component:
 1. Create implementation task(s)
-2. Add technology-specific checklist items
-3. Define acceptance criteria from requirements
-4. Add standard quality checklist items
+2. **Apply sub-type template** if specified by plan-type (see plan-type template)
+3. Add technology-specific checklist items
+4. Define acceptance criteria from requirements
+5. Add standard quality checklist items
+
+**Sub-Type Templates**: Plan-type templates (e.g., plugin-development.md) specify which sub-type templates to use for specific operations. The sub-type template provides the complete actionable checklist. See `templates/` directory for available templates:
+- `script-task.md` - TDD workflow for script creation
+- `skill-task.md` - Skill creation workflow
+- `command-task.md` - Command creation workflow
+- `agent-task.md` - Agent creation workflow
 
 Order tasks based on:
 - Component dependencies

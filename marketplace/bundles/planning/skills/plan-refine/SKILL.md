@@ -6,72 +6,19 @@ allowed-tools: Read, Write, Edit, Skill, AskUserQuestion
 
 # Plan Refine Skill
 
-**EXECUTION MODE**: Execute refine operations immediately. Do not explain or summarize.
+**Role**: Second phase skill. Intelligent analysis phase that transforms requirements into actionable implementation tasks.
 
-**OUTPUT RULES**:
-- Do NOT narrate internal process or tool invocations
-- Do NOT display raw script output - format as structured status
-- DO show task analysis results and requirement confirmations
-- Work silently until you have results to display
+**Execution Pattern**: Analyze requirements → Identify components → Generate tasks → Identify documentation needs
 
-**Role**: Second phase skill in the plan management system. Breaks down requirements into implementable tasks with acceptance criteria. Delegates all file I/O to `plan-files` skill.
-
-**AUTO-CONTINUE BEHAVIOR**: Execute all refine operations continuously without unnecessary user prompts. Only stop for:
-- Analysis review (if analysis.md is created for complex tasks)
-- Component analysis confirmation (brief approval of identified components)
-- Task list approval (brief approval of generated tasks)
-Do NOT prompt between operations or for routine confirmations.
-
-**MANDATORY PROGRESS TRACKING**:
-
-After completing each refine task, you MUST call update-progress:
-```
-python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id {task_id} --complete-items "{item_text}"
-```
-
-**NEVER skip this step**. The plan.md is the source of truth. Phase transitions WILL FAIL with `incomplete_phase` error if checklist items are not marked as `[x]`.
-
-**Anti-Patterns** (DO NOT DO):
-- Completing analysis without updating progress
-- Generating tasks without marking progress
-- Assuming plan.md auto-updates on operations
-
-**MANDATORY WORK-LOG**:
-
-After completing significant actions, you MUST log via work-log skill:
-```
-Skill: planning:work-log
-operation: log-entry
-plan_directory: {plan_directory}
-phase: refine
-task: {task_id}
-action: "{what was done}"
-result: "{outcome or artifact}"
-```
-
-**Entry Budget**: 1-2 entries for refine phase.
-
-**Log Points**:
-- Analysis complete (if analysis.md created): action="Completed strategic analysis", result="analysis.md"
-- Requirements generated: action="Generated implementation tasks", result="{count} tasks planned"
-
-**Anti-Patterns** (DO NOT DO):
-- Completing refine without any work-log entries
-- Logging each component analysis step
-
-**CRITICAL CONSTRAINT - NO EDIT/WRITE TOOLS FOR PLAN FILES**:
-- NEVER use Edit or Write tools directly on plan files (plan.md, config.toon, references.toon)
-- **WHY**: Edit/Write tools ALWAYS trigger user permission prompts for `.plan/` directories - this is a security feature that CANNOT be bypassed regardless of settings.json permissions
-- ALWAYS use Python scripts via Bash for plan file modifications
-- Python scripts via Bash can write to plan storage WITHOUT prompts
-
-| Operation | Wrong (triggers prompt) | Correct (no prompt) |
-|-----------|------------------------|---------------------|
-| Progress update | `Edit` on plan.md | `update-progress.py` via Bash |
-| Write plan | `Write` to plan.md | `write-plan.py` via Bash |
-| Update config | `Edit` on config.toon | `write-config.py` via Bash |
+**CRITICAL**: Use Python scripts via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
 
 ## Standards (Load On-Demand)
+
+### Architecture
+```
+Read standards/architecture.md
+```
+Contains: Core design principle, layered architecture, plan-type skills API, domain analysis skills, handoff protocol, component dependencies
 
 ### Workflow
 ```
@@ -79,12 +26,48 @@ Read standards/workflow.md
 ```
 Contains: Phase overview, operations, component analysis, task planning, documentation triggers
 
-### Templates
+### Artifact Templates (local)
 
 | Template | Purpose |
 |----------|---------|
 | `templates/implementation-requirements.md` | Implementation requirements artifact |
 | `templates/analysis.md` | Strategic analysis document (optional) |
+
+### Plan-Type Skill API
+
+All plan-type skills implement a uniform API. Query the skill for what you need:
+
+```
+Skill: planning:plan-type-{plan_type}
+operation: {operation}
+plan_id: {plan_id}
+```
+
+| Operation | Purpose | Used By |
+|-----------|---------|---------|
+| `get-phase-structure` | Returns phases and their tasks | plan-init |
+| `generate-tasks` | **Writes tasks directly** to plan.md | plan-refine |
+| `get-finalize-config` | Returns finalize behavior (commit, PR, etc.) | plan-execute |
+| `get-next-phase` | Returns next phase in workflow | phase-management |
+
+**Key Design**: `generate-tasks` writes directly to plan.md via scripts (no ping-pong between skills).
+
+### Domain Analysis Skills
+
+Component analysis is delegated to domain-specific skills:
+
+| Plan Type | Analysis Skill |
+|-----------|----------------|
+| `plugin-development` | `cui-plugin-development-tools:plugin-analysis` |
+| `java` | `cui-java-expert:java-analysis` |
+| `javascript` | `cui-frontend-expert:js-analysis` |
+| `simple` | N/A (tasks from description) |
+
+**Analysis Flow**:
+1. plan-refine delegates to domain analysis skill
+2. Analysis skill returns `components[]` with metadata
+3. plan-refine passes components to plan-type skill's `generate-tasks`
+4. plan-type skill writes tasks directly to plan.md
 
 ---
 
@@ -193,7 +176,7 @@ analysis_created:
 
 ## Operation: analyze
 
-**Input**: `plan_directory`
+**Input**: `plan_id`
 
 **Steps**:
 
@@ -209,58 +192,110 @@ analysis_created:
    Skill: planning:plan-files
    operation: read-plan, read-config, get-references
    ```
+   Extract: `plan_type`, `task_description`, `technology`, `build_system`
 
 3. **Fetch issue** (if URL): `gh issue view {number} --json title,body,labels`
 
-4. **Identify components**:
-   - Functional components (features, APIs, services)
-   - Technical boundaries (modules, packages, layers)
-   - Dependencies between components
-   - Complexity estimates (low/medium/high)
+4. **Delegate to domain analysis skill** based on plan_type:
 
-4. **Present analysis** (AskUserQuestion):
+   **For plugin-development**:
+   ```
+   Skill: cui-plugin-development-tools:plugin-analysis
+   operation: analyze
+   plan_id: {plan_id}
+   task_description: {task_description}
+   issue_context: {issue_body}
+   ```
+
+   **For java**:
+   ```
+   Skill: cui-java-expert:java-analysis
+   operation: analyze
+   plan_id: {plan_id}
+   task_description: {task_description}
+   issue_context: {issue_body}
+   build_system: maven|gradle
+   ```
+
+   **For javascript**:
+   ```
+   Skill: cui-frontend-expert:js-analysis
+   operation: analyze
+   plan_id: {plan_id}
+   task_description: {task_description}
+   issue_context: {issue_body}
+   build_system: npm
+   ```
+
+   **For simple**: Skip analysis, derive single component from task description.
+
+5. **Receive components** from domain analysis skill:
+   ```yaml
+   components:
+     - name: "{component-name}"
+       type: "{type}"
+       scope: "create|modify|refactor"
+       path: "{relative-path}"
+       dependencies: [...]
+       complexity: "low|medium|high"
+   ```
+
+6. **Present analysis** (AskUserQuestion):
    - Component list with scope and complexity
    - Dependency mapping
    - Options: Proceed / Modify / Re-analyze
 
-5. **Update progress** (after user approval):
+7. **Update progress** (after user approval):
    ```bash
-   python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id task-1 --complete-items "Analyze requirements"
+   python3 {update-progress.py} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-1 --complete-items "Analyze requirements"
    ```
 
-**Output**: `components[N]: {name, scope, complexity, dependencies}`
+**Output**: `components[]` ready for generate-tasks
 
 ---
 
 ## Operation: plan-tasks
 
-**Input**: `plan_directory`, `components`
+**Input**: `plan_id`, `components[]`
 
 **Steps**:
 
-1. **Generate tasks per component**:
-   - Create implementation task(s)
-   - Add technology-specific checklist (see `standards/workflow.md`)
-   - Define acceptance criteria
-   - Add quality checklist items
-
-2. **Order by dependencies**
-
-3. **Present task list** (AskUserQuestion):
-   - Task table with complexity and dependencies
-   - Options: Proceed / View details / Modify / Adjust granularity
-
-4. **Add tasks to plan**:
+1. **Read plan_type from config**:
    ```
    Skill: planning:plan-files
-   operation: write-plan
+   operation: read-config → get plan_type
+   ```
+
+2. **Present task preview** (AskUserQuestion):
+   - Component list with planned task types
+   - Options: Proceed / Modify / Adjust granularity
+
+3. **Call plan-type skill to generate and write tasks**:
+   ```
+   Skill: planning:plan-type-{plan_type}
+   operation: generate-tasks
+   plan_id: {plan_id}
+   components: {components from analyze operation}
+   ```
+
+   The plan-type skill:
+   - Generates tasks based on component types
+   - Writes tasks directly to plan.md via scripts
+   - Returns confirmation with task count
+
+4. **Receive confirmation**:
+   ```yaml
+   generate_tasks_result:
+     status: success
+     tasks_written: {count}
+     plan_file: .plan/plans/{plan_id}/plan.md
    ```
 
 5. **Log task planning**:
    ```
    Skill: planning:work-log
    operation: log-entry
-   plan_directory: {plan_directory}
+   plan_directory: .plan/plans/{plan_id}
    phase: refine
    task: task-2
    action: "Generated implementation tasks"
@@ -269,10 +304,10 @@ analysis_created:
 
 6. **Update progress**:
    ```bash
-   python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id task-2 --complete-items "Plan implementation tasks"
+   python3 {update-progress.py} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-2 --complete-items "Plan implementation tasks"
    ```
 
-**Output**: `tasks[N]: {id, name, complexity, dependencies, acceptance_criteria}`
+**Output**: `generate_tasks_result` with task count and confirmation
 
 ---
 
@@ -375,17 +410,28 @@ Options: Define scope / Remove component / Mark as TODO
 - **/plan-manage** - Primary command invoking this skill via phase-management (action=refine)
 
 ### Skills Used
+
+**Planning Bundle**:
 - **plan-files** - All file I/O operations
-- **adr-management** - ADR creation and verification
-- **interface-management** - Interface creation and verification
+- **plan-type-simple** - Task generation for simple plans
+- **plan-type-plugin** - Task generation for plugin plans
+- **plan-type-java** - Task generation for Java plans
+- **plan-type-javascript** - Task generation for JavaScript plans
 - **phase-management** - Orchestration (invokes this skill)
 - **work-log** - Logging significant actions
 
+**Domain Analysis** (delegated):
+- **cui-plugin-development-tools:plugin-analysis** - Plugin component analysis
+- **cui-java-expert:java-analysis** - Java component analysis
+- **cui-frontend-expert:js-analysis** - JavaScript component analysis
+
+**Documentation**:
+- **adr-management** - ADR creation and verification
+- **interface-management** - Interface creation and verification
+
 ### Related Skills
 - **plan-init** - Previous phase
-- **plan-implement** - Next phase
-- **plan-verify** - Verification phase
-- **plan-finalize** - Finalization phase
+- **plan-execute** - Execution phases (implement/verify/finalize)
 
 ---
 
@@ -397,30 +443,3 @@ Options: Define scope / Remove component / Mark as TODO
 - [x] User confirmation for all decisions
 - [x] Implementation requirements artifact generated
 
----
-
-## Continuous Improvement
-
-**MANDATORY**: When executing scripts from this skill, unexpected behavior or errors MUST be documented as lessons learned immediately.
-
-### When to Document
-
-File a lesson learned when a script:
-- Returns unexpected output
-- Fails to update files as expected
-- Requires a workaround to achieve the desired result
-- Has unclear or misleading documentation
-
-### How to Document
-
-Use the `general-tools:manage-lessons-learned` skill:
-```bash
-python3 {write-lesson.py path} --component "planning:plan-refine" --category {bug|improvement|anti-pattern} --title "Brief description" --detail "What happened, why, workaround, suggested fix"
-```
-
-**Categories**:
-- `bug`: Script is broken or produces wrong results
-- `improvement`: Script works but could be better
-- `anti-pattern`: Script was misused or documentation unclear
-
-**Why This Matters**: Script errors indicate gaps in validation, documentation, or implementation. Documented lessons improve future sessions and identify systemic issues.

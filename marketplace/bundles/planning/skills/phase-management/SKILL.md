@@ -160,7 +160,8 @@ Else (default "list"):
    ```
 4. **Determine next phase** based on plan_type:
    - `simple` → execute (skip refine phase)
-   - `implementation` → refine
+   - `java` → refine
+   - `javascript` → refine
    - `plugin-development` → refine
 5. **Auto-continue** to the determined next phase (no user prompt)
 6. Execute the appropriate operation:
@@ -173,7 +174,7 @@ Else (default "list"):
 
 **Auto-Continue Behavior**: Init automatically transitions to the appropriate next phase without prompting:
 - Simple plans → execute phase (3-phase flow: init→execute→finalize)
-- Implementation/Plugin-Development plans → refine phase (4-5 phase flows)
+- Java/JavaScript/Plugin-Development plans → refine phase (4-5 phase flows)
 
 The flow executes continuously, only stopping when:
 - A genuine question requires user input (e.g., ambiguous requirements)
@@ -273,9 +274,10 @@ Else:
 
 1. Run `Operation: route-phase` to get target skill
 2. Invoke target skill:
-   - `implement` → `Skill: planning:plan-implement`
-   - `verify` → `Skill: planning:plan-verify`
-   - `finalize` → `Skill: planning:plan-finalize`
+   - `implement` → `Skill: planning:plan-execute`
+   - `execute` → `Skill: planning:plan-execute`
+   - `verify` → `Skill: planning:plan-execute`
+   - `finalize` → `Skill: planning:plan-execute`
 
 ### Step 4: Handle Phase Completion
 
@@ -597,7 +599,8 @@ Converts a selected lesson into a new plan.
 
 7. **Determine next phase** based on plan_type:
    - `simple` → execute (skip refine phase)
-   - `implementation` → refine
+   - `java` → refine
+   - `javascript` → refine
    - `plugin-development` → refine
 
 8. **Auto-continue** to the determined next phase (no user prompt)
@@ -733,7 +736,7 @@ routing:
   plan_directory: {path}
   current_phase: {phase}
   current_task: {task-id}
-  target_skill: {plan-init|plan-refine|plan-implement|plan-verify|plan-finalize}
+  target_skill: {plan-init|plan-refine|plan-execute}
 
 phase_status:
   completed_phases[N]: {list}
@@ -1013,9 +1016,7 @@ suggestion: Verify path or create new plan
 ### Skills Delegated To
 - **plan-init** - Init phase execution
 - **plan-refine** - Refine phase execution
-- **plan-implement** - Implement phase execution
-- **plan-verify** - Verify phase execution
-- **plan-finalize** - Finalize phase execution
+- **plan-execute** - Implement/verify/finalize/execute phase execution
 
 ### Command Integration
 - **/plan-manage** - Plan lifecycle management (list, cleanup, init, refine)

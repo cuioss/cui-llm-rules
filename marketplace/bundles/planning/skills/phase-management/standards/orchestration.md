@@ -19,9 +19,7 @@ phase-management (orchestrator)
         └─→ phase skills (execution)
               ├── plan-init
               ├── plan-refine
-              ├── plan-implement
-              ├── plan-verify
-              └── plan-finalize
+              └── plan-execute (implement/verify/finalize/execute)
 ```
 
 ### Delegation Rules
@@ -40,7 +38,7 @@ operation: read-plan
 plan_directory: {path}
 
 # Correct: Delegate to phase skill
-Skill: planning:plan-implement
+Skill: planning:plan-execute
 plan_directory: {path}
 
 # Wrong: Direct file access

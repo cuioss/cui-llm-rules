@@ -1,124 +1,199 @@
 # CUI Task Workflow
 
-Goal-based development workflow from task implementation to PR quality verification.
+Plan-based task management system that transforms high-level task descriptions into executable action sequences through progressive refinement.
 
-## Purpose
+## Architecture
 
-Complete development workflow with two simple commands:
-1. **IMPLEMENT** - Transform tasks into verified code
-2. **DOCTOR** - Diagnose and fix PR issues
+**Core Principle**: Plan-Type Skills are SINGLE SOURCE OF TRUTH, phase skills execute checklists.
+
+See [skills/plan-refine/standards/architecture.md](skills/plan-refine/standards/architecture.md) for full architecture documentation.
+
+```
+User Request → Plan-Type Skill → Phase Skills (execute checklists) → Result
+```
 
 ## Commands
 
-### /task-implement (IMPLEMENT)
-Implement GitHub issues or standalone tasks with full verification.
+### /plan-manage
+Manage task plans - list, create, refine.
 
-**Modes**:
-- FULL: Review → Plan → Execute (GitHub issues)
-- PLAN: Plan → Execute (task descriptions)
-- QUICK: Execute only (immediate implementation)
-
-**Examples**:
-```
-/task-implement task=123
-/task-implement task="Add validation" quick
-/task-implement task=456 push
+```bash
+/plan-manage action=list              # List active plans
+/plan-manage action=create task="..." # Create new plan
+/plan-manage action=refine            # Refine current plan
 ```
 
-### /pr-doctor (DOCTOR)
+### /plan-execute
+Execute task plans - implement, verify, finalize.
+
+```bash
+/plan-execute                         # Continue current plan
+/plan-execute phase=implement         # Execute specific phase
+```
+
+### /pr-doctor
 Diagnose and fix PR issues (build, reviews, Sonar).
 
-**Checks**:
-- build: Fix compilation errors
-- reviews: Respond to review comments
-- sonar: Fix quality issues
-- all: Complete PR workflow
-
-**Examples**:
-```
+```bash
 /pr-doctor pr=123
 /pr-doctor checks=sonar
-/pr-doctor auto-fix
+```
+
+### /task-implement
+Quick task implementation (combines create + execute).
+
+```bash
+/task-implement task=123              # From GitHub issue
+/task-implement task="Add feature"    # From description
 ```
 
 ## Skills
 
-5 specialized skills provide all business logic:
-- **cui-task-planning** - Review, Plan, Execute workflows
-- **pr-workflow** - Fetch Comments, Handle Review
-- **sonar-workflow** - Fetch Issues, Fix Issues
-- **git-workflow** - Commit workflow
-- **workflow-patterns** - Handoff protocols (uses TOON format for 50% token reduction)
+### Plan-Type Skills (Single Source of Truth)
 
-## Benefits
+| Skill | Phases | Purpose |
+|-------|--------|---------|
+| `plan-type-simple` | 3 | Simple workflow for docs, config, quick fixes |
+| `plan-type-plugin` | 4 | Plugin development with /plugin-doctor verification |
+| `plan-type-java` | 5 | Java/Maven/Gradle implementation |
+| `plan-type-javascript` | 5 | JavaScript/npm implementation |
 
-**Before**: 6 commands, 1,161 lines
-**After**: 2 commands, 270 lines
-**Reduction**: 77% code reduction
+### Phase Skills
 
-**Simplified Architecture**:
+| Skill | Role | Purpose |
+|-------|------|---------|
+| `plan-init` | Setup | Create plan structure using plan-type skill |
+| `plan-refine` | Analysis | Analyze requirements, generate tasks (loads plan-type skill) |
+| `plan-execute` | Execution | Execute checklist items sequentially (dumb runner) |
+
+### Support Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `analysis-api` | **API contract** for domain analysis skills |
+| `plan-files` | File I/O abstraction for plan storage |
+| `phase-management` | Phase orchestration and transitions |
+| `git-workflow` | Git commit operations |
+| `pr-workflow` | PR creation and management |
+| `sonar-workflow` | Sonar issue handling |
+| `work-log` | Session activity logging |
+
+## Plan-Type Skill API
+
+All plan-type skills implement a uniform API:
+
+| Operation | Input | Output | Used By |
+|-----------|-------|--------|---------|
+| `get-phase-structure` | `plan_id`, `task_title` | Phase structure | plan-init |
+| `generate-tasks` | `plan_id`, `components[]` | **Writes directly** to plan.md | plan-refine |
+| `get-finalize-config` | `plan_id` | Finalize behavior | plan-execute |
+| `get-next-phase` | `plan_id`, `current_phase` | Next phase | phase-management |
+
+**Key Design**: `generate-tasks` writes directly to plan.md via scripts (no ping-pong between skills).
+
+## Domain Analysis Skills
+
+Component analysis is delegated to domain-specific skills in their expert bundles:
+
+| Plan Type | Analysis Skill |
+|-----------|----------------|
+| `plugin-development` | `cui-plugin-development-tools:plugin-analysis` |
+| `java` | `cui-java-expert:java-analysis` |
+| `javascript` | `cui-frontend-expert:js-analysis` |
+| `simple` | N/A (tasks from description) |
+
+### Unified Analysis API
+
+**Contract**: `planning:analysis-api` skill defines the full API specification.
+
+All domain analysis skills implement this contract:
+
+| Element | Description |
+|---------|-------------|
+| **Operation** | `analyze` |
+| **Input** | `plan_id`, `task_description`, `issue_context`, `build_system` |
+| **Output** | `analysis_result` with `status` and `components[]` |
+
+See `planning:analysis-api` for full input/output specification and domain-specific fields.
+
+### Handoff Protocol
+
 ```
-User Goal → One Command → Skills → Result
+plan-refine → analyze(plan_id, task, ...) → domain-analysis-skill
+            ← analysis_result{status, components[]}
 
-IMPLEMENT: /task-implement (116 lines)
-DOCTOR:    /pr-doctor     (142 lines)
+plan-refine → generate-tasks(plan_id, components) → plan-type-skill
+            ← (writes directly to plan.md)
 ```
+
+### Sub-Type Templates
+
+Located in `skills/plan-type-plugin/templates/` (internal to plan-type-plugin):
+
+| Template | Trigger | Provides |
+|----------|---------|----------|
+| `script-task.md` | "create script" | TDD workflow |
+| `skill-task.md` | "create skill" | Skill structure |
+| `command-task.md` | "create command" | Command orchestration |
+| `agent-task.md` | "create agent" | Agent frontmatter |
+
+## File Structure
+
+```
+planning/
+├── README.md                    # This file
+├── commands/
+│   ├── plan-manage.md
+│   ├── plan-execute.md
+│   ├── pr-doctor.md
+│   └── task-implement.md
+└── skills/
+    ├── plan-type-simple/        # Simple workflow skill (3 phases)
+    │   └── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
+    ├── plan-type-plugin/        # Plugin workflow skill (4 phases)
+    │   ├── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
+    │   └── templates/           # Sub-type templates (internal)
+    ├── plan-type-java/          # Java workflow skill (5 phases)
+    │   └── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
+    ├── plan-type-javascript/    # JavaScript workflow skill (5 phases)
+    │   └── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
+    ├── plan-init/               # Init phase skill
+    │   ├── SKILL.md
+    │   └── standards/           # Workflow reference
+    ├── plan-refine/             # Refine phase skill (smart analysis)
+    │   ├── SKILL.md
+    │   ├── standards/           # Architecture and workflow docs
+    │   │   ├── architecture.md  # Core architecture documentation
+    │   │   └── workflow.md      # Refine workflow reference
+    │   └── templates/           # Artifact templates
+    ├── plan-execute/            # Execute phase skill (dumb runner)
+    ├── plan-files/              # File I/O abstraction
+    ├── phase-management/        # Phase orchestration
+    ├── git-workflow/
+    ├── pr-workflow/
+    ├── sonar-workflow/
+    └── work-log/
+
+.plan/                           # Plan storage (per project)
+├── plans/                       # Active plans
+│   └── {plan-name}/
+│       ├── plan.md
+│       ├── config.toon
+│       └── references.toon
+├── archived-plans/              # Completed plans
+└── lessons-learned/             # Captured lessons
+```
+
+## Dependencies
+
+- **general-tools** - Script runner, lessons-learned management
+- **cui-plugin-development-tools** - Plugin doctor, plugin-analysis skill
+- **builder** - Build execution (maven/npm)
+- **cui-java-expert** - Java analysis and implementation delegation
+- **cui-frontend-expert** - JavaScript analysis and implementation delegation
 
 ## Installation
 
 ```bash
 /plugin install planning
 ```
-
-## Architecture
-
-```
-planning/
-├── README.md           # This file
-├── commands/           # 2 goal-based commands
-│   ├── task-implement.md
-│   └── pr-doctor.md
-└── skills/             # 5 skills with workflows
-    ├── workflow-patterns/
-    │   ├── SKILL.md    # Orchestration patterns overview
-    │   ├── templates/  # Handoff TOON templates (token-efficient format)
-    │   └── references/ # Protocol documentation
-    ├── cui-task-planning/
-    │   ├── SKILL.md    # Plan, Execute, Review workflows
-    │   ├── scripts/    # 3 Python scripts
-    │   └── standards/  # Planning standards
-    ├── git-workflow/
-    │   ├── SKILL.md    # Commit workflow
-    │   ├── scripts/    # 1 Python script
-    │   └── standards/  # Git commit standards
-    ├── pr-workflow/
-    │   ├── SKILL.md    # Fetch Comments, Handle Review workflows
-    │   └── scripts/    # 2 Python scripts
-    └── sonar-workflow/
-        ├── SKILL.md    # Fetch Issues, Fix Issues workflows
-        └── scripts/    # 2 Python scripts
-```
-
-## Dependencies
-
-### Inter-Bundle Dependencies
-- **builder-maven** (required) - Commands use /maven-build-and-fix for verification
-- **general-tools** (required) - manage-memories skill for session persistence
-- **cui-java-expert** (optional) - For Java implementation delegation
-- **cui-frontend-expert** (optional) - For JavaScript implementation delegation
-
-### External Dependencies
-- GitHub CLI (`gh`) for issue and PR operations
-- Maven wrapper (`./mvnw`) for build verification
-- SonarQube MCP tool for Sonar issue fetching
-
-## Bundle Statistics
-
-- **Commands**: 2 (minimal wrappers, ~130 lines each)
-- **Skills**: 5 (workflow-patterns + 4 with 8 Python scripts total)
-- **Total Lines**: 258 command lines (77% reduction from 1,161)
-
-## Support
-
-- Repository: https://github.com/cuioss/cui-llm-rules
-- Bundle: marketplace/bundles/planning/

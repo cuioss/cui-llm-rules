@@ -24,10 +24,13 @@
     "./skills/workflow-patterns",
     "./skills/phase-management",
     "./skills/plan-files",
+    "./skills/analysis-api",
+    "./skills/plan-type-simple",
+    "./skills/plan-type-plugin",
+    "./skills/plan-type-java",
+    "./skills/plan-type-javascript",
     "./skills/plan-init",
     "./skills/plan-refine",
-    "./skills/plan-implement",
-    "./skills/plan-verify",
-    "./skills/plan-finalize"
+    "./skills/plan-execute"
   ]
 }

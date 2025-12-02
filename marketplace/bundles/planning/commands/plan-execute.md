@@ -140,6 +140,4 @@ Completes the plan:
 | Skill | Purpose |
 |-------|---------|
 | `planning:phase-management` | Plan discovery, routing, workflows |
-| `planning:plan-implement` | Implementation phase execution |
-| `planning:plan-verify` | Verification phase execution |
-| `planning:plan-finalize` | Finalization phase execution |
+| `planning:plan-execute` | Execution phases (implement/verify/finalize) |

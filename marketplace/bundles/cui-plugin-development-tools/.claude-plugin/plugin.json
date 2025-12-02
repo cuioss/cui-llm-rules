@@ -17,6 +17,7 @@
   ],
   "skills": [
     "./skills/marketplace-inventory",
+    "./skills/plugin-analysis",
     "./skills/plugin-architecture",
     "./skills/plugin-create",
     "./skills/plugin-doctor",
