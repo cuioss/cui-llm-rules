@@ -1,72 +1,140 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with this repository.
 
 ## Repository Overview
 
-This repository contains LLM rules and standards for CUI (Common User Interface) OSS projects. It serves as a comprehensive documentation system defining coding standards, processes, and guidelines for AI assistants working with CUI codebases.
+This is a **Claude Code Marketplace** repository providing development standards, automation tools, and AI-assisted workflows for CUI (Common User Interface) Open Source projects. It contains 8 production bundles with 95 components (skills, agents, and commands) that integrate with Claude Code's plugin system.
 
 ## Architecture
 
-### Documentation Structure
-- `/standards/` - Primary standards documentation in AsciiDoc format, organized by domain (Java, JavaScript, CSS, Testing, Documentation, Logging)
-- Root README files provide entry points and overview documentation
-- Clear separation between standards (technical requirements) and implementation processes
+### Directory Structure
 
-### Document Format
-All standards use AsciiDoc format with consistent structure:
+```
+cui-llm-rules/
+├── marketplace/                    # Claude Code marketplace system
+│   ├── .claude-plugin/
+│   │   └── marketplace.json        # Master marketplace configuration
+│   └── bundles/                    # 8 production bundles
+│       ├── cui-java-expert/        # Java development standards + agents
+│       ├── cui-frontend-expert/    # JavaScript/CSS standards + agents
+│       ├── builder/                # Maven/Gradle/npm build automation
+│       ├── planning/               # Task planning & workflow management
+│       ├── cui-documentation-standards/  # AsciiDoc, ADRs, interfaces
+│       ├── general-tools/          # Utility commands & file operations
+│       ├── cui-plugin-development-tools/ # Plugin creation toolkit
+│       └── cui-requirements/       # Requirements engineering
+├── test/                           # Python pytest tests for scripts
+├── target/                         # Generated files and logs (gitignored)
+└── .claude/                        # Project-level Claude Code configuration
+```
 
-- Table of contents on left side
-- Section numbering enabled
-- Cross-references using `xref:path/to/document.adoc[Link Text]` syntax
-- Standard header format with `:toc: left`, `:toclevels: 3`, `:sectnums:`
-- **AsciiDoc Grammar**: Always ensure proper AsciiDoc formatting, especially for lists - there must always be a blank line before any list (consult AsciiDoc documentation when in doubt)
+### Component Model
 
-## Key Standards Categories
+The marketplace uses a three-tier component hierarchy:
 
-- **Java Standards** - Java development standards including DSL-style constants pattern
-- **JavaScript Standards** - Modern JavaScript, web components, project structure, Maven integration, linting, testing, JSDoc
-- **CDI/Quarkus Standards** - CDI aspects, container standards, integration testing, security
-- **CSS Standards** - Development standards, linting, formatting, best practices
-- **Testing Standards** - Core testing requirements and quality standards
-- **Documentation Standards** - General documentation, Javadoc standards and maintenance, README structure
-- **Logging Standards** - Core logging requirements, implementation guide, testing guide
-- **Requirements Standards** - Requirements documents, specifications, new project guide
+| Component | Count | Purpose |
+|-----------|-------|---------|
+| **Skills** | 28 | Domain knowledge, standards, and reference documentation |
+| **Agents** | 28 | Autonomous task executors with focused responsibilities |
+| **Commands** | 39 | User-invokable slash commands that orchestrate workflows |
 
-## Documentation Review Guidelines
+### Bundle Structure
 
-When performing comprehensive documentation review/rework:
+Each bundle follows a consistent structure:
 
-### Quality Standards
-- **Consistency**: Ensure uniform terminology, formatting, and structure across all documents
-- **Completeness**: Verify all standards areas are fully documented without gaps
-- **Correctness**: Validate all technical information and cross-references
-- **Focus**: Keep content concise but preserve all essential information
+```
+bundle-name/
+├── .claude-plugin/
+│   └── plugin.json         # Bundle manifest (name, version, components)
+├── agents/                 # Specialized task agents (*.md)
+├── commands/               # Slash commands (*.md)
+├── skills/                 # Development standards
+│   └── skill-name/
+│       ├── SKILL.md        # Skill definition and workflows
+│       ├── standards/      # Detailed standard documents (*.md)
+│       ├── scripts/        # Implementation scripts (Python/Bash)
+│       └── templates/      # Document/code templates
+└── README.md               # Bundle documentation
+```
 
-### Content Requirements
-- **No Duplication**: Eliminate duplicate information across documents; use cross-references instead
-- **Current State Only**: Document present requirements only - remove transitional, status, or deprecation information
-- **No Version History**: NEVER add version history, changelogs, "RECENT IMPROVEMENTS", "RECENT CHANGES", or dated update sections to any documentation
-- **No Timestamps**: NEVER add dates, version numbers, or timestamps to document content
-- **Source Attribution**: Always link to authoritative sources when referencing best practices or external standards
-- **Standards Linking**: Cross-reference related standards documents using `xref:` syntax
+## The 8 Production Bundles
 
-### Document Maintenance
-- Update all cross-references when restructuring content
-- Verify all `xref:` links remain valid after changes
-- Maintain AsciiDoc formatting conventions and document header structure
-- Focus on technical requirements rather than implementation procedures
+### cui-java-expert
+Java development standards covering core patterns, null safety, Lombok, CDI/Quarkus, unit testing with JUnit 5, JavaDoc, and logging. Includes agents for implementation, testing, refactoring, and build fixing.
 
-### File Structure and Organization
-- **Adapt structure when necessary**: Reorganize files and directories to improve logical organization and usability
-- **Single aspect per document**: Each document should represent one coherent aspect or domain; split overly broad documents into focused components
-- **Logical linking**: Use README files to provide overview and link related documents together in a coherent structure
-- **Optimal document size**: Documents should be neither too large (>400 lines) nor too small (<50 lines) - aim for comprehensive but focused content
-- **Consistent naming**: Use self-describing, consistent file naming conventions (e.g., `kebab-case.adoc`, descriptive names that clearly indicate content)
-- **Cross-reference updates**: When restructuring, ensure all cross-references are updated to reflect new file locations and names
+### cui-frontend-expert
+JavaScript and frontend standards for ES modules, modern patterns, CSS, JSDoc, project structure, Maven integration, ESLint/Prettier/StyleLint configuration, Cypress E2E testing, and Jest unit testing.
 
-## Development Notes
+### builder
+Unified build automation supporting Maven, Gradle, and npm. Features environment detection, build output parsing, error routing, and auto-fixing workflows.
 
-- This is a documentation-only repository with no build system, compilation, or testing
-- Uses standard git workflow on main branch
-- Allways use target-directory for documents or scripts you create on the fly. Do not use temp or proliferate within working-directory. Allways use proper tools  like Edit, Read, Write, NEVER use stuff like echo, cat and such
+### planning
+Complete development workflow automation with 14 skills covering task planning, implementation phases, plan refinement, finalization, git workflows, PR management, work logging, and Sonar integration.
+
+### cui-documentation-standards
+Documentation standards for AsciiDoc, Architectural Decision Records (ADRs), and interface specifications. Includes validation, formatting, and maintenance workflows.
+
+### general-tools
+Utility commands for script execution, permission management, file operations, memory management, lessons learned tracking, and project configuration.
+
+### cui-plugin-development-tools
+Plugin development toolkit with creation wizards, quality diagnosis, marketplace inventory scanning, architecture guidance, and component maintenance workflows.
+
+### cui-requirements
+Requirements engineering standards covering authoring, planning, traceability, and project initialization.
+
+## Key Design Patterns
+
+### Skills-First Development
+Standards are loaded before any code work begins. Skills provide the domain knowledge that guides implementation.
+
+### Agent Delegation
+Commands orchestrate agents for autonomous subtask execution. Agents have focused responsibilities and return structured JSON results.
+
+### Build System Abstraction
+Single interface for Maven/Gradle/npm with automatic environment detection. Consistent output parsing and error routing across all build systems.
+
+### Structured Contracts
+All agents return JSON with status, data, and metrics. Explicit error paths and partial success states enable iteration.
+
+## Working in This Repository
+
+### File Formats
+
+- **Skills/Commands/Agents**: Markdown with YAML frontmatter
+- **Standards documents**: Markdown (some AsciiDoc templates available)
+- **Scripts**: Python and Bash in `skills/*/scripts/` directories
+- **Configuration**: JSON for plugin.json, marketplace.json, settings
+
+### Naming Conventions
+
+- Files and commands: `kebab-case` (e.g., `java-implement-code.md`)
+- Bundles: Descriptive names with domain prefix (e.g., `cui-java-expert`)
+- Skills: Domain-specific names (e.g., `cui-java-core`, `plan-refine`)
+
+### Documentation Standards
+
+- **No version history**: Never add changelogs, "RECENT CHANGES", or dated update sections
+- **No timestamps**: Never add dates or version numbers to document content
+- **No duplication**: Use cross-references instead of duplicating information
+- **Current state only**: Document present requirements, not transitional information
+- **AsciiDoc formatting**: Ensure blank line before lists, proper cross-references with `xref:` syntax
+
+### Testing
+
+- Test suite located in `/test/` directory
+- Python pytest tests for script functionality
+- Tests cover plan file parsing, validation, phase management
+
+### Development Notes
+
+- Use `target/` directory for generated files and temporary outputs
+- Use proper tools (Edit, Read, Write) instead of shell commands (echo, cat)
+- Use `gh` tool for GitHub access, not MCP
+
+## Integration Points
+
+- **Git**: `git` tool for issue/PR management
+- **Build Systems**: none, md only
+- **IDE**: IntelliJ MCP for diagnostics (file must be active in editor)
