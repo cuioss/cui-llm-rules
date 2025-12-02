@@ -1,0 +1,16 @@
+number: {NUMBER}
+title: {TITLE}
+status: pending
+specification: {SPEC_REF}
+created: {TIMESTAMP}
+updated: {TIMESTAMP}
+
+description: |
+  {DESCRIPTION}
+
+steps[{STEP_COUNT}]{number,title,status}:
+1,{STEP_1_TITLE},pending
+2,{STEP_2_TITLE},pending
+3,{STEP_3_TITLE},pending
+
+current_step: 1
