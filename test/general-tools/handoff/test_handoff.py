@@ -15,7 +15,7 @@ from conftest import run_script, TestRunner, get_script_path
 SCRIPT_PATH = get_script_path('general-tools', 'handoff', 'handoff.py')
 
 # Import toon_parser for output parsing
-TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'
+TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'
 sys.path.insert(0, str(TOON_PARSER_DIR))
 from toon_parser import parse_toon
 

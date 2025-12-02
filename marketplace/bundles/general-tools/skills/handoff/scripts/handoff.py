@@ -21,10 +21,12 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-# Import from file-operations-base
+# Import from file-operations-base and toon-usage
 SCRIPT_DIR = Path(__file__).parent
 FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
+TOON_DIR = SCRIPT_DIR.parent.parent / 'toon-usage' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
+sys.path.insert(0, str(TOON_DIR))
 
 from file_ops import get_base_dir, atomic_write_file, ensure_directory
 from toon_parser import parse_toon, serialize_toon, ToonParseError

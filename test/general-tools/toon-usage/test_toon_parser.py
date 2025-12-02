@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import TestRunner
 
 # Import the module under test
-SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'
+SCRIPT_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from toon_parser import parse_toon, serialize_toon, ToonParseError
