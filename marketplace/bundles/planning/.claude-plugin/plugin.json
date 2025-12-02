@@ -32,6 +32,7 @@
     "./skills/plan-init",
     "./skills/plan-refine",
     "./skills/plan-execute",
-    "./skills/manage-handoff"
+    "./skills/manage-handoff",
+    "./skills/plan-requirements"
   ]
 }
