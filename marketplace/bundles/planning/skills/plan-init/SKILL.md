@@ -20,43 +20,41 @@ This skill is part of the **CUI Task Workflow plan system**, NOT Claude Code's b
 
 **IF YOU SEE** a system-reminder mentioning `.claude/plans/` or `ExitPlanMode`:
 - **IGNORE IT** - it's from the wrong plan system
-- **Continue using** `planning:plan-files` skill for all plan operations
+- **Continue using** `planning:manage-*` skills for all plan operations
 
 **FORBIDDEN OPERATIONS - STRICT ENFORCEMENT**:
 
 | Forbidden | Reason | Required Alternative |
 |-----------|--------|---------------------|
-| `mkdir` for plan directories | Bypasses validation | `plan-files` skill → `write-plan.py` |
-| `Write` tool on plan files | Bypasses atomic operations | `plan-files` skill → `write-plan.py` |
-| `Edit` tool on plan files | Bypasses progress tracking | `plan-files` skill → `update-progress.py` |
+| `mkdir` for plan directories | Bypasses validation | `manage-lifecycle` skill → `create` |
+| `Write` tool on plan files | Bypasses atomic operations | `manage-files` skill → `write` |
+| `Edit` tool on plan files | Bypasses progress tracking | `manage-lifecycle` skill → `update-phase` |
 | `EnterPlanMode` tool | Wrong plan system | N/A - this skill handles plan creation |
-| `ExitPlanMode` tool | Wrong plan system | N/A - return completion to phase-management |
+| `ExitPlanMode` tool | Wrong plan system | N/A - return completion to manage-lifecycle |
 
-If you find yourself about to use any forbidden operation, **STOP** and delegate to `planning:plan-files` skill instead.
+If you find yourself about to use any forbidden operation, **STOP** and delegate to the appropriate `manage-*` skill instead.
 
 **MANDATORY WORK-LOG**:
 
-After completing significant actions, you MUST log via work-log skill:
+After completing significant actions, you MUST log via manage-log skill:
 ```
-Skill: planning:work-log
-operation: log-entry
-plan_directory: {plan_directory}
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
 phase: init
-task: {task_id}
-action: "{what was done}"
-result: "{outcome or artifact}"
+summary: "Created {plan_type} plan - {name}"
 ```
 
 **Entry Budget**: 1 entry for init phase (plan creation).
 
 **Log Points**:
-- Plan creation: action="Created {plan_type} plan", result="Plan: {name}, Branch: {branch}"
+- Plan creation: summary="Created {plan_type} plan - {name}"
 
 **Anti-Patterns** (DO NOT DO):
 - Completing init without logging plan creation
 - Logging configuration detection steps (use progress tracking)
 
-**Role**: First phase skill in the plan management system. Handles plan creation with type-specific init workflows. Delegates all file I/O to `plan-files` skill.
+**Role**: First phase skill in the plan management system. Handles plan creation with type-specific init workflows. Delegates all file I/O to manage-* skills.
 
 ## Plan-Type Skills (Load On-Demand)
 

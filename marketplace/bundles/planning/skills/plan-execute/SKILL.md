@@ -33,12 +33,14 @@ Contains: Delegation patterns for builds, quality checks, PR creation
 For finalize phase, query the plan-type skill for commit/PR behavior:
 
 ```
-Skill: planning:plan-files
-operation: read-config → get plan_type
+Skill: planning:manage-config
+operation: get
+plan_id: {plan_id}
+field: plan_type
 
 Skill: planning:plan-type-{plan_type}
 operation: get-finalize-config
-plan_id: {plan_directory}
+plan_id: {plan_id}
 ```
 
 Returns: `commit_strategy`, `create_pr`, `verification_required`, `verification_command`
@@ -137,12 +139,14 @@ When transitioning from implement/execute phases, `transition-phase.py` automati
 - **/plan-execute** - Primary command invoking this skill
 
 ### Skills Used
-- **plan-files** - All file I/O operations
+- **manage-config** - Configuration CRUD
+- **manage-lifecycle** - Phase transitions
+- **manage-references** - Reference file CRUD
+- **manage-log** - Work log entries
 - **plan-type-simple** - Finalize config for simple plans
 - **plan-type-plugin** - Finalize config for plugin plans
 - **plan-type-implementation** - Finalize config for implementation plans
 - **git-workflow** - Commit operations
-- **work-log** - Session logging
 
 ### Related Skills
 - **plan-init** - Creates plan structure
@@ -153,6 +157,6 @@ When transitioning from implement/execute phases, `transition-phase.py` automati
 ## Quality Checklist
 
 - [x] Self-contained with relative paths
-- [x] All file I/O delegated to plan-files skill
+- [x] All file I/O delegated to manage-* skills
 - [x] DUMB TASK RUNNER pattern
 - [x] Handles implement/verify/finalize phases

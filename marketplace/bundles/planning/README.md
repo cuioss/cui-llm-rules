@@ -71,12 +71,24 @@ Quick task implementation (combines create + execute).
 | Skill | Purpose |
 |-------|---------|
 | `analysis-api` | **API contract** for domain analysis skills |
-| `plan-files` | File I/O abstraction for plan storage |
-| `phase-management` | Phase orchestration and transitions |
 | `git-workflow` | Git commit operations |
 | `pr-workflow` | PR creation and management |
 | `sonar-workflow` | Sonar issue handling |
-| `work-log` | Session activity logging |
+
+### Manage Skills (Data/Artifact CRUD)
+
+| Skill | Script | Purpose |
+|-------|--------|---------|
+| `manage-requirements` | `manage-requirement.py` | Requirements CRUD |
+| `manage-specifications` | `manage-specification.py` | Specifications CRUD |
+| `manage-tasks` | `manage-task.py` | Tasks + steps CRUD |
+| `manage-handoff` | `manage-handoff.py` | Session handoff |
+| `manage-files` | `manage-files.py` | Generic file I/O |
+| `manage-config` | `manage-config.py` | config.toon domain |
+| `manage-references` | `manage-references.py` | references.toon domain |
+| `manage-lifecycle` | `manage-lifecycle.py` | status.toon + phases |
+| `manage-log` | `manage-work-log.py` | Work log entries |
+| `manage-lessons` | `manage-lesson.py` | Global lessons |
 
 ## Plan-Type Skill API
 
@@ -167,12 +179,19 @@ planning/
     │   │   └── workflow.md      # Refine workflow reference
     │   └── templates/           # Artifact templates
     ├── plan-execute/            # Execute phase skill (dumb runner)
-    ├── plan-files/              # File I/O abstraction
-    ├── phase-management/        # Phase orchestration
+    ├── manage-requirements/     # Requirements CRUD
+    ├── manage-specifications/   # Specifications CRUD
+    ├── manage-tasks/            # Tasks + steps CRUD
+    ├── manage-handoff/          # Session handoff
+    ├── manage-files/            # Generic file I/O
+    ├── manage-config/           # config.toon domain
+    ├── manage-references/       # references.toon domain
+    ├── manage-lifecycle/        # status.toon + phases
+    ├── manage-log/              # Work log entries
+    ├── manage-lessons/          # Global lessons
     ├── git-workflow/
     ├── pr-workflow/
-    ├── sonar-workflow/
-    └── work-log/
+    └── sonar-workflow/
 
 .plan/                           # Plan storage (per project)
 ├── plans/                       # Active plans
@@ -186,7 +205,7 @@ planning/
 
 ## Dependencies
 
-- **general-tools** - Script runner, lessons-learned management
+- **general-tools** - Script runner, file operations base
 - **cui-plugin-development-tools** - Plugin doctor, plugin-analysis skill
 - **builder** - Build execution (maven/npm)
 - **cui-java-expert** - Java analysis and implementation delegation

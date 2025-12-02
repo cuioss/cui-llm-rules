@@ -48,7 +48,7 @@ plan_id: {plan_id}
 | `get-phase-structure` | Returns phases and their tasks | plan-init |
 | `generate-tasks` | **Writes tasks directly** to plan.md | plan-refine |
 | `get-finalize-config` | Returns finalize behavior (commit, PR, etc.) | plan-execute |
-| `get-next-phase` | Returns next phase in workflow | phase-management |
+| `get-next-phase` | Returns next phase in workflow | manage-lifecycle |
 
 **Key Design**: `generate-tasks` writes directly to plan.md via scripts (no ping-pong between skills).
 
@@ -93,8 +93,11 @@ Component analysis is delegated to domain-specific skills:
 
 1. **Read plan context**:
    ```
-   Skill: planning:plan-files
-   operation: read-plan, read-config
+   Skill: planning:manage-lifecycle
+   operation: read
+
+   Skill: planning:manage-config
+   operation: read
    ```
 
 2. **Evaluate complexity factors**:
@@ -146,11 +149,10 @@ complexity_assessment:
 
 5. **Update references**:
    ```
-   Skill: planning:plan-files
-   operation: write-references
-   action: add
-   section: implementation_files
-   value: {plan_directory}/analysis.md
+   Skill: planning:manage-references
+   operation: add-file
+   plan_id: {plan_id}
+   file: analysis.md
    ```
 
 **Output**:
@@ -163,13 +165,11 @@ analysis_created:
 
 6. **Log analysis creation**:
    ```
-   Skill: planning:work-log
-   operation: log-entry
-   plan_directory: {plan_directory}
+   Skill: planning:manage-log
+   operation: add
+   plan_id: {plan_id}
    phase: refine
-   task: task-1
-   action: "Completed strategic analysis"
-   result: "analysis.md created"
+   summary: "Completed strategic analysis - analysis.md created"
    ```
 
 ---
@@ -189,8 +189,14 @@ analysis_created:
 
 2. **Read context**:
    ```
-   Skill: planning:plan-files
-   operation: read-plan, read-config, get-references
+   Skill: planning:manage-lifecycle
+   operation: read
+
+   Skill: planning:manage-config
+   operation: read
+
+   Skill: planning:manage-references
+   operation: read
    ```
    Extract: `plan_type`, `task_description`, `technology`, `build_system`
 
@@ -262,8 +268,10 @@ analysis_created:
 
 1. **Read plan_type from config**:
    ```
-   Skill: planning:plan-files
-   operation: read-config → get plan_type
+   Skill: planning:manage-config
+   operation: get
+   plan_id: {plan_id}
+   field: plan_type
    ```
 
 2. **Present task preview** (AskUserQuestion):
@@ -293,13 +301,11 @@ analysis_created:
 
 5. **Log task planning**:
    ```
-   Skill: planning:work-log
-   operation: log-entry
-   plan_directory: .plan/plans/{plan_id}
+   Skill: planning:manage-log
+   operation: add
+   plan_id: {plan_id}
    phase: refine
-   task: task-2
-   action: "Generated implementation tasks"
-   result: "{count} tasks planned"
+   summary: "Generated {count} implementation tasks"
    ```
 
 6. **Update progress**:
@@ -333,10 +339,10 @@ analysis_created:
 
 5. **Update references**:
    ```
-   Skill: planning:plan-files
-   operation: write-references
-   action: add
-   reference_type: adr|interface
+   Skill: planning:manage-references
+   operation: add-file
+   plan_id: {plan_id}
+   file: {adr|interface path}
    ```
 
 6. **Update progress**:
@@ -364,13 +370,11 @@ After all refine tasks complete:
 
 4. **Log requirements generation**:
    ```
-   Skill: planning:work-log
-   operation: log-entry
-   plan_directory: {plan_directory}
+   Skill: planning:manage-log
+   operation: add
+   plan_id: {plan_id}
    phase: refine
-   task: task-3
-   action: "Created implementation requirements"
-   result: "implementation-requirements.md"
+   summary: "Created implementation-requirements.md"
    ```
 
 ---
@@ -380,11 +384,10 @@ After all refine tasks complete:
 After all refine tasks complete:
 
 ```
-Skill: planning:plan-files
-operation: update-progress
-plan_directory: {plan_directory}
-task_id: {last-refine-task}
-status: completed
+Skill: planning:manage-lifecycle
+operation: transition
+plan_id: {plan_id}
+completed: refine
 ```
 
 This updates: current_phase → implement, current_task → first implement task
@@ -407,18 +410,19 @@ Options: Define scope / Remove component / Mark as TODO
 ## Integration
 
 ### Command Integration
-- **/plan-manage** - Primary command invoking this skill via phase-management (action=refine)
+- **/plan-manage** - Primary command invoking this skill via manage-lifecycle (action=refine)
 
 ### Skills Used
 
 **Planning Bundle**:
-- **plan-files** - All file I/O operations
+- **manage-lifecycle** - Orchestration and phase transitions
+- **manage-config** - Configuration CRUD
+- **manage-references** - Reference file CRUD
+- **manage-log** - Work log entries
 - **plan-type-simple** - Task generation for simple plans
 - **plan-type-plugin** - Task generation for plugin plans
 - **plan-type-java** - Task generation for Java plans
 - **plan-type-javascript** - Task generation for JavaScript plans
-- **phase-management** - Orchestration (invokes this skill)
-- **work-log** - Logging significant actions
 
 **Domain Analysis** (delegated):
 - **cui-plugin-development-tools:plugin-analysis** - Plugin component analysis
@@ -439,7 +443,7 @@ Options: Define scope / Remove component / Mark as TODO
 
 - [x] Self-contained with relative paths
 - [x] Progressive disclosure (load on-demand)
-- [x] All file I/O delegated to plan-files skill
+- [x] All file I/O delegated to manage-* skills
 - [x] User confirmation for all decisions
 - [x] Implementation requirements artifact generated
 
