@@ -75,8 +75,8 @@ def test_save_creates_dirs():
         assert data.get('success') is True, "Should succeed"
         assert 'context' in data.get('path', ''), "Path should contain context"
 
-        # Verify directory was created
-        assert (temp_dir / '.claude' / 'memory' / 'context').is_dir(), \
+        # Verify directory was created (uses .plan/memory, not .claude/memory)
+        assert (temp_dir / '.plan' / 'memory' / 'context').is_dir(), \
             "Context directory should be created"
 
 
@@ -215,7 +215,8 @@ def test_cleanup():
     """Test cleanup old files."""
     with TempDirContext() as temp_dir:
         # Create a file with an old created timestamp directly in the JSON
-        memory_dir = temp_dir / '.claude' / 'memory' / 'context'
+        # Uses .plan/memory, not .claude/memory
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
         memory_dir.mkdir(parents=True)
         (memory_dir / 'old-cleanup-test.json').write_text('''{
   "meta": {

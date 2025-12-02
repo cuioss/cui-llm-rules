@@ -51,18 +51,18 @@ def test_create_new_config():
         assert data.get('success') is True, "Should succeed"
         assert data.get('action') == 'created', "Action should be 'created'"
 
-        # Verify file exists
-        config_file = temp_dir / '.claude' / 'run-configuration.json'
+        # Verify file exists (uses .plan, not .claude)
+        config_file = temp_dir / '.plan' / 'run-configuration.json'
         assert config_file.exists(), "Config file should be created"
 
 
 def test_skip_existing():
     """Test skip if file already exists."""
     with TempDirContext() as temp_dir:
-        # Create existing file
-        claude_dir = temp_dir / '.claude'
-        claude_dir.mkdir(parents=True)
-        (claude_dir / 'run-configuration.json').write_text('{"version": 1, "commands": {}}')
+        # Create existing file (uses .plan, not .claude)
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+        (plan_dir / 'run-configuration.json').write_text('{"version": 1, "commands": {}}')
 
         result = run_script(SCRIPT_PATH, '--project-dir', str(temp_dir))
         data = result.json()
@@ -74,10 +74,10 @@ def test_skip_existing():
 def test_force_overwrite():
     """Test force overwrite existing file."""
     with TempDirContext() as temp_dir:
-        # Create existing file with old content
-        claude_dir = temp_dir / '.claude'
-        claude_dir.mkdir(parents=True)
-        (claude_dir / 'run-configuration.json').write_text('{"version": 1, "commands": {"old": {}}}')
+        # Create existing file with old content (uses .plan, not .claude)
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+        (plan_dir / 'run-configuration.json').write_text('{"version": 1, "commands": {"old": {}}}')
 
         result = run_script(SCRIPT_PATH, '--project-dir', str(temp_dir), '--force')
         data = result.json()
@@ -86,7 +86,7 @@ def test_force_overwrite():
 
         # Verify old command entry is gone
         import json
-        content = json.loads((claude_dir / 'run-configuration.json').read_text())
+        content = json.loads((plan_dir / 'run-configuration.json').read_text())
         assert 'old' not in content.get('commands', {}), "Old command should be removed"
 
 
@@ -96,7 +96,7 @@ def test_correct_structure():
         run_script(SCRIPT_PATH, '--project-dir', str(temp_dir))
 
         import json
-        config_file = temp_dir / '.claude' / 'run-configuration.json'
+        config_file = temp_dir / '.plan' / 'run-configuration.json'
         content = json.loads(config_file.read_text())
 
         # Check version
@@ -113,18 +113,18 @@ def test_correct_structure():
         assert 'platform_specific' in aw, "Should have platform_specific category"
 
 
-def test_creates_claude_dir():
-    """Test creates .claude directory if needed."""
+def test_creates_plan_dir():
+    """Test creates .plan directory if needed."""
     with TempDirContext() as temp_dir:
-        # Ensure .claude doesn't exist
-        claude_dir = temp_dir / '.claude'
-        if claude_dir.exists():
-            shutil.rmtree(claude_dir)
+        # Ensure .plan doesn't exist
+        plan_dir = temp_dir / '.plan'
+        if plan_dir.exists():
+            shutil.rmtree(plan_dir)
 
         run_script(SCRIPT_PATH, '--project-dir', str(temp_dir))
 
-        assert claude_dir.exists(), ".claude directory should be created"
-        assert (claude_dir / 'run-configuration.json').exists(), "Config file should be created"
+        assert plan_dir.exists(), ".plan directory should be created"
+        assert (plan_dir / 'run-configuration.json').exists(), "Config file should be created"
 
 
 def test_output_includes_path():
@@ -161,7 +161,7 @@ def test_default_project_dir():
         finally:
             os.chdir(old_cwd)
 
-        config_file = temp_dir / '.claude' / 'run-configuration.json'
+        config_file = temp_dir / '.plan' / 'run-configuration.json'
         assert config_file.exists(), "Config file should be created in current directory"
 
 
@@ -176,7 +176,7 @@ if __name__ == '__main__':
         test_skip_existing,
         test_force_overwrite,
         test_correct_structure,
-        test_creates_claude_dir,
+        test_creates_plan_dir,
         test_output_includes_path,
         test_output_includes_structure,
         test_default_project_dir,

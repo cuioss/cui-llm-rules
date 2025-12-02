@@ -16,12 +16,13 @@ from conftest import TestRunner
 TEST_ROOT = Path(__file__).parent.parent.parent
 
 # Expected TOON files to measure (relative to test root)
+# Note: cui-task-workflow was renamed to planning
 EXPECTED_TOON_FILES = [
-    'cui-task-workflow/sonar-workflow/sonar-issues.toon',
-    'cui-task-workflow/sonar-workflow/triage-results.toon',
-    'cui-task-workflow/sonar-workflow/fix-suggestions.toon',
-    'cui-task-workflow/pr-workflow/review-comments.toon',
-    'cui-task-workflow/pr-workflow/triage-results.toon',
+    'planning/sonar-workflow/sonar-issues.toon',
+    'planning/sonar-workflow/triage-results.toon',
+    'planning/sonar-workflow/fix-suggestions.toon',
+    'planning/pr-workflow/review-comments.toon',
+    'planning/pr-workflow/triage-results.toon',
     'cui-frontend-expert/coverage/coverage-analysis.toon',
     'cui-java-expert/coverage/coverage-analysis.toon',
     'builder/maven/build-failure/expected-categorization.toon',
