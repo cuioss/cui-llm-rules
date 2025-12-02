@@ -29,7 +29,8 @@ from typing import Any, Dict, Optional
 
 
 # Default base directory for workflow files
-_BASE_DIR = Path('.plan')
+# Can be overridden via PLAN_BASE_DIR environment variable for testing
+_BASE_DIR = Path(os.environ.get('PLAN_BASE_DIR', '.plan'))
 
 
 def get_base_dir() -> Path:
@@ -37,7 +38,14 @@ def get_base_dir() -> Path:
 
     Returns:
         Path object for the workflow base directory (default: .plan)
+
+    Note:
+        Can be overridden via PLAN_BASE_DIR environment variable.
     """
+    # Check env var each time to support runtime changes in tests
+    env_dir = os.environ.get('PLAN_BASE_DIR')
+    if env_dir:
+        return Path(env_dir)
     return _BASE_DIR
 
 
