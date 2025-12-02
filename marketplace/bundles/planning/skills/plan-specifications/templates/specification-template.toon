@@ -1,0 +1,9 @@
+number: {NUMBER}
+title: {TITLE}
+status: pending
+created: {TIMESTAMP}
+updated: {TIMESTAMP}
+requirements: {REQUIREMENTS}
+
+body: |
+  {BODY}
