@@ -180,11 +180,11 @@ def test_discover_nonexistent_directory():
 
 
 def test_discover_default_path():
-    """Test default search path (.claude/plans/)."""
+    """Test default search path (.plan/plans/)."""
     # Just verify help works since we can't easily test default path
     result = run_script(SCRIPT_PATH, '--help')
     assert result.returncode == 0
-    assert '.claude/plans/' in result.stdout
+    assert '.plan/plans/' in result.stdout
 
 
 def test_discover_plan_metadata():

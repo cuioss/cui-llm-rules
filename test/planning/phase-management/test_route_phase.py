@@ -42,51 +42,61 @@ def test_route_refine_phase():
 
 
 def test_route_implement_phase():
-    """Test routing implement phase to plan-implement skill."""
+    """Test routing implement phase to plan-execute skill.
+
+    Note: implement, verify, and finalize all route to plan-execute now.
+    """
     result = run_script(SCRIPT_PATH, 'implement')
     assert result.success
     data = result.json()
 
-    assert data['routing']['target_skill'] == 'plan-implement'
+    assert data['routing']['target_skill'] == 'plan-execute'
+    assert data['routing']['skill_full_name'] == 'planning:plan-execute'
     assert data['phase_status']['phase_index'] == 2
     assert 'init' in data['phase_status']['completed_phases']
     assert 'refine' in data['phase_status']['completed_phases']
 
 
 def test_route_verify_phase():
-    """Test routing verify phase to plan-verify skill."""
+    """Test routing verify phase to plan-execute skill.
+
+    Note: All execution phases (implement/execute/verify/finalize) route to plan-execute.
+    """
     result = run_script(SCRIPT_PATH, 'verify')
     assert result.success
     data = result.json()
 
-    assert data['routing']['target_skill'] == 'plan-verify'
+    assert data['routing']['target_skill'] == 'plan-execute'
+    assert data['routing']['skill_full_name'] == 'planning:plan-execute'
     assert data['phase_status']['phase_index'] == 3
 
 
 def test_route_finalize_phase():
-    """Test routing finalize phase to plan-finalize skill."""
+    """Test routing finalize phase to plan-execute skill.
+
+    Note: All execution phases (implement/execute/verify/finalize) route to plan-execute.
+    """
     result = run_script(SCRIPT_PATH, 'finalize')
     assert result.success
     data = result.json()
 
-    assert data['routing']['target_skill'] == 'plan-finalize'
+    assert data['routing']['target_skill'] == 'plan-execute'
+    assert data['routing']['skill_full_name'] == 'planning:plan-execute'
     assert data['phase_status']['phase_index'] == 4
     assert data['phase_status']['pending_phases'] == []
 
 
 def test_route_execute_phase():
-    """Test routing execute phase to plan-implement skill.
+    """Test routing execute phase to plan-execute skill.
 
     Note: 'execute' is used by both Simple (3-phase) and Plugin-Development (4-phase) plans.
-    Without plan directory context, script cannot distinguish between them.
     """
     result = run_script(SCRIPT_PATH, 'execute')
     assert result.success
     data = result.json()
 
-    # Core routing must work correctly
-    assert data['routing']['target_skill'] == 'plan-implement'
-    assert data['routing']['skill_full_name'] == 'planning:plan-implement'
+    assert data['routing']['target_skill'] == 'plan-execute'
+    assert data['routing']['skill_full_name'] == 'planning:plan-execute'
     # Phase index in simple plan (execute is phase 2 of 3: init, execute, finalize)
     assert data['phase_status']['phase_index'] == 1
     assert 'finalize' in data['phase_status']['pending_phases']
@@ -191,13 +201,20 @@ def test_phase_status_structure():
 
 
 def test_all_phases_route_correctly():
-    """Test that all 5 phases route to correct skills."""
+    """Test that all phases route to correct skills.
+
+    New routing model:
+    - init -> plan-init
+    - refine -> plan-refine
+    - implement/execute/verify/finalize -> plan-execute
+    """
     phase_skill_map = {
         'init': 'plan-init',
         'refine': 'plan-refine',
-        'implement': 'plan-implement',
-        'verify': 'plan-verify',
-        'finalize': 'plan-finalize'
+        'implement': 'plan-execute',
+        'execute': 'plan-execute',
+        'verify': 'plan-execute',
+        'finalize': 'plan-execute'
     }
 
     for phase, expected_skill in phase_skill_map.items():

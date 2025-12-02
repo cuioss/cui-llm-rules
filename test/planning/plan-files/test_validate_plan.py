@@ -38,21 +38,10 @@ VALID_PLAN = """# Task Plan: JWT Authentication
 - [x] Done
 """
 
-VALID_CONFIG = """# Task Configuration
-
-**Plan Type**: Implementation
-
-## Build Configuration
-
-| Property | Value |
-|----------|-------|
-| Technology | Java |
-
-## Context
-
-| Property | Value |
-|----------|-------|
-| Branch | feature/jwt |
+# TOON format for config
+VALID_CONFIG = """plan_type: implementation
+branch: feature/jwt
+technology: Java
 """
 
 MINIMAL_PLAN = """# Task Plan: Test
@@ -67,15 +56,9 @@ MINIMAL_PLAN = """# Task Plan: Test
 | init | pending | 1 | 0/1 |
 """
 
-MINIMAL_CONFIG = """# Task Configuration
-
-**Plan Type**: Implementation
-
-## Context
-
-| Property | Value |
-|----------|-------|
-| Branch | main |
+# TOON format for minimal config
+MINIMAL_CONFIG = """plan_type: implementation
+branch: main
 """
 
 INVALID_PLAN = """# Task Plan: Test
@@ -83,20 +66,14 @@ INVALID_PLAN = """# Task Plan: Test
 Some content without required fields
 """
 
-INVALID_CONFIG = """# Task Configuration
-
-Some content without required fields
+# TOON format - invalid config (missing required fields)
+INVALID_CONFIG = """# This is not valid TOON
+some content without fields
 """
 
-INVALID_PLAN_TYPE_CONFIG = """# Task Configuration
-
-**Plan Type**: InvalidType
-
-## Context
-
-| Property | Value |
-|----------|-------|
-| Branch | main |
+# TOON format - invalid plan type
+INVALID_PLAN_TYPE_CONFIG = """plan_type: InvalidType
+branch: main
 """
 
 PLAN_WITHOUT_TASK = """# Task Plan: Test
@@ -110,15 +87,10 @@ PLAN_WITHOUT_TASK = """# Task Plan: Test
 | init | pending | 1 | 0/1 |
 """
 
-VALID_REFERENCES = """# Task References
-
-## Standards
-
-- [Java Core](../../standards/java/core.adoc)
-
-## Related ADRs
-
-- [ADR-001](../adr/ADR-001.md)
+# TOON format for references
+VALID_REFERENCES = """branch: feature/jwt
+issue: 123
+pr: 456
 """
 
 
@@ -127,17 +99,20 @@ VALID_REFERENCES = """# Task References
 # =============================================================================
 
 def create_plan_directory(plan_content=None, config_content=None, references_content=None):
-    """Create a temporary plan directory with specified files."""
+    """Create a temporary plan directory with specified files.
+
+    Note: config and references use TOON format (.toon extension).
+    """
     temp_dir = create_temp_dir()
 
     if plan_content:
         (temp_dir / 'plan.md').write_text(plan_content)
 
     if config_content:
-        (temp_dir / 'config.md').write_text(config_content)
+        (temp_dir / 'config.toon').write_text(config_content)
 
     if references_content:
-        (temp_dir / 'references.md').write_text(references_content)
+        (temp_dir / 'references.toon').write_text(references_content)
 
     return temp_dir
 
@@ -161,7 +136,7 @@ def test_validate_valid_plan():
 
         assert data['valid'] is True
         assert data['files']['plan.md']['valid'] is True
-        assert data['files']['config.md']['valid'] is True
+        assert data['files']['config.toon']['valid'] is True
         assert data['summary']['total_errors'] == 0
     finally:
         cleanup_dir(temp_dir)
@@ -182,15 +157,15 @@ def test_validate_missing_plan():
 
 
 def test_validate_missing_config():
-    """Test validation when config.md is missing."""
+    """Test validation when config.toon is missing."""
     temp_dir = create_plan_directory(plan_content=MINIMAL_PLAN)
     try:
         result = run_script(SCRIPT_PATH, str(temp_dir))
         data = result.json()
 
         assert data['valid'] is False
-        assert data['files']['config.md']['exists'] is False
-        assert 'config.md' in data['summary']['missing_required_files']
+        assert data['files']['config.toon']['exists'] is False
+        assert 'config.toon' in data['summary']['missing_required_files']
     finally:
         cleanup_dir(temp_dir)
 
@@ -221,11 +196,11 @@ def test_validate_config_errors():
         data = result.json()
 
         assert data['valid'] is False
-        assert data['files']['config.md']['valid'] is False
+        assert data['files']['config.toon']['valid'] is False
 
-        error_codes = [e['code'] for e in data['errors'] if e['file'] == 'config.md']
+        error_codes = [e['code'] for e in data['errors'] if e['file'] == 'config.toon']
+        # TOON format validation: missing plan_type and branch
         assert 'MISSING_PLAN_TYPE' in error_codes
-        assert 'MISSING_CONTEXT' in error_codes
         assert 'MISSING_BRANCH' in error_codes
     finally:
         cleanup_dir(temp_dir)
@@ -276,14 +251,14 @@ def test_validate_directory_not_found():
 
 
 def test_validate_with_references():
-    """Test validation includes references.md."""
+    """Test validation includes references.toon."""
     temp_dir = create_plan_directory(VALID_PLAN, VALID_CONFIG, VALID_REFERENCES)
     try:
         result = run_script(SCRIPT_PATH, str(temp_dir))
         data = result.json()
 
-        assert data['files']['references.md']['exists'] is True
-        assert data['files']['references.md']['valid'] is True
+        assert data['files']['references.toon']['exists'] is True
+        assert data['files']['references.toon']['valid'] is True
     finally:
         cleanup_dir(temp_dir)
 
