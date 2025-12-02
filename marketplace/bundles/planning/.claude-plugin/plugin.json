@@ -18,10 +18,10 @@
   ],
   "skills": [
     "./skills/git-workflow",
-    "./skills/project-type-api",
     "./skills/pr-workflow",
     "./skills/sonar-workflow",
     "./skills/analysis-api",
+    "./skills/plan-type-api",
     "./skills/plan-type-simple",
     "./skills/plan-type-plugin",
     "./skills/plan-type-java",
