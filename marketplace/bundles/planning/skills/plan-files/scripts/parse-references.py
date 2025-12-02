@@ -13,11 +13,16 @@ TOON format only - no markdown support.
 """
 
 import argparse
-import csv
-import io
 import json
 import sys
 from pathlib import Path
+
+# Import shared TOON parser
+SCRIPT_DIR = Path(__file__).parent
+TOON_DIR = SCRIPT_DIR.parent.parent.parent.parent / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'
+sys.path.insert(0, str(TOON_DIR))
+
+from toon_parser import parse_toon
 
 
 def find_references_file(path: Path) -> Path:
@@ -34,107 +39,55 @@ def find_references_file(path: Path) -> Path:
     return path  # Return original for error handling
 
 
-def parse_toon_scalar(content: str, key: str) -> str:
-    """Extract a scalar value from TOON content."""
-    for line in content.splitlines():
-        line = line.strip()
-        if line.startswith('#') or not line:
-            continue
-        if ':' in line and not line.endswith(':'):
-            k, v = line.split(':', 1)
-            if k.strip().lower() == key.lower():
-                return v.strip()
-    return ''
-
-
-def parse_toon_simple_list(content: str, key: str) -> list[str]:
-    """Parse a simple list like implementation_files[N]: followed by - items."""
-    result = []
-    in_section = False
-
-    for line in content.splitlines():
-        stripped = line.strip()
-
-        # Check for section header like "implementation_files[0]:" or "implementation_files[3]:"
-        if stripped.lower().startswith(key.lower()) and '[' in stripped:
-            in_section = True
-            continue
-
-        # End section on next header or empty array declaration
-        if in_section:
-            if stripped.startswith('-'):
-                item = stripped[1:].strip()
-                if item and not item.startswith('('):  # Skip placeholders like "(populated during...)"
-                    result.append(item)
-            elif stripped and not stripped.startswith('#'):
-                # Non-list line ends the section
-                if ':' in stripped or '[' in stripped:
-                    break
-
-    return result
-
-
-def parse_toon_structured_array(content: str, key: str, fields: list[str]) -> list[dict]:
-    """Parse a structured array like adrs[N]{id,path,status}: followed by CSV rows."""
-    result = []
-    in_section = False
-    section_fields = fields
-
-    for line in content.splitlines():
-        stripped = line.strip()
-
-        # Check for section header like "adrs[0]{id,path,status}:"
-        if stripped.lower().startswith(key.lower()) and '{' in stripped:
-            in_section = True
-            # Extract field names from header
-            field_match = stripped[stripped.index('{') + 1:stripped.index('}')]
-            if field_match:
-                section_fields = [f.strip() for f in field_match.split(',')]
-            continue
-
-        if in_section:
-            # Skip empty lines and comments
-            if not stripped or stripped.startswith('#'):
-                continue
-            # End section on next header
-            if ':' in stripped and (stripped.endswith(':') or '[' in stripped):
-                break
-            # Parse CSV row
-            if stripped and not stripped.startswith('-'):
-                try:
-                    reader = csv.reader(io.StringIO(stripped))
-                    values = next(reader)
-                    if len(values) >= len(section_fields):
-                        item = {}
-                        for i, field in enumerate(section_fields):
-                            item[field] = values[i].strip() if i < len(values) else ''
-                        result.append(item)
-                except (csv.Error, StopIteration):
-                    pass
-
-    return result
-
-
 def parse_references_toon(content: str) -> dict:
     """Parse TOON format references and return structured data."""
-    # Parse scalars
-    issue = parse_toon_scalar(content, 'issue')
-    issue_url = parse_toon_scalar(content, 'issue_url')
-    issue_title = parse_toon_scalar(content, 'issue_title')
-    branch = parse_toon_scalar(content, 'branch')
-    base_branch = parse_toon_scalar(content, 'base_branch')
+    # Use shared TOON parser
+    data = parse_toon(content)
 
-    # Parse simple lists
-    implementation_files = parse_toon_simple_list(content, 'implementation_files')
-    config_files = parse_toon_simple_list(content, 'config_files')
-    test_files = parse_toon_simple_list(content, 'test_files')
-    dependencies = parse_toon_simple_list(content, 'dependencies')
-    related_plans = parse_toon_simple_list(content, 'related_plans')
+    # Helper to get scalar with default
+    def get_scalar(key: str, default: str = '') -> str:
+        val = data.get(key)
+        if val is None or val == '(not set)':
+            return default
+        return str(val) if not isinstance(val, str) else val
 
-    # Parse structured arrays
-    adrs = parse_toon_structured_array(content, 'adrs', ['id', 'path', 'status'])
-    interfaces = parse_toon_structured_array(content, 'interfaces', ['name', 'path'])
-    external_docs = parse_toon_structured_array(content, 'external_docs', ['name', 'url'])
+    # Helper to get list with default
+    def get_list(key: str) -> list:
+        val = data.get(key)
+        if val is None:
+            return []
+        if isinstance(val, list):
+            # Filter out placeholders like "(populated during...)"
+            return [item for item in val if isinstance(item, str) and not item.startswith('(')]
+        return []
+
+    # Helper to get structured array
+    def get_structured_array(key: str) -> list[dict]:
+        val = data.get(key)
+        if val is None:
+            return []
+        if isinstance(val, list):
+            return [item for item in val if isinstance(item, dict)]
+        return []
+
+    # Extract scalars
+    issue = get_scalar('issue')
+    issue_url = get_scalar('issue_url')
+    issue_title = get_scalar('issue_title')
+    branch = get_scalar('branch')
+    base_branch = get_scalar('base_branch')
+
+    # Extract simple lists
+    implementation_files = get_list('implementation_files')
+    config_files = get_list('config_files')
+    test_files = get_list('test_files')
+    dependencies = get_list('dependencies')
+    related_plans = get_list('related_plans')
+
+    # Extract structured arrays
+    adrs = get_structured_array('adrs')
+    interfaces = get_structured_array('interfaces')
+    external_docs = get_structured_array('external_docs')
 
     # Build related_files structure (combine all file types)
     related_files = []

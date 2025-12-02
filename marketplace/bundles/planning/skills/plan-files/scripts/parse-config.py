@@ -18,22 +18,29 @@ import re
 import sys
 from pathlib import Path
 
+# Import shared TOON parser
+SCRIPT_DIR = Path(__file__).parent
+TOON_DIR = SCRIPT_DIR.parent.parent.parent.parent / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'
+sys.path.insert(0, str(TOON_DIR))
+
+from toon_parser import parse_toon as parse_toon_full
+
 
 def parse_toon(content: str) -> dict:
-    """Parse TOON format config (key: value pairs)."""
+    """Parse TOON format config (key: value pairs).
+
+    Uses shared toon_parser but normalizes keys to lowercase with underscores.
+    """
+    raw = parse_toon_full(content)
+    # Normalize keys: lowercase and replace spaces with underscores
     result = {}
-    for line in content.splitlines():
-        line = line.strip()
-        # Skip comments and empty lines
-        if not line or line.startswith('#'):
-            continue
-        # Parse key: value
-        if ':' in line:
-            key, value = line.split(':', 1)
-            key = key.strip().lower().replace(' ', '_')
-            value = value.strip()
-            if value:  # Only add non-empty values
-                result[key] = value
+    for key, value in raw.items():
+        normalized_key = key.lower().replace(' ', '_')
+        # Only include non-empty string values (skip nested objects)
+        if isinstance(value, str) and value:
+            result[normalized_key] = value
+        elif isinstance(value, (int, float, bool)):
+            result[normalized_key] = str(value)
     return result
 
 

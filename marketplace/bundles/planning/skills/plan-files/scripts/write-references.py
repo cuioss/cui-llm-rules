@@ -20,9 +20,12 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 MARKETPLACE_DIR = SCRIPT_DIR.parents[4]
 FILE_OPS_DIR = MARKETPLACE_DIR / 'bundles' / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'
+TOON_DIR = MARKETPLACE_DIR / 'bundles' / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
+sys.path.insert(0, str(TOON_DIR))
 
 from file_ops import atomic_write_file, ensure_directory, output_success, output_error
+from toon_parser import parse_toon
 
 
 # Valid sections
@@ -65,74 +68,52 @@ related_plans[0]:
 
 
 def parse_toon_content(content: str) -> dict:
-    """Parse TOON content into a structured dict."""
+    """Parse TOON content into a structured dict.
+
+    Uses shared toon_parser and transforms output to the expected format.
+    """
+    raw = parse_toon(content)
+
     result = {
         'scalars': {},
         'simple_lists': {},
         'structured_arrays': {}
     }
 
-    lines = content.splitlines()
-    i = 0
-    while i < len(lines):
-        line = lines[i].strip()
+    # Known structured arrays with their field definitions
+    structured_array_fields = {
+        'adrs': ['id', 'path', 'status'],
+        'interfaces': ['name', 'path'],
+        'external_docs': ['name', 'url']
+    }
 
-        # Skip comments and empty lines
-        if not line or line.startswith('#'):
-            i += 1
-            continue
+    # Known simple lists
+    simple_list_keys = {'implementation_files', 'config_files', 'test_files', 'dependencies', 'related_plans'}
 
-        # Check for array/list header
-        if '[' in line and line.endswith(':'):
-            key = line[:line.index('[')].lower()
-            has_fields = '{' in line
+    # Known scalars
+    scalar_keys = {'issue', 'issue_url', 'issue_title', 'branch', 'base_branch'}
 
-            if has_fields:
-                # Structured array like adrs[N]{id,path,status}:
-                field_str = line[line.index('{') + 1:line.index('}')]
-                fields = [f.strip() for f in field_str.split(',')]
-                items = []
-                i += 1
-                while i < len(lines):
-                    item_line = lines[i].strip()
-                    if not item_line or item_line.startswith('#'):
-                        i += 1
-                        continue
-                    if ':' in item_line and (item_line.endswith(':') or '[' in item_line):
-                        break
-                    # Parse CSV-like row
-                    if item_line and not item_line.startswith('-'):
-                        values = [v.strip() for v in item_line.split(',')]
-                        if len(values) >= len(fields):
-                            item = {fields[j]: values[j] for j in range(len(fields))}
-                            items.append(item)
-                    i += 1
-                result['structured_arrays'][key] = {'fields': fields, 'items': items}
+    for key, value in raw.items():
+        key_lower = key.lower()
+
+        if key_lower in scalar_keys:
+            result['scalars'][key_lower] = str(value) if value is not None else '(not set)'
+        elif key_lower in simple_list_keys:
+            if isinstance(value, list):
+                # Filter out placeholders and non-strings
+                result['simple_lists'][key_lower] = [
+                    item for item in value
+                    if isinstance(item, str) and not item.startswith('(')
+                ]
             else:
-                # Simple list like implementation_files[N]:
-                items = []
-                i += 1
-                while i < len(lines):
-                    item_line = lines[i].strip()
-                    if not item_line or item_line.startswith('#'):
-                        i += 1
-                        continue
-                    if ':' in item_line and (item_line.endswith(':') or '[' in item_line):
-                        break
-                    if item_line.startswith('-'):
-                        item = item_line[1:].strip()
-                        if item and not item.startswith('('):
-                            items.append(item)
-                    i += 1
-                result['simple_lists'][key] = items
-
-        # Scalar value
-        elif ':' in line:
-            key, value = line.split(':', 1)
-            result['scalars'][key.strip().lower()] = value.strip()
-            i += 1
-        else:
-            i += 1
+                result['simple_lists'][key_lower] = []
+        elif key_lower in structured_array_fields:
+            fields = structured_array_fields[key_lower]
+            if isinstance(value, list):
+                items = [item for item in value if isinstance(item, dict)]
+                result['structured_arrays'][key_lower] = {'fields': fields, 'items': items}
+            else:
+                result['structured_arrays'][key_lower] = {'fields': fields, 'items': []}
 
     return result
 

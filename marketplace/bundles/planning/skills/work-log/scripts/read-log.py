@@ -8,7 +8,6 @@ Output: JSON with entries array and metadata.
 """
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
@@ -18,60 +17,18 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 # Navigate: scripts -> work-log -> skills -> planning -> bundles -> marketplace -> bundles -> general-tools -> skills -> file-operations-base -> scripts
 MARKETPLACE_DIR = SCRIPT_DIR.parents[4]  # marketplace/bundles/planning/skills/work-log -> marketplace
 FILE_OPS_DIR = MARKETPLACE_DIR / 'bundles' / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'
+TOON_DIR = MARKETPLACE_DIR / 'bundles' / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
+sys.path.insert(0, str(TOON_DIR))
 
 from file_ops import output_success, output_error
-
-
-def parse_toon_csv_line(line: str, fields: list[str]) -> dict | None:
-    """Parse a TOON CSV line into a dict.
-
-    Handles quoted values with commas and escaped quotes.
-
-    Args:
-        line: CSV line to parse
-        fields: Field names from header
-
-    Returns:
-        Dict mapping field names to values, or None if parse fails
-    """
-    values = []
-    current = ''
-    in_quotes = False
-    i = 0
-
-    while i < len(line):
-        char = line[i]
-
-        if char == '"':
-            if in_quotes:
-                # Check for escaped quote
-                if i + 1 < len(line) and line[i + 1] == '"':
-                    current += '"'
-                    i += 1
-                else:
-                    in_quotes = False
-            else:
-                in_quotes = True
-        elif char == ',' and not in_quotes:
-            values.append(current)
-            current = ''
-        else:
-            current += char
-
-        i += 1
-
-    # Don't forget the last value
-    values.append(current)
-
-    if len(values) != len(fields):
-        return None
-
-    return dict(zip(fields, values))
+from toon_parser import parse_toon
 
 
 def parse_work_log(content: str) -> tuple[list[dict], dict]:
     """Parse work-log.toon content.
+
+    Uses shared toon_parser for parsing.
 
     Args:
         content: File content
@@ -79,31 +36,28 @@ def parse_work_log(content: str) -> tuple[list[dict], dict]:
     Returns:
         Tuple of (entries list, metadata dict)
     """
-    lines = content.strip().split('\n') if content.strip() else []
-    entries = []
+    # Extract metadata from comments before parsing
     metadata = {
         'plan': None,
         'created': None
     }
-    fields = []
 
-    for line in lines:
-        # Parse metadata comments
+    for line in content.splitlines():
         if line.startswith('# Plan:'):
             metadata['plan'] = line.replace('# Plan:', '').strip()
         elif line.startswith('# Created:'):
             metadata['created'] = line.replace('# Created:', '').strip()
-        # Parse entries header
-        elif line.startswith('entries['):
-            # Extract field names from {field1,field2,...}
-            match = re.search(r'\{([^}]+)\}', line)
-            if match:
-                fields = [f.strip() for f in match.group(1).split(',')]
-        # Parse entry lines
-        elif line.strip() and not line.startswith('#') and fields:
-            entry = parse_toon_csv_line(line, fields)
-            if entry:
-                entries.append(entry)
+
+    # Use shared TOON parser
+    data = parse_toon(content)
+
+    # Extract entries array
+    entries = data.get('entries', [])
+    if not isinstance(entries, list):
+        entries = []
+
+    # Ensure all entries are dicts
+    entries = [entry for entry in entries if isinstance(entry, dict)]
 
     return entries, metadata
 
