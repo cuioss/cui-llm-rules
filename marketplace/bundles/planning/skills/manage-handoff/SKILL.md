@@ -166,7 +166,11 @@ alternatives[3]:
 ## References
 
 - [standards/protocol.md](standards/protocol.md) - Full handoff protocol specification
-- [references/architecture.md](references/architecture.md) - Interaction patterns and use cases (optional)
+- [references/architecture.md](references/architecture.md) - Interaction patterns and use cases
+- [references/context-compression.md](references/context-compression.md) - Context reduction strategies for long sessions
+- [references/wave-processing.md](references/wave-processing.md) - Parallel task batching with sync points
+- [references/token-budget-guidelines.md](references/token-budget-guidelines.md) - Token allocation for agent orchestration
+- [references/integration-validation.md](references/integration-validation.md) - Validation patterns for parallel execution
 
 ## Related
 

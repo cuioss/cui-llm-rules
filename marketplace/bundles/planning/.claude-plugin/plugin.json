@@ -21,7 +21,6 @@
     "./skills/cui-task-planning",
     "./skills/pr-workflow",
     "./skills/sonar-workflow",
-    "./skills/workflow-patterns",
     "./skills/phase-management",
     "./skills/plan-files",
     "./skills/analysis-api",
