@@ -34,6 +34,7 @@
     "./skills/plan-configure",
     "./skills/plan-refine",
     "./skills/plan-execute",
+    "./skills/plan-finalize",
     "./skills/manage-requirements",
     "./skills/manage-specifications",
     "./skills/manage-tasks",
