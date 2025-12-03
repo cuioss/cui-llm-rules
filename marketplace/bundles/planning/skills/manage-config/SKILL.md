@@ -41,25 +41,28 @@ TOON format with typed fields:
 ```toon
 # Plan Configuration
 
-plan_type: implementation
-technology: java
-build_system: maven
-
+plan_type: java
 compatibility: deprecations
 commit_strategy: phase-specific
-finalizing: pr-workflow
 ```
 
 ### Schema Fields
 
 | Field | Values | Description |
 |-------|--------|-------------|
-| `plan_type` | implementation, plugin-development, simple | Type of plan workflow |
-| `technology` | java, javascript, plugin, mixed | Primary technology stack |
-| `build_system` | maven, gradle, npm, none | Build system used |
-| `compatibility` | deprecations, breaking | Compatibility strategy |
-| `commit_strategy` | fine-granular, phase-specific, complete | Git commit granularity |
-| `finalizing` | pr-workflow, commit-only | How to finalize work |
+| `plan_type` | java, javascript, plugin-development, simple | Type of plan workflow |
+| `compatibility` | deprecations, breaking | Compatibility strategy (user choice) |
+| `commit_strategy` | fine-granular, phase-specific, complete | Git commit granularity (user choice) |
+
+### Derived from plan_type (not stored)
+
+These values are derived from `plan_type` at runtime via `plan-type-{type}` skills:
+
+| Derived | Source |
+|---------|--------|
+| `technology` | plan-type characteristics |
+| `build_system` | `builder:environment-detection` or plan-type characteristics |
+| `finalizing` | `get-finalize-config` operation |
 
 ---
 
@@ -82,12 +85,9 @@ status: success
 plan_id: my-feature
 
 config:
-  plan_type: implementation
-  technology: java
-  build_system: maven
+  plan_type: java
   compatibility: deprecations
   commit_strategy: phase-specific
-  finalizing: pr-workflow
 ```
 
 ### get
@@ -105,7 +105,7 @@ python3 {script_path} get \
 status: success
 plan_id: my-feature
 field: plan_type
-value: implementation
+value: java
 ```
 
 ### set
@@ -115,17 +115,17 @@ Set a specific field value.
 ```bash
 python3 {script_path} set \
   --plan-id {plan_id} \
-  --field plan_type \
-  --value java
+  --field compatibility \
+  --value breaking
 ```
 
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
-field: plan_type
-value: java
-previous: implementation
+field: compatibility
+value: breaking
+previous: deprecations
 ```
 
 ### create
@@ -135,12 +135,9 @@ Create config.toon with initial values.
 ```bash
 python3 {script_path} create \
   --plan-id {plan_id} \
-  --plan-type implementation \
-  --technology java \
-  --build-system maven \
+  --plan-type java \
   [--compatibility deprecations] \
-  [--commit-strategy phase-specific] \
-  [--finalizing pr-workflow]
+  [--commit-strategy phase-specific]
 ```
 
 **Output** (TOON):
@@ -151,12 +148,9 @@ file: config.toon
 created: true
 
 config:
-  plan_type: implementation
-  technology: java
-  build_system: maven
+  plan_type: java
   compatibility: deprecations
   commit_strategy: phase-specific
-  finalizing: pr-workflow
 ```
 
 ---
@@ -173,12 +167,9 @@ config:
 
 | Field | Valid Values |
 |-------|--------------|
-| plan_type | implementation, plugin-development, simple |
-| technology | java, javascript, plugin, mixed |
-| build_system | maven, gradle, npm, none |
+| plan_type | java, javascript, plugin-development, simple |
 | compatibility | deprecations, breaking |
 | commit_strategy | fine-granular, phase-specific, complete |
-| finalizing | pr-workflow, commit-only |
 
 ---
 
@@ -191,8 +182,9 @@ field: plan_type
 error: invalid_value
 message: Invalid value 'unknown' for field 'plan_type'
 
-valid_values[3]:
-- implementation
+valid_values[4]:
+- java
+- javascript
 - plugin-development
 - simple
 ```

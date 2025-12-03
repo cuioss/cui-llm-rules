@@ -79,21 +79,14 @@ phase_tasks:
 
 **Contract**: See `planning:plan-type-api` for full specification.
 
-**Input**: `branch`
+**Input**: (none)
 
 **Output**:
 
 ```toon
 plan_type: simple
-branch: {branch}
-issue: none
-
-technology: none
-build_system: none
-
 compatibility: breaking
 commit_strategy: fine-granular
-finalizing: commit-only
 ```
 
 ---

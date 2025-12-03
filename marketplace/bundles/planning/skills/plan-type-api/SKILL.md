@@ -79,34 +79,26 @@ phase_tasks:
 
 ## Operation: get-config-template
 
-Returns the config.toon template for this plan type.
+Returns the config.toon template for this plan type. Config is simplified to 3 fields - other values are derived from plan_type at runtime.
 
 **Input Parameters**:
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `branch` | string | Yes | Current git branch |
-| `issue` | string | No | Issue reference (URL or ID) |
-| `build_system` | string | No | Detected build system |
-| `technology` | string | No | Technology stack |
+| (none) | | | Config template requires no inputs |
 
 **Output Structure**:
 
 ```toon
 plan_type: {type}
-branch: {branch}
-issue: {issue}
-
-technology: {technology}
-build_system: {build_system}
-
 compatibility: deprecations|breaking
 commit_strategy: fine-granular|phase-specific|complete
-finalizing: pr-workflow|commit-only
-
-# Type-specific fields
-{additional_fields}
 ```
+
+**Note**: Values like `technology`, `build_system`, and `finalizing` are derived from:
+- `technology`: Plan-type characteristics
+- `build_system`: `builder:environment-detection` skill at runtime
+- `finalizing`: `get-finalize-config` operation
 
 ---
 

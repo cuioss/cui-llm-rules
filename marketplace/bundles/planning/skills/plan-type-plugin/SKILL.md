@@ -82,25 +82,17 @@ phase_tasks:
 
 **Contract**: See `planning:plan-type-api` for full specification.
 
-**Input**: `branch`, `target_bundle`, `component_types`
+**Input**: (none)
 
 **Output**:
 
 ```toon
 plan_type: plugin-development
-branch: {branch}
-issue: none
-
-technology: none
-build_system: none
-
 compatibility: breaking
 commit_strategy: fine-granular
-finalizing: commit-only
-
-target_bundle: {target_bundle}
-component_types: {component_types}
 ```
+
+**Note**: `target_bundle` and `component_types` are stored in references.toon, not config.toon.
 
 ---
 

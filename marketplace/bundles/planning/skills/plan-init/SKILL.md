@@ -126,12 +126,13 @@ operation: get-references-template
 **Plan Type**: {type}
 **Branch**: {branch} ✓
 **Issue**: {issue} ✓
-**Build System**: {build_system} ✓
 
-**Defaults Applied**:
+**Detected Context** (stored in references.toon):
+- Build System: {build_system}
+
+**User Choices** (stored in config.toon):
 - Compatibility: {compatibility}
 - Commit Strategy: {commit_strategy}
-- Finalizing: {finalizing}
 
 Proceed with this configuration? (yes/no/edit)
 ```
@@ -159,14 +160,16 @@ Script: `planning:manage-config/scripts/manage-config.py`
 python3 {script_path} create \
   --plan-id {plan_id} \
   --plan-type {plan_type} \
-  --technology {technology} \
-  --build-system {build_system} \
   --compatibility {compatibility} \
-  --commit-strategy {commit_strategy} \
-  --finalizing {finalizing}
+  --commit-strategy {commit_strategy}
 ```
 
 Creates: `.plan/plans/{plan_id}/config.toon`
+
+**Note**: Config simplified to 3 fields. Other values derived at runtime:
+- `technology`: From plan-type characteristics
+- `build_system`: From `builder:environment-detection`
+- `finalizing`: From `get-finalize-config` operation
 
 ### Step 8: Write References
 

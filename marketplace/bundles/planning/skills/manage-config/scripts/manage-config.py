@@ -8,7 +8,7 @@ Usage:
     python3 manage-config.py read --plan-id my-plan
     python3 manage-config.py get --plan-id my-plan --field plan_type
     python3 manage-config.py set --plan-id my-plan --field plan_type --value java
-    python3 manage-config.py create --plan-id my-plan --plan-type implementation --technology java
+    python3 manage-config.py create --plan-id my-plan --plan-type java
 """
 
 import argparse
@@ -25,20 +25,17 @@ sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'toon-usage' /
 from file_ops import atomic_write_file, base_path
 from toon_parser import parse_toon, serialize_toon
 
-# Schema validation
+# Schema validation - simplified to 3 fields
+# Other values (technology, build_system, finalizing) are derived from plan_type at runtime
 SCHEMA = {
-    'plan_type': ['implementation', 'plugin-development', 'simple'],
-    'technology': ['java', 'javascript', 'plugin', 'mixed'],
-    'build_system': ['maven', 'gradle', 'npm', 'none'],
+    'plan_type': ['java', 'javascript', 'plugin-development', 'simple'],
     'compatibility': ['deprecations', 'breaking'],
     'commit_strategy': ['fine-granular', 'phase-specific', 'complete'],
-    'finalizing': ['pr-workflow', 'commit-only'],
 }
 
 DEFAULTS = {
     'compatibility': 'deprecations',
     'commit_strategy': 'phase-specific',
-    'finalizing': 'pr-workflow',
 }
 
 
@@ -211,14 +208,11 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    # Build config from args
+    # Build config from args (simplified to 3 fields)
     config = {
         'plan_type': args.plan_type,
-        'technology': args.technology,
-        'build_system': args.build_system,
         'compatibility': args.compatibility or DEFAULTS['compatibility'],
         'commit_strategy': args.commit_strategy or DEFAULTS['commit_strategy'],
-        'finalizing': args.finalizing or DEFAULTS['finalizing'],
     }
 
     # Validate all fields
@@ -270,27 +264,18 @@ def main():
     set_parser.add_argument('--value', required=True, help='Field value')
     set_parser.set_defaults(func=cmd_set)
 
-    # create
+    # create (simplified to 3 fields)
     create_parser = subparsers.add_parser('create', help='Create config.toon')
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--plan-type', required=True,
-                               choices=['implementation', 'plugin-development', 'simple'],
+                               choices=['java', 'javascript', 'plugin-development', 'simple'],
                                help='Plan type')
-    create_parser.add_argument('--technology', required=True,
-                               choices=['java', 'javascript', 'plugin', 'mixed'],
-                               help='Primary technology')
-    create_parser.add_argument('--build-system', required=True,
-                               choices=['maven', 'gradle', 'npm', 'none'],
-                               help='Build system')
     create_parser.add_argument('--compatibility',
                                choices=['deprecations', 'breaking'],
-                               help='Compatibility strategy')
+                               help='Compatibility strategy (default: deprecations)')
     create_parser.add_argument('--commit-strategy',
                                choices=['fine-granular', 'phase-specific', 'complete'],
-                               help='Commit strategy')
-    create_parser.add_argument('--finalizing',
-                               choices=['pr-workflow', 'commit-only'],
-                               help='Finalization method')
+                               help='Commit strategy (default: phase-specific)')
     create_parser.add_argument('--force', action='store_true',
                                help='Overwrite existing config')
     create_parser.set_defaults(func=cmd_create)

@@ -84,21 +84,14 @@ phase_tasks:
 
 **Contract**: See `planning:plan-type-api` for full specification.
 
-**Input**: `branch`, `issue`
+**Input**: (none)
 
 **Output**:
 
 ```toon
 plan_type: javascript
-branch: {branch}
-issue: {issue}
-
-technology: javascript
-build_system: npm
-
 compatibility: deprecations
 commit_strategy: fine-granular
-finalizing: pr-workflow
 ```
 
 ---

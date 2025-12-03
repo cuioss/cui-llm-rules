@@ -84,21 +84,14 @@ phase_tasks:
 
 **Contract**: See `planning:plan-type-api` for full specification.
 
-**Input**: `branch`, `issue`, `build_system`
+**Input**: (none)
 
 **Output**:
 
 ```toon
 plan_type: java
-branch: {branch}
-issue: {issue}
-
-technology: java
-build_system: {build_system}
-
 compatibility: deprecations
 commit_strategy: fine-granular
-finalizing: pr-workflow
 ```
 
 ---
