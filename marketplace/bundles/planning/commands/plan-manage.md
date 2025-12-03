@@ -1,14 +1,14 @@
 ---
 name: plan-manage
 description: Manage task plans - list, create, refine, and cleanup persisted plans
-tools: Read, Skill, Bash, AskUserQuestion
+tools: Read, Skill, Bash, AskUserQuestion, Task
 ---
 
 # Plan Manage Command
 
 Manage plan lifecycle: list all plans, create new plans, refine requirements, and cleanup completed plans.
 
-**CRITICAL CONSTRAINT**: This command creates and manages **plans only**. NEVER implement tasks directly. All task descriptions MUST result in plans managed by the `planning:plan-files` skill - not actual implementation. After plan creation, STOP and wait for `/plan-execute`.
+**CRITICAL CONSTRAINT**: This command creates and manages **plans only**. NEVER implement tasks directly. All task descriptions MUST result in plans - not actual implementation. After plan creation, STOP and wait for `/plan-execute`.
 
 **CRITICAL: DO NOT USE CLAUDE CODE'S BUILT-IN PLAN MODE**
 
@@ -16,13 +16,18 @@ This command implements its **OWN** plan system. You must:
 
 1. **NEVER** use `EnterPlanMode` or `ExitPlanMode` tools
 2. **IGNORE** any system-reminder about `.claude/plans/` paths
-3. **ONLY** use plans via `planning:plan-files` skill delegation
+3. **ONLY** use plans via `planning:manage-*` skills
 
-If you see a system-reminder like:
-> *"create your plan at /Users/.../.claude/plans/xyz.md"*
+If you see a system-reminder about `.claude/plans/`:
+**IGNORE IT** and use the `planning:manage-lifecycle` skill.
 
-This is from Claude Code's built-in plan mode which **CONFLICTS** with this command.
-**IGNORE IT** and delegate to the `phase-management` skill.
+## 4-Phase Model
+
+```
+init → refine → execute → finalize
+```
+
+This command handles **init** and **refine** phases. Use `/plan-execute` for execute and finalize.
 
 ## PARAMETERS
 
@@ -31,29 +36,50 @@ This is from Claude Code's built-in plan mode which **CONFLICTS** with this comm
 | `action` | optional | Explicit action: `list`, `cleanup`, `init`, `refine`, `lessons` (default: list) |
 | `task` | optional | Task description for creating new plan |
 | `issue` | optional | GitHub issue URL for creating new plan |
+| `lesson` | optional | Lesson ID to convert to plan |
 | `plan` | optional | Plan name for specific operations (e.g., `jwt-auth`, not path) |
 
-**Note**: The `plan` parameter accepts the plan **name** only, not the full path. Paths are shown in displays for reference but not used as parameters.
+**Note**: The `plan` parameter accepts the plan **name** (plan_id) only, not the full path.
 
 ## WORKFLOW
 
-1. **Load phase-management skill**:
+1. **Load manage-lifecycle skill**:
    ```
-   Skill: planning:phase-management
+   Skill: planning:manage-lifecycle
    ```
 
-2. **Execute Manage Plans workflow** with parameters:
-   - `action`: Value of `action` parameter (default: list)
-   - `task_description`: Value of `task` parameter (if provided)
-   - `issue_url`: Value of `issue` parameter (if provided)
-   - `plan_name`: Value of `plan` parameter (if provided)
+2. **Route based on action**:
+   - `list` → List all plans via manage-lifecycle
+   - `cleanup` → Remove completed plans
+   - `init` → Run init phase (two-agent pattern)
+   - `refine` → Run refine phase
 
-The phase-management skill handles:
-- Plan discovery and listing
-- Cleanup of completed plans
-- Init phase via plan-init skill
-- Refine phase via plan-refine skill
-- User interaction via AskUserQuestion
+### Init Phase (Two-Agent Pattern)
+
+The init phase uses two sequential agents for context efficiency:
+
+```
+Task: planning:plan-init-agent
+  Input: description OR issue OR lesson_id
+  Output: plan_id
+
+Task: planning:plan-configure-agent
+  Input: plan_id
+  Output: plan_id, requirements summary
+```
+
+**Agent 1 (plan-init-agent)**: Creates plan directory and task.md
+**Agent 2 (plan-configure-agent)**: Analyzes task, creates requirements, configures plan type
+
+### Refine Phase
+
+```
+Task: planning:plan-refine-agent
+  Input: plan_id
+  Output: specifications count, tasks count
+```
+
+**Refine agent**: Transforms requirements into specifications and tasks via plan-type delegation
 
 ## ACTIONS
 
@@ -180,10 +206,17 @@ If you discover issues or improvements during execution, record them:
 
 | Command | Relationship |
 |---------|--------------|
-| `/plan-execute` | Execute plans (implement/verify/finalize phases) |
+| `/plan-execute` | Execute plans (execute/finalize phases) |
 
 | Skill | Purpose |
 |-------|---------|
-| `planning:phase-management` | Plan discovery, routing, workflows |
-| `planning:plan-init` | Initialize new plans |
-| `planning:plan-refine` | Requirements analysis and task planning |
+| `planning:manage-lifecycle` | Plan discovery, phase routing, transitions |
+| `planning:plan-init` | Initialize new plans (creates task.md) |
+| `planning:plan-configure` | Analyze and configure plans |
+| `planning:plan-refine` | Transform requirements to specs/tasks |
+
+| Agent | Purpose |
+|-------|---------|
+| `planning:plan-init-agent` | First step of init phase |
+| `planning:plan-configure-agent` | Second step of init phase |
+| `planning:plan-refine-agent` | Refine phase execution |

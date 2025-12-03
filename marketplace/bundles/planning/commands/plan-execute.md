@@ -1,39 +1,70 @@
 ---
 name: plan-execute
-description: Execute task plans - implement, verify, and finalize phases
+description: Execute task plans - execute and finalize phases
 tools: Read, Skill, Bash, AskUserQuestion, Task
 ---
 
 # Plan Execute Command
 
-Execute task plans through implementation, verification, and finalization phases.
+Execute task plans through the execute phase (task implementation) and finalize phase (commit, PR).
+
+## 4-Phase Model
+
+```
+init → refine → execute → finalize
+```
+
+This command handles **execute** and **finalize** phases. Use `/plan-manage` for init and refine.
 
 ## PARAMETERS
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `plan` | optional | Plan name to execute (e.g., `jwt-auth`, not path) |
-| `phase` | optional | Force specific phase: `implement`, `verify`, `finalize` |
+| `action` | optional | Explicit action: `execute`, `finalize` (default: execute) |
 
-**Note**: The `plan` parameter accepts the plan **name** only, not the full path. Paths are shown in displays for reference but not used as parameters.
+**Note**: The `plan` parameter accepts the plan **name** (plan_id) only, not the full path.
 
 ## WORKFLOW
 
-1. **Load phase-management skill**:
+1. **Load manage-lifecycle skill**:
    ```
-   Skill: planning:phase-management
+   Skill: planning:manage-lifecycle
    ```
 
-2. **Execute Execute Plans workflow** with parameters:
-   - `plan_name`: Value of `plan` parameter (if provided)
-   - `explicit_phase`: Value of `phase` parameter (if provided)
+2. **Route based on action**:
+   - `execute` → Run execute phase (task iteration)
+   - `finalize` → Run finalize phase (commit, PR)
 
-The phase-management skill handles:
-- Discovery of executable plans (implement/verify/finalize phases)
-- Phase validation (rejects init/refine - use /plan-manage)
-- Phase routing to appropriate skill
-- Phase transitions on completion
-- User interaction via AskUserQuestion
+### Execute Phase (DUMB LOOP Pattern)
+
+The execute phase iterates through tasks using a simple loop:
+
+Script: `planning:manage-tasks/scripts/manage-task.py`
+
+```bash
+# Get next pending task
+python3 {script_path} next --plan-id {plan_id}
+
+# After task completion, mark done
+python3 {script_path} check --plan-id {plan_id} --number {task_number} --status done
+```
+
+For each task:
+1. Read task details via manage-tasks
+2. Delegate to domain agent based on plan_type
+3. Mark task complete
+4. Repeat until all tasks done
+
+### Finalize Phase
+
+```
+Skill: planning:plan-finalize
+operation: finalize
+plan_id: {plan_id}
+```
+
+Handles: verification, commit, push, PR creation, PR workflow
 
 ## BEHAVIOR
 
@@ -49,8 +80,8 @@ Shows:
 ```
 Executable Plans:
 
-1. jwt-authentication [implement] - Task 3/12: "Add token validation"
-2. user-profile-api [verify] - Build verification pending
+1. jwt-authentication [execute] - Task 3/12: "Add token validation"
+2. user-profile-api [finalize] - Ready to commit
 
 0. Exit (use /plan-manage to create or refine plans)
 
@@ -69,26 +100,24 @@ If plan is in init or refine phase:
 ```
 Plan 'jwt-auth' is in 'refine' phase.
 
-This command handles execution phases only (implement, verify, finalize).
+This command handles execute/finalize phases only.
 Use /plan-manage to complete init/refine phases first.
 ```
 
-### With phase override
+### With action parameter
 
-Force execution of specific phase:
+Force specific action:
 
 ```
-/plan-execute plan="jwt-auth" phase="verify"
+/plan-execute plan="jwt-auth" action="finalize"
 ```
 
-If override is invalid:
+If finalize requested but tasks incomplete:
 ```
-Cannot skip to 'finalize' phase.
+Cannot finalize: 5 tasks remaining.
 
-Current phase: implement
-Pending tasks: 5 of 12
-
-Complete implementation tasks first.
+Complete all tasks first, then run:
+  /plan-execute plan="jwt-auth" action="finalize"
 ```
 
 ## USAGE EXAMPLES
@@ -100,36 +129,36 @@ Complete implementation tasks first.
 # Execute specific plan (continues current phase)
 /plan-execute plan="jwt-auth"
 
-# Force specific phase
-/plan-execute plan="jwt-auth" phase="verify"
-
-# Resume implementation
-/plan-execute plan="jwt-auth" phase="implement"
+# Run finalize phase directly
+/plan-execute plan="jwt-auth" action="finalize"
 ```
 
 ## PHASE EXECUTION
 
-### Implement Phase
+### Execute Phase
 
-Executes implementation tasks:
-- Delegates to language-specific agents (java-implement-agent, etc.)
-- Updates progress via plan-files skill
-- Offers continuation to next task or verify phase
+Executes implementation tasks using DUMB LOOP pattern:
 
-### Verify Phase
-
-Runs verification checks:
-- Build project
-- Run tests
-- Quality checks
-- Documentation review
+1. Get next pending task via `manage-tasks:next`
+2. Read task details (title, specification, steps)
+3. Delegate to domain agent based on plan_type:
+   - `java` → `cui-java-expert:java-implement-agent`
+   - `javascript` → `cui-frontend-expert:js-implement-agent`
+   - `plugin-development` → No delegation (inline)
+   - `generic` → No delegation (inline)
+4. Mark task complete via `manage-tasks:check`
+5. Repeat until all tasks done
+6. Transition to finalize phase
 
 ### Finalize Phase
 
-Completes the plan:
+Completes the plan via `planning:plan-finalize` skill:
+- Run verification (if configured)
 - Commit changes
-- Create/update PR
-- Handle PR workflow
+- Push to remote
+- Create PR (if configured)
+- Run PR workflow (if configured)
+- Mark plan complete
 
 ## RELATED
 
@@ -139,5 +168,11 @@ Completes the plan:
 
 | Skill | Purpose |
 |-------|---------|
-| `planning:phase-management` | Plan discovery, routing, workflows |
-| `planning:plan-execute` | Execution phases (implement/verify/finalize) |
+| `planning:manage-lifecycle` | Plan discovery, phase routing, transitions |
+| `planning:manage-tasks` | Task iteration (next, check) |
+| `planning:plan-finalize` | Finalize phase execution |
+
+| Agent | Purpose |
+|-------|---------|
+| `cui-java-expert:java-implement-agent` | Java task implementation |
+| `cui-frontend-expert:js-implement-agent` | JavaScript task implementation |

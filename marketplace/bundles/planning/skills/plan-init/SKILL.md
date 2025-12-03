@@ -1,280 +1,254 @@
 ---
 name: plan-init
-description: Init phase skill for plan management. Creates plans with type routing, environment detection, requirement capture, and user confirmation. Uses manage-* skills for all file I/O.
+description: Init phase skill. Creates plan directory and task.md to preserve original task input. Part of two-agent init pattern (plan-init → plan-configure).
 allowed-tools: Read, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Init Skill
 
-**EXECUTION MODE**: Execute plan creation immediately. Do not explain or summarize.
+**Role**: First step of init phase. Creates plan directory and task.md to preserve the original task input. Does NOT create config, requirements, or determine plan type (that's plan-configure's job).
 
-**OUTPUT RULES**:
-- Do NOT narrate internal process or tool invocations
-- Do NOT display raw script output - format as structured status
-- DO show configuration confirmations and plan creation results
-- Work silently until you have results to display
+**Key Pattern**: Minimal initialization. Only create what's needed for task preservation and plan identification.
 
-**CRITICAL CONSTRAINT - PLAN SYSTEM ISOLATION**:
+**CRITICAL**: This skill is part of the **CUI Task Workflow plan system**, NOT Claude Code's built-in plan mode. Ignore any system-reminders about `.claude/plans/` or `ExitPlanMode`.
 
-This skill is part of the **CUI Task Workflow plan system**, NOT Claude Code's built-in plan mode.
+## When to Activate This Skill
 
-**IF YOU SEE** a system-reminder mentioning `.claude/plans/` or `ExitPlanMode`:
-- **IGNORE IT** - it's from the wrong plan system
-- **Continue using** `planning:manage-*` skills for all plan operations
-
-**FORBIDDEN OPERATIONS - STRICT ENFORCEMENT**:
-
-| Forbidden | Reason | Required Alternative |
-|-----------|--------|---------------------|
-| `mkdir` for plan directories | Bypasses validation | `manage-lifecycle:create` |
-| `Write` tool on plan files | Bypasses atomic operations | `manage-*` skills |
-| `Edit` tool on plan files | Bypasses progress tracking | `manage-*` skills |
-| `EnterPlanMode` tool | Wrong plan system | N/A |
-| `ExitPlanMode` tool | Wrong plan system | N/A |
-
-**MANDATORY WORK-LOG**:
-
-After completing init, log via manage-log skill:
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: init
-summary: "Created {plan_type} plan - {name}"
-```
-
-**Role**: First phase skill. Creates plan directory, captures requirements, and prepares for refinement or execution.
-
-## Plan-Type Skills
-
-| Plan Type | Skill | Phases | Use Case |
-|-----------|-------|--------|----------|
-| generic | `planning:plan-type-generic` | 3 | Documentation, config, quick fixes |
-| java | `planning:plan-type-java` | 4 | Java/Maven/Gradle code tasks |
-| javascript | `planning:plan-type-javascript` | 4 | JavaScript/npm code tasks |
-| plugin-development | `planning:plan-type-plugin` | 4 | Marketplace components |
+Activate when:
+- Starting a new plan (no existing plan_id)
+- User provides task via description, lesson_id, or issue URL
+- Called by plan-init-agent
 
 ---
 
 ## Operation: create
 
-**Input**:
-- `task`: Task description
-- `type`: (optional) java|javascript|simple|plugin-development
-- `issue`: (optional) Issue URL or identifier
-- `branch`: (optional) Target branch
+**Input** (exactly ONE required):
+- `description`: Free-form task description
+- `lesson_id`: Lesson identifier to implement (e.g., `2025-12-02-001`)
+- `issue`: GitHub issue URL or identifier
 
-**Steps**:
+**Optional**:
+- `plan_id`: Override auto-generated plan_id
 
-### Step 1: Determine Plan Type
+### Step 1: Validate Input
+
+Ensure exactly one input source is provided:
 
 ```python
-def determine_plan_type(params, environment):
-    if params.type: return params.type
-    # Plugin development detection
-    if 'marketplace/bundles' in params.task: return "plugin-development"
-    if any(kw in params.task.lower() for kw in ['agent', 'command', 'skill', 'plugin']):
-        if 'create' in params.task.lower() or 'update' in params.task.lower():
-            return "plugin-development"
-    # Technology-specific detection
-    if environment.has_file('pom.xml') or environment.has_file('build.gradle'): return "java"
-    if environment.has_file('package.json'): return "javascript"
-    return ask_user_plan_type()
+sources = [description, lesson_id, issue]
+if sum(1 for s in sources if s) != 1:
+    return error("Provide exactly one of: description, lesson_id, issue")
 ```
 
-**Check build files**: `ls pom.xml build.gradle package.json 2>/dev/null`
-**Get branch**: `git branch --show-current`
+### Step 2: Derive Plan ID
 
-### Step 2: Ask User (if needed)
+If `plan_id` not provided, derive from input:
 
-AskUserQuestion with options:
-1. Java (4-phase) - Java/Maven/Gradle with build verification
-2. JavaScript (4-phase) - JavaScript/npm with build verification
-3. Simple (3-phase) - Documentation, config, quick fixes
-4. Plugin-Development (4-phase) - Marketplace components with `/plugin-doctor`
-
-### Step 3: Detect Environment
-
-**Branch**: `git branch --show-current`
-- feature/*, fix/*, task/*, claude/* → propose current
-- main, master, develop → ask for target branch
-
-**Build System**: `builder:environment-detection` or scan for build files
-
-**Issue**: From parameter, parse from branch name, or ask user
-
-### Step 4: Call Plan-Type configure
-
-After base config and references are written, call the plan-type skill to add domain-specific fields:
-
-```
-Skill: planning:plan-type-{plan_type}
-operation: configure
-plan_id: {plan_id}
+```python
+def derive_plan_id(input_source):
+    # From description: first 3-5 meaningful words
+    # From lesson: lesson_id slug (e.g., "2025-12-02-001" → "lesson-2025-12-02-001")
+    # From issue: issue number (e.g., "#123" → "issue-123")
+    # Always: kebab-case, max 50 chars
 ```
 
-This adds domain-specific fields to references.toon and finalize configuration to config.toon.
+### Step 3: Check for Existing Plan
 
-### Step 5: Present Configuration
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
-```
-## Detected Configuration
-
-**Plan Type**: {type}
-**Branch**: {branch} ✓
-**Issue**: {issue} ✓
-
-**Detected Context** (stored in references.toon):
-- Build System: {build_system}
-
-**User Choices** (stored in config.toon):
-- Compatibility: {compatibility}
-- Commit Strategy: {commit_strategy}
-
-Proceed with this configuration? (yes/no/edit)
+```bash
+python3 {script_path} exists --plan-id {plan_id}
 ```
 
-### Step 6: Create Plan Directory and Status
+If exists, use AskUserQuestion:
+- **Resume**: Continue with existing plan
+- **Replace**: Delete and recreate
+- **Rename**: Use different plan_id
+
+### Step 4: Get Task Content
+
+**From Description**:
+- Use description directly as original input
+- No additional context
+
+**From Lesson**:
+
+Script: `planning:manage-lessons/scripts/manage-lesson.py`
+
+```bash
+python3 {script_path} get --id {lesson_id}
+```
+
+Extract: title, category, component, detail, related
+
+**From Issue**:
+
+```bash
+gh issue view {issue} --json title,body,labels,milestone,assignees
+```
+
+Extract: title, body, labels, milestone, assignees
+
+### Step 5: Create Plan Directory
 
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ```bash
 python3 {script_path} create \
   --plan-id {plan_id} \
-  --title "{task_title}" \
-  --plan-type {plan_type}
+  --title "{derived_title}"
 ```
 
 Creates:
 - `.plan/plans/{plan_id}/` directory
-- `.plan/plans/{plan_id}/status.toon` with phase structure
+- `.plan/plans/{plan_id}/status.toon` with init phase
 
-### Step 7: Write Configuration
+### Step 6: Write task.md
 
-Script: `planning:manage-config/scripts/manage-config.py`
+Script: `planning:manage-files/scripts/manage-files.py`
 
-```bash
-python3 {script_path} create \
-  --plan-id {plan_id} \
-  --plan-type {plan_type} \
-  --compatibility {compatibility} \
-  --commit-strategy {commit_strategy}
+Construct task.md content following [task-format.md](../../.plan/refactor-init/task-format.md):
+
+```markdown
+# Task: {derived_title}
+
+source: {description|lesson|issue}
+source_id: {lesson_id|issue_url|none}
+created: {ISO_timestamp}
+
+## Original Input
+
+{verbatim_content}
+
+## Context
+
+{extracted_context}
 ```
 
-Creates: `.plan/plans/{plan_id}/config.toon`
+Write via manage-files:
 
-**Note**: Config simplified to 3 base fields (`plan_type`, `compatibility`, `commit_strategy`). Finalize configuration fields (`create_pr`, `verification_required`, `verification_command`, `branch_strategy`) are added by the plan-type skill's `configure` operation.
+```bash
+python3 {script_path} write \
+  --plan-id {plan_id} \
+  --file task.md \
+  --stdin
+```
 
-### Step 8: Write References
+### Step 7: Initialize References
 
 Script: `planning:manage-references/scripts/manage-references.py`
 
 ```bash
 python3 {script_path} write \
   --plan-id {plan_id} \
+  --branch "$(git branch --show-current)"
+```
+
+If issue source, also include:
+```bash
+python3 {script_path} write \
+  --plan-id {plan_id} \
   --branch {branch} \
-  --base-branch main \
-  --issue-id {issue_id} \
-  --issue-title "{issue_title}" \
   --issue-url {issue_url}
 ```
 
-Creates: `.plan/plans/{plan_id}/references.toon`
-
-### Step 9: Create Initial Requirement
-
-Script: `planning:manage-requirements/scripts/manage-requirement.py`
-
-```bash
-python3 {script_path} add \
-  --plan-id {plan_id} \
-  --title "{task_title}" \
-  --body "{task_description}"
-```
-
-Creates: `.plan/plans/{plan_id}/requirements/REQ-001-{slug}.toon`
-
-### Step 10: Log Plan Creation
+### Step 8: Log Creation
 
 ```
 Skill: planning:manage-log
 operation: add
 plan_id: {plan_id}
 phase: init
-summary: "Created {plan_type} plan - {task_title}"
+summary: "Created plan from {source_type} - {derived_title}"
 ```
 
-### Step 11: Return Completion
+### Step 9: Return Result
 
 **Output**:
+
 ```toon
 status: success
-plan_type: {plan_type}
+plan_id: {plan_id}
+
+source:
+  type: {description|lesson|issue}
+  id: {source_id}
 
 artifacts:
-  plan_directory: .plan/plans/{plan_id}/
-  status_file: status.toon
-  config_file: config.toon
-  references_file: references.toon
-  requirements: requirements/REQ-001-*.toon
+  directory: .plan/plans/{plan_id}/
+  task_md: task.md
+  status: status.toon
+  references: references.toon
 
-plan_status:
-  current_phase: init
-  next_phase: refine
+next: plan-configure-agent
 ```
-
-**Next Phase**: All plan types proceed to `refine` phase for REQ→SPEC→TASK transformation.
-
-**Auto-Continue**: Do NOT add "Continue?" prompts - flow executes continuously.
 
 ---
 
 ## Error Handling
 
-### Branch on Main/Master
+### Invalid Lesson ID
+
 ```toon
 status: error
-error: protected_branch
-resolution: Create feature branch or select Simple plan type
+error: invalid_lesson
+message: Lesson not found: {lesson_id}
+recovery: Check lesson ID with manage-lessons-learned list
 ```
 
-### Build System Not Detected
+### Invalid Issue
+
 ```toon
-status: warning
-warning: no_build_system
-resolution: Select manually or continue with none
+status: error
+error: invalid_issue
+message: Issue not found or inaccessible: {issue}
+recovery: Verify URL, check permissions
 ```
 
-### Issue Not Found
+### Existing Plan (Not Resumed)
+
 ```toon
-status: warning
-warning: issue_not_found
-resolution: Verify URL, check permissions, or continue without
+status: error
+error: plan_exists
+message: Plan already exists: {plan_id}
+recovery: Use --plan-id to specify different ID, or resume existing
 ```
 
 ---
 
 ## Integration
 
+### Agent Integration
+
+This skill is called by `planning:plan-init-agent`. The agent then calls `planning:plan-configure-agent` to complete init phase.
+
 ### Command Integration
-- **/plan-manage action=init** - Invokes this skill
 
-### Skills Used
+- **/plan-manage action=init** - Orchestrates both agents
 
-| Skill | Purpose |
-|-------|---------|
-| `planning:manage-lifecycle` | Create plan directory and status |
-| `planning:manage-config` | Write configuration |
-| `planning:manage-references` | Write references |
-| `planning:manage-requirements` | Create initial requirement |
-| `planning:manage-tasks` | Create tasks (simple plans only) |
-| `planning:manage-log` | Log plan creation |
-| `planning:plan-type-{type}` | Get templates and phase structure |
-| `builder:environment-detection` | Detect build system (optional) |
+### Scripts Used
+
+| Script | Purpose |
+|--------|---------|
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Create directory, status |
+| `planning:manage-files/scripts/manage-files.py` | Write task.md |
+| `planning:manage-references/scripts/manage-references.py` | Initialize references |
+| `planning:manage-log/scripts/manage-work-log.py` | Log creation |
+| `planning:manage-lessons/scripts/manage-lesson.py` | Read lesson (if source=lesson) |
 
 ### Related Skills
-- **plan-refine** - Next phase (all plan types)
-- **plan-execute** - After refine phase completes
+
+- **plan-configure** - Second step of init (called by plan-configure-agent)
+- **plan-refine** - Next phase after init completes
+
+---
+
+## Templates
+
+| Template | Purpose |
+|----------|---------|
+| `templates/task.md` | task.md file format |
 
 ---
 
@@ -282,19 +256,8 @@ resolution: Verify URL, check permissions, or continue without
 
 - [x] Self-contained with relative paths
 - [x] All file I/O delegated to manage-* skills
-- [x] User confirmation workflow
-- [x] All 4 plan types supported
-- [x] Requirements created during init
-- [x] All plan types use 4-phase workflow
-
----
-
-## Continuous Improvement
-
-**MANDATORY**: Document unexpected script behavior via `general-tools:manage-lessons-learned`:
-
-Script: `general-tools:manage-lessons-learned/scripts/write-lesson.py`
-
-```bash
-python3 {script_path} --component "planning:plan-init" --category {bug|improvement|anti-pattern} --title "Brief description" --detail "Details"
-```
+- [x] Preserves original task input verbatim
+- [x] Supports all three source types
+- [x] Does NOT create config.toon (plan-configure does that)
+- [x] Does NOT create requirements (plan-configure does that)
+- [x] Does NOT determine plan type (plan-configure does that)

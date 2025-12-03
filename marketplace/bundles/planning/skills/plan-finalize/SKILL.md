@@ -272,7 +272,7 @@ Minimal workflow:
 | `planning:manage-config/scripts/manage-config.py` | Read finalize configuration |
 | `planning:manage-references/scripts/manage-references.py` | Read branch, issue info |
 | `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase transition |
-| `planning:manage-log/scripts/log.py` | Log completion |
+| `planning:manage-log/scripts/manage-work-log.py` | Log completion |
 
 ---
 
