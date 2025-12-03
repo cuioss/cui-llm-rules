@@ -58,9 +58,7 @@ def test_create_config():
     with TestContext(plan_id='config-create'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-create',
-            '--plan-type', 'implementation',
-            '--technology', 'java',
-            '--build-system', 'maven'
+            '--plan-type', 'java'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
@@ -73,8 +71,7 @@ def test_create_config_with_all_fields():
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-full',
             '--plan-type', 'simple',
-            '--technology', 'javascript',
-            '--build-system', 'npm',
+            '--compatibility', 'breaking',
             '--commit-strategy', 'fine-granular'
         )
         assert result.success, f"Script failed: {result.stderr}"
@@ -90,26 +87,24 @@ def test_set_and_get_field():
         # Create config first
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-getset',
-            '--plan-type', 'implementation',
-            '--technology', 'java',
-            '--build-system', 'maven'
+            '--plan-type', 'java'
         )
         # Set a field
         set_result = run_script(SCRIPT_PATH, 'set',
             '--plan-id', 'config-getset',
-            '--field', 'technology',
-            '--value', 'java'
+            '--field', 'compatibility',
+            '--value', 'breaking'
         )
         assert set_result.success, f"Set failed: {set_result.stderr}"
 
         # Get the field
         get_result = run_script(SCRIPT_PATH, 'get',
             '--plan-id', 'config-getset',
-            '--field', 'technology'
+            '--field', 'compatibility'
         )
         assert get_result.success, f"Get failed: {get_result.stderr}"
         data = parse_toon(get_result.stdout)
-        assert data['value'] == 'java'
+        assert data['value'] == 'breaking'
 
 
 def test_read_config():
@@ -118,9 +113,7 @@ def test_read_config():
         # Create config first
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-read',
-            '--plan-type', 'simple',
-            '--technology', 'javascript',
-            '--build-system', 'npm'
+            '--plan-type', 'simple'
         )
         # Read it
         result = run_script(SCRIPT_PATH, 'read',
@@ -135,9 +128,7 @@ def test_set_invalid_plan_type():
         # Create config first
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-invalid',
-            '--plan-type', 'implementation',
-            '--technology', 'java',
-            '--build-system', 'maven'
+            '--plan-type', 'java'
         )
         # Try to set invalid value
         result = run_script(SCRIPT_PATH, 'set',
