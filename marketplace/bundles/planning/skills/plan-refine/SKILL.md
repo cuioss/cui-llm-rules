@@ -1,32 +1,39 @@
 ---
 name: plan-refine
 description: Refine phase skill for plan management. Delegates to plan-type skill to transform requirements into specifications and tasks. Optionally creates analysis.md for complex tasks and identifies documentation needs.
-allowed-tools: Read, Write, Bash, Skill, AskUserQuestion
+allowed-tools: Read, Write, Bash, Skill, Task, AskUserQuestion
 ---
 
 # Plan Refine Skill
 
 **Role**: Second phase skill. Delegates to plan-type skill to transform requirements into specifications and tasks.
 
-**Execution Pattern**: Detect complexity → Delegate to plan-type:refine → Identify documentation needs → Transition
+**Execution Pattern**: Detect complexity → Delegate to plan-type:specify → Delegate to plan-type:plan → Identify documentation needs → Transition
 
 **CRITICAL**: Use Python scripts via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
 
 ## Plan-Type Skill API
 
-All plan-type skills implement a uniform `refine` operation:
+All plan-type skills implement two operations for refinement:
 
+**1. specify** - Transform REQ → SPEC:
 ```
 Skill: planning:plan-type-{plan_type}
-operation: refine
+operation: specify
 plan_id: {plan_id}
 ```
 
-The plan-type skill handles the full REQ → SPEC → TASK transformation:
-1. Loads requirements via `manage-requirements:findAll`
-2. Creates specifications via `manage-specifications:add`
-3. Creates tasks via `manage-tasks:add`
-4. Returns confirmation with counts
+**2. plan** - Transform SPEC → TASK:
+```
+Skill: planning:plan-type-{plan_type}
+operation: plan
+plan_id: {plan_id}
+```
+
+The plan-type skills delegate to domain agents which write directly:
+- Domain agents create specifications via `manage-specifications:add`
+- Domain agents create tasks via `manage-tasks:add`
+- Domain agents record lessons-learned on issues
 
 **No intermediate data passing** - plan-refine only passes `plan_id`.
 
@@ -62,11 +69,11 @@ For complex tasks, create analysis.md first:
 
 If complexity detected → Execute `create-analysis` operation before continuing.
 
-### Step 3: Delegate to Plan-Type Skill
+### Step 3: Delegate to Plan-Type Skill (specify)
 
 ```
 Skill: planning:plan-type-{plan_type}
-operation: refine
+operation: specify
 plan_id: {plan_id}
 ```
 
@@ -76,24 +83,39 @@ plan_id: {plan_id}
 status: success
 plan_id: {plan_id}
 
-phase_1:
-  requirements_processed: N
-  specs_created: N
+specs_created[N]:
+- SPEC-1
+- SPEC-2
+- SPEC-3
 
-phase_2:
-  specs_processed: N
-  tasks_created: N
-
-specifications[N]{number,title,requirements,file}:
-...
-
-tasks[N]{number,title,specification,file}:
-...
+lessons_recorded: {count}
 ```
 
-**For simple plans**: Returns `status: skipped` (tasks generated during init).
+### Step 4: Delegate to Plan-Type Skill (plan)
 
-### Step 4: Log Completion
+```
+Skill: planning:plan-type-{plan_type}
+operation: plan
+plan_id: {plan_id}
+```
+
+**Expected Output**:
+
+```toon
+status: success
+plan_id: {plan_id}
+
+tasks_created[N]:
+- TASK-1
+- TASK-2
+- TASK-3
+
+lessons_recorded: {count}
+```
+
+**For generic plans**: Plan-type handles inline (no domain agent delegation).
+
+### Step 5: Log Completion
 
 ```
 Skill: planning:manage-log
@@ -103,7 +125,7 @@ phase: refine
 summary: "Refined plan: {specs_created} specs, {tasks_created} tasks"
 ```
 
-### Step 5: Identify Documentation Needs (Optional)
+### Step 6: Identify Documentation Needs (Optional)
 
 Check if ADRs or interfaces should be created:
 
@@ -114,7 +136,7 @@ If needed, use AskUserQuestion to confirm, then:
 - Invoke `cui-documentation-standards:adr-management` or `cui-documentation-standards:interface-management`
 - Update references via `manage-references:add-file`
 
-### Step 6: Phase Transition
+### Step 7: Phase Transition
 
 ```
 Skill: planning:manage-lifecycle

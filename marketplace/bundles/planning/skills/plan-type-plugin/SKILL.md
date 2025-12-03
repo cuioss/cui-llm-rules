@@ -25,7 +25,8 @@ allowed-tools: Read, Bash
 | Technology | none |
 | Verification | `/cui-plugin-development-tools:plugin-doctor` |
 | PR Workflow | false |
-| Analysis Agent | `cui-plugin-development-tools:plugin-analysis-agent` |
+| Specify Agent | `cui-plugin-development-tools:plugin-specify-agent` |
+| Plan Agent | `cui-plugin-development-tools:plugin-plan-agent` |
 
 ---
 
@@ -55,9 +56,18 @@ allowed-tools: Read, Bash
 
 ## Operation: specify
 
-**Input**: `plan_id`
+**Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
 
-**Plugin-Specific Content** (included in specifications):
+**Delegation**:
+```
+Task(cui-plugin-development-tools:plugin-specify-agent,
+     plan_id={plan_id},
+     requirement_id={requirement_id})  # omit for batch
+```
+
+**Returns**: `{status, spec_ids[], lessons_recorded}`
+
+The agent analyzes marketplace structure, creates specifications with:
 - Component type (skill, command, agent, script)
 - Target bundle location
 - Frontmatter requirements
@@ -68,9 +78,18 @@ allowed-tools: Read, Bash
 
 ## Operation: plan
 
-**Input**: `plan_id`
+**Input**: `plan_id`, `specification_id?` (optional for single-item mode)
 
-**Task Steps by Component Type**:
+**Delegation**:
+```
+Task(cui-plugin-development-tools:plugin-plan-agent,
+     plan_id={plan_id},
+     specification_id={specification_id})  # omit for batch
+```
+
+**Returns**: `{status, task_ids[], lessons_recorded}`
+
+The agent creates tasks with plugin-specific steps:
 
 | Component Type | Key Steps |
 |----------------|-----------|

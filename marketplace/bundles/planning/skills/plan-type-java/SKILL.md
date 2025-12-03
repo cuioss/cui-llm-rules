@@ -25,7 +25,8 @@ allowed-tools: Read, Bash
 | Technology | java |
 | Verification | `/builder:builder-build-and-fix` |
 | PR Workflow | true |
-| Analysis Agent | `cui-java-expert:java-analysis-agent` |
+| Specify Agent | `cui-java-expert:java-specify-agent` |
+| Plan Agent | `cui-java-expert:java-plan-agent` |
 
 ---
 
@@ -55,9 +56,18 @@ allowed-tools: Read, Bash
 
 ## Operation: specify
 
-**Input**: `plan_id`
+**Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
 
-**Java-Specific Content** (included in specifications):
+**Delegation**:
+```
+Task(cui-java-expert:java-specify-agent,
+     plan_id={plan_id},
+     requirement_id={requirement_id})  # omit for batch
+```
+
+**Returns**: `{status, spec_ids[], lessons_recorded}`
+
+The agent analyzes Java codebase, creates specifications with:
 - Class/interface design decisions
 - Package placement rationale
 - Dependencies (CDI, Spring, external libs)
@@ -68,9 +78,18 @@ allowed-tools: Read, Bash
 
 ## Operation: plan
 
-**Input**: `plan_id`
+**Input**: `plan_id`, `specification_id?` (optional for single-item mode)
 
-**Java-Specific Task Steps** (standard for implementation tasks):
+**Delegation**:
+```
+Task(cui-java-expert:java-plan-agent,
+     plan_id={plan_id},
+     specification_id={specification_id})  # omit for batch
+```
+
+**Returns**: `{status, task_ids[], lessons_recorded}`
+
+The agent creates tasks with Java-specific steps:
 1. Create/modify implementation file at `{path}`
 2. Add unit tests (load `cui-java-expert:cui-java-unit-testing`)
 3. Add JavaDoc (load `cui-java-expert:cui-javadoc`)

@@ -20,7 +20,6 @@
     "./skills/git-workflow",
     "./skills/pr-workflow",
     "./skills/sonar-workflow",
-    "./skills/analysis-api",
     "./skills/plan-type-api",
     "./skills/plan-type-generic",
     "./skills/plan-type-plugin",

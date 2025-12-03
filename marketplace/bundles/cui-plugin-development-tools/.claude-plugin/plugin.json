@@ -17,11 +17,15 @@
   ],
   "skills": [
     "./skills/marketplace-inventory",
-    "./skills/plugin-analysis",
     "./skills/plugin-architecture",
     "./skills/plugin-create",
     "./skills/plugin-doctor",
-    "./skills/plugin-maintain"
+    "./skills/plugin-maintain",
+    "./skills/plugin-specify",
+    "./skills/plugin-plan"
   ],
-  "agents": []
+  "agents": [
+    "./agents/plugin-specify-agent.md",
+    "./agents/plugin-plan-agent.md"
+  ]
 }

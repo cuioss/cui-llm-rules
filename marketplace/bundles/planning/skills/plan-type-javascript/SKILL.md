@@ -25,7 +25,8 @@ allowed-tools: Read, Bash
 | Technology | javascript |
 | Verification | `/builder:builder-build-and-fix system=npm` |
 | PR Workflow | true |
-| Analysis Agent | `cui-frontend-expert:js-analysis-agent` |
+| Specify Agent | `cui-frontend-expert:js-specify-agent` |
+| Plan Agent | `cui-frontend-expert:js-plan-agent` |
 
 ---
 
@@ -55,9 +56,18 @@ allowed-tools: Read, Bash
 
 ## Operation: specify
 
-**Input**: `plan_id`
+**Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
 
-**JavaScript-Specific Content** (included in specifications):
+**Delegation**:
+```
+Task(cui-frontend-expert:js-specify-agent,
+     plan_id={plan_id},
+     requirement_id={requirement_id})  # omit for batch
+```
+
+**Returns**: `{status, spec_ids[], lessons_recorded}`
+
+The agent analyzes JavaScript codebase, creates specifications with:
 - Module design and exports
 - Web component structure (for UI components)
 - Event handling patterns
@@ -68,7 +78,18 @@ allowed-tools: Read, Bash
 
 ## Operation: plan
 
-**Input**: `plan_id`
+**Input**: `plan_id`, `specification_id?` (optional for single-item mode)
+
+**Delegation**:
+```
+Task(cui-frontend-expert:js-plan-agent,
+     plan_id={plan_id},
+     specification_id={specification_id})  # omit for batch
+```
+
+**Returns**: `{status, task_ids[], lessons_recorded}`
+
+The agent creates tasks with JavaScript-specific steps:
 
 **Module Task Steps**:
 1. Create/modify implementation file at `{path}`

@@ -28,7 +28,11 @@
     "./skills/cui-javascript-project",
     "./skills/cui-javascript-unit-testing",
     "./skills/cui-jsdoc",
-    "./skills/js-analysis"
+    "./skills/js-specify",
+    "./skills/js-plan"
   ],
-  "agents": []
+  "agents": [
+    "./agents/js-specify-agent.md",
+    "./agents/js-plan-agent.md"
+  ]
 }
