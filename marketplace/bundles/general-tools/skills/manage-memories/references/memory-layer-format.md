@@ -87,7 +87,7 @@ Retrieves memory file content.
 
 ```bash
 python3 scripts/manage-memory.py load \
-  --category handoffs \
+  --category context \
   --identifier "task-42"
 ```
 

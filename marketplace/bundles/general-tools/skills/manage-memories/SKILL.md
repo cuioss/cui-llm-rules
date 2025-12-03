@@ -41,7 +41,7 @@ Manage the memory layer for session persistence (via `file-operations-base` skil
 ### Parameters
 
 - **operation** (required): One of `save`, `load`, `list`, `query`, `cleanup`
-- **category** (optional): One of `context`, `handoffs`
+- **category** (optional): One of `context`
 - **identifier** (optional): File identifier or summary name
 - **content** (optional): JSON content for save operations
 
@@ -125,7 +125,7 @@ All memory files use a metadata envelope:
 {
   "meta": {
     "created": "2025-11-25T10:30:00Z",
-    "category": "context|handoffs",
+    "category": "context",
     "summary": "feature-auth",
     "session_id": "optional-session-id"
   },
@@ -140,7 +140,7 @@ All memory files use a metadata envelope:
 | Field | Type | Description |
 |-------|------|-------------|
 | created | string | ISO 8601 timestamp with Z suffix |
-| category | string | One of: context, handoffs |
+| category | string | One of: context |
 | summary | string | Human-readable identifier |
 
 ---

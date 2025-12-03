@@ -85,7 +85,6 @@ All plan-type skills implement `planning:plan-type-api` contract.
 | `manage-requirements` | `manage-requirement.py` | Requirements CRUD |
 | `manage-specifications` | `manage-specification.py` | Specifications CRUD |
 | `manage-tasks` | `manage-task.py` | Tasks + steps CRUD |
-| `manage-handoff` | `manage-handoff.py` | Session handoff |
 | `manage-files` | `manage-files.py` | Generic file I/O |
 | `manage-config` | `manage-config.py` | config.toon domain |
 | `manage-references` | `manage-references.py` | references.toon domain |
@@ -135,7 +134,7 @@ All domain analysis skills implement this contract:
 
 See `planning:analysis-api` for full input/output specification and domain-specific fields.
 
-### Handoff Protocol
+### Analysis Flow
 
 ```
 plan-refine → analyze(plan_id, task, ...) → domain-analysis-skill
@@ -191,7 +190,6 @@ planning/
     ├── manage-requirements/     # Requirements CRUD
     ├── manage-specifications/   # Specifications CRUD
     ├── manage-tasks/            # Tasks + steps CRUD
-    ├── manage-handoff/          # Session handoff
     ├── manage-files/            # Generic file I/O
     ├── manage-config/           # config.toon domain
     ├── manage-references/       # references.toon domain

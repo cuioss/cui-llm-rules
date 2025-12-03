@@ -9,7 +9,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
-  "keywords": ["workflow", "task", "pr", "implementation", "quality", "handoff", "orchestration"],
+  "keywords": ["workflow", "task", "pr", "implementation", "quality", "orchestration"],
   "commands": [
     "./commands/task-implement.md",
     "./commands/pr-doctor.md",
@@ -29,7 +29,6 @@
     "./skills/plan-init",
     "./skills/plan-refine",
     "./skills/plan-execute",
-    "./skills/manage-handoff",
     "./skills/manage-requirements",
     "./skills/manage-specifications",
     "./skills/manage-tasks",

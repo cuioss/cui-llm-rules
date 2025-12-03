@@ -138,7 +138,3 @@ entries[10]{timestamp,phase,summary}:
 ### With plan-execute
 
 Execution logs work as steps are completed.
-
-### With manage-handoff
-
-Handoff includes recent log entries for context.

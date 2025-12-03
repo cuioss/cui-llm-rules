@@ -3,7 +3,7 @@
 Manage the .plan/memory/ layer for session persistence.
 
 Provides CRUD operations for memory files organized by category:
-context, decisions, interfaces, handoffs.
+context, decisions, interfaces.
 
 Output: JSON to stdout with operation results.
 """

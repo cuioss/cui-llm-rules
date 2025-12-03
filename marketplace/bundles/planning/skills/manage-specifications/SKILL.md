@@ -324,7 +324,7 @@ Specifications can be referenced elsewhere using `SPEC-{n}` format (no zero padd
 - In plan.md phases: "Implement SPEC-1, SPEC-2"
 - In work-log entries: "Completed SPEC-3"
 - In commit messages: "feat: implement SPEC-1 JWT token format"
-- In handoffs: `specification: SPEC-1`
+- In task files: `specification: SPEC-1`
 
 ---
 
