@@ -1,0 +1,245 @@
+---
+name: plan-configure
+description: Analyze task input, create requirements, detect plan type, and configure plan
+allowed-tools: Read, Bash, Skill, AskUserQuestion
+---
+
+# Plan Configure Skill
+
+Analyze task input to create requirements, detect plan type, and configure the plan. This skill is the second phase of plan initialization, following plan-init.
+
+## What This Skill Provides
+
+- Task analysis from task.md
+- Requirements extraction and creation
+- Plan type detection (or override)
+- Configuration creation with defaults
+- Plan-type specific configuration via delegation
+
+## When to Activate This Skill
+
+Activate when `plan-configure-agent` delegates with:
+- `plan_id` (required): Plan identifier
+- `plan_type` (optional): Override auto-detection
+
+---
+
+## Workflow: Configure
+
+Execute this workflow when invoked.
+
+### Step 1: Read Task Input
+
+Read the original task input from task.md:
+
+```bash
+python3 {manage_files_path} read \
+  --plan-id {plan_id} \
+  --file task.md
+```
+
+Script: `planning:manage-files/scripts/manage-files.py`
+
+### Step 2: Analyze Task and Create Requirements
+
+Analyze the task.md content to understand:
+- What is the goal/objective?
+- What are the acceptance criteria?
+- What components/files are affected?
+- What constraints or dependencies exist?
+- What is the scope (small fix vs large feature)?
+
+**If uncertain about any aspect**, ask clarifying questions:
+
+```
+AskUserQuestion:
+  question: "What is the scope of this change?"
+  options:
+    - label: "Small fix"
+      description: "Single file or function change"
+    - label: "Medium change"
+      description: "Few related files"
+    - label: "Large feature"
+      description: "Multiple components"
+```
+
+### Step 3: Create Requirements
+
+For each identified requirement, create via manage-requirements:
+
+```bash
+python3 {manage_requirements_path} add \
+  --plan-id {plan_id} \
+  --title "Requirement title" \
+  --body "Detailed requirement description"
+```
+
+Script: `planning:manage-requirements/scripts/manage-requirement.py`
+
+Creates: `requirements/REQ-001-{slug}.toon`, `REQ-002-...`, etc.
+
+### Step 4: Detect Plan Type
+
+Determine plan type from task analysis:
+
+| Indicator | Plan Type |
+|-----------|-----------|
+| Java code, Maven/Gradle, .java files | `java` |
+| JavaScript, npm, .js/.ts files | `javascript` |
+| Plugin/skill/command development | `plugin-development` |
+| Generic/simple task | `generic` |
+
+**If plan_type parameter provided**: Use override value.
+
+**If uncertain**, ask:
+
+```
+AskUserQuestion:
+  question: "What technology stack does this task primarily involve?"
+  options:
+    - label: "Java"
+      description: "Java code with Maven or Gradle"
+    - label: "JavaScript"
+      description: "JavaScript/TypeScript with npm"
+    - label: "Plugin Development"
+      description: "Claude Code plugin components"
+    - label: "Generic"
+      description: "Simple task, no specific technology"
+```
+
+### Step 5: Create Configuration
+
+Create config.toon with base settings:
+
+```bash
+python3 {manage_config_path} create \
+  --plan-id {plan_id} \
+  --plan-type {plan_type}
+```
+
+Script: `planning:manage-config/scripts/manage-config.py`
+
+This creates config.toon with:
+- `plan_type`: detected or overridden
+- `compatibility`: deprecations (default)
+- `commit_strategy`: phase-specific (default)
+
+### Step 6: Call Plan-Type Configure
+
+Delegate to plan-type skill for domain-specific configuration:
+
+```
+Skill: planning:plan-type-{plan_type}
+operation: configure
+plan_id: {plan_id}
+```
+
+This adds finalize configuration to config.toon:
+- `create_pr`: Whether to create PR
+- `verification_required`: Whether verification needed
+- `verification_command`: Command for verification
+- `branch_strategy`: feature or direct
+
+### Step 7: Transition Phase
+
+The phase transitions from init → refine after configuration completes.
+
+Use manage-lifecycle to track:
+
+```bash
+python3 {manage_lifecycle_path} transition \
+  --plan-id {plan_id} \
+  --completed-phase init
+```
+
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+
+---
+
+## Output
+
+Return structured result:
+
+```toon
+status: success
+plan_id: my-feature
+plan_type: planning:plan-type-java
+next_phase: refine
+
+requirements:
+  count: 3
+  pending: 3
+
+configuration:
+  plan_type: java
+  compatibility: deprecations
+  commit_strategy: phase-specific
+```
+
+---
+
+## Scripts Used
+
+| Script | Purpose |
+|--------|---------|
+| `planning:manage-files/scripts/manage-files.py` | Read task.md |
+| `planning:manage-requirements/scripts/manage-requirement.py` | Create requirements |
+| `planning:manage-config/scripts/manage-config.py` | Create config.toon |
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase transitions |
+
+---
+
+## Clarifying Question Patterns
+
+Ask clarifying questions when:
+- Scope is unclear (small/medium/large)
+- Technology stack is ambiguous
+- Breaking changes uncertain
+- Testing requirements unclear
+
+Always provide options for easier selection:
+
+| Uncertainty | Question | Options |
+|-------------|----------|---------|
+| Scope | "What is the scope?" | Small fix, Medium change, Large feature |
+| Technology | "What technology?" | Java, JavaScript, Plugin, Generic |
+| Breaking | "Breaking changes?" | No (compatible), Yes (breaking) |
+| Testing | "Testing required?" | Unit only, Unit+integration, Full suite |
+
+---
+
+## Error Handling
+
+On script failure:
+1. Capture error context
+2. Record lesson-learned via `general-tools:manage-lessons-learned`
+3. Return error status with message
+
+```toon
+status: error
+plan_id: my-feature
+error: script_failed
+message: manage-requirements failed to create requirement
+```
+
+---
+
+## Integration Points
+
+### Input From
+
+- `plan-init-agent`: Creates plan directory and task.md
+- `plan-configure-agent`: Delegates to this skill
+
+### Output To
+
+- `plan-refine-agent`: Uses requirements and config for refinement
+- `plan-type-{type}`: Receives configure operation call
+
+### Files Created/Updated
+
+| File | Operation |
+|------|-----------|
+| `requirements/*.toon` | Created |
+| `config.toon` | Created |
+| `status.toon` | Updated (phase transition) |

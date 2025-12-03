@@ -31,6 +31,7 @@
     "./skills/plan-type-java",
     "./skills/plan-type-javascript",
     "./skills/plan-init",
+    "./skills/plan-configure",
     "./skills/plan-refine",
     "./skills/plan-execute",
     "./skills/manage-requirements",
