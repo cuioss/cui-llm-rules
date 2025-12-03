@@ -100,14 +100,14 @@ All plan-type skills implement this uniform API:
 
 | Operation | Input | Output | Caller |
 |-----------|-------|--------|--------|
-| `get-phase-structure` | `plan_id`, `task_title` | Phase config | plan-init |
-| `get-config-template` | context fields | config.toon template | plan-init |
-| `get-references-template` | context fields | references.toon template | plan-init |
-| `generate-tasks` | `plan_id`, `components[]` | TOON task files | plan-refine |
-| `get-next-phase` | `current_phase` | Next phase name | manage-lifecycle |
-| `get-finalize-config` | `plan_id` | Finalize behavior | plan-finalize |
+| `configure` | `plan_id` | References + config updated | plan-configure |
+| `specify` | `plan_id` | SPEC files created | plan-refine |
+| `plan` | `plan_id` | TASK files created | plan-refine |
 
-**Key Design**: `generate-tasks` writes directly to tasks/ directory via manage-tasks skill.
+**Key Design**:
+- `configure` adds domain-specific fields to references.toon and finalize configuration to config.toon
+- `specify` transforms requirements → specifications
+- `plan` transforms specifications → tasks
 
 ## Domain Analysis Skills
 
@@ -137,11 +137,11 @@ See `planning:analysis-api` for full input/output specification and domain-speci
 ### Analysis Flow
 
 ```
-plan-refine → analyze(plan_id, task, ...) → domain-analysis-skill
-            ← analysis_result{status, components[]}
+plan-refine → specify(plan_id) → plan-type-skill
+            ← (creates SPEC files from REQ files)
 
-plan-refine → generate-tasks(plan_id, components) → plan-type-skill
-            ← (writes directly to plan.md)
+plan-refine → plan(plan_id) → plan-type-skill
+            ← (creates TASK files from SPEC files)
 ```
 
 ### Sub-Type Templates
@@ -167,7 +167,7 @@ planning/
 │   └── task-implement.md
 └── skills/
     ├── plan-type-api/           # API contract for all plan-type skills
-    │   └── SKILL.md             # Contract: 6 operations
+    │   └── SKILL.md             # Contract: 3 operations (configure, specify, plan)
     ├── plan-type-simple/        # Simple workflow skill (3 phases)
     │   └── SKILL.md             # Implements plan-type-api
     ├── plan-type-plugin/        # Plugin workflow skill (4 phases)

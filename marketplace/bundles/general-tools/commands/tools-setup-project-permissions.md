@@ -29,6 +29,7 @@ Skill: general-tools:permission-management
 global_settings = ~/.claude/settings.json
 local_settings = .claude/settings.json
 marketplace_json = marketplace/marketplace.json
+scripts_local = .claude/scripts.local.json
 ```
 
 ### Step 3: Analyze Permissions
@@ -88,13 +89,25 @@ python3 {ensure-marketplace-wildcards.py} \
   --marketplace-json {marketplace_json}
 ```
 
-**C. Apply safe fixes to local:**
+**C. Sync script permissions to global (from scripts.local.json):**
+
+If `scripts_local` exists, sync script permissions:
+```bash
+python3 {apply-permissions.py} \
+  --action sync-scripts \
+  --scripts-file {scripts_local} \
+  --target global
+```
+
+This removes stale script permissions and adds current ones from the discovered scripts cache.
+
+**D. Apply safe fixes to local:**
 ```bash
 python3 {apply-permission-fixes.py} \
   --settings {local_settings}
 ```
 
-**D. Apply safe fixes to global:**
+**E. Apply safe fixes to global:**
 ```bash
 python3 {apply-permission-fixes.py} \
   --settings {global_settings}
@@ -114,6 +127,7 @@ Local Settings ({local_settings}):
 
 Global Settings ({global_settings}):
   - Marketplace wildcards added: {wildcards_added}
+  - Script permissions synced: {scripts_removed} removed, {scripts_added} added
   - Duplicates removed: {global_duplicates}
   - Defaults added: {global_defaults}
 
@@ -131,6 +145,7 @@ Scripts are resolved via the skill's scripts directory:
 - `general-tools:permission-management/scripts/detect-suspicious-permissions.py`
 - `general-tools:permission-management/scripts/consolidate-build-outputs.py`
 - `general-tools:permission-management/scripts/ensure-marketplace-wildcards.py`
+- `general-tools:permission-management/scripts/apply-permissions.py`
 - `general-tools:permission-management/scripts/apply-permission-fixes.py`
 
 Use `scripts.local.json` to resolve absolute paths.

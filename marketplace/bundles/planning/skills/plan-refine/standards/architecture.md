@@ -53,40 +53,43 @@ Plan-types are first-class skills that provide workflow definitions via a unifor
 ```
 planning/skills/
 ├── plan-type-simple/           # 3-phase workflow skill
-│   └── SKILL.md                # API: get-phase-structure, generate-tasks, get-finalize-config
+│   └── SKILL.md                # API: configure, specify, plan
 │
 ├── plan-type-plugin/           # 4-phase workflow skill
-│   ├── SKILL.md                # API: get-phase-structure, generate-tasks, get-finalize-config
+│   ├── SKILL.md                # API: configure, specify, plan
 │   └── templates/              # Internal sub-type templates
 │       ├── script-task.md
 │       ├── skill-task.md
 │       ├── command-task.md
 │       └── agent-task.md
 │
-├── plan-type-java/             # 5-phase workflow skill (Java)
-│   └── SKILL.md                # API: get-phase-structure, generate-tasks, get-finalize-config
+├── plan-type-java/             # 4-phase workflow skill (Java)
+│   └── SKILL.md                # API: configure, specify, plan
 │
-└── plan-type-javascript/       # 5-phase workflow skill (JavaScript)
-    └── SKILL.md                # API: get-phase-structure, generate-tasks, get-finalize-config
+└── plan-type-javascript/       # 4-phase workflow skill (JavaScript)
+    └── SKILL.md                # API: configure, specify, plan
 ```
 
 **Uniform API** (all plan-type skills):
 
 | Operation | Input | Output |
 |-----------|-------|--------|
-| `get-phase-structure` | `plan_id`, `task_title` | Phase structure for plan.md |
-| `generate-tasks` | `plan_id`, `components[]` | **Writes directly** to plan.md |
-| `get-finalize-config` | `plan_id` | Finalize behavior (commit, PR) |
-| `get-next-phase` | `plan_id`, `current_phase` | Next phase name |
+| `configure` | `plan_id` | Adds domain fields to references.toon + finalize config to config.toon |
+| `specify` | `plan_id` | Creates SPEC files from requirements |
+| `plan` | `plan_id` | Creates TASK files from specifications |
 
-**Key Design**: `generate-tasks` writes directly to plan.md via scripts (no ping-pong between skills).
+**Key Design**:
+- `configure` writes finalize configuration to config.toon during init (no separate query needed)
+- `specify` transforms requirements → specifications (single responsibility)
+- `plan` transforms specifications → tasks (single responsibility)
 
 **Flow**:
 1. User requests task
-2. `plan-init` determines plan type, queries `get-phase-structure` → writes to plan.md
-3. `plan-refine` delegates analysis to domain skill → receives components → calls `generate-tasks`
-4. `plan-execute` reads plan.md → executes checklists sequentially
-5. `plan-execute` queries `get-finalize-config` for commit/PR behavior
+2. `plan-init` determines plan type, creates base config/references, calls `configure`
+3. `plan-refine` calls `specify` to generate specifications from requirements
+4. `plan-refine` calls `plan` to generate tasks from specifications
+5. `plan-execute` reads plan files → executes tasks sequentially
+6. `plan-execute` reads finalize config directly from config.toon
 
 ## Domain Analysis Skills
 
@@ -141,12 +144,18 @@ All domain analysis skills implement this contract by loading the analysis-api s
        │
        │ components[]
        ▼
-┌─────────────┐    generate-tasks(plan_id, components)     ┌─────────────┐
+┌─────────────┐    specify(plan_id)                        ┌─────────────┐
 │ plan-refine │ ──────────────────────────────────────────► │  plan-type  │
 │             │                                             │  skill      │
 │             │ ◄────────────────────────────────────────── │             │
-└─────────────┘    generate_tasks_result{status, count}     └─────────────┘
-                   (writes directly to plan.md)
+└─────────────┘    (creates SPEC files from REQ files)      └─────────────┘
+       │
+       ▼
+┌─────────────┐    plan(plan_id)                           ┌─────────────┐
+│ plan-refine │ ──────────────────────────────────────────► │  plan-type  │
+│             │                                             │  skill      │
+│             │ ◄────────────────────────────────────────── │             │
+└─────────────┘    (creates TASK files from SPEC files)     └─────────────┘
 ```
 
 ### Analysis Flow
@@ -155,8 +164,8 @@ All domain analysis skills implement this contract by loading the analysis-api s
 2. Based on `plan_type`, delegates to appropriate analysis skill
 3. Analysis skill explores codebase, identifies components
 4. Returns `analysis_result` with structured `components[]`
-5. `plan-refine` passes components to plan-type skill's `generate-tasks`
-6. Plan-type skill writes tasks directly to plan.md
+5. `plan-refine` calls `specify` to create specifications from requirements
+6. `plan-refine` calls `plan` to create tasks from specifications
 
 **Why Domain Ownership**: Analysis requires domain expertise (Java patterns, JavaScript structure, plugin architecture). Keeping analysis skills in expert bundles:
 - Leverages existing domain knowledge
@@ -242,7 +251,7 @@ The detail level ensures:
           │         └───────►────────┘
           │                          │
           │    ┌─────────────────────┘
-          │    │ generate-tasks
+          │    │ specify + plan
           ▼    ▼ (writes directly)
    ┌─────────────────────────────────┐
    │    plan-files (skill)           │ ◄── File I/O Abstraction
@@ -281,14 +290,14 @@ See `general-tools:script-runner` SKILL.md "Workflow: Error Handling" for the le
 | `plan-type-javascript` | init → refine → implement → verify → finalize | JavaScript/npm implementation |
 | `plan-type-plugin` | init → refine → execute → finalize | Marketplace components |
 
-**Finalize Behavior** (via `get-finalize-config`):
+**Finalize Behavior** (from config.toon, written by configure):
 
 | Skill | Create PR | Verification |
 |-------|-----------|--------------|
 | `plan-type-simple` | No | None |
-| `plan-type-java` | Yes | `mvn verify` |
-| `plan-type-javascript` | Yes | `npm test && npm run build` |
-| `plan-type-plugin` | No | /plugin-doctor |
+| `plan-type-java` | Yes | `/builder-build-and-fix` |
+| `plan-type-javascript` | Yes | `/builder-build-and-fix system=npm` |
+| `plan-type-plugin` | No | `/plugin-doctor` |
 
 ## Sub-Type Templates
 
@@ -301,8 +310,8 @@ Located in `plan-type-plugin/templates/` (internal to plan-type-plugin skill):
 | `command-task.md` | component.type = "command" | Command orchestration workflow |
 | `agent-task.md` | component.type = "agent" | Agent frontmatter workflow |
 
-**Note**: These templates are internal to plan-type-plugin. When `generate-tasks` is called:
-1. It receives `components[]` from domain analysis
+**Note**: These templates are internal to plan-type-plugin. When `plan` operation is called:
+1. It reads specifications from SPEC files
 2. Selects appropriate template based on `component.type`
-3. Generates tasks and writes them directly to plan.md
+3. Generates tasks and writes them directly to TASK files
 4. Phase skills never access templates directly

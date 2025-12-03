@@ -72,6 +72,35 @@ JWT Guide,https://jwt.io/introduction
 
 Script: `planning:manage-references/scripts/manage-references.py`
 
+### create
+
+Create references.toon with basic fields. Plan-type-specific fields are added later by `plan-type-*:configure`.
+
+```bash
+python3 {script_path} create \
+  --plan-id {plan_id} \
+  --branch {branch_name} \
+  [--issue-url {url}] \
+  [--build-system {maven|gradle|npm}]
+```
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+file: references.toon
+created: true
+
+fields[5]:
+- branch
+- base_branch
+- modified_files
+- config_files
+- test_files
+```
+
+**Note**: After `create`, call `plan-type-{type}:configure` to add domain-specific fields (standards, adrs, etc.).
+
 ### read
 
 Read entire references.toon content.

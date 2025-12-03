@@ -103,20 +103,17 @@ AskUserQuestion with options:
 
 **Issue**: From parameter, parse from branch name, or ask user
 
-### Step 4: Load Plan-Type Skill
+### Step 4: Call Plan-Type configure
+
+After base config and references are written, call the plan-type skill to add domain-specific fields:
 
 ```
 Skill: planning:plan-type-{plan_type}
-operation: get-phase-structure
+operation: configure
 plan_id: {plan_id}
-task_title: {task_title}
 ```
 
-Also get templates:
-```
-operation: get-config-template
-operation: get-references-template
-```
+This adds domain-specific fields to references.toon and finalize configuration to config.toon.
 
 ### Step 5: Present Configuration
 
@@ -166,10 +163,7 @@ python3 {script_path} create \
 
 Creates: `.plan/plans/{plan_id}/config.toon`
 
-**Note**: Config simplified to 3 fields. Other values derived at runtime:
-- `technology`: From plan-type characteristics
-- `build_system`: From `builder:environment-detection`
-- `finalizing`: From `get-finalize-config` operation
+**Note**: Config simplified to 3 base fields (`plan_type`, `compatibility`, `commit_strategy`). Finalize configuration fields (`create_pr`, `verification_required`, `verification_command`, `branch_strategy`) are added by the plan-type skill's `configure` operation.
 
 ### Step 8: Write References
 

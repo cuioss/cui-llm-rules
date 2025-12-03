@@ -5,6 +5,7 @@ Manage references.toon files with field-level access and list management.
 Tracks files, branches, and external references for a plan.
 
 Usage:
+    python3 manage-references.py create --plan-id my-plan --branch feature/x
     python3 manage-references.py read --plan-id my-plan
     python3 manage-references.py get --plan-id my-plan --field branch
     python3 manage-references.py set --plan-id my-plan --field branch --value feature/x
@@ -55,6 +56,53 @@ def write_references(plan_id: str, refs: dict):
 def output_toon(data: dict):
     """Output TOON format to stdout."""
     print(serialize_toon(data))
+
+
+def cmd_create(args):
+    """Create references.toon with basic fields."""
+    if not validate_plan_id(args.plan_id):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        })
+        sys.exit(1)
+
+    path = get_references_path(args.plan_id)
+    if path.exists():
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'already_exists',
+            'message': 'references.toon already exists'
+        })
+        sys.exit(1)
+
+    # Build base references (plan-type-specific fields added by plan-type:configure)
+    refs = {
+        'branch': args.branch,
+        'base_branch': 'main',
+        'modified_files': [],
+        'config_files': [],
+        'test_files': []
+    }
+
+    # Add optional fields
+    if args.issue_url:
+        refs['issue_url'] = args.issue_url
+    if args.build_system:
+        refs['build_system'] = args.build_system
+
+    write_references(args.plan_id, refs)
+
+    output_toon({
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'file': 'references.toon',
+        'created': True,
+        'fields': list(refs.keys())
+    })
 
 
 def cmd_read(args):
@@ -226,6 +274,14 @@ def main():
         description='Manage references.toon files'
     )
     subparsers = parser.add_subparsers(dest='command', required=True)
+
+    # create
+    create_parser = subparsers.add_parser('create', help='Create references.toon')
+    create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    create_parser.add_argument('--branch', required=True, help='Git branch name')
+    create_parser.add_argument('--issue-url', help='GitHub issue URL')
+    create_parser.add_argument('--build-system', help='Build system (maven, gradle, npm)')
+    create_parser.set_defaults(func=cmd_create)
 
     # read
     read_parser = subparsers.add_parser('read', help='Read entire references')

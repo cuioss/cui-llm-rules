@@ -28,22 +28,19 @@ Read standards/operations.md
 ```
 Contains: Delegation patterns for builds, quality checks, PR creation
 
-### Finalize Configuration (from plan-type skill)
+### Finalize Configuration (from config.toon)
 
-For finalize phase, query the plan-type skill for commit/PR behavior:
+For finalize phase, read finalize configuration directly from config.toon:
 
 ```
 Skill: planning:manage-config
-operation: get
-plan_id: {plan_id}
-field: plan_type
-
-Skill: planning:plan-type-{plan_type}
-operation: get-finalize-config
+operation: read
 plan_id: {plan_id}
 ```
 
-Returns: `commit_strategy`, `create_pr`, `verification_required`, `verification_command`
+Returns fields including: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
+
+These fields are written during init by the plan-type skill's `configure` operation.
 
 ---
 
@@ -144,15 +141,11 @@ When transitioning from execute phase to finalize, `transition-phase.py` automat
 - **/plan-execute** - Primary command invoking this skill
 
 ### Skills Used
-- **manage-config** - Configuration CRUD
+- **manage-config** - Configuration CRUD (includes finalize config)
 - **manage-lifecycle** - Phase transitions
 - **manage-tasks** - Task and step operations
 - **manage-references** - Reference file CRUD
 - **manage-log** - Work log entries
-- **plan-type-simple** - Finalize config for simple plans
-- **plan-type-plugin** - Finalize config for plugin plans
-- **plan-type-java** - Finalize config for Java plans
-- **plan-type-javascript** - Finalize config for JavaScript plans
 - **git-workflow** - Commit operations
 
 ### Related Skills

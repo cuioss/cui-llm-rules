@@ -44,9 +44,15 @@ TOON format with typed fields:
 plan_type: java
 compatibility: deprecations
 commit_strategy: phase-specific
+
+# Finalize Configuration (added by plan-type configure)
+create_pr: true
+verification_required: true
+verification_command: /builder-build-and-fix
+branch_strategy: feature
 ```
 
-### Schema Fields
+### Base Schema Fields (set during plan creation)
 
 | Field | Values | Description |
 |-------|--------|-------------|
@@ -54,15 +60,14 @@ commit_strategy: phase-specific
 | `compatibility` | deprecations, breaking | Compatibility strategy (user choice) |
 | `commit_strategy` | fine-granular, phase-specific, complete | Git commit granularity (user choice) |
 
-### Derived from plan_type (not stored)
+### Finalize Configuration Fields (added by plan-type configure)
 
-These values are derived from `plan_type` at runtime via `plan-type-{type}` skills:
-
-| Derived | Source |
-|---------|--------|
-| `technology` | plan-type characteristics |
-| `build_system` | `builder:environment-detection` or plan-type characteristics |
-| `finalizing` | `get-finalize-config` operation |
+| Field | Values | Description |
+|-------|--------|-------------|
+| `create_pr` | true, false | Whether to create a pull request |
+| `verification_required` | true, false | Whether verification must pass before finalize |
+| `verification_command` | command string or null | Command to run for verification |
+| `branch_strategy` | feature, direct | Feature branch or direct-to-main |
 
 ---
 
@@ -170,6 +175,10 @@ config:
 | plan_type | java, javascript, plugin-development, simple |
 | compatibility | deprecations, breaking |
 | commit_strategy | fine-granular, phase-specific, complete |
+| create_pr | true, false |
+| verification_required | true, false |
+| verification_command | any string or null |
+| branch_strategy | feature, direct |
 
 ---
 
@@ -195,8 +204,12 @@ valid_values[4]:
 
 ### With plan-init
 
-Plan initialization creates config.toon with user-selected values.
+Plan initialization creates config.toon with base user-selected values (`plan_type`, `compatibility`, `commit_strategy`).
+
+### With plan-type configure
+
+After base config is created, plan-type skills add finalize configuration fields (`create_pr`, `verification_required`, `verification_command`, `branch_strategy`).
 
 ### With plan-execute
 
-Execution phase reads config to determine build commands and commit strategy.
+Execution phase reads config to determine build commands, commit strategy, and finalize behavior.
