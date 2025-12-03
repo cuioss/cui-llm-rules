@@ -4,7 +4,7 @@ description: Plugin development plan type providing domain-specific configuratio
 allowed-tools: Read, Bash
 ---
 
-# Plan Type: Plugin Development
+# Plan Type: Plugin Development (`planning:plan-type-plugin`)
 
 **Use Cases**:
 - Creating new marketplace components (agents, commands, skills)
@@ -14,6 +14,8 @@ allowed-tools: Read, Bash
 
 **API**: Implements `planning:plan-type-api` contract.
 
+**FQN Convention**: All skill/command references use fully qualified names: `{bundle}:{component}`
+
 ---
 
 ## Characteristics
@@ -21,8 +23,9 @@ allowed-tools: Read, Bash
 | Aspect | Value |
 |--------|-------|
 | Technology | none |
-| Verification | `/plugin-doctor` |
+| Verification | `/cui-plugin-development-tools:plugin-doctor` |
 | PR Workflow | false |
+| Analysis Agent | `cui-plugin-development-tools:plugin-analysis-agent` |
 
 ---
 
@@ -30,22 +33,22 @@ allowed-tools: Read, Bash
 
 **Input**: `plan_id`
 
-**References fields added**:
+**References fields added** (via `planning:manage-references set`):
 
 | Field | Value |
 |-------|-------|
 | `target_bundle` | `null` (populated during specify) |
 | `bundle_path` | `null` (populated during specify) |
 | `components` | `{"add": [], "modify": []}` |
-| `verification_commands` | `["/plugin-doctor"]` |
+| `verification_commands` | `["/cui-plugin-development-tools:plugin-doctor"]` |
 
-**Config fields added**:
+**Config fields added** (via `planning:manage-config set`):
 
 | Field | Value |
 |-------|-------|
 | `create_pr` | `false` |
 | `verification_required` | `true` |
-| `verification_command` | `/plugin-doctor` |
+| `verification_command` | `/cui-plugin-development-tools:plugin-doctor` |
 | `branch_strategy` | `direct` |
 
 ---

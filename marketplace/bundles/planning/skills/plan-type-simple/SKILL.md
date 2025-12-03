@@ -4,7 +4,7 @@ description: Simple plan type providing minimal configuration and refinement for
 allowed-tools: Read, Bash
 ---
 
-# Plan Type: Simple
+# Plan Type: Simple (`planning:plan-type-simple`)
 
 **Use Cases**:
 - Documentation updates
@@ -15,6 +15,8 @@ allowed-tools: Read, Bash
 
 **API**: Implements `planning:plan-type-api` contract.
 
+**FQN Convention**: All skill/command references use fully qualified names: `{bundle}:{component}`
+
 ---
 
 ## Characteristics
@@ -24,6 +26,7 @@ allowed-tools: Read, Bash
 | Technology | none |
 | Verification | none |
 | PR Workflow | false |
+| Analysis Agent | none (no codebase analysis needed) |
 
 ---
 
@@ -33,7 +36,7 @@ allowed-tools: Read, Bash
 
 **References fields added**: none (simple plans have no domain-specific fields)
 
-**Config fields added**:
+**Config fields added** (via `planning:manage-config set`):
 
 | Field | Value |
 |-------|-------|

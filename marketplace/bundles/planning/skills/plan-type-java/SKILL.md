@@ -4,7 +4,7 @@ description: Java plan type providing domain-specific configuration and refineme
 allowed-tools: Read, Bash
 ---
 
-# Plan Type: Java
+# Plan Type: Java (`planning:plan-type-java`)
 
 **Use Cases**:
 - Java implementation tasks
@@ -14,6 +14,8 @@ allowed-tools: Read, Bash
 
 **API**: Implements `planning:plan-type-api` contract.
 
+**FQN Convention**: All skill/command references use fully qualified names: `{bundle}:{component}`
+
 ---
 
 ## Characteristics
@@ -21,8 +23,9 @@ allowed-tools: Read, Bash
 | Aspect | Value |
 |--------|-------|
 | Technology | java |
-| Verification | `/builder-build-and-fix` |
+| Verification | `/builder:builder-build-and-fix` |
 | PR Workflow | true |
+| Analysis Agent | `cui-java-expert:java-analysis-agent` |
 
 ---
 
@@ -30,7 +33,7 @@ allowed-tools: Read, Bash
 
 **Input**: `plan_id`
 
-**References fields added**:
+**References fields added** (via `planning:manage-references set`):
 
 | Field | Value |
 |-------|-------|
@@ -39,13 +42,13 @@ allowed-tools: Read, Bash
 | `interfaces` | `[]` |
 | `dependencies` | `[]` |
 
-**Config fields added**:
+**Config fields added** (via `planning:manage-config set`):
 
 | Field | Value |
 |-------|-------|
 | `create_pr` | `true` |
 | `verification_required` | `true` |
-| `verification_command` | `/builder-build-and-fix` |
+| `verification_command` | `/builder:builder-build-and-fix` |
 | `branch_strategy` | `feature` |
 
 ---

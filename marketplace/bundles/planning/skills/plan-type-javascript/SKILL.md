@@ -4,7 +4,7 @@ description: JavaScript plan type providing domain-specific configuration and re
 allowed-tools: Read, Bash
 ---
 
-# Plan Type: JavaScript
+# Plan Type: JavaScript (`planning:plan-type-javascript`)
 
 **Use Cases**:
 - JavaScript implementation tasks
@@ -14,6 +14,8 @@ allowed-tools: Read, Bash
 
 **API**: Implements `planning:plan-type-api` contract.
 
+**FQN Convention**: All skill/command references use fully qualified names: `{bundle}:{component}`
+
 ---
 
 ## Characteristics
@@ -21,8 +23,9 @@ allowed-tools: Read, Bash
 | Aspect | Value |
 |--------|-------|
 | Technology | javascript |
-| Verification | `/builder-build-and-fix system=npm` |
+| Verification | `/builder:builder-build-and-fix system=npm` |
 | PR Workflow | true |
+| Analysis Agent | `cui-frontend-expert:js-analysis-agent` |
 
 ---
 
@@ -30,7 +33,7 @@ allowed-tools: Read, Bash
 
 **Input**: `plan_id`
 
-**References fields added**:
+**References fields added** (via `planning:manage-references set`):
 
 | Field | Value |
 |-------|-------|
@@ -39,13 +42,13 @@ allowed-tools: Read, Bash
 | `interfaces` | `[]` |
 | `dependencies` | `[]` |
 
-**Config fields added**:
+**Config fields added** (via `planning:manage-config set`):
 
 | Field | Value |
 |-------|-------|
 | `create_pr` | `true` |
 | `verification_required` | `true` |
-| `verification_command` | `/builder-build-and-fix system=npm` |
+| `verification_command` | `/builder:builder-build-and-fix system=npm` |
 | `branch_strategy` | `feature` |
 
 ---
