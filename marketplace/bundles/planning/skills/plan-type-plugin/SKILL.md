@@ -1,7 +1,7 @@
 ---
 name: plan-type-plugin
 description: Plugin development plan type providing 4-phase workflow (init→refine→execute→finalize) with mandatory /plugin-doctor verification
-allowed-tools: Read
+allowed-tools: Read, Bash
 ---
 
 # Plan Type: Plugin Development
@@ -14,8 +14,6 @@ allowed-tools: Read
 - Plugin maintenance and refactoring
 - Bundle restructuring
 
-**Analysis Skill**: `cui-plugin-development-tools:plugin-analysis`
-
 **API**: Implements `planning:plan-type-api` contract.
 
 ---
@@ -27,7 +25,6 @@ allowed-tools: Read
 | Phases | 4 |
 | Technology | none |
 | Build System | none |
-| Analysis Skill | `cui-plugin-development-tools:plugin-analysis` |
 | Branch Required | false |
 | Issue Required | false |
 | PR Workflow | false |
@@ -60,18 +57,16 @@ phase_tasks:
       steps: git branch --show-current, Identify target bundle in marketplace/bundles/
     - title: Analyze Task
       steps: Read task.md, List components to create/modify, Determine scope
+    - title: Add Requirements
+      steps: Create REQ files via manage-requirements
     - title: Detect Plan Type
       steps: Verify plugin-development type, Confirm target bundle
     - title: Confirm Configuration
       steps: Display config, List components, Confirm naming conventions
   refine:
-    - title: Assess Complexity
-      steps: Evaluate approaches, Evaluate changes, Evaluate cross-cutting, Decide
-    - title: Component Breakdown
-      steps: Identify similar components, Analyze patterns, Review scripts, Document
-    - title: Generate Tasks
-      steps: Create TASK files via manage-tasks, Use templates, Include verification
-  execute: (generated dynamically)
+    - title: Refine Plan
+      steps: Call plan-type-plugin:refine, Iterates REQ→SPEC→TASK
+  execute: (generated dynamically from TASK files)
   finalize:
     - title: Verify All Components
       steps: Run /plugin-doctor for each, Address issues, Re-run until clean
@@ -140,63 +135,97 @@ notes: []
 
 ---
 
-## Operation: generate-tasks
+## Operation: refine
 
 **Contract**: See `planning:plan-type-api` for full specification.
 
-**Input**: `plan_id`, `components[]`
-
-**Components Input** (from `cui-plugin-development-tools:plugin-analysis`):
-
-```toon
-components[3]{name,type,scope,bundle,path,complexity}:
-manage-auth,skill,create,planning,skills/manage-auth/,medium
-auth-workflow,command,create,planning,commands/auth-workflow.md,low
-auth-doctor,agent,create,planning,agents/auth-doctor.md,low
-```
+**Input**: `plan_id`
 
 **Process**:
 
-1. For each component, call `manage-task.py add` (writes directly to disk)
-2. Use templates for component-specific steps
-3. Add verification step for each component
-
-**Task Generation**:
-
-```bash
-python3 manage-task.py add \
-  --plan-id {plan_id} \
-  --specification SPEC-{n} \
-  --title "Create {type} {component-name}" \
-  --description "Create/modify {type} in {bundle}" \
-  --steps \
-    "Identify target bundle in marketplace/bundles/" \
-    "Load skill: cui-plugin-development-tools:plugin-create" \
-    "Create/locate {type}.md with proper frontmatter" \
-    "{type-specific steps from template}" \
-    "Verify: /plugin-doctor {type}={component-name}"
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 1: Requirements → Specifications                             │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. Load requirements:                                              │
+│     python3 {manage-requirement.py} findAll --plan-id {plan_id}     │
+│                                                                     │
+│  2. FOR EACH requirement:                                           │
+│     - Analyze plugin-specific implications                          │
+│     - Identify affected components (skill, command, agent, script)  │
+│     - Create specification with component details:                  │
+│       python3 {manage-specification.py} add \                       │
+│         --plan-id {plan_id} \                                       │
+│         --title "{component-type} {name}" \                         │
+│         --requirements "REQ-{n}" \                                  │
+│         --body "{component structure, standards, patterns}"         │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 2: Specifications → Tasks                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│  3. Load specifications:                                            │
+│     python3 {manage-specification.py} findAll --plan-id {plan_id}   │
+│                                                                     │
+│  4. FOR EACH specification:                                         │
+│     - Generate creation task with component-specific steps          │
+│     - Add verification step                                         │
+│     python3 {manage-task.py} add \                                  │
+│       --plan-id {plan_id} \                                         │
+│       --specification SPEC-{n} \                                    │
+│       --title "Create {type} {name}" \                              │
+│       --description "{goal}" \                                      │
+│       --steps \                                                     │
+│         "Identify target bundle" \                                  │
+│         "Load skill: cui-plugin-development-tools:plugin-create" \  │
+│         "Create {type}.md with proper frontmatter" \                │
+│         "{type-specific steps}" \                                   │
+│         "Verify: /plugin-doctor {type}={name}"                      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Task Template Selection**:
+**Plugin-Specific Specification Content**:
 
-| Component Type | Template | Key Steps |
-|----------------|----------|-----------|
-| script | `templates/script-task.md` | TDD workflow, test file, implementation |
-| skill | `templates/skill-task.md` | SKILL.md, standards/, scripts/ |
-| command | `templates/command-task.md` | Frontmatter, workflow, delegation |
-| agent | `templates/agent-task.md` | Frontmatter, tool selection, focus |
+When creating specifications, include:
+- Component type (skill, command, agent, script)
+- Target bundle location
+- Frontmatter requirements
+- Standards to follow
+- Integration points
 
-**Output** (confirmation only, tasks already written):
+**Plugin-Specific Task Steps by Component Type**:
+
+| Component Type | Key Steps |
+|----------------|-----------|
+| skill | Create SKILL.md, Add standards/, Add scripts/, Register in plugin.json |
+| command | Create command.md, Define workflow, Add delegation |
+| agent | Create agent.md, Select tools, Define focus |
+| script | Create test file first (TDD), Implement script, Verify tests pass |
+
+**Output**:
 
 ```toon
 status: success
 plan_id: {plan_id}
-tasks_created: 3
+
+phase_1:
+  requirements_processed: 2
+  specs_created: 3
+
+phase_2:
+  specs_processed: 3
+  tasks_created: 3
+
+specifications[3]{number,title,requirements,file}:
+1,Skill manage-auth,REQ-1,SPEC-001-skill-manage-auth.toon
+2,Command auth-workflow,REQ-1,SPEC-002-command-auth-workflow.toon
+3,Agent auth-doctor,REQ-2,SPEC-003-agent-auth-doctor.toon
 
 tasks[3]{number,title,specification,file}:
 1,Create skill manage-auth,SPEC-1,TASK-001-create-skill-manage-auth.toon
-2,Create command auth-workflow,SPEC-1,TASK-002-create-command-auth-workflow.toon
-3,Create agent auth-doctor,SPEC-1,TASK-003-create-agent-auth-doctor.toon
+2,Create command auth-workflow,SPEC-2,TASK-002-create-command-auth-workflow.toon
+3,Create agent auth-doctor,SPEC-3,TASK-003-create-agent-auth-doctor.toon
 ```
 
 ---
@@ -260,10 +289,11 @@ Internal templates for component-specific task generation (in `templates/` direc
 ## Quality Checklist
 
 - [x] Loads `planning:plan-type-api` for contract reference
-- [x] Implements all 7 operations with correct signatures
-- [x] Uses manage-tasks skill for task generation
+- [x] Implements all 6 operations with correct signatures
+- [x] Uses manage-* tools for all data I/O
 - [x] Returns `status` field in all outputs
 - [x] Defines phase transition matrix (4 phases)
 - [x] Defines characteristics matrix
 - [x] Handles errors with status and message
+- [x] refine operation iterates REQ→SPEC→TASK with plugin-specific content
 - [x] Includes verification via `/plugin-doctor`

@@ -48,14 +48,13 @@ TOON format with phases table:
 
 ```toon
 title: Implement JWT Authentication
-plan_type: implementation
-current_phase: implement
+plan_type: java
+current_phase: execute
 
-phases[5]{name,status}:
+phases[4]{name,status}:
 init,done
 refine,done
-implement,in_progress
-verify,pending
+execute,in_progress
 finalize,pending
 
 created: 2025-12-02T10:00:00Z
@@ -67,7 +66,7 @@ updated: 2025-12-02T14:30:00Z
 | Field | Description |
 |-------|-------------|
 | `title` | Plan title |
-| `plan_type` | implementation, plugin-development, simple |
+| `plan_type` | java, javascript, plugin-development, simple |
 | `current_phase` | Current active phase |
 | `phases` | Table of phase names and statuses |
 | `created` | ISO timestamp when created |
@@ -103,13 +102,12 @@ plan_id: my-feature
 
 plan:
   title: Implement JWT Authentication
-  plan_type: implementation
-  current_phase: implement
-  phases[5]{name,status}:
+  plan_type: java
+  current_phase: execute
+  phases[4]{name,status}:
   init,done
   refine,done
-  implement,in_progress
-  verify,pending
+  execute,in_progress
   finalize,pending
 ```
 
@@ -121,7 +119,7 @@ Initialize status.toon for a new plan.
 python3 {script_path} create \
   --plan-id {plan_id} \
   --title "Feature Title" \
-  --plan-type implementation
+  --plan-type java
 ```
 
 **Output** (TOON):
@@ -133,7 +131,7 @@ created: true
 
 plan:
   title: Feature Title
-  plan_type: implementation
+  plan_type: java
   current_phase: init
 ```
 
@@ -144,14 +142,14 @@ Set the current phase.
 ```bash
 python3 {script_path} set-phase \
   --plan-id {plan_id} \
-  --phase implement
+  --phase execute
 ```
 
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
-current_phase: implement
+current_phase: execute
 previous_phase: refine
 ```
 
@@ -189,10 +187,10 @@ status: success
 plan_id: my-feature
 
 progress:
-  total_phases: 5
+  total_phases: 4
   completed_phases: 2
-  current_phase: implement
-  percent: 40
+  current_phase: execute
+  percent: 50
 ```
 
 ---
@@ -205,7 +203,7 @@ Discover all plans.
 
 ```bash
 python3 {script_path} list \
-  [--filter init,implement]
+  [--filter init,execute]
 ```
 
 **Output** (TOON):
@@ -214,7 +212,7 @@ status: success
 total: 3
 
 plans[3]{id,current_phase,plan_type,status}:
-my-feature,implement,implementation,in_progress
+my-feature,execute,java,in_progress
 bug-fix-123,init,simple,in_progress
 plugin-update,finalize,plugin-development,in_progress
 ```
@@ -260,13 +258,13 @@ Get skill for a phase.
 
 ```bash
 python3 {script_path} route \
-  --phase implement
+  --phase execute
 ```
 
 **Output** (TOON):
 ```toon
 status: success
-phase: implement
+phase: execute
 skill: plan-execute
 description: Execute implementation tasks
 ```
@@ -283,14 +281,17 @@ description: Execute implementation tasks
 
 ## Plan Types and Phases
 
-### implementation (5 phases)
-init -> refine -> implement -> verify -> finalize
+### java (4 phases)
+init -> refine -> execute -> finalize
+
+### javascript (4 phases)
+init -> refine -> execute -> finalize
 
 ### plugin-development (4 phases)
-init -> implement -> verify -> finalize
+init -> refine -> execute -> finalize
 
 ### simple (3 phases)
-init -> implement -> finalize
+init -> execute -> finalize
 
 ---
 
@@ -300,8 +301,7 @@ init -> implement -> finalize
 |-------|-------|
 | init | plan-init |
 | refine | plan-refine |
-| implement | plan-execute |
-| verify | plan-execute |
+| execute | plan-execute |
 | finalize | plan-finalize |
 
 ---
@@ -312,5 +312,5 @@ init -> implement -> finalize
 status: error
 plan_id: my-feature
 error: invalid_transition
-message: Cannot transition from 'init' to 'implement' - must complete phases in order
+message: Cannot transition from 'init' to 'execute' - must complete phases in order
 ```

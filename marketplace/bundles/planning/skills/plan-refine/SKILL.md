@@ -1,151 +1,152 @@
 ---
 name: plan-refine
-description: Refine phase skill for plan management. Analyzes requirements into components, creates detailed implementation tasks with acceptance criteria, and identifies documentation needs (ADRs, interfaces). Generates implementation-requirements.md artifact.
-allowed-tools: Read, Write, Edit, Skill, AskUserQuestion
+description: Refine phase skill for plan management. Delegates to plan-type skill to transform requirements into specifications and tasks. Optionally creates analysis.md for complex tasks and identifies documentation needs.
+allowed-tools: Read, Write, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Refine Skill
 
-**Role**: Second phase skill. Intelligent analysis phase that transforms requirements into actionable implementation tasks.
+**Role**: Second phase skill. Delegates to plan-type skill to transform requirements into specifications and tasks.
 
-**Execution Pattern**: Analyze requirements → Identify components → Generate tasks → Identify documentation needs
+**Execution Pattern**: Detect complexity → Delegate to plan-type:refine → Identify documentation needs → Transition
 
 **CRITICAL**: Use Python scripts via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
 
-## Standards (Load On-Demand)
+## Plan-Type Skill API
 
-### Architecture
-```
-Read standards/architecture.md
-```
-Contains: Core design principle, layered architecture, plan-type skills API, domain analysis skills, handoff protocol, component dependencies
-
-### Workflow
-```
-Read standards/workflow.md
-```
-Contains: Phase overview, operations, component analysis, task planning, documentation triggers
-
-### Artifact Templates (local)
-
-| Template | Purpose |
-|----------|---------|
-| `templates/implementation-requirements.md` | Implementation requirements artifact |
-| `templates/analysis.md` | Strategic analysis document (optional) |
-
-### Plan-Type Skill API
-
-All plan-type skills implement a uniform API. Query the skill for what you need:
+All plan-type skills implement a uniform `refine` operation:
 
 ```
 Skill: planning:plan-type-{plan_type}
-operation: {operation}
+operation: refine
 plan_id: {plan_id}
 ```
 
-| Operation | Purpose | Used By |
-|-----------|---------|---------|
-| `get-phase-structure` | Returns phases and their tasks | plan-init |
-| `generate-tasks` | **Writes tasks directly** to plan.md | plan-refine |
-| `get-finalize-config` | Returns finalize behavior (commit, PR, etc.) | plan-execute |
-| `get-next-phase` | Returns next phase in workflow | manage-lifecycle |
+The plan-type skill handles the full REQ → SPEC → TASK transformation:
+1. Loads requirements via `manage-requirements:findAll`
+2. Creates specifications via `manage-specifications:add`
+3. Creates tasks via `manage-tasks:add`
+4. Returns confirmation with counts
 
-**Key Design**: `generate-tasks` writes directly to plan.md via scripts (no ping-pong between skills).
-
-### Domain Analysis Skills
-
-Component analysis is delegated to domain-specific skills:
-
-| Plan Type | Analysis Skill |
-|-----------|----------------|
-| `plugin-development` | `cui-plugin-development-tools:plugin-analysis` |
-| `java` | `cui-java-expert:java-analysis` |
-| `javascript` | `cui-frontend-expert:js-analysis` |
-| `simple` | N/A (tasks from description) |
-
-**Analysis Flow**:
-1. plan-refine delegates to domain analysis skill
-2. Analysis skill returns `components[]` with metadata
-3. plan-refine passes components to plan-type skill's `generate-tasks`
-4. plan-type skill writes tasks directly to plan.md
+**No intermediate data passing** - plan-refine only passes `plan_id`.
 
 ---
 
-## Operation: detect-complexity
+## Primary Operation: refine
 
-**Input**: `plan_directory`
-
-**Purpose**: Evaluate task complexity to determine if strategic analysis.md is needed before component breakdown.
-
-**Detection Criteria**:
-
-| Question | If YES → Create analysis.md |
-|----------|----------------------------|
-| Are multiple skills/components affected? | Yes |
-| Are there breaking changes? | Yes |
-| Are there architectural decisions (not just code changes)? | Yes |
-| Are there complex dependencies to understand first? | Yes |
-| Are there risks that need documentation? | Yes |
-
-**Decision Logic**: If ALL answers are NO → Skip analysis.md and proceed directly to component breakdown. If ANY answer is YES → Create analysis.md.
+**Input**: `plan_id`
 
 **Steps**:
 
-1. **Read plan context**:
-   ```
-   Skill: planning:manage-lifecycle
-   operation: read
+### Step 1: Read Context
 
-   Skill: planning:manage-config
-   operation: read
-   ```
-
-2. **Evaluate complexity factors**:
-   - Check task scope (single vs multiple components)
-   - Check for breaking change indicators
-   - Check for architectural keywords (design, architecture, pattern, migration)
-   - Check for dependency complexity
-   - Check for risk indicators
-
-3. **Return decision** (do NOT prompt user - auto-decide):
-
-**Output**:
 ```
-complexity_assessment:
-  needs_analysis: true|false
-  complexity_factors:
-    - {factor1}
-    - {factor2}
-  recommendation: "Create analysis.md" | "Skip to component breakdown"
+Skill: planning:manage-config
+operation: get
+plan_id: {plan_id}
+field: plan_type
 ```
 
-**Auto-Continue**: This operation does NOT prompt the user. It makes the decision automatically and proceeds.
+Extract: `plan_type` (java, javascript, plugin-development, simple)
+
+### Step 2: Detect Complexity (Optional)
+
+For complex tasks, create analysis.md first:
+
+| Question | If YES → Create analysis.md |
+|----------|----------------------------|
+| Are multiple components affected? | Yes |
+| Are there breaking changes? | Yes |
+| Are there architectural decisions? | Yes |
+| Are there complex dependencies? | Yes |
+
+If complexity detected → Execute `create-analysis` operation before continuing.
+
+### Step 3: Delegate to Plan-Type Skill
+
+```
+Skill: planning:plan-type-{plan_type}
+operation: refine
+plan_id: {plan_id}
+```
+
+**Expected Output**:
+
+```toon
+status: success
+plan_id: {plan_id}
+
+phase_1:
+  requirements_processed: N
+  specs_created: N
+
+phase_2:
+  specs_processed: N
+  tasks_created: N
+
+specifications[N]{number,title,requirements,file}:
+...
+
+tasks[N]{number,title,specification,file}:
+...
+```
+
+**For simple plans**: Returns `status: skipped` (tasks generated during init).
+
+### Step 4: Log Completion
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+summary: "Refined plan: {specs_created} specs, {tasks_created} tasks"
+```
+
+### Step 5: Identify Documentation Needs (Optional)
+
+Check if ADRs or interfaces should be created:
+
+1. **ADR triggers**: Architectural decisions, security changes, integration patterns
+2. **Interface triggers**: New APIs, service contracts, external integrations
+
+If needed, use AskUserQuestion to confirm, then:
+- Invoke `cui-documentation-standards:adr-management` or `cui-documentation-standards:interface-management`
+- Update references via `manage-references:add-file`
+
+### Step 6: Phase Transition
+
+```
+Skill: planning:manage-lifecycle
+operation: transition
+plan_id: {plan_id}
+completed: refine
+```
 
 ---
 
 ## Operation: create-analysis
 
-**Input**: `plan_directory`, `complexity_factors`
+**Input**: `plan_id`, `complexity_factors`
 
-**Purpose**: Create and populate analysis.md for complex tasks.
+**Purpose**: Create analysis.md for complex tasks before refinement.
 
 **Steps**:
 
 1. **Read template**: `Read templates/analysis.md`
 
-2. **Explore codebase** to gather information for each section:
+2. **Explore codebase** to gather information:
    - Current State: Search for existing implementations
    - Affected Components: Identify files/modules that will change
-   - Design Decisions: Document key choices being made
-   - Breaking Changes: Identify any compatibility impacts
+   - Design Decisions: Document key choices
+   - Breaking Changes: Identify compatibility impacts
    - Risks: Assess potential issues
 
-3. **Write analysis.md**: `Write {plan_directory}/analysis.md`
+3. **Write**: `Write {plan_directory}/analysis.md`
 
-4. **Present to user for review** (AskUserQuestion):
+4. **Present to user** (AskUserQuestion):
    - Show analysis summary
    - Options: Approve / Edit / Add details
-   - This is the ONLY user prompt in the analysis flow
 
 5. **Update references**:
    ```
@@ -155,304 +156,73 @@ complexity_assessment:
    file: analysis.md
    ```
 
-**Output**:
-```
-analysis_created:
-  file: {plan_directory}/analysis.md
-  sections_populated: [current_state, affected_components, design_decisions, risks, success_criteria]
-  user_approved: true
-```
-
-6. **Log analysis creation**:
+6. **Log**:
    ```
    Skill: planning:manage-log
    operation: add
    plan_id: {plan_id}
    phase: refine
-   summary: "Completed strategic analysis - analysis.md created"
+   summary: "Created strategic analysis - analysis.md"
    ```
-
----
-
-## Operation: analyze
-
-**Input**: `plan_id`
-
-**Steps**:
-
-1. **Detect complexity first**:
-   ```
-   Execute Operation: detect-complexity
-   ```
-   - If `needs_analysis: true` → Execute Operation: create-analysis before continuing
-   - If `needs_analysis: false` → Skip to step 2
-
-2. **Read context**:
-   ```
-   Skill: planning:manage-lifecycle
-   operation: read
-
-   Skill: planning:manage-config
-   operation: read
-
-   Skill: planning:manage-references
-   operation: read
-   ```
-   Extract: `plan_type`, `task_description`, `technology`, `build_system`
-
-3. **Fetch issue** (if URL): `gh issue view {number} --json title,body,labels`
-
-4. **Delegate to domain analysis skill** based on plan_type:
-
-   **For plugin-development**:
-   ```
-   Skill: cui-plugin-development-tools:plugin-analysis
-   operation: analyze
-   plan_id: {plan_id}
-   task_description: {task_description}
-   issue_context: {issue_body}
-   ```
-
-   **For java**:
-   ```
-   Skill: cui-java-expert:java-analysis
-   operation: analyze
-   plan_id: {plan_id}
-   task_description: {task_description}
-   issue_context: {issue_body}
-   build_system: maven|gradle
-   ```
-
-   **For javascript**:
-   ```
-   Skill: cui-frontend-expert:js-analysis
-   operation: analyze
-   plan_id: {plan_id}
-   task_description: {task_description}
-   issue_context: {issue_body}
-   build_system: npm
-   ```
-
-   **For simple**: Skip analysis, derive single component from task description.
-
-5. **Receive components** from domain analysis skill:
-   ```yaml
-   components:
-     - name: "{component-name}"
-       type: "{type}"
-       scope: "create|modify|refactor"
-       path: "{relative-path}"
-       dependencies: [...]
-       complexity: "low|medium|high"
-   ```
-
-6. **Present analysis** (AskUserQuestion):
-   - Component list with scope and complexity
-   - Dependency mapping
-   - Options: Proceed / Modify / Re-analyze
-
-7. **Update progress** (after user approval):
-
-   Script: `planning:plan-execute/scripts/update-progress.py`
-
-   ```bash
-   python3 {script_path} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-1 --complete-items "Analyze requirements"
-   ```
-
-**Output**: `components[]` ready for generate-tasks
-
----
-
-## Operation: plan-tasks
-
-**Input**: `plan_id`, `components[]`
-
-**Steps**:
-
-1. **Read plan_type from config**:
-   ```
-   Skill: planning:manage-config
-   operation: get
-   plan_id: {plan_id}
-   field: plan_type
-   ```
-
-2. **Present task preview** (AskUserQuestion):
-   - Component list with planned task types
-   - Options: Proceed / Modify / Adjust granularity
-
-3. **Call plan-type skill to generate and write tasks**:
-   ```
-   Skill: planning:plan-type-{plan_type}
-   operation: generate-tasks
-   plan_id: {plan_id}
-   components: {components from analyze operation}
-   ```
-
-   The plan-type skill:
-   - Generates tasks based on component types
-   - Writes tasks directly to plan.md via scripts
-   - Returns confirmation with task count
-
-4. **Receive confirmation**:
-   ```yaml
-   generate_tasks_result:
-     status: success
-     tasks_written: {count}
-     plan_file: .plan/plans/{plan_id}/plan.md
-   ```
-
-5. **Log task planning**:
-   ```
-   Skill: planning:manage-log
-   operation: add
-   plan_id: {plan_id}
-   phase: refine
-   summary: "Generated {count} implementation tasks"
-   ```
-
-6. **Update progress**:
-
-   Script: `planning:plan-execute/scripts/update-progress.py`
-
-   ```bash
-   python3 {script_path} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-2 --complete-items "Plan implementation tasks"
-   ```
-
-**Output**: `generate_tasks_result` with task count and confirmation
-
----
-
-## Operation: identify-docs
-
-**Input**: `plan_directory`, `tasks`
-
-**Steps**:
-
-1. **Analyze for ADR needs** (architectural decisions, security, integration, performance)
-
-2. **Prompt for ADR** (AskUserQuestion):
-   - Create new ADR (invoke adr-management)
-   - Link existing ADR
-   - Skip
-
-3. **Analyze for interface needs** (new APIs, service interfaces, external integrations)
-
-4. **Prompt for interface** (AskUserQuestion):
-   - Create new Interface (invoke interface-management)
-   - Link existing Interface
-   - Skip
-
-5. **Update references**:
-   ```
-   Skill: planning:manage-references
-   operation: add-file
-   plan_id: {plan_id}
-   file: {adr|interface path}
-   ```
-
-6. **Update progress**:
-
-   Script: `planning:plan-execute/scripts/update-progress.py`
-
-   ```bash
-   python3 {script_path} --plan-dir {plan_directory} --phase refine --task-id task-3 --complete-items "Identify documentation needs"
-   ```
-
-**Output**: `adrs_linked[N]`, `interfaces_linked[N]`
-
----
-
-## Generate Implementation Requirements
-
-After all refine tasks complete:
-
-1. **Read template**: `Read templates/implementation-requirements.md`
-
-2. **Populate**:
-   - Component summary table
-   - Task details with acceptance criteria
-   - Dependency graph
-   - Quality gates
-
-3. **Write**: `Write {plan_directory}/implementation-requirements.md`
-
-4. **Log requirements generation**:
-   ```
-   Skill: planning:manage-log
-   operation: add
-   plan_id: {plan_id}
-   phase: refine
-   summary: "Created implementation-requirements.md"
-   ```
-
----
-
-## Phase Transition
-
-After all refine tasks complete:
-
-```
-Skill: planning:manage-lifecycle
-operation: transition
-plan_id: {plan_id}
-completed: refine
-```
-
-This updates: current_phase → implement, current_task → first implement task
 
 ---
 
 ## Error Handling
 
-### Missing Issue Content
-Options: Retry / Enter manually / Proceed without
+### No Requirements Found
 
-### Invalid References
-Options: Create missing / Remove reference / Mark as TODO
+```toon
+status: error
+error: no_requirements
+message: No requirements found. Add requirements during init phase.
+```
 
-### Incomplete Analysis
-Options: Define scope / Remove component / Mark as TODO
+**Resolution**: Return to init phase to add requirements.
+
+### Plan-Type Skill Error
+
+If plan-type:refine fails, present options:
+- Retry with different parameters
+- Manual task creation via manage-tasks
+- Skip refine (for simple tasks)
 
 ---
 
 ## Integration
 
 ### Command Integration
-- **/plan-manage** - Primary command invoking this skill via manage-lifecycle (action=refine)
+- **/plan-manage action=refine** - Invokes this skill
 
 ### Skills Used
 
-**Planning Bundle**:
-- **manage-lifecycle** - Orchestration and phase transitions
-- **manage-config** - Configuration CRUD
-- **manage-references** - Reference file CRUD
-- **manage-log** - Work log entries
-- **plan-type-simple** - Task generation for simple plans
-- **plan-type-plugin** - Task generation for plugin plans
-- **plan-type-java** - Task generation for Java plans
-- **plan-type-javascript** - Task generation for JavaScript plans
-
-**Domain Analysis** (delegated):
-- **cui-plugin-development-tools:plugin-analysis** - Plugin component analysis
-- **cui-java-expert:java-analysis** - Java component analysis
-- **cui-frontend-expert:js-analysis** - JavaScript component analysis
-
-**Documentation**:
-- **adr-management** - ADR creation and verification
-- **interface-management** - Interface creation and verification
+| Skill | Purpose |
+|-------|---------|
+| `planning:manage-config` | Read plan_type |
+| `planning:manage-lifecycle` | Phase transition |
+| `planning:manage-references` | Track analysis.md, ADRs, interfaces |
+| `planning:manage-log` | Log refine completion |
+| `planning:plan-type-{type}` | **Delegate REQ→SPEC→TASK transformation** |
+| `cui-documentation-standards:adr-management` | Create ADRs (optional) |
+| `cui-documentation-standards:interface-management` | Create interfaces (optional) |
 
 ### Related Skills
-- **plan-init** - Previous phase
-- **plan-execute** - Execution phases (implement/verify/finalize)
+- **plan-init** - Previous phase (creates requirements)
+- **plan-execute** - Next phase (executes tasks)
+
+---
+
+## Templates
+
+| Template | Purpose |
+|----------|---------|
+| `templates/analysis.md` | Strategic analysis for complex tasks |
 
 ---
 
 ## Quality Checklist
 
 - [x] Self-contained with relative paths
-- [x] Progressive disclosure (load on-demand)
+- [x] Single delegation to plan-type:refine (no intermediate data)
 - [x] All file I/O delegated to manage-* skills
-- [x] User confirmation for all decisions
-- [x] Implementation requirements artifact generated
-
+- [x] Optional complexity analysis for complex tasks
+- [x] Optional documentation identification (ADRs, interfaces)

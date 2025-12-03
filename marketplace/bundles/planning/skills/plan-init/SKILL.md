@@ -1,7 +1,7 @@
 ---
 name: plan-init
-description: Init phase skill for plan management. Creates plans with type routing (implementation or simple), environment detection, and user confirmation. Produces complete phase structure for subsequent phases.
-allowed-tools: Read, Write, Bash, Skill, AskUserQuestion
+description: Init phase skill for plan management. Creates plans with type routing, environment detection, requirement capture, and user confirmation. Uses manage-* skills for all file I/O.
+allowed-tools: Read, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Init Skill
@@ -26,17 +26,15 @@ This skill is part of the **CUI Task Workflow plan system**, NOT Claude Code's b
 
 | Forbidden | Reason | Required Alternative |
 |-----------|--------|---------------------|
-| `mkdir` for plan directories | Bypasses validation | `manage-lifecycle` skill → `create` |
-| `Write` tool on plan files | Bypasses atomic operations | `manage-files` skill → `write` |
-| `Edit` tool on plan files | Bypasses progress tracking | `manage-lifecycle` skill → `update-phase` |
-| `EnterPlanMode` tool | Wrong plan system | N/A - this skill handles plan creation |
-| `ExitPlanMode` tool | Wrong plan system | N/A - return completion to manage-lifecycle |
-
-If you find yourself about to use any forbidden operation, **STOP** and delegate to the appropriate `manage-*` skill instead.
+| `mkdir` for plan directories | Bypasses validation | `manage-lifecycle:create` |
+| `Write` tool on plan files | Bypasses atomic operations | `manage-*` skills |
+| `Edit` tool on plan files | Bypasses progress tracking | `manage-*` skills |
+| `EnterPlanMode` tool | Wrong plan system | N/A |
+| `ExitPlanMode` tool | Wrong plan system | N/A |
 
 **MANDATORY WORK-LOG**:
 
-After completing significant actions, you MUST log via manage-log skill:
+After completing init, log via manage-log skill:
 ```
 Skill: planning:manage-log
 operation: add
@@ -45,39 +43,16 @@ phase: init
 summary: "Created {plan_type} plan - {name}"
 ```
 
-**Entry Budget**: 1 entry for init phase (plan creation).
+**Role**: First phase skill. Creates plan directory, captures requirements, and prepares for refinement or execution.
 
-**Log Points**:
-- Plan creation: summary="Created {plan_type} plan - {name}"
-
-**Anti-Patterns** (DO NOT DO):
-- Completing init without logging plan creation
-- Logging configuration detection steps (use progress tracking)
-
-**Role**: First phase skill in the plan management system. Handles plan creation with type-specific init workflows. Delegates all file I/O to manage-* skills.
-
-## Plan-Type Skills (Load On-Demand)
-
-### Workflow Reference
-```
-Read standards/workflow.md
-```
-Contains: Decision tree, property specifications, edit prompts
-
-### Plan-Type Skills
+## Plan-Type Skills
 
 | Plan Type | Skill | Phases | Use Case |
 |-----------|-------|--------|----------|
-| simple | `Skill: planning:plan-type-simple` | 3 | Documentation, config, quick fixes |
-| java | `Skill: planning:plan-type-java` | 5 | Java/Maven/Gradle code tasks |
-| javascript | `Skill: planning:plan-type-javascript` | 5 | JavaScript/npm code tasks |
-| plugin-development | `Skill: planning:plan-type-plugin` | 4 | Marketplace components |
-
-**Usage**: After determining plan type, load the corresponding skill to get:
-- Phase structure (Operation: get-phase-structure)
-- Config template (Operation: get-config-template)
-- References template (Operation: get-references-template)
-- Next phase mapping (Operation: get-next-phase)
+| simple | `planning:plan-type-simple` | 3 | Documentation, config, quick fixes |
+| java | `planning:plan-type-java` | 4 | Java/Maven/Gradle code tasks |
+| javascript | `planning:plan-type-javascript` | 4 | JavaScript/npm code tasks |
+| plugin-development | `planning:plan-type-plugin` | 4 | Marketplace components |
 
 ---
 
@@ -98,15 +73,12 @@ def determine_plan_type(params, environment):
     if params.type: return params.type
     # Plugin development detection
     if 'marketplace/bundles' in params.task: return "plugin-development"
-    if any(kw in params.task.lower() for kw in ['agent', 'command', 'skill', 'plugin', 'component']):
-        if 'create' in params.task.lower() or 'update' in params.task.lower() or 'modify' in params.task.lower():
+    if any(kw in params.task.lower() for kw in ['agent', 'command', 'skill', 'plugin']):
+        if 'create' in params.task.lower() or 'update' in params.task.lower():
             return "plugin-development"
-    if branch.startswith(('plugin/', 'component/')): return "plugin-development"
-    # Technology-specific detection based on build files
+    # Technology-specific detection
     if environment.has_file('pom.xml') or environment.has_file('build.gradle'): return "java"
     if environment.has_file('package.json'): return "javascript"
-    if params.issue: return ask_user_plan_type()  # Ask if issue but no build files
-    if branch.startswith(('feature/', 'fix/', 'task/', 'claude/')): return ask_user_plan_type()
     return ask_user_plan_type()
 ```
 
@@ -116,42 +88,37 @@ def determine_plan_type(params, environment):
 ### Step 2: Ask User (if needed)
 
 AskUserQuestion with options:
-1. Java (5-phase workflow) - Java/Maven/Gradle with build/test verification
-2. JavaScript (5-phase workflow) - JavaScript/npm with build/test verification
-3. Simple (3-phase workflow) - Documentation, config, quick fixes
-4. Plugin-Development (4-phase workflow) - Marketplace components with `/plugin-doctor` verification
+1. Java (4-phase) - Java/Maven/Gradle with build verification
+2. JavaScript (4-phase) - JavaScript/npm with build verification
+3. Simple (3-phase) - Documentation, config, quick fixes
+4. Plugin-Development (4-phase) - Marketplace components with `/plugin-doctor`
 
-### Step 3: Load Plan-Type Skill and Get Phase Structure
-
-**For java**: `Skill: planning:plan-type-java`
-**For javascript**: `Skill: planning:plan-type-javascript`
-**For simple**: `Skill: planning:plan-type-simple`
-**For plugin-development**: `Skill: planning:plan-type-plugin`
-
-**Query the skill for phase structure**:
-```
-operation: get-phase-structure
-plan_id: {plan_directory}
-task_title: {task_title}
-```
-
-The skill returns the complete phase structure (phases, tasks, checklists) ready to write to plan.md.
-
-### Step 4: Detect Environment
+### Step 3: Detect Environment
 
 **Branch**: `git branch --show-current`
 - feature/*, fix/*, task/*, claude/* → propose current
-- main, master, develop → ask for target (implementation only)
+- main, master, develop → ask for target branch
 
-**Build System**: Delegate to `builder:environment-detection` or scan for pom.xml, build.gradle, package.json
+**Build System**: `builder:environment-detection` or scan for build files
 
 **Issue**: From parameter, parse from branch name, or ask user
 
-### Step 5: Configure Properties
+### Step 4: Load Plan-Type Skill
 
-Use AskUserQuestion if property unknown. See `standards/workflow.md` for property prompts.
+```
+Skill: planning:plan-type-{plan_type}
+operation: get-phase-structure
+plan_id: {plan_id}
+task_title: {task_title}
+```
 
-### Step 6: Present Configuration
+Also get templates:
+```
+operation: get-config-template
+operation: get-references-template
+```
+
+### Step 5: Present Configuration
 
 ```
 ## Detected Configuration
@@ -160,7 +127,6 @@ Use AskUserQuestion if property unknown. See `standards/workflow.md` for propert
 **Branch**: {branch} ✓
 **Issue**: {issue} ✓
 **Build System**: {build_system} ✓
-**Technology**: {technology} ✓
 
 **Defaults Applied**:
 - Compatibility: {compatibility}
@@ -170,108 +136,141 @@ Use AskUserQuestion if property unknown. See `standards/workflow.md` for propert
 Proceed with this configuration? (yes/no/edit)
 ```
 
-### Step 7: Create Plan Directory
+### Step 6: Create Plan Directory and Status
 
-```
-Skill: planning:plan-files
-operation: create-directory
-task_name: {derived-from-task-or-issue}
-```
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
-### Step 8: Write Configuration
-
-```
-Skill: planning:plan-files
-operation: write-config
-plan_directory: {directory}
-configuration: {all-properties}
+```bash
+python3 {script_path} create \
+  --plan-id {plan_id} \
+  --title "{task_title}" \
+  --plan-type {plan_type}
 ```
 
-### Step 9: Write Plan Structure (from plan-type skill)
+Creates:
+- `.plan/plans/{plan_id}/` directory
+- `.plan/plans/{plan_id}/status.toon` with phase structure
 
-Write the phase structure returned by the plan-type skill to plan.md:
+### Step 7: Write Configuration
 
-```
-Skill: planning:plan-files
-operation: write-plan
-plan_directory: {directory}
-plan_content: {phase-structure from Step 3}
-```
+Script: `planning:manage-config/scripts/manage-config.py`
 
-The plan-type skill provided the complete structure; this step writes it to plan.md via scripts.
-
-### Step 10: Write Initial References
-
-```
-Skill: planning:plan-files
-operation: write-references
-plan_directory: {directory}
-action: add
-reference_type: issue
-reference_data: {issue-url, issue-title, branch}
+```bash
+python3 {script_path} create \
+  --plan-id {plan_id} \
+  --plan-type {plan_type} \
+  --technology {technology} \
+  --build-system {build_system} \
+  --compatibility {compatibility} \
+  --commit-strategy {commit_strategy} \
+  --finalizing {finalizing}
 ```
 
-### Step 11: Log Plan Creation
+Creates: `.plan/plans/{plan_id}/config.toon`
+
+### Step 8: Write References
+
+Script: `planning:manage-references/scripts/manage-references.py`
+
+```bash
+python3 {script_path} write \
+  --plan-id {plan_id} \
+  --branch {branch} \
+  --base-branch main \
+  --issue-id {issue_id} \
+  --issue-title "{issue_title}" \
+  --issue-url {issue_url}
+```
+
+Creates: `.plan/plans/{plan_id}/references.toon`
+
+### Step 9: Create Initial Requirement
+
+Script: `planning:manage-requirements/scripts/manage-requirement.py`
+
+```bash
+python3 {script_path} add \
+  --plan-id {plan_id} \
+  --title "{task_title}" \
+  --body "{task_description}"
+```
+
+Creates: `.plan/plans/{plan_id}/requirements/REQ-001-{slug}.toon`
+
+**For simple plans**: Also create tasks directly (no refine phase):
+
+Script: `planning:manage-tasks/scripts/manage-task.py`
+
+```bash
+python3 {script_path} add \
+  --plan-id {plan_id} \
+  --specification SPEC-1 \
+  --title "{task_title}" \
+  --description "{goal}" \
+  --steps "{step1}" "{step2}" "{step3}"
+```
+
+### Step 10: Log Plan Creation
 
 ```
-Skill: planning:work-log
-operation: log-entry
-plan_directory: {directory}
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
 phase: init
-task: task-1
-action: "Created {plan_type} plan"
-result: "Plan: {task-name}, Branch: {branch}"
+summary: "Created {plan_type} plan - {task_title}"
 ```
 
-### Step 12: Return Completion
+### Step 11: Return Completion
 
 **Output**:
-```
-plan_type: {java|javascript|simple|plugin-development}
+```toon
+status: success
+plan_type: {plan_type}
+
 artifacts:
-  plan_directory: {plan_directory}
-  plan_file: {plan_directory}/plan.md
-  config_file: {plan_directory}/config.toon
-  references_file: {plan_directory}/references.toon
+  plan_directory: .plan/plans/{plan_id}/
+  status_file: status.toon
+  config_file: config.toon
+  references_file: references.toon
+  requirements: requirements/REQ-001-*.toon
+
 plan_status:
   current_phase: init
   next_phase: {refine|execute}
-  current_task: task-1
-next_action: Start {next_phase} phase
 ```
 
 **Next Phase by Plan Type**:
+
 | Plan Type | next_phase | Reason |
 |-----------|------------|--------|
-| `java` | refine | Requires requirements analysis before implementation |
-| `javascript` | refine | Requires requirements analysis before implementation |
-| `plugin-development` | refine | Requires component analysis before execution |
-| `simple` | execute | Skips refine phase for quick tasks |
+| `java` | refine | Requires REQ→SPEC→TASK transformation |
+| `javascript` | refine | Requires REQ→SPEC→TASK transformation |
+| `plugin-development` | refine | Requires REQ→SPEC→TASK transformation |
+| `simple` | execute | Tasks created during init (skips refine) |
 
-**Auto-Continue**: After returning completion, the orchestrating skill (phase-management) will automatically proceed to the **next_phase** based on plan type:
-- Java/JavaScript/Plugin-Development plans → refine phase
-- Simple plans → execute phase (skips refine)
-
-Do NOT add any "Continue?" prompts - the flow executes continuously.
+**Auto-Continue**: Do NOT add "Continue?" prompts - flow executes continuously.
 
 ---
 
 ## Error Handling
 
-### Branch on Main/Master (Implementation)
-```
+### Branch on Main/Master
+```toon
+status: error
 error: protected_branch
 resolution: Create feature branch or select Simple plan type
 ```
 
 ### Build System Not Detected
-```
+```toon
+status: warning
 warning: no_build_system
 resolution: Select manually or continue with none
 ```
 
 ### Issue Not Found
-```
+```toon
+status: warning
 warning: issue_not_found
 resolution: Verify URL, check permissions, or continue without
 ```
@@ -281,61 +280,44 @@ resolution: Verify URL, check permissions, or continue without
 ## Integration
 
 ### Command Integration
-- **/plan-manage** - Primary command invoking this skill via phase-management (action=init)
+- **/plan-manage action=init** - Invokes this skill
 
 ### Skills Used
-- **plan-files** - All file I/O operations
-- **builder:environment-detection** - Build system detection (optional)
-- **phase-management** - Orchestration (invokes this skill)
-- **work-log** - Logging significant actions
 
-### Plan-Type Skills
-- **plan-type-simple** - 3-phase workflow definitions
-- **plan-type-plugin** - 4-phase plugin workflow definitions
-- **plan-type-java** - 5-phase Java implementation workflow definitions
-- **plan-type-javascript** - 5-phase JavaScript implementation workflow definitions
+| Skill | Purpose |
+|-------|---------|
+| `planning:manage-lifecycle` | Create plan directory and status |
+| `planning:manage-config` | Write configuration |
+| `planning:manage-references` | Write references |
+| `planning:manage-requirements` | Create initial requirement |
+| `planning:manage-tasks` | Create tasks (simple plans only) |
+| `planning:manage-log` | Log plan creation |
+| `planning:plan-type-{type}` | Get templates and phase structure |
+| `builder:environment-detection` | Detect build system (optional) |
 
 ### Related Skills
-- **plan-refine** - Next phase (implementation)
-- **plan-execute** - Execution phases (implement/verify/finalize)
+- **plan-refine** - Next phase (4-phase plans)
+- **plan-execute** - Next phase (simple plans) or after refine
 
 ---
 
 ## Quality Checklist
 
 - [x] Self-contained with relative paths
-- [x] Progressive disclosure (load standards on-demand)
-- [x] All file I/O delegated to plan-files skill
+- [x] All file I/O delegated to manage-* skills
 - [x] User confirmation workflow
-- [x] Both plan types supported
+- [x] All 4 plan types supported
+- [x] Requirements created during init
+- [x] Simple plans create tasks during init (skip refine)
 
 ---
 
 ## Continuous Improvement
 
-**MANDATORY**: When executing scripts from this skill, unexpected behavior or errors MUST be documented as lessons learned immediately.
-
-### When to Document
-
-File a lesson learned when a script:
-- Returns unexpected output
-- Fails to update files as expected
-- Requires a workaround to achieve the desired result
-- Has unclear or misleading documentation
-
-### How to Document
-
-Use the `general-tools:manage-lessons-learned` skill:
+**MANDATORY**: Document unexpected script behavior via `general-tools:manage-lessons-learned`:
 
 Script: `general-tools:manage-lessons-learned/scripts/write-lesson.py`
 
 ```bash
-python3 {script_path} --component "planning:plan-init" --category {bug|improvement|anti-pattern} --title "Brief description" --detail "What happened, why, workaround, suggested fix"
+python3 {script_path} --component "planning:plan-init" --category {bug|improvement|anti-pattern} --title "Brief description" --detail "Details"
 ```
-
-**Categories**:
-- `bug`: Script is broken or produces wrong results
-- `improvement`: Script works but could be better
-- `anti-pattern`: Script was misused or documentation unclear
-
-**Why This Matters**: Script errors indicate gaps in validation, documentation, or implementation. Documented lessons improve future sessions and identify systemic issues.
