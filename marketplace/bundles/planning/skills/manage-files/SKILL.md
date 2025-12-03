@@ -46,12 +46,14 @@ Files are stored in plan directories:
 
 ## Operations
 
+Script: `planning:manage-files/scripts/manage-files.py`
+
 ### read
 
 Read file content from a plan directory.
 
 ```bash
-python3 scripts/manage-files.py read \
+python3 {script_path} read \
   --plan-id {plan_id} \
   --file task.md
 ```
@@ -63,7 +65,7 @@ python3 scripts/manage-files.py read \
 Write content to a file in a plan directory.
 
 ```bash
-python3 scripts/manage-files.py write \
+python3 {script_path} write \
   --plan-id {plan_id} \
   --file task.md \
   --content "# Task Title\n\nTask description..."
@@ -71,7 +73,7 @@ python3 scripts/manage-files.py write \
 
 Or with stdin:
 ```bash
-cat content.md | python3 scripts/manage-files.py write \
+cat content.md | python3 {script_path} write \
   --plan-id {plan_id} \
   --file task.md \
   --stdin
@@ -84,7 +86,7 @@ cat content.md | python3 scripts/manage-files.py write \
 Remove a file from a plan directory.
 
 ```bash
-python3 scripts/manage-files.py remove \
+python3 {script_path} remove \
   --plan-id {plan_id} \
   --file old-file.md
 ```
@@ -96,7 +98,7 @@ python3 scripts/manage-files.py remove \
 List files in a plan directory.
 
 ```bash
-python3 scripts/manage-files.py list \
+python3 {script_path} list \
   --plan-id {plan_id} \
   [--dir subdir]
 ```
@@ -108,7 +110,7 @@ python3 scripts/manage-files.py list \
 Check if a file exists.
 
 ```bash
-python3 scripts/manage-files.py exists \
+python3 {script_path} exists \
   --plan-id {plan_id} \
   --file config.toon
 ```
@@ -120,7 +122,7 @@ python3 scripts/manage-files.py exists \
 Create a subdirectory in a plan directory.
 
 ```bash
-python3 scripts/manage-files.py mkdir \
+python3 {script_path} mkdir \
   --plan-id {plan_id} \
   --dir requirements
 ```
@@ -133,7 +135,7 @@ python3 scripts/manage-files.py mkdir \
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-files.py` | All file operations via subcommands | `python3 scripts/manage-files.py {command} --help` |
+| `planning:manage-files/scripts/manage-files.py` | All file operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

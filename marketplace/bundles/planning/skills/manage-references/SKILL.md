@@ -70,12 +70,14 @@ JWT Guide,https://jwt.io/introduction
 
 ## Operations
 
+Script: `planning:manage-references/scripts/manage-references.py`
+
 ### read
 
 Read entire references.toon content.
 
 ```bash
-python3 scripts/manage-references.py read \
+python3 {script_path} read \
   --plan-id {plan_id}
 ```
 
@@ -95,7 +97,7 @@ references:
 Get a specific field value.
 
 ```bash
-python3 scripts/manage-references.py get \
+python3 {script_path} get \
   --plan-id {plan_id} \
   --field branch
 ```
@@ -113,7 +115,7 @@ value: feature/my-feature
 Set a specific field value.
 
 ```bash
-python3 scripts/manage-references.py set \
+python3 {script_path} set \
   --plan-id {plan_id} \
   --field branch \
   --value feature/new-branch
@@ -133,7 +135,7 @@ previous: feature/my-feature
 Add a file to modified_files list.
 
 ```bash
-python3 scripts/manage-references.py add-file \
+python3 {script_path} add-file \
   --plan-id {plan_id} \
   --file src/main/java/NewClass.java
 ```
@@ -152,7 +154,7 @@ total: 4
 Remove a file from modified_files list.
 
 ```bash
-python3 scripts/manage-references.py remove-file \
+python3 {script_path} remove-file \
   --plan-id {plan_id} \
   --file src/main/java/OldClass.java
 ```
@@ -172,7 +174,7 @@ total: 2
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-references.py` | All reference operations via subcommands | `python3 scripts/manage-references.py {command} --help` |
+| `planning:manage-references/scripts/manage-references.py` | All reference operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

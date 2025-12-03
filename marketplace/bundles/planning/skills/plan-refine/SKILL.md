@@ -252,8 +252,11 @@ analysis_created:
    - Options: Proceed / Modify / Re-analyze
 
 7. **Update progress** (after user approval):
+
+   Script: `planning:plan-execute/scripts/update-progress.py`
+
    ```bash
-   python3 {update-progress.py} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-1 --complete-items "Analyze requirements"
+   python3 {script_path} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-1 --complete-items "Analyze requirements"
    ```
 
 **Output**: `components[]` ready for generate-tasks
@@ -309,8 +312,11 @@ analysis_created:
    ```
 
 6. **Update progress**:
+
+   Script: `planning:plan-execute/scripts/update-progress.py`
+
    ```bash
-   python3 {update-progress.py} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-2 --complete-items "Plan implementation tasks"
+   python3 {script_path} --plan-dir .plan/plans/{plan_id} --phase refine --task-id task-2 --complete-items "Plan implementation tasks"
    ```
 
 **Output**: `generate_tasks_result` with task count and confirmation
@@ -346,8 +352,11 @@ analysis_created:
    ```
 
 6. **Update progress**:
+
+   Script: `planning:plan-execute/scripts/update-progress.py`
+
    ```bash
-   python3 {update-progress.py} --plan-dir {plan_directory} --phase refine --task-id task-3 --complete-items "Identify documentation needs"
+   python3 {script_path} --plan-dir {plan_directory} --phase refine --task-id task-3 --complete-items "Identify documentation needs"
    ```
 
 **Output**: `adrs_linked[N]`, `interfaces_linked[N]`

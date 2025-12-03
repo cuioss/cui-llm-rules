@@ -111,12 +111,14 @@ current_step: 1
 
 ## Operations
 
+Script: `planning:manage-tasks/scripts/manage-task.py`
+
 ### add
 
 Add a new task file (creates directory if needed).
 
 ```bash
-python3 scripts/manage-manage-task.py add \
+python3 {script_path} add \
   --plan-id {plan_id} \
   --specification SPEC-1 \
   --title "Implement JWT Service" \
@@ -144,7 +146,7 @@ task:
 Update task metadata (not steps - use step operations for that).
 
 ```bash
-python3 scripts/manage-task.py update \
+python3 {script_path} update \
   --plan-id {plan_id} \
   --number 1 \
   [--title "New title"] \
@@ -157,7 +159,7 @@ python3 scripts/manage-task.py update \
 Remove a task file (keeps gaps in numbering).
 
 ```bash
-python3 scripts/manage-task.py remove \
+python3 {script_path} remove \
   --plan-id {plan_id} \
   --number 1
 ```
@@ -167,7 +169,7 @@ python3 scripts/manage-task.py remove \
 List all tasks with summary.
 
 ```bash
-python3 scripts/manage-manage-task.py list \
+python3 {script_path} list \
   --plan-id {plan_id} \
   [--status pending|in_progress|done|blocked|all] \
   [--specification SPEC-1]
@@ -196,7 +198,7 @@ tasks[3]{number,title,specification,status,progress}:
 Get a single task with full details.
 
 ```bash
-python3 scripts/manage-task.py get \
+python3 {script_path} get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -227,7 +229,7 @@ task:
 Get the next pending task or step (for execution).
 
 ```bash
-python3 scripts/manage-manage-task.py next \
+python3 {script_path} next \
   --plan-id {plan_id}
 ```
 
@@ -272,7 +274,7 @@ context:
 Mark a step as in_progress (also marks task as in_progress).
 
 ```bash
-python3 scripts/manage-manage-task.py step-start \
+python3 {script_path} step-start \
   --plan-id {plan_id} \
   --task 2 \
   --step 2
@@ -295,7 +297,7 @@ step_title: Add request/response DTOs
 Mark a step as completed.
 
 ```bash
-python3 scripts/manage-manage-task.py step-done \
+python3 {script_path} step-done \
   --plan-id {plan_id} \
   --task 2 \
   --step 2
@@ -332,7 +334,7 @@ message: Task completed
 Skip a step (mark as skipped, move to next).
 
 ```bash
-python3 scripts/manage-task.py step-skip \
+python3 {script_path} step-skip \
   --plan-id {plan_id} \
   --task 2 \
   --step 2 \
@@ -344,7 +346,7 @@ python3 scripts/manage-task.py step-skip \
 Add a new step to an existing task.
 
 ```bash
-python3 scripts/manage-manage-task.py add-step \
+python3 {script_path} add-step \
   --plan-id {plan_id} \
   --task 2 \
   --title "Add error handling" \
@@ -356,7 +358,7 @@ python3 scripts/manage-manage-task.py add-step \
 Remove a step from a task.
 
 ```bash
-python3 scripts/manage-task.py remove-step \
+python3 {script_path} remove-step \
   --plan-id {plan_id} \
   --task 2 \
   --step 3
@@ -368,7 +370,7 @@ python3 scripts/manage-task.py remove-step \
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-task.py` | All CRUD and step operations via subcommands | `python3 scripts/manage-task.py {command} --help` |
+| `planning:manage-tasks/scripts/manage-task.py` | All CRUD and step operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

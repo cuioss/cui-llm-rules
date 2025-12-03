@@ -326,8 +326,11 @@ File a lesson learned when a script:
 ### How to Document
 
 Use the `general-tools:manage-lessons-learned` skill:
+
+Script: `general-tools:manage-lessons-learned/scripts/write-lesson.py`
+
 ```bash
-python3 {write-lesson.py path} --component "planning:plan-init" --category {bug|improvement|anti-pattern} --title "Brief description" --detail "What happened, why, workaround, suggested fix"
+python3 {script_path} --component "planning:plan-init" --category {bug|improvement|anti-pattern} --title "Brief description" --detail "What happened, why, workaround, suggested fix"
 ```
 
 **Categories**:

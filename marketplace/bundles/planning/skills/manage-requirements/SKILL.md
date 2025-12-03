@@ -81,12 +81,14 @@ body: |
 
 ## Operations
 
+Script: `planning:manage-requirements/scripts/manage-requirement.py`
+
 ### add
 
 Add a new requirement file (creates directory if needed).
 
 ```bash
-python3 scripts/manage-requirement.py add \
+python3 {script_path} add \
   --plan-id {plan_id} \
   --title "Requirement title" \
   --body "Detailed requirement description"
@@ -110,7 +112,7 @@ requirement:
 Update an existing requirement file.
 
 ```bash
-python3 scripts/manage-requirement.py update \
+python3 {script_path} update \
   --plan-id {plan_id} \
   --number 2 \
   [--title "New title"] \
@@ -136,7 +138,7 @@ requirement:
 Remove a requirement file (keeps gaps in numbering).
 
 ```bash
-python3 scripts/manage-requirement.py remove \
+python3 {script_path} remove \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -158,7 +160,7 @@ removed:
 List all requirements (summary view with counts).
 
 ```bash
-python3 scripts/manage-requirement.py list \
+python3 {script_path} list \
   --plan-id {plan_id} \
   [--status pending|done|all]
 ```
@@ -184,7 +186,7 @@ requirements[3]{number,title,status,file}:
 Get all requirements with full content (body included).
 
 ```bash
-python3 scripts/manage-requirement.py findAll \
+python3 {script_path} findAll \
   --plan-id {plan_id}
 ```
 
@@ -226,7 +228,7 @@ requirements:
 Get a single requirement by number.
 
 ```bash
-python3 scripts/manage-requirement.py get \
+python3 {script_path} get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -251,7 +253,7 @@ requirement:
 Mark requirement as done or pending.
 
 ```bash
-python3 scripts/manage-requirement.py check \
+python3 {script_path} check \
   --plan-id {plan_id} \
   --number 2 \
   --status done
@@ -285,7 +287,7 @@ Requirements can be referenced elsewhere using `REQ-{n}` format (no zero padding
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-requirement.py` | All CRUD operations via subcommands | `python3 scripts/manage-requirement.py {command} --help` |
+| `planning:manage-requirements/scripts/manage-requirement.py` | All CRUD operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

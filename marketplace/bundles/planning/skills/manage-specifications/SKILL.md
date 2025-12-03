@@ -91,12 +91,14 @@ body: |
 
 ## Operations
 
+Script: `planning:manage-specifications/scripts/manage-specification.py`
+
 ### add
 
 Add a new specification file (creates directory if needed).
 
 ```bash
-python3 scripts/manage-specification.py add \
+python3 {script_path} add \
   --plan-id {plan_id} \
   --title "Specification title" \
   --requirements "REQ-1,REQ-3" \
@@ -128,7 +130,7 @@ message: At least one requirement reference is required
 Update an existing specification file.
 
 ```bash
-python3 scripts/manage-specification.py update \
+python3 {script_path} update \
   --plan-id {plan_id} \
   --number 2 \
   [--title "New title"] \
@@ -156,7 +158,7 @@ specification:
 Remove a specification file (keeps gaps in numbering).
 
 ```bash
-python3 scripts/manage-specification.py remove \
+python3 {script_path} remove \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -178,7 +180,7 @@ removed:
 List all specifications (summary view with counts).
 
 ```bash
-python3 scripts/manage-specification.py list \
+python3 {script_path} list \
   --plan-id {plan_id} \
   [--status pending|done|all] \
   [--requirement REQ-1]
@@ -205,7 +207,7 @@ specifications[3]{number,title,requirements,status,file}:
 Get all specifications with full content (body included).
 
 ```bash
-python3 scripts/manage-specification.py findAll \
+python3 {script_path} findAll \
   --plan-id {plan_id}
 ```
 
@@ -242,7 +244,7 @@ specifications:
 Get a single specification by number.
 
 ```bash
-python3 scripts/manage-specification.py get \
+python3 {script_path} get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -268,7 +270,7 @@ specification:
 Mark specification as done or pending.
 
 ```bash
-python3 scripts/manage-specification.py check \
+python3 {script_path} check \
   --plan-id {plan_id} \
   --number 2 \
   --status done
@@ -292,7 +294,7 @@ specification:
 Find all specifications that reference a specific requirement.
 
 ```bash
-python3 scripts/manage-specification.py findByRequirement \
+python3 {script_path} findByRequirement \
   --plan-id {plan_id} \
   --requirement REQ-1
 ```
@@ -332,7 +334,7 @@ Specifications can be referenced elsewhere using `SPEC-{n}` format (no zero padd
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-specification.py` | All CRUD operations via subcommands | `python3 scripts/manage-specification.py {command} --help` |
+| `planning:manage-specifications/scripts/manage-specification.py` | All CRUD operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

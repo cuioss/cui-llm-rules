@@ -19,12 +19,11 @@ All plan-type skills implement these operations:
 | `get-phase-structure` | `plan_id`, `task_title` | Phase config | plan-init |
 | `get-config-template` | context fields | config.toon template | plan-init |
 | `get-references-template` | context fields | references.toon template | plan-init |
-| `generate-specifications` | `plan_id`, `components[]` | TOON spec files | plan-refine |
-| `generate-tasks` | `plan_id`, `specifications[]` | TOON task files (linked to specs) | plan-refine |
+| `refine` | `plan_id` | SPEC + TASK files created | plan-refine |
 | `get-next-phase` | `current_phase` | next phase name | manage-lifecycle |
 | `get-finalize-config` | `plan_id` | finalize behavior | plan-finalize |
 
-**Traceability Flow**: Components → Specifications → Tasks (each task references its specification)
+**Traceability Flow**: Requirements → Specifications → Tasks (each task references its specification)
 
 ---
 
@@ -58,19 +57,17 @@ phase_tasks:
     - title: Detect Environment
       steps: git branch --show-current, builder:environment-detection skill
     - title: Analyze Task
-      steps: Read task.md, Determine scope and technology, Add requirements
+      steps: Read task.md, Determine scope and technology
+    - title: Add Requirements
+      steps: Create REQ files via manage-requirements
     - title: Detect Plan Type
       steps: From technology/scope, Apply detection rules
     - title: Confirm Configuration
       steps: Display config, Allow overrides, Confirm settings
   refine:
-    - title: Analyze Requirements
-      steps: Delegate to analysis skill, Review components
-    - title: Generate Specifications
-      steps: Create SPEC files via manage-specifications
-    - title: Generate Tasks
-      steps: Create TASK files via manage-tasks (linked to specs)
-  execute: (generated dynamically)
+    - title: Refine Plan
+      steps: Call plan-type:refine, Iterates REQ→SPEC→TASK automatically
+  execute: (generated dynamically from TASK files)
   finalize:
     - title: Run Verification
       steps: /builder-build-and-fix or /plugin-doctor
@@ -150,105 +147,98 @@ files:
 
 ---
 
-## Operation: generate-specifications
+## Operation: refine
 
-Generates specifications from analyzed components. **Writes directly** to specifications/ directory via manage-specifications skill - does NOT return spec content, only confirmation.
-
-**Input Parameters**:
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `plan_id` | string | Yes | Plan identifier |
-| `components` | array | Yes | Components from domain analysis |
-
-**Components Structure** (from analysis-api):
-
-```toon
-components[3]{name,type,scope,path,complexity}:
-jwt-service,class,create,src/main/java/auth/JwtService.java,medium
-auth-controller,class,create,src/main/java/auth/AuthController.java,low
-auth-tests,test,create,src/test/java/auth/AuthTest.java,low
-```
-
-**Process**:
-
-1. For each component, call `manage-specification.py add` to create SPEC file
-2. Group related components if applicable
-3. Return confirmation (specs already written to disk)
-
-**Specification Generation via manage-specifications**:
-
-```bash
-python3 manage-specification.py add \
-  --plan-id {plan_id} \
-  --title "{component-name} implementation" \
-  --description "{what needs to be implemented}" \
-  --acceptance-criteria "Criteria 1" "Criteria 2" "Criteria 3"
-```
-
-**Output Structure** (confirmation only, specs already written):
-
-```toon
-status: success
-plan_id: {plan_id}
-specs_created: 3
-
-specifications[3]{number,title,file}:
-1,JWT Service Implementation,SPEC-001-jwt-service.toon
-2,Auth Controller Implementation,SPEC-002-auth-controller.toon
-3,Auth Tests Implementation,SPEC-003-auth-tests.toon
-```
-
----
-
-## Operation: generate-tasks
-
-Generates implementation tasks from specifications. **Writes directly** to tasks/ directory via manage-tasks skill - does NOT return task content, only confirmation. Each task is linked to its specification for traceability.
+Transforms requirements into specifications and tasks. **Iterates through existing data** using manage-* tools, creating the full traceability chain: REQ → SPEC → TASK.
 
 **Input Parameters**:
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `specifications` | array | Yes | Specifications from generate-specifications |
-
-**Specifications Structure** (from generate-specifications):
-
-```toon
-specifications[3]{number,title,file}:
-1,JWT Service Implementation,SPEC-001-jwt-service.toon
-2,Auth Controller Implementation,SPEC-002-auth-controller.toon
-3,Auth Tests Implementation,SPEC-003-auth-tests.toon
-```
 
 **Process**:
 
-1. For each specification, call `manage-task.py add` to create TASK file with `--specification SPEC-{n}`
-2. Order tasks by dependencies
-3. Return confirmation (tasks already written to disk)
-
-**Task Generation via manage-tasks**:
-
-```bash
-python3 manage-task.py add \
-  --plan-id {plan_id} \
-  --specification SPEC-{n} \
-  --title "Implement {component-name}" \
-  --description "{goal-description}" \
-  --steps "Create implementation" "Add tests" "Add documentation" "Verify build"
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 1: Requirements → Specifications                             │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. Load all requirements:                                          │
+│     python3 {manage-requirement.py} findAll --plan-id {plan_id}     │
+│                                                                     │
+│  2. FOR EACH requirement:                                           │
+│     - Analyze requirement content                                   │
+│     - Apply domain-specific spec generation logic                   │
+│     - Create specification:                                         │
+│       python3 {manage-specification.py} add \                       │
+│         --plan-id {plan_id} \                                       │
+│         --title "{derived-title}" \                                 │
+│         --requirements "REQ-{n}" \                                  │
+│         --body "{domain-specific-content}"                          │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 2: Specifications → Tasks                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│  3. Load all specifications:                                        │
+│     python3 {manage-specification.py} findAll --plan-id {plan_id}   │
+│                                                                     │
+│  4. FOR EACH specification:                                         │
+│     - Analyze specification content                                 │
+│     - Apply domain-specific task generation logic                   │
+│     - Create task(s):                                               │
+│       python3 {manage-task.py} add \                                │
+│         --plan-id {plan_id} \                                       │
+│         --specification SPEC-{n} \                                  │
+│         --title "{derived-title}" \                                 │
+│         --description "{goal}" \                                    │
+│         --steps "{step1}" "{step2}" ...                             │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Output Structure** (confirmation only, tasks already written):
+**Domain-Specific Logic**:
+
+Each plan-type skill provides domain knowledge for:
+- **Spec title derivation**: How to name specs from requirements
+- **Spec body content**: What technical details to include
+- **Task generation**: How many tasks per spec, what steps
+- **Standards references**: Which skills to load during execution
+
+**Output Structure**:
 
 ```toon
 status: success
 plan_id: {plan_id}
-tasks_created: 3
 
-tasks[3]{number,title,specification,file}:
-1,Implement JWT Service,SPEC-1,TASK-001-implement-jwt-service.toon
-2,Add Auth Controller,SPEC-1,TASK-002-add-auth-controller.toon
-3,Write Auth Tests,SPEC-1,TASK-003-write-auth-tests.toon
+phase_1:
+  requirements_processed: 3
+  specs_created: 3
+
+phase_2:
+  specs_processed: 3
+  tasks_created: 5
+
+specifications[3]{number,title,requirements,file}:
+1,JWT Token Implementation,REQ-1,SPEC-001-jwt-token.toon
+2,Auth Endpoint,REQ-2,SPEC-002-auth-endpoint.toon
+3,Session Management,"REQ-1,REQ-3",SPEC-003-session-management.toon
+
+tasks[5]{number,title,specification,file}:
+1,Implement JwtService,SPEC-1,TASK-001-implement-jwt-service.toon
+2,Add JWT Unit Tests,SPEC-1,TASK-002-add-jwt-unit-tests.toon
+3,Create AuthController,SPEC-2,TASK-003-create-auth-controller.toon
+4,Implement SessionManager,SPEC-3,TASK-004-implement-session-manager.toon
+5,Add Integration Tests,SPEC-3,TASK-005-add-integration-tests.toon
+```
+
+**Error Handling**:
+
+```toon
+status: error
+plan_id: {plan_id}
+error: no_requirements
+message: No requirements found. Add requirements before refining.
 ```
 
 ---
@@ -325,11 +315,28 @@ Most plan types use this model:
 init ────────► refine ────────► execute ────────► finalize
   │              │                 │                 │
   │              │                 │                 │
-  ├─ Env detect  ├─ Requirements   ├─ Tasks from    ├─ Verify build
-  ├─ Config      ├─ Analysis       │  manage-tasks  ├─ Commit
-  └─ Confirm     ├─ Generate specs └─ Step loop     └─ PR (optional)
-                 └─ Generate tasks
-                    (linked to specs)
+  ├─ Env detect  ├─ REQ → SPEC     ├─ Tasks from    ├─ Verify build
+  ├─ Config      │  (iterate)      │  manage-tasks  ├─ Commit
+  └─ Confirm     └─ SPEC → TASK    └─ Step loop     └─ PR (optional)
+                    (iterate)
+```
+
+**Refine Phase Detail**:
+```
+manage-requirements:findAll → REQ[]
+        │
+        ▼
+   FOR EACH REQ:
+        │
+        └─► manage-specifications:add → SPEC
+                    │
+                    ▼
+       manage-specifications:findAll → SPEC[]
+                    │
+                    ▼
+              FOR EACH SPEC:
+                    │
+                    └─► manage-tasks:add → TASK
 ```
 
 ### Simple 3-Phase Model
@@ -343,6 +350,8 @@ init ─────────────────────────
   ├─ Minimal config                   ├─ Direct tasks  ├─ Commit only
   └─ Quick confirm                    └─ from desc     └─ No PR
 ```
+
+**Note**: Simple plans skip refine phase. Tasks are derived directly from the task description during init.
 
 ---
 
@@ -368,9 +377,9 @@ Each plan type defines its characteristics:
 Plan-type skills that implement this API must:
 
 1. **Load this skill**: Reference `planning:plan-type-api` for contract compliance
-2. **Implement all operations**: All 7 operations with correct signatures
+2. **Implement all operations**: All 6 operations with correct signatures
 3. **Define phase structure**: Static phases with placeholder for execute
-4. **Use manage-tasks**: Generate tasks via manage-task.py, not plan.md
+4. **Use manage-* tools**: All data I/O via manage-requirements, manage-specifications, manage-tasks
 5. **Return structured output**: All operations return status and data
 6. **Handle errors gracefully**: Return error status with message
 
@@ -380,7 +389,7 @@ Plan-type skills that implement this API must:
 ---
 name: plan-type-{domain}
 description: {Domain} plan type providing {N}-phase workflow for {use-cases}
-allowed-tools: Read
+allowed-tools: Read, Bash
 ---
 
 # Plan Type: {Domain}
@@ -390,8 +399,6 @@ allowed-tools: Read
 **Use Cases**:
 - {use-case-1}
 - {use-case-2}
-
-**Analysis Skill**: `{bundle}:{skill}` (or null for simple)
 
 **API**: Implements `planning:plan-type-api` contract.
 
@@ -404,7 +411,6 @@ allowed-tools: Read
 | Phases | {N} |
 | Technology | {tech} |
 | Build System | {build} |
-| Analysis Skill | {skill} |
 | Branch Required | {true/false} |
 | Issue Required | {true/false/recommended} |
 | PR Workflow | {true/false} |
@@ -430,15 +436,9 @@ allowed-tools: Read
 
 ---
 
-## Operation: generate-specifications
+## Operation: refine
 
-{Implementation per contract}
-
----
-
-## Operation: generate-tasks
-
-{Implementation per contract}
+{Domain-specific implementation - iterate REQ→SPEC→TASK}
 
 ---
 
@@ -462,7 +462,7 @@ allowed-tools: Read
 | Skill | Operations Used |
 |-------|-----------------|
 | `planning:plan-init` | get-phase-structure, get-config-template, get-references-template |
-| `planning:plan-refine` | generate-specifications, generate-tasks |
+| `planning:plan-refine` | refine |
 | `planning:manage-lifecycle` | get-next-phase |
 | `planning:plan-finalize` | get-finalize-config |
 
@@ -475,6 +475,15 @@ allowed-tools: Read
 | `planning:plan-type-java` | Java/Maven/Gradle |
 | `planning:plan-type-javascript` | JavaScript/npm |
 
+### Data Layer Tools (used by refine operation)
+
+| Tool | Purpose |
+|------|---------|
+| `manage-requirements:findAll` | Load all requirements for plan |
+| `manage-specifications:add` | Create specification from requirement |
+| `manage-specifications:findAll` | Load all specifications for plan |
+| `manage-tasks:add` | Create task from specification |
+
 ---
 
 ## Quality Checklist
@@ -482,9 +491,10 @@ allowed-tools: Read
 For implementing skills:
 
 - [ ] Loads `planning:plan-type-api` for contract reference
-- [ ] Implements all 7 operations with correct signatures
-- [ ] Uses manage-tasks skill for task generation (not plan.md)
+- [ ] Implements all 6 operations with correct signatures
+- [ ] Uses manage-* tools for all data I/O
 - [ ] Returns `status` field in all outputs
 - [ ] Defines phase transition matrix
 - [ ] Defines characteristics matrix
 - [ ] Handles errors with status and message
+- [ ] refine operation iterates REQ→SPEC→TASK with proper traceability

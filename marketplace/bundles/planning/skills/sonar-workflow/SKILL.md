@@ -171,13 +171,15 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 
 ## Scripts
 
+Scripts: `planning:sonar-workflow/scripts/`
+
 ### fetch-sonar-issues.py
 
 **Purpose:** Generate structure for fetching Sonar issues.
 
 **Usage:**
 ```bash
-python3 scripts/fetch-sonar-issues.py --project <key> [--pr <id>] [--severities <list>]
+python3 {script_path} --project <key> [--pr <id>] [--severities <list>]
 ```
 
 **Output:** JSON with MCP instruction and expected structure
@@ -188,7 +190,7 @@ python3 scripts/fetch-sonar-issues.py --project <key> [--pr <id>] [--severities 
 
 **Usage:**
 ```bash
-python3 scripts/triage-issue.py --issue '{"key":"...", "rule":"...", ...}'
+python3 {script_path} --issue '{"key":"...", "rule":"...", ...}'
 ```
 
 **Output:** JSON with action decision

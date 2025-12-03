@@ -84,12 +84,14 @@ This affects all projects using jakarta.json without explicit dependency.
 
 ## Operations
 
+Script: `planning:manage-lessons/scripts/manage-lesson.py`
+
 ### add
 
 Create a new lesson.
 
 ```bash
-python3 scripts/manage-lesson.py add \
+python3 {script_path} add \
   --component maven-build \
   --category bug \
   --title "Build fails with missing dependency" \
@@ -110,7 +112,7 @@ category: bug
 Update lesson metadata.
 
 ```bash
-python3 scripts/manage-lesson.py update \
+python3 {script_path} update \
   --id 2025-12-02-001 \
   --applied true
 ```
@@ -129,7 +131,7 @@ previous: false
 Get a single lesson.
 
 ```bash
-python3 scripts/manage-lesson.py get \
+python3 {script_path} get \
   --id 2025-12-02-001
 ```
 
@@ -152,7 +154,7 @@ content: |
 List lessons with filtering.
 
 ```bash
-python3 scripts/manage-lesson.py list \
+python3 {script_path} list \
   [--component maven-build] \
   [--category bug] \
   [--applied false]
@@ -174,7 +176,7 @@ lessons[2]{id,component,category,applied,title}:
 Create lesson from error context.
 
 ```bash
-python3 scripts/manage-lesson.py from-error \
+python3 {script_path} from-error \
   --context '{"component":"maven-build","error":"Missing dependency"}'
 ```
 
@@ -191,7 +193,7 @@ created_from: error_context
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-lesson.py` | All lesson operations via subcommands | `python3 scripts/manage-lesson.py {command} --help` |
+| `planning:manage-lessons/scripts/manage-lesson.py` | All lesson operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

@@ -65,12 +65,14 @@ finalizing: pr-workflow
 
 ## Operations
 
+Script: `planning:manage-config/scripts/manage-config.py`
+
 ### read
 
 Read entire config.toon content.
 
 ```bash
-python3 scripts/manage-config.py read \
+python3 {script_path} read \
   --plan-id {plan_id}
 ```
 
@@ -93,7 +95,7 @@ config:
 Get a specific field value.
 
 ```bash
-python3 scripts/manage-config.py get \
+python3 {script_path} get \
   --plan-id {plan_id} \
   --field plan_type
 ```
@@ -111,7 +113,7 @@ value: implementation
 Set a specific field value.
 
 ```bash
-python3 scripts/manage-config.py set \
+python3 {script_path} set \
   --plan-id {plan_id} \
   --field plan_type \
   --value java
@@ -131,7 +133,7 @@ previous: implementation
 Create config.toon with initial values.
 
 ```bash
-python3 scripts/manage-config.py create \
+python3 {script_path} create \
   --plan-id {plan_id} \
   --plan-type implementation \
   --technology java \
@@ -163,7 +165,7 @@ config:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-config.py` | All config operations via subcommands | `python3 scripts/manage-config.py {command} --help` |
+| `planning:manage-config/scripts/manage-config.py` | All config operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

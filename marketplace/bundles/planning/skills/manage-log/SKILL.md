@@ -59,12 +59,14 @@ entries[3]{timestamp,phase,summary}:
 
 ## Operations
 
+Script: `planning:manage-log/scripts/manage-work-log.py`
+
 ### add
 
 Add a new log entry.
 
 ```bash
-python3 scripts/manage-work-log.py add \
+python3 {script_path} add \
   --plan-id {plan_id} \
   --phase implement \
   --summary "Implemented JWT token generation"
@@ -85,7 +87,7 @@ total_entries: 4
 Read all log entries.
 
 ```bash
-python3 scripts/manage-work-log.py read \
+python3 {script_path} read \
   --plan-id {plan_id} \
   [--phase implement]
 ```
@@ -107,7 +109,7 @@ entries[3]{timestamp,phase,summary}:
 List entries summary.
 
 ```bash
-python3 scripts/manage-work-log.py list \
+python3 {script_path} list \
   --plan-id {plan_id} \
   [--limit 10]
 ```
@@ -129,7 +131,7 @@ entries[10]{timestamp,phase,summary}:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-work-log.py` | All log operations via subcommands | `python3 scripts/manage-work-log.py {command} --help` |
+| `planning:manage-log/scripts/manage-work-log.py` | All log operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

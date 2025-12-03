@@ -153,13 +153,15 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 
 ## Scripts
 
+Scripts: `planning:pr-workflow/scripts/`
+
 ### fetch-pr-comments.py
 
 **Purpose:** Fetch PR review comments from GitHub.
 
 **Usage:**
 ```bash
-python3 scripts/fetch-pr-comments.py [--pr <number>]
+python3 {script_path} [--pr <number>]
 ```
 
 **Requirements:** gh CLI installed and authenticated
@@ -172,7 +174,7 @@ python3 scripts/fetch-pr-comments.py [--pr <number>]
 
 **Usage:**
 ```bash
-python3 scripts/triage-comment.py --comment '{"id":"...", "body":"...", ...}'
+python3 {script_path} --comment '{"id":"...", "body":"...", ...}'
 ```
 
 **Output:** JSON with action decision

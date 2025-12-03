@@ -149,6 +149,8 @@ EOF
 
 ## Scripts
 
+Script: `planning:git-workflow/scripts/format-commit-message.py`
+
 ### format-commit-message.py
 
 **Purpose:** Format commit message or analyze diff for suggestions.
@@ -156,10 +158,10 @@ EOF
 **Usage:**
 ```bash
 # Format mode
-python3 scripts/format-commit-message.py --type feat --scope http --subject "add retry config"
+python3 {script_path} --type feat --scope http --subject "add retry config"
 
 # Analysis mode
-python3 scripts/format-commit-message.py --analyze <diff-file>
+python3 {script_path} --analyze <diff-file>
 ```
 
 **Output:** JSON with formatted message and validation

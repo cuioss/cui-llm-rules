@@ -85,12 +85,14 @@ updated: 2025-12-02T14:30:00Z
 
 ## Status Operations
 
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+
 ### read
 
 Read plan status.
 
 ```bash
-python3 scripts/manage-lifecycle.py read \
+python3 {script_path} read \
   --plan-id {plan_id}
 ```
 
@@ -116,7 +118,7 @@ plan:
 Initialize status.toon for a new plan.
 
 ```bash
-python3 scripts/manage-lifecycle.py create \
+python3 {script_path} create \
   --plan-id {plan_id} \
   --title "Feature Title" \
   --plan-type implementation
@@ -140,7 +142,7 @@ plan:
 Set the current phase.
 
 ```bash
-python3 scripts/manage-lifecycle.py set-phase \
+python3 {script_path} set-phase \
   --plan-id {plan_id} \
   --phase implement
 ```
@@ -158,7 +160,7 @@ previous_phase: refine
 Update a specific phase status.
 
 ```bash
-python3 scripts/manage-lifecycle.py update-phase \
+python3 {script_path} update-phase \
   --plan-id {plan_id} \
   --phase init \
   --status done
@@ -177,7 +179,7 @@ phase_status: done
 Calculate plan progress.
 
 ```bash
-python3 scripts/manage-lifecycle.py progress \
+python3 {script_path} progress \
   --plan-id {plan_id}
 ```
 
@@ -202,7 +204,7 @@ progress:
 Discover all plans.
 
 ```bash
-python3 scripts/manage-lifecycle.py list \
+python3 {script_path} list \
   [--filter init,implement]
 ```
 
@@ -222,7 +224,7 @@ plugin-update,finalize,plugin-development,in_progress
 Transition to next phase.
 
 ```bash
-python3 scripts/manage-lifecycle.py transition \
+python3 {script_path} transition \
   --plan-id {plan_id} \
   --completed init
 ```
@@ -240,7 +242,7 @@ next_phase: refine
 Archive a completed plan.
 
 ```bash
-python3 scripts/manage-lifecycle.py archive \
+python3 {script_path} archive \
   --plan-id {plan_id} \
   [--dry-run]
 ```
@@ -257,7 +259,7 @@ archived_to: .plan/archived-plans/2025-12-02-my-feature/
 Get skill for a phase.
 
 ```bash
-python3 scripts/manage-lifecycle.py route \
+python3 {script_path} route \
   --phase implement
 ```
 
@@ -275,7 +277,7 @@ description: Execute implementation tasks
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `manage-lifecycle.py` | All lifecycle operations via subcommands | `python3 scripts/manage-lifecycle.py {command} --help` |
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | All lifecycle operations via subcommands | `python3 {script_path} {command} --help` |
 
 ---
 

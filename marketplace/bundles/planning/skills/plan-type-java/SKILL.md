@@ -1,7 +1,7 @@
 ---
 name: plan-type-java
 description: Java plan type providing 4-phase workflow (init→refine→execute→finalize) for Java/Maven/Gradle projects
-allowed-tools: Read
+allowed-tools: Read, Bash
 ---
 
 # Plan Type: Java
@@ -14,8 +14,6 @@ allowed-tools: Read
 - CUI Java libraries and modules
 - Quarkus/CDI applications
 
-**Analysis Skill**: `cui-java-expert:java-analysis`
-
 **API**: Implements `planning:plan-type-api` contract.
 
 ---
@@ -27,7 +25,6 @@ allowed-tools: Read
 | Phases | 4 |
 | Technology | java |
 | Build System | maven, gradle |
-| Analysis Skill | `cui-java-expert:java-analysis` |
 | Branch Required | true |
 | Issue Required | recommended |
 | PR Workflow | true |
@@ -59,19 +56,17 @@ phase_tasks:
     - title: Detect Environment
       steps: git branch --show-current, builder:environment-detection skill
     - title: Analyze Task
-      steps: Read task.md, Determine scope and technology, Add requirements
+      steps: Read task.md, Determine scope and technology
+    - title: Add Requirements
+      steps: Create REQ files via manage-requirements
     - title: Detect Plan Type
       steps: From technology/scope, Apply detection rules
     - title: Confirm Configuration
       steps: Display config, Allow overrides, Confirm settings
   refine:
-    - title: Analyze Requirements
-      steps: Delegate to java-analysis, Identify classes, Map dependencies
-    - title: Generate Specifications
-      steps: Create SPEC files via manage-specifications
-    - title: Generate Tasks
-      steps: Create TASK files via manage-tasks, Order by dependencies
-  execute: (generated dynamically)
+    - title: Refine Plan
+      steps: Call plan-type-java:refine, Iterates REQ→SPEC→TASK
+  execute: (generated dynamically from TASK files)
   finalize:
     - title: Run Full Build
       steps: /builder-build-and-fix, Address any issues, Iterate until clean
@@ -146,54 +141,97 @@ related_plans: []
 
 ---
 
-## Operation: generate-tasks
+## Operation: refine
 
 **Contract**: See `planning:plan-type-api` for full specification.
 
-**Input**: `plan_id`, `components[]`
-
-**Components Input** (from `cui-java-expert:java-analysis`):
-
-```toon
-components[3]{name,type,scope,module,path,complexity}:
-JwtService,class,create,auth-module,src/main/java/auth/JwtService.java,medium
-AuthController,class,create,auth-module,src/main/java/auth/AuthController.java,low
-AuthTest,test,create,auth-module,src/test/java/auth/AuthTest.java,low
-```
+**Input**: `plan_id`
 
 **Process**:
 
-1. For each component, call `manage-task.py add` (writes directly to disk)
-2. Include CUI Java standards references in steps
-3. Order by dependencies
-
-**Task Generation**:
-
-```bash
-python3 manage-task.py add \
-  --plan-id {plan_id} \
-  --specification SPEC-{n} \
-  --title "Implement {component-name}" \
-  --description "Create/modify {type} at {path}" \
-  --steps \
-    "Create/modify implementation file at {path}" \
-    "Add unit tests in {test_path}" \
-    "Load cui-java-expert:cui-java-unit-testing for test patterns" \
-    "Add JavaDoc (load cui-java-expert:cui-javadoc)" \
-    "Verify mvn test -pl {module} passes"
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 1: Requirements → Specifications                             │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. Load requirements:                                              │
+│     python3 {manage-requirement.py} findAll --plan-id {plan_id}     │
+│                                                                     │
+│  2. FOR EACH requirement:                                           │
+│     - Analyze Java-specific implications                            │
+│     - Identify affected classes, modules, packages                  │
+│     - Create specification with technical details:                  │
+│       python3 {manage-specification.py} add \                       │
+│         --plan-id {plan_id} \                                       │
+│         --title "{Java component} implementation" \                 │
+│         --requirements "REQ-{n}" \                                  │
+│         --body "{class design, dependencies, patterns}"             │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 2: Specifications → Tasks                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│  3. Load specifications:                                            │
+│     python3 {manage-specification.py} findAll --plan-id {plan_id}   │
+│                                                                     │
+│  4. FOR EACH specification:                                         │
+│     - Generate implementation task with Java-specific steps         │
+│     - Generate test task if applicable                              │
+│     python3 {manage-task.py} add \                                  │
+│       --plan-id {plan_id} \                                         │
+│       --specification SPEC-{n} \                                    │
+│       --title "Implement {component}" \                             │
+│       --description "{goal}" \                                      │
+│       --steps \                                                     │
+│         "Create/modify implementation at {path}" \                  │
+│         "Add unit tests (load cui-java-expert:cui-java-unit-testing)" \
+│         "Add JavaDoc (load cui-java-expert:cui-javadoc)" \          │
+│         "Verify build passes"                                       │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Output** (confirmation only, tasks already written):
+**Java-Specific Specification Content**:
+
+When creating specifications, include:
+- Class/interface design decisions
+- Package placement rationale
+- Dependencies (CDI, Spring, external libs)
+- Module assignment (for multi-module projects)
+- Integration points with existing code
+
+**Java-Specific Task Steps**:
+
+Standard steps for Java implementation tasks:
+1. Create/modify implementation file at `{path}`
+2. Add unit tests (load `cui-java-expert:cui-java-unit-testing`)
+3. Add JavaDoc (load `cui-java-expert:cui-javadoc`)
+4. Follow CUI patterns (load `cui-java-expert:cui-java-core`)
+5. Verify `mvn test -pl {module}` passes
+
+**Output**:
 
 ```toon
 status: success
 plan_id: {plan_id}
-tasks_created: 3
 
-tasks[3]{number,title,specification,file}:
+phase_1:
+  requirements_processed: 2
+  specs_created: 3
+
+phase_2:
+  specs_processed: 3
+  tasks_created: 4
+
+specifications[3]{number,title,requirements,file}:
+1,JwtService Implementation,REQ-1,SPEC-001-jwt-service.toon
+2,AuthController Implementation,REQ-1,SPEC-002-auth-controller.toon
+3,Auth Integration Tests,REQ-2,SPEC-003-auth-tests.toon
+
+tasks[4]{number,title,specification,file}:
 1,Implement JwtService,SPEC-1,TASK-001-implement-jwt-service.toon
-2,Implement AuthController,SPEC-1,TASK-002-implement-auth-controller.toon
-3,Implement AuthTest,SPEC-1,TASK-003-implement-auth-test.toon
+2,Implement AuthController,SPEC-2,TASK-002-implement-auth-controller.toon
+3,Add JwtService Unit Tests,SPEC-1,TASK-003-add-jwt-unit-tests.toon
+4,Add Auth Integration Tests,SPEC-3,TASK-004-add-auth-integration-tests.toon
 ```
 
 ---
@@ -244,9 +282,10 @@ branch_strategy: feature
 ## Quality Checklist
 
 - [x] Loads `planning:plan-type-api` for contract reference
-- [x] Implements all 7 operations with correct signatures
-- [x] Uses manage-tasks skill for task generation
+- [x] Implements all 6 operations with correct signatures
+- [x] Uses manage-* tools for all data I/O
 - [x] Returns `status` field in all outputs
 - [x] Defines phase transition matrix (4 phases)
 - [x] Defines characteristics matrix
 - [x] Handles errors with status and message
+- [x] refine operation iterates REQ→SPEC→TASK with Java-specific content

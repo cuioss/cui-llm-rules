@@ -67,8 +67,10 @@ For each unchecked item `- [ ]`:
 
 ### Step 3: Update Progress
 
+Script: `planning:plan-execute/scripts/update-progress.py`
+
 ```bash
-python3 {update-progress.py} --plan-dir {plan_directory} --phase {phase} --task-id {task_id} --complete-items "{item_text}"
+python3 {script_path} --plan-dir {plan_directory} --phase {phase} --task-id {task_id} --complete-items "{item_text}"
 ```
 
 ### Step 4: Next Task or Phase
