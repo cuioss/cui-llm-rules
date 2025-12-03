@@ -10,6 +10,11 @@
   "homepage": "https://github.com/cuioss/cui-llm-rules",
   "repository": "https://github.com/cuioss/cui-llm-rules.git",
   "keywords": ["workflow", "task", "pr", "implementation", "quality", "orchestration"],
+  "agents": [
+    "./agents/plan-init-agent.md",
+    "./agents/plan-configure-agent.md",
+    "./agents/plan-refine-agent.md"
+  ],
   "commands": [
     "./commands/task-implement.md",
     "./commands/pr-doctor.md",
