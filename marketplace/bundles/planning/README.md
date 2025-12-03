@@ -51,12 +51,15 @@ Quick task implementation (combines create + execute).
 
 ### Plan-Type Skills (Single Source of Truth)
 
+All plan-type skills implement `planning:plan-type-api` contract.
+
 | Skill | Phases | Purpose |
 |-------|--------|---------|
+| `plan-type-api` | - | **API contract** for all plan-type skills |
 | `plan-type-simple` | 3 | Simple workflow for docs, config, quick fixes |
 | `plan-type-plugin` | 4 | Plugin development with /plugin-doctor verification |
-| `plan-type-java` | 5 | Java/Maven/Gradle implementation |
-| `plan-type-javascript` | 5 | JavaScript/npm implementation |
+| `plan-type-java` | 4 | Java/Maven/Gradle implementation |
+| `plan-type-javascript` | 4 | JavaScript/npm implementation |
 
 ### Phase Skills
 
@@ -92,16 +95,20 @@ Quick task implementation (combines create + execute).
 
 ## Plan-Type Skill API
 
-All plan-type skills implement a uniform API:
+**Contract**: `planning:plan-type-api` skill defines the full API specification.
 
-| Operation | Input | Output | Used By |
-|-----------|-------|--------|---------|
-| `get-phase-structure` | `plan_id`, `task_title` | Phase structure | plan-init |
-| `generate-tasks` | `plan_id`, `components[]` | **Writes directly** to plan.md | plan-refine |
-| `get-finalize-config` | `plan_id` | Finalize behavior | plan-execute |
-| `get-next-phase` | `plan_id`, `current_phase` | Next phase | phase-management |
+All plan-type skills implement this uniform API:
 
-**Key Design**: `generate-tasks` writes directly to plan.md via scripts (no ping-pong between skills).
+| Operation | Input | Output | Caller |
+|-----------|-------|--------|--------|
+| `get-phase-structure` | `plan_id`, `task_title` | Phase config | plan-init |
+| `get-config-template` | context fields | config.toon template | plan-init |
+| `get-references-template` | context fields | references.toon template | plan-init |
+| `generate-tasks` | `plan_id`, `components[]` | TOON task files | plan-refine |
+| `get-next-phase` | `current_phase` | Next phase name | manage-lifecycle |
+| `get-finalize-config` | `plan_id` | Finalize behavior | plan-finalize |
+
+**Key Design**: `generate-tasks` writes directly to tasks/ directory via manage-tasks skill.
 
 ## Domain Analysis Skills
 
@@ -160,15 +167,17 @@ planning/
 │   ├── pr-doctor.md
 │   └── task-implement.md
 └── skills/
+    ├── plan-type-api/           # API contract for all plan-type skills
+    │   └── SKILL.md             # Contract: 6 operations
     ├── plan-type-simple/        # Simple workflow skill (3 phases)
-    │   └── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
+    │   └── SKILL.md             # Implements plan-type-api
     ├── plan-type-plugin/        # Plugin workflow skill (4 phases)
-    │   ├── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
+    │   ├── SKILL.md             # Implements plan-type-api
     │   └── templates/           # Sub-type templates (internal)
-    ├── plan-type-java/          # Java workflow skill (5 phases)
-    │   └── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
-    ├── plan-type-javascript/    # JavaScript workflow skill (5 phases)
-    │   └── SKILL.md             # API: get-phase-structure, generate-tasks, etc.
+    ├── plan-type-java/          # Java workflow skill (4 phases)
+    │   └── SKILL.md             # Implements plan-type-api
+    ├── plan-type-javascript/    # JavaScript workflow skill (4 phases)
+    │   └── SKILL.md             # Implements plan-type-api
     ├── plan-init/               # Init phase skill
     │   ├── SKILL.md
     │   └── standards/           # Workflow reference

@@ -1,12 +1,12 @@
 ---
 name: plan-type-simple
-description: Simple plan type providing 3-phase workflow (init→execute→finalize) for documentation, config changes, and quick fixes.
+description: Simple plan type providing 3-phase workflow (init→execute→finalize) for documentation, config changes, and quick fixes
 allowed-tools: Read
 ---
 
 # Plan Type: Simple
 
-**Phases**: 3 (init→execute→finalize)
+**Phases**: 3 (init → execute → finalize)
 
 **Use Cases**:
 - Documentation updates
@@ -15,138 +15,72 @@ allowed-tools: Read
 - Non-code tasks
 - Direct-to-main work
 
+**Analysis Skill**: None (tasks derived directly from description)
+
+**API**: Implements `planning:plan-type-api` contract.
+
 ---
 
-## API Summary
+## Characteristics
 
-All plan-type skills implement this uniform API:
-
-| Operation | Input | Output | Used By |
-|-----------|-------|--------|---------|
-| `get-phase-structure` | `plan_id`, `task_title` | Phase structure for plan.md | plan-init |
-| `generate-tasks` | `plan_id`, `components[]` | **Writes directly** to plan.md | plan-refine |
-| `get-finalize-config` | `plan_id` | Finalize behavior (commit, PR) | plan-execute |
-| `get-next-phase` | `plan_id`, `current_phase` | Next phase name | phase-management |
-
-**Key Design**: `generate-tasks` writes directly to plan.md via scripts (no ping-pong between skills).
+| Aspect | Value |
+|--------|-------|
+| Phases | 3 |
+| Technology | none |
+| Build System | none |
+| Analysis Skill | null |
+| Branch Required | false |
+| Issue Required | false |
+| PR Workflow | false |
+| Verification | none |
 
 ---
 
 ## Operation: get-phase-structure
 
+**Contract**: See `planning:plan-type-api` for full specification.
+
 **Input**: `plan_id`, `task_title`
 
-**Output**: Complete phase structure for plan.md
+**Output**:
 
-```markdown
-# Task Plan: {task_title}
+```toon
+status: success
+current_phase: init
+initial_status: pending
 
-**Configuration**: See [config.toon](./config.toon)
-**References**: See [references.toon](./references.toon)
+phases[3]{name,order}:
+init,1
+execute,2
+finalize,3
 
-**Current Phase**: init
-**Current Task**: task-1
-
----
-
-## Phase Progress
-
-| Phase | Status | Tasks | Completed |
-|-------|--------|-------|-----------|
-| init | in_progress | 2 | 0/2 |
-| execute | pending | 0 | 0/0 |
-| finalize | pending | 2 | 0/2 |
-
----
-
-## Phase: init (in_progress)
-
-### Task 1: Detect Environment
-
-**Phase**: init
-**Goal**: Gather basic information
-
-**Acceptance Criteria**:
-- Current branch identified
-- Task scope understood
-
-**Checklist**:
-- [ ] Check current git branch
-- [ ] Understand task scope
-- [ ] Identify files to modify
-- [ ] **Log**: Record completion in work-log
-
-### Task 2: Confirm Configuration
-
-**Phase**: init
-**Goal**: Quick confirmation of defaults
-
-**Acceptance Criteria**:
-- User has confirmed settings
-
-**Checklist**:
-- [ ] Display quick summary
-- [ ] Confirm or edit settings
-- [ ] Transition to execute phase
-- [ ] **Log**: Record completion in work-log
-
----
-
-## Phase: execute (pending)
-
-{Tasks generated from task description}
-
----
-
-## Phase: finalize (pending)
-
-### Task 1: Commit Changes
-
-**Phase**: finalize
-**Goal**: Commit all changes
-
-**Acceptance Criteria**:
-- All changes committed
-- Commit message follows conventions
-
-**Checklist**:
-- [ ] Stage all changes
-- [ ] Create commit with descriptive message
-- [ ] Push to branch (if remote)
-- [ ] **Log**: Record completion in work-log
-
-### Task 2: Verify Completion
-
-**Phase**: finalize
-**Goal**: Ensure task is complete
-
-**Acceptance Criteria**:
-- All acceptance criteria met
-
-**Checklist**:
-- [ ] Verify all changes applied
-- [ ] Check no issues remaining
-- [ ] Mark plan complete
-- [ ] **Log**: Record completion in work-log
-
----
-
-## Completion Criteria
-
-Plan is complete when all phase tasks are marked `[x]`.
+phase_tasks:
+  init:
+    - title: Detect Environment
+      steps: git branch --show-current
+    - title: Analyze Task
+      steps: Read task.md, Determine scope
+    - title: Confirm Configuration
+      steps: Display summary, Confirm settings
+  execute: (generated from task description)
+  finalize:
+    - title: Commit Changes
+      steps: Stage changes, Create commit, Push
+    - title: Verify Completion
+      steps: Verify changes, Mark complete
 ```
 
 ---
 
 ## Operation: get-config-template
 
+**Contract**: See `planning:plan-type-api` for full specification.
+
 **Input**: `branch`
 
-**Output**: Config format for config.toon
+**Output**:
 
 ```toon
-# Plan Configuration
-
 plan_type: simple
 branch: {branch}
 issue: none
@@ -163,88 +97,75 @@ finalizing: commit-only
 
 ## Operation: get-references-template
 
+**Contract**: See `planning:plan-type-api` for full specification.
+
 **Input**: `branch`
 
-**Output**: References format for references.toon
+**Output**:
 
-```markdown
-# References
+```toon
+branch: {branch}
+base_branch: main
 
-## Context
+files:
+  modified: []
 
-**Branch**: `{branch}`
-
-## Related Files
-
-**Files to Modify**:
-- (populated during execute phase)
-
-## Notes
-
-(add any relevant notes)
+notes: []
 ```
 
 ---
 
 ## Operation: generate-tasks
 
+**Contract**: See `planning:plan-type-api` for full specification.
+
 **Input**: `plan_id`, `components[]`
 
-**Purpose**: Generate execute phase tasks and write them directly to plan.md.
-
-**Note**: Simple plans do NOT use domain analysis. Tasks are generated directly from the task description. The `components[]` input may be empty or contain a single "task" component derived from the task description.
+**Note**: Simple plans do NOT use domain analysis. The `components[]` input may be empty or contain a single component derived directly from the task description.
 
 **Process**:
-1. Generate task definitions from task description
-2. Write tasks directly to plan.md execute phase via scripts
-3. Return success confirmation
+
+1. Parse task description for actionable items
+2. Call `manage-task.py add` for each task (writes directly to disk)
+3. Each task has goal and steps
 
 **Task Generation**:
-```yaml
-# For each component or the main task if no components:
-task:
-  id: task-{n}
-  title: "{derived-from-task-description}"
-  phase: execute
-  goal: "{goal-from-task}"
-  acceptance_criteria:
-    - "{criterion-1}"
-    - "{criterion-2}"
-  checklist:
-    - "{action-1}"
-    - "{action-2}"
-    - "{action-3}"
-    - "**Log**: Record completion in work-log"
-    - "**Learn**: Capture lesson if unexpected behavior"
-```
 
-**Write to plan.md**:
 ```bash
-python3 {write-plan.py} --plan-dir .plan/plans/{plan_id} --add-task --phase execute --task-content "{task-yaml}"
+python3 manage-task.py add \
+  --plan-id {plan_id} \
+  --specification SPEC-1 \
+  --title "{task-title-from-description}" \
+  --description "{goal-statement}" \
+  --steps "{step-1}" "{step-2}" "{step-3}"
 ```
 
-**Output**:
-```yaml
-generate_tasks_result:
-  status: success
-  tasks_written: 1
-  plan_file: .plan/plans/{plan_id}/plan.md
+**Output** (confirmation only, tasks already written):
+
+```toon
+status: success
+plan_id: {plan_id}
+tasks_created: 1
+
+tasks[1]{number,title,specification,file}:
+1,{derived-title},SPEC-1,TASK-001-{slug}.toon
 ```
 
 **Task Generation Guidance**:
+
 For simple plans, generate execute phase tasks directly from the task description:
-- Goal statement
-- Acceptance criteria (1-3 items)
-- Checklist (3-5 items)
-- Log and Learn items at the end
+- Goal statement (1 sentence)
+- Steps (3-5 actionable items)
 
 ---
 
 ## Operation: get-next-phase
 
-**Input**: `plan_id`, `current_phase`
+**Contract**: See `planning:plan-type-api` for full specification.
 
-**Output**: Next phase in workflow
+**Input**: `current_phase`
+
+**Phase Transitions**:
 
 | Current Phase | Next Phase |
 |---------------|------------|
@@ -252,47 +173,40 @@ For simple plans, generate execute phase tasks directly from the task descriptio
 | execute | finalize |
 | finalize | complete |
 
----
-
-## Operation: get-finalize-config
-
-**Input**: `plan_id`
-
-**Purpose**: Returns finalize phase behavior configuration.
-
 **Output**:
 
-```yaml
-finalize_config:
-  commit_strategy: fine-granular    # fine-granular | phase-specific | complete
-  create_pr: false                  # Simple plans don't create PRs
-  verification_required: false      # No build verification
-  verification_command: null
+```toon
+status: success
+phase: {next}
 ```
 
 ---
 
-## Characteristics
+## Operation: get-finalize-config
 
-| Aspect | Value |
-|--------|-------|
-| Phases | 3 |
-| Refine Phase | No |
-| Branch Requirement | Any branch OK |
-| Issue | Not used |
-| Build System | None |
-| PR Workflow | No |
-| User Interaction | Minimal |
-| Total Init Tasks | 2 |
-| Total Finalize Tasks | 2 |
+**Contract**: See `planning:plan-type-api` for full specification.
+
+**Input**: `plan_id`
+
+**Output**:
+
+```toon
+status: success
+commit_strategy: fine-granular
+create_pr: false
+verification_required: false
+verification_command: null
+branch_strategy: direct
+```
 
 ---
 
-## Auto-Detection Criteria
+## Quality Checklist
 
-Use simple plan type when:
-1. Task involves documentation only
-2. Task involves configuration changes only
-3. No build system detected
-4. Branch is main/master (direct commits)
-5. User explicitly selects "simple"
+- [x] Loads `planning:plan-type-api` for contract reference
+- [x] Implements all 7 operations with correct signatures
+- [x] Uses manage-tasks skill for task generation
+- [x] Returns `status` field in all outputs
+- [x] Defines phase transition matrix (3 phases)
+- [x] Defines characteristics matrix
+- [x] Handles errors with status and message
