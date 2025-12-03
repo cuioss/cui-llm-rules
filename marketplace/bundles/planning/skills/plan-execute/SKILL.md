@@ -1,16 +1,16 @@
 ---
 name: plan-execute
-description: Execute phase skill for plan management. DUMB TASK RUNNER that executes checklist items from plan.md sequentially for implement, verify, and finalize phases.
+description: Execute phase skill for plan management. DUMB TASK RUNNER that executes tasks from TASK-*.toon files sequentially for execute and finalize phases.
 allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 ---
 
 # Plan Execute Skill
 
-**Role**: DUMB TASK RUNNER that executes checklist items from plan.md sequentially.
+**Role**: DUMB TASK RUNNER that executes tasks from TASK-*.toon files sequentially.
 
-**Execution Pattern**: Locate current task → Execute checklist items → Mark progress → Next task
+**Execution Pattern**: Locate current task → Execute steps → Mark progress → Next task
 
-**Phases Handled**: implement, verify, finalize (execute for simple plans)
+**Phases Handled**: execute, finalize
 
 **CRITICAL**: Use `update-progress.py` via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
 
@@ -54,16 +54,19 @@ For each task in current phase:
 ### Step 1: Locate Task
 
 ```
-Read plan.md
-Find task with status: in_progress or first pending
+Skill: planning:manage-tasks
+operation: next
+plan_id: {plan_id}
 ```
 
-### Step 2: Execute Checklist Items
+Returns next task with status `pending` or `in_progress`.
 
-For each unchecked item `- [ ]`:
-1. Parse the item text
+### Step 2: Execute Steps
+
+For each step in task's `steps[]` array:
+1. Parse the step text
 2. Execute the action (delegate if specified)
-3. Mark item complete via `update-progress.py`
+3. Mark step complete via `manage-tasks:step-done`
 
 ### Step 3: Update Progress
 
@@ -110,7 +113,7 @@ Execute continuously without user prompts except:
 
 ## Phase Transition
 
-When transitioning from implement/execute phases, `transition-phase.py` automatically:
+When transitioning from execute phase to finalize, `transition-phase.py` automatically:
 - Runs `collect-modified-files.py` to capture changes
 - Updates `references.toon` with collected files
 
@@ -143,11 +146,13 @@ When transitioning from implement/execute phases, `transition-phase.py` automati
 ### Skills Used
 - **manage-config** - Configuration CRUD
 - **manage-lifecycle** - Phase transitions
+- **manage-tasks** - Task and step operations
 - **manage-references** - Reference file CRUD
 - **manage-log** - Work log entries
 - **plan-type-simple** - Finalize config for simple plans
 - **plan-type-plugin** - Finalize config for plugin plans
-- **plan-type-implementation** - Finalize config for implementation plans
+- **plan-type-java** - Finalize config for Java plans
+- **plan-type-javascript** - Finalize config for JavaScript plans
 - **git-workflow** - Commit operations
 
 ### Related Skills
@@ -161,4 +166,4 @@ When transitioning from implement/execute phases, `transition-phase.py` automati
 - [x] Self-contained with relative paths
 - [x] All file I/O delegated to manage-* skills
 - [x] DUMB TASK RUNNER pattern
-- [x] Handles implement/verify/finalize phases
+- [x] Handles execute and finalize phases

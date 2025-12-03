@@ -302,7 +302,9 @@ init -> execute -> finalize
 | init | plan-init |
 | refine | plan-refine |
 | execute | plan-execute |
-| finalize | plan-finalize |
+| finalize | plan-execute |
+
+**Note**: Both `execute` and `finalize` phases are handled by `plan-execute` skill (no separate plan-finalize skill).
 
 ---
 

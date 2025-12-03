@@ -1,12 +1,12 @@
 ---
 name: plan-type-simple
-description: Simple plan type providing 3-phase workflow (init→execute→finalize) for documentation, config changes, and quick fixes
+description: Simple plan type providing 4-phase workflow (init→refine→execute→finalize) for documentation, config changes, and quick fixes
 allowed-tools: Read, Bash
 ---
 
 # Plan Type: Simple
 
-**Phases**: 3 (init → execute → finalize)
+**Phases**: 4 (init → refine → execute → finalize)
 
 **Use Cases**:
 - Documentation updates
@@ -17,15 +17,13 @@ allowed-tools: Read, Bash
 
 **API**: Implements `planning:plan-type-api` contract.
 
-**Note**: Simple plans skip the refine phase. Tasks are generated during init from the task description. The `refine` operation is a no-op for this plan type.
-
 ---
 
 ## Characteristics
 
 | Aspect | Value |
 |--------|-------|
-| Phases | 3 |
+| Phases | 4 |
 | Technology | none |
 | Build System | none |
 | Branch Required | false |
@@ -48,10 +46,11 @@ status: success
 current_phase: init
 initial_status: pending
 
-phases[3]{name,order}:
+phases[4]{name,order}:
 init,1
-execute,2
-finalize,3
+refine,2
+execute,3
+finalize,4
 
 phase_tasks:
   init:
@@ -61,11 +60,12 @@ phase_tasks:
       steps: Read task.md, Determine scope
     - title: Add Requirements
       steps: Create REQ file from task description
-    - title: Generate Tasks
-      steps: Create TASK files directly (no refine phase)
     - title: Confirm Configuration
       steps: Display summary, Confirm settings
-  execute: (generated from task description)
+  refine:
+    - title: Refine Plan
+      steps: Call plan-type-simple:refine, Iterates REQ→SPEC→TASK
+  execute: (generated dynamically from TASK files)
   finalize:
     - title: Commit Changes
       steps: Stage changes, Create commit, Push
@@ -117,29 +117,11 @@ notes: []
 
 **Input**: `plan_id`
 
-**Note**: Simple plans skip the refine phase. This operation is a **no-op** that returns immediately. Tasks are generated during init phase instead.
-
-**Output**:
-
-```toon
-status: skipped
-plan_id: {plan_id}
-message: Simple plans skip refine phase. Tasks generated during init.
-
-phase_1:
-  requirements_processed: 0
-  specs_created: 0
-
-phase_2:
-  specs_processed: 0
-  tasks_created: 0
-```
-
-**Alternative**: If called with `--force`, will generate tasks from existing requirements:
+**Process**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  Simple Task Generation (if forced)                                 │
+│  PHASE 1: Requirements → Specifications                             │
 ├─────────────────────────────────────────────────────────────────────┤
 │  1. Load requirements:                                              │
 │     python3 {manage-requirement.py} findAll --plan-id {plan_id}     │
@@ -151,8 +133,16 @@ phase_2:
 │         --title "{requirement title}" \                             │
 │         --requirements "REQ-{n}" \                                  │
 │         --body "{requirement body}"                                 │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 2: Specifications → Tasks                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│  3. Load specifications:                                            │
+│     python3 {manage-specification.py} findAll --plan-id {plan_id}   │
 │                                                                     │
-│  3. FOR EACH specification:                                         │
+│  4. FOR EACH specification:                                         │
 │     - Create single task with simple steps                          │
 │       python3 {manage-task.py} add \                                │
 │         --plan-id {plan_id} \                                       │
@@ -163,6 +153,21 @@ phase_2:
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+**Output**:
+
+```toon
+status: success
+plan_id: {plan_id}
+
+phase_1:
+  requirements_processed: 1
+  specs_created: 1
+
+phase_2:
+  specs_processed: 1
+  tasks_created: 1
+```
+
 ---
 
 ## Operation: get-next-phase
@@ -171,11 +176,12 @@ phase_2:
 
 **Input**: `current_phase`
 
-**Phase Transitions** (3-phase model - skips refine):
+**Phase Transitions**:
 
 | Current Phase | Next Phase |
 |---------------|------------|
-| init | execute |
+| init | refine |
+| refine | execute |
 | execute | finalize |
 | finalize | complete |
 
@@ -207,35 +213,13 @@ branch_strategy: direct
 
 ---
 
-## Init Phase Task Generation
-
-Since simple plans skip refine, tasks are generated during init phase:
-
-```bash
-# During init phase, after requirements are added:
-python3 {manage-task.py} add \
-  --plan-id {plan_id} \
-  --specification SPEC-1 \
-  --title "{task-title-from-description}" \
-  --description "{goal-statement}" \
-  --steps "{step-1}" "{step-2}" "{step-3}"
-```
-
-**Task Generation Guidance**:
-
-For simple plans, generate execute phase tasks directly from the task description:
-- Goal statement (1 sentence)
-- Steps (3-5 actionable items)
-
----
-
 ## Quality Checklist
 
 - [x] Loads `planning:plan-type-api` for contract reference
 - [x] Implements all 6 operations with correct signatures
 - [x] Uses manage-* tools for all data I/O
 - [x] Returns `status` field in all outputs
-- [x] Defines phase transition matrix (3 phases - skips refine)
+- [x] Defines phase transition matrix (4 phases)
 - [x] Defines characteristics matrix
 - [x] Handles errors with status and message
-- [x] Documents that refine is skipped (no-op)
+- [x] refine operation iterates REQ→SPEC→TASK with simple 1:1 mapping

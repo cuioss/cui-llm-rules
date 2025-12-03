@@ -200,19 +200,6 @@ python3 {script_path} add \
 
 Creates: `.plan/plans/{plan_id}/requirements/REQ-001-{slug}.toon`
 
-**For simple plans**: Also create tasks directly (no refine phase):
-
-Script: `planning:manage-tasks/scripts/manage-task.py`
-
-```bash
-python3 {script_path} add \
-  --plan-id {plan_id} \
-  --specification SPEC-1 \
-  --title "{task_title}" \
-  --description "{goal}" \
-  --steps "{step1}" "{step2}" "{step3}"
-```
-
 ### Step 10: Log Plan Creation
 
 ```
@@ -239,17 +226,10 @@ artifacts:
 
 plan_status:
   current_phase: init
-  next_phase: {refine|execute}
+  next_phase: refine
 ```
 
-**Next Phase by Plan Type**:
-
-| Plan Type | next_phase | Reason |
-|-----------|------------|--------|
-| `java` | refine | Requires REQ→SPEC→TASK transformation |
-| `javascript` | refine | Requires REQ→SPEC→TASK transformation |
-| `plugin-development` | refine | Requires REQ→SPEC→TASK transformation |
-| `simple` | execute | Tasks created during init (skips refine) |
+**Next Phase**: All plan types proceed to `refine` phase for REQ→SPEC→TASK transformation.
 
 **Auto-Continue**: Do NOT add "Continue?" prompts - flow executes continuously.
 
@@ -299,8 +279,8 @@ resolution: Verify URL, check permissions, or continue without
 | `builder:environment-detection` | Detect build system (optional) |
 
 ### Related Skills
-- **plan-refine** - Next phase (4-phase plans)
-- **plan-execute** - Next phase (simple plans) or after refine
+- **plan-refine** - Next phase (all plan types)
+- **plan-execute** - After refine phase completes
 
 ---
 
@@ -311,7 +291,7 @@ resolution: Verify URL, check permissions, or continue without
 - [x] User confirmation workflow
 - [x] All 4 plan types supported
 - [x] Requirements created during init
-- [x] Simple plans create tasks during init (skip refine)
+- [x] All plan types use 4-phase workflow
 
 ---
 

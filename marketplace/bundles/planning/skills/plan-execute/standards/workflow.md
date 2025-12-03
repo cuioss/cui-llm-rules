@@ -8,7 +8,7 @@
 │                                                                          │
 │      ┌──────────────────────────────────────────────────────────┐       │
 │      │                                                          │       │
-│      │  1. LOCATE    →  Find current task in plan.md           │       │
+│      │  1. LOCATE    →  Find current task via manage-tasks      │       │
 │      │       │                                                  │       │
 │      │       ▼                                                  │       │
 │      │  2. EXECUTE   →  Run checklist items (delegate as       │       │
@@ -29,20 +29,19 @@
 
 | Phase | Typical Tasks |
 |-------|---------------|
-| implement | Code implementation, test creation |
-| verify | Build verification, quality checks, documentation |
-| finalize | Commit, PR creation, completion |
-| execute | (simple plans) Combined implementation |
+| execute | Code implementation, test creation, build verification |
+| finalize | Quality checks, commit, PR creation, completion |
 
 ## Task Execution
 
 ### Reading Tasks
 
 ```
-Read plan.md
-Parse Phase Progress table
-Find current phase (status: in_progress)
-Find current task (first with unchecked items)
+Skill: planning:manage-tasks
+operation: next
+plan_id: {plan_id}
+
+Returns next task with status pending or in_progress
 ```
 
 ### Executing Checklist Items
@@ -64,13 +63,12 @@ python3 update-progress.py --plan-dir {dir} --phase {phase} --task-id {task} --c
 
 When all tasks in phase complete:
 
-1. **Automatic file collection** (implement/execute phases):
+1. **Automatic file collection** (execute phase):
    - `transition-phase.py` runs `collect-modified-files.py`
    - Updates `references.toon` with changed files
 
 2. **Auto-transition** to next phase:
-   - implement → verify
-   - verify → finalize
+   - execute → finalize
    - finalize → complete
 
 3. **No user prompt** for transitions (continuous execution)
