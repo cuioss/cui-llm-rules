@@ -23,15 +23,17 @@ allowed-tools: Read, Bash
 
 ### Step 1: Load Specifications
 
+Script: `planning:manage-specifications/scripts/manage-specification.py`
+
 **Batch mode** (no specification_id):
 ```bash
-python3 {planning:manage-specifications/scripts/manage-specification.py} findAll \
+python3 {script_path} findAll \
   --plan-id {plan_id}
 ```
 
 **Single mode** (specification_id provided):
 ```bash
-python3 {planning:manage-specifications/scripts/manage-specification.py} get \
+python3 {script_path} get \
   --plan-id {plan_id} \
   --number {specification_id}
 ```
@@ -51,8 +53,10 @@ Parse the specification body to determine:
 
 Generate task(s) with Java-specific steps:
 
+Script: `planning:manage-tasks/scripts/manage-task.py`
+
 ```bash
-python3 {planning:manage-tasks/scripts/manage-task.py} add \
+python3 {script_path} add \
   --plan-id {plan_id} \
   --specification SPEC-{n} \
   --title "Implement {component}" \
@@ -69,8 +73,10 @@ python3 {planning:manage-tasks/scripts/manage-task.py} add \
 
 On ambiguous specification or planning issues:
 
+Script: `planning:manage-lessons/scripts/manage-lesson.py`
+
 ```bash
-python3 {planning:manage-lessons/scripts/manage-lesson.py} add \
+python3 {script_path} add \
   --component-type skill \
   --component-name java-plan \
   --category observation \

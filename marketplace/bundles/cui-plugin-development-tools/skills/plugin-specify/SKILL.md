@@ -23,15 +23,17 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### Step 1: Load Requirements
 
+Script: `planning:manage-requirements/scripts/manage-requirement.py`
+
 **Batch mode** (no requirement_id):
 ```bash
-python3 {planning:manage-requirements/scripts/manage-requirement.py} findAll \
+python3 {script_path} findAll \
   --plan-id {plan_id}
 ```
 
 **Single mode** (requirement_id provided):
 ```bash
-python3 {planning:manage-requirements/scripts/manage-requirement.py} get \
+python3 {script_path} get \
   --plan-id {plan_id} \
   --number {requirement_id}
 ```
@@ -76,8 +78,10 @@ Read {component-path}
 
 Write specification with plugin-specific technical details:
 
+Script: `planning:manage-specifications/scripts/manage-specification.py`
+
 ```bash
-python3 {planning:manage-specifications/scripts/manage-specification.py} add \
+python3 {script_path} add \
   --plan-id {plan_id} \
   --title "{component} implementation" \
   --requirements "REQ-{n}" \
@@ -96,8 +100,10 @@ python3 {planning:manage-specifications/scripts/manage-specification.py} add \
 
 On unexpected structure or ambiguity:
 
+Script: `planning:manage-lessons/scripts/manage-lesson.py`
+
 ```bash
-python3 {planning:manage-lessons/scripts/manage-lesson.py} add \
+python3 {script_path} add \
   --component-type skill \
   --component-name plugin-specify \
   --category observation \
