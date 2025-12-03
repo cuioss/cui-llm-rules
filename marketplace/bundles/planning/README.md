@@ -56,7 +56,7 @@ All plan-type skills implement `planning:plan-type-api` contract.
 | Skill | Phases | Purpose |
 |-------|--------|---------|
 | `plan-type-api` | - | **API contract** for all plan-type skills |
-| `plan-type-simple` | 3 | Simple workflow for docs, config, quick fixes |
+| `plan-type-generic` | 3 | Generic workflow for docs, config, quick fixes |
 | `plan-type-plugin` | 4 | Plugin development with /plugin-doctor verification |
 | `plan-type-java` | 4 | Java/Maven/Gradle implementation |
 | `plan-type-javascript` | 4 | JavaScript/npm implementation |
@@ -168,7 +168,7 @@ planning/
 └── skills/
     ├── plan-type-api/           # API contract for all plan-type skills
     │   └── SKILL.md             # Contract: 3 operations (configure, specify, plan)
-    ├── plan-type-simple/        # Simple workflow skill (3 phases)
+    ├── plan-type-generic/       # Generic workflow skill (3 phases)
     │   └── SKILL.md             # Implements plan-type-api
     ├── plan-type-plugin/        # Plugin workflow skill (4 phases)
     │   ├── SKILL.md             # Implements plan-type-api

@@ -49,7 +49,7 @@ summary: "Created {plan_type} plan - {name}"
 
 | Plan Type | Skill | Phases | Use Case |
 |-----------|-------|--------|----------|
-| simple | `planning:plan-type-simple` | 3 | Documentation, config, quick fixes |
+| generic | `planning:plan-type-generic` | 3 | Documentation, config, quick fixes |
 | java | `planning:plan-type-java` | 4 | Java/Maven/Gradle code tasks |
 | javascript | `planning:plan-type-javascript` | 4 | JavaScript/npm code tasks |
 | plugin-development | `planning:plan-type-plugin` | 4 | Marketplace components |

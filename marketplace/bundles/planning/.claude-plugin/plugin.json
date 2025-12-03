@@ -22,7 +22,7 @@
     "./skills/sonar-workflow",
     "./skills/analysis-api",
     "./skills/plan-type-api",
-    "./skills/plan-type-simple",
+    "./skills/plan-type-generic",
     "./skills/plan-type-plugin",
     "./skills/plan-type-java",
     "./skills/plan-type-javascript",

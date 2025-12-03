@@ -1,10 +1,10 @@
 ---
-name: plan-type-simple
-description: Simple plan type providing minimal configuration and refinement for documentation, config, and quick fixes
+name: plan-type-generic
+description: Generic plan type providing minimal configuration and refinement for documentation, config, and quick fixes
 allowed-tools: Read, Bash
 ---
 
-# Plan Type: Simple (`planning:plan-type-simple`)
+# Plan Type: Generic (`planning:plan-type-generic`)
 
 **Use Cases**:
 - Documentation updates

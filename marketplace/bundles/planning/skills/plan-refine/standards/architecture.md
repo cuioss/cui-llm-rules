@@ -52,7 +52,7 @@ Plan-types are first-class skills that provide workflow definitions via a unifor
 
 ```
 planning/skills/
-├── plan-type-simple/           # 3-phase workflow skill
+├── plan-type-generic/          # 3-phase workflow skill
 │   └── SKILL.md                # API: configure, specify, plan
 │
 ├── plan-type-plugin/           # 4-phase workflow skill
@@ -285,7 +285,7 @@ See `general-tools:script-runner` SKILL.md "Workflow: Error Handling" for the le
 
 | Skill | Phases | Use Case |
 |-------|--------|----------|
-| `plan-type-simple` | init → execute → finalize | Documentation, config, quick fixes |
+| `plan-type-generic` | init → execute → finalize | Documentation, config, quick fixes |
 | `plan-type-java` | init → refine → implement → verify → finalize | Java/Maven/Gradle implementation |
 | `plan-type-javascript` | init → refine → implement → verify → finalize | JavaScript/npm implementation |
 | `plan-type-plugin` | init → refine → execute → finalize | Marketplace components |
@@ -294,7 +294,7 @@ See `general-tools:script-runner` SKILL.md "Workflow: Error Handling" for the le
 
 | Skill | Create PR | Verification |
 |-------|-----------|--------------|
-| `plan-type-simple` | No | None |
+| `plan-type-generic` | No | None |
 | `plan-type-java` | Yes | `/builder-build-and-fix` |
 | `plan-type-javascript` | Yes | `/builder-build-and-fix system=npm` |
 | `plan-type-plugin` | No | `/plugin-doctor` |
