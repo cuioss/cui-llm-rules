@@ -28,6 +28,7 @@ Skill: general-tools:script-runner
 Resolve: planning:manage-config/scripts/manage-config.py
 Resolve: planning:manage-references/scripts/manage-references.py
 Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+Resolve: planning:manage-log/scripts/manage-work-log.py
 ```
 
 Use the resolved absolute paths in all Bash commands.
@@ -60,6 +61,16 @@ python3 {resolved_manage_config} read \
 
 **Input**: `plan_id`
 
+### Step 0: Log Phase Start
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase finalize \
+  --type progress \
+  --summary "Starting finalize phase"
+```
+
 ### Step 1: Read Configuration
 
 ```bash
@@ -76,6 +87,17 @@ Script: `planning:manage-references/scripts/manage-references.py`
 ```bash
 python3 {resolved_manage_references} read \
   --plan-id {plan_id}
+```
+
+**After reading configuration**, log the finalize strategy decision:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase finalize \
+  --type decision \
+  --summary "Finalize strategy: verification={verification_required}, PR={create_pr}" \
+  --detail "branch={branch_strategy}, verification_command={verification_command}"
 ```
 
 ### Step 2: Run Verification (if required)
@@ -151,12 +173,13 @@ python3 {resolved_manage_lifecycle} transition \
 
 ### Step 7: Log Completion
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: finalize
-summary: "Plan completed - {commit_hash}, {pr_url if created}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase finalize \
+  --type outcome \
+  --summary "Plan completed: commit={commit_hash}, PR={pr_url|skipped}" \
+  --detail "verification={passed|skipped}, push=success"
 ```
 
 ---
@@ -192,6 +215,17 @@ recovery: {recovery_suggestion}
 ---
 
 ## Error Handling
+
+On any error, **first log the error** to work-log:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase finalize \
+  --type error \
+  --summary "ERROR: {step} failed - {error_type}" \
+  --detail "{full error context and message}"
+```
 
 ### Verification Failure
 

@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+"""Tests for manage-work-log.py script."""
+
+import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+# Import shared infrastructure
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import run_script, TestRunner, get_script_path
+
+# Get script path
+SCRIPT_PATH = get_script_path('planning', 'manage-log', 'manage-work-log.py')
+
+# Import toon_parser for output parsing
+TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'
+sys.path.insert(0, str(TOON_PARSER_DIR))
+from toon_parser import parse_toon
+
+
+# =============================================================================
+# Test Context
+# =============================================================================
+
+class TestContext:
+    """Context manager for test with temp directory."""
+
+    def __init__(self, plan_id='test-log'):
+        self.temp_dir = None
+        self.original_env = None
+        self.plan_id = plan_id
+
+    def __enter__(self):
+        self.temp_dir = Path(tempfile.mkdtemp())
+        self.original_env = os.environ.get('PLAN_BASE_DIR')
+        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir)
+        # Create plan directory
+        plan_dir = self.temp_dir / 'plans' / self.plan_id
+        plan_dir.mkdir(parents=True, exist_ok=True)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.original_env is None:
+            os.environ.pop('PLAN_BASE_DIR', None)
+        else:
+            os.environ['PLAN_BASE_DIR'] = self.original_env
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+
+# =============================================================================
+# Test: Add Command with Type and Detail
+# =============================================================================
+
+def test_add_entry_default_type():
+    """Test adding entry with default type (progress)."""
+    with TestContext(plan_id='log-default'):
+        result = run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-default',
+            '--phase', 'init',
+            '--summary', 'Started plan initialization'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['type'] == 'progress'
+        assert data['phase'] == 'init'
+        assert data['total_entries'] == 1
+
+
+def test_add_entry_decision_type():
+    """Test adding entry with decision type."""
+    with TestContext(plan_id='log-decision'):
+        result = run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-decision',
+            '--phase', 'configure',
+            '--summary', 'Selected plan-type-java',
+            '--type', 'decision',
+            '--detail', 'Task modifies .java files in service layer'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['type'] == 'decision'
+        assert data['detail'] == 'Task modifies .java files in service layer'
+
+
+def test_add_entry_artifact_type():
+    """Test adding entry with artifact type."""
+    with TestContext(plan_id='log-artifact'):
+        result = run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-artifact',
+            '--phase', 'configure',
+            '--summary', 'Created REQ-001: Implement JWT authentication',
+            '--type', 'artifact',
+            '--detail', 'Covers token generation and validation'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['type'] == 'artifact'
+
+
+def test_add_entry_error_type():
+    """Test adding entry with error type."""
+    with TestContext(plan_id='log-error'):
+        result = run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-error',
+            '--phase', 'refine',
+            '--summary', 'Skill load failed',
+            '--type', 'error',
+            '--detail', 'plan-type-plugin does not exist'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['type'] == 'error'
+        assert data['detail'] == 'plan-type-plugin does not exist'
+
+
+def test_add_entry_outcome_type():
+    """Test adding entry with outcome type."""
+    with TestContext(plan_id='log-outcome'):
+        result = run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-outcome',
+            '--phase', 'refine',
+            '--summary', 'Completed refine: 6 specs, 12 tasks',
+            '--type', 'outcome'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['type'] == 'outcome'
+
+
+def test_add_entry_invalid_type():
+    """Test that invalid type fails."""
+    with TestContext(plan_id='log-invalid-type'):
+        result = run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-invalid-type',
+            '--phase', 'init',
+            '--summary', 'Test entry',
+            '--type', 'invalid'
+        )
+        assert not result.success, "Expected failure for invalid type"
+
+
+# =============================================================================
+# Test: Read Command
+# =============================================================================
+
+def test_read_entries():
+    """Test reading entries includes type and detail fields."""
+    with TestContext(plan_id='log-read'):
+        # Add some entries
+        run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-read',
+            '--phase', 'init',
+            '--summary', 'Started',
+            '--type', 'progress'
+        )
+        run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-read',
+            '--phase', 'configure',
+            '--summary', 'Selected plan-type-java',
+            '--type', 'decision',
+            '--detail', 'Task modifies Java files'
+        )
+
+        # Read entries
+        result = run_script(SCRIPT_PATH, 'read',
+            '--plan-id', 'log-read'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['total_entries'] == 2
+        # Verify entries have type field
+        entries = data.get('entries', [])
+        assert len(entries) == 2
+
+
+def test_read_entries_by_phase():
+    """Test filtering entries by phase."""
+    with TestContext(plan_id='log-filter'):
+        # Add entries in different phases
+        run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-filter',
+            '--phase', 'init',
+            '--summary', 'Init entry'
+        )
+        run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'log-filter',
+            '--phase', 'configure',
+            '--summary', 'Configure entry'
+        )
+
+        # Read only configure entries
+        result = run_script(SCRIPT_PATH, 'read',
+            '--plan-id', 'log-filter',
+            '--phase', 'configure'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['total_entries'] == 1
+
+
+# =============================================================================
+# Test: List Command
+# =============================================================================
+
+def test_list_entries():
+    """Test listing entries with limit."""
+    with TestContext(plan_id='log-list'):
+        # Add several entries
+        for i in range(5):
+            run_script(SCRIPT_PATH, 'add',
+                '--plan-id', 'log-list',
+                '--phase', 'implement',
+                '--summary', f'Entry {i}'
+            )
+
+        # List with limit
+        result = run_script(SCRIPT_PATH, 'list',
+            '--plan-id', 'log-list',
+            '--limit', '3'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['total_entries'] == 5
+        assert data['showing'] == 3
+
+
+# =============================================================================
+# Test: Validation
+# =============================================================================
+
+def test_invalid_plan_id():
+    """Test that invalid plan_id fails."""
+    with TestContext(plan_id='valid-id'):
+        result = run_script(SCRIPT_PATH, 'add',
+            '--plan-id', 'INVALID_ID',
+            '--phase', 'init',
+            '--summary', 'Test'
+        )
+        assert not result.success, "Expected failure for invalid plan_id"
+        data = parse_toon(result.stdout)
+        assert data['error'] == 'invalid_plan_id'
+
+
+# =============================================================================
+# Test Runner
+# =============================================================================
+
+if __name__ == '__main__':
+    runner = TestRunner()
+    runner.add_tests([
+        # Add command with type and detail
+        test_add_entry_default_type,
+        test_add_entry_decision_type,
+        test_add_entry_artifact_type,
+        test_add_entry_error_type,
+        test_add_entry_outcome_type,
+        test_add_entry_invalid_type,
+        # Read command
+        test_read_entries,
+        test_read_entries_by_phase,
+        # List command
+        test_list_entries,
+        # Validation
+        test_invalid_plan_id,
+    ])
+    sys.exit(runner.run())

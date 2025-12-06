@@ -46,6 +46,19 @@ These fields are written during init by the plan-type skill's `configure` operat
 
 ## Execution Loop
 
+### Step 0: Log Phase Start (Once per phase)
+
+At the start of execute or finalize phase:
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: {phase}
+type: progress
+summary: "Starting {phase} phase"
+```
+
 For each task in current phase:
 
 ### Step 1: Locate Task
@@ -73,11 +86,37 @@ Script: `planning:plan-execute/scripts/update-progress.py`
 python3 {script_path} --plan-dir {plan_directory} --phase {phase} --task-id {task_id} --complete-items "{item_text}"
 ```
 
+### Step 3.5: Log Task Completion
+
+After each task completes:
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: {phase}
+type: artifact
+summary: "Completed {task_id}: {task_title}"
+detail: "{steps_completed} steps executed"
+```
+
 ### Step 4: Next Task or Phase
 
 - If more tasks in phase → Continue to next task
-- If phase complete → Auto-transition to next phase
+- If phase complete → Log phase outcome and auto-transition to next phase
 - If all phases complete → Mark plan complete
+
+### Step 5: Log Phase Completion (When phase completes)
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: {phase}
+type: outcome
+summary: "Completed {phase} phase: {tasks_completed} tasks"
+detail: "Transitioning to {next_phase}"
+```
 
 ---
 
@@ -118,12 +157,25 @@ When transitioning from execute phase to finalize, `transition-phase.py` automat
 
 ## Error Handling
 
+On any error, **first log the error** to work-log:
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: {phase}
+type: error
+summary: "ERROR: {task_id} failed - {error_type}"
+detail: "{full error context and message}"
+```
+
 ### Script Failure (Lessons-Learned Capture)
 
 **ON SCRIPT FAILURE**: When any script execution fails (exit != 0):
-1. Capture error context (script path, exit code, stderr)
-2. Follow `general-tools:script-runner` Error Handling workflow
-3. Continue with normal error recovery (retry, fail task, etc.)
+1. Log error to work-log (see above)
+2. Capture error context (script path, exit code, stderr)
+3. Follow `general-tools:script-runner` Error Handling workflow
+4. Continue with normal error recovery (retry, fail task, etc.)
 
 ### Other Errors
 

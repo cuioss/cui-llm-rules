@@ -32,6 +32,20 @@ plan_id: {plan_id}
 requirement_id: {requirement_id}  # omit for batch
 ```
 
+### Step 2.5: Log Each Specification Created
+
+After each specification is created, log to work-log:
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: artifact
+summary: "Created {spec_id}: {spec_title}"
+detail: "{brief description of what this specification covers}"
+```
+
 ### Step 3: Return Results
 
 Return the structured output from the skill:

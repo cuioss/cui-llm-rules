@@ -32,6 +32,20 @@ plan_id: {plan_id}
 specification_id: {specification_id}  # omit for batch
 ```
 
+### Step 2.5: Log Each Task Created
+
+After each task is created, log to work-log:
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: artifact
+summary: "Created {task_id}: {task_title}"
+detail: "{brief description of what this task accomplishes}"
+```
+
 ### Step 3: Return Results
 
 Return the structured output from the skill:

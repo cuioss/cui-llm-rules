@@ -31,6 +31,7 @@ Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
 Resolve: planning:manage-files/scripts/manage-files.py
 Resolve: planning:manage-references/scripts/manage-references.py
 Resolve: planning:manage-lessons/scripts/manage-lesson.py
+Resolve: planning:manage-log/scripts/manage-work-log.py
 ```
 
 Use the resolved absolute paths in all Bash commands:
@@ -51,6 +52,18 @@ python3 {resolved_manage_files} write --plan-id my-feature --file task.md
 
 **Optional**:
 - `plan_id`: Override auto-generated plan_id
+
+### Step 0: Log Phase Start (After Plan ID Derived)
+
+After deriving the plan_id (Step 2) and creating the plan directory (Step 5), log the phase start:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type progress \
+  --summary "Starting init phase"
+```
 
 ### Step 1: Validate Input
 
@@ -176,12 +189,15 @@ python3 {script_path} write \
 
 ### Step 8: Log Creation
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: init
-summary: "Created plan from {source_type} - {derived_title}"
+Log the plan creation as an artifact:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type artifact \
+  --summary "Created plan: {derived_title}" \
+  --detail "Source: {source_type}, files: task.md, status.toon, references.toon"
 ```
 
 ### Step 9: Return Result
@@ -208,6 +224,17 @@ next: plan-configure-agent
 ---
 
 ## Error Handling
+
+On any error, **first log the error** to work-log (if plan directory exists):
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type error \
+  --summary "ERROR: {error_type}" \
+  --detail "{full error context and message}"
+```
 
 ### Invalid Lesson ID
 

@@ -34,6 +34,7 @@ Resolve: planning:manage-files/scripts/manage-files.py
 Resolve: planning:manage-requirements/scripts/manage-requirement.py
 Resolve: planning:manage-config/scripts/manage-config.py
 Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+Resolve: planning:manage-log/scripts/manage-work-log.py
 ```
 
 Use the resolved absolute paths in all Bash commands.
@@ -43,6 +44,20 @@ Use the resolved absolute paths in all Bash commands.
 ## Workflow: Configure
 
 Execute this workflow when invoked.
+
+### Step 0: Log Phase Start
+
+Log the start of the configure phase:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase configure \
+  --type progress \
+  --summary "Starting configure phase"
+```
+
+Script: `planning:manage-log/scripts/manage-work-log.py`
 
 ### Step 1: Read Task Input
 
@@ -94,6 +109,17 @@ Script: `planning:manage-requirements/scripts/manage-requirement.py`
 
 Creates: `requirements/REQ-001-{slug}.toon`, `REQ-002-...`, etc.
 
+**After each requirement**, log the artifact:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase configure \
+  --type artifact \
+  --summary "Created {req_id}: {title}" \
+  --detail "{brief description of what this requirement covers}"
+```
+
 ### Step 4: Detect Plan Type
 
 Determine plan type from task analysis. Plan types use `bundle:skill` notation.
@@ -125,6 +151,17 @@ AskUserQuestion:
     - label: "Generic"
       description: "Generic task, no specific technology"
       value: "planning:plan-type-generic"
+```
+
+**After detecting plan type**, log the decision with reasoning:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase configure \
+  --type decision \
+  --summary "Selected {plan_type}" \
+  --detail "{reasoning why this plan type was chosen, e.g., 'Task modifies .java files in service layer'}"
 ```
 
 ### Step 5: Create Configuration
@@ -174,6 +211,19 @@ python3 {resolved_manage_lifecycle} transition \
 
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
+### Step 8: Log Phase Completion
+
+Log the outcome of the configure phase:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase configure \
+  --type outcome \
+  --summary "Completed configure: {req_count} requirements, type={plan_type}" \
+  --detail "compatibility={compatibility}, commit_strategy={commit_strategy}"
+```
+
 ---
 
 ## Output
@@ -206,6 +256,7 @@ configuration:
 | `planning:manage-requirements/scripts/manage-requirement.py` | Create requirements |
 | `planning:manage-config/scripts/manage-config.py` | Create config.toon |
 | `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase transitions |
+| `planning:manage-log/scripts/manage-work-log.py` | Work-log entries |
 
 ---
 
@@ -231,9 +282,21 @@ Always provide options for easier selection:
 ## Error Handling
 
 On script failure:
-1. Capture error context
-2. Record lesson-learned via `general-tools:manage-lessons-learned`
-3. Return error status with message
+
+1. **Log the error** to work-log:
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase configure \
+  --type error \
+  --summary "ERROR: {error_type}" \
+  --detail "{full error context and message}"
+```
+
+2. Capture error context
+3. Record lesson-learned via `general-tools:manage-lessons-learned`
+4. Return error status with message
 
 ```toon
 status: error

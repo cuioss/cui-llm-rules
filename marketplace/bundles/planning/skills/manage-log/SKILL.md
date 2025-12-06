@@ -41,19 +41,33 @@ TOON format with entries table:
 # Plan: my-feature
 # Created: 2025-12-02T10:00:00Z
 
-entries[3]{timestamp,phase,summary}:
-2025-12-02T10:00:00Z,init,Started plan initialization
-2025-12-02T11:30:00Z,init,Completed environment setup
-2025-12-02T14:00:00Z,implement,Implemented JWT service
+entries[5]{timestamp,type,phase,summary,detail}:
+2025-12-02T10:00:00Z,progress,init,Starting init phase,
+2025-12-02T10:05:00Z,decision,configure,Selected plan-type-java,Task modifies .java files in service layer
+2025-12-02T11:30:00Z,artifact,configure,Created REQ-001: Implement JWT authentication,Covers token generation and validation
+2025-12-02T14:00:00Z,outcome,implement,Completed implement phase: 3 tasks done,
+2025-12-02T14:30:00Z,error,implement,Build failed: compilation error,Missing dependency on jwt-core module
 ```
 
 ### Entry Fields
 
-| Field | Description |
-|-------|-------------|
-| `timestamp` | ISO timestamp |
-| `phase` | Phase when entry was created |
-| `summary` | Brief description of work done |
+| Field | Required | Description |
+|-------|----------|-------------|
+| `timestamp` | Yes | ISO timestamp (UTC) |
+| `type` | Yes | Entry type: `decision`, `artifact`, `progress`, `error`, `outcome` |
+| `phase` | Yes | Phase when entry was created |
+| `summary` | Yes | Brief description of work done |
+| `detail` | No | Additional context, reasoning, or error details |
+
+### Entry Types
+
+| Type | Purpose | Example Summary |
+|------|---------|-----------------|
+| `decision` | Log choices with reasoning | "Selected plan-type-java" |
+| `artifact` | Log created items with titles | "Created REQ-001: Implement JWT auth" |
+| `progress` | Log phase transitions or steps | "Starting refine phase" |
+| `error` | Log failures with context | "Skill load failed: plan-type-plugin not found" |
+| `outcome` | Log phase completion summaries | "Completed refine: 6 specs, 12 tasks" |
 
 ---
 
@@ -69,16 +83,30 @@ Add a new log entry.
 python3 {script_path} add \
   --plan-id {plan_id} \
   --phase implement \
-  --summary "Implemented JWT token generation"
+  --summary "Implemented JWT token generation" \
+  [--type decision|artifact|progress|error|outcome] \
+  [--detail "Additional context or reasoning"]
 ```
+
+**Parameters**:
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--plan-id` | Yes | Plan identifier |
+| `--phase` | Yes | Current phase (init, configure, refine, execute, finalize) |
+| `--summary` | Yes | Brief description of work done |
+| `--type` | No | Entry type (default: `progress`) |
+| `--detail` | No | Additional context, reasoning, or error details |
 
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
-phase: implement
+type: artifact
+phase: configure
 timestamp: 2025-12-02T14:30:00Z
-summary: Implemented JWT token generation
+summary: Created REQ-001: Implement JWT authentication
+detail: Covers token generation and validation for API endpoints
 total_entries: 4
 ```
 
@@ -98,10 +126,10 @@ status: success
 plan_id: my-feature
 total_entries: 3
 
-entries[3]{timestamp,phase,summary}:
-2025-12-02T10:00:00Z,init,Started plan initialization
-2025-12-02T11:30:00Z,init,Completed environment setup
-2025-12-02T14:00:00Z,implement,Implemented JWT service
+entries[3]{timestamp,type,phase,summary,detail}:
+2025-12-02T10:00:00Z,progress,init,Starting init phase,
+2025-12-02T10:30:00Z,decision,configure,Selected plan-type-java,Task modifies .java files
+2025-12-02T14:00:00Z,artifact,configure,Created REQ-001: JWT authentication,Token generation and validation
 ```
 
 ### list
@@ -121,7 +149,7 @@ plan_id: my-feature
 total_entries: 15
 showing: 10
 
-entries[10]{timestamp,phase,summary}:
+entries[10]{timestamp,type,phase,summary,detail}:
 ...
 ```
 

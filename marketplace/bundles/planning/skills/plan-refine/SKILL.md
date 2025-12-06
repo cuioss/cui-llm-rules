@@ -45,6 +45,17 @@ The plan-type skills delegate to domain agents which write directly:
 
 **Steps**:
 
+### Step 0: Log Phase Start
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: progress
+summary: "Starting refine phase"
+```
+
 ### Step 1: Read Context
 
 ```
@@ -122,7 +133,9 @@ Skill: planning:manage-log
 operation: add
 plan_id: {plan_id}
 phase: refine
-summary: "Refined plan: {specs_created} specs, {tasks_created} tasks"
+type: outcome
+summary: "Completed refine: {specs_created} specs, {tasks_created} tasks"
+detail: "Specifications and tasks created via {plan_type} domain agents"
 ```
 
 ### Step 6: Identify Documentation Needs (Optional)
@@ -184,12 +197,26 @@ completed: refine
    operation: add
    plan_id: {plan_id}
    phase: refine
-   summary: "Created strategic analysis - analysis.md"
+   type: artifact
+   summary: "Created analysis.md"
+   detail: "Strategic analysis for complex task: {complexity_factors}"
    ```
 
 ---
 
 ## Error Handling
+
+On any error, **first log the error** to work-log:
+
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: error
+summary: "ERROR: {error_type}"
+detail: "{full error context and message}"
+```
 
 ### No Requirements Found
 
@@ -203,7 +230,7 @@ message: No requirements found. Add requirements during init phase.
 
 ### Plan-Type Skill Error
 
-If plan-type:refine fails, present options:
+If plan-type skill fails, present options:
 - Retry with different parameters
 - Manual task creation via manage-tasks
 - Skip refine (for simple tasks)

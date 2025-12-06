@@ -58,11 +58,33 @@ allowed-tools: Read, Bash
 
 **Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
 
+**Before delegation**, log:
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: progress
+summary: "Delegating to java-specify-agent"
+detail: "requirement_id={requirement_id|batch}"
+```
+
 **Delegation**:
 ```
 Task(cui-java-expert:java-specify-agent,
      plan_id={plan_id},
      requirement_id={requirement_id})  # omit for batch
+```
+
+**After delegation**, log outcome:
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: outcome
+summary: "java-specify-agent completed: {spec_count} specs created"
+detail: "lessons_recorded={count}"
 ```
 
 **Returns**: `{status, spec_ids[], lessons_recorded}`
@@ -80,11 +102,33 @@ The agent analyzes Java codebase, creates specifications with:
 
 **Input**: `plan_id`, `specification_id?` (optional for single-item mode)
 
+**Before delegation**, log:
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: progress
+summary: "Delegating to java-plan-agent"
+detail: "specification_id={specification_id|batch}"
+```
+
 **Delegation**:
 ```
 Task(cui-java-expert:java-plan-agent,
      plan_id={plan_id},
      specification_id={specification_id})  # omit for batch
+```
+
+**After delegation**, log outcome:
+```
+Skill: planning:manage-log
+operation: add
+plan_id: {plan_id}
+phase: refine
+type: outcome
+summary: "java-plan-agent completed: {task_count} tasks created"
+detail: "lessons_recorded={count}"
 ```
 
 **Returns**: `{status, task_ids[], lessons_recorded}`

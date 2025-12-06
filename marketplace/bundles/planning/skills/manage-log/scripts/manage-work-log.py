@@ -13,7 +13,7 @@ Usage:
 import argparse
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Add parent paths for imports
@@ -37,8 +37,8 @@ def get_log_path(plan_id: str) -> Path:
 
 
 def now_iso() -> str:
-    """Get current time in ISO format."""
-    return datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    """Get current time in ISO format (UTC)."""
+    return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 def read_log(plan_id: str) -> dict:
@@ -73,26 +73,48 @@ def cmd_add(args):
         })
         sys.exit(1)
 
+    # Validate entry type
+    valid_types = ['decision', 'artifact', 'progress', 'error', 'outcome']
+    entry_type = args.type or 'progress'
+    if entry_type not in valid_types:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_type',
+            'message': f"Invalid type '{entry_type}'. Valid: {', '.join(valid_types)}"
+        })
+        sys.exit(1)
+
     log = read_log(args.plan_id)
     timestamp = now_iso()
 
     entry = {
         'timestamp': timestamp,
+        'type': entry_type,
         'phase': args.phase,
         'summary': args.summary
     }
 
+    # Add detail if provided
+    if args.detail:
+        entry['detail'] = args.detail
+
     log['entries'].append(entry)
     write_log(args.plan_id, log)
 
-    output_toon({
+    result = {
         'status': 'success',
         'plan_id': args.plan_id,
+        'type': entry_type,
         'phase': args.phase,
         'timestamp': timestamp,
         'summary': args.summary,
         'total_entries': len(log['entries'])
-    })
+    }
+    if args.detail:
+        result['detail'] = args.detail
+
+    output_toon(result)
 
 
 def cmd_read(args):
@@ -160,6 +182,9 @@ def main():
     add_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     add_parser.add_argument('--phase', required=True, help='Current phase')
     add_parser.add_argument('--summary', required=True, help='Work summary')
+    add_parser.add_argument('--type', choices=['decision', 'artifact', 'progress', 'error', 'outcome'],
+                           help='Entry type (default: progress)')
+    add_parser.add_argument('--detail', help='Additional context or reasoning (optional)')
     add_parser.set_defaults(func=cmd_add)
 
     # read
