@@ -22,7 +22,8 @@
     "./skills/plugin-doctor",
     "./skills/plugin-maintain",
     "./skills/plugin-specify",
-    "./skills/plugin-plan"
+    "./skills/plugin-plan",
+    "./skills/verification"
   ],
   "agents": [
     "./agents/plugin-specify-agent.md",
