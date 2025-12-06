@@ -7,8 +7,8 @@ Provides typed configuration for plan execution with enum validation.
 Usage:
     python3 manage-config.py read --plan-id my-plan
     python3 manage-config.py get --plan-id my-plan --field plan_type
-    python3 manage-config.py set --plan-id my-plan --field plan_type --value java
-    python3 manage-config.py create --plan-id my-plan --plan-type java
+    python3 manage-config.py set --plan-id my-plan --field plan_type --value planning:plan-type-java
+    python3 manage-config.py create --plan-id my-plan --plan-type planning:plan-type-java
 """
 
 import argparse
@@ -25,10 +25,9 @@ sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'toon-usage' /
 from file_ops import atomic_write_file, base_path
 from toon_parser import parse_toon, serialize_toon
 
-# Schema validation - simplified to 3 fields
-# Other values (technology, build_system, finalizing) are derived from plan_type at runtime
+# Schema validation - simplified to 2 enum fields
+# plan_type uses bundle:skill notation and is validated separately
 SCHEMA = {
-    'plan_type': ['java', 'javascript', 'plugin-development', 'simple'],
     'compatibility': ['deprecations', 'breaking'],
     'commit_strategy': ['fine-granular', 'phase-specific', 'complete'],
 }
@@ -42,6 +41,19 @@ DEFAULTS = {
 def validate_plan_id(plan_id: str) -> bool:
     """Validate plan_id is kebab-case with no special characters."""
     return bool(re.match(r'^[a-z][a-z0-9-]*$', plan_id))
+
+
+def validate_plan_type(plan_type: str) -> bool:
+    """Validate plan_type is in bundle:skill notation.
+
+    Examples of valid plan types:
+    - planning:plan-type-java
+    - planning:plan-type-javascript
+    - planning:plan-type-simple
+    - cui-plugin-development-tools:plan-type-plugin
+    """
+    # Pattern: bundle-name:skill-name (both kebab-case)
+    return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', plan_type))
 
 
 def get_config_path(plan_id: str) -> Path:
@@ -66,7 +78,14 @@ def write_config(plan_id: str, config: dict):
 
 
 def validate_field(field: str, value: str) -> tuple[bool, list]:
-    """Validate a field value against schema."""
+    """Validate a field value against schema.
+
+    For plan_type, validates bundle:skill notation.
+    For other fields, validates against enum values.
+    """
+    if field == 'plan_type':
+        # plan_type uses bundle:skill notation
+        return validate_plan_type(value), []
     if field not in SCHEMA:
         return True, []  # Unknown fields are allowed
     valid_values = SCHEMA[field]
@@ -160,14 +179,18 @@ def cmd_set(args):
     # Validate value against schema
     is_valid, valid_values = validate_field(args.field, args.value)
     if not is_valid:
-        output_toon({
+        error_data = {
             'status': 'error',
             'plan_id': args.plan_id,
             'field': args.field,
             'error': 'invalid_value',
-            'message': f"Invalid value '{args.value}' for field '{args.field}'",
-            'valid_values': valid_values
-        })
+        }
+        if args.field == 'plan_type':
+            error_data['message'] = f"Invalid plan_type format: {args.value}. Must be bundle:skill notation (e.g., planning:plan-type-java)"
+        else:
+            error_data['message'] = f"Invalid value '{args.value}' for field '{args.field}'"
+            error_data['valid_values'] = valid_values
+        output_toon(error_data)
         sys.exit(1)
 
     config = read_config(args.plan_id)
@@ -197,6 +220,16 @@ def cmd_create(args):
         })
         sys.exit(1)
 
+    # Validate plan_type format (bundle:skill notation)
+    if not validate_plan_type(args.plan_type):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_type',
+            'message': f"Invalid plan_type format: {args.plan_type}. Must be bundle:skill notation (e.g., planning:plan-type-java)"
+        })
+        sys.exit(1)
+
     # Check if already exists
     path = get_config_path(args.plan_id)
     if path.exists() and not args.force:
@@ -215,8 +248,9 @@ def cmd_create(args):
         'commit_strategy': args.commit_strategy or DEFAULTS['commit_strategy'],
     }
 
-    # Validate all fields
-    for field, value in config.items():
+    # Validate enum fields (plan_type already validated above)
+    for field in ['compatibility', 'commit_strategy']:
+        value = config[field]
         is_valid, valid_values = validate_field(field, value)
         if not is_valid:
             output_toon({
@@ -268,8 +302,7 @@ def main():
     create_parser = subparsers.add_parser('create', help='Create config.toon')
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--plan-type', required=True,
-                               choices=['java', 'javascript', 'plugin-development', 'simple'],
-                               help='Plan type')
+                               help='Plan type in bundle:skill notation (e.g., planning:plan-type-java)')
     create_parser.add_argument('--compatibility',
                                choices=['deprecations', 'breaking'],
                                help='Compatibility strategy (default: deprecations)')

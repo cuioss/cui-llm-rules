@@ -48,7 +48,7 @@ TOON format with phases table:
 
 ```toon
 title: Implement JWT Authentication
-plan_type: java
+plan_type: planning:plan-type-java
 current_phase: execute
 
 phases[4]{name,status}:
@@ -66,7 +66,7 @@ updated: 2025-12-02T14:30:00Z
 | Field | Description |
 |-------|-------------|
 | `title` | Plan title |
-| `plan_type` | java, javascript, plugin-development, simple |
+| `plan_type` | bundle:skill notation (e.g., planning:plan-type-java) |
 | `current_phase` | Current active phase |
 | `phases` | Table of phase names and statuses |
 | `created` | ISO timestamp when created |
@@ -102,7 +102,7 @@ plan_id: my-feature
 
 plan:
   title: Implement JWT Authentication
-  plan_type: java
+  plan_type: planning:plan-type-java
   current_phase: execute
   phases[4]{name,status}:
   init,done
@@ -119,7 +119,8 @@ Initialize status.toon for a new plan.
 python3 {script_path} create \
   --plan-id {plan_id} \
   --title "Feature Title" \
-  --plan-type java
+  --plan-type planning:plan-type-java \
+  --phases init,refine,execute,finalize
 ```
 
 **Output** (TOON):
@@ -131,7 +132,7 @@ created: true
 
 plan:
   title: Feature Title
-  plan_type: java
+  plan_type: planning:plan-type-java
   current_phase: init
 ```
 
@@ -212,9 +213,9 @@ status: success
 total: 3
 
 plans[3]{id,current_phase,plan_type,status}:
-my-feature,execute,java,in_progress
-bug-fix-123,init,simple,in_progress
-plugin-update,finalize,plugin-development,in_progress
+my-feature,execute,planning:plan-type-java,in_progress
+bug-fix-123,init,planning:plan-type-simple,in_progress
+plugin-update,finalize,cui-plugin-development-tools:plan-type-plugin,in_progress
 ```
 
 ### transition
@@ -281,17 +282,21 @@ description: Execute implementation tasks
 
 ## Plan Types and Phases
 
-### java (4 phases)
+Plan types use `bundle:skill` notation and define their own phase sequences.
+
+### planning:plan-type-java (4 phases)
 init -> refine -> execute -> finalize
 
-### javascript (4 phases)
+### planning:plan-type-javascript (4 phases)
 init -> refine -> execute -> finalize
 
-### plugin-development (4 phases)
+### cui-plugin-development-tools:plan-type-plugin (4 phases)
 init -> refine -> execute -> finalize
 
-### simple (3 phases)
+### planning:plan-type-simple (3 phases)
 init -> execute -> finalize
+
+**Note**: Plan types are extension points. Any bundle can define custom plan types with custom phase sequences.
 
 ---
 

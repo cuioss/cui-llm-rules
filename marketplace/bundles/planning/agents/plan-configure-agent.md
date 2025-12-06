@@ -11,7 +11,7 @@ Thin wrapper that delegates to `planning:plan-configure` skill.
 ## Parameters
 
 - **plan_id** (required): Plan identifier
-- **plan_type** (optional): Override auto-detection (java|javascript|simple|plugin-development)
+- **plan_type** (optional): Override auto-detection (bundle:skill notation, e.g., planning:plan-type-java)
 
 ## Workflow
 

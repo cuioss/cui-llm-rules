@@ -53,17 +53,19 @@ class TestContext:
 # Test: Create Command
 # =============================================================================
 
-def test_create_implementation_plan():
-    """Test creating a plan with implementation type."""
-    with TestContext(plan_id='impl-plan'):
+def test_create_java_plan():
+    """Test creating a plan with java type (qualified notation)."""
+    with TestContext(plan_id='java-plan'):
         result = run_script(SCRIPT_PATH, 'create',
-            '--plan-id', 'impl-plan',
+            '--plan-id', 'java-plan',
             '--title', 'Test Plan',
-            '--plan-type', 'implementation'
+            '--plan-type', 'planning:plan-type-java',
+            '--phases', 'init,refine,execute,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
+        assert data['plan']['plan_type'] == 'planning:plan-type-java'
 
 
 def test_create_simple_plan():
@@ -72,20 +74,38 @@ def test_create_simple_plan():
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'simple-plan',
             '--title', 'Simple Test',
-            '--plan-type', 'simple'
+            '--plan-type', 'planning:plan-type-simple',
+            '--phases', 'init,execute,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
 
 
-def test_create_plan_invalid_type():
-    """Test that creating a plan with invalid type fails."""
+def test_create_plan_invalid_type_format():
+    """Test that creating a plan with invalid type format fails."""
     with TestContext(plan_id='bad-plan'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'bad-plan',
             '--title', 'Bad Plan',
-            '--plan-type', 'invalid-type'
+            '--plan-type', 'invalid-type',  # Missing bundle:skill notation
+            '--phases', 'init,execute,finalize'
         )
-        assert not result.success, "Expected failure for invalid plan type"
+        assert not result.success, "Expected failure for invalid plan type format"
+        data = parse_toon(result.stdout)
+        assert data['error'] == 'invalid_plan_type'
+
+
+def test_create_plan_qualified_plugin_type():
+    """Test creating a plan with custom bundle plan type."""
+    with TestContext(plan_id='plugin-plan'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'plugin-plan',
+            '--title', 'Plugin Plan',
+            '--plan-type', 'cui-plugin-development-tools:plan-type-plugin',
+            '--phases', 'init,implement,verify,finalize'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['plan']['plan_type'] == 'cui-plugin-development-tools:plan-type-plugin'
 
 
 # =============================================================================
@@ -99,12 +119,13 @@ def test_set_phase():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'phase-plan',
             '--title', 'Phase Test',
-            '--plan-type', 'implementation'
+            '--plan-type', 'planning:plan-type-java',
+            '--phases', 'init,refine,execute,finalize'
         )
         # Then set phase
         result = run_script(SCRIPT_PATH, 'set-phase',
             '--plan-id', 'phase-plan',
-            '--phase', 'implement'
+            '--phase', 'execute'
         )
         assert result.success, f"Script failed: {result.stderr}"
 
@@ -115,7 +136,8 @@ def test_read_plan():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'read-plan',
             '--title', 'Read Test',
-            '--plan-type', 'implementation'
+            '--plan-type', 'planning:plan-type-java',
+            '--phases', 'init,refine,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'read',
             '--plan-id', 'read-plan'
@@ -140,7 +162,8 @@ def test_list_with_plan():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'list-plan',
             '--title', 'List Test',
-            '--plan-type', 'simple'
+            '--plan-type', 'planning:plan-type-simple',
+            '--phases', 'init,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'list')
         assert result.success, f"Script failed: {result.stderr}"
@@ -154,9 +177,10 @@ if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
         # Create command
-        test_create_implementation_plan,
+        test_create_java_plan,
         test_create_simple_plan,
-        test_create_plan_invalid_type,
+        test_create_plan_invalid_type_format,
+        test_create_plan_qualified_plugin_type,
         # Phase operations
         test_set_phase,
         test_read_plan,

@@ -96,16 +96,16 @@ Creates: `requirements/REQ-001-{slug}.toon`, `REQ-002-...`, etc.
 
 ### Step 4: Detect Plan Type
 
-Determine plan type from task analysis:
+Determine plan type from task analysis. Plan types use `bundle:skill` notation.
 
 | Indicator | Plan Type |
 |-----------|-----------|
-| Java code, Maven/Gradle, .java files | `java` |
-| JavaScript, npm, .js/.ts files | `javascript` |
-| Plugin/skill/command development | `plugin-development` |
-| Generic/simple task | `generic` |
+| Java code, Maven/Gradle, .java files | `planning:plan-type-java` |
+| JavaScript, npm, .js/.ts files | `planning:plan-type-javascript` |
+| Plugin/skill/command development | `cui-plugin-development-tools:plan-type-plugin` |
+| Generic/simple task | `planning:plan-type-simple` |
 
-**If plan_type parameter provided**: Use override value.
+**If plan_type parameter provided**: Use override value (must be bundle:skill notation).
 
 **If uncertain**, ask:
 
@@ -115,12 +115,16 @@ AskUserQuestion:
   options:
     - label: "Java"
       description: "Java code with Maven or Gradle"
+      value: "planning:plan-type-java"
     - label: "JavaScript"
       description: "JavaScript/TypeScript with npm"
+      value: "planning:plan-type-javascript"
     - label: "Plugin Development"
       description: "Claude Code plugin components"
-    - label: "Generic"
+      value: "cui-plugin-development-tools:plan-type-plugin"
+    - label: "Simple"
       description: "Simple task, no specific technology"
+      value: "planning:plan-type-simple"
 ```
 
 ### Step 5: Create Configuration
@@ -187,7 +191,7 @@ requirements:
   pending: 3
 
 configuration:
-  plan_type: java
+  plan_type: planning:plan-type-java
   compatibility: deprecations
   commit_strategy: phase-specific
 ```

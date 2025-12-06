@@ -54,15 +54,16 @@ class TestContext:
 # =============================================================================
 
 def test_create_config():
-    """Test creating a config file."""
+    """Test creating a config file with qualified plan type."""
     with TestContext(plan_id='config-create'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-create',
-            '--plan-type', 'java'
+            '--plan-type', 'planning:plan-type-java'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
+        assert data['config']['plan_type'] == 'planning:plan-type-java'
 
 
 def test_create_config_with_all_fields():
@@ -70,11 +71,23 @@ def test_create_config_with_all_fields():
     with TestContext(plan_id='config-full'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-full',
-            '--plan-type', 'simple',
+            '--plan-type', 'planning:plan-type-simple',
             '--compatibility', 'breaking',
             '--commit-strategy', 'fine-granular'
         )
         assert result.success, f"Script failed: {result.stderr}"
+
+
+def test_create_config_invalid_type_format():
+    """Test that invalid plan type format fails."""
+    with TestContext(plan_id='config-invalid-format'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-invalid-format',
+            '--plan-type', 'java'  # Missing bundle:skill notation
+        )
+        assert not result.success, "Expected failure for invalid plan type format"
+        data = parse_toon(result.stdout)
+        assert data['error'] == 'invalid_plan_type'
 
 
 # =============================================================================
@@ -87,7 +100,7 @@ def test_set_and_get_field():
         # Create config first
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-getset',
-            '--plan-type', 'java'
+            '--plan-type', 'planning:plan-type-java'
         )
         # Set a field
         set_result = run_script(SCRIPT_PATH, 'set',
@@ -113,7 +126,7 @@ def test_read_config():
         # Create config first
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-read',
-            '--plan-type', 'simple'
+            '--plan-type', 'planning:plan-type-simple'
         )
         # Read it
         result = run_script(SCRIPT_PATH, 'read',
@@ -122,21 +135,40 @@ def test_read_config():
         assert result.success, f"Script failed: {result.stderr}"
 
 
-def test_set_invalid_plan_type():
-    """Test that setting invalid plan_type fails."""
+def test_set_invalid_plan_type_format():
+    """Test that setting invalid plan_type format fails."""
     with TestContext(plan_id='config-invalid'):
         # Create config first
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-invalid',
-            '--plan-type', 'java'
+            '--plan-type', 'planning:plan-type-java'
         )
-        # Try to set invalid value
+        # Try to set invalid value (missing bundle:skill notation)
         result = run_script(SCRIPT_PATH, 'set',
             '--plan-id', 'config-invalid',
             '--field', 'plan_type',
             '--value', 'unknown'
         )
-        assert not result.success, "Expected failure for invalid plan_type"
+        assert not result.success, "Expected failure for invalid plan_type format"
+
+
+def test_set_valid_plan_type():
+    """Test that setting valid plan_type works."""
+    with TestContext(plan_id='config-valid-set'):
+        # Create config first
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-valid-set',
+            '--plan-type', 'planning:plan-type-java'
+        )
+        # Set to another valid type
+        result = run_script(SCRIPT_PATH, 'set',
+            '--plan-id', 'config-valid-set',
+            '--field', 'plan_type',
+            '--value', 'planning:plan-type-simple'
+        )
+        assert result.success, f"Set failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['value'] == 'planning:plan-type-simple'
 
 
 # =============================================================================
@@ -149,9 +181,11 @@ if __name__ == '__main__':
         # Create command
         test_create_config,
         test_create_config_with_all_fields,
+        test_create_config_invalid_type_format,
         # Get/Set operations
         test_set_and_get_field,
         test_read_config,
-        test_set_invalid_plan_type,
+        test_set_invalid_plan_type_format,
+        test_set_valid_plan_type,
     ])
     sys.exit(runner.run())

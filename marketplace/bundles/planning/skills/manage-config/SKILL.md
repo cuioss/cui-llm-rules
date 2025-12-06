@@ -41,7 +41,7 @@ TOON format with typed fields:
 ```toon
 # Plan Configuration
 
-plan_type: java
+plan_type: planning:plan-type-java
 compatibility: deprecations
 commit_strategy: phase-specific
 
@@ -56,7 +56,7 @@ branch_strategy: feature
 
 | Field | Values | Description |
 |-------|--------|-------------|
-| `plan_type` | java, javascript, plugin-development, simple | Type of plan workflow |
+| `plan_type` | bundle:skill notation (e.g., planning:plan-type-java) | Type of plan workflow (extension point) |
 | `compatibility` | deprecations, breaking | Compatibility strategy (user choice) |
 | `commit_strategy` | fine-granular, phase-specific, complete | Git commit granularity (user choice) |
 
@@ -90,7 +90,7 @@ status: success
 plan_id: my-feature
 
 config:
-  plan_type: java
+  plan_type: planning:plan-type-java
   compatibility: deprecations
   commit_strategy: phase-specific
 ```
@@ -110,7 +110,7 @@ python3 {script_path} get \
 status: success
 plan_id: my-feature
 field: plan_type
-value: java
+value: planning:plan-type-java
 ```
 
 ### set
@@ -140,7 +140,7 @@ Create config.toon with initial values.
 ```bash
 python3 {script_path} create \
   --plan-id {plan_id} \
-  --plan-type java \
+  --plan-type planning:plan-type-java \
   [--compatibility deprecations] \
   [--commit-strategy phase-specific]
 ```
@@ -153,7 +153,7 @@ file: config.toon
 created: true
 
 config:
-  plan_type: java
+  plan_type: planning:plan-type-java
   compatibility: deprecations
   commit_strategy: phase-specific
 ```
@@ -172,7 +172,7 @@ config:
 
 | Field | Valid Values |
 |-------|--------------|
-| plan_type | java, javascript, plugin-development, simple |
+| plan_type | bundle:skill notation (e.g., planning:plan-type-java) |
 | compatibility | deprecations, breaking |
 | commit_strategy | fine-granular, phase-specific, complete |
 | create_pr | true, false |
@@ -189,13 +189,7 @@ status: error
 plan_id: my-feature
 field: plan_type
 error: invalid_value
-message: Invalid value 'unknown' for field 'plan_type'
-
-valid_values[4]:
-- java
-- javascript
-- plugin-development
-- simple
+message: Invalid plan_type format: unknown. Must be bundle:skill notation (e.g., planning:plan-type-java)
 ```
 
 ---

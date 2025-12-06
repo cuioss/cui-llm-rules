@@ -6,8 +6,8 @@ Replaces plan.md and absorbs phase-management functionality.
 
 Usage:
     python3 manage-lifecycle.py read --plan-id my-plan
-    python3 manage-lifecycle.py create --plan-id my-plan --title "Title" --plan-type implementation
-    python3 manage-lifecycle.py set-phase --plan-id my-plan --phase implement
+    python3 manage-lifecycle.py create --plan-id my-plan --title "Title" --plan-type planning:plan-type-java --phases init,refine,execute,finalize
+    python3 manage-lifecycle.py set-phase --plan-id my-plan --phase execute
     python3 manage-lifecycle.py list
     python3 manage-lifecycle.py transition --plan-id my-plan --completed init
 """
@@ -28,20 +28,26 @@ sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'toon-usage' /
 from file_ops import atomic_write_file, base_path
 from toon_parser import parse_toon, serialize_toon
 
-# Plan type configurations
-PLAN_TYPES = {
-    'implementation': ['init', 'refine', 'implement', 'verify', 'finalize'],
-    'plugin-development': ['init', 'implement', 'verify', 'finalize'],
-    'simple': ['init', 'implement', 'finalize'],
-}
-
+# Phase routing maps phase names to skills (for route command)
 PHASE_ROUTING = {
     'init': ('plan-init', 'Initialize plan'),
     'refine': ('plan-refine', 'Refine requirements and specifications'),
-    'implement': ('plan-execute', 'Execute implementation tasks'),
-    'verify': ('plan-execute', 'Verify implementation'),
+    'execute': ('plan-execute', 'Execute implementation tasks'),
     'finalize': ('plan-finalize', 'Finalize with commit/PR'),
 }
+
+
+def validate_plan_type(plan_type: str) -> bool:
+    """Validate plan_type is in bundle:skill notation.
+
+    Examples of valid plan types:
+    - planning:plan-type-java
+    - planning:plan-type-javascript
+    - planning:plan-type-simple
+    - cui-plugin-development-tools:plan-type-plugin
+    """
+    # Pattern: bundle-name:skill-name (both kebab-case)
+    return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', plan_type))
 
 
 def validate_plan_id(plan_id: str) -> bool:
@@ -139,17 +145,26 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    if args.plan_type not in PLAN_TYPES:
+    if not validate_plan_type(args.plan_type):
         output_toon({
             'status': 'error',
             'plan_id': args.plan_id,
             'error': 'invalid_plan_type',
-            'message': f"Invalid plan_type: {args.plan_type}",
-            'valid_types': list(PLAN_TYPES.keys())
+            'message': f"Invalid plan_type format: {args.plan_type}. Must be bundle:skill notation (e.g., planning:plan-type-java)"
         })
         sys.exit(1)
 
-    phases = PLAN_TYPES[args.plan_type]
+    # Parse phases from comma-separated argument
+    phases = [p.strip() for p in args.phases.split(',') if p.strip()]
+    if not phases:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_phases',
+            'message': 'At least one phase is required'
+        })
+        sys.exit(1)
+
     now = now_iso()
 
     status = {
@@ -503,8 +518,9 @@ def main():
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--title', required=True, help='Plan title')
     create_parser.add_argument('--plan-type', required=True,
-                               choices=['implementation', 'plugin-development', 'simple'],
-                               help='Plan type')
+                               help='Plan type in bundle:skill notation (e.g., planning:plan-type-java)')
+    create_parser.add_argument('--phases', required=True,
+                               help='Comma-separated phase names (e.g., init,refine,execute,finalize)')
     create_parser.add_argument('--force', action='store_true',
                                help='Overwrite existing status')
     create_parser.set_defaults(func=cmd_create)
