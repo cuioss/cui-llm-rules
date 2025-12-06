@@ -49,11 +49,30 @@ def validate_plan_type(plan_type: str) -> bool:
     Examples of valid plan types:
     - planning:plan-type-java
     - planning:plan-type-javascript
-    - planning:plan-type-simple
-    - cui-plugin-development-tools:plan-type-plugin
+    - planning:plan-type-generic
+    - planning:plan-type-plugin
     """
     # Pattern: bundle-name:skill-name (both kebab-case)
     return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', plan_type))
+
+
+def validate_plan_type_exists(plan_type: str) -> tuple[bool, str | None]:
+    """Validate that the plan_type skill actually exists.
+
+    Args:
+        plan_type: Plan type in bundle:skill notation (e.g., planning:plan-type-java)
+
+    Returns:
+        Tuple of (exists, skill_path). If exists is False, skill_path is None.
+    """
+    if not validate_plan_type(plan_type):
+        return False, None
+
+    bundle, skill = plan_type.split(':')
+    skill_path = BUNDLES_DIR / bundle / 'skills' / skill / 'SKILL.md'
+    if skill_path.exists():
+        return True, str(skill_path)
+    return False, None
 
 
 def get_config_path(plan_id: str) -> Path:
@@ -193,6 +212,19 @@ def cmd_set(args):
         output_toon(error_data)
         sys.exit(1)
 
+    # For plan_type, also validate skill exists
+    if args.field == 'plan_type':
+        exists, _ = validate_plan_type_exists(args.value)
+        if not exists:
+            output_toon({
+                'status': 'error',
+                'plan_id': args.plan_id,
+                'field': args.field,
+                'error': 'skill_not_found',
+                'message': f"Skill not found for plan_type: {args.value}. Expected SKILL.md at bundles/{args.value.replace(':', '/skills/')}/SKILL.md"
+            })
+            sys.exit(1)
+
     config = read_config(args.plan_id)
     previous = config.get(args.field)
     config[args.field] = args.value
@@ -227,6 +259,17 @@ def cmd_create(args):
             'plan_id': args.plan_id,
             'error': 'invalid_plan_type',
             'message': f"Invalid plan_type format: {args.plan_type}. Must be bundle:skill notation (e.g., planning:plan-type-java)"
+        })
+        sys.exit(1)
+
+    # Validate plan_type skill exists
+    exists, _ = validate_plan_type_exists(args.plan_type)
+    if not exists:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'skill_not_found',
+            'message': f"Skill not found for plan_type: {args.plan_type}. Expected SKILL.md at bundles/{args.plan_type.replace(':', '/skills/')}/SKILL.md"
         })
         sys.exit(1)
 

@@ -102,8 +102,8 @@ Determine plan type from task analysis. Plan types use `bundle:skill` notation.
 |-----------|-----------|
 | Java code, Maven/Gradle, .java files | `planning:plan-type-java` |
 | JavaScript, npm, .js/.ts files | `planning:plan-type-javascript` |
-| Plugin/skill/command development | `cui-plugin-development-tools:plan-type-plugin` |
-| Generic/simple task | `planning:plan-type-simple` |
+| Plugin/skill/command development | `planning:plan-type-plugin` |
+| Generic/simple task | `planning:plan-type-generic` |
 
 **If plan_type parameter provided**: Use override value (must be bundle:skill notation).
 
@@ -121,10 +121,10 @@ AskUserQuestion:
       value: "planning:plan-type-javascript"
     - label: "Plugin Development"
       description: "Claude Code plugin components"
-      value: "cui-plugin-development-tools:plan-type-plugin"
-    - label: "Simple"
-      description: "Simple task, no specific technology"
-      value: "planning:plan-type-simple"
+      value: "planning:plan-type-plugin"
+    - label: "Generic"
+      description: "Generic task, no specific technology"
+      value: "planning:plan-type-generic"
 ```
 
 ### Step 5: Create Configuration

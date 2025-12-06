@@ -214,8 +214,8 @@ total: 3
 
 plans[3]{id,current_phase,plan_type,status}:
 my-feature,execute,planning:plan-type-java,in_progress
-bug-fix-123,init,planning:plan-type-simple,in_progress
-plugin-update,finalize,cui-plugin-development-tools:plan-type-plugin,in_progress
+bug-fix-123,init,planning:plan-type-generic,in_progress
+plugin-update,finalize,planning:plan-type-plugin,in_progress
 ```
 
 ### transition
@@ -290,10 +290,10 @@ init -> refine -> execute -> finalize
 ### planning:plan-type-javascript (4 phases)
 init -> refine -> execute -> finalize
 
-### cui-plugin-development-tools:plan-type-plugin (4 phases)
+### planning:plan-type-plugin (4 phases)
 init -> refine -> execute -> finalize
 
-### planning:plan-type-simple (3 phases)
+### planning:plan-type-generic (3 phases)
 init -> execute -> finalize
 
 **Note**: Plan types are extension points. Any bundle can define custom plan types with custom phase sequences.

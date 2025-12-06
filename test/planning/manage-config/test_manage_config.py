@@ -71,7 +71,7 @@ def test_create_config_with_all_fields():
     with TestContext(plan_id='config-full'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-full',
-            '--plan-type', 'planning:plan-type-simple',
+            '--plan-type', 'planning:plan-type-generic',
             '--compatibility', 'breaking',
             '--commit-strategy', 'fine-granular'
         )
@@ -88,6 +88,19 @@ def test_create_config_invalid_type_format():
         assert not result.success, "Expected failure for invalid plan type format"
         data = parse_toon(result.stdout)
         assert data['error'] == 'invalid_plan_type'
+
+
+def test_create_config_skill_not_found():
+    """Test that create fails when plan_type skill doesn't exist."""
+    with TestContext(plan_id='config-skill-not-found'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-skill-not-found',
+            '--plan-type', 'planning:plan-type-nonexistent'
+        )
+        assert not result.success, "Expected failure for non-existent skill"
+        data = parse_toon(result.stdout)
+        assert data['error'] == 'skill_not_found'
+        assert 'Skill not found' in data['message']
 
 
 # =============================================================================
@@ -126,7 +139,7 @@ def test_read_config():
         # Create config first
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-read',
-            '--plan-type', 'planning:plan-type-simple'
+            '--plan-type', 'planning:plan-type-generic'
         )
         # Read it
         result = run_script(SCRIPT_PATH, 'read',
@@ -152,6 +165,26 @@ def test_set_invalid_plan_type_format():
         assert not result.success, "Expected failure for invalid plan_type format"
 
 
+def test_set_plan_type_skill_not_found():
+    """Test that setting plan_type to non-existent skill fails."""
+    with TestContext(plan_id='config-set-not-found'):
+        # Create config first
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-set-not-found',
+            '--plan-type', 'planning:plan-type-java'
+        )
+        # Try to set to non-existent skill
+        result = run_script(SCRIPT_PATH, 'set',
+            '--plan-id', 'config-set-not-found',
+            '--field', 'plan_type',
+            '--value', 'planning:plan-type-nonexistent'
+        )
+        assert not result.success, "Expected failure for non-existent skill"
+        data = parse_toon(result.stdout)
+        assert data['error'] == 'skill_not_found'
+        assert 'Skill not found' in data['message']
+
+
 def test_set_valid_plan_type():
     """Test that setting valid plan_type works."""
     with TestContext(plan_id='config-valid-set'):
@@ -164,11 +197,11 @@ def test_set_valid_plan_type():
         result = run_script(SCRIPT_PATH, 'set',
             '--plan-id', 'config-valid-set',
             '--field', 'plan_type',
-            '--value', 'planning:plan-type-simple'
+            '--value', 'planning:plan-type-generic'
         )
         assert result.success, f"Set failed: {result.stderr}"
         data = parse_toon(result.stdout)
-        assert data['value'] == 'planning:plan-type-simple'
+        assert data['value'] == 'planning:plan-type-generic'
 
 
 # =============================================================================
@@ -182,10 +215,12 @@ if __name__ == '__main__':
         test_create_config,
         test_create_config_with_all_fields,
         test_create_config_invalid_type_format,
+        test_create_config_skill_not_found,
         # Get/Set operations
         test_set_and_get_field,
         test_read_config,
         test_set_invalid_plan_type_format,
+        test_set_plan_type_skill_not_found,
         test_set_valid_plan_type,
     ])
     sys.exit(runner.run())

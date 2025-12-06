@@ -43,8 +43,8 @@ def validate_plan_type(plan_type: str) -> bool:
     Examples of valid plan types:
     - planning:plan-type-java
     - planning:plan-type-javascript
-    - planning:plan-type-simple
-    - cui-plugin-development-tools:plan-type-plugin
+    - planning:plan-type-generic
+    - planning:plan-type-plugin
     """
     # Pattern: bundle-name:skill-name (both kebab-case)
     return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', plan_type))

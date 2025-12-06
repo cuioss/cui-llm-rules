@@ -68,13 +68,13 @@ def test_create_java_plan():
         assert data['plan']['plan_type'] == 'planning:plan-type-java'
 
 
-def test_create_simple_plan():
-    """Test creating a plan with simple type."""
-    with TestContext(plan_id='simple-plan'):
+def test_create_generic_plan():
+    """Test creating a plan with generic type."""
+    with TestContext(plan_id='generic-plan'):
         result = run_script(SCRIPT_PATH, 'create',
-            '--plan-id', 'simple-plan',
-            '--title', 'Simple Test',
-            '--plan-type', 'planning:plan-type-simple',
+            '--plan-id', 'generic-plan',
+            '--title', 'Generic Test',
+            '--plan-type', 'planning:plan-type-generic',
             '--phases', 'init,execute,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
@@ -100,12 +100,12 @@ def test_create_plan_qualified_plugin_type():
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'plugin-plan',
             '--title', 'Plugin Plan',
-            '--plan-type', 'cui-plugin-development-tools:plan-type-plugin',
+            '--plan-type', 'planning:plan-type-plugin',
             '--phases', 'init,implement,verify,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
-        assert data['plan']['plan_type'] == 'cui-plugin-development-tools:plan-type-plugin'
+        assert data['plan']['plan_type'] == 'planning:plan-type-plugin'
 
 
 # =============================================================================
@@ -162,7 +162,7 @@ def test_list_with_plan():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'list-plan',
             '--title', 'List Test',
-            '--plan-type', 'planning:plan-type-simple',
+            '--plan-type', 'planning:plan-type-generic',
             '--phases', 'init,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'list')
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     runner.add_tests([
         # Create command
         test_create_java_plan,
-        test_create_simple_plan,
+        test_create_generic_plan,
         test_create_plan_invalid_type_format,
         test_create_plan_qualified_plugin_type,
         # Phase operations
