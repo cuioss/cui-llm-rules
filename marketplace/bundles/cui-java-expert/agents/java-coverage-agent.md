@@ -71,3 +71,17 @@ Return the structured output from the skill workflow:
 - If coverage report not found → Suggest running Maven with jacoco
 - If module not found → Report available modules
 - This is a read-only agent → Never modify files
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-coverage"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  module: "{module if known}"
+```

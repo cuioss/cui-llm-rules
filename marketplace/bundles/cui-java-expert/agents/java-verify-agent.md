@@ -81,3 +81,17 @@ Apply Step 6 verification checklist from the skill:
 - If target not found → Report with file path suggestion
 - If standards cannot be loaded → Report skill loading error
 - This is a read-only agent → Never modify files
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-verify"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  target: "{target if known}"
+```

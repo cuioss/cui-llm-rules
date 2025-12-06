@@ -30,10 +30,36 @@ Return the skill output as agent result.
 
 ## Output
 
+### Success Output
+
 ```json
 {
-  "status": "success|failed",
+  "status": "success",
   "plan_id": "my-feature",
   "source": {"type": "description|lesson|issue", "id": "..."}
 }
+```
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "planning:plan-init"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  plan_id: "{plan_id if known}"
+```
+
+Example:
+```toon
+status: error
+error_type: resolution_failure
+component: "planning:plan-init"
+message: "Skill planning:plan-init not found"
+context:
+  operation: "load plan-init skill"
 ```

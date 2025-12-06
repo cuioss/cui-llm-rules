@@ -62,3 +62,28 @@ Return the structured output from the skill workflow:
 - If skill workflow returns `status: "partial"` → Report what was completed
 - If skill workflow returns `status: "failed"` → Report failure reason
 - If build fails after implementation → Report compilation errors
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-implement"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  target_class: "{target_class if known}"
+```
+
+Example:
+```toon
+status: error
+error_type: script_failure
+component: "cui-java-expert:java-implement"
+message: "Build failed with compilation errors"
+context:
+  operation: "verify implementation"
+  target_class: "com.example.AuthService"
+```

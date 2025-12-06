@@ -77,3 +77,17 @@ Parameters:
 - If refactoring breaks compilation → Attempt fix or revert
 - If refactoring is unclear → Report options without changing code
 - If target not found → Report with search suggestions
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-refactor"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  target: "{target if known}"
+```

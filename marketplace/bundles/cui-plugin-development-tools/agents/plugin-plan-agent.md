@@ -55,3 +55,17 @@ lessons_recorded: {count}
 - If skill returns error status → Report error message
 - If no specifications found → Report "no pending specifications"
 - If planning fails → Report findings with lesson recorded
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-plugin-development-tools:plugin-plan"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  plan_id: "{plan_id}"
+```

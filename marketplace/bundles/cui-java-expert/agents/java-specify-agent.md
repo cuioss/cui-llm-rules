@@ -53,3 +53,17 @@ lessons_recorded: {count}
 - If skill returns error status → Report error message
 - If no requirements found → Report "no pending requirements"
 - If codebase analysis fails → Report findings with lesson recorded
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-specify"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  plan_id: "{plan_id}"
+```

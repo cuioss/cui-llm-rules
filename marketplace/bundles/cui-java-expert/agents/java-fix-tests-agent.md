@@ -62,3 +62,17 @@ Return the structured output from the skill workflow:
 - If production fix needed but not allowed → Report with `requires_production_fix: true`
 - If failure persists after fix attempt → Report as unfixable
 - If failure requires architectural change → Report, don't attempt fix
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-fix-tests"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  module: "{module if known}"
+```

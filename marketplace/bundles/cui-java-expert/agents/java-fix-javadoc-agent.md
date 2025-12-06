@@ -63,3 +63,17 @@ Return the structured output from the skill workflow:
 - If error requires content changes → Apply minimal fix only
 - If error is ambiguous → Use safest fix (remove problematic element)
 - If error is in generated code → Skip and report
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-fix-javadoc"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  module: "{module if known}"
+```

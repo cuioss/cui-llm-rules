@@ -59,3 +59,17 @@ Return the structured output from the skill workflow:
 - If errors remain after max iterations → Report remaining errors
 - If error requires architectural change → Report as unfixable
 - If error is in generated code → Skip and report
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-fix-build"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  module: "{module if known}"
+```

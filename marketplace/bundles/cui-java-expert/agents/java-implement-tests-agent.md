@@ -64,3 +64,17 @@ Return the structured output from the skill workflow:
 - If target class not found → Report with search suggestions
 - If coverage below target → Report gaps with recommendations
 - If tests fail → Report failures (don't fix automatically)
+
+### Error Output (TOON format)
+
+When errors occur, output using this standardized TOON format for hook detection:
+
+```toon
+status: error
+error_type: {resolution_failure|script_failure|validation_failure}
+component: "cui-java-expert:java-implement-tests"
+message: "{human readable error}"
+context:
+  operation: "{what was being attempted}"
+  target_class: "{target_class if known}"
+```

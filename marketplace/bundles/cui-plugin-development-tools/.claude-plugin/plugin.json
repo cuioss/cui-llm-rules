@@ -23,7 +23,8 @@
     "./skills/plugin-maintain",
     "./skills/plugin-specify",
     "./skills/plugin-plan",
-    "./skills/verification"
+    "./skills/verification",
+    "./skills/error-handling"
   ],
   "agents": [
     "./agents/plugin-specify-agent.md",
