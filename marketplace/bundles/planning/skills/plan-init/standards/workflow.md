@@ -121,7 +121,7 @@ AskUserQuestion:
 - [ ] Plan ID format: kebab-case, max 50 chars
 
 ### Output Validation
-- [ ] Plan directory created: `.plan/plans/{plan_id}/`
+- [ ] Plan directory created (via manage-files)
 - [ ] task.md created with complete original input
 - [ ] status.toon created with init phase
 - [ ] references.toon created with branch

@@ -181,7 +181,7 @@ python3 {resolved_manage_lifecycle} create \
 **Note**: Phases depend on plan type. Use standard 4-phase for java/javascript/plugin, 3-phase (init,execute,finalize) for generic.
 
 Creates:
-- `.plan/plans/{plan_id}/status.toon` with init phase in_progress
+- `status.toon` with init phase in_progress (via manage-lifecycle)
 
 ### Step 6: Create Configuration
 
