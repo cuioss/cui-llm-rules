@@ -16,7 +16,7 @@ import argparse
 import re
 import shutil
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Add parent paths for imports
@@ -72,7 +72,7 @@ def get_archive_dir() -> Path:
 
 def now_iso() -> str:
     """Get current time in ISO format."""
-    return datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 def read_status(plan_id: str) -> dict:
