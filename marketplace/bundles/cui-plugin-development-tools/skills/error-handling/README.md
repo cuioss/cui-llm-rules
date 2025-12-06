@@ -109,6 +109,65 @@ standards/
 └── workaround-detection.md  # Detecting and analyzing workarounds
 ```
 
+### 4. Exclusion Configuration (`defaults/exclusions.txt`)
+
+Prevents false positives by excluding known-safe patterns:
+
+```
+defaults/
+└── exclusions.txt           # Default exclusion patterns
+```
+
+## False Positive Prevention
+
+The hook supports exclusion patterns to prevent triggering on false positives like "0 tests failed" or "exception handling".
+
+### Exclusion Files (checked in order)
+
+1. **Project-specific**: `.plan/error-exclusions.txt`
+2. **Skill defaults**: `defaults/exclusions.txt`
+
+### Exclusion File Format
+
+```txt
+# Comments start with #
+# Each non-empty line is a literal string to exclude
+
+# Test success patterns
+0 tests failed
+0 failures
+Failed: 0
+
+# Documentation patterns
+exception handling
+error handling
+
+# Build success
+BUILD SUCCESS
+```
+
+### Adding Project-Specific Exclusions
+
+Create `.plan/error-exclusions.txt` in your project:
+
+```bash
+# Create exclusion file
+cat > .plan/error-exclusions.txt << 'EOF'
+# Project-specific false positives
+my-error-handler-module
+legacy_exception_wrapper
+EOF
+```
+
+### Default Exclusions
+
+The skill includes sensible defaults for common false positives:
+- `0 tests failed`, `0 failures`, `0 errors`
+- `BUILD SUCCESS`, `Build successful`
+- `exception handling`, `error handling`, `error-handling`
+- `No issues found`, `No errors found`
+- `nothing to commit`
+
 ## Installation
 
 ### Step 1: Configure Hook in Project Settings
@@ -217,9 +276,9 @@ Uses `planning:manage-log` to record:
 ### False Positives
 
 If the hook triggers on non-error output containing error-like words:
-1. Check the patterns in `error-detector.sh`
-2. Consider adding exclusion patterns for known safe outputs
-3. The hook uses case-insensitive matching
+1. Add the pattern to `.plan/error-exclusions.txt` (project-specific)
+2. Or add to `defaults/exclusions.txt` if it's a common pattern
+3. See "False Positive Prevention" section above for format
 
 ### Context File Not Created
 

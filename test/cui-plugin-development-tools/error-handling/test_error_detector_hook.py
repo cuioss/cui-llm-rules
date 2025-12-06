@@ -102,6 +102,53 @@ def test_passes_normal_output():
 
 
 # =============================================================================
+# Test: Default Exclusions (False Positive Prevention)
+# =============================================================================
+
+def test_excludes_zero_tests_failed():
+    """Hook should NOT trigger on '0 tests failed' (success case)."""
+    result = run_hook("Tests complete: 10 passed, 0 tests failed", "Bash")
+    assert result.returncode == 0, "Should not trigger on '0 tests failed'"
+
+
+def test_excludes_zero_failures():
+    """Hook should NOT trigger on '0 failures' (success case)."""
+    result = run_hook("Passed: 55, Failed: 0", "Bash")
+    assert result.returncode == 0, "Should not trigger on 'Failed: 0'"
+
+
+def test_excludes_build_success():
+    """Hook should NOT trigger when BUILD SUCCESS is present."""
+    result = run_hook("[INFO] BUILD SUCCESS\n[INFO] Total time: 5.2 s", "Bash")
+    assert result.returncode == 0, "Should not trigger on BUILD SUCCESS"
+
+
+def test_excludes_exception_handling_docs():
+    """Hook should NOT trigger on 'exception handling' in docs."""
+    result = run_hook("This module provides exception handling utilities", "Read")
+    assert result.returncode == 0, "Should not trigger on 'exception handling'"
+
+
+def test_excludes_error_handling_code():
+    """Hook should NOT trigger on 'error-handling' in code/paths."""
+    result = run_hook("Loading skill: cui-plugin-development-tools:error-handling", "Skill")
+    assert result.returncode == 0, "Should not trigger on 'error-handling'"
+
+
+def test_excludes_no_issues_found():
+    """Hook should NOT trigger on 'No issues found'."""
+    result = run_hook("Scan complete. No issues found.", "Bash")
+    assert result.returncode == 0, "Should not trigger on 'No issues found'"
+
+
+def test_real_error_still_triggers():
+    """Hook should still trigger on real errors not in exclusions."""
+    result = run_hook("Build failed: compilation error in Main.java", "Bash")
+    assert result.returncode == 1, "Real errors should still trigger"
+    assert "ERROR DETECTED" in result.stdout
+
+
+# =============================================================================
 # Test: Output Format
 # =============================================================================
 
@@ -184,6 +231,14 @@ if __name__ == "__main__":
         # Pass-through behavior
         test_passes_success_output,
         test_passes_normal_output,
+        # Default exclusions (false positive prevention)
+        test_excludes_zero_tests_failed,
+        test_excludes_zero_failures,
+        test_excludes_build_success,
+        test_excludes_exception_handling_docs,
+        test_excludes_error_handling_code,
+        test_excludes_no_issues_found,
+        test_real_error_still_triggers,
         # Output format
         test_output_includes_skill_instruction,
         test_creates_error_context_file,

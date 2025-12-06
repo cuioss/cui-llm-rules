@@ -1,0 +1,44 @@
+# Default Error Detection Exclusions
+#
+# Lines starting with # are comments
+# Each non-empty line is a literal string that, if found in output,
+# will prevent error detection from triggering (false positive exclusion)
+#
+# For project-specific exclusions, create .plan/error-exclusions.txt
+
+# Test result patterns (success cases)
+0 tests failed
+0 failures
+0 errors
+Passed: 0, Failed: 0
+Failed: 0
+
+# Build success indicators
+BUILD SUCCESS
+Build successful
+
+# Documentation/code patterns (not actual errors)
+exception handling
+error handling
+error-handling
+error_handling
+on_error
+onError
+handleError
+handle_error
+catchException
+catch_exception
+
+# Informational messages
+not found in PATH
+No issues found
+No errors found
+No warnings found
+
+# Git/version control
+nothing to commit
+no changes
+
+# Common tool output patterns
+0 problems found
+All checks passed

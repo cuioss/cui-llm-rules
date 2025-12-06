@@ -6,18 +6,25 @@
 #
 # Part of the Reversed Hook Architecture:
 # 1. Hook detects errors (simple pattern matching)
-# 2. Hook collects context and STOPS execution
-# 3. Hook instructs LLM to load error-handling skill
-# 4. Error-handling skill takes over with full LLM capabilities
+# 2. Hook checks exclusions (false positive prevention)
+# 3. Hook collects context and STOPS execution
+# 4. Hook instructs LLM to load error-handling skill
+# 5. Error-handling skill takes over with full LLM capabilities
 #
-# Installation: Copy to .claude/hooks/ or configure in settings.json with full path
+# Exclusion files (checked in order):
+# 1. .plan/error-exclusions.txt (project-specific)
+# 2. <skill>/defaults/exclusions.txt (skill defaults)
 
 RESULT=$(cat)
 TOOL_NAME="${CLAUDE_TOOL_NAME:-unknown}"
 TIMESTAMP=$(date -Iseconds)
 
+# Get script directory (for finding default exclusions)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+DEFAULT_EXCLUSIONS="${SKILL_DIR}/defaults/exclusions.txt"
+
 # Find project root by searching for .plan directory
-# Start from current directory and search upward
 find_project_root() {
     local dir="$PWD"
     while [[ "$dir" != "/" ]]; do
@@ -33,13 +40,47 @@ find_project_root() {
 
 PROJECT_ROOT="$(find_project_root)"
 ERROR_CONTEXT_FILE="${PROJECT_ROOT}/.plan/error-context.toon"
+PROJECT_EXCLUSIONS="${PROJECT_ROOT}/.plan/error-exclusions.txt"
 
 # Ensure .plan directory exists
 mkdir -p "${PROJECT_ROOT}/.plan"
 
+# Check if output matches any exclusion pattern
+# Returns 0 if excluded (false positive), 1 if not excluded
+check_exclusions() {
+    local output="$1"
+    local exclusion_file="$2"
+
+    # Skip if file doesn't exist
+    [[ ! -f "$exclusion_file" ]] && return 1
+
+    # Read each non-comment, non-empty line and check for match
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        # Skip comments and empty lines
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+
+        # Check if exclusion pattern is found in output (case-insensitive)
+        if echo "$output" | grep -qiF "$line"; then
+            return 0  # Excluded (false positive)
+        fi
+    done < "$exclusion_file"
+
+    return 1  # Not excluded
+}
+
 # Simple error pattern detection
 # Matches: status: error, exit code N (where N > 0), Unknown skill, not found, failed, exception
 if echo "$RESULT" | grep -qiE "(status[[:space:]]*:[[:space:]]*error|exit code [1-9]|Unknown skill|skill not found|not found|failed|exception)"; then
+
+    # Check exclusions before triggering error
+    # Check project-specific exclusions first, then defaults
+    if check_exclusions "$RESULT" "$PROJECT_EXCLUSIONS"; then
+        exit 0  # False positive - excluded by project config
+    fi
+
+    if check_exclusions "$RESULT" "$DEFAULT_EXCLUSIONS"; then
+        exit 0  # False positive - excluded by defaults
+    fi
 
     # Extract error patterns matched (first 3 unique matches)
     PATTERNS=$(echo "$RESULT" | grep -oiE "(status[[:space:]]*:[[:space:]]*error|exit code [1-9]|Unknown skill|skill not found|not found|failed|exception)" | head -3 | tr '\n' ',' | sed 's/,$//')
