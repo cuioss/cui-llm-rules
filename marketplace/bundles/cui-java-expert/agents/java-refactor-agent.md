@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: target="src/main/java/auth/TokenValidator.java", refactor_type="extract-method"
   - Output: {status: "success", changes: [...], build_status: "SUCCESS"}
-tools: Read, Edit, Write, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
 ---
 
 # Java Refactor Agent
 
 Autonomous code refactoring with CUI standards compliance and build verification.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

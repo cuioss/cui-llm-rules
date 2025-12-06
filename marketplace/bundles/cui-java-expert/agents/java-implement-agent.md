@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: description="Add user authentication service", module="auth-service"
   - Output: {status: "success", files_created: [...], build_status: "SUCCESS"}
-tools: Read, Edit, Write, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
 ---
 
 # Java Implement Agent
 
 Autonomous Java feature implementation with CUI standards compliance and build verification.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

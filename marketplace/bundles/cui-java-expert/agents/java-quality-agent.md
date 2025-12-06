@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: target="src/main/java/auth/", module="auth-service"
   - Output: {compliance_rate: 85, violations: [...], recommendations: [...]}
-tools: Read, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: haiku
 ---
 
 # Java Quality Agent
 
 Code quality and standards compliance analysis (read-only, no modifications).
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

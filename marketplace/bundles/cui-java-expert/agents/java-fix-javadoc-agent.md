@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: module="auth-service", max_iterations=3
   - Output: {status: "success", fixed: 8, errors_by_type: {unclosed_tag: 3}}
-tools: Read, Edit, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: haiku
 ---
 
 # Java Fix JavaDoc Agent
 
 Autonomous JavaDoc error fixing with minimal, content-preserving fixes.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

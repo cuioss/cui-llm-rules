@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: module="auth-service", threshold=80
   - Output: {coverage_status: "below_threshold", line: 72.5, gaps_by_priority: {...}}
-tools: Read, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: haiku
 ---
 
 # Java Coverage Agent
 
 Coverage analysis and gap identification (read-only, no modifications).
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

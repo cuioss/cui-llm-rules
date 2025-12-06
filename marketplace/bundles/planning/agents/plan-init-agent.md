@@ -1,12 +1,20 @@
 ---
 name: plan-init-agent
 description: Initialize a plan from description, lesson, or issue
-tools: Read, Bash, Skill, AskUserQuestion
+tools: Read, Write, Edit, Glob, Grep, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Init Agent
 
 Thin wrapper that delegates to `planning:plan-init` skill.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

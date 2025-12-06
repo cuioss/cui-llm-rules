@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: module="auth-service", fix_production_code=false
   - Output: {status: "success", fixed: 3, requires_production_fix: false}
-tools: Read, Edit, Write, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
 ---
 
 # Java Fix Tests Agent
 
 Autonomous test failure fixing with optional production code fixes.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

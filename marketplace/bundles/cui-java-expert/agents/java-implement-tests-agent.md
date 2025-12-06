@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: target_class="TokenValidator", coverage_target=80
   - Output: {status: "success", tests_generated: 8, coverage: {line: 85.0}}
-tools: Read, Edit, Write, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
 ---
 
 # Java Implement Tests Agent
 
 Autonomous test implementation with CUI testing standards and coverage verification.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

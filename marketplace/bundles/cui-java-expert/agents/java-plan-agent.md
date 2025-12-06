@@ -1,13 +1,21 @@
 ---
 name: java-plan-agent
 description: Create implementation tasks from specifications
-tools: Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
 ---
 
 # Java Plan Agent
 
 Thin wrapper that delegates to `cui-java-expert:java-plan` skill. Writes tasks directly to plan storage.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Input
 

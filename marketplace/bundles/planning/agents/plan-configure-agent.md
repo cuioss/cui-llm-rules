@@ -1,12 +1,20 @@
 ---
 name: plan-configure-agent
 description: Analyze requirements and configure plan with type detection
-tools: Read, Bash, Skill, AskUserQuestion
+tools: Read, Write, Edit, Glob, Grep, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Configure Agent
 
 Thin wrapper that delegates to `planning:plan-configure` skill.
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 

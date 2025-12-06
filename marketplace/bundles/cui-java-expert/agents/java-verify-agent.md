@@ -6,13 +6,21 @@ description: |
   Examples:
   - Input: target="src/main/java/auth/TokenValidator.java"
   - Output: {compliant: true, checklist: {...}, issues: []}
-tools: Read, Glob, Grep, Skill
+tools: Read, Write, Edit, Glob, Grep, Skill
 model: haiku
 ---
 
 # Java Verify Agent
 
 Standards verification for Java code (read-only, no modifications).
+
+## Step 0: Load Development Rules
+
+```
+Skill: general-tools:general-development-rules
+```
+
+This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
 
 ## Parameters
 
