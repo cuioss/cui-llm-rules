@@ -19,6 +19,21 @@ Activate when:
 
 ---
 
+## Script Path Resolution
+
+**MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+```
+Skill: general-tools:script-runner
+Resolve: planning:manage-config/scripts/manage-config.py
+Resolve: planning:manage-references/scripts/manage-references.py
+Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+```
+
+Use the resolved absolute paths in all Bash commands.
+
+---
+
 ## Configuration Source
 
 All finalize configuration is read from config.toon (written during configure):
@@ -26,7 +41,7 @@ All finalize configuration is read from config.toon (written during configure):
 Script: `planning:manage-config/scripts/manage-config.py`
 
 ```bash
-python3 {script_path} read \
+python3 {resolved_manage_config} read \
   --plan-id {plan_id}
 ```
 
@@ -48,7 +63,7 @@ python3 {script_path} read \
 ### Step 1: Read Configuration
 
 ```bash
-python3 {script_path} read \
+python3 {resolved_manage_config} read \
   --plan-id {plan_id}
 ```
 
@@ -59,7 +74,7 @@ Also read references.toon for branch and issue information:
 Script: `planning:manage-references/scripts/manage-references.py`
 
 ```bash
-python3 {script_path} read \
+python3 {resolved_manage_references} read \
   --plan-id {plan_id}
 ```
 
@@ -129,7 +144,7 @@ Transition to complete:
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ```bash
-python3 {script_path} transition \
+python3 {resolved_manage_lifecycle} transition \
   --plan-id {plan_id} \
   --completed finalize
 ```

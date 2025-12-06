@@ -226,25 +226,88 @@ When lesson is created:
 
 ## Usage in Other Skills
 
-Skills that need to run scripts should:
+**CRITICAL**: Skills that call scripts from OTHER skills (cross-skill references) MUST include script path resolution. Without this, the executing agent cannot resolve the portable notation to an absolute path.
 
-1. **Document the notation** in their SKILL.md:
+### Required Pattern for Cross-Skill Script References
+
+Skills that need to run scripts from OTHER skills should include a **Script Path Resolution** section:
+
+```markdown
+## Script Path Resolution
+
+**MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+\`\`\`
+Skill: general-tools:script-runner
+Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+Resolve: planning:manage-files/scripts/manage-files.py
+\`\`\`
+
+Use the resolved absolute paths in all Bash commands:
+
+\`\`\`bash
+python3 {resolved_manage_lifecycle} create --plan-id my-feature
+python3 {resolved_manage_files} write --plan-id my-feature --file task.md
+\`\`\`
+```
+
+### Variable Naming Convention
+
+Use `{resolved_<script_name>}` pattern:
+- `planning:manage-lifecycle/scripts/manage-lifecycle.py` → `{resolved_manage_lifecycle}`
+- `planning:manage-files/scripts/manage-files.py` → `{resolved_manage_files}`
+- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py` → `{resolved_analyze_markdown}`
+
+### Step-by-Step Integration
+
+1. **Add resolution section** at the top of your skill's Operations/Workflow area:
    ```markdown
-   Script: `cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py`
-   ```
+   ## Script Path Resolution
 
-2. **Invoke script-runner to resolve**:
-   ```
+   **MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+   \`\`\`
    Skill: general-tools:script-runner
-   Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py
+   Resolve: {bundle}:{skill}/scripts/{script}.py
+   \`\`\`
    ```
 
-3. **Use the returned absolute path**:
+2. **Update all bash commands** to use resolved paths:
    ```bash
-   python3 {resolved_path} --scope marketplace
+   # Before (WRONG - won't work)
+   python3 {script_path} create --plan-id {plan_id}
+
+   # After (CORRECT)
+   python3 {resolved_manage_lifecycle} create --plan-id {plan_id}
    ```
 
-Or simply read `.claude/scripts.local.json` directly and use the absolute path.
+3. **Document the script** for reference:
+   ```markdown
+   Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+   ```
+
+### Common Mistake
+
+**DO NOT** just document the notation without resolution:
+
+```markdown
+# WRONG - Agent won't know how to get the absolute path
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+
+\`\`\`bash
+python3 {script_path} exists --plan-id {plan_id}
+\`\`\`
+```
+
+This causes "Exit code 2" errors because `{script_path}` is never resolved.
+
+### Verification Checklist
+
+For skills that execute scripts:
+- [ ] Has "Script Path Resolution" section
+- [ ] Lists all scripts to resolve via script-runner
+- [ ] All bash commands use `{resolved_*}` variable names
+- [ ] No raw `{script_path}` placeholders
 
 ## Integration with tools-setup-project-permissions
 

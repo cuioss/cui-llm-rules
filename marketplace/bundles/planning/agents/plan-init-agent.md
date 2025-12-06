@@ -1,7 +1,7 @@
 ---
 name: plan-init-agent
 description: Initialize a plan from description, lesson, or issue
-tools: Skill
+tools: Read, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Init Agent

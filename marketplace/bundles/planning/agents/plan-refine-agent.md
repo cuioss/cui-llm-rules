@@ -1,7 +1,7 @@
 ---
 name: plan-refine-agent
 description: Create specifications and tasks from requirements
-tools: Skill
+tools: Read, Write, Bash, Skill, Task, AskUserQuestion
 ---
 
 # Plan Refine Agent

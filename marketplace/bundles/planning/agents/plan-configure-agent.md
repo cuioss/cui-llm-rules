@@ -1,7 +1,7 @@
 ---
 name: plan-configure-agent
 description: Analyze requirements and configure plan with type detection
-tools: Skill
+tools: Read, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Configure Agent

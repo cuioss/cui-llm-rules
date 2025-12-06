@@ -21,6 +21,27 @@ Activate when:
 
 ---
 
+## Script Path Resolution
+
+**MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+```
+Skill: general-tools:script-runner
+Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+Resolve: planning:manage-files/scripts/manage-files.py
+Resolve: planning:manage-references/scripts/manage-references.py
+Resolve: planning:manage-lessons/scripts/manage-lesson.py
+```
+
+Use the resolved absolute paths in all Bash commands:
+
+```bash
+python3 {resolved_manage_lifecycle} create --plan-id my-feature
+python3 {resolved_manage_files} write --plan-id my-feature --file task.md
+```
+
+---
+
 ## Operation: create
 
 **Input** (exactly ONE required):
@@ -58,10 +79,10 @@ def derive_plan_id(input_source):
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ```bash
-python3 {script_path} exists --plan-id {plan_id}
+python3 {resolved_manage_lifecycle} read --plan-id {plan_id}
 ```
 
-If exists, use AskUserQuestion:
+If exit code 0 (plan exists), use AskUserQuestion:
 - **Resume**: Continue with existing plan
 - **Replace**: Delete and recreate
 - **Rename**: Use different plan_id

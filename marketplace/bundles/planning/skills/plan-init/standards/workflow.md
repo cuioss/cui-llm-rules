@@ -173,7 +173,7 @@ recovery: Use resume option or provide different plan_id
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Create directory, status, check exists |
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Create directory, status, check plan via read |
 | `planning:manage-files/scripts/manage-files.py` | Write task.md |
 | `planning:manage-references/scripts/manage-references.py` | Initialize references |
 | `planning:manage-log/scripts/manage-work-log.py` | Log creation |

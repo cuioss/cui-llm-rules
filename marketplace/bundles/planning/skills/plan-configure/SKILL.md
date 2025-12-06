@@ -24,6 +24,22 @@ Activate when `plan-configure-agent` delegates with:
 
 ---
 
+## Script Path Resolution
+
+**MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+```
+Skill: general-tools:script-runner
+Resolve: planning:manage-files/scripts/manage-files.py
+Resolve: planning:manage-requirements/scripts/manage-requirement.py
+Resolve: planning:manage-config/scripts/manage-config.py
+Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+```
+
+Use the resolved absolute paths in all Bash commands.
+
+---
+
 ## Workflow: Configure
 
 Execute this workflow when invoked.
@@ -33,7 +49,7 @@ Execute this workflow when invoked.
 Read the original task input from task.md:
 
 ```bash
-python3 {manage_files_path} read \
+python3 {resolved_manage_files} read \
   --plan-id {plan_id} \
   --file task.md
 ```
@@ -68,7 +84,7 @@ AskUserQuestion:
 For each identified requirement, create via manage-requirements:
 
 ```bash
-python3 {manage_requirements_path} add \
+python3 {resolved_manage_requirements} add \
   --plan-id {plan_id} \
   --title "Requirement title" \
   --body "Detailed requirement description"
@@ -112,7 +128,7 @@ AskUserQuestion:
 Create config.toon with base settings:
 
 ```bash
-python3 {manage_config_path} create \
+python3 {resolved_manage_config} create \
   --plan-id {plan_id} \
   --plan-type {plan_type}
 ```
@@ -147,7 +163,7 @@ The phase transitions from init → refine after configuration completes.
 Use manage-lifecycle to track:
 
 ```bash
-python3 {manage_lifecycle_path} transition \
+python3 {resolved_manage_lifecycle} transition \
   --plan-id {plan_id} \
   --completed-phase init
 ```
