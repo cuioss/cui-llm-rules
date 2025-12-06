@@ -12,6 +12,24 @@ allowed-tools: Read, Write, Bash, Skill, Task, AskUserQuestion
 
 **CRITICAL**: Use Python scripts via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
 
+---
+
+## Script Path Resolution
+
+**MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+```
+Skill: general-tools:script-runner
+Resolve: planning:manage-config/scripts/manage-config.py
+Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+Resolve: planning:manage-log/scripts/manage-work-log.py
+Resolve: planning:manage-references/scripts/manage-references.py
+```
+
+Use the resolved absolute paths in all Bash commands.
+
+---
+
 ## Plan-Type Skill API
 
 All plan-type skills implement two operations for refinement:
@@ -47,22 +65,23 @@ The plan-type skills delegate to domain agents which write directly:
 
 ### Step 0: Log Phase Start
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: refine
-type: progress
-summary: "Starting refine phase"
+Script: `planning:manage-log/scripts/manage-work-log.py`
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type progress \
+  --summary "Starting refine phase"
 ```
 
 ### Step 1: Read Context
 
-```
-Skill: planning:manage-config
-operation: get
-plan_id: {plan_id}
-field: plan_type
+Script: `planning:manage-config/scripts/manage-config.py`
+
+```bash
+python3 {resolved_manage_config} read \
+  --plan-id {plan_id}
 ```
 
 Extract: `plan_type` (java, javascript, plugin-development, simple)
@@ -128,14 +147,15 @@ lessons_recorded: {count}
 
 ### Step 5: Log Completion
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: refine
-type: outcome
-summary: "Completed refine: {specs_created} specs, {tasks_created} tasks"
-detail: "Specifications and tasks created via {plan_type} domain agents"
+Script: `planning:manage-log/scripts/manage-work-log.py`
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type outcome \
+  --summary "Completed refine: {specs_created} specs, {tasks_created} tasks" \
+  --detail "Specifications and tasks created via {plan_type} domain agents"
 ```
 
 ### Step 6: Identify Documentation Needs (Optional)
@@ -151,11 +171,12 @@ If needed, use AskUserQuestion to confirm, then:
 
 ### Step 7: Phase Transition
 
-```
-Skill: planning:manage-lifecycle
-operation: transition
-plan_id: {plan_id}
-completed: refine
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+
+```bash
+python3 {resolved_manage_lifecycle} transition \
+  --plan-id {plan_id} \
+  --completed refine
 ```
 
 ---
@@ -184,22 +205,20 @@ completed: refine
    - Options: Approve / Edit / Add details
 
 5. **Update references**:
-   ```
-   Skill: planning:manage-references
-   operation: add-file
-   plan_id: {plan_id}
-   file: analysis.md
+   ```bash
+   python3 {resolved_manage_references} add-file \
+     --plan-id {plan_id} \
+     --file analysis.md
    ```
 
 6. **Log**:
-   ```
-   Skill: planning:manage-log
-   operation: add
-   plan_id: {plan_id}
-   phase: refine
-   type: artifact
-   summary: "Created analysis.md"
-   detail: "Strategic analysis for complex task: {complexity_factors}"
+   ```bash
+   python3 {resolved_manage_work_log} add \
+     --plan-id {plan_id} \
+     --phase refine \
+     --type artifact \
+     --summary "Created analysis.md" \
+     --detail "Strategic analysis for complex task: {complexity_factors}"
    ```
 
 ---
@@ -208,14 +227,13 @@ completed: refine
 
 On any error, **first log the error** to work-log:
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: refine
-type: error
-summary: "ERROR: {error_type}"
-detail: "{full error context and message}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type error \
+  --summary "ERROR: {error_type}" \
+  --detail "{full error context and message}"
 ```
 
 ### No Requirements Found

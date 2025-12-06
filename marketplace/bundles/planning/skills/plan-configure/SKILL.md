@@ -47,14 +47,14 @@ Execute this workflow when invoked.
 
 ### Step 0: Log Phase Start
 
-Log the start of the configure phase:
+Log the start of the configure step (part of init phase):
 
 ```bash
 python3 {resolved_manage_work_log} add \
   --plan-id {plan_id} \
-  --phase configure \
+  --phase init \
   --type progress \
-  --summary "Starting configure phase"
+  --summary "Starting configure step"
 ```
 
 Script: `planning:manage-log/scripts/manage-work-log.py`
@@ -114,7 +114,7 @@ Creates: `requirements/REQ-001-{slug}.toon`, `REQ-002-...`, etc.
 ```bash
 python3 {resolved_manage_work_log} add \
   --plan-id {plan_id} \
-  --phase configure \
+  --phase init \
   --type artifact \
   --summary "Created {req_id}: {title}" \
   --detail "{brief description of what this requirement covers}"
@@ -158,13 +158,32 @@ AskUserQuestion:
 ```bash
 python3 {resolved_manage_work_log} add \
   --plan-id {plan_id} \
-  --phase configure \
+  --phase init \
   --type decision \
   --summary "Selected {plan_type}" \
   --detail "{reasoning why this plan type was chosen, e.g., 'Task modifies .java files in service layer'}"
 ```
 
-### Step 5: Create Configuration
+### Step 5: Create Status
+
+Create status.toon with detected plan type and phases. This must happen before config.toon creation.
+
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+
+```bash
+python3 {resolved_manage_lifecycle} create \
+  --plan-id {plan_id} \
+  --title "{title_from_task_md}" \
+  --plan-type {plan_type} \
+  --phases init,refine,execute,finalize
+```
+
+**Note**: Phases depend on plan type. Use standard 4-phase for java/javascript/plugin, 3-phase (init,execute,finalize) for generic.
+
+Creates:
+- `.plan/plans/{plan_id}/status.toon` with init phase in_progress
+
+### Step 6: Create Configuration
 
 Create config.toon with base settings:
 
@@ -181,7 +200,7 @@ This creates config.toon with:
 - `compatibility`: deprecations (default)
 - `commit_strategy`: phase-specific (default)
 
-### Step 6: Call Plan-Type Configure
+### Step 7: Call Plan-Type Configure
 
 Delegate to plan-type skill for domain-specific configuration:
 
@@ -197,7 +216,7 @@ This adds finalize configuration to config.toon:
 - `verification_command`: Command for verification
 - `branch_strategy`: feature or direct
 
-### Step 7: Transition Phase
+### Step 8: Transition Phase
 
 The phase transitions from init → refine after configuration completes.
 
@@ -206,21 +225,21 @@ Use manage-lifecycle to track:
 ```bash
 python3 {resolved_manage_lifecycle} transition \
   --plan-id {plan_id} \
-  --completed-phase init
+  --completed init
 ```
 
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
-### Step 8: Log Phase Completion
+### Step 9: Log Phase Completion
 
-Log the outcome of the configure phase:
+Log the outcome of the init phase (configure step complete):
 
 ```bash
 python3 {resolved_manage_work_log} add \
   --plan-id {plan_id} \
-  --phase configure \
+  --phase init \
   --type outcome \
-  --summary "Completed configure: {req_count} requirements, type={plan_type}" \
+  --summary "Completed init: {req_count} requirements, type={plan_type}" \
   --detail "compatibility={compatibility}, commit_strategy={commit_strategy}"
 ```
 
@@ -288,7 +307,7 @@ On script failure:
 ```bash
 python3 {resolved_manage_work_log} add \
   --plan-id {plan_id} \
-  --phase configure \
+  --phase init \
   --type error \
   --summary "ERROR: {error_type}" \
   --detail "{full error context and message}"
@@ -324,5 +343,6 @@ message: manage-requirements failed to create requirement
 | File | Operation |
 |------|-----------|
 | `requirements/*.toon` | Created |
+| `status.toon` | Created (with plan type and phases) |
 | `config.toon` | Created |
-| `status.toon` | Updated (phase transition) |
+| `status.toon` | Updated (phase transition to refine) |

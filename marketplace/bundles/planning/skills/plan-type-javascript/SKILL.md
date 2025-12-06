@@ -18,6 +18,21 @@ allowed-tools: Read, Bash
 
 ---
 
+## Script Path Resolution
+
+**MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+```
+Skill: general-tools:script-runner
+Resolve: planning:manage-log/scripts/manage-work-log.py
+Resolve: planning:manage-config/scripts/manage-config.py
+Resolve: planning:manage-references/scripts/manage-references.py
+```
+
+Use the resolved absolute paths in all Bash commands.
+
+---
+
 ## Characteristics
 
 | Aspect | Value |
@@ -59,14 +74,13 @@ allowed-tools: Read, Bash
 **Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
 
 **Before delegation**, log:
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: refine
-type: progress
-summary: "Delegating to js-specify-agent"
-detail: "requirement_id={requirement_id|batch}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type progress \
+  --summary "Delegating to js-specify-agent" \
+  --detail "requirement_id={requirement_id|batch}"
 ```
 
 **Delegation**:
@@ -77,14 +91,13 @@ Task(cui-frontend-expert:js-specify-agent,
 ```
 
 **After delegation**, log outcome:
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: refine
-type: outcome
-summary: "js-specify-agent completed: {spec_count} specs created"
-detail: "lessons_recorded={count}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type outcome \
+  --summary "js-specify-agent completed: {spec_count} specs created" \
+  --detail "lessons_recorded={count}"
 ```
 
 **Returns**: `{status, spec_ids[], lessons_recorded}`
@@ -103,14 +116,13 @@ The agent analyzes JavaScript codebase, creates specifications with:
 **Input**: `plan_id`, `specification_id?` (optional for single-item mode)
 
 **Before delegation**, log:
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: refine
-type: progress
-summary: "Delegating to js-plan-agent"
-detail: "specification_id={specification_id|batch}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type progress \
+  --summary "Delegating to js-plan-agent" \
+  --detail "specification_id={specification_id|batch}"
 ```
 
 **Delegation**:
@@ -121,14 +133,13 @@ Task(cui-frontend-expert:js-plan-agent,
 ```
 
 **After delegation**, log outcome:
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: refine
-type: outcome
-summary: "js-plan-agent completed: {task_count} tasks created"
-detail: "lessons_recorded={count}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type outcome \
+  --summary "js-plan-agent completed: {task_count} tasks created" \
+  --detail "lessons_recorded={count}"
 ```
 
 **Returns**: `{status, task_ids[], lessons_recorded}`

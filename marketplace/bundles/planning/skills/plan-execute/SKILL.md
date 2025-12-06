@@ -14,6 +14,26 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 **CRITICAL**: Use `update-progress.py` via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
 
+---
+
+## Script Path Resolution
+
+**MANDATORY**: Before executing any script, resolve paths via script-runner.
+
+```
+Skill: general-tools:script-runner
+Resolve: planning:manage-config/scripts/manage-config.py
+Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
+Resolve: planning:manage-log/scripts/manage-work-log.py
+Resolve: planning:manage-tasks/scripts/manage-tasks.py
+Resolve: planning:manage-references/scripts/manage-references.py
+Resolve: planning:plan-execute/scripts/update-progress.py
+```
+
+Use the resolved absolute paths in all Bash commands.
+
+---
+
 ## Standards (Load On-Demand)
 
 ### Workflow
@@ -32,10 +52,11 @@ Contains: Delegation patterns for builds, quality checks, PR creation
 
 For finalize phase, read finalize configuration directly from config.toon:
 
-```
-Skill: planning:manage-config
-operation: read
-plan_id: {plan_id}
+Script: `planning:manage-config/scripts/manage-config.py`
+
+```bash
+python3 {resolved_manage_config} read \
+  --plan-id {plan_id}
 ```
 
 Returns fields including: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
@@ -50,23 +71,25 @@ These fields are written during init by the plan-type skill's `configure` operat
 
 At the start of execute or finalize phase:
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: {phase}
-type: progress
-summary: "Starting {phase} phase"
+Script: `planning:manage-log/scripts/manage-work-log.py`
+
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase {phase} \
+  --type progress \
+  --summary "Starting {phase} phase"
 ```
 
 For each task in current phase:
 
 ### Step 1: Locate Task
 
-```
-Skill: planning:manage-tasks
-operation: next
-plan_id: {plan_id}
+Script: `planning:manage-tasks/scripts/manage-tasks.py`
+
+```bash
+python3 {resolved_manage_tasks} next \
+  --plan-id {plan_id}
 ```
 
 Returns next task with status `pending` or `in_progress`.
@@ -90,14 +113,13 @@ python3 {script_path} --plan-dir {plan_directory} --phase {phase} --task-id {tas
 
 After each task completes:
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: {phase}
-type: artifact
-summary: "Completed {task_id}: {task_title}"
-detail: "{steps_completed} steps executed"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase {phase} \
+  --type artifact \
+  --summary "Completed {task_id}: {task_title}" \
+  --detail "{steps_completed} steps executed"
 ```
 
 ### Step 4: Next Task or Phase
@@ -108,14 +130,13 @@ detail: "{steps_completed} steps executed"
 
 ### Step 5: Log Phase Completion (When phase completes)
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: {phase}
-type: outcome
-summary: "Completed {phase} phase: {tasks_completed} tasks"
-detail: "Transitioning to {next_phase}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase {phase} \
+  --type outcome \
+  --summary "Completed {phase} phase: {tasks_completed} tasks" \
+  --detail "Transitioning to {next_phase}"
 ```
 
 ---
@@ -159,14 +180,13 @@ When transitioning from execute phase to finalize, `transition-phase.py` automat
 
 On any error, **first log the error** to work-log:
 
-```
-Skill: planning:manage-log
-operation: add
-plan_id: {plan_id}
-phase: {phase}
-type: error
-summary: "ERROR: {task_id} failed - {error_type}"
-detail: "{full error context and message}"
+```bash
+python3 {resolved_manage_work_log} add \
+  --plan-id {plan_id} \
+  --phase {phase} \
+  --type error \
+  --summary "ERROR: {task_id} failed - {error_type}" \
+  --detail "{full error context and message}"
 ```
 
 ### Script Failure (Lessons-Learned Capture)

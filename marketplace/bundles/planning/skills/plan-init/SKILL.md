@@ -126,17 +126,16 @@ Extract: title, body, labels, milestone, assignees
 
 ### Step 5: Create Plan Directory
 
-Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+Create the plan directory. The directory will be created automatically when writing task.md via manage-files, but explicit creation ensures the directory exists for all subsequent operations:
 
 ```bash
-python3 {script_path} create \
-  --plan-id {plan_id} \
-  --title "{derived_title}"
+mkdir -p .plan/plans/{plan_id}
 ```
 
 Creates:
 - `.plan/plans/{plan_id}/` directory
-- `.plan/plans/{plan_id}/status.toon` with init phase
+
+**Note**: status.toon is NOT created here. It is created by plan-configure after plan type detection.
 
 ### Step 6: Write task.md
 
@@ -215,11 +214,12 @@ source:
 artifacts:
   directory: .plan/plans/{plan_id}/
   task_md: task.md
-  status: status.toon
   references: references.toon
 
 next: plan-configure-agent
 ```
+
+**Note**: status.toon is created by plan-configure-agent after plan type detection.
 
 ---
 
@@ -279,11 +279,13 @@ This skill is called by `planning:plan-init-agent`. The agent then calls `planni
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Create directory, status |
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Check for existing plan (read only) |
 | `planning:manage-files/scripts/manage-files.py` | Write task.md |
 | `planning:manage-references/scripts/manage-references.py` | Initialize references |
 | `planning:manage-log/scripts/manage-work-log.py` | Log creation |
 | `planning:manage-lessons/scripts/manage-lesson.py` | Read lesson (if source=lesson) |
+
+**Note**: status.toon creation moved to plan-configure skill.
 
 ### Related Skills
 
