@@ -146,6 +146,66 @@ def test_read_plan():
 
 
 # =============================================================================
+# Test: Get Routing Context
+# =============================================================================
+
+def test_get_routing_context():
+    """Test getting routing context combines phase, skill, and progress."""
+    with TestContext(plan_id='routing-plan'):
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'routing-plan',
+            '--title', 'Routing Test',
+            '--plan-type', 'planning:plan-type-java',
+            '--phases', 'init,refine,execute,finalize'
+        )
+        result = run_script(SCRIPT_PATH, 'get-routing-context',
+            '--plan-id', 'routing-plan'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        # Should have current phase
+        assert data['current_phase'] == 'init'
+        # Should have skill routing
+        assert data['skill'] == 'plan-init'
+        # Should have progress
+        assert 'total_phases' in data
+        assert 'completed_phases' in data
+
+
+def test_get_routing_context_after_transition():
+    """Test routing context updates after phase transition."""
+    with TestContext(plan_id='transition-routing'):
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'transition-routing',
+            '--title', 'Transition Test',
+            '--plan-type', 'planning:plan-type-java',
+            '--phases', 'init,refine,execute,finalize'
+        )
+        run_script(SCRIPT_PATH, 'transition',
+            '--plan-id', 'transition-routing',
+            '--completed', 'init'
+        )
+        result = run_script(SCRIPT_PATH, 'get-routing-context',
+            '--plan-id', 'transition-routing'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['current_phase'] == 'refine'
+        assert data['skill'] == 'plan-refine'
+        assert data['completed_phases'] == 1
+
+
+def test_get_routing_context_not_found():
+    """Test get-routing-context with missing plan."""
+    with TestContext():
+        result = run_script(SCRIPT_PATH, 'get-routing-context',
+            '--plan-id', 'nonexistent'
+        )
+        assert not result.success, "Expected failure for missing plan"
+
+
+# =============================================================================
 # Test: List Command
 # =============================================================================
 
@@ -184,6 +244,10 @@ if __name__ == '__main__':
         # Phase operations
         test_set_phase,
         test_read_plan,
+        # Get routing context
+        test_get_routing_context,
+        test_get_routing_context_after_transition,
+        test_get_routing_context_not_found,
         # List command
         test_list_empty,
         test_list_with_plan,

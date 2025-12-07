@@ -343,6 +343,63 @@ def test_next_empty_plan():
         cleanup(temp_dir)
 
 
+def test_next_include_context():
+    """Next with --include-context embeds specification details."""
+    temp_dir = setup_plan_dir()
+    try:
+        # Create a specification first
+        spec_dir = Path(os.environ['PLAN_BASE_DIR']) / 'plans' / 'test-plan' / 'specifications'
+        spec_dir.mkdir(parents=True, exist_ok=True)
+        spec_content = """number: 1
+title: Test Specification
+status: pending
+created: 2025-01-01T00:00:00Z
+updated: 2025-01-01T00:00:00Z
+requirements: REQ-1, REQ-2
+
+body: |
+  This is the specification body.
+"""
+        (spec_dir / 'SPEC-001-test-specification.toon').write_text(spec_content)
+
+        # Create a task referencing that spec
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
+                   '--title', 'Implement feature',
+                   '--specification', 'SPEC-1',
+                   '--description', 'Task description',
+                   '--steps', 'Step one', 'Step two')
+
+        # Get next with context
+        result = run_script(SCRIPT_PATH, 'next', '--plan-id', 'test-plan', '--include-context')
+
+        assert result.returncode == 0, f"Failed: {result.stderr}"
+        assert 'task_number: 1' in result.stdout
+        assert 'specification_title: Test Specification' in result.stdout
+        assert 'specification_body:' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+def test_next_include_context_no_spec():
+    """Next with --include-context handles missing specification gracefully."""
+    temp_dir = setup_plan_dir()
+    try:
+        # Create a task without corresponding spec file
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
+                   '--title', 'Orphan task',
+                   '--specification', 'SPEC-99',
+                   '--description', 'No spec file',
+                   '--steps', 'Step one')
+
+        result = run_script(SCRIPT_PATH, 'next', '--plan-id', 'test-plan', '--include-context')
+
+        assert result.returncode == 0
+        assert 'task_number: 1' in result.stdout
+        assert 'specification_found: false' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
 # =============================================================================
 # Tests: step-start
 # =============================================================================
@@ -775,6 +832,8 @@ if __name__ == '__main__':
         test_next_returns_in_progress_task,
         test_next_returns_null_when_all_done,
         test_next_empty_plan,
+        test_next_include_context,
+        test_next_include_context_no_spec,
         # step-start
         test_step_start_marks_in_progress,
         test_step_start_invalid_step,

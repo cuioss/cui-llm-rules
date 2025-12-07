@@ -89,6 +89,118 @@ def validate_specification(spec_str: str) -> str:
     return spec_str
 
 
+def get_specifications_dir(plan_id: str) -> Path:
+    """Get the specifications directory for a plan.
+
+    Args:
+        plan_id: The plan identifier
+
+    Returns:
+        Path to specifications directory
+    """
+    return base_path('plans', plan_id, 'specifications')
+
+
+def find_specification_file(spec_dir: Path, number: int) -> Optional[Path]:
+    """Find specification file by number.
+
+    Args:
+        spec_dir: Specifications directory
+        number: Specification number
+
+    Returns:
+        Path to file or None if not found
+    """
+    pattern = f"SPEC-{number:03d}-*.toon"
+    matches = list(spec_dir.glob(pattern))
+    return matches[0] if matches else None
+
+
+def parse_specification_file(content: str) -> dict:
+    """Parse a specification TOON file into a dictionary.
+
+    Args:
+        content: File content
+
+    Returns:
+        Dictionary with specification fields
+    """
+    result = {}
+    lines = content.split('\n')
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+
+        if line.startswith('body:'):
+            if line.strip() == 'body: |':
+                body_lines = []
+                i += 1
+                while i < len(lines):
+                    if lines[i].startswith('  '):
+                        body_lines.append(lines[i][2:])
+                    elif lines[i].strip() == '':
+                        body_lines.append('')
+                    else:
+                        break
+                    i += 1
+                result['body'] = '\n'.join(body_lines).strip()
+            else:
+                result['body'] = line[5:].strip()
+                i += 1
+        elif ':' in line and not line.startswith(' '):
+            key, value = line.split(':', 1)
+            key = key.strip()
+            value = value.strip()
+            if key == 'number':
+                value = int(value)
+            result[key] = value
+            i += 1
+        else:
+            i += 1
+
+    return result
+
+
+def get_specification_context(plan_id: str, spec_ref: str) -> Optional[dict]:
+    """Get specification details for including in task context.
+
+    Args:
+        plan_id: The plan identifier
+        spec_ref: Specification reference (e.g., "SPEC-1")
+
+    Returns:
+        Dictionary with specification context or None if not found
+    """
+    # Extract number from SPEC-N reference
+    match = re.match(r'^SPEC-(\d+)$', spec_ref)
+    if not match:
+        return None
+
+    spec_num = int(match.group(1))
+    spec_dir = get_specifications_dir(plan_id)
+
+    if not spec_dir.exists():
+        return None
+
+    spec_file = find_specification_file(spec_dir, spec_num)
+    if not spec_file:
+        return None
+
+    try:
+        content = spec_file.read_text(encoding='utf-8')
+        spec = parse_specification_file(content)
+        return {
+            'specification_found': True,
+            'specification_number': spec.get('number', spec_num),
+            'specification_title': spec.get('title', ''),
+            'specification_requirements': spec.get('requirements', ''),
+            'specification_body': spec.get('body', '')
+        }
+    except Exception:
+        return None
+
+
 def get_tasks_dir(plan_id: str) -> Path:
     """Get the tasks directory for a plan.
 
@@ -333,9 +445,15 @@ def output_toon(data: dict) -> None:
         else:
             lines.append("next:")
             nxt = data['next']
-            for key in ['task_number', 'task_title', 'specification', 'step_number', 'step_title']:
+            for key in ['task_number', 'task_title', 'specification', 'step_number', 'step_title',
+                        'specification_found', 'specification_number', 'specification_title',
+                        'specification_requirements', 'specification_body']:
                 if key in nxt:
-                    lines.append(f"  {key}: {nxt[key]}")
+                    val = nxt[key]
+                    # Convert Python booleans to lowercase for TOON format
+                    if isinstance(val, bool):
+                        val = 'true' if val else 'false'
+                    lines.append(f"  {key}: {val}")
 
     # Context block
     if 'context' in data:
@@ -691,7 +809,8 @@ def cmd_next(args) -> int:
         })
         return 0
 
-    output_toon({
+    # Build base result
+    result = {
         'status': 'success',
         'plan_id': args.plan_id,
         'next': {
@@ -707,7 +826,18 @@ def cmd_next(args) -> int:
             'total_tasks': total_tasks,
             'completed_tasks': completed_tasks
         }
-    })
+    }
+
+    # Include specification context if requested
+    if getattr(args, 'include_context', False):
+        spec_ref = next_task.get('specification', '')
+        spec_context = get_specification_context(args.plan_id, spec_ref)
+        if spec_context:
+            result['next'].update(spec_context)
+        else:
+            result['next']['specification_found'] = False
+
+    output_toon(result)
     return 0
 
 
@@ -1074,6 +1204,8 @@ def build_parser() -> argparse.ArgumentParser:
     # next
     p_next = subparsers.add_parser('next', help='Get next pending task/step')
     p_next.add_argument('--plan-id', required=True, help='Plan identifier')
+    p_next.add_argument('--include-context', action='store_true',
+                        help='Include specification details in output')
 
     # step-start
     p_step_start = subparsers.add_parser('step-start', help='Mark a step as in_progress')

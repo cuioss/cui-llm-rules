@@ -326,6 +326,106 @@ def test_find_all_returns_full_content():
 
 
 # =============================================================================
+# Tests: validate (NEW OPTIMIZATION)
+# =============================================================================
+
+def create_specification(temp_dir, plan_id, number, title, requirements):
+    """Helper to create a specification file."""
+    spec_dir = Path(temp_dir) / '.plan' / 'plans' / plan_id / 'specifications'
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    slug = title.lower().replace(' ', '-')[:40]
+    filename = f"SPEC-{number:03d}-{slug}.toon"
+    content = f"""number: {number}
+title: {title}
+status: pending
+created: 2024-01-01T00:00:00Z
+updated: 2024-01-01T00:00:00Z
+requirements: {requirements}
+
+body: |
+  Test specification body
+"""
+    (spec_dir / filename).write_text(content, encoding='utf-8')
+
+
+def test_validate_all_covered():
+    """Validate shows all requirements are covered."""
+    temp_dir = setup_plan_dir()
+    try:
+        # Create requirements
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First', '--body', 'B1')
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second', '--body', 'B2')
+
+        # Create specifications covering them
+        create_specification(temp_dir, 'test-plan', 1, 'Spec One', 'REQ-1')
+        create_specification(temp_dir, 'test-plan', 2, 'Spec Two', 'REQ-2')
+
+        result = run_script(SCRIPT_PATH, 'validate', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0, f"Failed: {result.stderr}"
+        assert 'status: success' in result.stdout
+        assert 'total_requirements:' in result.stdout
+        assert 'covered:' in result.stdout
+        assert 'uncovered: 0' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+def test_validate_uncovered_requirements():
+    """Validate shows uncovered requirements."""
+    temp_dir = setup_plan_dir()
+    try:
+        # Create requirements
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First', '--body', 'B1')
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second', '--body', 'B2')
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Third', '--body', 'B3')
+
+        # Only cover first requirement
+        create_specification(temp_dir, 'test-plan', 1, 'Spec One', 'REQ-1')
+
+        result = run_script(SCRIPT_PATH, 'validate', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0
+        assert 'uncovered: 2' in result.stdout
+        assert 'REQ-2' in result.stdout
+        assert 'REQ-3' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+def test_validate_empty():
+    """Validate with no requirements."""
+    temp_dir = setup_plan_dir()
+    try:
+        result = run_script(SCRIPT_PATH, 'validate', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0
+        assert 'total_requirements: 0' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+def test_validate_coverage_percentage():
+    """Validate includes coverage percentage."""
+    temp_dir = setup_plan_dir()
+    try:
+        # Create 4 requirements
+        for i in range(1, 5):
+            run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
+                       '--title', f'Req {i}', '--body', f'Body {i}')
+
+        # Cover 2 of them (50%)
+        create_specification(temp_dir, 'test-plan', 1, 'Spec One', 'REQ-1, REQ-2')
+
+        result = run_script(SCRIPT_PATH, 'validate', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0
+        assert 'coverage_percent: 50' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+# =============================================================================
 # Tests: slug generation
 # =============================================================================
 
@@ -391,6 +491,11 @@ if __name__ == '__main__':
         test_remove_preserves_gaps,
         # findAll
         test_find_all_returns_full_content,
+        # validate (optimization)
+        test_validate_all_covered,
+        test_validate_uncovered_requirements,
+        test_validate_empty,
+        test_validate_coverage_percentage,
         # slug
         test_slug_special_characters,
         test_slug_truncation,

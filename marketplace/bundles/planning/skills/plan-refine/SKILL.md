@@ -24,6 +24,8 @@ Resolve: planning:manage-config/scripts/manage-config.py
 Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
 Resolve: planning:manage-log/scripts/manage-work-log.py
 Resolve: planning:manage-references/scripts/manage-references.py
+Resolve: planning:manage-requirements/scripts/manage-requirement.py
+Resolve: planning:manage-specifications/scripts/manage-specification.py
 ```
 
 Use the resolved absolute paths in all Bash commands.
@@ -80,11 +82,12 @@ python3 {resolved_manage_work_log} add \
 Script: `planning:manage-config/scripts/manage-config.py`
 
 ```bash
-python3 {resolved_manage_config} read \
-  --plan-id {plan_id}
+python3 {resolved_manage_config} get-multi \
+  --plan-id {plan_id} \
+  --fields plan_type,compatibility
 ```
 
-Extract: `plan_type` (java, javascript, plugin-development, simple)
+Returns only the required fields: `plan_type` (java, javascript, plugin-development, generic) and `compatibility`.
 
 ### Step 2: Detect Complexity (Optional)
 
@@ -145,7 +148,42 @@ lessons_recorded: {count}
 
 **For generic plans**: Plan-type handles inline (no domain agent delegation).
 
-### Step 5: Log Completion
+### Step 5: Validate Requirements Coverage
+
+Verify all requirements are covered by specifications:
+
+Script: `planning:manage-requirements/scripts/manage-requirement.py`
+
+```bash
+python3 {resolved_manage_requirements} validate \
+  --plan-id {plan_id}
+```
+
+Returns coverage status:
+```toon
+status: success
+total_requirements: 3
+covered: 3
+uncovered: 0
+coverage_percent: 100
+```
+
+If `uncovered > 0`, log a warning and optionally alert the user.
+
+### Step 5.5: Get Traceability Map (Optional)
+
+For complex plans, get the full REQ↔SPEC traceability:
+
+Script: `planning:manage-specifications/scripts/manage-specification.py`
+
+```bash
+python3 {resolved_manage_specifications} get-traceability-map \
+  --plan-id {plan_id}
+```
+
+Returns bidirectional mapping for verification and logging.
+
+### Step 6: Log Completion
 
 Script: `planning:manage-log/scripts/manage-work-log.py`
 
@@ -155,10 +193,10 @@ python3 {resolved_manage_work_log} add \
   --phase refine \
   --type outcome \
   --summary "Completed refine: {specs_created} specs, {tasks_created} tasks" \
-  --detail "Specifications and tasks created via {plan_type} domain agents"
+  --detail "Specifications and tasks created via {plan_type} domain agents. Coverage: {coverage_percent}%"
 ```
 
-### Step 6: Identify Documentation Needs (Optional)
+### Step 7: Identify Documentation Needs (Optional)
 
 Check if ADRs or interfaces should be created:
 
@@ -169,7 +207,7 @@ If needed, use AskUserQuestion to confirm, then:
 - Invoke `cui-documentation-standards:adr-management` or `cui-documentation-standards:interface-management`
 - Update references via `manage-references:add-file`
 
-### Step 7: Phase Transition
+### Step 8: Phase Transition
 
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
@@ -262,15 +300,17 @@ If plan-type skill fails, present options:
 
 ### Skills Used
 
-| Skill | Purpose |
-|-------|---------|
-| `planning:manage-config` | Read plan_type |
-| `planning:manage-lifecycle` | Phase transition |
-| `planning:manage-references` | Track analysis.md, ADRs, interfaces |
-| `planning:manage-log` | Log refine completion |
-| `planning:plan-type-{type}` | **Delegate REQ→SPEC→TASK transformation** |
-| `cui-documentation-standards:adr-management` | Create ADRs (optional) |
-| `cui-documentation-standards:interface-management` | Create interfaces (optional) |
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| `planning:manage-config` | `get-multi` | Read plan_type, compatibility |
+| `planning:manage-requirements` | `validate` | Verify requirements coverage |
+| `planning:manage-specifications` | `get-traceability-map` | REQ↔SPEC mapping (optional) |
+| `planning:manage-lifecycle` | `transition` | Phase transition |
+| `planning:manage-references` | `add-file` | Track analysis.md, ADRs, interfaces |
+| `planning:manage-log` | `add` | Log refine completion |
+| `planning:plan-type-{type}` | `specify`, `plan` | **Delegate REQ→SPEC→TASK transformation** |
+| `cui-documentation-standards:adr-management` | - | Create ADRs (optional) |
+| `cui-documentation-standards:interface-management` | - | Create interfaces (optional) |
 
 ### Related Skills
 - **plan-init** - Previous phase (creates requirements)

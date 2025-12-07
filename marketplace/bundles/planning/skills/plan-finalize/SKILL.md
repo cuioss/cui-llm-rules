@@ -42,9 +42,12 @@ All finalize configuration is read from config.toon (written during configure):
 Script: `planning:manage-config/scripts/manage-config.py`
 
 ```bash
-python3 {resolved_manage_config} read \
-  --plan-id {plan_id}
+python3 {resolved_manage_config} get-multi \
+  --plan-id {plan_id} \
+  --fields create_pr,verification_required,verification_command,branch_strategy
 ```
+
+Returns only the required finalize fields in a single call.
 
 **Config Fields Used**:
 
@@ -74,20 +77,23 @@ python3 {resolved_manage_work_log} add \
 ### Step 1: Read Configuration
 
 ```bash
-python3 {resolved_manage_config} read \
-  --plan-id {plan_id}
+python3 {resolved_manage_config} get-multi \
+  --plan-id {plan_id} \
+  --fields create_pr,verification_required,verification_command,branch_strategy
 ```
 
-Extract: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
+Returns: `create_pr`, `verification_required`, `verification_command`, `branch_strategy` in a single call.
 
-Also read references.toon for branch and issue information:
+Also read references context for branch and issue information:
 
 Script: `planning:manage-references/scripts/manage-references.py`
 
 ```bash
-python3 {resolved_manage_references} read \
+python3 {resolved_manage_references} get-context \
   --plan-id {plan_id}
 ```
+
+Returns: `branch`, `base_branch`, `issue_url`, `build_system`, and file counts in a single call.
 
 **After reading configuration**, log the finalize strategy decision:
 
@@ -316,12 +322,12 @@ Minimal workflow:
 
 ## Scripts Used
 
-| Script | Purpose |
-|--------|---------|
-| `planning:manage-config/scripts/manage-config.py` | Read finalize configuration |
-| `planning:manage-references/scripts/manage-references.py` | Read branch, issue info |
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase transition |
-| `planning:manage-log/scripts/manage-work-log.py` | Log completion |
+| Script | Command | Purpose |
+|--------|---------|---------|
+| `planning:manage-config/scripts/manage-config.py` | `get-multi` | Read finalize config fields |
+| `planning:manage-references/scripts/manage-references.py` | `get-context` | Read branch, issue info |
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | `transition` | Phase transition |
+| `planning:manage-log/scripts/manage-work-log.py` | `add` | Log completion |
 
 ---
 

@@ -205,6 +205,76 @@ def test_set_valid_plan_type():
 
 
 # =============================================================================
+# Test: Get Multi (NEW OPTIMIZATION)
+# =============================================================================
+
+def test_get_multi_all_fields():
+    """Test getting multiple fields in one call."""
+    with TestContext(plan_id='config-multi'):
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-multi',
+            '--plan-type', 'planning:plan-type-java',
+            '--compatibility', 'breaking',
+            '--commit-strategy', 'fine-granular'
+        )
+        result = run_script(SCRIPT_PATH, 'get-multi',
+            '--plan-id', 'config-multi',
+            '--fields', 'plan_type,compatibility,commit_strategy'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['plan_type'] == 'planning:plan-type-java'
+        assert data['compatibility'] == 'breaking'
+        assert data['commit_strategy'] == 'fine-granular'
+
+
+def test_get_multi_subset():
+    """Test getting a subset of fields."""
+    with TestContext(plan_id='config-subset'):
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-subset',
+            '--plan-type', 'planning:plan-type-generic'
+        )
+        result = run_script(SCRIPT_PATH, 'get-multi',
+            '--plan-id', 'config-subset',
+            '--fields', 'plan_type,compatibility'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['plan_type'] == 'planning:plan-type-generic'
+        assert 'compatibility' in data
+
+
+def test_get_multi_missing_field():
+    """Test get-multi with a field that doesn't exist."""
+    with TestContext(plan_id='config-missing'):
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-missing',
+            '--plan-type', 'planning:plan-type-java'
+        )
+        result = run_script(SCRIPT_PATH, 'get-multi',
+            '--plan-id', 'config-missing',
+            '--fields', 'plan_type,nonexistent_field'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['plan_type'] == 'planning:plan-type-java'
+        # Non-existent field should not be in output or be None
+        assert data.get('nonexistent_field') is None
+
+
+def test_get_multi_not_found():
+    """Test get-multi with missing plan."""
+    with TestContext():
+        result = run_script(SCRIPT_PATH, 'get-multi',
+            '--plan-id', 'nonexistent',
+            '--fields', 'plan_type'
+        )
+        assert not result.success, "Expected failure for missing plan"
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 
@@ -222,5 +292,10 @@ if __name__ == '__main__':
         test_set_invalid_plan_type_format,
         test_set_plan_type_skill_not_found,
         test_set_valid_plan_type,
+        # Get multi (optimization)
+        test_get_multi_all_fields,
+        test_get_multi_subset,
+        test_get_multi_missing_field,
+        test_get_multi_not_found,
     ])
     sys.exit(runner.run())

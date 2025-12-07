@@ -502,6 +502,54 @@ def cmd_route(args):
     })
 
 
+def cmd_get_routing_context(args):
+    """Get combined routing context: phase, skill, and progress in one call."""
+    if not validate_plan_id(args.plan_id):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        })
+        sys.exit(1)
+
+    status = read_status(args.plan_id)
+    if not status:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'file_not_found',
+            'message': 'status.toon not found'
+        })
+        sys.exit(1)
+
+    current_phase = status.get('current_phase', 'unknown')
+    phases = status.get('phases', [])
+
+    # Calculate progress
+    total = len(phases)
+    completed = sum(1 for p in phases if p.get('status') == 'done')
+
+    # Get skill routing
+    skill = 'unknown'
+    description = 'Unknown phase'
+    if current_phase in PHASE_ROUTING:
+        skill, description = PHASE_ROUTING[current_phase]
+
+    output_toon({
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'title': status.get('title', ''),
+        'plan_type': status.get('plan_type', ''),
+        'current_phase': current_phase,
+        'skill': skill,
+        'skill_description': description,
+        'total_phases': total,
+        'completed_phases': completed,
+        'phases': [{'name': p['name'], 'status': p['status']} for p in phases]
+    })
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Manage plan lifecycle with status.toon and phase operations'
@@ -566,6 +614,12 @@ def main():
     route_parser = subparsers.add_parser('route', help='Get skill for phase')
     route_parser.add_argument('--phase', required=True, help='Phase name')
     route_parser.set_defaults(func=cmd_route)
+
+    # get-routing-context
+    routing_context_parser = subparsers.add_parser('get-routing-context',
+        help='Get combined routing context (phase, skill, progress)')
+    routing_context_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    routing_context_parser.set_defaults(func=cmd_get_routing_context)
 
     args = parser.parse_args()
     args.func(args)

@@ -539,6 +539,92 @@ def test_slug_truncation():
 
 
 # =============================================================================
+# Tests: get-traceability-map
+# =============================================================================
+
+def test_get_traceability_map_single_spec():
+    """Get traceability map with one specification."""
+    temp_dir = setup_plan_dir()
+    try:
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
+                   '--title', 'First spec',
+                   '--requirements', 'REQ-1',
+                   '--body', 'Body 1')
+
+        result = run_script(SCRIPT_PATH, 'get-traceability-map', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0
+        assert 'status: success' in result.stdout
+        # REQ to SPEC mapping
+        assert 'REQ-1' in result.stdout
+        assert 'SPEC-1' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+def test_get_traceability_map_multiple_specs_multiple_reqs():
+    """Get traceability map with multiple specs and requirements."""
+    temp_dir = setup_plan_dir()
+    try:
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
+                   '--title', 'First spec',
+                   '--requirements', 'REQ-1,REQ-2',
+                   '--body', 'Body 1')
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
+                   '--title', 'Second spec',
+                   '--requirements', 'REQ-2,REQ-3',
+                   '--body', 'Body 2')
+
+        result = run_script(SCRIPT_PATH, 'get-traceability-map', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0
+        # All requirements should appear
+        assert 'REQ-1' in result.stdout
+        assert 'REQ-2' in result.stdout
+        assert 'REQ-3' in result.stdout
+        # Both specs should appear
+        assert 'SPEC-1' in result.stdout
+        assert 'SPEC-2' in result.stdout
+        # Should have totals
+        assert 'total_requirements:' in result.stdout
+        assert 'total_specifications:' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+def test_get_traceability_map_empty():
+    """Get traceability map with no specifications."""
+    temp_dir = setup_plan_dir()
+    try:
+        result = run_script(SCRIPT_PATH, 'get-traceability-map', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0
+        assert 'total_requirements: 0' in result.stdout
+        assert 'total_specifications: 0' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+def test_get_traceability_map_includes_coverage():
+    """Get traceability map includes coverage statistics."""
+    temp_dir = setup_plan_dir()
+    try:
+        run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
+                   '--title', 'First spec',
+                   '--requirements', 'REQ-1',
+                   '--body', 'Body 1')
+        run_script(SCRIPT_PATH, 'check', '--plan-id', 'test-plan', '--number', '1', '--status', 'done')
+
+        result = run_script(SCRIPT_PATH, 'get-traceability-map', '--plan-id', 'test-plan')
+
+        assert result.returncode == 0
+        # Should have status counts
+        assert 'pending:' in result.stdout or 'done:' in result.stdout
+    finally:
+        cleanup(temp_dir)
+
+
+# =============================================================================
 # Tests: file content verification
 # =============================================================================
 
@@ -606,5 +692,10 @@ if __name__ == '__main__':
         test_slug_truncation,
         # file content
         test_file_contains_requirements_field,
+        # get-traceability-map
+        test_get_traceability_map_single_spec,
+        test_get_traceability_map_multiple_specs_multiple_reqs,
+        test_get_traceability_map_empty,
+        test_get_traceability_map_includes_coverage,
     ])
     sys.exit(runner.run())

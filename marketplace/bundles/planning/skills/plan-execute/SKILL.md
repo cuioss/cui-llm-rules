@@ -55,11 +55,12 @@ For finalize phase, read finalize configuration directly from config.toon:
 Script: `planning:manage-config/scripts/manage-config.py`
 
 ```bash
-python3 {resolved_manage_config} read \
-  --plan-id {plan_id}
+python3 {resolved_manage_config} get-multi \
+  --plan-id {plan_id} \
+  --fields create_pr,verification_required,verification_command,branch_strategy
 ```
 
-Returns fields including: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
+Returns only the required finalize fields in a single call: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`.
 
 These fields are written during init by the plan-type skill's `configure` operation.
 
@@ -67,7 +68,36 @@ These fields are written during init by the plan-type skill's `configure` operat
 
 ## Execution Loop
 
-### Step 0: Log Phase Start (Once per phase)
+### Step 0: Get Routing Context (Once at start)
+
+Get current phase, skill routing, and progress in a single call:
+
+Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+
+```bash
+python3 {resolved_manage_lifecycle} get-routing-context \
+  --plan-id {plan_id}
+```
+
+Returns:
+```toon
+status: success
+plan_id: {plan_id}
+current_phase: execute
+skill: planning:plan-execute
+skill_description: Execute phase skill for task implementation
+total_phases: 4
+completed_phases: 2
+phases:
+- init: complete
+- refine: complete
+- execute: in_progress
+- finalize: pending
+```
+
+Use `current_phase` for logging, `skill` for dynamic routing, and `completed_phases/total_phases` for progress display.
+
+### Step 0.5: Log Phase Start (Once per phase)
 
 At the start of execute or finalize phase:
 
@@ -83,16 +113,17 @@ python3 {resolved_manage_work_log} add \
 
 For each task in current phase:
 
-### Step 1: Locate Task
+### Step 1: Locate Task with Context
 
 Script: `planning:manage-tasks/scripts/manage-tasks.py`
 
 ```bash
 python3 {resolved_manage_tasks} next \
-  --plan-id {plan_id}
+  --plan-id {plan_id} \
+  --include-context
 ```
 
-Returns next task with status `pending` or `in_progress`.
+Returns next task with status `pending` or `in_progress`, including embedded specification context (title, body, requirements) for immediate use without additional script calls.
 
 ### Step 2: Execute Steps
 
@@ -213,12 +244,15 @@ python3 {resolved_manage_work_log} add \
 - **/plan-execute** - Primary command invoking this skill
 
 ### Skills Used
-- **manage-config** - Configuration CRUD (includes finalize config)
-- **manage-lifecycle** - Phase transitions
-- **manage-tasks** - Task and step operations
-- **manage-references** - Reference file CRUD
-- **manage-log** - Work log entries
-- **git-workflow** - Commit operations
+
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| `planning:manage-lifecycle` | `get-routing-context` | Phase, skill routing, progress |
+| `planning:manage-config` | `get-multi` | Finalize config fields |
+| `planning:manage-tasks` | `next --include-context` | Task with specification context |
+| `planning:manage-log` | `add` | Work log entries |
+| `planning:manage-references` | - | Reference file CRUD |
+| `planning:git-workflow` | - | Commit operations |
 
 ### Related Skills
 - **plan-init** - Creates plan structure

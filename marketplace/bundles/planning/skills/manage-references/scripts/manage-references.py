@@ -269,6 +269,53 @@ def cmd_remove_file(args):
     })
 
 
+def cmd_get_context(args):
+    """Get all references context in one call."""
+    if not validate_plan_id(args.plan_id):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        })
+        sys.exit(1)
+
+    refs = read_references(args.plan_id)
+    if not refs:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'file_not_found',
+            'message': 'references.toon not found'
+        })
+        sys.exit(1)
+
+    # Build comprehensive context
+    context = {
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'branch': refs.get('branch', ''),
+        'base_branch': refs.get('base_branch', 'main'),
+        'modified_files_count': len(refs.get('modified_files', [])),
+        'config_files_count': len(refs.get('config_files', [])),
+        'test_files_count': len(refs.get('test_files', []))
+    }
+
+    # Include optional fields if present
+    if refs.get('issue_url'):
+        context['issue_url'] = refs['issue_url']
+    if refs.get('build_system'):
+        context['build_system'] = refs['build_system']
+
+    # Include file lists if requested
+    if args.include_files:
+        context['modified_files'] = refs.get('modified_files', [])
+        context['config_files'] = refs.get('config_files', [])
+        context['test_files'] = refs.get('test_files', [])
+
+    output_toon(context)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Manage references.toon files'
@@ -312,6 +359,14 @@ def main():
     remove_file_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     remove_file_parser.add_argument('--file', required=True, help='File path to remove')
     remove_file_parser.set_defaults(func=cmd_remove_file)
+
+    # get-context
+    get_context_parser = subparsers.add_parser('get-context',
+        help='Get all references context in one call')
+    get_context_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    get_context_parser.add_argument('--include-files', action='store_true',
+        help='Include full file lists in output')
+    get_context_parser.set_defaults(func=cmd_get_context)
 
     args = parser.parse_args()
     args.func(args)

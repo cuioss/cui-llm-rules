@@ -700,6 +700,67 @@ def cmd_find_by_requirement(args) -> int:
     return 0
 
 
+def cmd_get_traceability_map(args) -> int:
+    """Handle 'get-traceability-map' subcommand.
+
+    Builds a complete bidirectional mapping between requirements and specifications.
+    """
+    spec_dir = get_specifications_dir(args.plan_id)
+    all_specs = get_all_specifications(spec_dir)
+
+    # Build REQ -> SPEC mapping
+    req_to_specs = {}  # REQ-N -> [SPEC-N, ...]
+    spec_to_reqs = {}  # SPEC-N -> [REQ-N, ...]
+
+    for _, spec in all_specs:
+        spec_num = spec['number']
+        spec_ref = f"SPEC-{spec_num}"
+        reqs = parse_requirements(spec.get('requirements', ''))
+        spec_to_reqs[spec_ref] = reqs
+
+        for req in reqs:
+            if req not in req_to_specs:
+                req_to_specs[req] = []
+            if spec_ref not in req_to_specs[req]:
+                req_to_specs[req].append(spec_ref)
+
+    # Compute counts
+    pending = sum(1 for _, s in all_specs if s.get('status') == 'pending')
+    done = sum(1 for _, s in all_specs if s.get('status') == 'done')
+
+    # Build output
+    lines = [
+        "status: success",
+        f"plan_id: {args.plan_id}",
+        f"total_requirements: {len(req_to_specs)}",
+        f"total_specifications: {len(all_specs)}",
+        f"pending: {pending}",
+        f"done: {done}",
+        "",
+        "req_to_specs:"
+    ]
+
+    # Sort requirements by number
+    sorted_reqs = sorted(req_to_specs.keys(), key=lambda r: int(r.split('-')[1]))
+    for req in sorted_reqs:
+        specs = req_to_specs[req]
+        specs_str = ', '.join(sorted(specs, key=lambda s: int(s.split('-')[1])))
+        lines.append(f"  {req}: {specs_str}")
+
+    lines.append("")
+    lines.append("spec_to_reqs:")
+
+    # Sort specifications by number
+    sorted_specs = sorted(spec_to_reqs.keys(), key=lambda s: int(s.split('-')[1]))
+    for spec in sorted_specs:
+        reqs = spec_to_reqs[spec]
+        reqs_str = ', '.join(sorted(reqs, key=lambda r: int(r.split('-')[1])))
+        lines.append(f"  {spec}: {reqs_str}")
+
+    print('\n'.join(lines))
+    return 0
+
+
 # ============================================================================
 # CLI setup
 # ============================================================================
@@ -765,6 +826,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_find_by_req.add_argument('--requirement', required=True,
                                help='Requirement reference (e.g., REQ-1)')
 
+    # get-traceability-map
+    p_traceability = subparsers.add_parser('get-traceability-map',
+                                           help='Get bidirectional REQ-SPEC mapping')
+    p_traceability.add_argument('--plan-id', required=True, help='Plan identifier')
+
     return parser
 
 
@@ -790,6 +856,8 @@ def main() -> int:
             return cmd_check(args)
         elif args.command == 'findByRequirement':
             return cmd_find_by_requirement(args)
+        elif args.command == 'get-traceability-map':
+            return cmd_get_traceability_map(args)
         else:
             output_error(f"Unknown command: {args.command}")
             return 1

@@ -522,6 +522,94 @@ def cmd_get(args) -> int:
     return 0
 
 
+def get_specifications_dir(plan_id: str) -> Path:
+    """Get the specifications directory for a plan."""
+    return base_path('plans', plan_id, 'specifications')
+
+
+def get_all_specifications(spec_dir: Path) -> list:
+    """Get all specifications sorted by number."""
+    if not spec_dir.exists():
+        return []
+
+    specs = []
+    for f in sorted(spec_dir.glob("SPEC-*.toon")):
+        content = f.read_text(encoding='utf-8')
+        # Simple parsing for requirements field
+        spec = {}
+        for line in content.split('\n'):
+            if line.startswith('requirements:'):
+                spec['requirements'] = line.split(':', 1)[1].strip()
+                break
+        specs.append(spec)
+
+    return specs
+
+
+def cmd_validate(args) -> int:
+    """Handle 'validate' subcommand - validate requirements coverage."""
+    req_dir = get_requirements_dir(args.plan_id)
+    spec_dir = get_specifications_dir(args.plan_id)
+
+    # Get all requirements
+    all_reqs = get_all_requirements(req_dir)
+    total_reqs = len(all_reqs)
+
+    if total_reqs == 0:
+        output_toon({
+            'status': 'success',
+            'plan_id': args.plan_id,
+            'total_requirements': 0,
+            'covered': 0,
+            'uncovered': 0,
+            'coverage_percent': 100
+        })
+        return 0
+
+    # Get all specifications and extract covered requirements
+    all_specs = get_all_specifications(spec_dir)
+    covered_reqs = set()
+
+    for spec in all_specs:
+        req_str = spec.get('requirements', '')
+        for req in req_str.split(','):
+            req = req.strip()
+            if req.startswith('REQ-'):
+                covered_reqs.add(req)
+
+    # Find uncovered requirements
+    uncovered_list = []
+    for _, req in all_reqs:
+        req_ref = f"REQ-{req['number']}"
+        if req_ref not in covered_reqs:
+            uncovered_list.append({
+                'ref': req_ref,
+                'title': req['title']
+            })
+
+    covered_count = total_reqs - len(uncovered_list)
+    coverage_percent = int((covered_count / total_reqs) * 100) if total_reqs > 0 else 100
+
+    # Build output
+    lines = [
+        "status: success",
+        f"plan_id: {args.plan_id}",
+        f"total_requirements: {total_reqs}",
+        f"covered: {covered_count}",
+        f"uncovered: {len(uncovered_list)}",
+        f"coverage_percent: {coverage_percent}"
+    ]
+
+    if uncovered_list:
+        lines.append("")
+        lines.append("uncovered_requirements:")
+        for req in uncovered_list:
+            lines.append(f"  - {req['ref']}: {req['title']}")
+
+    print('\n'.join(lines))
+    return 0
+
+
 def cmd_check(args) -> int:
     """Handle 'check' subcommand."""
     req_dir = get_requirements_dir(args.plan_id)
@@ -614,6 +702,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_check.add_argument('--status', required=True, choices=['pending', 'done'],
                          help='New status')
 
+    # validate
+    p_validate = subparsers.add_parser('validate', help='Validate requirements coverage')
+    p_validate.add_argument('--plan-id', required=True, help='Plan identifier')
+
     return parser
 
 
@@ -637,6 +729,8 @@ def main() -> int:
             return cmd_get(args)
         elif args.command == 'check':
             return cmd_check(args)
+        elif args.command == 'validate':
+            return cmd_validate(args)
         else:
             output_error(f"Unknown command: {args.command}")
             return 1

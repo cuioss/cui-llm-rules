@@ -241,6 +241,43 @@ def cmd_set(args):
     output_toon(result)
 
 
+def cmd_get_multi(args):
+    """Get multiple fields in one call."""
+    if not validate_plan_id(args.plan_id):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        })
+        sys.exit(1)
+
+    config = read_config(args.plan_id)
+    if not config:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'file_not_found',
+            'message': 'config.toon not found'
+        })
+        sys.exit(1)
+
+    # Parse requested fields
+    fields = [f.strip() for f in args.fields.split(',') if f.strip()]
+
+    result = {
+        'status': 'success',
+        'plan_id': args.plan_id
+    }
+
+    # Add requested fields to result (only if they exist)
+    for field in fields:
+        if field in config:
+            result[field] = config[field]
+
+    output_toon(result)
+
+
 def cmd_create(args):
     """Create config.toon with initial values."""
     if not validate_plan_id(args.plan_id):
@@ -340,6 +377,13 @@ def main():
     set_parser.add_argument('--field', required=True, help='Field name')
     set_parser.add_argument('--value', required=True, help='Field value')
     set_parser.set_defaults(func=cmd_set)
+
+    # get-multi
+    get_multi_parser = subparsers.add_parser('get-multi', help='Get multiple fields in one call')
+    get_multi_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    get_multi_parser.add_argument('--fields', required=True,
+                                  help='Comma-separated field names (e.g., plan_type,compatibility)')
+    get_multi_parser.set_defaults(func=cmd_get_multi)
 
     # create (simplified to 3 fields)
     create_parser = subparsers.add_parser('create', help='Create config.toon')
