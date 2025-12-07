@@ -12,6 +12,8 @@ Options:
     --scope <value>          Directory scope: marketplace, global, project (default: marketplace)
     --resource-types <types> Resource types: agents, commands, skills, scripts, or comma-separated (default: all)
     --include-descriptions   Extract descriptions from YAML frontmatter
+    --name-pattern <pattern> Filter resources by name pattern (fnmatch glob, pipe-separated for multiple)
+    --bundles <names>        Filter to specific bundles (comma-separated)
 
 Exit codes:
     0 - Success (JSON output)
@@ -19,12 +21,17 @@ Exit codes:
 """
 
 import argparse
+import fnmatch
 import json
 import os
 import re
 import sys
 from pathlib import Path
 from typing import Optional
+
+
+# Constants
+MARKETPLACE_BUNDLES_PATH = "marketplace/bundles"
 
 
 def find_bundles(base_path: Path) -> list[Path]:
@@ -159,16 +166,81 @@ def discover_scripts(bundle_dir: Path) -> list[dict]:
     return scripts
 
 
+def matches_name_pattern(name: str, patterns: list[str]) -> bool:
+    """Check if name matches any of the given fnmatch patterns."""
+    if not patterns:
+        return True
+    return any(fnmatch.fnmatch(name, pattern) for pattern in patterns)
+
+
+def filter_resources_by_pattern(resources: list[dict], patterns: list[str]) -> list[dict]:
+    """Filter resources list by name patterns."""
+    if not patterns:
+        return resources
+    return [r for r in resources if matches_name_pattern(r.get('name', ''), patterns)]
+
+
+VALID_RESOURCE_TYPES = ("agents", "commands", "skills", "scripts")
+
+
+def parse_resource_types(resource_types_str: str) -> tuple[dict, Optional[str]]:
+    """Parse resource types string and return inclusion flags and optional error."""
+    if resource_types_str == "all":
+        return dict.fromkeys(VALID_RESOURCE_TYPES, True), None
+
+    include = dict.fromkeys(VALID_RESOURCE_TYPES, False)
+    for rtype in resource_types_str.split(","):
+        rtype = rtype.strip()
+        if rtype in VALID_RESOURCE_TYPES:
+            include[rtype] = True
+        else:
+            return include, f"Invalid resource type: {rtype}"
+
+    return include, None
+
+
+def process_bundle(bundle_dir: Path, include: dict, include_descriptions: bool,
+                   name_patterns: list[str]) -> dict:
+    """Process a single bundle directory and return its data."""
+    bundle = {
+        "name": bundle_dir.name,
+        "path": str(bundle_dir.relative_to(Path.cwd()))
+    }
+
+    # Discover and filter resources
+    agents = discover_agents(bundle_dir, include_descriptions) if include["agents"] else []
+    commands = discover_commands(bundle_dir, include_descriptions) if include["commands"] else []
+    skills = discover_skills(bundle_dir, include_descriptions) if include["skills"] else []
+    scripts = discover_scripts(bundle_dir) if include["scripts"] else []
+
+    # Apply name pattern filter
+    bundle["agents"] = filter_resources_by_pattern(agents, name_patterns)
+    bundle["commands"] = filter_resources_by_pattern(commands, name_patterns)
+    bundle["skills"] = filter_resources_by_pattern(skills, name_patterns)
+    bundle["scripts"] = filter_resources_by_pattern(scripts, name_patterns)
+
+    # Bundle statistics
+    bundle["statistics"] = {
+        "agents": len(bundle["agents"]),
+        "commands": len(bundle["commands"]),
+        "skills": len(bundle["skills"]),
+        "scripts": len(bundle["scripts"]),
+        "total_resources": sum(len(bundle[k]) for k in ["agents", "commands", "skills", "scripts"])
+    }
+
+    return bundle
+
+
 def get_base_path(scope: str) -> Path:
     """Determine base path based on scope."""
     if scope == "marketplace":
         # Try current directory first, then parent
-        if (Path.cwd() / "marketplace/bundles").is_dir():
-            return Path.cwd() / "marketplace/bundles"
-        elif (Path.cwd().parent / "marketplace/bundles").is_dir():
-            return Path.cwd().parent / "marketplace/bundles"
+        if (Path.cwd() / MARKETPLACE_BUNDLES_PATH).is_dir():
+            return Path.cwd() / MARKETPLACE_BUNDLES_PATH
+        elif (Path.cwd().parent / MARKETPLACE_BUNDLES_PATH).is_dir():
+            return Path.cwd().parent / MARKETPLACE_BUNDLES_PATH
         else:
-            raise FileNotFoundError("marketplace/bundles directory not found")
+            raise FileNotFoundError(f"{MARKETPLACE_BUNDLES_PATH} directory not found")
     elif scope == "global":
         return Path.home() / ".claude"
     elif scope == "project":
@@ -197,32 +269,31 @@ def main():
         action="store_true",
         help="Extract descriptions from YAML frontmatter"
     )
+    parser.add_argument(
+        "--name-pattern",
+        default="",
+        help="Filter resources by name pattern (fnmatch glob, pipe-separated for multiple)"
+    )
+    parser.add_argument(
+        "--bundles",
+        default="",
+        help="Filter to specific bundles (comma-separated)"
+    )
 
     args = parser.parse_args()
 
-    # Parse resource types
-    include_agents = False
-    include_commands = False
-    include_skills = False
-    include_scripts = False
+    # Parse name patterns (pipe-separated for multiple patterns)
+    name_patterns = [p.strip() for p in args.name_pattern.split("|") if p.strip()] if args.name_pattern else []
 
-    if args.resource_types == "all":
-        include_agents = include_commands = include_skills = include_scripts = True
-    else:
-        for rtype in args.resource_types.split(","):
-            rtype = rtype.strip()
-            if rtype == "agents":
-                include_agents = True
-            elif rtype == "commands":
-                include_commands = True
-            elif rtype == "skills":
-                include_skills = True
-            elif rtype == "scripts":
-                include_scripts = True
-            else:
-                print(f"ERROR: Invalid resource type: {rtype}", file=sys.stderr)
-                print("Valid values: agents, commands, skills, scripts", file=sys.stderr)
-                return 1
+    # Parse bundle filter
+    bundle_filter = {b.strip() for b in args.bundles.split(",") if b.strip()} if args.bundles else set()
+
+    # Parse resource types
+    include, error = parse_resource_types(args.resource_types)
+    if error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        print(f"Valid values: {', '.join(VALID_RESOURCE_TYPES)}", file=sys.stderr)
+        return 1
 
     # Get base path
     try:
@@ -235,48 +306,22 @@ def main():
         print(f"ERROR: Base path not found: {base_path}", file=sys.stderr)
         return 1
 
-    # Find bundles
+    # Find and filter bundles
     bundle_dirs = find_bundles(base_path)
+    if bundle_filter:
+        bundle_dirs = [b for b in bundle_dirs if b.name in bundle_filter]
 
     # Build inventory
-    bundles_data = []
-    total_agents = total_commands = total_skills = total_scripts = 0
+    bundles_data = [
+        process_bundle(bundle_dir, include, args.include_descriptions, name_patterns)
+        for bundle_dir in bundle_dirs
+    ]
 
-    for bundle_dir in bundle_dirs:
-        bundle_name = bundle_dir.name
-
-        bundle = {
-            "name": bundle_name,
-            "path": str(bundle_dir.relative_to(Path.cwd()))
-        }
-
-        # Discover resources
-        agents = discover_agents(bundle_dir, args.include_descriptions) if include_agents else []
-        commands = discover_commands(bundle_dir, args.include_descriptions) if include_commands else []
-        skills = discover_skills(bundle_dir, args.include_descriptions) if include_skills else []
-        scripts = discover_scripts(bundle_dir) if include_scripts else []
-
-        bundle["agents"] = agents
-        bundle["commands"] = commands
-        bundle["skills"] = skills
-        bundle["scripts"] = scripts
-
-        # Bundle statistics
-        bundle["statistics"] = {
-            "agents": len(agents),
-            "commands": len(commands),
-            "skills": len(skills),
-            "scripts": len(scripts),
-            "total_resources": len(agents) + len(commands) + len(skills) + len(scripts)
-        }
-
-        bundles_data.append(bundle)
-
-        # Update totals
-        total_agents += len(agents)
-        total_commands += len(commands)
-        total_skills += len(skills)
-        total_scripts += len(scripts)
+    # Calculate totals
+    total_agents = sum(b["statistics"]["agents"] for b in bundles_data)
+    total_commands = sum(b["statistics"]["commands"] for b in bundles_data)
+    total_skills = sum(b["statistics"]["skills"] for b in bundles_data)
+    total_scripts = sum(b["statistics"]["scripts"] for b in bundles_data)
 
     # Output
     output = {

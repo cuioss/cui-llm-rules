@@ -303,6 +303,123 @@ def test_scripts_have_path_formats():
 
 
 # =============================================================================
+# Tests - Name Pattern Filtering
+# =============================================================================
+
+def test_name_pattern_filters_agents():
+    """Test --name-pattern filters agents by pattern."""
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents', '--name-pattern', '*-plan-*')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    total_agents = data.get('statistics', {}).get('total_agents', 0)
+    assert total_agents >= 1, "Should find at least 1 plan-related agent"
+
+    # Verify all agents match the pattern
+    for bundle in data.get('bundles', []):
+        for agent in bundle.get('agents', []):
+            assert '-plan-' in agent['name'], f"Agent {agent['name']} should match *-plan-* pattern"
+
+
+def test_name_pattern_multiple_patterns():
+    """Test --name-pattern with multiple pipe-separated patterns."""
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents', '--name-pattern', '*-plan-*|*-specify-*')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    total_agents = data.get('statistics', {}).get('total_agents', 0)
+    assert total_agents >= 2, "Should find at least 2 agents matching plan or specify patterns"
+
+    # Verify all agents match one of the patterns
+    for bundle in data.get('bundles', []):
+        for agent in bundle.get('agents', []):
+            assert '-plan-' in agent['name'] or '-specify-' in agent['name'], \
+                f"Agent {agent['name']} should match *-plan-* or *-specify-* pattern"
+
+
+def test_name_pattern_no_matches():
+    """Test --name-pattern with pattern that matches nothing."""
+    result = run_script(SCRIPT_PATH, '--name-pattern', 'nonexistent-xyz-pattern')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    total_resources = data.get('statistics', {}).get('total_resources', 0)
+    assert total_resources == 0, "Should find 0 resources with non-matching pattern"
+
+
+def test_name_pattern_skills_filter():
+    """Test --name-pattern filters skills."""
+    result = run_script(SCRIPT_PATH, '--resource-types', 'skills', '--name-pattern', 'plan-*')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    total_skills = data.get('statistics', {}).get('total_skills', 0)
+    assert total_skills >= 1, "Should find at least 1 skill starting with plan-"
+
+    # Verify all skills match the pattern
+    for bundle in data.get('bundles', []):
+        for skill in bundle.get('skills', []):
+            assert skill['name'].startswith('plan-'), f"Skill {skill['name']} should start with plan-"
+
+
+# =============================================================================
+# Tests - Bundle Filtering
+# =============================================================================
+
+def test_bundles_filter_single():
+    """Test --bundles filters to single bundle."""
+    result = run_script(SCRIPT_PATH, '--bundles', 'planning')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    bundles = data.get('bundles', [])
+    assert len(bundles) == 1, f"Should have exactly 1 bundle, found {len(bundles)}"
+    assert bundles[0]['name'] == 'planning', f"Bundle should be 'planning', got '{bundles[0]['name']}'"
+
+
+def test_bundles_filter_multiple():
+    """Test --bundles filters to multiple bundles."""
+    result = run_script(SCRIPT_PATH, '--bundles', 'planning,cui-java-expert')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    bundles = data.get('bundles', [])
+    bundle_names = {b['name'] for b in bundles}
+    assert bundle_names == {'planning', 'cui-java-expert'}, f"Expected planning and cui-java-expert, got {bundle_names}"
+
+
+def test_bundles_filter_nonexistent():
+    """Test --bundles with nonexistent bundle returns empty."""
+    result = run_script(SCRIPT_PATH, '--bundles', 'nonexistent-bundle')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    bundles = data.get('bundles', [])
+    assert len(bundles) == 0, f"Should have 0 bundles for nonexistent filter, found {len(bundles)}"
+
+
+# =============================================================================
+# Tests - Combined Filtering
+# =============================================================================
+
+def test_combined_bundle_and_name_pattern():
+    """Test combining --bundles and --name-pattern filters."""
+    result = run_script(SCRIPT_PATH, '--bundles', 'cui-java-expert', '--resource-types', 'agents', '--name-pattern', '*-plan-*')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    bundles = data.get('bundles', [])
+    assert len(bundles) == 1, "Should have exactly 1 bundle"
+    assert bundles[0]['name'] == 'cui-java-expert', "Bundle should be cui-java-expert"
+
+    # Should find java-plan-agent
+    agents = bundles[0].get('agents', [])
+    assert len(agents) >= 1, "Should find at least 1 plan agent in cui-java-expert"
+    for agent in agents:
+        assert '-plan-' in agent['name'], f"Agent {agent['name']} should match *-plan-*"
+
+
+# =============================================================================
 # Tests - Error Handling
 # =============================================================================
 
@@ -325,11 +442,13 @@ def test_invalid_resource_type_returns_error():
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
+        # Basic Discovery
         test_default_scan_finds_bundles,
         test_default_scan_finds_agents,
         test_default_scan_finds_commands,
         test_default_scan_finds_skills,
         test_default_scope_is_marketplace,
+        # Resource Filtering
         test_agents_only_no_commands,
         test_agents_only_no_skills,
         test_agents_only_has_agents,
@@ -338,14 +457,30 @@ if __name__ == '__main__':
         test_skills_only_no_agents,
         test_skills_only_has_skills,
         test_multiple_types_has_both,
+        # Description Extraction
         test_no_descriptions_returns_null,
         test_with_descriptions_extracts_desc,
+        # JSON Validity
         test_default_produces_valid_json,
         test_with_descriptions_produces_valid_json,
         test_filtered_produces_valid_json,
+        # Bundle Structure
         test_bundles_have_required_fields,
+        # Script Discovery
         test_script_count_matches_filesystem,
         test_scripts_have_path_formats,
+        # Name Pattern Filtering
+        test_name_pattern_filters_agents,
+        test_name_pattern_multiple_patterns,
+        test_name_pattern_no_matches,
+        test_name_pattern_skills_filter,
+        # Bundle Filtering
+        test_bundles_filter_single,
+        test_bundles_filter_multiple,
+        test_bundles_filter_nonexistent,
+        # Combined Filtering
+        test_combined_bundle_and_name_pattern,
+        # Error Handling
         test_invalid_scope_returns_error,
         test_invalid_resource_type_returns_error,
     ])

@@ -43,6 +43,7 @@
     "./skills/manage-references",
     "./skills/manage-lifecycle",
     "./skills/manage-log",
-    "./skills/manage-lessons"
+    "./skills/manage-lessons",
+    "./skills/planning-inventory"
   ]
 }

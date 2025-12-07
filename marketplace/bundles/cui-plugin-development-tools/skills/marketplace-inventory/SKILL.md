@@ -143,6 +143,38 @@ python3 {resolved_path} --include-descriptions
 }
 ```
 
+### --name-pattern (optional)
+
+Filter resources by name using fnmatch glob patterns. Use pipe (`|`) to separate multiple patterns.
+
+| Pattern | Matches |
+|---------|---------|
+| `*-plan-*` | Names containing "-plan-" |
+| `plan-*` | Names starting with "plan-" |
+| `*-agent` | Names ending with "-agent" |
+
+**Examples**:
+```bash
+# Single pattern
+python3 {resolved_path} --name-pattern "*-plan-*"
+
+# Multiple patterns (pipe-separated)
+python3 {resolved_path} --name-pattern "*-plan-*|*-specify-*|plan-*|manage-*"
+```
+
+### --bundles (optional)
+
+Filter to specific bundles by name (comma-separated).
+
+**Example**:
+```bash
+# Single bundle
+python3 {resolved_path} --bundles planning
+
+# Multiple bundles
+python3 {resolved_path} --bundles "planning,cui-java-expert,cui-frontend-expert"
+```
+
 ## Error Handling
 
 If the script fails:
