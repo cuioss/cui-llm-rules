@@ -185,6 +185,62 @@ def cmd_mkdir(args):
     print(f"Created: {target_dir}/", file=sys.stderr)
 
 
+def cmd_create_or_reference(args):
+    """Create plan directory if it doesn't exist, or reference existing one.
+
+    Returns TOON output indicating whether the plan was created or already exists.
+    This replaces the two-step list+check pattern in plan-init.
+    """
+    # Import toon_parser for output
+    sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'))
+    from toon_parser import parse_toon, serialize_toon
+
+    if not validate_plan_id(args.plan_id):
+        result = {
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        }
+        print(serialize_toon(result))
+        sys.exit(1)
+
+    plan_dir = get_plan_dir(args.plan_id)
+
+    if plan_dir.exists():
+        # Plan already exists - gather info about it
+        result = {
+            'status': 'success',
+            'plan_id': args.plan_id,
+            'action': 'exists',
+            'path': str(plan_dir)
+        }
+
+        # Check if status.toon exists to get phase info
+        status_path = plan_dir / 'status.toon'
+        if status_path.exists():
+            try:
+                status = parse_toon(status_path.read_text(encoding='utf-8'))
+                result['current_phase'] = status.get('current_phase', 'unknown')
+                result['plan_type'] = status.get('plan_type', 'unknown')
+            except Exception:
+                # If we can't parse status.toon, just note it exists
+                result['has_status'] = True
+
+        print(serialize_toon(result))
+    else:
+        # Create the plan directory
+        plan_dir.mkdir(parents=True, exist_ok=True)
+
+        result = {
+            'status': 'success',
+            'plan_id': args.plan_id,
+            'action': 'created',
+            'path': str(plan_dir)
+        }
+        print(serialize_toon(result))
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generic file I/O operations for plan directories'
@@ -228,6 +284,12 @@ def main():
     mkdir_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     mkdir_parser.add_argument('--dir', required=True, help='Directory to create')
     mkdir_parser.set_defaults(func=cmd_mkdir)
+
+    # create-or-reference
+    create_ref_parser = subparsers.add_parser('create-or-reference',
+        help='Create plan directory or reference existing one')
+    create_ref_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    create_ref_parser.set_defaults(func=cmd_create_or_reference)
 
     args = parser.parse_args()
     args.func(args)

@@ -173,6 +173,97 @@ def test_mkdir():
 
 
 # =============================================================================
+# Test: Create-or-Reference
+# =============================================================================
+
+class TestContextEmpty:
+    """Context manager for test WITHOUT pre-created plan directory."""
+
+    def __init__(self):
+        self.temp_dir = None
+        self.original_env = None
+
+    def __enter__(self):
+        self.temp_dir = Path(tempfile.mkdtemp())
+        self.original_env = os.environ.get('PLAN_BASE_DIR')
+        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir)
+        # Create plans directory but NOT the plan subdirectory
+        (self.temp_dir / 'plans').mkdir(parents=True, exist_ok=True)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.original_env is None:
+            os.environ.pop('PLAN_BASE_DIR', None)
+        else:
+            os.environ['PLAN_BASE_DIR'] = self.original_env
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def plan_dir(self, plan_id):
+        return self.temp_dir / 'plans' / plan_id
+
+
+def test_create_or_reference_new_plan():
+    """Test create-or-reference creates new plan directory."""
+    with TestContextEmpty() as ctx:
+        result = run_script(SCRIPT_PATH, 'create-or-reference',
+            '--plan-id', 'new-plan'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['action'] == 'created'
+        assert data['plan_id'] == 'new-plan'
+        # Verify directory was created
+        assert ctx.plan_dir('new-plan').exists()
+
+
+def test_create_or_reference_existing_plan():
+    """Test create-or-reference returns exists for existing plan."""
+    with TestContext(plan_id='existing-plan'):
+        result = run_script(SCRIPT_PATH, 'create-or-reference',
+            '--plan-id', 'existing-plan'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['action'] == 'exists'
+        assert data['plan_id'] == 'existing-plan'
+
+
+def test_create_or_reference_existing_with_status():
+    """Test create-or-reference returns phase info when status.toon exists."""
+    with TestContext(plan_id='status-plan') as ctx:
+        # Create status.toon with phase info
+        status_content = """title: Test Plan
+plan_type: planning:plan-type-java
+current_phase: refine
+"""
+        (ctx.plan_dir / 'status.toon').write_text(status_content)
+
+        result = run_script(SCRIPT_PATH, 'create-or-reference',
+            '--plan-id', 'status-plan'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['action'] == 'exists'
+        assert data['current_phase'] == 'refine'
+        assert data['plan_type'] == 'planning:plan-type-java'
+
+
+def test_create_or_reference_invalid_plan_id():
+    """Test create-or-reference rejects invalid plan IDs."""
+    with TestContextEmpty():
+        result = run_script(SCRIPT_PATH, 'create-or-reference',
+            '--plan-id', 'Invalid_Plan'
+        )
+        assert not result.success, "Expected failure for invalid plan ID"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'error'
+        assert data['error'] == 'invalid_plan_id'
+
+
+# =============================================================================
 # Test: Invalid Plan IDs
 # =============================================================================
 
@@ -213,6 +304,11 @@ if __name__ == '__main__':
         # Remove and Mkdir
         test_remove_file,
         test_mkdir,
+        # Create-or-Reference
+        test_create_or_reference_new_plan,
+        test_create_or_reference_existing_plan,
+        test_create_or_reference_existing_with_status,
+        test_create_or_reference_invalid_plan_id,
         # Invalid plan IDs
         test_invalid_plan_id_uppercase,
         test_invalid_plan_id_underscore,

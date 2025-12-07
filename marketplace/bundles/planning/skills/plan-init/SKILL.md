@@ -27,7 +27,6 @@ Activate when:
 
 ```
 Skill: general-tools:script-runner
-Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
 Resolve: planning:manage-files/scripts/manage-files.py
 Resolve: planning:manage-references/scripts/manage-references.py
 Resolve: planning:manage-lessons/scripts/manage-lesson.py
@@ -37,7 +36,7 @@ Resolve: planning:manage-log/scripts/manage-work-log.py
 Use the resolved absolute paths in all Bash commands:
 
 ```bash
-python3 {resolved_manage_lifecycle} create --plan-id my-feature
+python3 {resolved_manage_files} create-or-reference --plan-id my-feature
 python3 {resolved_manage_files} write --plan-id my-feature --file task.md
 ```
 
@@ -87,20 +86,22 @@ def derive_plan_id(input_source):
     # Always: kebab-case, max 50 chars
 ```
 
-### Step 3: Check for Existing Plan
+### Step 3: Create or Reference Plan
 
-Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+Script: `planning:manage-files/scripts/manage-files.py`
 
 ```bash
-python3 {resolved_manage_lifecycle} list
+python3 {resolved_manage_files} create-or-reference --plan-id {plan_id}
 ```
 
-Parse the TOON output and check if `{plan_id}` is in the list of existing plan IDs.
+Parse the TOON output. The `action` field indicates:
+- `action: created` - New plan directory was created, continue to Step 4
+- `action: exists` - Plan already exists, prompt user
 
-If plan exists, use AskUserQuestion:
-- **Resume**: Continue with existing plan
-- **Replace**: Delete and recreate
-- **Rename**: Use different plan_id
+If `action: exists`, use AskUserQuestion:
+- **Resume**: Continue with existing plan (skip to Step 9 with existing data)
+- **Replace**: Delete plan directory and re-run create-or-reference
+- **Rename**: Ask for new plan_id and re-run from Step 2
 
 ### Step 4: Get Task Content
 
@@ -126,9 +127,9 @@ gh issue view {issue} --json title,body,labels,milestone,assignees
 
 Extract: title, body, labels, milestone, assignees
 
-### Step 5: Create Plan Directory
+### Step 5: Plan Directory Ready
 
-The plan directory is created automatically by manage-files when writing task.md (Step 6). No explicit directory creation needed.
+The plan directory was created in Step 3 by `create-or-reference`. No additional action needed.
 
 **Note**: status.toon is NOT created here. It is created by plan-configure after plan type detection.
 
@@ -273,8 +274,7 @@ This skill is called by `planning:plan-init-agent`. The agent then calls `planni
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | List existing plans to check for conflicts |
-| `planning:manage-files/scripts/manage-files.py` | Write task.md |
+| `planning:manage-files/scripts/manage-files.py` | Create/reference plan directory, write task.md |
 | `planning:manage-references/scripts/manage-references.py` | Initialize references |
 | `planning:manage-log/scripts/manage-work-log.py` | Log creation |
 | `planning:manage-lessons/scripts/manage-lesson.py` | Read lesson (if source=lesson) |

@@ -13,9 +13,9 @@ User Request (description, lesson_id, or issue)
 │                                                     │
 │   1. Validate input (exactly one source)            │
 │   2. Derive plan_id from input                      │
-│   3. Check for existing plan (ask if exists)        │
+│   3. Create or reference plan (single atomic call)  │
 │   4. Get task content from source                   │
-│   5. Create plan directory and status.toon          │
+│   5. Plan directory ready                           │
 │   6. Write task.md (preserves original input)       │
 │   7. Initialize references.toon (branch only)       │
 │   8. Log creation                                   │
@@ -121,9 +121,8 @@ AskUserQuestion:
 - [ ] Plan ID format: kebab-case, max 50 chars
 
 ### Output Validation
-- [ ] Plan directory created (via manage-files)
+- [ ] Plan directory created (via manage-files create-or-reference)
 - [ ] task.md created with complete original input
-- [ ] status.toon created with init phase
 - [ ] references.toon created with branch
 - [ ] Work-log entry written
 - [ ] plan_id returned
@@ -173,8 +172,7 @@ recovery: Use resume option or provide different plan_id
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Create directory, status, check plan via read |
-| `planning:manage-files/scripts/manage-files.py` | Write task.md |
+| `planning:manage-files/scripts/manage-files.py` | Create/reference plan directory, write task.md |
 | `planning:manage-references/scripts/manage-references.py` | Initialize references |
 | `planning:manage-log/scripts/manage-work-log.py` | Log creation |
 | `planning:manage-lessons/scripts/manage-lesson.py` | Read lesson content |

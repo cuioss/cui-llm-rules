@@ -13,6 +13,7 @@ Generic file operations for plan directories. Provides basic CRUD operations for
 - Generic file read/write/remove operations
 - Directory listing and creation
 - File existence checking
+- Plan directory create-or-reference (atomic check/create)
 - No content validation (caller provides complete content)
 
 ## When to Activate This Skill
@@ -128,6 +129,37 @@ python3 {script_path} mkdir \
 ```
 
 **Output**: Confirmation message to stderr, exit code 0 on success
+
+### create-or-reference
+
+Create a plan directory if it doesn't exist, or reference an existing one. This is an atomic operation that replaces the two-step pattern of listing plans and checking for conflicts.
+
+```bash
+python3 {script_path} create-or-reference \
+  --plan-id {plan_id}
+```
+
+**Output** (TOON format):
+
+When plan is newly created:
+```toon
+status: success
+plan_id: my-feature
+action: created
+path: /path/to/.plan/plans/my-feature
+```
+
+When plan already exists:
+```toon
+status: success
+plan_id: my-feature
+action: exists
+path: /path/to/.plan/plans/my-feature
+current_phase: refine
+plan_type: planning:plan-type-java
+```
+
+**Use case**: Called by plan-init to atomically check/create plan directories.
 
 ---
 
