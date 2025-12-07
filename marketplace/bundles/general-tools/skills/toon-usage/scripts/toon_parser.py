@@ -352,8 +352,16 @@ def parse_toon(content: str) -> dict[str, Any]:
         ) from e
 
 
-def _serialize_value(value: Any) -> str:
-    """Serialize a Python value to TOON format."""
+def _serialize_value(value: Any, indent: int = 0) -> str:
+    """Serialize a Python value to TOON format.
+
+    Args:
+        value: Value to serialize
+        indent: Current indentation level for nested structures
+
+    Returns:
+        TOON formatted string (may be multi-line for complex types)
+    """
     if value is None:
         return 'null'
     if isinstance(value, bool):
@@ -365,22 +373,43 @@ def _serialize_value(value: Any) -> str:
         if ',' in value or ':' in value or '\n' in value:
             return f'"{value}"'
         return value
+    if isinstance(value, dict):
+        # Serialize dict as inline or nested based on complexity
+        return str(value)  # Fallback - dicts should be handled by serialize_toon
+    if isinstance(value, list):
+        # Lists should be handled by serialize_toon
+        return str(value)  # Fallback
     return str(value)
 
 
 def _is_uniform_array(arr: list) -> tuple[bool, list[str]]:
-    """Check if array is uniform (all dicts with same keys)."""
+    """Check if array is uniform (all dicts with compatible keys).
+
+    Returns True if all items are dicts. Uses union of all keys found,
+    allowing optional fields (missing keys serialize as empty).
+
+    Args:
+        arr: List to check
+
+    Returns:
+        Tuple of (is_uniform, field_names)
+    """
     if not arr:
         return False, []
 
     if not all(isinstance(item, dict) for item in arr):
         return False, []
 
-    first_keys = set(arr[0].keys())
-    if not all(set(item.keys()) == first_keys for item in arr):
-        return False, []
+    # Collect union of all keys across all items (preserves order from first occurrence)
+    all_keys = []
+    seen_keys = set()
+    for item in arr:
+        for key in item.keys():
+            if key not in seen_keys:
+                all_keys.append(key)
+                seen_keys.add(key)
 
-    return True, list(arr[0].keys())
+    return True, all_keys
 
 
 def serialize_toon(data: dict[str, Any], indent: int = 0) -> str:

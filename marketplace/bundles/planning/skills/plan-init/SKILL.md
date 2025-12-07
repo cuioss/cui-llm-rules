@@ -21,23 +21,22 @@ Activate when:
 
 ---
 
-## Script Path Resolution
+## Script Paths
 
-**MANDATORY**: Before executing any script, resolve paths via script-runner.
+Scripts are located relative to the skill base directory. Use these paths:
 
-```
-Skill: general-tools:script-runner
-Resolve: planning:manage-files/scripts/manage-files.py
-Resolve: planning:manage-references/scripts/manage-references.py
-Resolve: planning:manage-lessons/scripts/manage-lesson.py
-Resolve: planning:manage-log/scripts/manage-work-log.py
-```
+| Script | Path |
+|--------|------|
+| manage-files | `planning:manage-files/scripts/manage-files.py` |
+| manage-references | `planning:manage-references/scripts/manage-references.py` |
+| manage-lessons | `planning:manage-lessons/scripts/manage-lesson.py` |
+| manage-work-log | `planning:manage-log/scripts/manage-work-log.py` |
 
-Use the resolved absolute paths in all Bash commands:
+Example usage:
 
 ```bash
-python3 {resolved_manage_files} create-or-reference --plan-id my-feature
-python3 {resolved_manage_files} write --plan-id my-feature --file task.md
+python3 {manage_files_path} create-or-reference --plan-id my-feature
+python3 {manage_files_path} write --plan-id my-feature --file task.md
 ```
 
 ---
@@ -57,7 +56,7 @@ python3 {resolved_manage_files} write --plan-id my-feature --file task.md
 After deriving the plan_id (Step 2) and creating the plan directory (Step 5), log the phase start:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type progress \
@@ -91,7 +90,7 @@ def derive_plan_id(input_source):
 Script: `planning:manage-files/scripts/manage-files.py`
 
 ```bash
-python3 {resolved_manage_files} create-or-reference --plan-id {plan_id}
+python3 {manage_files_path} create-or-reference --plan-id {plan_id}
 ```
 
 Parse the TOON output. The `action` field indicates:
@@ -169,14 +168,14 @@ python3 {script_path} write \
 Script: `planning:manage-references/scripts/manage-references.py`
 
 ```bash
-python3 {script_path} write \
+python3 {manage_references_path} create \
   --plan-id {plan_id} \
   --branch "$(git branch --show-current)"
 ```
 
 If issue source, also include:
 ```bash
-python3 {script_path} write \
+python3 {manage_references_path} create \
   --plan-id {plan_id} \
   --branch {branch} \
   --issue-url {issue_url}
@@ -187,7 +186,7 @@ python3 {script_path} write \
 Log the plan creation as an artifact:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type artifact \
@@ -223,7 +222,7 @@ next: plan-configure-agent
 On any error, **first log the error** to work-log (if plan directory exists):
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type error \

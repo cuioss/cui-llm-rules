@@ -24,20 +24,17 @@ Activate when `plan-configure-agent` delegates with:
 
 ---
 
-## Script Path Resolution
+## Script Paths
 
-**MANDATORY**: Before executing any script, resolve paths via script-runner.
+Scripts are located relative to the skill base directory. Use these paths:
 
-```
-Skill: general-tools:script-runner
-Resolve: planning:manage-files/scripts/manage-files.py
-Resolve: planning:manage-requirements/scripts/manage-requirement.py
-Resolve: planning:manage-config/scripts/manage-config.py
-Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
-Resolve: planning:manage-log/scripts/manage-work-log.py
-```
-
-Use the resolved absolute paths in all Bash commands.
+| Script | Path |
+|--------|------|
+| manage-files | `planning:manage-files/scripts/manage-files.py` |
+| manage-requirements | `planning:manage-requirements/scripts/manage-requirement.py` |
+| manage-config | `planning:manage-config/scripts/manage-config.py` |
+| manage-lifecycle | `planning:manage-lifecycle/scripts/manage-lifecycle.py` |
+| manage-work-log | `planning:manage-log/scripts/manage-work-log.py` |
 
 ---
 
@@ -50,7 +47,7 @@ Execute this workflow when invoked.
 Log the start of the configure step (part of init phase):
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type progress \
@@ -64,7 +61,7 @@ Script: `planning:manage-log/scripts/manage-work-log.py`
 Read the original task input from task.md:
 
 ```bash
-python3 {resolved_manage_files} read \
+python3 {manage_files_path} read \
   --plan-id {plan_id} \
   --file task.md
 ```
@@ -99,7 +96,7 @@ AskUserQuestion:
 For each identified requirement, create via manage-requirements:
 
 ```bash
-python3 {resolved_manage_requirements} add \
+python3 {manage_requirements_path} add \
   --plan-id {plan_id} \
   --title "Requirement title" \
   --body "Detailed requirement description"
@@ -112,7 +109,7 @@ Creates: `requirements/REQ-001-{slug}.toon`, `REQ-002-...`, etc.
 **After each requirement**, log the artifact:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type artifact \
@@ -156,7 +153,7 @@ AskUserQuestion:
 **After detecting plan type**, log the decision with reasoning:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type decision \
@@ -171,7 +168,7 @@ Create status.toon with detected plan type and phases. This must happen before c
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ```bash
-python3 {resolved_manage_lifecycle} create \
+python3 {manage_lifecycle_path} create \
   --plan-id {plan_id} \
   --title "{title_from_task_md}" \
   --plan-type {plan_type} \
@@ -188,7 +185,7 @@ Creates:
 Create config.toon with base settings:
 
 ```bash
-python3 {resolved_manage_config} create \
+python3 {manage_config_path} create \
   --plan-id {plan_id} \
   --plan-type {plan_type}
 ```
@@ -223,7 +220,7 @@ The phase transitions from init → refine after configuration completes.
 Use manage-lifecycle to track:
 
 ```bash
-python3 {resolved_manage_lifecycle} transition \
+python3 {manage_lifecycle_path} transition \
   --plan-id {plan_id} \
   --completed init
 ```
@@ -235,7 +232,7 @@ Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 Log the outcome of the init phase (configure step complete):
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type outcome \
@@ -305,7 +302,7 @@ On script failure:
 1. **Log the error** to work-log:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase init \
   --type error \

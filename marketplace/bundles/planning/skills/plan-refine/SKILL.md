@@ -14,21 +14,18 @@ allowed-tools: Read, Write, Bash, Skill, Task, AskUserQuestion
 
 ---
 
-## Script Path Resolution
+## Script Paths
 
-**MANDATORY**: Before executing any script, resolve paths via script-runner.
+Scripts are located relative to the skill base directory. Use these paths:
 
-```
-Skill: general-tools:script-runner
-Resolve: planning:manage-config/scripts/manage-config.py
-Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
-Resolve: planning:manage-log/scripts/manage-work-log.py
-Resolve: planning:manage-references/scripts/manage-references.py
-Resolve: planning:manage-requirements/scripts/manage-requirement.py
-Resolve: planning:manage-specifications/scripts/manage-specification.py
-```
-
-Use the resolved absolute paths in all Bash commands.
+| Script | Path |
+|--------|------|
+| manage-config | `planning:manage-config/scripts/manage-config.py` |
+| manage-lifecycle | `planning:manage-lifecycle/scripts/manage-lifecycle.py` |
+| manage-work-log | `planning:manage-log/scripts/manage-work-log.py` |
+| manage-references | `planning:manage-references/scripts/manage-references.py` |
+| manage-requirements | `planning:manage-requirements/scripts/manage-requirement.py` |
+| manage-specifications | `planning:manage-specifications/scripts/manage-specification.py` |
 
 ---
 
@@ -70,7 +67,7 @@ The plan-type skills delegate to domain agents which write directly:
 Script: `planning:manage-log/scripts/manage-work-log.py`
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -82,7 +79,7 @@ python3 {resolved_manage_work_log} add \
 Script: `planning:manage-config/scripts/manage-config.py`
 
 ```bash
-python3 {resolved_manage_config} get-multi \
+python3 {manage_config_path} get-multi \
   --plan-id {plan_id} \
   --fields plan_type,compatibility
 ```
@@ -155,7 +152,7 @@ Verify all requirements are covered by specifications:
 Script: `planning:manage-requirements/scripts/manage-requirement.py`
 
 ```bash
-python3 {resolved_manage_requirements} validate \
+python3 {manage_requirements_path} validate \
   --plan-id {plan_id}
 ```
 
@@ -177,7 +174,7 @@ For complex plans, get the full REQ↔SPEC traceability:
 Script: `planning:manage-specifications/scripts/manage-specification.py`
 
 ```bash
-python3 {resolved_manage_specifications} get-traceability-map \
+python3 {manage_specifications_path} get-traceability-map \
   --plan-id {plan_id}
 ```
 
@@ -188,7 +185,7 @@ Returns bidirectional mapping for verification and logging.
 Script: `planning:manage-log/scripts/manage-work-log.py`
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
@@ -212,7 +209,7 @@ If needed, use AskUserQuestion to confirm, then:
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ```bash
-python3 {resolved_manage_lifecycle} transition \
+python3 {manage_lifecycle_path} transition \
   --plan-id {plan_id} \
   --completed refine
 ```
@@ -244,14 +241,14 @@ python3 {resolved_manage_lifecycle} transition \
 
 5. **Update references**:
    ```bash
-   python3 {resolved_manage_references} add-file \
+   python3 {manage_references_path} add-file \
      --plan-id {plan_id} \
      --file analysis.md
    ```
 
 6. **Log**:
    ```bash
-   python3 {resolved_manage_work_log} add \
+   python3 {manage_work_log_path} add \
      --plan-id {plan_id} \
      --phase refine \
      --type artifact \
@@ -266,7 +263,7 @@ python3 {resolved_manage_lifecycle} transition \
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type error \
