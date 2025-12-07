@@ -21,6 +21,7 @@ Read: standards/java-core-patterns.md
 Read: standards/java-null-safety.md
 Read: standards/java-lombok-patterns.md
 Read: standards/java-modern-features.md
+Read: standards/java-performance-patterns.md
 Read: standards/logging-standards.md
 ```
 
@@ -101,6 +102,14 @@ From all loaded standards, extract and organize:
    - Log level guidelines
    - Exception logging patterns
 
+6. **Performance**:
+   - String handling in hot paths (avoid concatenation)
+   - Autoboxing avoidance in tight loops
+   - Collection initialization with capacity
+   - Stream performance (avoid creation in loops)
+   - Optional.orElseGet for expensive defaults
+   - ThreadLocal cleanup in pooled environments
+
 ### Step 4: Analyze Existing Code (if applicable)
 
 If working with existing Java code:
@@ -118,6 +127,7 @@ If working with existing Java code:
    - Inefficient patterns (deep inheritance, god classes)
    - Missing modern features (classic switch, manual data classes)
    - Verbose boilerplate that Lombok could handle
+   - Performance anti-patterns (string concatenation in loops, autoboxing, unsized collections)
 
 3. **Check code organization**:
    - Package structure (feature-based)
@@ -167,6 +177,14 @@ When writing or refactoring Java code:
    - Use %s for all string substitutions
    - Organize identifiers by log level ranges
 
+6. **Apply performance patterns**:
+   - Use parameterized logging (no string concatenation)
+   - Prefer primitives over wrappers in tight loops
+   - Initialize collections with expected capacity
+   - Avoid stream creation inside loops (use lookup maps)
+   - Use orElseGet for expensive Optional defaults
+   - Clean up ThreadLocal in finally blocks
+
 ### Step 6: Verify Standards Compliance
 
 Before completing the task:
@@ -206,6 +224,14 @@ Before completing the task:
    - [ ] Exception parameter comes first
    - [ ] %s used for substitutions
    - [ ] No System.out or System.err
+
+6. **Performance check**:
+   - [ ] No string concatenation in hot paths
+   - [ ] Primitives used in tight loops (not wrappers)
+   - [ ] Collections sized appropriately
+   - [ ] No stream creation inside loops
+   - [ ] orElseGet used for expensive defaults
+   - [ ] ThreadLocal cleaned up in pooled contexts
 
 ### Step 7: Report Results
 
@@ -927,6 +953,7 @@ Before returning success:
 * Null Safety: standards/java-null-safety.md
 * Lombok Patterns: standards/java-lombok-patterns.md
 * Modern Features: standards/java-modern-features.md
+* Performance Patterns: standards/java-performance-patterns.md
 * Logging: standards/logging-standards.md
 
 **Optional Standards (load when needed):**
