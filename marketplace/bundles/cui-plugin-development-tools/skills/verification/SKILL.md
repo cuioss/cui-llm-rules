@@ -26,6 +26,32 @@ Activate this skill when:
 - **Quality assurance** - Ensuring scripts and tools function as documented
 - **Integration testing** - Verifying component interactions
 
+## Activation Scopes
+
+The skill supports different verification scopes via the `scope` parameter:
+
+### Base Verification (default)
+
+```
+Skill: cui-plugin-development-tools:verification
+```
+
+Applies: Script failures, resolution failures, workaround detection
+
+### Planning Verification
+
+```
+Skill: cui-plugin-development-tools:verification
+scope: planning
+```
+
+Applies: All base checks PLUS:
+- No direct .plan file access (must use manage-* scripts)
+- Work-log population after each operation
+- Status consistency after phase transitions
+
+Use this scope when testing `/plan-manage`, `/plan-execute`, or any planning-related skills.
+
 ## Verification Mode Behavior
 
 **CRITICAL**: When this skill is loaded, you MUST modify your behavior as follows:
@@ -106,6 +132,12 @@ When this skill is loaded, immediately acknowledge:
 Verification Mode Active - All operations will stop on failures, resolution issues, or workarounds for analysis.
 ```
 
+If `scope: planning` was specified, add:
+
+```
+Planning Scope Active - Additional checks: .plan access patterns, work-log population, status consistency.
+```
+
 ### Step 2: Execute with Vigilance
 
 For each operation:
@@ -134,7 +166,8 @@ Only after user provides direction:
 standards/
 ├── failure-analysis.md      (Script and tool failure analysis)
 ├── resolution-analysis.md   (Path and reference resolution issues)
-└── workaround-detection.md  (Detecting and analyzing workarounds)
+├── workaround-detection.md  (Detecting and analyzing workarounds)
+└── planning-compliance.md   (Planning command/skill access patterns)
 ```
 
 ## Verification Triggers
@@ -159,6 +192,20 @@ standards/
 - Skipping documented step
 - Substituting different tool
 - Manual intervention where automation expected
+
+### Planning Compliance Violations (scope: planning only)
+
+These checks apply ONLY when `scope: planning` is specified:
+
+- Direct Read/Write/Edit of `.plan/plans/*/status.toon`
+- Direct Read/Write/Edit of `.plan/plans/*/config.toon`
+- Direct Read/Write/Edit of `.plan/plans/*/work-log.toon`
+- Direct access to requirements/specifications/tasks directories
+- Glob patterns targeting `.plan/plans/**/*.toon` or subdirectories
+- Bash find/ls commands scanning `.plan/plans/` structure
+- Missing work-log entry after significant operation
+- Status not updated after phase transition
+- Artifacts created without manage-* scripts
 
 ## Tool Access
 
@@ -227,6 +274,103 @@ Fix option 1 - Update calling code to use "planning:plan-type-java"
 
 ---
 **Verification Mode Active** - Awaiting user decision before proceeding.
+```
+
+## Planning-Specific Verification (scope: planning)
+
+When `scope: planning` is specified, apply these additional checks for planning commands:
+
+### Before Each Operation
+1. Check if operation will access .plan files directly
+2. Verify manage-* script is being used instead
+
+### After Each Operation
+1. Query work-log for recent entry matching operation
+2. Query status for consistency with expected phase
+3. Report any discrepancies
+
+### Example Planning Violation
+
+```
+User: Continue executing the current plan
+
+Claude: Verification Mode Active
+
+Checking plan status...
+
+## PLANNING COMPLIANCE Violation Detected
+
+### Issue Detected
+Direct .plan file access bypassing manage-* API
+
+### Context
+- **Operation**: Read
+- **Target**: .plan/plans/jwt-auth/status.toon
+- **Expected**: Use manage-lifecycle.py read --plan-id jwt-auth
+- **Actual**: Direct file read attempted
+
+### Root Cause Analysis
+Command is reading status.toon directly instead of using manage-lifecycle
+script. This bypasses audit trail and validation.
+
+### Impact Assessment
+| Aspect | Impact |
+|--------|--------|
+| Blocking | No - but should not proceed |
+| Data Loss Risk | No (read-only) |
+| Audit Trail | Not broken but inconsistent pattern |
+| Maintainability | Poor - mixed access patterns |
+
+### Options
+1. **Use manage-lifecycle.py**: Consistent abstraction layer
+2. **Proceed with warning**: Log deviation but continue
+
+### Recommendation
+Use manage-lifecycle.py read for all status access
+
+---
+**Verification Mode Active** - Awaiting user decision before proceeding.
+```
+
+### Example Post-Operation Audit
+
+```
+User: (approved using manage-lifecycle.py)
+
+Claude: Task TASK-001 completed successfully.
+
+## POST-OPERATION Audit Verification
+
+### Operation Completed
+Marked TASK-001 as complete, transitioned to TASK-002
+
+### Work-Log Check
+```toon
+entries[1]{timestamp,type,phase,summary}:
+2025-12-07T14:30:00Z,outcome,execute,Completed TASK-001: Implement JWT generator
+```
+
+### Status Check
+```toon
+current_phase: execute
+phases[4]{name,status}:
+init,done
+refine,done
+execute,in_progress
+finalize,pending
+```
+
+### Verification Result
+| Check | Status | Notes |
+|-------|--------|-------|
+| Work-log entry exists | Pass | Entry within last 5 seconds |
+| Correct type | Pass | outcome matches task completion |
+| Correct phase | Pass | execute phase |
+| Meaningful summary | Pass | Describes completed task |
+| Status consistent | Pass | execute phase in_progress |
+
+### Assessment
+PASS - All audit trail and status checks verified
 ```
 
 ## Deactivation

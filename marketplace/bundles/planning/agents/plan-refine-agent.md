@@ -1,7 +1,7 @@
 ---
 name: plan-refine-agent
 description: Create specifications and tasks from requirements
-tools: Read, Write, Edit, Glob, Grep, Bash, Skill, Task, AskUserQuestion
+tools: Bash, Skill, Task, AskUserQuestion
 ---
 
 # Plan Refine Agent
@@ -14,7 +14,7 @@ Thin wrapper that delegates to `planning:plan-refine` skill.
 Skill: general-tools:general-development-rules
 ```
 
-This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).
+This ensures proper development practices. All file operations use manage-* scripts via Bash.
 
 ## Parameters
 
