@@ -21,7 +21,6 @@ Some `.plan` files are designed for direct access:
 
 | File | Access | Purpose |
 |------|--------|---------|
-| `.plan/scripts-library.toon` | Read | Script path resolution (legacy) |
 | `.plan/execute-script.py` | Execute | Universal script executor with embedded mappings |
 | `.plan/execution_log.py` | Import | Execution logging module |
 | `.plan/marshall-state.toon` | Read/Write | Executor generation metadata |

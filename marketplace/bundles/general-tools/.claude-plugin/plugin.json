@@ -30,7 +30,6 @@
     "./skills/manage-run-configuration",
     "./skills/permission-management",
     "./skills/script-executor",
-    "./skills/script-runner",
     "./skills/toon-usage",
     "./skills/web-security-standards"
   ]

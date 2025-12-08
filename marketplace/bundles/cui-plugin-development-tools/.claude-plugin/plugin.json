@@ -21,6 +21,7 @@
     "./skills/plugin-create",
     "./skills/plugin-doctor",
     "./skills/plugin-maintain",
+    "./skills/plugin-script-architecture",
     "./skills/plugin-specify",
     "./skills/plugin-plan",
     "./skills/verification"

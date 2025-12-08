@@ -280,23 +280,21 @@ Read references/frontmatter-standards.md
 **File**: `references/script-standards.md`
 
 **Load When**:
-- Creating new scripts (Python/Bash)
 - Documenting scripts in SKILL.md
-- Writing script tests
-- Understanding stdlib-only requirements
-- Implementing JSON output format
+- Understanding script quality requirements
+- Common issues and fixes
 
 **Contents**:
 - Script location (`{skill-dir}/scripts/`)
 - Documentation requirements in SKILL.md
-- Test file requirements and structure
-- Help output requirements (`--help` flag)
-- Stdlib-only requirement (Python/Bash)
-- JSON output format
-- Executable permissions and shebang
-- Error handling patterns
-- Common issues and fixes
 - Script quality checklist
+- Common issues and fixes
+
+**Related Skill**:
+For Python implementation patterns, testing standards, and output contracts:
+```
+Skill: cui-plugin-development-tools:plugin-script-architecture
+```
 
 **Load Command**:
 ```
@@ -657,6 +655,7 @@ Components using this skill should demonstrate:
 ### Related Skills
 - general-tools:general-development-rules - Core development principles
 - general-tools:diagnostic-patterns - Tool usage patterns
+- cui-plugin-development-tools:plugin-script-architecture - Python implementation, testing, output contracts
 
 ### Internal References (Load On-Demand)
 All references are in `references/` directory:

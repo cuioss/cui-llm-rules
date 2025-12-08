@@ -514,7 +514,7 @@ Glob: pattern="**/plugin.json", path="marketplace/bundles"
 ```
 Skill: general-tools:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
-Read plugin-architecture:references/script-standards.md
+Skill: cui-plugin-development-tools:plugin-script-architecture
 Read references/fix-catalog.md
 ```
 

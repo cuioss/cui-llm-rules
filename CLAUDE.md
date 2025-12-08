@@ -121,6 +121,8 @@ python3 .plan/execute-script.py {notation} {subcommand} {args...}
 
 **Setup**: Run `/plan-marshall` after bundle changes to regenerate the executor with updated mappings.
 
+**Script Development**: See `cui-plugin-development-tools:plugin-script-architecture` skill for implementation standards.
+
 ## Working in This Repository
 
 ### File Formats
@@ -146,7 +148,7 @@ python3 .plan/execute-script.py {notation} {subcommand} {args...}
 
 ### Testing
 
-See [test/README.md](test/README.md) for full documentation.
+See `cui-plugin-development-tools:plugin-script-architecture` skill for testing standards.
 
 ```bash
 python3 test/run-tests.py                                          # all tests

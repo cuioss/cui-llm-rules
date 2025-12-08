@@ -206,20 +206,19 @@ Risky fixes require user confirmation because they involve judgment calls or may
 
 ### 5. rule-8-violation
 
-**Description**: Component uses hardcoded script paths instead of script-runner.
+**Description**: Component uses hardcoded script paths instead of the executor pattern.
 
 **Detection**: Direct script invocations with hardcoded paths (e.g., `python3 /path/to/script.py`, `bash {bundle}/scripts/foo.sh`)
 
 **Fix Strategy**:
-- Replace hardcoded paths with script-runner skill calls
-- Use portable notation: `Skill: general-tools:script-runner` with `Script: bundle:skill/script-name`
-- Example: Replace `python3 {cui-java-core}/scripts/verify.py` with `Script: cui-java-expert:cui-java-core/verify`
+- Replace hardcoded paths with executor pattern
+- Use notation: `python3 .plan/execute-script.py {bundle}:{skill} {subcommand} {args}`
+- Example: Replace `python3 marketplace/.../scripts/verify.py --input x` with `python3 .plan/execute-script.py cui-java-expert:cui-java-core verify --input x`
 
 **Why Risky**:
 - Changes script resolution mechanism
-- May break if script-runner configuration is incorrect
-- User should verify scripts-library.toon is up to date
-- Requires general-tools:script-runner skill
+- May break if executor is not generated (run `/plan-marshall` first)
+- User should verify script notation and subcommands
 
 ### 6. pattern-22-violation
 
@@ -300,7 +299,7 @@ def categorize(issue_type):
     }
     RISKY = {
         "unused-tool-declared", "tool-not-declared",
-        "rule-6-violation", "rule-7-violation",
+        "rule-6-violation", "rule-7-violation", "rule-8-violation",
         "pattern-22-violation", "backup-file-pattern",
         "ci-rule-self-update"
     }
