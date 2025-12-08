@@ -35,7 +35,7 @@ Agent workflows must use MANDATORY markers to ensure critical steps are executed
 
 **MANDATORY**: Execute this script NOW before proceeding:
 ```bash
-python3 scripts/analyze.py {target}
+python3 .plan/execute-script.py {bundle}:{skill}:analyze {target}
 ```
 
 Do not continue to Step 3 until this completes successfully.

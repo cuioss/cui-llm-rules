@@ -759,7 +759,7 @@ Add POST-FIX VERIFICATION step (see Rule 7).
 
 **Diagnosis**:
 ```bash
-Bash: python3 scripts/validate-references.py {command_path}
+Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate-references {command_path}
 # Check references array for incorrect formats
 ```
 

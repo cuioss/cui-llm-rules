@@ -95,7 +95,7 @@ Bash: scripts/analyze-markdown-file.sh {file_path} agent
 - **Output**: JSON with structure analysis (score, missing files, unreferenced files)
 - **Usage**:
   ```bash
-  Bash: scripts/analyze-skill-structure.sh {skill_dir}
+  Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze-structure {skill_dir}
   ```
 
 **4. validate-references.py**: Python script for reference pre-filtering and extraction
@@ -103,7 +103,7 @@ Bash: scripts/analyze-markdown-file.sh {file_path} agent
 - **Output**: JSON with detected references and pre-filter statistics
 - **Usage**:
   ```bash
-  Bash: python3 scripts/validate-references.py {file_path}
+  Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate-references {file_path}
   ```
 ```
 

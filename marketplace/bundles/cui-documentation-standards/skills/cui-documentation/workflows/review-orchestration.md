@@ -357,7 +357,7 @@ Partial Results:
 [source,bash]
 ----
 # Quick format check only
-python3 scripts/validate-format.py --file $FILE
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:validate-format --file $FILE
 
 # Exit if format errors
 if [ $? -ne 0 ]; then

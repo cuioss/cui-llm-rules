@@ -110,7 +110,7 @@ affectedCode();
 ### Step 1: Search for Markers
 
 ```bash
-python3 scripts/search-openrewrite-markers.py --source-dir src
+python3 .plan/execute-script.py builder:builder-gradle-rules:search-openrewrite-markers --source-dir src
 ```
 
 ### Step 2: Categorize Results

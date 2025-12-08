@@ -37,7 +37,7 @@ Run the marketplace inventory scanner script:
 python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --scope marketplace
 ```
 
-**Direct execution from marketplace checkout:**
+**Direct execution from marketplace checkout (bootstrap only - before executor exists):**
 ```bash
 python3 marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py --scope marketplace
 ```

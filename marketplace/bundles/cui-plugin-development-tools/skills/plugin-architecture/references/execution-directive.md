@@ -299,7 +299,7 @@ Apply rules from the reference to the script output.
 
 **EXECUTE**:
 ```bash
-python3 scripts/apply-changes.py --input results.json
+python3 .plan/execute-script.py {bundle}:{skill}:apply-changes --input results.json
 ```
 
 **CRITICAL**: Verify changes before proceeding to next component.

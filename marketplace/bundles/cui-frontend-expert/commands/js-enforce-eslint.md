@@ -36,7 +36,7 @@ npm run lint --workspace={workspace} > target/npm-lint-output.log 2>&1
 
 **Parse output for structured violations:**
 ```bash
-python3 skills/cui-javascript-project/scripts/parse-npm-output.py \
+python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-project:parse-npm-output \
     --log target/npm-lint-output.log --mode structured
 ```
 
@@ -72,7 +72,7 @@ npm run lint > target/npm-lint-verify.log 2>&1
 
 **Parse output to verify zero violations:**
 ```bash
-python3 skills/cui-javascript-project/scripts/parse-npm-output.py \
+python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-project:parse-npm-output \
     --log target/npm-lint-verify.log --mode errors
 ```
 

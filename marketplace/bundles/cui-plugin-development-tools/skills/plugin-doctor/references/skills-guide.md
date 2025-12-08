@@ -214,8 +214,8 @@ Relative paths resolve from the skill directory regardless of installation locat
 
 **Scripts**:
 ```bash
-Bash: scripts/analyze-structure.sh {file_path}
-Bash: python3 scripts/validate-refs.py {component}
+Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze {file_path}
+Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate-refs {component}
 ```
 
 **References**:
@@ -620,7 +620,7 @@ Skill: bundle:skill-a
 - **Output**: JSON with structural analysis
 - **Usage**:
   ```bash
-  Bash: scripts/analyze-structure.sh {file_path} agent
+  Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze {file_path} agent
   ```
 
 **2. validate-references.py**: Validates plugin references (Python)
@@ -628,7 +628,7 @@ Skill: bundle:skill-a
 - **Output**: JSON with detected references and pre-filter statistics
 - **Usage**:
   ```bash
-  Bash: python3 scripts/validate-references.py {component_path}
+  Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate-references {component_path}
   ```
 ```
 
@@ -822,7 +822,7 @@ Refactor to progressive disclosure pattern (see Progressive Disclosure section).
 
 **Diagnosis**:
 ```bash
-Bash: python3 scripts/validate-references.py {skill_dir}/SKILL.md
+Bash: python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate-references {skill_dir}/SKILL.md
 # Check for absolute paths in references array
 ```
 

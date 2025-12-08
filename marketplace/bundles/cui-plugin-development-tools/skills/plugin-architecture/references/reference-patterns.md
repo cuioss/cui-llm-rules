@@ -58,34 +58,31 @@ for file in $(extracted_paths); do
 done
 ```
 
-## Pattern 2: Script Execution (scripts/)
+## Pattern 2: Script Execution (via execute-script.py)
 
 **Purpose**: Executable automation scripts (Python, Bash) for deterministic logic.
 
 **Format**:
 ```markdown
-bash scripts/script-name.sh {args}
-python scripts/script-name.py {args}
-python3 scripts/script-name.py {args}
+python3 .plan/execute-script.py {bundle}:{skill}:{subcommand} {args}
 ```
 
 **Rules**:
-- Use relative path from skill directory
+- Use the executor pattern with bundle:skill:subcommand notation
 - Scripts must exist in skill's scripts/ directory
-- Use `bash`, `python`, or `python3` command
-- Pass arguments as needed
+- Subcommand maps to script entry point
 
 **Examples**:
 ```markdown
-✅ bash scripts/analyzer.sh {input_file}
-✅ python3 scripts/validate.py {component_path}
-✅ bash scripts/generate-report.sh {findings_json}
+✅ python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze {input_file}
+✅ python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate {component_path}
+✅ python3 .plan/execute-script.py planning:manage-files:add --plan-id {id} --file {file}
 ```
 
 **Prohibited**:
 ```markdown
 ❌ python ~/project/scripts/analyzer.py        # Absolute path
-❌ ./scripts/analyzer.sh                       # Explicit relative (unnecessary)
+❌ python3 scripts/analyzer.py                 # Direct script path (bypasses executor)
 ```
 
 **Script Output**:
