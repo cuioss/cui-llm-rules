@@ -70,9 +70,9 @@ Return the skill output as agent result.
 
 Before returning success, verify:
 1. ✅ Skills were loaded (you read the SKILL.md files in Step 0)
-2. ✅ All file operations used manage-* scripts from skill
+2. ✅ All file operations used commands from the loaded skill
 3. ✅ No direct `.plan/` access occurred (no cat, Read, Write on `.plan/`)
-4. ✅ Work-log entry was created via manage-work-log.py
+4. ✅ Work-log entry was created (per skill workflow)
 
 If ANY check fails, fix before returning.
 
