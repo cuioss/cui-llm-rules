@@ -23,8 +23,14 @@
   ],
   "skills": [
     "./skills/diagnostic-patterns",
+    "./skills/file-operations-base",
     "./skills/general-development-rules",
+    "./skills/json-file-operations",
+    "./skills/manage-memories",
+    "./skills/manage-run-configuration",
     "./skills/permission-management",
+    "./skills/script-executor",
+    "./skills/script-runner",
     "./skills/toon-usage",
     "./skills/web-security-standards"
   ]
