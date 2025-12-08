@@ -135,7 +135,9 @@ def test_error_entry_includes_stderr():
 def test_cleanup_deletes_old_logs():
     """Cleanup deletes logs older than max_age_days."""
     with tempfile.TemporaryDirectory() as tmp:
-        log_dir = Path(tmp) / 'logs'
+        # Create .plan/logs structure
+        plan_base = Path(tmp)
+        log_dir = plan_base / 'logs'
         log_dir.mkdir()
 
         # Create an old log file
@@ -146,52 +148,64 @@ def test_cleanup_deletes_old_logs():
         old_time = time.time() - (30 * 86400)
         os.utime(old_log, (old_time, old_time))
 
-        # Patch GLOBAL_LOG_DIR
-        original_dir = module.GLOBAL_LOG_DIR
-        module.GLOBAL_LOG_DIR = log_dir
+        # Use PLAN_BASE_DIR environment variable for test isolation
+        original_env = os.environ.get('PLAN_BASE_DIR')
+        os.environ['PLAN_BASE_DIR'] = str(plan_base)
 
         try:
             deleted = module.cleanup_old_global_logs(max_age_days=7)
             assert deleted == 1, f"Expected 1 deleted, got {deleted}"
             assert not old_log.exists(), "Old log should be deleted"
         finally:
-            module.GLOBAL_LOG_DIR = original_dir
+            if original_env is not None:
+                os.environ['PLAN_BASE_DIR'] = original_env
+            elif 'PLAN_BASE_DIR' in os.environ:
+                del os.environ['PLAN_BASE_DIR']
 
 
 def test_cleanup_preserves_recent_logs():
     """Cleanup preserves logs newer than max_age_days."""
     with tempfile.TemporaryDirectory() as tmp:
-        log_dir = Path(tmp) / 'logs'
+        # Create .plan/logs structure
+        plan_base = Path(tmp)
+        log_dir = plan_base / 'logs'
         log_dir.mkdir()
 
         # Create a recent log file
         recent_log = log_dir / f'script-execution-{date.today()}.log'
         recent_log.write_text('recent log')
 
-        original_dir = module.GLOBAL_LOG_DIR
-        module.GLOBAL_LOG_DIR = log_dir
+        original_env = os.environ.get('PLAN_BASE_DIR')
+        os.environ['PLAN_BASE_DIR'] = str(plan_base)
 
         try:
             deleted = module.cleanup_old_global_logs(max_age_days=7)
             assert deleted == 0, f"Expected 0 deleted, got {deleted}"
             assert recent_log.exists(), "Recent log should be preserved"
         finally:
-            module.GLOBAL_LOG_DIR = original_dir
+            if original_env is not None:
+                os.environ['PLAN_BASE_DIR'] = original_env
+            elif 'PLAN_BASE_DIR' in os.environ:
+                del os.environ['PLAN_BASE_DIR']
 
 
 def test_cleanup_returns_zero_for_missing_dir():
     """Cleanup returns 0 when log directory doesn't exist."""
     with tempfile.TemporaryDirectory() as tmp:
-        nonexistent = Path(tmp) / 'nonexistent'
+        # Point to a directory without logs subdirectory
+        nonexistent_base = Path(tmp) / 'nonexistent'
 
-        original_dir = module.GLOBAL_LOG_DIR
-        module.GLOBAL_LOG_DIR = nonexistent
+        original_env = os.environ.get('PLAN_BASE_DIR')
+        os.environ['PLAN_BASE_DIR'] = str(nonexistent_base)
 
         try:
             deleted = module.cleanup_old_global_logs()
             assert deleted == 0, f"Expected 0 deleted, got {deleted}"
         finally:
-            module.GLOBAL_LOG_DIR = original_dir
+            if original_env is not None:
+                os.environ['PLAN_BASE_DIR'] = original_env
+            elif 'PLAN_BASE_DIR' in os.environ:
+                del os.environ['PLAN_BASE_DIR']
 
 
 if __name__ == '__main__':

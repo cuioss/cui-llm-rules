@@ -3,22 +3,37 @@
 Execution logging module for script executor.
 
 Provides two-tier logging:
-- Plan-scoped: .plan/plans/{plan-id}/execution.log (when --plan-id provided)
-- Global: .plan/logs/script-execution-YYYY-MM-DD.log (fallback)
+- Plan-scoped: {plan_base_dir}/plans/{plan-id}/execution.log (when --plan-id provided)
+- Global: {plan_base_dir}/logs/script-execution-YYYY-MM-DD.log (fallback)
 
 Detailed error capture for non-zero exits includes args, stdout, stderr.
+
+Configuration via environment variables for test isolation:
+- PLAN_BASE_DIR: Base directory for .plan structure (default: .plan)
 """
 
+import os
 from datetime import date, datetime
 from pathlib import Path
 from typing import Optional
 
 # ============================================================================
-# CONFIGURATION
+# CONFIGURATION (configurable via environment for test isolation)
 # ============================================================================
 LOG_ENABLED = True
-GLOBAL_LOG_DIR = Path('.plan/logs')
 MAX_OUTPUT_CAPTURE = 2000  # Max chars of stdout/stderr to capture on error
+
+def get_plan_base_dir() -> Path:
+    """Get base directory for plan structure. Configurable via PLAN_BASE_DIR env var."""
+    return Path(os.environ.get('PLAN_BASE_DIR', '.plan'))
+
+def get_global_log_dir() -> Path:
+    """Get global log directory."""
+    return get_plan_base_dir() / 'logs'
+
+def get_plans_dir() -> Path:
+    """Get plans directory."""
+    return get_plan_base_dir() / 'plans'
 
 # ============================================================================
 # PLAN-ID EXTRACTION
@@ -43,13 +58,14 @@ def get_log_file(args: list) -> Path:
 
     if plan_id:
         # Plan-scoped log
-        plan_dir = Path(f'.plan/plans/{plan_id}')
+        plan_dir = get_plans_dir() / plan_id
         if plan_dir.exists():
             return plan_dir / 'execution.log'
 
     # Global session log (fallback)
-    GLOBAL_LOG_DIR.mkdir(parents=True, exist_ok=True)
-    return GLOBAL_LOG_DIR / f'script-execution-{date.today()}.log'
+    global_log_dir = get_global_log_dir()
+    global_log_dir.mkdir(parents=True, exist_ok=True)
+    return global_log_dir / f'script-execution-{date.today()}.log'
 
 # ============================================================================
 # LOG ENTRY FORMATTING
@@ -143,10 +159,11 @@ def cleanup_old_global_logs(max_age_days: int = 7) -> int:
     deleted = 0
     cutoff = time.time() - (max_age_days * 86400)
 
-    if not GLOBAL_LOG_DIR.exists():
+    global_log_dir = get_global_log_dir()
+    if not global_log_dir.exists():
         return 0
 
-    for log_file in GLOBAL_LOG_DIR.glob('script-execution-*.log'):
+    for log_file in global_log_dir.glob('script-execution-*.log'):
         try:
             if log_file.stat().st_mtime < cutoff:
                 log_file.unlink()
