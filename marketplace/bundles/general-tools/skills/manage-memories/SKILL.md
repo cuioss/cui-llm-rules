@@ -47,8 +47,10 @@ Manage the memory layer for session persistence (via `file-operations-base` skil
 
 ### Step 1: Execute Operation
 
+Script: `general-tools:manage-memories/scripts/manage-memory.py`
+
 ```bash
-python3 scripts/manage-memory.py {operation} [--category {category}] [--identifier {identifier}] [--content '{content}']
+python3 {manage_memory_path} {operation} [--category {category}] [--identifier {identifier}] [--content '{content}']
 ```
 
 ### Step 2: Process Result
@@ -69,19 +71,19 @@ Parse JSON output and handle accordingly.
 
 ```bash
 # Save context snapshot (directories created on-the-fly)
-python3 scripts/manage-memory.py save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
+python3 {manage_memory_path} save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
 
 # Load memory file
-python3 scripts/manage-memory.py load --category context --identifier "2025-12-02-feature-auth"
+python3 {manage_memory_path} load --category context --identifier "2025-12-02-feature-auth"
 
 # List context files from last 7 days
-python3 scripts/manage-memory.py list --category context --since 7d
+python3 {manage_memory_path} list --category context --since 7d
 
 # Find files matching pattern
-python3 scripts/manage-memory.py query --pattern "auth*" --category context
+python3 {manage_memory_path} query --pattern "auth*" --category context
 
 # Cleanup old context files
-python3 scripts/manage-memory.py cleanup --category context --older-than 7d
+python3 {manage_memory_path} cleanup --category context --older-than 7d
 ```
 
 ---
@@ -98,8 +100,10 @@ Validate memory file format and structure.
 
 ### Step 1: Execute Validation
 
+Script: `general-tools:manage-memories/scripts/validate-memory.py`
+
 ```bash
-python3 scripts/validate-memory.py {file_path}
+python3 {validate_memory_path} {file_path}
 ```
 
 ### Step 2: Process Result
@@ -147,10 +151,10 @@ All memory files use a metadata envelope:
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `manage-memory.py` | Memory layer CRUD operations |
-| `validate-memory.py` | Memory file format validation |
+| Script | Notation |
+|--------|----------|
+| manage-memory | `general-tools:manage-memories/scripts/manage-memory.py` |
+| validate-memory | `general-tools:manage-memories/scripts/validate-memory.py` |
 
 All scripts:
 - Use Python stdlib only (json, argparse, pathlib, datetime)
@@ -165,9 +169,9 @@ All scripts:
 ### With json-file-operations Skill
 - Uses generic JSON operations for low-level file access
 
-### With script-runner Skill
-- Memory scripts are discovered via script-runner
-- Use portable notation: `general-tools:manage-memories/scripts/manage-memory.py`
+### With Scripts Library
+- Memory scripts are discovered via scripts-library.toon
+- Use portable notation from Scripts table above
 
 ### With planning Bundle
 - Memory operations enable task state persistence

@@ -46,12 +46,11 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
    ```
 
 2. **Fetch Comments**
-   ```
-   Skill: general-tools:script-runner
-   Resolve: planning:pr-workflow/scripts/fetch-pr-comments.py
-   ```
+
+   Script: `planning:pr-workflow/scripts/fetch-pr-comments.py`
+
    ```bash
-   python3 {resolved_path} [--pr {number}]
+   python3 {script_path} [--pr {number}]
    ```
 
    Script outputs JSON:
@@ -92,12 +91,11 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 
 2. **Triage Each Comment**
    For each unresolved comment:
-   ```
-   Skill: general-tools:script-runner
-   Resolve: planning:pr-workflow/scripts/triage-comment.py
-   ```
+
+   Script: `planning:pr-workflow/scripts/triage-comment.py`
+
    ```bash
-   python3 {resolved_path} --comment '{json}'
+   python3 {script_path} --comment '{json}'
    ```
 
    Script outputs decision:

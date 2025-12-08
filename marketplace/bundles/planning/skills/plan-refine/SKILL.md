@@ -14,12 +14,10 @@ allowed-tools: Read, Write, Bash, Skill, Task, AskUserQuestion
 
 ---
 
-## Script Paths
+## Scripts
 
-Scripts are located relative to the skill base directory. Use these paths:
-
-| Script | Path |
-|--------|------|
+| Script | Notation |
+|--------|----------|
 | manage-config | `planning:manage-config/scripts/manage-config.py` |
 | manage-lifecycle | `planning:manage-lifecycle/scripts/manage-lifecycle.py` |
 | manage-work-log | `planning:manage-log/scripts/manage-work-log.py` |

@@ -41,8 +41,10 @@ Perform read, write, and update operations on JSON files.
 
 ### Step 1: Execute Operation
 
+Script: `general-tools:json-file-operations/scripts/manage-json-file.py`
+
 ```bash
-python3 scripts/manage-json-file.py {operation} {file_path} [--field {field}] [--value '{value}']
+python3 {manage_json_file_path} {operation} {file_path} [--field {field}] [--value '{value}']
 ```
 
 ### Step 2: Process Result
@@ -66,19 +68,19 @@ Parse JSON output:
 
 ```bash
 # Read entire file
-python3 scripts/manage-json-file.py read config.json
+python3 {manage_json_file_path} read config.json
 
 # Read specific field
-python3 scripts/manage-json-file.py read-field config.json --field "database.host"
+python3 {manage_json_file_path} read-field config.json --field "database.host"
 
 # Update field
-python3 scripts/manage-json-file.py update-field config.json --field "database.port" --value '5432'
+python3 {manage_json_file_path} update-field config.json --field "database.port" --value '5432'
 
 # Add to array
-python3 scripts/manage-json-file.py add-entry config.json --field "servers" --value '"new-server"'
+python3 {manage_json_file_path} add-entry config.json --field "servers" --value '"new-server"'
 
 # Remove from array
-python3 scripts/manage-json-file.py remove-entry config.json --field "servers" --value '"old-server"'
+python3 {manage_json_file_path} remove-entry config.json --field "servers" --value '"old-server"'
 ```
 
 ---
@@ -104,9 +106,9 @@ Use dot notation for JSON paths:
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `manage-json-file.py` | JSON file CRUD operations |
+| Script | Notation |
+|--------|----------|
+| manage-json-file | `general-tools:json-file-operations/scripts/manage-json-file.py` |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)
@@ -118,9 +120,9 @@ Script characteristics:
 
 ## Integration Points
 
-### With script-runner Skill
-- Scripts are discovered via script-runner
-- Use portable notation: `general-tools:json-file-operations/scripts/manage-json-file.py`
+### With Scripts Library
+- Scripts are discovered via scripts-library.toon
+- Use portable notation from Scripts table above
 
 ### With manage-memories Skill
 - Provides low-level JSON operations used by memory layer

@@ -18,18 +18,13 @@ allowed-tools: Read, Bash
 
 ---
 
-## Script Path Resolution
+## Scripts
 
-**MANDATORY**: Before executing any script, resolve paths via script-runner.
-
-```
-Skill: general-tools:script-runner
-Resolve: planning:manage-log/scripts/manage-work-log.py
-Resolve: planning:manage-config/scripts/manage-config.py
-Resolve: planning:manage-references/scripts/manage-references.py
-```
-
-Use the resolved absolute paths in all Bash commands.
+| Script | Purpose |
+|--------|---------|
+| `planning:manage-log/scripts/manage-work-log.py` | Work log entries |
+| `planning:manage-config/scripts/manage-config.py` | Config field access |
+| `planning:manage-references/scripts/manage-references.py` | Reference file CRUD |
 
 ---
 
@@ -75,7 +70,7 @@ Use the resolved absolute paths in all Bash commands.
 
 **Before delegation**, log:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -92,7 +87,7 @@ Task(cui-java-expert:java-specify-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
@@ -117,7 +112,7 @@ The agent analyzes Java codebase, creates specifications with:
 
 **Before delegation**, log:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -134,7 +129,7 @@ Task(cui-java-expert:java-plan-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \

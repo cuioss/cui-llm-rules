@@ -99,19 +99,16 @@ All 5 workflows follow the same pattern:
 
 4. **MANDATORY - Analyze Each Component** (using scripts)
 
-   **EXECUTE** script resolution first:
-   ```
-   Skill: general-tools:script-runner
-   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
-   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py
-   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
-   ```
+   Scripts:
+   - `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
+   - `cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py`
+   - `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
 
-   **EXECUTE** with resolved paths:
+   **EXECUTE**:
    ```bash
-   python3 {resolved_analyze_markdown} {path} {type}
-   python3 {resolved_analyze_tool_coverage} {path}
-   python3 {resolved_validate_references} {path}
+   python3 {analyze_markdown_path} {path} {type}
+   python3 {analyze_tool_coverage_path} {path}
+   python3 {validate_references_path} {path}
    ```
 
 ### Phase 2: Categorize Issues
@@ -162,15 +159,10 @@ All 5 workflows follow the same pattern:
 
 1. **Verify Fixes**
 
-   Resolve script path:
-   ```
-   Skill: general-tools:script-runner
-   Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-fix.py
-   ```
+   Script: `cui-plugin-development-tools:plugin-doctor/scripts/verify-fix.py`
 
-   Execute:
    ```bash
-   python3 {resolved_path} {type} {path}
+   python3 {script_path} {type} {path}
    ```
 
 2. **Generate Summary**
@@ -211,20 +203,17 @@ Glob: pattern="*.md", path="{scope_path}/agents"
 
 ### Step 3: Analyze Each Agent
 
-For each agent file, first resolve script paths:
+For each agent file, execute:
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
-```
+Scripts:
+- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
+- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py`
+- `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
 
-Then execute:
 ```bash
-python3 {resolved_analyze_markdown} {agent_path} agent
-python3 {resolved_analyze_tool_coverage} {agent_path}
-python3 {resolved_validate_references} {agent_path}
+python3 {analyze_markdown_path} {agent_path} agent
+python3 {analyze_tool_coverage_path} {agent_path}
+python3 {validate_references_path} {agent_path}
 ```
 
 **Check against agents-guide.md**:
@@ -282,17 +271,13 @@ Same pattern as doctor-agents.
 
 ### Step 3: Analyze Each Command
 
-First resolve script paths:
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
-```
+Scripts:
+- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
+- `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
 
-Then execute:
 ```bash
-python3 {resolved_analyze_markdown} {cmd_path} command
-python3 {resolved_validate_references} {cmd_path}
+python3 {analyze_markdown_path} {cmd_path} command
+python3 {validate_references_path} {cmd_path}
 ```
 
 **Check against commands-guide.md**:
@@ -414,19 +399,15 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 
 ### Step 3: Analyze Each Skill
 
-First resolve script paths:
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-skill-structure.py
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
-```
+Scripts:
+- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-skill-structure.py`
+- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
+- `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
 
-Then execute:
 ```bash
-python3 {resolved_analyze_skill_structure} {skill_dir}
-python3 {resolved_analyze_markdown} {skill_dir}/SKILL.md skill
-python3 {resolved_validate_references} {skill_dir}/SKILL.md
+python3 {analyze_skill_structure_path} {skill_dir}
+python3 {analyze_markdown_path} {skill_dir}/SKILL.md skill
+python3 {validate_references_path} {skill_dir}/SKILL.md
 ```
 
 **Check against skills-guide.md**:
@@ -589,15 +570,10 @@ Read references/content-quality-guide.md
 
 ### Step 2: Phase 1 - Inventory (SCRIPT)
 
-Resolve and execute inventory script:
-
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/scan-skill-inventory.py
-```
+Script: `cui-plugin-development-tools:plugin-doctor/scripts/scan-skill-inventory.py`
 
 ```bash
-python3 {resolved_path} --skill-path {skill_path}
+python3 {script_path} --skill-path {skill_path}
 ```
 
 Parse JSON output to get:
@@ -634,15 +610,10 @@ Skip if `--skip-quality` specified.
 
 **Step 4a: Run Cross-File Analysis Script**
 
-Resolve and execute cross-file analysis:
-
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/analyze-cross-file-content.py
-```
+Script: `cui-plugin-development-tools:plugin-doctor/scripts/analyze-cross-file-content.py`
 
 ```bash
-python3 {resolved_path} --skill-path {skill_path}
+python3 {script_path} --skill-path {skill_path}
 ```
 
 Parse JSON output for:
@@ -680,16 +651,11 @@ Read each content file and analyze:
 
 **Step 4d: Verify LLM Findings**
 
-Resolve and execute verification:
-
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/verify-cross-file-findings.py
-```
+Script: `cui-plugin-development-tools:plugin-doctor/scripts/verify-cross-file-findings.py`
 
 Pipe LLM findings JSON to verification:
 ```bash
-echo '{llm_findings_json}' | python3 {resolved_path} --analysis {cross_file_analysis_json}
+echo '{llm_findings_json}' | python3 {script_path} --analysis {cross_file_analysis_json}
 ```
 
 **Reject any LLM claims that can't be verified** against actual content.
@@ -732,15 +698,10 @@ AskUserQuestion:
 
 ### Step 6: Phase 5 - Verify Links (SCRIPT)
 
-Resolve and execute validation:
-
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py
-```
+Script: `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
 
 ```bash
-python3 {resolved_path} {skill_path}/SKILL.md
+python3 {script_path} {skill_path}/SKILL.md
 ```
 
 For each content file, verify:
@@ -879,9 +840,8 @@ This skill is designed to run without user prompts for safe operations. Required
 - `Skill(general-tools:*)` - diagnostic-patterns
 - `Skill(cui-plugin-development-tools:*)` - plugin-architecture, marketplace-inventory
 
-**Script Execution (resolved via script-runner):**
-- Scripts resolved via `general-tools:script-runner` skill
-- Absolute paths stored in `.claude/scripts.local.json`
+**Script Execution:**
+- Script paths resolved from `.plan/scripts-library.toon` (system convention)
 - Permissions managed by `tools-setup-project-permissions`
 
 **File Operations (covered by project permissions):**
@@ -896,7 +856,7 @@ This skill is designed to run without user prompts for safe operations. Required
 
 **Ensuring Non-Prompting for Safe Operations:**
 - All file reads/edits use relative paths within marketplace/
-- Script paths resolved via script-runner to absolute paths in `.claude/scripts.local.json`
+- Script paths resolved from `.plan/scripts-library.toon` (system convention)
 - Skill invocations use bundle-qualified names covered by `Skill({bundle}:*)` wildcards
 - AskUserQuestion is ONLY used for risky fix confirmations
 

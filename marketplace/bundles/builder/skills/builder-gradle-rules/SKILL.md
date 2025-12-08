@@ -11,6 +11,18 @@ allowed_tools:
 
 Build execution, output parsing, and issue routing for Gradle projects.
 
+## Scripts
+
+| Script | Notation |
+|--------|----------|
+| execute-gradle-build | `builder:builder-gradle-rules/scripts/execute-gradle-build.py` |
+| parse-gradle-output | `builder:builder-gradle-rules/scripts/parse-gradle-output.py` |
+| find-gradle-project | `builder:builder-gradle-rules/scripts/find-gradle-project.py` |
+| search-openrewrite-markers | `builder:builder-gradle-rules/scripts/search-openrewrite-markers.py` |
+| check-acceptable-warnings | `builder:builder-gradle-rules/scripts/check-acceptable-warnings.py` |
+
+---
+
 ## Workflows
 
 ### Workflow 1: Execute Gradle Build
@@ -28,8 +40,11 @@ Build execution, output parsing, and issue routing for Gradle projects.
 **Execution Steps**:
 
 1. **Execute Gradle**:
+
+   Script: `builder:builder-gradle-rules/scripts/execute-gradle-build.py`
+
    ```bash
-   python3 scripts/execute-gradle-build.py \
+   python3 {execute_gradle_build_path} \
        --tasks "{tasks}" \
        --project {project} \
        --skip-tests {skip_tests} \
@@ -38,8 +53,11 @@ Build execution, output parsing, and issue routing for Gradle projects.
    Returns JSON with `log_file`, `exit_code`, `duration_ms`, `command_executed`
 
 2. **Parse Output**:
+
+   Script: `builder:builder-gradle-rules/scripts/parse-gradle-output.py`
+
    ```bash
-   python3 scripts/parse-gradle-output.py \
+   python3 {parse_gradle_output_path} \
        --log {log_file from step 1} \
        --mode {output_mode}
    ```
@@ -92,8 +110,11 @@ Build execution, output parsing, and issue routing for Gradle projects.
 - `mode` (optional): "default", "errors", "structured" (default: "default")
 
 **Execution**:
+
+Script: `builder:builder-gradle-rules/scripts/parse-gradle-output.py`
+
 ```bash
-python3 scripts/parse-gradle-output.py --log <path> --mode <mode>
+python3 {parse_gradle_output_path} --log <path> --mode <mode>
 ```
 
 **Output Modes**:
@@ -131,12 +152,15 @@ python3 scripts/parse-gradle-output.py --log <path> --mode <mode>
 - `root` (optional): Project root directory (default: current directory)
 
 **Execution**:
+
+Script: `builder:builder-gradle-rules/scripts/find-gradle-project.py`
+
 ```bash
 # Search by project name
-python3 scripts/find-gradle-project.py --project-name {project_name}
+python3 {find_gradle_project_path} --project-name {project_name}
 
 # Validate explicit path
-python3 scripts/find-gradle-project.py --project-path {project_path}
+python3 {find_gradle_project_path} --project-path {project_path}
 ```
 
 **Success Response**:
@@ -174,8 +198,11 @@ python3 scripts/find-gradle-project.py --project-path {project_path}
 - `extensions` (optional): File extensions to search (default: `.java,.kt`)
 
 **Execution**:
+
+Script: `builder:builder-gradle-rules/scripts/search-openrewrite-markers.py`
+
 ```bash
-python3 scripts/search-openrewrite-markers.py \
+python3 {search_openrewrite_markers_path} \
     --source-dir {source_dir} \
     --extensions {extensions}
 ```
@@ -223,8 +250,11 @@ python3 scripts/search-openrewrite-markers.py \
 1. Load acceptable patterns via `general-tools:manage-run-configuration` skill
    - Read from field: `gradle.acceptable_warnings`
 2. Execute categorization:
+
+   Script: `builder:builder-gradle-rules/scripts/check-acceptable-warnings.py`
+
    ```bash
-   python3 scripts/check-acceptable-warnings.py \
+   python3 {check_acceptable_warnings_path} \
        --warnings '{issues_json}' \
        --acceptable-warnings '{patterns_json}'
    ```

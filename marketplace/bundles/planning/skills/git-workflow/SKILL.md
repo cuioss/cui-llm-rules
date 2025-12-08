@@ -88,13 +88,12 @@ If custom message provided:
 - Use provided message
 
 If no message:
-- Resolve and analyze diff using script:
-  ```
-  Skill: general-tools:script-runner
-  Resolve: planning:git-workflow/scripts/format-commit-message.py
-  ```
+- Analyze diff using script:
+
+  Script: `planning:git-workflow/scripts/format-commit-message.py`
+
   ```bash
-  python3 {resolved_path} --analyze <diff-file>
+  python3 {script_path} --analyze <diff-file>
   ```
 - Generate message following standards
 

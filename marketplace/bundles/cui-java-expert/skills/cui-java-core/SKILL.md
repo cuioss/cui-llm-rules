@@ -460,15 +460,12 @@ Analyze LOGGER usage in Java files and detect violations of CUI logging standard
    ```
    Or use provided file path directly.
 
-2. **Resolve Script Path**
-   ```
-   Skill: general-tools:script-runner
-   Resolve: cui-java-expert:cui-java-core/scripts/analyze-logging-violations.py
-   ```
+2. **Run Violation Analysis Script**
 
-3. **Run Violation Analysis Script**
+   Script: `cui-java-expert:cui-java-core/scripts/analyze-logging-violations.py`
+
    ```bash
-   python3 {resolved_path} --directory {target}
+   python3 {script_path} --directory {target}
    ```
 
 4. **Parse Results**
@@ -555,15 +552,12 @@ Generate AsciiDoc documentation for LogMessages holder classes.
    ```
    Fail fast if file doesn't exist.
 
-2. **Resolve Script Path**
-   ```
-   Skill: general-tools:script-runner
-   Resolve: cui-java-expert:cui-java-core/scripts/document-logrecord.py
-   ```
+2. **Run Documentation Script**
 
-3. **Run Documentation Script**
+   Script: `cui-java-expert:cui-java-core/scripts/document-logrecord.py`
+
    ```bash
-   python3 {resolved_path} --holder {holder_class} --output {output_file}
+   python3 {script_path} --holder {holder_class} --output {output_file}
    ```
 
 4. **Parse Results**
@@ -638,11 +632,11 @@ Verify that implementation task description is clear and the build is clean befo
 ### Steps
 
 1. **Validate Task Description**
-   ```
-   Skill: general-tools:script-runner
-   Script: cui-java-expert:cui-java-core/verify-implementation-params
-   Parameters:
-     description: "{description}"
+
+   Script: `cui-java-expert:cui-java-core/scripts/verify-implementation-params.py`
+
+   ```bash
+   python3 {script_path} --description "{description}"
    ```
 
    Parse JSON output:

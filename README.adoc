@@ -193,13 +193,13 @@ Run once after installing the marketplace:
 /tools-setup-project-permissions
 ----
 
-This command reads `.claude/scripts.local.json` and adds the necessary `Bash(python3 ...)` and `Bash(bash ...)` permissions to `~/.claude/settings.json`.
+This command reads `.plan/scripts-library.toon` and adds the necessary `Bash(python3 ...)` and `Bash(bash ...)` permissions to `~/.claude/settings.json`.
 
 === When Scripts Don't Execute
 
-If a skill script fails with a permission error, the `script-runner` skill will auto-generate `.claude/scripts.local.json`. Then re-run `/tools-setup-project-permissions` to sync permissions.
+If a skill script fails with a permission error, run `/tools-discover-skill-scripts` to generate `.plan/scripts-library.toon`. Then re-run `/tools-setup-project-permissions` to sync permissions.
 
-NOTE: `.claude/scripts.local.json` is machine-specific (absolute paths) and git-ignored.
+NOTE: `.plan/scripts-library.toon` is machine-specific (absolute paths) and git-ignored.
 
 == Architecture
 

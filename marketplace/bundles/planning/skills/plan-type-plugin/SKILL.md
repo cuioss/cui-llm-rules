@@ -18,18 +18,13 @@ allowed-tools: Read, Bash
 
 ---
 
-## Script Path Resolution
+## Scripts
 
-**MANDATORY**: Before executing any script, resolve paths via script-runner.
-
-```
-Skill: general-tools:script-runner
-Resolve: planning:manage-log/scripts/manage-work-log.py
-Resolve: planning:manage-config/scripts/manage-config.py
-Resolve: planning:manage-references/scripts/manage-references.py
-```
-
-Use the resolved absolute paths in all Bash commands.
+| Script | Purpose |
+|--------|---------|
+| `planning:manage-log/scripts/manage-work-log.py` | Work log entries |
+| `planning:manage-config/scripts/manage-config.py` | Config field access |
+| `planning:manage-references/scripts/manage-references.py` | Reference file CRUD |
 
 ---
 
@@ -55,25 +50,25 @@ Use `planning:manage-references/scripts/manage-references.py` to add domain-spec
 
 ```bash
 # Set target_bundle (populated during specify)
-python3 {resolved_manage_references} set \
+python3 {manage_references_path} set \
   --plan-id {plan_id} \
   --field target_bundle \
   --value null
 
 # Set bundle_path (populated during specify)
-python3 {resolved_manage_references} set \
+python3 {manage_references_path} set \
   --plan-id {plan_id} \
   --field bundle_path \
   --value null
 
 # Set components tracking
-python3 {resolved_manage_references} set \
+python3 {manage_references_path} set \
   --plan-id {plan_id} \
   --field components \
   --value '{"add": [], "modify": []}'
 
 # Set verification commands
-python3 {resolved_manage_references} set \
+python3 {manage_references_path} set \
   --plan-id {plan_id} \
   --field verification_commands \
   --value '["/cui-plugin-development-tools:plugin-doctor"]'
@@ -85,25 +80,25 @@ Use `planning:manage-config/scripts/manage-config.py` to add finalize configurat
 
 ```bash
 # Set create_pr
-python3 {resolved_manage_config} set \
+python3 {manage_config_path} set \
   --plan-id {plan_id} \
   --field create_pr \
   --value false
 
 # Set verification_required
-python3 {resolved_manage_config} set \
+python3 {manage_config_path} set \
   --plan-id {plan_id} \
   --field verification_required \
   --value true
 
 # Set verification_command
-python3 {resolved_manage_config} set \
+python3 {manage_config_path} set \
   --plan-id {plan_id} \
   --field verification_command \
   --value "/cui-plugin-development-tools:plugin-doctor"
 
 # Set branch_strategy
-python3 {resolved_manage_config} set \
+python3 {manage_config_path} set \
   --plan-id {plan_id} \
   --field branch_strategy \
   --value direct
@@ -137,7 +132,7 @@ python3 {resolved_manage_config} set \
 
 **Before delegation**, log:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -154,7 +149,7 @@ Task(cui-plugin-development-tools:plugin-specify-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
@@ -179,7 +174,7 @@ The agent analyzes marketplace structure, creates specifications with:
 
 **Before delegation**, log:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -196,7 +191,7 @@ Task(cui-plugin-development-tools:plugin-plan-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \

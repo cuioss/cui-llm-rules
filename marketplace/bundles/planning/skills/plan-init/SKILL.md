@@ -21,23 +21,14 @@ Activate when:
 
 ---
 
-## Script Paths
+## Scripts
 
-Scripts are located relative to the skill base directory. Use these paths:
-
-| Script | Path |
-|--------|------|
+| Script | Notation |
+|--------|----------|
 | manage-files | `planning:manage-files/scripts/manage-files.py` |
 | manage-references | `planning:manage-references/scripts/manage-references.py` |
 | manage-lessons | `planning:manage-lessons/scripts/manage-lesson.py` |
 | manage-work-log | `planning:manage-log/scripts/manage-work-log.py` |
-
-Example usage:
-
-```bash
-python3 {manage_files_path} create-or-reference --plan-id my-feature
-python3 {manage_files_path} write --plan-id my-feature --file task.md
-```
 
 ---
 

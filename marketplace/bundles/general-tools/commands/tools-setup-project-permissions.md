@@ -29,7 +29,7 @@ Skill: general-tools:permission-management
 global_settings = ~/.claude/settings.json
 local_settings = .claude/settings.json
 marketplace_json = marketplace/marketplace.json
-scripts_local = .claude/scripts.local.json
+scripts_library = .plan/scripts-library.toon
 ```
 
 ### Step 3: Analyze Permissions
@@ -89,17 +89,17 @@ python3 {ensure-marketplace-wildcards.py} \
   --marketplace-json {marketplace_json}
 ```
 
-**C. Sync script permissions to global (from scripts.local.json):**
+**C. Sync script permissions to global (from scripts-library.toon):**
 
-If `scripts_local` exists, sync script permissions:
+If `scripts_library` exists, sync script permissions:
 ```bash
 python3 {apply-permissions.py} \
   --action sync-scripts \
-  --scripts-file {scripts_local} \
+  --scripts-file {scripts_library} \
   --target global
 ```
 
-This removes stale script permissions and adds current ones from the discovered scripts cache.
+This removes stale script permissions and adds current ones from the discovered scripts library.
 
 **D. Apply safe fixes to local:**
 ```bash
@@ -148,7 +148,7 @@ Scripts are resolved via the skill's scripts directory:
 - `general-tools:permission-management/scripts/apply-permissions.py`
 - `general-tools:permission-management/scripts/apply-permission-fixes.py`
 
-Use `scripts.local.json` to resolve absolute paths.
+Use `.plan/scripts-library.toon` to resolve absolute paths.
 
 ## Critical Rules
 
@@ -159,6 +159,6 @@ Use `scripts.local.json` to resolve absolute paths.
 
 ## Related
 
-- `/tools-discover-skill-scripts` - Discovers scripts and generates `scripts.local.json`
+- `/tools-discover-skill-scripts` - Discovers scripts and generates `scripts-library.toon`
 - `/tools-audit-permission-wildcards` - Audits marketplace for permission wildcards
 - `general-tools:permission-management` - Permission validation and operations

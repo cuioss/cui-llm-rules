@@ -35,16 +35,16 @@ This skill provides 5 maintenance workflows:
 **Total Context Per Workflow**: ~1,400 lines (SKILL.md + reference)
 **vs Loading Everything**: ~3,800 lines (75% reduction)
 
-## Scripts Available
+## Scripts
 
-All scripts are stdlib-only with JSON output:
+| Script | Notation |
+|--------|----------|
+| analyze-component | `cui-plugin-development-tools:plugin-maintain/scripts/analyze-component.py` |
+| check-duplication | `cui-plugin-development-tools:plugin-maintain/scripts/check-duplication.py` |
+| update-component | `cui-plugin-development-tools:plugin-maintain/scripts/update-component.py` |
+| generate-readme | `cui-plugin-development-tools:plugin-maintain/scripts/generate-readme.sh` |
 
-| Script | Purpose |
-|--------|---------|
-| `analyze-component.py` | Analyze component quality, detect issues |
-| `check-duplication.py` | Check for duplicate knowledge across references |
-| `update-component.py` | Apply updates with backup and rollback |
-| `generate-readme.sh` | Generate README from bundle inventory |
+All scripts are stdlib-only with JSON output.
 
 ## Assets Available
 
@@ -82,12 +82,8 @@ Read: references/component-update-guide.md
 
 Run component analysis:
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-maintain/scripts/analyze-component.py
-```
 ```bash
-python3 {resolved_path} {component_path}
+python3 {analyze_component_path} {component_path}
 ```
 
 Parse JSON output to understand:
@@ -108,12 +104,8 @@ Check that proposed improvements:
 
 Use `update-component.py` or Edit tool to apply changes:
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-maintain/scripts/update-component.py
-```
 ```bash
-echo '{"updates": [...]}' | python3 {resolved_path} {component_path}
+echo '{"updates": [...]}' | python3 {update_component_path} {component_path}
 ```
 
 Or use Edit tool for precise modifications.
@@ -170,12 +162,8 @@ If file: Read the file
 
 #### Step 4: Check for Duplication
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-maintain/scripts/check-duplication.py
-```
 ```bash
-python3 {resolved_path} {skill_path} {content_file}
+python3 {check_duplication_path} {skill_path} {content_file}
 ```
 
 Parse JSON output:
@@ -234,12 +222,8 @@ Read: references/readme-maintenance-guide.md
 
 For each bundle:
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-maintain/scripts/generate-readme.sh
-```
 ```bash
-bash {resolved_path} {bundle_path}
+bash {generate_readme_path} {bundle_path}
 ```
 
 Parse JSON output for:

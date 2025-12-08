@@ -38,18 +38,13 @@ Activate this skill when you need to:
 
 Run the planning inventory scanner script:
 
-**For skill scripts, use the script-runner skill to resolve the path:**
-```
-Skill: general-tools:script-runner
-Resolve: planning:planning-inventory/scripts/scan-planning-inventory.py
-```
+**Script**: `planning:planning-inventory/scripts/scan-planning-inventory.py`
 
-Then execute:
 ```bash
-python3 {resolved_path}
+python3 {script_path}
 ```
 
-**Alternative (direct execution from marketplace checkout):**
+**Direct execution from marketplace checkout:**
 ```bash
 python3 marketplace/bundles/planning/skills/planning-inventory/scripts/scan-planning-inventory.py
 ```
@@ -71,8 +66,8 @@ Output format. Default: `full`
 
 **Examples**:
 ```bash
-python3 {resolved_path} --format full
-python3 {resolved_path} --format summary
+python3 {script_path} --format full
+python3 {script_path} --format summary
 ```
 
 ### --include-descriptions (optional flag)
@@ -80,7 +75,7 @@ python3 {resolved_path} --format summary
 When specified, includes description fields from YAML frontmatter.
 
 ```bash
-python3 {resolved_path} --include-descriptions
+python3 {script_path} --include-descriptions
 ```
 
 ## Output Format

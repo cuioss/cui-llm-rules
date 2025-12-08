@@ -77,7 +77,7 @@ These utilities are independent tools that can be used across different CUI proj
 
 7. **discover-skill-scripts** - Script discovery and registration
    - Discovers all skill scripts from installed plugins
-   - Generates `.claude/scripts.local.json` with path mappings
+   - Generates `.plan/scripts-library.toon` with path mappings
    - Usage: `/tools-discover-skill-scripts`
 
 ## Installation

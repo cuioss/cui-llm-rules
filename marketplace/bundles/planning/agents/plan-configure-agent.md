@@ -60,7 +60,7 @@ When the skill says `planning:manage-references/scripts/manage-references.py`:
 Copy paths AND parameter names EXACTLY from the skill documentation. Do not infer or guess.
 
 ### WHY THESE CONSTRAINTS EXIST
-Skills provide: correct paths via script-runner, validation, audit trail via work-log.
+Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.
 Direct file access bypasses ALL of these and CAUSES FAILURES.
 The path `.plan/plans/` is managed by manage-files.py, not by agents directly.
 

@@ -63,8 +63,10 @@ Activate this skill when:
 
 ### Step 1: Initialize Configuration File
 
+Script: `general-tools:manage-run-configuration/scripts/init-run-config.py`
+
 ```bash
-python3 scripts/init-run-config.py
+python3 {init_run_config_path}
 ```
 
 This creates the run configuration file with base structure if it doesn't exist.
@@ -189,8 +191,10 @@ Validate run configuration format and structure.
 
 ### Step 1: Execute Validation
 
+Script: `general-tools:manage-run-configuration/scripts/validate-run-config.py`
+
 ```bash
-python3 scripts/validate-run-config.py {run-config-file}
+python3 {validate_run_config_path} {run-config-file}
 ```
 
 ### Step 2: Process Result
@@ -238,10 +242,10 @@ Categories: `transitive_dependency`, `plugin_compatibility`, `platform_specific`
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `init-run-config.py` | Initialize run configuration with base structure |
-| `validate-run-config.py` | Run configuration format validation |
+| Script | Notation |
+|--------|----------|
+| init-run-config | `general-tools:manage-run-configuration/scripts/init-run-config.py` |
+| validate-run-config | `general-tools:manage-run-configuration/scripts/validate-run-config.py` |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)
@@ -257,9 +261,9 @@ Script characteristics:
 - Uses generic JSON operations for field access and updates
 - All CRUD operations delegate to json-file-operations
 
-### With script-runner Skill
-- Validation script discovered via script-runner
-- Use portable notation: `general-tools:manage-run-configuration/scripts/validate-run-config.py`
+### With Scripts Library
+- Validation script discovered via scripts-library.toon
+- Use portable notation from Scripts table above
 
 ### With planning Bundle
 - Commands record execution history to run configuration

@@ -48,6 +48,15 @@ Activate when:
 Skill: cui-frontend-expert:cui-javascript-project
 ```
 
+## Scripts
+
+| Script | Notation |
+|--------|----------|
+| execute-npm-build | `builder:builder-npm-rules/scripts/execute-npm-build.py` |
+| parse-npm-output | `builder:builder-npm-rules/scripts/parse-npm-output.py` |
+
+---
+
 ## Standards Reference
 
 **Load for build execution context:**
@@ -82,10 +91,12 @@ Use this workflow when:
 
 ### Step 1: Execute npm Build
 
-Use `execute-npm-build.py` which handles log file pre-creation, timestamping, and npm/npx execution atomically:
+Script: `builder:builder-npm-rules/scripts/execute-npm-build.py`
+
+Use the execute script which handles log file pre-creation, timestamping, and npm/npx execution atomically:
 
 ```bash
-python3 scripts/execute-npm-build.py \
+python3 {execute_npm_build_path} \
     --command "{command}" \
     --workspace {workspace} \
     --env {env} \
@@ -97,16 +108,16 @@ python3 scripts/execute-npm-build.py \
 **Examples:**
 ```bash
 # Basic test run
-python3 scripts/execute-npm-build.py --command "run test"
+python3 {execute_npm_build_path} --command "run test"
 
 # Workspace-specific build
-python3 scripts/execute-npm-build.py --command "run build" --workspace e-2-e-playwright
+python3 {execute_npm_build_path} --command "run build" --workspace e-2-e-playwright
 
 # Playwright tests with environment
-python3 scripts/execute-npm-build.py --command "playwright test" --env "CI=true"
+python3 {execute_npm_build_path} --command "playwright test" --env "CI=true"
 
 # Lint with extended timeout
-python3 scripts/execute-npm-build.py --command "run lint" --timeout 180000
+python3 {execute_npm_build_path} --command "run lint" --timeout 180000
 ```
 
 The script:
@@ -119,8 +130,10 @@ The script:
 
 ### Step 2: Parse Build Output
 
+Script: `builder:builder-npm-rules/scripts/parse-npm-output.py`
+
 ```bash
-python3 scripts/parse-npm-output.py \
+python3 {parse_npm_output_path} \
     --log {log_file from step 1} \
     --mode {output_mode}
 ```
@@ -174,10 +187,12 @@ Use this workflow when:
 
 ### Step 1: Execute Script
 
+Script: `builder:builder-npm-rules/scripts/parse-npm-output.py`
+
 **Parse the build log file:**
 
 ```bash
-python3 scripts/parse-npm-output.py \
+python3 {parse_npm_output_path} \
     --log <path-to-log-file> \
     --mode <output-mode>
 ```
@@ -234,10 +249,6 @@ Based on issue category, delegate to appropriate commands:
 | `dependency_error` | Manual package.json fix |
 | `playwright_error` | `/js-implement-tests` |
 
-### Script Location
-
-`scripts/parse-npm-output.py`
-
 ---
 
 ## Standards Organization
@@ -252,9 +263,7 @@ Standards in `standards/` directory:
 - **Grep**: Search patterns
 - **Bash(npm:*)**: Execute npm commands
 - **Bash(npx:*)**: Execute npx commands (Playwright, ESLint, etc.)
-- **Bash(python3:*)**: Execute scripts:
-  - `execute-npm-build.py` - Atomic build execution
-  - `parse-npm-output.py` - Output parsing
+- **Bash(python3:*)**: Execute scripts (see Scripts table)
 
 ## Integration
 

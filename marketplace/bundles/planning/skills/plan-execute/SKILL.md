@@ -16,21 +16,16 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 ---
 
-## Script Path Resolution
+## Scripts
 
-**MANDATORY**: Before executing any script, resolve paths via script-runner.
-
-```
-Skill: general-tools:script-runner
-Resolve: planning:manage-config/scripts/manage-config.py
-Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
-Resolve: planning:manage-log/scripts/manage-work-log.py
-Resolve: planning:manage-tasks/scripts/manage-tasks.py
-Resolve: planning:manage-references/scripts/manage-references.py
-Resolve: planning:plan-execute/scripts/update-progress.py
-```
-
-Use the resolved absolute paths in all Bash commands.
+| Script | Purpose |
+|--------|---------|
+| `planning:manage-config/scripts/manage-config.py` | Config field access |
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase routing and transitions |
+| `planning:manage-log/scripts/manage-work-log.py` | Work log entries |
+| `planning:manage-tasks/scripts/manage-tasks.py` | Task management |
+| `planning:manage-references/scripts/manage-references.py` | Reference file CRUD |
+| `planning:plan-execute/scripts/update-progress.py` | Progress updates |
 
 ---
 
@@ -55,7 +50,7 @@ For finalize phase, read finalize configuration directly from config.toon:
 Script: `planning:manage-config/scripts/manage-config.py`
 
 ```bash
-python3 {resolved_manage_config} get-multi \
+python3 {manage_config_path} get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -75,7 +70,7 @@ Get current phase, skill routing, and progress in a single call:
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ```bash
-python3 {resolved_manage_lifecycle} get-routing-context \
+python3 {manage_lifecycle_path} get-routing-context \
   --plan-id {plan_id}
 ```
 
@@ -104,7 +99,7 @@ At the start of execute or finalize phase:
 Script: `planning:manage-log/scripts/manage-work-log.py`
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type progress \
@@ -118,7 +113,7 @@ For each task in current phase:
 Script: `planning:manage-tasks/scripts/manage-tasks.py`
 
 ```bash
-python3 {resolved_manage_tasks} next \
+python3 {manage_tasks_path} next \
   --plan-id {plan_id} \
   --include-context
 ```
@@ -145,7 +140,7 @@ python3 {script_path} --plan-dir {plan_directory} --phase {phase} --task-id {tas
 After each task completes:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type artifact \
@@ -162,7 +157,7 @@ python3 {resolved_manage_work_log} add \
 ### Step 5: Log Phase Completion (When phase completes)
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type outcome \
@@ -212,7 +207,7 @@ When transitioning from execute phase to finalize, `transition-phase.py` automat
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type error \
@@ -225,8 +220,7 @@ python3 {resolved_manage_work_log} add \
 **ON SCRIPT FAILURE**: When any script execution fails (exit != 0):
 1. Log error to work-log (see above)
 2. Capture error context (script path, exit code, stderr)
-3. Follow `general-tools:script-runner` Error Handling workflow
-4. Continue with normal error recovery (retry, fail task, etc.)
+3. Continue with normal error recovery (retry, fail task, etc.)
 
 ### Other Errors
 

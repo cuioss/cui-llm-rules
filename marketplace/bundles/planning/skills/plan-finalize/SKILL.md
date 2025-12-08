@@ -19,19 +19,14 @@ Activate when:
 
 ---
 
-## Script Path Resolution
+## Scripts
 
-**MANDATORY**: Before executing any script, resolve paths via script-runner.
-
-```
-Skill: general-tools:script-runner
-Resolve: planning:manage-config/scripts/manage-config.py
-Resolve: planning:manage-references/scripts/manage-references.py
-Resolve: planning:manage-lifecycle/scripts/manage-lifecycle.py
-Resolve: planning:manage-log/scripts/manage-work-log.py
-```
-
-Use the resolved absolute paths in all Bash commands.
+| Script | Purpose |
+|--------|---------|
+| `planning:manage-config/scripts/manage-config.py` | Config field access |
+| `planning:manage-references/scripts/manage-references.py` | Reference file CRUD |
+| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase transitions |
+| `planning:manage-log/scripts/manage-work-log.py` | Work log entries |
 
 ---
 
@@ -42,7 +37,7 @@ All finalize configuration is read from config.toon (written during configure):
 Script: `planning:manage-config/scripts/manage-config.py`
 
 ```bash
-python3 {resolved_manage_config} get-multi \
+python3 {manage_config_path} get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -67,7 +62,7 @@ Returns only the required finalize fields in a single call.
 ### Step 0: Log Phase Start
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase finalize \
   --type progress \
@@ -77,7 +72,7 @@ python3 {resolved_manage_work_log} add \
 ### Step 1: Read Configuration
 
 ```bash
-python3 {resolved_manage_config} get-multi \
+python3 {manage_config_path} get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -89,7 +84,7 @@ Also read references context for branch and issue information:
 Script: `planning:manage-references/scripts/manage-references.py`
 
 ```bash
-python3 {resolved_manage_references} get-context \
+python3 {manage_references_path} get-context \
   --plan-id {plan_id}
 ```
 
@@ -98,7 +93,7 @@ Returns: `branch`, `base_branch`, `issue_url`, `build_system`, and file counts i
 **After reading configuration**, log the finalize strategy decision:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase finalize \
   --type decision \
@@ -172,7 +167,7 @@ Transition to complete:
 Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ```bash
-python3 {resolved_manage_lifecycle} transition \
+python3 {manage_lifecycle_path} transition \
   --plan-id {plan_id} \
   --completed finalize
 ```
@@ -180,7 +175,7 @@ python3 {resolved_manage_lifecycle} transition \
 ### Step 7: Log Completion
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase finalize \
   --type outcome \
@@ -225,7 +220,7 @@ recovery: {recovery_suggestion}
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 {resolved_manage_work_log} add \
+python3 {manage_work_log_path} add \
   --plan-id {plan_id} \
   --phase finalize \
   --type error \

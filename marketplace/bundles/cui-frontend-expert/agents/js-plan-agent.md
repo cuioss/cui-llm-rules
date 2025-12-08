@@ -48,7 +48,7 @@ These constraints apply EVEN IF skill loading fails:
 - Report errors if skill fails to load
 
 ### WHY THESE CONSTRAINTS EXIST
-Skills provide: correct paths via script-runner, validation, audit trail via work-log.
+Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.
 Direct `.plan/` file access bypasses ALL of these and CAUSES FAILURES.
 
 ## Input

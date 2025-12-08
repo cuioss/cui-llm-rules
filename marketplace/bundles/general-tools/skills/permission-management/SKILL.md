@@ -111,15 +111,11 @@ The skill returns JSON with all marketplace resources (bundles, agents, commands
 
 #### Step 3: Generate Permission Wildcards
 
-Resolve script path:
-```
-Skill: general-tools:script-runner
-Resolve: general-tools:permission-management/scripts/generate-permission-wildcards.py
-```
+Script: `general-tools:permission-management/scripts/generate-permission-wildcards.py`
 
 Pass the inventory JSON to the wildcard generator script:
 ```bash
-echo '<inventory-json>' | python3 {resolved_path} --format json
+echo '<inventory-json>' | python3 {script_path} --format json
 ```
 
 The script analyzes inventory and outputs:

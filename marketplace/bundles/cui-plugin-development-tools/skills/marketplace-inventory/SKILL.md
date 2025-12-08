@@ -29,21 +29,15 @@ When activated, this skill scans the marketplace and returns structured JSON inv
 
 ### Step 1: Execute Inventory Scan
 
-Run the marketplace inventory scanner script using the resolved path:
+Run the marketplace inventory scanner script:
 
-**For skill scripts, use the script-runner skill to resolve the path:**
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py
-```
+**Script**: `cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.py`
 
-Then execute:
 ```bash
-python3 {resolved_path} --scope marketplace
+python3 {script_path} --scope marketplace
 ```
 
-**Alternative (direct execution from marketplace checkout):**
-If working directly in the marketplace repository, execute:
+**Direct execution from marketplace checkout:**
 ```bash
 python3 marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py --scope marketplace
 ```
@@ -100,8 +94,8 @@ Directory scope to scan. Default: `marketplace`
 
 **Example**:
 ```bash
-python3 {resolved_path} --scope marketplace
-python3 {resolved_path} --scope project
+python3 {script_path} --scope marketplace
+python3 {script_path} --scope project
 ```
 
 ### --resource-types (optional)
@@ -118,7 +112,7 @@ Filter which resource types to include in the inventory. Default: `all`
 
 Multiple types can be combined with commas:
 ```bash
-python3 {resolved_path} --resource-types agents,skills
+python3 {script_path} --resource-types agents,skills
 ```
 
 ### --include-descriptions (optional flag)
@@ -127,7 +121,7 @@ When specified, extracts description fields from YAML frontmatter of each resour
 
 **Example**:
 ```bash
-python3 {resolved_path} --include-descriptions
+python3 {script_path} --include-descriptions
 ```
 
 **Output with descriptions**:
@@ -156,10 +150,10 @@ Filter resources by name using fnmatch glob patterns. Use pipe (`|`) to separate
 **Examples**:
 ```bash
 # Single pattern
-python3 {resolved_path} --name-pattern "*-plan-*"
+python3 {script_path} --name-pattern "*-plan-*"
 
 # Multiple patterns (pipe-separated)
-python3 {resolved_path} --name-pattern "*-plan-*|*-specify-*|plan-*|manage-*"
+python3 {script_path} --name-pattern "*-plan-*|*-specify-*|plan-*|manage-*"
 ```
 
 ### --bundles (optional)
@@ -169,10 +163,10 @@ Filter to specific bundles by name (comma-separated).
 **Example**:
 ```bash
 # Single bundle
-python3 {resolved_path} --bundles planning
+python3 {script_path} --bundles planning
 
 # Multiple bundles
-python3 {resolved_path} --bundles "planning,cui-java-expert,cui-frontend-expert"
+python3 {script_path} --bundles "planning,cui-java-expert,cui-frontend-expert"
 ```
 
 ## Error Handling
@@ -188,11 +182,10 @@ This skill is designed to run without user prompts. Required permissions:
 
 **Script Execution:**
 - `Bash(bash:*)` - Bash interpreter
-- Script permissions synced via `/tools-setup-project-permissions` from `.claude/scripts.local.json`
+- Script permissions synced via `/tools-setup-project-permissions`
 
 **Ensuring Non-Prompting:**
-- Use script-runner skill to resolve absolute paths, or use direct path in marketplace checkout
-- Permissions for skill scripts are managed globally via script-runner discovery
+- Resolve script paths from `.plan/scripts-library.toon` (system convention)
 - Script only reads marketplace directory structure (no writes)
 - All output is JSON to stdout
 

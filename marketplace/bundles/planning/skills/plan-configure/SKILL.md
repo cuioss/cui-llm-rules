@@ -24,12 +24,10 @@ Activate when `plan-configure-agent` delegates with:
 
 ---
 
-## Script Paths
+## Scripts
 
-Scripts are located relative to the skill base directory. Use these paths:
-
-| Script | Path |
-|--------|------|
+| Script | Notation |
+|--------|----------|
 | manage-files | `planning:manage-files/scripts/manage-files.py` |
 | manage-requirements | `planning:manage-requirements/scripts/manage-requirement.py` |
 | manage-config | `planning:manage-config/scripts/manage-config.py` |

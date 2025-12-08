@@ -40,17 +40,12 @@ List all ADRs with optional status filtering.
 
 ### Steps
 
-**Step 1: Resolve Script Path**
+**Step 1: Execute List**
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
-```
-
-**Step 2: Execute List**
+Script: `cui-documentation-standards:adr-management/scripts/manage-adr.py`
 
 ```bash
-python3 {resolved_path} list [--status {status}]
+python3 {script_path} list [--status {status}]
 ```
 
 **Step 3: Parse Output**
@@ -82,17 +77,12 @@ Create a new ADR with automatic numbering.
 
 ### Steps
 
-**Step 1: Resolve Script Path**
+**Step 1: Create ADR**
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
-```
-
-**Step 2: Create ADR**
+Script: `cui-documentation-standards:adr-management/scripts/manage-adr.py`
 
 ```bash
-python3 {resolved_path} create --title "{title}" [--status "{status}"]
+python3 {script_path} create --title "{title}" [--status "{status}"]
 ```
 
 **Step 3: Parse Output**
@@ -138,17 +128,12 @@ Read ADR content by number.
 
 ### Steps
 
-**Step 1: Resolve Script Path**
+**Step 1: Read ADR**
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
-```
-
-**Step 2: Read ADR**
+Script: `cui-documentation-standards:adr-management/scripts/manage-adr.py`
 
 ```bash
-python3 {resolved_path} read --number {number}
+python3 {script_path} read --number {number}
 ```
 
 **Step 3: Display Content**
@@ -166,17 +151,12 @@ Update ADR status through lifecycle.
 
 ### Steps
 
-**Step 1: Resolve Script Path**
+**Step 1: Update ADR**
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
-```
-
-**Step 2: Update ADR**
+Script: `cui-documentation-standards:adr-management/scripts/manage-adr.py`
 
 ```bash
-python3 {resolved_path} update --number {number} --status {status}
+python3 {script_path} update --number {number} --status {status}
 ```
 
 **Step 3: Confirm Update**
@@ -194,17 +174,12 @@ Delete ADR with confirmation.
 
 ### Steps
 
-**Step 1: Resolve Script Path**
+**Step 1: Delete ADR**
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:adr-management/scripts/manage-adr.py
-```
-
-**Step 2: Delete ADR**
+Script: `cui-documentation-standards:adr-management/scripts/manage-adr.py`
 
 ```bash
-python3 {resolved_path} delete --number {number} --force
+python3 {script_path} delete --number {number} --force
 ```
 
 **Step 3: Confirm Deletion**
@@ -286,4 +261,3 @@ Examples:
 ## References
 
 - [cui-documentation SKILL](../cui-documentation/SKILL.md) - Format validation
-- [script-runner SKILL](../../general-tools/skills/script-runner/SKILL.md) - Script path resolution

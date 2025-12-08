@@ -57,7 +57,7 @@ When the skill says `planning:manage-files/scripts/manage-files.py`:
 Copy paths EXACTLY from the skill's Script Paths table. Do not infer or guess paths.
 
 ### WHY THESE CONSTRAINTS EXIST
-Skills provide: correct paths via script-runner, validation, audit trail via work-log.
+Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.
 Direct file access bypasses ALL of these and CAUSES FAILURES.
 The path `.plan/plans/` is managed by manage-files.py, not by agents directly.
 

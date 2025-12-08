@@ -67,15 +67,10 @@ OPTIONS=""
 if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 ```
 
-Resolve script path:
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-formatter.sh
-```
+Script: `cui-documentation-standards:cui-documentation/scripts/asciidoc-formatter.sh`
 
-Execute:
 ```bash
-bash {resolved_path} $OPTIONS {target} 2>&1
+bash {script_path} $OPTIONS {target} 2>&1
 ```
 
 **Step 4: Parse Output**
@@ -97,13 +92,12 @@ Changes applied: {list}
 
 **Step 6: Validation (after changes applied)**
 
-Resolve and run validation:
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
-```
+Run validation:
+
+Script: `cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh`
+
 ```bash
-bash {resolved_path} {target} 2>&1
+bash {script_path} {target} 2>&1
 ```
 
 ---
@@ -140,13 +134,10 @@ If target is a directory:
 
 **Step 3: Run Format Validation**
 
-Resolve and execute:
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
-```
+Script: `cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh`
+
 ```bash
-bash {resolved_path} {target} 2>&1
+bash {script_path} {target} 2>&1
 ```
 
 **Step 4: Parse Output**
@@ -234,20 +225,15 @@ mkdir -p target/asciidoc-link-verifier
 
 **Step 4: Run Link Verification**
 
-Resolve script path:
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:cui-documentation/scripts/verify-adoc-links.py
-```
+Script: `cui-documentation-standards:cui-documentation/scripts/verify-adoc-links.py`
 
-Execute:
 ```bash
-python3 {resolved_path} --file {file_path} --report target/asciidoc-link-verifier/links.md 2>&1
+python3 {script_path} --file {file_path} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
 For directories:
 ```bash
-python3 {resolved_path} --directory {directory} --report target/asciidoc-link-verifier/links.md 2>&1
+python3 {script_path} --directory {directory} --report target/asciidoc-link-verifier/links.md 2>&1
 ```
 
 **Step 5: Parse Report**
@@ -330,20 +316,15 @@ If target is a directory:
 
 **Step 3: Run Content Analysis**
 
-Resolve script path:
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:cui-documentation/scripts/review-content.py
-```
+Script: `cui-documentation-standards:cui-documentation/scripts/review-content.py`
 
-Execute:
 ```bash
-python3 {resolved_path} --file {file_path} 2>&1
+python3 {script_path} --file {file_path} 2>&1
 ```
 
 For directories:
 ```bash
-python3 {resolved_path} --directory {directory} 2>&1
+python3 {script_path} --directory {directory} 2>&1
 ```
 
 **Step 4: Parse JSON Output**
@@ -510,13 +491,10 @@ Parameters:
 
 After running verify-adoc-links.py, classify results:
 
-Resolve and execute classification:
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:cui-documentation/scripts/verify-links-false-positives.py
-```
+Script: `cui-documentation-standards:cui-documentation/scripts/verify-links-false-positives.py`
+
 ```bash
-python3 {resolved_path} --input target/links.json --output target/classified.json
+python3 {script_path} --input target/links.json --output target/classified.json
 ```
 
 Parse classified results:
@@ -553,13 +531,10 @@ Parameters:
 
 **Enhanced Content Analysis:**
 
-Resolve and execute tone analysis:
-```
-Skill: general-tools:script-runner
-Resolve: cui-documentation-standards:cui-documentation/scripts/analyze-content-tone.py
-```
+Script: `cui-documentation-standards:cui-documentation/scripts/analyze-content-tone.py`
+
 ```bash
-python3 {resolved_path} --file {file_path} --output target/tone-analysis.json
+python3 {script_path} --file {file_path} --output target/tone-analysis.json
 ```
 
 Parse tone analysis JSON:

@@ -1,21 +1,31 @@
 #!/usr/bin/env python3
 """
-generate-scripts-local.py
+generate-scripts-library.py
 
-Generates .claude/scripts.local.json from marketplace inventory.
-This script ensures ALL scripts are captured deterministically.
+Generates .plan/scripts-library.toon from marketplace inventory.
+This script ensures ALL scripts are captured deterministically in TOON format.
 
 Usage:
-    python3 generate-scripts-local.py [--output PATH] [--marketplace-root PATH]
+    python3 generate-scripts-library.py [--output PATH] [--marketplace-root PATH]
 
 Options:
-    --output PATH           Output path (default: .claude/scripts.local.json)
+    --output PATH           Output path (default: .plan/scripts-library.toon)
     --marketplace-root PATH Path to marketplace root (default: current directory)
     --dry-run               Print output instead of writing file
 
 Exit codes:
     0 - Success
     1 - Error during execution
+
+Output format (TOON):
+    version: 2
+    generated: 2025-12-07T10:30:00Z
+    marketplace: cui-development-standards
+    script_count: 79
+
+    scripts[79]{notation,absolute,type}:
+    bundle:skill/scripts/name.py,/absolute/path/name.py,python
+    ...
 """
 
 import argparse
@@ -89,10 +99,20 @@ def build_notation(bundle: str, skill: str, script_name: str, script_type: str) 
     return f"{bundle}:{skill}/scripts/{script_name}{ext}"
 
 
-def generate_scripts_local(scripts: list[dict], marketplace_name: str) -> dict:
-    """Generate the scripts.local.json structure."""
-    # Build scripts mapping
-    scripts_mapping = {}
+def generate_scripts_library_toon(scripts: list[dict], marketplace_name: str) -> str:
+    """Generate the scripts-library.toon content."""
+    lines = []
+
+    # Header
+    timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    lines.append(f"version: 2")
+    lines.append(f"generated: {timestamp}")
+    lines.append(f"marketplace: {marketplace_name}")
+    lines.append(f"script_count: {len(scripts)}")
+    lines.append("")
+
+    # Build sorted list of (notation, absolute, type)
+    script_entries = []
     for script in scripts:
         notation = build_notation(
             script["bundle"],
@@ -100,49 +120,28 @@ def generate_scripts_local(scripts: list[dict], marketplace_name: str) -> dict:
             script["name"],
             script["type"]
         )
-        scripts_mapping[notation] = {
-            "absolute": script["absolute_path"],
-            "type": script["type"]
-        }
+        script_entries.append((notation, script["absolute_path"], script["type"]))
 
-    # Build permissions - one per skill directory
-    # Group scripts by skill to generate one permission per skill
-    skill_paths = {}  # skill_path -> {has_bash, has_python}
-    for script in scripts:
-        skill_dir = str(Path(script["absolute_path"]).parent)
-        if skill_dir not in skill_paths:
-            skill_paths[skill_dir] = {"has_bash": False, "has_python": False}
+    # Sort by notation for consistent output
+    script_entries.sort(key=lambda x: x[0])
 
-        if script["type"] == "bash":
-            skill_paths[skill_dir]["has_bash"] = True
-        elif script["type"] == "python":
-            skill_paths[skill_dir]["has_python"] = True
+    # Scripts table
+    lines.append(f"scripts[{len(script_entries)}]{{notation,absolute,type}}:")
+    for notation, absolute, script_type in script_entries:
+        lines.append(f"{notation},{absolute},{script_type}")
 
-    permissions = []
-    for skill_dir, types in sorted(skill_paths.items()):
-        if types["has_bash"]:
-            permissions.append(f"Bash(bash {skill_dir}/*:*)")
-        if types["has_python"]:
-            permissions.append(f"Bash(python3 {skill_dir}/*:*)")
-
-    return {
-        "version": 1,
-        "discovered_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "marketplace": marketplace_name,
-        "scripts": scripts_mapping,
-        "permissions": sorted(permissions)
-    }
+    return "\n".join(lines)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate scripts.local.json from marketplace inventory"
+        description="Generate scripts-library.toon from marketplace inventory"
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path(".claude/scripts.local.json"),
-        help="Output path for scripts.local.json"
+        default=Path(".plan/scripts-library.toon"),
+        help="Output path for scripts-library.toon"
     )
     parser.add_argument(
         "--marketplace-root",
@@ -166,41 +165,34 @@ def main():
         # Discover all scripts
         scripts, marketplace_name = discover_marketplace_scripts(args.marketplace_root)
 
-        # Generate the output structure
-        output = generate_scripts_local(scripts, marketplace_name)
-
-        # Output
-        json_output = json.dumps(output, indent=2)
+        # Generate TOON content
+        toon_content = generate_scripts_library_toon(scripts, marketplace_name)
 
         if args.dry_run:
-            print(json_output)
+            print(toon_content)
             print(f"\n# Would write to: {args.output}", file=sys.stderr)
             print(f"# Scripts discovered: {len(scripts)}", file=sys.stderr)
-            print(f"# Permissions generated: {len(output['permissions'])}", file=sys.stderr)
         else:
             # Ensure directory exists
             args.output.parent.mkdir(parents=True, exist_ok=True)
 
             # Write file
             with open(args.output, "w") as f:
-                f.write(json_output)
+                f.write(toon_content)
                 f.write("\n")
 
-            print(json.dumps({
-                "success": True,
-                "file": str(args.output),
-                "scripts_discovered": len(scripts),
-                "permissions_generated": len(output["permissions"]),
-                "marketplace": marketplace_name
-            }, indent=2))
+            # Output success in TOON format
+            print(f"status: success")
+            print(f"scripts_discovered: {len(scripts)}")
+            print(f"output_file: {args.output}")
+            print(f"marketplace: {marketplace_name}")
 
         return 0
 
     except Exception as e:
-        print(json.dumps({
-            "success": False,
-            "error": str(e)
-        }), file=sys.stderr)
+        # Output error in TOON format
+        print(f"status: error", file=sys.stderr)
+        print(f"message: {e}", file=sys.stderr)
         return 1
 
 

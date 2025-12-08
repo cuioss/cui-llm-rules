@@ -145,12 +145,8 @@ Track `validations_performed` counter.
 #### Step 4: Generate Agent File
 
 **Generate frontmatter:**
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
-```
 ```bash
-python3 {resolved_path} "agent" "{answers_json}"
+python3 {generate_frontmatter_path} "agent" "{answers_json}"
 ```
 
 Where answers_json contains:
@@ -200,12 +196,8 @@ Track `files_created` counter.
 
 #### Step 5: Validate Generated Component
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
-```
 ```bash
-python3 {resolved_path} "{file_path}" "agent"
+python3 {validate_component_path} "{file_path}" "agent"
 ```
 
 Validation checks:
@@ -315,12 +307,8 @@ Same pattern as agent workflow, using Glob/Grep to find similar commands.
 #### Step 4: Generate Command File
 
 **Generate frontmatter:**
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
-```
 ```bash
-python3 {resolved_path} "command" "{answers_json}"
+python3 {generate_frontmatter_path} "command" "{answers_json}"
 ```
 
 **Load template:**
@@ -360,12 +348,8 @@ Track `files_created` counter.
 
 #### Step 5: Validate Generated Component
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
-```
 ```bash
-python3 {resolved_path} "{file_path}" "command"
+python3 {validate_component_path} "{file_path}" "command"
 ```
 
 Validation checks:
@@ -456,12 +440,8 @@ bash mkdir -p {bundle}/skills/{skill-name}/standards
 **Generate SKILL.md:**
 
 Generate frontmatter:
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py
-```
 ```bash
-python3 {resolved_path} "skill" "{answers_json}"
+python3 {generate_frontmatter_path} "skill" "{answers_json}"
 ```
 
 Load template:
@@ -520,12 +500,8 @@ Track `files_created` and `standards_files_created` counters.
 
 #### Step 5: Validate Generated Component
 
-```
-Skill: general-tools:script-runner
-Resolve: cui-plugin-development-tools:plugin-create/scripts/validate-component.py
-```
 ```bash
-python3 {resolved_path} "{skill_path}/SKILL.md" "skill"
+python3 {validate_component_path} "{skill_path}/SKILL.md" "skill"
 ```
 
 Validation checks:
@@ -757,14 +733,17 @@ This skill uses the following reference files (load on-demand):
 
 ## Scripts
 
-This skill uses the following scripts:
+| Script | Notation |
+|--------|----------|
+| validate-component | `cui-plugin-development-tools:plugin-create/scripts/validate-component.py` |
+| generate-frontmatter | `cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py` |
 
 ### validate-component.py
 **Purpose**: Validates marketplace component structure
 
 **Usage**:
 ```bash
-scripts/validate-component.py <file_path> <component_type>
+python3 {validate_component_path} <file_path> <component_type>
 ```
 
 **Output**: JSON with validation results
@@ -774,7 +753,7 @@ scripts/validate-component.py <file_path> <component_type>
 
 **Usage**:
 ```bash
-scripts/generate-frontmatter.py <component_type> <answers_json>
+python3 {generate_frontmatter_path} <component_type> <answers_json>
 ```
 
 **Output**: Formatted YAML frontmatter string

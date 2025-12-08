@@ -218,7 +218,7 @@ Risky fixes require user confirmation because they involve judgment calls or may
 **Why Risky**:
 - Changes script resolution mechanism
 - May break if script-runner configuration is incorrect
-- User should verify scripts.local.json is up to date
+- User should verify scripts-library.toon is up to date
 - Requires general-tools:script-runner skill
 
 ### 6. pattern-22-violation

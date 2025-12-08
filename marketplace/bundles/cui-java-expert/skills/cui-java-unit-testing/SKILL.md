@@ -307,15 +307,12 @@ Analyze existing JaCoCo coverage reports and extract coverage metrics.
    ```
    Or use provided file path directly.
 
-2. **Resolve Script Path**
-   ```
-   Skill: general-tools:script-runner
-   Resolve: cui-java-expert:cui-java-unit-testing/scripts/analyze-coverage.py
-   ```
+2. **Run Coverage Analysis Script**
 
-3. **Run Coverage Analysis Script**
+   Script: `cui-java-expert:cui-java-unit-testing/scripts/analyze-coverage.py`
+
    ```bash
-   python3 {resolved_path} --file {report_path} --threshold {threshold}
+   python3 {script_path} --file {report_path} --threshold {threshold}
    ```
 
 4. **Parse Results**
@@ -401,12 +398,11 @@ Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements
    ```
 
 2. **Analyze Coverage Gaps**
-   ```
-   Skill: general-tools:script-runner
-   Script: cui-java-expert:cui-java-unit-testing/analyze-coverage-gaps
-   Parameters:
-     report_path: "{report_path}"
-     priority_filter: "{priority_filter}"
+
+   Script: `cui-java-expert:cui-java-unit-testing/scripts/analyze-coverage-gaps.py`
+
+   ```bash
+   python3 {script_path} --report-path {report_path} --priority-filter {priority_filter}
    ```
 
    Parse JSON output:

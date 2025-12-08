@@ -60,12 +60,11 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
    ```
 
    Or use script for structure:
-   ```
-   Skill: general-tools:script-runner
-   Resolve: planning:sonar-workflow/scripts/fetch-sonar-issues.py
-   ```
+
+   Script: `planning:sonar-workflow/scripts/fetch-sonar-issues.py`
+
    ```bash
-   python3 {resolved_path} --project {key} [--pr {id}]
+   python3 {script_path} --project {key} [--pr {id}]
    ```
 
 3. **Return Structured List**
@@ -109,12 +108,11 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 
 2. **Triage Each Issue**
    For each issue:
-   ```
-   Skill: general-tools:script-runner
-   Resolve: planning:sonar-workflow/scripts/triage-issue.py
-   ```
+
+   Script: `planning:sonar-workflow/scripts/triage-issue.py`
+
    ```bash
-   python3 {resolved_path} --issue '{json}'
+   python3 {script_path} --issue '{json}'
    ```
 
    Script outputs decision:

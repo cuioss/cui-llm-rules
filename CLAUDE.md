@@ -98,6 +98,24 @@ Single interface for Maven/Gradle/npm with automatic environment detection. Cons
 ### Structured Contracts
 All agents return JSON with status, data, and metrics. Explicit error paths and partial success states enable iteration.
 
+### Script Resolution Convention
+
+Skills contain Python scripts that implement operations. Scripts use portable notation for cross-bundle references:
+
+**Notation format**: `{bundle}:{skill}/scripts/{name}.{ext}`
+
+**Examples**:
+- `planning:manage-files/scripts/manage-files.py`
+- `builder:builder-maven-rules/scripts/execute-maven-build.py`
+
+**Resolution**: When executing scripts with portable notation, resolve the absolute path from `.plan/scripts-library.toon`:
+
+1. Read `.plan/scripts-library.toon`
+2. Look up notation in `scripts` table
+3. Use the `absolute` path in bash commands
+
+**Cache generation**: Run `/tools-discover-skill-scripts` to regenerate the scripts library after adding or moving scripts.
+
 ## Working in This Repository
 
 ### File Formats
