@@ -302,6 +302,40 @@ def test_scripts_have_path_formats():
         f"All scripts should have path_formats: {scripts_with_paths} vs {total_scripts}"
 
 
+def test_scripts_have_notation_field():
+    """Test all scripts have notation field in {bundle}:{skill} format."""
+    result = run_script(SCRIPT_PATH, '--resource-types', 'scripts')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+
+    # Verify all scripts have notation field
+    for bundle in data.get('bundles', []):
+        bundle_name = bundle['name']
+        for script in bundle.get('scripts', []):
+            assert 'notation' in script, f"Script {script['name']} missing notation field"
+            notation = script['notation']
+            skill_name = script['skill']
+            expected = f"{bundle_name}:{skill_name}"
+            assert notation == expected, f"Script notation mismatch: expected '{expected}', got '{notation}'"
+
+
+def test_scripts_notation_format_valid():
+    """Test notation follows {bundle}:{skill} format with single colon."""
+    result = run_script(SCRIPT_PATH, '--resource-types', 'scripts')
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+
+    for bundle in data.get('bundles', []):
+        for script in bundle.get('scripts', []):
+            notation = script.get('notation', '')
+            parts = notation.split(':')
+            assert len(parts) == 2, f"Notation '{notation}' should have exactly one colon"
+            assert parts[0], f"Notation '{notation}' should have non-empty bundle"
+            assert parts[1], f"Notation '{notation}' should have non-empty skill"
+
+
 # =============================================================================
 # Tests - Name Pattern Filtering
 # =============================================================================
@@ -469,6 +503,8 @@ if __name__ == '__main__':
         # Script Discovery
         test_script_count_matches_filesystem,
         test_scripts_have_path_formats,
+        test_scripts_have_notation_field,
+        test_scripts_notation_format_valid,
         # Name Pattern Filtering
         test_name_pattern_filters_agents,
         test_name_pattern_multiple_patterns,

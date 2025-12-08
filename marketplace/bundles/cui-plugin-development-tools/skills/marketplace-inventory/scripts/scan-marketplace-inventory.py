@@ -15,6 +15,10 @@ Options:
     --name-pattern <pattern> Filter resources by name pattern (fnmatch glob, pipe-separated for multiple)
     --bundles <names>        Filter to specific bundles (comma-separated)
 
+Script Output:
+    Scripts include a 'notation' field in {bundle}:{skill} format for use with
+    the script executor (e.g., "planning:manage-files").
+
 Exit codes:
     0 - Success (JSON output)
     1 - Error (invalid parameters, missing directory)
@@ -132,8 +136,11 @@ def discover_skills(bundle_dir: Path, include_descriptions: bool) -> list[dict]:
     return skills
 
 
-def discover_scripts(bundle_dir: Path) -> list[dict]:
-    """Discover script files (.sh, .py) in skill/scripts/ directories."""
+def discover_scripts(bundle_dir: Path, bundle_name: str) -> list[dict]:
+    """Discover script files (.sh, .py) in skill/scripts/ directories.
+
+    Returns scripts with 'notation' field in {bundle}:{skill} format.
+    """
     skills_dir = bundle_dir / "skills"
     if not skills_dir.is_dir():
         return []
@@ -155,6 +162,7 @@ def discover_scripts(bundle_dir: Path) -> list[dict]:
             scripts.append({
                 "name": script_file.stem,
                 "skill": skill_name,
+                "notation": f"{bundle_name}:{skill_name}",
                 "type": script_type,
                 "path_formats": {
                     "runtime": runtime_mount,
@@ -202,8 +210,9 @@ def parse_resource_types(resource_types_str: str) -> tuple[dict, Optional[str]]:
 def process_bundle(bundle_dir: Path, include: dict, include_descriptions: bool,
                    name_patterns: list[str]) -> dict:
     """Process a single bundle directory and return its data."""
+    bundle_name = bundle_dir.name
     bundle = {
-        "name": bundle_dir.name,
+        "name": bundle_name,
         "path": str(bundle_dir.relative_to(Path.cwd()))
     }
 
@@ -211,7 +220,7 @@ def process_bundle(bundle_dir: Path, include: dict, include_descriptions: bool,
     agents = discover_agents(bundle_dir, include_descriptions) if include["agents"] else []
     commands = discover_commands(bundle_dir, include_descriptions) if include["commands"] else []
     skills = discover_skills(bundle_dir, include_descriptions) if include["skills"] else []
-    scripts = discover_scripts(bundle_dir) if include["scripts"] else []
+    scripts = discover_scripts(bundle_dir, bundle_name) if include["scripts"] else []
 
     # Apply name pattern filter
     bundle["agents"] = filter_resources_by_pattern(agents, name_patterns)

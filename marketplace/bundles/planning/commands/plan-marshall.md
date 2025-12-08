@@ -53,22 +53,30 @@ Display this banner on command start (output as single code block):
 Skill: general-tools:script-executor
 ```
 
-### Step 2: Discover Scripts
+### Step 2: Discover Scripts with Notation
 
-Use marketplace-inventory to find all scripts:
+Use marketplace-inventory to find all scripts (includes `notation` field in `{bundle}:{skill}` format):
 
 ```bash
 python3 marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py --scope marketplace --resource-types scripts
 ```
 
-### Step 3: Build Mappings
+Output contains:
+```json
+{
+  "bundles": [{
+    "name": "planning",
+    "scripts": [{
+      "name": "manage-files",
+      "skill": "manage-files",
+      "notation": "planning:manage-files",
+      "path_formats": { "absolute": "/abs/path/manage-files.py" }
+    }]
+  }]
+}
+```
 
-For each discovered script:
-1. Extract bundle and skill from path
-2. Generate simplified notation: `{bundle}:{skill}`
-3. Verify script exists at absolute path
-
-### Step 4: Generate Executor
+### Step 3: Generate Executor
 
 Read template from:
 ```
@@ -76,7 +84,7 @@ marketplace/bundles/general-tools/skills/script-executor/templates/execute-scrip
 ```
 
 Replace placeholders:
-- `{{SCRIPT_MAPPINGS}}` with discovered mappings in format:
+- `{{SCRIPT_MAPPINGS}}` with notation→path mappings from Step 2:
   ```python
       "planning:manage-files": "/abs/path/manage-files.py",
       "planning:manage-config": "/abs/path/manage-config.py",
@@ -88,7 +96,7 @@ Replace placeholders:
 
 Write to: `.plan/execute-script.py`
 
-### Step 5: Clean Up Old Logs
+### Step 4: Clean Up Old Logs
 
 Delete global logs older than 7 days from `.plan/logs/`:
 
@@ -99,7 +107,7 @@ from execution_log import cleanup_old_global_logs
 cleaned = cleanup_old_global_logs(max_age_days=7)
 ```
 
-### Step 6: Update State
+### Step 5: Update State
 
 Write to: `.plan/marshall-state.toon`
 
