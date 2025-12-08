@@ -197,6 +197,11 @@ standards/
 
 These checks apply ONLY when `scope: planning` is specified:
 
+**Allowed `.plan` Access** (NOT violations):
+- `.plan/scripts-library.toon` - Read for script path resolution (system convention)
+- `.plan/lessons-learned/*.md` - Read/write via manage-lessons skill
+
+**Prohibited `.plan/plans/**` Access** (violations):
 - Direct Read/Write/Edit of `.plan/plans/*/status.toon`
 - Direct Read/Write/Edit of `.plan/plans/*/config.toon`
 - Direct Read/Write/Edit of `.plan/plans/*/work-log.toon`

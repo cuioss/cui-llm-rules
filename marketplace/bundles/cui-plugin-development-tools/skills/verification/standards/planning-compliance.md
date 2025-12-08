@@ -15,9 +15,20 @@ Planning operations MUST use the official manage-* APIs for all .plan directory 
 
 ## Compliance Rules
 
-### Rule 1: No Direct .plan Access
+### Rule 0: Allowed .plan Access
 
-**Prohibited Operations**:
+Some `.plan` files are designed for direct access:
+
+| File | Access | Purpose |
+|------|--------|---------|
+| `.plan/scripts-library.toon` | Read | Script path resolution (system convention) |
+| `.plan/lessons-learned/*.md` | Read/Write | Lessons learned via manage-lessons skill |
+
+These are NOT violations and should not trigger compliance alerts.
+
+### Rule 1: No Direct .plan/plans/** Access
+
+**Prohibited Operations** (plan data must use manage-* API):
 
 | Tool | Prohibited Pattern | Correct Alternative |
 |------|-------------------|---------------------|
