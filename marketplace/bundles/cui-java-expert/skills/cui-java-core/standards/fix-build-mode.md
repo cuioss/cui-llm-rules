@@ -165,7 +165,7 @@ exit_code=$?
 
 [source,bash]
 ----
-python3 parse-maven-output.py \
+python3 .plan/execute-script.py builder:builder-maven-rules:parse \
   --log target/build-errors-before.log \
   --mode structured
 ----
@@ -272,7 +272,7 @@ Fix: Change to getId() or add getUserId() method
 mvn clean compile -l target/build-errors-after.log
 exit_code=$?
 
-python3 parse-maven-output.py \
+python3 .plan/execute-script.py builder:builder-maven-rules:parse \
   --log target/build-errors-after.log \
   --mode structured
 ----

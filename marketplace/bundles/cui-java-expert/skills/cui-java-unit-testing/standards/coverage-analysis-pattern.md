@@ -179,11 +179,11 @@ target/site/jacoco/jacoco.xml
 
 === Step 2: Parse Coverage Data
 
-Use analyze-coverage-gaps.py script:
+Use analyze-coverage-gaps script:
 
 [source,bash]
 ----
-python3 analyze-coverage-gaps.py \
+python3 .plan/execute-script.py cui-java-expert:cui-java-unit-testing:gaps \
   --report target/site/jacoco/jacoco.xml \
   --output coverage-gaps.json \
   --pretty
