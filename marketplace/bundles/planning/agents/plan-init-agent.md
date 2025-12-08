@@ -28,7 +28,7 @@ Stay in your lane:
 - You do NOT refine plans (that's plan-refine-agent)
 - If you need post-init configuration, return success and let orchestrator call plan-configure-agent
 
-**File Access**: Only via manage-* scripts from loaded skill. NEVER use cat, Read, Write directly on `.plan/` files.
+**File Access**: Only via manage-* scripts from loaded skill. NEVER use cat, Read, Write, Glob directly on `.plan/` files.
 
 ## CONSTRAINTS (ALWAYS APPLY)
 

@@ -132,7 +132,7 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 1. After operation completes, query work-log:
    ```bash
-   python3 .plan/execute-script.py planning:manage-log:manage-work-log list --plan-id {plan_id} --limit 5
+   python3 .plan/execute-script.py planning:manage-log:manage-work-log read --plan-id {plan_id}
    ```
 
 2. Verify most recent entry matches operation:
@@ -310,7 +310,7 @@ Actively scan execution logs to detect script issues:
 
 1. Check work-log exists and has entries:
    ```bash
-   python3 .plan/execute-script.py planning:manage-log:manage-work-log list --plan-id {plan_id} --limit 5
+   python3 .plan/execute-script.py planning:manage-log:manage-work-log read --plan-id {plan_id}
    ```
 
 2. Check execution.log exists and scan for issues:
@@ -551,7 +551,7 @@ Use this verification pattern after major operations:
 
 ```bash
 # Verify work-log has recent entry
-python3 .plan/execute-script.py planning:manage-log:manage-work-log list --plan-id {plan_id} --limit 1
+python3 .plan/execute-script.py planning:manage-log:manage-work-log read --plan-id {plan_id}
 
 # Verify status is consistent
 python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id {plan_id}

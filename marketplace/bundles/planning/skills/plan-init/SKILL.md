@@ -147,14 +147,28 @@ created: {ISO_timestamp}
 {extracted_context}
 ```
 
-Write via manage-files:
+Write via manage-files using `--content` parameter:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-files:manage-files write \
   --plan-id {plan_id} \
   --file task.md \
-  --stdin
+  --content "# Task: {derived_title}
+
+source: {description|lesson|issue}
+source_id: {lesson_id|issue_url|none}
+created: {ISO_timestamp}
+
+## Original Input
+
+{verbatim_content}
+
+## Context
+
+{extracted_context}"
 ```
+
+**Note**: The `--content` parameter supports multiline content. Do NOT use `--stdin` with shell heredocs.
 
 ### Step 7: Initialize References
 

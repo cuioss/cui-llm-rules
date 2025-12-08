@@ -69,16 +69,16 @@ Write content to a file in a plan directory.
 python3 .plan/execute-script.py planning:manage-files:manage-files write \
   --plan-id {plan_id} \
   --file task.md \
-  --content "# Task Title\n\nTask description..."
+  --content "# Task Title
+
+Task description with multiline content.
+
+## Section
+
+More content here..."
 ```
 
-Or with stdin:
-```bash
-cat content.md | python3 .plan/execute-script.py planning:manage-files:manage-files write \
-  --plan-id {plan_id} \
-  --file task.md \
-  --stdin
-```
+**Note**: The `--content` parameter supports multiline content. Do NOT use `--stdin` with shell heredocs or cat commands.
 
 **Output**: Confirmation message to stderr, exit code 0 on success
 
