@@ -20,12 +20,12 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-config/scripts/manage-config.py` | Config field access |
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase routing and transitions |
-| `planning:manage-log/scripts/manage-work-log.py` | Work log entries |
-| `planning:manage-tasks/scripts/manage-tasks.py` | Task management |
-| `planning:manage-references/scripts/manage-references.py` | Reference file CRUD |
-| `planning:plan-execute/scripts/update-progress.py` | Progress updates |
+| `planning:manage-config` | Config field access |
+| `planning:manage-lifecycle` | Phase routing and transitions |
+| `planning:manage-log` | Work log entries |
+| `planning:manage-tasks` | Task management |
+| `planning:manage-references` | Reference file CRUD |
+| `planning:plan-execute` | Progress updates |
 
 ---
 
@@ -47,10 +47,10 @@ Contains: Delegation patterns for builds, quality checks, PR creation
 
 For finalize phase, read finalize configuration directly from config.toon:
 
-Script: `planning:manage-config/scripts/manage-config.py`
+Script: `planning:manage-config`
 
 ```bash
-python3 {manage_config_path} get-multi \
+python3 .plan/execute-script.py planning:manage-config:get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -67,10 +67,10 @@ These fields are written during init by the plan-type skill's `configure` operat
 
 Get current phase, skill routing, and progress in a single call:
 
-Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+Script: `planning:manage-lifecycle`
 
 ```bash
-python3 {manage_lifecycle_path} get-routing-context \
+python3 .plan/execute-script.py planning:manage-lifecycle:get-routing-context \
   --plan-id {plan_id}
 ```
 
@@ -96,10 +96,10 @@ Use `current_phase` for logging, `skill` for dynamic routing, and `completed_pha
 
 At the start of execute or finalize phase:
 
-Script: `planning:manage-log/scripts/manage-work-log.py`
+Script: `planning:manage-log`
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type progress \
@@ -110,10 +110,10 @@ For each task in current phase:
 
 ### Step 1: Locate Task with Context
 
-Script: `planning:manage-tasks/scripts/manage-tasks.py`
+Script: `planning:manage-tasks`
 
 ```bash
-python3 {manage_tasks_path} next \
+python3 .plan/execute-script.py planning:manage-tasks:next \
   --plan-id {plan_id} \
   --include-context
 ```
@@ -129,10 +129,14 @@ For each step in task's `steps[]` array:
 
 ### Step 3: Update Progress
 
-Script: `planning:plan-execute/scripts/update-progress.py`
+Script: `planning:plan-execute`
 
 ```bash
-python3 {script_path} --plan-dir {plan_directory} --phase {phase} --task-id {task_id} --complete-items "{item_text}"
+python3 .plan/execute-script.py planning:plan-execute:update-progress \
+  --plan-dir {plan_directory} \
+  --phase {phase} \
+  --task-id {task_id} \
+  --complete-items "{item_text}"
 ```
 
 ### Step 3.5: Log Task Completion
@@ -140,7 +144,7 @@ python3 {script_path} --plan-dir {plan_directory} --phase {phase} --task-id {tas
 After each task completes:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type artifact \
@@ -157,7 +161,7 @@ python3 {manage_work_log_path} add \
 ### Step 5: Log Phase Completion (When phase completes)
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type outcome \
@@ -207,7 +211,7 @@ When transitioning from execute phase to finalize, `transition-phase.py` automat
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type error \

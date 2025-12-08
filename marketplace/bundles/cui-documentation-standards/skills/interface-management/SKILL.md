@@ -42,10 +42,10 @@ List all interfaces with optional type filtering.
 
 **Step 1: Execute List**
 
-Script: `cui-documentation-standards:interface-management/scripts/manage-interface.py`
+Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 {script_path} list [--type {type}]
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:list [--type {type}]
 ```
 
 **Step 3: Parse Output**
@@ -79,10 +79,10 @@ Create a new interface specification with automatic numbering.
 
 **Step 1: Create Interface**
 
-Script: `cui-documentation-standards:interface-management/scripts/manage-interface.py`
+Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 {script_path} create --title "{title}" --type "{type}"
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:create --title "{title}" --type "{type}"
 ```
 
 **Step 3: Parse Output**
@@ -130,10 +130,10 @@ Read interface content by number.
 
 **Step 1: Read Interface**
 
-Script: `cui-documentation-standards:interface-management/scripts/manage-interface.py`
+Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 {script_path} read --number {number}
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:read --number {number}
 ```
 
 **Step 3: Display Content**
@@ -154,10 +154,10 @@ Update interface field content.
 
 **Step 1: Update Interface**
 
-Script: `cui-documentation-standards:interface-management/scripts/manage-interface.py`
+Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 {script_path} update --number {number} --field {field} --value "{value}"
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:update --number {number} --field {field} --value "{value}"
 ```
 
 **Step 3: Confirm Update**
@@ -177,10 +177,10 @@ Delete interface with confirmation.
 
 **Step 1: Delete Interface**
 
-Script: `cui-documentation-standards:interface-management/scripts/manage-interface.py`
+Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 {script_path} delete --number {number} --force
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:delete --number {number} --force
 ```
 
 **Step 3: Confirm Deletion**

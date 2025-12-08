@@ -23,10 +23,10 @@ Activate when:
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-config/scripts/manage-config.py` | Config field access |
-| `planning:manage-references/scripts/manage-references.py` | Reference file CRUD |
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase transitions |
-| `planning:manage-log/scripts/manage-work-log.py` | Work log entries |
+| `planning:manage-config` | Config field access |
+| `planning:manage-references` | Reference file CRUD |
+| `planning:manage-lifecycle` | Phase transitions |
+| `planning:manage-log` | Work log entries |
 
 ---
 
@@ -34,10 +34,10 @@ Activate when:
 
 All finalize configuration is read from config.toon (written during configure):
 
-Script: `planning:manage-config/scripts/manage-config.py`
+Script: `planning:manage-config`
 
 ```bash
-python3 {manage_config_path} get-multi \
+python3 .plan/execute-script.py planning:manage-config:get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -62,7 +62,7 @@ Returns only the required finalize fields in a single call.
 ### Step 0: Log Phase Start
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase finalize \
   --type progress \
@@ -72,7 +72,7 @@ python3 {manage_work_log_path} add \
 ### Step 1: Read Configuration
 
 ```bash
-python3 {manage_config_path} get-multi \
+python3 .plan/execute-script.py planning:manage-config:get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -81,10 +81,10 @@ Returns: `create_pr`, `verification_required`, `verification_command`, `branch_s
 
 Also read references context for branch and issue information:
 
-Script: `planning:manage-references/scripts/manage-references.py`
+Script: `planning:manage-references`
 
 ```bash
-python3 {manage_references_path} get-context \
+python3 .plan/execute-script.py planning:manage-references:get-context \
   --plan-id {plan_id}
 ```
 
@@ -93,7 +93,7 @@ Returns: `branch`, `base_branch`, `issue_url`, `build_system`, and file counts i
 **After reading configuration**, log the finalize strategy decision:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase finalize \
   --type decision \
@@ -164,10 +164,10 @@ This handles CI monitoring and review addressing.
 
 Transition to complete:
 
-Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+Script: `planning:manage-lifecycle`
 
 ```bash
-python3 {manage_lifecycle_path} transition \
+python3 .plan/execute-script.py planning:manage-lifecycle:transition \
   --plan-id {plan_id} \
   --completed finalize
 ```
@@ -175,7 +175,7 @@ python3 {manage_lifecycle_path} transition \
 ### Step 7: Log Completion
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase finalize \
   --type outcome \
@@ -220,7 +220,7 @@ recovery: {recovery_suggestion}
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase finalize \
   --type error \
@@ -319,10 +319,10 @@ Minimal workflow:
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `planning:manage-config/scripts/manage-config.py` | `get-multi` | Read finalize config fields |
-| `planning:manage-references/scripts/manage-references.py` | `get-context` | Read branch, issue info |
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | `transition` | Phase transition |
-| `planning:manage-log/scripts/manage-work-log.py` | `add` | Log completion |
+| `planning:manage-config` | `get-multi` | Read finalize config fields |
+| `planning:manage-references` | `get-context` | Read branch, issue info |
+| `planning:manage-lifecycle` | `transition` | Phase transition |
+| `planning:manage-log` | `add` | Log completion |
 
 ---
 

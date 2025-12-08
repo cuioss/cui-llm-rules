@@ -53,11 +53,12 @@ When the skill says `--field` parameter:
 - ✅ CORRECT: `--field target_bundle`
 - ❌ WRONG: `--key target_bundle` (parameter name mismatch)
 
-When the skill says `planning:manage-references/scripts/manage-references.py`:
-- ✅ CORRECT: `planning:manage-references/scripts/manage-references.py`
-- ❌ WRONG: `planning:plan-references/scripts/manage-references.py`
+When the skill says `planning:manage-references`:
+- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-references:set`
+- ❌ WRONG: `python3 .plan/execute-script.py planning:plan-references:set`
+- ❌ WRONG: `python3 {script_path} set` (old notation)
 
-Copy paths AND parameter names EXACTLY from the skill documentation. Do not infer or guess.
+Copy notations AND parameter names EXACTLY from the skill documentation. Do not infer or guess.
 
 ### WHY THESE CONSTRAINTS EXIST
 Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.

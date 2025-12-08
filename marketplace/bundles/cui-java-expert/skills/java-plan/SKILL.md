@@ -23,17 +23,17 @@ allowed-tools: Read, Bash
 
 ### Step 1: Load Specifications
 
-Script: `planning:manage-specifications/scripts/manage-specification.py`
+Script: `planning:manage-specifications`
 
 **Batch mode** (no specification_id):
 ```bash
-python3 {script_path} findAll \
+python3 .plan/execute-script.py planning:manage-specifications:findAll \
   --plan-id {plan_id}
 ```
 
 **Single mode** (specification_id provided):
 ```bash
-python3 {script_path} get \
+python3 .plan/execute-script.py planning:manage-specifications:get \
   --plan-id {plan_id} \
   --number {specification_id}
 ```
@@ -53,10 +53,10 @@ Parse the specification body to determine:
 
 Generate task(s) with Java-specific steps:
 
-Script: `planning:manage-tasks/scripts/manage-task.py`
+Script: `planning:manage-tasks`
 
 ```bash
-python3 {script_path} add \
+python3 .plan/execute-script.py planning:manage-tasks:add \
   --plan-id {plan_id} \
   --specification SPEC-{n} \
   --title "Implement {component}" \
@@ -73,10 +73,10 @@ python3 {script_path} add \
 
 On ambiguous specification or planning issues:
 
-Script: `planning:manage-lessons/scripts/manage-lesson.py`
+Script: `planning:manage-lessons`
 
 ```bash
-python3 {script_path} add \
+python3 .plan/execute-script.py planning:manage-lessons:add \
   --component-type skill \
   --component-name java-plan \
   --category observation \
@@ -235,9 +235,9 @@ If specification lacks detail:
 **Caller**: `cui-java-expert:java-plan-agent`
 
 **Scripts Used**:
-- `planning:manage-specifications/scripts/manage-specification.py` - Load specifications
-- `planning:manage-tasks/scripts/manage-task.py` - Create tasks
-- `planning:manage-lessons/scripts/manage-lesson.py` - Record lessons on issues
+- `planning:manage-specifications` - Load specifications
+- `planning:manage-tasks` - Create tasks
+- `planning:manage-lessons` - Record lessons on issues
 
 **Standards Referenced in Task Steps**:
 - `cui-java-expert:cui-java-core` - Core Java patterns

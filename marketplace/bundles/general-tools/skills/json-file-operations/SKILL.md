@@ -41,10 +41,10 @@ Perform read, write, and update operations on JSON files.
 
 ### Step 1: Execute Operation
 
-Script: `general-tools:json-file-operations/scripts/manage-json-file.py`
+Script: `general-tools:json-file-operations`
 
 ```bash
-python3 {manage_json_file_path} {operation} {file_path} [--field {field}] [--value '{value}']
+python3 .plan/execute-script.py general-tools:json-file-operations:{operation} {file_path} [--field {field}] [--value '{value}']
 ```
 
 ### Step 2: Process Result
@@ -68,19 +68,19 @@ Parse JSON output:
 
 ```bash
 # Read entire file
-python3 {manage_json_file_path} read config.json
+python3 .plan/execute-script.py general-tools:json-file-operations:read config.json
 
 # Read specific field
-python3 {manage_json_file_path} read-field config.json --field "database.host"
+python3 .plan/execute-script.py general-tools:json-file-operations:read-field config.json --field "database.host"
 
 # Update field
-python3 {manage_json_file_path} update-field config.json --field "database.port" --value '5432'
+python3 .plan/execute-script.py general-tools:json-file-operations:update-field config.json --field "database.port" --value '5432'
 
 # Add to array
-python3 {manage_json_file_path} add-entry config.json --field "servers" --value '"new-server"'
+python3 .plan/execute-script.py general-tools:json-file-operations:add-entry config.json --field "servers" --value '"new-server"'
 
 # Remove from array
-python3 {manage_json_file_path} remove-entry config.json --field "servers" --value '"old-server"'
+python3 .plan/execute-script.py general-tools:json-file-operations:remove-entry config.json --field "servers" --value '"old-server"'
 ```
 
 ---
@@ -108,7 +108,7 @@ Use dot notation for JSON paths:
 
 | Script | Notation |
 |--------|----------|
-| manage-json-file | `general-tools:json-file-operations/scripts/manage-json-file.py` |
+| manage-json-file | `general-tools:json-file-operations` |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)

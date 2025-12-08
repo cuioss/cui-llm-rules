@@ -22,9 +22,9 @@ allowed-tools: Read, Bash
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-log/scripts/manage-work-log.py` | Work log entries |
-| `planning:manage-config/scripts/manage-config.py` | Config field access |
-| `planning:manage-references/scripts/manage-references.py` | Reference file CRUD |
+| `planning:manage-log` | Work log entries |
+| `planning:manage-config` | Config field access |
+| `planning:manage-references` | Reference file CRUD |
 
 ---
 
@@ -70,7 +70,7 @@ allowed-tools: Read, Bash
 
 **Before delegation**, log:
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -87,7 +87,7 @@ Task(cui-java-expert:java-specify-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
@@ -112,7 +112,7 @@ The agent analyzes Java codebase, creates specifications with:
 
 **Before delegation**, log:
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -129,7 +129,7 @@ Task(cui-java-expert:java-plan-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \

@@ -16,8 +16,8 @@ Options:
     --bundles <names>        Filter to specific bundles (comma-separated)
 
 Script Output:
-    Scripts include a 'notation' field in {bundle}:{skill} format for use with
-    the script executor (e.g., "planning:manage-files").
+    Scripts include a 'notation' field in {bundle}:{skill}:{script} format for use with
+    the script executor (e.g., "planning:manage-files:manage-files").
 
 Exit codes:
     0 - Success (JSON output)
@@ -139,7 +139,7 @@ def discover_skills(bundle_dir: Path, include_descriptions: bool) -> list[dict]:
 def discover_scripts(bundle_dir: Path, bundle_name: str) -> list[dict]:
     """Discover script files (.sh, .py) in skill/scripts/ directories.
 
-    Returns scripts with 'notation' field in {bundle}:{skill} format.
+    Returns scripts with 'notation' field in {bundle}:{skill}:{script} format.
     """
     skills_dir = bundle_dir / "skills"
     if not skills_dir.is_dir():
@@ -162,7 +162,7 @@ def discover_scripts(bundle_dir: Path, bundle_name: str) -> list[dict]:
             scripts.append({
                 "name": script_file.stem,
                 "skill": skill_name,
-                "notation": f"{bundle_name}:{skill_name}",
+                "notation": f"{bundle_name}:{skill_name}:{script_file.stem}",
                 "type": script_type,
                 "path_formats": {
                     "runtime": runtime_mount,

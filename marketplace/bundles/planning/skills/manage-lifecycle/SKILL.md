@@ -84,14 +84,14 @@ updated: 2025-12-02T14:30:00Z
 
 ## Status Operations
 
-Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+Script: `planning:manage-lifecycle`
 
 ### read
 
 Read plan status.
 
 ```bash
-python3 {script_path} read \
+python3 .plan/execute-script.py planning:manage-lifecycle:read \
   --plan-id {plan_id}
 ```
 
@@ -116,7 +116,7 @@ plan:
 Initialize status.toon for a new plan.
 
 ```bash
-python3 {script_path} create \
+python3 .plan/execute-script.py planning:manage-lifecycle:create \
   --plan-id {plan_id} \
   --title "Feature Title" \
   --plan-type planning:plan-type-java \
@@ -141,7 +141,7 @@ plan:
 Set the current phase.
 
 ```bash
-python3 {script_path} set-phase \
+python3 .plan/execute-script.py planning:manage-lifecycle:set-phase \
   --plan-id {plan_id} \
   --phase execute
 ```
@@ -159,7 +159,7 @@ previous_phase: refine
 Update a specific phase status.
 
 ```bash
-python3 {script_path} update-phase \
+python3 .plan/execute-script.py planning:manage-lifecycle:update-phase \
   --plan-id {plan_id} \
   --phase init \
   --status done
@@ -178,7 +178,7 @@ phase_status: done
 Calculate plan progress.
 
 ```bash
-python3 {script_path} progress \
+python3 .plan/execute-script.py planning:manage-lifecycle:progress \
   --plan-id {plan_id}
 ```
 
@@ -203,7 +203,7 @@ progress:
 Discover all plans.
 
 ```bash
-python3 {script_path} list \
+python3 .plan/execute-script.py planning:manage-lifecycle:list \
   [--filter init,execute]
 ```
 
@@ -223,7 +223,7 @@ plugin-update,finalize,planning:plan-type-plugin,in_progress
 Transition to next phase.
 
 ```bash
-python3 {script_path} transition \
+python3 .plan/execute-script.py planning:manage-lifecycle:transition \
   --plan-id {plan_id} \
   --completed init
 ```
@@ -241,7 +241,7 @@ next_phase: refine
 Archive a completed plan.
 
 ```bash
-python3 {script_path} archive \
+python3 .plan/execute-script.py planning:manage-lifecycle:archive \
   --plan-id {plan_id} \
   [--dry-run]
 ```
@@ -258,7 +258,7 @@ archived_to: .plan/archived-plans/2025-12-02-my-feature/
 Get skill for a phase.
 
 ```bash
-python3 {script_path} route \
+python3 .plan/execute-script.py planning:manage-lifecycle:route \
   --phase execute
 ```
 
@@ -276,7 +276,7 @@ description: Execute implementation tasks
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | All lifecycle operations via subcommands | `python3 {script_path} {command} --help` |
+| `planning:manage-lifecycle` | All lifecycle operations via subcommands | `python3 .plan/execute-script.py planning:manage-lifecycle::{command} --help` |
 
 ---
 

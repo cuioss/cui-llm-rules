@@ -47,14 +47,14 @@ Files are stored in plan directories:
 
 ## Operations
 
-Script: `planning:manage-files/scripts/manage-files.py`
+Script: `planning:manage-files`
 
 ### read
 
 Read file content from a plan directory.
 
 ```bash
-python3 {script_path} read \
+python3 .plan/execute-script.py planning:manage-files:read \
   --plan-id {plan_id} \
   --file task.md
 ```
@@ -66,7 +66,7 @@ python3 {script_path} read \
 Write content to a file in a plan directory.
 
 ```bash
-python3 {script_path} write \
+python3 .plan/execute-script.py planning:manage-files:write \
   --plan-id {plan_id} \
   --file task.md \
   --content "# Task Title\n\nTask description..."
@@ -74,7 +74,7 @@ python3 {script_path} write \
 
 Or with stdin:
 ```bash
-cat content.md | python3 {script_path} write \
+cat content.md | python3 .plan/execute-script.py planning:manage-files:write \
   --plan-id {plan_id} \
   --file task.md \
   --stdin
@@ -87,7 +87,7 @@ cat content.md | python3 {script_path} write \
 Remove a file from a plan directory.
 
 ```bash
-python3 {script_path} remove \
+python3 .plan/execute-script.py planning:manage-files:remove \
   --plan-id {plan_id} \
   --file old-file.md
 ```
@@ -99,7 +99,7 @@ python3 {script_path} remove \
 List files in a plan directory.
 
 ```bash
-python3 {script_path} list \
+python3 .plan/execute-script.py planning:manage-files:list \
   --plan-id {plan_id} \
   [--dir subdir]
 ```
@@ -111,7 +111,7 @@ python3 {script_path} list \
 Check if a file exists.
 
 ```bash
-python3 {script_path} exists \
+python3 .plan/execute-script.py planning:manage-files:exists \
   --plan-id {plan_id} \
   --file config.toon
 ```
@@ -123,7 +123,7 @@ python3 {script_path} exists \
 Create a subdirectory in a plan directory.
 
 ```bash
-python3 {script_path} mkdir \
+python3 .plan/execute-script.py planning:manage-files:mkdir \
   --plan-id {plan_id} \
   --dir requirements
 ```
@@ -135,7 +135,7 @@ python3 {script_path} mkdir \
 Create a plan directory if it doesn't exist, or reference an existing one. This is an atomic operation that replaces the two-step pattern of listing plans and checking for conflicts.
 
 ```bash
-python3 {script_path} create-or-reference \
+python3 .plan/execute-script.py planning:manage-files:create-or-reference \
   --plan-id {plan_id}
 ```
 
@@ -167,7 +167,7 @@ plan_type: planning:plan-type-java
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-files/scripts/manage-files.py` | All file operations via subcommands | `python3 {script_path} {command} --help` |
+| `planning:manage-files` | All file operations via subcommands | `python3 .plan/execute-script.py planning:manage-files::{command} --help` |
 
 ---
 

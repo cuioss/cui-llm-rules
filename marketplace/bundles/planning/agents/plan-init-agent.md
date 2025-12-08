@@ -48,13 +48,13 @@ These constraints apply EVEN IF skill loading fails:
 - Follow skill workflow exactly as documented
 - Report errors if skill fails to load
 
-### SCRIPT PATH VERIFICATION
-When the skill says `planning:manage-files/scripts/manage-files.py`:
-- ✅ CORRECT: `planning:manage-files/scripts/manage-files.py`
-- ❌ WRONG: `planning:plan-files/scripts/manage-files.py` (skill name mismatch)
-- ❌ WRONG: `planning:manage-files/manage-files.py` (missing scripts/)
+### SCRIPT NOTATION VERIFICATION
+When the skill says `planning:manage-files`:
+- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-files:read`
+- ❌ WRONG: `python3 .plan/execute-script.py planning:plan-files:read` (skill name mismatch)
+- ❌ WRONG: `python3 {script_path} read` (old notation)
 
-Copy paths EXACTLY from the skill's Script Paths table. Do not infer or guess paths.
+Copy notations EXACTLY from the skill's Script table. Do not infer or guess notations.
 
 ### WHY THESE CONSTRAINTS EXIST
 Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.

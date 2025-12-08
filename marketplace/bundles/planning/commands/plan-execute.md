@@ -40,14 +40,14 @@ This command handles **execute** and **finalize** phases. Use `/plan-manage` for
 
 The execute phase iterates through tasks using a simple loop:
 
-Script: `planning:manage-tasks/scripts/manage-task.py`
+Script: `planning:manage-tasks`
 
 ```bash
 # Get next pending task
-python3 {script_path} next --plan-id {plan_id}
+python3 .plan/execute-script.py planning:manage-tasks:next --plan-id {plan_id}
 
 # After task completion, mark done
-python3 {script_path} check --plan-id {plan_id} --number {task_number} --status done
+python3 .plan/execute-script.py planning:manage-tasks:check --plan-id {plan_id} --number {task_number} --status done
 ```
 
 For each task:

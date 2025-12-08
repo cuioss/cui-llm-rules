@@ -265,7 +265,7 @@ Script manage-lifecycle.py returned non-zero exit code (1)
 
 ### Context
 - **Operation**: Create plan status
-- **Component**: planning:manage-lifecycle/scripts/manage-lifecycle.py
+- **Component**: planning:manage-lifecycle
 - **Expected**: status: success with plan created
 - **Actual**: status: error with invalid_plan_type
 

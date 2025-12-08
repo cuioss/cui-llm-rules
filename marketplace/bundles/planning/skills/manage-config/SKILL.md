@@ -73,14 +73,14 @@ branch_strategy: feature
 
 ## Operations
 
-Script: `planning:manage-config/scripts/manage-config.py`
+Script: `planning:manage-config`
 
 ### read
 
 Read entire config.toon content.
 
 ```bash
-python3 {script_path} read \
+python3 .plan/execute-script.py planning:manage-config:read \
   --plan-id {plan_id}
 ```
 
@@ -100,7 +100,7 @@ config:
 Get a specific field value.
 
 ```bash
-python3 {script_path} get \
+python3 .plan/execute-script.py planning:manage-config:get \
   --plan-id {plan_id} \
   --field plan_type
 ```
@@ -118,7 +118,7 @@ value: planning:plan-type-java
 Set a specific field value.
 
 ```bash
-python3 {script_path} set \
+python3 .plan/execute-script.py planning:manage-config:set \
   --plan-id {plan_id} \
   --field compatibility \
   --value breaking
@@ -138,7 +138,7 @@ previous: deprecations
 Create config.toon with initial values.
 
 ```bash
-python3 {script_path} create \
+python3 .plan/execute-script.py planning:manage-config:create \
   --plan-id {plan_id} \
   --plan-type planning:plan-type-java \
   [--compatibility deprecations] \
@@ -164,7 +164,7 @@ config:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-config/scripts/manage-config.py` | All config operations via subcommands | `python3 {script_path} {command} --help` |
+| `planning:manage-config` | All config operations via subcommands | `python3 .plan/execute-script.py planning:manage-config::{command} --help` |
 
 ---
 

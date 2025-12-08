@@ -38,15 +38,10 @@ Activate this skill when you need to:
 
 Run the planning inventory scanner script:
 
-**Script**: `planning:planning-inventory/scripts/scan-planning-inventory.py`
+**Script**: `planning:planning-inventory`
 
 ```bash
-python3 {script_path}
-```
-
-**Direct execution from marketplace checkout:**
-```bash
-python3 marketplace/bundles/planning/skills/planning-inventory/scripts/scan-planning-inventory.py
+python3 .plan/execute-script.py planning:planning-inventory:scan
 ```
 
 ### Step 2: Parse and Return Results
@@ -66,8 +61,8 @@ Output format. Default: `full`
 
 **Examples**:
 ```bash
-python3 {script_path} --format full
-python3 {script_path} --format summary
+python3 .plan/execute-script.py planning:planning-inventory:scan --format full
+python3 .plan/execute-script.py planning:planning-inventory:scan --format summary
 ```
 
 ### --include-descriptions (optional flag)
@@ -75,7 +70,7 @@ python3 {script_path} --format summary
 When specified, includes description fields from YAML frontmatter.
 
 ```bash
-python3 {script_path} --include-descriptions
+python3 .plan/execute-script.py planning:planning-inventory:scan --include-descriptions
 ```
 
 ## Output Format

@@ -303,7 +303,7 @@ def test_scripts_have_path_formats():
 
 
 def test_scripts_have_notation_field():
-    """Test all scripts have notation field in {bundle}:{skill} format."""
+    """Test all scripts have notation field in {bundle}:{skill}:{script} format."""
     result = run_script(SCRIPT_PATH, '--resource-types', 'scripts')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
@@ -316,12 +316,13 @@ def test_scripts_have_notation_field():
             assert 'notation' in script, f"Script {script['name']} missing notation field"
             notation = script['notation']
             skill_name = script['skill']
-            expected = f"{bundle_name}:{skill_name}"
+            script_name = script['name']
+            expected = f"{bundle_name}:{skill_name}:{script_name}"
             assert notation == expected, f"Script notation mismatch: expected '{expected}', got '{notation}'"
 
 
 def test_scripts_notation_format_valid():
-    """Test notation follows {bundle}:{skill} format with single colon."""
+    """Test notation follows {bundle}:{skill}:{script} format with two colons."""
     result = run_script(SCRIPT_PATH, '--resource-types', 'scripts')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
@@ -331,9 +332,10 @@ def test_scripts_notation_format_valid():
         for script in bundle.get('scripts', []):
             notation = script.get('notation', '')
             parts = notation.split(':')
-            assert len(parts) == 2, f"Notation '{notation}' should have exactly one colon"
+            assert len(parts) == 3, f"Notation '{notation}' should have exactly two colons"
             assert parts[0], f"Notation '{notation}' should have non-empty bundle"
             assert parts[1], f"Notation '{notation}' should have non-empty skill"
+            assert parts[2], f"Notation '{notation}' should have non-empty script"
 
 
 # =============================================================================

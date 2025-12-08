@@ -25,10 +25,10 @@ Activate when:
 
 | Script | Notation |
 |--------|----------|
-| manage-files | `planning:manage-files/scripts/manage-files.py` |
-| manage-references | `planning:manage-references/scripts/manage-references.py` |
-| manage-lessons | `planning:manage-lessons/scripts/manage-lesson.py` |
-| manage-work-log | `planning:manage-log/scripts/manage-work-log.py` |
+| manage-files | `planning:manage-files` |
+| manage-references | `planning:manage-references` |
+| manage-lessons | `planning:manage-lessons` |
+| manage-work-log | `planning:manage-log` |
 
 ---
 
@@ -47,7 +47,7 @@ Activate when:
 After deriving the plan_id (Step 2) and creating the plan directory (Step 5), log the phase start:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type progress \
@@ -78,10 +78,11 @@ def derive_plan_id(input_source):
 
 ### Step 3: Create or Reference Plan
 
-Script: `planning:manage-files/scripts/manage-files.py`
+Script: `planning:manage-files`
 
 ```bash
-python3 {manage_files_path} create-or-reference --plan-id {plan_id}
+python3 .plan/execute-script.py planning:manage-files:create-or-reference \
+  --plan-id {plan_id}
 ```
 
 Parse the TOON output. The `action` field indicates:
@@ -101,10 +102,11 @@ If `action: exists`, use AskUserQuestion:
 
 **From Lesson**:
 
-Script: `planning:manage-lessons/scripts/manage-lesson.py`
+Script: `planning:manage-lessons`
 
 ```bash
-python3 {script_path} get --id {lesson_id}
+python3 .plan/execute-script.py planning:manage-lessons:get \
+  --id {lesson_id}
 ```
 
 Extract: title, category, component, detail, related
@@ -125,7 +127,7 @@ The plan directory was created in Step 3 by `create-or-reference`. No additional
 
 ### Step 6: Write task.md
 
-Script: `planning:manage-files/scripts/manage-files.py`
+Script: `planning:manage-files`
 
 Construct task.md content following this format:
 
@@ -148,7 +150,7 @@ created: {ISO_timestamp}
 Write via manage-files:
 
 ```bash
-python3 {script_path} write \
+python3 .plan/execute-script.py planning:manage-files:write \
   --plan-id {plan_id} \
   --file task.md \
   --stdin
@@ -156,17 +158,17 @@ python3 {script_path} write \
 
 ### Step 7: Initialize References
 
-Script: `planning:manage-references/scripts/manage-references.py`
+Script: `planning:manage-references`
 
 ```bash
-python3 {manage_references_path} create \
+python3 .plan/execute-script.py planning:manage-references:create \
   --plan-id {plan_id} \
   --branch "$(git branch --show-current)"
 ```
 
 If issue source, also include:
 ```bash
-python3 {manage_references_path} create \
+python3 .plan/execute-script.py planning:manage-references:create \
   --plan-id {plan_id} \
   --branch {branch} \
   --issue-url {issue_url}
@@ -177,7 +179,7 @@ python3 {manage_references_path} create \
 Log the plan creation as an artifact:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type artifact \
@@ -213,7 +215,7 @@ next: plan-configure-agent
 On any error, **first log the error** to work-log (if plan directory exists):
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type error \
@@ -264,10 +266,10 @@ This skill is called by `planning:plan-init-agent`. The agent then calls `planni
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-files/scripts/manage-files.py` | Create/reference plan directory, write task.md |
-| `planning:manage-references/scripts/manage-references.py` | Initialize references |
-| `planning:manage-log/scripts/manage-work-log.py` | Log creation |
-| `planning:manage-lessons/scripts/manage-lesson.py` | Read lesson (if source=lesson) |
+| `planning:manage-files` | Create/reference plan directory, write task.md |
+| `planning:manage-references` | Initialize references |
+| `planning:manage-log` | Log creation |
+| `planning:manage-lessons` | Read lesson (if source=lesson) |
 
 **Note**: status.toon creation moved to plan-configure skill.
 

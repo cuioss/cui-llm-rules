@@ -47,10 +47,10 @@ Manage the memory layer for session persistence (via `file-operations-base` skil
 
 ### Step 1: Execute Operation
 
-Script: `general-tools:manage-memories/scripts/manage-memory.py`
+Script: `general-tools:manage-memories`
 
 ```bash
-python3 {manage_memory_path} {operation} [--category {category}] [--identifier {identifier}] [--content '{content}']
+python3 .plan/execute-script.py general-tools:manage-memories:{operation} [--category {category}] [--identifier {identifier}] [--content '{content}']
 ```
 
 ### Step 2: Process Result
@@ -71,19 +71,19 @@ Parse JSON output and handle accordingly.
 
 ```bash
 # Save context snapshot (directories created on-the-fly)
-python3 {manage_memory_path} save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
+python3 .plan/execute-script.py general-tools:manage-memories:save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
 
 # Load memory file
-python3 {manage_memory_path} load --category context --identifier "2025-12-02-feature-auth"
+python3 .plan/execute-script.py general-tools:manage-memories:load --category context --identifier "2025-12-02-feature-auth"
 
 # List context files from last 7 days
-python3 {manage_memory_path} list --category context --since 7d
+python3 .plan/execute-script.py general-tools:manage-memories:list --category context --since 7d
 
 # Find files matching pattern
-python3 {manage_memory_path} query --pattern "auth*" --category context
+python3 .plan/execute-script.py general-tools:manage-memories:query --pattern "auth*" --category context
 
 # Cleanup old context files
-python3 {manage_memory_path} cleanup --category context --older-than 7d
+python3 .plan/execute-script.py general-tools:manage-memories:cleanup --category context --older-than 7d
 ```
 
 ---
@@ -100,10 +100,10 @@ Validate memory file format and structure.
 
 ### Step 1: Execute Validation
 
-Script: `general-tools:manage-memories/scripts/validate-memory.py`
+Script: `general-tools:manage-memories`
 
 ```bash
-python3 {validate_memory_path} {file_path}
+python3 .plan/execute-script.py general-tools:manage-memories:validate {file_path}
 ```
 
 ### Step 2: Process Result
@@ -153,8 +153,8 @@ All memory files use a metadata envelope:
 
 | Script | Notation |
 |--------|----------|
-| manage-memory | `general-tools:manage-memories/scripts/manage-memory.py` |
-| validate-memory | `general-tools:manage-memories/scripts/validate-memory.py` |
+| manage-memory | `general-tools:manage-memories` |
+| validate-memory | `general-tools:manage-memories` |
 
 All scripts:
 - Use Python stdlib only (json, argparse, pathlib, datetime)

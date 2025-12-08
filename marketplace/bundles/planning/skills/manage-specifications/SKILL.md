@@ -91,14 +91,14 @@ body: |
 
 ## Operations
 
-Script: `planning:manage-specifications/scripts/manage-specification.py`
+Script: `planning:manage-specifications`
 
 ### add
 
 Add a new specification file (creates directory if needed).
 
 ```bash
-python3 {script_path} add \
+python3 .plan/execute-script.py planning:manage-specifications:add \
   --plan-id {plan_id} \
   --title "Specification title" \
   --requirements "REQ-1,REQ-3" \
@@ -130,7 +130,7 @@ message: At least one requirement reference is required
 Update an existing specification file.
 
 ```bash
-python3 {script_path} update \
+python3 .plan/execute-script.py planning:manage-specifications:update \
   --plan-id {plan_id} \
   --number 2 \
   [--title "New title"] \
@@ -158,7 +158,7 @@ specification:
 Remove a specification file (keeps gaps in numbering).
 
 ```bash
-python3 {script_path} remove \
+python3 .plan/execute-script.py planning:manage-specifications:remove \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -180,7 +180,7 @@ removed:
 List all specifications (summary view with counts).
 
 ```bash
-python3 {script_path} list \
+python3 .plan/execute-script.py planning:manage-specifications:list \
   --plan-id {plan_id} \
   [--status pending|done|all] \
   [--requirement REQ-1]
@@ -207,7 +207,7 @@ specifications[3]{number,title,requirements,status,file}:
 Get all specifications with full content (body included).
 
 ```bash
-python3 {script_path} findAll \
+python3 .plan/execute-script.py planning:manage-specifications:findAll \
   --plan-id {plan_id}
 ```
 
@@ -244,7 +244,7 @@ specifications:
 Get a single specification by number.
 
 ```bash
-python3 {script_path} get \
+python3 .plan/execute-script.py planning:manage-specifications:get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -270,7 +270,7 @@ specification:
 Mark specification as done or pending.
 
 ```bash
-python3 {script_path} check \
+python3 .plan/execute-script.py planning:manage-specifications:check \
   --plan-id {plan_id} \
   --number 2 \
   --status done
@@ -294,7 +294,7 @@ specification:
 Find all specifications that reference a specific requirement.
 
 ```bash
-python3 {script_path} findByRequirement \
+python3 .plan/execute-script.py planning:manage-specifications:findByRequirement \
   --plan-id {plan_id} \
   --requirement REQ-1
 ```
@@ -334,7 +334,7 @@ Specifications can be referenced elsewhere using `SPEC-{n}` format (no zero padd
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-specifications/scripts/manage-specification.py` | All CRUD operations via subcommands | `python3 {script_path} {command} --help` |
+| `planning:manage-specifications` | All CRUD operations via subcommands | `python3 .plan/execute-script.py planning:manage-specifications::{command} --help` |
 
 ---
 

@@ -81,14 +81,14 @@ body: |
 
 ## Operations
 
-Script: `planning:manage-requirements/scripts/manage-requirement.py`
+Script: `planning:manage-requirements`
 
 ### add
 
 Add a new requirement file (creates directory if needed).
 
 ```bash
-python3 {script_path} add \
+python3 .plan/execute-script.py planning:manage-requirements:add \
   --plan-id {plan_id} \
   --title "Requirement title" \
   --body "Detailed requirement description"
@@ -112,7 +112,7 @@ requirement:
 Update an existing requirement file.
 
 ```bash
-python3 {script_path} update \
+python3 .plan/execute-script.py planning:manage-requirements:update \
   --plan-id {plan_id} \
   --number 2 \
   [--title "New title"] \
@@ -138,7 +138,7 @@ requirement:
 Remove a requirement file (keeps gaps in numbering).
 
 ```bash
-python3 {script_path} remove \
+python3 .plan/execute-script.py planning:manage-requirements:remove \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -160,7 +160,7 @@ removed:
 List all requirements (summary view with counts).
 
 ```bash
-python3 {script_path} list \
+python3 .plan/execute-script.py planning:manage-requirements:list \
   --plan-id {plan_id} \
   [--status pending|done|all]
 ```
@@ -186,7 +186,7 @@ requirements[3]{number,title,status,file}:
 Get all requirements with full content (body included).
 
 ```bash
-python3 {script_path} findAll \
+python3 .plan/execute-script.py planning:manage-requirements:findAll \
   --plan-id {plan_id}
 ```
 
@@ -228,7 +228,7 @@ requirements:
 Get a single requirement by number.
 
 ```bash
-python3 {script_path} get \
+python3 .plan/execute-script.py planning:manage-requirements:get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -253,7 +253,7 @@ requirement:
 Mark requirement as done or pending.
 
 ```bash
-python3 {script_path} check \
+python3 .plan/execute-script.py planning:manage-requirements:check \
   --plan-id {plan_id} \
   --number 2 \
   --status done
@@ -287,7 +287,7 @@ Requirements can be referenced elsewhere using `REQ-{n}` format (no zero padding
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-requirements/scripts/manage-requirement.py` | All CRUD operations via subcommands | `python3 {script_path} {command} --help` |
+| `planning:manage-requirements` | All CRUD operations via subcommands | `python3 .plan/execute-script.py planning:manage-requirements::{command} --help` |
 
 ---
 

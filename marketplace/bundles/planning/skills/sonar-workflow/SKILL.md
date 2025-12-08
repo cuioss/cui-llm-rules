@@ -64,7 +64,7 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
    Script: `planning:sonar-workflow`
 
    ```bash
-   python3 {script_path} fetch --project {key} [--pr {id}]
+   python3 .plan/execute-script.py planning:sonar-workflow:fetch --project {key} [--pr {id}]
    ```
 
 3. **Return Structured List**
@@ -112,7 +112,7 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
    Script: `planning:sonar-workflow`
 
    ```bash
-   python3 {script_path} triage --issue '{json}'
+   python3 .plan/execute-script.py planning:sonar-workflow:triage --issue '{json}'
    ```
 
    Script outputs decision:
@@ -177,7 +177,7 @@ Script: `planning:sonar-workflow` → `sonar.py`
 
 **Usage:**
 ```bash
-python3 {script_path} fetch --project <key> [--pr <id>] [--severities <list>]
+python3 .plan/execute-script.py planning:sonar-workflow:fetch --project <key> [--pr <id>] [--severities <list>]
 ```
 
 **Output:** JSON with MCP instruction and expected structure
@@ -188,7 +188,7 @@ python3 {script_path} fetch --project <key> [--pr <id>] [--severities <list>]
 
 **Usage:**
 ```bash
-python3 {script_path} triage --issue '{"key":"...", "rule":"...", ...}'
+python3 .plan/execute-script.py planning:sonar-workflow:triage --issue '{"key":"...", "rule":"...", ...}'
 ```
 
 **Output:** JSON with action decision

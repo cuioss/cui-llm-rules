@@ -28,11 +28,11 @@ Activate when `plan-configure-agent` delegates with:
 
 | Script | Notation |
 |--------|----------|
-| manage-files | `planning:manage-files/scripts/manage-files.py` |
-| manage-requirements | `planning:manage-requirements/scripts/manage-requirement.py` |
-| manage-config | `planning:manage-config/scripts/manage-config.py` |
-| manage-lifecycle | `planning:manage-lifecycle/scripts/manage-lifecycle.py` |
-| manage-work-log | `planning:manage-log/scripts/manage-work-log.py` |
+| manage-files | `planning:manage-files` |
+| manage-requirements | `planning:manage-requirements` |
+| manage-config | `planning:manage-config` |
+| manage-lifecycle | `planning:manage-lifecycle` |
+| manage-work-log | `planning:manage-log` |
 
 ---
 
@@ -44,27 +44,27 @@ Execute this workflow when invoked.
 
 Log the start of the configure step (part of init phase):
 
+Script: `planning:manage-log`
+
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type progress \
   --summary "Starting configure step"
 ```
 
-Script: `planning:manage-log/scripts/manage-work-log.py`
-
 ### Step 1: Read Task Input
 
 Read the original task input from task.md:
 
+Script: `planning:manage-files`
+
 ```bash
-python3 {manage_files_path} read \
+python3 .plan/execute-script.py planning:manage-files:read \
   --plan-id {plan_id} \
   --file task.md
 ```
-
-Script: `planning:manage-files/scripts/manage-files.py`
 
 ### Step 2: Analyze Task and Create Requirements
 
@@ -93,21 +93,21 @@ AskUserQuestion:
 
 For each identified requirement, create via manage-requirements:
 
+Script: `planning:manage-requirements`
+
 ```bash
-python3 {manage_requirements_path} add \
+python3 .plan/execute-script.py planning:manage-requirements:add \
   --plan-id {plan_id} \
   --title "Requirement title" \
   --body "Detailed requirement description"
 ```
-
-Script: `planning:manage-requirements/scripts/manage-requirement.py`
 
 Creates: `requirements/REQ-001-{slug}.toon`, `REQ-002-...`, etc.
 
 **After each requirement**, log the artifact:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type artifact \
@@ -151,7 +151,7 @@ AskUserQuestion:
 **After detecting plan type**, log the decision with reasoning:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type decision \
@@ -163,10 +163,10 @@ python3 {manage_work_log_path} add \
 
 Create status.toon with detected plan type and phases. This must happen before config.toon creation.
 
-Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
+Script: `planning:manage-lifecycle`
 
 ```bash
-python3 {manage_lifecycle_path} create \
+python3 .plan/execute-script.py planning:manage-lifecycle:create \
   --plan-id {plan_id} \
   --title "{title_from_task_md}" \
   --plan-type {plan_type} \
@@ -182,13 +182,13 @@ Creates:
 
 Create config.toon with base settings:
 
+Script: `planning:manage-config`
+
 ```bash
-python3 {manage_config_path} create \
+python3 .plan/execute-script.py planning:manage-config:create \
   --plan-id {plan_id} \
   --plan-type {plan_type}
 ```
-
-Script: `planning:manage-config/scripts/manage-config.py`
 
 This creates config.toon with:
 - `plan_type`: detected or overridden
@@ -217,20 +217,20 @@ The phase transitions from init → refine after configuration completes.
 
 Use manage-lifecycle to track:
 
+Script: `planning:manage-lifecycle`
+
 ```bash
-python3 {manage_lifecycle_path} transition \
+python3 .plan/execute-script.py planning:manage-lifecycle:transition \
   --plan-id {plan_id} \
   --completed init
 ```
-
-Script: `planning:manage-lifecycle/scripts/manage-lifecycle.py`
 
 ### Step 9: Log Phase Completion
 
 Log the outcome of the init phase (configure step complete):
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type outcome \
@@ -266,11 +266,11 @@ configuration:
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-files/scripts/manage-files.py` | Read task.md |
-| `planning:manage-requirements/scripts/manage-requirement.py` | Create requirements |
-| `planning:manage-config/scripts/manage-config.py` | Create config.toon |
-| `planning:manage-lifecycle/scripts/manage-lifecycle.py` | Phase transitions |
-| `planning:manage-log/scripts/manage-work-log.py` | Work-log entries |
+| `planning:manage-files` | Read task.md |
+| `planning:manage-requirements` | Create requirements |
+| `planning:manage-config` | Create config.toon |
+| `planning:manage-lifecycle` | Phase transitions |
+| `planning:manage-log` | Work-log entries |
 
 ---
 
@@ -300,7 +300,7 @@ On script failure:
 1. **Log the error** to work-log:
 
 ```bash
-python3 {manage_work_log_path} add \
+python3 .plan/execute-script.py planning:manage-log:add \
   --plan-id {plan_id} \
   --phase init \
   --type error \

@@ -70,14 +70,14 @@ JWT Guide,https://jwt.io/introduction
 
 ## Operations
 
-Script: `planning:manage-references/scripts/manage-references.py`
+Script: `planning:manage-references`
 
 ### create
 
 Create references.toon with basic fields. Plan-type-specific fields are added later by `plan-type-*:configure`.
 
 ```bash
-python3 {script_path} create \
+python3 .plan/execute-script.py planning:manage-references:create \
   --plan-id {plan_id} \
   --branch {branch_name} \
   [--issue-url {url}] \
@@ -106,7 +106,7 @@ fields[5]:
 Read entire references.toon content.
 
 ```bash
-python3 {script_path} read \
+python3 .plan/execute-script.py planning:manage-references:read \
   --plan-id {plan_id}
 ```
 
@@ -126,7 +126,7 @@ references:
 Get a specific field value.
 
 ```bash
-python3 {script_path} get \
+python3 .plan/execute-script.py planning:manage-references:get \
   --plan-id {plan_id} \
   --field branch
 ```
@@ -144,7 +144,7 @@ value: feature/my-feature
 Set a specific field value.
 
 ```bash
-python3 {script_path} set \
+python3 .plan/execute-script.py planning:manage-references:set \
   --plan-id {plan_id} \
   --field branch \
   --value feature/new-branch
@@ -164,7 +164,7 @@ previous: feature/my-feature
 Add a file to modified_files list.
 
 ```bash
-python3 {script_path} add-file \
+python3 .plan/execute-script.py planning:manage-references:add-file \
   --plan-id {plan_id} \
   --file src/main/java/NewClass.java
 ```
@@ -183,7 +183,7 @@ total: 4
 Remove a file from modified_files list.
 
 ```bash
-python3 {script_path} remove-file \
+python3 .plan/execute-script.py planning:manage-references:remove-file \
   --plan-id {plan_id} \
   --file src/main/java/OldClass.java
 ```
@@ -203,7 +203,7 @@ total: 2
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-references/scripts/manage-references.py` | All reference operations via subcommands | `python3 {script_path} {command} --help` |
+| `planning:manage-references` | All reference operations via subcommands | `python3 .plan/execute-script.py planning:manage-references::{command} --help` |
 
 ---
 

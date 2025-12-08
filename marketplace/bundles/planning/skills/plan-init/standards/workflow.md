@@ -172,10 +172,10 @@ recovery: Use resume option or provide different plan_id
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-files/scripts/manage-files.py` | Create/reference plan directory, write task.md |
-| `planning:manage-references/scripts/manage-references.py` | Initialize references |
-| `planning:manage-log/scripts/manage-work-log.py` | Log creation |
-| `planning:manage-lessons/scripts/manage-lesson.py` | Read lesson content |
+| `planning:manage-files` | Create/reference plan directory, write task.md |
+| `planning:manage-references` | Initialize references |
+| `planning:manage-log` | Log creation |
+| `planning:manage-lessons` | Read lesson content |
 
 ### Subsequent Agent
 

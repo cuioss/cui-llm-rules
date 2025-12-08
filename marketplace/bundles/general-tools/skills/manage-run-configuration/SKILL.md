@@ -63,10 +63,10 @@ Activate this skill when:
 
 ### Step 1: Initialize Configuration File
 
-Script: `general-tools:manage-run-configuration/scripts/init-run-config.py`
+Script: `general-tools:manage-run-configuration`
 
 ```bash
-python3 {init_run_config_path}
+python3 .plan/execute-script.py general-tools:manage-run-configuration:init
 ```
 
 This creates the run configuration file with base structure if it doesn't exist.
@@ -96,7 +96,7 @@ If the script is not available, create manually:
 
 ```bash
 test -f {run-config-file} || \
-  python3 json-file-operations/scripts/manage-json-file.py write {run-config-file} \
+  python3 .plan/execute-script.py general-tools:json-file-operations:write {run-config-file} \
     --value '{"version": 1, "commands": {}, "maven": {"acceptable_warnings": {"transitive_dependency": [], "plugin_compatibility": [], "platform_specific": []}}}'
 ```
 
@@ -118,14 +118,14 @@ First, run the **Initialize Configuration** workflow to ensure the file exists.
 
 ```bash
 # Read entire configuration
-python3 json-file-operations/scripts/manage-json-file.py read {run-config-file}
+python3 .plan/execute-script.py general-tools:json-file-operations:read {run-config-file}
 
 # Read specific command entry
-python3 json-file-operations/scripts/manage-json-file.py read-field {run-config-file} \
+python3 .plan/execute-script.py general-tools:json-file-operations:read-field {run-config-file} \
   --field "commands.setup-project-permissions"
 
 # Read last execution
-python3 json-file-operations/scripts/manage-json-file.py read-field {run-config-file} \
+python3 .plan/execute-script.py general-tools:json-file-operations:read-field {run-config-file} \
   --field "commands.setup-project-permissions.last_execution"
 ```
 
@@ -147,7 +147,7 @@ Before updating nested fields, ensure the command entry exists:
 
 ```bash
 # Create command entry if it doesn't exist (update-field auto-creates intermediate objects)
-python3 json-file-operations/scripts/manage-json-file.py update-field {run-config-file} \
+python3 .plan/execute-script.py general-tools:json-file-operations:update-field {run-config-file} \
   --field "commands.<command-name>" \
   --value '{}'
 ```
@@ -157,7 +157,7 @@ python3 json-file-operations/scripts/manage-json-file.py update-field {run-confi
 ### Step 3: Update Last Execution
 
 ```bash
-python3 json-file-operations/scripts/manage-json-file.py update-field {run-config-file} \
+python3 .plan/execute-script.py general-tools:json-file-operations:update-field {run-config-file} \
   --field "commands.<command-name>.last_execution" \
   --value '{"date": "2025-11-25", "status": "SUCCESS", "duration_ms": 12345}'
 ```
@@ -167,16 +167,16 @@ python3 json-file-operations/scripts/manage-json-file.py update-field {run-confi
 ```bash
 # Step 1: Initialize if not exists
 test -f {run-config-file} || \
-  python3 json-file-operations/scripts/manage-json-file.py write {run-config-file} \
+  python3 .plan/execute-script.py general-tools:json-file-operations:write {run-config-file} \
     --value '{"version": 1, "commands": {}, "maven": {"acceptable_warnings": {"transitive_dependency": [], "plugin_compatibility": [], "platform_specific": []}}}'
 
 # Step 2: Create command entry
-python3 json-file-operations/scripts/manage-json-file.py update-field {run-config-file} \
+python3 .plan/execute-script.py general-tools:json-file-operations:update-field {run-config-file} \
   --field "commands.verify-integration-tests" \
   --value '{}'
 
 # Step 3: Update execution status
-python3 json-file-operations/scripts/manage-json-file.py update-field {run-config-file} \
+python3 .plan/execute-script.py general-tools:json-file-operations:update-field {run-config-file} \
   --field "commands.verify-integration-tests.last_execution" \
   --value '{"date": "2025-11-27", "status": "SUCCESS", "duration_ms": 231584}'
 ```
@@ -191,10 +191,10 @@ Validate run configuration format and structure.
 
 ### Step 1: Execute Validation
 
-Script: `general-tools:manage-run-configuration/scripts/validate-run-config.py`
+Script: `general-tools:manage-run-configuration`
 
 ```bash
-python3 {validate_run_config_path} {run-config-file}
+python3 .plan/execute-script.py general-tools:manage-run-configuration:validate {run-config-file}
 ```
 
 ### Step 2: Process Result
@@ -244,8 +244,8 @@ Categories: `transitive_dependency`, `plugin_compatibility`, `platform_specific`
 
 | Script | Notation |
 |--------|----------|
-| init-run-config | `general-tools:manage-run-configuration/scripts/init-run-config.py` |
-| validate-run-config | `general-tools:manage-run-configuration/scripts/validate-run-config.py` |
+| init-run-config | `general-tools:manage-run-configuration` |
+| validate-run-config | `general-tools:manage-run-configuration` |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)

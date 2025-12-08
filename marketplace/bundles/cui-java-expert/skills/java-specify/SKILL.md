@@ -23,17 +23,17 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### Step 1: Load Requirements
 
-Script: `planning:manage-requirements/scripts/manage-requirement.py`
+Script: `planning:manage-requirements`
 
 **Batch mode** (no requirement_id):
 ```bash
-python3 {script_path} findAll \
+python3 .plan/execute-script.py planning:manage-requirements:findAll \
   --plan-id {plan_id}
 ```
 
 **Single mode** (requirement_id provided):
 ```bash
-python3 {script_path} get \
+python3 .plan/execute-script.py planning:manage-requirements:get \
   --plan-id {plan_id} \
   --number {requirement_id}
 ```
@@ -79,10 +79,10 @@ Read {java-file-path}
 
 Write specification with Java-specific technical details:
 
-Script: `planning:manage-specifications/scripts/manage-specification.py`
+Script: `planning:manage-specifications`
 
 ```bash
-python3 {script_path} add \
+python3 .plan/execute-script.py planning:manage-specifications:add \
   --plan-id {plan_id} \
   --title "{component} implementation" \
   --requirements "REQ-{n}" \
@@ -101,10 +101,10 @@ python3 {script_path} add \
 
 On unexpected codebase state or ambiguity:
 
-Script: `planning:manage-lessons/scripts/manage-lesson.py`
+Script: `planning:manage-lessons`
 
 ```bash
-python3 {script_path} add \
+python3 .plan/execute-script.py planning:manage-lessons:add \
   --component-type skill \
   --component-name java-specify \
   --category observation \
@@ -227,9 +227,9 @@ If multiple classes match the name:
 **Caller**: `cui-java-expert:java-specify-agent`
 
 **Scripts Used**:
-- `planning:manage-requirements/scripts/manage-requirement.py` - Load requirements
-- `planning:manage-specifications/scripts/manage-specification.py` - Create specifications
-- `planning:manage-lessons/scripts/manage-lesson.py` - Record lessons on issues
+- `planning:manage-requirements` - Load requirements
+- `planning:manage-specifications` - Create specifications
+- `planning:manage-lessons` - Record lessons on issues
 
 **Standards Referenced**:
 - `cui-java-expert:cui-java-core` - Core Java patterns
