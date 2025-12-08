@@ -91,7 +91,7 @@ body: |
 
 ## Operations
 
-Script: `planning:manage-specifications`
+Script: `planning:manage-specifications:manage-specification`
 
 ### add
 
@@ -334,7 +334,7 @@ Specifications can be referenced elsewhere using `SPEC-{n}` format (no zero padd
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-specifications` | All CRUD operations via subcommands | `python3 .plan/execute-script.py planning:manage-specifications::{command} --help` |
+| `planning:manage-specifications:manage-specification` | All CRUD operations via subcommands | `python3 .plan/execute-script.py planning:manage-specifications:manage-specification {subcommand} --help` |
 
 ---
 

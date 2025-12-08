@@ -12,11 +12,14 @@ Constrained specialist for JavaScript specification creation. Delegates to `cui-
 
 ## Step 0: Load Skills (MANDATORY)
 
-Read and apply these skills BEFORE any other action:
-1. `marketplace/bundles/cui-frontend-expert/skills/js-specify/SKILL.md`
-2. `marketplace/bundles/general-tools/skills/general-development-rules/SKILL.md`
+Load these skills using the Skill tool BEFORE any other action:
 
-If any Read fails, STOP and report the error. Do NOT proceed without skills loaded.
+```
+Skill: cui-frontend-expert:js-specify
+Skill: general-tools:general-development-rules
+```
+
+If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.
 
 ## Role Boundaries
 

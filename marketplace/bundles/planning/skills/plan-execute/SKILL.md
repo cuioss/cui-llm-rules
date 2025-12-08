@@ -47,8 +47,6 @@ Contains: Delegation patterns for builds, quality checks, PR creation
 
 For finalize phase, read finalize configuration directly from config.toon:
 
-Script: `planning:manage-config`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
   --plan-id {plan_id} \
@@ -66,8 +64,6 @@ These fields are written during init by the plan-type skill's `configure` operat
 ### Step 0: Get Routing Context (Once at start)
 
 Get current phase, skill routing, and progress in a single call:
-
-Script: `planning:manage-lifecycle`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle get-routing-context \
@@ -96,8 +92,6 @@ Use `current_phase` for logging, `skill` for dynamic routing, and `completed_pha
 
 At the start of execute or finalize phase:
 
-Script: `planning:manage-log`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
@@ -109,8 +103,6 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 For each task in current phase:
 
 ### Step 1: Locate Task with Context
-
-Script: `planning:manage-tasks`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task next \
@@ -128,8 +120,6 @@ For each step in task's `steps[]` array:
 3. Mark step complete via `manage-tasks:step-done`
 
 ### Step 3: Update Progress
-
-Script: `planning:plan-execute`
 
 ```bash
 python3 .plan/execute-script.py planning:plan-execute:update-progress \

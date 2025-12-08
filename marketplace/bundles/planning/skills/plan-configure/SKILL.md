@@ -44,8 +44,6 @@ Execute this workflow when invoked.
 
 Log the start of the configure step (part of init phase):
 
-Script: `planning:manage-log`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
@@ -57,8 +55,6 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 ### Step 1: Read Task Input
 
 Read the original task input from task.md:
-
-Script: `planning:manage-files`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-files:manage-files read \
@@ -92,8 +88,6 @@ AskUserQuestion:
 ### Step 3: Create Requirements
 
 For each identified requirement, create via manage-requirements:
-
-Script: `planning:manage-requirements`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-requirements:manage-requirement add \
@@ -163,8 +157,6 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 Create status.toon with detected plan type and phases. This must happen before config.toon creation.
 
-Script: `planning:manage-lifecycle`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle create \
   --plan-id {plan_id} \
@@ -181,8 +173,6 @@ Creates:
 ### Step 6: Create Configuration
 
 Create config.toon with base settings:
-
-Script: `planning:manage-config`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-config:manage-config create \
@@ -216,8 +206,6 @@ This adds finalize configuration to config.toon:
 The phase transitions from init → refine after configuration completes.
 
 Use manage-lifecycle to track:
-
-Script: `planning:manage-lifecycle`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \

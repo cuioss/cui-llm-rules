@@ -84,7 +84,7 @@ updated: 2025-12-02T14:30:00Z
 
 ## Status Operations
 
-Script: `planning:manage-lifecycle`
+Script: `planning:manage-lifecycle:manage-lifecycle`
 
 ### read
 
@@ -276,7 +276,7 @@ description: Execute implementation tasks
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-lifecycle` | All lifecycle operations via subcommands | `python3 .plan/execute-script.py planning:manage-lifecycle::{command} --help` |
+| `planning:manage-lifecycle:manage-lifecycle` | All lifecycle operations via subcommands | `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle {subcommand} --help` |
 
 ---
 

@@ -47,7 +47,7 @@ Files are stored in plan directories:
 
 ## Operations
 
-Script: `planning:manage-files`
+Script: `planning:manage-files:manage-files`
 
 ### read
 
@@ -167,7 +167,7 @@ plan_type: planning:plan-type-java
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-files` | All file operations via subcommands | `python3 .plan/execute-script.py planning:manage-files::{command} --help` |
+| `planning:manage-files:manage-files` | All file operations via subcommands | `python3 .plan/execute-script.py planning:manage-files:manage-files {subcommand} --help` |
 
 ---
 

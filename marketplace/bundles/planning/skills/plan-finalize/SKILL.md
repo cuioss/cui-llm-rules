@@ -34,8 +34,6 @@ Activate when:
 
 All finalize configuration is read from config.toon (written during configure):
 
-Script: `planning:manage-config`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
   --plan-id {plan_id} \
@@ -80,8 +78,6 @@ python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
 Returns: `create_pr`, `verification_required`, `verification_command`, `branch_strategy` in a single call.
 
 Also read references context for branch and issue information:
-
-Script: `planning:manage-references`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-references:manage-references get-context \
@@ -163,8 +159,6 @@ This handles CI monitoring and review addressing.
 ### Step 6: Mark Plan Complete
 
 Transition to complete:
-
-Script: `planning:manage-lifecycle`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \

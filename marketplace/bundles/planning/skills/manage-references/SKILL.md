@@ -70,7 +70,7 @@ JWT Guide,https://jwt.io/introduction
 
 ## Operations
 
-Script: `planning:manage-references`
+Script: `planning:manage-references:manage-references`
 
 ### create
 
@@ -203,7 +203,7 @@ total: 2
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-references` | All reference operations via subcommands | `python3 .plan/execute-script.py planning:manage-references::{command} --help` |
+| `planning:manage-references:manage-references` | All reference operations via subcommands | `python3 .plan/execute-script.py planning:manage-references:manage-references {subcommand} --help` |
 
 ---
 

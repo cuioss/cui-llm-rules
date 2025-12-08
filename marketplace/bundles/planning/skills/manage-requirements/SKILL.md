@@ -81,7 +81,7 @@ body: |
 
 ## Operations
 
-Script: `planning:manage-requirements`
+Script: `planning:manage-requirements:manage-requirement`
 
 ### add
 
@@ -287,7 +287,7 @@ Requirements can be referenced elsewhere using `REQ-{n}` format (no zero padding
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-requirements` | All CRUD operations via subcommands | `python3 .plan/execute-script.py planning:manage-requirements::{command} --help` |
+| `planning:manage-requirements:manage-requirement` | All CRUD operations via subcommands | `python3 .plan/execute-script.py planning:manage-requirements:manage-requirement {subcommand} --help` |
 
 ---
 

@@ -73,7 +73,7 @@ branch_strategy: feature
 
 ## Operations
 
-Script: `planning:manage-config`
+Script: `planning:manage-config:manage-config`
 
 ### read
 
@@ -164,7 +164,7 @@ config:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-config` | All config operations via subcommands | `python3 .plan/execute-script.py planning:manage-config::{command} --help` |
+| `planning:manage-config:manage-config` | All config operations via subcommands | `python3 .plan/execute-script.py planning:manage-config:manage-config {subcommand} --help` |
 
 ---
 

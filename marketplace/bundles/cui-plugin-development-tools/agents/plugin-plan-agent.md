@@ -12,11 +12,14 @@ Constrained specialist for plugin task planning. Delegates to `cui-plugin-develo
 
 ## Step 0: Load Skills (MANDATORY)
 
-Read and apply these skills BEFORE any other action:
-1. `marketplace/bundles/cui-plugin-development-tools/skills/plugin-plan/SKILL.md`
-2. `marketplace/bundles/general-tools/skills/general-development-rules/SKILL.md`
+Load these skills using the Skill tool BEFORE any other action:
 
-If any Read fails, STOP and report the error. Do NOT proceed without skills loaded.
+```
+Skill: cui-plugin-development-tools:plugin-plan
+Skill: general-tools:general-development-rules
+```
+
+If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.
 
 ## Role Boundaries
 

@@ -62,8 +62,6 @@ The plan-type skills delegate to domain agents which write directly:
 
 ### Step 0: Log Phase Start
 
-Script: `planning:manage-log`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
@@ -73,8 +71,6 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 ```
 
 ### Step 1: Read Context
-
-Script: `planning:manage-config`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
@@ -147,8 +143,6 @@ lessons_recorded: {count}
 
 Verify all requirements are covered by specifications:
 
-Script: `planning:manage-requirements`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-requirements:manage-requirement validate \
   --plan-id {plan_id}
@@ -169,8 +163,6 @@ If `uncovered > 0`, log a warning and optionally alert the user.
 
 For complex plans, get the full REQ↔SPEC traceability:
 
-Script: `planning:manage-specifications`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-specifications:manage-specification get-traceability-map \
   --plan-id {plan_id}
@@ -179,8 +171,6 @@ python3 .plan/execute-script.py planning:manage-specifications:manage-specificat
 Returns bidirectional mapping for verification and logging.
 
 ### Step 6: Log Completion
-
-Script: `planning:manage-log`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
@@ -203,8 +193,6 @@ If needed, use AskUserQuestion to confirm, then:
 - Update references via `manage-references:add-file`
 
 ### Step 8: Phase Transition
-
-Script: `planning:manage-lifecycle`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \

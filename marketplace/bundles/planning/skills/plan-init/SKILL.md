@@ -78,8 +78,6 @@ def derive_plan_id(input_source):
 
 ### Step 3: Create or Reference Plan
 
-Script: `planning:manage-files`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-files:manage-files create-or-reference \
   --plan-id {plan_id}
@@ -101,8 +99,6 @@ If `action: exists`, use AskUserQuestion:
 - No additional context
 
 **From Lesson**:
-
-Script: `planning:manage-lessons`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson get \
@@ -126,8 +122,6 @@ The plan directory was created in Step 3 by `create-or-reference`. No additional
 **Note**: status.toon is NOT created here. It is created by plan-configure after plan type detection.
 
 ### Step 6: Write task.md
-
-Script: `planning:manage-files`
 
 Construct task.md content following this format:
 
@@ -171,8 +165,6 @@ created: {ISO_timestamp}
 **Note**: The `--content` parameter supports multiline content. Do NOT use `--stdin` with shell heredocs.
 
 ### Step 7: Initialize References
-
-Script: `planning:manage-references`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-references:manage-references create \

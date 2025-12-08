@@ -111,7 +111,7 @@ current_step: 1
 
 ## Operations
 
-Script: `planning:manage-tasks`
+Script: `planning:manage-tasks:manage-task`
 
 ### add
 
@@ -370,7 +370,7 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task remove-step \
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-tasks` | All CRUD and step operations via subcommands | `python3 .plan/execute-script.py planning:manage-tasks::{command} --help` |
+| `planning:manage-tasks:manage-task` | All CRUD and step operations via subcommands | `python3 .plan/execute-script.py planning:manage-tasks:manage-task {subcommand} --help` |
 
 ---
 

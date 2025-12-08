@@ -84,7 +84,7 @@ This affects all projects using jakarta.json without explicit dependency.
 
 ## Operations
 
-Script: `planning:manage-lessons`
+Script: `planning:manage-lessons:manage-lesson`
 
 ### add
 
@@ -193,7 +193,7 @@ created_from: error_context
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-lessons` | All lesson operations via subcommands | `python3 .plan/execute-script.py planning:manage-lessons::{command} --help` |
+| `planning:manage-lessons:manage-lesson` | All lesson operations via subcommands | `python3 .plan/execute-script.py planning:manage-lessons:manage-lesson {subcommand} --help` |
 
 ---
 

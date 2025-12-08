@@ -73,7 +73,7 @@ entries[5]{timestamp,type,phase,summary,detail}:
 
 ## Operations
 
-Script: `planning:manage-log`
+Script: `planning:manage-log:manage-work-log`
 
 ### add
 
@@ -159,7 +159,7 @@ entries[10]{timestamp,type,phase,summary,detail}:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-log` | All log operations via subcommands | `python3 .plan/execute-script.py planning:manage-log::{command} --help` |
+| `planning:manage-log:manage-work-log` | All log operations via subcommands | `python3 .plan/execute-script.py planning:manage-log:manage-work-log {subcommand} --help` |
 
 ---
 
