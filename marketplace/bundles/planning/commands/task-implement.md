@@ -45,7 +45,7 @@ Otherwise → PLAN mode (Plan → Execute)
 ### Step 2: Check Memory for Pending Workflow
 
 ```bash
-python3 manage-memory.py list --category handoffs
+python3 .plan/execute-script.py general-tools:manage-memories:list --category handoffs
 ```
 If pending found: Prompt "[R]esume / [S]tart fresh / [A]bort"
 
@@ -71,7 +71,7 @@ If push=true: Run `git push`.
 
 ### Step 6: Cleanup and Return Handoff
 
-Cleanup memory: `python3 manage-memory.py cleanup --category handoffs --pattern "workflow-*"`
+Cleanup memory: `python3 .plan/execute-script.py general-tools:manage-memories:cleanup --category handoffs --pattern "workflow-*"`
 
 Return structured result with handoff using `workflow-patterns/templates/handoff-standard.json` format.
 
