@@ -13,13 +13,15 @@ Build execution, output parsing, and issue routing for Gradle projects.
 
 ## Scripts
 
-| Script | Notation |
-|--------|----------|
-| execute-gradle-build | `builder:builder-gradle-rules/scripts/execute-gradle-build.py` |
-| parse-gradle-output | `builder:builder-gradle-rules/scripts/parse-gradle-output.py` |
-| find-gradle-project | `builder:builder-gradle-rules/scripts/find-gradle-project.py` |
-| search-openrewrite-markers | `builder:builder-gradle-rules/scripts/search-openrewrite-markers.py` |
-| check-acceptable-warnings | `builder:builder-gradle-rules/scripts/check-acceptable-warnings.py` |
+Script: `builder:builder-gradle-rules` → `gradle.py`
+
+| Subcommand | Description |
+|------------|-------------|
+| `execute` | Execute Gradle build with automatic log file handling |
+| `parse` | Parse Gradle build output and categorize issues |
+| `find-project` | Find Gradle project path from project name |
+| `search-markers` | Search for OpenRewrite TODO markers |
+| `check-warnings` | Categorize build warnings against acceptable patterns |
 
 ---
 
@@ -41,23 +43,23 @@ Build execution, output parsing, and issue routing for Gradle projects.
 
 1. **Execute Gradle**:
 
-   Script: `builder:builder-gradle-rules/scripts/execute-gradle-build.py`
+   Script: `builder:builder-gradle-rules`
 
    ```bash
-   python3 {execute_gradle_build_path} \
+   python3 {script_path} execute \
        --tasks "{tasks}" \
        --project {project} \
-       --skip-tests {skip_tests} \
+       --skip-tests \
        --timeout {timeout}
    ```
    Returns JSON with `log_file`, `exit_code`, `duration_ms`, `command_executed`
 
 2. **Parse Output**:
 
-   Script: `builder:builder-gradle-rules/scripts/parse-gradle-output.py`
+   Script: `builder:builder-gradle-rules`
 
    ```bash
-   python3 {parse_gradle_output_path} \
+   python3 {script_path} parse \
        --log {log_file from step 1} \
        --mode {output_mode}
    ```
@@ -111,10 +113,10 @@ Build execution, output parsing, and issue routing for Gradle projects.
 
 **Execution**:
 
-Script: `builder:builder-gradle-rules/scripts/parse-gradle-output.py`
+Script: `builder:builder-gradle-rules`
 
 ```bash
-python3 {parse_gradle_output_path} --log <path> --mode <mode>
+python3 {script_path} parse --log <path> --mode <mode>
 ```
 
 **Output Modes**:
@@ -153,14 +155,14 @@ python3 {parse_gradle_output_path} --log <path> --mode <mode>
 
 **Execution**:
 
-Script: `builder:builder-gradle-rules/scripts/find-gradle-project.py`
+Script: `builder:builder-gradle-rules`
 
 ```bash
 # Search by project name
-python3 {find_gradle_project_path} --project-name {project_name}
+python3 {script_path} find-project --project-name {project_name}
 
 # Validate explicit path
-python3 {find_gradle_project_path} --project-path {project_path}
+python3 {script_path} find-project --project-path {project_path}
 ```
 
 **Success Response**:
@@ -199,10 +201,10 @@ python3 {find_gradle_project_path} --project-path {project_path}
 
 **Execution**:
 
-Script: `builder:builder-gradle-rules/scripts/search-openrewrite-markers.py`
+Script: `builder:builder-gradle-rules`
 
 ```bash
-python3 {search_openrewrite_markers_path} \
+python3 {script_path} search-markers \
     --source-dir {source_dir} \
     --extensions {extensions}
 ```
@@ -251,10 +253,10 @@ python3 {search_openrewrite_markers_path} \
    - Read from field: `gradle.acceptable_warnings`
 2. Execute categorization:
 
-   Script: `builder:builder-gradle-rules/scripts/check-acceptable-warnings.py`
+   Script: `builder:builder-gradle-rules`
 
    ```bash
-   python3 {check_acceptable_warnings_path} \
+   python3 {script_path} check-warnings \
        --warnings '{issues_json}' \
        --acceptable-warnings '{patterns_json}'
    ```

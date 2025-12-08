@@ -47,10 +47,10 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 
 2. **Fetch Comments**
 
-   Script: `planning:pr-workflow/scripts/fetch-pr-comments.py`
+   Script: `planning:pr-workflow`
 
    ```bash
-   python3 {script_path} [--pr {number}]
+   python3 {script_path} fetch-comments [--pr {number}]
    ```
 
    Script outputs JSON:
@@ -92,10 +92,10 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 2. **Triage Each Comment**
    For each unresolved comment:
 
-   Script: `planning:pr-workflow/scripts/triage-comment.py`
+   Script: `planning:pr-workflow`
 
    ```bash
-   python3 {script_path} --comment '{json}'
+   python3 {script_path} triage --comment '{json}'
    ```
 
    Script outputs decision:
@@ -151,28 +151,28 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
 
 ## Scripts
 
-Scripts: `planning:pr-workflow/scripts/`
+Script: `planning:pr-workflow` → `pr.py`
 
-### fetch-pr-comments.py
+### pr.py fetch-comments
 
 **Purpose:** Fetch PR review comments from GitHub.
 
 **Usage:**
 ```bash
-python3 {script_path} [--pr <number>]
+python3 {script_path} fetch-comments [--pr <number>]
 ```
 
 **Requirements:** gh CLI installed and authenticated
 
 **Output:** JSON with comments array
 
-### triage-comment.py
+### pr.py triage
 
 **Purpose:** Analyze a single comment and determine action.
 
 **Usage:**
 ```bash
-python3 {script_path} --comment '{"id":"...", "body":"...", ...}'
+python3 {script_path} triage --comment '{"id":"...", "body":"...", ...}'
 ```
 
 **Output:** JSON with action decision

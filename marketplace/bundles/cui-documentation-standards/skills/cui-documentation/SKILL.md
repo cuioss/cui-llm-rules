@@ -971,19 +971,37 @@ All workflow procedures are in the `workflows/` directory (operational procedure
 | `content-review.md` | ULTRATHINK-based tone analysis framework | Content review workflow |
 | `review-orchestration.md` | Comprehensive review orchestration | comprehensive-review workflow |
 
-## Script Reference
+## Scripts
 
-All scripts are in the `scripts/` directory:
+Script: `cui-documentation-standards:cui-documentation` → `docs.py`
 
-| Script | Purpose | Output |
-|--------|---------|--------|
-| `asciidoc-formatter.sh` | Auto-fix formatting | Console output |
-| `asciidoc-validator.sh` | Validate format | Console output |
-| `verify-adoc-links.py` | Verify links | Markdown report |
-| `verify-links-false-positives.py` | Classify broken links to reduce false positives | JSON |
-| `analyze-content-tone.py` | Automated detection of promotional language | JSON |
-| `review-content.py` | Content quality (deprecated - use analyze-content-tone.py) | JSON |
-| `documentation-stats.sh` | Statistics | Multiple formats |
+| Subcommand | Description |
+|------------|-------------|
+| `stats` | Generate documentation statistics |
+| `validate` | Validate AsciiDoc files for compliance |
+| `format` | Auto-fix AsciiDoc formatting issues |
+| `verify-links` | Verify links and cross-references |
+| `classify-links` | Classify broken links to reduce false positives |
+| `review` | Analyze content for quality issues |
+| `analyze-tone` | Detect promotional language and missing sources |
+
+**Usage Examples:**
+```bash
+# Generate statistics
+python3 {script_path} stats -f json /path/to/docs
+
+# Validate formatting
+python3 {script_path} validate /path/to/file.adoc
+
+# Format files
+python3 {script_path} format -t all /path/to/docs
+
+# Verify links
+python3 {script_path} verify-links --directory /path/to/docs
+
+# Analyze tone
+python3 {script_path} analyze-tone --file /path/to/file.adoc --output report.json
+```
 
 ## Usage from Commands
 

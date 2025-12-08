@@ -112,20 +112,20 @@ Analyzes JavaScript files for JSDoc compliance violations and returns structured
 
 1. **Run violation analysis script**
 
-   Script: `cui-frontend-expert:cui-jsdoc/scripts/analyze-jsdoc-violations.py`
+   Script: `cui-frontend-expert:cui-jsdoc` → `jsdoc.py`
 
    ```bash
    # Analyze entire directory
-   python3 {script_path} --directory src/
+   python3 {script_path} analyze --directory src/
 
    # Analyze single file
-   python3 {script_path} --file src/utils/formatter.js
+   python3 {script_path} analyze --file src/utils/formatter.js
 
    # Analyze only for missing JSDoc (skip syntax checks)
-   python3 {script_path} --directory src/ --scope missing
+   python3 {script_path} analyze --directory src/ --scope missing
 
    # Analyze only JSDoc syntax issues
-   python3 {script_path} --directory src/ --scope syntax
+   python3 {script_path} analyze --directory src/ --scope syntax
    ```
 
 2. **Process violation results**

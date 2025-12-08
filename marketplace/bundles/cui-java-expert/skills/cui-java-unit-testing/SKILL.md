@@ -1,7 +1,7 @@
 ---
 name: cui-java-unit-testing
 description: CUI Java unit testing standards and patterns with JUnit 5, generators, and value object testing
-allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Bash, Grep, Glob, Bash(python3:*)]
 ---
 
 # CUI Java Unit Testing Skill
@@ -309,10 +309,10 @@ Analyze existing JaCoCo coverage reports and extract coverage metrics.
 
 2. **Run Coverage Analysis Script**
 
-   Script: `cui-java-expert:cui-java-unit-testing/scripts/analyze-coverage.py`
+   Script: `cui-java-expert:cui-java-unit-testing` → `coverage.py`
 
    ```bash
-   python3 {script_path} --file {report_path} --threshold {threshold}
+   python3 {script_path} analyze --file {report_path} --threshold {threshold}
    ```
 
 4. **Parse Results**
@@ -399,10 +399,10 @@ Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements
 
 2. **Analyze Coverage Gaps**
 
-   Script: `cui-java-expert:cui-java-unit-testing/scripts/analyze-coverage-gaps.py`
+   Script: `cui-java-expert:cui-java-unit-testing` → `coverage.py`
 
    ```bash
-   python3 {script_path} --report-path {report_path} --priority-filter {priority_filter}
+   python3 {script_path} gaps --report {report_path} --priority {priority_filter}
    ```
 
    Parse JSON output:
@@ -786,6 +786,17 @@ Before returning success:
 - [ ] Value object contracts implemented (if applicable)
 - [ ] All tests pass
 - [ ] Coverage meets target
+
+---
+
+## Scripts
+
+Script: `cui-java-expert:cui-java-unit-testing` → `coverage.py`
+
+| Subcommand | Description |
+|------------|-------------|
+| `analyze` | Analyze JaCoCo coverage report and extract metrics |
+| `gaps` | Identify coverage gaps and prioritize test improvements |
 
 ---
 

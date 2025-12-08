@@ -68,12 +68,12 @@ Field: build
 
 ### Step 2: Detect Build Systems
 
-Script: `builder:environment-detection/scripts/detect-build-systems.py`
+Script: `builder:environment-detection`
 
 If not cached, run detection:
 
 ```bash
-python3 {detect_build_systems_path} --project-dir .
+python3 {script_path} detect --project-dir .
 ```
 
 **Output:**
@@ -127,10 +127,10 @@ Force re-detection of build systems (bypasses cache).
 
 ### Step 1: Detect Build Systems
 
-Script: `builder:environment-detection/scripts/detect-build-systems.py`
+Script: `builder:environment-detection`
 
 ```bash
-python3 {detect_build_systems_path} --project-dir .
+python3 {script_path} detect --project-dir .
 ```
 
 ### Step 2: Update Cache
@@ -286,9 +286,11 @@ technology = technology_map.get(result["default_system"], "unknown")
 
 ## Scripts
 
-| Script | Notation |
-|--------|----------|
-| detect-build-systems | `builder:environment-detection/scripts/detect-build-systems.py` |
+Script: `builder:environment-detection` → `build-env.py`
+
+| Subcommand | Description |
+|------------|-------------|
+| `detect` | Detect available build systems in a project |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)

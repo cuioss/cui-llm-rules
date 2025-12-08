@@ -100,15 +100,15 @@ All 5 workflows follow the same pattern:
 4. **MANDATORY - Analyze Each Component** (using scripts)
 
    Scripts:
-   - `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
-   - `cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py`
-   - `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
+   - `cui-plugin-development-tools:plugin-doctor` → `analyze.py markdown`
+   - `cui-plugin-development-tools:plugin-doctor` → `analyze.py coverage`
+   - `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
    **EXECUTE**:
    ```bash
-   python3 {analyze_markdown_path} {path} {type}
-   python3 {analyze_tool_coverage_path} {path}
-   python3 {validate_references_path} {path}
+   python3 {analyze_path} markdown --file {path} --type {type}
+   python3 {analyze_path} coverage --file {path}
+   python3 {validate_path} references --file {path}
    ```
 
 ### Phase 2: Categorize Issues
@@ -159,10 +159,10 @@ All 5 workflows follow the same pattern:
 
 1. **Verify Fixes**
 
-   Script: `cui-plugin-development-tools:plugin-doctor/scripts/verify-fix.py`
+   Script: `cui-plugin-development-tools:plugin-doctor` → `fix.py verify`
 
    ```bash
-   python3 {script_path} {type} {path}
+   python3 {fix_path} verify --fix-type {type} --file {path}
    ```
 
 2. **Generate Summary**
@@ -206,14 +206,14 @@ Glob: pattern="*.md", path="{scope_path}/agents"
 For each agent file, execute:
 
 Scripts:
-- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
-- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-tool-coverage.py`
-- `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
+- `cui-plugin-development-tools:plugin-doctor` → `analyze.py markdown`
+- `cui-plugin-development-tools:plugin-doctor` → `analyze.py coverage`
+- `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {analyze_markdown_path} {agent_path} agent
-python3 {analyze_tool_coverage_path} {agent_path}
-python3 {validate_references_path} {agent_path}
+python3 {analyze_path} markdown --file {agent_path} --type agent
+python3 {analyze_path} coverage --file {agent_path}
+python3 {validate_path} references --file {agent_path}
 ```
 
 **Check against agents-guide.md**:
@@ -272,12 +272,12 @@ Same pattern as doctor-agents.
 ### Step 3: Analyze Each Command
 
 Scripts:
-- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
-- `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
+- `cui-plugin-development-tools:plugin-doctor` → `analyze.py markdown`
+- `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {analyze_markdown_path} {cmd_path} command
-python3 {validate_references_path} {cmd_path}
+python3 {analyze_path} markdown --file {cmd_path} --type command
+python3 {validate_path} references --file {cmd_path}
 ```
 
 **Check against commands-guide.md**:
@@ -400,14 +400,14 @@ Skill: cui-plugin-development-tools:marketplace-inventory
 ### Step 3: Analyze Each Skill
 
 Scripts:
-- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-skill-structure.py`
-- `cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.py`
-- `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
+- `cui-plugin-development-tools:plugin-doctor` → `analyze.py structure`
+- `cui-plugin-development-tools:plugin-doctor` → `analyze.py markdown`
+- `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {analyze_skill_structure_path} {skill_dir}
-python3 {analyze_markdown_path} {skill_dir}/SKILL.md skill
-python3 {validate_references_path} {skill_dir}/SKILL.md
+python3 {analyze_path} structure --directory {skill_dir}
+python3 {analyze_path} markdown --file {skill_dir}/SKILL.md --type skill
+python3 {validate_path} references --file {skill_dir}/SKILL.md
 ```
 
 **Check against skills-guide.md**:
@@ -570,10 +570,10 @@ Read references/content-quality-guide.md
 
 ### Step 2: Phase 1 - Inventory (SCRIPT)
 
-Script: `cui-plugin-development-tools:plugin-doctor/scripts/scan-skill-inventory.py`
+Script: `cui-plugin-development-tools:plugin-doctor` → `validate.py inventory`
 
 ```bash
-python3 {script_path} --skill-path {skill_path}
+python3 {validate_path} inventory --skill-path {skill_path}
 ```
 
 Parse JSON output to get:
@@ -610,10 +610,10 @@ Skip if `--skip-quality` specified.
 
 **Step 4a: Run Cross-File Analysis Script**
 
-Script: `cui-plugin-development-tools:plugin-doctor/scripts/analyze-cross-file-content.py`
+Script: `cui-plugin-development-tools:plugin-doctor` → `analyze.py cross-file`
 
 ```bash
-python3 {script_path} --skill-path {skill_path}
+python3 {analyze_path} cross-file --skill-path {skill_path}
 ```
 
 Parse JSON output for:
@@ -651,11 +651,11 @@ Read each content file and analyze:
 
 **Step 4d: Verify LLM Findings**
 
-Script: `cui-plugin-development-tools:plugin-doctor/scripts/verify-cross-file-findings.py`
+Script: `cui-plugin-development-tools:plugin-doctor` → `validate.py cross-file`
 
 Pipe LLM findings JSON to verification:
 ```bash
-echo '{llm_findings_json}' | python3 {script_path} --analysis {cross_file_analysis_json}
+echo '{llm_findings_json}' | python3 {validate_path} cross-file --analysis {cross_file_analysis_json}
 ```
 
 **Reject any LLM claims that can't be verified** against actual content.
@@ -698,10 +698,10 @@ AskUserQuestion:
 
 ### Step 6: Phase 5 - Verify Links (SCRIPT)
 
-Script: `cui-plugin-development-tools:plugin-doctor/scripts/validate-references.py`
+Script: `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {script_path} {skill_path}/SKILL.md
+python3 {validate_path} references --file {skill_path}/SKILL.md
 ```
 
 For each content file, verify:
@@ -777,19 +777,19 @@ Generate comprehensive report:
 
 ### Scripts (scripts/)
 
-| Script | Mode | Purpose |
-|--------|------|---------|
-| `analyze-markdown-file.py` | **EXECUTE** | Structural analysis, bloat, Rule 6/7/Pattern 22 |
-| `analyze-tool-coverage.py` | **EXECUTE** | Tool fit score, missing/unused tools |
-| `analyze-skill-structure.py` | **EXECUTE** | Skill directory structure validation |
-| `scan-skill-inventory.py` | **EXECUTE** | Skill content inventory for doctor-skill-content |
-| `analyze-cross-file-content.py` | **EXECUTE** | Cross-file duplication, similarity, extraction analysis |
-| `verify-cross-file-findings.py` | **EXECUTE** | Verify LLM cross-file claims against actual content |
-| `validate-references.py` | **EXECUTE** | Reference extraction and validation |
-| `extract-fixable-issues.py` | **EXECUTE** | Filter fixable issues from analysis |
-| `categorize-fixes.py` | **EXECUTE** | Categorize as safe/risky |
-| `apply-fix.py` | **EXECUTE** | Apply single fix with backup |
-| `verify-fix.py` | **EXECUTE** | Verify fix resolved issue |
+| Script | Subcommand | Mode | Purpose |
+|--------|------------|------|---------|
+| `analyze.py` | `markdown` | **EXECUTE** | Structural analysis, bloat, Rule 6/7/Pattern 22 |
+| `analyze.py` | `coverage` | **EXECUTE** | Tool fit score, missing/unused tools |
+| `analyze.py` | `structure` | **EXECUTE** | Skill directory structure validation |
+| `analyze.py` | `cross-file` | **EXECUTE** | Cross-file duplication, similarity, extraction analysis |
+| `validate.py` | `references` | **EXECUTE** | Reference extraction and validation |
+| `validate.py` | `cross-file` | **EXECUTE** | Verify LLM cross-file claims against actual content |
+| `validate.py` | `inventory` | **EXECUTE** | Skill content inventory for doctor-skill-content |
+| `fix.py` | `extract` | **EXECUTE** | Filter fixable issues from analysis |
+| `fix.py` | `categorize` | **EXECUTE** | Categorize as safe/risky |
+| `fix.py` | `apply` | **EXECUTE** | Apply single fix with backup |
+| `fix.py` | `verify` | **EXECUTE** | Verify fix resolved issue |
 
 ### References (references/)
 

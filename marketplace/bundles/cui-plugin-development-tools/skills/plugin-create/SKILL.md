@@ -733,27 +733,29 @@ This skill uses the following reference files (load on-demand):
 
 ## Scripts
 
-| Script | Notation |
-|--------|----------|
-| validate-component | `cui-plugin-development-tools:plugin-create/scripts/validate-component.py` |
-| generate-frontmatter | `cui-plugin-development-tools:plugin-create/scripts/generate-frontmatter.py` |
+Script: `cui-plugin-development-tools:plugin-create` → `component.py`
 
-### validate-component.py
+| Subcommand | Purpose |
+|------------|---------|
+| `validate` | Validates marketplace component structure |
+| `generate` | Generates YAML frontmatter for components |
+
+### component.py validate
 **Purpose**: Validates marketplace component structure
 
 **Usage**:
 ```bash
-python3 {validate_component_path} <file_path> <component_type>
+python3 {component_path} validate --file <file_path> --type <component_type>
 ```
 
 **Output**: JSON with validation results
 
-### generate-frontmatter.py
+### component.py generate
 **Purpose**: Generates YAML frontmatter for components
 
 **Usage**:
 ```bash
-python3 {generate_frontmatter_path} <component_type> <answers_json>
+python3 {component_path} generate --type <component_type> --config '<answers_json>'
 ```
 
 **Output**: Formatted YAML frontmatter string

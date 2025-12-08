@@ -50,10 +50,12 @@ Skill: cui-frontend-expert:cui-javascript-project
 
 ## Scripts
 
-| Script | Notation |
-|--------|----------|
-| execute-npm-build | `builder:builder-npm-rules/scripts/execute-npm-build.py` |
-| parse-npm-output | `builder:builder-npm-rules/scripts/parse-npm-output.py` |
+Script: `builder:builder-npm-rules` → `npm.py`
+
+| Subcommand | Description |
+|------------|-------------|
+| `execute` | Execute npm/npx build with automatic log file handling |
+| `parse` | Parse npm/npx build output and categorize issues |
 
 ---
 
@@ -91,12 +93,12 @@ Use this workflow when:
 
 ### Step 1: Execute npm Build
 
-Script: `builder:builder-npm-rules/scripts/execute-npm-build.py`
+Script: `builder:builder-npm-rules`
 
-Use the execute script which handles log file pre-creation, timestamping, and npm/npx execution atomically:
+Use the execute subcommand which handles log file pre-creation, timestamping, and npm/npx execution atomically:
 
 ```bash
-python3 {execute_npm_build_path} \
+python3 {script_path} execute \
     --command "{command}" \
     --workspace {workspace} \
     --env {env} \
@@ -108,16 +110,16 @@ python3 {execute_npm_build_path} \
 **Examples:**
 ```bash
 # Basic test run
-python3 {execute_npm_build_path} --command "run test"
+python3 {script_path} execute --command "run test"
 
 # Workspace-specific build
-python3 {execute_npm_build_path} --command "run build" --workspace e-2-e-playwright
+python3 {script_path} execute --command "run build" --workspace e-2-e-playwright
 
 # Playwright tests with environment
-python3 {execute_npm_build_path} --command "playwright test" --env "CI=true"
+python3 {script_path} execute --command "playwright test" --env "CI=true"
 
 # Lint with extended timeout
-python3 {execute_npm_build_path} --command "run lint" --timeout 180000
+python3 {script_path} execute --command "run lint" --timeout 180000
 ```
 
 The script:
@@ -130,10 +132,10 @@ The script:
 
 ### Step 2: Parse Build Output
 
-Script: `builder:builder-npm-rules/scripts/parse-npm-output.py`
+Script: `builder:builder-npm-rules`
 
 ```bash
-python3 {parse_npm_output_path} \
+python3 {script_path} parse \
     --log {log_file from step 1} \
     --mode {output_mode}
 ```
@@ -187,12 +189,12 @@ Use this workflow when:
 
 ### Step 1: Execute Script
 
-Script: `builder:builder-npm-rules/scripts/parse-npm-output.py`
+Script: `builder:builder-npm-rules`
 
 **Parse the build log file:**
 
 ```bash
-python3 {parse_npm_output_path} \
+python3 {script_path} parse \
     --log <path-to-log-file> \
     --mode <output-mode>
 ```

@@ -322,6 +322,129 @@ def cmd_cleanup(args) -> int:
         return 1
 
 
+def check_required_fields(data: Dict, required: List[str]) -> tuple:
+    """Check if required fields exist."""
+    missing = [f for f in required if f not in data]
+    return len(missing) == 0, missing
+
+
+def check_field_type(data: Dict, field: str, expected_type: type) -> tuple:
+    """Check if field has expected type."""
+    if field not in data:
+        return False, f"Field '{field}' not found"
+
+    actual = type(data[field])
+    if actual != expected_type:
+        return False, f"Expected {expected_type.__name__}, got {actual.__name__}"
+
+    return True, f"Field '{field}' is {expected_type.__name__}"
+
+
+def validate_memory_format(data: Dict) -> List[Dict]:
+    """Validate memory file format."""
+    checks = []
+
+    # Check required envelope
+    required = ['meta', 'content']
+    passed, missing = check_required_fields(data, required)
+    checks.append({
+        "check": "required_fields",
+        "passed": passed,
+        "fields": required,
+        "missing": missing if not passed else []
+    })
+
+    # Check meta structure
+    if 'meta' in data:
+        passed, msg = check_field_type(data, 'meta', dict)
+        checks.append({
+            "check": "meta_object",
+            "passed": passed,
+            "message": msg
+        })
+
+        if passed:
+            meta_required = ['created', 'category', 'summary']
+            meta_passed, meta_missing = check_required_fields(data['meta'], meta_required)
+            checks.append({
+                "check": "meta_required_fields",
+                "passed": meta_passed,
+                "fields": meta_required,
+                "missing": meta_missing if not meta_passed else []
+            })
+
+            # Validate category value
+            if 'category' in data['meta']:
+                valid_categories = CATEGORIES
+                cat = data['meta']['category']
+                checks.append({
+                    "check": "category_valid",
+                    "passed": cat in valid_categories,
+                    "value": cat,
+                    "valid_values": valid_categories
+                })
+
+    # Check content exists (can be any type)
+    if 'content' in data:
+        checks.append({
+            "check": "content_present",
+            "passed": True,
+            "message": f"Content is {type(data['content']).__name__}"
+        })
+
+    return checks
+
+
+def cmd_validate(args) -> int:
+    """Validate memory file format and structure."""
+    try:
+        if not args.file:
+            output_error("validate", "File path required")
+            return 1
+
+        file_path = Path(args.file)
+
+        if not file_path.exists():
+            output_error("validate", f"File not found: {file_path}")
+            return 1
+
+        # Parse JSON
+        try:
+            data = read_memory_file(file_path)
+        except json.JSONDecodeError as e:
+            result = {
+                "success": True,
+                "valid": False,
+                "file": str(file_path),
+                "format": "memory",
+                "checks": [{"check": "json_syntax", "passed": False, "error": str(e)}]
+            }
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0
+
+        # Add JSON syntax check
+        checks = [{"check": "json_syntax", "passed": True}]
+
+        # Run validation
+        checks.extend(validate_memory_format(data))
+
+        # Determine overall validity
+        valid = all(c.get('passed', True) for c in checks)
+
+        result = {
+            "success": True,
+            "valid": valid,
+            "file": str(file_path),
+            "format": "memory",
+            "checks": checks
+        }
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
+    except Exception as e:
+        output_error("validate", str(e))
+        return 1
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Manage .plan/memory/ layer for session persistence',
@@ -381,6 +504,11 @@ Examples:
     p_cleanup.add_argument('--category', choices=CATEGORIES, help='Filter by category')
     p_cleanup.add_argument('--older-than', dest='older_than', help='Remove files older than (e.g., 7d, 24h)')
     p_cleanup.set_defaults(func=cmd_cleanup)
+
+    # validate command
+    p_validate = subparsers.add_parser('validate', help='Validate memory file format')
+    p_validate.add_argument('--file', help='Path to memory file to validate')
+    p_validate.set_defaults(func=cmd_validate)
 
     args = parser.parse_args()
 

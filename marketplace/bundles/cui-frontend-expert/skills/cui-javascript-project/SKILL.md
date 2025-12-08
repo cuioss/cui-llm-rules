@@ -5,6 +5,7 @@ allowed-tools:
   - Read
   - Grep
   - Glob
+  - Bash(python3:*)
 ---
 
 # JavaScript Project Structure and Build Standards
@@ -238,3 +239,19 @@ Parameters:
 ```
 
 See builder-npm-rules skill documentation for complete workflow details.
+
+---
+
+## Scripts
+
+Script: `cui-frontend-expert:cui-javascript-project` → `npm-output.py`
+
+| Subcommand | Description |
+|------------|-------------|
+| `parse` | Parse npm/npx build output logs and categorize issues |
+
+Script characteristics:
+- Uses Python stdlib only (json, argparse, re, pathlib)
+- Outputs JSON to stdout
+- Exit code 0 for success, 1 for errors
+- Supports `--help` flag

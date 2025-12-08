@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Tests for manage-memory.py script.
 
-Migrated from test-manage-memory.sh - tests memory layer CRUD operations
-including save, load, list, query, and cleanup.
+Consolidated from:
+- test-manage-memory.sh - CRUD operations (save, load, list, query, cleanup)
+- test_validate_memory.py - validation subcommand
+
+Tests memory layer operations and format validation.
 """
 
 import os
@@ -280,12 +283,184 @@ def test_context_date_prefix():
 
 
 # =============================================================================
+# Validate Subcommand Tests
+# =============================================================================
+
+def test_validate_valid_memory():
+    """Test validate valid memory file."""
+    with TempDirContext() as temp_dir:
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
+        memory_dir.mkdir(parents=True)
+        (memory_dir / 'valid-test.json').write_text('''{
+  "meta": {
+    "created": "2025-11-25T10:30:00Z",
+    "category": "context",
+    "summary": "test-feature"
+  },
+  "content": {
+    "decisions": ["Use JWT"]
+  }
+}''')
+
+        result = run_memory_script(
+            'validate', '--file',
+            str(memory_dir / 'valid-test.json')
+        )
+        data = parse_json(result.stdout)
+
+        assert data.get('success') is True, "Should succeed"
+        assert data.get('valid') is True, "Valid memory file should be valid"
+
+
+def test_validate_missing_meta():
+    """Test detect invalid memory file (missing meta)."""
+    with TempDirContext() as temp_dir:
+        (temp_dir / 'invalid-memory.json').write_text('''{
+  "content": {
+    "test": true
+  }
+}''')
+
+        result = run_memory_script(
+            'validate', '--file',
+            str(temp_dir / 'invalid-memory.json')
+        )
+        data = parse_json(result.stdout)
+
+        assert data.get('success') is True, "Should succeed (validation ran)"
+        assert data.get('valid') is False, "Missing meta should be invalid"
+
+
+def test_validate_missing_content():
+    """Test detect invalid memory file (missing content)."""
+    with TempDirContext() as temp_dir:
+        (temp_dir / 'missing-content.json').write_text('''{
+  "meta": {
+    "created": "2025-11-25T10:30:00Z",
+    "category": "context",
+    "summary": "test"
+  }
+}''')
+
+        result = run_memory_script(
+            'validate', '--file',
+            str(temp_dir / 'missing-content.json')
+        )
+        data = parse_json(result.stdout)
+
+        assert data.get('success') is True, "Should succeed (validation ran)"
+        assert data.get('valid') is False, "Missing content should be invalid"
+
+
+def test_validate_invalid_category():
+    """Test detect invalid category."""
+    with TempDirContext() as temp_dir:
+        (temp_dir / 'invalid-category.json').write_text('''{
+  "meta": {
+    "created": "2025-11-25T10:30:00Z",
+    "category": "invalid",
+    "summary": "test"
+  },
+  "content": {}
+}''')
+
+        result = run_memory_script(
+            'validate', '--file',
+            str(temp_dir / 'invalid-category.json')
+        )
+        data = parse_json(result.stdout)
+
+        assert data.get('success') is True, "Should succeed (validation ran)"
+        assert data.get('valid') is False, "Invalid category should be invalid"
+
+
+def test_validate_invalid_json():
+    """Test detect invalid JSON syntax."""
+    with TempDirContext() as temp_dir:
+        (temp_dir / 'invalid-json.json').write_text('''{
+  "broken": true,
+  missing-quotes: "value"
+}''')
+
+        result = run_memory_script(
+            'validate', '--file',
+            str(temp_dir / 'invalid-json.json')
+        )
+        data = parse_json(result.stdout)
+
+        assert data.get('success') is True, "Should succeed (validation ran)"
+        assert data.get('valid') is False, "Invalid JSON should be invalid"
+
+
+def test_validate_checks_array():
+    """Test validate output includes checks array."""
+    with TempDirContext() as temp_dir:
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
+        memory_dir.mkdir(parents=True)
+        (memory_dir / 'checks-test.json').write_text('''{
+  "meta": {
+    "created": "2025-11-25T10:30:00Z",
+    "category": "context",
+    "summary": "test-feature"
+  },
+  "content": {}
+}''')
+
+        result = run_memory_script(
+            'validate', '--file',
+            str(memory_dir / 'checks-test.json')
+        )
+        data = parse_json(result.stdout)
+
+        assert data.get('success') is True, "Should succeed"
+        checks = data.get('checks', [])
+        assert len(checks) > 0, "Should include checks array with items"
+
+
+def test_validate_file_not_found():
+    """Test validate file not found returns error."""
+    with TempDirContext() as temp_dir:
+        result = run_memory_script(
+            'validate', '--file',
+            str(temp_dir / 'nonexistent.json')
+        )
+        output = result.stdout if result.stdout.strip() else result.stderr
+        data = parse_json(output)
+
+        assert data.get('success') is False, "Should fail for non-existent file"
+
+
+def test_validate_format_is_memory():
+    """Test validate format is memory."""
+    with TempDirContext() as temp_dir:
+        memory_dir = temp_dir / '.plan' / 'memory' / 'context'
+        memory_dir.mkdir(parents=True)
+        (memory_dir / 'format-test.json').write_text('''{
+  "meta": {
+    "created": "2025-11-25T10:30:00Z",
+    "category": "context",
+    "summary": "test-feature"
+  },
+  "content": {}
+}''')
+
+        result = run_memory_script(
+            'validate', '--file',
+            str(memory_dir / 'format-test.json')
+        )
+        data = parse_json(result.stdout)
+
+        assert data.get('format') == 'memory', "Format should be 'memory'"
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
+        # CRUD operations
         test_save_creates_dirs,
         test_save_context,
         test_load,
@@ -297,5 +472,14 @@ if __name__ == '__main__':
         test_load_not_found,
         test_invalid_category,
         test_context_date_prefix,
+        # Validate subcommand
+        test_validate_valid_memory,
+        test_validate_missing_meta,
+        test_validate_missing_content,
+        test_validate_invalid_category,
+        test_validate_invalid_json,
+        test_validate_checks_array,
+        test_validate_file_not_found,
+        test_validate_format_is_memory,
     ])
     sys.exit(runner.run())

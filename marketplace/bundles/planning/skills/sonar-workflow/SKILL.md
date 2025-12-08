@@ -61,10 +61,10 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 
    Or use script for structure:
 
-   Script: `planning:sonar-workflow/scripts/fetch-sonar-issues.py`
+   Script: `planning:sonar-workflow`
 
    ```bash
-   python3 {script_path} --project {key} [--pr {id}]
+   python3 {script_path} fetch --project {key} [--pr {id}]
    ```
 
 3. **Return Structured List**
@@ -109,10 +109,10 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 2. **Triage Each Issue**
    For each issue:
 
-   Script: `planning:sonar-workflow/scripts/triage-issue.py`
+   Script: `planning:sonar-workflow`
 
    ```bash
-   python3 {script_path} --issue '{json}'
+   python3 {script_path} triage --issue '{json}'
    ```
 
    Script outputs decision:
@@ -169,26 +169,26 @@ Handles Sonar issue workflows - fetching issues from SonarQube, triaging them, a
 
 ## Scripts
 
-Scripts: `planning:sonar-workflow/scripts/`
+Script: `planning:sonar-workflow` → `sonar.py`
 
-### fetch-sonar-issues.py
+### sonar.py fetch
 
 **Purpose:** Generate structure for fetching Sonar issues.
 
 **Usage:**
 ```bash
-python3 {script_path} --project <key> [--pr <id>] [--severities <list>]
+python3 {script_path} fetch --project <key> [--pr <id>] [--severities <list>]
 ```
 
 **Output:** JSON with MCP instruction and expected structure
 
-### triage-issue.py
+### sonar.py triage
 
 **Purpose:** Analyze a single issue and determine fix vs suppress.
 
 **Usage:**
 ```bash
-python3 {script_path} --issue '{"key":"...", "rule":"...", ...}'
+python3 {script_path} triage --issue '{"key":"...", "rule":"...", ...}'
 ```
 
 **Output:** JSON with action decision

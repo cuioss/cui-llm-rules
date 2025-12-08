@@ -90,10 +90,10 @@ If custom message provided:
 If no message:
 - Analyze diff using script:
 
-  Script: `planning:git-workflow/scripts/format-commit-message.py`
+  Script: `planning:git-workflow`
 
   ```bash
-  python3 {script_path} --analyze <diff-file>
+  python3 {script_path} analyze-diff --file <diff-file>
   ```
 - Generate message following standards
 
@@ -148,22 +148,29 @@ EOF
 
 ## Scripts
 
-Script: `planning:git-workflow/scripts/format-commit-message.py`
+Script: `planning:git-workflow` → `git-workflow.py`
 
-### format-commit-message.py
+### git-workflow.py format-commit
 
-**Purpose:** Format commit message or analyze diff for suggestions.
+**Purpose:** Format commit message following conventional commits.
 
 **Usage:**
 ```bash
-# Format mode
-python3 {script_path} --type feat --scope http --subject "add retry config"
-
-# Analysis mode
-python3 {script_path} --analyze <diff-file>
+python3 {script_path} format-commit --type feat --scope http --subject "add retry config"
 ```
 
 **Output:** JSON with formatted message and validation
+
+### git-workflow.py analyze-diff
+
+**Purpose:** Analyze diff file to suggest commit message.
+
+**Usage:**
+```bash
+python3 {script_path} analyze-diff --file <diff-file>
+```
+
+**Output:** JSON with commit type, scope, and subject suggestions
 
 ## Standards (Load On-Demand)
 

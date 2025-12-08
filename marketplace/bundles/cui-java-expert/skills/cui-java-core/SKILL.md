@@ -1,7 +1,7 @@
 ---
 name: cui-java-core
 description: Core Java development standards for CUI projects including coding patterns, null safety, Lombok, modern features, and logging
-allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
+allowed-tools: [Read, Edit, Write, Bash, Grep, Glob, Bash(python3:*)]
 ---
 
 # CUI Java Core Development Skill
@@ -462,10 +462,10 @@ Analyze LOGGER usage in Java files and detect violations of CUI logging standard
 
 2. **Run Violation Analysis Script**
 
-   Script: `cui-java-expert:cui-java-core/scripts/analyze-logging-violations.py`
+   Script: `cui-java-expert:cui-java-core` → `java-core.py`
 
    ```bash
-   python3 {script_path} --directory {target}
+   python3 {script_path} analyze-logging --directory {target}
    ```
 
 4. **Parse Results**
@@ -554,10 +554,10 @@ Generate AsciiDoc documentation for LogMessages holder classes.
 
 2. **Run Documentation Script**
 
-   Script: `cui-java-expert:cui-java-core/scripts/document-logrecord.py`
+   Script: `cui-java-expert:cui-java-core` → `java-core.py`
 
    ```bash
-   python3 {script_path} --holder {holder_class} --output {output_file}
+   python3 {script_path} document-logrecord --holder {holder_class} --output {output_file}
    ```
 
 4. **Parse Results**
@@ -633,10 +633,10 @@ Verify that implementation task description is clear and the build is clean befo
 
 1. **Validate Task Description**
 
-   Script: `cui-java-expert:cui-java-core/scripts/verify-implementation-params.py`
+   Script: `cui-java-expert:cui-java-core` → `java-core.py`
 
    ```bash
-   python3 {script_path} --description "{description}"
+   python3 {script_path} verify-params --description "{description}"
    ```
 
    Parse JSON output:
@@ -937,6 +937,18 @@ Before returning success:
 - [ ] Appropriate Lombok annotations
 - [ ] Modern Java features applied
 - [ ] Build compiles successfully
+
+---
+
+## Scripts
+
+Script: `cui-java-expert:cui-java-core` → `java-core.py`
+
+| Subcommand | Description |
+|------------|-------------|
+| `analyze-logging` | Analyze LOGGER usage violations in Java files |
+| `document-logrecord` | Generate AsciiDoc documentation for LogRecord classes |
+| `verify-params` | Verify implementation parameters for ambiguity |
 
 ---
 

@@ -44,13 +44,15 @@ Skill: builder:builder-pom-maintenance
 
 ## Scripts
 
-| Script | Notation |
-|--------|----------|
-| execute-maven-build | `builder:builder-maven-rules/scripts/execute-maven-build.py` |
-| parse-maven-output | `builder:builder-maven-rules/scripts/parse-maven-output.py` |
-| find-module-path | `builder:builder-maven-rules/scripts/find-module-path.py` |
-| search-openrewrite-markers | `builder:builder-maven-rules/scripts/search-openrewrite-markers.py` |
-| check-acceptable-warnings | `builder:builder-maven-rules/scripts/check-acceptable-warnings.py` |
+Script: `builder:builder-maven-rules` → `maven.py`
+
+| Subcommand | Description |
+|------------|-------------|
+| `execute` | Execute Maven build with automatic log file handling |
+| `parse` | Parse Maven build output and categorize issues |
+| `find-module` | Find Maven module path from artifactId |
+| `search-markers` | Search for OpenRewrite TODO markers |
+| `check-warnings` | Categorize build warnings against acceptable patterns |
 
 ---
 
@@ -97,12 +99,12 @@ Use this workflow when:
 
 ### Step 1: Execute Maven Build
 
-Script: `builder:builder-maven-rules/scripts/execute-maven-build.py`
+Script: `builder:builder-maven-rules`
 
-Use the execute script which handles log file pre-creation, timestamping, and Maven execution atomically:
+Use the execute subcommand which handles log file pre-creation, timestamping, and Maven execution atomically:
 
 ```bash
-python3 {execute_maven_build_path} \
+python3 {script_path} execute \
     --goals "{goals}" \
     --profile {profile} \
     --module {module} \
@@ -114,19 +116,19 @@ python3 {execute_maven_build_path} \
 **Examples:**
 ```bash
 # Basic build
-python3 {execute_maven_build_path} --goals "clean install"
+python3 {script_path} execute --goals "clean install"
 
 # Module-specific build
-python3 {execute_maven_build_path} --goals "clean install" --module auth-service
+python3 {script_path} execute --goals "clean install" --module auth-service
 
 # With profile
-python3 {execute_maven_build_path} --goals "clean verify" --profile pre-commit
+python3 {script_path} execute --goals "clean verify" --profile pre-commit
 
 # Coverage build
-python3 {execute_maven_build_path} --goals "clean test" --profile coverage
+python3 {script_path} execute --goals "clean test" --profile coverage
 
 # Native image with extended timeout
-python3 {execute_maven_build_path} --goals "clean package -Dnative" --timeout 600000
+python3 {script_path} execute --goals "clean package -Dnative" --timeout 600000
 ```
 
 The script:
@@ -138,10 +140,10 @@ The script:
 
 ### Step 2: Parse Build Output
 
-Script: `builder:builder-maven-rules/scripts/parse-maven-output.py`
+Script: `builder:builder-maven-rules`
 
 ```bash
-python3 {parse_maven_output_path} \
+python3 {script_path} parse \
     --log {log_file from step 1} \
     --mode {output_mode}
 ```
@@ -196,12 +198,12 @@ Use this workflow when:
 
 ### Step 1: Execute Script
 
-Script: `builder:builder-maven-rules/scripts/parse-maven-output.py`
+Script: `builder:builder-maven-rules`
 
 **Parse the build log file:**
 
 ```bash
-python3 {parse_maven_output_path} \
+python3 {script_path} parse \
     --log <path-to-log-file> \
     --mode <output-mode>
 ```
@@ -282,17 +284,17 @@ Use this workflow when:
 
 ### Step 1: Execute Find Script
 
-Script: `builder:builder-maven-rules/scripts/find-module-path.py`
+Script: `builder:builder-maven-rules`
 
 **Search by artifactId:**
 ```bash
-python3 {find_module_path_path} \
+python3 {script_path} find-module \
     --artifact-id {artifact_id}
 ```
 
 **Validate explicit path:**
 ```bash
-python3 {find_module_path_path} \
+python3 {script_path} find-module \
     --module-path {module_path}
 ```
 
@@ -360,10 +362,10 @@ Use this workflow when:
 
 ### Step 1: Execute Search Script
 
-Script: `builder:builder-maven-rules/scripts/search-openrewrite-markers.py`
+Script: `builder:builder-maven-rules`
 
 ```bash
-python3 {search_openrewrite_markers_path} \
+python3 {script_path} search-markers \
     --source-dir {source_dir} \
     --extensions {extensions}
 ```
@@ -457,16 +459,16 @@ If file doesn't exist or field is missing, use empty object `{}`.
 
 ### Step 2: Extract Warnings from Parsed Output
 
-From the parse-maven-output.py result, extract the `data.issues` array.
+From the `maven.py parse` result, extract the `data.issues` array.
 
 ### Step 3: Categorize Warnings
 
-Script: `builder:builder-maven-rules/scripts/check-acceptable-warnings.py`
+Script: `builder:builder-maven-rules`
 
 Pass warnings and patterns to the categorization script:
 
 ```bash
-python3 {check_acceptable_warnings_path} \
+python3 {script_path} check-warnings \
     --warnings '{issues_json}' \
     --acceptable-warnings '{patterns_json}'
 ```
@@ -474,7 +476,7 @@ python3 {check_acceptable_warnings_path} \
 Or via stdin:
 ```bash
 echo '{"warnings": [...], "acceptable_warnings": {...}}' | \
-    python3 {check_acceptable_warnings_path}
+    python3 {script_path} check-warnings
 ```
 
 **Output**: JSON with categorized warnings:

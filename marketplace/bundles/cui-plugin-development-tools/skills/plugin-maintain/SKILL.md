@@ -37,12 +37,14 @@ This skill provides 5 maintenance workflows:
 
 ## Scripts
 
-| Script | Notation |
-|--------|----------|
-| analyze-component | `cui-plugin-development-tools:plugin-maintain/scripts/analyze-component.py` |
-| check-duplication | `cui-plugin-development-tools:plugin-maintain/scripts/check-duplication.py` |
-| update-component | `cui-plugin-development-tools:plugin-maintain/scripts/update-component.py` |
-| generate-readme | `cui-plugin-development-tools:plugin-maintain/scripts/generate-readme.sh` |
+Script: `cui-plugin-development-tools:plugin-maintain` → `maintain.py`
+
+| Subcommand | Purpose |
+|------------|---------|
+| `analyze` | Analyze component for quality and improvement opportunities |
+| `check-duplication` | Check for duplicate knowledge when adding content |
+| `update` | Apply updates to a component file |
+| `readme` | Generate README content from bundle inventory |
 
 All scripts are stdlib-only with JSON output.
 
@@ -83,7 +85,7 @@ Read: references/component-update-guide.md
 Run component analysis:
 
 ```bash
-python3 {analyze_component_path} {component_path}
+python3 {maintain_path} analyze --component {component_path}
 ```
 
 Parse JSON output to understand:
@@ -102,10 +104,10 @@ Check that proposed improvements:
 
 #### Step 4: Apply Updates
 
-Use `update-component.py` or Edit tool to apply changes:
+Use `maintain.py update` or Edit tool to apply changes:
 
 ```bash
-echo '{"updates": [...]}' | python3 {update_component_path} {component_path}
+python3 {maintain_path} update --component {component_path} --updates '{"updates": [...]}'
 ```
 
 Or use Edit tool for precise modifications.
@@ -163,7 +165,7 @@ If file: Read the file
 #### Step 4: Check for Duplication
 
 ```bash
-python3 {check_duplication_path} {skill_path} {content_file}
+python3 {maintain_path} check-duplication --skill-path {skill_path} --content-file {content_file}
 ```
 
 Parse JSON output:
@@ -223,7 +225,7 @@ Read: references/readme-maintenance-guide.md
 For each bundle:
 
 ```bash
-bash {generate_readme_path} {bundle_path}
+python3 {maintain_path} readme --bundle-path {bundle_path}
 ```
 
 Parse JSON output for:
@@ -283,7 +285,7 @@ Read: references/refactoring-strategies-guide.md
 For each component in scope:
 
 ```bash
-scripts/analyze-component.py {component_path}
+python3 {maintain_path} analyze --component {component_path}
 ```
 
 Identify:
