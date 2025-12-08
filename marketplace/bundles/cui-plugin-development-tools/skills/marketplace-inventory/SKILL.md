@@ -34,7 +34,7 @@ Run the marketplace inventory scanner script:
 **Script**: `cui-plugin-development-tools:marketplace-inventory`
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --scope marketplace
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --scope marketplace
 ```
 
 **Direct execution from marketplace checkout (bootstrap only - before executor exists):**
@@ -94,8 +94,8 @@ Directory scope to scan. Default: `marketplace`
 
 **Example**:
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --scope marketplace
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --scope project
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --scope marketplace
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --scope project
 ```
 
 ### --resource-types (optional)
@@ -112,7 +112,7 @@ Filter which resource types to include in the inventory. Default: `all`
 
 Multiple types can be combined with commas:
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --resource-types agents,skills
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --resource-types agents,skills
 ```
 
 ### --include-descriptions (optional flag)
@@ -121,7 +121,7 @@ When specified, extracts description fields from YAML frontmatter of each resour
 
 **Example**:
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --include-descriptions
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --include-descriptions
 ```
 
 **Output with descriptions**:
@@ -150,10 +150,10 @@ Filter resources by name using fnmatch glob patterns. Use pipe (`|`) to separate
 **Examples**:
 ```bash
 # Single pattern
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --name-pattern "*-plan-*"
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --name-pattern "*-plan-*"
 
 # Multiple patterns (pipe-separated)
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --name-pattern "*-plan-*|*-specify-*|plan-*|manage-*"
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --name-pattern "*-plan-*|*-specify-*|plan-*|manage-*"
 ```
 
 ### --bundles (optional)
@@ -163,10 +163,10 @@ Filter to specific bundles by name (comma-separated).
 **Example**:
 ```bash
 # Single bundle
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --bundles planning
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --bundles planning
 
 # Multiple bundles
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --bundles "planning,cui-java-expert,cui-frontend-expert"
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --bundles "planning,cui-java-expert,cui-frontend-expert"
 ```
 
 ## Error Handling

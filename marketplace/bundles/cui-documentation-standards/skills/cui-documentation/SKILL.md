@@ -70,7 +70,7 @@ if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:format $OPTIONS {target}
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs format $OPTIONS {target}
 ```
 
 **Step 4: Parse Output**
@@ -97,7 +97,7 @@ Run validation:
 Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:validate {target}
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs validate {target}
 ```
 
 ---
@@ -137,7 +137,7 @@ If target is a directory:
 Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:validate {target}
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs validate {target}
 ```
 
 **Step 4: Parse Output**
@@ -228,12 +228,12 @@ mkdir -p target/asciidoc-link-verifier
 Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:verify-links --file {file_path} --report target/asciidoc-link-verifier/links.md
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs verify-links --file {file_path} --report target/asciidoc-link-verifier/links.md
 ```
 
 For directories:
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:verify-links --directory {directory} --report target/asciidoc-link-verifier/links.md
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs verify-links --directory {directory} --report target/asciidoc-link-verifier/links.md
 ```
 
 **Step 5: Parse Report**
@@ -319,12 +319,12 @@ If target is a directory:
 Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:review --file {file_path}
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs review --file {file_path}
 ```
 
 For directories:
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:review --directory {directory}
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs review --directory {directory}
 ```
 
 **Step 4: Parse JSON Output**
@@ -494,7 +494,7 @@ After running verify-adoc-links.py, classify results:
 Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:classify-links --input target/links.json --output target/classified.json
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs classify-links --input target/links.json --output target/classified.json
 ```
 
 Parse classified results:
@@ -534,7 +534,7 @@ Parameters:
 Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:analyze-tone --file {file_path} --output target/tone-analysis.json
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs analyze-tone --file {file_path} --output target/tone-analysis.json
 ```
 
 Parse tone analysis JSON:
@@ -988,19 +988,19 @@ Script: `cui-documentation-standards:cui-documentation` → `docs.py`
 **Usage Examples:**
 ```bash
 # Generate statistics
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:stats -f json /path/to/docs
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs stats -f json /path/to/docs
 
 # Validate formatting
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:validate /path/to/file.adoc
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs validate /path/to/file.adoc
 
 # Format files
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:format -t all /path/to/docs
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs format -t all /path/to/docs
 
 # Verify links
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:verify-links --directory /path/to/docs
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs verify-links --directory /path/to/docs
 
 # Analyze tone
-python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:analyze-tone --file /path/to/file.adoc --output report.json
+python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs analyze-tone --file /path/to/file.adoc --output report.json
 ```
 
 ## Usage from Commands

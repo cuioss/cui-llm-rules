@@ -212,8 +212,8 @@ Risky fixes require user confirmation because they involve judgment calls or may
 
 **Fix Strategy**:
 - Replace hardcoded paths with executor pattern
-- Use notation: `python3 .plan/execute-script.py {bundle}:{skill} {subcommand} {args}`
-- Example: Replace `python3 marketplace/.../scripts/verify.py --input x` with `python3 .plan/execute-script.py cui-java-expert:cui-java-core verify --input x`
+- Use notation: `python3 .plan/execute-script.py {bundle}:{skill}:{script} {subcommand} {args}`
+- Example: Replace `python3 marketplace/.../scripts/verify.py --input x` with `python3 .plan/execute-script.py cui-java-expert:cui-java-core:java-core verify --input x`
 
 **Why Risky**:
 - Changes script resolution mechanism

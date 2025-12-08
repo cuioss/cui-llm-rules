@@ -27,13 +27,13 @@ Script: `planning:manage-requirements`
 
 **Batch mode** (no requirement_id):
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:findAll \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement findAll \
   --plan-id {plan_id}
 ```
 
 **Single mode** (requirement_id provided):
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:get \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement get \
   --plan-id {plan_id} \
   --number {requirement_id}
 ```
@@ -81,7 +81,7 @@ Write specification with plugin-specific technical details:
 Script: `planning:manage-specifications`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:add \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification add \
   --plan-id {plan_id} \
   --title "{component} implementation" \
   --requirements "REQ-{n}" \
@@ -103,7 +103,7 @@ On unexpected structure or ambiguity:
 Script: `planning:manage-lessons`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:add \
+python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
   --component-name plugin-specify \
   --category observation \

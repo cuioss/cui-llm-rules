@@ -98,7 +98,7 @@ Script: `planning:manage-specifications`
 Add a new specification file (creates directory if needed).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:add \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification add \
   --plan-id {plan_id} \
   --title "Specification title" \
   --requirements "REQ-1,REQ-3" \
@@ -130,7 +130,7 @@ message: At least one requirement reference is required
 Update an existing specification file.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:update \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification update \
   --plan-id {plan_id} \
   --number 2 \
   [--title "New title"] \
@@ -158,7 +158,7 @@ specification:
 Remove a specification file (keeps gaps in numbering).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:remove \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification remove \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -180,7 +180,7 @@ removed:
 List all specifications (summary view with counts).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:list \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification list \
   --plan-id {plan_id} \
   [--status pending|done|all] \
   [--requirement REQ-1]
@@ -207,7 +207,7 @@ specifications[3]{number,title,requirements,status,file}:
 Get all specifications with full content (body included).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:findAll \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification findAll \
   --plan-id {plan_id}
 ```
 
@@ -244,7 +244,7 @@ specifications:
 Get a single specification by number.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:get \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -270,7 +270,7 @@ specification:
 Mark specification as done or pending.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:check \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification check \
   --plan-id {plan_id} \
   --number 2 \
   --status done
@@ -294,7 +294,7 @@ specification:
 Find all specifications that reference a specific requirement.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:findByRequirement \
+python3 .plan/execute-script.py planning:manage-specifications:manage-specification findByRequirement \
   --plan-id {plan_id} \
   --requirement REQ-1
 ```

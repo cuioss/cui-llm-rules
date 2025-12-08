@@ -58,7 +58,7 @@ Skill: general-tools:script-executor
 Use marketplace-inventory to find all scripts (includes `notation` field in `{bundle}:{skill}` format):
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan --scope marketplace --resource-types scripts
+python3 .plan/execute-script.py cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory scan --scope marketplace --resource-types scripts
 ```
 
 Output contains:

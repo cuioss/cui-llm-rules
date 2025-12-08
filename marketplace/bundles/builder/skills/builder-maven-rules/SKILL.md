@@ -104,7 +104,7 @@ Script: `builder:builder-maven-rules`
 Use the execute subcommand which handles log file pre-creation, timestamping, and Maven execution atomically:
 
 ```bash
-python3 .plan/execute-script.py builder:builder-maven-rules:execute \
+python3 .plan/execute-script.py builder:builder-maven-rules:maven execute \
     --goals "{goals}" \
     --profile {profile} \
     --module {module} \
@@ -116,19 +116,19 @@ python3 .plan/execute-script.py builder:builder-maven-rules:execute \
 **Examples:**
 ```bash
 # Basic build
-python3 .plan/execute-script.py builder:builder-maven-rules:execute --goals "clean install"
+python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals "clean install"
 
 # Module-specific build
-python3 .plan/execute-script.py builder:builder-maven-rules:execute --goals "clean install" --module auth-service
+python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals "clean install" --module auth-service
 
 # With profile
-python3 .plan/execute-script.py builder:builder-maven-rules:execute --goals "clean verify" --profile pre-commit
+python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals "clean verify" --profile pre-commit
 
 # Coverage build
-python3 .plan/execute-script.py builder:builder-maven-rules:execute --goals "clean test" --profile coverage
+python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals "clean test" --profile coverage
 
 # Native image with extended timeout
-python3 .plan/execute-script.py builder:builder-maven-rules:execute --goals "clean package -Dnative" --timeout 600000
+python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals "clean package -Dnative" --timeout 600000
 ```
 
 The script:
@@ -143,7 +143,7 @@ The script:
 Script: `builder:builder-maven-rules`
 
 ```bash
-python3 .plan/execute-script.py builder:builder-maven-rules:parse \
+python3 .plan/execute-script.py builder:builder-maven-rules:maven parse \
     --log {log_file from step 1} \
     --mode {output_mode}
 ```
@@ -203,7 +203,7 @@ Script: `builder:builder-maven-rules`
 **Parse the build log file:**
 
 ```bash
-python3 .plan/execute-script.py builder:builder-maven-rules:parse \
+python3 .plan/execute-script.py builder:builder-maven-rules:maven parse \
     --log <path-to-log-file> \
     --mode <output-mode>
 ```
@@ -288,13 +288,13 @@ Script: `builder:builder-maven-rules`
 
 **Search by artifactId:**
 ```bash
-python3 .plan/execute-script.py builder:builder-maven-rules:find-module \
+python3 .plan/execute-script.py builder:builder-maven-rules:maven find-module \
     --artifact-id {artifact_id}
 ```
 
 **Validate explicit path:**
 ```bash
-python3 .plan/execute-script.py builder:builder-maven-rules:find-module \
+python3 .plan/execute-script.py builder:builder-maven-rules:maven find-module \
     --module-path {module_path}
 ```
 
@@ -365,7 +365,7 @@ Use this workflow when:
 Script: `builder:builder-maven-rules`
 
 ```bash
-python3 .plan/execute-script.py builder:builder-maven-rules:search-markers \
+python3 .plan/execute-script.py builder:builder-maven-rules:maven search-markers \
     --source-dir {source_dir} \
     --extensions {extensions}
 ```
@@ -468,7 +468,7 @@ Script: `builder:builder-maven-rules`
 Pass warnings and patterns to the categorization script:
 
 ```bash
-python3 .plan/execute-script.py builder:builder-maven-rules:check-warnings \
+python3 .plan/execute-script.py builder:builder-maven-rules:maven check-warnings \
     --warnings '{issues_json}' \
     --acceptable-warnings '{patterns_json}'
 ```
@@ -476,7 +476,7 @@ python3 .plan/execute-script.py builder:builder-maven-rules:check-warnings \
 Or via stdin:
 ```bash
 echo '{"warnings": [...], "acceptable_warnings": {...}}' | \
-    python3 .plan/execute-script.py builder:builder-maven-rules:check-warnings
+    python3 .plan/execute-script.py builder:builder-maven-rules:maven check-warnings
 ```
 
 **Output**: JSON with categorized warnings:

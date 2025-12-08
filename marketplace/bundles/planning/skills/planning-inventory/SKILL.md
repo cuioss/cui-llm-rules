@@ -41,7 +41,7 @@ Run the planning inventory scanner script:
 **Script**: `planning:planning-inventory`
 
 ```bash
-python3 .plan/execute-script.py planning:planning-inventory:scan
+python3 .plan/execute-script.py planning:planning-inventory:scan-planning-inventory scan
 ```
 
 ### Step 2: Parse and Return Results
@@ -61,8 +61,8 @@ Output format. Default: `full`
 
 **Examples**:
 ```bash
-python3 .plan/execute-script.py planning:planning-inventory:scan --format full
-python3 .plan/execute-script.py planning:planning-inventory:scan --format summary
+python3 .plan/execute-script.py planning:planning-inventory:scan-planning-inventory scan --format full
+python3 .plan/execute-script.py planning:planning-inventory:scan-planning-inventory scan --format summary
 ```
 
 ### --include-descriptions (optional flag)
@@ -70,7 +70,7 @@ python3 .plan/execute-script.py planning:planning-inventory:scan --format summar
 When specified, includes description fields from YAML frontmatter.
 
 ```bash
-python3 .plan/execute-script.py planning:planning-inventory:scan --include-descriptions
+python3 .plan/execute-script.py planning:planning-inventory:scan-planning-inventory scan --include-descriptions
 ```
 
 ## Output Format

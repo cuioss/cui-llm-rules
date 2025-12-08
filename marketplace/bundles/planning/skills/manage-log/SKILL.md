@@ -80,7 +80,7 @@ Script: `planning:manage-log`
 Add a new log entry.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase implement \
   --summary "Implemented JWT token generation" \
@@ -115,7 +115,7 @@ total_entries: 4
 Read all log entries.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:read \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log read \
   --plan-id {plan_id} \
   [--phase implement]
 ```
@@ -137,7 +137,7 @@ entries[3]{timestamp,type,phase,summary,detail}:
 List entries summary.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:list \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log list \
   --plan-id {plan_id} \
   [--limit 10]
 ```

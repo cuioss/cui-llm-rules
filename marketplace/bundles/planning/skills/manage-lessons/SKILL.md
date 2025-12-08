@@ -91,7 +91,7 @@ Script: `planning:manage-lessons`
 Create a new lesson.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:add \
+python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component maven-build \
   --category bug \
   --title "Build fails with missing dependency" \
@@ -112,7 +112,7 @@ category: bug
 Update lesson metadata.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:update \
+python3 .plan/execute-script.py planning:manage-lessons:manage-lesson update \
   --id 2025-12-02-001 \
   --applied true
 ```
@@ -131,7 +131,7 @@ previous: false
 Get a single lesson.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:get \
+python3 .plan/execute-script.py planning:manage-lessons:manage-lesson get \
   --id 2025-12-02-001
 ```
 
@@ -154,7 +154,7 @@ content: |
 List lessons with filtering.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:list \
+python3 .plan/execute-script.py planning:manage-lessons:manage-lesson list \
   [--component maven-build] \
   [--category bug] \
   [--applied false]
@@ -176,7 +176,7 @@ lessons[2]{id,component,category,applied,title}:
 Create lesson from error context.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:from-error \
+python3 .plan/execute-script.py planning:manage-lessons:manage-lesson from-error \
   --context '{"component":"maven-build","error":"Missing dependency"}'
 ```
 

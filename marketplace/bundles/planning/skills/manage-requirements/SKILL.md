@@ -88,7 +88,7 @@ Script: `planning:manage-requirements`
 Add a new requirement file (creates directory if needed).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:add \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement add \
   --plan-id {plan_id} \
   --title "Requirement title" \
   --body "Detailed requirement description"
@@ -112,7 +112,7 @@ requirement:
 Update an existing requirement file.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:update \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement update \
   --plan-id {plan_id} \
   --number 2 \
   [--title "New title"] \
@@ -138,7 +138,7 @@ requirement:
 Remove a requirement file (keeps gaps in numbering).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:remove \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement remove \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -160,7 +160,7 @@ removed:
 List all requirements (summary view with counts).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:list \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement list \
   --plan-id {plan_id} \
   [--status pending|done|all]
 ```
@@ -186,7 +186,7 @@ requirements[3]{number,title,status,file}:
 Get all requirements with full content (body included).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:findAll \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement findAll \
   --plan-id {plan_id}
 ```
 
@@ -228,7 +228,7 @@ requirements:
 Get a single requirement by number.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:get \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -253,7 +253,7 @@ requirement:
 Mark requirement as done or pending.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:check \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement check \
   --plan-id {plan_id} \
   --number 2 \
   --status done

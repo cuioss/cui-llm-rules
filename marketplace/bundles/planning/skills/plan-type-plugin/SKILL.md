@@ -50,25 +50,25 @@ Use `planning:manage-references` to add domain-specific fields:
 
 ```bash
 # Set target_bundle (populated during specify)
-python3 .plan/execute-script.py planning:manage-references:set \
+python3 .plan/execute-script.py planning:manage-references:manage-references set \
   --plan-id {plan_id} \
   --field target_bundle \
   --value null
 
 # Set bundle_path (populated during specify)
-python3 .plan/execute-script.py planning:manage-references:set \
+python3 .plan/execute-script.py planning:manage-references:manage-references set \
   --plan-id {plan_id} \
   --field bundle_path \
   --value null
 
 # Set components tracking
-python3 .plan/execute-script.py planning:manage-references:set \
+python3 .plan/execute-script.py planning:manage-references:manage-references set \
   --plan-id {plan_id} \
   --field components \
   --value '{"add": [], "modify": []}'
 
 # Set verification commands
-python3 .plan/execute-script.py planning:manage-references:set \
+python3 .plan/execute-script.py planning:manage-references:manage-references set \
   --plan-id {plan_id} \
   --field verification_commands \
   --value '["/cui-plugin-development-tools:plugin-doctor"]'
@@ -80,25 +80,25 @@ Use `planning:manage-config` to add finalize configuration:
 
 ```bash
 # Set create_pr
-python3 .plan/execute-script.py planning:manage-config:set \
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
   --plan-id {plan_id} \
   --field create_pr \
   --value false
 
 # Set verification_required
-python3 .plan/execute-script.py planning:manage-config:set \
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
   --plan-id {plan_id} \
   --field verification_required \
   --value true
 
 # Set verification_command
-python3 .plan/execute-script.py planning:manage-config:set \
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
   --plan-id {plan_id} \
   --field verification_command \
   --value "/cui-plugin-development-tools:plugin-doctor"
 
 # Set branch_strategy
-python3 .plan/execute-script.py planning:manage-config:set \
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
   --plan-id {plan_id} \
   --field branch_strategy \
   --value direct
@@ -132,7 +132,7 @@ python3 .plan/execute-script.py planning:manage-config:set \
 
 **Before delegation**, log:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -149,7 +149,7 @@ Task(cui-plugin-development-tools:plugin-specify-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
@@ -174,7 +174,7 @@ The agent analyzes marketplace structure, creates specifications with:
 
 **Before delegation**, log:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -191,7 +191,7 @@ Task(cui-plugin-development-tools:plugin-plan-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \

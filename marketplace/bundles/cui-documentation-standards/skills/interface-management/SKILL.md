@@ -45,7 +45,7 @@ List all interfaces with optional type filtering.
 Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:interface-management:list [--type {type}]
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface list [--type {type}]
 ```
 
 **Step 3: Parse Output**
@@ -82,7 +82,7 @@ Create a new interface specification with automatic numbering.
 Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:interface-management:create --title "{title}" --type "{type}"
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface create --title "{title}" --type "{type}"
 ```
 
 **Step 3: Parse Output**
@@ -133,7 +133,7 @@ Read interface content by number.
 Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:interface-management:read --number {number}
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface read --number {number}
 ```
 
 **Step 3: Display Content**
@@ -157,7 +157,7 @@ Update interface field content.
 Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:interface-management:update --number {number} --field {field} --value "{value}"
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface update --number {number} --field {field} --value "{value}"
 ```
 
 **Step 3: Confirm Update**
@@ -180,7 +180,7 @@ Delete interface with confirmation.
 Script: `cui-documentation-standards:interface-management`
 
 ```bash
-python3 .plan/execute-script.py cui-documentation-standards:interface-management:delete --number {number} --force
+python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface delete --number {number} --force
 ```
 
 **Step 3: Confirm Deletion**

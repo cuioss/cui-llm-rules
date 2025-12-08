@@ -70,7 +70,7 @@ allowed-tools: Read, Bash
 
 **Before delegation**, log:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -87,7 +87,7 @@ Task(cui-frontend-expert:js-specify-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
@@ -112,7 +112,7 @@ The agent analyzes JavaScript codebase, creates specifications with:
 
 **Before delegation**, log:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
@@ -129,7 +129,7 @@ Task(cui-frontend-expert:js-plan-agent,
 
 **After delegation**, log outcome:
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \

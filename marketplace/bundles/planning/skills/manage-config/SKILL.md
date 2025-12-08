@@ -80,7 +80,7 @@ Script: `planning:manage-config`
 Read entire config.toon content.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:read \
+python3 .plan/execute-script.py planning:manage-config:manage-config read \
   --plan-id {plan_id}
 ```
 
@@ -100,7 +100,7 @@ config:
 Get a specific field value.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:get \
+python3 .plan/execute-script.py planning:manage-config:manage-config get \
   --plan-id {plan_id} \
   --field plan_type
 ```
@@ -118,7 +118,7 @@ value: planning:plan-type-java
 Set a specific field value.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:set \
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
   --plan-id {plan_id} \
   --field compatibility \
   --value breaking
@@ -138,7 +138,7 @@ previous: deprecations
 Create config.toon with initial values.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:create \
+python3 .plan/execute-script.py planning:manage-config:manage-config create \
   --plan-id {plan_id} \
   --plan-type planning:plan-type-java \
   [--compatibility deprecations] \

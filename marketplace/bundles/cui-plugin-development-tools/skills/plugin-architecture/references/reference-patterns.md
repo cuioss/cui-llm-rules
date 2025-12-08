@@ -76,7 +76,7 @@ python3 .plan/execute-script.py {bundle}:{skill}:{subcommand} {args}
 ```markdown
 ✅ python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze {input_file}
 ✅ python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate {component_path}
-✅ python3 .plan/execute-script.py planning:manage-files:add --plan-id {id} --file {file}
+✅ python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id {id} --file {file}
 ```
 
 **Prohibited**:

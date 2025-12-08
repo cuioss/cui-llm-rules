@@ -146,7 +146,7 @@ Track `validations_performed` counter.
 
 **Generate frontmatter:**
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:generate --type "agent" --config "{answers_json}"
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component generate --type "agent" --config "{answers_json}"
 ```
 
 Where answers_json contains:
@@ -197,7 +197,7 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:validate --file "{file_path}" --type "agent"
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component validate --file "{file_path}" --type "agent"
 ```
 
 Validation checks:
@@ -308,7 +308,7 @@ Same pattern as agent workflow, using Glob/Grep to find similar commands.
 
 **Generate frontmatter:**
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:generate --type "command" --config "{answers_json}"
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component generate --type "command" --config "{answers_json}"
 ```
 
 **Load template:**
@@ -349,7 +349,7 @@ Track `files_created` counter.
 #### Step 5: Validate Generated Component
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:validate --file "{file_path}" --type "command"
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component validate --file "{file_path}" --type "command"
 ```
 
 Validation checks:
@@ -441,7 +441,7 @@ bash mkdir -p {bundle}/skills/{skill-name}/standards
 
 Generate frontmatter:
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:generate --type "skill" --config "{answers_json}"
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component generate --type "skill" --config "{answers_json}"
 ```
 
 Load template:
@@ -501,7 +501,7 @@ Track `files_created` and `standards_files_created` counters.
 #### Step 5: Validate Generated Component
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:validate --file "{skill_path}/SKILL.md" --type "skill"
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component validate --file "{skill_path}/SKILL.md" --type "skill"
 ```
 
 Validation checks:
@@ -745,7 +745,7 @@ Script: `cui-plugin-development-tools:plugin-create` → `component.py`
 
 **Usage**:
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:validate --file <file_path> --type <component_type>
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component validate --file <file_path> --type <component_type>
 ```
 
 **Output**: JSON with validation results
@@ -755,7 +755,7 @@ python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:valid
 
 **Usage**:
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:generate --type <component_type> --config '<answers_json>'
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-create:component generate --type <component_type> --config '<answers_json>'
 ```
 
 **Output**: Formatted YAML frontmatter string

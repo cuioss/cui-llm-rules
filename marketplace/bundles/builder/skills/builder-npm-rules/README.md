@@ -97,9 +97,9 @@ Atomic build execution script that handles:
 
 **Usage:**
 ```bash
-python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "run test"
-python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "playwright test" --workspace e-2-e-playwright
-python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "run build" --env "NODE_ENV=production"
+python3 .plan/execute-script.py builder:builder-npm-rules:npm execute --command "run test"
+python3 .plan/execute-script.py builder:builder-npm-rules:npm execute --command "playwright test" --workspace e-2-e-playwright
+python3 .plan/execute-script.py builder:builder-npm-rules:npm execute --command "run build" --env "NODE_ENV=production"
 ```
 
 ### parse-npm-output.py
@@ -108,9 +108,9 @@ Output parsing script that categorizes issues:
 
 **Usage:**
 ```bash
-python3 .plan/execute-script.py builder:builder-npm-rules:parse --log target/npm-output-2025-11-26.log
-python3 .plan/execute-script.py builder:builder-npm-rules:parse --log build.log --mode structured
-python3 .plan/execute-script.py builder:builder-npm-rules:parse --log test.log --mode errors
+python3 .plan/execute-script.py builder:builder-npm-rules:npm parse --log target/npm-output-2025-11-26.log
+python3 .plan/execute-script.py builder:builder-npm-rules:npm parse --log build.log --mode structured
+python3 .plan/execute-script.py builder:builder-npm-rules:npm parse --log test.log --mode errors
 ```
 
 ## Standards
@@ -164,7 +164,7 @@ This skill is used by:
 **Before** (commands executing npm directly):
 ```bash
 npm run test > target/npm-output.log 2>&1
-python3 .plan/execute-script.py builder:builder-npm-rules:parse --log target/npm-output.log
+python3 .plan/execute-script.py builder:builder-npm-rules:npm parse --log target/npm-output.log
 ```
 
 **After** (using skill):

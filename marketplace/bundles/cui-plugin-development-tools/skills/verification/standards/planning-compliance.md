@@ -34,12 +34,12 @@ These are NOT violations and should not trigger compliance alerts.
 All marketplace scripts should be executed via the executor:
 
 ```bash
-python3 .plan/execute-script.py {notation} {subcommand} {args...}
+python3 .plan/execute-script.py {notation} [subcommand] {args...}
 ```
 
 Examples:
-- `python3 .plan/execute-script.py planning:manage-files add --plan-id my-plan`
-- `python3 .plan/execute-script.py builder:builder-maven-rules execute --goals verify`
+- `python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan`
+- `python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals verify`
 
 **Violation** (after executor migration complete):
 - Direct script execution: `python3 /path/to/script.py {args}` (bypasses logging and standardization)
@@ -132,7 +132,7 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 1. After operation completes, query work-log:
    ```bash
-   python3 .plan/execute-script.py planning:manage-log:list --plan-id {plan_id} --limit 5
+   python3 .plan/execute-script.py planning:manage-log:manage-work-log list --plan-id {plan_id} --limit 5
    ```
 
 2. Verify most recent entry matches operation:
@@ -208,7 +208,7 @@ Direct script execution bypassing execute-script.py
 ### Context
 - **Operation**: Bash
 - **Target**: python3 {path}/manage-files.py add --plan-id my-plan
-- **Expected**: python3 .plan/execute-script.py planning:manage-files add --plan-id my-plan
+- **Expected**: python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan
 - **Actual**: Direct script path used
 
 ### Root Cause Analysis
@@ -310,7 +310,7 @@ Actively scan execution logs to detect script issues:
 
 1. Check work-log exists and has entries:
    ```bash
-   python3 .plan/execute-script.py planning:manage-log:list --plan-id {plan_id} --limit 5
+   python3 .plan/execute-script.py planning:manage-log:manage-work-log list --plan-id {plan_id} --limit 5
    ```
 
 2. Check execution.log exists and scan for issues:
@@ -400,7 +400,7 @@ Actively scan execution logs to detect script issues:
 
 1. After phase-affecting operation, query status:
    ```bash
-   python3 .plan/execute-script.py planning:manage-lifecycle:read --plan-id {plan_id}
+   python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id {plan_id}
    ```
 
 2. Verify status consistency:
@@ -482,7 +482,7 @@ When `/plan-execute` executes, verify after each task:
 
 ```
 Claude uses: Read .plan/plans/my-plan/status.toon
-Should use: python3 .plan/execute-script.py planning:manage-lifecycle:read --plan-id my-plan
+Should use: python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id my-plan
 ```
 
 **Why It Matters**: Direct reads bypass the managed parser, may read stale data during atomic writes, and don't leverage script validation.
@@ -510,7 +510,7 @@ Actual: current_phase=execute (not updated)
 
 ```
 Claude uses: Write .plan/plans/my-plan/tasks/TASK-003.toon
-Should use: python3 .plan/execute-script.py planning:manage-tasks:create --plan-id my-plan --title "..."
+Should use: python3 .plan/execute-script.py planning:manage-tasks:manage-task create --plan-id my-plan --title "..."
 ```
 
 **Why It Matters**: Bypasses numbering logic, validation, and work-log entry creation.
@@ -551,13 +551,13 @@ Use this verification pattern after major operations:
 
 ```bash
 # Verify work-log has recent entry
-python3 .plan/execute-script.py planning:manage-log:list --plan-id {plan_id} --limit 1
+python3 .plan/execute-script.py planning:manage-log:manage-work-log list --plan-id {plan_id} --limit 1
 
 # Verify status is consistent
-python3 .plan/execute-script.py planning:manage-lifecycle:read --plan-id {plan_id}
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id {plan_id}
 
 # Verify no orphaned files (optional)
-python3 .plan/execute-script.py planning:manage-files:list --plan-id {plan_id}
+python3 .plan/execute-script.py planning:manage-files:manage-files list --plan-id {plan_id}
 ```
 
 Expected output should show:

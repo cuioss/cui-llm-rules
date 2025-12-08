@@ -50,7 +50,7 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
    Script: `planning:pr-workflow`
 
    ```bash
-   python3 .plan/execute-script.py planning:pr-workflow:fetch-comments [--pr {number}]
+   python3 .plan/execute-script.py planning:pr-workflow:pr fetch-comments [--pr {number}]
    ```
 
    Script outputs JSON:
@@ -95,7 +95,7 @@ Handles PR review comment workflows - fetching comments, triaging them, and gene
    Script: `planning:pr-workflow`
 
    ```bash
-   python3 .plan/execute-script.py planning:pr-workflow:triage --comment '{json}'
+   python3 .plan/execute-script.py planning:pr-workflow:pr triage --comment '{json}'
    ```
 
    Script outputs decision:
@@ -159,7 +159,7 @@ Script: `planning:pr-workflow` → `pr.py`
 
 **Usage:**
 ```bash
-python3 .plan/execute-script.py planning:pr-workflow:fetch-comments [--pr <number>]
+python3 .plan/execute-script.py planning:pr-workflow:pr fetch-comments [--pr <number>]
 ```
 
 **Requirements:** gh CLI installed and authenticated
@@ -172,7 +172,7 @@ python3 .plan/execute-script.py planning:pr-workflow:fetch-comments [--pr <numbe
 
 **Usage:**
 ```bash
-python3 .plan/execute-script.py planning:pr-workflow:triage --comment '{"id":"...", "body":"...", ...}'
+python3 .plan/execute-script.py planning:pr-workflow:pr triage --comment '{"id":"...", "body":"...", ...}'
 ```
 
 **Output:** JSON with action decision

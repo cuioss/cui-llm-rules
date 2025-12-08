@@ -47,7 +47,7 @@ Activate when:
 After deriving the plan_id (Step 2) and creating the plan directory (Step 5), log the phase start:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type progress \
@@ -81,7 +81,7 @@ def derive_plan_id(input_source):
 Script: `planning:manage-files`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:create-or-reference \
+python3 .plan/execute-script.py planning:manage-files:manage-files create-or-reference \
   --plan-id {plan_id}
 ```
 
@@ -105,7 +105,7 @@ If `action: exists`, use AskUserQuestion:
 Script: `planning:manage-lessons`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:get \
+python3 .plan/execute-script.py planning:manage-lessons:manage-lesson get \
   --id {lesson_id}
 ```
 
@@ -150,7 +150,7 @@ created: {ISO_timestamp}
 Write via manage-files:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:write \
+python3 .plan/execute-script.py planning:manage-files:manage-files write \
   --plan-id {plan_id} \
   --file task.md \
   --stdin
@@ -161,14 +161,14 @@ python3 .plan/execute-script.py planning:manage-files:write \
 Script: `planning:manage-references`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:create \
+python3 .plan/execute-script.py planning:manage-references:manage-references create \
   --plan-id {plan_id} \
   --branch "$(git branch --show-current)"
 ```
 
 If issue source, also include:
 ```bash
-python3 .plan/execute-script.py planning:manage-references:create \
+python3 .plan/execute-script.py planning:manage-references:manage-references create \
   --plan-id {plan_id} \
   --branch {branch} \
   --issue-url {issue_url}
@@ -179,7 +179,7 @@ python3 .plan/execute-script.py planning:manage-references:create \
 Log the plan creation as an artifact:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type artifact \
@@ -215,7 +215,7 @@ next: plan-configure-agent
 On any error, **first log the error** to work-log (if plan directory exists):
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type error \

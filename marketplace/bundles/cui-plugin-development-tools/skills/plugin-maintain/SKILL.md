@@ -85,7 +85,7 @@ Read: references/component-update-guide.md
 Run component analysis:
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:analyze --component {component_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:maintain analyze --component {component_path}
 ```
 
 Parse JSON output to understand:
@@ -107,7 +107,7 @@ Check that proposed improvements:
 Use `maintain.py update` or Edit tool to apply changes:
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:update --component {component_path} --updates '{"updates": [...]}'
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:maintain update --component {component_path} --updates '{"updates": [...]}'
 ```
 
 Or use Edit tool for precise modifications.
@@ -165,7 +165,7 @@ If file: Read the file
 #### Step 4: Check for Duplication
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:check-duplication --skill-path {skill_path} --content-file {content_file}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:maintain check-duplication --skill-path {skill_path} --content-file {content_file}
 ```
 
 Parse JSON output:
@@ -225,7 +225,7 @@ Read: references/readme-maintenance-guide.md
 For each bundle:
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:readme --bundle-path {bundle_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:maintain readme --bundle-path {bundle_path}
 ```
 
 Parse JSON output for:
@@ -285,7 +285,7 @@ Read: references/refactoring-strategies-guide.md
 For each component in scope:
 
 ```bash
-python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:analyze --component {component_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-maintain:maintain analyze --component {component_path}
 ```
 
 Identify:

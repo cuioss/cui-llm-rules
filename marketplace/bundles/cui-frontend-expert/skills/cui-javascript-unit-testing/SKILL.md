@@ -162,11 +162,11 @@ Analyzes existing test coverage reports (Jest/Istanbul JSON or LCOV format) and 
    Script: `cui-frontend-expert:cui-javascript-unit-testing` → `js-coverage.py`
 
    ```bash
-   python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:analyze --report coverage/coverage-summary.json
+   python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:js-coverage analyze --report coverage/coverage-summary.json
    # Or for LCOV format:
-   python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:analyze --report coverage/lcov.info --format lcov
+   python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:js-coverage analyze --report coverage/lcov.info --format lcov
    # With custom threshold:
-   python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:analyze --report coverage/coverage-summary.json --threshold 80
+   python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:js-coverage analyze --report coverage/coverage-summary.json --threshold 80
    ```
 
 3. **Process results**

@@ -37,7 +37,7 @@ All finalize configuration is read from config.toon (written during configure):
 Script: `planning:manage-config`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:get-multi \
+python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -62,7 +62,7 @@ Returns only the required finalize fields in a single call.
 ### Step 0: Log Phase Start
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase finalize \
   --type progress \
@@ -72,7 +72,7 @@ python3 .plan/execute-script.py planning:manage-log:add \
 ### Step 1: Read Configuration
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:get-multi \
+python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -84,7 +84,7 @@ Also read references context for branch and issue information:
 Script: `planning:manage-references`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:get-context \
+python3 .plan/execute-script.py planning:manage-references:manage-references get-context \
   --plan-id {plan_id}
 ```
 
@@ -93,7 +93,7 @@ Returns: `branch`, `base_branch`, `issue_url`, `build_system`, and file counts i
 **After reading configuration**, log the finalize strategy decision:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase finalize \
   --type decision \
@@ -167,7 +167,7 @@ Transition to complete:
 Script: `planning:manage-lifecycle`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lifecycle:transition \
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \
   --plan-id {plan_id} \
   --completed finalize
 ```
@@ -175,7 +175,7 @@ python3 .plan/execute-script.py planning:manage-lifecycle:transition \
 ### Step 7: Log Completion
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase finalize \
   --type outcome \
@@ -220,7 +220,7 @@ recovery: {recovery_suggestion}
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase finalize \
   --type error \

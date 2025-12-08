@@ -115,7 +115,7 @@ npm run test > target/npm-output-2025-11-26-143022.log 2>&1
 
 **Custom timeouts:**
 ```bash
-python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "run test:e2e" --timeout 300000
+python3 .plan/execute-script.py builder:builder-npm-rules:npm execute --command "run test:e2e" --timeout 300000
 ```
 
 ### Exit Code Interpretation
@@ -210,7 +210,7 @@ Commands execute from project root by default.
 For projects with nested frontend directories:
 
 ```bash
-python3 .plan/execute-script.py builder:builder-npm-rules:execute \
+python3 .plan/execute-script.py builder:builder-npm-rules:npm execute \
     --command "run test" \
     --working-dir frontend/
 ```

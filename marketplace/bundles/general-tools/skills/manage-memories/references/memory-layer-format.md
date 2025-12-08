@@ -73,7 +73,7 @@ Session context snapshots. Short-lived, typically cleaned up after days.
 Creates or updates a memory file. Directories are created on-the-fly.
 
 ```bash
-python3 .plan/execute-script.py general-tools:manage-memories:save \
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory save \
   --category context \
   --identifier "feature-auth" \
   --content '{"decisions": ["Use JWT"]}'
@@ -86,7 +86,7 @@ For `context` category, date prefix is auto-added.
 Retrieves memory file content.
 
 ```bash
-python3 .plan/execute-script.py general-tools:manage-memories:load \
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory load \
   --category context \
   --identifier "task-42"
 ```
@@ -96,7 +96,7 @@ python3 .plan/execute-script.py general-tools:manage-memories:load \
 Lists files in category.
 
 ```bash
-python3 .plan/execute-script.py general-tools:manage-memories:list \
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory list \
   --category context \
   --since 7d
 ```
@@ -106,7 +106,7 @@ python3 .plan/execute-script.py general-tools:manage-memories:list \
 Finds files by pattern.
 
 ```bash
-python3 .plan/execute-script.py general-tools:manage-memories:query \
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory query \
   --pattern "auth*" \
   --category context
 ```
@@ -116,7 +116,7 @@ python3 .plan/execute-script.py general-tools:manage-memories:query \
 Removes old files.
 
 ```bash
-python3 .plan/execute-script.py general-tools:manage-memories:cleanup \
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory cleanup \
   --category context \
   --older-than 7d
 ```

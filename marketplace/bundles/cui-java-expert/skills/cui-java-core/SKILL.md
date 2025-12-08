@@ -465,7 +465,7 @@ Analyze LOGGER usage in Java files and detect violations of CUI logging standard
    Script: `cui-java-expert:cui-java-core` → `java-core.py`
 
    ```bash
-   python3 .plan/execute-script.py cui-java-expert:cui-java-core:analyze-logging --directory {target}
+   python3 .plan/execute-script.py cui-java-expert:cui-java-core:java-core analyze-logging --directory {target}
    ```
 
 4. **Parse Results**
@@ -557,7 +557,7 @@ Generate AsciiDoc documentation for LogMessages holder classes.
    Script: `cui-java-expert:cui-java-core` → `java-core.py`
 
    ```bash
-   python3 .plan/execute-script.py cui-java-expert:cui-java-core:document-logrecord --holder {holder_class} --output {output_file}
+   python3 .plan/execute-script.py cui-java-expert:cui-java-core:java-core document-logrecord --holder {holder_class} --output {output_file}
    ```
 
 4. **Parse Results**
@@ -636,7 +636,7 @@ Verify that implementation task description is clear and the build is clean befo
    Script: `cui-java-expert:cui-java-core` → `java-core.py`
 
    ```bash
-   python3 .plan/execute-script.py cui-java-expert:cui-java-core:verify-params --description "{description}"
+   python3 .plan/execute-script.py cui-java-expert:cui-java-core:java-core verify-params --description "{description}"
    ```
 
    Parse JSON output:

@@ -116,16 +116,16 @@ Analyzes JavaScript files for JSDoc compliance violations and returns structured
 
    ```bash
    # Analyze entire directory
-   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:analyze --directory src/
+   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:jsdoc analyze --directory src/
 
    # Analyze single file
-   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:analyze --file src/utils/formatter.js
+   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:jsdoc analyze --file src/utils/formatter.js
 
    # Analyze only for missing JSDoc (skip syntax checks)
-   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:analyze --directory src/ --scope missing
+   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:jsdoc analyze --directory src/ --scope missing
 
    # Analyze only JSDoc syntax issues
-   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:analyze --directory src/ --scope syntax
+   python3 .plan/execute-script.py cui-frontend-expert:cui-jsdoc:jsdoc analyze --directory src/ --scope syntax
    ```
 
 2. **Process violation results**

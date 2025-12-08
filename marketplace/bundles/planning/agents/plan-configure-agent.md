@@ -54,7 +54,7 @@ When the skill says `--field` parameter:
 - ❌ WRONG: `--key target_bundle` (parameter name mismatch)
 
 When the skill says `planning:manage-references`:
-- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-references:set`
+- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-references:manage-references set`
 - ❌ WRONG: `python3 .plan/execute-script.py planning:plan-references:set`
 - ❌ WRONG: `python3 {script_path} set` (old notation)
 

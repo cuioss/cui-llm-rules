@@ -47,7 +47,7 @@ Log the start of the configure step (part of init phase):
 Script: `planning:manage-log`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type progress \
@@ -61,7 +61,7 @@ Read the original task input from task.md:
 Script: `planning:manage-files`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:read \
+python3 .plan/execute-script.py planning:manage-files:manage-files read \
   --plan-id {plan_id} \
   --file task.md
 ```
@@ -96,7 +96,7 @@ For each identified requirement, create via manage-requirements:
 Script: `planning:manage-requirements`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-requirements:add \
+python3 .plan/execute-script.py planning:manage-requirements:manage-requirement add \
   --plan-id {plan_id} \
   --title "Requirement title" \
   --body "Detailed requirement description"
@@ -107,7 +107,7 @@ Creates: `requirements/REQ-001-{slug}.toon`, `REQ-002-...`, etc.
 **After each requirement**, log the artifact:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type artifact \
@@ -151,7 +151,7 @@ AskUserQuestion:
 **After detecting plan type**, log the decision with reasoning:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type decision \
@@ -166,7 +166,7 @@ Create status.toon with detected plan type and phases. This must happen before c
 Script: `planning:manage-lifecycle`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lifecycle:create \
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle create \
   --plan-id {plan_id} \
   --title "{title_from_task_md}" \
   --plan-type {plan_type} \
@@ -185,7 +185,7 @@ Create config.toon with base settings:
 Script: `planning:manage-config`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:create \
+python3 .plan/execute-script.py planning:manage-config:manage-config create \
   --plan-id {plan_id} \
   --plan-type {plan_type}
 ```
@@ -220,7 +220,7 @@ Use manage-lifecycle to track:
 Script: `planning:manage-lifecycle`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lifecycle:transition \
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \
   --plan-id {plan_id} \
   --completed init
 ```
@@ -230,7 +230,7 @@ python3 .plan/execute-script.py planning:manage-lifecycle:transition \
 Log the outcome of the init phase (configure step complete):
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type outcome \
@@ -300,7 +300,7 @@ On script failure:
 1. **Log the error** to work-log:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase init \
   --type error \

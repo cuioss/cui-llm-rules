@@ -50,7 +50,7 @@ These constraints apply EVEN IF skill loading fails:
 
 ### SCRIPT NOTATION VERIFICATION
 When the skill says `planning:manage-files`:
-- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-files:read`
+- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-files:manage-files read`
 - ❌ WRONG: `python3 .plan/execute-script.py planning:plan-files:read` (skill name mismatch)
 - ❌ WRONG: `python3 {script_path} read` (old notation)
 

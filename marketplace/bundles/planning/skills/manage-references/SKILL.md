@@ -77,7 +77,7 @@ Script: `planning:manage-references`
 Create references.toon with basic fields. Plan-type-specific fields are added later by `plan-type-*:configure`.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:create \
+python3 .plan/execute-script.py planning:manage-references:manage-references create \
   --plan-id {plan_id} \
   --branch {branch_name} \
   [--issue-url {url}] \
@@ -106,7 +106,7 @@ fields[5]:
 Read entire references.toon content.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:read \
+python3 .plan/execute-script.py planning:manage-references:manage-references read \
   --plan-id {plan_id}
 ```
 
@@ -126,7 +126,7 @@ references:
 Get a specific field value.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:get \
+python3 .plan/execute-script.py planning:manage-references:manage-references get \
   --plan-id {plan_id} \
   --field branch
 ```
@@ -144,7 +144,7 @@ value: feature/my-feature
 Set a specific field value.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:set \
+python3 .plan/execute-script.py planning:manage-references:manage-references set \
   --plan-id {plan_id} \
   --field branch \
   --value feature/new-branch
@@ -164,7 +164,7 @@ previous: feature/my-feature
 Add a file to modified_files list.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:add-file \
+python3 .plan/execute-script.py planning:manage-references:manage-references add-file \
   --plan-id {plan_id} \
   --file src/main/java/NewClass.java
 ```
@@ -183,7 +183,7 @@ total: 4
 Remove a file from modified_files list.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-references:remove-file \
+python3 .plan/execute-script.py planning:manage-references:manage-references remove-file \
   --plan-id {plan_id} \
   --file src/main/java/OldClass.java
 ```

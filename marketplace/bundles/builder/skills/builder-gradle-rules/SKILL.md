@@ -46,7 +46,7 @@ Script: `builder:builder-gradle-rules` → `gradle.py`
    Script: `builder:builder-gradle-rules`
 
    ```bash
-   python3 .plan/execute-script.py builder:builder-gradle-rules:execute \
+   python3 .plan/execute-script.py builder:builder-gradle-rules:gradle execute \
        --tasks "{tasks}" \
        --project {project} \
        --skip-tests \
@@ -59,7 +59,7 @@ Script: `builder:builder-gradle-rules` → `gradle.py`
    Script: `builder:builder-gradle-rules`
 
    ```bash
-   python3 .plan/execute-script.py builder:builder-gradle-rules:parse \
+   python3 .plan/execute-script.py builder:builder-gradle-rules:gradle parse \
        --log {log_file from step 1} \
        --mode {output_mode}
    ```
@@ -116,7 +116,7 @@ Script: `builder:builder-gradle-rules` → `gradle.py`
 Script: `builder:builder-gradle-rules`
 
 ```bash
-python3 .plan/execute-script.py builder:builder-gradle-rules:parse --log <path> --mode <mode>
+python3 .plan/execute-script.py builder:builder-gradle-rules:gradle parse --log <path> --mode <mode>
 ```
 
 **Output Modes**:
@@ -159,10 +159,10 @@ Script: `builder:builder-gradle-rules`
 
 ```bash
 # Search by project name
-python3 .plan/execute-script.py builder:builder-gradle-rules:find-project --project-name {project_name}
+python3 .plan/execute-script.py builder:builder-gradle-rules:gradle find-project --project-name {project_name}
 
 # Validate explicit path
-python3 .plan/execute-script.py builder:builder-gradle-rules:find-project --project-path {project_path}
+python3 .plan/execute-script.py builder:builder-gradle-rules:gradle find-project --project-path {project_path}
 ```
 
 **Success Response**:
@@ -204,7 +204,7 @@ python3 .plan/execute-script.py builder:builder-gradle-rules:find-project --proj
 Script: `builder:builder-gradle-rules`
 
 ```bash
-python3 .plan/execute-script.py builder:builder-gradle-rules:search-markers \
+python3 .plan/execute-script.py builder:builder-gradle-rules:gradle search-markers \
     --source-dir {source_dir} \
     --extensions {extensions}
 ```
@@ -256,7 +256,7 @@ python3 .plan/execute-script.py builder:builder-gradle-rules:search-markers \
    Script: `builder:builder-gradle-rules`
 
    ```bash
-   python3 .plan/execute-script.py builder:builder-gradle-rules:check-warnings \
+   python3 .plan/execute-script.py builder:builder-gradle-rules:gradle check-warnings \
        --warnings '{issues_json}' \
        --acceptable-warnings '{patterns_json}'
    ```

@@ -93,7 +93,7 @@ If no message:
   Script: `planning:git-workflow`
 
   ```bash
-  python3 .plan/execute-script.py planning:git-workflow:analyze-diff --file <diff-file>
+  python3 .plan/execute-script.py planning:git-workflow:git-workflow analyze-diff --file <diff-file>
   ```
 - Generate message following standards
 
@@ -156,7 +156,7 @@ Script: `planning:git-workflow` → `git-workflow.py`
 
 **Usage:**
 ```bash
-python3 .plan/execute-script.py planning:git-workflow:format-commit --type feat --scope http --subject "add retry config"
+python3 .plan/execute-script.py planning:git-workflow:git-workflow format-commit --type feat --scope http --subject "add retry config"
 ```
 
 **Output:** JSON with formatted message and validation
@@ -167,7 +167,7 @@ python3 .plan/execute-script.py planning:git-workflow:format-commit --type feat 
 
 **Usage:**
 ```bash
-python3 .plan/execute-script.py planning:git-workflow:analyze-diff --file <diff-file>
+python3 .plan/execute-script.py planning:git-workflow:git-workflow analyze-diff --file <diff-file>
 ```
 
 **Output:** JSON with commit type, scope, and subject suggestions

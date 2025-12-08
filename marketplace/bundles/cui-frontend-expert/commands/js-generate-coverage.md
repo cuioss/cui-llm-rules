@@ -35,7 +35,7 @@ npm run test:coverage --workspace={workspace} > target/npm-coverage-output.log 2
 
 **Parse build output (if needed):**
 ```bash
-python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-project:parse-npm-output \
+python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-project:npm-output parse-npm-output \
     --log target/npm-coverage-output.log --mode structured
 ```
 
@@ -51,9 +51,9 @@ Execute workflow: Analyze Coverage
 
 Or run script directly:
 ```bash
-python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:analyze --report coverage/coverage-summary.json
+python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:js-coverage analyze --report coverage/coverage-summary.json
 # Or for LCOV format:
-python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:analyze --report coverage/lcov.info --format lcov
+python3 .plan/execute-script.py cui-frontend-expert:cui-javascript-unit-testing:js-coverage analyze --report coverage/lcov.info --format lcov
 ```
 
 Script returns structured JSON with overall_coverage, by_file, and low_coverage_files.

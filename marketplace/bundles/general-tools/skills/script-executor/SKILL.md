@@ -27,13 +27,13 @@ Simplified notation: `{bundle}:{skill}`
 
 ```bash
 # File operations
-python3 .plan/execute-script.py planning:manage-files add --plan-id my-plan --file task.md
+python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan --file task.md
 
 # Build operations
-python3 .plan/execute-script.py builder:builder-maven-rules execute --goals clean,verify
+python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals clean,verify
 
 # Config operations
-python3 .plan/execute-script.py planning:manage-config set --plan-id my-plan --key foo --value bar
+python3 .plan/execute-script.py planning:manage-config:manage-config set --plan-id my-plan --key foo --value bar
 ```
 
 ## Error Handling

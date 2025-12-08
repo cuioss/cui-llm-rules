@@ -50,7 +50,7 @@ For finalize phase, read finalize configuration directly from config.toon:
 Script: `planning:manage-config`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-config:get-multi \
+python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
   --plan-id {plan_id} \
   --fields create_pr,verification_required,verification_command,branch_strategy
 ```
@@ -70,7 +70,7 @@ Get current phase, skill routing, and progress in a single call:
 Script: `planning:manage-lifecycle`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lifecycle:get-routing-context \
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle get-routing-context \
   --plan-id {plan_id}
 ```
 
@@ -99,7 +99,7 @@ At the start of execute or finalize phase:
 Script: `planning:manage-log`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type progress \
@@ -113,7 +113,7 @@ For each task in current phase:
 Script: `planning:manage-tasks`
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:next \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task next \
   --plan-id {plan_id} \
   --include-context
 ```
@@ -144,7 +144,7 @@ python3 .plan/execute-script.py planning:plan-execute:update-progress \
 After each task completes:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type artifact \
@@ -161,7 +161,7 @@ python3 .plan/execute-script.py planning:manage-log:add \
 ### Step 5: Log Phase Completion (When phase completes)
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type outcome \
@@ -211,7 +211,7 @@ When transitioning from execute phase to finalize, `transition-phase.py` automat
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-log:add \
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase {phase} \
   --type error \

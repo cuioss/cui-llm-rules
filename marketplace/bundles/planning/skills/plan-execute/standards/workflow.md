@@ -56,7 +56,7 @@ For each `- [ ]` item:
 
 After each item completion:
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:update --plan-id {plan_id} --task-id {task_id} --complete-items "{item}"
+python3 .plan/execute-script.py planning:manage-tasks:manage-task update --plan-id {plan_id} --task-id {task_id} --complete-items "{item}"
 ```
 
 ## Phase Transition
@@ -67,7 +67,7 @@ When all tasks in phase complete:
    - `manage-lifecycle transition` collects modified files
    - Updates `references.toon` with changed files
    ```bash
-   python3 .plan/execute-script.py planning:manage-lifecycle:transition --plan-id {plan_id} --completed {phase}
+   python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition --plan-id {plan_id} --completed {phase}
    ```
 
 2. **Auto-transition** to next phase:

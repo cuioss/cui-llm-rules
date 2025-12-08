@@ -118,7 +118,7 @@ Script: `planning:manage-tasks`
 Add a new task file (creates directory if needed).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:add \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
   --specification SPEC-1 \
   --title "Implement JWT Service" \
@@ -146,7 +146,7 @@ task:
 Update task metadata (not steps - use step operations for that).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:update \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task update \
   --plan-id {plan_id} \
   --number 1 \
   [--title "New title"] \
@@ -159,7 +159,7 @@ python3 .plan/execute-script.py planning:manage-tasks:update \
 Remove a task file (keeps gaps in numbering).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:remove \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task remove \
   --plan-id {plan_id} \
   --number 1
 ```
@@ -169,7 +169,7 @@ python3 .plan/execute-script.py planning:manage-tasks:remove \
 List all tasks with summary.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:list \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task list \
   --plan-id {plan_id} \
   [--status pending|in_progress|done|blocked|all] \
   [--specification SPEC-1]
@@ -198,7 +198,7 @@ tasks[3]{number,title,specification,status,progress}:
 Get a single task with full details.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:get \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task get \
   --plan-id {plan_id} \
   --number 2
 ```
@@ -229,7 +229,7 @@ task:
 Get the next pending task or step (for execution).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:next \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task next \
   --plan-id {plan_id}
 ```
 
@@ -274,7 +274,7 @@ context:
 Mark a step as in_progress (also marks task as in_progress).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:step-start \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task step-start \
   --plan-id {plan_id} \
   --task 2 \
   --step 2
@@ -297,7 +297,7 @@ step_title: Add request/response DTOs
 Mark a step as completed.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:step-done \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task step-done \
   --plan-id {plan_id} \
   --task 2 \
   --step 2
@@ -334,7 +334,7 @@ message: Task completed
 Skip a step (mark as skipped, move to next).
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:step-skip \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task step-skip \
   --plan-id {plan_id} \
   --task 2 \
   --step 2 \
@@ -346,7 +346,7 @@ python3 .plan/execute-script.py planning:manage-tasks:step-skip \
 Add a new step to an existing task.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:add-step \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task add-step \
   --plan-id {plan_id} \
   --task 2 \
   --title "Add error handling" \
@@ -358,7 +358,7 @@ python3 .plan/execute-script.py planning:manage-tasks:add-step \
 Remove a step from a task.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:remove-step \
+python3 .plan/execute-script.py planning:manage-tasks:manage-task remove-step \
   --plan-id {plan_id} \
   --task 2 \
   --step 3

@@ -103,15 +103,15 @@ All agents return JSON with status, data, and metrics. Explicit error paths and 
 All marketplace scripts are executed via the executor:
 
 ```bash
-python3 .plan/execute-script.py {notation} {subcommand} {args...}
+python3 .plan/execute-script.py {notation} [subcommand] {args...}
 ```
 
-**Notation format**: `{bundle}:{skill}` (e.g., `planning:manage-files`)
+**Notation format**: `{bundle}:{skill}:{script}` (e.g., `planning:manage-files:manage-files`)
 
 **Examples**:
-- `python3 .plan/execute-script.py planning:manage-files add --plan-id my-plan --file task.md`
-- `python3 .plan/execute-script.py builder:builder-maven-rules execute --goals verify`
-- `python3 .plan/execute-script.py planning:manage-config set --plan-id my-plan --key foo --value bar`
+- `python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan --file task.md`
+- `python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals verify`
+- `python3 .plan/execute-script.py planning:manage-config:manage-config set --plan-id my-plan --key foo --value bar`
 
 **Executor features**:
 - Embedded script mappings (no runtime file I/O)

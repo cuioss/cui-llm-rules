@@ -54,7 +54,7 @@ Script: `planning:manage-files`
 Read file content from a plan directory.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:read \
+python3 .plan/execute-script.py planning:manage-files:manage-files read \
   --plan-id {plan_id} \
   --file task.md
 ```
@@ -66,7 +66,7 @@ python3 .plan/execute-script.py planning:manage-files:read \
 Write content to a file in a plan directory.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:write \
+python3 .plan/execute-script.py planning:manage-files:manage-files write \
   --plan-id {plan_id} \
   --file task.md \
   --content "# Task Title\n\nTask description..."
@@ -74,7 +74,7 @@ python3 .plan/execute-script.py planning:manage-files:write \
 
 Or with stdin:
 ```bash
-cat content.md | python3 .plan/execute-script.py planning:manage-files:write \
+cat content.md | python3 .plan/execute-script.py planning:manage-files:manage-files write \
   --plan-id {plan_id} \
   --file task.md \
   --stdin
@@ -87,7 +87,7 @@ cat content.md | python3 .plan/execute-script.py planning:manage-files:write \
 Remove a file from a plan directory.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:remove \
+python3 .plan/execute-script.py planning:manage-files:manage-files remove \
   --plan-id {plan_id} \
   --file old-file.md
 ```
@@ -99,7 +99,7 @@ python3 .plan/execute-script.py planning:manage-files:remove \
 List files in a plan directory.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:list \
+python3 .plan/execute-script.py planning:manage-files:manage-files list \
   --plan-id {plan_id} \
   [--dir subdir]
 ```
@@ -111,7 +111,7 @@ python3 .plan/execute-script.py planning:manage-files:list \
 Check if a file exists.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:exists \
+python3 .plan/execute-script.py planning:manage-files:manage-files exists \
   --plan-id {plan_id} \
   --file config.toon
 ```
@@ -123,7 +123,7 @@ python3 .plan/execute-script.py planning:manage-files:exists \
 Create a subdirectory in a plan directory.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:mkdir \
+python3 .plan/execute-script.py planning:manage-files:manage-files mkdir \
   --plan-id {plan_id} \
   --dir requirements
 ```
@@ -135,7 +135,7 @@ python3 .plan/execute-script.py planning:manage-files:mkdir \
 Create a plan directory if it doesn't exist, or reference an existing one. This is an atomic operation that replaces the two-step pattern of listing plans and checking for conflicts.
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:create-or-reference \
+python3 .plan/execute-script.py planning:manage-files:manage-files create-or-reference \
   --plan-id {plan_id}
 ```
 

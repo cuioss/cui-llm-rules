@@ -169,7 +169,7 @@ A warning can be marked as acceptable if ALL of these are true:
 ### Warning Categorization Script
 
 ```bash
-python3 .plan/execute-script.py builder:builder-gradle-rules:check-acceptable-warnings \
+python3 .plan/execute-script.py builder:builder-gradle-rules:gradle check-acceptable-warnings \
     --warnings '{issues_json}' \
     --acceptable-warnings '{patterns_json}'
 ```

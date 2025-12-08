@@ -71,19 +71,19 @@ Parse JSON output and handle accordingly.
 
 ```bash
 # Save context snapshot (directories created on-the-fly)
-python3 .plan/execute-script.py general-tools:manage-memories:save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory save --category context --identifier "feature-auth" --content '{"notes": "Working on auth feature"}'
 
 # Load memory file
-python3 .plan/execute-script.py general-tools:manage-memories:load --category context --identifier "2025-12-02-feature-auth"
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory load --category context --identifier "2025-12-02-feature-auth"
 
 # List context files from last 7 days
-python3 .plan/execute-script.py general-tools:manage-memories:list --category context --since 7d
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory list --category context --since 7d
 
 # Find files matching pattern
-python3 .plan/execute-script.py general-tools:manage-memories:query --pattern "auth*" --category context
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory query --pattern "auth*" --category context
 
 # Cleanup old context files
-python3 .plan/execute-script.py general-tools:manage-memories:cleanup --category context --older-than 7d
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory cleanup --category context --older-than 7d
 ```
 
 ---
@@ -103,7 +103,7 @@ Validate memory file format and structure.
 Script: `general-tools:manage-memories`
 
 ```bash
-python3 .plan/execute-script.py general-tools:manage-memories:validate {file_path}
+python3 .plan/execute-script.py general-tools:manage-memories:manage-memory validate {file_path}
 ```
 
 ### Step 2: Process Result
