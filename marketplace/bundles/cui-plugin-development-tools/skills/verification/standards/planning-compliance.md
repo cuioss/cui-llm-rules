@@ -170,6 +170,63 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 After phase transitions or progress updates, verify status reflects correct state.
 
+### Rule 4: Script Execution via Executor (Mandatory)
+
+All marketplace script execution MUST use the universal executor pattern.
+
+**Required Pattern**:
+```bash
+python3 .plan/execute-script.py {notation} {subcommand} {args...}
+```
+
+**Notation Format**: `{bundle}:{skill}` (e.g., `planning:manage-files`)
+
+**Prohibited Operations** (direct script paths must use executor):
+
+| Tool | Prohibited Pattern | Correct Alternative |
+|------|-------------------|---------------------|
+| Bash | `python3 {script_path} {verb}` | `python3 .plan/execute-script.py {notation} {verb}` |
+| Bash | `python3 marketplace/.../script.py` | `python3 .plan/execute-script.py {notation}` |
+| Bash | `python3 {bundle}/scripts/foo.py` | `python3 .plan/execute-script.py {bundle}:{skill}` |
+
+**Why This Matters**:
+- **Execution logging**: All invocations are logged with timestamps and duration
+- **Notation consistency**: Single canonical way to reference scripts
+- **Error standardization**: Consistent error output format
+- **Cross-cutting features**: Enables future metrics, caching, etc.
+
+**Detection Pattern**:
+
+When you observe tool calls that directly execute scripts:
+
+```
+## PLANNING COMPLIANCE Violation Detected
+
+### Issue Detected
+Direct script execution bypassing execute-script.py
+
+### Context
+- **Operation**: Bash
+- **Target**: python3 {path}/manage-files.py add --plan-id my-plan
+- **Expected**: python3 .plan/execute-script.py planning:manage-files add --plan-id my-plan
+- **Actual**: Direct script path used
+
+### Root Cause Analysis
+Calling code is executing scripts directly instead of using the
+execute-script.py proxy. This bypasses:
+- Execution logging
+- Notation consistency
+- Error standardization
+- Cross-cutting features
+
+### Options
+1. **Use executor**: Replace direct path with executor notation
+2. **Update caller**: Fix the SKILL.md/agent/command documentation
+
+### Recommendation
+Use executor pattern - this is a design violation
+```
+
 **Status Verification Points**:
 
 | Trigger | What to Verify |
@@ -343,3 +400,37 @@ Expected output should show:
 - Work-log entry within last few seconds
 - Status current_phase matches expected
 - All files properly registered
+
+## Post-Run Verification: Executor Pattern
+
+After script operations complete, verify proper executor usage:
+
+**For plan-scoped operations** (when `--plan-id` was provided):
+```bash
+# Verify execution logged to plan
+tail -5 .plan/plans/{plan-id}/execution.log
+```
+
+**For global operations** (no plan context):
+```bash
+# Verify execution logged to daily global log
+tail -5 .plan/logs/script-execution-$(date +%Y-%m-%d).log
+```
+
+**Success entry format** (compact):
+```
+{timestamp}	{notation}	{subcommand}	0	{duration}
+```
+
+**Error entry format** (detailed):
+```
+{timestamp}	{notation}	{subcommand}	{exit_code}	{duration}	ERROR
+  args: {full argument list}
+  stderr: {error message}
+```
+
+Expected verification:
+- Timestamp is recent (within last few seconds)
+- Notation matches expected script
+- Exit code is 0 for success
+- For errors: args and stderr provide debugging context
