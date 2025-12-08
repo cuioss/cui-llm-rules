@@ -74,12 +74,11 @@ def get_log_file(args: list) -> Path:
 def format_success_entry(
     notation: str,
     subcommand: str,
-    exit_code: int,
     duration: float
 ) -> str:
     """Format a success log entry (compact)."""
     timestamp = datetime.now().isoformat()
-    return f"{timestamp}\t{notation}\t{subcommand}\t{exit_code}\t{duration:.2f}s\n"
+    return f"{timestamp}\tSUCCESS\t{notation}\t{subcommand}\t{duration:.2f}s\n"
 
 def format_error_entry(
     notation: str,
@@ -99,7 +98,7 @@ def format_error_entry(
 
     # Multi-line error entry with details
     lines = [
-        f"{timestamp}\t{notation}\t{subcommand}\t{exit_code}\t{duration:.2f}s\tERROR",
+        f"{timestamp}\tERROR({exit_code})\t{notation}\t{subcommand}\t{duration:.2f}s",
         f"  args: {' '.join(args)}",
     ]
 
@@ -136,7 +135,7 @@ def log_execution(
         log_file = get_log_file(args)
 
         if exit_code == 0:
-            entry = format_success_entry(notation, subcommand, exit_code, duration)
+            entry = format_success_entry(notation, subcommand, duration)
         else:
             entry = format_error_entry(
                 notation, subcommand, exit_code, duration,

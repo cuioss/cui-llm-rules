@@ -55,11 +55,10 @@ def test_extract_plan_id_empty_args():
 # =============================================================================
 
 def test_success_entry_format():
-    """Success entry is compact single-line."""
+    """Success entry is compact single-line with SUCCESS after timestamp."""
     entry = module.format_success_entry(
         notation='planning:manage-files',
         subcommand='add',
-        exit_code=0,
         duration=0.15
     )
 
@@ -68,22 +67,24 @@ def test_success_entry_format():
     assert len(lines) == 1, f"Expected 1 line, got {len(lines)}"
 
     # Should contain expected fields
+    assert 'SUCCESS' in entry, "Missing SUCCESS marker"
     assert 'planning:manage-files' in entry, "Missing notation"
     assert 'add' in entry, "Missing subcommand"
     assert '0.15s' in entry, "Missing duration"
 
 
 def test_success_entry_tab_separated():
-    """Success entry uses tab separators."""
+    """Success entry uses tab separators with SUCCESS as second field."""
     entry = module.format_success_entry(
         notation='test:skill',
         subcommand='verb',
-        exit_code=0,
         duration=1.0
     )
 
     parts = entry.strip().split('\t')
-    assert len(parts) >= 4, f"Expected at least 4 tab-separated parts, got {len(parts)}"
+    # Format: timestamp\tSUCCESS\tnotation\tsubcommand\tduration
+    assert len(parts) == 5, f"Expected 5 tab-separated parts, got {len(parts)}: {parts}"
+    assert parts[1] == 'SUCCESS', f"Expected 'SUCCESS' as second field, got '{parts[1]}'"
 
 
 # =============================================================================
@@ -91,7 +92,7 @@ def test_success_entry_tab_separated():
 # =============================================================================
 
 def test_error_entry_multiline():
-    """Error entry is multi-line with details."""
+    """Error entry is multi-line with ERROR(code) as second field."""
     entry = module.format_error_entry(
         notation='planning:manage-files',
         subcommand='add',
@@ -105,8 +106,9 @@ def test_error_entry_multiline():
     lines = entry.strip().split('\n')
     assert len(lines) >= 2, f"Expected at least 2 lines, got {len(lines)}"
 
-    # First line should have ERROR marker
-    assert 'ERROR' in lines[0], "Missing ERROR marker in first line"
+    # First line should have ERROR(exit_code) marker as second field
+    first_line_parts = lines[0].split('\t')
+    assert first_line_parts[1] == 'ERROR(1)', f"Expected 'ERROR(1)' as second field, got '{first_line_parts[1]}'"
 
     # Should include args
     assert any('args:' in line for line in lines), "Missing args line"

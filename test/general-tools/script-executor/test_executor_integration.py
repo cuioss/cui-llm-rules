@@ -280,7 +280,7 @@ def test_successful_execution_logged():
     # Check log was created
     log_content = env.get_log_content()
     assert 'planning:manage-config' in log_content, f"Missing log entry. Log content: {log_content}"
-    assert '\t0\t' in log_content, f"Expected exit code 0 in log: {log_content}"
+    assert '\tSUCCESS\t' in log_content, f"Expected SUCCESS marker in log: {log_content}"
 
 
 def test_log_format_success_compact():
@@ -293,13 +293,14 @@ def test_log_format_success_compact():
     log_content = env.get_log_content()
 
     # Success entries should be single line with tab-separated fields
-    # Format: timestamp\tnotation\tsubcommand\texit_code\tduration
+    # Format: timestamp\tSUCCESS\tnotation\tsubcommand\tduration
     lines = [line for line in log_content.strip().split('\n') if 'planning:manage-config' in line]
     assert len(lines) >= 1, "No log entry found for planning:manage-config"
 
     entry = lines[0]
     fields = entry.split('\t')
-    assert len(fields) >= 5, f"Expected at least 5 tab-separated fields, got {len(fields)}: {entry}"
+    assert len(fields) == 5, f"Expected 5 tab-separated fields, got {len(fields)}: {entry}"
+    assert fields[1] == 'SUCCESS', f"Expected SUCCESS as second field, got: {fields[1]}"
 
     # Should NOT contain ERROR marker for success
     assert 'ERROR' not in entry, f"Success entry should not contain ERROR: {entry}"
@@ -345,9 +346,8 @@ def test_execute_script_that_fails():
     # Verify error was logged
     log_content = env.get_log_content()
     assert 'planning:manage-config' in log_content, f"Missing log entry for failed execution: {log_content}"
-    # Error entries have exit code != 0
-    assert '\t0\t' not in log_content or 'ERROR' in log_content, \
-        f"Expected non-zero exit code or ERROR in log: {log_content}"
+    # Error entries have ERROR(code) marker, not SUCCESS
+    assert 'ERROR(' in log_content, f"Expected ERROR marker in log: {log_content}"
 
 
 def test_error_execution_logged_with_details():
