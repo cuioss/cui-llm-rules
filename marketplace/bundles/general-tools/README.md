@@ -18,7 +18,7 @@ These utilities are independent tools that can be used across different CUI proj
 
 ## Components Included
 
-### Skills (9 skills)
+### Skills (10 skills)
 
 1. **diagnostic-patterns** - Tool usage patterns for non-prompting file operations
 2. **general-development-rules** - Core development principles for CUI projects
@@ -26,9 +26,10 @@ These utilities are independent tools that can be used across different CUI proj
 4. **manage-memories** - Memory layer operations for .plan/memory/ session persistence
 5. **manage-run-configuration** - Run configuration handling for .plan/run-configuration.json
 6. **permission-management** - Permission validation and settings management
-7. **script-runner** - Script resolution and execution with portable notation
-8. **toon-usage** - TOON format specification and usage patterns for agent communication (50% token reduction)
-9. **web-security-standards** - Trusted domains and security assessment patterns
+7. **script-executor** - Universal script execution via `.plan/execute-script.py` proxy
+8. **script-runner** - Script resolution and execution with portable notation (legacy)
+9. **toon-usage** - TOON format specification and usage patterns for agent communication (50% token reduction)
+10. **web-security-standards** - Trusted domains and security assessment patterns
 
 ### Agents (1 agent)
 
@@ -40,9 +41,15 @@ These utilities are independent tools that can be used across different CUI proj
    - Maintains complete reference trails
    - Invoked when user requests research, best practices, or topic investigation
 
-### Commands (7 commands)
+### Commands (8 commands)
 
-1. **audit-permission-wildcards** - Marketplace wildcard analyzer
+1. **plan-marshall** - Script executor generator
+   - Generates `.plan/execute-script.py` with embedded script mappings
+   - Generates `.plan/execution_log.py` logging module
+   - Cleans up old global execution logs (7 day retention)
+   - Usage: `/plan-marshall [--force] [--verify] [--dry-run]`
+
+2. **audit-permission-wildcards** - Marketplace wildcard analyzer
    - Analyzes marketplace bundles to identify required permission wildcard patterns
    - Generates minimal set of wildcards for all marketplace tools
    - Usage: `/tools-audit-permission-wildcards [--dry-run]`

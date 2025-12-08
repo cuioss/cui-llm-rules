@@ -198,8 +198,19 @@ standards/
 These checks apply ONLY when `scope: planning` is specified:
 
 **Allowed `.plan` Access** (NOT violations):
-- `.plan/scripts-library.toon` - Read for script path resolution (system convention)
+- `.plan/scripts-library.toon` - Read for script path resolution (legacy)
+- `.plan/execute-script.py` - Script executor with embedded mappings
+- `.plan/execution_log.py` - Execution logging module
+- `.plan/marshall-state.toon` - Executor generation metadata
+- `.plan/logs/script-execution-*.log` - Global execution logs
 - `.plan/lessons-learned/*.md` - Read/write via manage-lessons skill
+
+**Approved Script Execution Pattern**:
+```bash
+python3 .plan/execute-script.py {notation} {subcommand} {args...}
+```
+
+This is the preferred pattern for all marketplace script execution.
 
 **Prohibited `.plan/plans/**` Access** (violations):
 - Direct Read/Write/Edit of `.plan/plans/*/status.toon`

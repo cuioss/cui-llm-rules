@@ -98,23 +98,28 @@ Single interface for Maven/Gradle/npm with automatic environment detection. Cons
 ### Structured Contracts
 All agents return JSON with status, data, and metrics. Explicit error paths and partial success states enable iteration.
 
-### Script Resolution Convention
+### Script Execution Convention
 
-Skills contain Python scripts that implement operations. Scripts use portable notation for cross-bundle references:
+All marketplace scripts are executed via the executor:
 
-**Notation format**: `{bundle}:{skill}/scripts/{name}.{ext}`
+```bash
+python3 .plan/execute-script.py {notation} {subcommand} {args...}
+```
+
+**Notation format**: `{bundle}:{skill}` (e.g., `planning:manage-files`)
 
 **Examples**:
-- `planning:manage-files/scripts/manage-files.py`
-- `builder:builder-maven-rules/scripts/execute-maven-build.py`
+- `python3 .plan/execute-script.py planning:manage-files add --plan-id my-plan --file task.md`
+- `python3 .plan/execute-script.py builder:builder-maven-rules execute --goals verify`
+- `python3 .plan/execute-script.py planning:manage-config set --plan-id my-plan --key foo --value bar`
 
-**Resolution**: When executing scripts with portable notation, resolve the absolute path from `.plan/scripts-library.toon`:
+**Executor features**:
+- Embedded script mappings (no runtime file I/O)
+- Notation-to-path resolution
+- Two-tier execution logging (plan-scoped or global)
+- Error standardization
 
-1. Read `.plan/scripts-library.toon`
-2. Look up notation in `scripts` table
-3. Use the `absolute` path in bash commands
-
-**Cache generation**: Run `/tools-discover-skill-scripts` to regenerate the scripts library after adding or moving scripts.
+**Setup**: Run `/plan-marshall` after bundle changes to regenerate the executor with updated mappings.
 
 ## Working in This Repository
 

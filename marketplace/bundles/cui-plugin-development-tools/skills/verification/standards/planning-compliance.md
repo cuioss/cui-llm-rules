@@ -21,10 +21,29 @@ Some `.plan` files are designed for direct access:
 
 | File | Access | Purpose |
 |------|--------|---------|
-| `.plan/scripts-library.toon` | Read | Script path resolution (system convention) |
+| `.plan/scripts-library.toon` | Read | Script path resolution (legacy) |
+| `.plan/execute-script.py` | Execute | Universal script executor with embedded mappings |
+| `.plan/execution_log.py` | Import | Execution logging module |
+| `.plan/marshall-state.toon` | Read/Write | Executor generation metadata |
+| `.plan/logs/script-execution-*.log` | Append | Global execution logs |
 | `.plan/lessons-learned/*.md` | Read/Write | Lessons learned via manage-lessons skill |
 
 These are NOT violations and should not trigger compliance alerts.
+
+**Approved Script Execution Pattern**:
+
+All marketplace scripts should be executed via the executor:
+
+```bash
+python3 .plan/execute-script.py {notation} {subcommand} {args...}
+```
+
+Examples:
+- `python3 .plan/execute-script.py planning:manage-files add --plan-id my-plan`
+- `python3 .plan/execute-script.py builder:builder-maven-rules execute --goals verify`
+
+**Violation** (after executor migration complete):
+- Direct script execution: `python3 /path/to/script.py {args}` (bypasses logging and standardization)
 
 ### Rule 1: No Direct .plan/plans/** Access
 
