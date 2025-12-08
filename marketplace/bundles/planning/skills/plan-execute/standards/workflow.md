@@ -50,13 +50,13 @@ For each `- [ ]` item:
 1. **Parse** - Understand what action is needed
 2. **Delegate** - If item specifies agent/skill/command, invoke it
 3. **Execute** - Perform the action
-4. **Update** - Mark item `[x]` via update-progress.py
+4. **Update** - Mark item `[x]` via manage-tasks script
 
 ### Progress Update
 
 After each item completion:
 ```bash
-python3 update-progress.py --plan-dir {dir} --phase {phase} --task-id {task} --complete-items "{item}"
+python3 .plan/execute-script.py planning:manage-tasks:update --plan-id {plan_id} --task-id {task_id} --complete-items "{item}"
 ```
 
 ## Phase Transition
@@ -64,8 +64,11 @@ python3 update-progress.py --plan-dir {dir} --phase {phase} --task-id {task} --c
 When all tasks in phase complete:
 
 1. **Automatic file collection** (execute phase):
-   - `transition-phase.py` runs `collect-modified-files.py`
+   - `manage-lifecycle transition` collects modified files
    - Updates `references.toon` with changed files
+   ```bash
+   python3 .plan/execute-script.py planning:manage-lifecycle:transition --plan-id {plan_id} --completed {phase}
+   ```
 
 2. **Auto-transition** to next phase:
    - execute → finalize
