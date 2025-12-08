@@ -133,7 +133,7 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 1. After operation completes, query work-log:
    ```bash
-   python3 {script_path} list --plan-id {plan_id} --limit 5
+   python3 .plan/execute-script.py planning:manage-log:list --plan-id {plan_id} --limit 5
    ```
 
 2. Verify most recent entry matches operation:
@@ -184,7 +184,7 @@ After phase transitions or progress updates, verify status reflects correct stat
 
 1. After phase-affecting operation, query status:
    ```bash
-   python3 {script_path} read --plan-id {plan_id}
+   python3 .plan/execute-script.py planning:manage-lifecycle:read --plan-id {plan_id}
    ```
 
 2. Verify status consistency:
@@ -331,13 +331,13 @@ Use this verification pattern after major operations:
 
 ```bash
 # Verify work-log has recent entry
-python3 manage-work-log.py list --plan-id {plan_id} --limit 1
+python3 .plan/execute-script.py planning:manage-log:list --plan-id {plan_id} --limit 1
 
 # Verify status is consistent
-python3 manage-lifecycle.py read --plan-id {plan_id}
+python3 .plan/execute-script.py planning:manage-lifecycle:read --plan-id {plan_id}
 
 # Verify no orphaned files (optional)
-python3 manage-files.py list --plan-id {plan_id}
+python3 .plan/execute-script.py planning:manage-files:list --plan-id {plan_id}
 ```
 
 Expected output should show:

@@ -36,7 +36,7 @@ scripts_library = .plan/scripts-library.toon
 
 **A. Detect redundant permissions (local vs global):**
 ```bash
-python3 {permission.py} detect-redundant \
+python3 .plan/execute-script.py general-tools:permission-management:detect-redundant \
   --global-settings {global_settings} \
   --local-settings {local_settings}
 ```
@@ -45,7 +45,7 @@ Parse result: `redundant[]`, `marketplace_in_local[]`
 
 **B. Detect suspicious permissions:**
 ```bash
-python3 {permission.py} detect-suspicious \
+python3 .plan/execute-script.py general-tools:permission-management:detect-suspicious \
   --settings {local_settings}
 ```
 
@@ -78,13 +78,13 @@ For each suspicious permission not in `already_approved`:
 
 **A. Consolidate build outputs:**
 ```bash
-python3 {permission.py} consolidate \
+python3 .plan/execute-script.py general-tools:permission-management:consolidate \
   --settings {local_settings}
 ```
 
 **B. Ensure marketplace wildcards in global:**
 ```bash
-python3 {permission.py} ensure-wildcards \
+python3 .plan/execute-script.py general-tools:permission-management:ensure-wildcards \
   --settings {global_settings} \
   --marketplace-json {marketplace_json}
 ```
@@ -93,7 +93,7 @@ python3 {permission.py} ensure-wildcards \
 
 If `scripts_library` exists, sync script permissions:
 ```bash
-python3 {permission.py} apply \
+python3 .plan/execute-script.py general-tools:permission-management:apply \
   --action sync-scripts \
   --scripts-file {scripts_library} \
   --target global
@@ -103,13 +103,13 @@ This removes stale script permissions and adds current ones from the discovered 
 
 **D. Apply safe fixes to local:**
 ```bash
-python3 {permission.py} apply-fixes \
+python3 .plan/execute-script.py general-tools:permission-management:apply-fixes \
   --settings {local_settings}
 ```
 
 **E. Apply safe fixes to global:**
 ```bash
-python3 {permission.py} apply-fixes \
+python3 .plan/execute-script.py general-tools:permission-management:apply-fixes \
   --settings {global_settings}
 ```
 
