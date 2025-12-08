@@ -312,7 +312,7 @@ Analyze existing JaCoCo coverage reports and extract coverage metrics.
    Script: `cui-java-expert:cui-java-unit-testing` → `coverage.py`
 
    ```bash
-   python3 {script_path} analyze --file {report_path} --threshold {threshold}
+   python3 .plan/execute-script.py cui-java-expert:cui-java-unit-testing:analyze --file {report_path} --threshold {threshold}
    ```
 
 4. **Parse Results**
@@ -402,7 +402,7 @@ Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements
    Script: `cui-java-expert:cui-java-unit-testing` → `coverage.py`
 
    ```bash
-   python3 {script_path} gaps --report {report_path} --priority {priority_filter}
+   python3 .plan/execute-script.py cui-java-expert:cui-java-unit-testing:gaps --report {report_path} --priority {priority_filter}
    ```
 
    Parse JSON output:

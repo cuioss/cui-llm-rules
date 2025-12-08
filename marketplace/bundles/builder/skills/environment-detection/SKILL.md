@@ -73,7 +73,7 @@ Script: `builder:environment-detection`
 If not cached, run detection:
 
 ```bash
-python3 {script_path} detect --project-dir .
+python3 .plan/execute-script.py builder:environment-detection:detect --project-dir .
 ```
 
 **Output:**
@@ -130,7 +130,7 @@ Force re-detection of build systems (bypasses cache).
 Script: `builder:environment-detection`
 
 ```bash
-python3 {script_path} detect --project-dir .
+python3 .plan/execute-script.py builder:environment-detection:detect --project-dir .
 ```
 
 ### Step 2: Update Cache

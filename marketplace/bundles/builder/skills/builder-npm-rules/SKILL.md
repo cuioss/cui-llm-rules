@@ -98,7 +98,7 @@ Script: `builder:builder-npm-rules`
 Use the execute subcommand which handles log file pre-creation, timestamping, and npm/npx execution atomically:
 
 ```bash
-python3 {script_path} execute \
+python3 .plan/execute-script.py builder:builder-npm-rules:execute \
     --command "{command}" \
     --workspace {workspace} \
     --env {env} \
@@ -110,16 +110,16 @@ python3 {script_path} execute \
 **Examples:**
 ```bash
 # Basic test run
-python3 {script_path} execute --command "run test"
+python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "run test"
 
 # Workspace-specific build
-python3 {script_path} execute --command "run build" --workspace e-2-e-playwright
+python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "run build" --workspace e-2-e-playwright
 
 # Playwright tests with environment
-python3 {script_path} execute --command "playwright test" --env "CI=true"
+python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "playwright test" --env "CI=true"
 
 # Lint with extended timeout
-python3 {script_path} execute --command "run lint" --timeout 180000
+python3 .plan/execute-script.py builder:builder-npm-rules:execute --command "run lint" --timeout 180000
 ```
 
 The script:
@@ -135,7 +135,7 @@ The script:
 Script: `builder:builder-npm-rules`
 
 ```bash
-python3 {script_path} parse \
+python3 .plan/execute-script.py builder:builder-npm-rules:parse \
     --log {log_file from step 1} \
     --mode {output_mode}
 ```
@@ -194,7 +194,7 @@ Script: `builder:builder-npm-rules`
 **Parse the build log file:**
 
 ```bash
-python3 {script_path} parse \
+python3 .plan/execute-script.py builder:builder-npm-rules:parse \
     --log <path-to-log-file> \
     --mode <output-mode>
 ```

@@ -58,7 +58,7 @@ Discovers all skill scripts from installed plugins and generates the scripts cac
 
 1. **Run discovery script**:
    ```bash
-   python3 {absolute_path_to_generate_scripts_library} --marketplace-root {workspace-root}
+   python3 .plan/execute-script.py general-tools:script-runner:generate --marketplace-root {workspace-root}
    ```
 
    This script:

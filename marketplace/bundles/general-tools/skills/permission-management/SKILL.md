@@ -115,7 +115,7 @@ Script: `general-tools:permission-management` → `permission.py generate-wildca
 
 Pass the inventory JSON to the wildcard generator script:
 ```bash
-echo '<inventory-json>' | python3 {permission_path} generate-wildcards
+echo '<inventory-json>' | python3 .plan/execute-script.py general-tools:permission-management:generate-wildcards
 ```
 
 The script analyzes inventory and outputs:
@@ -257,7 +257,7 @@ Generate and sync script permissions from marketplace inventory.
 
 **Input**:
 ```bash
-echo '{inventory_json}' | python3 {permission_path} generate-wildcards
+echo '{inventory_json}' | python3 .plan/execute-script.py general-tools:permission-management:generate-wildcards
 ```
 
 **Output JSON**:
@@ -285,7 +285,7 @@ Detect permissions in local settings that duplicate global settings.
 
 **Input**:
 ```bash
-python3 {permission_path} detect-redundant --global-settings {global_path} --local-settings {local_path}
+python3 .plan/execute-script.py general-tools:permission-management:detect-redundant --global-settings {global_path} --local-settings {local_path}
 ```
 
 **Output JSON**:
@@ -316,7 +316,7 @@ Detect permissions matching anti-patterns (security risks).
 
 **Input**:
 ```bash
-python3 {permission_path} detect-suspicious --settings {settings_path} [--approved-file {run_config_path}]
+python3 .plan/execute-script.py general-tools:permission-management:detect-suspicious --settings {settings_path} [--approved-file {run_config_path}]
 ```
 
 **Output JSON**:
@@ -345,7 +345,7 @@ Replace timestamped build output permissions with wildcards.
 
 **Input**:
 ```bash
-python3 {permission_path} consolidate --settings {settings_path} [--dry-run]
+python3 .plan/execute-script.py general-tools:permission-management:consolidate --settings {settings_path} [--dry-run]
 ```
 
 **Output JSON**:
@@ -370,7 +370,7 @@ Ensure marketplace bundle wildcards exist in global settings.
 
 **Input**:
 ```bash
-python3 {permission_path} ensure-wildcards --settings {settings_path} --marketplace-json {marketplace_path} [--dry-run]
+python3 .plan/execute-script.py general-tools:permission-management:ensure-wildcards --settings {settings_path} --marketplace-json {marketplace_path} [--dry-run]
 ```
 
 **Output JSON**:
@@ -394,7 +394,7 @@ Apply safe fixes: duplicate removal, path normalization, sorting, default permis
 
 **Input**:
 ```bash
-python3 {permission_path} apply-fixes --settings {settings_path} [--dry-run]
+python3 .plan/execute-script.py general-tools:permission-management:apply-fixes --settings {settings_path} [--dry-run]
 ```
 
 **Output JSON**:

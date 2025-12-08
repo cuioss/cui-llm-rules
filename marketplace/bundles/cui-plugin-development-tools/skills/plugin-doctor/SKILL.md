@@ -106,9 +106,9 @@ All 5 workflows follow the same pattern:
 
    **EXECUTE**:
    ```bash
-   python3 {analyze_path} markdown --file {path} --type {type}
-   python3 {analyze_path} coverage --file {path}
-   python3 {validate_path} references --file {path}
+   python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze markdown --file {path} --type {type}
+   python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze coverage --file {path}
+   python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate references --file {path}
    ```
 
 ### Phase 2: Categorize Issues
@@ -162,7 +162,7 @@ All 5 workflows follow the same pattern:
    Script: `cui-plugin-development-tools:plugin-doctor` → `fix.py verify`
 
    ```bash
-   python3 {fix_path} verify --fix-type {type} --file {path}
+   python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:fix verify --fix-type {type} --file {path}
    ```
 
 2. **Generate Summary**
@@ -211,9 +211,9 @@ Scripts:
 - `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {analyze_path} markdown --file {agent_path} --type agent
-python3 {analyze_path} coverage --file {agent_path}
-python3 {validate_path} references --file {agent_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze markdown --file {agent_path} --type agent
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze coverage --file {agent_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate references --file {agent_path}
 ```
 
 **Check against agents-guide.md**:
@@ -276,8 +276,8 @@ Scripts:
 - `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {analyze_path} markdown --file {cmd_path} --type command
-python3 {validate_path} references --file {cmd_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze markdown --file {cmd_path} --type command
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate references --file {cmd_path}
 ```
 
 **Check against commands-guide.md**:
@@ -405,9 +405,9 @@ Scripts:
 - `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {analyze_path} structure --directory {skill_dir}
-python3 {analyze_path} markdown --file {skill_dir}/SKILL.md --type skill
-python3 {validate_path} references --file {skill_dir}/SKILL.md
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze structure --directory {skill_dir}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze markdown --file {skill_dir}/SKILL.md --type skill
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate references --file {skill_dir}/SKILL.md
 ```
 
 **Check against skills-guide.md**:
@@ -573,7 +573,7 @@ Read references/content-quality-guide.md
 Script: `cui-plugin-development-tools:plugin-doctor` → `validate.py inventory`
 
 ```bash
-python3 {validate_path} inventory --skill-path {skill_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate inventory --skill-path {skill_path}
 ```
 
 Parse JSON output to get:
@@ -613,7 +613,7 @@ Skip if `--skip-quality` specified.
 Script: `cui-plugin-development-tools:plugin-doctor` → `analyze.py cross-file`
 
 ```bash
-python3 {analyze_path} cross-file --skill-path {skill_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze cross-file --skill-path {skill_path}
 ```
 
 Parse JSON output for:
@@ -655,7 +655,7 @@ Script: `cui-plugin-development-tools:plugin-doctor` → `validate.py cross-file
 
 Pipe LLM findings JSON to verification:
 ```bash
-echo '{llm_findings_json}' | python3 {validate_path} cross-file --analysis {cross_file_analysis_json}
+echo '{llm_findings_json}' | python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate cross-file --analysis {cross_file_analysis_json}
 ```
 
 **Reject any LLM claims that can't be verified** against actual content.
@@ -701,7 +701,7 @@ AskUserQuestion:
 Script: `cui-plugin-development-tools:plugin-doctor` → `validate.py references`
 
 ```bash
-python3 {validate_path} references --file {skill_path}/SKILL.md
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate references --file {skill_path}/SKILL.md
 ```
 
 For each content file, verify:
