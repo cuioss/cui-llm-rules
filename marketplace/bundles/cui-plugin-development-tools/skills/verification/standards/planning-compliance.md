@@ -262,7 +262,7 @@ When `/plan-execute` executes, verify after each task:
 
 ```
 Claude uses: Read .plan/plans/my-plan/status.toon
-Should use: python3 manage-lifecycle.py read --plan-id my-plan
+Should use: python3 .plan/execute-script.py planning:manage-lifecycle:read --plan-id my-plan
 ```
 
 **Why It Matters**: Direct reads bypass the managed parser, may read stale data during atomic writes, and don't leverage script validation.
@@ -290,7 +290,7 @@ Actual: current_phase=execute (not updated)
 
 ```
 Claude uses: Write .plan/plans/my-plan/tasks/TASK-003.toon
-Should use: python3 manage-task.py create --plan-id my-plan --title "..."
+Should use: python3 .plan/execute-script.py planning:manage-tasks:create --plan-id my-plan --title "..."
 ```
 
 **Why It Matters**: Bypasses numbering logic, validation, and work-log entry creation.
