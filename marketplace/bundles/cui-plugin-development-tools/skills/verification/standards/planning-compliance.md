@@ -227,6 +227,166 @@ execute-script.py proxy. This bypasses:
 Use executor pattern - this is a design violation
 ```
 
+### Rule 5: Log File Verification and Issue Detection
+
+Plan-related log files must exist, be properly formatted, remain consistent, and be actively scanned to detect script execution issues.
+
+**Log File Types**:
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `work-log.toon` | `.plan/plans/{id}/work-log.toon` | Semantic work entries (decisions, artifacts, progress) |
+| `execution.log` | `.plan/plans/{id}/execution.log` | Script execution records for plan-scoped operations |
+| `script-execution-*.log` | `.plan/logs/script-execution-{date}.log` | Global execution records (non-plan operations) |
+
+**Log Entry Format** (execution.log):
+
+Success entry (single line):
+```
+{timestamp}\t{notation}\t{subcommand}\t{exit_code}\t{duration}s
+```
+
+Error entry (multi-line):
+```
+{timestamp}\t{notation}\t{subcommand}\t{exit_code}\t{duration}s\tERROR
+  args: {full argument list}
+  stdout: {truncated stdout}
+  stderr: {truncated stderr}
+```
+
+**Verification Checks**:
+
+| Check | What to Verify | When |
+|-------|---------------|------|
+| Existence | `work-log.toon` exists for every active plan | After plan creation |
+| Existence | `execution.log` exists after first plan-scoped script call | After executor runs with `--plan-id` |
+| Format | `work-log.toon` follows TOON format with entries table | After any log operation |
+| Format | `execution.log` uses TSV format with required columns | After executor runs |
+| Consistency | Work-log entries match expected operations | After phase transitions |
+| Consistency | Execution.log records match script calls | After any executor call |
+
+**Issue Detection via Log Scanning**:
+
+Actively scan execution logs to detect script issues:
+
+| Issue Type | Detection Pattern | Severity | Action |
+|------------|-------------------|----------|--------|
+| Script failure | Lines containing `\tERROR` | High | Investigate stderr, fix root cause |
+| Repeated failures | Same notation with exit_code != 0 multiple times | Critical | Script is broken, needs immediate fix |
+| Slow execution | Duration > 30s for simple operations | Medium | Optimize script or investigate hang |
+| Missing executions | Expected script calls not in log | High | Executor not used (compliance violation) |
+| Argument errors | stderr contains "usage:" or "argument" | Medium | Caller using wrong arguments |
+| Import/module errors | stderr contains "ModuleNotFoundError" or "ImportError" | Critical | Missing dependency or path issue |
+| Permission errors | stderr contains "Permission denied" | High | File/directory access issue |
+
+**Log Scanning Commands**:
+
+1. Find all errors in plan execution log:
+   ```bash
+   grep -E '\tERROR$' .plan/plans/{plan_id}/execution.log
+   ```
+
+2. Find repeated failures (same script failing):
+   ```bash
+   grep -E '\tERROR$' .plan/plans/{plan_id}/execution.log | cut -f2 | sort | uniq -c | sort -rn
+   ```
+
+3. Find slow executions (>10s):
+   ```bash
+   awk -F'\t' '$5+0 > 10 {print}' .plan/plans/{plan_id}/execution.log
+   ```
+
+4. Get full error context (multi-line entries):
+   ```bash
+   grep -A3 '\tERROR$' .plan/plans/{plan_id}/execution.log
+   ```
+
+5. Scan global logs for today's issues:
+   ```bash
+   grep -E '\tERROR$' .plan/logs/script-execution-$(date +%Y-%m-%d).log
+   ```
+
+**Verification Steps**:
+
+1. Check work-log exists and has entries:
+   ```bash
+   python3 .plan/execute-script.py planning:manage-log:list --plan-id {plan_id} --limit 5
+   ```
+
+2. Check execution.log exists and scan for issues:
+   ```bash
+   # Check recent entries
+   tail -10 .plan/plans/{plan_id}/execution.log
+
+   # Scan for errors
+   grep -c '\tERROR$' .plan/plans/{plan_id}/execution.log || echo "0 errors"
+   ```
+
+3. Verify format compliance:
+   - Work-log: Has header comments, entries table with 5 columns
+   - Execution.log: TSV with timestamp, notation, subcommand, exit_code, duration
+
+**Detection Pattern for Log Issues**:
+
+```
+## PLANNING COMPLIANCE Violation Detected
+
+### Issue Detected
+[Log file integrity issue / Script execution failure detected]
+
+### Context
+- **Check Type**: [existence/format/consistency/script-failure]
+- **File**: [path to log file]
+- **Expected**: [what should exist or match]
+- **Actual**: [what was found]
+
+### Log Scan Results (if script failure)
+| Metric | Value |
+|--------|-------|
+| Total executions | {count} |
+| Failed executions | {error_count} |
+| Unique failing scripts | {list} |
+| Most recent error | {timestamp} |
+
+### Error Details
+```
+{stderr content from log}
+```
+
+### Root Cause Analysis
+[Explanation of why this matters for audit trail integrity or script health]
+
+### Impact Assessment
+| Aspect | Impact |
+|--------|--------|
+| Audit Trail | Incomplete or corrupted |
+| Debugging | Missing operation history |
+| Compliance | Cannot verify operations occurred |
+| Script Health | [Broken/Degraded/Healthy] |
+
+### Options
+1. **Fix script**: Address the error shown in stderr
+2. **Regenerate entries**: Use manage-log to add missing entries
+3. **Investigate cause**: Determine why log was not updated
+4. **Manual recovery**: Reconstruct from other sources if possible
+
+### Recommendation
+[Specific action based on violation type]
+```
+
+**Common Log Violations and Script Issues**:
+
+| Violation | Symptom | Cause |
+|-----------|---------|-------|
+| Missing work-log | `manage-log:list` returns error | Plan created without init entry |
+| Empty work-log | No entries after operations | Operations bypassed logging |
+| Stale execution.log | Old timestamps only | Executor not used for recent calls |
+| Format corruption | Parse errors | Direct file edit instead of API |
+| Script failure | ERROR entries in log | Bug in script or invalid arguments |
+| Repeated failures | Same script failing multiple times | Systemic issue needs investigation |
+| Import errors | ModuleNotFoundError in stderr | Missing dependency or wrong Python path |
+| Timeout patterns | Very long durations (>60s) | Script hanging or performance issue |
+
 **Status Verification Points**:
 
 | Trigger | What to Verify |
@@ -285,6 +445,10 @@ After each planning command/skill execution, verify:
 - [ ] Status reflects current phase correctly
 - [ ] All artifacts created via manage-* scripts
 - [ ] No orphaned files in .plan structure
+- [ ] Log files exist and are properly formatted (work-log.toon, execution.log)
+- [ ] Execution.log contains recent entries for script calls
+- [ ] Execution.log scanned for ERROR entries - none found or issues addressed
+- [ ] No repeated script failures detected in logs
 
 ## Integration with Commands
 
