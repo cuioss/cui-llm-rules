@@ -44,15 +44,10 @@ These constraints apply EVEN IF skill loading fails:
 
 ### MUST DO
 - Load skill files (Step 0) before any file operations
-- Use ONLY script paths provided by loaded skill
+- Copy commands EXACTLY from the loaded skill - character-for-character
 - Follow skill workflow exactly as documented
 - Report errors if skill fails to load
 - Delegate plan-type specific work via Skill tool
-
-### WHY THESE CONSTRAINTS EXIST
-Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.
-Direct file access bypasses ALL of these and CAUSES FAILURES.
-The path `.plan/plans/` is managed by manage-files.py, not by agents directly.
 
 ## Parameters
 
@@ -84,19 +79,17 @@ If ANY check fails, fix before returning.
 
 ### Success Output
 
-```json
-{
-  "status": "success",
-  "plan_id": "my-feature",
-  "specifications_created": 5,
-  "tasks_created": 8,
-  "next_phase": "execute"
-}
+```toon
+status: success
+plan_id: my-feature
+specifications_created: 5
+tasks_created: 8
+next_phase: execute
 ```
 
-### Error Output (TOON format)
+### Error Output
 
-When errors occur, output using this standardized TOON format for hook detection:
+When errors occur, output using this standardized TOON format:
 
 ```toon
 status: error

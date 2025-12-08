@@ -42,28 +42,9 @@ These constraints apply EVEN IF skill loading fails:
 
 ### MUST DO
 - Load skill files (Step 0) before any file operations
-- Use ONLY script paths provided by loaded skill - copy paths EXACTLY, character-for-character
-- Use ONLY parameter names provided by loaded skill - copy parameter names EXACTLY
-- BEFORE running any script: verify path and parameters match what's in the loaded SKILL.md
+- Copy commands EXACTLY from the loaded skill - character-for-character
 - Follow skill workflow exactly as documented
 - Report errors if skill fails to load
-
-### SCRIPT API VERIFICATION
-When the skill says `--field` parameter:
-- ✅ CORRECT: `--field target_bundle`
-- ❌ WRONG: `--key target_bundle` (parameter name mismatch)
-
-When the skill says `planning:manage-references`:
-- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-references:manage-references set`
-- ❌ WRONG: `python3 .plan/execute-script.py planning:plan-references:set`
-- ❌ WRONG: `python3 {script_path} set` (old notation)
-
-Copy notations AND parameter names EXACTLY from the skill documentation. Do not infer or guess.
-
-### WHY THESE CONSTRAINTS EXIST
-Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.
-Direct file access bypasses ALL of these and CAUSES FAILURES.
-The path `.plan/plans/` is managed by manage-files.py, not by agents directly.
 
 ## Parameters
 
@@ -97,18 +78,16 @@ If ANY check fails, fix before returning.
 
 ### Success Output
 
-```json
-{
-  "status": "success",
-  "plan_id": "my-feature",
-  "plan_type": "planning:plan-type-java",
-  "next_phase": "refine"
-}
+```toon
+status: success
+plan_id: my-feature
+plan_type: planning:plan-type-java
+next_phase: refine
 ```
 
-### Error Output (TOON format)
+### Error Output
 
-When errors occur, output using this standardized TOON format for hook detection:
+When errors occur, output using this standardized TOON format:
 
 ```toon
 status: error

@@ -43,23 +43,9 @@ These constraints apply EVEN IF skill loading fails:
 
 ### MUST DO
 - Load skill files (Step 0) before any file operations
-- Use ONLY script paths provided by loaded skill - copy paths EXACTLY, character-for-character
-- BEFORE running any script: verify the path matches what's in the loaded SKILL.md
+- Copy commands EXACTLY from the loaded skill - character-for-character
 - Follow skill workflow exactly as documented
 - Report errors if skill fails to load
-
-### SCRIPT NOTATION VERIFICATION
-When the skill says `planning:manage-files`:
-- ✅ CORRECT: `python3 .plan/execute-script.py planning:manage-files:manage-files read`
-- ❌ WRONG: `python3 .plan/execute-script.py planning:plan-files:read` (skill name mismatch)
-- ❌ WRONG: `python3 {script_path} read` (old notation)
-
-Copy notations EXACTLY from the skill's Script table. Do not infer or guess notations.
-
-### WHY THESE CONSTRAINTS EXIST
-Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.
-Direct file access bypasses ALL of these and CAUSES FAILURES.
-The path `.plan/plans/` is managed by manage-files.py, not by agents directly.
 
 ## Parameters
 
@@ -94,17 +80,18 @@ If ANY check fails, fix before returning.
 
 ### Success Output
 
-```json
-{
-  "status": "success",
-  "plan_id": "my-feature",
-  "source": {"type": "description|lesson|issue", "id": "..."}
-}
+```toon
+status: success
+plan_id: my-feature
+
+source:
+  type: {description|lesson|issue}
+  id: {source_id}
 ```
 
-### Error Output (TOON format)
+### Error Output
 
-When errors occur, output using this standardized TOON format for hook detection:
+When errors occur, output using this standardized TOON format:
 
 ```toon
 status: error
