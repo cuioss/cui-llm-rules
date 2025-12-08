@@ -1,17 +1,17 @@
 ---
 name: plan-marshall
-description: Generate execute-script.py and execution_log.py with embedded script mappings
+description: Generate execute-script.py with embedded script mappings
 allowed-tools: Read, Write, Bash, Glob
 ---
 
 # plan-marshall Command
 
-Generate or update `.plan/execute-script.py` and `.plan/execution_log.py` with current script mappings.
+Generate or update `.plan/execute-script.py` with current script mappings.
 
 ## Usage
 
 ```
-/plan-marshall              # Generate/update executor and log module
+/plan-marshall              # Generate/update executor
 /plan-marshall --force      # Regenerate even if up-to-date
 /plan-marshall --verify     # Check without modifying
 /plan-marshall --dry-run    # Show what would be generated
@@ -41,42 +41,38 @@ For each discovered script:
 2. Generate simplified notation: `{bundle}:{skill}`
 3. Verify script exists at absolute path
 
-### Step 4: Generate Logging Module
-
-Read template from:
-```
-marketplace/bundles/general-tools/skills/script-executor/templates/execution-log.py.template
-```
-
-Write to: `.plan/execution_log.py`
-
-### Step 5: Generate Executor
+### Step 4: Generate Executor
 
 Read template from:
 ```
 marketplace/bundles/general-tools/skills/script-executor/templates/execute-script.py.template
 ```
 
-Replace `{{SCRIPT_MAPPINGS}}` with discovered mappings in format:
-```python
-    "planning:manage-files": "/abs/path/manage-files.py",
-    "planning:manage-config": "/abs/path/manage-config.py",
-```
+Replace placeholders:
+- `{{SCRIPT_MAPPINGS}}` with discovered mappings in format:
+  ```python
+      "planning:manage-files": "/abs/path/manage-files.py",
+      "planning:manage-config": "/abs/path/manage-config.py",
+  ```
+- `{{EXECUTION_LOG_DIR}}` with absolute path to:
+  ```
+  marketplace/bundles/general-tools/skills/script-executor/scripts
+  ```
 
 Write to: `.plan/execute-script.py`
 
-### Step 6: Clean Up Old Logs
+### Step 5: Clean Up Old Logs
 
 Delete global logs older than 7 days from `.plan/logs/`:
 
 ```python
-# Import the generated module
-sys.path.insert(0, '.plan')
+# Import from marketplace location
+sys.path.insert(0, '{marketplace}/general-tools/skills/script-executor/scripts')
 from execution_log import cleanup_old_global_logs
 cleaned = cleanup_old_global_logs(max_age_days=7)
 ```
 
-### Step 7: Update State
+### Step 6: Update State
 
 Write to: `.plan/marshall-state.toon`
 
@@ -89,19 +85,18 @@ success	{timestamp}	{count}	{hash}	{cleaned_count}
 
 After generation, verify:
 1. `execute-script.py` exists and is valid Python
-2. `execution_log.py` exists and is valid Python
-3. All mapped scripts exist
-4. State file is current
+2. All mapped scripts exist
+3. State file is current
 
 Run verification:
 ```bash
-python3 -c "import sys; sys.path.insert(0, '.plan'); import execute_script; print('Executor OK')"
-python3 -c "import sys; sys.path.insert(0, '.plan'); import execution_log; print('Logger OK')"
+python3 -m py_compile .plan/execute-script.py && echo "Executor syntax OK"
+python3 .plan/execute-script.py --list | wc -l  # Should match script count
 ```
 
 ## Output
 
 ```toon
-status	scripts_discovered	executor_generated	log_module_generated	logs_cleaned
-success	42	.plan/execute-script.py	.plan/execution_log.py	3
+status	scripts_discovered	executor_generated	logs_cleaned
+success	42	.plan/execute-script.py	3
 ```
