@@ -79,10 +79,10 @@ Completeness Issues:
 
 ### Script Pre-Processing
 
-Run `analyze-cross-file-content.py` first to get structured analysis:
+Run `analyze cross-file` first to get structured analysis:
 
 ```bash
-python3 analyze-cross-file-content.py --skill-path {skill_path}
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze cross-file --skill-path {skill_path}
 ```
 
 **Script Output Categories**:
@@ -442,10 +442,10 @@ Extraction Candidate:
 
 ## Verification of LLM Findings
 
-After LLM analysis, run `verify-cross-file-findings.py` to validate claims:
+After LLM analysis, run `validate cross-file` to validate claims:
 
 ```bash
-echo '{llm_findings_json}' | python3 verify-cross-file-findings.py --analysis {script_analysis_json}
+echo '{llm_findings_json}' | python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate cross-file --analysis {script_analysis_json}
 ```
 
 **Verification Output**:
@@ -474,7 +474,7 @@ This guide is loaded in **Phase 3: Analyze Content Quality**.
 
 1. **Run cross-file analysis script**:
    ```bash
-   python3 analyze-cross-file-content.py --skill-path {skill_path} > analysis.json
+   python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:analyze cross-file --skill-path {skill_path} > analysis.json
    ```
 
 2. **Report exact duplicates directly** (no LLM needed):
@@ -492,7 +492,7 @@ This guide is loaded in **Phase 3: Analyze Content Quality**.
 
 5. **Verify LLM findings**:
    ```bash
-   echo '{llm_output}' | python3 verify-cross-file-findings.py --analysis analysis.json
+   echo '{llm_output}' | python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:validate cross-file --analysis analysis.json
    ```
 
 6. **Generate quality report** with verified findings only.

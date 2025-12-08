@@ -761,11 +761,11 @@ def apply_fix_with_backup(file_path, fix_func):
 
 **Script Chaining** (enabled by consistent JSON):
 ```bash
-# Extract → Categorize → Apply → Verify
-python3 extract-issues.py file.md | \
-  python3 categorize-fixes.py | \
-  python3 apply-fix.py | \
-  python3 verify-fix.py
+# Extract → Categorize → Apply → Verify (via fix.py subcommands)
+python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:fix extract --input file.md | \
+  python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:fix categorize | \
+  python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:fix apply | \
+  python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:fix verify
 ```
 
 ### Validation Script Integration

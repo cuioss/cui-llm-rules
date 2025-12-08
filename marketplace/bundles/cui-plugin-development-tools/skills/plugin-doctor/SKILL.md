@@ -865,6 +865,6 @@ This skill is designed to run without user prompts for safe operations. Required
 - **Unified workflow**: Diagnose → Auto-Fix → Prompt Risky → Verify
 - **Progressive disclosure**: Load 2 references per workflow (~800 lines)
 - **Stdlib-only scripts**: No external dependencies
-- **Backup before modify**: apply-fix.py creates backups
+- **Backup before modify**: `fix apply` creates backups
 - **User control**: Risky fixes require explicit approval
 - **Non-prompting safe fixes**: Safe fixes never prompt - applied automatically

@@ -129,8 +129,8 @@ Document all scripts with explicit modes:
 
 | Script | Mode | Purpose |
 |--------|------|---------|
-| `analyze-markdown-file.sh` | **EXECUTE** | Run to analyze component structure |
-| `apply-fix.py` | **EXECUTE** | Run to apply identified fixes |
+| `plugin-doctor:analyze markdown` | **EXECUTE** | Run to analyze component structure |
+| `plugin-doctor:fix apply` | **EXECUTE** | Run to apply identified fixes |
 | `README.md` | Reference | Read only if script errors occur |
 | `fix-catalog.md` | READ | Load before applying fixes |
 ```

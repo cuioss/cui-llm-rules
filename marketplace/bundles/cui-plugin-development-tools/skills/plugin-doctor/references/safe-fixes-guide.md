@@ -19,11 +19,11 @@ Safe fixes are mechanical transformations that:
 3. **Validate Result**: Ensure fix was applied correctly
 4. **Track Changes**: Record what was changed
 
-### Using apply-fix.py
+### Using fix.py apply subcommand
 
 ```bash
 echo '{"type": "fix-type", "file": "path/to/file.md"}' | \
-  scripts/apply-fix.py - /path/to/bundle
+  python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:fix apply --fix -
 ```
 
 Output:
@@ -161,7 +161,7 @@ If fix fails mid-application:
 cp file.md.fix-backup file.md
 ```
 
-apply-fix.py does this automatically on error.
+`fix apply` does this automatically on error.
 
 ### Validation After Fix
 
