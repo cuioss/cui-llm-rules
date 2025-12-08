@@ -36,7 +36,7 @@ scripts_library = .plan/scripts-library.toon
 
 **A. Detect redundant permissions (local vs global):**
 ```bash
-python3 {detect-redundant-permissions.py} \
+python3 {permission.py} detect-redundant \
   --global-settings {global_settings} \
   --local-settings {local_settings}
 ```
@@ -45,7 +45,7 @@ Parse result: `redundant[]`, `marketplace_in_local[]`
 
 **B. Detect suspicious permissions:**
 ```bash
-python3 {detect-suspicious-permissions.py} \
+python3 {permission.py} detect-suspicious \
   --settings {local_settings}
 ```
 
@@ -78,13 +78,13 @@ For each suspicious permission not in `already_approved`:
 
 **A. Consolidate build outputs:**
 ```bash
-python3 {consolidate-build-outputs.py} \
+python3 {permission.py} consolidate \
   --settings {local_settings}
 ```
 
 **B. Ensure marketplace wildcards in global:**
 ```bash
-python3 {ensure-marketplace-wildcards.py} \
+python3 {permission.py} ensure-wildcards \
   --settings {global_settings} \
   --marketplace-json {marketplace_json}
 ```
@@ -93,7 +93,7 @@ python3 {ensure-marketplace-wildcards.py} \
 
 If `scripts_library` exists, sync script permissions:
 ```bash
-python3 {apply-permissions.py} \
+python3 {permission.py} apply \
   --action sync-scripts \
   --scripts-file {scripts_library} \
   --target global
@@ -103,13 +103,13 @@ This removes stale script permissions and adds current ones from the discovered 
 
 **D. Apply safe fixes to local:**
 ```bash
-python3 {apply-permission-fixes.py} \
+python3 {permission.py} apply-fixes \
   --settings {local_settings}
 ```
 
 **E. Apply safe fixes to global:**
 ```bash
-python3 {apply-permission-fixes.py} \
+python3 {permission.py} apply-fixes \
   --settings {global_settings}
 ```
 
@@ -140,15 +140,10 @@ Changes applied successfully
 
 ## Script Resolution
 
-Scripts are resolved via the skill's scripts directory:
-- `general-tools:permission-management/scripts/detect-redundant-permissions.py`
-- `general-tools:permission-management/scripts/detect-suspicious-permissions.py`
-- `general-tools:permission-management/scripts/consolidate-build-outputs.py`
-- `general-tools:permission-management/scripts/ensure-marketplace-wildcards.py`
-- `general-tools:permission-management/scripts/apply-permissions.py`
-- `general-tools:permission-management/scripts/apply-permission-fixes.py`
+All operations use the consolidated `permission.py` script with subcommands:
+- `general-tools:permission-management` → `permission.py {subcommand}`
 
-Use `.plan/scripts-library.toon` to resolve absolute paths.
+Subcommands: `detect-redundant`, `detect-suspicious`, `consolidate`, `ensure-wildcards`, `apply`, `apply-fixes`
 
 ## Critical Rules
 

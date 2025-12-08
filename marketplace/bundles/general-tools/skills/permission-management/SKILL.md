@@ -111,11 +111,11 @@ The skill returns JSON with all marketplace resources (bundles, agents, commands
 
 #### Step 3: Generate Permission Wildcards
 
-Script: `general-tools:permission-management/scripts/generate-permission-wildcards.py`
+Script: `general-tools:permission-management` → `permission.py generate-wildcards`
 
 Pass the inventory JSON to the wildcard generator script:
 ```bash
-echo '<inventory-json>' | python3 {script_path} --format json
+echo '<inventory-json>' | python3 {permission_path} generate-wildcards
 ```
 
 The script analyzes inventory and outputs:
@@ -253,11 +253,11 @@ local_settings: .claude/settings.json
 
 Generate and sync script permissions from marketplace inventory.
 
-**Script**: `generate-permission-wildcards.py`
+**Script**: `permission.py generate-wildcards`
 
 **Input**:
 ```bash
-echo '{inventory_json}' | python3 {script} --format json
+echo '{inventory_json}' | python3 {permission_path} generate-wildcards
 ```
 
 **Output JSON**:
@@ -281,11 +281,11 @@ echo '{inventory_json}' | python3 {script} --format json
 
 Detect permissions in local settings that duplicate global settings.
 
-**Script**: `detect-redundant-permissions.py`
+**Script**: `permission.py detect-redundant`
 
 **Input**:
 ```bash
-python3 {script} --global-settings {global_path} --local-settings {local_path}
+python3 {permission_path} detect-redundant --global-settings {global_path} --local-settings {local_path}
 ```
 
 **Output JSON**:
@@ -312,11 +312,11 @@ python3 {script} --global-settings {global_path} --local-settings {local_path}
 
 Detect permissions matching anti-patterns (security risks).
 
-**Script**: `detect-suspicious-permissions.py`
+**Script**: `permission.py detect-suspicious`
 
 **Input**:
 ```bash
-python3 {script} --settings {settings_path} [--approved-file {run_config_path}]
+python3 {permission_path} detect-suspicious --settings {settings_path} [--approved-file {run_config_path}]
 ```
 
 **Output JSON**:
@@ -341,11 +341,11 @@ python3 {script} --settings {settings_path} [--approved-file {run_config_path}]
 
 Replace timestamped build output permissions with wildcards.
 
-**Script**: `consolidate-build-outputs.py`
+**Script**: `permission.py consolidate`
 
 **Input**:
 ```bash
-python3 {script} --settings {settings_path} [--dry-run]
+python3 {permission_path} consolidate --settings {settings_path} [--dry-run]
 ```
 
 **Output JSON**:
@@ -366,11 +366,11 @@ python3 {script} --settings {settings_path} [--dry-run]
 
 Ensure marketplace bundle wildcards exist in global settings.
 
-**Script**: `ensure-marketplace-wildcards.py`
+**Script**: `permission.py ensure-wildcards`
 
 **Input**:
 ```bash
-python3 {script} --settings {settings_path} --marketplace-json {marketplace_path} [--dry-run]
+python3 {permission_path} ensure-wildcards --settings {settings_path} --marketplace-json {marketplace_path} [--dry-run]
 ```
 
 **Output JSON**:
@@ -390,11 +390,11 @@ python3 {script} --settings {settings_path} --marketplace-json {marketplace_path
 
 Apply safe fixes: duplicate removal, path normalization, sorting, default permissions.
 
-**Script**: `apply-permission-fixes.py`
+**Script**: `permission.py apply-fixes`
 
 **Input**:
 ```bash
-python3 {script} --settings {settings_path} [--dry-run]
+python3 {permission_path} apply-fixes --settings {settings_path} [--dry-run]
 ```
 
 **Output JSON**:
@@ -415,15 +415,15 @@ python3 {script} --settings {settings_path} [--dry-run]
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `generate-permission-wildcards.py` | Analyzes inventory JSON and generates permission wildcards |
-| `apply-permissions.py` | Applies permission changes to settings files |
-| `detect-redundant-permissions.py` | Detects redundant permissions between global/local |
-| `detect-suspicious-permissions.py` | Detects security anti-patterns in permissions |
-| `consolidate-build-outputs.py` | Consolidates timestamped build output permissions |
-| `ensure-marketplace-wildcards.py` | Ensures marketplace wildcards exist |
-| `apply-permission-fixes.py` | Applies safe fixes (dedup, sort, defaults) |
+| Script | Subcommand | Purpose |
+|--------|------------|---------|
+| `permission.py` | `generate-wildcards` | Analyzes inventory JSON and generates permission wildcards |
+| `permission.py` | `apply` | Applies permission changes to settings files |
+| `permission.py` | `detect-redundant` | Detects redundant permissions between global/local |
+| `permission.py` | `detect-suspicious` | Detects security anti-patterns in permissions |
+| `permission.py` | `consolidate` | Consolidates timestamped build output permissions |
+| `permission.py` | `ensure-wildcards` | Ensures marketplace wildcards exist |
+| `permission.py` | `apply-fixes` | Applies safe fixes (dedup, sort, defaults) |
 
 ## Standards Organization
 
@@ -450,7 +450,6 @@ This skill is designed to run without user prompts. Required permissions:
 
 **Script Execution (covered by project permissions):**
 - `Bash(python3:*)` - Python interpreter
-- `Bash(scripts/generate-permission-wildcards.py:*)` - Wildcard generator
 
 **File Operations (covered by project permissions):**
 - `Read(//marketplace/**)` - Read marketplace files
