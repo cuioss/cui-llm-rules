@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit tests for execution_log module (template)."""
+"""Unit tests for execution_log module."""
 
 import os
 import sys
@@ -12,21 +12,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import TestRunner
 
-# Add the template directory to path for importing
-TEMPLATE_DIR = Path(__file__).parent.parent.parent.parent / "marketplace/bundles/general-tools/skills/script-executor/templates"
+# Add the scripts directory to path for importing
+SCRIPTS_DIR = Path(__file__).parent.parent.parent.parent / "marketplace/bundles/general-tools/skills/script-executor/scripts"
+sys.path.insert(0, str(SCRIPTS_DIR))
 
-
-def load_execution_log_module():
-    """Load the execution_log module from template."""
-    template_path = TEMPLATE_DIR / "execution-log.py.template"
-    with open(template_path) as f:
-        code = f.read()
-
-    # Create a module from the template code
-    import types
-    module = types.ModuleType('execution_log')
-    exec(code, module.__dict__)
-    return module
+import execution_log as module
 
 
 # =============================================================================
@@ -35,7 +25,6 @@ def load_execution_log_module():
 
 def test_extract_plan_id_with_space_separator():
     """Extract plan-id with --plan-id value format."""
-    module = load_execution_log_module()
     args = ['add', '--plan-id', 'my-plan', '--file', 'test.md']
     result = module.extract_plan_id(args)
     assert result == 'my-plan', f"Expected 'my-plan', got {result}"
@@ -43,7 +32,6 @@ def test_extract_plan_id_with_space_separator():
 
 def test_extract_plan_id_with_equals_separator():
     """Extract plan-id with --plan-id=value format."""
-    module = load_execution_log_module()
     args = ['add', '--plan-id=my-plan', '--file', 'test.md']
     result = module.extract_plan_id(args)
     assert result == 'my-plan', f"Expected 'my-plan', got {result}"
@@ -51,7 +39,6 @@ def test_extract_plan_id_with_equals_separator():
 
 def test_extract_plan_id_missing():
     """Return None when --plan-id is not present."""
-    module = load_execution_log_module()
     args = ['add', '--file', 'test.md']
     result = module.extract_plan_id(args)
     assert result is None, f"Expected None, got {result}"
@@ -59,7 +46,6 @@ def test_extract_plan_id_missing():
 
 def test_extract_plan_id_empty_args():
     """Return None for empty args list."""
-    module = load_execution_log_module()
     result = module.extract_plan_id([])
     assert result is None, f"Expected None, got {result}"
 
@@ -70,7 +56,6 @@ def test_extract_plan_id_empty_args():
 
 def test_success_entry_format():
     """Success entry is compact single-line."""
-    module = load_execution_log_module()
     entry = module.format_success_entry(
         notation='planning:manage-files',
         subcommand='add',
@@ -90,7 +75,6 @@ def test_success_entry_format():
 
 def test_success_entry_tab_separated():
     """Success entry uses tab separators."""
-    module = load_execution_log_module()
     entry = module.format_success_entry(
         notation='test:skill',
         subcommand='verb',
@@ -108,7 +92,6 @@ def test_success_entry_tab_separated():
 
 def test_error_entry_multiline():
     """Error entry is multi-line with details."""
-    module = load_execution_log_module()
     entry = module.format_error_entry(
         notation='planning:manage-files',
         subcommand='add',
@@ -131,7 +114,6 @@ def test_error_entry_multiline():
 
 def test_error_entry_includes_stderr():
     """Error entry includes stderr when present."""
-    module = load_execution_log_module()
     entry = module.format_error_entry(
         notation='test:skill',
         subcommand='verb',
@@ -152,8 +134,6 @@ def test_error_entry_includes_stderr():
 
 def test_cleanup_deletes_old_logs():
     """Cleanup deletes logs older than max_age_days."""
-    module = load_execution_log_module()
-
     with tempfile.TemporaryDirectory() as tmp:
         log_dir = Path(tmp) / 'logs'
         log_dir.mkdir()
@@ -180,8 +160,6 @@ def test_cleanup_deletes_old_logs():
 
 def test_cleanup_preserves_recent_logs():
     """Cleanup preserves logs newer than max_age_days."""
-    module = load_execution_log_module()
-
     with tempfile.TemporaryDirectory() as tmp:
         log_dir = Path(tmp) / 'logs'
         log_dir.mkdir()
@@ -203,8 +181,6 @@ def test_cleanup_preserves_recent_logs():
 
 def test_cleanup_returns_zero_for_missing_dir():
     """Cleanup returns 0 when log directory doesn't exist."""
-    module = load_execution_log_module()
-
     with tempfile.TemporaryDirectory() as tmp:
         nonexistent = Path(tmp) / 'nonexistent'
 

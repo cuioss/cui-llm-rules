@@ -11,8 +11,10 @@ from unittest.mock import MagicMock
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import TestRunner
 
-# Path to templates
-TEMPLATE_DIR = Path(__file__).parent.parent.parent.parent / "marketplace/bundles/general-tools/skills/script-executor/templates"
+# Path to templates and scripts
+SKILL_DIR = Path(__file__).parent.parent.parent.parent / "marketplace/bundles/general-tools/skills/script-executor"
+TEMPLATE_DIR = SKILL_DIR / "templates"
+SCRIPTS_DIR = SKILL_DIR / "scripts"
 
 
 def load_executor_module():
@@ -21,7 +23,7 @@ def load_executor_module():
     with open(template_path) as f:
         code = f.read()
 
-    # Replace the placeholder with test mappings
+    # Replace the placeholders with test values
     code = code.replace(
         '{{SCRIPT_MAPPINGS}}',
         '''
@@ -30,14 +32,13 @@ def load_executor_module():
     "test:skill": "/test/path/test-skill.py",
 '''
     )
+    code = code.replace('{{EXECUTION_LOG_DIR}}', str(SCRIPTS_DIR))
 
-    # Mock the execution_log import before exec
-    import types
-    mock_log = types.ModuleType('execution_log')
-    mock_log.log_execution = MagicMock()
-    sys.modules['execution_log'] = mock_log
+    # Add scripts dir to path so execution_log can be imported
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
     # Create a module and provide __file__
+    import types
     module = types.ModuleType('execute_script')
     module.__dict__['__file__'] = str(template_path)
 
@@ -154,7 +155,7 @@ print(json.dumps(sys.argv[1:]))
 
 def test_generate_script_help():
     """Generate script shows help."""
-    script_path = TEMPLATE_DIR.parent / "scripts" / "generate-executor.py"
+    script_path = SCRIPTS_DIR / "generate-executor.py"
 
     if script_path.exists():
         result = subprocess.run(
@@ -169,7 +170,7 @@ def test_generate_script_help():
 
 def test_verify_script_help():
     """Verify script shows help."""
-    script_path = TEMPLATE_DIR.parent / "scripts" / "verify-executor.py"
+    script_path = SCRIPTS_DIR / "verify-executor.py"
 
     if script_path.exists():
         result = subprocess.run(

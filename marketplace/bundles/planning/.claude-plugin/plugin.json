@@ -19,7 +19,8 @@
     "./commands/task-implement.md",
     "./commands/pr-doctor.md",
     "./commands/plan-manage.md",
-    "./commands/plan-execute.md"
+    "./commands/plan-execute.md",
+    "./commands/plan-marshall.md"
   ],
   "skills": [
     "./skills/git-workflow",

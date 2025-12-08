@@ -94,10 +94,12 @@ Run `/plan-marshall` to generate the executor after bundle changes.
 ```
 .plan/
 ├── execute-script.py      # Generated executor with embedded mappings
-├── execution_log.py       # Logging module (generated alongside executor)
 ├── marshall-state.toon    # Metadata: last run, script count, hash
 └── logs/                  # Global execution logs (no plan context)
     └── script-execution-YYYY-MM-DD.log
+
+marketplace/bundles/general-tools/skills/script-executor/scripts/
+└── execution_log.py       # Shared logging module (not generated)
 ```
 
 ## Integration with Verification
