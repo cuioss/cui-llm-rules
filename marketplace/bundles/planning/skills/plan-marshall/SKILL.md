@@ -269,7 +269,9 @@ next_steps:
 
 ## Interactive Menu (Returning User)
 
-Display menu when both executor and marshal.json exist:
+Display menu when both executor and marshal.json exist.
+
+**MENU LOOP**: After completing any menu option (except Quit), return to this menu. Continue looping until user selects Quit.
 
 ```
 AskUserQuestion:
@@ -290,9 +292,20 @@ AskUserQuestion:
     - label: "5. Full Reconfigure"
       description: "Run first-run wizard again"
       value: "wizard"
+    - label: "6. Quit"
+      description: "Exit plan-marshall"
+      value: "quit"
 ```
 
-Route to appropriate section based on selection.
+**Routing**:
+| Selection | Action |
+|-----------|--------|
+| maintenance | Execute "Menu Option: Maintenance", then **return to menu** |
+| permissions | Execute "Menu Option: Permissions", then **return to menu** |
+| build | Execute "Menu Option: Build System", then **return to menu** |
+| plan-types | Execute "Menu Option: Plan-Types", then **return to menu** |
+| wizard | Execute "First-Run Wizard", then **return to menu** |
+| quit | Output "Good bye!" and **stop execution** |
 
 ---
 
