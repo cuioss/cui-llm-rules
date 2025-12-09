@@ -1,14 +1,14 @@
 ---
 name: plugin-plan
-description: Create implementation tasks from goals with direct storage
+description: Create implementation tasks from goals using skill delegation
 allowed-tools: Read, Bash
 ---
 
 # Plugin Plan Skill
 
-**Role**: Domain planning skill for plugin development tasks. Transforms goals into executable tasks by applying plugin-specific knowledge and writing TASKs directly.
+**Role**: Domain planning skill for plugin development tasks. Transforms goals into executable tasks that delegate to existing skills for implementation.
 
-**Key Pattern**: Direct storage - tasks are written immediately via `manage-tasks` script.
+**Key Pattern**: Skill delegation - tasks specify which skill to load and execute, not inline implementation steps. The delegated skills handle validation, creation, and verification internally.
 
 ## Operation: plan
 
@@ -41,31 +41,41 @@ python3 .plan/execute-script.py planning:manage-goals:manage-goal get \
 #### 2a. Analyze Goal Content
 
 Parse the goal body to determine:
-- Component type and target path
-- Task granularity (single task or multiple)
-- Plugin-specific implementation steps
-- Verification requirements
-- Standards to apply
+- **Operation type**: create or modify
+- **Component type**: skill, command, agent, script, bundle
+- **Target bundle and path**
+- **Parameters** for skill delegation
 
-#### 2b. Create Task(s)
+#### 2b. Determine Delegation Target
 
-Generate task(s) with plugin-specific steps:
+| Operation | Component | Delegate To |
+|-----------|-----------|-------------|
+| create | skill | `cui-plugin-development-tools:plugin-create` → create-skill |
+| create | command | `cui-plugin-development-tools:plugin-create` → create-command |
+| create | agent | `cui-plugin-development-tools:plugin-create` → create-agent |
+| create | bundle | `cui-plugin-development-tools:plugin-create` → create-bundle |
+| modify | any | `cui-plugin-development-tools:plugin-maintain` → update-component |
+| refactor | any | `cui-plugin-development-tools:plugin-maintain` → refactor-structure |
+
+**Note**: Verification is handled internally by the delegated skills - no separate doctor call needed.
+
+#### 2c. Create Task(s)
+
+Generate task(s) with skill delegation steps:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
   --goal GOAL-{n} \
-  --title "Implement {component}" \
-  --description "{goal from goal}" \
+  --title "{action} {component-type}: {name}" \
+  --description "{goal description}" \
   --steps \
-    "Create/modify component at {path}" \
-    "Add frontmatter with correct fields" \
-    "Follow architecture patterns (load cui-plugin-development-tools:plugin-architecture)" \
-    "Add to plugin.json" \
-    "Verify with /plugin-doctor"
+    "Load skill: {delegated-skill}" \
+    "Execute workflow: {workflow-name}" \
+    "Parameters: {extracted parameters}"
 ```
 
-#### 2c. Record Issues as Lessons
+#### 2d. Record Issues as Lessons
 
 On ambiguous goal or planning issues:
 
@@ -86,11 +96,8 @@ status: success
 plan_id: {plan_id}
 
 tasks_created[N]:
-- TASK-1
-- TASK-2
-- TASK-3
-- TASK-4
-- TASK-5
+- TASK-1: {title}
+- TASK-2: {title}
 
 lessons_recorded: {count}
 ```
@@ -99,106 +106,142 @@ lessons_recorded: {count}
 
 ## Task Generation Patterns
 
-### Single Component Task
+### Create Component Task
 
-One goal → one task when:
-- Single skill/command/agent to implement
-- Localized change in one file
-- Simple addition
+**Goal**: "Create new {skill|command|agent} for {purpose}"
 
-**Steps**:
-1. Create/modify component at `{path}`
-2. Add correct frontmatter
-3. Follow architecture patterns
-4. Add to plugin.json
-5. Verify with `/plugin-doctor`
+**Task Structure**:
+```
+Title: Create {component-type}: {name}
+Steps:
+1. Load skill: cui-plugin-development-tools:plugin-create
+2. Execute workflow: create-{component-type}
+3. Parameters:
+   - bundle: {target-bundle}
+   - name: {component-name}
+   - description: {from goal}
+   - type: {component-specific type}
+```
 
-### Multi-Step Component Task
+**Example**:
+```
+Title: Create skill: java-logging-patterns
+Steps:
+1. Load skill: cui-plugin-development-tools:plugin-create
+2. Execute workflow: create-skill
+3. Parameters:
+   - bundle: cui-java-expert
+   - name: java-logging-patterns
+   - description: "Java logging standards for CUI projects"
+   - type: standards
+```
 
-One goal → multiple tasks when:
-- Skill + scripts pattern
-- Command + skill delegation
-- Refactoring with multiple phases
+### Modify Component Task
 
-**Example for Skill with Scripts**:
-- TASK-1: Create SKILL.md with structure
-- TASK-2: Create Python script(s)
-- TASK-3: Add references/ if needed
-- TASK-4: Update plugin.json and verify
+**Goal**: "Update {component} to {change description}"
+
+**Task Structure**:
+```
+Title: Update {component-type}: {name}
+Steps:
+1. Load skill: cui-plugin-development-tools:plugin-maintain
+2. Execute workflow: update-component
+3. Parameters:
+   - component_path: {path}
+   - improvements: {change description}
+```
+
+### Refactor Task
+
+**Goal**: "Refactor {scope} using {strategy}"
+
+**Task Structure**:
+```
+Title: Refactor {scope}
+Steps:
+1. Load skill: cui-plugin-development-tools:plugin-maintain
+2. Execute workflow: refactor-structure
+3. Parameters:
+   - scope: {component|bundle|marketplace}
+   - strategy: {consolidate|split|extract|reorganize}
+```
+
+### Script Task (Special Case)
+
+Scripts are created within skills, so delegate to plugin-create with skill context:
+
+**Task Structure**:
+```
+Title: Create script: {script-name}
+Steps:
+1. Load skill: cui-plugin-development-tools:plugin-create
+2. Execute workflow: create-skill (if new skill needed)
+3. Create script file at {skill}/scripts/{script-name}.py
+4. Add test in test/{bundle}/{skill}/
+5. Update SKILL.md with script documentation
+```
 
 ---
 
-## Standard Task Steps by Component Type
+## Parameter Extraction
 
-### Skill
+When analyzing goals, extract these parameters:
+
+### For Create Operations
+
+| Parameter | Source |
+|-----------|--------|
+| `bundle` | Explicit in goal OR inferred from context |
+| `name` | Explicit in goal OR derived from purpose |
+| `description` | Extracted from goal body |
+| `type` | Component-specific (agent type, skill type, etc.) |
+
+### For Modify Operations
+
+| Parameter | Source |
+|-----------|--------|
+| `component_path` | Explicit path OR resolve from component name |
+| `improvements` | Description from goal body |
+
+---
+
+## Multi-Task Goals
+
+Some goals require multiple tasks in sequence:
+
+### Skill with Scripts
 ```
-1. Create skill directory at {bundle}/skills/{skill-name}/
-2. Create SKILL.md with frontmatter and operations
-3. Create scripts/ directory if automation needed
-4. Create references/ directory if documentation needed
-5. Add to plugin.json skills array
-6. Verify with /plugin-doctor
+TASK-1: Create skill structure
+  - Delegate to: plugin-create → create-skill
+
+TASK-2: Create script(s)
+  - Create Python script in skill/scripts/
+  - Add test file
+  - Update SKILL.md
 ```
 
-### Command
+### Command with New Skill
 ```
-1. Create command file at {bundle}/commands/{command-name}.md
-2. Add frontmatter (name, description)
-3. Implement thin orchestrator pattern
-4. Add skill delegation logic
-5. Add to plugin.json commands array
-6. Verify with /plugin-doctor
-```
+TASK-1: Create supporting skill
+  - Delegate to: plugin-create → create-skill
 
-### Agent
-```
-1. Create agent file at {bundle}/agents/{agent-name}.md
-2. Add frontmatter (name, description, tools, model)
-3. Implement minimal wrapper pattern (< 150 lines)
-4. Add skill delegation
-5. Add to plugin.json agents array
-6. Verify with /plugin-doctor
-```
-
-### Script
-```
-1. Create script at {skill}/scripts/{script-name}.py
-2. Add shebang and stdlib-only imports
-3. Implement argparse with --help
-4. Use JSON output format
-5. Add script documentation to SKILL.md
-6. Create test in test/ directory
+TASK-2: Create command
+  - Delegate to: plugin-create → create-command
+  - Reference skill from TASK-1
 ```
 
 ---
 
 ## Task Dependencies
 
-When creating multiple tasks from one goal, consider:
+When creating multiple tasks:
 
-| Dependency Type | Ordering |
-|-----------------|----------|
-| Scripts before skill | Scripts first (if skill uses them) |
-| Skill before command | Skill first (command delegates) |
-| Skill before agent | Skill first (agent delegates) |
-| References before main doc | Reference docs first |
-
----
-
-## Verification Steps
-
-All plugin tasks should include verification:
-
-**For component compliance**:
-```
-Run /plugin-doctor
-```
-
-**For bundle health**:
-```
-Verify plugin.json is valid JSON
-Verify all referenced files exist
-```
+| Dependency | Ordering |
+|------------|----------|
+| Scripts within skill | Create skill first, then scripts |
+| Command referencing skill | Create skill first |
+| Agent referencing skill | Create skill first |
+| Refactor before create | Complete refactor first |
 
 ---
 
@@ -206,17 +249,17 @@ Verify all referenced files exist
 
 ### Ambiguous Goal
 
-If goal doesn't clearly indicate:
-- Target path → Ask for clarification
-- Component type → Infer from context or ask
-- Bundle placement → Check marketplace structure
+If goal doesn't specify:
+- **Target bundle** → Ask for clarification
+- **Component type** → Infer from keywords or ask
+- **Operation type** → Default to create unless "update/modify/fix" present
 
 ### Missing Information
 
-If goal lacks detail:
-- Generate task with placeholder
-- Add lesson-learned for future reference
-- Note ambiguity in task description
+If goal lacks required parameters:
+- Generate task with available info
+- Note missing parameters in task description
+- Record lesson for future reference
 
 ---
 
@@ -229,7 +272,6 @@ If goal lacks detail:
 - `planning:manage-tasks` - Create tasks
 - `planning:manage-lessons` - Record lessons on issues
 
-**Standards Referenced in Task Steps**:
-- `cui-plugin-development-tools:plugin-architecture` - Architecture principles
-- `cui-plugin-development-tools:plugin-create` - Creation patterns
-- `cui-plugin-development-tools:plugin-doctor` - Verification
+**Skills Delegated To**:
+- `cui-plugin-development-tools:plugin-create` - Component creation (handles validation and verification internally)
+- `cui-plugin-development-tools:plugin-maintain` - Component updates and refactoring (handles verification internally)
