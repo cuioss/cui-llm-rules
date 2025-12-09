@@ -261,7 +261,7 @@ Executing plan-init for my-plan...
 ## SCRIPT FAILURE Analysis Required
 
 ### Issue Detected
-Script manage-lifecycle.py returned non-zero exit code (1)
+Script planning:manage-lifecycle:manage-lifecycle returned non-zero exit code (1)
 
 ### Context
 - **Operation**: Create plan status
@@ -322,12 +322,13 @@ Direct .plan file access bypassing manage-* API
 ### Context
 - **Operation**: Read
 - **Target**: .plan/plans/jwt-auth/status.toon
-- **Expected**: Use manage-lifecycle.py read --plan-id jwt-auth
+- **Expected**: Use `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id jwt-auth`
 - **Actual**: Direct file read attempted
 
 ### Root Cause Analysis
-Command is reading status.toon directly instead of using manage-lifecycle
-script. This bypasses audit trail and validation.
+Command is reading status.toon directly instead of using
+`python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read`.
+This bypasses audit trail and validation.
 
 ### Impact Assessment
 | Aspect | Impact |
@@ -338,11 +339,11 @@ script. This bypasses audit trail and validation.
 | Maintainability | Poor - mixed access patterns |
 
 ### Options
-1. **Use manage-lifecycle.py**: Consistent abstraction layer
+1. **Use planning:manage-lifecycle:manage-lifecycle**: Consistent abstraction layer
 2. **Proceed with warning**: Log deviation but continue
 
 ### Recommendation
-Use manage-lifecycle.py read for all status access
+Use `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read` for all status access
 
 ---
 **Verification Mode Active** - Awaiting user decision before proceeding.
@@ -351,7 +352,7 @@ Use manage-lifecycle.py read for all status access
 ### Example Post-Operation Audit
 
 ```
-User: (approved using manage-lifecycle.py)
+User: (approved using planning:manage-lifecycle:manage-lifecycle)
 
 Claude: Task TASK-001 completed successfully.
 

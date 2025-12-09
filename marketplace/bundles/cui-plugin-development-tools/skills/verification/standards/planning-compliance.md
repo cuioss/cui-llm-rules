@@ -50,26 +50,26 @@ Examples:
 
 | Tool | Prohibited Pattern | Correct Alternative |
 |------|-------------------|---------------------|
-| Read | `.plan/plans/{id}/status.toon` | `manage-lifecycle.py read --plan-id {id}` |
-| Read | `.plan/plans/{id}/config.toon` | `manage-config.py read --plan-id {id}` |
-| Read | `.plan/plans/{id}/work-log.toon` | `manage-work-log.py list --plan-id {id}` |
-| Read | `.plan/plans/{id}/goals/GOAL-*.toon` | `manage-goal.py read --plan-id {id} --id GOAL-001` |
-| Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `manage-task.py read --plan-id {id} --id TASK-001` |
-| Write | `.plan/plans/{id}/*` | Use appropriate manage-* create/update |
-| Edit | `.plan/plans/{id}/*` | Use appropriate manage-* update |
-| Glob | `.plan/plans/**/*.toon` | Use manage-* list operations |
-| Glob | `.plan/plans/{id}/goals/*` | `manage-goal.py list --plan-id {id}` |
-| Glob | `.plan/plans/{id}/tasks/*` | `manage-task.py list --plan-id {id}` |
-| Bash find | `find .plan/plans -name "*.toon"` | Use manage-* list operations |
-| Bash ls | `ls .plan/plans/{id}/tasks/` | `manage-task.py list --plan-id {id}` |
+| Read | `.plan/plans/{id}/status.toon` | `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id {id}` |
+| Read | `.plan/plans/{id}/config.toon` | `python3 .plan/execute-script.py planning:manage-config:manage-config read --plan-id {id}` |
+| Read | `.plan/plans/{id}/work-log.toon` | `python3 .plan/execute-script.py planning:manage-log:manage-work-log read --plan-id {id}` |
+| Read | `.plan/plans/{id}/goals/GOAL-*.toon` | `python3 .plan/execute-script.py planning:manage-goals:manage-goal get --plan-id {id} --number 1` |
+| Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task get --plan-id {id} --number 1` |
+| Write | `.plan/plans/{id}/*` | Use appropriate manage-* create/update via execute-script.py |
+| Edit | `.plan/plans/{id}/*` | Use appropriate manage-* update via execute-script.py |
+| Glob | `.plan/plans/**/*.toon` | Use manage-* list operations via execute-script.py |
+| Glob | `.plan/plans/{id}/goals/*` | `python3 .plan/execute-script.py planning:manage-goals:manage-goal findAll --plan-id {id}` |
+| Glob | `.plan/plans/{id}/tasks/*` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task list --plan-id {id}` |
+| Bash find | `find .plan/plans -name "*.toon"` | Use manage-* list operations via execute-script.py |
+| Bash ls | `ls .plan/plans/{id}/tasks/` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task list --plan-id {id}` |
 
 **No Exceptions**: All .plan file access must go through manage-* scripts. The following scripts provide complete coverage:
 
 | File | Read Script | Write Script |
 |------|-------------|--------------|
-| `request.md` | `manage-files.py read --plan-id {id} --file request.md` | `manage-files.py write --plan-id {id} --file request.md` |
-| `lessons-learned/*.md` | `manage-lesson.py get --id {lesson_id}` | `manage-lesson.py add` |
-| Any plan file | `manage-files.py read --plan-id {id} --file {path}` | `manage-files.py write --plan-id {id} --file {path}` |
+| `request.md` | `planning:manage-files:manage-files read --plan-id {id} --file request.md` | `planning:manage-files:manage-files write --plan-id {id} --file request.md` |
+| `lessons-learned/*.md` | `planning:manage-lessons:manage-lesson get --id {lesson_id}` | `planning:manage-lessons:manage-lesson add` |
+| Any plan file | `planning:manage-files:manage-files read --plan-id {id} --file {path}` | `planning:manage-files:manage-files write --plan-id {id} --file {path}` |
 
 **Detection Pattern**:
 
@@ -84,7 +84,7 @@ Direct .plan file access bypassing manage-* API
 ### Context
 - **Operation**: [Read/Write/Edit/Glob]
 - **Target**: [.plan/plans/{id}/status.toon]
-- **Expected**: Use manage-lifecycle.py read
+- **Expected**: Use `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read`
 - **Actual**: Direct file read attempted
 
 ### Root Cause Analysis
@@ -177,7 +177,19 @@ All marketplace script execution MUST use the universal executor pattern.
 python3 .plan/execute-script.py {notation} {subcommand} {args...}
 ```
 
-**Notation Format**: `{bundle}:{skill}` (e.g., `planning:manage-files`)
+**Notation Format**: `{bundle}:{skill}:{script}` (e.g., `planning:manage-files:manage-files`)
+
+**CRITICAL - Singular vs Plural Script Names**:
+
+| Skill Name (plural) | Script Name (SINGULAR) | Full Notation |
+|---------------------|------------------------|---------------|
+| `manage-goals` | `manage-goal` | `planning:manage-goals:manage-goal` |
+| `manage-tasks` | `manage-task` | `planning:manage-tasks:manage-task` |
+| `manage-lessons` | `manage-lesson` | `planning:manage-lessons:manage-lesson` |
+| `manage-lifecycle` | `manage-lifecycle` | `planning:manage-lifecycle:manage-lifecycle` |
+| `manage-config` | `manage-config` | `planning:manage-config:manage-config` |
+| `manage-files` | `manage-files` | `planning:manage-files:manage-files` |
+| `manage-log` | `manage-work-log` | `planning:manage-log:manage-work-log` |
 
 **Prohibited Operations** (direct script paths must use executor):
 
@@ -205,8 +217,8 @@ Direct script execution bypassing execute-script.py
 
 ### Context
 - **Operation**: Bash
-- **Target**: python3 {path}/manage-files.py add --plan-id my-plan
-- **Expected**: python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan
+- **Target**: `python3 {path}/manage-files.py add --plan-id my-plan`
+- **Expected**: `python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan`
 - **Actual**: Direct script path used
 
 ### Root Cause Analysis
@@ -418,7 +430,7 @@ Actively scan execution logs to detect script issues:
 
 ### Actual State
 ```toon
-[Output from manage-lifecycle.py read]
+[Output from planning:manage-lifecycle:manage-lifecycle read]
 ```
 
 ### Consistency Check
@@ -483,6 +495,8 @@ Claude uses: Read .plan/plans/my-plan/status.toon
 Should use: python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id my-plan
 ```
 
+**Note**: Script notation is `planning:manage-lifecycle:manage-lifecycle` (skill name matches script name).
+
 **Why It Matters**: Direct reads bypass the managed parser, may read stale data during atomic writes, and don't leverage script validation.
 
 ### Violation 2: Missing Work-Log Entry
@@ -508,8 +522,10 @@ Actual: current_phase=execute (not updated)
 
 ```
 Claude uses: Write .plan/plans/my-plan/tasks/TASK-003.toon
-Should use: python3 .plan/execute-script.py planning:manage-tasks:manage-task create --plan-id my-plan --title "..."
+Should use: python3 .plan/execute-script.py planning:manage-tasks:manage-task add --plan-id my-plan --title "..." --goal GOAL-1 --description "..." --steps "A" "B"
 ```
+
+**Note**: Script notation uses SINGULAR `manage-task` (not `manage-tasks`). Full notation: `planning:manage-tasks:manage-task`.
 
 **Why It Matters**: Bypasses numbering logic, validation, and work-log entry creation.
 
