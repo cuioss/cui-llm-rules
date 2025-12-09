@@ -1,7 +1,7 @@
 ---
 name: plan-type-javascript
 description: JavaScript plan type providing domain-specific configuration and refinement for JavaScript/npm projects
-allowed-tools: Read, Bash
+allowed-tools: Read, Bash, Task
 ---
 
 # Plan Type: JavaScript (`planning:plan-type-javascript`)

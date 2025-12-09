@@ -1,7 +1,7 @@
 ---
 name: plan-type-java
 description: Java plan type providing domain-specific configuration and refinement for Java/Maven/Gradle projects
-allowed-tools: Read, Bash
+allowed-tools: Read, Bash, Task
 ---
 
 # Plan Type: Java (`planning:plan-type-java`)

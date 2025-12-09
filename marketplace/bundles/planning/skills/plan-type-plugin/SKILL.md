@@ -1,7 +1,7 @@
 ---
 name: plan-type-plugin
 description: Plugin development plan type providing domain-specific configuration and refinement with /plugin-doctor verification
-allowed-tools: Read, Bash
+allowed-tools: Read, Bash, Task
 ---
 
 # Plan Type: Plugin Development (`planning:plan-type-plugin`)
