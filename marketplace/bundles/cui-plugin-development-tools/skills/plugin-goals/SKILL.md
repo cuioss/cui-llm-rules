@@ -102,7 +102,9 @@ python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
 
 ### Step 3b: Path-Multi Workflow
 
-For cross-cutting changes, perform comprehensive impact analysis:
+For cross-cutting changes, perform comprehensive impact analysis that produces **concrete file enumeration**.
+
+**CRITICAL**: Goals must contain explicit file paths. A goal that says "update all X" without listing the files is INVALID - it just restates the request.
 
 #### 3b.1: Load Marketplace Inventory
 
@@ -130,7 +132,7 @@ For each component in the inventory, **read and analyze** to determine if affect
 1. Read the component file
 2. Search for references to the changed entity
 3. Determine if update is required
-4. Document the finding
+4. **Record the file path if affected**
 
 **Analysis checklist per component**:
 - [ ] Does it reference the changed skill/command/agent?
@@ -138,35 +140,63 @@ For each component in the inventory, **read and analyze** to determine if affect
 - [ ] Does it follow the pattern being modified?
 - [ ] Does it output in the format being changed?
 
-#### 3b.3: Create Goals
+**Build affected files list** as you analyze:
+```
+affected_files:
+  bundle-a:
+    - path/to/file1.md (reason: uses JSON output)
+    - path/to/file2.md (reason: references changed pattern)
+  bundle-b:
+    - path/to/file3.md (reason: produces affected format)
+```
 
-**Goal 1: Core Changes**
+#### 3b.3: Create Goals with Enumeration
+
+**Goal Organization**: Create one goal per bundle (or per ~5-8 files if a bundle has many). Each goal MUST list the specific files to modify.
+
+**Goal Body Requirements** (all fields mandatory for Path-Multi):
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `files` | Explicit list of file paths | `marketplace/bundles/planning/agents/plan-refine-agent.md` |
+| `change_per_file` | What changes in each file | "Replace ```json output blocks with ```toon" |
+| `verification` | How to verify the change | "Grep for ```json returns 0 matches" |
+
+**Template**:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
   --plan-id {plan_id} \
-  --title "Implement core {change type}" \
-  --body "Primary implementation of the change:
-- Component: {primary component}
-- Path: {path}
-- Change: {what needs to change}
-- Standards: {applicable standards}"
+  --title "Update {bundle} {component-type}s for {change}" \
+  --body "Affected files:
+- {path/to/file1.md}
+- {path/to/file2.md}
+- {path/to/file3.md}
+
+Change per file: {specific change description}
+Verification: {how to verify completion}"
 ```
 
-**Goal N: Each Affected Component**
-
-For each component identified as affected:
-
+**Example** (correct):
 ```bash
 python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
-  --plan-id {plan_id} \
-  --title "Update {component-name} for {change}" \
-  --body "Update component to align with core change:
-- Component: {bundle}:{component}
-- Path: {path}
-- References to update: {list}
-- Verification: {how to verify}"
+  --plan-id migrate-json-to-toon \
+  --title "Update planning agents to TOON output" \
+  --body "Affected files:
+- marketplace/bundles/planning/agents/plan-init-agent.md
+- marketplace/bundles/planning/agents/plan-refine-agent.md
+- marketplace/bundles/planning/agents/plan-execute-agent.md
+
+Change per file: Replace output format from JSON to TOON in Return/Output sections
+Verification: grep -l 'status: success' returns all files, grep -l '\"status\":' returns none"
 ```
+
+**Anti-pattern** (INVALID - do not create goals like this):
+```
+--title "Update agent output formats to TOON"
+--body "Migrate all agent .md files to specify TOON output format"
+```
+This restates the request without enumeration. The goals phase added no information.
 
 **Continue to Step 4.**
 
@@ -194,13 +224,16 @@ plan_id: {plan_id}
 impact_path: {Single|Multi}
 
 goals_created[N]:
-- GOAL-1: {title}
-- GOAL-2: {title}
-- GOAL-3: {title}
+- GOAL-1: {title} ({file_count} files)
+- GOAL-2: {title} ({file_count} files)
+- GOAL-3: {title} ({file_count} files)
 
+total_files_affected: {sum of files across all goals}
 components_analyzed: {count for Path-Multi, 0 for Path-Single}
 lessons_recorded: {count}
 ```
+
+**Path-Multi Validation**: If `total_files_affected` is 0 or goals don't contain file paths, the decomposition is incomplete.
 
 ---
 
