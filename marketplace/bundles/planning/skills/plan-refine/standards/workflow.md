@@ -185,39 +185,31 @@ Order tasks based on:
 ### Input Handling
 - [ ] Accept `plan_id` parameter (never paths)
 - [ ] Read config.toon to get plan_type and build_system
-- [ ] Read all requirements via plan-requirements skill (findAll operation)
-- [ ] Fail if no requirements found with message: "Run plan-configure first"
+- [ ] Read all goals via manage-goals skill (findAll operation)
+- [ ] Fail if no goals found with message: "Run plan-init first"
 - [ ] Fail if config.toon missing with message: "Plan not configured"
 
 ### Domain Delegation
 - [ ] Select domain skill based on plan_type:
-  - `java` → `cui-java-expert:java-analysis`
-  - `javascript` → `cui-frontend-expert:js-analysis`
-  - `plugin-development` → `cui-plugin-development-tools:plugin-analysis`
+  - `java` → `cui-java-expert:java-plan`
+  - `javascript` → `cui-frontend-expert:js-plan`
+  - `plugin-development` → `cui-plugin-development-tools:plugin-plan`
   - `generic` → Handle directly (no delegation)
-- [ ] Call plan-type:specify to transform requirements to specifications
-- [ ] Call plan-type:plan to transform specifications to tasks
-
-### Specifications Creation
-- [ ] Write each specification via manage-specifications skill
-- [ ] Each specification references at least one requirement
-- [ ] Specifications numbered sequentially (SPEC-1, SPEC-2, etc.)
+- [ ] Call plan-type:plan to transform goals to tasks
 
 ### Tasks Creation
 - [ ] Write each task via manage-tasks skill
-- [ ] Each task references exactly one specification
+- [ ] Each task references at least one goal
 - [ ] Tasks include steps (atomic, verifiable, sequenced)
 - [ ] Tasks numbered sequentially (TASK-1, TASK-2, etc.)
 
 ### Traceability Validation
-- [ ] Every specification references existing requirements
-- [ ] Every task references existing specification
-- [ ] Every requirement has at least one specification
+- [ ] Every task references existing goals
+- [ ] Every goal has at least one task
 - [ ] Return traceability summary in output
 
 ### Integration
-- [ ] Write work-log entry after creating specifications
 - [ ] Write work-log entry after creating tasks
 - [ ] Record lesson-learned on any script/command failure
 - [ ] Transition phase from "refine" to "execute" via manage-lifecycle
-- [ ] Return `plan_id`, `specifications` count, `tasks` count, and `next_phase` in output
+- [ ] Return `plan_id`, `tasks` count, and `next_phase` in output

@@ -12,7 +12,6 @@
   "keywords": ["workflow", "task", "pr", "implementation", "quality", "orchestration"],
   "agents": [
     "./agents/plan-init-agent.md",
-    "./agents/plan-configure-agent.md",
     "./agents/plan-refine-agent.md"
   ],
   "commands": [
@@ -32,12 +31,10 @@
     "./skills/plan-type-java",
     "./skills/plan-type-javascript",
     "./skills/plan-init",
-    "./skills/plan-configure",
     "./skills/plan-refine",
     "./skills/plan-execute",
     "./skills/plan-finalize",
-    "./skills/manage-requirements",
-    "./skills/manage-specifications",
+    "./skills/manage-goals",
     "./skills/manage-tasks",
     "./skills/manage-files",
     "./skills/manage-config",

@@ -53,14 +53,12 @@ Examples:
 | Read | `.plan/plans/{id}/status.toon` | `manage-lifecycle.py read --plan-id {id}` |
 | Read | `.plan/plans/{id}/config.toon` | `manage-config.py read --plan-id {id}` |
 | Read | `.plan/plans/{id}/work-log.toon` | `manage-work-log.py list --plan-id {id}` |
-| Read | `.plan/plans/{id}/requirements/REQ-*.toon` | `manage-requirement.py read --plan-id {id} --id REQ-001` |
-| Read | `.plan/plans/{id}/specifications/SPEC-*.toon` | `manage-specification.py read --plan-id {id} --id SPEC-001` |
+| Read | `.plan/plans/{id}/goals/GOAL-*.toon` | `manage-goal.py read --plan-id {id} --id GOAL-001` |
 | Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `manage-task.py read --plan-id {id} --id TASK-001` |
 | Write | `.plan/plans/{id}/*` | Use appropriate manage-* create/update |
 | Edit | `.plan/plans/{id}/*` | Use appropriate manage-* update |
 | Glob | `.plan/plans/**/*.toon` | Use manage-* list operations |
-| Glob | `.plan/plans/{id}/requirements/*` | `manage-requirement.py list --plan-id {id}` |
-| Glob | `.plan/plans/{id}/specifications/*` | `manage-specification.py list --plan-id {id}` |
+| Glob | `.plan/plans/{id}/goals/*` | `manage-goal.py list --plan-id {id}` |
 | Glob | `.plan/plans/{id}/tasks/*` | `manage-task.py list --plan-id {id}` |
 | Bash find | `find .plan/plans -name "*.toon"` | Use manage-* list operations |
 | Bash ls | `ls .plan/plans/{id}/tasks/` | `manage-task.py list --plan-id {id}` |
@@ -460,7 +458,7 @@ When `/plan-manage` executes, verify after each action:
 |--------|------------------------|----------------------|
 | `init` | type=artifact, summary=plan created | phases[init]=in_progress |
 | configure complete | type=progress, summary=configuration complete | phases[init]=done, current_phase=refine |
-| `refine` | type=artifact per REQ/SPEC/TASK created | phases[refine] progress updates |
+| `refine` | type=artifact per GOAL/TASK created | phases[refine] progress updates |
 | refine complete | type=outcome, summary=refine complete | phases[refine]=done, current_phase=execute |
 
 ### plan-execute Command
@@ -490,7 +488,7 @@ Should use: python3 .plan/execute-script.py planning:manage-lifecycle:manage-lif
 ### Violation 2: Missing Work-Log Entry
 
 ```
-Operation: Created SPEC-001 specification
+Operation: Created GOAL-001 goal
 Work-log: No entry found for artifact creation
 ```
 

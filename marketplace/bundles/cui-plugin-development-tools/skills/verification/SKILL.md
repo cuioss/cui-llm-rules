@@ -216,7 +216,7 @@ This is the preferred pattern for all marketplace script execution.
 - Direct Read/Write/Edit of `.plan/plans/*/status.toon`
 - Direct Read/Write/Edit of `.plan/plans/*/config.toon`
 - Direct Read/Write/Edit of `.plan/plans/*/work-log.toon`
-- Direct access to requirements/specifications/tasks directories
+- Direct access to goals/tasks directories
 - Glob patterns targeting `.plan/plans/**/*.toon` or subdirectories
 - Bash find/ls commands scanning `.plan/plans/` structure
 - Missing work-log entry after significant operation

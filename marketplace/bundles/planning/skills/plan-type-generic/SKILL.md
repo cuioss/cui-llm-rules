@@ -47,11 +47,11 @@ allowed-tools: Read, Bash
 
 ---
 
-## Operation: specify
+## Operation: decompose
 
 **Input**: `plan_id`
 
-**Simple Behavior**: Creates 1:1 specification per requirement with minimal transformation.
+**Simple Behavior**: Creates 1:1 goal per request item with minimal transformation.
 
 ---
 
@@ -59,6 +59,6 @@ allowed-tools: Read, Bash
 
 **Input**: `plan_id`
 
-**Simple Behavior**: Creates single task per specification with basic steps:
+**Simple Behavior**: Creates single task per goal with basic steps:
 1. Execute task
 2. Verify result

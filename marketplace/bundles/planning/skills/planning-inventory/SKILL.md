@@ -17,9 +17,9 @@ Planning-related components are distributed across multiple bundles:
 | Bundle | Component Types |
 |--------|-----------------|
 | `planning` | Core infrastructure (plan-*, manage-*, *-workflow) |
-| `cui-java-expert` | java-plan, java-specify (skills + agents) |
-| `cui-frontend-expert` | js-plan, js-specify (skills + agents) |
-| `cui-plugin-development-tools` | plugin-plan, plugin-specify (skills + agents) |
+| `cui-java-expert` | java-plan, java-goals (skills + agents) |
+| `cui-frontend-expert` | js-plan, js-goals (skills + agents) |
+| `cui-plugin-development-tools` | plugin-plan, plugin-goals (skills + agents) |
 
 This skill provides a single command to discover all these components.
 
@@ -79,7 +79,7 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 
 ```json
 {
-  "patterns": ["plan-*", "manage-*", "*-workflow", "*-plan", "*-specify", "*-plan-*", "*-specify-*"],
+  "patterns": ["plan-*", "manage-*", "*-workflow", "*-plan", "*-goals", "*-plan-*", "*-goals-*"],
   "bundles_scanned": ["planning", "cui-java-expert", "cui-frontend-expert", "cui-plugin-development-tools"],
   "core": {
     "bundle": "planning",
@@ -91,8 +91,8 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
   "derived": [
     {
       "bundle": "cui-java-expert",
-      "agents": [{"name": "java-plan-agent", ...}, {"name": "java-specify-agent", ...}],
-      "skills": [{"name": "java-plan", ...}, {"name": "java-specify", ...}],
+      "agents": [{"name": "java-plan-agent", ...}, {"name": "java-goals-agent", ...}],
+      "skills": [{"name": "java-plan", ...}, {"name": "java-goals", ...}],
       ...
     },
     ...
@@ -111,8 +111,8 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 {
   "core_bundle": "planning",
   "core_components": [
-    {"type": "skills", "names": ["plan-init", "plan-configure", ...]},
-    {"type": "agents", "names": ["plan-init-agent", ...]},
+    {"type": "skills", "names": ["plan-init", "plan-refine", "plan-execute", ...]},
+    {"type": "agents", "names": ["plan-init-agent", "plan-refine-agent", ...]},
     {"type": "commands", "names": ["task-implement", ...]}
   ],
   "derived_bundles": [
@@ -129,8 +129,8 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 
 | Pattern | Examples |
 |---------|----------|
-| `plan-*` | plan-init, plan-configure, plan-refine, plan-execute, plan-finalize |
-| `manage-*` | manage-tasks, manage-specifications, manage-requirements, manage-config |
+| `plan-*` | plan-init, plan-refine, plan-execute, plan-finalize |
+| `manage-*` | manage-tasks, manage-goals, manage-config, manage-lifecycle |
 | `*-workflow` | pr-workflow, git-workflow, sonar-workflow |
 | `task-*` | task-implement |
 | `pr-*` | pr-doctor |
@@ -140,9 +140,9 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 
 | Bundle | Agents | Skills |
 |--------|--------|--------|
-| cui-java-expert | java-plan-agent, java-specify-agent | java-plan, java-specify |
-| cui-frontend-expert | js-plan-agent, js-specify-agent | js-plan, js-specify |
-| cui-plugin-development-tools | plugin-plan-agent, plugin-specify-agent | plugin-plan, plugin-specify |
+| cui-java-expert | java-plan-agent, java-goals-agent | java-plan, java-goals |
+| cui-frontend-expert | js-plan-agent, js-goals-agent | js-plan, js-goals |
+| cui-plugin-development-tools | plugin-plan-agent, plugin-goals-agent | plugin-plan, plugin-goals |
 
 ## Dependencies
 

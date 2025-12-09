@@ -26,15 +26,15 @@ from pathlib import Path
 
 # Planning-related name patterns
 PLANNING_PATTERNS = [
-    "plan-*",       # Core planning skills (plan-init, plan-configure, etc.)
-    "manage-*",     # Management skills (manage-tasks, manage-specs, etc.)
+    "plan-*",       # Core planning skills (plan-init, plan-refine, etc.)
+    "manage-*",     # Management skills (manage-tasks, manage-goals, etc.)
     "*-workflow",   # Workflow skills (pr-workflow, git-workflow, etc.)
     "task-*",       # Task commands (task-implement)
     "pr-*",         # PR commands (pr-doctor) - note: also matches pr-workflow
     "*-plan",       # Derived plan skills (java-plan, js-plan, etc.)
-    "*-specify",    # Derived specify skills
+    "*-goals",      # Derived goals skills (java-goals, js-goals, etc.)
     "*-plan-*",     # Derived agents (java-plan-agent, etc.)
-    "*-specify-*",  # Derived agents (java-specify-agent, etc.)
+    "*-goals-*",    # Derived agents (java-goals-agent, etc.)
 ]
 
 # Bundles that contain planning-related components

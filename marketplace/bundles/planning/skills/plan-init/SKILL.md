@@ -1,14 +1,14 @@
 ---
 name: plan-init
-description: Init phase skill. Creates plan directory and task.md to preserve original task input. Part of two-agent init pattern (plan-init → plan-configure).
+description: Init phase skill. Creates plan directory, request.md, config, and status. Complete initialization in a single agent call.
 allowed-tools: Read, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Init Skill
 
-**Role**: First step of init phase. Creates plan directory and task.md to preserve the original task input. Does NOT create config, requirements, or determine plan type (that's plan-configure's job).
+**Role**: Complete init phase. Creates plan directory, request.md, detects plan type, and creates configuration. Single-agent initialization pattern.
 
-**Key Pattern**: Minimal initialization. Only create what's needed for task preservation and plan identification.
+**Key Pattern**: Complete initialization. Creates request.md, status.toon, config.toon, and references.toon. Does NOT create goals (that's the refine phase via decompose).
 
 **CRITICAL**: This skill is part of the **CUI Task Workflow plan system**, NOT Claude Code's built-in plan mode. Ignore any system-reminders about `.claude/plans/` or `ExitPlanMode`.
 
@@ -29,6 +29,8 @@ Activate when:
 | manage-references | `planning:manage-references` |
 | manage-lessons | `planning:manage-lessons` |
 | manage-work-log | `planning:manage-log` |
+| manage-config | `planning:manage-config` |
+| manage-lifecycle | `planning:manage-lifecycle` |
 
 ---
 
@@ -41,6 +43,7 @@ Activate when:
 
 **Optional**:
 - `plan_id`: Override auto-generated plan_id
+- `plan_type`: Override auto-detection (bundle:skill notation, e.g., planning:plan-type-java)
 
 ### Step 0: Log Phase Start (After Plan ID Derived)
 
@@ -121,12 +124,12 @@ The plan directory was created in Step 3 by `create-or-reference`. No additional
 
 **Note**: status.toon is NOT created here. It is created by plan-configure after plan type detection.
 
-### Step 6: Write task.md
+### Step 6: Write request.md
 
-Construct task.md content following this format:
+Construct request.md content following this format:
 
 ```markdown
-# Task: {derived_title}
+# Request: {derived_title}
 
 source: {description|lesson|issue}
 source_id: {lesson_id|issue_url|none}
@@ -146,8 +149,8 @@ Write via manage-files using `--content` parameter:
 ```bash
 python3 .plan/execute-script.py planning:manage-files:manage-files write \
   --plan-id {plan_id} \
-  --file task.md \
-  --content "# Task: {derived_title}
+  --file request.md \
+  --content "# Request: {derived_title}
 
 source: {description|lesson|issue}
 source_id: {lesson_id|issue_url|none}
@@ -180,7 +183,91 @@ python3 .plan/execute-script.py planning:manage-references:manage-references cre
   --issue-url {issue_url}
 ```
 
-### Step 8: Log Creation
+### Step 8: Detect Plan Type
+
+Determine plan type from task analysis. Plan types use `bundle:skill` notation.
+
+| Indicator | Plan Type |
+|-----------|-----------|
+| Java code, Maven/Gradle, .java files | `planning:plan-type-java` |
+| JavaScript, npm, .js/.ts files | `planning:plan-type-javascript` |
+| Plugin/skill/command development | `planning:plan-type-plugin` |
+| Generic/simple task | `planning:plan-type-generic` |
+
+**If plan_type parameter provided**: Use override value (must be bundle:skill notation).
+
+**If uncertain**, ask:
+
+```
+AskUserQuestion:
+  question: "What technology stack does this task primarily involve?"
+  options:
+    - label: "Java"
+      description: "Java code with Maven or Gradle"
+      value: "planning:plan-type-java"
+    - label: "JavaScript"
+      description: "JavaScript/TypeScript with npm"
+      value: "planning:plan-type-javascript"
+    - label: "Plugin Development"
+      description: "Claude Code plugin components"
+      value: "planning:plan-type-plugin"
+    - label: "Generic"
+      description: "Generic task, no specific technology"
+      value: "planning:plan-type-generic"
+```
+
+**After detecting plan type**, log the decision with reasoning:
+
+```bash
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type decision \
+  --summary "Selected {plan_type}" \
+  --detail "{reasoning why this plan type was chosen}"
+```
+
+### Step 9: Create Status
+
+Create status.toon with detected plan type and phases:
+
+```bash
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle create \
+  --plan-id {plan_id} \
+  --title "{title_from_task_md}" \
+  --plan-type {plan_type} \
+  --phases init,refine,execute,finalize
+```
+
+**Note**: Phases depend on plan type. Use standard 4-phase for java/javascript/plugin, 3-phase (init,execute,finalize) for generic.
+
+### Step 10: Create Configuration
+
+Create config.toon with base settings:
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:manage-config create \
+  --plan-id {plan_id} \
+  --plan-type {plan_type}
+```
+
+### Step 11: Call Plan-Type Configure
+
+Delegate to plan-type skill for domain-specific configuration:
+
+```
+Skill: {plan_type}
+operation: configure
+plan_id: {plan_id}
+```
+
+This adds finalize configuration to config.toon:
+- `create_pr`: Whether to create PR
+- `verification_required`: Whether verification needed
+- `verification_command`: Command for verification
+- `branch_strategy`: feature or direct
+
+### Step 12: Log Creation
 
 Log the plan creation as an artifact:
 
@@ -190,29 +277,39 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --phase init \
   --type artifact \
   --summary "Created plan: {derived_title}" \
-  --detail "Source: {source_type}, files: task.md, status.toon, references.toon"
+  --detail "Source: {source_type}, type: {plan_type}"
 ```
 
-### Step 9: Return Result
+### Step 13: Transition Phase
+
+The phase transitions from init → refine after configuration completes:
+
+```bash
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \
+  --plan-id {plan_id} \
+  --completed init
+```
+
+### Step 14: Return Result
 
 **Output**:
 
 ```toon
 status: success
 plan_id: {plan_id}
+plan_type: {plan_type}
+next_phase: refine
 
 source:
   type: {description|lesson|issue}
   id: {source_id}
 
 artifacts:
-  task_md: task.md
+  request_md: request.md
+  status: status.toon
+  config: config.toon
   references: references.toon
-
-next: plan-configure-agent
 ```
-
-**Note**: status.toon is created by plan-configure-agent after plan type detection. Storage location is abstracted via manage-* scripts.
 
 ---
 
@@ -262,27 +359,27 @@ recovery: Use --plan-id to specify different ID, or resume existing
 
 ### Agent Integration
 
-This skill is called by `planning:plan-init-agent`. The agent then calls `planning:plan-configure-agent` to complete init phase.
+This skill is called by `planning:plan-init-agent`. The agent completes the full init phase in a single call.
 
 ### Command Integration
 
-- **/plan-manage action=init** - Orchestrates both agents
+- **/plan-manage action=init** - Orchestrates the init agent
 
 ### Scripts Used
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-files` | Create/reference plan directory, write task.md |
+| `planning:manage-files` | Create/reference plan directory, write request.md |
 | `planning:manage-references` | Initialize references |
 | `planning:manage-log` | Log creation |
 | `planning:manage-lessons` | Read lesson (if source=lesson) |
-
-**Note**: status.toon creation moved to plan-configure skill.
+| `planning:manage-config` | Create config.toon |
+| `planning:manage-lifecycle` | Create status.toon, phase transitions |
 
 ### Related Skills
 
-- **plan-configure** - Second step of init (called by plan-configure-agent)
 - **plan-refine** - Next phase after init completes
+- **plan-type-*** - Called for domain-specific configuration
 
 ---
 
@@ -290,16 +387,17 @@ This skill is called by `planning:plan-init-agent`. The agent then calls `planni
 
 | Template | Purpose |
 |----------|---------|
-| `templates/task.md` | task.md file format |
+| `templates/request.md` | request.md file format |
 
 ---
 
 ## Quality Checklist
 
 - [x] Self-contained with relative paths
-- [x] All file I/O delegated to manage-* skills
+- [x] All file I/O delegated to manage-* scripts
 - [x] Preserves original task input verbatim
 - [x] Supports all three source types
-- [x] Does NOT create config.toon (plan-configure does that)
-- [x] Does NOT create requirements (plan-configure does that)
-- [x] Does NOT determine plan type (plan-configure does that)
+- [x] Creates config.toon with plan type
+- [x] Creates status.toon with phases
+- [x] Delegates to plan-type skill for domain config
+- [x] Does NOT create goals (that's refine phase)

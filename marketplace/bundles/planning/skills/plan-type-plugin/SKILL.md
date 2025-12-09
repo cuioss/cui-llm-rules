@@ -35,7 +35,7 @@ allowed-tools: Read, Bash
 | Technology | none |
 | Verification | `/cui-plugin-development-tools:plugin-doctor` |
 | PR Workflow | false |
-| Specify Agent | `cui-plugin-development-tools:plugin-specify-agent` |
+| Goals Agent | `cui-plugin-development-tools:plugin-goals-agent` |
 | Plan Agent | `cui-plugin-development-tools:plugin-plan-agent` |
 
 ---
@@ -126,9 +126,9 @@ python3 .plan/execute-script.py planning:manage-config:manage-config set \
 
 ---
 
-## Operation: specify
+## Operation: decompose
 
-**Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
+**Input**: `plan_id`
 
 **Before delegation**, log:
 ```bash
@@ -136,15 +136,14 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
-  --summary "Delegating to plugin-specify-agent" \
-  --detail "requirement_id={requirement_id|batch}"
+  --summary "Delegating to plugin-goals-agent" \
+  --detail "decomposing request into goals"
 ```
 
 **Delegation**:
 ```
-Task(cui-plugin-development-tools:plugin-specify-agent,
-     plan_id={plan_id},
-     requirement_id={requirement_id})  # omit for batch
+Task(cui-plugin-development-tools:plugin-goals-agent,
+     plan_id={plan_id})
 ```
 
 **After delegation**, log outcome:
@@ -153,13 +152,13 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
-  --summary "plugin-specify-agent completed: {spec_count} specs created" \
+  --summary "plugin-goals-agent completed: {goal_count} goals created" \
   --detail "lessons_recorded={count}"
 ```
 
-**Returns**: `{status, spec_ids[], lessons_recorded}`
+**Returns**: `{status, goal_ids[], lessons_recorded}`
 
-The agent analyzes marketplace structure, creates specifications with:
+The agent analyzes marketplace structure, creates goals with:
 - Component type (skill, command, agent, script)
 - Target bundle location
 - Frontmatter requirements
@@ -170,7 +169,7 @@ The agent analyzes marketplace structure, creates specifications with:
 
 ## Operation: plan
 
-**Input**: `plan_id`, `specification_id?` (optional for single-item mode)
+**Input**: `plan_id`, `goal_id?` (optional for single-item mode)
 
 **Before delegation**, log:
 ```bash
@@ -179,14 +178,14 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --phase refine \
   --type progress \
   --summary "Delegating to plugin-plan-agent" \
-  --detail "specification_id={specification_id|batch}"
+  --detail "goal_id={goal_id|batch}"
 ```
 
 **Delegation**:
 ```
 Task(cui-plugin-development-tools:plugin-plan-agent,
      plan_id={plan_id},
-     specification_id={specification_id})  # omit for batch
+     goal_id={goal_id})  # omit for batch
 ```
 
 **After delegation**, log outcome:

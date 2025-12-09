@@ -4,7 +4,7 @@ Manage implementation tasks with sequential sub-steps within a plan.
 
 Single CLI with subcommands for CRUD operations on task files.
 Uses TOON format for both storage and output.
-Each task must reference exactly one specification.
+Each task must reference exactly one goal.
 
 Subcommands:
   add              - Add a new task
@@ -66,64 +66,64 @@ def slugify(title: str, max_length: int = 40) -> str:
     return slug
 
 
-def validate_specification(spec_str: str) -> str:
-    """Validate specification reference.
+def validate_goal(goal_str: str) -> str:
+    """Validate goal reference.
 
     Args:
-        spec_str: SPEC reference (e.g., "SPEC-1")
+        goal_str: GOAL reference (e.g., "GOAL-1")
 
     Returns:
-        Validated SPEC reference
+        Validated GOAL reference
 
     Raises:
         ValueError: If format is invalid
     """
-    if not spec_str or not spec_str.strip():
-        raise ValueError("Specification reference is required")
+    if not goal_str or not goal_str.strip():
+        raise ValueError("Goal reference is required")
 
-    spec_str = spec_str.strip()
-    pattern = re.compile(r'^SPEC-\d+$')
-    if not pattern.match(spec_str):
-        raise ValueError(f"Invalid specification format: {spec_str}. Expected SPEC-N (e.g., SPEC-1)")
+    goal_str = goal_str.strip()
+    pattern = re.compile(r'^GOAL-\d+$')
+    if not pattern.match(goal_str):
+        raise ValueError(f"Invalid goal format: {goal_str}. Expected GOAL-N (e.g., GOAL-1)")
 
-    return spec_str
+    return goal_str
 
 
-def get_specifications_dir(plan_id: str) -> Path:
-    """Get the specifications directory for a plan.
+def get_goals_dir(plan_id: str) -> Path:
+    """Get the goals directory for a plan.
 
     Args:
         plan_id: The plan identifier
 
     Returns:
-        Path to specifications directory
+        Path to goals directory
     """
-    return base_path('plans', plan_id, 'specifications')
+    return base_path('plans', plan_id, 'goals')
 
 
-def find_specification_file(spec_dir: Path, number: int) -> Optional[Path]:
-    """Find specification file by number.
+def find_goal_file(goal_dir: Path, number: int) -> Optional[Path]:
+    """Find goal file by number.
 
     Args:
-        spec_dir: Specifications directory
-        number: Specification number
+        goal_dir: Goals directory
+        number: Goal number
 
     Returns:
         Path to file or None if not found
     """
-    pattern = f"SPEC-{number:03d}-*.toon"
-    matches = list(spec_dir.glob(pattern))
+    pattern = f"GOAL-{number:03d}-*.toon"
+    matches = list(goal_dir.glob(pattern))
     return matches[0] if matches else None
 
 
-def parse_specification_file(content: str) -> dict:
-    """Parse a specification TOON file into a dictionary.
+def parse_goal_file(content: str) -> dict:
+    """Parse a goal TOON file into a dictionary.
 
     Args:
         content: File content
 
     Returns:
-        Dictionary with specification fields
+        Dictionary with goal fields
     """
     result = {}
     lines = content.split('\n')
@@ -162,40 +162,39 @@ def parse_specification_file(content: str) -> dict:
     return result
 
 
-def get_specification_context(plan_id: str, spec_ref: str) -> Optional[dict]:
-    """Get specification details for including in task context.
+def get_goal_context(plan_id: str, goal_ref: str) -> Optional[dict]:
+    """Get goal details for including in task context.
 
     Args:
         plan_id: The plan identifier
-        spec_ref: Specification reference (e.g., "SPEC-1")
+        goal_ref: Goal reference (e.g., "GOAL-1")
 
     Returns:
-        Dictionary with specification context or None if not found
+        Dictionary with goal context or None if not found
     """
-    # Extract number from SPEC-N reference
-    match = re.match(r'^SPEC-(\d+)$', spec_ref)
+    # Extract number from GOAL-N reference
+    match = re.match(r'^GOAL-(\d+)$', goal_ref)
     if not match:
         return None
 
-    spec_num = int(match.group(1))
-    spec_dir = get_specifications_dir(plan_id)
+    goal_num = int(match.group(1))
+    goal_dir = get_goals_dir(plan_id)
 
-    if not spec_dir.exists():
+    if not goal_dir.exists():
         return None
 
-    spec_file = find_specification_file(spec_dir, spec_num)
-    if not spec_file:
+    goal_file = find_goal_file(goal_dir, goal_num)
+    if not goal_file:
         return None
 
     try:
-        content = spec_file.read_text(encoding='utf-8')
-        spec = parse_specification_file(content)
+        content = goal_file.read_text(encoding='utf-8')
+        goal = parse_goal_file(content)
         return {
-            'specification_found': True,
-            'specification_number': spec.get('number', spec_num),
-            'specification_title': spec.get('title', ''),
-            'specification_requirements': spec.get('requirements', ''),
-            'specification_body': spec.get('body', '')
+            'goal_found': True,
+            'goal_number': goal.get('number', goal_num),
+            'goal_title': goal.get('title', ''),
+            'goal_body': goal.get('body', '')
         }
     except Exception:
         return None
@@ -288,7 +287,7 @@ def format_task_file(task: dict) -> str:
         f"number: {task['number']}",
         f"title: {task['title']}",
         f"status: {task['status']}",
-        f"specification: {task['specification']}",
+        f"goal: {task['goal']}",
         f"created: {task['created']}",
         f"updated: {task['updated']}",
         "",
@@ -417,7 +416,7 @@ def output_toon(data: dict) -> None:
         lines.append("")
         lines.append("task:")
         task = data['task']
-        for key in ['number', 'title', 'specification', 'status', 'current_step', 'created', 'updated', 'step_count']:
+        for key in ['number', 'title', 'goal', 'status', 'current_step', 'created', 'updated', 'step_count']:
             if key in task:
                 lines.append(f"  {key}: {task[key]}")
         if 'description' in task:
@@ -445,9 +444,8 @@ def output_toon(data: dict) -> None:
         else:
             lines.append("next:")
             nxt = data['next']
-            for key in ['task_number', 'task_title', 'specification', 'step_number', 'step_title',
-                        'specification_found', 'specification_number', 'specification_title',
-                        'specification_requirements', 'specification_body']:
+            for key in ['task_number', 'task_title', 'goal', 'step_number', 'step_title',
+                        'goal_found', 'goal_number', 'goal_title', 'goal_body']:
                 if key in nxt:
                     val = nxt[key]
                     # Convert Python booleans to lowercase for TOON format
@@ -467,9 +465,9 @@ def output_toon(data: dict) -> None:
     if 'tasks_table' in data:
         tasks = data['tasks_table']
         lines.append("")
-        lines.append(f"tasks[{len(tasks)}]{{number,title,specification,status,progress}}:")
+        lines.append(f"tasks[{len(tasks)}]{{number,title,goal,status,progress}}:")
         for t in tasks:
-            lines.append(f"{t['number']},{t['title']},{t['specification']},{t['status']},{t['progress']}")
+            lines.append(f"{t['number']},{t['title']},{t['goal']},{t['status']},{t['progress']}")
 
     print('\n'.join(lines))
 
@@ -485,9 +483,9 @@ def output_error(message: str) -> None:
 
 def cmd_add(args) -> int:
     """Handle 'add' subcommand."""
-    # Validate specification
+    # Validate goal
     try:
-        spec = validate_specification(args.specification)
+        goal = validate_goal(args.goal)
     except ValueError as e:
         output_error(str(e))
         return 1
@@ -522,7 +520,7 @@ def cmd_add(args) -> int:
         'number': number,
         'title': args.title,
         'status': 'pending',
-        'specification': spec,
+        'goal': goal,
         'created': now,
         'updated': now,
         'description': args.description,
@@ -545,7 +543,7 @@ def cmd_add(args) -> int:
         'task': {
             'number': number,
             'title': args.title,
-            'specification': spec,
+            'goal': goal,
             'status': 'pending',
             'step_count': len(steps)
         }
@@ -575,9 +573,9 @@ def cmd_update(args) -> int:
         task['title'] = args.title
     if args.description:
         task['description'] = args.description
-    if args.specification:
+    if args.goal:
         try:
-            task['specification'] = validate_specification(args.specification)
+            task['goal'] = validate_goal(args.goal)
         except ValueError as e:
             output_error(str(e))
             return 1
@@ -614,7 +612,7 @@ def cmd_update(args) -> int:
         'task': {
             'number': task['number'],
             'title': task['title'],
-            'specification': task['specification'],
+            'goal': task['goal'],
             'status': task['status']
         }
     })
@@ -660,11 +658,11 @@ def cmd_list(args) -> int:
     task_dir = get_tasks_dir(args.plan_id)
     all_tasks = get_all_tasks(task_dir)
 
-    # Filter by specification if specified
-    if args.specification:
+    # Filter by goal if specified
+    if args.goal:
         all_tasks = [
             (p, t) for p, t in all_tasks
-            if t.get('specification') == args.specification
+            if t.get('goal') == args.goal
         ]
 
     # Get filtered list for status filtering
@@ -672,7 +670,7 @@ def cmd_list(args) -> int:
     if args.status and args.status != 'all':
         filtered_tasks = [(p, t) for p, t in all_tasks if t.get('status') == args.status]
 
-    # Compute counts from all (not status-filtered, but specification-filtered)
+    # Compute counts from all (not status-filtered, but goal-filtered)
     pending = sum(1 for _, t in all_tasks if t.get('status') == 'pending')
     in_progress = sum(1 for _, t in all_tasks if t.get('status') == 'in_progress')
     done = sum(1 for _, t in all_tasks if t.get('status') == 'done')
@@ -685,7 +683,7 @@ def cmd_list(args) -> int:
         table.append({
             'number': task['number'],
             'title': task['title'],
-            'specification': task.get('specification', ''),
+            'goal': task.get('goal', ''),
             'status': task['status'],
             'progress': f"{completed}/{total}"
         })
@@ -726,7 +724,7 @@ def cmd_get(args) -> int:
         'task': {
             'number': task['number'],
             'title': task['title'],
-            'specification': task.get('specification', ''),
+            'goal': task.get('goal', ''),
             'status': task['status'],
             'current_step': task.get('current_step', 1),
             'created': task.get('created', ''),
@@ -816,7 +814,7 @@ def cmd_next(args) -> int:
         'next': {
             'task_number': next_task['number'],
             'task_title': next_task['title'],
-            'specification': next_task.get('specification', ''),
+            'goal': next_task.get('goal', ''),
             'step_number': next_step['number'],
             'step_title': next_step['title']
         },
@@ -828,14 +826,14 @@ def cmd_next(args) -> int:
         }
     }
 
-    # Include specification context if requested
+    # Include goal context if requested
     if getattr(args, 'include_context', False):
-        spec_ref = next_task.get('specification', '')
-        spec_context = get_specification_context(args.plan_id, spec_ref)
-        if spec_context:
-            result['next'].update(spec_context)
+        goal_ref = next_task.get('goal', '')
+        goal_context = get_goal_context(args.plan_id, goal_ref)
+        if goal_context:
+            result['next'].update(goal_context)
         else:
-            result['next']['specification_found'] = False
+            result['next']['goal_found'] = False
 
     output_toon(result)
     return 0
@@ -1169,8 +1167,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_add = subparsers.add_parser('add', help='Add a new task')
     p_add.add_argument('--plan-id', required=True, help='Plan identifier')
     p_add.add_argument('--title', required=True, help='Task title')
-    p_add.add_argument('--specification', required=True,
-                       help='Specification reference (e.g., SPEC-1)')
+    p_add.add_argument('--goal', required=True,
+                       help='Specification reference (e.g., GOAL-1)')
     p_add.add_argument('--description', required=True, help='Task description')
     p_add.add_argument('--steps', nargs='+', required=True,
                        help='Step titles (space-separated, order matters)')
@@ -1181,7 +1179,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_update.add_argument('--number', required=True, type=int, help='Task number')
     p_update.add_argument('--title', help='New title')
     p_update.add_argument('--description', help='New description')
-    p_update.add_argument('--specification', help='New specification reference')
+    p_update.add_argument('--goal', help='New goal reference')
     p_update.add_argument('--status', help='New status (pending/in_progress/done/blocked)')
 
     # remove
@@ -1194,7 +1192,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_list.add_argument('--plan-id', required=True, help='Plan identifier')
     p_list.add_argument('--status', choices=['pending', 'in_progress', 'done', 'blocked', 'all'],
                         default='all', help='Filter by status')
-    p_list.add_argument('--specification', help='Filter by specification reference')
+    p_list.add_argument('--goal', help='Filter by goal reference')
 
     # get
     p_get = subparsers.add_parser('get', help='Get a single task')
@@ -1205,7 +1203,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_next = subparsers.add_parser('next', help='Get next pending task/step')
     p_next.add_argument('--plan-id', required=True, help='Plan identifier')
     p_next.add_argument('--include-context', action='store_true',
-                        help='Include specification details in output')
+                        help='Include goal details in output')
 
     # step-start
     p_step_start = subparsers.add_parser('step-start', help='Mark a step as in_progress')

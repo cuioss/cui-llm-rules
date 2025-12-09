@@ -1,42 +1,26 @@
 ---
-name: plugin-specify
-description: Analyze plugin codebase and create specifications from requirements with direct storage
+name: plugin-goals
+description: Analyze plugin codebase and decompose request into goals
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-# Plugin Specify Skill
+# Plugin Goals Skill
 
-**Role**: Domain analysis skill for plugin development tasks. Transforms requirements into specifications by analyzing the marketplace structure and writing SPECs directly.
+**Role**: Domain analysis skill for plugin development tasks. Transforms the request into goals by analyzing the marketplace structure and writing GOALs directly.
 
-**Key Pattern**: Direct storage - specifications are written immediately via `manage-specifications` script.
+**Key Pattern**: Direct storage - goals are written immediately via `manage-goals` script.
 
-## Operation: specify
+## Operation: decompose
 
 **Input**:
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `requirement_id` | string | No | Single REQ ID (omit for batch - queries all pending) |
 
 **Process**:
 
-### Step 1: Load Requirements
-
-**Batch mode** (no requirement_id):
-```bash
-python3 .plan/execute-script.py planning:manage-requirements:manage-requirement findAll \
-  --plan-id {plan_id}
-```
-
-**Single mode** (requirement_id provided):
-```bash
-python3 .plan/execute-script.py planning:manage-requirements:manage-requirement get \
-  --plan-id {plan_id} \
-  --number {requirement_id}
-```
-
-### Step 2: Load Context
+### Step 1: Load Request Context
 
 Read plan context files:
 ```
@@ -45,11 +29,11 @@ Read {plan_dir}/config.toon    # build_system, plan_type
 Read {plan_dir}/references.toon # issue_context if available
 ```
 
-### Step 3: For Each Requirement
+Parse the request to identify what needs to be accomplished.
 
-#### 3a. Analyze Marketplace Structure
+### Step 2: Analyze Marketplace Structure
 
-Parse requirement intent and explore affected plugin components:
+Parse request intent and explore affected plugin components:
 
 **Bundle Detection**:
 ```bash
@@ -72,19 +56,23 @@ Read {component-path}
 - Reference document needs
 - Complexity assessment
 
-#### 3b. Create Specification
+### Step 3: Decompose Into Goals
 
-Write specification with plugin-specific technical details:
+Break the request into discrete, achievable goals. Each goal should be:
+- **Independent**: Can be implemented without other goals completing first (when possible)
+- **Testable**: Has clear completion criteria
+- **Sized**: Reasonable scope (not too large, not too small)
+
+For each goal identified:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:manage-specification add \
+python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
   --plan-id {plan_id} \
-  --title "{component} implementation" \
-  --requirements "REQ-{n}" \
-  --body "{Plugin-specific technical specification}"
+  --title "{goal title}" \
+  --body "{Plugin-specific technical goal description}"
 ```
 
-**Specification Body Content**:
+**Goal Body Content**:
 - Component type (skill, command, agent, script)
 - Target bundle
 - Target path (e.g., `marketplace/bundles/{bundle}/skills/...`)
@@ -92,33 +80,43 @@ python3 .plan/execute-script.py planning:manage-specifications:manage-specificat
 - Frontmatter requirements
 - Standards to follow
 
-#### 3c. Record Issues as Lessons
+### Step 4: Record Issues as Lessons
 
 On unexpected structure or ambiguity:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name plugin-specify \
+  --component-name plugin-goals \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
 ```
 
-### Step 4: Return Results
+### Step 5: Return Results
 
 **Output**:
 ```toon
 status: success
 plan_id: {plan_id}
 
-specs_created[N]:
-- SPEC-1
-- SPEC-2
-- SPEC-3
+goals_created[N]:
+- GOAL-1
+- GOAL-2
+- GOAL-3
 
 lessons_recorded: {count}
 ```
+
+---
+
+## Goal Decomposition Patterns
+
+| Request Pattern | Typical Goals |
+|-----------------|---------------|
+| "Add new skill" | 1. Create SKILL.md 2. Add standards documents 3. Create scripts 4. Update plugin.json |
+| "Add new command" | 1. Create command markdown 2. Implement skill delegation 3. Update plugin.json |
+| "Add new agent" | 1. Create agent markdown 2. Define tool requirements 3. Update plugin.json |
 
 ---
 
@@ -126,10 +124,10 @@ lessons_recorded: {count}
 
 | Type | Indicators | Example |
 |------|------------|---------|
-| `skill` | SKILL.md, standards, references | java-specify |
+| `skill` | SKILL.md, standards, references | java-goals |
 | `command` | Slash command, user-facing | plugin-doctor.md |
 | `agent` | Autonomous execution, tools | java-implement-agent.md |
-| `script` | Python/Bash automation | manage-specification.py |
+| `script` | Python/Bash automation | manage-goal.py |
 
 ---
 
@@ -204,11 +202,10 @@ If multiple components match:
 
 ## Integration
 
-**Caller**: `cui-plugin-development-tools:plugin-specify-agent`
+**Caller**: `cui-plugin-development-tools:plugin-goals-agent`
 
 **Scripts Used**:
-- `planning:manage-requirements` - Load requirements
-- `planning:manage-specifications` - Create specifications
+- `planning:manage-goals` - Create goals
 - `planning:manage-lessons` - Record lessons on issues
 
 **Standards Referenced**:

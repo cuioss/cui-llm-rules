@@ -8,7 +8,7 @@ allowed-tools: Read
 
 **Role**: API contract definition for plan-type skills. This skill defines the interface that all plan-type skills must implement.
 
-**Key Principle**: Plan-type skills are **thin orchestrators** that delegate to domain agents. Domain agents analyze the codebase and write SPECs/TASKs directly via manage-* scripts.
+**Key Principle**: Plan-type skills are **thin orchestrators** that delegate to domain agents. Domain agents analyze the codebase and write GOALs/TASKs directly via manage-* scripts.
 
 ## API Contract Overview
 
@@ -16,11 +16,11 @@ All plan-type skills implement these operations:
 
 | Operation | Input | Output | Caller | When |
 |-----------|-------|--------|--------|------|
-| `configure` | `plan_id` | References + config updated | plan-configure | After type detection |
-| `specify` | `plan_id`, `requirement_id?` | SPEC files created (via delegation) | plan-refine | Refine phase (step 1) |
-| `plan` | `plan_id`, `specification_id?` | TASK files created (via delegation) | plan-refine | Refine phase (step 2) |
+| `configure` | `plan_id` | References + config updated | plan-init | During initialization |
+| `decompose` | `plan_id` | GOAL files created (via delegation) | plan-refine | Refine phase (step 1) |
+| `plan` | `plan_id`, `goal_id?` | TASK files created (via delegation) | plan-refine | Refine phase (step 2) |
 
-**Traceability Flow**: Requirements → Specifications → Tasks (each task references its specification)
+**Traceability Flow**: Request → Goals → Tasks (each task references its goal)
 
 **Batch + Single Mode**:
 - `plan_id` only → batch mode (processes all pending items)
@@ -49,44 +49,43 @@ Adds domain-specific fields to references.toon AND finalize configuration to con
 
 ---
 
-## Operation: specify
+## Operation: decompose
 
-Transforms requirements into specifications (REQ → SPEC) via domain agent delegation.
+Analyzes the request and decomposes it into goals (Request → GOALs) via domain agent delegation.
 
-**Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
+**Input**: `plan_id`
 
 **Process**:
 ```
-Task({domain}-specify-agent,
-     plan_id={plan_id},
-     requirement_id={requirement_id})  # omit for batch
+Task({domain}-goals-agent,
+     plan_id={plan_id})
 ```
 
 **Domain Agent Responsibility**:
-- Query requirements via `manage-requirements` script
+- Read request.md for the request
 - Analyze codebase with domain knowledge
-- Create specifications via `manage-specifications:add`
+- Create goals via `manage-goals:add`
 - Record lessons-learned on issues
 
-**Output**: `{status, spec_ids[], lessons_recorded}`
+**Output**: `{status, goal_ids[], lessons_recorded}`
 
 ---
 
 ## Operation: plan
 
-Transforms specifications into executable tasks (SPEC → TASK) via domain agent delegation.
+Transforms goals into executable tasks (GOAL → TASK) via domain agent delegation.
 
-**Input**: `plan_id`, `specification_id?` (optional for single-item mode)
+**Input**: `plan_id`, `goal_id?` (optional for single-item mode)
 
 **Process**:
 ```
 Task({domain}-plan-agent,
      plan_id={plan_id},
-     specification_id={specification_id})  # omit for batch
+     goal_id={goal_id})  # omit for batch
 ```
 
 **Domain Agent Responsibility**:
-- Query specifications via `manage-specifications` script
+- Query goals via `manage-goals` script
 - Generate domain-specific task steps
 - Create tasks via `manage-tasks:add`
 - Record lessons-learned on issues
@@ -97,11 +96,11 @@ Task({domain}-plan-agent,
 
 ## Plan Types
 
-| Plan Type | Specify Agent | Plan Agent | Verification |
-|-----------|---------------|------------|--------------|
-| `java` | `cui-java-expert:java-specify-agent` | `cui-java-expert:java-plan-agent` | `/builder:builder-build-and-fix` |
-| `javascript` | `cui-frontend-expert:js-specify-agent` | `cui-frontend-expert:js-plan-agent` | `/builder:builder-build-and-fix system=npm` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-specify-agent` | `cui-plugin-development-tools:plugin-plan-agent` | `/cui-plugin-development-tools:plugin-doctor` |
+| Plan Type | Goals Agent | Plan Agent | Verification |
+|-----------|-------------|------------|--------------|
+| `java` | `cui-java-expert:java-goals-agent` | `cui-java-expert:java-plan-agent` | `/builder:builder-build-and-fix` |
+| `javascript` | `cui-frontend-expert:js-goals-agent` | `cui-frontend-expert:js-plan-agent` | `/builder:builder-build-and-fix system=npm` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` | `cui-plugin-development-tools:plugin-plan-agent` | `/cui-plugin-development-tools:plugin-doctor` |
 | `generic` | None (inline) | None (inline) | None |
 
 ---
@@ -110,8 +109,8 @@ Task({domain}-plan-agent,
 
 Plan-type skills must:
 
-1. Implement all three operations: `configure`, `specify`, `plan`
-2. Delegate `specify` and `plan` to domain agents (except generic)
+1. Implement all three operations: `configure`, `decompose`, `plan`
+2. Delegate `decompose` and `plan` to domain agents (except generic)
 3. Return `status` field in all outputs
 4. Handle errors with `status: error` and `message`
 
@@ -120,14 +119,14 @@ Plan-type skills must:
 ## Integration
 
 **Callers**:
-- `plan-configure` → calls `configure`
-- `plan-refine` → calls `specify`, then `plan`
+- `plan-init` → calls `configure`
+- `plan-refine` → calls `decompose`, then `plan`
 - `plan-finalize` → reads config.toon directly (no operation call needed)
 
-**Domain Agents** (for specify/plan delegation):
-- `cui-java-expert:java-specify-agent` / `cui-java-expert:java-plan-agent`
-- `cui-frontend-expert:js-specify-agent` / `cui-frontend-expert:js-plan-agent`
-- `cui-plugin-development-tools:plugin-specify-agent` / `cui-plugin-development-tools:plugin-plan-agent`
+**Domain Agents** (for decompose/plan delegation):
+- `cui-java-expert:java-goals-agent` / `cui-java-expert:java-plan-agent`
+- `cui-frontend-expert:js-goals-agent` / `cui-frontend-expert:js-plan-agent`
+- `cui-plugin-development-tools:plugin-goals-agent` / `cui-plugin-development-tools:plugin-plan-agent`
 
 **Data Layer** (used by domain agents):
-- `manage-requirements` / `manage-specifications` / `manage-tasks` scripts
+- `manage-goals` / `manage-tasks` scripts

@@ -1,28 +1,28 @@
-# Requirements File Format Specification
+# Goals File Format Specification
 
 ## Overview
 
-Requirements are stored as individual TOON files in the plan's `requirements/` directory. Each file represents one requirement with metadata and body content.
+Goals are stored as individual TOON files in the plan's `goals/` directory. Each file represents one goal with metadata and body content.
 
 ## Directory Structure
 
 ```
-{plan_dir}/requirements/
-├── REQ-001-implement-user-auth.toon
-├── REQ-002-add-session-mgmt.toon
-└── REQ-003-create-logout-flow.toon
+{plan_dir}/goals/
+├── GOAL-001-add-caffeine-dependency.toon
+├── GOAL-002-create-cache-config.toon
+└── GOAL-003-add-cacheable-annotation.toon
 ```
 
 ## Filename Convention
 
-**Pattern**: `REQ-{NNN}-{slug}.toon`
+**Pattern**: `GOAL-{NNN}-{slug}.toon`
 
 | Component | Description | Example |
 |-----------|-------------|---------|
-| `REQ-` | Fixed prefix | `REQ-` |
+| `GOAL-` | Fixed prefix | `GOAL-` |
 | `{NNN}` | Zero-padded 3-digit number | `001`, `042`, `123` |
 | `-` | Separator | `-` |
-| `{slug}` | Kebab-case from title (max 40 chars) | `implement-user-auth` |
+| `{slug}` | Kebab-case from title (max 40 chars) | `add-caffeine-dependency` |
 | `.toon` | File extension | `.toon` |
 
 ### Slug Generation Rules
@@ -34,22 +34,20 @@ Requirements are stored as individual TOON files in the plan's `requirements/` d
 5. Truncate to 40 characters
 6. Remove trailing hyphens
 
-**Example**: "Implement User Authentication!" → `implement-user-authentication`
+**Example**: "Add Caffeine Cache Dependency!" → `add-caffeine-cache-dependency`
 
 ## File Format
 
 ```toon
 number: 1
-title: Implement user authentication
+title: Add Caffeine cache dependency
 status: pending
 created: 2025-12-02T10:30:00Z
 updated: 2025-12-02T10:30:00Z
 
 body: |
-  Detailed requirement description.
-  Can be multiple lines.
-
-  Supports paragraphs and formatting.
+  Add Caffeine caching library to pom.xml.
+  Use version from parent BOM if available.
 ```
 
 ## Field Definitions
@@ -59,7 +57,7 @@ body: |
 - **Type**: Integer
 - **Constraints**: Positive integer, unique within plan, immutable after creation
 - **Assignment**: Next available number when created
-- **Note**: Gaps allowed after removal (1, 3, 4 if REQ-2 removed)
+- **Note**: Gaps allowed after removal (1, 3, 4 if GOAL-2 removed)
 
 ### title (required)
 
@@ -93,7 +91,7 @@ body: |
 
 - **Type**: Multiline string
 - **Format**: TOON multiline with `|` indicator
-- **Purpose**: Detailed requirement description
+- **Purpose**: Detailed goal description
 - **Supports**: Multiple paragraphs, markdown formatting
 
 ## Numbering Rules
@@ -103,26 +101,26 @@ body: |
 Numbers are assigned sequentially based on the highest existing number:
 
 ```
-Existing: REQ-001, REQ-002, REQ-003
-Next add → REQ-004
+Existing: GOAL-001, GOAL-002, GOAL-003
+Next add → GOAL-004
 ```
 
 ### Gaps After Removal
 
-Numbers are never reassigned. Removing a requirement creates a gap:
+Numbers are never reassigned. Removing a goal creates a gap:
 
 ```
-Before: REQ-001, REQ-002, REQ-003
-Remove REQ-002
-After: REQ-001, REQ-003
-Next add → REQ-004
+Before: GOAL-001, GOAL-002, GOAL-003
+Remove GOAL-002
+After: GOAL-001, GOAL-003
+Next add → GOAL-004
 ```
 
 ### Reference Stability
 
-External references use `REQ-{n}` (no zero padding):
-- `REQ-1` (not `REQ-001`)
-- `REQ-42` (not `REQ-042`)
+External references use `GOAL-{n}` (no zero padding):
+- `GOAL-1` (not `GOAL-001`)
+- `GOAL-42` (not `GOAL-042`)
 
 This ensures references remain valid even if the file is renamed (due to title change).
 

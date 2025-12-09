@@ -1,42 +1,26 @@
 ---
-name: java-specify
-description: Analyze Java codebase and create specifications from requirements with direct storage
+name: java-goals
+description: Analyze Java codebase and decompose request into goals
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-# Java Specify Skill
+# Java Goals Skill
 
-**Role**: Domain analysis skill for Java implementation tasks. Transforms requirements into specifications by analyzing the codebase and writing SPECs directly.
+**Role**: Domain analysis skill for Java implementation tasks. Transforms the request into goals by analyzing the codebase and writing GOALs directly.
 
-**Key Pattern**: Direct storage - specifications are written immediately via `manage-specifications` script.
+**Key Pattern**: Direct storage - goals are written immediately via `manage-goals` script.
 
-## Operation: specify
+## Operation: decompose
 
 **Input**:
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `requirement_id` | string | No | Single REQ ID (omit for batch - queries all pending) |
 
 **Process**:
 
-### Step 1: Load Requirements
-
-**Batch mode** (no requirement_id):
-```bash
-python3 .plan/execute-script.py planning:manage-requirements:manage-requirement findAll \
-  --plan-id {plan_id}
-```
-
-**Single mode** (requirement_id provided):
-```bash
-python3 .plan/execute-script.py planning:manage-requirements:manage-requirement get \
-  --plan-id {plan_id} \
-  --number {requirement_id}
-```
-
-### Step 2: Load Context
+### Step 1: Load Request Context
 
 Read plan context files:
 ```
@@ -45,11 +29,11 @@ Read {plan_dir}/config.toon    # build_system, plan_type
 Read {plan_dir}/references.toon # issue_context if available
 ```
 
-### Step 3: For Each Requirement
+Parse the request to identify what needs to be accomplished.
 
-#### 3a. Analyze Codebase
+### Step 2: Analyze Codebase
 
-Parse requirement intent and explore affected Java components:
+Parse request intent and explore affected Java components:
 
 **Project Structure Detection**:
 ```bash
@@ -73,19 +57,23 @@ Read {java-file-path}
 - Test requirements
 - Complexity assessment
 
-#### 3b. Create Specification
+### Step 3: Decompose Into Goals
 
-Write specification with Java-specific technical details:
+Break the request into discrete, achievable goals. Each goal should be:
+- **Independent**: Can be implemented without other goals completing first (when possible)
+- **Testable**: Has clear completion criteria
+- **Sized**: Reasonable scope (not too large, not too small)
+
+For each goal identified:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:manage-specification add \
+python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
   --plan-id {plan_id} \
-  --title "{component} implementation" \
-  --requirements "REQ-{n}" \
-  --body "{Java-specific technical specification}"
+  --title "{goal title}" \
+  --body "{Java-specific technical goal description}"
 ```
 
-**Specification Body Content**:
+**Goal Body Content**:
 - Component type (class, interface, module, config)
 - Target path (e.g., `src/main/java/de/cuioss/...`)
 - Module assignment (for multi-module projects)
@@ -93,33 +81,43 @@ python3 .plan/execute-script.py planning:manage-specifications:manage-specificat
 - Test requirements and test path
 - Standards to follow (CDI, logging, etc.)
 
-#### 3c. Record Issues as Lessons
+### Step 4: Record Issues as Lessons
 
 On unexpected codebase state or ambiguity:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name java-specify \
+  --component-name java-goals \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
 ```
 
-### Step 4: Return Results
+### Step 5: Return Results
 
 **Output**:
 ```toon
 status: success
 plan_id: {plan_id}
 
-specs_created[N]:
-- SPEC-1
-- SPEC-2
-- SPEC-3
+goals_created[N]:
+- GOAL-1
+- GOAL-2
+- GOAL-3
 
 lessons_recorded: {count}
 ```
+
+---
+
+## Goal Decomposition Patterns
+
+| Request Pattern | Typical Goals |
+|-----------------|---------------|
+| "Add caching to service" | 1. Add cache dependency 2. Create cache config 3. Add @Cacheable annotations 4. Add cache tests |
+| "Implement new endpoint" | 1. Create DTO classes 2. Create controller 3. Add service method 4. Add integration tests |
+| "Refactor to interface" | 1. Extract interface 2. Update implementations 3. Update injection points 4. Update tests |
 
 ---
 
@@ -218,11 +216,10 @@ If multiple classes match the name:
 
 ## Integration
 
-**Caller**: `cui-java-expert:java-specify-agent`
+**Caller**: `cui-java-expert:java-goals-agent`
 
 **Scripts Used**:
-- `planning:manage-requirements` - Load requirements
-- `planning:manage-specifications` - Create specifications
+- `planning:manage-goals` - Create goals
 - `planning:manage-lessons` - Record lessons on issues
 
 **Standards Referenced**:

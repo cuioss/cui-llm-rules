@@ -55,22 +55,17 @@ This command handles **init** and **refine** phases. Use `/plan-execute` for exe
    - `init` → Run init phase, then **automatically continue to refine** (unless `stop-after-init=true`)
    - `refine` → Run refine phase only
 
-### Init Phase (Two-Agent Pattern)
+### Init Phase
 
-The init phase uses two sequential agents for context efficiency:
+The init phase uses a single agent:
 
 ```
 Task: planning:plan-init-agent
   Input: description OR issue OR lesson_id
-  Output: plan_id
-
-Task: planning:plan-configure-agent
-  Input: plan_id
-  Output: plan_id, requirements summary
+  Output: plan_id, goals summary
 ```
 
-**Agent 1 (plan-init-agent)**: Creates plan directory and task.md
-**Agent 2 (plan-configure-agent)**: Analyzes task, creates requirements, configures plan type
+**plan-init-agent**: Creates plan directory, writes request.md, analyzes task, creates goals, configures plan type
 
 ### Automatic Continuation to Refine
 
@@ -86,10 +81,10 @@ This provides a seamless flow from task description to actionable tasks in a sin
 ```
 Task: planning:plan-refine-agent
   Input: plan_id
-  Output: specifications count, tasks count
+  Output: tasks count
 ```
 
-**Refine agent**: Transforms requirements into specifications and tasks via plan-type delegation
+**Refine agent**: Transforms goals into tasks via plan-type delegation
 
 ## ACTIONS
 
@@ -124,15 +119,15 @@ Create a new plan and automatically continue to refine phase.
 /plan-manage action=init task="Add feature" stop-after-init=true
 ```
 
-**Default behavior**: After init completes, automatically runs refine phase to create specifications and tasks. The command completes when the plan is ready for `/plan-execute`.
+**Default behavior**: After init completes, automatically runs refine phase to create tasks from goals. The command completes when the plan is ready for `/plan-execute`.
 
-**With `stop-after-init=true`**: Stops after init phase, useful when you want to review/edit requirements before refining.
+**With `stop-after-init=true`**: Stops after init phase, useful when you want to review/edit goals before refining.
 
 If init-phase plans exist, offers to continue existing or create new.
 
 ### refine
 
-Refine requirements for a plan.
+Create tasks from goals for a plan.
 
 ```
 /plan-manage action=refine
@@ -194,7 +189,7 @@ When a lesson is selected:
 # Create new plan from GitHub issue (auto-continues to refine)
 /plan-manage action=init issue="https://github.com/org/repo/issues/42"
 
-# Create plan but stop after init (to review requirements first)
+# Create plan but stop after init (to review goals first)
 /plan-manage action=init task="Complex feature" stop-after-init=true
 
 # Refine specific plan (if stopped after init or needs re-refining)
@@ -229,12 +224,10 @@ If you discover issues or improvements during execution, record them:
 | Skill | Purpose |
 |-------|---------|
 | `planning:manage-lifecycle` | Plan discovery, phase routing, transitions |
-| `planning:plan-init` | Initialize new plans (creates task.md) |
-| `planning:plan-configure` | Analyze and configure plans |
-| `planning:plan-refine` | Transform requirements to specs/tasks |
+| `planning:plan-init` | Initialize new plans (creates request.md, goals, config) |
+| `planning:plan-refine` | Transform goals to tasks |
 
 | Agent | Purpose |
 |-------|---------|
-| `planning:plan-init-agent` | First step of init phase |
-| `planning:plan-configure-agent` | Second step of init phase |
+| `planning:plan-init-agent` | Init phase execution |
 | `planning:plan-refine-agent` | Refine phase execution |

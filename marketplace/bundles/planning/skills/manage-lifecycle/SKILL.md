@@ -302,30 +302,26 @@ init -> execute -> finalize
 
 ## Phase Routing
 
-The init phase uses a two-agent pattern; all other phases use single components.
+Each phase uses a single component.
 
 | Phase | Component | Type | Description |
 |-------|-----------|------|-------------|
-| init (step 1) | `planning:plan-init-agent` | agent | Creates plan directory and task.md |
-| init (step 2) | `planning:plan-configure-agent` | agent | Analyzes task, creates requirements, detects type, configures plan |
-| refine | `planning:plan-refine-agent` | agent | Creates specifications and tasks from requirements |
+| init | `planning:plan-init-agent` | agent | Creates plan, analyzes task, creates goals, configures plan |
+| refine | `planning:plan-refine-agent` | agent | Creates tasks from goals |
 | execute | `planning:plan-execute` | skill | Executes implementation tasks |
 | finalize | `planning:plan-finalize` | skill | Git workflow, commit, PR creation |
 
-### Init Phase Orchestration
+### Init Phase
 
-The init phase requires two sequential agents:
+The init phase handles complete plan initialization:
 
 ```
-1. plan-init-agent:
+plan-init-agent:
    - Creates plan directory
-   - Writes task.md from input (description/lesson/issue)
-
-2. plan-configure-agent:
-   - Reads task.md
-   - Analyzes task to create requirements
+   - Writes request.md from input (description/lesson/issue)
+   - Analyzes task to create goals
    - Detects plan type (or uses override)
-   - Creates config.toon with base settings
+   - Creates config.toon and status.toon
    - Calls plan-type configure for domain fields
    - Transitions phase: init → refine
 ```

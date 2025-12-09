@@ -35,7 +35,7 @@ allowed-tools: Read, Bash
 | Technology | javascript |
 | Verification | `/builder:builder-build-and-fix system=npm` |
 | PR Workflow | true |
-| Specify Agent | `cui-frontend-expert:js-specify-agent` |
+| Goals Agent | `cui-frontend-expert:js-goals-agent` |
 | Plan Agent | `cui-frontend-expert:js-plan-agent` |
 
 ---
@@ -64,9 +64,9 @@ allowed-tools: Read, Bash
 
 ---
 
-## Operation: specify
+## Operation: decompose
 
-**Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
+**Input**: `plan_id`
 
 **Before delegation**, log:
 ```bash
@@ -74,15 +74,14 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
-  --summary "Delegating to js-specify-agent" \
-  --detail "requirement_id={requirement_id|batch}"
+  --summary "Delegating to js-goals-agent" \
+  --detail "decomposing request into goals"
 ```
 
 **Delegation**:
 ```
-Task(cui-frontend-expert:js-specify-agent,
-     plan_id={plan_id},
-     requirement_id={requirement_id})  # omit for batch
+Task(cui-frontend-expert:js-goals-agent,
+     plan_id={plan_id})
 ```
 
 **After delegation**, log outcome:
@@ -91,13 +90,13 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
-  --summary "js-specify-agent completed: {spec_count} specs created" \
+  --summary "js-goals-agent completed: {goal_count} goals created" \
   --detail "lessons_recorded={count}"
 ```
 
-**Returns**: `{status, spec_ids[], lessons_recorded}`
+**Returns**: `{status, goal_ids[], lessons_recorded}`
 
-The agent analyzes JavaScript codebase, creates specifications with:
+The agent analyzes JavaScript codebase, creates goals with:
 - Module design and exports
 - Web component structure (for UI components)
 - Event handling patterns
@@ -108,7 +107,7 @@ The agent analyzes JavaScript codebase, creates specifications with:
 
 ## Operation: plan
 
-**Input**: `plan_id`, `specification_id?` (optional for single-item mode)
+**Input**: `plan_id`, `goal_id?` (optional for single-item mode)
 
 **Before delegation**, log:
 ```bash
@@ -117,14 +116,14 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --phase refine \
   --type progress \
   --summary "Delegating to js-plan-agent" \
-  --detail "specification_id={specification_id|batch}"
+  --detail "goal_id={goal_id|batch}"
 ```
 
 **Delegation**:
 ```
 Task(cui-frontend-expert:js-plan-agent,
      plan_id={plan_id},
-     specification_id={specification_id})  # omit for batch
+     goal_id={goal_id})  # omit for batch
 ```
 
 **After delegation**, log outcome:

@@ -35,7 +35,7 @@ allowed-tools: Read, Bash
 | Technology | java |
 | Verification | `/builder:builder-build-and-fix` |
 | PR Workflow | true |
-| Specify Agent | `cui-java-expert:java-specify-agent` |
+| Goals Agent | `cui-java-expert:java-goals-agent` |
 | Plan Agent | `cui-java-expert:java-plan-agent` |
 
 ---
@@ -64,9 +64,9 @@ allowed-tools: Read, Bash
 
 ---
 
-## Operation: specify
+## Operation: decompose
 
-**Input**: `plan_id`, `requirement_id?` (optional for single-item mode)
+**Input**: `plan_id`
 
 **Before delegation**, log:
 ```bash
@@ -74,15 +74,14 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type progress \
-  --summary "Delegating to java-specify-agent" \
-  --detail "requirement_id={requirement_id|batch}"
+  --summary "Delegating to java-goals-agent" \
+  --detail "decomposing request into goals"
 ```
 
 **Delegation**:
 ```
-Task(cui-java-expert:java-specify-agent,
-     plan_id={plan_id},
-     requirement_id={requirement_id})  # omit for batch
+Task(cui-java-expert:java-goals-agent,
+     plan_id={plan_id})
 ```
 
 **After delegation**, log outcome:
@@ -91,13 +90,13 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
-  --summary "java-specify-agent completed: {spec_count} specs created" \
+  --summary "java-goals-agent completed: {goal_count} goals created" \
   --detail "lessons_recorded={count}"
 ```
 
-**Returns**: `{status, spec_ids[], lessons_recorded}`
+**Returns**: `{status, goal_ids[], lessons_recorded}`
 
-The agent analyzes Java codebase, creates specifications with:
+The agent analyzes Java codebase, creates goals with:
 - Class/interface design decisions
 - Package placement rationale
 - Dependencies (CDI, Spring, external libs)
@@ -108,7 +107,7 @@ The agent analyzes Java codebase, creates specifications with:
 
 ## Operation: plan
 
-**Input**: `plan_id`, `specification_id?` (optional for single-item mode)
+**Input**: `plan_id`, `goal_id?` (optional for single-item mode)
 
 **Before delegation**, log:
 ```bash
@@ -117,14 +116,14 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --phase refine \
   --type progress \
   --summary "Delegating to java-plan-agent" \
-  --detail "specification_id={specification_id|batch}"
+  --detail "goal_id={goal_id|batch}"
 ```
 
 **Delegation**:
 ```
 Task(cui-java-expert:java-plan-agent,
      plan_id={plan_id},
-     specification_id={specification_id})  # omit for batch
+     goal_id={goal_id})  # omit for batch
 ```
 
 **After delegation**, log outcome:

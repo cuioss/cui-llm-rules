@@ -65,8 +65,8 @@ All plan-type skills implement `planning:plan-type-api` contract.
 
 | Skill | Role | Purpose |
 |-------|------|---------|
-| `plan-init` | Setup | Create plan structure using plan-type skill |
-| `plan-refine` | Analysis | Analyze requirements, generate tasks (loads plan-type skill) |
+| `plan-init` | Setup | Create plan structure, detect type, configure |
+| `plan-refine` | Analysis | Decompose request into goals, generate tasks |
 | `plan-execute` | Execution | Execute checklist items sequentially (dumb runner) |
 
 ### Support Skills
@@ -82,8 +82,7 @@ All plan-type skills implement `planning:plan-type-api` contract.
 
 | Skill | Script | Purpose |
 |-------|--------|---------|
-| `manage-requirements` | `manage-requirement.py` | Requirements CRUD |
-| `manage-specifications` | `manage-specification.py` | Specifications CRUD |
+| `manage-goals` | `manage-goal.py` | Goals CRUD |
 | `manage-tasks` | `manage-task.py` | Tasks + steps CRUD |
 | `manage-files` | `manage-files.py` | Generic file I/O |
 | `manage-config` | `manage-config.py` | config.toon domain |
@@ -100,48 +99,34 @@ All plan-type skills implement this uniform API:
 
 | Operation | Input | Output | Caller |
 |-----------|-------|--------|--------|
-| `configure` | `plan_id` | References + config updated | plan-configure |
-| `specify` | `plan_id` | SPEC files created | plan-refine |
+| `configure` | `plan_id` | References + config updated | plan-init |
+| `decompose` | `plan_id` | GOAL files created | plan-refine |
 | `plan` | `plan_id` | TASK files created | plan-refine |
 
 **Key Design**:
 - `configure` adds domain-specific fields to references.toon and finalize configuration to config.toon
-- `specify` transforms requirements → specifications
-- `plan` transforms specifications → tasks
+- `decompose` analyzes request and creates goals
+- `plan` transforms goals → tasks
 
-## Domain Analysis Skills
+## Domain Goal Decomposition
 
-Component analysis is delegated to domain-specific skills in their expert bundles:
+Goal decomposition is delegated to domain-specific agents in their expert bundles:
 
-| Plan Type | Analysis Skill |
-|-----------|----------------|
-| `plugin-development` | `cui-plugin-development-tools:plugin-analysis` |
-| `java` | `cui-java-expert:java-analysis` |
-| `javascript` | `cui-frontend-expert:js-analysis` |
-| `simple` | N/A (tasks from description) |
+| Plan Type | Goals Agent |
+|-----------|-------------|
+| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` |
+| `java` | `cui-java-expert:java-goals-agent` |
+| `javascript` | `cui-frontend-expert:js-goals-agent` |
+| `generic` | N/A (inline in plan-type skill) |
 
-### Unified Analysis API
-
-**Contract**: `planning:analysis-api` skill defines the full API specification.
-
-All domain analysis skills implement this contract:
-
-| Element | Description |
-|---------|-------------|
-| **Operation** | `analyze` |
-| **Input** | `plan_id`, `task_description`, `issue_context`, `build_system` |
-| **Output** | `analysis_result` with `status` and `components[]` |
-
-See `planning:analysis-api` for full input/output specification and domain-specific fields.
-
-### Analysis Flow
+### Refine Flow
 
 ```
-plan-refine → specify(plan_id) → plan-type-skill
-            ← (creates SPEC files from REQ files)
+plan-refine → decompose(plan_id) → plan-type-skill → domain-goals-agent
+            ← (creates GOAL files from request.md)
 
-plan-refine → plan(plan_id) → plan-type-skill
-            ← (creates TASK files from SPEC files)
+plan-refine → plan(plan_id) → plan-type-skill → domain-plan-agent
+            ← (creates TASK files from GOAL files)
 ```
 
 ### Sub-Type Templates
@@ -167,7 +152,7 @@ planning/
 │   └── task-implement.md
 └── skills/
     ├── plan-type-api/           # API contract for all plan-type skills
-    │   └── SKILL.md             # Contract: 3 operations (configure, specify, plan)
+    │   └── SKILL.md             # Contract: 3 operations (configure, decompose, plan)
     ├── plan-type-generic/       # Generic workflow skill (3 phases)
     │   └── SKILL.md             # Implements plan-type-api
     ├── plan-type-plugin/        # Plugin workflow skill (4 phases)
@@ -177,18 +162,17 @@ planning/
     │   └── SKILL.md             # Implements plan-type-api
     ├── plan-type-javascript/    # JavaScript workflow skill (4 phases)
     │   └── SKILL.md             # Implements plan-type-api
-    ├── plan-init/               # Init phase skill
+    ├── plan-init/               # Init phase skill (complete initialization)
     │   ├── SKILL.md
     │   └── standards/           # Workflow reference
-    ├── plan-refine/             # Refine phase skill (smart analysis)
+    ├── plan-refine/             # Refine phase skill (goals + tasks)
     │   ├── SKILL.md
     │   ├── standards/           # Architecture and workflow docs
     │   │   ├── architecture.md  # Core architecture documentation
     │   │   └── workflow.md      # Refine workflow reference
     │   └── templates/           # Artifact templates
     ├── plan-execute/            # Execute phase skill (dumb runner)
-    ├── manage-requirements/     # Requirements CRUD
-    ├── manage-specifications/   # Specifications CRUD
+    ├── manage-goals/            # Goals CRUD
     ├── manage-tasks/            # Tasks + steps CRUD
     ├── manage-files/            # Generic file I/O
     ├── manage-config/           # config.toon domain

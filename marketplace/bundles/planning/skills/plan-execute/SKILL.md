@@ -110,7 +110,7 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task next \
   --include-context
 ```
 
-Returns next task with status `pending` or `in_progress`, including embedded specification context (title, body, requirements) for immediate use without additional script calls.
+Returns next task with status `pending` or `in_progress`, including embedded goal context (title, body) for immediate use without additional script calls.
 
 ### Step 2: Execute Steps
 
@@ -237,14 +237,14 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 |-------|---------|---------|
 | `planning:manage-lifecycle` | `get-routing-context` | Phase, skill routing, progress |
 | `planning:manage-config` | `get-multi` | Finalize config fields |
-| `planning:manage-tasks` | `next --include-context` | Task with specification context |
+| `planning:manage-tasks` | `next --include-context` | Task with goal context |
 | `planning:manage-log` | `add` | Work log entries |
 | `planning:manage-references` | - | Reference file CRUD |
 | `planning:git-workflow` | - | Commit operations |
 
 ### Related Skills
-- **plan-init** - Creates plan structure
-- **plan-refine** - Generates implementation tasks
+- **plan-init** - Creates plan structure (request.md, config, status)
+- **plan-refine** - Decomposes request into goals and tasks
 
 ---
 

@@ -1,40 +1,32 @@
 # Plan Init Workflow
 
-## Two-Agent Init Pattern
+## Init Phase Pattern
 
-The init phase uses two sequential agents for context efficiency:
+The init phase uses a single agent for complete initialization:
 
 ```
 User Request (description, lesson_id, or issue)
         │
         ▼
 ┌─────────────────────────────────────────────────────┐
-│ PLAN-INIT-AGENT (creates task.md)                   │
+│ PLAN-INIT-AGENT (complete initialization)           │
 │                                                     │
 │   1. Validate input (exactly one source)            │
 │   2. Derive plan_id from input                      │
 │   3. Create or reference plan (single atomic call)  │
 │   4. Get task content from source                   │
 │   5. Plan directory ready                           │
-│   6. Write task.md (preserves original input)       │
+│   6. Write request.md (preserves original input)    │
 │   7. Initialize references.toon (branch only)       │
-│   8. Log creation                                   │
-│   OUTPUT: plan_id                                   │
-└─────────────────────────────────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────────────────────┐
-│ PLAN-CONFIGURE-AGENT (analyzes and configures)      │
-│                                                     │
-│   1. Read task.md                                   │
-│   2. Analyze task to extract requirements           │
-│   3. Ask user for clarification (if needed)         │
-│   4. Create numbered requirements (REQ-1, REQ-2)    │
-│   5. Detect plan type from requirements             │
-│   6. Create config.toon with plan type              │
-│   7. Call plan-type:configure for domain fields     │
-│   8. Transition phase to "refine"                   │
-│   OUTPUT: plan_id, requirements summary             │
+│   8. Analyze task to extract goals                  │
+│   9. Ask user for clarification (if needed)         │
+│  10. Create numbered goals (GOAL-1, GOAL-2)         │
+│  11. Detect plan type from goals                    │
+│  12. Create config.toon with plan type              │
+│  13. Create status.toon                             │
+│  14. Call plan-type:configure for domain fields     │
+│  15. Transition phase to "refine"                   │
+│   OUTPUT: plan_id, goals summary                    │
 └─────────────────────────────────────────────────────┘
         │
         ▼
@@ -48,7 +40,7 @@ Plan-init is minimal. It ONLY:
 | Does | Does NOT |
 |------|----------|
 | Creates plan directory | Determine plan type |
-| Writes task.md | Create config.toon |
+| Writes request.md | Create config.toon |
 | Initializes references.toon (branch) | Create requirements |
 | Logs creation | Ask about configuration |
 | Returns plan_id | Call plan-type skills |
@@ -62,7 +54,7 @@ Plan-init accepts exactly ONE of these inputs:
 description: "Add dark mode toggle to application settings"
 ```
 
-- Stored verbatim in task.md
+- Stored verbatim in request.md
 - No additional context extraction
 - Simplest input type
 
@@ -122,15 +114,16 @@ AskUserQuestion:
 
 ### Output Validation
 - [ ] Plan directory created (via manage-files create-or-reference)
-- [ ] task.md created with complete original input
+- [ ] request.md created with complete original input
 - [ ] references.toon created with branch
 - [ ] Work-log entry written
 - [ ] plan_id returned
 
-### NOT Created (plan-configure responsibility)
-- [ ] config.toon NOT created
-- [ ] requirements/ NOT created
-- [ ] Plan type NOT determined
+### Also Created (part of init)
+- [ ] config.toon created with plan type
+- [ ] goals/ directory with goals created
+- [ ] status.toon created
+- [ ] Plan type determined
 
 ## Error Handling
 
@@ -172,16 +165,16 @@ recovery: Use resume option or provide different plan_id
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-files` | Create/reference plan directory, write task.md |
+| `planning:manage-files` | Create/reference plan directory, write request.md |
 | `planning:manage-references` | Initialize references |
 | `planning:manage-log` | Log creation |
 | `planning:manage-lessons` | Read lesson content |
 
-### Subsequent Agent
+### Complete Initialization
 
-After plan-init completes, `plan-configure-agent` is called to:
-1. Read task.md
-2. Analyze and create requirements
+The plan-init agent handles the complete initialization, including:
+1. Create plan directory and request.md
+2. Analyze task and create goals
 3. Detect plan type
-4. Create configuration
+4. Create configuration (config.toon, status.toon)
 5. Transition to refine phase

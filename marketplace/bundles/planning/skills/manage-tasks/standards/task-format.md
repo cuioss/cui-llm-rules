@@ -59,12 +59,12 @@ current_step: {integer}
 - Values: `pending`, `in_progress`, `done`, `blocked`
 - Example: `status: in_progress`
 
-### specification
-- Type: String (SPEC reference)
+### goal
+- Type: String (GOAL reference)
 - Required: Yes
-- Description: The specification this task implements
-- Format: `SPEC-{n}` where n is a positive integer
-- Example: `specification: SPEC-1`
+- Description: The goal this task implements
+- Format: `GOAL-{n}` where n is a positive integer
+- Example: `goal: GOAL-1`
 
 ### created
 - Type: ISO 8601 timestamp
@@ -132,7 +132,7 @@ current_step: {integer}
 number: 2
 title: Add Auth Endpoint
 status: in_progress
-specification: SPEC-1
+goal: GOAL-1
 created: 2025-12-02T10:30:00Z
 updated: 2025-12-02T11:00:00Z
 

@@ -6,12 +6,12 @@ Provides basic CRUD operations for any file within a plan directory.
 Uses file_ops for consistent path handling and atomic writes.
 
 Usage:
-    python3 manage-files.py read --plan-id my-plan --file task.md
-    python3 manage-files.py write --plan-id my-plan --file task.md --content "..."
+    python3 manage-files.py read --plan-id my-plan --file request.md
+    python3 manage-files.py write --plan-id my-plan --file request.md --content "..."
     python3 manage-files.py list --plan-id my-plan
     python3 manage-files.py exists --plan-id my-plan --file config.toon
     python3 manage-files.py remove --plan-id my-plan --file old-file.md
-    python3 manage-files.py mkdir --plan-id my-plan --dir requirements
+    python3 manage-files.py mkdir --plan-id my-plan --dir goals
 """
 
 import argparse

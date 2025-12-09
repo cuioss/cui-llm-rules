@@ -1,12 +1,12 @@
 ---
 name: js-plan
-description: Create implementation tasks from specifications with direct storage
+description: Create implementation tasks from goals with direct storage
 allowed-tools: Read, Bash
 ---
 
 # JavaScript Plan Skill
 
-**Role**: Domain planning skill for JavaScript implementation tasks. Transforms specifications into executable tasks by applying JavaScript-specific knowledge and writing TASKs directly.
+**Role**: Domain planning skill for JavaScript implementation tasks. Transforms goals into executable tasks by applying JavaScript-specific knowledge and writing TASKs directly.
 
 **Key Pattern**: Direct storage - tasks are written immediately via `manage-tasks` script.
 
@@ -17,30 +17,30 @@ allowed-tools: Read, Bash
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `specification_id` | string | No | Single SPEC ID (omit for batch - queries all pending) |
+| `goal_id` | string | No | Single GOAL ID (omit for batch - queries all pending) |
 
 **Process**:
 
-### Step 1: Load Specifications
+### Step 1: Load Goals
 
-**Batch mode** (no specification_id):
+**Batch mode** (no goal_id):
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:manage-specification findAll \
+python3 .plan/execute-script.py planning:manage-goals:manage-goal findAll \
   --plan-id {plan_id}
 ```
 
-**Single mode** (specification_id provided):
+**Single mode** (goal_id provided):
 ```bash
-python3 .plan/execute-script.py planning:manage-specifications:manage-specification get \
+python3 .plan/execute-script.py planning:manage-goals:manage-goal get \
   --plan-id {plan_id} \
-  --number {specification_id}
+  --number {goal_id}
 ```
 
-### Step 2: For Each Specification
+### Step 2: For Each Goal
 
-#### 2a. Analyze Specification Content
+#### 2a. Analyze Goal Content
 
-Parse the specification body to determine:
+Parse the goal body to determine:
 - Component type and target path
 - Task granularity (single task or multiple)
 - JavaScript-specific implementation steps
@@ -54,9 +54,9 @@ Generate task(s) with JavaScript-specific steps:
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --specification SPEC-{n} \
+  --goal GOAL-{n} \
   --title "Implement {component}" \
-  --description "{goal from specification}" \
+  --description "{goal from goal}" \
   --steps \
     "Create/modify implementation at {path}" \
     "Add unit tests (load cui-frontend-expert:cui-javascript-unit-testing)" \
@@ -67,7 +67,7 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
 
 #### 2c. Record Issues as Lessons
 
-On ambiguous specification or planning issues:
+On ambiguous goal or planning issues:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
@@ -101,7 +101,7 @@ lessons_recorded: {count}
 
 ### Single Component Task
 
-One specification → one task when:
+One goal → one task when:
 - Single module/class to implement
 - Localized change in one file
 - Simple feature addition
@@ -114,7 +114,7 @@ One specification → one task when:
 
 ### Multi-Step Component Task
 
-One specification → multiple tasks when:
+One goal → multiple tasks when:
 - Implementation + tests require separation
 - Web component + styles + tests pattern
 - Refactoring with multiple phases
@@ -180,7 +180,7 @@ One specification → multiple tasks when:
 
 ## Task Dependencies
 
-When creating multiple tasks from one specification, consider:
+When creating multiple tasks from one goal, consider:
 
 | Dependency Type | Ordering |
 |-----------------|----------|
@@ -214,16 +214,16 @@ Run /builder:builder-build-and-fix system=npm
 
 ## Error Handling
 
-### Ambiguous Specification
+### Ambiguous Goal
 
-If specification doesn't clearly indicate:
+If goal doesn't clearly indicate:
 - Target path → Ask for clarification
 - Component type → Infer from context or ask
 - Package placement → Check project structure
 
 ### Missing Information
 
-If specification lacks detail:
+If goal lacks detail:
 - Generate task with placeholder
 - Add lesson-learned for future reference
 - Note ambiguity in task description
@@ -235,7 +235,7 @@ If specification lacks detail:
 **Caller**: `cui-frontend-expert:js-plan-agent`
 
 **Scripts Used**:
-- `planning:manage-specifications` - Load specifications
+- `planning:manage-goals` - Load goals
 - `planning:manage-tasks` - Create tasks
 - `planning:manage-lessons` - Record lessons on issues
 

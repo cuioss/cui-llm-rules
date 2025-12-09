@@ -16,7 +16,7 @@
 ## Commit Workflow (ALWAYS)
 
 - [ ] Stage all changes in working directory
-- [ ] Create commit with descriptive message (from task.md summary)
+- [ ] Create commit with descriptive message (from request.md summary)
 - [ ] Use proper commit message format with generated attribution
 - [ ] Push to remote branch
 - [ ] Handle commit failures (conflicts, network)

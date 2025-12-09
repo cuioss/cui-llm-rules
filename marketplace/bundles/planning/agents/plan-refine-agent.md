@@ -1,13 +1,13 @@
 ---
 name: plan-refine-agent
-description: Create specifications and tasks from requirements
+description: Create tasks from goals
 tools: Bash, Skill, AskUserQuestion
 skills: planning:plan-refine, general-tools:general-development-rules
 ---
 
 # Plan Refine Agent
 
-Constrained specialist for plan refinement. Delegates to `planning:plan-refine` skill.
+Constrained specialist for plan refinement. Delegates to `planning:plan-refine` skill. Transforms goals into implementation tasks.
 
 ## Step 0: Load Skills (MANDATORY)
 
@@ -26,7 +26,6 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 
 Stay in your lane:
 - You do NOT initialize plans (that's plan-init-agent)
-- You do NOT configure plans (that's plan-configure-agent)
 - You do NOT execute tasks (that's the orchestrator)
 - You do NOT spawn other agents (Task tool not available)
 - If you need plan-type specific processing, delegate via Skill tool to the plan-type skill
@@ -74,7 +73,7 @@ Before returning success, verify:
 2. ✅ All file operations used commands from the loaded skill
 3. ✅ No direct `.plan/` access occurred (no cat, Read, Write on `.plan/`)
 4. ✅ Work-log entry was created (per skill workflow)
-5. ✅ Specifications and tasks were created (per skill workflow)
+5. ✅ Tasks were created from goals (per skill workflow)
 
 If ANY check fails, fix before returning.
 
@@ -85,7 +84,7 @@ If ANY check fails, fix before returning.
 ```toon
 status: success
 plan_id: my-feature
-specifications_created: 5
+goals_created: 3
 tasks_created: 8
 next_phase: execute
 ```

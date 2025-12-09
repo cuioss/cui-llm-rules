@@ -120,7 +120,7 @@ Stage all changes:
 git add -A
 ```
 
-Create commit with descriptive message (read task.md for summary):
+Create commit with descriptive message (read request.md for summary):
 
 ```bash
 git commit -m "{commit_message}"
@@ -136,7 +136,7 @@ git push origin {branch}
 
 If `create_pr == true`:
 
-Read task.md for PR summary, then create PR:
+Read request.md for PR summary, then create PR:
 
 ```bash
 gh pr create \

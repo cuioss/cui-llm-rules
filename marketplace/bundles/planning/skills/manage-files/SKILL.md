@@ -34,12 +34,11 @@ Files are stored in plan directories:
 
 ```
 .plan/plans/{plan_id}/
-  task.md
+  request.md
   config.toon
   references.toon
   status.toon
-  requirements/
-  specifications/
+  goals/
   tasks/
 ```
 
@@ -56,7 +55,7 @@ Read file content from a plan directory.
 ```bash
 python3 .plan/execute-script.py planning:manage-files:manage-files read \
   --plan-id {plan_id} \
-  --file task.md
+  --file request.md
 ```
 
 **Output**: Raw file content (no wrapping)
@@ -68,8 +67,8 @@ Write content to a file in a plan directory.
 ```bash
 python3 .plan/execute-script.py planning:manage-files:manage-files write \
   --plan-id {plan_id} \
-  --file task.md \
-  --content "# Task Title
+  --file request.md \
+  --content "# Request Title
 
 Task description with multiline content.
 

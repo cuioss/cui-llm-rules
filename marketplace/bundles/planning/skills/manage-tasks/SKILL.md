@@ -6,13 +6,13 @@ allowed-tools: Read, Glob, Bash
 
 # Manage Tasks Skill
 
-Manage implementation tasks with sequential sub-steps within a plan. Each task references a specification and contains ordered steps for execution.
+Manage implementation tasks with sequential sub-steps within a plan. Each task references a goal and contains ordered steps for execution.
 
 ## What This Skill Provides
 
 - Individual TOON file storage for each task
 - Sequential, immutable numbering (TASK-1, TASK-2, etc.)
-- Required specification reference (SPEC-N) for traceability
+- Required goal reference (GOAL-N) for traceability
 - Step management with status tracking
 - Simple execution loop via `next` query
 
@@ -53,7 +53,7 @@ Individual TOON files with metadata and steps:
 number: 1
 title: Implement JWT Service
 status: pending
-specification: SPEC-1
+goal: GOAL-1
 created: 2025-12-02T10:30:00Z
 updated: 2025-12-02T10:30:00Z
 
@@ -75,7 +75,7 @@ current_step: 1
 |-------|----------|-------------|
 | `number` | Yes | Unique number (assigned at creation, immutable) |
 | `title` | Yes | Short descriptive title |
-| `specification` | Yes | SPEC-N reference (exactly one) |
+| `goal` | Yes | GOAL-N reference (exactly one) |
 | `description` | Yes | Detailed task description |
 | `status` | Yes | `pending`, `in_progress`, `done`, or `blocked` |
 | `steps` | Yes | Ordered list of steps (at least one) |
@@ -120,7 +120,7 @@ Add a new task file (creates directory if needed).
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --specification SPEC-1 \
+  --goal GOAL-1 \
   --title "Implement JWT Service" \
   --description "Create the JWT service class..." \
   --steps "Create JwtService class" "Add token generation" "Write unit tests"
@@ -136,7 +136,7 @@ total_tasks: 1
 task:
   number: 1
   title: Implement JWT Service
-  specification: SPEC-1
+  goal: GOAL-1
   status: pending
   step_count: 3
 ```
@@ -151,7 +151,7 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task update \
   --number 1 \
   [--title "New title"] \
   [--description "New description"] \
-  [--specification SPEC-2]
+  [--goal GOAL-2]
 ```
 
 ### remove
@@ -172,7 +172,7 @@ List all tasks with summary.
 python3 .plan/execute-script.py planning:manage-tasks:manage-task list \
   --plan-id {plan_id} \
   [--status pending|in_progress|done|blocked|all] \
-  [--specification SPEC-1]
+  [--goal GOAL-1]
 ```
 
 **Output**:
@@ -187,10 +187,10 @@ counts:
   done: 1
   blocked: 0
 
-tasks[3]{number,title,specification,status,progress}:
-1,Implement JWT Service,SPEC-1,done,3/3
-2,Add Auth Endpoint,SPEC-1,in_progress,1/3
-3,Write Integration Tests,SPEC-2,pending,0/2
+tasks[3]{number,title,goal,status,progress}:
+1,Implement JWT Service,GOAL-1,done,3/3
+2,Add Auth Endpoint,GOAL-1,in_progress,1/3
+3,Write Integration Tests,GOAL-2,pending,0/2
 ```
 
 ### get
@@ -212,7 +212,7 @@ file: TASK-002-add-auth-endpoint.toon
 task:
   number: 2
   title: Add Auth Endpoint
-  specification: SPEC-1
+  goal: GOAL-1
   status: in_progress
   current_step: 2
   created: 2025-12-02T10:30:00Z
@@ -241,7 +241,7 @@ plan_id: my-feature
 next:
   task_number: 2
   task_title: Add Auth Endpoint
-  specification: SPEC-1
+  goal: GOAL-1
   step_number: 2
   step_title: Add request/response DTOs
 
@@ -378,14 +378,14 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task remove-step \
 
 ### With plan-refine
 
-Tasks are created during plan refinement, after specifications are defined:
+Tasks are created during plan refinement, after goals are defined:
 
 ```
-FOR EACH specification:
-  1. READ specification via plan-specifications skill
+FOR EACH goal:
+  1. READ goal via plan-goals skill
   2. ANALYZE what implementation work is needed
-  3. CREATE tasks for the specification:
-     manage-task.py add --plan-id {plan_id} --specification SPEC-{n} ...
+  3. CREATE tasks for the goal:
+     manage-task.py add --plan-id {plan_id} --goal GOAL-{n} ...
 ```
 
 ### With plan-execute
@@ -402,21 +402,21 @@ LOOP:
   6. CONTINUE
 ```
 
-### With manage-specifications
+### With manage-goals
 
-Tasks reference specifications via the `specification` field, enabling:
-- Forward traceability: SPEC -> TASKs
-- Backward traceability: TASK -> SPEC
-- Coverage analysis: Which SPECs have implementation tasks?
+Tasks reference goals via the `goal` field, enabling:
+- Forward traceability: GOAL -> TASKs
+- Backward traceability: TASK -> GOAL
+- Coverage analysis: Which GOALs have implementation tasks?
 
 ---
 
 ## Traceability Chain
 
 ```
-REQ-1 (User can authenticate)
+Request (User can authenticate)
   |
-  +-> SPEC-1 (JWT Token Format)
+  +-> GOAL-1 (JWT Token Format)
         |
         +-> TASK-1 (Implement JWT Service)
         |     +-- Step 1: Create class
@@ -429,22 +429,21 @@ REQ-1 (User can authenticate)
 ```
 
 Query capabilities:
-- `manage-requirement.py findAll` -> All requirements
-- `manage-specification.py findByRequirement REQ-1` -> SPEC-1
-- `manage-task.py list --specification SPEC-1` -> TASK-1, TASK-2
+- `manage-goal.py findAll` -> All goals
+- `manage-task.py list --goal GOAL-1` -> TASK-1, TASK-2
 - `manage-task.py next` -> Next actionable step
 
 ---
 
-## Relationship to Specifications
+## Relationship to Goals
 
-| Aspect | specifications | tasks |
-|--------|----------------|-------|
-| Directory | `{plan_dir}/specifications/` | `{plan_dir}/tasks/` |
-| Prefix | SPEC- | TASK- |
-| References | REQ references | **SPEC reference** |
-| Created in | plan-refine phase | plan-refine phase |
+| Aspect | goals | tasks |
+|--------|-------|-------|
+| Directory | `{plan_dir}/goals/` | `{plan_dir}/tasks/` |
+| Prefix | GOAL- | TASK- |
+| References | From request | **GOAL reference** |
+| Created in | plan-init phase | plan-refine phase |
 | Purpose | What will be built | How to build it |
 | Granularity | Feature-level | Step-level |
 
-**Flow**: REQ (what) -> SPEC (how) -> TASK (steps) -> Implementation (code)
+**Flow**: Request (what) -> GOAL (how) -> TASK (steps) -> Implementation (code)

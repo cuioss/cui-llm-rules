@@ -28,7 +28,7 @@
     "./agents/java-coverage-agent.md",
     "./agents/java-quality-agent.md",
     "./agents/java-verify-agent.md",
-    "./agents/java-specify-agent.md",
+    "./agents/java-goals-agent.md",
     "./agents/java-plan-agent.md"
   ],
   "skills": [
@@ -37,7 +37,7 @@
     "./skills/cui-java-maintenance",
     "./skills/cui-java-unit-testing",
     "./skills/cui-javadoc",
-    "./skills/java-specify",
+    "./skills/java-goals",
     "./skills/java-plan"
   ]
 }
