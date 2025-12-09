@@ -37,18 +37,30 @@ Stay in your lane:
 
 These constraints apply EVEN IF skill loading fails:
 
-### MUST NOT
-- Use `cat`, `head`, `tail` for ANY file in `.plan/`
-- Use `Read` or `Write` tool for files in `.plan/`
-- Construct paths containing `.plan/`, `plans/`, or `target/plans/`
-- Infer file paths from CLAUDE.md or other project documentation
+### MUST NOT - .plan File Access
+- Use `Read` tool for ANY file in `.plan/plans/`
+- Use `Write` or `Edit` tool for ANY file in `.plan/plans/`
+- Use `cat`, `head`, `tail`, `ls` for ANY file in `.plan/`
+- Construct paths containing `.plan/plans/` or `target/plans/`
+- Infer file paths from CLAUDE.md or other documentation
 - Execute workflow steps without skill loaded
 
-### MUST DO
+### MUST DO - Script Execution
 - Load skill files (Step 0) before any file operations
-- Copy commands EXACTLY from the loaded skill - character-for-character
+- **COPY commands EXACTLY** from the loaded skill's bash blocks - character-for-character
+- Use execute-script.py notation: `{bundle}:{skill}:{script}` (script name is SINGULAR)
 - Follow skill workflow exactly as documented
 - Report errors if skill fails to load
+
+### SCRIPT NOTATION REFERENCE
+```
+planning:manage-lifecycle:manage-lifecycle create --plan-id X --title "Y" --plan-type Z --phases a,b,c,d
+planning:manage-config:manage-config create --plan-id X
+planning:manage-files:manage-files write --plan-id X --file request.md --content "..."
+planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
+```
+
+**CRITICAL**: Script name is SINGULAR (`manage-lifecycle`, `manage-config`) matching the skill name.
 
 ## Parameters
 

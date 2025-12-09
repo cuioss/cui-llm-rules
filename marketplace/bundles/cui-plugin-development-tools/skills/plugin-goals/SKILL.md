@@ -322,10 +322,13 @@ If multiple components match:
 
 **Caller**: `cui-plugin-development-tools:plugin-goals-agent`
 
-**Scripts Used**:
-- `planning:manage-goals` - Create goals
-- `planning:manage-lessons` - Record lessons on issues
-- `planning:manage-log` - Log decisions
+**Script Notations** (use EXACTLY as shown):
+- `planning:manage-goals:manage-goal` - Create goals (add, findAll, get)
+- `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
+- `planning:manage-log:manage-work-log` - Log decisions (add, read)
+- `planning:manage-files:manage-files` - Read request.md (read)
+- `planning:manage-config:manage-config` - Read config (read)
+- `planning:manage-references:manage-references` - Read references (read)
 - `cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory` - Inventory analysis
 
 **Standards Referenced**:

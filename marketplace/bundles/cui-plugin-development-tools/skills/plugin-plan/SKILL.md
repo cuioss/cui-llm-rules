@@ -267,10 +267,11 @@ If goal lacks required parameters:
 
 **Caller**: `cui-plugin-development-tools:plugin-plan-agent`
 
-**Scripts Used**:
-- `planning:manage-goals` - Load goals
-- `planning:manage-tasks` - Create tasks
-- `planning:manage-lessons` - Record lessons on issues
+**Script Notations** (use EXACTLY as shown):
+- `planning:manage-goals:manage-goal` - Load goals (findAll, get)
+- `planning:manage-tasks:manage-task` - Create tasks (add, list)
+- `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
+- `planning:manage-log:manage-work-log` - Log progress (add)
 
 **Skills Delegated To**:
 - `cui-plugin-development-tools:plugin-create` - Component creation (handles validation and verification internally)

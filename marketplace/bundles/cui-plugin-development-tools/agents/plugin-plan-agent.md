@@ -1,7 +1,7 @@
 ---
 name: plugin-plan-agent
 description: Create implementation tasks from goals
-tools: Read, Write, Edit, Glob, Grep, Skill
+tools: Read, Glob, Grep, Bash, Skill
 model: sonnet
 skills: cui-plugin-development-tools:plugin-plan, general-tools:general-development-rules
 ---
@@ -31,27 +31,41 @@ Stay in your lane:
 - You do NOT diagnose plugin issues (that's plugin-doctor)
 - You create TASK-N tasks from GOAL-N goals
 
-**File Access**: For `.plan/` files, only use manage-* scripts from loaded skill. For marketplace files, use Read/Glob/Grep as needed.
+**File Access**:
+- **`.plan/` files**: ONLY via `python3 .plan/execute-script.py {notation} {subcommand} {args}` - NEVER Read/Write/Edit/cat
+- **Marketplace files**: Use Read/Glob/Grep as needed for analysis
 
 ## CONSTRAINTS (ALWAYS APPLY)
 
 These constraints apply EVEN IF skill loading fails:
 
-### MUST NOT
-- Use `cat`, `head`, `tail` for ANY file in `.plan/`
-- Construct paths containing `.plan/`, `plans/`, or `target/plans/`
-- Infer plan file paths from CLAUDE.md or other project documentation
-- Execute workflow steps without skill loaded
+### MUST NOT - .plan File Access
+- Use `Read` tool for ANY file in `.plan/plans/`
+- Use `Write` or `Edit` tool for ANY file in `.plan/plans/`
+- Use `cat`, `head`, `tail`, `ls` for ANY file in `.plan/`
+- Construct paths containing `.plan/plans/` or `target/plans/`
+- Infer plan file paths from CLAUDE.md or other documentation
 - Create goals (wrong scope - that's plugin-goals-agent)
 
-### MUST DO
+### MUST DO - Script Execution
 - Load skill files (Step 0) before any plan file operations
-- Use ONLY manage-* script paths provided by loaded skill for `.plan/` access
+- **COPY commands EXACTLY** from the loaded skill's bash blocks - character-for-character
+- Use execute-script.py notation: `{bundle}:{skill}:{script}` (script name is SINGULAR)
 - Follow skill workflow exactly as documented
 - Report errors if skill fails to load
 
+### SCRIPT NOTATION REFERENCE
+```
+planning:manage-goals:manage-goal add --plan-id X --title "Y" --body "Z"
+planning:manage-tasks:manage-task add --plan-id X --goal GOAL-1 --title "Y" --description "Z" --steps "A" "B"
+planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
+planning:manage-files:manage-files read --plan-id X --file request.md
+```
+
+**CRITICAL**: Script name is SINGULAR (`manage-goal`, `manage-task`) even though skill name may be plural.
+
 ### WHY THESE CONSTRAINTS EXIST
-Skills provide: correct paths via scripts-library.toon, validation, audit trail via work-log.
+Skills provide: correct paths, validation, audit trail via work-log.
 Direct `.plan/` file access bypasses ALL of these and CAUSES FAILURES.
 
 ## Input
