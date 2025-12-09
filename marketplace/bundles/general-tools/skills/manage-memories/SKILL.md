@@ -47,8 +47,6 @@ Manage the memory layer for session persistence (via `file-operations-base` skil
 
 ### Step 1: Execute Operation
 
-Script: `general-tools:manage-memories`
-
 ```bash
 python3 .plan/execute-script.py general-tools:manage-memories:{operation} [--category {category}] [--identifier {identifier}] [--content '{content}']
 ```
@@ -99,8 +97,6 @@ Validate memory file format and structure.
 - **file_path** (required): Path to memory file
 
 ### Step 1: Execute Validation
-
-Script: `general-tools:manage-memories`
 
 ```bash
 python3 .plan/execute-script.py general-tools:manage-memories:manage-memory validate {file_path}

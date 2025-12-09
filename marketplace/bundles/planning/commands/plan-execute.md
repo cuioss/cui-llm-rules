@@ -40,8 +40,6 @@ This command handles **execute** and **finalize** phases. Use `/plan-manage` for
 
 The execute phase iterates through tasks using a simple loop:
 
-Script: `planning:manage-tasks`
-
 ```bash
 # Get next pending task
 python3 .plan/execute-script.py planning:manage-tasks:manage-task next --plan-id {plan_id}

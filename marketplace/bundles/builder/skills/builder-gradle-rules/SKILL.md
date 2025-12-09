@@ -43,8 +43,6 @@ Script: `builder:builder-gradle-rules` → `gradle.py`
 
 1. **Execute Gradle**:
 
-   Script: `builder:builder-gradle-rules`
-
    ```bash
    python3 .plan/execute-script.py builder:builder-gradle-rules:gradle execute \
        --tasks "{tasks}" \
@@ -55,8 +53,6 @@ Script: `builder:builder-gradle-rules` → `gradle.py`
    Returns JSON with `log_file`, `exit_code`, `duration_ms`, `command_executed`
 
 2. **Parse Output**:
-
-   Script: `builder:builder-gradle-rules`
 
    ```bash
    python3 .plan/execute-script.py builder:builder-gradle-rules:gradle parse \
@@ -113,8 +109,6 @@ Script: `builder:builder-gradle-rules` → `gradle.py`
 
 **Execution**:
 
-Script: `builder:builder-gradle-rules`
-
 ```bash
 python3 .plan/execute-script.py builder:builder-gradle-rules:gradle parse --log <path> --mode <mode>
 ```
@@ -154,8 +148,6 @@ python3 .plan/execute-script.py builder:builder-gradle-rules:gradle parse --log 
 - `root` (optional): Project root directory (default: current directory)
 
 **Execution**:
-
-Script: `builder:builder-gradle-rules`
 
 ```bash
 # Search by project name
@@ -200,8 +192,6 @@ python3 .plan/execute-script.py builder:builder-gradle-rules:gradle find-project
 - `extensions` (optional): File extensions to search (default: `.java,.kt`)
 
 **Execution**:
-
-Script: `builder:builder-gradle-rules`
 
 ```bash
 python3 .plan/execute-script.py builder:builder-gradle-rules:gradle search-markers \
@@ -252,8 +242,6 @@ python3 .plan/execute-script.py builder:builder-gradle-rules:gradle search-marke
 1. Load acceptable patterns via `general-tools:manage-run-configuration` skill
    - Read from field: `gradle.acceptable_warnings`
 2. Execute categorization:
-
-   Script: `builder:builder-gradle-rules`
 
    ```bash
    python3 .plan/execute-script.py builder:builder-gradle-rules:gradle check-warnings \

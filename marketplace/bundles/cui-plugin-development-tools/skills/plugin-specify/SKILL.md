@@ -23,8 +23,6 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### Step 1: Load Requirements
 
-Script: `planning:manage-requirements`
-
 **Batch mode** (no requirement_id):
 ```bash
 python3 .plan/execute-script.py planning:manage-requirements:manage-requirement findAll \
@@ -78,8 +76,6 @@ Read {component-path}
 
 Write specification with plugin-specific technical details:
 
-Script: `planning:manage-specifications`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-specifications:manage-specification add \
   --plan-id {plan_id} \
@@ -99,8 +95,6 @@ python3 .plan/execute-script.py planning:manage-specifications:manage-specificat
 #### 3c. Record Issues as Lessons
 
 On unexpected structure or ambiguity:
-
-Script: `planning:manage-lessons`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \

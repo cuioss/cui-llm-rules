@@ -99,8 +99,6 @@ Use this workflow when:
 
 ### Step 1: Execute Maven Build
 
-Script: `builder:builder-maven-rules`
-
 Use the execute subcommand which handles log file pre-creation, timestamping, and Maven execution atomically:
 
 ```bash
@@ -139,8 +137,6 @@ The script:
 - Returns structured JSON result
 
 ### Step 2: Parse Build Output
-
-Script: `builder:builder-maven-rules`
 
 ```bash
 python3 .plan/execute-script.py builder:builder-maven-rules:maven parse \
@@ -197,8 +193,6 @@ Use this workflow when:
 - Generating structured issue reports
 
 ### Step 1: Execute Script
-
-Script: `builder:builder-maven-rules`
 
 **Parse the build log file:**
 
@@ -284,8 +278,6 @@ Use this workflow when:
 
 ### Step 1: Execute Find Script
 
-Script: `builder:builder-maven-rules`
-
 **Search by artifactId:**
 ```bash
 python3 .plan/execute-script.py builder:builder-maven-rules:maven find-module \
@@ -361,8 +353,6 @@ Use this workflow when:
 - **extensions** (optional): File extensions to search (default: `.java`)
 
 ### Step 1: Execute Search Script
-
-Script: `builder:builder-maven-rules`
 
 ```bash
 python3 .plan/execute-script.py builder:builder-maven-rules:maven search-markers \
@@ -462,8 +452,6 @@ If file doesn't exist or field is missing, use empty object `{}`.
 From the `maven.py parse` result, extract the `data.issues` array.
 
 ### Step 3: Categorize Warnings
-
-Script: `builder:builder-maven-rules`
 
 Pass warnings and patterns to the categorization script:
 

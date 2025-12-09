@@ -68,8 +68,6 @@ Field: build
 
 ### Step 2: Detect Build Systems
 
-Script: `builder:environment-detection`
-
 If not cached, run detection:
 
 ```bash
@@ -126,8 +124,6 @@ Return structured result:
 Force re-detection of build systems (bypasses cache).
 
 ### Step 1: Detect Build Systems
-
-Script: `builder:environment-detection`
 
 ```bash
 python3 .plan/execute-script.py builder:environment-detection:build-env detect --project-dir .

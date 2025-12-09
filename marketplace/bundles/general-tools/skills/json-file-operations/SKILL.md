@@ -41,8 +41,6 @@ Perform read, write, and update operations on JSON files.
 
 ### Step 1: Execute Operation
 
-Script: `general-tools:json-file-operations`
-
 ```bash
 python3 .plan/execute-script.py general-tools:json-file-operations:{operation} {file_path} [--field {field}] [--value '{value}']
 ```

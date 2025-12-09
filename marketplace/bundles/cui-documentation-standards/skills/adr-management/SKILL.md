@@ -42,8 +42,6 @@ List all ADRs with optional status filtering.
 
 **Step 1: Execute List**
 
-Script: `cui-documentation-standards:adr-management`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:adr-management:manage-adr list [--status {status}]
 ```
@@ -78,8 +76,6 @@ Create a new ADR with automatic numbering.
 ### Steps
 
 **Step 1: Create ADR**
-
-Script: `cui-documentation-standards:adr-management`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:adr-management:manage-adr create --title "{title}" [--status "{status}"]
@@ -130,8 +126,6 @@ Read ADR content by number.
 
 **Step 1: Read ADR**
 
-Script: `cui-documentation-standards:adr-management`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:adr-management:manage-adr read --number {number}
 ```
@@ -153,8 +147,6 @@ Update ADR status through lifecycle.
 
 **Step 1: Update ADR**
 
-Script: `cui-documentation-standards:adr-management`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:adr-management:manage-adr update --number {number} --status {status}
 ```
@@ -175,8 +167,6 @@ Delete ADR with confirmation.
 ### Steps
 
 **Step 1: Delete ADR**
-
-Script: `cui-documentation-standards:adr-management`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:adr-management:manage-adr delete --number {number} --force

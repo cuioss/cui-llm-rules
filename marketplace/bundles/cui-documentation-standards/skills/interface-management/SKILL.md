@@ -42,8 +42,6 @@ List all interfaces with optional type filtering.
 
 **Step 1: Execute List**
 
-Script: `cui-documentation-standards:interface-management`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface list [--type {type}]
 ```
@@ -78,8 +76,6 @@ Create a new interface specification with automatic numbering.
 ### Steps
 
 **Step 1: Create Interface**
-
-Script: `cui-documentation-standards:interface-management`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface create --title "{title}" --type "{type}"
@@ -130,8 +126,6 @@ Read interface content by number.
 
 **Step 1: Read Interface**
 
-Script: `cui-documentation-standards:interface-management`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface read --number {number}
 ```
@@ -154,8 +148,6 @@ Update interface field content.
 
 **Step 1: Update Interface**
 
-Script: `cui-documentation-standards:interface-management`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface update --number {number} --field {field} --value "{value}"
 ```
@@ -176,8 +168,6 @@ Delete interface with confirmation.
 ### Steps
 
 **Step 1: Delete Interface**
-
-Script: `cui-documentation-standards:interface-management`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:interface-management:manage-interface delete --number {number} --force

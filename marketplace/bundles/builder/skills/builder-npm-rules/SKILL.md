@@ -93,8 +93,6 @@ Use this workflow when:
 
 ### Step 1: Execute npm Build
 
-Script: `builder:builder-npm-rules`
-
 Use the execute subcommand which handles log file pre-creation, timestamping, and npm/npx execution atomically:
 
 ```bash
@@ -131,8 +129,6 @@ The script:
 - Returns structured JSON result
 
 ### Step 2: Parse Build Output
-
-Script: `builder:builder-npm-rules`
 
 ```bash
 python3 .plan/execute-script.py builder:builder-npm-rules:npm parse \
@@ -188,8 +184,6 @@ Use this workflow when:
 - Generating structured issue reports
 
 ### Step 1: Execute Script
-
-Script: `builder:builder-npm-rules`
 
 **Parse the build log file:**
 

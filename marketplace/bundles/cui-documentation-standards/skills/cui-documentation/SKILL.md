@@ -67,8 +67,6 @@ OPTIONS=""
 if [fix_types != "all"]; then OPTIONS="$OPTIONS -t {fix_type}"; fi
 ```
 
-Script: `cui-documentation-standards:cui-documentation`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs format $OPTIONS {target}
 ```
@@ -93,8 +91,6 @@ Changes applied: {list}
 **Step 6: Validation (after changes applied)**
 
 Run validation:
-
-Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs validate {target}
@@ -133,8 +129,6 @@ If target is a directory:
 - Use Glob: `{directory}/*.adoc` (non-recursive)
 
 **Step 3: Run Format Validation**
-
-Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs validate {target}
@@ -225,8 +219,6 @@ mkdir -p target/asciidoc-link-verifier
 
 **Step 4: Run Link Verification**
 
-Script: `cui-documentation-standards:cui-documentation`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs verify-links --file {file_path} --report target/asciidoc-link-verifier/links.md
 ```
@@ -315,8 +307,6 @@ If target is a directory:
 - Use Glob: `{directory}/*.adoc` (non-recursive)
 
 **Step 3: Run Content Analysis**
-
-Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs review --file {file_path}
@@ -491,8 +481,6 @@ Parameters:
 
 After running verify-adoc-links.py, classify results:
 
-Script: `cui-documentation-standards:cui-documentation`
-
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs classify-links --input target/links.json --output target/classified.json
 ```
@@ -530,8 +518,6 @@ Parameters:
 ```
 
 **Enhanced Content Analysis:**
-
-Script: `cui-documentation-standards:cui-documentation`
 
 ```bash
 python3 .plan/execute-script.py cui-documentation-standards:cui-documentation:docs analyze-tone --file {file_path} --output target/tone-analysis.json

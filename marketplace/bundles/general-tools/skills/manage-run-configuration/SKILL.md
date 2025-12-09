@@ -63,8 +63,6 @@ Activate this skill when:
 
 ### Step 1: Initialize Configuration File
 
-Script: `general-tools:manage-run-configuration`
-
 ```bash
 python3 .plan/execute-script.py general-tools:manage-run-configuration:run-config init
 ```
@@ -190,8 +188,6 @@ python3 .plan/execute-script.py general-tools:json-file-operations:manage-json-f
 Validate run configuration format and structure.
 
 ### Step 1: Execute Validation
-
-Script: `general-tools:manage-run-configuration`
 
 ```bash
 python3 .plan/execute-script.py general-tools:manage-run-configuration:run-config validate {run-config-file}

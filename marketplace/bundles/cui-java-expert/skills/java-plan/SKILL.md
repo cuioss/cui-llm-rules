@@ -23,8 +23,6 @@ allowed-tools: Read, Bash
 
 ### Step 1: Load Specifications
 
-Script: `planning:manage-specifications`
-
 **Batch mode** (no specification_id):
 ```bash
 python3 .plan/execute-script.py planning:manage-specifications:manage-specification findAll \
@@ -53,8 +51,6 @@ Parse the specification body to determine:
 
 Generate task(s) with Java-specific steps:
 
-Script: `planning:manage-tasks`
-
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
@@ -72,8 +68,6 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
 #### 2c. Record Issues as Lessons
 
 On ambiguous specification or planning issues:
-
-Script: `planning:manage-lessons`
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
