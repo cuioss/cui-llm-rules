@@ -34,6 +34,7 @@
     "./skills/plan-refine",
     "./skills/plan-execute",
     "./skills/plan-finalize",
+    "./skills/plan-marshall",
     "./skills/manage-goals",
     "./skills/manage-tasks",
     "./skills/manage-files",

@@ -1,0 +1,522 @@
+---
+name: plan-marshall
+description: Project configuration wizard for planning system. Manages executor generation, permissions, build systems, and plan-types.
+allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
+---
+
+# Plan Marshall Skill
+
+**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin with Step 0 to determine mode and route to the appropriate workflow.
+
+Project configuration wizard for the planning system. Handles executor generation, permission configuration, build system detection, and plan-type management.
+
+## What This Skill Provides
+
+**Wizard Mode**: Sequential setup for new projects (executor generation, marshal.json init, build detection, plan-types)
+
+**Menu Mode**: Interactive maintenance for returning users (regenerate executor, permissions, build config, plan-types)
+
+## When to Activate This Skill
+
+Activate when:
+- Called by `/plan-marshall` command
+- User needs to configure project planning settings
+- Executor needs regeneration after bundle changes
+
+---
+
+## Scripts
+
+| Script | Notation | Purpose |
+|--------|----------|---------|
+| determine-mode | `planning:plan-marshall:determine-mode` | Determine wizard vs menu mode |
+| gitignore-setup | `planning:plan-marshall:gitignore-setup` | Configure .gitignore for .plan/ |
+| marshal-config | `planning:manage-config:marshal-config` | Project-level marshal.json CRUD |
+| scan-marketplace-inventory | `cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
+| build-env | `builder:environment-detection:build-env` | Build system detection |
+| permission | `general-tools:permission-management:permission` | Permission sync |
+| manage-work-log | `planning:manage-log:manage-work-log` | Log cleanup |
+
+---
+
+## Step 0: Determine Mode
+
+Determine whether to run wizard or menu based on existing files.
+
+**BOOTSTRAP**: Since execute-script.py may not exist yet, use DIRECT Python call:
+
+```bash
+python3 marketplace/bundles/planning/skills/plan-marshall/scripts/determine-mode.py --plan-dir .plan
+```
+
+**Output (TOON)**:
+```toon
+mode	wizard
+reason	executor_missing
+```
+
+| mode | reason | Action |
+|------|--------|--------|
+| `wizard` | `executor_missing` | Run First-Run Wizard from Step 1 |
+| `wizard` | `marshal_missing` | Run First-Run Wizard from Step 2 |
+| `menu` | `both_exist` | Show Interactive Menu |
+
+### Check for `--wizard` Flag
+
+If `--wizard` flag provided, force first-run wizard regardless of determine-mode result.
+
+---
+
+## First-Run Wizard
+
+Sequential structured setup for new projects. **CRITICAL**: Execute-script.py generation MUST be Step 1.
+
+### Step 1: Gitignore Setup
+
+Configure `.gitignore` for `.plan/` directory.
+
+**BOOTSTRAP**: Use DIRECT Python call:
+
+```bash
+python3 marketplace/bundles/planning/skills/plan-marshall/scripts/gitignore-setup.py --project-root .
+```
+
+**Output (TOON)**:
+```toon
+status	created
+gitignore_path	/path/to/.gitignore
+entries_added	2
+```
+
+| status | Meaning |
+|--------|---------|
+| `created` | New .gitignore created with planning entries |
+| `updated` | Existing .gitignore updated with planning entries |
+| `unchanged` | Planning entries already present |
+
+**NOTE**: `execute-script.py` is NOT tracked because it contains local absolute paths and must be regenerated per-machine.
+
+### Step 2: Generate Executor
+
+**BOOTSTRAP**: Since execute-script.py doesn't exist yet, use DIRECT Python call:
+
+```bash
+# Direct call - no executor dependency
+python3 marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
+  --scope marketplace \
+  --resource-types scripts
+```
+
+Parse the JSON output to extract script mappings. The output contains:
+```json
+{
+  "bundles": [{
+    "name": "planning",
+    "scripts": [{
+      "name": "manage-files",
+      "skill": "manage-files",
+      "notation": "planning:manage-files:manage-files",
+      "path_formats": { "absolute": "/abs/path/manage-files.py" }
+    }]
+  }]
+}
+```
+
+**Generate executor**:
+1. Read template from: `marketplace/bundles/general-tools/skills/script-executor/templates/execute-script.py.template`
+2. Replace `{{SCRIPT_MAPPINGS}}` with notation→path mappings
+3. Replace `{{EXECUTION_LOG_DIR}}` with absolute path to executor scripts directory
+4. Write to: `.plan/execute-script.py`
+
+**Verify**:
+```bash
+python3 -m py_compile .plan/execute-script.py && echo "Executor syntax OK"
+```
+
+**Output**: "Executor ready with N script mappings"
+
+**NOTE**: From this point on, all script calls use: `python3 .plan/execute-script.py {notation} ...`
+
+### Step 3: Initialize Marshal.json
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:marshal-config init
+```
+
+**Output**: "Created .plan/marshal.json with defaults"
+
+### Step 4: Build System Detection
+
+```bash
+python3 .plan/execute-script.py builder:environment-detection:build-env detect
+```
+
+Parse detected systems and prompt user:
+
+```
+AskUserQuestion:
+  question: "Detected build systems: [Maven, npm]. Configure these?"
+  options:
+    - label: "Yes"
+      description: "Configure detected build systems"
+      value: "yes"
+    - label: "No"
+      description: "Skip build system configuration"
+      value: "no"
+```
+
+If yes, update marshal.json with detected systems:
+```bash
+python3 .plan/execute-script.py planning:manage-config:marshal-config build-systems set \
+  --system maven --active true
+python3 .plan/execute-script.py planning:manage-config:marshal-config build-systems set \
+  --system npm --active true
+```
+
+### Step 5: Plan-Type Selection
+
+```
+AskUserQuestion:
+  question: "Which plan-types should this project support? (select all that apply)"
+  options:
+    - label: "Java"
+      description: "Maven/Gradle projects with Java/Kotlin"
+      value: "java"
+    - label: "JavaScript"
+      description: "npm/TypeScript projects"
+      value: "javascript"
+    - label: "Plugin"
+      description: "Claude Code marketplace development"
+      value: "plugin"
+    - label: "Generic only"
+      description: "No domain-specific plan types"
+      value: "generic"
+```
+
+For each selected type, configure domain agents:
+```bash
+# Example for Java
+python3 .plan/execute-script.py planning:manage-config:marshal-config domain-agents set \
+  --plan-type planning:plan-type-java \
+  --goals-agent cui-java-expert:java-goals-agent \
+  --plan-agent cui-java-expert:java-plan-agent
+```
+
+### Step 6: Custom Plan-Types
+
+```
+AskUserQuestion:
+  question: "Define project-local plan-types?"
+  options:
+    - label: "Yes"
+      description: "Create custom plan-type definitions"
+      value: "yes"
+    - label: "No"
+      description: "Use only standard plan-types"
+      value: "no"
+```
+
+If yes, run Custom Plan-Type Wizard (see below).
+
+### Step 7: Permission Setup
+
+```
+AskUserQuestion:
+  question: "Configure permissions now?"
+  options:
+    - label: "Yes"
+      description: "Set up global and project permissions"
+      value: "yes"
+    - label: "Later"
+      description: "Skip permission setup for now"
+      value: "no"
+```
+
+If yes:
+```bash
+python3 .plan/execute-script.py general-tools:permission-management:permission sync --scope project
+```
+
+### Step 8: Summary
+
+Output final summary:
+
+```toon
+status: success
+operation: wizard_complete
+
+gitignore: configured
+executor:
+  path: .plan/execute-script.py
+  script_count: 45
+marshal:
+  path: .plan/marshal.json
+build_systems:
+  - maven
+  - npm
+plan_types:
+  - planning:plan-type-java
+  - planning:plan-type-javascript
+  - planning:plan-type-generic
+custom_types: 0
+
+next_steps:
+  - Run /plan-manage to create a new plan
+  - Use /plan-marshall for maintenance tasks
+```
+
+---
+
+## Interactive Menu (Returning User)
+
+Display menu when both executor and marshal.json exist:
+
+```
+AskUserQuestion:
+  question: "What can I do for you?"
+  options:
+    - label: "1. Maintenance"
+      description: "Regenerate executor, update mappings, clean logs"
+      value: "maintenance"
+    - label: "2. Permissions"
+      description: "Update global/project permissions, sync wildcards"
+      value: "permissions"
+    - label: "3. Build System"
+      description: "Detect and configure build systems"
+      value: "build"
+    - label: "4. Plan-Types"
+      description: "Add/remove plan-types, define custom types"
+      value: "plan-types"
+    - label: "5. Full Reconfigure"
+      description: "Run first-run wizard again"
+      value: "wizard"
+```
+
+Route to appropriate section based on selection.
+
+---
+
+## Menu Option: Maintenance
+
+### Regenerate Executor
+
+```bash
+python3 marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
+  --scope marketplace \
+  --resource-types scripts
+```
+
+Regenerate executor file with fresh mappings.
+
+### Update Script Mappings
+
+Same as regenerate but incremental - only add new scripts.
+
+### Clean Old Logs
+
+```bash
+python3 .plan/execute-script.py planning:manage-log:manage-work-log clean --max-age-days 30
+```
+
+---
+
+## Menu Option: Permissions
+
+### Update Global Permissions
+
+```bash
+python3 .plan/execute-script.py general-tools:permission-management:permission sync --scope global
+```
+
+### Update Project Permissions
+
+```bash
+python3 .plan/execute-script.py general-tools:permission-management:permission sync --scope project
+```
+
+### Sync Wildcards
+
+```
+SlashCommand: /tools-audit-permission-wildcards
+```
+
+---
+
+## Menu Option: Build System
+
+### Detect Build Systems
+
+```bash
+python3 .plan/execute-script.py builder:environment-detection:build-env detect
+```
+
+### Configure Build Mappings
+
+| Detected | Skill | Verification Command |
+|----------|-------|---------------------|
+| Maven | `builder:builder-maven-rules` | `/builder:builder-build-and-fix` |
+| Gradle | `builder:builder-gradle-rules` | `/builder:builder-build-and-fix` |
+| npm | `builder:builder-npm-rules` | `/builder:builder-build-and-fix system=npm` |
+
+### Update Verification Commands
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:marshal-config plan-type-defaults set \
+  --plan-type planning:plan-type-java \
+  --verification-command "/builder:builder-build-and-fix"
+```
+
+---
+
+## Menu Option: Plan-Types
+
+### Add/Remove Plan-Types
+
+```
+AskUserQuestion:
+  question: "Which plan-types to toggle?"
+  options:
+    - label: "Add Java"
+      value: "add-java"
+    - label: "Add JavaScript"
+      value: "add-javascript"
+    - label: "Add Plugin"
+      value: "add-plugin"
+    - label: "Remove a type"
+      value: "remove"
+```
+
+### Define Custom Plan-Type
+
+See Custom Plan-Type Wizard below.
+
+### Update Domain Agent Mappings
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:marshal-config domain-agents set \
+  --plan-type {plan_type} \
+  --goals-agent {goals_agent} \
+  --plan-agent {plan_agent}
+```
+
+---
+
+## Custom Plan-Type Wizard
+
+Interactive flow for creating project-local plan-types:
+
+```
+AskUserQuestion:
+  question: "Name for custom plan-type (kebab-case):"
+  type: text
+```
+
+```
+AskUserQuestion:
+  question: "Description:"
+  type: text
+```
+
+```
+AskUserQuestion:
+  question: "File patterns (comma-separated, e.g., *.java,*.kt):"
+  type: text
+```
+
+```
+AskUserQuestion:
+  question: "Goals agent (or 'null' for none):"
+  type: text
+```
+
+```
+AskUserQuestion:
+  question: "Plan agent (or 'null' for none):"
+  type: text
+```
+
+Create custom plan-type:
+1. Read template from `templates/custom-plan-type.md`
+2. Create `.claude/plan-types/{name}/SKILL.md` with template
+3. Add to marshal.json:
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:marshal-config custom-types add \
+  --name {name} \
+  --skill-path .claude/plan-types/{name}/SKILL.md \
+  --goals-agent {goals_agent} \
+  --plan-agent {plan_agent}
+```
+
+---
+
+## Output Format
+
+All operations return TOON format:
+
+**Success**:
+```toon
+status: success
+operation: {operation_name}
+data:
+  key: value
+```
+
+**Error**:
+```toon
+status: error
+error: {error_type}
+message: {error_message}
+recovery: {suggested_action}
+```
+
+---
+
+## Error Handling
+
+### Missing Executor
+
+```toon
+status: error
+error: missing_executor
+message: .plan/execute-script.py not found
+recovery: Run first-run wizard to generate executor
+```
+
+### Invalid Marshal.json
+
+```toon
+status: error
+error: invalid_config
+message: Failed to parse marshal.json
+recovery: Delete and re-run wizard, or fix JSON syntax
+```
+
+### Script Not Found
+
+```toon
+status: error
+error: script_not_found
+message: Script notation not found in executor
+recovery: Regenerate executor via Maintenance menu
+```
+
+---
+
+## Templates
+
+| Template | Purpose |
+|----------|---------|
+| `templates/custom-plan-type.md` | SKILL.md template for custom plan-types |
+
+---
+
+## Quality Checklist
+
+- [x] Detects first-run vs returning user
+- [x] Bootstrap mechanism for executor generation
+- [x] Gitignore configured correctly (execute-script.py NOT tracked)
+- [x] All script calls use notation via executor (except bootstrap)
+- [x] Interactive menu for returning users
+- [x] Custom plan-type wizard
+- [x] TOON output format
