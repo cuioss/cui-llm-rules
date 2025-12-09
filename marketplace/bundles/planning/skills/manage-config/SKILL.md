@@ -1,26 +1,29 @@
 ---
 name: manage-config
-description: Manage config.toon files with schema validation and field-level access
+description: Manage plan and project configuration with schema validation
 allowed-tools: Read, Glob, Bash
 ---
 
 # Manage Config Skill
 
-Manage config.toon files with schema validation and field-level access. Provides typed configuration for plan execution.
+Configuration management at two levels:
+1. **Per-plan** (`config.toon`) - Plan-specific settings
+2. **Project-level** (`marshal.json`) - Domain agents, plan-type routing, defaults
 
 ## What This Skill Provides
 
-- Read/write config.toon with schema validation
+- Per-plan config.toon management with schema validation
+- Project-level marshal.json for domain agent routing
 - Field-level get/set operations
-- Default value initialization
-- Enum validation for typed fields
+- Plan-type routing rules and keyword detection
 
 ## When to Activate This Skill
 
 Activate this skill when:
 - Creating initial plan configuration
 - Reading or updating plan settings
-- Querying specific configuration values
+- Configuring domain agent mappings
+- Setting up plan-type routing rules
 
 ---
 
@@ -164,7 +167,8 @@ config:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `planning:manage-config:manage-config` | All config operations via subcommands | `python3 .plan/execute-script.py planning:manage-config:manage-config {subcommand} --help` |
+| `planning:manage-config:manage-config` | Per-plan config.toon operations | `python3 .plan/execute-script.py planning:manage-config:manage-config {subcommand} --help` |
+| `planning:manage-config:marshal-config` | Project-level marshal.json operations | `python3 .plan/execute-script.py planning:manage-config:marshal-config {noun} {verb} --help` |
 
 ---
 
@@ -207,3 +211,124 @@ After base config is created, plan-type skills add finalize configuration fields
 ### With plan-execute
 
 Execution phase reads config to determine build commands, commit strategy, and finalize behavior.
+
+---
+
+# Marshal Config (Project-Level)
+
+Project-level configuration for domain agent routing and plan-type detection.
+
+## Storage Location
+
+```
+.plan/marshal.json
+```
+
+## Purpose
+
+Enables commands to route to domain agents directly (bypassing broken agent-to-agent delegation).
+
+## Noun-Verb Operations
+
+Script: `planning:manage-config:marshal-config`
+
+### domain-agents
+
+Manage domain agent mappings per plan-type.
+
+```bash
+# Get agents for plan-type
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  domain-agents get --plan-type planning:plan-type-java
+
+# Set agents
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  domain-agents set --plan-type planning:plan-type-java \
+  --goals-agent cui-java-expert:java-goals-agent \
+  --plan-agent cui-java-expert:java-plan-agent
+
+# List all
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  domain-agents list
+```
+
+### defaults
+
+Manage default configuration values.
+
+```bash
+# Get field
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  defaults get --field verification_required
+
+# Set field
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  defaults set --field create_pr --value true
+
+# List all
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  defaults list
+```
+
+### rules
+
+Manage file pattern → plan-type routing rules.
+
+```bash
+# Match file to plan-type
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  rules match --file src/main/java/Foo.java
+
+# Add rule
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  rules add --pattern "*.kt" --plan-type planning:plan-type-java \
+  --description "Kotlin files"
+
+# List rules
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  rules list
+```
+
+### keywords
+
+Manage keyword-based plan-type detection.
+
+```bash
+# Match text to plan-type
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  keywords match --text "implement junit test for service"
+
+# Add keyword
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  keywords add --plan-type planning:plan-type-java --keyword quarkus
+```
+
+### init
+
+Initialize marshal.json with defaults.
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:marshal-config init
+python3 .plan/execute-script.py planning:manage-config:marshal-config init --force
+```
+
+## Output Format
+
+All marshal-config commands return TOON for token efficiency:
+
+```toon
+status: success
+data:
+  goals_agent: cui-java-expert:java-goals-agent
+  plan_agent: cui-java-expert:java-plan-agent
+```
+
+## Integration Points
+
+| Consumer | Operation | Purpose |
+|----------|-----------|---------|
+| /plan-manage | `domain-agents get` | Route refine to domain agents |
+| /plan-manage | `rules match` | Auto-detect plan-type |
+| /plan-marshall | `init` | First-run setup |
+| plan-init | `defaults list` | Set plan config |
+| plan-finalize | `plan-type-defaults get` | Get verification command |
