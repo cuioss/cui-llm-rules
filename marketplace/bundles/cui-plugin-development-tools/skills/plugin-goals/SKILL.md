@@ -25,70 +25,152 @@ allowed-tools: Read, Glob, Grep, Bash
 Load plan context via manage-* scripts:
 
 ```bash
-# Read original request description
 python3 .plan/execute-script.py planning:manage-files:manage-files read \
   --plan-id {plan_id} \
   --file request.md
 
-# Read plan configuration
 python3 .plan/execute-script.py planning:manage-config:manage-config read \
   --plan-id {plan_id}
 
-# Read references (issue context if available)
 python3 .plan/execute-script.py planning:manage-references:manage-references read \
   --plan-id {plan_id}
 ```
 
 Parse the request to identify what needs to be accomplished.
 
-### Step 2: Analyze Marketplace Structure
+### Step 2: Determine Impact Path
 
-Parse request intent and explore affected plugin components:
+Analyze the request to determine the impact scope:
 
-**Bundle Detection**:
+**Path-Single** (Isolated Change):
+- Creating/modifying 1-3 components in a single bundle
+- No cross-references or dependencies to update
+- Examples: "Add new skill", "Fix command X", "Create agent Y"
+
+**Path-Multi** (Cross-Cutting Change):
+- Changes affect shared patterns, interfaces, or conventions
+- Multiple components reference the changed entity
+- Examples: "Rename script notation", "Change output format", "Update API contract"
+
+**Decision Criteria**:
+
+| Indicator | Path |
+|-----------|------|
+| "add", "create", "new" (single component) | Single |
+| "fix", "update" (localized) | Single |
+| "rename", "migrate", "refactor" | Multi |
+| "change format", "update pattern" | Multi |
+| Cross-bundle impact mentioned | Multi |
+
+**Log the decision**:
+
 ```bash
-Glob marketplace/bundles/*/\.claude-plugin/plugin.json
-Read marketplace/.claude-plugin/marketplace.json
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type decision \
+  --summary "Impact path: {Single|Multi}" \
+  --detail "{reasoning for the decision}"
 ```
 
-**Component Exploration**:
-```bash
-Glob marketplace/bundles/{bundle}/skills/*/SKILL.md
-Glob marketplace/bundles/{bundle}/commands/*.md
-Glob marketplace/bundles/{bundle}/agents/*.md
-Read {component-path}
-```
+---
 
-**Identify**:
-- Skills, commands, agents affected
-- Bundle structure and organization
-- Script requirements
-- Reference document needs
-- Complexity assessment
+### Step 3a: Path-Single Workflow
 
-### Step 3: Decompose Into Goals
+For isolated changes, identify the target components directly:
 
-Break the request into discrete, achievable goals. Each goal should be:
-- **Independent**: Can be implemented without other goals completing first (when possible)
-- **Testable**: Has clear completion criteria
-- **Sized**: Reasonable scope (not too large, not too small)
-
-For each goal identified:
+1. **Identify target bundle and component type**
+2. **Read existing component** (if modify/refactor scope)
+3. **Create goals** for each component to create/modify
 
 ```bash
 python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
   --plan-id {plan_id} \
-  --title "{goal title}" \
-  --body "{Plugin-specific technical goal description}"
+  --title "{component action}" \
+  --body "{technical description with path, type, dependencies}"
 ```
 
-**Goal Body Content**:
+**Goal Structure for Path-Single**:
 - Component type (skill, command, agent, script)
-- Target bundle
-- Target path (e.g., `marketplace/bundles/{bundle}/skills/...`)
-- Dependencies (skills referenced, scripts needed)
-- Frontmatter requirements
+- Target path
+- Dependencies (if any)
 - Standards to follow
+
+**Continue to Step 4.**
+
+---
+
+### Step 3b: Path-Multi Workflow
+
+For cross-cutting changes, perform comprehensive impact analysis:
+
+#### 3b.1: Load Marketplace Inventory
+
+Use scan-marketplace-inventory to get complete component list:
+
+```bash
+# Full inventory with descriptions
+python3 .plan/execute-script.py \
+  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  --include-descriptions
+
+# Or filter by bundles if impact is known to be limited
+python3 .plan/execute-script.py \
+  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  --bundles planning,cui-java-expert \
+  --include-descriptions
+```
+
+#### 3b.2: Analyze Each Component
+
+For each component in the inventory, **read and analyze** to determine if affected:
+
+**DO NOT use scripts to determine impact** - thoroughly analyze each component step-by-step:
+
+1. Read the component file
+2. Search for references to the changed entity
+3. Determine if update is required
+4. Document the finding
+
+**Analysis checklist per component**:
+- [ ] Does it reference the changed skill/command/agent?
+- [ ] Does it use the changed script notation?
+- [ ] Does it follow the pattern being modified?
+- [ ] Does it output in the format being changed?
+
+#### 3b.3: Create Goals
+
+**Goal 1: Core Changes**
+
+```bash
+python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
+  --plan-id {plan_id} \
+  --title "Implement core {change type}" \
+  --body "Primary implementation of the change:
+- Component: {primary component}
+- Path: {path}
+- Change: {what needs to change}
+- Standards: {applicable standards}"
+```
+
+**Goal N: Each Affected Component**
+
+For each component identified as affected:
+
+```bash
+python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
+  --plan-id {plan_id} \
+  --title "Update {component-name} for {change}" \
+  --body "Update component to align with core change:
+- Component: {bundle}:{component}
+- Path: {path}
+- References to update: {list}
+- Verification: {how to verify}"
+```
+
+**Continue to Step 4.**
+
+---
 
 ### Step 4: Record Issues as Lessons
 
@@ -109,24 +191,73 @@ python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
 ```toon
 status: success
 plan_id: {plan_id}
+impact_path: {Single|Multi}
 
 goals_created[N]:
-- GOAL-1
-- GOAL-2
-- GOAL-3
+- GOAL-1: {title}
+- GOAL-2: {title}
+- GOAL-3: {title}
 
+components_analyzed: {count for Path-Multi, 0 for Path-Single}
 lessons_recorded: {count}
+```
+
+---
+
+## Inventory Script Reference
+
+**Script**: `cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory`
+
+**Options**:
+
+| Option | Description |
+|--------|-------------|
+| `--scope marketplace` | Scan marketplace bundles (default) |
+| `--resource-types agents,commands,skills,scripts` | Filter resource types |
+| `--include-descriptions` | Extract descriptions from frontmatter |
+| `--name-pattern <pattern>` | Filter by name (fnmatch glob, pipe-separated) |
+| `--bundles <names>` | Filter to specific bundles (comma-separated) |
+
+**Example Calls**:
+
+```bash
+# All components with descriptions
+python3 .plan/execute-script.py \
+  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  --include-descriptions
+
+# Only skills in planning bundle
+python3 .plan/execute-script.py \
+  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  --bundles planning \
+  --resource-types skills
+
+# Components matching pattern
+python3 .plan/execute-script.py \
+  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  --name-pattern "*-goals*|*-plan*"
 ```
 
 ---
 
 ## Goal Decomposition Patterns
 
+### Path-Single Patterns
+
 | Request Pattern | Typical Goals |
 |-----------------|---------------|
-| "Add new skill" | 1. Create SKILL.md 2. Add standards documents 3. Create scripts 4. Update plugin.json |
-| "Add new command" | 1. Create command markdown 2. Implement skill delegation 3. Update plugin.json |
-| "Add new agent" | 1. Create agent markdown 2. Define tool requirements 3. Update plugin.json |
+| "Add new skill" | 1. Create SKILL.md 2. Add standards docs 3. Create scripts 4. Update plugin.json |
+| "Add new command" | 1. Create command.md 2. Implement skill delegation 3. Update plugin.json |
+| "Add new agent" | 1. Create agent.md 2. Define tool requirements 3. Update plugin.json |
+| "Fix command X" | 1. Update command with fix |
+
+### Path-Multi Patterns
+
+| Request Pattern | Typical Goals |
+|-----------------|---------------|
+| "Rename notation X to Y" | 1. Update core definition 2-N. Update each referencing component |
+| "Change output format" | 1. Define new format 2-N. Update each producer/consumer |
+| "Migrate to new API" | 1. Implement new API 2-N. Migrate each caller |
 
 ---
 
@@ -163,29 +294,6 @@ lessons_recorded: {count}
 
 ---
 
-## Plugin Architecture Patterns
-
-### Skill Structure
-When task involves skills:
-- Check for SKILL.md template
-- Identify required references/
-- Check for scripts/ directory
-- Reference `cui-plugin-development-tools:plugin-architecture`
-
-### Command Structure
-When task involves commands:
-- Check frontmatter format
-- Identify skill delegation pattern
-- Reference thin orchestrator pattern
-
-### Agent Structure
-When task involves agents:
-- Check tools declaration
-- Identify skill loading pattern
-- Reference minimal wrapper pattern
-
----
-
 ## Error Handling
 
 ### Component Not Found
@@ -217,6 +325,8 @@ If multiple components match:
 **Scripts Used**:
 - `planning:manage-goals` - Create goals
 - `planning:manage-lessons` - Record lessons on issues
+- `planning:manage-log` - Log decisions
+- `cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory` - Inventory analysis
 
 **Standards Referenced**:
 - `cui-plugin-development-tools:plugin-architecture` - Architecture principles
