@@ -22,11 +22,21 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### Step 1: Load Request Context
 
-Read plan context files:
-```
-Read {plan_dir}/task.md        # Original task description
-Read {plan_dir}/config.toon    # build_system, plan_type
-Read {plan_dir}/references.toon # issue_context if available
+Load plan context via manage-* scripts:
+
+```bash
+# Read original request description
+python3 .plan/execute-script.py planning:manage-files:manage-files read \
+  --plan-id {plan_id} \
+  --file request.md
+
+# Read plan configuration
+python3 .plan/execute-script.py planning:manage-config:manage-config read \
+  --plan-id {plan_id}
+
+# Read references (issue context if available)
+python3 .plan/execute-script.py planning:manage-references:manage-references read \
+  --plan-id {plan_id}
 ```
 
 Parse the request to identify what needs to be accomplished.

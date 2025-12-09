@@ -67,7 +67,7 @@ Examples:
 
 | File | Read Script | Write Script |
 |------|-------------|--------------|
-| `task.md` | `manage-files.py read --plan-id {id} --file task.md` | `manage-files.py write --plan-id {id} --file task.md` |
+| `request.md` | `manage-files.py read --plan-id {id} --file request.md` | `manage-files.py write --plan-id {id} --file request.md` |
 | `lessons-learned/*.md` | `manage-lesson.py get --id {lesson_id}` | `manage-lesson.py add` |
 | Any plan file | `manage-files.py read --plan-id {id} --file {path}` | `manage-files.py write --plan-id {id} --file {path}` |
 
@@ -438,7 +438,7 @@ Actively scan execution logs to detect script issues:
 
 After each planning command/skill execution, verify:
 
-- [ ] No direct .plan file access (except task.md read)
+- [ ] No direct .plan file access (except request.md read)
 - [ ] Work-log entry added for significant operations
 - [ ] Status reflects current phase correctly
 - [ ] All artifacts created via manage-* scripts
@@ -519,8 +519,8 @@ Some operations legitimately need direct access:
 
 ### Legitimate Exceptions
 
-1. **Initial task.md creation** - plan-init creates this file directly
-2. **Reading task.md** - reference document, read-only
+1. **Initial request.md creation** - plan-init creates this file directly
+2. **Reading request.md** - reference document, read-only
 3. **Lessons learned** - standalone markdown files
 4. **Diagnostics/debugging** - when investigating issues with user approval
 

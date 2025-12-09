@@ -27,7 +27,7 @@ Simplified notation: `{bundle}:{skill}`
 
 ```bash
 # File operations
-python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan --file task.md
+python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan --file request.md
 
 # Build operations
 python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals clean,verify
