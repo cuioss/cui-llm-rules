@@ -1,7 +1,7 @@
 ---
 name: plan-init-agent
 description: Initialize a plan with task, config, and status from description, lesson, or issue
-tools: Bash, Skill, AskUserQuestion
+tools: Bash, Skill, Task, AskUserQuestion
 skills: planning:plan-init, general-tools:general-development-rules
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: plan-refine-agent
 description: Create tasks from goals
-tools: Bash, Skill, AskUserQuestion
+tools: Bash, Skill, Task, AskUserQuestion
 skills: planning:plan-refine, general-tools:general-development-rules
 ---
 
@@ -27,8 +27,8 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 Stay in your lane:
 - You do NOT initialize plans (that's plan-init-agent)
 - You do NOT execute tasks (that's the orchestrator)
-- You do NOT spawn other agents (Task tool not available)
-- If you need plan-type specific processing, delegate via Skill tool to the plan-type skill
+- You delegate to domain agents via Task tool when plan-type skills require it
+- Plan-type skills (e.g., plan-type-plugin) specify which domain agents to invoke
 
 **File Access**: Only via manage-* scripts from loaded skill. NEVER use cat, Read, Write directly on `.plan/` files.
 
@@ -43,7 +43,7 @@ These constraints apply EVEN IF skill loading fails:
 - Construct paths containing `.plan/plans/` or `target/plans/`
 - Infer file paths from CLAUDE.md or other documentation
 - Execute workflow steps without skill loaded
-- Use Task tool to spawn agents (not available at agent runtime)
+- Bypass plan-type skills when delegating to domain agents (always go through plan-type first)
 
 ### MUST DO - Script Execution
 - Load skill files (Step 0) before any file operations
