@@ -30,8 +30,8 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `cui-frontend-expert:js-solution-outline-agent` | Decomposes request into goals |
-| `task_plan_agent` | `cui-frontend-expert:js-task-plan-agent` | Creates tasks from goals |
+| `solution_outline_agent` | `cui-frontend-expert:js-solution-outline-agent` | Creates solution outline with deliverables |
+| `task_plan_agent` | `cui-frontend-expert:js-task-plan-agent` | Creates tasks from deliverables |
 | `verification_command` | `/builder:builder-build-and-fix system=npm` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
 | `standards` | JavaScript, JSDoc, Unit testing, Linting | Skills to load |
@@ -66,14 +66,14 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 ### js-solution-outline-agent
 
-Analyzes JavaScript codebase and creates goals with:
+Analyzes JavaScript codebase and creates deliverables with:
 - Module design and exports
 - Web component structure (for UI components)
 - Event handling patterns
 - State management approach
 - Integration with existing modules
 
-**Returns**: `{status, goal_count, solution_document, lessons_recorded}`
+**Returns**: `{status, deliverable_count, solution_document, lessons_recorded}`
 
 ### js-task-plan-agent
 

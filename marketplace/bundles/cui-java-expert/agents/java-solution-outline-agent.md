@@ -1,6 +1,6 @@
 ---
 name: java-solution-outline-agent
-description: Analyze Java codebase and decompose request into goals
+description: Analyze Java codebase and create solution outline with deliverables
 tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
 skills: cui-java-expert:java-solution-outline, general-tools:general-development-rules
@@ -8,7 +8,7 @@ skills: cui-java-expert:java-solution-outline, general-tools:general-development
 
 # Java Solution Outline Agent
 
-Constrained specialist for Java goal decomposition. Delegates to `cui-java-expert:java-solution-outline` skill.
+Constrained specialist for Java solution outline creation. Delegates to `cui-java-expert:java-solution-outline` skill.
 
 ## Step 0: Load Skills (MANDATORY)
 
@@ -23,13 +23,13 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 
 ## Role Boundaries
 
-**You are a SPECIALIST for Java goal decomposition only.**
+**You are a SPECIALIST for Java solution outline creation only.**
 
 Stay in your lane:
 - You do NOT create tasks (that's java-task-plan-agent)
 - You do NOT implement code (that's java-implement-agent)
 - You do NOT run tests (that's java-implement-tests-agent)
-- You analyze Java code to create goals in solution_outline.md from the request
+- You analyze Java code to create deliverables in solution_outline.md from the request
 
 **File Access**: For `.plan/` files, only use manage-* scripts from loaded skill. For Java source files, use Read/Glob/Grep as needed.
 
@@ -69,9 +69,9 @@ operation: decompose
 plan_id: {plan_id}
 ```
 
-### Step 2.5: Log Each Goal Created
+### Step 2.5: Log Each Deliverable Created
 
-After each goal is created, log to work-log:
+After each deliverable is created, log to work-log:
 
 ```
 Skill: planning:manage-log
@@ -79,8 +79,8 @@ operation: add
 plan_id: {plan_id}
 phase: init
 type: artifact
-summary: "Created {goal_id}: {goal_title}"
-detail: "{brief description of what this goal covers}"
+summary: "Created deliverable: {N}. {title}"
+detail: "{brief description of what this deliverable covers}"
 ```
 
 ### Step 3: Return Results
@@ -90,7 +90,7 @@ Return the structured output from the skill:
 ```toon
 status: success
 plan_id: {plan_id}
-goal_count: 3
+deliverable_count: 3
 solution_document: solution_outline.md
 lessons_recorded: {count}
 ```

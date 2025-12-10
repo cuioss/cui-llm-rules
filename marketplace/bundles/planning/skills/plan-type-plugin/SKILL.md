@@ -28,8 +28,8 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `cui-plugin-development-tools:plugin-solution-outline-agent` | Decomposes request into goals |
-| `task_plan_agent` | `cui-plugin-development-tools:plugin-task-plan-agent` | Creates tasks from goals |
+| `solution_outline_agent` | `cui-plugin-development-tools:plugin-solution-outline-agent` | Creates solution outline with deliverables |
+| `task_plan_agent` | `cui-plugin-development-tools:plugin-task-plan-agent` | Creates tasks from deliverables |
 | `verification_command` | `/cui-plugin-development-tools:plugin-doctor` | Plugin validation |
 | `pr_workflow` | `false` | No PR (direct to main) |
 | `standards` | Plugin architecture, Script architecture | Skills to load |
@@ -126,14 +126,14 @@ python3 .plan/execute-script.py planning:manage-config:manage-config set \
 
 ### plugin-solution-outline-agent
 
-Analyzes marketplace structure and creates goals with:
+Analyzes marketplace structure and creates deliverables with:
 - Component type (skill, command, agent, script)
 - Target bundle location
 - Frontmatter requirements
 - Standards to follow
 - Integration points
 
-**Returns**: `{status, goal_count, solution_document, lessons_recorded}`
+**Returns**: `{status, deliverable_count, solution_document, lessons_recorded}`
 
 ### plugin-task-plan-agent
 

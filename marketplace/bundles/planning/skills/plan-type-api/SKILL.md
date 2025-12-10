@@ -20,8 +20,8 @@ name: plan-type-{domain}
 description: {Domain} plan type
 allowed-tools: Read, Bash
 domain:
-  solution_outline_agent: {bundle}:{goals-agent-name}    # Agent for request → goals
-  task_plan_agent: {bundle}:{plan-agent-name}      # Agent for goals → tasks
+  solution_outline_agent: {bundle}:{solution-outline-agent}  # Agent for request → solution outline
+  task_plan_agent: {bundle}:{task-plan-agent}                # Agent for solution outline → tasks
   verification_command: /{verification-cmd}   # Finalize verification
   pr_workflow: true|false                     # Create PR on finalize
   standards:                                  # Domain skills to load
@@ -44,9 +44,9 @@ All plan-type skills implement these operations:
 |-----------|-------|--------|--------|------|
 | `configure` | `plan_id` | References + config updated | plan-init | During initialization |
 
-**Note**: The `decompose` and `plan` operations are documented in plan-type skills but executed by domain agents invoked from commands.
+**Note**: Solution outline creation and task planning are documented in plan-type skills but executed by domain agents invoked from commands.
 
-**Traceability Flow**: Request → Solution (with goals) → Tasks (each task references its goal number)
+**Traceability Flow**: Request → Solution Outline (with Deliverables) → Tasks (each task references its deliverable number)
 
 ---
 
@@ -77,29 +77,31 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
 ### Solution Outline Agent
 
-**Purpose**: Analyze request and create solution document (Request → Solution)
+**Purpose**: Analyze request and create solution outline document (Request → Solution Outline)
 
 **Invoked by**: `/plan-manage action=refine` command
 
 **Responsibilities**:
+- Load `planning:manage-solution-outline` skill for structure guidance
 - Read request.md for the request
 - Analyze codebase with domain knowledge
-- Write solution_outline.md directly via Write tool, then validate with `manage-plan-documents:solution validate`
-- Document goals as numbered sections in solution document
+- Write solution_outline.md directly via Write tool (includes ASCII overview diagram)
+- Document deliverables as numbered `### N. Title` sections
+- Validate with `manage-solution-outline validate --plan-id {plan_id}`
 - Record lessons-learned on issues
 
-**Returns**: `{status, goal_count, lessons_recorded}`
+**Returns**: `{status, deliverable_count, lessons_recorded}`
 
 ### Task Plan Agent
 
-**Purpose**: Transform goals into executable tasks (Solution → TASKs)
+**Purpose**: Transform deliverables into executable tasks (Solution Outline → Tasks)
 
 **Invoked by**: `/plan-manage action=refine` command (after solution outline agent completes)
 
 **Responsibilities**:
-- Read solution_outline.md for goals
-- Generate domain-specific task steps
-- Create tasks via `manage-tasks:add --goal N` (numeric reference)
+- Read solution_outline.md for deliverables via `manage-solution-outline list-deliverables`
+- Generate domain-specific task steps per deliverable
+- Create tasks via `manage-tasks:add --goal N` (numeric deliverable reference)
 - Record lessons-learned on issues
 
 **Returns**: `{status, task_ids[], lessons_recorded}`
@@ -123,7 +125,7 @@ Plan-type skills must:
 
 1. Include `domain:` frontmatter with agent references (or null for generic)
 2. Implement `configure` operation for plan initialization
-3. Document domain agent behavior for goals and plan operations
+3. Document domain agent behavior for solution outline and task plan operations
 4. Return `status` field in all outputs
 5. Handle errors with `status: error` and `message`
 
@@ -142,4 +144,6 @@ Plan-type skills must:
 - `cui-plugin-development-tools:plugin-solution-outline-agent` / `cui-plugin-development-tools:plugin-task-plan-agent`
 
 **Data Layer** (used by domain agents):
-- `manage-plan-documents` (request/solution) / `manage-tasks` scripts
+- `manage-plan-documents` (request) - Request document operations
+- `manage-solution-outline` (solution_outline.md) - Solution outline validation and queries
+- `manage-tasks` - Task creation with deliverable references

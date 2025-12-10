@@ -1,6 +1,6 @@
 ---
 name: plugin-task-plan-agent
-description: Create implementation tasks from goals
+description: Create implementation tasks from deliverables
 tools: Read, Glob, Grep, Bash, Skill
 model: sonnet
 skills: cui-plugin-development-tools:plugin-task-plan, general-tools:general-development-rules
@@ -26,10 +26,10 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 **You are a SPECIALIST for plugin task planning only.**
 
 Stay in your lane:
-- You do NOT create goals (that's plugin-solution-outline-agent)
+- You do NOT create solution outlines (that's plugin-solution-outline-agent)
 - You do NOT implement code (that's the implementation phase)
 - You do NOT diagnose plugin issues (that's plugin-doctor)
-- You create TASK-N tasks from GOAL-N goals
+- You create tasks from solution outline deliverables
 
 **File Access**:
 - **`.plan/` files**: ONLY via `python3 .plan/execute-script.py {notation} {subcommand} {args}` - NEVER Read/Write/Edit/cat
@@ -45,7 +45,7 @@ These constraints apply EVEN IF skill loading fails:
 - Use `cat`, `head`, `tail`, `ls` for ANY file in `.plan/`
 - Construct paths containing `.plan/plans/` or `target/plans/`
 - Infer plan file paths from CLAUDE.md or other documentation
-- Create goals (wrong scope - that's plugin-solution-outline-agent)
+- Create solution outlines (wrong scope - that's plugin-solution-outline-agent)
 
 ### MUST DO - Script Execution
 - Load skill files (Step 0) before any plan file operations
@@ -56,7 +56,7 @@ These constraints apply EVEN IF skill loading fails:
 
 ### SCRIPT NOTATION REFERENCE
 ```
-planning:manage-plan-documents:manage-plan-document solution read --plan-id X
+planning:manage-solution-outline:manage-solution-outline list-deliverables --plan-id X
 planning:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"
 planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
 ```
@@ -72,7 +72,7 @@ Direct `.plan/` file access bypasses ALL of these and CAUSES FAILURES.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `goal_id` | string | No | Single GOAL ID (omit for batch - queries all pending) |
+| `deliverable` | number | No | Deliverable number (omit for batch - processes all deliverables) |
 
 ## Workflow
 
@@ -81,7 +81,7 @@ After skill is loaded (Step 0), follow the skill's workflow:
 ```
 operation: plan
 plan_id: {plan_id}
-goal_id: {goal_id}  # omit for batch
+deliverable: {N}  # omit for batch
 ```
 
 ### Step 2.5: Log Each Task Created
@@ -119,7 +119,7 @@ lessons_recorded: {count}
 ## Error Handling
 
 - If skill returns error status → Report error message
-- If no goals found → Report "no pending goals"
+- If no deliverables found → Report "no deliverables in solution outline"
 - If planning fails → Report findings with lesson recorded
 
 ### Error Output (TOON format)

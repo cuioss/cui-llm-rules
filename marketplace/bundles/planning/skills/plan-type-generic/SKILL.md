@@ -33,7 +33,7 @@ The `domain:` frontmatter indicates no domain agents (generic plans use inline r
 | `pr_workflow` | `false` | No PR (direct to main) |
 | `standards` | `[]` | No domain-specific standards |
 
-When `solution_outline_agent` is `null`, the command falls back to `planning:plan-refine-agent` for inline goal/task creation.
+When `solution_outline_agent` is `null`, the command falls back to `planning:plan-refine-agent` for inline solution outline/task creation.
 
 ---
 
@@ -59,7 +59,7 @@ When `solution_outline_agent` is `null`, the command falls back to `planning:pla
 Since `solution_outline_agent` and `task_plan_agent` are `null`, the `/plan-manage` command falls back to `planning:plan-refine-agent` for the refine phase.
 
 The plan-refine-agent provides simple inline refinement:
-- Creates 1:1 goal per request item with minimal transformation
-- Creates single task per goal with basic steps (execute, verify)
+- Creates 1:1 deliverable per request item with minimal transformation
+- Creates single task per deliverable with basic steps (execute, verify)
 
 This avoids the overhead of domain-specific agents for simple tasks.

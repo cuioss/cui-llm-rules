@@ -29,8 +29,8 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `cui-java-expert:java-solution-outline-agent` | Decomposes request into goals |
-| `task_plan_agent` | `cui-java-expert:java-task-plan-agent` | Creates tasks from goals |
+| `solution_outline_agent` | `cui-java-expert:java-solution-outline-agent` | Creates solution outline with deliverables |
+| `task_plan_agent` | `cui-java-expert:java-task-plan-agent` | Creates tasks from deliverables |
 | `verification_command` | `/builder:builder-build-and-fix` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
 | `standards` | Java core, JavaDoc, Unit testing | Skills to load |
@@ -65,14 +65,14 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 ### java-solution-outline-agent
 
-Analyzes Java codebase and creates goals with:
+Analyzes Java codebase and creates deliverables with:
 - Class/interface design decisions
 - Package placement rationale
 - Dependencies (CDI, Spring, external libs)
 - Module assignment (for multi-module projects)
 - Integration points with existing code
 
-**Returns**: `{status, goal_count, solution_document, lessons_recorded}`
+**Returns**: `{status, deliverable_count, solution_document, lessons_recorded}`
 
 ### java-task-plan-agent
 
