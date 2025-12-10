@@ -33,9 +33,9 @@
       "strict": false
     },
     {
-      "name": "pm-core",
+      "name": "plan-marshall",
       "description": "Environment setup, permission management, and cross-cutting utilities",
-      "source": "./bundles/pm-core",
+      "source": "./bundles/plan-marshall",
       "strict": false
     },
     {

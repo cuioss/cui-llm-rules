@@ -239,7 +239,7 @@ python3 .plan/execute-script.py pm-dev-builder:builder-gradle-rules:gradle searc
 - `acceptable_warnings` (optional): JSON object with acceptable patterns
 
 **Steps**:
-1. Load acceptable patterns via `pm-core:run-config` skill
+1. Load acceptable patterns via `plan-marshall:run-config` skill
    - Read from field: `gradle.acceptable_warnings`
 2. Execute categorization:
 
@@ -281,11 +281,11 @@ python3 .plan/execute-script.py pm-dev-builder:builder-gradle-rules:gradle searc
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-**Operation**: Add/Remove patterns via `pm-core:run-config` skill
+**Operation**: Add/Remove patterns via `plan-marshall:run-config` skill
 
 **Add Pattern**:
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Action: add-entry
 Field: gradle.acceptable_warnings.dependency_resolution
@@ -294,7 +294,7 @@ Value: "Could not resolve com.example:lib"
 
 **Remove Pattern**:
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Action: remove-entry
 Field: gradle.acceptable_warnings.dependency_resolution

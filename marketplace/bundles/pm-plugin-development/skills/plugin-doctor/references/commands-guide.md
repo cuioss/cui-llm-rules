@@ -304,11 +304,11 @@ Generate summary.
 ```markdown
 ### Step 1: Load Diagnostic Patterns
 
-Skill: pm-core:diagnostic-patterns
+Skill: plan-marshall:diagnostic-patterns
 
 ### Step 2: Load Inventory
 
-Skill: pm-core:marketplace-inventory
+Skill: plan-marshall:marketplace-inventory
 
 # Load other skills only when needed in specific steps
 ```
@@ -317,8 +317,8 @@ Skill: pm-core:marketplace-inventory
 ```markdown
 ### Step 1: Load All Prerequisites
 
-Skill: pm-core:diagnostic-patterns
-Skill: pm-core:marketplace-inventory
+Skill: plan-marshall:diagnostic-patterns
+Skill: plan-marshall:marketplace-inventory
 Skill: pm-plugin-development:bundle-orchestration-compliance
 Read references/reporting-templates.md
 Skill: pm-dev-java:cui-java-core
@@ -513,7 +513,7 @@ Else:
 Based on scope parameter:
 
 **marketplace** (default):
-  Skill: pm-core:marketplace-inventory
+  Skill: plan-marshall:marketplace-inventory
   Parse JSON to extract component paths
 
 **global**:
@@ -601,11 +601,11 @@ Aggregate results for bundle.
 ```markdown
 ### Step 1: Load Core Skills
 
-Skill: pm-core:diagnostic-patterns
+Skill: plan-marshall:diagnostic-patterns
 
 ### Step 2: Discover Components
 
-Skill: pm-core:marketplace-inventory
+Skill: plan-marshall:marketplace-inventory
 
 # Later steps load additional skills only if needed:
 
@@ -646,7 +646,7 @@ Commands MUST include standard lessons-learned pattern:
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: pm-core:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern

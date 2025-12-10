@@ -146,7 +146,7 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 ## Dependencies
 
-This skill uses `pm-core:marketplace-inventory` internally with:
+This skill uses `plan-marshall:marketplace-inventory` internally with:
 
 - `--bundles`: Filtered to planning-related bundles
 - `--name-pattern`: Filtered to planning-related patterns

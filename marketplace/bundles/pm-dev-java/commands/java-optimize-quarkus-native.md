@@ -11,7 +11,7 @@ Orchestrates systematic Quarkus native image optimization workflow with focus on
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: pm-core:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "java-optimize-quarkus-native", bundle: "pm-dev-java"}`
    - Category: bug | improvement | pattern | anti-pattern

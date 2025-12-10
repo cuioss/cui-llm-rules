@@ -158,7 +158,7 @@ Commands record lessons learned via the `manage-lessons-learned` skill.
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: pm-core:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern

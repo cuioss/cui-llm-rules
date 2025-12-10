@@ -49,7 +49,7 @@ Returns build environment info, using cached values when available.
 Read from run-configuration:
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Read Configuration
 Field: build
 ```
@@ -92,12 +92,12 @@ python3 .plan/execute-script.py pm-dev-builder:environment-detection:build-env d
 Store in run-configuration:
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Field: build.available_systems
 Value: "{available_systems}"
 
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Field: build.default_system
 Value: "{default_system}"
@@ -132,12 +132,12 @@ python3 .plan/execute-script.py pm-dev-builder:environment-detection:build-env d
 ### Step 2: Update Cache
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Field: build.available_systems
 Value: "{available_systems}"
 
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Field: build.default_system
 Value: "{default_system}"
@@ -294,7 +294,7 @@ Script characteristics:
 
 ## Related
 
-- Skill: `pm-core:run-config` - Cache storage
+- Skill: `plan-marshall:run-config` - Cache storage
 - Skill: `pm-dev-builder:builder-maven-rules` - Maven builds
 - Skill: `pm-dev-builder:builder-gradle-rules` - Gradle builds
 - Skill: `pm-dev-builder:builder-npm-rules` - npm builds

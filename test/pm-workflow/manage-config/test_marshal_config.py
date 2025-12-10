@@ -16,7 +16,7 @@ from conftest import run_script, TestRunner, get_script_path
 SCRIPT_PATH = get_script_path('pm-workflow', 'manage-config', 'marshal-config.py')
 
 # Import toon_parser for output parsing
-TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'pm-core' / 'skills' / 'toon-usage' / 'scripts'
+TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'
 sys.path.insert(0, str(TOON_PARSER_DIR))
 from toon_parser import parse_toon
 

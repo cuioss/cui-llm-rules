@@ -11,7 +11,7 @@ Systematic workflow for maintaining requirements and specification documents to 
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: pm-core:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "cui-maintain-requirements", bundle: "pm-requirements"}`
    - Category: bug | improvement | pattern | anti-pattern

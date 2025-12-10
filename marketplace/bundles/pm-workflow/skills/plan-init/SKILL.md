@@ -28,7 +28,7 @@ Activate when:
 | manage-plan-document | `pm-workflow:manage-plan-documents` |
 | manage-files | `pm-workflow:manage-files` |
 | manage-references | `pm-workflow:manage-references` |
-| manage-lessons | `pm-core:lessons-learned` |
+| manage-lessons | `plan-marshall:lessons-learned` |
 | manage-work-log | `pm-workflow:manage-log` |
 | manage-config | `pm-workflow:manage-config` |
 | manage-lifecycle | `pm-workflow:manage-lifecycle` |
@@ -95,7 +95,7 @@ If `action: exists`, use AskUserQuestion:
 **From Lesson**:
 
 ```bash
-python3 .plan/execute-script.py pm-core:lessons-learned:manage-lesson get \
+python3 .plan/execute-script.py plan-marshall:lessons-learned:manage-lesson get \
   --id {lesson_id}
 ```
 
@@ -345,7 +345,7 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 | `pm-workflow:manage-files` | Create/reference plan directory |
 | `pm-workflow:manage-references` | Initialize references |
 | `pm-workflow:manage-log` | Log creation |
-| `pm-core:lessons-learned` | Read lesson (if source=lesson) |
+| `plan-marshall:lessons-learned` | Read lesson (if source=lesson) |
 | `pm-workflow:manage-config` | Create config.toon |
 | `pm-workflow:manage-lifecycle` | Create status.toon, phase transitions |
 

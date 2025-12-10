@@ -24,7 +24,7 @@ from pathlib import Path
 # Add parent paths for imports
 script_dir = Path(__file__).parent
 BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
-sys.path.insert(0, str(BUNDLES_DIR / 'pm-core' / 'skills' / 'toon-usage' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
 
 from toon_parser import serialize_toon
 

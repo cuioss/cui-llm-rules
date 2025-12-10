@@ -226,9 +226,9 @@ pm-dev-java/
 
 **Purpose**: Provide commands and agents for tasks
 
-**Example**: `pm-core`
+**Example**: `plan-marshall`
 ```
-pm-core/
+plan-marshall/
 ├── plugin.json
 ├── README.md
 ├── commands/
@@ -381,7 +381,7 @@ Don't repeat component documentation. Link to component files:
 
 or
 
-- Bundle name: `pm-core`
+- Bundle name: `plan-marshall`
 - Display name: "CUI Utilities"
 
 ## Component Organization
@@ -600,7 +600,7 @@ bundle/
 
 **Small Bundle** (5-10 components):
 ```
-pm-core/
+plan-marshall/
 ├── 2 agents
 ├── 3 commands
 └── 2 skills

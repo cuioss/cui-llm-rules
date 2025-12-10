@@ -52,7 +52,7 @@ Apply defaults based on detected system:
 ### Step 3: Load Previous Execution Data
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Read Configuration
 Field: commands.builder-build-and-fix.{system}.last_execution
 ```
@@ -99,7 +99,7 @@ Field: commands.builder-build-and-fix.{system}.last_execution
 On successful build (0 issues):
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Field: commands.builder-build-and-fix.{system}.last_execution
 Value: {

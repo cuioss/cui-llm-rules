@@ -88,7 +88,7 @@ error: incompatible types
 ### Reading Acceptable Patterns
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Read Configuration
 Field: gradle.acceptable_warnings
 ```
@@ -125,7 +125,7 @@ Field: gradle.acceptable_warnings
 ### Add Pattern Command
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Action: add-entry
 Field: gradle.acceptable_warnings.dependency_resolution
@@ -137,7 +137,7 @@ Value: "Could not resolve artifact com.example:legacy:1.0"
 When a warning is fixed or no longer needed:
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Action: remove-entry
 Field: gradle.acceptable_warnings.dependency_resolution

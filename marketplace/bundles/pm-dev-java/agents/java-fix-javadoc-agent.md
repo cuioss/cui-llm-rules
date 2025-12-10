@@ -17,7 +17,7 @@ Autonomous JavaDoc error fixing with minimal, content-preserving fixes.
 ## Step 0: Load Development Rules
 
 ```
-Skill: pm-core:general-development-rules
+Skill: plan-marshall:general-development-rules
 ```
 
 This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).

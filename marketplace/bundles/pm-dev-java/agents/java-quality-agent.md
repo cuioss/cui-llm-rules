@@ -17,7 +17,7 @@ Code quality and standards compliance analysis (read-only, no modifications).
 ## Step 0: Load Development Rules
 
 ```
-Skill: pm-core:general-development-rules
+Skill: plan-marshall:general-development-rules
 ```
 
 This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).

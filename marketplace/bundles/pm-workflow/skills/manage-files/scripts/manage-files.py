@@ -26,7 +26,7 @@ from pathlib import Path
 # Add parent paths for imports
 script_dir = Path(__file__).parent
 BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
-sys.path.insert(0, str(BUNDLES_DIR / 'pm-core' / 'skills' / 'file-operations-base' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
 
 from file_ops import atomic_write_file, base_path
 
@@ -195,7 +195,7 @@ def cmd_create_or_reference(args):
     This replaces the two-step list+check pattern in plan-init.
     """
     # Import toon_parser for output
-    sys.path.insert(0, str(BUNDLES_DIR / 'pm-core' / 'skills' / 'toon-usage' / 'scripts'))
+    sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
     from toon_parser import parse_toon, serialize_toon
 
     if not validate_plan_id(args.plan_id):

@@ -69,7 +69,7 @@ Examples:
 |------|-------------|--------------|
 | `request.md` | `pm-workflow:manage-plan-documents:manage-plan-document request read --plan-id {id}` | `pm-workflow:manage-plan-documents:manage-plan-document request create --plan-id {id} --title ... --source ... --body ...` |
 | `solution_outline.md` | `pm-workflow:manage-solution-outline:manage-solution-outline read --plan-id {id}` | `pm-workflow:manage-solution-outline:manage-solution-outline write --plan-id {id} <<'EOF'` then validate |
-| `lessons-learned/*.md` | `pm-core:lessons-learned:manage-lesson get --id {lesson_id}` | `pm-core:lessons-learned:manage-lesson add` |
+| `lessons-learned/*.md` | `plan-marshall:lessons-learned:manage-lesson get --id {lesson_id}` | `plan-marshall:lessons-learned:manage-lesson add` |
 | Any plan file | `pm-workflow:manage-files:manage-files read --plan-id {id} --file {path}` | `pm-workflow:manage-files:manage-files write --plan-id {id} --file {path}` |
 
 **Detection Pattern**:
@@ -186,7 +186,7 @@ python3 .plan/execute-script.py {notation} {subcommand} {args...}
 |---------------------|------------------------|---------------|
 | `manage-plan-documents` | `manage-plan-document` | `pm-workflow:manage-plan-documents:manage-plan-document` |
 | `manage-tasks` | `manage-task` | `pm-workflow:manage-tasks:manage-task` |
-| `manage-lessons` | `manage-lesson` | `pm-core:lessons-learned:manage-lesson` |
+| `manage-lessons` | `manage-lesson` | `plan-marshall:lessons-learned:manage-lesson` |
 | `manage-lifecycle` | `manage-lifecycle` | `pm-workflow:manage-lifecycle:manage-lifecycle` |
 | `manage-config` | `manage-config` | `pm-workflow:manage-config:manage-config` |
 | `manage-files` | `manage-files` | `pm-workflow:manage-files:manage-files` |

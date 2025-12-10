@@ -57,7 +57,7 @@ def find_marketplace_inventory_script() -> Path:
 
     inventory_script = (
         marketplace_bundles /
-        "pm-core" /
+        "plan-marshall" /
         "skills" /
         "marketplace-inventory" /
         "scripts" /
@@ -68,7 +68,7 @@ def find_marketplace_inventory_script() -> Path:
         return inventory_script
 
     # Try from cwd
-    cwd_path = Path.cwd() / "marketplace/bundles/pm-core/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py"
+    cwd_path = Path.cwd() / "marketplace/bundles/plan-marshall/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py"
     if cwd_path.exists():
         return cwd_path
 

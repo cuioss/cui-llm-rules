@@ -36,5 +36,5 @@
 |-------------|--------|---------|
 | `{task-title}` | User request | "Create metrics-report command" |
 | `{goal-description}` | User request | "Add command to generate metrics report" |
-| `{bundle}` | Target bundle | "pm-core" |
+| `{bundle}` | Target bundle | "plan-marshall" |
 | `{command-name}` | New command name | "metrics-report" |

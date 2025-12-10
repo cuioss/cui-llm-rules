@@ -3,7 +3,7 @@ name: js-solution-outline-agent
 description: Analyze JavaScript codebase and create solution outline with deliverables
 tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
-skills: pm-dev-frontend:js-solution-outline, pm-core:general-development-rules
+skills: pm-dev-frontend:js-solution-outline, plan-marshall:general-development-rules
 ---
 
 # JavaScript Solution Outline Agent
@@ -16,7 +16,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: pm-dev-frontend:js-solution-outline
-Skill: pm-core:general-development-rules
+Skill: plan-marshall:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

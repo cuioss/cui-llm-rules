@@ -69,7 +69,7 @@ All scripts are stdlib-only with JSON output.
 
 ```
 Skill: pm-plugin-development:plugin-architecture
-Skill: pm-core:diagnostic-patterns
+Skill: plan-marshall:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -140,7 +140,7 @@ Report results including:
 
 ```
 Skill: pm-plugin-development:plugin-architecture
-Skill: pm-core:diagnostic-patterns
+Skill: plan-marshall:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -209,7 +209,7 @@ Add reference based on load_type:
 
 ```
 Skill: pm-plugin-development:plugin-architecture
-Skill: pm-core:diagnostic-patterns
+Skill: plan-marshall:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -269,7 +269,7 @@ Report:
 
 ```
 Skill: pm-plugin-development:plugin-architecture
-Skill: pm-core:diagnostic-patterns
+Skill: plan-marshall:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -329,7 +329,7 @@ Report any issues introduced.
 
 ```
 Skill: pm-plugin-development:plugin-architecture
-Skill: pm-core:diagnostic-patterns
+Skill: plan-marshall:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.

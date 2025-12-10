@@ -35,5 +35,5 @@
 |-------------|--------|---------|
 | `{task-title}` | User request | "Create metrics-collector skill" |
 | `{goal-description}` | User request | "Add skill for collecting metrics" |
-| `{bundle}` | Target bundle | "pm-core" |
+| `{bundle}` | Target bundle | "plan-marshall" |
 | `{skill-name}` | New/existing skill | "metrics-collector" |

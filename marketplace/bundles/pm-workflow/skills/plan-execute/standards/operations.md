@@ -141,4 +141,4 @@ python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
 ### Lesson Learned
 **Trigger**: "**Learn**:", "Capture lesson"
 
-Only execute if unexpected behavior occurred. Follow `pm-core:script-runner` Error Handling workflow.
+Only execute if unexpected behavior occurred. Follow `plan-marshall:script-runner` Error Handling workflow.

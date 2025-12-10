@@ -36,8 +36,8 @@ pm-plugin-development:plugin-doctor/scripts/analyze-markdown-file.sh
 ### Python Scripts
 
 ```
-pm-core:marketplace-inventory/scripts/scan-marketplace-inventory.py
-pm-core:permission-doctor/scripts/permission-doctor.py
+plan-marshall:marketplace-inventory/scripts/scan-marketplace-inventory.py
+plan-marshall:permission-doctor/scripts/permission-doctor.py
 pm-dev-java:cui-java-core/scripts/analyze-logging-violations.py
 pm-workflow:pr-workflow/scripts/fetch-pr-comments.py
 ```
@@ -56,7 +56,7 @@ Where `{install_path}` comes from `~/.claude/plugins/installed_plugins.json`.
 
 Notation:
 ```
-pm-core:marketplace-inventory/scripts/scan-marketplace-inventory.py
+plan-marshall:marketplace-inventory/scripts/scan-marketplace-inventory.py
 ```
 
 Install path (from installed_plugins.json):

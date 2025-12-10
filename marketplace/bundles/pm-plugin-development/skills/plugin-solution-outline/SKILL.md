@@ -131,12 +131,12 @@ Use scan-marketplace-inventory to get complete component list:
 ```bash
 # Full inventory with descriptions
 python3 .plan/execute-script.py \
-  pm-core:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall:marketplace-inventory:scan-marketplace-inventory \
   --include-descriptions
 
 # Or filter by bundles if impact is known to be limited
 python3 .plan/execute-script.py \
-  pm-core:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall:marketplace-inventory:scan-marketplace-inventory \
   --bundles planning,pm-dev-java \
   --include-descriptions
 ```
@@ -313,7 +313,7 @@ EOF
 On unexpected structure or ambiguity:
 
 ```bash
-python3 .plan/execute-script.py pm-core:lessons-learned:manage-lesson add \
+python3 .plan/execute-script.py plan-marshall:lessons-learned:manage-lesson add \
   --component-type skill \
   --component-name plugin-solution-outline \
   --category observation \
@@ -342,7 +342,7 @@ lessons_recorded: {count}
 
 ## Inventory Script Reference
 
-**Script**: `pm-core:marketplace-inventory:scan-marketplace-inventory`
+**Script**: `plan-marshall:marketplace-inventory:scan-marketplace-inventory`
 
 **Options**:
 
@@ -359,18 +359,18 @@ lessons_recorded: {count}
 ```bash
 # All components with descriptions
 python3 .plan/execute-script.py \
-  pm-core:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall:marketplace-inventory:scan-marketplace-inventory \
   --include-descriptions
 
 # Only skills in planning bundle
 python3 .plan/execute-script.py \
-  pm-core:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall:marketplace-inventory:scan-marketplace-inventory \
   --bundles planning \
   --resource-types skills
 
 # Components matching pattern
 python3 .plan/execute-script.py \
-  pm-core:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall:marketplace-inventory:scan-marketplace-inventory \
   --name-pattern "*-goals*|*-plan*"
 ```
 
@@ -461,11 +461,11 @@ If multiple components match:
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write --validate, validate, read, list-deliverables, exists)
 - `pm-workflow:manage-plan-documents:manage-plan-document` - Request operations (request read, request create)
-- `pm-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
+- `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 - `pm-workflow:manage-log:manage-work-log` - Log decisions (add, read, list)
 - `pm-workflow:manage-config:manage-config` - Plan config (read, get, set)
 - `pm-workflow:manage-references:manage-references` - Plan references (read, get, set)
-- `pm-core:marketplace-inventory:scan-marketplace-inventory` - Marketplace component inventory
+- `plan-marshall:marketplace-inventory:scan-marketplace-inventory` - Marketplace component inventory
 
 **Standards Referenced**:
 - `pm-plugin-development:plugin-architecture` - Architecture principles

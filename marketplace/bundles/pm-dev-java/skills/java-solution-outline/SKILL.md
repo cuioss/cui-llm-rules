@@ -139,7 +139,7 @@ EOF
 On unexpected codebase state or ambiguity:
 
 ```bash
-python3 .plan/execute-script.py pm-core:lessons-learned:manage-lesson add \
+python3 .plan/execute-script.py plan-marshall:lessons-learned:manage-lesson add \
   --component-type skill \
   --component-name java-solution-outline \
   --category observation \
@@ -273,7 +273,7 @@ If multiple classes match the name:
 - `pm-workflow:manage-plan-documents:manage-plan-document` - Request operations (request read)
 - `pm-workflow:manage-config:manage-config` - Plan config (read)
 - `pm-workflow:manage-references:manage-references` - Plan references (read)
-- `pm-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
+- `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced**:
 - `pm-dev-java:cui-java-core` - Core Java patterns

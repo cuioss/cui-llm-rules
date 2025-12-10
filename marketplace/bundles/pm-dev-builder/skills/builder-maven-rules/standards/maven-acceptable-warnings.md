@@ -53,7 +53,7 @@ These warnings MUST be fixed and NEVER added to acceptable list:
 Access acceptable warnings via the configuration skill:
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Read Configuration
 Field: maven.acceptable_warnings
 ```
@@ -78,7 +78,7 @@ Field: maven.acceptable_warnings
 - `plugin_compatibility` - Plugin compatibility warnings
 - `platform_specific` - Platform-specific warnings
 
-Use the `pm-core:run-config` skill for all configuration access.
+Use the `plan-marshall:run-config` skill for all configuration access.
 
 ## Adding Acceptable Warnings
 
@@ -101,10 +101,10 @@ Before adding a warning to acceptable list:
 
 ### Add Workflow
 
-Activate `pm-core:run-config` skill:
+Activate `plan-marshall:run-config` skill:
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Action: add-entry
 Field: maven.acceptable_warnings.transitive_dependency
@@ -120,10 +120,10 @@ Remove warnings from acceptable list when:
 
 ### Remove Workflow
 
-Activate `pm-core:run-config` skill:
+Activate `plan-marshall:run-config` skill:
 
 ```
-Skill: pm-core:run-config
+Skill: plan-marshall:run-config
 Workflow: Update Configuration
 Action: remove-entry
 Field: maven.acceptable_warnings.transitive_dependency
@@ -154,7 +154,7 @@ deprecated for plugin
 
 During build verification, use the workflow from `builder-maven-rules` SKILL.md:
 
-1. **Load patterns**: Activate `pm-core:run-config` to read `maven.acceptable_warnings`
+1. **Load patterns**: Activate `plan-marshall:run-config` to read `maven.acceptable_warnings`
 2. **Parse build output**: Use `parse-maven-output.py` to extract issues
 3. **Categorize**: Pass warnings and patterns to `check-acceptable-warnings.py`
 4. **Process results**:

@@ -164,7 +164,7 @@ recovery: Use resume option or provide different plan_id
 | `pm-workflow:manage-files` | Create/reference plan directory |
 | `pm-workflow:manage-references` | Initialize references |
 | `pm-workflow:manage-log` | Log creation |
-| `pm-core:lessons-learned` | Read lesson content |
+| `plan-marshall:lessons-learned` | Read lesson content |
 
 ### Complete Initialization
 

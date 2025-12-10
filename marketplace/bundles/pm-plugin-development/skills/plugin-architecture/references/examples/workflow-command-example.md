@@ -229,7 +229,7 @@ MARKETPLACE HEALTH REPORT
 2. pm-dev-frontend: 88/100 ✅
 3. pm-plugin-development: 82/100 ✅
 4. pm-workflow: 78/100 ⚠️
-5. pm-core: 95/100 ✅
+5. plan-marshall: 95/100 ✅
 
 ### Recommendations
 1. Fix critical issues first (3 components affected)

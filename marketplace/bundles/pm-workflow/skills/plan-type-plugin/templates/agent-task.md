@@ -36,5 +36,5 @@
 |-------------|--------|---------|
 | `{task-title}` | User request | "Create metrics-analyzer agent" |
 | `{goal-description}` | User request | "Add agent for analyzing metrics" |
-| `{bundle}` | Target bundle | "pm-core" |
+| `{bundle}` | Target bundle | "plan-marshall" |
 | `{agent-name}` | New agent name | "metrics-analyzer" |

@@ -21,7 +21,7 @@ cui-llm-rules/
 │       ├── builder/                # Maven/Gradle/npm build automation
 │       ├── planning/               # Task planning & workflow management
 │       ├── pm-documents/  # AsciiDoc, ADRs, interfaces
-│       ├── pm-core/          # Utility commands & file operations
+│       ├── plan-marshall/          # Utility commands & file operations
 │       ├── pm-plugin-development/ # Plugin creation toolkit
 │       └── pm-requirements/       # Requirements engineering
 ├── test/                           # Python pytest tests for scripts
@@ -75,7 +75,7 @@ Complete development workflow automation with 14 skills covering task planning, 
 ### pm-documents
 Documentation standards for AsciiDoc, Architectural Decision Records (ADRs), and interface specifications. Includes validation, formatting, and maintenance workflows.
 
-### pm-core
+### plan-marshall
 Utility commands for script execution, permission management, file operations, memory management, lessons learned tracking, and project configuration.
 
 ### pm-plugin-development

@@ -20,8 +20,8 @@ from pathlib import Path
 # Add parent paths for imports
 script_dir = Path(__file__).parent
 BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
-sys.path.insert(0, str(BUNDLES_DIR / 'pm-core' / 'skills' / 'file-operations-base' / 'scripts'))
-sys.path.insert(0, str(BUNDLES_DIR / 'pm-core' / 'skills' / 'toon-usage' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
 
 from file_ops import atomic_write_file, base_path
 from toon_parser import parse_toon, serialize_toon

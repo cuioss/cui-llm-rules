@@ -81,7 +81,7 @@ Reintroduce agents and commands as **thin orchestration wrappers** that:
 │                                                              │
 │  Skills can call other skills:                             │
 │    Skill(pm-dev-builder:builder-maven-rules)                        │
-│    Skill(pm-core:script-runner)                      │
+│    Skill(plan-marshall:script-runner)                      │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```

@@ -11,7 +11,7 @@ Comprehensive diagnostic and automation command that enforces CUI logging standa
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: pm-core:lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "java-enforce-logrecords", bundle: "pm-dev-java"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -27,9 +27,9 @@ If you discover issues or improvements during execution, record them:
 
 **Determine project structure:**
 
-1. Activate `pm-core:run-config` skill to check for module configuration:
+1. Activate `plan-marshall:run-config` skill to check for module configuration:
    ```
-   Skill: pm-core:run-config
+   Skill: plan-marshall:run-config
    Workflow: Read Configuration
    Field: commands.java-enforce-logrecords.modules
    ```
@@ -52,9 +52,9 @@ If build fails, report to caller and stop execution.
 ### Step 3: Load Configuration and Logging Standards
 
 **Read configuration:**
-1. Activate `pm-core:run-config` skill:
+1. Activate `plan-marshall:run-config` skill:
    ```
-   Skill: pm-core:run-config
+   Skill: plan-marshall:run-config
    Workflow: Read Configuration
    Field: commands.java-enforce-logrecords.modules.{module-name}
    ```
@@ -93,9 +93,9 @@ This loads:
 - Attempt to locate LogMessages classes using Glob: `**/*LogMessages.java`
 - Attempt to locate LogMessages.adoc using Glob: `**/LogMessages.adoc`
 - If still uncertain (confidence < 100%), ask user for help
-- Store results using `pm-core:run-config` skill:
+- Store results using `plan-marshall:run-config` skill:
   ```
-  Skill: pm-core:run-config
+  Skill: plan-marshall:run-config
   Workflow: Update Configuration
   Field: commands.java-enforce-logrecords.modules.{module}
   ```
@@ -321,7 +321,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - See: `logging-enforcement-patterns.md` → Pattern 15
 
 **Configuration Management:**
-- Use `pm-core:run-config` skill for all configuration access
+- Use `plan-marshall:run-config` skill for all configuration access
 - Read path: `commands.java-enforce-logrecords.modules`
 - Store LogMessages class and documentation locations in JSON structure
 - Ask user for help if locations uncertain (< 100% confidence)

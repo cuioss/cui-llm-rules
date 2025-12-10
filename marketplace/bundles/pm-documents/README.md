@@ -204,4 +204,4 @@ All commands are thin orchestrators (<150 lines) that delegate to skill workflow
 ### Inter-Bundle Dependencies
 
 - **planning** (optional) - For commit workflow in batch processing
-- **pm-core** (optional) - For script-runner workflow
+- **plan-marshall** (optional) - For script-runner workflow

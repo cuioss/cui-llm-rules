@@ -69,7 +69,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
 On ambiguous deliverable or planning issues:
 
 ```bash
-python3 .plan/execute-script.py pm-core:lessons-learned:manage-lesson add \
+python3 .plan/execute-script.py plan-marshall:lessons-learned:manage-lesson add \
   --component-type skill \
   --component-name java-task-plan \
   --category observation \
@@ -230,7 +230,7 @@ If deliverable lacks detail:
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables (list-deliverables, read)
 - `pm-workflow:manage-tasks:manage-task` - Create tasks (add --goal N --title --steps)
-- `pm-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
+- `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced in Task Steps**:
 - `pm-dev-java:cui-java-core` - Core Java patterns

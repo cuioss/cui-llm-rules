@@ -9,7 +9,7 @@ Implement tasks through goal-based workflow with automatic mode selection and ve
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-Record improvements: `Skill: pm-core:manage-lessons-learned` with component `{type: "command", name: "task-implement", bundle: "pm-workflow"}`
+Record improvements: `Skill: plan-marshall:manage-lessons-learned` with component `{type: "command", name: "task-implement", bundle: "pm-workflow"}`
 
 ## PARAMETERS
 
@@ -25,7 +25,7 @@ Load required skills:
 ```
 Skill: pm-workflow:cui-task-planning
 Skill: pm-workflow:workflow-patterns
-Skill: pm-core:manage-memories
+Skill: plan-marshall:manage-memories
 ```
 
 ## WORKFLOW
@@ -45,7 +45,7 @@ Otherwise → PLAN mode (Plan → Execute)
 ### Step 2: Check Memory for Pending Workflow
 
 ```bash
-python3 .plan/execute-script.py pm-core:manage-memories:manage-memory list --category handoffs
+python3 .plan/execute-script.py plan-marshall:manage-memories:manage-memory list --category handoffs
 ```
 If pending found: Prompt "[R]esume / [S]tart fresh / [A]bort"
 
@@ -71,7 +71,7 @@ If push=true: Run `git push`.
 
 ### Step 6: Cleanup and Return Handoff
 
-Cleanup memory: `python3 .plan/execute-script.py pm-core:manage-memories:manage-memory cleanup --category handoffs --pattern "workflow-*"`
+Cleanup memory: `python3 .plan/execute-script.py plan-marshall:manage-memories:manage-memory cleanup --category handoffs --pattern "workflow-*"`
 
 Return structured result with handoff using `workflow-patterns/templates/handoff-standard.json` format.
 

@@ -3,7 +3,7 @@ name: plugin-solution-outline-agent
 description: Analyze plugin codebase and create solution outline with deliverables
 tools: Read, Glob, Grep, Bash, Skill
 model: sonnet
-skills: pm-plugin-development:plugin-solution-outline, pm-core:general-development-rules
+skills: pm-plugin-development:plugin-solution-outline, plan-marshall:general-development-rules
 ---
 
 # Plugin Solution Outline Agent
@@ -16,7 +16,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: pm-plugin-development:plugin-solution-outline
-Skill: pm-core:general-development-rules
+Skill: plan-marshall:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

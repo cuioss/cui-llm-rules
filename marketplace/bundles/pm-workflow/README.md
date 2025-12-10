@@ -208,7 +208,7 @@ planning/
 
 ## Dependencies
 
-- **pm-core** - Script runner, file operations base
+- **plan-marshall** - Script runner, file operations base
 - **pm-plugin-development** - Plugin doctor, plugin-solution-outline-agent, plugin-task-plan-agent
 - **builder** - Build execution (maven/npm)
 - **pm-dev-java** - java-solution-outline-agent, java-task-plan-agent, java-implement-agent
