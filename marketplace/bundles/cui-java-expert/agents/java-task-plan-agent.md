@@ -3,7 +3,7 @@ name: java-task-plan-agent
 description: Create implementation tasks from deliverables
 tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
-skills: cui-java-expert:java-task-plan, general-tools:general-development-rules
+skills: cui-java-expert:java-task-plan, plan-marshall-core:general-development-rules
 ---
 
 # Java Task Plan Agent
@@ -16,7 +16,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: cui-java-expert:java-task-plan
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

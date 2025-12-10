@@ -3,7 +3,7 @@ name: plugin-solution-outline-agent
 description: Analyze plugin codebase and create solution outline with deliverables
 tools: Read, Glob, Grep, Bash, Skill
 model: sonnet
-skills: cui-plugin-development-tools:plugin-solution-outline, general-tools:general-development-rules
+skills: cui-plugin-development-tools:plugin-solution-outline, plan-marshall-core:general-development-rules
 ---
 
 # Plugin Solution Outline Agent
@@ -16,7 +16,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: cui-plugin-development-tools:plugin-solution-outline
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

@@ -209,12 +209,12 @@ Track build durations for accurate timeout calculation:
 2. Update tracking when duration changes by >10%
 3. Failed builds have unpredictable durations and should not update tracking
 
-**Storage**: Use `general-tools:manage-run-configuration` skill for duration tracking.
+**Storage**: Use `plan-marshall-core:run-config` skill for duration tracking.
 
 **Read last execution duration:**
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Read Configuration
 Field: commands.{command-id}.last_execution.duration_ms
 ```
@@ -222,7 +222,7 @@ Field: commands.{command-id}.last_execution.duration_ms
 **Update after successful build:**
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Field: commands.{command-id}.last_execution
 Value: {"date": "2025-11-25", "status": "SUCCESS", "duration_ms": 120000, "duration_human": "2 minutes"}

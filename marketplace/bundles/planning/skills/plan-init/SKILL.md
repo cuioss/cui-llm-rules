@@ -28,7 +28,7 @@ Activate when:
 | manage-plan-document | `planning:manage-plan-documents` |
 | manage-files | `planning:manage-files` |
 | manage-references | `planning:manage-references` |
-| manage-lessons | `planning:manage-lessons` |
+| manage-lessons | `plan-marshall-core:lessons-learned` |
 | manage-work-log | `planning:manage-log` |
 | manage-config | `planning:manage-config` |
 | manage-lifecycle | `planning:manage-lifecycle` |
@@ -95,7 +95,7 @@ If `action: exists`, use AskUserQuestion:
 **From Lesson**:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:manage-lesson get \
+python3 .plan/execute-script.py plan-marshall-core:lessons-learned:manage-lesson get \
   --id {lesson_id}
 ```
 
@@ -345,7 +345,7 @@ This skill is called by `planning:plan-init-agent`. The agent completes the full
 | `planning:manage-files` | Create/reference plan directory |
 | `planning:manage-references` | Initialize references |
 | `planning:manage-log` | Log creation |
-| `planning:manage-lessons` | Read lesson (if source=lesson) |
+| `plan-marshall-core:lessons-learned` | Read lesson (if source=lesson) |
 | `planning:manage-config` | Create config.toon |
 | `planning:manage-lifecycle` | Create status.toon, phase transitions |
 

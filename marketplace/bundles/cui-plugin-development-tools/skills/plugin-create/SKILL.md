@@ -57,7 +57,7 @@ This skill provides 4 workflows, one for each component type. All workflows foll
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -180,7 +180,7 @@ Agent template MUST use pattern:
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall-core:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "agent", name: "{agent-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -254,7 +254,7 @@ If diagnosis fails: Display warning but don't abort (agent already created).
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -332,7 +332,7 @@ Read assets/templates/command-template.md
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall-core:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "{command-name}", bundle: "{bundle}"}`
    - Category: bug | improvement | pattern | anti-pattern
@@ -379,7 +379,7 @@ SlashCommand: /cui-plugin-development-tools:plugin-doctor commands command-name=
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -552,7 +552,7 @@ SlashCommand: /cui-plugin-development-tools:plugin-doctor skills skill-name={ski
 
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 ```
 
 These provide architecture principles and non-prompting tool usage patterns.

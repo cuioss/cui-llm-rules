@@ -127,7 +127,7 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
 On unexpected codebase state or ambiguity:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
+python3 .plan/execute-script.py plan-marshall-core:lessons-learned:manage-lesson add \
   --component-type skill \
   --component-name java-solution-outline \
   --category observation \
@@ -259,7 +259,7 @@ If multiple classes match the name:
 **Scripts Used**:
 - `planning:manage-solution-outline` - Write and validate solution document
 - `planning:manage-plan-documents` - Read request document
-- `planning:manage-lessons` - Record lessons on issues
+- `plan-marshall-core:lessons-learned` - Record lessons on issues
 
 **Standards Referenced**:
 - `cui-java-expert:cui-java-core` - Core Java patterns

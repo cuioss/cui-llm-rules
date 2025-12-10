@@ -131,12 +131,12 @@ Use scan-marketplace-inventory to get complete component list:
 ```bash
 # Full inventory with descriptions
 python3 .plan/execute-script.py \
-  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall-core:marketplace-inventory:scan-marketplace-inventory \
   --include-descriptions
 
 # Or filter by bundles if impact is known to be limited
 python3 .plan/execute-script.py \
-  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall-core:marketplace-inventory:scan-marketplace-inventory \
   --bundles planning,cui-java-expert \
   --include-descriptions
 ```
@@ -298,7 +298,7 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
 On unexpected structure or ambiguity:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
+python3 .plan/execute-script.py plan-marshall-core:lessons-learned:manage-lesson add \
   --component-type skill \
   --component-name plugin-solution-outline \
   --category observation \
@@ -327,7 +327,7 @@ lessons_recorded: {count}
 
 ## Inventory Script Reference
 
-**Script**: `cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory`
+**Script**: `plan-marshall-core:marketplace-inventory:scan-marketplace-inventory`
 
 **Options**:
 
@@ -344,18 +344,18 @@ lessons_recorded: {count}
 ```bash
 # All components with descriptions
 python3 .plan/execute-script.py \
-  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall-core:marketplace-inventory:scan-marketplace-inventory \
   --include-descriptions
 
 # Only skills in planning bundle
 python3 .plan/execute-script.py \
-  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall-core:marketplace-inventory:scan-marketplace-inventory \
   --bundles planning \
   --resource-types skills
 
 # Components matching pattern
 python3 .plan/execute-script.py \
-  cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory \
+  plan-marshall-core:marketplace-inventory:scan-marketplace-inventory \
   --name-pattern "*-goals*|*-plan*"
 ```
 
@@ -446,11 +446,11 @@ If multiple components match:
 **Script Notations** (use EXACTLY as shown):
 - `planning:manage-solution-outline:manage-solution-outline` - Write and validate solution document
 - `planning:manage-plan-documents:manage-plan-document` - Read request (request read)
-- `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
+- `plan-marshall-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
 - `planning:manage-log:manage-work-log` - Log decisions (add, read)
 - `planning:manage-config:manage-config` - Read config (read)
 - `planning:manage-references:manage-references` - Read references (read)
-- `cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory` - Inventory analysis
+- `plan-marshall-core:marketplace-inventory:scan-marketplace-inventory` - Inventory analysis
 
 **Standards Referenced**:
 - `cui-plugin-development-tools:plugin-architecture` - Architecture principles

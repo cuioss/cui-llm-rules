@@ -3,7 +3,7 @@ name: js-solution-outline-agent
 description: Analyze JavaScript codebase and create solution outline with deliverables
 tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
-skills: cui-frontend-expert:js-solution-outline, general-tools:general-development-rules
+skills: cui-frontend-expert:js-solution-outline, plan-marshall-core:general-development-rules
 ---
 
 # JavaScript Solution Outline Agent
@@ -16,7 +16,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: cui-frontend-expert:js-solution-outline
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

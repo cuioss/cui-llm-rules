@@ -81,7 +81,7 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
 On ambiguous goal or planning issues:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
+python3 .plan/execute-script.py plan-marshall-core:lessons-learned:manage-lesson add \
   --component-type skill \
   --component-name plugin-task-plan \
   --category observation \
@@ -271,7 +271,7 @@ If goal lacks required parameters:
 **Script Notations** (use EXACTLY as shown):
 - `planning:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables
 - `planning:manage-tasks:manage-task` - Create tasks (add, list)
-- `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
+- `plan-marshall-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
 - `planning:manage-log:manage-work-log` - Log progress (add)
 
 **Skills Delegated To**:

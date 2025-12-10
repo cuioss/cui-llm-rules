@@ -6,7 +6,7 @@ Standards for script output format, exit codes, and error handling.
 
 **TOON** (Token-Oriented Object Notation) is the default output format for marketplace scripts.
 
-See `general-tools:toon-usage` skill for complete TOON specification.
+See `plan-marshall-core:toon-usage` skill for complete TOON specification.
 
 ### TOON Structure
 

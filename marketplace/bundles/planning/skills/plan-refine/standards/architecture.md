@@ -262,10 +262,10 @@ The detail level ensures:
 
 When script execution fails (exit != 0):
 1. Capture error context (script path, exit code, stderr)
-2. Follow `general-tools:script-runner` Error Handling workflow
+2. Follow `plan-marshall-core:script-runner` Error Handling workflow
 3. Continue with normal error recovery
 
-See `general-tools:script-runner` SKILL.md "Workflow: Error Handling" for the lessons-learned capture pattern.
+See `plan-marshall-core:script-runner` SKILL.md "Workflow: Error Handling" for the lessons-learned capture pattern.
 
 ## Plan-Type Skills Summary
 

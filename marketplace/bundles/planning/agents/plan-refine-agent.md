@@ -2,7 +2,7 @@
 name: plan-refine-agent
 description: Create tasks from goals (GENERIC PLANS ONLY)
 tools: Bash, Skill, AskUserQuestion
-skills: planning:plan-refine, general-tools:general-development-rules
+skills: planning:plan-refine, plan-marshall-core:general-development-rules
 ---
 
 # Plan Refine Agent
@@ -19,7 +19,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: planning:plan-refine
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

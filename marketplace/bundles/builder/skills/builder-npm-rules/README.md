@@ -182,7 +182,7 @@ The `parse-npm-output.py` script was moved from `cui-javascript-project` to `bui
 
 **Before:**
 ```
-Skill: general-tools:script-runner
+Skill: plan-marshall-core:script-runner
 Resolve: cui-frontend-expert:cui-javascript-project/scripts/parse-npm-output.py
 ```
 

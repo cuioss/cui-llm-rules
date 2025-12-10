@@ -17,7 +17,7 @@ Autonomous test implementation with CUI testing standards and coverage verificat
 ## Step 0: Load Development Rules
 
 ```
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 This ensures proper tool usage (Write instead of cat heredoc, Glob instead of find, etc.).

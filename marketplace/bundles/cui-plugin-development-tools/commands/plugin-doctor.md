@@ -124,7 +124,7 @@ Result: Shows usage with all scope options
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: general-tools:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall-core:manage-lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "plugin-doctor", bundle: "cui-plugin-development-tools"}`
    - Category: bug | improvement | pattern | anti-pattern

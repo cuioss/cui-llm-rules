@@ -229,7 +229,7 @@ MARKETPLACE HEALTH REPORT
 2. cui-frontend-expert: 88/100 ✅
 3. cui-plugin-development-tools: 82/100 ✅
 4. planning: 78/100 ⚠️
-5. general-tools: 95/100 ✅
+5. plan-marshall-core: 95/100 ✅
 
 ### Recommendations
 1. Fix critical issues first (3 components affected)

@@ -9,7 +9,7 @@ Diagnose and fix pull request issues with parameterized checks.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-Record improvements: `Skill: general-tools:manage-lessons-learned` with component `{type: "command", name: "pr-doctor", bundle: "planning"}`
+Record improvements: `Skill: plan-marshall-core:manage-lessons-learned` with component `{type: "command", name: "pr-doctor", bundle: "planning"}`
 
 ## PARAMETERS
 

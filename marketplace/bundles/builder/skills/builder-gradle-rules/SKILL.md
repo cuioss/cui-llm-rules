@@ -239,7 +239,7 @@ python3 .plan/execute-script.py builder:builder-gradle-rules:gradle search-marke
 - `acceptable_warnings` (optional): JSON object with acceptable patterns
 
 **Steps**:
-1. Load acceptable patterns via `general-tools:manage-run-configuration` skill
+1. Load acceptable patterns via `plan-marshall-core:run-config` skill
    - Read from field: `gradle.acceptable_warnings`
 2. Execute categorization:
 
@@ -281,11 +281,11 @@ python3 .plan/execute-script.py builder:builder-gradle-rules:gradle search-marke
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-**Operation**: Add/Remove patterns via `general-tools:manage-run-configuration` skill
+**Operation**: Add/Remove patterns via `plan-marshall-core:run-config` skill
 
 **Add Pattern**:
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Action: add-entry
 Field: gradle.acceptable_warnings.dependency_resolution
@@ -294,7 +294,7 @@ Value: "Could not resolve com.example:lib"
 
 **Remove Pattern**:
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Action: remove-entry
 Field: gradle.acceptable_warnings.dependency_resolution

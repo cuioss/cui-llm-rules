@@ -2,7 +2,7 @@
 name: plan-init-agent
 description: Initialize a plan with task, config, and status from description, lesson, or issue
 tools: Bash, Skill, Task, AskUserQuestion
-skills: planning:plan-init, general-tools:general-development-rules
+skills: planning:plan-init, plan-marshall-core:general-development-rules
 ---
 
 # Plan Init Agent
@@ -15,7 +15,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: planning:plan-init
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

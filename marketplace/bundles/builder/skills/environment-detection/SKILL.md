@@ -49,7 +49,7 @@ Returns build environment info, using cached values when available.
 Read from run-configuration:
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Read Configuration
 Field: build
 ```
@@ -92,12 +92,12 @@ python3 .plan/execute-script.py builder:environment-detection:build-env detect -
 Store in run-configuration:
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Field: build.available_systems
 Value: "{available_systems}"
 
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Field: build.default_system
 Value: "{default_system}"
@@ -132,12 +132,12 @@ python3 .plan/execute-script.py builder:environment-detection:build-env detect -
 ### Step 2: Update Cache
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Field: build.available_systems
 Value: "{available_systems}"
 
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Field: build.default_system
 Value: "{default_system}"
@@ -294,7 +294,7 @@ Script characteristics:
 
 ## Related
 
-- Skill: `general-tools:manage-run-configuration` - Cache storage
+- Skill: `plan-marshall-core:run-config` - Cache storage
 - Skill: `builder:builder-maven-rules` - Maven builds
 - Skill: `builder:builder-gradle-rules` - Gradle builds
 - Skill: `builder:builder-npm-rules` - npm builds

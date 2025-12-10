@@ -16,7 +16,6 @@
     "./commands/plugin-maintain.md"
   ],
   "skills": [
-    "./skills/marketplace-inventory",
     "./skills/plugin-architecture",
     "./skills/plugin-create",
     "./skills/plugin-doctor",

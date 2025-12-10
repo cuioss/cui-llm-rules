@@ -18,8 +18,7 @@
     "./commands/task-implement.md",
     "./commands/pr-doctor.md",
     "./commands/plan-manage.md",
-    "./commands/plan-execute.md",
-    "./commands/plan-marshall.md"
+    "./commands/plan-execute.md"
   ],
   "skills": [
     "./skills/git-workflow",
@@ -34,7 +33,6 @@
     "./skills/plan-refine",
     "./skills/plan-execute",
     "./skills/plan-finalize",
-    "./skills/plan-marshall",
     "./skills/manage-tasks",
     "./skills/manage-files",
     "./skills/manage-plan-documents",
@@ -43,7 +41,6 @@
     "./skills/manage-references",
     "./skills/manage-lifecycle",
     "./skills/manage-log",
-    "./skills/manage-lessons",
     "./skills/planning-inventory"
   ]
 }

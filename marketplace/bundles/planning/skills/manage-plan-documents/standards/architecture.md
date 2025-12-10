@@ -180,8 +180,8 @@ Input: doc_type, plan_id, section, content
 
 | Component | Source | Purpose |
 |-----------|--------|---------|
-| `toon_parser` | `general-tools:toon-usage` | Parse/serialize TOON format |
-| `file_ops` | `general-tools:file-operations-base` | Atomic writes, path resolution |
+| `toon_parser` | `plan-marshall-core:toon-usage` | Parse/serialize TOON format |
+| `file_ops` | `plan-marshall-core:file-operations-base` | Atomic writes, path resolution |
 
 ---
 

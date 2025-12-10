@@ -164,7 +164,7 @@ recovery: Use resume option or provide different plan_id
 | `planning:manage-files` | Create/reference plan directory |
 | `planning:manage-references` | Initialize references |
 | `planning:manage-log` | Log creation |
-| `planning:manage-lessons` | Read lesson content |
+| `plan-marshall-core:lessons-learned` | Read lesson content |
 
 ### Complete Initialization
 

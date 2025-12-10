@@ -3,7 +3,7 @@ name: js-task-plan-agent
 description: Create implementation tasks from deliverables
 tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
-skills: cui-frontend-expert:js-task-plan, general-tools:general-development-rules
+skills: cui-frontend-expert:js-task-plan, plan-marshall-core:general-development-rules
 ---
 
 # JavaScript Task Plan Agent
@@ -16,7 +16,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: cui-frontend-expert:js-task-plan
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

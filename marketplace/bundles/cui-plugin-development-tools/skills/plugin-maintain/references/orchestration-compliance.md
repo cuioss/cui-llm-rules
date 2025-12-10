@@ -221,7 +221,7 @@ At workflow start:
 
 **Required patterns:**
 ```
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 ```
 
 **Orchestration compliance:**

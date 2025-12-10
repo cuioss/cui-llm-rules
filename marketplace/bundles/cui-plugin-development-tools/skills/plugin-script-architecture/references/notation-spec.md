@@ -29,15 +29,15 @@ bundle:skill/scripts/name.ext
 ### Bash Scripts
 
 ```
-cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.sh
-cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
 cui-documentation-standards:cui-documentation/scripts/asciidoc-validator.sh
+cui-plugin-development-tools:plugin-doctor/scripts/analyze-markdown-file.sh
 ```
 
 ### Python Scripts
 
 ```
-general-tools:permission-management/scripts/generate-permission-wildcards.py
+plan-marshall-core:marketplace-inventory/scripts/scan-marketplace-inventory.py
+plan-marshall-core:permission-doctor/scripts/permission-doctor.py
 cui-java-expert:cui-java-core/scripts/analyze-logging-violations.py
 planning:pr-workflow/scripts/fetch-pr-comments.py
 ```
@@ -56,17 +56,17 @@ Where `{install_path}` comes from `~/.claude/plugins/installed_plugins.json`.
 
 Notation:
 ```
-cui-plugin-development-tools:marketplace-inventory/scripts/scan-marketplace-inventory.sh
+plan-marshall-core:marketplace-inventory/scripts/scan-marketplace-inventory.py
 ```
 
 Install path (from installed_plugins.json):
 ```
-/Users/oliver/git/cui-llm-rules/marketplace/bundles/cui-plugin-development-tools
+/Users/oliver/git/cui-llm-rules/marketplace/bundles/plan-marshall-core
 ```
 
 Resolved absolute path:
 ```
-/Users/oliver/git/cui-llm-rules/marketplace/bundles/cui-plugin-development-tools/skills/marketplace-inventory/scripts/scan-marketplace-inventory.sh
+/Users/oliver/git/cui-llm-rules/marketplace/bundles/plan-marshall-core/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py
 ```
 
 ## Validation Rules

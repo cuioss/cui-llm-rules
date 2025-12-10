@@ -35,7 +35,7 @@ When you invoke this command, I will:
 
 2. **Load lessons learned skill**:
    ```
-   Skill: general-tools:manage-lessons-learned
+   Skill: plan-marshall-core:manage-lessons-learned
    ```
 
 3. **Query unapplied lessons**:
@@ -168,6 +168,6 @@ Add to warnings or "avoid" sections:
 
 ## Related
 
-- `general-tools:manage-lessons-learned` - Skill for lesson storage/retrieval
+- `plan-marshall-core:manage-lessons-learned` - Skill for lesson storage/retrieval
 - `/plugin-maintain` - General component maintenance
 - `/plugin-doctor` - Diagnose component issues

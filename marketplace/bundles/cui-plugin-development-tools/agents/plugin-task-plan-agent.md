@@ -3,7 +3,7 @@ name: plugin-task-plan-agent
 description: Create implementation tasks from deliverables
 tools: Read, Glob, Grep, Bash, Skill
 model: sonnet
-skills: cui-plugin-development-tools:plugin-task-plan, general-tools:general-development-rules
+skills: cui-plugin-development-tools:plugin-task-plan, plan-marshall-core:general-development-rules
 ---
 
 # Plugin Task Plan Agent
@@ -16,7 +16,7 @@ Load these skills using the Skill tool BEFORE any other action:
 
 ```
 Skill: cui-plugin-development-tools:plugin-task-plan
-Skill: general-tools:general-development-rules
+Skill: plan-marshall-core:general-development-rules
 ```
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.

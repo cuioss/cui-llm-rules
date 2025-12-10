@@ -71,7 +71,7 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
 On ambiguous goal or planning issues:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
+python3 .plan/execute-script.py plan-marshall-core:lessons-learned:manage-lesson add \
   --component-type skill \
   --component-name java-task-plan \
   --category observation \
@@ -232,7 +232,7 @@ If goal lacks detail:
 **Scripts Used**:
 - `planning:manage-solution-outline` - Read solution and list deliverables
 - `planning:manage-tasks` - Create tasks
-- `planning:manage-lessons` - Record lessons on issues
+- `plan-marshall-core:lessons-learned` - Record lessons on issues
 
 **Standards Referenced in Task Steps**:
 - `cui-java-expert:cui-java-core` - Core Java patterns

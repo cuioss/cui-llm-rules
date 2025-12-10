@@ -33,9 +33,9 @@
       "strict": false
     },
     {
-      "name": "general-tools",
-      "description": "Standalone utility commands for project setup, permissions, diagnostics, and documentation",
-      "source": "./bundles/general-tools",
+      "name": "plan-marshall-core",
+      "description": "Environment setup, permission management, and cross-cutting utilities",
+      "source": "./bundles/plan-marshall-core",
       "strict": false
     },
     {

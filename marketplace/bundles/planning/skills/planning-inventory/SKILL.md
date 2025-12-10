@@ -146,7 +146,7 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 
 ## Dependencies
 
-This skill uses `cui-plugin-development-tools:marketplace-inventory` internally with:
+This skill uses `plan-marshall-core:marketplace-inventory` internally with:
 
 - `--bundles`: Filtered to planning-related bundles
 - `--name-pattern`: Filtered to planning-related patterns

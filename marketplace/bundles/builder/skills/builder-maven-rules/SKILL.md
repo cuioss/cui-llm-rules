@@ -437,10 +437,10 @@ Use this workflow when:
 
 ### Step 1: Load Acceptable Patterns
 
-Activate `general-tools:manage-run-configuration` skill to read patterns:
+Activate `plan-marshall-core:run-config` skill to read patterns:
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Read Configuration
 Field: maven.acceptable_warnings
 ```
@@ -518,7 +518,7 @@ Unknown warnings in output have `requires_classification: true` flag. Agent shou
 Read patterns using the configuration skill:
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Read Configuration
 Field: maven.acceptable_warnings
 ```
@@ -537,7 +537,7 @@ Field: maven.acceptable_warnings
 }
 ```
 
-Use `general-tools:manage-run-configuration` skill for all configuration access.
+Use `plan-marshall-core:run-config` skill for all configuration access.
 
 ---
 
@@ -545,7 +545,7 @@ Use `general-tools:manage-run-configuration` skill for all configuration access.
 
 **Pattern**: Pattern 2 (Read-Process-Write)
 
-This workflow manages the acceptable warnings configuration via `general-tools:manage-run-configuration` skill.
+This workflow manages the acceptable warnings configuration via `plan-marshall-core:run-config` skill.
 
 ### When to Use
 
@@ -556,10 +556,10 @@ Use this workflow when:
 
 ### Adding a Pattern
 
-Activate `general-tools:manage-run-configuration` skill:
+Activate `plan-marshall-core:run-config` skill:
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Action: add-entry
 Field: maven.acceptable_warnings.transitive_dependency
@@ -573,10 +573,10 @@ Pattern categories:
 
 ### Removing a Pattern
 
-Activate `general-tools:manage-run-configuration` skill:
+Activate `plan-marshall-core:run-config` skill:
 
 ```
-Skill: general-tools:manage-run-configuration
+Skill: plan-marshall-core:run-config
 Workflow: Update Configuration
 Action: remove-entry
 Field: maven.acceptable_warnings.transitive_dependency

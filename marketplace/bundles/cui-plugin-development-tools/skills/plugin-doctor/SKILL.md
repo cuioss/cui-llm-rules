@@ -83,9 +83,9 @@ All 5 workflows follow the same pattern:
 
    **EXECUTE** these skill loads before proceeding:
    ```
-   Skill: general-tools:diagnostic-patterns
+   Skill: plan-marshall-core:diagnostic-patterns
    Skill: cui-plugin-development-tools:plugin-architecture
-   Skill: cui-plugin-development-tools:marketplace-inventory
+   Skill: plan-marshall-core:marketplace-inventory
    ```
 
 2. **MANDATORY - Load Component Reference** (progressive disclosure)
@@ -183,7 +183,7 @@ All 5 workflows follow the same pattern:
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/agents-guide.md
 Read references/fix-catalog.md
@@ -193,7 +193,7 @@ Read references/fix-catalog.md
 
 **marketplace scope** (default):
 ```
-Skill: cui-plugin-development-tools:marketplace-inventory
+Skill: plan-marshall-core:marketplace-inventory
 ```
 
 **global/project scope**:
@@ -259,7 +259,7 @@ Display summary using reporting-templates.md format.
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/commands-guide.md
 Read references/fix-catalog.md
@@ -338,7 +338,7 @@ Search for `## Workflow`, `## Parameter Validation`, `## Parameters` and replace
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: \`Skill: general-tools:manage-lessons-learned\`
+1. **Activate skill**: \`Skill: plan-marshall-core:manage-lessons-learned\`
 2. **Record lesson** with:
    - Component: \`{type: "command", name: "{command-name}", bundle: "{bundle}"}\`
    - Category: bug | improvement | pattern | anti-pattern
@@ -384,7 +384,7 @@ Same pattern as doctor-agents with command-specific thresholds.
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/skills-guide.md
 Read references/fix-catalog.md
@@ -394,7 +394,7 @@ Read references/fix-catalog.md
 
 **marketplace scope**:
 ```
-Skill: cui-plugin-development-tools:marketplace-inventory
+Skill: plan-marshall-core:marketplace-inventory
 ```
 
 ### Step 3: Analyze Each Skill
@@ -425,12 +425,12 @@ python3 .plan/execute-script.py cui-plugin-development-tools:plugin-doctor:valid
 **Required foundation skills**:
 ```
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 ```
 
 **Check criteria**:
 1. Search SKILL.md for `Skill: cui-plugin-development-tools:plugin-architecture`
-2. Search SKILL.md for `Skill: general-tools:diagnostic-patterns`
+2. Search SKILL.md for `Skill: plan-marshall-core:diagnostic-patterns`
 3. **Exempt skills** (skip check):
    - `plugin-architecture` (is itself the architecture skill)
    - `marketplace-inventory` (pure Pattern 1 script automation, no component operations)
@@ -452,7 +452,7 @@ Skill: general-tools:diagnostic-patterns
 
 \`\`\`
 Skill: cui-plugin-development-tools:plugin-architecture
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 \`\`\`
 
 These provide architecture principles and non-prompting tool usage patterns.
@@ -475,7 +475,7 @@ Same pattern with skill-specific checks.
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 Read references/metadata-guide.md
 Read references/fix-catalog.md
 ```
@@ -512,7 +512,7 @@ Glob: pattern="**/plugin.json", path="marketplace/bundles"
 ### Step 1: Load Prerequisites and Standards
 
 ```
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Skill: cui-plugin-development-tools:plugin-script-architecture
 Read references/fix-catalog.md
@@ -562,7 +562,7 @@ This workflow analyzes all markdown files within a skill's subdirectories for pr
 ### Step 1: Load Prerequisites
 
 ```
-Skill: general-tools:diagnostic-patterns
+Skill: plan-marshall-core:diagnostic-patterns
 Skill: cui-plugin-development-tools:plugin-architecture
 Read references/content-classification-guide.md
 Read references/content-quality-guide.md
@@ -837,7 +837,7 @@ Agents MUST record lessons via manage-lessons-learned skill, not self-invoke com
 This skill is designed to run without user prompts for safe operations. Required permissions:
 
 **Skill Invocations (covered by bundle wildcards):**
-- `Skill(general-tools:*)` - diagnostic-patterns
+- `Skill(plan-marshall-core:*)` - diagnostic-patterns
 - `Skill(cui-plugin-development-tools:*)` - plugin-architecture, marketplace-inventory
 
 **Script Execution:**

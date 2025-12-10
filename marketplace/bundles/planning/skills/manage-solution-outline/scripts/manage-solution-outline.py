@@ -26,8 +26,8 @@ script_dir = Path(__file__).parent
 SKILL_DIR = script_dir.parent
 BUNDLES_DIR = SKILL_DIR.parent.parent.parent
 
-sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'toon-usage' / 'scripts'))
-sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall-core' / 'skills' / 'toon-usage' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall-core' / 'skills' / 'file-operations-base' / 'scripts'))
 
 from toon_parser import serialize_toon
 from file_ops import base_path, atomic_write_file
