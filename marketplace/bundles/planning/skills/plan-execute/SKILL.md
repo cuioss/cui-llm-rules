@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 **Phases Handled**: execute, finalize
 
-**CRITICAL**: Use `update-progress.py` via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
+**CRITICAL**: Use manage-* scripts via Bash for plan file updates (Edit/Write tools trigger permission prompts on `.plan/` directories).
 
 ---
 
@@ -20,12 +20,11 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-config` | Config field access |
-| `planning:manage-lifecycle` | Phase routing and transitions |
-| `planning:manage-log` | Work log entries |
-| `planning:manage-tasks` | Task management |
-| `planning:manage-references` | Reference file CRUD |
-| `planning:plan-execute` | Progress updates |
+| `planning:manage-config:manage-config` | Config field access |
+| `planning:manage-lifecycle:manage-lifecycle` | Phase routing and transitions |
+| `planning:manage-log:manage-work-log` | Work log entries |
+| `planning:manage-tasks:manage-task` | Task and step management |
+| `planning:manage-references:manage-references` | Reference file CRUD |
 
 ---
 
@@ -119,14 +118,13 @@ For each step in task's `steps[]` array:
 2. Execute the action (delegate if specified)
 3. Mark step complete via `manage-tasks:step-done`
 
-### Step 3: Update Progress
+### Step 3: Mark Step Complete
 
 ```bash
-python3 .plan/execute-script.py planning:plan-execute:update-progress \
-  --plan-dir {plan_directory} \
-  --phase {phase} \
-  --task-id {task_id} \
-  --complete-items "{item_text}"
+python3 .plan/execute-script.py planning:manage-tasks:manage-task step-done \
+  --plan-id {plan_id} \
+  --task {task_number} \
+  --step {step_number}
 ```
 
 ### Step 3.5: Log Task Completion
@@ -190,9 +188,15 @@ Execute continuously without user prompts except:
 
 ## Phase Transition
 
-When transitioning from execute phase to finalize, `transition-phase.py` automatically:
-- Runs `collect-modified-files.py` to capture changes
-- Updates `references.toon` with collected files
+When transitioning from execute phase to finalize:
+
+```bash
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \
+  --plan-id {plan_id} \
+  --completed execute
+```
+
+This automatically updates status.toon and moves to the next phase.
 
 ---
 
@@ -244,7 +248,7 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 ### Related Skills
 - **plan-init** - Creates plan structure (request.md, config, status)
-- **plan-refine** - Decomposes request into goals and tasks
+- **plan-refine** - Creates solution outline and tasks from request
 
 ---
 

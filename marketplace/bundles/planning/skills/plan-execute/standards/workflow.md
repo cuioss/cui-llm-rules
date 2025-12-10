@@ -54,9 +54,12 @@ For each `- [ ]` item:
 
 ### Progress Update
 
-After each item completion:
+After each step completion:
 ```bash
-python3 .plan/execute-script.py planning:manage-tasks:manage-task update --plan-id {plan_id} --task-id {task_id} --complete-items "{item}"
+python3 .plan/execute-script.py planning:manage-tasks:manage-task step-done \
+  --plan-id {plan_id} \
+  --task {task_number} \
+  --step {step_number}
 ```
 
 ## Phase Transition
