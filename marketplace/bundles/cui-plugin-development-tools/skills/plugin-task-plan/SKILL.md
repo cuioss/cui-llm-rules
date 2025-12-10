@@ -1,14 +1,14 @@
 ---
 name: plugin-task-plan
-description: Create implementation tasks from goals using skill delegation
+description: Create implementation tasks from deliverables using skill delegation
 allowed-tools: Read, Bash
 ---
 
-# Plugin Plan Skill
+# Plugin Task Plan Skill
 
-**Role**: Domain planning skill for plugin development tasks. Transforms solution goals into executable tasks that delegate to existing skills for implementation.
+**Role**: Domain planning skill for plugin development tasks. Transforms solution outline deliverables into executable tasks that delegate to existing skills for implementation.
 
-**Key Pattern**: Skill delegation - reads goals from `solution_outline.md` via `manage-plan-documents`, creates tasks that specify which skill to load and execute. The delegated skills handle validation, creation, and verification internally.
+**Key Pattern**: Skill delegation - reads deliverables from `solution_outline.md` via `manage-solution-outline`, creates tasks that specify which skill to load and execute. The delegated skills handle validation, creation, and verification internally.
 
 ## Operation: plan
 
@@ -17,29 +17,27 @@ allowed-tools: Read, Bash
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `goal_number` | number | No | Single goal number (omit to process all goals) |
+| `deliverable_number` | number | No | Single deliverable number (omit to process all deliverables) |
 
 **Process**:
 
 ### Step 1: Load Solution Document
 
-Read the solution document to get all goals:
+Read the solution document to get all deliverables:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution read \
+python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline \
+  list-deliverables \
   --plan-id {plan_id}
 ```
 
-The output contains:
-- `sections.goals` - Markdown with numbered goal sections (`### 1.`, `### 2.`, etc.)
-- Parse each `### N. {Title}` section to extract individual goals
+The output contains an array of deliverables with `number` and `title` fields. Use `read` for full document content if needed.
 
-### Step 2: For Each Goal
+### Step 2: For Each Deliverable
 
-#### 2a. Analyze Goal Content
+#### 2a. Analyze Deliverable Content
 
-Parse the goal body to determine:
+Parse the deliverable body to determine:
 - **Operation type**: create or modify
 - **Component type**: skill, command, agent, script, bundle
 - **Target bundle and path**
@@ -74,11 +72,11 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
     "Parameters: {extracted parameters}"
 ```
 
-**Note**: The `--goal` parameter is now numeric (e.g., `--goal 1`) referencing the goal section number in solution_outline.md.
+**Note**: The `--goal` parameter is numeric (e.g., `--goal 1`) referencing the deliverable section number in solution_outline.md.
 
 #### 2d. Record Issues as Lessons
 
-On ambiguous goal or planning issues:
+On ambiguous deliverable or planning issues:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall-core:lessons-learned:manage-lesson add \
@@ -109,7 +107,7 @@ lessons_recorded: {count}
 
 ### Create Component Task
 
-**Goal**: "Create new {skill|command|agent} for {purpose}"
+**Deliverable**: "Create new {skill|command|agent} for {purpose}"
 
 **Task Structure**:
 ```
@@ -139,7 +137,7 @@ Steps:
 
 ### Modify Component Task
 
-**Goal**: "Update {component} to {change description}"
+**Deliverable**: "Update {component} to {change description}"
 
 **Task Structure**:
 ```
@@ -154,7 +152,7 @@ Steps:
 
 ### Refactor Task
 
-**Goal**: "Refactor {scope} using {strategy}"
+**Deliverable**: "Refactor {scope} using {strategy}"
 
 **Task Structure**:
 ```
@@ -186,15 +184,15 @@ Steps:
 
 ## Parameter Extraction
 
-When analyzing goals, extract these parameters:
+When analyzing deliverables, extract these parameters:
 
 ### For Create Operations
 
 | Parameter | Source |
 |-----------|--------|
-| `bundle` | Explicit in goal OR inferred from context |
-| `name` | Explicit in goal OR derived from purpose |
-| `description` | Extracted from goal body |
+| `bundle` | Explicit in deliverable OR inferred from context |
+| `name` | Explicit in deliverable OR derived from purpose |
+| `description` | Extracted from deliverable body |
 | `type` | Component-specific (agent type, skill type, etc.) |
 
 ### For Modify Operations
@@ -202,13 +200,13 @@ When analyzing goals, extract these parameters:
 | Parameter | Source |
 |-----------|--------|
 | `component_path` | Explicit path OR resolve from component name |
-| `improvements` | Description from goal body |
+| `improvements` | Description from deliverable body |
 
 ---
 
-## Multi-Task Goals
+## Multi-Task Deliverables
 
-Some goals require multiple tasks in sequence:
+Some deliverables require multiple tasks in sequence:
 
 ### Skill with Scripts
 ```
@@ -248,16 +246,16 @@ When creating multiple tasks:
 
 ## Error Handling
 
-### Ambiguous Goal
+### Ambiguous Deliverable
 
-If goal doesn't specify:
+If deliverable doesn't specify:
 - **Target bundle** → Ask for clarification
 - **Component type** → Infer from keywords or ask
 - **Operation type** → Default to create unless "update/modify/fix" present
 
 ### Missing Information
 
-If goal lacks required parameters:
+If deliverable lacks required parameters:
 - Generate task with available info
 - Note missing parameters in task description
 - Record lesson for future reference
