@@ -95,8 +95,16 @@ python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component maven-build \
   --category bug \
   --title "Build fails with missing dependency" \
-  --detail "When running mvn clean install..."
+  --detail "When running mvn clean install..." \
+  [--bundle planning]
 ```
+
+**Parameters**:
+- `--component` (required): Component that lesson applies to
+- `--category` (required): `bug`, `improvement`, or `anti-pattern`
+- `--title` (required): Lesson title
+- `--detail` (required): Lesson detail/content
+- `--bundle`: Optional bundle reference
 
 **Output** (TOON):
 ```toon
@@ -114,8 +122,16 @@ Update lesson metadata.
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson update \
   --id 2025-12-02-001 \
-  --applied true
+  [--applied true|false] \
+  [--component new-component] \
+  [--category bug|improvement|anti-pattern]
 ```
+
+**Parameters**:
+- `--id` (required): Lesson ID to update
+- `--applied`: Set applied status (true/false)
+- `--component`: Update component name
+- `--category`: Update category
 
 **Output** (TOON):
 ```toon
@@ -157,28 +173,46 @@ List lessons with filtering.
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson list \
   [--component maven-build] \
   [--category bug] \
-  [--applied false]
+  [--applied true|false]
 ```
+
+**Parameters**:
+- `--component`: Filter by component name
+- `--category`: Filter by category (`bug`, `improvement`, `anti-pattern`)
+- `--applied`: Filter by applied status (true/false)
 
 **Output** (TOON):
 ```toon
 status: success
 total: 5
 filtered: 2
-
-lessons[2]{id,component,category,applied,title}:
-2025-12-02-001,maven-build,bug,false,Build fails with missing dependency
-2025-12-02-002,plan-files,improvement,true,Add validation for plan_id format
+lessons:
+  - id: 2025-12-02-001
+    component: maven-build
+    category: bug
+    applied: false
+    title: Build fails with missing dependency
+  - id: 2025-12-02-002
+    component: plan-files
+    category: improvement
+    applied: true
+    title: Add validation for plan_id format
 ```
 
 ### from-error
 
-Create lesson from error context.
+Create lesson from error context (JSON).
 
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson from-error \
-  --context '{"component":"maven-build","error":"Missing dependency"}'
+  --context '{"component":"maven-build","error":"Missing dependency","solution":"Add explicit dep"}'
 ```
+
+**Parameters**:
+- `--context` (required): JSON object with error context
+  - `component`: Component name (defaults to "unknown")
+  - `error`: Error message (required)
+  - `solution`: Optional solution description
 
 **Output** (TOON):
 ```toon
@@ -191,9 +225,15 @@ created_from: error_context
 
 ## Scripts
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `planning:manage-lessons:manage-lesson` | All lesson operations via subcommands | `python3 .plan/execute-script.py planning:manage-lessons:manage-lesson {subcommand} --help` |
+**Script**: `planning:manage-lessons:manage-lesson`
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `add` | `--component --category --title --detail [--bundle]` | Create new lesson |
+| `update` | `--id [--applied] [--component] [--category]` | Update lesson metadata |
+| `get` | `--id` | Get single lesson |
+| `list` | `[--component] [--category] [--applied]` | List with filtering |
+| `from-error` | `--context` | Create from JSON error context |
 
 ---
 
