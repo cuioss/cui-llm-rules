@@ -43,7 +43,7 @@ When `solution_outline_agent` is `null`, the command falls back to `planning:pla
 
 **References fields added**: none (simple plans have no domain-specific fields)
 
-**Config fields added** (via `planning:manage-config set`):
+**Config fields added** (via `planning:manage-config:manage-config set`):
 
 | Field | Value |
 |-------|-------|
