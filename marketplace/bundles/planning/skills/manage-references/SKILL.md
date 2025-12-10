@@ -84,19 +84,24 @@ python3 .plan/execute-script.py planning:manage-references:manage-references cre
   [--build-system {maven|gradle|npm}]
 ```
 
+**Parameters**:
+- `--plan-id` (required): Plan identifier (kebab-case)
+- `--branch` (required): Git branch name
+- `--issue-url`: GitHub issue URL
+- `--build-system`: Build system (`maven`, `gradle`, `npm`)
+
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
 file: references.toon
 created: true
-
-fields[5]:
-- branch
-- base_branch
-- modified_files
-- config_files
-- test_files
+fields:
+  - branch
+  - base_branch
+  - modified_files
+  - config_files
+  - test_files
 ```
 
 **Note**: After `create`, call `plan-type-{type}:configure` to add domain-specific fields (standards, adrs, etc.).
@@ -197,13 +202,68 @@ removed: src/main/java/OldClass.java
 total: 2
 ```
 
+### get-context
+
+Get all references context in one call. Useful for getting comprehensive plan context.
+
+```bash
+python3 .plan/execute-script.py planning:manage-references:manage-references get-context \
+  --plan-id {plan_id} \
+  [--include-files]
+```
+
+**Parameters**:
+- `--plan-id` (required): Plan identifier
+- `--include-files`: Include full file lists in output (default: only counts)
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+branch: feature/my-feature
+base_branch: main
+modified_files_count: 3
+config_files_count: 1
+test_files_count: 2
+issue_url: https://github.com/org/repo/issues/123
+build_system: maven
+```
+
+With `--include-files`:
+```toon
+status: success
+plan_id: my-feature
+branch: feature/my-feature
+base_branch: main
+modified_files_count: 3
+config_files_count: 1
+test_files_count: 2
+modified_files:
+  - src/main/java/Foo.java
+  - src/main/java/Bar.java
+  - src/main/java/Baz.java
+config_files:
+  - pom.xml
+test_files:
+  - src/test/java/FooTest.java
+  - src/test/java/BarTest.java
+```
+
 ---
 
 ## Scripts
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `planning:manage-references:manage-references` | All reference operations via subcommands | `python3 .plan/execute-script.py planning:manage-references:manage-references {subcommand} --help` |
+**Script**: `planning:manage-references:manage-references`
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `create` | `--plan-id --branch [--issue-url] [--build-system]` | Create references.toon |
+| `read` | `--plan-id` | Read entire references |
+| `get` | `--plan-id --field` | Get specific field value |
+| `set` | `--plan-id --field --value` | Set specific field value |
+| `add-file` | `--plan-id --file` | Add file to modified_files |
+| `remove-file` | `--plan-id --file` | Remove file from modified_files |
+| `get-context` | `--plan-id [--include-files]` | Get all references context |
 
 ---
 
