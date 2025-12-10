@@ -32,3 +32,5 @@ target/
 # Workflow artifacts (plans, lessons, memory, run-config)
 .plan/
 
+# Planning system (managed by /plan-marshall)
+!.plan/marshal.json

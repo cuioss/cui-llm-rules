@@ -16,14 +16,14 @@ cui-llm-rules/
 │   ├── .claude-plugin/
 │   │   └── marketplace.json        # Master marketplace configuration
 │   └── bundles/                    # 8 production bundles
-│       ├── pm-dev-java/        # Java development standards + agents
-│       ├── pm-dev-frontend/    # JavaScript/CSS standards + agents
-│       ├── builder/                # Maven/Gradle/npm build automation
+│       ├── pm-dev-java/            # Java development standards + agents
+│       ├── pm-dev-frontend/        # JavaScript/CSS standards + agents
+│       ├── pm-dev-builder/         # Maven/Gradle/npm build automation
 │       ├── planning/               # Task planning & workflow management
-│       ├── pm-documents/  # AsciiDoc, ADRs, interfaces
+│       ├── pm-documents/           # AsciiDoc, ADRs, interfaces
 │       ├── plan-marshall/          # Utility commands & file operations
-│       ├── pm-plugin-development/ # Plugin creation toolkit
-│       └── pm-requirements/       # Requirements engineering
+│       ├── pm-plugin-development/  # Plugin creation toolkit
+│       └── pm-requirements/        # Requirements engineering
 ├── test/                           # Python pytest tests for scripts
 ├── target/                         # Generated files and logs (gitignored)
 └── .claude/                        # Project-level Claude Code configuration

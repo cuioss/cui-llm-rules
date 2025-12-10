@@ -191,6 +191,64 @@ class TestEnsureWildcards(ScriptTestCase):
 
         self.assertIn('already_present', data)
 
+    def test_supports_plugins_key(self):
+        """Should support 'plugins' key (real marketplace.json format).
+
+        The actual marketplace.json uses 'plugins' not 'bundles':
+        { "plugins": [{ "name": "pm-workflow", ... }] }
+
+        This test ensures the script handles the real-world format.
+        """
+        settings_file = self.temp_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": ["Bash(git:*)"],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        # Use 'plugins' key like the real marketplace.json
+        marketplace_file = self.temp_dir / 'marketplace.json'
+        marketplace_file.write_text(json.dumps({
+            "name": "plan-marshall",
+            "plugins": [
+                {
+                    "name": "pm-workflow",
+                    "description": "Workflow management",
+                    "source": "./bundles/pm-workflow",
+                    "skills": [{"name": "manage-lifecycle"}],
+                    "commands": [{"name": "plan-manage"}]
+                },
+                {
+                    "name": "pm-dev-java",
+                    "description": "Java development",
+                    "source": "./bundles/pm-dev-java",
+                    "skills": [{"name": "cui-java-core"}],
+                    "commands": [{"name": "java-create"}]
+                }
+            ]
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'ensure-wildcards',
+            '--settings', str(settings_file),
+            '--marketplace-json', str(marketplace_file),
+            '--dry-run'
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        # Should generate wildcards for both bundles
+        self.assertIn('added', data)
+        added = data['added']
+        self.assertIn('Skill(pm-workflow:*)', added)
+        self.assertIn('SlashCommand(/pm-workflow:*)', added)
+        self.assertIn('Skill(pm-dev-java:*)', added)
+        self.assertIn('SlashCommand(/pm-dev-java:*)', added)
+        self.assertEqual(data['total'], 4)  # 2 bundles × 2 wildcards each
+
 
 # =============================================================================
 # Tests for apply-fixes subcommand

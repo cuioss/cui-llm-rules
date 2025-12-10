@@ -25,8 +25,7 @@ cui-llm-rules/
 |--------|---------|
 | **pm-dev-java** | Java development standards, CDI/Quarkus, JUnit 5, logging |
 | **pm-dev-frontend** | JavaScript, CSS, Jest, Cypress, ESLint/Prettier |
-| **builder** | Maven/Gradle/npm unified build automation |
-| **planning** | Task planning, workflow orchestration, PR management |
+| **pm-dev-builder** | Maven/Gradle/npm unified build automation |
 | **pm-documents** | AsciiDoc, ADRs, interface specifications |
 | **plan-marshall** | Utilities, permissions, file operations |
 | **pm-plugin-development** | Plugin creation, quality diagnosis |

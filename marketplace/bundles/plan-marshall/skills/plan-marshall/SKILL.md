@@ -37,7 +37,7 @@ Activate when:
 | permission-doctor | `plan-marshall:permission-doctor:permission-doctor` | Permission analysis |
 | permission-fix | `plan-marshall:permission-fix:permission-fix` | Permission fixes |
 | marketplace-sync | `plan-marshall:marketplace-sync:marketplace-sync` | Marketplace permission sync |
-| manage-work-log | `pm-workflow:manage-log:manage-work-log` | Log cleanup |
+| generate-executor | `plan-marshall:script-executor:generate-executor` | Executor generation and log cleanup |
 
 ---
 
@@ -336,24 +336,55 @@ Same as regenerate but incremental - only add new scripts.
 ### Clean Old Logs
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log clean --max-age-days 30
+python3 .plan/execute-script.py plan-marshall:script-executor:generate-executor cleanup --max-age-days 30
 ```
 
 ---
 
 ## Menu Option: Permissions
 
-### Update Global Permissions
+### Step 1: Diagnose Permissions (always run first)
 
+**Detect redundant permissions** (local duplicates of global):
+```bash
+python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-doctor detect-redundant --scope both
+```
+
+**Detect suspicious permissions** in global settings:
+```bash
+python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-doctor detect-suspicious --scope global
+```
+
+**Detect suspicious permissions** in project settings:
+```bash
+python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-doctor detect-suspicious --scope project
+```
+
+### Step 2: Apply Fixes
+
+**Apply safe fixes** to global settings:
 ```bash
 python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix apply-fixes --scope global
 ```
 
-### Update Project Permissions
-
+**Apply safe fixes** to project settings:
 ```bash
 python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix apply-fixes --scope project
 ```
+
+### Step 3: Manual Operations (if needed)
+
+**Add permission** (use `--target global` or `--target project`):
+```bash
+python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix add --target global --permission "Skill(bundle:*)"
+```
+
+**Remove permission** (use `--target global` or `--target project`):
+```bash
+python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix remove --target project --permission "Edit(.plan/**)"
+```
+
+**Note**: The `remove` and `add` commands use `--target`, while `apply-fixes` uses `--scope`.
 
 ### Sync Wildcards
 

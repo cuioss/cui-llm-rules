@@ -470,9 +470,14 @@ def has_commands(bundle: dict) -> bool:
 
 
 def generate_required_wildcards(marketplace: dict) -> list[str]:
-    """Generate list of required wildcard permissions from marketplace."""
+    """Generate list of required wildcard permissions from marketplace.
+
+    Supports both 'bundles' key (from scan-marketplace-inventory output)
+    and 'plugins' key (from marketplace.json format).
+    """
     wildcards = []
-    bundles = marketplace.get("bundles", [])
+    # Support both 'bundles' (inventory output) and 'plugins' (marketplace.json)
+    bundles = marketplace.get("bundles", marketplace.get("plugins", []))
 
     for bundle in bundles:
         bundle_name = bundle.get("name", "")
