@@ -136,6 +136,25 @@ value: breaking
 previous: deprecations
 ```
 
+### get-multi
+
+Get multiple fields in one call.
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
+  --plan-id {plan_id} \
+  --fields "plan_type,compatibility,commit_strategy"
+```
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+plan_type: planning:plan-type-java
+compatibility: deprecations
+commit_strategy: phase-specific
+```
+
 ### create
 
 Create config.toon with initial values.
@@ -145,7 +164,8 @@ python3 .plan/execute-script.py planning:manage-config:manage-config create \
   --plan-id {plan_id} \
   --plan-type planning:plan-type-java \
   [--compatibility deprecations] \
-  [--commit-strategy phase-specific]
+  [--commit-strategy phase-specific] \
+  [--force]
 ```
 
 **Output** (TOON):
@@ -287,6 +307,10 @@ python3 .plan/execute-script.py planning:manage-config:marshal-config \
   rules add --pattern "*.kt" --plan-type planning:plan-type-java \
   --description "Kotlin files"
 
+# Remove rule
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  rules remove --pattern "*.kt"
+
 # List rules
 python3 .plan/execute-script.py planning:manage-config:marshal-config \
   rules list
@@ -301,9 +325,85 @@ Manage keyword-based plan-type detection.
 python3 .plan/execute-script.py planning:manage-config:marshal-config \
   keywords match --text "implement junit test for service"
 
+# List all keywords (or filter by plan-type)
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  keywords list [--plan-type planning:plan-type-java]
+
 # Add keyword
 python3 .plan/execute-script.py planning:manage-config:marshal-config \
   keywords add --plan-type planning:plan-type-java --keyword quarkus
+```
+
+### plan-type-defaults
+
+Manage per-plan-type default settings.
+
+```bash
+# Get defaults for plan-type
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  plan-type-defaults get --plan-type planning:plan-type-java
+
+# Set defaults for plan-type
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  plan-type-defaults set --plan-type planning:plan-type-java \
+  --verification-command "/builder-build-and-fix" \
+  --pr-workflow true
+```
+
+### build-systems
+
+Manage build system configuration.
+
+```bash
+# List detected build systems
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  build-systems list
+
+# Enable/disable a build system
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  build-systems set --system maven --active true
+
+# Auto-detect build systems from project files
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  build-systems detect
+```
+
+### custom-types
+
+Manage custom plan types.
+
+```bash
+# List custom types
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  custom-types list
+
+# Add custom type
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  custom-types add --name my-custom-type --skill-path ./skills/my-type/SKILL.md \
+  --solution-outline-agent my-bundle:my-solution-outline-agent \
+  --task-plan-agent my-bundle:my-task-plan-agent
+
+# Remove custom type
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  custom-types remove --name my-custom-type
+```
+
+### state
+
+Manage generation state for marshal.json.
+
+```bash
+# Get current state
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  state get
+
+# Set state field
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  state set --field last_run --value "2025-01-15"
+
+# Update checksum
+python3 .plan/execute-script.py planning:manage-config:marshal-config \
+  state update-checksum
 ```
 
 ### init
@@ -313,6 +413,7 @@ Initialize marshal.json with defaults.
 ```bash
 python3 .plan/execute-script.py planning:manage-config:marshal-config init
 python3 .plan/execute-script.py planning:manage-config:marshal-config init --force
+python3 .plan/execute-script.py planning:manage-config:marshal-config init --template java-project
 ```
 
 ## Output Format
@@ -328,11 +429,24 @@ data:
 
 ## Integration Points
 
+### Per-Plan Config (manage-config)
+
+| Consumer | Operation | Purpose |
+|----------|-----------|---------|
+| plan-init-agent | `create` | Create initial config.toon |
+| plan-type configure | `set` | Add finalize configuration fields |
+| plan-execute | `read`, `get` | Read commit strategy, verification settings |
+| plan-finalize | `get` | Check create_pr, branch_strategy |
+
+### Project-Level Config (marshal-config)
+
 | Consumer | Operation | Purpose |
 |----------|-----------|---------|
 | /plan-manage | `domain-agents get` | Check for project-level agent override |
 | /plan-manage | `rules match` | Auto-detect plan-type from file patterns |
+| /plan-manage | `keywords match` | Detect plan-type from description text |
 | /plan-marshall | `init` | First-run project setup |
+| /plan-marshall | `build-systems detect` | Auto-detect project build systems |
 | plan-init | `defaults list` | Set plan config defaults |
 | plan-finalize | `plan-type-defaults get` | Get verification command |
 

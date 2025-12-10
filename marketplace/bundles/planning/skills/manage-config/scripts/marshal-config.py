@@ -607,8 +607,8 @@ Examples:
 
     da_set = da_sub.add_parser('set', help='Set agents for plan-type')
     da_set.add_argument('--plan-type', required=True, help='Plan type (bundle:skill)')
-    da_set.add_argument('--solution-outline-agent', help='Goals agent (bundle:agent or null)')
-    da_set.add_argument('--task-plan-agent', help='Plan agent (bundle:agent or null)')
+    da_set.add_argument('--solution-outline-agent', help='Solution Outline agent (bundle:agent or null)')
+    da_set.add_argument('--task-plan-agent', help='Task Plan agent (bundle:agent or null)')
 
     da_sub.add_parser('list', help='List all domain agent mappings')
 
@@ -689,8 +689,8 @@ Examples:
     ct_add = ct_sub.add_parser('add', help='Add custom type')
     ct_add.add_argument('--name', required=True, help='Type name')
     ct_add.add_argument('--skill-path', required=True, help='Path to SKILL.md')
-    ct_add.add_argument('--solution-outline-agent', help='Goals agent (or null)')
-    ct_add.add_argument('--task-plan-agent', help='Plan agent (or null)')
+    ct_add.add_argument('--solution-outline-agent', help='Solution Outline agent (or null)')
+    ct_add.add_argument('--task-plan-agent', help='Task Plan agent (or null)')
 
     ct_remove = ct_sub.add_parser('remove', help='Remove custom type')
     ct_remove.add_argument('--name', required=True, help='Type name')
