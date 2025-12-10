@@ -16,14 +16,14 @@ cui-llm-rules/
 │   ├── .claude-plugin/
 │   │   └── marketplace.json        # Master marketplace configuration
 │   └── bundles/                    # 8 production bundles
-│       ├── cui-java-expert/        # Java development standards + agents
-│       ├── cui-frontend-expert/    # JavaScript/CSS standards + agents
+│       ├── pm-java/        # Java development standards + agents
+│       ├── pm-frontend/    # JavaScript/CSS standards + agents
 │       ├── builder/                # Maven/Gradle/npm build automation
 │       ├── planning/               # Task planning & workflow management
-│       ├── cui-documentation-standards/  # AsciiDoc, ADRs, interfaces
-│       ├── general-tools/          # Utility commands & file operations
-│       ├── cui-plugin-development-tools/ # Plugin creation toolkit
-│       └── cui-requirements/       # Requirements engineering
+│       ├── pm-documents/  # AsciiDoc, ADRs, interfaces
+│       ├── pm-core/          # Utility commands & file operations
+│       ├── pm-plugins/ # Plugin creation toolkit
+│       └── pm-requirements/       # Requirements engineering
 ├── test/                           # Python pytest tests for scripts
 ├── target/                         # Generated files and logs (gitignored)
 └── .claude/                        # Project-level Claude Code configuration
@@ -60,10 +60,10 @@ bundle-name/
 
 ## The 8 Production Bundles
 
-### cui-java-expert
+### pm-java
 Java development standards covering core patterns, null safety, Lombok, CDI/Quarkus, unit testing with JUnit 5, JavaDoc, and logging. Includes agents for implementation, testing, refactoring, and build fixing.
 
-### cui-frontend-expert
+### pm-frontend
 JavaScript and frontend standards for ES modules, modern patterns, CSS, JSDoc, project structure, Maven integration, ESLint/Prettier/StyleLint configuration, Cypress E2E testing, and Jest unit testing.
 
 ### builder
@@ -72,16 +72,16 @@ Unified build automation supporting Maven, Gradle, and npm. Features environment
 ### planning
 Complete development workflow automation with 14 skills covering task planning, implementation phases, plan refinement, finalization, git workflows, PR management, work logging, and Sonar integration.
 
-### cui-documentation-standards
+### pm-documents
 Documentation standards for AsciiDoc, Architectural Decision Records (ADRs), and interface specifications. Includes validation, formatting, and maintenance workflows.
 
-### general-tools
+### pm-core
 Utility commands for script execution, permission management, file operations, memory management, lessons learned tracking, and project configuration.
 
-### cui-plugin-development-tools
+### pm-plugins
 Plugin development toolkit with creation wizards, quality diagnosis, marketplace inventory scanning, architecture guidance, and component maintenance workflows.
 
-### cui-requirements
+### pm-requirements
 Requirements engineering standards covering authoring, planning, traceability, and project initialization.
 
 ## Key Design Patterns
@@ -121,7 +121,7 @@ python3 .plan/execute-script.py {notation} [subcommand] {args...}
 
 **Setup**: Run `/plan-marshall` after bundle changes to regenerate the executor with updated mappings.
 
-**Script Development**: See `cui-plugin-development-tools:plugin-script-architecture` skill for implementation standards.
+**Script Development**: See `pm-plugins:plugin-script-architecture` skill for implementation standards.
 
 ## Working in This Repository
 
@@ -135,7 +135,7 @@ python3 .plan/execute-script.py {notation} [subcommand] {args...}
 ### Naming Conventions
 
 - Files and commands: `kebab-case` (e.g., `java-implement-code.md`)
-- Bundles: Descriptive names with domain prefix (e.g., `cui-java-expert`)
+- Bundles: Descriptive names with domain prefix (e.g., `pm-java`)
 - Skills: Domain-specific names (e.g., `cui-java-core`, `plan-refine`)
 
 ### Documentation Standards
@@ -148,7 +148,7 @@ python3 .plan/execute-script.py {notation} [subcommand] {args...}
 
 ### Testing
 
-See `cui-plugin-development-tools:plugin-script-architecture` skill for testing standards.
+See `pm-plugins:plugin-script-architecture` skill for testing standards.
 
 ```bash
 python3 test/run-tests.py                                          # all tests

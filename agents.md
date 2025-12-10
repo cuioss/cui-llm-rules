@@ -23,14 +23,14 @@ cui-llm-rules/
 
 | Bundle | Purpose |
 |--------|---------|
-| **cui-java-expert** | Java development standards, CDI/Quarkus, JUnit 5, logging |
-| **cui-frontend-expert** | JavaScript, CSS, Jest, Cypress, ESLint/Prettier |
+| **pm-java** | Java development standards, CDI/Quarkus, JUnit 5, logging |
+| **pm-frontend** | JavaScript, CSS, Jest, Cypress, ESLint/Prettier |
 | **builder** | Maven/Gradle/npm unified build automation |
 | **planning** | Task planning, workflow orchestration, PR management |
-| **cui-documentation-standards** | AsciiDoc, ADRs, interface specifications |
-| **general-tools** | Utilities, permissions, file operations |
-| **cui-plugin-development-tools** | Plugin creation, quality diagnosis |
-| **cui-requirements** | Requirements authoring and traceability |
+| **pm-documents** | AsciiDoc, ADRs, interface specifications |
+| **pm-core** | Utilities, permissions, file operations |
+| **pm-plugins** | Plugin creation, quality diagnosis |
+| **pm-requirements** | Requirements authoring and traceability |
 
 ### Component Model
 
@@ -67,7 +67,7 @@ bundle-name/
 ### Naming Conventions
 
 - Files and commands: `kebab-case` (e.g., `java-implement-code.md`)
-- Bundles: Descriptive names with domain prefix (e.g., `cui-java-expert`)
+- Bundles: Descriptive names with domain prefix (e.g., `pm-java`)
 - Skills: Domain-specific names (e.g., `cui-java-core`, `plan-refine`)
 
 ## Testing Instructions

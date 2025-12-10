@@ -32,11 +32,11 @@ This repository contains **8 production-ready bundles** with **95 total componen
 |===
 |Bundle |Description |Skills |Agents |Commands
 
-|xref:marketplace/bundles/cui-java-expert/README.md[cui-java-expert]
+|xref:marketplace/bundles/pm-java/README.md[pm-java]
 |Java development standards and tooling
 |5 |3 |9
 
-|xref:marketplace/bundles/cui-frontend-expert/README.md[cui-frontend-expert]
+|xref:marketplace/bundles/pm-frontend/README.md[pm-frontend]
 |JavaScript/frontend development standards and tooling
 |8 |3 |7
 
@@ -48,7 +48,7 @@ This repository contains **8 production-ready bundles** with **95 total componen
 |Complete development workflow from issue to PR
 |2 |8 |6
 
-|xref:marketplace/bundles/cui-documentation-standards/README.md[cui-documentation-standards]
+|xref:marketplace/bundles/pm-documents/README.md[pm-documents]
 |AsciiDoc documentation standards and review
 |1 |4 |2
 
@@ -56,11 +56,11 @@ This repository contains **8 production-ready bundles** with **95 total componen
 |General-purpose utility commands and diagnostics
 |4 |1 |6
 
-|xref:marketplace/bundles/cui-plugin-development-tools/README.md[cui-plugin-development-tools]
+|xref:marketplace/bundles/pm-plugins/README.md[pm-plugins]
 |Claude Code marketplace development tools
 |3 |8 |13
 
-|xref:marketplace/bundles/cui-requirements/README.md[cui-requirements]
+|xref:marketplace/bundles/pm-requirements/README.md[pm-requirements]
 |Requirements and planning documentation standards
 |4 |0 |1
 |===
@@ -84,7 +84,7 @@ This repository contains **8 production-ready bundles** with **95 total componen
 /java-generate-coverage
 ----
 
-See xref:marketplace/bundles/cui-java-expert/README.md[cui-java-expert bundle] for details.
+See xref:marketplace/bundles/pm-java/README.md[pm-java bundle] for details.
 
 === JavaScript Development
 
@@ -103,7 +103,7 @@ See xref:marketplace/bundles/cui-java-expert/README.md[cui-java-expert bundle] f
 /js-enforce-eslint
 ----
 
-See xref:marketplace/bundles/cui-frontend-expert/README.md[cui-frontend-expert bundle] for details.
+See xref:marketplace/bundles/pm-frontend/README.md[pm-frontend bundle] for details.
 
 === Maven Build & Quality
 
@@ -129,7 +129,7 @@ See xref:marketplace/bundles/builder-maven/README.md[builder-maven bundle] for d
 /doc-review-single-asciidoc <file>
 ----
 
-See xref:marketplace/bundles/cui-documentation-standards/README.md[cui-documentation-standards bundle] for details.
+See xref:marketplace/bundles/pm-documents/README.md[pm-documents bundle] for details.
 
 === Complete Workflows
 
@@ -163,20 +163,20 @@ See xref:marketplace/bundles/cui-task-workflow/README.md[cui-task-workflow bundl
 /plugin-diagnose-commands
 ----
 
-See xref:marketplace/bundles/cui-plugin-development-tools/README.md[cui-plugin-development-tools bundle] for details.
+See xref:marketplace/bundles/pm-plugins/README.md[pm-plugins bundle] for details.
 
 == Bundle Details
 
 For comprehensive documentation on each bundle, see their individual README files:
 
-* xref:marketplace/bundles/cui-java-expert/README.md[Java Expert Bundle] - Java development standards, logging, CDI, testing
-* xref:marketplace/bundles/cui-frontend-expert/README.md[Frontend Expert Bundle] - JavaScript, CSS, Cypress, linting, project structure
+* xref:marketplace/bundles/pm-java/README.md[pm-java Bundle] - Java development standards, logging, CDI, testing
+* xref:marketplace/bundles/pm-frontend/README.md[pm-frontend Bundle] - JavaScript, CSS, Cypress, linting, project structure
 * xref:marketplace/bundles/builder-maven/README.md[Maven Bundle] - Build verification, POM maintenance, quality gates
 * xref:marketplace/bundles/cui-task-workflow/README.md[Task Workflow Bundle] - Issue implementation, PR handling, Sonar integration
-* xref:marketplace/bundles/cui-documentation-standards/README.md[Documentation Standards Bundle] - AsciiDoc formatting, validation, linking
+* xref:marketplace/bundles/pm-documents/README.md[pm-documents Bundle] - AsciiDoc formatting, validation, linking
 * xref:marketplace/bundles/cui-utilities/README.md[Utilities Bundle] - Research, permissions, diagnostics, architecture diagrams
-* xref:marketplace/bundles/cui-plugin-development-tools/README.md[Plugin Development Tools Bundle] - Component creation, quality diagnosis
-* xref:marketplace/bundles/cui-requirements/README.md[Requirements Bundle] - Requirements authoring, planning, traceability
+* xref:marketplace/bundles/pm-plugins/README.md[pm-plugins Bundle] - Component creation, quality diagnosis
+* xref:marketplace/bundles/pm-requirements/README.md[pm-requirements Bundle] - Requirements authoring, planning, traceability
 
 See also: xref:marketplace/README.md[Marketplace Overview]
 
@@ -280,7 +280,7 @@ List all marketplace components:
 
 [source,bash]
 ----
-./marketplace/bundles/cui-plugin-development-tools/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh
+./marketplace/bundles/pm-plugins/skills/cui-marketplace-architecture/scripts/scan-marketplace-inventory.sh
 ----
 
 == Contributing
@@ -300,7 +300,7 @@ List all marketplace components:
 . Update bundle README
 . Submit for review
 
-See xref:marketplace/bundles/cui-plugin-development-tools/README.md[Plugin Development Tools] for detailed guidance.
+See xref:marketplace/bundles/pm-plugins/README.md[pm-plugins] for detailed guidance.
 
 == Support
 

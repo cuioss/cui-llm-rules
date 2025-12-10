@@ -1,59 +1,59 @@
 {
-  "name": "cui-development-standards",
+  "name": "plan-marshall",
   "owner": {
     "name": "CUI OSS Project"
   },
   "metadata": {
-    "description": "Comprehensive marketplace of CUI development standards, skills, and best practices for AI-assisted development",
+    "description": "Comprehensive marketplace of development standards, skills, and best practices for AI-assisted development",
     "version": "1.0.0"
   },
   "plugins": [
     {
-      "name": "cui-java-expert",
+      "name": "pm-java",
       "description": "Comprehensive Java development expertise bundle aggregating core Java patterns, CDI/Quarkus, and unit testing standards",
-      "source": "./bundles/cui-java-expert",
+      "source": "./bundles/pm-java",
       "strict": false
     },
     {
-      "name": "cui-frontend-expert",
-      "description": "JavaScript, CSS, and web component standards for CUI applications",
-      "source": "./bundles/cui-frontend-expert",
+      "name": "pm-frontend",
+      "description": "JavaScript, CSS, and web component standards for applications",
+      "source": "./bundles/pm-frontend",
       "strict": false
     },
     {
-      "name": "cui-documentation-standards",
-      "description": "AsciiDoc and documentation standards enforcement for CUI projects",
-      "source": "./bundles/cui-documentation-standards",
+      "name": "pm-documents",
+      "description": "AsciiDoc and documentation standards enforcement for projects",
+      "source": "./bundles/pm-documents",
       "strict": false
     },
     {
-      "name": "cui-plugin-development-tools",
+      "name": "pm-plugins",
       "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
-      "source": "./bundles/cui-plugin-development-tools",
+      "source": "./bundles/pm-plugins",
       "strict": false
     },
     {
-      "name": "plan-marshall-core",
+      "name": "pm-core",
       "description": "Environment setup, permission management, and cross-cutting utilities",
-      "source": "./bundles/plan-marshall-core",
+      "source": "./bundles/pm-core",
       "strict": false
     },
     {
-      "name": "planning",
+      "name": "pm-workflow",
       "description": "Complete development workflow from issue implementation to PR review and quality verification",
-      "source": "./bundles/planning",
+      "source": "./bundles/pm-workflow",
       "strict": false
     },
     {
-      "name": "builder",
+      "name": "pm-builder",
       "description": "Unified build tools for Maven, Gradle, and npm projects",
-      "source": "./bundles/builder",
+      "source": "./bundles/pm-builder",
       "strict": false
     },
     {
-      "name": "cui-requirements",
-      "description": "Requirements engineering and specification standards for CUI projects",
-      "source": "./bundles/cui-requirements",
+      "name": "pm-requirements",
+      "description": "Requirements engineering and specification standards for projects",
+      "source": "./bundles/pm-requirements",
       "strict": false
     }
   ]
