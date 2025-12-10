@@ -17,9 +17,9 @@ Planning-related components are distributed across multiple bundles:
 | Bundle | Component Types |
 |--------|-----------------|
 | `planning` | Core infrastructure (plan-*, manage-*, *-workflow) |
-| `cui-java-expert` | java-plan, java-solution-plan (skills + agents) |
-| `cui-frontend-expert` | js-plan, js-solution-plan (skills + agents) |
-| `cui-plugin-development-tools` | plugin-plan, plugin-solution-plan (skills + agents) |
+| `cui-java-expert` | java-plan, java-solution-outline (skills + agents) |
+| `cui-frontend-expert` | js-plan, js-solution-outline (skills + agents) |
+| `cui-plugin-development-tools` | plugin-plan, plugin-solution-outline (skills + agents) |
 
 This skill provides a single command to discover all these components.
 
@@ -91,8 +91,8 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
   "derived": [
     {
       "bundle": "cui-java-expert",
-      "agents": [{"name": "java-plan-agent", ...}, {"name": "java-solution-plan-agent", ...}],
-      "skills": [{"name": "java-plan", ...}, {"name": "java-solution-plan", ...}],
+      "agents": [{"name": "java-plan-agent", ...}, {"name": "java-solution-outline-agent", ...}],
+      "skills": [{"name": "java-plan", ...}, {"name": "java-solution-outline", ...}],
       ...
     },
     ...
@@ -140,9 +140,9 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 
 | Bundle | Agents | Skills |
 |--------|--------|--------|
-| cui-java-expert | java-plan-agent, java-solution-plan-agent | java-plan, java-solution-plan |
-| cui-frontend-expert | js-plan-agent, js-solution-plan-agent | js-plan, js-solution-plan |
-| cui-plugin-development-tools | plugin-plan-agent, plugin-solution-plan-agent | plugin-plan, plugin-solution-plan |
+| cui-java-expert | java-plan-agent, java-solution-outline-agent | java-plan, java-solution-outline |
+| cui-frontend-expert | js-plan-agent, js-solution-outline-agent | js-plan, js-solution-outline |
+| cui-plugin-development-tools | plugin-plan-agent, plugin-solution-outline-agent | plugin-plan, plugin-solution-outline |
 
 ## Dependencies
 

@@ -3,7 +3,7 @@ name: plan-type-java
 description: Java plan type for Maven/Gradle projects
 allowed-tools: Read, Bash
 domain:
-  goals_agent: cui-java-expert:java-solution-plan-agent
+  solution_outline_agent: cui-java-expert:java-solution-outline-agent
   plan_agent: cui-java-expert:java-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
@@ -29,7 +29,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `goals_agent` | `cui-java-expert:java-solution-plan-agent` | Decomposes request into goals |
+| `solution_outline_agent` | `cui-java-expert:java-solution-outline-agent` | Decomposes request into goals |
 | `plan_agent` | `cui-java-expert:java-plan-agent` | Creates tasks from goals |
 | `verification_command` | `/builder:builder-build-and-fix` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
@@ -63,7 +63,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 ## Agent Behavior
 
-### java-solution-plan-agent
+### java-solution-outline-agent
 
 Analyzes Java codebase and creates goals with:
 - Class/interface design decisions

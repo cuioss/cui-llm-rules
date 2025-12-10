@@ -3,7 +3,7 @@ name: plan-type-{{NAME}}
 description: Custom plan-type for {{DESCRIPTION}}
 allowed-tools: Read, Bash
 domain:
-  goals_agent: {{GOALS_AGENT}}
+  solution_outline_agent: {{SOLUTION_OUTLINE_AGENT}}
   plan_agent: {{PLAN_AGENT}}
   verification_command: {{VERIFICATION_COMMAND}}
   pr_workflow: false
@@ -32,7 +32,7 @@ Use this plan-type when:
 
 | Field | Value |
 |-------|-------|
-| `goals_agent` | {{GOALS_AGENT}} |
+| `solution_outline_agent` | {{SOLUTION_OUTLINE_AGENT}} |
 | `plan_agent` | {{PLAN_AGENT}} |
 | `verification_command` | {{VERIFICATION_COMMAND}} |
 | `pr_workflow` | false |
@@ -90,13 +90,13 @@ python3 .plan/execute-script.py planning:manage-config:manage-config set \
    ├─ Loads this skill
    ├─ Reads domain: frontmatter
    │
-   ├─ Task: {{GOALS_AGENT}}  → Creates goals from request
+   ├─ Task: {{SOLUTION_OUTLINE_AGENT}}  → Creates goals from request
    └─ Task: {{PLAN_AGENT}}   → Creates tasks from goals
 ```
 
 ### Generic Fallback
 
-If `goals_agent` is `null`, the command falls back to `plan-refine-agent` for inline goal/task creation.
+If `solution_outline_agent` is `null`, the command falls back to `plan-refine-agent` for inline goal/task creation.
 
 ---
 

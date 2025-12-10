@@ -124,7 +124,7 @@ def test_domain_agents_get():
         ctx.write_marshal({
             "domain_agents": {
                 "planning:plan-type-java": {
-                    "goals_agent": "cui-java-expert:java-solution-plan-agent",
+                    "solution_outline_agent": "cui-java-expert:java-solution-outline-agent",
                     "plan_agent": "cui-java-expert:java-plan-agent"
                 }
             }
@@ -134,7 +134,7 @@ def test_domain_agents_get():
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
-        assert data['data']['goals_agent'] == 'cui-java-expert:java-solution-plan-agent'
+        assert data['data']['solution_outline_agent'] == 'cui-java-expert:java-solution-outline-agent'
 
 
 def test_domain_agents_get_unknown():
@@ -153,12 +153,12 @@ def test_domain_agents_set():
         run_script(SCRIPT_PATH, 'init')
         result = run_script(SCRIPT_PATH, 'domain-agents', 'set',
                            '--plan-type', 'planning:plan-type-java',
-                           '--goals-agent', 'test:goals-agent')
+                           '--solution-outline-agent', 'test:solution-outline-agent')
         assert result.success, f"Script failed: {result.stderr}"
 
         # Verify it was saved
         config = json.loads(ctx.marshal_path.read_text())
-        assert config['domain_agents']['planning:plan-type-java']['goals_agent'] == 'test:goals-agent'
+        assert config['domain_agents']['planning:plan-type-java']['solution_outline_agent'] == 'test:solution-outline-agent'
 
 
 def test_domain_agents_set_null():
@@ -167,17 +167,17 @@ def test_domain_agents_set_null():
         ctx.write_marshal({
             "domain_agents": {
                 "planning:plan-type-java": {
-                    "goals_agent": "some:agent",
+                    "solution_outline_agent": "some:agent",
                     "plan_agent": "some:other"
                 }
             }
         })
         result = run_script(SCRIPT_PATH, 'domain-agents', 'set',
                            '--plan-type', 'planning:plan-type-java',
-                           '--goals-agent', 'null')
+                           '--solution-outline-agent', 'null')
         assert result.success
         config = json.loads(ctx.marshal_path.read_text())
-        assert config['domain_agents']['planning:plan-type-java']['goals_agent'] is None
+        assert config['domain_agents']['planning:plan-type-java']['solution_outline_agent'] is None
 
 
 # =============================================================================
@@ -456,7 +456,7 @@ def test_custom_types_add():
         result = run_script(SCRIPT_PATH, 'custom-types', 'add',
                            '--name', 'security-review',
                            '--skill-path', '.claude/plan-types/security/SKILL.md',
-                           '--goals-agent', 'null',
+                           '--solution-outline-agent', 'null',
                            '--plan-agent', 'null')
         assert result.success
         config = json.loads(ctx.marshal_path.read_text())
@@ -469,7 +469,7 @@ def test_custom_types_add_duplicate():
     with TestContext() as ctx:
         ctx.write_marshal({
             "custom_plan_types": [
-                {"name": "security-review", "skill_path": "path", "goals_agent": None, "plan_agent": None}
+                {"name": "security-review", "skill_path": "path", "solution_outline_agent": None, "plan_agent": None}
             ]
         })
         result = run_script(SCRIPT_PATH, 'custom-types', 'add',
@@ -483,7 +483,7 @@ def test_custom_types_remove():
     with TestContext() as ctx:
         ctx.write_marshal({
             "custom_plan_types": [
-                {"name": "security-review", "skill_path": "path", "goals_agent": None, "plan_agent": None}
+                {"name": "security-review", "skill_path": "path", "solution_outline_agent": None, "plan_agent": None}
             ]
         })
         result = run_script(SCRIPT_PATH, 'custom-types', 'remove', '--name', 'security-review')

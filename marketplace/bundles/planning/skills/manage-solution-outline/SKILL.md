@@ -11,7 +11,7 @@ This skill provides structure guidelines, examples, and operations for `solution
 ## When to Load This Skill
 
 Load this skill in Step 0 when:
-- Creating a solution outline (goals agents: java-solution-plan, js-solution-plan, plugin-solution-plan, plan-refine)
+- Creating a solution outline (solution outline agents: java-solution-outline, js-solution-outline, plugin-solution-outline, plan-refine)
 - Reviewing or updating an existing solution outline
 - Validating solution document structure
 
@@ -181,9 +181,9 @@ def validate_deliverable(deliverable_str: str) -> tuple[int, str]:
 ## Integration
 
 **Loaded by**:
-- `cui-java-expert:java-solution-plan` agent
-- `cui-frontend-expert:js-solution-plan` agent
-- `cui-plugin-development-tools:plugin-solution-plan` agent
+- `cui-java-expert:java-solution-outline` agent
+- `cui-frontend-expert:js-solution-outline` agent
+- `cui-plugin-development-tools:plugin-solution-outline` agent
 - `planning:plan-refine` agent (for generic plans)
 
 **Scripts Used**:

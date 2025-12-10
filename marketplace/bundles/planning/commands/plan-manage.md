@@ -95,7 +95,7 @@ Example: `Skill: planning:plan-type-java`
 The skill's `domain:` frontmatter contains:
 ```yaml
 domain:
-  goals_agent: cui-java-expert:java-solution-plan-agent
+  solution_outline_agent: cui-java-expert:java-solution-outline-agent
   plan_agent: cui-java-expert:java-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
@@ -103,9 +103,9 @@ domain:
 
 **Step 3**: Route based on skill.domain:
 
-**If domain.goals_agent is NOT null** (domain-specific plan type):
+**If domain.solution_outline_agent is NOT null** (domain-specific plan type):
 ```
-Task: {domain.goals_agent}
+Task: {domain.solution_outline_agent}
   Input: plan_id={plan_id}
   Output: goals created
 
@@ -124,7 +124,7 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --detail "Domain agent from skill frontmatter"
 ```
 
-**If domain.goals_agent IS null** (generic plan type):
+**If domain.solution_outline_agent IS null** (generic plan type):
 ```
 Task: planning:plan-refine-agent
   Input: plan_id
@@ -290,9 +290,9 @@ If you discover issues or improvements during execution, record them:
 |-------|---------|
 | `planning:plan-init-agent` | Init phase execution |
 | `planning:plan-refine-agent` | Refine phase fallback (generic plans) |
-| `cui-java-expert:java-solution-plan-agent` | Java: Request → Goals |
+| `cui-java-expert:java-solution-outline-agent` | Java: Request → Goals |
 | `cui-java-expert:java-plan-agent` | Java: Goals → Tasks |
-| `cui-frontend-expert:js-solution-plan-agent` | JavaScript: Request → Goals |
+| `cui-frontend-expert:js-solution-outline-agent` | JavaScript: Request → Goals |
 | `cui-frontend-expert:js-plan-agent` | JavaScript: Goals → Tasks |
-| `cui-plugin-development-tools:plugin-solution-plan-agent` | Plugin: Request → Goals |
+| `cui-plugin-development-tools:plugin-solution-outline-agent` | Plugin: Request → Goals |
 | `cui-plugin-development-tools:plugin-plan-agent` | Plugin: Goals → Tasks |

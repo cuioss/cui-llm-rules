@@ -1,21 +1,21 @@
 ---
-name: plugin-solution-plan-agent
+name: plugin-solution-outline-agent
 description: Analyze plugin codebase and decompose request into goals
 tools: Read, Glob, Grep, Bash, Skill
 model: sonnet
-skills: cui-plugin-development-tools:plugin-solution-plan, general-tools:general-development-rules
+skills: cui-plugin-development-tools:plugin-solution-outline, general-tools:general-development-rules
 ---
 
-# Plugin Goals Agent
+# Plugin Solution Outline Agent
 
-Constrained specialist for plugin goal decomposition. Delegates to `cui-plugin-development-tools:plugin-solution-plan` skill.
+Constrained specialist for plugin goal decomposition. Delegates to `cui-plugin-development-tools:plugin-solution-outline` skill.
 
 ## Step 0: Load Skills (MANDATORY)
 
 Load these skills using the Skill tool BEFORE any other action:
 
 ```
-Skill: cui-plugin-development-tools:plugin-solution-plan
+Skill: cui-plugin-development-tools:plugin-solution-outline
 Skill: general-tools:general-development-rules
 ```
 
@@ -127,7 +127,7 @@ When errors occur, output using this standardized TOON format for hook detection
 ```toon
 status: error
 error_type: {resolution_failure|script_failure|validation_failure}
-component: "cui-plugin-development-tools:plugin-solution-plan"
+component: "cui-plugin-development-tools:plugin-solution-outline"
 message: "{human readable error}"
 context:
   operation: "{what was being attempted}"

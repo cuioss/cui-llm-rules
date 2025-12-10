@@ -3,7 +3,7 @@ name: plan-type-plugin
 description: Plugin development plan type for marketplace components
 allowed-tools: Read, Bash
 domain:
-  goals_agent: cui-plugin-development-tools:plugin-solution-plan-agent
+  solution_outline_agent: cui-plugin-development-tools:plugin-solution-outline-agent
   plan_agent: cui-plugin-development-tools:plugin-plan-agent
   verification_command: /cui-plugin-development-tools:plugin-doctor
   pr_workflow: false
@@ -28,7 +28,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `goals_agent` | `cui-plugin-development-tools:plugin-solution-plan-agent` | Decomposes request into goals |
+| `solution_outline_agent` | `cui-plugin-development-tools:plugin-solution-outline-agent` | Decomposes request into goals |
 | `plan_agent` | `cui-plugin-development-tools:plugin-plan-agent` | Creates tasks from goals |
 | `verification_command` | `/cui-plugin-development-tools:plugin-doctor` | Plugin validation |
 | `pr_workflow` | `false` | No PR (direct to main) |
@@ -124,7 +124,7 @@ python3 .plan/execute-script.py planning:manage-config:manage-config set \
 
 ## Agent Behavior
 
-### plugin-solution-plan-agent
+### plugin-solution-outline-agent
 
 Analyzes marketplace structure and creates goals with:
 - Component type (skill, command, agent, script)

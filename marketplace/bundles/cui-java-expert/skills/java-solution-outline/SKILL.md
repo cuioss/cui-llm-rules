@@ -1,5 +1,5 @@
 ---
-name: java-solution-plan
+name: java-solution-outline
 description: Analyze Java codebase and decompose request into goals
 allowed-tools: Read, Glob, Grep, Bash
 ---
@@ -129,7 +129,7 @@ On unexpected codebase state or ambiguity:
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name java-solution-plan \
+  --component-name java-solution-outline \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
@@ -254,7 +254,7 @@ If multiple classes match the name:
 
 ## Integration
 
-**Caller**: `cui-java-expert:java-solution-plan-agent`
+**Caller**: `cui-java-expert:java-solution-outline-agent`
 
 **Scripts Used**:
 - `planning:manage-plan-documents` - Create solution document

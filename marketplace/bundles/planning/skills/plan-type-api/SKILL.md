@@ -20,7 +20,7 @@ name: plan-type-{domain}
 description: {Domain} plan type
 allowed-tools: Read, Bash
 domain:
-  goals_agent: {bundle}:{goals-agent-name}    # Agent for request → goals
+  solution_outline_agent: {bundle}:{goals-agent-name}    # Agent for request → goals
   plan_agent: {bundle}:{plan-agent-name}      # Agent for goals → tasks
   verification_command: /{verification-cmd}   # Finalize verification
   pr_workflow: true|false                     # Create PR on finalize
@@ -33,8 +33,8 @@ domain:
 **Routing Flow**:
 1. `/plan-manage` command loads plan-type skill
 2. Command reads `domain:` section from skill frontmatter
-3. Command invokes `domain.goals_agent` and `domain.plan_agent` via Task tool
-4. For generic plans (`domain.goals_agent: null`), falls back to `plan-refine-agent`
+3. Command invokes `domain.solution_outline_agent` and `domain.plan_agent` via Task tool
+4. For generic plans (`domain.solution_outline_agent: null`), falls back to `plan-refine-agent`
 
 ## API Contract Overview
 
@@ -75,7 +75,7 @@ Adds domain-specific fields to references.toon AND finalize configuration to con
 
 Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
-### Goals Agent
+### Solution Outline Agent
 
 **Purpose**: Analyze request and create solution document (Request → Solution)
 
@@ -94,7 +94,7 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
 **Purpose**: Transform goals into executable tasks (Solution → TASKs)
 
-**Invoked by**: `/plan-manage action=refine` command (after goals agent completes)
+**Invoked by**: `/plan-manage action=refine` command (after solution outline agent completes)
 
 **Responsibilities**:
 - Read solution_outline.md for goals
@@ -108,11 +108,11 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
 ## Plan Types
 
-| Plan Type | Goals Agent | Plan Agent | Verification |
+| Plan Type | Solution Outline Agent | Plan Agent | Verification |
 |-----------|-------------|------------|--------------|
-| `java` | `cui-java-expert:java-solution-plan-agent` | `cui-java-expert:java-plan-agent` | `/builder:builder-build-and-fix` |
-| `javascript` | `cui-frontend-expert:js-solution-plan-agent` | `cui-frontend-expert:js-plan-agent` | `/builder:builder-build-and-fix system=npm` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-solution-plan-agent` | `cui-plugin-development-tools:plugin-plan-agent` | `/cui-plugin-development-tools:plugin-doctor` |
+| `java` | `cui-java-expert:java-solution-outline-agent` | `cui-java-expert:java-plan-agent` | `/builder:builder-build-and-fix` |
+| `javascript` | `cui-frontend-expert:js-solution-outline-agent` | `cui-frontend-expert:js-plan-agent` | `/builder:builder-build-and-fix system=npm` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-solution-outline-agent` | `cui-plugin-development-tools:plugin-plan-agent` | `/cui-plugin-development-tools:plugin-doctor` |
 | `generic` | None (inline) | None (inline) | None |
 
 ---
@@ -137,9 +137,9 @@ Plan-type skills must:
 - `plan-finalize` → reads config.toon directly (no operation call needed)
 
 **Domain Agents** (invoked by commands):
-- `cui-java-expert:java-solution-plan-agent` / `cui-java-expert:java-plan-agent`
-- `cui-frontend-expert:js-solution-plan-agent` / `cui-frontend-expert:js-plan-agent`
-- `cui-plugin-development-tools:plugin-solution-plan-agent` / `cui-plugin-development-tools:plugin-plan-agent`
+- `cui-java-expert:java-solution-outline-agent` / `cui-java-expert:java-plan-agent`
+- `cui-frontend-expert:js-solution-outline-agent` / `cui-frontend-expert:js-plan-agent`
+- `cui-plugin-development-tools:plugin-solution-outline-agent` / `cui-plugin-development-tools:plugin-plan-agent`
 
 **Data Layer** (used by domain agents):
 - `manage-plan-documents` (request/solution) / `manage-tasks` scripts

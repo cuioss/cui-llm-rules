@@ -6,7 +6,7 @@ Manages .plan/marshal.json with noun-verb subcommand pattern.
 
 Usage:
     marshal-config.py domain-agents get --plan-type planning:plan-type-java
-    marshal-config.py domain-agents set --plan-type planning:plan-type-java --goals-agent ...
+    marshal-config.py domain-agents set --plan-type planning:plan-type-java --solution-outline-agent ...
     marshal-config.py defaults get --field verification_required
     marshal-config.py defaults set --field create_pr --value true
     marshal-config.py rules match --file src/main/java/Foo.java
@@ -64,7 +64,7 @@ DEFAULTS = {
         {"pattern": "*", "plan_type": "planning:plan-type-generic", "description": "Default"}
     ],
     "domain_agents": {
-        "planning:plan-type-generic": {"goals_agent": None, "plan_agent": None}
+        "planning:plan-type-generic": {"solution_outline_agent": None, "plan_agent": None}
     },
     "defaults": {
         "create_pr": False,
@@ -141,10 +141,10 @@ def cmd_domain_agents(args) -> int:
     elif args.verb == 'set':
         plan_type = args.plan_type
         if plan_type not in domain_agents:
-            domain_agents[plan_type] = {"goals_agent": None, "plan_agent": None}
+            domain_agents[plan_type] = {"solution_outline_agent": None, "plan_agent": None}
 
-        if args.goals_agent:
-            domain_agents[plan_type]["goals_agent"] = args.goals_agent if args.goals_agent != 'null' else None
+        if args.solution_outline_agent:
+            domain_agents[plan_type]["solution_outline_agent"] = args.solution_outline_agent if args.solution_outline_agent != 'null' else None
         if args.plan_agent:
             domain_agents[plan_type]["plan_agent"] = args.plan_agent if args.plan_agent != 'null' else None
 
@@ -469,7 +469,7 @@ def cmd_custom_types(args) -> int:
         new_type = {
             "name": args.name,
             "skill_path": args.skill_path,
-            "goals_agent": args.goals_agent if args.goals_agent != 'null' else None,
+            "solution_outline_agent": args.solution_outline_agent if args.solution_outline_agent != 'null' else None,
             "plan_agent": args.plan_agent if args.plan_agent != 'null' else None
         }
         # Check for duplicates
@@ -607,7 +607,7 @@ Examples:
 
     da_set = da_sub.add_parser('set', help='Set agents for plan-type')
     da_set.add_argument('--plan-type', required=True, help='Plan type (bundle:skill)')
-    da_set.add_argument('--goals-agent', help='Goals agent (bundle:agent or null)')
+    da_set.add_argument('--solution-outline-agent', help='Goals agent (bundle:agent or null)')
     da_set.add_argument('--plan-agent', help='Plan agent (bundle:agent or null)')
 
     da_sub.add_parser('list', help='List all domain agent mappings')
@@ -689,7 +689,7 @@ Examples:
     ct_add = ct_sub.add_parser('add', help='Add custom type')
     ct_add.add_argument('--name', required=True, help='Type name')
     ct_add.add_argument('--skill-path', required=True, help='Path to SKILL.md')
-    ct_add.add_argument('--goals-agent', help='Goals agent (or null)')
+    ct_add.add_argument('--solution-outline-agent', help='Goals agent (or null)')
     ct_add.add_argument('--plan-agent', help='Plan agent (or null)')
 
     ct_remove = ct_sub.add_parser('remove', help='Remove custom type')

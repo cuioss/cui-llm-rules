@@ -97,8 +97,8 @@ python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle trans
 | Plan Type | Handler | Routing |
 |-----------|---------|---------|
 | `generic` | `plan-refine-agent` → this workflow | Command invokes agent via Task |
-| `java` | `java-solution-plan-agent`, `java-plan-agent` | Command reads skill frontmatter, invokes via Task |
-| `javascript` | `js-solution-plan-agent`, `js-plan-agent` | Command reads skill frontmatter, invokes via Task |
-| `plugin-development` | `plugin-solution-plan-agent`, `plugin-plan-agent` | Command reads skill frontmatter, invokes via Task |
+| `java` | `java-solution-outline-agent`, `java-plan-agent` | Command reads skill frontmatter, invokes via Task |
+| `javascript` | `js-solution-outline-agent`, `js-plan-agent` | Command reads skill frontmatter, invokes via Task |
+| `plugin-development` | `plugin-solution-outline-agent`, `plugin-plan-agent` | Command reads skill frontmatter, invokes via Task |
 
 **Key**: The `/plan-manage` command handles all routing. This skill is only invoked for generic plans.

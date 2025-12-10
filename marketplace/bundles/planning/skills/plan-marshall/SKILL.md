@@ -204,7 +204,7 @@ For each selected type, configure domain agents:
 # Example for Java
 python3 .plan/execute-script.py planning:manage-config:marshal-config domain-agents set \
   --plan-type planning:plan-type-java \
-  --goals-agent cui-java-expert:java-solution-plan-agent \
+  --solution-outline-agent cui-java-expert:java-solution-outline-agent \
   --plan-agent cui-java-expert:java-plan-agent
 ```
 
@@ -414,7 +414,7 @@ See Custom Plan-Type Wizard below.
 ```bash
 python3 .plan/execute-script.py planning:manage-config:marshal-config domain-agents set \
   --plan-type {plan_type} \
-  --goals-agent {goals_agent} \
+  --solution-outline-agent {solution_outline_agent} \
   --plan-agent {plan_agent}
 ```
 
@@ -463,7 +463,7 @@ Create custom plan-type:
 python3 .plan/execute-script.py planning:manage-config:marshal-config custom-types add \
   --name {name} \
   --skill-path .claude/plan-types/{name}/SKILL.md \
-  --goals-agent {goals_agent} \
+  --solution-outline-agent {solution_outline_agent} \
   --plan-agent {plan_agent}
 ```
 

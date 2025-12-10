@@ -87,7 +87,7 @@ Plan-type skills also declare domain agents in their `domain:` frontmatter secti
 1. User requests task
 2. `plan-init` determines plan type, creates base config/references, calls `configure`
 3. `/plan-manage` loads plan-type skill, reads `domain:` frontmatter
-4. `/plan-manage` invokes domain agents via Task tool (goals_agent, plan_agent)
+4. `/plan-manage` invokes domain agents via Task tool (solution_outline_agent, plan_agent)
 5. `plan-execute` reads plan files → executes tasks sequentially
 6. `plan-execute` reads finalize config directly from config.toon
 
@@ -97,15 +97,15 @@ Domain agents live in their expert bundles and are invoked by commands via Task 
 
 ```
 cui-java-expert/agents/
-├── java-solution-plan-agent.md         # Decomposes request into goals
+├── java-solution-outline-agent.md         # Decomposes request into goals
 └── java-plan-agent.md          # Transforms goals into tasks
 
 cui-frontend-expert/agents/
-├── js-solution-plan-agent.md           # Decomposes request into goals
+├── js-solution-outline-agent.md           # Decomposes request into goals
 └── js-plan-agent.md            # Transforms goals into tasks
 
 cui-plugin-development-tools/agents/
-├── plugin-solution-plan-agent.md       # Decomposes request into goals
+├── plugin-solution-outline-agent.md       # Decomposes request into goals
 └── plugin-plan-agent.md        # Transforms goals into tasks
 ```
 
@@ -117,18 +117,18 @@ Plan-type skills declare their domain agents in structured frontmatter:
 # Example: plan-type-java/SKILL.md
 ---
 domain:
-  goals_agent: cui-java-expert:java-solution-plan-agent
+  solution_outline_agent: cui-java-expert:java-solution-outline-agent
   plan_agent: cui-java-expert:java-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
 ---
 ```
 
-| Plan Type | Goals Agent | Plan Agent |
+| Plan Type | Solution Outline Agent | Plan Agent |
 |-----------|-------------|------------|
-| `java` | `cui-java-expert:java-solution-plan-agent` | `cui-java-expert:java-plan-agent` |
-| `javascript` | `cui-frontend-expert:js-solution-plan-agent` | `cui-frontend-expert:js-plan-agent` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-solution-plan-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
+| `java` | `cui-java-expert:java-solution-outline-agent` | `cui-java-expert:java-plan-agent` |
+| `javascript` | `cui-frontend-expert:js-solution-outline-agent` | `cui-frontend-expert:js-plan-agent` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-solution-outline-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
 | `generic` | N/A | N/A (uses plan-refine-agent fallback) |
 
 ### Routing Flow
@@ -142,7 +142,7 @@ domain:
        ├─ Skill: planning:plan-type-java
        │     └─ Read frontmatter.domain
        │
-       ├─ Task: {domain.goals_agent}
+       ├─ Task: {domain.solution_outline_agent}
        │     └─ Analyzes request, creates GOAL files
        │
        └─ Task: {domain.plan_agent}
@@ -249,11 +249,11 @@ The detail level ensures:
 
    Domain Agents (in expert bundles):
    ┌─────────────────────────────────────────────┐
-   │ cui-java-expert: java-solution-plan-agent           │
+   │ cui-java-expert: java-solution-outline-agent           │
    │                  java-plan-agent            │
-   │ cui-frontend-expert: js-solution-plan-agent         │
+   │ cui-frontend-expert: js-solution-outline-agent         │
    │                      js-plan-agent          │
-   │ cui-plugin-development-tools: plugin-solution-plan  │
+   │ cui-plugin-development-tools: plugin-solution-outline  │
    │                               plugin-plan   │
    └─────────────────────────────────────────────┘
 ```

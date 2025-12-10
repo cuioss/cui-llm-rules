@@ -34,18 +34,18 @@ The `/plan-manage` command uses **skill-based routing**:
 2. Reads `domain:` frontmatter for agent references
 3. Invokes domain agents directly via Task tool
 
-**This skill is the fallback** when plan-type has `domain.goals_agent: null` (generic plans).
+**This skill is the fallback** when plan-type has `domain.solution_outline_agent: null` (generic plans).
 
 ```
 /plan-manage action=refine plan=X
   │
   ├─ Load plan-type skill, read domain: frontmatter
   │
-  ├─ If domain.goals_agent is NOT null:
-  │    → Task: {skill.domain.goals_agent}
+  ├─ If domain.solution_outline_agent is NOT null:
+  │    → Task: {skill.domain.solution_outline_agent}
   │    → Task: {skill.domain.plan_agent}
   │
-  └─ If domain.goals_agent IS null (generic):
+  └─ If domain.solution_outline_agent IS null (generic):
        → Task: plan-refine-agent
          → Skill: plan-refine ← THIS SKILL
            → Write tool → solution_outline.md (direct)

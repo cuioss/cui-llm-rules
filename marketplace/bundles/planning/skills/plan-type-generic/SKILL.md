@@ -3,7 +3,7 @@ name: plan-type-generic
 description: Generic plan type for documentation, config, and quick fixes
 allowed-tools: Read, Bash
 domain:
-  goals_agent: null
+  solution_outline_agent: null
   plan_agent: null
   verification_command: null
   pr_workflow: false
@@ -27,13 +27,13 @@ The `domain:` frontmatter indicates no domain agents (generic plans use inline r
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `goals_agent` | `null` | No domain agent - use plan-refine-agent |
+| `solution_outline_agent` | `null` | No domain agent - use plan-refine-agent |
 | `plan_agent` | `null` | No domain agent - use plan-refine-agent |
 | `verification_command` | `null` | No verification required |
 | `pr_workflow` | `false` | No PR (direct to main) |
 | `standards` | `[]` | No domain-specific standards |
 
-When `goals_agent` is `null`, the command falls back to `planning:plan-refine-agent` for inline goal/task creation.
+When `solution_outline_agent` is `null`, the command falls back to `planning:plan-refine-agent` for inline goal/task creation.
 
 ---
 
@@ -56,7 +56,7 @@ When `goals_agent` is `null`, the command falls back to `planning:plan-refine-ag
 
 ## Fallback Behavior
 
-Since `goals_agent` and `plan_agent` are `null`, the `/plan-manage` command falls back to `planning:plan-refine-agent` for the refine phase.
+Since `solution_outline_agent` and `plan_agent` are `null`, the `/plan-manage` command falls back to `planning:plan-refine-agent` for the refine phase.
 
 The plan-refine-agent provides simple inline refinement:
 - Creates 1:1 goal per request item with minimal transformation

@@ -35,7 +35,7 @@ Stay in your lane:
 - You handle ONLY generic plans using inline goal-to-task transformation
 
 **CRITICAL - NO DOMAIN AGENT DELEGATION**:
-- Do NOT use Task tool to invoke domain agents (e.g., plugin-solution-plan-agent)
+- Do NOT use Task tool to invoke domain agents (e.g., plugin-solution-outline-agent)
 - Do NOT use Skill tool to load agents (agents are loaded via Task, not Skill)
 - If plan_type is domain-specific, return an error: "Domain-specific plans must be refined via /plan-manage command"
 
@@ -54,7 +54,7 @@ These constraints apply EVEN IF skill loading fails:
 - Execute workflow steps without skill loaded
 
 ### MUST NOT - Agent Delegation (Platform Limitation)
-- Use `Task` tool to invoke domain agents (e.g., `Task: plugin-solution-plan-agent`) - WILL FAIL
+- Use `Task` tool to invoke domain agents (e.g., `Task: plugin-solution-outline-agent`) - WILL FAIL
 - Use `Skill` tool to load agents (agents are NOT skills)
 - Handle domain-specific plan types (Java, JavaScript, Plugin) - return error instead
 

@@ -1,5 +1,5 @@
 ---
-name: js-solution-plan
+name: js-solution-outline
 description: Analyze JavaScript codebase and decompose request into goals
 allowed-tools: Read, Glob, Grep, Bash
 ---
@@ -130,7 +130,7 @@ On unexpected codebase state or ambiguity:
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name js-solution-plan \
+  --component-name js-solution-outline \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
@@ -254,7 +254,7 @@ If multiple files match the name:
 
 ## Integration
 
-**Caller**: `cui-frontend-expert:js-solution-plan-agent`
+**Caller**: `cui-frontend-expert:js-solution-outline-agent`
 
 **Scripts Used**:
 - `planning:manage-plan-documents` - Create solution document

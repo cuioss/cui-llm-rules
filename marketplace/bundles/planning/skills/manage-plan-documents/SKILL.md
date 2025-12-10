@@ -222,9 +222,9 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
   --body "$BODY"
 ```
 
-### With domain goals agents (java-solution-plan, js-solution-plan, plugin-solution-plan)
+### With domain solution outline agents (java-solution-outline, js-solution-outline, plugin-solution-outline)
 
-Domain goals agents read the request document:
+Domain solution outline agents read the request document:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \

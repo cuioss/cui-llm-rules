@@ -22,12 +22,12 @@
     "./skills/plugin-doctor",
     "./skills/plugin-maintain",
     "./skills/plugin-script-architecture",
-    "./skills/plugin-solution-plan",
+    "./skills/plugin-solution-outline",
     "./skills/plugin-plan",
     "./skills/verification"
   ],
   "agents": [
-    "./agents/plugin-solution-plan-agent.md",
+    "./agents/plugin-solution-outline-agent.md",
     "./agents/plugin-plan-agent.md"
   ]
 }
