@@ -1,14 +1,14 @@
 ---
 name: java-task-plan
-description: Create implementation tasks from goals with direct storage
+description: Create implementation tasks from deliverables with direct storage
 allowed-tools: Read, Bash
 ---
 
-# Java Plan Skill
+# Java Task Plan Skill
 
-**Role**: Domain planning skill for Java implementation tasks. Transforms solution goals into executable tasks by applying Java-specific knowledge and writing TASKs directly.
+**Role**: Domain planning skill for Java implementation tasks. Transforms solution outline deliverables into executable tasks by applying Java-specific knowledge and writing TASKs directly.
 
-**Key Pattern**: Reads goals from `solution_outline.md` via `manage-plan-documents`, creates tasks via `manage-tasks` script.
+**Key Pattern**: Reads deliverables from `solution_outline.md` via `manage-solution-outline`, creates tasks via `manage-tasks` script.
 
 ## Operation: plan
 
@@ -17,29 +17,27 @@ allowed-tools: Read, Bash
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `goal_number` | number | No | Single goal number (omit to process all goals) |
+| `deliverable_number` | number | No | Single deliverable number (omit to process all deliverables) |
 
 **Process**:
 
 ### Step 1: Load Solution Document
 
-Read the solution document to get all goals:
+Read the solution document to get all deliverables:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
-  solution read \
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
+  list-deliverables \
   --plan-id {plan_id}
 ```
 
-The output contains:
-- `sections.goals` - Markdown with numbered goal sections (`### 1.`, `### 2.`, etc.)
-- Parse each `### N. {Title}` section to extract individual goals
+The output contains an array of deliverables with `number` and `title` fields. Use `read` for full document content if needed.
 
-### Step 2: For Each Goal
+### Step 2: For Each Deliverable
 
-#### 2a. Analyze Goal Content
+#### 2a. Analyze Deliverable Content
 
-Parse the goal body to determine:
+Parse the deliverable body to determine:
 - Component type and target path
 - Task granularity (single task or multiple)
 - Java-specific implementation steps
@@ -64,11 +62,11 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
     "Verify build passes"
 ```
 
-**Note**: The `--goal` parameter is now numeric (e.g., `--goal 1`) referencing the goal section number in solution_outline.md.
+**Note**: The `--goal` parameter is numeric (e.g., `--goal 1`) referencing the deliverable section number in solution_outline.md.
 
 #### 2c. Record Issues as Lessons
 
-On ambiguous goal or planning issues:
+On ambiguous deliverable or planning issues:
 
 ```bash
 python3 .plan/execute-script.py pm-core:lessons-learned:manage-lesson add \
@@ -102,7 +100,7 @@ lessons_recorded: {count}
 
 ### Single Component Task
 
-One goal → one task when:
+One deliverable → one task when:
 - Single class/interface to implement
 - Localized change in one file
 - Simple feature addition
@@ -115,7 +113,7 @@ One goal → one task when:
 
 ### Multi-Step Component Task
 
-One goal → multiple tasks when:
+One deliverable → multiple tasks when:
 - Implementation + tests require separation
 - Config + service + controller pattern
 - Refactoring with multiple phases
@@ -175,7 +173,7 @@ One goal → multiple tasks when:
 
 ## Task Dependencies
 
-When creating multiple tasks from one goal, consider:
+When creating multiple tasks from one deliverable, consider:
 
 | Dependency Type | Ordering |
 |-----------------|----------|
@@ -209,16 +207,16 @@ Run /pm-builder:builder-build-and-fix
 
 ## Error Handling
 
-### Ambiguous Goal
+### Ambiguous Deliverable
 
-If goal doesn't clearly indicate:
+If deliverable doesn't clearly indicate:
 - Target path → Ask for clarification
 - Component type → Infer from context or ask
 - Module placement → Check project structure
 
 ### Missing Information
 
-If goal lacks detail:
+If deliverable lacks detail:
 - Generate task with placeholder
 - Add lesson-learned for future reference
 - Note ambiguity in task description
@@ -229,10 +227,10 @@ If goal lacks detail:
 
 **Caller**: `pm-java:java-task-plan-agent`
 
-**Scripts Used**:
-- `pm-workflow:manage-solution-outline` - Read solution and list deliverables
-- `pm-workflow:manage-tasks` - Create tasks
-- `pm-core:lessons-learned` - Record lessons on issues
+**Script Notations** (use EXACTLY as shown):
+- `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables (list-deliverables, read)
+- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --goal N --title --steps)
+- `pm-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced in Task Steps**:
 - `pm-java:cui-java-core` - Core Java patterns
