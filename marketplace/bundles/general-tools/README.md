@@ -41,7 +41,7 @@ These utilities are independent tools that can be used across different CUI proj
    - Maintains complete reference trails
    - Invoked when user requests research, best practices, or topic investigation
 
-### Commands (8 commands)
+### Commands (7 commands)
 
 1. **plan-marshall** - Script executor generator
    - Generates `.plan/execute-script.py` with embedded script mappings
@@ -81,11 +81,6 @@ These utilities are independent tools that can be used across different CUI proj
    - Regenerates PNG images
    - Removes orphaned diagrams with approval
    - Usage: `/tools-verify-architecture-diagrams [plantuml_dir] [push]`
-
-7. **discover-skill-scripts** - Script discovery and registration
-   - Discovers all skill scripts from installed plugins
-   - Generates `.plan/scripts-library.toon` with path mappings
-   - Usage: `/tools-discover-skill-scripts`
 
 ## Installation
 

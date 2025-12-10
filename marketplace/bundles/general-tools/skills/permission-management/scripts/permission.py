@@ -875,20 +875,30 @@ def analyze_settings_action(settings_path: Optional[str] = None) -> dict:
     return result
 
 
-def sync_script_permissions(scripts_file: str, target: str = "global") -> dict:
-    """Sync script permissions from scripts.local.json to settings."""
-    scripts_path = Path(scripts_file)
-    if not scripts_path.exists():
-        return {"error": f"Scripts file not found: {scripts_file}"}
+# Executor-only permission pattern
+EXECUTOR_PERMISSION = "Bash(python3 .plan/execute-script.py:*)"
+OVERLY_BROAD_PYTHON = "Bash(python3:*)"
 
-    try:
-        with open(scripts_path, 'r') as f:
-            scripts_data = json.load(f)
-    except json.JSONDecodeError as e:
-        return {"error": f"Invalid JSON in scripts file: {e}"}
 
-    new_permissions = scripts_data.get("permissions", [])
+def is_individual_script_permission(permission: str) -> bool:
+    """Check if permission is an individual marketplace script path permission."""
+    # Matches: Bash(python3 /path/to/marketplace/bundles/.../scripts/*:*)
+    return (
+        permission.startswith("Bash(python3 ") and
+        "/marketplace/bundles/" in permission and
+        "/scripts" in permission
+    )
 
+
+def ensure_executor_permission(target: str = "global", dry_run: bool = False) -> dict:
+    """Ensure the executor permission exists (executor-only pattern).
+
+    The executor pattern uses a single permission for all script execution:
+    - Bash(python3 .plan/execute-script.py:*)
+
+    This replaces the need for individual script path permissions since
+    the executor invokes scripts via subprocess (not checked by Claude Code).
+    """
     if target == "global":
         settings_path = get_global_settings_path()
     else:
@@ -897,32 +907,143 @@ def sync_script_permissions(scripts_file: str, target: str = "global") -> dict:
     settings = load_settings_path(settings_path)
     allow_list = settings["permissions"]["allow"]
 
-    old_script_permissions = [
-        p for p in allow_list
-        if "/marketplace/bundles/" in p and "/scripts" in p
-    ]
+    result = {
+        "executor_permission": EXECUTOR_PERMISSION,
+        "settings_file": str(settings_path),
+        "dry_run": dry_run
+    }
 
-    for old_perm in old_script_permissions:
-        allow_list.remove(old_perm)
+    if EXECUTOR_PERMISSION in allow_list:
+        result["action"] = "already_exists"
+        result["success"] = True
+        return result
 
-    added = 0
-    for perm in new_permissions:
-        if perm not in allow_list:
-            allow_list.append(perm)
-            added += 1
-
-    allow_list.sort()
-
-    if save_settings(str(settings_path), settings):
-        return {
-            "success": True,
-            "settings_file": str(settings_path),
-            "removed": len(old_script_permissions),
-            "added": added,
-            "total_permissions": len(allow_list)
-        }
+    if not dry_run:
+        allow_list.append(EXECUTOR_PERMISSION)
+        allow_list.sort()
+        if save_settings(str(settings_path), settings):
+            result["action"] = "added"
+            result["success"] = True
+        else:
+            result["error"] = "Failed to save settings"
+            result["success"] = False
     else:
-        return {"error": "Failed to save settings"}
+        result["action"] = "would_add"
+        result["success"] = True
+
+    return result
+
+
+def cleanup_script_permissions(target: str = "global", dry_run: bool = False,
+                                remove_broad_python: bool = False) -> dict:
+    """Remove redundant individual script permissions (executor-only pattern).
+
+    With the executor pattern, individual script permissions are unnecessary:
+    - Removes: Bash(python3 /path/to/marketplace/bundles/.../scripts/*:*)
+    - Optionally removes: Bash(python3:*) (overly broad)
+
+    The executor permission handles all script execution via subprocess.
+    """
+    if target == "global":
+        settings_path = get_global_settings_path()
+    else:
+        settings_path = get_project_settings_path_for_write()
+
+    settings = load_settings_path(settings_path)
+    allow_list = settings["permissions"]["allow"]
+
+    # Find permissions to remove
+    individual_scripts = [p for p in allow_list if is_individual_script_permission(p)]
+    broad_python = OVERLY_BROAD_PYTHON in allow_list and remove_broad_python
+
+    result = {
+        "settings_file": str(settings_path),
+        "individual_script_permissions": individual_scripts,
+        "individual_count": len(individual_scripts),
+        "broad_python_found": OVERLY_BROAD_PYTHON in allow_list,
+        "broad_python_removed": broad_python,
+        "dry_run": dry_run
+    }
+
+    if not individual_scripts and not broad_python:
+        result["action"] = "nothing_to_remove"
+        result["success"] = True
+        return result
+
+    if not dry_run:
+        # Remove individual script permissions
+        for perm in individual_scripts:
+            allow_list.remove(perm)
+
+        # Optionally remove overly broad python permission
+        if broad_python:
+            allow_list.remove(OVERLY_BROAD_PYTHON)
+
+        if save_settings(str(settings_path), settings):
+            result["action"] = "removed"
+            result["success"] = True
+            result["total_removed"] = len(individual_scripts) + (1 if broad_python else 0)
+        else:
+            result["error"] = "Failed to save settings"
+            result["success"] = False
+    else:
+        result["action"] = "would_remove"
+        result["success"] = True
+        result["total_would_remove"] = len(individual_scripts) + (1 if broad_python else 0)
+
+    return result
+
+
+def migrate_to_executor_pattern(target: str = "global", dry_run: bool = False,
+                                 remove_broad_python: bool = False) -> dict:
+    """Full migration to executor-only permission pattern.
+
+    Combines:
+    1. ensure_executor_permission - adds executor permission
+    2. cleanup_script_permissions - removes redundant individual permissions
+
+    Result: Single permission for all script execution instead of N permissions.
+    """
+    # Step 1: Ensure executor permission exists
+    ensure_result = ensure_executor_permission(target, dry_run)
+    if not ensure_result.get("success"):
+        return {"error": ensure_result.get("error"), "step": "ensure_executor"}
+
+    # Step 2: Cleanup redundant permissions
+    cleanup_result = cleanup_script_permissions(target, dry_run, remove_broad_python)
+    if not cleanup_result.get("success"):
+        return {"error": cleanup_result.get("error"), "step": "cleanup"}
+
+    return {
+        "success": True,
+        "settings_file": ensure_result["settings_file"],
+        "dry_run": dry_run,
+        "executor": {
+            "permission": EXECUTOR_PERMISSION,
+            "action": ensure_result["action"]
+        },
+        "cleanup": {
+            "individual_removed": cleanup_result.get("total_removed", 0) if not dry_run
+                                  else cleanup_result.get("total_would_remove", 0),
+            "individual_permissions": cleanup_result["individual_script_permissions"],
+            "broad_python_removed": cleanup_result["broad_python_removed"]
+        },
+        "summary": f"Migrated to executor-only pattern: 1 permission replaces {cleanup_result['individual_count']} individual script permissions"
+    }
+
+
+def sync_script_permissions(scripts_file: str, target: str = "global") -> dict:
+    """DEPRECATED: Use migrate_to_executor_pattern instead.
+
+    This function is kept for backward compatibility but now just ensures
+    the executor permission exists. Individual script permissions are no
+    longer needed with the executor pattern.
+    """
+    # Just ensure executor permission exists - ignore scripts_file
+    result = ensure_executor_permission(target, dry_run=False)
+    result["deprecated"] = True
+    result["migration_note"] = "sync-scripts is deprecated. Use 'migrate-executor' action instead."
+    return result
 
 
 def add_permission_action(permission: str, target: str = "project") -> dict:
@@ -1006,15 +1127,28 @@ def ensure_permissions_action(permissions: list, target: str = "global") -> dict
 def cmd_apply(args) -> int:
     """Handle apply subcommand."""
     result = {}
+    dry_run = getattr(args, 'dry_run', False)
 
     if args.action == "analyze":
         result = analyze_settings_action(args.settings_file)
 
     elif args.action == "sync-scripts":
-        if not args.scripts_file:
-            result = {"error": "--scripts-file required for sync-scripts action"}
-        else:
-            result = sync_script_permissions(args.scripts_file, args.target)
+        # Deprecated - now just ensures executor permission
+        result = sync_script_permissions(
+            args.scripts_file if args.scripts_file else "",
+            args.target
+        )
+
+    elif args.action == "ensure-executor":
+        result = ensure_executor_permission(args.target, dry_run)
+
+    elif args.action == "cleanup-scripts":
+        remove_broad = getattr(args, 'remove_broad_python', False)
+        result = cleanup_script_permissions(args.target, dry_run, remove_broad)
+
+    elif args.action == "migrate-executor":
+        remove_broad = getattr(args, 'remove_broad_python', False)
+        result = migrate_to_executor_pattern(args.target, dry_run, remove_broad)
 
     elif args.action == "add":
         if not args.permission:
@@ -1086,15 +1220,21 @@ def main():
     p_fix.set_defaults(func=cmd_apply_fixes)
 
     # apply subcommand (manage permissions)
-    p_app = subparsers.add_parser('apply', help='Manage permissions (analyze, sync-scripts, add, remove, ensure)')
-    p_app.add_argument('--action', required=True, choices=['analyze', 'sync-scripts', 'add', 'remove', 'ensure'],
+    p_app = subparsers.add_parser('apply', help='Manage permissions (executor pattern, add, remove, ensure)')
+    p_app.add_argument('--action', required=True,
+                       choices=['analyze', 'sync-scripts', 'ensure-executor', 'cleanup-scripts',
+                                'migrate-executor', 'add', 'remove', 'ensure'],
                        help='Action to perform')
     p_app.add_argument('--settings-file', help='Path to settings file (for analyze)')
-    p_app.add_argument('--scripts-file', help='Path to scripts.local.json (for sync-scripts)')
+    p_app.add_argument('--scripts-file', help='DEPRECATED: Path to scripts file (ignored)')
     p_app.add_argument('--permission', help='Single permission (for add/remove)')
     p_app.add_argument('--permissions', help='Comma-separated permissions (for ensure)')
     p_app.add_argument('--target', default='global', choices=['global', 'project'],
                        help='Target settings file (default: global)')
+    p_app.add_argument('--dry-run', action='store_true',
+                       help='Show what would be changed without modifying files')
+    p_app.add_argument('--remove-broad-python', action='store_true',
+                       help='Also remove Bash(python3:*) wildcard (for cleanup-scripts/migrate-executor)')
     p_app.set_defaults(func=cmd_apply)
 
     args = parser.parse_args()

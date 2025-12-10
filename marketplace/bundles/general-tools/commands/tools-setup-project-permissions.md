@@ -29,7 +29,6 @@ Skill: general-tools:permission-management
 global_settings = ~/.claude/settings.json
 local_settings = .claude/settings.json
 marketplace_json = marketplace/marketplace.json
-scripts_library = .plan/scripts-library.toon
 ```
 
 ### Step 3: Analyze Permissions
@@ -89,17 +88,15 @@ python3 .plan/execute-script.py general-tools:permission-management:permission e
   --marketplace-json {marketplace_json}
 ```
 
-**C. Sync script permissions to global (from scripts-library.toon):**
+**C. Ensure executor permission:**
 
-If `scripts_library` exists, sync script permissions:
 ```bash
 python3 .plan/execute-script.py general-tools:permission-management:permission apply \
-  --action sync-scripts \
-  --scripts-file {scripts_library} \
+  --action ensure-executor \
   --target global
 ```
 
-This removes stale script permissions and adds current ones from the discovered scripts library.
+Adds `Bash(python3 .plan/execute-script.py:*)` if not present.
 
 **D. Apply safe fixes to local:**
 ```bash
@@ -127,7 +124,7 @@ Local Settings ({local_settings}):
 
 Global Settings ({global_settings}):
   - Marketplace wildcards added: {wildcards_added}
-  - Script permissions synced: {scripts_removed} removed, {scripts_added} added
+  - Executor permission: {executor_status}
   - Duplicates removed: {global_duplicates}
   - Defaults added: {global_defaults}
 
@@ -154,6 +151,6 @@ Subcommands: `detect-redundant`, `detect-suspicious`, `consolidate`, `ensure-wil
 
 ## Related
 
-- `/tools-discover-skill-scripts` - Discovers scripts and generates `scripts-library.toon`
 - `/tools-audit-permission-wildcards` - Audits marketplace for permission wildcards
 - `general-tools:permission-management` - Permission validation and operations
+- `general-tools:script-executor` - Executor pattern for script invocation

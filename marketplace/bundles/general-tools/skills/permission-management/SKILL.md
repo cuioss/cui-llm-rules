@@ -249,9 +249,67 @@ local_settings: .claude/settings.json
 
 ---
 
-#### Operation: sync-script-permissions
+#### Operation: ensure-executor-permission
 
-Generate and sync script permissions from marketplace inventory.
+Ensure the executor permission exists without removing other permissions.
+
+**Script**: `permission.py apply --action ensure-executor`
+
+**Input**:
+```bash
+python3 .plan/execute-script.py general-tools:permission-management:permission apply \
+  --action ensure-executor \
+  --target global \
+  [--dry-run]
+```
+
+**Output JSON**:
+```json
+{
+  "executor_permission": "Bash(python3 .plan/execute-script.py:*)",
+  "action": "added",
+  "success": true
+}
+```
+
+**Usage**: Add executor permission without cleanup. Use when you want to enable the executor pattern incrementally.
+
+---
+
+#### Operation: cleanup-script-permissions
+
+Remove redundant individual script permissions (cleanup only).
+
+**Script**: `permission.py apply --action cleanup-scripts`
+
+**Input**:
+```bash
+python3 .plan/execute-script.py general-tools:permission-management:permission apply \
+  --action cleanup-scripts \
+  --target global \
+  [--dry-run] \
+  [--remove-broad-python]
+```
+
+**Output JSON**:
+```json
+{
+  "individual_count": 35,
+  "individual_script_permissions": ["Bash(python3 /path/to/scripts/*:*)", "..."],
+  "broad_python_found": true,
+  "broad_python_removed": false,
+  "action": "removed",
+  "total_removed": 35
+}
+```
+
+**Usage**: Remove individual script permissions that are redundant when using the executor pattern.
+
+---
+
+#### Operation: generate-wildcards (DEPRECATED for scripts)
+
+Generate skill/command wildcards from marketplace inventory.
 
 **Script**: `permission.py generate-wildcards`
 
@@ -273,7 +331,7 @@ echo '{inventory_json}' | python3 .plan/execute-script.py general-tools:permissi
 }
 ```
 
-**Usage**: Generate required permission wildcards from marketplace inventory.
+**Usage**: Generate skill/command wildcards. Script permissions are NO LONGER generated - use executor pattern instead.
 
 ---
 
@@ -417,8 +475,9 @@ python3 .plan/execute-script.py general-tools:permission-management:permission a
 
 | Script | Subcommand | Purpose |
 |--------|------------|---------|
-| `permission.py` | `generate-wildcards` | Analyzes inventory JSON and generates permission wildcards |
-| `permission.py` | `apply` | Applies permission changes to settings files |
+| `permission.py` | `apply --action ensure-executor` | Ensures executor permission exists |
+| `permission.py` | `apply --action cleanup-scripts` | Removes redundant individual script permissions |
+| `permission.py` | `generate-wildcards` | Generates skill/command wildcards from inventory |
 | `permission.py` | `detect-redundant` | Detects redundant permissions between global/local |
 | `permission.py` | `detect-suspicious` | Detects security anti-patterns in permissions |
 | `permission.py` | `consolidate` | Consolidates timestamped build output permissions |

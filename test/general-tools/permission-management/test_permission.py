@@ -515,6 +515,143 @@ class TestApplyFixes(ScriptTestCase):
 
 
 # =============================================================================
+# Tests for executor pattern actions
+# =============================================================================
+
+class TestExecutorPattern(ScriptTestCase):
+    """Test permission.py executor pattern actions."""
+
+    bundle = 'general-tools'
+    skill = 'permission-management'
+    script = 'permission.py'
+
+    def test_ensure_executor_adds_permission(self):
+        """Should add executor permission when missing."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": ["Bash(git:*)"],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'apply',
+            '--action', 'ensure-executor',
+            '--target', 'project',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertTrue(data.get('success'))
+        self.assertEqual(data.get('action'), 'added')
+
+        settings = json.loads(settings_file.read_text())
+        self.assertIn('Bash(python3 .plan/execute-script.py:*)', settings['permissions']['allow'])
+
+    def test_ensure_executor_already_exists(self):
+        """Should report when executor permission already exists."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": ["Bash(python3 .plan/execute-script.py:*)"],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'apply',
+            '--action', 'ensure-executor',
+            '--target', 'project',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertTrue(data.get('success'))
+        self.assertEqual(data.get('action'), 'already_exists')
+
+    def test_cleanup_scripts_removes_individual_permissions(self):
+        """Should remove individual script permissions."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": [
+                    "Bash(git:*)",
+                    "Bash(python3 /path/to/marketplace/bundles/test/skills/foo/scripts/*:*)",
+                    "Bash(python3 /path/to/marketplace/bundles/test/skills/bar/scripts/*:*)"
+                ],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'apply',
+            '--action', 'cleanup-scripts',
+            '--target', 'project',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertTrue(data.get('success'))
+        self.assertEqual(data.get('individual_count'), 2)
+
+        settings = json.loads(settings_file.read_text())
+        self.assertEqual(len(settings['permissions']['allow']), 1)
+        self.assertIn('Bash(git:*)', settings['permissions']['allow'])
+
+    def test_migrate_executor_full_migration(self):
+        """Should add executor and remove individual permissions."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": [
+                    "Bash(git:*)",
+                    "Bash(python3 /path/to/marketplace/bundles/test/skills/foo/scripts/*:*)"
+                ],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'apply',
+            '--action', 'migrate-executor',
+            '--target', 'project',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertTrue(data.get('success'))
+        self.assertIn('executor', data)
+        self.assertIn('cleanup', data)
+
+        settings = json.loads(settings_file.read_text())
+        self.assertIn('Bash(python3 .plan/execute-script.py:*)', settings['permissions']['allow'])
+        self.assertIn('Bash(git:*)', settings['permissions']['allow'])
+        # Individual script permission should be removed
+        self.assertEqual(len(settings['permissions']['allow']), 2)
+
+
+# =============================================================================
 # Tests for apply subcommand
 # =============================================================================
 
@@ -660,6 +797,7 @@ if __name__ == '__main__':
     suite.addTests(loader.loadTestsFromTestCase(TestConsolidate))
     suite.addTests(loader.loadTestsFromTestCase(TestEnsureWildcards))
     suite.addTests(loader.loadTestsFromTestCase(TestApplyFixes))
+    suite.addTests(loader.loadTestsFromTestCase(TestExecutorPattern))
     suite.addTests(loader.loadTestsFromTestCase(TestApply))
 
     runner = unittest.TextTestRunner(verbosity=2)
