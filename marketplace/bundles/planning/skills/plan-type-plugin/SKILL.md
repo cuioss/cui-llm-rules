@@ -42,7 +42,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 ### Step 1: Add References Fields
 
-Use `planning:manage-references` to add domain-specific fields:
+Use `planning:manage-references:manage-references` to add domain-specific fields:
 
 ```bash
 # Set target_bundle (populated during specify)
@@ -72,7 +72,7 @@ python3 .plan/execute-script.py planning:manage-references:manage-references set
 
 ### Step 2: Add Config Fields
 
-Use `planning:manage-config` to add finalize configuration:
+Use `planning:manage-config:manage-config` to add finalize configuration:
 
 ```bash
 # Set create_pr
