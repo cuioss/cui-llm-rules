@@ -48,7 +48,7 @@ Determine whether to run wizard or menu based on existing files.
 **BOOTSTRAP**: Since execute-script.py may not exist yet, use DIRECT Python call:
 
 ```bash
-python3 marketplace/bundles/plan-marshall-core/skills/plan-marshall/scripts/determine-mode.py --plan-dir .plan
+python3 marketplace/bundles/pm-core/skills/plan-marshall/scripts/determine-mode.py --plan-dir .plan
 ```
 
 **Output (TOON)**:
@@ -80,7 +80,7 @@ Configure `.gitignore` for `.plan/` directory.
 **BOOTSTRAP**: Use DIRECT Python call:
 
 ```bash
-python3 marketplace/bundles/plan-marshall-core/skills/plan-marshall/scripts/gitignore-setup.py --project-root .
+python3 marketplace/bundles/pm-core/skills/plan-marshall/scripts/gitignore-setup.py --project-root .
 ```
 
 **Output (TOON)**:
@@ -104,7 +104,7 @@ entries_added	2
 
 ```bash
 # Direct call - no executor dependency
-python3 marketplace/bundles/pm-plugins/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
+python3 marketplace/bundles/pm-core/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
   --scope marketplace \
   --resource-types scripts
 ```
@@ -322,7 +322,7 @@ AskUserQuestion:
 ### Regenerate Executor
 
 ```bash
-python3 marketplace/bundles/pm-plugins/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
+python3 marketplace/bundles/pm-core/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
   --scope marketplace \
   --resource-types scripts
 ```

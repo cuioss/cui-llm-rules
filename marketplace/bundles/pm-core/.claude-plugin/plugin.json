@@ -3,26 +3,26 @@
   "version": "1.0.0",
   "description": "Environment setup, permission management, and cross-cutting utilities",
   "skills": [
-    "diagnostic-patterns",
-    "file-operations-base",
-    "general-development-rules",
-    "json-file-operations",
-    "lessons-learned",
-    "manage-memories",
-    "marketplace-inventory",
-    "marketplace-sync",
-    "permission-doctor",
-    "permission-fix",
-    "plan-marshall",
-    "run-config",
-    "script-executor",
-    "toon-usage",
-    "web-permissions"
+    "./skills/diagnostic-patterns",
+    "./skills/file-operations-base",
+    "./skills/general-development-rules",
+    "./skills/json-file-operations",
+    "./skills/lessons-learned",
+    "./skills/manage-memories",
+    "./skills/marketplace-inventory",
+    "./skills/marketplace-sync",
+    "./skills/permission-doctor",
+    "./skills/permission-fix",
+    "./skills/plan-marshall",
+    "./skills/run-config",
+    "./skills/script-executor",
+    "./skills/toon-usage",
+    "./skills/web-permissions"
   ],
   "agents": [
-    "research-best-practices"
+    "./agents/research-best-practices.md"
   ],
   "commands": [
-    "plan-marshall"
+    "./commands/plan-marshall.md"
   ]
 }

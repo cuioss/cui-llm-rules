@@ -173,9 +173,19 @@ def add_default_permissions(allow_list: list[str]) -> list[str]:
     return added
 
 
+def resolve_settings_arg(args) -> str:
+    """Resolve settings path from --settings or --scope argument."""
+    if hasattr(args, 'settings') and args.settings:
+        return args.settings
+    if hasattr(args, 'scope') and args.scope:
+        return str(get_settings_path(args.scope))
+    return str(get_project_settings_path_for_write())
+
+
 def cmd_apply_fixes(args) -> int:
     """Handle apply-fixes subcommand."""
-    settings, error = load_settings(args.settings)
+    settings_path = resolve_settings_arg(args)
+    settings, error = load_settings(settings_path)
     if error:
         print(json.dumps({"error": error}))
         return EXIT_ERROR
@@ -209,11 +219,11 @@ def cmd_apply_fixes(args) -> int:
         "sorted": was_sorted,
         "changes_made": changes_made,
         "dry_run": args.dry_run,
-        "settings_path": args.settings
+        "settings_path": settings_path
     }
 
     if not args.dry_run and changes_made:
-        result["applied"] = save_settings(args.settings, settings)
+        result["applied"] = save_settings(settings_path, settings)
         if not result["applied"]:
             result["error"] = "Failed to save settings"
     else:
@@ -383,7 +393,8 @@ def generate_wildcard(parsed_permissions: list[dict]) -> str:
 
 def cmd_consolidate(args) -> int:
     """Handle consolidate subcommand."""
-    settings, error = load_settings(args.settings)
+    settings_path = resolve_settings_arg(args)
+    settings, error = load_settings(settings_path)
     if error:
         print(json.dumps({"error": error}))
         return EXIT_ERROR
@@ -418,7 +429,7 @@ def cmd_consolidate(args) -> int:
             "non_timestamped_kept": len(non_timestamped)
         },
         "dry_run": args.dry_run,
-        "settings_path": args.settings
+        "settings_path": settings_path
     }
 
     if not args.dry_run and result["consolidated"] > 0:
@@ -430,7 +441,7 @@ def cmd_consolidate(args) -> int:
                 allow_list.append(wildcard)
         allow_list.sort()
 
-        if save_settings(args.settings, settings):
+        if save_settings(settings_path, settings):
             result["applied"] = True
         else:
             result["error"] = "Failed to save settings"
@@ -548,7 +559,9 @@ def main():
 
     # apply-fixes subcommand
     p_fix = subparsers.add_parser('apply-fixes', help='Apply safe fixes to permission settings')
-    p_fix.add_argument('--settings', required=True, help='Path to settings file to fix')
+    p_fix_group = p_fix.add_mutually_exclusive_group(required=True)
+    p_fix_group.add_argument('--settings', help='Path to settings file to fix')
+    p_fix_group.add_argument('--scope', choices=['global', 'project'], help='Target scope (auto-resolves path)')
     p_fix.add_argument('--dry-run', action='store_true', help='Preview changes without modifying files')
     p_fix.set_defaults(func=cmd_apply_fixes)
 
@@ -575,7 +588,9 @@ def main():
 
     # consolidate subcommand
     p_con = subparsers.add_parser('consolidate', help='Consolidate timestamped permissions with wildcards')
-    p_con.add_argument('--settings', required=True, help='Path to settings file to analyze and modify')
+    p_con_group = p_con.add_mutually_exclusive_group(required=True)
+    p_con_group.add_argument('--settings', help='Path to settings file to analyze and modify')
+    p_con_group.add_argument('--scope', choices=['global', 'project'], help='Target scope (auto-resolves path)')
     p_con.add_argument('--dry-run', action='store_true', help='Preview changes without modifying files')
     p_con.set_defaults(func=cmd_consolidate)
 

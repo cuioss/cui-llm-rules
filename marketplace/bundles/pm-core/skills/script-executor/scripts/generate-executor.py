@@ -39,7 +39,7 @@ LOG_MODULE_TEMPLATE = TEMPLATES_DIR / 'execution-log.py.template'
 
 # Marketplace inventory script
 MARKETPLACE_ROOT = Path('marketplace/bundles')
-INVENTORY_SCRIPT = MARKETPLACE_ROOT / 'pm-plugins/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py'
+INVENTORY_SCRIPT = MARKETPLACE_ROOT / 'pm-core/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py'
 
 # ============================================================================
 # SCRIPT DISCOVERY
@@ -71,18 +71,14 @@ def discover_scripts() -> dict[str, str]:
 
     # Build notation mappings
     mappings = {}
-    base_path = Path(inventory.get('base_path', 'marketplace/bundles'))
 
     for bundle in inventory.get('bundles', []):
-        bundle_name = bundle['name']
-
         for script in bundle.get('scripts', []):
-            script_path = script['path']
-            skill_name = script.get('skill', '')
+            notation = script.get('notation', '')
+            path_formats = script.get('path_formats', {})
+            abs_path = path_formats.get('absolute', '')
 
-            if skill_name:
-                notation = f"{bundle_name}:{skill_name}"
-                abs_path = str(Path(script_path).resolve())
+            if notation and abs_path:
                 mappings[notation] = abs_path
 
     return mappings
@@ -157,7 +153,12 @@ def generate_executor(mappings: dict[str, str], dry_run: bool = False) -> bool:
 
     template = EXECUTOR_TEMPLATE.read_text()
     mappings_code = generate_mappings_code(mappings)
+
+    # execution_log.py location (same directory as this script)
+    log_module_dir = str(SCRIPT_DIR.resolve())
+
     content = template.replace('{{SCRIPT_MAPPINGS}}', mappings_code)
+    content = content.replace('{{EXECUTION_LOG_DIR}}', log_module_dir)
 
     if dry_run:
         print("=== execute-script.py ===")
@@ -297,7 +298,7 @@ def verify_executor() -> bool:
 # ============================================================================
 
 def cmd_generate(args):
-    """Generate executor and log module."""
+    """Generate executor (log module is pre-existing)."""
     # Discover scripts
     print("Discovering scripts...")
     try:
@@ -314,12 +315,7 @@ def cmd_generate(args):
             print(f"  {notation} -> {path}")
         print()
 
-    # Generate log module
-    print("Generating log module...")
-    if not generate_log_module(dry_run=args.dry_run):
-        sys.exit(1)
-
-    # Generate executor
+    # Generate executor (log module exists at SCRIPT_DIR/execution_log.py)
     print("Generating executor...")
     if not generate_executor(mappings, dry_run=args.dry_run):
         sys.exit(1)

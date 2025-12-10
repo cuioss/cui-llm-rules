@@ -382,6 +382,86 @@ class TestRemove(ScriptTestCase):
 
 
 # =============================================================================
+# Tests for --scope option
+# =============================================================================
+
+class TestScopeOption(ScriptTestCase):
+    """Test permission-fix.py --scope option for apply-fixes and consolidate."""
+
+    bundle = 'pm-core'
+    skill = 'permission-fix'
+    script = 'permission-fix.py'
+
+    def test_apply_fixes_with_scope_project(self):
+        """apply-fixes should work with --scope project."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": ["Bash(git:*)", "Bash(git:*)"],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'apply-fixes',
+            '--scope', 'project',
+            '--dry-run',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertIn('duplicates_removed', data)
+        self.assertEqual(data['duplicates_removed'], 1)
+        self.assertIn(str(settings_file), data['settings_path'])
+
+    def test_consolidate_with_scope_project(self):
+        """consolidate should work with --scope project."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": [
+                    "Read(target/build-output-2025-11-20-174411.log)",
+                    "Read(target/build-output-2025-11-21-093000.log)"
+                ],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'consolidate',
+            '--scope', 'project',
+            '--dry-run',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertIn('consolidated', data)
+        self.assertEqual(data['consolidated'], 2)
+
+    def test_scope_and_settings_mutually_exclusive(self):
+        """--scope and --settings should be mutually exclusive."""
+        result = run_script(
+            SCRIPT_PATH,
+            'apply-fixes',
+            '--scope', 'project',
+            '--settings', '/tmp/test.json',
+            '--dry-run'
+        )
+        # Should fail due to mutual exclusivity
+        self.assertEqual(result.returncode, 2)
+
+
+# =============================================================================
 # Simple function-based tests for quick validation
 # =============================================================================
 
@@ -453,6 +533,7 @@ if __name__ == '__main__':
     suite.addTests(loader.loadTestsFromTestCase(TestApplyFixes))
     suite.addTests(loader.loadTestsFromTestCase(TestAdd))
     suite.addTests(loader.loadTestsFromTestCase(TestRemove))
+    suite.addTests(loader.loadTestsFromTestCase(TestScopeOption))
 
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

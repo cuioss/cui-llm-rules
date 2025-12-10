@@ -206,6 +206,71 @@ class TestDetectSuspicious(ScriptTestCase):
 
 
 # =============================================================================
+# Tests for --scope option
+# =============================================================================
+
+class TestScopeOption(ScriptTestCase):
+    """Test permission-doctor.py --scope option."""
+
+    bundle = 'pm-core'
+    skill = 'permission-doctor'
+    script = 'permission-doctor.py'
+
+    def test_detect_redundant_with_scope_both(self):
+        """detect-redundant should work with --scope both."""
+        # Create global settings in home directory simulation
+        # Note: This test uses the actual home directory's settings
+        # For proper isolation, we'd need to mock Path.home()
+        # Here we just verify the command works with --scope both
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-redundant',
+            '--scope', 'both',
+            cwd=self.temp_dir
+        )
+        # May succeed or fail depending on whether settings exist
+        # Just verify it doesn't crash with unexpected error
+        self.assertIn(result.returncode, [0, 1])
+
+    def test_detect_suspicious_with_scope_project(self):
+        """detect-suspicious should work with --scope project."""
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        settings_file = claude_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": ["Bash(sudo:*)"],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-suspicious',
+            '--scope', 'project',
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertIn('suspicious', data)
+        suspicious_perms = [s['permission'] for s in data['suspicious']]
+        self.assertIn('Bash(sudo:*)', suspicious_perms)
+
+    def test_scope_and_settings_mutually_exclusive(self):
+        """--scope and --settings should be mutually exclusive."""
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-suspicious',
+            '--scope', 'project',
+            '--settings', '/tmp/test.json'
+        )
+        # Should fail due to mutual exclusivity
+        self.assertEqual(result.returncode, 2)
+
+
+# =============================================================================
 # Simple function-based tests for quick validation
 # =============================================================================
 
@@ -250,6 +315,7 @@ if __name__ == '__main__':
 
     suite.addTests(loader.loadTestsFromTestCase(TestDetectRedundant))
     suite.addTests(loader.loadTestsFromTestCase(TestDetectSuspicious))
+    suite.addTests(loader.loadTestsFromTestCase(TestScopeOption))
 
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

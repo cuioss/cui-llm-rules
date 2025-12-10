@@ -50,6 +50,36 @@ def output_result(result: dict, format_type: str = "json") -> None:
         print(json.dumps(result, indent=2))
 
 
+def get_global_settings_path() -> Path:
+    """Get path to global settings file."""
+    return Path.home() / ".claude" / "settings.json"
+
+
+def get_project_settings_path() -> Path:
+    """Get path to project settings file (prefers settings.local.json if exists)."""
+    project_dir = Path.cwd()
+    settings_local = project_dir / ".claude" / "settings.local.json"
+    if settings_local.exists():
+        return settings_local
+    return project_dir / ".claude" / "settings.json"
+
+
+def resolve_scope_to_paths(scope: str) -> tuple[Optional[str], Optional[str]]:
+    """Resolve scope to global and local settings paths.
+
+    Returns:
+        Tuple of (global_path, local_path). For 'global' or 'project' scope,
+        one will be None. For 'both', both paths are returned.
+    """
+    if scope == "global":
+        return str(get_global_settings_path()), None
+    elif scope == "project":
+        return None, str(get_project_settings_path())
+    elif scope == "both":
+        return str(get_global_settings_path()), str(get_project_settings_path())
+    return None, None
+
+
 # =============================================================================
 # detect-redundant subcommand
 # =============================================================================
@@ -91,12 +121,19 @@ def is_covered_by_wildcard(specific: str, broader: str) -> bool:
 
 def cmd_detect_redundant(args) -> int:
     """Handle detect-redundant subcommand."""
-    global_settings, global_error = load_settings(args.global_settings)
+    # Resolve paths from --scope or explicit args
+    if hasattr(args, 'scope') and args.scope:
+        global_path, local_path = resolve_scope_to_paths(args.scope)
+    else:
+        global_path = args.global_settings
+        local_path = args.local_settings
+
+    global_settings, global_error = load_settings(global_path)
     if global_error:
         print(json.dumps({"error": global_error, "global_exists": False}))
         return EXIT_ERROR
 
-    local_settings, local_error = load_settings(args.local_settings)
+    local_settings, local_error = load_settings(local_path)
     if local_error:
         print(json.dumps({"error": local_error, "local_exists": False}))
         return EXIT_ERROR
@@ -147,8 +184,8 @@ def cmd_detect_redundant(args) -> int:
         },
         "global_exists": True,
         "local_exists": True,
-        "global_path": args.global_settings,
-        "local_path": args.local_settings
+        "global_path": global_path,
+        "local_path": local_path
     }
     print(json.dumps(result, indent=2))
     return EXIT_SUCCESS
@@ -221,12 +258,21 @@ def check_permission(permission: str) -> Optional[dict]:
 
 def cmd_detect_suspicious(args) -> int:
     """Handle detect-suspicious subcommand."""
-    settings, error = load_settings(args.settings)
+    # Resolve path from --scope or explicit --settings
+    if hasattr(args, 'scope') and args.scope:
+        if args.scope == "global":
+            settings_path = str(get_global_settings_path())
+        else:  # project
+            settings_path = str(get_project_settings_path())
+    else:
+        settings_path = args.settings
+
+    settings, error = load_settings(settings_path)
     if error:
         print(json.dumps({"error": error}))
         return EXIT_ERROR
 
-    approved_permissions = load_approved_permissions(args.approved_file)
+    approved_permissions = load_approved_permissions(args.approved_file if hasattr(args, 'approved_file') else None)
     allow_list = settings.get("permissions", {}).get("allow", [])
 
     suspicious = []
@@ -256,9 +302,9 @@ def cmd_detect_suspicious(args) -> int:
             "by_severity": severity_counts,
             "permissions_checked": len(allow_list)
         },
-        "settings_path": args.settings
+        "settings_path": settings_path
     }
-    if args.approved_file:
+    if hasattr(args, 'approved_file') and args.approved_file:
         result["approved_file"] = args.approved_file
 
     print(json.dumps(result, indent=2))
@@ -277,13 +323,17 @@ def main():
 
     # detect-redundant subcommand
     p_red = subparsers.add_parser('detect-redundant', help='Detect redundant permissions between global and local settings')
-    p_red.add_argument('--global-settings', required=True, help='Path to global settings file')
-    p_red.add_argument('--local-settings', required=True, help='Path to local/project settings file')
+    p_red_group = p_red.add_mutually_exclusive_group(required=True)
+    p_red_group.add_argument('--scope', choices=['both'], help='Analyze both global and project settings (auto-resolves paths)')
+    p_red_group.add_argument('--global-settings', help='Path to global settings file (requires --local-settings)')
+    p_red.add_argument('--local-settings', help='Path to local/project settings file (required with --global-settings)')
     p_red.set_defaults(func=cmd_detect_redundant)
 
     # detect-suspicious subcommand
     p_sus = subparsers.add_parser('detect-suspicious', help='Detect suspicious permissions matching anti-patterns')
-    p_sus.add_argument('--settings', required=True, help='Path to settings file to analyze')
+    p_sus_group = p_sus.add_mutually_exclusive_group(required=True)
+    p_sus_group.add_argument('--settings', help='Path to settings file to analyze')
+    p_sus_group.add_argument('--scope', choices=['global', 'project'], help='Target scope (auto-resolves path)')
     p_sus.add_argument('--approved-file', help='Path to run-configuration file with user-approved permissions')
     p_sus.set_defaults(func=cmd_detect_suspicious)
 
