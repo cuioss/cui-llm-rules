@@ -163,26 +163,26 @@ def test_core_has_commands():
 # =============================================================================
 
 def test_derived_includes_java_expert():
-    """Test derived includes pm-java bundle."""
+    """Test derived includes pm-dev-java bundle."""
     result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     derived = data.get('derived', [])
     bundle_names = [d['bundle'] for d in derived]
-    assert 'pm-java' in bundle_names, "Derived should include pm-java"
+    assert 'pm-dev-java' in bundle_names, "Derived should include pm-dev-java"
 
 
 def test_derived_java_has_plan_components():
-    """Test pm-java derived bundle has plan components."""
+    """Test pm-dev-java derived bundle has plan components."""
     result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     derived = data.get('derived', [])
 
-    java_bundle = next((d for d in derived if d['bundle'] == 'pm-java'), None)
-    assert java_bundle is not None, "Should find pm-java in derived"
+    java_bundle = next((d for d in derived if d['bundle'] == 'pm-dev-java'), None)
+    assert java_bundle is not None, "Should find pm-dev-java in derived"
 
     # Should have java-task-plan agent and skill
     agent_names = [a['name'] for a in java_bundle.get('agents', [])]

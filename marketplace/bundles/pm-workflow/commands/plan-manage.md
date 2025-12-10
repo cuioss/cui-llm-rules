@@ -95,8 +95,8 @@ Example: `Skill: pm-workflow:plan-type-java`
 The skill's `domain:` frontmatter contains:
 ```yaml
 domain:
-  solution_outline_agent: pm-java:java-solution-outline-agent
-  task_plan_agent: pm-java:java-task-plan-agent
+  solution_outline_agent: pm-dev-java:java-solution-outline-agent
+  task_plan_agent: pm-dev-java:java-task-plan-agent
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
 ```
@@ -290,8 +290,8 @@ If you discover issues or improvements during execution, record them:
 |-------|---------|
 | `pm-workflow:plan-init-agent` | Init phase execution |
 | `pm-workflow:plan-refine-agent` | Refine phase fallback (generic plans) |
-| `pm-java:java-solution-outline-agent` | Java: Request → Goals |
-| `pm-java:java-task-plan-agent` | Java: Goals → Tasks |
+| `pm-dev-java:java-solution-outline-agent` | Java: Request → Goals |
+| `pm-dev-java:java-task-plan-agent` | Java: Goals → Tasks |
 | `pm-dev-frontend:js-solution-outline-agent` | JavaScript: Request → Goals |
 | `pm-dev-frontend:js-task-plan-agent` | JavaScript: Goals → Tasks |
 | `pm-plugin-development:plugin-solution-outline-agent` | Plugin: Request → Goals |

@@ -23,7 +23,7 @@ cui-llm-rules/
 
 | Bundle | Purpose |
 |--------|---------|
-| **pm-java** | Java development standards, CDI/Quarkus, JUnit 5, logging |
+| **pm-dev-java** | Java development standards, CDI/Quarkus, JUnit 5, logging |
 | **pm-dev-frontend** | JavaScript, CSS, Jest, Cypress, ESLint/Prettier |
 | **builder** | Maven/Gradle/npm unified build automation |
 | **planning** | Task planning, workflow orchestration, PR management |
@@ -67,7 +67,7 @@ bundle-name/
 ### Naming Conventions
 
 - Files and commands: `kebab-case` (e.g., `java-implement-code.md`)
-- Bundles: Descriptive names with domain prefix (e.g., `pm-java`)
+- Bundles: Descriptive names with domain prefix (e.g., `pm-dev-java`)
 - Skills: Domain-specific names (e.g., `cui-java-core`, `plan-refine`)
 
 ## Testing Instructions

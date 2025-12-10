@@ -266,7 +266,7 @@ Read references/java-quality-standards.md
 ```markdown
 ### Step 3: Validate Logging
 
-Skill: pm-java:logging-validator
+Skill: pm-dev-java:logging-validator
 ```
 
 ### 3. Concise Workflow Steps

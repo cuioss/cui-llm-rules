@@ -198,8 +198,8 @@ bundle-name/
 **Examples**:
 ```
 # ✅ Correct
-Directory: marketplace/bundles/pm-java/
-plugin.json: {"name": "pm-java"}
+Directory: marketplace/bundles/pm-dev-java/
+plugin.json: {"name": "pm-dev-java"}
 
 agents/diagnose-code.md
 plugin.json: {"name": "diagnose-code", "path": "agents/diagnose-code.md"}
@@ -209,7 +209,7 @@ plugin.json: {"name": "cui-java-core", "path": "skills/cui-java-core"}
 
 # ❌ Incorrect
 Directory: marketplace/bundles/cui_java_expert/  (underscore)
-plugin.json: {"name": "pm-java"}  (mismatch)
+plugin.json: {"name": "pm-dev-java"}  (mismatch)
 ```
 
 ### Required Files
@@ -446,8 +446,8 @@ Bash: scripts/scan-marketplace-inventory.sh {bundle_dir}
 **Output**:
 ```json
 {
-  "bundle_name": "pm-java",
-  "plugin_json_path": "marketplace/bundles/pm-java/plugin.json",
+  "bundle_name": "pm-dev-java",
+  "plugin_json_path": "marketplace/bundles/pm-dev-java/plugin.json",
   "validation": {
     "schema_valid": true,
     "required_fields_present": true,

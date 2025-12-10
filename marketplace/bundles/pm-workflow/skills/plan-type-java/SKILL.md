@@ -3,14 +3,14 @@ name: plan-type-java
 description: Java plan type for Maven/Gradle projects
 allowed-tools: Read, Bash
 domain:
-  solution_outline_agent: pm-java:java-solution-outline-agent
-  task_plan_agent: pm-java:java-task-plan-agent
+  solution_outline_agent: pm-dev-java:java-solution-outline-agent
+  task_plan_agent: pm-dev-java:java-task-plan-agent
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
   standards:
-    - pm-java:cui-java-core
-    - pm-java:cui-javadoc
-    - pm-java:cui-java-unit-testing
+    - pm-dev-java:cui-java-core
+    - pm-dev-java:cui-javadoc
+    - pm-dev-java:cui-java-unit-testing
 ---
 
 # Plan Type: Java (`pm-workflow:plan-type-java`)
@@ -29,8 +29,8 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `pm-java:java-solution-outline-agent` | Creates solution outline with deliverables |
-| `task_plan_agent` | `pm-java:java-task-plan-agent` | Creates tasks from deliverables |
+| `solution_outline_agent` | `pm-dev-java:java-solution-outline-agent` | Creates solution outline with deliverables |
+| `task_plan_agent` | `pm-dev-java:java-task-plan-agent` | Creates tasks from deliverables |
 | `verification_command` | `/pm-dev-builder:builder-build-and-fix` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
 | `standards` | Java core, JavaDoc, Unit testing | Skills to load |
@@ -45,7 +45,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value |
 |-------|-------|
-| `standards` | `["pm-java:cui-java-core", "pm-java:cui-javadoc", "pm-java:cui-java-unit-testing"]` |
+| `standards` | `["pm-dev-java:cui-java-core", "pm-dev-java:cui-javadoc", "pm-dev-java:cui-java-unit-testing"]` |
 | `adrs` | `[]` |
 | `interfaces` | `[]` |
 | `dependencies` | `[]` |
@@ -78,9 +78,9 @@ Analyzes Java codebase and creates deliverables with:
 
 Creates tasks with Java-specific steps:
 1. Create/modify implementation file at `{path}`
-2. Add unit tests (load `pm-java:cui-java-unit-testing`)
-3. Add JavaDoc (load `pm-java:cui-javadoc`)
-4. Follow CUI patterns (load `pm-java:cui-java-core`)
+2. Add unit tests (load `pm-dev-java:cui-java-unit-testing`)
+3. Add JavaDoc (load `pm-dev-java:cui-javadoc`)
+4. Follow CUI patterns (load `pm-dev-java:cui-java-core`)
 5. Verify `mvn test -pl {module}` passes
 
 **Returns**: `{status, task_ids[], lessons_recorded}`

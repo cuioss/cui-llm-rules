@@ -96,7 +96,7 @@ Plan-type skills also declare domain agents in their `domain:` frontmatter secti
 Domain agents live in their expert bundles and are invoked by commands via Task tool:
 
 ```
-pm-java/agents/
+pm-dev-java/agents/
 ├── java-solution-outline-agent.md         # Decomposes request into goals
 └── java-task-plan-agent.md          # Transforms goals into tasks
 
@@ -117,8 +117,8 @@ Plan-type skills declare their domain agents in structured frontmatter:
 # Example: plan-type-java/SKILL.md
 ---
 domain:
-  solution_outline_agent: pm-java:java-solution-outline-agent
-  task_plan_agent: pm-java:java-task-plan-agent
+  solution_outline_agent: pm-dev-java:java-solution-outline-agent
+  task_plan_agent: pm-dev-java:java-task-plan-agent
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
 ---
@@ -126,7 +126,7 @@ domain:
 
 | Plan Type | Solution Outline Agent | Task Plan Agent |
 |-----------|-------------|------------|
-| `java` | `pm-java:java-solution-outline-agent` | `pm-java:java-task-plan-agent` |
+| `java` | `pm-dev-java:java-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` |
 | `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` |
 | `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` |
 | `generic` | N/A | N/A (uses plan-refine-agent fallback) |
@@ -249,7 +249,7 @@ The detail level ensures:
 
    Domain Agents (in expert bundles):
    ┌─────────────────────────────────────────────┐
-   │ pm-java: java-solution-outline-agent           │
+   │ pm-dev-java: java-solution-outline-agent           │
    │                  java-task-plan-agent            │
    │ pm-dev-frontend: js-solution-outline-agent         │
    │                      js-task-plan-agent          │

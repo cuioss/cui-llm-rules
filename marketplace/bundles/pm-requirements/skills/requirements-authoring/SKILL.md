@@ -151,7 +151,7 @@ This skill integrates with:
 - **pm-requirements:planning** - Planning tasks trace to requirements created here
 - **pm-requirements:traceability** - Links authored specs to implementation code
 - **cui-documentation:cui-documentation** - General AsciiDoc formatting standards
-- **pm-java:cui-javadoc** - JavaDoc standards for referencing requirements
+- **pm-dev-java:cui-javadoc** - JavaDoc standards for referencing requirements
 
 ## Anti-Patterns to Avoid
 
@@ -199,5 +199,5 @@ Before completing requirements/specification work:
 
 **External:**
 - cui-documentation:cui-documentation - AsciiDoc formatting
-- pm-java:cui-javadoc - JavaDoc requirement references
+- pm-dev-java:cui-javadoc - JavaDoc requirement references
 - pm-workflow:git-workflow - Committing requirement changes

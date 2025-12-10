@@ -29,7 +29,7 @@ Task:
 
 ```
 Task:
-  subagent_type: pm-java:java-quality-agent
+  subagent_type: pm-dev-java:java-quality-agent
   prompt: Analyze code quality (checkstyle, PMD, SpotBugs)
 ```
 
@@ -54,7 +54,7 @@ mcp__sonarqube__search_sonar_issues_in_projects
 
 ```
 Task:
-  subagent_type: pm-java:java-implement-agent
+  subagent_type: pm-dev-java:java-implement-agent
   prompt: Execute Task {N}: {name}, Goal: {goal}, Criteria: {list}
 ```
 
@@ -113,7 +113,7 @@ SlashCommand: /plugin-doctor {type}={name}
 
 ```
 Task:
-  subagent_type: pm-java:java-fix-javadoc-agent
+  subagent_type: pm-dev-java:java-fix-javadoc-agent
   prompt: Check JavaDoc coverage (report only)
 ```
 

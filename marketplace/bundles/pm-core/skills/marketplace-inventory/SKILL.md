@@ -130,7 +130,7 @@ python3 .plan/execute-script.py pm-core:marketplace-inventory:scan-marketplace-i
   "agents": [
     {
       "name": "java-implement-agent",
-      "path": "marketplace/bundles/pm-java/agents/java-implement-agent.md",
+      "path": "marketplace/bundles/pm-dev-java/agents/java-implement-agent.md",
       "description": "Implements Java code following CUI standards"
     }
   ]
@@ -166,7 +166,7 @@ Filter to specific bundles by name (comma-separated).
 python3 .plan/execute-script.py pm-core:marketplace-inventory:scan-marketplace-inventory --bundles planning
 
 # Multiple bundles
-python3 .plan/execute-script.py pm-core:marketplace-inventory:scan-marketplace-inventory --bundles "planning,pm-java,pm-dev-frontend"
+python3 .plan/execute-script.py pm-core:marketplace-inventory:scan-marketplace-inventory --bundles "planning,pm-dev-java,pm-dev-frontend"
 ```
 
 ## Error Handling

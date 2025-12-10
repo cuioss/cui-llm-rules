@@ -267,8 +267,8 @@ python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config \
 # Set agents
 python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config \
   domain-agents set --plan-type pm-workflow:plan-type-java \
-  --solution-outline-agent pm-java:java-solution-outline-agent \
-  --task-plan-agent pm-java:java-task-plan-agent
+  --solution-outline-agent pm-dev-java:java-solution-outline-agent \
+  --task-plan-agent pm-dev-java:java-task-plan-agent
 
 # List all
 python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config \
@@ -423,8 +423,8 @@ All marshal-config commands return TOON for token efficiency:
 ```toon
 status: success
 data:
-  solution_outline_agent: pm-java:java-solution-outline-agent
-  task_plan_agent: pm-java:java-task-plan-agent
+  solution_outline_agent: pm-dev-java:java-solution-outline-agent
+  task_plan_agent: pm-dev-java:java-task-plan-agent
 ```
 
 ## Integration Points

@@ -107,7 +107,7 @@ Result: Diagnoses all agents, auto-fixes safe issues, prompts for risky fixes
 User: /plugin-doctor skill=my-skill
 Result: Diagnoses single skill, applies fixes, verifies
 
-User: /plugin-doctor skill-content marketplace/bundles/pm-java/skills/cui-java-core
+User: /plugin-doctor skill-content marketplace/bundles/pm-dev-java/skills/cui-java-core
 Result: Cross-file content analysis - duplication, extraction candidates, terminology
 
 User: /plugin-doctor marketplace

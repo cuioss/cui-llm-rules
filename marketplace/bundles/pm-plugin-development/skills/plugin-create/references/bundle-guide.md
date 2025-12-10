@@ -36,14 +36,14 @@ bundle-name/
 
 ✅ **New Bundle** (distinct domain):
 ```
-pm-java         (Java development)
+pm-dev-java         (Java development)
 pm-dev-frontend     (Frontend development)
 pm-documents (Documentation)
 ```
 
 ✅ **Add to Existing** (related):
 ```
-pm-java/
+pm-dev-java/
 ├── skills/
 │   ├── cui-java-core  (existing)
 │   └── cui-java-advanced  (NEW - add to existing bundle)
@@ -205,9 +205,9 @@ mv bundle/plugin.json.tmp bundle/plugin.json
 
 **Purpose**: Provide development standards and guidelines
 
-**Example**: `pm-java`
+**Example**: `pm-dev-java`
 ```
-pm-java/
+pm-dev-java/
 ├── plugin.json
 ├── README.md
 ├── skills/
@@ -422,7 +422,7 @@ bundle/
 
 **Cross-Bundle References**:
 - Use fully qualified: `bundle-name:component-name`
-- Example: `pm-java:cui-java-core`
+- Example: `pm-dev-java:cui-java-core`
 
 ## Bundle Creation Workflow
 
@@ -609,7 +609,7 @@ pm-core/
 
 **Medium Bundle** (10-20 components):
 ```
-pm-java/
+pm-dev-java/
 ├── 3 agents
 ├── 7 commands
 └── 8 skills

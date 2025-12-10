@@ -17,7 +17,7 @@ Planning-related components are distributed across multiple bundles:
 | Bundle | Component Types |
 |--------|-----------------|
 | `planning` | Core infrastructure (plan-*, manage-*, *-workflow) |
-| `pm-java` | java-task-plan, java-solution-outline (skills + agents) |
+| `pm-dev-java` | java-task-plan, java-solution-outline (skills + agents) |
 | `pm-dev-frontend` | js-task-plan, js-solution-outline (skills + agents) |
 | `pm-plugin-development` | plugin-task-plan, plugin-solution-outline (skills + agents) |
 
@@ -80,7 +80,7 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 ```json
 {
   "patterns": ["plan-*", "manage-*", "*-workflow", "*-plan", "*-goals", "*-plan-*", "*-goals-*"],
-  "bundles_scanned": ["planning", "pm-java", "pm-dev-frontend", "pm-plugin-development"],
+  "bundles_scanned": ["planning", "pm-dev-java", "pm-dev-frontend", "pm-plugin-development"],
   "core": {
     "bundle": "planning",
     "agents": [...],
@@ -90,7 +90,7 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
   },
   "derived": [
     {
-      "bundle": "pm-java",
+      "bundle": "pm-dev-java",
       "agents": [{"name": "java-task-plan-agent", ...}, {"name": "java-solution-outline-agent", ...}],
       "skills": [{"name": "java-task-plan", ...}, {"name": "java-solution-outline", ...}],
       ...
@@ -116,7 +116,7 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
     {"type": "commands", "names": ["task-implement", ...]}
   ],
   "derived_bundles": [
-    {"bundle": "pm-java", "agents": ["java-task-plan-agent", ...], "skills": ["java-task-plan", ...]},
+    {"bundle": "pm-dev-java", "agents": ["java-task-plan-agent", ...], "skills": ["java-task-plan", ...]},
     ...
   ],
   "statistics": {...}
@@ -140,7 +140,7 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 | Bundle | Agents | Skills |
 |--------|--------|--------|
-| pm-java | java-task-plan-agent, java-solution-outline-agent | java-task-plan, java-solution-outline |
+| pm-dev-java | java-task-plan-agent, java-solution-outline-agent | java-task-plan, java-solution-outline |
 | pm-dev-frontend | js-task-plan-agent, js-solution-outline-agent | js-task-plan, js-solution-outline |
 | pm-plugin-development | plugin-task-plan-agent, plugin-solution-outline-agent | plugin-task-plan, plugin-solution-outline |
 

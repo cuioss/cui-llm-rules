@@ -9,9 +9,9 @@
   },
   "plugins": [
     {
-      "name": "pm-java",
+      "name": "pm-dev-java",
       "description": "Comprehensive Java development expertise bundle aggregating core Java patterns, CDI/Quarkus, and unit testing standards",
-      "source": "./bundles/pm-java",
+      "source": "./bundles/pm-dev-java",
       "strict": false
     },
     {

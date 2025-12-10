@@ -124,8 +124,8 @@ def test_domain_agents_get():
         ctx.write_marshal({
             "domain_agents": {
                 "pm-workflow:plan-type-java": {
-                    "solution_outline_agent": "pm-java:java-solution-outline-agent",
-                    "task_plan_agent": "pm-java:java-task-plan-agent"
+                    "solution_outline_agent": "pm-dev-java:java-solution-outline-agent",
+                    "task_plan_agent": "pm-dev-java:java-task-plan-agent"
                 }
             }
         })
@@ -134,7 +134,7 @@ def test_domain_agents_get():
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
-        assert data['data']['solution_outline_agent'] == 'pm-java:java-solution-outline-agent'
+        assert data['data']['solution_outline_agent'] == 'pm-dev-java:java-solution-outline-agent'
 
 
 def test_domain_agents_get_unknown():

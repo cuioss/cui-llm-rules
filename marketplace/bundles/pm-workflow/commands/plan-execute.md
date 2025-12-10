@@ -140,7 +140,7 @@ Executes implementation tasks using DUMB LOOP pattern:
 1. Get next pending task via `manage-tasks:next`
 2. Read task details (title, specification, steps)
 3. Delegate to domain agent based on plan_type:
-   - `java` → `pm-java:java-implement-agent`
+   - `java` → `pm-dev-java:java-implement-agent`
    - `javascript` → `pm-dev-frontend:js-implement-agent`
    - `plugin-development` → No delegation (inline)
    - `generic` → No delegation (inline)
@@ -172,5 +172,5 @@ Completes the plan via `pm-workflow:plan-finalize` skill:
 
 | Agent | Purpose |
 |-------|---------|
-| `pm-java:java-implement-agent` | Java task implementation |
+| `pm-dev-java:java-implement-agent` | Java task implementation |
 | `pm-dev-frontend:js-implement-agent` | JavaScript task implementation |

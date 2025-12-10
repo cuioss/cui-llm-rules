@@ -432,12 +432,12 @@ skill: duplication-detector
 
 ## Step 1: Scan Bundle 1 Content
 
-bash scripts/extract-content-blocks.sh marketplace/bundles/pm-java
+bash scripts/extract-content-blocks.sh marketplace/bundles/pm-dev-java
 
 Outputs content fingerprints:
 ```json
 {
-  "bundle": "pm-java",
+  "bundle": "pm-dev-java",
   "blocks": [
     {"id": "java-1", "content_hash": "abc123", "type": "example"},
     ...
@@ -471,7 +471,7 @@ Outputs:
   "high_similarity": 8,
   "matches": [
     {
-      "block1": {"bundle": "pm-java", "file": "..."},
+      "block1": {"bundle": "pm-dev-java", "file": "..."},
       "block2": {"bundle": "pm-dev-frontend", "file": "..."},
       "similarity": 95,
       "recommendation": "Extract to shared skill: cui-code-standards"

@@ -321,7 +321,7 @@ Skill: pm-core:diagnostic-patterns
 Skill: pm-core:marketplace-inventory
 Skill: pm-plugin-development:bundle-orchestration-compliance
 Read references/reporting-templates.md
-Skill: pm-java:cui-java-core
+Skill: pm-dev-java:cui-java-core
 Skill: pm-dev-frontend:cui-javascript
 # ... loads 10 more skills upfront
 ```
@@ -398,7 +398,7 @@ Exceptions should be...
 ```markdown
 ### Step 2: Load Standards
 
-Skill: pm-java:cui-java-core
+Skill: pm-dev-java:cui-java-core
 
 # All standards loaded from skill, not embedded in command
 ```
@@ -630,7 +630,7 @@ If --save-report flag:
 
 **Skill invocations** (commands invoke skills):
 - ❌ No prefix: `Skill: cui-java-core`
-- ✅ Bundle prefix: `Skill: pm-java:cui-java-core`
+- ✅ Bundle prefix: `Skill: pm-dev-java:cui-java-core`
 
 **Rationale**:
 - SlashCommand: Command names globally unique, no bundle needed

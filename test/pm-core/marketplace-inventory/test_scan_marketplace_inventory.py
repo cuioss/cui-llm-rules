@@ -415,13 +415,13 @@ def test_bundles_filter_single():
 
 def test_bundles_filter_multiple():
     """Test --bundles filters to multiple bundles."""
-    result = run_script(SCRIPT_PATH, '--bundles', 'pm-workflow,pm-java')
+    result = run_script(SCRIPT_PATH, '--bundles', 'pm-workflow,pm-dev-java')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     bundles = data.get('bundles', [])
     bundle_names = {b['name'] for b in bundles}
-    assert bundle_names == {'pm-workflow', 'pm-java'}, f"Expected pm-workflow and pm-java, got {bundle_names}"
+    assert bundle_names == {'pm-workflow', 'pm-dev-java'}, f"Expected pm-workflow and pm-dev-java, got {bundle_names}"
 
 
 def test_bundles_filter_nonexistent():
@@ -440,17 +440,17 @@ def test_bundles_filter_nonexistent():
 
 def test_combined_bundle_and_name_pattern():
     """Test combining --bundles and --name-pattern filters."""
-    result = run_script(SCRIPT_PATH, '--bundles', 'pm-java', '--resource-types', 'agents', '--name-pattern', '*-plan-*')
+    result = run_script(SCRIPT_PATH, '--bundles', 'pm-dev-java', '--resource-types', 'agents', '--name-pattern', '*-plan-*')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     bundles = data.get('bundles', [])
     assert len(bundles) == 1, "Should have exactly 1 bundle"
-    assert bundles[0]['name'] == 'pm-java', "Bundle should be pm-java"
+    assert bundles[0]['name'] == 'pm-dev-java', "Bundle should be pm-dev-java"
 
     # Should find java-task-plan-agent
     agents = bundles[0].get('agents', [])
-    assert len(agents) >= 1, "Should find at least 1 plan agent in pm-java"
+    assert len(agents) >= 1, "Should find at least 1 plan agent in pm-dev-java"
     for agent in agents:
         assert '-plan-' in agent['name'], f"Agent {agent['name']} should match *-plan-*"
 

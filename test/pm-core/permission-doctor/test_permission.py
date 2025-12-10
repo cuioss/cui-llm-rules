@@ -80,7 +80,7 @@ class TestDetectRedundant(ScriptTestCase):
         local_file = self.temp_dir / 'local.json'
         local_file.write_text(json.dumps({
             "permissions": {
-                "allow": ["Skill(pm-java:*)", "Edit(.plan/**)"],
+                "allow": ["Skill(pm-dev-java:*)", "Edit(.plan/**)"],
                 "deny": [],
                 "ask": []
             }
@@ -97,7 +97,7 @@ class TestDetectRedundant(ScriptTestCase):
 
         self.assertIn('marketplace_in_local', data)
         marketplace_perms = [m['permission'] for m in data['marketplace_in_local']]
-        self.assertIn('Skill(pm-java:*)', marketplace_perms)
+        self.assertIn('Skill(pm-dev-java:*)', marketplace_perms)
 
     def test_output_includes_summary(self):
         """Output should include summary counts."""

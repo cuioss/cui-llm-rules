@@ -116,7 +116,7 @@ Each plan-type skill declares its domain agents in structured frontmatter:
 
 | Plan Type | Solution Outline Agent | Task Plan Agent |
 |-----------|-------------|------------|
-| `java` | `pm-java:java-solution-outline-agent` | `pm-java:java-task-plan-agent` |
+| `java` | `pm-dev-java:java-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` |
 | `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` |
 | `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` |
 | `generic` | N/A (uses plan-refine-agent fallback) | N/A |
@@ -211,7 +211,7 @@ planning/
 - **pm-core** - Script runner, file operations base
 - **pm-plugin-development** - Plugin doctor, plugin-solution-outline-agent, plugin-task-plan-agent
 - **builder** - Build execution (maven/npm)
-- **pm-java** - java-solution-outline-agent, java-task-plan-agent, java-implement-agent
+- **pm-dev-java** - java-solution-outline-agent, java-task-plan-agent, java-implement-agent
 - **pm-dev-frontend** - js-solution-outline-agent, js-task-plan-agent
 
 ## Installation

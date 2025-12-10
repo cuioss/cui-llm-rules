@@ -206,8 +206,8 @@ For each selected type, configure domain agents:
 # Example for Java
 python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config domain-agents set \
   --plan-type pm-workflow:plan-type-java \
-  --solution-outline-agent pm-java:java-solution-outline-agent \
-  --task-plan-agent pm-java:java-task-plan-agent
+  --solution-outline-agent pm-dev-java:java-solution-outline-agent \
+  --task-plan-agent pm-dev-java:java-task-plan-agent
 ```
 
 ### Step 6: Custom Plan-Types

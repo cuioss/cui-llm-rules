@@ -24,7 +24,7 @@ EXPECTED_TOON_FILES = [
     'pm-workflow/pr-workflow/review-comments.toon',
     'pm-workflow/pr-workflow/triage-results.toon',
     'pm-dev-frontend/coverage/coverage-analysis.toon',
-    'pm-java/coverage/coverage-analysis.toon',
+    'pm-dev-java/coverage/coverage-analysis.toon',
     'pm-dev-builder/maven/build-failure/expected-categorization.toon',
     'pm-dev-frontend/build/build-analysis.toon',
 ]

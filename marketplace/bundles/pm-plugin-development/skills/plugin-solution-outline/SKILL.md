@@ -137,7 +137,7 @@ python3 .plan/execute-script.py \
 # Or filter by bundles if impact is known to be limited
 python3 .plan/execute-script.py \
   pm-core:marketplace-inventory:scan-marketplace-inventory \
-  --bundles planning,pm-java \
+  --bundles planning,pm-dev-java \
   --include-descriptions
 ```
 

@@ -38,7 +38,7 @@ pm-plugin-development:plugin-doctor/scripts/analyze-markdown-file.sh
 ```
 pm-core:marketplace-inventory/scripts/scan-marketplace-inventory.py
 pm-core:permission-doctor/scripts/permission-doctor.py
-pm-java:cui-java-core/scripts/analyze-logging-violations.py
+pm-dev-java:cui-java-core/scripts/analyze-logging-violations.py
 pm-workflow:pr-workflow/scripts/fetch-pr-comments.py
 ```
 

@@ -16,7 +16,7 @@ cui-llm-rules/
 │   ├── .claude-plugin/
 │   │   └── marketplace.json        # Master marketplace configuration
 │   └── bundles/                    # 8 production bundles
-│       ├── pm-java/        # Java development standards + agents
+│       ├── pm-dev-java/        # Java development standards + agents
 │       ├── pm-dev-frontend/    # JavaScript/CSS standards + agents
 │       ├── builder/                # Maven/Gradle/npm build automation
 │       ├── planning/               # Task planning & workflow management
@@ -60,7 +60,7 @@ bundle-name/
 
 ## The 8 Production Bundles
 
-### pm-java
+### pm-dev-java
 Java development standards covering core patterns, null safety, Lombok, CDI/Quarkus, unit testing with JUnit 5, JavaDoc, and logging. Includes agents for implementation, testing, refactoring, and build fixing.
 
 ### pm-dev-frontend
@@ -135,7 +135,7 @@ python3 .plan/execute-script.py {notation} [subcommand] {args...}
 ### Naming Conventions
 
 - Files and commands: `kebab-case` (e.g., `java-implement-code.md`)
-- Bundles: Descriptive names with domain prefix (e.g., `pm-java`)
+- Bundles: Descriptive names with domain prefix (e.g., `pm-dev-java`)
 - Skills: Domain-specific names (e.g., `cui-java-core`, `plan-refine`)
 
 ### Documentation Standards

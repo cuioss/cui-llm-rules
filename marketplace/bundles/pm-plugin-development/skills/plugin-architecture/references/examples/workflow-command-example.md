@@ -225,7 +225,7 @@ MARKETPLACE HEALTH REPORT
 3. Missing progressive disclosure (6 occurrences)
 
 ### Bundle Health Scores
-1. pm-java: 92/100 ✅
+1. pm-dev-java: 92/100 ✅
 2. pm-dev-frontend: 88/100 ✅
 3. pm-plugin-development: 82/100 ✅
 4. pm-workflow: 78/100 ⚠️

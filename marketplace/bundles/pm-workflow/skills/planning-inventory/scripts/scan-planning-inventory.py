@@ -40,7 +40,7 @@ PLANNING_PATTERNS = [
 # Bundles that contain planning-related components
 PLANNING_BUNDLES = [
     "pm-workflow",
-    "pm-java",
+    "pm-dev-java",
     "pm-dev-frontend",
     "pm-plugin-development",
 ]

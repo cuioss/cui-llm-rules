@@ -129,7 +129,7 @@ Steps:
 1. Load skill: pm-plugin-development:plugin-create
 2. Execute workflow: create-skill
 3. Parameters:
-   - bundle: pm-java
+   - bundle: pm-dev-java
    - name: java-logging-patterns
    - description: "Java logging standards for CUI projects"
    - type: standards

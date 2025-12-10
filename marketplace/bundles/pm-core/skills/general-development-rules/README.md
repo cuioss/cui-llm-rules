@@ -105,7 +105,7 @@ Commands should reference this skill when they need to enforce general developme
 ### With Other Bundles
 
 This skill provides cross-cutting principles useful for:
-- pm-java agents (implementation patterns)
+- pm-dev-java agents (implementation patterns)
 - planning commands (when to ask users)
 - pm-plugin-development (creating new components)
 - Any development work in CUI ecosystem
