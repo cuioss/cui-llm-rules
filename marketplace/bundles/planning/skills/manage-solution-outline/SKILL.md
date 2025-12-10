@@ -135,17 +135,37 @@ Draw ASCII diagram showing:
 
 ### Step 4: Write Document
 
-Write using manage-files with stdin to ensure consistent path handling:
+Write using stdin to handle ASCII box-drawing characters:
 
 ```bash
-echo "document content here" | python3 .plan/execute-script.py \
-  planning:manage-files:manage-files write \
+python3 .plan/execute-script.py \
+  planning:manage-solution-outline:manage-solution-outline write \
   --plan-id {plan_id} \
-  --file solution_outline.md \
-  --stdin
+  [--force] \
+  [--validate] <<'EOF'
+# Solution: {title}
+
+## Summary
+...
+
+## Overview
+```
+┌─────────────┐
+│  Component  │
+└─────────────┘
 ```
 
-**Why `--stdin`?** Solution outlines contain ASCII diagrams with box-drawing characters (│, ─, ┌, └) that are difficult to pass via CLI parameters. Using `--stdin` allows the agent to pipe content directly while benefiting from manage-files' path resolution and validation.
+## Deliverables
+...
+EOF
+```
+
+**Parameters**:
+- `--plan-id` (required): Plan identifier
+- `--force`: Overwrite existing solution outline
+- `--validate`: Validate structure after writing and include validation result in output
+
+**Why heredoc?** Solution outlines contain ASCII diagrams with box-drawing characters (│, ─, ┌, └). Using `<<'EOF'` (quoted) preserves content exactly without variable expansion or escaping issues.
 
 ### Step 5: Validate
 
@@ -190,7 +210,7 @@ python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution
 - `planning:plan-refine` agent (for generic plans)
 
 **Scripts Used**:
-- `planning:manage-solution-outline:manage-solution-outline` - `validate`, `read`, `list-deliverables`, `exists`
+- `planning:manage-solution-outline:manage-solution-outline` - `write`, `validate`, `read`, `list-deliverables`, `exists`
 
 **Related Skills**:
 - `planning:manage-tasks` - Task creation with deliverable references

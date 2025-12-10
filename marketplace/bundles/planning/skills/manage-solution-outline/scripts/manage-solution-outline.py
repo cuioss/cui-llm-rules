@@ -2,15 +2,14 @@
 """
 Manage solution outline documents.
 
-Solution outlines are written using manage-files with --stdin to support ASCII
-diagrams with box-drawing characters, then validated and queried via this script.
-
-Write: echo "$content" | manage-files write --plan-id X --file solution_outline.md --stdin
-Validate: manage-solution-outline validate --plan-id X
-Read: manage-solution-outline read --plan-id X [--raw]
-List: manage-solution-outline list-deliverables --plan-id X
+Solution outlines support ASCII diagrams with box-drawing characters.
+Use heredoc with write command to handle special characters properly.
 
 Usage:
+    python3 manage-solution-outline.py write --plan-id my-plan <<'EOF'
+    # Solution content here
+    EOF
+
     python3 manage-solution-outline.py validate --plan-id my-plan
     python3 manage-solution-outline.py list-deliverables --plan-id my-plan
     python3 manage-solution-outline.py read --plan-id my-plan [--raw]
@@ -31,7 +30,7 @@ sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'toon-usage' /
 sys.path.insert(0, str(BUNDLES_DIR / 'general-tools' / 'skills' / 'file-operations-base' / 'scripts'))
 
 from toon_parser import serialize_toon
-from file_ops import base_path
+from file_ops import base_path, atomic_write_file
 
 SOLUTION_FILE = 'solution_outline.md'
 
@@ -155,7 +154,7 @@ def cmd_validate(args) -> int:
             'plan_id': args.plan_id,
             'file': SOLUTION_FILE,
             'suggestions': [
-                'Write solution_outline.md using manage-files write --stdin',
+                "Write solution using: manage-solution-outline write --plan-id X <<'EOF'",
                 'Check plan_id spelling'
             ]
         }))
@@ -249,7 +248,7 @@ def cmd_read(args) -> int:
             'plan_id': args.plan_id,
             'file': SOLUTION_FILE,
             'suggestions': [
-                'Write solution_outline.md using manage-files write --stdin',
+                "Write solution using: manage-solution-outline write --plan-id X <<'EOF'",
                 'Check plan_id spelling'
             ]
         }))
@@ -294,6 +293,78 @@ def cmd_exists(args) -> int:
     return 0 if exists else 1
 
 
+def cmd_write(args) -> int:
+    """Write solution outline from stdin.
+
+    Reads content from stdin to support ASCII diagrams with box-drawing characters.
+    Optionally validates structure after writing.
+    """
+    if not validate_plan_id(args.plan_id):
+        print(serialize_toon({
+            'status': 'error',
+            'error': 'invalid_plan_id',
+            'plan_id': args.plan_id,
+            'message': 'Plan ID must be kebab-case (lowercase, hyphens only)'
+        }))
+        return 1
+
+    # Read content from stdin
+    content = sys.stdin.read()
+
+    if not content.strip():
+        print(serialize_toon({
+            'status': 'error',
+            'error': 'empty_content',
+            'plan_id': args.plan_id,
+            'message': 'Content cannot be empty'
+        }))
+        return 1
+
+    file_path = get_solution_path(args.plan_id)
+
+    # Check if exists and --force not specified
+    if file_path.exists() and not getattr(args, 'force', False):
+        print(serialize_toon({
+            'status': 'error',
+            'error': 'file_exists',
+            'plan_id': args.plan_id,
+            'file': SOLUTION_FILE,
+            'message': 'Solution outline already exists. Use --force to overwrite.'
+        }))
+        return 1
+
+    # Ensure plan directory exists
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Write atomically
+    atomic_write_file(file_path, content)
+
+    result = {
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'file': SOLUTION_FILE,
+        'action': 'updated' if file_path.exists() else 'created'
+    }
+
+    # Optionally validate after writing
+    if getattr(args, 'validate', False):
+        issues, info = validate_solution_structure(content)
+        if issues:
+            result['validation'] = {
+                'valid': False,
+                'issues': issues
+            }
+        else:
+            result['validation'] = {
+                'valid': True,
+                'deliverable_count': info['deliverable_count'],
+                'sections_found': ','.join(info['sections_found'])
+            }
+
+    print(serialize_toon(result))
+    return 0
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -324,6 +395,13 @@ def main():
     exists_parser = subparsers.add_parser('exists', help='Check if solution exists')
     exists_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     exists_parser.set_defaults(func=cmd_exists)
+
+    # write
+    write_parser = subparsers.add_parser('write', help='Write solution outline from stdin')
+    write_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    write_parser.add_argument('--force', action='store_true', help='Overwrite existing file')
+    write_parser.add_argument('--validate', action='store_true', help='Validate structure after writing')
+    write_parser.set_defaults(func=cmd_write)
 
     args = parser.parse_args()
 
