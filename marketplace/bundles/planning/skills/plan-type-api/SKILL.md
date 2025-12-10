@@ -57,8 +57,8 @@ Adds domain-specific fields to references.toon AND finalize configuration to con
 **Input**: `plan_id`
 
 **Process**:
-1. Add domain fields to references.toon via `manage-references:set`
-2. Add finalize config to config.toon via `manage-config:set`
+1. Add domain fields to references.toon via `planning:manage-references:manage-references set`
+2. Add finalize config to config.toon via `planning:manage-config:manage-config set`
 
 **Finalize Configuration Fields** (all plan types set these in config.toon):
 
@@ -85,9 +85,9 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 - Load `planning:manage-solution-outline` skill for structure guidance
 - Read request.md for the request
 - Analyze codebase with domain knowledge
-- Write solution_outline.md via `manage-solution-outline write` with heredoc (includes ASCII overview diagram)
+- Write solution_outline.md via `planning:manage-solution-outline:manage-solution-outline write` with heredoc (includes ASCII overview diagram)
 - Document deliverables as numbered `### N. Title` sections
-- Validate with `manage-solution-outline validate --plan-id {plan_id}`
+- Validate with `planning:manage-solution-outline:manage-solution-outline validate --plan-id {plan_id}`
 - Record lessons-learned on issues
 
 **Returns**: `{status, deliverable_count, lessons_recorded}`
@@ -99,9 +99,9 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 **Invoked by**: `/plan-manage action=refine` command (after solution outline agent completes)
 
 **Responsibilities**:
-- Read solution_outline.md for deliverables via `manage-solution-outline list-deliverables`
+- Read solution_outline.md for deliverables via `planning:manage-solution-outline:manage-solution-outline list-deliverables`
 - Generate domain-specific task steps per deliverable
-- Create tasks via `manage-tasks:add --goal N` (numeric deliverable reference)
+- Create tasks via `planning:manage-tasks:manage-task add --goal N` (numeric deliverable reference)
 - Record lessons-learned on issues
 
 **Returns**: `{status, task_ids[], lessons_recorded}`
@@ -144,6 +144,6 @@ Plan-type skills must:
 - `cui-plugin-development-tools:plugin-solution-outline-agent` / `cui-plugin-development-tools:plugin-task-plan-agent`
 
 **Data Layer** (used by domain agents):
-- `manage-plan-documents` (request) - Request document operations
-- `manage-solution-outline` (solution_outline.md) - Solution outline validation and queries
-- `manage-tasks` - Task creation with deliverable references
+- `planning:manage-plan-documents:manage-plan-document` (request) - Request document operations
+- `planning:manage-solution-outline:manage-solution-outline` (solution_outline.md) - Solution outline validation and queries
+- `planning:manage-tasks:manage-task` - Task creation with deliverable references
