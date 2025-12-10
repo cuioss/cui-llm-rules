@@ -1,14 +1,14 @@
 ---
 name: plugin-solution-outline
-description: Analyze plugin codebase and decompose request into goals
+description: Analyze plugin codebase and create solution outline with deliverables
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-# Plugin Goals Skill
+# Plugin Solution Outline Skill
 
 **Role**: Domain analysis skill for plugin development tasks. Transforms the request into a solution document by analyzing the marketplace structure.
 
-**Key Pattern**: Single solution document - goals are consolidated into `solution_outline.md` via `manage-plan-documents` skill.
+**Key Pattern**: Single solution document - deliverables are consolidated into `solution_outline.md` via `manage-solution-outline` skill.
 
 ## Operation: decompose
 
@@ -81,7 +81,7 @@ Analyze the request to determine the impact scope:
 ```bash
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
-  --phase init \
+  --phase refine \
   --type decision \
   --summary "Impact path: {Single|Multi}" \
   --detail "{reasoning for the decision}"
@@ -95,9 +95,9 @@ For isolated changes, identify the target components directly:
 
 1. **Identify target bundle and component type**
 2. **Read existing component** (if modify/refactor scope)
-3. **Build goals section** for each component to create/modify
+3. **Build deliverables section** for each component to create/modify
 
-Build a goals markdown section:
+Build a deliverables markdown section:
 
 ```markdown
 ### 1. {Component Action}
@@ -159,7 +159,7 @@ Process components in batches of **10-15 files** per bundle. After each batch:
 # After each batch of 10-15 components
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
-  --phase init \
+  --phase refine \
   --type progress \
   --summary "Analyzed batch {N} of {bundle}: {X} affected, {Y} not affected" \
   --detail "Affected: file1.md, file2.md | Not affected: file3.md, file4.md, ..."
@@ -187,7 +187,7 @@ For each **affected** file, log immediately:
 ```bash
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
-  --phase init \
+  --phase refine \
   --type finding \
   --summary "Affected: {file_path}" \
   --detail "Reason: {why this file needs changes}"
@@ -210,17 +210,17 @@ After all batches complete, log the summary:
 ```bash
 python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
-  --phase init \
+  --phase refine \
   --type milestone \
   --summary "Impact analysis complete: {total_affected} of {total_analyzed} affected" \
-  --detail "Bundles analyzed: {list}. Ready for goal creation."
+  --detail "Bundles analyzed: {list}. Ready for deliverable creation."
 ```
 
-#### 3b.3: Build Goals Section with Enumeration
+#### 3b.3: Build Deliverables Section with Enumeration
 
-**Goal Organization**: Create one goal per bundle (or per ~5-8 files if a bundle has many). Each goal MUST list the specific files to modify.
+**Deliverable Organization**: Create one deliverable per bundle (or per ~5-8 files if a bundle has many). Each deliverable MUST list the specific files to modify.
 
-**Goal Requirements** (all fields mandatory for Path-Multi):
+**Deliverable Requirements** (all fields mandatory for Path-Multi):
 
 | Field | Description | Example |
 |-------|-------------|---------|
@@ -269,7 +269,7 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 Migrate all agent .md files to specify TOON output format
 ```
-This restates the request without enumeration. The goals phase added no information.
+This restates the request without enumeration. The solution outline phase added no information.
 
 **Continue to Step 3c to create the solution document.**
 
@@ -277,17 +277,32 @@ This restates the request without enumeration. The goals phase added no informat
 
 ### Step 3c: Create Solution Document
 
-After building the goals section (from either Path-Single or Path-Multi workflow), write the solution document directly using Claude Code's Write tool to: `.plan/plans/{plan_id}/solution_outline.md`
-
-Then validate the structure:
+After building the deliverables section (from either Path-Single or Path-Multi workflow), write and validate the solution document using heredoc:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution validate \
-  --plan-id {plan_id}
+python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline \
+  write \
+  --plan-id {plan_id} \
+  --validate <<'EOF'
+# Solution Outline
+
+## Summary
+{one-line summary}
+
+## Overview
+{ASCII diagram showing component relationships}
+
+## Deliverables
+
+### 1. {Deliverable Title}
+{content}
+
+### 2. {Deliverable Title}
+{content}
+EOF
 ```
 
-**Why direct Write?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The agent generates the full markdown document and writes it directly.
+**Why heredoc?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The `--validate` flag is REQUIRED - it ensures structure validation on every write.
 
 **Continue to Step 4.**
 
@@ -315,13 +330,13 @@ plan_id: {plan_id}
 solution_created: true
 impact_path: {Single|Multi}
 
-goals_count: {number of goals in solution document}
-total_files_affected: {sum of files across all goals}
+deliverables_count: {number of deliverables in solution document}
+total_files_affected: {sum of files across all deliverables}
 components_analyzed: {count for Path-Multi, 0 for Path-Single}
 lessons_recorded: {count}
 ```
 
-**Path-Multi Validation**: If `total_files_affected` is 0 or goals don't contain file paths, the decomposition is incomplete.
+**Path-Multi Validation**: If `total_files_affected` is 0 or deliverables don't contain file paths, the decomposition is incomplete.
 
 ---
 
@@ -361,12 +376,12 @@ python3 .plan/execute-script.py \
 
 ---
 
-## Goal Decomposition Patterns
+## Deliverable Decomposition Patterns
 
 ### Path-Single Patterns
 
-| Request Pattern | Typical Goals |
-|-----------------|---------------|
+| Request Pattern | Typical Deliverables |
+|-----------------|----------------------|
 | "Add new skill" | 1. Create SKILL.md 2. Add standards docs 3. Create scripts 4. Update plugin.json |
 | "Add new command" | 1. Create command.md 2. Implement skill delegation 3. Update plugin.json |
 | "Add new agent" | 1. Create agent.md 2. Define tool requirements 3. Update plugin.json |
@@ -374,8 +389,8 @@ python3 .plan/execute-script.py \
 
 ### Path-Multi Patterns
 
-| Request Pattern | Typical Goals |
-|-----------------|---------------|
+| Request Pattern | Typical Deliverables |
+|-----------------|----------------------|
 | "Rename notation X to Y" | 1. Update core definition 2-N. Update each referencing component |
 | "Change output format" | 1. Define new format 2-N. Update each producer/consumer |
 | "Migrate to new API" | 1. Implement new API 2-N. Migrate each caller |
@@ -444,13 +459,13 @@ If multiple components match:
 **Caller**: `cui-plugin-development-tools:plugin-solution-outline-agent`
 
 **Script Notations** (use EXACTLY as shown):
-- `planning:manage-solution-outline:manage-solution-outline` - Write and validate solution document
-- `planning:manage-plan-documents:manage-plan-document` - Read request (request read)
+- `planning:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write --validate, validate, read, list-deliverables, exists)
+- `planning:manage-plan-documents:manage-plan-document` - Request operations (request read, request create)
 - `plan-marshall-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
-- `planning:manage-log:manage-work-log` - Log decisions (add, read)
-- `planning:manage-config:manage-config` - Read config (read)
-- `planning:manage-references:manage-references` - Read references (read)
-- `plan-marshall-core:marketplace-inventory:scan-marketplace-inventory` - Inventory analysis
+- `planning:manage-log:manage-work-log` - Log decisions (add, read, list)
+- `planning:manage-config:manage-config` - Plan config (read, get, set)
+- `planning:manage-references:manage-references` - Plan references (read, get, set)
+- `plan-marshall-core:marketplace-inventory:scan-marketplace-inventory` - Marketplace component inventory
 
 **Standards Referenced**:
 - `cui-plugin-development-tools:plugin-architecture` - Architecture principles
