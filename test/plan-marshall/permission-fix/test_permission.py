@@ -191,13 +191,11 @@ class TestEnsureWildcards(ScriptTestCase):
 
         self.assertIn('already_present', data)
 
-    def test_supports_plugins_key(self):
-        """Should support 'plugins' key (real marketplace.json format).
+    def test_supports_plugins_key_with_embedded_skills_commands(self):
+        """Should support 'plugins' key with embedded skills/commands arrays.
 
-        The actual marketplace.json uses 'plugins' not 'bundles':
-        { "plugins": [{ "name": "pm-workflow", ... }] }
-
-        This test ensures the script handles the real-world format.
+        This tests a format where plugins have skills and commands arrays
+        directly in the plugin entry (used by scan-marketplace-inventory output).
         """
         settings_file = self.temp_dir / 'settings.json'
         settings_file.write_text(json.dumps({
@@ -208,7 +206,7 @@ class TestEnsureWildcards(ScriptTestCase):
             }
         }))
 
-        # Use 'plugins' key like the real marketplace.json
+        # Use 'plugins' key with embedded skills/commands
         marketplace_file = self.temp_dir / 'marketplace.json'
         marketplace_file.write_text(json.dumps({
             "name": "plan-marshall",
@@ -247,6 +245,73 @@ class TestEnsureWildcards(ScriptTestCase):
         self.assertIn('SlashCommand(/pm-workflow:*)', added)
         self.assertIn('Skill(pm-dev-java:*)', added)
         self.assertIn('SlashCommand(/pm-dev-java:*)', added)
+        self.assertEqual(data['total'], 4)  # 2 bundles × 2 wildcards each
+
+    def test_supports_real_marketplace_json_format(self):
+        """Should support REAL marketplace.json format without skills/commands arrays.
+
+        The actual marketplace/.claude-plugin/marketplace.json uses this format:
+        {
+            "plugins": [
+                {
+                    "name": "pm-workflow",
+                    "description": "...",
+                    "source": "./bundles/pm-workflow",
+                    "strict": false
+                }
+            ]
+        }
+
+        Note: NO skills or commands arrays in the plugin entries.
+        The script should generate wildcards for ALL bundles in this case.
+        """
+        settings_file = self.temp_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": ["Bash(git:*)"],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        # Use REAL marketplace.json format - NO skills/commands arrays
+        marketplace_file = self.temp_dir / 'marketplace.json'
+        marketplace_file.write_text(json.dumps({
+            "name": "plan-marshall",
+            "plugins": [
+                {
+                    "name": "pm-workflow",
+                    "description": "Workflow management",
+                    "source": "./bundles/pm-workflow",
+                    "strict": False
+                },
+                {
+                    "name": "pm-dev-java",
+                    "description": "Java development",
+                    "source": "./bundles/pm-dev-java",
+                    "strict": False
+                }
+            ]
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'ensure-wildcards',
+            '--settings', str(settings_file),
+            '--marketplace-json', str(marketplace_file),
+            '--dry-run'
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        # Should generate wildcards for ALL bundles (assume both skills and commands)
+        self.assertIn('added', data)
+        added = data['added']
+        self.assertIn('Skill(pm-workflow:*)', added)
+        self.assertIn('SlashCommand(/pm-workflow:*)', added)
+        self.assertIn('Skill(pm-dev-java:*)', added)
+        self.assertIn('SlashCommand(/pm-dev-java:*)', added)
+        self.assertEqual(data['bundles_analyzed'], 2)
         self.assertEqual(data['total'], 4)  # 2 bundles × 2 wildcards each
 
 

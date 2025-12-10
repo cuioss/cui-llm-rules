@@ -388,8 +388,12 @@ python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix remo
 
 ### Sync Wildcards
 
-```
-SlashCommand: /tools-audit-permission-wildcards
+Ensure marketplace wildcards exist in global settings:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix ensure-wildcards \
+  --settings ~/.claude/settings.json \
+  --marketplace-json marketplace/.claude-plugin/marketplace.json
 ```
 
 ---

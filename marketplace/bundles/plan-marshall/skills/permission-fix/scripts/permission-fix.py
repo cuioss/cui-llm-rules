@@ -458,15 +458,47 @@ def cmd_consolidate(args) -> int:
 # =============================================================================
 
 def has_skills(bundle: dict) -> bool:
-    """Check if a bundle has skills defined."""
-    skills = bundle.get("skills", [])
-    return isinstance(skills, list) and len(skills) > 0
+    """Check if a bundle has skills defined.
+
+    Returns True if:
+    - 'skills' key exists and is a non-empty list, OR
+    - Neither 'skills' nor 'commands' keys exist (assume bundle has both)
+    """
+    skills = bundle.get("skills")
+    commands = bundle.get("commands")
+
+    # If skills key exists, check if it's a non-empty list
+    if skills is not None:
+        return isinstance(skills, list) and len(skills) > 0
+
+    # If neither skills nor commands exist (real marketplace.json format),
+    # assume the bundle has skills
+    if skills is None and commands is None:
+        return True
+
+    return False
 
 
 def has_commands(bundle: dict) -> bool:
-    """Check if a bundle has commands defined."""
-    commands = bundle.get("commands", [])
-    return isinstance(commands, list) and len(commands) > 0
+    """Check if a bundle has commands defined.
+
+    Returns True if:
+    - 'commands' key exists and is a non-empty list, OR
+    - Neither 'skills' nor 'commands' keys exist (assume bundle has both)
+    """
+    skills = bundle.get("skills")
+    commands = bundle.get("commands")
+
+    # If commands key exists, check if it's a non-empty list
+    if commands is not None:
+        return isinstance(commands, list) and len(commands) > 0
+
+    # If neither skills nor commands exist (real marketplace.json format),
+    # assume the bundle has commands
+    if skills is None and commands is None:
+        return True
+
+    return False
 
 
 def generate_required_wildcards(marketplace: dict) -> list[str]:
@@ -474,6 +506,9 @@ def generate_required_wildcards(marketplace: dict) -> list[str]:
 
     Supports both 'bundles' key (from scan-marketplace-inventory output)
     and 'plugins' key (from marketplace.json format).
+
+    For real marketplace.json format (no skills/commands arrays),
+    assumes all bundles have both skills and commands.
     """
     wildcards = []
     # Support both 'bundles' (inventory output) and 'plugins' (marketplace.json)
@@ -524,11 +559,14 @@ def cmd_ensure_wildcards(args) -> int:
         else:
             added.append(wildcard)
 
+    # Count bundles from either 'bundles' or 'plugins' key
+    bundles = marketplace.get("bundles", marketplace.get("plugins", []))
+
     result = {
         "added": added,
         "already_present": already_present,
         "total": len(required_wildcards),
-        "bundles_analyzed": len(marketplace.get("bundles", [])),
+        "bundles_analyzed": len(bundles),
         "dry_run": args.dry_run,
         "settings_path": args.settings,
         "marketplace_path": args.marketplace_json
