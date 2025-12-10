@@ -151,8 +151,8 @@ def main() -> int:
     project_root = Path(args.project_root)
 
     if not project_root.exists():
-        print(f"status\terror", file=sys.stderr)
-        print(f"error\tproject_root_not_found", file=sys.stderr)
+        print("status\terror", file=sys.stderr)
+        print("error\tproject_root_not_found", file=sys.stderr)
         print(f"path\t{project_root}", file=sys.stderr)
         return 1
 
@@ -163,7 +163,7 @@ def main() -> int:
     print(f"gitignore_path\t{result['gitignore_path']}")
     print(f"entries_added\t{result['entries_added']}")
     if result['dry_run']:
-        print(f"dry_run\ttrue")
+        print("dry_run\ttrue")
 
     return 0
 
