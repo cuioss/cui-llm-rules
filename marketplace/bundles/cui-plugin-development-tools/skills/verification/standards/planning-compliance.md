@@ -68,7 +68,7 @@ Examples:
 | File | Read Script | Write Script |
 |------|-------------|--------------|
 | `request.md` | `planning:manage-plan-documents:manage-plan-document request read --plan-id {id}` | `planning:manage-plan-documents:manage-plan-document request create --plan-id {id} --title ... --source ... --body ...` |
-| `solution_outline.md` | `planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` | `planning:manage-plan-documents:manage-plan-document solution create --plan-id {id} --title ... --summary ... --goals ...` |
+| `solution_outline.md` | `planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` | Write tool directly, then `planning:manage-plan-documents:manage-plan-document solution validate --plan-id {id}` |
 | `lessons-learned/*.md` | `planning:manage-lessons:manage-lesson get --id {lesson_id}` | `planning:manage-lessons:manage-lesson add` |
 | Any plan file | `planning:manage-files:manage-files read --plan-id {id} --file {path}` | `planning:manage-files:manage-files write --plan-id {id} --file {path}` |
 

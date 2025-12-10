@@ -38,6 +38,7 @@
     "./skills/manage-tasks",
     "./skills/manage-files",
     "./skills/manage-plan-documents",
+    "./skills/manage-solution-outline",
     "./skills/manage-config",
     "./skills/manage-references",
     "./skills/manage-lifecycle",

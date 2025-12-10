@@ -20,6 +20,20 @@ allowed-tools: Read, Glob, Grep, Bash
 
 **Process**:
 
+### Step 0: Load Solution Outline Skill
+
+Load the solution outline skill for structure and examples:
+
+```
+Skill: planning:manage-solution-outline
+```
+
+This provides:
+- Required document structure (Summary, Overview, Deliverables)
+- ASCII diagram patterns for plugin integration tasks
+- Deliverable reference format
+- Realistic examples (see `examples/plugin-feature.md`)
+
 ### Step 1: Load Request Context
 
 Load plan context via manage-* scripts:
@@ -263,19 +277,17 @@ This restates the request without enumeration. The goals phase added no informat
 
 ### Step 3c: Create Solution Document
 
-After building the goals section (from either Path-Single or Path-Multi workflow), create the solution document:
+After building the goals section (from either Path-Single or Path-Multi workflow), write the solution document directly using Claude Code's Write tool to: `.plan/plans/{plan_id}/solution_outline.md`
+
+Then validate the structure:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution create \
-  --plan-id {plan_id} \
-  --title "{solution title derived from request}" \
-  --summary "{2-3 sentence summary including impact path}" \
-  --goals "{goals markdown section from Step 3a or 3b.3}" \
-  --approach "{technical approach description}" \
-  --dependencies "{list of dependencies}" \
-  --risks "{risks and mitigations}"
+  solution validate \
+  --plan-id {plan_id}
 ```
+
+**Why direct Write?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The agent generates the full markdown document and writes it directly.
 
 **Continue to Step 4.**
 
@@ -432,7 +444,7 @@ If multiple components match:
 **Caller**: `cui-plugin-development-tools:plugin-goals-agent`
 
 **Script Notations** (use EXACTLY as shown):
-- `planning:manage-plan-documents:manage-plan-document` - Create solution document (solution create), read request (request read)
+- `planning:manage-plan-documents:manage-plan-document` - Validate solution document (solution validate), read request (request read)
 - `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
 - `planning:manage-log:manage-work-log` - Log decisions (add, read)
 - `planning:manage-config:manage-config` - Read config (read)

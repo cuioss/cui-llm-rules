@@ -49,22 +49,19 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
 
 ## Step 3: Create Solution Document
 
-For generic plans, create a simple solution document:
+For generic plans, write the solution document directly using Claude Code's Write tool to: `.plan/plans/{plan_id}/solution_outline.md`
+
+See plan-refine SKILL.md for the template content.
+
+Then validate the structure:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution create \
-  --plan-id {plan_id} \
-  --title "Solution for {request_title}" \
-  --summary "{brief summary}" \
-  --goals "### 1. Complete Task
-
-{request_summary}
-
-**Success Criteria:**
-- Task completed as requested
-- Results verified"
+  solution validate \
+  --plan-id {plan_id}
 ```
+
+**Why direct Write?** Solution outlines can contain ASCII diagrams and rich content that don't fit CLI parameter passing.
 
 ---
 

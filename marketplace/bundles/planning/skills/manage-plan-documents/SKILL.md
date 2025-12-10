@@ -1,28 +1,29 @@
 ---
 name: manage-plan-documents
-description: Manage typed documents (request, solution) within plan directories with schema validation
+description: Manage request documents within plan directories with schema validation and template-based creation
 allowed-tools: Read, Glob, Bash
 ---
 
 # Manage Plan Documents Skill
 
-Domain-specific document management for plan content files. Provides logical document names, schema validation, template enforcement, and structured CRUD operations.
+Domain-specific document management for request documents. Provides logical document names, schema validation, and structured read/update operations.
 
 ## What This Skill Provides
 
 - Logical document names (abstract from physical filenames)
 - Declarative document type definitions
 - Template-based document creation
-- Section-based updates
+- Section-based reading and updates
 - TOON output format
 
 ## When to Activate This Skill
 
 Activate this skill when:
-- Creating or managing request documents
-- Creating or managing solution outlines
-- Reading plan documents with structured output
-- Updating specific sections of plan documents
+- Creating request documents (via template)
+- Reading request documents with structured output
+- Updating specific sections of request documents
+
+**For solution outlines**, use the `planning:manage-solution-outline` skill instead.
 
 ---
 
@@ -31,7 +32,6 @@ Activate this skill when:
 | Type | File | Purpose |
 |------|------|---------|
 | `request` | `request.md` | Original user input (source of truth) |
-| `solution` | `solution_outline.md` | Consolidated goals and approach |
 
 ---
 
@@ -96,31 +96,6 @@ document_info:
   sections: title,source,source_id,body,context
 ```
 
-### solution create
-
-Create a solution outline document.
-
-```bash
-python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution create \
-  --plan-id {plan_id} \
-  --title "Solution Overview" \
-  --summary "Brief approach description" \
-  --goals "### 1. First Goal\n\nDescription...\n\n### 2. Second Goal\n\nDescription..."
-```
-
-**Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `--plan-id` | Yes | Plan identifier |
-| `--title` | Yes | Solution title |
-| `--summary` | Yes | Brief summary of approach |
-| `--goals` | Yes | Goals content (markdown) |
-| `--approach` | No | Technical approach details |
-| `--dependencies` | No | Dependencies list |
-| `--risks` | No | Risks and mitigations |
-
 ### read
 
 Read a document with parsed sections.
@@ -153,10 +128,10 @@ Update a specific section.
 
 ```bash
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution update \
+  request update \
   --plan-id {plan_id} \
-  --section goals \
-  --content "### 1. Updated Goal\n\nNew description..."
+  --section context \
+  --content "Updated context information..."
 ```
 
 ### exists
@@ -212,7 +187,7 @@ suggestions[2]:
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-plan-documents:manage-plan-document` | All document operations |
+| `planning:manage-plan-documents:manage-plan-document` | Request document operations |
 
 ---
 
@@ -225,6 +200,10 @@ See [standards/architecture.md](standards/architecture.md) for:
 
 See [standards/adding-document-types.md](standards/adding-document-types.md) for:
 - Step-by-step guide to add new types
+
+## Related Skills
+
+- `planning:manage-solution-outline` - Solution outline management (validate, read, list-deliverables)
 
 ---
 
@@ -243,18 +222,17 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
   --body "$BODY"
 ```
 
-### With plan-refine
+### With domain goals agents (java-goals, js-goals, plugin-goals)
 
-Plan refinement creates solution outline:
+Domain goals agents read the request document:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution create \
-  --plan-id $PLAN_ID \
-  --title "Solution Overview" \
-  --summary "$SUMMARY" \
-  --goals "$GOALS"
+  request read \
+  --plan-id $PLAN_ID
 ```
+
+Then write solution outline using `planning:manage-solution-outline` skill.
 
 ### With manage-files
 

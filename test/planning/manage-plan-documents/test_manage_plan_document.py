@@ -67,7 +67,7 @@ def test_list_types():
         assert 'types' in data
         type_names = [t['name'] for t in data['types']]
         assert 'request' in type_names
-        assert 'solution' in type_names
+        # Note: 'solution' is now handled by manage-solution-outline skill
 
 
 # =============================================================================
@@ -241,79 +241,6 @@ def test_request_remove():
 
 
 # =============================================================================
-# Test: Solution Document
-# =============================================================================
-
-def test_solution_create():
-    """Test creating a solution document."""
-    with TestContext(plan_id='solution-create') as ctx:
-        result = run_script(SCRIPT_PATH,
-            'solution', 'create',
-            '--plan-id', 'solution-create',
-            '--title', 'Solution Overview',
-            '--summary', 'Brief summary of approach',
-            '--goals', '### 1. First Goal\n\nDescription'
-        )
-        assert result.success, f"Script failed: {result.stderr}"
-        data = parse_toon(result.stdout)
-        assert data['status'] == 'success'
-        assert data['document'] == 'solution'
-        # Verify file was created
-        assert (ctx.plan_dir / 'solution_outline.md').exists()
-
-
-def test_solution_create_full():
-    """Test creating a solution document with all fields."""
-    with TestContext(plan_id='solution-full') as ctx:
-        result = run_script(SCRIPT_PATH,
-            'solution', 'create',
-            '--plan-id', 'solution-full',
-            '--title', 'Full Solution',
-            '--summary', 'Complete approach',
-            '--goals', '### 1. Goal One\n\n### 2. Goal Two',
-            '--approach', 'Technical approach here',
-            '--dependencies', '- Dep 1\n- Dep 2',
-            '--risks', '| Risk | Mitigation |'
-        )
-        assert result.success, f"Script failed: {result.stderr}"
-        content = (ctx.plan_dir / 'solution_outline.md').read_text()
-        assert 'Full Solution' in content
-        assert 'Technical approach here' in content
-        assert 'Dep 1' in content
-
-
-def test_solution_update_section():
-    """Test updating a section of solution document."""
-    with TestContext(plan_id='solution-update') as ctx:
-        # Create initial document
-        (ctx.plan_dir / 'solution_outline.md').write_text('''# Solution: Test
-
-## Summary
-
-Old summary
-
-## Goals
-
-Old goals
-''')
-
-        result = run_script(SCRIPT_PATH,
-            'solution', 'update',
-            '--plan-id', 'solution-update',
-            '--section', 'goals',
-            '--content', '### 1. New Goal\n\nUpdated goal content'
-        )
-        assert result.success, f"Script failed: {result.stderr}"
-        data = parse_toon(result.stdout)
-        assert data['updated'] is True
-
-        # Verify content was updated
-        content = (ctx.plan_dir / 'solution_outline.md').read_text()
-        assert 'New Goal' in content
-        assert 'Old summary' in content  # Other sections preserved
-
-
-# =============================================================================
 # Test: Invalid Plan IDs
 # =============================================================================
 
@@ -419,10 +346,6 @@ if __name__ == '__main__':
         test_request_exists_present,
         test_request_exists_absent,
         test_request_remove,
-        # Solution document
-        test_solution_create,
-        test_solution_create_full,
-        test_solution_update_section,
         # Invalid plan IDs
         test_invalid_plan_id_uppercase,
         test_invalid_plan_id_underscore,

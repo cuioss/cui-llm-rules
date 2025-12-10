@@ -20,6 +20,20 @@ allowed-tools: Read, Glob, Grep, Bash
 
 **Process**:
 
+### Step 0: Load Solution Outline Skill
+
+Load the solution outline skill for structure and examples:
+
+```
+Skill: planning:manage-solution-outline
+```
+
+This provides:
+- Required document structure (Summary, Overview, Deliverables)
+- ASCII diagram patterns for JavaScript/frontend features
+- Deliverable reference format
+- Realistic examples
+
 ### Step 1: Load Request Context
 
 Load plan context via manage-* scripts:
@@ -97,19 +111,17 @@ Build a goals markdown section with numbered goals:
 ...
 ```
 
-Create the solution document:
+Write the solution document directly using Claude Code's Write tool to: `.plan/plans/{plan_id}/solution_outline.md`
+
+Then validate the structure:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution create \
-  --plan-id {plan_id} \
-  --title "{solution title derived from request}" \
-  --summary "{2-3 sentence summary of the approach}" \
-  --goals "{goals markdown section as shown above}" \
-  --approach "{technical approach description}" \
-  --dependencies "{list of dependencies}" \
-  --risks "{risks and mitigations}"
+  solution validate \
+  --plan-id {plan_id}
 ```
+
+**Why direct Write?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The agent generates the full markdown document and writes it directly.
 
 ### Step 4: Record Issues as Lessons
 

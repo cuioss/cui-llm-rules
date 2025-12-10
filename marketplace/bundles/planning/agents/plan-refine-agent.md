@@ -68,7 +68,14 @@ These constraints apply EVEN IF skill loading fails:
 
 ### SCRIPT NOTATION REFERENCE
 ```
-planning:manage-plan-documents:manage-plan-document solution create --plan-id X --title "Y" --summary "Z" --goals "### 1. Goal Title\n..."
+# Read request (always via script)
+planning:manage-plan-documents:manage-plan-document request read --plan-id X
+
+# Write solution (use Write tool directly, then validate)
+Write tool → .plan/plans/{plan_id}/solution_outline.md
+planning:manage-plan-documents:manage-plan-document solution validate --plan-id X
+
+# Create tasks and manage lifecycle
 planning:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"
 planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
 planning:manage-lifecycle:manage-lifecycle transition --plan-id X --completed Y

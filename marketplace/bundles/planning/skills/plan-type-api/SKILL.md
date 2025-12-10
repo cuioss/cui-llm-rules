@@ -84,7 +84,7 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 **Responsibilities**:
 - Read request.md for the request
 - Analyze codebase with domain knowledge
-- Create solution_outline.md via `manage-plan-documents:solution create`
+- Write solution_outline.md directly via Write tool, then validate with `manage-plan-documents:solution validate`
 - Document goals as numbered sections in solution document
 - Record lessons-learned on issues
 

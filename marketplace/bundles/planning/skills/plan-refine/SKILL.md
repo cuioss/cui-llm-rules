@@ -48,7 +48,8 @@ The `/plan-manage` command uses **skill-based routing**:
   └─ If domain.goals_agent IS null (generic):
        → Task: plan-refine-agent
          → Skill: plan-refine ← THIS SKILL
-           → manage-plan-document solution create (Bash)
+           → Write tool → solution_outline.md (direct)
+           → manage-plan-document solution validate (Bash)
            → manage-task add (Bash)
 ```
 
@@ -57,6 +58,19 @@ The `/plan-manage` command uses **skill-based routing**:
 ## Primary Operation: refine
 
 **Input**: `plan_id`
+
+### Step 0: Load Solution Outline Skill
+
+Load the solution outline skill for structure and examples:
+
+```
+Skill: planning:manage-solution-outline
+```
+
+This provides:
+- Required document structure (Summary, Overview, Deliverables)
+- ASCII diagram patterns
+- Deliverable reference format
 
 ### Step 1: Log Phase Start
 
@@ -100,22 +114,57 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
 
 ### Step 4: Create Solution Document
 
-For generic plans, create a simple solution document with a single goal:
+For generic plans, write the solution document directly using Claude Code's Write tool to: `.plan/plans/{plan_id}/solution_outline.md`
 
-```bash
-python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution create \
-  --plan-id {plan_id} \
-  --title "Solution for {request_title}" \
-  --summary "{brief summary of what will be done}" \
-  --goals "### 1. Complete Task
+**Solution Document Template for Generic Plans:**
+```markdown
+# Solution: {request_title}
+
+plan_id: {plan_id}
+created: {timestamp}
+
+## Summary
+
+{brief summary of what will be done}
+
+## Overview
+
+```
+Request → Analyze → Implement → Verify
+```
+
+## Deliverables
+
+### 1. Complete Task
 
 {request_summary}
 
 **Success Criteria:**
 - Task completed as requested
-- Results verified"
+- Results verified
+
+## Approach
+
+Execute the request as specified.
+
+## Dependencies
+
+None identified.
+
+## Risks and Mitigations
+
+None identified.
 ```
+
+Then validate the structure:
+
+```bash
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  solution validate \
+  --plan-id {plan_id}
+```
+
+**Why direct Write?** Solution outlines can contain ASCII diagrams and rich content that don't fit CLI parameter passing.
 
 ### Step 5: Create Tasks
 
@@ -176,7 +225,7 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `planning:manage-plan-documents` | `request read`, `solution create` | Read request, create solution |
+| `planning:manage-plan-documents` | `request read`, `solution validate` | Read request, validate solution (written directly via Write tool) |
 | `planning:manage-config` | `get` | Read plan_type |
 | `planning:manage-tasks` | `add` | Create tasks |
 | `planning:manage-lifecycle` | `transition` | Phase transition |

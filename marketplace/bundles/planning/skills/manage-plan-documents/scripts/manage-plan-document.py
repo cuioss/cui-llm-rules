@@ -2,15 +2,16 @@
 """
 Generic engine for plan document management.
 
-Manages typed documents (request, solution, etc.) within plan directories.
+Manages typed documents (request) within plan directories.
 Document types are defined declaratively in documents/*.toon files.
 Delegates file I/O to manage-files.
 
 Usage:
     python3 manage-plan-document.py request create --plan-id my-plan --title "..." --source description --body "..."
     python3 manage-plan-document.py request read --plan-id my-plan
-    python3 manage-plan-document.py solution create --plan-id my-plan --title "..." --summary "..." --goals "1|2|3"
-    python3 manage-plan-document.py solution update --plan-id my-plan --section goals --content "..."
+    python3 manage-plan-document.py request update --plan-id my-plan --section context --content "..."
+
+Note: Solution documents are managed by the manage-solution-outline skill.
 """
 
 import argparse
