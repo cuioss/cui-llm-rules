@@ -200,13 +200,95 @@ python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution
 - `planning:plan-refine` agent (for generic plans)
 
 **Scripts Used**:
-- `planning:manage-solution-outline:manage-solution-outline`:
-  - `write --plan-id X --validate [--force]` - Write solution from stdin
-  - `validate --plan-id X` - Validate structure
-  - `read --plan-id X [--raw]` - Read solution (TOON or raw markdown)
-  - `list-deliverables --plan-id X` - Extract deliverables list
-  - `exists --plan-id X` - Check if solution exists
+
+**Script**: `planning:manage-solution-outline:manage-solution-outline`
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `write` | `--plan-id --validate [--force]` | Write solution from stdin |
+| `validate` | `--plan-id` | Validate structure |
+| `read` | `--plan-id [--raw]` | Read solution (TOON or raw markdown) |
+| `list-deliverables` | `--plan-id` | Extract deliverables list |
+| `exists` | `--plan-id` | Check if solution exists |
 
 **Related Skills**:
 - `planning:manage-tasks` - Task creation with deliverable references
 - `planning:manage-plan-documents` - Request document operations
+
+---
+
+## Script Output Examples
+
+### write
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+file: solution_outline.md
+action: created
+validation:
+  valid: true
+  deliverable_count: 3
+  sections_found: summary,overview,deliverables
+```
+
+### validate
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+file: solution_outline.md
+validation:
+  sections_found: summary,overview,deliverables
+  deliverable_count: 3
+  deliverables:
+    - 1. Create JwtValidationService class
+    - 2. Add configuration support
+    - 3. Create unit tests
+```
+
+### list-deliverables
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+deliverable_count: 3
+deliverables:
+  - number: 1
+    title: Create JwtValidationService class
+    reference: 1. Create JwtValidationService class
+  - number: 2
+    title: Add configuration support
+    reference: 2. Add configuration support
+```
+
+### read
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+file: solution_outline.md
+content:
+  _header: # Solution: JWT Validation...
+  summary: Implement JWT validation service...
+  overview: Component architecture diagram...
+  deliverables: ### 1. Create JwtValidationService...
+```
+
+With `--raw`: Returns raw markdown content.
+
+### exists
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+file: solution_outline.md
+exists: true
+```
+
+Returns exit code 0 if exists, 1 if not.
