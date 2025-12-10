@@ -153,8 +153,17 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task update \
   --number 1 \
   [--title "New title"] \
   [--description "New description"] \
-  [--goal 2]
+  [--goal 2] \
+  [--status pending|in_progress|done|blocked]
 ```
+
+**Parameters**:
+- `--plan-id` (required): Plan identifier
+- `--number` (required): Task number to update
+- `--title`: New task title (renames file if changed)
+- `--description`: New task description
+- `--goal`: New goal reference (numeric)
+- `--status`: New status (`pending`, `in_progress`, `done`, `blocked`)
 
 ### remove
 
@@ -232,8 +241,13 @@ Get the next pending task or step (for execution).
 
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task next \
-  --plan-id {plan_id}
+  --plan-id {plan_id} \
+  [--include-context]
 ```
+
+**Parameters**:
+- `--plan-id` (required): Plan identifier
+- `--include-context`: Include goal details in output
 
 **Output (task in progress)**:
 ```toon
@@ -370,9 +384,21 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task remove-step \
 
 ## Scripts
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `planning:manage-tasks:manage-task` | All CRUD and step operations via subcommands | `python3 .plan/execute-script.py planning:manage-tasks:manage-task {subcommand} --help` |
+**Script**: `planning:manage-tasks:manage-task`
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `add` | `--plan-id --goal --title --description --steps` | Add a new task |
+| `update` | `--plan-id --number [--title] [--description] [--goal] [--status]` | Update task metadata |
+| `remove` | `--plan-id --number` | Remove a task |
+| `list` | `--plan-id [--status] [--goal]` | List all tasks |
+| `get` | `--plan-id --number` | Get single task details |
+| `next` | `--plan-id [--include-context]` | Get next pending task/step |
+| `step-start` | `--plan-id --task --step` | Mark step as in_progress |
+| `step-done` | `--plan-id --task --step` | Mark step as done |
+| `step-skip` | `--plan-id --task --step [--reason]` | Skip a step |
+| `add-step` | `--plan-id --task --title [--after]` | Add step to task |
+| `remove-step` | `--plan-id --task --step` | Remove step from task |
 
 ---
 
@@ -380,14 +406,14 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task remove-step \
 
 ### With plan-refine
 
-Tasks are created during plan refinement, after goals are defined:
+Tasks are created during plan refinement, after deliverables are defined in solution_outline.md:
 
 ```
-FOR EACH goal:
-  1. READ goal via plan-goals skill
+FOR EACH deliverable in solution_outline.md:
+  1. READ deliverable via manage-solution-outline list-deliverables
   2. ANALYZE what implementation work is needed
-  3. CREATE tasks for the goal:
-     manage-task.py add --plan-id {plan_id} --goal GOAL-{n} ...
+  3. CREATE tasks for the deliverable:
+     manage-task add --plan-id {plan_id} --goal {N} ...
 ```
 
 ### With plan-execute
@@ -436,8 +462,8 @@ Request (request.md)
 ```
 
 Query capabilities:
-- `manage-plan-document solution read` -> All goals from solution
-- `manage-task list --goal 1` -> TASK-1, TASK-2
+- `manage-solution-outline list-deliverables` -> All deliverables from solution
+- `manage-task list --goal 1` -> Tasks for deliverable 1
 - `manage-task next` -> Next actionable step
 
 ---
