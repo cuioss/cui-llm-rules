@@ -55,7 +55,7 @@ This bundle provides comprehensive frontend development expertise by aggregating
 
 ### Agents (1 build execution agent)
 
-**npm-builder** - Autonomous npm/npx build agent
+**npm-dev-builder** - Autonomous npm/npx build agent
 - Project structure detection (single-package vs monorepo)
 - Workspace validation
 - Delegates to builder-npm-rules skill for execution
@@ -87,7 +87,7 @@ This bundle provides comprehensive frontend development expertise by aggregating
 ```
 pm-dev-frontend/
 ├── agents/                  # Build execution agents
-│   └── npm-builder.md       # Autonomous npm/npx build agent
+│   └── npm-dev-builder.md       # Autonomous npm/npx build agent
 ├── commands/                # 7 goal-based orchestrators
 │   ├── js-implement-code.md
 │   ├── js-implement-tests.md
@@ -126,7 +126,7 @@ pm-dev-frontend/
 Similar to builder-maven with maven-builder agent and builder-maven-rules skill:
 
 ```
-npm-builder agent (Layer 3)
+npm-dev-builder agent (Layer 3)
   ├─> Detects project structure (single-package vs monorepo)
   ├─> Validates workspace configuration
   └─> Delegates to builder-npm-rules skill

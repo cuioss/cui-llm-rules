@@ -5,7 +5,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: pm-java:java-solution-outline-agent
   task_plan_agent: pm-java:java-task-plan-agent
-  verification_command: /pm-builder:builder-build-and-fix
+  verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
   standards:
     - pm-java:cui-java-core
@@ -31,7 +31,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 |-------|-------|---------|
 | `solution_outline_agent` | `pm-java:java-solution-outline-agent` | Creates solution outline with deliverables |
 | `task_plan_agent` | `pm-java:java-task-plan-agent` | Creates tasks from deliverables |
-| `verification_command` | `/pm-builder:builder-build-and-fix` | Build verification |
+| `verification_command` | `/pm-dev-builder:builder-build-and-fix` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
 | `standards` | Java core, JavaDoc, Unit testing | Skills to load |
 
@@ -56,7 +56,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 |-------|-------|
 | `create_pr` | `true` |
 | `verification_required` | `true` |
-| `verification_command` | `/pm-builder:builder-build-and-fix` |
+| `verification_command` | `/pm-dev-builder:builder-build-and-fix` |
 | `branch_strategy` | `feature` |
 
 ---

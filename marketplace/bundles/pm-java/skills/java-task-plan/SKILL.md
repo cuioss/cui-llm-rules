@@ -200,7 +200,7 @@ Verify `./gradlew :{module}:test` passes
 
 **Final verification**:
 ```
-Run /pm-builder:builder-build-and-fix
+Run /pm-dev-builder:builder-build-and-fix
 ```
 
 ---

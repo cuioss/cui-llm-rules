@@ -5,7 +5,7 @@ description: Self-contained command for JavaScript code implementation with veri
 
 # JavaScript Implement Code Command
 
-Self-contained command that implements JavaScript code with full standards compliance, verifies with npm-builder, and iterates until clean.
+Self-contained command that implements JavaScript code with full standards compliance, verifies with npm-dev-builder, and iterates until clean.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -80,7 +80,7 @@ If the description explicitly indicates the task is to **fix the build** (e.g., 
 2. **Execute build verification**:
    ```
    Task:
-     subagent_type: npm-builder
+     subagent_type: npm-dev-builder
      description: Verify build precondition
      prompt: |
        Execute npm build to verify clean starting point.
@@ -269,7 +269,7 @@ For each step in the plan:
 2. **Execute build**:
    ```
    Task:
-     subagent_type: npm-builder
+     subagent_type: npm-dev-builder
      description: Verify implementation build
      prompt: |
        Execute npm build to verify implementation.
@@ -456,7 +456,7 @@ Summary:
 - ALWAYS apply patterns consistently
 
 **Post-Implementation Build Verification (Step 7):**
-- ALWAYS verify with npm-builder
+- ALWAYS verify with npm-dev-builder
 - ALWAYS use "run build" at minimum
 - NEVER proceed with build errors
 - NEVER proceed with build warnings
@@ -489,7 +489,7 @@ Summary:
 - **Glob**: Find related files, package.json locations
 - **Grep**: Search for patterns, functions, dependencies
 - **Skill**: Load cui-javascript (always) and other skills (when needed)
-- **Task**: Invoke npm-builder agent for build verification
+- **Task**: Invoke npm-dev-builder agent for build verification
 
 ## ARCHITECTURE
 
@@ -498,20 +498,20 @@ This is a Layer 2 self-contained command:
 ```
 /js-implement-code (Layer 2: Single-item orchestration)
   ├─> Implement code directly (no agent delegation)
-  ├─> Task(npm-builder) [Layer 3: verifies builds]
+  ├─> Task(npm-dev-builder) [Layer 3: verifies builds]
   ├─> Analyze and iterate (max 3 cycles)
   └─> Return result
 ```
 
 **Key Design:**
 - Self-contained: Implements code directly without agent delegation
-- Verification: Uses npm-builder for builds (Rule 7 compliance)
+- Verification: Uses npm-dev-builder for builds (Rule 7 compliance)
 - Iteration: Max 3 build-fix cycles
 - Can be invoked by users OR Layer 1 batch commands
 
 ## RELATED
 
-- `npm-builder` - Build verification agent (Layer 3)
+- `npm-dev-builder` - Build verification agent (Layer 3)
 - `/orchestrate-js` - Orchestrates multiple implementations (Layer 1)
 - `cui-javascript` - Core JavaScript standards skill
 - `cui-jsdoc` - JSDoc documentation skill

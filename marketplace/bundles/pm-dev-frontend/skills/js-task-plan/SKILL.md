@@ -206,7 +206,7 @@ Verify `npm run lint` passes
 
 **Final verification**:
 ```
-Run /pm-builder:builder-build-and-fix system=npm
+Run /pm-dev-builder:builder-build-and-fix system=npm
 ```
 
 ---

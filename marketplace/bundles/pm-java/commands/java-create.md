@@ -109,7 +109,7 @@ Task:
 ### Step 5: Verify Build
 
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile

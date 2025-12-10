@@ -381,7 +381,7 @@ def detect_build_systems() -> list:
     if (project_root / 'pom.xml').exists():
         detected.append({
             "detected": "maven",
-            "skill": "pm-builder:builder-maven-rules",
+            "skill": "pm-dev-builder:builder-maven-rules",
             "active": True
         })
 
@@ -389,7 +389,7 @@ def detect_build_systems() -> list:
     if (project_root / 'build.gradle').exists() or (project_root / 'build.gradle.kts').exists():
         detected.append({
             "detected": "gradle",
-            "skill": "pm-builder:builder-gradle-rules",
+            "skill": "pm-dev-builder:builder-gradle-rules",
             "active": True
         })
 
@@ -397,7 +397,7 @@ def detect_build_systems() -> list:
     if (project_root / 'package.json').exists():
         detected.append({
             "detected": "npm",
-            "skill": "pm-builder:builder-npm-rules",
+            "skill": "pm-dev-builder:builder-npm-rules",
             "active": True
         })
 

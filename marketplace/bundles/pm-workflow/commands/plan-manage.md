@@ -97,7 +97,7 @@ The skill's `domain:` frontmatter contains:
 domain:
   solution_outline_agent: pm-java:java-solution-outline-agent
   task_plan_agent: pm-java:java-task-plan-agent
-  verification_command: /pm-builder:builder-build-and-fix
+  verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
 ```
 

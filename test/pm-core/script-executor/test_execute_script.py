@@ -28,7 +28,7 @@ def load_executor_module():
         '{{SCRIPT_MAPPINGS}}',
         '''
     "pm-workflow:manage-files": "/test/path/manage-files.py",
-    "pm-builder:builder-maven-rules": "/test/path/maven.py",
+    "pm-dev-builder:builder-maven-rules": "/test/path/maven.py",
     "test:skill": "/test/path/test-skill.py",
 '''
     )
@@ -77,7 +77,7 @@ def test_resolve_all_mappings():
     """All mappings are available in SCRIPTS dict."""
     executor = load_executor_module()
     assert 'pm-workflow:manage-files' in executor.SCRIPTS
-    assert 'pm-builder:builder-maven-rules' in executor.SCRIPTS
+    assert 'pm-dev-builder:builder-maven-rules' in executor.SCRIPTS
     assert 'test:skill' in executor.SCRIPTS
 
 

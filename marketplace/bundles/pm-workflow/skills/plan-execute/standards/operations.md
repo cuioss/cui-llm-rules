@@ -9,7 +9,7 @@ Reference for executing common checklist items. The executor uses these patterns
 
 ```
 Task:
-  subagent_type: pm-builder:maven-builder
+  subagent_type: pm-dev-builder:maven-builder
   prompt: Execute mvn clean verify, report results and coverage
 ```
 
@@ -18,7 +18,7 @@ Task:
 
 ```
 Task:
-  subagent_type: pm-builder:npm-builder
+  subagent_type: pm-dev-builder:npm-dev-builder
   prompt: Execute npm build and test, report results and coverage
 ```
 
@@ -63,7 +63,7 @@ Task:
 
 ```
 Task:
-  subagent_type: pm-builder:npm-builder
+  subagent_type: pm-dev-builder:npm-dev-builder
   prompt: Execute Task {N}: {name}, Goal: {goal}, Criteria: {list}
 ```
 

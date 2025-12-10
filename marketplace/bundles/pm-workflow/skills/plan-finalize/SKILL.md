@@ -107,8 +107,8 @@ SlashCommand("{verification_command}")
 ```
 
 Common verification commands:
-- `/pm-builder:builder-build-and-fix` - Java/Gradle/Maven
-- `/pm-builder:builder-build-and-fix system=npm` - JavaScript
+- `/pm-dev-builder:builder-build-and-fix` - Java/Gradle/Maven
+- `/pm-dev-builder:builder-build-and-fix system=npm` - JavaScript
 - `/pm-plugin-development:plugin-doctor` - Plugin development
 
 If verification fails, report error and allow retry.

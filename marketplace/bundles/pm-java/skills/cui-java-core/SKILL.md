@@ -406,7 +406,7 @@ Map<String, List<User>> usersByRole = users.stream()
 6. Implement methods with proper null safety
 7. Use modern Java features (records for DTOs, switch expressions, streams)
 8. Write unit tests verifying behavior
-9. Verify build using pm-builder:builder-maven-rules workflow
+9. Verify build using pm-dev-builder:builder-maven-rules workflow
 
 ### Task: Refactor existing code to standards
 
@@ -417,7 +417,7 @@ Map<String, List<User>> usersByRole = users.stream()
 5. Replace classic patterns with modern features (records, switch expressions)
 6. Add null checks at API boundaries
 7. Update tests to verify compliance
-8. Verify build using pm-builder:builder-maven-rules workflow
+8. Verify build using pm-dev-builder:builder-maven-rules workflow
 
 ### Task: Add comprehensive logging
 
@@ -656,7 +656,7 @@ Verify that implementation task description is clear and the build is clean befo
 
    **Execute clean build:**
    ```
-   Skill: pm-builder:builder-maven-rules
+   Skill: pm-dev-builder:builder-maven-rules
    Workflow: Execute Maven Build
    Parameters:
      goals: clean compile
@@ -706,7 +706,7 @@ Verify that implementation task description is clear and the build is clean befo
 **Execute Maven Build** (via builder-maven workflow):
 - **Input**: Maven goals, optional module, output_mode
 - **Output**: JSON with build status and categorized issues
-- **Workflow**: `pm-builder:builder-maven-rules` → `Execute Maven Build`
+- **Workflow**: `pm-dev-builder:builder-maven-rules` → `Execute Maven Build`
 
 ### Related Standards
 
@@ -734,7 +734,7 @@ Use this workflow when:
 ### Step 1: Execute Build
 
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile
@@ -780,7 +780,7 @@ For each error:
 ### Step 5: Verify Build
 
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: compile
@@ -890,7 +890,7 @@ Use Edit tool (existing file) or Write tool (new file):
 ### Step 6: Verify Build
 
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean compile

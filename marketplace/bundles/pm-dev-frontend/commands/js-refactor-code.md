@@ -73,7 +73,7 @@ This loads comprehensive maintenance standards including:
 
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Verify build before refactoring
   prompt: |
     Execute npm build to verify build health.
@@ -87,7 +87,7 @@ Task:
 
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Execute test suite
   prompt: |
     Execute complete test suite.
@@ -189,7 +189,7 @@ Track in `fixes_applied`.
 
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Verify workspace changes
   prompt: |
     Execute build and tests for workspace {workspace-name}.
@@ -236,7 +236,7 @@ Track in `workspaces_completed`. Continue to next workspace.
 
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Final build verification
   prompt: |
     Execute complete build to verify all changes.
@@ -247,7 +247,7 @@ Task:
 
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Final test verification
   prompt: |
     Execute complete test suite.
@@ -258,7 +258,7 @@ Task:
 
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Lint verification
   prompt: |
     Execute lint checks.
@@ -368,14 +368,14 @@ Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Standards for detection, prioritization, verification
 - **Explore agent** - Codebase analysis for violation detection
 - **`/js-implement-code` command** - Self-contained code fixes (Layer 2)
-- **npm-builder agent** - Build and verification
+- **npm-dev-builder agent** - Build and verification
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Standards this command implements
 - `/js-implement-code` command - Implementation fixes (Layer 2)
-- `npm-builder` agent - Build verification
+- `npm-dev-builder` agent - Build verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript` skill - Implementation patterns
 - `cui-task-planning` skill - For refactoring task planning

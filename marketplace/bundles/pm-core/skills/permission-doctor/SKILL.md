@@ -61,7 +61,7 @@ python3 .plan/execute-script.py pm-core:permission-doctor:permission-doctor dete
     {"permission": "Bash(git:*)", "reason": "Exact duplicate", "type": "exact_duplicate"}
   ],
   "marketplace_in_local": [
-    {"permission": "Skill(pm-builder:*)", "reason": "Should be in global", "type": "marketplace_permission"}
+    {"permission": "Skill(pm-dev-builder:*)", "reason": "Should be in global", "type": "marketplace_permission"}
   ],
   "summary": {
     "redundant_count": 1,

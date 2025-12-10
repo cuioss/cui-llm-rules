@@ -33,7 +33,7 @@ Activate when:
 | gitignore-setup | `pm-core:plan-marshall:gitignore-setup` | Configure .gitignore for .plan/ |
 | marshal-config | `pm-workflow:manage-config:marshal-config` | Project-level marshal.json CRUD |
 | scan-marketplace-inventory | `pm-core:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
-| build-env | `pm-builder:environment-detection:build-env` | Build system detection |
+| build-env | `pm-dev-builder:environment-detection:build-env` | Build system detection |
 | permission-doctor | `pm-core:permission-doctor:permission-doctor` | Permission analysis |
 | permission-fix | `pm-core:permission-fix:permission-fix` | Permission fixes |
 | marketplace-sync | `pm-core:marketplace-sync:marketplace-sync` | Marketplace permission sync |
@@ -156,7 +156,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config init
 ### Step 4: Build System Detection
 
 ```bash
-python3 .plan/execute-script.py pm-builder:environment-detection:build-env detect
+python3 .plan/execute-script.py pm-dev-builder:environment-detection:build-env detect
 ```
 
 Parse detected systems and prompt user:
@@ -368,23 +368,23 @@ SlashCommand: /tools-audit-permission-wildcards
 ### Detect Build Systems
 
 ```bash
-python3 .plan/execute-script.py pm-builder:environment-detection:build-env detect
+python3 .plan/execute-script.py pm-dev-builder:environment-detection:build-env detect
 ```
 
 ### Configure Build Mappings
 
 | Detected | Skill | Verification Command |
 |----------|-------|---------------------|
-| Maven | `pm-builder:builder-maven-rules` | `/pm-builder:builder-build-and-fix` |
-| Gradle | `pm-builder:builder-gradle-rules` | `/pm-builder:builder-build-and-fix` |
-| npm | `pm-builder:builder-npm-rules` | `/pm-builder:builder-build-and-fix system=npm` |
+| Maven | `pm-dev-builder:builder-maven-rules` | `/pm-dev-builder:builder-build-and-fix` |
+| Gradle | `pm-dev-builder:builder-gradle-rules` | `/pm-dev-builder:builder-build-and-fix` |
+| npm | `pm-dev-builder:builder-npm-rules` | `/pm-dev-builder:builder-build-and-fix system=npm` |
 
 ### Update Verification Commands
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config plan-type-defaults set \
   --plan-type pm-workflow:plan-type-java \
-  --verification-command "/pm-builder:builder-build-and-fix"
+  --verification-command "/pm-dev-builder:builder-build-and-fix"
 ```
 
 ---

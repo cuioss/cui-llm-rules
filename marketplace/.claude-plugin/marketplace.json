@@ -45,9 +45,9 @@
       "strict": false
     },
     {
-      "name": "pm-builder",
+      "name": "pm-dev-builder",
       "description": "Unified build tools for Maven, Gradle, and npm projects",
-      "source": "./bundles/pm-builder",
+      "source": "./bundles/pm-dev-builder",
       "strict": false
     },
     {

@@ -122,7 +122,7 @@ Before each task can be marked complete, use skill operations:
 
 | Gate | Skill/Agent | Purpose |
 |------|-------------|---------|
-| Build Verification | `maven-builder` or `npm-builder` agent | Run build and fix errors |
+| Build Verification | `maven-builder` or `npm-dev-builder` agent | Run build and fix errors |
 | Test Execution | `java-implement-tests-agent` or `js-implement-tests` command | Verify tests pass |
 | Coverage Check | `java-coverage-agent` or `js-generate-coverage` command | Verify ≥80% coverage |
 | Documentation | `java-fix-javadoc-agent` or `js-fix-jsdoc` command | Verify docs complete |
@@ -154,7 +154,7 @@ Before starting implementation:
 - [ ] All tasks reviewed and understood
 - [ ] Dependencies correctly identified
 - [ ] References accessible (ADRs, interfaces, code)
-- [ ] Build system working (via `maven-builder` or `npm-builder` agent)
+- [ ] Build system working (via `maven-builder` or `npm-dev-builder` agent)
 - [ ] Branch correct: {branch}
 - [ ] Issue linked: {issue}
 

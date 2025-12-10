@@ -21,7 +21,7 @@ Simplified notation: `{bundle}:{skill}`
 | Example |
 |---------|
 | `pm-workflow:manage-files` |
-| `pm-builder:builder-maven-rules` |
+| `pm-dev-builder:builder-maven-rules` |
 
 ## Examples
 
@@ -34,7 +34,7 @@ python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-do
 python3 .plan/execute-script.py pm-workflow:manage-files:manage-files write --plan-id my-plan --file notes.md --content "..."
 
 # Build operations
-python3 .plan/execute-script.py pm-builder:builder-maven-rules:maven execute --goals clean,verify
+python3 .plan/execute-script.py pm-dev-builder:builder-maven-rules:maven execute --goals clean,verify
 
 # Config operations
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set --plan-id my-plan --key foo --value bar
@@ -79,7 +79,7 @@ Fallback when no plan context:
 **Success entries** (compact, single-line):
 ```
 2025-12-08T10:30:00	pm-workflow:manage-files	add	0	0.15s
-2025-12-08T10:30:05	pm-builder:builder-maven-rules	execute	0	45.23s
+2025-12-08T10:30:05	pm-dev-builder:builder-maven-rules	execute	0	45.23s
 ```
 
 **Error entries** (detailed, multi-line):

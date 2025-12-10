@@ -41,8 +41,8 @@ python3 .plan/execute-script.py pm-core:marketplace-sync:marketplace-sync genera
     "wildcards_generated": 22
   },
   "permissions": {
-    "skill_wildcards": ["Skill(pm-builder:*)", "Skill(pm-workflow:*)"],
-    "command_bundle_wildcards": ["SlashCommand(/pm-builder:*)", "SlashCommand(/pm-workflow:*)"],
+    "skill_wildcards": ["Skill(pm-dev-builder:*)", "Skill(pm-workflow:*)"],
+    "command_bundle_wildcards": ["SlashCommand(/pm-dev-builder:*)", "SlashCommand(/pm-workflow:*)"],
     "command_shortform": ["SlashCommand(/java-create:*)"]
   }
 }

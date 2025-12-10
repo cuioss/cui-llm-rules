@@ -185,7 +185,7 @@ Provide summary of:
 
 ### Coverage Verification
 
-- [ ] Generate coverage using pm-builder:builder-maven-rules workflow with jacoco
+- [ ] Generate coverage using pm-dev-builder:builder-maven-rules workflow with jacoco
 - [ ] Coverage meets minimum requirements (80% line/branch)
 - [ ] Critical paths have 100% coverage
 - [ ] No coverage regressions from previous state
@@ -389,7 +389,7 @@ Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements
 
    If report doesn't exist, run Maven with jacoco:
    ```
-   Skill: pm-builder:builder-maven-rules
+   Skill: pm-dev-builder:builder-maven-rules
    Workflow: Execute Maven Build
    Parameters:
      goals: clean test jacoco:report
@@ -495,7 +495,7 @@ Analyze JaCoCo coverage reports, identify gaps, and prioritize test improvements
 
 To generate coverage reports with tests:
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean test jacoco:report
@@ -530,7 +530,7 @@ Use this workflow when:
 ### Step 1: Execute Tests
 
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean test
@@ -589,7 +589,7 @@ Use Edit tool for all modifications.
 ### Step 6: Verify Tests Pass
 
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: test
@@ -721,7 +721,7 @@ Edit: {existing_test_file}
 ### Step 6: Verify Tests Pass
 
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: test -Dtest={target_class}Test

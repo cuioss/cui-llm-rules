@@ -54,7 +54,7 @@ Execute pre-maintenance checklist to establish baseline:
 **2.1 Test Execution:**
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Execute test suite
   prompt: |
     Execute test suite to verify baseline.
@@ -213,7 +213,7 @@ After all improvements for workspace/batch:
 
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Verify test improvements
   prompt: |
     Execute tests for workspace.
@@ -268,7 +268,7 @@ After all workspaces/test files processed:
 **6.1 Full Test Suite:**
 ```
 Task:
-  subagent_type: npm-builder
+  subagent_type: npm-dev-builder
   description: Final test verification
   prompt: |
     Execute complete test suite.
@@ -424,14 +424,14 @@ Orchestrates agents and commands:
 - **cui-javascript-maintenance skill** - Test quality standards and prioritization
 - **Explore agent** - Test quality analysis
 - **`/js-implement-tests` command** - Self-contained test improvements (Layer 2)
-- **npm-builder agent** - Test execution and verification (Layer 3)
+- **npm-dev-builder agent** - Test execution and verification (Layer 3)
 - **`/javascript-coverage-report` command** - Coverage analysis
 
 ## RELATED
 
 - `cui-javascript-maintenance` skill - Test quality standards this command implements
 - `/js-implement-tests` command - Test implementation and improvement (Layer 2)
-- `npm-builder` agent - Test execution and verification
+- `npm-dev-builder` agent - Test execution and verification
 - `/javascript-coverage-report` command - Coverage analysis
 - `cui-javascript-unit-testing` skill - Jest testing patterns
 - `cui-cypress` skill - E2E testing patterns

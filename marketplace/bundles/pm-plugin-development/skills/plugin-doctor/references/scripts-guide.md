@@ -43,7 +43,7 @@ get-config.py --key foo
 ```markdown
 # COMPLIANT
 python3 .plan/execute-script.py pm-workflow:manage-files:manage-files add --plan-id my-plan
-python3 .plan/execute-script.py pm-builder:builder-maven-rules:maven execute --goals verify
+python3 .plan/execute-script.py pm-dev-builder:builder-maven-rules:maven execute --goals verify
 
 # VIOLATION (direct path)
 python3 /path/to/marketplace/.../manage-files.py add --plan-id my-plan

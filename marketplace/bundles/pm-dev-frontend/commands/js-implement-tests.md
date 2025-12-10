@@ -5,7 +5,7 @@ description: Self-contained command for JavaScript test implementation with veri
 
 # JavaScript Implement Tests Command
 
-Self-contained command that implements Jest/Vitest tests with full standards compliance, verifies with npm-builder, and iterates until tests pass.
+Self-contained command that implements Jest/Vitest tests with full standards compliance, verifies with npm-dev-builder, and iterates until tests pass.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
@@ -80,7 +80,7 @@ If the description explicitly indicates the task is to **fix the build or failin
 2. **Execute test verification**:
    ```
    Task:
-     subagent_type: npm-builder
+     subagent_type: npm-dev-builder
      description: Verify test precondition
      prompt: |
        Execute npm test to verify all existing tests pass.
@@ -249,7 +249,7 @@ Reference patterns from loaded `cui-javascript-unit-testing` skill:
 2. **Execute tests**:
    ```
    Task:
-     subagent_type: npm-builder
+     subagent_type: npm-dev-builder
      description: Run tests
      prompt: |
        Execute npm test to run tests.
@@ -414,7 +414,7 @@ Result: ⚠️ PARTIAL SUCCESS
 - NEVER use hardcoded test data when builders/factories are better
 
 **Test Verification:**
-- ALWAYS verify tests with npm-builder
+- ALWAYS verify tests with npm-dev-builder
 - ALWAYS use "run test" at minimum
 - ANALYZE test failures (test bug vs production bug)
 - FIX test bugs and iterate (max 3 iterations)
@@ -443,7 +443,7 @@ Result: ⚠️ PARTIAL SUCCESS
 - **Glob**: Find test files, package.json locations
 - **Grep**: Verify files exist, search for patterns, find dependencies
 - **Skill**: Load cui-javascript-unit-testing (loads all applicable testing standards)
-- **Task**: Invoke npm-builder agent for test execution
+- **Task**: Invoke npm-dev-builder agent for test execution
 
 ## ARCHITECTURE
 
@@ -452,21 +452,21 @@ This is a Layer 2 self-contained command:
 ```
 /js-implement-tests (Layer 2: Single-item orchestration)
   ├─> Implement tests directly (no agent delegation)
-  ├─> Task(npm-builder) [Layer 3: executes tests]
+  ├─> Task(npm-dev-builder) [Layer 3: executes tests]
   ├─> Analyze and iterate (max 3 cycles)
   └─> Return result
 ```
 
 **Key Design:**
 - Self-contained: Implements tests directly without agent delegation
-- Verification: Uses npm-builder for test execution (Rule 7 compliance)
+- Verification: Uses npm-dev-builder for test execution (Rule 7 compliance)
 - Iteration: Max 3 test-fix cycles
 - Can be invoked by users OR Layer 1 batch commands
 - Production bug detection: Documents production issues without fixing them
 
 ## RELATED
 
-- `npm-builder` - Test execution agent (Layer 3)
+- `npm-dev-builder` - Test execution agent (Layer 3)
 - `/orchestrate-js` - Orchestrates multiple test tasks (Layer 1)
 - `cui-javascript-unit-testing` - Testing standards skill
 - `/javascript-implement-code` - Production code implementation (Layer 2)

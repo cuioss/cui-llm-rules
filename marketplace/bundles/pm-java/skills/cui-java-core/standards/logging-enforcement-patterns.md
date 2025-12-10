@@ -343,7 +343,7 @@ WARN Level:
 
 **Use builder-maven-rules skill workflow:**
 ```
-Skill: pm-builder:builder-maven-rules
+Skill: pm-dev-builder:builder-maven-rules
 Workflow: Execute Maven Build
 Parameters:
   goals: clean verify

@@ -58,7 +58,7 @@ Add a build caching skill to the builder bundle that caches build outputs and re
 
 Python script for cache key generation and storage.
 
-**Location**: `marketplace/bundles/pm-builder/skills/build-cache/scripts/manage-cache.py`
+**Location**: `marketplace/bundles/pm-dev-builder/skills/build-cache/scripts/manage-cache.py`
 
 **Commands**:
 - `key` - Generate cache key from inputs (pom.xml, src/**)
@@ -70,7 +70,7 @@ Python script for cache key generation and storage.
 
 Define the skill interface and workflows.
 
-**Location**: `marketplace/bundles/pm-builder/skills/build-cache/SKILL.md`
+**Location**: `marketplace/bundles/pm-dev-builder/skills/build-cache/SKILL.md`
 
 **Workflows**:
 - Pre-build: Check cache, restore if hit
@@ -91,7 +91,7 @@ Implement robust cache key algorithm.
 
 Add cache hooks to Maven build workflow.
 
-**Changes to**: `marketplace/bundles/pm-builder/skills/builder-maven-rules/SKILL.md`
+**Changes to**: `marketplace/bundles/pm-dev-builder/skills/builder-maven-rules/SKILL.md`
 
 **Integration points**:
 - Before `mvn compile`: check cache

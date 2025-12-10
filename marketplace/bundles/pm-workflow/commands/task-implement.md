@@ -61,7 +61,7 @@ If pending found: Prompt "[R]esume / [S]tart fresh / [A]bort"
 
 Auto-detect language: `pom.xml` → Java, `package.json` → JavaScript
 
-Run `SlashCommand(/pm-builder:maven-build-and-fix)`. Iterate up to 3 times if fails.
+Run `SlashCommand(/pm-dev-builder:maven-build-and-fix)`. Iterate up to 3 times if fails.
 
 ### Step 5: Commit and Push
 
