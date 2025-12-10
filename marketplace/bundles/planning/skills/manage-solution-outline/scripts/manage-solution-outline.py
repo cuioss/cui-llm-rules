@@ -2,13 +2,19 @@
 """
 Manage solution outline documents.
 
-Solution outlines are written directly by agents using Claude Code's Write tool
-(to support ASCII diagrams), then validated and queried via this script.
+Solution outlines are written using manage-files with --stdin to support ASCII
+diagrams with box-drawing characters, then validated and queried via this script.
+
+Write: echo "$content" | manage-files write --plan-id X --file solution_outline.md --stdin
+Validate: manage-solution-outline validate --plan-id X
+Read: manage-solution-outline read --plan-id X [--raw]
+List: manage-solution-outline list-deliverables --plan-id X
 
 Usage:
     python3 manage-solution-outline.py validate --plan-id my-plan
     python3 manage-solution-outline.py list-deliverables --plan-id my-plan
     python3 manage-solution-outline.py read --plan-id my-plan [--raw]
+    python3 manage-solution-outline.py exists --plan-id my-plan
 """
 
 import argparse
@@ -149,7 +155,7 @@ def cmd_validate(args) -> int:
             'plan_id': args.plan_id,
             'file': SOLUTION_FILE,
             'suggestions': [
-                'Write the solution outline using Write tool first',
+                'Write solution_outline.md using manage-files write --stdin',
                 'Check plan_id spelling'
             ]
         }))
@@ -243,7 +249,7 @@ def cmd_read(args) -> int:
             'plan_id': args.plan_id,
             'file': SOLUTION_FILE,
             'suggestions': [
-                'Write the solution outline using Write tool first',
+                'Write solution_outline.md using manage-files write --stdin',
                 'Check plan_id spelling'
             ]
         }))

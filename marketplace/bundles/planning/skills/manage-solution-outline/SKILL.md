@@ -135,9 +135,17 @@ Draw ASCII diagram showing:
 
 ### Step 4: Write Document
 
-Write directly using Claude Code's Write tool to: `.plan/plans/{plan_id}/solution_outline.md`
+Write using manage-files with stdin to ensure consistent path handling:
 
-**Why direct Write?** Solution outlines contain ASCII diagrams with box-drawing characters (│, ─, ┌, └) that are difficult to pass via CLI parameters.
+```bash
+echo "document content here" | python3 .plan/execute-script.py \
+  planning:manage-files:manage-files write \
+  --plan-id {plan_id} \
+  --file solution_outline.md \
+  --stdin
+```
+
+**Why `--stdin`?** Solution outlines contain ASCII diagrams with box-drawing characters (│, ─, ┌, └) that are difficult to pass via CLI parameters. Using `--stdin` allows the agent to pipe content directly while benefiting from manage-files' path resolution and validation.
 
 ### Step 5: Validate
 

@@ -35,10 +35,10 @@ Files are stored in plan directories:
 ```
 .plan/plans/{plan_id}/
   request.md
+  solution_outline.md
   config.toon
   references.toon
   status.toon
-  goals/
   tasks/
 ```
 
@@ -77,9 +77,15 @@ Task description with multiline content.
 More content here..."
 ```
 
+**Parameters**:
+- `--plan-id` (required): Plan identifier
+- `--file` (required): Relative file path within plan directory
+- `--content`: Content to write (mutually exclusive with `--stdin`)
+- `--stdin`: Read content from stdin instead of `--content`
+
 **Note**: The `--content` parameter supports multiline content. Do NOT use `--stdin` with shell heredocs or cat commands.
 
-**Output**: Confirmation message to stderr, exit code 0 on success
+**Output**: Prints "Created: {path}" to stderr, exit code 0 on success
 
 ### remove
 
@@ -226,4 +232,7 @@ Plan orchestration skills (plan-init, plan-refine, plan-execute) use this skill 
 | manage-config | config.toon | N/A (use manage-config) |
 | manage-references | references.toon | N/A (use manage-references) |
 | manage-lifecycle | status.toon | N/A (use manage-lifecycle) |
-| manage-files | any file | Generic read/write/list |
+| manage-plan-documents | request.md | N/A (use manage-plan-documents) |
+| manage-solution-outline | solution_outline.md | N/A (use manage-solution-outline) |
+| manage-tasks | tasks/*.toon | N/A (use manage-tasks) |
+| manage-files | any other file | Generic read/write/list |
