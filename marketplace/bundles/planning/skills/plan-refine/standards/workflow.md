@@ -56,8 +56,7 @@ See plan-refine SKILL.md for the template content.
 Then validate the structure:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution validate \
+python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline validate \
   --plan-id {plan_id}
 ```
 

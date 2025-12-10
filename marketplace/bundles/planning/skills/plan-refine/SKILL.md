@@ -18,11 +18,12 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 
 | Script | Notation |
 |--------|----------|
-| manage-plan-documents | `planning:manage-plan-documents` |
-| manage-config | `planning:manage-config` |
-| manage-lifecycle | `planning:manage-lifecycle` |
-| manage-work-log | `planning:manage-log` |
-| manage-tasks | `planning:manage-tasks` |
+| manage-plan-document | `planning:manage-plan-documents:manage-plan-document` |
+| manage-solution-outline | `planning:manage-solution-outline:manage-solution-outline` |
+| manage-config | `planning:manage-config:manage-config` |
+| manage-lifecycle | `planning:manage-lifecycle:manage-lifecycle` |
+| manage-work-log | `planning:manage-log:manage-work-log` |
+| manage-task | `planning:manage-tasks:manage-task` |
 
 ---
 
@@ -49,7 +50,7 @@ The `/plan-manage` command uses **skill-based routing**:
        → Task: plan-refine-agent
          → Skill: plan-refine ← THIS SKILL
            → Write tool → solution_outline.md (direct)
-           → manage-plan-document solution validate (Bash)
+           → manage-solution-outline validate (Bash)
            → manage-task add (Bash)
 ```
 
@@ -159,8 +160,7 @@ None identified.
 Then validate the structure:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
-  solution validate \
+python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline validate \
   --plan-id {plan_id}
 ```
 
@@ -225,14 +225,22 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `planning:manage-plan-documents` | `request read` | Read request document |
-| `planning:manage-solution-outline` | `write`, `validate` | Write and validate solution outline |
-| `planning:manage-config` | `get` | Read plan_type |
-| `planning:manage-tasks` | `add` | Create tasks |
-| `planning:manage-lifecycle` | `transition` | Phase transition |
-| `planning:manage-log` | `add` | Log progress and completion |
+| `planning:manage-plan-documents:manage-plan-document` | `request read` | Read request document |
+| `planning:manage-solution-outline:manage-solution-outline` | `validate` | Validate solution structure |
+| `planning:manage-config:manage-config` | `get` | Read plan_type |
+| `planning:manage-tasks:manage-task` | `add` | Create tasks |
+| `planning:manage-lifecycle:manage-lifecycle` | `transition` | Phase transition |
+| `planning:manage-log:manage-work-log` | `add` | Log progress and completion |
+
+### Standards (Load On-Demand)
+
+| Standard | Purpose |
+|----------|---------|
+| `standards/workflow.md` | Step-by-step refine workflow |
+| `standards/architecture.md` | Skill-based routing architecture |
 
 ### Related Skills
+- **manage-solution-outline** - Solution document structure and examples
 - **plan-init** - Previous phase (creates request.md, config, status)
 - **plan-execute** - Next phase (executes tasks)
 - **plan-type-*** - Domain configuration (loaded by command for agent routing)
