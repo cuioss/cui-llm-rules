@@ -133,6 +133,12 @@ Parse the JSON output to extract script mappings. The output contains:
 python3 -m py_compile .plan/execute-script.py && echo "Executor syntax OK"
 ```
 
+**Ensure executor permission** (prevents permission prompts when using executor):
+```bash
+python3 .plan/execute-script.py general-tools:permission-management:permission apply \
+  --action ensure-executor --target global
+```
+
 **Output**: "Executor ready with N script mappings"
 
 **NOTE**: From this point on, all script calls use: `python3 .plan/execute-script.py {notation} ...`
