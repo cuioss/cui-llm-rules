@@ -257,7 +257,8 @@ If multiple files match the name:
 **Caller**: `cui-frontend-expert:js-solution-outline-agent`
 
 **Scripts Used**:
-- `planning:manage-plan-documents` - Create solution document
+- `planning:manage-solution-outline` - Write and validate solution document
+- `planning:manage-plan-documents` - Read request document
 - `planning:manage-lessons` - Record lessons on issues
 
 **Standards Referenced**:

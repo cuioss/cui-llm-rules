@@ -133,16 +133,16 @@ Draw ASCII diagram showing:
 - Dependencies (arrows)
 - Package/file structure
 
-### Step 4: Write Document
+### Step 4: Write and Validate Document
 
-Write using stdin to handle ASCII box-drawing characters:
+Write using stdin with validation to handle ASCII box-drawing characters:
 
 ```bash
 python3 .plan/execute-script.py \
   planning:manage-solution-outline:manage-solution-outline write \
   --plan-id {plan_id} \
-  [--force] \
-  [--validate] <<'EOF'
+  --validate \
+  [--force] <<'EOF'
 # Solution: {title}
 
 ## Summary
@@ -162,20 +162,10 @@ EOF
 
 **Parameters**:
 - `--plan-id` (required): Plan identifier
+- `--validate` (required): Validate structure after writing - checks for required sections (Summary, Overview, Deliverables) and numbered deliverable format (`### N. Title`)
 - `--force`: Overwrite existing solution outline
-- `--validate`: Validate structure after writing and include validation result in output
 
 **Why heredoc?** Solution outlines contain ASCII diagrams with box-drawing characters (│, ─, ┌, └). Using `<<'EOF'` (quoted) preserves content exactly without variable expansion or escaping issues.
-
-### Step 5: Validate
-
-After writing, validate structure:
-
-```bash
-python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline \
-  validate \
-  --plan-id {plan_id}
-```
 
 ---
 
@@ -210,7 +200,12 @@ python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution
 - `planning:plan-refine` agent (for generic plans)
 
 **Scripts Used**:
-- `planning:manage-solution-outline:manage-solution-outline` - `write`, `validate`, `read`, `list-deliverables`, `exists`
+- `planning:manage-solution-outline:manage-solution-outline`:
+  - `write --plan-id X --validate [--force]` - Write solution from stdin
+  - `validate --plan-id X` - Validate structure
+  - `read --plan-id X [--raw]` - Read solution (TOON or raw markdown)
+  - `list-deliverables --plan-id X` - Extract deliverables list
+  - `exists --plan-id X` - Check if solution exists
 
 **Related Skills**:
 - `planning:manage-tasks` - Task creation with deliverable references

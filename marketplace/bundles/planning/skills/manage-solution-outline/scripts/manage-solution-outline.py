@@ -321,9 +321,10 @@ def cmd_write(args) -> int:
         return 1
 
     file_path = get_solution_path(args.plan_id)
+    existed_before = file_path.exists()
 
     # Check if exists and --force not specified
-    if file_path.exists() and not getattr(args, 'force', False):
+    if existed_before and not getattr(args, 'force', False):
         print(serialize_toon({
             'status': 'error',
             'error': 'file_exists',
@@ -343,7 +344,7 @@ def cmd_write(args) -> int:
         'status': 'success',
         'plan_id': args.plan_id,
         'file': SOLUTION_FILE,
-        'action': 'updated' if file_path.exists() else 'created'
+        'action': 'updated' if existed_before else 'created'
     }
 
     # Optionally validate after writing
@@ -399,8 +400,8 @@ def main():
     # write
     write_parser = subparsers.add_parser('write', help='Write solution outline from stdin')
     write_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    write_parser.add_argument('--validate', required=True, action='store_true', help='Validate structure after writing (required)')
     write_parser.add_argument('--force', action='store_true', help='Overwrite existing file')
-    write_parser.add_argument('--validate', action='store_true', help='Validate structure after writing')
     write_parser.set_defaults(func=cmd_write)
 
     args = parser.parse_args()

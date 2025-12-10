@@ -53,12 +53,12 @@ Examples:
 | Read | `.plan/plans/{id}/status.toon` | `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id {id}` |
 | Read | `.plan/plans/{id}/config.toon` | `python3 .plan/execute-script.py planning:manage-config:manage-config read --plan-id {id}` |
 | Read | `.plan/plans/{id}/work-log.toon` | `python3 .plan/execute-script.py planning:manage-log:manage-work-log read --plan-id {id}` |
-| Read | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` |
+| Read | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline read --plan-id {id}` |
 | Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task get --plan-id {id} --number 1` |
 | Write | `.plan/plans/{id}/*` | Use appropriate manage-* create/update via execute-script.py |
 | Edit | `.plan/plans/{id}/*` | Use appropriate manage-* update via execute-script.py |
 | Glob | `.plan/plans/**/*.toon` | Use manage-* list operations via execute-script.py |
-| Glob | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` |
+| Glob | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline read --plan-id {id}` |
 | Glob | `.plan/plans/{id}/tasks/*` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task list --plan-id {id}` |
 | Bash find | `find .plan/plans -name "*.toon"` | Use manage-* list operations via execute-script.py |
 | Bash ls | `ls .plan/plans/{id}/tasks/` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task list --plan-id {id}` |
@@ -68,7 +68,7 @@ Examples:
 | File | Read Script | Write Script |
 |------|-------------|--------------|
 | `request.md` | `planning:manage-plan-documents:manage-plan-document request read --plan-id {id}` | `planning:manage-plan-documents:manage-plan-document request create --plan-id {id} --title ... --source ... --body ...` |
-| `solution_outline.md` | `planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` | Write tool directly, then `planning:manage-plan-documents:manage-plan-document solution validate --plan-id {id}` |
+| `solution_outline.md` | `planning:manage-solution-outline:manage-solution-outline read --plan-id {id}` | `planning:manage-solution-outline:manage-solution-outline write --plan-id {id} <<'EOF'` then validate |
 | `lessons-learned/*.md` | `planning:manage-lessons:manage-lesson get --id {lesson_id}` | `planning:manage-lessons:manage-lesson add` |
 | Any plan file | `planning:manage-files:manage-files read --plan-id {id} --file {path}` | `planning:manage-files:manage-files write --plan-id {id} --file {path}` |
 

@@ -85,7 +85,7 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 - Load `planning:manage-solution-outline` skill for structure guidance
 - Read request.md for the request
 - Analyze codebase with domain knowledge
-- Write solution_outline.md directly via Write tool (includes ASCII overview diagram)
+- Write solution_outline.md via `manage-solution-outline write` with heredoc (includes ASCII overview diagram)
 - Document deliverables as numbered `### N. Title` sections
 - Validate with `manage-solution-outline validate --plan-id {plan_id}`
 - Record lessons-learned on issues

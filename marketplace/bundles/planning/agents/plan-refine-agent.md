@@ -71,9 +71,11 @@ These constraints apply EVEN IF skill loading fails:
 # Read request (always via script)
 planning:manage-plan-documents:manage-plan-document request read --plan-id X
 
-# Write solution (use Write tool directly, then validate)
-Write tool → .plan/plans/{plan_id}/solution_outline.md
-planning:manage-plan-documents:manage-plan-document solution validate --plan-id X
+# Write solution (use heredoc with write command)
+planning:manage-solution-outline:manage-solution-outline write --plan-id X <<'EOF'
+# Solution content with ASCII diagrams
+EOF
+planning:manage-solution-outline:manage-solution-outline validate --plan-id X
 
 # Create tasks and manage lifecycle
 planning:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"

@@ -324,38 +324,24 @@ def test_exists_absent():
 # =============================================================================
 
 def test_write_new():
-    """Test writing a new solution outline via stdin."""
+    """Test writing a new solution outline via stdin with validation."""
     with TestContext(plan_id='solution-write') as ctx:
         result = run_script(SCRIPT_PATH,
             'write',
             '--plan-id', 'solution-write',
-            input_data=VALID_SOLUTION
-        )
-        assert result.success, f"Script failed: {result.stderr}\nOutput: {result.stdout}"
-        data = parse_toon(result.stdout)
-        assert data['status'] == 'success'
-        assert data['file'] == 'solution_outline.md'
-        # Verify file was created
-        assert (ctx.plan_dir / 'solution_outline.md').exists()
-        content = (ctx.plan_dir / 'solution_outline.md').read_text()
-        assert '# Solution: JWT Validation Service' in content
-
-
-def test_write_with_validate():
-    """Test writing with validation enabled."""
-    with TestContext(plan_id='solution-write-validate') as ctx:
-        result = run_script(SCRIPT_PATH,
-            'write',
-            '--plan-id', 'solution-write-validate',
             '--validate',
             input_data=VALID_SOLUTION
         )
         assert result.success, f"Script failed: {result.stderr}\nOutput: {result.stdout}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
+        assert data['file'] == 'solution_outline.md'
         assert 'validation' in data
         assert data['validation']['valid'] is True
-        assert data['validation']['deliverable_count'] == 3
+        # Verify file was created
+        assert (ctx.plan_dir / 'solution_outline.md').exists()
+        content = (ctx.plan_dir / 'solution_outline.md').read_text()
+        assert '# Solution: JWT Validation Service' in content
 
 
 def test_write_exists_without_force():
@@ -367,6 +353,7 @@ def test_write_exists_without_force():
         result = run_script(SCRIPT_PATH,
             'write',
             '--plan-id', 'solution-exists',
+            '--validate',
             input_data=VALID_SOLUTION
         )
         assert not result.success, "Expected failure when file exists without --force"
@@ -383,6 +370,7 @@ def test_write_with_force():
         result = run_script(SCRIPT_PATH,
             'write',
             '--plan-id', 'solution-force',
+            '--validate',
             '--force',
             input_data=VALID_SOLUTION
         )

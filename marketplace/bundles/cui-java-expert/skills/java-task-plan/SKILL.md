@@ -230,7 +230,7 @@ If goal lacks detail:
 **Caller**: `cui-java-expert:java-task-plan-agent`
 
 **Scripts Used**:
-- `planning:manage-plan-documents` - Read solution document (solution read)
+- `planning:manage-solution-outline` - Read solution and list deliverables
 - `planning:manage-tasks` - Create tasks
 - `planning:manage-lessons` - Record lessons on issues
 

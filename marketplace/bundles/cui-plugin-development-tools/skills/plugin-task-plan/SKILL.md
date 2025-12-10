@@ -269,7 +269,7 @@ If goal lacks required parameters:
 **Caller**: `cui-plugin-development-tools:plugin-task-plan-agent`
 
 **Script Notations** (use EXACTLY as shown):
-- `planning:manage-plan-documents:manage-plan-document` - Read solution document (solution read)
+- `planning:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables
 - `planning:manage-tasks:manage-task` - Create tasks (add, list)
 - `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
 - `planning:manage-log:manage-work-log` - Log progress (add)

@@ -225,7 +225,8 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `planning:manage-plan-documents` | `request read`, `solution validate` | Read request, validate solution (written directly via Write tool) |
+| `planning:manage-plan-documents` | `request read` | Read request document |
+| `planning:manage-solution-outline` | `write`, `validate` | Write and validate solution outline |
 | `planning:manage-config` | `get` | Read plan_type |
 | `planning:manage-tasks` | `add` | Create tasks |
 | `planning:manage-lifecycle` | `transition` | Phase transition |

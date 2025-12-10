@@ -444,7 +444,8 @@ If multiple components match:
 **Caller**: `cui-plugin-development-tools:plugin-solution-outline-agent`
 
 **Script Notations** (use EXACTLY as shown):
-- `planning:manage-plan-documents:manage-plan-document` - Validate solution document (solution validate), read request (request read)
+- `planning:manage-solution-outline:manage-solution-outline` - Write and validate solution document
+- `planning:manage-plan-documents:manage-plan-document` - Read request (request read)
 - `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
 - `planning:manage-log:manage-work-log` - Log decisions (add, read)
 - `planning:manage-config:manage-config` - Read config (read)
