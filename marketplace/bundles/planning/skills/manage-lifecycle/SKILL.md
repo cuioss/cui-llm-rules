@@ -120,8 +120,16 @@ python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle creat
   --plan-id {plan_id} \
   --title "Feature Title" \
   --plan-type planning:plan-type-java \
-  --phases init,refine,execute,finalize
+  --phases init,refine,execute,finalize \
+  [--force]
 ```
+
+**Parameters**:
+- `--plan-id` (required): Plan identifier (kebab-case)
+- `--title` (required): Plan title
+- `--plan-type` (required): Plan type in `bundle:skill` notation
+- `--phases` (required): Comma-separated phase names
+- `--force`: Overwrite existing status.toon
 
 **Output** (TOON):
 ```toon
@@ -207,15 +215,22 @@ python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle list 
   [--filter init,execute]
 ```
 
+**Parameters**:
+- `--filter`: Filter by phases (comma-separated)
+
 **Output** (TOON):
 ```toon
 status: success
 total: 3
-
-plans[3]{id,current_phase,plan_type,status}:
-my-feature,execute,planning:plan-type-java,in_progress
-bug-fix-123,init,planning:plan-type-generic,in_progress
-plugin-update,finalize,planning:plan-type-plugin,in_progress
+plans:
+  - id: my-feature
+    current_phase: execute
+    plan_type: planning:plan-type-java
+    status: in_progress
+  - id: bug-fix-123
+    current_phase: init
+    plan_type: planning:plan-type-generic
+    status: in_progress
 ```
 
 ### transition
@@ -262,6 +277,9 @@ python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle route
   --phase execute
 ```
 
+**Parameters**:
+- `--phase` (required): Phase name
+
 **Output** (TOON):
 ```toon
 status: success
@@ -270,13 +288,58 @@ skill: plan-execute
 description: Execute implementation tasks
 ```
 
+### get-routing-context
+
+Get combined routing context (phase, skill, and progress) in one call.
+
+```bash
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle get-routing-context \
+  --plan-id {plan_id}
+```
+
+**Parameters**:
+- `--plan-id` (required): Plan identifier
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+title: Implement JWT Authentication
+plan_type: planning:plan-type-java
+current_phase: execute
+skill: plan-execute
+skill_description: Execute implementation tasks
+total_phases: 4
+completed_phases: 2
+phases:
+  - name: init
+    status: done
+  - name: refine
+    status: done
+  - name: execute
+    status: in_progress
+  - name: finalize
+    status: pending
+```
+
 ---
 
 ## Scripts
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `planning:manage-lifecycle:manage-lifecycle` | All lifecycle operations via subcommands | `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle {subcommand} --help` |
+**Script**: `planning:manage-lifecycle:manage-lifecycle`
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `read` | `--plan-id` | Read plan status |
+| `create` | `--plan-id --title --plan-type --phases [--force]` | Initialize status.toon |
+| `set-phase` | `--plan-id --phase` | Set current phase |
+| `update-phase` | `--plan-id --phase --status` | Update phase status |
+| `progress` | `--plan-id` | Calculate plan progress |
+| `list` | `[--filter]` | Discover all plans |
+| `transition` | `--plan-id --completed` | Transition to next phase |
+| `archive` | `--plan-id [--dry-run]` | Archive completed plan |
+| `route` | `--phase` | Get skill for phase |
+| `get-routing-context` | `--plan-id` | Get combined routing context |
 
 ---
 
@@ -302,12 +365,21 @@ init -> execute -> finalize
 
 ## Phase Routing
 
-Each phase uses a single component.
+The `route` command returns skill names for each phase (from script `PHASE_ROUTING`):
+
+| Phase | Skill | Description |
+|-------|-------|-------------|
+| init | `plan-init` | Initialize plan |
+| refine | `plan-refine` | Refine requirements and specifications |
+| execute | `plan-execute` | Execute implementation tasks |
+| finalize | `plan-finalize` | Finalize with commit/PR |
+
+**Note**: These are skill names, not full bundle:skill notation. The actual components used:
 
 | Phase | Component | Type | Description |
 |-------|-----------|------|-------------|
-| init | `planning:plan-init-agent` | agent | Creates plan, analyzes task, creates goals, configures plan |
-| refine | `planning:plan-refine-agent` | agent | Creates tasks from goals |
+| init | `planning:plan-init-agent` | agent | Creates plan, analyzes task, creates solution outline |
+| refine | `planning:plan-refine-agent` | agent | Creates tasks from deliverables |
 | execute | `planning:plan-execute` | skill | Executes implementation tasks |
 | finalize | `planning:plan-finalize` | skill | Git workflow, commit, PR creation |
 
@@ -319,7 +391,7 @@ The init phase handles complete plan initialization:
 plan-init-agent:
    - Creates plan directory
    - Writes request.md from input (description/lesson/issue)
-   - Analyzes task to create goals
+   - Analyzes task to create solution outline with deliverables
    - Detects plan type (or uses override)
    - Creates config.toon and status.toon
    - Calls plan-type configure for domain fields
