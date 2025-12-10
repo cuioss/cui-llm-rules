@@ -41,7 +41,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 **Input**: `plan_id`
 
-**References fields added** (via `planning:manage-references set`):
+**References fields added** (via `planning:manage-references:manage-references set`):
 
 | Field | Value |
 |-------|-------|
@@ -50,7 +50,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 | `interfaces` | `[]` |
 | `dependencies` | `[]` |
 
-**Config fields added** (via `planning:manage-config set`):
+**Config fields added** (via `planning:manage-config:manage-config set`):
 
 | Field | Value |
 |-------|-------|
