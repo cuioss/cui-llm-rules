@@ -1,14 +1,14 @@
 ---
 name: java-solution-outline
-description: Analyze Java codebase and decompose request into goals
+description: Analyze Java codebase and create solution outline with deliverables
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-# Java Goals Skill
+# Java Solution Outline Skill
 
 **Role**: Domain analysis skill for Java implementation tasks. Transforms the request into a solution document by analyzing the codebase.
 
-**Key Pattern**: Single solution document - goals are consolidated into `solution_outline.md` via `manage-plan-documents` skill.
+**Key Pattern**: Single solution document - deliverables are consolidated into `solution_outline.md` via `manage-solution-outline` skill.
 
 ## Operation: decompose
 
@@ -83,17 +83,17 @@ Read {java-file-path}
 
 ### Step 3: Create Solution Document
 
-Create a single solution document containing all goals. Each goal should be:
-- **Independent**: Can be implemented without other goals completing first (when possible)
+Create a single solution document containing all deliverables. Each deliverable should be:
+- **Independent**: Can be implemented without other deliverables completing first (when possible)
 - **Testable**: Has clear completion criteria
 - **Sized**: Reasonable scope (not too large, not too small)
 
-Build a goals markdown section with numbered goals:
+Build a deliverables markdown section with numbered deliverables:
 
 ```markdown
-### 1. {Goal Title}
+### 1. {Deliverable Title}
 
-{Java-specific technical goal description}
+{Java-specific technical deliverable description}
 
 **Component**: {class|interface|module|config}
 **Path**: `src/main/java/de/cuioss/...`
@@ -106,21 +106,33 @@ Build a goals markdown section with numbered goals:
 - {criterion 1}
 - {criterion 2}
 
-### 2. {Next Goal Title}
+### 2. {Next Deliverable Title}
 ...
 ```
 
-Write the solution document directly using Claude Code's Write tool to: `.plan/plans/{plan_id}/solution_outline.md`
-
-Then validate the structure:
+Write and validate the solution document using heredoc:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
-  solution validate \
-  --plan-id {plan_id}
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
+  write \
+  --plan-id {plan_id} \
+  --validate <<'EOF'
+# Solution Outline
+
+## Summary
+{one-line summary}
+
+## Overview
+{ASCII diagram showing component relationships}
+
+## Deliverables
+
+### 1. {Deliverable Title}
+{content}
+EOF
 ```
 
-**Why direct Write?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The agent generates the full markdown document and writes it directly.
+**Why heredoc?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The `--validate` flag is REQUIRED - it ensures structure validation on every write.
 
 ### Step 4: Record Issues as Lessons
 
@@ -143,16 +155,16 @@ status: success
 plan_id: {plan_id}
 solution_created: true
 
-goals_count: {number of goals in solution document}
+deliverables_count: {number of deliverables in solution document}
 lessons_recorded: {count}
 ```
 
 ---
 
-## Goal Decomposition Patterns
+## Deliverable Decomposition Patterns
 
-| Request Pattern | Typical Goals |
-|-----------------|---------------|
+| Request Pattern | Typical Deliverables |
+|-----------------|----------------------|
 | "Add caching to service" | 1. Add cache dependency 2. Create cache config 3. Add @Cacheable annotations 4. Add cache tests |
 | "Implement new endpoint" | 1. Create DTO classes 2. Create controller 3. Add service method 4. Add integration tests |
 | "Refactor to interface" | 1. Extract interface 2. Update implementations 3. Update injection points 4. Update tests |
@@ -256,10 +268,12 @@ If multiple classes match the name:
 
 **Caller**: `pm-java:java-solution-outline-agent`
 
-**Scripts Used**:
-- `pm-workflow:manage-solution-outline` - Write and validate solution document
-- `pm-workflow:manage-plan-documents` - Read request document
-- `pm-core:lessons-learned` - Record lessons on issues
+**Script Notations** (use EXACTLY as shown):
+- `pm-workflow:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write --validate, read, list-deliverables)
+- `pm-workflow:manage-plan-documents:manage-plan-document` - Request operations (request read)
+- `pm-workflow:manage-config:manage-config` - Plan config (read)
+- `pm-workflow:manage-references:manage-references` - Plan references (read)
+- `pm-core:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced**:
 - `pm-java:cui-java-core` - Core Java patterns
