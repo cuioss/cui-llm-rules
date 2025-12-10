@@ -73,7 +73,6 @@ All plan-type skills implement `planning:plan-type-api` contract.
 
 | Skill | Purpose |
 |-------|---------|
-| `analysis-api` | **API contract** for domain analysis skills |
 | `git-workflow` | Git commit operations |
 | `pr-workflow` | PR creation and management |
 | `sonar-workflow` | Sonar issue handling |
@@ -95,39 +94,52 @@ All plan-type skills implement `planning:plan-type-api` contract.
 
 **Contract**: `planning:plan-type-api` skill defines the full API specification.
 
-All plan-type skills implement this uniform API:
+All plan-type skills implement:
 
-| Operation | Input | Output | Caller |
-|-----------|-------|--------|--------|
-| `configure` | `plan_id` | References + config updated | plan-init |
-| `decompose` | `plan_id` | GOAL files created | plan-refine |
-| `plan` | `plan_id` | TASK files created | plan-refine |
+| Element | Description |
+|---------|-------------|
+| `configure` operation | Adds domain-specific fields to references.toon and finalize config |
+| `domain:` frontmatter | Declares goals_agent, plan_agent, verification_command |
 
 **Key Design**:
-- `configure` adds domain-specific fields to references.toon and finalize configuration to config.toon
-- `decompose` analyzes request and creates goals
-- `plan` transforms goals → tasks
+- `configure` operation adds finalize configuration to config.toon
+- `domain:` frontmatter enables command-level routing to domain agents
+- Domain agents (goals_agent, plan_agent) are invoked by `/plan-manage` command via Task tool
 
-## Domain Goal Decomposition
+## Skill-Based Domain Agent Routing
 
-Goal decomposition is delegated to domain-specific agents in their expert bundles:
+The refine phase uses **skill-based routing**: commands load plan-type skills and invoke domain agents from the skill's `domain:` frontmatter.
 
-| Plan Type | Goals Agent |
-|-----------|-------------|
-| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` |
-| `java` | `cui-java-expert:java-goals-agent` |
-| `javascript` | `cui-frontend-expert:js-goals-agent` |
-| `generic` | N/A (inline in plan-type skill) |
+### Plan-Type Skills
+
+Each plan-type skill declares its domain agents in structured frontmatter:
+
+| Plan Type | Goals Agent | Plan Agent |
+|-----------|-------------|------------|
+| `java` | `cui-java-expert:java-goals-agent` | `cui-java-expert:java-plan-agent` |
+| `javascript` | `cui-frontend-expert:js-goals-agent` | `cui-frontend-expert:js-plan-agent` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
+| `generic` | N/A (uses plan-refine-agent fallback) | N/A |
 
 ### Refine Flow
 
 ```
-plan-refine → decompose(plan_id) → plan-type-skill → domain-goals-agent
-            ← (creates GOAL files from request.md)
-
-plan-refine → plan(plan_id) → plan-type-skill → domain-plan-agent
-            ← (creates TASK files from GOAL files)
+/plan-manage action=refine
+   │
+   ├─ manage-config get --field plan_type
+   │     └─ "planning:plan-type-java"
+   │
+   ├─ Skill: planning:plan-type-java
+   │     └─ Read frontmatter.domain
+   │
+   ├─ Task: {domain.goals_agent}
+   │     └─ Creates GOAL files from request.md
+   │
+   └─ Task: {domain.plan_agent}
+         └─ Creates TASK files from GOAL files
 ```
+
+**Override**: Projects can customize agent mappings via marshal.json for project-specific needs.
 
 ### Sub-Type Templates
 
@@ -152,7 +164,7 @@ planning/
 │   └── task-implement.md
 └── skills/
     ├── plan-type-api/           # API contract for all plan-type skills
-    │   └── SKILL.md             # Contract: 3 operations (configure, decompose, plan)
+    │   └── SKILL.md             # Contract: configure operation + domain frontmatter
     ├── plan-type-generic/       # Generic workflow skill (3 phases)
     │   └── SKILL.md             # Implements plan-type-api
     ├── plan-type-plugin/        # Plugin workflow skill (4 phases)
@@ -197,10 +209,10 @@ planning/
 ## Dependencies
 
 - **general-tools** - Script runner, file operations base
-- **cui-plugin-development-tools** - Plugin doctor, plugin-analysis skill
+- **cui-plugin-development-tools** - Plugin doctor, plugin-goals-agent, plugin-plan-agent
 - **builder** - Build execution (maven/npm)
-- **cui-java-expert** - Java analysis and implementation delegation
-- **cui-frontend-expert** - JavaScript analysis and implementation delegation
+- **cui-java-expert** - java-goals-agent, java-plan-agent, java-implement-agent
+- **cui-frontend-expert** - js-goals-agent, js-plan-agent
 
 ## Installation
 

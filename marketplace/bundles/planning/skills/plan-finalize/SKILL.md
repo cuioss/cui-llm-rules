@@ -338,4 +338,4 @@ planning:manage-lifecycle route --phase finalize → planning:plan-finalize
 ### Related Skills
 
 - **plan-execute** - Previous phase (executes tasks)
-- **plan-lifecycle** - Handles phase transition
+- **manage-lifecycle** - Handles phase transitions

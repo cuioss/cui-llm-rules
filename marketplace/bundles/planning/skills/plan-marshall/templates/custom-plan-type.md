@@ -1,7 +1,13 @@
 ---
 name: plan-type-{{NAME}}
 description: Custom plan-type for {{DESCRIPTION}}
-allowed-tools: Read, Bash, Skill, AskUserQuestion
+allowed-tools: Read, Bash
+domain:
+  goals_agent: {{GOALS_AGENT}}
+  plan_agent: {{PLAN_AGENT}}
+  verification_command: {{VERIFICATION_COMMAND}}
+  pr_workflow: false
+  standards: []
 ---
 
 # Plan Type: {{NAME}}
@@ -20,37 +26,43 @@ Use this plan-type when:
 
 ---
 
-## Configuration
+## Domain Configuration
 
-### Domain Agents
+### Frontmatter Fields
 
-| Role | Agent |
-|------|-------|
-| Goals | {{GOALS_AGENT}} |
-| Plan | {{PLAN_AGENT}} |
+| Field | Value |
+|-------|-------|
+| `goals_agent` | {{GOALS_AGENT}} |
+| `plan_agent` | {{PLAN_AGENT}} |
+| `verification_command` | {{VERIFICATION_COMMAND}} |
+| `pr_workflow` | false |
 
-### Defaults
-
-| Setting | Value |
-|---------|-------|
-| verification_required | true |
-| verification_command | {{VERIFICATION_COMMAND}} |
-| create_pr | false |
-| branch_strategy | direct |
+**Note**: Domain agents are invoked by the `/plan-manage` command via Task tool, not by operations in this skill.
 
 ---
 
 ## Operation: configure
 
-Called during plan initialization to set domain-specific defaults.
+Called during plan initialization to set domain-specific defaults in config.toon.
 
-**Input**:
-- `plan_id`: The plan identifier
+**Input**: `plan_id`
 
-**Actions**:
-1. Set verification command
-2. Configure PR workflow
-3. Set branch strategy
+**Process**:
+1. Set finalize configuration fields in config.toon
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
+  --plan-id {plan_id} \
+  --key create_pr \
+  --value "false"
+```
+
+```bash
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
+  --plan-id {plan_id} \
+  --key verification_required \
+  --value "true"
+```
 
 ```bash
 python3 .plan/execute-script.py planning:manage-config:manage-config set \
@@ -59,47 +71,42 @@ python3 .plan/execute-script.py planning:manage-config:manage-config set \
   --value "{{VERIFICATION_COMMAND}}"
 ```
 
----
-
-## Operation: decompose
-
-Decompose request into goals. Custom implementation or delegate to agent.
-
-**If goals_agent is set**:
+```bash
+python3 .plan/execute-script.py planning:manage-config:manage-config set \
+  --plan-id {plan_id} \
+  --key branch_strategy \
+  --value "direct"
 ```
-Task(subagent_type="{{GOALS_AGENT}}")
-```
-
-**If no goals_agent**:
-Manual decomposition following these guidelines:
-- {{DECOMPOSITION_GUIDELINE_1}}
-- {{DECOMPOSITION_GUIDELINE_2}}
 
 ---
 
-## Operation: create-tasks
+## Integration
 
-Create implementation tasks from goals. Custom implementation or delegate to agent.
+### Routing Flow
 
-**If plan_agent is set**:
 ```
-Task(subagent_type="{{PLAN_AGENT}}")
+/plan-manage action=refine
+   │
+   ├─ Loads this skill
+   ├─ Reads domain: frontmatter
+   │
+   ├─ Task: {{GOALS_AGENT}}  → Creates goals from request
+   └─ Task: {{PLAN_AGENT}}   → Creates tasks from goals
 ```
 
-**If no plan_agent**:
-Manual task creation following these guidelines:
-- {{TASK_CREATION_GUIDELINE_1}}
-- {{TASK_CREATION_GUIDELINE_2}}
+### Generic Fallback
+
+If `goals_agent` is `null`, the command falls back to `plan-refine-agent` for inline goal/task creation.
 
 ---
 
 ## Customization
 
 Edit this file to customize:
+- Domain agents (in frontmatter)
 - Verification command
-- Decomposition guidelines
-- Task creation patterns
-- Domain-specific workflows
+- PR workflow setting
+- Configure operation defaults
 
 ---
 

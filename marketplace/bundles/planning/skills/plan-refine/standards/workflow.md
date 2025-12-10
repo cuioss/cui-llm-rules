@@ -1,215 +1,98 @@
 # Plan Refine Workflow
 
-## Phase Overview
+**Scope**: This workflow applies to **generic plan types only**. Domain-specific plans (Java, JavaScript, Plugin) use domain agents invoked by the `/plan-manage` command. See [architecture.md](architecture.md) for the skill-based routing pattern.
 
-The refine phase analyzes requirements and produces detailed implementation tasks:
+## Workflow Overview
+
+Generic plan refinement creates simple goals and tasks from the request:
 
 ```
-Plan from Init Phase
+Request from Init Phase
         │
         ▼
 ┌─────────────────────────────────────────────────────┐
-│ REFINE PHASE                                        │
+│ REFINE PHASE (Generic Plans Only)                   │
 │                                                     │
-│   0. Detect complexity (auto-decide)                │
-│      ├─ Complex → Create analysis.md                │
-│      └─ Simple → Skip to step 2                     │
-│   1. Read context (plan, config, issue)             │
-│   2. Analyze requirements → components              │
-│   3. Plan implementation tasks                      │
-│   4. Identify documentation needs                   │
-│   5. Generate implementation-requirements.md        │
-│   6. Transition to implement phase                  │
+│   1. Read context (plan_id, config)                 │
+│   2. Create goal from request                       │
+│   3. Create tasks for goal                          │
+│   4. Validate coverage (goals have tasks)           │
+│   5. Transition to execute phase                    │
 └─────────────────────────────────────────────────────┘
         │
         ▼
-    Implement Phase
+    Execute Phase
 ```
-
-**Auto-Continue Behavior**: The refine phase executes continuously without user prompts except:
-- Analysis review (only if analysis.md is created)
-- Component analysis confirmation
-- Task list approval
-
-## Operations Summary
-
-| Operation | Description | Output |
-|-----------|-------------|--------|
-| **detect-complexity** | Evaluate if strategic analysis needed | needs_analysis: boolean |
-| **create-analysis** | Create and populate analysis.md | analysis.md file |
-| **analyze** | Break down requirements into components | Component list with relationships |
-| **plan-tasks** | Create detailed implementation tasks | Tasks with acceptance criteria |
-| **identify-docs** | Determine documentation needs | ADR and interface references |
 
 ---
 
-## Step 0: Detect Complexity
+## Step 1: Read Context
 
-**Purpose**: Automatically determine if the task requires strategic analysis before component breakdown.
+```bash
+python3 .plan/execute-script.py planning:manage-config:manage-config get \
+  --plan-id {plan_id} --field plan_type
+```
 
-**Detection Criteria**:
-
-| Question | If YES → analysis.md |
-|----------|---------------------|
-| Are multiple skills/components affected? | Create analysis |
-| Are there breaking changes? | Create analysis |
-| Are there architectural decisions (not just code changes)? | Create analysis |
-| Are there complex dependencies to understand first? | Create analysis |
-| Are there risks that need documentation? | Create analysis |
-
-**Decision Logic**:
-- ALL answers NO → Skip to component breakdown (standard flow)
-- ANY answer YES → Create analysis.md first
-
-**Auto-Decision**: This step does NOT prompt the user. It evaluates automatically and proceeds.
+**Guard**: If `plan_type` is NOT `generic`, return error - domain-specific plans must use `/plan-manage` command.
 
 ---
 
-## Conditional: Create Analysis (if needed)
+## Step 2: Create Goal
 
-When `needs_analysis: true`:
+For generic plans, create a single goal from the request:
 
-1. **Create analysis.md** from `templates/analysis.md`
-2. **Explore codebase** to populate sections:
-   - Current State: Existing implementations
-   - Affected Components: Files/modules that will change
-   - Design Decisions: Key choices being made
-   - Breaking Changes: Compatibility impacts (if any)
-   - Risks: Potential issues and mitigations
-   - Success Criteria: Measurable outcomes
-3. **Present to user for review** (single prompt):
-   - Options: Approve / Edit / Add details
-4. **Add to references** as implementation file
-5. **Continue** to component analysis
-
-When `needs_analysis: false`:
-- Skip directly to component analysis (no prompt)
-
-## Component Analysis
-
-Analyze requirements to identify:
-1. Functional components (features, APIs, services)
-2. Technical boundaries (modules, packages, layers)
-3. Dependencies between components
-4. Complexity estimates (low/medium/high)
-
-## Task Planning
-
-For each component:
-1. Create implementation task(s)
-2. **Apply sub-type template** if specified by plan-type (see plan-type template)
-3. Add technology-specific checklist items
-4. Define acceptance criteria from requirements
-5. Add standard quality checklist items
-
-**Sub-Type Templates**: Plan-type templates (e.g., plugin-development.md) specify which sub-type templates to use for specific operations. The sub-type template provides the complete actionable checklist. See `templates/` directory for available templates:
-- `script-task.md` - TDD workflow for script creation
-- `skill-task.md` - Skill creation workflow
-- `command-task.md` - Command creation workflow
-- `agent-task.md` - Agent creation workflow
-
-Order tasks based on:
-- Component dependencies
-- Build order requirements
-- Test isolation needs
-
-## Technology-Specific Standards
-
-### For Java Tasks
-
-**Standard Checklist Items**:
-```markdown
-- [ ] Follow CUI Java coding standards
-- [ ] Add JavaDoc to public methods
-- [ ] Implement unit tests (JUnit 5)
-- [ ] Verify build via `maven-builder` agent
-- [ ] Check coverage ≥80%
+```bash
+python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
+  --plan-id {plan_id} \
+  --title "Complete task" \
+  --body "{request_summary}"
 ```
-
-**Delegation**: `cui-java-expert:java-implement-agent`
-
-### For JavaScript Tasks
-
-**Standard Checklist Items**:
-```markdown
-- [ ] Follow CUI JavaScript standards
-- [ ] Add JSDoc to exported functions
-- [ ] Implement unit tests (Jest)
-- [ ] Verify build via `npm-builder` agent
-- [ ] Check coverage ≥80%
-```
-
-**Delegation**: `cui-frontend-expert`
-
-### For Mixed Tasks
-
-**Standard Checklist Items**:
-```markdown
-- [ ] Follow technology-appropriate standards
-- [ ] Add documentation per language
-- [ ] Implement tests for both stacks
-- [ ] Run both Maven and npm builds
-```
-
-## Documentation Identification
-
-### ADR Triggers
-- Architectural decisions (technology choices, patterns)
-- Security considerations
-- Integration approaches
-- Performance trade-offs
-
-### Interface Triggers
-- New APIs (REST, GraphQL, etc.)
-- Service interfaces
-- External integrations
-- Contract definitions
-
-## Quality Gates
-
-**Before Implement Phase**:
-- [ ] All tasks have clear goals
-- [ ] All tasks have acceptance criteria
-- [ ] Dependencies correctly mapped
-- [ ] Documentation references complete
-
-**Per Task**:
-- Test coverage: ≥80%
-- Build status: passing
-- Documentation: complete
 
 ---
 
-## Validation Criteria
+## Step 3: Create Tasks
 
-### Input Handling
-- [ ] Accept `plan_id` parameter (never paths)
-- [ ] Read config.toon to get plan_type and build_system
-- [ ] Read all goals via manage-goals skill (findAll operation)
-- [ ] Fail if no goals found with message: "Run plan-init first"
-- [ ] Fail if config.toon missing with message: "Plan not configured"
+Create execution and verification tasks:
 
-### Domain Delegation
-- [ ] Select domain skill based on plan_type:
-  - `java` → `cui-java-expert:java-plan`
-  - `javascript` → `cui-frontend-expert:js-plan`
-  - `plugin-development` → `cui-plugin-development-tools:plugin-plan`
-  - `generic` → Handle directly (no delegation)
-- [ ] Call plan-type:plan to transform goals to tasks
+```bash
+python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
+  --plan-id {plan_id} \
+  --goal GOAL-1 \
+  --title "Execute request" \
+  --description "Complete the requested task" \
+  --steps "Analyze requirements" "Implement solution" "Verify result"
+```
 
-### Tasks Creation
-- [ ] Write each task via manage-tasks skill
-- [ ] Each task references at least one goal
-- [ ] Tasks include steps (atomic, verifiable, sequenced)
-- [ ] Tasks numbered sequentially (TASK-1, TASK-2, etc.)
+---
 
-### Traceability Validation
-- [ ] Every task references existing goals
-- [ ] Every goal has at least one task
-- [ ] Return traceability summary in output
+## Step 4: Validate Coverage
 
-### Integration
-- [ ] Write work-log entry after creating tasks
-- [ ] Record lesson-learned on any script/command failure
-- [ ] Transition phase from "refine" to "execute" via manage-lifecycle
-- [ ] Return `plan_id`, `tasks` count, and `next_phase` in output
+```bash
+python3 .plan/execute-script.py planning:manage-goals:manage-goal check \
+  --plan-id {plan_id}
+```
+
+Verify `without_tasks: 0` in response.
+
+---
+
+## Step 5: Transition
+
+```bash
+python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle transition \
+  --plan-id {plan_id} \
+  --completed refine
+```
+
+---
+
+## Domain Routing Summary
+
+| Plan Type | Handler | Routing |
+|-----------|---------|---------|
+| `generic` | `plan-refine-agent` → this workflow | Command invokes agent via Task |
+| `java` | `java-goals-agent`, `java-plan-agent` | Command reads skill frontmatter, invokes via Task |
+| `javascript` | `js-goals-agent`, `js-plan-agent` | Command reads skill frontmatter, invokes via Task |
+| `plugin-development` | `plugin-goals-agent`, `plugin-plan-agent` | Command reads skill frontmatter, invokes via Task |
+
+**Key**: The `/plan-manage` command handles all routing. This skill is only invoked for generic plans.

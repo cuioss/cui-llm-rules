@@ -8,7 +8,33 @@ allowed-tools: Read
 
 **Role**: API contract definition for plan-type skills. This skill defines the interface that all plan-type skills must implement.
 
-**Key Principle**: Plan-type skills are **thin orchestrators** that delegate to domain agents. Domain agents analyze the codebase and write GOALs/TASKs directly via manage-* scripts.
+**Key Principle**: Plan-type skills **document domain agents** in structured frontmatter. Commands read this frontmatter and invoke agents directly via Task tool.
+
+## Domain Frontmatter Structure
+
+All plan-type skills declare domain agents in YAML frontmatter:
+
+```yaml
+---
+name: plan-type-{domain}
+description: {Domain} plan type
+allowed-tools: Read, Bash
+domain:
+  goals_agent: {bundle}:{goals-agent-name}    # Agent for request → goals
+  plan_agent: {bundle}:{plan-agent-name}      # Agent for goals → tasks
+  verification_command: /{verification-cmd}   # Finalize verification
+  pr_workflow: true|false                     # Create PR on finalize
+  standards:                                  # Domain skills to load
+    - {bundle}:{skill-1}
+    - {bundle}:{skill-2}
+---
+```
+
+**Routing Flow**:
+1. `/plan-manage` command loads plan-type skill
+2. Command reads `domain:` section from skill frontmatter
+3. Command invokes `domain.goals_agent` and `domain.plan_agent` via Task tool
+4. For generic plans (`domain.goals_agent: null`), falls back to `plan-refine-agent`
 
 ## API Contract Overview
 
@@ -17,14 +43,10 @@ All plan-type skills implement these operations:
 | Operation | Input | Output | Caller | When |
 |-----------|-------|--------|--------|------|
 | `configure` | `plan_id` | References + config updated | plan-init | During initialization |
-| `decompose` | `plan_id` | GOAL files created (via delegation) | plan-refine | Refine phase (step 1) |
-| `plan` | `plan_id`, `goal_id?` | TASK files created (via delegation) | plan-refine | Refine phase (step 2) |
+
+**Note**: The `decompose` and `plan` operations are documented in plan-type skills but executed by domain agents invoked from commands.
 
 **Traceability Flow**: Request → Goals → Tasks (each task references its goal)
-
-**Batch + Single Mode**:
-- `plan_id` only → batch mode (processes all pending items)
-- `plan_id` + item ID → single mode (processes one item)
 
 ---
 
@@ -49,48 +71,37 @@ Adds domain-specific fields to references.toon AND finalize configuration to con
 
 ---
 
-## Operation: decompose
+## Domain Agent Behavior
 
-Analyzes the request and decomposes it into goals (Request → GOALs) via domain agent delegation.
+Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
-**Input**: `plan_id`
+### Goals Agent
 
-**Process**:
-```
-Task({domain}-goals-agent,
-     plan_id={plan_id})
-```
+**Purpose**: Analyze request and decompose into goals (Request → GOALs)
 
-**Domain Agent Responsibility**:
+**Invoked by**: `/plan-manage action=refine` command
+
+**Responsibilities**:
 - Read request.md for the request
 - Analyze codebase with domain knowledge
 - Create goals via `manage-goals:add`
 - Record lessons-learned on issues
 
-**Output**: `{status, goal_ids[], lessons_recorded}`
+**Returns**: `{status, goal_ids[], lessons_recorded}`
 
----
+### Plan Agent
 
-## Operation: plan
+**Purpose**: Transform goals into executable tasks (GOAL → TASK)
 
-Transforms goals into executable tasks (GOAL → TASK) via domain agent delegation.
+**Invoked by**: `/plan-manage action=refine` command (after goals agent completes)
 
-**Input**: `plan_id`, `goal_id?` (optional for single-item mode)
-
-**Process**:
-```
-Task({domain}-plan-agent,
-     plan_id={plan_id},
-     goal_id={goal_id})  # omit for batch
-```
-
-**Domain Agent Responsibility**:
+**Responsibilities**:
 - Query goals via `manage-goals` script
 - Generate domain-specific task steps
 - Create tasks via `manage-tasks:add`
 - Record lessons-learned on issues
 
-**Output**: `{status, task_ids[], lessons_recorded}`
+**Returns**: `{status, task_ids[], lessons_recorded}`
 
 ---
 
@@ -109,21 +120,22 @@ Task({domain}-plan-agent,
 
 Plan-type skills must:
 
-1. Implement all three operations: `configure`, `decompose`, `plan`
-2. Delegate `decompose` and `plan` to domain agents (except generic)
-3. Return `status` field in all outputs
-4. Handle errors with `status: error` and `message`
+1. Include `domain:` frontmatter with agent references (or null for generic)
+2. Implement `configure` operation for plan initialization
+3. Document domain agent behavior for goals and plan operations
+4. Return `status` field in all outputs
+5. Handle errors with `status: error` and `message`
 
 ---
 
 ## Integration
 
 **Callers**:
-- `plan-init` → calls `configure`
-- `plan-refine` → calls `decompose`, then `plan`
+- `plan-init` → calls `configure` operation
+- `/plan-manage action=refine` → loads skill, reads `domain:` frontmatter, invokes agents via Task
 - `plan-finalize` → reads config.toon directly (no operation call needed)
 
-**Domain Agents** (for decompose/plan delegation):
+**Domain Agents** (invoked by commands):
 - `cui-java-expert:java-goals-agent` / `cui-java-expert:java-plan-agent`
 - `cui-frontend-expert:js-goals-agent` / `cui-frontend-expert:js-plan-agent`
 - `cui-plugin-development-tools:plugin-goals-agent` / `cui-plugin-development-tools:plugin-plan-agent`

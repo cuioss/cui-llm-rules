@@ -216,7 +216,7 @@ Execution phase reads config to determine build commands, commit strategy, and f
 
 # Marshal Config (Project-Level)
 
-Project-level configuration for domain agent routing and plan-type detection.
+Project-level configuration for **optional overrides** of domain agent routing and plan-type detection.
 
 ## Storage Location
 
@@ -226,7 +226,10 @@ Project-level configuration for domain agent routing and plan-type detection.
 
 ## Purpose
 
-Enables commands to route to domain agents directly (bypassing broken agent-to-agent delegation).
+Provides project-specific overrides for domain agent routing. Default routing uses plan-type skill frontmatter (`domain:` section); marshal.json is only needed for custom agent mappings.
+
+**Primary routing source**: Plan-type skill `domain:` frontmatter (see `planning:plan-type-api`)
+**Override mechanism**: marshal.json `domain_agents` section
 
 ## Noun-Verb Operations
 
@@ -327,8 +330,10 @@ data:
 
 | Consumer | Operation | Purpose |
 |----------|-----------|---------|
-| /plan-manage | `domain-agents get` | Route refine to domain agents |
-| /plan-manage | `rules match` | Auto-detect plan-type |
-| /plan-marshall | `init` | First-run setup |
-| plan-init | `defaults list` | Set plan config |
+| /plan-manage | `domain-agents get` | Check for project-level agent override |
+| /plan-manage | `rules match` | Auto-detect plan-type from file patterns |
+| /plan-marshall | `init` | First-run project setup |
+| plan-init | `defaults list` | Set plan config defaults |
 | plan-finalize | `plan-type-defaults get` | Get verification command |
+
+**Note**: `/plan-manage` checks marshal-config for overrides, then falls back to plan-type skill frontmatter for default agent routing.

@@ -53,10 +53,10 @@ Plan-types are first-class skills that provide workflow definitions via a unifor
 ```
 planning/skills/
 ├── plan-type-generic/          # 3-phase workflow skill
-│   └── SKILL.md                # API: configure, specify, plan
+│   └── SKILL.md                # configure + domain: frontmatter (null agents)
 │
 ├── plan-type-plugin/           # 4-phase workflow skill
-│   ├── SKILL.md                # API: configure, specify, plan
+│   ├── SKILL.md                # configure + domain: frontmatter
 │   └── templates/              # Internal sub-type templates
 │       ├── script-task.md
 │       ├── skill-task.md
@@ -64,10 +64,10 @@ planning/skills/
 │       └── agent-task.md
 │
 ├── plan-type-java/             # 4-phase workflow skill (Java)
-│   └── SKILL.md                # API: configure, specify, plan
+│   └── SKILL.md                # configure + domain: frontmatter
 │
 └── plan-type-javascript/       # 4-phase workflow skill (JavaScript)
-    └── SKILL.md                # API: configure, specify, plan
+    └── SKILL.md                # configure + domain: frontmatter
 ```
 
 **Uniform API** (all plan-type skills):
@@ -75,99 +75,92 @@ planning/skills/
 | Operation | Input | Output |
 |-----------|-------|--------|
 | `configure` | `plan_id` | Adds domain fields to references.toon + finalize config to config.toon |
-| `specify` | `plan_id` | Creates SPEC files from requirements |
-| `plan` | `plan_id` | Creates TASK files from specifications |
+
+Plan-type skills also declare domain agents in their `domain:` frontmatter section.
 
 **Key Design**:
-- `configure` writes finalize configuration to config.toon during init (no separate query needed)
-- `specify` transforms requirements → specifications (single responsibility)
-- `plan` transforms specifications → tasks (single responsibility)
+- `configure` writes finalize configuration to config.toon during init
+- Domain agent references in skill frontmatter enable command-level routing
+- Goals and plan operations are handled by domain agents invoked via Task tool
 
 **Flow**:
 1. User requests task
 2. `plan-init` determines plan type, creates base config/references, calls `configure`
-3. `plan-refine` calls `specify` to generate specifications from requirements
-4. `plan-refine` calls `plan` to generate tasks from specifications
+3. `/plan-manage` loads plan-type skill, reads `domain:` frontmatter
+4. `/plan-manage` invokes domain agents via Task tool (goals_agent, plan_agent)
 5. `plan-execute` reads plan files → executes tasks sequentially
 6. `plan-execute` reads finalize config directly from config.toon
 
-## Domain Analysis Skills
+## Skill-Based Domain Agent Routing
 
-Domain-specific analysis skills live in their respective expert bundles:
-
-```
-cui-plugin-development-tools/skills/
-└── plugin-analysis/            # Analyzes plugin components
-
-cui-java-expert/skills/
-└── java-analysis/              # Analyzes Java implementation
-
-cui-frontend-expert/skills/
-└── js-analysis/                # Analyzes JavaScript implementation
-```
-
-### Unified Analysis API
-
-**Contract Definition**: `planning:analysis-api` skill defines the full API contract.
+Domain agents live in their expert bundles and are invoked by commands via Task tool:
 
 ```
-Skill: planning:analysis-api
+cui-java-expert/agents/
+├── java-goals-agent.md         # Decomposes request into goals
+└── java-plan-agent.md          # Transforms goals into tasks
+
+cui-frontend-expert/agents/
+├── js-goals-agent.md           # Decomposes request into goals
+└── js-plan-agent.md            # Transforms goals into tasks
+
+cui-plugin-development-tools/agents/
+├── plugin-goals-agent.md       # Decomposes request into goals
+└── plugin-plan-agent.md        # Transforms goals into tasks
 ```
 
-All domain analysis skills implement this contract by loading the analysis-api skill and providing domain-specific implementations.
+### Domain Agent Mapping
 
-**Key Elements** (see `planning:analysis-api` for full specification):
+Plan-type skills declare their domain agents in structured frontmatter:
 
-| Element | Description |
-|---------|-------------|
-| **Operation** | `analyze` |
-| **Input** | `plan_id`, `task_description`, `issue_context`, `build_system` |
-| **Output** | `analysis_result` with `status` and `components[]` |
-| **Components** | name, type, scope, path, dependencies, complexity, notes |
+```yaml
+# Example: plan-type-java/SKILL.md
+---
+domain:
+  goals_agent: cui-java-expert:java-goals-agent
+  plan_agent: cui-java-expert:java-plan-agent
+  verification_command: /builder:builder-build-and-fix
+  pr_workflow: true
+---
+```
 
-**Component Types by Domain**:
+| Plan Type | Goals Agent | Plan Agent |
+|-----------|-------------|------------|
+| `java` | `cui-java-expert:java-goals-agent` | `cui-java-expert:java-plan-agent` |
+| `javascript` | `cui-frontend-expert:js-goals-agent` | `cui-frontend-expert:js-plan-agent` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
+| `generic` | N/A | N/A (uses plan-refine-agent fallback) |
 
-| Domain | Skill | Types |
-|--------|-------|-------|
-| Plugin | `cui-plugin-development-tools:plugin-analysis` | `script`, `skill`, `command`, `agent` |
-| Java | `cui-java-expert:java-analysis` | `class`, `interface`, `module`, `package`, `config` |
-| JavaScript | `cui-frontend-expert:js-analysis` | `module`, `class`, `web-component`, `utility`, `config` |
-
-### Handoff Protocol
+### Routing Flow
 
 ```
-┌─────────────┐    analyze(plan_id, task, issue, build)    ┌─────────────┐
-│ plan-refine │ ──────────────────────────────────────────► │  domain     │
-│             │                                             │  analysis   │
-│             │ ◄────────────────────────────────────────── │  skill      │
-└─────────────┘    analysis_result{status, components[]}    └─────────────┘
+/plan-manage action=refine
        │
-       │ components[]
-       ▼
-┌─────────────┐    specify(plan_id)                        ┌─────────────┐
-│ plan-refine │ ──────────────────────────────────────────► │  plan-type  │
-│             │                                             │  skill      │
-│             │ ◄────────────────────────────────────────── │             │
-└─────────────┘    (creates SPEC files from REQ files)      └─────────────┘
+       ├─ manage-config get --field plan_type
+       │     └─ "planning:plan-type-java"
        │
-       ▼
-┌─────────────┐    plan(plan_id)                           ┌─────────────┐
-│ plan-refine │ ──────────────────────────────────────────► │  plan-type  │
-│             │                                             │  skill      │
-│             │ ◄────────────────────────────────────────── │             │
-└─────────────┘    (creates TASK files from SPEC files)     └─────────────┘
+       ├─ Skill: planning:plan-type-java
+       │     └─ Read frontmatter.domain
+       │
+       ├─ Task: {domain.goals_agent}
+       │     └─ Analyzes request, creates GOAL files
+       │
+       └─ Task: {domain.plan_agent}
+             └─ Reads goals, creates TASK files
 ```
 
-### Analysis Flow
+**Key Insight**: Commands have Task tool, skills do not. Commands load plan-type skills to read agent references, then invoke agents directly.
 
-1. `plan-refine` reads plan context (task description, issue, config)
-2. Based on `plan_type`, delegates to appropriate analysis skill
-3. Analysis skill explores codebase, identifies components
-4. Returns `analysis_result` with structured `components[]`
-5. `plan-refine` calls `specify` to create specifications from requirements
-6. `plan-refine` calls `plan` to create tasks from specifications
+**Generic Fallback**: For generic plans (no domain agents), falls back to `planning:plan-refine-agent` which creates goals and tasks inline.
 
-**Why Domain Ownership**: Analysis requires domain expertise (Java patterns, JavaScript structure, plugin architecture). Keeping analysis skills in expert bundles:
+### Why Domain Ownership
+
+Domain agents have deep expertise in their technology:
+- **Java agents**: Understand Maven/Gradle, package structure, JUnit patterns
+- **JavaScript agents**: Understand npm, ES modules, Jest patterns
+- **Plugin agents**: Understand marketplace structure, skill/command/agent patterns
+
+Keeping domain agents in expert bundles:
 - Leverages existing domain knowledge
 - Allows domain-specific evolution
 - Avoids overloading planning bundle with domain logic
@@ -220,55 +213,48 @@ The detail level ensures:
 ```
                            Commands
                     ┌────────────────────┐
-                    │  /plan-manage      │
+                    │  /plan-manage      │ ◄── Routes to domain agents
                     │  /plan-execute     │
-                    └─────────┬──────────┘
-                              │
-                              ▼
-                    ┌────────────────────┐
-                    │  phase-management  │ ◄── Orchestration
-                    │     (skill)        │
                     └─────────┬──────────┘
                               │
           ┌───────────────────┼───────────────────┐
           │                   │                   │
           ▼                   ▼                   ▼
    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-   │ plan-init   │    │ plan-refine │    │plan-execute │ ◄── Phase Skills
-   │             │    │(orchestrate)│    │(dumb runner)│
+   │ plan-init   │    │ Plan-Type   │    │plan-execute │ ◄── Phase Skills
+   │   (agent)   │    │   Skills    │    │(dumb runner)│
    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
           │                  │                  │
-          │         ┌────────┴────────┐         │
-          │         │                 │         │
-          │         ▼                 ▼         │
-          │  ┌─────────────┐  ┌─────────────┐   │
-          │  │   Domain    │  │ Plan-Type   │   │
-          │  │  Analysis   │  │   Skills    │◄──┘
-          │  │   Skills    │  │             │
-          │  └─────────────┘  └──────┬──────┘
-          │         │                │
-          │         │  components[]  │
-          │         └───────►────────┘
-          │                          │
-          │    ┌─────────────────────┘
-          │    │ specify + plan
-          ▼    ▼ (writes directly)
-   ┌─────────────────────────────────┐
-   │    plan-files (skill)           │ ◄── File I/O Abstraction
-   └─────────────────────────────────┘
-                    │
-                    ▼
+          │                  │ frontmatter.domain
+          │                  ▼                  │
+          │         ┌─────────────┐             │
+          │         │   Domain    │             │
+          │         │   Agents    │ ◄── Invoked via Task by commands
+          │         │(goals/plan) │
+          │         └──────┬──────┘
+          │                │
+          │         ┌──────┴──────┐
+          │         │             │
+          │         ▼             ▼
+          │  ┌─────────────┐ ┌────────────┐
+          │  │manage-goals │ │manage-tasks│ ◄── Script-based CRUD
+          │  └─────────────┘ └────────────┘
+          │
+          ▼
    ┌─────────────────────────────────┐
    │  Python Scripts                 │ ◄── Atomic Operations
-   │  write-plan.py, update-progress │
-   │  transition-phase.py            │
+   │  manage-config.py, manage-goal  │
+   │  manage-task.py, manage-files   │
    └─────────────────────────────────┘
 
-   Domain Analysis Skills (in expert bundles):
+   Domain Agents (in expert bundles):
    ┌─────────────────────────────────────────────┐
-   │ cui-plugin-development-tools:plugin-analysis│
-   │ cui-java-expert:java-analysis               │
-   │ cui-frontend-expert:js-analysis             │
+   │ cui-java-expert: java-goals-agent           │
+   │                  java-plan-agent            │
+   │ cui-frontend-expert: js-goals-agent         │
+   │                      js-plan-agent          │
+   │ cui-plugin-development-tools: plugin-goals  │
+   │                               plugin-plan   │
    └─────────────────────────────────────────────┘
 ```
 
@@ -310,8 +296,8 @@ Located in `plan-type-plugin/templates/` (internal to plan-type-plugin skill):
 | `command-task.md` | component.type = "command" | Command orchestration workflow |
 | `agent-task.md` | component.type = "agent" | Agent frontmatter workflow |
 
-**Note**: These templates are internal to plan-type-plugin. When `plan` operation is called:
-1. It reads specifications from SPEC files
-2. Selects appropriate template based on `component.type`
-3. Generates tasks and writes them directly to TASK files
-4. Phase skills never access templates directly
+**Note**: These templates are internal to plan-type-plugin. When the `plugin-plan-agent` is invoked:
+1. It reads GOAL files from the plan directory
+2. Selects appropriate template based on component type
+3. Generates tasks and writes them via manage-tasks script
+4. Commands invoke domain agents, not templates directly

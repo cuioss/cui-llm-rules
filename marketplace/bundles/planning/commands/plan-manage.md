@@ -78,13 +78,60 @@ This provides a seamless flow from task description to actionable tasks in a sin
 
 ### Refine Phase
 
+The refine phase uses **skill-based routing**: load the plan-type skill and invoke its documented domain agents directly.
+
+**Step 1**: Get plan_type from config:
+```bash
+python3 .plan/execute-script.py planning:manage-config:manage-config get \
+  --plan-id {plan_id} --field plan_type
+```
+
+**Step 2**: Load the plan-type skill:
+```
+Skill: {plan_type}
+```
+Example: `Skill: planning:plan-type-java`
+
+The skill's `domain:` frontmatter contains:
+```yaml
+domain:
+  goals_agent: cui-java-expert:java-goals-agent
+  plan_agent: cui-java-expert:java-plan-agent
+  verification_command: /builder:builder-build-and-fix
+  pr_workflow: true
+```
+
+**Step 3**: Route based on skill.domain:
+
+**If domain.goals_agent is NOT null** (domain-specific plan type):
+```
+Task: {domain.goals_agent}
+  Input: plan_id={plan_id}
+  Output: goals created
+
+Task: {domain.plan_agent}
+  Input: plan_id={plan_id}
+  Output: tasks created
+```
+
+Log each domain agent invocation:
+```bash
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type progress \
+  --summary "Invoked {agent_name}" \
+  --detail "Domain agent from skill frontmatter"
+```
+
+**If domain.goals_agent IS null** (generic plan type):
 ```
 Task: planning:plan-refine-agent
   Input: plan_id
   Output: tasks count
 ```
 
-**Refine agent**: Transforms goals into tasks via plan-type delegation
+**Refine agent**: Fallback for generic plans without domain-specific agents
 
 ## ACTIONS
 
@@ -127,12 +174,14 @@ If init-phase plans exist, offers to continue existing or create new.
 
 ### refine
 
-Create tasks from goals for a plan.
+Create tasks from goals for a plan. Uses skill-based domain agent routing.
 
 ```
 /plan-manage action=refine
 /plan-manage action=refine plan="jwt-auth"
 ```
+
+**Routing**: Loads plan-type skill and reads `domain:` frontmatter. For domain-specific types (Java, JavaScript, Plugin), invokes goals and plan agents from skill. For generic types, falls back to plan-refine-agent.
 
 If no plan specified, shows plans in init/refine phase for selection.
 
@@ -220,14 +269,30 @@ If you discover issues or improvements during execution, record them:
 | Command | Relationship |
 |---------|--------------|
 | `/plan-execute` | Execute plans (execute/finalize phases) |
+| `/plan-marshall` | Configure project-level planning settings |
 
 | Skill | Purpose |
 |-------|---------|
 | `planning:manage-lifecycle` | Plan discovery, phase routing, transitions |
 | `planning:plan-init` | Initialize new plans (creates request.md, goals, config) |
-| `planning:plan-refine` | Transform goals to tasks |
+| `planning:plan-refine` | Transform goals to tasks (fallback for generic plans) |
+| `planning:plan-type-java` | Java domain config (provides domain agents in frontmatter) |
+| `planning:plan-type-javascript` | JavaScript domain config |
+| `planning:plan-type-plugin` | Plugin domain config |
+| `planning:plan-type-generic` | Generic config (no domain agents) |
+
+| Script | Purpose |
+|--------|---------|
+| `planning:manage-config:manage-config` | Plan config field access |
+| `planning:manage-log:manage-work-log` | Work log entries |
 
 | Agent | Purpose |
 |-------|---------|
 | `planning:plan-init-agent` | Init phase execution |
-| `planning:plan-refine-agent` | Refine phase execution |
+| `planning:plan-refine-agent` | Refine phase fallback (generic plans) |
+| `cui-java-expert:java-goals-agent` | Java: Request → Goals |
+| `cui-java-expert:java-plan-agent` | Java: Goals → Tasks |
+| `cui-frontend-expert:js-goals-agent` | JavaScript: Request → Goals |
+| `cui-frontend-expert:js-plan-agent` | JavaScript: Goals → Tasks |
+| `cui-plugin-development-tools:plugin-goals-agent` | Plugin: Request → Goals |
+| `cui-plugin-development-tools:plugin-plan-agent` | Plugin: Goals → Tasks |

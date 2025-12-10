@@ -129,14 +129,13 @@ npm run docs:check
 ### Work Log Entry
 **Trigger**: "**Log**:", "Record completion"
 
-```
-Skill: planning:work-log
-operation: log-entry
-plan_directory: {plan_directory}
-phase: {phase}
-task: {task_id}
-action: "{what was done}"
-result: "{outcome}"
+```bash
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase {phase} \
+  --type artifact \
+  --summary "{what was done}" \
+  --detail "{outcome}"
 ```
 
 ### Lesson Learned

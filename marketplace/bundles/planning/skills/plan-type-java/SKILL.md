@@ -1,7 +1,16 @@
 ---
 name: plan-type-java
-description: Java plan type providing domain-specific configuration and refinement for Java/Maven/Gradle projects
-allowed-tools: Read, Bash, Task
+description: Java plan type for Maven/Gradle projects
+allowed-tools: Read, Bash
+domain:
+  goals_agent: cui-java-expert:java-goals-agent
+  plan_agent: cui-java-expert:java-plan-agent
+  verification_command: /builder:builder-build-and-fix
+  pr_workflow: true
+  standards:
+    - cui-java-expert:cui-java-core
+    - cui-java-expert:cui-javadoc
+    - cui-java-expert:cui-java-unit-testing
 ---
 
 # Plan Type: Java (`planning:plan-type-java`)
@@ -14,29 +23,17 @@ allowed-tools: Read, Bash, Task
 
 **API**: Implements `planning:plan-type-api` contract.
 
-**FQN Convention**: All skill/command references use fully qualified names: `{bundle}:{component}`
+## Domain Configuration
 
----
+The `domain:` frontmatter provides structured routing information for commands:
 
-## Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `planning:manage-log` | Work log entries |
-| `planning:manage-config` | Config field access |
-| `planning:manage-references` | Reference file CRUD |
-
----
-
-## Characteristics
-
-| Aspect | Value |
-|--------|-------|
-| Technology | java |
-| Verification | `/builder:builder-build-and-fix` |
-| PR Workflow | true |
-| Goals Agent | `cui-java-expert:java-goals-agent` |
-| Plan Agent | `cui-java-expert:java-plan-agent` |
+| Field | Value | Purpose |
+|-------|-------|---------|
+| `goals_agent` | `cui-java-expert:java-goals-agent` | Decomposes request into goals |
+| `plan_agent` | `cui-java-expert:java-plan-agent` | Creates tasks from goals |
+| `verification_command` | `/builder:builder-build-and-fix` | Build verification |
+| `pr_workflow` | `true` | Create PR after execution |
+| `standards` | Java core, JavaDoc, Unit testing | Skills to load |
 
 ---
 
@@ -64,83 +61,26 @@ allowed-tools: Read, Bash, Task
 
 ---
 
-## Operation: decompose
+## Agent Behavior
 
-**Input**: `plan_id`
+### java-goals-agent
 
-**Before delegation**, log:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type progress \
-  --summary "Delegating to java-goals-agent" \
-  --detail "decomposing request into goals"
-```
-
-**Delegation**:
-```
-Task(cui-java-expert:java-goals-agent,
-     plan_id={plan_id})
-```
-
-**After delegation**, log outcome:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type outcome \
-  --summary "java-goals-agent completed: {goal_count} goals created" \
-  --detail "lessons_recorded={count}"
-```
-
-**Returns**: `{status, goal_ids[], lessons_recorded}`
-
-The agent analyzes Java codebase, creates goals with:
+Analyzes Java codebase and creates goals with:
 - Class/interface design decisions
 - Package placement rationale
 - Dependencies (CDI, Spring, external libs)
 - Module assignment (for multi-module projects)
 - Integration points with existing code
 
----
+**Returns**: `{status, goal_ids[], lessons_recorded}`
 
-## Operation: plan
+### java-plan-agent
 
-**Input**: `plan_id`, `goal_id?` (optional for single-item mode)
-
-**Before delegation**, log:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type progress \
-  --summary "Delegating to java-plan-agent" \
-  --detail "goal_id={goal_id|batch}"
-```
-
-**Delegation**:
-```
-Task(cui-java-expert:java-plan-agent,
-     plan_id={plan_id},
-     goal_id={goal_id})  # omit for batch
-```
-
-**After delegation**, log outcome:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type outcome \
-  --summary "java-plan-agent completed: {task_count} tasks created" \
-  --detail "lessons_recorded={count}"
-```
-
-**Returns**: `{status, task_ids[], lessons_recorded}`
-
-The agent creates tasks with Java-specific steps:
+Creates tasks with Java-specific steps:
 1. Create/modify implementation file at `{path}`
 2. Add unit tests (load `cui-java-expert:cui-java-unit-testing`)
 3. Add JavaDoc (load `cui-java-expert:cui-javadoc`)
 4. Follow CUI patterns (load `cui-java-expert:cui-java-core`)
 5. Verify `mvn test -pl {module}` passes
+
+**Returns**: `{status, task_ids[], lessons_recorded}`

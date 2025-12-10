@@ -13,37 +13,34 @@ User Request (description, lesson_id, or issue)
 │                                                     │
 │   1. Validate input (exactly one source)            │
 │   2. Derive plan_id from input                      │
-│   3. Create or reference plan (single atomic call)  │
+│   3. Create or reference plan directory             │
 │   4. Get task content from source                   │
-│   5. Plan directory ready                           │
-│   6. Write request.md (preserves original input)    │
-│   7. Initialize references.toon (branch only)       │
-│   8. Analyze task to extract goals                  │
-│   9. Ask user for clarification (if needed)         │
-│  10. Create numbered goals (GOAL-1, GOAL-2)         │
-│  11. Detect plan type from goals                    │
-│  12. Create config.toon with plan type              │
-│  13. Create status.toon                             │
-│  14. Call plan-type:configure for domain fields     │
-│  15. Transition phase to "refine"                   │
-│   OUTPUT: plan_id, goals summary                    │
+│   5. Write request.md (preserves original input)    │
+│   6. Initialize references.toon (branch only)       │
+│   7. Detect plan type from task analysis            │
+│   8. Create status.toon with phases                 │
+│   9. Create config.toon with plan type              │
+│  10. Call plan-type:configure for domain fields     │
+│  11. Transition phase to "refine"                   │
+│   OUTPUT: plan_id, plan_type, next_phase            │
 └─────────────────────────────────────────────────────┘
         │
         ▼
-    Refine Phase
+    Refine Phase (creates goals and tasks)
 ```
 
 ## Plan Init Responsibilities
 
-Plan-init is minimal. It ONLY:
-
 | Does | Does NOT |
 |------|----------|
-| Creates plan directory | Determine plan type |
-| Writes request.md | Create config.toon |
-| Initializes references.toon (branch) | Create requirements |
-| Logs creation | Ask about configuration |
-| Returns plan_id | Call plan-type skills |
+| Creates plan directory | Create goals (that's refine phase) |
+| Writes request.md | Create tasks (that's refine phase) |
+| Initializes references.toon | Execute implementation |
+| Detects plan type | Skip to execute phase |
+| Creates config.toon | |
+| Creates status.toon | |
+| Calls plan-type configure | |
+| Transitions to refine | |
 
 ## Input Sources
 
@@ -116,14 +113,12 @@ AskUserQuestion:
 - [ ] Plan directory created (via manage-files create-or-reference)
 - [ ] request.md created with complete original input
 - [ ] references.toon created with branch
-- [ ] Work-log entry written
-- [ ] plan_id returned
-
-### Also Created (part of init)
+- [ ] status.toon created with phases
 - [ ] config.toon created with plan type
-- [ ] goals/ directory with goals created
-- [ ] status.toon created
-- [ ] Plan type determined
+- [ ] Plan-type configure called for domain fields
+- [ ] Work-log entry written
+- [ ] Phase transitioned to refine
+- [ ] plan_id returned
 
 ## Error Handling
 
@@ -172,9 +167,13 @@ recovery: Use resume option or provide different plan_id
 
 ### Complete Initialization
 
-The plan-init agent handles the complete initialization, including:
+The plan-init agent handles complete initialization:
 1. Create plan directory and request.md
-2. Analyze task and create goals
-3. Detect plan type
-4. Create configuration (config.toon, status.toon)
-5. Transition to refine phase
+2. Initialize references.toon with branch
+3. Detect plan type from task analysis
+4. Create status.toon with phases
+5. Create config.toon with plan type
+6. Call plan-type configure for domain fields
+7. Transition to refine phase
+
+**Note**: Goals and tasks are NOT created during init. That's the refine phase.

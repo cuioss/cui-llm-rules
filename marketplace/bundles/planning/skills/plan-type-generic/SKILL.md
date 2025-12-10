@@ -1,7 +1,13 @@
 ---
 name: plan-type-generic
-description: Generic plan type providing minimal configuration and refinement for documentation, config, and quick fixes
+description: Generic plan type for documentation, config, and quick fixes
 allowed-tools: Read, Bash
+domain:
+  goals_agent: null
+  plan_agent: null
+  verification_command: null
+  pr_workflow: false
+  standards: []
 ---
 
 # Plan Type: Generic (`planning:plan-type-generic`)
@@ -15,18 +21,19 @@ allowed-tools: Read, Bash
 
 **API**: Implements `planning:plan-type-api` contract.
 
-**FQN Convention**: All skill/command references use fully qualified names: `{bundle}:{component}`
+## Domain Configuration
 
----
+The `domain:` frontmatter indicates no domain agents (generic plans use inline refinement):
 
-## Characteristics
+| Field | Value | Purpose |
+|-------|-------|---------|
+| `goals_agent` | `null` | No domain agent - use plan-refine-agent |
+| `plan_agent` | `null` | No domain agent - use plan-refine-agent |
+| `verification_command` | `null` | No verification required |
+| `pr_workflow` | `false` | No PR (direct to main) |
+| `standards` | `[]` | No domain-specific standards |
 
-| Aspect | Value |
-|--------|-------|
-| Technology | none |
-| Verification | none |
-| PR Workflow | false |
-| Analysis Agent | none (no codebase analysis needed) |
+When `goals_agent` is `null`, the command falls back to `planning:plan-refine-agent` for inline goal/task creation.
 
 ---
 
@@ -47,18 +54,12 @@ allowed-tools: Read, Bash
 
 ---
 
-## Operation: decompose
+## Fallback Behavior
 
-**Input**: `plan_id`
+Since `goals_agent` and `plan_agent` are `null`, the `/plan-manage` command falls back to `planning:plan-refine-agent` for the refine phase.
 
-**Simple Behavior**: Creates 1:1 goal per request item with minimal transformation.
+The plan-refine-agent provides simple inline refinement:
+- Creates 1:1 goal per request item with minimal transformation
+- Creates single task per goal with basic steps (execute, verify)
 
----
-
-## Operation: plan
-
-**Input**: `plan_id`
-
-**Simple Behavior**: Creates single task per goal with basic steps:
-1. Execute task
-2. Verify result
+This avoids the overhead of domain-specific agents for simple tasks.

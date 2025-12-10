@@ -1,4 +1,4 @@
-# Task: {derived_title}
+# Request: {derived_title}
 
 source: {description|lesson|issue}
 source_id: {source_id_or_none}

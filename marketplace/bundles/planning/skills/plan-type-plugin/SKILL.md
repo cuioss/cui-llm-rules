@@ -1,7 +1,15 @@
 ---
 name: plan-type-plugin
-description: Plugin development plan type providing domain-specific configuration and refinement with /plugin-doctor verification
-allowed-tools: Read, Bash, Task
+description: Plugin development plan type for marketplace components
+allowed-tools: Read, Bash
+domain:
+  goals_agent: cui-plugin-development-tools:plugin-goals-agent
+  plan_agent: cui-plugin-development-tools:plugin-plan-agent
+  verification_command: /cui-plugin-development-tools:plugin-doctor
+  pr_workflow: false
+  standards:
+    - cui-plugin-development-tools:plugin-architecture
+    - cui-plugin-development-tools:plugin-script-architecture
 ---
 
 # Plan Type: Plugin Development (`planning:plan-type-plugin`)
@@ -14,29 +22,17 @@ allowed-tools: Read, Bash, Task
 
 **API**: Implements `planning:plan-type-api` contract.
 
-**FQN Convention**: All skill/command references use fully qualified names: `{bundle}:{component}`
+## Domain Configuration
 
----
+The `domain:` frontmatter provides structured routing information for commands:
 
-## Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `planning:manage-log` | Work log entries |
-| `planning:manage-config` | Config field access |
-| `planning:manage-references` | Reference file CRUD |
-
----
-
-## Characteristics
-
-| Aspect | Value |
-|--------|-------|
-| Technology | none |
-| Verification | `/cui-plugin-development-tools:plugin-doctor` |
-| PR Workflow | false |
-| Goals Agent | `cui-plugin-development-tools:plugin-goals-agent` |
-| Plan Agent | `cui-plugin-development-tools:plugin-plan-agent` |
+| Field | Value | Purpose |
+|-------|-------|---------|
+| `goals_agent` | `cui-plugin-development-tools:plugin-goals-agent` | Decomposes request into goals |
+| `plan_agent` | `cui-plugin-development-tools:plugin-plan-agent` | Creates tasks from goals |
+| `verification_command` | `/cui-plugin-development-tools:plugin-doctor` | Plugin validation |
+| `pr_workflow` | `false` | No PR (direct to main) |
+| `standards` | Plugin architecture, Script architecture | Skills to load |
 
 ---
 
@@ -126,81 +122,22 @@ python3 .plan/execute-script.py planning:manage-config:manage-config set \
 
 ---
 
-## Operation: decompose
+## Agent Behavior
 
-**Input**: `plan_id`
+### plugin-goals-agent
 
-**Before delegation**, log:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type progress \
-  --summary "Delegating to plugin-goals-agent" \
-  --detail "decomposing request into goals"
-```
-
-**Delegation**:
-```
-Task(cui-plugin-development-tools:plugin-goals-agent,
-     plan_id={plan_id})
-```
-
-**After delegation**, log outcome:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type outcome \
-  --summary "plugin-goals-agent completed: {goal_count} goals created" \
-  --detail "lessons_recorded={count}"
-```
-
-**Returns**: `{status, goal_ids[], lessons_recorded}`
-
-The agent analyzes marketplace structure, creates goals with:
+Analyzes marketplace structure and creates goals with:
 - Component type (skill, command, agent, script)
 - Target bundle location
 - Frontmatter requirements
 - Standards to follow
 - Integration points
 
----
+**Returns**: `{status, goal_ids[], lessons_recorded}`
 
-## Operation: plan
+### plugin-plan-agent
 
-**Input**: `plan_id`, `goal_id?` (optional for single-item mode)
-
-**Before delegation**, log:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type progress \
-  --summary "Delegating to plugin-plan-agent" \
-  --detail "goal_id={goal_id|batch}"
-```
-
-**Delegation**:
-```
-Task(cui-plugin-development-tools:plugin-plan-agent,
-     plan_id={plan_id},
-     goal_id={goal_id})  # omit for batch
-```
-
-**After delegation**, log outcome:
-```bash
-python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type outcome \
-  --summary "plugin-plan-agent completed: {task_count} tasks created" \
-  --detail "lessons_recorded={count}"
-```
-
-**Returns**: `{status, task_ids[], lessons_recorded}`
-
-The agent creates tasks with plugin-specific steps:
+Creates tasks with plugin-specific steps:
 
 | Component Type | Key Steps |
 |----------------|-----------|
@@ -217,3 +154,5 @@ The agent creates tasks with plugin-specific steps:
 | `skill-task.md` | Skill creation with SKILL.md structure |
 | `command-task.md` | Command orchestration patterns |
 | `agent-task.md` | Agent frontmatter and tool selection |
+
+**Returns**: `{status, task_ids[], lessons_recorded}`
