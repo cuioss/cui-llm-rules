@@ -125,20 +125,55 @@ python3 .plan/execute-script.py \
 
 #### 3b.2: Analyze Each Component
 
-For each component in the inventory, **read and analyze** to determine if affected:
+For each component in the inventory, **read and analyze** to determine if affected.
 
-**DO NOT use scripts to determine impact** - thoroughly analyze each component step-by-step:
+**CRITICAL**: Analyze components in batches with explicit logging to ensure thoroughness.
 
-1. Read the component file
-2. Search for references to the changed entity
-3. Determine if update is required
-4. **Record the file path if affected**
+##### Batch Processing
+
+Process components in batches of **10-15 files** per bundle. After each batch:
+
+1. Log a checkpoint to work-log
+2. Review findings before continuing
+3. Do NOT skip components or rush through batches
+
+```bash
+# After each batch of 10-15 components
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type progress \
+  --summary "Analyzed batch {N} of {bundle}: {X} affected, {Y} not affected" \
+  --detail "Affected: file1.md, file2.md | Not affected: file3.md, file4.md, ..."
+```
+
+##### Per-Component Analysis
+
+For each component, execute these steps **in order**:
+
+1. **Read** the component file completely
+2. **Search** for references to the changed entity
+3. **Evaluate** against the checklist below
+4. **Record** the result (affected or not, with reason)
 
 **Analysis checklist per component**:
 - [ ] Does it reference the changed skill/command/agent?
 - [ ] Does it use the changed script notation?
 - [ ] Does it follow the pattern being modified?
 - [ ] Does it output in the format being changed?
+
+##### Logging Affected Files
+
+For each **affected** file, log immediately:
+
+```bash
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type finding \
+  --summary "Affected: {file_path}" \
+  --detail "Reason: {why this file needs changes}"
+```
 
 **Build affected files list** as you analyze:
 ```
@@ -148,6 +183,19 @@ affected_files:
     - path/to/file2.md (reason: references changed pattern)
   bundle-b:
     - path/to/file3.md (reason: produces affected format)
+```
+
+##### Final Verification
+
+After all batches complete, log the summary:
+
+```bash
+python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase init \
+  --type milestone \
+  --summary "Impact analysis complete: {total_affected} of {total_analyzed} affected" \
+  --detail "Bundles analyzed: {list}. Ready for goal creation."
 ```
 
 #### 3b.3: Create Goals with Enumeration
