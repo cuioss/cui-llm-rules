@@ -6,7 +6,7 @@ allowed-tools: Read, Bash, Glob, SlashCommand
 
 # Plan Finalize Skill
 
-**Role**: Finalize phase skill. Handles git workflow (commit, push, PR) and plan completion. Reads configuration from config.toon written during configure phase.
+**Role**: Finalize phase skill. Handles git workflow (commit, push, PR) and plan completion. Reads configuration from config.toon written during init phase.
 
 **Key Pattern**: Configuration-agnostic execution. All finalize behavior determined by config.toon values.
 
@@ -23,16 +23,17 @@ Activate when:
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-config` | Config field access |
-| `planning:manage-references` | Reference file CRUD |
-| `planning:manage-lifecycle` | Phase transitions |
-| `planning:manage-log` | Work log entries |
+| `planning:manage-config:manage-config` | Config field access |
+| `planning:manage-references:manage-references` | Reference file CRUD |
+| `planning:manage-lifecycle:manage-lifecycle` | Phase transitions |
+| `planning:manage-log:manage-work-log` | Work log entries |
+| `planning:git-workflow:git-workflow` | Commit, push, PR creation |
 
 ---
 
 ## Configuration Source
 
-All finalize configuration is read from config.toon (written during configure):
+All finalize configuration is read from config.toon (written during init phase):
 
 ```bash
 python3 .plan/execute-script.py planning:manage-config:manage-config get-multi \
@@ -114,37 +115,28 @@ If verification fails, report error and allow retry.
 
 ### Step 3: Commit Workflow
 
-Stage all changes:
+Load the git-workflow skill for commit operations:
 
-```bash
-git add -A
+```
+Skill: planning:git-workflow
 ```
 
-Create commit with descriptive message (read request.md for summary):
+The git-workflow skill handles:
+- Artifact detection and cleanup (*.class, *.temp files)
+- Commit message generation following conventional commits
+- Stage, commit, and push operations
 
-```bash
-git commit -m "{commit_message}"
-```
-
-Push to remote:
-
-```bash
-git push origin {branch}
-```
+**Parameters** (from config and request):
+- `message`: Generated from request.md summary
+- `push`: true (always push in finalize)
+- `create-pr`: from `create_pr` config field
 
 ### Step 4: Create PR (if enabled)
 
-If `create_pr == true`:
-
-Read request.md for PR summary, then create PR:
-
-```bash
-gh pr create \
-  --title "{title}" \
-  --body "{body_from_template}"
-```
-
-If issue is linked in references.toon, include `Closes #{issue}` in body.
+If `create_pr == true`, the git-workflow skill creates the PR with:
+- Title from request.md
+- Body using `templates/pr-template.md`
+- Issue link from references.toon (`Closes #{issue}` if present)
 
 ### Step 5: PR Workflow (if PR created)
 
@@ -301,6 +293,16 @@ Minimal workflow:
 
 ---
 
+## Standards (Load On-Demand)
+
+### Validation
+```
+Read standards/validation.md
+```
+Contains: Configuration requirements, step-by-step validation checklist, output format examples
+
+---
+
 ## Templates
 
 | Template | Purpose |
@@ -313,10 +315,11 @@ Minimal workflow:
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `planning:manage-config` | `get-multi` | Read finalize config fields |
-| `planning:manage-references` | `get-context` | Read branch, issue info |
-| `planning:manage-lifecycle` | `transition` | Phase transition |
-| `planning:manage-log` | `add` | Log completion |
+| `planning:manage-config:manage-config` | `get-multi` | Read finalize config fields |
+| `planning:manage-references:manage-references` | `get-context` | Read branch, issue info |
+| `planning:manage-lifecycle:manage-lifecycle` | `transition` | Phase transition |
+| `planning:manage-log:manage-work-log` | `add` | Log completion |
+| `planning:git-workflow:git-workflow` | `format-commit`, `analyze-diff` | Commit message generation |
 
 ---
 
@@ -337,5 +340,6 @@ planning:manage-lifecycle route --phase finalize → planning:plan-finalize
 
 ### Related Skills
 
+- **git-workflow** - Handles commit, push, and PR creation
 - **plan-execute** - Previous phase (executes tasks)
 - **manage-lifecycle** - Handles phase transitions
