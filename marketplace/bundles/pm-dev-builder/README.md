@@ -34,7 +34,7 @@ This bundle consolidates build execution, output parsing, and issue routing for 
 
 - **maven-builder** - Autonomous Maven build agent
 - **gradle-builder** - Autonomous Gradle build agent
-- **npm-dev-builder** - Autonomous npm/npx build agent
+- **npm-builder** - Autonomous npm/npx build agent
 
 ## Commands
 

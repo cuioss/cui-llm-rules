@@ -17,7 +17,7 @@ This skill provides centralized npm/npx build execution logic, similar to how `b
 This skill follows the same pattern as `pm-dev-builder:builder-maven-rules`:
 
 ```
-npm-dev-builder agent (Layer 3)
+npm-builder agent (Layer 3)
   ├─> Detects project structure
   ├─> Validates workspace configuration
   └─> Delegates to builder-npm-rules skill
@@ -43,11 +43,11 @@ Parameters:
 
 ### From Agents
 
-The `npm-dev-builder` agent automatically delegates to this skill:
+The `npm-builder` agent automatically delegates to this skill:
 
 ```
 Task:
-  subagent_type: npm-dev-builder
+  subagent_type: npm-builder
   description: Verify build
   prompt: |
     Execute npm build to verify implementation.
@@ -152,7 +152,7 @@ This skill is used by:
 | **Build tool** | ./mvnw | npm/npx |
 | **Execution script** | execute-maven-build.py | execute-npm-build.py |
 | **Parsing script** | parse-maven-output.py | parse-npm-output.py |
-| **Agent** | maven-builder | npm-dev-builder |
+| **Agent** | maven-builder | npm-builder |
 | **Module targeting** | -pl flag | --workspace flag |
 | **Log location** | target/build-output-*.log | target/npm-output-*.log |
 | **Default timeout** | 120000ms | 120000ms |

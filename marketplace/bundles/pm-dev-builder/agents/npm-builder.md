@@ -1,5 +1,5 @@
 ---
-name: npm-dev-builder
+name: npm-builder
 description: Autonomous npm/npx build agent with project detection and skill delegation
 allowed-tools: Glob, Read, Grep, Skill
 model: haiku
@@ -69,5 +69,5 @@ Return the structured output from the skill as the agent result.
 ## RELATED
 
 - Skill: `pm-dev-builder:builder-npm-rules` - Build execution
-- Command: `/js-implement-code` - Uses npm-dev-builder for verification
-- Command: `/js-implement-tests` - Uses npm-dev-builder for verification
+- Command: `/js-implement-code` - Uses npm-builder for verification
+- Command: `/js-implement-tests` - Uses npm-builder for verification

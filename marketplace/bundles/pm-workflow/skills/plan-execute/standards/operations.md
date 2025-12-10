@@ -18,7 +18,7 @@ Task:
 
 ```
 Task:
-  subagent_type: pm-dev-builder:npm-dev-builder
+  subagent_type: pm-dev-builder:npm-builder
   prompt: Execute npm build and test, report results and coverage
 ```
 
@@ -63,7 +63,7 @@ Task:
 
 ```
 Task:
-  subagent_type: pm-dev-builder:npm-dev-builder
+  subagent_type: pm-dev-builder:npm-builder
   prompt: Execute Task {N}: {name}, Goal: {goal}, Criteria: {list}
 ```
 

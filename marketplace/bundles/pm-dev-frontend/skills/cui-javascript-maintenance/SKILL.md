@@ -427,7 +427,7 @@ Return structured analysis with prioritized action items.
 
 If issues arise during maintenance:
 
-1. **Build failures**: Use npm-dev-builder agent to diagnose and fix
+1. **Build failures**: Use npm-builder agent to diagnose and fix
 2. **Test failures**: Review test output and fix broken tests
 3. **Coverage regressions**: Add tests for uncovered code paths
 4. **Lint issues**: Run `npm run lint:fix` for auto-fixable issues

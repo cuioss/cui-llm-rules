@@ -25,6 +25,6 @@
   "agents": [
     "./agents/maven-builder.md",
     "./agents/gradle-builder.md",
-    "./agents/npm-dev-builder.md"
+    "./agents/npm-builder.md"
   ]
 }
