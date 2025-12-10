@@ -17,7 +17,7 @@ cui-llm-rules/
 │   │   └── marketplace.json        # Master marketplace configuration
 │   └── bundles/                    # 8 production bundles
 │       ├── pm-java/        # Java development standards + agents
-│       ├── pm-frontend/    # JavaScript/CSS standards + agents
+│       ├── pm-dev-frontend/    # JavaScript/CSS standards + agents
 │       ├── builder/                # Maven/Gradle/npm build automation
 │       ├── planning/               # Task planning & workflow management
 │       ├── pm-documents/  # AsciiDoc, ADRs, interfaces
@@ -63,7 +63,7 @@ bundle-name/
 ### pm-java
 Java development standards covering core patterns, null safety, Lombok, CDI/Quarkus, unit testing with JUnit 5, JavaDoc, and logging. Includes agents for implementation, testing, refactoring, and build fixing.
 
-### pm-frontend
+### pm-dev-frontend
 JavaScript and frontend standards for ES modules, modern patterns, CSS, JSDoc, project structure, Maven integration, ESLint/Prettier/StyleLint configuration, Cypress E2E testing, and Jest unit testing.
 
 ### builder

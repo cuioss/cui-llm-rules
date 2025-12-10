@@ -88,5 +88,5 @@ Parameters:
 ## Related Bundles
 
 - **pm-java** - Java development standards
-- **pm-frontend** - JavaScript development standards
+- **pm-dev-frontend** - JavaScript development standards
 - **planning** - PR and issue workflows

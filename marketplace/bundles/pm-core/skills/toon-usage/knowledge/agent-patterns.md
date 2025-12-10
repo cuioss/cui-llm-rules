@@ -493,5 +493,5 @@ When TOON migration is complete, template files will be available at:
 ### Test Fixtures
 When TOON migration is complete, test fixtures will be available at:
 - `test/planning/sonar-workflow/sonar-issues.toon`
-- `test/pm-frontend/coverage/coverage-analysis.toon`
+- `test/pm-dev-frontend/coverage/coverage-analysis.toon`
 - `test/builder-maven/build-failure/expected-categorization.toon`

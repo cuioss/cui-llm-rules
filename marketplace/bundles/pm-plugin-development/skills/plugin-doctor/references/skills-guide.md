@@ -559,12 +559,12 @@ Duplicated Content (127 characters):
   - Both skills contain identical logging requirements
   - Recommendation: Extract to shared pm-java:cui-java-logging skill
 
-Skill Pair: pm-frontend:cui-javascript ↔ pm-frontend:cui-cypress
+Skill Pair: pm-dev-frontend:cui-javascript ↔ pm-dev-frontend:cui-cypress
 
 Duplicated Content (213 characters):
 - Section: "Test Organization"
   - Similar test organization guidance in both
-  - Recommendation: Move to shared pm-frontend:cui-testing-common skill
+  - Recommendation: Move to shared pm-dev-frontend:cui-testing-common skill
 ```
 
 ### Consolidation Strategies

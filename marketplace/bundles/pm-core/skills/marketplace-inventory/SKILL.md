@@ -166,7 +166,7 @@ Filter to specific bundles by name (comma-separated).
 python3 .plan/execute-script.py pm-core:marketplace-inventory:scan-marketplace-inventory --bundles planning
 
 # Multiple bundles
-python3 .plan/execute-script.py pm-core:marketplace-inventory:scan-marketplace-inventory --bundles "planning,pm-java,pm-frontend"
+python3 .plan/execute-script.py pm-core:marketplace-inventory:scan-marketplace-inventory --bundles "planning,pm-java,pm-dev-frontend"
 ```
 
 ## Error Handling

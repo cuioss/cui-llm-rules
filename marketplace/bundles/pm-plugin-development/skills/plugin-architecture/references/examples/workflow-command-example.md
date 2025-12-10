@@ -226,7 +226,7 @@ MARKETPLACE HEALTH REPORT
 
 ### Bundle Health Scores
 1. pm-java: 92/100 ✅
-2. pm-frontend: 88/100 ✅
+2. pm-dev-frontend: 88/100 ✅
 3. pm-plugin-development: 82/100 ✅
 4. pm-workflow: 78/100 ⚠️
 5. pm-core: 95/100 ✅

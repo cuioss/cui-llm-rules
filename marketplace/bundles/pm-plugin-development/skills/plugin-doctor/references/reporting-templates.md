@@ -81,7 +81,7 @@ Fixes Applied:
 By Bundle:
 - pm-plugin-development: 8 agents | 10 issues | 6 fixed
 - pm-java: 3 agents | 3 issues | 2 fixed
-- pm-frontend: 4 agents | 3 issues | 1 fixed
+- pm-dev-frontend: 4 agents | 3 issues | 1 fixed
 
 ✅ All agents across all bundles are high quality!
 ```

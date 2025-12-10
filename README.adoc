@@ -36,7 +36,7 @@ This repository contains **8 production-ready bundles** with **95 total componen
 |Java development standards and tooling
 |5 |3 |9
 
-|xref:marketplace/bundles/pm-frontend/README.md[pm-frontend]
+|xref:marketplace/bundles/pm-dev-frontend/README.md[pm-dev-frontend]
 |JavaScript/frontend development standards and tooling
 |8 |3 |7
 
@@ -103,7 +103,7 @@ See xref:marketplace/bundles/pm-java/README.md[pm-java bundle] for details.
 /js-enforce-eslint
 ----
 
-See xref:marketplace/bundles/pm-frontend/README.md[pm-frontend bundle] for details.
+See xref:marketplace/bundles/pm-dev-frontend/README.md[pm-dev-frontend bundle] for details.
 
 === Maven Build & Quality
 
@@ -170,7 +170,7 @@ See xref:marketplace/bundles/pm-plugin-development/README.md[pm-plugin-developme
 For comprehensive documentation on each bundle, see their individual README files:
 
 * xref:marketplace/bundles/pm-java/README.md[pm-java Bundle] - Java development standards, logging, CDI, testing
-* xref:marketplace/bundles/pm-frontend/README.md[pm-frontend Bundle] - JavaScript, CSS, Cypress, linting, project structure
+* xref:marketplace/bundles/pm-dev-frontend/README.md[pm-dev-frontend Bundle] - JavaScript, CSS, Cypress, linting, project structure
 * xref:marketplace/bundles/builder-maven/README.md[Maven Bundle] - Build verification, POM maintenance, quality gates
 * xref:marketplace/bundles/cui-task-workflow/README.md[Task Workflow Bundle] - Issue implementation, PR handling, Sonar integration
 * xref:marketplace/bundles/pm-documents/README.md[pm-documents Bundle] - AsciiDoc formatting, validation, linking

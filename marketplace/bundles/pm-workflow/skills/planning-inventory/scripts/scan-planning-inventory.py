@@ -41,7 +41,7 @@ PLANNING_PATTERNS = [
 PLANNING_BUNDLES = [
     "pm-workflow",
     "pm-java",
-    "pm-frontend",
+    "pm-dev-frontend",
     "pm-plugin-development",
 ]
 

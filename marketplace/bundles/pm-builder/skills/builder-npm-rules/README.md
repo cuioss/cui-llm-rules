@@ -141,9 +141,9 @@ This skill is used by:
 
 ### Related Skills
 
-- `pm-frontend:cui-javascript-project` - Project structure and dependencies
-- `pm-frontend:cui-javascript-unit-testing` - Test standards
-- `pm-frontend:cui-javascript-linting` - Linting standards
+- `pm-dev-frontend:cui-javascript-project` - Project structure and dependencies
+- `pm-dev-frontend:cui-javascript-unit-testing` - Test standards
+- `pm-dev-frontend:cui-javascript-linting` - Linting standards
 
 ## Comparison with Maven
 
@@ -183,7 +183,7 @@ The `parse-npm-output.py` script was moved from `cui-javascript-project` to `bui
 **Before:**
 ```
 Skill: pm-core:script-runner
-Resolve: pm-frontend:cui-javascript-project/scripts/parse-npm-output.py
+Resolve: pm-dev-frontend:cui-javascript-project/scripts/parse-npm-output.py
 ```
 
 **After:**

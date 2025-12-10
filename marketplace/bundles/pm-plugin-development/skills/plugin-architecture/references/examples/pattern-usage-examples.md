@@ -447,7 +447,7 @@ Outputs content fingerprints:
 
 ## Step 2: Scan Bundle 2 Content
 
-bash scripts/extract-content-blocks.sh marketplace/bundles/pm-frontend
+bash scripts/extract-content-blocks.sh marketplace/bundles/pm-dev-frontend
 
 Outputs content fingerprints
 
@@ -472,7 +472,7 @@ Outputs:
   "matches": [
     {
       "block1": {"bundle": "pm-java", "file": "..."},
-      "block2": {"bundle": "pm-frontend", "file": "..."},
+      "block2": {"bundle": "pm-dev-frontend", "file": "..."},
       "similarity": 95,
       "recommendation": "Extract to shared skill: cui-code-standards"
     }

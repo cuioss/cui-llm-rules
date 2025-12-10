@@ -113,7 +113,7 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 | Plan Type | Solution Outline Agent | Task Plan Agent | Verification |
 |-----------|-------------|------------|--------------|
 | `java` | `pm-java:java-solution-outline-agent` | `pm-java:java-task-plan-agent` | `/pm-builder:builder-build-and-fix` |
-| `javascript` | `pm-frontend:js-solution-outline-agent` | `pm-frontend:js-task-plan-agent` | `/pm-builder:builder-build-and-fix system=npm` |
+| `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` | `/pm-builder:builder-build-and-fix system=npm` |
 | `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` | `/pm-plugin-development:plugin-doctor` |
 | `generic` | None (inline) | None (inline) | None |
 
@@ -140,7 +140,7 @@ Plan-type skills must:
 
 **Domain Agents** (invoked by commands):
 - `pm-java:java-solution-outline-agent` / `pm-java:java-task-plan-agent`
-- `pm-frontend:js-solution-outline-agent` / `pm-frontend:js-task-plan-agent`
+- `pm-dev-frontend:js-solution-outline-agent` / `pm-dev-frontend:js-task-plan-agent`
 - `pm-plugin-development:plugin-solution-outline-agent` / `pm-plugin-development:plugin-task-plan-agent`
 
 **Data Layer** (used by domain agents):

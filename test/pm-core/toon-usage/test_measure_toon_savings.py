@@ -23,10 +23,10 @@ EXPECTED_TOON_FILES = [
     'pm-workflow/sonar-workflow/fix-suggestions.toon',
     'pm-workflow/pr-workflow/review-comments.toon',
     'pm-workflow/pr-workflow/triage-results.toon',
-    'pm-frontend/coverage/coverage-analysis.toon',
+    'pm-dev-frontend/coverage/coverage-analysis.toon',
     'pm-java/coverage/coverage-analysis.toon',
     'pm-builder/maven/build-failure/expected-categorization.toon',
-    'pm-frontend/build/build-analysis.toon',
+    'pm-dev-frontend/build/build-analysis.toon',
 ]
 
 

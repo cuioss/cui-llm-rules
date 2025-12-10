@@ -322,7 +322,7 @@ Skill: pm-core:marketplace-inventory
 Skill: pm-plugin-development:bundle-orchestration-compliance
 Read references/reporting-templates.md
 Skill: pm-java:cui-java-core
-Skill: pm-frontend:cui-javascript
+Skill: pm-dev-frontend:cui-javascript
 # ... loads 10 more skills upfront
 ```
 

@@ -193,14 +193,14 @@ def test_derived_java_has_plan_components():
 
 
 def test_derived_includes_frontend_expert():
-    """Test derived includes pm-frontend bundle."""
+    """Test derived includes pm-dev-frontend bundle."""
     result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     derived = data.get('derived', [])
     bundle_names = [d['bundle'] for d in derived]
-    assert 'pm-frontend' in bundle_names, "Derived should include pm-frontend"
+    assert 'pm-dev-frontend' in bundle_names, "Derived should include pm-dev-frontend"
 
 
 def test_derived_includes_plugin_tools():

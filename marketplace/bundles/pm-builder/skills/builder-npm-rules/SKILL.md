@@ -45,7 +45,7 @@ Activate when:
 
 **For project structure and dependencies:**
 ```
-Skill: pm-frontend:cui-javascript-project
+Skill: pm-dev-frontend:cui-javascript-project
 ```
 
 ## Scripts
@@ -272,7 +272,7 @@ Standards in `standards/` directory:
 
 ### Related Skills
 
-- `pm-frontend:cui-javascript-project` - Project structure and Maven integration
-- `pm-frontend:cui-jsdoc` - JSDoc standards
-- `pm-frontend:cui-javascript-unit-testing` - Test standards
-- `pm-frontend:cui-javascript-linting` - Linting standards
+- `pm-dev-frontend:cui-javascript-project` - Project structure and Maven integration
+- `pm-dev-frontend:cui-jsdoc` - JSDoc standards
+- `pm-dev-frontend:cui-javascript-unit-testing` - Test standards
+- `pm-dev-frontend:cui-javascript-linting` - Linting standards

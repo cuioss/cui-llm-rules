@@ -24,7 +24,7 @@ cui-llm-rules/
 | Bundle | Purpose |
 |--------|---------|
 | **pm-java** | Java development standards, CDI/Quarkus, JUnit 5, logging |
-| **pm-frontend** | JavaScript, CSS, Jest, Cypress, ESLint/Prettier |
+| **pm-dev-frontend** | JavaScript, CSS, Jest, Cypress, ESLint/Prettier |
 | **builder** | Maven/Gradle/npm unified build automation |
 | **planning** | Task planning, workflow orchestration, PR management |
 | **pm-documents** | AsciiDoc, ADRs, interface specifications |

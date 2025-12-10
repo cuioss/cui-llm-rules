@@ -292,7 +292,7 @@ If you discover issues or improvements during execution, record them:
 | `pm-workflow:plan-refine-agent` | Refine phase fallback (generic plans) |
 | `pm-java:java-solution-outline-agent` | Java: Request → Goals |
 | `pm-java:java-task-plan-agent` | Java: Goals → Tasks |
-| `pm-frontend:js-solution-outline-agent` | JavaScript: Request → Goals |
-| `pm-frontend:js-task-plan-agent` | JavaScript: Goals → Tasks |
+| `pm-dev-frontend:js-solution-outline-agent` | JavaScript: Request → Goals |
+| `pm-dev-frontend:js-task-plan-agent` | JavaScript: Goals → Tasks |
 | `pm-plugin-development:plugin-solution-outline-agent` | Plugin: Request → Goals |
 | `pm-plugin-development:plugin-task-plan-agent` | Plugin: Goals → Tasks |

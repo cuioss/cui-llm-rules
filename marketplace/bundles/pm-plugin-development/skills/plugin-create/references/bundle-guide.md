@@ -37,7 +37,7 @@ bundle-name/
 ✅ **New Bundle** (distinct domain):
 ```
 pm-java         (Java development)
-pm-frontend     (Frontend development)
+pm-dev-frontend     (Frontend development)
 pm-documents (Documentation)
 ```
 
