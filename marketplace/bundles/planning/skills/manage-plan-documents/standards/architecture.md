@@ -6,7 +6,7 @@ Document types are **data, not code**. The engine is a generic processor that:
 1. Loads document definitions from `documents/{type}.toon`
 2. Validates input against field schemas
 3. Renders templates with provided values
-4. Delegates file I/O to `manage-files`
+4. Writes files using `file_ops` utilities
 
 This separation enables adding new document types without code changes.
 
@@ -16,7 +16,7 @@ This separation enables adding new document types without code changes.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ CLI Layer                                                    │
+│ CLI Layer                                                   │
 │   - Parses: {doc-type} {verb} [options]                     │
 │   - Dynamically builds subparsers from document definitions │
 │   - Routes to command handlers                              │
@@ -24,34 +24,34 @@ This separation enables adding new document types without code changes.
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Document Type Registry                                       │
-│   - Discovers types from documents/*.toon                    │
-│   - Parses field and section definitions                     │
-│   - Provides schema for validation                           │
+│ Document Type Registry                                      │
+│   - Discovers types from documents/*.toon                   │
+│   - Parses field and section definitions                    │
+│   - Provides schema for validation                          │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Validation Layer                                             │
-│   - Checks required fields present                           │
+│ Validation Layer                                            │
+│   - Checks required fields present                          │
 │   - Validates field types (enum, date, etc.)                │
-│   - Reports structured errors                                │
+│   - Reports structured errors                               │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Template Engine                                              │
-│   - Loads template from templates/                           │
+│ Template Engine                                             │
+│   - Loads template from templates/                          │
 │   - Substitutes {field} placeholders                        │
 │   - Handles built-in placeholders ({plan_id}, {timestamp})  │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ File Operations (via file_ops)                               │
-│   - Atomic writes                                            │
+│ File Operations (via file_ops)                              │
+│   - Atomic writes via atomic_write_file()                   │
 │   - Path resolution via base_path()                         │
-│   - Plan directory management                                │
+│   - Plan directory management                               │
 └─────────────────────────────────────────────────────────────┘
 ```
 

@@ -134,6 +134,21 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
   --content "Updated context information..."
 ```
 
+**Parameters**:
+- `--plan-id` (required): Plan identifier
+- `--section` (required): Section name to update (e.g., `context`, `original_input`)
+- `--content` (required): New content for the section
+
+**Output:**
+
+```toon
+status: success
+plan_id: my-feature
+document: request
+section: context
+updated: true
+```
+
 ### exists
 
 Check if document exists.
@@ -142,6 +157,16 @@ Check if document exists.
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
   request exists \
   --plan-id {plan_id}
+```
+
+**Output:**
+
+```toon
+status: success
+plan_id: my-feature
+document: request
+file: request.md
+exists: true
 ```
 
 Returns exit code 0 if exists, 1 if not.
@@ -156,6 +181,16 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
   --plan-id {plan_id}
 ```
 
+**Output:**
+
+```toon
+status: success
+plan_id: my-feature
+document: request
+file: request.md
+action: removed
+```
+
 ### list-types
 
 List available document types.
@@ -163,6 +198,16 @@ List available document types.
 ```bash
 python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
   list-types
+```
+
+**Output:**
+
+```toon
+status: success
+types:
+  - name: request
+    file: request.md
+    fields: 5
 ```
 
 ---
@@ -185,9 +230,16 @@ suggestions[2]:
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `planning:manage-plan-documents:manage-plan-document` | Request document operations |
+**Script**: `planning:manage-plan-documents:manage-plan-document`
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `request create` | `--plan-id --title --source --body [--source-id] [--context] [--force]` | Create request document |
+| `request read` | `--plan-id [--raw]` | Read document (parsed or raw) |
+| `request update` | `--plan-id --section --content` | Update specific section |
+| `request exists` | `--plan-id` | Check if document exists |
+| `request remove` | `--plan-id` | Delete document |
+| `list-types` | (none) | List available document types |
 
 ---
 
@@ -234,6 +286,6 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
 
 Then write solution outline using `planning:manage-solution-outline` skill.
 
-### With manage-files
+### With file_ops
 
-This skill delegates file I/O to manage-files internally. Use manage-files directly only for non-typed documents.
+This skill uses `file_ops` utilities (`atomic_write_file`, `base_path`) directly for file I/O. Use manage-files for non-typed documents.
