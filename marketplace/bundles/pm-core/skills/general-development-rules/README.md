@@ -107,7 +107,7 @@ Commands should reference this skill when they need to enforce general developme
 This skill provides cross-cutting principles useful for:
 - pm-java agents (implementation patterns)
 - planning commands (when to ask users)
-- pm-plugins (creating new components)
+- pm-plugin-development (creating new components)
 - Any development work in CUI ecosystem
 
 ## Core Principles Summary
@@ -184,4 +184,4 @@ Part of the **pm-core** bundle - Utility commands and agents for CUI development
 - research-best-practices agent - Comprehensive web research for current best practices
 - diagnostic-patterns skill - Detailed tool usage patterns for non-prompting operations
 - planning bundle - Development workflow integration
-- pm-plugins bundle - Creating agents and commands following these principles
+- pm-plugin-development bundle - Creating agents and commands following these principles

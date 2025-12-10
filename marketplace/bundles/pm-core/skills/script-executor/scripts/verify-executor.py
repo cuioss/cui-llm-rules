@@ -29,7 +29,7 @@ LOG_MODULE_PATH = PLAN_DIR / 'execution_log.py'
 STATE_PATH = PLAN_DIR / 'marshall-state.toon'
 
 MARKETPLACE_ROOT = Path('marketplace/bundles')
-INVENTORY_SCRIPT = MARKETPLACE_ROOT / 'pm-plugins/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py'
+INVENTORY_SCRIPT = MARKETPLACE_ROOT / 'pm-plugin-development/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py'
 
 
 # ============================================================================

@@ -10,7 +10,7 @@ Visual analysis of call relationships and dependencies for `/plugin-doctor` comm
 │                      (plugin-doctor.md - Thin Wrapper)                          │
 └───────────────────────────────────┬─────────────────────────────────────────────┘
                                     │
-                                    │ Skill: pm-plugins:plugin-doctor
+                                    │ Skill: pm-plugin-development:plugin-doctor
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                           PLUGIN-DOCTOR SKILL                                   │

@@ -196,7 +196,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 **Loaded by**:
 - `pm-java:java-solution-outline` agent
 - `pm-frontend:js-solution-outline` agent
-- `pm-plugins:plugin-solution-outline` agent
+- `pm-plugin-development:plugin-solution-outline` agent
 - `pm-workflow:plan-refine` agent (for generic plans)
 
 **Scripts Used**:

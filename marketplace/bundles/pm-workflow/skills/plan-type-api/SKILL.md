@@ -114,7 +114,7 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 |-----------|-------------|------------|--------------|
 | `java` | `pm-java:java-solution-outline-agent` | `pm-java:java-task-plan-agent` | `/pm-builder:builder-build-and-fix` |
 | `javascript` | `pm-frontend:js-solution-outline-agent` | `pm-frontend:js-task-plan-agent` | `/pm-builder:builder-build-and-fix system=npm` |
-| `plugin-development` | `pm-plugins:plugin-solution-outline-agent` | `pm-plugins:plugin-task-plan-agent` | `/pm-plugins:plugin-doctor` |
+| `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` | `/pm-plugin-development:plugin-doctor` |
 | `generic` | None (inline) | None (inline) | None |
 
 ---
@@ -141,7 +141,7 @@ Plan-type skills must:
 **Domain Agents** (invoked by commands):
 - `pm-java:java-solution-outline-agent` / `pm-java:java-task-plan-agent`
 - `pm-frontend:js-solution-outline-agent` / `pm-frontend:js-task-plan-agent`
-- `pm-plugins:plugin-solution-outline-agent` / `pm-plugins:plugin-task-plan-agent`
+- `pm-plugin-development:plugin-solution-outline-agent` / `pm-plugin-development:plugin-task-plan-agent`
 
 **Data Layer** (used by domain agents):
 - `pm-workflow:manage-plan-documents:manage-plan-document` (request) - Request document operations

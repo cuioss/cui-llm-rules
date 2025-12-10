@@ -386,7 +386,7 @@ SlashCommand: /command-2
    ```
 3. Execute Step 2: "Load plugin-doctor skill"
    ```
-   Skill: pm-plugins:plugin-doctor
+   Skill: pm-plugin-development:plugin-doctor
    ```
 4. Execute Step 3: Execute diagnosis scripts
    ```
@@ -541,5 +541,5 @@ Following these rules ensures:
 - **diagnostic-patterns skill** - Detailed tool usage patterns for file operations
 - **research-best-practices agent** - Structured web research for current best practices
 - **planning skills** - Development workflow integration
-- **pm-plugins skills** - Creating components following these principles
+- **pm-plugin-development skills** - Creating components following these principles
 

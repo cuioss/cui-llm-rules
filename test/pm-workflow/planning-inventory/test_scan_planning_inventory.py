@@ -204,14 +204,14 @@ def test_derived_includes_frontend_expert():
 
 
 def test_derived_includes_plugin_tools():
-    """Test derived includes pm-plugins bundle."""
+    """Test derived includes pm-plugin-development bundle."""
     result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     derived = data.get('derived', [])
     bundle_names = [d['bundle'] for d in derived]
-    assert 'pm-plugins' in bundle_names, "Derived should include pm-plugins"
+    assert 'pm-plugin-development' in bundle_names, "Derived should include pm-plugin-development"
 
 
 # =============================================================================

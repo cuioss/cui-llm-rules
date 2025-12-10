@@ -294,5 +294,5 @@ If you discover issues or improvements during execution, record them:
 | `pm-java:java-task-plan-agent` | Java: Goals → Tasks |
 | `pm-frontend:js-solution-outline-agent` | JavaScript: Request → Goals |
 | `pm-frontend:js-task-plan-agent` | JavaScript: Goals → Tasks |
-| `pm-plugins:plugin-solution-outline-agent` | Plugin: Request → Goals |
-| `pm-plugins:plugin-task-plan-agent` | Plugin: Goals → Tasks |
+| `pm-plugin-development:plugin-solution-outline-agent` | Plugin: Request → Goals |
+| `pm-plugin-development:plugin-task-plan-agent` | Plugin: Goals → Tasks |

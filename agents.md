@@ -29,7 +29,7 @@ cui-llm-rules/
 | **planning** | Task planning, workflow orchestration, PR management |
 | **pm-documents** | AsciiDoc, ADRs, interface specifications |
 | **pm-core** | Utilities, permissions, file operations |
-| **pm-plugins** | Plugin creation, quality diagnosis |
+| **pm-plugin-development** | Plugin creation, quality diagnosis |
 | **pm-requirements** | Requirements authoring and traceability |
 
 ### Component Model

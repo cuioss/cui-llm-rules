@@ -27,9 +27,9 @@
       "strict": false
     },
     {
-      "name": "pm-plugins",
+      "name": "pm-plugin-development",
       "description": "Complete toolchain for creating and diagnosing Claude Code plugins",
-      "source": "./bundles/pm-plugins",
+      "source": "./bundles/pm-plugin-development",
       "strict": false
     },
     {

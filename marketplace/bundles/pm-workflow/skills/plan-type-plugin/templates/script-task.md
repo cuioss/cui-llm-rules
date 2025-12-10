@@ -12,7 +12,7 @@
 
 **Checklist** (Test-Driven Development):
 - [ ] Identify target skill and scripts/ directory
-- [ ] Load skill: `pm-plugins:plugin-create`
+- [ ] Load skill: `pm-plugin-development:plugin-create`
 - [ ] Locate or create test file in skill's test directory
 - [ ] Write test case for expected script behavior
 - [ ] Run test (verify it fails - TDD red phase)

@@ -12,7 +12,7 @@
 
 **Checklist**:
 - [ ] Identify target bundle in marketplace/bundles/
-- [ ] Load skill: `pm-plugins:plugin-create`
+- [ ] Load skill: `pm-plugin-development:plugin-create`
 - [ ] Create command file in bundle's commands/ directory
 - [ ] Define command with proper frontmatter
 - [ ] Specify required skills in command body

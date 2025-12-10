@@ -3,13 +3,13 @@ name: plan-type-plugin
 description: Plugin development plan type for marketplace components
 allowed-tools: Read, Bash
 domain:
-  solution_outline_agent: pm-plugins:plugin-solution-outline-agent
-  task_plan_agent: pm-plugins:plugin-task-plan-agent
-  verification_command: /pm-plugins:plugin-doctor
+  solution_outline_agent: pm-plugin-development:plugin-solution-outline-agent
+  task_plan_agent: pm-plugin-development:plugin-task-plan-agent
+  verification_command: /pm-plugin-development:plugin-doctor
   pr_workflow: false
   standards:
-    - pm-plugins:plugin-architecture
-    - pm-plugins:plugin-script-architecture
+    - pm-plugin-development:plugin-architecture
+    - pm-plugin-development:plugin-script-architecture
 ---
 
 # Plan Type: Plugin Development (`pm-workflow:plan-type-plugin`)
@@ -28,9 +28,9 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `pm-plugins:plugin-solution-outline-agent` | Creates solution outline with deliverables |
-| `task_plan_agent` | `pm-plugins:plugin-task-plan-agent` | Creates tasks from deliverables |
-| `verification_command` | `/pm-plugins:plugin-doctor` | Plugin validation |
+| `solution_outline_agent` | `pm-plugin-development:plugin-solution-outline-agent` | Creates solution outline with deliverables |
+| `task_plan_agent` | `pm-plugin-development:plugin-task-plan-agent` | Creates tasks from deliverables |
+| `verification_command` | `/pm-plugin-development:plugin-doctor` | Plugin validation |
 | `pr_workflow` | `false` | No PR (direct to main) |
 | `standards` | Plugin architecture, Script architecture | Skills to load |
 
@@ -67,7 +67,7 @@ python3 .plan/execute-script.py pm-workflow:manage-references:manage-references 
 python3 .plan/execute-script.py pm-workflow:manage-references:manage-references set \
   --plan-id {plan_id} \
   --field verification_commands \
-  --value '["/pm-plugins:plugin-doctor"]'
+  --value '["/pm-plugin-development:plugin-doctor"]'
 ```
 
 ### Step 2: Add Config Fields
@@ -91,7 +91,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
   --plan-id {plan_id} \
   --field verification_command \
-  --value "/pm-plugins:plugin-doctor"
+  --value "/pm-plugin-development:plugin-doctor"
 
 # Set branch_strategy
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
@@ -109,7 +109,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
 | `target_bundle` | `null` (populated during specify) |
 | `bundle_path` | `null` (populated during specify) |
 | `components` | `{"add": [], "modify": []}` |
-| `verification_commands` | `["/pm-plugins:plugin-doctor"]` |
+| `verification_commands` | `["/pm-plugin-development:plugin-doctor"]` |
 
 **Config fields added**:
 
@@ -117,7 +117,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
 |-------|-------|
 | `create_pr` | `false` |
 | `verification_required` | `true` |
-| `verification_command` | `/pm-plugins:plugin-doctor` |
+| `verification_command` | `/pm-plugin-development:plugin-doctor` |
 | `branch_strategy` | `direct` |
 
 ---

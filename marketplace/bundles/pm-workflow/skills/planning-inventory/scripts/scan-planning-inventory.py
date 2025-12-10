@@ -42,7 +42,7 @@ PLANNING_BUNDLES = [
     "pm-workflow",
     "pm-java",
     "pm-frontend",
-    "pm-plugins",
+    "pm-plugin-development",
 ]
 
 # Core planning bundle name

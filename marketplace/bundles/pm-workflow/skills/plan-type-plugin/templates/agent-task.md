@@ -12,7 +12,7 @@
 
 **Checklist**:
 - [ ] Identify target bundle in marketplace/bundles/
-- [ ] Load skill: `pm-plugins:plugin-create`
+- [ ] Load skill: `pm-plugin-development:plugin-create`
 - [ ] Create agent file in bundle's agents/ directory
 - [ ] Define agent with proper frontmatter (tools, model)
 - [ ] Write clear goal-oriented instructions

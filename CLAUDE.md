@@ -22,7 +22,7 @@ cui-llm-rules/
 │       ├── planning/               # Task planning & workflow management
 │       ├── pm-documents/  # AsciiDoc, ADRs, interfaces
 │       ├── pm-core/          # Utility commands & file operations
-│       ├── pm-plugins/ # Plugin creation toolkit
+│       ├── pm-plugin-development/ # Plugin creation toolkit
 │       └── pm-requirements/       # Requirements engineering
 ├── test/                           # Python pytest tests for scripts
 ├── target/                         # Generated files and logs (gitignored)
@@ -78,7 +78,7 @@ Documentation standards for AsciiDoc, Architectural Decision Records (ADRs), and
 ### pm-core
 Utility commands for script execution, permission management, file operations, memory management, lessons learned tracking, and project configuration.
 
-### pm-plugins
+### pm-plugin-development
 Plugin development toolkit with creation wizards, quality diagnosis, marketplace inventory scanning, architecture guidance, and component maintenance workflows.
 
 ### pm-requirements
@@ -121,7 +121,7 @@ python3 .plan/execute-script.py {notation} [subcommand] {args...}
 
 **Setup**: Run `/plan-marshall` after bundle changes to regenerate the executor with updated mappings.
 
-**Script Development**: See `pm-plugins:plugin-script-architecture` skill for implementation standards.
+**Script Development**: See `pm-plugin-development:plugin-script-architecture` skill for implementation standards.
 
 ## Working in This Repository
 
@@ -148,7 +148,7 @@ python3 .plan/execute-script.py {notation} [subcommand] {args...}
 
 ### Testing
 
-See `pm-plugins:plugin-script-architecture` skill for testing standards.
+See `pm-plugin-development:plugin-script-architecture` skill for testing standards.
 
 ```bash
 python3 test/run-tests.py                                          # all tests

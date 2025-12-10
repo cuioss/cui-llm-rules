@@ -12,7 +12,7 @@
 
 **Checklist**:
 - [ ] Identify target bundle in marketplace/bundles/
-- [ ] Load skill: `pm-plugins:plugin-create`
+- [ ] Load skill: `pm-plugin-development:plugin-create`
 - [ ] Create/locate SKILL.md with proper frontmatter
 - [ ] Define workflows with clear Steps sections
 - [ ] Create scripts/ directory if needed

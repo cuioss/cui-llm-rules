@@ -104,7 +104,7 @@ pm-frontend/agents/
 ├── js-solution-outline-agent.md           # Decomposes request into goals
 └── js-task-plan-agent.md            # Transforms goals into tasks
 
-pm-plugins/agents/
+pm-plugin-development/agents/
 ├── plugin-solution-outline-agent.md       # Decomposes request into goals
 └── plugin-task-plan-agent.md        # Transforms goals into tasks
 ```
@@ -128,7 +128,7 @@ domain:
 |-----------|-------------|------------|
 | `java` | `pm-java:java-solution-outline-agent` | `pm-java:java-task-plan-agent` |
 | `javascript` | `pm-frontend:js-solution-outline-agent` | `pm-frontend:js-task-plan-agent` |
-| `plugin-development` | `pm-plugins:plugin-solution-outline-agent` | `pm-plugins:plugin-task-plan-agent` |
+| `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` |
 | `generic` | N/A | N/A (uses plan-refine-agent fallback) |
 
 ### Routing Flow
@@ -253,7 +253,7 @@ The detail level ensures:
    │                  java-task-plan-agent            │
    │ pm-frontend: js-solution-outline-agent         │
    │                      js-task-plan-agent          │
-   │ pm-plugins: plugin-solution-outline  │
+   │ pm-plugin-development: plugin-solution-outline  │
    │                               plugin-task-plan   │
    └─────────────────────────────────────────────┘
 ```
