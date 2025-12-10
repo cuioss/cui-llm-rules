@@ -175,11 +175,7 @@ Workflow: Get Build Environment
 
 ### Step 2: Check Availability
 
-```python
-available = result["available_systems"].split(",")
-is_available = system in available
-is_default = result["default_system"] == system
-```
+Parse the `available_systems` comma-separated list to check if the requested system is present. Also check if it's the default system.
 
 ### Step 3: Return Result
 
