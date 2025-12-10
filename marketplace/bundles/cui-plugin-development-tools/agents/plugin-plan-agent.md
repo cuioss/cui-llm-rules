@@ -56,13 +56,12 @@ These constraints apply EVEN IF skill loading fails:
 
 ### SCRIPT NOTATION REFERENCE
 ```
-planning:manage-goals:manage-goal add --plan-id X --title "Y" --body "Z"
-planning:manage-tasks:manage-task add --plan-id X --goal GOAL-1 --title "Y" --description "Z" --steps "A" "B"
+planning:manage-plan-documents:manage-plan-document solution read --plan-id X
+planning:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"
 planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
-planning:manage-plan-documents:manage-plan-document request read --plan-id X
 ```
 
-**CRITICAL**: Script name is SINGULAR (`manage-goal`, `manage-task`) even though skill name may be plural.
+**CRITICAL**: Script name is SINGULAR (e.g., `manage-task`) even though skill name may be plural.
 
 ### WHY THESE CONSTRAINTS EXIST
 Skills provide: correct paths, validation, audit trail via work-log.

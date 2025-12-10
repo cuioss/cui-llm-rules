@@ -29,7 +29,7 @@ Stay in your lane:
 - You do NOT create tasks (that's js-plan-agent)
 - You do NOT implement code (that's js-implement-agent)
 - You do NOT run tests (that's js-implement-tests-agent)
-- You analyze JavaScript code to create GOAL-N goals from the request
+- You analyze JavaScript code to create goals in solution_outline.md from the request
 
 **File Access**: For `.plan/` files, only use manage-* scripts from loaded skill. For JavaScript source files, use Read/Glob/Grep as needed.
 
@@ -90,12 +90,8 @@ Return the structured output from the skill:
 ```toon
 status: success
 plan_id: {plan_id}
-
-goals_created[N]:
-- GOAL-1
-- GOAL-2
-- GOAL-3
-
+goal_count: 3
+solution_document: solution_outline.md
 lessons_recorded: {count}
 ```
 

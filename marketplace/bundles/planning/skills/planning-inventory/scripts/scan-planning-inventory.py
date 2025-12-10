@@ -27,7 +27,7 @@ from pathlib import Path
 # Planning-related name patterns
 PLANNING_PATTERNS = [
     "plan-*",       # Core planning skills (plan-init, plan-refine, etc.)
-    "manage-*",     # Management skills (manage-tasks, manage-goals, etc.)
+    "manage-*",     # Management skills (manage-tasks, manage-plan-documents, etc.)
     "*-workflow",   # Workflow skills (pr-workflow, git-workflow, etc.)
     "task-*",       # Task commands (task-implement)
     "pr-*",         # PR commands (pr-doctor) - note: also matches pr-workflow

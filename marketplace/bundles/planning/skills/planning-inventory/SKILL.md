@@ -130,7 +130,7 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 | Pattern | Examples |
 |---------|----------|
 | `plan-*` | plan-init, plan-refine, plan-execute, plan-finalize |
-| `manage-*` | manage-tasks, manage-goals, manage-config, manage-lifecycle |
+| `manage-*` | manage-tasks, manage-plan-documents, manage-config, manage-lifecycle |
 | `*-workflow` | pr-workflow, git-workflow, sonar-workflow |
 | `task-*` | task-implement |
 | `pr-*` | pr-doctor |

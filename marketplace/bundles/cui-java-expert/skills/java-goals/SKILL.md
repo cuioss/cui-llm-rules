@@ -6,9 +6,9 @@ allowed-tools: Read, Glob, Grep, Bash
 
 # Java Goals Skill
 
-**Role**: Domain analysis skill for Java implementation tasks. Transforms the request into goals by analyzing the codebase and writing GOALs directly.
+**Role**: Domain analysis skill for Java implementation tasks. Transforms the request into a solution document by analyzing the codebase.
 
-**Key Pattern**: Direct storage - goals are written immediately via `manage-goals` script.
+**Key Pattern**: Single solution document - goals are consolidated into `solution_outline.md` via `manage-plan-documents` skill.
 
 ## Operation: decompose
 
@@ -67,29 +67,48 @@ Read {java-file-path}
 - Test requirements
 - Complexity assessment
 
-### Step 3: Decompose Into Goals
+### Step 3: Create Solution Document
 
-Break the request into discrete, achievable goals. Each goal should be:
+Create a single solution document containing all goals. Each goal should be:
 - **Independent**: Can be implemented without other goals completing first (when possible)
 - **Testable**: Has clear completion criteria
 - **Sized**: Reasonable scope (not too large, not too small)
 
-For each goal identified:
+Build a goals markdown section with numbered goals:
 
-```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
-  --plan-id {plan_id} \
-  --title "{goal title}" \
-  --body "{Java-specific technical goal description}"
+```markdown
+### 1. {Goal Title}
+
+{Java-specific technical goal description}
+
+**Component**: {class|interface|module|config}
+**Path**: `src/main/java/de/cuioss/...`
+**Module**: {module name for multi-module projects}
+**Dependencies**: {dependencies and integration points}
+**Test Path**: `src/test/java/...`
+**Standards**: {CDI, logging, etc.}
+
+**Success Criteria:**
+- {criterion 1}
+- {criterion 2}
+
+### 2. {Next Goal Title}
+...
 ```
 
-**Goal Body Content**:
-- Component type (class, interface, module, config)
-- Target path (e.g., `src/main/java/de/cuioss/...`)
-- Module assignment (for multi-module projects)
-- Dependencies and integration points
-- Test requirements and test path
-- Standards to follow (CDI, logging, etc.)
+Create the solution document:
+
+```bash
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  solution create \
+  --plan-id {plan_id} \
+  --title "{solution title derived from request}" \
+  --summary "{2-3 sentence summary of the approach}" \
+  --goals "{goals markdown section as shown above}" \
+  --approach "{technical approach description}" \
+  --dependencies "{list of dependencies}" \
+  --risks "{risks and mitigations}"
+```
 
 ### Step 4: Record Issues as Lessons
 
@@ -110,12 +129,9 @@ python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
 ```toon
 status: success
 plan_id: {plan_id}
+solution_created: true
 
-goals_created[N]:
-- GOAL-1
-- GOAL-2
-- GOAL-3
-
+goals_count: {number of goals in solution document}
 lessons_recorded: {count}
 ```
 
@@ -229,7 +245,7 @@ If multiple classes match the name:
 **Caller**: `cui-java-expert:java-goals-agent`
 
 **Scripts Used**:
-- `planning:manage-goals` - Create goals
+- `planning:manage-plan-documents` - Create solution document
 - `planning:manage-lessons` - Record lessons on issues
 
 **Standards Referenced**:

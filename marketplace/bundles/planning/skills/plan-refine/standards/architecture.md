@@ -236,15 +236,15 @@ The detail level ensures:
           │         ┌──────┴──────┐
           │         │             │
           │         ▼             ▼
-          │  ┌─────────────┐ ┌────────────┐
-          │  │manage-goals │ │manage-tasks│ ◄── Script-based CRUD
-          │  └─────────────┘ └────────────┘
+          │  ┌──────────────────┐ ┌────────────┐
+          │  │manage-plan-docs  │ │manage-tasks│ ◄── Script-based CRUD
+          │  └──────────────────┘ └────────────┘
           │
           ▼
    ┌─────────────────────────────────┐
    │  Python Scripts                 │ ◄── Atomic Operations
-   │  manage-config.py, manage-goal  │
-   │  manage-task.py, manage-files   │
+   │  manage-config.py, manage-plan  │
+   │  document.py, manage-task.py    │
    └─────────────────────────────────┘
 
    Domain Agents (in expert bundles):

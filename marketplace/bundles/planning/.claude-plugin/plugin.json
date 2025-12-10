@@ -1,7 +1,7 @@
 {
   "name": "planning",
   "version": "1.0.0",
-  "description": "Goal-based development workflow from task implementation to PR quality verification",
+  "description": "Solution-based development workflow from task implementation to PR quality verification",
   "author": {
     "name": "CUI OSS Project",
     "email": "contact@cuioss.de"
@@ -35,9 +35,9 @@
     "./skills/plan-execute",
     "./skills/plan-finalize",
     "./skills/plan-marshall",
-    "./skills/manage-goals",
     "./skills/manage-tasks",
     "./skills/manage-files",
+    "./skills/manage-plan-documents",
     "./skills/manage-config",
     "./skills/manage-references",
     "./skills/manage-lifecycle",

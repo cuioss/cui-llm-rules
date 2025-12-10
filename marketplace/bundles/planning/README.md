@@ -81,7 +81,7 @@ All plan-type skills implement `planning:plan-type-api` contract.
 
 | Skill | Script | Purpose |
 |-------|--------|---------|
-| `manage-goals` | `manage-goal.py` | Goals CRUD |
+| `manage-plan-documents` | `manage-plan-document.py` | Request/Solution document CRUD |
 | `manage-tasks` | `manage-task.py` | Tasks + steps CRUD |
 | `manage-files` | `manage-files.py` | Generic file I/O |
 | `manage-config` | `manage-config.py` | config.toon domain |
@@ -133,10 +133,10 @@ Each plan-type skill declares its domain agents in structured frontmatter:
    │     └─ Read frontmatter.domain
    │
    ├─ Task: {domain.goals_agent}
-   │     └─ Creates GOAL files from request.md
+   │     └─ Creates solution_outline.md with goals from request.md
    │
    └─ Task: {domain.plan_agent}
-         └─ Creates TASK files from GOAL files
+         └─ Creates TASK files from solution_outline.md goals
 ```
 
 **Override**: Projects can customize agent mappings via marshal.json for project-specific needs.
@@ -184,7 +184,7 @@ planning/
     │   │   └── workflow.md      # Refine workflow reference
     │   └── templates/           # Artifact templates
     ├── plan-execute/            # Execute phase skill (dumb runner)
-    ├── manage-goals/            # Goals CRUD
+    ├── manage-plan-documents/   # Request/Solution document CRUD
     ├── manage-tasks/            # Tasks + steps CRUD
     ├── manage-files/            # Generic file I/O
     ├── manage-config/           # config.toon domain

@@ -46,7 +46,7 @@ All plan-type skills implement these operations:
 
 **Note**: The `decompose` and `plan` operations are documented in plan-type skills but executed by domain agents invoked from commands.
 
-**Traceability Flow**: Request → Goals → Tasks (each task references its goal)
+**Traceability Flow**: Request → Solution (with goals) → Tasks (each task references its goal number)
 
 ---
 
@@ -77,28 +77,29 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
 ### Goals Agent
 
-**Purpose**: Analyze request and decompose into goals (Request → GOALs)
+**Purpose**: Analyze request and create solution document (Request → Solution)
 
 **Invoked by**: `/plan-manage action=refine` command
 
 **Responsibilities**:
 - Read request.md for the request
 - Analyze codebase with domain knowledge
-- Create goals via `manage-goals:add`
+- Create solution_outline.md via `manage-plan-documents:solution create`
+- Document goals as numbered sections in solution document
 - Record lessons-learned on issues
 
-**Returns**: `{status, goal_ids[], lessons_recorded}`
+**Returns**: `{status, goal_count, lessons_recorded}`
 
 ### Plan Agent
 
-**Purpose**: Transform goals into executable tasks (GOAL → TASK)
+**Purpose**: Transform goals into executable tasks (Solution → TASKs)
 
 **Invoked by**: `/plan-manage action=refine` command (after goals agent completes)
 
 **Responsibilities**:
-- Query goals via `manage-goals` script
+- Read solution_outline.md for goals
 - Generate domain-specific task steps
-- Create tasks via `manage-tasks:add`
+- Create tasks via `manage-tasks:add --goal N` (numeric reference)
 - Record lessons-learned on issues
 
 **Returns**: `{status, task_ids[], lessons_recorded}`
@@ -141,4 +142,4 @@ Plan-type skills must:
 - `cui-plugin-development-tools:plugin-goals-agent` / `cui-plugin-development-tools:plugin-plan-agent`
 
 **Data Layer** (used by domain agents):
-- `manage-goals` / `manage-tasks` scripts
+- `manage-plan-documents` (request/solution) / `manage-tasks` scripts

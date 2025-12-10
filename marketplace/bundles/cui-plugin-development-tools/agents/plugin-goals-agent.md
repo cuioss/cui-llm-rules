@@ -29,7 +29,7 @@ Stay in your lane:
 - You do NOT create tasks (that's plugin-plan-agent)
 - You do NOT implement code (that's the implementation phase)
 - You do NOT diagnose plugin issues (that's plugin-doctor)
-- You analyze marketplace components to create GOAL-N goals from the request
+- You analyze marketplace components to create goals in solution_outline.md from the request
 
 **File Access**:
 - **`.plan/` files**: ONLY via `python3 .plan/execute-script.py {notation} {subcommand} {args}` - NEVER Read/Write/Edit/cat
@@ -56,13 +56,12 @@ These constraints apply EVEN IF skill loading fails:
 
 ### SCRIPT NOTATION REFERENCE
 ```
-planning:manage-goals:manage-goal add --plan-id X --title "Y" --body "Z"
-planning:manage-tasks:manage-task add --plan-id X --goal GOAL-1 --title "Y" --description "Z" --steps "A" "B"
-planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
+planning:manage-plan-documents:manage-plan-document solution create --plan-id X --title "Y" --summary "Z" --goals "### 1. Goal Title\n..."
 planning:manage-plan-documents:manage-plan-document request read --plan-id X
+planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
 ```
 
-**CRITICAL**: Script name is SINGULAR (`manage-goal`, `manage-task`) even though skill name may be plural.
+**CRITICAL**: Script name is SINGULAR (e.g., `manage-task`) even though skill name may be plural.
 
 ### WHY THESE CONSTRAINTS EXIST
 Skills provide: correct paths, validation, audit trail via work-log.
@@ -104,12 +103,8 @@ Return the structured output from the skill:
 ```toon
 status: success
 plan_id: {plan_id}
-
-goals_created[N]:
-- GOAL-1
-- GOAL-2
-- GOAL-3
-
+goal_count: 3
+solution_document: solution_outline.md
 lessons_recorded: {count}
 ```
 

@@ -6,9 +6,9 @@ allowed-tools: Read, Bash
 
 # Plugin Plan Skill
 
-**Role**: Domain planning skill for plugin development tasks. Transforms goals into executable tasks that delegate to existing skills for implementation.
+**Role**: Domain planning skill for plugin development tasks. Transforms solution goals into executable tasks that delegate to existing skills for implementation.
 
-**Key Pattern**: Skill delegation - tasks specify which skill to load and execute, not inline implementation steps. The delegated skills handle validation, creation, and verification internally.
+**Key Pattern**: Skill delegation - reads goals from `solution_outline.md` via `manage-plan-documents`, creates tasks that specify which skill to load and execute. The delegated skills handle validation, creation, and verification internally.
 
 ## Operation: plan
 
@@ -17,24 +17,23 @@ allowed-tools: Read, Bash
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `goal_id` | string | No | Single GOAL ID (omit for batch - queries all pending) |
+| `goal_number` | number | No | Single goal number (omit to process all goals) |
 
 **Process**:
 
-### Step 1: Load Goals
+### Step 1: Load Solution Document
 
-**Batch mode** (no goal_id):
+Read the solution document to get all goals:
+
 ```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal findAll \
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  solution read \
   --plan-id {plan_id}
 ```
 
-**Single mode** (goal_id provided):
-```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal get \
-  --plan-id {plan_id} \
-  --number {goal_id}
-```
+The output contains:
+- `sections.goals` - Markdown with numbered goal sections (`### 1.`, `### 2.`, etc.)
+- Parse each `### N. {Title}` section to extract individual goals
 
 ### Step 2: For Each Goal
 
@@ -66,7 +65,7 @@ Generate task(s) with skill delegation steps:
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --goal GOAL-{n} \
+  --goal {n} \
   --title "{action} {component-type}: {name}" \
   --description "{goal description}" \
   --steps \
@@ -74,6 +73,8 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
     "Execute workflow: {workflow-name}" \
     "Parameters: {extracted parameters}"
 ```
+
+**Note**: The `--goal` parameter is now numeric (e.g., `--goal 1`) referencing the goal section number in solution_outline.md.
 
 #### 2d. Record Issues as Lessons
 
@@ -268,7 +269,7 @@ If goal lacks required parameters:
 **Caller**: `cui-plugin-development-tools:plugin-plan-agent`
 
 **Script Notations** (use EXACTLY as shown):
-- `planning:manage-goals:manage-goal` - Load goals (findAll, get)
+- `planning:manage-plan-documents:manage-plan-document` - Read solution document (solution read)
 - `planning:manage-tasks:manage-task` - Create tasks (add, list)
 - `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
 - `planning:manage-log:manage-work-log` - Log progress (add)

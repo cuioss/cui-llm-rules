@@ -6,9 +6,9 @@ allowed-tools: Read, Bash
 
 # JavaScript Plan Skill
 
-**Role**: Domain planning skill for JavaScript implementation tasks. Transforms goals into executable tasks by applying JavaScript-specific knowledge and writing TASKs directly.
+**Role**: Domain planning skill for JavaScript implementation tasks. Transforms solution goals into executable tasks by applying JavaScript-specific knowledge and writing TASKs directly.
 
-**Key Pattern**: Direct storage - tasks are written immediately via `manage-tasks` script.
+**Key Pattern**: Reads goals from `solution_outline.md` via `manage-plan-documents`, creates tasks via `manage-tasks` script.
 
 ## Operation: plan
 
@@ -17,24 +17,23 @@ allowed-tools: Read, Bash
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
-| `goal_id` | string | No | Single GOAL ID (omit for batch - queries all pending) |
+| `goal_number` | number | No | Single goal number (omit to process all goals) |
 
 **Process**:
 
-### Step 1: Load Goals
+### Step 1: Load Solution Document
 
-**Batch mode** (no goal_id):
+Read the solution document to get all goals:
+
 ```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal findAll \
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  solution read \
   --plan-id {plan_id}
 ```
 
-**Single mode** (goal_id provided):
-```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal get \
-  --plan-id {plan_id} \
-  --number {goal_id}
-```
+The output contains:
+- `sections.goals` - Markdown with numbered goal sections (`### 1.`, `### 2.`, etc.)
+- Parse each `### N. {Title}` section to extract individual goals
 
 ### Step 2: For Each Goal
 
@@ -54,9 +53,9 @@ Generate task(s) with JavaScript-specific steps:
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --goal GOAL-{n} \
+  --goal {n} \
   --title "Implement {component}" \
-  --description "{goal from goal}" \
+  --description "{goal from solution}" \
   --steps \
     "Create/modify implementation at {path}" \
     "Add unit tests (load cui-frontend-expert:cui-javascript-unit-testing)" \
@@ -64,6 +63,8 @@ python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
     "Follow CUI patterns (load cui-frontend-expert:cui-javascript)" \
     "Verify npm test passes"
 ```
+
+**Note**: The `--goal` parameter is now numeric (e.g., `--goal 1`) referencing the goal section number in solution_outline.md.
 
 #### 2c. Record Issues as Lessons
 
@@ -235,7 +236,7 @@ If goal lacks detail:
 **Caller**: `cui-frontend-expert:js-plan-agent`
 
 **Scripts Used**:
-- `planning:manage-goals` - Load goals
+- `planning:manage-plan-documents` - Read solution document (solution read)
 - `planning:manage-tasks` - Create tasks
 - `planning:manage-lessons` - Record lessons on issues
 

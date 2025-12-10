@@ -8,7 +8,7 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 
 **SCOPE**: This skill is ONLY for **generic plan types** without domain-specific agents.
 
-**Role**: Fallback refine phase for generic plans. Creates goals and tasks using inline logic.
+**Role**: Fallback refine phase for generic plans. Creates solution document and tasks using inline logic.
 
 **CRITICAL**: Use Python scripts via Bash for plan file updates.
 
@@ -18,10 +18,10 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 
 | Script | Notation |
 |--------|----------|
+| manage-plan-documents | `planning:manage-plan-documents` |
 | manage-config | `planning:manage-config` |
 | manage-lifecycle | `planning:manage-lifecycle` |
 | manage-work-log | `planning:manage-log` |
-| manage-goals | `planning:manage-goals` |
 | manage-tasks | `planning:manage-tasks` |
 
 ---
@@ -48,7 +48,7 @@ The `/plan-manage` command uses **skill-based routing**:
   └─ If domain.goals_agent IS null (generic):
        → Task: plan-refine-agent
          → Skill: plan-refine ← THIS SKILL
-           → manage-goal add (Bash)
+           → manage-plan-document solution create (Bash)
            → manage-task add (Bash)
 ```
 
@@ -88,38 +88,49 @@ Return this error. Do NOT proceed.
 
 **IF plan_type is generic**: Continue to Step 3.
 
-### Step 3: Create Goal
+### Step 3: Read Request
 
-For generic plans, create a single goal from request text:
+Read the request document to understand the task:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
-  --plan-id {plan_id} \
-  --title "Complete task" \
-  --body "{request_summary}"
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  request read \
+  --plan-id {plan_id}
 ```
 
-### Step 4: Create Tasks
+### Step 4: Create Solution Document
 
-Create execution tasks:
+For generic plans, create a simple solution document with a single goal:
+
+```bash
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  solution create \
+  --plan-id {plan_id} \
+  --title "Solution for {request_title}" \
+  --summary "{brief summary of what will be done}" \
+  --goals "### 1. Complete Task
+
+{request_summary}
+
+**Success Criteria:**
+- Task completed as requested
+- Results verified"
+```
+
+### Step 5: Create Tasks
+
+Create execution tasks referencing the goal in the solution document:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --goal GOAL-1 \
+  --goal 1 \
   --title "Execute request" \
   --description "Complete the requested task" \
   --steps "Analyze requirements" "Implement solution" "Verify result"
 ```
 
-### Step 5: Validate Goals Coverage
-
-```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal check \
-  --plan-id {plan_id}
-```
-
-Returns coverage status. If `without_tasks > 0`, log a warning.
+**Note**: Task goal reference is now numeric (`--goal 1`) referencing the goal section number in solution_outline.md.
 
 ### Step 6: Log Completion
 
@@ -128,7 +139,7 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase refine \
   --type outcome \
-  --summary "Completed refine: {goals_created} goals, {tasks_created} tasks"
+  --summary "Completed refine: solution document created, {tasks_created} tasks"
 ```
 
 ### Step 7: Phase Transition
@@ -165,8 +176,8 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 | Script | Command | Purpose |
 |--------|---------|---------|
+| `planning:manage-plan-documents` | `request read`, `solution create` | Read request, create solution |
 | `planning:manage-config` | `get` | Read plan_type |
-| `planning:manage-goals` | `add`, `check` | Create goals, verify coverage |
 | `planning:manage-tasks` | `add` | Create tasks |
 | `planning:manage-lifecycle` | `transition` | Phase transition |
 | `planning:manage-log` | `add` | Log progress and completion |

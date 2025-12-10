@@ -133,7 +133,7 @@ Analyzes marketplace structure and creates goals with:
 - Standards to follow
 - Integration points
 
-**Returns**: `{status, goal_ids[], lessons_recorded}`
+**Returns**: `{status, goal_count, solution_document, lessons_recorded}`
 
 ### plugin-plan-agent
 

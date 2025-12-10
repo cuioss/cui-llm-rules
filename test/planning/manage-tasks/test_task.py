@@ -50,7 +50,7 @@ def test_add_first_task():
         result = run_script(SCRIPT_PATH, 'add',
                             '--plan-id', 'test-plan',
                             '--title', 'First task',
-                            '--goal', 'GOAL-1',
+                            '--goal', '1',
                             '--description', 'Task description',
                             '--steps', 'Step one', 'Step two')
 
@@ -72,10 +72,10 @@ def test_add_sequential_numbering():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First',
-                   '--goal', 'GOAL-1', '--description', 'Desc 1',
+                   '--goal', '1', '--description', 'Desc 1',
                    '--steps', 'Step 1')
         result = run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second',
-                            '--goal', 'GOAL-2', '--description', 'Desc 2',
+                            '--goal', '2', '--description', 'Desc 2',
                             '--steps', 'Step 1', 'Step 2')
 
         assert result.returncode == 0
@@ -91,7 +91,7 @@ def test_add_creates_slug_from_title():
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
                    '--title', 'Implement JWT Service!',
-                   '--goal', 'GOAL-1',
+                   '--goal', '1',
                    '--description', 'Details here',
                    '--steps', 'Step 1')
 
@@ -143,7 +143,7 @@ def test_add_fails_without_steps():
         # argparse will catch this before our validation
         result = run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
                             '--title', 'No steps',
-                            '--goal', 'GOAL-1',
+                            '--goal', '1',
                             '--description', 'Desc')
 
         assert result.returncode != 0
@@ -161,7 +161,7 @@ def test_get_existing_task():
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
                    '--title', 'Test task',
-                   '--goal', 'GOAL-1',
+                   '--goal', '1',
                    '--description', 'Test description',
                    '--steps', 'Step one', 'Step two', 'Step three')
 
@@ -171,7 +171,7 @@ def test_get_existing_task():
         assert 'status: success' in result.stdout
         assert 'number: 1' in result.stdout
         assert 'Test task' in result.stdout
-        assert 'GOAL-1' in result.stdout
+        assert 'goal: 1' in result.stdout
         assert 'Test description' in result.stdout
         assert 'Step one' in result.stdout
         assert 'Step two' in result.stdout
@@ -213,17 +213,17 @@ def test_list_with_tasks():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First',
-                   '--goal', 'GOAL-1', '--description', 'D1', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D1', '--steps', 'S1')
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second',
-                   '--goal', 'GOAL-2', '--description', 'D2', '--steps', 'S1', 'S2')
+                   '--goal', '2', '--description', 'D2', '--steps', 'S1', 'S2')
 
         result = run_script(SCRIPT_PATH, 'list', '--plan-id', 'test-plan')
 
         assert result.returncode == 0
         assert 'total: 2' in result.stdout
         assert 'tasks[2]' in result.stdout
-        assert '1,First,GOAL-1,pending,0/1' in result.stdout
-        assert '2,Second,GOAL-2,pending,0/2' in result.stdout
+        assert '1,First,1,pending,0/1' in result.stdout
+        assert '2,Second,2,pending,0/2' in result.stdout
     finally:
         cleanup(temp_dir)
 
@@ -233,9 +233,9 @@ def test_list_filter_by_status():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First',
-                   '--goal', 'GOAL-1', '--description', 'D1', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D1', '--steps', 'S1')
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second',
-                   '--goal', 'GOAL-2', '--description', 'D2', '--steps', 'S1')
+                   '--goal', '2', '--description', 'D2', '--steps', 'S1')
         # Mark first task as in_progress
         run_script(SCRIPT_PATH, 'step-start', '--plan-id', 'test-plan', '--task', '1', '--step', '1')
 
@@ -254,13 +254,13 @@ def test_list_filter_by_goal():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First',
-                   '--goal', 'GOAL-1', '--description', 'D1', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D1', '--steps', 'S1')
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second',
-                   '--goal', 'GOAL-1', '--description', 'D2', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D2', '--steps', 'S1')
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Third',
-                   '--goal', 'GOAL-2', '--description', 'D3', '--steps', 'S1')
+                   '--goal', '2', '--description', 'D3', '--steps', 'S1')
 
-        result = run_script(SCRIPT_PATH, 'list', '--plan-id', 'test-plan', '--goal', 'GOAL-1')
+        result = run_script(SCRIPT_PATH, 'list', '--plan-id', 'test-plan', '--goal', '1')
 
         assert result.returncode == 0
         assert 'total: 2' in result.stdout
@@ -280,7 +280,7 @@ def test_next_returns_first_pending():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First Task',
-                   '--goal', 'GOAL-1', '--description', 'D1',
+                   '--goal', '1', '--description', 'D1',
                    '--steps', 'Step one', 'Step two')
 
         result = run_script(SCRIPT_PATH, 'next', '--plan-id', 'test-plan')
@@ -299,9 +299,9 @@ def test_next_returns_in_progress_task():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First',
-                   '--goal', 'GOAL-1', '--description', 'D1', '--steps', 'S1', 'S2')
+                   '--goal', '1', '--description', 'D1', '--steps', 'S1', 'S2')
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second',
-                   '--goal', 'GOAL-2', '--description', 'D2', '--steps', 'S1')
+                   '--goal', '2', '--description', 'D2', '--steps', 'S1')
         # Start first task
         run_script(SCRIPT_PATH, 'step-start', '--plan-id', 'test-plan', '--task', '1', '--step', '1')
 
@@ -319,7 +319,7 @@ def test_next_returns_null_when_all_done():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Only Task',
-                   '--goal', 'GOAL-1', '--description', 'D1', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D1', '--steps', 'S1')
         run_script(SCRIPT_PATH, 'step-done', '--plan-id', 'test-plan', '--task', '1', '--step', '1')
 
         result = run_script(SCRIPT_PATH, 'next', '--plan-id', 'test-plan')
@@ -344,27 +344,13 @@ def test_next_empty_plan():
 
 
 def test_next_include_context():
-    """Next with --include-context embeds goal details."""
+    """Next with --include-context embeds goal details (now references solution_outline.md)."""
     temp_dir = setup_plan_dir()
     try:
-        # Create a goal first
-        goal_dir = Path(os.environ['PLAN_BASE_DIR']) / 'plans' / 'test-plan' / 'goals'
-        goal_dir.mkdir(parents=True, exist_ok=True)
-        goal_content = """number: 1
-title: Test Goal
-status: pending
-created: 2025-01-01T00:00:00Z
-updated: 2025-01-01T00:00:00Z
-
-body: |
-  This is the goal body.
-"""
-        (goal_dir / 'GOAL-001-test-goal.toon').write_text(goal_content)
-
-        # Create a task referencing that goal
+        # Create a task referencing goal 1 (goal info comes from solution_outline.md now)
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
                    '--title', 'Implement feature',
-                   '--goal', 'GOAL-1',
+                   '--goal', '1',
                    '--description', 'Task description',
                    '--steps', 'Step one', 'Step two')
 
@@ -373,28 +359,31 @@ body: |
 
         assert result.returncode == 0, f"Failed: {result.stderr}"
         assert 'task_number: 1' in result.stdout
-        assert 'goal_title: Test Goal' in result.stdout
+        # With new architecture, goal_title is generic "Goal N"
+        assert 'goal_title: Goal 1' in result.stdout
         assert 'goal_body:' in result.stdout
     finally:
         cleanup(temp_dir)
 
 
-def test_next_include_context_no_goal():
-    """Next with --include-context handles missing goal gracefully."""
+def test_next_include_context_any_goal():
+    """Next with --include-context always returns goal context (references solution_outline.md)."""
     temp_dir = setup_plan_dir()
     try:
-        # Create a task without corresponding goal file
+        # Create a task with any goal number - no goal files needed anymore
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
-                   '--title', 'Orphan task',
-                   '--goal', 'GOAL-99',
-                   '--description', 'No goal file',
+                   '--title', 'Task with goal',
+                   '--goal', '99',
+                   '--description', 'Goal info from solution',
                    '--steps', 'Step one')
 
         result = run_script(SCRIPT_PATH, 'next', '--plan-id', 'test-plan', '--include-context')
 
         assert result.returncode == 0
         assert 'task_number: 1' in result.stdout
-        assert 'goal_found: false' in result.stdout
+        # New architecture always provides context
+        assert 'goal_found: true' in result.stdout
+        assert 'goal_title: Goal 99' in result.stdout
     finally:
         cleanup(temp_dir)
 
@@ -408,7 +397,7 @@ def test_step_start_marks_in_progress():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1', 'S2')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1', 'S2')
 
         result = run_script(SCRIPT_PATH, 'step-start', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '1')
@@ -425,7 +414,7 @@ def test_step_start_invalid_step():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'step-start', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '99')
@@ -445,7 +434,7 @@ def test_step_done_marks_completed():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1', 'S2')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1', 'S2')
 
         result = run_script(SCRIPT_PATH, 'step-done', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '1')
@@ -462,7 +451,7 @@ def test_step_done_completes_task():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'step-done', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '1')
@@ -484,7 +473,7 @@ def test_step_skip_marks_skipped():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1', 'S2')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1', 'S2')
 
         result = run_script(SCRIPT_PATH, 'step-skip', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '1', '--reason', 'Already done')
@@ -501,7 +490,7 @@ def test_step_skip_completes_task():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'step-skip', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '1')
@@ -521,7 +510,7 @@ def test_add_step_appends():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1', 'S2')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1', 'S2')
 
         result = run_script(SCRIPT_PATH, 'add-step', '--plan-id', 'test-plan',
                             '--task', '1', '--title', 'New Step')
@@ -541,7 +530,7 @@ def test_add_step_after():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1', 'S3')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1', 'S3')
 
         result = run_script(SCRIPT_PATH, 'add-step', '--plan-id', 'test-plan',
                             '--task', '1', '--title', 'S2', '--after', '1')
@@ -567,7 +556,7 @@ def test_remove_step():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1', 'S2', 'S3')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1', 'S2', 'S3')
 
         result = run_script(SCRIPT_PATH, 'remove-step', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '2')
@@ -589,7 +578,7 @@ def test_remove_step_last_fails():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'remove-step', '--plan-id', 'test-plan',
                             '--task', '1', '--step', '1')
@@ -609,7 +598,7 @@ def test_update_title_renames_file():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Old Title',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'update', '--plan-id', 'test-plan',
                             '--number', '1', '--title', 'New Title')
@@ -633,13 +622,13 @@ def test_update_goal():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'update', '--plan-id', 'test-plan',
-                            '--number', '1', '--goal', 'GOAL-2')
+                            '--number', '1', '--goal', '2')
 
         assert result.returncode == 0
-        assert 'GOAL-2' in result.stdout
+        assert 'goal: 2' in result.stdout
     finally:
         cleanup(temp_dir)
 
@@ -649,7 +638,7 @@ def test_update_invalid_goal_fails():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'update', '--plan-id', 'test-plan',
                             '--number', '1', '--goal', 'INVALID')
@@ -669,7 +658,7 @@ def test_remove_deletes_file():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'To Delete',
-                   '--goal', 'GOAL-1', '--description', 'D', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D', '--steps', 'S1')
 
         result = run_script(SCRIPT_PATH, 'remove', '--plan-id', 'test-plan', '--number', '1')
 
@@ -690,18 +679,18 @@ def test_remove_preserves_gaps():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'First',
-                   '--goal', 'GOAL-1', '--description', 'D1', '--steps', 'S1')
+                   '--goal', '1', '--description', 'D1', '--steps', 'S1')
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Second',
-                   '--goal', 'GOAL-2', '--description', 'D2', '--steps', 'S1')
+                   '--goal', '2', '--description', 'D2', '--steps', 'S1')
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Third',
-                   '--goal', 'GOAL-3', '--description', 'D3', '--steps', 'S1')
+                   '--goal', '3', '--description', 'D3', '--steps', 'S1')
 
         # Remove middle
         run_script(SCRIPT_PATH, 'remove', '--plan-id', 'test-plan', '--number', '2')
 
         # Next add should be 4, not 2
         result = run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Fourth',
-                            '--goal', 'GOAL-4', '--description', 'D4', '--steps', 'S1')
+                            '--goal', '4', '--description', 'D4', '--steps', 'S1')
 
         assert 'TASK-004' in result.stdout
     finally:
@@ -717,7 +706,7 @@ def test_progress_calculation():
     temp_dir = setup_plan_dir()
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', '--title', 'Task',
-                   '--goal', 'GOAL-1', '--description', 'D',
+                   '--goal', '1', '--description', 'D',
                    '--steps', 'S1', 'S2', 'S3')
         run_script(SCRIPT_PATH, 'step-done', '--plan-id', 'test-plan', '--task', '1', '--step', '1')
         run_script(SCRIPT_PATH, 'step-skip', '--plan-id', 'test-plan', '--task', '1', '--step', '2')
@@ -740,7 +729,7 @@ def test_file_contains_goal_field():
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
                    '--title', 'Test task',
-                   '--goal', 'GOAL-1',
+                   '--goal', '1',
                    '--description', 'Test description',
                    '--steps', 'Step 1', 'Step 2')
 
@@ -748,7 +737,7 @@ def test_file_contains_goal_field():
         files = list(task_dir.glob('TASK-001-*.toon'))
         content = files[0].read_text(encoding='utf-8')
 
-        assert 'goal: GOAL-1' in content
+        assert 'goal: 1' in content
         assert 'number: 1' in content
         assert 'status: pending' in content
         assert 'description: |' in content
@@ -770,7 +759,7 @@ def test_slug_special_characters():
     try:
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
                    '--title', 'Test@#$%Special!!!Characters',
-                   '--goal', 'GOAL-1',
+                   '--goal', '1',
                    '--description', 'D',
                    '--steps', 'S1')
 
@@ -790,7 +779,7 @@ def test_slug_truncation():
         long_title = 'A' * 100
         run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan',
                    '--title', long_title,
-                   '--goal', 'GOAL-1',
+                   '--goal', '1',
                    '--description', 'D',
                    '--steps', 'S1')
 
@@ -832,7 +821,7 @@ if __name__ == '__main__':
         test_next_returns_null_when_all_done,
         test_next_empty_plan,
         test_next_include_context,
-        test_next_include_context_no_goal,
+        test_next_include_context_any_goal,
         # step-start
         test_step_start_marks_in_progress,
         test_step_start_invalid_step,

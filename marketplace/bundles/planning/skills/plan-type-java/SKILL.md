@@ -72,7 +72,7 @@ Analyzes Java codebase and creates goals with:
 - Module assignment (for multi-module projects)
 - Integration points with existing code
 
-**Returns**: `{status, goal_ids[], lessons_recorded}`
+**Returns**: `{status, goal_count, solution_document, lessons_recorded}`
 
 ### java-plan-agent
 

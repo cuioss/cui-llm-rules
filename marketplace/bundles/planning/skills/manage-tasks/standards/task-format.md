@@ -60,11 +60,11 @@ current_step: {integer}
 - Example: `status: in_progress`
 
 ### goal
-- Type: String (GOAL reference)
+- Type: Integer
 - Required: Yes
-- Description: The goal this task implements
-- Format: `GOAL-{n}` where n is a positive integer
-- Example: `goal: GOAL-1`
+- Description: The goal number this task implements (references solution_outline.md section)
+- Format: Positive integer referencing goal section number
+- Example: `goal: 1`
 
 ### created
 - Type: ISO 8601 timestamp
@@ -132,7 +132,7 @@ current_step: {integer}
 number: 2
 title: Add Auth Endpoint
 status: in_progress
-goal: GOAL-1
+goal: 1
 created: 2025-12-02T10:30:00Z
 updated: 2025-12-02T11:00:00Z
 

@@ -4,7 +4,7 @@
 
 ## Workflow Overview
 
-Generic plan refinement creates simple goals and tasks from the request:
+Generic plan refinement creates a solution document and tasks from the request:
 
 ```
 Request from Init Phase
@@ -14,9 +14,9 @@ Request from Init Phase
 │ REFINE PHASE (Generic Plans Only)                   │
 │                                                     │
 │   1. Read context (plan_id, config)                 │
-│   2. Create goal from request                       │
-│   3. Create tasks for goal                          │
-│   4. Validate coverage (goals have tasks)           │
+│   2. Read request document                          │
+│   3. Create solution document with goal(s)          │
+│   4. Create tasks referencing goals                 │
 │   5. Transition to execute phase                    │
 └─────────────────────────────────────────────────────┘
         │
@@ -37,42 +37,51 @@ python3 .plan/execute-script.py planning:manage-config:manage-config get \
 
 ---
 
-## Step 2: Create Goal
-
-For generic plans, create a single goal from the request:
+## Step 2: Read Request
 
 ```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal add \
-  --plan-id {plan_id} \
-  --title "Complete task" \
-  --body "{request_summary}"
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  request read \
+  --plan-id {plan_id}
 ```
 
 ---
 
-## Step 3: Create Tasks
+## Step 3: Create Solution Document
 
-Create execution and verification tasks:
+For generic plans, create a simple solution document:
+
+```bash
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  solution create \
+  --plan-id {plan_id} \
+  --title "Solution for {request_title}" \
+  --summary "{brief summary}" \
+  --goals "### 1. Complete Task
+
+{request_summary}
+
+**Success Criteria:**
+- Task completed as requested
+- Results verified"
+```
+
+---
+
+## Step 4: Create Tasks
+
+Create execution tasks referencing the goal number:
 
 ```bash
 python3 .plan/execute-script.py planning:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --goal GOAL-1 \
+  --goal 1 \
   --title "Execute request" \
   --description "Complete the requested task" \
   --steps "Analyze requirements" "Implement solution" "Verify result"
 ```
 
----
-
-## Step 4: Validate Coverage
-
-```bash
-python3 .plan/execute-script.py planning:manage-goals:manage-goal check \
-  --plan-id {plan_id}
-```
-
-Verify `without_tasks: 0` in response.
+**Note**: The `--goal` parameter is numeric, referencing the goal section number in solution_outline.md.
 
 ---
 

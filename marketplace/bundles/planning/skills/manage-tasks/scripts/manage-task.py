@@ -66,27 +66,40 @@ def slugify(title: str, max_length: int = 40) -> str:
     return slug
 
 
-def validate_goal(goal_str: str) -> str:
+def validate_goal(goal_input) -> int:
     """Validate goal reference.
 
     Args:
-        goal_str: GOAL reference (e.g., "GOAL-1")
+        goal_input: Goal number (positive integer referencing solution_outline.md section)
 
     Returns:
-        Validated GOAL reference
+        Validated goal number as integer
 
     Raises:
         ValueError: If format is invalid
     """
-    if not goal_str or not goal_str.strip():
+    if goal_input is None:
         raise ValueError("Goal reference is required")
 
-    goal_str = goal_str.strip()
-    pattern = re.compile(r'^GOAL-\d+$')
-    if not pattern.match(goal_str):
-        raise ValueError(f"Invalid goal format: {goal_str}. Expected GOAL-N (e.g., GOAL-1)")
+    # Handle numeric input directly
+    if isinstance(goal_input, int):
+        if goal_input < 1:
+            raise ValueError(f"Invalid goal number: {goal_input}. Must be positive integer.")
+        return goal_input
 
-    return goal_str
+    # Handle string input
+    goal_str = str(goal_input).strip()
+    if not goal_str:
+        raise ValueError("Goal reference is required")
+
+    # Must be numeric
+    if goal_str.isdigit():
+        goal_num = int(goal_str)
+        if goal_num < 1:
+            raise ValueError(f"Invalid goal number: {goal_num}. Must be positive integer.")
+        return goal_num
+
+    raise ValueError(f"Invalid goal format: {goal_str}. Expected positive integer (e.g., 1, 2, 3)")
 
 
 def get_goals_dir(plan_id: str) -> Path:
@@ -162,42 +175,27 @@ def parse_goal_file(content: str) -> dict:
     return result
 
 
-def get_goal_context(plan_id: str, goal_ref: str) -> Optional[dict]:
+def get_goal_context(plan_id: str, goal_num: int) -> Optional[dict]:
     """Get goal details for including in task context.
+
+    Note: With the solution_outline.md architecture, goals are stored in a single
+    document. This function now returns minimal context since detailed goal info
+    should be read from the solution document via manage-plan-documents.
 
     Args:
         plan_id: The plan identifier
-        goal_ref: Goal reference (e.g., "GOAL-1")
+        goal_num: Goal number (references ### N. section in solution_outline.md)
 
     Returns:
-        Dictionary with goal context or None if not found
+        Dictionary with goal context (basic info only)
     """
-    # Extract number from GOAL-N reference
-    match = re.match(r'^GOAL-(\d+)$', goal_ref)
-    if not match:
-        return None
-
-    goal_num = int(match.group(1))
-    goal_dir = get_goals_dir(plan_id)
-
-    if not goal_dir.exists():
-        return None
-
-    goal_file = find_goal_file(goal_dir, goal_num)
-    if not goal_file:
-        return None
-
-    try:
-        content = goal_file.read_text(encoding='utf-8')
-        goal = parse_goal_file(content)
-        return {
-            'goal_found': True,
-            'goal_number': goal.get('number', goal_num),
-            'goal_title': goal.get('title', ''),
-            'goal_body': goal.get('body', '')
-        }
-    except Exception:
-        return None
+    # Return basic context - detailed goal info is in solution_outline.md
+    return {
+        'goal_found': True,
+        'goal_number': goal_num,
+        'goal_title': f'Goal {goal_num}',
+        'goal_body': f'See solution_outline.md section ### {goal_num}.'
+    }
 
 
 def get_tasks_dir(plan_id: str) -> Path:
@@ -263,8 +261,8 @@ def parse_task_file(content: str) -> dict:
             key, value = line.split(':', 1)
             key = key.strip()
             value = value.strip()
-            # Convert number to int
-            if key in ('number', 'current_step'):
+            # Convert numeric fields to int
+            if key in ('number', 'current_step', 'goal'):
                 value = int(value) if value else 1
             result[key] = value
             i += 1
@@ -660,10 +658,15 @@ def cmd_list(args) -> int:
 
     # Filter by goal if specified
     if args.goal:
-        all_tasks = [
-            (p, t) for p, t in all_tasks
-            if t.get('goal') == args.goal
-        ]
+        try:
+            goal_num = validate_goal(args.goal)
+            all_tasks = [
+                (p, t) for p, t in all_tasks
+                if t.get('goal') == goal_num
+            ]
+        except ValueError:
+            # Invalid goal format - filter will return empty
+            all_tasks = []
 
     # Get filtered list for status filtering
     filtered_tasks = all_tasks
@@ -1168,7 +1171,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_add.add_argument('--plan-id', required=True, help='Plan identifier')
     p_add.add_argument('--title', required=True, help='Task title')
     p_add.add_argument('--goal', required=True,
-                       help='Specification reference (e.g., GOAL-1)')
+                       help='Goal number (positive integer referencing solution_outline.md section)')
     p_add.add_argument('--description', required=True, help='Task description')
     p_add.add_argument('--steps', nargs='+', required=True,
                        help='Step titles (space-separated, order matters)')

@@ -53,12 +53,12 @@ Examples:
 | Read | `.plan/plans/{id}/status.toon` | `python3 .plan/execute-script.py planning:manage-lifecycle:manage-lifecycle read --plan-id {id}` |
 | Read | `.plan/plans/{id}/config.toon` | `python3 .plan/execute-script.py planning:manage-config:manage-config read --plan-id {id}` |
 | Read | `.plan/plans/{id}/work-log.toon` | `python3 .plan/execute-script.py planning:manage-log:manage-work-log read --plan-id {id}` |
-| Read | `.plan/plans/{id}/goals/GOAL-*.toon` | `python3 .plan/execute-script.py planning:manage-goals:manage-goal get --plan-id {id} --number 1` |
+| Read | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` |
 | Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task get --plan-id {id} --number 1` |
 | Write | `.plan/plans/{id}/*` | Use appropriate manage-* create/update via execute-script.py |
 | Edit | `.plan/plans/{id}/*` | Use appropriate manage-* update via execute-script.py |
 | Glob | `.plan/plans/**/*.toon` | Use manage-* list operations via execute-script.py |
-| Glob | `.plan/plans/{id}/goals/*` | `python3 .plan/execute-script.py planning:manage-goals:manage-goal findAll --plan-id {id}` |
+| Glob | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` |
 | Glob | `.plan/plans/{id}/tasks/*` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task list --plan-id {id}` |
 | Bash find | `find .plan/plans -name "*.toon"` | Use manage-* list operations via execute-script.py |
 | Bash ls | `ls .plan/plans/{id}/tasks/` | `python3 .plan/execute-script.py planning:manage-tasks:manage-task list --plan-id {id}` |
@@ -184,7 +184,7 @@ python3 .plan/execute-script.py {notation} {subcommand} {args...}
 
 | Skill Name (plural) | Script Name (SINGULAR) | Full Notation |
 |---------------------|------------------------|---------------|
-| `manage-goals` | `manage-goal` | `planning:manage-goals:manage-goal` |
+| `manage-plan-documents` | `manage-plan-document` | `planning:manage-plan-documents:manage-plan-document` |
 | `manage-tasks` | `manage-task` | `planning:manage-tasks:manage-task` |
 | `manage-lessons` | `manage-lesson` | `planning:manage-lessons:manage-lesson` |
 | `manage-lifecycle` | `manage-lifecycle` | `planning:manage-lifecycle:manage-lifecycle` |
@@ -503,7 +503,7 @@ Should use: python3 .plan/execute-script.py planning:manage-lifecycle:manage-lif
 ### Violation 2: Missing Work-Log Entry
 
 ```
-Operation: Created GOAL-001 goal
+Operation: Created solution_outline.md with 3 goals
 Work-log: No entry found for artifact creation
 ```
 
@@ -523,7 +523,7 @@ Actual: current_phase=execute (not updated)
 
 ```
 Claude uses: Write .plan/plans/my-plan/tasks/TASK-003.toon
-Should use: python3 .plan/execute-script.py planning:manage-tasks:manage-task add --plan-id my-plan --title "..." --goal GOAL-1 --description "..." --steps "A" "B"
+Should use: python3 .plan/execute-script.py planning:manage-tasks:manage-task add --plan-id my-plan --title "..." --goal 1 --description "..." --steps "A" "B"
 ```
 
 **Note**: Script notation uses SINGULAR `manage-task` (not `manage-tasks`). Full notation: `planning:manage-tasks:manage-task`.

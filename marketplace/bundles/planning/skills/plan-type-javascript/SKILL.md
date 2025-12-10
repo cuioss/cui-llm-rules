@@ -73,7 +73,7 @@ Analyzes JavaScript codebase and creates goals with:
 - State management approach
 - Integration with existing modules
 
-**Returns**: `{status, goal_ids[], lessons_recorded}`
+**Returns**: `{status, goal_count, solution_document, lessons_recorded}`
 
 ### js-plan-agent
 
