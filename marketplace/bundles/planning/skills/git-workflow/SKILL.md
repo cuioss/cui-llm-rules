@@ -90,8 +90,6 @@ If custom message provided:
 If no message:
 - Analyze diff using script:
 
-  Script: `planning:git-workflow`
-
   ```bash
   python3 .plan/execute-script.py planning:git-workflow:git-workflow analyze-diff --file <diff-file>
   ```
@@ -148,29 +146,73 @@ EOF
 
 ## Scripts
 
-Script: `planning:git-workflow` → `git-workflow.py`
+**Script**: `planning:git-workflow:git-workflow`
 
-### git-workflow.py format-commit
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `format-commit` | `--type --subject [--scope] [--body] [--breaking] [--footer]` | Format commit message |
+| `analyze-diff` | `--file` | Analyze diff for commit suggestions |
 
-**Purpose:** Format commit message following conventional commits.
+### format-commit
 
-**Usage:**
+Format commit message following conventional commits.
+
 ```bash
-python3 .plan/execute-script.py planning:git-workflow:git-workflow format-commit --type feat --scope http --subject "add retry config"
+python3 .plan/execute-script.py planning:git-workflow:git-workflow format-commit \
+  --type feat \
+  --scope http \
+  --subject "add retry config" \
+  [--body "Extended description..."] \
+  [--breaking "API changed"] \
+  [--footer "Fixes #123"]
 ```
 
-**Output:** JSON with formatted message and validation
+**Parameters**:
+- `--type` (required): Commit type (feat, fix, docs, style, refactor, perf, test, chore)
+- `--subject` (required): Commit subject line
+- `--scope`: Optional component scope
+- `--body`: Optional commit body
+- `--breaking`: Optional breaking change description
+- `--footer`: Optional additional footer
 
-### git-workflow.py analyze-diff
-
-**Purpose:** Analyze diff file to suggest commit message.
-
-**Usage:**
-```bash
-python3 .plan/execute-script.py planning:git-workflow:git-workflow analyze-diff --file <diff-file>
+**Output** (JSON):
+```json
+{
+  "type": "feat",
+  "scope": "http",
+  "subject": "add retry config",
+  "formatted_message": "feat(http): add retry config\n\n🤖 Generated...",
+  "validation": {"valid": true, "warnings": []},
+  "status": "success"
+}
 ```
 
-**Output:** JSON with commit type, scope, and subject suggestions
+### analyze-diff
+
+Analyze diff file to suggest commit message parameters.
+
+```bash
+python3 .plan/execute-script.py planning:git-workflow:git-workflow analyze-diff \
+  --file changes.diff
+```
+
+**Parameters**:
+- `--file` (required): Path to diff file to analyze
+
+**Output** (JSON):
+```json
+{
+  "mode": "analysis",
+  "suggestions": {
+    "type": "feat",
+    "scope": "auth",
+    "subject": null,
+    "detected_changes": ["Significant new code added"],
+    "files_changed": ["src/main/java/auth/Login.java"]
+  },
+  "status": "success"
+}
+```
 
 ## Standards (Load On-Demand)
 
@@ -194,12 +236,12 @@ Provides:
 
 ## Integration
 
-### Commands Using This Skill
-- **/orchestrate-workflow** - Commits after task completion
-- **/orchestrate-task** - Commits individual task changes
+### Skills Using This Skill
+- **plan-finalize** - Commits and creates PR after plan execution
+- **plan-execute** - May commit after task completion
 
 ### Related Skills
-- **cui-task-planning** - Task completion triggers commit
+- **manage-lifecycle** - Phase transitions that trigger finalize
 
 ## Quality Verification
 
