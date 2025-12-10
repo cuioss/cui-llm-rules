@@ -60,25 +60,15 @@ python3 .plan/execute-script.py planning:manage-log:manage-work-log add \
 
 ### Step 1: Validate Input
 
-Ensure exactly one input source is provided:
-
-```python
-sources = [description, lesson_id, issue]
-if sum(1 for s in sources if s) != 1:
-    return error("Provide exactly one of: description, lesson_id, issue")
-```
+Ensure exactly one input source is provided (description, lesson_id, or issue). If multiple or none provided, return error: "Provide exactly one of: description, lesson_id, issue"
 
 ### Step 2: Derive Plan ID
 
 If `plan_id` not provided, derive from input:
-
-```python
-def derive_plan_id(input_source):
-    # From description: first 3-5 meaningful words
-    # From lesson: lesson_id slug (e.g., "2025-12-02-001" → "lesson-2025-12-02-001")
-    # From issue: issue number (e.g., "#123" → "issue-123")
-    # Always: kebab-case, max 50 chars
-```
+- From description: first 3-5 meaningful words
+- From lesson: lesson_id slug (e.g., `2025-12-02-001` → `lesson-2025-12-02-001`)
+- From issue: issue number (e.g., `#123` → `issue-123`)
+- Always: kebab-case, max 50 chars
 
 ### Step 3: Create or Reference Plan
 
