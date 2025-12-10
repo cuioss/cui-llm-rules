@@ -110,9 +110,9 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
 | Plan Type | Goals Agent | Plan Agent | Verification |
 |-----------|-------------|------------|--------------|
-| `java` | `cui-java-expert:java-goals-agent` | `cui-java-expert:java-plan-agent` | `/builder:builder-build-and-fix` |
-| `javascript` | `cui-frontend-expert:js-goals-agent` | `cui-frontend-expert:js-plan-agent` | `/builder:builder-build-and-fix system=npm` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` | `cui-plugin-development-tools:plugin-plan-agent` | `/cui-plugin-development-tools:plugin-doctor` |
+| `java` | `cui-java-expert:java-solution-plan-agent` | `cui-java-expert:java-plan-agent` | `/builder:builder-build-and-fix` |
+| `javascript` | `cui-frontend-expert:js-solution-plan-agent` | `cui-frontend-expert:js-plan-agent` | `/builder:builder-build-and-fix system=npm` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-solution-plan-agent` | `cui-plugin-development-tools:plugin-plan-agent` | `/cui-plugin-development-tools:plugin-doctor` |
 | `generic` | None (inline) | None (inline) | None |
 
 ---
@@ -137,9 +137,9 @@ Plan-type skills must:
 - `plan-finalize` → reads config.toon directly (no operation call needed)
 
 **Domain Agents** (invoked by commands):
-- `cui-java-expert:java-goals-agent` / `cui-java-expert:java-plan-agent`
-- `cui-frontend-expert:js-goals-agent` / `cui-frontend-expert:js-plan-agent`
-- `cui-plugin-development-tools:plugin-goals-agent` / `cui-plugin-development-tools:plugin-plan-agent`
+- `cui-java-expert:java-solution-plan-agent` / `cui-java-expert:java-plan-agent`
+- `cui-frontend-expert:js-solution-plan-agent` / `cui-frontend-expert:js-plan-agent`
+- `cui-plugin-development-tools:plugin-solution-plan-agent` / `cui-plugin-development-tools:plugin-plan-agent`
 
 **Data Layer** (used by domain agents):
 - `manage-plan-documents` (request/solution) / `manage-tasks` scripts

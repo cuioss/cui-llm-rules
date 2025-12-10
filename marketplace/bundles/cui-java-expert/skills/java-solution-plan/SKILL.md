@@ -1,12 +1,12 @@
 ---
-name: js-goals
-description: Analyze JavaScript codebase and decompose request into goals
+name: java-solution-plan
+description: Analyze Java codebase and decompose request into goals
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-# JavaScript Goals Skill
+# Java Goals Skill
 
-**Role**: Domain analysis skill for JavaScript implementation tasks. Transforms the request into a solution document by analyzing the codebase.
+**Role**: Domain analysis skill for Java implementation tasks. Transforms the request into a solution document by analyzing the codebase.
 
 **Key Pattern**: Single solution document - goals are consolidated into `solution_outline.md` via `manage-plan-documents` skill.
 
@@ -30,7 +30,7 @@ Skill: planning:manage-solution-outline
 
 This provides:
 - Required document structure (Summary, Overview, Deliverables)
-- ASCII diagram patterns for JavaScript/frontend features
+- ASCII diagram patterns for Java features
 - Deliverable reference format
 - Realistic examples
 
@@ -57,28 +57,27 @@ Parse the request to identify what needs to be accomplished.
 
 ### Step 2: Analyze Codebase
 
-Parse request intent and explore affected JavaScript components:
+Parse request intent and explore affected Java components:
 
 **Project Structure Detection**:
 ```bash
-Glob package.json           # npm project
-Glob **/package.json        # workspace packages
-Glob pom.xml               # Maven integration (frontend-maven-plugin)
+Glob **/pom.xml              # Maven multi-module
+Glob **/build.gradle*        # Gradle
+Glob settings.gradle*        # Gradle settings
 ```
 
 **Component Exploration**:
 ```bash
-Grep "class {ClassName}" --type js
-Grep "export.*{FunctionName}" --type js
-Glob src/**/*.js
-Glob src/**/*.mjs
-Read {js-file-path}
+Grep "class {ClassName}" --type java
+Grep "interface {InterfaceName}" --type java
+Glob src/main/java/**/*.java
+Read {java-file-path}
 ```
 
 **Identify**:
-- Modules, classes, web components affected
-- Directory structure and placement
-- Dependencies (npm packages, internal modules)
+- Classes, interfaces, modules affected
+- Package structure and placement
+- Dependencies (CDI, external libs)
 - Test requirements
 - Complexity assessment
 
@@ -94,14 +93,14 @@ Build a goals markdown section with numbered goals:
 ```markdown
 ### 1. {Goal Title}
 
-{JavaScript-specific technical goal description}
+{Java-specific technical goal description}
 
-**Component**: {module|class|web-component|utility|config}
-**Path**: `src/components/...`
-**Package**: {package name for workspaces}
-**Dependencies**: {npm packages, internal modules}
-**Test Path**: `src/__tests__/...`
-**Standards**: {ESLint, JSDoc, etc.}
+**Component**: {class|interface|module|config}
+**Path**: `src/main/java/de/cuioss/...`
+**Module**: {module name for multi-module projects}
+**Dependencies**: {dependencies and integration points}
+**Test Path**: `src/test/java/...`
+**Standards**: {CDI, logging, etc.}
 
 **Success Criteria:**
 - {criterion 1}
@@ -130,7 +129,7 @@ On unexpected codebase state or ambiguity:
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name js-goals \
+  --component-name java-solution-plan \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
@@ -154,9 +153,9 @@ lessons_recorded: {count}
 
 | Request Pattern | Typical Goals |
 |-----------------|---------------|
-| "Add form validation" | 1. Create validation utility 2. Add validation to form component 3. Add error display 4. Add tests |
-| "Implement new component" | 1. Create component class 2. Add CSS styles 3. Register custom element 4. Add unit tests |
-| "Refactor to ES modules" | 1. Convert CommonJS to ES modules 2. Update imports 3. Update build config 4. Update tests |
+| "Add caching to service" | 1. Add cache dependency 2. Create cache config 3. Add @Cacheable annotations 4. Add cache tests |
+| "Implement new endpoint" | 1. Create DTO classes 2. Create controller 3. Add service method 4. Add integration tests |
+| "Refactor to interface" | 1. Extract interface 2. Update implementations 3. Update injection points 4. Update tests |
 
 ---
 
@@ -164,11 +163,11 @@ lessons_recorded: {count}
 
 | Type | Indicators | Example |
 |------|------------|---------|
-| `module` | ES module, export statements | user-service.js |
-| `class` | Class definition | AuthenticationProvider.js |
-| `web-component` | Custom element, LitElement | my-button.js |
-| `utility` | Helper functions, no state | string-utils.js |
-| `config` | Configuration file | eslint.config.js |
+| `class` | Service, ServiceImpl, Repository, Controller | UserService.java |
+| `interface` | Interface definition | AuthenticationProvider.java |
+| `module` | pom.xml, build.gradle reference | core-service module |
+| `config` | Config, Configuration suffix | CacheConfig.java |
+| `package` | Package path mentioned | de.cuioss.service.auth |
 
 ---
 
@@ -187,10 +186,10 @@ lessons_recorded: {count}
 | Factor | Low | Medium | High |
 |--------|-----|--------|------|
 | Files affected | 1-3 | 4-8 | 9+ |
-| Cross-package | No | 1 package | 2+ packages |
+| Cross-module | No | 1 module | 2+ modules |
 | Breaking changes | None | Internal | Public API |
 | Dependencies | 0-2 | 3-5 | 6+ |
-| Test coverage needed | Unit only | Unit + E2E | Full suite |
+| Test coverage needed | Unit only | Unit + Integration | Full suite |
 
 ---
 
@@ -198,33 +197,34 @@ lessons_recorded: {count}
 
 | Component Type | Test Required | Test Type |
 |---------------|---------------|-----------|
-| Module | Yes | Unit (Jest) |
-| Class | Yes | Unit (Jest) |
-| Web Component | Yes | Unit + E2E (Cypress) |
-| Utility | Yes | Unit (Jest) |
-| Config | Conditional | Lint verification |
+| Service class | Yes | Unit + Integration |
+| Repository | Yes | Integration |
+| Controller | Yes | Integration |
+| DTO/Model | Conditional | Unit (if logic) |
+| Config class | Conditional | Integration |
+| Utility class | Yes | Unit |
 
 ---
 
-## CUI Frontend Patterns
+## CUI-Specific Patterns
 
-### ESLint/Prettier
-When task involves code quality:
-- Check for existing ESLint configuration
-- Identify Prettier settings
-- Reference `cui-frontend-expert:cui-javascript-linting` standards
+### Logging Analysis
+When task involves logging:
+- Check for `CuiLogger` usage
+- Identify `LogRecord` requirements
+- Reference `cui-java-expert:cui-java-core` standards
 
-### Web Components
-When task involves custom elements:
-- Check for LitElement usage
-- Identify component registration patterns
-- Reference `cui-frontend-expert:cui-javascript` standards
+### CDI Analysis
+When task involves CDI:
+- Check `beans.xml` configuration
+- Identify scope annotations
+- Reference `cui-java-expert:cui-java-cdi` standards
 
-### Testing
+### Testing Analysis
 When task involves testing:
-- Check for Jest configuration
-- Identify Cypress E2E tests
-- Reference `cui-frontend-expert:cui-javascript-unit-testing` standards
+- Check for `@EnabledIfReachable` patterns
+- Identify generator requirements
+- Reference `cui-java-expert:cui-java-unit-testing` standards
 
 ---
 
@@ -238,15 +238,15 @@ When task involves testing:
 | `modify` | Warn and ask for clarification |
 | `refactor` | Error and request correct path |
 
-### Package Not Found
+### Module Not Found
 
-If package doesn't exist in workspace:
-- Check if task is to create the package
+If module doesn't exist in multi-module project:
+- Check if task is to create the module
 - Otherwise error with suggestion
 
 ### Ambiguous Component
 
-If multiple files match the name:
+If multiple classes match the name:
 - List all matches with paths
 - Ask user to select correct one
 
@@ -254,14 +254,13 @@ If multiple files match the name:
 
 ## Integration
 
-**Caller**: `cui-frontend-expert:js-goals-agent`
+**Caller**: `cui-java-expert:java-solution-plan-agent`
 
 **Scripts Used**:
 - `planning:manage-plan-documents` - Create solution document
 - `planning:manage-lessons` - Record lessons on issues
 
 **Standards Referenced**:
-- `cui-frontend-expert:cui-javascript` - Core JavaScript patterns
-- `cui-frontend-expert:cui-javascript-linting` - ESLint/Prettier standards
-- `cui-frontend-expert:cui-javascript-unit-testing` - Jest testing standards
-- `cui-frontend-expert:cui-jsdoc` - Documentation standards
+- `cui-java-expert:cui-java-core` - Core Java patterns
+- `cui-java-expert:cui-java-cdi` - CDI/Quarkus patterns
+- `cui-java-expert:cui-java-unit-testing` - Testing standards

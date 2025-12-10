@@ -124,7 +124,7 @@ def test_domain_agents_get():
         ctx.write_marshal({
             "domain_agents": {
                 "planning:plan-type-java": {
-                    "goals_agent": "cui-java-expert:java-goals-agent",
+                    "goals_agent": "cui-java-expert:java-solution-plan-agent",
                     "plan_agent": "cui-java-expert:java-plan-agent"
                 }
             }
@@ -134,7 +134,7 @@ def test_domain_agents_get():
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
-        assert data['data']['goals_agent'] == 'cui-java-expert:java-goals-agent'
+        assert data['data']['goals_agent'] == 'cui-java-expert:java-solution-plan-agent'
 
 
 def test_domain_agents_get_unknown():

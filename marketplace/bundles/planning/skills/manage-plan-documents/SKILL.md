@@ -222,7 +222,7 @@ python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-docum
   --body "$BODY"
 ```
 
-### With domain goals agents (java-goals, js-goals, plugin-goals)
+### With domain goals agents (java-solution-plan, js-solution-plan, plugin-solution-plan)
 
 Domain goals agents read the request document:
 

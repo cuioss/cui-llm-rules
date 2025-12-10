@@ -3,7 +3,7 @@ name: plan-type-javascript
 description: JavaScript plan type for npm/frontend projects
 allowed-tools: Read, Bash
 domain:
-  goals_agent: cui-frontend-expert:js-goals-agent
+  goals_agent: cui-frontend-expert:js-solution-plan-agent
   plan_agent: cui-frontend-expert:js-plan-agent
   verification_command: /builder:builder-build-and-fix system=npm
   pr_workflow: true
@@ -30,7 +30,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `goals_agent` | `cui-frontend-expert:js-goals-agent` | Decomposes request into goals |
+| `goals_agent` | `cui-frontend-expert:js-solution-plan-agent` | Decomposes request into goals |
 | `plan_agent` | `cui-frontend-expert:js-plan-agent` | Creates tasks from goals |
 | `verification_command` | `/builder:builder-build-and-fix system=npm` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
@@ -64,7 +64,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 ## Agent Behavior
 
-### js-goals-agent
+### js-solution-plan-agent
 
 Analyzes JavaScript codebase and creates goals with:
 - Module design and exports

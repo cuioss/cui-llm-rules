@@ -116,9 +116,9 @@ Each plan-type skill declares its domain agents in structured frontmatter:
 
 | Plan Type | Goals Agent | Plan Agent |
 |-----------|-------------|------------|
-| `java` | `cui-java-expert:java-goals-agent` | `cui-java-expert:java-plan-agent` |
-| `javascript` | `cui-frontend-expert:js-goals-agent` | `cui-frontend-expert:js-plan-agent` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
+| `java` | `cui-java-expert:java-solution-plan-agent` | `cui-java-expert:java-plan-agent` |
+| `javascript` | `cui-frontend-expert:js-solution-plan-agent` | `cui-frontend-expert:js-plan-agent` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-solution-plan-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
 | `generic` | N/A (uses plan-refine-agent fallback) | N/A |
 
 ### Refine Flow
@@ -209,10 +209,10 @@ planning/
 ## Dependencies
 
 - **general-tools** - Script runner, file operations base
-- **cui-plugin-development-tools** - Plugin doctor, plugin-goals-agent, plugin-plan-agent
+- **cui-plugin-development-tools** - Plugin doctor, plugin-solution-plan-agent, plugin-plan-agent
 - **builder** - Build execution (maven/npm)
-- **cui-java-expert** - java-goals-agent, java-plan-agent, java-implement-agent
-- **cui-frontend-expert** - js-goals-agent, js-plan-agent
+- **cui-java-expert** - java-solution-plan-agent, java-plan-agent, java-implement-agent
+- **cui-frontend-expert** - js-solution-plan-agent, js-plan-agent
 
 ## Installation
 

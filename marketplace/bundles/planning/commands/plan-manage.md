@@ -95,7 +95,7 @@ Example: `Skill: planning:plan-type-java`
 The skill's `domain:` frontmatter contains:
 ```yaml
 domain:
-  goals_agent: cui-java-expert:java-goals-agent
+  goals_agent: cui-java-expert:java-solution-plan-agent
   plan_agent: cui-java-expert:java-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
@@ -290,9 +290,9 @@ If you discover issues or improvements during execution, record them:
 |-------|---------|
 | `planning:plan-init-agent` | Init phase execution |
 | `planning:plan-refine-agent` | Refine phase fallback (generic plans) |
-| `cui-java-expert:java-goals-agent` | Java: Request → Goals |
+| `cui-java-expert:java-solution-plan-agent` | Java: Request → Goals |
 | `cui-java-expert:java-plan-agent` | Java: Goals → Tasks |
-| `cui-frontend-expert:js-goals-agent` | JavaScript: Request → Goals |
+| `cui-frontend-expert:js-solution-plan-agent` | JavaScript: Request → Goals |
 | `cui-frontend-expert:js-plan-agent` | JavaScript: Goals → Tasks |
-| `cui-plugin-development-tools:plugin-goals-agent` | Plugin: Request → Goals |
+| `cui-plugin-development-tools:plugin-solution-plan-agent` | Plugin: Request → Goals |
 | `cui-plugin-development-tools:plugin-plan-agent` | Plugin: Goals → Tasks |

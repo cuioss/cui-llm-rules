@@ -204,7 +204,7 @@ For each selected type, configure domain agents:
 # Example for Java
 python3 .plan/execute-script.py planning:manage-config:marshal-config domain-agents set \
   --plan-type planning:plan-type-java \
-  --goals-agent cui-java-expert:java-goals-agent \
+  --goals-agent cui-java-expert:java-solution-plan-agent \
   --plan-agent cui-java-expert:java-plan-agent
 ```
 

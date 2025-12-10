@@ -1,5 +1,5 @@
 ---
-name: plugin-goals
+name: plugin-solution-plan
 description: Analyze plugin codebase and decompose request into goals
 allowed-tools: Read, Glob, Grep, Bash
 ---
@@ -300,7 +300,7 @@ On unexpected structure or ambiguity:
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name plugin-goals \
+  --component-name plugin-solution-plan \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
@@ -386,7 +386,7 @@ python3 .plan/execute-script.py \
 
 | Type | Indicators | Example |
 |------|------------|---------|
-| `skill` | SKILL.md, standards, references | java-goals |
+| `skill` | SKILL.md, standards, references | java-solution-plan |
 | `command` | Slash command, user-facing | plugin-doctor.md |
 | `agent` | Autonomous execution, tools | java-implement-agent.md |
 | `script` | Python/Bash automation | manage-goal.py |
@@ -441,7 +441,7 @@ If multiple components match:
 
 ## Integration
 
-**Caller**: `cui-plugin-development-tools:plugin-goals-agent`
+**Caller**: `cui-plugin-development-tools:plugin-solution-plan-agent`
 
 **Script Notations** (use EXACTLY as shown):
 - `planning:manage-plan-documents:manage-plan-document` - Validate solution document (solution validate), read request (request read)

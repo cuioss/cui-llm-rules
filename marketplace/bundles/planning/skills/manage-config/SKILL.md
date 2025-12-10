@@ -247,7 +247,7 @@ python3 .plan/execute-script.py planning:manage-config:marshal-config \
 # Set agents
 python3 .plan/execute-script.py planning:manage-config:marshal-config \
   domain-agents set --plan-type planning:plan-type-java \
-  --goals-agent cui-java-expert:java-goals-agent \
+  --goals-agent cui-java-expert:java-solution-plan-agent \
   --plan-agent cui-java-expert:java-plan-agent
 
 # List all
@@ -322,7 +322,7 @@ All marshal-config commands return TOON for token efficiency:
 ```toon
 status: success
 data:
-  goals_agent: cui-java-expert:java-goals-agent
+  goals_agent: cui-java-expert:java-solution-plan-agent
   plan_agent: cui-java-expert:java-plan-agent
 ```
 

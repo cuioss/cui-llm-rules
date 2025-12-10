@@ -97,15 +97,15 @@ Domain agents live in their expert bundles and are invoked by commands via Task 
 
 ```
 cui-java-expert/agents/
-├── java-goals-agent.md         # Decomposes request into goals
+├── java-solution-plan-agent.md         # Decomposes request into goals
 └── java-plan-agent.md          # Transforms goals into tasks
 
 cui-frontend-expert/agents/
-├── js-goals-agent.md           # Decomposes request into goals
+├── js-solution-plan-agent.md           # Decomposes request into goals
 └── js-plan-agent.md            # Transforms goals into tasks
 
 cui-plugin-development-tools/agents/
-├── plugin-goals-agent.md       # Decomposes request into goals
+├── plugin-solution-plan-agent.md       # Decomposes request into goals
 └── plugin-plan-agent.md        # Transforms goals into tasks
 ```
 
@@ -117,7 +117,7 @@ Plan-type skills declare their domain agents in structured frontmatter:
 # Example: plan-type-java/SKILL.md
 ---
 domain:
-  goals_agent: cui-java-expert:java-goals-agent
+  goals_agent: cui-java-expert:java-solution-plan-agent
   plan_agent: cui-java-expert:java-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
@@ -126,9 +126,9 @@ domain:
 
 | Plan Type | Goals Agent | Plan Agent |
 |-----------|-------------|------------|
-| `java` | `cui-java-expert:java-goals-agent` | `cui-java-expert:java-plan-agent` |
-| `javascript` | `cui-frontend-expert:js-goals-agent` | `cui-frontend-expert:js-plan-agent` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-goals-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
+| `java` | `cui-java-expert:java-solution-plan-agent` | `cui-java-expert:java-plan-agent` |
+| `javascript` | `cui-frontend-expert:js-solution-plan-agent` | `cui-frontend-expert:js-plan-agent` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-solution-plan-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
 | `generic` | N/A | N/A (uses plan-refine-agent fallback) |
 
 ### Routing Flow
@@ -249,11 +249,11 @@ The detail level ensures:
 
    Domain Agents (in expert bundles):
    ┌─────────────────────────────────────────────┐
-   │ cui-java-expert: java-goals-agent           │
+   │ cui-java-expert: java-solution-plan-agent           │
    │                  java-plan-agent            │
-   │ cui-frontend-expert: js-goals-agent         │
+   │ cui-frontend-expert: js-solution-plan-agent         │
    │                      js-plan-agent          │
-   │ cui-plugin-development-tools: plugin-goals  │
+   │ cui-plugin-development-tools: plugin-solution-plan  │
    │                               plugin-plan   │
    └─────────────────────────────────────────────┘
 ```

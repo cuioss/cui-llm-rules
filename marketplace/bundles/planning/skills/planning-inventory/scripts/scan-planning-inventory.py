@@ -32,9 +32,9 @@ PLANNING_PATTERNS = [
     "task-*",       # Task commands (task-implement)
     "pr-*",         # PR commands (pr-doctor) - note: also matches pr-workflow
     "*-plan",       # Derived plan skills (java-plan, js-plan, etc.)
-    "*-goals",      # Derived goals skills (java-goals, js-goals, etc.)
+    "*-goals",      # Derived goals skills (java-solution-plan, js-solution-plan, etc.)
     "*-plan-*",     # Derived agents (java-plan-agent, etc.)
-    "*-goals-*",    # Derived agents (java-goals-agent, etc.)
+    "*-goals-*",    # Derived agents (java-solution-plan-agent, etc.)
 ]
 
 # Bundles that contain planning-related components
