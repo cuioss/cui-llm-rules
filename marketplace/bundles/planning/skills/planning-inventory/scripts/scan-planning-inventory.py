@@ -31,9 +31,9 @@ PLANNING_PATTERNS = [
     "*-workflow",   # Workflow skills (pr-workflow, git-workflow, etc.)
     "task-*",       # Task commands (task-implement)
     "pr-*",         # PR commands (pr-doctor) - note: also matches pr-workflow
-    "*-plan",       # Derived plan skills (java-plan, js-plan, etc.)
+    "*-task-plan",       # Derived plan skills (java-plan, js-plan, etc.)
     "*-goals",      # Derived goals skills (java-solution-outline, js-solution-outline, etc.)
-    "*-plan-*",     # Derived agents (java-plan-agent, etc.)
+    "*-plan-*",     # Derived agents (java-task-plan-agent, etc.)
     "*-goals-*",    # Derived agents (java-solution-outline-agent, etc.)
 ]
 

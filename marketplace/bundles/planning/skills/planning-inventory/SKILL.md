@@ -17,9 +17,9 @@ Planning-related components are distributed across multiple bundles:
 | Bundle | Component Types |
 |--------|-----------------|
 | `planning` | Core infrastructure (plan-*, manage-*, *-workflow) |
-| `cui-java-expert` | java-plan, java-solution-outline (skills + agents) |
-| `cui-frontend-expert` | js-plan, js-solution-outline (skills + agents) |
-| `cui-plugin-development-tools` | plugin-plan, plugin-solution-outline (skills + agents) |
+| `cui-java-expert` | java-task-plan, java-solution-outline (skills + agents) |
+| `cui-frontend-expert` | js-task-plan, js-solution-outline (skills + agents) |
+| `cui-plugin-development-tools` | plugin-task-plan, plugin-solution-outline (skills + agents) |
 
 This skill provides a single command to discover all these components.
 
@@ -91,8 +91,8 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
   "derived": [
     {
       "bundle": "cui-java-expert",
-      "agents": [{"name": "java-plan-agent", ...}, {"name": "java-solution-outline-agent", ...}],
-      "skills": [{"name": "java-plan", ...}, {"name": "java-solution-outline", ...}],
+      "agents": [{"name": "java-task-plan-agent", ...}, {"name": "java-solution-outline-agent", ...}],
+      "skills": [{"name": "java-task-plan", ...}, {"name": "java-solution-outline", ...}],
       ...
     },
     ...
@@ -116,7 +116,7 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
     {"type": "commands", "names": ["task-implement", ...]}
   ],
   "derived_bundles": [
-    {"bundle": "cui-java-expert", "agents": ["java-plan-agent", ...], "skills": ["java-plan", ...]},
+    {"bundle": "cui-java-expert", "agents": ["java-task-plan-agent", ...], "skills": ["java-task-plan", ...]},
     ...
   ],
   "statistics": {...}
@@ -140,9 +140,9 @@ python3 .plan/execute-script.py planning:planning-inventory:scan-planning-invent
 
 | Bundle | Agents | Skills |
 |--------|--------|--------|
-| cui-java-expert | java-plan-agent, java-solution-outline-agent | java-plan, java-solution-outline |
-| cui-frontend-expert | js-plan-agent, js-solution-outline-agent | js-plan, js-solution-outline |
-| cui-plugin-development-tools | plugin-plan-agent, plugin-solution-outline-agent | plugin-plan, plugin-solution-outline |
+| cui-java-expert | java-task-plan-agent, java-solution-outline-agent | java-task-plan, java-solution-outline |
+| cui-frontend-expert | js-task-plan-agent, js-solution-outline-agent | js-task-plan, js-solution-outline |
+| cui-plugin-development-tools | plugin-task-plan-agent, plugin-solution-outline-agent | plugin-task-plan, plugin-solution-outline |
 
 ## Dependencies
 

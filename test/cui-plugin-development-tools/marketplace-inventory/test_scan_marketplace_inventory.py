@@ -448,7 +448,7 @@ def test_combined_bundle_and_name_pattern():
     assert len(bundles) == 1, "Should have exactly 1 bundle"
     assert bundles[0]['name'] == 'cui-java-expert', "Bundle should be cui-java-expert"
 
-    # Should find java-plan-agent
+    # Should find java-task-plan-agent
     agents = bundles[0].get('agents', [])
     assert len(agents) >= 1, "Should find at least 1 plan agent in cui-java-expert"
     for agent in agents:

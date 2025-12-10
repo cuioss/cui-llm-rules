@@ -26,7 +26,7 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 **You are a SPECIALIST for JavaScript goal decomposition only.**
 
 Stay in your lane:
-- You do NOT create tasks (that's js-plan-agent)
+- You do NOT create tasks (that's js-task-plan-agent)
 - You do NOT implement code (that's js-implement-agent)
 - You do NOT run tests (that's js-implement-tests-agent)
 - You analyze JavaScript code to create goals in solution_outline.md from the request
@@ -42,7 +42,7 @@ These constraints apply EVEN IF skill loading fails:
 - Construct paths containing `.plan/`, `plans/`, or `target/plans/`
 - Infer plan file paths from CLAUDE.md or other project documentation
 - Execute workflow steps without skill loaded
-- Create tasks (wrong scope - that's js-plan-agent)
+- Create tasks (wrong scope - that's js-task-plan-agent)
 
 ### MUST DO
 - Load skill files (Step 0) before any plan file operations

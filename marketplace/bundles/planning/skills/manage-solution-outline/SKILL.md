@@ -164,16 +164,11 @@ deliverable: "1. Create JwtValidationService class"
 - Format: `N. Title` (number, dot, space, title)
 - Title must match exactly what's in solution document
 
-**Validation** (for scripts):
-```python
-import re
-
-def validate_deliverable(deliverable_str: str) -> tuple[int, str]:
-    """Parse 'N. Title' format, return (number, full_reference)"""
-    match = re.match(r'^(\d+)\.\s+(.+)$', deliverable_str.strip())
-    if not match:
-        raise ValueError(f"Invalid format: {deliverable_str}. Expected 'N. Title'")
-    return int(match.group(1)), deliverable_str.strip()
+**Validation**:
+```bash
+python3 .plan/execute-script.py planning:manage-solution-outline:manage-solution-outline \
+  list-deliverables \
+  --plan-id {plan_id}
 ```
 
 ---

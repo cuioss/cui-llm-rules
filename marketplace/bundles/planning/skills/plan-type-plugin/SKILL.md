@@ -4,7 +4,7 @@ description: Plugin development plan type for marketplace components
 allowed-tools: Read, Bash
 domain:
   solution_outline_agent: cui-plugin-development-tools:plugin-solution-outline-agent
-  plan_agent: cui-plugin-development-tools:plugin-plan-agent
+  task_plan_agent: cui-plugin-development-tools:plugin-task-plan-agent
   verification_command: /cui-plugin-development-tools:plugin-doctor
   pr_workflow: false
   standards:
@@ -29,7 +29,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 | Field | Value | Purpose |
 |-------|-------|---------|
 | `solution_outline_agent` | `cui-plugin-development-tools:plugin-solution-outline-agent` | Decomposes request into goals |
-| `plan_agent` | `cui-plugin-development-tools:plugin-plan-agent` | Creates tasks from goals |
+| `task_plan_agent` | `cui-plugin-development-tools:plugin-task-plan-agent` | Creates tasks from goals |
 | `verification_command` | `/cui-plugin-development-tools:plugin-doctor` | Plugin validation |
 | `pr_workflow` | `false` | No PR (direct to main) |
 | `standards` | Plugin architecture, Script architecture | Skills to load |
@@ -135,7 +135,7 @@ Analyzes marketplace structure and creates goals with:
 
 **Returns**: `{status, goal_count, solution_document, lessons_recorded}`
 
-### plugin-plan-agent
+### plugin-task-plan-agent
 
 Creates tasks with plugin-specific steps:
 

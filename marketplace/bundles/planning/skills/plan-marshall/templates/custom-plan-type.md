@@ -4,7 +4,7 @@ description: Custom plan-type for {{DESCRIPTION}}
 allowed-tools: Read, Bash
 domain:
   solution_outline_agent: {{SOLUTION_OUTLINE_AGENT}}
-  plan_agent: {{PLAN_AGENT}}
+  task_plan_agent: {{TASK_PLAN_AGENT}}
   verification_command: {{VERIFICATION_COMMAND}}
   pr_workflow: false
   standards: []
@@ -33,7 +33,7 @@ Use this plan-type when:
 | Field | Value |
 |-------|-------|
 | `solution_outline_agent` | {{SOLUTION_OUTLINE_AGENT}} |
-| `plan_agent` | {{PLAN_AGENT}} |
+| `task_plan_agent` | {{TASK_PLAN_AGENT}} |
 | `verification_command` | {{VERIFICATION_COMMAND}} |
 | `pr_workflow` | false |
 
@@ -91,7 +91,7 @@ python3 .plan/execute-script.py planning:manage-config:manage-config set \
    ├─ Reads domain: frontmatter
    │
    ├─ Task: {{SOLUTION_OUTLINE_AGENT}}  → Creates goals from request
-   └─ Task: {{PLAN_AGENT}}   → Creates tasks from goals
+   └─ Task: {{TASK_PLAN_AGENT}}   → Creates tasks from goals
 ```
 
 ### Generic Fallback

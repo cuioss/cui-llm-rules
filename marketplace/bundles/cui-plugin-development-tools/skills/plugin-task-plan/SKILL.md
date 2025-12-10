@@ -1,5 +1,5 @@
 ---
-name: plugin-plan
+name: plugin-task-plan
 description: Create implementation tasks from goals using skill delegation
 allowed-tools: Read, Bash
 ---
@@ -83,7 +83,7 @@ On ambiguous goal or planning issues:
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name plugin-plan \
+  --component-name plugin-task-plan \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
@@ -266,7 +266,7 @@ If goal lacks required parameters:
 
 ## Integration
 
-**Caller**: `cui-plugin-development-tools:plugin-plan-agent`
+**Caller**: `cui-plugin-development-tools:plugin-task-plan-agent`
 
 **Script Notations** (use EXACTLY as shown):
 - `planning:manage-plan-documents:manage-plan-document` - Read solution document (solution read)

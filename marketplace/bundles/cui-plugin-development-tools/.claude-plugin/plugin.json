@@ -23,11 +23,11 @@
     "./skills/plugin-maintain",
     "./skills/plugin-script-architecture",
     "./skills/plugin-solution-outline",
-    "./skills/plugin-plan",
+    "./skills/plugin-task-plan",
     "./skills/verification"
   ],
   "agents": [
     "./agents/plugin-solution-outline-agent.md",
-    "./agents/plugin-plan-agent.md"
+    "./agents/plugin-task-plan-agent.md"
   ]
 }

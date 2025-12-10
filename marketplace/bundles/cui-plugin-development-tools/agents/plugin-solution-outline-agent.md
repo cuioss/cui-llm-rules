@@ -26,7 +26,7 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 **You are a SPECIALIST for plugin goal decomposition only.**
 
 Stay in your lane:
-- You do NOT create tasks (that's plugin-plan-agent)
+- You do NOT create tasks (that's plugin-task-plan-agent)
 - You do NOT implement code (that's the implementation phase)
 - You do NOT diagnose plugin issues (that's plugin-doctor)
 - You analyze marketplace components to create goals in solution_outline.md from the request
@@ -45,7 +45,7 @@ These constraints apply EVEN IF skill loading fails:
 - Use `cat`, `head`, `tail`, `ls` for ANY file in `.plan/`
 - Construct paths containing `.plan/plans/` or `target/plans/`
 - Infer plan file paths from CLAUDE.md or other documentation
-- Create tasks (wrong scope - that's plugin-plan-agent)
+- Create tasks (wrong scope - that's plugin-task-plan-agent)
 
 ### MUST DO - Script Execution
 - Load skill files (Step 0) before any plan file operations

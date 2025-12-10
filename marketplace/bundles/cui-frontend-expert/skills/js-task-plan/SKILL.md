@@ -1,5 +1,5 @@
 ---
-name: js-plan
+name: js-task-plan
 description: Create implementation tasks from goals with direct storage
 allowed-tools: Read, Bash
 ---
@@ -73,7 +73,7 @@ On ambiguous goal or planning issues:
 ```bash
 python3 .plan/execute-script.py planning:manage-lessons:manage-lesson add \
   --component-type skill \
-  --component-name js-plan \
+  --component-name js-task-plan \
   --category observation \
   --title "{issue summary}" \
   --detail "{context and resolution approach}"
@@ -233,7 +233,7 @@ If goal lacks detail:
 
 ## Integration
 
-**Caller**: `cui-frontend-expert:js-plan-agent`
+**Caller**: `cui-frontend-expert:js-task-plan-agent`
 
 **Scripts Used**:
 - `planning:manage-plan-documents` - Read solution document (solution read)

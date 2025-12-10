@@ -248,7 +248,7 @@ python3 .plan/execute-script.py planning:manage-config:marshal-config \
 python3 .plan/execute-script.py planning:manage-config:marshal-config \
   domain-agents set --plan-type planning:plan-type-java \
   --solution-outline-agent cui-java-expert:java-solution-outline-agent \
-  --plan-agent cui-java-expert:java-plan-agent
+  --task-plan-agent cui-java-expert:java-task-plan-agent
 
 # List all
 python3 .plan/execute-script.py planning:manage-config:marshal-config \
@@ -323,7 +323,7 @@ All marshal-config commands return TOON for token efficiency:
 status: success
 data:
   solution_outline_agent: cui-java-expert:java-solution-outline-agent
-  plan_agent: cui-java-expert:java-plan-agent
+  task_plan_agent: cui-java-expert:java-task-plan-agent
 ```
 
 ## Integration Points

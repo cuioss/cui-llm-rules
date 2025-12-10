@@ -125,7 +125,7 @@ def test_domain_agents_get():
             "domain_agents": {
                 "planning:plan-type-java": {
                     "solution_outline_agent": "cui-java-expert:java-solution-outline-agent",
-                    "plan_agent": "cui-java-expert:java-plan-agent"
+                    "task_plan_agent": "cui-java-expert:java-task-plan-agent"
                 }
             }
         })
@@ -168,7 +168,7 @@ def test_domain_agents_set_null():
             "domain_agents": {
                 "planning:plan-type-java": {
                     "solution_outline_agent": "some:agent",
-                    "plan_agent": "some:other"
+                    "task_plan_agent": "some:other"
                 }
             }
         })
@@ -457,7 +457,7 @@ def test_custom_types_add():
                            '--name', 'security-review',
                            '--skill-path', '.claude/plan-types/security/SKILL.md',
                            '--solution-outline-agent', 'null',
-                           '--plan-agent', 'null')
+                           '--task-plan-agent', 'null')
         assert result.success
         config = json.loads(ctx.marshal_path.read_text())
         assert len(config['custom_plan_types']) == 1
@@ -469,7 +469,7 @@ def test_custom_types_add_duplicate():
     with TestContext() as ctx:
         ctx.write_marshal({
             "custom_plan_types": [
-                {"name": "security-review", "skill_path": "path", "solution_outline_agent": None, "plan_agent": None}
+                {"name": "security-review", "skill_path": "path", "solution_outline_agent": None, "task_plan_agent": None}
             ]
         })
         result = run_script(SCRIPT_PATH, 'custom-types', 'add',
@@ -483,7 +483,7 @@ def test_custom_types_remove():
     with TestContext() as ctx:
         ctx.write_marshal({
             "custom_plan_types": [
-                {"name": "security-review", "skill_path": "path", "solution_outline_agent": None, "plan_agent": None}
+                {"name": "security-review", "skill_path": "path", "solution_outline_agent": None, "task_plan_agent": None}
             ]
         })
         result = run_script(SCRIPT_PATH, 'custom-types', 'remove', '--name', 'security-review')

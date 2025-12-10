@@ -87,7 +87,7 @@ Plan-type skills also declare domain agents in their `domain:` frontmatter secti
 1. User requests task
 2. `plan-init` determines plan type, creates base config/references, calls `configure`
 3. `/plan-manage` loads plan-type skill, reads `domain:` frontmatter
-4. `/plan-manage` invokes domain agents via Task tool (solution_outline_agent, plan_agent)
+4. `/plan-manage` invokes domain agents via Task tool (solution_outline_agent, task_plan_agent)
 5. `plan-execute` reads plan files → executes tasks sequentially
 6. `plan-execute` reads finalize config directly from config.toon
 
@@ -98,15 +98,15 @@ Domain agents live in their expert bundles and are invoked by commands via Task 
 ```
 cui-java-expert/agents/
 ├── java-solution-outline-agent.md         # Decomposes request into goals
-└── java-plan-agent.md          # Transforms goals into tasks
+└── java-task-plan-agent.md          # Transforms goals into tasks
 
 cui-frontend-expert/agents/
 ├── js-solution-outline-agent.md           # Decomposes request into goals
-└── js-plan-agent.md            # Transforms goals into tasks
+└── js-task-plan-agent.md            # Transforms goals into tasks
 
 cui-plugin-development-tools/agents/
 ├── plugin-solution-outline-agent.md       # Decomposes request into goals
-└── plugin-plan-agent.md        # Transforms goals into tasks
+└── plugin-task-plan-agent.md        # Transforms goals into tasks
 ```
 
 ### Domain Agent Mapping
@@ -118,17 +118,17 @@ Plan-type skills declare their domain agents in structured frontmatter:
 ---
 domain:
   solution_outline_agent: cui-java-expert:java-solution-outline-agent
-  plan_agent: cui-java-expert:java-plan-agent
+  task_plan_agent: cui-java-expert:java-task-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
 ---
 ```
 
-| Plan Type | Solution Outline Agent | Plan Agent |
+| Plan Type | Solution Outline Agent | Task Plan Agent |
 |-----------|-------------|------------|
-| `java` | `cui-java-expert:java-solution-outline-agent` | `cui-java-expert:java-plan-agent` |
-| `javascript` | `cui-frontend-expert:js-solution-outline-agent` | `cui-frontend-expert:js-plan-agent` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-solution-outline-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
+| `java` | `cui-java-expert:java-solution-outline-agent` | `cui-java-expert:java-task-plan-agent` |
+| `javascript` | `cui-frontend-expert:js-solution-outline-agent` | `cui-frontend-expert:js-task-plan-agent` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-solution-outline-agent` | `cui-plugin-development-tools:plugin-task-plan-agent` |
 | `generic` | N/A | N/A (uses plan-refine-agent fallback) |
 
 ### Routing Flow
@@ -145,7 +145,7 @@ domain:
        ├─ Task: {domain.solution_outline_agent}
        │     └─ Analyzes request, creates GOAL files
        │
-       └─ Task: {domain.plan_agent}
+       └─ Task: {domain.task_plan_agent}
              └─ Reads goals, creates TASK files
 ```
 
@@ -250,11 +250,11 @@ The detail level ensures:
    Domain Agents (in expert bundles):
    ┌─────────────────────────────────────────────┐
    │ cui-java-expert: java-solution-outline-agent           │
-   │                  java-plan-agent            │
+   │                  java-task-plan-agent            │
    │ cui-frontend-expert: js-solution-outline-agent         │
-   │                      js-plan-agent          │
+   │                      js-task-plan-agent          │
    │ cui-plugin-development-tools: plugin-solution-outline  │
-   │                               plugin-plan   │
+   │                               plugin-task-plan   │
    └─────────────────────────────────────────────┘
 ```
 
@@ -296,7 +296,7 @@ Located in `plan-type-plugin/templates/` (internal to plan-type-plugin skill):
 | `command-task.md` | component.type = "command" | Command orchestration workflow |
 | `agent-task.md` | component.type = "agent" | Agent frontmatter workflow |
 
-**Note**: These templates are internal to plan-type-plugin. When the `plugin-plan-agent` is invoked:
+**Note**: These templates are internal to plan-type-plugin. When the `plugin-task-plan-agent` is invoked:
 1. It reads GOAL files from the plan directory
 2. Selects appropriate template based on component type
 3. Generates tasks and writes them via manage-tasks script

@@ -29,10 +29,10 @@
     "./skills/cui-javascript-unit-testing",
     "./skills/cui-jsdoc",
     "./skills/js-solution-outline",
-    "./skills/js-plan"
+    "./skills/js-task-plan"
   ],
   "agents": [
     "./agents/js-solution-outline-agent.md",
-    "./agents/js-plan-agent.md"
+    "./agents/js-task-plan-agent.md"
   ]
 }

@@ -64,7 +64,7 @@ DEFAULTS = {
         {"pattern": "*", "plan_type": "planning:plan-type-generic", "description": "Default"}
     ],
     "domain_agents": {
-        "planning:plan-type-generic": {"solution_outline_agent": None, "plan_agent": None}
+        "planning:plan-type-generic": {"solution_outline_agent": None, "task_plan_agent": None}
     },
     "defaults": {
         "create_pr": False,
@@ -141,12 +141,12 @@ def cmd_domain_agents(args) -> int:
     elif args.verb == 'set':
         plan_type = args.plan_type
         if plan_type not in domain_agents:
-            domain_agents[plan_type] = {"solution_outline_agent": None, "plan_agent": None}
+            domain_agents[plan_type] = {"solution_outline_agent": None, "task_plan_agent": None}
 
         if args.solution_outline_agent:
             domain_agents[plan_type]["solution_outline_agent"] = args.solution_outline_agent if args.solution_outline_agent != 'null' else None
-        if args.plan_agent:
-            domain_agents[plan_type]["plan_agent"] = args.plan_agent if args.plan_agent != 'null' else None
+        if args.task_plan_agent:
+            domain_agents[plan_type]["task_plan_agent"] = args.task_plan_agent if args.task_plan_agent != 'null' else None
 
         config['domain_agents'] = domain_agents
         save_config(config)
@@ -470,7 +470,7 @@ def cmd_custom_types(args) -> int:
             "name": args.name,
             "skill_path": args.skill_path,
             "solution_outline_agent": args.solution_outline_agent if args.solution_outline_agent != 'null' else None,
-            "plan_agent": args.plan_agent if args.plan_agent != 'null' else None
+            "task_plan_agent": args.task_plan_agent if args.task_plan_agent != 'null' else None
         }
         # Check for duplicates
         for ct in custom_types:
@@ -608,7 +608,7 @@ Examples:
     da_set = da_sub.add_parser('set', help='Set agents for plan-type')
     da_set.add_argument('--plan-type', required=True, help='Plan type (bundle:skill)')
     da_set.add_argument('--solution-outline-agent', help='Goals agent (bundle:agent or null)')
-    da_set.add_argument('--plan-agent', help='Plan agent (bundle:agent or null)')
+    da_set.add_argument('--task-plan-agent', help='Plan agent (bundle:agent or null)')
 
     da_sub.add_parser('list', help='List all domain agent mappings')
 
@@ -690,7 +690,7 @@ Examples:
     ct_add.add_argument('--name', required=True, help='Type name')
     ct_add.add_argument('--skill-path', required=True, help='Path to SKILL.md')
     ct_add.add_argument('--solution-outline-agent', help='Goals agent (or null)')
-    ct_add.add_argument('--plan-agent', help='Plan agent (or null)')
+    ct_add.add_argument('--task-plan-agent', help='Plan agent (or null)')
 
     ct_remove = ct_sub.add_parser('remove', help='Remove custom type')
     ct_remove.add_argument('--name', required=True, help='Type name')

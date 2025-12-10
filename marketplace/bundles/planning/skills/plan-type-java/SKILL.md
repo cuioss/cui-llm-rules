@@ -4,7 +4,7 @@ description: Java plan type for Maven/Gradle projects
 allowed-tools: Read, Bash
 domain:
   solution_outline_agent: cui-java-expert:java-solution-outline-agent
-  plan_agent: cui-java-expert:java-plan-agent
+  task_plan_agent: cui-java-expert:java-task-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
   standards:
@@ -30,7 +30,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 | Field | Value | Purpose |
 |-------|-------|---------|
 | `solution_outline_agent` | `cui-java-expert:java-solution-outline-agent` | Decomposes request into goals |
-| `plan_agent` | `cui-java-expert:java-plan-agent` | Creates tasks from goals |
+| `task_plan_agent` | `cui-java-expert:java-task-plan-agent` | Creates tasks from goals |
 | `verification_command` | `/builder:builder-build-and-fix` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
 | `standards` | Java core, JavaDoc, Unit testing | Skills to load |
@@ -74,7 +74,7 @@ Analyzes Java codebase and creates goals with:
 
 **Returns**: `{status, goal_count, solution_document, lessons_recorded}`
 
-### java-plan-agent
+### java-task-plan-agent
 
 Creates tasks with Java-specific steps:
 1. Create/modify implementation file at `{path}`

@@ -43,7 +43,7 @@ The `/plan-manage` command uses **skill-based routing**:
   │
   ├─ If domain.solution_outline_agent is NOT null:
   │    → Task: {skill.domain.solution_outline_agent}
-  │    → Task: {skill.domain.plan_agent}
+  │    → Task: {skill.domain.task_plan_agent}
   │
   └─ If domain.solution_outline_agent IS null (generic):
        → Task: plan-refine-agent

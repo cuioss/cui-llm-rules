@@ -96,7 +96,7 @@ The skill's `domain:` frontmatter contains:
 ```yaml
 domain:
   solution_outline_agent: cui-java-expert:java-solution-outline-agent
-  plan_agent: cui-java-expert:java-plan-agent
+  task_plan_agent: cui-java-expert:java-task-plan-agent
   verification_command: /builder:builder-build-and-fix
   pr_workflow: true
 ```
@@ -109,7 +109,7 @@ Task: {domain.solution_outline_agent}
   Input: plan_id={plan_id}
   Output: goals created
 
-Task: {domain.plan_agent}
+Task: {domain.task_plan_agent}
   Input: plan_id={plan_id}
   Output: tasks created
 ```
@@ -291,8 +291,8 @@ If you discover issues or improvements during execution, record them:
 | `planning:plan-init-agent` | Init phase execution |
 | `planning:plan-refine-agent` | Refine phase fallback (generic plans) |
 | `cui-java-expert:java-solution-outline-agent` | Java: Request → Goals |
-| `cui-java-expert:java-plan-agent` | Java: Goals → Tasks |
+| `cui-java-expert:java-task-plan-agent` | Java: Goals → Tasks |
 | `cui-frontend-expert:js-solution-outline-agent` | JavaScript: Request → Goals |
-| `cui-frontend-expert:js-plan-agent` | JavaScript: Goals → Tasks |
+| `cui-frontend-expert:js-task-plan-agent` | JavaScript: Goals → Tasks |
 | `cui-plugin-development-tools:plugin-solution-outline-agent` | Plugin: Request → Goals |
-| `cui-plugin-development-tools:plugin-plan-agent` | Plugin: Goals → Tasks |
+| `cui-plugin-development-tools:plugin-task-plan-agent` | Plugin: Goals → Tasks |

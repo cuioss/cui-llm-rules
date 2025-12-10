@@ -184,12 +184,12 @@ def test_derived_java_has_plan_components():
     java_bundle = next((d for d in derived if d['bundle'] == 'cui-java-expert'), None)
     assert java_bundle is not None, "Should find cui-java-expert in derived"
 
-    # Should have java-plan agent and skill
+    # Should have java-task-plan agent and skill
     agent_names = [a['name'] for a in java_bundle.get('agents', [])]
     skill_names = [s['name'] for s in java_bundle.get('skills', [])]
 
-    assert 'java-plan-agent' in agent_names, "Should have java-plan-agent"
-    assert 'java-plan' in skill_names, "Should have java-plan skill"
+    assert 'java-task-plan-agent' in agent_names, "Should have java-task-plan-agent"
+    assert 'java-task-plan' in skill_names, "Should have java-task-plan skill"
 
 
 def test_derived_includes_frontend_expert():

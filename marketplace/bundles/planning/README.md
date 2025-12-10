@@ -99,12 +99,12 @@ All plan-type skills implement:
 | Element | Description |
 |---------|-------------|
 | `configure` operation | Adds domain-specific fields to references.toon and finalize config |
-| `domain:` frontmatter | Declares solution_outline_agent, plan_agent, verification_command |
+| `domain:` frontmatter | Declares solution_outline_agent, task_plan_agent, verification_command |
 
 **Key Design**:
 - `configure` operation adds finalize configuration to config.toon
 - `domain:` frontmatter enables command-level routing to domain agents
-- Domain agents (solution_outline_agent, plan_agent) are invoked by `/plan-manage` command via Task tool
+- Domain agents (solution_outline_agent, task_plan_agent) are invoked by `/plan-manage` command via Task tool
 
 ## Skill-Based Domain Agent Routing
 
@@ -114,11 +114,11 @@ The refine phase uses **skill-based routing**: commands load plan-type skills an
 
 Each plan-type skill declares its domain agents in structured frontmatter:
 
-| Plan Type | Solution Outline Agent | Plan Agent |
+| Plan Type | Solution Outline Agent | Task Plan Agent |
 |-----------|-------------|------------|
-| `java` | `cui-java-expert:java-solution-outline-agent` | `cui-java-expert:java-plan-agent` |
-| `javascript` | `cui-frontend-expert:js-solution-outline-agent` | `cui-frontend-expert:js-plan-agent` |
-| `plugin-development` | `cui-plugin-development-tools:plugin-solution-outline-agent` | `cui-plugin-development-tools:plugin-plan-agent` |
+| `java` | `cui-java-expert:java-solution-outline-agent` | `cui-java-expert:java-task-plan-agent` |
+| `javascript` | `cui-frontend-expert:js-solution-outline-agent` | `cui-frontend-expert:js-task-plan-agent` |
+| `plugin-development` | `cui-plugin-development-tools:plugin-solution-outline-agent` | `cui-plugin-development-tools:plugin-task-plan-agent` |
 | `generic` | N/A (uses plan-refine-agent fallback) | N/A |
 
 ### Refine Flow
@@ -135,7 +135,7 @@ Each plan-type skill declares its domain agents in structured frontmatter:
    ├─ Task: {domain.solution_outline_agent}
    │     └─ Creates solution_outline.md with goals from request.md
    │
-   └─ Task: {domain.plan_agent}
+   └─ Task: {domain.task_plan_agent}
          └─ Creates TASK files from solution_outline.md goals
 ```
 
@@ -209,10 +209,10 @@ planning/
 ## Dependencies
 
 - **general-tools** - Script runner, file operations base
-- **cui-plugin-development-tools** - Plugin doctor, plugin-solution-outline-agent, plugin-plan-agent
+- **cui-plugin-development-tools** - Plugin doctor, plugin-solution-outline-agent, plugin-task-plan-agent
 - **builder** - Build execution (maven/npm)
-- **cui-java-expert** - java-solution-outline-agent, java-plan-agent, java-implement-agent
-- **cui-frontend-expert** - js-solution-outline-agent, js-plan-agent
+- **cui-java-expert** - java-solution-outline-agent, java-task-plan-agent, java-implement-agent
+- **cui-frontend-expert** - js-solution-outline-agent, js-task-plan-agent
 
 ## Installation
 

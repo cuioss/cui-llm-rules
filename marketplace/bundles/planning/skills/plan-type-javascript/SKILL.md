@@ -4,7 +4,7 @@ description: JavaScript plan type for npm/frontend projects
 allowed-tools: Read, Bash
 domain:
   solution_outline_agent: cui-frontend-expert:js-solution-outline-agent
-  plan_agent: cui-frontend-expert:js-plan-agent
+  task_plan_agent: cui-frontend-expert:js-task-plan-agent
   verification_command: /builder:builder-build-and-fix system=npm
   pr_workflow: true
   standards:
@@ -31,7 +31,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 | Field | Value | Purpose |
 |-------|-------|---------|
 | `solution_outline_agent` | `cui-frontend-expert:js-solution-outline-agent` | Decomposes request into goals |
-| `plan_agent` | `cui-frontend-expert:js-plan-agent` | Creates tasks from goals |
+| `task_plan_agent` | `cui-frontend-expert:js-task-plan-agent` | Creates tasks from goals |
 | `verification_command` | `/builder:builder-build-and-fix system=npm` | Build verification |
 | `pr_workflow` | `true` | Create PR after execution |
 | `standards` | JavaScript, JSDoc, Unit testing, Linting | Skills to load |
@@ -75,7 +75,7 @@ Analyzes JavaScript codebase and creates goals with:
 
 **Returns**: `{status, goal_count, solution_document, lessons_recorded}`
 
-### js-plan-agent
+### js-task-plan-agent
 
 Creates tasks with JavaScript-specific steps:
 
