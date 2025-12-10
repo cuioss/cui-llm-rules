@@ -25,6 +25,7 @@ Activate when:
 
 | Script | Notation |
 |--------|----------|
+| manage-plan-document | `planning:manage-plan-documents` |
 | manage-files | `planning:manage-files` |
 | manage-references | `planning:manage-references` |
 | manage-lessons | `planning:manage-lessons` |
@@ -126,46 +127,27 @@ The plan directory was created in Step 3 by `create-or-reference`. No additional
 
 ### Step 6: Write request.md
 
-Construct request.md content following this format:
-
-```markdown
-# Request: {derived_title}
-
-source: {description|lesson|issue}
-source_id: {lesson_id|issue_url|none}
-created: {ISO_timestamp}
-
-## Original Input
-
-{verbatim_content}
-
-## Context
-
-{extracted_context}
-```
-
-Write via manage-files using `--content` parameter:
+Create the request document via manage-plan-documents:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:manage-files write \
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  request create \
   --plan-id {plan_id} \
-  --file request.md \
-  --content "# Request: {derived_title}
-
-source: {description|lesson|issue}
-source_id: {lesson_id|issue_url|none}
-created: {ISO_timestamp}
-
-## Original Input
-
-{verbatim_content}
-
-## Context
-
-{extracted_context}"
+  --title "{derived_title}" \
+  --source {description|lesson|issue} \
+  --body "{verbatim_content}" \
+  --source-id "{lesson_id|issue_url}" \
+  --context "{extracted_context}"
 ```
 
-**Note**: The `--content` parameter supports multiline content. Do NOT use `--stdin` with shell heredocs.
+**Parameters:**
+- `--title`: Derived title from input
+- `--source`: One of `description`, `lesson`, or `issue`
+- `--body`: The verbatim original input content
+- `--source-id`: (optional) Lesson ID or issue URL if applicable
+- `--context`: (optional) Extracted context from lesson or issue metadata
+
+**Note**: The skill handles template rendering and timestamps automatically.
 
 ### Step 7: Initialize References
 
@@ -369,7 +351,8 @@ This skill is called by `planning:plan-init-agent`. The agent completes the full
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-files` | Create/reference plan directory, write request.md |
+| `planning:manage-plan-documents` | Write request.md (typed document) |
+| `planning:manage-files` | Create/reference plan directory |
 | `planning:manage-references` | Initialize references |
 | `planning:manage-log` | Log creation |
 | `planning:manage-lessons` | Read lesson (if source=lesson) |

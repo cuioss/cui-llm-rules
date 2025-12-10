@@ -56,7 +56,7 @@ These constraints apply EVEN IF skill loading fails:
 ```
 planning:manage-lifecycle:manage-lifecycle create --plan-id X --title "Y" --plan-type Z --phases a,b,c,d
 planning:manage-config:manage-config create --plan-id X
-planning:manage-files:manage-files write --plan-id X --file request.md --content "..."
+planning:manage-plan-documents:manage-plan-document request create --plan-id X --title "Y" --source Z --body "..."
 planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
 ```
 

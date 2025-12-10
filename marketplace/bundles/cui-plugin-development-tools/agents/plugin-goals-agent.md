@@ -59,7 +59,7 @@ These constraints apply EVEN IF skill loading fails:
 planning:manage-goals:manage-goal add --plan-id X --title "Y" --body "Z"
 planning:manage-tasks:manage-task add --plan-id X --goal GOAL-1 --title "Y" --description "Z" --steps "A" "B"
 planning:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
-planning:manage-files:manage-files read --plan-id X --file request.md
+planning:manage-plan-documents:manage-plan-document request read --plan-id X
 ```
 
 **CRITICAL**: Script name is SINGULAR (`manage-goal`, `manage-task`) even though skill name may be plural.

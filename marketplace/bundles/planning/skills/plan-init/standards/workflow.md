@@ -160,7 +160,8 @@ recovery: Use resume option or provide different plan_id
 
 | Script | Purpose |
 |--------|---------|
-| `planning:manage-files` | Create/reference plan directory, write request.md |
+| `planning:manage-plan-documents` | Write request.md (typed document) |
+| `planning:manage-files` | Create/reference plan directory |
 | `planning:manage-references` | Initialize references |
 | `planning:manage-log` | Log creation |
 | `planning:manage-lessons` | Read lesson content |

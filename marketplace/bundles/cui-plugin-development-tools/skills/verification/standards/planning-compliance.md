@@ -67,7 +67,8 @@ Examples:
 
 | File | Read Script | Write Script |
 |------|-------------|--------------|
-| `request.md` | `planning:manage-files:manage-files read --plan-id {id} --file request.md` | `planning:manage-files:manage-files write --plan-id {id} --file request.md` |
+| `request.md` | `planning:manage-plan-documents:manage-plan-document request read --plan-id {id}` | `planning:manage-plan-documents:manage-plan-document request create --plan-id {id} --title ... --source ... --body ...` |
+| `solution_outline.md` | `planning:manage-plan-documents:manage-plan-document solution read --plan-id {id}` | `planning:manage-plan-documents:manage-plan-document solution create --plan-id {id} --title ... --summary ... --goals ...` |
 | `lessons-learned/*.md` | `planning:manage-lessons:manage-lesson get --id {lesson_id}` | `planning:manage-lessons:manage-lesson add` |
 | Any plan file | `planning:manage-files:manage-files read --plan-id {id} --file {path}` | `planning:manage-files:manage-files write --plan-id {id} --file {path}` |
 
@@ -535,10 +536,10 @@ Some operations legitimately need direct access:
 
 ### Legitimate Exceptions
 
-1. **Initial request.md creation** - plan-init creates this file directly
-2. **Reading request.md** - reference document, read-only
-3. **Lessons learned** - standalone markdown files
-4. **Diagnostics/debugging** - when investigating issues with user approval
+1. **Lessons learned** - standalone markdown files accessed via manage-lessons skill
+2. **Diagnostics/debugging** - when investigating issues with user approval
+
+**Note**: `request.md` and `solution_outline.md` are now managed via `planning:manage-plan-documents` skill.
 
 ### Documenting Exceptions
 

@@ -24,7 +24,7 @@ Activate this skill when:
 - Listing plan contents
 - Checking if files exist
 
-**Note**: For domain-specific operations (config.toon, references.toon, status.toon), use the dedicated manage-* skills instead.
+**Note**: For typed plan documents (`request.md`, `solution_outline.md`), use `planning:manage-plan-documents` instead. For domain-specific files (config.toon, references.toon, status.toon), use the dedicated manage-* skills.
 
 ---
 
@@ -55,7 +55,7 @@ Read file content from a plan directory.
 ```bash
 python3 .plan/execute-script.py planning:manage-files:manage-files read \
   --plan-id {plan_id} \
-  --file request.md
+  --file notes.md
 ```
 
 **Output**: Raw file content (no wrapping)

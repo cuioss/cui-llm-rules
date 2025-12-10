@@ -26,9 +26,9 @@ Load plan context via manage-* scripts:
 
 ```bash
 # Read original request description
-python3 .plan/execute-script.py planning:manage-files:manage-files read \
-  --plan-id {plan_id} \
-  --file request.md
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  request read \
+  --plan-id {plan_id}
 
 # Read plan configuration
 python3 .plan/execute-script.py planning:manage-config:manage-config read \

@@ -25,9 +25,9 @@ allowed-tools: Read, Glob, Grep, Bash
 Load plan context via manage-* scripts:
 
 ```bash
-python3 .plan/execute-script.py planning:manage-files:manage-files read \
-  --plan-id {plan_id} \
-  --file request.md
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document \
+  request read \
+  --plan-id {plan_id}
 
 python3 .plan/execute-script.py planning:manage-config:manage-config read \
   --plan-id {plan_id}
@@ -359,7 +359,7 @@ If multiple components match:
 - `planning:manage-goals:manage-goal` - Create goals (add, findAll, get)
 - `planning:manage-lessons:manage-lesson` - Record lessons on issues (add)
 - `planning:manage-log:manage-work-log` - Log decisions (add, read)
-- `planning:manage-files:manage-files` - Read request.md (read)
+- `planning:manage-plan-documents:manage-plan-document` - Read request (request read)
 - `planning:manage-config:manage-config` - Read config (read)
 - `planning:manage-references:manage-references` - Read references (read)
 - `cui-plugin-development-tools:marketplace-inventory:scan-marketplace-inventory` - Inventory analysis

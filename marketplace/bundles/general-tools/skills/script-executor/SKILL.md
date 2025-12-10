@@ -26,8 +26,12 @@ Simplified notation: `{bundle}:{skill}`
 ## Examples
 
 ```bash
-# File operations
-python3 .plan/execute-script.py planning:manage-files:manage-files add --plan-id my-plan --file request.md
+# Document operations (typed documents)
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document request create --plan-id my-plan --title "My Task" --source description --body "Task details"
+python3 .plan/execute-script.py planning:manage-plan-documents:manage-plan-document request read --plan-id my-plan
+
+# File operations (generic files)
+python3 .plan/execute-script.py planning:manage-files:manage-files write --plan-id my-plan --file notes.md --content "..."
 
 # Build operations
 python3 .plan/execute-script.py builder:builder-maven-rules:maven execute --goals clean,verify

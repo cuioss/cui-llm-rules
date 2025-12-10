@@ -5,9 +5,12 @@ Generic file I/O operations for plan directories.
 Provides basic CRUD operations for any file within a plan directory.
 Uses file_ops for consistent path handling and atomic writes.
 
+NOTE: For typed documents (request.md, solution_outline.md), prefer using
+manage-plan-documents skill which provides validation and templating.
+
 Usage:
-    python3 manage-files.py read --plan-id my-plan --file request.md
-    python3 manage-files.py write --plan-id my-plan --file request.md --content "..."
+    python3 manage-files.py read --plan-id my-plan --file notes.md
+    python3 manage-files.py write --plan-id my-plan --file notes.md --content "..."
     python3 manage-files.py list --plan-id my-plan
     python3 manage-files.py exists --plan-id my-plan --file config.toon
     python3 manage-files.py remove --plan-id my-plan --file old-file.md
