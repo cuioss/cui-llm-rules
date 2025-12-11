@@ -6,13 +6,23 @@ Usage:
     python3 test/run-tests.py                    # Run all tests
     python3 test/run-tests.py test/pm-workflow/     # Run tests in directory
     python3 test/run-tests.py test/pm-workflow/plan-files/test_parse_plan.py  # Run single test
+
+Features:
+    - Centralized test fixture directory at .plan/temp/test-fixture/{timestamp}
+    - Automatic cleanup after test run
+    - Sets TEST_FIXTURE_DIR environment variable for tests
 """
 
+import os
+import shutil
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 TEST_ROOT = Path(__file__).parent
+PROJECT_ROOT = TEST_ROOT.parent
+TEST_FIXTURE_BASE = PROJECT_ROOT / '.plan' / 'temp' / 'test-fixture'
 
 
 def find_test_files(path: Path) -> list[Path]:
@@ -22,13 +32,48 @@ def find_test_files(path: Path) -> list[Path]:
     return sorted(path.rglob('test_*.py'))
 
 
-def run_test(test_file: Path) -> tuple[bool, str]:
-    """Run a single test file. Returns (success, output)."""
+def create_test_fixture_dir() -> Path:
+    """
+    Create a timestamped test fixture directory.
+
+    Returns:
+        Path to .plan/temp/test-fixture/{timestamp}
+    """
+    timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+    fixture_dir = TEST_FIXTURE_BASE / timestamp
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    return fixture_dir
+
+
+def cleanup_test_fixture_dir(fixture_dir: Path) -> None:
+    """
+    Remove the test fixture directory.
+
+    Args:
+        fixture_dir: Path to the fixture directory to remove
+    """
+    if fixture_dir.exists():
+        shutil.rmtree(fixture_dir, ignore_errors=True)
+
+
+def run_test(test_file: Path, fixture_dir: Path) -> tuple[bool, str]:
+    """
+    Run a single test file. Returns (success, output).
+
+    Args:
+        test_file: Path to the test file
+        fixture_dir: Path to the test fixture directory
+    """
+    env = os.environ.copy()
+    env['TEST_FIXTURE_DIR'] = str(fixture_dir)
+    env['PLAN_BASE_DIR'] = str(fixture_dir)  # Default for plan-based tests
+
     result = subprocess.run(
         [sys.executable, str(test_file)],
         capture_output=True,
         text=True,
-        cwd=TEST_ROOT.parent
+        cwd=TEST_ROOT.parent,
+        env=env
     )
     output = result.stdout + result.stderr
     return result.returncode == 0, output
@@ -53,6 +98,9 @@ def main():
         print(f"No test files found in: {target}")
         sys.exit(1)
 
+    # Create centralized test fixture directory
+    fixture_dir = create_test_fixture_dir()
+    print(f"Test fixture directory: {fixture_dir}")
     print(f"Running {len(test_files)} test file(s)...")
     print("=" * 60)
 
@@ -60,27 +108,33 @@ def main():
     failed = 0
     failed_tests = []
 
-    for test_file in test_files:
-        relative_path = test_file.relative_to(TEST_ROOT.parent)
-        success, output = run_test(test_file)
+    try:
+        for test_file in test_files:
+            relative_path = test_file.relative_to(TEST_ROOT.parent)
+            success, output = run_test(test_file, fixture_dir)
 
-        if success:
-            passed += 1
-            print(f"  \u2713 {relative_path}")
-        else:
-            failed += 1
-            failed_tests.append((relative_path, output))
-            print(f"  \u2717 {relative_path}")
+            if success:
+                passed += 1
+                print(f"  ✓ {relative_path}")
+            else:
+                failed += 1
+                failed_tests.append((relative_path, output))
+                print(f"  ✗ {relative_path}")
 
-    print("=" * 60)
-    print(f"Passed: {passed}, Failed: {failed}")
+        print("=" * 60)
+        print(f"Passed: {passed}, Failed: {failed}")
 
-    # Show failure details
-    if failed_tests:
-        print("\nFailure details:")
-        for path, output in failed_tests:
-            print(f"\n--- {path} ---")
-            print(output)
+        # Show failure details
+        if failed_tests:
+            print("\nFailure details:")
+            for path, output in failed_tests:
+                print(f"\n--- {path} ---")
+                print(output)
+
+    finally:
+        # Always cleanup the fixture directory
+        cleanup_test_fixture_dir(fixture_dir)
+        print(f"\nCleaned up: {fixture_dir}")
 
     sys.exit(0 if failed == 0 else 1)
 

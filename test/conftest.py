@@ -29,6 +29,7 @@ from unittest import TestCase
 TEST_ROOT = Path(__file__).parent
 PROJECT_ROOT = TEST_ROOT.parent
 MARKETPLACE_ROOT = PROJECT_ROOT / 'marketplace' / 'bundles'
+TEST_FIXTURE_BASE = PROJECT_ROOT / '.plan' / 'temp' / 'test-fixture'
 
 
 # =============================================================================
@@ -344,3 +345,90 @@ def load_fixture(fixture_path: Union[str, Path]) -> str:
         # Assume relative to test file's directory
         path = Path(os.getcwd()) / path
     return path.read_text()
+
+
+# =============================================================================
+# Plan Test Context
+# =============================================================================
+
+def get_test_fixture_dir() -> Path:
+    """
+    Get the test fixture directory.
+
+    When run via test/run-tests.py, uses the TEST_FIXTURE_DIR environment variable.
+    When run standalone, creates a directory in .plan/temp/test-fixture/.
+
+    Returns:
+        Path to the test fixture directory
+    """
+    env_dir = os.environ.get('TEST_FIXTURE_DIR')
+    if env_dir:
+        return Path(env_dir)
+
+    # Fallback for standalone execution
+    from datetime import datetime
+    timestamp = datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+    fixture_dir = TEST_FIXTURE_BASE / f"standalone-{timestamp}"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    return fixture_dir
+
+
+class PlanTestContext:
+    """
+    Context manager for tests that need PLAN_BASE_DIR.
+
+    Uses centralized test fixture directory instead of system temp.
+    When run via test/run-tests.py, the fixture directory is managed
+    by the runner and cleaned up automatically after all tests.
+
+    Usage:
+        with PlanTestContext(plan_id='my-plan') as ctx:
+            result = run_script(SCRIPT_PATH, 'add', '--plan-id', 'my-plan', ...)
+            # ctx.fixture_dir contains the base directory
+            # ctx.plan_dir contains the plan directory
+
+    Attributes:
+        fixture_dir: Base test fixture directory
+        plan_id: The plan identifier
+        plan_dir: Path to .../plans/{plan_id}
+    """
+
+    def __init__(self, plan_id: str = 'test-plan'):
+        """
+        Initialize the test context.
+
+        Args:
+            plan_id: Plan identifier (kebab-case)
+        """
+        self.plan_id = plan_id
+        self.fixture_dir: Optional[Path] = None
+        self.plan_dir: Optional[Path] = None
+        self._original_plan_base_dir: Optional[str] = None
+        self._is_standalone: bool = False
+
+    def __enter__(self) -> 'PlanTestContext':
+        """Set up the test context."""
+        self.fixture_dir = get_test_fixture_dir()
+        self._is_standalone = 'TEST_FIXTURE_DIR' not in os.environ
+
+        # Create plan directory structure
+        self.plan_dir = self.fixture_dir / 'plans' / self.plan_id
+        self.plan_dir.mkdir(parents=True, exist_ok=True)
+
+        # Set PLAN_BASE_DIR environment variable
+        self._original_plan_base_dir = os.environ.get('PLAN_BASE_DIR')
+        os.environ['PLAN_BASE_DIR'] = str(self.fixture_dir)
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Clean up the test context."""
+        # Restore original PLAN_BASE_DIR
+        if self._original_plan_base_dir is None:
+            os.environ.pop('PLAN_BASE_DIR', None)
+        else:
+            os.environ['PLAN_BASE_DIR'] = self._original_plan_base_dir
+
+        # Only cleanup if running standalone (not via run-tests.py)
+        if self._is_standalone and self.fixture_dir and self.fixture_dir.exists():
+            shutil.rmtree(self.fixture_dir, ignore_errors=True)

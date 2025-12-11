@@ -72,7 +72,7 @@ entries:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `timestamp` | Yes | ISO timestamp (UTC) |
-| `type` | Yes | Entry type: `decision`, `artifact`, `progress`, `error`, `outcome` |
+| `type` | Yes | Entry type: `decision`, `artifact`, `progress`, `error`, `outcome`, `finding` |
 | `phase` | Yes | Phase when entry was created |
 | `summary` | Yes | Brief description of work done |
 | `detail` | No | Additional context, reasoning, or error details |
@@ -86,6 +86,7 @@ entries:
 | `progress` | Log phase transitions or steps | "Starting refine phase" |
 | `error` | Log failures with context | "Skill load failed: plan-type-plugin not found" |
 | `outcome` | Log phase completion summaries | "Completed refine: 6 specs, 12 tasks" |
+| `finding` | Log discoveries during analysis | "Already migrated: agents use TOON format" |
 
 ---
 
@@ -102,7 +103,7 @@ python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
   --plan-id {plan_id} \
   --phase implement \
   --summary "Implemented JWT token generation" \
-  [--type decision|artifact|progress|error|outcome] \
+  [--type decision|artifact|progress|error|outcome|finding] \
   [--detail "Additional context or reasoning"]
 ```
 
@@ -113,7 +114,7 @@ python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
 | `--plan-id` | Yes | Plan identifier (kebab-case) |
 | `--phase` | Yes | Current phase (init, refine, execute, finalize) |
 | `--summary` | Yes | Brief description of work done |
-| `--type` | No | Entry type: `decision`, `artifact`, `progress`, `error`, `outcome` (default: `progress`) |
+| `--type` | No | Entry type: `decision`, `artifact`, `progress`, `error`, `outcome`, `finding` (default: `progress`) |
 | `--detail` | No | Additional context, reasoning, or error details |
 
 **Output** (TOON):

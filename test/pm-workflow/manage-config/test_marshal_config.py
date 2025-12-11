@@ -2,15 +2,12 @@
 """Tests for marshal-config.py script."""
 
 import json
-import os
-import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import run_script, TestRunner, get_script_path
+from conftest import run_script, TestRunner, get_script_path, PlanTestContext
 
 # Get script path
 SCRIPT_PATH = get_script_path('pm-workflow', 'manage-config', 'marshal-config.py')
@@ -25,29 +22,20 @@ from toon_parser import parse_toon
 # Test Context
 # =============================================================================
 
-class TestContext:
-    """Context manager for test with temp directory."""
+class TestContext(PlanTestContext):
+    """Extended context for marshal-config tests with marshal_path."""
 
     def __init__(self):
-        self.temp_dir = None
-        self.original_env = None
+        super().__init__(plan_id='marshal-test')
 
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        self.original_env = os.environ.get('PLAN_BASE_DIR')
-        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.original_env is None:
-            os.environ.pop('PLAN_BASE_DIR', None)
-        else:
-            os.environ['PLAN_BASE_DIR'] = self.original_env
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+    @property
+    def temp_dir(self) -> Path:
+        """Alias for fixture_dir for backward compatibility."""
+        return self.fixture_dir
 
     @property
     def marshal_path(self) -> Path:
-        return self.temp_dir / 'marshal.json'
+        return self.fixture_dir / 'marshal.json'
 
     def write_marshal(self, config: dict):
         """Write marshal.json with given config."""

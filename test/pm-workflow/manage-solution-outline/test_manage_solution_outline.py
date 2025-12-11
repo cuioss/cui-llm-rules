@@ -5,15 +5,12 @@ Tests for manage-solution-outline script.
 Solution outlines are written directly by agents, then validated via this script.
 """
 
-import os
-import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import run_script, TestRunner, get_script_path
+from conftest import run_script, TestRunner, get_script_path, PlanTestContext
 
 # Get script path
 SCRIPT_PATH = get_script_path('pm-workflow', 'manage-solution-outline', 'manage-solution-outline.py')
@@ -24,27 +21,8 @@ sys.path.insert(0, str(TOON_PARSER_DIR))
 from toon_parser import parse_toon
 
 
-class TestContext:
-    """Context manager for test setup/teardown."""
-
-    def __init__(self, plan_id='test-plan'):
-        self.plan_id = plan_id
-        self.temp_dir = None
-        self.plan_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir)
-        self.plan_dir = self.temp_dir / 'plans' / self.plan_id
-        self.plan_dir.mkdir(parents=True, exist_ok=True)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        import shutil
-        if self.temp_dir and self.temp_dir.exists():
-            shutil.rmtree(self.temp_dir)
-        if 'PLAN_BASE_DIR' in os.environ:
-            del os.environ['PLAN_BASE_DIR']
+# Alias for backward compatibility
+TestContext = PlanTestContext
 
 
 # Sample valid solution outline with ASCII diagram

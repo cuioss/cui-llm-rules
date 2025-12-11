@@ -4,12 +4,11 @@
 import os
 import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import run_script, TestRunner, get_script_path
+from conftest import run_script, TestRunner, get_script_path, PlanTestContext, get_test_fixture_dir
 
 # Get script path
 SCRIPT_PATH = get_script_path('pm-workflow', 'manage-files', 'manage-files.py')
@@ -20,37 +19,8 @@ sys.path.insert(0, str(TOON_PARSER_DIR))
 from toon_parser import parse_toon
 
 
-# =============================================================================
-# Test Context
-# =============================================================================
-
-class TestContext:
-    """Context manager for test with temp directory."""
-
-    def __init__(self, plan_id='test-plan'):
-        self.temp_dir = None
-        self.original_env = None
-        self.plan_id = plan_id
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        self.original_env = os.environ.get('PLAN_BASE_DIR')
-        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir)
-        # Create plan directory
-        plan_dir = self.temp_dir / 'plans' / self.plan_id
-        plan_dir.mkdir(parents=True, exist_ok=True)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.original_env is None:
-            os.environ.pop('PLAN_BASE_DIR', None)
-        else:
-            os.environ['PLAN_BASE_DIR'] = self.original_env
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-    @property
-    def plan_dir(self):
-        return self.temp_dir / 'plans' / self.plan_id
+# Alias for backward compatibility
+TestContext = PlanTestContext
 
 
 # =============================================================================
@@ -180,26 +150,37 @@ class TestContextEmpty:
     """Context manager for test WITHOUT pre-created plan directory."""
 
     def __init__(self):
-        self.temp_dir = None
-        self.original_env = None
+        self.fixture_dir = None
+        self._original_plan_base_dir = None
+        self._is_standalone = False
 
     def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        self.original_env = os.environ.get('PLAN_BASE_DIR')
-        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir)
+        self.fixture_dir = get_test_fixture_dir()
+        self._is_standalone = 'TEST_FIXTURE_DIR' not in os.environ
+
+        self._original_plan_base_dir = os.environ.get('PLAN_BASE_DIR')
+        os.environ['PLAN_BASE_DIR'] = str(self.fixture_dir)
         # Create plans directory but NOT the plan subdirectory
-        (self.temp_dir / 'plans').mkdir(parents=True, exist_ok=True)
+        (self.fixture_dir / 'plans').mkdir(parents=True, exist_ok=True)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.original_env is None:
+        if self._original_plan_base_dir is None:
             os.environ.pop('PLAN_BASE_DIR', None)
         else:
-            os.environ['PLAN_BASE_DIR'] = self.original_env
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+            os.environ['PLAN_BASE_DIR'] = self._original_plan_base_dir
+
+        # Only cleanup if running standalone
+        if self._is_standalone and self.fixture_dir and self.fixture_dir.exists():
+            shutil.rmtree(self.fixture_dir, ignore_errors=True)
+
+    @property
+    def temp_dir(self):
+        """Alias for backward compatibility."""
+        return self.fixture_dir
 
     def plan_dir(self, plan_id):
-        return self.temp_dir / 'plans' / plan_id
+        return self.fixture_dir / 'plans' / plan_id
 
 
 def test_create_or_reference_new_plan():

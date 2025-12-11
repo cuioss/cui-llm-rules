@@ -217,6 +217,68 @@ def test_parses_only():
     result.json()  # Just checks it parses, not content!
 ```
 
+## Plan Test Context
+
+For scripts that use `PLAN_BASE_DIR` (plan management scripts), use `PlanTestContext`:
+
+```python
+#!/usr/bin/env python3
+"""Tests for manage-config.py script."""
+
+import sys
+from pathlib import Path
+
+# Import shared infrastructure
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import run_script, TestRunner, get_script_path, PlanTestContext
+
+SCRIPT_PATH = get_script_path('pm-workflow', 'manage-config', 'manage-config.py')
+
+# Alias for backward compatibility (optional)
+TestContext = PlanTestContext
+
+def test_create_config():
+    """Test creating a config file."""
+    with PlanTestContext(plan_id='test-config') as ctx:
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'test-config',
+            '--plan-type', 'pm-workflow:plan-type-java'
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        # ctx.fixture_dir - base test directory
+        # ctx.plan_dir - path to plans/{plan_id}
+```
+
+### How It Works
+
+1. **Via `test/run-tests.py`**: Creates `.plan/temp/test-fixture/{timestamp}` once, passes to all tests via `TEST_FIXTURE_DIR` and `PLAN_BASE_DIR` env vars, cleans up after all tests complete.
+
+2. **Standalone execution**: Each `PlanTestContext` creates its own timestamped directory in `.plan/temp/test-fixture/standalone-{timestamp}` and cleans up when exiting the context.
+
+### PlanTestContext Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `fixture_dir` | Base test fixture directory (`.plan/temp/test-fixture/...`) |
+| `plan_id` | The plan identifier passed to constructor |
+| `plan_dir` | Path to `{fixture_dir}/plans/{plan_id}` |
+
+### Extending PlanTestContext
+
+For custom test requirements:
+
+```python
+class TestContextWithMarshal(PlanTestContext):
+    """Extended context with marshal.json path."""
+
+    def __init__(self):
+        super().__init__(plan_id='marshal-test')
+
+    @property
+    def marshal_path(self) -> Path:
+        return self.fixture_dir / 'marshal.json'
+```
+
 ## Test Fixtures
 
 **Location**: `test/{bundle}/{skill}/fixtures/`
@@ -306,6 +368,29 @@ runner = TestRunner()
 runner.add_tests([test_a, test_b, test_c])
 sys.exit(runner.run())
 ```
+
+### `conftest.PlanTestContext`
+
+Context manager for tests needing `PLAN_BASE_DIR`.
+
+**Constructor**:
+- `plan_id` - Plan identifier (default: 'test-plan')
+
+**Attributes**:
+- `fixture_dir` - Base test directory (`.plan/temp/test-fixture/...`)
+- `plan_id` - The plan identifier
+- `plan_dir` - Path to `{fixture_dir}/plans/{plan_id}`
+
+**Example**:
+```python
+with PlanTestContext(plan_id='my-plan') as ctx:
+    result = run_script(SCRIPT_PATH, '--plan-id', 'my-plan')
+    assert result.success
+```
+
+### `conftest.get_test_fixture_dir()`
+
+Get the test fixture directory. Uses `TEST_FIXTURE_DIR` env var when run via `test/run-tests.py`, otherwise creates a standalone directory.
 
 ## Test Quality Checklist
 

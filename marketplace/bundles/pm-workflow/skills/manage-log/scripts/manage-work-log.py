@@ -74,7 +74,7 @@ def cmd_add(args):
         sys.exit(1)
 
     # Validate entry type
-    valid_types = ['decision', 'artifact', 'progress', 'error', 'outcome']
+    valid_types = ['decision', 'artifact', 'progress', 'error', 'outcome', 'finding']
     entry_type = args.type or 'progress'
     if entry_type not in valid_types:
         output_toon({
@@ -172,6 +172,10 @@ def cmd_list(args):
 
 
 def main():
+    # Strip whitespace from arguments to handle extra spaces in invocation
+    # This prevents errors like 'list  --plan-id' being parsed as ['list', '', '--plan-id']
+    sys.argv = [arg.strip() for arg in sys.argv if arg.strip()]
+
     parser = argparse.ArgumentParser(
         description='Manage work-log.toon files'
     )
@@ -182,7 +186,7 @@ def main():
     add_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     add_parser.add_argument('--phase', required=True, help='Current phase')
     add_parser.add_argument('--summary', required=True, help='Work summary')
-    add_parser.add_argument('--type', choices=['decision', 'artifact', 'progress', 'error', 'outcome'],
+    add_parser.add_argument('--type', choices=['decision', 'artifact', 'progress', 'error', 'outcome', 'finding'],
                            help='Entry type (default: progress)')
     add_parser.add_argument('--detail', help='Additional context or reasoning (optional)')
     add_parser.set_defaults(func=cmd_add)

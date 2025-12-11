@@ -348,70 +348,34 @@ AskUserQuestion:
 
 ### Regenerate Executor
 
-1. Ensure temp directory exists:
+Use the dedicated generate-executor script:
+
 ```bash
-mkdir -p .plan/temp
+python3 marketplace/bundles/plan-marshall/skills/script-executor/scripts/generate-executor.py generate
 ```
 
-2. Scan marketplace for scripts and save to temp:
-```bash
-python3 marketplace/bundles/plan-marshall/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
-  --scope marketplace \
-  --resource-types scripts > .plan/temp/script-inventory.json
-```
-
-3. Generate executor from inventory (use inline Python to avoid temp file permission issues):
-```python
-import json
-
-# Read inventory
-with open('.plan/temp/script-inventory.json') as f:
-    data = json.load(f)
-
-# Build mappings
-mappings = {}
-for bundle in data.get('bundles', []):
-    for script in bundle.get('scripts', []):
-        notation = script.get('notation', '')
-        path = script.get('path_formats', {}).get('absolute', '')
-        if notation and path:
-            mappings[notation] = path
-
-# Read template
-with open('marketplace/bundles/plan-marshall/skills/script-executor/templates/execute-script.py.template') as f:
-    template = f.read()
-
-# Generate mappings string
-mappings_str = json.dumps(mappings, indent=4)
-
-# Replace placeholders
-import os
-executor_dir = os.path.abspath('marketplace/bundles/plan-marshall/skills/script-executor/scripts')
-output = template.replace('{{SCRIPT_MAPPINGS}}', mappings_str)
-output = output.replace('{{EXECUTION_LOG_DIR}}', executor_dir)
-
-# Write executor
-with open('.plan/execute-script.py', 'w') as f:
-    f.write(output)
-```
-
-4. Verify syntax:
+Verify syntax:
 ```bash
 python3 -m py_compile .plan/execute-script.py && echo "Executor syntax OK"
 ```
 
-**Output**: "Executor ready with N script mappings"
+**Output (TOON)**:
+```toon
+status	scripts_discovered	executor_generated	log_module_generated	logs_cleaned
+success	47	.plan/execute-script.py	.plan/execution_log.py	0
+```
 
 ### Clean Old Logs and Temp Files
 
-Remove old execution logs and temp files:
+Clean execution logs and temp files:
 
 ```bash
-# Clean logs older than 30 days
 python3 .plan/execute-script.py plan-marshall:script-executor:generate-executor cleanup --max-age-days 30
+```
 
-# Clean temp directory
-rm -rf .plan/temp/*
+Clean temp directory:
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall:cleanup-temp clean
 ```
 
 **NOTE**: The `.plan/temp/` directory is the default temp directory for ALL temporary files. It is covered by the existing `Write(.plan/**)` permission (avoiding permission prompts for `/tmp/`) and cleaned during maintenance.
