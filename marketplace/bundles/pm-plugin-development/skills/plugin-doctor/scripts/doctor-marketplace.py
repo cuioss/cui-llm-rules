@@ -323,8 +323,10 @@ def extract_issues_from_markdown_analysis(analysis: Dict, file_path: str, compon
 def extract_issues_from_coverage_analysis(coverage: Dict, file_path: str, component_type: str = "") -> List[Dict]:
     """Extract deterministic issues from tool coverage analysis.
 
-    NOTE: This function only extracts issues that can be determined structurally:
+    NOTE: This function extracts issues that can be determined structurally:
     - Rule 6 violations (Task declared in agent frontmatter)
+    - Rule 7 violations (Maven calls outside builder)
+    - Backup file patterns (quality issue)
 
     Tool usage analysis (missing/unused) is NOT done here - that requires
     semantic understanding and is delegated to LLM via tool-coverage-agent.
@@ -347,6 +349,30 @@ def extract_issues_from_coverage_analysis(coverage: Dict, file_path: str, compon
             "severity": "warning",
             "fixable": True,
             "description": "Agent declares Task tool (Rule 6)"
+        })
+
+    # Rule 7: Maven calls outside builder (only flag if not in builder bundle)
+    maven_calls = violations.get("maven_calls", [])
+    if maven_calls and "builder" not in file_path:
+        issues.append({
+            "type": "rule-7-violation",
+            "file": file_path,
+            "severity": "warning",
+            "fixable": False,
+            "description": f"Direct Maven usage (Rule 7) - {len(maven_calls)} call(s)",
+            "details": {"maven_calls": maven_calls}
+        })
+
+    # Backup file patterns (quality issue)
+    backup_patterns = violations.get("backup_file_patterns", [])
+    if backup_patterns:
+        issues.append({
+            "type": "backup-pattern",
+            "file": file_path,
+            "severity": "info",
+            "fixable": False,
+            "description": f"Backup file patterns found - {len(backup_patterns)} occurrence(s)",
+            "details": {"patterns": backup_patterns}
         })
 
     # NOTE: tool-not-declared and unused-tool-declared issues are NOT extracted here.
@@ -506,7 +532,8 @@ def extract_components_for_tool_analysis(analysis_results: List[Dict]) -> List[D
     """Extract components needing semantic tool coverage analysis by LLM."""
     components = []
     for result in analysis_results:
-        tc = result.get("coverage", {}).get("tool_coverage", {})
+        # Fix: coverage is stored under analysis.coverage, not result.coverage
+        tc = result.get("analysis", {}).get("coverage", {}).get("tool_coverage", {})
         if tc.get("needs_llm_analysis"):
             comp = result.get("component", {})
             components.append({

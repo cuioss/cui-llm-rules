@@ -808,14 +808,19 @@ Parse the JSON output to get:
 
 2. **Tool Coverage Analysis via Agents** (for items in `components_for_tool_analysis`):
 
-   For each component needing tool analysis, spawn `tool-coverage-agent`:
+   Spawn `tool-coverage-agent` for each component. **Use parallel spawning** for efficiency:
    ```
-   Task: tool-coverage-agent
-   Prompt: Analyze tool coverage for {file}
-     - file_path: {file}
-     - declared_tools: {declared_tools}
-     - component_type: {type}
+   # Spawn multiple agents in parallel (single message with multiple Task calls)
+   Task: tool-coverage-agent (file1)
+   Task: tool-coverage-agent (file2)
+   Task: tool-coverage-agent (file3)
+   ...
    ```
+
+   Each agent receives:
+   - file_path: {file}
+   - declared_tools: {declared_tools}
+   - component_type: {type}
 
    The agent semantically determines:
    - Which tools are actually USED (not just mentioned in docs)
@@ -828,7 +833,28 @@ Parse the JSON output to get:
    - "task=" parameter matched "Task"
    - Documentation about tools matched as usage
 
-3. **Aggregate agent results** and create findings.md with:
+3. **Aggregate results using TOON format**:
+
+   Use `templates/tool-coverage-results.toon` template to aggregate agent results:
+   ```toon
+   analysis_timestamp: 2025-12-11T10:30:00Z
+   total_components: 5
+
+   results[5]{file,type,bundle,declared_tools,used_tools,missing_tools,unused_tools,confidence}:
+   agents/foo.md,agent,pm-dev-java,"Read,Write","Read,Write",,Write,high
+   commands/bar.md,command,pm-workflow,"Skill,Read","Skill,Read,Bash",,Bash,medium
+   ...
+
+   summary:
+     components_analyzed: 5
+     with_missing_tools: 1
+     with_unused_tools: 2
+     false_positives_detected: 3
+   ```
+
+   **Why TOON?** Uniform arrays of analysis results achieve ~50% token reduction vs JSON.
+
+4. **Create findings.md** with:
    - Executive summary with statistics
    - Bundle-by-bundle analysis
    - Issue categorization:
@@ -836,10 +862,10 @@ Parse the JSON output to get:
      - **False Positive**: Rule violations that are intentional
      - **Intentional**: Design decisions (e.g., Task tool for orchestration)
      - **Needs Review**: Actual issues requiring attention
-   - Tool coverage findings from agents
+   - Tool coverage findings from aggregated TOON
    - Recommendations for manual review
 
-4. **Write findings.md**:
+5. **Write findings.md**:
    ```
    Write: {findings_file}
    ```
@@ -983,6 +1009,10 @@ After Phase 1 creates the report directory and JSON, the LLM:
 ### Assets (assets/)
 
 - `fix-templates.json` - Fix templates and rules
+
+### Templates (templates/)
+
+- `tool-coverage-results.toon` - TOON template for aggregating tool-coverage-agent results
 
 ---
 
