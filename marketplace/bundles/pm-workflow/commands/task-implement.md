@@ -1,6 +1,7 @@
 ---
 name: task-implement
 description: Implement GitHub issues or standalone tasks with full verification
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task, AskUserQuestion
 ---
 
 # Task Implementation Command
@@ -9,7 +10,7 @@ Implement tasks through goal-based workflow with automatic mode selection and ve
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-Record improvements: `Skill: plan-marshall:manage-lessons-learned` with component `{type: "command", name: "task-implement", bundle: "pm-workflow"}`
+Record improvements: `Skill: plan-marshall:lessons-learned` with component `{type: "command", name: "task-implement", bundle: "pm-workflow"}`
 
 ## PARAMETERS
 

@@ -25,7 +25,7 @@ cui-llm-rules/
 │       ├── pm-plugin-development/  # Plugin creation toolkit
 │       └── pm-requirements/        # Requirements engineering
 ├── test/                           # Python pytest tests for scripts
-├── target/                         # Generated files and logs (gitignored)
+├── .plan/                          # Planning and temp files (gitignored)
 └── .claude/                        # Project-level Claude Code configuration
 ```
 
@@ -158,9 +158,19 @@ python3 test/run-tests.py test/planning/plan-files/test_parse_plan.py  # single 
 
 ### Development Notes
 
-- Use `target/` directory for generated files and temporary outputs
+- Use `.plan/temp/` for ALL temporary and generated files (covered by `Write(.plan/**)` permission - avoids permission prompts)
 - Use proper tools (Edit, Read, Write) instead of shell commands (echo, cat)
 - Use `gh` tool for GitHub access, not MCP
+
+### Plugin Cache Sync
+
+When modifying plugin source files (skills, agents, commands), changes won't take effect until the plugin cache is updated. After editing files in `marketplace/bundles/`, copy them to the cache:
+
+```bash
+cp marketplace/bundles/{bundle}/skills/{skill}/SKILL.md ~/.claude/plugins/cache/plan-marshall/{bundle}/1.0.0/skills/{skill}/SKILL.md
+```
+
+Alternatively, run `/plan-marshall` → Maintenance → Regenerate Executor to rebuild the entire cache.
 
 ## Integration Points
 

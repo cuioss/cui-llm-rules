@@ -39,7 +39,7 @@ python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketp
 
 **Direct execution from marketplace checkout (bootstrap only - before executor exists):**
 ```bash
-python3 marketplace/bundles/plan-marshall-core/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py --scope marketplace
+python3 marketplace/bundles/plan-marshall/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py --scope marketplace
 ```
 
 The script will:

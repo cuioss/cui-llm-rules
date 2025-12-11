@@ -1,6 +1,7 @@
 ---
 name: doc-doctor
 description: Diagnose documentation issues (format, links, content)
+allowed-tools: Skill, Read, Glob, Grep, Bash
 ---
 
 # Documentation Doctor Command

@@ -1,4 +1,5 @@
 ---
+name: gradle-builder
 model: haiku
 tools:
   - Glob

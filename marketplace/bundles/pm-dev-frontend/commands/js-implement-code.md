@@ -1,6 +1,7 @@
 ---
 name: js-implement-code
 description: Self-contained command for JavaScript code implementation with verification and iteration
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
 # JavaScript Implement Code Command
@@ -11,7 +12,7 @@ Self-contained command that implements JavaScript code with full standards compl
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "js-implement-code", bundle: "pm-dev-frontend"}`
    - Category: bug | improvement | pattern | anti-pattern

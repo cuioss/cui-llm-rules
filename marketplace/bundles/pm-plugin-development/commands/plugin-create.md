@@ -1,6 +1,7 @@
 ---
 name: plugin-create
 description: Create new marketplace component (agent, command, skill, or bundle)
+allowed-tools: Skill, Read, Write, Edit, Glob, AskUserQuestion
 ---
 
 # Create Marketplace Component

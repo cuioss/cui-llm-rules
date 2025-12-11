@@ -1,6 +1,7 @@
 ---
 name: js-refactor-code
 description: Execute systematic JavaScript refactoring with standards compliance verification
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
 # CUI JavaScript Refactor Command
@@ -11,7 +12,7 @@ Orchestrates systematic JavaScript code refactoring and maintenance workflow wit
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "js-refactor-code", bundle: "pm-dev-frontend"}`
    - Category: bug | improvement | pattern | anti-pattern

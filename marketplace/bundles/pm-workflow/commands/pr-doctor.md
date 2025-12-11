@@ -1,6 +1,7 @@
 ---
 name: pr-doctor
 description: Diagnose and fix PR issues (build, reviews, Sonar)
+allowed-tools: Skill, Read, Edit, Glob, Grep, Bash, Task
 ---
 
 # PR Doctor Command
@@ -9,7 +10,7 @@ Diagnose and fix pull request issues with parameterized checks.
 
 ## CONTINUOUS IMPROVEMENT RULE
 
-Record improvements: `Skill: plan-marshall:manage-lessons-learned` with component `{type: "command", name: "pr-doctor", bundle: "pm-workflow"}`
+Record improvements: `Skill: plan-marshall:lessons-learned` with component `{type: "command", name: "pr-doctor", bundle: "pm-workflow"}`
 
 ## PARAMETERS
 

@@ -1,6 +1,7 @@
 ---
 name: doc-maintain
 description: Maintain documentation (sync, cleanup, update)
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash
 ---
 
 # Documentation Maintain Command

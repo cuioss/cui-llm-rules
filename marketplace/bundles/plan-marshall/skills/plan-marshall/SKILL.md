@@ -1,6 +1,6 @@
 ---
 name: plan-marshall
-description: Project configuration wizard for planning system. Manages executor generation, permissions, build systems, and plan-types.
+description: Project configuration wizard for planning system. Manages executor generation, health checks, build systems, and plan-types.
 allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 ---
 
@@ -8,13 +8,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 
 **EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin with Step 0 to determine mode and route to the appropriate workflow.
 
-Project configuration wizard for the planning system. Handles executor generation, permission configuration, build system detection, and plan-type management.
+Project configuration wizard for the planning system. Handles executor generation, health checks, build system detection, and plan-type management.
 
 ## What This Skill Provides
 
 **Wizard Mode**: Sequential setup for new projects (executor generation, marshal.json init, build detection, plan-types)
 
-**Menu Mode**: Interactive maintenance for returning users (regenerate executor, permissions, build config, plan-types)
+**Menu Mode**: Interactive maintenance for returning users (regenerate executor, health check, configuration)
 
 ## When to Activate This Skill
 
@@ -97,6 +97,24 @@ entries_added	2
 | `unchanged` | Planning entries already present |
 
 **NOTE**: `execute-script.py` is NOT tracked because it contains local absolute paths and must be regenerated per-machine.
+
+### Step 1b: Update Project Documentation
+
+If `CLAUDE.md` exists, ensure it documents `.plan/temp/` usage:
+
+```bash
+# Check if CLAUDE.md exists and needs .plan/temp documentation
+if [ -f "CLAUDE.md" ]; then
+  grep -q "\.plan/temp" CLAUDE.md || echo "CLAUDE.md needs .plan/temp documentation"
+fi
+```
+
+If missing, add to the Development Notes section:
+```
+- Use `.plan/temp/` for ALL temporary files (covered by `Write(.plan/**)` permission - avoids permission prompts)
+```
+
+If `agents.md` exists, add similar documentation to the Tool Usage section.
 
 ### Step 2: Generate Executor
 
@@ -283,24 +301,18 @@ Display menu when both executor and marshal.json exist.
 
 ```
 AskUserQuestion:
-  question: "What can I do for you?"
+  question: "What would you like to do?"
   options:
     - label: "1. Maintenance"
-      description: "Regenerate executor, update mappings, clean logs"
+      description: "Regenerate executor, clean logs"
       value: "maintenance"
-    - label: "2. Permissions"
-      description: "Update global/project permissions, sync wildcards"
-      value: "permissions"
-    - label: "3. Build System"
-      description: "Detect and configure build systems"
-      value: "build"
-    - label: "4. Plan-Types"
-      description: "Add/remove plan-types, define custom types"
-      value: "plan-types"
-    - label: "5. Full Reconfigure"
-      description: "Run first-run wizard again"
-      value: "wizard"
-    - label: "6. Quit"
+    - label: "2. Health Check"
+      description: "Verify setup, diagnose issues"
+      value: "health-check"
+    - label: "3. Configuration"
+      description: "Build systems, plan-types"
+      value: "configuration"
+    - label: "4. Quit"
       description: "Exit plan-marshall"
       value: "quit"
 ```
@@ -309,96 +321,264 @@ AskUserQuestion:
 | Selection | Action |
 |-----------|--------|
 | maintenance | Execute "Menu Option: Maintenance", then **return to menu** |
-| permissions | Execute "Menu Option: Permissions", then **return to menu** |
-| build | Execute "Menu Option: Build System", then **return to menu** |
-| plan-types | Execute "Menu Option: Plan-Types", then **return to menu** |
-| wizard | Execute "First-Run Wizard", then **return to menu** |
+| health-check | Execute "Menu Option: Health Check", then **return to menu** |
+| configuration | Execute "Menu Option: Configuration", then **return to menu** |
 | quit | Output "Good bye!" and **stop execution** |
 
 ---
 
 ## Menu Option: Maintenance
 
+Sub-menu for maintenance operations.
+
+```
+AskUserQuestion:
+  question: "Which maintenance operation?"
+  options:
+    - label: "Regenerate Executor"
+      description: "Rebuild executor with fresh script mappings"
+      value: "regenerate"
+    - label: "Clean Old Logs"
+      description: "Remove execution logs older than 30 days"
+      value: "clean-logs"
+    - label: "Back"
+      description: "Return to main menu"
+      value: "back"
+```
+
 ### Regenerate Executor
 
+1. Ensure temp directory exists:
+```bash
+mkdir -p .plan/temp
+```
+
+2. Scan marketplace for scripts and save to temp:
 ```bash
 python3 marketplace/bundles/plan-marshall/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
   --scope marketplace \
-  --resource-types scripts
+  --resource-types scripts > .plan/temp/script-inventory.json
 ```
 
-Regenerate executor file with fresh mappings.
+3. Generate executor from inventory (use inline Python to avoid temp file permission issues):
+```python
+import json
 
-### Update Script Mappings
+# Read inventory
+with open('.plan/temp/script-inventory.json') as f:
+    data = json.load(f)
 
-Same as regenerate but incremental - only add new scripts.
+# Build mappings
+mappings = {}
+for bundle in data.get('bundles', []):
+    for script in bundle.get('scripts', []):
+        notation = script.get('notation', '')
+        path = script.get('path_formats', {}).get('absolute', '')
+        if notation and path:
+            mappings[notation] = path
 
-### Clean Old Logs
+# Read template
+with open('marketplace/bundles/plan-marshall/skills/script-executor/templates/execute-script.py.template') as f:
+    template = f.read()
+
+# Generate mappings string
+mappings_str = json.dumps(mappings, indent=4)
+
+# Replace placeholders
+import os
+executor_dir = os.path.abspath('marketplace/bundles/plan-marshall/skills/script-executor/scripts')
+output = template.replace('{{SCRIPT_MAPPINGS}}', mappings_str)
+output = output.replace('{{EXECUTION_LOG_DIR}}', executor_dir)
+
+# Write executor
+with open('.plan/execute-script.py', 'w') as f:
+    f.write(output)
+```
+
+4. Verify syntax:
+```bash
+python3 -m py_compile .plan/execute-script.py && echo "Executor syntax OK"
+```
+
+**Output**: "Executor ready with N script mappings"
+
+### Clean Old Logs and Temp Files
+
+Remove old execution logs and temp files:
 
 ```bash
+# Clean logs older than 30 days
 python3 .plan/execute-script.py plan-marshall:script-executor:generate-executor cleanup --max-age-days 30
+
+# Clean temp directory
+rm -rf .plan/temp/*
+```
+
+**NOTE**: The `.plan/temp/` directory is the default temp directory for ALL temporary files. It is covered by the existing `Write(.plan/**)` permission (avoiding permission prompts for `/tmp/`) and cleaned during maintenance.
+
+### Update Project Documentation (if needed)
+
+Check if project docs need `.plan/temp/` documentation:
+
+```bash
+# Check CLAUDE.md
+if [ -f "CLAUDE.md" ] && ! grep -q "\.plan/temp" CLAUDE.md; then
+  echo "CLAUDE.md needs .plan/temp documentation"
+fi
+
+# Check agents.md
+if [ -f "agents.md" ] && ! grep -q "\.plan/temp" agents.md; then
+  echo "agents.md needs .plan/temp documentation"
+fi
+```
+
+If missing, add to the appropriate section:
+```
+- Use `.plan/temp/` for ALL temporary files (covered by `Write(.plan/**)` permission - avoids permission prompts)
 ```
 
 ---
 
-## Menu Option: Permissions
+## Menu Option: Health Check
 
-### Step 1: Diagnose Permissions (always run first)
+Verify the planning system setup and diagnose issues. Run all checks and report results.
 
-**Detect redundant permissions** (local duplicates of global):
+### Step 1: Verify Executor
+
+Check executor exists and has correct permission:
+
 ```bash
-python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-doctor detect-redundant --scope both
+# Check executor file exists
+test -f .plan/execute-script.py && echo "Executor: OK" || echo "Executor: MISSING"
+
+# Verify executor permission in global settings
+grep -q "Bash(python3 .plan/execute-script.py:\*)" ~/.claude/settings.json && \
+  echo "Executor permission: OK" || echo "Executor permission: MISSING"
 ```
 
-**Detect suspicious permissions** in global settings:
+If executor missing: Offer to regenerate via Maintenance menu.
+If permission missing: Auto-fix with:
 ```bash
-python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-doctor detect-suspicious --scope global
+python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync ensure-executor --target global
 ```
 
-**Detect suspicious permissions** in project settings:
-```bash
-python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-doctor detect-suspicious --scope project
-```
+### Step 2: Verify Plugin Wildcards
 
-### Step 2: Apply Fixes
-
-**Apply safe fixes** to global settings:
-```bash
-python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix apply-fixes --scope global
-```
-
-**Apply safe fixes** to project settings:
-```bash
-python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix apply-fixes --scope project
-```
-
-### Step 3: Manual Operations (if needed)
-
-**Add permission** (use `--target global` or `--target project`):
-```bash
-python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix add --target global --permission "Skill(bundle:*)"
-```
-
-**Remove permission** (use `--target global` or `--target project`):
-```bash
-python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix remove --target project --permission "Edit(.plan/**)"
-```
-
-**Note**: The `remove` and `add` commands use `--target`, while `apply-fixes` uses `--scope`.
-
-### Sync Wildcards
-
-Ensure marketplace wildcards exist in global settings:
+Check that enabled plugins have corresponding Skill/SlashCommand wildcards:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix ensure-wildcards \
   --settings ~/.claude/settings.json \
-  --marketplace-json marketplace/.claude-plugin/marketplace.json
+  --marketplace-json marketplace/.claude-plugin/marketplace.json \
+  --dry-run
+```
+
+**Interpret results**:
+- `added: []` → All wildcards present ✓
+- `added: [...]` → Missing wildcards, offer to add them
+
+If missing wildcards found, ask user:
+```
+AskUserQuestion:
+  question: "Found {N} missing plugin wildcards. Add them?"
+  options:
+    - label: "Yes"
+      description: "Add missing wildcards to global settings"
+      value: "yes"
+    - label: "No"
+      description: "Skip (may cause permission prompts)"
+      value: "no"
+```
+
+If yes, run without `--dry-run`.
+
+### Step 3: Check for Stale Permissions
+
+Detect permissions for bundles that no longer exist:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-doctor detect-redundant --scope both
+```
+
+Report any redundant or stale permissions found.
+
+### Step 4: Summary
+
+Output health check summary:
+
+```toon
+status: success
+operation: health_check
+
+executor:
+  exists: true
+  permission: true
+wildcards:
+  total: 16
+  missing: 0
+redundant_permissions: 0
+suspicious_permissions: 0
+
+overall: HEALTHY
+```
+
+Or if issues found:
+
+```toon
+status: warning
+operation: health_check
+
+executor:
+  exists: true
+  permission: false
+wildcards:
+  total: 16
+  missing: 2
+redundant_permissions: 3
+
+issues:
+  - Executor permission missing in global settings
+  - 2 plugin wildcards missing
+  - 3 redundant permissions in project settings
+
+fixes_available: true
 ```
 
 ---
 
-## Menu Option: Build System
+## Menu Option: Configuration
+
+Sub-menu for build systems and plan-types configuration.
+
+```
+AskUserQuestion:
+  question: "What would you like to configure?"
+  options:
+    - label: "Build Systems"
+      description: "Detect and configure Maven/Gradle/npm"
+      value: "build"
+    - label: "Plan-Types"
+      description: "Add/remove plan-types, define custom types"
+      value: "plan-types"
+    - label: "Full Reconfigure"
+      description: "Run first-run wizard again"
+      value: "wizard"
+    - label: "Back"
+      description: "Return to main menu"
+      value: "back"
+```
+
+**Routing**:
+| Selection | Action |
+|-----------|--------|
+| build | Execute "Configuration: Build System" |
+| plan-types | Execute "Configuration: Plan-Types" |
+| wizard | Execute "First-Run Wizard" |
+| back | Return to main menu |
+
+---
+
+## Configuration: Build System
 
 ### Detect Build Systems
 
@@ -424,7 +604,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config plan-ty
 
 ---
 
-## Menu Option: Plan-Types
+## Configuration: Plan-Types
 
 ### Add/Remove Plan-Types
 

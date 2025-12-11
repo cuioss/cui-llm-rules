@@ -1,6 +1,7 @@
 ---
+name: builder-gradle-rules
 description: Gradle build execution, output parsing, and issue routing for CUI projects
-allowed_tools:
+allowed-tools:
   - Read
   - Grep
   - Bash(./gradlew:*)

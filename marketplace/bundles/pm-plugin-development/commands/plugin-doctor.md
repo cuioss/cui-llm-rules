@@ -1,6 +1,7 @@
 ---
 name: plugin-doctor
 description: Diagnose and fix quality issues in marketplace components
+allowed-tools: Skill, Read, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 # Doctor Marketplace Components

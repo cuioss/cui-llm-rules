@@ -1,6 +1,7 @@
 ---
 name: doc-create
 description: Create new documentation from templates
+allowed-tools: Skill, Read, Write, Glob
 ---
 
 # Documentation Create Command

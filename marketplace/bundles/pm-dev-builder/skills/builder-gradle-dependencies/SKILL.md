@@ -1,6 +1,7 @@
 ---
+name: builder-gradle-dependencies
 description: Gradle dependency maintenance, version catalog management, and build quality verification
-allowed_tools:
+allowed-tools:
   - Read
   - Grep
   - Glob

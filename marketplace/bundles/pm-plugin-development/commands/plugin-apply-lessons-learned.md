@@ -1,6 +1,7 @@
 ---
 name: plugin-apply-lessons-learned
 description: Apply accumulated lessons learned to component documentation
+allowed-tools: Skill, Read, Edit, Glob, Bash
 ---
 
 # Apply Lessons Learned

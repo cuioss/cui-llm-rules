@@ -1,6 +1,7 @@
 ---
 name: java-enforce-logrecords
 description: Enforce CUI logging standards by validating LogRecord usage, testing coverage, and identifier organization
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
 # Log Record Enforcer Command

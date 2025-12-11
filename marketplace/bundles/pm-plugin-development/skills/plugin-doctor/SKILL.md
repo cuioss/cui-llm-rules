@@ -69,7 +69,7 @@ Each workflow performs the complete cycle: discover → analyze → categorize �
 | doctor-commands | `commands-guide.md` | `fix-catalog.md` |
 | doctor-skills | `skills-guide.md` | `fix-catalog.md` |
 | doctor-metadata | `metadata-guide.md` | `fix-catalog.md` |
-| doctor-scripts | `plugin-architecture:script-standards.md` | `fix-catalog.md` |
+| doctor-scripts | `scripts-guide.md` | `fix-catalog.md` |
 
 **Context Efficiency**: ~800 lines per workflow vs ~4,000 lines if loading everything.
 
@@ -790,6 +790,50 @@ Generate comprehensive report:
 | `fix.py` | `categorize` | **EXECUTE** | Categorize as safe/risky |
 | `fix.py` | `apply` | **EXECUTE** | Apply single fix with backup |
 | `fix.py` | `verify` | **EXECUTE** | Verify fix resolved issue |
+| `doctor-marketplace.py` | `scan` | **EXECUTE** | Batch discovery of all marketplace components |
+| `doctor-marketplace.py` | `analyze` | **EXECUTE** | Batch analysis of all components for issues |
+| `doctor-marketplace.py` | `fix` | **EXECUTE** | Auto-apply safe fixes across marketplace |
+| `doctor-marketplace.py` | `report` | **EXECUTE** | Generate comprehensive report for LLM review |
+
+#### Hybrid Batch Processing (doctor-marketplace.py)
+
+The `doctor-marketplace.py` script provides Phase 1 of the hybrid doctor workflow for full marketplace operations:
+
+**Phase 1 (Script - Deterministic)**:
+```bash
+# Scan entire marketplace
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace scan
+
+# Analyze all components
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace analyze
+
+# Preview safe fixes (dry run)
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace fix --dry-run
+
+# Apply safe fixes
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace fix
+
+# Generate report for LLM review (default: .plan/temp/doctor-marketplace-report-YYYYMMDD-HHMMSS.json)
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report
+
+# Or specify custom output path
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report --output .plan/temp/custom-report.json
+```
+
+**Report Output**: Reports are always written to `.plan/temp/` directory with timestamped filenames by default (e.g., `doctor-marketplace-report-20251211-143022.json`). Use `--output` to specify a custom path.
+
+**Phase 2 (LLM - Semantic)**:
+After Phase 1 generates the report, the LLM processes:
+- Risky fixes (require semantic judgment)
+- Complex refactoring recommendations
+- Architectural improvement suggestions
+
+**Workflow for `/plugin-doctor marketplace`**:
+1. Run `doctor-marketplace scan` to discover components
+2. Run `doctor-marketplace analyze` to find issues
+3. Run `doctor-marketplace fix` to auto-apply safe fixes
+4. Run `doctor-marketplace report` to generate LLM review items
+5. LLM processes remaining risky/unfixable issues
 
 ### References (references/)
 

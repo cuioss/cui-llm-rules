@@ -1,6 +1,7 @@
 ---
 name: plugin-maintain
 description: Maintain marketplace health through updates and refactoring
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, WebFetch
 ---
 
 # Maintain Marketplace

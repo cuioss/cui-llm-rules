@@ -1,6 +1,7 @@
 ---
 name: java-optimize-quarkus-native
 description: Systematic Quarkus native image optimization with reflection registration and performance improvements
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
 # CUI Quarkus Native Optimize Command
@@ -11,7 +12,7 @@ Orchestrates systematic Quarkus native image optimization workflow with focus on
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "java-optimize-quarkus-native", bundle: "pm-dev-java"}`
    - Category: bug | improvement | pattern | anti-pattern

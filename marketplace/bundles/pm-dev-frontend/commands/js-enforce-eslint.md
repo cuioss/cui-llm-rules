@@ -1,6 +1,7 @@
 ---
 name: js-enforce-eslint
 description: Enforce ESLint standards by fixing violations systematically
+allowed-tools: Skill, Read, Edit, Glob, Grep, Bash
 ---
 
 # CUI ESLint Enforce Command
@@ -11,7 +12,7 @@ Orchestrates systematic ESLint violation fixing workflow with standards complian
 
 If you discover issues or improvements during execution, record them:
 
-1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
+1. **Activate skill**: `Skill: plan-marshall:lessons-learned`
 2. **Record lesson** with:
    - Component: `{type: "command", name: "js-enforce-eslint", bundle: "pm-dev-frontend"}`
    - Category: bug | improvement | pattern | anti-pattern

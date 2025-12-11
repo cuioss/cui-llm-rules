@@ -15,7 +15,7 @@ cui-llm-rules/
 │   │   └── marketplace.json        # Master marketplace configuration
 │   └── bundles/                    # 8 production bundles
 ├── test/                           # Python pytest tests for scripts
-├── target/                         # Generated files (gitignored)
+├── .plan/                          # Planning and temp files (gitignored)
 └── .claude/                        # Project-level Claude Code configuration
 ```
 
@@ -112,7 +112,7 @@ Use conventional commit format:
 - Document current state only, not transitional information
 - Use cross-references instead of duplicating content
 - Ensure blank line before lists in AsciiDoc
-- Use `target/` directory for generated or temporary files
+- Use `.plan/temp/` for generated or temporary files
 
 ## Tool Usage
 
@@ -122,7 +122,7 @@ Use conventional commit format:
 - **File search**: Use Glob tool (not `find` or `ls`)
 - **Content search**: Use Grep tool (not `grep` or `rg` commands)
 - **GitHub access**: Use `gh` CLI tool (not GitHub MCP)
-- **Generated files**: Use `target/` directory (not temp or working directory)
+- **Temporary files**: Use `.plan/temp/` for ALL temp files (covered by `Write(.plan/**)` permission - avoids permission prompts)
 
 ### Agent Coordination
 

@@ -324,6 +324,11 @@ def find_existing_files(skill_dir: Path) -> set[str]:
         if subdir_path.is_dir():
             for file_path in subdir_path.rglob('*'):
                 if file_path.is_file():
+                    # Skip files in __pycache__ directories or with excluded extensions
+                    if '__pycache__' in file_path.parts:
+                        continue
+                    if file_path.suffix in {'.pyc', '.pyo', '.class', '.o'}:
+                        continue
                     existing.add(str(file_path.relative_to(skill_dir)))
 
     return existing
