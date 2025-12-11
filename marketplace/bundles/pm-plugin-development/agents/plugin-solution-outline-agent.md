@@ -1,7 +1,7 @@
 ---
 name: plugin-solution-outline-agent
 description: Analyze plugin codebase and create solution outline with deliverables
-tools: Read, Glob, Grep, Bash, Skill
+tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 model: sonnet
 skills: pm-plugin-development:plugin-solution-outline, plan-marshall:general-development-rules
 ---

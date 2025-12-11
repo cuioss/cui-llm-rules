@@ -1,7 +1,7 @@
 ---
 name: task-implement
 description: Implement GitHub issues or standalone tasks with full verification
-allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task, AskUserQuestion
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task, AskUserQuestion, SlashCommand
 ---
 
 # Task Implementation Command

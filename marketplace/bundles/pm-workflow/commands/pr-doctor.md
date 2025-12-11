@@ -1,7 +1,7 @@
 ---
 name: pr-doctor
 description: Diagnose and fix PR issues (build, reviews, Sonar)
-allowed-tools: Skill, Read, Edit, Glob, Grep, Bash, Task
+allowed-tools: Skill, Read, Edit, Glob, Grep, Bash, Task, SlashCommand
 ---
 
 # PR Doctor Command

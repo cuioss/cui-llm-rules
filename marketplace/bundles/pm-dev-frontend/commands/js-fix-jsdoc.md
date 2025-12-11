@@ -1,7 +1,7 @@
 ---
 name: js-fix-jsdoc
 description: Fix JSDoc errors and warnings from build/lint with content preservation
-allowed-tools: Skill, Read, Edit, Glob, Grep, Bash
+allowed-tools: Skill, Read, Edit, Glob, Grep, Bash, SlashCommand
 ---
 
 # CUI JSDoc Fix Command

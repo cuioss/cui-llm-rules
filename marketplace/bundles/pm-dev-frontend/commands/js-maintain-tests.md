@@ -1,7 +1,7 @@
 ---
 name: js-maintain-tests
 description: Execute systematic JavaScript test quality improvement with NO production code changes
-allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task, SlashCommand
 ---
 
 # CUI JavaScript Test Maintain Command

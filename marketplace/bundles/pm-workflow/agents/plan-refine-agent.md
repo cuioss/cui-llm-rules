@@ -1,7 +1,7 @@
 ---
 name: plan-refine-agent
 description: Create tasks from goals (GENERIC PLANS ONLY)
-tools: Bash, Skill, AskUserQuestion
+tools: Read, Write, Edit, Bash, Skill, AskUserQuestion
 skills: pm-workflow:plan-refine, plan-marshall:general-development-rules
 ---
 

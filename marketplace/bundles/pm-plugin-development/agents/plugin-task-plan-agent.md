@@ -1,7 +1,7 @@
 ---
 name: plugin-task-plan-agent
 description: Create implementation tasks from deliverables
-tools: Read, Glob, Grep, Bash, Skill
+tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 model: sonnet
 skills: pm-plugin-development:plugin-task-plan, plan-marshall:general-development-rules
 ---

@@ -1,7 +1,7 @@
 ---
 name: js-enforce-eslint
 description: Enforce ESLint standards by fixing violations systematically
-allowed-tools: Skill, Read, Edit, Glob, Grep, Bash
+allowed-tools: Skill, Read, Edit, Glob, Grep, Bash, SlashCommand
 ---
 
 # CUI ESLint Enforce Command

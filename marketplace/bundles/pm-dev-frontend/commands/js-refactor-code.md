@@ -1,7 +1,7 @@
 ---
 name: js-refactor-code
 description: Execute systematic JavaScript refactoring with standards compliance verification
-allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task, SlashCommand
 ---
 
 # CUI JavaScript Refactor Command

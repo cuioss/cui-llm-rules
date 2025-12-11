@@ -1,7 +1,7 @@
 ---
 name: java-maintain-logger
 description: Execute systematic logging standards maintenance with plan tracking and comprehensive test coverage
-allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task
+allowed-tools: Skill, Read, Write, Edit, Glob, Grep, Bash, Task, SlashCommand
 ---
 
 # CUI Logger Maintain Command

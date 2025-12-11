@@ -1,7 +1,7 @@
 ---
 name: java-analyze-all
 description: Run parallel analysis agents for quality, coverage, and standards compliance
-tools: Read, Glob, Task
+tools: Read, Glob, Task, Skill
 ---
 
 # Java Analyze All Command
