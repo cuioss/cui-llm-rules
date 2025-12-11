@@ -42,20 +42,21 @@ Provides unified doctor workflows following the pattern: **Diagnose → Auto-Fix
 → **EXECUTE** Workflow 5: doctor-scripts (jump to that section)
 
 ### If scope = "marketplace" (full marketplace health check)
-→ **EXECUTE** all 5 component workflows in sequence
+→ **EXECUTE** Workflow 7: doctor-marketplace (jump to that section)
 
 ### If scope = "skill-content" or skill-path specified with content analysis
 → **EXECUTE** Workflow 6: doctor-skill-content (jump to that section)
 
 ---
 
-**6 Doctor Workflows**:
+**7 Doctor Workflows**:
 1. **doctor-agents**: Analyze and fix agent issues
 2. **doctor-commands**: Analyze and fix command issues
 3. **doctor-skills**: Analyze and fix skill issues
 4. **doctor-metadata**: Analyze and fix plugin.json issues
 5. **doctor-scripts**: Analyze and fix script issues
 6. **doctor-skill-content**: Analyze and reorganize skill content files
+7. **doctor-marketplace**: Full marketplace batch analysis with report
 
 Each workflow performs the complete cycle: discover → analyze → categorize → fix → verify.
 
@@ -769,6 +770,92 @@ Generate comprehensive report:
 ## Recommendations
 
 1. {recommendation}
+```
+
+---
+
+## Workflow 7: doctor-marketplace
+
+Full marketplace batch analysis using hybrid two-phase workflow.
+
+### Parameters
+- `--no-fix` (optional): Generate report only, skip fix phase
+
+### Step 1: Phase 1 - Script Batch Processing
+
+**EXECUTE** the batch script to scan, analyze, and apply safe fixes:
+
+```bash
+# Apply safe fixes automatically
+python3 marketplace/bundles/pm-plugin-development/skills/plugin-doctor/scripts/doctor-marketplace.py fix
+
+# Generate comprehensive report
+python3 marketplace/bundles/pm-plugin-development/skills/plugin-doctor/scripts/doctor-marketplace.py report
+```
+
+Parse the JSON output to get:
+- `report_dir`: Directory containing report files
+- `report_file`: Path to JSON report
+- `findings_file`: Path where LLM should write findings.md
+- `summary`: Issue counts and categorization
+
+### Step 2: Phase 2 - LLM Analysis
+
+1. **Read the JSON report**:
+   ```
+   Read: {report_file}
+   ```
+
+2. **Analyze and create findings.md** in the same directory with:
+   - Executive summary with statistics
+   - Bundle-by-bundle analysis
+   - Issue categorization:
+     - **Fixed**: Safe fixes already applied by script
+     - **False Positive**: Rule violations that are intentional (e.g., Maven in documentation examples)
+     - **Intentional**: Design decisions (e.g., Task tool for orchestration)
+     - **Needs Review**: Actual issues requiring attention
+   - Recommendations for manual review
+
+3. **Write findings.md**:
+   ```
+   Write: {findings_file}
+   ```
+
+### Step 3: Process Risky Fixes
+
+For each item in `llm_review_items` from the JSON report:
+
+1. **Evaluate context** - Is this a real issue or false positive?
+2. **If real issue, prompt for risky fix**:
+   ```
+   AskUserQuestion:
+     question: "Fix {issue_type} in {file}?"
+     options:
+       - label: "Yes" description: "Apply fix"
+       - label: "No" description: "Skip"
+       - label: "Skip All" description: "Skip remaining"
+   ```
+3. **Apply fix if approved** using Edit tool
+
+### Step 4: Report Summary
+
+Display final summary:
+```
+## Marketplace Health Report
+
+**Report Location**: {report_dir}
+
+| Metric | Value |
+|--------|-------|
+| Total Bundles | X |
+| Total Components | X |
+| Safe Fixes Applied | X |
+| Issues Reviewed | X |
+| False Positives | X |
+
+**Files Created**:
+- {report_file}
+- {findings_file}
 ```
 
 ---
