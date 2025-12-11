@@ -440,13 +440,39 @@ def extract_content_after_frontmatter(content: str) -> str:
 
 
 def parse_declared_tools(frontmatter: str) -> list[str]:
-    """Parse tools from frontmatter."""
-    tools_match = re.search(r'^tools:\s*(.*)$', frontmatter, re.MULTILINE)
+    """Parse tools from frontmatter.
+
+    Handles both 'tools:' and 'allowed-tools:' field names,
+    and both inline (comma-separated) and YAML list (- item) formats.
+    """
+    # Try both field names
+    tools_match = re.search(r'^(?:tools|allowed-tools):\s*(.*)$', frontmatter, re.MULTILINE)
     if not tools_match:
         return []
 
     tools_line = tools_match.group(1).strip()
-    return [t.strip() for t in tools_line.replace(',', ' ').split() if t.strip()]
+
+    # If inline format (tools: Read, Write, Edit)
+    if tools_line:
+        return [t.strip() for t in tools_line.replace(',', ' ').split() if t.strip()]
+
+    # Otherwise check for YAML list format (- Read\n- Write)
+    # Find all lines after tools: that start with -
+    lines = frontmatter.split('\n')
+    tools = []
+    in_tools_section = False
+    for line in lines:
+        if re.match(r'^(?:tools|allowed-tools):', line):
+            in_tools_section = True
+            continue
+        if in_tools_section:
+            list_match = re.match(r'^\s+-\s*(.+)$', line)
+            if list_match:
+                tools.append(list_match.group(1).strip())
+            elif line.strip() and not line.startswith(' '):
+                # New field started, stop parsing
+                break
+    return tools
 
 
 def check_tool_usage(content: str, tool: str) -> bool:
