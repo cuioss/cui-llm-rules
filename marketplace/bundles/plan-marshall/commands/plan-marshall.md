@@ -40,7 +40,7 @@ Display this banner on command start (output as single code block):
 ║         ...              .;:::::::::;.              ...               ║
 ║                              :;:::;:                                  ║
 ║                               .;:;.                                   ║
-║                                 :                                     ║
+║                                 :                          by KIDICAP ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 ```
 
