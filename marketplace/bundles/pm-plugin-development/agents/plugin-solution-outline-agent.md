@@ -66,7 +66,7 @@ EOF
 pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id X
 
 # Work log
-pm-workflow:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
+plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
 ```
 
 **CRITICAL**: Script name is SINGULAR (e.g., `manage-task`) even though skill name may be plural.
@@ -98,12 +98,12 @@ plan_id: {plan_id}
 After each deliverable is created, log to work-log:
 
 ```
-Skill: pm-workflow:manage-log
-operation: add
+Skill: plan-marshall:logging
+operation: work add
 plan_id: {plan_id}
 phase: init
-type: artifact
-summary: "Created deliverable: {N}. {title}"
+category: ARTIFACT
+message: "Created deliverable: {N}. {title}"
 detail: "{brief description of what this deliverable covers}"
 ```
 

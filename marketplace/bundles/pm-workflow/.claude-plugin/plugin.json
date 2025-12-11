@@ -40,7 +40,6 @@
     "./skills/manage-config",
     "./skills/manage-references",
     "./skills/manage-lifecycle",
-    "./skills/manage-log",
     "./skills/planning-inventory"
   ]
 }

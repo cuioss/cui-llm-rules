@@ -29,6 +29,7 @@ SKILL_DIR = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'script-executor'
 SCRIPTS_DIR = SKILL_DIR / 'scripts'
 TEMPLATES_DIR = SKILL_DIR / 'templates'
 EXECUTOR_TEMPLATE = TEMPLATES_DIR / 'execute-script.py.template'
+LOGGING_DIR = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'logging' / 'scripts'
 
 # A simple script that we know exists for testing
 TEST_SCRIPT_BUNDLE = 'pm-workflow'
@@ -93,10 +94,10 @@ class ExecutorTestEnvironment:
             '{{SCRIPT_MAPPINGS}}',
             mappings_code
         )
-        # Point to real execution_log.py location (isolation via PLAN_BASE_DIR env var)
+        # Point to real plan_logging.py location (isolation via PLAN_BASE_DIR env var)
         executor_content = executor_content.replace(
-            '{{EXECUTION_LOG_DIR}}',
-            str(SCRIPTS_DIR)  # Real marketplace location
+            '{{LOGGING_DIR}}',
+            str(LOGGING_DIR)  # Real marketplace location for plan_logging module
         )
 
         self.executor_path = self.plan_dir / 'execute-script.py'
@@ -280,7 +281,7 @@ def test_successful_execution_logged():
     # Check log was created
     log_content = env.get_log_content()
     assert 'pm-workflow:manage-config' in log_content, f"Missing log entry. Log content: {log_content}"
-    assert '\tSUCCESS\t' in log_content, f"Expected SUCCESS marker in log: {log_content}"
+    assert '[SUCCESS]' in log_content, f"Expected SUCCESS marker in log: {log_content}"
 
 
 def test_log_format_success_compact():
@@ -292,18 +293,19 @@ def test_log_format_success_compact():
 
     log_content = env.get_log_content()
 
-    # Success entries should be single line with tab-separated fields
-    # Format: timestamp\tSUCCESS\tnotation\tsubcommand\tduration
+    # Success entries should be single line with bracket format
+    # Format: [timestamp] [SUCCESS] [SCRIPT] notation subcommand (duration)
     lines = [line for line in log_content.strip().split('\n') if 'pm-workflow:manage-config' in line]
     assert len(lines) >= 1, "No log entry found for pm-workflow:manage-config"
 
     entry = lines[0]
-    fields = entry.split('\t')
-    assert len(fields) == 5, f"Expected 5 tab-separated fields, got {len(fields)}: {entry}"
-    assert fields[1] == 'SUCCESS', f"Expected SUCCESS as second field, got: {fields[1]}"
+    # Check bracket format
+    assert '[SUCCESS]' in entry, f"Expected [SUCCESS] marker, got: {entry}"
+    assert '[SCRIPT]' in entry, f"Expected [SCRIPT] category, got: {entry}"
+    assert entry.startswith('['), f"Entry should start with timestamp bracket: {entry}"
 
     # Should NOT contain ERROR marker for success
-    assert 'ERROR' not in entry, f"Success entry should not contain ERROR: {entry}"
+    assert '[ERROR]' not in entry, f"Success entry should not contain [ERROR]: {entry}"
 
 
 # ============================================================================
@@ -346,8 +348,8 @@ def test_execute_script_that_fails():
     # Verify error was logged
     log_content = env.get_log_content()
     assert 'pm-workflow:manage-config' in log_content, f"Missing log entry for failed execution: {log_content}"
-    # Error entries have ERROR(code) marker, not SUCCESS
-    assert 'ERROR(' in log_content, f"Expected ERROR marker in log: {log_content}"
+    # Error entries have [ERROR] marker, not [SUCCESS]
+    assert '[ERROR]' in log_content, f"Expected [ERROR] marker in log: {log_content}"
 
 
 def test_error_execution_logged_with_details():
@@ -364,8 +366,8 @@ def test_error_execution_logged_with_details():
     log_content = env.get_log_content()
     assert 'pm-workflow:manage-config' in log_content, f"Missing log entry: {log_content}"
 
-    # Error entries should contain ERROR marker and args detail
-    assert 'ERROR' in log_content, f"Expected ERROR marker in log: {log_content}"
+    # Error entries should contain [ERROR] marker and args detail
+    assert '[ERROR]' in log_content, f"Expected [ERROR] marker in log: {log_content}"
     assert 'args:' in log_content, f"Error entry missing args detail: {log_content}"
     assert 'nonexistent-plan-xyz' in log_content, f"Args should include plan-id: {log_content}"
 
@@ -388,8 +390,8 @@ def test_log_format_error_multi_line():
     # Should have at least the main entry line + args line
     assert len(error_lines) >= 2, f"Expected multi-line error entry, got: {error_lines}"
 
-    # First line should have ERROR marker
-    assert 'ERROR' in error_lines[0], f"First line should have ERROR: {error_lines[0]}"
+    # First line should have [ERROR] marker
+    assert '[ERROR]' in error_lines[0], f"First line should have [ERROR]: {error_lines[0]}"
 
     # Should have indented detail lines
     indented_lines = [l for l in error_lines if l.startswith('  ')]
@@ -544,7 +546,7 @@ def test_plan_scoped_log_when_plan_exists():
         )
 
         # Check if plan-scoped log was created
-        plan_log = plan_dir / 'execution.log'
+        plan_log = plan_dir / 'script-execution.log'
         assert plan_log.exists(), f"Plan-scoped log not created at {plan_log}"
 
         log_content = plan_log.read_text()

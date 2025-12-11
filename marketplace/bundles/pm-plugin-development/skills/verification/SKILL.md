@@ -200,7 +200,7 @@ These checks apply ONLY when `scope: planning` is specified:
 **Allowed `.plan` Access** (NOT violations):
 - `.plan/scripts-library.toon` - Read for script path resolution (legacy)
 - `.plan/execute-script.py` - Script executor with embedded mappings
-- `.plan/execution_log.py` - Execution logging module
+- `.plan/plan_logging.py` - Logging module
 - `.plan/marshall-state.toon` - Executor generation metadata
 - `.plan/logs/script-execution-*.log` - Global execution logs
 - `.plan/lessons-learned/*.md` - Read/write via manage-lessons skill
@@ -215,11 +215,11 @@ This is the preferred pattern for all marketplace script execution.
 **Prohibited `.plan/plans/**` Access** (violations):
 - Direct Read/Write/Edit of `.plan/plans/*/status.toon`
 - Direct Read/Write/Edit of `.plan/plans/*/config.toon`
-- Direct Read/Write/Edit of `.plan/plans/*/work-log.toon`
+- Direct Read/Write/Edit of `.plan/plans/*/work.log`
 - Direct access to goals/tasks directories
 - Glob patterns targeting `.plan/plans/**/*.toon` or subdirectories
 - Bash find/ls commands scanning `.plan/plans/` structure
-- Missing work-log entry after significant operation
+- Missing work.log entry after significant operation
 - Status not updated after phase transition
 - Artifacts created without manage-* scripts
 

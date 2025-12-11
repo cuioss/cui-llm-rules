@@ -87,8 +87,9 @@ All plan-type skills implement `pm-workflow:plan-type-api` contract.
 | `manage-config` | `manage-config.py` | config.toon domain |
 | `manage-references` | `manage-references.py` | references.toon domain |
 | `manage-lifecycle` | `manage-lifecycle.py` | status.toon + phases |
-| `manage-log` | `manage-work-log.py` | Work log entries |
 | `manage-lessons` | `manage-lesson.py` | Global lessons |
+
+**Logging**: Work log entries and script execution logging are provided by `plan-marshall:logging` skill.
 
 ## Plan-Type Skill API
 
@@ -190,7 +191,6 @@ planning/
     ├── manage-config/           # config.toon domain
     ├── manage-references/       # references.toon domain
     ├── manage-lifecycle/        # status.toon + phases
-    ├── manage-log/              # Work log entries
     ├── manage-lessons/          # Global lessons
     ├── git-workflow/
     ├── pr-workflow/

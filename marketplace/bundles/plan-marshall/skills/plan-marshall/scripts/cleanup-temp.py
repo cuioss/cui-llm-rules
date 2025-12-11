@@ -5,15 +5,14 @@ Clean temporary files and directories.
 Cleans the .plan/temp/ directory used for transient files during operations.
 
 Usage:
-    python3 cleanup-temp.py clean [--plan-dir PATH] [--dry-run]
-    python3 cleanup-temp.py status [--plan-dir PATH]
+    python3 cleanup-temp.py clean [--dry-run]
+    python3 cleanup-temp.py status
 
 Subcommands:
     clean     Remove all files from temp directory
     status    Show temp directory status without modifying
 
 Options:
-    --plan-dir PATH    Base plan directory (default: .plan)
     --dry-run          Show what would be deleted without deleting
 
 Output (TOON format):

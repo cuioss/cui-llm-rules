@@ -270,7 +270,7 @@ If deliverable lacks required parameters:
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables
 - `pm-workflow:manage-tasks:manage-task` - Create tasks (add, list)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
-- `pm-workflow:manage-log:manage-work-log` - Log progress (add)
+- `plan-marshall:logging:manage-log` - Log progress (work)
 
 **Skills Delegated To**:
 - `pm-plugin-development:plugin-create` - Component creation (handles validation and verification internally)

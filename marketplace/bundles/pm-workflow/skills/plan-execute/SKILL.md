@@ -22,7 +22,7 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 |--------|---------|
 | `pm-workflow:manage-config:manage-config` | Config field access |
 | `pm-workflow:manage-lifecycle:manage-lifecycle` | Phase routing and transitions |
-| `pm-workflow:manage-log:manage-work-log` | Work log entries |
+| `plan-marshall:logging:manage-log` | Work log entries |
 | `pm-workflow:manage-tasks:manage-task` | Task and step management |
 | `pm-workflow:manage-references:manage-references` | Reference file CRUD |
 
@@ -92,11 +92,8 @@ Use `current_phase` for logging, `skill` for dynamic routing, and `completed_pha
 At the start of execute or finalize phase:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase {phase} \
-  --type progress \
-  --summary "Starting {phase} phase"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "Starting {phase} phase"
 ```
 
 For each task in current phase:
@@ -132,12 +129,8 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task step-done \
 After each task completes:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase {phase} \
-  --type artifact \
-  --summary "Completed {task_id}: {task_title}" \
-  --detail "{steps_completed} steps executed"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} SUCCESS "Completed {task_id}: {task_title} ({steps_completed} steps)"
 ```
 
 ### Step 4: Next Task or Phase
@@ -149,12 +142,8 @@ python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
 ### Step 5: Log Phase Completion (When phase completes)
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase {phase} \
-  --type outcome \
-  --summary "Completed {phase} phase: {tasks_completed} tasks" \
-  --detail "Transitioning to {next_phase}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} SUCCESS "Completed {phase} phase: {tasks_completed} tasks"
 ```
 
 ---
@@ -205,12 +194,8 @@ This automatically updates status.toon and moves to the next phase.
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase {phase} \
-  --type error \
-  --summary "ERROR: {task_id} failed - {error_type}" \
-  --detail "{full error context and message}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} ERROR "ERROR: {task_id} failed - {error_type}: {error_context}"
 ```
 
 ### Script Failure (Lessons-Learned Capture)
@@ -242,7 +227,7 @@ python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
 | `pm-workflow:manage-lifecycle` | `get-routing-context` | Phase, skill routing, progress |
 | `pm-workflow:manage-config` | `get-multi` | Finalize config fields |
 | `pm-workflow:manage-tasks` | `next --include-context` | Task with goal context |
-| `pm-workflow:manage-log` | `add` | Work log entries |
+| `plan-marshall:logging:manage-log` | `work` | Work log entries |
 | `pm-workflow:manage-references` | - | Reference file CRUD |
 | `pm-workflow:git-workflow` | - | Commit operations |
 

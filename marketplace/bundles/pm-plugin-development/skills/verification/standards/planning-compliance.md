@@ -22,7 +22,7 @@ Some `.plan` files are designed for direct access:
 | File | Access | Purpose |
 |------|--------|---------|
 | `.plan/execute-script.py` | Execute | Universal script executor with embedded mappings |
-| `.plan/execution_log.py` | Import | Execution logging module |
+| `.plan/plan_logging.py` | Import | Logging module |
 | `.plan/marshall-state.toon` | Read/Write | Executor generation metadata |
 | `.plan/logs/script-execution-*.log` | Append | Global execution logs |
 | `.plan/lessons-learned/*.md` | Read/Write | Lessons learned via manage-lessons skill |
@@ -52,7 +52,7 @@ Examples:
 |------|-------------------|---------------------|
 | Read | `.plan/plans/{id}/status.toon` | `python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle read --plan-id {id}` |
 | Read | `.plan/plans/{id}/config.toon` | `python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --plan-id {id}` |
-| Read | `.plan/plans/{id}/work-log.toon` | `python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log read --plan-id {id}` |
+| Read | `.plan/plans/{id}/work.log` | `cat .plan/plans/{id}/work.log` |
 | Read | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline read --plan-id {id}` |
 | Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task get --plan-id {id} --number 1` |
 | Write | `.plan/plans/{id}/*` | Use appropriate manage-* create/update via execute-script.py |
@@ -131,7 +131,7 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 1. After operation completes, query work-log:
    ```bash
-   python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log read --plan-id {plan_id}
+   python3 .plan/execute-script.py plan-marshall:logging:manage-log work read --plan-id {plan_id}
    ```
 
 2. Verify most recent entry matches operation:
@@ -150,7 +150,7 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 ### Work-Log Check
 ```toon
-[Output from manage-work-log.py list]
+[Output from plan-marshall:logging:manage-log work read]
 ```
 
 ### Verification Result
@@ -190,7 +190,7 @@ python3 .plan/execute-script.py {notation} {subcommand} {args...}
 | `manage-lifecycle` | `manage-lifecycle` | `pm-workflow:manage-lifecycle:manage-lifecycle` |
 | `manage-config` | `manage-config` | `pm-workflow:manage-config:manage-config` |
 | `manage-files` | `manage-files` | `pm-workflow:manage-files:manage-files` |
-| `manage-log` | `manage-work-log` | `pm-workflow:manage-log:manage-work-log` |
+| `logging` | `manage-log` | `plan-marshall:logging:manage-log` |
 
 **Prohibited Operations** (direct script paths must use executor):
 
@@ -246,35 +246,33 @@ Plan-related log files must exist, be properly formatted, remain consistent, and
 
 | File | Location | Purpose |
 |------|----------|---------|
-| `work-log.toon` | `.plan/plans/{id}/work-log.toon` | Semantic work entries (decisions, artifacts, progress) |
-| `execution.log` | `.plan/plans/{id}/execution.log` | Script execution records for plan-scoped operations |
+| `work.log` | `.plan/plans/{id}/work.log` | Semantic work entries (decisions, artifacts, progress) |
+| `script-execution.log` | `.plan/plans/{id}/script-execution.log` | Script execution records for plan-scoped operations |
 | `script-execution-*.log` | `.plan/logs/script-execution-{date}.log` | Global execution records (non-plan operations) |
 
-**Log Entry Format** (execution.log):
+**Log Entry Format** (script-execution.log):
 
-Success entry (single line):
+Standard entry:
 ```
-{timestamp}\t{notation}\t{subcommand}\t{exit_code}\t{duration}s
+[{timestamp}] [{level}] [SCRIPT] {notation} {subcommand} ({duration}s)
 ```
 
-Error entry (multi-line):
+Example:
 ```
-{timestamp}\t{notation}\t{subcommand}\t{exit_code}\t{duration}s\tERROR
-  args: {full argument list}
-  stdout: {truncated stdout}
-  stderr: {truncated stderr}
+[2025-12-11T12:14:26Z] [SUCCESS] [SCRIPT] pm-workflow:manage-files:manage-files create (0.19s)
+[2025-12-11T12:17:50Z] [ERROR] [SCRIPT] pm-workflow:manage-task:manage-task add failed (exit 1)
 ```
 
 **Verification Checks**:
 
 | Check | What to Verify | When |
 |-------|---------------|------|
-| Existence | `work-log.toon` exists for every active plan | After plan creation |
-| Existence | `execution.log` exists after first plan-scoped script call | After executor runs with `--plan-id` |
-| Format | `work-log.toon` follows TOON format with entries table | After any log operation |
-| Format | `execution.log` uses TSV format with required columns | After executor runs |
-| Consistency | Work-log entries match expected operations | After phase transitions |
-| Consistency | Execution.log records match script calls | After any executor call |
+| Existence | `work.log` exists for every active plan | After plan creation |
+| Existence | `script-execution.log` exists after first plan-scoped script call | After executor runs with plan_id |
+| Format | `work.log` follows standard log format | After any log operation |
+| Format | `script-execution.log` uses standard log format | After executor runs |
+| Consistency | work.log entries match expected operations | After phase transitions |
+| Consistency | script-execution.log records match script calls | After any executor call |
 
 **Issue Detection via Log Scanning**:
 
@@ -282,60 +280,55 @@ Actively scan execution logs to detect script issues:
 
 | Issue Type | Detection Pattern | Severity | Action |
 |------------|-------------------|----------|--------|
-| Script failure | Lines containing `\tERROR` | High | Investigate stderr, fix root cause |
-| Repeated failures | Same notation with exit_code != 0 multiple times | Critical | Script is broken, needs immediate fix |
+| Script failure | Lines containing `[ERROR]` | High | Investigate log, fix root cause |
+| Repeated failures | Same notation with multiple ERROR entries | Critical | Script is broken, needs immediate fix |
 | Slow execution | Duration > 30s for simple operations | Medium | Optimize script or investigate hang |
 | Missing executions | Expected script calls not in log | High | Executor not used (compliance violation) |
-| Argument errors | stderr contains "usage:" or "argument" | Medium | Caller using wrong arguments |
-| Import/module errors | stderr contains "ModuleNotFoundError" or "ImportError" | Critical | Missing dependency or path issue |
-| Permission errors | stderr contains "Permission denied" | High | File/directory access issue |
+| Argument errors | Log contains "usage:" or "argument" | Medium | Caller using wrong arguments |
+| Import/module errors | Log contains "ModuleNotFoundError" or "ImportError" | Critical | Missing dependency or path issue |
+| Permission errors | Log contains "Permission denied" | High | File/directory access issue |
 
 **Log Scanning Commands**:
 
 1. Find all errors in plan execution log:
    ```bash
-   grep -E '\tERROR$' .plan/plans/{plan_id}/execution.log
+   grep '\[ERROR\]' .plan/plans/{plan_id}/script-execution.log
    ```
 
 2. Find repeated failures (same script failing):
    ```bash
-   grep -E '\tERROR$' .plan/plans/{plan_id}/execution.log | cut -f2 | sort | uniq -c | sort -rn
+   grep '\[ERROR\]' .plan/plans/{plan_id}/script-execution.log | sort | uniq -c | sort -rn
    ```
 
 3. Find slow executions (>10s):
    ```bash
-   awk -F'\t' '$5+0 > 10 {print}' .plan/plans/{plan_id}/execution.log
+   grep -E '\([0-9]{2,}\.[0-9]+s\)' .plan/plans/{plan_id}/script-execution.log
    ```
 
-4. Get full error context (multi-line entries):
+4. Scan global logs for today's issues:
    ```bash
-   grep -A3 '\tERROR$' .plan/plans/{plan_id}/execution.log
-   ```
-
-5. Scan global logs for today's issues:
-   ```bash
-   grep -E '\tERROR$' .plan/logs/script-execution-$(date +%Y-%m-%d).log
+   grep '\[ERROR\]' .plan/logs/script-execution-$(date +%Y-%m-%d).log
    ```
 
 **Verification Steps**:
 
-1. Check work-log exists and has entries:
+1. Check work.log exists and has entries:
    ```bash
-   python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log read --plan-id {plan_id}
+   cat .plan/plans/{plan_id}/work.log
    ```
 
-2. Check execution.log exists and scan for issues:
+2. Check script-execution.log exists and scan for issues:
    ```bash
    # Check recent entries
-   tail -10 .plan/plans/{plan_id}/execution.log
+   tail -10 .plan/plans/{plan_id}/script-execution.log
 
    # Scan for errors
-   grep -c '\tERROR$' .plan/plans/{plan_id}/execution.log || echo "0 errors"
+   grep -c '\[ERROR\]' .plan/plans/{plan_id}/script-execution.log || echo "0 errors"
    ```
 
 3. Verify format compliance:
-   - Work-log: Has header comments, entries table with 5 columns
-   - Execution.log: TSV with timestamp, notation, subcommand, exit_code, duration
+   - work.log: Standard log format `[timestamp] [level] [WORK] message`
+   - script-execution.log: Standard log format `[timestamp] [level] [SCRIPT] notation subcommand (duration)`
 
 **Detection Pattern for Log Issues**:
 
@@ -389,13 +382,13 @@ Actively scan execution logs to detect script issues:
 
 | Violation | Symptom | Cause |
 |-----------|---------|-------|
-| Missing work-log | `manage-log:list` returns error | Plan created without init entry |
-| Empty work-log | No entries after operations | Operations bypassed logging |
-| Stale execution.log | Old timestamps only | Executor not used for recent calls |
+| Missing work.log | work.log file not found | Plan created without init entry |
+| Empty work.log | No entries after operations | Operations bypassed logging |
+| Stale script-execution.log | Old timestamps only | Executor not used for recent calls |
 | Format corruption | Parse errors | Direct file edit instead of API |
 | Script failure | ERROR entries in log | Bug in script or invalid arguments |
 | Repeated failures | Same script failing multiple times | Systemic issue needs investigation |
-| Import errors | ModuleNotFoundError in stderr | Missing dependency or wrong Python path |
+| Import errors | ModuleNotFoundError in log | Missing dependency or wrong Python path |
 | Timeout patterns | Very long durations (>60s) | Script hanging or performance issue |
 
 **Status Verification Points**:
@@ -452,13 +445,13 @@ Actively scan execution logs to detect script issues:
 After each planning command/skill execution, verify:
 
 - [ ] No direct .plan file access (except request.md read)
-- [ ] Work-log entry added for significant operations
+- [ ] work.log entry added for significant operations
 - [ ] Status reflects current phase correctly
 - [ ] All artifacts created via manage-* scripts
 - [ ] No orphaned files in .plan structure
-- [ ] Log files exist and are properly formatted (work-log.toon, execution.log)
-- [ ] Execution.log contains recent entries for script calls
-- [ ] Execution.log scanned for ERROR entries - none found or issues addressed
+- [ ] Log files exist and are properly formatted (work.log, script-execution.log)
+- [ ] script-execution.log contains recent entries for script calls
+- [ ] script-execution.log scanned for ERROR entries - none found or issues addressed
 - [ ] No repeated script failures detected in logs
 
 ## Integration with Commands
@@ -565,8 +558,8 @@ User approval obtained: [Yes/No]
 Use this verification pattern after major operations:
 
 ```bash
-# Verify work-log has recent entry
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log read --plan-id {plan_id}
+# Verify work.log has recent entry
+cat .plan/plans/{plan_id}/work.log
 
 # Verify status is consistent
 python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle read --plan-id {plan_id}
@@ -584,10 +577,10 @@ Expected output should show:
 
 After script operations complete, verify proper executor usage:
 
-**For plan-scoped operations** (when `--plan-id` was provided):
+**For plan-scoped operations** (when plan_id was provided):
 ```bash
 # Verify execution logged to plan
-tail -5 .plan/plans/{plan-id}/execution.log
+tail -5 .plan/plans/{plan-id}/script-execution.log
 ```
 
 **For global operations** (no plan context):
@@ -596,20 +589,17 @@ tail -5 .plan/plans/{plan-id}/execution.log
 tail -5 .plan/logs/script-execution-$(date +%Y-%m-%d).log
 ```
 
-**Success entry format** (compact):
+**Success entry format**:
 ```
-{timestamp}	{notation}	{subcommand}	0	{duration}
+[{timestamp}] [SUCCESS] [SCRIPT] {notation} {subcommand} ({duration}s)
 ```
 
-**Error entry format** (detailed):
+**Error entry format**:
 ```
-{timestamp}	{notation}	{subcommand}	{exit_code}	{duration}	ERROR
-  args: {full argument list}
-  stderr: {error message}
+[{timestamp}] [ERROR] [SCRIPT] {notation} {subcommand} failed (exit {code})
 ```
 
 Expected verification:
 - Timestamp is recent (within last few seconds)
 - Notation matches expected script
-- Exit code is 0 for success
-- For errors: args and stderr provide debugging context
+- Level is SUCCESS for success, ERROR for failures

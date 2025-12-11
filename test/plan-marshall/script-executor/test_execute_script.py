@@ -15,6 +15,7 @@ from conftest import TestRunner
 SKILL_DIR = Path(__file__).parent.parent.parent.parent / "marketplace/bundles/plan-marshall/skills/script-executor"
 TEMPLATE_DIR = SKILL_DIR / "templates"
 SCRIPTS_DIR = SKILL_DIR / "scripts"
+LOGGING_DIR = Path(__file__).parent.parent.parent.parent / "marketplace/bundles/plan-marshall/skills/logging/scripts"
 
 
 def load_executor_module():
@@ -32,10 +33,10 @@ def load_executor_module():
     "test:skill": "/test/path/test-skill.py",
 '''
     )
-    code = code.replace('{{EXECUTION_LOG_DIR}}', str(SCRIPTS_DIR))
+    code = code.replace('{{LOGGING_DIR}}', str(LOGGING_DIR))
 
-    # Add scripts dir to path so execution_log can be imported
-    sys.path.insert(0, str(SCRIPTS_DIR))
+    # Add logging dir to path so plan_logging can be imported
+    sys.path.insert(0, str(LOGGING_DIR))
 
     # Create a module and provide __file__
     import types

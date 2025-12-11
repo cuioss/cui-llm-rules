@@ -6,22 +6,43 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 
 # Plan Marshall Skill
 
-**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin with Step 0 to determine mode and route to the appropriate workflow.
+## Enforcement Rules
 
-Project configuration wizard for the planning system. Handles executor generation, health checks, build system detection, and plan-type management.
+**EXECUTION MODE**: Execute this skill immediately. Do not explain, summarize, or discuss these instructions.
+
+### Script Execution
+1. Run scripts EXACTLY as documented - no improvisation
+2. Use the bash commands verbatim from each section
+3. Bootstrap scripts (Step 0, Step 1, Step 2) use direct Python paths
+4. All other scripts use: `python3 .plan/execute-script.py {notation} ...`
+
+### Menu Behavior
+1. Main Menu and submenus use EXACTLY 4 options as documented
+2. After ANY operation completes → return to Main Menu
+3. Only exit when user selects "Quit"
+
+### Prohibited Actions
+- Inventing alternative menu structures or options
+- Skipping submenus to go directly to operations
+- Ending without returning to menu (unless Quit)
+- Checking files manually instead of running documented scripts
+- Summarizing what you're about to do instead of doing it
+
+### Execution Flow
+```
+Step 0: determine-mode.py
+    ↓
+mode=wizard → First-Run Wizard (Steps 1-8)
+mode=menu   → Interactive Menu Loop
+```
+
+---
 
 ## What This Skill Provides
 
 **Wizard Mode**: Sequential setup for new projects (executor generation, marshal.json init, build detection, plan-types)
 
 **Menu Mode**: Interactive maintenance for returning users (regenerate executor, health check, configuration)
-
-## When to Activate This Skill
-
-Activate when:
-- Called by `/plan-marshall` command
-- User needs to configure project planning settings
-- Executor needs regeneration after bundle changes
 
 ---
 
@@ -49,7 +70,7 @@ Determine whether to run wizard or menu based on existing files.
 **BOOTSTRAP**: Since execute-script.py may not exist yet, use DIRECT Python call:
 
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/determine-mode.py --plan-dir .plan
+python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/determine-mode.py mode
 ```
 
 **Output (TOON)**:
@@ -72,7 +93,7 @@ If `--wizard` flag provided, force first-run wizard regardless of determine-mode
 
 ## First-Run Wizard
 
-Sequential structured setup for new projects. **CRITICAL**: Execute-script.py generation MUST be Step 1.
+Sequential structured setup for new projects.
 
 ### Step 1: Gitignore Setup
 
@@ -81,7 +102,7 @@ Configure `.gitignore` for `.plan/` directory.
 **BOOTSTRAP**: Use DIRECT Python call:
 
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/gitignore-setup.py --project-root .
+python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/gitignore-setup.py
 ```
 
 **Output (TOON)**:
@@ -101,21 +122,31 @@ entries_added	2
 
 ### Step 1b: Update Project Documentation
 
-If `CLAUDE.md` exists, ensure it documents `.plan/temp/` usage:
+Check if project docs need `.plan/temp/` documentation:
+
+**BOOTSTRAP**: Use DIRECT Python call (executor not yet available):
 
 ```bash
-# Check if CLAUDE.md exists and needs .plan/temp documentation
-if [ -f "CLAUDE.md" ]; then
-  grep -q "\.plan/temp" CLAUDE.md || echo "CLAUDE.md needs .plan/temp documentation"
-fi
+python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/determine-mode.py check-docs
 ```
 
-If missing, add to the Development Notes section:
+**Output (TOON)**:
+```toon
+status	ok
+files_needing_update	0
+```
+
+Or if updates needed:
+```toon
+status	needs_update
+files_needing_update	2
+missing	CLAUDE.md,agents.md
+```
+
+If `status` is `needs_update`, add to each listed file's appropriate section:
 ```
 - Use `.plan/temp/` for ALL temporary files (covered by `Write(.plan/**)` permission - avoids permission prompts)
 ```
-
-If `agents.md` exists, add similar documentation to the Tool Usage section.
 
 ### Step 2: Generate Executor
 
@@ -298,33 +329,32 @@ next_steps:
 
 Display menu when both executor and marshal.json exist.
 
-**MENU LOOP**: After completing any menu option (except Quit), return to this menu. Continue looping until user selects Quit.
+### Main Menu
 
 ```
 AskUserQuestion:
   question: "What would you like to do?"
+  header: "Main Menu"
   options:
     - label: "1. Maintenance"
       description: "Regenerate executor, clean logs"
-      value: "maintenance"
     - label: "2. Health Check"
       description: "Verify setup, diagnose issues"
-      value: "health-check"
     - label: "3. Configuration"
       description: "Build systems, plan-types"
-      value: "configuration"
     - label: "4. Quit"
       description: "Exit plan-marshall"
-      value: "quit"
+  multiSelect: false
 ```
 
-**Routing**:
-| Selection | Action |
-|-----------|--------|
-| maintenance | Execute "Menu Option: Maintenance", then **return to menu** |
-| health-check | Execute "Menu Option: Health Check", then **return to menu** |
-| configuration | Execute "Menu Option: Configuration", then **return to menu** |
-| quit | Output "Good bye!" and **stop execution** |
+### Routing
+
+| User Selection | Action | After Completion |
+|----------------|--------|------------------|
+| "1. Maintenance" | → Jump to "Menu Option: Maintenance" | → Return to Main Menu |
+| "2. Health Check" | → Jump to "Menu Option: Health Check" | → Return to Main Menu |
+| "3. Configuration" | → Jump to "Menu Option: Configuration" | → Return to Main Menu |
+| "4. Quit" | Output "Good bye!" | → STOP (only valid exit) |
 
 ---
 
@@ -332,40 +362,49 @@ AskUserQuestion:
 
 Sub-menu for maintenance operations.
 
+### Maintenance Submenu
+
 ```
 AskUserQuestion:
   question: "Which maintenance operation?"
+  header: "Maintenance"
   options:
     - label: "1. All"
       description: "Regenerate executor + clean logs/temp (recommended)"
-      value: "all"
     - label: "2. Regenerate Executor"
       description: "Rebuild executor with fresh script mappings"
-      value: "regenerate"
     - label: "3. Clean Old Logs"
       description: "Remove execution logs older than 30 days"
-      value: "clean-logs"
     - label: "4. Back"
       description: "Return to main menu"
-      value: "back"
+  multiSelect: false
 ```
 
-### All (Regenerate + Clean)
+### Routing
 
-Execute both maintenance operations in sequence:
+| User Selection | Action | After Completion |
+|----------------|--------|------------------|
+| "1. All" | Execute regenerate + clean (below) | → Return to Main Menu |
+| "2. Regenerate Executor" | Execute regenerate only (below) | → Return to Main Menu |
+| "3. Clean Old Logs" | Execute clean only (below) | → Return to Main Menu |
+| "4. Back" | Do nothing | → Return to Main Menu |
 
-1. Regenerate executor (see below)
-2. Clean old logs and temp files (see below)
+### Operation: All (Regenerate + Clean)
+
+Execute BOTH operations in sequence:
+
+1. Execute "Operation: Regenerate Executor" (below)
+2. Execute "Operation: Clean Old Logs" (below)
 
 **Output**: Combined summary of both operations.
 
-### Regenerate Executor
-
-Use the dedicated generate-executor script:
+### Operation: Regenerate Executor
 
 ```bash
 python3 marketplace/bundles/plan-marshall/skills/script-executor/scripts/generate-executor.py generate
 ```
+
+The script uses subcommands (`generate`, `verify`, `drift`, `paths`, `cleanup`), not positional arguments.
 
 Verify syntax:
 ```bash
@@ -374,8 +413,8 @@ python3 -m py_compile .plan/execute-script.py && echo "Executor syntax OK"
 
 **Output (TOON)**:
 ```toon
-status	scripts_discovered	executor_generated	log_module_generated	logs_cleaned
-success	47	.plan/execute-script.py	.plan/execution_log.py	0
+status	scripts_discovered	executor_generated	logs_cleaned
+success	47	.plan/execute-script.py	0
 ```
 
 ### Clean Old Logs and Temp Files
@@ -398,18 +437,23 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall:cleanup-temp clean
 Check if project docs need `.plan/temp/` documentation:
 
 ```bash
-# Check CLAUDE.md
-if [ -f "CLAUDE.md" ] && ! grep -q "\.plan/temp" CLAUDE.md; then
-  echo "CLAUDE.md needs .plan/temp documentation"
-fi
-
-# Check agents.md
-if [ -f "agents.md" ] && ! grep -q "\.plan/temp" agents.md; then
-  echo "agents.md needs .plan/temp documentation"
-fi
+python3 .plan/execute-script.py plan-marshall:plan-marshall:determine-mode check-docs
 ```
 
-If missing, add to the appropriate section:
+**Output (TOON)**:
+```toon
+status	ok
+files_needing_update	0
+```
+
+Or if updates needed:
+```toon
+status	needs_update
+files_needing_update	2
+missing	CLAUDE.md,agents.md
+```
+
+If `status` is `needs_update`, add to each listed file:
 ```
 - Use `.plan/temp/` for ALL temporary files (covered by `Write(.plan/**)` permission - avoids permission prompts)
 ```
@@ -422,24 +466,37 @@ Verify the planning system setup and diagnose issues. Run all checks and report 
 
 ### Step 1: Verify Executor
 
-Check executor exists and has correct permission:
+Check executor exists, is valid, and in sync with marketplace:
 
 ```bash
-# Check executor file exists
-test -f .plan/execute-script.py && echo "Executor: OK" || echo "Executor: MISSING"
-
-# Verify executor permission in global settings
-grep -q "Bash(python3 .plan/execute-script.py:\*)" ~/.claude/settings.json && \
-  echo "Executor permission: OK" || echo "Executor permission: MISSING"
+python3 .plan/execute-script.py plan-marshall:script-executor:generate-executor verify
 ```
 
-If executor missing: Offer to regenerate via Maintenance menu.
-If permission missing: Auto-fix with:
+**Output (TOON)**:
+```toon
+status	script_count
+ok	47
+```
+
+If status is `error` or executor missing: Offer to regenerate via Maintenance menu.
+
+### Step 2: Check Executor Drift
+
+Compare executor mappings with current marketplace state:
+
 ```bash
-python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync ensure-executor --target global
+python3 .plan/execute-script.py plan-marshall:script-executor:generate-executor drift
 ```
 
-### Step 2: Verify Plugin Wildcards
+**Output (TOON)**:
+```toon
+status	added	removed	changed
+ok	0	0	0
+```
+
+If drift detected (added/removed/changed > 0): Offer to regenerate executor.
+
+### Step 3: Verify Plugin Wildcards
 
 Check that enabled plugins have corresponding Skill/SlashCommand wildcards:
 
@@ -469,7 +526,7 @@ AskUserQuestion:
 
 If yes, run without `--dry-run`.
 
-### Step 3: Check for Stale Permissions
+### Step 4: Check for Stale Permissions
 
 Detect permissions for bundles that no longer exist:
 
@@ -479,7 +536,7 @@ python3 .plan/execute-script.py plan-marshall:permission-doctor:permission-docto
 
 Report any redundant or stale permissions found.
 
-### Step 4: Summary
+### Step 5: Summary
 
 Output health check summary:
 
@@ -488,13 +545,13 @@ status: success
 operation: health_check
 
 executor:
-  exists: true
-  permission: true
+  valid: true
+  script_count: 47
+  drift: none
 wildcards:
   total: 16
   missing: 0
 redundant_permissions: 0
-suspicious_permissions: 0
 
 overall: HEALTHY
 ```
@@ -506,15 +563,16 @@ status: warning
 operation: health_check
 
 executor:
-  exists: true
-  permission: false
+  valid: true
+  script_count: 47
+  drift: 3 added, 1 removed
 wildcards:
   total: 16
   missing: 2
 redundant_permissions: 3
 
 issues:
-  - Executor permission missing in global settings
+  - Executor drift detected (regenerate recommended)
   - 2 plugin wildcards missing
   - 3 redundant permissions in project settings
 

@@ -26,7 +26,7 @@ Activate when:
 | `pm-workflow:manage-config:manage-config` | Config field access |
 | `pm-workflow:manage-references:manage-references` | Reference file CRUD |
 | `pm-workflow:manage-lifecycle:manage-lifecycle` | Phase transitions |
-| `pm-workflow:manage-log:manage-work-log` | Work log entries |
+| `plan-marshall:logging:manage-log` | Work log entries |
 | `pm-workflow:git-workflow:git-workflow` | Commit, push, PR creation |
 
 ---
@@ -61,11 +61,8 @@ Returns only the required finalize fields in a single call.
 ### Step 0: Log Phase Start
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase finalize \
-  --type progress \
-  --summary "Starting finalize phase"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "Starting finalize phase"
 ```
 
 ### Step 1: Read Configuration
@@ -90,12 +87,8 @@ Returns: `branch`, `base_branch`, `issue_url`, `build_system`, and file counts i
 **After reading configuration**, log the finalize strategy decision:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase finalize \
-  --type decision \
-  --summary "Finalize strategy: verification={verification_required}, PR={create_pr}" \
-  --detail "branch={branch_strategy}, verification_command={verification_command}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "Finalize strategy: verification={verification_required}, PR={create_pr}, branch={branch_strategy}"
 ```
 
 ### Step 2: Run Verification (if required)
@@ -161,12 +154,8 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
 ### Step 7: Log Completion
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase finalize \
-  --type outcome \
-  --summary "Plan completed: commit={commit_hash}, PR={pr_url|skipped}" \
-  --detail "verification={passed|skipped}, push=success"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} SUCCESS "Plan completed: commit={commit_hash}, PR={pr_url|skipped}"
 ```
 
 ---
@@ -206,12 +195,8 @@ recovery: {recovery_suggestion}
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase finalize \
-  --type error \
-  --summary "ERROR: {step} failed - {error_type}" \
-  --detail "{full error context and message}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} ERROR "ERROR: {step} failed - {error_type}: {error_context}"
 ```
 
 ### Verification Failure
@@ -318,7 +303,7 @@ Contains: Configuration requirements, step-by-step validation checklist, output 
 | `pm-workflow:manage-config:manage-config` | `get-multi` | Read finalize config fields |
 | `pm-workflow:manage-references:manage-references` | `get-context` | Read branch, issue info |
 | `pm-workflow:manage-lifecycle:manage-lifecycle` | `transition` | Phase transition |
-| `pm-workflow:manage-log:manage-work-log` | `add` | Log completion |
+| `plan-marshall:logging:manage-log` | `work` | Log completion |
 | `pm-workflow:git-workflow:git-workflow` | `format-commit`, `analyze-diff` | Commit message generation |
 
 ---

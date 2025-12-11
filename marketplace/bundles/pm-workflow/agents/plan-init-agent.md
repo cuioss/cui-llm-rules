@@ -57,7 +57,7 @@ These constraints apply EVEN IF skill loading fails:
 pm-workflow:manage-lifecycle:manage-lifecycle create --plan-id X --title "Y" --plan-type Z --phases a,b,c,d
 pm-workflow:manage-config:manage-config create --plan-id X
 pm-workflow:manage-plan-documents:manage-plan-document request create --plan-id X --title "Y" --source Z --body "..."
-pm-workflow:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
+plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
 ```
 
 **CRITICAL**: Script name is SINGULAR (`manage-lifecycle`, `manage-config`) matching the skill name.

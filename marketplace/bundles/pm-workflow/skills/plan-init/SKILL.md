@@ -29,7 +29,7 @@ Activate when:
 | manage-files | `pm-workflow:manage-files` |
 | manage-references | `pm-workflow:manage-references` |
 | manage-lessons | `plan-marshall:lessons-learned` |
-| manage-work-log | `pm-workflow:manage-log` |
+| manage-log | `plan-marshall:logging:manage-log` |
 | manage-config | `pm-workflow:manage-config` |
 | manage-lifecycle | `pm-workflow:manage-lifecycle` |
 
@@ -51,11 +51,8 @@ Activate when:
 After deriving the plan_id (Step 2) and creating the plan directory (Step 5), log the phase start:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase init \
-  --type progress \
-  --summary "Starting init phase"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "Starting init phase"
 ```
 
 ### Step 1: Validate Input
@@ -191,12 +188,8 @@ AskUserQuestion:
 **After detecting plan type**, log the decision with reasoning:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase init \
-  --type decision \
-  --summary "Selected {plan_type}" \
-  --detail "{reasoning why this plan type was chosen}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[DECISION] Selected {plan_type}: {reasoning}"
 ```
 
 ### Step 9: Create Status
@@ -244,12 +237,8 @@ This adds finalize configuration to config.toon:
 Log the plan creation as an artifact:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase init \
-  --type artifact \
-  --summary "Created plan: {derived_title}" \
-  --detail "Source: {source_type}, type: {plan_type}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[ARTIFACT] Created plan: {derived_title} (source: {source_type}, type: {plan_type})"
 ```
 
 ### Step 13: Transition Phase
@@ -290,12 +279,8 @@ artifacts:
 On any error, **first log the error** to work-log (if plan directory exists):
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase init \
-  --type error \
-  --summary "ERROR: {error_type}" \
-  --detail "{full error context and message}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} ERROR "{error_type}: {full error context and message}"
 ```
 
 ### Invalid Lesson ID
@@ -344,7 +329,7 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 | `pm-workflow:manage-plan-documents` | Write request.md (typed document) |
 | `pm-workflow:manage-files` | Create/reference plan directory |
 | `pm-workflow:manage-references` | Initialize references |
-| `pm-workflow:manage-log` | Log creation |
+| `plan-marshall:logging:manage-log` | Log creation |
 | `plan-marshall:lessons-learned` | Read lesson (if source=lesson) |
 | `pm-workflow:manage-config` | Create config.toon |
 | `pm-workflow:manage-lifecycle` | Create status.toon, phase transitions |

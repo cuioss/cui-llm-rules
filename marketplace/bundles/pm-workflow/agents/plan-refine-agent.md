@@ -79,7 +79,7 @@ pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id X
 
 # Create tasks and manage lifecycle
 pm-workflow:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"
-pm-workflow:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
+plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
 pm-workflow:manage-lifecycle:manage-lifecycle transition --plan-id X --completed Y
 ```
 

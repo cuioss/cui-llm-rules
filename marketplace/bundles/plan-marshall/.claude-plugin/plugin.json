@@ -8,6 +8,7 @@
     "./skills/general-development-rules",
     "./skills/json-file-operations",
     "./skills/lessons-learned",
+    "./skills/logging",
     "./skills/manage-memories",
     "./skills/marketplace-inventory",
     "./skills/marketplace-sync",

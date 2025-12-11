@@ -22,7 +22,7 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 | manage-solution-outline | `pm-workflow:manage-solution-outline:manage-solution-outline` |
 | manage-config | `pm-workflow:manage-config:manage-config` |
 | manage-lifecycle | `pm-workflow:manage-lifecycle:manage-lifecycle` |
-| manage-work-log | `pm-workflow:manage-log:manage-work-log` |
+| manage-log | `plan-marshall:logging:manage-log` |
 | manage-task | `pm-workflow:manage-tasks:manage-task` |
 
 ---
@@ -76,11 +76,8 @@ This provides:
 ### Step 1: Log Phase Start
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type progress \
-  --summary "Starting refine phase"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "Starting refine phase"
 ```
 
 ### Step 2: Validate Plan Type
@@ -220,11 +217,8 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
 ### Step 6: Log Completion
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type outcome \
-  --summary "Completed refine: solution document created, {tasks_created} tasks"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} SUCCESS "Completed refine: solution document created, {tasks_created} tasks"
 ```
 
 ### Step 7: Phase Transition
@@ -242,12 +236,8 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
 On any error, **first log the error** to work-log:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type error \
-  --summary "ERROR: {error_type}" \
-  --detail "{full error context and message}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} ERROR "ERROR: {error_type} - {error_context}"
 ```
 
 ---
@@ -266,7 +256,7 @@ python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
 | `pm-workflow:manage-config:manage-config` | `get` | Read plan_type |
 | `pm-workflow:manage-tasks:manage-task` | `add` | Create tasks |
 | `pm-workflow:manage-lifecycle:manage-lifecycle` | `transition` | Phase transition |
-| `pm-workflow:manage-log:manage-work-log` | `add` | Log progress and completion |
+| `plan-marshall:logging:manage-log` | `work` | Log progress and completion |
 
 ### Standards (Load On-Demand)
 

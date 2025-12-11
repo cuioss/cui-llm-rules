@@ -130,12 +130,8 @@ npm run docs:check
 **Trigger**: "**Log**:", "Record completion"
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase {phase} \
-  --type artifact \
-  --summary "{what was done}" \
-  --detail "{outcome}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} SUCCESS "{what was done}: {outcome}"
 ```
 
 ### Lesson Learned

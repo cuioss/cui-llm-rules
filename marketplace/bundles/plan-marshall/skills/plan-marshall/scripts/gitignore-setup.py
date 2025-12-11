@@ -5,10 +5,9 @@ Configure .gitignore for the planning system.
 Ensures .plan/ directory is ignored while marshal.json is tracked.
 
 Usage:
-    python3 gitignore-setup.py [--project-root PATH] [--dry-run]
+    python3 gitignore-setup.py [--dry-run]
 
 Options:
-    --project-root PATH    Project root directory (default: current directory)
     --dry-run              Show what would be done without making changes
 
 Output (TOON format):

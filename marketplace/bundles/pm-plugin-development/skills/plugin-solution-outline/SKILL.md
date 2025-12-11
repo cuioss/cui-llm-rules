@@ -79,12 +79,8 @@ Analyze the request to determine the impact scope:
 **Log the decision**:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type decision \
-  --summary "Impact path: {Single|Multi}" \
-  --detail "{reasoning for the decision}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[DECISION] Impact path: {Single|Multi} - {reasoning}"
 ```
 
 ---
@@ -157,12 +153,8 @@ Process components in batches of **10-15 files** per bundle. After each batch:
 
 ```bash
 # After each batch of 10-15 components
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type progress \
-  --summary "Analyzed batch {N} of {bundle}: {X} affected, {Y} not affected" \
-  --detail "Affected: file1.md, file2.md | Not affected: file3.md, file4.md, ..."
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[PROGRESS] Analyzed batch {N} of {bundle}: {X} affected, {Y} not affected"
 ```
 
 ##### Per-Component Analysis
@@ -185,12 +177,8 @@ For each component, execute these steps **in order**:
 For each **affected** file, log immediately:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type finding \
-  --summary "Affected: {file_path}" \
-  --detail "Reason: {why this file needs changes}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[FINDING] Affected: {file_path} - {reason}"
 ```
 
 **Build affected files list** as you analyze:
@@ -208,12 +196,8 @@ affected_files:
 After all batches complete, log the summary:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type milestone \
-  --summary "Impact analysis complete: {total_affected} of {total_analyzed} affected" \
-  --detail "Bundles analyzed: {list}. Ready for deliverable creation."
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} SUCCESS "[MILESTONE] Impact analysis complete: {total_affected} of {total_analyzed} affected"
 ```
 
 #### 3b.3: Build Deliverables Section with Enumeration
@@ -462,7 +446,7 @@ If multiple components match:
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write --validate, validate, read, list-deliverables, exists)
 - `pm-workflow:manage-plan-documents:manage-plan-document` - Request operations (request read, request create)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
-- `pm-workflow:manage-log:manage-work-log` - Log decisions (add, read, list)
+- `plan-marshall:logging:manage-log` - Log decisions and progress (work)
 - `pm-workflow:manage-config:manage-config` - Plan config (read, get, set)
 - `pm-workflow:manage-references:manage-references` - Plan references (read, get, set)
 - `plan-marshall:marketplace-inventory:scan-marketplace-inventory` - Marketplace component inventory

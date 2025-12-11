@@ -77,13 +77,11 @@ plan_id: {plan_id}
 After each deliverable is created, log to work-log:
 
 ```
-Skill: pm-workflow:manage-log
-operation: add
+Skill: plan-marshall:logging
+type: work
 plan_id: {plan_id}
-phase: init
-type: artifact
-summary: "Created deliverable: {N}. {title}"
-detail: "{brief description of what this deliverable covers}"
+level: INFO
+message: "Created deliverable: {N}. {title}"
 ```
 
 ### Step 3: Return Results

@@ -122,12 +122,8 @@ Task: {domain.solution_outline_agent}
 
 Log solution outline creation:
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type artifact \
-  --summary "Created solution_outline.md" \
-  --detail "Deliverables defined, pending user review"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} SUCCESS "[ARTIFACT] Created solution_outline.md - pending user review"
 ```
 
 **If domain.solution_outline_agent IS null** (generic plan type):
@@ -197,12 +193,8 @@ Task: {domain.task_plan_agent}
 
 Log task plan agent invocation:
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
-  --plan-id {plan_id} \
-  --phase refine \
-  --type progress \
-  --summary "Invoked {agent_name}" \
-  --detail "Domain agent from skill frontmatter"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[PROGRESS] Invoked {agent_name}"
 ```
 
 ---
@@ -362,7 +354,7 @@ If you discover issues or improvements during execution, record them:
 | Script | Purpose |
 |--------|---------|
 | `pm-workflow:manage-config:manage-config` | Plan config field access |
-| `pm-workflow:manage-log:manage-work-log` | Work log entries |
+| `plan-marshall:logging:manage-log` | Work log entries |
 
 | Agent | Purpose |
 |-------|---------|

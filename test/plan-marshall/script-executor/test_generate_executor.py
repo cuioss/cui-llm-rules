@@ -178,6 +178,8 @@ def test_help_output():
     assert result.returncode == 0, f"Script failed: {result.stderr}"
     assert 'generate' in result.stdout, "Missing 'generate' in help"
     assert 'verify' in result.stdout, "Missing 'verify' in help"
+    assert 'drift' in result.stdout, "Missing 'drift' in help"
+    assert 'paths' in result.stdout, "Missing 'paths' in help"
     assert 'cleanup' in result.stdout, "Missing 'cleanup' in help"
 
 
@@ -206,6 +208,58 @@ def test_verify_requires_executor():
         )
 
         assert result.returncode == 1, f"Expected failure, got {result.returncode}"
+
+
+def test_drift_requires_executor():
+    """Drift fails when executor doesn't exist."""
+    with tempfile.TemporaryDirectory() as tmp:
+        result = subprocess.run(
+            ['python3', str(GENERATE_SCRIPT), 'drift'],
+            capture_output=True,
+            text=True,
+            cwd=tmp
+        )
+
+        assert result.returncode == 1, f"Expected failure, got {result.returncode}"
+        assert 'Could not read executor mappings' in result.stderr
+
+
+def test_paths_requires_executor():
+    """Paths fails when executor doesn't exist."""
+    with tempfile.TemporaryDirectory() as tmp:
+        result = subprocess.run(
+            ['python3', str(GENERATE_SCRIPT), 'paths'],
+            capture_output=True,
+            text=True,
+            cwd=tmp
+        )
+
+        assert result.returncode == 1, f"Expected failure, got {result.returncode}"
+        assert 'Could not read executor mappings' in result.stderr
+
+
+def test_drift_help():
+    """Drift subcommand has help."""
+    result = subprocess.run(
+        ['python3', str(GENERATE_SCRIPT), 'drift', '--help'],
+        capture_output=True,
+        text=True
+    )
+
+    assert result.returncode == 0, f"Script failed: {result.stderr}"
+    assert 'drift' in result.stdout.lower(), "Missing 'drift' in help"
+
+
+def test_paths_help():
+    """Paths subcommand has help."""
+    result = subprocess.run(
+        ['python3', str(GENERATE_SCRIPT), 'paths', '--help'],
+        capture_output=True,
+        text=True
+    )
+
+    assert result.returncode == 0, f"Script failed: {result.stderr}"
+    assert 'paths' in result.stdout.lower(), "Missing 'paths' in help"
 
 
 # =============================================================================
@@ -275,6 +329,10 @@ if __name__ == '__main__':
         test_help_output,
         test_generate_help,
         test_verify_requires_executor,
+        test_drift_requires_executor,
+        test_paths_requires_executor,
+        test_drift_help,
+        test_paths_help,
         test_discovers_scripts_from_directory_structure,
         test_skips_test_files,
     ])

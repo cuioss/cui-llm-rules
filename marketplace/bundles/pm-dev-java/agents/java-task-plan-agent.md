@@ -76,13 +76,11 @@ deliverable: {N}  # omit for batch
 After each task is created, log to work-log:
 
 ```
-Skill: pm-workflow:manage-log
-operation: add
+Skill: plan-marshall:logging
+type: work
 plan_id: {plan_id}
-phase: refine
-type: artifact
-summary: "Created {task_id}: {task_title}"
-detail: "{brief description of what this task accomplishes}"
+level: INFO
+message: "Created {task_id}: {task_title}"
 ```
 
 ### Step 3: Return Results

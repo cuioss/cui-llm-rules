@@ -56,7 +56,7 @@ The executor provides two-tier logging:
 
 When `--plan-id` is provided, logs to:
 ```
-.plan/plans/{plan-id}/execution.log
+.plan/plans/{plan-id}/script-execution.log
 ```
 
 **Benefits**:
@@ -76,18 +76,20 @@ Fallback when no plan context:
 
 ### Log Entry Formats
 
-**Success entries** (compact, single-line):
+**Success entries** (single-line):
 ```
-2025-12-08T10:30:00	pm-workflow:manage-files	add	0	0.15s
-2025-12-08T10:30:05	pm-dev-builder:builder-maven-rules	execute	0	45.23s
+[2025-12-08T10:30:00Z] [SUCCESS] [SCRIPT] pm-workflow:manage-files:manage-files add (0.15s)
 ```
 
-**Error entries** (detailed, multi-line):
+**Error entries** (multi-line with fields):
 ```
-2025-12-08T10:31:00	pm-workflow:manage-files	add	1	0.23s	ERROR
+[2025-12-08T10:31:00Z] [ERROR] [SCRIPT] pm-workflow:manage-files:manage-files add (0.23s)
+  exit_code: 1
   args: --plan-id my-plan --file missing.md
   stderr: FileNotFoundError: missing.md not found
 ```
+
+See `plan-marshall:logging` skill for full log format specification.
 
 ## Setup
 
@@ -102,8 +104,8 @@ Run `/plan-marshall` to generate the executor after bundle changes.
 └── logs/                  # Global execution logs (no plan context)
     └── script-execution-YYYY-MM-DD.log
 
-marketplace/bundles/plan-marshall-core/skills/script-executor/scripts/
-└── execution_log.py       # Shared logging module (not generated)
+marketplace/bundles/plan-marshall/skills/logging/scripts/
+└── plan_logging.py        # Unified logging module (see logging skill)
 ```
 
 ## Integration with Verification

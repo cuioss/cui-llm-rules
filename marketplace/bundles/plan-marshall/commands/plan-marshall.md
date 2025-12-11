@@ -1,7 +1,7 @@
 ---
 name: plan-marshall
 description: Project configuration wizard for planning system
-allowed-tools: Skill, AskUserQuestion
+allowed-tools: Read, Bash, Skill, AskUserQuestion
 ---
 
 # /plan-marshall
@@ -46,16 +46,30 @@ Display this banner on command start (output as single code block):
 
 ## Execution
 
-Load and execute the plan-marshall skill:
+### Step 1: Determine Mode
+
+Run the mode detection script (handles missing executor):
+
+```bash
+python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/determine-mode.py mode
+```
+
+If `--wizard` flag was provided, skip to wizard mode regardless of output.
+
+### Step 2: Route Based on Output
+
+| mode | reason | Action |
+|------|--------|--------|
+| `wizard` | `executor_missing` | Read skill, start at "First-Run Wizard" Step 1 |
+| `wizard` | `marshal_missing` | Read skill, start at "First-Run Wizard" Step 2 |
+| `menu` | `both_exist` | Read skill, go to "Interactive Menu" |
+
+### Step 3: Execute Skill
+
+Read and follow the skill instructions:
 
 ```
-Skill: plan-marshall:plan-marshall
+Read: marketplace/bundles/plan-marshall/skills/plan-marshall/SKILL.md
 ```
 
-The skill handles all interactive flows and operations:
-- First-run wizard for new projects
-- Interactive menu for returning users
-- Executor generation and maintenance
-- Permission configuration
-- Build system detection
-- Plan-type management
+Execute the section identified in Step 2. Follow all steps exactly as documented.

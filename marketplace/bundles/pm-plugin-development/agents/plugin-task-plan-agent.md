@@ -58,7 +58,7 @@ These constraints apply EVEN IF skill loading fails:
 ```
 pm-workflow:manage-solution-outline:manage-solution-outline list-deliverables --plan-id X
 pm-workflow:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"
-pm-workflow:manage-log:manage-work-log add --plan-id X --phase Y --type Z --summary "S"
+plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
 ```
 
 **CRITICAL**: Script name is SINGULAR (e.g., `manage-task`) even though skill name may be plural.
@@ -89,12 +89,12 @@ deliverable: {N}  # omit for batch
 After each task is created, log to work-log:
 
 ```
-Skill: pm-workflow:manage-log
-operation: add
+Skill: plan-marshall:logging
+operation: work add
 plan_id: {plan_id}
 phase: refine
-type: artifact
-summary: "Created {task_id}: {task_title}"
+category: ARTIFACT
+message: "Created {task_id}: {task_title}"
 detail: "{brief description of what this task accomplishes}"
 ```
 
