@@ -334,7 +334,7 @@ def test_report_help():
 
 
 def test_report_returns_valid_json():
-    """Test report returns valid JSON structure with file path."""
+    """Test report returns valid JSON structure with directory path."""
     if not marketplace_available():
         return  # Skip if marketplace not available
 
@@ -356,9 +356,12 @@ def test_report_returns_valid_json():
     assert data is not None, "Should return valid JSON"
     assert 'status' in data, "Should have status field"
     assert data['status'] == 'success', "Status should be success"
+    assert 'report_dir' in data, "Should have report_dir field"
     assert 'report_file' in data, "Should have report_file field"
+    assert 'findings_file' in data, "Should have findings_file field"
     assert 'summary' in data, "Should have summary field"
-    assert '.plan/temp/' in data['report_file'], "Report should be in .plan/temp/"
+    assert '.plan/temp/plugin-doctor-report-' in data['report_dir'], \
+        "Report dir should be in .plan/temp/plugin-doctor-report-*"
 
 
 def test_report_summary_structure():
@@ -420,8 +423,8 @@ def test_report_has_llm_review_items():
         "llm_review_items should be a list"
 
 
-def test_report_to_file():
-    """Test report outputs to file when --output specified."""
+def test_report_to_custom_dir():
+    """Test report outputs to custom directory when --output specified."""
     if not marketplace_available():
         return  # Skip if marketplace not available
 
@@ -432,26 +435,27 @@ def test_report_to_file():
 
     first_bundle = scan_data['bundles'][0]['name']
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-        output_file = f.name
+    # Create a temp directory for the custom output
+    output_dir = tempfile.mkdtemp()
 
     try:
         result = run_script(
             SCRIPT_PATH, 'report',
             '--bundles', first_bundle,
-            '--output', output_file,
+            '--output', output_dir,
             cwd=str(PROJECT_ROOT)
         )
         assert result.returncode == 0, f"Report failed: {result.stderr}"
 
-        # Verify file was created with valid JSON
-        assert Path(output_file).exists(), "Output file should exist"
-        with open(output_file, 'r') as f:
+        # Verify directory contains JSON file
+        json_path = Path(output_dir) / 'doctor-marketplace-report.json'
+        assert json_path.exists(), f"JSON file should exist: {json_path}"
+
+        with open(json_path, 'r') as f:
             data = json.load(f)
         assert 'summary' in data, "File should contain valid report"
     finally:
-        if Path(output_file).exists():
-            os.unlink(output_file)
+        shutil.rmtree(output_dir, ignore_errors=True)
 
 
 # =============================================================================
@@ -587,7 +591,9 @@ def test_fixture_report():
         response = result.json()
         assert response['status'] == 'success', "Status should be success"
         assert response['summary']['total_bundles'] == 1, "Should have one bundle"
+        assert 'report_dir' in response, "Should have report_dir"
         assert 'report_file' in response, "Should have report_file"
+        assert 'findings_file' in response, "Should have findings_file"
 
         # Read and verify report file
         report_path = temp_dir / response['report_file']
@@ -596,6 +602,10 @@ def test_fixture_report():
         with open(report_path, 'r') as f:
             report_data = json.load(f)
         assert 'llm_review_items' in report_data, "Report should have LLM review items"
+
+        # Verify directory structure
+        report_dir = temp_dir / response['report_dir']
+        assert report_dir.is_dir(), f"Report dir should exist: {report_dir}"
     finally:
         fixture.cleanup()
 
@@ -632,7 +642,7 @@ if __name__ == '__main__':
         test_report_returns_valid_json,
         test_report_summary_structure,
         test_report_has_llm_review_items,
-        test_report_to_file,
+        test_report_to_custom_dir,
         # Fixture tests
         test_fixture_scan,
         test_fixture_analyze_finds_issues,

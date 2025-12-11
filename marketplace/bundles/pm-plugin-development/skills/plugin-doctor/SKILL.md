@@ -813,20 +813,33 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marke
 # Apply safe fixes
 python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace fix
 
-# Generate report for LLM review (default: .plan/temp/doctor-marketplace-report-YYYYMMDD-HHMMSS.json)
+# Generate report for LLM review (creates directory: .plan/temp/plugin-doctor-report-{timestamp}/)
 python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report
 
-# Or specify custom output path
-python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report --output .plan/temp/custom-report.json
+# Or specify custom output directory
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report --output .plan/temp/my-review
 ```
 
-**Report Output**: Reports are always written to `.plan/temp/` directory with timestamped filenames by default (e.g., `doctor-marketplace-report-20251211-143022.json`). Use `--output` to specify a custom path.
+**Report Output**: Reports are written to a timestamped directory in `.plan/temp/` by default:
+```
+.plan/temp/plugin-doctor-report-{timestamp}/
+├── doctor-marketplace-report.json   # Script-generated structured data
+└── findings.md                       # LLM-generated analysis (Phase 2)
+```
+
+Use `--output` to specify a custom directory path.
 
 **Phase 2 (LLM - Semantic)**:
-After Phase 1 generates the report, the LLM processes:
-- Risky fixes (require semantic judgment)
-- Complex refactoring recommendations
-- Architectural improvement suggestions
+After Phase 1 creates the report directory and JSON, the LLM:
+1. Reads `doctor-marketplace-report.json` for structured data
+2. Applies contextual judgment (identifies false positives, priorities)
+3. Creates `findings.md` in the same directory with:
+   - Executive summary and statistics
+   - Bundle-by-bundle analysis
+   - Categorization of remaining issues (fixed, false positive, intentional)
+   - Recommendations for manual review
+4. Processes risky fixes with user confirmation
+5. Documents complex refactoring recommendations
 
 **Workflow for `/plugin-doctor marketplace`**:
 1. Run `doctor-marketplace scan` to discover components

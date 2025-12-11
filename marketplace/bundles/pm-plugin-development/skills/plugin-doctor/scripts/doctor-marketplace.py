@@ -60,20 +60,20 @@ from fix import (
 
 MARKETPLACE_BUNDLES_PATH = "marketplace/bundles"
 TEMP_DIR = ".plan/temp"
-REPORT_PREFIX = "doctor-marketplace-report"
+REPORT_DIR_PREFIX = "plugin-doctor-report"
+REPORT_JSON_NAME = "doctor-marketplace-report.json"
 
 
-def get_default_report_path() -> Path:
-    """Generate timestamped report path in .plan/temp/ directory."""
+def get_default_report_dir() -> Path:
+    """Generate timestamped report directory path in .plan/temp/."""
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    return Path(TEMP_DIR) / f"{REPORT_PREFIX}-{timestamp}.json"
+    return Path(TEMP_DIR) / f"{REPORT_DIR_PREFIX}-{timestamp}"
 
 
-def ensure_temp_dir() -> Path:
-    """Ensure .plan/temp/ directory exists and return path."""
-    temp_path = Path(TEMP_DIR)
-    temp_path.mkdir(parents=True, exist_ok=True)
-    return temp_path
+def ensure_report_dir(report_dir: Path) -> Path:
+    """Ensure report directory exists and return path."""
+    report_dir.mkdir(parents=True, exist_ok=True)
+    return report_dir
 
 
 # =============================================================================
@@ -766,26 +766,30 @@ def cmd_report(args) -> int:
     # Generate report
     report = generate_report(scan_results, all_analysis)
 
-    # Determine output path - always write to file
+    # Determine output directory
     if args.output:
-        output_path = Path(args.output)
-        # Ensure parent directory exists
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        # Custom output: treat as directory path
+        report_dir = Path(args.output)
     else:
-        # Default: timestamped file in .plan/temp/
-        ensure_temp_dir()
-        output_path = get_default_report_path()
+        # Default: timestamped directory in .plan/temp/
+        report_dir = get_default_report_dir()
 
-    # Write report to file
+    # Create directory and write JSON report
+    ensure_report_dir(report_dir)
+    json_path = report_dir / REPORT_JSON_NAME
+
     output_json = json.dumps(report, indent=2)
-    with open(output_path, "w", encoding="utf-8") as f:
+    with open(json_path, "w", encoding="utf-8") as f:
         f.write(output_json)
 
-    # Output success message with file path
+    # Output success message with directory and file paths
     print(json.dumps({
         "status": "success",
-        "report_file": str(output_path),
-        "summary": report["summary"]
+        "report_dir": str(report_dir),
+        "report_file": str(json_path),
+        "findings_file": str(report_dir / "findings.md"),
+        "summary": report["summary"],
+        "next_step": "LLM should read report_file and create findings.md with analysis"
     }, indent=2))
 
     return 0
@@ -819,8 +823,8 @@ Examples:
   # Apply safe fixes
   %(prog)s fix
 
-  # Generate report for LLM review
-  %(prog)s report --output analysis-report.json
+  # Generate report for LLM review (creates directory with JSON)
+  %(prog)s report --output .plan/temp/my-report
 """
     )
 
@@ -846,7 +850,7 @@ Examples:
     # report subcommand
     p_report = subparsers.add_parser('report', help='Generate comprehensive report')
     p_report.add_argument('--bundles', help='Comma-separated list of bundle names')
-    p_report.add_argument('--output', '-o', help='Output file for report (default: stdout)')
+    p_report.add_argument('--output', '-o', help='Output directory for report (default: .plan/temp/plugin-doctor-report-{timestamp})')
     p_report.set_defaults(func=cmd_report)
 
     args = parser.parse_args()
