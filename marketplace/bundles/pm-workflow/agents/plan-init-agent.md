@@ -1,7 +1,7 @@
 ---
 name: plan-init-agent
 description: Initialize a plan with task, config, and status from description, lesson, or issue
-tools: Read, Write, Edit, Glob, Bash, Skill, Task, AskUserQuestion
+tools: Read, Write, Edit, Glob, Bash, Skill, AskUserQuestion
 skills: pm-workflow:plan-init, plan-marshall:general-development-rules
 ---
 

@@ -291,7 +291,7 @@ def extract_issues_from_markdown_analysis(analysis: Dict, file_path: str, compon
             "file": file_path,
             "severity": "warning",
             "fixable": False,
-            "description": "Direct script path (Rule 8)"
+            "description": "Hardcoded script path - use executor notation instead (Rule 8)"
         })
 
     # Check CI rule
