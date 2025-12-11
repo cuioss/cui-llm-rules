@@ -31,6 +31,7 @@ Activate when:
 |--------|----------|---------|
 | determine-mode | `plan-marshall:plan-marshall:determine-mode` | Determine wizard vs menu mode |
 | gitignore-setup | `plan-marshall:plan-marshall:gitignore-setup` | Configure .gitignore for .plan/ |
+| cleanup-temp | `plan-marshall:plan-marshall:cleanup-temp` | Clean temp directories and old files |
 | marshal-config | `pm-workflow:manage-config:marshal-config` | Project-level marshal.json CRUD |
 | scan-marketplace-inventory | `plan-marshall:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
 | build-env | `pm-dev-builder:environment-detection:build-env` | Build system detection |
@@ -335,16 +336,28 @@ Sub-menu for maintenance operations.
 AskUserQuestion:
   question: "Which maintenance operation?"
   options:
-    - label: "Regenerate Executor"
+    - label: "1. All"
+      description: "Regenerate executor + clean logs/temp (recommended)"
+      value: "all"
+    - label: "2. Regenerate Executor"
       description: "Rebuild executor with fresh script mappings"
       value: "regenerate"
-    - label: "Clean Old Logs"
+    - label: "3. Clean Old Logs"
       description: "Remove execution logs older than 30 days"
       value: "clean-logs"
-    - label: "Back"
+    - label: "4. Back"
       description: "Return to main menu"
       value: "back"
 ```
+
+### All (Regenerate + Clean)
+
+Execute both maintenance operations in sequence:
+
+1. Regenerate executor (see below)
+2. Clean old logs and temp files (see below)
+
+**Output**: Combined summary of both operations.
 
 ### Regenerate Executor
 
