@@ -477,8 +477,16 @@ def parse_declared_tools(frontmatter: str) -> list[str]:
 
 
 def check_tool_usage(content: str, tool: str) -> bool:
-    """Check if a tool is referenced in content."""
-    return bool(re.search(re.escape(tool), content, re.IGNORECASE))
+    """Check if a tool is referenced in content.
+
+    Uses word boundaries and negative lookahead to avoid false positives like:
+    - 'Global' matching 'Glob'
+    - 'task=' matching 'Task' (parameter assignment)
+    """
+    # Use word boundaries with negative lookahead for = (parameter assignment)
+    # This avoids matching 'task="Fix..."' as Task tool usage
+    pattern = r'\b' + re.escape(tool) + r'\b(?!=)'
+    return bool(re.search(pattern, content, re.IGNORECASE))
 
 
 def find_missing_tools(content: str, declared_tools: list[str]) -> list[str]:
