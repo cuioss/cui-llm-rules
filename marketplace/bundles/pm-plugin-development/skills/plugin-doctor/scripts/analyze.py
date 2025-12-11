@@ -446,7 +446,8 @@ def parse_declared_tools(frontmatter: str) -> list[str]:
     and both inline (comma-separated) and YAML list (- item) formats.
     """
     # Try both field names
-    tools_match = re.search(r'^(?:tools|allowed-tools):\s*(.*)$', frontmatter, re.MULTILINE)
+    # Use [ \t]* instead of \s* to avoid matching newlines (which would cross lines)
+    tools_match = re.search(r'^(?:tools|allowed-tools):[ \t]*(.*)$', frontmatter, re.MULTILINE)
     if not tools_match:
         return []
 
