@@ -55,7 +55,6 @@ def format_timestamp() -> str:
 
 def format_log_entry(
     level: str,
-    category: str,
     message: str,
     **fields
 ) -> str:
@@ -64,7 +63,6 @@ def format_log_entry(
 
     Args:
         level: Log level (SUCCESS, INFO, WARN, ERROR)
-        category: Entry category (SCRIPT, DECISION, etc.)
         message: Primary message
         **fields: Additional fields to include as indented lines
 
@@ -72,7 +70,7 @@ def format_log_entry(
         Formatted log entry string with trailing newline
     """
     timestamp = format_timestamp()
-    lines = [f"[{timestamp}] [{level}] [{category}] {message}"]
+    lines = [f"[{timestamp}] [{level}] {message}"]
 
     for key, value in fields.items():
         if value is not None and value != '':
@@ -116,12 +114,13 @@ def get_log_path(plan_id: Optional[str], log_type: str = 'script') -> Path:
         if plan_dir.exists():
             return plan_dir / filename
 
-    # Global fallback (script only, work requires plan)
-    if log_type == 'work':
-        raise ValueError("work log requires valid plan_id")
-
+    # Global fallback for both script and work logs
     global_log_dir = get_global_log_dir()
     global_log_dir.mkdir(parents=True, exist_ok=True)
+
+    if log_type == 'work':
+        return global_log_dir / f'work-{date.today()}.log'
+
     return global_log_dir / f'script-execution-{date.today()}.log'
 
 # =============================================================================
@@ -151,7 +150,7 @@ def log_entry(log_type: str, plan_id: str, level: str, message: str) -> None:
         log_file = get_log_path(plan_id, log_type_lower)
         log_file.parent.mkdir(parents=True, exist_ok=True)
 
-        entry = format_log_entry(level, log_type.upper(), message)
+        entry = format_log_entry(level, message)
 
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(entry)
@@ -194,11 +193,11 @@ def log_script_execution(
         message = f"{notation} {subcommand} ({duration:.2f}s)"
 
         if exit_code == 0:
-            entry = format_log_entry('SUCCESS', 'SCRIPT', message)
+            entry = format_log_entry('SUCCESS', message)
         else:
             max_output = get_max_output()
             entry = format_log_entry(
-                'ERROR', 'SCRIPT', message,
+                'ERROR', message,
                 exit_code=exit_code,
                 args=' '.join(args),
                 stdout=stdout[:max_output].replace('\n', ' ')[:500] if stdout else None,
@@ -289,8 +288,10 @@ def log_work(
         log_file.parent.mkdir(parents=True, exist_ok=True)
 
         level = 'ERROR' if category == 'ERROR' else 'INFO'
+        # Include category in message for work logs (DECISION, ARTIFACT, etc.)
+        formatted_message = f"[{category}] {message}"
         entry = format_log_entry(
-            level, category, message,
+            level, formatted_message,
             phase=phase,
             detail=detail
         )
@@ -405,9 +406,11 @@ def list_recent_work(plan_id: str, limit: int = 10) -> dict:
 # PARSING HELPERS
 # =============================================================================
 
+# Matches both old format [timestamp] [level] [category] message
+# and new format [timestamp] [level] message (with optional [CATEGORY] in message)
 HEADER_PATTERN = re.compile(
     r'^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)\] '
-    r'\[(\w+)\] \[(\w+)\] (.+)$',
+    r'\[(\w+)\] (?:\[(\w+)\] )?(.+)$',
     re.MULTILINE
 )
 FIELD_PATTERN = re.compile(r'^  (\w+): (.+)$', re.MULTILINE)

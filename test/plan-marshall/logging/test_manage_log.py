@@ -45,7 +45,6 @@ def test_script_success():
 
         log_content = read_log_file(ctx.plan_dir, 'script')
         assert '[SUCCESS]' in log_content
-        assert '[SCRIPT]' in log_content
         assert 'test:skill:script add (0.15s)' in log_content
 
 
@@ -59,7 +58,6 @@ def test_script_error():
 
         log_content = read_log_file(ctx.plan_dir, 'script')
         assert '[ERROR]' in log_content
-        assert '[SCRIPT]' in log_content
 
 
 # =============================================================================
@@ -77,7 +75,6 @@ def test_work_info():
 
         log_content = read_log_file(ctx.plan_dir, 'work')
         assert '[INFO]' in log_content
-        assert '[WORK]' in log_content
         assert 'Created deliverable: auth module' in log_content
 
 
@@ -91,7 +88,6 @@ def test_work_warn():
 
         log_content = read_log_file(ctx.plan_dir, 'work')
         assert '[WARN]' in log_content
-        assert '[WORK]' in log_content
 
 
 # =============================================================================

@@ -38,9 +38,8 @@ def test_format_timestamp_iso8601():
 
 def test_format_log_entry_basic():
     """Log entry has correct structure."""
-    entry = module.format_log_entry('SUCCESS', 'SCRIPT', 'test message')
+    entry = module.format_log_entry('SUCCESS', 'test message')
     assert '[SUCCESS]' in entry, "Missing level"
-    assert '[SCRIPT]' in entry, "Missing category"
     assert 'test message' in entry, "Missing message"
     assert entry.endswith('\n'), "Should end with newline"
 
@@ -48,7 +47,7 @@ def test_format_log_entry_basic():
 def test_format_log_entry_with_fields():
     """Log entry includes additional fields."""
     entry = module.format_log_entry(
-        'ERROR', 'SCRIPT', 'failed',
+        'ERROR', 'failed',
         exit_code=1,
         args='--plan-id test'
     )
@@ -59,7 +58,7 @@ def test_format_log_entry_with_fields():
 def test_format_log_entry_skips_empty_fields():
     """Log entry skips None/empty fields."""
     entry = module.format_log_entry(
-        'INFO', 'PROGRESS', 'message',
+        'INFO', 'message',
         phase='init',
         detail=None,
         empty=''
@@ -169,7 +168,6 @@ def test_log_script_execution_success():
 
             content = log_file.read_text()
             assert '[SUCCESS]' in content
-            assert '[SCRIPT]' in content
             assert 'test:skill:script add' in content
             assert '0.15s' in content
         finally:

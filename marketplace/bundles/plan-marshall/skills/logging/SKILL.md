@@ -74,22 +74,24 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 ### Standard Entry Structure
 
 ```
-[{timestamp}] [{level}] [{type}] {message}
+[{timestamp}] [{level}] {message}
 ```
+
+Since entries go to separate files (`script-execution.log` vs `work.log`), redundant type tags are omitted.
 
 ### Example Output
 
 **script-execution.log**:
 ```
-[2025-12-11T12:14:26Z] [SUCCESS] [SCRIPT] pm-workflow:manage-files:manage-files create (0.19s)
-[2025-12-11T12:17:50Z] [ERROR] [SCRIPT] pm-workflow:manage-task:manage-task add failed (exit 1)
+[2025-12-11T12:14:26Z] [SUCCESS] pm-workflow:manage-files:manage-files create (0.19s)
+[2025-12-11T12:17:50Z] [ERROR] pm-workflow:manage-task:manage-task add failed (exit 1)
 ```
 
 **work.log**:
 ```
-[2025-12-11T11:14:30Z] [INFO] [WORK] Starting init phase
-[2025-12-11T11:14:48Z] [INFO] [WORK] Created deliverable: auth module
-[2025-12-11T11:17:50Z] [WARN] [WORK] Skipped validation step
+[2025-12-11T11:14:30Z] [INFO] Starting init phase
+[2025-12-11T11:14:48Z] [INFO] [DECISION] Selected plan-type-java: Task modifies .java files
+[2025-12-11T11:15:20Z] [INFO] [ARTIFACT] Created deliverable: auth module
 ```
 
 ### Log Levels
@@ -189,12 +191,13 @@ plan_id = extract_plan_id(['--plan-id', 'my-plan', '--file', 'test.md'])  # 'my-
 
 ```
 .plan/logs/
-└── script-execution-YYYY-MM-DD.log    # Daily global script logs
+├── script-execution-YYYY-MM-DD.log    # Daily global script logs
+└── work-YYYY-MM-DD.log                # Daily global work logs (when no plan)
 ```
 
 **Scope Selection**:
-- If `plan_id` is provided and plan exists: plan-scoped log
-- Otherwise: global log (script execution only, work requires plan)
+- If `plan_id` is provided and plan directory exists: plan-scoped log
+- Otherwise: global log (both script and work types supported)
 
 ---
 
