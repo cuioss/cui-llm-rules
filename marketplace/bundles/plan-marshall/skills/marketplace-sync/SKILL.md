@@ -61,7 +61,7 @@ python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync 
 **Output (JSON)**:
 ```json
 {
-  "executor_permission": "Bash(python3 .plan/execute-script.py:*)",
+  "executor_permission": "Bash(python3 .plan/execute-script.py *)",
   "settings_file": "/Users/name/.claude/settings.json",
   "action": "added",
   "success": true
@@ -108,7 +108,7 @@ python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync 
   "success": true,
   "dry_run": true,
   "executor": {
-    "permission": "Bash(python3 .plan/execute-script.py:*)",
+    "permission": "Bash(python3 .plan/execute-script.py *)",
     "action": "added"
   },
   "cleanup": {
@@ -122,7 +122,7 @@ python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync 
 ## Executor Permission Pattern
 
 The executor pattern uses a single permission for all marketplace scripts:
-- `Bash(python3 .plan/execute-script.py:*)`
+- `Bash(python3 .plan/execute-script.py *)`
 
 This replaces individual script path permissions because the executor invokes scripts via subprocess (not checked by Claude Code permissions).
 
@@ -148,7 +148,7 @@ This replaces individual script path permissions because the executor invokes sc
 The `plan-marshall` skill uses this during setup:
 
 1. **Step 2: Generate Executor** - Creates `.plan/execute-script.py`
-2. **Ensure Executor Permission** - Adds `Bash(python3 .plan/execute-script.py:*)` to global settings
+2. **Ensure Executor Permission** - Adds `Bash(python3 .plan/execute-script.py *)` to global settings
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync ensure-executor \

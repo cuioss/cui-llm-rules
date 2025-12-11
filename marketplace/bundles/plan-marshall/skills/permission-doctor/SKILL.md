@@ -150,7 +150,7 @@ local_settings: .claude/settings.json
 This skill is designed to run without user prompts. Required permissions:
 
 **Script Execution:**
-- `Bash(python3 .plan/execute-script.py:*)` - Script execution via executor
+- `Bash(python3 .plan/execute-script.py *)` - Script execution via executor
 
 **File Operations:**
 - `Read(~/.claude/settings.json)` - Read global settings

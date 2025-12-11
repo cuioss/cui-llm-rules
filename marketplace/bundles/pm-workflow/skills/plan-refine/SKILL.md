@@ -166,6 +166,42 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 
 **Why direct Write?** Solution outlines can contain ASCII diagrams and rich content that don't fit CLI parameter passing.
 
+### Step 4.5: MANDATORY USER REVIEW (NEVER SKIP)
+
+After creating solution_outline.md, you MUST halt and request user review:
+
+1. **Display the solution outline for review**:
+   ```
+   ## Solution Outline Created
+
+   📄 **Review your solution outline**: .plan/plans/{plan_id}/solution_outline.md
+
+   Please review the deliverables before proceeding.
+   ```
+
+2. **Ask the user to confirm or request changes**:
+   ```
+   AskUserQuestion:
+     questions:
+       - question: "Have you reviewed the solution outline? How would you like to proceed?"
+         header: "Review"
+         options:
+           - label: "Proceed to create tasks"
+             description: "Solution outline looks good, continue to task creation"
+           - label: "Request changes"
+             description: "I have feedback to improve the solution outline"
+         multiSelect: false
+   ```
+
+3. **Handle user response**:
+   - **If "Proceed to create tasks"**: Continue to Step 5
+   - **If "Request changes"** or user provides custom feedback:
+     - Incorporate feedback into solution_outline.md via Edit tool
+     - Re-validate the document
+     - Loop back to Step 4.5 (show updated outline, ask again)
+
+This halt is **NOT OPTIONAL**. The workflow MUST pause here for user review before creating tasks.
+
 ### Step 5: Create Tasks
 
 Create execution tasks referencing the goal in the solution document:

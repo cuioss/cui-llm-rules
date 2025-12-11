@@ -19,7 +19,7 @@ EXIT_SUCCESS = 0
 EXIT_ERROR = 1
 
 # Executor-only permission pattern
-EXECUTOR_PERMISSION = "Bash(python3 .plan/execute-script.py:*)"
+EXECUTOR_PERMISSION = "Bash(python3 .plan/execute-script.py *)"
 OVERLY_BROAD_PYTHON = "Bash(python3:*)"
 
 

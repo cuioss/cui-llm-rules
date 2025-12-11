@@ -164,13 +164,13 @@ python3 test/run-tests.py test/planning/plan-files/test_parse_plan.py  # single 
 
 ### Plugin Cache Sync
 
-When modifying plugin source files (skills, agents, commands), changes won't take effect until the plugin cache is updated. After editing files in `marketplace/bundles/`, copy them to the cache:
+When modifying plugin source files (skills, agents, commands), changes won't take effect until the plugin cache is updated. After editing files in `marketplace/bundles/`, run:
 
-```bash
-cp marketplace/bundles/{bundle}/skills/{skill}/SKILL.md ~/.claude/plugins/cache/plan-marshall/{bundle}/1.0.0/skills/{skill}/SKILL.md
+```
+/sync-plugin-cache
 ```
 
-Alternatively, run `/plan-marshall` → Maintenance → Regenerate Executor to rebuild the entire cache.
+This synchronizes all bundles from `marketplace/bundles/` to `~/.claude/plugins/cache/plan-marshall/` using rsync with `--delete` to ensure exact mirroring.
 
 ## Integration Points
 

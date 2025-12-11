@@ -80,11 +80,17 @@ This provides a seamless flow from task description to actionable tasks in a sin
 
 The refine phase uses **skill-based routing**: load the plan-type skill and invoke its documented domain agents directly.
 
+**CRITICAL**: This phase has 5 steps. Step 4 is a MANDATORY user review gate. Do NOT skip from Step 3 to Step 5.
+
+---
+
 **Step 1**: Get plan_type from config:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
   --plan-id {plan_id} --field plan_type
 ```
+
+---
 
 **Step 2**: Load the plan-type skill:
 ```
@@ -101,20 +107,95 @@ domain:
   pr_workflow: true
 ```
 
-**Step 3**: Route based on skill.domain:
+---
+
+**Step 3**: Invoke solution outline agent
+
+Route based on skill.domain:
 
 **If domain.solution_outline_agent is NOT null** (domain-specific plan type):
 ```
 Task: {domain.solution_outline_agent}
   Input: plan_id={plan_id}
-  Output: goals created
+  Output: deliverables created, solution_document path
+```
 
+Log solution outline creation:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
+  --plan-id {plan_id} \
+  --phase refine \
+  --type artifact \
+  --summary "Created solution_outline.md" \
+  --detail "Deliverables defined, pending user review"
+```
+
+**If domain.solution_outline_agent IS null** (generic plan type):
+```
+Task: pm-workflow:plan-refine-agent
+  Input: plan_id
+  Output: solution_outline created (agent handles Steps 3-5 internally)
+```
+Note: The plan-refine-agent handles its own user review internally. Skip to "After Refine Phase" when using this agent.
+
+---
+
+## ⛔ Step 4: MANDATORY USER REVIEW
+
+**STOP HERE. Do NOT proceed to Step 5 without user approval.**
+
+After the solution outline agent completes, you MUST:
+
+### 4a. Display the solution outline for review:
+```
+## Solution Outline Created
+
+📄 **Review your solution outline**: .plan/plans/{plan_id}/solution_outline.md
+
+Please review the deliverables and architecture before proceeding.
+```
+
+### 4b. Ask the user to confirm or request changes:
+```
+AskUserQuestion:
+  questions:
+    - question: "Have you reviewed the solution outline? How would you like to proceed?"
+      header: "Review"
+      options:
+        - label: "Proceed to create tasks"
+          description: "Solution outline looks good, continue to task planning"
+        - label: "Request changes"
+          description: "I have feedback to improve the solution outline"
+      multiSelect: false
+```
+
+### 4c. Handle user response:
+- **If "Proceed to create tasks"**: Continue to Step 5
+- **If "Request changes"** or user provides custom feedback:
+  - Capture the user's feedback
+  - Re-invoke the solution outline agent with feedback:
+    ```
+    Task: {domain.solution_outline_agent}
+      Input: plan_id={plan_id}, feedback="{user_feedback}"
+      Output: updated solution outline
+    ```
+  - **Loop back to Step 4a** (show updated outline, ask again)
+
+**This gate is NOT OPTIONAL.** Task creation MUST NOT proceed without explicit user approval.
+
+---
+
+**Step 5**: Create tasks from deliverables
+
+Only execute this step AFTER user approves in Step 4.
+
+```
 Task: {domain.task_plan_agent}
   Input: plan_id={plan_id}
   Output: tasks created
 ```
 
-Log each domain agent invocation:
+Log task plan agent invocation:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
   --plan-id {plan_id} \
@@ -124,14 +205,11 @@ python3 .plan/execute-script.py pm-workflow:manage-log:manage-work-log add \
   --detail "Domain agent from skill frontmatter"
 ```
 
-**If domain.solution_outline_agent IS null** (generic plan type):
-```
-Task: pm-workflow:plan-refine-agent
-  Input: plan_id
-  Output: tasks count
-```
+---
 
-**Refine agent**: Fallback for generic plans without domain-specific agents
+### After Refine Phase
+
+Refine phase is complete when tasks are created. The plan is now ready for `/plan-execute`.
 
 ## ACTIONS
 

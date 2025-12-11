@@ -88,8 +88,11 @@ pm-workflow:manage-lifecycle:manage-lifecycle transition --plan-id X --completed
 ## Parameters
 
 - **plan_id** (required): Plan identifier
+- **feedback** (optional): User feedback from review (for revision iterations)
 
 ## Workflow
+
+**If `feedback` is provided**: This is a revision iteration. Read the existing solution_outline.md via manage-solution-outline script, incorporate the user's feedback, update the document using Write tool, and return to the orchestrating command for another review cycle.
 
 After skill is loaded (Step 0), follow the skill's workflow with these parameters:
 

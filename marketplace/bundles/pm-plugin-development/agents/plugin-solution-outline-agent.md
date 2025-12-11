@@ -80,8 +80,11 @@ Direct `.plan/` file access bypasses ALL of these and CAUSES FAILURES.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
+| `feedback` | string | No | User feedback from review (for revision iterations) |
 
 ## Workflow
+
+**If `feedback` is provided**: This is a revision iteration. Read the existing solution_outline.md, incorporate the user's feedback, update the document, and return.
 
 After skill is loaded (Step 0), follow the skill's workflow:
 

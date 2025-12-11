@@ -81,6 +81,12 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 
 **Invoked by**: `/plan-manage action=refine` command
 
+**Input Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `plan_id` | string | Yes | Plan identifier |
+| `feedback` | string | No | User feedback from review (for revision iterations) |
+
 **Responsibilities**:
 - Load `pm-workflow:manage-solution-outline` skill for structure guidance
 - Read request.md for the request
@@ -89,14 +95,36 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 - Document deliverables as numbered `### N. Title` sections
 - Validate with `pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id {plan_id}`
 - Record lessons-learned on issues
+- **If `feedback` provided**: Incorporate user feedback into existing solution_outline.md
 
 **Returns**: `{status, deliverable_count, lessons_recorded}`
+
+### MANDATORY User Review (Command Responsibility)
+
+After the solution outline agent completes, the `/plan-manage` command MUST:
+
+1. **Display the solution outline for review**:
+   ```
+   ## Solution Outline Created
+
+   📄 **Review your solution outline**: .plan/plans/{plan_id}/solution_outline.md
+
+   Please review the deliverables and architecture before proceeding.
+   ```
+
+2. **Ask user via AskUserQuestion**:
+   - Option 1: "Proceed to create tasks" → Continue to task plan agent
+   - Option 2: "Request changes" → Capture feedback, re-invoke solution outline agent with `feedback` parameter
+
+3. **Loop until user approves**: This halt is NOT OPTIONAL. Task creation MUST NOT proceed without user confirmation.
+
+**Rationale**: Solution outlines define deliverables that become tasks. User review ensures alignment before committing to implementation scope.
 
 ### Task Plan Agent
 
 **Purpose**: Transform deliverables into executable tasks (Solution Outline → Tasks)
 
-**Invoked by**: `/plan-manage action=refine` command (after solution outline agent completes)
+**Invoked by**: `/plan-manage action=refine` command (after user approves solution outline)
 
 **Responsibilities**:
 - Read solution_outline.md for deliverables via `pm-workflow:manage-solution-outline:manage-solution-outline list-deliverables`
