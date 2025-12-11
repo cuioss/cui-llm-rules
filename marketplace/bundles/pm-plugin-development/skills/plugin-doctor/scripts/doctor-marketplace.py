@@ -321,7 +321,13 @@ def extract_issues_from_markdown_analysis(analysis: Dict, file_path: str, compon
 
 
 def extract_issues_from_coverage_analysis(coverage: Dict, file_path: str, component_type: str = "") -> List[Dict]:
-    """Extract issues from tool coverage analysis.
+    """Extract deterministic issues from tool coverage analysis.
+
+    NOTE: This function only extracts issues that can be determined structurally:
+    - Rule 6 violations (Task declared in agent frontmatter)
+
+    Tool usage analysis (missing/unused) is NOT done here - that requires
+    semantic understanding and is delegated to LLM via tool-coverage-agent.
 
     Args:
         coverage: Tool coverage analysis result
@@ -330,35 +336,22 @@ def extract_issues_from_coverage_analysis(coverage: Dict, file_path: str, compon
     """
     issues = []
 
-    tc = coverage.get("tool_coverage", {})
+    # Only extract deterministic violations
+    violations = coverage.get("critical_violations", {})
 
-    # Unused tools
-    unused = tc.get("unused_tools", [])
-    if unused:
+    # Rule 6: Agent declares Task tool (deterministic - check frontmatter only)
+    if component_type == "agent" and violations.get("has_task_declared"):
         issues.append({
-            "type": "unused-tool-declared",
-            "file": file_path,
-            "severity": "info",
-            "fixable": True,
-            "details": {"unused_tools": unused}
-        })
-
-    # Missing tools
-    missing = tc.get("missing_tools", [])
-
-    # Rule 6: Agents must never use Task tool
-    # Filter out Task from missing_tools for agents - it should be a Rule 6 violation, not a missing tool
-    if component_type == "agent" and "Task" in missing:
-        missing = [t for t in missing if t != "Task"]
-
-    if missing:
-        issues.append({
-            "type": "tool-not-declared",
+            "type": "rule-6-violation",
             "file": file_path,
             "severity": "warning",
             "fixable": True,
-            "details": {"missing_tools": missing}
+            "description": "Agent declares Task tool (Rule 6)"
         })
+
+    # NOTE: tool-not-declared and unused-tool-declared issues are NOT extracted here.
+    # Those require semantic analysis by LLM via tool-coverage-agent.
+    # Components needing tool analysis are listed in report["components_for_tool_analysis"]
 
     return issues
 
@@ -481,41 +474,84 @@ def find_bundle_for_file(file_path: Path, marketplace_root: Path) -> Optional[Pa
 # Report Functions
 # =============================================================================
 
-def generate_report(scan_results: Dict, analysis_results: List[Dict], fix_results: Optional[Dict] = None) -> Dict:
-    """Generate comprehensive report for LLM review."""
+def count_issues_by_type(all_issues: List[Dict]) -> Dict[str, int]:
+    """Count issues by their type."""
+    counts: Dict[str, int] = {}
+    for issue in all_issues:
+        itype = issue.get("type", "unknown")
+        counts[itype] = counts.get(itype, 0) + 1
+    return counts
 
+
+def count_issues_by_bundle(analysis_results: List[Dict]) -> Dict[str, Dict[str, int]]:
+    """Count issues by bundle with safe/risky breakdown."""
+    counts: Dict[str, Dict[str, int]] = {}
+    for result in analysis_results:
+        path = result.get("component", {}).get("path", "")
+        bundle_name = extract_bundle_name(path)
+
+        if bundle_name not in counts:
+            counts[bundle_name] = {"total": 0, "safe": 0, "risky": 0}
+
+        for issue in result.get("issues", []):
+            counts[bundle_name]["total"] += 1
+            if issue.get("fixable", False):
+                cat = categorize_fix(issue)
+                counts[bundle_name]["safe" if cat == "safe" else "risky"] += 1
+
+    return counts
+
+
+def extract_components_for_tool_analysis(analysis_results: List[Dict]) -> List[Dict]:
+    """Extract components needing semantic tool coverage analysis by LLM."""
+    components = []
+    for result in analysis_results:
+        tc = result.get("coverage", {}).get("tool_coverage", {})
+        if tc.get("needs_llm_analysis"):
+            comp = result.get("component", {})
+            components.append({
+                "file": comp.get("path", ""),
+                "type": comp.get("type", ""),
+                "bundle": result.get("bundle", ""),
+                "declared_tools": tc.get("declared_tools", [])
+            })
+    return components
+
+
+def build_llm_review_items(categorized: Dict) -> List[Dict]:
+    """Build list of items requiring LLM review."""
+    items = []
+    for issue in categorized["risky"]:
+        items.append({
+            "type": issue.get("type"),
+            "file": issue.get("file"),
+            "description": issue.get("description", ""),
+            "action_required": "Review and confirm fix"
+        })
+    for issue in categorized["unfixable"]:
+        items.append({
+            "type": issue.get("type"),
+            "file": issue.get("file"),
+            "description": issue.get("description", ""),
+            "action_required": "Manual investigation required"
+        })
+    return items
+
+
+def generate_report(scan_results: Dict, analysis_results: List[Dict], fix_results: Optional[Dict] = None) -> Dict:
+    """Generate comprehensive report for LLM review.
+
+    Includes:
+    - Deterministic issues found by script (structural violations)
+    - Components needing tool coverage analysis by LLM (semantic work)
+    """
     # Aggregate all issues
     all_issues = []
     for result in analysis_results:
         all_issues.extend(result.get("issues", []))
 
     categorized = categorize_all_issues(all_issues)
-
-    # Count by type
-    issue_counts: Dict[str, int] = {}
-    for issue in all_issues:
-        itype = issue.get("type", "unknown")
-        issue_counts[itype] = issue_counts.get(itype, 0) + 1
-
-    # Count by bundle
-    bundle_counts: Dict[str, Dict[str, int]] = {}
-    for result in analysis_results:
-        comp = result.get("component", {})
-        path = comp.get("path", "")
-
-        # Extract bundle name from path
-        bundle_name = extract_bundle_name(path)
-        if bundle_name not in bundle_counts:
-            bundle_counts[bundle_name] = {"total": 0, "safe": 0, "risky": 0}
-
-        for issue in result.get("issues", []):
-            bundle_counts[bundle_name]["total"] += 1
-            cat = categorize_fix(issue)
-            if issue.get("fixable", False):
-                if cat == "safe":
-                    bundle_counts[bundle_name]["safe"] += 1
-                else:
-                    bundle_counts[bundle_name]["risky"] += 1
+    components_for_tool_analysis = extract_components_for_tool_analysis(analysis_results)
 
     report = {
         "summary": {
@@ -524,32 +560,17 @@ def generate_report(scan_results: Dict, analysis_results: List[Dict], fix_result
             "total_issues": len(all_issues),
             "safe_fixes": len(categorized["safe"]),
             "risky_fixes": len(categorized["risky"]),
-            "unfixable": len(categorized["unfixable"])
+            "unfixable": len(categorized["unfixable"]),
+            "components_needing_tool_analysis": len(components_for_tool_analysis)
         },
-        "issues_by_type": issue_counts,
-        "issues_by_bundle": bundle_counts,
+        "issues_by_type": count_issues_by_type(all_issues),
+        "issues_by_bundle": count_issues_by_bundle(analysis_results),
         "safe_fixes": categorized["safe"],
         "risky_fixes": categorized["risky"],
         "unfixable_issues": categorized["unfixable"],
-        "llm_review_items": []
+        "components_for_tool_analysis": components_for_tool_analysis,
+        "llm_review_items": build_llm_review_items(categorized)
     }
-
-    # Items requiring LLM review
-    for issue in categorized["risky"]:
-        report["llm_review_items"].append({
-            "type": issue.get("type"),
-            "file": issue.get("file"),
-            "description": issue.get("description", ""),
-            "action_required": "Review and confirm fix"
-        })
-
-    for issue in categorized["unfixable"]:
-        report["llm_review_items"].append({
-            "type": issue.get("type"),
-            "file": issue.get("file"),
-            "description": issue.get("description", ""),
-            "action_required": "Manual investigation required"
-        })
 
     if fix_results:
         report["fix_results"] = {

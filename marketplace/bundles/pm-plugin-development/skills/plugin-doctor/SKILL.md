@@ -806,17 +806,40 @@ Parse the JSON output to get:
    Read: {report_file}
    ```
 
-2. **Analyze and create findings.md** in the same directory with:
+2. **Tool Coverage Analysis via Agents** (for items in `components_for_tool_analysis`):
+
+   For each component needing tool analysis, spawn `tool-coverage-agent`:
+   ```
+   Task: tool-coverage-agent
+   Prompt: Analyze tool coverage for {file}
+     - file_path: {file}
+     - declared_tools: {declared_tools}
+     - component_type: {type}
+   ```
+
+   The agent semantically determines:
+   - Which tools are actually USED (not just mentioned in docs)
+   - Missing tools (used but not declared)
+   - Unused tools (declared but not used)
+   - False positives (tool mentioned in documentation, not actual usage)
+
+   **Why agents?** Script-based regex detection causes false positives:
+   - "Global settings" matched "Glob"
+   - "task=" parameter matched "Task"
+   - Documentation about tools matched as usage
+
+3. **Aggregate agent results** and create findings.md with:
    - Executive summary with statistics
    - Bundle-by-bundle analysis
    - Issue categorization:
      - **Fixed**: Safe fixes already applied by script
-     - **False Positive**: Rule violations that are intentional (e.g., Maven in documentation examples)
+     - **False Positive**: Rule violations that are intentional
      - **Intentional**: Design decisions (e.g., Task tool for orchestration)
      - **Needs Review**: Actual issues requiring attention
+   - Tool coverage findings from agents
    - Recommendations for manual review
 
-3. **Write findings.md**:
+4. **Write findings.md**:
    ```
    Write: {findings_file}
    ```
@@ -867,7 +890,7 @@ Display final summary:
 | Script | Subcommand | Mode | Purpose |
 |--------|------------|------|---------|
 | `analyze.py` | `markdown` | **EXECUTE** | Structural analysis, bloat, Rule 6/7/Pattern 22 |
-| `analyze.py` | `coverage` | **EXECUTE** | Tool fit score, missing/unused tools |
+| `analyze.py` | `coverage` | **EXECUTE** | Extract declared tools (semantic analysis via agent) |
 | `analyze.py` | `structure` | **EXECUTE** | Skill directory structure validation |
 | `analyze.py` | `cross-file` | **EXECUTE** | Cross-file duplication, similarity, extraction analysis |
 | `validate.py` | `references` | **EXECUTE** | Reference extraction and validation |

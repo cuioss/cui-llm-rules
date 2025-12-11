@@ -476,64 +476,13 @@ def parse_declared_tools(frontmatter: str) -> list[str]:
     return tools
 
 
-def check_tool_usage(content: str, tool: str) -> bool:
-    """Check if a tool is referenced in content.
-
-    Uses word boundaries and negative lookahead to avoid false positives like:
-    - 'Global' matching 'Glob'
-    - 'task=' matching 'Task' (parameter assignment)
-    """
-    # Use word boundaries with negative lookahead for = (parameter assignment)
-    # This avoids matching 'task="Fix..."' as Task tool usage
-    pattern = r'\b' + re.escape(tool) + r'\b(?!=)'
-    return bool(re.search(pattern, content, re.IGNORECASE))
-
-
-def find_missing_tools(content: str, declared_tools: list[str]) -> list[str]:
-    """Find common tools used but not declared."""
-    common_tools = [
-        'Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash',
-        'WebFetch', 'WebSearch', 'AskUserQuestion', 'TodoWrite',
-        'Skill', 'Task', 'SlashCommand'
-    ]
-
-    missing = []
-    declared_lower = [t.lower() for t in declared_tools]
-
-    for tool in common_tools:
-        if check_tool_usage(content, tool) and tool.lower() not in declared_lower:
-            missing.append(tool)
-
-    return missing
-
-
-def calculate_fit_score(used_count: int, declared_count: int,
-                        missing_count: int, unused_count: int) -> float:
-    """Calculate tool fit score."""
-    if declared_count == 0:
-        return 0.0
-
-    if missing_count == 0 and unused_count == 0:
-        return 100.0
-
-    if missing_count == 0:
-        return (used_count / declared_count) * 100
-
-    total_needed = used_count + missing_count
-    if total_needed == 0:
-        return 0.0
-    return (used_count / total_needed) * 100
-
-
-def get_rating(score: float) -> str:
-    """Get rating based on score."""
-    if score >= 90:
-        return 'Excellent'
-    elif score >= 70:
-        return 'Good'
-    elif score >= 50:
-        return 'Needs improvement'
-    return 'Poor'
+# NOTE: Semantic tool usage detection functions removed.
+# Tool usage analysis (missing/unused) is now delegated to LLM via tool-coverage-agent.
+# The following functions were removed as they caused false positives:
+# - check_tool_usage() - regex matching couldn't distinguish docs from invocations
+# - find_missing_tools() - depended on check_tool_usage()
+# - calculate_fit_score() - no longer applicable without usage detection
+# - get_rating() - no longer applicable without fit score
 
 
 def find_maven_calls(content: str) -> list[dict]:
@@ -561,7 +510,14 @@ def find_backup_patterns(content: str) -> list[dict]:
 
 
 def analyze_tool_coverage(file_path: Path) -> dict:
-    """Analyze tool coverage in file."""
+    """Analyze tool declarations in file (deterministic only).
+
+    NOTE: This function only extracts declared tools from frontmatter.
+    Semantic analysis of tool USAGE (missing/unused detection) is delegated
+    to the LLM via tool-coverage-agent for accurate context understanding.
+
+    Returns declared tools and structural info for LLM analysis.
+    """
     try:
         content = file_path.read_text(encoding='utf-8', errors='replace')
     except (OSError, IOError) as e:
@@ -574,46 +530,25 @@ def analyze_tool_coverage(file_path: Path) -> dict:
     declared_tools = parse_declared_tools(frontmatter)
     declared_count = len(declared_tools)
 
-    body_content = extract_content_after_frontmatter(content)
+    # Rule 6 check: Task in agent frontmatter (deterministic - just check declaration)
+    has_task_declared = 'Task' in declared_tools or 'task' in [t.lower() for t in declared_tools]
 
-    used_tools = []
-    unused_tools = []
-
-    for tool in declared_tools:
-        if check_tool_usage(body_content, tool):
-            used_tools.append(tool)
-        else:
-            unused_tools.append(tool)
-
-    used_count = len(used_tools)
-    unused_count = len(unused_tools)
-
-    missing_tools = find_missing_tools(body_content, declared_tools)
-    missing_count = len(missing_tools)
-
-    tool_fit_score = calculate_fit_score(used_count, declared_count, missing_count, unused_count)
-    rating = get_rating(tool_fit_score)
-
-    has_task_tool = 'Task' in declared_tools or 'task' in [t.lower() for t in declared_tools]
-    has_task_calls = bool(re.search(r'Task tool|invoke.*Task|subagent_type', body_content, re.IGNORECASE))
-    maven_calls = find_maven_calls(body_content)
-    backup_patterns = find_backup_patterns(body_content)
+    # Structural checks only (no semantic tool usage detection)
+    maven_calls = find_maven_calls(content)
+    backup_patterns = find_backup_patterns(content)
 
     return {
         'file_path': str(file_path),
         'tool_coverage': {
             'declared_count': declared_count,
-            'used_count': used_count,
-            'missing_count': missing_count,
-            'unused_count': unused_count,
-            'tool_fit_score': round(tool_fit_score, 1),
-            'rating': rating,
-            'missing_tools': missing_tools,
-            'unused_tools': unused_tools
+            'declared_tools': declared_tools,
+            # These fields removed - LLM determines via agent:
+            # 'used_count', 'missing_count', 'unused_count',
+            # 'tool_fit_score', 'rating', 'missing_tools', 'unused_tools'
+            'needs_llm_analysis': True
         },
         'critical_violations': {
-            'has_task_tool': has_task_tool,
-            'has_task_calls': has_task_calls,
+            'has_task_declared': has_task_declared,
             'maven_calls': maven_calls,
             'backup_file_patterns': backup_patterns
         }
