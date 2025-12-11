@@ -5,6 +5,7 @@ tools:
   - Glob
   - Read
   - Grep
+  - Bash
   - Skill
 description: Autonomous Gradle build agent with project detection and skill delegation
 ---

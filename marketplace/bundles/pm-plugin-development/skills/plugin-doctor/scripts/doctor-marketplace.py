@@ -197,7 +197,7 @@ def analyze_component(component: Dict) -> Dict:
             coverage = analyze_tool_coverage(file_path)
             if "error" not in coverage:
                 analysis["coverage"] = coverage
-                issues.extend(extract_issues_from_coverage_analysis(coverage, path))
+                issues.extend(extract_issues_from_coverage_analysis(coverage, path, component_type))
 
     elif component_type == "skill":
         skill_dir = Path(path)
@@ -320,8 +320,14 @@ def extract_issues_from_markdown_analysis(analysis: Dict, file_path: str, compon
     return issues
 
 
-def extract_issues_from_coverage_analysis(coverage: Dict, file_path: str) -> List[Dict]:
-    """Extract issues from tool coverage analysis."""
+def extract_issues_from_coverage_analysis(coverage: Dict, file_path: str, component_type: str = "") -> List[Dict]:
+    """Extract issues from tool coverage analysis.
+
+    Args:
+        coverage: Tool coverage analysis result
+        file_path: Path to the component file
+        component_type: Type of component (agent, command, skill)
+    """
     issues = []
 
     tc = coverage.get("tool_coverage", {})
@@ -339,6 +345,12 @@ def extract_issues_from_coverage_analysis(coverage: Dict, file_path: str) -> Lis
 
     # Missing tools
     missing = tc.get("missing_tools", [])
+
+    # Rule 6: Agents must never use Task tool
+    # Filter out Task from missing_tools for agents - it should be a Rule 6 violation, not a missing tool
+    if component_type == "agent" and "Task" in missing:
+        missing = [t for t in missing if t != "Task"]
+
     if missing:
         issues.append({
             "type": "tool-not-declared",

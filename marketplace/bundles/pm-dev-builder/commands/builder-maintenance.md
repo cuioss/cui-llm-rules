@@ -1,7 +1,7 @@
 ---
 name: builder-maintenance
 description: Orchestrate dependency/package maintenance workflows (auto-detects build system)
-allowed-tools: Skill, Task
+allowed-tools: Write, Bash, Skill, Task
 ---
 
 # Builder Maintenance Command

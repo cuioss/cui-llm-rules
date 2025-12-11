@@ -1,7 +1,7 @@
 ---
 name: builder-build-and-fix
 description: Execute build, analyze errors, delegate fixes, and iterate until clean (auto-detects build system)
-allowed-tools: Skill, Task
+allowed-tools: Read, Bash, Skill, Task
 ---
 
 # Build and Fix Command

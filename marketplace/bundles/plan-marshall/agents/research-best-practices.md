@@ -16,7 +16,7 @@ examples:
 - User: "What are the recommendations for TOPIC"
   Assistant: Invokes research-best-practices agent to find recommendations
 
-tools: WebSearch, WebFetch
+tools: WebSearch, WebFetch, Read, Skill
 model: opus
 color: blue
 ---
