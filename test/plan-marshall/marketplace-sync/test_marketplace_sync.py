@@ -147,7 +147,7 @@ class TestExecutorPattern(ScriptTestCase):
         self.assertEqual(data.get('action'), 'added')
 
         settings = json.loads(settings_file.read_text())
-        self.assertIn('Bash(python3 .plan/execute-script.py:*)', settings['permissions']['allow'])
+        self.assertIn('Bash(python3 .plan/execute-script.py *)', settings['permissions']['allow'])
 
     def test_ensure_executor_already_exists(self):
         """Should report when executor permission already exists."""
@@ -156,7 +156,7 @@ class TestExecutorPattern(ScriptTestCase):
         settings_file = claude_dir / 'settings.json'
         settings_file.write_text(json.dumps({
             "permissions": {
-                "allow": ["Bash(python3 .plan/execute-script.py:*)"],
+                "allow": ["Bash(python3 .plan/execute-script.py *)"],
                 "deny": [],
                 "ask": []
             }
@@ -237,7 +237,7 @@ class TestExecutorPattern(ScriptTestCase):
         self.assertIn('cleanup', data)
 
         settings = json.loads(settings_file.read_text())
-        self.assertIn('Bash(python3 .plan/execute-script.py:*)', settings['permissions']['allow'])
+        self.assertIn('Bash(python3 .plan/execute-script.py *)', settings['permissions']['allow'])
         self.assertIn('Bash(git:*)', settings['permissions']['allow'])
         # Individual script permission should be removed
         self.assertEqual(len(settings['permissions']['allow']), 2)

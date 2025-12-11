@@ -26,7 +26,7 @@ SCRIPT_DIR = Path(__file__).parent
 FILE_OPS_DIR = SCRIPT_DIR.parent.parent / 'file-operations-base' / 'scripts'
 sys.path.insert(0, str(FILE_OPS_DIR))
 
-from file_ops import base_path
+# Note: base_path not used here since init uses project_dir explicitly
 
 
 DEFAULT_STRUCTURE = {
@@ -83,7 +83,9 @@ def cmd_init(args) -> int:
     """Initialize run-configuration.json with base structure."""
     try:
         project_dir = Path(args.project_dir).resolve()
-        config_path = project_dir / base_path('run-configuration.json')
+        # Use .plan subdirectory relative to project_dir, not base_path()
+        # which may return an absolute path based on PLAN_BASE_DIR env var
+        config_path = project_dir / '.plan' / 'run-configuration.json'
 
         if config_path.exists() and not args.force:
             output_success(

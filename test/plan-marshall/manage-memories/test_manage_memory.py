@@ -28,20 +28,29 @@ SCRIPT_PATH = get_script_path('plan-marshall', 'manage-memories', 'manage-memory
 # =============================================================================
 
 class TempDirContext:
-    """Context manager for tests that need a fresh temp directory."""
+    """Context manager for tests that need a fresh temp directory with PLAN_BASE_DIR."""
 
     def __init__(self):
         self.temp_dir = None
         self.old_cwd = None
+        self.old_plan_base_dir = None
 
     def __enter__(self):
         self.temp_dir = Path(tempfile.mkdtemp())
         self.old_cwd = os.getcwd()
+        self.old_plan_base_dir = os.environ.get('PLAN_BASE_DIR')
         os.chdir(self.temp_dir)
+        # Set PLAN_BASE_DIR to temp_dir/.plan for script to find files
+        os.environ['PLAN_BASE_DIR'] = str(self.temp_dir / '.plan')
         return self.temp_dir
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         os.chdir(self.old_cwd)
+        # Restore original PLAN_BASE_DIR
+        if self.old_plan_base_dir is None:
+            os.environ.pop('PLAN_BASE_DIR', None)
+        else:
+            os.environ['PLAN_BASE_DIR'] = self.old_plan_base_dir
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 

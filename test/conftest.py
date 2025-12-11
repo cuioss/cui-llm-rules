@@ -423,12 +423,17 @@ class PlanTestContext:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Clean up the test context."""
+        # Clean up the plan_dir to ensure test isolation
+        # (when via runner, fixture_dir is shared but each test should get fresh plan_dir)
+        if self.plan_dir and self.plan_dir.exists():
+            shutil.rmtree(self.plan_dir, ignore_errors=True)
+
         # Restore original PLAN_BASE_DIR
         if self._original_plan_base_dir is None:
             os.environ.pop('PLAN_BASE_DIR', None)
         else:
             os.environ['PLAN_BASE_DIR'] = self._original_plan_base_dir
 
-        # Only cleanup if running standalone (not via run-tests.py)
+        # Only cleanup fixture_dir if running standalone (not via run-tests.py)
         if self._is_standalone and self.fixture_dir and self.fixture_dir.exists():
             shutil.rmtree(self.fixture_dir, ignore_errors=True)
