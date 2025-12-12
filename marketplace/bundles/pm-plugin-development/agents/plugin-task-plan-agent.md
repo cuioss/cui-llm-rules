@@ -88,14 +88,8 @@ deliverable: {N}  # omit for batch
 
 After each task is created, log to work-log:
 
-```
-Skill: plan-marshall:logging
-operation: work add
-plan_id: {plan_id}
-phase: refine
-category: ARTIFACT
-message: "Created {task_id}: {task_title}"
-detail: "{brief description of what this task accomplishes}"
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log work {plan_id} INFO "Created {task_id}: {task_title}"
 ```
 
 ### Step 3: Return Results
