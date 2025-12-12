@@ -22,8 +22,12 @@ from typing import Optional
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1
 
-# Default permissions for plan directory
-DEFAULT_PERMISSIONS = ["Edit(.plan/**)", "Write(.plan/**)"]
+# Default permissions for plan directory and plugin cache
+DEFAULT_PERMISSIONS = [
+    "Edit(.plan/**)",
+    "Write(.plan/**)",
+    "Read(~/.claude/plugins/cache/**)",  # Skills reference files via relative paths
+]
 
 # Timestamp patterns for consolidation
 TIMESTAMP_PATTERN = re.compile(r'^(\w+)\((.*/)?(.+)-(\d{4}-\d{2}-\d{2}-\d{6})\.(\w+)\)$')

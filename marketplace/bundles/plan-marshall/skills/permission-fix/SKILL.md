@@ -162,6 +162,16 @@ Recommended workflow:
 3. **Apply fixes**: Use `permission-fix apply-fixes` or specific operations
 4. **Verify**: Re-run analysis to confirm fixes
 
+## Default Permissions
+
+`apply-fixes` automatically adds these if missing:
+
+| Permission | Reason |
+|------------|--------|
+| `Edit(.plan/**)` | Plan file modifications |
+| `Write(.plan/**)` | Plan file creation |
+| `Read(~/.claude/plugins/cache/**)` | Skills reference files via relative paths |
+
 ## Error Handling
 
 All operations return JSON with error details:

@@ -372,6 +372,32 @@ class TestApplyFixes(ScriptTestCase):
         self.assertIn('sorted', data)
         self.assertTrue(data['sorted'])
 
+    def test_adds_default_permissions(self):
+        """Should add default permissions if missing."""
+        settings_file = self.temp_dir / 'settings.json'
+        settings_file.write_text(json.dumps({
+            "permissions": {
+                "allow": ["Bash(git:*)"],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'apply-fixes',
+            '--settings', str(settings_file),
+            '--dry-run'
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertIn('defaults_added', data)
+        defaults = data['defaults_added']
+        self.assertIn('Edit(.plan/**)', defaults)
+        self.assertIn('Write(.plan/**)', defaults)
+        self.assertIn('Read(~/.claude/plugins/cache/**)', defaults)
+
 
 # =============================================================================
 # Tests for add subcommand
