@@ -1,0 +1,31 @@
+{
+  "plan_type_rules": [
+    {
+      "pattern": "*",
+      "plan_type": "pm-workflow:plan-type-generic",
+      "description": "Default"
+    }
+  ],
+  "domain_agents": {
+    "pm-workflow:plan-type-generic": {
+      "solution_outline_agent": null,
+      "task_plan_agent": null
+    }
+  },
+  "defaults": {
+    "create_pr": false,
+    "verification_required": true,
+    "branch_strategy": "direct"
+  },
+  "plan_type_defaults": {},
+  "custom_plan_types": [],
+  "detection_keywords": {},
+  "build_systems": [],
+  "retention": {
+    "logs_days": 1,
+    "archived_plans_days": 5,
+    "memory_days": 5,
+    "temp_on_maintenance": true
+  },
+  "state": {}
+}
