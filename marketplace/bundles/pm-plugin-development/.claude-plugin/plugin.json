@@ -26,6 +26,7 @@
     "./skills/verification"
   ],
   "agents": [
+    "./agents/plugin-implement-agent.md",
     "./agents/plugin-solution-outline-agent.md",
     "./agents/plugin-task-plan-agent.md",
     "./agents/tool-coverage-agent.md"

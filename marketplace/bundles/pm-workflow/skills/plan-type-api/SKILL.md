@@ -71,6 +71,76 @@ Adds domain-specific fields to references.toon AND finalize configuration to con
 
 ---
 
+## Deliverable Contract
+
+Deliverables in solution_outline.md provide the technical design that enables task-plan-agent optimization.
+
+> **Full Specification**: See [standards/deliverable-contract.md](standards/deliverable-contract.md) for complete field definitions, domain values, and validation rules.
+
+### Required Metadata
+
+All deliverables MUST include a metadata block:
+
+```markdown
+**Metadata:**
+- change_type: {create|modify|refactor|migrate|delete}
+- execution_mode: {automated|manual|mixed}
+- domain: {java|java-testing|javascript|javascript-testing|plugin}
+- suggested_skill: {bundle}:{skill-name}
+- suggested_workflow: {workflow-name}
+- context_skills: []
+- depends: {none | deliverable number(s)}
+```
+
+### Validation Requirements
+
+Each deliverable MUST contain:
+
+| Requirement | Purpose |
+|-------------|---------|
+| `domain` metadata | Skill loading via skill-domains |
+| `suggested_skill` and `suggested_workflow` | Delegation mapping |
+| `context_skills` | Optional skill loading (must be in domain's optionals) |
+| `depends` field | Dependency ordering and parallelization |
+| Explicit file list | Step generation (not "all files matching X") |
+| Verification command | Task verification |
+
+---
+
+## Task Contract
+
+Tasks are created by task-plan agents and represent committable units of work. Each task:
+
+- References one or more deliverables (M:N relationship)
+- Contains delegation information for execution
+- Includes verification criteria
+- Specifies dependencies on other tasks (for ordering/parallelization)
+- Results in exactly one commit
+
+> **Full Specification**: See [standards/task-contract.md](standards/task-contract.md) for the complete task contract including optimization workflow and decision tables.
+
+### Key Fields for Task Planning
+
+| Field | Purpose |
+|-------|---------|
+| `deliverables` | Track which solution outline items are covered |
+| `depends_on` | Enable execution ordering and parallelization |
+| `delegation.skill` | Skill to execute task |
+| `delegation.workflow` | Workflow within skill |
+| `delegation.domain` | Domain for loading default skills |
+| `delegation.context_skills` | Optional skills from domain |
+| `verification` | Consolidated from deliverable verification criteria |
+
+### Deliverable-to-Task Relationship
+
+| Pattern | Description | When to Use |
+|---------|-------------|-------------|
+| 1:1 | One deliverable → one task | Large coherent deliverables |
+| N:1 | Multiple deliverables → one task | Similar small changes (aggregation) |
+| 1:N | One deliverable → multiple tasks | Mixed execution modes (split) |
+
+---
+
 ## Domain Agent Behavior
 
 Domain agents are invoked by commands (not by plan-type skills) via Task tool.
@@ -87,15 +157,27 @@ Domain agents are invoked by commands (not by plan-type skills) via Task tool.
 | `plan_id` | string | Yes | Plan identifier |
 | `feedback` | string | No | User feedback from review (for revision iterations) |
 
+**Key Responsibility**: Produce deliverables that follow the **Deliverable Contract** defined above. Deliverables that lack required fields (metadata, file enumeration, verification) are INVALID.
+
 **Responsibilities**:
 - Load `pm-workflow:manage-solution-outline` skill for structure guidance
 - Read request.md for the request
 - Analyze codebase with domain knowledge
 - Write solution_outline.md via `pm-workflow:manage-solution-outline:manage-solution-outline write` with heredoc (includes ASCII overview diagram)
-- Document deliverables as numbered `### N. Title` sections
+- Document deliverables as numbered `### N. Title` sections with **Deliverable Contract** metadata
 - Validate with `pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id {plan_id}`
 - Record lessons-learned on issues
 - **If `feedback` provided**: Incorporate user feedback into existing solution_outline.md
+
+**Output Validation**: The agent MUST validate that each deliverable contains:
+- [ ] `change_type` metadata
+- [ ] `execution_mode` metadata
+- [ ] `domain` metadata (valid domain from config)
+- [ ] `suggested_skill` and `suggested_workflow`
+- [ ] `context_skills` (empty list or valid optionals for domain)
+- [ ] `depends` field (`none` or valid deliverable references)
+- [ ] Explicit file list (not "all files matching X")
+- [ ] Verification command and criteria
 
 **Returns**: `{status, deliverable_count, lessons_recorded}`
 
@@ -122,17 +204,35 @@ After the solution outline agent completes, the `/plan-manage` command MUST:
 
 ### Task Plan Agent
 
-**Purpose**: Transform deliverables into executable tasks (Solution Outline → Tasks)
+**Purpose**: Transform deliverables into optimized, committable tasks (Solution Outline → Tasks)
 
 **Invoked by**: `/plan-manage action=refine` command (after user approves solution outline)
 
+**Key Responsibility**: Apply optimization to package deliverables efficiently while maintaining:
+1. **Atomic committability**: Each task = one coherent commit
+2. **Testability**: Each task has verification
+3. **Execution efficiency**: Minimize agent spawns and skill loads
+4. **Dependency ordering**: Tasks execute in valid dependency order
+5. **Parallelization**: Independent tasks can run concurrently
+
+**Optimization Workflow**: Task-plan agents MUST follow the 6-step optimization workflow:
+1. Load all deliverables with metadata
+2. Build dependency graph
+3. Analyze for aggregation opportunities
+4. Analyze for split requirements
+5. Create optimized tasks
+6. Log optimization decisions
+
+> **Full Workflow**: See [standards/task-contract.md](standards/task-contract.md) for the complete optimization workflow and decision tables.
+
 **Responsibilities**:
 - Read solution_outline.md for deliverables via `pm-workflow:manage-solution-outline:manage-solution-outline list-deliverables`
-- Generate domain-specific task steps per deliverable
-- Create tasks via `pm-workflow:manage-tasks:manage-task add --goal N` (numeric deliverable reference)
+- Apply optimization workflow to determine task groupings
+- Create tasks via `pm-workflow:manage-tasks:manage-task add --deliverables N [M ...]` (numeric deliverable references)
+- Set task dependencies via `--depends-on` parameter
 - Record lessons-learned on issues
 
-**Returns**: `{status, task_ids[], lessons_recorded}`
+**Returns**: `{status, task_ids[], optimization_summary, lessons_recorded}`
 
 ---
 

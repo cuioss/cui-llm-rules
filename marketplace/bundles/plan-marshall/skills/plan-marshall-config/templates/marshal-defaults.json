@@ -15,6 +15,10 @@
     "javascript-testing": {
       "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
       "optionals": ["pm-dev-frontend:cui-cypress"]
+    },
+    "plugin": {
+      "defaults": ["pm-plugin-development:plugin-architecture"],
+      "optionals": ["pm-plugin-development:plugin-script-architecture"]
     }
   },
   "modules": {},

@@ -88,10 +88,19 @@ Create a single solution document containing all deliverables. Each deliverable 
 - **Testable**: Has clear completion criteria
 - **Sized**: Reasonable scope (not too large, not too small)
 
-Build a deliverables markdown section with numbered deliverables:
+Build a deliverables markdown section with numbered deliverables and required metadata:
 
 ```markdown
 ### 1. {Deliverable Title}
+
+**Metadata:**
+- change_type: {create|modify|refactor}
+- execution_mode: automated
+- domain: {java|java-testing}
+- suggested_skill: pm-dev-java:{java-implement|java-refactor|java-implement-tests}
+- suggested_workflow: {implement|refactor|implement-tests}
+- context_skills: []
+- depends: none
 
 {Java-specific technical deliverable description}
 
@@ -101,6 +110,10 @@ Build a deliverables markdown section with numbered deliverables:
 **Dependencies**: {dependencies and integration points}
 **Test Path**: `src/test/java/...`
 **Standards**: {CDI, logging, etc.}
+
+**Verification:**
+- Command: `mvn test -pl {module}`
+- Criteria: Build and tests pass
 
 **Success Criteria:**
 - {criterion 1}
@@ -158,6 +171,37 @@ solution_created: true
 deliverables_count: {number of deliverables in solution document}
 lessons_recorded: {count}
 ```
+
+---
+
+## Skill and Workflow Mapping
+
+When creating deliverables, use this mapping for `suggested_skill` and `suggested_workflow`:
+
+| Change Type | Component Type | Skill | Workflow |
+|-------------|----------------|-------|----------|
+| create | class/interface | pm-dev-java:java-implement | implement |
+| create | test | pm-dev-java:java-implement-tests | implement-tests |
+| modify | any | pm-dev-java:java-implement | implement |
+| refactor | any | pm-dev-java:java-refactor | refactor |
+| fix | build error | pm-dev-java:java-fix-build | fix-build |
+| fix | test failure | pm-dev-java:java-fix-tests | fix-tests |
+
+### Domain Selection
+
+| Content Type | Domain |
+|--------------|--------|
+| Production code (`src/main/java`) | `java` |
+| Test code (`src/test/java`) | `java-testing` |
+| Mixed (prod + tests in same deliverable) | Split into separate deliverables |
+
+### Context Skills Guidance
+
+| Situation | Add to context_skills |
+|-----------|----------------------|
+| Uses CDI/injection | `pm-dev-java:cui-java-cdi` |
+| Quarkus-specific | `pm-dev-java:cui-java-cdi` |
+| Complex refactoring | `pm-dev-java:cui-java-maintenance` |
 
 ---
 

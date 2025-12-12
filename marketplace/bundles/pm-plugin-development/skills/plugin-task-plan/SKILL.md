@@ -6,9 +6,11 @@ allowed-tools: Read, Bash
 
 # Plugin Task Plan Skill
 
-**Role**: Domain planning skill for plugin development tasks. Transforms solution outline deliverables into executable tasks that delegate to existing skills for implementation.
+**Role**: Domain planning skill for plugin development tasks. Transforms solution outline deliverables into optimized, executable tasks that delegate to existing skills for implementation.
 
-**Key Pattern**: Skill delegation - reads deliverables from `solution_outline.md` via `manage-solution-outline`, creates tasks that specify which skill to load and execute. The delegated skills handle validation, creation, and verification internally.
+**Key Pattern**: Skill delegation with optimization - reads deliverables with metadata from `solution_outline.md`, applies aggregation/split analysis, creates tasks with delegation blocks and dependencies.
+
+> **Contract Reference**: See [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) for the optimization workflow and decision tables.
 
 ## Operation: plan
 
@@ -21,9 +23,9 @@ allowed-tools: Read, Bash
 
 **Process**:
 
-### Step 1: Load Solution Document
+### Step 1: Load All Deliverables
 
-Read the solution document to get all deliverables:
+Read the solution document to get all deliverables with metadata:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
@@ -31,50 +33,61 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
   --plan-id {plan_id}
 ```
 
-The output contains an array of deliverables with `number` and `title` fields. Use `read` for full document content if needed.
+For each deliverable, extract:
+- `metadata.change_type`, `metadata.execution_mode`, `metadata.domain`
+- `metadata.suggested_skill`, `metadata.suggested_workflow`
+- `metadata.context_skills`, `metadata.depends`
+- `affected_files`, `verification`
 
-### Step 2: For Each Deliverable
+### Step 2: Build Dependency Graph
 
-#### 2a. Analyze Deliverable Content
+Parse `depends` field for each deliverable:
+- Identify independent deliverables (`depends: none`)
+- Identify dependency chains
+- Detect cycles (INVALID - reject)
 
-Parse the deliverable body to determine:
-- **Operation type**: create or modify
-- **Component type**: skill, command, agent, script, bundle
-- **Target bundle and path**
-- **Parameters** for skill delegation
+### Step 3: Analyze for Aggregation
 
-#### 2b. Determine Delegation Target
+For each pair of deliverables, check if they can be aggregated:
+- Same `change_type`?
+- Same `suggested_skill`?
+- Same `execution_mode` (must be `automated`)?
+- Combined file count < 10?
+- **NO dependency between them?** (CRITICAL - cannot aggregate if one depends on other)
 
-| Operation | Component | Delegate To |
-|-----------|-----------|-------------|
-| create | skill | `pm-plugin-development:plugin-create` → create-skill |
-| create | command | `pm-plugin-development:plugin-create` → create-command |
-| create | agent | `pm-plugin-development:plugin-create` → create-agent |
-| create | bundle | `pm-plugin-development:plugin-create` → create-bundle |
-| modify | any | `pm-plugin-development:plugin-maintain` → update-component |
-| refactor | any | `pm-plugin-development:plugin-maintain` → refactor-structure |
+### Step 4: Analyze for Splits
 
-**Note**: Verification is handled internally by the delegated skills - no separate doctor call needed.
+For each deliverable, check for split requirements:
+- `execution_mode: mixed` → MUST split
+- Different concerns within → SHOULD split
+- File count > 15 → CONSIDER splitting
 
-#### 2c. Create Task(s)
+### Step 5: Create Optimized Tasks
 
-Generate task(s) with skill delegation steps:
+For aggregated deliverables or single deliverables, create tasks:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --goal {n} \
+  --deliverables {n1} {n2} {n3} \
   --title "{action} {component-type}: {name}" \
-  --description "{goal description}" \
-  --steps \
-    "Load skill: {delegated-skill}" \
-    "Execute workflow: {workflow-name}" \
-    "Parameters: {extracted parameters}"
+  --description "{combined description}" \
+  --domain plugin \
+  --phase execute \
+  --steps "{file1}" "{file2}" "{file3}" \
+  --depends-on "TASK-1" "TASK-2" \
+  --delegation-skill pm-plugin-development:{plugin-create|plugin-maintain} \
+  --delegation-workflow {workflow-name} \
+  --verification-commands "{cmd}" \
+  --verification-criteria "{criteria}"
 ```
 
-**Note**: The `--goal` parameter is numeric (e.g., `--goal 1`) referencing the deliverable section number in solution_outline.md.
+**Parameters**:
+- `--deliverables`: References deliverable numbers from solution_outline.md (space-separated)
+- `--domain`: Always `plugin` for marketplace components
+- `--depends-on`: Task dependencies computed from deliverable dependencies
 
-#### 2d. Record Issues as Lessons
+### Step 6: Record Issues as Lessons
 
 On ambiguous deliverable or planning issues:
 
@@ -87,19 +100,55 @@ python3 .plan/execute-script.py plan-marshall:lessons-learned:manage-lesson add 
   --detail "{context and resolution approach}"
 ```
 
-### Step 3: Return Results
+### Step 7: Return Results
 
 **Output**:
 ```toon
 status: success
 plan_id: {plan_id}
 
-tasks_created[N]:
-- TASK-1: {title}
-- TASK-2: {title}
+optimization_summary:
+  deliverables_processed: {N}
+  tasks_created: {M}
+  aggregations: {count of deliverable groups}
+  splits: {count of split deliverables}
+
+tasks_created[M]{number,title,deliverables,depends_on}:
+1,Create skill: java-logging-patterns,[1],none
+2,Update plugin-maintain,[2 3],TASK-1
+3,Refactor bundle structure,[4],none
 
 lessons_recorded: {count}
 ```
+
+---
+
+## Delegation Mapping
+
+When creating tasks, map from deliverable metadata to task delegation:
+
+| Deliverable Metadata | Task Parameter |
+|---------------------|----------------|
+| `domain` | `--domain` |
+| `suggested_skill` | `--delegation-skill` |
+| `suggested_workflow` | `--delegation-workflow` |
+| `context_skills` | `--context-skills` (merged from all aggregated deliverables) |
+| `affected_files` | `--steps` (one per file) |
+| `verification.command` | `--verification-commands` (may consolidate) |
+| `verification.criteria` | `--verification-criteria` |
+
+### Plugin-Specific Skill Mapping
+
+| Change Type | Component Type | Skill | Workflow |
+|-------------|----------------|-------|----------|
+| create | skill | pm-plugin-development:plugin-create | create-skill |
+| create | command | pm-plugin-development:plugin-create | create-command |
+| create | agent | pm-plugin-development:plugin-create | create-agent |
+| create | bundle | pm-plugin-development:plugin-create | create-bundle |
+| modify | any | pm-plugin-development:plugin-maintain | update-component |
+| refactor | any | pm-plugin-development:plugin-maintain | refactor-structure |
+| migrate | format | pm-plugin-development:plugin-maintain | update-component |
+| delete | any | pm-plugin-development:plugin-maintain | remove-component |
 
 ---
 
@@ -267,11 +316,14 @@ If deliverable lacks required parameters:
 **Caller**: `pm-plugin-development:plugin-task-plan-agent`
 
 **Script Notations** (use EXACTLY as shown):
-- `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables
-- `pm-workflow:manage-tasks:manage-task` - Create tasks (add, list)
+- `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables (list-deliverables, read)
+- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --deliverables N M --domain plugin --delegation-skill ...)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 - `plan-marshall:logging:manage-log` - Log progress (work)
 
 **Skills Delegated To**:
 - `pm-plugin-development:plugin-create` - Component creation (handles validation and verification internally)
 - `pm-plugin-development:plugin-maintain` - Component updates and refactoring (handles verification internally)
+
+**Contract Reference**:
+- [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) - Optimization workflow and decision tables

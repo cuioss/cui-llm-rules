@@ -68,14 +68,14 @@ def test_default_scan_finds_skills():
     assert total_skills >= 20, f"Should find at least 20 skills, found {total_skills}"
 
 
-def test_default_scope_is_marketplace():
-    """Test default scope is marketplace."""
+def test_default_scope_is_auto():
+    """Test default scope is auto (tries marketplace first, then plugin-cache)."""
     result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     scope = data.get('scope')
-    assert scope == 'marketplace', f"Default scope should be 'marketplace', got '{scope}'"
+    assert scope == 'auto', f"Default scope should be 'auto', got '{scope}'"
 
 
 # =============================================================================
@@ -483,7 +483,7 @@ if __name__ == '__main__':
         test_default_scan_finds_agents,
         test_default_scan_finds_commands,
         test_default_scan_finds_skills,
-        test_default_scope_is_marketplace,
+        test_default_scope_is_auto,
         # Resource Filtering
         test_agents_only_no_commands,
         test_agents_only_no_skills,

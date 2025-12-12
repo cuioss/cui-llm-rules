@@ -89,10 +89,19 @@ Create a single solution document containing all deliverables. Each deliverable 
 - **Testable**: Has clear completion criteria
 - **Sized**: Reasonable scope (not too large, not too small)
 
-Build a deliverables markdown section with numbered deliverables:
+Build a deliverables markdown section with numbered deliverables and required metadata:
 
 ```markdown
 ### 1. {Deliverable Title}
+
+**Metadata:**
+- change_type: {create|modify|refactor}
+- execution_mode: automated
+- domain: {javascript|javascript-testing}
+- suggested_skill: pm-dev-frontend:{js-implement|js-refactor|js-implement-tests}
+- suggested_workflow: {implement|refactor|implement-tests}
+- context_skills: []
+- depends: none
 
 {JavaScript-specific technical deliverable description}
 
@@ -102,6 +111,10 @@ Build a deliverables markdown section with numbered deliverables:
 **Dependencies**: {npm packages, internal modules}
 **Test Path**: `src/__tests__/...`
 **Standards**: {ESLint, JSDoc, etc.}
+
+**Verification:**
+- Command: `npm test`
+- Criteria: All tests pass, no lint errors
 
 **Success Criteria:**
 - {criterion 1}
@@ -159,6 +172,36 @@ solution_created: true
 deliverables_count: {number of deliverables in solution document}
 lessons_recorded: {count}
 ```
+
+---
+
+## Skill and Workflow Mapping
+
+When creating deliverables, use this mapping for `suggested_skill` and `suggested_workflow`:
+
+| Change Type | Component Type | Skill | Workflow |
+|-------------|----------------|-------|----------|
+| create | module | pm-dev-frontend:js-implement | implement |
+| create | test | pm-dev-frontend:js-implement-tests | implement-tests |
+| modify | any | pm-dev-frontend:js-implement | implement |
+| refactor | any | pm-dev-frontend:js-refactor | refactor |
+| fix | lint | pm-dev-frontend:js-enforce-eslint | fix-lint |
+| fix | docs | pm-dev-frontend:js-fix-jsdoc | fix-docs |
+
+### Domain Selection
+
+| Content Type | Domain |
+|--------------|--------|
+| Production code (`src/`) | `javascript` |
+| Test code (`src/__tests__/`, `test/`, `cypress/`) | `javascript-testing` |
+| Mixed (prod + tests in same deliverable) | Split into separate deliverables |
+
+### Context Skills Guidance
+
+| Situation | Add to context_skills |
+|-----------|----------------------|
+| E2E testing with Cypress | `pm-dev-frontend:cui-cypress` |
+| Complex CSS work | `pm-dev-frontend:cui-css` |
 
 ---
 

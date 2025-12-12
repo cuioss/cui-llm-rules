@@ -91,6 +91,15 @@ JavaScript test code (Jest, Cypress, Playwright).
 | defaults | `pm-dev-frontend:cui-javascript-unit-testing` |
 | optionals | `pm-dev-frontend:cui-cypress` |
 
+### plugin
+
+Claude Code marketplace plugin development.
+
+| Field | Default Skills |
+|-------|---------------|
+| defaults | `pm-plugin-development:plugin-architecture` |
+| optionals | `pm-plugin-development:plugin-script-architecture` |
+
 ## Usage Patterns
 
 ### Implementation Agent: Load Skills

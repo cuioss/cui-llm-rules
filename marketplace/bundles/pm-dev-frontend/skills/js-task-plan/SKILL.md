@@ -6,9 +6,11 @@ allowed-tools: Read, Bash
 
 # JavaScript Task Plan Skill
 
-**Role**: Domain planning skill for JavaScript implementation tasks. Transforms solution outline deliverables into executable tasks by applying JavaScript-specific knowledge and writing TASKs directly.
+**Role**: Domain planning skill for JavaScript implementation tasks. Transforms solution outline deliverables into optimized, executable tasks by applying JavaScript-specific knowledge.
 
-**Key Pattern**: Reads deliverables from `solution_outline.md` via `manage-solution-outline`, creates tasks via `manage-tasks` script.
+**Key Pattern**: Reads deliverables with metadata from `solution_outline.md`, applies aggregation/split analysis, creates tasks with delegation blocks and dependencies.
+
+> **Contract Reference**: See [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) for the optimization workflow and decision tables.
 
 ## Operation: plan
 
@@ -21,9 +23,9 @@ allowed-tools: Read, Bash
 
 **Process**:
 
-### Step 1: Load Solution Document
+### Step 1: Load All Deliverables
 
-Read the solution document to get all deliverables:
+Read the solution document to get all deliverables with metadata:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
@@ -31,40 +33,63 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
   --plan-id {plan_id}
 ```
 
-The output contains an array of deliverables with `number` and `title` fields. Use `read` for full document content if needed.
+For each deliverable, extract:
+- `metadata.change_type`, `metadata.execution_mode`, `metadata.domain`
+- `metadata.suggested_skill`, `metadata.suggested_workflow`
+- `metadata.context_skills`, `metadata.depends`
+- `affected_files`, `verification`
 
-### Step 2: For Each Deliverable
+### Step 2: Build Dependency Graph
 
-#### 2a. Analyze Deliverable Content
+Parse `depends` field for each deliverable:
+- Identify independent deliverables (`depends: none`)
+- Identify dependency chains
+- Detect cycles (INVALID - reject)
 
-Parse the deliverable body to determine:
-- Component type and target path
-- Task granularity (single task or multiple)
-- JavaScript-specific implementation steps
-- Test requirements
-- Standards to apply
+### Step 3: Analyze for Aggregation
 
-#### 2b. Create Task(s)
+For each pair of deliverables, check if they can be aggregated:
+- Same `change_type`?
+- Same `suggested_skill`?
+- Same package? (JS-specific: prefer aggregating within same npm package)
+- Same `execution_mode` (must be `automated`)?
+- Combined file count < 10?
+- **NO dependency between them?** (CRITICAL)
 
-Generate task(s) with JavaScript-specific steps:
+### Step 4: Analyze for Splits
+
+For each deliverable, check for split requirements:
+- `execution_mode: mixed` → MUST split
+- Production + test code combined → SHOULD split (different domains)
+- File count > 15 → CONSIDER splitting
+
+### Step 5: Create Optimized Tasks
+
+For aggregated deliverables or single deliverables, create tasks:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
   --plan-id {plan_id} \
-  --goal {n} \
+  --deliverables {n1} {n2} {n3} \
   --title "Implement {component}" \
-  --description "{goal from solution}" \
-  --steps \
-    "Create/modify implementation at {path}" \
-    "Add unit tests (load pm-dev-frontend:cui-javascript-unit-testing)" \
-    "Add JSDoc (load pm-dev-frontend:cui-jsdoc)" \
-    "Follow CUI patterns (load pm-dev-frontend:cui-javascript)" \
-    "Verify npm test passes"
+  --description "{combined description}" \
+  --domain {javascript|javascript-testing} \
+  --phase execute \
+  --steps "{file1}" "{file2}" "{file3}" \
+  --depends-on "TASK-1" "TASK-2" \
+  --delegation-skill pm-dev-frontend:{js-implement|js-refactor|js-implement-tests} \
+  --delegation-workflow {implement|refactor|implement-tests} \
+  --context-skills pm-dev-frontend:cui-cypress \
+  --verification-commands "npm test" \
+  --verification-criteria "All tests pass, no lint errors"
 ```
 
-**Note**: The `--goal` parameter is numeric (e.g., `--goal 1`) referencing the deliverable section number in solution_outline.md.
+**Parameters**:
+- `--deliverables`: References deliverable numbers from solution_outline.md (space-separated)
+- `--domain`: `javascript` for production code, `javascript-testing` for test code
+- `--context-skills`: Add `pm-dev-frontend:cui-cypress` for E2E testing
 
-#### 2c. Record Issues as Lessons
+### Step 6: Record Issues as Lessons
 
 On ambiguous deliverable or planning issues:
 
@@ -77,22 +102,53 @@ python3 .plan/execute-script.py plan-marshall:lessons-learned:manage-lesson add 
   --detail "{context and resolution approach}"
 ```
 
-### Step 3: Return Results
+### Step 7: Return Results
 
 **Output**:
 ```toon
 status: success
 plan_id: {plan_id}
 
-tasks_created[N]:
-- TASK-1
-- TASK-2
-- TASK-3
-- TASK-4
-- TASK-5
+optimization_summary:
+  deliverables_processed: {N}
+  tasks_created: {M}
+  aggregations: {count of deliverable groups}
+  splits: {count of split deliverables}
+
+tasks_created[M]{number,title,deliverables,depends_on}:
+1,Implement FormValidator,[1],none
+2,Add validation styles,[2],none
+3,Add unit tests,[3],"TASK-1" "TASK-2"
 
 lessons_recorded: {count}
 ```
+
+---
+
+## Delegation Mapping
+
+When creating tasks, map from deliverable metadata to task delegation:
+
+| Deliverable Metadata | Task Parameter |
+|---------------------|----------------|
+| `domain` | `--domain` |
+| `suggested_skill` | `--delegation-skill` |
+| `suggested_workflow` | `--delegation-workflow` |
+| `context_skills` | `--context-skills` (merged from all aggregated deliverables) |
+| `affected_files` | `--steps` (one per file) |
+| `verification.command` | `--verification-commands` |
+| `verification.criteria` | `--verification-criteria` |
+
+### JavaScript-Specific Skill Mapping
+
+| Change Type | Component Type | Skill | Workflow |
+|-------------|----------------|-------|----------|
+| create | module | pm-dev-frontend:js-implement | implement |
+| create | test | pm-dev-frontend:js-implement-tests | implement-tests |
+| modify | any | pm-dev-frontend:js-implement | implement |
+| refactor | any | pm-dev-frontend:js-refactor | refactor |
+| fix | lint | pm-dev-frontend:js-enforce-eslint | fix-lint |
+| fix | docs | pm-dev-frontend:js-fix-jsdoc | fix-docs |
 
 ---
 
@@ -235,7 +291,7 @@ If deliverable lacks detail:
 
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables (list-deliverables, read)
-- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --goal N --title --steps)
+- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --deliverables N M --domain javascript --delegation-skill ...)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced in Task Steps**:
@@ -243,3 +299,6 @@ If deliverable lacks detail:
 - `pm-dev-frontend:cui-javascript-unit-testing` - Jest testing standards
 - `pm-dev-frontend:cui-jsdoc` - JSDoc documentation standards
 - `pm-dev-frontend:cui-cypress` - E2E testing (when applicable)
+
+**Contract Reference**:
+- [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) - Optimization workflow and decision tables

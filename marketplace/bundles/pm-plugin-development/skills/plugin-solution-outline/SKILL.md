@@ -93,10 +93,19 @@ For isolated changes, identify the target components directly:
 2. **Read existing component** (if modify/refactor scope)
 3. **Build deliverables section** for each component to create/modify
 
-Build a deliverables markdown section:
+Build a deliverables markdown section with required metadata:
 
 ```markdown
 ### 1. {Component Action}
+
+**Metadata:**
+- change_type: {create|modify|refactor}
+- execution_mode: automated
+- domain: plugin
+- suggested_skill: pm-plugin-development:plugin-{create|maintain}
+- suggested_workflow: {create-skill|create-agent|update-component|...}
+- context_skills: []
+- depends: none
 
 {Technical description}
 
@@ -104,6 +113,10 @@ Build a deliverables markdown section:
 **Path**: `marketplace/bundles/{bundle}/{type}/{name}`
 **Dependencies**: {dependencies if any}
 **Standards**: {standards to follow}
+
+**Verification:**
+- Command: `/pm-plugin-development:plugin-doctor --component {path}`
+- Criteria: No quality issues detected
 
 **Success Criteria:**
 - {criterion 1}
@@ -221,13 +234,26 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 ```markdown
 ### 1. Update {bundle} {component-type}s for {change}
 
+**Metadata:**
+- change_type: migrate
+- execution_mode: automated
+- domain: plugin
+- suggested_skill: pm-plugin-development:plugin-maintain
+- suggested_workflow: update-component
+- context_skills: []
+- depends: none
+
 **Affected files:**
 - `{path/to/file1.md}`
 - `{path/to/file2.md}`
 - `{path/to/file3.md}`
 
 **Change per file:** {specific change description}
-**Verification:** {how to verify completion}
+
+**Verification:**
+- Command: `grep -L '{old_pattern}' {files} | wc -l`
+- Expected: 0 (no files with old pattern)
+- Criteria: All files updated, no old pattern remains
 
 **Success Criteria:**
 - {criterion 1}
@@ -365,6 +391,28 @@ python3 .plan/execute-script.py \
   --trace-plan-id {plan_id} \
   --name-pattern "*-goals*|*-plan*"
 ```
+
+---
+
+## Skill and Workflow Mapping
+
+When creating deliverables, use this mapping for `suggested_skill` and `suggested_workflow`:
+
+| Change Type | Component Type | Skill | Workflow |
+|-------------|----------------|-------|----------|
+| create | skill | pm-plugin-development:plugin-create | create-skill |
+| create | command | pm-plugin-development:plugin-create | create-command |
+| create | agent | pm-plugin-development:plugin-create | create-agent |
+| create | bundle | pm-plugin-development:plugin-create | create-bundle |
+| modify | any | pm-plugin-development:plugin-maintain | update-component |
+| refactor | any | pm-plugin-development:plugin-maintain | refactor-structure |
+| migrate | format | pm-plugin-development:plugin-maintain | update-component |
+| delete | any | pm-plugin-development:plugin-maintain | remove-component |
+
+### Domain and Context Skills
+
+- **domain**: Always `plugin` for marketplace components
+- **context_skills**: Usually empty (`[]`). Add `pm-plugin-development:plugin-script-architecture` when deliverable involves Python scripts
 
 ---
 

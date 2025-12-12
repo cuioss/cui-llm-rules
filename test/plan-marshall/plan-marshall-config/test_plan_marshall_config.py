@@ -260,6 +260,88 @@ def test_skill_domains_validate():
         assert 'true' in result.stdout.lower() or 'valid' in result.stdout.lower()
 
 
+def test_skill_domains_validate_returns_location():
+    """Test skill-domains validate returns in_defaults or in_optionals."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        # Skill in defaults
+        result_defaults = run_script(
+            SCRIPT_PATH, 'skill-domains', 'validate',
+            '--domain', 'java',
+            '--skill', 'pm-dev-java:cui-java-core'
+        )
+
+        assert result_defaults.success, f"Should succeed: {result_defaults.stderr}"
+        assert 'in_defaults' in result_defaults.stdout.lower()
+
+        # Skill in optionals
+        result_optionals = run_script(
+            SCRIPT_PATH, 'skill-domains', 'validate',
+            '--domain', 'java',
+            '--skill', 'pm-dev-java:cui-java-cdi'
+        )
+
+        assert result_optionals.success, f"Should succeed: {result_optionals.stderr}"
+        assert 'in_optionals' in result_optionals.stdout.lower()
+
+
+def test_skill_domains_validate_invalid_skill():
+    """Test skill-domains validate with invalid skill returns false."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'skill-domains', 'validate',
+            '--domain', 'java',
+            '--skill', 'pm-dev-java:invalid-skill'
+        )
+
+        assert result.success, f"Should succeed even if invalid: {result.stderr}"
+        assert 'false' in result.stdout.lower()
+
+
+def test_skill_domains_plugin_domain():
+    """Test skill-domains with plugin domain from init defaults."""
+    with PlanTestContext() as ctx:
+        # Use init to create marshal.json with default domains including plugin
+        run_script(SCRIPT_PATH, 'init')
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get', '--domain', 'plugin')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'plugin-architecture' in result.stdout.lower() or 'plugin' in result.stdout.lower()
+
+
+def test_skill_domains_plugin_domain_get_defaults():
+    """Test skill-domains get-defaults for plugin domain."""
+    with PlanTestContext() as ctx:
+        # Use init to create marshal.json with default domains
+        run_script(SCRIPT_PATH, 'init')
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-defaults', '--domain', 'plugin')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Plugin defaults should include plugin-architecture
+        assert 'plugin-architecture' in result.stdout.lower()
+
+
+def test_skill_domains_plugin_domain_validate():
+    """Test skill-domains validate for plugin domain."""
+    with PlanTestContext() as ctx:
+        # Use init to create marshal.json with default domains
+        run_script(SCRIPT_PATH, 'init')
+
+        result = run_script(
+            SCRIPT_PATH, 'skill-domains', 'validate',
+            '--domain', 'plugin',
+            '--skill', 'pm-plugin-development:plugin-architecture'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'true' in result.stdout.lower() or 'valid' in result.stdout.lower()
+
+
 # =============================================================================
 # Modules Tests
 # =============================================================================
@@ -580,6 +662,11 @@ if __name__ == '__main__':
         test_skill_domains_unknown_domain,
         test_skill_domains_add,
         test_skill_domains_validate,
+        test_skill_domains_validate_returns_location,
+        test_skill_domains_validate_invalid_skill,
+        test_skill_domains_plugin_domain,
+        test_skill_domains_plugin_domain_get_defaults,
+        test_skill_domains_plugin_domain_validate,
         # Modules tests
         test_modules_list,
         test_modules_get,

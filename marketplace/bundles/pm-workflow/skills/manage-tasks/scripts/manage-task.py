@@ -4,7 +4,7 @@ Manage implementation tasks with sequential sub-steps within a plan.
 
 Single CLI with subcommands for CRUD operations on task files.
 Uses TOON format for both storage and output.
-Each task must reference exactly one goal.
+Each task references deliverables from solution_outline.md.
 
 Subcommands:
   add              - Add a new task
@@ -66,135 +66,256 @@ def slugify(title: str, max_length: int = 40) -> str:
     return slug
 
 
-def validate_goal(goal_input) -> int:
-    """Validate goal reference.
+def validate_deliverables(deliverables_input) -> List[int]:
+    """Validate deliverables list.
 
     Args:
-        goal_input: Goal number (positive integer referencing solution_outline.md section)
+        deliverables_input: List of deliverable numbers (positive integers referencing
+                           solution_outline.md sections)
 
     Returns:
-        Validated goal number as integer
+        Validated list of deliverable numbers as integers
 
     Raises:
-        ValueError: If format is invalid
+        ValueError: If format is invalid or list is empty
     """
-    if goal_input is None:
-        raise ValueError("Goal reference is required")
+    if deliverables_input is None or len(deliverables_input) == 0:
+        raise ValueError("At least one deliverable is required")
 
-    # Handle numeric input directly
-    if isinstance(goal_input, int):
-        if goal_input < 1:
-            raise ValueError(f"Invalid goal number: {goal_input}. Must be positive integer.")
-        return goal_input
-
-    # Handle string input
-    goal_str = str(goal_input).strip()
-    if not goal_str:
-        raise ValueError("Goal reference is required")
-
-    # Must be numeric
-    if goal_str.isdigit():
-        goal_num = int(goal_str)
-        if goal_num < 1:
-            raise ValueError(f"Invalid goal number: {goal_num}. Must be positive integer.")
-        return goal_num
-
-    raise ValueError(f"Invalid goal format: {goal_str}. Expected positive integer (e.g., 1, 2, 3)")
-
-
-def get_goals_dir(plan_id: str) -> Path:
-    """Get the goals directory for a plan.
-
-    Args:
-        plan_id: The plan identifier
-
-    Returns:
-        Path to goals directory
-    """
-    return base_path('plans', plan_id, 'goals')
-
-
-def find_goal_file(goal_dir: Path, number: int) -> Optional[Path]:
-    """Find goal file by number.
-
-    Args:
-        goal_dir: Goals directory
-        number: Goal number
-
-    Returns:
-        Path to file or None if not found
-    """
-    pattern = f"GOAL-{number:03d}-*.toon"
-    matches = list(goal_dir.glob(pattern))
-    return matches[0] if matches else None
-
-
-def parse_goal_file(content: str) -> dict:
-    """Parse a goal TOON file into a dictionary.
-
-    Args:
-        content: File content
-
-    Returns:
-        Dictionary with goal fields
-    """
-    result = {}
-    lines = content.split('\n')
-    i = 0
-
-    while i < len(lines):
-        line = lines[i]
-
-        if line.startswith('body:'):
-            if line.strip() == 'body: |':
-                body_lines = []
-                i += 1
-                while i < len(lines):
-                    if lines[i].startswith('  '):
-                        body_lines.append(lines[i][2:])
-                    elif lines[i].strip() == '':
-                        body_lines.append('')
-                    else:
-                        break
-                    i += 1
-                result['body'] = '\n'.join(body_lines).strip()
-            else:
-                result['body'] = line[5:].strip()
-                i += 1
-        elif ':' in line and not line.startswith(' '):
-            key, value = line.split(':', 1)
-            key = key.strip()
-            value = value.strip()
-            if key == 'number':
-                value = int(value)
-            result[key] = value
-            i += 1
+    result = []
+    for item in deliverables_input:
+        # Handle numeric input directly
+        if isinstance(item, int):
+            if item < 1:
+                raise ValueError(f"Invalid deliverable number: {item}. Must be positive integer.")
+            result.append(item)
         else:
-            i += 1
+            # Handle string input
+            item_str = str(item).strip()
+            if not item_str:
+                continue
+            if item_str.isdigit():
+                num = int(item_str)
+                if num < 1:
+                    raise ValueError(f"Invalid deliverable number: {num}. Must be positive integer.")
+                result.append(num)
+            else:
+                raise ValueError(f"Invalid deliverable format: {item_str}. Expected positive integer.")
+
+    if len(result) == 0:
+        raise ValueError("At least one deliverable is required")
 
     return result
 
 
-def get_goal_context(plan_id: str, goal_num: int) -> Optional[dict]:
-    """Get goal details for including in task context.
+# Valid domains for skill loading
+VALID_DOMAINS = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plugin']
 
-    Note: With the solution_outline.md architecture, goals are stored in a single
-    document. This function now returns minimal context since detailed goal info
-    should be read from the solution document via manage-plan-documents.
+# Valid phases
+VALID_PHASES = ['init', 'refine', 'execute', 'finalize']
+
+
+def validate_domain(domain: str) -> str:
+    """Validate domain value.
 
     Args:
-        plan_id: The plan identifier
-        goal_num: Goal number (references ### N. section in solution_outline.md)
+        domain: Domain string
 
     Returns:
-        Dictionary with goal context (basic info only)
+        Validated domain string
+
+    Raises:
+        ValueError: If domain is invalid
     """
-    # Return basic context - detailed goal info is in solution_outline.md
+    if domain not in VALID_DOMAINS:
+        raise ValueError(f"Invalid domain: {domain}. Must be one of: {', '.join(VALID_DOMAINS)}")
+    return domain
+
+
+def validate_phase(phase: str) -> str:
+    """Validate phase value.
+
+    Args:
+        phase: Phase string
+
+    Returns:
+        Validated phase string
+
+    Raises:
+        ValueError: If phase is invalid
+    """
+    if phase not in VALID_PHASES:
+        raise ValueError(f"Invalid phase: {phase}. Must be one of: {', '.join(VALID_PHASES)}")
+    return phase
+
+
+def parse_depends_on(depends_str: str) -> List[str]:
+    """Parse depends_on field from TOON format.
+
+    Args:
+        depends_str: String like 'none', 'TASK-1', or 'TASK-1, TASK-2'
+
+    Returns:
+        List of task references or empty list for 'none'
+    """
+    if not depends_str or depends_str.strip().lower() == 'none':
+        return []
+
+    # Split by comma and clean up
+    parts = [p.strip() for p in depends_str.split(',')]
+    result = []
+    for part in parts:
+        if part.startswith('TASK-'):
+            result.append(part)
+        elif part.isdigit():
+            result.append(f"TASK-{int(part)}")
+    return result
+
+
+def format_depends_on(deps: List[str]) -> str:
+    """Format depends_on for file storage.
+
+    Args:
+        deps: List of task references
+
+    Returns:
+        String like 'none' or 'TASK-1, TASK-2'
+    """
+    if not deps:
+        return 'none'
+    return ', '.join(deps)
+
+
+def parse_deliverables_block(lines: List[str], start_idx: int) -> Tuple[List[int], int]:
+    """Parse deliverables block from TOON format.
+
+    Args:
+        lines: All lines of the file
+        start_idx: Index of the 'deliverables[N]:' line
+
+    Returns:
+        Tuple of (list of deliverable numbers, next line index)
+    """
+    deliverables = []
+    i = start_idx + 1
+
+    while i < len(lines):
+        line = lines[i].strip()
+        if line.startswith('- '):
+            try:
+                deliverables.append(int(line[2:].strip()))
+            except ValueError:
+                pass
+            i += 1
+        elif line == '' or line.startswith('-'):
+            i += 1
+        else:
+            break
+
+    return deliverables, i
+
+
+def parse_delegation_block(lines: List[str], start_idx: int) -> Tuple[dict, int]:
+    """Parse delegation block from TOON format.
+
+    Args:
+        lines: All lines of the file
+        start_idx: Index of the 'delegation:' line
+
+    Returns:
+        Tuple of (delegation dict, next line index)
+    """
+    delegation = {
+        'skill': '',
+        'workflow': '',
+        'domain': '',
+        'context_skills': []
+    }
+    i = start_idx + 1
+
+    while i < len(lines):
+        line = lines[i]
+        if not line.startswith('  '):
+            break
+
+        stripped = line.strip()
+        if stripped.startswith('skill:'):
+            delegation['skill'] = stripped[6:].strip()
+        elif stripped.startswith('workflow:'):
+            delegation['workflow'] = stripped[9:].strip()
+        elif stripped.startswith('domain:'):
+            delegation['domain'] = stripped[7:].strip()
+        elif stripped.startswith('context_skills:'):
+            # Start of context_skills list
+            i += 1
+            while i < len(lines) and lines[i].startswith('  - '):
+                skill = lines[i].strip()[2:].strip()
+                if skill:
+                    delegation['context_skills'].append(skill)
+                i += 1
+            continue
+        i += 1
+
+    return delegation, i
+
+
+def parse_verification_block(lines: List[str], start_idx: int) -> Tuple[dict, int]:
+    """Parse verification block from TOON format.
+
+    Args:
+        lines: All lines of the file
+        start_idx: Index of the 'verification:' line
+
+    Returns:
+        Tuple of (verification dict, next line index)
+    """
+    verification = {
+        'commands': [],
+        'criteria': '',
+        'manual': False
+    }
+    i = start_idx + 1
+
+    while i < len(lines):
+        line = lines[i]
+        if not line.startswith('  '):
+            break
+
+        stripped = line.strip()
+        if stripped.startswith('commands['):
+            # Start of commands list
+            i += 1
+            while i < len(lines) and lines[i].startswith('  - '):
+                cmd = lines[i].strip()[2:].strip()
+                if cmd:
+                    verification['commands'].append(cmd)
+                i += 1
+            continue
+        elif stripped.startswith('criteria:'):
+            verification['criteria'] = stripped[9:].strip()
+        elif stripped.startswith('manual:'):
+            val = stripped[7:].strip().lower()
+            verification['manual'] = val == 'true'
+        i += 1
+
+    return verification, i
+
+
+def get_deliverable_context(deliverables: List[int]) -> dict:
+    """Get deliverable details for including in task context.
+
+    Args:
+        deliverables: List of deliverable numbers
+
+    Returns:
+        Dictionary with deliverable context (basic info only)
+    """
+    # Return basic context - detailed info is in solution_outline.md
     return {
-        'goal_found': True,
-        'goal_number': goal_num,
-        'goal_title': f'Goal {goal_num}',
-        'goal_body': f'See solution_outline.md section ### {goal_num}.'
+        'deliverables_found': True,
+        'deliverable_count': len(deliverables),
+        'deliverables': deliverables,
+        'deliverables_source': f'See solution_outline.md sections: {", ".join(f"### {d}." for d in deliverables)}'
     }
 
 
@@ -217,9 +338,24 @@ def parse_task_file(content: str) -> dict:
         content: File content
 
     Returns:
-        Dictionary with task fields including steps list
+        Dictionary with task fields including steps, deliverables, delegation, verification
     """
-    result = {'steps': []}
+    result = {
+        'steps': [],
+        'deliverables': [],
+        'depends_on': [],
+        'delegation': {
+            'skill': '',
+            'workflow': '',
+            'domain': '',
+            'context_skills': []
+        },
+        'verification': {
+            'commands': [],
+            'criteria': '',
+            'manual': False
+        }
+    }
     lines = content.split('\n')
     i = 0
 
@@ -245,10 +381,19 @@ def parse_task_file(content: str) -> dict:
                 # Single line description
                 result['description'] = line[12:].strip()
                 i += 1
+        elif line.startswith('deliverables['):
+            # Parse deliverables block
+            result['deliverables'], i = parse_deliverables_block(lines, i)
+        elif line.startswith('delegation:'):
+            # Parse delegation block
+            result['delegation'], i = parse_delegation_block(lines, i)
+        elif line.startswith('verification:'):
+            # Parse verification block
+            result['verification'], i = parse_verification_block(lines, i)
         elif line.startswith('steps['):
             # Parse steps table header: steps[N]{number,title,status}:
             i += 1
-            while i < len(lines) and lines[i].strip() and not lines[i].startswith('current_step:'):
+            while i < len(lines) and lines[i].strip() and not lines[i].startswith('current_step:') and not lines[i].startswith('verification:'):
                 parts = lines[i].split(',', 2)
                 if len(parts) == 3:
                     result['steps'].append({
@@ -257,12 +402,17 @@ def parse_task_file(content: str) -> dict:
                         'status': parts[2]
                     })
                 i += 1
+        elif line.startswith('depends_on:'):
+            # Parse depends_on field
+            value = line[11:].strip()
+            result['depends_on'] = parse_depends_on(value)
+            i += 1
         elif ':' in line and not line.startswith(' '):
             key, value = line.split(':', 1)
             key = key.strip()
             value = value.strip()
             # Convert numeric fields to int
-            if key in ('number', 'current_step', 'goal'):
+            if key in ('number', 'current_step'):
                 value = int(value) if value else 1
             result[key] = value
             i += 1
@@ -276,7 +426,7 @@ def format_task_file(task: dict) -> str:
     """Format a task dictionary as TOON file content.
 
     Args:
-        task: Task dictionary with steps
+        task: Task dictionary with steps, deliverables, delegation, verification
 
     Returns:
         TOON formatted string
@@ -285,16 +435,44 @@ def format_task_file(task: dict) -> str:
         f"number: {task['number']}",
         f"title: {task['title']}",
         f"status: {task['status']}",
-        f"goal: {task['goal']}",
+        f"phase: {task.get('phase', 'execute')}",
         f"created: {task['created']}",
         f"updated: {task['updated']}",
         "",
-        "description: |",
     ]
 
-    # Add description with 2-space indent
-    for desc_line in task['description'].split('\n'):
+    # Add deliverables block
+    deliverables = task.get('deliverables', [])
+    lines.append(f"deliverables[{len(deliverables)}]:")
+    for d in deliverables:
+        lines.append(f"- {d}")
+
+    lines.append("")
+
+    # Add depends_on
+    depends_on = task.get('depends_on', [])
+    lines.append(f"depends_on: {format_depends_on(depends_on)}")
+
+    lines.append("")
+
+    # Add description
+    lines.append("description: |")
+    for desc_line in task.get('description', '').split('\n'):
         lines.append(f"  {desc_line}")
+
+    lines.append("")
+
+    # Add delegation block
+    delegation = task.get('delegation', {})
+    lines.append("delegation:")
+    lines.append(f"  skill: {delegation.get('skill', '')}")
+    lines.append(f"  workflow: {delegation.get('workflow', '')}")
+    lines.append(f"  domain: {delegation.get('domain', '')}")
+    context_skills = delegation.get('context_skills', [])
+    if context_skills:
+        lines.append("  context_skills:")
+        for skill in context_skills:
+            lines.append(f"  - {skill}")
 
     lines.append("")
 
@@ -303,6 +481,18 @@ def format_task_file(task: dict) -> str:
     lines.append(f"steps[{len(steps)}]{{number,title,status}}:")
     for step in steps:
         lines.append(f"{step['number']},{step['title']},{step['status']}")
+
+    lines.append("")
+
+    # Add verification block
+    verification = task.get('verification', {})
+    lines.append("verification:")
+    commands = verification.get('commands', [])
+    lines.append(f"  commands[{len(commands)}]:")
+    for cmd in commands:
+        lines.append(f"  - {cmd}")
+    lines.append(f"  criteria: {verification.get('criteria', '')}")
+    lines.append(f"  manual: {'true' if verification.get('manual', False) else 'false'}")
 
     lines.append("")
     lines.append(f"current_step: {task.get('current_step', 1)}")
@@ -384,12 +574,19 @@ def calculate_progress(task: dict) -> Tuple[int, int]:
     return completed, len(steps)
 
 
+def format_list_value(val) -> str:
+    """Format a list value for TOON output."""
+    if isinstance(val, list):
+        return f"[{', '.join(str(v) for v in val)}]"
+    return str(val)
+
+
 def output_toon(data: dict) -> None:
     """Print TOON formatted output."""
     lines = []
 
     # Top-level simple fields
-    for key in ['status', 'plan_id', 'file', 'renamed', 'total_tasks', 'task_number', 'step']:
+    for key in ['status', 'plan_id', 'file', 'renamed', 'total_tasks', 'task_number', 'step', 'phase_filter']:
         if key in data:
             lines.append(f"{key}: {data[key]}")
 
@@ -407,23 +604,59 @@ def output_toon(data: dict) -> None:
         lines.append("")
         lines.append("counts:")
         for k, v in data['counts'].items():
-            lines.append(f"  {k}: {v}")
+            if isinstance(v, dict):
+                # Handle nested dict like by_phase
+                lines.append(f"  {k}:")
+                for k2, v2 in v.items():
+                    lines.append(f"    {k2}: {v2}")
+            else:
+                lines.append(f"  {k}: {v}")
 
     # Single task block
     if 'task' in data:
         lines.append("")
         lines.append("task:")
         task = data['task']
-        for key in ['number', 'title', 'goal', 'status', 'current_step', 'created', 'updated', 'step_count']:
+        for key in ['number', 'title', 'phase', 'status', 'current_step', 'created', 'updated', 'step_count']:
             if key in task:
                 lines.append(f"  {key}: {task[key]}")
+        # Handle deliverables array
+        if 'deliverables' in task:
+            lines.append(f"  deliverables: {format_list_value(task['deliverables'])}")
+        # Handle depends_on array
+        if 'depends_on' in task:
+            deps = task['depends_on']
+            if deps:
+                lines.append(f"  depends_on: {format_list_value(deps)}")
+            else:
+                lines.append("  depends_on: none")
         if 'description' in task:
             lines.append(f"  description: {task['description']}")
+        # Handle delegation block
+        if 'delegation' in task:
+            deleg = task['delegation']
+            lines.append("  delegation:")
+            lines.append(f"    skill: {deleg.get('skill', '')}")
+            lines.append(f"    workflow: {deleg.get('workflow', '')}")
+            lines.append(f"    domain: {deleg.get('domain', '')}")
+            ctx_skills = deleg.get('context_skills', [])
+            if ctx_skills:
+                lines.append(f"    context_skills: {format_list_value(ctx_skills)}")
         if 'steps' in task:
             steps = task['steps']
             lines.append(f"  steps[{len(steps)}]{{number,title,status}}:")
             for s in steps:
                 lines.append(f"  {s['number']},{s['title']},{s['status']}")
+        # Handle verification block
+        if 'verification' in task:
+            verif = task['verification']
+            lines.append("  verification:")
+            cmds = verif.get('commands', [])
+            lines.append(f"    commands[{len(cmds)}]:")
+            for cmd in cmds:
+                lines.append(f"    - {cmd}")
+            lines.append(f"    criteria: {verif.get('criteria', '')}")
+            lines.append(f"    manual: {'true' if verif.get('manual', False) else 'false'}")
 
     # Removed block
     if 'removed' in data:
@@ -434,6 +667,14 @@ def output_toon(data: dict) -> None:
             if key in rem:
                 lines.append(f"  {key}: {rem[key]}")
 
+    # Blocked tasks block
+    if 'blocked_tasks' in data:
+        blocked = data['blocked_tasks']
+        lines.append("")
+        lines.append(f"blocked_tasks[{len(blocked)}]{{number,title,waiting_for}}:")
+        for bt in blocked:
+            lines.append(f"{bt['number']},{bt['title']},{bt['waiting_for']}")
+
     # Next block
     if 'next' in data:
         lines.append("")
@@ -442,14 +683,17 @@ def output_toon(data: dict) -> None:
         else:
             lines.append("next:")
             nxt = data['next']
-            for key in ['task_number', 'task_title', 'goal', 'step_number', 'step_title',
-                        'goal_found', 'goal_number', 'goal_title', 'goal_body']:
+            for key in ['task_number', 'task_title', 'phase', 'step_number', 'step_title',
+                        'deliverables_found', 'deliverable_count', 'deliverables_source']:
                 if key in nxt:
                     val = nxt[key]
                     # Convert Python booleans to lowercase for TOON format
                     if isinstance(val, bool):
                         val = 'true' if val else 'false'
                     lines.append(f"  {key}: {val}")
+            # Handle deliverables array
+            if 'deliverables' in nxt:
+                lines.append(f"  deliverables: {format_list_value(nxt['deliverables'])}")
 
     # Context block
     if 'context' in data:
@@ -459,13 +703,14 @@ def output_toon(data: dict) -> None:
         for k, v in ctx.items():
             lines.append(f"  {k}: {v}")
 
-    # Tasks list (tabular)
+    # Tasks list (tabular) - updated format with phase and deliverables
     if 'tasks_table' in data:
         tasks = data['tasks_table']
         lines.append("")
-        lines.append(f"tasks[{len(tasks)}]{{number,title,goal,status,progress}}:")
+        lines.append(f"tasks[{len(tasks)}]{{number,title,phase,deliverables,status,progress}}:")
         for t in tasks:
-            lines.append(f"{t['number']},{t['title']},{t['goal']},{t['status']},{t['progress']}")
+            delivs = format_list_value(t.get('deliverables', []))
+            lines.append(f"{t['number']},{t['title']},{t.get('phase', 'execute')},{delivs},{t['status']},{t['progress']}")
 
     print('\n'.join(lines))
 
@@ -481,9 +726,23 @@ def output_error(message: str) -> None:
 
 def cmd_add(args) -> int:
     """Handle 'add' subcommand."""
-    # Validate goal
+    # Validate deliverables
     try:
-        goal = validate_goal(args.goal)
+        deliverables = validate_deliverables(args.deliverables)
+    except ValueError as e:
+        output_error(str(e))
+        return 1
+
+    # Validate domain
+    try:
+        domain = validate_domain(args.domain)
+    except ValueError as e:
+        output_error(str(e))
+        return 1
+
+    # Validate phase
+    try:
+        phase = validate_phase(args.phase)
     except ValueError as e:
         output_error(str(e))
         return 1
@@ -512,16 +771,42 @@ def cmd_add(args) -> int:
             'status': 'pending'
         })
 
+    # Parse depends_on
+    depends_on = []
+    if args.depends_on:
+        for dep in args.depends_on:
+            if dep.lower() != 'none':
+                depends_on.extend(parse_depends_on(dep))
+
+    # Build delegation block
+    delegation = {
+        'skill': args.delegation_skill or '',
+        'workflow': args.delegation_workflow or '',
+        'domain': domain,
+        'context_skills': args.context_skills or []
+    }
+
+    # Build verification block
+    verification = {
+        'commands': args.verification_commands or [],
+        'criteria': args.verification_criteria or '',
+        'manual': args.verification_manual or False
+    }
+
     # Create task
     now = now_iso()
     task = {
         'number': number,
         'title': args.title,
         'status': 'pending',
-        'goal': goal,
+        'phase': phase,
         'created': now,
         'updated': now,
+        'deliverables': deliverables,
+        'depends_on': depends_on,
         'description': args.description,
+        'delegation': delegation,
+        'verification': verification,
         'steps': steps,
         'current_step': 1
     }
@@ -541,7 +826,9 @@ def cmd_add(args) -> int:
         'task': {
             'number': number,
             'title': args.title,
-            'goal': goal,
+            'deliverables': deliverables,
+            'depends_on': depends_on,
+            'phase': phase,
             'status': 'pending',
             'step_count': len(steps)
         }
@@ -571,12 +858,13 @@ def cmd_update(args) -> int:
         task['title'] = args.title
     if args.description:
         task['description'] = args.description
-    if args.goal:
-        try:
-            task['goal'] = validate_goal(args.goal)
-        except ValueError as e:
-            output_error(str(e))
-            return 1
+    if args.depends_on is not None:
+        # Parse depends_on - handle 'none' or task references
+        depends_on = []
+        for dep in args.depends_on:
+            if dep.lower() != 'none':
+                depends_on.extend(parse_depends_on(dep))
+        task['depends_on'] = depends_on
     if args.status:
         if args.status not in ('pending', 'in_progress', 'done', 'blocked'):
             output_error(f"Invalid status: {args.status}. Must be pending, in_progress, done, or blocked")
@@ -610,7 +898,6 @@ def cmd_update(args) -> int:
         'task': {
             'number': task['number'],
             'title': task['title'],
-            'goal': task['goal'],
             'status': task['status']
         }
     })
@@ -656,53 +943,80 @@ def cmd_list(args) -> int:
     task_dir = get_tasks_dir(args.plan_id)
     all_tasks = get_all_tasks(task_dir)
 
-    # Filter by goal if specified
-    if args.goal:
-        try:
-            goal_num = validate_goal(args.goal)
-            all_tasks = [
-                (p, t) for p, t in all_tasks
-                if t.get('goal') == goal_num
-            ]
-        except ValueError:
-            # Invalid goal format - filter will return empty
-            all_tasks = []
+    # Build set of done task numbers for dependency checking
+    done_tasks = {f"TASK-{t['number']}" for _, t in all_tasks if t.get('status') == 'done'}
+
+    # Filter by phase if specified
+    if args.phase:
+        all_tasks = [
+            (p, t) for p, t in all_tasks
+            if t.get('phase', 'execute') == args.phase
+        ]
+
+    # Filter by deliverable if specified
+    if args.deliverable:
+        all_tasks = [
+            (p, t) for p, t in all_tasks
+            if args.deliverable in t.get('deliverables', [])
+        ]
+
+    # Filter by ready (dependencies satisfied) if specified
+    if args.ready:
+        all_tasks = [
+            (p, t) for p, t in all_tasks
+            if all(dep in done_tasks for dep in t.get('depends_on', []))
+        ]
 
     # Get filtered list for status filtering
     filtered_tasks = all_tasks
     if args.status and args.status != 'all':
         filtered_tasks = [(p, t) for p, t in all_tasks if t.get('status') == args.status]
 
-    # Compute counts from all (not status-filtered, but goal-filtered)
+    # Compute counts from filtered list
     pending = sum(1 for _, t in all_tasks if t.get('status') == 'pending')
     in_progress = sum(1 for _, t in all_tasks if t.get('status') == 'in_progress')
-    done = sum(1 for _, t in all_tasks if t.get('status') == 'done')
+    done_count = sum(1 for _, t in all_tasks if t.get('status') == 'done')
     blocked = sum(1 for _, t in all_tasks if t.get('status') == 'blocked')
+
+    # Compute counts by phase
+    by_phase = {}
+    for _, t in all_tasks:
+        phase = t.get('phase', 'execute')
+        by_phase[phase] = by_phase.get(phase, 0) + 1
 
     # Build table data
     table = []
     for path, task in filtered_tasks:
         completed, total = calculate_progress(task)
+        deliverables = task.get('deliverables', [])
         table.append({
             'number': task['number'],
             'title': task['title'],
-            'goal': task.get('goal', ''),
+            'phase': task.get('phase', 'execute'),
+            'deliverables': deliverables,
             'status': task['status'],
             'progress': f"{completed}/{total}"
         })
 
-    output_toon({
+    result = {
         'status': 'success',
         'plan_id': args.plan_id,
+        'phase_filter': args.phase if args.phase else 'all',
         'counts': {
             'total': len(all_tasks),
             'pending': pending,
             'in_progress': in_progress,
-            'done': done,
+            'done': done_count,
             'blocked': blocked
         },
         'tasks_table': table
-    })
+    }
+
+    # Add by_phase counts if showing all phases
+    if not args.phase and by_phase:
+        result['counts']['by_phase'] = by_phase
+
+    output_toon(result)
     return 0
 
 
@@ -727,13 +1041,17 @@ def cmd_get(args) -> int:
         'task': {
             'number': task['number'],
             'title': task['title'],
-            'goal': task.get('goal', ''),
+            'deliverables': task.get('deliverables', []),
+            'depends_on': task.get('depends_on', []),
+            'phase': task.get('phase', 'execute'),
             'status': task['status'],
             'current_step': task.get('current_step', 1),
             'created': task.get('created', ''),
             'updated': task.get('updated', ''),
             'description': task.get('description', ''),
-            'steps': task.get('steps', [])
+            'delegation': task.get('delegation', {}),
+            'steps': task.get('steps', []),
+            'verification': task.get('verification', {})
         }
     })
     return 0
@@ -744,57 +1062,97 @@ def cmd_next(args) -> int:
     task_dir = get_tasks_dir(args.plan_id)
     all_tasks = get_all_tasks(task_dir)
 
-    total_tasks = len(all_tasks)
-    completed_tasks = sum(1 for _, t in all_tasks if t.get('status') == 'done')
+    # Build set of done task numbers for dependency checking
+    done_tasks = {f"TASK-{t['number']}" for _, t in all_tasks if t.get('status') == 'done'}
 
-    # Find first in_progress or pending task
+    # Filter by phase if specified
+    filtered_tasks = all_tasks
+    if args.phase:
+        filtered_tasks = [
+            (p, t) for p, t in all_tasks
+            if t.get('phase', 'execute') == args.phase
+        ]
+
+    total_tasks = len(filtered_tasks)
+    completed_tasks = sum(1 for _, t in filtered_tasks if t.get('status') == 'done')
+    in_progress_count = sum(1 for _, t in filtered_tasks if t.get('status') == 'in_progress')
+
+    # Helper to check if dependencies are satisfied
+    def deps_satisfied(task):
+        if getattr(args, 'ignore_deps', False):
+            return True
+        deps = task.get('depends_on', [])
+        return all(dep in done_tasks for dep in deps)
+
+    # Find first in_progress or pending task with satisfied dependencies
     next_task = None
-    next_task_path = None
+    blocked_tasks = []
 
     # First, look for in_progress tasks
-    for path, task in all_tasks:
+    for path, task in filtered_tasks:
         if task.get('status') == 'in_progress':
             next_task = task
-            next_task_path = path
             break
 
-    # If no in_progress, find first pending
+    # If no in_progress, find first pending with satisfied deps
     if not next_task:
-        for path, task in all_tasks:
+        for path, task in filtered_tasks:
             if task.get('status') == 'pending':
-                next_task = task
-                next_task_path = path
-                break
+                if deps_satisfied(task):
+                    next_task = task
+                    break
+                else:
+                    # Track blocked tasks
+                    waiting_for = [dep for dep in task.get('depends_on', []) if dep not in done_tasks]
+                    blocked_tasks.append({
+                        'number': task['number'],
+                        'title': task['title'],
+                        'waiting_for': ', '.join(waiting_for)
+                    })
 
     if not next_task:
-        # All done
-        output_toon({
-            'status': 'success',
-            'plan_id': args.plan_id,
-            'next': None,
-            'context': {
-                'total_tasks': total_tasks,
-                'completed_tasks': completed_tasks,
-                'message': 'All tasks completed'
-            }
-        })
+        # Check if blocked by dependencies or all done
+        if blocked_tasks:
+            output_toon({
+                'status': 'success',
+                'plan_id': args.plan_id,
+                'next': None,
+                'blocked_tasks': blocked_tasks,
+                'context': {
+                    'total_tasks': total_tasks,
+                    'completed_tasks': completed_tasks,
+                    'in_progress': in_progress_count,
+                    'blocked_by_deps': len(blocked_tasks),
+                    'message': 'Waiting for in-progress tasks to complete'
+                }
+            })
+        else:
+            output_toon({
+                'status': 'success',
+                'plan_id': args.plan_id,
+                'next': None,
+                'context': {
+                    'total_tasks': total_tasks,
+                    'completed_tasks': completed_tasks,
+                    'message': 'All tasks completed'
+                }
+            })
         return 0
 
     # Find next pending step in this task
     steps = next_task.get('steps', [])
     next_step = None
     completed_steps = 0
-    remaining_steps = 0
 
     for step in steps:
         if step['status'] in ('done', 'skipped'):
             completed_steps += 1
         elif step['status'] == 'in_progress':
             next_step = step
-            remaining_steps = len(steps) - completed_steps
         elif step['status'] == 'pending' and not next_step:
             next_step = step
-            remaining_steps = len(steps) - completed_steps
+
+    remaining_steps = len(steps) - completed_steps
 
     if not next_step:
         # Task has no pending steps but isn't marked done - edge case
@@ -817,7 +1175,8 @@ def cmd_next(args) -> int:
         'next': {
             'task_number': next_task['number'],
             'task_title': next_task['title'],
-            'goal': next_task.get('goal', ''),
+            'phase': next_task.get('phase', 'execute'),
+            'deliverables': next_task.get('deliverables', []),
             'step_number': next_step['number'],
             'step_title': next_step['title']
         },
@@ -829,14 +1188,12 @@ def cmd_next(args) -> int:
         }
     }
 
-    # Include goal context if requested
+    # Include deliverable context if requested
     if getattr(args, 'include_context', False):
-        goal_ref = next_task.get('goal', '')
-        goal_context = get_goal_context(args.plan_id, goal_ref)
-        if goal_context:
-            result['next'].update(goal_context)
-        else:
-            result['next']['goal_found'] = False
+        deliverables = next_task.get('deliverables', [])
+        if deliverables:
+            deliverable_context = get_deliverable_context(deliverables)
+            result['next'].update(deliverable_context)
 
     output_toon(result)
     return 0
@@ -1170,11 +1527,29 @@ def build_parser() -> argparse.ArgumentParser:
     p_add = subparsers.add_parser('add', help='Add a new task')
     p_add.add_argument('--plan-id', required=True, help='Plan identifier')
     p_add.add_argument('--title', required=True, help='Task title')
-    p_add.add_argument('--goal', required=True,
-                       help='Goal number (positive integer referencing solution_outline.md section)')
+    p_add.add_argument('--deliverables', nargs='+', type=int, required=True,
+                       help='Deliverable numbers from solution_outline.md')
+    p_add.add_argument('--domain', required=True,
+                       choices=['java', 'java-testing', 'javascript', 'javascript-testing', 'plugin'],
+                       help='Skill domain for loading defaults')
     p_add.add_argument('--description', required=True, help='Task description')
     p_add.add_argument('--steps', nargs='+', required=True,
                        help='Step titles (space-separated, order matters)')
+    p_add.add_argument('--phase', default='execute',
+                       choices=['init', 'refine', 'execute', 'finalize'],
+                       help='Plan phase (default: execute)')
+    p_add.add_argument('--depends-on', nargs='*', default=[],
+                       help='Task dependencies (TASK-N references or "none")')
+    p_add.add_argument('--delegation-skill', help='Skill for task execution')
+    p_add.add_argument('--delegation-workflow', help='Workflow within skill')
+    p_add.add_argument('--context-skills', nargs='*', default=[],
+                       help='Optional skills from domain optionals')
+    p_add.add_argument('--verification-commands', nargs='*', default=[],
+                       help='Commands for verification')
+    p_add.add_argument('--verification-criteria', default='',
+                       help='Success criteria')
+    p_add.add_argument('--verification-manual', action='store_true',
+                       help='Mark as requiring manual verification')
 
     # update
     p_update = subparsers.add_parser('update', help='Update an existing task')
@@ -1182,7 +1557,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_update.add_argument('--number', required=True, type=int, help='Task number')
     p_update.add_argument('--title', help='New title')
     p_update.add_argument('--description', help='New description')
-    p_update.add_argument('--goal', help='New goal reference')
+    p_update.add_argument('--depends-on', nargs='*',
+                          help='Update dependencies (TASK-N references or "none" to clear)')
     p_update.add_argument('--status', help='New status (pending/in_progress/done/blocked)')
 
     # remove
@@ -1195,7 +1571,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_list.add_argument('--plan-id', required=True, help='Plan identifier')
     p_list.add_argument('--status', choices=['pending', 'in_progress', 'done', 'blocked', 'all'],
                         default='all', help='Filter by status')
-    p_list.add_argument('--goal', help='Filter by goal reference')
+    p_list.add_argument('--phase', choices=['init', 'refine', 'execute', 'finalize'],
+                        help='Filter by phase')
+    p_list.add_argument('--deliverable', type=int, help='Filter by deliverable number')
+    p_list.add_argument('--ready', action='store_true',
+                        help='Only show tasks with no unmet dependencies')
 
     # get
     p_get = subparsers.add_parser('get', help='Get a single task')
@@ -1205,8 +1585,12 @@ def build_parser() -> argparse.ArgumentParser:
     # next
     p_next = subparsers.add_parser('next', help='Get next pending task/step')
     p_next.add_argument('--plan-id', required=True, help='Plan identifier')
+    p_next.add_argument('--phase', choices=['init', 'refine', 'execute', 'finalize'],
+                        help='Filter by phase')
     p_next.add_argument('--include-context', action='store_true',
-                        help='Include goal details in output')
+                        help='Include deliverable details in output')
+    p_next.add_argument('--ignore-deps', action='store_true',
+                        help='Ignore dependency constraints')
 
     # step-start
     p_step_start = subparsers.add_parser('step-start', help='Mark a step as in_progress')
