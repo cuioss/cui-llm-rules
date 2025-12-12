@@ -783,14 +783,18 @@ Full marketplace batch analysis using hybrid two-phase workflow.
 
 ### Step 1: Phase 1 - Script Batch Processing
 
-**EXECUTE** the batch script to scan, analyze, and apply safe fixes:
+**EXECUTE** the batch script to scan, analyze, and apply safe fixes.
 
+If executor exists, use notation:
 ```bash
-# Apply safe fixes automatically
-python3 marketplace/bundles/pm-plugin-development/skills/plugin-doctor/scripts/doctor-marketplace.py fix
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace fix
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:doctor-marketplace report
+```
 
-# Generate comprehensive report
-python3 marketplace/bundles/pm-plugin-development/skills/plugin-doctor/scripts/doctor-marketplace.py report
+Otherwise, use bootstrap pattern with `${PLUGIN_ROOT}` (see `script-executor` skill):
+```bash
+python3 ${PLUGIN_ROOT}/pm-plugin-development/*/skills/plugin-doctor/scripts/doctor-marketplace.py fix
+python3 ${PLUGIN_ROOT}/pm-plugin-development/*/skills/plugin-doctor/scripts/doctor-marketplace.py report
 ```
 
 Parse the JSON output to get:

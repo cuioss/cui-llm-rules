@@ -37,9 +37,16 @@ Run the marketplace inventory scanner script:
 python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory --scope marketplace
 ```
 
-**Direct execution from marketplace checkout (bootstrap only - before executor exists):**
+**Direct execution (bootstrap only - before executor exists):**
+
+First, get the plugin root (or read from `.plan/marshall-state.toon` if cached):
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py --scope marketplace
+python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall/scripts/bootstrap-plugin.py get-root
+```
+
+Then execute with the resolved path (auto-detects marketplace or plugin-cache):
+```bash
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py
 ```
 
 The script will:
@@ -84,13 +91,17 @@ Return this JSON output to the invoking command for further processing.
 
 ### --scope (optional)
 
-Directory scope to scan. Default: `marketplace`
+Directory scope to scan. Default: `auto`
 
 | Value | Description |
 |-------|-------------|
-| `marketplace` | Scans marketplace/bundles/ directory |
+| `auto` | **Default**. Tries `marketplace/bundles/` first, falls back to `plugin-cache` |
+| `marketplace` | Explicit: scans marketplace/bundles/ directory only |
+| `plugin-cache` | Explicit: scans ~/.claude/plugins/cache/plan-marshall/ only |
 | `global` | Scans ~/.claude directory |
 | `project` | Scans .claude directory in current working directory |
+
+The `auto` default makes the script work in both the marketplace repo and other projects without specifying a scope.
 
 **Example**:
 ```bash

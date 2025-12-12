@@ -17,7 +17,7 @@ Project configuration wizard for the planning system.
 
 ## Banner
 
-Display this banner on command start (output as single code block):
+Output this banner directly as text at command start (do NOT use Bash echo - output it in your response):
 
 ```
 ╔═══════════════════════════════════════════════════════════════════════╗
@@ -46,17 +46,35 @@ Display this banner on command start (output as single code block):
 
 ## Execution
 
-### Step 1: Determine Mode
+### Step 1: Bootstrap Plugin Root
 
-Run the mode detection script (handles missing executor):
+Get the plugin root path (cached in `.plan/marshall-state.toon` after first detection).
+
+**If `.plan/marshall-state.toon` exists**, read `plugin_root` from it:
+```
+Read: .plan/marshall-state.toon
+```
+
+**If state file doesn't exist or lacks `plugin_root`**, find and run the bootstrap script:
+```bash
+python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall/scripts/bootstrap-plugin.py get-root
+```
+
+This detects the plugin root and caches it in `.plan/marshall-state.toon`. Extract `plugin_root` from the output.
+
+Store the plugin root path for use in subsequent steps (e.g., `PLUGIN_ROOT=/Users/.../.claude/plugins/cache/plan-marshall`).
+
+### Step 2: Determine Mode
+
+Run the mode detection script using the plugin root (glob pattern handles any version):
 
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/determine-mode.py mode
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/determine-mode.py mode
 ```
 
 If `--wizard` flag was provided, skip to wizard mode regardless of output.
 
-### Step 2: Route Based on Output
+### Step 3: Route Based on Output
 
 | mode | reason | Action |
 |------|--------|--------|
@@ -64,12 +82,12 @@ If `--wizard` flag was provided, skip to wizard mode regardless of output.
 | `wizard` | `marshal_missing` | Read skill, start at "First-Run Wizard" Step 2 |
 | `menu` | `both_exist` | Read skill, go to "Interactive Menu" |
 
-### Step 3: Execute Skill
+### Step 4: Execute Skill
 
-Read and follow the skill instructions:
+Resolve and read the skill file:
 
+```bash
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/bootstrap-plugin.py resolve plan-marshall skills/plan-marshall/SKILL.md
 ```
-Read: marketplace/bundles/plan-marshall/skills/plan-marshall/SKILL.md
-```
 
-Execute the section identified in Step 2. Follow all steps exactly as documented.
+Read the `resolved_path` from output and follow the skill instructions. Execute the section identified in Step 3.

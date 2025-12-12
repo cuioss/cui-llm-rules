@@ -63,14 +63,21 @@ mode=menu   → Interactive Menu Loop
 
 ---
 
+## Prerequisites
+
+This skill requires `${PLUGIN_ROOT}` to be set by the invoking command (e.g., `/plan-marshall`).
+The plugin root is detected via `bootstrap-plugin.py` and cached in `.plan/marshall-state.toon`.
+
+---
+
 ## Step 0: Determine Mode
 
 Determine whether to run wizard or menu based on existing files.
 
-**BOOTSTRAP**: Since execute-script.py may not exist yet, use DIRECT Python call:
+**BOOTSTRAP**: Since execute-script.py may not exist yet, use DIRECT Python call with glob:
 
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/determine-mode.py mode
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/determine-mode.py mode
 ```
 
 **Output (TOON)**:
@@ -99,10 +106,10 @@ Sequential structured setup for new projects.
 
 Configure `.gitignore` for `.plan/` directory.
 
-**BOOTSTRAP**: Use DIRECT Python call:
+**BOOTSTRAP**: Use DIRECT Python call with glob:
 
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/gitignore-setup.py
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/gitignore-setup.py
 ```
 
 **Output (TOON)**:
@@ -124,10 +131,10 @@ entries_added	2
 
 Check if project docs need `.plan/temp/` documentation:
 
-**BOOTSTRAP**: Use DIRECT Python call (executor not yet available):
+**BOOTSTRAP**: Use DIRECT Python call with glob (executor not yet available):
 
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/plan-marshall/scripts/determine-mode.py check-docs
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/determine-mode.py check-docs
 ```
 
 **Output (TOON)**:
@@ -150,12 +157,11 @@ If `status` is `needs_update`, add to each listed file's appropriate section:
 
 ### Step 2: Generate Executor
 
-**BOOTSTRAP**: Since execute-script.py doesn't exist yet, use DIRECT Python call:
+**BOOTSTRAP**: Since execute-script.py doesn't exist yet, use DIRECT Python call with glob:
 
 ```bash
-# Direct call - no executor dependency
-python3 marketplace/bundles/plan-marshall/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
-  --scope marketplace \
+# Direct call - no executor dependency (auto-detects marketplace or plugin-cache)
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
   --resource-types scripts
 ```
 
@@ -175,7 +181,7 @@ Parse the JSON output to extract script mappings. The output contains:
 ```
 
 **Generate executor**:
-1. Read template from: `marketplace/bundles/plan-marshall/skills/script-executor/templates/execute-script.py.template`
+1. Read template from: `${PLUGIN_ROOT}/plan-marshall/*/skills/script-executor/templates/execute-script.py.template`
 2. Replace `{{SCRIPT_MAPPINGS}}` with notation→path mappings
 3. Replace `{{EXECUTION_LOG_DIR}}` with absolute path to executor scripts directory
 4. Write to: `.plan/execute-script.py`
@@ -401,7 +407,7 @@ Execute BOTH operations in sequence:
 ### Operation: Regenerate Executor
 
 ```bash
-python3 marketplace/bundles/plan-marshall/skills/script-executor/scripts/generate-executor.py generate
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/script-executor/scripts/generate-executor.py generate
 ```
 
 The script uses subcommands (`generate`, `verify`, `drift`, `paths`, `cleanup`), not positional arguments.

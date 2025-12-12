@@ -121,13 +121,54 @@ Run `/plan-marshall` to generate the executor after bundle changes.
 ```
 .plan/
 ├── execute-script.py      # Generated executor with embedded mappings
-├── marshall-state.toon    # Metadata: last run, script count, hash
+├── marshall-state.toon    # Plugin root path + metadata
 └── logs/                  # Global execution logs (no plan context)
     └── script-execution-YYYY-MM-DD.log
 
-marketplace/bundles/plan-marshall/skills/logging/scripts/
-└── plan_logging.py        # Unified logging module (see logging skill)
+~/.claude/plugins/cache/plan-marshall/
+└── {bundle}/              # Installed plugin bundles
+    └── {version}/         # Versioned bundle contents
+        └── skills/...     # Skills with scripts
 ```
+
+## Bootstrap Pattern (Before Executor Exists)
+
+When `.plan/execute-script.py` doesn't exist yet (first run), use the bootstrap pattern:
+
+### Step 1: Get Plugin Root
+
+Check `.plan/marshall-state.toon` for cached `plugin_root`, or detect it:
+
+```bash
+python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall/scripts/bootstrap-plugin.py get-root
+```
+
+Output:
+```
+plugin_root	/Users/.../.claude/plugins/cache/plan-marshall
+source	detected|cached
+```
+
+### Step 2: Execute Scripts Directly
+
+Use the plugin root with glob pattern for version:
+
+```bash
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/{skill}/scripts/{script}.py {args}
+```
+
+### State File Format
+
+`.plan/marshall-state.toon`:
+```
+plugin_root	/Users/oliver/.claude/plugins/cache/plan-marshall
+detected_at	2025-12-12T10:30:00+00:00
+```
+
+This pattern enables:
+- Plugin scripts to work in any project (not just the marketplace repo)
+- Caching for fast subsequent lookups
+- Version-agnostic paths via glob
 
 ## Integration with Verification
 

@@ -9,7 +9,8 @@ Usage:
     python3 scan-marketplace-inventory.py [options]
 
 Options:
-    --scope <value>          Directory scope: marketplace, global, project (default: marketplace)
+    --scope <value>          Directory scope: auto (default), marketplace, plugin-cache, global, project
+                             'auto' tries marketplace/bundles first, then falls back to plugin-cache
     --resource-types <types> Resource types: agents, commands, skills, scripts, or comma-separated (default: all)
     --include-descriptions   Extract descriptions from YAML frontmatter
     --name-pattern <pattern> Filter resources by name pattern (fnmatch glob, pipe-separated for multiple)
@@ -36,6 +37,17 @@ from typing import Optional
 
 # Constants
 MARKETPLACE_BUNDLES_PATH = "marketplace/bundles"
+CLAUDE_DIR = ".claude"
+PLUGIN_CACHE_SUBPATH = "plugins/cache/plan-marshall"
+
+
+def safe_relative_path(path: Path) -> str:
+    """Return path relative to cwd if possible, otherwise absolute path."""
+    try:
+        return str(path.relative_to(Path.cwd()))
+    except ValueError:
+        # Path is not under cwd, return absolute
+        return str(path)
 
 
 def find_bundles(base_path: Path) -> list[Path]:
@@ -90,7 +102,7 @@ def discover_agents(bundle_dir: Path, include_descriptions: bool) -> list[dict]:
         if agent_file.is_file():
             agent = {
                 "name": agent_file.stem,
-                "path": str(agent_file.relative_to(Path.cwd()))
+                "path": safe_relative_path(agent_file)
             }
             if include_descriptions:
                 agent["description"] = extract_description(agent_file)
@@ -109,7 +121,7 @@ def discover_commands(bundle_dir: Path, include_descriptions: bool) -> list[dict
         if command_file.is_file():
             command = {
                 "name": command_file.stem,
-                "path": str(command_file.relative_to(Path.cwd()))
+                "path": safe_relative_path(command_file)
             }
             if include_descriptions:
                 command["description"] = extract_description(command_file)
@@ -128,7 +140,7 @@ def discover_skills(bundle_dir: Path, include_descriptions: bool) -> list[dict]:
         skill_dir = skill_md.parent
         skill = {
             "name": skill_dir.name,
-            "path": str(skill_dir.relative_to(Path.cwd()))
+            "path": safe_relative_path(skill_dir)
         }
         if include_descriptions:
             skill["description"] = extract_description(skill_md)
@@ -156,7 +168,7 @@ def discover_scripts(bundle_dir: Path, bundle_name: str) -> list[dict]:
             script_type = "python" if script_file.suffix == ".py" else "bash"
 
             # Generate path formats
-            relative_path = str(script_file.relative_to(Path.cwd()))
+            relative_path = safe_relative_path(script_file)
             runtime_mount = f"./.claude/skills/{skill_name}/scripts/{script_file.name}"
 
             scripts.append({
@@ -213,7 +225,7 @@ def process_bundle(bundle_dir: Path, include: dict, include_descriptions: bool,
     bundle_name = bundle_dir.name
     bundle = {
         "name": bundle_name,
-        "path": str(bundle_dir.relative_to(Path.cwd()))
+        "path": safe_relative_path(bundle_dir)
     }
 
     # Discover and filter resources
@@ -240,22 +252,58 @@ def process_bundle(bundle_dir: Path, include: dict, include_descriptions: bool,
     return bundle
 
 
+def _find_marketplace_path() -> Path | None:
+    """Find marketplace/bundles directory in cwd or parent."""
+    if (Path.cwd() / MARKETPLACE_BUNDLES_PATH).is_dir():
+        return Path.cwd() / MARKETPLACE_BUNDLES_PATH
+    if (Path.cwd().parent / MARKETPLACE_BUNDLES_PATH).is_dir():
+        return Path.cwd().parent / MARKETPLACE_BUNDLES_PATH
+    return None
+
+
+def _get_plugin_cache_path() -> Path | None:
+    """Get plugin cache path if it exists."""
+    cache_path = Path.home() / CLAUDE_DIR / PLUGIN_CACHE_SUBPATH
+    return cache_path if cache_path.is_dir() else None
+
+
 def get_base_path(scope: str) -> Path:
-    """Determine base path based on scope."""
+    """Determine base path based on scope.
+
+    The 'auto' scope (default) tries marketplace first, then falls back to plugin-cache.
+    This enables the script to work both in the marketplace repo and in other projects.
+    """
+    if scope == "auto":
+        marketplace = _find_marketplace_path()
+        if marketplace:
+            return marketplace
+        cache = _get_plugin_cache_path()
+        if cache:
+            return cache
+        raise FileNotFoundError(
+            f"Neither {MARKETPLACE_BUNDLES_PATH} nor plugin cache found. "
+            f"Run from marketplace repo or ensure plugin is installed."
+        )
+
     if scope == "marketplace":
-        # Try current directory first, then parent
-        if (Path.cwd() / MARKETPLACE_BUNDLES_PATH).is_dir():
-            return Path.cwd() / MARKETPLACE_BUNDLES_PATH
-        elif (Path.cwd().parent / MARKETPLACE_BUNDLES_PATH).is_dir():
-            return Path.cwd().parent / MARKETPLACE_BUNDLES_PATH
-        else:
-            raise FileNotFoundError(f"{MARKETPLACE_BUNDLES_PATH} directory not found")
-    elif scope == "global":
-        return Path.home() / ".claude"
-    elif scope == "project":
-        return Path.cwd() / ".claude"
-    else:
-        raise ValueError(f"Invalid scope: {scope}")
+        marketplace = _find_marketplace_path()
+        if marketplace:
+            return marketplace
+        raise FileNotFoundError(f"{MARKETPLACE_BUNDLES_PATH} directory not found")
+
+    if scope == "global":
+        return Path.home() / CLAUDE_DIR
+
+    if scope == "project":
+        return Path.cwd() / CLAUDE_DIR
+
+    if scope == "plugin-cache":
+        cache = _get_plugin_cache_path()
+        if cache:
+            return cache
+        raise FileNotFoundError(f"Plugin cache not found: {Path.home() / CLAUDE_DIR / PLUGIN_CACHE_SUBPATH}")
+
+    raise ValueError(f"Invalid scope: {scope}")
 
 
 def main():
@@ -264,9 +312,10 @@ def main():
     )
     parser.add_argument(
         "--scope",
-        choices=["marketplace", "global", "project"],
-        default="marketplace",
-        help="Directory scope to scan"
+        choices=["auto", "marketplace", "global", "project", "plugin-cache"],
+        default="auto",
+        help="Directory scope: auto (default, tries marketplace then plugin-cache), "
+             "marketplace, plugin-cache, global, project"
     )
     parser.add_argument(
         "--resource-types",
