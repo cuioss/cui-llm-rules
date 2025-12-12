@@ -428,6 +428,12 @@ class PlanTestContext:
         if self.plan_dir and self.plan_dir.exists():
             shutil.rmtree(self.plan_dir, ignore_errors=True)
 
+        # Clean up marshal.json to ensure test isolation
+        if self.fixture_dir:
+            marshal_path = self.fixture_dir / 'marshal.json'
+            if marshal_path.exists():
+                marshal_path.unlink()
+
         # Restore original PLAN_BASE_DIR
         if self._original_plan_base_dir is None:
             os.environ.pop('PLAN_BASE_DIR', None)

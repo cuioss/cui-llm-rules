@@ -677,7 +677,12 @@ def cmd_plan(args) -> int:
             })
 
         elif args.verb == 'get':
-            field = args.field
+            field = getattr(args, 'field', None)
+            if not field:
+                # No field specified - return all defaults
+                return success_exit({
+                    "defaults": defaults
+                })
             if field not in defaults:
                 return error_exit(f"Unknown default field: {field}")
             return success_exit({
@@ -852,8 +857,8 @@ def main():
 
     def_sub.add_parser('list', help='List all plan defaults')
 
-    def_get = def_sub.add_parser('get', help='Get default value')
-    def_get.add_argument('--field', required=True, help='Field name')
+    def_get = def_sub.add_parser('get', help='Get default value (all if no field specified)')
+    def_get.add_argument('--field', help='Field name (optional, shows all if omitted)')
 
     def_set = def_sub.add_parser('set', help='Set default value')
     def_set.add_argument('--field', required=True, help='Field name')
