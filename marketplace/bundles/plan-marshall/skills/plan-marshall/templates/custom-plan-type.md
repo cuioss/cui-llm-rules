@@ -2,9 +2,20 @@
 name: plan-type-{{NAME}}
 description: Custom plan-type for {{DESCRIPTION}}
 allowed-tools: Read, Bash
+
+# Detection patterns and keywords
+patterns:
+  {{FILE_PATTERNS_YAML}}
+keywords:
+  {{KEYWORDS_YAML}}
+
+# Agent routing
 domain:
   solution_outline_agent: {{SOLUTION_OUTLINE_AGENT}}
   task_plan_agent: {{TASK_PLAN_AGENT}}
+
+# Plan defaults for this type
+plan_defaults:
   verification_command: {{VERIFICATION_COMMAND}}
   pr_workflow: false
   standards: []
@@ -116,4 +127,4 @@ This is a project-local plan-type created by `/plan-marshall`.
 
 Location: `.claude/plan-types/{{NAME}}/SKILL.md`
 
-Registered in: `.plan/marshal.json` under `custom_plan_types`
+Plan-types are discovered automatically from skill frontmatter - no registration required.

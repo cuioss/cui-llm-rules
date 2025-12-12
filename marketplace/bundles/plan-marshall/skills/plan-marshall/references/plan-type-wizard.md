@@ -49,16 +49,12 @@ AskUserQuestion:
 ## Step 4: Create Custom Plan-Type
 
 1. Read template from `templates/custom-plan-type.md`
-2. Create `.claude/plan-types/{name}/SKILL.md` with filled template
-3. Add to marshal.json:
+2. Create `.claude/plan-types/{name}/SKILL.md` with filled template containing:
+   - `patterns:` - file patterns from Step 2
+   - `domain:` with solution_outline_agent and task_plan_agent
+   - `plan_defaults:` with verification_command and standards
 
-```bash
-python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config custom-types add \
-  --name {name} \
-  --skill-path .claude/plan-types/{name}/SKILL.md \
-  --solution-outline-agent {solution_outline_agent} \
-  --task-plan-agent {task_plan_agent}
-```
+Plan-types are discovered automatically from skill frontmatter. No marshal.json modification required.
 
 ---
 

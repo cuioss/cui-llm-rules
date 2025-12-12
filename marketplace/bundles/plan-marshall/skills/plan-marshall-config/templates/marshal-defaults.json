@@ -1,0 +1,39 @@
+{
+  "skill_domains": {
+    "java": {
+      "defaults": ["pm-dev-java:cui-java-core"],
+      "optionals": ["pm-dev-java:cui-java-cdi"]
+    },
+    "java-testing": {
+      "defaults": ["pm-dev-java:cui-java-unit-testing"],
+      "optionals": []
+    },
+    "javascript": {
+      "defaults": ["pm-dev-frontend:cui-javascript"],
+      "optionals": []
+    },
+    "javascript-testing": {
+      "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
+      "optionals": ["pm-dev-frontend:cui-cypress"]
+    }
+  },
+  "modules": {},
+  "build_systems": [],
+  "system": {
+    "retention": {
+      "logs_days": 1,
+      "archived_plans_days": 5,
+      "memory_days": 5,
+      "temp_on_maintenance": true
+    }
+  },
+  "plan": {
+    "defaults": {
+      "compatibility": "deprecations",
+      "commit_strategy": "phase-specific",
+      "create_pr": false,
+      "verification_required": true,
+      "branch_strategy": "direct"
+    }
+  }
+}

@@ -35,7 +35,9 @@ def clean_fixture_dirs(fixture_dir: Path):
 def setup_marshal_json(fixture_dir: Path, retention: dict = None):
     """Create marshal.json with retention settings."""
     config = {
-        "retention": retention or DEFAULT_RETENTION
+        "system": {
+            "retention": retention or DEFAULT_RETENTION
+        }
     }
     marshal_path = fixture_dir / 'marshal.json'
     marshal_path.write_text(json.dumps(config, indent=2))
@@ -251,14 +253,14 @@ def test_missing_marshal_json():
 def test_missing_retention_config():
     """Script fails loudly when retention config is missing."""
     with PlanTestContext(plan_id='test-missing-retention') as ctx:
-        # Create marshal.json without retention section
+        # Create marshal.json without system.retention section
         marshal_path = ctx.fixture_dir / 'marshal.json'
         marshal_path.write_text(json.dumps({"other": "config"}))
 
         result = run_script(SCRIPT_PATH, 'clean', '--target', 'all')
         assert not result.success, "Should fail without retention config"
         assert 'error' in result.stdout.lower()
-        assert 'retention' in result.stdout.lower()
+        assert 'system.retention' in result.stdout.lower()
 
 
 def test_missing_subcommand():

@@ -2,9 +2,30 @@
 name: plan-type-javascript
 description: JavaScript plan type for npm/frontend projects
 allowed-tools: Read, Bash
+
+# Detection patterns and keywords
+patterns:
+  - "*.js"
+  - "*.ts"
+  - "*.jsx"
+  - "*.tsx"
+  - "package.json"
+keywords:
+  - javascript
+  - typescript
+  - npm
+  - frontend
+  - web component
+  - react
+  - node
+
+# Agent routing
 domain:
   solution_outline_agent: pm-dev-frontend:js-solution-outline-agent
   task_plan_agent: pm-dev-frontend:js-task-plan-agent
+
+# Plan defaults for this type
+plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix system=npm
   pr_workflow: true
   standards:

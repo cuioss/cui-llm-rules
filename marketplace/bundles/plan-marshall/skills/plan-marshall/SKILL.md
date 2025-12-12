@@ -41,7 +41,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 | determine-mode | `plan-marshall:plan-marshall:determine-mode` | Determine wizard vs menu mode |
 | gitignore-setup | `plan-marshall:plan-marshall:gitignore-setup` | Configure .gitignore for .plan/ |
 | cleanup-plan-directory | `plan-marshall:plan-marshall:cleanup-plan-directory` | Clean temp, logs, archived-plans, memory |
-| marshal-config | `pm-workflow:manage-config:marshal-config` | Project-level marshal.json CRUD |
+| plan-marshall-config | `plan-marshall:plan-marshall-config:plan-marshall-config` | Project-level marshal.json CRUD |
 | scan-marketplace-inventory | `plan-marshall:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
 | build-env | `pm-dev-builder:environment-detection:build-env` | Build system detection |
 | permission-doctor | `plan-marshall:permission-doctor:permission-doctor` | Permission analysis |

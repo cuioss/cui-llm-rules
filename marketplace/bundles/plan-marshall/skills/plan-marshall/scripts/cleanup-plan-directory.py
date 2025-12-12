@@ -78,7 +78,7 @@ def get_retention_settings() -> dict:
     if not MARSHAL_JSON.exists():
         print(serialize_toon({
             "status": "error",
-            "error": "marshal.json not found. You must run /plan-marshall command first."
+            "error": "marshal.json not found. Run command /plan-marshall first"
         }))
         sys.exit(1)
 
@@ -91,14 +91,14 @@ def get_retention_settings() -> dict:
         }))
         sys.exit(1)
 
-    if 'retention' not in config:
+    if 'system' not in config or 'retention' not in config['system']:
         print(serialize_toon({
             "status": "error",
-            "error": "No retention settings in marshal.json. You must run /plan-marshall command first."
+            "error": "system.retention not configured. Run command /plan-marshall first"
         }))
         sys.exit(1)
 
-    return config['retention']
+    return config['system']['retention']
 
 
 def get_dir_age_days(path: Path) -> float:

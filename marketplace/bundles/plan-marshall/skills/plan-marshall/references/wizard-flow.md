@@ -141,7 +141,7 @@ python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync 
 ## Step 3: Initialize Marshal.json
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config init
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config init
 ```
 
 **Output**: "Created .plan/marshal.json with defaults"
@@ -168,55 +168,40 @@ AskUserQuestion:
       value: "no"
 ```
 
-If yes, update marshal.json with detected systems:
+If yes, auto-detect and add build systems to marshal.json:
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config build-systems set \
-  --system maven --active true
-python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config build-systems set \
-  --system npm --active true
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config build-systems detect
 ```
+
+This populates marshal.json with detected systems and their default commands.
 
 ---
 
 ## Step 5: Plan-Type Selection
 
-```
-AskUserQuestion:
-  question: "Which plan-types should this project support? (select all that apply)"
-  options:
-    - label: "Java"
-      description: "Maven/Gradle projects with Java/Kotlin"
-      value: "java"
-    - label: "JavaScript"
-      description: "npm/TypeScript projects"
-      value: "javascript"
-    - label: "Plugin"
-      description: "Claude Code marketplace development"
-      value: "plugin"
-    - label: "Generic only"
-      description: "No domain-specific plan types"
-      value: "generic"
-```
+Plan-types are automatically available based on installed skills. The following plan-types are provided by the marketplace:
 
-For each selected type, configure domain agents:
-```bash
-# Example for Java
-python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config domain-agents set \
-  --plan-type pm-workflow:plan-type-java \
-  --solution-outline-agent pm-dev-java:java-solution-outline-agent \
-  --task-plan-agent pm-dev-java:java-task-plan-agent
-```
+| Plan-Type | Skill | Description |
+|-----------|-------|-------------|
+| Java | `pm-workflow:plan-type-java` | Maven/Gradle projects with Java/Kotlin |
+| JavaScript | `pm-workflow:plan-type-javascript` | npm/TypeScript projects |
+| Plugin | `pm-workflow:plan-type-plugin` | Claude Code marketplace development |
+| Generic | `pm-workflow:plan-type-generic` | Documentation, config, quick fixes |
+
+**Note**: Domain agents and plan defaults are defined in plan-type skill frontmatter (`patterns:`, `keywords:`, `domain:`, `plan_defaults:`), not in marshal.json. No configuration is required - plan-types are discovered automatically.
 
 ---
 
 ## Step 6: Custom Plan-Types
+
+Custom plan-types require creating new plan-type skills with appropriate frontmatter (`patterns:`, `keywords:`, `domain:`, `plan_defaults:`).
 
 ```
 AskUserQuestion:
   question: "Define project-local plan-types?"
   options:
     - label: "Yes"
-      description: "Create custom plan-type definitions"
+      description: "Create custom plan-type skill"
       value: "yes"
     - label: "No"
       description: "Use only standard plan-types"
@@ -227,7 +212,7 @@ If yes:
 ```
 Read references/plan-type-wizard.md
 ```
-Execute the Custom Plan-Type Wizard workflow from that file.
+Execute the Custom Plan-Type Wizard workflow from that file. This creates a new plan-type skill in the project's bundle.
 
 ---
 

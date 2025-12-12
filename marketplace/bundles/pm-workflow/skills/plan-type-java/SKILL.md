@@ -2,9 +2,28 @@
 name: plan-type-java
 description: Java plan type for Maven/Gradle projects
 allowed-tools: Read, Bash
+
+# Detection patterns and keywords
+patterns:
+  - "*.java"
+  - "pom.xml"
+  - "build.gradle"
+  - "build.gradle.kts"
+keywords:
+  - java
+  - maven
+  - gradle
+  - junit
+  - quarkus
+  - spring
+
+# Agent routing
 domain:
   solution_outline_agent: pm-dev-java:java-solution-outline-agent
   task_plan_agent: pm-dev-java:java-task-plan-agent
+
+# Plan defaults for this type
+plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
   standards:
@@ -81,6 +100,6 @@ Creates tasks with Java-specific steps:
 2. Add unit tests (load `pm-dev-java:cui-java-unit-testing`)
 3. Add JavaDoc (load `pm-dev-java:cui-javadoc`)
 4. Follow CUI patterns (load `pm-dev-java:cui-java-core`)
-5. Verify `mvn test -pl {module}` passes
+5. Verify build passes (via `/pm-dev-builder:builder-build-and-fix`)
 
 **Returns**: `{status, task_ids[], lessons_recorded}`

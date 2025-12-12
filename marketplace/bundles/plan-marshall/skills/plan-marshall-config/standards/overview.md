@@ -1,0 +1,116 @@
+# Plan-Marshall Config Overview
+
+Project-level infrastructure configuration for Claude Code marketplace projects.
+
+## Purpose
+
+The `plan-marshall-config` skill manages `.plan/marshal.json`, providing a centralized configuration for:
+
+- **Skill Domains**: Which implementation skills to load per development domain
+- **Modules**: Project module structure with domain and build system mappings
+- **Build Systems**: Available build systems with command configurations
+- **System Settings**: Retention and cleanup configuration
+- **Plan Defaults**: Default values applied to new plans
+
+## Design Principles
+
+### 1. Skills Define Their Own Behavior
+
+Plan-type routing (patterns, keywords, agents) belongs in plan-type skill frontmatter, not in marshal.json. This skill manages only project-specific infrastructure.
+
+### 2. Noun-Verb API Pattern
+
+All operations follow the `{noun} {verb}` pattern:
+
+```bash
+plan-marshall-config skill-domains list
+plan-marshall-config modules get --module my-core
+plan-marshall-config build-systems detect
+```
+
+### 3. TOON Output Format
+
+All commands output TOON (Token-Oriented Object Notation) for token efficiency:
+
+```toon
+status: success
+domain: java
+defaults[1]:
+- pm-dev-java:cui-java-core
+```
+
+### 4. Fail Early, Fail Loud
+
+Operations validate prerequisites before proceeding. Missing marshal.json produces a clear error directing users to run `/plan-marshall`.
+
+## marshal.json Scope
+
+The configuration file contains **only project-specific infrastructure**:
+
+| Section | Purpose |
+|---------|---------|
+| `skill_domains` | Implementation skill defaults/optionals per domain |
+| `modules` | Project modules with domain/build-system mappings |
+| `build_systems` | Build system commands and skills |
+| `system` | Retention settings for cleanup |
+| `plan` | Default values for new plans |
+
+## What Does NOT Belong in marshal.json
+
+These configurations belong in plan-type skill frontmatter:
+
+- File pattern routing (`patterns:`)
+- Keyword detection (`keywords:`)
+- Domain agents (`domain:`)
+- Plan-type defaults (`plan_defaults:`)
+
+## File Location
+
+```
+.plan/marshal.json
+```
+
+Created by `/plan-marshall` wizard or `plan-marshall-config init`.
+
+## Integration Points
+
+### With /plan-marshall Command
+
+The wizard uses this skill to:
+- Initialize marshal.json
+- Detect build systems
+- Configure retention settings
+
+### With Implementation Agents
+
+Agents query skill domains to load appropriate skills:
+
+```bash
+# Get skills to load for Java domain
+plan-marshall-config skill-domains get-defaults --domain java
+```
+
+### With Build Commands
+
+Build commands resolve module-specific commands:
+
+```bash
+# Get verify command for a module (with override resolution)
+plan-marshall-config modules get-command --module my-ui --system npm --label verify
+```
+
+### With Cleanup Scripts
+
+Cleanup uses retention settings:
+
+```bash
+plan-marshall-config system retention get
+```
+
+## Related Documentation
+
+- [data-model.md](data-model.md) - JSON structure and field definitions
+- [api-reference.md](api-reference.md) - Complete API with examples
+- [modules.md](modules.md) - Module configuration details
+- [skill-domains.md](skill-domains.md) - Skill domain management
+- [build-systems.md](build-systems.md) - Build system configuration

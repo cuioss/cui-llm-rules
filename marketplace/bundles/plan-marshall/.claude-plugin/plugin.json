@@ -15,6 +15,7 @@
     "./skills/permission-doctor",
     "./skills/permission-fix",
     "./skills/plan-marshall",
+    "./skills/plan-marshall-config",
     "./skills/run-config",
     "./skills/script-executor",
     "./skills/toon-usage",

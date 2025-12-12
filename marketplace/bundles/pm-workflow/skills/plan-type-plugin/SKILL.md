@@ -2,9 +2,28 @@
 name: plan-type-plugin
 description: Plugin development plan type for marketplace components
 allowed-tools: Read, Bash
+
+# Detection patterns and keywords
+patterns:
+  - "marketplace/bundles/**/SKILL.md"
+  - "marketplace/bundles/**/plugin.json"
+  - "**/agents/*.md"
+  - "**/commands/*.md"
+keywords:
+  - plugin
+  - marketplace
+  - skill
+  - agent
+  - command
+  - bundle
+
+# Agent routing
 domain:
   solution_outline_agent: pm-plugin-development:plugin-solution-outline-agent
   task_plan_agent: pm-plugin-development:plugin-task-plan-agent
+
+# Plan defaults for this type
+plan_defaults:
   verification_command: /pm-plugin-development:plugin-doctor
   pr_workflow: false
   standards:

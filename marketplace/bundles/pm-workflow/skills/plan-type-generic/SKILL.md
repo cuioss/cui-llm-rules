@@ -2,9 +2,22 @@
 name: plan-type-generic
 description: Generic plan type for documentation, config, and quick fixes
 allowed-tools: Read, Bash
+
+# Detection patterns and keywords (minimal - fallback type)
+patterns: []
+keywords:
+  - documentation
+  - config
+  - fix
+  - update
+
+# Agent routing (null = use plan-refine-agent fallback)
 domain:
   solution_outline_agent: null
   task_plan_agent: null
+
+# Plan defaults for this type
+plan_defaults:
   verification_command: null
   pr_workflow: false
   standards: []
