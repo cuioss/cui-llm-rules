@@ -43,7 +43,7 @@ plan_type: pm-workflow:plan-type-java
 compatibility: deprecations
 commit_strategy: phase-specific
 
-# Finalize Configuration (added by plan-type configure)
+# Finalize Configuration (from plan-type frontmatter plan_defaults)
 create_pr: true
 verification_required: true
 verification_command: /pm-dev-builder:builder-build-and-fix
@@ -58,7 +58,7 @@ branch_strategy: feature
 | `compatibility` | deprecations, breaking | Compatibility strategy (user choice) |
 | `commit_strategy` | fine-granular, phase-specific, complete | Git commit granularity (user choice) |
 
-### Finalize Configuration Fields (added by plan-type configure)
+### Finalize Configuration Fields (from plan-type frontmatter)
 
 | Field | Values | Description |
 |-------|--------|-------------|
@@ -152,7 +152,7 @@ commit_strategy: phase-specific
 
 ### create
 
-Create config.toon with initial values.
+Create config.toon with initial values. Automatically extracts `plan_defaults` from the plan-type skill's frontmatter and applies finalize configuration fields.
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
@@ -163,17 +163,31 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
   [--force]
 ```
 
+**Automatic Plan Defaults**: The command reads the plan-type skill's SKILL.md frontmatter and extracts `plan_defaults` to populate finalize configuration:
+
+| Frontmatter Field | Config Field | Derivation |
+|-------------------|--------------|------------|
+| `plan_defaults.verification_command` | `verification_command` | Direct copy |
+| `plan_defaults.pr_workflow` | `create_pr` | Direct copy |
+| `plan_defaults.pr_workflow` | `branch_strategy` | `feature` if true, else `direct` |
+| `plan_defaults.verification_command` | `verification_required` | `true` if command exists |
+
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
 file: config.toon
 created: true
+plan_defaults_applied: true
 
 config:
   plan_type: pm-workflow:plan-type-java
   compatibility: deprecations
   commit_strategy: phase-specific
+  create_pr: true
+  verification_required: true
+  verification_command: /pm-dev-builder:builder-build-and-fix
+  branch_strategy: feature
 ```
 
 ---
@@ -216,8 +230,7 @@ message: Invalid plan_type format: unknown. Must be bundle:skill notation (e.g.,
 
 | Consumer | Operation | Purpose |
 |----------|-----------|---------|
-| plan-init-agent | `create` | Create initial config.toon |
-| plan-type configure | `set` | Add finalize configuration fields |
+| plan-init-agent | `create` | Create config.toon with base and finalize fields |
 | plan-execute | `read`, `get` | Read commit strategy, verification settings |
 | plan-finalize | `get` | Check create_pr, branch_strategy |
 

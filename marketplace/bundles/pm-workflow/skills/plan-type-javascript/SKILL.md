@@ -53,33 +53,14 @@ The `domain:` frontmatter provides structured routing information for commands:
 |-------|-------|---------|
 | `solution_outline_agent` | `pm-dev-frontend:js-solution-outline-agent` | Creates solution outline with deliverables |
 | `task_plan_agent` | `pm-dev-frontend:js-task-plan-agent` | Creates tasks from deliverables |
-| `verification_command` | `/pm-dev-builder:builder-build-and-fix system=npm` | Build verification |
-| `pr_workflow` | `true` | Create PR after execution |
-| `standards` | JavaScript, JSDoc, Unit testing, Linting | Skills to load |
 
----
+The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
 
-## Operation: configure
-
-**Input**: `plan_id`
-
-**References fields added** (via `pm-workflow:manage-references:manage-references set`):
-
-| Field | Value |
-|-------|-------|
-| `standards` | `["pm-dev-frontend:cui-javascript", "pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-unit-testing", "pm-dev-frontend:cui-javascript-linting"]` |
-| `adrs` | `[]` |
-| `interfaces` | `[]` |
-| `dependencies` | `[]` |
-
-**Config fields added** (via `pm-workflow:manage-config:manage-config set`):
-
-| Field | Value |
-|-------|-------|
-| `create_pr` | `true` |
-| `verification_required` | `true` |
-| `verification_command` | `/pm-dev-builder:builder-build-and-fix system=npm` |
-| `branch_strategy` | `feature` |
+| Field | Value | Config Field |
+|-------|-------|--------------|
+| `verification_command` | `/pm-dev-builder:builder-build-and-fix system=npm` | `verification_command`, `verification_required` |
+| `pr_workflow` | `true` | `create_pr`, `branch_strategy` |
+| `standards` | JavaScript, JSDoc, Unit testing, Linting | (informational) |
 
 ---
 

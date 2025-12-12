@@ -15,7 +15,6 @@ allowed-tools: Read
 | Contract | Purpose | Document |
 |----------|---------|----------|
 | **Domain Frontmatter** | Required YAML frontmatter structure | [standards/domain-frontmatter-contract.md](standards/domain-frontmatter-contract.md) |
-| **Configure Operation** | Plan initialization operation | [standards/configure-operation-contract.md](standards/configure-operation-contract.md) |
 | **Solution Outline Agent** | Request → Solution Outline | [standards/solution-outline-agent-contract.md](standards/solution-outline-agent-contract.md) |
 | **User Review Protocol** | Mandatory review before task creation | [standards/user-review-protocol.md](standards/user-review-protocol.md) |
 | **Task Plan Agent** | Solution Outline → Tasks | [standards/task-plan-agent-contract.md](standards/task-plan-agent-contract.md) |
@@ -61,10 +60,12 @@ Each task maintains traceability to its source deliverable(s), enabling M:N rela
 Plan-type skills must:
 
 1. Include `domain:` frontmatter per [Domain Frontmatter Contract](standards/domain-frontmatter-contract.md)
-2. Implement `configure` operation per [Configure Operation Contract](standards/configure-operation-contract.md)
+2. Include `plan_defaults:` frontmatter with `verification_command`, `pr_workflow`, `standards`
 3. Document domain agent behavior for solution outline and task plan operations
 4. Return `status` field in all outputs
 5. Handle errors with `status: error` and `message`
+
+**Note**: The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization. No separate configure operation is needed.
 
 ---
 
@@ -100,9 +101,9 @@ The `--trace-plan-id` parameter is:
 ## Integration
 
 **Callers**:
-- `plan-init` → calls `configure` operation
+- `plan-init` → `manage-config create` reads `plan_defaults:` from frontmatter automatically
 - `/plan-manage action=refine` → loads skill, reads `domain:` frontmatter, invokes agents via Task
-- `plan-finalize` → reads config.toon directly (no operation call needed)
+- `plan-finalize` → reads config.toon directly
 
 **Domain Agents** (invoked by commands):
 - `pm-dev-java:java-solution-outline-agent` / `pm-dev-java:java-task-plan-agent`

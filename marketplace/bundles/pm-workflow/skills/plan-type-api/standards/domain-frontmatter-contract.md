@@ -13,12 +13,17 @@ All plan-type skills declare domain agents and configuration in YAML frontmatter
 name: plan-type-{domain}
 description: {Domain} plan type
 allowed-tools: Read, Bash
+
+# Agent routing
 domain:
   solution_outline_agent: {bundle}:{solution-outline-agent}  # Agent for request → solution outline
   task_plan_agent: {bundle}:{task-plan-agent}                # Agent for solution outline → tasks
+
+# Plan defaults (read by manage-config create)
+plan_defaults:
   verification_command: /{verification-cmd}   # Finalize verification
   pr_workflow: true|false                     # Create PR on finalize
-  standards:                                  # Domain skills to load
+  standards:                                  # Domain skills to load (informational)
     - {bundle}:{skill-1}
     - {bundle}:{skill-2}
 ---
@@ -33,9 +38,11 @@ domain:
 | `allowed-tools` | string | Yes | Tools the skill may reference |
 | `domain.solution_outline_agent` | string\|null | Yes | Agent for Request → Solution Outline |
 | `domain.task_plan_agent` | string\|null | Yes | Agent for Solution Outline → Tasks |
-| `domain.verification_command` | string\|null | Yes | Command for finalize verification |
-| `domain.pr_workflow` | boolean | Yes | Whether to create PR on finalize |
-| `domain.standards` | array | Yes | Domain skills to load (can be empty) |
+| `plan_defaults.verification_command` | string\|null | Yes | Command for finalize verification |
+| `plan_defaults.pr_workflow` | boolean | Yes | Whether to create PR on finalize |
+| `plan_defaults.standards` | array | Yes | Domain skills (informational, can be empty) |
+
+**Note**: `plan_defaults` fields are automatically read by `manage-config create` during plan initialization and written to config.toon as finalize configuration fields.
 
 ## Agent Reference Format
 
@@ -73,6 +80,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: pm-dev-java:java-solution-outline-agent
   task_plan_agent: pm-dev-java:java-task-plan-agent
+plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
   standards:
@@ -91,6 +99,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: pm-dev-frontend:js-solution-outline-agent
   task_plan_agent: pm-dev-frontend:js-task-plan-agent
+plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix system=npm
   pr_workflow: true
   standards:
@@ -109,6 +118,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: pm-plugin-development:plugin-solution-outline-agent
   task_plan_agent: pm-plugin-development:plugin-task-plan-agent
+plan_defaults:
   verification_command: /pm-plugin-development:plugin-doctor
   pr_workflow: false
   standards:
@@ -126,6 +136,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: null
   task_plan_agent: null
+plan_defaults:
   verification_command: null
   pr_workflow: false
   standards: []
@@ -144,11 +155,12 @@ domain:
 
 ## Integration
 
-**Readers**: `/plan-manage action=refine` command
+**Readers**:
+- `/plan-manage action=refine` → reads `domain:` frontmatter for agent routing
+- `manage-config create` → reads `plan_defaults:` frontmatter for finalize configuration
 
 **Producers**: Plan-type skill authors
 
 **Related**:
 - [Solution Outline Agent Contract](solution-outline-agent-contract.md)
 - [Task Plan Agent Contract](task-plan-agent-contract.md)
-- [Configure Operation Contract](configure-operation-contract.md)

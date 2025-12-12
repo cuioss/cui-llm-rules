@@ -49,95 +49,14 @@ The `domain:` frontmatter provides structured routing information for commands:
 |-------|-------|---------|
 | `solution_outline_agent` | `pm-plugin-development:plugin-solution-outline-agent` | Creates solution outline with deliverables |
 | `task_plan_agent` | `pm-plugin-development:plugin-task-plan-agent` | Creates tasks from deliverables |
-| `verification_command` | `/pm-plugin-development:plugin-doctor` | Plugin validation |
-| `pr_workflow` | `false` | No PR (direct to main) |
-| `standards` | Plugin architecture, Script architecture | Skills to load |
 
----
+The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
 
-## Operation: configure
-
-**Input**: `plan_id`
-
-### Step 1: Add References Fields
-
-Use `pm-workflow:manage-references:manage-references` to add domain-specific fields:
-
-```bash
-# Set target_bundle (populated during specify)
-python3 .plan/execute-script.py pm-workflow:manage-references:manage-references set \
-  --plan-id {plan_id} \
-  --field target_bundle \
-  --value null
-
-# Set bundle_path (populated during specify)
-python3 .plan/execute-script.py pm-workflow:manage-references:manage-references set \
-  --plan-id {plan_id} \
-  --field bundle_path \
-  --value null
-
-# Set components tracking
-python3 .plan/execute-script.py pm-workflow:manage-references:manage-references set \
-  --plan-id {plan_id} \
-  --field components \
-  --value '{"add": [], "modify": []}'
-
-# Set verification commands
-python3 .plan/execute-script.py pm-workflow:manage-references:manage-references set \
-  --plan-id {plan_id} \
-  --field verification_commands \
-  --value '["/pm-plugin-development:plugin-doctor"]'
-```
-
-### Step 2: Add Config Fields
-
-Use `pm-workflow:manage-config:manage-config` to add finalize configuration:
-
-```bash
-# Set create_pr
-python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
-  --plan-id {plan_id} \
-  --field create_pr \
-  --value false
-
-# Set verification_required
-python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
-  --plan-id {plan_id} \
-  --field verification_required \
-  --value true
-
-# Set verification_command
-python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
-  --plan-id {plan_id} \
-  --field verification_command \
-  --value "/pm-plugin-development:plugin-doctor"
-
-# Set branch_strategy
-python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
-  --plan-id {plan_id} \
-  --field branch_strategy \
-  --value direct
-```
-
-### Summary
-
-**References fields added**:
-
-| Field | Value |
-|-------|-------|
-| `target_bundle` | `null` (populated during specify) |
-| `bundle_path` | `null` (populated during specify) |
-| `components` | `{"add": [], "modify": []}` |
-| `verification_commands` | `["/pm-plugin-development:plugin-doctor"]` |
-
-**Config fields added**:
-
-| Field | Value |
-|-------|-------|
-| `create_pr` | `false` |
-| `verification_required` | `true` |
-| `verification_command` | `/pm-plugin-development:plugin-doctor` |
-| `branch_strategy` | `direct` |
+| Field | Value | Config Field |
+|-------|-------|--------------|
+| `verification_command` | `/pm-plugin-development:plugin-doctor` | `verification_command`, `verification_required` |
+| `pr_workflow` | `false` | `create_pr`, `branch_strategy` |
+| `standards` | Plugin architecture, Script architecture | (informational) |
 
 ---
 

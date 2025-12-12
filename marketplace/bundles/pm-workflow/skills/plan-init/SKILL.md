@@ -200,7 +200,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle cr
 
 ### Step 9: Create Configuration
 
-Create config.toon with base settings:
+Create config.toon with base settings and finalize configuration. The `manage-config create` command automatically reads `plan_defaults` from the plan-type skill's frontmatter and applies them:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
@@ -208,23 +208,11 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
   --plan-type {plan_type}
 ```
 
-### Step 10: Call Plan-Type Configure
+This creates config.toon with:
+- Base fields: `plan_type`, `compatibility`, `commit_strategy`
+- Finalize fields (from plan-type frontmatter): `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
 
-Delegate to plan-type skill for domain-specific configuration:
-
-```
-Skill: {plan_type}
-operation: configure
-plan_id: {plan_id}
-```
-
-This adds finalize configuration to config.toon:
-- `create_pr`: Whether to create PR
-- `verification_required`: Whether verification needed
-- `verification_command`: Command for verification
-- `branch_strategy`: feature or direct
-
-### Step 11: Log Creation
+### Step 10: Log Creation
 
 Log the plan creation as an artifact:
 
@@ -233,7 +221,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   work {plan_id} INFO "[ARTIFACT] Created plan: {derived_title} (source: {source_type}, type: {plan_type})"
 ```
 
-### Step 12: Transition Phase
+### Step 11: Transition Phase
 
 The phase transitions from init → refine after configuration completes:
 
@@ -243,7 +231,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
   --completed init
 ```
 
-### Step 13: Return Result
+### Step 12: Return Result
 
 **Output**:
 
@@ -329,7 +317,7 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 ### Related Skills
 
 - **plan-refine** - Next phase after init completes
-- **plan-type-*** - Called for domain-specific configuration
+- **plan-type-*** - Provides plan_defaults frontmatter for configuration
 
 ---
 
@@ -347,7 +335,6 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 - [x] All file I/O delegated to manage-* scripts
 - [x] Preserves original task input verbatim
 - [x] Supports all three source types
-- [x] Creates config.toon with plan type
+- [x] Creates config.toon with plan type and finalize fields
 - [x] Creates status.toon with phases
-- [x] Delegates to plan-type skill for domain config
 - [x] Does NOT create goals (that's refine phase)

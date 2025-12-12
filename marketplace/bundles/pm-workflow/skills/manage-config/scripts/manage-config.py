@@ -75,6 +75,121 @@ def validate_plan_type_exists(plan_type: str) -> tuple[bool, str | None]:
     return False, None
 
 
+def _extract_frontmatter_text(content: str) -> str | None:
+    """Extract frontmatter text from markdown content."""
+    if not content.startswith('---'):
+        return None
+    match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+    return match.group(1) if match else None
+
+
+def _parse_frontmatter_line(line: str, result: dict, current_section: str | None) -> str | None:
+    """Parse a single frontmatter line, return updated current_section."""
+    stripped = line.lstrip()
+    if not stripped or stripped.startswith('#') or ':' not in stripped:
+        return current_section
+
+    indent = len(line) - len(stripped)
+    key_part, _, value_part = stripped.partition(':')
+    key, value = key_part.strip(), value_part.strip()
+
+    if indent == 0:
+        if value:
+            result[key] = _parse_value(value)
+            return None
+        result[key] = {}
+        return key
+
+    if current_section and indent > 0 and value:
+        result[current_section][key] = _parse_value(value)
+    return current_section
+
+
+def parse_frontmatter(content: str) -> dict:
+    """Parse YAML frontmatter from markdown content.
+
+    Handles nested structures like plan_defaults.verification_command.
+    Uses simple regex parsing to avoid yaml dependency.
+    """
+    frontmatter_text = _extract_frontmatter_text(content)
+    if not frontmatter_text:
+        return {}
+
+    result = {}
+    current_section = None
+    for line in frontmatter_text.split('\n'):
+        current_section = _parse_frontmatter_line(line, result, current_section)
+    return result
+
+
+def _parse_value(value: str):
+    """Parse a YAML-ish value string into Python type."""
+    # Remove quotes if present
+    if (value.startswith('"') and value.endswith('"')) or \
+       (value.startswith("'") and value.endswith("'")):
+        return value[1:-1]
+
+    # Handle booleans
+    if value.lower() == 'true':
+        return True
+    if value.lower() == 'false':
+        return False
+
+    # Handle null
+    if value.lower() == 'null' or value == '~':
+        return None
+
+    # Handle arrays (simple single-line format)
+    if value.startswith('[') and value.endswith(']'):
+        inner = value[1:-1].strip()
+        if not inner:
+            return []
+        return [_parse_value(v.strip()) for v in inner.split(',')]
+
+    # Return as string
+    return value
+
+
+def extract_plan_defaults(plan_type: str) -> dict:
+    """Extract plan_defaults from plan-type skill frontmatter.
+
+    Args:
+        plan_type: Plan type in bundle:skill notation
+
+    Returns:
+        Dict with finalize config fields derived from plan_defaults:
+        - create_pr: from plan_defaults.pr_workflow
+        - verification_required: True if verification_command is set
+        - verification_command: from plan_defaults.verification_command
+        - branch_strategy: 'feature' if pr_workflow else 'direct'
+    """
+    exists, skill_path = validate_plan_type_exists(plan_type)
+    if not exists or not skill_path:
+        return {}
+
+    try:
+        content = Path(skill_path).read_text(encoding='utf-8')
+    except (OSError, UnicodeDecodeError):
+        return {}
+
+    frontmatter = parse_frontmatter(content)
+    plan_defaults = frontmatter.get('plan_defaults', {})
+
+    if not plan_defaults:
+        return {}
+
+    # Map plan_defaults to finalize config fields
+    verification_cmd = plan_defaults.get('verification_command')
+    pr_workflow = plan_defaults.get('pr_workflow', False)
+
+    return {
+        'create_pr': pr_workflow if isinstance(pr_workflow, bool) else pr_workflow == 'true',
+        'verification_required': verification_cmd is not None and verification_cmd != 'null',
+        'verification_command': verification_cmd,
+        'branch_strategy': 'feature' if pr_workflow else 'direct',
+    }
+
+
 def get_config_path(plan_id: str) -> Path:
     """Get the config.toon file path."""
     return base_path('plans', plan_id, 'config.toon')
@@ -321,7 +436,7 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    # Build config from args (simplified to 3 fields)
+    # Build config from args (base fields)
     config = {
         'plan_type': args.plan_type,
         'compatibility': args.compatibility or DEFAULTS['compatibility'],
@@ -343,6 +458,11 @@ def cmd_create(args):
             })
             sys.exit(1)
 
+    # Extract and add finalize config fields from plan-type skill frontmatter
+    plan_defaults = extract_plan_defaults(args.plan_type)
+    if plan_defaults:
+        config.update(plan_defaults)
+
     write_config(args.plan_id, config)
 
     output_toon({
@@ -350,6 +470,7 @@ def cmd_create(args):
         'plan_id': args.plan_id,
         'file': 'config.toon',
         'created': True,
+        'plan_defaults_applied': bool(plan_defaults),
         'config': config
     })
 

@@ -104,7 +104,7 @@ fields:
   - test_files
 ```
 
-**Note**: After `create`, call `plan-type-{type}:configure` to add domain-specific fields (standards, adrs, etc.).
+**Note**: Basic fields are created during plan-init. Additional reference fields are added as needed during execution.
 
 ### read
 

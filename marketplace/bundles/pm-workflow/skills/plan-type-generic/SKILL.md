@@ -42,28 +42,16 @@ The `domain:` frontmatter indicates no domain agents (generic plans use inline r
 |-------|-------|---------|
 | `solution_outline_agent` | `null` | No domain agent - use plan-refine-agent |
 | `task_plan_agent` | `null` | No domain agent - use plan-refine-agent |
-| `verification_command` | `null` | No verification required |
-| `pr_workflow` | `false` | No PR (direct to main) |
-| `standards` | `[]` | No domain-specific standards |
+
+The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
+
+| Field | Value | Config Field |
+|-------|-------|--------------|
+| `verification_command` | `null` | `verification_command`, `verification_required=false` |
+| `pr_workflow` | `false` | `create_pr`, `branch_strategy=direct` |
+| `standards` | `[]` | (none) |
 
 When `solution_outline_agent` is `null`, the command falls back to `pm-workflow:plan-refine-agent` for inline solution outline/task creation.
-
----
-
-## Operation: configure
-
-**Input**: `plan_id`
-
-**References fields added**: none (simple plans have no domain-specific fields)
-
-**Config fields added** (via `pm-workflow:manage-config:manage-config set`):
-
-| Field | Value |
-|-------|-------|
-| `create_pr` | `false` |
-| `verification_required` | `false` |
-| `verification_command` | `null` |
-| `branch_strategy` | `direct` |
 
 ---
 
