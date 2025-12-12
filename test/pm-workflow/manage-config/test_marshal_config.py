@@ -25,8 +25,16 @@ from toon_parser import parse_toon
 class TestContext(PlanTestContext):
     """Extended context for marshal-config tests with marshal_path."""
 
-    def __init__(self):
+    def __init__(self, clean_marshal: bool = True):
         super().__init__(plan_id='marshal-test')
+        self._clean_marshal = clean_marshal
+
+    def __enter__(self):
+        result = super().__enter__()
+        # Clean up marshal.json if it exists from previous tests (shared fixture dir)
+        if self._clean_marshal and self.marshal_path.exists():
+            self.marshal_path.unlink()
+        return result
 
     @property
     def temp_dir(self) -> Path:

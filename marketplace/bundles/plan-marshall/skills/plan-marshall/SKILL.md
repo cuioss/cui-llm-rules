@@ -52,14 +52,14 @@ mode=menu   → Interactive Menu Loop
 |--------|----------|---------|
 | determine-mode | `plan-marshall:plan-marshall:determine-mode` | Determine wizard vs menu mode |
 | gitignore-setup | `plan-marshall:plan-marshall:gitignore-setup` | Configure .gitignore for .plan/ |
-| cleanup-temp | `plan-marshall:plan-marshall:cleanup-temp` | Clean temp directories and old files |
+| cleanup-plan-directory | `plan-marshall:plan-marshall:cleanup-plan-directory` | Clean temp, logs, archived-plans, memory |
 | marshal-config | `pm-workflow:manage-config:marshal-config` | Project-level marshal.json CRUD |
 | scan-marketplace-inventory | `plan-marshall:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
 | build-env | `pm-dev-builder:environment-detection:build-env` | Build system detection |
 | permission-doctor | `plan-marshall:permission-doctor:permission-doctor` | Permission analysis |
 | permission-fix | `plan-marshall:permission-fix:permission-fix` | Permission fixes |
 | marketplace-sync | `plan-marshall:marketplace-sync:marketplace-sync` | Marketplace permission sync |
-| generate-executor | `plan-marshall:script-executor:generate-executor` | Executor generation and log cleanup |
+| generate-executor | `plan-marshall:script-executor:generate-executor` | Executor generation |
 
 ---
 
@@ -370,11 +370,11 @@ AskUserQuestion:
   header: "Maintenance"
   options:
     - label: "1. All"
-      description: "Regenerate executor + clean logs/temp (recommended)"
+      description: "Regenerate executor + cleanup (recommended)"
     - label: "2. Regenerate Executor"
       description: "Rebuild executor with fresh script mappings"
-    - label: "3. Clean Old Logs"
-      description: "Remove execution logs older than 30 days"
+    - label: "3. Cleanup"
+      description: "Clean temp, old logs, archived plans, memory"
     - label: "4. Back"
       description: "Return to main menu"
   multiSelect: false
@@ -384,17 +384,17 @@ AskUserQuestion:
 
 | User Selection | Action | After Completion |
 |----------------|--------|------------------|
-| "1. All" | Execute regenerate + clean (below) | → Return to Main Menu |
+| "1. All" | Execute regenerate + cleanup (below) | → Return to Main Menu |
 | "2. Regenerate Executor" | Execute regenerate only (below) | → Return to Main Menu |
-| "3. Clean Old Logs" | Execute clean only (below) | → Return to Main Menu |
+| "3. Cleanup" | Execute cleanup only (below) | → Return to Main Menu |
 | "4. Back" | Do nothing | → Return to Main Menu |
 
-### Operation: All (Regenerate + Clean)
+### Operation: All (Regenerate + Cleanup)
 
 Execute BOTH operations in sequence:
 
 1. Execute "Operation: Regenerate Executor" (below)
-2. Execute "Operation: Clean Old Logs" (below)
+2. Execute "Operation: Cleanup" (below)
 
 **Output**: Combined summary of both operations.
 
@@ -417,17 +417,47 @@ status	scripts_discovered	executor_generated	logs_cleaned
 success	47	.plan/execute-script.py	0
 ```
 
-### Clean Old Logs and Temp Files
+### Operation: Cleanup
 
-Clean execution logs and temp files:
+Clean all directories based on retention settings from marshal.json:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:script-executor:generate-executor cleanup --max-age-days 30
+python3 .plan/execute-script.py plan-marshall:plan-marshall:cleanup-plan-directory clean
 ```
 
-Clean temp directory:
+**Output (TOON)**:
+```toon
+status	success
+target	all
+temp_files	5
+temp_bytes	1024
+logs_deleted	3
+logs_bytes	512
+archived_plans_deleted	2
+archived_plans_bytes	8192
+memory_files_deleted	10
+memory_bytes	2048
+total_bytes_freed	11776
+```
+
+**Retention Settings** (configurable via marshal.json):
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `logs_days` | 1 | Delete logs older than N days |
+| `archived_plans_days` | 5 | Delete archived plans older than N days |
+| `memory_days` | 5 | Delete memory files older than N days |
+| `temp_on_maintenance` | true | Clean temp directory on maintenance |
+
+**Configure retention**:
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall:cleanup-temp clean
+python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config retention set --field logs_days --value 7
+python3 .plan/execute-script.py pm-workflow:manage-config:marshal-config retention set --field archived_plans_days --value 14
+```
+
+**Cleanup specific target**:
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall:cleanup-plan-directory clean --target logs
+python3 .plan/execute-script.py plan-marshall:plan-marshall:cleanup-plan-directory clean --target archived-plans
 ```
 
 **NOTE**: The `.plan/temp/` directory is the default temp directory for ALL temporary files. It is covered by the existing `Write(.plan/**)` permission (avoiding permission prompts for `/tmp/`) and cleaned during maintenance.

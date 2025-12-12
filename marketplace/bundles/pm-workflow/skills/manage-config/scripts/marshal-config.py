@@ -58,25 +58,9 @@ def require_initialized() -> None:
         )
 
 
-# Hardcoded defaults when marshal.json is missing
-DEFAULTS = {
-    "plan_type_rules": [
-        {"pattern": "*", "plan_type": "pm-workflow:plan-type-generic", "description": "Default"}
-    ],
-    "domain_agents": {
-        "pm-workflow:plan-type-generic": {"solution_outline_agent": None, "task_plan_agent": None}
-    },
-    "defaults": {
-        "create_pr": False,
-        "verification_required": True,
-        "branch_strategy": "direct"
-    },
-    "plan_type_defaults": {},
-    "custom_plan_types": [],
-    "detection_keywords": {},
-    "build_systems": [],
-    "state": {}
-}
+# Template location (copied to .plan/marshal.json on init)
+TEMPLATES_DIR = Path(__file__).parent.parent / 'templates'
+DEFAULTS_TEMPLATE = TEMPLATES_DIR / 'marshal-defaults.json'
 
 
 # =============================================================================
@@ -85,13 +69,7 @@ DEFAULTS = {
 
 def load_config() -> dict:
     """Load marshal.json. Assumes require_initialized() was called first."""
-    if MARSHAL_PATH.exists():
-        try:
-            return json.loads(MARSHAL_PATH.read_text(encoding='utf-8'))
-        except json.JSONDecodeError:
-            return DEFAULTS.copy()
-    # For init command which doesn't call require_initialized
-    return DEFAULTS.copy()
+    return json.loads(MARSHAL_PATH.read_text(encoding='utf-8'))
 
 
 def save_config(config: dict) -> None:
@@ -173,7 +151,7 @@ def cmd_defaults(args) -> int:
         return EXIT_ERROR
 
     config = load_config()
-    defaults = config.get('defaults', DEFAULTS['defaults'].copy())
+    defaults = config.get('defaults', {})
 
     if args.verb == 'get':
         field = args.field
@@ -269,7 +247,7 @@ def cmd_rules(args) -> int:
         return EXIT_ERROR
 
     config = load_config()
-    rules = config.get('plan_type_rules', DEFAULTS['plan_type_rules'].copy())
+    rules = config.get('plan_type_rules', [])
 
     if args.verb == 'match':
         filepath = args.file
@@ -544,27 +522,67 @@ def cmd_state(args) -> int:
 
 
 # =============================================================================
+# retention Subcommand
+# =============================================================================
+
+def cmd_retention(args) -> int:
+    """Handle retention noun."""
+    try:
+        require_initialized()
+    except MarshalNotInitializedError as e:
+        output(error_response(str(e)))
+        return EXIT_ERROR
+
+    config = load_config()
+    retention = config.get('retention', {})
+
+    if args.verb == 'get':
+        field = args.field
+        if field not in retention:
+            output(error_response(f"Unknown retention field: {field}"))
+            return EXIT_ERROR
+        output(success_response({field: retention[field]}))
+        return EXIT_SUCCESS
+
+    elif args.verb == 'set':
+        field = args.field
+        value = args.value
+        # Type coercion
+        if value.lower() == 'true':
+            value = True
+        elif value.lower() == 'false':
+            value = False
+        elif value.isdigit():
+            value = int(value)
+        retention[field] = value
+        config['retention'] = retention
+        save_config(config)
+        output(success_response({field: value}))
+        return EXIT_SUCCESS
+
+    elif args.verb == 'list':
+        output(success_response(retention))
+        return EXIT_SUCCESS
+
+    return EXIT_ERROR
+
+
+# =============================================================================
 # init Subcommand
 # =============================================================================
 
 def cmd_init(args) -> int:
-    """Handle init command. Does NOT require_initialized() - this creates the file."""
+    """Handle init command. Copies template to .plan/marshal.json."""
     if is_initialized() and not getattr(args, 'force', False):
         output(error_response("marshal.json already exists. Use --force to overwrite."))
         return EXIT_ERROR
 
-    # Start with defaults
-    config = DEFAULTS.copy()
+    # Copy from template
+    if not DEFAULTS_TEMPLATE.exists():
+        output(error_response(f"Template not found: {DEFAULTS_TEMPLATE}"))
+        return EXIT_ERROR
 
-    # If template specified, load it
-    if hasattr(args, 'template') and args.template:
-        template_path = Path(__file__).parent.parent.parent.parent.parent / 'pm-workflow' / 'skills' / 'plan-marshall' / 'templates' / f'{args.template}.json'
-        if template_path.exists():
-            try:
-                template = json.loads(template_path.read_text(encoding='utf-8'))
-                config.update(template)
-            except json.JSONDecodeError:
-                pass
+    config = json.loads(DEFAULTS_TEMPLATE.read_text(encoding='utf-8'))
 
     # Auto-detect build systems
     detected = detect_build_systems()
@@ -707,6 +725,19 @@ Examples:
 
     state_sub.add_parser('update-checksum', help='Recalculate checksum')
 
+    # --- retention ---
+    p_ret = subparsers.add_parser('retention', help='Manage cleanup retention settings')
+    ret_sub = p_ret.add_subparsers(dest='verb', help='Operation')
+
+    ret_get = ret_sub.add_parser('get', help='Get retention value')
+    ret_get.add_argument('--field', required=True, help='Field name (logs_days, archived_plans_days, memory_days, temp_on_maintenance)')
+
+    ret_set = ret_sub.add_parser('set', help='Set retention value')
+    ret_set.add_argument('--field', required=True, help='Field name')
+    ret_set.add_argument('--value', required=True, help='Field value')
+
+    ret_sub.add_parser('list', help='List all retention settings')
+
     # --- init ---
     p_init = subparsers.add_parser('init', help='Initialize marshal.json')
     p_init.add_argument('--template', help='Template name (e.g., java-project)')
@@ -735,6 +766,8 @@ Examples:
         return cmd_custom_types(args)
     elif args.noun == 'state':
         return cmd_state(args)
+    elif args.noun == 'retention':
+        return cmd_retention(args)
     elif args.noun == 'init':
         return cmd_init(args)
     else:

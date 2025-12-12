@@ -294,14 +294,13 @@ def test_log_format_success_compact():
     log_content = env.get_log_content()
 
     # Success entries should be single line with bracket format
-    # Format: [timestamp] [SUCCESS] [SCRIPT] notation subcommand (duration)
+    # Format: [timestamp] [SUCCESS] notation subcommand (duration)
     lines = [line for line in log_content.strip().split('\n') if 'pm-workflow:manage-config' in line]
     assert len(lines) >= 1, "No log entry found for pm-workflow:manage-config"
 
     entry = lines[0]
     # Check bracket format
     assert '[SUCCESS]' in entry, f"Expected [SUCCESS] marker, got: {entry}"
-    assert '[SCRIPT]' in entry, f"Expected [SCRIPT] category, got: {entry}"
     assert entry.startswith('['), f"Entry should start with timestamp bracket: {entry}"
 
     # Should NOT contain ERROR marker for success
