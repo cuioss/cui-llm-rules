@@ -2,7 +2,9 @@
 """
 Configure .gitignore for the planning system.
 
-Ensures .plan/ directory is ignored while marshal.json is tracked.
+Ensures .plan/* contents are ignored while marshal.json is tracked.
+Uses .plan/* (not .plan/) to allow exceptions - .plan/ ignores the entire
+directory making exceptions impossible.
 
 Usage:
     python3 gitignore-setup.py [--dry-run]
@@ -29,8 +31,9 @@ import sys
 from pathlib import Path
 
 # Lines to add to .gitignore
+# Use .plan/* (not .plan/) to allow exceptions - .plan/ ignores entire directory
 GITIGNORE_COMMENT = "# Planning system (managed by /plan-marshall)"
-GITIGNORE_PLAN_DIR = ".plan/"
+GITIGNORE_PLAN_DIR = ".plan/*"
 GITIGNORE_MARSHAL_EXCEPTION = "!.plan/marshal.json"
 
 
@@ -61,7 +64,8 @@ def check_gitignore_status(gitignore_path: Path) -> dict:
 
         for line in lines:
             stripped = line.strip()
-            if stripped == GITIGNORE_PLAN_DIR or stripped == ".plan":
+            # Accept both .plan/* (correct) and .plan/ or .plan (legacy)
+            if stripped in (".plan/*", ".plan/", ".plan"):
                 result["has_plan_dir"] = True
             if stripped == GITIGNORE_MARSHAL_EXCEPTION:
                 result["has_marshal_exception"] = True
