@@ -30,7 +30,8 @@ target/
 .claude/lessons-learned/*.md
 
 # Workflow artifacts (plans, lessons, memory, run-config)
-.plan/
+# Use .plan/* instead of .plan/ to allow exceptions below
+.plan/*
 
 # Planning system (managed by /plan-marshall)
 !.plan/marshal.json
