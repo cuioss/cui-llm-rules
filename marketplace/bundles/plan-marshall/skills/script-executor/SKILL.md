@@ -54,10 +54,31 @@ The executor provides two-tier logging:
 
 ### Plan-Scoped Logging
 
-When `--plan-id` is provided, logs to:
+When a plan ID is provided, logs to:
 ```
 .plan/plans/{plan-id}/script-execution.log
 ```
+
+**Two ways to enable plan-scoped logging:**
+
+| Parameter | Use Case | Behavior |
+|-----------|----------|----------|
+| `--plan-id` | Scripts that accept it (manage-* scripts) | Script uses value + logging picks it up |
+| `--trace-plan-id` | Scripts without `--plan-id` (scan-*, analyze-*) | Stripped before passing to script, logging only |
+
+**Example with --plan-id** (script uses it):
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-files:manage-files add \
+  --plan-id my-plan --file task.md
+```
+
+**Example with --trace-plan-id** (logging only, stripped):
+```bash
+python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --trace-plan-id my-plan --include-descriptions
+```
+
+The `--trace-plan-id` parameter is removed before the script executes, so the script never sees it. This enables plan-scoped logging for scripts that don't have their own `--plan-id` parameter.
 
 **Benefits**:
 - Tied to plan lifecycle (deleted when plan archived/deleted)

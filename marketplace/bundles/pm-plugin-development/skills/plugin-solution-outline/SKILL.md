@@ -122,17 +122,21 @@ For cross-cutting changes, perform comprehensive impact analysis that produces *
 
 #### 3b.1: Load Marketplace Inventory
 
-Use scan-marketplace-inventory to get complete component list:
+**CRITICAL**: For Path-Multi analysis, you MUST use the `scan-marketplace-inventory` script to get the complete component list. Do NOT use ad-hoc Glob/Grep for component discovery - the script ensures consistent enumeration and audit trail.
+
+**Note**: Use `--trace-plan-id` for plan-scoped logging (the script doesn't have its own `--plan-id` parameter).
 
 ```bash
 # Full inventory with descriptions
 python3 .plan/execute-script.py \
   plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --trace-plan-id {plan_id} \
   --include-descriptions
 
 # Or filter by bundles if impact is known to be limited
 python3 .plan/execute-script.py \
   plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --trace-plan-id {plan_id} \
   --bundles planning,pm-dev-java \
   --include-descriptions
 ```
@@ -332,6 +336,7 @@ lessons_recorded: {count}
 
 | Option | Description |
 |--------|-------------|
+| `--trace-plan-id <id>` | Enable plan-scoped logging (executor strips before passing) |
 | `--scope marketplace` | Scan marketplace bundles (default) |
 | `--resource-types agents,commands,skills,scripts` | Filter resource types |
 | `--include-descriptions` | Extract descriptions from frontmatter |
@@ -341,20 +346,23 @@ lessons_recorded: {count}
 **Example Calls**:
 
 ```bash
-# All components with descriptions
+# All components with descriptions (with plan-scoped logging)
 python3 .plan/execute-script.py \
   plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --trace-plan-id {plan_id} \
   --include-descriptions
 
 # Only skills in planning bundle
 python3 .plan/execute-script.py \
   plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --trace-plan-id {plan_id} \
   --bundles planning \
   --resource-types skills
 
 # Components matching pattern
 python3 .plan/execute-script.py \
   plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --trace-plan-id {plan_id} \
   --name-pattern "*-goals*|*-plan*"
 ```
 

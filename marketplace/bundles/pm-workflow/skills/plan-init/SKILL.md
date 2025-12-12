@@ -46,15 +46,6 @@ Activate when:
 - `plan_id`: Override auto-generated plan_id
 - `plan_type`: Override auto-detection (bundle:skill notation, e.g., pm-workflow:plan-type-java)
 
-### Step 0: Log Phase Start (After Plan ID Derived)
-
-After deriving the plan_id (Step 2) and creating the plan directory (Step 5), log the phase start:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Starting init phase"
-```
-
 ### Step 1: Validate Input
 
 Ensure exactly one input source is provided (description, lesson_id, or issue). If multiple or none provided, return error: "Provide exactly one of: description, lesson_id, issue"
@@ -75,8 +66,15 @@ python3 .plan/execute-script.py pm-workflow:manage-files:manage-files create-or-
 ```
 
 Parse the TOON output. The `action` field indicates:
-- `action: created` - New plan directory was created, continue to Step 4
+- `action: created` - New plan directory was created, log phase start and continue to Step 4
 - `action: exists` - Plan already exists, prompt user
+
+**On successful creation**, log the phase start (directory now exists):
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "Starting init phase"
+```
 
 If `action: exists`, use AskUserQuestion:
 - **Resume**: Continue with existing plan (skip to Step 9 with existing data)
@@ -106,13 +104,7 @@ gh issue view {issue} --json title,body,labels,milestone,assignees
 
 Extract: title, body, labels, milestone, assignees
 
-### Step 5: Plan Directory Ready
-
-The plan directory was created in Step 3 by `create-or-reference`. No additional action needed.
-
-**Note**: status.toon is NOT created here. It is created by plan-configure after plan type detection.
-
-### Step 6: Write request.md
+### Step 5: Write request.md
 
 Create the request document via manage-plan-documents:
 
@@ -136,7 +128,7 @@ python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-do
 
 **Note**: The skill handles template rendering and timestamps automatically.
 
-### Step 7: Initialize References
+### Step 6: Initialize References
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-references:manage-references create \
@@ -152,7 +144,7 @@ python3 .plan/execute-script.py pm-workflow:manage-references:manage-references 
   --issue-url {issue_url}
 ```
 
-### Step 8: Detect Plan Type
+### Step 7: Detect Plan Type
 
 Determine plan type from task analysis. Plan types use `bundle:skill` notation.
 
@@ -192,7 +184,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   work {plan_id} INFO "[DECISION] Selected {plan_type}: {reasoning}"
 ```
 
-### Step 9: Create Status
+### Step 8: Create Status
 
 Create status.toon with detected plan type and phases:
 
@@ -206,7 +198,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle cr
 
 **Note**: Phases depend on plan type. Use standard 4-phase for java/javascript/plugin, 3-phase (init,execute,finalize) for generic.
 
-### Step 10: Create Configuration
+### Step 9: Create Configuration
 
 Create config.toon with base settings:
 
@@ -216,7 +208,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
   --plan-type {plan_type}
 ```
 
-### Step 11: Call Plan-Type Configure
+### Step 10: Call Plan-Type Configure
 
 Delegate to plan-type skill for domain-specific configuration:
 
@@ -232,7 +224,7 @@ This adds finalize configuration to config.toon:
 - `verification_command`: Command for verification
 - `branch_strategy`: feature or direct
 
-### Step 12: Log Creation
+### Step 11: Log Creation
 
 Log the plan creation as an artifact:
 
@@ -241,7 +233,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   work {plan_id} INFO "[ARTIFACT] Created plan: {derived_title} (source: {source_type}, type: {plan_type})"
 ```
 
-### Step 13: Transition Phase
+### Step 12: Transition Phase
 
 The phase transitions from init → refine after configuration completes:
 
@@ -251,7 +243,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
   --completed init
 ```
 
-### Step 14: Return Result
+### Step 13: Return Result
 
 **Output**:
 

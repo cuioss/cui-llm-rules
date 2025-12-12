@@ -159,6 +159,37 @@ Plan-type skills must:
 
 ---
 
+## Script Execution Tracing
+
+Domain agents execute scripts via `execute-script.py`. For plan-scoped logging, agents MUST pass the plan context:
+
+### Scripts with `--plan-id` Parameter
+
+Scripts that accept `--plan-id` (manage-* scripts) use it for both logic AND logging:
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+  --plan-id {plan_id} --title "Task title"
+```
+
+### Scripts without `--plan-id` Parameter
+
+Scripts that don't accept `--plan-id` (scan-*, analyze-*) use `--trace-plan-id` for logging only:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --trace-plan-id {plan_id} --include-descriptions
+```
+
+The `--trace-plan-id` parameter is:
+- Extracted by the executor for logging purposes
+- Stripped before passing to the script (script never sees it)
+- Enables plan-scoped logging in `.plan/plans/{plan_id}/script-execution.log`
+
+**Rationale**: Plan-scoped logging enables audit trail per plan. Without `--trace-plan-id`, scripts log to global `.plan/logs/` which lacks plan association.
+
+---
+
 ## Integration
 
 **Callers**:

@@ -33,7 +33,8 @@ Stay in your lane:
 
 **File Access**:
 - **`.plan/` files**: ONLY via `python3 .plan/execute-script.py {notation} {subcommand} {args}` - NEVER Read/Write/Edit/cat
-- **Marketplace files**: Use Read/Glob/Grep as needed for analysis
+- **Marketplace files (Path-Single)**: Use Read/Glob/Grep as needed for analysis
+- **Marketplace files (Path-Multi)**: MUST use `scan-marketplace-inventory` script for component discovery, then Read for individual file analysis
 
 ## CONSTRAINTS (ALWAYS APPLY)
 

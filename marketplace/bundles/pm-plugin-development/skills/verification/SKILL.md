@@ -197,31 +197,32 @@ standards/
 
 These checks apply ONLY when `scope: planning` is specified:
 
-**Allowed `.plan` Access** (NOT violations):
-- `.plan/scripts-library.toon` - Read for script path resolution (legacy)
-- `.plan/execute-script.py` - Script executor with embedded mappings
-- `.plan/plan_logging.py` - Logging module
-- `.plan/marshall-state.toon` - Executor generation metadata
-- `.plan/logs/script-execution-*.log` - Global execution logs
-- `.plan/lessons-learned/*.md` - Read/write via manage-lessons skill
-
-**Approved Script Execution Pattern**:
+**Single Allowed `.plan` Access Pattern**:
 ```bash
 python3 .plan/execute-script.py {notation} {subcommand} {args...}
 ```
 
-This is the preferred pattern for all marketplace script execution.
+This is the ONLY allowed way to interact with `.plan` files. All other access is a violation.
 
-**Prohibited `.plan/plans/**` Access** (violations):
+**Prohibited `.plan` Access** (ALL violations):
+- Direct Read/Write/Edit of ANY `.plan/**` file (except via execute-script.py invocation)
 - Direct Read/Write/Edit of `.plan/plans/*/status.toon`
 - Direct Read/Write/Edit of `.plan/plans/*/config.toon`
 - Direct Read/Write/Edit of `.plan/plans/*/work.log`
+- Direct Read/Write/Edit of `.plan/marshall-state.toon`
+- Direct Read/Write/Edit of `.plan/logs/*.log`
+- Direct Read/Write/Edit of `.plan/lessons-learned/*.md`
 - Direct access to goals/tasks directories
-- Glob patterns targeting `.plan/plans/**/*.toon` or subdirectories
-- Bash find/ls commands scanning `.plan/plans/` structure
+- Glob patterns targeting `.plan/**`
+- Bash find/ls/cat commands accessing `.plan/` structure
 - Missing work.log entry after significant operation
 - Status not updated after phase transition
 - Artifacts created without manage-* scripts
+
+**Rationale**: All `.plan` access must go through manage-* scripts to ensure:
+- Consistent audit trail via script execution logging
+- Validation and error handling
+- Single source of truth for file format changes
 
 ## Tool Access
 
