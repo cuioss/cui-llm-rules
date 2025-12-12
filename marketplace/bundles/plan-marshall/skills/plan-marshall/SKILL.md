@@ -155,6 +155,33 @@ If `status` is `needs_update`, add to each listed file's appropriate section:
 - Use `.plan/temp/` for ALL temporary files (covered by `Write(.plan/**)` permission - avoids permission prompts)
 ```
 
+### Step 1c: Ensure Executor Permission
+
+Add the executor permission to project-local settings so script execution doesn't prompt:
+
+**BOOTSTRAP**: Use DIRECT Python call with glob:
+
+```bash
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/permission-fix/scripts/permission-fix.py ensure \
+  --permissions "Bash(python3 .plan/execute-script.py *)" \
+  --target project
+```
+
+**Output (TOON)**:
+```toon
+status	added
+permission	Bash(python3 .plan/execute-script.py *)
+target	project
+settings_file	/path/to/.claude/settings.local.json
+```
+
+| status | Meaning |
+|--------|---------|
+| `added` | Permission added to project settings |
+| `exists` | Permission already present |
+
+This ensures script execution works without prompting, independent of global settings.
+
 ### Step 2: Generate Executor
 
 **BOOTSTRAP**: Since execute-script.py doesn't exist yet, use DIRECT Python call with glob:
