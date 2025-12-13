@@ -270,7 +270,7 @@ fi
 
 For complete Docker Compose configuration including production-grade security hardening, health checks, and certificate management, see [container.md](container.md).
 
-For OWASP security hardening details (`no-new-privileges`, `cap_drop`, `read_only`), see `pm-dev-java:java-cdi` skill (cdi-security.md).
+For OWASP security hardening details (`no-new-privileges`, `cap_drop`, `read_only`), see [security.md](security.md).
 
 ### Integration Test Port Mapping
 

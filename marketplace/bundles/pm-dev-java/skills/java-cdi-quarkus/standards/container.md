@@ -140,7 +140,7 @@ networks:
     internal: false
 ```
 
-For detailed explanation of OWASP security options (`no-new-privileges`, `cap_drop`, `read_only`), see `pm-dev-java:java-cdi` skill (cdi-security.md) section "OWASP-Compliant Deployment".
+For detailed explanation of OWASP security options (`no-new-privileges`, `cap_drop`, `read_only`), see [security.md](security.md) section "OWASP-Compliant Deployment".
 
 ### Environment Configuration (.env)
 
@@ -237,7 +237,7 @@ exit 0
 
 ### Runtime Security Configuration
 
-For complete OWASP-compliant Docker deployment configuration with security options explained, see `pm-dev-java:java-cdi` skill (cdi-security.md) section "OWASP-Compliant Deployment".
+For complete OWASP-compliant Docker deployment configuration with security options explained, see [security.md](security.md) section "OWASP-Compliant Deployment".
 
 **Key Security Requirements for Container Runtime**:
 - Use `--security-opt=no-new-privileges` to prevent privilege escalation
