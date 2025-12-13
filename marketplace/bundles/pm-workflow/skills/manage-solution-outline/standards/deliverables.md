@@ -104,17 +104,22 @@ See: `pm-workflow:manage-solution-outline:manage-solution-outline`
 
 ## Task Integration
 
-When creating tasks that implement deliverables:
+When creating tasks that implement deliverables, use heredoc:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id {plan_id} \
-  --goal 1 \
-  --title "Implement JWT validation service" \
-  --steps "Create interface" "Implement validation" "Add tests"
+  --plan-id {plan_id} <<'EOF'
+title: Implement JWT validation service
+deliverables: [1]
+domain: java
+steps:
+  - Create interface
+  - Implement validation
+  - Add tests
+EOF
 ```
 
-**Note**: `--goal` accepts the numeric part only. The task stores the full reference internally.
+**Note**: `deliverables` accepts the numeric part(s) as an array. The task stores the full reference internally.
 
 ## Listing Deliverables
 

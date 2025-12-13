@@ -94,7 +94,7 @@ Script: `pm-workflow:manage-tasks:manage-task`
 
 | Command | Parameters | Description |
 |---------|------------|-------------|
-| `add` | `--plan-id --deliverables --domain --title --description --steps [--phase] [--depends-on] [--delegation-*] [--verification-*]` | Add a new task |
+| `add` | `--plan-id` + stdin | Add a new task (reads definition from stdin) |
 | `update` | `--plan-id --number [--title] [--description] [--depends-on] [--status]` | Update task metadata |
 | `remove` | `--plan-id --number` | Remove a task |
 | `list` | `--plan-id [--status] [--phase] [--deliverable] [--ready]` | List all tasks |
@@ -106,20 +106,53 @@ Script: `pm-workflow:manage-tasks:manage-task`
 | `add-step` | `--plan-id --task --title [--after]` | Add step to task |
 | `remove-step` | `--plan-id --task --step` | Remove step from task |
 
-### Add Command Parameters
+### Add Command (stdin-based API)
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `--deliverables` | Yes | Deliverable numbers from solution_outline.md (space-separated) |
-| `--domain` | Yes | Skill domain: `java`, `java-testing`, `javascript`, `javascript-testing`, `plugin` |
-| `--phase` | No | Plan phase: `init`, `refine`, `execute` (default), `finalize` |
-| `--depends-on` | No | Task dependencies: `TASK-N` references or `none` |
-| `--delegation-skill` | No | Skill for task execution |
-| `--delegation-workflow` | No | Workflow within skill |
-| `--context-skills` | No | Optional skills from domain optionals |
-| `--verification-commands` | No | Commands for verification |
-| `--verification-criteria` | No | Success criteria text |
-| `--verification-manual` | No | Flag for manual verification |
+The `add` command reads the task definition from stdin in TOON format. Only `--plan-id` is passed as a CLI argument.
+
+**Why stdin?** Complex task definitions with verification commands containing shell metacharacters (pipes, wildcards, quotes) caused permission issues when passed as CLI arguments. The stdin approach avoids shell interpretation of these characters.
+
+**Stdin format**:
+
+```toon
+title: My Task Title
+deliverables: [1, 2, 3]
+domain: plugin
+phase: execute
+description: |
+  Multi-line task description here.
+  Can include any characters.
+
+steps:
+  - First step to execute
+  - Second step to execute
+  - Third step to execute
+
+depends_on: none
+
+delegation:
+  skill: pm-plugin-development:plugin-maintain
+  workflow: update-component
+  context_skills:
+    - pm-plugin-development:plugin-architecture
+
+verification:
+  commands:
+    - grep -l '```json' marketplace/bundles/*.md | wc -l
+    - mvn verify
+  criteria: All grep commands return 0 (no JSON blocks remain)
+  manual: false
+```
+
+**Required fields**: `title`, `deliverables`, `domain`, `steps`
+
+**Optional fields**: `phase` (default: execute), `description`, `depends_on`, `delegation`, `verification`
+
+**Field values**:
+- `deliverables`: Array of integers `[1, 2, 3]`
+- `domain`: One of `java`, `java-testing`, `javascript`, `javascript-testing`, `plugin`, `generic`
+- `phase`: One of `init`, `refine`, `execute`, `finalize`
+- `depends_on`: `none` or task references like `TASK-1, TASK-2`
 
 ### List/Next Filters
 
@@ -138,29 +171,79 @@ Script: `pm-workflow:manage-tasks:manage-task`
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id my-feature \
-  --deliverables 1 2 4 \
-  --domain java \
-  --title "Update misc agents to TOON" \
-  --description "Migrate miscellaneous agents..." \
-  --steps "file1.md" "file2.md" "file3.md" \
-  --delegation-skill pm-plugin-development:plugin-maintain \
-  --delegation-workflow update-component \
-  --verification-commands "mvn verify"
+  --plan-id my-feature <<'EOF'
+title: Update misc agents to TOON
+deliverables: [1, 2, 4]
+domain: java
+description: |
+  Migrate miscellaneous agents from JSON to TOON output format.
+
+steps:
+  - file1.md
+  - file2.md
+  - file3.md
+
+delegation:
+  skill: pm-plugin-development:plugin-maintain
+  workflow: update-component
+
+verification:
+  commands:
+    - mvn verify
+  criteria: Build passes
+EOF
 ```
 
 ### Add a task with dependencies
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id my-feature \
-  --deliverables 3 \
-  --domain java-testing \
-  --title "Write integration tests" \
-  --description "Add integration tests for new endpoint" \
-  --steps "Create test class" "Add test methods" "Run tests" \
-  --depends-on TASK-1 TASK-2 \
-  --verification-commands "mvn verify -Pintegration"
+  --plan-id my-feature <<'EOF'
+title: Write integration tests
+deliverables: [3]
+domain: java-testing
+description: Add integration tests for new endpoint
+
+steps:
+  - Create test class
+  - Add test methods
+  - Run tests
+
+depends_on: TASK-1, TASK-2
+
+verification:
+  commands:
+    - mvn verify -Pintegration
+  criteria: All tests pass
+EOF
+```
+
+### Add a task with complex verification commands (shell metacharacters)
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+  --plan-id migrate-json-to-toon <<'EOF'
+title: Migrate agent outputs to TOON
+deliverables: [1, 2, 3]
+domain: plugin
+description: |
+  Update agents to use TOON format instead of JSON.
+
+steps:
+  - Update java-implement-agent.md
+  - Update java-verify-agent.md
+  - Update gradle-builder.md
+
+delegation:
+  skill: pm-plugin-development:plugin-maintain
+  workflow: update-component
+
+verification:
+  commands:
+    - grep -l '```json' marketplace/bundles/pm-dev-java/agents/*.md | wc -l
+    - grep -l '```json' marketplace/bundles/pm-dev-builder/agents/*.md | wc -l
+  criteria: All grep commands return 0 (no JSON blocks remain)
+EOF
 ```
 
 ### Get next task/step (respects dependencies)
@@ -201,9 +284,18 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task step-done \
 
 ### With task-plan-agent
 
-Task-plan agents create tasks during plan refinement:
-```
-manage-task add --plan-id {plan_id} --deliverables {n1} {n2} ...
+Task-plan agents create tasks during plan refinement using heredoc:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+  --plan-id {plan_id} <<'EOF'
+title: {task_title}
+deliverables: [{n1}, {n2}]
+domain: {domain}
+steps:
+  - {step1}
+  - {step2}
+...
+EOF
 ```
 
 ### With plan-execute
@@ -230,13 +322,13 @@ Implement agents execute steps:
 
 ## Deliverable-to-Task Relationship
 
-Tasks reference deliverables from `solution_outline.md` using the `--deliverables` parameter.
+Tasks reference deliverables from `solution_outline.md` using the `deliverables` field in stdin.
 
 | Pattern | Description | Example |
 |---------|-------------|---------|
-| 1:1 | One task per deliverable | `--deliverables 1` - Task implements deliverable 1 |
-| N:1 | Multiple deliverables in one task | `--deliverables 1 2 3` - Task implements deliverables 1, 2, 3 |
-| 1:N | One deliverable split across tasks | TASK-1 and TASK-2 both have `--deliverables 1` |
+| 1:1 | One task per deliverable | `deliverables: [1]` - Task implements deliverable 1 |
+| N:1 | Multiple deliverables in one task | `deliverables: [1, 2, 3]` - Task implements deliverables 1, 2, 3 |
+| 1:N | One deliverable split across tasks | TASK-1 and TASK-2 both have `deliverables: [1]` |
 
 **When to use N:1**: Group related deliverables that share implementation context.
 
@@ -246,14 +338,14 @@ Tasks reference deliverables from `solution_outline.md` using the `--deliverable
 
 ## Dependency Management
 
-Tasks can depend on other tasks using `--depends-on`:
+Tasks can depend on other tasks using the `depends_on` field in stdin:
 
-```bash
+```yaml
 # Task 3 waits for Task 1 and Task 2 to complete
---depends-on TASK-1 TASK-2
+depends_on: TASK-1, TASK-2
 
 # No dependencies
---depends-on none
+depends_on: none
 ```
 
 **Dependency enforcement**:

@@ -96,21 +96,38 @@ Record why deliverables were grouped/split for audit trail.
 
 ## Task Creation
 
+Uses stdin-based API with heredoc to avoid shell metacharacter issues:
+
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id {plan_id} \
-  --deliverables {n1} {n2} {n3} \
-  --title "{aggregated title}" \
-  --description "{combined description}" \
-  --domain {domain} \
-  --phase execute \
-  --steps "{file_1}" "{file_2}" "{file_3}" \
-  --depends-on "TASK-1" "TASK-2" \
-  --delegation-skill {skill} \
-  --delegation-workflow {workflow} \
-  --context-skills {skill1} {skill2} \
-  --verification-commands "{cmd1}" "{cmd2}" \
-  --verification-criteria "{criteria}"
+  --plan-id {plan_id} <<'EOF'
+title: {aggregated title}
+deliverables: [{n1}, {n2}, {n3}]
+domain: {domain}
+phase: execute
+description: |
+  {combined description}
+
+steps:
+  - {file_1}
+  - {file_2}
+  - {file_3}
+
+depends_on: TASK-1, TASK-2
+
+delegation:
+  skill: {skill}
+  workflow: {workflow}
+  context_skills:
+    - {skill1}
+    - {skill2}
+
+verification:
+  commands:
+    - {cmd1}
+    - {cmd2}
+  criteria: {criteria}
+EOF
 ```
 
 ## Return Structure

@@ -201,18 +201,25 @@ This halt is **NOT OPTIONAL**. The workflow MUST pause here for user review befo
 
 ### Step 5: Create Tasks
 
-Create execution tasks referencing the goal in the solution document:
+Create execution tasks referencing the deliverable in the solution document using heredoc:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id {plan_id} \
-  --goal 1 \
-  --title "Execute request" \
-  --description "Complete the requested task" \
-  --steps "Analyze requirements" "Implement solution" "Verify result"
+  --plan-id {plan_id} <<'EOF'
+title: Execute request
+deliverables: [1]
+domain: generic
+description: |
+  Complete the requested task
+
+steps:
+  - Analyze requirements
+  - Implement solution
+  - Verify result
+EOF
 ```
 
-**Note**: Task goal reference is now numeric (`--goal 1`) referencing the goal section number in solution_outline.md.
+**Note**: Task deliverable reference is numeric (`deliverables: [1]`) referencing the deliverable number in solution_outline.md.
 
 ### Step 6: Log Completion
 

@@ -65,29 +65,42 @@ For each deliverable, check for split requirements:
 
 ### Step 5: Create Optimized Tasks
 
-For aggregated deliverables or single deliverables, create tasks:
+For aggregated deliverables or single deliverables, create tasks using heredoc:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id {plan_id} \
-  --deliverables {n1} {n2} {n3} \
-  --title "Implement {component}" \
-  --description "{combined description}" \
-  --domain {java|java-testing} \
-  --phase execute \
-  --steps "{file1}" "{file2}" "{file3}" \
-  --depends-on "TASK-1" "TASK-2" \
-  --delegation-skill pm-dev-java:{java-implement|java-refactor|java-implement-tests} \
-  --delegation-workflow {implement|refactor|implement-tests} \
-  --context-skills pm-dev-java:cui-java-cdi \
-  --verification-commands "mvn test -pl {module}" \
-  --verification-criteria "Build and tests pass"
+  --plan-id {plan_id} <<'EOF'
+title: Implement {component}
+deliverables: [{n1}, {n2}, {n3}]
+domain: {java|java-testing}
+phase: execute
+description: |
+  {combined description}
+
+steps:
+  - {file1}
+  - {file2}
+  - {file3}
+
+depends_on: TASK-1, TASK-2
+
+delegation:
+  skill: pm-dev-java:{java-implement|java-refactor|java-implement-tests}
+  workflow: {implement|refactor|implement-tests}
+  context_skills:
+    - pm-dev-java:cui-java-cdi
+
+verification:
+  commands:
+    - mvn test -pl {module}
+  criteria: Build and tests pass
+EOF
 ```
 
-**Parameters**:
-- `--deliverables`: References deliverable numbers from solution_outline.md (space-separated)
-- `--domain`: `java` for production code, `java-testing` for test code
-- `--context-skills`: Add `pm-dev-java:cui-java-cdi` when CDI/Quarkus patterns needed
+**Stdin format fields**:
+- `deliverables`: Array of deliverable numbers from solution_outline.md
+- `domain`: `java` for production code, `java-testing` for test code
+- `delegation.context_skills`: Add `pm-dev-java:cui-java-cdi` when CDI/Quarkus patterns needed
 
 ### Step 6: Record Issues as Lessons
 
@@ -127,17 +140,17 @@ lessons_recorded: {count}
 
 ## Delegation Mapping
 
-When creating tasks, map from deliverable metadata to task delegation:
+When creating tasks, map from deliverable metadata to stdin TOON fields:
 
-| Deliverable Metadata | Task Parameter |
-|---------------------|----------------|
-| `domain` | `--domain` |
-| `suggested_skill` | `--delegation-skill` |
-| `suggested_workflow` | `--delegation-workflow` |
-| `context_skills` | `--context-skills` (merged from all aggregated deliverables) |
-| `affected_files` | `--steps` (one per file) |
-| `verification.command` | `--verification-commands` |
-| `verification.criteria` | `--verification-criteria` |
+| Deliverable Metadata | TOON Field |
+|---------------------|------------|
+| `domain` | `domain:` |
+| `suggested_skill` | `delegation: skill:` |
+| `suggested_workflow` | `delegation: workflow:` |
+| `context_skills` | `delegation: context_skills:` (merged from all aggregated deliverables) |
+| `affected_files` | `steps:` (one per file) |
+| `verification.command` | `verification: commands:` |
+| `verification.criteria` | `verification: criteria:` |
 
 ### Java-Specific Skill Mapping
 
@@ -296,7 +309,7 @@ If deliverable lacks detail:
 
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables (list-deliverables, read)
-- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --deliverables N M --domain java --delegation-skill ...)
+- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --plan-id X <<'EOF' ... EOF)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced in Task Steps**:

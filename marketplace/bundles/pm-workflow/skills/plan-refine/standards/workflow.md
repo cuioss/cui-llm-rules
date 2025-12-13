@@ -66,18 +66,25 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 
 ## Step 4: Create Tasks
 
-Create execution tasks referencing the goal number:
+Create execution tasks referencing the deliverable number using heredoc:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id {plan_id} \
-  --goal 1 \
-  --title "Execute request" \
-  --description "Complete the requested task" \
-  --steps "Analyze requirements" "Implement solution" "Verify result"
+  --plan-id {plan_id} <<'EOF'
+title: Execute request
+deliverables: [1]
+domain: generic
+description: |
+  Complete the requested task
+
+steps:
+  - Analyze requirements
+  - Implement solution
+  - Verify result
+EOF
 ```
 
-**Note**: The `--goal` parameter is numeric, referencing the goal section number in solution_outline.md.
+**Note**: The `deliverables` array contains numeric references to deliverable numbers in solution_outline.md.
 
 ---
 

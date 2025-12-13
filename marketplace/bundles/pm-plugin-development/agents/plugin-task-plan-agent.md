@@ -57,7 +57,14 @@ These constraints apply EVEN IF skill loading fails:
 ### SCRIPT NOTATION REFERENCE
 ```
 pm-workflow:manage-solution-outline:manage-solution-outline list-deliverables --plan-id X
-pm-workflow:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"
+pm-workflow:manage-tasks:manage-task add --plan-id X <<'EOF'
+title: Task title
+deliverables: [1, 2]
+domain: plugin
+steps:
+  - Step A
+  - Step B
+EOF
 plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
 ```
 

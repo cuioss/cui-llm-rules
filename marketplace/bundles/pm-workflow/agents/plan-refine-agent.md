@@ -77,8 +77,15 @@ pm-workflow:manage-solution-outline:manage-solution-outline write --plan-id X <<
 EOF
 pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id X
 
-# Create tasks and manage lifecycle
-pm-workflow:manage-tasks:manage-task add --plan-id X --goal 1 --title "Y" --description "Z" --steps "A" "B"
+# Create tasks (use heredoc)
+pm-workflow:manage-tasks:manage-task add --plan-id X <<'EOF'
+title: Task title
+deliverables: [1, 2]
+domain: java
+steps:
+  - Step A
+  - Step B
+EOF
 plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
 pm-workflow:manage-lifecycle:manage-lifecycle transition --plan-id X --completed Y
 ```

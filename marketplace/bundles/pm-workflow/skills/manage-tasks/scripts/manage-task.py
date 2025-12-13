@@ -7,7 +7,7 @@ Uses TOON format for both storage and output.
 Each task references deliverables from solution_outline.md.
 
 Subcommands:
-  add              - Add a new task
+  add              - Add a new task (reads task definition from stdin)
   update           - Update an existing task
   remove           - Remove a task
   list             - List all tasks (summary)
@@ -20,6 +20,27 @@ Subcommands:
   remove-step      - Remove a step from a task
 
 Output: TOON format for all operations.
+
+Add command usage (stdin-based API):
+  python3 manage-task.py add --plan-id my-plan <<'EOF'
+  title: My Task Title
+  deliverables: [1, 2, 3]
+  domain: plugin
+  phase: execute
+  description: |
+    Task description here
+  steps:
+    - First step
+    - Second step
+  depends_on: none
+  delegation:
+    skill: pm-plugin-development:plugin-maintain
+    workflow: update-component
+  verification:
+    commands:
+      - grep -l '```json' *.md | wc -l
+    criteria: All grep commands return 0
+  EOF
 """
 
 import argparse
@@ -109,7 +130,7 @@ def validate_deliverables(deliverables_input) -> List[int]:
 
 
 # Valid domains for skill loading
-VALID_DOMAINS = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plugin']
+VALID_DOMAINS = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plugin', 'generic']
 
 # Valid phases
 VALID_PHASES = ['init', 'refine', 'execute', 'finalize']
@@ -317,6 +338,199 @@ def get_deliverable_context(deliverables: List[int]) -> dict:
         'deliverables': deliverables,
         'deliverables_source': f'See solution_outline.md sections: {", ".join(f"### {d}." for d in deliverables)}'
     }
+
+
+def parse_stdin_task(stdin_content: str) -> dict:
+    """Parse task definition from stdin TOON format.
+
+    Expected format:
+        title: My Task Title
+        deliverables: [1, 2, 3]
+        domain: plugin
+        phase: execute
+        description: |
+          Multi-line description
+        steps:
+          - First step
+          - Second step
+        depends_on: none | TASK-1, TASK-2
+        delegation:
+          skill: pm-plugin-development:plugin-maintain
+          workflow: update-component
+          context_skills:
+            - skill1
+            - skill2
+        verification:
+          commands:
+            - command1
+            - command2
+          criteria: Success criteria text
+          manual: false
+
+    Args:
+        stdin_content: Raw stdin content
+
+    Returns:
+        Dictionary with parsed task fields
+
+    Raises:
+        ValueError: If required fields are missing or invalid
+    """
+    result = {
+        'title': '',
+        'deliverables': [],
+        'domain': '',
+        'phase': 'execute',
+        'description': '',
+        'steps': [],
+        'depends_on': [],
+        'delegation': {
+            'skill': '',
+            'workflow': '',
+            'domain': '',
+            'context_skills': []
+        },
+        'verification': {
+            'commands': [],
+            'criteria': '',
+            'manual': False
+        }
+    }
+
+    lines = stdin_content.split('\n')
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+
+        # Skip empty lines at top level
+        if not line.strip():
+            i += 1
+            continue
+
+        # Parse top-level fields
+        if line.startswith('title:'):
+            result['title'] = line[6:].strip()
+            i += 1
+
+        elif line.startswith('deliverables:'):
+            # Parse [1, 2, 3] format
+            value = line[13:].strip()
+            if value.startswith('[') and value.endswith(']'):
+                # Parse inline array
+                inner = value[1:-1]
+                if inner.strip():
+                    result['deliverables'] = [int(x.strip()) for x in inner.split(',')]
+            i += 1
+
+        elif line.startswith('domain:'):
+            result['domain'] = line[7:].strip()
+            i += 1
+
+        elif line.startswith('phase:'):
+            result['phase'] = line[6:].strip()
+            i += 1
+
+        elif line.startswith('description:'):
+            rest = line[12:].strip()
+            if rest == '|':
+                # Multi-line description
+                desc_lines = []
+                i += 1
+                while i < len(lines):
+                    if lines[i].startswith('  '):
+                        desc_lines.append(lines[i][2:])
+                    elif lines[i].strip() == '':
+                        # Empty line within description
+                        desc_lines.append('')
+                    else:
+                        break
+                    i += 1
+                result['description'] = '\n'.join(desc_lines).strip()
+            else:
+                result['description'] = rest
+                i += 1
+
+        elif line.startswith('steps:'):
+            # Parse list of steps
+            i += 1
+            while i < len(lines) and lines[i].startswith('  - '):
+                step_title = lines[i][4:].strip()
+                if step_title:
+                    result['steps'].append(step_title)
+                i += 1
+
+        elif line.startswith('depends_on:'):
+            value = line[11:].strip()
+            result['depends_on'] = parse_depends_on(value)
+            i += 1
+
+        elif line.startswith('delegation:'):
+            # Parse delegation block
+            i += 1
+            while i < len(lines) and lines[i].startswith('  '):
+                stripped = lines[i].strip()
+                if stripped.startswith('skill:'):
+                    result['delegation']['skill'] = stripped[6:].strip()
+                elif stripped.startswith('workflow:'):
+                    result['delegation']['workflow'] = stripped[9:].strip()
+                elif stripped.startswith('context_skills:'):
+                    i += 1
+                    while i < len(lines) and lines[i].startswith('    - '):
+                        skill = lines[i][6:].strip()
+                        if skill:
+                            result['delegation']['context_skills'].append(skill)
+                        i += 1
+                    continue
+                i += 1
+
+        elif line.startswith('verification:'):
+            # Parse verification block
+            i += 1
+            while i < len(lines) and lines[i].startswith('  '):
+                stripped = lines[i].strip()
+                if stripped.startswith('commands:'):
+                    i += 1
+                    while i < len(lines) and lines[i].startswith('    - '):
+                        cmd = lines[i][6:].strip()
+                        if cmd:
+                            result['verification']['commands'].append(cmd)
+                        i += 1
+                    continue
+                elif stripped.startswith('criteria:'):
+                    result['verification']['criteria'] = stripped[9:].strip()
+                elif stripped.startswith('manual:'):
+                    val = stripped[7:].strip().lower()
+                    result['verification']['manual'] = val == 'true'
+                i += 1
+
+        else:
+            i += 1
+
+    # Copy domain to delegation block
+    if result['domain']:
+        result['delegation']['domain'] = result['domain']
+
+    # Validate required fields
+    if not result['title']:
+        raise ValueError("Missing required field: title")
+    if not result['deliverables']:
+        raise ValueError("Missing required field: deliverables")
+    if not result['domain']:
+        raise ValueError("Missing required field: domain")
+    if not result['steps']:
+        raise ValueError("Missing required field: steps (at least one step required)")
+
+    # Validate domain
+    validate_domain(result['domain'])
+
+    # Validate phase
+    validate_phase(result['phase'])
+
+    # Validate deliverables
+    validate_deliverables(result['deliverables'])
+
+    return result
 
 
 def get_tasks_dir(plan_id: str) -> Path:
@@ -725,31 +939,22 @@ def output_error(message: str) -> None:
 # ============================================================================
 
 def cmd_add(args) -> int:
-    """Handle 'add' subcommand."""
-    # Validate deliverables
-    try:
-        deliverables = validate_deliverables(args.deliverables)
-    except ValueError as e:
-        output_error(str(e))
+    """Handle 'add' subcommand.
+
+    Reads task definition from stdin in TOON format.
+    Only --plan-id is passed as CLI argument.
+    """
+    # Read task definition from stdin
+    stdin_content = sys.stdin.read()
+    if not stdin_content.strip():
+        output_error("No task definition provided on stdin")
         return 1
 
-    # Validate domain
+    # Parse stdin content
     try:
-        domain = validate_domain(args.domain)
+        parsed = parse_stdin_task(stdin_content)
     except ValueError as e:
         output_error(str(e))
-        return 1
-
-    # Validate phase
-    try:
-        phase = validate_phase(args.phase)
-    except ValueError as e:
-        output_error(str(e))
-        return 1
-
-    # Validate steps
-    if not args.steps or len(args.steps) == 0:
-        output_error("At least one step is required")
         return 1
 
     task_dir = get_tasks_dir(args.plan_id)
@@ -758,55 +963,33 @@ def cmd_add(args) -> int:
     number = get_next_number(task_dir)
 
     # Generate slug and filename
-    slug = slugify(args.title)
+    slug = slugify(parsed['title'])
     filename = f"TASK-{number:03d}-{slug}.toon"
     filepath = task_dir / filename
 
     # Create steps
     steps = []
-    for i, step_title in enumerate(args.steps, 1):
+    for i, step_title in enumerate(parsed['steps'], 1):
         steps.append({
             'number': i,
             'title': step_title,
             'status': 'pending'
         })
 
-    # Parse depends_on
-    depends_on = []
-    if args.depends_on:
-        for dep in args.depends_on:
-            if dep.lower() != 'none':
-                depends_on.extend(parse_depends_on(dep))
-
-    # Build delegation block
-    delegation = {
-        'skill': args.delegation_skill or '',
-        'workflow': args.delegation_workflow or '',
-        'domain': domain,
-        'context_skills': args.context_skills or []
-    }
-
-    # Build verification block
-    verification = {
-        'commands': args.verification_commands or [],
-        'criteria': args.verification_criteria or '',
-        'manual': args.verification_manual or False
-    }
-
     # Create task
     now = now_iso()
     task = {
         'number': number,
-        'title': args.title,
+        'title': parsed['title'],
         'status': 'pending',
-        'phase': phase,
+        'phase': parsed['phase'],
         'created': now,
         'updated': now,
-        'deliverables': deliverables,
-        'depends_on': depends_on,
-        'description': args.description,
-        'delegation': delegation,
-        'verification': verification,
+        'deliverables': parsed['deliverables'],
+        'depends_on': parsed['depends_on'],
+        'description': parsed['description'],
+        'delegation': parsed['delegation'],
+        'verification': parsed['verification'],
         'steps': steps,
         'current_step': 1
     }
@@ -825,10 +1008,10 @@ def cmd_add(args) -> int:
         'total_tasks': total,
         'task': {
             'number': number,
-            'title': args.title,
-            'deliverables': deliverables,
-            'depends_on': depends_on,
-            'phase': phase,
+            'title': parsed['title'],
+            'deliverables': parsed['deliverables'],
+            'depends_on': parsed['depends_on'],
+            'phase': parsed['phase'],
             'status': 'pending',
             'step_count': len(steps)
         }
@@ -1523,33 +1706,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest='command', required=True)
 
-    # add
-    p_add = subparsers.add_parser('add', help='Add a new task')
+    # add (stdin-based API)
+    p_add = subparsers.add_parser('add', help='Add a new task (reads definition from stdin)')
     p_add.add_argument('--plan-id', required=True, help='Plan identifier')
-    p_add.add_argument('--title', required=True, help='Task title')
-    p_add.add_argument('--deliverables', nargs='+', type=int, required=True,
-                       help='Deliverable numbers from solution_outline.md')
-    p_add.add_argument('--domain', required=True,
-                       choices=['java', 'java-testing', 'javascript', 'javascript-testing', 'plugin'],
-                       help='Skill domain for loading defaults')
-    p_add.add_argument('--description', required=True, help='Task description')
-    p_add.add_argument('--steps', nargs='+', required=True,
-                       help='Step titles (space-separated, order matters)')
-    p_add.add_argument('--phase', default='execute',
-                       choices=['init', 'refine', 'execute', 'finalize'],
-                       help='Plan phase (default: execute)')
-    p_add.add_argument('--depends-on', nargs='*', default=[],
-                       help='Task dependencies (TASK-N references or "none")')
-    p_add.add_argument('--delegation-skill', help='Skill for task execution')
-    p_add.add_argument('--delegation-workflow', help='Workflow within skill')
-    p_add.add_argument('--context-skills', nargs='*', default=[],
-                       help='Optional skills from domain optionals')
-    p_add.add_argument('--verification-commands', nargs='*', default=[],
-                       help='Commands for verification')
-    p_add.add_argument('--verification-criteria', default='',
-                       help='Success criteria')
-    p_add.add_argument('--verification-manual', action='store_true',
-                       help='Mark as requiring manual verification')
 
     # update
     p_update = subparsers.add_parser('update', help='Update an existing task')

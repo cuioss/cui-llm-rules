@@ -64,28 +64,40 @@ For each deliverable, check for split requirements:
 
 ### Step 5: Create Optimized Tasks
 
-For aggregated deliverables or single deliverables, create tasks:
+For aggregated deliverables or single deliverables, create tasks using heredoc:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
-  --plan-id {plan_id} \
-  --deliverables {n1} {n2} {n3} \
-  --title "{action} {component-type}: {name}" \
-  --description "{combined description}" \
-  --domain plugin \
-  --phase execute \
-  --steps "{file1}" "{file2}" "{file3}" \
-  --depends-on "TASK-1" "TASK-2" \
-  --delegation-skill pm-plugin-development:{plugin-create|plugin-maintain} \
-  --delegation-workflow {workflow-name} \
-  --verification-commands "{cmd}" \
-  --verification-criteria "{criteria}"
+  --plan-id {plan_id} <<'EOF'
+title: {action} {component-type}: {name}
+deliverables: [{n1}, {n2}, {n3}]
+domain: plugin
+phase: execute
+description: |
+  {combined description}
+
+steps:
+  - {file1}
+  - {file2}
+  - {file3}
+
+depends_on: TASK-1, TASK-2
+
+delegation:
+  skill: pm-plugin-development:{plugin-create|plugin-maintain}
+  workflow: {workflow-name}
+
+verification:
+  commands:
+    - {cmd}
+  criteria: {criteria}
+EOF
 ```
 
-**Parameters**:
-- `--deliverables`: References deliverable numbers from solution_outline.md (space-separated)
-- `--domain`: Always `plugin` for marketplace components
-- `--depends-on`: Task dependencies computed from deliverable dependencies
+**Stdin format fields**:
+- `deliverables`: Array of deliverable numbers from solution_outline.md
+- `domain`: Always `plugin` for marketplace components
+- `depends_on`: Task dependencies computed from deliverable dependencies
 
 ### Step 6: Record Issues as Lessons
 
@@ -125,17 +137,17 @@ lessons_recorded: {count}
 
 ## Delegation Mapping
 
-When creating tasks, map from deliverable metadata to task delegation:
+When creating tasks, map from deliverable metadata to stdin TOON fields:
 
-| Deliverable Metadata | Task Parameter |
-|---------------------|----------------|
-| `domain` | `--domain` |
-| `suggested_skill` | `--delegation-skill` |
-| `suggested_workflow` | `--delegation-workflow` |
-| `context_skills` | `--context-skills` (merged from all aggregated deliverables) |
-| `affected_files` | `--steps` (one per file) |
-| `verification.command` | `--verification-commands` (may consolidate) |
-| `verification.criteria` | `--verification-criteria` |
+| Deliverable Metadata | TOON Field |
+|---------------------|------------|
+| `domain` | `domain:` |
+| `suggested_skill` | `delegation: skill:` |
+| `suggested_workflow` | `delegation: workflow:` |
+| `context_skills` | `delegation: context_skills:` (merged from all aggregated deliverables) |
+| `affected_files` | `steps:` (one per file) |
+| `verification.command` | `verification: commands:` (may consolidate) |
+| `verification.criteria` | `verification: criteria:` |
 
 ### Plugin-Specific Skill Mapping
 
@@ -317,7 +329,7 @@ If deliverable lacks required parameters:
 
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables (list-deliverables, read)
-- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --deliverables N M --domain plugin --delegation-skill ...)
+- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --plan-id X <<'EOF' ... EOF)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 - `plan-marshall:logging:manage-log` - Log progress (work)
 

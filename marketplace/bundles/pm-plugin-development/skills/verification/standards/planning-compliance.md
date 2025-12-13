@@ -516,10 +516,17 @@ Actual: current_phase=execute (not updated)
 
 ```
 Claude uses: Write .plan/plans/my-plan/tasks/TASK-003.toon
-Should use: python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add --plan-id my-plan --title "..." --goal 1 --description "..." --steps "A" "B"
+Should use: python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add --plan-id my-plan <<'EOF'
+title: Task title
+deliverables: [1]
+domain: java
+steps:
+  - Step A
+  - Step B
+EOF
 ```
 
-**Note**: Script notation uses SINGULAR `manage-task` (not `manage-tasks`). Full notation: `pm-workflow:manage-tasks:manage-task`.
+**Note**: Script notation uses SINGULAR `manage-task` (not `manage-tasks`). Full notation: `pm-workflow:manage-tasks:manage-task`. Task definitions are passed via stdin using heredoc to avoid shell metacharacter issues.
 
 **Why It Matters**: Bypasses numbering logic, validation, and work-log entry creation.
 
