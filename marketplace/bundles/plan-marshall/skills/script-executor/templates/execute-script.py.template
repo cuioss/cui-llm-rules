@@ -44,6 +44,30 @@ VALIDATE_TOON = False  # Set True for strict TOON output validation
 # EXECUTION LOGIC
 # ============================================================================
 
+# Scripts whose successful executions are NOT logged to prevent meta-logging noise
+# (logging scripts logging themselves creates excessive noise)
+SILENT_ON_SUCCESS = frozenset([
+    'plan-marshall:logging:manage-log',
+])
+
+
+def should_skip_logging(notation: str, exit_code: int) -> bool:
+    """
+    Determine if logging should be skipped for this execution.
+
+    Logging scripts (like manage-log) are not logged when successful to avoid
+    meta-logging noise. Errors are always logged regardless of script type.
+
+    Args:
+        notation: Script notation (e.g., 'plan-marshall:logging:manage-log')
+        exit_code: Script exit code (0 = success)
+
+    Returns:
+        True if logging should be skipped, False otherwise
+    """
+    return notation in SILENT_ON_SUCCESS and exit_code == 0
+
+
 def extract_trace_plan_id(args: list[str]) -> tuple[str | None, list[str]]:
     """
     Extract --trace-plan-id from args and return cleaned args.
@@ -210,16 +234,17 @@ def main():
     if trace_plan_id:
         args_for_logging = ['--plan-id', trace_plan_id] + args_for_logging
 
-    # Log execution (detailed on error, compact on success)
-    log_script_execution(
-        notation=notation,
-        subcommand=subcommand,
-        args=args_for_logging,
-        exit_code=exit_code,
-        duration=duration,
-        stdout=stdout_capture if exit_code != 0 else '',
-        stderr=stderr_capture if exit_code != 0 else ''
-    )
+    # Log execution (skip for logging scripts on success to avoid meta-logging noise)
+    if not should_skip_logging(notation, exit_code):
+        log_script_execution(
+            notation=notation,
+            subcommand=subcommand,
+            args=args_for_logging,
+            exit_code=exit_code,
+            duration=duration,
+            stdout=stdout_capture if exit_code != 0 else '',
+            stderr=stderr_capture if exit_code != 0 else ''
+        )
 
     sys.exit(exit_code)
 
