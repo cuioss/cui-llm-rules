@@ -1,14 +1,16 @@
-# Integration Testing Standards
+# Quarkus External Integration Testing Standards
 
 ## Purpose
 
-Standards for implementing integration tests in Quarkus applications that test the complete application stack through external API interfaces using production-like configurations.
+Standards for implementing **external API integration tests** in Quarkus applications that test the complete application stack through published API interfaces using production-like configurations with Docker containers.
+
+**Prerequisites**: For basic Maven Failsafe configuration and naming conventions, see `pm-dev-java:junit-integration`.
 
 ## Core Principles
 
 ### API-Only Testing
 
-Integration tests **MUST** test only through published APIs, never through internal CDI injection:
+External integration tests **MUST** test only through published APIs, never through internal CDI injection:
 
 * **No CDI Injection**: Tests must not use `@Inject` for services
 * **External Client Perspective**: Tests simulate real client interactions
@@ -17,7 +19,7 @@ Integration tests **MUST** test only through published APIs, never through inter
 
 ### Production Equivalence
 
-Integration tests **MUST** use production-equivalent configurations:
+External integration tests **MUST** use production-equivalent configurations:
 
 * **HTTPS Required**: All tests use TLS with proper certificates
 * **Real Networking**: Actual TCP/IP communication, not in-memory
@@ -32,134 +34,93 @@ Integration tests **MUST** use production-equivalent configurations:
 src/test/java/
 └── integration/           # All integration tests here
     ├── BaseIntegrationTest.java    # Common setup
-    ├── *Test.java                  # Individual test classes
-    └── *IT.java                    # Alternative naming pattern
+    └── *IT.java                    # Integration test classes
 ```
 
-### Maven Profile Configuration
+## Quarkus-Specific Maven Configuration
 
-**Critical**: Use profile-based configuration to avoid duplicate native builds.
+Extends `pm-dev-java:junit-integration` with Quarkus native build and Docker lifecycle:
 
 ```xml
-<profiles>
-    <profile>
-        <id>integration-tests</id>
-        <properties>
-            <!-- Skip unit tests for integration test profile -->
-            <skipITs>false</skipITs>
+<profile>
+    <id>integration-tests</id>
+    <properties>
+        <skipITs>false</skipITs>
+        <quarkus.native.container-build>true</quarkus.native.container-build>
+        <quarkus.native.enabled>true</quarkus.native.enabled>
+        <test.https.port>10443</test.https.port>
+    </properties>
 
-            <!-- Enable native image building -->
-            <quarkus.native.container-build>true</quarkus.native.container-build>
-            <quarkus.native.enabled>true</quarkus.native.enabled>
+    <build>
+        <plugins>
+            <!-- Quarkus Maven Plugin - SINGLE EXECUTION prevents duplicate builds -->
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <properties>
+                        <quarkus.native.enabled>true</quarkus.native.enabled>
+                        <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
+                    </properties>
+                </configuration>
+            </plugin>
 
-            <!-- External port from docker-compose -->
-            <test.https.port>10443</test.https.port>
-        </properties>
-
-        <build>
-            <plugins>
-                <!-- Quarkus Maven Plugin for native builds -->
-                <plugin>
-                    <groupId>io.quarkus</groupId>
-                    <artifactId>quarkus-maven-plugin</artifactId>
-                    <executions>
-                        <!-- Single execution prevents duplicate builds -->
-                        <execution>
-                            <goals>
-                                <goal>generate-code</goal>
-                                <goal>generate-code-tests</goal>
-                                <goal>build</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <properties>
-                            <quarkus.native.enabled>true</quarkus.native.enabled>
-                            <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
-                        </properties>
-                    </configuration>
-                </plugin>
-
-                <!-- Skip unit tests -->
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <skipTests>true</skipTests>
-                    </configuration>
-                </plugin>
-
-                <!-- Application lifecycle via scripts -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>start-integration-app</id>
-                            <phase>pre-integration-test</phase>
-                            <goals><goal>exec</goal></goals>
-                            <configuration>
-                                <executable>./scripts/start-integration-container.sh</executable>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>stop-integration-app</id>
-                            <phase>post-integration-test</phase>
-                            <goals><goal>exec</goal></goals>
-                            <configuration>
-                                <executable>./scripts/stop-integration-container.sh</executable>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!-- Integration test execution -->
-                <plugin>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                            <configuration>
-                                <includes>
-                                    <include>**/integration/**/*IT.java</include>
-                                </includes>
-                                <systemPropertyVariables>
-                                    <test.https.port>${test.https.port}</test.https.port>
-                                </systemPropertyVariables>
-                                <skipITs>${skipITs}</skipITs>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
-</profiles>
+            <!-- Docker lifecycle via scripts -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>start-integration-app</id>
+                        <phase>pre-integration-test</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>./scripts/start-integration-container.sh</executable>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-integration-app</id>
+                        <phase>post-integration-test</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>./scripts/stop-integration-container.sh</executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</profile>
 ```
 
-### Critical Configuration Requirements
+### Critical: Prevent Duplicate Native Builds
 
-**Single Execution Pattern**: Use one execution with all goals to prevent duplicate native builds
+**Single Execution Pattern**: Use one execution with all goals.
 
-**Anti-Pattern** (causes duplicate builds):
 ```xml
 <!-- ❌ WRONG: Causes duplicate native builds -->
 <executions>
-    <execution>
-        <id>default</id>
-        <goals>
-            <goal>generate-code</goal>
-        </goals>
-    </execution>
-    <execution>
-        <id>build-native</id>  <!-- DUPLICATE BUILD! -->
-        <goals>
-            <goal>build</goal>
-        </goals>
-    </execution>
+    <execution><goals><goal>generate-code</goal></goals></execution>
+    <execution><goals><goal>build</goal></goals></execution>  <!-- DUPLICATE! -->
 </executions>
+
+<!-- ✅ CORRECT: Single execution -->
+<execution>
+    <goals>
+        <goal>generate-code</goal>
+        <goal>generate-code-tests</goal>
+        <goal>build</goal>
+    </goals>
+</execution>
 ```
 
 **Modern Properties**: Use `quarkus.native.enabled` instead of deprecated `quarkus.package.type`

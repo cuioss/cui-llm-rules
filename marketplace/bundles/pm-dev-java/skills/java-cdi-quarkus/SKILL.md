@@ -33,12 +33,12 @@ This provides foundational rules for:
 
 ### Step 2: Load Additional Standards (As Needed)
 
-**Integration Testing** (load for IT configuration):
+**External Integration Testing** (load for Docker-based IT):
 ```
 Read: standards/integration-testing.md
 ```
 
-Use when: Configuring Maven Failsafe for Quarkus integration tests.
+Use when: Configuring external API integration tests with Docker containers. For basic Maven Failsafe setup, see `pm-dev-java:junit-integration`.
 
 **Native Image** (load for GraalVM work):
 ```
@@ -119,6 +119,6 @@ mvn verify -Pnative -Dquarkus.test.native-image-profile=native
 | Standard | Purpose |
 |----------|---------|
 | quarkus-testing.md | @QuarkusTest, JaCoCo, REST Assured |
-| integration-testing.md | Maven Failsafe for Quarkus |
+| integration-testing.md | External API testing with Docker (extends junit-integration) |
 | quarkus-native.md | GraalVM native image builds |
 | quarkus-reflection.md | Reflection registration for native |

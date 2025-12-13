@@ -38,8 +38,6 @@ import de.cuioss.tools.logging.CuiLogger;
 
 public class TokenValidator {
     private static final CuiLogger LOGGER = new CuiLogger(TokenValidator.class);
-
-    // Use logger throughout the class
 }
 ```
 
@@ -48,27 +46,25 @@ public class TokenValidator {
 * Logger must be `private static final`
 * Logger constant name must be `LOGGER`
 * Pass the class to logger constructor: `new CuiLogger(YourClass.class)`
-* Module/artifact: `cui-java-tools`
 
 ### Prohibited Practices
 
 **DO NOT**:
 * Use log4j or slf4j directly
-* Use `System.out.println()` or `System.err.println()` - use appropriate logger level instead
-* Use `@Slf4j` or other logging annotations - CUI uses explicit logger declaration
-* Use prefixes like `[DEBUG_LOG]` - always use log levels (DEBUG, INFO, WARN, ERROR, FATAL)
-* Directly instantiate loggers in multiple places - use single static final logger per class
+* Use `System.out.println()` or `System.err.println()`
+* Use `@Slf4j` or other logging annotations
+* Use prefixes like `[DEBUG_LOG]` - always use log levels
+* Directly instantiate loggers in multiple places
 
 ```java
-// ❌ WRONG - prohibited practices
-@Slf4j  // Don't use Lombok logging
+// ❌ WRONG
+@Slf4j
 public class MyClass {
-    System.out.println("Debug: " + message);  // Don't use System.out
-    System.err.println("Error: " + error);    // Don't use System.err
-    log.info("[DEBUG_LOG] Processing...");    // Don't use custom prefixes
+    System.out.println("Debug: " + message);
+    log.info("[DEBUG_LOG] Processing...");
 }
 
-// ✅ CORRECT - use CuiLogger
+// ✅ CORRECT
 public class MyClass {
     private static final CuiLogger LOGGER = new CuiLogger(MyClass.class);
 
@@ -99,11 +95,9 @@ LOGGER.fatal("Critical system failure");
 
 // With parameters (%s for all substitutions)
 LOGGER.info("User %s logged in from %s", username, ipAddress);
-LOGGER.warn("Request took %s ms (threshold: %s)", duration, threshold);
 
 // With exception (exception comes FIRST)
 LOGGER.error(exception, "Failed to connect to database: %s", url);
-LOGGER.fatal(exception, "System shutdown due to: %s", reason);
 ```
 
 ## LogRecord Usage
@@ -120,14 +114,13 @@ LOGGER.fatal(exception, "System shutdown due to: %s", reason);
 - INFO/WARN/ERROR/FATAL are production-critical messages that require structured identifiers for monitoring, alerting, and documentation
 - DEBUG/TRACE are development-only messages that don't need the overhead of LogRecord structure
 
-### Module Organization
+### LogMessages Class Structure
 
 Aggregate LogRecords in module-specific 'LogMessages' class:
 
 ```java
 @UtilityClass
 public final class AuthenticationLogMessages {
-    // Module prefix for all messages
     public static final String PREFIX = "AUTH";
 
     @UtilityClass
@@ -136,12 +129,6 @@ public final class AuthenticationLogMessages {
             .template("User %s logged in successfully")
             .prefix(PREFIX)
             .identifier(1)
-            .build();
-
-        public static final LogRecord SESSION_CREATED = LogRecordModel.builder()
-            .template("Session created for user %s with validity %s")
-            .prefix(PREFIX)
-            .identifier(2)
             .build();
     }
 
@@ -161,12 +148,6 @@ public final class AuthenticationLogMessages {
             .prefix(PREFIX)
             .identifier(200)
             .build();
-
-        public static final LogRecord DATABASE_ERROR = LogRecordModel.builder()
-            .template("Database connection failed: %s")
-            .prefix(PREFIX)
-            .identifier(201)
-            .build();
     }
 
     @UtilityClass
@@ -184,33 +165,24 @@ public final class AuthenticationLogMessages {
 
 Organize identifiers by log level:
 
-* **001-099**: INFO level
-* **100-199**: WARN level
-* **200-299**: ERROR level
-* **300-399**: FATAL level
+| Level | Range | Example |
+|-------|-------|---------|
+| INFO | 001-099 | `identifier(1)` |
+| WARN | 100-199 | `identifier(100)` |
+| ERROR | 200-299 | `identifier(200)` |
+| FATAL | 300-399 | `identifier(300)` |
 
 **Note**: DEBUG and TRACE levels do NOT have identifier ranges because they must NOT use LogRecord.
+
 ### LogMessages Best Practices
 
-LogMessages classes follow the DSL-Style Constants Pattern. For comprehensive DSL pattern documentation including nested structure, import patterns, and complete examples, see [dsl-constants.md](dsl-constants.md).
+LogMessages classes follow the DSL-Style Constants Pattern. For comprehensive DSL pattern documentation including nested structure and import patterns, see [dsl-constants.md](dsl-constants.md).
 
 ### LogMessages Documentation Requirements
 
 **REQUIRED**: Every LogMessages class MUST have corresponding documentation at `doc/LogMessages.adoc`.
 
-**See [logmessages-documentation.md](logmessages-documentation.md) for complete documentation standards** including:
-- Complete AsciiDoc template and structure
-- Table format and column definitions
-- Documentation rules and update requirements
-- Integration with project documentation
-- Complete working examples
-
-**Quick summary**:
-- Document all INFO/WARN/ERROR/FATAL messages in `doc/LogMessages.adoc`
-- Use AsciiDoc tables organized by log level
-- Include: identifier, component, message template, description
-- Keep documentation synchronized with implementation
-- DEBUG and TRACE are not documented (they don't use LogRecord)
+See [logmessages-documentation.md](logmessages-documentation.md) for complete documentation standards.
 
 ## Usage Examples
 
@@ -225,35 +197,13 @@ public class AuthenticationService {
 
     public void authenticateUser(String username) {
         try {
-            // Authentication logic
             LOGGER.info(INFO.USER_LOGIN, username);
-
         } catch (DatabaseException e) {
             LOGGER.error(e, ERROR.DATABASE_ERROR, e.getMessage());
             throw new AuthenticationException("Authentication failed", e);
         }
     }
-
-    public void createSession(String username, Duration validity) {
-        LOGGER.info(INFO.SESSION_CREATED, username, validity);
-    }
 }
-```
-
-### LogRecord with Multiple Parameters
-
-```java
-@UtilityClass
-public static final class INFO {
-    public static final LogRecord TOKEN_VALIDATED = LogRecordModel.builder()
-        .template("Token validated for user %s, issuer: %s, expiry: %s")
-        .prefix(PREFIX)
-        .identifier(3)
-        .build();
-}
-
-// Usage
-LOGGER.info(INFO.TOKEN_VALIDATED, userId, issuer, expiryTime);
 ```
 
 ### LogRecord with Exception
@@ -264,28 +214,13 @@ LOGGER.error(exception, ERROR.VALIDATION_FAILED, exception.getMessage());
 LOGGER.fatal(exception, FATAL.SYSTEM_FAILURE, "Database unavailable");
 ```
 
-## How to Test
+## Testing
 
-For comprehensive testing of logging in unit tests, see the dedicated testing guide:
-
-**CUI Test JULi Logger** - Complete guide for testing log output in unit tests, including:
-- `@EnableTestLogger` setup and configuration
-- `LogAsserts` for verifying log messages
-- Testing with LogRecord identifiers
-- Dynamic log level configuration
-- Integration with CUI logging framework
-
-See: `pm-dev-java-cui:cui-testing` skill → `standards/testing-juli-logger.md`
-
-**Note**: The testing-juli-logger.md standard is part of the `pm-dev-java-cui:cui-testing` skill in this bundle.
+For comprehensive testing of logging in unit tests, see: `pm-dev-java-cui:cui-testing` skill → `standards/testing-juli-logger.md`
 
 **Quick example**:
 
 ```java
-import de.cuioss.test.juli.junit5.EnableTestLogger;
-import de.cuioss.test.juli.LogAsserts;
-import de.cuioss.test.juli.TestLogLevel;
-
 @EnableTestLogger
 class TokenValidatorTest {
     @Test
@@ -298,229 +233,163 @@ class TokenValidatorTest {
 
 ## Log Levels
 
-### When to Use Each Level
-
-**DEBUG**:
-* Detailed information for diagnosing problems
-* Technical details that help trace execution
-* Not used in production (disabled by default)
-
-**INFO**:
-* Important business events
-* Successful operations
-* Configuration information
-* Application lifecycle events
-
-**WARN**:
-* Potentially harmful situations
-* Deprecated API usage
-* Unexpected but recoverable conditions
-* Performance degradation warnings
-
-**ERROR**:
-* Error events that might still allow the application to continue
-* Failed operations that don't require immediate intervention
-* Recoverable errors with fallback handling
-
-**FATAL**:
-* Severe error events that will presumably lead the application to abort
-* Unrecoverable errors
-* Critical system failures
+| Level | Usage | LogRecord |
+|-------|-------|-----------|
+| DEBUG | Technical details for diagnosing problems | PROHIBITED |
+| TRACE | Fine-grained execution details | PROHIBITED |
+| INFO | Important business events, lifecycle events | REQUIRED |
+| WARN | Potentially harmful situations, recoverable issues | REQUIRED |
+| ERROR | Failed operations, recoverable errors | REQUIRED |
+| FATAL | Unrecoverable errors, critical system failures | REQUIRED |
 
 ### Examples by Level
 
 ```java
-// DEBUG - technical details (MUST NOT use LogRecord)
+// DEBUG/TRACE - simple strings (LogRecord PROHIBITED)
 LOGGER.debug("Parsing JWT token with algorithm: %s", algorithm);
-LOGGER.debug("Cache hit for key: %s", cacheKey);
+LOGGER.trace("Entering method validateToken");
 
-// TRACE - fine-grained details (MUST NOT use LogRecord)
-LOGGER.trace("Entering method validateToken with parameter: %s", tokenId);
-LOGGER.trace("Token signature bytes: %s", signatureHex);
-
-// INFO - important business events (MUST use LogRecord)
+// INFO/WARN/ERROR/FATAL - LogRecord REQUIRED
 LOGGER.info(INFO.USER_LOGIN, username);
-LOGGER.info(INFO.SESSION_CREATED, sessionId);
-
-// WARN - potentially harmful situations (MUST use LogRecord)
 LOGGER.warn(WARN.RATE_LIMIT, userId);
-LOGGER.warn(WARN.CLOCK_SKEW, skewSeconds);
-
-// ERROR - failed operations (MUST use LogRecord)
 LOGGER.error(exception, ERROR.VALIDATION_FAILED, tokenId);
-LOGGER.error(exception, ERROR.DATABASE_ERROR, "connection timeout");
-
-// FATAL - critical failures (MUST use LogRecord)
-LOGGER.fatal(exception, FATAL.SYSTEM_FAILURE, "database unreachable");
-LOGGER.fatal(FATAL.CONFIGURATION_INVALID, "required config missing");
+LOGGER.fatal(FATAL.SYSTEM_FAILURE, "database unreachable");
 ```
 
 ## Best Practices
 
-### 1. Use Appropriate Log Levels
+### 1. Use LogRecord for Production Levels Only
 
 ```java
-// ✅ Good - appropriate levels with correct LogRecord usage
-LOGGER.debug("Token signature algorithm: %s", algorithm);  // Simple string for debug
-LOGGER.info(INFO.USER_LOGIN, username);  // LogRecord for info
-LOGGER.error(exception, ERROR.VALIDATION_FAILED, tokenId);  // LogRecord for error
-
-// ❌ Bad - wrong levels
-LOGGER.info("Debug info: token = %s", fullToken);  // Should be debug
-LOGGER.error("User logged in");  // Should be info
-LOGGER.debug(DEBUG.SOME_MESSAGE, value);  // PROHIBITED - no LogRecord for debug!
-```
-
-### 2. Use LogRecord for Production Levels Only
-
-```java
-// ✅ Good - LogRecord REQUIRED for INFO/WARN/ERROR/FATAL
+// ✅ Good - LogRecord for INFO/WARN/ERROR/FATAL
 LOGGER.info(INFO.USER_LOGIN, username);
 LOGGER.warn(WARN.RATE_LIMIT, userId);
-LOGGER.error(exception, ERROR.DATABASE_ERROR, details);
-LOGGER.fatal(FATAL.SYSTEM_FAILURE, reason);
 
-// ✅ Good - simple strings for DEBUG/TRACE (LogRecord prohibited)
+// ✅ Good - simple strings for DEBUG/TRACE
 LOGGER.debug("Validating token signature");
-LOGGER.trace("Entering method with parameter: %s", paramValue);
 
 // ❌ Bad - simple string for production levels
 LOGGER.info("User " + username + " logged in");  // MUST use LogRecord
-LOGGER.warn("Rate limit exceeded");  // MUST use LogRecord
 
-// ❌ Bad - LogRecord for debug/trace levels
-LOGGER.debug(DEBUG.TOKEN_DETAILS, token);  // PROHIBITED - no LogRecord for debug!
-LOGGER.trace(TRACE.METHOD_ENTRY, methodName);  // PROHIBITED - no LogRecord for trace!
+// ❌ Bad - LogRecord for debug/trace
+LOGGER.debug(DEBUG.TOKEN_DETAILS, token);  // PROHIBITED
 ```
 
-### 3. Exception Parameter First
+### 2. Exception Parameter First
 
 ```java
-// ✅ Good - exception first
+// ✅ Good
 LOGGER.error(exception, ERROR.VALIDATION_FAILED, tokenId);
 
-// ❌ Bad - exception not first
+// ❌ Bad
 LOGGER.error(ERROR.VALIDATION_FAILED, tokenId, exception);  // Won't work
 ```
 
-### 4. Use %s for All Substitutions
+### 3. Use %s for All Substitutions
 
 ```java
-// ✅ Good - %s for all types
+// ✅ Good
 LOGGER.info("Processing %s records in %s ms", count, duration);
-LOGGER.warn("Memory usage: %s MB", memoryMb);
 
-// ❌ Bad - wrong format specifiers
-LOGGER.info("Processing %d records in %d ms", count, duration);  // Use %s
+// ❌ Bad
+LOGGER.info("Processing %d records", count);  // Use %s
 ```
 
-### 5. Avoid Expensive Operations
+### 4. Don't Log Sensitive Information
 
 ```java
-// ✅ Good - cheap operations
-LOGGER.debug("Validating token for user: %s", userId);
-
-// ❌ Bad - expensive serialization
-LOGGER.debug("Token details: %s", serializeComplexObject(token));
-
-// ✅ Better - guard with level check
-if (LOGGER.isDebugEnabled()) {
-    LOGGER.debug("Token details: %s", serializeComplexObject(token));
-}
-```
-
-### 6. Don't Log Sensitive Information
-
-```java
-// ❌ Bad - logs sensitive data
+// ❌ Bad
 LOGGER.info("User password: %s", password);
-LOGGER.debug("Credit card: %s", creditCard);
-LOGGER.info("Full JWT token: %s", jwtToken);
 
-// ✅ Good - masks or omits sensitive data
+// ✅ Good
 LOGGER.info("User authenticated: %s", username);
-LOGGER.debug("Token ID: %s", tokenId);  // ID only, not full token
 ```
 
-## Complete Example
+---
 
-```java
-import de.cuioss.tools.logging.CuiLogger;
-import de.cuioss.tools.logging.LogRecord;
-import de.cuioss.tools.logging.LogRecordModel;
-import lombok.experimental.UtilityClass;
-import static com.example.TokenValidatorLogMessages.INFO;
-import static com.example.TokenValidatorLogMessages.ERROR;
+## Compliance Verification
 
-// LogMessages definition
-@UtilityClass
-public final class TokenValidatorLogMessages {
-    public static final String PREFIX = "TOKEN";
+Patterns for enforcing CUI logging standards through automated analysis.
 
-    @UtilityClass
-    public static final class INFO {
-        public static final LogRecord VALIDATION_SUCCESS = LogRecordModel.builder()
-            .template("Token validated successfully for user %s")
-            .prefix(PREFIX)
-            .identifier(1)
-            .build();
-    }
+### Violation Detection
 
-    @UtilityClass
-    public static final class ERROR {
-        public static final LogRecord VALIDATION_FAILED = LogRecordModel.builder()
-            .template("Token validation failed for user %s: %s")
-            .prefix(PREFIX)
-            .identifier(200)
-            .build();
-    }
-}
-
-// Service using logging
-public class TokenValidator {
-    private static final CuiLogger LOGGER = new CuiLogger(TokenValidator.class);
-
-    public ValidationResult validate(String token) {
-        LOGGER.debug("Starting token validation");
-
-        try {
-            String userId = extractUserId(token);
-            boolean isValid = performValidation(token);
-
-            if (isValid) {
-                LOGGER.info(INFO.VALIDATION_SUCCESS, userId);
-                return ValidationResult.valid();
-            } else {
-                LOGGER.error(ERROR.VALIDATION_FAILED, userId, "Invalid signature");
-                return ValidationResult.invalid("Invalid signature");
-            }
-
-        } catch (TokenException e) {
-            LOGGER.error(e, ERROR.VALIDATION_FAILED, "unknown", e.getMessage());
-            throw new ValidationException("Validation failed", e);
-        }
-    }
-}
+**Find all logging statements:**
 ```
+Grep: pattern="LOGGER\.(info|debug|trace|warn|error|fatal)\("
+      output_mode="content" -n=true
+```
+
+**Determine LogRecord usage:**
+- Pattern `[A-Z_]+\.[A-Z_]+` → LogRecord usage
+- String literal or format string → Direct string usage
+
+**Validation rules:**
+- INFO/WARN/ERROR/FATAL with direct string → MISSING_LOGRECORD violation
+- DEBUG/TRACE with LogRecord → PROHIBITED_LOGRECORD violation
+
+### Coverage Analysis
+
+**Find LogRecord definitions:**
+```
+Grep: pattern="LogRecordModel\.builder\(\)"
+      glob="**/*LogMessages.java"
+```
+
+**Find production usage:**
+```
+Grep: pattern="INFO\.USER_LOGIN|ERROR\.DATABASE_ERROR"
+      glob="src/main/**/*.java"
+```
+
+**Find test coverage (LogAssert):**
+```
+Grep: pattern="LogAssert.*{PREFIX}-{IDENTIFIER}"
+      glob="src/test/**/*.java"
+```
+
+**Coverage status:**
+
+| Production | Test | Status | Action |
+|-----------|------|--------|--------|
+| No | No | UNUSED | Remove LogRecord |
+| Yes | No | UNTESTED | Add LogAssert test |
+| No | Yes | TEST_ONLY | USER REVIEW (critical bug) |
+| Yes | Yes | COMPLIANT | No action |
+
+### Identifier Validation
+
+**Extract identifiers:**
+```
+Grep: pattern="\.identifier\((\d+)\)"
+      path="{LogMessages.java}"
+```
+
+**Check for issues:**
+- Out-of-range: INFO using identifier 150 (WARN range)
+- Gaps: INFO has 1, 2, 5, 6 (missing 3, 4)
+- Out-of-order: INFO has 5, 2, 8, 1
+
+---
 
 ## Quality Checklist
 
+### Implementation
 - [ ] CuiLogger used (not SLF4J or Log4j)
-- [ ] Logger is private static final
-- [ ] Logger constant named LOGGER
-- [ ] **LogRecord REQUIRED for INFO/WARN/ERROR/FATAL**
-- [ ] **LogRecord NOT used for DEBUG/TRACE**
+- [ ] Logger is private static final named LOGGER
+- [ ] LogRecord REQUIRED for INFO/WARN/ERROR/FATAL
+- [ ] LogRecord NOT used for DEBUG/TRACE
 - [ ] LogMessages class follows DSL pattern
-- [ ] Message identifiers in correct ranges (001-099 INFO, 100-199 WARN, 200-299 ERROR, 300-399 FATAL)
-- [ ] No DEBUG or TRACE identifiers defined (prohibited)
-- [ ] **doc/LogMessages.adoc file exists and is up-to-date**
-- [ ] LogMessages.adoc includes all INFO/WARN/ERROR/FATAL messages
-- [ ] LogMessages.adoc matches implementation exactly
+- [ ] Identifiers in correct ranges
 - [ ] Exception parameter comes first
 - [ ] %s used for all substitutions
-- [ ] Appropriate log levels used
 - [ ] No sensitive information logged
-- [ ] Static imports used for LogRecord categories
-- [ ] Test logging configured correctly
 - [ ] No System.out or System.err usage
-- [ ] No custom log prefixes in messages
+
+### Documentation
+- [ ] doc/LogMessages.adoc exists and is up-to-date
+- [ ] LogMessages.adoc includes all production-level messages
+
+### Compliance
+- [ ] All production-level logging uses LogRecord
+- [ ] All LogRecords have test coverage
+- [ ] Identifiers are sequential within ranges

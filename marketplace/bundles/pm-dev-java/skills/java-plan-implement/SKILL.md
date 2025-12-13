@@ -18,14 +18,6 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 | `plan-marshall:logging:manage-log` | Work log entries |
 | `plan-marshall:plan-marshall-config:plan-marshall-config` | Domain skill retrieval |
 
-## Standards (Load On-Demand)
-
-### Step Execution
-```
-Read standards/step-execution.md
-```
-Contains: How to execute each step type (modify, create, etc.)
-
 ---
 
 ## Input
@@ -113,11 +105,6 @@ The step `title` is a file path. Apply changes based on:
 - Follow CUI Java patterns from loaded skills
 - Write updated content
 
-Load step execution patterns if needed:
-```
-Read standards/step-execution.md
-```
-
 #### 4c. Log Step Progress
 
 ```bash
@@ -196,6 +183,73 @@ next_action: requires_attention
 
 ---
 
+## Step Execution Patterns
+
+Each step `title` is a file path. Determine operation type from:
+1. Task description
+2. File existence
+3. Deliverable guidance
+
+| File Exists | Task Intent | Operation |
+|-------------|-------------|-----------|
+| Yes | Update | Modify existing file |
+| Yes | Replace | Overwrite file |
+| No | Create | Create new file |
+| Yes | Delete | Remove file |
+
+### Execution Flow Per Step
+
+#### 1. Read Current Content
+
+```
+Read: {step.title}
+```
+
+Parse the file to understand:
+- Package declaration
+- Import statements
+- Class structure
+- Existing methods
+
+#### 2. Plan Changes
+
+Based on task description, identify:
+- What methods to modify
+- What imports to add
+- What patterns to apply (from loaded skills)
+
+#### 3. Apply Changes
+
+Use Edit tool for surgical changes:
+
+```
+Edit:
+  file_path: {step.title}
+  old_string: {exact text to replace}
+  new_string: {replacement text}
+```
+
+**Prefer multiple small edits over one large write.**
+
+#### 4. Verify Changes
+
+After editing, optionally verify:
+- File still compiles
+- No syntax errors
+- CUI patterns followed
+
+### Common Java Changes
+
+**Add Field**: Find field section → Add with annotations → Add getter/setter if needed (Lombok may handle)
+
+**Add Method**: Find appropriate location → Add with JavaDoc → Follow CUI patterns
+
+**Add Test Method**: Find test class → Add @Test method → Follow JUnit 5 patterns → Use generators if applicable
+
+**Update JavaDoc**: Find class/method JavaDoc → Update description, params, returns → Follow CUI standards
+
+---
+
 ## Error Handling
 
 ### Step Failure
@@ -212,6 +266,14 @@ If verification fails:
 1. Log what failed
 2. Return error status with `recoverable: true`
 3. Task remains in_progress for retry
+
+### Edit Conflict
+
+If old_string not found:
+1. Read file again (may have changed)
+2. Adjust old_string
+3. Retry edit
+4. If still fails, log and continue
 
 ---
 

@@ -46,13 +46,6 @@ Read: standards/logmessages-documentation.md
 
 Use when: Writing AsciiDoc documentation for LogMessages classes.
 
-**LogRecord Enforcement** (load for compliance work):
-```
-Read: standards/logging-enforcement-patterns.md
-```
-
-Use when: Migrating existing code to CUI logging standards or validating compliance.
-
 **Logging Maintenance** (load for migration/refactoring):
 ```
 Read: standards/logging-maintenance-reference.md
@@ -100,8 +93,7 @@ LOGGER.error(ERROR.getResolver().formatted("Operation failed"), exception);
 
 | Standard | Purpose |
 |----------|---------|
-| logging-standards.md | Core CuiLogger and LogRecord rules |
+| logging-standards.md | Core CuiLogger, LogRecord rules, and compliance verification |
 | dsl-constants.md | DSL-style constant organization |
 | logmessages-documentation.md | AsciiDoc documentation patterns |
-| logging-enforcement-patterns.md | Compliance validation |
 | logging-maintenance-reference.md | Migration and maintenance |
