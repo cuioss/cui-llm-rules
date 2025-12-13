@@ -172,7 +172,7 @@ marketplace/bundles/pm-plugin-development/
     │   ├── scripts/
     │   │   ├── analyze-structure.sh
     │   │   ├── analyze-tools.sh
-    │   │   ├── scan-inventory.sh
+    │   │   ├── scan-inventory.py       # Conceptual - actual: scan-marketplace-inventory.py
     │   │   └── validate-references.sh
     │   ├── references/
     │   │   ├── quality-standards.md
@@ -377,8 +377,9 @@ Analyzes all components of a specific type.
 - `scope`: "marketplace" | "project" | "global"
 
 **Process**:
-1. Discover components
-   ```
+1. Discover components (conceptual example)
+   ```bash
+   # Actual API: python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory --scope {scope}
    bash scripts/scan-inventory.sh --type {component_type} --scope {scope}
    ```
 
@@ -402,8 +403,9 @@ Complete marketplace health check.
 **Input Parameters**: None
 
 **Process**:
-1. Scan complete inventory
-   ```
+1. Scan complete inventory (conceptual example)
+   ```bash
+   # Actual API: python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory --scope marketplace
    bash scripts/scan-inventory.sh --scope marketplace
    ```
 
@@ -481,7 +483,7 @@ All scripts return JSON for structured parsing.
 }
 ```
 
-**scan-inventory.sh**:
+**scan-inventory.sh** (conceptual - actual script: `plan-marshall:marketplace-inventory:scan-marketplace-inventory`):
 ```json
 {
   "scope": "marketplace",

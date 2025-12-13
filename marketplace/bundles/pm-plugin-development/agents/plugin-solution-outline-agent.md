@@ -67,7 +67,7 @@ EOF
 pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id X
 
 # Work log
-plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log work {plan_id} INFO "{message}"
 ```
 
 **CRITICAL**: Script name is SINGULAR (e.g., `manage-task`) even though skill name may be plural.
@@ -98,14 +98,9 @@ plan_id: {plan_id}
 
 After each deliverable is created, log to work-log:
 
-```
-Skill: plan-marshall:logging
-operation: work add
-plan_id: {plan_id}
-phase: init
-category: ARTIFACT
-message: "Created deliverable: {N}. {title}"
-detail: "{brief description of what this deliverable covers}"
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[ARTIFACT] Created deliverable: {N}. {title}"
 ```
 
 ### Step 3: Return Results

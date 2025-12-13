@@ -20,19 +20,23 @@ skill: marketplace-inventory
 
 ## Step 1: Scan Marketplace Structure
 
-bash scripts/scan-inventory.sh --scope marketplace --format json
+python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+  --scope marketplace \
+  --include-descriptions
+
+# Note: JSON is the default output format (no --format flag needed)
 
 Script outputs:
 ```json
 {
-  "bundles": 5,
-  "agents": 25,
-  "commands": 45,
-  "skills": 18,
-  "inventory": [
-    {"type": "agent", "path": "...", "bundle": "..."},
-    ...
-  ]
+  "scope": "marketplace",
+  "bundles": [...],
+  "statistics": {
+    "total_bundles": 5,
+    "total_agents": 25,
+    "total_commands": 45,
+    "total_skills": 18
+  }
 }
 ```
 

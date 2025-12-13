@@ -10,7 +10,7 @@ plugin-diagnose/
 ├── scripts/
 │   ├── analyze-structure.sh      (structural analysis)
 │   ├── analyze-tools.sh           (tool coverage analysis)
-│   ├── scan-inventory.sh          (component discovery)
+│   ├── scan-inventory.sh          (conceptual - actual: scan-marketplace-inventory.py)
 │   └── validate-references.sh     (reference compliance)
 ├── references/
 │   ├── quality-standards.md       (comprehensive standards)
@@ -149,6 +149,8 @@ Analyzes all components of a specific type.
 
 #### Step 1: Discover Components
 
+# Conceptual example - Actual API:
+# python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory --scope {scope}
 bash scripts/scan-inventory.sh --type {component_type} --scope {scope}
 
 Script outputs JSON:
@@ -211,6 +213,8 @@ Complete marketplace health check.
 
 #### Step 1: Scan Complete Inventory
 
+# Conceptual example - Actual API:
+# python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory --scope marketplace
 bash scripts/scan-inventory.sh --scope marketplace
 
 Returns all bundles, agents, commands, skills.
@@ -333,6 +337,8 @@ Detects duplicate content across components.
 
 #### Step 1: Scan All Components in Scope
 
+# Conceptual example - Actual API:
+# python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory --scope {scope}
 bash scripts/scan-inventory.sh --scope {scope}
 
 #### Step 2: Extract Content Blocks
@@ -402,9 +408,11 @@ All scripts return JSON for structured parsing:
 # Output: JSON with structure analysis
 ```
 
-**scan-inventory.sh**:
+**scan-inventory.sh** (conceptual - actual script: `plan-marshall:marketplace-inventory:scan-marketplace-inventory`):
 ```bash
 #!/bin/bash
+# Conceptual example script
+# Actual API: python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory
 # Usage: scan-inventory.sh --type <type> --scope <scope>
 # Output: JSON with component inventory
 ```

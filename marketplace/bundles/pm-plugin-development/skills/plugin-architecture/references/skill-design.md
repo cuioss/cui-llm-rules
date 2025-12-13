@@ -160,8 +160,9 @@ Parameters: {component_path: "...", component_type: "agent"}
 **Pattern**: One workflow's output feeds into another.
 
 ```markdown
-Workflow 1: scan-inventory
+Workflow 1: scan-inventory (conceptual)
   Output: List of components
+  # Actual: plan-marshall:marketplace-inventory:scan-marketplace-inventory
 
 Workflow 2: analyze-component
   Input: Component from Workflow 1
