@@ -238,7 +238,7 @@ Plan-related configuration.
 
 | Field | Type | Default | Values |
 |-------|------|---------|--------|
-| `compatibility` | string | "deprecations" | deprecations, breaking |
+| `compatibility` | string | "breaking" | deprecations, breaking |
 | `commit_strategy` | string | "phase-specific" | fine-granular, phase-specific, complete |
 | `create_pr` | bool | false | true, false |
 | `verification_required` | bool | true | true, false |

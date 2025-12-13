@@ -29,7 +29,7 @@
   },
   "plan": {
     "defaults": {
-      "compatibility": "deprecations",
+      "compatibility": "breaking",
       "commit_strategy": "phase-specific",
       "create_pr": false,
       "verification_required": true,

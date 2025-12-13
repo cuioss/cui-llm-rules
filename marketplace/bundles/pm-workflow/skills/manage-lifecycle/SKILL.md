@@ -14,6 +14,7 @@ Manage plan lifecycle with status.toon and phase operations. Replaces plan.md an
 - Phase management (transitions, progress)
 - Plan discovery (list all plans)
 - Phase routing (skill mapping)
+- Delete operations (via manage-files)
 - Archive operations
 
 ## When to Activate This Skill
@@ -22,6 +23,7 @@ Activate this skill when:
 - Creating or updating plan status
 - Transitioning between phases
 - Discovering all plans
+- Deleting plans (to replace or abandon)
 - Archiving completed plans
 
 ---
@@ -268,6 +270,59 @@ plan_id: my-feature
 archived_to: .plan/archived-plans/2025-12-02-my-feature/
 ```
 
+---
+
+## Delete Operations
+
+Delete operations use `pm-workflow:manage-files:manage-files` (not manage-lifecycle) because deletion involves removing plan directories, not just status management.
+
+### delete-plan
+
+Delete an entire plan directory. Use when:
+- Replacing an existing plan with a fresh one
+- Abandoning a plan that's no longer needed
+- Cleaning up failed or corrupted plans
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-files:manage-files delete-plan \
+  --plan-id {plan_id}
+```
+
+**Parameters**:
+- `--plan-id` (required): Plan identifier to delete
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+action: deleted
+path: .plan/plans/my-feature
+files_removed: 7
+```
+
+**Error Output**:
+```toon
+status: error
+plan_id: my-feature
+error: plan_not_found
+message: Plan directory does not exist
+```
+
+**Safety Notes**:
+- Only deletes directories under `.plan/plans/`
+- Validates plan_id format (kebab-case)
+- Does NOT prompt for confirmation (caller handles user confirmation)
+- Cannot be undone - ensure user confirms before calling
+
+### Delete vs Archive
+
+| Operation | Use Case | Recoverable |
+|-----------|----------|-------------|
+| `delete-plan` | Replace, abandon, cleanup | No |
+| `archive` | Completed plans for reference | Yes (moved to archived-plans) |
+
+---
+
 ### route
 
 Get skill for a phase.
@@ -340,6 +395,12 @@ phases:
 | `archive` | `--plan-id [--dry-run]` | Archive completed plan |
 | `route` | `--phase` | Get skill for phase |
 | `get-routing-context` | `--plan-id` | Get combined routing context |
+
+**Script**: `pm-workflow:manage-files:manage-files` (delete operations)
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `delete-plan` | `--plan-id` | Delete entire plan directory |
 
 ---
 
