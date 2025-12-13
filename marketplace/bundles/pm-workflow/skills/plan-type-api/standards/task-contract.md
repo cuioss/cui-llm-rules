@@ -203,3 +203,48 @@ execution_order:
 
 lessons_recorded: {count}
 ```
+
+## Steps Field Contract
+
+**CRITICAL**: The `steps` field MUST contain file paths from the deliverable's `Affected files` section.
+
+### Valid Steps (File Paths)
+
+```yaml
+steps:
+  - marketplace/bundles/planning/agents/plan-init-agent.md
+  - marketplace/bundles/planning/agents/plan-refine-agent.md
+  - marketplace/bundles/planning/agents/plan-execute-agent.md
+```
+
+**Why valid:**
+- Each step is an explicit file path
+- Steps are derived from deliverable's `Affected files`
+- Execution progress can be tracked per file
+
+### Invalid Steps (Descriptive Text)
+
+```yaml
+steps:
+  - Update plan-init-agent to use TOON output
+  - Migrate plan-refine-agent output format
+  - Convert all remaining agents
+```
+
+**Why invalid:**
+- Steps are action descriptions, not file paths
+- Cannot track which files have been processed
+- "all remaining agents" is vague
+- Validation will reject this task
+
+### Invalid Steps (Task Numbers)
+
+```yaml
+steps[2]{number,title,status}:
+1,Convert plan-init-agent outputs,pending
+2,Convert plan-refine-agent outputs,pending
+```
+
+**Why invalid:**
+- Title column contains descriptions, not file paths
+- This was the old format - now rejected by contract validation

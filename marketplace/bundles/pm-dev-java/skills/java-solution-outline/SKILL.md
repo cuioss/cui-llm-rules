@@ -10,6 +10,21 @@ allowed-tools: Read, Glob, Grep, Bash
 
 **Key Pattern**: Single solution document - deliverables are consolidated into `solution_outline.md` via `manage-solution-outline` skill.
 
+## Contract Compliance
+
+**MANDATORY**: All deliverables MUST follow the structure defined in the central contracts:
+
+| Contract | Location | Purpose |
+|----------|----------|---------|
+| Deliverable Contract | `pm-workflow:plan-type-api/standards/deliverable-contract.md` | Required deliverable structure |
+| Agent Contract | `pm-workflow:plan-type-api/standards/solution-outline-agent-contract.md` | Agent responsibilities |
+
+**Key Requirements**:
+- Every deliverable requires a `**Metadata:**` block with all 7 fields
+- `**Affected files:**` must list explicit file paths (no wildcards, no "all files")
+- `**Verification:**` must include automatable commands
+- Validation is automatic on write - non-compliant deliverables are rejected
+
 ## Operation: decompose
 
 **Input**:
@@ -104,11 +119,15 @@ Build a deliverables markdown section with numbered deliverables and required me
 
 {Java-specific technical deliverable description}
 
+**Affected files:**
+- `src/main/java/de/cuioss/{package}/{ClassName}.java`
+- `src/test/java/de/cuioss/{package}/{ClassNameTest}.java`
+
+**Change per file:** {What will be created or modified in each file}
+
 **Component**: {class|interface|module|config}
-**Path**: `src/main/java/de/cuioss/...`
 **Module**: {module name for multi-module projects}
 **Dependencies**: {dependencies and integration points}
-**Test Path**: `src/test/java/...`
 **Standards**: {CDI, logging, etc.}
 
 **Verification:**
@@ -123,13 +142,12 @@ Build a deliverables markdown section with numbered deliverables and required me
 ...
 ```
 
-Write and validate the solution document using heredoc:
+Write the solution document using heredoc (validation is automatic):
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
   write \
-  --plan-id {plan_id} \
-  --validate <<'EOF'
+  --plan-id {plan_id} <<'EOF'
 # Solution Outline
 
 ## Summary
@@ -145,7 +163,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 EOF
 ```
 
-**Why heredoc?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The `--validate` flag is REQUIRED - it ensures structure validation on every write.
+**Why heredoc?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. Validation runs automatically on every write - non-compliant deliverables are rejected before the file is created.
 
 ### Step 4: Record Issues as Lessons
 

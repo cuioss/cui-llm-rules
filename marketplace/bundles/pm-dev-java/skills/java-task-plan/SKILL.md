@@ -10,7 +10,19 @@ allowed-tools: Read, Bash
 
 **Key Pattern**: Reads deliverables with metadata from `solution_outline.md`, applies aggregation/split analysis, creates tasks with delegation blocks and dependencies.
 
-> **Contract Reference**: See [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) for the optimization workflow and decision tables.
+## Contract Compliance
+
+**MANDATORY**: All tasks MUST follow the structure defined in the central contracts:
+
+| Contract | Location | Purpose |
+|----------|----------|---------|
+| Task Contract | `pm-workflow:plan-type-api/standards/task-contract.md` | Required task structure and optimization workflow |
+| Task-Plan Agent Contract | `pm-workflow:plan-type-api/standards/task-plan-agent-contract.md` | Agent responsibilities |
+
+**CRITICAL - Steps Field**:
+- The `steps` field MUST contain file paths from the deliverable's `Affected files` section
+- Steps must NOT be descriptive text (e.g., "Update AuthController.java" is INVALID)
+- Validation rejects tasks with non-file-path steps
 
 ## Operation: plan
 

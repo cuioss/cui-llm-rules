@@ -170,6 +170,61 @@ def validate_phase(phase: str) -> str:
     return phase
 
 
+# Valid file extensions for step validation
+VALID_FILE_EXTENSIONS = [
+    '.md', '.py', '.java', '.js', '.ts', '.tsx', '.jsx', '.json', '.yaml', '.yml',
+    '.xml', '.sh', '.bash', '.properties', '.adoc', '.toon', '.html', '.css'
+]
+
+
+def validate_steps_are_file_paths(steps: list[str]) -> tuple[list[str], list[str]]:
+    """Validate that steps are file paths, not descriptive text.
+
+    Steps MUST be file paths from the deliverable's `affected_files` section.
+    This enforces the task contract from plan-type-api/standards/task-contract.md.
+
+    Args:
+        steps: List of step strings
+
+    Returns:
+        Tuple of (errors, warnings)
+
+    Contract reference: pm-workflow:plan-type-api/standards/task-contract.md lines 156-159
+    """
+    errors = []
+    warnings = []
+
+    for i, step in enumerate(steps, 1):
+        step = step.strip()
+
+        # Check 1: Step must contain a path separator OR end with a known file extension
+        has_path_separator = '/' in step
+        has_valid_extension = any(step.endswith(ext) for ext in VALID_FILE_EXTENSIONS)
+
+        if not has_path_separator and not has_valid_extension:
+            errors.append(
+                f"Step {i}: '{step[:50]}...' is not a file path. "
+                f"Steps MUST be file paths from deliverable's Affected files section."
+            )
+            continue
+
+        # Check 2: Warn if step looks like descriptive text (contains common verbs)
+        descriptive_patterns = [
+            'update ', 'create ', 'implement ', 'add ', 'fix ', 'migrate ',
+            'convert ', 'modify ', 'change ', 'remove ', 'delete ',
+            ' to ', ' from ', ' with ', ' for '
+        ]
+        step_lower = step.lower()
+        for pattern in descriptive_patterns:
+            if pattern in step_lower:
+                warnings.append(
+                    f"Step {i}: '{step[:50]}' looks like descriptive text rather than a file path."
+                )
+                break
+
+    return errors, warnings
+
+
 def parse_depends_on(depends_str: str) -> List[str]:
     """Parse depends_on field from TOON format.
 
@@ -529,6 +584,15 @@ def parse_stdin_task(stdin_content: str) -> dict:
 
     # Validate deliverables
     validate_deliverables(result['deliverables'])
+
+    # Validate steps are file paths (task contract enforcement)
+    step_errors, step_warnings = validate_steps_are_file_paths(result['steps'])
+    if step_errors:
+        raise ValueError(
+            "Task contract violation - steps must be file paths:\n" +
+            "\n".join(step_errors) +
+            "\n\nContract reference: pm-workflow:plan-type-api/standards/task-contract.md"
+        )
 
     return result
 

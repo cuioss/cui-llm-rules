@@ -10,6 +10,26 @@ allowed-tools: Read, Glob, Grep, Bash
 
 **Key Pattern**: Single solution document - deliverables are consolidated into `solution_outline.md` via `manage-solution-outline` skill.
 
+## Contract Compliance
+
+**MANDATORY**: All deliverables MUST follow the structure defined in the central contracts:
+
+| Contract | Location | Purpose |
+|----------|----------|---------|
+| Deliverable Contract | `pm-workflow:plan-type-api/standards/deliverable-contract.md` | Required deliverable structure |
+| Agent Contract | `pm-workflow:plan-type-api/standards/solution-outline-agent-contract.md` | Agent responsibilities |
+
+**Non-compliant deliverables will be rejected by validation.**
+
+Every deliverable you create MUST have these sections in this exact order:
+
+1. `### N. {Title}` - Numbered heading with action verb
+2. `**Metadata:**` block with all 7 required fields
+3. `**Affected files:**` with explicit file paths (no wildcards, no "all X")
+4. `**Change per file:**` description of what changes
+5. `**Verification:**` with command and criteria
+6. `**Success Criteria:**` bullet list of measurable outcomes
+
 ## Required Skills
 
 Load these skills at the start of any decomposition operation:
@@ -140,32 +160,83 @@ For cross-cutting changes, follow [standards/path-multi-workflow.md](standards/p
 
 ### Step 3c: Create Solution Document
 
-After building the deliverables section (from either Path-Single or Path-Multi workflow), write and validate the solution document using heredoc:
+After building the deliverables section (from either Path-Single or Path-Multi workflow), write the solution document using heredoc. Validation is automatic on every write.
+
+**Step 3c.1**: Write the solution document:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
   write \
-  --plan-id {plan_id} \
-  --validate <<'EOF'
+  --plan-id {plan_id} <<'EOF'
 # Solution Outline
 
 ## Summary
-{one-line summary}
+{One paragraph summary describing the solution approach}
 
 ## Overview
-{ASCII diagram showing component relationships}
+{ASCII diagram showing component relationships - see manage-solution-outline skill for patterns}
 
 ## Deliverables
 
-### 1. {Deliverable Title}
-{content}
+### 1. {Action Verb} {Component Type}: {Name/Scope}
 
-### 2. {Deliverable Title}
-{content}
+**Metadata:**
+- change_type: {create|modify|refactor|migrate|delete}
+- execution_mode: {automated|manual|mixed}
+- domain: plugin
+- suggested_skill: pm-plugin-development:{plugin-create|plugin-maintain}
+- suggested_workflow: {create-skill|create-command|update-component|...}
+- context_skills: []
+- depends: none
+
+**Affected files:**
+- `marketplace/bundles/{bundle}/{type}/{file1}.md`
+- `marketplace/bundles/{bundle}/{type}/{file2}.md`
+
+**Change per file:** {Specific description of what changes in each file}
+
+**Pattern:** (optional, for format changes)
+```{format}
+{pattern to apply}
+```
+
+**Verification:**
+- Command: `/pm-plugin-development:plugin-doctor --component {path}`
+- Criteria: No quality issues detected
+
+**Success Criteria:**
+- {Specific measurable criterion 1}
+- {Specific measurable criterion 2}
+
+### 2. {Next Deliverable Title}
+{Same structure as above}
 EOF
 ```
 
-**Why heredoc?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing. The `--validate` flag is REQUIRED - it ensures structure validation on every write.
+**Step 3c.2**: Check validation result.
+
+The write command validates automatically. If validation fails, you will see errors like:
+
+```toon
+status: error
+message: Deliverable contract violations detected
+errors[N]:
+- D1: Missing **Metadata:** block
+- D2: Missing metadata field: suggested_skill
+- D3: Wildcard in affected files: marketplace/bundles/*/agents/*.md
+```
+
+**If validation fails**: Fix the issues in your deliverables and re-run the write command. Do NOT proceed with invalid deliverables.
+
+**Validation checks performed**:
+- Every deliverable has `**Metadata:**` block
+- Every metadata block has all 7 fields (change_type, execution_mode, domain, suggested_skill, suggested_workflow, context_skills, depends)
+- Every deliverable has `**Affected files:**` with explicit paths
+- No wildcards (`*`) or vague references ("all X") in affected files
+- Every deliverable has `**Verification:**` section
+- Every deliverable has `**Success Criteria:**` section
+
+**Why heredoc?** Solution outlines contain ASCII diagrams and rich content that don't fit CLI parameter passing.
 
 ---
 
@@ -236,7 +307,7 @@ Each script-related deliverable MUST include a **Script Verification** section p
 **Caller**: `pm-plugin-development:plugin-solution-outline-agent`
 
 **Script Notations** (use EXACTLY as shown):
-- `pm-workflow:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write --validate, validate, read, list-deliverables, exists)
+- `pm-workflow:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write, validate, read, list-deliverables, exists) - validation is automatic on write
 - `pm-workflow:manage-plan-documents:manage-plan-documents` - Request operations (request read, request create)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 - `plan-marshall:logging:manage-log` - Log decisions and progress (work)

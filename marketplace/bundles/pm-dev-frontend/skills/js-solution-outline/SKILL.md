@@ -10,6 +10,21 @@ allowed-tools: Read, Glob, Grep, Bash
 
 **Key Pattern**: Single solution document - deliverables are consolidated into `solution_outline.md` via `manage-solution-outline` skill.
 
+## Contract Compliance
+
+**MANDATORY**: All deliverables MUST follow the structure defined in the central contracts:
+
+| Contract | Location | Purpose |
+|----------|----------|---------|
+| Deliverable Contract | `pm-workflow:plan-type-api/standards/deliverable-contract.md` | Required deliverable structure |
+| Agent Contract | `pm-workflow:plan-type-api/standards/solution-outline-agent-contract.md` | Agent responsibilities |
+
+**Key Requirements**:
+- Every deliverable requires a `**Metadata:**` block with all 7 fields
+- `**Affected files:**` must list explicit file paths (no wildcards, no "all files")
+- `**Verification:**` must include automatable commands
+- Validation is automatic on write - non-compliant deliverables are rejected
+
 ## Operation: decompose
 
 **Input**:

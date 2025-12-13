@@ -178,3 +178,48 @@ public class AuthController {
 - Returns JWT token on successful authentication
 - Returns 401 on invalid credentials
 ```
+
+## Invalid Examples (Anti-patterns)
+
+### Missing Metadata Block
+
+```markdown
+### 1. Update Agent Outputs
+
+Update all agent outputs to use TOON format.
+
+**Verification:** Check manually
+```
+
+**Why invalid:**
+- No `**Metadata:**` block
+- No explicit file list ("all agents" is vague)
+- No suggested_skill for delegation
+- "Check manually" is not an automatable verification
+
+### Vague File References
+
+```markdown
+### 2. Update Planning Agents
+
+**Metadata:**
+- change_type: modify
+- execution_mode: automated
+- domain: plugin
+- suggested_skill: pm-plugin-development:plugin-maintain
+- suggested_workflow: update-component
+- context_skills: []
+- depends: none
+
+**Affected files:**
+- All files in marketplace/bundles/planning/agents/
+
+**Verification:**
+- Command: `grep -l '```toon' *.md`
+- Criteria: All files match
+```
+
+**Why invalid:**
+- `Affected files` uses "All files in..." instead of explicit paths
+- Task-plan agent cannot generate steps from vague references
+- Validation will reject this deliverable

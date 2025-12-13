@@ -25,7 +25,7 @@ from toon_parser import parse_toon
 TestContext = PlanTestContext
 
 
-# Sample valid solution outline with ASCII diagram
+# Sample valid solution outline with ASCII diagram (contract-compliant)
 VALID_SOLUTION = '''# Solution: JWT Validation Service
 
 plan_id: test-plan
@@ -54,13 +54,70 @@ Implement JWT validation service for authentication.
 
 Implement the main validation logic.
 
+**Metadata:**
+- change_type: create
+- execution_mode: automated
+- domain: java
+- suggested_skill: pm-dev-java:java-implement
+- suggested_workflow: implement
+- context_skills: []
+- depends: none
+
+**Affected files:**
+- `src/main/java/de/cuioss/jwt/JwtValidationService.java`
+
+**Verification:**
+- Command: `mvn test -Dtest=JwtValidationServiceTest`
+- Criteria: All tests pass
+
+**Success Criteria:**
+- Service validates JWT tokens correctly
+
 ### 2. Add configuration properties
 
 Add JWT configuration to application.properties.
 
+**Metadata:**
+- change_type: create
+- execution_mode: automated
+- domain: java
+- suggested_skill: pm-dev-java:java-implement
+- suggested_workflow: implement
+- context_skills: []
+- depends: 1
+
+**Affected files:**
+- `src/main/resources/application.properties`
+
+**Verification:**
+- Command: `mvn verify`
+- Criteria: Application starts successfully
+
+**Success Criteria:**
+- JWT properties are configurable
+
 ### 3. Implement unit tests
 
 Create comprehensive test coverage.
+
+**Metadata:**
+- change_type: create
+- execution_mode: automated
+- domain: java-testing
+- suggested_skill: pm-dev-java:java-implement-tests
+- suggested_workflow: implement-tests
+- context_skills: []
+- depends: 1
+
+**Affected files:**
+- `src/test/java/de/cuioss/jwt/JwtValidationServiceTest.java`
+
+**Verification:**
+- Command: `mvn test`
+- Criteria: All tests pass with >80% coverage
+
+**Success Criteria:**
+- Test coverage above 80%
 
 ## Approach
 
@@ -302,12 +359,11 @@ def test_exists_absent():
 # =============================================================================
 
 def test_write_new():
-    """Test writing a new solution outline via stdin with validation."""
+    """Test writing a new solution outline via stdin (validates automatically)."""
     with TestContext(plan_id='solution-write') as ctx:
         result = run_script(SCRIPT_PATH,
             'write',
             '--plan-id', 'solution-write',
-            '--validate',
             input_data=VALID_SOLUTION
         )
         assert result.success, f"Script failed: {result.stderr}\nOutput: {result.stdout}"
@@ -315,7 +371,7 @@ def test_write_new():
         assert data['status'] == 'success'
         assert data['file'] == 'solution_outline.md'
         assert 'validation' in data
-        assert data['validation']['valid'] is True
+        assert data['validation']['deliverable_count'] == 3
         # Verify file was created
         assert (ctx.plan_dir / 'solution_outline.md').exists()
         content = (ctx.plan_dir / 'solution_outline.md').read_text()
@@ -325,13 +381,12 @@ def test_write_new():
 def test_write_exists_without_force():
     """Test that write fails if document exists and --force not specified."""
     with TestContext(plan_id='solution-exists') as ctx:
-        # Create existing file
-        (ctx.plan_dir / 'solution_outline.md').write_text("# Existing content")
+        # Create existing file with valid content
+        (ctx.plan_dir / 'solution_outline.md').write_text(VALID_SOLUTION)
 
         result = run_script(SCRIPT_PATH,
             'write',
             '--plan-id', 'solution-exists',
-            '--validate',
             input_data=VALID_SOLUTION
         )
         assert not result.success, "Expected failure when file exists without --force"
@@ -342,13 +397,12 @@ def test_write_exists_without_force():
 def test_write_with_force():
     """Test that write succeeds with --force when document exists."""
     with TestContext(plan_id='solution-force') as ctx:
-        # Create existing file
+        # Create existing file with old content
         (ctx.plan_dir / 'solution_outline.md').write_text("# Old content")
 
         result = run_script(SCRIPT_PATH,
             'write',
             '--plan-id', 'solution-force',
-            '--validate',
             '--force',
             input_data=VALID_SOLUTION
         )

@@ -72,30 +72,125 @@ def parse_document_sections(content: str) -> dict[str, str]:
 def extract_deliverables(deliverables_section: str) -> list[dict]:
     """Extract numbered deliverables from Deliverables section.
 
-    Parses `### N. Title` headings and returns structured deliverable info.
+    Parses `### N. Title` headings and returns structured deliverable info
+    including metadata, affected files, and verification.
     """
     deliverables = []
+    # Split by ### N. headers
     pattern = re.compile(r'^###\s+(\d+)\.\s+(.+)$', re.MULTILINE)
 
-    for match in pattern.finditer(deliverables_section):
+    # Find all deliverable start positions
+    matches = list(pattern.finditer(deliverables_section))
+
+    for i, match in enumerate(matches):
         number = int(match.group(1))
         title = match.group(2).strip()
+
+        # Get content until next deliverable or end
+        start_pos = match.end()
+        end_pos = matches[i + 1].start() if i + 1 < len(matches) else len(deliverables_section)
+        content = deliverables_section[start_pos:end_pos].strip()
+
+        # Extract metadata block
+        metadata = extract_metadata_block(content)
+
+        # Extract affected files
+        affected_files = extract_affected_files(content)
+
+        # Extract verification
+        verification = extract_verification(content)
+
+        # Check for success criteria
+        has_success_criteria = '**Success Criteria:**' in content or '**Success criteria:**' in content
+
         deliverables.append({
             'number': number,
             'title': title,
-            'reference': f"{number}. {title}"
+            'reference': f"{number}. {title}",
+            'metadata': metadata,
+            'affected_files': affected_files,
+            'verification': verification,
+            'has_success_criteria': has_success_criteria
         })
 
     return sorted(deliverables, key=lambda d: d['number'])
 
 
-def validate_solution_structure(content: str) -> tuple[list[str], dict]:
-    """Validate solution outline document structure.
+def extract_metadata_block(content: str) -> dict:
+    """Extract **Metadata:** block fields from deliverable content."""
+    metadata = {}
 
-    Returns (issues, info) where issues is a list of validation errors
-    and info contains validation metadata.
+    # Look for Metadata block
+    metadata_match = re.search(r'\*\*Metadata:\*\*\s*((?:- [^\n]+\n?)+)', content, re.IGNORECASE)
+    if not metadata_match:
+        return metadata
+
+    metadata_text = metadata_match.group(1)
+
+    # Extract each field
+    field_pattern = re.compile(r'-\s*(\w+):\s*(.+)')
+    for match in field_pattern.finditer(metadata_text):
+        field_name = match.group(1).strip()
+        field_value = match.group(2).strip()
+        metadata[field_name] = field_value
+
+    return metadata
+
+
+def extract_affected_files(content: str) -> list[str]:
+    """Extract **Affected files:** list from deliverable content."""
+    files = []
+
+    # Look for Affected files block
+    files_match = re.search(r'\*\*Affected files:\*\*\s*((?:- [^\n]+\n?)+)', content, re.IGNORECASE)
+    if not files_match:
+        return files
+
+    files_text = files_match.group(1)
+
+    # Extract each file path (remove backticks)
+    file_pattern = re.compile(r'-\s*`?([^`\n]+)`?')
+    for match in file_pattern.finditer(files_text):
+        file_path = match.group(1).strip()
+        if file_path:
+            files.append(file_path)
+
+    return files
+
+
+def extract_verification(content: str) -> dict:
+    """Extract **Verification:** section from deliverable content."""
+    verification = {}
+
+    # Look for Verification block
+    verif_match = re.search(r'\*\*Verification:\*\*\s*((?:- [^\n]+\n?)+)', content, re.IGNORECASE)
+    if not verif_match:
+        return verification
+
+    verif_text = verif_match.group(1)
+
+    # Extract Command and Criteria
+    cmd_match = re.search(r'-\s*Command:\s*(.+)', verif_text)
+    if cmd_match:
+        verification['command'] = cmd_match.group(1).strip()
+
+    criteria_match = re.search(r'-\s*Criteria:\s*(.+)', verif_text)
+    if criteria_match:
+        verification['criteria'] = criteria_match.group(1).strip()
+
+    return verification
+
+
+def validate_solution_structure(content: str) -> tuple[list[str], list[str], dict]:
+    """Validate solution outline document structure against deliverable contract.
+
+    Returns (errors, warnings, info) where:
+    - errors: Contract violations that must be fixed
+    - warnings: Issues that should be addressed but don't block
+    - info: Validation metadata
     """
-    issues = []
+    errors = []
+    warnings = []
     info = {
         'sections_found': [],
         'deliverable_count': 0,
@@ -110,7 +205,7 @@ def validate_solution_structure(content: str) -> tuple[list[str], dict]:
         if section in sections:
             info['sections_found'].append(section)
         else:
-            issues.append(f"Missing required section: {section.replace('_', ' ').title()}")
+            errors.append(f"Missing required section: {section.replace('_', ' ').title()}")
 
     # Optional sections
     optional_sections = ['approach', 'dependencies', 'risks_and_mitigations', 'risks']
@@ -118,16 +213,97 @@ def validate_solution_structure(content: str) -> tuple[list[str], dict]:
         if section in sections:
             info['sections_found'].append(section)
 
-    # Validate deliverables section has numbered items
+    # Validate deliverables section
     if 'deliverables' in sections:
         deliverables = extract_deliverables(sections['deliverables'])
         info['deliverable_count'] = len(deliverables)
         info['deliverables'] = [d['reference'] for d in deliverables]
 
         if not deliverables:
-            issues.append("No numbered deliverables found in Deliverables section (expected ### N. Title)")
+            errors.append("No numbered deliverables found (expected ### N. Title)")
+        else:
+            # Validate each deliverable against contract
+            for d in deliverables:
+                d_errors, d_warnings = validate_deliverable_contract(d)
+                errors.extend(d_errors)
+                warnings.extend(d_warnings)
 
-    return issues, info
+    return errors, warnings, info
+
+
+def validate_deliverable_contract(deliverable: dict) -> tuple[list[str], list[str]]:
+    """Validate a single deliverable against the deliverable contract.
+
+    Contract requires:
+    - Metadata block with 7 fields
+    - Affected files with explicit paths
+    - Verification section
+    - Success criteria
+    """
+    errors = []
+    warnings = []
+    num = deliverable['number']
+
+    # Check 1: Metadata block exists
+    metadata = deliverable.get('metadata', {})
+    if not metadata:
+        errors.append(f"D{num}: Missing **Metadata:** block")
+    else:
+        # Check 1a: All required metadata fields
+        required_fields = [
+            'change_type', 'execution_mode', 'domain',
+            'suggested_skill', 'suggested_workflow', 'depends'
+        ]
+        for field in required_fields:
+            if field not in metadata:
+                errors.append(f"D{num}: Missing metadata field: {field}")
+
+        # Check 1b: Valid change_type
+        valid_change_types = ['create', 'modify', 'refactor', 'migrate', 'delete']
+        if metadata.get('change_type') and metadata['change_type'] not in valid_change_types:
+            errors.append(f"D{num}: Invalid change_type '{metadata['change_type']}' (must be one of: {', '.join(valid_change_types)})")
+
+        # Check 1c: Valid execution_mode
+        valid_modes = ['automated', 'manual', 'mixed']
+        if metadata.get('execution_mode') and metadata['execution_mode'] not in valid_modes:
+            errors.append(f"D{num}: Invalid execution_mode '{metadata['execution_mode']}' (must be one of: {', '.join(valid_modes)})")
+
+        # Check 1d: context_skills is optional but note if missing
+        if 'context_skills' not in metadata:
+            warnings.append(f"D{num}: Missing context_skills (use [] if none)")
+
+    # Check 2: Affected files section
+    affected_files = deliverable.get('affected_files', [])
+    if not affected_files:
+        errors.append(f"D{num}: Missing **Affected files:** section")
+    else:
+        # Check 2a: No wildcards or vague references
+        for f in affected_files:
+            if '*' in f:
+                errors.append(f"D{num}: Wildcard in affected files: {f}")
+            if '...' in f:
+                errors.append(f"D{num}: Ellipsis in affected files: {f}")
+            if 'all ' in f.lower():
+                errors.append(f"D{num}: Vague reference in affected files: {f}")
+            # Check for reasonable path structure
+            if not ('/' in f or f.endswith('.md') or f.endswith('.py')):
+                warnings.append(f"D{num}: Unusual file path format: {f}")
+
+    # Check 3: Verification section
+    verification = deliverable.get('verification', {})
+    if not verification:
+        errors.append(f"D{num}: Missing **Verification:** section")
+    else:
+        if 'command' not in verification:
+            warnings.append(f"D{num}: Verification missing Command")
+        if 'criteria' not in verification:
+            warnings.append(f"D{num}: Verification missing Criteria")
+
+    # Check 4: Success criteria
+    if not deliverable.get('has_success_criteria'):
+        warnings.append(f"D{num}: Missing **Success Criteria:** section")
+
+    return errors, warnings
 
 
 # =============================================================================
@@ -135,7 +311,7 @@ def validate_solution_structure(content: str) -> tuple[list[str], dict]:
 # =============================================================================
 
 def cmd_validate(args) -> int:
-    """Validate solution outline structure."""
+    """Validate solution outline structure against deliverable contract."""
     if not validate_plan_id(args.plan_id):
         print(serialize_toon({
             'status': 'error',
@@ -161,18 +337,20 @@ def cmd_validate(args) -> int:
         return 1
 
     content = file_path.read_text(encoding='utf-8')
-    issues, info = validate_solution_structure(content)
+    errors, warnings, info = validate_solution_structure(content)
 
-    if issues:
+    if errors:
         print(serialize_toon({
             'status': 'error',
-            'plan_id': args.plan_id,
             'error': 'validation_failed',
-            'issues': issues
+            'plan_id': args.plan_id,
+            'issues': errors,
+            'warnings': warnings,
+            'deliverable_count': info['deliverable_count']
         }))
         return 1
 
-    print(serialize_toon({
+    result = {
         'status': 'success',
         'plan_id': args.plan_id,
         'file': SOLUTION_FILE,
@@ -181,7 +359,12 @@ def cmd_validate(args) -> int:
             'deliverable_count': info['deliverable_count'],
             'deliverables': info['deliverables']
         }
-    }))
+    }
+
+    if warnings:
+        result['warnings'] = warnings
+
+    print(serialize_toon(result))
     return 0
 
 
@@ -294,10 +477,11 @@ def cmd_exists(args) -> int:
 
 
 def cmd_write(args) -> int:
-    """Write solution outline from stdin.
+    """Write solution outline from stdin with automatic contract validation.
 
     Reads content from stdin to support ASCII diagrams with box-drawing characters.
-    Optionally validates structure after writing.
+    ALWAYS validates against the deliverable contract before writing.
+    Returns error if validation fails (file is NOT written).
     """
     if not validate_plan_id(args.plan_id):
         print(serialize_toon({
@@ -317,6 +501,20 @@ def cmd_write(args) -> int:
             'error': 'empty_content',
             'plan_id': args.plan_id,
             'message': 'Content cannot be empty'
+        }))
+        return 1
+
+    # ALWAYS validate before writing
+    errors, warnings, info = validate_solution_structure(content)
+
+    if errors:
+        print(serialize_toon({
+            'status': 'error',
+            'error': 'validation_failed',
+            'plan_id': args.plan_id,
+            'issues': errors,
+            'warnings': warnings,
+            'deliverable_count': info['deliverable_count']
         }))
         return 1
 
@@ -344,23 +542,15 @@ def cmd_write(args) -> int:
         'status': 'success',
         'plan_id': args.plan_id,
         'file': SOLUTION_FILE,
-        'action': 'updated' if existed_before else 'created'
+        'action': 'updated' if existed_before else 'created',
+        'validation': {
+            'deliverable_count': info['deliverable_count'],
+            'sections_found': ','.join(info['sections_found'])
+        }
     }
 
-    # Optionally validate after writing
-    if getattr(args, 'validate', False):
-        issues, info = validate_solution_structure(content)
-        if issues:
-            result['validation'] = {
-                'valid': False,
-                'issues': issues
-            }
-        else:
-            result['validation'] = {
-                'valid': True,
-                'deliverable_count': info['deliverable_count'],
-                'sections_found': ','.join(info['sections_found'])
-            }
+    if warnings:
+        result['warnings'] = warnings
 
     print(serialize_toon(result))
     return 0
@@ -398,9 +588,8 @@ def main():
     exists_parser.set_defaults(func=cmd_exists)
 
     # write
-    write_parser = subparsers.add_parser('write', help='Write solution outline from stdin')
+    write_parser = subparsers.add_parser('write', help='Write solution outline from stdin (validates automatically)')
     write_parser.add_argument('--plan-id', required=True, help='Plan identifier')
-    write_parser.add_argument('--validate', required=True, action='store_true', help='Validate structure after writing (required)')
     write_parser.add_argument('--force', action='store_true', help='Overwrite existing file')
     write_parser.set_defaults(func=cmd_write)
 

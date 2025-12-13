@@ -23,35 +23,47 @@ For isolated changes, identify the target components directly:
 
 ## Deliverable Template
 
-Build a deliverables markdown section with required metadata:
+Build a deliverables markdown section following the contract from `pm-workflow:plan-type-api/standards/deliverable-contract.md`.
+
+**IMPORTANT**: Every field shown below is REQUIRED. Missing fields will cause validation to fail.
 
 ```markdown
-### 1. {Component Action}
+### 1. {Action Verb} {Component Type}: {Name}
 
 **Metadata:**
 - change_type: {create|modify|refactor}
 - execution_mode: automated
 - domain: plugin
-- suggested_skill: pm-plugin-development:plugin-{create|maintain}
-- suggested_workflow: {create-skill|create-agent|update-component|...}
+- suggested_skill: pm-plugin-development:{plugin-create|plugin-maintain}
+- suggested_workflow: {create-skill|create-command|create-agent|update-component}
 - context_skills: []
 - depends: none
 
-{Technical description}
+**Affected files:**
+- `marketplace/bundles/{bundle}/{type}/{name}.md`
 
-**Type**: {skill|command|agent|script}
-**Path**: `marketplace/bundles/{bundle}/{type}/{name}`
-**Dependencies**: {dependencies if any}
-**Standards**: {standards to follow}
+**Change per file:** {What will be created or modified in each file}
 
 **Verification:**
-- Command: `/pm-plugin-development:plugin-doctor --component {path}`
+- Command: `/pm-plugin-development:plugin-doctor --component marketplace/bundles/{bundle}/{type}/{name}.md`
 - Criteria: No quality issues detected
 
 **Success Criteria:**
-- {criterion 1}
-- {criterion 2}
+- {Specific measurable criterion 1}
+- {Specific measurable criterion 2}
 ```
+
+### Field Reference
+
+| Field | Valid Values | Description |
+|-------|--------------|-------------|
+| `change_type` | create, modify, refactor | What kind of change |
+| `execution_mode` | automated, manual, mixed | Can it run without human intervention |
+| `domain` | plugin | Always "plugin" for marketplace components |
+| `suggested_skill` | pm-plugin-development:plugin-create, pm-plugin-development:plugin-maintain | Skill to delegate to |
+| `suggested_workflow` | create-skill, create-command, create-agent, update-component | Workflow within skill |
+| `context_skills` | [] or [skill1, skill2] | Additional skills to load |
+| `depends` | none, or deliverable number(s) | Dependencies on other deliverables |
 
 ## Decomposition Patterns
 

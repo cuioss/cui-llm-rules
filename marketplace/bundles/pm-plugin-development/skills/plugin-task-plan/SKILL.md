@@ -10,7 +10,32 @@ allowed-tools: Read, Bash
 
 **Key Pattern**: Skill delegation with optimization - reads deliverables with metadata from `solution_outline.md`, applies aggregation/split analysis, creates tasks with delegation blocks and dependencies.
 
-> **Contract Reference**: See [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) for the optimization workflow and decision tables.
+## Contract Compliance
+
+**MANDATORY**: All tasks MUST follow the structure defined in the central contracts:
+
+| Contract | Location | Purpose |
+|----------|----------|---------|
+| Task Contract | `pm-workflow:plan-type-api/standards/task-contract.md` | Task structure and optimization workflow |
+| Agent Contract | `pm-workflow:plan-type-api/standards/task-plan-agent-contract.md` | Agent responsibilities |
+
+**Non-compliant tasks will be rejected by validation.**
+
+**CRITICAL**: The `steps` field MUST contain file paths from the deliverable's `Affected files` section:
+
+```yaml
+# CORRECT - file paths from deliverable
+steps:
+  - marketplace/bundles/pm-workflow/agents/plan-init-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-refine-agent.md
+
+# WRONG - descriptive text (violates contract)
+steps[2]{number,title,status}:
+1,Convert plan-init-agent outputs,pending
+2,Convert plan-refine-agent outputs,pending
+```
+
+The `steps` field lists FILES TO MODIFY, not progress tracking entries.
 
 ## Operation: plan
 
@@ -62,42 +87,104 @@ For each deliverable, check for split requirements:
 - Different concerns within → SHOULD split
 - File count > 15 → CONSIDER splitting
 
+### Step 4b: Log Optimization Decisions (REQUIRED)
+
+After analyzing each deliverable or deliverable pair, log the decision:
+
+```bash
+# If aggregating deliverables
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[OPTIMIZATION] Aggregating D{N}+D{M}: same skill ({skill}), no inter-dependency"
+
+# If keeping deliverable separate
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[OPTIMIZATION] Keeping D{N} separate: {reason}"
+
+# If splitting deliverable
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[OPTIMIZATION] Splitting D{N}: execution_mode=mixed"
+```
+
+This logging is REQUIRED for audit trail and debugging.
+
 ### Step 5: Create Optimized Tasks
 
-For aggregated deliverables or single deliverables, create tasks using heredoc:
+For aggregated deliverables or single deliverables, create tasks using heredoc.
+
+**CRITICAL**: The `steps` field MUST contain file paths copied from the deliverable's `Affected files` section.
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
-title: {action} {component-type}: {name}
+title: {Action Verb} {Target}: {Scope}
 deliverables: [{n1}, {n2}, {n3}]
 domain: plugin
 phase: execute
 description: |
-  {combined description}
+  {combined description from deliverables}
 
 steps:
-  - {file1}
-  - {file2}
-  - {file3}
+  - marketplace/bundles/{bundle}/agents/{file1}.md
+  - marketplace/bundles/{bundle}/agents/{file2}.md
+  - marketplace/bundles/{bundle}/commands/{file3}.md
 
-depends_on: TASK-1, TASK-2
+depends_on: {TASK-N | none}
 
 delegation:
-  skill: pm-plugin-development:{plugin-create|plugin-maintain}
-  workflow: {workflow-name}
+  skill: {suggested_skill from deliverable metadata}
+  workflow: {suggested_workflow from deliverable metadata}
+  context_skills: {context_skills from deliverable metadata}
 
 verification:
   commands:
-    - {cmd}
-  criteria: {criteria}
+    - {verification.command from deliverable}
+  criteria: {verification.criteria from deliverable}
 EOF
 ```
 
-**Stdin format fields**:
-- `deliverables`: Array of deliverable numbers from solution_outline.md
-- `domain`: Always `plugin` for marketplace components
-- `depends_on`: Task dependencies computed from deliverable dependencies
+**Field mapping from deliverable to task**:
+
+| Deliverable Field | Task Field |
+|-------------------|------------|
+| `Affected files:` list | `steps:` list (copy file paths directly) |
+| `metadata.suggested_skill` | `delegation.skill` |
+| `metadata.suggested_workflow` | `delegation.workflow` |
+| `metadata.context_skills` | `delegation.context_skills` |
+| `metadata.depends` | Used to compute `depends_on` |
+| `Verification.Command` | `verification.commands` |
+| `Verification.Criteria` | `verification.criteria` |
+
+**Example with real paths**:
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
+  --plan-id migrate-json-to-toon <<'EOF'
+title: Migrate pm-workflow Agents to TOON Format
+deliverables: [2]
+domain: plugin
+phase: execute
+description: |
+  Convert all JSON output blocks to TOON format in pm-workflow agents.
+
+steps:
+  - marketplace/bundles/pm-workflow/agents/plan-init-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-refine-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-execute-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-finalize-agent.md
+
+depends_on: TASK-1
+
+delegation:
+  skill: pm-plugin-development:plugin-maintain
+  workflow: update-component
+  context_skills: []
+
+verification:
+  commands:
+    - grep -r '```json' marketplace/bundles/pm-workflow/agents/
+  criteria: Returns no matches (exit code 1)
+EOF
+```
 
 ### Step 6: Record Issues as Lessons
 
@@ -166,79 +253,68 @@ When creating tasks, map from deliverable metadata to stdin TOON fields:
 
 ## Task Generation Patterns
 
+These patterns show how to create tasks for different operation types. Note that `steps` always contains FILE PATHS.
+
 ### Create Component Task
 
 **Deliverable**: "Create new {skill|command|agent} for {purpose}"
 
-**Task Structure**:
-```
-Title: Create {component-type}: {name}
-Steps:
-1. Load skill: pm-plugin-development:plugin-create
-2. Execute workflow: create-{component-type}
-3. Parameters:
-   - bundle: {target-bundle}
-   - name: {component-name}
-   - description: {from goal}
-   - type: {component-specific type}
-```
+The `steps` field lists files that WILL BE CREATED:
 
-**Example**:
-```
-Title: Create skill: java-logging-patterns
-Steps:
-1. Load skill: pm-plugin-development:plugin-create
-2. Execute workflow: create-skill
-3. Parameters:
-   - bundle: pm-dev-java
-   - name: java-logging-patterns
-   - description: "Java logging standards for CUI projects"
-   - type: standards
+```yaml
+title: Create skill: java-logging-patterns
+steps:
+  - marketplace/bundles/pm-dev-java/skills/java-logging-patterns/SKILL.md
+delegation:
+  skill: pm-plugin-development:plugin-create
+  workflow: create-skill
 ```
 
 ### Modify Component Task
 
 **Deliverable**: "Update {component} to {change description}"
 
-**Task Structure**:
-```
-Title: Update {component-type}: {name}
-Steps:
-1. Load skill: pm-plugin-development:plugin-maintain
-2. Execute workflow: update-component
-3. Parameters:
-   - component_path: {path}
-   - improvements: {change description}
+The `steps` field lists existing files to MODIFY:
+
+```yaml
+title: Update plugin-maintain Skill
+steps:
+  - marketplace/bundles/pm-plugin-development/skills/plugin-maintain/SKILL.md
+delegation:
+  skill: pm-plugin-development:plugin-maintain
+  workflow: update-component
 ```
 
-### Refactor Task
+### Migrate Task (Multiple Files)
 
-**Deliverable**: "Refactor {scope} using {strategy}"
+**Deliverable**: "Migrate {components} to {new format}"
 
-**Task Structure**:
-```
-Title: Refactor {scope}
-Steps:
-1. Load skill: pm-plugin-development:plugin-maintain
-2. Execute workflow: refactor-structure
-3. Parameters:
-   - scope: {component|bundle|marketplace}
-   - strategy: {consolidate|split|extract|reorganize}
+The `steps` field lists ALL files to migrate (copied from `Affected files`):
+
+```yaml
+title: Migrate pm-workflow Agents to TOON Format
+steps:
+  - marketplace/bundles/pm-workflow/agents/plan-init-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-refine-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-execute-agent.md
+  - marketplace/bundles/pm-workflow/agents/plan-finalize-agent.md
+delegation:
+  skill: pm-plugin-development:plugin-maintain
+  workflow: update-component
 ```
 
 ### Script Task (Special Case)
 
-Scripts are created within skills, so delegate to plugin-create with skill context:
+Scripts are created within skills. The `steps` lists the script file AND its test:
 
-**Task Structure**:
-```
-Title: Create script: {script-name}
-Steps:
-1. Load skill: pm-plugin-development:plugin-create
-2. Execute workflow: create-skill (if new skill needed)
-3. Create script file at {skill}/scripts/{script-name}.py
-4. Add test in test/{bundle}/{skill}/
-5. Update SKILL.md with script documentation
+```yaml
+title: Create script: manage-config
+steps:
+  - marketplace/bundles/pm-workflow/skills/manage-config/scripts/manage-config.py
+  - test/pm-workflow/manage-config/test_manage_config.py
+delegation:
+  skill: pm-plugin-development:plugin-create
+  workflow: create-skill
 ```
 
 ---
