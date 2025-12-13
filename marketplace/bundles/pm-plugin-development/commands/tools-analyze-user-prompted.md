@@ -13,7 +13,7 @@ If you discover issues or improvements during execution, record them:
 
 1. **Activate skill**: `Skill: plan-marshall:manage-lessons-learned`
 2. **Record lesson** with:
-   - Component: `{type: "command", name: "tools-analyze-user-prompted", bundle: "plan-marshall"}`
+   - Component: `{type: "command", name: "tools-analyze-user-prompted", bundle: "pm-plugin-development"}`
    - Category: bug | improvement | pattern | anti-pattern
    - Summary and detail of the finding
 
@@ -225,22 +225,22 @@ If user selects 1-3:
 
 **Analyze with screenshot:**
 ```
-/plan-marshall:tools-analyze-user-prompted screenshot=/tmp/prompt.png
+/pm-plugin-development:tools-analyze-user-prompted screenshot=/tmp/prompt.png
 ```
 
 **Analyze with description:**
 ```
-/plan-marshall:tools-analyze-user-prompted description="Got prompted when running /plugin-doctor"
+/pm-plugin-development:tools-analyze-user-prompted description="Got prompted when running /plugin-doctor"
 ```
 
 **Analyze with both:**
 ```
-/plan-marshall:tools-analyze-user-prompted screenshot=/tmp/prompt.png description="Was running maven build"
+/pm-plugin-development:tools-analyze-user-prompted screenshot=/tmp/prompt.png description="Was running maven build"
 ```
 
 **Analyze current context only:**
 ```
-/plan-marshall:tools-analyze-user-prompted
+/pm-plugin-development:tools-analyze-user-prompted
 ```
 
 ## RELATED

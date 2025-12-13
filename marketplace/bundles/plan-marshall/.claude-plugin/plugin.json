@@ -26,7 +26,6 @@
   ],
   "commands": [
     "./commands/plan-marshall.md",
-    "./commands/tools-analyze-user-prompted.md",
     "./commands/tools-fix-intellij-diagnostics.md",
     "./commands/tools-manage-web-permissions.md",
     "./commands/tools-sync-agents-file.md",

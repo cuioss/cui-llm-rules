@@ -13,7 +13,8 @@
   "commands": [
     "./commands/plugin-create.md",
     "./commands/plugin-doctor.md",
-    "./commands/plugin-maintain.md"
+    "./commands/plugin-maintain.md",
+    "./commands/tools-analyze-user-prompted.md"
   ],
   "skills": [
     "./skills/plugin-architecture",
