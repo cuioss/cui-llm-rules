@@ -163,3 +163,23 @@ When verification mode detects a failure:
 3. Perform analysis steps for that category
 4. Format output using template
 5. Present to user and wait for decision
+
+## Deep Analysis Follow-Up
+
+For complex failures requiring origin tracing and fix proposals, recommend:
+
+```
+/pm-plugin-development:tools-analyze-script-failures
+```
+
+This command provides:
+- **Origin tracing**: Which command/agent/skill triggered the failure
+- **Instruction path analysis**: How LLM interpreted instructions to produce the failed call
+- **Fix proposals**: Specific code changes to prevent recurrence
+- **Lessons learned integration**: Record findings for future reference
+
+Use when:
+- Root cause is unclear from immediate analysis
+- Same failure pattern recurs
+- Fix requires understanding component relationships
+- Documentation or workflow gaps suspected

@@ -398,3 +398,26 @@ Verification mode remains active for the entire session once loaded.
 To run without verification:
 - Start a new session without loading this skill
 - Or explicitly acknowledge: "Disable verification mode for this operation"
+
+## Related Skills
+
+### Deep Failure Analysis
+
+For post-hoc analysis of script failures with origin tracing and fix proposals:
+
+```
+Skill: pm-plugin-development:analyze-script-failures
+```
+
+Or invoke via command:
+```
+/pm-plugin-development:tools-analyze-script-failures
+```
+
+**When to use**: After verification mode catches a failure, use analyze-script-failures to:
+- Trace which component (command/agent/skill) triggered the failure
+- Analyze how instructions led to the incorrect script call
+- Get specific code fix proposals
+- Record findings as lessons learned
+
+**Difference**: Verification mode stops and analyzes in real-time; analyze-script-failures performs deep post-hoc analysis with origin tracing.
