@@ -183,7 +183,7 @@ public class ValidationResult {
 * Already using Lombok extensively in the project
 * Need `@Singular` for collection builders
 
-**Migration strategy**: See [java-modern-features.md](java-modern-features.md) for detailed migration guidance from Lombok @Value to records.
+**Migration strategy**: See `pm-dev-java:java-core` skill (java-modern-features.md) for migration guidance from Lombok @Value to records.
 
 ## Additional Lombok Annotations
 

@@ -1,14 +1,5 @@
 # JUnit Core Testing Standards
 
-## Related Documentation
-
-* [Test Quality Standards](testing-quality-standards.md) - Quality best practices, AI code detection, and library compliance
-* [Test Generator Framework](test-generator-framework.md) - CUI test generator standards and API reference
-* [Value Object Testing](testing-value-objects.md) - Contract testing for value objects
-* [HTTP Testing with MockWebServer](testing-mockwebserver.md) - HTTP client testing patterns
-* [Integration Testing](integration-testing.md) - Maven configuration for integration tests
-* [JULi Logger Testing](testing-juli-logger.md) - Testing logging with Java Util Logging
-
 ## Core Testing Principles
 
 ### Test Class Requirements
@@ -132,7 +123,10 @@ class TokenValidatorTest {
 
 All assertions must include meaningful, concise failure messages (20-60 characters).
 
-For complete assertion message standards, patterns, examples, and anti-patterns, see [Test Quality Standards - Assertion Message Standards](testing-quality-standards.md#assertion-message-standards).
+**Assertion Message Guidelines:**
+- Messages should be 20-60 characters
+- Describe what should have happened, not what failed
+- Example: `"Token should be valid"` not `"Token is invalid"`
 
 ### Exception Testing
 
@@ -180,7 +174,7 @@ void shouldThrowExceptionOnInvalidInput() {
 * Should verify correct integration behavior
 * Should be isolated from external systems when possible
 * Test classes named `*IT.java` or `*ITCase.java`
-* See integration-testing.md for detailed Maven configuration
+* See `pm-dev-java:junit-integration` skill for Maven Failsafe configuration
 
 ### System Tests
 
@@ -218,9 +212,9 @@ When encountering forbidden libraries:
 * `assertThat(x, is(y))` → `assertEquals(y, x, "message")`
 * `assertThat(x, notNullValue())` → `assertNotNull(x, "message")`
 
-**Manual Data → CUI Generators**
+**Manual Data → CUI Generators** (CUI projects only)
 * Replace hardcoded values with `Generators.*` calls
-* See [Test Generator Framework](test-generator-framework.md) for details
+* See `pm-dev-java-cui:cui-testing` skill for details
 
 ## Best Practices
 

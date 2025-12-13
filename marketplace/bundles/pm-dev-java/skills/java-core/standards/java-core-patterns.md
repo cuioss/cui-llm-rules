@@ -439,8 +439,8 @@ public class UserAuthenticator {
 * Follow JavaDoc standards for all public APIs
 * Document non-obvious behavior
 * Document assumptions and preconditions
-* For detailed JavaDoc requirements, see the `pm-dev-java:javadoc` skill
-* For logging standards and requirements, see [logging-standards.md](logging-standards.md)
+* For detailed JavaDoc requirements, see `pm-dev-java:javadoc` skill
+* For CUI logging standards, see `pm-dev-java-cui:cui-logging` skill
 
 ## Quality Checklist
 

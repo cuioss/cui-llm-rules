@@ -222,7 +222,7 @@ class HealthCheckIntegrationTest extends BaseIntegrationTest {
 
 Application **MUST** be configured for HTTPS-only operation.
 
-For complete Quarkus PEM configuration including TLS certificates, cipher suites, and protocols, see [cdi-container.md](cdi-container.md) section "Quarkus PEM Configuration".
+For complete Quarkus PEM configuration including TLS certificates, cipher suites, and protocols, see `pm-dev-java:java-cdi` skill (cdi-container.md).
 
 ### Port Mapping Strategy
 
@@ -307,9 +307,9 @@ fi
 
 ## Docker Compose Integration
 
-For complete Docker Compose configuration including production-grade security hardening, health checks, and certificate management, see **[cdi-container.md](cdi-container.md)** section "Docker Compose Standards".
+For complete Docker Compose configuration including production-grade security hardening, health checks, and certificate management, see `pm-dev-java:java-cdi` skill (cdi-container.md).
 
-For OWASP security hardening details (`no-new-privileges`, `cap_drop`, `read_only`), see **[cdi-security.md](cdi-security.md)** section "OWASP-Compliant Deployment".
+For OWASP security hardening details (`no-new-privileges`, `cap_drop`, `read_only`), see `pm-dev-java:java-cdi` skill (cdi-security.md).
 
 ### Integration Test Port Mapping
 

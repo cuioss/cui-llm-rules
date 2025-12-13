@@ -367,4 +367,4 @@ export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Sl
 ## See Also
 
 - [POM Maintenance Standards](pom-maintenance.md) - Dependency and BOM management
-- [Integration Testing](../../../../pm-dev-java/skills/cui-java-unit-testing/standards/integration-testing.md) - Maven Surefire/Failsafe configuration
+- `pm-dev-java:junit-integration` skill - Maven Surefire/Failsafe configuration

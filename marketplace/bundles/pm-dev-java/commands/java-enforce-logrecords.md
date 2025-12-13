@@ -103,7 +103,7 @@ This loads:
 
 ### Step 4: Find and Analyze Logging Violations
 
-**Use cui-java-core skill workflow:**
+**Use `pm-dev-java-cui:cui-logging` skill workflow:**
 
 Execute workflow: Analyze Logging Violations
 - target: {module path or project root}
@@ -119,13 +119,13 @@ scripts/analyze-logging-violations.py --directory {target}
 - Current vs expected usage
 - Summary counts
 
-This uses the cui-java-core skill workflow for structured logging standards validation.
+This uses the `pm-dev-java-cui:cui-logging` skill workflow for structured logging standards validation.
 
 ### Step 5: Verify LogRecord Usage and Test Coverage
 
 **Analyze LogRecord coverage:**
 
-For each LogMessages class, apply coverage analysis patterns from cui-java-core skill:
+For each LogMessages class, apply coverage analysis patterns from `pm-dev-java-cui:cui-logging` skill:
 - Extract all LogRecord definitions (Pattern 6)
 - Find production usage with Grep (Pattern 7)
 - Find test coverage with LogAssert (Pattern 8)
@@ -187,7 +187,7 @@ Batch 4: User Review Required
 
 **Execute batches using agent coordination patterns:**
 
-Follow batch execution templates from cui-java-core skill (Pattern 11).
+Follow batch execution templates from `pm-dev-java-cui:cui-logging` skill (Pattern 11).
 
 **Batch 1:** Fix logging violations using /java-implement-code
 - Pass violations list with file locations and required corrections
@@ -240,7 +240,7 @@ For each LogMessages class that was modified:
 2. Locate corresponding LogMessages.adoc file (from configuration in Step 3)
 3. Execute documentation workflow
 
-**Execute documentation update using cui-java-core skill workflow:**
+**Execute documentation update using `pm-dev-java-cui:cui-logging` skill workflow:**
 
 Execute workflow: Document LogRecord
 - holder_class: {path-to-java-file}
@@ -329,7 +329,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 - Update configuration for future executions
 
 **Violation Detection:**
-- Use cui-java-core skill workflow: Analyze Logging Violations
+- Use `pm-dev-java-cui:cui-logging` skill workflow: Analyze Logging Violations
 - Script handles: finding statements, determining LogRecord usage, applying rules
 - Receive structured violations with file locations and types
 - Process violation data for batched fixes

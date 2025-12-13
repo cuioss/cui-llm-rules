@@ -9,7 +9,7 @@ allowed-tools: Read, Edit, Write, Bash, Grep, Glob, Skill
 Standards and workflows for writing clear, maintainable technical documentation in CUI projects.
 
 **Note**: This skill covers general documentation. For code documentation, use:
-- `cui-javadoc` for Java code documentation
+- `pm-dev-java:javadoc` for Java code documentation
 - `cui-frontend-development/jsdoc-standards.md` for JavaScript documentation
 
 ## Available Workflows

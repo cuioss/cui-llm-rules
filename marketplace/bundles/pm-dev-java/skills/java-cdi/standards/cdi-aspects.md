@@ -41,7 +41,7 @@ This document defines CDI (Contexts and Dependency Injection) standards and best
 
 **REQUIRED**: Always use constructor injection instead of field injection in CDI beans.
 
-For foundational constructor injection principles (immutability, testability, fail-fast behavior), see **cui-java-core** skill (invoked in SKILL.md Step 1).
+For foundational constructor injection principles (immutability, testability, fail-fast behavior), see `pm-dev-java:java-core` skill.
 
 This section focuses on **CDI-specific** constructor injection rules and patterns
 

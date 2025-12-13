@@ -580,7 +580,7 @@ If PASS:
 
 === verify-implementation-readiness Workflow
 
-Reference this standard in cui-java-core SKILL.md:
+Reference this standard in java-core SKILL.md:
 
 [source,yaml]
 ----

@@ -275,9 +275,9 @@ For comprehensive testing of logging in unit tests, see the dedicated testing gu
 - Dynamic log level configuration
 - Integration with CUI logging framework
 
-See: `cui-java-unit-testing` skill → `standards/testing-juli-logger.md`
+See: `pm-dev-java-cui:cui-testing` skill → `standards/testing-juli-logger.md`
 
-**Note**: The `cui-java-unit-testing` skill is part of the `pm-dev-java` marketplace bundle. If the skill is not available, implement basic logger testing using JUnit assertions with `java.util.logging.Handler` for log message verification.
+**Note**: The testing-juli-logger.md standard is part of the `pm-dev-java-cui:cui-testing` skill in this bundle.
 
 **Quick example**:
 

@@ -712,7 +712,7 @@ class RetryLogicTest {
 
 Combine MockWebServer with generator framework for comprehensive testing.
 
-For detailed generator usage patterns and requirements, see [test-generator-framework.md](test-generator-framework.md).
+For detailed generator usage patterns and requirements, see `pm-dev-java-cui:cui-testing` skill.
 
 ```java
 @EnableMockWebServer
@@ -780,7 +780,7 @@ class ContextAwareTest {
 
 ### Clear Test Structure
 
-* Follow AAA pattern (see [testing-junit-core.md](testing-junit-core.md) for details)
+* Follow AAA pattern (see `pm-dev-java:junit-core` skill for details)
 * Use `@MockResponseConfig` for simple mocking scenarios
 * Use `@ModuleDispatcher` for complex routing or reusable dispatchers
 * Always use parameter injection (URIBuilder, MockWebServer, SSLContext)

@@ -23,8 +23,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Package Organization
 
-**Standards Reference**: Package Structure Standards in cui-java-core
-**See**: cui-java-core skill, `standards/java-core-patterns.md` section "Package Organization"
+**Standards Reference**: Package Structure Standards in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-core-patterns.md` section "Package Organization"
 
 ### Verification Items
 
@@ -44,8 +44,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Class Design
 
-**Standards Reference**: Class Structure Standards in cui-java-core
-**See**: cui-java-core skill, `standards/java-core-patterns.md` section "Class Design"
+**Standards Reference**: Class Structure Standards in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-core-patterns.md` section "Class Design"
 
 ### Verification Items
 
@@ -71,8 +71,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Method Design
 
-**Standards Reference**: Method Design Standards in cui-java-core
-**See**: cui-java-core skill, `standards/java-core-patterns.md` section "Method Design"
+**Standards Reference**: Method Design Standards in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-core-patterns.md` section "Method Design"
 
 ### Verification Items
 
@@ -131,8 +131,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Null Safety
 
-**Standards Reference**: Null Safety Standards in cui-java-core
-**See**: cui-java-core skill, `standards/java-null-safety.md`
+**Standards Reference**: Null Safety Standards in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-null-safety.md`
 
 ### Verification Items
 
@@ -162,8 +162,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Exception Handling
 
-**Standards Reference**: Exception Handling Standards in cui-java-core
-**See**: cui-java-core skill, `standards/java-core-patterns.md` section "Exception Handling"
+**Standards Reference**: Exception Handling Standards in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-core-patterns.md` section "Exception Handling"
 
 ### Verification Items
 
@@ -189,8 +189,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Naming Conventions
 
-**Standards Reference**: Naming Conventions in cui-java-core
-**See**: cui-java-core skill, `standards/java-core-patterns.md` section "Naming Conventions"
+**Standards Reference**: Naming Conventions in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-core-patterns.md` section "Naming Conventions"
 
 ### Verification Items
 
@@ -212,8 +212,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Modern Java Features
 
-**Standards Reference**: Modern Features Standards in cui-java-core
-**See**: cui-java-core skill, `standards/java-modern-features.md`
+**Standards Reference**: Modern Features Standards in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-modern-features.md`
 
 ### Verification Items
 
@@ -265,8 +265,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Lombok Usage
 
-**Standards Reference**: Lombok Patterns in cui-java-core
-**See**: cui-java-core skill, `standards/java-lombok-patterns.md`
+**Standards Reference**: Lombok Patterns in java-core
+**See**: `pm-dev-java:java-core` skill, `standards/java-lombok-patterns.md`
 
 ### Verification Items
 
@@ -290,10 +290,10 @@ This checklist ensures systematic verification of standards compliance after ref
   - Use CuiLogger explicitly
   - Follow CUI logging patterns
 
-## Logging
+## Logging (CUI Projects)
 
-**Standards Reference**: Logging Standards in cui-java-core
-**See**: cui-java-core skill, `standards/logging-standards.md`
+**Standards Reference**: Logging Standards in pm-dev-java-cui
+**See**: `pm-dev-java-cui:cui-logging` skill
 
 ### Verification Items
 
@@ -329,8 +329,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Documentation
 
-**Standards Reference**: Javadoc Standards in cui-javadoc skill
-**See**: cui-javadoc skill, `standards/javadoc-core.md`
+**Standards Reference**: Javadoc Standards in `pm-dev-java:javadoc` skill
+**See**: `pm-dev-java:javadoc` skill, `standards/javadoc-core.md`
 
 ### Verification Items
 
@@ -356,8 +356,8 @@ This checklist ensures systematic verification of standards compliance after ref
 
 ## Build and Tests
 
-**Standards Reference**: Testing Standards in cui-java-unit-testing
-**See**: cui-java-unit-testing skill, `standards/testing-junit-core.md`
+**Standards Reference**: Testing Standards in pm-dev-java:junit-core
+**See**: `pm-dev-java:junit-core` skill, `standards/testing-junit-core.md`
 
 ### Verification Items
 

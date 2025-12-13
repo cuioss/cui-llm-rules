@@ -101,7 +101,7 @@ public record Range(int start, int end) {
 
 ### When to Use Records vs Lombok @Value
 
-For comprehensive comparison of records vs Lombok @Value including decision criteria, see [java-lombok-patterns.md](java-lombok-patterns.md) section "Records vs Lombok @Value".
+For comprehensive comparison of records vs Lombok @Value including decision criteria, see `pm-dev-java:java-lombok` skill.
 
 **Migration from Lombok @Value to Records**:
 

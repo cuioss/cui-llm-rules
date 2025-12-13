@@ -441,7 +441,7 @@ Step 7: Verify coverage improvement ← THIS STANDARD
 
 === analyze-test-coverage Workflow
 
-Reference this standard in cui-java-unit-testing SKILL.md:
+Reference this standard in junit-core SKILL.md:
 
 [source,yaml]
 ----
@@ -720,5 +720,4 @@ Method Coverage: 80%
 == References
 
 * JaCoCo Documentation: https://www.jacoco.org/jacoco/trunk/doc/[JaCoCo]
-* xref:cui-java-unit-testing.adoc[CUI Java Unit Testing Standards]
 * Maven JaCoCo Plugin: https://www.jacoco.org/jacoco/trunk/doc/maven.html[Maven Plugin]
