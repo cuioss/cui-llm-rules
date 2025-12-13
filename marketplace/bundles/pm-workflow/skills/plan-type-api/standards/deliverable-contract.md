@@ -27,7 +27,7 @@ All solution-outline agents MUST produce deliverables following this structure:
 - suggested_skill: {bundle}:{skill-name}
 - suggested_workflow: {workflow-name}
 - context_skills: [{optional-skill-1}, {optional-skill-2}]
-- depends: {none | deliverable number(s)}
+- depends: {none | N. Title | N, M}
 
 **Affected files:**
 - `{path/to/file1}`
@@ -59,7 +59,7 @@ All solution-outline agents MUST produce deliverables following this structure:
 | `suggested_skill` | Yes | Skill for delegation | Delegation mapping |
 | `suggested_workflow` | Yes | Workflow within skill | Delegation mapping |
 | `context_skills` | No | Optional skills from domain's optionals list | Skill loading |
-| `depends` | Yes | Dependencies on other deliverables (by number) | Ordering, parallelization |
+| `depends` | Yes | Dependencies on other deliverables (number or `N. Title`) | Ordering, parallelization |
 | `Affected files` | Yes | Explicit file list | Step generation |
 | `Change per file` | Yes | What changes | Task description |
 | `Pattern` | Conditional | Code/format pattern | Implementation guide |
@@ -84,14 +84,16 @@ The `depends` field enables task-plan-agent to determine execution order and par
 | Value | Meaning | Example |
 |-------|---------|---------|
 | `none` | No dependencies, can run in parallel | Independent refactoring |
-| Single number | Must complete after numbered deliverable | `1` |
-| Multiple numbers | Must complete after ALL numbered deliverables | `1, 2, 4` |
+| `N` | Must complete after deliverable N | `1` |
+| `N. Title` | Must complete after deliverable N (with title for clarity) | `1. Create Database Schema` |
+| `N, M` | Must complete after ALL numbered deliverables | `1, 2, 4` |
 
 ### Dependency Rules
 
 - Use `none` when the deliverable has no prerequisites
-- Reference deliverables by their number (e.g., `1`, `2`, `4`)
-- Multiple dependencies are comma-separated
+- Reference deliverables by number alone (e.g., `1`) or with title (e.g., `1. Create Schema`)
+- Title format improves readability - task-plan agent parses the number prefix
+- Multiple dependencies are comma-separated (numbers only for brevity)
 - Circular dependencies are INVALID
 - Dependencies should reference earlier deliverable numbers (lower numbers first)
 
@@ -150,7 +152,7 @@ Solution outline agents MUST validate that each deliverable contains:
 - suggested_skill: pm-dev-java:java-implement
 - suggested_workflow: implement
 - context_skills: [pm-dev-java:cui-java-cdi]
-- depends: 1
+- depends: 1. Create Database Schema
 
 **Affected files:**
 - `src/main/java/de/cuioss/auth/AuthController.java`

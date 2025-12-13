@@ -441,6 +441,138 @@ Actively scan execution logs to detect script issues:
 [PASS/FAIL with explanation]
 ```
 
+## Plan-Type-API Contract Verification
+
+After each planning phase completes, verify artifacts comply with the plan-type-api contracts. Reference: [pm-workflow:plan-type-api](../../../pm-workflow/skills/plan-type-api/SKILL.md)
+
+### Phase 1: Init Complete
+
+**Contract Reference**: [plan-type-api/standards/domain-frontmatter-contract.md](../../../pm-workflow/skills/plan-type-api/standards/domain-frontmatter-contract.md)
+
+**Verification**:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --plan-id {plan_id}
+```
+
+**Required Fields**:
+| Field | Required | Description |
+|-------|----------|-------------|
+| `plan_type` | Yes | Plan type skill reference |
+| `title` | Yes | Plan title |
+| `description` | Yes | Plan description |
+
+### Phase 2: Solution Outline Complete
+
+**Contract Reference**: [plan-type-api/standards/deliverable-contract.md](../../../pm-workflow/skills/plan-type-api/standards/deliverable-contract.md)
+
+**Verification**:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id {plan_id}
+```
+
+**Required Deliverable Fields**:
+| Field | Required | Description |
+|-------|----------|-------------|
+| `change_type` | Yes | create/modify/refactor/migrate/delete |
+| `execution_mode` | Yes | automated/manual/mixed |
+| `domain` | Yes | Valid domain (java/javascript/plugin etc.) |
+| `suggested_skill` | Yes | Format: `{bundle}:{skill-name}` |
+| `suggested_workflow` | Yes | Workflow within skill |
+| `context_skills` | No | List of optional skills from domain |
+| `depends` | Yes | `none` or `N` or `N. Title` or `N, M` |
+| `Affected files` | Yes | Explicit file paths (not glob patterns) |
+| `Verification` | Yes | Command and criteria |
+
+**Common Violations**:
+| Violation | Description | Fix |
+|-----------|-------------|-----|
+| Vague file references | "All files matching X" instead of explicit paths | Enumerate all files explicitly |
+| Missing `depends` | No dependency specification | Add `depends: none` or proper reference |
+| Wrong `depends` format | Using title without number | Use `N. Title` format |
+| Missing `domain` | Skill loading will fail | Add valid domain from config |
+| Missing `context_skills` | Key in delegation block | Add empty list `[]` or valid skills |
+
+### Phase 3: User Review (Mandatory)
+
+**Contract Reference**: [plan-type-api/standards/user-review-protocol.md](../../../pm-workflow/skills/plan-type-api/standards/user-review-protocol.md)
+
+**Verification**: Check work.log for user approval entry
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log read --plan-id {plan_id} --type work | grep -i "approved\|proceed"
+```
+
+**Required**: User explicitly approved solution outline before task creation. Task creation without user approval is a CRITICAL violation.
+
+### Phase 4: Tasks Created
+
+**Contract Reference**: [plan-type-api/standards/task-contract.md](../../../pm-workflow/skills/plan-type-api/standards/task-contract.md)
+
+**Verification**:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks list --plan-id {plan_id}
+```
+
+For each task, verify:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get --plan-id {plan_id} --number {N}
+```
+
+**Required Task Fields**:
+| Field | Required | Description |
+|-------|----------|-------------|
+| `deliverables` | Yes | List of deliverable numbers (non-empty) |
+| `depends_on` | Yes | `none` or `TASK-N` references |
+| `delegation.skill` | Yes | Format: `{bundle}:{skill-name}` |
+| `delegation.workflow` | Yes | Workflow within skill |
+| `delegation.domain` | Yes | Valid domain value |
+| `delegation.context_skills` | Yes* | From deliverable's context_skills (*may be empty list) |
+| `steps` | Yes | TOON tabular format with file paths |
+| `verification.commands` | Yes | List of verification commands |
+| `verification.criteria` | Yes | Success criteria |
+
+**Steps Field Contract** (CRITICAL):
+- Steps MUST be file paths from deliverable's `Affected files`
+- Steps MUST NOT be action descriptions
+- TOON format: `steps[N]{number,title,status}:` with file paths in title column
+
+**Common Violations**:
+| Violation | Description | Fix |
+|-----------|-------------|-----|
+| Missing `context_skills` | Delegation block incomplete | Add context_skills from deliverable |
+| Descriptive steps | Steps contain action text, not file paths | Use file paths from deliverable |
+| Missing `deliverables` | No traceability to solution outline | Add deliverable number references |
+
+### Post-Phase Verification Template
+
+After each phase completes, use this verification template:
+
+```
+## PLAN-TYPE-API Contract Verification
+
+### Phase Completed
+{init | solution_outline | user_review | task_creation}
+
+### Contract Checks
+| Check | Status | Notes |
+|-------|--------|-------|
+| Required fields present | Pass/Fail | [Details] |
+| Field formats correct | Pass/Fail | [Details] |
+| References valid | Pass/Fail | [Details] |
+| No anti-patterns | Pass/Fail | [Details] |
+
+### Violations Found
+| Artifact | Field | Issue | Severity |
+|----------|-------|-------|----------|
+| {file} | {field} | {description} | Critical/High/Medium |
+
+### Remediation
+[Actions taken or required]
+
+### Assessment
+[PASS/FAIL with explanation]
+```
+
 ## Automated Verification Checklist
 
 After each planning command/skill execution, verify:

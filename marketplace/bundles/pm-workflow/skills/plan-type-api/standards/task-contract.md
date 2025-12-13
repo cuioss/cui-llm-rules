@@ -208,7 +208,9 @@ lessons_recorded: {count}
 
 **CRITICAL**: The `steps` field MUST contain file paths from the deliverable's `Affected files` section.
 
-### Valid Steps (File Paths)
+### Input Format (API calls)
+
+When calling `manage-tasks add`, use YAML list format:
 
 ```yaml
 steps:
@@ -216,6 +218,19 @@ steps:
   - marketplace/bundles/planning/agents/plan-refine-agent.md
   - marketplace/bundles/planning/agents/plan-execute-agent.md
 ```
+
+### Stored Format (.toon files)
+
+The script converts input to TOON tabular format in task files:
+
+```toon
+steps[3]{number,title,status}:
+1,marketplace/bundles/planning/agents/plan-init-agent.md,pending
+2,marketplace/bundles/planning/agents/plan-refine-agent.md,pending
+3,marketplace/bundles/planning/agents/plan-execute-agent.md,pending
+```
+
+### Valid Steps Requirements
 
 **Why valid:**
 - Each step is an explicit file path
@@ -237,9 +252,9 @@ steps:
 - "all remaining agents" is vague
 - Validation will reject this task
 
-### Invalid Steps (Task Numbers)
+### Invalid Steps (Wrong Content in Tabular Format)
 
-```yaml
+```toon
 steps[2]{number,title,status}:
 1,Convert plan-init-agent outputs,pending
 2,Convert plan-refine-agent outputs,pending
@@ -247,4 +262,5 @@ steps[2]{number,title,status}:
 
 **Why invalid:**
 - Title column contains descriptions, not file paths
-- This was the old format - now rejected by contract validation
+- The TOON tabular format is correct, but content must be file paths
+- Validation will reject this task
