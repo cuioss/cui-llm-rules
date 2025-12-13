@@ -78,8 +78,24 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 If `action: exists`, use AskUserQuestion:
 - **Resume**: Continue with existing plan (skip to Step 9 with existing data)
-- **Replace**: Delete plan directory and re-run create-or-reference
+- **Replace**: Delete existing plan and create new (see below)
 - **Rename**: Ask for new plan_id and re-run from Step 2
+
+**Replace Flow** (see `standards/plan-overwrite.md` for details):
+
+1. Delete the existing plan:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-files:manage-files delete-plan \
+  --plan-id {plan_id}
+```
+
+2. Re-run create-or-reference (should now return `action: created`):
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-files:manage-files create-or-reference \
+  --plan-id {plan_id}
+```
+
+3. Continue with Step 4 (Get Task Content)
 
 ### Step 4: Get Task Content
 
@@ -130,17 +146,25 @@ python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-do
 
 ### Step 6: Initialize References
 
+**IMPORTANT**: Get the branch name first, then pass it as a plain string. Do NOT use shell expansion `$(...)` in the command as it triggers permission prompts.
+
+First, get the current branch:
+```bash
+git branch --show-current
+```
+
+Then create references with the branch value:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-references:manage-references create \
   --plan-id {plan_id} \
-  --branch "$(git branch --show-current)"
+  --branch {branch_name}
 ```
 
 If issue source, also include:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-references:manage-references create \
   --plan-id {plan_id} \
-  --branch {branch} \
+  --branch {branch_name} \
   --issue-url {issue_url}
 ```
 

@@ -244,6 +244,75 @@ def cmd_create_or_reference(args):
         print(serialize_toon(result))
 
 
+def cmd_delete_plan(args):
+    """Delete an entire plan directory.
+
+    Returns TOON output indicating the deletion result.
+    Used by plan-init when user selects 'Replace' for an existing plan.
+
+    See: standards/plan-overwrite.md for the full workflow.
+    """
+    import shutil
+
+    # Import toon_parser for output
+    sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
+    from toon_parser import serialize_toon
+
+    if not validate_plan_id(args.plan_id):
+        result = {
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        }
+        print(serialize_toon(result))
+        sys.exit(1)
+
+    plan_dir = get_plan_dir(args.plan_id)
+
+    if not plan_dir.exists():
+        result = {
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'plan_not_found',
+            'message': f"Plan directory does not exist: {plan_dir}"
+        }
+        print(serialize_toon(result))
+        sys.exit(1)
+
+    # Count files before deletion for audit trail
+    files_removed = sum(1 for _ in plan_dir.rglob('*') if _.is_file())
+
+    try:
+        shutil.rmtree(plan_dir)
+        result = {
+            'status': 'success',
+            'plan_id': args.plan_id,
+            'action': 'deleted',
+            'path': str(plan_dir),
+            'files_removed': files_removed
+        }
+        print(serialize_toon(result))
+    except PermissionError as e:
+        result = {
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'permission_denied',
+            'message': f"Permission denied: {e}"
+        }
+        print(serialize_toon(result))
+        sys.exit(1)
+    except Exception as e:
+        result = {
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'delete_failed',
+            'message': f"Failed to delete plan directory: {e}"
+        }
+        print(serialize_toon(result))
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generic file I/O operations for plan directories'
@@ -293,6 +362,12 @@ def main():
         help='Create plan directory or reference existing one')
     create_ref_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_ref_parser.set_defaults(func=cmd_create_or_reference)
+
+    # delete-plan
+    delete_plan_parser = subparsers.add_parser('delete-plan',
+        help='Delete entire plan directory')
+    delete_plan_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    delete_plan_parser.set_defaults(func=cmd_delete_plan)
 
     args = parser.parse_args()
     args.func(args)

@@ -166,6 +166,36 @@ plan_type: pm-workflow:plan-type-java
 
 **Use case**: Called by plan-init to atomically check/create plan directories.
 
+### delete-plan
+
+Delete an entire plan directory. Used when user selects "Replace" for an existing plan during plan-init.
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-files:manage-files delete-plan \
+  --plan-id {plan_id}
+```
+
+**Output** (TOON format):
+
+On success:
+```toon
+status: success
+plan_id: my-feature
+action: deleted
+path: /path/to/.plan/plans/my-feature
+files_removed: 5
+```
+
+On error (plan not found):
+```toon
+status: error
+plan_id: my-feature
+error: plan_not_found
+message: Plan directory does not exist: /path/to/.plan/plans/my-feature
+```
+
+**Use case**: Called by plan-init when user selects "Replace" to delete existing plan before creating new one. See `pm-workflow:plan-init/standards/plan-overwrite.md` for the full workflow.
+
 ---
 
 ## Scripts
