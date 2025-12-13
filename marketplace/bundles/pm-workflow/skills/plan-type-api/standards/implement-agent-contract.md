@@ -235,9 +235,9 @@ If verification fails:
 
 | Domain | Agent | Implementation Skill |
 |--------|-------|----------------------|
-| `plugin` | `pm-plugin-development:plugin-implement-agent` | `plugin-plan-implement` |
-| `java` | `pm-dev-java:java-implement-agent` | `java-plan-implement` |
-| `javascript` | `pm-dev-frontend:js-implement-agent` | `js-plan-implement` |
+| `plugin` | `pm-plugin-development:plugin-plan-implement-agent` | `plugin-plan-implement` |
+| `java` | `pm-dev-java:java-plan-implement-agent` | `java-plan-implement` |
+| `javascript` | `pm-dev-frontend:js-plan-implement-agent` | `js-plan-implement` |
 
 ## Integration
 

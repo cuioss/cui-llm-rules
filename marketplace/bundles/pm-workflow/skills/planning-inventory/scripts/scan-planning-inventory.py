@@ -26,16 +26,14 @@ from pathlib import Path
 
 # Planning-related name patterns
 PLANNING_PATTERNS = [
-    "plan-*",       # Core planning skills (plan-init, plan-refine, etc.)
-    "manage-*",     # Management skills (manage-tasks, manage-plan-documents, etc.)
-    "*-workflow",   # Workflow skills (pr-workflow, git-workflow, etc.)
-    "task-*",       # Task commands (task-implement)
-    "pr-*",         # PR commands (pr-doctor) - note: also matches pr-workflow
-    "*-task-plan",       # Derived plan skills (java-task-plan, etc.)
-    "*-goals",      # Derived goals skills (java-solution-outline, etc.)
-    "*-plan-*",     # Derived agents and skills (java-task-plan-agent, plugin-plan-implement, etc.)
-    "*-goals-*",    # Derived agents (java-solution-outline-agent, etc.)
-    "*-implement*", # Implement agents (plugin-implement-agent, java-implement-agent, etc.)
+    "plan-*",              # Core planning skills (plan-init, plan-refine, etc.)
+    "manage-*",            # Management skills (manage-tasks, manage-plan-documents, etc.)
+    "*-workflow",          # Workflow skills (pr-workflow, git-workflow, etc.)
+    "task-*",              # Task commands (task-implement)
+    "pr-*",                # PR commands (pr-doctor) - note: also matches pr-workflow
+    "*-task-plan",         # Task plan skills (java-task-plan, js-task-plan, plugin-task-plan)
+    "*-solution-outline",  # Solution outline skills (java-solution-outline, js-solution-outline, plugin-solution-outline)
+    "*-plan-*",            # Plan-prefixed agents/skills (java-plan-implement-agent, plugin-plan-solution-outline-agent, etc.)
 ]
 
 # Bundles that contain planning-related components

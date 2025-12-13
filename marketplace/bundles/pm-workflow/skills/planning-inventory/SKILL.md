@@ -16,10 +16,10 @@ Planning-related components are distributed across multiple bundles:
 
 | Bundle | Component Types |
 |--------|-----------------|
-| `planning` | Core infrastructure (plan-*, manage-*, *-workflow) |
-| `pm-dev-java` | java-task-plan, java-solution-outline (skills + agents) |
-| `pm-dev-frontend` | js-task-plan, js-solution-outline (skills + agents) |
-| `pm-plugin-development` | plugin-task-plan, plugin-solution-outline (skills + agents) |
+| `pm-workflow` | Core infrastructure (plan-*, manage-*, *-workflow) |
+| `pm-dev-java` | java-task-plan, java-solution-outline, java-plan-implement (skills + agents) |
+| `pm-dev-frontend` | js-task-plan, js-solution-outline, js-plan-implement (skills + agents) |
+| `pm-plugin-development` | plugin-task-plan, plugin-solution-outline, plugin-plan-implement (skills + agents) |
 
 This skill provides a single command to discover all these components.
 
@@ -79,10 +79,10 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 ```json
 {
-  "patterns": ["plan-*", "manage-*", "*-workflow", "*-plan", "*-goals", "*-plan-*", "*-goals-*"],
-  "bundles_scanned": ["planning", "pm-dev-java", "pm-dev-frontend", "pm-plugin-development"],
+  "patterns": ["plan-*", "manage-*", "*-workflow", "*-task-plan", "*-solution-outline", "*-plan-*"],
+  "bundles_scanned": ["pm-workflow", "pm-dev-java", "pm-dev-frontend", "pm-plugin-development"],
   "core": {
-    "bundle": "planning",
+    "bundle": "pm-workflow",
     "agents": [...],
     "commands": [...],
     "skills": [...],
@@ -91,8 +91,8 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
   "derived": [
     {
       "bundle": "pm-dev-java",
-      "agents": [{"name": "java-task-plan-agent", ...}, {"name": "java-solution-outline-agent", ...}],
-      "skills": [{"name": "java-task-plan", ...}, {"name": "java-solution-outline", ...}],
+      "agents": [{"name": "java-task-plan-agent", ...}, {"name": "java-plan-solution-outline-agent", ...}, {"name": "java-plan-implement-agent", ...}],
+      "skills": [{"name": "java-task-plan", ...}, {"name": "java-solution-outline", ...}, {"name": "java-plan-implement", ...}],
       ...
     },
     ...
@@ -109,14 +109,14 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 ```json
 {
-  "core_bundle": "planning",
+  "core_bundle": "pm-workflow",
   "core_components": [
     {"type": "skills", "names": ["plan-init", "plan-refine", "plan-execute", ...]},
     {"type": "agents", "names": ["plan-init-agent", "plan-refine-agent", ...]},
     {"type": "commands", "names": ["task-implement", ...]}
   ],
   "derived_bundles": [
-    {"bundle": "pm-dev-java", "agents": ["java-task-plan-agent", ...], "skills": ["java-task-plan", ...]},
+    {"bundle": "pm-dev-java", "agents": ["java-task-plan-agent", "java-plan-solution-outline-agent", "java-plan-implement-agent", ...], "skills": ["java-task-plan", "java-solution-outline", "java-plan-implement", ...]},
     ...
   ],
   "statistics": {...}
@@ -125,7 +125,7 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 ## Component Categories
 
-### Core Components (planning bundle)
+### Core Components (pm-workflow bundle)
 
 | Pattern | Examples |
 |---------|----------|
@@ -140,9 +140,9 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 | Bundle | Agents | Skills |
 |--------|--------|--------|
-| pm-dev-java | java-task-plan-agent, java-solution-outline-agent, java-implement-agent | java-task-plan, java-solution-outline, java-plan-implement |
-| pm-dev-frontend | js-task-plan-agent, js-solution-outline-agent, js-implement-agent | js-task-plan, js-solution-outline, js-plan-implement |
-| pm-plugin-development | plugin-task-plan-agent, plugin-solution-outline-agent, plugin-implement-agent | plugin-task-plan, plugin-solution-outline, plugin-plan-implement |
+| pm-dev-java | java-task-plan-agent, java-plan-solution-outline-agent, java-plan-implement-agent | java-task-plan, java-solution-outline, java-plan-implement |
+| pm-dev-frontend | js-task-plan-agent, js-plan-solution-outline-agent, js-plan-implement-agent | js-task-plan, js-solution-outline, js-plan-implement |
+| pm-plugin-development | plugin-task-plan-agent, plugin-plan-solution-outline-agent, plugin-plan-implement-agent | plugin-task-plan, plugin-solution-outline, plugin-plan-implement |
 
 ## Dependencies
 

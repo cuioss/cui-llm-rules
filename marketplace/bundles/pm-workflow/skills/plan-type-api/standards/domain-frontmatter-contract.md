@@ -51,9 +51,9 @@ plan_defaults:
 Agent references use the format `{bundle}:{agent-name}`:
 
 ```yaml
-solution_outline_agent: pm-dev-java:java-solution-outline-agent
+solution_outline_agent: pm-dev-java:java-plan-solution-outline-agent
 task_plan_agent: pm-dev-java:java-task-plan-agent
-implement_agent: pm-dev-java:java-implement-agent
+implement_agent: pm-dev-java:java-plan-implement-agent
 ```
 
 For generic plans (no domain agents), use `null`:
@@ -103,9 +103,9 @@ name: plan-type-javascript
 description: JavaScript plan type for CUI projects
 allowed-tools: Read, Bash
 domain:
-  solution_outline_agent: pm-dev-frontend:js-solution-outline-agent
+  solution_outline_agent: pm-dev-frontend:js-plan-solution-outline-agent
   task_plan_agent: pm-dev-frontend:js-task-plan-agent
-  implement_agent: pm-dev-frontend:js-implement-agent
+  implement_agent: pm-dev-frontend:js-plan-implement-agent
 plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix system=npm
   pr_workflow: true
@@ -123,9 +123,9 @@ name: plan-type-plugin-development
 description: Plugin development plan type
 allowed-tools: Read, Bash
 domain:
-  solution_outline_agent: pm-plugin-development:plugin-solution-outline-agent
+  solution_outline_agent: pm-plugin-development:plugin-plan-solution-outline-agent
   task_plan_agent: pm-plugin-development:plugin-task-plan-agent
-  implement_agent: pm-plugin-development:plugin-implement-agent
+  implement_agent: pm-plugin-development:plugin-plan-implement-agent
 plan_defaults:
   verification_command: /pm-plugin-development:plugin-doctor
   pr_workflow: false

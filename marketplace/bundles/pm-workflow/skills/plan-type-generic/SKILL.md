@@ -15,6 +15,7 @@ keywords:
 domain:
   solution_outline_agent: null
   task_plan_agent: null
+  implement_agent: null
 
 # Plan defaults for this type
 plan_defaults:
@@ -42,6 +43,7 @@ The `domain:` frontmatter indicates no domain agents (generic plans use inline r
 |-------|-------|---------|
 | `solution_outline_agent` | `null` | No domain agent - use plan-refine-agent |
 | `task_plan_agent` | `null` | No domain agent - use plan-refine-agent |
+| `implement_agent` | `null` | No domain agent - inline execution |
 
 The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
 

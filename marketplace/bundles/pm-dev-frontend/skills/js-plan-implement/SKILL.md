@@ -1,12 +1,12 @@
 ---
-name: plugin-plan-implement
-description: Implement plugin tasks from plan with step iteration and progress tracking
+name: js-plan-implement
+description: Implement JavaScript tasks from plan with step iteration and progress tracking
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
-# Plugin Plan Implement Skill
+# JavaScript Plan Implement Skill
 
-**Role**: Implement plugin-domain tasks by iterating through steps (file paths) and applying changes.
+**Role**: Implement JavaScript-domain tasks by iterating through steps (file paths) and applying changes.
 
 **Execution Pattern**: Load task → Load skills → Iterate steps → Apply changes → Verify → Return result
 
@@ -104,12 +104,13 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-start
 The step `title` is a file path. Apply changes based on:
 1. Task `description` - overall change guidance
 2. Loaded skills - implementation patterns
-3. File type - markdown with YAML frontmatter for plugins
+3. File type - JavaScript source files, test files, web components, etc.
 
-**For plugin files** (agents, commands, skills):
+**For JavaScript files**:
 - Read the file
 - Identify sections to update
 - Apply changes per task description
+- Follow CUI JavaScript patterns from loaded skills
 - Write updated content
 
 Load step execution patterns if needed:
@@ -218,7 +219,7 @@ If verification fails:
 
 ### File Access
 - **`.plan/` files**: ONLY via execute-script.py
-- **Marketplace files**: Use Read/Write/Edit as needed
+- **JavaScript source files**: Use Read/Write/Edit as needed
 
 ### Progress Tracking
 - Mark step-start BEFORE execution
@@ -230,14 +231,16 @@ If verification fails:
 ## Integration
 
 ### Called By
-- `pm-plugin-development:plugin-plan-implement-agent` - Thin wrapper agent
+- `pm-dev-frontend:js-plan-implement-agent` - Thin wrapper agent
 
 ### Uses
-- `pm-plugin-development:plugin-architecture` - Architecture principles
+- `pm-dev-frontend:cui-javascript` - Core JavaScript patterns
+- `pm-dev-frontend:cui-javascript-unit-testing` - Unit testing standards
+- `pm-dev-frontend:cui-jsdoc` - JSDoc standards
 - `pm-workflow:manage-tasks` - Task and step management
 - `plan-marshall:logging:manage-log` - Work logging
 - Context skills from task delegation (loaded dynamically)
 
 ### Related Skills
 - `pm-workflow:plan-execute` - Generic plan execution orchestrator
-- `pm-plugin-development:plugin-maintain` - Plugin maintenance operations
+- `pm-dev-frontend:cui-javascript-maintenance` - JavaScript maintenance operations

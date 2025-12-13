@@ -21,8 +21,9 @@ keywords:
 
 # Agent routing
 domain:
-  solution_outline_agent: pm-dev-frontend:js-solution-outline-agent
+  solution_outline_agent: pm-dev-frontend:js-plan-solution-outline-agent
   task_plan_agent: pm-dev-frontend:js-task-plan-agent
+  implement_agent: pm-dev-frontend:js-plan-implement-agent
 
 # Plan defaults for this type
 plan_defaults:
@@ -51,8 +52,9 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `pm-dev-frontend:js-solution-outline-agent` | Creates solution outline with deliverables |
+| `solution_outline_agent` | `pm-dev-frontend:js-plan-solution-outline-agent` | Creates solution outline with deliverables |
 | `task_plan_agent` | `pm-dev-frontend:js-task-plan-agent` | Creates tasks from deliverables |
+| `implement_agent` | `pm-dev-frontend:js-plan-implement-agent` | Executes tasks from plan |
 
 The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
 
@@ -66,7 +68,7 @@ The `plan_defaults:` frontmatter is automatically read by `manage-config create`
 
 ## Agent Behavior
 
-### js-solution-outline-agent
+### js-plan-solution-outline-agent
 
 Analyzes JavaScript codebase and creates deliverables with:
 - Module design and exports

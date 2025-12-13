@@ -19,8 +19,9 @@ keywords:
 
 # Agent routing
 domain:
-  solution_outline_agent: pm-dev-java:java-solution-outline-agent
+  solution_outline_agent: pm-dev-java:java-plan-solution-outline-agent
   task_plan_agent: pm-dev-java:java-task-plan-agent
+  implement_agent: pm-dev-java:java-plan-implement-agent
 
 # Plan defaults for this type
 plan_defaults:
@@ -48,8 +49,9 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `pm-dev-java:java-solution-outline-agent` | Creates solution outline with deliverables |
+| `solution_outline_agent` | `pm-dev-java:java-plan-solution-outline-agent` | Creates solution outline with deliverables |
 | `task_plan_agent` | `pm-dev-java:java-task-plan-agent` | Creates tasks from deliverables |
+| `implement_agent` | `pm-dev-java:java-plan-implement-agent` | Executes tasks from plan |
 
 The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
 
@@ -63,7 +65,7 @@ The `plan_defaults:` frontmatter is automatically read by `manage-config create`
 
 ## Agent Behavior
 
-### java-solution-outline-agent
+### java-plan-solution-outline-agent
 
 Analyzes Java codebase and creates deliverables with:
 - Class/interface design decisions

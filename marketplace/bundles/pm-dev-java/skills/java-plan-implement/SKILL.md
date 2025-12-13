@@ -1,12 +1,12 @@
 ---
-name: plugin-plan-implement
-description: Implement plugin tasks from plan with step iteration and progress tracking
+name: java-plan-implement
+description: Implement Java tasks from plan with step iteration and progress tracking
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
-# Plugin Plan Implement Skill
+# Java Plan Implement Skill
 
-**Role**: Implement plugin-domain tasks by iterating through steps (file paths) and applying changes.
+**Role**: Implement Java-domain tasks by iterating through steps (file paths) and applying changes.
 
 **Execution Pattern**: Load task → Load skills → Iterate steps → Apply changes → Verify → Return result
 
@@ -104,12 +104,13 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-start
 The step `title` is a file path. Apply changes based on:
 1. Task `description` - overall change guidance
 2. Loaded skills - implementation patterns
-3. File type - markdown with YAML frontmatter for plugins
+3. File type - Java source files, test files, etc.
 
-**For plugin files** (agents, commands, skills):
+**For Java files**:
 - Read the file
 - Identify sections to update
 - Apply changes per task description
+- Follow CUI Java patterns from loaded skills
 - Write updated content
 
 Load step execution patterns if needed:
@@ -218,7 +219,7 @@ If verification fails:
 
 ### File Access
 - **`.plan/` files**: ONLY via execute-script.py
-- **Marketplace files**: Use Read/Write/Edit as needed
+- **Java source files**: Use Read/Write/Edit as needed
 
 ### Progress Tracking
 - Mark step-start BEFORE execution
@@ -230,14 +231,16 @@ If verification fails:
 ## Integration
 
 ### Called By
-- `pm-plugin-development:plugin-plan-implement-agent` - Thin wrapper agent
+- `pm-dev-java:java-plan-implement-agent` - Thin wrapper agent
 
 ### Uses
-- `pm-plugin-development:plugin-architecture` - Architecture principles
+- `pm-dev-java:cui-java-core` - Core Java patterns
+- `pm-dev-java:cui-java-unit-testing` - Unit testing standards
+- `pm-dev-java:cui-javadoc` - JavaDoc standards
 - `pm-workflow:manage-tasks` - Task and step management
 - `plan-marshall:logging:manage-log` - Work logging
 - Context skills from task delegation (loaded dynamically)
 
 ### Related Skills
 - `pm-workflow:plan-execute` - Generic plan execution orchestrator
-- `pm-plugin-development:plugin-maintain` - Plugin maintenance operations
+- `pm-dev-java:cui-java-maintenance` - Java maintenance operations

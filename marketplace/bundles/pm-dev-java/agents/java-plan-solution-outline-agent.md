@@ -1,12 +1,12 @@
 ---
-name: java-solution-outline-agent
+name: java-plan-solution-outline-agent
 description: Analyze Java codebase and create solution outline with deliverables
 tools: Read, Write, Edit, Glob, Grep, Skill
 model: sonnet
 skills: pm-dev-java:java-solution-outline, plan-marshall:general-development-rules
 ---
 
-# Java Solution Outline Agent
+# Java Plan Solution Outline Agent
 
 Constrained specialist for Java solution outline creation. Delegates to `pm-dev-java:java-solution-outline` skill.
 
@@ -27,7 +27,7 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 
 Stay in your lane:
 - You do NOT create tasks (that's java-task-plan-agent)
-- You do NOT implement code (that's java-implement-agent)
+- You do NOT implement code (that's java-plan-implement-agent)
 - You do NOT run tests (that's java-implement-tests-agent)
 - You analyze Java code to create deliverables in solution_outline.md from the request
 

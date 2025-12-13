@@ -19,9 +19,9 @@ keywords:
 
 # Agent routing
 domain:
-  solution_outline_agent: pm-plugin-development:plugin-solution-outline-agent
+  solution_outline_agent: pm-plugin-development:plugin-plan-solution-outline-agent
   task_plan_agent: pm-plugin-development:plugin-task-plan-agent
-  implement_agent: pm-plugin-development:plugin-implement-agent
+  implement_agent: pm-plugin-development:plugin-plan-implement-agent
 
 # Plan defaults for this type
 plan_defaults:
@@ -48,9 +48,9 @@ The `domain:` frontmatter provides structured routing information for commands:
 
 | Field | Value | Purpose |
 |-------|-------|---------|
-| `solution_outline_agent` | `pm-plugin-development:plugin-solution-outline-agent` | Creates solution outline with deliverables |
+| `solution_outline_agent` | `pm-plugin-development:plugin-plan-solution-outline-agent` | Creates solution outline with deliverables |
 | `task_plan_agent` | `pm-plugin-development:plugin-task-plan-agent` | Creates tasks from deliverables |
-| `implement_agent` | `pm-plugin-development:plugin-implement-agent` | Executes tasks from plan |
+| `implement_agent` | `pm-plugin-development:plugin-plan-implement-agent` | Executes tasks from plan |
 
 The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
 
@@ -64,7 +64,7 @@ The `plan_defaults:` frontmatter is automatically read by `manage-config create`
 
 ## Agent Behavior
 
-### plugin-solution-outline-agent
+### plugin-plan-solution-outline-agent
 
 Analyzes marketplace structure and creates deliverables with:
 - Component type (skill, command, agent, script)
@@ -97,7 +97,7 @@ Creates tasks with plugin-specific steps:
 
 **Returns**: `{status, task_ids[], lessons_recorded}`
 
-### plugin-implement-agent
+### plugin-plan-implement-agent
 
 Implements tasks by delegating to `plugin-plan-implement` skill:
 - Loads task from plan via manage-tasks API

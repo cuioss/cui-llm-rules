@@ -42,9 +42,9 @@ Request → [Solution Outline Agent] → User Review → [Task Plan Agent] → T
 
 | Plan Type | Solution Outline Agent | Task Plan Agent | Implement Agent | Verification |
 |-----------|------------------------|-----------------|-----------------|--------------|
-| `java` | `pm-dev-java:java-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` | `pm-dev-java:java-implement-agent` | `/pm-dev-builder:builder-build-and-fix` |
-| `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` | `pm-dev-frontend:js-implement-agent` | `/pm-dev-builder:builder-build-and-fix system=npm` |
-| `plugin` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` | `pm-plugin-development:plugin-implement-agent` | `/pm-plugin-development:plugin-doctor` |
+| `java` | `pm-dev-java:java-plan-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` | `pm-dev-java:java-plan-implement-agent` | `/pm-dev-builder:builder-build-and-fix` |
+| `javascript` | `pm-dev-frontend:js-plan-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` | `pm-dev-frontend:js-plan-implement-agent` | `/pm-dev-builder:builder-build-and-fix system=npm` |
+| `plugin` | `pm-plugin-development:plugin-plan-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` | `pm-plugin-development:plugin-plan-implement-agent` | `/pm-plugin-development:plugin-doctor` |
 | `generic` | None (inline) | None (inline) | None (inline) | None |
 
 ## Traceability Flow
@@ -108,9 +108,9 @@ The `--trace-plan-id` parameter is:
 - `plan-finalize` → reads config.toon directly
 
 **Domain Agents** (invoked by commands):
-- `pm-dev-java:java-solution-outline-agent` / `pm-dev-java:java-task-plan-agent` / `pm-dev-java:java-implement-agent`
-- `pm-dev-frontend:js-solution-outline-agent` / `pm-dev-frontend:js-task-plan-agent` / `pm-dev-frontend:js-implement-agent`
-- `pm-plugin-development:plugin-solution-outline-agent` / `pm-plugin-development:plugin-task-plan-agent` / `pm-plugin-development:plugin-implement-agent`
+- `pm-dev-java:java-plan-solution-outline-agent` / `pm-dev-java:java-task-plan-agent` / `pm-dev-java:java-plan-implement-agent`
+- `pm-dev-frontend:js-plan-solution-outline-agent` / `pm-dev-frontend:js-task-plan-agent` / `pm-dev-frontend:js-plan-implement-agent`
+- `pm-plugin-development:plugin-plan-solution-outline-agent` / `pm-plugin-development:plugin-task-plan-agent` / `pm-plugin-development:plugin-plan-implement-agent`
 
 **Data Layer** (used by domain agents):
 - `pm-workflow:manage-plan-documents:manage-plan-documents` (request) - Request document operations
