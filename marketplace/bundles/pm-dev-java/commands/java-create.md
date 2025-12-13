@@ -68,7 +68,7 @@ AskUserQuestion:
 ### Step 3: Load Standards
 
 ```
-Skill: pm-dev-java:cui-java-core
+Skill: pm-dev-java:java-core
 ```
 
 Load appropriate standards based on component type:

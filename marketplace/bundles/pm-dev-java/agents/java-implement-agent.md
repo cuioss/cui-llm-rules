@@ -33,7 +33,7 @@ This ensures proper tool usage (Write instead of cat heredoc, Glob instead of fi
 ### Step 1: Load Implementation Skill
 
 ```
-Skill: pm-dev-java:cui-java-core
+Skill: pm-dev-java:java-core
 ```
 
 ### Step 2: Execute Implement Feature Workflow

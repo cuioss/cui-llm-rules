@@ -625,6 +625,6 @@ Standards in `standards/` directory:
 ### Related Skills
 
 - `pm-dev-builder:builder-pom-maintenance` - POM maintenance (dependencies, BOMs, scopes)
-- `pm-dev-java:cui-javadoc` - JavaDoc standards
-- `pm-dev-java:cui-java-unit-testing` - Test standards
+- `pm-dev-java:javadoc` - JavaDoc standards
+- `pm-dev-java:junit-core` - Test standards
 

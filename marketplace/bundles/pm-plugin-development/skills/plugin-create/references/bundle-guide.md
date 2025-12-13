@@ -422,7 +422,7 @@ bundle/
 
 **Cross-Bundle References**:
 - Use fully qualified: `bundle-name:component-name`
-- Example: `pm-dev-java:cui-java-core`
+- Example: `pm-dev-java:java-core`
 
 ## Bundle Creation Workflow
 

@@ -340,7 +340,7 @@ def test_add_with_delegation():
             steps=['src/main/java/Component.java'],
             delegation_skill='pm-dev-java:java-implement',
             delegation_workflow='implement',
-            context_skills=['pm-dev-java:cui-java-cdi']
+            context_skills=['pm-dev-java:java-cdi']
         )
         result = run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', input_data=toon)
 

@@ -33,7 +33,7 @@ This ensures proper tool usage (Write instead of cat heredoc, Glob instead of fi
 ### Step 1: Load Testing Skill
 
 ```
-Skill: pm-dev-java:cui-java-unit-testing
+Skill: pm-dev-java:junit-core
 ```
 
 ### Step 2: Execute Fix Test Failures Workflow

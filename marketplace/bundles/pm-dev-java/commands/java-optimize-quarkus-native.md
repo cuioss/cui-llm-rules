@@ -36,7 +36,7 @@ If you discover issues or improvements during execution, record them:
 ### Step 1: Load Optimization Standards
 
 ```
-Skill: pm-dev-java:cui-java-cdi
+Skill: pm-dev-java:java-cdi-quarkus
 ```
 
 This loads comprehensive Quarkus native optimization standards from `standards/quarkus-native.md`:
@@ -400,5 +400,5 @@ Track and report these metrics:
 
 ## REFERENCES
 
-- Skill: `pm-dev-java:cui-java-cdi` - Contains `standards/quarkus-native.md` with detailed technical guidance
+- Skill: `pm-dev-java:java-cdi-quarkus` - Contains `standards/quarkus-native.md` with detailed technical guidance
 - [Quarkus Native Applications Guide](https://quarkus.io/guides/writing-native-applications-tips)

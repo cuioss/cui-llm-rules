@@ -100,7 +100,7 @@ delegation:
   skill: pm-dev-java:{java-implement|java-refactor|java-implement-tests}
   workflow: {implement|refactor|implement-tests}
   context_skills:
-    - pm-dev-java:cui-java-cdi
+    - pm-dev-java:java-cdi
 
 verification:
   commands:
@@ -112,7 +112,7 @@ EOF
 **Stdin format fields**:
 - `deliverables`: Array of deliverable numbers from solution_outline.md
 - `domain`: `java` for production code, `java-testing` for test code
-- `delegation.context_skills`: Add `pm-dev-java:cui-java-cdi` when CDI/Quarkus patterns needed
+- `delegation.context_skills`: Add `pm-dev-java:java-cdi` when CDI/Quarkus patterns needed
 
 ### Step 6: Record Issues as Lessons
 
@@ -199,8 +199,8 @@ One deliverable → one task when:
 
 **Steps**:
 1. Create/modify implementation at `{path}`
-2. Add unit tests (load `pm-dev-java:cui-java-unit-testing`)
-3. Add JavaDoc (load `pm-dev-java:cui-javadoc`)
+2. Add unit tests (load `pm-dev-java:junit-core`)
+3. Add JavaDoc (load `pm-dev-java:javadoc`)
 4. Verify `mvn test -pl {module}` passes
 
 ### Multi-Step Component Task
@@ -225,8 +225,8 @@ One deliverable → multiple tasks when:
 1. Create service interface at {interface_path}
 2. Create service implementation at {impl_path}
 3. Add CDI annotations (@ApplicationScoped, @Inject)
-4. Add unit tests (load pm-dev-java:cui-java-unit-testing)
-5. Add JavaDoc (load pm-dev-java:cui-javadoc)
+4. Add unit tests (load pm-dev-java:junit-core)
+5. Add JavaDoc (load pm-dev-java:javadoc)
 6. Verify build passes
 ```
 
@@ -235,8 +235,8 @@ One deliverable → multiple tasks when:
 1. Create repository interface at {interface_path}
 2. Create repository implementation at {impl_path}
 3. Add data access logic with proper exception handling
-4. Add integration tests (load pm-dev-java:cui-java-unit-testing)
-5. Add JavaDoc (load pm-dev-java:cui-javadoc)
+4. Add integration tests (load pm-dev-java:junit-core)
+5. Add JavaDoc (load pm-dev-java:javadoc)
 6. Verify build passes
 ```
 
@@ -246,7 +246,7 @@ One deliverable → multiple tasks when:
 2. Add @ConfigProperty annotations for properties
 3. Add validation logic if needed
 4. Add unit tests for configuration validation
-5. Add JavaDoc (load pm-dev-java:cui-javadoc)
+5. Add JavaDoc (load pm-dev-java:javadoc)
 6. Verify build passes
 ```
 
@@ -325,10 +325,10 @@ If deliverable lacks detail:
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced in Task Steps**:
-- `pm-dev-java:cui-java-core` - Core Java patterns
-- `pm-dev-java:cui-java-unit-testing` - Testing standards
-- `pm-dev-java:cui-javadoc` - Documentation standards
-- `pm-dev-java:cui-java-cdi` - CDI/Quarkus patterns (when applicable)
+- `pm-dev-java:java-core` - Core Java patterns
+- `pm-dev-java:junit-core` - Testing standards
+- `pm-dev-java:javadoc` - Documentation standards
+- `pm-dev-java:java-cdi` - CDI/Quarkus patterns (when applicable)
 
 **Contract Reference**:
 - [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) - Optimization workflow and decision tables

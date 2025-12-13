@@ -552,12 +552,12 @@ For each skill A:
 ```
 Cross-Skill Duplication Report
 
-Skill Pair: pm-dev-java:cui-java-core ↔ pm-dev-java:cui-java-cdi
+Skill Pair: pm-dev-java:java-core ↔ pm-dev-java:java-cdi
 
 Duplicated Content (127 characters):
 - Section: "Logging Standards"
   - Both skills contain identical logging requirements
-  - Recommendation: Extract to shared pm-dev-java:cui-java-logging skill
+  - Recommendation: Extract to shared pm-dev-java-cui:cui-logging skill
 
 Skill Pair: pm-dev-frontend:cui-javascript ↔ pm-dev-frontend:cui-cypress
 

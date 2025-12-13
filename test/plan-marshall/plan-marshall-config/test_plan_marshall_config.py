@@ -30,11 +30,11 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
         config = {
             "skill_domains": {
                 "java": {
-                    "defaults": ["pm-dev-java:cui-java-core"],
-                    "optionals": ["pm-dev-java:cui-java-cdi"]
+                    "defaults": ["pm-dev-java:java-core"],
+                    "optionals": ["pm-dev-java:java-cdi"]
                 },
                 "java-testing": {
-                    "defaults": ["pm-dev-java:cui-java-unit-testing"],
+                    "defaults": ["pm-dev-java:junit-core"],
                     "optionals": []
                 }
             },
@@ -190,7 +190,7 @@ def test_skill_domains_get():
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get', '--domain', 'java')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-dev-java:cui-java-core' in result.stdout
+        assert 'pm-dev-java:java-core' in result.stdout
 
 
 def test_skill_domains_get_defaults():
@@ -201,7 +201,7 @@ def test_skill_domains_get_defaults():
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get-defaults', '--domain', 'java')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-dev-java:cui-java-core' in result.stdout
+        assert 'pm-dev-java:java-core' in result.stdout
 
 
 def test_skill_domains_get_optionals():
@@ -212,7 +212,7 @@ def test_skill_domains_get_optionals():
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get-optionals', '--domain', 'java')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-dev-java:cui-java-cdi' in result.stdout
+        assert 'pm-dev-java:java-cdi' in result.stdout
 
 
 def test_skill_domains_unknown_domain():
@@ -253,7 +253,7 @@ def test_skill_domains_validate():
         result = run_script(
             SCRIPT_PATH, 'skill-domains', 'validate',
             '--domain', 'java',
-            '--skill', 'pm-dev-java:cui-java-core'
+            '--skill', 'pm-dev-java:java-core'
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
@@ -269,7 +269,7 @@ def test_skill_domains_validate_returns_location():
         result_defaults = run_script(
             SCRIPT_PATH, 'skill-domains', 'validate',
             '--domain', 'java',
-            '--skill', 'pm-dev-java:cui-java-core'
+            '--skill', 'pm-dev-java:java-core'
         )
 
         assert result_defaults.success, f"Should succeed: {result_defaults.stderr}"
@@ -279,7 +279,7 @@ def test_skill_domains_validate_returns_location():
         result_optionals = run_script(
             SCRIPT_PATH, 'skill-domains', 'validate',
             '--domain', 'java',
-            '--skill', 'pm-dev-java:cui-java-cdi'
+            '--skill', 'pm-dev-java:java-cdi'
         )
 
         assert result_optionals.success, f"Should succeed: {result_optionals.stderr}"

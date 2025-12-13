@@ -33,11 +33,15 @@
     "./agents/java-task-plan-agent.md"
   ],
   "skills": [
-    "./skills/cui-java-cdi",
-    "./skills/cui-java-core",
-    "./skills/cui-java-maintenance",
-    "./skills/cui-java-unit-testing",
-    "./skills/cui-javadoc",
+    "./skills/java-core",
+    "./skills/java-null-safety",
+    "./skills/java-lombok",
+    "./skills/java-cdi",
+    "./skills/java-cdi-quarkus",
+    "./skills/junit-core",
+    "./skills/junit-integration",
+    "./skills/javadoc",
+    "./skills/java-maintenance",
     "./skills/java-plan-implement",
     "./skills/java-solution-outline",
     "./skills/java-task-plan"

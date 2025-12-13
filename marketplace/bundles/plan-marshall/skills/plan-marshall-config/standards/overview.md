@@ -36,7 +36,7 @@ All commands output TOON (Token-Oriented Object Notation) for token efficiency:
 status: success
 domain: java
 defaults[1]:
-- pm-dev-java:cui-java-core
+- pm-dev-java:java-core
 ```
 
 ### 4. Fail Early, Fail Loud

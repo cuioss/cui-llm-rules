@@ -15,6 +15,12 @@
       "strict": false
     },
     {
+      "name": "pm-dev-java-cui",
+      "description": "CUI-specific Java development standards for CuiLogger, test generators, and HTTP client patterns",
+      "source": "./bundles/pm-dev-java-cui",
+      "strict": false
+    },
+    {
       "name": "pm-dev-frontend",
       "description": "JavaScript, CSS, and web component standards for applications",
       "source": "./bundles/pm-dev-frontend",

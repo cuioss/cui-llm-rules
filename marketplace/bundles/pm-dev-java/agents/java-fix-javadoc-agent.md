@@ -32,7 +32,7 @@ This ensures proper tool usage (Write instead of cat heredoc, Glob instead of fi
 ### Step 1: Load JavaDoc Skill
 
 ```
-Skill: pm-dev-java:cui-javadoc
+Skill: pm-dev-java:javadoc
 ```
 
 ### Step 2: Execute Fix JavaDoc Errors Workflow

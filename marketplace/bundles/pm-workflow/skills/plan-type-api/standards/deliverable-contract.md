@@ -69,8 +69,8 @@ All solution-outline agents MUST produce deliverables following this structure:
 
 | Domain | Description | Default Skills | Optional Skills |
 |--------|-------------|----------------|-----------------|
-| `java` | Production Java code | pm-dev-java:cui-java-core | pm-dev-java:cui-java-cdi |
-| `java-testing` | Java test code | pm-dev-java:cui-java-unit-testing | (none) |
+| `java` | Production Java code | pm-dev-java:java-core | pm-dev-java:java-cdi |
+| `java-testing` | Java test code | pm-dev-java:junit-core | (none) |
 | `javascript` | Production JavaScript | pm-dev-frontend:cui-javascript | (none) |
 | `javascript-testing` | JavaScript test code | pm-dev-frontend:cui-javascript-unit-testing | pm-dev-frontend:cui-cypress |
 | `plugin` | Marketplace plugins | pm-plugin-development:plugin-architecture | pm-plugin-development:plugin-script-architecture |
@@ -151,7 +151,7 @@ Solution outline agents MUST validate that each deliverable contains:
 - domain: java
 - suggested_skill: pm-dev-java:java-implement
 - suggested_workflow: implement
-- context_skills: [pm-dev-java:cui-java-cdi]
+- context_skills: [pm-dev-java:java-cdi]
 - depends: 1. Create Database Schema
 
 **Affected files:**

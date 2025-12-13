@@ -45,9 +45,9 @@ plan-marshall-config skill-domains get --domain java
 status: success
 domain: java
 defaults[1]:
-- pm-dev-java:cui-java-core
+- pm-dev-java:java-core
 optionals[1]:
-- pm-dev-java:cui-java-cdi
+- pm-dev-java:java-cdi
 ```
 
 ### get-defaults
@@ -73,8 +73,8 @@ Update domain configuration.
 ```bash
 plan-marshall-config skill-domains set \
   --domain java \
-  --defaults "pm-dev-java:cui-java-core,pm-dev-java:cui-javadoc" \
-  --optionals "pm-dev-java:cui-java-cdi"
+  --defaults "pm-dev-java:java-core,pm-dev-java:javadoc" \
+  --optionals "pm-dev-java:java-cdi"
 ```
 
 ### add
@@ -94,14 +94,14 @@ Check if a skill is valid for a domain.
 ```bash
 plan-marshall-config skill-domains validate \
   --domain java \
-  --skill pm-dev-java:cui-java-cdi
+  --skill pm-dev-java:java-cdi
 ```
 
 **Output:**
 ```toon
 status: success
 domain: java
-skill: pm-dev-java:cui-java-cdi
+skill: pm-dev-java:java-cdi
 valid: true
 in_defaults: false
 in_optionals: true

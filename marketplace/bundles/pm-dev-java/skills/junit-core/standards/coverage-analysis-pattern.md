@@ -183,7 +183,7 @@ Use analyze-coverage-gaps script:
 
 [source,bash]
 ----
-python3 .plan/execute-script.py pm-dev-java:cui-java-unit-testing:coverage gaps \
+python3 .plan/execute-script.py pm-dev-java:junit-core:coverage gaps \
   --report target/site/jacoco/jacoco.xml \
   --output coverage-gaps.json \
   --pretty

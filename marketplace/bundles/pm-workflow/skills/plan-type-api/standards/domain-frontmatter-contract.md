@@ -90,8 +90,8 @@ plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
   standards:
-    - pm-dev-java:cui-java-core
-    - pm-dev-java:cui-java-unit-testing
+    - pm-dev-java:java-core
+    - pm-dev-java:junit-core
 ---
 ```
 

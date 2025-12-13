@@ -12,11 +12,11 @@ Skill domains configure which implementation skills are loaded when working on c
 {
   "skill_domains": {
     "java": {
-      "defaults": ["pm-dev-java:cui-java-core"],
-      "optionals": ["pm-dev-java:cui-java-cdi"]
+      "defaults": ["pm-dev-java:java-core"],
+      "optionals": ["pm-dev-java:java-cdi"]
     },
     "java-testing": {
-      "defaults": ["pm-dev-java:cui-java-unit-testing"],
+      "defaults": ["pm-dev-java:junit-core"],
       "optionals": []
     },
     "javascript": {
@@ -38,7 +38,7 @@ Skill domains configure which implementation skills are loaded when working on c
 Skills that are **always loaded** when working in this domain.
 
 ```json
-"defaults": ["pm-dev-java:cui-java-core", "pm-dev-java:cui-javadoc"]
+"defaults": ["pm-dev-java:java-core", "pm-dev-java:javadoc"]
 ```
 
 Implementation agents automatically load these skills before starting work.
@@ -48,7 +48,7 @@ Implementation agents automatically load these skills before starting work.
 Skills that are **available for selection** but not automatically loaded.
 
 ```json
-"optionals": ["pm-dev-java:cui-java-cdi", "pm-dev-java:cui-java-maintenance"]
+"optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
 ```
 
 Solution outline agents may suggest loading optionals based on task requirements.
@@ -61,8 +61,8 @@ Production Java code.
 
 | Field | Default Skills |
 |-------|---------------|
-| defaults | `pm-dev-java:cui-java-core` |
-| optionals | `pm-dev-java:cui-java-cdi` |
+| defaults | `pm-dev-java:java-core` |
+| optionals | `pm-dev-java:java-cdi` |
 
 ### java-testing
 
@@ -70,7 +70,7 @@ Java test code (JUnit, integration tests).
 
 | Field | Default Skills |
 |-------|---------------|
-| defaults | `pm-dev-java:cui-java-unit-testing` |
+| defaults | `pm-dev-java:junit-core` |
 | optionals | (none) |
 
 ### javascript
@@ -112,10 +112,10 @@ plan-marshall-config skill-domains get-defaults --domain java
 # status: success
 # domain: java
 # defaults[1]:
-# - pm-dev-java:cui-java-core
+# - pm-dev-java:java-core
 ```
 
-Agent then loads: `Skill: pm-dev-java:cui-java-core`
+Agent then loads: `Skill: pm-dev-java:java-core`
 
 ### Solution Outline Agent: Suggest Optionals
 
@@ -127,7 +127,7 @@ plan-marshall-config skill-domains get-optionals --domain java
 # status: success
 # domain: java
 # optionals[1]:
-# - pm-dev-java:cui-java-cdi
+# - pm-dev-java:java-cdi
 ```
 
 Agent may suggest: "Consider loading CDI skill if using dependency injection"
@@ -138,7 +138,7 @@ Agent may suggest: "Consider loading CDI skill if using dependency injection"
 # Check if skill is valid for domain
 plan-marshall-config skill-domains validate \
   --domain java \
-  --skill pm-dev-java:cui-java-cdi
+  --skill pm-dev-java:java-cdi
 
 # Output:
 # status: success
@@ -155,8 +155,8 @@ For projects with special requirements:
 # Add a new domain
 plan-marshall-config skill-domains add \
   --domain quarkus \
-  --defaults "pm-dev-java:cui-java-core,pm-dev-java:cui-java-cdi" \
-  --optionals "pm-dev-java:cui-java-maintenance"
+  --defaults "pm-dev-java:java-core,pm-dev-java:java-cdi" \
+  --optionals "pm-dev-java:java-maintenance"
 ```
 
 ## Modifying Existing Domains
@@ -165,7 +165,7 @@ plan-marshall-config skill-domains add \
 # Add JavaDoc to Java defaults
 plan-marshall-config skill-domains set \
   --domain java \
-  --defaults "pm-dev-java:cui-java-core,pm-dev-java:cui-javadoc"
+  --defaults "pm-dev-java:java-core,pm-dev-java:javadoc"
 ```
 
 ## Integration with Modules
@@ -194,11 +194,11 @@ Module → get-domains → [java, java-testing]
                             ↓
          skill-domains get-defaults --domain java
                             ↓
-                    Load: pm-dev-java:cui-java-core
+                    Load: pm-dev-java:java-core
                             ↓
          skill-domains get-defaults --domain java-testing
                             ↓
-                    Load: pm-dev-java:cui-java-unit-testing
+                    Load: pm-dev-java:junit-core
 ```
 
 ## Best Practices

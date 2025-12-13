@@ -64,7 +64,7 @@ If build fails, report to caller and stop execution.
 
 **Load logging standards:**
 ```
-Skill: pm-dev-java:cui-java-core
+Skill: pm-dev-java-cui:cui-logging
 ```
 
 This loads:
@@ -388,7 +388,7 @@ COMPLIANCE STATUS: {COMPLIANT / ISSUES REMAINING}
 
 ## RELATED
 
-- Skill: `pm-dev-java:cui-java-core` - Logging standards, enforcement patterns, and workflows
+- Skill: `pm-dev-java-cui:cui-logging` - Logging standards, enforcement patterns, and workflows
   - Workflow: Analyze Logging Violations - Detect LOGGER usage violations
   - Workflow: Document LogRecord - Generate AsciiDoc documentation
 - Standards: `logging-standards.md`, `logmessages-documentation.md`, `logging-enforcement-patterns.md`

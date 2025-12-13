@@ -12,11 +12,11 @@ JSON structure and field definitions for project configuration.
 {
   "skill_domains": {
     "java": {
-      "defaults": ["pm-dev-java:cui-java-core"],
-      "optionals": ["pm-dev-java:cui-java-cdi"]
+      "defaults": ["pm-dev-java:java-core"],
+      "optionals": ["pm-dev-java:java-cdi"]
     },
     "java-testing": {
-      "defaults": ["pm-dev-java:cui-java-unit-testing"],
+      "defaults": ["pm-dev-java:junit-core"],
       "optionals": []
     },
     "javascript": {

@@ -234,13 +234,13 @@ If verification fails:
 - `pm-dev-java:java-plan-implement-agent` - Thin wrapper agent
 
 ### Uses
-- `pm-dev-java:cui-java-core` - Core Java patterns
-- `pm-dev-java:cui-java-unit-testing` - Unit testing standards
-- `pm-dev-java:cui-javadoc` - JavaDoc standards
+- `pm-dev-java:java-core` - Core Java patterns
+- `pm-dev-java:junit-core` - Unit testing standards
+- `pm-dev-java:javadoc` - JavaDoc standards
 - `pm-workflow:manage-tasks` - Task and step management
 - `plan-marshall:logging:manage-log` - Work logging
 - Context skills from task delegation (loaded dynamically)
 
 ### Related Skills
 - `pm-workflow:plan-execute` - Generic plan execution orchestrator
-- `pm-dev-java:cui-java-maintenance` - Java maintenance operations
+- `pm-dev-java:java-maintenance` - Java maintenance operations

@@ -28,9 +28,9 @@ plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
   standards:
-    - pm-dev-java:cui-java-core
-    - pm-dev-java:cui-javadoc
-    - pm-dev-java:cui-java-unit-testing
+    - pm-dev-java:java-core
+    - pm-dev-java:javadoc
+    - pm-dev-java:junit-core
 ---
 
 # Plan Type: Java (`pm-workflow:plan-type-java`)
@@ -80,9 +80,9 @@ Analyzes Java codebase and creates deliverables with:
 
 Creates tasks with Java-specific steps:
 1. Create/modify implementation file at `{path}`
-2. Add unit tests (load `pm-dev-java:cui-java-unit-testing`)
-3. Add JavaDoc (load `pm-dev-java:cui-javadoc`)
-4. Follow CUI patterns (load `pm-dev-java:cui-java-core`)
+2. Add unit tests (load `pm-dev-java:junit-core`)
+3. Add JavaDoc (load `pm-dev-java:javadoc`)
+4. Follow CUI patterns (load `pm-dev-java:java-core`)
 5. Verify build passes (via `/pm-dev-builder:builder-build-and-fix`)
 
 **Returns**: `{status, task_ids[], lessons_recorded}`

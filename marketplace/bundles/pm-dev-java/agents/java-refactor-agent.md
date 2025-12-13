@@ -33,7 +33,7 @@ This ensures proper tool usage (Write instead of cat heredoc, Glob instead of fi
 ### Step 1: Load Core Standards
 
 ```
-Skill: pm-dev-java:cui-java-core
+Skill: pm-dev-java:java-core
 ```
 
 This loads all core Java standards for compliance verification.

@@ -217,9 +217,9 @@ When creating deliverables, use this mapping for `suggested_skill` and `suggeste
 
 | Situation | Add to context_skills |
 |-----------|----------------------|
-| Uses CDI/injection | `pm-dev-java:cui-java-cdi` |
-| Quarkus-specific | `pm-dev-java:cui-java-cdi` |
-| Complex refactoring | `pm-dev-java:cui-java-maintenance` |
+| Uses CDI/injection | `pm-dev-java:java-cdi` |
+| Quarkus-specific | `pm-dev-java:java-cdi` |
+| Complex refactoring | `pm-dev-java:java-maintenance` |
 
 ---
 
@@ -286,19 +286,19 @@ When creating deliverables, use this mapping for `suggested_skill` and `suggeste
 When task involves logging:
 - Check for `CuiLogger` usage
 - Identify `LogRecord` requirements
-- Reference `pm-dev-java:cui-java-core` standards
+- Reference `pm-dev-java:java-core` standards
 
 ### CDI Analysis
 When task involves CDI:
 - Check `beans.xml` configuration
 - Identify scope annotations
-- Reference `pm-dev-java:cui-java-cdi` standards
+- Reference `pm-dev-java:java-cdi` standards
 
 ### Testing Analysis
 When task involves testing:
 - Check for `@EnabledIfReachable` patterns
 - Identify generator requirements
-- Reference `pm-dev-java:cui-java-unit-testing` standards
+- Reference `pm-dev-java:junit-core` standards
 
 ---
 
@@ -338,6 +338,6 @@ If multiple classes match the name:
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced**:
-- `pm-dev-java:cui-java-core` - Core Java patterns
-- `pm-dev-java:cui-java-cdi` - CDI/Quarkus patterns
-- `pm-dev-java:cui-java-unit-testing` - Testing standards
+- `pm-dev-java:java-core` - Core Java patterns
+- `pm-dev-java:java-cdi` - CDI/Quarkus patterns
+- `pm-dev-java:junit-core` - Testing standards

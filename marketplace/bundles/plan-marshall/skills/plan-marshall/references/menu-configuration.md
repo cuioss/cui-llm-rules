@@ -103,7 +103,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 # Add JavaDoc to Java defaults
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains set \
   --domain java \
-  --defaults "pm-dev-java:cui-java-core,pm-dev-java:cui-javadoc"
+  --defaults "pm-dev-java:java-core,pm-dev-java:javadoc"
 ```
 
 ---

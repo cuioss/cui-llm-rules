@@ -353,7 +353,7 @@ Step 1: Load Architecture Principles
 Skill: pm-plugin-development:plugin-architecture
 
 Step 2: Load Java Standards
-Skill: pm-dev-java:cui-java-core
+Skill: pm-dev-java:java-core
 
 Step 3: Apply Standards
 [Analysis using loaded standards]

@@ -71,7 +71,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 status: success
 domain: java
 defaults[1]:
-- pm-dev-java:cui-java-core
+- pm-dev-java:java-core
 ```
 
 ### Get Domain Optionals
@@ -85,7 +85,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains validate --domain java --skill pm-dev-java:cui-java-cdi
+  skill-domains validate --domain java --skill pm-dev-java:java-cdi
 ```
 
 ---
@@ -281,8 +281,8 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 {
   "skill_domains": {
     "java": {
-      "defaults": ["pm-dev-java:cui-java-core"],
-      "optionals": ["pm-dev-java:cui-java-cdi"]
+      "defaults": ["pm-dev-java:java-core"],
+      "optionals": ["pm-dev-java:java-cdi"]
     }
   },
   "modules": {
@@ -327,8 +327,8 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 | Domain | Purpose | Default Skills |
 |--------|---------|----------------|
-| `java` | Production Java code | `pm-dev-java:cui-java-core` |
-| `java-testing` | Java test code | `pm-dev-java:cui-java-unit-testing` |
+| `java` | Production Java code | `pm-dev-java:java-core` |
+| `java-testing` | Java test code | `pm-dev-java:junit-core` |
 | `javascript` | Production JS code | `pm-dev-frontend:cui-javascript` |
 | `javascript-testing` | JS test code | `pm-dev-frontend:cui-javascript-unit-testing` |
 

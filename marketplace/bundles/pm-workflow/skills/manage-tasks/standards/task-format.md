@@ -216,7 +216,7 @@ delegation:
   workflow: implement
   domain: java
   context_skills:
-  - pm-dev-java:cui-java-cdi
+  - pm-dev-java:java-cdi
 
 steps[3]{number,title,status}:
 1,Create AuthController class,done

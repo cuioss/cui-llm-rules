@@ -27,12 +27,19 @@ pm-dev-java/
 │   ├── java-enforce-logrecords.md   # Logging standards enforcement
 │   ├── java-maintain-logger.md      # Logger maintenance workflow
 │   └── java-optimize-quarkus-native.md # Native image optimization
-└── skills/                  # 5 skills with workflows
-    ├── cui-java-core/       # Core Java + Fix Compilation + Implement Feature
-    ├── cui-java-unit-testing/ # Testing + Fix Test Failures + Implement Tests
-    ├── cui-javadoc/         # JavaDoc + Fix JavaDoc Errors
-    ├── cui-java-cdi/        # CDI/Quarkus standards
-    └── cui-java-maintenance/ # Maintenance standards
+└── skills/                  # 12 skills with workflows
+    ├── java-core/           # Core Java patterns, modern features
+    ├── java-null-safety/    # JSpecify null annotations
+    ├── java-lombok/         # Lombok patterns (@Delegate, @Builder)
+    ├── junit-core/          # JUnit 5 testing, AAA structure
+    ├── junit-integration/   # Integration testing with Failsafe
+    ├── java-cdi/            # Core CDI patterns, constructor injection
+    ├── java-cdi-quarkus/    # Quarkus-specific CDI, @QuarkusTest
+    ├── javadoc/             # JavaDoc documentation standards
+    ├── java-maintenance/    # Maintenance prioritization
+    ├── java-plan-implement/ # Plan implementation workflow
+    ├── java-solution-outline/ # Solution outline generation
+    └── java-task-plan/      # Task plan generation
 ```
 
 ## Agent-First Design
@@ -77,27 +84,31 @@ Commands use the Task tool to coordinate multiple agents:
 
 ## Components
 
-### Skills (5 skills with compound workflows)
+### Skills (12 skills)
 
-1. **cui-java-core** - Core Java development standards
-   - Workflow: Fix Compilation Errors (iterative)
-   - Workflow: Implement Feature (with verification)
-   - Standards: null safety, Lombok, logging, modern features
+**Core Development:**
+- **java-core** - Core Java patterns, modern features, performance
+- **java-null-safety** - JSpecify null annotations, @Nullable/@NonNull
+- **java-lombok** - Lombok patterns (@Delegate, @Builder, @Value)
 
-2. **cui-java-unit-testing** - Java unit testing standards
-   - Workflow: Fix Test Failures (iterative)
-   - Workflow: Implement Tests (with coverage)
-   - Standards: JUnit 5, generators, value objects
+**Testing:**
+- **junit-core** - JUnit 5 patterns, AAA structure, assertions
+- **junit-integration** - Integration testing with Maven Failsafe
 
-3. **cui-javadoc** - JavaDoc documentation standards
-   - Workflow: Fix JavaDoc Errors (iterative)
-   - Standards: JavaDoc best practices, error reference
+**CDI/Quarkus:**
+- **java-cdi** - Core CDI patterns, constructor injection, scopes
+- **java-cdi-quarkus** - Quarkus-specific CDI, @QuarkusTest, native image
 
-4. **cui-java-cdi** - CDI and Quarkus standards
-   - Standards: CDI lifecycle, Quarkus native
+**Documentation & Maintenance:**
+- **javadoc** - JavaDoc documentation standards
+- **java-maintenance** - Maintenance prioritization, refactoring triggers
 
-5. **cui-java-maintenance** - Maintenance standards
-   - Standards: refactoring, code quality
+**Planning Workflow:**
+- **java-plan-implement** - Plan implementation workflow
+- **java-solution-outline** - Solution outline generation
+- **java-task-plan** - Task plan generation
+
+> **Note**: CUI library-specific patterns (CuiLogger, test generators) are in the separate `pm-dev-java-cui` bundle.
 
 ### Agents (9 autonomous agents)
 
@@ -169,7 +180,7 @@ Task:
 
 - **Agents**: 9 (autonomous execution)
 - **Commands**: 6 (orchestration)
-- **Skills**: 5 (with 5 compound workflows)
+- **Skills**: 12 (core development, testing, CDI, planning)
 - **Scripts**: 3+ (Python automation)
 
 ## Dependencies
