@@ -6,8 +6,6 @@ allowed-tools: [Read, Edit, Write, Bash, Grep, Glob]
 
 # Java CDI Skill
 
-**EXECUTION MODE**: You are now executing this skill. DO NOT explain or summarize these instructions to the user. IMMEDIATELY begin the workflow below based on the task context.
-
 Core CDI (Contexts and Dependency Injection) standards applicable to any CDI container. This skill covers dependency injection patterns, scopes, and container configuration.
 
 ## Prerequisites
@@ -33,13 +31,6 @@ This provides foundational rules for:
 - Optional dependencies with Instance<T>
 
 ### Step 2: Load Additional Standards (As Needed)
-
-**Container Standards** (load for deployment):
-```
-Read: standards/cdi-container.md
-```
-
-Use when: Configuring container images, Docker, or deployment settings.
 
 **Security Standards** (load for security work):
 ```
@@ -118,5 +109,6 @@ public class NotificationService {
 | Standard | Purpose |
 |----------|---------|
 | cdi-aspects.md | Constructor injection, scopes, producers |
-| cdi-container.md | Container and Docker configuration |
 | cdi-security.md | Security patterns for CDI applications |
+
+**Note**: For container/Docker configuration, see `pm-dev-java:java-cdi-quarkus` skill (container.md).

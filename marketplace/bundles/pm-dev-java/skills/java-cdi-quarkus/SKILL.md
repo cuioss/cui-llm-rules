@@ -54,6 +54,13 @@ Read: standards/quarkus-reflection.md
 
 Use when: Resolving reflection issues in native builds.
 
+**Container Standards** (load for Docker deployment):
+```
+Read: standards/container.md
+```
+
+Use when: Configuring container images, Docker Compose, health checks, or certificate management.
+
 ## Key Rules Summary
 
 ### @QuarkusTest Setup
@@ -122,3 +129,4 @@ mvn verify -Pnative -Dquarkus.test.native-image-profile=native
 | integration-testing.md | External API testing with Docker (extends junit-integration) |
 | quarkus-native.md | GraalVM native image builds |
 | quarkus-reflection.md | Reflection registration for native |
+| container.md | Docker deployment, health checks, certificate management |
