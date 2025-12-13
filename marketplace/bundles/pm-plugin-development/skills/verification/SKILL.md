@@ -10,6 +10,38 @@ allowed-tools: Read
 
 Verification mode ensures quality by stopping execution on any failure, workaround, or resolution issue to perform root cause analysis before proceeding.
 
+## CRITICAL: Process vs Data Priority
+
+**In verification mode, the PROCESS takes priority over the TASK.**
+
+| Aspect | Normal Mode | Verification Mode |
+|--------|-------------|-------------------|
+| **Priority** | Complete the task | Validate the process |
+| **On error** | Fix the data/result, continue | Fix the PROCESS (agent/skill/command) |
+| **Success metric** | Task completed | Process works correctly |
+| **Retry behavior** | Acceptable if result correct | STOP - investigate why retry was needed |
+
+### Example: Wrong Approach vs Right Approach
+
+**Scenario**: Agent produces invalid output, retries, second attempt succeeds.
+
+❌ **Wrong (Normal Mode thinking)**:
+> "The retry succeeded, the output is correct now. Continuing..."
+
+✅ **Right (Verification Mode thinking)**:
+> "STOP. The agent failed on first attempt. WHY? The process is broken.
+> I must fix the AGENT/SKILL that produced the invalid output, not just accept the retry."
+
+### The Core Question
+
+When an error occurs, ask:
+
+> "Which COMPONENT (agent, skill, command, script) caused this, and how do I fix IT?"
+
+NOT:
+
+> "How do I fix the data so I can continue?"
+
 ## What This Skill Provides
 
 - **Failure Detection** - Stop on script failures, tool errors, or unexpected outputs

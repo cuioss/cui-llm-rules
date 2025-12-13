@@ -13,6 +13,126 @@ Planning operations MUST use the official manage-* APIs for all .plan directory 
 3. **State Consistency** - Status reflects actual phase and progress
 4. **No Silent Mutations** - All changes are tracked and verifiable
 
+---
+
+## MANDATORY: Post-Phase Verification Protocol
+
+**CRITICAL**: Execute this protocol after EVERY phase transition (init→refine, refine→execute, execute→finalize). This is NOT optional.
+
+### Step 1: Chat History Error Check
+
+Scan the conversation history for failures since the phase started:
+
+**Look for**:
+- Tool calls with non-zero exit codes
+- Error messages in tool output
+- `status: error` in script responses
+- Agent failures or exceptions
+
+**If errors found** → **STOP**. Do not proceed. Analyze the error using:
+```
+Skill: pm-plugin-development:analyze-script-failures
+```
+
+### Step 2: Script Execution Log Check
+
+Query the execution log for the plan:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
+  --plan-id {plan_id} --type script
+```
+
+**Scan for**:
+- `[ERROR]` entries - any script failures
+- Retry patterns: `[ERROR]` followed by `[SUCCESS]` for same script (indicates hidden failure + recovery)
+- Argument errors: entries containing "usage:" or "argument"
+
+**If errors found** → **STOP**. Analyze the failure before proceeding.
+
+**Retry Pattern Detection**:
+```
+[timestamp1] [ERROR] {notation} {subcommand} ...
+[timestamp2] [SUCCESS] {notation} {subcommand} ...
+```
+This indicates an agent silently retried after failure. Investigate WHY the first attempt failed.
+
+### Step 3: Plan-Type-API Contract Verification
+
+Load the contract skill and verify artifacts for the **completed phase**:
+
+```
+Skill: pm-workflow:plan-type-api
+```
+
+| Completed Phase | Contract to Verify | Verification Command |
+|-----------------|-------------------|---------------------|
+| init | domain-frontmatter-contract.md | `manage-config read --plan-id {id}` |
+| refine (solution) | deliverable-contract.md | `manage-solution-outline validate --plan-id {id}` |
+| refine (tasks) | task-contract.md | `manage-tasks list --plan-id {id}` then `get` each |
+| execute | task verification criteria | Check each task's verification.criteria |
+
+**If violations found** → **STOP**. Report violations and remediate before proceeding.
+
+### Step 4: Status Consistency Check
+
+Verify plan status reflects the transition:
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle read \
+  --plan-id {plan_id}
+```
+
+**Verify**:
+- `current_phase` matches expected next phase
+- Previous phase status is `done`
+- `updated` timestamp is recent
+
+### Verification Output Template
+
+After completing all steps, output:
+
+```
+## POST-PHASE VERIFICATION: {phase_name} Complete
+
+### Step 1: Chat History
+| Check | Result |
+|-------|--------|
+| Tool failures | None / {count} found |
+| Error messages | None / {count} found |
+
+### Step 2: Script Execution Log
+| Check | Result |
+|-------|--------|
+| ERROR entries | None / {count} found |
+| Retry patterns | None / {count} detected |
+
+### Step 3: Contract Verification
+| Contract | Status | Issues |
+|----------|--------|--------|
+| {contract} | PASS/FAIL | {details} |
+
+### Step 4: Status Consistency
+| Field | Expected | Actual | Status |
+|-------|----------|--------|--------|
+| current_phase | {phase} | {actual} | PASS/FAIL |
+| prev phase status | done | {actual} | PASS/FAIL |
+
+### Assessment
+**{PASS / FAIL}** - {summary}
+```
+
+### Failure Response
+
+If ANY step fails:
+
+1. **STOP** - Do not proceed to next phase
+2. **Analyze** - Use `pm-plugin-development:analyze-script-failures` for script issues
+3. **Report** - Show user the verification failure with full context
+4. **Wait** - Ask user how to proceed before continuing
+
+---
+
 ## Compliance Rules
 
 ### Rule 0: Allowed .plan Access

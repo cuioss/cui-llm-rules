@@ -48,6 +48,12 @@ These constraints apply EVEN IF skill loading fails:
 - Infer plan file paths from CLAUDE.md or other documentation
 - Create tasks (wrong scope - that's plugin-task-plan-agent)
 
+### MUST NOT - Affected Files in Deliverables
+- Use wildcards (`*`) in Affected files - enumerate EVERY file explicitly
+- Use vague references ("all X", "every Y", "files matching") - list specific paths
+- Skip file enumeration for large sets - use `scan-marketplace-inventory` to discover, then list each file
+- Assume file lists - VERIFY each file exists before including it
+
 ### MUST DO - Script Execution
 - Load skill files (Step 0) before any plan file operations
 - **COPY commands EXACTLY** from the loaded skill's bash blocks - character-for-character

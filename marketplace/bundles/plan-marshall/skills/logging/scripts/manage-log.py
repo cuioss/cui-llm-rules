@@ -74,7 +74,7 @@ def format_toon_output(result: dict) -> str:
     if 'showing' in result:
         lines.append(f"showing: {result['showing']}")
 
-    # Entries
+    # Entries (structured work log)
     entries = result.get('entries', [])
     if entries:
         lines.append("")
@@ -89,6 +89,15 @@ def format_toon_output(result: dict) -> str:
                 lines.append(f"    phase: {entry.get('phase', '')}")
             if entry.get('detail'):
                 lines.append(f"    detail: {entry.get('detail', '')}")
+
+    # Raw content (script execution logs)
+    raw_content = result.get('raw_content')
+    if raw_content:
+        lines.append("")
+        lines.append("content:")
+        for line in raw_content.split('\n'):
+            if line.strip():
+                lines.append(f"  {line}")
 
     return '\n'.join(lines)
 
