@@ -133,7 +133,7 @@ depends_on: {TASK-N | none}
 delegation:
   skill: {suggested_skill from deliverable metadata}
   workflow: {suggested_workflow from deliverable metadata}
-  context_skills: {context_skills from deliverable metadata}
+  context_skills: {context_skills from deliverable metadata - MUST include even if empty []}
 
 verification:
   commands:
@@ -144,15 +144,17 @@ EOF
 
 **Field mapping from deliverable to task**:
 
-| Deliverable Field | Task Field |
-|-------------------|------------|
-| `Affected files:` list | `steps:` list (copy file paths directly) |
-| `metadata.suggested_skill` | `delegation.skill` |
-| `metadata.suggested_workflow` | `delegation.workflow` |
-| `metadata.context_skills` | `delegation.context_skills` |
-| `metadata.depends` | Used to compute `depends_on` |
-| `Verification.Command` | `verification.commands` |
-| `Verification.Criteria` | `verification.criteria` |
+| Deliverable Field | Task Field | Required |
+|-------------------|------------|----------|
+| `Affected files:` list | `steps:` list (copy file paths directly) | Yes |
+| `metadata.suggested_skill` | `delegation.skill` | Yes |
+| `metadata.suggested_workflow` | `delegation.workflow` | Yes |
+| `metadata.context_skills` | `delegation.context_skills` | **Yes (even if empty `[]`)** |
+| `metadata.depends` | Used to compute `depends_on` | Yes |
+| `Verification.Command` | `verification.commands` | Yes |
+| `Verification.Criteria` | `verification.criteria` | Yes |
+
+**CRITICAL**: The `context_skills` field MUST always be included in the delegation block, even when empty. Tasks without this field violate the task-contract and will fail validation.
 
 **Example with real paths**:
 

@@ -81,8 +81,12 @@ Applies: All base checks PLUS:
 - No direct .plan file access (must use manage-* scripts)
 - Work-log population after each operation
 - Status consistency after phase transitions
+- **Post-Phase Verification Protocol (4 steps) after EVERY phase completes**
+- **Plan-Type-API Contract Verification (Step 3) is MANDATORY**
 
 Use this scope when testing `/plan-manage`, `/plan-execute`, or any planning-related skills.
+
+**CRITICAL**: After each phase completes, you MUST execute ALL 4 steps of the Post-Phase Verification Protocol, including verifying artifacts against plan-type-api contracts. See "After Each Phase Completes" section below.
 
 ## Verification Mode Behavior
 
@@ -333,7 +337,37 @@ When `scope: planning` is specified, apply these additional checks for planning 
 1. Check if operation will access .plan files directly
 2. Verify manage-* script is being used instead
 
-### After Each Operation
+### After Each Phase Completes (MANDATORY)
+
+**CRITICAL**: Execute the **Post-Phase Verification Protocol** after EVERY phase transition (init→refine, refine→execute, execute→finalize). This is NOT optional.
+
+Load and follow the protocol from `standards/planning-compliance.md`:
+
+```bash
+Read: marketplace/bundles/pm-plugin-development/skills/verification/standards/planning-compliance.md
+```
+
+The protocol has **4 steps** - ALL are MANDATORY:
+
+| Step | Check | Action |
+|------|-------|--------|
+| 1 | Chat History Error Check | Scan for tool failures, error messages |
+| 2 | Script Execution Log Check | Query `manage-log read --type script`, look for ERROR entries |
+| 3 | **Plan-Type-API Contract Verification** | **CRITICAL** - Load `pm-workflow:plan-type-api`, verify artifacts against contracts |
+| 4 | Status Consistency Check | Query `manage-lifecycle read`, verify phase transition |
+
+**Step 3 Contract Verification Details**:
+
+| Completed Phase | Contract | Verification Command |
+|-----------------|----------|---------------------|
+| init | domain-frontmatter-contract.md | `manage-config read --plan-id {id}` |
+| refine (solution) | deliverable-contract.md | `manage-solution-outline validate --plan-id {id}` |
+| refine (tasks) | task-contract.md | `manage-tasks get` each task, verify ALL required fields |
+| execute | task verification criteria | Check each task's verification.criteria |
+
+**If ANY step fails** → STOP, analyze, present to user, wait for decision.
+
+### After Each Operation (Non-Phase)
 1. Query work-log for recent entry matching operation
 2. Query status for consistency with expected phase
 3. Report any discrepancies

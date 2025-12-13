@@ -435,16 +435,14 @@ Actively scan execution logs to detect script issues:
 
 1. Check work.log exists and has entries:
    ```bash
-   cat .plan/plans/{plan_id}/work.log
+   python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
+     --plan-id {plan_id} --type work --limit 20
    ```
 
 2. Check script-execution.log exists and scan for issues:
    ```bash
-   # Check recent entries
-   tail -10 .plan/plans/{plan_id}/script-execution.log
-
-   # Scan for errors
-   grep -c '\[ERROR\]' .plan/plans/{plan_id}/script-execution.log || echo "0 errors"
+   python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
+     --plan-id {plan_id} --type script --limit 20
    ```
 
 3. Verify format compliance:
@@ -819,13 +817,16 @@ Use this verification pattern after major operations:
 
 ```bash
 # Verify work.log has recent entry
-cat .plan/plans/{plan_id}/work.log
+python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
+  --plan-id {plan_id} --type work --limit 20
 
 # Verify status is consistent
-python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle read --plan-id {plan_id}
+python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle read \
+  --plan-id {plan_id}
 
 # Verify no orphaned files (optional)
-python3 .plan/execute-script.py pm-workflow:manage-files:manage-files list --plan-id {plan_id}
+python3 .plan/execute-script.py pm-workflow:manage-files:manage-files list \
+  --plan-id {plan_id}
 ```
 
 Expected output should show:
@@ -840,12 +841,13 @@ After script operations complete, verify proper executor usage:
 **For plan-scoped operations** (when plan_id was provided):
 ```bash
 # Verify execution logged to plan
-tail -5 .plan/plans/{plan-id}/script-execution.log
+python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
+  --plan-id {plan_id} --type script --limit 20
 ```
 
 **For global operations** (no plan context):
 ```bash
-# Verify execution logged to daily global log
+# Verify execution logged to daily global log (direct access acceptable for global logs)
 tail -5 .plan/logs/script-execution-$(date +%Y-%m-%d).log
 ```
 
