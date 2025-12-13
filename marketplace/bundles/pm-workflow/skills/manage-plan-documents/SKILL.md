@@ -38,7 +38,7 @@ Activate this skill when:
 ## API: Noun-Verb Pattern
 
 ```
-manage-plan-document {document-type} {verb} [options]
+manage-plan-documents {document-type} {verb} [options]
 ```
 
 ### Verbs
@@ -55,14 +55,14 @@ manage-plan-document {document-type} {verb} [options]
 
 ## Operations
 
-Script: `pm-workflow:manage-plan-documents:manage-plan-document`
+Script: `pm-workflow:manage-plan-documents:manage-plan-documents`
 
 ### request create
 
 Create a request document.
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request create \
   --plan-id {plan_id} \
   --title "Feature Title" \
@@ -101,7 +101,7 @@ document_info:
 Read a document with parsed sections.
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request read \
   --plan-id {plan_id}
 ```
@@ -127,7 +127,7 @@ Add `--raw` for raw markdown output.
 Update a specific section.
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request update \
   --plan-id {plan_id} \
   --section context \
@@ -154,7 +154,7 @@ updated: true
 Check if document exists.
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request exists \
   --plan-id {plan_id}
 ```
@@ -176,7 +176,7 @@ Returns exit code 0 if exists, 1 if not.
 Remove a document.
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request remove \
   --plan-id {plan_id}
 ```
@@ -196,7 +196,7 @@ action: removed
 List available document types.
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   list-types
 ```
 
@@ -230,7 +230,7 @@ suggestions[2]:
 
 ## Scripts
 
-**Script**: `pm-workflow:manage-plan-documents:manage-plan-document`
+**Script**: `pm-workflow:manage-plan-documents:manage-plan-documents`
 
 | Command | Parameters | Description |
 |---------|------------|-------------|
@@ -266,7 +266,7 @@ See [standards/adding-document-types.md](standards/adding-document-types.md) for
 Plan initialization creates request document:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request create \
   --plan-id $PLAN_ID \
   --title "$TITLE" \
@@ -279,7 +279,7 @@ python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-do
 Domain solution outline agents read the request document:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request read \
   --plan-id $PLAN_ID
 ```

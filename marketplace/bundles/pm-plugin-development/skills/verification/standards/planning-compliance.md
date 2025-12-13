@@ -52,23 +52,24 @@ Examples:
 |------|-------------------|---------------------|
 | Read | `.plan/plans/{id}/status.toon` | `python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle read --plan-id {id}` |
 | Read | `.plan/plans/{id}/config.toon` | `python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --plan-id {id}` |
-| Read | `.plan/plans/{id}/work.log` | `cat .plan/plans/{id}/work.log` |
+| Read | `.plan/plans/{id}/work.log` | `python3 .plan/execute-script.py plan-marshall:logging:manage-log read --plan-id {id} --type work` |
 | Read | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline read --plan-id {id}` |
-| Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task get --plan-id {id} --number 1` |
+| Read | `.plan/plans/{id}/tasks/TASK-*.toon` | `python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get --plan-id {id} --number 1` |
 | Write | `.plan/plans/{id}/*` | Use appropriate manage-* create/update via execute-script.py |
 | Edit | `.plan/plans/{id}/*` | Use appropriate manage-* update via execute-script.py |
 | Glob | `.plan/plans/**/*.toon` | Use manage-* list operations via execute-script.py |
 | Glob | `.plan/plans/{id}/solution_outline.md` | `python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline read --plan-id {id}` |
-| Glob | `.plan/plans/{id}/tasks/*` | `python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task list --plan-id {id}` |
+| Glob | `.plan/plans/{id}/tasks/*` | `python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks list --plan-id {id}` |
 | Bash find | `find .plan/plans -name "*.toon"` | Use manage-* list operations via execute-script.py |
-| Bash ls | `ls .plan/plans/{id}/tasks/` | `python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task list --plan-id {id}` |
+| Bash ls | `ls .plan/plans/{id}/tasks/` | `python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks list --plan-id {id}` |
 
 **No Exceptions**: All .plan file access must go through manage-* scripts. The following scripts provide complete coverage:
 
 | File | Read Script | Write Script |
 |------|-------------|--------------|
-| `request.md` | `pm-workflow:manage-plan-documents:manage-plan-document request read --plan-id {id}` | `pm-workflow:manage-plan-documents:manage-plan-document request create --plan-id {id} --title ... --source ... --body ...` |
+| `request.md` | `pm-workflow:manage-plan-documents:manage-plan-documents request read --plan-id {id}` | `pm-workflow:manage-plan-documents:manage-plan-documents request create --plan-id {id} --title ... --source ... --body ...` |
 | `solution_outline.md` | `pm-workflow:manage-solution-outline:manage-solution-outline read --plan-id {id}` | `pm-workflow:manage-solution-outline:manage-solution-outline write --plan-id {id} <<'EOF'` then validate |
+| `work.log` | `plan-marshall:logging:manage-log read --plan-id {id} --type work` | `plan-marshall:logging:manage-log work {id} {level} "{message}"` |
 | `lessons-learned/*.md` | `plan-marshall:lessons-learned:manage-lesson get --id {lesson_id}` | `plan-marshall:lessons-learned:manage-lesson add` |
 | Any plan file | `pm-workflow:manage-files:manage-files read --plan-id {id} --file {path}` | `pm-workflow:manage-files:manage-files write --plan-id {id} --file {path}` |
 
@@ -131,7 +132,7 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 1. After operation completes, query work-log:
    ```bash
-   python3 .plan/execute-script.py plan-marshall:logging:manage-log work read --plan-id {plan_id}
+   python3 .plan/execute-script.py plan-marshall:logging:manage-log read --plan-id {plan_id} --type work
    ```
 
 2. Verify most recent entry matches operation:
@@ -150,7 +151,7 @@ After any planning operation completes, verify work-log contains appropriate ent
 
 ### Work-Log Check
 ```toon
-[Output from plan-marshall:logging:manage-log work read]
+[Output from plan-marshall:logging:manage-log read]
 ```
 
 ### Verification Result
@@ -184,8 +185,8 @@ python3 .plan/execute-script.py {notation} {subcommand} {args...}
 
 | Skill Name (plural) | Script Name (SINGULAR) | Full Notation |
 |---------------------|------------------------|---------------|
-| `manage-plan-documents` | `manage-plan-document` | `pm-workflow:manage-plan-documents:manage-plan-document` |
-| `manage-tasks` | `manage-task` | `pm-workflow:manage-tasks:manage-task` |
+| `manage-plan-documents` | `manage-plan-document` | `pm-workflow:manage-plan-documents:manage-plan-documents` |
+| `manage-tasks` | `manage-task` | `pm-workflow:manage-tasks:manage-tasks` |
 | `manage-lessons` | `manage-lesson` | `plan-marshall:lessons-learned:manage-lesson` |
 | `manage-lifecycle` | `manage-lifecycle` | `pm-workflow:manage-lifecycle:manage-lifecycle` |
 | `manage-config` | `manage-config` | `pm-workflow:manage-config:manage-config` |
@@ -516,7 +517,7 @@ Actual: current_phase=execute (not updated)
 
 ```
 Claude uses: Write .plan/plans/my-plan/tasks/TASK-003.toon
-Should use: python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add --plan-id my-plan <<'EOF'
+Should use: python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add --plan-id my-plan <<'EOF'
 title: Task title
 deliverables: [1]
 domain: java
@@ -526,7 +527,7 @@ steps:
 EOF
 ```
 
-**Note**: Script notation uses SINGULAR `manage-task` (not `manage-tasks`). Full notation: `pm-workflow:manage-tasks:manage-task`. Task definitions are passed via stdin using heredoc to avoid shell metacharacter issues.
+**Note**: Script notation uses SINGULAR `manage-task` (not `manage-tasks`). Full notation: `pm-workflow:manage-tasks:manage-tasks`. Task definitions are passed via stdin using heredoc to avoid shell metacharacter issues.
 
 **Why It Matters**: Bypasses numbering logic, validation, and work-log entry creation.
 

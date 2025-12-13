@@ -27,8 +27,8 @@ Simplified notation: `{bundle}:{skill}`
 
 ```bash
 # Document operations (typed documents)
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document request create --plan-id my-plan --title "My Task" --source description --body "Task details"
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document request read --plan-id my-plan
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents request create --plan-id my-plan --title "My Task" --source description --body "Task details"
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents request read --plan-id my-plan
 
 # File operations (generic files)
 python3 .plan/execute-script.py pm-workflow:manage-files:manage-files write --plan-id my-plan --file notes.md --content "..."

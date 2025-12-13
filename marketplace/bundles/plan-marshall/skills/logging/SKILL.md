@@ -32,10 +32,11 @@ This skill provides a single unified API for two logging concerns:
 
 Script: `plan-marshall:logging:manage-log`
 
-### Simplified API
+### Write API (Positional)
 
 ```bash
-manage-log {type} {plan_id} {level} "{message}"
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  {type} {plan_id} {level} "{message}"
 ```
 
 **Arguments** (all positional, all required):
@@ -49,22 +50,71 @@ manage-log {type} {plan_id} {level} "{message}"
 
 **Output**: None (exit code only)
 
+### Read API
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  read --plan-id {plan_id} --type {work|script} [--limit N] [--phase PHASE]
+```
+
+**Arguments**:
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `--plan-id` | Yes | Plan identifier |
+| `--type` | Yes | Log type: `work` or `script` |
+| `--limit` | No | Max entries to return (most recent) |
+| `--phase` | No | Filter by phase (work logs only) |
+
+**Output** (TOON):
+
+```toon
+status: success
+plan_id: my-plan
+log_type: work
+total_entries: 5
+showing: 3
+
+entries:
+  - timestamp: 2025-12-11T11:14:30Z
+    level: INFO
+    category: DECISION
+    message: Selected plan-type-java
+    phase: init
+  - timestamp: 2025-12-11T11:15:20Z
+    level: INFO
+    category: ARTIFACT
+    message: Created deliverable: auth module
+```
+
 ### Examples
 
 ```bash
-# Script execution logging
+# Write: Script execution logging
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   script my-plan SUCCESS "pm-workflow:manage-task:manage-task add (0.15s)"
 
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   script my-plan ERROR "pm-workflow:manage-task:manage-task add failed (exit 1)"
 
-# Work logging
+# Write: Work logging
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   work my-plan INFO "Created deliverable: auth module"
 
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   work my-plan WARN "Skipped validation step"
+
+# Read: All work log entries
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  read --plan-id my-plan --type work
+
+# Read: Last 5 work log entries
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  read --plan-id my-plan --type work --limit 5
+
+# Read: Work log entries for init phase only
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  read --plan-id my-plan --type work --phase init
 ```
 
 ---
@@ -232,5 +282,12 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 | Script | Notation | Description |
 |--------|----------|-------------|
-| `manage-log.py` | `plan-marshall:logging:manage-log` | CLI for all logging operations |
+| `manage-log.py` | `plan-marshall:logging:manage-log` | CLI for logging operations (write and read) |
 | `plan_logging.py` | - | Python module (imported, not executed) |
+
+### Script Commands
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| (positional) | `{type} {plan_id} {level} "{message}"` | Write log entry |
+| `read` | `--plan-id --type [--limit] [--phase]` | Read log entries (TOON output) |

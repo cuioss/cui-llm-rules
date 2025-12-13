@@ -40,7 +40,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
 ## Step 2: Read Request
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request read \
   --plan-id {plan_id}
 ```
@@ -69,7 +69,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 Create execution tasks referencing the deliverable number using heredoc:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: Execute request
 deliverables: [1]

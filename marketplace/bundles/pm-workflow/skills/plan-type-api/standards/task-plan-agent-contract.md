@@ -99,7 +99,7 @@ Record why deliverables were grouped/split for audit trail.
 Uses stdin-based API with heredoc to avoid shell metacharacter issues:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: {aggregated title}
 deliverables: [{n1}, {n2}, {n3}]
@@ -180,6 +180,6 @@ message: {error message if status=error}
 
 **Data Layer**:
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Solution outline queries
-- `pm-workflow:manage-tasks:manage-task` - Task creation with deliverable references
+- `pm-workflow:manage-tasks:manage-tasks` - Task creation with deliverable references
 
 **Prerequisites**: [Solution Outline Agent](solution-outline-agent-contract.md) completion and [User Review Protocol](user-review-protocol.md) approval

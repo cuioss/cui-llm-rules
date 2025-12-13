@@ -108,7 +108,7 @@ The `--trace-plan-id` parameter is:
 **Callers**: `/plan-manage action=refine` command
 
 **Data Layer**:
-- `pm-workflow:manage-plan-documents:manage-plan-document` - Request document operations
+- `pm-workflow:manage-plan-documents:manage-plan-documents` - Request document operations
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Solution outline validation and queries
 
 **Next Step**: After completion, command triggers [User Review Protocol](user-review-protocol.md)

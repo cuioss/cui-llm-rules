@@ -23,7 +23,7 @@ allowed-tools: Read, Write, Edit, Bash, Skill, Task, AskUserQuestion
 | `pm-workflow:manage-config:manage-config` | Config field access |
 | `pm-workflow:manage-lifecycle:manage-lifecycle` | Phase routing and transitions |
 | `plan-marshall:logging:manage-log` | Work log entries |
-| `pm-workflow:manage-tasks:manage-task` | Task and step management |
+| `pm-workflow:manage-tasks:manage-tasks` | Task and step management |
 | `pm-workflow:manage-references:manage-references` | Reference file CRUD |
 
 ---
@@ -101,7 +101,7 @@ For each task in current phase:
 ### Step 1: Locate Task with Context
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task next \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks next \
   --plan-id {plan_id} \
   --include-context
 ```
@@ -118,7 +118,7 @@ For each step in task's `steps[]` array:
 ### Step 3: Mark Step Complete
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task step-done \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-done \
   --plan-id {plan_id} \
   --task {task_number} \
   --step {step_number}

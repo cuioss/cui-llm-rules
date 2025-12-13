@@ -125,7 +125,7 @@ Extract: title, body, labels, milestone, assignees
 Create the request document via manage-plan-documents:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request create \
   --plan-id {plan_id} \
   --title "{derived_title}" \

@@ -68,7 +68,7 @@ For each deliverable, check for split requirements:
 For aggregated deliverables or single deliverables, create tasks using heredoc:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: Implement {component}
 deliverables: [{n1}, {n2}, {n3}]
@@ -304,7 +304,7 @@ If deliverable lacks detail:
 
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Read solution and list deliverables (list-deliverables, read)
-- `pm-workflow:manage-tasks:manage-task` - Create tasks (add --plan-id X <<'EOF' ... EOF)
+- `pm-workflow:manage-tasks:manage-tasks` - Create tasks (add --plan-id X <<'EOF' ... EOF)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 
 **Standards Referenced in Task Steps**:

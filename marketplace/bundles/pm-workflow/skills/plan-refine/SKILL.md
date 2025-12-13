@@ -18,12 +18,12 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 
 | Script | Notation |
 |--------|----------|
-| manage-plan-document | `pm-workflow:manage-plan-documents:manage-plan-document` |
+| manage-plan-document | `pm-workflow:manage-plan-documents:manage-plan-documents` |
 | manage-solution-outline | `pm-workflow:manage-solution-outline:manage-solution-outline` |
 | manage-config | `pm-workflow:manage-config:manage-config` |
 | manage-lifecycle | `pm-workflow:manage-lifecycle:manage-lifecycle` |
 | manage-log | `plan-marshall:logging:manage-log` |
-| manage-task | `pm-workflow:manage-tasks:manage-task` |
+| manage-task | `pm-workflow:manage-tasks:manage-tasks` |
 
 ---
 
@@ -105,7 +105,7 @@ Return this error. Do NOT proceed.
 Read the request document to understand the task:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request read \
   --plan-id {plan_id}
 ```
@@ -204,7 +204,7 @@ This halt is **NOT OPTIONAL**. The workflow MUST pause here for user review befo
 Create execution tasks referencing the deliverable in the solution document using heredoc:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: Execute request
 deliverables: [1]
@@ -258,10 +258,10 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `pm-workflow:manage-plan-documents:manage-plan-document` | `request read` | Read request document |
+| `pm-workflow:manage-plan-documents:manage-plan-documents` | `request read` | Read request document |
 | `pm-workflow:manage-solution-outline:manage-solution-outline` | `validate` | Validate solution structure |
 | `pm-workflow:manage-config:manage-config` | `get` | Read plan_type |
-| `pm-workflow:manage-tasks:manage-task` | `add` | Create tasks |
+| `pm-workflow:manage-tasks:manage-tasks` | `add` | Create tasks |
 | `pm-workflow:manage-lifecycle:manage-lifecycle` | `transition` | Phase transition |
 | `plan-marshall:logging:manage-log` | `work` | Log progress and completion |
 

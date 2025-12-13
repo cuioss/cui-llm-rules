@@ -40,7 +40,7 @@ Load plan context via manage-* scripts:
 
 ```bash
 # Read original request description
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request read \
   --plan-id {plan_id}
 
@@ -313,7 +313,7 @@ If multiple files match the name:
 
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write --validate, read, list-deliverables)
-- `pm-workflow:manage-plan-documents:manage-plan-document` - Request operations (request read)
+- `pm-workflow:manage-plan-documents:manage-plan-documents` - Request operations (request read)
 - `pm-workflow:manage-config:manage-config` - Plan config (read)
 - `pm-workflow:manage-references:manage-references` - Plan references (read)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)

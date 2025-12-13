@@ -133,7 +133,7 @@ The `manage-plan-document solution validate` command checks:
 
 **Validation Command**:
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   solution validate \
   --plan-id {plan_id}
 ```

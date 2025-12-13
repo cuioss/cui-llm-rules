@@ -107,7 +107,7 @@ See: `pm-workflow:manage-solution-outline:manage-solution-outline`
 When creating tasks that implement deliverables, use heredoc:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: Implement JWT validation service
 deliverables: [1]

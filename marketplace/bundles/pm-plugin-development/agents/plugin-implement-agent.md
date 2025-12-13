@@ -49,7 +49,7 @@ Stay in your lane:
 Retrieve the task details:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task get \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get \
   --plan-id {plan_id} \
   --number {task_number}
 ```
@@ -93,7 +93,7 @@ For each step WHERE status == `pending`:
 #### 3a. Mark Step Started
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task step-start \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-start \
   --plan-id {plan_id} \
   --task {task_number} \
   --step {step_number}
@@ -117,7 +117,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 On success:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task step-done \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-done \
   --plan-id {plan_id} \
   --task {task_number} \
   --step {step_number}
@@ -240,15 +240,15 @@ If verification fails:
 
 ```
 # Get task details
-pm-workflow:manage-tasks:manage-task get --plan-id X --number N
+pm-workflow:manage-tasks:manage-tasks get --plan-id X --number N
 
 # Get domain defaults
 plan-marshall:plan-marshall-config:plan-marshall-config skill-domains get-defaults --domain plugin
 
 # Step operations
-pm-workflow:manage-tasks:manage-task step-start --plan-id X --task N --step M
-pm-workflow:manage-tasks:manage-task step-done --plan-id X --task N --step M
-pm-workflow:manage-tasks:manage-task step-skip --plan-id X --task N --step M --reason "..."
+pm-workflow:manage-tasks:manage-tasks step-start --plan-id X --task N --step M
+pm-workflow:manage-tasks:manage-tasks step-done --plan-id X --task N --step M
+pm-workflow:manage-tasks:manage-tasks step-skip --plan-id X --task N --step M --reason "..."
 
 # Logging
 plan-marshall:logging:manage-log work {plan_id} INFO "{message}"

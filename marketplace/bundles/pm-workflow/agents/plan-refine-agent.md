@@ -69,7 +69,7 @@ These constraints apply EVEN IF skill loading fails:
 ### SCRIPT NOTATION REFERENCE
 ```
 # Read request (always via script)
-pm-workflow:manage-plan-documents:manage-plan-document request read --plan-id X
+pm-workflow:manage-plan-documents:manage-plan-documents request read --plan-id X
 
 # Write solution (use heredoc with write command)
 pm-workflow:manage-solution-outline:manage-solution-outline write --plan-id X <<'EOF'
@@ -78,7 +78,7 @@ EOF
 pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id X
 
 # Create tasks (use heredoc)
-pm-workflow:manage-tasks:manage-task add --plan-id X <<'EOF'
+pm-workflow:manage-tasks:manage-tasks add --plan-id X <<'EOF'
 title: Task title
 deliverables: [1, 2]
 domain: java

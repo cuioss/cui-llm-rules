@@ -64,7 +64,7 @@ This provides:
 Load plan context via manage-* scripts:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   request read \
   --plan-id {plan_id}
 
@@ -237,7 +237,7 @@ Each script-related deliverable MUST include a **Script Verification** section p
 
 **Script Notations** (use EXACTLY as shown):
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Write and validate solution document (write --validate, validate, read, list-deliverables, exists)
-- `pm-workflow:manage-plan-documents:manage-plan-document` - Request operations (request read, request create)
+- `pm-workflow:manage-plan-documents:manage-plan-documents` - Request operations (request read, request create)
 - `plan-marshall:lessons-learned:manage-lesson` - Record lessons on issues (add)
 - `plan-marshall:logging:manage-log` - Log decisions and progress (work)
 - `pm-workflow:manage-config:manage-config` - Plan config (read, get, set)

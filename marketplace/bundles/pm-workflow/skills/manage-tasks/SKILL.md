@@ -90,7 +90,7 @@ current_step: 1
 
 ## Operations
 
-Script: `pm-workflow:manage-tasks:manage-task`
+Script: `pm-workflow:manage-tasks:manage-tasks`
 
 | Command | Parameters | Description |
 |---------|------------|-------------|
@@ -170,7 +170,7 @@ verification:
 ### Add a task
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id my-feature <<'EOF'
 title: Update misc agents to TOON
 deliverables: [1, 2, 4]
@@ -197,7 +197,7 @@ EOF
 ### Add a task with dependencies
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id my-feature <<'EOF'
 title: Write integration tests
 deliverables: [3]
@@ -221,7 +221,7 @@ EOF
 ### Add a task with complex verification commands (shell metacharacters)
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id migrate-json-to-toon <<'EOF'
 title: Migrate agent outputs to TOON
 deliverables: [1, 2, 3]
@@ -249,14 +249,14 @@ EOF
 ### Get next task/step (respects dependencies)
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task next \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks next \
   --plan-id my-feature
 ```
 
 ### Get next task in specific phase
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task next \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks next \
   --plan-id my-feature \
   --phase execute
 ```
@@ -264,7 +264,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task next \
 ### List ready tasks only
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task list \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks list \
   --plan-id my-feature \
   --ready
 ```
@@ -272,7 +272,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task list \
 ### Mark step done
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task step-done \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-done \
   --plan-id my-feature \
   --task 2 \
   --step 3
@@ -286,7 +286,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task step-done \
 
 Task-plan agents create tasks during plan refinement using heredoc:
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: {task_title}
 deliverables: [{n1}, {n2}]
@@ -303,7 +303,7 @@ EOF
 Plan-execute iterates through tasks:
 ```
 LOOP:
-  1. manage-task next --plan-id {plan_id}
+  1. manage-tasks next --plan-id {plan_id}
   2. IF no next: DONE
   3. SPAWN implement agent
   4. CONTINUE
@@ -313,7 +313,7 @@ LOOP:
 
 Implement agents execute steps:
 ```
-1. manage-task get --plan-id {plan_id} --number {N}
+1. manage-tasks get --plan-id {plan_id} --number {N}
 2. FOR EACH step: step-start → execute → step-done
 3. RUN verification
 ```

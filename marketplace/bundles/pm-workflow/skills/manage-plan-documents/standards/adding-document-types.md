@@ -98,7 +98,7 @@ created: {timestamp}
 The new document type is immediately available:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-document \
+python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \
   retrospective create \
   --plan-id my-feature \
   --summary "Completed JWT implementation" \

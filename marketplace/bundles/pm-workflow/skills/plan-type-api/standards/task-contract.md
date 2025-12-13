@@ -144,7 +144,7 @@ Record why deliverables were grouped/split for audit trail.
 Uses stdin-based API with heredoc to avoid shell metacharacter issues:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: {aggregated title}
 deliverables: [{n1}, {n2}, {n3}]

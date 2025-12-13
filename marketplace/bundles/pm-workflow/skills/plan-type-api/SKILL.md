@@ -78,7 +78,7 @@ Domain agents execute scripts via `execute-script.py`. For plan-scoped logging, 
 Scripts that accept `--plan-id` (manage-* scripts) use it for both logic AND logging:
 
 ```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-task add \
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} --title "Task title"
 ```
 
@@ -111,6 +111,6 @@ The `--trace-plan-id` parameter is:
 - `pm-plugin-development:plugin-solution-outline-agent` / `pm-plugin-development:plugin-task-plan-agent`
 
 **Data Layer** (used by domain agents):
-- `pm-workflow:manage-plan-documents:manage-plan-document` (request) - Request document operations
+- `pm-workflow:manage-plan-documents:manage-plan-documents` (request) - Request document operations
 - `pm-workflow:manage-solution-outline:manage-solution-outline` (solution_outline.md) - Solution outline validation and queries
-- `pm-workflow:manage-tasks:manage-task` - Task creation with deliverable references
+- `pm-workflow:manage-tasks:manage-tasks` - Task creation with deliverable references

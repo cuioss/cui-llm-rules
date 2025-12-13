@@ -135,6 +135,91 @@ def test_multiple_entries():
 
 
 # =============================================================================
+# Test: Read Subcommand
+# =============================================================================
+
+def test_read_work_log():
+    """Test read subcommand returns work log entries."""
+    with PlanTestContext(plan_id='log-read-work') as ctx:
+        # Write some entries first
+        run_script(SCRIPT_PATH, 'work', 'log-read-work', 'INFO', 'Test entry one')
+        run_script(SCRIPT_PATH, 'work', 'log-read-work', 'SUCCESS', 'Test entry two')
+
+        # Read them back
+        result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'log-read-work', '--type', 'work')
+        assert result.success, f"Read failed: {result.stderr}"
+        assert 'status: success' in result.stdout
+        assert 'total_entries: 2' in result.stdout
+        assert 'Test entry one' in result.stdout
+        assert 'Test entry two' in result.stdout
+
+
+def test_read_work_log_with_limit():
+    """Test read subcommand with --limit returns limited entries."""
+    with PlanTestContext(plan_id='log-read-limit') as ctx:
+        # Write multiple entries
+        run_script(SCRIPT_PATH, 'work', 'log-read-limit', 'INFO', 'Entry 1')
+        run_script(SCRIPT_PATH, 'work', 'log-read-limit', 'INFO', 'Entry 2')
+        run_script(SCRIPT_PATH, 'work', 'log-read-limit', 'INFO', 'Entry 3')
+        run_script(SCRIPT_PATH, 'work', 'log-read-limit', 'INFO', 'Entry 4')
+
+        # Read with limit
+        result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'log-read-limit', '--type', 'work', '--limit', '2')
+        assert result.success, f"Read failed: {result.stderr}"
+        assert 'status: success' in result.stdout
+        assert 'total_entries: 4' in result.stdout
+        assert 'showing: 2' in result.stdout
+        # Should show most recent entries
+        assert 'Entry 3' in result.stdout
+        assert 'Entry 4' in result.stdout
+
+
+def test_read_empty_log():
+    """Test read subcommand on plan with no log entries."""
+    with PlanTestContext(plan_id='log-read-empty') as ctx:
+        result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'log-read-empty', '--type', 'work')
+        assert result.success, f"Read failed: {result.stderr}"
+        assert 'status: success' in result.stdout
+        assert 'total_entries: 0' in result.stdout
+
+
+def test_read_script_log():
+    """Test read subcommand for script type logs."""
+    with PlanTestContext(plan_id='log-read-script') as ctx:
+        # Write script log entry
+        run_script(SCRIPT_PATH, 'script', 'log-read-script', 'SUCCESS', 'test:skill:script (0.1s)')
+
+        # Read it back
+        result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'log-read-script', '--type', 'script')
+        assert result.success, f"Read failed: {result.stderr}"
+        assert 'status: success' in result.stdout
+        assert 'log_type: script' in result.stdout
+
+
+def test_read_missing_plan_id():
+    """Test read subcommand fails without --plan-id."""
+    result = run_script(SCRIPT_PATH, 'read', '--type', 'work')
+    assert not result.success, "Expected failure without --plan-id"
+    assert 'missing_argument' in result.stderr
+    assert '--plan-id is required' in result.stderr
+
+
+def test_read_missing_type():
+    """Test read subcommand fails without --type."""
+    result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'test-plan')
+    assert not result.success, "Expected failure without --type"
+    assert 'missing_argument' in result.stderr
+    assert '--type is required' in result.stderr
+
+
+def test_read_invalid_type():
+    """Test read subcommand fails with invalid type."""
+    result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'test-plan', '--type', 'invalid')
+    assert not result.success, "Expected failure with invalid type"
+    assert 'invalid_type' in result.stderr
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 
@@ -152,5 +237,13 @@ if __name__ == '__main__':
         test_invalid_level,
         test_missing_args,
         test_multiple_entries,
+        # read subcommand
+        test_read_work_log,
+        test_read_work_log_with_limit,
+        test_read_empty_log,
+        test_read_script_log,
+        test_read_missing_plan_id,
+        test_read_missing_type,
+        test_read_invalid_type,
     ])
     sys.exit(runner.run())

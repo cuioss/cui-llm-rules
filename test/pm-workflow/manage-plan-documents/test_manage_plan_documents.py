@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for manage-plan-document.py script."""
+"""Tests for manage-plan-documents.py script."""
 
 import sys
 from pathlib import Path
@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path, PlanTestContext
 
 # Get script path
-SCRIPT_PATH = get_script_path('pm-workflow', 'manage-plan-documents', 'manage-plan-document.py')
+SCRIPT_PATH = get_script_path('pm-workflow', 'manage-plan-documents', 'manage-plan-documents.py')
 
 # Import toon_parser for output parsing
 TOON_PARSER_DIR = Path(__file__).parent.parent.parent.parent / 'marketplace' / 'bundles' / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'
