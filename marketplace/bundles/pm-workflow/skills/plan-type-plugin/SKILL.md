@@ -21,6 +21,7 @@ keywords:
 domain:
   solution_outline_agent: pm-plugin-development:plugin-solution-outline-agent
   task_plan_agent: pm-plugin-development:plugin-task-plan-agent
+  implement_agent: pm-plugin-development:plugin-implement-agent
 
 # Plan defaults for this type
 plan_defaults:
@@ -49,6 +50,7 @@ The `domain:` frontmatter provides structured routing information for commands:
 |-------|-------|---------|
 | `solution_outline_agent` | `pm-plugin-development:plugin-solution-outline-agent` | Creates solution outline with deliverables |
 | `task_plan_agent` | `pm-plugin-development:plugin-task-plan-agent` | Creates tasks from deliverables |
+| `implement_agent` | `pm-plugin-development:plugin-implement-agent` | Executes tasks from plan |
 
 The `plan_defaults:` frontmatter is automatically read by `manage-config create` during plan initialization:
 
@@ -94,3 +96,15 @@ Creates tasks with plugin-specific steps:
 | `agent-task.md` | Agent frontmatter and tool selection |
 
 **Returns**: `{status, task_ids[], lessons_recorded}`
+
+### plugin-implement-agent
+
+Executes tasks by delegating to `plugin-plan-execute` skill:
+- Loads task from plan via manage-tasks API
+- Loads domain and context skills
+- Iterates through steps (each step is a file path)
+- Applies changes per step using Edit/Write tools
+- Runs verification command
+- Returns structured execution result
+
+**Returns**: `{status, plan_id, task_number, execution_summary, verification, next_action}`

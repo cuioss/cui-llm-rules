@@ -20,13 +20,15 @@ allowed-tools: Read
 | **Task Plan Agent** | Solution Outline → Tasks | [standards/task-plan-agent-contract.md](standards/task-plan-agent-contract.md) |
 | **Deliverable Contract** | Deliverable structure in solution outline | [standards/deliverable-contract.md](standards/deliverable-contract.md) |
 | **Task Contract** | Task structure and optimization | [standards/task-contract.md](standards/task-contract.md) |
+| **Implementation Delegation** | How tasks specify execution delegation | [standards/implementation-delegation-contract.md](standards/implementation-delegation-contract.md) |
+| **Implement Agent** | Implement agent input/output interface | [standards/implement-agent-contract.md](standards/implement-agent-contract.md) |
 
 ## Routing Flow
 
 ```
-Request → [Solution Outline Agent] → User Review → [Task Plan Agent] → Tasks
-            ↓                           ↓
-     solution_outline.md          [User Review Protocol]
+Request → [Solution Outline Agent] → User Review → [Task Plan Agent] → Tasks → [Implement Agent]
+            ↓                           ↓                                ↓
+     solution_outline.md          [User Review Protocol]           [Delegation Contract]
 ```
 
 1. `/plan-manage` command loads plan-type skill
@@ -38,12 +40,12 @@ Request → [Solution Outline Agent] → User Review → [Task Plan Agent] → T
 
 ## Plan Types
 
-| Plan Type | Solution Outline Agent | Task Plan Agent | Verification |
-|-----------|------------------------|-----------------|--------------|
-| `java` | `pm-dev-java:java-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` | `/pm-dev-builder:builder-build-and-fix` |
-| `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` | `/pm-dev-builder:builder-build-and-fix system=npm` |
-| `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` | `/pm-plugin-development:plugin-doctor` |
-| `generic` | None (inline) | None (inline) | None |
+| Plan Type | Solution Outline Agent | Task Plan Agent | Implement Agent | Verification |
+|-----------|------------------------|-----------------|-----------------|--------------|
+| `java` | `pm-dev-java:java-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` | `pm-dev-java:java-implement-agent` | `/pm-dev-builder:builder-build-and-fix` |
+| `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` | `pm-dev-frontend:js-implement-agent` | `/pm-dev-builder:builder-build-and-fix system=npm` |
+| `plugin` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` | `pm-plugin-development:plugin-implement-agent` | `/pm-plugin-development:plugin-doctor` |
+| `generic` | None (inline) | None (inline) | None (inline) | None |
 
 ## Traceability Flow
 
@@ -106,9 +108,9 @@ The `--trace-plan-id` parameter is:
 - `plan-finalize` → reads config.toon directly
 
 **Domain Agents** (invoked by commands):
-- `pm-dev-java:java-solution-outline-agent` / `pm-dev-java:java-task-plan-agent`
-- `pm-dev-frontend:js-solution-outline-agent` / `pm-dev-frontend:js-task-plan-agent`
-- `pm-plugin-development:plugin-solution-outline-agent` / `pm-plugin-development:plugin-task-plan-agent`
+- `pm-dev-java:java-solution-outline-agent` / `pm-dev-java:java-task-plan-agent` / `pm-dev-java:java-implement-agent`
+- `pm-dev-frontend:js-solution-outline-agent` / `pm-dev-frontend:js-task-plan-agent` / `pm-dev-frontend:js-implement-agent`
+- `pm-plugin-development:plugin-solution-outline-agent` / `pm-plugin-development:plugin-task-plan-agent` / `pm-plugin-development:plugin-implement-agent`
 
 **Data Layer** (used by domain agents):
 - `pm-workflow:manage-plan-documents:manage-plan-documents` (request) - Request document operations

@@ -21,6 +21,7 @@
     "./skills/plugin-create",
     "./skills/plugin-doctor",
     "./skills/plugin-maintain",
+    "./skills/plugin-plan-execute",
     "./skills/plugin-script-architecture",
     "./skills/plugin-solution-outline",
     "./skills/plugin-task-plan",

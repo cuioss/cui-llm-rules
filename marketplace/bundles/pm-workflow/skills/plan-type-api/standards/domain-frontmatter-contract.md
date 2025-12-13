@@ -18,6 +18,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: {bundle}:{solution-outline-agent}  # Agent for request → solution outline
   task_plan_agent: {bundle}:{task-plan-agent}                # Agent for solution outline → tasks
+  implement_agent: {bundle}:{implement-agent}                # Agent for task execution
 
 # Plan defaults (read by manage-config create)
 plan_defaults:
@@ -38,6 +39,7 @@ plan_defaults:
 | `allowed-tools` | string | Yes | Tools the skill may reference |
 | `domain.solution_outline_agent` | string\|null | Yes | Agent for Request → Solution Outline |
 | `domain.task_plan_agent` | string\|null | Yes | Agent for Solution Outline → Tasks |
+| `domain.implement_agent` | string\|null | Yes | Agent for Task Execution |
 | `plan_defaults.verification_command` | string\|null | Yes | Command for finalize verification |
 | `plan_defaults.pr_workflow` | boolean | Yes | Whether to create PR on finalize |
 | `plan_defaults.standards` | array | Yes | Domain skills (informational, can be empty) |
@@ -51,6 +53,7 @@ Agent references use the format `{bundle}:{agent-name}`:
 ```yaml
 solution_outline_agent: pm-dev-java:java-solution-outline-agent
 task_plan_agent: pm-dev-java:java-task-plan-agent
+implement_agent: pm-dev-java:java-implement-agent
 ```
 
 For generic plans (no domain agents), use `null`:
@@ -58,6 +61,7 @@ For generic plans (no domain agents), use `null`:
 ```yaml
 solution_outline_agent: null
 task_plan_agent: null
+implement_agent: null
 ```
 
 ## Routing Flow
@@ -66,7 +70,8 @@ task_plan_agent: null
 2. Command reads `domain:` section from skill frontmatter
 3. Command invokes `domain.solution_outline_agent` via Task tool
 4. After user review, command invokes `domain.task_plan_agent` via Task tool
-5. For generic plans (`solution_outline_agent: null`), falls back to `plan-refine-agent`
+5. `/plan-execute` invokes `domain.implement_agent` for each task
+6. For generic plans (`solution_outline_agent: null`), falls back to `plan-refine-agent`
 
 ## Plan Type Examples
 
@@ -80,6 +85,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: pm-dev-java:java-solution-outline-agent
   task_plan_agent: pm-dev-java:java-task-plan-agent
+  implement_agent: pm-dev-java:java-implement-agent
 plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix
   pr_workflow: true
@@ -99,6 +105,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: pm-dev-frontend:js-solution-outline-agent
   task_plan_agent: pm-dev-frontend:js-task-plan-agent
+  implement_agent: pm-dev-frontend:js-implement-agent
 plan_defaults:
   verification_command: /pm-dev-builder:builder-build-and-fix system=npm
   pr_workflow: true
@@ -118,6 +125,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: pm-plugin-development:plugin-solution-outline-agent
   task_plan_agent: pm-plugin-development:plugin-task-plan-agent
+  implement_agent: pm-plugin-development:plugin-implement-agent
 plan_defaults:
   verification_command: /pm-plugin-development:plugin-doctor
   pr_workflow: false
@@ -136,6 +144,7 @@ allowed-tools: Read, Bash
 domain:
   solution_outline_agent: null
   task_plan_agent: null
+  implement_agent: null
 plan_defaults:
   verification_command: null
   pr_workflow: false
@@ -151,7 +160,7 @@ plan_defaults:
 | Agent format | Must be `{bundle}:{agent}` or `null` |
 | Standards format | Each entry must be `{bundle}:{skill}` |
 | `standards` array | Can be empty but must be present |
-| Null agents | Both `solution_outline_agent` and `task_plan_agent` null for generic |
+| Null agents | All domain agents null for generic plans |
 
 ## Integration
 
@@ -164,3 +173,4 @@ plan_defaults:
 **Related**:
 - [Solution Outline Agent Contract](solution-outline-agent-contract.md)
 - [Task Plan Agent Contract](task-plan-agent-contract.md)
+- [Implement Agent Contract](implement-agent-contract.md)
