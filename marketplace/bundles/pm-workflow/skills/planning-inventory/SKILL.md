@@ -140,9 +140,9 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 | Bundle | Agents | Skills |
 |--------|--------|--------|
-| pm-dev-java | java-task-plan-agent, java-solution-outline-agent | java-task-plan, java-solution-outline |
-| pm-dev-frontend | js-task-plan-agent, js-solution-outline-agent | js-task-plan, js-solution-outline |
-| pm-plugin-development | plugin-task-plan-agent, plugin-solution-outline-agent | plugin-task-plan, plugin-solution-outline |
+| pm-dev-java | java-task-plan-agent, java-solution-outline-agent, java-implement-agent | java-task-plan, java-solution-outline, java-plan-implement |
+| pm-dev-frontend | js-task-plan-agent, js-solution-outline-agent, js-implement-agent | js-task-plan, js-solution-outline, js-plan-implement |
+| pm-plugin-development | plugin-task-plan-agent, plugin-solution-outline-agent, plugin-implement-agent | plugin-task-plan, plugin-solution-outline, plugin-plan-implement |
 
 ## Dependencies
 

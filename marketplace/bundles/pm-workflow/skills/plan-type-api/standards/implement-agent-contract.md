@@ -101,15 +101,15 @@ Skill: {domain-architecture-skill}
 Skill: plan-marshall:general-development-rules
 ```
 
-### Step 1: Load Execution Skill
+### Step 1: Load Implementation Skill
 
 ```
-Skill: {domain-plan-execute-skill}
+Skill: {domain-plan-implement-skill}
 ```
 
 ### Step 2: Delegate to Skill
 
-Invoke the skill's `execute` workflow with:
+Invoke the skill's `implement` workflow with:
 - `plan_id`
 - `task_number`
 
@@ -124,20 +124,20 @@ Implement agents SHOULD follow the minimal wrapper pattern:
 ```markdown
 ---
 name: {domain}-implement-agent
-description: Execute {domain} implementation tasks from plan
+description: Implement {domain} tasks from plan
 tools: Read, Write, Edit, Bash, Skill
 model: sonnet
-skills: {domain}-plan-execute, plan-marshall:general-development-rules
+skills: {domain}-plan-implement, plan-marshall:general-development-rules
 ---
 
 # {Domain} Implement Agent
 
-Minimal wrapper that loads {domain}-plan-execute skill and executes tasks.
+Minimal wrapper that loads {domain}-plan-implement skill and implements tasks.
 
 ## Step 0: Load Skills (MANDATORY)
 
 ```
-Skill: {bundle}:{domain}-plan-execute
+Skill: {bundle}:{domain}-plan-implement
 Skill: plan-marshall:general-development-rules
 ```
 
@@ -153,7 +153,7 @@ Skill: plan-marshall:general-development-rules
 After skills loaded, invoke:
 
 ```
-operation: execute
+operation: implement
 plan_id: {plan_id}
 task_number: {task_number}
 ```
@@ -233,11 +233,11 @@ If verification fails:
 
 ## Domain Implement Agents
 
-| Domain | Agent | Execution Skill |
-|--------|-------|-----------------|
-| `plugin` | `pm-plugin-development:plugin-implement-agent` | `plugin-plan-execute` |
-| `java` | `pm-dev-java:java-implement-agent` | `java-plan-execute` |
-| `javascript` | `pm-dev-frontend:js-implement-agent` | `js-plan-execute` |
+| Domain | Agent | Implementation Skill |
+|--------|-------|----------------------|
+| `plugin` | `pm-plugin-development:plugin-implement-agent` | `plugin-plan-implement` |
+| `java` | `pm-dev-java:java-implement-agent` | `java-plan-implement` |
+| `javascript` | `pm-dev-frontend:js-implement-agent` | `js-plan-implement` |
 
 ## Integration
 
@@ -248,7 +248,7 @@ If verification fails:
 **Dependencies**:
 - `manage-tasks` → task retrieval and progress tracking
 - `manage-log` → work log entries
-- Domain execution skills → actual implementation logic
+- Domain implementation skills → actual implementation logic
 
 **Related**:
 - [Implementation Delegation Contract](implementation-delegation-contract.md) - How tasks specify delegation

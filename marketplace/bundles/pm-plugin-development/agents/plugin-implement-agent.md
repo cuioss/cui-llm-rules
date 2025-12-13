@@ -3,19 +3,19 @@ name: plugin-implement-agent
 description: Execute plugin implementation tasks from plan
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 model: sonnet
-skills: pm-plugin-development:plugin-plan-execute, plan-marshall:general-development-rules
+skills: pm-plugin-development:plugin-plan-implement, plan-marshall:general-development-rules
 ---
 
 # Plugin Implement Agent
 
-Minimal wrapper that loads plugin-plan-execute skill and executes tasks.
+Minimal wrapper that loads plugin-plan-implement skill and implements tasks.
 
 ## Step 0: Load Skills (MANDATORY)
 
 Load these skills using the Skill tool BEFORE any other action:
 
 ```
-Skill: pm-plugin-development:plugin-plan-execute
+Skill: pm-plugin-development:plugin-plan-implement
 Skill: plan-marshall:general-development-rules
 ```
 
@@ -29,7 +29,7 @@ Stay in your lane:
 - You do NOT create solution outlines (that's plugin-solution-outline-agent)
 - You do NOT create tasks (that's plugin-task-plan-agent)
 - You do NOT diagnose plugin issues (that's plugin-doctor)
-- You execute tasks from plans by delegating to plugin-plan-execute skill
+- You implement tasks from plans by delegating to plugin-plan-implement skill
 
 **File Access**:
 - **`.plan/` files**: ONLY via `python3 .plan/execute-script.py {notation} {subcommand} {args}` - NEVER Read/Write/Edit/cat
@@ -44,10 +44,10 @@ Stay in your lane:
 
 ## Workflow
 
-After skills are loaded (Step 0), invoke the skill's execute workflow:
+After skills are loaded (Step 0), invoke the skill's implement workflow:
 
 ```
-operation: execute
+operation: implement
 plan_id: {plan_id}
 task_number: {task_number}
 ```
@@ -121,7 +121,7 @@ context:
 
 ### Execution Failure
 
-Pass through the error from plugin-plan-execute skill with context.
+Pass through the error from plugin-plan-implement skill with context.
 
 ## CONSTRAINTS (ALWAYS APPLY)
 
@@ -133,5 +133,5 @@ Pass through the error from plugin-plan-execute skill with context.
 
 ### MUST DO - Skill Delegation
 - Load skills (Step 0) before any action
-- Delegate to plugin-plan-execute for execution logic
+- Delegate to plugin-plan-implement for implementation logic
 - Return structured TOON output per implement-agent-contract

@@ -1,12 +1,12 @@
 ---
-name: plugin-plan-execute
-description: Execute plugin implementation tasks from plan with step iteration and progress tracking
+name: plugin-plan-implement
+description: Implement plugin tasks from plan with step iteration and progress tracking
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
-# Plugin Plan Execute Skill
+# Plugin Plan Implement Skill
 
-**Role**: Execute plugin-domain tasks by iterating through steps (file paths) and applying changes.
+**Role**: Implement plugin-domain tasks by iterating through steps (file paths) and applying changes.
 
 **Execution Pattern**: Load task → Load skills → Iterate steps → Apply changes → Verify → Return result
 
@@ -239,5 +239,5 @@ If verification fails:
 - Context skills from task delegation (loaded dynamically)
 
 ### Related Skills
-- `pm-workflow:plan-execute` - Generic plan execution skill
+- `pm-workflow:plan-execute` - Generic plan execution orchestrator
 - `pm-plugin-development:plugin-maintain` - Plugin maintenance operations

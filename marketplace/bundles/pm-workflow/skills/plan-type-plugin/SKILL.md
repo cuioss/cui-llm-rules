@@ -99,7 +99,7 @@ Creates tasks with plugin-specific steps:
 
 ### plugin-implement-agent
 
-Executes tasks by delegating to `plugin-plan-execute` skill:
+Implements tasks by delegating to `plugin-plan-implement` skill:
 - Loads task from plan via manage-tasks API
 - Loads domain and context skills
 - Iterates through steps (each step is a file path)
