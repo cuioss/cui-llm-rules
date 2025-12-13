@@ -281,7 +281,7 @@ def test_successful_execution_logged():
     # Check log was created
     log_content = env.get_log_content()
     assert 'pm-workflow:manage-config' in log_content, f"Missing log entry. Log content: {log_content}"
-    assert '[SUCCESS]' in log_content, f"Expected SUCCESS marker in log: {log_content}"
+    assert '[INFO]' in log_content, f"Expected INFO marker in log: {log_content}"
 
 
 def test_log_format_success_compact():
@@ -294,13 +294,13 @@ def test_log_format_success_compact():
     log_content = env.get_log_content()
 
     # Success entries should be single line with bracket format
-    # Format: [timestamp] [SUCCESS] notation subcommand (duration)
+    # Format: [timestamp] [INFO] notation subcommand (duration)
     lines = [line for line in log_content.strip().split('\n') if 'pm-workflow:manage-config' in line]
     assert len(lines) >= 1, "No log entry found for pm-workflow:manage-config"
 
     entry = lines[0]
     # Check bracket format
-    assert '[SUCCESS]' in entry, f"Expected [SUCCESS] marker, got: {entry}"
+    assert '[INFO]' in entry, f"Expected [INFO] marker, got: {entry}"
     assert entry.startswith('['), f"Entry should start with timestamp bracket: {entry}"
 
     # Should NOT contain ERROR marker for success

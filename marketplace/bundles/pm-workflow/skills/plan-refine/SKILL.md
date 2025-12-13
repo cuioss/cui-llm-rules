@@ -225,7 +225,7 @@ EOF
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} SUCCESS "Completed refine: solution document created, {tasks_created} tasks"
+  work {plan_id} INFO "Completed refine: solution document created, {tasks_created} tasks"
 ```
 
 ### Step 7: Phase Transition

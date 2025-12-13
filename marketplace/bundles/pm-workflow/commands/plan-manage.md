@@ -123,7 +123,7 @@ Task: {domain.solution_outline_agent}
 Log solution outline creation:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} SUCCESS "[ARTIFACT] Created solution_outline.md - pending user review"
+  work {plan_id} INFO "[ARTIFACT] Created solution_outline.md - pending user review"
 ```
 
 **If domain.solution_outline_agent IS null** (generic plan type):

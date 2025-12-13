@@ -130,7 +130,7 @@ After each task completes:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} SUCCESS "Completed {task_id}: {task_title} ({steps_completed} steps)"
+  work {plan_id} INFO "Completed {task_id}: {task_title} ({steps_completed} steps)"
 ```
 
 ### Step 4: Next Task or Phase
@@ -143,7 +143,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} SUCCESS "Completed {phase} phase: {tasks_completed} tasks"
+  work {plan_id} INFO "Completed {phase} phase: {tasks_completed} tasks"
 ```
 
 ---

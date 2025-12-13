@@ -4,7 +4,7 @@
 New simplified API: manage-log {type} {plan_id} {level} "{message}"
 - type: script or work
 - plan_id: plan identifier
-- level: SUCCESS, ERROR, INFO, WARN
+- level: INFO, WARN, ERROR
 - message: log message
 
 No stdout output, exit code only.
@@ -35,16 +35,16 @@ def read_log_file(plan_dir: Path, log_type: str) -> str:
 # =============================================================================
 
 def test_script_success():
-    """Test script type logs SUCCESS entry."""
+    """Test script type logs INFO entry for success."""
     with PlanTestContext(plan_id='log-script-success') as ctx:
         result = run_script(SCRIPT_PATH,
-            'script', 'log-script-success', 'SUCCESS', 'test:skill:script add (0.15s)'
+            'script', 'log-script-success', 'INFO', 'test:skill:script add (0.15s)'
         )
         assert result.success, f"Script failed: {result.stderr}"
         assert result.stdout == '', "Expected no stdout output"
 
         log_content = read_log_file(ctx.plan_dir, 'script')
-        assert '[SUCCESS]' in log_content
+        assert '[INFO]' in log_content
         assert 'test:skill:script add (0.15s)' in log_content
 
 
@@ -125,7 +125,7 @@ def test_multiple_entries():
     """Test multiple log entries append correctly."""
     with PlanTestContext(plan_id='log-multiple') as ctx:
         run_script(SCRIPT_PATH, 'work', 'log-multiple', 'INFO', 'First entry')
-        run_script(SCRIPT_PATH, 'work', 'log-multiple', 'SUCCESS', 'Second entry')
+        run_script(SCRIPT_PATH, 'work', 'log-multiple', 'INFO', 'Second entry')
         run_script(SCRIPT_PATH, 'work', 'log-multiple', 'WARN', 'Third entry')
 
         log_content = read_log_file(ctx.plan_dir, 'work')
@@ -143,7 +143,7 @@ def test_read_work_log():
     with PlanTestContext(plan_id='log-read-work') as ctx:
         # Write some entries first
         run_script(SCRIPT_PATH, 'work', 'log-read-work', 'INFO', 'Test entry one')
-        run_script(SCRIPT_PATH, 'work', 'log-read-work', 'SUCCESS', 'Test entry two')
+        run_script(SCRIPT_PATH, 'work', 'log-read-work', 'INFO', 'Test entry two')
 
         # Read them back
         result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'log-read-work', '--type', 'work')
@@ -187,7 +187,7 @@ def test_read_script_log():
     """Test read subcommand for script type logs."""
     with PlanTestContext(plan_id='log-read-script') as ctx:
         # Write script log entry
-        run_script(SCRIPT_PATH, 'script', 'log-read-script', 'SUCCESS', 'test:skill:script (0.1s)')
+        run_script(SCRIPT_PATH, 'script', 'log-read-script', 'INFO', 'test:skill:script (0.1s)')
 
         # Read it back
         result = run_script(SCRIPT_PATH, 'read', '--plan-id', 'log-read-script', '--type', 'script')

@@ -155,7 +155,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} SUCCESS "Plan completed: commit={commit_hash}, PR={pr_url|skipped}"
+  work {plan_id} INFO "Plan completed: commit={commit_hash}, PR={pr_url|skipped}"
 ```
 
 ---

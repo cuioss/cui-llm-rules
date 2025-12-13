@@ -94,7 +94,7 @@ After all batches complete, log the summary:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} SUCCESS "[MILESTONE] Impact analysis complete: {total_affected} of {total_analyzed} affected"
+  work {plan_id} INFO "[MILESTONE] Impact analysis complete: {total_affected} of {total_analyzed} affected"
 ```
 
 ## Step 3b.3: Build Deliverables Section with Enumeration

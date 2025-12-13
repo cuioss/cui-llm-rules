@@ -45,7 +45,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
 
 **Scan for**:
 - `[ERROR]` entries - any script failures
-- Retry patterns: `[ERROR]` followed by `[SUCCESS]` for same script (indicates hidden failure + recovery)
+- Retry patterns: `[ERROR]` followed by `[INFO]` for same script (indicates hidden failure + recovery)
 - Argument errors: entries containing "usage:" or "argument"
 
 **If errors found** → **STOP**. Analyze the failure before proceeding.
@@ -53,7 +53,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
 **Retry Pattern Detection**:
 ```
 [timestamp1] [ERROR] {notation} {subcommand} ...
-[timestamp2] [SUCCESS] {notation} {subcommand} ...
+[timestamp2] [INFO] {notation} {subcommand} ...
 ```
 This indicates an agent silently retried after failure. Investigate WHY the first attempt failed.
 
@@ -380,7 +380,7 @@ Standard entry:
 
 Example:
 ```
-[2025-12-11T12:14:26Z] [SUCCESS] [SCRIPT] pm-workflow:manage-files:manage-files create (0.19s)
+[2025-12-11T12:14:26Z] [INFO] [SCRIPT] pm-workflow:manage-files:manage-files create (0.19s)
 [2025-12-11T12:17:50Z] [ERROR] [SCRIPT] pm-workflow:manage-task:manage-task add failed (exit 1)
 ```
 
@@ -853,7 +853,7 @@ tail -5 .plan/logs/script-execution-$(date +%Y-%m-%d).log
 
 **Success entry format**:
 ```
-[{timestamp}] [SUCCESS] [SCRIPT] {notation} {subcommand} ({duration}s)
+[{timestamp}] [INFO] [SCRIPT] {notation} {subcommand} ({duration}s)
 ```
 
 **Error entry format**:
@@ -864,4 +864,4 @@ tail -5 .plan/logs/script-execution-$(date +%Y-%m-%d).log
 Expected verification:
 - Timestamp is recent (within last few seconds)
 - Notation matches expected script
-- Level is SUCCESS for success, ERROR for failures
+- Level is INFO for success, ERROR for failures

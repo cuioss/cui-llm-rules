@@ -12,7 +12,7 @@ Usage:
 Arguments (write):
     type      - Log type: 'script' or 'work'
     plan_id   - Plan identifier
-    level     - Log level: SUCCESS, ERROR, INFO, WARN
+    level     - Log level: INFO, WARN, ERROR
     message   - Log message
 
 Arguments (read):
@@ -23,7 +23,7 @@ Arguments (read):
 
 Examples:
     # Write operations
-    python3 manage-log.py script my-plan SUCCESS "pm-workflow:manage-task:manage-task add (0.15s)"
+    python3 manage-log.py script my-plan INFO "pm-workflow:manage-task:manage-task add (0.15s)"
     python3 manage-log.py work my-plan INFO "Created deliverable: auth module"
 
     # Read operations
@@ -42,7 +42,7 @@ sys.path.insert(0, str(script_dir))
 from plan_logging import log_entry, read_work_log, list_recent_work, get_log_path
 
 VALID_TYPES = ('script', 'work')
-VALID_LEVELS = ('SUCCESS', 'ERROR', 'INFO', 'WARN')
+VALID_LEVELS = ('INFO', 'WARN', 'ERROR')
 
 
 def format_toon_output(result: dict) -> str:

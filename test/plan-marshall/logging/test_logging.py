@@ -38,8 +38,8 @@ def test_format_timestamp_iso8601():
 
 def test_format_log_entry_basic():
     """Log entry has correct structure."""
-    entry = module.format_log_entry('SUCCESS', 'test message')
-    assert '[SUCCESS]' in entry, "Missing level"
+    entry = module.format_log_entry('INFO', 'test message')
+    assert '[INFO]' in entry, "Missing level"
     assert 'test message' in entry, "Missing message"
     assert entry.endswith('\n'), "Should end with newline"
 
@@ -167,7 +167,7 @@ def test_log_script_execution_success():
             assert log_file.exists(), "Log file not created"
 
             content = log_file.read_text()
-            assert '[SUCCESS]' in content
+            assert '[INFO]' in content
             assert 'test:skill:script add' in content
             assert '0.15s' in content
         finally:

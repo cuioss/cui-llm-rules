@@ -62,7 +62,7 @@ def format_log_entry(
     Format a standard log entry.
 
     Args:
-        level: Log level (SUCCESS, INFO, WARN, ERROR)
+        level: Log level (INFO, WARN, ERROR)
         message: Primary message
         **fields: Additional fields to include as indented lines
 
@@ -128,7 +128,7 @@ def get_log_path(plan_id: Optional[str], log_type: str = 'script') -> Path:
 # =============================================================================
 
 VALID_TYPES = ('script', 'work')
-VALID_LEVELS = ('SUCCESS', 'ERROR', 'INFO', 'WARN')
+VALID_LEVELS = ('INFO', 'WARN', 'ERROR')
 
 def log_entry(log_type: str, plan_id: str, level: str, message: str) -> None:
     """
@@ -137,7 +137,7 @@ def log_entry(log_type: str, plan_id: str, level: str, message: str) -> None:
     Args:
         log_type: 'script' or 'work'
         plan_id: Plan identifier
-        level: SUCCESS, ERROR, INFO, WARN
+        level: INFO, WARN, ERROR
         message: Log message
     """
     if not LOG_ENABLED:
@@ -193,7 +193,7 @@ def log_script_execution(
         message = f"{notation} {subcommand} ({duration:.2f}s)"
 
         if exit_code == 0:
-            entry = format_log_entry('SUCCESS', message)
+            entry = format_log_entry('INFO', message)
         else:
             max_output = get_max_output()
             entry = format_log_entry(

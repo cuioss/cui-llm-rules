@@ -15,7 +15,7 @@ This document defines the standard log entry format used by the unified logging 
 | Component | Description | Example |
 |-----------|-------------|---------|
 | `timestamp` | ISO 8601 UTC timestamp | `2025-12-11T12:14:26Z` |
-| `level` | Log severity level | `SUCCESS`, `INFO`, `ERROR` |
+| `level` | Log severity level | `INFO`, `WARN`, `ERROR` |
 | `category` | Entry categorization | `SCRIPT`, `DECISION`, `ARTIFACT` |
 | `message` | Primary log message | `pm-workflow:manage-files add (0.15s)` |
 | `field: value` | Additional data (indented) | `phase: init` |
@@ -68,12 +68,12 @@ Additional data is provided as indented key-value pairs:
 ### Success Entry
 
 ```
-[2025-12-11T12:14:26Z] [SUCCESS] [SCRIPT] {notation} {subcommand} ({duration}s)
+[2025-12-11T12:14:26Z] [INFO] [SCRIPT] {notation} {subcommand} ({duration}s)
 ```
 
 **Example**:
 ```
-[2025-12-11T12:14:26Z] [SUCCESS] [SCRIPT] pm-workflow:manage-files:manage-files create-or-reference (0.19s)
+[2025-12-11T12:14:26Z] [INFO] [SCRIPT] pm-workflow:manage-files:manage-files create-or-reference (0.19s)
 ```
 
 ### Error Entry

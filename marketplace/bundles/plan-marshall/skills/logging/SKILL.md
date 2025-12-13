@@ -45,7 +45,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 |----------|--------|-------------|
 | `type` | `script`, `work` | Log type (determines output file) |
 | `plan_id` | kebab-case | Plan identifier |
-| `level` | `SUCCESS`, `ERROR`, `INFO`, `WARN` | Log level |
+| `level` | `INFO`, `WARN`, `ERROR` | Log level |
 | `message` | string | Log message |
 
 **Output**: None (exit code only)
@@ -92,7 +92,7 @@ entries:
 ```bash
 # Write: Script execution logging
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  script my-plan SUCCESS "pm-workflow:manage-task:manage-task add (0.15s)"
+  script my-plan INFO "pm-workflow:manage-task:manage-task add (0.15s)"
 
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   script my-plan ERROR "pm-workflow:manage-task:manage-task add failed (exit 1)"
@@ -133,7 +133,7 @@ Since entries go to separate files (`script-execution.log` vs `work.log`), redun
 
 **script-execution.log**:
 ```
-[2025-12-11T12:14:26Z] [SUCCESS] pm-workflow:manage-files:manage-files create (0.19s)
+[2025-12-11T12:14:26Z] [INFO] pm-workflow:manage-files:manage-files create (0.19s)
 [2025-12-11T12:17:50Z] [ERROR] pm-workflow:manage-task:manage-task add failed (exit 1)
 ```
 
@@ -148,8 +148,7 @@ Since entries go to separate files (`script-execution.log` vs `work.log`), redun
 
 | Level | Description |
 |-------|-------------|
-| `SUCCESS` | Operation completed successfully |
-| `INFO` | Progress or informational message |
+| `INFO` | Progress, informational, or successful completion message |
 | `WARN` | Warning (non-fatal issue) |
 | `ERROR` | Error with details |
 
@@ -174,7 +173,7 @@ log_entry(
 log_entry(
     log_type='script',
     plan_id='my-plan',
-    level='SUCCESS',
+    level='INFO',
     message='pm-workflow:manage-task:manage-task add (0.15s)'
 )
 ```

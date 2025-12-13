@@ -99,7 +99,7 @@ Fallback when no plan context:
 
 **Success entries** (single-line):
 ```
-[2025-12-08T10:30:00Z] [SUCCESS] [SCRIPT] pm-workflow:manage-files:manage-files add (0.15s)
+[2025-12-08T10:30:00Z] [INFO] [SCRIPT] pm-workflow:manage-files:manage-files add (0.15s)
 ```
 
 **Error entries** (multi-line with fields):

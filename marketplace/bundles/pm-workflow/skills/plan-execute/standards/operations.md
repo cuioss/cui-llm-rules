@@ -131,7 +131,7 @@ npm run docs:check
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} SUCCESS "{what was done}: {outcome}"
+  work {plan_id} INFO "{what was done}: {outcome}"
 ```
 
 ### Lesson Learned
