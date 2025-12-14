@@ -16,12 +16,12 @@ Modules represent distinct parts of a project with different:
   "modules": {
     "nifi-cuioss-processors": {
       "path": "nifi-cuioss-processors",
-      "domains": ["java"],
+      "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"]
     },
     "nifi-cuioss-ui": {
       "path": "nifi-cuioss-ui",
-      "domains": ["java", "javascript"],
+      "domains": ["java-core", "java-implementation", "javascript-core", "javascript-implementation"],
       "build_systems": ["maven", "npm"],
       "commands": {
         "npm": {
@@ -48,13 +48,17 @@ Relative path from project root to the module.
 Skill domains applicable to this module. Links to `skill_domains` configuration.
 
 ```json
-"domains": ["java", "javascript"]
+"domains": ["java-core", "java-implementation", "javascript-core", "javascript-implementation"]
 ```
 
+Technical domains follow the pattern: `{language}-core`, `{language}-implementation`, `{language}-testing`.
+
 Standard domains:
-- `java` - Production Java code
+- `java-core` - Common Java standards (shared)
+- `java-implementation` - Production Java code
 - `java-testing` - Java test code
-- `javascript` - Production JavaScript code
+- `javascript-core` - Common JavaScript standards (shared)
+- `javascript-implementation` - Production JavaScript code
 - `javascript-testing` - JavaScript test code
 
 ### build_systems
@@ -125,12 +129,12 @@ plan-marshall-config modules detect
 
 Domains are inferred from module content:
 
-| Pattern | Inferred Domain |
-|---------|----------------|
-| `*.java` files (non-test) | `java` |
-| `*.java` files in test dirs | `java-testing` |
-| `*.js` or `*.ts` files | `javascript` |
-| `e2e`, `playwright`, `cypress` in path | `javascript-testing` |
+| Pattern | Inferred Domains |
+|---------|-----------------|
+| `*.java` files (non-test) | `java-core`, `java-implementation` |
+| `*.java` files in test dirs | `java-core`, `java-testing` |
+| `*.js` or `*.ts` files (non-test) | `javascript-core`, `javascript-implementation` |
+| `e2e`, `playwright`, `cypress` in path | `javascript-core`, `javascript-testing` |
 
 ### Build System Inference
 
@@ -151,8 +155,9 @@ Build systems are inferred from module files:
 domains=$(plan-marshall-config modules get-domains --module my-ui)
 
 # For each domain, get implementation skills
-plan-marshall-config skill-domains get-defaults --domain java
-plan-marshall-config skill-domains get-defaults --domain javascript
+plan-marshall-config skill-domains get-defaults --domain java-core
+plan-marshall-config skill-domains get-defaults --domain java-implementation
+plan-marshall-config skill-domains get-defaults --domain javascript-core
 ```
 
 ### Get Build Command
@@ -182,22 +187,22 @@ plan-marshall-config modules add \
   "modules": {
     "core-api": {
       "path": "core-api",
-      "domains": ["java"],
+      "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"]
     },
     "core-impl": {
       "path": "core-impl",
-      "domains": ["java"],
+      "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"]
     },
     "web-ui": {
       "path": "web-ui",
-      "domains": ["javascript"],
+      "domains": ["javascript-core", "javascript-implementation"],
       "build_systems": ["npm"]
     },
     "e2e-tests": {
       "path": "e2e-tests",
-      "domains": ["javascript-testing"],
+      "domains": ["javascript-core", "javascript-testing"],
       "build_systems": ["npm"],
       "commands": {
         "npm": {

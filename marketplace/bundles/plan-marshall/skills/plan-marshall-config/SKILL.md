@@ -63,13 +63,13 @@ Get implementation skills for a specific domain.
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains get-defaults --domain java
+  skill-domains get-defaults --domain java-core
 ```
 
 **Output**:
 ```toon
 status: success
-domain: java
+domain: java-core
 defaults[1]:
 - pm-dev-java:java-core
 ```
@@ -78,14 +78,14 @@ defaults[1]:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains get-optionals --domain java
+  skill-domains get-optionals --domain java-implementation
 ```
 
 ### Validate Skill in Domain
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains validate --domain java --skill pm-dev-java:java-cdi
+  skill-domains validate --domain java-core --skill pm-dev-java:java-lombok
 ```
 
 ---
@@ -280,15 +280,19 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 ```json
 {
   "skill_domains": {
-    "java": {
+    "system": {
+      "defaults": ["plan-marshall:general-development-rules"],
+      "optionals": ["plan-marshall:diagnostic-patterns"]
+    },
+    "java-core": {
       "defaults": ["pm-dev-java:java-core"],
-      "optionals": ["pm-dev-java:java-cdi"]
+      "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
     }
   },
   "modules": {
     "my-module": {
       "path": "my-module",
-      "domains": ["java"],
+      "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"]
     }
   },
@@ -325,11 +329,22 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ## Standard Domains
 
+### System Domains
+
 | Domain | Purpose | Default Skills |
 |--------|---------|----------------|
-| `java` | Production Java code | `pm-dev-java:java-core` |
+| `system` | Applied to all agents/skills | `plan-marshall:general-development-rules` |
+| `plugin-development` | Plugin/agent/skill development | `pm-plugin-development:plugin-architecture`, `pm-plugin-development:plugin-script-architecture` |
+
+### Technical Domains (core/implementation/testing pattern)
+
+| Domain | Purpose | Default Skills |
+|--------|---------|----------------|
+| `java-core` | Common Java standards | `pm-dev-java:java-core` |
+| `java-implementation` | Production Java code | (none - inherits from core) |
 | `java-testing` | Java test code | `pm-dev-java:junit-core` |
-| `javascript` | Production JS code | `pm-dev-frontend:cui-javascript` |
+| `javascript-core` | Common JavaScript standards | `pm-dev-frontend:cui-javascript` |
+| `javascript-implementation` | Production JS code | (none - inherits from core) |
 | `javascript-testing` | JS test code | `pm-dev-frontend:cui-javascript-unit-testing` |
 
 ---

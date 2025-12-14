@@ -34,7 +34,7 @@ All commands output TOON (Token-Oriented Object Notation) for token efficiency:
 
 ```toon
 status: success
-domain: java
+domain: java-core
 defaults[1]:
 - pm-dev-java:java-core
 ```
@@ -86,8 +86,8 @@ The wizard uses this skill to:
 Agents query skill domains to load appropriate skills:
 
 ```bash
-# Get skills to load for Java domain
-plan-marshall-config skill-domains get-defaults --domain java
+# Get skills to load for Java core domain
+plan-marshall-config skill-domains get-defaults --domain java-core
 ```
 
 ### With Build Commands

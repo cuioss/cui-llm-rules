@@ -4,28 +4,23 @@ Implementation skill management with defaults and optionals per domain.
 
 ## Purpose
 
-Skill domains configure which implementation skills are loaded when working on code in different domains (Java, JavaScript, testing, etc.).
+Skill domains configure which implementation skills are loaded when working on code in different domains. Domains are organized into two categories:
+
+- **System Domains**: Applied globally to all agents and skills
+- **Technical Domains**: Language-specific with core/implementation/testing variants
 
 ## Structure
 
 ```json
 {
   "skill_domains": {
-    "java": {
+    "system": {
+      "defaults": ["plan-marshall:general-development-rules"],
+      "optionals": ["plan-marshall:diagnostic-patterns"]
+    },
+    "java-core": {
       "defaults": ["pm-dev-java:java-core"],
-      "optionals": ["pm-dev-java:java-cdi"]
-    },
-    "java-testing": {
-      "defaults": ["pm-dev-java:junit-core"],
-      "optionals": []
-    },
-    "javascript": {
-      "defaults": ["pm-dev-frontend:cui-javascript"],
-      "optionals": []
-    },
-    "javascript-testing": {
-      "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
-      "optionals": ["pm-dev-frontend:cui-cypress"]
+      "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
     }
   }
 }
@@ -38,7 +33,7 @@ Skill domains configure which implementation skills are loaded when working on c
 Skills that are **always loaded** when working in this domain.
 
 ```json
-"defaults": ["pm-dev-java:java-core", "pm-dev-java:javadoc"]
+"defaults": ["pm-dev-java:java-core"]
 ```
 
 Implementation agents automatically load these skills before starting work.
@@ -53,64 +48,105 @@ Skills that are **available for selection** but not automatically loaded.
 
 Solution outline agents may suggest loading optionals based on task requirements.
 
-## Standard Domains
+## System Domains
 
-### java
+### system
+
+Applied to all agents and skills. Provides general development rules.
+
+| Field | Skills |
+|-------|--------|
+| defaults | `plan-marshall:general-development-rules` |
+| optionals | `plan-marshall:diagnostic-patterns` |
+
+### plugin-development
+
+Creating, updating, and verifying agents, commands, skills.
+
+| Field | Skills |
+|-------|--------|
+| defaults | `pm-plugin-development:plugin-architecture`, `pm-plugin-development:plugin-script-architecture` |
+| optionals | `plan-marshall:toon-usage`, `plan-marshall:script-executor` |
+
+## Technical Domain Pattern
+
+Each technical domain follows a three-variant pattern:
+
+| Variant | Purpose | Example |
+|---------|---------|---------|
+| `{lang}-core` | Common standards applicable to both implementation and testing | `java-core` |
+| `{lang}-implementation` | Production code specific standards | `java-implementation` |
+| `{lang}-testing` | Test code specific standards | `java-testing` |
+
+### Java Domains
+
+#### java-core
+
+Common Java standards applicable to implementation and testing.
+
+| Field | Skills |
+|-------|--------|
+| defaults | `pm-dev-java:java-core` |
+| optionals | `pm-dev-java:java-null-safety`, `pm-dev-java:java-lombok`, `pm-dev-java:javadoc` |
+
+#### java-implementation
 
 Production Java code.
 
-| Field | Default Skills |
-|-------|---------------|
-| defaults | `pm-dev-java:java-core` |
-| optionals | `pm-dev-java:java-cdi` |
+| Field | Skills |
+|-------|--------|
+| defaults | (none - inherits from java-core) |
+| optionals | `pm-dev-java:java-cdi`, `pm-dev-java:java-maintenance` |
 
-### java-testing
+#### java-testing
 
 Java test code (JUnit, integration tests).
 
-| Field | Default Skills |
-|-------|---------------|
+| Field | Skills |
+|-------|--------|
 | defaults | `pm-dev-java:junit-core` |
-| optionals | (none) |
+| optionals | `pm-dev-java:junit-integration` |
 
-### javascript
+### JavaScript Domains
+
+#### javascript-core
+
+Common JavaScript standards applicable to implementation and testing.
+
+| Field | Skills |
+|-------|--------|
+| defaults | `pm-dev-frontend:cui-javascript` |
+| optionals | `pm-dev-frontend:cui-jsdoc`, `pm-dev-frontend:cui-javascript-project` |
+
+#### javascript-implementation
 
 Production JavaScript code.
 
-| Field | Default Skills |
-|-------|---------------|
-| defaults | `pm-dev-frontend:cui-javascript` |
-| optionals | (none) |
+| Field | Skills |
+|-------|--------|
+| defaults | (none - inherits from javascript-core) |
+| optionals | `pm-dev-frontend:cui-javascript-maintenance`, `pm-dev-frontend:cui-javascript-linting` |
 
-### javascript-testing
+#### javascript-testing
 
-JavaScript test code (Jest, Cypress, Playwright).
+JavaScript test code (Jest, Cypress).
 
-| Field | Default Skills |
-|-------|---------------|
+| Field | Skills |
+|-------|--------|
 | defaults | `pm-dev-frontend:cui-javascript-unit-testing` |
 | optionals | `pm-dev-frontend:cui-cypress` |
-
-### plugin
-
-Claude Code marketplace plugin development.
-
-| Field | Default Skills |
-|-------|---------------|
-| defaults | `pm-plugin-development:plugin-architecture` |
-| optionals | `pm-plugin-development:plugin-script-architecture` |
 
 ## Usage Patterns
 
 ### Implementation Agent: Load Skills
 
 ```bash
-# Get skills to load for Java work
-plan-marshall-config skill-domains get-defaults --domain java
+# Get skills to load for Java core
+plan-marshall-config skill-domains get-defaults --domain java-core
 
 # Output:
 # status: success
-# domain: java
+# domain: java-core
 # defaults[1]:
 # - pm-dev-java:java-core
 ```
@@ -121,13 +157,14 @@ Agent then loads: `Skill: pm-dev-java:java-core`
 
 ```bash
 # Get available optional skills
-plan-marshall-config skill-domains get-optionals --domain java
+plan-marshall-config skill-domains get-optionals --domain java-implementation
 
 # Output:
 # status: success
-# domain: java
-# optionals[1]:
+# domain: java-implementation
+# optionals[2]:
 # - pm-dev-java:java-cdi
+# - pm-dev-java:java-maintenance
 ```
 
 Agent may suggest: "Consider loading CDI skill if using dependency injection"
@@ -137,8 +174,8 @@ Agent may suggest: "Consider loading CDI skill if using dependency injection"
 ```bash
 # Check if skill is valid for domain
 plan-marshall-config skill-domains validate \
-  --domain java \
-  --skill pm-dev-java:java-cdi
+  --domain java-core \
+  --skill pm-dev-java:java-lombok
 
 # Output:
 # status: success
@@ -162,10 +199,10 @@ plan-marshall-config skill-domains add \
 ## Modifying Existing Domains
 
 ```bash
-# Add JavaDoc to Java defaults
+# Add null-safety to Java core defaults
 plan-marshall-config skill-domains set \
-  --domain java \
-  --defaults "pm-dev-java:java-core,pm-dev-java:javadoc"
+  --domain java-core \
+  --defaults "pm-dev-java:java-core,pm-dev-java:java-null-safety"
 ```
 
 ## Integration with Modules
@@ -176,25 +213,29 @@ Modules reference domains in their configuration:
 {
   "modules": {
     "my-module": {
-      "domains": ["java", "java-testing"]
+      "domains": ["java-core", "java-implementation", "java-testing"]
     }
   }
 }
 ```
 
 When working on `my-module`, agents:
-1. Get domains: `["java", "java-testing"]`
+1. Get domains: `["java-core", "java-implementation", "java-testing"]`
 2. For each domain, load default skills
 3. Consider optionals based on task requirements
 
 ## Workflow
 
 ```
-Module → get-domains → [java, java-testing]
+Module → get-domains → [java-core, java-implementation, java-testing]
                             ↓
-         skill-domains get-defaults --domain java
+         skill-domains get-defaults --domain java-core
                             ↓
                     Load: pm-dev-java:java-core
+                            ↓
+         skill-domains get-defaults --domain java-implementation
+                            ↓
+                    (no additional defaults)
                             ↓
          skill-domains get-defaults --domain java-testing
                             ↓
@@ -207,7 +248,7 @@ Module → get-domains → [java, java-testing]
 
 - Include skills that are **always needed** for the domain
 - Keep defaults minimal to reduce context load
-- Core coding standards belong in defaults
+- Core coding standards belong in `*-core` domain defaults
 
 ### Optionals
 
@@ -218,5 +259,5 @@ Module → get-domains → [java, java-testing]
 ### Domain Naming
 
 - Use lowercase with hyphens
-- Suffix testing domains with `-testing`
-- Be specific: `javascript-testing` not just `testing`
+- Follow the pattern: `{language}-core`, `{language}-implementation`, `{language}-testing`
+- System domains use descriptive names: `system`, `plugin-development`

@@ -11,17 +11,33 @@ JSON structure and field definitions for project configuration.
 ```json
 {
   "skill_domains": {
-    "java": {
+    "system": {
+      "defaults": ["plan-marshall:general-development-rules"],
+      "optionals": ["plan-marshall:diagnostic-patterns"]
+    },
+    "plugin-development": {
+      "defaults": ["pm-plugin-development:plugin-architecture", "pm-plugin-development:plugin-script-architecture"],
+      "optionals": ["plan-marshall:toon-usage", "plan-marshall:script-executor"]
+    },
+    "java-core": {
       "defaults": ["pm-dev-java:java-core"],
-      "optionals": ["pm-dev-java:java-cdi"]
+      "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
+    },
+    "java-implementation": {
+      "defaults": [],
+      "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
     },
     "java-testing": {
       "defaults": ["pm-dev-java:junit-core"],
-      "optionals": []
+      "optionals": ["pm-dev-java:junit-integration"]
     },
-    "javascript": {
+    "javascript-core": {
       "defaults": ["pm-dev-frontend:cui-javascript"],
-      "optionals": []
+      "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
+    },
+    "javascript-implementation": {
+      "defaults": [],
+      "optionals": ["pm-dev-frontend:cui-javascript-maintenance", "pm-dev-frontend:cui-javascript-linting"]
     },
     "javascript-testing": {
       "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
@@ -31,12 +47,12 @@ JSON structure and field definitions for project configuration.
   "modules": {
     "my-core": {
       "path": "my-core",
-      "domains": ["java"],
+      "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"]
     },
     "my-ui": {
       "path": "my-ui",
-      "domains": ["java", "javascript"],
+      "domains": ["java-core", "java-implementation", "javascript-core", "javascript-implementation"],
       "build_systems": ["maven", "npm"],
       "commands": {
         "npm": {
@@ -101,13 +117,26 @@ Implementation skill configuration per domain.
 | `defaults` | array | Skills always loaded for this domain |
 | `optionals` | array | Skills available for selection |
 
-### Standard Domains
+### Domain Categories
+
+#### System Domains
 
 | Domain | Purpose |
 |--------|---------|
-| `java` | Production Java code |
+| `system` | Applied to all agents and skills |
+| `plugin-development` | Creating, updating, and verifying agents, commands, skills |
+
+#### Technical Domains
+
+Each technical domain follows the pattern: `{language}-core`, `{language}-implementation`, `{language}-testing`.
+
+| Domain | Purpose |
+|--------|---------|
+| `java-core` | Common Java standards (applies to implementation and testing) |
+| `java-implementation` | Production Java code |
 | `java-testing` | Java test code |
-| `javascript` | Production JavaScript code |
+| `javascript-core` | Common JavaScript standards (applies to implementation and testing) |
+| `javascript-implementation` | Production JavaScript code |
 | `javascript-testing` | JavaScript test code |
 
 ## Section: modules

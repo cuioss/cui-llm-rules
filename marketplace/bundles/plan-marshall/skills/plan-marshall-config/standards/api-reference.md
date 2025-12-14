@@ -24,12 +24,16 @@ plan-marshall-config skill-domains list
 **Output:**
 ```toon
 status: success
-domains[4]:
-- java
+domains[8]:
+- system
+- plugin-development
+- java-core
+- java-implementation
 - java-testing
-- javascript
+- javascript-core
+- javascript-implementation
 - javascript-testing
-count: 4
+count: 8
 ```
 
 ### get
@@ -37,17 +41,19 @@ count: 4
 Get full domain configuration.
 
 ```bash
-plan-marshall-config skill-domains get --domain java
+plan-marshall-config skill-domains get --domain java-core
 ```
 
 **Output:**
 ```toon
 status: success
-domain: java
+domain: java-core
 defaults[1]:
 - pm-dev-java:java-core
-optionals[1]:
-- pm-dev-java:java-cdi
+optionals[3]:
+- pm-dev-java:java-null-safety
+- pm-dev-java:java-lombok
+- pm-dev-java:javadoc
 ```
 
 ### get-defaults
@@ -55,7 +61,7 @@ optionals[1]:
 Get default skills for a domain.
 
 ```bash
-plan-marshall-config skill-domains get-defaults --domain java
+plan-marshall-config skill-domains get-defaults --domain java-core
 ```
 
 ### get-optionals
@@ -63,7 +69,7 @@ plan-marshall-config skill-domains get-defaults --domain java
 Get optional skills for a domain.
 
 ```bash
-plan-marshall-config skill-domains get-optionals --domain java
+plan-marshall-config skill-domains get-optionals --domain java-implementation
 ```
 
 ### set
@@ -72,9 +78,9 @@ Update domain configuration.
 
 ```bash
 plan-marshall-config skill-domains set \
-  --domain java \
-  --defaults "pm-dev-java:java-core,pm-dev-java:javadoc" \
-  --optionals "pm-dev-java:java-cdi"
+  --domain java-core \
+  --defaults "pm-dev-java:java-core,pm-dev-java:java-null-safety" \
+  --optionals "pm-dev-java:java-lombok,pm-dev-java:javadoc"
 ```
 
 ### add
@@ -93,15 +99,15 @@ Check if a skill is valid for a domain.
 
 ```bash
 plan-marshall-config skill-domains validate \
-  --domain java \
-  --skill pm-dev-java:java-cdi
+  --domain java-core \
+  --skill pm-dev-java:java-lombok
 ```
 
 **Output:**
 ```toon
 status: success
-domain: java
-skill: pm-dev-java:java-cdi
+domain: java-core
+skill: pm-dev-java:java-lombok
 valid: true
 in_defaults: false
 in_optionals: true
@@ -127,11 +133,11 @@ status: success
 modules[2]:
 - name: my-core
   path: my-core
-  domains: ["java"]
+  domains: ["java-core", "java-implementation"]
   build_systems: ["maven"]
 - name: my-ui
   path: my-ui
-  domains: ["java", "javascript"]
+  domains: ["java-core", "java-implementation", "javascript-core", "javascript-implementation"]
   build_systems: ["maven", "npm"]
 count: 2
 ```
@@ -156,9 +162,11 @@ plan-marshall-config modules get-domains --module my-ui
 ```toon
 status: success
 module: my-ui
-domains[2]:
-- java
-- javascript
+domains[4]:
+- java-core
+- java-implementation
+- javascript-core
+- javascript-implementation
 ```
 
 ### get-build-systems
@@ -208,7 +216,7 @@ Add a new module.
 plan-marshall-config modules add \
   --module new-module \
   --path path/to/module \
-  --domains "java,java-testing" \
+  --domains "java-core,java-implementation,java-testing" \
   --build-systems "maven"
 ```
 
@@ -219,7 +227,7 @@ Update module configuration.
 ```bash
 plan-marshall-config modules set \
   --module my-core \
-  --domains "java,java-testing"
+  --domains "java-core,java-implementation,java-testing"
 ```
 
 ### remove

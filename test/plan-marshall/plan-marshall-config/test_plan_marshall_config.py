@@ -301,40 +301,40 @@ def test_skill_domains_validate_invalid_skill():
         assert 'false' in result.stdout.lower()
 
 
-def test_skill_domains_plugin_domain():
-    """Test skill-domains with plugin domain from init defaults."""
+def test_skill_domains_plugin_development_domain():
+    """Test skill-domains with plugin-development domain from init defaults."""
     with PlanTestContext() as ctx:
-        # Use init to create marshal.json with default domains including plugin
+        # Use init to create marshal.json with default domains including plugin-development
         run_script(SCRIPT_PATH, 'init')
 
-        result = run_script(SCRIPT_PATH, 'skill-domains', 'get', '--domain', 'plugin')
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get', '--domain', 'plugin-development')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'plugin-architecture' in result.stdout.lower() or 'plugin' in result.stdout.lower()
+        assert 'plugin-architecture' in result.stdout.lower()
 
 
-def test_skill_domains_plugin_domain_get_defaults():
-    """Test skill-domains get-defaults for plugin domain."""
+def test_skill_domains_plugin_development_domain_get_defaults():
+    """Test skill-domains get-defaults for plugin-development domain."""
     with PlanTestContext() as ctx:
         # Use init to create marshal.json with default domains
         run_script(SCRIPT_PATH, 'init')
 
-        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-defaults', '--domain', 'plugin')
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-defaults', '--domain', 'plugin-development')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        # Plugin defaults should include plugin-architecture
+        # Plugin-development defaults should include plugin-architecture
         assert 'plugin-architecture' in result.stdout.lower()
 
 
-def test_skill_domains_plugin_domain_validate():
-    """Test skill-domains validate for plugin domain."""
+def test_skill_domains_plugin_development_domain_validate():
+    """Test skill-domains validate for plugin-development domain."""
     with PlanTestContext() as ctx:
         # Use init to create marshal.json with default domains
         run_script(SCRIPT_PATH, 'init')
 
         result = run_script(
             SCRIPT_PATH, 'skill-domains', 'validate',
-            '--domain', 'plugin',
+            '--domain', 'plugin-development',
             '--skill', 'pm-plugin-development:plugin-architecture'
         )
 
@@ -664,9 +664,9 @@ if __name__ == '__main__':
         test_skill_domains_validate,
         test_skill_domains_validate_returns_location,
         test_skill_domains_validate_invalid_skill,
-        test_skill_domains_plugin_domain,
-        test_skill_domains_plugin_domain_get_defaults,
-        test_skill_domains_plugin_domain_validate,
+        test_skill_domains_plugin_development_domain,
+        test_skill_domains_plugin_development_domain_get_defaults,
+        test_skill_domains_plugin_development_domain_validate,
         # Modules tests
         test_modules_list,
         test_modules_get,
