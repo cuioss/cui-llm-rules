@@ -1,0 +1,131 @@
+"""
+Core utilities for plan-marshall-config.
+
+Shared functions for configuration loading, saving, output formatting,
+and error handling used by all command modules.
+"""
+
+import json
+import os
+import sys
+from pathlib import Path
+
+# Add script directory for toon_parser import
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
+BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
+
+from toon_parser import serialize_toon
+
+EXIT_SUCCESS = 0
+EXIT_ERROR = 1
+
+# File location
+PLAN_BASE_DIR = Path(os.environ.get('PLAN_BASE_DIR', '.plan'))
+MARSHAL_PATH = PLAN_BASE_DIR / 'marshal.json'
+
+# Template location
+TEMPLATES_DIR = Path(__file__).parent.parent / 'templates'
+DEFAULTS_TEMPLATE = TEMPLATES_DIR / 'marshal-defaults.json'
+
+
+class MarshalNotInitializedError(Exception):
+    """Raised when marshal.json doesn't exist and operation requires it."""
+    pass
+
+
+def is_initialized() -> bool:
+    """Check if marshal.json exists."""
+    return MARSHAL_PATH.exists()
+
+
+def require_initialized() -> None:
+    """Raise exception if marshal.json doesn't exist."""
+    if not PLAN_BASE_DIR.exists():
+        raise MarshalNotInitializedError(
+            f"Directory '{PLAN_BASE_DIR}' does not exist. Run command /plan-marshall first"
+        )
+    if not MARSHAL_PATH.exists():
+        raise MarshalNotInitializedError(
+            f"marshal.json not found. Run command /plan-marshall first"
+        )
+
+
+def load_config() -> dict:
+    """Load marshal.json."""
+    return json.loads(MARSHAL_PATH.read_text(encoding='utf-8'))
+
+
+def save_config(config: dict) -> None:
+    """Save config to marshal.json."""
+    MARSHAL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MARSHAL_PATH.write_text(json.dumps(config, indent=2), encoding='utf-8')
+
+
+def output(data: dict) -> None:
+    """Output TOON result to stdout."""
+    print(serialize_toon(data))
+
+
+def error_exit(message: str, **extra) -> int:
+    """Output error and return error exit code."""
+    output({"status": "error", "error": message, **extra})
+    return EXIT_ERROR
+
+
+def success_exit(data: dict) -> int:
+    """Output success and return success exit code."""
+    output({"status": "success", **data})
+    return EXIT_SUCCESS
+
+
+def get_skill_description(skill_notation: str) -> str:
+    """Extract description from SKILL.md frontmatter.
+
+    Args:
+        skill_notation: e.g., "pm-dev-java:java-core"
+
+    Returns:
+        Description string or skill name as fallback
+    """
+    try:
+        parts = skill_notation.split(":")
+        if len(parts) != 2:
+            return skill_notation
+        bundle, skill = parts
+        skill_path = BUNDLES_DIR / bundle / 'skills' / skill / 'SKILL.md'
+
+        if not skill_path.exists():
+            return skill_notation
+
+        content = skill_path.read_text(encoding='utf-8')
+
+        # Parse YAML frontmatter (between --- markers)
+        if not content.startswith('---'):
+            return skill_notation
+
+        end_marker = content.find('---', 3)
+        if end_marker == -1:
+            return skill_notation
+
+        frontmatter = content[3:end_marker].strip()
+
+        # Simple YAML parsing for description field
+        for line in frontmatter.split('\n'):
+            if line.startswith('description:'):
+                desc = line[12:].strip()
+                # Remove quotes if present
+                if (desc.startswith('"') and desc.endswith('"')) or \
+                   (desc.startswith("'") and desc.endswith("'")):
+                    desc = desc[1:-1]
+                return desc
+
+        return skill_notation
+    except Exception:
+        return skill_notation
+
+
+def is_nested_domain(domain_config: dict) -> bool:
+    """Check if domain config uses nested structure (with core, profiles)."""
+    return 'core' in domain_config or 'workflow_skills' in domain_config

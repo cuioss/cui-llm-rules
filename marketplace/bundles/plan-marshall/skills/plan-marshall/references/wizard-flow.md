@@ -148,7 +148,11 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ---
 
-## Step 4: Build System Detection
+## Step 4: Project Detection
+
+Detect build systems, skill domains, and modules from project structure.
+
+### 4a: Build System Detection
 
 ```bash
 python3 .plan/execute-script.py pm-dev-builder:environment-detection:build-env detect
@@ -173,7 +177,31 @@ If yes, auto-detect and add build systems to marshal.json:
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config build-systems detect
 ```
 
-This populates marshal.json with detected systems and their default commands.
+### 4b: Skill Domain Detection
+
+Detect skill domains based on project files (pom.xml → java, package.json → javascript):
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains detect
+```
+
+This populates `skill_domains` in marshal.json with the nested structure:
+- `{domain}.workflow_skills` - workflow phase skills
+- `{domain}.core` - foundation skills (defaults + optionals)
+- `{domain}.implementation` - implementation profile skills
+- `{domain}.testing` - testing profile skills
+
+### 4c: Module Detection
+
+For multi-module projects, detect modules and infer their domains/build systems:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config modules detect
+```
+
+This populates `modules` in marshal.json with per-module domain and build system mappings.
+
+**Note**: Module detection infers domains from module content (e.g., nested `package.json` → javascript domain for that module).
 
 ---
 

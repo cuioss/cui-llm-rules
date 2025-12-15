@@ -137,7 +137,39 @@ TASK-003	Update docs	pending
 
 **Fix Strategy**: Report missing tests, suggest test template
 
-### 6. Help Output Validation
+### 6. Script Size Validation (Modularization)
+
+**Standard**: Scripts exceeding 400 lines MUST be modularized by subcommand.
+
+**Check Criteria**:
+1. Count lines in main script file
+2. If >400 lines, check for modular structure (cmd_*.py files in same directory)
+3. Main script should be <250 lines (parser + dispatch only)
+
+**Detection**:
+```bash
+# Check script line count
+wc -l scripts/{script}.py
+
+# Check for modular structure
+ls scripts/cmd_*.py scripts/config_*.py
+```
+
+**Modular Structure Expected**:
+```
+scripts/
+  {script}.py        # <250 lines: parser + dispatch
+  config_core.py     # Shared utilities
+  config_defaults.py # Constants
+  cmd_{noun1}.py     # Command handlers
+  cmd_{noun2}.py     # Command handlers
+```
+
+**Categorization**: Risky fix (requires script restructuring)
+
+**Fix Strategy**: Flag for refactoring - split into modules per `plugin-script-architecture:standards/python-implementation.md`
+
+### 7. Help Output Validation
 
 **Standard**: All scripts MUST support `--help` flag via argparse.
 
@@ -156,6 +188,37 @@ python3 .plan/execute-script.py {bundle}:{skill} {subcommand} --help
 
 **Fix Strategy**: Flag missing help - argparse provides automatic help
 
+### 8. Test Size Validation (Modularization)
+
+**Standard**: Test files exceeding 400 lines MUST be modularized by command module.
+
+**Check Criteria**:
+1. Count lines in main test file
+2. If >400 lines, check for modular structure (test_cmd_*.py files in same directory)
+3. Main test file should be <250 lines (integration tests only)
+
+**Detection**:
+```bash
+# Check test file line count
+wc -l test/{bundle}/{skill}/test_{script}.py
+
+# Check for modular structure
+ls test/{bundle}/{skill}/test_cmd_*.py test/{bundle}/{skill}/test_helpers.py
+```
+
+**Modular Structure Expected**:
+```
+test/{bundle}/{skill}/
+  test_helpers.py              # Shared fixtures (no tests)
+  test_cmd_{noun1}.py          # {noun1} command variants/corners
+  test_cmd_{noun2}.py          # {noun2} command variants/corners
+  test_{script}.py             # <250 lines: happy-path integration only
+```
+
+**Categorization**: Risky fix (requires test restructuring)
+
+**Fix Strategy**: Flag for refactoring - split into modules per `plugin-script-architecture:standards/testing-standards.md`
+
 ## Validation Workflow
 
 ### Step 1: Discover Scripts
@@ -171,7 +234,9 @@ Glob: pattern="scripts/*.py", path="marketplace/bundles/*/skills/*"
 3. **Imports**: Are all imports stdlib-only?
 4. **Output**: Does it use TOON/JSON format?
 5. **Tests**: Does test file exist?
-6. **Help**: Does `--help` work?
+6. **Size**: Is it >400 lines? If so, is it modularized?
+7. **Help**: Does `--help` work?
+8. **Test Size**: Is test file >400 lines? If so, is it modularized?
 
 ### Step 3: For Each SKILL.md, Check
 
@@ -188,7 +253,9 @@ Glob: pattern="scripts/*.py", path="marketplace/bundles/*/skills/*"
 | External imports | Risky | No |
 | JSON instead of TOON | Risky | No |
 | Missing tests | Safe | No |
+| Script >400 lines not modularized | Risky | No |
 | Missing help | Safe | No |
+| Test >400 lines not modularized | Risky | No |
 
 ### Step 5: Report
 

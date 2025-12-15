@@ -7,30 +7,6 @@
     "plugin-development": {
       "defaults": ["pm-plugin-development:plugin-architecture", "pm-plugin-development:plugin-script-architecture"],
       "optionals": ["plan-marshall:toon-usage", "plan-marshall:script-executor"]
-    },
-    "java-core": {
-      "defaults": ["pm-dev-java:java-core"],
-      "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
-    },
-    "java-implementation": {
-      "defaults": [],
-      "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
-    },
-    "java-testing": {
-      "defaults": ["pm-dev-java:junit-core"],
-      "optionals": ["pm-dev-java:junit-integration"]
-    },
-    "javascript-core": {
-      "defaults": ["pm-dev-frontend:cui-javascript"],
-      "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
-    },
-    "javascript-implementation": {
-      "defaults": [],
-      "optionals": ["pm-dev-frontend:cui-javascript-maintenance", "pm-dev-frontend:cui-javascript-linting"]
-    },
-    "javascript-testing": {
-      "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
-      "optionals": ["pm-dev-frontend:cui-cypress"]
     }
   },
   "modules": {},

@@ -85,6 +85,16 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 Skill domains configure which implementation skills are loaded for different code types.
 
+### Detect Domains
+
+Auto-detect skill domains from project files (pom.xml → java, package.json → javascript):
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains detect
+```
+
+This populates the nested `skill_domains` structure with workflow_skills, core, implementation, and testing blocks.
+
 ### List Domains
 
 ```bash
@@ -95,6 +105,15 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains get --domain java
+```
+
+### Resolve Domain Skills (for task planning)
+
+Aggregate core + profile skills with descriptions for LLM skill selection:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config resolve-domain-skills \
+  --domain java --profile implementation
 ```
 
 ### Update Domain Skills

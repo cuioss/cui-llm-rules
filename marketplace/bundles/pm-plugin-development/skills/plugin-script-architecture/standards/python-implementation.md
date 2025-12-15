@@ -225,6 +225,68 @@ ls -l scripts/
 # Should show: -rwxr-xr-x (executable flag set)
 ```
 
+## Script Modularization (400+ Lines)
+
+**Rule**: Scripts exceeding 400 lines MUST be modularized by subcommand while keeping a monolithic API.
+
+### Module Structure
+
+Split large scripts into focused modules:
+
+| Module | Purpose |
+|--------|---------|
+| `{script}.py` | Main entry point with argparse parser and dispatch only |
+| `config_core.py` | Shared utilities (load/save, error handling, output) |
+| `config_defaults.py` | Constants and default configurations |
+| `cmd_{noun}.py` | Command handlers for each noun/subcommand group |
+
+### Import Pattern
+
+Command modules import shared utilities from config_core:
+
+```python
+from config_core import (
+    EXIT_ERROR,
+    MarshalNotInitializedError,
+    require_initialized,
+    load_config,
+    save_config,
+    error_exit,
+    success_exit,
+)
+```
+
+Main script imports command handlers:
+
+```python
+from cmd_skill_domains import cmd_skill_domains, cmd_resolve_domain_skills
+from cmd_modules import cmd_modules
+from cmd_build_systems import cmd_build_systems
+```
+
+### Module Size Guidelines
+
+| Module Type | Target Lines |
+|-------------|-------------|
+| Main script (parser + dispatch) | <250 |
+| Command handler modules | <300 |
+| Shared utilities | <150 |
+| Constants/defaults | <100 |
+
+### When to Modularize
+
+Apply modularization when:
+- Script exceeds 400 lines
+- Script has 4+ subcommand groups
+- Command handlers are largely independent
+
+### Benefits
+
+- Each module is focused and self-contained
+- Easier to understand, test, and maintain
+- API remains monolithic (same CLI interface)
+- Parallel development possible
+
 ## Script Quality Checklist
 
 Before marking script as "quality approved":
@@ -238,3 +300,4 @@ Before marking script as "quality approved":
 - [ ] Exit codes (0 for success, 1 for error)
 - [ ] Executable permissions set
 - [ ] Test file exists and passes
+- [ ] Scripts >400 lines are modularized by subcommand

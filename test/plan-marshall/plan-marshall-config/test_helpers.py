@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+"""Shared test helpers for plan-marshall-config tests.
+
+Provides common fixtures and utilities used across all test modules.
+"""
+
+import json
+import sys
+from pathlib import Path
+
+# Import shared infrastructure
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import run_script, TestRunner, get_script_path, PlanTestContext
+
+# Script under test
+SCRIPT_PATH = get_script_path('plan-marshall', 'plan-marshall-config', 'plan-marshall-config.py')
+
+
+def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
+    """Create marshal.json in fixture directory with flat structure."""
+    if config is None:
+        config = {
+            "skill_domains": {
+                "java": {
+                    "defaults": ["pm-dev-java:java-core"],
+                    "optionals": ["pm-dev-java:java-cdi"]
+                },
+                "java-testing": {
+                    "defaults": ["pm-dev-java:junit-core"],
+                    "optionals": []
+                }
+            },
+            "modules": {
+                "my-core": {
+                    "path": "my-core",
+                    "domains": ["java"],
+                    "build_systems": ["maven"]
+                },
+                "my-ui": {
+                    "path": "my-ui",
+                    "domains": ["java", "javascript"],
+                    "build_systems": ["maven", "npm"],
+                    "commands": {
+                        "npm": {
+                            "test": "custom:test"
+                        }
+                    }
+                }
+            },
+            "build_systems": [
+                {
+                    "system": "maven",
+                    "skill": "pm-dev-builder:builder-maven-rules",
+                    "commands": {
+                        "verify": "clean verify",
+                        "test": "clean test"
+                    }
+                },
+                {
+                    "system": "npm",
+                    "skill": "pm-dev-builder:builder-npm-rules",
+                    "commands": {
+                        "test": "run test",
+                        "verify": "run test && run lint"
+                    }
+                }
+            ],
+            "system": {
+                "retention": {
+                    "logs_days": 1,
+                    "archived_plans_days": 5,
+                    "memory_days": 5,
+                    "temp_on_maintenance": True
+                }
+            },
+            "plan": {
+                "defaults": {
+                    "compatibility": "deprecations",
+                    "commit_strategy": "phase-specific",
+                    "create_pr": False,
+                    "verification_required": True,
+                    "branch_strategy": "direct"
+                }
+            }
+        }
+    marshal_path = fixture_dir / 'marshal.json'
+    marshal_path.write_text(json.dumps(config, indent=2))
+    return marshal_path
+
+
+def create_nested_marshal_json(fixture_dir: Path) -> Path:
+    """Create marshal.json with nested skill_domains structure."""
+    config = {
+        "skill_domains": {
+            "system": {
+                "defaults": ["plan-marshall:general-development-rules"],
+                "optionals": ["plan-marshall:diagnostic-patterns"]
+            },
+            "java": {
+                "workflow_skills": {
+                    "solution_outline": "pm-workflow:solution-outline",
+                    "task_plan": "pm-workflow:task-plan",
+                    "implementation": "pm-workflow:task-implementation",
+                    "testing": "pm-workflow:task-testing"
+                },
+                "core": {
+                    "defaults": ["pm-dev-java:java-core"],
+                    "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
+                },
+                "implementation": {
+                    "defaults": [],
+                    "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
+                },
+                "testing": {
+                    "defaults": ["pm-dev-java:junit-core"],
+                    "optionals": ["pm-dev-java:junit-integration"]
+                }
+            },
+            "javascript": {
+                "workflow_skills": {
+                    "solution_outline": "pm-workflow:solution-outline",
+                    "task_plan": "pm-workflow:task-plan",
+                    "implementation": "pm-workflow:task-implementation",
+                    "testing": "pm-workflow:task-testing"
+                },
+                "core": {
+                    "defaults": ["pm-dev-frontend:cui-javascript"],
+                    "optionals": ["pm-dev-frontend:cui-jsdoc"]
+                },
+                "implementation": {
+                    "defaults": [],
+                    "optionals": ["pm-dev-frontend:cui-javascript-linting"]
+                },
+                "testing": {
+                    "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
+                    "optionals": ["pm-dev-frontend:cui-cypress"]
+                }
+            }
+        },
+        "modules": {},
+        "build_systems": [],
+        "system": {
+            "retention": {
+                "logs_days": 1,
+                "archived_plans_days": 5,
+                "memory_days": 5,
+                "temp_on_maintenance": True
+            }
+        },
+        "plan": {
+            "defaults": {
+                "compatibility": "breaking",
+                "commit_strategy": "phase-specific",
+                "create_pr": False,
+                "verification_required": True,
+                "branch_strategy": "direct"
+            }
+        }
+    }
+    marshal_path = fixture_dir / 'marshal.json'
+    marshal_path.write_text(json.dumps(config, indent=2))
+    return marshal_path
+
+
+def parse_toon_output(output: str) -> dict:
+    """Parse TOON output to dict (simplified parser for tests)."""
+    result = {}
+    lines = output.strip().split('\n')
+    for line in lines:
+        if ':' in line and not line.endswith(':'):
+            key, value = line.split(':', 1)
+            key = key.strip()
+            value = value.strip()
+            # Try to parse as JSON for lists/bools/numbers
+            try:
+                result[key] = json.loads(value)
+            except (json.JSONDecodeError, ValueError):
+                result[key] = value
+        elif line.startswith('- '):
+            # Array item
+            if 'items' not in result:
+                result['items'] = []
+            result['items'].append(line[2:].strip())
+    return result

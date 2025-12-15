@@ -392,6 +392,144 @@ with PlanTestContext(plan_id='my-plan') as ctx:
 
 Get the test fixture directory. Uses `TEST_FIXTURE_DIR` env var when run via `test/run-tests.py`, otherwise creates a standalone directory.
 
+## Test Modularization (400+ Lines)
+
+**Rule**: Test files exceeding 400 lines MUST be modularized by command module while keeping integration tests.
+
+### Module Structure
+
+Split large test files into focused modules:
+
+| Module | Purpose |
+|--------|---------|
+| `test_helpers.py` | Shared fixtures and helper functions (no test functions) |
+| `test_cmd_{noun}.py` | Detailed tests for each command module |
+| `test_{script}.py` | Happy-path integration tests only |
+
+### Example Structure
+
+```
+test/{bundle}/{skill}/
+  test_helpers.py              # Shared fixtures
+  test_cmd_init.py             # init command variants/corners
+  test_cmd_skill_domains.py    # skill-domains variants/corners
+  test_cmd_modules.py          # modules variants/corners
+  test_{script}.py             # Happy-path integration only
+```
+
+### test_helpers.py Pattern
+
+```python
+#!/usr/bin/env python3
+"""Shared test fixtures for {script} tests."""
+
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import get_script_path
+
+SCRIPT_PATH = get_script_path('{bundle}', '{skill}', '{script}.py')
+
+def create_fixture(fixture_dir: Path, config: dict = None) -> Path:
+    """Create test fixture in fixture directory."""
+    # Fixture creation logic
+    pass
+```
+
+### test_cmd_{noun}.py Pattern
+
+```python
+#!/usr/bin/env python3
+"""Tests for {noun} command in {script}.
+
+Tests {noun} command variants and edge cases.
+"""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import run_script, TestRunner, PlanTestContext
+from test_helpers import SCRIPT_PATH, create_fixture
+
+def test_{noun}_happy_path():
+    """Test {noun} basic operation."""
+    with PlanTestContext() as ctx:
+        create_fixture(ctx.fixture_dir)
+        result = run_script(SCRIPT_PATH, '{noun}', 'verb')
+        assert result.success
+
+def test_{noun}_edge_case():
+    """Test {noun} edge case."""
+    # Edge case testing
+    pass
+
+if __name__ == '__main__':
+    runner = TestRunner()
+    runner.add_tests([
+        test_{noun}_happy_path,
+        test_{noun}_edge_case,
+    ])
+    sys.exit(runner.run())
+```
+
+### Main Test File Pattern (Integration Only)
+
+```python
+#!/usr/bin/env python3
+"""Integration tests for {script}.py script.
+
+Happy-path tests verifying the monolithic CLI API.
+Detailed variant and corner case tests are in:
+- test_cmd_{noun1}.py
+- test_cmd_{noun2}.py
+"""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import run_script, TestRunner, PlanTestContext
+from test_helpers import SCRIPT_PATH, create_fixture
+
+def test_{noun1}_happy_path():
+    """Test {noun1} basic operation."""
+    # One simple happy-path test per command
+    pass
+
+if __name__ == '__main__':
+    runner = TestRunner()
+    runner.add_tests([
+        test_{noun1}_happy_path,
+        test_{noun2}_happy_path,
+    ])
+    sys.exit(runner.run())
+```
+
+### Module Size Guidelines
+
+| Module Type | Target Lines |
+|-------------|-------------|
+| Main test file (integration only) | <250 |
+| Command test modules | <400 |
+| Shared helpers | <150 |
+
+### When to Modularize Tests
+
+Apply modularization when:
+- Test file exceeds 400 lines
+- Script has modular structure (cmd_*.py files)
+- Tests cover 4+ subcommand groups
+
+### Benefits
+
+- Parallel structure to script modules (cmd_{noun}.py → test_cmd_{noun}.py)
+- Easier to maintain (changes to a command only need editing corresponding test file)
+- Main test file serves as API contract test
+- Individual module tests cover all variants and corner cases
+
 ## Test Quality Checklist
 
 Before marking tests as complete:
@@ -404,3 +542,4 @@ Before marking tests as complete:
 - [ ] All tests have at least one `assert` statement
 - [ ] Fixtures are in `fixtures/` directory
 - [ ] Tests pass: `python3 test/run-tests.py test/{bundle}/{skill}/`
+- [ ] Test files >400 lines are modularized by command

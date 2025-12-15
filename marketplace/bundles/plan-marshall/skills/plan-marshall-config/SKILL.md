@@ -213,12 +213,27 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 | Verb | Parameters | Purpose |
 |------|------------|---------|
 | `list` | (none) | List all domains |
-| `get` | `--domain` | Get full domain config |
-| `get-defaults` | `--domain` | Get default skills |
-| `get-optionals` | `--domain` | Get optional skills |
+| `get` | `--domain` | Get full domain config (returns nested structure for technical domains) |
+| `get-defaults` | `--domain` | Get default skills (returns `core.defaults` for nested domains) |
+| `get-optionals` | `--domain` | Get optional skills (returns `core.optionals` for nested domains) |
 | `set` | `--domain [--defaults] [--optionals]` | Set domain config |
 | `add` | `--domain --defaults [--optionals]` | Add new domain |
-| `validate` | `--domain --skill` | Check if skill valid |
+| `validate` | `--domain --skill` | Check if skill valid (searches all profiles for nested domains) |
+| `detect` | (none) | Auto-detect domains from project files (pom.xml → java, package.json → javascript) |
+
+### resolve-domain-skills
+
+| Parameters | Purpose |
+|------------|---------|
+| `--domain --profile` | Resolve skills for domain and profile (aggregates `{domain}.core` + `{domain}.{profile}`) |
+
+Profiles are convention-based (derived from domain config keys). Standard profiles: `implementation`, `testing`. Custom profiles can be added.
+
+### get-workflow-skills
+
+| Parameters | Purpose |
+|------------|---------|
+| (none) | Get domain-agnostic workflow skills (solution_outline, task_plan, implementation, testing) |
 
 ### Noun: modules
 
@@ -277,6 +292,10 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ### Structure
 
+The defaults template contains only `system` domain. Technical domains (java, javascript, etc.) are added during project initialization based on detection or manual configuration.
+
+**Example** (Java project after init):
+
 ```json
 {
   "skill_domains": {
@@ -284,15 +303,31 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
       "defaults": ["plan-marshall:general-development-rules"],
       "optionals": ["plan-marshall:diagnostic-patterns"]
     },
-    "java-core": {
-      "defaults": ["pm-dev-java:java-core"],
-      "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
+    "java": {
+      "workflow_skills": {
+        "solution_outline": "pm-workflow:solution-outline",
+        "task_plan": "pm-workflow:task-plan",
+        "implementation": "pm-workflow:task-implementation",
+        "testing": "pm-workflow:task-testing"
+      },
+      "core": {
+        "defaults": ["pm-dev-java:java-core"],
+        "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
+      },
+      "implementation": {
+        "defaults": [],
+        "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
+      },
+      "testing": {
+        "defaults": ["pm-dev-java:junit-core"],
+        "optionals": ["pm-dev-java:junit-integration"]
+      }
     }
   },
   "modules": {
     "my-module": {
       "path": "my-module",
-      "domains": ["java-core", "java-implementation"],
+      "domains": ["java"],
       "build_systems": ["maven"]
     }
   },
@@ -329,23 +364,22 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ## Standard Domains
 
-### System Domains
+### System Domains (Flat Structure)
 
 | Domain | Purpose | Default Skills |
 |--------|---------|----------------|
 | `system` | Applied to all agents/skills | `plan-marshall:general-development-rules` |
-| `plugin-development` | Plugin/agent/skill development | `pm-plugin-development:plugin-architecture`, `pm-plugin-development:plugin-script-architecture` |
 
-### Technical Domains (core/implementation/testing pattern)
+### Technical Domains (Nested Structure)
 
-| Domain | Purpose | Default Skills |
-|--------|---------|----------------|
-| `java-core` | Common Java standards | `pm-dev-java:java-core` |
-| `java-implementation` | Production Java code | (none - inherits from core) |
-| `java-testing` | Java test code | `pm-dev-java:junit-core` |
-| `javascript-core` | Common JavaScript standards | `pm-dev-frontend:cui-javascript` |
-| `javascript-implementation` | Production JS code | (none - inherits from core) |
-| `javascript-testing` | JS test code | `pm-dev-frontend:cui-javascript-unit-testing` |
+Technical domains use nested structure with `workflow_skills`, `core`, `implementation`, and `testing` profiles.
+
+| Domain | Purpose | Core Defaults | Core Optionals |
+|--------|---------|---------------|----------------|
+| `java` | Java development | `pm-dev-java:java-core` | `pm-dev-java:java-null-safety`, `pm-dev-java:java-lombok`, `pm-dev-java:javadoc` |
+| `javascript` | JavaScript/Frontend | `pm-dev-frontend:cui-javascript` | `pm-dev-frontend:cui-jsdoc`, `pm-dev-frontend:cui-javascript-project` |
+
+Use `resolve-domain-skills --domain {domain} --profile {profile}` to get aggregated skills.
 
 ---
 
