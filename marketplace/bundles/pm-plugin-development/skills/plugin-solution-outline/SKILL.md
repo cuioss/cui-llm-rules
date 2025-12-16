@@ -184,9 +184,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 - change_type: {create|modify|refactor|migrate|delete}
 - execution_mode: {automated|manual|mixed}
 - domain: plugin
-- suggested_skill: pm-plugin-development:{plugin-create|plugin-maintain}
-- suggested_workflow: {create-skill|create-command|update-component|...}
-- context_skills: []
+- profile: {implementation|testing}
 - depends: none
 
 **Affected files:**
@@ -313,7 +311,12 @@ Each script-related deliverable MUST include a **Script Verification** section p
 - `plan-marshall:logging:manage-log` - Log decisions and progress (work)
 - `pm-workflow:manage-config:manage-config` - Plan config (read, get, set)
 - `pm-workflow:manage-references:manage-references` - Plan references (read, get, set)
-- `plan-marshall:marketplace-inventory:scan-marketplace-inventory` - Marketplace component inventory
+- `plan-marshall:marketplace-inventory:scan-marketplace-inventory` - Marketplace component inventory (see path-multi-workflow.md for usage):
+  ```bash
+  python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory \
+    --trace-plan-id {plan_id} \
+    --include-descriptions
+  ```
 
 **Standards Referenced**:
 - `pm-plugin-development:plugin-architecture` - Architecture principles

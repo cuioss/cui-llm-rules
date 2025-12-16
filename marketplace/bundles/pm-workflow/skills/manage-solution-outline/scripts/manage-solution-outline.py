@@ -250,13 +250,19 @@ def validate_deliverable_contract(deliverable: dict) -> tuple[list[str], list[st
         errors.append(f"D{num}: Missing **Metadata:** block")
     else:
         # Check 1a: All required metadata fields
+        # profile is the universal requirement for config-based routing
+        # suggested_skill/suggested_workflow are optional explicit overrides
         required_fields = [
-            'change_type', 'execution_mode', 'domain',
-            'suggested_skill', 'suggested_workflow', 'depends'
+            'change_type', 'execution_mode', 'domain', 'profile', 'depends'
         ]
         for field in required_fields:
             if field not in metadata:
                 errors.append(f"D{num}: Missing metadata field: {field}")
+
+        # Check 1a2: Valid profile values
+        valid_profiles = ['implementation', 'testing']
+        if metadata.get('profile') and metadata['profile'] not in valid_profiles:
+            errors.append(f"D{num}: Invalid profile '{metadata['profile']}' (must be one of: {', '.join(valid_profiles)})")
 
         # Check 1b: Valid change_type
         valid_change_types = ['create', 'modify', 'refactor', 'migrate', 'delete']
@@ -267,10 +273,6 @@ def validate_deliverable_contract(deliverable: dict) -> tuple[list[str], list[st
         valid_modes = ['automated', 'manual', 'mixed']
         if metadata.get('execution_mode') and metadata['execution_mode'] not in valid_modes:
             errors.append(f"D{num}: Invalid execution_mode '{metadata['execution_mode']}' (must be one of: {', '.join(valid_modes)})")
-
-        # Check 1d: context_skills is optional but note if missing
-        if 'context_skills' not in metadata:
-            warnings.append(f"D{num}: Missing context_skills (use [] if none)")
 
     # Check 2: Affected files section
     affected_files = deliverable.get('affected_files', [])

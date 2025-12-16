@@ -594,12 +594,13 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 | `change_type` | Yes | create/modify/refactor/migrate/delete |
 | `execution_mode` | Yes | automated/manual/mixed |
 | `domain` | Yes | Valid domain (java/javascript/plugin etc.) |
-| `suggested_skill` | Yes | Format: `{bundle}:{skill-name}` |
-| `suggested_workflow` | Yes | Workflow within skill |
-| `context_skills` | No | List of optional skills from domain |
+| `profile` | Yes | `implementation` or `testing` |
 | `depends` | Yes | `none` or `N` or `N. Title` or `N, M` |
 | `Affected files` | Yes | Explicit file paths (not glob patterns) |
 | `Verification` | Yes | Command and criteria |
+| `suggested_skill` | No | Optional override: explicit skill `{bundle}:{skill-name}` |
+| `suggested_workflow` | No | Optional override: workflow within explicit skill |
+| `context_skills` | No | List of optional skills from domain |
 
 **Common Violations**:
 | Violation | Description | Fix |

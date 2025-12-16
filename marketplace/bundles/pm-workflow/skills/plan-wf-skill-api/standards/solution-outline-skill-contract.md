@@ -39,8 +39,7 @@ The agent MUST validate that each deliverable contains all required fields from 
 - [ ] `change_type` metadata
 - [ ] `execution_mode` metadata
 - [ ] `domain` metadata (valid domain from config)
-- [ ] `suggested_skill` and `suggested_workflow`
-- [ ] `context_skills` (empty list or valid optionals for domain)
+- [ ] `profile` metadata (`implementation` or `testing`)
 - [ ] `depends` field (`none` or valid deliverable references)
 - [ ] Explicit file list (not "all files matching X")
 - [ ] Verification command and criteria

@@ -1,12 +1,22 @@
 {
   "skill_domains": {
     "system": {
-      "defaults": ["plan-marshall:general-development-rules"],
-      "optionals": ["plan-marshall:diagnostic-patterns"]
+      "defaults": [
+        "plan-marshall:general-development-rules"
+      ],
+      "optionals": [
+        "plan-marshall:diagnostic-patterns"
+      ]
     },
     "plugin-development": {
-      "defaults": ["pm-plugin-development:plugin-architecture", "pm-plugin-development:plugin-script-architecture"],
-      "optionals": ["plan-marshall:toon-usage", "plan-marshall:script-executor"]
+      "defaults": [
+        "pm-plugin-development:plugin-architecture",
+        "pm-plugin-development:plugin-script-architecture"
+      ],
+      "optionals": [
+        "plan-marshall:toon-usage",
+        "plan-marshall:script-executor"
+      ]
     }
   },
   "modules": {},

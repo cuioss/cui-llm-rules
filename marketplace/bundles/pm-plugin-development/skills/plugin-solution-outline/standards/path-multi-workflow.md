@@ -118,9 +118,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 - change_type: migrate
 - execution_mode: automated
 - domain: plugin
-- suggested_skill: pm-plugin-development:plugin-maintain
-- suggested_workflow: update-component
-- context_skills: []
+- profile: implementation
 - depends: none
 
 **Affected files:**

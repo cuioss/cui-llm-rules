@@ -147,7 +147,7 @@ Build a deliverables markdown section with numbered deliverables and required me
 
 ### Step 4: Write Solution Document
 
-Write the solution document using heredoc (validation is automatic):
+Write the solution document using heredoc. **Note**: Validation runs automatically on write - do NOT add a `--validate` flag (it doesn't exist):
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
