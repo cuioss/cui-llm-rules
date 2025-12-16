@@ -31,8 +31,8 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 
 The `/plan-manage` command uses thin agents with domain skill loading:
 
-1. Reads config.toon for domain and workflow_skills
-2. Loads domain-specific skills via workflow_skills block
+1. Reads config.toon for domain
+2. Resolves workflow skills from marshal.json via `resolve-workflow-skill`
 3. Falls back to this skill when domain has no specific skills
 
 **This skill is the fallback** for generic domain (no domain-specific solution outline skill).
@@ -40,11 +40,11 @@ The `/plan-manage` command uses thin agents with domain skill loading:
 ```
 /plan-manage action=refine plan=X
   │
-  ├─ Read config.toon workflow_skills.{domain}
+  ├─ Resolve workflow_skill from marshal.json for domain
   │
   ├─ If solution_outline skill is NOT null:
-  │    → Task: solution-outline-agent (loads domain skill)
-  │    → Task: task-plan-agent (loads domain skill)
+  │    → Task: solution-outline-agent (loads workflow skill)
+  │    → Task: task-plan-agent (loads workflow skill)
   │
   └─ If solution_outline skill IS null (generic):
        → Task: plan-refine-agent
@@ -276,4 +276,4 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 - **manage-solution-outline** - Solution document structure and examples
 - **plan-init** - Previous phase (creates request.md, config, status)
 - **plan-execute** - Next phase (executes tasks)
-- **Domain skills** - Loaded by thin agents via config.toon workflow_skills
+- **Domain skills** - Loaded by thin agents via marshal.json workflow_skills (resolved at runtime)

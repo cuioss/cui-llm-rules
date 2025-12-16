@@ -58,26 +58,27 @@ pm-workflow/agents/
 └── task-execute-agent.md       # Execute single task
 ```
 
-**Skill Loading** (from config.toon):
+**Skill Loading** (from marshal.json via resolve-workflow-skill):
 
 | Agent | Skill Source |
 |-------|--------------|
 | `plan-init-agent` | System skills only |
-| `solution-outline-agent` | `config.workflow_skills.{domain}.solution_outline` |
-| `task-plan-agent` | `config.workflow_skills.{domain}.task_plan` |
-| `task-execute-agent` | `config.workflow_skills.{domain}.{profile}` + `task.skills` |
+| `solution-outline-agent` | `resolve-workflow-skill --domain {domain} --phase solution_outline` |
+| `task-plan-agent` | `resolve-workflow-skill --domain {domain} --phase task_plan` |
+| `task-execute-agent` | `resolve-workflow-skill --domain {domain} --phase {profile}` + `task.skills` |
 
 **Key Design**:
-- `plan-init` detects domains, writes workflow_skills to config.toon
-- Thin agents read config.toon to determine which domain skills to load
+- `plan-init` detects domains, writes config.toon (domains + settings only)
+- Workflow skills resolved at runtime from marshal.json (not stored in config.toon)
+- Thin agents use `resolve-workflow-skill` to determine which workflow skills to load
 - Domain skills provide the intelligence; agents provide the workflow
 
 **Flow**:
 1. User requests task
-2. `plan-init-agent` detects domain, writes config.toon with workflow_skills
+2. `plan-init-agent` detects domain, writes config.toon with domains and settings
 3. `/plan-manage action=refine` invokes `solution-outline-agent` → `task-plan-agent`
 4. `/plan-execute` invokes `task-execute-agent` for each task
-5. Thin agents load domain skills from config.toon's workflow_skills block
+5. Thin agents resolve workflow skills from marshal.json at runtime
 
 ## Domain Skill Loading
 
@@ -95,34 +96,34 @@ Domain-specific knowledge comes from `task.skills` array, populated during task-
 
 ### config.toon Structure
 
-The workflow_skills block in config.toon maps domains to workflow skills:
+config.toon stores domains and plan settings (NOT workflow_skills):
 
 ```toon
 domains: [java]
 
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
+commit_strategy: per_task
+create_pr: true
+verification_required: true
+branch_strategy: feature
 ```
 
 For multi-domain plans:
 ```toon
 domains: [java, javascript]
 
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-  javascript:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
+commit_strategy: per_task
+create_pr: true
+verification_required: true
+branch_strategy: feature
+```
+
+### Workflow Skill Resolution
+
+Workflow skills are resolved from marshal.json via `plan-marshall-config resolve-workflow-skill`:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --domain java --phase implementation
 ```
 
 ### Routing Flow
@@ -131,12 +132,12 @@ workflow_skills:
 /plan-manage action=refine
        │
        ├─ Task: pm-workflow:solution-outline-agent
-       │     ├─ Read config.toon workflow_skills.{domain}.solution_outline
+       │     ├─ Resolve workflow skill from marshal.json (solution_outline phase)
        │     ├─ Load workflow skill (pm-workflow:solution-outline)
        │     └─ Analyzes request, creates deliverables
        │
        └─ Task: pm-workflow:task-plan-agent
-             ├─ Read config.toon workflow_skills.{domain}.task_plan
+             ├─ Resolve workflow skill from marshal.json (task_plan phase)
              ├─ Load workflow skill (pm-workflow:task-plan)
              └─ Reads deliverables, creates tasks with domain skills
 ```
@@ -197,7 +198,7 @@ The detail level ensures:
                               │
                               ▼
                     ┌─────────────────────┐
-                    │    Thin Agents      │ ◄── Load domain skills from config.toon
+                    │    Thin Agents      │ ◄── Resolve workflow skills from marshal.json
                     │  (4 generic agents) │
                     └─────────┬───────────┘
                               │

@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 **Role**: Domain-agnostic workflow skill for executing implementation tasks (profile=implementation). Loaded by `pm-workflow:task-execute-agent` when `task.profile` is `implementation`.
 
-**Key Pattern**: Agent loads this skill based on `config.workflow_skills.{domain}.implementation`. Skill executes a generic workflow: understand context → plan → implement → verify. Domain-specific knowledge comes from `task.skills` (loaded by agent).
+**Key Pattern**: Agent loads this skill via `resolve-workflow-skill --domain {domain} --phase implementation`. Skill executes a generic workflow: understand context → plan → implement → verify. Domain-specific knowledge comes from `task.skills` (loaded by agent).
 
 ## Contract Compliance
 

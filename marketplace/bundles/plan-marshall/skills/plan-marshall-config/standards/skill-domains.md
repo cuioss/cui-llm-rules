@@ -211,9 +211,38 @@ optionals:
 
 ## Workflow Skills Access
 
+### resolve-workflow-skill Command
+
+Resolves the workflow skill for a specific domain and phase combination. This is the primary method for workflow skill resolution.
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --domain java --phase implementation
+```
+
+**Parameters**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `--domain` | string | Yes | Domain name (java, javascript, plugin, generic) |
+| `--phase` | string | Yes | Phase name (solution_outline, task_plan, implementation, testing) |
+
+**Output**:
+```toon
+status: success
+domain: java
+phase: implementation
+workflow_skill: pm-workflow:task-implementation
+```
+
+**Error Cases**:
+- Unknown domain → `error: Unknown domain: {domain}. Available: java, javascript, plugin, generic`
+- No workflow_skills configured → `error: Domain '{domain}' has no workflow_skills configured`
+- Unknown phase → `error: Unknown phase: {phase} for domain: {domain}. Available: {phases}`
+
 ### get-workflow-skills Command
 
-Returns domain-agnostic workflow skills for java/javascript domains.
+Returns domain-agnostic workflow skills (backward compatible).
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \

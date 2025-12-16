@@ -1,6 +1,6 @@
 ---
 name: plan-wf-skill-api
-description: Defines the unified API contracts for workflow skills. Workflow skills provide domain-agnostic operations that load domain knowledge from config.toon.
+description: Defines the unified API contracts for workflow skills. Workflow skills provide domain-agnostic operations that load domain knowledge from marshal.json.
 allowed-tools: Read
 ---
 
@@ -8,13 +8,13 @@ allowed-tools: Read
 
 **Role**: API contract definition for workflow skills. This skill defines the interface contracts for solution outline, task planning, and task execution operations.
 
-**Key Principle**: Workflow skills are **domain-agnostic**. Domain knowledge comes from `config.toon` which specifies which domain skills to load during execution.
+**Key Principle**: Workflow skills are **domain-agnostic**. Domain knowledge comes from `marshal.json` (via `resolve-workflow-skill`) which specifies which workflow skills to load during execution.
 
 ## Contract Standards
 
 | Contract | Purpose | Document |
 |----------|---------|----------|
-| **Config TOON Format** | config.toon structure with domains and workflow_skills | [standards/config-toon-format.md](standards/config-toon-format.md) |
+| **Config TOON Format** | config.toon structure with domains and settings | [standards/config-toon-format.md](standards/config-toon-format.md) |
 | **Solution Outline Skill** | Request → Solution Outline with deliverables | [standards/solution-outline-skill-contract.md](standards/solution-outline-skill-contract.md) |
 | **User Review Protocol** | Mandatory review before task creation | [standards/user-review-protocol.md](standards/user-review-protocol.md) |
 | **Task Plan Skill** | Solution Outline → Tasks with domain/profile | [standards/task-plan-skill-contract.md](standards/task-plan-skill-contract.md) |
@@ -28,25 +28,25 @@ allowed-tools: Read
 Request → [plan-init-agent] → [solution-outline-agent] → User Review → [task-plan-agent] → Tasks → [task-execute-agent]
               ↓                        ↓                      ↓                ↓                      ↓
          config.toon           solution_outline.md    [User Review]      task files          two-tier skills
-         (domains,               (deliverables)        Protocol           (domain,            1. system
-          workflow_skills)                                                profile,            2. task.skills
+         (domains)               (deliverables)        Protocol           (domain,            1. system
+                                                                          profile,            2. task.skills
                                                                           skills)
 ```
 
-1. `plan-init-agent` creates plan, detects domains, writes workflow_skills to config.toon
-2. `solution-outline-agent` loads workflow skill from `config.workflow_skills.{domain}.solution_outline`
+1. `plan-init-agent` creates plan, detects domains, writes config.toon (domains + settings)
+2. `solution-outline-agent` resolves workflow skill from `marshal.json` via `resolve-workflow-skill --domain {domain} --phase solution_outline`
 3. `/plan-manage` triggers [User Review Protocol](standards/user-review-protocol.md) (mandatory)
 4. After approval, `task-plan-agent` creates tasks with domain, profile, skills fields
-5. `task-execute-agent` loads workflow skill based on `task.profile`, loads `task.skills` array
+5. `task-execute-agent` resolves workflow skill from `marshal.json` based on `task.profile`, loads `task.skills` array
 
 ## Thin Agent Pattern
 
 | Agent | Purpose | Skill Loading |
 |-------|---------|---------------|
 | `pm-workflow:plan-init-agent` | Init plan, detect domains, write config.toon | System skills only |
-| `pm-workflow:solution-outline-agent` | Create deliverables | `config.workflow_skills.{domain}.solution_outline` |
-| `pm-workflow:task-plan-agent` | Create tasks from deliverables | `config.workflow_skills.{domain}.task_plan` |
-| `pm-workflow:task-execute-agent` | Execute single task | `config.workflow_skills.{domain}.{profile}` + `task.skills` |
+| `pm-workflow:solution-outline-agent` | Create deliverables | `resolve-workflow-skill --domain {domain} --phase solution_outline` |
+| `pm-workflow:task-plan-agent` | Create tasks from deliverables | `resolve-workflow-skill --domain {domain} --phase task_plan` |
+| `pm-workflow:task-execute-agent` | Execute single task | `resolve-workflow-skill --domain {domain} --phase {profile}` + `task.skills` |
 
 ## Domain Configuration
 
@@ -133,10 +133,14 @@ The `--trace-plan-id` parameter is:
 ## Integration
 
 **Callers**:
-- `plan-init-agent` → writes domains and workflow_skills to config.toon
+- `plan-init-agent` → writes domains and settings to config.toon
 - `/plan-manage action=refine` → spawns solution-outline-agent then task-plan-agent
 - `/plan-execute` → spawns task-execute-agent for each task
 - `plan-finalize` → reads config.toon directly
+
+**Workflow Skill Resolution**:
+- Workflow skills resolved from `marshal.json` via `plan-marshall-config resolve-workflow-skill`
+- NOT stored in config.toon (only domains and plan settings)
 
 **Thin Agents** (4 generic agents):
 - `pm-workflow:plan-init-agent` - Plan creation and domain detection

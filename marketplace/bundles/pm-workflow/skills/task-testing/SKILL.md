@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 **Role**: Domain-agnostic workflow skill for executing testing tasks (profile=testing). Loaded by `pm-workflow:task-execute-agent` when `task.profile` is `testing`.
 
-**Key Pattern**: Agent loads this skill based on `config.workflow_skills.{domain}.testing`. Skill executes a test-focused workflow: understand context → plan tests → implement tests → verify. Domain-specific testing knowledge comes from `task.skills` (loaded by agent).
+**Key Pattern**: Agent loads this skill via `resolve-workflow-skill --domain {domain} --phase testing`. Skill executes a test-focused workflow: understand context → plan tests → implement tests → verify. Domain-specific testing knowledge comes from `task.skills` (loaded by agent).
 
 ## Contract Compliance
 

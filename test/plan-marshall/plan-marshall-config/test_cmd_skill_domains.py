@@ -430,6 +430,120 @@ def test_get_workflow_skills_output_format():
 
 
 # =============================================================================
+# resolve-workflow-skill Tests
+# =============================================================================
+
+def test_resolve_workflow_skill_java_implementation():
+    """Test resolve-workflow-skill for java + implementation phase."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'java', '--phase', 'implementation')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-workflow:task-implementation' in result.stdout
+        assert 'domain' in result.stdout
+        assert 'phase' in result.stdout
+        assert 'workflow_skill' in result.stdout
+
+
+def test_resolve_workflow_skill_java_solution_outline():
+    """Test resolve-workflow-skill for java + solution_outline phase."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'java', '--phase', 'solution_outline')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-workflow:solution-outline' in result.stdout
+
+
+def test_resolve_workflow_skill_java_testing():
+    """Test resolve-workflow-skill for java + testing phase."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'java', '--phase', 'testing')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-workflow:task-testing' in result.stdout
+
+
+def test_resolve_workflow_skill_plugin_solution_outline():
+    """Test resolve-workflow-skill for plugin + solution_outline phase."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'plugin', '--phase', 'solution_outline')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-plugin-development:plugin-solution-outline' in result.stdout
+
+
+def test_resolve_workflow_skill_plugin_implementation():
+    """Test resolve-workflow-skill for plugin + implementation phase."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'plugin', '--phase', 'implementation')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-plugin-development:plugin-plan-implement' in result.stdout
+
+
+def test_resolve_workflow_skill_generic_implementation():
+    """Test resolve-workflow-skill for generic + implementation phase."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'generic', '--phase', 'implementation')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-workflow:task-implementation' in result.stdout
+
+
+def test_resolve_workflow_skill_unknown_domain():
+    """Test resolve-workflow-skill with unknown domain returns error."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'unknown', '--phase', 'implementation')
+
+        assert 'error' in result.stdout.lower(), "Should report error"
+        assert 'unknown' in result.stdout.lower()
+
+
+def test_resolve_workflow_skill_unknown_phase():
+    """Test resolve-workflow-skill with unknown phase returns error."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'java', '--phase', 'invalid_phase')
+
+        assert 'error' in result.stdout.lower(), "Should report error"
+        assert 'phase' in result.stdout.lower()
+
+
+def test_resolve_workflow_skill_plugin_no_testing():
+    """Test resolve-workflow-skill for plugin + testing returns error (plugin has no testing phase)."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
+            '--domain', 'plugin', '--phase', 'testing')
+
+        assert 'error' in result.stdout.lower(), "Should report error (plugin has no testing phase)"
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -465,5 +579,15 @@ if __name__ == '__main__':
         # get-workflow-skills tests
         test_get_workflow_skills,
         test_get_workflow_skills_output_format,
+        # resolve-workflow-skill tests
+        test_resolve_workflow_skill_java_implementation,
+        test_resolve_workflow_skill_java_solution_outline,
+        test_resolve_workflow_skill_java_testing,
+        test_resolve_workflow_skill_plugin_solution_outline,
+        test_resolve_workflow_skill_plugin_implementation,
+        test_resolve_workflow_skill_generic_implementation,
+        test_resolve_workflow_skill_unknown_domain,
+        test_resolve_workflow_skill_unknown_phase,
+        test_resolve_workflow_skill_plugin_no_testing,
     ])
     sys.exit(runner.run())

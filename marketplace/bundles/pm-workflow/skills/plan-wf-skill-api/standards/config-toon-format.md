@@ -1,14 +1,15 @@
 # Config TOON Format
 
-Defines the structure of `config.toon` after init phase. This file is self-contained and used by all subsequent workflow phases.
+Defines the structure of `config.toon` after init phase. This file stores plan-level configuration settings.
 
 ## Purpose
 
 The `config.toon` file:
-- Stores detected domains (array) from init phase
-- Contains workflow_skills mapping for each domain
-- Provides finalization settings
-- Is self-contained after init (no runtime lookups needed)
+- Stores detected domains (array) for the plan
+- Provides commit and branch strategy settings
+- Contains finalization settings
+
+Note: `workflow_skills` are NOT stored in config.toon. They are resolved at runtime from `marshal.json` via `plan-marshall-config resolve-workflow-skill`.
 
 ## File Format
 
@@ -17,19 +18,6 @@ The `config.toon` file:
 domains:
   - java
   - javascript
-
-# Workflow skills (written by init, read by refine/execute)
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-  javascript:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
 
 commit_strategy: per_task
 
@@ -44,8 +32,7 @@ branch_strategy: feature
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `domains` | list | Array of detected domains (java, javascript, plugin) |
-| `workflow_skills` | object | Domain-keyed mapping of workflow phase -> skill |
+| `domains` | list | Array of detected domains (java, javascript, plugin, generic) |
 | `commit_strategy` | string | per_task, per_plan, or none |
 | `create_pr` | boolean | Whether to create PR on finalize |
 | `verification_required` | boolean | Whether to run verification before PR |
@@ -62,71 +49,51 @@ The `domains` array supports multi-domain plans:
 | Frontend feature | Add dashboard component | `[javascript]` |
 | Fullstack feature | Add metrics API + dashboard | `[java, javascript]` |
 | Plugin development | Create new skill | `[plugin]` |
+| Generic tasks | Documentation work | `[generic]` |
 
 Each deliverable/task selects ONE domain from this array.
 
-## Workflow Skills Block
+## Workflow Skills Resolution
 
-The `workflow_skills` block maps workflow phases to skills:
+Workflow skills are resolved at runtime from `marshal.json`:
 
-```toon
-workflow_skills:
-  {domain}:
-    solution_outline: {skill for solution outline phase}
-    task_plan: {skill for task planning phase}
-    implementation: {skill for implementation profile}
-    testing: {skill for testing profile}
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --domain {domain} --phase {phase}
 ```
 
-### Domain-Agnostic Skills (Java/JavaScript)
+| Phase | Purpose |
+|-------|---------|
+| `solution_outline` | Skill for creating solution outlines |
+| `task_plan` | Skill for task planning |
+| `implementation` | Skill for code implementation |
+| `testing` | Skill for test implementation |
 
-For java and javascript domains, workflow skills are domain-agnostic:
+### Domain-Specific Skills
 
-```toon
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-```
-
-### Plugin Domain (Hardcoded)
-
-Plugin uses domain-specific workflow skills (hardcoded during init):
-
-```toon
-workflow_skills:
-  plugin:
-    solution_outline: pm-plugin-development:plugin-solution-outline
-    task_plan: pm-plugin-development:plugin-task-plan
-    implementation: pm-plugin-development:plugin-plan-implement
-```
+| Domain | solution_outline | task_plan | implementation | testing |
+|--------|------------------|-----------|----------------|---------|
+| java | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | pm-workflow:task-testing |
+| javascript | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | pm-workflow:task-testing |
+| plugin | pm-plugin-development:plugin-solution-outline | pm-plugin-development:plugin-task-plan | pm-plugin-development:plugin-plan-implement | - |
+| generic | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | - |
 
 ## Workflow Phase Usage
 
-| Phase | Reads | Purpose |
-|-------|-------|---------|
-| Init | - | Writes config.toon with domains + workflow_skills |
-| Refine | `workflow_skills.{domain}.solution_outline` | Creates deliverables |
-| Refine | `workflow_skills.{domain}.task_plan` | Creates tasks |
-| Execute | `workflow_skills.{task.domain}.{task.profile}` | Executes task |
-| Finalize | finalize settings | Creates PR |
-
-## Source of Workflow Skills
-
-| Domain | Source | Reason |
-|--------|--------|--------|
-| java | `skill_domains.java.workflow_skills` | Configurable per project |
-| javascript | `skill_domains.javascript.workflow_skills` | Configurable per project |
-| plugin | Hardcoded in init | Fixed toolset, not exposed |
+| Phase | Operation | Purpose |
+|-------|-----------|---------|
+| Init | Creates config.toon | Stores domains and settings |
+| Refine | Resolves workflow_skill from marshal.json | Creates deliverables and tasks |
+| Execute | Resolves workflow_skill from marshal.json | Executes task |
+| Finalize | Reads finalize settings | Creates PR |
 
 ## Commit Strategy
 
 | Strategy | Behavior |
 |----------|----------|
 | `per_task` | One commit per completed task |
-| `batch` | Single commit for all tasks |
+| `per_plan` | Single commit for all tasks |
+| `none` | No commits (manual) |
 
 ## Branch Strategy
 
@@ -147,22 +114,15 @@ workflow_skills:
 
 1. **Plan level**: `domains` is an array (supports multi-domain plans)
 2. **Deliverable level**: Each deliverable has single `domain` field
-3. **Task level**: Each task has single `domain` field (used by resolve-domain-skills)
-4. **Self-contained**: After init, config.toon has everything needed - no runtime lookup
-5. **Same refine/execute path**: All domains use same code path - read config.workflow_skills
+3. **Task level**: Each task has single `domain` field
+4. **Runtime resolution**: workflow_skills resolved from marshal.json (not stored in config.toon)
+5. **Same resolve path**: All domains use same resolution via `resolve-workflow-skill` command
 
 ## Example: Single Domain (Java)
 
 ```toon
 domains:
   - java
-
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
 
 commit_strategy: per_task
 create_pr: true
@@ -178,18 +138,6 @@ domains:
   - java
   - javascript
 
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-  javascript:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-
 commit_strategy: per_task
 create_pr: true
 verification_required: true
@@ -202,12 +150,6 @@ branch_strategy: feature
 ```toon
 domains:
   - plugin
-
-workflow_skills:
-  plugin:
-    solution_outline: pm-plugin-development:plugin-solution-outline
-    task_plan: pm-plugin-development:plugin-task-plan
-    implementation: pm-plugin-development:plugin-plan-implement
 
 commit_strategy: per_task
 create_pr: true

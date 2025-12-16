@@ -3,24 +3,18 @@
 Manage config.toon files with schema validation and field-level access.
 
 Provides typed configuration for plan execution with enum validation.
-Supports domain-based workflow skills configuration.
 
 Usage:
     python3 manage-config.py read --plan-id my-plan
     python3 manage-config.py get --plan-id my-plan --field commit_strategy
-    python3 manage-config.py get --plan-id my-plan --field workflow_skills.java.implementation
     python3 manage-config.py set --plan-id my-plan --field commit_strategy --value per_task
     python3 manage-config.py create --plan-id my-plan --domains java
-    python3 manage-config.py create --plan-id my-plan --domains java --workflow-skills '{"java":{...}}'
-    python3 manage-config.py get-workflow-skill --plan-id my-plan --domain java --profile implementation
     python3 manage-config.py get-domains --plan-id my-plan
 
-Note: --workflow-skills is optional. When not provided, workflow_skills are
-looked up from domain defaults (java, javascript, plugin, generic).
+Note: workflow_skills are resolved from marshal.json via plan-marshall-config resolve-workflow-skill.
 """
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
@@ -43,7 +37,7 @@ SCHEMA = {
 }
 
 # Structural validation (not enum)
-REQUIRED_FIELDS = ['domains', 'workflow_skills', 'commit_strategy']
+REQUIRED_FIELDS = ['domains', 'commit_strategy']
 OPTIONAL_FIELDS = ['create_pr', 'verification_required', 'verification_command', 'branch_strategy']
 
 # Fallback defaults (used when marshal.json doesn't exist)
@@ -53,46 +47,6 @@ FALLBACK_DEFAULTS = {
     'verification_required': True,
     'branch_strategy': 'feature',
 }
-
-# Domain workflow_skills defaults - looked up when --workflow-skills not provided
-DOMAIN_WORKFLOW_SKILLS = {
-    'java': {
-        'solution_outline': 'pm-workflow:solution-outline',
-        'task_plan': 'pm-workflow:task-plan',
-        'implementation': 'pm-workflow:task-implementation',
-        'testing': 'pm-workflow:task-testing',
-    },
-    'javascript': {
-        'solution_outline': 'pm-workflow:solution-outline',
-        'task_plan': 'pm-workflow:task-plan',
-        'implementation': 'pm-workflow:task-implementation',
-        'testing': 'pm-workflow:task-testing',
-    },
-    'plugin': {
-        'solution_outline': 'pm-plugin-development:plugin-solution-outline',
-        'task_plan': 'pm-plugin-development:plugin-task-plan',
-        'implementation': 'pm-plugin-development:plugin-plan-implement',
-    },
-    'generic': {
-        'solution_outline': 'pm-workflow:solution-outline',
-        'task_plan': 'pm-workflow:task-plan',
-        'implementation': 'pm-workflow:task-implementation',
-    },
-}
-
-
-def get_workflow_skills_for_domains(domains: list) -> dict | None:
-    """Look up workflow_skills for each domain.
-
-    Returns dict mapping domain -> skills, or None if any domain is unknown.
-    """
-    result = {}
-    for domain in domains:
-        if domain not in DOMAIN_WORKFLOW_SKILLS:
-            return None
-        result[domain] = DOMAIN_WORKFLOW_SKILLS[domain].copy()
-    return result
-
 
 def get_defaults() -> dict:
     """Get plan defaults from marshal.json, falling back to hardcoded defaults.
@@ -128,14 +82,6 @@ def validate_domain(domain: str) -> bool:
     Examples of valid domains: java, javascript, plugin
     """
     return bool(re.match(r'^[a-z][a-z0-9]*$', domain))
-
-
-def validate_workflow_skill(skill: str) -> bool:
-    """Validate workflow skill is in bundle:skill notation.
-
-    Examples: pm-workflow:solution-outline, pm-dev-java:java-implement-agent
-    """
-    return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', skill))
 
 
 def get_config_path(plan_id: str) -> Path:
@@ -350,7 +296,11 @@ def cmd_get_multi(args):
 
 
 def cmd_create(args):
-    """Create config.toon with domains and workflow_skills configuration."""
+    """Create config.toon with domains configuration.
+
+    Note: workflow_skills are NOT stored in config.toon. They are resolved
+    at runtime from marshal.json via plan-marshall-config resolve-workflow-skill.
+    """
     if not validate_plan_id(args.plan_id):
         output_toon({
             'status': 'error',
@@ -380,74 +330,6 @@ def cmd_create(args):
                 'message': f"Invalid domain format: {domain}. Must be lowercase identifier (e.g., java, javascript, plugin)"
             })
             sys.exit(1)
-
-    # Get workflow_skills: from argument or lookup by domain
-    if args.workflow_skills:
-        # Parse and validate workflow_skills JSON
-        try:
-            workflow_skills = json.loads(args.workflow_skills)
-        except json.JSONDecodeError as e:
-            output_toon({
-                'status': 'error',
-                'plan_id': args.plan_id,
-                'error': 'invalid_workflow_skills',
-                'message': f"Invalid workflow_skills JSON: {e}"
-            })
-            sys.exit(1)
-
-        if not isinstance(workflow_skills, dict):
-            output_toon({
-                'status': 'error',
-                'plan_id': args.plan_id,
-                'error': 'invalid_workflow_skills',
-                'message': 'workflow_skills must be a JSON object'
-            })
-            sys.exit(1)
-    else:
-        # Look up workflow_skills from domain defaults
-        workflow_skills = get_workflow_skills_for_domains(domains)
-        if workflow_skills is None:
-            unknown = [d for d in domains if d not in DOMAIN_WORKFLOW_SKILLS]
-            output_toon({
-                'status': 'error',
-                'plan_id': args.plan_id,
-                'error': 'unknown_domain',
-                'message': f"Unknown domain(s) with no default workflow_skills: {', '.join(unknown)}",
-                'known_domains': list(DOMAIN_WORKFLOW_SKILLS.keys())
-            })
-            sys.exit(1)
-
-    # Validate workflow_skills structure matches domains
-    for domain in domains:
-        if domain not in workflow_skills:
-            output_toon({
-                'status': 'error',
-                'plan_id': args.plan_id,
-                'error': 'missing_domain_skills',
-                'message': f"workflow_skills missing entry for domain: {domain}"
-            })
-            sys.exit(1)
-
-        domain_skills = workflow_skills[domain]
-        if not isinstance(domain_skills, dict):
-            output_toon({
-                'status': 'error',
-                'plan_id': args.plan_id,
-                'error': 'invalid_domain_skills',
-                'message': f"workflow_skills.{domain} must be an object"
-            })
-            sys.exit(1)
-
-        # Validate each skill in the domain is bundle:skill notation
-        for profile, skill in domain_skills.items():
-            if not validate_workflow_skill(skill):
-                output_toon({
-                    'status': 'error',
-                    'plan_id': args.plan_id,
-                    'error': 'invalid_workflow_skill',
-                    'message': f"Invalid workflow skill format: {skill}. Must be bundle:skill notation"
-                })
-                sys.exit(1)
 
     # Check if already exists
     path = get_config_path(args.plan_id)
@@ -479,7 +361,6 @@ def cmd_create(args):
 
     config = {
         'domains': domains,
-        'workflow_skills': workflow_skills,
         'commit_strategy': commit_strategy,
     }
 
@@ -518,76 +399,7 @@ def cmd_create(args):
         'plan_id': args.plan_id,
         'file': 'config.toon',
         'created': True,
-        'domains_count': len(domains),
         'config': config
-    })
-
-
-def cmd_get_workflow_skill(args):
-    """Get workflow skill for a specific domain and profile."""
-    if not validate_plan_id(args.plan_id):
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'error': 'invalid_plan_id',
-            'message': f"Invalid plan_id format: {args.plan_id}"
-        })
-        sys.exit(1)
-
-    config = read_config(args.plan_id)
-    if not config:
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'error': 'file_not_found',
-            'message': 'config.toon not found'
-        })
-        sys.exit(1)
-
-    # Check if domain exists in config.domains
-    domains = config.get('domains', [])
-    if args.domain not in domains:
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'domain': args.domain,
-            'error': 'domain_not_found',
-            'message': f"Domain '{args.domain}' not found in config.domains",
-            'available_domains': domains
-        })
-        sys.exit(1)
-
-    # Check if workflow_skills exists and has the domain
-    workflow_skills = config.get('workflow_skills', {})
-    if args.domain not in workflow_skills:
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'domain': args.domain,
-            'error': 'domain_not_found',
-            'message': f"Domain '{args.domain}' not found in workflow_skills"
-        })
-        sys.exit(1)
-
-    domain_skills = workflow_skills[args.domain]
-    if args.profile not in domain_skills:
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'domain': args.domain,
-            'profile': args.profile,
-            'error': 'profile_not_found',
-            'message': f"Profile '{args.profile}' not found in workflow_skills.{args.domain}",
-            'available_profiles': list(domain_skills.keys())
-        })
-        sys.exit(1)
-
-    output_toon({
-        'status': 'success',
-        'plan_id': args.plan_id,
-        'domain': args.domain,
-        'profile': args.profile,
-        'workflow_skill': domain_skills[args.profile]
     })
 
 
@@ -636,7 +448,7 @@ def main():
     get_parser = subparsers.add_parser('get', help='Get specific field (supports dot notation)')
     get_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     get_parser.add_argument('--field', required=True,
-                            help='Field name (supports dot notation: workflow_skills.java.implementation)')
+                            help='Field name (supports dot notation for nested access)')
     get_parser.set_defaults(func=cmd_get)
 
     # set
@@ -653,13 +465,11 @@ def main():
                                   help='Comma-separated field names (e.g., commit_strategy,branch_strategy)')
     get_multi_parser.set_defaults(func=cmd_get_multi)
 
-    # create (new format with domains and workflow_skills)
+    # create
     create_parser = subparsers.add_parser('create', help='Create config.toon')
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--domains', required=True,
                                help='Comma-separated list of domains (e.g., java or java,javascript)')
-    create_parser.add_argument('--workflow-skills',
-                               help='JSON object mapping domains to workflow skills (optional - looked up by domain if not provided)')
     create_parser.add_argument('--commit-strategy',
                                choices=['per_task', 'per_plan', 'none'],
                                help='Commit strategy (default: per_task, none=no commits)')
@@ -675,16 +485,6 @@ def main():
     create_parser.add_argument('--force', action='store_true',
                                help='Overwrite existing config')
     create_parser.set_defaults(func=cmd_create)
-
-    # get-workflow-skill
-    gws_parser = subparsers.add_parser('get-workflow-skill',
-                                        help='Get workflow skill for domain and profile')
-    gws_parser.add_argument('--plan-id', required=True, help='Plan identifier')
-    gws_parser.add_argument('--domain', required=True,
-                            help='Domain name (e.g., java, javascript, plugin)')
-    gws_parser.add_argument('--profile', required=True,
-                            help='Profile name (e.g., implementation, testing)')
-    gws_parser.set_defaults(func=cmd_get_workflow_skill)
 
     # get-domains
     gd_parser = subparsers.add_parser('get-domains', help='Get domains array from config')

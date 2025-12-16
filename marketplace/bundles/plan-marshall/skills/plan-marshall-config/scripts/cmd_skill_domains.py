@@ -249,3 +249,42 @@ def cmd_get_workflow_skills(args) -> int:
         "implementation": workflow_skills.get("implementation", ""),
         "testing": workflow_skills.get("testing", "")
     })
+
+
+def cmd_resolve_workflow_skill(args) -> int:
+    """Resolve workflow skill for domain + phase.
+
+    Returns the specific workflow skill from skill_domains.{domain}.workflow_skills.{phase}
+
+    Phases: solution_outline, task_plan, implementation, testing
+    """
+    try:
+        require_initialized()
+    except MarshalNotInitializedError as e:
+        return error_exit(str(e))
+
+    config = load_config()
+    skill_domains = config.get('skill_domains', {})
+
+    domain = args.domain
+    phase = args.phase
+
+    if domain not in skill_domains:
+        available = [d for d in skill_domains.keys() if d != 'system']
+        return error_exit(f"Unknown domain: {domain}. Available: {', '.join(available)}")
+
+    domain_config = skill_domains[domain]
+    workflow_skills = domain_config.get('workflow_skills', {})
+
+    if not workflow_skills:
+        return error_exit(f"Domain '{domain}' has no workflow_skills configured")
+
+    if phase not in workflow_skills:
+        available = list(workflow_skills.keys())
+        return error_exit(f"Unknown phase: {phase} for domain: {domain}. Available: {', '.join(available)}")
+
+    return success_exit({
+        "domain": domain,
+        "phase": phase,
+        "workflow_skill": workflow_skills[phase]
+    })

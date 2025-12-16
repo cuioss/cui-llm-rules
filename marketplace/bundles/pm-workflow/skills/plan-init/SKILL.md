@@ -227,7 +227,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle cr
 
 ### Step 9: Create Configuration
 
-Create config.toon with base settings and finalize configuration. The `manage-config create` command looks up workflow_skills from domain defaults:
+Create config.toon with base settings and finalize configuration:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
@@ -236,10 +236,11 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
 ```
 
 This creates config.toon with:
-- `domains`: Array of detected domains
-- `workflow_skills`: Looked up from domain defaults (java, javascript, plugin, generic)
-- `commit_strategy`: From defaults (per_task)
-- Finalize fields: `create_pr`, `verification_required`, `branch_strategy` (from defaults)
+- `domains`: Array of detected domains (used for workflow_skill resolution from marshal.json)
+- `commit_strategy`: From marshal.json plan.defaults (per_task)
+- Finalize fields: `create_pr`, `verification_required`, `branch_strategy` (from marshal.json plan.defaults)
+
+Note: `workflow_skills` are NOT stored in config.toon. They are resolved at runtime from `marshal.json` via `plan-marshall-config resolve-workflow-skill`.
 
 ### Step 10: Log Creation
 
@@ -346,7 +347,7 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 ### Related Skills
 
 - **plan-refine** - Next phase after init completes
-- **Domain skills** - Loaded by thin agents via config.toon workflow_skills
+- **Domain skills** - Loaded by thin agents via marshal.json workflow_skills (resolved at runtime)
 
 ---
 

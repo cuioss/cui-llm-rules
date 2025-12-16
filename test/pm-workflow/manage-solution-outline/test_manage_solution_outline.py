@@ -58,6 +58,7 @@ Implement the main validation logic.
 - change_type: create
 - execution_mode: automated
 - domain: java
+- profile: implementation
 - suggested_skill: pm-dev-java:java-implement
 - suggested_workflow: implement
 - context_skills: []
@@ -81,6 +82,7 @@ Add JWT configuration to application.properties.
 - change_type: create
 - execution_mode: automated
 - domain: java
+- profile: implementation
 - suggested_skill: pm-dev-java:java-implement
 - suggested_workflow: implement
 - context_skills: []
@@ -103,7 +105,8 @@ Create comprehensive test coverage.
 **Metadata:**
 - change_type: create
 - execution_mode: automated
-- domain: java-testing
+- domain: java
+- profile: testing
 - suggested_skill: pm-dev-java:java-implement-tests
 - suggested_workflow: implement-tests
 - context_skills: []

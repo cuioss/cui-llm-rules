@@ -135,6 +135,36 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                     "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
                     "optionals": ["pm-dev-frontend:cui-cypress"]
                 }
+            },
+            "plugin": {
+                "workflow_skills": {
+                    "solution_outline": "pm-plugin-development:plugin-solution-outline",
+                    "task_plan": "pm-plugin-development:plugin-task-plan",
+                    "implementation": "pm-plugin-development:plugin-plan-implement"
+                },
+                "core": {
+                    "defaults": ["pm-plugin-development:plugin-architecture"],
+                    "optionals": []
+                },
+                "implementation": {
+                    "defaults": [],
+                    "optionals": []
+                }
+            },
+            "generic": {
+                "workflow_skills": {
+                    "solution_outline": "pm-workflow:solution-outline",
+                    "task_plan": "pm-workflow:task-plan",
+                    "implementation": "pm-workflow:task-implementation"
+                },
+                "core": {
+                    "defaults": [],
+                    "optionals": []
+                },
+                "implementation": {
+                    "defaults": [],
+                    "optionals": []
+                }
             }
         },
         "modules": {},

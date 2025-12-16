@@ -23,7 +23,7 @@ script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
 from config_core import EXIT_ERROR
-from cmd_skill_domains import cmd_skill_domains, cmd_resolve_domain_skills, cmd_get_workflow_skills
+from cmd_skill_domains import cmd_skill_domains, cmd_resolve_domain_skills, cmd_get_workflow_skills, cmd_resolve_workflow_skill
 from cmd_modules import cmd_modules
 from cmd_build_systems import cmd_build_systems
 from cmd_system_plan import cmd_system, cmd_plan
@@ -167,6 +167,12 @@ def main():
     subparsers.add_parser('get-workflow-skills',
                           help='Get domain-agnostic workflow skills')
 
+    # --- resolve-workflow-skill ---
+    p_rws = subparsers.add_parser('resolve-workflow-skill',
+                                   help='Resolve workflow skill for domain and phase')
+    p_rws.add_argument('--domain', required=True, help='Domain name (java, javascript, plugin, generic)')
+    p_rws.add_argument('--phase', required=True, help='Phase name (solution_outline, task_plan, implementation, testing)')
+
     args = parser.parse_args()
 
     if args.noun is None:
@@ -205,6 +211,8 @@ def main():
         return cmd_resolve_domain_skills(args)
     elif args.noun == 'get-workflow-skills':
         return cmd_get_workflow_skills(args)
+    elif args.noun == 'resolve-workflow-skill':
+        return cmd_resolve_workflow_skill(args)
     else:
         parser.print_help()
         return EXIT_ERROR
