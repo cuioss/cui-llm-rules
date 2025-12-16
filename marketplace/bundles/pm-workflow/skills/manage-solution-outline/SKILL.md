@@ -141,7 +141,6 @@ Write using stdin with validation to handle ASCII box-drawing characters:
 python3 .plan/execute-script.py \
   pm-workflow:manage-solution-outline:manage-solution-outline write \
   --plan-id {plan_id} \
-  --validate \
   [--force] <<'EOF'
 # Solution: {title}
 
@@ -162,8 +161,9 @@ EOF
 
 **Parameters**:
 - `--plan-id` (required): Plan identifier
-- `--validate` (required): Validate structure after writing - checks for required sections (Summary, Overview, Deliverables) and numbered deliverable format (`### N. Title`)
 - `--force`: Overwrite existing solution outline
+
+**Note**: Validation runs automatically on write - checks for required sections (Summary, Overview, Deliverables) and numbered deliverable format (`### N. Title`). If validation fails, the file is NOT written.
 
 **Why heredoc?** Solution outlines contain ASCII diagrams with box-drawing characters (│, ─, ┌, └). Using `<<'EOF'` (quoted) preserves content exactly without variable expansion or escaping issues.
 
@@ -203,7 +203,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 
 | Command | Parameters | Description |
 |---------|------------|-------------|
-| `write` | `--plan-id --validate [--force]` | Write solution from stdin |
+| `write` | `--plan-id [--force]` | Write solution from stdin (validates automatically) |
 | `validate` | `--plan-id` | Validate structure |
 | `read` | `--plan-id [--raw]` | Read solution (TOON or raw markdown) |
 | `list-deliverables` | `--plan-id` | Extract deliverables list |

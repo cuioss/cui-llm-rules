@@ -62,10 +62,10 @@ The init phase uses a single agent:
 ```
 Task: pm-workflow:plan-init-agent
   Input: description OR issue OR lesson_id
-  Output: plan_id, domains array, workflow_skills in config.toon
+  Output: plan_id, domains array
 ```
 
-**plan-init-agent**: Creates plan directory, writes request.md, detects domains, writes workflow_skills to config.toon
+**plan-init-agent**: Creates plan directory, writes request.md, detects domains, creates config.toon
 
 ### Automatic Continuation to Refine
 
@@ -78,29 +78,25 @@ This provides a seamless flow from task description to actionable tasks in a sin
 
 ### Refine Phase
 
-The refine phase uses **thin agents** that load workflow skills from config.toon.
+The refine phase uses **thin agents** that load workflow skills from marshal.json based on domain.
 
-**CRITICAL**: This phase has 5 steps. Step 4 is a MANDATORY user review gate. Do NOT skip from Step 3 to Step 5.
+**CRITICAL**: This phase has 4 steps. Step 3 is a MANDATORY user review gate. Do NOT skip from Step 2 to Step 4.
 
 ---
 
-**Step 1**: Read domains and workflow_skills from config:
+**Step 1**: Read domains from config:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
   --plan-id {plan_id} --field domains
-python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
-  --plan-id {plan_id} --field workflow_skills
 ```
 
-This returns:
-- `domains`: Array like `[java]` or `[java, javascript]`
-- `workflow_skills`: Domain-keyed mapping to skills
+This returns the domain(s) like `[java]` or `[plugin]`. Workflow skills are resolved from marshal.json's `skill_domains.{domain}.workflow_skills` by the agents.
 
 ---
 
 **Step 2**: Invoke solution outline agent
 
-The thin agent loads the workflow skill from config.toon:
+The thin agent loads the workflow skill from marshal.json based on domain:
 
 ```
 Task: pm-workflow:solution-outline-agent
@@ -109,8 +105,8 @@ Task: pm-workflow:solution-outline-agent
 ```
 
 The agent:
-1. Reads `config.workflow_skills.{domains[0]}.solution_outline`
-2. Loads the skill (e.g., `pm-workflow:solution-outline`)
+1. Reads domain from config.toon, resolves `skill_domains.{domain}.workflow_skills.solution_outline` from marshal.json
+2. Loads the skill (e.g., `pm-plugin-development:plugin-solution-outline` for plugin domain)
 3. Executes the skill workflow
 4. Returns deliverables (each with single `domain` field)
 
@@ -128,7 +124,14 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 After the solution outline agent completes, you MUST:
 
-### 3a. Display the solution outline for review:
+### 3a. Read and display the solution outline for review:
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline read \
+  --plan-id {plan_id}
+```
+
+Then display:
 ```
 ## Solution Outline Created
 
@@ -235,14 +238,14 @@ If init-phase plans exist, offers to continue existing or create new.
 
 ### refine
 
-Create tasks from goals for a plan. Uses thin agent pattern with workflow skills from config.toon.
+Create tasks from goals for a plan. Uses thin agent pattern with workflow skills from marshal.json.
 
 ```
 /plan-manage action=refine
 /plan-manage action=refine plan="jwt-auth"
 ```
 
-**Routing**: Reads `config.workflow_skills` and spawns thin agents that load the appropriate skill.
+**Routing**: Agents resolve workflow skills from marshal.json based on domain.
 
 If no plan specified, shows plans in init/refine phase for selection.
 
