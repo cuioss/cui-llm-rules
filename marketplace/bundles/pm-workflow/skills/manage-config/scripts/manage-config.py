@@ -3,15 +3,20 @@
 Manage config.toon files with schema validation and field-level access.
 
 Provides typed configuration for plan execution with enum validation.
+Supports domain-based workflow skills configuration.
 
 Usage:
     python3 manage-config.py read --plan-id my-plan
-    python3 manage-config.py get --plan-id my-plan --field plan_type
-    python3 manage-config.py set --plan-id my-plan --field plan_type --value pm-workflow:plan-type-java
-    python3 manage-config.py create --plan-id my-plan --plan-type pm-workflow:plan-type-java
+    python3 manage-config.py get --plan-id my-plan --field commit_strategy
+    python3 manage-config.py get --plan-id my-plan --field workflow_skills.java.implementation
+    python3 manage-config.py set --plan-id my-plan --field commit_strategy --value per_task
+    python3 manage-config.py create --plan-id my-plan --domains java --workflow-skills '{"java":{...}}'
+    python3 manage-config.py get-workflow-skill --plan-id my-plan --domain java --profile implementation
+    python3 manage-config.py get-domains --plan-id my-plan
 """
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -25,16 +30,21 @@ sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' /
 from file_ops import atomic_write_file, base_path
 from toon_parser import parse_toon, serialize_toon
 
-# Schema validation - simplified to 2 enum fields
-# plan_type uses bundle:skill notation and is validated separately
+# Schema validation - enum fields
 SCHEMA = {
-    'compatibility': ['deprecations', 'breaking'],
-    'commit_strategy': ['fine-granular', 'phase-specific', 'complete'],
+    'commit_strategy': ['per_task', 'per_deliverable', 'at_end'],
+    'branch_strategy': ['feature', 'direct'],
 }
 
+# Structural validation (not enum)
+REQUIRED_FIELDS = ['domains', 'workflow_skills', 'commit_strategy']
+OPTIONAL_FIELDS = ['create_pr', 'verification_required', 'verification_command', 'branch_strategy']
+
 DEFAULTS = {
-    'compatibility': 'deprecations',
-    'commit_strategy': 'phase-specific',
+    'commit_strategy': 'per_task',
+    'create_pr': True,
+    'verification_required': True,
+    'branch_strategy': 'feature',
 }
 
 
@@ -43,151 +53,20 @@ def validate_plan_id(plan_id: str) -> bool:
     return bool(re.match(r'^[a-z][a-z0-9-]*$', plan_id))
 
 
-def validate_plan_type(plan_type: str) -> bool:
-    """Validate plan_type is in bundle:skill notation.
+def validate_domain(domain: str) -> bool:
+    """Validate domain is a simple lowercase identifier.
 
-    Examples of valid plan types:
-    - pm-workflow:plan-type-java
-    - pm-workflow:plan-type-javascript
-    - pm-workflow:plan-type-generic
-    - pm-workflow:plan-type-plugin
+    Examples of valid domains: java, javascript, plugin
     """
-    # Pattern: bundle-name:skill-name (both kebab-case)
-    return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', plan_type))
+    return bool(re.match(r'^[a-z][a-z0-9]*$', domain))
 
 
-def validate_plan_type_exists(plan_type: str) -> tuple[bool, str | None]:
-    """Validate that the plan_type skill actually exists.
+def validate_workflow_skill(skill: str) -> bool:
+    """Validate workflow skill is in bundle:skill notation.
 
-    Args:
-        plan_type: Plan type in bundle:skill notation (e.g., pm-workflow:plan-type-java)
-
-    Returns:
-        Tuple of (exists, skill_path). If exists is False, skill_path is None.
+    Examples: pm-workflow:solution-outline, pm-dev-java:java-implement-agent
     """
-    if not validate_plan_type(plan_type):
-        return False, None
-
-    bundle, skill = plan_type.split(':')
-    skill_path = BUNDLES_DIR / bundle / 'skills' / skill / 'SKILL.md'
-    if skill_path.exists():
-        return True, str(skill_path)
-    return False, None
-
-
-def _extract_frontmatter_text(content: str) -> str | None:
-    """Extract frontmatter text from markdown content."""
-    if not content.startswith('---'):
-        return None
-    match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
-    return match.group(1) if match else None
-
-
-def _parse_frontmatter_line(line: str, result: dict, current_section: str | None) -> str | None:
-    """Parse a single frontmatter line, return updated current_section."""
-    stripped = line.lstrip()
-    if not stripped or stripped.startswith('#') or ':' not in stripped:
-        return current_section
-
-    indent = len(line) - len(stripped)
-    key_part, _, value_part = stripped.partition(':')
-    key, value = key_part.strip(), value_part.strip()
-
-    if indent == 0:
-        if value:
-            result[key] = _parse_value(value)
-            return None
-        result[key] = {}
-        return key
-
-    if current_section and indent > 0 and value:
-        result[current_section][key] = _parse_value(value)
-    return current_section
-
-
-def parse_frontmatter(content: str) -> dict:
-    """Parse YAML frontmatter from markdown content.
-
-    Handles nested structures like plan_defaults.verification_command.
-    Uses simple regex parsing to avoid yaml dependency.
-    """
-    frontmatter_text = _extract_frontmatter_text(content)
-    if not frontmatter_text:
-        return {}
-
-    result = {}
-    current_section = None
-    for line in frontmatter_text.split('\n'):
-        current_section = _parse_frontmatter_line(line, result, current_section)
-    return result
-
-
-def _parse_value(value: str):
-    """Parse a YAML-ish value string into Python type."""
-    # Remove quotes if present
-    if (value.startswith('"') and value.endswith('"')) or \
-       (value.startswith("'") and value.endswith("'")):
-        return value[1:-1]
-
-    # Handle booleans
-    if value.lower() == 'true':
-        return True
-    if value.lower() == 'false':
-        return False
-
-    # Handle null
-    if value.lower() == 'null' or value == '~':
-        return None
-
-    # Handle arrays (simple single-line format)
-    if value.startswith('[') and value.endswith(']'):
-        inner = value[1:-1].strip()
-        if not inner:
-            return []
-        return [_parse_value(v.strip()) for v in inner.split(',')]
-
-    # Return as string
-    return value
-
-
-def extract_plan_defaults(plan_type: str) -> dict:
-    """Extract plan_defaults from plan-type skill frontmatter.
-
-    Args:
-        plan_type: Plan type in bundle:skill notation
-
-    Returns:
-        Dict with finalize config fields derived from plan_defaults:
-        - create_pr: from plan_defaults.pr_workflow
-        - verification_required: True if verification_command is set
-        - verification_command: from plan_defaults.verification_command
-        - branch_strategy: 'feature' if pr_workflow else 'direct'
-    """
-    exists, skill_path = validate_plan_type_exists(plan_type)
-    if not exists or not skill_path:
-        return {}
-
-    try:
-        content = Path(skill_path).read_text(encoding='utf-8')
-    except (OSError, UnicodeDecodeError):
-        return {}
-
-    frontmatter = parse_frontmatter(content)
-    plan_defaults = frontmatter.get('plan_defaults', {})
-
-    if not plan_defaults:
-        return {}
-
-    # Map plan_defaults to finalize config fields
-    verification_cmd = plan_defaults.get('verification_command')
-    pr_workflow = plan_defaults.get('pr_workflow', False)
-
-    return {
-        'create_pr': pr_workflow if isinstance(pr_workflow, bool) else pr_workflow == 'true',
-        'verification_required': verification_cmd is not None and verification_cmd != 'null',
-        'verification_command': verification_cmd,
-        'branch_strategy': 'feature' if pr_workflow else 'direct',
-    }
+    return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', skill))
 
 
 def get_config_path(plan_id: str) -> Path:
@@ -214,16 +93,33 @@ def write_config(plan_id: str, config: dict):
 def validate_field(field: str, value: str) -> tuple[bool, list]:
     """Validate a field value against schema.
 
-    For plan_type, validates bundle:skill notation.
-    For other fields, validates against enum values.
+    For enum fields, validates against allowed values.
+    For other fields, allows any value.
     """
-    if field == 'plan_type':
-        # plan_type uses bundle:skill notation
-        return validate_plan_type(value), []
     if field not in SCHEMA:
         return True, []  # Unknown fields are allowed
     valid_values = SCHEMA[field]
     return value in valid_values, valid_values
+
+
+def get_nested_value(config: dict, field_path: str):
+    """Get a nested value using dot notation.
+
+    Args:
+        config: Configuration dictionary
+        field_path: Dot-separated path (e.g., 'workflow_skills.java.implementation')
+
+    Returns:
+        Value at path, or None if not found
+    """
+    parts = field_path.split('.')
+    current = config
+    for part in parts:
+        if isinstance(current, dict) and part in current:
+            current = current[part]
+        else:
+            return None
+    return current
 
 
 def output_toon(data: dict):
@@ -260,7 +156,10 @@ def cmd_read(args):
 
 
 def cmd_get(args):
-    """Get a specific field value."""
+    """Get a specific field value.
+
+    Supports nested field access via dot notation (e.g., workflow_skills.java.implementation).
+    """
     if not validate_plan_id(args.plan_id):
         output_toon({
             'status': 'error',
@@ -280,7 +179,12 @@ def cmd_get(args):
         })
         sys.exit(1)
 
-    value = config.get(args.field)
+    # Support nested field access via dot notation
+    if '.' in args.field:
+        value = get_nested_value(config, args.field)
+    else:
+        value = config.get(args.field)
+
     if value is None:
         output_toon({
             'status': 'error',
@@ -310,35 +214,18 @@ def cmd_set(args):
         })
         sys.exit(1)
 
-    # Validate value against schema
+    # Validate value against schema for enum fields
     is_valid, valid_values = validate_field(args.field, args.value)
     if not is_valid:
-        error_data = {
+        output_toon({
             'status': 'error',
             'plan_id': args.plan_id,
             'field': args.field,
             'error': 'invalid_value',
-        }
-        if args.field == 'plan_type':
-            error_data['message'] = f"Invalid plan_type format: {args.value}. Must be bundle:skill notation (e.g., pm-workflow:plan-type-java)"
-        else:
-            error_data['message'] = f"Invalid value '{args.value}' for field '{args.field}'"
-            error_data['valid_values'] = valid_values
-        output_toon(error_data)
+            'message': f"Invalid value '{args.value}' for field '{args.field}'",
+            'valid_values': valid_values
+        })
         sys.exit(1)
-
-    # For plan_type, also validate skill exists
-    if args.field == 'plan_type':
-        exists, _ = validate_plan_type_exists(args.value)
-        if not exists:
-            output_toon({
-                'status': 'error',
-                'plan_id': args.plan_id,
-                'field': args.field,
-                'error': 'skill_not_found',
-                'message': f"Skill not found for plan_type: {args.value}. Expected SKILL.md at bundles/{args.value.replace(':', '/skills/')}/SKILL.md"
-            })
-            sys.exit(1)
 
     config = read_config(args.plan_id)
     previous = config.get(args.field)
@@ -394,7 +281,7 @@ def cmd_get_multi(args):
 
 
 def cmd_create(args):
-    """Create config.toon with initial values."""
+    """Create config.toon with domains and workflow_skills configuration."""
     if not validate_plan_id(args.plan_id):
         output_toon({
             'status': 'error',
@@ -404,26 +291,79 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    # Validate plan_type format (bundle:skill notation)
-    if not validate_plan_type(args.plan_type):
+    # Parse and validate domains
+    domains = [d.strip() for d in args.domains.split(',') if d.strip()]
+    if not domains:
         output_toon({
             'status': 'error',
             'plan_id': args.plan_id,
-            'error': 'invalid_plan_type',
-            'message': f"Invalid plan_type format: {args.plan_type}. Must be bundle:skill notation (e.g., pm-workflow:plan-type-java)"
+            'error': 'invalid_domains',
+            'message': 'At least one domain is required'
         })
         sys.exit(1)
 
-    # Validate plan_type skill exists
-    exists, _ = validate_plan_type_exists(args.plan_type)
-    if not exists:
+    for domain in domains:
+        if not validate_domain(domain):
+            output_toon({
+                'status': 'error',
+                'plan_id': args.plan_id,
+                'error': 'invalid_domain',
+                'message': f"Invalid domain format: {domain}. Must be lowercase identifier (e.g., java, javascript, plugin)"
+            })
+            sys.exit(1)
+
+    # Parse and validate workflow_skills JSON
+    try:
+        workflow_skills = json.loads(args.workflow_skills)
+    except json.JSONDecodeError as e:
         output_toon({
             'status': 'error',
             'plan_id': args.plan_id,
-            'error': 'skill_not_found',
-            'message': f"Skill not found for plan_type: {args.plan_type}. Expected SKILL.md at bundles/{args.plan_type.replace(':', '/skills/')}/SKILL.md"
+            'error': 'invalid_workflow_skills',
+            'message': f"Invalid workflow_skills JSON: {e}"
         })
         sys.exit(1)
+
+    if not isinstance(workflow_skills, dict):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_workflow_skills',
+            'message': 'workflow_skills must be a JSON object'
+        })
+        sys.exit(1)
+
+    # Validate workflow_skills structure matches domains
+    for domain in domains:
+        if domain not in workflow_skills:
+            output_toon({
+                'status': 'error',
+                'plan_id': args.plan_id,
+                'error': 'missing_domain_skills',
+                'message': f"workflow_skills missing entry for domain: {domain}"
+            })
+            sys.exit(1)
+
+        domain_skills = workflow_skills[domain]
+        if not isinstance(domain_skills, dict):
+            output_toon({
+                'status': 'error',
+                'plan_id': args.plan_id,
+                'error': 'invalid_domain_skills',
+                'message': f"workflow_skills.{domain} must be an object"
+            })
+            sys.exit(1)
+
+        # Validate each skill in the domain is bundle:skill notation
+        for profile, skill in domain_skills.items():
+            if not validate_workflow_skill(skill):
+                output_toon({
+                    'status': 'error',
+                    'plan_id': args.plan_id,
+                    'error': 'invalid_workflow_skill',
+                    'message': f"Invalid workflow skill format: {skill}. Must be bundle:skill notation"
+                })
+                sys.exit(1)
 
     # Check if already exists
     path = get_config_path(args.plan_id)
@@ -436,32 +376,53 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    # Build config from args (base fields)
+    # Build config with required fields
+    commit_strategy = args.commit_strategy or DEFAULTS['commit_strategy']
+    is_valid, valid_values = validate_field('commit_strategy', commit_strategy)
+    if not is_valid:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'field': 'commit_strategy',
+            'error': 'invalid_value',
+            'message': f"Invalid value '{commit_strategy}' for commit_strategy",
+            'valid_values': valid_values
+        })
+        sys.exit(1)
+
     config = {
-        'plan_type': args.plan_type,
-        'compatibility': args.compatibility or DEFAULTS['compatibility'],
-        'commit_strategy': args.commit_strategy or DEFAULTS['commit_strategy'],
+        'domains': domains,
+        'workflow_skills': workflow_skills,
+        'commit_strategy': commit_strategy,
     }
 
-    # Validate enum fields (plan_type already validated above)
-    for field in ['compatibility', 'commit_strategy']:
-        value = config[field]
-        is_valid, valid_values = validate_field(field, value)
-        if not is_valid:
-            output_toon({
-                'status': 'error',
-                'plan_id': args.plan_id,
-                'field': field,
-                'error': 'invalid_value',
-                'message': f"Invalid value '{value}' for field '{field}'",
-                'valid_values': valid_values
-            })
-            sys.exit(1)
+    # Add optional finalize settings with defaults
+    if args.create_pr is not None:
+        config['create_pr'] = args.create_pr.lower() == 'true'
+    else:
+        config['create_pr'] = DEFAULTS['create_pr']
 
-    # Extract and add finalize config fields from plan-type skill frontmatter
-    plan_defaults = extract_plan_defaults(args.plan_type)
-    if plan_defaults:
-        config.update(plan_defaults)
+    if args.verification_required is not None:
+        config['verification_required'] = args.verification_required.lower() == 'true'
+    else:
+        config['verification_required'] = DEFAULTS['verification_required']
+
+    if args.verification_command:
+        config['verification_command'] = args.verification_command
+
+    branch_strategy = args.branch_strategy or DEFAULTS['branch_strategy']
+    is_valid, valid_values = validate_field('branch_strategy', branch_strategy)
+    if not is_valid:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'field': 'branch_strategy',
+            'error': 'invalid_value',
+            'message': f"Invalid value '{branch_strategy}' for branch_strategy",
+            'valid_values': valid_values
+        })
+        sys.exit(1)
+    config['branch_strategy'] = branch_strategy
 
     write_config(args.plan_id, config)
 
@@ -470,8 +431,106 @@ def cmd_create(args):
         'plan_id': args.plan_id,
         'file': 'config.toon',
         'created': True,
-        'plan_defaults_applied': bool(plan_defaults),
+        'domains_count': len(domains),
         'config': config
+    })
+
+
+def cmd_get_workflow_skill(args):
+    """Get workflow skill for a specific domain and profile."""
+    if not validate_plan_id(args.plan_id):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        })
+        sys.exit(1)
+
+    config = read_config(args.plan_id)
+    if not config:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'file_not_found',
+            'message': 'config.toon not found'
+        })
+        sys.exit(1)
+
+    # Check if domain exists in config.domains
+    domains = config.get('domains', [])
+    if args.domain not in domains:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'domain': args.domain,
+            'error': 'domain_not_found',
+            'message': f"Domain '{args.domain}' not found in config.domains",
+            'available_domains': domains
+        })
+        sys.exit(1)
+
+    # Check if workflow_skills exists and has the domain
+    workflow_skills = config.get('workflow_skills', {})
+    if args.domain not in workflow_skills:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'domain': args.domain,
+            'error': 'domain_not_found',
+            'message': f"Domain '{args.domain}' not found in workflow_skills"
+        })
+        sys.exit(1)
+
+    domain_skills = workflow_skills[args.domain]
+    if args.profile not in domain_skills:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'domain': args.domain,
+            'profile': args.profile,
+            'error': 'profile_not_found',
+            'message': f"Profile '{args.profile}' not found in workflow_skills.{args.domain}",
+            'available_profiles': list(domain_skills.keys())
+        })
+        sys.exit(1)
+
+    output_toon({
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'domain': args.domain,
+        'profile': args.profile,
+        'workflow_skill': domain_skills[args.profile]
+    })
+
+
+def cmd_get_domains(args):
+    """Get the domains array from config.toon."""
+    if not validate_plan_id(args.plan_id):
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'invalid_plan_id',
+            'message': f"Invalid plan_id format: {args.plan_id}"
+        })
+        sys.exit(1)
+
+    config = read_config(args.plan_id)
+    if not config:
+        output_toon({
+            'status': 'error',
+            'plan_id': args.plan_id,
+            'error': 'file_not_found',
+            'message': 'config.toon not found'
+        })
+        sys.exit(1)
+
+    domains = config.get('domains', [])
+    output_toon({
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'domains': domains,
+        'count': len(domains)
     })
 
 
@@ -486,10 +545,11 @@ def main():
     read_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     read_parser.set_defaults(func=cmd_read)
 
-    # get
-    get_parser = subparsers.add_parser('get', help='Get specific field')
+    # get (supports nested field access via dot notation)
+    get_parser = subparsers.add_parser('get', help='Get specific field (supports dot notation)')
     get_parser.add_argument('--plan-id', required=True, help='Plan identifier')
-    get_parser.add_argument('--field', required=True, help='Field name')
+    get_parser.add_argument('--field', required=True,
+                            help='Field name (supports dot notation: workflow_skills.java.implementation)')
     get_parser.set_defaults(func=cmd_get)
 
     # set
@@ -503,23 +563,46 @@ def main():
     get_multi_parser = subparsers.add_parser('get-multi', help='Get multiple fields in one call')
     get_multi_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     get_multi_parser.add_argument('--fields', required=True,
-                                  help='Comma-separated field names (e.g., plan_type,compatibility)')
+                                  help='Comma-separated field names (e.g., commit_strategy,branch_strategy)')
     get_multi_parser.set_defaults(func=cmd_get_multi)
 
-    # create (simplified to 3 fields)
+    # create (new format with domains and workflow_skills)
     create_parser = subparsers.add_parser('create', help='Create config.toon')
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
-    create_parser.add_argument('--plan-type', required=True,
-                               help='Plan type in bundle:skill notation (e.g., pm-workflow:plan-type-java)')
-    create_parser.add_argument('--compatibility',
-                               choices=['deprecations', 'breaking'],
-                               help='Compatibility strategy (default: deprecations)')
+    create_parser.add_argument('--domains', required=True,
+                               help='Comma-separated list of domains (e.g., java or java,javascript)')
+    create_parser.add_argument('--workflow-skills', required=True,
+                               help='JSON object mapping domains to workflow skills')
     create_parser.add_argument('--commit-strategy',
-                               choices=['fine-granular', 'phase-specific', 'complete'],
-                               help='Commit strategy (default: phase-specific)')
+                               choices=['per_task', 'per_deliverable', 'at_end'],
+                               help='Commit strategy (default: per_task)')
+    create_parser.add_argument('--create-pr',
+                               help='Create PR on finalize (default: true)')
+    create_parser.add_argument('--verification-required',
+                               help='Require verification (default: true)')
+    create_parser.add_argument('--verification-command',
+                               help='Verification command to run')
+    create_parser.add_argument('--branch-strategy',
+                               choices=['feature', 'direct'],
+                               help='Branch strategy (default: feature)')
     create_parser.add_argument('--force', action='store_true',
                                help='Overwrite existing config')
     create_parser.set_defaults(func=cmd_create)
+
+    # get-workflow-skill
+    gws_parser = subparsers.add_parser('get-workflow-skill',
+                                        help='Get workflow skill for domain and profile')
+    gws_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    gws_parser.add_argument('--domain', required=True,
+                            help='Domain name (e.g., java, javascript, plugin)')
+    gws_parser.add_argument('--profile', required=True,
+                            help='Profile name (e.g., implementation, testing)')
+    gws_parser.set_defaults(func=cmd_get_workflow_skill)
+
+    # get-domains
+    gd_parser = subparsers.add_parser('get-domains', help='Get domains array from config')
+    gd_parser.add_argument('--plan-id', required=True, help='Plan identifier')
+    gd_parser.set_defaults(func=cmd_get_domains)
 
     args = parser.parse_args()
     args.func(args)

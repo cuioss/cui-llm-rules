@@ -11,7 +11,8 @@ Per-plan configuration management for plan-specific settings stored in `config.t
 ## What This Skill Provides
 
 - Per-plan config.toon management with schema validation
-- Field-level get/set operations
+- Domain-based workflow skills configuration
+- Field-level get/set operations with nested access support
 - Multi-field retrieval
 
 ## When to Activate This Skill
@@ -19,6 +20,7 @@ Per-plan configuration management for plan-specific settings stored in `config.t
 Activate this skill when:
 - Creating initial plan configuration
 - Reading or updating plan settings
+- Retrieving workflow skills for domain/profile combinations
 
 ---
 
@@ -39,39 +41,149 @@ TOON format with typed fields:
 ```toon
 # Plan Configuration
 
-plan_type: pm-workflow:plan-type-java
-compatibility: deprecations
-commit_strategy: phase-specific
+domains[1]:
+- java
 
-# Finalize Configuration (from plan-type frontmatter plan_defaults)
+workflow_skills:
+  java:
+    solution_outline: pm-workflow:solution-outline
+    task_plan: pm-workflow:task-plan
+    implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
+
+commit_strategy: per_task
 create_pr: true
 verification_required: true
 verification_command: /pm-dev-builder:builder-build-and-fix
 branch_strategy: feature
 ```
 
-### Base Schema Fields (set during plan creation)
+### Required Fields
 
-| Field | Values | Description |
-|-------|--------|-------------|
-| `plan_type` | bundle:skill notation (e.g., pm-workflow:plan-type-java) | Type of plan workflow (extension point) |
-| `compatibility` | deprecations, breaking | Compatibility strategy (user choice) |
-| `commit_strategy` | fine-granular, phase-specific, complete | Git commit granularity (user choice) |
+| Field | Type | Description |
+|-------|------|-------------|
+| `domains` | array | List of domains (e.g., java, javascript, plugin) |
+| `workflow_skills` | object | Workflow skills keyed by domain, then by profile |
+| `commit_strategy` | enum | `per_task`, `per_deliverable`, `at_end` |
 
-### Finalize Configuration Fields (from plan-type frontmatter)
+### Optional Fields
 
-| Field | Values | Description |
-|-------|--------|-------------|
-| `create_pr` | true, false | Whether to create a pull request |
-| `verification_required` | true, false | Whether verification must pass before finalize |
-| `verification_command` | command string or null | Command to run for verification |
-| `branch_strategy` | feature, direct | Feature branch or direct-to-main |
+| Field | Values | Default | Description |
+|-------|--------|---------|-------------|
+| `create_pr` | true, false | true | Create PR on finalize |
+| `verification_required` | true, false | true | Require verification before finalize |
+| `verification_command` | string | - | Command to run for verification |
+| `branch_strategy` | feature, direct | feature | Feature branch or direct-to-main |
 
 ---
 
 ## Operations
 
 Script: `pm-workflow:manage-config:manage-config`
+
+### create
+
+Create config.toon with domains and workflow_skills configuration.
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
+  --plan-id {plan_id} \
+  --domains java \
+  --workflow-skills '{"java":{"solution_outline":"pm-workflow:solution-outline","task_plan":"pm-workflow:task-plan","implementation":"pm-workflow:task-implementation","testing":"pm-workflow:task-testing"}}' \
+  [--commit-strategy per_task] \
+  [--create-pr true] \
+  [--verification-required true] \
+  [--verification-command "/pm-dev-builder:builder-build-and-fix"] \
+  [--branch-strategy feature] \
+  [--force]
+```
+
+**Parameters**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `--domains` | string (comma-separated) | Yes | Domain list (e.g., `java` or `java,javascript`) |
+| `--workflow-skills` | JSON string | Yes | Workflow skills keyed by domain |
+| `--commit-strategy` | enum | No | `per_task` (default), `per_deliverable`, `at_end` |
+| `--create-pr` | bool | No | Create PR on finalize (default: true) |
+| `--verification-required` | bool | No | Require verification (default: true) |
+| `--verification-command` | string | No | Verification command |
+| `--branch-strategy` | enum | No | `feature` (default), `direct` |
+| `--force` | flag | No | Overwrite existing config |
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+file: config.toon
+created: true
+domains_count: 1
+
+config:
+  domains[1]:
+  - java
+  workflow_skills:
+    java:
+      solution_outline: pm-workflow:solution-outline
+      task_plan: pm-workflow:task-plan
+      implementation: pm-workflow:task-implementation
+      testing: pm-workflow:task-testing
+  commit_strategy: per_task
+  create_pr: true
+  verification_required: true
+  verification_command: /pm-dev-builder:builder-build-and-fix
+  branch_strategy: feature
+```
+
+### get-workflow-skill
+
+Get workflow skill for a specific domain and profile combination.
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config \
+  get-workflow-skill --plan-id {plan_id} --domain java --profile implementation
+```
+
+**Parameters**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `--plan-id` | string | Yes | Plan identifier |
+| `--domain` | string | Yes | Domain name (java, javascript, plugin) |
+| `--profile` | string | Yes | Profile name (implementation, testing, solution_outline, task_plan) |
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+domain: java
+profile: implementation
+workflow_skill: pm-workflow:task-implementation
+```
+
+**Error Cases**:
+- Config not found → `error: file_not_found`
+- Domain not in config.domains → `error: domain_not_found` (includes `available_domains`)
+- Profile not in workflow_skills → `error: profile_not_found` (includes `available_profiles`)
+
+### get-domains
+
+Get the domains array from config.toon.
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config \
+  get-domains --plan-id {plan_id}
+```
+
+**Output** (TOON):
+```toon
+status: success
+plan_id: my-feature
+domains[2]:
+- java
+- javascript
+count: 2
+```
 
 ### read
 
@@ -88,27 +200,36 @@ status: success
 plan_id: my-feature
 
 config:
-  plan_type: pm-workflow:plan-type-java
-  compatibility: deprecations
-  commit_strategy: phase-specific
+  domains[1]:
+  - java
+  workflow_skills:
+    java:
+      solution_outline: pm-workflow:solution-outline
+  commit_strategy: per_task
 ```
 
 ### get
 
-Get a specific field value.
+Get a specific field value. Supports nested field access via dot notation.
 
 ```bash
+# Simple field
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
   --plan-id {plan_id} \
-  --field plan_type
+  --field commit_strategy
+
+# Nested field (dot notation)
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
+  --plan-id {plan_id} \
+  --field workflow_skills.java.implementation
 ```
 
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
-field: plan_type
-value: pm-workflow:plan-type-java
+field: workflow_skills.java.implementation
+value: pm-workflow:task-implementation
 ```
 
 ### set
@@ -118,17 +239,17 @@ Set a specific field value.
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
   --plan-id {plan_id} \
-  --field compatibility \
-  --value breaking
+  --field commit_strategy \
+  --value at_end
 ```
 
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
-field: compatibility
-value: breaking
-previous: deprecations
+field: commit_strategy
+value: at_end
+previous: per_task
 ```
 
 ### get-multi
@@ -138,56 +259,15 @@ Get multiple fields in one call.
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get-multi \
   --plan-id {plan_id} \
-  --fields "plan_type,compatibility,commit_strategy"
+  --fields "commit_strategy,branch_strategy"
 ```
 
 **Output** (TOON):
 ```toon
 status: success
 plan_id: my-feature
-plan_type: pm-workflow:plan-type-java
-compatibility: deprecations
-commit_strategy: phase-specific
-```
-
-### create
-
-Create config.toon with initial values. Automatically extracts `plan_defaults` from the plan-type skill's frontmatter and applies finalize configuration fields.
-
-```bash
-python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
-  --plan-id {plan_id} \
-  --plan-type pm-workflow:plan-type-java \
-  [--compatibility deprecations] \
-  [--commit-strategy phase-specific] \
-  [--force]
-```
-
-**Automatic Plan Defaults**: The command reads the plan-type skill's SKILL.md frontmatter and extracts `plan_defaults` to populate finalize configuration:
-
-| Frontmatter Field | Config Field | Derivation |
-|-------------------|--------------|------------|
-| `plan_defaults.verification_command` | `verification_command` | Direct copy |
-| `plan_defaults.pr_workflow` | `create_pr` | Direct copy |
-| `plan_defaults.pr_workflow` | `branch_strategy` | `feature` if true, else `direct` |
-| `plan_defaults.verification_command` | `verification_required` | `true` if command exists |
-
-**Output** (TOON):
-```toon
-status: success
-plan_id: my-feature
-file: config.toon
-created: true
-plan_defaults_applied: true
-
-config:
-  plan_type: pm-workflow:plan-type-java
-  compatibility: deprecations
-  commit_strategy: phase-specific
-  create_pr: true
-  verification_required: true
-  verification_command: /pm-dev-builder:builder-build-and-fix
-  branch_strategy: feature
+commit_strategy: per_task
+branch_strategy: feature
 ```
 
 ---
@@ -204,12 +284,12 @@ config:
 
 | Field | Valid Values |
 |-------|--------------|
-| plan_type | bundle:skill notation (e.g., pm-workflow:plan-type-java) |
-| compatibility | deprecations, breaking |
-| commit_strategy | fine-granular, phase-specific, complete |
+| domains | lowercase identifiers (e.g., java, javascript, plugin) |
+| workflow_skills | bundle:skill notation per profile |
+| commit_strategy | per_task, per_deliverable, at_end |
 | create_pr | true, false |
 | verification_required | true, false |
-| verification_command | any string or null |
+| verification_command | any string |
 | branch_strategy | feature, direct |
 
 ---
@@ -219,9 +299,10 @@ config:
 ```toon
 status: error
 plan_id: my-feature
-field: plan_type
-error: invalid_value
-message: Invalid plan_type format: unknown. Must be bundle:skill notation (e.g., pm-workflow:plan-type-java)
+error: domain_not_found
+message: Domain 'python' not found in config.domains
+available_domains[1]:
+- java
 ```
 
 ---
@@ -230,7 +311,9 @@ message: Invalid plan_type format: unknown. Must be bundle:skill notation (e.g.,
 
 | Consumer | Operation | Purpose |
 |----------|-----------|---------|
-| plan-init-agent | `create` | Create config.toon with base and finalize fields |
+| plan-init-agent | `create` | Create config.toon with domains and workflow_skills |
+| solution-outline-agent | `get-domains` | Get domains for deliverable assignment |
+| task-execute-agent | `get-workflow-skill` | Get workflow skill for task execution |
 | plan-execute | `read`, `get` | Read commit strategy, verification settings |
 | plan-finalize | `get` | Check create_pr, branch_strategy |
 
