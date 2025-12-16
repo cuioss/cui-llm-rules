@@ -227,18 +227,19 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle cr
 
 ### Step 9: Create Configuration
 
-Create config.toon with base settings and finalize configuration. The `manage-config create` command reads workflow_skills from domain configuration:
+Create config.toon with base settings and finalize configuration. The `manage-config create` command looks up workflow_skills from domain defaults:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
   --plan-id {plan_id} \
-  --domain {domain}
+  --domains {domain}
 ```
 
 This creates config.toon with:
-- Base fields: `domain`, `compatibility`, `commit_strategy`
-- Workflow skills mapping from domain configuration
-- Finalize fields: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
+- `domains`: Array of detected domains
+- `workflow_skills`: Looked up from domain defaults (java, javascript, plugin, generic)
+- `commit_strategy`: From defaults (per_task)
+- Finalize fields: `create_pr`, `verification_required`, `branch_strategy` (from defaults)
 
 ### Step 10: Log Creation
 

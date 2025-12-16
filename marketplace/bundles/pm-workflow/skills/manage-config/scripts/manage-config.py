@@ -10,9 +10,13 @@ Usage:
     python3 manage-config.py get --plan-id my-plan --field commit_strategy
     python3 manage-config.py get --plan-id my-plan --field workflow_skills.java.implementation
     python3 manage-config.py set --plan-id my-plan --field commit_strategy --value per_task
+    python3 manage-config.py create --plan-id my-plan --domains java
     python3 manage-config.py create --plan-id my-plan --domains java --workflow-skills '{"java":{...}}'
     python3 manage-config.py get-workflow-skill --plan-id my-plan --domain java --profile implementation
     python3 manage-config.py get-domains --plan-id my-plan
+
+Note: --workflow-skills is optional. When not provided, workflow_skills are
+looked up from domain defaults (java, javascript, plugin, generic).
 """
 
 import argparse
@@ -49,6 +53,45 @@ FALLBACK_DEFAULTS = {
     'verification_required': True,
     'branch_strategy': 'feature',
 }
+
+# Domain workflow_skills defaults - looked up when --workflow-skills not provided
+DOMAIN_WORKFLOW_SKILLS = {
+    'java': {
+        'solution_outline': 'pm-workflow:solution-outline',
+        'task_plan': 'pm-workflow:task-plan',
+        'implementation': 'pm-workflow:task-implementation',
+        'testing': 'pm-workflow:task-testing',
+    },
+    'javascript': {
+        'solution_outline': 'pm-workflow:solution-outline',
+        'task_plan': 'pm-workflow:task-plan',
+        'implementation': 'pm-workflow:task-implementation',
+        'testing': 'pm-workflow:task-testing',
+    },
+    'plugin': {
+        'solution_outline': 'pm-plugin-development:plugin-solution-outline',
+        'task_plan': 'pm-plugin-development:plugin-task-plan',
+        'implementation': 'pm-plugin-development:plugin-plan-implement',
+    },
+    'generic': {
+        'solution_outline': 'pm-workflow:solution-outline',
+        'task_plan': 'pm-workflow:task-plan',
+        'implementation': 'pm-workflow:task-implementation',
+    },
+}
+
+
+def get_workflow_skills_for_domains(domains: list) -> dict | None:
+    """Look up workflow_skills for each domain.
+
+    Returns dict mapping domain -> skills, or None if any domain is unknown.
+    """
+    result = {}
+    for domain in domains:
+        if domain not in DOMAIN_WORKFLOW_SKILLS:
+            return None
+        result[domain] = DOMAIN_WORKFLOW_SKILLS[domain].copy()
+    return result
 
 
 def get_defaults() -> dict:
@@ -338,26 +381,41 @@ def cmd_create(args):
             })
             sys.exit(1)
 
-    # Parse and validate workflow_skills JSON
-    try:
-        workflow_skills = json.loads(args.workflow_skills)
-    except json.JSONDecodeError as e:
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'error': 'invalid_workflow_skills',
-            'message': f"Invalid workflow_skills JSON: {e}"
-        })
-        sys.exit(1)
+    # Get workflow_skills: from argument or lookup by domain
+    if args.workflow_skills:
+        # Parse and validate workflow_skills JSON
+        try:
+            workflow_skills = json.loads(args.workflow_skills)
+        except json.JSONDecodeError as e:
+            output_toon({
+                'status': 'error',
+                'plan_id': args.plan_id,
+                'error': 'invalid_workflow_skills',
+                'message': f"Invalid workflow_skills JSON: {e}"
+            })
+            sys.exit(1)
 
-    if not isinstance(workflow_skills, dict):
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'error': 'invalid_workflow_skills',
-            'message': 'workflow_skills must be a JSON object'
-        })
-        sys.exit(1)
+        if not isinstance(workflow_skills, dict):
+            output_toon({
+                'status': 'error',
+                'plan_id': args.plan_id,
+                'error': 'invalid_workflow_skills',
+                'message': 'workflow_skills must be a JSON object'
+            })
+            sys.exit(1)
+    else:
+        # Look up workflow_skills from domain defaults
+        workflow_skills = get_workflow_skills_for_domains(domains)
+        if workflow_skills is None:
+            unknown = [d for d in domains if d not in DOMAIN_WORKFLOW_SKILLS]
+            output_toon({
+                'status': 'error',
+                'plan_id': args.plan_id,
+                'error': 'unknown_domain',
+                'message': f"Unknown domain(s) with no default workflow_skills: {', '.join(unknown)}",
+                'known_domains': list(DOMAIN_WORKFLOW_SKILLS.keys())
+            })
+            sys.exit(1)
 
     # Validate workflow_skills structure matches domains
     for domain in domains:
@@ -600,8 +658,8 @@ def main():
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--domains', required=True,
                                help='Comma-separated list of domains (e.g., java or java,javascript)')
-    create_parser.add_argument('--workflow-skills', required=True,
-                               help='JSON object mapping domains to workflow skills')
+    create_parser.add_argument('--workflow-skills',
+                               help='JSON object mapping domains to workflow skills (optional - looked up by domain if not provided)')
     create_parser.add_argument('--commit-strategy',
                                choices=['per_task', 'per_plan', 'none'],
                                help='Commit strategy (default: per_task, none=no commits)')

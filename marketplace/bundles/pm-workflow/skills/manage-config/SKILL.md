@@ -86,16 +86,16 @@ Script: `pm-workflow:manage-config:manage-config`
 Create config.toon with domains and workflow_skills configuration.
 
 ```bash
+# Simple: workflow_skills looked up from domain defaults
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
+  --plan-id {plan_id} \
+  --domains java
+
+# With explicit workflow_skills (overrides defaults)
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
   --plan-id {plan_id} \
   --domains java \
-  --workflow-skills '{"java":{"solution_outline":"pm-workflow:solution-outline","task_plan":"pm-workflow:task-plan","implementation":"pm-workflow:task-implementation","testing":"pm-workflow:task-testing"}}' \
-  [--commit-strategy per_task] \
-  [--create-pr true] \
-  [--verification-required true] \
-  [--verification-command "/pm-dev-builder:builder-build-and-fix"] \
-  [--branch-strategy feature] \
-  [--force]
+  --workflow-skills '{"java":{"solution_outline":"...", ...}}'
 ```
 
 **Parameters**:
@@ -103,13 +103,22 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `--domains` | string (comma-separated) | Yes | Domain list (e.g., `java` or `java,javascript`) |
-| `--workflow-skills` | JSON string | Yes | Workflow skills keyed by domain |
+| `--workflow-skills` | JSON string | No | Workflow skills keyed by domain (looked up from defaults if not provided) |
 | `--commit-strategy` | enum | No | `per_task` (default), `per_plan`, `none` |
 | `--create-pr` | bool | No | Create PR on finalize (default: true) |
 | `--verification-required` | bool | No | Require verification (default: true) |
 | `--verification-command` | string | No | Verification command |
 | `--branch-strategy` | enum | No | `feature` (default), `direct` |
 | `--force` | flag | No | Overwrite existing config |
+
+**Domain Defaults** (used when `--workflow-skills` not provided):
+
+| Domain | solution_outline | task_plan | implementation | testing |
+|--------|------------------|-----------|----------------|---------|
+| java | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | pm-workflow:task-testing |
+| javascript | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | pm-workflow:task-testing |
+| plugin | pm-plugin-development:plugin-solution-outline | pm-plugin-development:plugin-task-plan | pm-plugin-development:plugin-plan-implement | - |
+| generic | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | - |
 
 **Output** (TOON):
 ```toon

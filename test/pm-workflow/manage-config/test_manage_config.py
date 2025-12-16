@@ -427,6 +427,136 @@ def test_set_invalid_commit_strategy():
 
 
 # =============================================================================
+# Test: Domain Workflow Skills Lookup (TDD - New Feature)
+# =============================================================================
+
+def test_create_config_java_domain_lookup():
+    """Test creating config with java domain - workflow_skills auto-looked up."""
+    with TestContext(plan_id='config-java-lookup'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-java-lookup',
+            '--domains', 'java'
+            # No --workflow-skills provided - should be looked up
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['config']['domains'] == ['java']
+        # Verify correct workflow_skills structure
+        java_skills = data['config']['workflow_skills']['java']
+        assert java_skills['solution_outline'] == 'pm-workflow:solution-outline'
+        assert java_skills['task_plan'] == 'pm-workflow:task-plan'
+        assert java_skills['implementation'] == 'pm-workflow:task-implementation'
+        assert java_skills['testing'] == 'pm-workflow:task-testing'
+
+
+def test_create_config_plugin_domain_lookup():
+    """Test creating config with plugin domain - workflow_skills auto-looked up."""
+    with TestContext(plan_id='config-plugin-lookup'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-plugin-lookup',
+            '--domains', 'plugin'
+            # No --workflow-skills provided - should be looked up
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['config']['domains'] == ['plugin']
+        # Verify correct plugin workflow_skills structure
+        plugin_skills = data['config']['workflow_skills']['plugin']
+        assert plugin_skills['solution_outline'] == 'pm-plugin-development:plugin-solution-outline'
+        assert plugin_skills['task_plan'] == 'pm-plugin-development:plugin-task-plan'
+        assert plugin_skills['implementation'] == 'pm-plugin-development:plugin-plan-implement'
+
+
+def test_create_config_javascript_domain_lookup():
+    """Test creating config with javascript domain - workflow_skills auto-looked up."""
+    with TestContext(plan_id='config-js-lookup'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-js-lookup',
+            '--domains', 'javascript'
+            # No --workflow-skills provided - should be looked up
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['config']['domains'] == ['javascript']
+        # Verify correct workflow_skills structure
+        js_skills = data['config']['workflow_skills']['javascript']
+        assert js_skills['solution_outline'] == 'pm-workflow:solution-outline'
+        assert js_skills['task_plan'] == 'pm-workflow:task-plan'
+        assert js_skills['implementation'] == 'pm-workflow:task-implementation'
+        assert js_skills['testing'] == 'pm-workflow:task-testing'
+
+
+def test_create_config_generic_domain_lookup():
+    """Test creating config with generic domain - workflow_skills auto-looked up."""
+    with TestContext(plan_id='config-generic-lookup'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-generic-lookup',
+            '--domains', 'generic'
+            # No --workflow-skills provided - should be looked up
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['config']['domains'] == ['generic']
+        # Verify correct workflow_skills structure
+        generic_skills = data['config']['workflow_skills']['generic']
+        assert generic_skills['solution_outline'] == 'pm-workflow:solution-outline'
+        assert generic_skills['task_plan'] == 'pm-workflow:task-plan'
+        assert generic_skills['implementation'] == 'pm-workflow:task-implementation'
+
+
+def test_create_config_multi_domain_lookup():
+    """Test creating config with multiple domains - workflow_skills auto-looked up for each."""
+    with TestContext(plan_id='config-multi-lookup'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-multi-lookup',
+            '--domains', 'java,javascript'
+            # No --workflow-skills provided - should be looked up for each domain
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert data['domains_count'] == 2
+        # Both domains should have workflow_skills
+        assert 'java' in data['config']['workflow_skills']
+        assert 'javascript' in data['config']['workflow_skills']
+        assert data['config']['workflow_skills']['java']['implementation'] == 'pm-workflow:task-implementation'
+        assert data['config']['workflow_skills']['javascript']['implementation'] == 'pm-workflow:task-implementation'
+
+
+def test_create_config_explicit_overrides_lookup():
+    """Test that explicit --workflow-skills still works (backwards compatible)."""
+    custom_skills = '{"java":{"solution_outline":"custom:outline","task_plan":"custom:plan","implementation":"custom:impl","testing":"custom:test"}}'
+    with TestContext(plan_id='config-explicit-override'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-explicit-override',
+            '--domains', 'java',
+            '--workflow-skills', custom_skills
+        )
+        assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        # Should use explicit value, not lookup
+        assert data['config']['workflow_skills']['java']['implementation'] == 'custom:impl'
+
+
+def test_create_config_unknown_domain_fails():
+    """Test that unknown domain fails when no workflow-skills provided."""
+    with TestContext(plan_id='config-unknown-domain'):
+        result = run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'config-unknown-domain',
+            '--domains', 'python'  # Unknown domain with no default
+            # No --workflow-skills provided
+        )
+        assert not result.success, "Expected failure for unknown domain"
+        data = parse_toon(result.stdout)
+        assert data['error'] == 'unknown_domain'
+
+
+# =============================================================================
 # Test: Get Multi
 # =============================================================================
 
@@ -498,5 +628,13 @@ if __name__ == '__main__':
         # Get multi
         test_get_multi_fields,
         test_get_multi_not_found,
+        # Domain workflow_skills lookup (TDD - new feature)
+        test_create_config_java_domain_lookup,
+        test_create_config_plugin_domain_lookup,
+        test_create_config_javascript_domain_lookup,
+        test_create_config_generic_domain_lookup,
+        test_create_config_multi_domain_lookup,
+        test_create_config_explicit_overrides_lookup,
+        test_create_config_unknown_domain_fails,
     ])
     sys.exit(runner.run())
