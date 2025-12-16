@@ -46,7 +46,7 @@ branch_strategy: feature
 |-------|------|-------------|
 | `domains` | list | Array of detected domains (java, javascript, plugin) |
 | `workflow_skills` | object | Domain-keyed mapping of workflow phase -> skill |
-| `commit_strategy` | string | per_task or batch |
+| `commit_strategy` | string | per_task, per_plan, or none |
 | `create_pr` | boolean | Whether to create PR on finalize |
 | `verification_required` | boolean | Whether to run verification before PR |
 | `verification_command` | string | Command to run for verification |

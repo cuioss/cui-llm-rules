@@ -107,7 +107,80 @@ def render_template(doc_def: dict, fields: dict, plan_id: str) -> str:
         placeholder = f'{{{key}}}'
         template = template.replace(placeholder, value if value else '')
 
+    # Clean up unreplaced placeholders (optional fields not provided)
+    template = _cleanup_unreplaced_placeholders(template)
+
     return template
+
+
+def _cleanup_unreplaced_placeholders(content: str) -> str:
+    """Remove lines with unreplaced placeholders and empty sections.
+
+    Handles:
+    - Metadata lines like "source_id: {source_id}" - remove entire line
+    - Section content lines with only placeholder - remove line
+    - Empty sections (heading followed by blank or another heading) - remove section
+    """
+    import re
+
+    lines = content.split('\n')
+    cleaned_lines = []
+    placeholder_pattern = re.compile(r'\{[a-z_]+\}')
+
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+
+        # Check if line contains unreplaced placeholder
+        if placeholder_pattern.search(line):
+            # Metadata line pattern: "key: {placeholder}" - skip entire line
+            if re.match(r'^[a-z_]+:\s*\{[a-z_]+\}\s*$', line):
+                i += 1
+                continue
+            # Line is ONLY a placeholder - skip it
+            if re.match(r'^\s*\{[a-z_]+\}\s*$', line):
+                i += 1
+                continue
+            # Otherwise replace placeholder with empty string
+            line = placeholder_pattern.sub('', line)
+
+        cleaned_lines.append(line)
+        i += 1
+
+    # Remove empty sections (## heading followed by blank lines then another ## or EOF)
+    final_lines = []
+    i = 0
+    while i < len(cleaned_lines):
+        line = cleaned_lines[i]
+
+        if line.startswith('## '):
+            # Look ahead to see if section is empty
+            section_has_content = False
+            j = i + 1
+            while j < len(cleaned_lines):
+                next_line = cleaned_lines[j]
+                if next_line.startswith('## ') or next_line.startswith('# '):
+                    # Hit another heading - section was empty
+                    break
+                if next_line.strip():
+                    # Found non-empty content
+                    section_has_content = True
+                    break
+                j += 1
+
+            if not section_has_content:
+                # Skip this empty section heading and any blank lines after it
+                i = j
+                continue
+
+        final_lines.append(line)
+        i += 1
+
+    # Clean up trailing blank lines
+    while final_lines and not final_lines[-1].strip():
+        final_lines.pop()
+
+    return '\n'.join(final_lines) + '\n'
 
 
 def get_plan_dir(plan_id: str) -> Path:

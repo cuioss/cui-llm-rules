@@ -64,7 +64,7 @@ branch_strategy: feature
 |-------|------|-------------|
 | `domains` | array | List of domains (e.g., java, javascript, plugin) |
 | `workflow_skills` | object | Workflow skills keyed by domain, then by profile |
-| `commit_strategy` | enum | `per_task`, `per_deliverable`, `at_end` |
+| `commit_strategy` | enum | `per_task`, `per_plan`, `none` |
 
 ### Optional Fields
 
@@ -104,7 +104,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
 |-----------|------|----------|-------------|
 | `--domains` | string (comma-separated) | Yes | Domain list (e.g., `java` or `java,javascript`) |
 | `--workflow-skills` | JSON string | Yes | Workflow skills keyed by domain |
-| `--commit-strategy` | enum | No | `per_task` (default), `per_deliverable`, `at_end` |
+| `--commit-strategy` | enum | No | `per_task` (default), `per_plan`, `none` |
 | `--create-pr` | bool | No | Create PR on finalize (default: true) |
 | `--verification-required` | bool | No | Require verification (default: true) |
 | `--verification-command` | string | No | Verification command |
@@ -240,7 +240,7 @@ Set a specific field value.
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
   --plan-id {plan_id} \
   --field commit_strategy \
-  --value at_end
+  --value per_plan
 ```
 
 **Output** (TOON):
@@ -248,7 +248,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set \
 status: success
 plan_id: my-feature
 field: commit_strategy
-value: at_end
+value: per_plan
 previous: per_task
 ```
 
@@ -286,7 +286,7 @@ branch_strategy: feature
 |-------|--------------|
 | domains | lowercase identifiers (e.g., java, javascript, plugin) |
 | workflow_skills | bundle:skill notation per profile |
-| commit_strategy | per_task, per_deliverable, at_end |
+| commit_strategy | per_task, per_plan, none |
 | create_pr | true, false |
 | verification_required | true, false |
 | verification_command | any string |

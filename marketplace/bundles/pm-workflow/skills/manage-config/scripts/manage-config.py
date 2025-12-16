@@ -26,13 +26,15 @@ script_dir = Path(__file__).parent
 BUNDLES_DIR = script_dir.parent.parent.parent.parent  # .../bundles/
 sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
 sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
+sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'plan-marshall-config' / 'scripts'))
 
 from file_ops import atomic_write_file, base_path
 from toon_parser import parse_toon, serialize_toon
+from config_core import is_initialized, load_config
 
 # Schema validation - enum fields
 SCHEMA = {
-    'commit_strategy': ['per_task', 'per_deliverable', 'at_end'],
+    'commit_strategy': ['per_task', 'per_plan', 'none'],
     'branch_strategy': ['feature', 'direct'],
 }
 
@@ -40,12 +42,36 @@ SCHEMA = {
 REQUIRED_FIELDS = ['domains', 'workflow_skills', 'commit_strategy']
 OPTIONAL_FIELDS = ['create_pr', 'verification_required', 'verification_command', 'branch_strategy']
 
-DEFAULTS = {
+# Fallback defaults (used when marshal.json doesn't exist)
+FALLBACK_DEFAULTS = {
     'commit_strategy': 'per_task',
     'create_pr': True,
     'verification_required': True,
     'branch_strategy': 'feature',
 }
+
+
+def get_defaults() -> dict:
+    """Get plan defaults from marshal.json, falling back to hardcoded defaults.
+
+    Reads from .plan/marshal.json -> plan.defaults if available.
+    Returns FALLBACK_DEFAULTS if marshal.json doesn't exist or lacks plan.defaults.
+    """
+    if not is_initialized():
+        return FALLBACK_DEFAULTS.copy()
+
+    try:
+        marshal_config = load_config()
+        plan_defaults = marshal_config.get('plan', {}).get('defaults', {})
+
+        # Merge: marshal.json values override fallback defaults
+        result = FALLBACK_DEFAULTS.copy()
+        for key in FALLBACK_DEFAULTS:
+            if key in plan_defaults:
+                result[key] = plan_defaults[key]
+        return result
+    except Exception:
+        return FALLBACK_DEFAULTS.copy()
 
 
 def validate_plan_id(plan_id: str) -> bool:
@@ -376,8 +402,11 @@ def cmd_create(args):
         })
         sys.exit(1)
 
+    # Get defaults from marshal.json (falls back to hardcoded if not available)
+    defaults = get_defaults()
+
     # Build config with required fields
-    commit_strategy = args.commit_strategy or DEFAULTS['commit_strategy']
+    commit_strategy = args.commit_strategy or defaults['commit_strategy']
     is_valid, valid_values = validate_field('commit_strategy', commit_strategy)
     if not is_valid:
         output_toon({
@@ -396,21 +425,21 @@ def cmd_create(args):
         'commit_strategy': commit_strategy,
     }
 
-    # Add optional finalize settings with defaults
+    # Add optional finalize settings with defaults from marshal.json
     if args.create_pr is not None:
         config['create_pr'] = args.create_pr.lower() == 'true'
     else:
-        config['create_pr'] = DEFAULTS['create_pr']
+        config['create_pr'] = defaults['create_pr']
 
     if args.verification_required is not None:
         config['verification_required'] = args.verification_required.lower() == 'true'
     else:
-        config['verification_required'] = DEFAULTS['verification_required']
+        config['verification_required'] = defaults['verification_required']
 
     if args.verification_command:
         config['verification_command'] = args.verification_command
 
-    branch_strategy = args.branch_strategy or DEFAULTS['branch_strategy']
+    branch_strategy = args.branch_strategy or defaults['branch_strategy']
     is_valid, valid_values = validate_field('branch_strategy', branch_strategy)
     if not is_valid:
         output_toon({
@@ -574,8 +603,8 @@ def main():
     create_parser.add_argument('--workflow-skills', required=True,
                                help='JSON object mapping domains to workflow skills')
     create_parser.add_argument('--commit-strategy',
-                               choices=['per_task', 'per_deliverable', 'at_end'],
-                               help='Commit strategy (default: per_task)')
+                               choices=['per_task', 'per_plan', 'none'],
+                               help='Commit strategy (default: per_task, none=no commits)')
     create_parser.add_argument('--create-pr',
                                help='Create PR on finalize (default: true)')
     create_parser.add_argument('--verification-required',

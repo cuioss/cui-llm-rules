@@ -131,15 +131,18 @@ python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-do
   --title "{derived_title}" \
   --source {description|lesson|issue} \
   --body "{verbatim_content}" \
-  --source-id "{lesson_id|issue_url}" \
-  --context "{extracted_context}"
+  [--source-id "{lesson_id|issue_url}"] \
+  [--context "{extracted_context}"]
 ```
 
 **Parameters:**
 - `--title`: Derived title from input
 - `--source`: One of `description`, `lesson`, or `issue`
 - `--body`: The verbatim original input content
-- `--source-id`: (optional) Lesson ID or issue URL if applicable
+- `--source-id`: (only for traceable sources) External reference identifier:
+  - For `lesson`: The lesson ID (e.g., `2025-12-02-001`)
+  - For `issue`: The issue URL
+  - For `description`: Omit (no external reference)
 - `--context`: (optional) Extracted context from lesson or issue metadata
 
 **Note**: The skill handles template rendering and timestamps automatically.

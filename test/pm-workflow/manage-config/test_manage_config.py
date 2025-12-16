@@ -83,7 +83,7 @@ def test_create_config_with_all_options():
             '--plan-id', 'config-full-opts',
             '--domains', 'java',
             '--workflow-skills', JAVA_WORKFLOW_SKILLS,
-            '--commit-strategy', 'per_deliverable',
+            '--commit-strategy', 'per_plan',
             '--create-pr', 'false',
             '--verification-required', 'true',
             '--verification-command', '/pm-dev-builder:builder-build-and-fix',
@@ -91,7 +91,7 @@ def test_create_config_with_all_options():
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
-        assert data['config']['commit_strategy'] == 'per_deliverable'
+        assert data['config']['commit_strategy'] == 'per_plan'
         assert data['config']['create_pr'] == False
         assert data['config']['verification_required'] == True
         assert data['config']['verification_command'] == '/pm-dev-builder:builder-build-and-fix'
@@ -375,7 +375,7 @@ def test_set_and_get_field():
         set_result = run_script(SCRIPT_PATH, 'set',
             '--plan-id', 'config-getset',
             '--field', 'commit_strategy',
-            '--value', 'at_end'
+            '--value', 'per_plan'
         )
         assert set_result.success, f"Set failed: {set_result.stderr}"
 
@@ -386,7 +386,7 @@ def test_set_and_get_field():
         )
         assert get_result.success, f"Get failed: {get_result.stderr}"
         data = parse_toon(get_result.stdout)
-        assert data['value'] == 'at_end'
+        assert data['value'] == 'per_plan'
 
 
 def test_read_config():
@@ -437,7 +437,7 @@ def test_get_multi_fields():
             '--plan-id', 'config-multi',
             '--domains', 'java',
             '--workflow-skills', JAVA_WORKFLOW_SKILLS,
-            '--commit-strategy', 'per_deliverable',
+            '--commit-strategy', 'per_plan',
             '--branch-strategy', 'direct'
         )
         result = run_script(SCRIPT_PATH, 'get-multi',
@@ -447,7 +447,7 @@ def test_get_multi_fields():
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
-        assert data['commit_strategy'] == 'per_deliverable'
+        assert data['commit_strategy'] == 'per_plan'
         assert data['branch_strategy'] == 'direct'
 
 

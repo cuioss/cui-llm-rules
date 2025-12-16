@@ -152,8 +152,7 @@ Write the solution document using heredoc (validation is automatic):
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
   write \
-  --plan-id {plan_id} \
-  --validate <<'EOF'
+  --plan-id {plan_id} <<'EOF'
 # Solution Outline
 
 ## Summary

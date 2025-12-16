@@ -22,7 +22,7 @@
   "plan": {
     "defaults": {
       "compatibility": "breaking",
-      "commit_strategy": "phase-specific",
+      "commit_strategy": "per_plan",
       "create_pr": false,
       "verification_required": true,
       "branch_strategy": "direct"
