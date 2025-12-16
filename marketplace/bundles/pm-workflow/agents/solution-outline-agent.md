@@ -21,6 +21,12 @@ Skill: pm-workflow:solution-outline
 
 If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.
 
+**Log skill selection**:
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[SKILL] Using workflow_skill: pm-workflow:solution-outline from phase: solution_outline"
+```
+
 ## Role Boundaries
 
 **You are a SPECIALIST for solution outline creation only.**

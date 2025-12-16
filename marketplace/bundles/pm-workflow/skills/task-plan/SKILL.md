@@ -115,6 +115,12 @@ optionals:
   pm-dev-java:java-lombok: Lombok annotations (@Builder, @Value, @Delegate)
 ```
 
+**Log domain skill resolution**:
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[SKILL] Resolved domain skills for domain: {task.domain}, profile: {task.profile} - defaults: [{default_skills}]"
+```
+
 **Skill Selection**:
 1. All `defaults` are automatically included in `task.skills`
 2. Review `optionals` and select based on task content (LLM decision)

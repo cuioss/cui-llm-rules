@@ -64,6 +64,12 @@ Load domain skills from task.skills:
 Skill: {skill_name}
 ```
 
+**Log domain skills loaded**:
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[SKILL] Loading domain skills from task.skills: [{task.skills}]"
+```
+
 ### Step 3: Resolve Workflow Skill
 
 Resolve workflow skill from marshal.json based on domain and phase:
@@ -75,6 +81,12 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 ```
 
 Note: The task's `profile` field (implementation/testing) maps to the workflow_skills phase.
+
+**Log the resolved skill**:
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[SKILL] Using workflow_skill: {workflow_skill} from domain: {task.domain}, phase: {task.profile}"
+```
 
 ### Step 4: Load and Execute Workflow Skill
 
