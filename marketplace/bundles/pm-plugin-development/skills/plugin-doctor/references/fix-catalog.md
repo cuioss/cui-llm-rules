@@ -220,7 +220,32 @@ Risky fixes require user confirmation because they involve judgment calls or may
 - May break if executor is not generated (run `/plan-marshall` first)
 - User should verify script notation and subcommands
 
-### 6. pattern-22-violation
+### 6. rule-9-violation
+
+**Description**: Skill workflow step contains action verbs without explicit script call.
+
+**Detection**: Workflow steps (### Step N:) containing action verbs like "read the", "display the", "check the", "validate the" without a bash code block containing `execute-script.py`
+
+**Fix Strategy**:
+- Add explicit bash code block with the correct script call
+- Example: If step says "Display the solution outline for review", add:
+  ```bash
+  python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline read \
+    --plan-id {plan_id}
+  ```
+
+**Why Risky**:
+- Requires knowledge of correct script notation and subcommand
+- May need to identify which manage-* script handles the operation
+- User should verify the correct script and parameters
+
+**Exempt Patterns** (no violation):
+- Steps using `Task:` (agent delegation)
+- Steps using `Skill:` (skill loading)
+- Steps using Claude Code tools (`Read:`, `Glob:`, `Grep:`)
+- Steps that already have `execute-script.py` bash blocks
+
+### 7. pattern-22-violation
 
 **Description**: Agent uses self-update pattern instead of caller reporting.
 
@@ -235,7 +260,7 @@ Risky fixes require user confirmation because they involve judgment calls or may
 - May require rethinking improvement workflow
 - User should understand new pattern
 
-### 7. backup-file-pattern
+### 8. backup-file-pattern
 
 **Description**: Content references backup file patterns (.bak, .backup, etc.).
 
@@ -250,7 +275,7 @@ Risky fixes require user confirmation because they involve judgment calls or may
 - Removal might lose important information
 - User should decide if references are needed
 
-### 7. ci-rule-self-update
+### 9. ci-rule-self-update
 
 **Description**: CONTINUOUS IMPROVEMENT section uses prohibited self-update.
 

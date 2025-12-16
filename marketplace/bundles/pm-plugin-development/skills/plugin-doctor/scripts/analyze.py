@@ -166,6 +166,78 @@ def check_execution_patterns(content: str) -> dict:
     }
 
 
+def check_rule_9_violations(content: str) -> list:
+    """Check for Rule 9 violations: workflow steps with action verbs but no explicit script calls.
+
+    Returns list of violations with step info.
+    """
+    violations = []
+
+    # Action verbs that typically require script calls
+    action_verbs = [
+        'read the', 'write the', 'display the', 'check the', 'validate the',
+        'get the', 'list the', 'create the', 'update the', 'delete the',
+        'read config', 'read status', 'read solution', 'read task',
+        'display solution', 'display status', 'display config'
+    ]
+
+    # Exempt patterns (don't need execute-script.py)
+    exempt_patterns = [
+        r'Task:',           # Agent delegation
+        r'Skill:',          # Skill loading
+        r'Read:',           # Claude Code tool
+        r'Glob:',           # Claude Code tool
+        r'Grep:',           # Claude Code tool
+        r'AskUserQuestion', # Claude Code tool
+    ]
+
+    # Find all workflow steps
+    step_pattern = re.compile(r'^###?\s+Step\s+\d+[a-z]?[:\s].*$', re.MULTILINE | re.IGNORECASE)
+
+    # Split content by steps
+    step_matches = list(step_pattern.finditer(content))
+
+    for i, match in enumerate(step_matches):
+        step_header = match.group(0)
+        step_start = match.end()
+        step_end = step_matches[i + 1].start() if i + 1 < len(step_matches) else len(content)
+        step_content = content[step_start:step_end]
+
+        # Check if step contains action verbs
+        has_action_verb = False
+        found_verb = None
+        for verb in action_verbs:
+            if verb.lower() in step_content.lower():
+                has_action_verb = True
+                found_verb = verb
+                break
+
+        if not has_action_verb:
+            continue
+
+        # Check for exempt patterns
+        is_exempt = False
+        for pattern in exempt_patterns:
+            if re.search(pattern, step_content):
+                is_exempt = True
+                break
+
+        if is_exempt:
+            continue
+
+        # Check for execute-script.py bash block
+        has_script_call = bool(re.search(r'execute-script\.py', step_content))
+
+        if not has_script_call:
+            violations.append({
+                'step': step_header.strip(),
+                'action_verb': found_verb,
+                'issue': 'Missing explicit script call (execute-script.py) for action verb'
+            })
+
+    return violations
+
+
 def check_rule_violations(content: str, frontmatter: str, component_type: str,
                           has_tools: bool, file_path: str) -> dict:
     """Check for rule violations."""
@@ -189,10 +261,16 @@ def check_rule_violations(content: str, frontmatter: str, component_type: str,
         if not re.search(r'Skill:.*script-runner', content):
             rule_8_violation = True
 
+    # Rule 9: Explicit script calls in workflows (skills only)
+    rule_9_violations = []
+    if component_type == 'skill':
+        rule_9_violations = check_rule_9_violations(content)
+
     return {
         'rule_6_violation': rule_6_violation,
         'rule_7_violation': rule_7_violation,
-        'rule_8_violation': rule_8_violation
+        'rule_8_violation': rule_8_violation,
+        'rule_9_violations': rule_9_violations
     }
 
 

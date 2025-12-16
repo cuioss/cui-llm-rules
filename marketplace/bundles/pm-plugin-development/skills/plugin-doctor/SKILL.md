@@ -129,6 +129,7 @@ All 5 workflows follow the same pattern:
 - Rule 6 violations (Task tool in agents)
 - Rule 7 violations (Direct Maven usage - should use builder-maven skill)
 - Rule 8 violations (Hardcoded script paths - should use script-runner)
+- Rule 9 violations (Missing explicit script calls in workflows)
 - Pattern 22 violations (self-invocation)
 - Structural changes
 - Content removal
@@ -418,6 +419,7 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:validate ref
 - No missing referenced files
 - No unreferenced files
 - **Foundation skill loading** (see below)
+- **Rule 9 compliance** (explicit script calls in workflows)
 
 ### Step 3b: Validate Foundation Skill Loading
 
@@ -439,6 +441,28 @@ Skill: plan-marshall:diagnostic-patterns
 
 **If missing**: Flag as safe fix (auto-apply).
 
+### Step 3c: Validate Rule 9 - Explicit Script Calls
+
+**CRITICAL**: Workflow steps that perform script operations MUST have explicit bash code blocks.
+
+**Detection logic**:
+1. Find workflow steps (### Step N: ...)
+2. For each step, check if it contains action verbs: "read", "write", "display", "check", "validate", "get", "list", "create", "update", "delete"
+3. If action verb present WITHOUT a bash code block containing `execute-script.py`, flag as Rule 9 violation
+
+**Violations examples**:
+- "Display the solution outline for review" (no bash block)
+- "Read the config to get domains" (no bash block)
+- "Validate the output" (no bash block)
+
+**Exempt patterns**:
+- Steps that use `Task:` (agent delegation)
+- Steps that use `Skill:` (skill loading)
+- Steps that use `Read:` or `Glob:` (Claude Code tools)
+- Steps with explicit bash blocks containing `execute-script.py`
+
+**If violation found**: Flag as risky fix (requires manual intervention to add proper script call).
+
 ### Step 4: Categorize and Fix
 
 **Safe fixes** (auto-apply unless --no-fix):
@@ -446,6 +470,9 @@ Skill: plan-marshall:diagnostic-patterns
 - Unused tools in frontmatter
 - Invalid YAML syntax
 - **Missing foundation skill loading** (add Step 0 to each workflow)
+
+**Risky fixes** (require confirmation):
+- **Rule 9 violations** (missing explicit script calls in workflows)
 
 **Auto-fix pattern for missing foundation skills**:
 ```markdown
@@ -1030,6 +1057,26 @@ Only maven-builder agent may execute Maven commands.
 
 ### Pattern 22: Agent Lessons Learned Requirement
 Agents MUST record lessons via manage-lessons-learned skill, not self-invoke commands.
+
+### Rule 9: Explicit Script Calls in Workflows
+All script/tool invocations in workflow documentation MUST have explicit bash code blocks. Vague instructions like "read the file", "display the content", or "check the status" are NOT acceptable. Every operation requiring a script call MUST document the exact `python3 .plan/execute-script.py` command.
+
+**Detection**: Scan workflow steps for action verbs (read, write, display, check, validate, get, list) without accompanying bash code blocks containing `execute-script.py`.
+
+**Examples of violations**:
+- "Display the solution outline for review" (missing bash block)
+- "Read the config to get domains" (missing bash block)
+- "Validate the output" (missing bash block)
+
+**Correct pattern**:
+```markdown
+### Step N: Read the solution outline
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline read \
+  --plan-id {plan_id}
+```
+```
 
 ---
 
