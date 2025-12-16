@@ -125,7 +125,7 @@ Analyze the request to determine the impact scope:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[DECISION] Impact path: {Single|Multi} - {reasoning}"
+  work {plan_id} INFO "[DECISION] (pm-plugin-development:plugin-solution-outline) Impact path: {Single|Multi} - {reasoning}"
 ```
 
 ---

@@ -118,7 +118,7 @@ optionals:
 **Log domain skill resolution**:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[SKILL] Resolved domain skills for domain: {task.domain}, profile: {task.profile} - defaults: [{default_skills}]"
+  work {plan_id} INFO "[SKILL] (pm-workflow:task-plan) Resolved domain skills for domain: {task.domain}, profile: {task.profile} - defaults: [{default_skills}]"
 ```
 
 **Skill Selection**:

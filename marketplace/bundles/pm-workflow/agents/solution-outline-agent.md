@@ -24,7 +24,7 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 **Log skill selection**:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[SKILL] Using workflow_skill: pm-workflow:solution-outline from phase: solution_outline"
+  work {plan_id} INFO "[SKILL] (pm-workflow:solution-outline-agent) Using workflow_skill: pm-workflow:solution-outline from phase: solution_outline"
 ```
 
 ## Role Boundaries

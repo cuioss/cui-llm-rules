@@ -352,7 +352,7 @@ The protocol has **4 steps** - ALL are MANDATORY:
 | Step | Check | Action |
 |------|-------|--------|
 | 1 | Chat History Error Check | Scan for tool failures, error messages |
-| 2 | Script Execution Log Check | Query `manage-log read --type script`, look for ERROR entries |
+| 2 | Script Execution Log Check | Query `manage-log read --plan-id {plan_id} --type script`, look for ERROR entries |
 | 3 | **Workflow Skill API Contract Verification** | **CRITICAL** - Load `pm-workflow:plan-wf-skill-api`, verify artifacts against contracts |
 | 4 | Status Consistency Check | Query `manage-lifecycle read`, verify phase transition |
 

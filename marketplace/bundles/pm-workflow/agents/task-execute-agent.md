@@ -67,7 +67,7 @@ Skill: {skill_name}
 **Log domain skills loaded**:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[SKILL] Loading domain skills from task.skills: [{task.skills}]"
+  work {plan_id} INFO "[SKILL] (pm-workflow:task-execute-agent) Loading domain skills from task.skills: [{task.skills}]"
 ```
 
 ### Step 3: Resolve Workflow Skill
@@ -85,7 +85,7 @@ Note: The task's `profile` field (implementation/testing) maps to the workflow_s
 **Log the resolved skill**:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[SKILL] Using workflow_skill: {workflow_skill} from domain: {task.domain}, phase: {task.profile}"
+  work {plan_id} INFO "[SKILL] (pm-workflow:task-execute-agent) Using workflow_skill: {workflow_skill} from domain: {task.domain}, phase: {task.profile}"
 ```
 
 ### Step 4: Load and Execute Workflow Skill

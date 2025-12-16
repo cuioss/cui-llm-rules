@@ -62,7 +62,7 @@ Returns only the required finalize fields in a single call.
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Starting finalize phase"
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-finalize) Starting finalize phase"
 ```
 
 ### Step 1: Read Configuration
@@ -88,7 +88,7 @@ Returns: `branch`, `base_branch`, `issue_url`, `build_system`, and file counts i
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Finalize strategy: verification={verification_required}, PR={create_pr}, branch={branch_strategy}"
+  work {plan_id} INFO "[DECISION] (pm-workflow:plan-finalize) Finalize strategy: verification={verification_required}, PR={create_pr}, branch={branch_strategy}"
 ```
 
 ### Step 2: Run Verification (if required)
@@ -155,7 +155,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Plan completed: commit={commit_hash}, PR={pr_url|skipped}"
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-finalize) Plan completed: commit={commit_hash}, PR={pr_url|skipped}"
 ```
 
 ---
@@ -196,7 +196,7 @@ On any error, **first log the error** to work-log:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} ERROR "ERROR: {step} failed - {error_type}: {error_context}"
+  work {plan_id} ERROR "[ERROR] (pm-workflow:plan-finalize) {step} failed - {error_type}: {error_context}"
 ```
 
 ### Verification Failure

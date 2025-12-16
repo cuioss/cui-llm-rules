@@ -93,7 +93,7 @@ At the start of execute or finalize phase:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Starting {phase} phase"
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-execute) Starting {phase} phase"
 ```
 
 For each task in current phase:
@@ -130,7 +130,7 @@ After each task completes:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Completed {task_id}: {task_title} ({steps_completed} steps)"
+  work {plan_id} INFO "[OUTCOME] (pm-workflow:plan-execute) Completed {task_id}: {task_title} ({steps_completed} steps)"
 ```
 
 ### Step 4: Next Task or Phase
@@ -143,7 +143,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Completed {phase} phase: {tasks_completed} tasks"
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-execute) Completed {phase} phase: {tasks_completed} tasks"
 ```
 
 ---
@@ -195,7 +195,7 @@ On any error, **first log the error** to work-log:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} ERROR "ERROR: {task_id} failed - {error_type}: {error_context}"
+  work {plan_id} ERROR "[ERROR] (pm-workflow:plan-execute) {task_id} failed - {error_type}: {error_context}"
 ```
 
 ### Script Failure (Lessons-Learned Capture)

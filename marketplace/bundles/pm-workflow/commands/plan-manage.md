@@ -113,7 +113,7 @@ The agent:
 Log solution outline creation:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[ARTIFACT] Created solution_outline.md - pending user review"
+  work {plan_id} INFO "[ARTIFACT] (pm-workflow:plan-manage) Created solution_outline.md - pending user review"
 ```
 
 ---
@@ -188,7 +188,7 @@ The agent:
 Log task plan agent invocation:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[PROGRESS] Invoked task-plan-agent"
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-manage) Invoked task-plan-agent"
 ```
 
 ---

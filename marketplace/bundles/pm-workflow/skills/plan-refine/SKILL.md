@@ -77,7 +77,7 @@ This provides:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Starting refine phase"
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-refine) Starting refine phase"
 ```
 
 ### Step 2: Validate Domain
@@ -161,6 +161,13 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
   --plan-id {plan_id}
 ```
 
+**After successful validation**, log the artifact:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[ARTIFACT] (pm-workflow:plan-refine) Created solution_outline.md - pending user review"
+```
+
 **Why direct Write?** Solution outlines can contain ASCII diagrams and rich content that don't fit CLI parameter passing.
 
 ### Step 4.5: MANDATORY USER REVIEW (NEVER SKIP)
@@ -221,11 +228,18 @@ EOF
 
 **Note**: Task deliverable reference is numeric (`deliverables: [1]`) referencing the deliverable number in solution_outline.md.
 
+**After successful task creation**, log the artifact:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[ARTIFACT] (pm-workflow:plan-refine) Created task: Execute request"
+```
+
 ### Step 6: Log Completion
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "Completed refine: solution document created, {tasks_created} tasks"
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-refine) Completed refine: solution document created, {tasks_created} tasks"
 ```
 
 ### Step 7: Phase Transition
@@ -236,6 +250,13 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
   --completed refine
 ```
 
+**After successful transition**, log phase completion:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[STATUS] (pm-workflow:plan-refine) Refine phase complete, transitioning to execute"
+```
+
 ---
 
 ## Error Handling
@@ -244,7 +265,7 @@ On any error, **first log the error** to work-log:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} ERROR "ERROR: {error_type} - {error_context}"
+  work {plan_id} ERROR "[ERROR] (pm-workflow:plan-refine) {error_type} - {error_context}"
 ```
 
 ---
