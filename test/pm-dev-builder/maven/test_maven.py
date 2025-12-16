@@ -222,9 +222,9 @@ def test_parse_missing_file():
 # =============================================================================
 
 def test_find_module_by_artifact_id():
-    """Test finding module by artifactId."""
+    """Test finding module by artifactId (without namespace)."""
     with TempDirContext() as temp_dir:
-        # Create test structure - use POM without namespace for simpler parsing
+        # Create test structure - use POM without namespace
         module_dir = temp_dir / 'modules' / 'auth-service'
         module_dir.mkdir(parents=True)
         pom = module_dir / 'pom.xml'
@@ -248,6 +248,52 @@ def test_find_module_by_artifact_id():
         assert 'auth-service' in data['data']['module_path'], "Module path should contain auth-service"
 
 
+def test_find_module_by_artifact_id_with_namespace():
+    """Test finding module by artifactId with Maven namespace (real-world POMs)."""
+    with TempDirContext() as temp_dir:
+        # Create test structure - use POM WITH namespace (standard Maven POM)
+        module_dir = temp_dir / 'modules' / 'core-service'
+        module_dir.mkdir(parents=True)
+        pom = module_dir / 'pom.xml'
+        pom.write_text('''<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example</groupId>
+    <artifactId>core-service</artifactId>
+    <version>1.0.0</version>
+</project>''')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'find-module',
+            '--artifact-id', 'core-service',
+            '--root', str(temp_dir)
+        )
+        data = result.json()
+
+        assert data['status'] == 'success', f"Should find module with namespace: {data}"
+        assert 'core-service' in data['data']['module_path'], "Module path should contain core-service"
+
+
+def test_find_module_with_fixture():
+    """Test finding module using real fixture with namespace."""
+    # Use the existing multi-module fixture which has namespaced POMs
+    fixture_dir = FIXTURES_DIR / 'multi-module-project'
+
+    result = run_script(
+        SCRIPT_PATH,
+        'find-module',
+        '--artifact-id', 'core-module',
+        '--root', str(fixture_dir)
+    )
+    data = result.json()
+
+    assert data['status'] == 'success', f"Should find core-module in fixture: {data}"
+    assert data['data']['module_path'] == 'core', f"Module path should be 'core': {data}"
+
+
 def test_find_module_not_found():
     """Test finding non-existent module."""
     with TempDirContext() as temp_dir:
@@ -263,9 +309,9 @@ def test_find_module_not_found():
 
 
 def test_find_module_validate_path():
-    """Test validating explicit module path."""
+    """Test validating explicit module path (without namespace)."""
     with TempDirContext() as temp_dir:
-        # Create test structure - use POM without namespace for simpler parsing
+        # Create test structure - use POM without namespace
         module_dir = temp_dir / 'services' / 'api'
         module_dir.mkdir(parents=True)
         pom = module_dir / 'pom.xml'
@@ -286,6 +332,54 @@ def test_find_module_validate_path():
         data = result.json()
 
         assert data['status'] == 'success', f"Should validate existing path: {data}"
+
+
+def test_find_module_validate_path_with_namespace():
+    """Test validating explicit module path with Maven namespace."""
+    with TempDirContext() as temp_dir:
+        # Create test structure - use POM WITH namespace
+        module_dir = temp_dir / 'services' / 'api'
+        module_dir.mkdir(parents=True)
+        pom = module_dir / 'pom.xml'
+        pom.write_text('''<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example</groupId>
+    <artifactId>api-service</artifactId>
+    <version>1.0.0</version>
+</project>''')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'find-module',
+            '--module-path', 'services/api',
+            '--root', str(temp_dir)
+        )
+        data = result.json()
+
+        assert data['status'] == 'success', f"Should validate path with namespace: {data}"
+        assert data['data']['artifact_id'] == 'api-service', f"Should extract artifact_id: {data}"
+
+
+def test_find_module_ambiguous():
+    """Test finding module with multiple matches (ambiguous artifactId)."""
+    # Use the existing multi-module fixture which has auth-service in two locations
+    fixture_dir = FIXTURES_DIR / 'multi-module-project'
+
+    result = run_script(
+        SCRIPT_PATH,
+        'find-module',
+        '--artifact-id', 'auth-service',
+        '--root', str(fixture_dir)
+    )
+    data = result.json()
+
+    assert data['status'] == 'error', f"Should return error for ambiguous: {data}"
+    assert data['error'] == 'ambiguous_artifact_id', f"Error type should be ambiguous: {data}"
+    assert 'choices' in data, f"Should provide choices: {data}"
+    assert len(data['choices']) == 2, f"Should have 2 choices: {data}"
 
 
 # =============================================================================
@@ -486,8 +580,12 @@ if __name__ == '__main__':
         test_parse_missing_file,
         # Find-module tests
         test_find_module_by_artifact_id,
+        test_find_module_by_artifact_id_with_namespace,
+        test_find_module_with_fixture,
         test_find_module_not_found,
         test_find_module_validate_path,
+        test_find_module_validate_path_with_namespace,
+        test_find_module_ambiguous,
         # Search-markers tests
         test_search_markers_no_markers,
         test_search_markers_finds_todo,

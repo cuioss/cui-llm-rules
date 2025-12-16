@@ -254,13 +254,29 @@ def find_pom_files(root_dir: str) -> List[Path]:
 
 
 def extract_artifact_id(pom_path: Path) -> Optional[str]:
-    """Extract artifactId from a pom.xml file."""
+    """Extract artifactId from a pom.xml file.
+
+    Handles both namespaced and non-namespaced POM files.
+    - Namespaced: <project xmlns="http://maven.apache.org/POM/4.0.0">
+    - Non-namespaced: <project>
+    """
     try:
         tree = ET.parse(pom_path)
         root = tree.getroot()
-        ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
-        elem = root.find('m:artifactId', ns) or root.find('artifactId')
-        return elem.text.strip() if elem is not None and elem.text else None
+
+        # Check for Maven namespace in root element
+        # ElementTree represents default namespace as {namespace}tagname
+        maven_ns = 'http://maven.apache.org/POM/4.0.0'
+        if root.tag == f'{{{maven_ns}}}project':
+            # Namespaced POM - use {namespace}elementname syntax
+            elem = root.find(f'{{{maven_ns}}}artifactId')
+        else:
+            # Non-namespaced POM - direct element lookup
+            elem = root.find('artifactId')
+
+        if elem is not None and elem.text:
+            return elem.text.strip()
+        return None
     except Exception:
         return None
 
