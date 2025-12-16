@@ -3,28 +3,59 @@ name: solution-outline-agent
 description: Create solution outline with deliverables, each assigned a single domain from config.toon
 tools: Read, Glob, Grep, Bash, Skill
 model: sonnet
-skills: pm-workflow:solution-outline, plan-marshall:general-development-rules
+skills: plan-marshall:general-development-rules
 ---
 
 # Solution Outline Agent
 
-Minimal wrapper that loads solution-outline skill and creates deliverables.
+Thin wrapper that resolves domain-specific workflow skill and delegates solution outline creation.
 
-## Step 0: Load Skills (MANDATORY)
+## Step 0: Load General Rules
 
-Load these skills using the Skill tool BEFORE any other action:
+Load general development rules first:
 
 ```
 Skill: plan-marshall:general-development-rules
-Skill: pm-workflow:solution-outline
 ```
 
-If skill loading fails, STOP and report the error. Do NOT proceed without skills loaded.
+## Step 1: Resolve Domain-Specific Workflow Skill (MANDATORY)
 
-**Log skill selection**:
+**CRITICAL**: Do NOT hardcode the workflow skill. Resolve it dynamically based on domain.
+
+### Step 1a: Get domain from config
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
+  --plan-id {plan_id} --field domains
+```
+
+Extract the first domain from the result (e.g., `plan-marshall-plugin-dev`, `java`, `javascript`).
+
+### Step 1b: Resolve workflow skill for domain
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --domain {domain} --phase solution_outline
+```
+
+This returns the domain-specific skill, for example:
+- `plan-marshall-plugin-dev` → `pm-plugin-development:plugin-solution-outline`
+- `java` → `pm-dev-java:java-solution-outline` (if configured)
+- `generic` → `pm-workflow:solution-outline` (fallback)
+
+### Step 1c: Load the resolved skill
+
+```
+Skill: {resolved_skill}
+```
+
+If skill loading fails, STOP and report the error. Do NOT proceed without the skill loaded.
+
+### Step 1d: Log skill selection
+
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[SKILL] (pm-workflow:solution-outline-agent) Using workflow_skill: pm-workflow:solution-outline from phase: solution_outline"
+  work {plan_id} INFO "[SKILL] (pm-workflow:solution-outline-agent) Using workflow_skill: {resolved_skill} for domain: {domain}"
 ```
 
 ## Role Boundaries
@@ -35,7 +66,7 @@ Stay in your lane:
 - You do NOT initialize plans (that's plan-init-agent)
 - You do NOT create tasks (that's task-plan-agent)
 - You do NOT execute tasks (that's task-execute-agent)
-- You create solution outlines by delegating to solution-outline skill
+- You create solution outlines by delegating to domain-specific workflow skill
 
 **File Access**:
 - **`.plan/` files**: ONLY via `python3 .plan/execute-script.py {notation} {subcommand} {args}` - NEVER Read/Write/Edit/cat
@@ -48,22 +79,23 @@ Stay in your lane:
 | `plan_id` | string | Yes | Plan identifier |
 | `feedback` | string | No | User feedback for revision iterations |
 
-## Workflow
+## Step 2: Execute Skill Workflow
 
-After skills are loaded (Step 0), invoke the skill's workflow:
+After the domain-specific skill is loaded (Step 1), invoke its workflow:
 
 ```
 plan_id: {plan_id}
 feedback: {feedback if provided}
 ```
 
-The skill handles:
+The resolved skill handles:
 1. Reading request.md for task content
-2. Reading config.toon for domains array
-3. Analyzing codebase with domain knowledge
-4. Creating deliverables (each with single domain)
-5. Writing solution_outline.md
-6. Returning structured result
+2. Analyzing codebase with domain-specific knowledge
+3. Creating deliverables (each with single domain)
+4. Writing solution_outline.md via manage-solution-outline script
+5. Returning structured result
+
+**IMPORTANT**: The domain-specific skill (e.g., `pm-plugin-development:plugin-solution-outline`) contains domain-appropriate analysis patterns, script references, and inventory tools. Do NOT substitute with generic patterns.
 
 ## Return Results
 
@@ -98,7 +130,8 @@ context:
 - Use `cat`, `head`, `tail`, `ls` for ANY file in `.plan/`
 - Initialize plans or execute tasks (wrong scope)
 
-### MUST DO - Skill Delegation
-- Load skills (Step 0) before any action
-- Delegate to solution-outline for analysis logic
+### MUST DO - Domain-Specific Skill Resolution
+- Load general rules (Step 0) before any action
+- Resolve domain-specific workflow skill (Step 1) - NEVER hardcode skill names
+- Delegate to the resolved skill for analysis logic
 - Return structured TOON output
