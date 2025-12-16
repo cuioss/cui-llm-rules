@@ -81,31 +81,48 @@ pm-workflow/agents/
 
 ## Domain Skill Loading
 
-Domain skills live in their expert bundles and are loaded by thin agents via config.toon:
+All domains use the same 4 domain-agnostic workflow skills in pm-workflow:
 
 ```
-pm-plugin-development/skills/
-├── plugin-solution-outline/    # Solution outline skill
-├── plugin-task-plan/           # Task planning skill
-└── plugin-plan-implement/      # Implementation skill
+pm-workflow/skills/
+├── solution-outline/       # Domain-agnostic solution outline creation
+├── task-plan/              # Domain-agnostic task planning
+├── task-implementation/    # Domain-agnostic implementation workflow
+└── task-testing/           # Domain-agnostic testing workflow
 ```
+
+Domain-specific knowledge comes from `task.skills` array, populated during task-plan via `resolve-domain-skills`.
 
 ### config.toon Structure
 
-The workflow_skills block in config.toon maps domains to skills:
+The workflow_skills block in config.toon maps domains to workflow skills:
 
 ```toon
-workflow_skills
-  plugin
-    solution_outline: pm-plugin-development:plugin-solution-outline
-    task_plan: pm-plugin-development:plugin-task-plan
-    implementation: pm-plugin-development:plugin-plan-implement
-    testing: pm-plugin-development:plugin-plan-implement
-  java
-    solution_outline: null
-    task_plan: null
-    implementation: pm-dev-java:java-core
-    testing: pm-dev-java:junit-core
+domains: [java]
+
+workflow_skills:
+  java:
+    solution_outline: pm-workflow:solution-outline
+    task_plan: pm-workflow:task-plan
+    implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
+```
+
+For multi-domain plans:
+```toon
+domains: [java, javascript]
+
+workflow_skills:
+  java:
+    solution_outline: pm-workflow:solution-outline
+    task_plan: pm-workflow:task-plan
+    implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
+  javascript:
+    solution_outline: pm-workflow:solution-outline
+    task_plan: pm-workflow:task-plan
+    implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
 ```
 
 ### Routing Flow
@@ -115,16 +132,16 @@ workflow_skills
        │
        ├─ Task: pm-workflow:solution-outline-agent
        │     ├─ Read config.toon workflow_skills.{domain}.solution_outline
-       │     ├─ Load domain skill (e.g., plugin-solution-outline)
+       │     ├─ Load workflow skill (pm-workflow:solution-outline)
        │     └─ Analyzes request, creates deliverables
        │
        └─ Task: pm-workflow:task-plan-agent
              ├─ Read config.toon workflow_skills.{domain}.task_plan
-             ├─ Load domain skill (e.g., plugin-task-plan)
-             └─ Reads deliverables, creates tasks
+             ├─ Load workflow skill (pm-workflow:task-plan)
+             └─ Reads deliverables, creates tasks with domain skills
 ```
 
-**Key Insight**: Thin agents load domain skills dynamically. Commands invoke the same 4 generic agents for all domains.
+**Key Insight**: All domains use the same 4 workflow skills. Domain-specific knowledge is loaded via `task.skills` at execution time.
 
 ## Task Runner Pattern
 
@@ -200,14 +217,16 @@ The detail level ensures:
    │ task-execute-agent   - Execute single task  │
    └─────────────────────────────────────────────┘
 
-   Domain Skills (loaded dynamically):
+   Domain Skills (loaded via task.skills):
    ┌─────────────────────────────────────────────┐
-   │ pm-plugin-development:                      │
-   │   plugin-solution-outline, plugin-task-plan │
-   │   plugin-plan-implement                     │
+   │ pm-dev-java: java-core, java-cdi,          │
+   │   junit-core, junit-integration, etc.      │
    │                                             │
-   │ pm-dev-java: java-core, junit-core, etc.   │
-   │ pm-dev-frontend: cui-javascript, etc.      │
+   │ pm-dev-frontend: cui-javascript,           │
+   │   cui-javascript-unit-testing, etc.        │
+   │                                             │
+   │ pm-plugin-development: plugin-architecture,│
+   │   plugin-create, plugin-maintain, etc.     │
    └─────────────────────────────────────────────┘
 ```
 
@@ -222,11 +241,13 @@ See `plan-marshall:script-runner` SKILL.md "Workflow: Error Handling" for the le
 
 ## Domain Summary
 
-| Domain | Solution Outline Skill | Task Plan Skill | Implementation Skill |
-|--------|----------------------|-----------------|----------------------|
-| `plugin` | `plugin-solution-outline` | `plugin-task-plan` | `plugin-plan-implement` |
-| `java` | (system) | (system) | `java-core`, `junit-core`, etc. |
-| `javascript` | (system) | (system) | `cui-javascript`, etc. |
+All domains use the same 4 workflow skills. Domain-specific knowledge comes from `task.skills`:
+
+| Domain | Workflow Skills | Domain Skills (task.skills) |
+|--------|-----------------|----------------------------|
+| `java` | `pm-workflow:solution-outline`, `task-plan`, `task-implementation`, `task-testing` | `java-core`, `java-cdi`, `junit-core`, etc. |
+| `javascript` | `pm-workflow:solution-outline`, `task-plan`, `task-implementation`, `task-testing` | `cui-javascript`, `cui-javascript-unit-testing`, etc. |
+| `plugin` | `pm-workflow:solution-outline`, `task-plan`, `task-implementation`, `task-testing` | `plugin-architecture`, `plugin-create`, etc. |
 
 **Finalize Behavior** (from config.toon):
 
@@ -235,19 +256,3 @@ See `plan-marshall:script-runner` SKILL.md "Workflow: Error Handling" for the le
 | `plugin` | No | `/plugin-doctor` |
 | `java` | Yes | `/builder-build-and-fix` |
 | `javascript` | Yes | `/builder-build-and-fix system=npm` |
-
-## Sub-Type Templates
-
-Located in `pm-plugin-development/skills/plugin-task-plan/templates/`:
-
-| Template | Trigger | Provides |
-|----------|---------|----------|
-| `script-task.md` | component.type = "script" | TDD workflow (red→green) |
-| `skill-task.md` | component.type = "skill" | Skill structure workflow |
-| `command-task.md` | component.type = "command" | Command orchestration workflow |
-| `agent-task.md` | component.type = "agent" | Agent frontmatter workflow |
-
-**Note**: When `task-plan-agent` loads `plugin-task-plan` skill:
-1. The skill reads deliverables from the plan directory
-2. Selects appropriate template based on component type
-3. Generates tasks and writes them via manage-tasks script

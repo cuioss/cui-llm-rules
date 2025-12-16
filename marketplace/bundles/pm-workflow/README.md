@@ -141,10 +141,12 @@ workflow_skills:
     solution_outline: pm-workflow:solution-outline
     task_plan: pm-workflow:task-plan
     implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
   javascript:
     solution_outline: pm-workflow:solution-outline
     task_plan: pm-workflow:task-plan
     implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
 ```
 
 ## Two-Tier Skill Loading
@@ -213,9 +215,9 @@ pm-workflow/
 ## Dependencies
 
 - **plan-marshall** - Script runner, file operations base, domain skill configuration
-- **pm-plugin-development** - Plugin domain skills (plugin-solution-outline, plugin-task-plan, plugin-plan-implement)
+- **pm-plugin-development** - Plugin domain skills (plugin-architecture, plugin-create, plugin-maintain)
 - **pm-dev-builder** - Build execution (maven/npm)
-- **pm-dev-java** - Java domain skills (java-core, java-cdi, etc.)
+- **pm-dev-java** - Java domain skills (java-core, java-cdi, junit-core, etc.)
 - **pm-dev-frontend** - JavaScript domain skills (cui-javascript, cui-jsdoc, etc.)
 
 ## Installation

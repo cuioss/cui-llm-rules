@@ -74,17 +74,23 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
 title: Execute request
 deliverables: [1]
 domain: generic
+profile: implementation
 description: |
   Complete the requested task
 
 steps:
-  - Analyze requirements
-  - Implement solution
-  - Verify result
+  - .plan/plans/{plan_id}/solution_outline.md
+
+skills: []
+
+verification:
+  commands:
+    - echo "Task completed"
+  criteria: All changes applied successfully
 EOF
 ```
 
-**Note**: The `deliverables` array contains numeric references to deliverable numbers in solution_outline.md.
+**Note**: The `deliverables` array contains numeric references to deliverable numbers in solution_outline.md. Steps must be file paths, not descriptive text.
 
 ---
 

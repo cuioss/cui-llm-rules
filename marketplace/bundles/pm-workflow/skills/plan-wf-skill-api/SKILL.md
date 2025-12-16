@@ -72,10 +72,12 @@ workflow_skills:
     solution_outline: pm-workflow:solution-outline
     task_plan: pm-workflow:task-plan
     implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
   javascript:
     solution_outline: pm-workflow:solution-outline
     task_plan: pm-workflow:task-plan
     implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
 ```
 
 ## Traceability Flow
