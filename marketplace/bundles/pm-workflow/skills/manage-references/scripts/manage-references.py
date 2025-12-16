@@ -79,7 +79,7 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    # Build base references (plan-type-specific fields added by plan-type:configure)
+    # Build base references
     refs = {
         'branch': args.branch,
         'base_branch': 'main',

@@ -74,7 +74,7 @@ Script: `pm-workflow:manage-references:manage-references`
 
 ### create
 
-Create references.toon with basic fields. Plan-type-specific fields are added later by `plan-type-*:configure`.
+Create references.toon with basic fields.
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-references:manage-references create \

@@ -17,12 +17,11 @@ User Request (description, lesson_id, or issue)
 │   4. Get task content from source                   │
 │   5. Write request.md (preserves original input)    │
 │   6. Initialize references.toon (branch only)       │
-│   7. Detect plan type from task analysis            │
+│   7. Detect domain from task analysis               │
 │   8. Create status.toon with phases                 │
-│   9. Create config.toon with plan type              │
-│  10. Call plan-type:configure for domain fields     │
-│  11. Transition phase to "refine"                   │
-│   OUTPUT: plan_id, plan_type, next_phase            │
+│   9. Create config.toon with domain                 │
+│  10. Transition phase to "refine"                   │
+│   OUTPUT: plan_id, domain, next_phase               │
 └─────────────────────────────────────────────────────┘
         │
         ▼
@@ -36,10 +35,9 @@ User Request (description, lesson_id, or issue)
 | Creates plan directory | Create goals (that's refine phase) |
 | Writes request.md | Create tasks (that's refine phase) |
 | Initializes references.toon | Execute implementation |
-| Detects plan type | Skip to execute phase |
+| Detects domain | Skip to execute phase |
 | Creates config.toon | |
 | Creates status.toon | |
-| Calls plan-type configure | |
 | Transitions to refine | |
 
 ## Input Sources
@@ -114,8 +112,7 @@ AskUserQuestion:
 - [ ] request.md created with complete original input
 - [ ] references.toon created with branch
 - [ ] status.toon created with phases
-- [ ] config.toon created with plan type
-- [ ] Plan-type configure called for domain fields
+- [ ] config.toon created with domain
 - [ ] Work-log entry written
 - [ ] Phase transitioned to refine
 - [ ] plan_id returned
@@ -171,10 +168,9 @@ recovery: Use resume option or provide different plan_id
 The plan-init agent handles complete initialization:
 1. Create plan directory and request.md
 2. Initialize references.toon with branch
-3. Detect plan type from task analysis
+3. Detect domain from task analysis
 4. Create status.toon with phases
-5. Create config.toon with plan type
-6. Call plan-type configure for domain fields
-7. Transition to refine phase
+5. Create config.toon with domain
+6. Transition to refine phase
 
 **Note**: Goals and tasks are NOT created during init. That's the refine phase.

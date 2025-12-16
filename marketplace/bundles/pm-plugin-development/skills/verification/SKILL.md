@@ -82,11 +82,11 @@ Applies: All base checks PLUS:
 - Work-log population after each operation
 - Status consistency after phase transitions
 - **Post-Phase Verification Protocol (4 steps) after EVERY phase completes**
-- **Plan-Type-API Contract Verification (Step 3) is MANDATORY**
+- **Workflow Skill API Contract Verification (Step 3) is MANDATORY**
 
 Use this scope when testing `/plan-manage`, `/plan-execute`, or any planning-related skills.
 
-**CRITICAL**: After each phase completes, you MUST execute ALL 4 steps of the Post-Phase Verification Protocol, including verifying artifacts against plan-type-api contracts. See "After Each Phase Completes" section below.
+**CRITICAL**: After each phase completes, you MUST execute ALL 4 steps of the Post-Phase Verification Protocol, including verifying artifacts against workflow skill API contracts. See "After Each Phase Completes" section below.
 
 ## Verification Mode Behavior
 
@@ -353,7 +353,7 @@ The protocol has **4 steps** - ALL are MANDATORY:
 |------|-------|--------|
 | 1 | Chat History Error Check | Scan for tool failures, error messages |
 | 2 | Script Execution Log Check | Query `manage-log read --type script`, look for ERROR entries |
-| 3 | **Plan-Type-API Contract Verification** | **CRITICAL** - Load `pm-workflow:plan-type-api`, verify artifacts against contracts |
+| 3 | **Workflow Skill API Contract Verification** | **CRITICAL** - Load `pm-workflow:plan-wf-skill-api`, verify artifacts against contracts |
 | 4 | Status Consistency Check | Query `manage-lifecycle read`, verify phase transition |
 
 **Step 3 Contract Verification Details**:

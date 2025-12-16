@@ -80,25 +80,25 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   work {plan_id} INFO "Starting refine phase"
 ```
 
-### Step 2: Validate Plan Type
+### Step 2: Validate Domain
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
-  --plan-id {plan_id} --field plan_type
+  --plan-id {plan_id} --field domain
 ```
 
-**IF plan_type is domain-specific** (java, javascript, plugin):
+**IF domain is specific** (java, javascript, plugin):
 ```toon
 status: error
 error_type: wrong_routing
 message: "Domain-specific plans must be refined via /plan-manage command, not plan-refine skill"
 context:
-  plan_type: {plan_type}
+  domain: {domain}
   correct_command: "/plan-manage action=refine plan={plan_id}"
 ```
 Return this error. Do NOT proceed.
 
-**IF plan_type is generic**: Continue to Step 3.
+**IF domain is generic**: Continue to Step 3.
 
 ### Step 3: Read Request
 
@@ -260,7 +260,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 |--------|---------|---------|
 | `pm-workflow:manage-plan-documents:manage-plan-documents` | `request read` | Read request document |
 | `pm-workflow:manage-solution-outline:manage-solution-outline` | `validate` | Validate solution structure |
-| `pm-workflow:manage-config:manage-config` | `get` | Read plan_type |
+| `pm-workflow:manage-config:manage-config` | `get` | Read domain |
 | `pm-workflow:manage-tasks:manage-tasks` | `add` | Create tasks |
 | `pm-workflow:manage-lifecycle:manage-lifecycle` | `transition` | Phase transition |
 | `plan-marshall:logging:manage-log` | `work` | Log progress and completion |
@@ -276,4 +276,4 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 - **manage-solution-outline** - Solution document structure and examples
 - **plan-init** - Previous phase (creates request.md, config, status)
 - **plan-execute** - Next phase (executes tasks)
-- **plan-type-*** - Domain configuration (loaded by command for agent routing)
+- **Domain skills** - Loaded by thin agents via config.toon workflow_skills

@@ -1,6 +1,6 @@
 # Menu Option: Configuration
 
-Sub-menu for build systems and plan-types configuration.
+Sub-menu for build systems and skill domains configuration.
 
 ---
 

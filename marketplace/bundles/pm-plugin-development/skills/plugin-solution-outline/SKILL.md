@@ -16,8 +16,8 @@ allowed-tools: Read, Glob, Grep, Bash
 
 | Contract | Location | Purpose |
 |----------|----------|---------|
-| Deliverable Contract | `pm-workflow:plan-type-api/standards/deliverable-contract.md` | Required deliverable structure |
-| Agent Contract | `pm-workflow:plan-type-api/standards/solution-outline-agent-contract.md` | Agent responsibilities |
+| Deliverable Contract | `pm-workflow:plan-wf-skill-api/standards/deliverable-contract.md` | Required deliverable structure |
+| Agent Contract | `pm-workflow:plan-wf-skill-api/standards/solution-outline-agent-contract.md` | Agent responsibilities |
 
 **Non-compliant deliverables will be rejected by validation.**
 

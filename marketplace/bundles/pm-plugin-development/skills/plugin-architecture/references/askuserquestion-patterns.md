@@ -82,7 +82,7 @@ Options:
 
 When user must choose between distinct types/modes.
 
-**Use Case**: Select plan type or execution mode.
+**Use Case**: Select domain or execution mode.
 
 ```markdown
 Question: "What type of plan for this task?"
@@ -93,7 +93,7 @@ Options:
 ```
 
 **Handling Response**:
-- Map selection directly to plan type
+- Map selection directly to domain
 - "Type something" rarely used but could specify hybrid needs
 
 ### Pattern 4: Multi-Select Features

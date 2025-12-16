@@ -53,7 +53,7 @@ When transitioning between phases, output must include:
 ```
 Plan created successfully:
 
-plan_type: simple
+domain: generic
 artifacts:
   plan_directory: <plan-storage>/feature-auth/
   plan_file: <plan-storage>/feature-auth/plan.md
@@ -73,7 +73,7 @@ Show configuration summaries for user confirmation before proceeding:
 ```
 ## Detected Configuration
 
-**Plan Type**: simple (3-phase: init->execute->finalize)
+**Domain**: generic (3-phase: init->execute->finalize)
 **Branch**: feature/auth-improvements
 **Issue**: #123
 **Build System**: maven
@@ -149,7 +149,7 @@ artifacts:
 
 **Bad:**
 ```
-Step 1-2: Determine Plan Type
+Step 1-2: Determine Domain
 Step 3: Load Simple Init Standards
 Step 6: Present Configuration
 Steps 7-10: Create Plan Structure
@@ -388,7 +388,7 @@ Used when artifacts are created:
 ```
 Plan created successfully:
 
-plan_type: simple
+domain: generic
 artifacts:
   plan_directory: <plan-storage>/feature-auth/
   plan_file: <plan-storage>/feature-auth/plan.md

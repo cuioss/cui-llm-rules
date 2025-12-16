@@ -1,6 +1,6 @@
 ---
 name: plan-marshall
-description: Project configuration wizard for planning system. Manages executor generation, health checks, build systems, and plan-types.
+description: Project configuration wizard for planning system. Manages executor generation, health checks, build systems, and skill domains.
 allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 ---
 
@@ -28,7 +28,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 
 ## What This Skill Provides
 
-**Wizard Mode**: Sequential setup for new projects (executor generation, marshal.json init, build detection, plan-types)
+**Wizard Mode**: Sequential setup for new projects (executor generation, marshal.json init, build detection, skill domains)
 
 **Menu Mode**: Interactive maintenance for returning users (regenerate executor, health check, configuration)
 
@@ -107,7 +107,7 @@ AskUserQuestion:
     - label: "2. Health Check"
       description: "Verify setup, diagnose issues"
     - label: "3. Configuration"
-      description: "Build systems, plan-types"
+      description: "Build systems, skill domains"
     - label: "4. Quit"
       description: "Exit plan-marshall"
   multiSelect: false
@@ -151,8 +151,7 @@ Then execute the workflow described in that file.
 | `wizard-flow.md` | First-run wizard steps 1-8 | mode=wizard or --wizard flag |
 | `menu-maintenance.md` | Regenerate executor, cleanup | Menu option 1 |
 | `menu-healthcheck.md` | Verify setup, diagnose issues | Menu option 2 |
-| `menu-configuration.md` | Build systems, plan-types | Menu option 3 |
-| `plan-type-wizard.md` | Custom plan-type creation | From wizard step 6 or config menu |
+| `menu-configuration.md` | Build systems, skill domains | Menu option 3 |
 | `output-format.md` | TOON output standards | Reference for output formatting |
 | `error-handling.md` | Error types and recovery | On error conditions |
 
@@ -174,5 +173,5 @@ Apply the recovery guidance for the specific error type.
 - [x] Bootstrap mechanism for executor generation
 - [x] Progressive disclosure via deferred loading
 - [x] Interactive menu for returning users
-- [x] Shared plan-type wizard (no duplication)
+- [x] Shared skill domain configuration (no duplication)
 - [x] TOON output format (see output-format.md)

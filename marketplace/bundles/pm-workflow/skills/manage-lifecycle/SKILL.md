@@ -453,9 +453,8 @@ plan-init-agent:
    - Creates plan directory
    - Writes request.md from input (description/lesson/issue)
    - Analyzes task to create solution outline with deliverables
-   - Detects plan type (or uses override)
+   - Detects domain (or uses override)
    - Creates config.toon and status.toon
-   - Calls plan-type configure for domain fields
    - Transitions phase: init → refine
 ```
 

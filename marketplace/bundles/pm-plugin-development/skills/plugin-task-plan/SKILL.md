@@ -16,8 +16,8 @@ allowed-tools: Read, Bash
 
 | Contract | Location | Purpose |
 |----------|----------|---------|
-| Task Contract | `pm-workflow:plan-type-api/standards/task-contract.md` | Task structure and optimization workflow |
-| Agent Contract | `pm-workflow:plan-type-api/standards/task-plan-agent-contract.md` | Agent responsibilities |
+| Task Contract | `pm-workflow:plan-wf-skill-api/standards/task-contract.md` | Task structure and optimization workflow |
+| Agent Contract | `pm-workflow:plan-wf-skill-api/standards/task-plan-agent-contract.md` | Agent responsibilities |
 
 **Non-compliant tasks will be rejected by validation.**
 
@@ -416,4 +416,4 @@ If deliverable lacks required parameters:
 - `pm-plugin-development:plugin-maintain` - Component updates and refactoring (handles verification internally)
 
 **Contract Reference**:
-- [plan-type-api/standards/task-contract.md](../../pm-workflow/skills/plan-type-api/standards/task-contract.md) - Optimization workflow and decision tables
+- [plan-wf-skill-api/standards/task-contract.md](../../pm-workflow/skills/plan-wf-skill-api/standards/task-contract.md) - Optimization workflow and decision tables

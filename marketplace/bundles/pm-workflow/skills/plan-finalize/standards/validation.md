@@ -3,9 +3,9 @@
 ## Configuration
 
 - [ ] Accept `plan_id` parameter (never paths)
-- [ ] Read plan_type and finalize config from config.toon
+- [ ] Read domain and finalize config from config.toon
 - [ ] Finalize config fields: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
-- [ ] Handle all plan types: java, javascript, plugin-development, generic
+- [ ] Handle all domains: java, javascript, plugin, generic
 
 ## Verification (if verification_required)
 

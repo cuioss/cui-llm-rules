@@ -16,7 +16,7 @@ The `plan-marshall-config` skill manages `.plan/marshal.json`, providing a centr
 
 ### 1. Skills Define Their Own Behavior
 
-Plan-type routing (patterns, keywords, agents) belongs in plan-type skill frontmatter, not in marshal.json. This skill manages only project-specific infrastructure.
+Domain routing and workflow skills are configured in marshal.json's `skill_domains` section. This skill manages project-specific infrastructure.
 
 ### 2. Noun-Verb API Pattern
 
@@ -57,12 +57,10 @@ The configuration file contains **only project-specific infrastructure**:
 
 ## What Does NOT Belong in marshal.json
 
-These configurations belong in plan-type skill frontmatter:
+These configurations do not belong in marshal.json:
 
-- File pattern routing (`patterns:`)
-- Keyword detection (`keywords:`)
-- Domain agents (`domain:`)
-- Plan-type defaults (`plan_defaults:`)
+- File pattern routing (deprecated)
+- Keyword detection (deprecated)
 
 ## File Location
 

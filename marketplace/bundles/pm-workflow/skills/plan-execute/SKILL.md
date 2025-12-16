@@ -54,7 +54,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get-mult
 
 Returns only the required finalize fields in a single call: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`.
 
-These fields are written during init by the plan-type skill's `configure` operation.
+These fields are written during init based on domain configuration.
 
 ---
 

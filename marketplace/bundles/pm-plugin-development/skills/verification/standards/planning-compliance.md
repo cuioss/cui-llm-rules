@@ -57,12 +57,12 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log read \
 ```
 This indicates an agent silently retried after failure. Investigate WHY the first attempt failed.
 
-### Step 3: Plan-Type-API Contract Verification
+### Step 3: Workflow Skill API Contract Verification
 
 Load the contract skill and verify artifacts for the **completed phase**:
 
 ```
-Skill: pm-workflow:plan-type-api
+Skill: pm-workflow:plan-wf-skill-api
 ```
 
 | Completed Phase | Contract to Verify | Verification Command |
@@ -559,13 +559,13 @@ Actively scan execution logs to detect script issues:
 [PASS/FAIL with explanation]
 ```
 
-## Plan-Type-API Contract Verification
+## Workflow Skill API Contract Verification
 
-After each planning phase completes, verify artifacts comply with the plan-type-api contracts. Reference: [pm-workflow:plan-type-api](../../../pm-workflow/skills/plan-type-api/SKILL.md)
+After each planning phase completes, verify artifacts comply with the workflow skill API contracts. Reference: [pm-workflow:plan-wf-skill-api](../../../pm-workflow/skills/plan-wf-skill-api/SKILL.md)
 
 ### Phase 1: Init Complete
 
-**Contract Reference**: [plan-type-api/standards/domain-frontmatter-contract.md](../../../pm-workflow/skills/plan-type-api/standards/domain-frontmatter-contract.md)
+**Contract Reference**: [plan-wf-skill-api/standards/domain-frontmatter-contract.md](../../../pm-workflow/skills/plan-wf-skill-api/standards/domain-frontmatter-contract.md)
 
 **Verification**:
 ```bash
@@ -575,13 +575,13 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --p
 **Required Fields**:
 | Field | Required | Description |
 |-------|----------|-------------|
-| `plan_type` | Yes | Plan type skill reference |
+| `domain` | Yes | Domain identifier (java, javascript, plugin, generic) |
 | `title` | Yes | Plan title |
 | `description` | Yes | Plan description |
 
 ### Phase 2: Solution Outline Complete
 
-**Contract Reference**: [plan-type-api/standards/deliverable-contract.md](../../../pm-workflow/skills/plan-type-api/standards/deliverable-contract.md)
+**Contract Reference**: [plan-wf-skill-api/standards/deliverable-contract.md](../../../pm-workflow/skills/plan-wf-skill-api/standards/deliverable-contract.md)
 
 **Verification**:
 ```bash
@@ -612,7 +612,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 
 ### Phase 3: User Review (Mandatory)
 
-**Contract Reference**: [plan-type-api/standards/user-review-protocol.md](../../../pm-workflow/skills/plan-type-api/standards/user-review-protocol.md)
+**Contract Reference**: [plan-wf-skill-api/standards/user-review-protocol.md](../../../pm-workflow/skills/plan-wf-skill-api/standards/user-review-protocol.md)
 
 **Verification**: Check work.log for user approval entry
 
@@ -624,7 +624,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log read --plan-id 
 
 ### Phase 4: Tasks Created
 
-**Contract Reference**: [plan-type-api/standards/task-contract.md](../../../pm-workflow/skills/plan-type-api/standards/task-contract.md)
+**Contract Reference**: [plan-wf-skill-api/standards/task-contract.md](../../../pm-workflow/skills/plan-wf-skill-api/standards/task-contract.md)
 
 **Verification**:
 ```bash
@@ -666,7 +666,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get --plan
 After each phase completes, use this verification template:
 
 ```
-## PLAN-TYPE-API Contract Verification
+## Workflow Skill API Contract Verification
 
 ### Phase Completed
 {init | solution_outline | user_review | task_creation}

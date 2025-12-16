@@ -48,8 +48,8 @@ When a script or tool fails during verification mode, perform systematic analysi
 **Common Patterns**:
 ```
 status: error
-error: invalid_plan_type
-message: Must be bundle:skill notation
+error: invalid_domain
+message: Must be valid domain identifier (java, javascript, plugin, generic)
 ```
 
 **Resolution Approach**:

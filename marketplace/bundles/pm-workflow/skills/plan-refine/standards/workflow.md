@@ -1,6 +1,6 @@
 # Plan Refine Workflow
 
-**Scope**: This workflow applies to **generic plan types only**. Domain-specific plans (Java, JavaScript, Plugin) use domain agents invoked by the `/plan-manage` command. See [architecture.md](architecture.md) for the skill-based routing pattern.
+**Scope**: This workflow applies to **generic domain only**. Domain-specific plans (Java, JavaScript, Plugin) use domain agents invoked by the `/plan-manage` command. See [architecture.md](architecture.md) for the skill-based routing pattern.
 
 ## Workflow Overview
 
@@ -30,10 +30,10 @@ Request from Init Phase
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
-  --plan-id {plan_id} --field plan_type
+  --plan-id {plan_id} --field domain
 ```
 
-**Guard**: If `plan_type` is NOT `generic`, return error - domain-specific plans must use `/plan-manage` command.
+**Guard**: If `domain` is NOT `generic`, return error - domain-specific plans must use `/plan-manage` command.
 
 ---
 

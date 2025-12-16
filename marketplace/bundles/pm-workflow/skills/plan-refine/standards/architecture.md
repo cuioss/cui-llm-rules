@@ -6,11 +6,11 @@
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    SINGLE SOURCE OF TRUTH                                │
 │                                                                          │
-│  Plan-type SKILLS define STRUCTURE and ACTIONABLE TASKS.                 │
+│  Domain SKILLS define STRUCTURE and ACTIONABLE TASKS.                    │
 │  They POPULATE plan.md with phases and checklists via scripts.           │
 │                                                                          │
 │  plan-execute reads plan.md and runs the checklists sequentially.        │
-│  Intelligence lives in the PLAN-TYPE SKILL, not the EXECUTOR.            │
+│  Intelligence lives in the DOMAIN SKILL, not the EXECUTOR.               │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 

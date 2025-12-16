@@ -249,7 +249,7 @@ The skill checks current state before each step:
 
 ---
 
-## Finalize by Plan Type
+## Finalize by Domain
 
 ### Java / JavaScript
 

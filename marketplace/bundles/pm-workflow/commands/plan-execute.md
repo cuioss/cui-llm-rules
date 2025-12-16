@@ -50,7 +50,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks check --pl
 
 For each task:
 1. Read task details via manage-tasks
-2. Delegate to domain agent based on plan_type
+2. Delegate to domain agent based on domain
 3. Mark task complete
 4. Repeat until all tasks done
 
@@ -139,7 +139,7 @@ Executes implementation tasks using DUMB LOOP pattern:
 
 1. Get next pending task via `manage-tasks:next`
 2. Read task details (title, specification, steps)
-3. Delegate to domain agent based on plan_type:
+3. Delegate to domain agent based on domain:
    - `java` → `pm-dev-java:java-implement-agent`
    - `javascript` → `pm-dev-frontend:js-implement-agent`
    - `plugin-development` → No delegation (inline)

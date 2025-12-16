@@ -6,7 +6,7 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 
 # Plan Init Skill
 
-**Role**: Complete init phase. Creates plan directory, request.md, detects plan type, and creates configuration. Single-agent initialization pattern.
+**Role**: Complete init phase. Creates plan directory, request.md, detects domain, and creates configuration. Single-agent initialization pattern.
 
 **Key Pattern**: Complete initialization. Creates request.md, status.toon, config.toon, and references.toon. Does NOT create goals (that's the refine phase via decompose).
 
@@ -360,6 +360,6 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 - [x] All file I/O delegated to manage-* scripts
 - [x] Preserves original task input verbatim
 - [x] Supports all three source types
-- [x] Creates config.toon with plan type and finalize fields
+- [x] Creates config.toon with domain and finalize fields
 - [x] Creates status.toon with phases
 - [x] Does NOT create goals (that's refine phase)
