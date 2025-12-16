@@ -27,14 +27,6 @@
     "./skills/cui-javascript-maintenance",
     "./skills/cui-javascript-project",
     "./skills/cui-javascript-unit-testing",
-    "./skills/cui-jsdoc",
-    "./skills/js-plan-implement",
-    "./skills/js-solution-outline",
-    "./skills/js-task-plan"
-  ],
-  "agents": [
-    "./agents/js-plan-solution-outline-agent.md",
-    "./agents/js-plan-implement-agent.md",
-    "./agents/js-task-plan-agent.md"
+    "./skills/cui-jsdoc"
   ]
 }

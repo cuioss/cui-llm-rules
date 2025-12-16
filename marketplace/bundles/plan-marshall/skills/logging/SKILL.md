@@ -79,7 +79,7 @@ entries:
   - timestamp: 2025-12-11T11:14:30Z
     level: INFO
     category: DECISION
-    message: Selected plan-type-java
+    message: Detected domain: java
     phase: init
   - timestamp: 2025-12-11T11:15:20Z
     level: INFO
@@ -140,7 +140,7 @@ Since entries go to separate files (`script-execution.log` vs `work.log`), redun
 **work.log**:
 ```
 [2025-12-11T11:14:30Z] [INFO] Starting init phase
-[2025-12-11T11:14:48Z] [INFO] [DECISION] Selected plan-type-java: Task modifies .java files
+[2025-12-11T11:14:48Z] [INFO] [DECISION] Detected domain: java (pom.xml found)
 [2025-12-11T11:15:20Z] [INFO] [ARTIFACT] Created deliverable: auth module
 ```
 
@@ -198,9 +198,9 @@ log_script_execution(
 result = log_work(
     plan_id='my-plan',
     category='DECISION',
-    message='Selected plan-type-java',
+    message='Detected domain: java',
     phase='init',
-    detail='Task modifies .java files'
+    detail='pom.xml found in project root'
 )
 
 # Read/list work entries

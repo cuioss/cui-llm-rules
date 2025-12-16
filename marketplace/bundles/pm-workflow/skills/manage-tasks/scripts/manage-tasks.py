@@ -181,7 +181,7 @@ def validate_steps_are_file_paths(steps: list[str]) -> tuple[list[str], list[str
     """Validate that steps are file paths, not descriptive text.
 
     Steps MUST be file paths from the deliverable's `affected_files` section.
-    This enforces the task contract from plan-type-api/standards/task-contract.md.
+    This enforces the task contract from plan-wf-skill-api/standards/task-contract.md.
 
     Args:
         steps: List of step strings
@@ -189,7 +189,7 @@ def validate_steps_are_file_paths(steps: list[str]) -> tuple[list[str], list[str
     Returns:
         Tuple of (errors, warnings)
 
-    Contract reference: pm-workflow:plan-type-api/standards/task-contract.md lines 156-159
+    Contract reference: pm-workflow:plan-wf-skill-api/standards/task-contract.md lines 156-159
     """
     errors = []
     warnings = []
@@ -591,7 +591,7 @@ def parse_stdin_task(stdin_content: str) -> dict:
         raise ValueError(
             "Task contract violation - steps must be file paths:\n" +
             "\n".join(step_errors) +
-            "\n\nContract reference: pm-workflow:plan-type-api/standards/task-contract.md"
+            "\n\nContract reference: pm-workflow:plan-wf-skill-api/standards/task-contract.md"
         )
 
     return result

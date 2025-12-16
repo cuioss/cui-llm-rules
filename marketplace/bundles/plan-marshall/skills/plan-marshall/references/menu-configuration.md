@@ -155,21 +155,18 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ---
 
-## Plan-Types
+## Thin Agent Architecture
 
-Plan-types are defined in skill frontmatter and discovered automatically. Available plan-types:
+The pm-workflow bundle uses thin agents that load domain-specific skills dynamically:
 
-| Plan-Type | Skill | Description |
-|-----------|-------|-------------|
-| Java | `pm-workflow:plan-type-java` | Maven/Gradle Java projects |
-| JavaScript | `pm-workflow:plan-type-javascript` | npm/TypeScript projects |
-| Plugin | `pm-workflow:plan-type-plugin` | Claude Code marketplace |
-| Generic | `pm-workflow:plan-type-generic` | Documentation, config |
+| Agent | Purpose | Skill Source |
+|-------|---------|--------------|
+| `plan-init-agent` | Initialize plan, detect domains | System skills only |
+| `solution-outline-agent` | Create deliverables | `config.workflow_skills.{domain}.solution_outline` |
+| `task-plan-agent` | Create tasks from deliverables | `config.workflow_skills.{domain}.task_plan` |
+| `task-execute-agent` | Execute single task | `config.workflow_skills.{domain}.{profile}` + `task.skills` |
 
-To create custom plan-types:
-```
-Read references/plan-type-wizard.md
-```
+Domain skill mappings are configured in `skill_domains` within marshal.json and written to plan's config.toon during init.
 
 ---
 

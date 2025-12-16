@@ -242,7 +242,7 @@ def test_create_config():
     with PlanTestContext(plan_id='test-config') as ctx:
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'test-config',
-            '--plan-type', 'pm-workflow:plan-type-java'
+            '--domain', 'java'
         )
         assert result.success, f"Script failed: {result.stderr}"
         # ctx.fixture_dir - base test directory

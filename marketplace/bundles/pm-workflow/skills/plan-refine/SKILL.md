@@ -1,12 +1,12 @@
 ---
 name: plan-refine
-description: Refine phase skill for GENERIC plan types only
+description: Refine phase skill for generic domain only
 allowed-tools: Read, Bash, Skill, AskUserQuestion
 ---
 
 # Plan Refine Skill
 
-**SCOPE**: This skill is ONLY for **generic plan types** without domain-specific agents.
+**SCOPE**: This skill is ONLY for **generic domain** without domain-specific skills.
 
 **Role**: Fallback refine phase for generic plans. Creates solution document and tasks using inline logic.
 
@@ -27,26 +27,26 @@ allowed-tools: Read, Bash, Skill, AskUserQuestion
 
 ---
 
-## Skill-Based Routing
+## Thin Agent Routing
 
-The `/plan-manage` command uses **skill-based routing**:
+The `/plan-manage` command uses thin agents with domain skill loading:
 
-1. Loads plan-type skill (e.g., `pm-workflow:plan-type-java`)
-2. Reads `domain:` frontmatter for agent references
-3. Invokes domain agents directly via Task tool
+1. Reads config.toon for domain and workflow_skills
+2. Loads domain-specific skills via workflow_skills block
+3. Falls back to this skill when domain has no specific skills
 
-**This skill is the fallback** when plan-type has `domain.solution_outline_agent: null` (generic plans).
+**This skill is the fallback** for generic domain (no domain-specific solution outline skill).
 
 ```
 /plan-manage action=refine plan=X
   │
-  ├─ Load plan-type skill, read domain: frontmatter
+  ├─ Read config.toon workflow_skills.{domain}
   │
-  ├─ If domain.solution_outline_agent is NOT null:
-  │    → Task: {skill.domain.solution_outline_agent}
-  │    → Task: {skill.domain.task_plan_agent}
+  ├─ If solution_outline skill is NOT null:
+  │    → Task: solution-outline-agent (loads domain skill)
+  │    → Task: task-plan-agent (loads domain skill)
   │
-  └─ If domain.solution_outline_agent IS null (generic):
+  └─ If solution_outline skill IS null (generic):
        → Task: plan-refine-agent
          → Skill: plan-refine ← THIS SKILL
            → Write tool → solution_outline.md (direct)

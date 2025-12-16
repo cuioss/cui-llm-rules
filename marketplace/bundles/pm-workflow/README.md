@@ -1,16 +1,27 @@
 # CUI Task Workflow
 
-Plan-based task management system that transforms high-level task descriptions into executable action sequences through progressive refinement.
+Plan-based task management system that transforms high-level task descriptions into executable action sequences through progressive refinement using thin agents and domain-agnostic workflow skills.
 
 ## Architecture
 
-**Core Principle**: Plan-Type Skills are SINGLE SOURCE OF TRUTH, phase skills execute checklists.
-
-See [skills/plan-refine/standards/architecture.md](skills/plan-refine/standards/architecture.md) for full architecture documentation.
+**Core Principle**: Thin agents load workflow skills from config.toon. Domain knowledge comes from config, not hardcoded in agents.
 
 ```
-User Request → Plan-Type Skill → Phase Skills (execute checklists) → Result
+User Request → [Thin Agents] → Workflow Skills (from config.toon) → Domain Skills (from task.skills) → Result
 ```
+
+### 4-Phase Model
+
+```
+init → refine → execute → finalize
+```
+
+| Phase | Agent | Purpose |
+|-------|-------|---------|
+| `init` | `plan-init-agent` | Create plan, detect domains, write config.toon |
+| `refine` | `solution-outline-agent` → `task-plan-agent` | Create deliverables, then tasks |
+| `execute` | `task-execute-agent` | Execute tasks with two-tier skill loading |
+| `finalize` | (inline) | Create PR, cleanup |
 
 ## Commands
 
@@ -19,8 +30,8 @@ Manage task plans - list, create, refine.
 
 ```bash
 /plan-manage action=list              # List active plans
-/plan-manage action=create task="..." # Create new plan
-/plan-manage action=refine            # Refine current plan
+/plan-manage action=init task="..."   # Create new plan and refine
+/plan-manage action=refine            # Refine specific plan
 ```
 
 ### /plan-execute
@@ -28,7 +39,7 @@ Execute task plans - implement, verify, finalize.
 
 ```bash
 /plan-execute                         # Continue current plan
-/plan-execute phase=implement         # Execute specific phase
+/plan-execute phase=execute           # Execute specific phase
 ```
 
 ### /pr-doctor
@@ -47,27 +58,42 @@ Quick task implementation (combines create + execute).
 /task-implement task="Add feature"    # From description
 ```
 
+## Thin Agent Pattern
+
+All 4 agents are domain-agnostic wrappers that load skills from config.toon:
+
+| Agent | Loads From | Purpose |
+|-------|------------|---------|
+| `plan-init-agent` | System skills only | Creates plan, detects domains, writes workflow_skills |
+| `solution-outline-agent` | `config.workflow_skills.{domain}.solution_outline` | Creates deliverables from request |
+| `task-plan-agent` | `config.workflow_skills.{domain}.task_plan` | Creates tasks from deliverables |
+| `task-execute-agent` | `config.workflow_skills.{domain}.{profile}` + `task.skills` | Executes single task |
+
 ## Skills
 
-### Plan-Type Skills (Single Source of Truth)
+### API Contract Skill
 
-All plan-type skills implement `pm-workflow:plan-type-api` contract.
+| Skill | Purpose |
+|-------|---------|
+| `plan-wf-skill-api` | **API contract** for all workflow skills |
 
-| Skill | Phases | Purpose |
-|-------|--------|---------|
-| `plan-type-api` | - | **API contract** for all plan-type skills |
-| `plan-type-generic` | 3 | Generic workflow for docs, config, quick fixes |
-| `plan-type-plugin` | 4 | Plugin development with /plugin-doctor verification |
-| `plan-type-java` | 4 | Java/Maven/Gradle implementation |
-| `plan-type-javascript` | 4 | JavaScript/npm implementation |
+### Workflow Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `solution-outline` | Domain-agnostic solution outline creation |
+| `task-plan` | Domain-agnostic task planning |
+| `task-implementation` | Domain-agnostic implementation workflow |
+| `task-testing` | Domain-agnostic testing workflow |
 
 ### Phase Skills
 
 | Skill | Role | Purpose |
 |-------|------|---------|
-| `plan-init` | Setup | Create plan structure, detect type, configure |
-| `plan-refine` | Analysis | Decompose request into goals, generate tasks |
-| `plan-execute` | Execution | Execute checklist items sequentially (dumb runner) |
+| `plan-init` | Setup | Create plan structure, detect domains, configure |
+| `plan-refine` | Analysis | Coordinate solution outline and task plan agents |
+| `plan-execute` | Execution | Coordinate task-execute-agent for each task |
+| `plan-finalize` | Cleanup | Create PR, archive plan |
 
 ### Support Skills
 
@@ -82,116 +108,94 @@ All plan-type skills implement `pm-workflow:plan-type-api` contract.
 | Skill | Script | Purpose |
 |-------|--------|---------|
 | `manage-plan-documents` | `manage-plan-document.py` | Request/Solution document CRUD |
-| `manage-tasks` | `manage-task.py` | Tasks + steps CRUD |
+| `manage-solution-outline` | `manage-solution-outline.py` | Solution outline queries |
+| `manage-tasks` | `manage-tasks.py` | Tasks + steps CRUD |
 | `manage-files` | `manage-files.py` | Generic file I/O |
 | `manage-config` | `manage-config.py` | config.toon domain |
 | `manage-references` | `manage-references.py` | references.toon domain |
 | `manage-lifecycle` | `manage-lifecycle.py` | status.toon + phases |
-| `manage-lessons` | `manage-lesson.py` | Global lessons |
 
 **Logging**: Work log entries and script execution logging are provided by `plan-marshall:logging` skill.
 
-## Plan-Type Skill API
+## Domain Configuration
 
-**Contract**: `pm-workflow:plan-type-api` skill defines the full API specification.
+Domains and workflow skills are stored in `config.toon`:
 
-All plan-type skills implement:
+```toon
+domains: [java]
 
-| Element | Description |
-|---------|-------------|
-| `configure` operation | Adds domain-specific fields to references.toon and finalize config |
-| `domain:` frontmatter | Declares solution_outline_agent, task_plan_agent, verification_command |
-
-**Key Design**:
-- `configure` operation adds finalize configuration to config.toon
-- `domain:` frontmatter enables command-level routing to domain agents
-- Domain agents (solution_outline_agent, task_plan_agent) are invoked by `/plan-manage` command via Task tool
-
-## Skill-Based Domain Agent Routing
-
-The refine phase uses **skill-based routing**: commands load plan-type skills and invoke domain agents from the skill's `domain:` frontmatter.
-
-### Plan-Type Skills
-
-Each plan-type skill declares its domain agents in structured frontmatter:
-
-| Plan Type | Solution Outline Agent | Task Plan Agent |
-|-----------|-------------|------------|
-| `java` | `pm-dev-java:java-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` |
-| `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` |
-| `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` |
-| `generic` | N/A (uses plan-refine-agent fallback) | N/A |
-
-### Refine Flow
-
-```
-/plan-manage action=refine
-   │
-   ├─ manage-config get --field plan_type
-   │     └─ "pm-workflow:plan-type-java"
-   │
-   ├─ Skill: pm-workflow:plan-type-java
-   │     └─ Read frontmatter.domain
-   │
-   ├─ Task: {domain.solution_outline_agent}
-   │     └─ Creates solution_outline.md with goals from request.md
-   │
-   └─ Task: {domain.task_plan_agent}
-         └─ Creates TASK files from solution_outline.md goals
+workflow_skills:
+  java:
+    solution_outline: pm-workflow:solution-outline
+    task_plan: pm-workflow:task-plan
+    implementation: pm-workflow:task-implementation
+    testing: pm-workflow:task-testing
 ```
 
-**Override**: Projects can customize agent mappings via marshal.json for project-specific needs.
+For multi-domain plans (fullstack):
+```toon
+domains: [java, javascript]
 
-### Sub-Type Templates
+workflow_skills:
+  java:
+    solution_outline: pm-workflow:solution-outline
+    task_plan: pm-workflow:task-plan
+    implementation: pm-workflow:task-implementation
+  javascript:
+    solution_outline: pm-workflow:solution-outline
+    task_plan: pm-workflow:task-plan
+    implementation: pm-workflow:task-implementation
+```
 
-Located in `skills/plan-type-plugin/templates/` (internal to plan-type-plugin):
+## Two-Tier Skill Loading
 
-| Template | Trigger | Provides |
-|----------|---------|----------|
-| `script-task.md` | "create script" | TDD workflow |
-| `skill-task.md` | "create skill" | Skill structure |
-| `command-task.md` | "create command" | Command orchestration |
-| `agent-task.md` | "create agent" | Agent frontmatter |
+Task execution uses two-tier skill loading:
+
+| Tier | Source | Purpose |
+|------|--------|---------|
+| **Tier 1** | Agent frontmatter | System skills (architecture, rules) |
+| **Tier 2** | `task.skills` array | Domain-specific skills (java-core, java-cdi, etc.) |
+
+Task-plan resolves skills during task creation:
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+    resolve-domain-skills --domain java --profile implementation
+```
 
 ## File Structure
 
 ```
-planning/
+pm-workflow/
 ├── README.md                    # This file
+├── agents/
+│   ├── plan-init-agent.md       # Creates plan, detects domains
+│   ├── solution-outline-agent.md # Creates deliverables
+│   ├── task-plan-agent.md       # Creates tasks
+│   └── task-execute-agent.md    # Executes single task
 ├── commands/
-│   ├── plan-manage.md
-│   ├── plan-execute.md
+│   ├── plan-manage.md           # Init + refine phases
+│   ├── plan-execute.md          # Execute + finalize phases
 │   ├── pr-doctor.md
 │   └── task-implement.md
 └── skills/
-    ├── plan-type-api/           # API contract for all plan-type skills
-    │   └── SKILL.md             # Contract: configure operation + domain frontmatter
-    ├── plan-type-generic/       # Generic workflow skill (3 phases)
-    │   └── SKILL.md             # Implements plan-type-api
-    ├── plan-type-plugin/        # Plugin workflow skill (4 phases)
-    │   ├── SKILL.md             # Implements plan-type-api
-    │   └── templates/           # Sub-type templates (internal)
-    ├── plan-type-java/          # Java workflow skill (4 phases)
-    │   └── SKILL.md             # Implements plan-type-api
-    ├── plan-type-javascript/    # JavaScript workflow skill (4 phases)
-    │   └── SKILL.md             # Implements plan-type-api
-    ├── plan-init/               # Init phase skill (complete initialization)
+    ├── plan-wf-skill-api/       # API contract for workflow skills
     │   ├── SKILL.md
-    │   └── standards/           # Workflow reference
-    ├── plan-refine/             # Refine phase skill (goals + tasks)
-    │   ├── SKILL.md
-    │   ├── standards/           # Architecture and workflow docs
-    │   │   ├── architecture.md  # Core architecture documentation
-    │   │   └── workflow.md      # Refine workflow reference
-    │   └── templates/           # Artifact templates
-    ├── plan-execute/            # Execute phase skill (dumb runner)
+    │   └── standards/           # Contract documents
+    ├── solution-outline/        # Solution outline workflow skill
+    ├── task-plan/               # Task planning workflow skill
+    ├── task-implementation/     # Implementation workflow skill
+    ├── task-testing/            # Testing workflow skill
+    ├── plan-init/               # Init phase skill
+    ├── plan-refine/             # Refine phase coordination
+    ├── plan-execute/            # Execute phase coordination
+    ├── plan-finalize/           # Finalize phase skill
     ├── manage-plan-documents/   # Request/Solution document CRUD
+    ├── manage-solution-outline/ # Solution outline queries
     ├── manage-tasks/            # Tasks + steps CRUD
     ├── manage-files/            # Generic file I/O
     ├── manage-config/           # config.toon domain
     ├── manage-references/       # references.toon domain
     ├── manage-lifecycle/        # status.toon + phases
-    ├── manage-lessons/          # Global lessons
     ├── git-workflow/
     ├── pr-workflow/
     └── sonar-workflow/
@@ -199,23 +203,23 @@ planning/
 .plan/                           # Plan storage (per project)
 ├── plans/                       # Active plans
 │   └── {plan-name}/
-│       ├── plan.md
+│       ├── request.md
+│       ├── solution_outline.md
 │       ├── config.toon
-│       └── references.toon
-├── archived-plans/              # Completed plans
-└── lessons-learned/             # Captured lessons
+│       └── tasks/
+└── archived-plans/              # Completed plans
 ```
 
 ## Dependencies
 
-- **plan-marshall** - Script runner, file operations base
-- **pm-plugin-development** - Plugin doctor, plugin-solution-outline-agent, plugin-task-plan-agent
-- **builder** - Build execution (maven/npm)
-- **pm-dev-java** - java-solution-outline-agent, java-task-plan-agent, java-implement-agent
-- **pm-dev-frontend** - js-solution-outline-agent, js-task-plan-agent
+- **plan-marshall** - Script runner, file operations base, domain skill configuration
+- **pm-plugin-development** - Plugin domain skills (plugin-solution-outline, plugin-task-plan, plugin-plan-implement)
+- **pm-dev-builder** - Build execution (maven/npm)
+- **pm-dev-java** - Java domain skills (java-core, java-cdi, etc.)
+- **pm-dev-frontend** - JavaScript domain skills (cui-javascript, cui-jsdoc, etc.)
 
 ## Installation
 
 ```bash
-/plugin install planning
+/plugin install pm-workflow
 ```

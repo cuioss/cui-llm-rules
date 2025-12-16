@@ -98,13 +98,13 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
 
 ---
 
-## Domain Routing Summary
+## Thin Agent Architecture
 
-| Plan Type | Handler | Routing |
-|-----------|---------|---------|
-| `generic` | `plan-refine-agent` → this workflow | Command invokes agent via Task |
-| `java` | `java-solution-outline-agent`, `java-task-plan-agent` | Command reads skill frontmatter, invokes via Task |
-| `javascript` | `js-solution-outline-agent`, `js-task-plan-agent` | Command reads skill frontmatter, invokes via Task |
-| `plugin-development` | `plugin-solution-outline-agent`, `plugin-task-plan-agent` | Command reads skill frontmatter, invokes via Task |
+The refine phase uses thin agents that load domain-specific skills dynamically:
 
-**Key**: The `/plan-manage` command handles all routing. This skill is only invoked for generic plans.
+| Agent | Purpose | Skill Source |
+|-------|---------|--------------|
+| `solution-outline-agent` | Create deliverables | `config.workflow_skills.{domain}.solution_outline` |
+| `task-plan-agent` | Create tasks | `config.workflow_skills.{domain}.task_plan` |
+
+**Key**: The `/plan-manage` command invokes the thin agents, which load domain skills from config.toon's workflow_skills block.

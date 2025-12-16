@@ -359,18 +359,18 @@ def test_name_pattern_filters_agents():
 
 def test_name_pattern_multiple_patterns():
     """Test --name-pattern with multiple pipe-separated patterns."""
-    result = run_script(SCRIPT_PATH, '--resource-types', 'agents', '--name-pattern', '*-plan-*|*-specify-*')
+    result = run_script(SCRIPT_PATH, '--resource-types', 'agents', '--name-pattern', 'plan-*|task-*')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     total_agents = data.get('statistics', {}).get('total_agents', 0)
-    assert total_agents >= 2, "Should find at least 2 agents matching plan or specify patterns"
+    assert total_agents >= 2, "Should find at least 2 agents matching plan-* or task-* patterns"
 
     # Verify all agents match one of the patterns
     for bundle in data.get('bundles', []):
         for agent in bundle.get('agents', []):
-            assert '-plan-' in agent['name'] or '-specify-' in agent['name'], \
-                f"Agent {agent['name']} should match *-plan-* or *-specify-* pattern"
+            assert agent['name'].startswith('plan-') or agent['name'].startswith('task-'), \
+                f"Agent {agent['name']} should match plan-* or task-* pattern"
 
 
 def test_name_pattern_no_matches():
@@ -440,19 +440,19 @@ def test_bundles_filter_nonexistent():
 
 def test_combined_bundle_and_name_pattern():
     """Test combining --bundles and --name-pattern filters."""
-    result = run_script(SCRIPT_PATH, '--bundles', 'pm-dev-java', '--resource-types', 'agents', '--name-pattern', '*-plan-*')
+    result = run_script(SCRIPT_PATH, '--bundles', 'pm-workflow', '--resource-types', 'agents', '--name-pattern', 'plan-*')
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     bundles = data.get('bundles', [])
     assert len(bundles) == 1, "Should have exactly 1 bundle"
-    assert bundles[0]['name'] == 'pm-dev-java', "Bundle should be pm-dev-java"
+    assert bundles[0]['name'] == 'pm-workflow', "Bundle should be pm-workflow"
 
-    # Should find java-task-plan-agent
+    # Should find plan-init-agent (thin agent pattern)
     agents = bundles[0].get('agents', [])
-    assert len(agents) >= 1, "Should find at least 1 plan agent in pm-dev-java"
+    assert len(agents) >= 1, "Should find at least 1 plan-* agent in pm-workflow"
     for agent in agents:
-        assert '-plan-' in agent['name'], f"Agent {agent['name']} should match *-plan-*"
+        assert agent['name'].startswith('plan-'), f"Agent {agent['name']} should match plan-*"
 
 
 # =============================================================================

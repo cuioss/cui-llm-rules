@@ -1,30 +1,97 @@
 # Task Contract
 
-Standard structure for tasks created by task-plan agents. Tasks represent committable units of work derived from deliverables.
+Standard structure for tasks created by task-plan skills. Tasks represent committable units of work derived from deliverables.
 
 ## Purpose
 
 Each task:
 
 - References one or more deliverables (M:N relationship)
-- Contains delegation information for execution
+- Contains domain and profile for workflow routing
+- Includes explicit skills array for domain knowledge
 - Includes verification criteria
 - Specifies dependencies on other tasks (for ordering/parallelization)
 - Results in exactly one commit
 
-> **Full Specification**: See [manage-tasks/standards/task-format.md](../../manage-tasks/standards/task-format.md) for the complete task file format and field definitions.
+## Task File Format (TOON)
 
-## Key Fields for Task Planning
+```toon
+id: TASK-1
+title: "Create CacheConfig class"
+domain: java
+profile: implementation
+skills:
+  - pm-dev-java:java-core
+  - pm-dev-java:java-cdi
+deliverables: [1]
+depends_on: none
 
-| Field | Purpose in Planning |
-|-------|---------------------|
-| `deliverables` | Track which solution outline items are covered |
-| `depends_on` | Enable execution ordering and parallelization |
-| `delegation.skill` | Skill to execute task |
-| `delegation.workflow` | Workflow within skill |
-| `delegation.domain` | Domain for loading default skills |
-| `delegation.context_skills` | Optional skills from domain |
-| `verification` | Consolidated from deliverable verification criteria |
+description: |
+  Create CacheConfig class with Redis configuration...
+
+steps[N]{number,title,status}:
+1,src/main/java/com/example/CacheConfig.java,pending
+2,src/main/java/com/example/CacheManager.java,pending
+
+verification:
+  commands:
+    - mvn test -Dtest=CacheConfigTest
+  criteria: All tests pass
+```
+
+## Key Fields
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `id` | string | Unique task identifier (TASK-N) |
+| `title` | string | Task title for display |
+| `domain` | string | Single domain from deliverable (java, javascript, plugin) |
+| `profile` | string | Workflow type (implementation, testing) |
+| `skills` | list | Domain skills to load (explicit, from resolve-domain-skills) |
+| `deliverables` | list | Referenced deliverable numbers |
+| `depends_on` | string | Task dependencies for ordering |
+| `description` | string | Detailed task description |
+| `steps` | table | File paths to process |
+| `verification` | object | Commands and criteria |
+
+## Domain and Profile
+
+### Domain Field
+
+The `domain` field is inherited from the deliverable:
+
+| Domain | Description |
+|--------|-------------|
+| `java` | Java code |
+| `javascript` | JavaScript code |
+| `plugin` | Marketplace plugins |
+
+### Profile Field
+
+The `profile` field determines which workflow skill is loaded:
+
+| Profile | Workflow Skill | Description |
+|---------|----------------|-------------|
+| `implementation` | `config.workflow_skills.{domain}.implementation` | Create/modify production code |
+| `testing` | `config.workflow_skills.{domain}.testing` | Create/modify test code |
+
+## Skills Array
+
+The `skills` array contains domain-specific skills resolved during task-plan:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+    resolve-domain-skills --domain java --profile implementation
+```
+
+Returns defaults and optionals. Task-plan:
+1. Adds all defaults to `skills`
+2. Selects relevant optionals based on task content
+3. Writes final list to `task.skills`
+
+**Two-tier skill loading at execution**:
+- **Tier 1 (implicit)**: System skills loaded by agent automatically
+- **Tier 2 (explicit)**: `task.skills` loaded by agent from task file
 
 ## Deliverable-to-Task Relationship
 
@@ -32,9 +99,9 @@ Tasks and deliverables have a **many-to-many relationship**:
 
 | Pattern | Description | Example |
 |---------|-------------|---------|
-| 1:1 | One deliverable → one task | Large coherent deliverable |
-| N:1 | Multiple deliverables → one task | Similar small changes (aggregation) |
-| 1:N | One deliverable → multiple tasks | Mixed execution modes (split) |
+| 1:1 | One deliverable -> one task | Large coherent deliverable |
+| N:1 | Multiple deliverables -> one task | Similar small changes (aggregation) |
+| 1:N | One deliverable -> multiple tasks | Mixed execution modes (split) |
 
 ### When to Use Each Pattern
 
@@ -45,7 +112,7 @@ Tasks and deliverables have a **many-to-many relationship**:
 
 **N:1 (Aggregate)**:
 - Same change_type
-- Same suggested_skill and workflow
+- Same domain and profile
 - Same execution_mode (must be `automated`)
 - No dependency between them
 - Combined file count < 10
@@ -57,7 +124,7 @@ Tasks and deliverables have a **many-to-many relationship**:
 
 ## Optimization Workflow
 
-Task-plan agents MUST follow this workflow:
+Task-plan skills MUST follow this workflow:
 
 ### Step 1: Load All Deliverables
 
@@ -65,9 +132,7 @@ Extract for each deliverable:
 - `metadata.change_type`
 - `metadata.execution_mode`
 - `metadata.domain`
-- `metadata.suggested_skill`
-- `metadata.suggested_workflow`
-- `metadata.context_skills`
+- `metadata.profile`
 - `metadata.depends`
 - `affected_files`
 - `verification`
@@ -83,7 +148,7 @@ Extract for each deliverable:
 
 For each pair of deliverables, check:
 - Same change_type?
-- Same suggested_skill?
+- Same domain and profile?
 - Same execution_mode?
 - Combined file count < 10?
 - Verification can be merged?
@@ -94,19 +159,21 @@ Cannot aggregate if one depends on the other.
 ### Step 4: Analyze for Splits
 
 For each deliverable, check:
-- `execution_mode: mixed` → MUST split
-- Different concerns → SHOULD split
-- File count > 15 → CONSIDER splitting
+- `execution_mode: mixed` -> MUST split
+- Different concerns -> SHOULD split
+- File count > 15 -> CONSIDER splitting
 
 ### Step 5: Create Optimized Tasks
 
-- Group aggregated deliverables
-- Split mixed-mode deliverables
-- Extract delegation (skill, workflow, domain, context_skills)
-- Consolidate verification commands
-- Generate steps from file lists
-- Compute task dependencies from deliverable dependencies
-- Identify parallelizable tasks
+For each task:
+1. Resolve skills: `resolve-domain-skills --domain {domain} --profile {profile}`
+2. Add all defaults to `skills`
+3. Select relevant optionals based on task content
+4. Set `domain` and `profile` from deliverable
+5. Consolidate verification commands
+6. Generate steps from file lists
+7. Compute task dependencies from deliverable dependencies
+8. Identify parallelizable tasks
 
 ### Step 6: Log Optimization Decisions
 
@@ -116,28 +183,17 @@ Record why deliverables were grouped/split for audit trail.
 
 | Factor | Aggregate | Split | Keep |
 |--------|-----------|-------|------|
-| Same change_type | ✓ | | |
-| Same suggested_skill | ✓ | | |
-| Same suggested_workflow | ✓ | | |
-| Combined files < 10 | ✓ | | |
-| Same execution_mode | ✓ | | |
-| Both depends: none | ✓ | | |
-| One depends on other | ✗ (NEVER) | | |
-| execution_mode: mixed | | ✓ | |
-| Different concerns | | ✓ | |
+| Same change_type | Y | | |
+| Same domain and profile | Y | | |
+| Combined files < 10 | Y | | |
+| Same execution_mode | Y | | |
+| Both depends: none | Y | | |
+| One depends on other | N (NEVER) | | |
+| execution_mode: mixed | | Y | |
+| Different concerns | | Y | |
 | File count > 15 | | Consider | |
-| Large but coherent | | | ✓ |
-| Single file | | | ✓ |
-
-## Dependency Rules for Aggregation
-
-| D1.depends | D2.depends | Can Aggregate? | Reason |
-|------------|------------|----------------|--------|
-| none | none | Yes | Both independent |
-| none | D1 | **No** | D2 depends on D1 |
-| D3 | D3 | Yes | Same dependency, can run together |
-| D3 | D4 | Yes | Different deps, no conflict |
-| D2 | D1 | **No** | Creates cycle if aggregated |
+| Large but coherent | | | Y |
+| Single file | | | Y |
 
 ## Task Creation API
 
@@ -149,6 +205,10 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
 title: {aggregated title}
 deliverables: [{n1}, {n2}, {n3}]
 domain: {domain}
+profile: {profile}
+skills:
+  - pm-dev-java:java-core
+  - pm-dev-java:java-cdi
 phase: execute
 description: |
   {combined description}
@@ -160,13 +220,6 @@ steps:
 
 depends_on: TASK-1, TASK-2
 
-delegation:
-  skill: {skill}
-  workflow: {workflow}
-  context_skills:
-    - {skill1}
-    - {skill2}
-
 verification:
   commands:
     - {cmd1}
@@ -175,7 +228,7 @@ verification:
 EOF
 ```
 
-## Task Plan Agent Output
+## Task-Plan Output
 
 ```toon
 status: success
@@ -250,17 +303,4 @@ steps:
 - Steps are action descriptions, not file paths
 - Cannot track which files have been processed
 - "all remaining agents" is vague
-- Validation will reject this task
-
-### Invalid Steps (Wrong Content in Tabular Format)
-
-```toon
-steps[2]{number,title,status}:
-1,Convert plan-init-agent outputs,pending
-2,Convert plan-refine-agent outputs,pending
-```
-
-**Why invalid:**
-- Title column contains descriptions, not file paths
-- The TOON tabular format is correct, but content must be file paths
 - Validation will reject this task

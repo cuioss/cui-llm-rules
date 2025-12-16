@@ -274,9 +274,9 @@ python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-do
   --body "$BODY"
 ```
 
-### With domain solution outline agents (java-solution-outline, js-solution-outline, plugin-solution-outline)
+### With solution-outline-agent
 
-Domain solution outline agents read the request document:
+The thin agent reads the request document:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-plan-documents:manage-plan-documents \

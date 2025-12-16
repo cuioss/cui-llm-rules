@@ -205,42 +205,32 @@ This populates `modules` in marshal.json with per-module domain and build system
 
 ---
 
-## Step 5: Plan-Type Selection
+## Step 5: Verify Skill Domain Configuration
 
-Plan-types are automatically available based on installed skills. The following plan-types are provided by the marketplace:
+Skill domains configure which implementation skills are loaded during plan execution. The thin agent architecture routes skills via `config.toon`'s workflow_skills block.
 
-| Plan-Type | Skill | Description |
-|-----------|-------|-------------|
-| Java | `pm-workflow:plan-type-java` | Maven/Gradle projects with Java/Kotlin |
-| JavaScript | `pm-workflow:plan-type-javascript` | npm/TypeScript projects |
-| Plugin | `pm-workflow:plan-type-plugin` | Claude Code marketplace development |
-| Generic | `pm-workflow:plan-type-generic` | Documentation, config, quick fixes |
-
-**Note**: Domain agents and plan defaults are defined in plan-type skill frontmatter (`patterns:`, `keywords:`, `domain:`, `plan_defaults:`), not in marshal.json. No configuration is required - plan-types are discovered automatically.
-
----
-
-## Step 6: Custom Plan-Types
-
-Custom plan-types require creating new plan-type skills with appropriate frontmatter (`patterns:`, `keywords:`, `domain:`, `plan_defaults:`).
-
-```
-AskUserQuestion:
-  question: "Define project-local plan-types?"
-  options:
-    - label: "Yes"
-      description: "Create custom plan-type skill"
-      value: "yes"
-    - label: "No"
-      description: "Use only standard plan-types"
-      value: "no"
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains list
 ```
 
-If yes:
+**Expected output**: Shows configured domains with their workflow_skills mappings:
+```json
+{
+  "java": {
+    "workflow_skills": {
+      "solution_outline": "pm-plugin-development:plugin-solution-outline",
+      "task_plan": "pm-plugin-development:plugin-task-plan",
+      "implementation": "pm-plugin-development:plugin-plan-implement",
+      "testing": "pm-plugin-development:plugin-plan-implement"
+    },
+    "core": {...},
+    "implementation": {...},
+    "testing": {...}
+  }
+}
 ```
-Read references/plan-type-wizard.md
-```
-Execute the Custom Plan-Type Wizard workflow from that file. This creates a new plan-type skill in the project's bundle.
+
+**Note**: The pm-workflow thin agents (solution-outline-agent, task-plan-agent, task-execute-agent) load domain-specific skills dynamically based on deliverable.domain from config.toon.
 
 ---
 
@@ -282,11 +272,10 @@ marshal:
 build_systems:
   - maven
   - npm
-plan_types:
-  - pm-workflow:plan-type-java
-  - pm-workflow:plan-type-javascript
-  - pm-workflow:plan-type-generic
-custom_types: 0
+skill_domains:
+  - java
+  - javascript
+  - plugin
 
 next_steps:
   - Run /plan-manage to create a new plan

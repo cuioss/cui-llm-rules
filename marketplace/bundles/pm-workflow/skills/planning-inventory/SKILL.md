@@ -12,16 +12,16 @@ Provides a unified view of all planning-related components across the marketplac
 
 ## Purpose
 
-Planning-related components are distributed across multiple bundles:
+Planning-related components are distributed across bundles:
 
 | Bundle | Component Types |
 |--------|-----------------|
-| `pm-workflow` | Core infrastructure (plan-*, manage-*, *-workflow) |
-| `pm-dev-java` | java-task-plan, java-solution-outline, java-plan-implement (skills + agents) |
-| `pm-dev-frontend` | js-task-plan, js-solution-outline, js-plan-implement (skills + agents) |
-| `pm-plugin-development` | plugin-task-plan, plugin-solution-outline, plugin-plan-implement (skills + agents) |
+| `pm-workflow` | Core infrastructure (plan-*, manage-*, *-workflow, thin agents) |
+| `pm-plugin-development` | plugin-task-plan, plugin-solution-outline, plugin-plan-implement (skills) |
 
-This skill provides a single command to discover all these components.
+This skill provides a single command to discover all planning components.
+
+**Note**: pm-dev-java and pm-dev-frontend no longer contain planning-specific components. The thin agent architecture in pm-workflow loads domain skills dynamically via config.toon.
 
 ## When to Use This Skill
 
@@ -80,27 +80,25 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 ```json
 {
   "patterns": ["plan-*", "manage-*", "*-workflow", "*-task-plan", "*-solution-outline", "*-plan-*"],
-  "bundles_scanned": ["pm-workflow", "pm-dev-java", "pm-dev-frontend", "pm-plugin-development"],
+  "bundles_scanned": ["pm-workflow", "pm-plugin-development"],
   "core": {
     "bundle": "pm-workflow",
-    "agents": [...],
+    "agents": [{"name": "plan-init-agent"}, {"name": "solution-outline-agent"}, {"name": "task-plan-agent"}, {"name": "task-execute-agent"}],
     "commands": [...],
     "skills": [...],
     "scripts": [...]
   },
   "derived": [
     {
-      "bundle": "pm-dev-java",
-      "agents": [{"name": "java-task-plan-agent", ...}, {"name": "java-plan-solution-outline-agent", ...}, {"name": "java-plan-implement-agent", ...}],
-      "skills": [{"name": "java-task-plan", ...}, {"name": "java-solution-outline", ...}, {"name": "java-plan-implement", ...}],
-      ...
-    },
-    ...
+      "bundle": "pm-plugin-development",
+      "agents": [],
+      "skills": [{"name": "plugin-task-plan"}, {"name": "plugin-solution-outline"}, {"name": "plugin-plan-implement"}]
+    }
   ],
   "statistics": {
-    "core": {"agents": 3, "commands": 4, "skills": 22, "scripts": 12, "total": 41},
-    "derived": {"bundles": 3, "agents": 6, "skills": 6, "total": 12},
-    "total_components": 53
+    "core": {"agents": 4, "commands": 4, "skills": 20, "scripts": 12, "total": 40},
+    "derived": {"bundles": 1, "agents": 0, "skills": 3, "total": 3},
+    "total_components": 43
   }
 }
 ```
@@ -111,13 +109,12 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 {
   "core_bundle": "pm-workflow",
   "core_components": [
-    {"type": "skills", "names": ["plan-init", "plan-refine", "plan-execute", ...]},
-    {"type": "agents", "names": ["plan-init-agent", "plan-refine-agent", ...]},
-    {"type": "commands", "names": ["task-implement", ...]}
+    {"type": "skills", "names": ["plan-init", "plan-execute", "plan-finalize", ...]},
+    {"type": "agents", "names": ["plan-init-agent", "solution-outline-agent", "task-plan-agent", "task-execute-agent"]},
+    {"type": "commands", "names": ["task-implement", "plan-manage", "plan-execute", "pr-doctor"]}
   ],
   "derived_bundles": [
-    {"bundle": "pm-dev-java", "agents": ["java-task-plan-agent", "java-plan-solution-outline-agent", "java-plan-implement-agent", ...], "skills": ["java-task-plan", "java-solution-outline", "java-plan-implement", ...]},
-    ...
+    {"bundle": "pm-plugin-development", "agents": [], "skills": ["plugin-task-plan", "plugin-solution-outline", "plugin-plan-implement"]}
   ],
   "statistics": {...}
 }
@@ -129,20 +126,25 @@ python3 .plan/execute-script.py pm-workflow:planning-inventory:scan-planning-inv
 
 | Pattern | Examples |
 |---------|----------|
-| `plan-*` | plan-init, plan-refine, plan-execute, plan-finalize |
+| `plan-*` | plan-init, plan-execute, plan-finalize |
 | `manage-*` | manage-tasks, manage-plan-documents, manage-config, manage-lifecycle |
 | `*-workflow` | pr-workflow, git-workflow, sonar-workflow |
 | `task-*` | task-implement |
 | `pr-*` | pr-doctor |
-| `plan-type-*` | plan-type-java, plan-type-javascript, plan-type-plugin |
+
+**Thin Agents** (4 generic agents that load domain skills dynamically):
+- `plan-init-agent` - Initialize plan, detect domains
+- `solution-outline-agent` - Create deliverables
+- `task-plan-agent` - Create tasks from deliverables
+- `task-execute-agent` - Execute single task
 
 ### Derived Components (domain bundles)
 
-| Bundle | Agents | Skills |
-|--------|--------|--------|
-| pm-dev-java | java-task-plan-agent, java-plan-solution-outline-agent, java-plan-implement-agent | java-task-plan, java-solution-outline, java-plan-implement |
-| pm-dev-frontend | js-task-plan-agent, js-plan-solution-outline-agent, js-plan-implement-agent | js-task-plan, js-solution-outline, js-plan-implement |
-| pm-plugin-development | plugin-task-plan-agent, plugin-plan-solution-outline-agent, plugin-plan-implement-agent | plugin-task-plan, plugin-solution-outline, plugin-plan-implement |
+| Bundle | Skills |
+|--------|--------|
+| pm-plugin-development | plugin-task-plan, plugin-solution-outline, plugin-plan-implement |
+
+**Note**: pm-dev-java and pm-dev-frontend no longer have planning-specific components. Domain skills are loaded by thin agents via config.toon.
 
 ## Dependencies
 

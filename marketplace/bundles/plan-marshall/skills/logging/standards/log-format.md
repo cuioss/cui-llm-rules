@@ -131,9 +131,9 @@ Additional data is provided as indented key-value pairs:
 #### DECISION
 
 ```
-[2025-12-11T11:14:48Z] [INFO] [DECISION] Selected pm-workflow:plan-type-plugin
+[2025-12-11T11:14:48Z] [INFO] [DECISION] Detected domain: plugin
   phase: init
-  detail: Task involves migrating output formats across agents
+  detail: marketplace/bundles structure detected
 ```
 
 #### ARTIFACT
@@ -141,7 +141,7 @@ Additional data is provided as indented key-value pairs:
 ```
 [2025-12-11T11:15:24Z] [INFO] [ARTIFACT] Created plan: Migrate agent outputs to TOON
   phase: init
-  detail: Source: description, type: pm-workflow:plan-type-plugin
+  detail: Source: description, domain: plugin
 ```
 
 #### ERROR
@@ -149,7 +149,7 @@ Additional data is provided as indented key-value pairs:
 ```
 [2025-12-11T11:17:50Z] [ERROR] [ERROR] Skill load failed
   phase: refine
-  detail: plan-type-plugin does not exist
+  detail: plugin-solution-outline skill not found in config.toon
 ```
 
 #### OUTCOME

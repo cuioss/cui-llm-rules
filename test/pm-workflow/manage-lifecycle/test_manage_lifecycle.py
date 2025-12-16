@@ -26,58 +26,58 @@ TestContext = PlanTestContext
 # =============================================================================
 
 def test_create_java_plan():
-    """Test creating a plan with java type (qualified notation)."""
+    """Test creating a plan with java domain."""
     with TestContext(plan_id='java-plan'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'java-plan',
             '--title', 'Test Plan',
-            '--plan-type', 'pm-workflow:plan-type-java',
+            '--domain', 'java',
             '--phases', 'init,refine,execute,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
-        assert data['plan']['plan_type'] == 'pm-workflow:plan-type-java'
+        assert data['plan']['domain'] == 'java'
 
 
 def test_create_generic_plan():
-    """Test creating a plan with generic type."""
+    """Test creating a plan with generic domain."""
     with TestContext(plan_id='generic-plan'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'generic-plan',
             '--title', 'Generic Test',
-            '--plan-type', 'pm-workflow:plan-type-generic',
+            '--domain', 'generic',
             '--phases', 'init,execute,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
 
 
-def test_create_plan_invalid_type_format():
-    """Test that creating a plan with invalid type format fails."""
+def test_create_plan_invalid_domain():
+    """Test that creating a plan with invalid domain fails."""
     with TestContext(plan_id='bad-plan'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'bad-plan',
             '--title', 'Bad Plan',
-            '--plan-type', 'invalid-type',  # Missing bundle:skill notation
+            '--domain', 'invalid-domain',  # Not a valid domain
             '--phases', 'init,execute,finalize'
         )
-        assert not result.success, "Expected failure for invalid plan type format"
+        assert not result.success, "Expected failure for invalid domain"
         data = parse_toon(result.stdout)
-        assert data['error'] == 'invalid_plan_type'
+        assert data['error'] == 'invalid_domain'
 
 
-def test_create_plan_qualified_plugin_type():
-    """Test creating a plan with custom bundle plan type."""
+def test_create_plugin_plan():
+    """Test creating a plan with plugin domain."""
     with TestContext(plan_id='plugin-plan'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'plugin-plan',
             '--title', 'Plugin Plan',
-            '--plan-type', 'pm-workflow:plan-type-plugin',
+            '--domain', 'plugin',
             '--phases', 'init,implement,verify,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
-        assert data['plan']['plan_type'] == 'pm-workflow:plan-type-plugin'
+        assert data['plan']['domain'] == 'plugin'
 
 
 # =============================================================================
@@ -91,7 +91,7 @@ def test_set_phase():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'phase-plan',
             '--title', 'Phase Test',
-            '--plan-type', 'pm-workflow:plan-type-java',
+            '--domain', 'java',
             '--phases', 'init,refine,execute,finalize'
         )
         # Then set phase
@@ -108,7 +108,7 @@ def test_read_plan():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'read-plan',
             '--title', 'Read Test',
-            '--plan-type', 'pm-workflow:plan-type-java',
+            '--domain', 'java',
             '--phases', 'init,refine,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'read',
@@ -127,7 +127,7 @@ def test_get_routing_context():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'routing-plan',
             '--title', 'Routing Test',
-            '--plan-type', 'pm-workflow:plan-type-java',
+            '--domain', 'java',
             '--phases', 'init,refine,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'get-routing-context',
@@ -151,7 +151,7 @@ def test_get_routing_context_after_transition():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'transition-routing',
             '--title', 'Transition Test',
-            '--plan-type', 'pm-workflow:plan-type-java',
+            '--domain', 'java',
             '--phases', 'init,refine,execute,finalize'
         )
         run_script(SCRIPT_PATH, 'transition',
@@ -194,7 +194,7 @@ def test_list_with_plan():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'list-plan',
             '--title', 'List Test',
-            '--plan-type', 'pm-workflow:plan-type-generic',
+            '--domain', 'generic',
             '--phases', 'init,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'list')
@@ -211,8 +211,8 @@ if __name__ == '__main__':
         # Create command
         test_create_java_plan,
         test_create_generic_plan,
-        test_create_plan_invalid_type_format,
-        test_create_plan_qualified_plugin_type,
+        test_create_plan_invalid_domain,
+        test_create_plugin_plan,
         # Phase operations
         test_set_phase,
         test_read_plan,

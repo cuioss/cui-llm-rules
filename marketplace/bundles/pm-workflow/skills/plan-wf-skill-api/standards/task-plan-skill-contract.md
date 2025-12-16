@@ -1,18 +1,18 @@
-# Task Plan Agent Contract
+# Task Plan Skill Contract
 
-Standard contract for task plan agents that transform deliverables into optimized, committable tasks.
+Standard contract for task plan skills that transform deliverables into optimized, committable tasks.
 
 ## Purpose
 
-Task plan agents analyze solution outline deliverables and create optimized tasks. Each task represents a committable unit of work.
+Task plan skills analyze solution outline deliverables and create optimized tasks. Each task represents a committable unit of work with explicit domain, profile, and skills fields.
 
 **Flow**: Solution Outline (Deliverables) → Tasks
 
 ## Invocation
 
-**Invoked by**: `/plan-manage action=refine` command (after user approves solution outline via [User Review Protocol](user-review-protocol.md))
+**Invoked by**: `pm-workflow:task-plan-agent` (thin agent that loads this skill from config.toon)
 
-The command reads the `domain.task_plan_agent` field from the plan-type skill's frontmatter and invokes the agent via Task tool.
+The agent reads `config.workflow_skills.{domain}.task_plan` to determine which skill to load.
 
 ## Input Parameters
 
@@ -29,10 +29,11 @@ Apply optimization to package deliverables efficiently while maintaining:
 3. **Execution efficiency**: Minimize agent spawns and skill loads
 4. **Dependency ordering**: Tasks execute in valid dependency order
 5. **Parallelization**: Independent tasks can run concurrently
+6. **Skill resolution**: Each task gets explicit skills array for execution
 
 ## Optimization Workflow
 
-Task-plan agents MUST follow the 6-step optimization workflow:
+Task-plan skills MUST follow the 6-step optimization workflow:
 
 ### Step 1: Load All Deliverables
 
@@ -45,9 +46,7 @@ Extract for each deliverable:
 - `metadata.change_type`
 - `metadata.execution_mode`
 - `metadata.domain`
-- `metadata.suggested_skill`
-- `metadata.suggested_workflow`
-- `metadata.context_skills`
+- `metadata.profile`
 - `metadata.depends`
 - `affected_files`
 - `verification`
@@ -63,7 +62,7 @@ Extract for each deliverable:
 
 For each pair of deliverables, check:
 - Same change_type?
-- Same suggested_skill?
+- Same domain and profile?
 - Same execution_mode?
 - Combined file count < 10?
 - Verification can be merged?
@@ -80,13 +79,15 @@ For each deliverable, check:
 
 ### Step 5: Create Optimized Tasks
 
-- Group aggregated deliverables
-- Split mixed-mode deliverables
-- Extract delegation (skill, workflow, domain, context_skills)
-- Consolidate verification commands
-- Generate steps from file lists
-- Compute task dependencies from deliverable dependencies
-- Identify parallelizable tasks
+For each task:
+1. Resolve skills: `resolve-domain-skills --domain {domain} --profile {profile}`
+2. Add all defaults to `skills` array
+3. Select relevant optionals based on task content
+4. Set `domain` and `profile` from deliverable
+5. Consolidate verification commands
+6. Generate steps from file lists
+7. Compute task dependencies from deliverable dependencies
+8. Identify parallelizable tasks
 
 ### Step 6: Log Optimization Decisions
 
@@ -104,6 +105,10 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
 title: {aggregated title}
 deliverables: [{n1}, {n2}, {n3}]
 domain: {domain}
+profile: {profile}
+skills:
+  - {bundle}:{skill1}
+  - {bundle}:{skill2}
 phase: execute
 description: |
   {combined description}
@@ -114,13 +119,6 @@ steps:
   - {file_3}
 
 depends_on: TASK-1, TASK-2
-
-delegation:
-  skill: {skill}
-  workflow: {workflow}
-  context_skills:
-    - {skill1}
-    - {skill2}
 
 verification:
   commands:
@@ -156,14 +154,19 @@ lessons_recorded: {count}
 message: {error message if status=error}
 ```
 
-## Domain Agent Implementations
+## Skill Resolution
 
-| Plan Type | Agent |
-|-----------|-------|
-| `java` | `pm-dev-java:java-task-plan-agent` |
-| `javascript` | `pm-dev-frontend:js-task-plan-agent` |
-| `plugin-development` | `pm-plugin-development:plugin-task-plan-agent` |
-| `generic` | None (inline in command) |
+The `resolve-domain-skills` script returns skills for the task:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+    resolve-domain-skills --domain java --profile implementation
+```
+
+Returns defaults and optionals. Task-plan:
+1. Adds all defaults to `skills`
+2. Selects relevant optionals based on task content
+3. Writes final list to `task.skills`
 
 ## Error Handling
 
@@ -176,10 +179,11 @@ message: {error message if status=error}
 
 ## Integration
 
-**Callers**: `/plan-manage action=refine` command
+**Callers**: `pm-workflow:task-plan-agent` (thin agent)
 
 **Data Layer**:
 - `pm-workflow:manage-solution-outline:manage-solution-outline` - Solution outline queries
 - `pm-workflow:manage-tasks:manage-tasks` - Task creation with deliverable references
+- `plan-marshall:plan-marshall-config:plan-marshall-config` - Skill resolution
 
-**Prerequisites**: [Solution Outline Agent](solution-outline-agent-contract.md) completion and [User Review Protocol](user-review-protocol.md) approval
+**Prerequisites**: [Solution Outline Skill](solution-outline-skill-contract.md) completion and [User Review Protocol](user-review-protocol.md) approval

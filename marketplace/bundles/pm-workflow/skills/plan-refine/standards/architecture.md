@@ -46,124 +46,85 @@
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Plan-Type Skills (Single Source of Truth)
+## Thin Agent Architecture
 
-Plan-types are first-class skills that provide workflow definitions via a uniform API:
+The pm-workflow bundle uses 4 thin agents that load domain-specific skills dynamically:
 
 ```
-planning/skills/
-├── plan-type-generic/          # 3-phase workflow skill
-│   └── SKILL.md                # configure + domain: frontmatter (null agents)
-│
-├── plan-type-plugin/           # 4-phase workflow skill
-│   ├── SKILL.md                # configure + domain: frontmatter
-│   └── templates/              # Internal sub-type templates
-│       ├── script-task.md
-│       ├── skill-task.md
-│       ├── command-task.md
-│       └── agent-task.md
-│
-├── plan-type-java/             # 4-phase workflow skill (Java)
-│   └── SKILL.md                # configure + domain: frontmatter
-│
-└── plan-type-javascript/       # 4-phase workflow skill (JavaScript)
-    └── SKILL.md                # configure + domain: frontmatter
+pm-workflow/agents/
+├── plan-init-agent.md          # Initialize plan, detect domains
+├── solution-outline-agent.md   # Create deliverables
+├── task-plan-agent.md          # Create tasks from deliverables
+└── task-execute-agent.md       # Execute single task
 ```
 
-**Uniform API** (all plan-type skills):
+**Skill Loading** (from config.toon):
 
-| Operation | Input | Output |
-|-----------|-------|--------|
-| `configure` | `plan_id` | Adds domain fields to references.toon + finalize config to config.toon |
-
-Plan-type skills also declare domain agents in their `domain:` frontmatter section.
+| Agent | Skill Source |
+|-------|--------------|
+| `plan-init-agent` | System skills only |
+| `solution-outline-agent` | `config.workflow_skills.{domain}.solution_outline` |
+| `task-plan-agent` | `config.workflow_skills.{domain}.task_plan` |
+| `task-execute-agent` | `config.workflow_skills.{domain}.{profile}` + `task.skills` |
 
 **Key Design**:
-- `configure` writes finalize configuration to config.toon during init
-- Domain agent references in skill frontmatter enable command-level routing
-- Goals and plan operations are handled by domain agents invoked via Task tool
+- `plan-init` detects domains, writes workflow_skills to config.toon
+- Thin agents read config.toon to determine which domain skills to load
+- Domain skills provide the intelligence; agents provide the workflow
 
 **Flow**:
 1. User requests task
-2. `plan-init` determines plan type, creates base config/references, calls `configure`
-3. `/plan-manage` loads plan-type skill, reads `domain:` frontmatter
-4. `/plan-manage` invokes domain agents via Task tool (solution_outline_agent, task_plan_agent)
-5. `plan-execute` reads plan files → executes tasks sequentially
-6. `plan-execute` reads finalize config directly from config.toon
+2. `plan-init-agent` detects domain, writes config.toon with workflow_skills
+3. `/plan-manage action=refine` invokes `solution-outline-agent` → `task-plan-agent`
+4. `/plan-execute` invokes `task-execute-agent` for each task
+5. Thin agents load domain skills from config.toon's workflow_skills block
 
-## Skill-Based Domain Agent Routing
+## Domain Skill Loading
 
-Domain agents live in their expert bundles and are invoked by commands via Task tool:
+Domain skills live in their expert bundles and are loaded by thin agents via config.toon:
 
 ```
-pm-dev-java/agents/
-├── java-solution-outline-agent.md         # Decomposes request into goals
-└── java-task-plan-agent.md          # Transforms goals into tasks
-
-pm-dev-frontend/agents/
-├── js-solution-outline-agent.md           # Decomposes request into goals
-└── js-task-plan-agent.md            # Transforms goals into tasks
-
-pm-plugin-development/agents/
-├── plugin-solution-outline-agent.md       # Decomposes request into goals
-└── plugin-task-plan-agent.md        # Transforms goals into tasks
+pm-plugin-development/skills/
+├── plugin-solution-outline/    # Solution outline skill
+├── plugin-task-plan/           # Task planning skill
+└── plugin-plan-implement/      # Implementation skill
 ```
 
-### Domain Agent Mapping
+### config.toon Structure
 
-Plan-type skills declare their domain agents in structured frontmatter:
+The workflow_skills block in config.toon maps domains to skills:
 
-```yaml
-# Example: plan-type-java/SKILL.md
----
-domain:
-  solution_outline_agent: pm-dev-java:java-solution-outline-agent
-  task_plan_agent: pm-dev-java:java-task-plan-agent
-  verification_command: /pm-dev-builder:builder-build-and-fix
-  pr_workflow: true
----
+```toon
+workflow_skills
+  plugin
+    solution_outline: pm-plugin-development:plugin-solution-outline
+    task_plan: pm-plugin-development:plugin-task-plan
+    implementation: pm-plugin-development:plugin-plan-implement
+    testing: pm-plugin-development:plugin-plan-implement
+  java
+    solution_outline: null
+    task_plan: null
+    implementation: pm-dev-java:java-core
+    testing: pm-dev-java:junit-core
 ```
-
-| Plan Type | Solution Outline Agent | Task Plan Agent |
-|-----------|-------------|------------|
-| `java` | `pm-dev-java:java-solution-outline-agent` | `pm-dev-java:java-task-plan-agent` |
-| `javascript` | `pm-dev-frontend:js-solution-outline-agent` | `pm-dev-frontend:js-task-plan-agent` |
-| `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` | `pm-plugin-development:plugin-task-plan-agent` |
-| `generic` | N/A | N/A (uses plan-refine-agent fallback) |
 
 ### Routing Flow
 
 ```
 /plan-manage action=refine
        │
-       ├─ manage-config get --field plan_type
-       │     └─ "pm-workflow:plan-type-java"
+       ├─ Task: pm-workflow:solution-outline-agent
+       │     ├─ Read config.toon workflow_skills.{domain}.solution_outline
+       │     ├─ Load domain skill (e.g., plugin-solution-outline)
+       │     └─ Analyzes request, creates deliverables
        │
-       ├─ Skill: pm-workflow:plan-type-java
-       │     └─ Read frontmatter.domain
-       │
-       ├─ Task: {domain.solution_outline_agent}
-       │     └─ Analyzes request, creates GOAL files
-       │
-       └─ Task: {domain.task_plan_agent}
-             └─ Reads goals, creates TASK files
+       └─ Task: pm-workflow:task-plan-agent
+             ├─ Read config.toon workflow_skills.{domain}.task_plan
+             ├─ Load domain skill (e.g., plugin-task-plan)
+             └─ Reads deliverables, creates tasks
 ```
 
-**Key Insight**: Commands have Task tool, skills do not. Commands load plan-type skills to read agent references, then invoke agents directly.
-
-**Generic Fallback**: For generic plans (no domain agents), falls back to `pm-workflow:plan-refine-agent` which creates goals and tasks inline.
-
-### Why Domain Ownership
-
-Domain agents have deep expertise in their technology:
-- **Java agents**: Understand Maven/Gradle, package structure, JUnit patterns
-- **JavaScript agents**: Understand npm, ES modules, Jest patterns
-- **Plugin agents**: Understand marketplace structure, skill/command/agent patterns
-
-Keeping domain agents in expert bundles:
-- Leverages existing domain knowledge
-- Allows domain-specific evolution
-- Avoids overloading planning bundle with domain logic
+**Key Insight**: Thin agents load domain skills dynamically. Commands invoke the same 4 generic agents for all domains.
 
 ## Task Runner Pattern
 
@@ -213,48 +174,40 @@ The detail level ensures:
 ```
                            Commands
                     ┌────────────────────┐
-                    │  /plan-manage      │ ◄── Routes to domain agents
+                    │  /plan-manage      │ ◄── Invokes thin agents
                     │  /plan-execute     │
                     └─────────┬──────────┘
+                              │
+                              ▼
+                    ┌─────────────────────┐
+                    │    Thin Agents      │ ◄── Load domain skills from config.toon
+                    │  (4 generic agents) │
+                    └─────────┬───────────┘
                               │
           ┌───────────────────┼───────────────────┐
           │                   │                   │
           ▼                   ▼                   ▼
-   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-   │ plan-init   │    │ Plan-Type   │    │plan-execute │ ◄── Phase Skills
-   │   (agent)   │    │   Skills    │    │(dumb runner)│
-   └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
-          │                  │                  │
-          │                  │ frontmatter.domain
-          │                  ▼                  │
-          │         ┌─────────────┐             │
-          │         │   Domain    │             │
-          │         │   Agents    │ ◄── Invoked via Task by commands
-          │         │(goals/plan) │
-          │         └──────┬──────┘
-          │                │
-          │         ┌──────┴──────┐
-          │         │             │
-          │         ▼             ▼
-          │  ┌──────────────────┐ ┌────────────┐
-          │  │manage-plan-docs  │ │manage-tasks│ ◄── Script-based CRUD
-          │  └──────────────────┘ └────────────┘
-          │
-          ▼
-   ┌─────────────────────────────────┐
-   │  Python Scripts                 │ ◄── Atomic Operations
-   │  manage-config.py, manage-plan  │
-   │  document.py, manage-task.py    │
-   └─────────────────────────────────┘
+   ┌──────────────┐   ┌──────────────┐   ┌───────────────┐
+   │ Domain Skills│   │manage-* APIs │   │ Python Scripts│
+   │ (from config)│   │  (CRUD ops)  │   │(atomic ops)   │
+   └──────────────┘   └──────────────┘   └───────────────┘
 
-   Domain Agents (in expert bundles):
+   Thin Agents (in pm-workflow):
    ┌─────────────────────────────────────────────┐
-   │ pm-dev-java: java-solution-outline-agent           │
-   │                  java-task-plan-agent            │
-   │ pm-dev-frontend: js-solution-outline-agent         │
-   │                      js-task-plan-agent          │
-   │ pm-plugin-development: plugin-solution-outline  │
-   │                               plugin-task-plan   │
+   │ plan-init-agent      - Initialize, detect   │
+   │ solution-outline-agent - Create deliverables│
+   │ task-plan-agent      - Create tasks         │
+   │ task-execute-agent   - Execute single task  │
+   └─────────────────────────────────────────────┘
+
+   Domain Skills (loaded dynamically):
+   ┌─────────────────────────────────────────────┐
+   │ pm-plugin-development:                      │
+   │   plugin-solution-outline, plugin-task-plan │
+   │   plugin-plan-implement                     │
+   │                                             │
+   │ pm-dev-java: java-core, junit-core, etc.   │
+   │ pm-dev-frontend: cui-javascript, etc.      │
    └─────────────────────────────────────────────┘
 ```
 
@@ -267,27 +220,25 @@ When script execution fails (exit != 0):
 
 See `plan-marshall:script-runner` SKILL.md "Workflow: Error Handling" for the lessons-learned capture pattern.
 
-## Plan-Type Skills Summary
+## Domain Summary
 
-| Skill | Phases | Use Case |
-|-------|--------|----------|
-| `plan-type-generic` | init → execute → finalize | Documentation, config, quick fixes |
-| `plan-type-java` | init → refine → implement → verify → finalize | Java/Maven/Gradle implementation |
-| `plan-type-javascript` | init → refine → implement → verify → finalize | JavaScript/npm implementation |
-| `plan-type-plugin` | init → refine → execute → finalize | Marketplace components |
+| Domain | Solution Outline Skill | Task Plan Skill | Implementation Skill |
+|--------|----------------------|-----------------|----------------------|
+| `plugin` | `plugin-solution-outline` | `plugin-task-plan` | `plugin-plan-implement` |
+| `java` | (system) | (system) | `java-core`, `junit-core`, etc. |
+| `javascript` | (system) | (system) | `cui-javascript`, etc. |
 
-**Finalize Behavior** (from config.toon, written by configure):
+**Finalize Behavior** (from config.toon):
 
-| Skill | Create PR | Verification |
-|-------|-----------|--------------|
-| `plan-type-generic` | No | None |
-| `plan-type-java` | Yes | `/builder-build-and-fix` |
-| `plan-type-javascript` | Yes | `/builder-build-and-fix system=npm` |
-| `plan-type-plugin` | No | `/plugin-doctor` |
+| Domain | Create PR | Verification |
+|--------|-----------|--------------|
+| `plugin` | No | `/plugin-doctor` |
+| `java` | Yes | `/builder-build-and-fix` |
+| `javascript` | Yes | `/builder-build-and-fix system=npm` |
 
 ## Sub-Type Templates
 
-Located in `plan-type-plugin/templates/` (internal to plan-type-plugin skill):
+Located in `pm-plugin-development/skills/plugin-task-plan/templates/`:
 
 | Template | Trigger | Provides |
 |----------|---------|----------|
@@ -296,8 +247,7 @@ Located in `plan-type-plugin/templates/` (internal to plan-type-plugin skill):
 | `command-task.md` | component.type = "command" | Command orchestration workflow |
 | `agent-task.md` | component.type = "agent" | Agent frontmatter workflow |
 
-**Note**: These templates are internal to plan-type-plugin. When the `plugin-task-plan-agent` is invoked:
-1. It reads GOAL files from the plan directory
+**Note**: When `task-plan-agent` loads `plugin-task-plan` skill:
+1. The skill reads deliverables from the plan directory
 2. Selects appropriate template based on component type
 3. Generates tasks and writes them via manage-tasks script
-4. Commands invoke domain agents, not templates directly

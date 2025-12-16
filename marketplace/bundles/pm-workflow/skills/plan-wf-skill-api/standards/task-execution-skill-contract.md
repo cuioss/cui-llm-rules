@@ -1,16 +1,44 @@
-# Implement Agent Contract
+# Task Execution Skill Contract
 
-Standard interface for implement agents that execute tasks from plans.
+Standard interface for task execution skills that implement tasks from plans using two-tier skill loading.
 
 ## Purpose
 
-All implement agents MUST:
+Task execution skills:
 
 1. Accept standardized input (plan_id, task_number)
-2. Load skills per delegation block
-3. Iterate through steps
-4. Track progress via manage-tasks
-5. Return structured output
+2. Load workflow skill based on task.profile
+3. Load domain skills from task.skills array (two-tier loading)
+4. Iterate through steps
+5. Track progress via manage-tasks
+6. Return structured output
+
+## Two-Tier Skill Loading
+
+Task execution uses a two-tier skill loading pattern:
+
+| Tier | Source | Purpose | Loaded By |
+|------|--------|---------|-----------|
+| **Tier 1** | Agent frontmatter | System skills (architecture, rules) | Agent automatically |
+| **Tier 2** | `task.skills` array | Domain-specific skills | Agent from task file |
+
+### Example Task with Skills
+
+```toon
+id: TASK-1
+title: "Create CacheConfig class"
+domain: java
+profile: implementation
+skills:
+  - pm-dev-java:java-core
+  - pm-dev-java:java-cdi
+deliverables: [1]
+...
+```
+
+The `task-execute-agent` will:
+1. Load system skills from its frontmatter (Tier 1)
+2. Load `pm-dev-java:java-core` and `pm-dev-java:java-cdi` (Tier 2)
 
 ## Input Contract
 
@@ -92,80 +120,83 @@ next_action: requires_attention
 
 ## Agent Workflow
 
-All implement agents follow this workflow:
+The `task-execute-agent` follows this workflow:
 
-### Step 0: Load Foundation Skills
+### Step 0: Read Task
 
-```
-Skill: {domain-architecture-skill}
-Skill: plan-marshall:general-development-rules
-```
-
-### Step 1: Load Implementation Skill
-
-```
-Skill: {domain-plan-implement-skill}
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get \
+  --plan-id {plan_id} --task {task_number}
 ```
 
-### Step 2: Delegate to Skill
+Extract:
+- `task.domain`
+- `task.profile`
+- `task.skills` (array)
 
-Invoke the skill's `implement` workflow with:
+### Step 1: Load Workflow Skill
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
+  --plan-id {plan_id} --field workflow_skills
+```
+
+Then load: `config.workflow_skills.{task.domain}.{task.profile}`
+
+### Step 2: Load Domain Skills (Tier 2)
+
+For each skill in `task.skills`:
+```
+Skill: {skill_name}
+```
+
+### Step 3: Execute Implementation
+
+Invoke the workflow skill's implementation workflow with:
 - `plan_id`
 - `task_number`
 
-### Step 3: Return Structured Result
+### Step 4: Return Structured Result
 
 Return TOON output per this contract.
 
-## Minimal Agent Wrapper Pattern
+## Thin Agent Pattern
 
-Implement agents SHOULD follow the minimal wrapper pattern:
+The `task-execute-agent` is a minimal wrapper:
 
 ```markdown
 ---
-name: {domain}-implement-agent
-description: Implement {domain} tasks from plan
+name: task-execute-agent
+description: Execute single task with two-tier skill loading
 tools: Read, Write, Edit, Bash, Skill
 model: sonnet
-skills: {domain}-plan-implement, plan-marshall:general-development-rules
+skills: pm-workflow:task-execution, plan-marshall:general-development-rules
 ---
 
-# {Domain} Implement Agent
+# Task Execute Agent
 
-Minimal wrapper that loads {domain}-plan-implement skill and implements tasks.
+Thin agent that executes a single task. Loads workflow skill based on task.profile,
+then loads task.skills array for domain knowledge.
 
-## Step 0: Load Skills (MANDATORY)
+## Step 0: Load System Skills (MANDATORY)
 
 ```
-Skill: {bundle}:{domain}-plan-implement
+Skill: pm-workflow:task-execution
 Skill: plan-marshall:general-development-rules
 ```
 
-## Input
-
-| Parameter | Type | Required |
-|-----------|------|----------|
-| `plan_id` | string | Yes |
-| `task_number` | number | Yes |
-
 ## Workflow
 
-After skills loaded, invoke:
-
-```
-operation: implement
-plan_id: {plan_id}
-task_number: {task_number}
-```
-
-## Return Results
-
-Return the skill's output in TOON format per implement-agent-contract.
+1. Read task via manage-tasks
+2. Load workflow skill from config.workflow_skills.{domain}.{profile}
+3. Load each skill from task.skills array
+4. Execute skill's implement workflow
+5. Return structured TOON output
 ```
 
 ## Step Progress Tracking
 
-Agents MUST track progress via manage-tasks:
+Skills MUST track progress via manage-tasks:
 
 ### Mark Step Started
 
@@ -197,7 +228,7 @@ If skills fail to load:
 ```toon
 status: error
 error_type: skill_loading_failure
-component: "{agent-name}"
+component: "task-execute-agent"
 message: "Failed to load skill: {skill_name}"
 failure:
   recoverable: false
@@ -231,25 +262,17 @@ If verification fails:
 | Summary required | Output must include execution_summary |
 | Progress tracked | All step transitions logged |
 
-## Domain Implement Agents
-
-| Domain | Agent | Implementation Skill |
-|--------|-------|----------------------|
-| `plugin` | `pm-plugin-development:plugin-plan-implement-agent` | `plugin-plan-implement` |
-| `java` | `pm-dev-java:java-plan-implement-agent` | `java-plan-implement` |
-| `javascript` | `pm-dev-frontend:js-plan-implement-agent` | `js-plan-implement` |
-
 ## Integration
 
 **Callers**:
-- `plan-execute` skill → invokes agent via Task tool
+- `plan-execute` skill → spawns task-execute-agent
 - `/plan-execute` command → orchestrates execution
 
 **Dependencies**:
 - `manage-tasks` → task retrieval and progress tracking
+- `manage-config` → workflow skill resolution
 - `manage-log` → work log entries
-- Domain implementation skills → actual implementation logic
 
 **Related**:
-- [Implementation Delegation Contract](implementation-delegation-contract.md) - How tasks specify delegation
-- [Task Contract](task-contract.md) - Task structure including delegation block
+- [Task Contract](task-contract.md) - Task structure with domain, profile, skills
+- [Config TOON Format](config-toon-format.md) - Workflow skill configuration

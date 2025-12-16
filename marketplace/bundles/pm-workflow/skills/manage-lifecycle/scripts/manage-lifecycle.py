@@ -6,7 +6,7 @@ Replaces plan.md and absorbs phase-management functionality.
 
 Usage:
     python3 manage-lifecycle.py read --plan-id my-plan
-    python3 manage-lifecycle.py create --plan-id my-plan --title "Title" --plan-type pm-workflow:plan-type-java --phases init,refine,execute,finalize
+    python3 manage-lifecycle.py create --plan-id my-plan --title "Title" --domain java --phases init,refine,execute,finalize
     python3 manage-lifecycle.py set-phase --plan-id my-plan --phase execute
     python3 manage-lifecycle.py list
     python3 manage-lifecycle.py transition --plan-id my-plan --completed init
@@ -37,17 +37,15 @@ PHASE_ROUTING = {
 }
 
 
-def validate_plan_type(plan_type: str) -> bool:
-    """Validate plan_type is in bundle:skill notation.
+VALID_DOMAINS = {'java', 'javascript', 'plugin', 'generic'}
 
-    Examples of valid plan types:
-    - pm-workflow:plan-type-java
-    - pm-workflow:plan-type-javascript
-    - pm-workflow:plan-type-generic
-    - pm-workflow:plan-type-plugin
+
+def validate_domain(domain: str) -> bool:
+    """Validate domain is a known domain identifier.
+
+    Valid domains: java, javascript, plugin, generic
     """
-    # Pattern: bundle-name:skill-name (both kebab-case)
-    return bool(re.match(r'^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$', plan_type))
+    return domain in VALID_DOMAINS
 
 
 def validate_plan_id(plan_id: str) -> bool:
@@ -145,12 +143,12 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    if not validate_plan_type(args.plan_type):
+    if not validate_domain(args.domain):
         output_toon({
             'status': 'error',
             'plan_id': args.plan_id,
-            'error': 'invalid_plan_type',
-            'message': f"Invalid plan_type format: {args.plan_type}. Must be bundle:skill notation (e.g., pm-workflow:plan-type-java)"
+            'error': 'invalid_domain',
+            'message': f"Invalid domain: {args.domain}. Must be one of: {', '.join(sorted(VALID_DOMAINS))}"
         })
         sys.exit(1)
 
@@ -169,7 +167,7 @@ def cmd_create(args):
 
     status = {
         'title': args.title,
-        'plan_type': args.plan_type,
+        'domain': args.domain,
         'current_phase': phases[0],
         'phases': [{'name': p, 'status': 'pending'} for p in phases],
         'created': now,
@@ -187,7 +185,7 @@ def cmd_create(args):
         'created': True,
         'plan': {
             'title': args.title,
-            'plan_type': args.plan_type,
+            'domain': args.domain,
             'current_phase': phases[0]
         }
     })
@@ -361,7 +359,7 @@ def cmd_list(args):
             plans.append({
                 'id': plan_dir.name,
                 'current_phase': current_phase,
-                'plan_type': status.get('plan_type', 'unknown'),
+                'domain': status.get('domain', 'unknown'),
                 'status': 'in_progress'
             })
         except Exception:
@@ -540,7 +538,7 @@ def cmd_get_routing_context(args):
         'status': 'success',
         'plan_id': args.plan_id,
         'title': status.get('title', ''),
-        'plan_type': status.get('plan_type', ''),
+        'domain': status.get('domain', ''),
         'current_phase': current_phase,
         'skill': skill,
         'skill_description': description,
@@ -565,8 +563,8 @@ def main():
     create_parser = subparsers.add_parser('create', help='Create status.toon')
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--title', required=True, help='Plan title')
-    create_parser.add_argument('--plan-type', required=True,
-                               help='Plan type in bundle:skill notation (e.g., pm-workflow:plan-type-java)')
+    create_parser.add_argument('--domain', required=True,
+                               help='Domain identifier (java, javascript, plugin, generic)')
     create_parser.add_argument('--phases', required=True,
                                help='Comma-separated phase names (e.g., init,refine,execute,finalize)')
     create_parser.add_argument('--force', action='store_true',

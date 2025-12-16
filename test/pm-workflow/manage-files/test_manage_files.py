@@ -216,7 +216,7 @@ def test_create_or_reference_existing_with_status():
     with TestContext(plan_id='status-plan') as ctx:
         # Create status.toon with phase info
         status_content = """title: Test Plan
-plan_type: pm-workflow:plan-type-java
+domain: java
 current_phase: refine
 """
         (ctx.plan_dir / 'status.toon').write_text(status_content)
@@ -229,7 +229,7 @@ current_phase: refine
         assert data['status'] == 'success'
         assert data['action'] == 'exists'
         assert data['current_phase'] == 'refine'
-        assert data['plan_type'] == 'pm-workflow:plan-type-java'
+        assert data['domain'] == 'java'
 
 
 def test_create_or_reference_invalid_plan_id():

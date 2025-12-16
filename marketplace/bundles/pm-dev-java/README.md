@@ -36,10 +36,7 @@ pm-dev-java/
     ├── java-cdi/            # Core CDI patterns, constructor injection
     ├── java-cdi-quarkus/    # Quarkus-specific CDI, @QuarkusTest
     ├── javadoc/             # JavaDoc documentation standards
-    ├── java-maintenance/    # Maintenance prioritization
-    ├── java-plan-implement/ # Plan implementation workflow
-    ├── java-solution-outline/ # Solution outline generation
-    └── java-task-plan/      # Task plan generation
+    └── java-maintenance/    # Maintenance prioritization
 ```
 
 ## Agent-First Design
@@ -84,7 +81,7 @@ Commands use the Task tool to coordinate multiple agents:
 
 ## Components
 
-### Skills (12 skills)
+### Skills (9 skills)
 
 **Core Development:**
 - **java-core** - Core Java patterns, modern features, performance
@@ -103,12 +100,9 @@ Commands use the Task tool to coordinate multiple agents:
 - **javadoc** - JavaDoc documentation standards
 - **java-maintenance** - Maintenance prioritization, refactoring triggers
 
-**Planning Workflow:**
-- **java-plan-implement** - Plan implementation workflow
-- **java-solution-outline** - Solution outline generation
-- **java-task-plan** - Task plan generation
-
 > **Note**: CUI library-specific patterns (CuiLogger, test generators) are in the separate `pm-dev-java-cui` bundle.
+>
+> **Planning Integration**: Java domain skills are loaded by `pm-workflow` thin agents during plan execution via `task.skills` array.
 
 ### Agents (9 autonomous agents)
 
@@ -180,7 +174,7 @@ Task:
 
 - **Agents**: 9 (autonomous execution)
 - **Commands**: 6 (orchestration)
-- **Skills**: 12 (core development, testing, CDI, planning)
+- **Skills**: 9 (core development, testing, CDI, documentation)
 - **Scripts**: 3+ (Python automation)
 
 ## Dependencies

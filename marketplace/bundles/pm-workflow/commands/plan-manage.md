@@ -62,10 +62,10 @@ The init phase uses a single agent:
 ```
 Task: pm-workflow:plan-init-agent
   Input: description OR issue OR lesson_id
-  Output: plan_id, goals summary
+  Output: plan_id, domains array, workflow_skills in config.toon
 ```
 
-**plan-init-agent**: Creates plan directory, writes request.md, analyzes task, creates goals, configures plan type
+**plan-init-agent**: Creates plan directory, writes request.md, detects domains, writes workflow_skills to config.toon
 
 ### Automatic Continuation to Refine
 
@@ -78,47 +78,41 @@ This provides a seamless flow from task description to actionable tasks in a sin
 
 ### Refine Phase
 
-The refine phase uses **skill-based routing**: load the plan-type skill and invoke its documented domain agents directly.
+The refine phase uses **thin agents** that load workflow skills from config.toon.
 
 **CRITICAL**: This phase has 5 steps. Step 4 is a MANDATORY user review gate. Do NOT skip from Step 3 to Step 5.
 
 ---
 
-**Step 1**: Get plan_type from config:
+**Step 1**: Read domains and workflow_skills from config:
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
-  --plan-id {plan_id} --field plan_type
+  --plan-id {plan_id} --field domains
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
+  --plan-id {plan_id} --field workflow_skills
 ```
+
+This returns:
+- `domains`: Array like `[java]` or `[java, javascript]`
+- `workflow_skills`: Domain-keyed mapping to skills
 
 ---
 
-**Step 2**: Load the plan-type skill:
+**Step 2**: Invoke solution outline agent
+
+The thin agent loads the workflow skill from config.toon:
+
 ```
-Skill: {plan_type}
-```
-Example: `Skill: pm-workflow:plan-type-java`
-
-The skill's `domain:` frontmatter contains:
-```yaml
-domain:
-  solution_outline_agent: pm-dev-java:java-solution-outline-agent
-  task_plan_agent: pm-dev-java:java-task-plan-agent
-  verification_command: /pm-dev-builder:builder-build-and-fix
-  pr_workflow: true
-```
-
----
-
-**Step 3**: Invoke solution outline agent
-
-Route based on skill.domain:
-
-**If domain.solution_outline_agent is NOT null** (domain-specific plan type):
-```
-Task: {domain.solution_outline_agent}
+Task: pm-workflow:solution-outline-agent
   Input: plan_id={plan_id}
-  Output: deliverables created, solution_document path
+  Output: deliverables created, solution_outline.md path
 ```
+
+The agent:
+1. Reads `config.workflow_skills.{domains[0]}.solution_outline`
+2. Loads the skill (e.g., `pm-workflow:solution-outline`)
+3. Executes the skill workflow
+4. Returns deliverables (each with single `domain` field)
 
 Log solution outline creation:
 ```bash
@@ -126,23 +120,15 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
   work {plan_id} INFO "[ARTIFACT] Created solution_outline.md - pending user review"
 ```
 
-**If domain.solution_outline_agent IS null** (generic plan type):
-```
-Task: pm-workflow:plan-refine-agent
-  Input: plan_id
-  Output: solution_outline created (agent handles Steps 3-5 internally)
-```
-Note: The plan-refine-agent handles its own user review internally. Skip to "After Refine Phase" when using this agent.
-
 ---
 
-## ⛔ Step 4: MANDATORY USER REVIEW
+## ⛔ Step 3: MANDATORY USER REVIEW
 
-**STOP HERE. Do NOT proceed to Step 5 without user approval.**
+**STOP HERE. Do NOT proceed to Step 4 without user approval.**
 
 After the solution outline agent completes, you MUST:
 
-### 4a. Display the solution outline for review:
+### 3a. Display the solution outline for review:
 ```
 ## Solution Outline Created
 
@@ -151,7 +137,7 @@ After the solution outline agent completes, you MUST:
 Please review the deliverables and architecture before proceeding.
 ```
 
-### 4b. Ask the user to confirm or request changes:
+### 3b. Ask the user to confirm or request changes:
 ```
 AskUserQuestion:
   questions:
@@ -165,36 +151,41 @@ AskUserQuestion:
       multiSelect: false
 ```
 
-### 4c. Handle user response:
-- **If "Proceed to create tasks"**: Continue to Step 5
+### 3c. Handle user response:
+- **If "Proceed to create tasks"**: Continue to Step 4
 - **If "Request changes"** or user provides custom feedback:
   - Capture the user's feedback
   - Re-invoke the solution outline agent with feedback:
     ```
-    Task: {domain.solution_outline_agent}
+    Task: pm-workflow:solution-outline-agent
       Input: plan_id={plan_id}, feedback="{user_feedback}"
       Output: updated solution outline
     ```
-  - **Loop back to Step 4a** (show updated outline, ask again)
+  - **Loop back to Step 3a** (show updated outline, ask again)
 
 **This gate is NOT OPTIONAL.** Task creation MUST NOT proceed without explicit user approval.
 
 ---
 
-**Step 5**: Create tasks from deliverables
+**Step 4**: Create tasks from deliverables
 
-Only execute this step AFTER user approves in Step 4.
+Only execute this step AFTER user approves in Step 3.
 
 ```
-Task: {domain.task_plan_agent}
+Task: pm-workflow:task-plan-agent
   Input: plan_id={plan_id}
-  Output: tasks created
+  Output: tasks created with domain, profile, skills
 ```
+
+The agent:
+1. Reads deliverables from solution_outline.md
+2. For each task: resolves domain skills via `resolve-domain-skills --domain {domain} --profile {profile}`
+3. Writes tasks with explicit `skills` array
 
 Log task plan agent invocation:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[PROGRESS] Invoked {agent_name}"
+  work {plan_id} INFO "[PROGRESS] Invoked task-plan-agent"
 ```
 
 ---
@@ -244,14 +235,14 @@ If init-phase plans exist, offers to continue existing or create new.
 
 ### refine
 
-Create tasks from goals for a plan. Uses skill-based domain agent routing.
+Create tasks from goals for a plan. Uses thin agent pattern with workflow skills from config.toon.
 
 ```
 /plan-manage action=refine
 /plan-manage action=refine plan="jwt-auth"
 ```
 
-**Routing**: Loads plan-type skill and reads `domain:` frontmatter. For domain-specific types (Java, JavaScript, Plugin), invokes goals and plan agents from skill. For generic types, falls back to plan-refine-agent.
+**Routing**: Reads `config.workflow_skills` and spawns thin agents that load the appropriate skill.
 
 If no plan specified, shows plans in init/refine phase for selection.
 
@@ -345,11 +336,7 @@ If you discover issues or improvements during execution, record them:
 |-------|---------|
 | `pm-workflow:manage-lifecycle` | Plan discovery, phase routing, transitions |
 | `pm-workflow:plan-init` | Initialize new plans (creates request.md, goals, config) |
-| `pm-workflow:plan-refine` | Transform goals to tasks (fallback for generic plans) |
-| `pm-workflow:plan-type-java` | Java domain config (provides domain agents in frontmatter) |
-| `pm-workflow:plan-type-javascript` | JavaScript domain config |
-| `pm-workflow:plan-type-plugin` | Plugin domain config |
-| `pm-workflow:plan-type-generic` | Generic config (no domain agents) |
+| `pm-workflow:plan-wf-skill-api` | API contracts for workflow skills and plan artifacts |
 
 | Script | Purpose |
 |--------|---------|
@@ -358,11 +345,7 @@ If you discover issues or improvements during execution, record them:
 
 | Agent | Purpose |
 |-------|---------|
-| `pm-workflow:plan-init-agent` | Init phase execution |
-| `pm-workflow:plan-refine-agent` | Refine phase fallback (generic plans) |
-| `pm-dev-java:java-solution-outline-agent` | Java: Request → Goals |
-| `pm-dev-java:java-task-plan-agent` | Java: Goals → Tasks |
-| `pm-dev-frontend:js-solution-outline-agent` | JavaScript: Request → Goals |
-| `pm-dev-frontend:js-task-plan-agent` | JavaScript: Goals → Tasks |
-| `pm-plugin-development:plugin-solution-outline-agent` | Plugin: Request → Goals |
-| `pm-plugin-development:plugin-task-plan-agent` | Plugin: Goals → Tasks |
+| `pm-workflow:plan-init-agent` | Init phase: creates plan, detects domains, writes config.toon |
+| `pm-workflow:solution-outline-agent` | Refine phase: loads solution-outline skill, creates deliverables |
+| `pm-workflow:task-plan-agent` | Refine phase: loads task-plan skill, creates tasks with skills |
+| `pm-workflow:task-execute-agent` | Execute phase: loads workflow skill based on task.profile |

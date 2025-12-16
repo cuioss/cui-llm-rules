@@ -44,7 +44,7 @@ Activate when:
 
 **Optional**:
 - `plan_id`: Override auto-generated plan_id
-- `plan_type`: Override auto-detection (bundle:skill notation, e.g., pm-workflow:plan-type-java)
+- `domain`: Override auto-detection (java, javascript, plugin, generic)
 
 ### Step 1: Validate Input
 
@@ -168,18 +168,18 @@ python3 .plan/execute-script.py pm-workflow:manage-references:manage-references 
   --issue-url {issue_url}
 ```
 
-### Step 7: Detect Plan Type
+### Step 7: Detect Domain
 
-Determine plan type from task analysis. Plan types use `bundle:skill` notation.
+Determine domain from task analysis.
 
-| Indicator | Plan Type |
-|-----------|-----------|
-| Java code, Maven/Gradle, .java files | `pm-workflow:plan-type-java` |
-| JavaScript, npm, .js/.ts files | `pm-workflow:plan-type-javascript` |
-| Plugin/skill/command development | `pm-workflow:plan-type-plugin` |
-| Generic/simple task | `pm-workflow:plan-type-generic` |
+| Indicator | Domain |
+|-----------|--------|
+| Java code, Maven/Gradle, .java files | `java` |
+| JavaScript, npm, .js/.ts files | `javascript` |
+| Plugin/skill/command development | `plugin` |
+| Generic/simple task | `generic` |
 
-**If plan_type parameter provided**: Use override value (must be bundle:skill notation).
+**If domain parameter provided**: Use override value.
 
 **If uncertain**, ask:
 
@@ -189,52 +189,53 @@ AskUserQuestion:
   options:
     - label: "Java"
       description: "Java code with Maven or Gradle"
-      value: "pm-workflow:plan-type-java"
+      value: "java"
     - label: "JavaScript"
       description: "JavaScript/TypeScript with npm"
-      value: "pm-workflow:plan-type-javascript"
+      value: "javascript"
     - label: "Plugin Development"
       description: "Claude Code plugin components"
-      value: "pm-workflow:plan-type-plugin"
+      value: "plugin"
     - label: "Generic"
       description: "Generic task, no specific technology"
-      value: "pm-workflow:plan-type-generic"
+      value: "generic"
 ```
 
-**After detecting plan type**, log the decision with reasoning:
+**After detecting domain**, log the decision with reasoning:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[DECISION] Selected {plan_type}: {reasoning}"
+  work {plan_id} INFO "[DECISION] Detected domain: {domain} - {reasoning}"
 ```
 
 ### Step 8: Create Status
 
-Create status.toon with detected plan type and phases:
+Create status.toon with detected domain and phases:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle create \
   --plan-id {plan_id} \
   --title "{title_from_task_md}" \
-  --plan-type {plan_type} \
+  --domain {domain} \
   --phases init,refine,execute,finalize
 ```
 
-**Note**: Phases depend on plan type. Use standard 4-phase for java/javascript/plugin, 3-phase (init,execute,finalize) for generic.
+**Note**: Phases depend on domain. Use standard 4-phase for java/javascript/plugin, 3-phase (init,execute,finalize) for generic.
 
 ### Step 9: Create Configuration
 
-Create config.toon with base settings and finalize configuration. The `manage-config create` command automatically reads `plan_defaults` from the plan-type skill's frontmatter and applies them:
+Create config.toon with base settings and finalize configuration. The `manage-config create` command reads workflow_skills from domain configuration:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-config:manage-config create \
   --plan-id {plan_id} \
-  --plan-type {plan_type}
+  --domain {domain}
 ```
 
 This creates config.toon with:
-- Base fields: `plan_type`, `compatibility`, `commit_strategy`
-- Finalize fields (from plan-type frontmatter): `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
+- Base fields: `domain`, `compatibility`, `commit_strategy`
+- Workflow skills mapping from domain configuration
+- Finalize fields: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
 
 ### Step 10: Log Creation
 
@@ -242,7 +243,7 @@ Log the plan creation as an artifact:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[ARTIFACT] Created plan: {derived_title} (source: {source_type}, type: {plan_type})"
+  work {plan_id} INFO "[ARTIFACT] Created plan: {derived_title} (source: {source_type}, domain: {domain})"
 ```
 
 ### Step 11: Transition Phase
@@ -262,7 +263,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle tr
 ```toon
 status: success
 plan_id: {plan_id}
-plan_type: {plan_type}
+domain: {domain}
 next_phase: refine
 
 source:
@@ -341,7 +342,7 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 ### Related Skills
 
 - **plan-refine** - Next phase after init completes
-- **plan-type-*** - Provides plan_defaults frontmatter for configuration
+- **Domain skills** - Loaded by thin agents via config.toon workflow_skills
 
 ---
 

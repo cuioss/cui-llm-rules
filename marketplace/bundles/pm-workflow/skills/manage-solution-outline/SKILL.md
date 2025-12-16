@@ -11,7 +11,7 @@ This skill provides structure guidelines, examples, and operations for `solution
 ## When to Load This Skill
 
 Load this skill in Step 0 when:
-- Creating a solution outline (solution outline agents: java-solution-outline, js-solution-outline, plugin-solution-outline, plan-refine)
+- Creating a solution outline (via `solution-outline-agent` thin agent)
 - Reviewing or updating an existing solution outline
 - Validating solution document structure
 
@@ -194,10 +194,8 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 ## Integration
 
 **Loaded by**:
-- `pm-dev-java:java-solution-outline` agent
-- `pm-dev-frontend:js-solution-outline` agent
-- `pm-plugin-development:plugin-solution-outline` agent
-- `pm-workflow:plan-refine` agent (for generic plans)
+- `pm-workflow:solution-outline-agent` (thin agent that loads domain skills from config.toon)
+- Domain skills: `pm-plugin-development:plugin-solution-outline`, etc.
 
 **Scripts Used**:
 

@@ -20,7 +20,6 @@
   ],
   "agents": [
     "./agents/java-implement-agent.md",
-    "./agents/java-plan-implement-agent.md",
     "./agents/java-implement-tests-agent.md",
     "./agents/java-fix-build-agent.md",
     "./agents/java-fix-tests-agent.md",
@@ -28,9 +27,7 @@
     "./agents/java-refactor-agent.md",
     "./agents/java-coverage-agent.md",
     "./agents/java-quality-agent.md",
-    "./agents/java-verify-agent.md",
-    "./agents/java-plan-solution-outline-agent.md",
-    "./agents/java-task-plan-agent.md"
+    "./agents/java-verify-agent.md"
   ],
   "skills": [
     "./skills/java-core",
@@ -41,9 +38,6 @@
     "./skills/junit-core",
     "./skills/junit-integration",
     "./skills/javadoc",
-    "./skills/java-maintenance",
-    "./skills/java-plan-implement",
-    "./skills/java-solution-outline",
-    "./skills/java-task-plan"
+    "./skills/java-maintenance"
   ]
 }

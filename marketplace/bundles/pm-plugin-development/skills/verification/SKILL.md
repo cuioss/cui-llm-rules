@@ -304,11 +304,11 @@ Script pm-workflow:manage-lifecycle:manage-lifecycle returned non-zero exit code
 - **Operation**: Create plan status
 - **Component**: pm-workflow:manage-lifecycle
 - **Expected**: status: success with plan created
-- **Actual**: status: error with invalid_plan_type
+- **Actual**: status: error with invalid_domain
 
 ### Root Cause Analysis
-The plan_type "java" does not conform to bundle:skill notation.
-Script expects format like "pm-workflow:plan-type-java" but received "java".
+The domain "java-main" is not a valid domain identifier.
+Script expects one of: java, javascript, plugin, generic.
 
 ### Impact Assessment
 | Aspect | Impact |
@@ -318,12 +318,12 @@ Script expects format like "pm-workflow:plan-type-java" but received "java".
 | Workaround Available | Yes |
 
 ### Options
-1. Fix the calling code to use qualified plan_type
-2. Manually run with correct plan_type
-3. Update script to accept short names (not recommended)
+1. Fix the calling code to use valid domain identifier
+2. Manually run with correct domain
+3. Extend VALID_DOMAINS if new domain needed
 
 ### Recommendation
-Fix option 1 - Update calling code to use "pm-workflow:plan-type-java"
+Fix option 1 - Update calling code to use valid domain "java"
 
 ---
 **Verification Mode Active** - Awaiting user decision before proceeding.

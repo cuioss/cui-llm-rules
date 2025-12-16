@@ -31,16 +31,15 @@ PLANNING_PATTERNS = [
     "*-workflow",          # Workflow skills (pr-workflow, git-workflow, etc.)
     "task-*",              # Task commands (task-implement)
     "pr-*",                # PR commands (pr-doctor) - note: also matches pr-workflow
-    "*-task-plan",         # Task plan skills (java-task-plan, js-task-plan, plugin-task-plan)
-    "*-solution-outline",  # Solution outline skills (java-solution-outline, js-solution-outline, plugin-solution-outline)
-    "*-plan-*",            # Plan-prefixed agents/skills (java-plan-implement-agent, plugin-plan-solution-outline-agent, etc.)
+    "*-task-plan",         # Task plan skills (plugin-task-plan)
+    "*-solution-outline",  # Solution outline skills (plugin-solution-outline)
+    "*-plan-*",            # Plan-prefixed skills (plugin-plan-implement)
 ]
 
 # Bundles that contain planning-related components
+# Note: pm-dev-java and pm-dev-frontend removed - they no longer have planning-specific components
 PLANNING_BUNDLES = [
     "pm-workflow",
-    "pm-dev-java",
-    "pm-dev-frontend",
     "pm-plugin-development",
 ]
 

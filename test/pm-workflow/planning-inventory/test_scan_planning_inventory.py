@@ -162,45 +162,36 @@ def test_core_has_commands():
 # Tests - Derived Components
 # =============================================================================
 
-def test_derived_includes_java_expert():
-    """Test derived includes pm-dev-java bundle."""
+def test_derived_plugin_has_plan_components():
+    """Test pm-plugin-development derived bundle has plan components."""
+    result = run_script(SCRIPT_PATH)
+    assert result.returncode == 0, f"Script returned error: {result.stderr}"
+
+    data = parse_json(result.stdout)
+    derived = data.get('derived', [])
+
+    plugin_bundle = next((d for d in derived if d['bundle'] == 'pm-plugin-development'), None)
+    assert plugin_bundle is not None, "Should find pm-plugin-development in derived"
+
+    # Should have plugin-solution-outline, plugin-task-plan, plugin-plan-implement skills
+    skill_names = [s['name'] for s in plugin_bundle.get('skills', [])]
+
+    assert 'plugin-solution-outline' in skill_names, "Should have plugin-solution-outline skill"
+    assert 'plugin-task-plan' in skill_names, "Should have plugin-task-plan skill"
+
+
+def test_java_and_frontend_not_in_derived():
+    """Test pm-dev-java and pm-dev-frontend are NOT in derived (planning components removed)."""
     result = run_script(SCRIPT_PATH)
     assert result.returncode == 0, f"Script returned error: {result.stderr}"
 
     data = parse_json(result.stdout)
     derived = data.get('derived', [])
     bundle_names = [d['bundle'] for d in derived]
-    assert 'pm-dev-java' in bundle_names, "Derived should include pm-dev-java"
 
-
-def test_derived_java_has_plan_components():
-    """Test pm-dev-java derived bundle has plan components."""
-    result = run_script(SCRIPT_PATH)
-    assert result.returncode == 0, f"Script returned error: {result.stderr}"
-
-    data = parse_json(result.stdout)
-    derived = data.get('derived', [])
-
-    java_bundle = next((d for d in derived if d['bundle'] == 'pm-dev-java'), None)
-    assert java_bundle is not None, "Should find pm-dev-java in derived"
-
-    # Should have java-task-plan agent and skill
-    agent_names = [a['name'] for a in java_bundle.get('agents', [])]
-    skill_names = [s['name'] for s in java_bundle.get('skills', [])]
-
-    assert 'java-task-plan-agent' in agent_names, "Should have java-task-plan-agent"
-    assert 'java-task-plan' in skill_names, "Should have java-task-plan skill"
-
-
-def test_derived_includes_frontend_expert():
-    """Test derived includes pm-dev-frontend bundle."""
-    result = run_script(SCRIPT_PATH)
-    assert result.returncode == 0, f"Script returned error: {result.stderr}"
-
-    data = parse_json(result.stdout)
-    derived = data.get('derived', [])
-    bundle_names = [d['bundle'] for d in derived]
-    assert 'pm-dev-frontend' in bundle_names, "Derived should include pm-dev-frontend"
+    # These bundles no longer have planning-specific components
+    assert 'pm-dev-java' not in bundle_names, "pm-dev-java should NOT be in derived (planning components removed)"
+    assert 'pm-dev-frontend' not in bundle_names, "pm-dev-frontend should NOT be in derived (planning components removed)"
 
 
 def test_derived_includes_plugin_tools():
@@ -338,9 +329,8 @@ if __name__ == '__main__':
         test_core_has_workflow_skills,
         test_core_has_commands,
         # Derived Components
-        test_derived_includes_java_expert,
-        test_derived_java_has_plan_components,
-        test_derived_includes_frontend_expert,
+        test_derived_plugin_has_plan_components,
+        test_java_and_frontend_not_in_derived,
         test_derived_includes_plugin_tools,
         # Summary Format
         test_summary_format_has_required_fields,

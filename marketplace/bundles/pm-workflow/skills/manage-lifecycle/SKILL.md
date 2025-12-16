@@ -50,7 +50,7 @@ TOON format with phases table:
 
 ```toon
 title: Implement JWT Authentication
-plan_type: pm-workflow:plan-type-java
+domain: java
 current_phase: execute
 
 phases[4]{name,status}:
@@ -68,7 +68,7 @@ updated: 2025-12-02T14:30:00Z
 | Field | Description |
 |-------|-------------|
 | `title` | Plan title |
-| `plan_type` | bundle:skill notation (e.g., pm-workflow:plan-type-java) |
+| `domain` | Domain identifier (java, javascript, plugin, generic) |
 | `current_phase` | Current active phase |
 | `phases` | Table of phase names and statuses |
 | `created` | ISO timestamp when created |
@@ -104,7 +104,7 @@ plan_id: my-feature
 
 plan:
   title: Implement JWT Authentication
-  plan_type: pm-workflow:plan-type-java
+  domain: java
   current_phase: execute
   phases[4]{name,status}:
   init,done
@@ -121,7 +121,7 @@ Initialize status.toon for a new plan.
 python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle create \
   --plan-id {plan_id} \
   --title "Feature Title" \
-  --plan-type pm-workflow:plan-type-java \
+  --domain java \
   --phases init,refine,execute,finalize \
   [--force]
 ```
@@ -129,7 +129,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle cr
 **Parameters**:
 - `--plan-id` (required): Plan identifier (kebab-case)
 - `--title` (required): Plan title
-- `--plan-type` (required): Plan type in `bundle:skill` notation
+- `--domain` (required): Domain identifier (java, javascript, plugin, generic)
 - `--phases` (required): Comma-separated phase names
 - `--force`: Overwrite existing status.toon
 
@@ -142,7 +142,7 @@ created: true
 
 plan:
   title: Feature Title
-  plan_type: pm-workflow:plan-type-java
+  domain: java
   current_phase: init
 ```
 
@@ -227,11 +227,11 @@ total: 3
 plans:
   - id: my-feature
     current_phase: execute
-    plan_type: pm-workflow:plan-type-java
+    domain: java
     status: in_progress
   - id: bug-fix-123
     current_phase: init
-    plan_type: pm-workflow:plan-type-generic
+    domain: generic
     status: in_progress
 ```
 
@@ -360,7 +360,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle ge
 status: success
 plan_id: my-feature
 title: Implement JWT Authentication
-plan_type: pm-workflow:plan-type-java
+domain: java
 current_phase: execute
 skill: plan-execute
 skill_description: Execute implementation tasks
@@ -386,7 +386,7 @@ phases:
 | Command | Parameters | Description |
 |---------|------------|-------------|
 | `read` | `--plan-id` | Read plan status |
-| `create` | `--plan-id --title --plan-type --phases [--force]` | Initialize status.toon |
+| `create` | `--plan-id --title --domain --phases [--force]` | Initialize status.toon |
 | `set-phase` | `--plan-id --phase` | Set current phase |
 | `update-phase` | `--plan-id --phase --status` | Update phase status |
 | `progress` | `--plan-id` | Calculate plan progress |
@@ -404,23 +404,23 @@ phases:
 
 ---
 
-## Plan Types and Phases
+## Domains and Phases
 
-Plan types use `bundle:skill` notation and define their own phase sequences.
+Domains define phase sequences and skill routing via config.toon's `workflow_skills` block.
 
-### pm-workflow:plan-type-java (4 phases)
+### java (4 phases)
 init -> refine -> execute -> finalize
 
-### pm-workflow:plan-type-javascript (4 phases)
+### javascript (4 phases)
 init -> refine -> execute -> finalize
 
-### pm-workflow:plan-type-plugin (4 phases)
+### plugin (4 phases)
 init -> refine -> execute -> finalize
 
-### pm-workflow:plan-type-generic (3 phases)
+### generic (3 phases)
 init -> execute -> finalize
 
-**Note**: Plan types are extension points. Any bundle can define custom plan types with custom phase sequences.
+**Note**: Domain skill routing is configured in config.toon's `workflow_skills` block. Thin agents load domain-specific skills dynamically.
 
 ---
 

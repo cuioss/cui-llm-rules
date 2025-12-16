@@ -161,7 +161,7 @@ plan_id: my-feature
 action: exists
 path: /path/to/.plan/plans/my-feature
 current_phase: refine
-plan_type: pm-workflow:plan-type-java
+domain: java
 ```
 
 **Use case**: Called by plan-init to atomically check/create plan directories.

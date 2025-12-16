@@ -12,7 +12,7 @@ Solution outline agents analyze a request and produce a structured solution outl
 
 **Invoked by**: `/plan-manage action=refine` command
 
-The command reads the `domain.solution_outline_agent` field from the plan-type skill's frontmatter and invokes the agent via Task tool.
+The command invokes the thin agent `pm-workflow:solution-outline-agent` which loads domain-specific skills from `config.workflow_skills.{domain}.solution_outline`.
 
 ## Input Parameters
 
@@ -55,14 +55,17 @@ lessons_recorded: {count}
 message: {error message if status=error}
 ```
 
-## Domain Agent Implementations
+## Thin Agent Architecture
 
-| Plan Type | Agent |
-|-----------|-------|
-| `java` | `pm-dev-java:java-solution-outline-agent` |
-| `javascript` | `pm-dev-frontend:js-solution-outline-agent` |
-| `plugin-development` | `pm-plugin-development:plugin-solution-outline-agent` |
-| `generic` | None (inline in command) |
+A single generic agent (`pm-workflow:solution-outline-agent`) handles all domains by loading domain-specific skills dynamically:
+
+| Domain | Solution Outline Skill |
+|--------|----------------------|
+| `plugin` | `pm-plugin-development:plugin-solution-outline` |
+| `java` | (system skills only - no domain-specific solution outline skill) |
+| `javascript` | (system skills only - no domain-specific solution outline skill) |
+
+The agent reads `config.workflow_skills.{domain}.solution_outline` from config.toon to determine which skill to load.
 
 ## Script Execution Tracing
 
