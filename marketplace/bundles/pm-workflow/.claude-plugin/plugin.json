@@ -12,7 +12,9 @@
   "keywords": ["workflow", "task", "pr", "implementation", "quality", "orchestration"],
   "agents": [
     "./agents/plan-init-agent.md",
-    "./agents/plan-refine-agent.md"
+    "./agents/solution-outline-agent.md",
+    "./agents/task-plan-agent.md",
+    "./agents/task-execute-agent.md"
   ],
   "commands": [
     "./commands/task-implement.md",
