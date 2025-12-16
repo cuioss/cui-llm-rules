@@ -160,6 +160,12 @@ verification:
 EOF
 ```
 
+**MANDATORY - Log each task creation**:
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[ARTIFACT] (pm-workflow:task-plan) Created TASK-{N}: {title}"
+```
+
 **Key Fields**:
 - `domain`: Single domain from deliverable
 - `profile`: `implementation` or `testing` (determines workflow skill at execution)

@@ -65,12 +65,45 @@ Load the contract skill and verify artifacts for the **completed phase**:
 Skill: pm-workflow:plan-wf-skill-api
 ```
 
-| Completed Phase | Contract to Verify | Verification Command |
-|-----------------|-------------------|---------------------|
-| init | domain-frontmatter-contract.md | `manage-config read --plan-id {id}` |
-| refine (solution) | deliverable-contract.md | `manage-solution-outline validate --plan-id {id}` |
-| refine (tasks) | task-contract.md | `manage-tasks list --plan-id {id}` then `get` each |
-| execute | task verification criteria | Check each task's verification.criteria |
+| Completed Phase | Contract to Verify |
+|-----------------|-------------------|
+| init | domain-frontmatter-contract.md |
+| refine (solution) | deliverable-contract.md |
+| refine (tasks) | task-contract.md |
+| execute | task verification criteria |
+
+**Exact Verification Commands** (copy-paste ready):
+
+**Init Phase** - Verify config.toon:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --plan-id {plan_id}
+```
+
+**Refine (solution)** - Validate solution outline:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id {plan_id}
+```
+
+**Refine (tasks)** - List and verify each task:
+```bash
+# List all tasks
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks list --plan-id {plan_id}
+
+# Get each task by number (replace {N} with 1, 2, 3, etc.)
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get --plan-id {plan_id} --number {N}
+
+# Verify work-log has entry for each task creation
+python3 .plan/execute-script.py plan-marshall:logging:manage-log read --plan-id {plan_id} --type work
+# Check output contains "[ARTIFACT]" entries for each TASK-N created
+```
+
+**Execute Phase** - Run task verification commands:
+```bash
+# Get task to retrieve verification.commands
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get --plan-id {plan_id} --number {N}
+
+# Then execute each command from the task's verification.commands array
+```
 
 **If violations found** → **STOP**. Report violations and remediate before proceeding.
 

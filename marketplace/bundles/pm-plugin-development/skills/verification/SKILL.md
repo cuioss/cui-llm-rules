@@ -352,18 +352,61 @@ The protocol has **4 steps** - ALL are MANDATORY:
 | Step | Check | Action |
 |------|-------|--------|
 | 1 | Chat History Error Check | Scan for tool failures, error messages |
-| 2 | Script Execution Log Check | Query `manage-log read --plan-id {plan_id} --type script`, look for ERROR entries |
-| 3 | **Workflow Skill API Contract Verification** | **CRITICAL** - Load `pm-workflow:plan-wf-skill-api`, verify artifacts against contracts |
-| 4 | Status Consistency Check | Query `manage-lifecycle read`, verify phase transition |
+| 2 | Script Execution Log Check | See command below, look for ERROR entries |
+| 3 | **Workflow Skill API Contract Verification** | **CRITICAL** - See commands below |
+| 4 | Status Consistency Check | See command below |
+
+**Step 2 Command**:
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log read --plan-id {plan_id} --type script
+```
+
+**Step 4 Command**:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle read --plan-id {plan_id}
+```
 
 **Step 3 Contract Verification Details**:
 
-| Completed Phase | Contract | Verification Command |
-|-----------------|----------|---------------------|
-| init | domain-frontmatter-contract.md | `manage-config read --plan-id {id}` |
-| refine (solution) | deliverable-contract.md | `manage-solution-outline validate --plan-id {id}` |
-| refine (tasks) | task-contract.md | `manage-tasks get` each task, verify ALL required fields |
-| execute | task verification criteria | Check each task's verification.criteria |
+| Completed Phase | Contract |
+|-----------------|----------|
+| init | domain-frontmatter-contract.md |
+| refine (solution) | deliverable-contract.md |
+| refine (tasks) | task-contract.md |
+| execute | task verification criteria |
+
+**Exact Verification Commands** (copy-paste ready):
+
+**Init Phase** - Verify config.toon:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --plan-id {plan_id}
+```
+
+**Refine (solution)** - Validate solution outline:
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id {plan_id}
+```
+
+**Refine (tasks)** - List and verify each task:
+```bash
+# List all tasks
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks list --plan-id {plan_id}
+
+# Get each task by number (replace {N} with 1, 2, 3, etc.)
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get --plan-id {plan_id} --number {N}
+
+# Verify work-log has entry for each task creation
+python3 .plan/execute-script.py plan-marshall:logging:manage-log read --plan-id {plan_id} --type work
+# Check output contains "[ARTIFACT]" entries for each TASK-N created
+```
+
+**Execute Phase** - Run task verification commands:
+```bash
+# Get task to retrieve verification.commands
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get --plan-id {plan_id} --number {N}
+
+# Then execute each command from the task's verification.commands array
+```
 
 **If ANY step fails** → STOP, analyze, present to user, wait for decision.
 
