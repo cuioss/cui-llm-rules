@@ -272,8 +272,15 @@ def test_discovers_scripts_from_directory_structure():
     # This validates the function works with the actual codebase
     module = load_module()
 
+    # Try to get marketplace path
+    try:
+        base_path = module.get_base_path(use_marketplace=True)
+    except FileNotFoundError:
+        # Marketplace not available, skip test
+        return
+
     # Run against real marketplace - should find at least some scripts
-    mappings = module.discover_scripts_fallback()
+    mappings = module.discover_scripts_fallback(base_path)
 
     # If marketplace exists and has scripts, verify format
     if mappings:
@@ -294,8 +301,8 @@ def test_skips_test_files():
     module = load_module()
 
     with tempfile.TemporaryDirectory() as tmp:
-        marketplace = Path(tmp) / 'marketplace' / 'bundles'
-        skill = marketplace / 'bundle' / 'skills' / 'skill' / 'scripts'
+        bundles_dir = Path(tmp) / 'bundles'
+        skill = bundles_dir / 'bundle' / 'skills' / 'skill' / 'scripts'
         skill.mkdir(parents=True)
 
         # Create test file (should be skipped)
@@ -304,16 +311,12 @@ def test_skips_test_files():
         # Create real script
         (skill / 'script.py').write_text('real')
 
-        original = module.MARKETPLACE_ROOT
-        module.MARKETPLACE_ROOT = marketplace
+        # Call with temporary bundles directory as base_path
+        mappings = module.discover_scripts_fallback(bundles_dir)
 
-        try:
-            mappings = module.discover_scripts_fallback()
-            # Should find the real script, not the test
-            if 'bundle:skill' in mappings:
-                assert 'test_' not in mappings['bundle:skill'], "Should not include test files"
-        finally:
-            module.MARKETPLACE_ROOT = original
+        # Should find the real script, not the test
+        if 'bundle:skill' in mappings:
+            assert 'test_' not in mappings['bundle:skill'], "Should not include test files"
 
 
 if __name__ == '__main__':
