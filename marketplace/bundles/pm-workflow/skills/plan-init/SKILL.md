@@ -44,7 +44,7 @@ Activate when:
 
 **Optional**:
 - `plan_id`: Override auto-generated plan_id
-- `domain`: Override auto-detection (java, javascript, plugin, generic)
+- `domain`: Override auto-detection (java, javascript, plan-marshall-plugin-dev, generic)
 
 ### Step 1: Validate Input
 
@@ -192,7 +192,7 @@ Determine domain from task analysis.
 |-----------|--------|
 | Java code, Maven/Gradle, .java files | `java` |
 | JavaScript, npm, .js/.ts files | `javascript` |
-| Plugin/skill/command development | `plugin` |
+| Plugin/skill/command development | `plan-marshall-plugin-dev` |
 | Generic/simple task | `generic` |
 
 **If domain parameter provided**: Use override value.
@@ -211,7 +211,7 @@ AskUserQuestion:
       value: "javascript"
     - label: "Plugin Development"
       description: "Claude Code plugin components"
-      value: "plugin"
+      value: "plan-marshall-plugin-dev"
     - label: "Generic"
       description: "Generic task, no specific technology"
       value: "generic"
@@ -236,7 +236,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle cr
   --phases init,refine,execute,finalize
 ```
 
-**Note**: Phases depend on domain. Use standard 4-phase for java/javascript/plugin, 3-phase (init,execute,finalize) for generic.
+**Note**: Phases depend on domain. Use standard 4-phase for java/javascript/plan-marshall-plugin-dev, 3-phase (init,execute,finalize) for generic.
 
 ### Step 9: Create Configuration
 

@@ -473,24 +473,24 @@ def test_resolve_workflow_skill_java_testing():
 
 
 def test_resolve_workflow_skill_plugin_solution_outline():
-    """Test resolve-workflow-skill for plugin + solution_outline phase."""
+    """Test resolve-workflow-skill for plan-marshall-plugin-dev + solution_outline phase."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'plugin', '--phase', 'solution_outline')
+            '--domain', 'plan-marshall-plugin-dev', '--phase', 'solution_outline')
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'pm-plugin-development:plugin-solution-outline' in result.stdout
 
 
 def test_resolve_workflow_skill_plugin_implementation():
-    """Test resolve-workflow-skill for plugin + implementation phase."""
+    """Test resolve-workflow-skill for plan-marshall-plugin-dev + implementation phase."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'plugin', '--phase', 'implementation')
+            '--domain', 'plan-marshall-plugin-dev', '--phase', 'implementation')
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'pm-plugin-development:plugin-plan-implement' in result.stdout
@@ -533,14 +533,14 @@ def test_resolve_workflow_skill_unknown_phase():
 
 
 def test_resolve_workflow_skill_plugin_no_testing():
-    """Test resolve-workflow-skill for plugin + testing returns error (plugin has no testing phase)."""
+    """Test resolve-workflow-skill for plan-marshall-plugin-dev + testing returns error (plan-marshall-plugin-dev has no testing phase)."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'plugin', '--phase', 'testing')
+            '--domain', 'plan-marshall-plugin-dev', '--phase', 'testing')
 
-        assert 'error' in result.stdout.lower(), "Should report error (plugin has no testing phase)"
+        assert 'error' in result.stdout.lower(), "Should report error (plan-marshall-plugin-dev has no testing phase)"
 
 
 # =============================================================================

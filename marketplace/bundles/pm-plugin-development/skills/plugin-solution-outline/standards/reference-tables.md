@@ -59,7 +59,7 @@ When creating deliverables, use this mapping for `suggested_skill` and `suggeste
 
 ### Domain and Context Skills
 
-- **domain**: Always `plugin` for marketplace components
+- **domain**: Always `plan-marshall-plugin-dev` for marketplace components
 - **context_skills**: Usually empty (`[]`). Add `pm-plugin-development:plugin-script-architecture` when deliverable involves Python scripts
 
 ---

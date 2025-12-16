@@ -37,13 +37,13 @@ PHASE_ROUTING = {
 }
 
 
-VALID_DOMAINS = {'java', 'javascript', 'plugin', 'generic'}
+VALID_DOMAINS = {'java', 'javascript', 'plan-marshall-plugin-dev', 'generic'}
 
 
 def validate_domain(domain: str) -> bool:
     """Validate domain is a known domain identifier.
 
-    Valid domains: java, javascript, plugin, generic
+    Valid domains: java, javascript, plan-marshall-plugin-dev, generic
     """
     return domain in VALID_DOMAINS
 
@@ -564,7 +564,7 @@ def main():
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--title', required=True, help='Plan title')
     create_parser.add_argument('--domain', required=True,
-                               help='Domain identifier (java, javascript, plugin, generic)')
+                               help='Domain identifier (java, javascript, plan-marshall-plugin-dev, generic)')
     create_parser.add_argument('--phases', required=True,
                                help='Comma-separated phase names (e.g., init,refine,execute,finalize)')
     create_parser.add_argument('--force', action='store_true',

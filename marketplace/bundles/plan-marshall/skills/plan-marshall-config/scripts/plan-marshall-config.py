@@ -170,7 +170,7 @@ def main():
     # --- resolve-workflow-skill ---
     p_rws = subparsers.add_parser('resolve-workflow-skill',
                                    help='Resolve workflow skill for domain and phase')
-    p_rws.add_argument('--domain', required=True, help='Domain name (java, javascript, plugin, generic)')
+    p_rws.add_argument('--domain', required=True, help='Domain name (java, javascript, plan-marshall-plugin-dev, generic)')
     p_rws.add_argument('--phase', required=True, help='Phase name (solution_outline, task_plan, implementation, testing)')
 
     args = parser.parse_args()

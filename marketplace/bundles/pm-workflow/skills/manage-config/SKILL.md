@@ -57,7 +57,7 @@ branch_strategy: feature
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `domains` | array | List of domains (e.g., java, javascript, plugin, generic) |
+| `domains` | array | List of domains (e.g., java, javascript, plan-marshall-plugin-dev, generic) |
 | `commit_strategy` | enum | `per_task`, `per_plan`, `none` |
 
 ### Optional Fields
@@ -223,7 +223,7 @@ branch_strategy: feature
 
 | Field | Valid Values |
 |-------|--------------|
-| domains | lowercase identifiers (e.g., java, javascript, plugin, generic) |
+| domains | lowercase identifiers (e.g., java, javascript, plan-marshall-plugin-dev, generic) |
 | commit_strategy | per_task, per_plan, none |
 | create_pr | true, false |
 | verification_required | true, false |

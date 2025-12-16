@@ -90,7 +90,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
   --plan-id {plan_id} --field domains
 ```
 
-This returns the domain(s) like `[java]` or `[plugin]`. Workflow skills are resolved from marshal.json's `skill_domains.{domain}.workflow_skills` by the agents.
+This returns the domain(s) like `[java]` or `[plan-marshall-plugin-dev]`. Workflow skills are resolved from marshal.json's `skill_domains.{domain}.workflow_skills` by the agents.
 
 ---
 
@@ -106,7 +106,7 @@ Task: pm-workflow:solution-outline-agent
 
 The agent:
 1. Reads domain from config.toon, resolves `skill_domains.{domain}.workflow_skills.solution_outline` from marshal.json
-2. Loads the skill (e.g., `pm-plugin-development:plugin-solution-outline` for plugin domain)
+2. Loads the skill (e.g., `pm-plugin-development:plugin-solution-outline` for plan-marshall-plugin-dev domain)
 3. Executes the skill workflow
 4. Returns deliverables (each with single `domain` field)
 

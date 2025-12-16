@@ -60,7 +60,7 @@ A single generic agent (`pm-workflow:solution-outline-agent`) handles all domain
 
 | Domain | Solution Outline Skill |
 |--------|----------------------|
-| `plugin` | `pm-plugin-development:plugin-solution-outline` |
+| `plan-marshall-plugin-dev` | `pm-plugin-development:plugin-solution-outline` |
 | `java` | (system skills only - no domain-specific solution outline skill) |
 | `javascript` | (system skills only - no domain-specific solution outline skill) |
 

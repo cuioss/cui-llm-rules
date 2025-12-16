@@ -24,7 +24,7 @@ All solution-outline skills MUST produce deliverables following this structure:
 **Metadata:**
 - change_type: {create|modify|refactor|migrate|delete}
 - execution_mode: {automated|manual|mixed}
-- domain: {java|javascript|plugin}
+- domain: {java|javascript|plan-marshall-plugin-dev}
 - profile: {implementation|testing}
 - depends: {none | N. Title | N, M}
 
@@ -70,7 +70,7 @@ The `domain` field MUST be a single value from `config.domains`:
 |--------|-------------|
 | `java` | Java production and test code |
 | `javascript` | JavaScript production and test code |
-| `plugin` | Marketplace plugin components |
+| `plan-marshall-plugin-dev` | Marketplace plugin components |
 
 Multi-domain plans (e.g., fullstack features) have multiple domains in `config.domains`. Each deliverable selects ONE domain for its work.
 
@@ -208,7 +208,7 @@ Update all agent outputs to use TOON format.
 **Metadata:**
 - change_type: modify
 - execution_mode: automated
-- domain: plugin
+- domain: plan-marshall-plugin-dev
 - profile: implementation
 - depends: none
 

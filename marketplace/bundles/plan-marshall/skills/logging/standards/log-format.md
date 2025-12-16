@@ -131,7 +131,7 @@ Additional data is provided as indented key-value pairs:
 #### DECISION
 
 ```
-[2025-12-11T11:14:48Z] [INFO] [DECISION] Detected domain: plugin
+[2025-12-11T11:14:48Z] [INFO] [DECISION] Detected domain: plan-marshall-plugin-dev
   phase: init
   detail: marketplace/bundles structure detected
 ```
@@ -141,7 +141,7 @@ Additional data is provided as indented key-value pairs:
 ```
 [2025-12-11T11:15:24Z] [INFO] [ARTIFACT] Created plan: Migrate agent outputs to TOON
   phase: init
-  detail: Source: description, domain: plugin
+  detail: Source: description, domain: plan-marshall-plugin-dev
 ```
 
 #### ERROR
@@ -157,7 +157,7 @@ Additional data is provided as indented key-value pairs:
 ```
 [2025-12-11T11:17:55Z] [INFO] [OUTCOME] Impact analysis complete: 19 agents identified
   phase: refine
-  detail: Categories: 3 builder, 9 Java, 2 JS, 3 plugin, 2 workflow
+  detail: Categories: 3 builder, 9 Java, 2 JS, 3 plan-marshall-plugin-dev, 2 workflow
 ```
 
 #### FINDING

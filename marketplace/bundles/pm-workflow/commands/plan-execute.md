@@ -142,7 +142,7 @@ Executes implementation tasks using DUMB LOOP pattern:
 3. Delegate to domain agent based on domain:
    - `java` → `pm-dev-java:java-implement-agent`
    - `javascript` → `pm-dev-frontend:js-implement-agent`
-   - `plugin-development` → No delegation (inline)
+   - `plan-marshall-plugin-dev` → No delegation (inline)
    - `generic` → No delegation (inline)
 4. Mark task complete via `manage-tasks:check`
 5. Repeat until all tasks done

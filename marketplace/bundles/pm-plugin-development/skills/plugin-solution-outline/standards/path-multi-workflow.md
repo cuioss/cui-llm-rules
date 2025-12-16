@@ -117,7 +117,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 **Metadata:**
 - change_type: migrate
 - execution_mode: automated
-- domain: plugin
+- domain: plan-marshall-plugin-dev
 - profile: implementation
 - depends: none
 

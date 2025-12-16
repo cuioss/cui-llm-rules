@@ -136,7 +136,7 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                     "optionals": ["pm-dev-frontend:cui-cypress"]
                 }
             },
-            "plugin": {
+            "plan-marshall-plugin-dev": {
                 "workflow_skills": {
                     "solution_outline": "pm-plugin-development:plugin-solution-outline",
                     "task_plan": "pm-plugin-development:plugin-task-plan",

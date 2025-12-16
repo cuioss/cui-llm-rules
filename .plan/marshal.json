@@ -48,7 +48,7 @@
         "optionals": ["pm-dev-frontend:cui-cypress"]
       }
     },
-    "plugin": {
+    "plan-marshall-plugin-dev": {
       "workflow_skills": {
         "solution_outline": "pm-plugin-development:plugin-solution-outline",
         "task_plan": "pm-plugin-development:plugin-task-plan",

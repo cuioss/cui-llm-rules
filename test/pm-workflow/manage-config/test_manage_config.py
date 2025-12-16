@@ -59,16 +59,16 @@ def test_create_config_multiple_domains():
 
 
 def test_create_config_plugin_domain():
-    """Test creating a config file with plugin domain."""
+    """Test creating a config file with plan-marshall-plugin-dev domain."""
     with TestContext(plan_id='config-plugin'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'config-plugin',
-            '--domains', 'plugin'
+            '--domains', 'plan-marshall-plugin-dev'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
-        assert data['config']['domains'] == ['plugin']
+        assert data['config']['domains'] == ['plan-marshall-plugin-dev']
 
 
 def test_create_config_with_all_options():

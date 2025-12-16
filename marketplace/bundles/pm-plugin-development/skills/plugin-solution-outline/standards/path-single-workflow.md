@@ -33,7 +33,7 @@ Build a deliverables markdown section following the contract from `pm-workflow:p
 **Metadata:**
 - change_type: {create|modify|refactor}
 - execution_mode: automated
-- domain: plugin
+- domain: plan-marshall-plugin-dev
 - suggested_skill: pm-plugin-development:{plugin-create|plugin-maintain}
 - suggested_workflow: {create-skill|create-command|create-agent|update-component}
 - context_skills: []
@@ -59,7 +59,7 @@ Build a deliverables markdown section following the contract from `pm-workflow:p
 |-------|--------------|-------------|
 | `change_type` | create, modify, refactor | What kind of change |
 | `execution_mode` | automated, manual, mixed | Can it run without human intervention |
-| `domain` | plugin | Always "plugin" for marketplace components |
+| `domain` | plan-marshall-plugin-dev | Always "plan-marshall-plugin-dev" for marketplace components |
 | `suggested_skill` | pm-plugin-development:plugin-create, pm-plugin-development:plugin-maintain | Skill to delegate to |
 | `suggested_workflow` | create-skill, create-command, create-agent, update-component | Workflow within skill |
 | `context_skills` | [] or [skill1, skill2] | Additional skills to load |

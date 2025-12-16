@@ -379,7 +379,7 @@ def test_add_with_shell_metacharacters_in_verification():
         toon = build_task_toon(
             title='Task with complex verification',
             deliverables=[1, 2, 3],
-            domain='plugin',
+            domain='plan-marshall-plugin-dev',
             description='Migrate outputs from JSON to TOON',
             steps=['Update agent1.md', 'Update agent2.md'],
             delegation_skill='pm-plugin-development:plugin-maintain',
@@ -453,7 +453,7 @@ def test_get_returns_delegation_block():
         toon = build_task_toon(
             title='Delegated task',
             deliverables=[1],
-            domain='plugin',
+            domain='plan-marshall-plugin-dev',
             description='Task with delegation',
             steps=['src/main/java/Component.java'],
             delegation_skill='pm-plugin-development:plugin-create',
@@ -468,7 +468,7 @@ def test_get_returns_delegation_block():
         assert 'delegation:' in result.stdout
         assert 'skill: pm-plugin-development:plugin-create' in result.stdout
         assert 'workflow: create-skill' in result.stdout
-        assert 'domain: plugin' in result.stdout
+        assert 'domain: plan-marshall-plugin-dev' in result.stdout
     finally:
         cleanup(temp_dir)
 
@@ -1213,7 +1213,7 @@ def test_valid_domains():
     """All valid domains are accepted."""
     temp_dir = setup_plan_dir()
     try:
-        valid_domains = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plugin']
+        valid_domains = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plan-marshall-plugin-dev']
         for i, domain in enumerate(valid_domains, 1):
             toon = build_task_toon(
                 title=f'Task {i}',

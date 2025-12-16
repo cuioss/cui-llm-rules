@@ -67,17 +67,17 @@ def test_create_plan_invalid_domain():
 
 
 def test_create_plugin_plan():
-    """Test creating a plan with plugin domain."""
+    """Test creating a plan with plan-marshall-plugin-dev domain."""
     with TestContext(plan_id='plugin-plan'):
         result = run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'plugin-plan',
             '--title', 'Plugin Plan',
-            '--domain', 'plugin',
+            '--domain', 'plan-marshall-plugin-dev',
             '--phases', 'init,implement,verify,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
-        assert data['plan']['domain'] == 'plugin'
+        assert data['plan']['domain'] == 'plan-marshall-plugin-dev'
 
 
 # =============================================================================

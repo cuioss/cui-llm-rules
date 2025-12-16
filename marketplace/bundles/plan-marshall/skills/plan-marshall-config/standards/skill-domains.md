@@ -224,7 +224,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `--domain` | string | Yes | Domain name (java, javascript, plugin, generic) |
+| `--domain` | string | Yes | Domain name (java, javascript, plan-marshall-plugin-dev, generic) |
 | `--phase` | string | Yes | Phase name (solution_outline, task_plan, implementation, testing) |
 
 **Output**:
@@ -236,7 +236,7 @@ workflow_skill: pm-workflow:task-implementation
 ```
 
 **Error Cases**:
-- Unknown domain → `error: Unknown domain: {domain}. Available: java, javascript, plugin, generic`
+- Unknown domain → `error: Unknown domain: {domain}. Available: java, javascript, plan-marshall-plugin-dev, generic`
 - No workflow_skills configured → `error: Domain '{domain}' has no workflow_skills configured`
 - Unknown phase → `error: Unknown phase: {phase} for domain: {domain}. Available: {phases}`
 

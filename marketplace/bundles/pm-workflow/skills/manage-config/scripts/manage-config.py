@@ -77,11 +77,11 @@ def validate_plan_id(plan_id: str) -> bool:
 
 
 def validate_domain(domain: str) -> bool:
-    """Validate domain is a simple lowercase identifier.
+    """Validate domain is a simple lowercase identifier with optional hyphens.
 
-    Examples of valid domains: java, javascript, plugin
+    Examples of valid domains: java, javascript, plan-marshall-plugin-dev
     """
-    return bool(re.match(r'^[a-z][a-z0-9]*$', domain))
+    return bool(re.match(r'^[a-z][a-z0-9-]*$', domain))
 
 
 def get_config_path(plan_id: str) -> Path:
@@ -327,7 +327,7 @@ def cmd_create(args):
                 'status': 'error',
                 'plan_id': args.plan_id,
                 'error': 'invalid_domain',
-                'message': f"Invalid domain format: {domain}. Must be lowercase identifier (e.g., java, javascript, plugin)"
+                'message': f"Invalid domain format: {domain}. Must be lowercase identifier (e.g., java, javascript, plan-marshall-plugin-dev)"
             })
             sys.exit(1)
 

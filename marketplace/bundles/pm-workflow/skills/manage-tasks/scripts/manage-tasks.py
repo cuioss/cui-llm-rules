@@ -25,7 +25,7 @@ Add command usage (stdin-based API):
   python3 manage-task.py add --plan-id my-plan <<'EOF'
   title: My Task Title
   deliverables: [1, 2, 3]
-  domain: plugin
+  domain: plan-marshall-plugin-dev
   phase: execute
   description: |
     Task description here
@@ -130,7 +130,7 @@ def validate_deliverables(deliverables_input) -> List[int]:
 
 
 # Valid domains for skill loading
-VALID_DOMAINS = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plugin', 'generic']
+VALID_DOMAINS = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plan-marshall-plugin-dev', 'generic']
 
 # Valid phases
 VALID_PHASES = ['init', 'refine', 'execute', 'finalize']
@@ -401,7 +401,7 @@ def parse_stdin_task(stdin_content: str) -> dict:
     Expected format:
         title: My Task Title
         deliverables: [1, 2, 3]
-        domain: plugin
+        domain: plan-marshall-plugin-dev
         phase: execute
         description: |
           Multi-line description

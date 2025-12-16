@@ -118,7 +118,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id {plan_id} <<'EOF'
 title: {Action Verb} {Target}: {Scope}
 deliverables: [{n1}, {n2}, {n3}]
-domain: plugin
+domain: plan-marshall-plugin-dev
 phase: execute
 description: |
   {combined description from deliverables}
@@ -163,7 +163,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id migrate-json-to-toon <<'EOF'
 title: Migrate pm-workflow Agents to TOON Format
 deliverables: [2]
-domain: plugin
+domain: plan-marshall-plugin-dev
 phase: execute
 description: |
   Convert all JSON output blocks to TOON format in pm-workflow agents.

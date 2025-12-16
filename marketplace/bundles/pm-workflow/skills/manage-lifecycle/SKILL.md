@@ -68,7 +68,7 @@ updated: 2025-12-02T14:30:00Z
 | Field | Description |
 |-------|-------------|
 | `title` | Plan title |
-| `domain` | Domain identifier (java, javascript, plugin, generic) |
+| `domain` | Domain identifier (java, javascript, plan-marshall-plugin-dev, generic) |
 | `current_phase` | Current active phase |
 | `phases` | Table of phase names and statuses |
 | `created` | ISO timestamp when created |
@@ -129,7 +129,7 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle cr
 **Parameters**:
 - `--plan-id` (required): Plan identifier (kebab-case)
 - `--title` (required): Plan title
-- `--domain` (required): Domain identifier (java, javascript, plugin, generic)
+- `--domain` (required): Domain identifier (java, javascript, plan-marshall-plugin-dev, generic)
 - `--phases` (required): Comma-separated phase names
 - `--force`: Overwrite existing status.toon
 
@@ -414,7 +414,7 @@ init -> refine -> execute -> finalize
 ### javascript (4 phases)
 init -> refine -> execute -> finalize
 
-### plugin (4 phases)
+### plan-marshall-plugin-dev (4 phases)
 init -> refine -> execute -> finalize
 
 ### generic (3 phases)

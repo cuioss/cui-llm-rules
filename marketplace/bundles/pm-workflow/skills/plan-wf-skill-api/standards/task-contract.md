@@ -45,7 +45,7 @@ verification:
 |-------|------|---------|
 | `id` | string | Unique task identifier (TASK-N) |
 | `title` | string | Task title for display |
-| `domain` | string | Single domain from deliverable (java, javascript, plugin) |
+| `domain` | string | Single domain from deliverable (java, javascript, plan-marshall-plugin-dev) |
 | `profile` | string | Workflow type (implementation, testing) |
 | `skills` | list | Domain skills to load (explicit, from resolve-domain-skills) |
 | `deliverables` | list | Referenced deliverable numbers |
@@ -64,7 +64,7 @@ The `domain` field is inherited from the deliverable:
 |--------|-------------|
 | `java` | Java code |
 | `javascript` | JavaScript code |
-| `plugin` | Marketplace plugins |
+| `plan-marshall-plugin-dev` | Marketplace plugins |
 
 ### Profile Field
 

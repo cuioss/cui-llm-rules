@@ -32,7 +32,7 @@ branch_strategy: feature
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `domains` | list | Array of detected domains (java, javascript, plugin, generic) |
+| `domains` | list | Array of detected domains (java, javascript, plan-marshall-plugin-dev, generic) |
 | `commit_strategy` | string | per_task, per_plan, or none |
 | `create_pr` | boolean | Whether to create PR on finalize |
 | `verification_required` | boolean | Whether to run verification before PR |
@@ -48,7 +48,7 @@ The `domains` array supports multi-domain plans:
 | Java backend feature | Add caching to UserService | `[java]` |
 | Frontend feature | Add dashboard component | `[javascript]` |
 | Fullstack feature | Add metrics API + dashboard | `[java, javascript]` |
-| Plugin development | Create new skill | `[plugin]` |
+| Plugin development | Create new skill | `[plan-marshall-plugin-dev]` |
 | Generic tasks | Documentation work | `[generic]` |
 
 Each deliverable/task selects ONE domain from this array.
@@ -75,7 +75,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 |--------|------------------|-----------|----------------|---------|
 | java | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | pm-workflow:task-testing |
 | javascript | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | pm-workflow:task-testing |
-| plugin | pm-plugin-development:plugin-solution-outline | pm-plugin-development:plugin-task-plan | pm-plugin-development:plugin-plan-implement | - |
+| plan-marshall-plugin-dev | pm-plugin-development:plugin-solution-outline | pm-plugin-development:plugin-task-plan | pm-plugin-development:plugin-plan-implement | - |
 | generic | pm-workflow:solution-outline | pm-workflow:task-plan | pm-workflow:task-implementation | - |
 
 ## Workflow Phase Usage
@@ -149,7 +149,7 @@ branch_strategy: feature
 
 ```toon
 domains:
-  - plugin
+  - plan-marshall-plugin-dev
 
 commit_strategy: per_task
 create_pr: true

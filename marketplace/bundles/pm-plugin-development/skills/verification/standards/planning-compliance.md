@@ -575,7 +575,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config read --p
 **Required Fields**:
 | Field | Required | Description |
 |-------|----------|-------------|
-| `domain` | Yes | Domain identifier (java, javascript, plugin, generic) |
+| `domain` | Yes | Domain identifier (java, javascript, plan-marshall-plugin-dev, generic) |
 | `title` | Yes | Plan title |
 | `description` | Yes | Plan description |
 
@@ -593,7 +593,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 |-------|----------|-------------|
 | `change_type` | Yes | create/modify/refactor/migrate/delete |
 | `execution_mode` | Yes | automated/manual/mixed |
-| `domain` | Yes | Valid domain (java/javascript/plugin etc.) |
+| `domain` | Yes | Valid domain (java/javascript/plan-marshall-plugin-dev etc.) |
 | `profile` | Yes | `implementation` or `testing` |
 | `depends` | Yes | `none` or `N` or `N. Title` or `N, M` |
 | `Affected files` | Yes | Explicit file paths (not glob patterns) |

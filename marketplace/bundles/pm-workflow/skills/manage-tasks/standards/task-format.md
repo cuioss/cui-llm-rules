@@ -138,7 +138,7 @@ pending ──► in_progress ──► done
 | `java-testing` | Java test code (JUnit, integration tests) |
 | `javascript` | Production JavaScript code |
 | `javascript-testing` | JavaScript test code (Jest, Cypress) |
-| `plugin` | Claude Code marketplace plugin development |
+| `plan-marshall-plugin-dev` | Claude Code marketplace plugin development |
 
 ## Dependency Format
 

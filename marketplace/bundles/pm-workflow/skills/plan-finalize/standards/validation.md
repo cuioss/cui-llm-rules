@@ -5,7 +5,7 @@
 - [ ] Accept `plan_id` parameter (never paths)
 - [ ] Read domain and finalize config from config.toon
 - [ ] Finalize config fields: `create_pr`, `verification_required`, `verification_command`, `branch_strategy`
-- [ ] Handle all domains: java, javascript, plugin, generic
+- [ ] Handle all domains: java, javascript, plan-marshall-plugin-dev, generic
 
 ## Verification (if verification_required)
 

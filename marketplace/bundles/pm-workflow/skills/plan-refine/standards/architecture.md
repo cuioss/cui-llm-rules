@@ -248,12 +248,12 @@ All domains use the same 4 workflow skills. Domain-specific knowledge comes from
 |--------|-----------------|----------------------------|
 | `java` | `pm-workflow:solution-outline`, `task-plan`, `task-implementation`, `task-testing` | `java-core`, `java-cdi`, `junit-core`, etc. |
 | `javascript` | `pm-workflow:solution-outline`, `task-plan`, `task-implementation`, `task-testing` | `cui-javascript`, `cui-javascript-unit-testing`, etc. |
-| `plugin` | `pm-workflow:solution-outline`, `task-plan`, `task-implementation`, `task-testing` | `plugin-architecture`, `plugin-create`, etc. |
+| `plan-marshall-plugin-dev` | `pm-workflow:solution-outline`, `task-plan`, `task-implementation`, `task-testing` | `plugin-architecture`, `plugin-create`, etc. |
 
 **Finalize Behavior** (from config.toon):
 
 | Domain | Create PR | Verification |
 |--------|-----------|--------------|
-| `plugin` | No | `/plugin-doctor` |
+| `plan-marshall-plugin-dev` | No | `/plugin-doctor` |
 | `java` | Yes | `/builder-build-and-fix` |
 | `javascript` | Yes | `/builder-build-and-fix system=npm` |

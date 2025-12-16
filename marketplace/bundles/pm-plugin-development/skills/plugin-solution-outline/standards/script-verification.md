@@ -114,7 +114,7 @@ This provides:
 **Metadata:**
 - change_type: create
 - execution_mode: automated
-- domain: plugin
+- domain: plan-marshall-plugin-dev
 - suggested_skill: pm-plugin-development:plugin-create
 - suggested_workflow: create-script
 - context_skills: [pm-plugin-development:plugin-script-architecture]
@@ -149,7 +149,7 @@ This provides:
 **Metadata:**
 - change_type: refactor
 - execution_mode: automated
-- domain: plugin
+- domain: plan-marshall-plugin-dev
 - suggested_skill: pm-plugin-development:plugin-maintain
 - suggested_workflow: update-component
 - context_skills: []

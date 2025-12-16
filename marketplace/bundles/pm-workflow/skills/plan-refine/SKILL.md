@@ -87,7 +87,7 @@ python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
   --plan-id {plan_id} --field domain
 ```
 
-**IF domain is specific** (java, javascript, plugin):
+**IF domain is specific** (java, javascript, plan-marshall-plugin-dev):
 ```toon
 status: error
 error_type: wrong_routing

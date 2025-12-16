@@ -68,7 +68,7 @@ description: |
 delegation:
   skill: pm-plugin-development:plugin-maintain
   workflow: update-component
-  domain: plugin
+  domain: plan-marshall-plugin-dev
   context_skills:
   - pm-plugin-development:plugin-architecture
 
@@ -117,7 +117,7 @@ The `add` command reads the task definition from stdin in TOON format. Only `--p
 ```toon
 title: My Task Title
 deliverables: [1, 2, 3]
-domain: plugin
+domain: plan-marshall-plugin-dev
 phase: execute
 description: |
   Multi-line task description here.
@@ -150,7 +150,7 @@ verification:
 
 **Field values**:
 - `deliverables`: Array of integers `[1, 2, 3]`
-- `domain`: One of `java`, `java-testing`, `javascript`, `javascript-testing`, `plugin`, `generic`
+- `domain`: One of `java`, `java-testing`, `javascript`, `javascript-testing`, `plan-marshall-plugin-dev`, `generic`
 - `phase`: One of `init`, `refine`, `execute`, `finalize`
 - `depends_on`: `none` or task references like `TASK-1, TASK-2`
 
@@ -225,7 +225,7 @@ python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks add \
   --plan-id migrate-json-to-toon <<'EOF'
 title: Migrate agent outputs to TOON
 deliverables: [1, 2, 3]
-domain: plugin
+domain: plan-marshall-plugin-dev
 description: |
   Update agents to use TOON format instead of JSON.
 

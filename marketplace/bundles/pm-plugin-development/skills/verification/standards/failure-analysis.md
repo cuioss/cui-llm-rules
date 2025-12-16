@@ -49,7 +49,7 @@ When a script or tool fails during verification mode, perform systematic analysi
 ```
 status: error
 error: invalid_domain
-message: Must be valid domain identifier (java, javascript, plugin, generic)
+message: Must be valid domain identifier (java, javascript, plan-marshall-plugin-dev, generic)
 ```
 
 **Resolution Approach**:

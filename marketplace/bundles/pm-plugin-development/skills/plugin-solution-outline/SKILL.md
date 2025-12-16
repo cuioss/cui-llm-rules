@@ -183,7 +183,7 @@ python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solut
 **Metadata:**
 - change_type: {create|modify|refactor|migrate|delete}
 - execution_mode: {automated|manual|mixed}
-- domain: plugin
+- domain: plan-marshall-plugin-dev
 - profile: {implementation|testing}
 - depends: none
 
