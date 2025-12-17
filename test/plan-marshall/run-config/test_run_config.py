@@ -338,6 +338,201 @@ def test_validate_format_is_run_config():
 
 
 # =============================================================================
+# Timeout Subcommand Tests
+# =============================================================================
+
+def parse_toon(output: str) -> dict:
+    """Parse TOON output into dict."""
+    result = {}
+    for line in output.strip().split('\n'):
+        if '\t' in line:
+            key, value = line.split('\t', 1)
+            result[key.strip()] = value.strip()
+    return result
+
+
+def test_timeout_get_default_when_no_persisted():
+    """Test timeout get returns default when no persisted value."""
+    with TempDirContext() as temp_dir:
+        # Create .plan directory
+        (temp_dir / '.plan').mkdir(parents=True)
+
+        result = run_script(SCRIPT_PATH, 'timeout', 'get',
+                          '--command', 'ci:pr_checks',
+                          '--default', '300',
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Plain number output
+        assert result.stdout.strip() == '300'
+
+
+def test_timeout_get_with_safety_margin():
+    """Test timeout get applies safety margin to persisted value."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with persisted timeout
+        config = {
+            "version": 1,
+            "commands": {
+                "ci:pr_checks": {
+                    "timeout_seconds": 240
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'timeout', 'get',
+                          '--command', 'ci:pr_checks',
+                          '--default', '300',
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # 240 * 1.25 = 300 (plain number output)
+        assert result.stdout.strip() == '300'
+
+
+def test_timeout_set_initial_value():
+    """Test timeout set writes directly when no existing value."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        result = run_script(SCRIPT_PATH, 'timeout', 'set',
+                          '--command', 'ci:pr_checks',
+                          '--duration', '180',
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data.get('status') == 'success'
+        assert data.get('timeout_seconds') == '180'
+        assert data.get('source') == 'initial'
+
+        # Verify file was written
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert config['commands']['ci:pr_checks']['timeout_seconds'] == 180
+
+
+def test_timeout_set_weighted_update():
+    """Test timeout set computes weighted value when existing."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with existing timeout
+        config = {
+            "version": 1,
+            "commands": {
+                "ci:pr_checks": {
+                    "timeout_seconds": 240
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'timeout', 'set',
+                          '--command', 'ci:pr_checks',
+                          '--duration', '180',
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data.get('status') == 'success'
+        # 0.8 * 240 + 0.2 * 180 = 192 + 36 = 228
+        assert data.get('timeout_seconds') == '228'
+        assert data.get('previous_seconds') == '240'
+        assert data.get('source') == 'computed'
+
+
+def test_timeout_set_weighted_favors_higher():
+    """Test timeout set weighted calculation favors higher value regardless of order."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with lower existing timeout
+        config = {
+            "version": 1,
+            "commands": {
+                "ci:pr_checks": {
+                    "timeout_seconds": 180
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        # Set higher duration
+        result = run_script(SCRIPT_PATH, 'timeout', 'set',
+                          '--command', 'ci:pr_checks',
+                          '--duration', '240',
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        # Higher=240, Lower=180: 0.8 * 240 + 0.2 * 180 = 228
+        assert data.get('timeout_seconds') == '228'
+
+
+def test_timeout_set_same_value():
+    """Test timeout set with same value returns same value."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {
+                "ci:pr_checks": {
+                    "timeout_seconds": 300
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'timeout', 'set',
+                          '--command', 'ci:pr_checks',
+                          '--duration', '300',
+                          '--project-dir', str(temp_dir))
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        # 0.8 * 300 + 0.2 * 300 = 300
+        assert data.get('timeout_seconds') == '300'
+
+
+def test_timeout_help():
+    """Test timeout subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'timeout', '--help')
+    assert result.success, f"Should succeed: {result.stderr}"
+    assert 'get' in result.stdout
+    assert 'set' in result.stdout
+
+
+def test_timeout_get_help():
+    """Test timeout get subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'timeout', 'get', '--help')
+    assert result.success, f"Should succeed: {result.stderr}"
+    assert '--command' in result.stdout
+    assert '--default' in result.stdout
+
+
+def test_timeout_set_help():
+    """Test timeout set subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'timeout', 'set', '--help')
+    assert result.success, f"Should succeed: {result.stderr}"
+    assert '--command' in result.stdout
+    assert '--duration' in result.stdout
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -364,5 +559,15 @@ if __name__ == '__main__':
         test_validate_checks_array,
         test_validate_file_not_found,
         test_validate_format_is_run_config,
+        # Timeout subcommand tests
+        test_timeout_get_default_when_no_persisted,
+        test_timeout_get_with_safety_margin,
+        test_timeout_set_initial_value,
+        test_timeout_set_weighted_update,
+        test_timeout_set_weighted_favors_higher,
+        test_timeout_set_same_value,
+        test_timeout_help,
+        test_timeout_get_help,
+        test_timeout_set_help,
     ])
     sys.exit(runner.run())

@@ -29,6 +29,10 @@ sys.path.insert(0, str(FILE_OPS_DIR))
 # Note: base_path not used here since init uses project_dir explicitly
 
 
+# Constants for timeout handling
+SAFETY_MARGIN = 1.25  # Multiplier applied to persisted values on retrieval
+HIGHER_WEIGHT = 0.80  # Weight given to higher value during update
+
 DEFAULT_STRUCTURE = {
     "version": 1,
     "commands": {},
@@ -249,6 +253,115 @@ def cmd_validate(args) -> int:
 
 
 # =============================================================================
+# Timeout Subcommand
+# =============================================================================
+
+def get_run_config_path(project_dir: str = '.') -> Path:
+    """Get path to run-configuration.json."""
+    return Path(project_dir).resolve() / '.plan' / 'run-configuration.json'
+
+
+def read_run_config(config_path: Path) -> dict:
+    """Read run configuration file."""
+    if config_path.exists():
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {"version": 1, "commands": {}}
+
+
+def output_toon(status: str, **fields) -> None:
+    """Output result in TOON format."""
+    print(f"status\t{status}")
+    for key, value in fields.items():
+        print(f"{key}\t{value}")
+
+
+def cmd_timeout_get(args) -> int:
+    """Get timeout for a command with default fallback."""
+    try:
+        config_path = get_run_config_path(args.project_dir)
+        config = read_run_config(config_path)
+
+        # Look up persisted timeout
+        commands = config.get("commands", {})
+        cmd_entry = commands.get(args.command, {})
+        persisted = cmd_entry.get("timeout_seconds")
+
+        if persisted is None:
+            # No persisted value - return default
+            print(args.default)
+        else:
+            # Apply safety margin to persisted value
+            print(int(persisted * SAFETY_MARGIN))
+
+        return 0
+
+    except Exception as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+
+
+def compute_weighted_timeout(existing: int, new_duration: int) -> int:
+    """Compute weighted timeout favoring higher value."""
+    higher = max(existing, new_duration)
+    lower = min(existing, new_duration)
+    return int(HIGHER_WEIGHT * higher + (1 - HIGHER_WEIGHT) * lower)
+
+
+def cmd_timeout_set(args) -> int:
+    """Set timeout for a command with adaptive weighting."""
+    try:
+        config_path = get_run_config_path(args.project_dir)
+        config = read_run_config(config_path)
+
+        command = args.command
+        duration = args.duration
+
+        # Ensure commands section exists
+        if "commands" not in config:
+            config["commands"] = {}
+
+        # Ensure command entry exists
+        if command not in config["commands"]:
+            config["commands"][command] = {}
+
+        cmd_entry = config["commands"][command]
+        existing = cmd_entry.get("timeout_seconds")
+
+        if existing is None:
+            # No existing value - write directly
+            cmd_entry["timeout_seconds"] = duration
+            write_json_file(config_path, config)
+
+            output_toon(
+                "success",
+                command=command,
+                timeout_seconds=duration,
+                source="initial"
+            )
+        else:
+            # Compute weighted value favoring higher
+            new_timeout = compute_weighted_timeout(existing, duration)
+            cmd_entry["timeout_seconds"] = new_timeout
+            write_json_file(config_path, config)
+
+            output_toon(
+                "success",
+                command=command,
+                timeout_seconds=new_timeout,
+                previous_seconds=existing,
+                observed_seconds=duration,
+                source="computed"
+            )
+
+        return 0
+
+    except Exception as e:
+        output_toon("error", error=str(e))
+        return 1
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -269,6 +382,12 @@ Examples:
 
   # Validate run configuration
   %(prog)s validate --file .plan/run-configuration.json
+
+  # Get timeout for a command (with default)
+  %(prog)s timeout get --command "ci:pr_checks" --default 300
+
+  # Set/update timeout for a command
+  %(prog)s timeout set --command "ci:pr_checks" --duration 180
 """
     )
 
@@ -293,11 +412,61 @@ Examples:
     p_validate.add_argument('--file', required=True, help='Path to run-configuration.json')
     p_validate.set_defaults(func=cmd_validate)
 
+    # timeout command with subcommands
+    p_timeout = subparsers.add_parser('timeout', help='Manage command timeouts')
+    timeout_subparsers = p_timeout.add_subparsers(dest='timeout_command', help='Timeout operation')
+
+    # timeout get
+    p_timeout_get = timeout_subparsers.add_parser('get', help='Get timeout for a command')
+    p_timeout_get.add_argument(
+        '--command',
+        required=True,
+        help='Command identifier (e.g., "ci:pr_checks")'
+    )
+    p_timeout_get.add_argument(
+        '--default',
+        type=int,
+        required=True,
+        help='Default timeout in seconds if no persisted value'
+    )
+    p_timeout_get.add_argument(
+        '--project-dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    p_timeout_get.set_defaults(func=cmd_timeout_get)
+
+    # timeout set
+    p_timeout_set = timeout_subparsers.add_parser('set', help='Set/update timeout for a command')
+    p_timeout_set.add_argument(
+        '--command',
+        required=True,
+        help='Command identifier (e.g., "ci:pr_checks")'
+    )
+    p_timeout_set.add_argument(
+        '--duration',
+        type=int,
+        required=True,
+        help='Observed duration in seconds'
+    )
+    p_timeout_set.add_argument(
+        '--project-dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    p_timeout_set.set_defaults(func=cmd_timeout_set)
+
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         return 1
+
+    # Handle timeout subcommand
+    if args.command == 'timeout':
+        if not hasattr(args, 'timeout_command') or not args.timeout_command:
+            p_timeout.print_help()
+            return 1
 
     return args.func(args)
 

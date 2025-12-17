@@ -236,16 +236,70 @@ Categories: `transitive_dependency`, `plugin_compatibility`, `platform_specific`
 
 ---
 
+## Workflow: Timeout Handling (Optional)
+
+**Pattern**: Adaptive Learning
+
+Manage command timeouts with learned values based on execution history.
+
+**Load Reference**:
+```
+Read standards/timeout-handling.md
+```
+
+### Get Timeout
+
+Retrieve timeout for a command with default fallback. Returns plain number (seconds).
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout get \
+  --command "ci:pr_checks" \
+  --default 300
+```
+
+**Output**: Plain number (e.g., `300`)
+
+**Logic**:
+- If no persisted value: returns `--default`
+- If persisted: returns `persisted * 1.25` (safety margin)
+
+### Set Timeout
+
+Update timeout for a command with adaptive weighting.
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout set \
+  --command "ci:pr_checks" \
+  --duration 180
+```
+
+**Output** (TOON format):
+```
+status           success
+command          ci:pr_checks
+timeout_seconds  228
+previous_seconds 240
+source           initial|computed
+```
+
+**Logic**:
+- If not set: writes directly
+- If set: 80% weight to higher value (favors reliability)
+
+---
+
 ## Scripts
 
 | Script | Notation |
 |--------|----------|
-| init-run-config | `plan-marshall:run-config:run-config` |
-| validate-run-config | `plan-marshall:run-config:run-config` |
+| init | `plan-marshall:run-config:run-config init` |
+| validate | `plan-marshall:run-config:run-config validate` |
+| timeout get | `plan-marshall:run-config:run-config timeout get` |
+| timeout set | `plan-marshall:run-config:run-config timeout set` |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)
-- Outputs JSON to stdout
+- Outputs JSON (init/validate) or TOON (timeout) to stdout
 - Exit code 0 for success, 1 for errors
 - Supports `--help` flag
 
@@ -273,3 +327,4 @@ Script characteristics:
 ## References
 
 - `references/run-config-format.md` - Complete schema documentation
+- `standards/timeout-handling.md` - Adaptive timeout management specification
