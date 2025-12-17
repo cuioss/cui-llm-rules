@@ -29,7 +29,7 @@ def cmd_skill_domains(args) -> int:
     config = load_config()
 
     if "skill_domains" not in config:
-        return error_exit("skill_domains not configured. Run command /plan-marshall first")
+        return error_exit("skill_domains not configured. Run command /plan-marshall-hq first")
 
     skill_domains = config.get('skill_domains', {})
 

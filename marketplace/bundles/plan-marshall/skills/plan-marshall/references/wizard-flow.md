@@ -279,7 +279,7 @@ skill_domains:
 
 next_steps:
   - Run /plan-manage to create a new plan
-  - Use /plan-marshall for maintenance tasks
+  - Use /plan-marshall-hq for maintenance tasks
 ```
 
 After summary output, wizard is complete. Exit skill execution.

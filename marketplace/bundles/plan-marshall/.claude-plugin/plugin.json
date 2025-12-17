@@ -25,7 +25,7 @@
     "./agents/research-best-practices.md"
   ],
   "commands": [
-    "./commands/plan-marshall.md",
+    "./commands/plan-marshall-hq.md",
     "./commands/tools-fix-intellij-diagnostics.md",
     "./commands/tools-manage-web-permissions.md",
     "./commands/tools-sync-agents-file.md",

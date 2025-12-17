@@ -217,7 +217,7 @@ Risky fixes require user confirmation because they involve judgment calls or may
 
 **Why Risky**:
 - Changes script resolution mechanism
-- May break if executor is not generated (run `/plan-marshall` first)
+- May break if executor is not generated (run `/plan-marshall-hq` first)
 - User should verify script notation and subcommands
 
 ### 6. rule-9-violation

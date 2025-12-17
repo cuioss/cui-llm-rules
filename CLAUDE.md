@@ -119,7 +119,7 @@ python3 .plan/execute-script.py {notation} [subcommand] {args...}
 - Two-tier execution logging (plan-scoped or global)
 - Error standardization
 
-**Setup**: Run `/plan-marshall` after bundle changes to regenerate the executor with updated mappings.
+**Setup**: Run `/plan-marshall-hq` after bundle changes to regenerate the executor with updated mappings.
 
 **Script Development**: See `pm-plugin-development:plugin-script-architecture` skill for implementation standards.
 

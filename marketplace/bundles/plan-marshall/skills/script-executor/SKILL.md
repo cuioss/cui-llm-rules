@@ -93,7 +93,7 @@ Fallback when no plan context:
 
 **Benefits**:
 - Session-based daily logs
-- Automatically cleaned by `/plan-marshall` (7 days retention)
+- Automatically cleaned by `/plan-marshall-hq` (7 days retention)
 
 ### Log Entry Formats
 
@@ -114,7 +114,7 @@ See `plan-marshall:logging` skill for full log format specification.
 
 ## Setup
 
-Run `/plan-marshall` to generate the executor after bundle changes.
+Run `/plan-marshall-hq` to generate the executor after bundle changes.
 
 ## Architecture
 

@@ -1,18 +1,18 @@
 ---
-name: plan-marshall
+name: plan-marshall-hq
 description: Project configuration wizard for planning system
 allowed-tools: Read, Bash, Skill, AskUserQuestion
 ---
 
-# /plan-marshall
+# /plan-marshall-hq
 
 Project configuration wizard for the planning system.
 
 ## Usage
 
 ```
-/plan-marshall           # Interactive menu or first-run wizard
-/plan-marshall --wizard  # Force first-run wizard
+/plan-marshall-hq           # Interactive menu or first-run wizard
+/plan-marshall-hq --wizard  # Force first-run wizard
 ```
 
 ## Banner

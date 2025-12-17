@@ -253,5 +253,5 @@ References:
 
 ## RELATED
 
-- `/plan-marshall:plan-marshall` - Permission management wizard
+- `/plan-marshall:plan-marshall-hq` - Permission management wizard
 - `plan-marshall:web-permissions` skill - Domain security knowledge

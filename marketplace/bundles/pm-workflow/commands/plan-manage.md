@@ -333,7 +333,7 @@ If you discover issues or improvements during execution, record them:
 | Command | Relationship |
 |---------|--------------|
 | `/plan-execute` | Execute plans (execute/finalize phases) |
-| `/plan-marshall` | Configure project-level planning settings |
+| `/plan-marshall-hq` | Configure project-level planning settings |
 
 | Skill | Purpose |
 |-------|---------|

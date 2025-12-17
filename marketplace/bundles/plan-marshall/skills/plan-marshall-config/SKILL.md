@@ -19,7 +19,7 @@ Manages project-level infrastructure configuration in `.plan/marshal.json`.
 ## When to Activate This Skill
 
 Activate this skill when:
-- Initializing project configuration (`/plan-marshall` wizard)
+- Initializing project configuration (`/plan-marshall-hq` wizard)
 - Querying implementation skills for a domain
 - Resolving build commands for a module
 - Managing retention settings
@@ -435,12 +435,12 @@ All operations validate prerequisites before proceeding:
 
 ```toon
 status: error
-error: marshal.json not found. Run command /plan-marshall first
+error: marshal.json not found. Run command /plan-marshall-hq first
 ```
 
 Standard error conditions:
-- `marshal.json not found` - Run `/plan-marshall` first
-- `skill_domains not configured` - Run `/plan-marshall` first
+- `marshal.json not found` - Run `/plan-marshall-hq` first
+- `skill_domains not configured` - Run `/plan-marshall-hq` first
 - `Unknown domain: {name}` - Domain doesn't exist
 - `Unknown module: {name}` - Module doesn't exist
 - `Build system not found: {name}` - Build system not configured

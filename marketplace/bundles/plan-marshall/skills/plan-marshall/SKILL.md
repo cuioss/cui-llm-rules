@@ -52,7 +52,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 
 ## Prerequisites
 
-This skill requires `${PLUGIN_ROOT}` to be set by the invoking command (e.g., `/plan-marshall`).
+This skill requires `${PLUGIN_ROOT}` to be set by the invoking command (e.g., `/plan-marshall-hq`).
 The plugin root is detected via `bootstrap-plugin.py` and cached in `.plan/marshall-state.toon`.
 
 ---
