@@ -27,6 +27,7 @@ from cmd_skill_domains import cmd_skill_domains, cmd_resolve_domain_skills, cmd_
 from cmd_modules import cmd_modules
 from cmd_build_systems import cmd_build_systems
 from cmd_system_plan import cmd_system, cmd_plan
+from cmd_ci import cmd_ci
 from cmd_init import cmd_init
 
 
@@ -153,6 +154,21 @@ def main():
     def_set.add_argument('--field', required=True, help='Field name')
     def_set.add_argument('--value', required=True, help='Field value')
 
+    # --- ci ---
+    p_ci = subparsers.add_parser('ci', help='Manage CI provider configuration')
+    ci_sub = p_ci.add_subparsers(dest='verb', help='Operation')
+
+    ci_sub.add_parser('get', help='Get full CI config')
+    ci_sub.add_parser('get-provider', help='Get CI provider')
+    ci_sub.add_parser('get-tools', help='Get authenticated tools')
+
+    ci_set_prov = ci_sub.add_parser('set-provider', help='Set CI provider')
+    ci_set_prov.add_argument('--provider', required=True, help='Provider name (github, gitlab, unknown)')
+    ci_set_prov.add_argument('--repo-url', required=True, help='Repository URL')
+
+    ci_set_tools = ci_sub.add_parser('set-tools', help='Set authenticated tools')
+    ci_set_tools.add_argument('--tools', required=True, help='Comma-separated tool names')
+
     # --- init ---
     p_init = subparsers.add_parser('init', help='Initialize marshal.json')
     p_init.add_argument('--force', action='store_true', help='Overwrite existing')
@@ -205,6 +221,11 @@ def main():
             p_plan.print_help()
             return EXIT_ERROR
         return cmd_plan(args)
+    elif args.noun == 'ci':
+        if not args.verb:
+            p_ci.print_help()
+            return EXIT_ERROR
+        return cmd_ci(args)
     elif args.noun == 'init':
         return cmd_init(args)
     elif args.noun == 'resolve-domain-skills':

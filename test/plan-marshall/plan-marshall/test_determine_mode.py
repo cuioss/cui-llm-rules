@@ -18,14 +18,14 @@ from conftest import ScriptTestCase, run_script, MARKETPLACE_ROOT
 
 
 # Script path to determine-mode.py
-SCRIPT_PATH = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'plan-marshall' / 'scripts' / 'determine-mode.py'
+SCRIPT_PATH = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'marshall-steward' / 'scripts' / 'determine-mode.py'
 
 
 class TestModeSubcommand(ScriptTestCase):
     """Test the 'mode' subcommand for operational mode detection."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'determine-mode.py'
 
     def test_wizard_mode_when_executor_missing(self):
@@ -124,7 +124,7 @@ class TestCheckDocsSubcommand(ScriptTestCase):
     """Test the 'check-docs' subcommand for documentation checks."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'determine-mode.py'
 
     def test_ok_when_no_docs_exist(self):
@@ -227,7 +227,7 @@ class TestSubcommandRequired(ScriptTestCase):
     """Test that subcommand is required."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'determine-mode.py'
 
     def test_error_without_subcommand(self):

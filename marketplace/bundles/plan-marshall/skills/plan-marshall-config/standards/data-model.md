@@ -273,6 +273,42 @@ Plan-related configuration.
 | `verification_required` | bool | true | true, false |
 | `branch_strategy` | string | "direct" | direct, feature |
 
+## Section: ci
+
+CI provider configuration (project-level, shared via git).
+
+### Structure
+
+```json
+{
+  "ci": {
+    "repo_url": "https://github.com/org/repo",
+    "provider": "github",
+    "detected_at": "2025-01-15T10:30:00Z"
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `repo_url` | string | No | Git remote origin URL |
+| `provider` | string | Yes | CI provider: `github`, `gitlab`, `unknown` |
+| `detected_at` | string | No | ISO timestamp of last detection |
+
+### Provider Values
+
+| Value | CLI Tool | Description |
+|-------|----------|-------------|
+| `github` | `gh` | GitHub (github.com or enterprise) |
+| `gitlab` | `glab` | GitLab (gitlab.com or self-hosted) |
+| `unknown` | - | Could not detect provider |
+
+### Note: Authenticated Tools
+
+Tool availability (`authenticated_tools`) is stored in `run-configuration.json` (local, not shared via git) since it varies per developer machine. See run-config skill for the `ci` section schema.
+
 ## Template Location
 
 Default values are provided by:

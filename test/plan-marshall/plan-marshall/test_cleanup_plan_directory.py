@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path, PlanTestContext
 
 # Get script path
-SCRIPT_PATH = get_script_path('plan-marshall', 'plan-marshall', 'cleanup-plan-directory.py')
+SCRIPT_PATH = get_script_path('plan-marshall', 'marshall-steward', 'cleanup-plan-directory.py')
 
 # Default retention config for tests
 DEFAULT_RETENTION = {

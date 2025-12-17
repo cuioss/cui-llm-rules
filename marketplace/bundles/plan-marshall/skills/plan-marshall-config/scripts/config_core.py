@@ -24,6 +24,7 @@ EXIT_ERROR = 1
 # File location
 PLAN_BASE_DIR = Path(os.environ.get('PLAN_BASE_DIR', '.plan'))
 MARSHAL_PATH = PLAN_BASE_DIR / 'marshal.json'
+RUN_CONFIG_PATH = PLAN_BASE_DIR / 'run-configuration.json'
 
 # Template location
 TEMPLATES_DIR = Path(__file__).parent.parent / 'templates'
@@ -61,6 +62,19 @@ def save_config(config: dict) -> None:
     """Save config to marshal.json."""
     MARSHAL_PATH.parent.mkdir(parents=True, exist_ok=True)
     MARSHAL_PATH.write_text(json.dumps(config, indent=2), encoding='utf-8')
+
+
+def load_run_config() -> dict:
+    """Load run-configuration.json (local, not shared via git)."""
+    if RUN_CONFIG_PATH.exists():
+        return json.loads(RUN_CONFIG_PATH.read_text(encoding='utf-8'))
+    return {"version": 1, "commands": {}, "ci": {"authenticated_tools": [], "verified_at": None}}
+
+
+def save_run_config(config: dict) -> None:
+    """Save config to run-configuration.json."""
+    RUN_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RUN_CONFIG_PATH.write_text(json.dumps(config, indent=2), encoding='utf-8')
 
 
 def output(data: dict) -> None:

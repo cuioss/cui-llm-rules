@@ -234,6 +234,27 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ---
 
+## Step 6: Detect CI Provider
+
+Detect CI provider and verify tools:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:marshall-steward:ci-health status
+```
+
+Display detection result to user. If tool not authenticated, warn:
+- "GitHub detected but 'gh' not authenticated. Run 'gh auth login' for CI operations."
+- "GitLab detected but 'glab' not authenticated. Run 'glab auth login' for CI operations."
+
+Persist CI configuration to marshal.json:
+```bash
+python3 .plan/execute-script.py plan-marshall:marshall-steward:ci-health persist --plan-dir .plan
+```
+
+**Output**: CI configuration persisted to marshal.json with detected provider and authenticated tools.
+
+---
+
 ## Step 7: Permission Setup
 
 ```

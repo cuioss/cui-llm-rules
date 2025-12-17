@@ -46,6 +46,22 @@ Output this banner directly as text at command start (do NOT use Bash echo - out
 
 ## Execution
 
+### Step 0: Verify Prerequisites
+
+Before running any Python scripts, verify python3 is available:
+
+```bash
+command -v python3 >/dev/null 2>&1 && python3 --version
+```
+
+If python3 check fails, inform the user:
+```
+Error: python3 is required but not installed.
+Please install Python 3.8+ and try again.
+```
+
+**Note**: Git availability is checked during CI detection (Step 6) and recorded in run-configuration.json.
+
 ### Step 1: Bootstrap Plugin Root
 
 Get the plugin root path (cached in `.plan/marshall-state.toon` after first detection).

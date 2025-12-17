@@ -16,7 +16,7 @@ from pathlib import Path
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, PlanTestContext
-from test_helpers import SCRIPT_PATH, create_marshal_json, create_nested_marshal_json
+from test_helpers import SCRIPT_PATH, create_marshal_json, create_nested_marshal_json, create_run_config
 
 
 # =============================================================================
@@ -167,6 +167,72 @@ def test_help_output():
     assert 'skill-domains' in result.stdout
     assert 'modules' in result.stdout
     assert 'build-systems' in result.stdout
+    assert 'ci' in result.stdout
+
+
+def test_ci_get():
+    """Test ci get returns full CI config."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'ci', 'get')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'github' in result.stdout
+        assert 'repo_url' in result.stdout
+
+
+def test_ci_get_provider():
+    """Test ci get-provider returns provider info."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'ci', 'get-provider')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'github' in result.stdout
+
+
+def test_ci_get_tools():
+    """Test ci get-tools returns authenticated tools from run-configuration.json."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+        create_run_config(ctx.fixture_dir)  # Tools are stored in run-configuration.json
+
+        result = run_script(SCRIPT_PATH, 'ci', 'get-tools')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'git' in result.stdout
+        assert 'gh' in result.stdout
+
+
+def test_ci_set_provider():
+    """Test ci set-provider updates provider."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'ci', 'set-provider',
+            '--provider', 'gitlab',
+            '--repo-url', 'https://gitlab.com/test/repo'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'gitlab' in result.stdout
+
+
+def test_ci_set_tools():
+    """Test ci set-tools updates authenticated tools."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'ci', 'set-tools',
+            '--tools', 'git,glab,python3'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'glab' in result.stdout
 
 
 # =============================================================================
@@ -189,5 +255,10 @@ if __name__ == '__main__':
         test_get_workflow_skills,
         test_error_without_marshal_json,
         test_help_output,
+        test_ci_get,
+        test_ci_get_provider,
+        test_ci_get_tools,
+        test_ci_set_provider,
+        test_ci_set_tools,
     ])
     sys.exit(runner.run())

@@ -20,14 +20,14 @@ from conftest import ScriptTestCase, run_script, MARKETPLACE_ROOT
 
 
 # Script path to gitignore-setup.py
-SCRIPT_PATH = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'plan-marshall' / 'scripts' / 'gitignore-setup.py'
+SCRIPT_PATH = MARKETPLACE_ROOT / 'plan-marshall' / 'skills' / 'marshall-steward' / 'scripts' / 'gitignore-setup.py'
 
 
 class TestGitignoreSetupCreate(ScriptTestCase):
     """Test gitignore-setup.py creating new .gitignore."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'gitignore-setup.py'
 
     def test_creates_gitignore_when_missing(self):
@@ -52,7 +52,7 @@ class TestGitignoreSetupUpdate(ScriptTestCase):
     """Test gitignore-setup.py updating existing .gitignore."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'gitignore-setup.py'
 
     def test_updates_existing_gitignore(self):
@@ -92,7 +92,7 @@ class TestGitignoreSetupUnchanged(ScriptTestCase):
     """Test gitignore-setup.py when no changes needed."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'gitignore-setup.py'
 
     def test_unchanged_when_all_entries_exist(self):
@@ -122,7 +122,7 @@ class TestGitignoreSetupDryRun(ScriptTestCase):
     """Test gitignore-setup.py dry-run mode."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'gitignore-setup.py'
 
     def test_dry_run_does_not_create_file(self):
@@ -157,7 +157,7 @@ class TestGitignoreSetupEdgeCases(ScriptTestCase):
     """Test gitignore-setup.py edge cases."""
 
     bundle = 'plan-marshall'
-    skill = 'plan-marshall'
+    skill = 'marshall-steward'
     script = 'gitignore-setup.py'
 
     def test_nonexistent_project_root_fails(self):

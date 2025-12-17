@@ -84,7 +84,32 @@ Report any redundant or stale permissions found.
 
 ---
 
-## Step 5: Summary
+## Step 5: Verify CI Tools
+
+Check CI provider detection and tool availability:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:marshall-steward:ci-health status
+```
+
+**Interpret results**:
+- `overall: healthy` → All CI tools ready ✓
+- `overall: degraded` → Provider detected but tool not authenticated
+- `overall: unknown` → Could not detect CI provider
+
+If tool not authenticated, show:
+```
+AskUserQuestion:
+  question: "CI tool '{tool}' is not authenticated. Run '{tool} auth login' to authenticate."
+  options:
+    - label: "Continue"
+      description: "Skip CI tool verification"
+      value: "continue"
+```
+
+---
+
+## Step 6: Summary
 
 Output health check summary:
 
@@ -101,6 +126,10 @@ wildcards:
   total: 16
   missing: 0
 redundant_permissions: 0
+ci:
+  provider: github
+  required_tool: gh
+  tool_ready: true
 
 overall: HEALTHY
 ```
@@ -118,11 +147,16 @@ wildcards:
   total: 16
   missing: 2
 redundant_permissions: 3
+ci:
+  provider: github
+  required_tool: gh
+  tool_ready: false
 
 issues:
   - Executor drift detected (regenerate recommended)
   - 2 plugin wildcards missing
   - 3 redundant permissions in project settings
+  - CI tool 'gh' not authenticated
 
 fixes_available: true
 ```

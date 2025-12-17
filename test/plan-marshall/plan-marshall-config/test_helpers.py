@@ -16,6 +16,31 @@ from conftest import run_script, TestRunner, get_script_path, PlanTestContext
 SCRIPT_PATH = get_script_path('plan-marshall', 'plan-marshall-config', 'plan-marshall-config.py')
 
 
+def create_run_config(fixture_dir: Path, config: dict = None) -> Path:
+    """Create run-configuration.json in fixture directory.
+
+    Args:
+        fixture_dir: Directory to create file in
+        config: Optional config dict (uses default if not provided)
+
+    Returns:
+        Path to created file
+    """
+    if config is None:
+        config = {
+            "version": 1,
+            "commands": {},
+            "ci": {
+                "git_present": True,
+                "authenticated_tools": ["git", "gh"],
+                "verified_at": "2025-01-15T10:30:00Z"
+            }
+        }
+    run_config_path = fixture_dir / 'run-configuration.json'
+    run_config_path.write_text(json.dumps(config, indent=2))
+    return run_config_path
+
+
 def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
     """Create marshal.json in fixture directory with flat structure."""
     if config is None:
@@ -81,6 +106,11 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
                     "verification_required": True,
                     "branch_strategy": "direct"
                 }
+            },
+            "ci": {
+                "repo_url": "https://github.com/test/repo",
+                "provider": "github",
+                "detected_at": "2025-01-15T10:30:00Z"
             }
         }
     marshal_path = fixture_dir / 'marshal.json'
@@ -185,6 +215,11 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                 "verification_required": True,
                 "branch_strategy": "direct"
             }
+        },
+        "ci": {
+            "repo_url": None,
+            "provider": "unknown",
+            "detected_at": None
         }
     }
     marshal_path = fixture_dir / 'marshal.json'

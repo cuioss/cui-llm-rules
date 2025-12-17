@@ -38,6 +38,10 @@ DEFAULT_STRUCTURE = {
             "plugin_compatibility": [],
             "platform_specific": []
         }
+    },
+    "ci": {
+        "authenticated_tools": [],
+        "verified_at": None
     }
 }
 

@@ -275,6 +275,16 @@ Profiles are convention-based (derived from domain config keys). Standard profil
 | `defaults get` | `--field` | Get default value |
 | `defaults set` | `--field --value` | Set default value |
 
+### Noun: ci
+
+| Verb | Parameters | Purpose |
+|------|------------|---------|
+| `get` | (none) | Get full CI config |
+| `get-provider` | (none) | Get CI provider and repo URL |
+| `get-tools` | (none) | Get authenticated tools list |
+| `set-provider` | `--provider --repo-url` | Set CI provider |
+| `set-tools` | `--tools` | Set authenticated tools (comma-separated) |
+
 ### init
 
 ```bash
