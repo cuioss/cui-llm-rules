@@ -64,7 +64,7 @@ Activate this skill when:
 ### Step 1: Initialize Configuration File
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:run-config:run-config init
+python3 .plan/execute-script.py plan-marshall:run-config:run_config init
 ```
 
 This creates the run configuration file with base structure if it doesn't exist.
@@ -190,7 +190,7 @@ Validate run configuration format and structure.
 ### Step 1: Execute Validation
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:run-config:run-config validate {run-config-file}
+python3 .plan/execute-script.py plan-marshall:run-config:run_config validate {run-config-file}
 ```
 
 ### Step 2: Process Result
@@ -236,15 +236,35 @@ Categories: `transitive_dependency`, `plugin_compatibility`, `platform_specific`
 
 ---
 
-## Workflow: Timeout Handling (Optional)
+## Workflow: Timeout Handling for Synchronous Builds
 
 **Pattern**: Adaptive Learning
 
-Manage command timeouts with learned values based on execution history.
+Manage command timeouts with learned values based on execution history. Primary use case is **synchronous builds** (Maven, npm, Gradle).
 
 **Load Reference**:
 ```
 Read standards/timeout-handling.md
+```
+
+### Complete Build Execution Pattern
+
+The standard pattern for builds with adaptive timeout:
+
+```bash
+# 1. Get adaptive timeout (plain number in seconds)
+TIMEOUT=$(python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get \
+  --command "build:maven_verify" --default 300)
+
+# 2. Execute with shell timeout
+START=$(date +%s)
+timeout ${TIMEOUT}s mvn verify
+EXIT_CODE=$?
+END=$(date +%s)
+
+# 3. Record duration for adaptive learning
+python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout set \
+  --command "build:maven_verify" --duration $((END - START))
 ```
 
 ### Get Timeout
@@ -252,8 +272,8 @@ Read standards/timeout-handling.md
 Retrieve timeout for a command with default fallback. Returns plain number (seconds).
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout get \
-  --command "ci:pr_checks" \
+python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get \
+  --command "build:maven_verify" \
   --default 300
 ```
 
@@ -268,15 +288,15 @@ python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout get 
 Update timeout for a command with adaptive weighting.
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout set \
-  --command "ci:pr_checks" \
+python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout set \
+  --command "build:maven_verify" \
   --duration 180
 ```
 
 **Output** (TOON format):
 ```
 status           success
-command          ci:pr_checks
+command          build:maven_verify
 timeout_seconds  228
 previous_seconds 240
 source           initial|computed
@@ -286,16 +306,40 @@ source           initial|computed
 - If not set: writes directly
 - If set: 80% weight to higher value (favors reliability)
 
+### Recommended Defaults
+
+| Command Type | Default (seconds) |
+|--------------|-------------------|
+| test-compile | 120 |
+| test | 300 |
+| verify | 300 |
+| install | 300 |
+| pre-commit | 600 |
+| integration | 900 |
+
+### Polling Operations (Corner Case)
+
+For async polling (CI checks, Sonar), use `await-until --command-key` instead. It handles timeout internally with a generous external timeout as circuit breaker:
+
+```bash
+# await-until manages timeout internally via run-config
+# External timeout (600s) is just a safety net
+timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+  --check-cmd "gh pr checks 123 --json state" \
+  --success-field "state=completed" \
+  --command-key "ci:pr_checks"
+```
+
 ---
 
 ## Scripts
 
 | Script | Notation |
 |--------|----------|
-| init | `plan-marshall:run-config:run-config init` |
-| validate | `plan-marshall:run-config:run-config validate` |
-| timeout get | `plan-marshall:run-config:run-config timeout get` |
-| timeout set | `plan-marshall:run-config:run-config timeout set` |
+| init | `plan-marshall:run-config:run_config init` |
+| validate | `plan-marshall:run-config:run_config validate` |
+| timeout get | `plan-marshall:run-config:run_config timeout get` |
+| timeout set | `plan-marshall:run-config:run_config timeout set` |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)

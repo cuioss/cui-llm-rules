@@ -285,7 +285,7 @@ The key is used to store/retrieve execution history in `run-configuration.json` 
 
 ## Adaptive Timeout Learning
 
-The wait utility can learn from execution history to provide better timeout defaults.
+The wait utility delegates all timeout management to `run-config timeout get/set`. See [timeout-handling.md](../../run-config/standards/timeout-handling.md) for the algorithm specification.
 
 ```
                 ADAPTIVE TIMEOUT LEARNING
@@ -294,92 +294,90 @@ The wait utility can learn from execution history to provide better timeout defa
     │                                                        │
     │  Execution 1: PR Checks                                │
     │  ┌──────────────────────────────────────────────────┐  │
-    │  │ Timeout: 300s                                    │  │
+    │  │ Timeout: 300s (default)                          │  │
     │  │ Actual:  120s                                    │  │
     │  │ Status:  SUCCESS                                 │  │
     │  └──────────────────────────────────────────────────┘  │
     │                       │                                │
     │                       ▼                                │
     │  ┌──────────────────────────────────────────────────┐  │
-    │  │ run-configuration.json                           │  │
-    │  │ commands.ci:pr_checks.last_execution:            │  │
-    │  │   duration_ms: 120000                            │  │
-    │  │   status: SUCCESS                                │  │
+    │  │ run-config timeout set --command-key ci:pr_checks│  │
+    │  │              --duration 120                      │  │
+    │  │                                                  │  │
+    │  │ (run-config handles weighted update internally)  │  │
     │  └──────────────────────────────────────────────────┘  │
     │                       │                                │
     │                       ▼                                │
     │  Execution 2: PR Checks                                │
     │  ┌──────────────────────────────────────────────────┐  │
-    │  │ Adaptive timeout: 120s * 1.5 = 180s              │  │
-    │  │ (with minimum of 60s, maximum of 600s)           │  │
+    │  │ run-config timeout get --command-key ci:pr_checks│  │
+    │  │                                                  │  │
+    │  │ (run-config handles safety margin internally)    │  │
     │  └──────────────────────────────────────────────────┘  │
     │                                                        │
     └────────────────────────────────────────────────────────┘
 ```
 
-### Learning Algorithm
+### Delegation to run-config
+
+await-until uses subprocess calls to delegate timeout management:
 
 ```python
-def calculate_adaptive_timeout(command_key: str) -> int:
-    """Calculate timeout based on execution history."""
-    history = get_execution_history(command_key)
+def get_adaptive_timeout(command_key: str) -> Optional[int]:
+    """Get timeout via run-config timeout get."""
+    result = subprocess.run([
+        "python3", ".plan/execute-script.py",
+        "plan-marshall:run-config:run_config",
+        "timeout", "get", "--command-key", command_key
+    ], capture_output=True, text=True)
+    # Parse timeout_seconds from TOON output
+    return timeout_ms  # Clamped to 60s-600s bounds
 
-    if not history:
-        return DEFAULT_TIMEOUT  # No history, use default
-
-    last_duration = history.last_execution.duration_ms
-
-    # Apply buffer factor (1.5x by default)
-    adaptive_timeout = last_duration * BUFFER_FACTOR
-
-    # Clamp to bounds
-    return clamp(
-        adaptive_timeout,
-        minimum=MINIMUM_TIMEOUT,  # 60s
-        maximum=MAXIMUM_TIMEOUT   # 600s
-    )
+def update_timeout(command_key: str, duration_ms: int) -> None:
+    """Update timeout via run-config timeout set."""
+    subprocess.run([
+        "python3", ".plan/execute-script.py",
+        "plan-marshall:run-config:run_config",
+        "timeout", "set", "--command-key", command_key,
+        "--duration", str(duration_ms // 1000)
+    ])
 ```
+
+All margin and weighting logic is encapsulated in `run-config timeout`.
 
 ---
 
 ## Integration with run-config
 
-When `--command-key` is provided, the await-until script **internally manages** all timeout/interval configuration:
+When `--command-key` is provided, await-until delegates timeout management to `run-config timeout`:
 
-1. **Before polling**: Fetches timeout from run-config history (if available)
-2. **After completion**: Updates run-config with execution result for learning
-
-The caller does NOT need to manage run-config separately - it's all handled internally.
+1. **Before polling**: Calls `run-config timeout get` (returns timeout with safety margin)
+2. **After completion**: Calls `run-config timeout set` (applies weighted update)
 
 ```
-                CONFIG INTEGRATION (INTERNAL)
+                CONFIG INTEGRATION
 
     ┌─────────────────────────────────────────────────────────┐
     │                                                         │
     │  await-until.py --command-key "ci:pr_checks"            │
     │                                                         │
     │  ┌───────────────────────────────────────────────────┐  │
-    │  │ 1. INTERNAL: Fetch timeout from run-config        │  │
-    │  │    commands.ci:pr_checks.last_execution           │  │
-    │  │    → Found: duration_ms=120000                    │  │
-    │  │    → Adaptive timeout: 120000 * 1.5 = 180000ms    │  │
+    │  │ 1. run-config timeout get --command-key ci:...    │  │
+    │  │    → Returns timeout with margin applied          │  │
     │  └───────────────────────────────────────────────────┘  │
     │                         │                               │
     │                         ▼                               │
     │  ┌───────────────────────────────────────────────────┐  │
     │  │ 2. Execute poll loop with adaptive timeout        │  │
-    │  │    timeout=180s, interval=30s (default)           │  │
     │  │    ... polling condition ...                      │  │
     │  │    Result: SUCCESS after 95s                      │  │
     │  └───────────────────────────────────────────────────┘  │
     │                         │                               │
     │                         ▼                               │
     │  ┌───────────────────────────────────────────────────┐  │
-    │  │ 3. INTERNAL: Update run-config with result        │  │
-    │  │    commands.ci:pr_checks.last_execution:          │  │
-    │  │      date: "2025-01-15"                           │  │
-    │  │      duration_ms: 95000                           │  │
-    │  │      status: "SUCCESS"                            │  │
+    │  │ 3. run-config timeout set --command-key ci:...    │  │
+    │  │    --duration 95                                  │  │
+    │  │    → run-config applies weighted update           │  │
     │  └───────────────────────────────────────────────────┘  │
     │                         │                               │
     │                         ▼                               │
@@ -389,29 +387,6 @@ The caller does NOT need to manage run-config separately - it's all handled inte
     │  └───────────────────────────────────────────────────┘  │
     │                                                         │
     └─────────────────────────────────────────────────────────┘
-```
-
-### run-configuration.json Structure
-
-```json
-{
-  "commands": {
-    "ci:pr_checks": {
-      "last_execution": {
-        "date": "2025-01-15",
-        "duration_ms": 95000,
-        "status": "SUCCESS"
-      }
-    },
-    "ci:sonar_analysis": {
-      "last_execution": {
-        "date": "2025-01-15",
-        "duration_ms": 45000,
-        "status": "SUCCESS"
-      }
-    }
-  }
-}
 ```
 
 ---
@@ -498,23 +473,6 @@ final_result.conclusion	success
 
 ---
 
-## Implementation Tasks
-
-See [pm-ci-integration.md](../../../../../.plan/refactor-plan-execution/plans/pm-ci-integration.md) Phase C:
-
-- [x] **C1.1** This document (wait-pattern.md)
-- [x] **C1.2** Create `scripts/await-until.py` - Synchronous wait with polling, internal run-config management
-- [x] **C1.3** Update `SKILL.md` with wait pattern documentation as optional loading
-- [x] **C1.4** Create tests for wait pattern
-- [x] **C1.5** Update `run-config/references/run-config-format.md` - Document command-key storage format for adaptive timeouts
-- [x] **C1.6** Run all tests: `python3 test/run-tests.py`
-- [x] **C1.7** Update `.plan/refactor-plan-execution/` documents - Phase C tasks marked complete
-
-> **Note**: No extensions to `run-config.py` are needed - the await-until.py script directly uses `json-file-operations` to read/update run-configuration.json internally.
-
-> **Post-Implementation**: Remove this "Implementation Tasks" section once all tasks are complete - this specification should document the API, not track implementation progress.
-
----
 
 ## References
 

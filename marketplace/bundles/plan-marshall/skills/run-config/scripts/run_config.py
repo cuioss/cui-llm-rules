@@ -253,7 +253,7 @@ def cmd_validate(args) -> int:
 
 
 # =============================================================================
-# Timeout Subcommand
+# Timeout API (for direct Python calls)
 # =============================================================================
 
 def get_run_config_path(project_dir: str = '.') -> Path:
@@ -307,6 +307,29 @@ def compute_weighted_timeout(existing: int, new_duration: int) -> int:
     lower = min(existing, new_duration)
     return int(HIGHER_WEIGHT * higher + (1 - HIGHER_WEIGHT) * lower)
 
+
+def timeout_get(command_key: str, default: int, project_dir: str = '.') -> int:
+    """Get timeout for a command. Returns default if not persisted, else persisted * SAFETY_MARGIN."""
+    config = read_run_config(get_run_config_path(project_dir))
+    persisted = config.get("commands", {}).get(command_key, {}).get("timeout_seconds")
+    return default if persisted is None else int(persisted * SAFETY_MARGIN)
+
+
+def timeout_set(command_key: str, duration: int, project_dir: str = '.') -> None:
+    """Set timeout for a command with adaptive weighting."""
+    config_path = get_run_config_path(project_dir)
+    config = read_run_config(config_path)
+    config.setdefault("commands", {}).setdefault(command_key, {})
+    existing = config["commands"][command_key].get("timeout_seconds")
+    config["commands"][command_key]["timeout_seconds"] = (
+        duration if existing is None else compute_weighted_timeout(existing, duration)
+    )
+    write_json_file(config_path, config)
+
+
+# =============================================================================
+# CLI Subcommands
+# =============================================================================
 
 def cmd_timeout_set(args) -> int:
     """Set timeout for a command with adaptive weighting."""

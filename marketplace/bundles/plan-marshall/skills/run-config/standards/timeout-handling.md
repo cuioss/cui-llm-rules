@@ -1,6 +1,6 @@
 # Timeout Handling Specification
 
-Adaptive timeout management for command execution, enabling learned timeout values based on historical execution data.
+Adaptive timeout management for **synchronous command execution** (Maven, npm, Gradle builds), enabling learned timeout values based on historical execution data.
 
 ---
 
@@ -11,15 +11,17 @@ The timeout handling system provides:
 - **Safety margin**: Apply buffer to persisted values to account for variance
 - **Adaptive learning**: Update timeouts weighted towards longer durations for reliability
 
+**Primary use case**: Synchronous builds where shell `timeout` is the single timeout mechanism.
+
 ```
-                    TIMEOUT FLOW
+                    BUILD EXECUTION FLOW
 
     ┌─────────────────────────────────────────────────────┐
     │                                                     │
-    │   GET TIMEOUT                                       │
+    │   1. GET TIMEOUT                                    │
     │   ┌───────────────────────────────────────────┐     │
     │   │  timeout get                              │     │
-    │   │    --command "ci:pr_checks"               │     │
+    │   │    --command "build:maven_verify"         │     │
     │   │    --default 300                          │     │
     │   └───────────────────────────────────────────┘     │
     │                       │                             │
@@ -34,14 +36,24 @@ The timeout handling system provides:
     │     (300s)                  (240 * 1.25 = 300s)    │
     │                                                     │
     └─────────────────────────────────────────────────────┘
-
-
+                            │
+                            ▼
     ┌─────────────────────────────────────────────────────┐
-    │                                                     │
-    │   SET TIMEOUT                                       │
+    │   2. EXECUTE WITH SHELL TIMEOUT                     │
+    │   ┌───────────────────────────────────────────┐     │
+    │   │  timeout ${TIMEOUT}s mvn verify           │     │
+    │   └───────────────────────────────────────────┘     │
+    │                       │                             │
+    │                       ▼                             │
+    │                 Record duration                     │
+    └─────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌─────────────────────────────────────────────────────┐
+    │   3. SET TIMEOUT (adaptive learning)                │
     │   ┌───────────────────────────────────────────┐     │
     │   │  timeout set                              │     │
-    │   │    --command "ci:pr_checks"               │     │
+    │   │    --command "build:maven_verify"         │     │
     │   │    --duration 180                         │     │
     │   └───────────────────────────────────────────┘     │
     │                       │                             │
@@ -79,8 +91,8 @@ The timeout handling system provides:
 Retrieve timeout for a command with default fallback. Returns plain number (seconds).
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout get \
-  --command "ci:pr_checks" \
+python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get \
+  --command "build:maven_verify" \
   --default 300
 ```
 
@@ -88,7 +100,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout get 
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `--command` | Yes | Command identifier (e.g., `ci:pr_checks`) |
+| `--command` | Yes | Command identifier (e.g., `build:maven_verify`) |
 | `--default` | Yes | Default timeout in seconds if no persisted value |
 
 **Logic**:
@@ -103,8 +115,8 @@ python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout get 
 Update timeout for a command with adaptive weighting.
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout set \
-  --command "ci:pr_checks" \
+python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout set \
+  --command "build:maven_verify" \
   --duration 180
 ```
 
@@ -112,7 +124,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout set 
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `--command` | Yes | Command identifier (e.g., `ci:pr_checks`) |
+| `--command` | Yes | Command identifier (e.g., `build:maven_verify`) |
 | `--duration` | Yes | Observed duration in seconds |
 
 **Logic**:
@@ -126,7 +138,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout set 
 **Output** (TOON format):
 ```
 status	success
-command	ci:pr_checks
+command	build:maven_verify
 timeout_seconds	228
 previous_seconds	240
 source	computed|initial
@@ -142,7 +154,7 @@ Timeouts are stored in `run-configuration.json` under the command entry:
 {
   "version": 1,
   "commands": {
-    "ci:pr_checks": {
+    "build:maven_verify": {
       "timeout_seconds": 240,
       "last_execution": {
         "date": "2025-12-17",
@@ -194,7 +206,7 @@ The timeout subcommand complements `await-until.py` from `script-executor`:
 
 ```bash
 # Get learned timeout (or default) - outputs plain number
-TIMEOUT=$(python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout get \
+TIMEOUT=$(python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get \
   --command "ci:pr_checks" --default 300)
 
 # Use in await-until
@@ -205,11 +217,30 @@ python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
   --interval 30
 
 # Record actual duration for learning
-python3 .plan/execute-script.py plan-marshall:run-config:run-config timeout set \
+python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout set \
   --command "ci:pr_checks" --duration 180
 ```
 
 > **Note**: `await-until.py` has built-in adaptive timeout support via `--command-key`. This API provides an alternative for scripts that need explicit timeout control.
+
+---
+
+## Polling Operations (Corner Case)
+
+For **async polling** (CI checks, Sonar analysis), use `await-until --command-key` instead. It handles timeout internally with a generous external timeout as circuit breaker:
+
+```bash
+# await-until manages timeout internally via run-config
+# External timeout (600s) is just a safety net
+timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+  --check-cmd "gh pr checks 123 --json state" \
+  --success-field "state=completed" \
+  --command-key "ci:pr_checks"
+```
+
+**Key difference from synchronous builds**:
+- **Synchronous builds**: Single timeout layer (shell `timeout` command)
+- **Polling operations**: Two timeout layers (generous external + internal adaptive)
 
 ---
 

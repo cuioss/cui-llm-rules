@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for run-config.py script.
+"""Tests for run_config.py script.
 
 Consolidated from:
 - test_init_run_config.py → init subcommand tests
@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
-SCRIPT_PATH = get_script_path('plan-marshall', 'run-config', 'run-config.py')
+SCRIPT_PATH = get_script_path('plan-marshall', 'run-config', 'run_config.py')
 
 
 # =============================================================================
