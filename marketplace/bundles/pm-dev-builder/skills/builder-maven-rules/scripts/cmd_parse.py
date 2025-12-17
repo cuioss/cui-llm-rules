@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Parse subcommand for Maven build output."""
+
+import json
+import re
+from pathlib import Path
+from typing import Optional
+
+
+def detect_build_status(content: str) -> str:
+    """Detect overall build status from log content."""
+    if "BUILD SUCCESS" in content:
+        return "SUCCESS"
+    if "BUILD FAILURE" in content:
+        return "FAILURE"
+    if re.search(r"^\[ERROR\]", content, re.MULTILINE):
+        return "FAILURE"
+    return "SUCCESS"
+
+
+def extract_duration(content: str) -> Optional[int]:
+    """Extract total build time in milliseconds."""
+    match = re.search(r"Total time:\s+([\d.]+)\s+s", content)
+    if match:
+        return int(float(match.group(1)) * 1000)
+    match = re.search(r"Total time:\s+(\d+):(\d+)\s+min", content)
+    if match:
+        return (int(match.group(1)) * 60 + int(match.group(2))) * 1000
+    return None
+
+
+def extract_test_summary(content: str) -> dict:
+    """Extract test execution summary."""
+    pattern = r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)"
+    matches = list(re.finditer(pattern, content))
+    if matches:
+        m = matches[-1]
+        return {"tests_run": int(m.group(1)), "failures": int(m.group(2)), "errors": int(m.group(3)), "skipped": int(m.group(4))}
+    return {"tests_run": 0, "failures": 0, "errors": 0, "skipped": 0}
+
+
+def categorize_issue(message: str) -> str:
+    """Categorize an issue based on its message content."""
+    lower_msg = message.lower()
+    if any(p in lower_msg for p in ["cannot find symbol", "incompatible types", "illegal start", "class, interface, or enum expected", "unreported exception", "method does not override", "not a statement", "package does not exist", "cannot be applied"]):
+        return "compilation_error"
+    if any(p in lower_msg for p in ["tests run:", "failure!", "test failure", "assertionfailed", "expected:"]):
+        return "test_failure"
+    if any(p in lower_msg for p in ["could not resolve dependencies", "could not find artifact", "missing, no dependency", "artifact not found", "non-resolvable"]):
+        return "dependency_error"
+    if any(p in lower_msg for p in ["javadoc", "no @param", "no @return", "@param name", "missing @"]):
+        return "javadoc_warning"
+    if "[deprecation]" in lower_msg or "has been deprecated" in lower_msg:
+        return "deprecation_warning"
+    if "[unchecked]" in lower_msg or "unchecked conversion" in lower_msg:
+        return "unchecked_warning"
+    if any(p in lower_msg for p in ["org.openrewrite", "rewrite-maven-plugin", "rewrite:"]):
+        return "openrewrite_info"
+    return "other"
+
+
+def parse_file_location(line: str) -> dict:
+    """Extract file, line, and column from a Maven error/warning line."""
+    result = {"file": None, "line": None, "column": None}
+    match = re.search(r"([^\s\[\]]+\.java):\[(\d+),(\d+)\]", line)
+    if match:
+        return {"file": match.group(1), "line": int(match.group(2)), "column": int(match.group(3))}
+    match = re.search(r"([^\s\[\]]+\.java):(\d+):", line)
+    if match:
+        return {"file": match.group(1), "line": int(match.group(2)), "column": None}
+    match = re.search(r"(\w+Test)\.(\w+):(\d+)", line)
+    if match:
+        return {"file": f"{match.group(1)}.java", "line": int(match.group(3)), "column": None, "method": match.group(2)}
+    return result
+
+
+def extract_issues(content: str, include_warnings: bool = True) -> list:
+    """Extract all issues from Maven output."""
+    issues = []
+    for line_num, line in enumerate(content.split("\n"), 1):
+        severity = None
+        if "[ERROR]" in line:
+            severity = "ERROR"
+        elif include_warnings and "[WARNING]" in line:
+            severity = "WARNING"
+        if severity:
+            message = re.sub(r"^\[(INFO|ERROR|WARNING)\]\s*", "", line.strip())
+            if not message or message.startswith("->") or message.startswith("at "):
+                continue
+            location = parse_file_location(line)
+            issues.append({"type": categorize_issue(message), "file": location.get("file"), "line": location.get("line"), "column": location.get("column"), "message": message[:500], "severity": severity, "log_line": line_num})
+    return issues
+
+
+def generate_summary(issues: list) -> dict:
+    """Generate issue summary by category."""
+    summary = {"compilation_errors": 0, "test_failures": 0, "javadoc_warnings": 0, "deprecation_warnings": 0, "unchecked_warnings": 0, "dependency_errors": 0, "openrewrite_info": 0, "other_warnings": 0, "other_errors": 0, "total_issues": len(issues)}
+    for issue in issues:
+        t, s = issue["type"], issue["severity"]
+        if t == "compilation_error": summary["compilation_errors"] += 1
+        elif t == "test_failure": summary["test_failures"] += 1
+        elif t == "javadoc_warning": summary["javadoc_warnings"] += 1
+        elif t == "deprecation_warning": summary["deprecation_warnings"] += 1
+        elif t == "unchecked_warning": summary["unchecked_warnings"] += 1
+        elif t == "dependency_error": summary["dependency_errors"] += 1
+        elif t == "openrewrite_info": summary["openrewrite_info"] += 1
+        elif s == "ERROR": summary["other_errors"] += 1
+        else: summary["other_warnings"] += 1
+    return summary
+
+
+def cmd_parse(args):
+    """Handle parse subcommand."""
+    path = Path(args.log)
+    if not path.exists():
+        print(json.dumps({"status": "error", "error": f"Log file not found: {args.log}"}, indent=2))
+        return 1
+    try:
+        content = path.read_text(encoding="utf-8", errors="replace")
+    except Exception as e:
+        print(json.dumps({"status": "error", "error": f"Failed to read log file: {str(e)}"}, indent=2))
+        return 1
+
+    build_status = detect_build_status(content)
+    duration = extract_duration(content)
+    test_summary = extract_test_summary(content)
+    issues = extract_issues(content, args.mode not in ["errors"])
+    if args.mode == "no-openrewrite":
+        issues = [i for i in issues if i["type"] != "openrewrite_info"]
+    summary = generate_summary(issues)
+
+    result = {"status": "success" if build_status == "SUCCESS" else "error", "data": {"build_status": build_status, "issues": issues, "summary": summary}, "metrics": {"duration_ms": duration, "tests_run": test_summary["tests_run"], "tests_failed": test_summary["failures"] + test_summary["errors"]}}
+    print(json.dumps(result, indent=2))
+    return 0
