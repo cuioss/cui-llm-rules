@@ -57,7 +57,7 @@ Read: .plan/marshall-state.toon
 
 **If state file doesn't exist or lacks `plugin_root`**, find and run the bootstrap script:
 ```bash
-python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall/scripts/bootstrap-plugin.py get-root
+python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall-hq/scripts/bootstrap-plugin.py get-root
 ```
 
 This detects the plugin root and caches it in `.plan/marshall-state.toon`. Extract `plugin_root` from the output.
@@ -69,7 +69,7 @@ Store the plugin root path for use in subsequent steps (e.g., `PLUGIN_ROOT=/User
 Run the mode detection script using the plugin root (glob pattern handles any version):
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/determine-mode.py mode
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall-hq/scripts/determine-mode.py mode
 ```
 
 If `--wizard` flag was provided, skip to wizard mode regardless of output.
@@ -87,7 +87,7 @@ If `--wizard` flag was provided, skip to wizard mode regardless of output.
 Resolve and read the skill file:
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/bootstrap-plugin.py resolve plan-marshall skills/plan-marshall/SKILL.md
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall-hq/scripts/bootstrap-plugin.py resolve plan-marshall skills/plan-marshall-hq/SKILL.md
 ```
 
 Read the `resolved_path` from output and follow the skill instructions. Execute the section identified in Step 3.

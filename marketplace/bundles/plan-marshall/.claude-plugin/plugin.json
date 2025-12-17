@@ -14,7 +14,7 @@
     "./skills/marketplace-sync",
     "./skills/permission-doctor",
     "./skills/permission-fix",
-    "./skills/plan-marshall",
+    "./skills/plan-marshall-hq",
     "./skills/plan-marshall-config",
     "./skills/run-config",
     "./skills/script-executor",

@@ -41,7 +41,7 @@ python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketp
 
 First, get the plugin root (or read from `.plan/marshall-state.toon` if cached):
 ```bash
-python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall/scripts/bootstrap-plugin.py get-root
+python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall-hq/scripts/bootstrap-plugin.py get-root
 ```
 
 Then execute with the resolved path (auto-detects marketplace or plugin-cache):

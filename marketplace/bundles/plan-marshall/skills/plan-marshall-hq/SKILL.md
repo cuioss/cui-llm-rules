@@ -1,10 +1,10 @@
 ---
-name: plan-marshall
+name: plan-marshall-hq
 description: Project configuration wizard for planning system. Manages executor generation, health checks, build systems, and skill domains.
 allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 ---
 
-# Plan Marshall Skill
+# Plan Marshall HQ Skill
 
 ## Enforcement Rules
 
@@ -38,9 +38,9 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 
 | Script | Notation | Purpose |
 |--------|----------|---------|
-| determine-mode | `plan-marshall:plan-marshall:determine-mode` | Determine wizard vs menu mode |
-| gitignore-setup | `plan-marshall:plan-marshall:gitignore-setup` | Configure .gitignore for .plan/ |
-| cleanup-plan-directory | `plan-marshall:plan-marshall:cleanup-plan-directory` | Clean temp, logs, archived-plans, memory |
+| determine-mode | `plan-marshall:plan-marshall-hq:determine-mode` | Determine wizard vs menu mode |
+| gitignore-setup | `plan-marshall:plan-marshall-hq:gitignore-setup` | Configure .gitignore for .plan/ |
+| cleanup-plan-directory | `plan-marshall:plan-marshall-hq:cleanup-plan-directory` | Clean temp, logs, archived-plans, memory |
 | plan-marshall-config | `plan-marshall:plan-marshall-config:plan-marshall-config` | Project-level marshal.json CRUD |
 | scan-marketplace-inventory | `plan-marshall:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
 | build-env | `pm-dev-builder:environment-detection:build-env` | Build system detection |
@@ -64,7 +64,7 @@ Determine whether to run wizard or menu based on existing files.
 **BOOTSTRAP**: Since execute-script.py may not exist yet, use DIRECT Python call with glob:
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall/scripts/determine-mode.py mode
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall-hq/scripts/determine-mode.py mode
 ```
 
 **Output (TOON)**:
