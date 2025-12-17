@@ -470,6 +470,9 @@ def analyze_skill_structure(skill_dir: Path) -> dict:
 
         for existing_file in existing:
             if existing_file not in references:
+                # Skip cmd_*.py files - these are internal Python modules imported by main scripts
+                if existing_file.startswith('scripts/cmd_') and existing_file.endswith('.py'):
+                    continue
                 unreferenced_files.append(existing_file)
 
     structure_score = calculate_structure_score(
