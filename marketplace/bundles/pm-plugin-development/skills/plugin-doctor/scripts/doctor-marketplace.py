@@ -44,14 +44,10 @@ from analyze import (
     detect_component_type,
 )
 
-# Import functions from fix.py
-from fix import (
-    SAFE_FIX_TYPES,
-    RISKY_FIX_TYPES,
-    categorize_fix,
-    apply_single_fix,
-    load_templates,
-)
+# Import functions from fix modules
+from fix_shared import SAFE_FIX_TYPES, RISKY_FIX_TYPES
+from cmd_categorize import categorize_fix
+from cmd_apply import apply_single_fix, load_templates
 
 
 # =============================================================================
