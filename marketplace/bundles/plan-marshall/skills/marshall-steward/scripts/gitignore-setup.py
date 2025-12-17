@@ -32,7 +32,7 @@ from pathlib import Path
 
 # Lines to add to .gitignore
 # Use .plan/* (not .plan/) to allow exceptions - .plan/ ignores entire directory
-GITIGNORE_COMMENT = "# Planning system (managed by /plan-marshall-hq)"
+GITIGNORE_COMMENT = "# Planning system (managed by /marshall-steward)"
 GITIGNORE_PLAN_DIR = ".plan/*"
 GITIGNORE_MARSHAL_EXCEPTION = "!.plan/marshal.json"
 

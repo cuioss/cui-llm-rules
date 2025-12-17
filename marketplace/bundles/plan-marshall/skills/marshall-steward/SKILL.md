@@ -1,10 +1,10 @@
 ---
-name: plan-marshall-hq
+name: marshall-steward
 description: Project configuration wizard for planning system. Manages executor generation, health checks, build systems, and skill domains.
 allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 ---
 
-# Plan Marshall HQ Skill
+# Marshall Steward Skill
 
 ## Enforcement Rules
 
@@ -38,9 +38,9 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 
 | Script | Notation | Purpose |
 |--------|----------|---------|
-| determine-mode | `plan-marshall:plan-marshall-hq:determine-mode` | Determine wizard vs menu mode |
-| gitignore-setup | `plan-marshall:plan-marshall-hq:gitignore-setup` | Configure .gitignore for .plan/ |
-| cleanup-plan-directory | `plan-marshall:plan-marshall-hq:cleanup-plan-directory` | Clean temp, logs, archived-plans, memory |
+| determine-mode | `plan-marshall:marshall-steward:determine-mode` | Determine wizard vs menu mode |
+| gitignore-setup | `plan-marshall:marshall-steward:gitignore-setup` | Configure .gitignore for .plan/ |
+| cleanup-plan-directory | `plan-marshall:marshall-steward:cleanup-plan-directory` | Clean temp, logs, archived-plans, memory |
 | plan-marshall-config | `plan-marshall:plan-marshall-config:plan-marshall-config` | Project-level marshal.json CRUD |
 | scan-marketplace-inventory | `plan-marshall:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
 | build-env | `pm-dev-builder:environment-detection:build-env` | Build system detection |
@@ -52,7 +52,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 
 ## Prerequisites
 
-This skill requires `${PLUGIN_ROOT}` to be set by the invoking command (e.g., `/plan-marshall-hq`).
+This skill requires `${PLUGIN_ROOT}` to be set by the invoking command (e.g., `/marshall-steward`).
 The plugin root is detected via `bootstrap-plugin.py` and cached in `.plan/marshall-state.toon`.
 
 ---
@@ -64,7 +64,7 @@ Determine whether to run wizard or menu based on existing files.
 **BOOTSTRAP**: Since execute-script.py may not exist yet, use DIRECT Python call with glob:
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall-hq/scripts/determine-mode.py mode
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marshall-steward/scripts/determine-mode.py mode
 ```
 
 **Output (TOON)**:

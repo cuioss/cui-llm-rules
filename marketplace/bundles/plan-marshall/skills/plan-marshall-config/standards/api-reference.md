@@ -437,8 +437,8 @@ error: {message}
 ```
 
 Common errors:
-- `marshal.json not found. Run command /plan-marshall-hq first`
-- `skill_domains not configured. Run command /plan-marshall-hq first`
+- `marshal.json not found. Run command /marshall-steward first`
+- `skill_domains not configured. Run command /marshall-steward first`
 - `Unknown domain: {name}`
 - `Unknown module: {name}`
 - `Build system not found: {name}`

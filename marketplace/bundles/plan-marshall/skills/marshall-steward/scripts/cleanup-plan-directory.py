@@ -78,7 +78,7 @@ def get_retention_settings() -> dict:
     if not MARSHAL_JSON.exists():
         print(serialize_toon({
             "status": "error",
-            "error": "marshal.json not found. Run command /plan-marshall-hq first"
+            "error": "marshal.json not found. Run command /marshall-steward first"
         }))
         sys.exit(1)
 
@@ -94,7 +94,7 @@ def get_retention_settings() -> dict:
     if 'system' not in config or 'retention' not in config['system']:
         print(serialize_toon({
             "status": "error",
-            "error": "system.retention not configured. Run command /plan-marshall-hq first"
+            "error": "system.retention not configured. Run command /marshall-steward first"
         }))
         sys.exit(1)
 

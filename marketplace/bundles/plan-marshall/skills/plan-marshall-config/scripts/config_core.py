@@ -44,11 +44,11 @@ def require_initialized() -> None:
     """Raise exception if marshal.json doesn't exist."""
     if not PLAN_BASE_DIR.exists():
         raise MarshalNotInitializedError(
-            f"Directory '{PLAN_BASE_DIR}' does not exist. Run command /plan-marshall-hq first"
+            f"Directory '{PLAN_BASE_DIR}' does not exist. Run command /marshall-steward first"
         )
     if not MARSHAL_PATH.exists():
         raise MarshalNotInitializedError(
-            f"marshal.json not found. Run command /plan-marshall-hq first"
+            f"marshal.json not found. Run command /marshall-steward first"
         )
 
 

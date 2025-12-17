@@ -33,5 +33,5 @@ target/
 # Use .plan/* instead of .plan/ to allow exceptions below
 .plan/*
 
-# Planning system (managed by /plan-marshall-hq)
+# Planning system (managed by /marshall-steward)
 !.plan/marshal.json

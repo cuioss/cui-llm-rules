@@ -93,7 +93,7 @@ Fallback when no plan context:
 
 **Benefits**:
 - Session-based daily logs
-- Automatically cleaned by `/plan-marshall-hq` (7 days retention)
+- Automatically cleaned by `/marshall-steward` (7 days retention)
 
 ### Log Entry Formats
 
@@ -114,7 +114,7 @@ See `plan-marshall:logging` skill for full log format specification.
 
 ## Setup
 
-Run `/plan-marshall-hq` to generate the executor after bundle changes.
+Run `/marshall-steward` to generate the executor after bundle changes.
 
 ## Architecture
 
@@ -140,7 +140,7 @@ When `.plan/execute-script.py` doesn't exist yet (first run), use the bootstrap 
 Check `.plan/marshall-state.toon` for cached `plugin_root`, or detect it:
 
 ```bash
-python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/plan-marshall-hq/scripts/bootstrap-plugin.py get-root
+python3 ~/.claude/plugins/cache/*/plan-marshall/*/skills/marshall-steward/scripts/bootstrap-plugin.py get-root
 ```
 
 Output:

@@ -41,7 +41,7 @@ defaults[1]:
 
 ### 4. Fail Early, Fail Loud
 
-Operations validate prerequisites before proceeding. Missing marshal.json produces a clear error directing users to run `/plan-marshall-hq`.
+Operations validate prerequisites before proceeding. Missing marshal.json produces a clear error directing users to run `/marshall-steward`.
 
 ## marshal.json Scope
 
@@ -68,11 +68,11 @@ These configurations do not belong in marshal.json:
 .plan/marshal.json
 ```
 
-Created by `/plan-marshall-hq` wizard or `plan-marshall-config init`.
+Created by `/marshall-steward` wizard or `plan-marshall-config init`.
 
 ## Integration Points
 
-### With /plan-marshall-hq Command
+### With /marshall-steward Command
 
 The wizard uses this skill to:
 - Initialize marshal.json

@@ -70,7 +70,7 @@ success	47	.plan/execute-script.py	0
 Clean all directories based on retention settings from marshal.json:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-hq:cleanup-plan-directory clean
+python3 .plan/execute-script.py plan-marshall:marshall-steward:cleanup-plan-directory clean
 ```
 
 **Output (TOON)**:
@@ -109,8 +109,8 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 ### Cleanup Specific Target
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-hq:cleanup-plan-directory clean --target logs
-python3 .plan/execute-script.py plan-marshall:plan-marshall-hq:cleanup-plan-directory clean --target archived-plans
+python3 .plan/execute-script.py plan-marshall:marshall-steward:cleanup-plan-directory clean --target logs
+python3 .plan/execute-script.py plan-marshall:marshall-steward:cleanup-plan-directory clean --target archived-plans
 ```
 
 **NOTE**: The `.plan/temp/` directory is the default temp directory for ALL temporary files. It is covered by the existing `Write(.plan/**)` permission (avoiding permission prompts for `/tmp/`) and cleaned during maintenance.
@@ -122,7 +122,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-hq:cleanup-plan-dire
 Check if project docs need `.plan/temp/` documentation:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-hq:determine-mode check-docs
+python3 .plan/execute-script.py plan-marshall:marshall-steward:determine-mode check-docs
 ```
 
 **Output (TOON)**:

@@ -13,7 +13,7 @@ message: .plan/execute-script.py not found
 recovery: Run first-run wizard to generate executor
 ```
 
-**Resolution**: Run `/plan-marshall-hq --wizard` or select "Full Reconfigure" from Configuration menu.
+**Resolution**: Run `/marshall-steward --wizard` or select "Full Reconfigure" from Configuration menu.
 
 ---
 
@@ -28,7 +28,7 @@ recovery: Delete and re-run wizard, or fix JSON syntax
 
 **Resolution**:
 1. Check `.plan/marshal.json` for JSON syntax errors
-2. Or delete the file and run `/plan-marshall-hq --wizard`
+2. Or delete the file and run `/marshall-steward --wizard`
 
 ---
 
@@ -77,7 +77,7 @@ recovery: Ensure project contains pom.xml, build.gradle, or package.json
 status: error
 error: plugin_root_missing
 message: ${PLUGIN_ROOT} not set or invalid
-recovery: Ensure skill invoked via /plan-marshall-hq command
+recovery: Ensure skill invoked via /marshall-steward command
 ```
 
-**Resolution**: Use the `/plan-marshall-hq` command to invoke this skill properly.
+**Resolution**: Use the `/marshall-steward` command to invoke this skill properly.

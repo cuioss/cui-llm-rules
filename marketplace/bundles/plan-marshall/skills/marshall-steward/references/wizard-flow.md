@@ -11,7 +11,7 @@ Configure `.gitignore` for `.plan/` directory.
 **BOOTSTRAP**: Use DIRECT Python call with glob:
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall-hq/scripts/gitignore-setup.py
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marshall-steward/scripts/gitignore-setup.py
 ```
 
 **Output (TOON)**:
@@ -38,7 +38,7 @@ Check if project docs need `.plan/temp/` documentation:
 **BOOTSTRAP**: Use DIRECT Python call with glob (executor not yet available):
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/plan-marshall-hq/scripts/determine-mode.py check-docs
+python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marshall-steward/scripts/determine-mode.py check-docs
 ```
 
 **Output (TOON)**:
@@ -279,7 +279,7 @@ skill_domains:
 
 next_steps:
   - Run /plan-manage to create a new plan
-  - Use /plan-marshall-hq for maintenance tasks
+  - Use /marshall-steward for maintenance tasks
 ```
 
 After summary output, wizard is complete. Exit skill execution.
