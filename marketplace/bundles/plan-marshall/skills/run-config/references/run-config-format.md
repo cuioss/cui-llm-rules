@@ -70,7 +70,20 @@ Each command entry can have:
 | Field | Type | Description |
 |-------|------|-------------|
 | date | string | ISO date of execution |
-| status | string | SUCCESS or FAILURE |
+| status | string | SUCCESS, FAILURE, or TIMEOUT |
+| duration_ms | integer | Execution duration in milliseconds (optional, used for adaptive timeouts) |
+
+### Command-Key Naming Convention
+
+Command keys support namespaced naming for organized storage:
+
+| Key Pattern | Description | Example |
+|-------------|-------------|---------|
+| `ci:<operation>` | CI/CD operations | `ci:pr_checks`, `ci:sonar_analysis` |
+| `build:<type>` | Build operations | `build:maven_verify`, `build:npm_test` |
+| `deploy:<env>` | Deployment waits | `deploy:staging`, `deploy:production` |
+
+The `duration_ms` field enables adaptive timeout learning. The `await-until` script uses previous execution durations to calculate appropriate timeouts for polling operations.
 
 ---
 
@@ -127,6 +140,13 @@ Use dot notation for field access:
       "skipped_files": ["CHANGELOG.adoc"],
       "skipped_directories": ["target/", "node_modules/"],
       "acceptable_warnings": []
+    },
+    "ci:pr_checks": {
+      "last_execution": {
+        "date": "2025-12-17",
+        "duration_ms": 95000,
+        "status": "SUCCESS"
+      }
     }
   },
   "maven": {

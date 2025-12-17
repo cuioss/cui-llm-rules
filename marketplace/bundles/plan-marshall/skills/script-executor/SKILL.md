@@ -170,6 +170,50 @@ This pattern enables:
 - Caching for fast subsequent lookups
 - Version-agnostic paths via glob
 
+## Wait Pattern (Optional)
+
+The script executor includes a synchronous polling utility for blocking until async operations complete.
+
+**When to Load**: Activate when implementing workflows that wait for:
+- CI/CD pipeline completion
+- Sonar analysis completion
+- External service readiness
+- Any async operation requiring polling
+
+**Load Reference**:
+```
+Read standards/wait-pattern.md
+```
+
+**Quick Usage**:
+
+```bash
+# Adaptive mode (timeout managed via run-config)
+python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+  --check-cmd "python3 .plan/execute-script.py pm-ci:ci-api:ci-provider-api ci check-status --pr 123" \
+  --success-field "status=success" \
+  --failure-field "status=failure" \
+  --command-key "ci:pr_checks"
+
+# Explicit mode (manual timeout)
+python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+  --check-cmd "gh pr checks 123 --json state" \
+  --success-field "status=success" \
+  --timeout 300 \
+  --interval 30
+```
+
+**Output** (TOON format):
+```
+status          success|timeout|failure
+duration_ms     Actual wait duration
+polls           Number of condition checks
+timeout_used_ms Timeout value used
+timeout_source  explicit|adaptive|default
+command_key     The command key (if adaptive)
+final_result.*  Flattened fields from last check
+```
+
 ## Integration with Verification
 
 The verification skill recognizes this execution pattern:
