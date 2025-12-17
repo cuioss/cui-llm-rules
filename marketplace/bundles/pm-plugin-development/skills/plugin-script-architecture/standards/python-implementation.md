@@ -287,6 +287,203 @@ Apply modularization when:
 - API remains monolithic (same CLI interface)
 - Parallel development possible
 
+## Unit Consistency
+
+**Rule**: Use consistent units throughout a script. For time-related values, prefer **seconds** (human-readable, standard in Python).
+
+### Anti-pattern: Mixed Units
+
+```python
+# BAD: Mixing milliseconds and seconds
+timeout_ms = timeout_get(...)  # Returns milliseconds
+duration = int(time.time() - start)  # Seconds (time.time() returns seconds)
+config["duration_ms"] = duration * 1000  # Convert back to ms
+
+output = {
+    "duration_ms": duration_ms,
+    "timeout_used_ms": timeout_ms,
+    "elapsed": duration  # Seconds - inconsistent!
+}
+```
+
+### Correct Pattern: Consistent Units
+
+```python
+# GOOD: Everything in seconds
+timeout = timeout_get(...)  # Returns seconds
+duration = int(time.time() - start)  # Seconds
+config["timeout_seconds"] = timeout
+
+output = {
+    "duration_seconds": duration,
+    "timeout_seconds": timeout
+}
+```
+
+### Unit Naming Convention
+
+Include the unit in variable and key names:
+
+| Unit | Suffix | Example |
+|------|--------|---------|
+| Seconds | `_seconds` | `timeout_seconds`, `duration_seconds` |
+| Milliseconds | `_ms` | `latency_ms` (only if ms is required) |
+| Bytes | `_bytes` | `file_size_bytes` |
+| Count | `_count` | `error_count`, `retry_count` |
+
+### Why Seconds for Time
+
+- Python's `time.time()` returns seconds
+- Human-readable (120 seconds vs 120000 milliseconds)
+- Standard in Unix/POSIX conventions
+- Easier mental math during debugging
+
+## API Functions Pattern
+
+**Rule**: Scripts SHOULD expose pure API functions separate from CLI wrappers, enabling direct import by other scripts.
+
+### Two-Layer Design
+
+```python
+# Layer 1: Pure API functions (no argparse dependency)
+def timeout_get(command_key: str, default: int, project_dir: str = '.') -> int:
+    """Get timeout for a command. Returns default if not persisted.
+
+    Args:
+        command_key: The command identifier
+        default: Default timeout in seconds
+        project_dir: Project directory containing run config
+
+    Returns:
+        Timeout in seconds
+    """
+    config = load_run_config(get_config_path(project_dir))
+    persisted = config.get("commands", {}).get(command_key, {}).get("timeout_seconds")
+    return default if persisted is None else int(persisted * SAFETY_MARGIN)
+
+
+def timeout_set(command_key: str, duration: int, project_dir: str = '.') -> None:
+    """Persist timeout for a command using weighted average."""
+    # Implementation...
+
+
+# Layer 2: CLI wrappers that call API functions
+def cmd_timeout_get(args):
+    """CLI wrapper for timeout_get."""
+    result = timeout_get(args.command_key, args.default, args.project_dir or '.')
+    print(json.dumps({"timeout_seconds": result}))
+
+
+def cmd_timeout_set(args):
+    """CLI wrapper for timeout_set."""
+    timeout_set(args.command_key, args.duration, args.project_dir or '.')
+    print(json.dumps({"status": "ok"}))
+```
+
+### API Function Requirements
+
+- **No `args` parameter**: Accept explicit typed parameters
+- **Type hints**: All parameters and return types annotated
+- **Docstrings**: Describe purpose, arguments, and return value
+- **No stdout**: Return values; let callers decide on output
+- **Raise exceptions**: Don't call `sys.exit()` in API functions
+
+### CLI Wrapper Requirements
+
+- **Thin**: Only parse args and call API function
+- **Handle output**: Print JSON results to stdout
+- **Handle errors**: Catch exceptions and format error output
+- **Call sys.exit**: Only in wrappers, not in API functions
+
+### Benefits
+
+- **Importable**: Other scripts can call `timeout_get()` directly
+- **Testable**: Unit tests call API functions without argparse
+- **Reusable**: Same logic available via CLI and programmatic API
+
+## File Naming for Import Compatibility
+
+**Rule**: Python files that may be imported as modules MUST use underscores, not hyphens.
+
+### Why This Matters
+
+Python module names cannot contain hyphens. A file named `run-config.py` cannot be imported:
+
+```python
+# FAILS - Python syntax error
+from run-config import timeout_get
+```
+
+### Naming Convention
+
+| Component | Naming | Example |
+|-----------|--------|---------|
+| Directory names | MAY use hyphens | `run-config/`, `json-file-operations/` |
+| Python files for import | MUST use underscores | `run_config.py`, `config_core.py` |
+| Entry-point-only scripts | MAY use hyphens | `doctor-marketplace.py` (if never imported) |
+
+### Recommended: Always Use Underscores
+
+For consistency and future-proofing, prefer underscores for all Python files:
+
+```
+scripts/
+  run_config.py       # ✓ Can be imported
+  config_core.py      # ✓ Can be imported
+  cmd_timeout.py      # ✓ Can be imported
+```
+
+### Anti-pattern
+
+```
+scripts/
+  run-config.py       # ✗ Cannot be imported
+  manage-files.py     # ✗ Cannot be imported
+```
+
+## Direct Python Imports vs Subprocess
+
+**Rule**: When script A needs functionality from script B, and both are Python, use direct imports instead of subprocess calls.
+
+### Anti-pattern: Subprocess to Python Script
+
+```python
+# BAD: Subprocess call to Python script
+result = subprocess.run([
+    "python3", ".plan/execute-script.py",
+    "plan-marshall:run-config:run_config",
+    "timeout", "get", "--command-key", command_key
+], capture_output=True, text=True)
+# Then parse JSON output...
+timeout = json.loads(result.stdout)["timeout_seconds"]
+```
+
+### Correct Pattern: Direct Import
+
+```python
+# GOOD: Direct import and function call
+from run_config import timeout_get
+
+timeout = timeout_get(command_key, default=300)
+```
+
+### When to Use Each Approach
+
+| Scenario | Use |
+|----------|-----|
+| Calling another Python script in marketplace | Direct import |
+| Calling external commands (git, gh, mvn) | Subprocess |
+| Calling system utilities (ls, cat, grep) | Subprocess |
+| Cross-language calls (Python to Bash) | Subprocess |
+
+### Benefits of Direct Import
+
+- **No parsing**: Return native Python types, not JSON strings
+- **Type safety**: Function signatures with type hints
+- **Performance**: No subprocess overhead
+- **Testability**: Can mock functions in unit tests
+- **Error handling**: Catch exceptions directly
+
 ## Script Quality Checklist
 
 Before marking script as "quality approved":

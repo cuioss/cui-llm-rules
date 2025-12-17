@@ -277,7 +277,7 @@ def main():
     exec_parser.add_argument("--workspace", help="Workspace name for monorepo projects")
     exec_parser.add_argument("--working-dir", dest="working_dir", help="Working directory for command execution")
     exec_parser.add_argument("--env", help="Environment variables (e.g., 'NODE_ENV=test CI=true')")
-    exec_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds")
+    exec_parser.add_argument("--timeout", type=int, default=120000, help="Build timeout in milliseconds (default: 120000 = 2 min)")
     exec_parser.set_defaults(func=cmd_execute)
 
     # parse subcommand
