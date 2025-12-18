@@ -122,7 +122,7 @@ def is_covered_by_wildcard(specific: str, broader: str) -> bool:
 def cmd_detect_redundant(args) -> int:
     """Handle detect-redundant subcommand."""
     # Resolve paths from --scope or explicit args
-    if hasattr(args, 'scope') and args.scope:
+    if args.scope:
         global_path, local_path = resolve_scope_to_paths(args.scope)
     else:
         global_path = args.global_settings
@@ -259,7 +259,7 @@ def check_permission(permission: str) -> Optional[dict]:
 def cmd_detect_suspicious(args) -> int:
     """Handle detect-suspicious subcommand."""
     # Resolve path from --scope or explicit --settings
-    if hasattr(args, 'scope') and args.scope:
+    if args.scope:
         if args.scope == "global":
             settings_path = str(get_global_settings_path())
         else:  # project
@@ -272,7 +272,7 @@ def cmd_detect_suspicious(args) -> int:
         print(json.dumps({"error": error}))
         return EXIT_ERROR
 
-    approved_permissions = load_approved_permissions(args.approved_file if hasattr(args, 'approved_file') else None)
+    approved_permissions = load_approved_permissions(args.approved_file)
     allow_list = settings.get("permissions", {}).get("allow", [])
 
     suspicious = []
@@ -304,7 +304,7 @@ def cmd_detect_suspicious(args) -> int:
         },
         "settings_path": settings_path
     }
-    if hasattr(args, 'approved_file') and args.approved_file:
+    if args.approved_file:
         result["approved_file"] = args.approved_file
 
     print(json.dumps(result, indent=2))
