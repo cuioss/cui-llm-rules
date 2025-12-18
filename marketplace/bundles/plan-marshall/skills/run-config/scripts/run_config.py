@@ -487,7 +487,7 @@ Examples:
 
     # Handle timeout subcommand
     if args.command == 'timeout':
-        if not hasattr(args, 'timeout_command') or not args.timeout_command:
+        if not args.timeout_command:
             p_timeout.print_help()
             return 1
 
