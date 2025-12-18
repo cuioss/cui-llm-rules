@@ -130,16 +130,6 @@ def output_error(operation: str, error: str) -> None:
 def cmd_save(args) -> int:
     """Save content to memory file."""
     try:
-        if not args.category:
-            output_error("save", "Category required")
-            return 1
-        if not args.identifier:
-            output_error("save", "Identifier required")
-            return 1
-        if not args.content:
-            output_error("save", "Content required")
-            return 1
-
         content = json.loads(args.content)
 
         # Generate timestamped filename for context category
@@ -170,13 +160,6 @@ def cmd_save(args) -> int:
 def cmd_load(args) -> int:
     """Load content from memory file."""
     try:
-        if not args.category:
-            output_error("load", "Category required")
-            return 1
-        if not args.identifier:
-            output_error("load", "Identifier required")
-            return 1
-
         file_path = get_memory_path(args.category, args.identifier)
 
         if not file_path.exists():
@@ -244,10 +227,6 @@ def cmd_list(args) -> int:
 def cmd_query(args) -> int:
     """Find memory files matching pattern."""
     try:
-        if not args.pattern:
-            output_error("query", "Pattern required")
-            return 1
-
         # Convert glob pattern to regex
         pattern = args.pattern.replace('*', '.*').replace('?', '.')
         regex = re.compile(pattern, re.IGNORECASE)
@@ -281,10 +260,6 @@ def cmd_query(args) -> int:
 def cmd_cleanup(args) -> int:
     """Remove old memory files based on age."""
     try:
-        if not args.older_than:
-            output_error("cleanup", "--older-than duration required")
-            return 1
-
         duration = parse_duration(args.older_than)
         cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - duration
 
@@ -398,10 +373,6 @@ def validate_memory_format(data: Dict) -> List[Dict]:
 def cmd_validate(args) -> int:
     """Validate memory file format and structure."""
     try:
-        if not args.file:
-            output_error("validate", "File path required")
-            return 1
-
         file_path = Path(args.file)
 
         if not file_path.exists():
@@ -475,16 +446,16 @@ Examples:
 
     # save command
     p_save = subparsers.add_parser('save', help='Save content to memory file')
-    p_save.add_argument('--category', choices=CATEGORIES, help='Memory category')
-    p_save.add_argument('--identifier', help='File identifier/summary')
-    p_save.add_argument('--content', help='JSON content to save')
+    p_save.add_argument('--category', required=True, choices=CATEGORIES, help='Memory category')
+    p_save.add_argument('--identifier', required=True, help='File identifier/summary')
+    p_save.add_argument('--content', required=True, help='JSON content to save')
     p_save.add_argument('--session-id', dest='session_id', help='Optional session ID')
     p_save.set_defaults(func=cmd_save)
 
     # load command
     p_load = subparsers.add_parser('load', help='Load content from memory file')
-    p_load.add_argument('--category', choices=CATEGORIES, help='Memory category')
-    p_load.add_argument('--identifier', help='File identifier')
+    p_load.add_argument('--category', required=True, choices=CATEGORIES, help='Memory category')
+    p_load.add_argument('--identifier', required=True, help='File identifier')
     p_load.set_defaults(func=cmd_load)
 
     # list command
@@ -495,19 +466,19 @@ Examples:
 
     # query command
     p_query = subparsers.add_parser('query', help='Find files matching pattern')
-    p_query.add_argument('--pattern', help='Glob pattern to match')
+    p_query.add_argument('--pattern', required=True, help='Glob pattern to match')
     p_query.add_argument('--category', choices=CATEGORIES, help='Filter by category')
     p_query.set_defaults(func=cmd_query)
 
     # cleanup command
     p_cleanup = subparsers.add_parser('cleanup', help='Remove old memory files')
     p_cleanup.add_argument('--category', choices=CATEGORIES, help='Filter by category')
-    p_cleanup.add_argument('--older-than', dest='older_than', help='Remove files older than (e.g., 7d, 24h)')
+    p_cleanup.add_argument('--older-than', required=True, dest='older_than', help='Remove files older than (e.g., 7d, 24h)')
     p_cleanup.set_defaults(func=cmd_cleanup)
 
     # validate command
     p_validate = subparsers.add_parser('validate', help='Validate memory file format')
-    p_validate.add_argument('--file', help='Path to memory file to validate')
+    p_validate.add_argument('--file', required=True, help='Path to memory file to validate')
     p_validate.set_defaults(func=cmd_validate)
 
     args = parser.parse_args()
