@@ -201,11 +201,6 @@ def cmd_read_field(args) -> int:
     try:
         file_path = Path(args.file_path)
         data = read_json_file(file_path)
-
-        if not args.field:
-            output_error("read-field", "Field path required")
-            return 1
-
         components = parse_json_path(args.field)
         value = get_nested_value(data, components)
 
@@ -220,11 +215,6 @@ def cmd_write(args) -> int:
     """Write entire JSON content to file."""
     try:
         file_path = Path(args.file_path)
-
-        if not args.value:
-            output_error("write", "Value required")
-            return 1
-
         data = json.loads(args.value)
         write_json_file(file_path, data)
 
@@ -242,13 +232,6 @@ def cmd_update_field(args) -> int:
     """Update specific field in JSON file."""
     try:
         file_path = Path(args.file_path)
-
-        if not args.field:
-            output_error("update-field", "Field path required")
-            return 1
-        if not args.value:
-            output_error("update-field", "Value required")
-            return 1
 
         # Read existing or start fresh
         if file_path.exists():
@@ -276,14 +259,6 @@ def cmd_add_entry(args) -> int:
     """Add entry to array or object in JSON file."""
     try:
         file_path = Path(args.file_path)
-
-        if not args.field:
-            output_error("add-entry", "Field path required")
-            return 1
-        if not args.value:
-            output_error("add-entry", "Value required")
-            return 1
-
         data = read_json_file(file_path) if file_path.exists() else {}
         value = json.loads(args.value)
         components = parse_json_path(args.field)
@@ -322,11 +297,6 @@ def cmd_remove_entry(args) -> int:
     """Remove entry from array or object in JSON file."""
     try:
         file_path = Path(args.file_path)
-
-        if not args.field:
-            output_error("remove-entry", "Field path required")
-            return 1
-
         data = read_json_file(file_path)
         components = parse_json_path(args.field)
 
