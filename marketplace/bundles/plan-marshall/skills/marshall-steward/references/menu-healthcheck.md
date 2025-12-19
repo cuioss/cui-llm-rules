@@ -89,7 +89,7 @@ Report any redundant or stale permissions found.
 Check CI provider detection and tool availability:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:marshall-steward:ci-health status
+python3 .plan/execute-script.py plan-marshall:ci-operations:ci_health status
 ```
 
 **Interpret results**:

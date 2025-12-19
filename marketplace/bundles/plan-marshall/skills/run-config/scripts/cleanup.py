@@ -40,10 +40,9 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-# Add parent paths for toon_parser
-script_dir = Path(__file__).parent
-BUNDLES_DIR = script_dir.parent.parent.parent.parent  # marketplace/bundles
-sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
+# Add sibling skill paths (works for both source and cache locations)
+SKILLS_DIR = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(SKILLS_DIR / 'toon-usage' / 'scripts'))
 
 from toon_parser import serialize_toon
 

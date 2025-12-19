@@ -40,8 +40,8 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Skill, AskUserQuestion
 |--------|----------|---------|
 | determine-mode | `plan-marshall:marshall-steward:determine-mode` | Determine wizard vs menu mode |
 | gitignore-setup | `plan-marshall:marshall-steward:gitignore-setup` | Configure .gitignore for .plan/ |
-| cleanup-plan-directory | `plan-marshall:marshall-steward:cleanup-plan-directory` | Clean temp, logs, archived-plans, memory |
-| ci-health | `plan-marshall:marshall-steward:ci-health` | CI provider detection and tool verification |
+| cleanup | `plan-marshall:run-config:cleanup` | Clean temp, logs, archived-plans, memory (delegated to run-config) |
+| ci_health | `plan-marshall:ci-operations:ci_health` | CI provider detection (delegated to ci-operations) |
 | plan-marshall-config | `plan-marshall:plan-marshall-config:plan-marshall-config` | Project-level marshal.json CRUD |
 | scan-marketplace-inventory | `plan-marshall:marketplace-inventory:scan-marketplace-inventory` | Script discovery |
 | build-env | `pm-dev-builder:environment-detection:build-env` | Build system detection |

@@ -259,11 +259,31 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def generate_ci_commands(provider: str) -> dict:
+    """Generate static CI commands for the detected provider.
+
+    Returns dict of command_name -> full command string.
+    """
+    if provider not in ("github", "gitlab"):
+        return {}
+
+    executor = "python3 .plan/execute-script.py"
+    script = f"ci-operations:{provider}"  # Notation: {skill}:{script}
+
+    return {
+        "pr-create": f"{executor} {script} pr create",
+        "pr-reviews": f"{executor} {script} pr reviews",
+        "ci-status": f"{executor} {script} ci status",
+        "ci-wait": f"{executor} {script} ci wait",
+        "issue-create": f"{executor} {script} issue create",
+    }
+
+
 def cmd_persist(args: argparse.Namespace) -> int:
     """Handle the 'persist' subcommand.
 
     Splits CI config between two files:
-    - marshal.json (shared): provider, repo_url, detected_at
+    - marshal.json (shared): provider, repo_url, detected_at, commands
     - run-configuration.json (local): authenticated_tools, verified_at
     """
     plan_dir = Path(args.plan_dir)
@@ -289,11 +309,15 @@ def cmd_persist(args: argparse.Namespace) -> int:
     # Timestamps
     now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
+    # Generate static commands for provider
+    ci_commands = generate_ci_commands(provider_result["provider"])
+
     # Build marshal.json CI config (project-level, shared)
     marshal_ci_config = {
         "repo_url": provider_result["repo_url"],
         "provider": provider_result["provider"],
         "detected_at": now,
+        "commands": ci_commands,
     }
 
     # Build run-configuration.json CI config (local, machine-specific)
@@ -326,13 +350,21 @@ def cmd_persist(args: argparse.Namespace) -> int:
     except Exception as e:
         return error_json(f"Failed to update run-configuration.json: {e}")
 
-    output_json({
-        "status": "success",
-        "persisted": {
-            "marshal_json": marshal_ci_config,
-            "run_configuration_json": run_config_ci,
-        },
-    })
+    # Output in TOON format
+    print("status: success")
+    print("persisted_to: marshal.json")
+    print()
+    print("ci_config{key,value}:")
+    print(f"provider\t{provider_result['provider']}")
+    print(f"repo_url\t{provider_result['repo_url'] or 'none'}")
+    print()
+    if ci_commands:
+        print(f"ci_commands[{len(ci_commands)}]{{name,command}}:")
+        for name, command in ci_commands.items():
+            print(f"{name}\t{command}")
+    else:
+        print("ci_commands[0]{name,command}:")
+
     return 0
 
 

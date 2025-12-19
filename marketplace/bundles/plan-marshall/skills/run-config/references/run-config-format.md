@@ -49,6 +49,7 @@ The run configuration file stores:
 
 | Section | Purpose |
 |---------|---------|
+| ci | CI provider tool verification status |
 | maven | Maven build configurations |
 
 ---
@@ -84,6 +85,32 @@ Command keys support namespaced naming for organized storage:
 | `deploy:<env>` | Deployment waits | `deploy:staging`, `deploy:production` |
 
 The `duration_ms` field enables adaptive timeout learning. The `await-until` script uses previous execution durations to calculate appropriate timeouts for polling operations.
+
+---
+
+## CI Section
+
+CI provider tool verification status (written by `ci-operations:ci_health persist`).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| git_present | boolean | Whether git is installed |
+| authenticated_tools | array | List of authenticated CI tools |
+| verified_at | string | ISO timestamp of last verification |
+
+### Example
+
+```json
+{
+  "ci": {
+    "git_present": true,
+    "authenticated_tools": ["git", "gh"],
+    "verified_at": "2025-12-19T10:30:00Z"
+  }
+}
+```
+
+> **Note**: Provider-specific configuration (provider name, repo URL, static commands) is stored in `marshal.json` (shared via git), while tool authentication status is stored in `run-configuration.json` (local, machine-specific).
 
 ---
 
@@ -148,6 +175,11 @@ Use dot notation for field access:
         "status": "SUCCESS"
       }
     }
+  },
+  "ci": {
+    "git_present": true,
+    "authenticated_tools": ["git", "gh"],
+    "verified_at": "2025-12-19T10:30:00Z"
   },
   "maven": {
     "acceptable_warnings": {

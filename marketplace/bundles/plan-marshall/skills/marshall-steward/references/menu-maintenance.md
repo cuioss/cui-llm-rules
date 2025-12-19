@@ -70,22 +70,20 @@ success	47	.plan/execute-script.py	0
 Clean all directories based on retention settings from marshal.json:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:marshall-steward:cleanup-plan-directory clean
+python3 .plan/execute-script.py plan-marshall:run-config:cleanup run
 ```
 
 **Output (TOON)**:
 ```toon
-status	success
-target	all
-temp_files	5
-temp_bytes	1024
-logs_deleted	3
-logs_bytes	512
-archived_plans_deleted	2
-archived_plans_bytes	8192
-memory_files_deleted	10
-memory_bytes	2048
-total_bytes_freed	11776
+status: success
+operation: cleanup
+dry_run: false
+
+deleted[4]{category,count,size_bytes}:
+logs	3	512
+archived_plans	2	8192
+memory	10	2048
+temp	5	1024
 ```
 
 ### Retention Settings
@@ -106,11 +104,17 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config system retention set --field archived_plans_days --value 14
 ```
 
-### Cleanup Specific Target
+### Cleanup with Custom Retention
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:marshall-steward:cleanup-plan-directory clean --target logs
-python3 .plan/execute-script.py plan-marshall:marshall-steward:cleanup-plan-directory clean --target archived-plans
+python3 .plan/execute-script.py plan-marshall:run-config:cleanup run \
+    --logs-days 1 --archived-days 5 --memory-days 5
+```
+
+### Dry Run (Preview)
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:cleanup run --dry-run
 ```
 
 **NOTE**: The `.plan/temp/` directory is the default temp directory for ALL temporary files. It is covered by the existing `Write(.plan/**)` permission (avoiding permission prompts for `/tmp/`) and cleaned during maintenance.

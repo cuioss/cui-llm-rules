@@ -16,16 +16,29 @@
         "testing": "pm-workflow:task-testing"
       },
       "core": {
-        "defaults": ["pm-dev-java:java-core"],
-        "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
+        "defaults": [
+          "pm-dev-java:java-core"
+        ],
+        "optionals": [
+          "pm-dev-java:java-null-safety",
+          "pm-dev-java:java-lombok",
+          "pm-dev-java:javadoc"
+        ]
       },
       "implementation": {
         "defaults": [],
-        "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
+        "optionals": [
+          "pm-dev-java:java-cdi",
+          "pm-dev-java:java-maintenance"
+        ]
       },
       "testing": {
-        "defaults": ["pm-dev-java:junit-core"],
-        "optionals": ["pm-dev-java:junit-integration"]
+        "defaults": [
+          "pm-dev-java:junit-core"
+        ],
+        "optionals": [
+          "pm-dev-java:junit-integration"
+        ]
       }
     },
     "javascript": {
@@ -36,16 +49,28 @@
         "testing": "pm-workflow:task-testing"
       },
       "core": {
-        "defaults": ["pm-dev-frontend:cui-javascript"],
-        "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
+        "defaults": [
+          "pm-dev-frontend:cui-javascript"
+        ],
+        "optionals": [
+          "pm-dev-frontend:cui-jsdoc",
+          "pm-dev-frontend:cui-javascript-project"
+        ]
       },
       "implementation": {
         "defaults": [],
-        "optionals": ["pm-dev-frontend:cui-javascript-linting", "pm-dev-frontend:cui-javascript-maintenance"]
+        "optionals": [
+          "pm-dev-frontend:cui-javascript-linting",
+          "pm-dev-frontend:cui-javascript-maintenance"
+        ]
       },
       "testing": {
-        "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
-        "optionals": ["pm-dev-frontend:cui-cypress"]
+        "defaults": [
+          "pm-dev-frontend:cui-javascript-unit-testing"
+        ],
+        "optionals": [
+          "pm-dev-frontend:cui-cypress"
+        ]
       }
     },
     "plan-marshall-plugin-dev": {
@@ -102,6 +127,18 @@
       "create_pr": false,
       "verification_required": true,
       "branch_strategy": "direct"
+    }
+  },
+  "ci": {
+    "repo_url": "https://github.com/cuioss/cui-llm-rules.git",
+    "provider": "github",
+    "detected_at": "2025-12-19T11:30:26Z",
+    "commands": {
+      "pr-create": "python3 .plan/execute-script.py ci-operations:github pr create",
+      "pr-reviews": "python3 .plan/execute-script.py ci-operations:github pr reviews",
+      "ci-status": "python3 .plan/execute-script.py ci-operations:github ci status",
+      "ci-wait": "python3 .plan/execute-script.py ci-operations:github ci wait",
+      "issue-create": "python3 .plan/execute-script.py ci-operations:github issue create"
     }
   }
 }

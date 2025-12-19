@@ -340,12 +340,62 @@ timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await
 | validate | `plan-marshall:run-config:run_config validate` |
 | timeout get | `plan-marshall:run-config:run_config timeout get` |
 | timeout set | `plan-marshall:run-config:run_config timeout set` |
+| cleanup | `plan-marshall:run-config:cleanup` |
 
 Script characteristics:
 - Uses Python stdlib only (json, argparse, pathlib)
-- Outputs JSON (init/validate) or TOON (timeout) to stdout
+- Outputs JSON (init/validate) or TOON (timeout/cleanup) to stdout
 - Exit code 0 for success, 1 for errors
 - Supports `--help` flag
+
+---
+
+## Workflow: Cleanup Plan Directory
+
+**Pattern**: Command Chain Execution
+
+Clean temporary files, logs, archived plans, and memory based on retention settings.
+
+### Step 1: Run Cleanup (Dry Run)
+
+Preview what would be deleted:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:cleanup run --dry-run
+```
+
+### Step 2: Run Cleanup
+
+Execute cleanup with default retention (1 day logs, 5 days archived/memory):
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:cleanup run
+```
+
+### Step 3: Custom Retention
+
+Override retention periods:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:cleanup run \
+    --logs-days 1 \
+    --archived-days 5 \
+    --memory-days 5
+```
+
+### Output (TOON)
+
+```toon
+status: success
+operation: cleanup
+dry_run: false
+
+deleted[4]{category,count,size_bytes}:
+logs	12	45678
+archived_plans	3	12345
+memory	5	8901
+temp	28	56789
+```
 
 ---
 
