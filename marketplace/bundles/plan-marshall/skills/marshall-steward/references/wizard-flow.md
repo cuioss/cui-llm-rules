@@ -148,34 +148,42 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ---
 
-## Step 4: Project Detection
+## Step 4: Build System and Module Detection
 
-Detect build systems, skill domains, and modules from project structure.
-
-### 4a: Build System Detection
+Detect build systems, modules, and generate commands in a single delegation call.
 
 ```bash
-python3 .plan/execute-script.py pm-dev-builder:environment-detection:build-env detect
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
 ```
 
-Parse detected systems and prompt user:
+**Output (TOON)**:
+```toon
+status: success
+build_systems: maven,npm
+modules_updated: 3
+commands_generated: 15
 
-```
-AskUserQuestion:
-  question: "Detected build systems: [Maven, npm]. Configure these?"
-  options:
-    - label: "Yes"
-      description: "Configure detected build systems"
-      value: "yes"
-    - label: "No"
-      description: "Skip build system configuration"
-      value: "no"
+modules[3]{name,path,commands_count}:
+default	.	5
+oauth-sheriff-core	oauth-sheriff-core	5
+oauth-sheriff-ui	oauth-sheriff-ui	5
 ```
 
-If yes, auto-detect and add build systems to marshal.json:
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config build-systems detect
+Display to user:
 ```
+Build Systems: Maven, npm
+Modules detected: 3
+  - default (5 commands)
+  - oauth-sheriff-core (5 commands)
+  - oauth-sheriff-ui (5 commands)
+```
+
+This single command:
+- Detects available build systems (Maven, Gradle, npm)
+- Detects project modules (Maven modules, Gradle subprojects, npm workspaces)
+- Generates full command strings for each module
+- Persists to `modules.{name}.commands` in marshal.json
+- Updates `build_systems[]` for skill reference
 
 ### 4b: Skill Domain Detection
 
@@ -190,18 +198,6 @@ This populates `skill_domains` in marshal.json with the nested structure:
 - `{domain}.core` - foundation skills (defaults + optionals)
 - `{domain}.implementation` - implementation profile skills
 - `{domain}.testing` - testing profile skills
-
-### 4c: Module Detection
-
-For multi-module projects, detect modules and infer their domains/build systems:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config modules detect
-```
-
-This populates `modules` in marshal.json with per-module domain and build system mappings.
-
-**Note**: Module detection infers domains from module content (e.g., nested `package.json` → javascript domain for that module).
 
 ---
 
@@ -293,6 +289,9 @@ marshal:
 build_systems:
   - maven
   - npm
+modules:
+  count: 3
+  commands_generated: 15
 skill_domains:
   - java
   - javascript

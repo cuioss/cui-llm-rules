@@ -2,6 +2,7 @@
 """Tests for build-systems command in plan-marshall-config.
 
 Tests build-systems command variants and edge cases.
+Note: build_systems is now detection-only. Commands are stored in modules.
 """
 
 import sys
@@ -29,30 +30,15 @@ def test_build_systems_list():
 
 
 def test_build_systems_get():
-    """Test build-systems get."""
+    """Test build-systems get (detection reference only)."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'maven')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-dev-builder:builder-maven-rules' in result.stdout
-        assert 'verify' in result.stdout.lower()
-
-
-def test_build_systems_get_command():
-    """Test build-systems get-command."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-
-        result = run_script(
-            SCRIPT_PATH, 'build-systems', 'get-command',
-            '--system', 'maven',
-            '--label', 'verify'
-        )
-
-        assert result.success, f"Should succeed: {result.stderr}"
-        assert 'clean verify' in result.stdout
+        # Now uses plan-marshall:build-operations (not pm-dev-builder)
+        assert 'plan-marshall:build-operations' in result.stdout
 
 
 def test_build_systems_add():
@@ -66,7 +52,8 @@ def test_build_systems_add():
 
         # Verify added
         verify = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'gradle')
-        assert 'pm-dev-builder:builder-gradle-rules' in verify.stdout
+        # Now uses plan-marshall:build-operations
+        assert 'plan-marshall:build-operations' in verify.stdout
 
 
 def test_build_systems_remove():
@@ -103,20 +90,6 @@ def test_build_systems_add_duplicate_fails():
         assert 'error' in result.stdout.lower() or 'exists' in result.stdout.lower()
 
 
-def test_build_systems_get_command_unknown_label():
-    """Test build-systems get-command with unknown label returns error."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-
-        result = run_script(
-            SCRIPT_PATH, 'build-systems', 'get-command',
-            '--system', 'maven',
-            '--label', 'nonexistent'
-        )
-
-        assert 'error' in result.stdout.lower(), "Should report error"
-
-
 # =============================================================================
 # Main
 # =============================================================================
@@ -126,11 +99,9 @@ if __name__ == '__main__':
     runner.add_tests([
         test_build_systems_list,
         test_build_systems_get,
-        test_build_systems_get_command,
         test_build_systems_add,
         test_build_systems_remove,
         test_build_systems_get_unknown,
         test_build_systems_add_duplicate_fails,
-        test_build_systems_get_command_unknown_label,
     ])
     sys.exit(runner.run())

@@ -51,12 +51,6 @@
       "strict": false
     },
     {
-      "name": "pm-dev-builder",
-      "description": "Unified build tools for Maven, Gradle, and npm projects",
-      "source": "./bundles/pm-dev-builder",
-      "strict": false
-    },
-    {
       "name": "pm-requirements",
       "description": "Requirements engineering and specification standards for projects",
       "source": "./bundles/pm-requirements",

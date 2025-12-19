@@ -45,32 +45,38 @@ JSON structure and field definitions for project configuration.
     }
   },
   "modules": {
-    "my-core": {
-      "path": "my-core",
+    "default": {
+      "path": ".",
       "domains": ["java-core", "java-implementation"],
-      "build_systems": ["maven"]
+      "build_systems": ["maven"],
+      "commands": {
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\""
+      }
     },
     "my-ui": {
       "path": "my-ui",
       "domains": ["java-core", "java-implementation", "javascript-core", "javascript-implementation"],
       "build_systems": ["maven", "npm"],
       "commands": {
-        "npm": {
-          "test": "custom:test"
-        }
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\"",
+        "build": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run build\""
       }
     }
   },
   "build_systems": [
     {
       "system": "maven",
-      "skill": "pm-dev-builder:builder-maven-rules",
-      "commands": {
-        "compile": "compile",
-        "test": "clean test",
-        "verify": "clean verify",
-        "install": "clean install"
-      }
+      "skill": "plan-marshall:build-operations"
+    },
+    {
+      "system": "gradle",
+      "skill": "plan-marshall:build-operations"
+    },
+    {
+      "system": "npm",
+      "skill": "plan-marshall:build-operations"
     }
   ],
   "system": {
@@ -141,7 +147,7 @@ Each technical domain follows the pattern: `{language}-core`, `{language}-implem
 
 ## Section: modules
 
-Project module configuration with domain and build system mappings.
+Project module configuration with domain, build system, and command mappings.
 
 ### Structure
 
@@ -153,9 +159,37 @@ Project module configuration with domain and build system mappings.
       "domains": ["domain1", "domain2"],
       "build_systems": ["system1", "system2"],
       "commands": {
-        "{system}": {
-          "{label}": "command"
-        }
+        "{label}": "python3 .plan/execute-script.py plan-marshall:build-operations:{system} execute --goals \"{goals}\""
+      }
+    }
+  }
+}
+```
+
+### Example
+
+```json
+{
+  "modules": {
+    "default": {
+      "path": ".",
+      "domains": ["java-core", "java-implementation"],
+      "build_systems": ["maven"],
+      "commands": {
+        "test-compile": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"test-compile\"",
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\"",
+        "pre-commit": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\" --profile pre-commit"
+      }
+    },
+    "oauth-sheriff-core": {
+      "path": "oauth-sheriff-core",
+      "domains": ["java-core", "java-implementation"],
+      "build_systems": ["maven"],
+      "commands": {
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module oauth-sheriff-core",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module oauth-sheriff-core"
       }
     }
   }
@@ -168,17 +202,27 @@ Project module configuration with domain and build system mappings.
 |-------|------|----------|-------------|
 | `path` | string | Yes | Relative path from project root |
 | `domains` | array | Yes | Skill domains for this module |
-| `build_systems` | array | Yes | Available build systems |
-| `commands` | object | No | Module-specific command overrides |
+| `build_systems` | array | Yes | Available build systems (for detection info) |
+| `commands` | object | Yes | Label to full command string mapping |
 
-### Command Resolution
+### Command Resolution (Static Routing)
 
-1. Check module-specific override: `modules.{name}.commands.{system}.{label}`
-2. Fall back to project-level: `build_systems[system].commands.{label}`
+Commands are stored as **full executable strings** - no runtime routing needed:
+
+1. Get command from `modules.{name}.commands.{label}`
+2. Execute directly with `eval "$COMMAND"`
+3. If module doesn't have the label, fall back to `modules.default.commands.{label}`
+
+### Static Routing Benefits
+
+- **Transparency**: Config shows exactly what runs
+- **Customization**: User can edit marshal.json to customize any command
+- **No runtime logic**: Command already contains correct script path
+- **Single mental model**: Same pattern as CI commands
 
 ## Section: build_systems
 
-Build system configuration with command mappings.
+Build system detection and skill reference. Used by wizard for initial setup.
 
 ### Structure
 
@@ -187,10 +231,7 @@ Build system configuration with command mappings.
   "build_systems": [
     {
       "system": "maven",
-      "skill": "pm-dev-builder:builder-maven-rules",
-      "commands": {
-        "label": "command"
-      }
+      "skill": "plan-marshall:build-operations"
     }
   ]
 }
@@ -200,20 +241,24 @@ Build system configuration with command mappings.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `system` | string | Build system identifier |
+| `system` | string | Build system identifier (maven, gradle, npm) |
 | `skill` | string | Skill for executing builds |
-| `commands` | object | Label to command mapping |
 
-### Standard Command Labels
+### Role in Static Routing
 
-| Label | Purpose |
-|-------|---------|
-| `compile` | Compile source code |
-| `test` | Run unit tests |
-| `verify` | Full verification |
-| `install` | Install artifacts |
-| `pre-commit` | Pre-commit checks |
-| `coverage` | Coverage analysis |
+The `build_systems` section serves as:
+- **Detection reference**: Wizard uses this to map detected systems to skills
+- **Skill lookup**: Agents can look up which skill handles which system
+
+Command execution uses `modules.{name}.commands.{label}` directly - no runtime routing through build_systems is needed.
+
+### Supported Systems
+
+| System | Skill | Detection Files |
+|--------|-------|-----------------|
+| `maven` | `plan-marshall:build-operations` | `pom.xml` |
+| `gradle` | `plan-marshall:build-operations` | `build.gradle`, `build.gradle.kts` |
+| `npm` | `plan-marshall:build-operations` | `package.json` |
 
 ## Section: system
 

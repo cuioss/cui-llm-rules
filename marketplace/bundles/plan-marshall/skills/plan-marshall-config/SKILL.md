@@ -110,26 +110,33 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
   modules get-domains --module my-module
 ```
 
-### Get Build Command (with Override Resolution)
+### Get Build Command (Static Routing)
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  modules get-command --module my-module --system maven --label verify
+  modules get-command --module my-module --label verify
 ```
 
 **Output**:
 ```toon
 status: success
 module: my-module
-system: maven
 label: verify
-command: clean verify
-source: project_level
+command: python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "clean verify" --module my-module
+source: module
 ```
 
 Command resolution order:
-1. Module-specific override (if defined in `modules.{name}.commands`)
-2. Project-level build system command (fallback)
+1. Module-specific command (if defined in `modules.{name}.commands`)
+2. Default module command (fallback to `modules.default.commands`)
+
+### Set Build Command
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  modules set-command --module my-module --label verify \
+  --command 'python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "clean verify" --module my-module'
+```
 
 ---
 
@@ -137,7 +144,7 @@ Command resolution order:
 
 **Pattern**: Read-Process-Write
 
-Get build system configuration and commands.
+Get build system detection reference. Commands are resolved via `modules get-command`.
 
 ### List Build Systems
 
@@ -146,12 +153,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
   build-systems list
 ```
 
-### Get Command for Label
-
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  build-systems get-command --system maven --label verify
-```
+**Note**: Build commands are not stored in `build_systems` section. Use `modules get-command --module {module} --label {label}` to resolve executable commands.
 
 ---
 
@@ -243,7 +245,8 @@ Profiles are convention-based (derived from domain config keys). Standard profil
 | `get` | `--module` | Get full module config |
 | `get-domains` | `--module` | Get skill domains for module |
 | `get-build-systems` | `--module` | Get available build systems for module |
-| `get-command` | `--module --system --label` | Get command (with module override resolution) |
+| `get-command` | `--module --label` | Get command (static routing with default fallback) |
+| `set-command` | `--module --label --command` | Set full command string for module |
 | `add` | `--module --path --domains --build-systems` | Add new module |
 | `set` | `--module [--domains] [--build-systems]` | Update module config |
 | `remove` | `--module` | Remove module |
@@ -253,12 +256,13 @@ Profiles are convention-based (derived from domain config keys). Standard profil
 
 | Verb | Parameters | Purpose |
 |------|------------|---------|
-| `list` | (none) | List configured systems with commands |
+| `list` | (none) | List configured systems (detection reference only) |
 | `get` | `--system` | Get specific build system config |
-| `get-command` | `--system --label` | Get command for label |
-| `add` | `--system` | Add build system with default commands |
+| `add` | `--system` | Add build system |
 | `remove` | `--system` | Remove build system |
-| `detect` | (none) | Auto-detect from project and populate commands |
+| `detect` | (none) | Auto-detect from project |
+
+**Note**: `build_systems` section is for detection reference only. Commands are stored in `modules.{name}.commands` using static routing.
 
 ### Noun: system
 
@@ -335,19 +339,32 @@ The defaults template contains only `system` domain. Technical domains (java, ja
     }
   },
   "modules": {
+    "default": {
+      "path": ".",
+      "domains": ["java"],
+      "build_systems": ["maven"],
+      "commands": {
+        "test-compile": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"test-compile\"",
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\"",
+        "pre-commit": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\" --profile pre-commit"
+      }
+    },
     "my-module": {
       "path": "my-module",
       "domains": ["java"],
-      "build_systems": ["maven"]
+      "build_systems": ["maven"],
+      "commands": {
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-module",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module my-module"
+      }
     }
   },
   "build_systems": [
     {
       "system": "maven",
-      "skill": "pm-dev-builder:builder-maven-rules",
-      "commands": {
-        "verify": "clean verify"
-      }
+      "skill": "plan-marshall:build-operations"
     }
   ],
   "system": {
@@ -431,8 +448,9 @@ Script characteristics:
 - `skill-domains get-optionals` provides available optionals
 
 ### With Build Commands
-- `modules get-command` resolves build commands with overrides
-- `build-systems get-command` provides project-level commands
+- `modules get-command` resolves build commands using static routing
+- `modules set-command` allows custom command configuration
+- Commands are generated by `plan-marshall:build-operations:build_env persist`
 
 ### With Cleanup
 - `system retention get` provides retention settings

@@ -56,6 +56,15 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
                 }
             },
             "modules": {
+                "default": {
+                    "path": ".",
+                    "domains": ["java"],
+                    "build_systems": ["maven"],
+                    "commands": {
+                        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+                        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\""
+                    }
+                },
                 "my-core": {
                     "path": "my-core",
                     "domains": ["java"],
@@ -66,28 +75,19 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
                     "domains": ["java", "javascript"],
                     "build_systems": ["maven", "npm"],
                     "commands": {
-                        "npm": {
-                            "test": "custom:test"
-                        }
+                        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\"",
+                        "build": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run build\""
                     }
                 }
             },
             "build_systems": [
                 {
                     "system": "maven",
-                    "skill": "pm-dev-builder:builder-maven-rules",
-                    "commands": {
-                        "verify": "clean verify",
-                        "test": "clean test"
-                    }
+                    "skill": "plan-marshall:build-operations"
                 },
                 {
                     "system": "npm",
-                    "skill": "pm-dev-builder:builder-npm-rules",
-                    "commands": {
-                        "test": "run test",
-                        "verify": "run test && run lint"
-                    }
+                    "skill": "plan-marshall:build-operations"
                 }
             ],
             "system": {

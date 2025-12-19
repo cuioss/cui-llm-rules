@@ -8,45 +8,16 @@ project initialization and detection.
 # Reserved keys in nested domain config (not profile names)
 RESERVED_DOMAIN_KEYS = ['workflow_skills', 'core']
 
-# Build system defaults
+# Build system defaults (detection reference only - commands are in modules)
 BUILD_SYSTEM_DEFAULTS = {
     "maven": {
-        "skill": "pm-dev-builder:builder-maven-rules",
-        "commands": {
-            "compile": "compile",
-            "test-compile": "test-compile",
-            "test": "clean test",
-            "verify": "clean verify",
-            "install": "clean install",
-            "pre-commit": "-Ppre-commit clean install",
-            "coverage": "-Pcoverage clean verify",
-            "integration": "-Pintegration-tests clean verify",
-            "native": "clean package -Dnative"
-        }
+        "skill": "plan-marshall:build-operations"
     },
     "gradle": {
-        "skill": "pm-dev-builder:builder-gradle-rules",
-        "commands": {
-            "compile": "compileJava",
-            "test-compile": "testClasses",
-            "test": "clean test",
-            "verify": "clean check",
-            "install": "clean publishToMavenLocal",
-            "pre-commit": "clean preCommit",
-            "coverage": "clean test jacocoTestReport"
-        }
+        "skill": "plan-marshall:build-operations"
     },
     "npm": {
-        "skill": "pm-dev-builder:builder-npm-rules",
-        "commands": {
-            "compile": "run build",
-            "test": "run test",
-            "verify": "run test && run lint",
-            "lint": "run lint",
-            "format": "run format:check",
-            "coverage": "run test:coverage",
-            "e2e": "run test:e2e"
-        }
+        "skill": "plan-marshall:build-operations"
     }
 }
 

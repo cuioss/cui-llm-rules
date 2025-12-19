@@ -68,14 +68,12 @@ def cmd_build_systems(args) -> int:
             defaults = BUILD_SYSTEM_DEFAULTS[system]
             new_system = {
                 "system": system,
-                "skill": defaults["skill"],
-                "commands": defaults["commands"].copy()
+                "skill": defaults["skill"]
             }
         else:
             new_system = {
                 "system": system,
-                "skill": "",
-                "commands": {}
+                "skill": "plan-marshall:build-operations"
             }
 
         build_systems.append(new_system)

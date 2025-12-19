@@ -64,38 +64,60 @@ def test_modules_get_build_systems():
         assert 'npm' in result.stdout.lower()
 
 
-def test_modules_get_command_project_level():
-    """Test modules get-command returns project-level command."""
+def test_modules_get_command_from_default():
+    """Test modules get-command falls back to default module."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(
             SCRIPT_PATH, 'modules', 'get-command',
             '--module', 'my-core',
-            '--system', 'maven',
             '--label', 'verify'
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'clean verify' in result.stdout
-        assert 'project_level' in result.stdout
+        assert 'source: default' in result.stdout
 
 
-def test_modules_get_command_module_override():
-    """Test modules get-command returns module-specific override."""
+def test_modules_get_command_from_module():
+    """Test modules get-command returns module-specific command."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(
             SCRIPT_PATH, 'modules', 'get-command',
             '--module', 'my-ui',
-            '--system', 'npm',
             '--label', 'test'
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'custom:test' in result.stdout
-        assert 'module_override' in result.stdout
+        assert 'npm' in result.stdout  # Contains npm in the command
+        assert 'source: module' in result.stdout
+
+
+def test_modules_set_command():
+    """Test modules set-command sets command for module."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'modules', 'set-command',
+            '--module', 'my-core',
+            '--label', 'custom',
+            '--command', 'python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "custom"'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+
+        # Verify the command was set
+        verify = run_script(
+            SCRIPT_PATH, 'modules', 'get-command',
+            '--module', 'my-core',
+            '--label', 'custom'
+        )
+        assert 'custom' in verify.stdout
+        assert 'source: module' in verify.stdout
 
 
 def test_modules_add():
@@ -167,8 +189,9 @@ if __name__ == '__main__':
         test_modules_get,
         test_modules_get_domains,
         test_modules_get_build_systems,
-        test_modules_get_command_project_level,
-        test_modules_get_command_module_override,
+        test_modules_get_command_from_default,
+        test_modules_get_command_from_module,
+        test_modules_set_command,
         test_modules_add,
         test_modules_remove,
         test_modules_get_unknown_module,

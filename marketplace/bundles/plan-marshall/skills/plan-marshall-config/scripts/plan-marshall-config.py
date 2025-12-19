@@ -86,10 +86,14 @@ def main():
     mod_get_bs = mod_sub.add_parser('get-build-systems', help='Get module build systems')
     mod_get_bs.add_argument('--module', required=True, help='Module name')
 
-    mod_get_cmd = mod_sub.add_parser('get-command', help='Get command with override resolution')
+    mod_get_cmd = mod_sub.add_parser('get-command', help='Get command from module (static routing)')
     mod_get_cmd.add_argument('--module', required=True, help='Module name')
-    mod_get_cmd.add_argument('--system', required=True, help='Build system')
     mod_get_cmd.add_argument('--label', required=True, help='Command label')
+
+    mod_set_cmd = mod_sub.add_parser('set-command', help='Set command for module (static routing)')
+    mod_set_cmd.add_argument('--module', required=True, help='Module name')
+    mod_set_cmd.add_argument('--label', required=True, help='Command label')
+    mod_set_cmd.add_argument('--command', required=True, help='Full command string')
 
     mod_add = mod_sub.add_parser('add', help='Add module')
     mod_add.add_argument('--module', required=True, help='Module name')

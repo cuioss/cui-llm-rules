@@ -141,7 +141,6 @@ def cmd_modules(args) -> int:
 
     elif args.verb == 'get-command':
         module = args.module
-        system = args.system
         label = args.label
 
         if module not in modules:
@@ -149,32 +148,52 @@ def cmd_modules(args) -> int:
 
         mod_config = modules[module]
 
-        # Check module-specific override first
-        if "commands" in mod_config and system in mod_config["commands"]:
-            if label in mod_config["commands"][system]:
+        # Static routing: check module commands directly (label -> full command string)
+        if "commands" in mod_config and label in mod_config["commands"]:
+            return success_exit({
+                "module": module,
+                "label": label,
+                "command": mod_config["commands"][label],
+                "source": "module"
+            })
+
+        # Fall back to default module
+        if "default" in modules and module != "default":
+            default_config = modules["default"]
+            if "commands" in default_config and label in default_config["commands"]:
                 return success_exit({
                     "module": module,
-                    "system": system,
                     "label": label,
-                    "command": mod_config["commands"][system][label],
-                    "source": "module_override"
+                    "command": default_config["commands"][label],
+                    "source": "default"
                 })
 
-        # Fall back to project-level build_systems
-        build_systems = config.get("build_systems", [])
-        for bs in build_systems:
-            if bs.get("system") == system:
-                commands = bs.get("commands", {})
-                if label in commands:
-                    return success_exit({
-                        "module": module,
-                        "system": system,
-                        "label": label,
-                        "command": commands[label],
-                        "source": "project_level"
-                    })
+        return error_exit(f"Command not found: {module}.{label}")
 
-        return error_exit(f"Command not found: {system}.{label}")
+    elif args.verb == 'set-command':
+        module = args.module
+        label = args.label
+        command = args.command
+
+        if module not in modules:
+            return error_exit(f"Unknown module: {module}")
+
+        mod_config = modules[module]
+
+        # Initialize commands dict if needed
+        if "commands" not in mod_config:
+            mod_config["commands"] = {}
+
+        mod_config["commands"][label] = command
+        config['modules'] = modules
+        save_config(config)
+
+        return success_exit({
+            "module": module,
+            "label": label,
+            "command": command,
+            "action": "set"
+        })
 
     elif args.verb == 'add':
         module = args.module

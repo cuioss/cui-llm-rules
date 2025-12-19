@@ -179,33 +179,49 @@ plan-marshall-config modules get-build-systems --module my-ui
 
 ### get-command
 
-Get build command with override resolution.
+Get build command using static routing.
 
 ```bash
 plan-marshall-config modules get-command \
   --module my-ui \
-  --system npm \
   --label test
 ```
 
-**Output (module override):**
+**Output (module command):**
 ```toon
 status: success
 module: my-ui
-system: npm
 label: test
-command: custom:test
-source: module_override
+command: python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "run test"
+source: module
 ```
 
-**Output (project level fallback):**
+**Output (default module fallback):**
 ```toon
 status: success
 module: my-core
-system: maven
 label: verify
-command: clean verify
-source: project_level
+command: python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "clean verify"
+source: default
+```
+
+### set-command
+
+Set a build command for a module.
+
+```bash
+plan-marshall-config modules set-command \
+  --module my-ui \
+  --label verify \
+  --command 'python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "run lint && run test"'
+```
+
+**Output:**
+```toon
+status: success
+module: my-ui
+label: verify
+command: python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "run lint && run test"
 ```
 
 ### add
@@ -261,7 +277,7 @@ total_modules: 3
 
 ## Noun: build-systems
 
-Manage build system configuration.
+Detection reference for available build systems. Commands are stored in modules using static routing.
 
 ### list
 
@@ -269,6 +285,16 @@ List configured build systems.
 
 ```bash
 plan-marshall-config build-systems list
+```
+
+**Output:**
+```toon
+status: success
+build_systems[2]:
+- system: maven
+  skill: plan-marshall:build-operations
+- system: npm
+  skill: plan-marshall:build-operations
 ```
 
 ### get
@@ -283,35 +309,12 @@ plan-marshall-config build-systems get --system maven
 ```toon
 status: success
 system: maven
-skill: pm-dev-builder:builder-maven-rules
-commands:
-  compile: compile
-  test: clean test
-  verify: clean verify
-```
-
-### get-command
-
-Get command for a label.
-
-```bash
-plan-marshall-config build-systems get-command \
-  --system maven \
-  --label verify
-```
-
-**Output:**
-```toon
-status: success
-system: maven
-label: verify
-command: clean verify
-skill: pm-dev-builder:builder-maven-rules
+skill: plan-marshall:build-operations
 ```
 
 ### add
 
-Add build system with default commands.
+Add build system to detection reference.
 
 ```bash
 plan-marshall-config build-systems add --system gradle
@@ -332,6 +335,8 @@ Auto-detect build systems from project.
 ```bash
 plan-marshall-config build-systems detect
 ```
+
+**Note:** Build commands are retrieved from modules, not build-systems. Use `modules get-command --module X --label Y`
 
 ---
 

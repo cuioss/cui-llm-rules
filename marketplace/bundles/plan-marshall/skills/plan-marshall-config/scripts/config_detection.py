@@ -15,7 +15,7 @@ def detect_build_systems() -> list:
     """Auto-detect build systems from project files.
 
     Returns:
-        List of build system configs with system, skill, and commands.
+        List of build system configs with system and skill (detection reference only).
     """
     detected = []
     project_root = Path('.')
@@ -25,8 +25,7 @@ def detect_build_systems() -> list:
         defaults = BUILD_SYSTEM_DEFAULTS["maven"]
         detected.append({
             "system": "maven",
-            "skill": defaults["skill"],
-            "commands": defaults["commands"].copy()
+            "skill": defaults["skill"]
         })
 
     # Gradle
@@ -34,8 +33,7 @@ def detect_build_systems() -> list:
         defaults = BUILD_SYSTEM_DEFAULTS["gradle"]
         detected.append({
             "system": "gradle",
-            "skill": defaults["skill"],
-            "commands": defaults["commands"].copy()
+            "skill": defaults["skill"]
         })
 
     # npm
@@ -43,8 +41,7 @@ def detect_build_systems() -> list:
         defaults = BUILD_SYSTEM_DEFAULTS["npm"]
         detected.append({
             "system": "npm",
-            "skill": defaults["skill"],
-            "commands": defaults["commands"].copy()
+            "skill": defaults["skill"]
         })
 
     return detected

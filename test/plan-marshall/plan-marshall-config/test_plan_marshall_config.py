@@ -98,7 +98,7 @@ def test_build_systems_get():
         result = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'maven')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-dev-builder:builder-maven-rules' in result.stdout
+        assert 'plan-marshall:build-operations' in result.stdout
 
 
 def test_system_retention_get():

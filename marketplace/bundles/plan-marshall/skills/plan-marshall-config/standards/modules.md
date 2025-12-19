@@ -1,32 +1,37 @@
 # Module Configuration
 
-Project module management with domain and build system mappings.
+Project module management with domain and build system mappings using static routing.
 
 ## Purpose
 
 Modules represent distinct parts of a project with different:
 - Skill domains (Java, JavaScript, testing)
 - Build systems (Maven, npm, Gradle)
-- Command configurations
+- Command configurations (full executable strings)
 
-## Module Structure
+## Static Routing Pattern
+
+Commands are stored as **full executable strings** in `modules.{name}.commands`:
 
 ```json
 {
   "modules": {
-    "nifi-cuioss-processors": {
-      "path": "nifi-cuioss-processors",
-      "domains": ["java-core", "java-implementation"],
-      "build_systems": ["maven"]
-    },
-    "nifi-cuioss-ui": {
-      "path": "nifi-cuioss-ui",
-      "domains": ["java-core", "java-implementation", "javascript-core", "javascript-implementation"],
-      "build_systems": ["maven", "npm"],
+    "default": {
+      "path": ".",
+      "domains": ["java"],
+      "build_systems": ["maven"],
       "commands": {
-        "npm": {
-          "test": "playwright:test"
-        }
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\""
+      }
+    },
+    "my-module": {
+      "path": "my-module",
+      "domains": ["java"],
+      "build_systems": ["maven"],
+      "commands": {
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-module",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module my-module"
       }
     }
   }
@@ -48,37 +53,30 @@ Relative path from project root to the module.
 Skill domains applicable to this module. Links to `skill_domains` configuration.
 
 ```json
-"domains": ["java-core", "java-implementation", "javascript-core", "javascript-implementation"]
+"domains": ["java"]
 ```
 
-Technical domains follow the pattern: `{language}-core`, `{language}-implementation`, `{language}-testing`.
-
 Standard domains:
-- `java-core` - Common Java standards (shared)
-- `java-implementation` - Production Java code
-- `java-testing` - Java test code
-- `javascript-core` - Common JavaScript standards (shared)
-- `javascript-implementation` - Production JavaScript code
-- `javascript-testing` - JavaScript test code
+- `java` - Java development (nested structure with core/implementation/testing)
+- `javascript` - JavaScript development (nested structure with core/implementation/testing)
 
 ### build_systems
 
-Available build systems for this module. References project-level `build_systems`.
+Available build systems for this module. Used for detection reference.
 
 ```json
 "build_systems": ["maven", "npm"]
 ```
 
-### commands (optional)
+### commands
 
-Module-specific command overrides per build system.
+Full executable command strings for each label.
 
 ```json
 "commands": {
-  "npm": {
-    "test": "playwright:test",
-    "verify": "playwright:test"
-  }
+  "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+  "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+  "pre-commit": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\" --profile pre-commit"
 }
 ```
 
@@ -86,35 +84,64 @@ Module-specific command overrides per build system.
 
 When requesting a command for a module:
 
-1. **Check module override first**
+1. **Check module commands first**
    ```
-   modules.{module}.commands.{system}.{label}
+   modules.{module}.commands.{label}
    ```
 
-2. **Fall back to project level**
+2. **Fall back to default module**
    ```
-   build_systems[system=system].commands.{label}
+   modules.default.commands.{label}
    ```
 
 ### Example
 
 ```bash
-# For e2e-playwright module with npm test
-plan-marshall-config modules get-command \
-  --module e2e-playwright \
-  --system npm \
-  --label test
+# Get verify command for my-module
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  modules get-command --module my-module --label verify
 ```
 
-If `modules.e2e-playwright.commands.npm.test` exists → returns `playwright:test`
-Otherwise → returns project-level `build_systems[npm].commands.test`
+**Output**:
+```toon
+status: success
+module: my-module
+label: verify
+command: python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "clean verify" --module my-module
+source: module
+```
+
+If `modules.my-module.commands.verify` exists → returns module-specific command
+Otherwise → returns `modules.default.commands.verify`
+
+## Command Generation
+
+Commands are generated by the `build_env persist` workflow:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
+```
+
+This:
+1. Detects build systems
+2. Detects modules
+3. Generates full command strings
+4. Persists to marshal.json
+
+### Generated Command Format
+
+| Build System | Format |
+|--------------|--------|
+| Maven | `python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "{goals}" [--module {module}] [--profile {profile}]` |
+| Gradle | `python3 .plan/execute-script.py plan-marshall:build-operations:gradle execute --tasks "{tasks}" [--module {module}]` |
+| npm | `python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "{command}" [--module {module}]` |
 
 ## Module Detection
 
 Auto-detect modules from build files:
 
 ```bash
-plan-marshall-config modules detect
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-modules
 ```
 
 ### Detection Sources
@@ -122,29 +149,8 @@ plan-marshall-config modules detect
 | Build System | Source File | Detection Method |
 |--------------|-------------|------------------|
 | Maven | pom.xml | Parse `<modules>` section |
-| Gradle | build.gradle | Parse `subprojects` |
+| Gradle | settings.gradle.kts | Parse `include` statements |
 | npm | package.json | Parse `workspaces` |
-
-### Domain Inference
-
-Domains are inferred from module content:
-
-| Pattern | Inferred Domains |
-|---------|-----------------|
-| `*.java` files (non-test) | `java-core`, `java-implementation` |
-| `*.java` files in test dirs | `java-core`, `java-testing` |
-| `*.js` or `*.ts` files (non-test) | `javascript-core`, `javascript-implementation` |
-| `e2e`, `playwright`, `cypress` in path | `javascript-core`, `javascript-testing` |
-
-### Build System Inference
-
-Build systems are inferred from module files:
-
-| File | Inferred System |
-|------|-----------------|
-| `pom.xml` | maven |
-| `build.gradle` / `build.gradle.kts` | gradle |
-| `package.json` | npm |
 
 ## Usage Patterns
 
@@ -152,31 +158,39 @@ Build systems are inferred from module files:
 
 ```bash
 # Get domains for module
-domains=$(plan-marshall-config modules get-domains --module my-ui)
+domains=$(python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  modules get-domains --module my-ui)
 
-# For each domain, get implementation skills
-plan-marshall-config skill-domains get-defaults --domain java-core
-plan-marshall-config skill-domains get-defaults --domain java-implementation
-plan-marshall-config skill-domains get-defaults --domain javascript-core
+# Resolve skills for domain and profile
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-domain-skills --domain java --profile implementation
 ```
 
 ### Get Build Command
 
 ```bash
-# Get verify command with override resolution
-plan-marshall-config modules get-command \
-  --module my-ui \
-  --system npm \
-  --label verify
+# Get verify command (static routing)
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  modules get-command --module my-ui --label verify
+```
+
+### Set Custom Command
+
+```bash
+# Set custom command for module
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  modules set-command --module my-ui --label verify \
+  --command 'python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "run lint && run test"'
 ```
 
 ### Add Module
 
 ```bash
-plan-marshall-config modules add \
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  modules add \
   --module new-e2e \
   --path tests/e2e \
-  --domains "javascript-testing" \
+  --domains "javascript" \
   --build-systems "npm"
 ```
 
@@ -185,35 +199,55 @@ plan-marshall-config modules add \
 ```json
 {
   "modules": {
+    "default": {
+      "path": ".",
+      "domains": ["java"],
+      "build_systems": ["maven"],
+      "commands": {
+        "test-compile": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"test-compile\"",
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\"",
+        "pre-commit": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\" --profile pre-commit"
+      }
+    },
     "core-api": {
       "path": "core-api",
-      "domains": ["java-core", "java-implementation"],
-      "build_systems": ["maven"]
-    },
-    "core-impl": {
-      "path": "core-impl",
-      "domains": ["java-core", "java-implementation"],
-      "build_systems": ["maven"]
+      "domains": ["java"],
+      "build_systems": ["maven"],
+      "commands": {
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module core-api",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module core-api"
+      }
     },
     "web-ui": {
       "path": "web-ui",
-      "domains": ["javascript-core", "javascript-implementation"],
-      "build_systems": ["npm"]
+      "domains": ["javascript"],
+      "build_systems": ["npm"],
+      "commands": {
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\"",
+        "build": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run build\""
+      }
     },
     "e2e-tests": {
       "path": "e2e-tests",
-      "domains": ["javascript-core", "javascript-testing"],
+      "domains": ["javascript"],
       "build_systems": ["npm"],
       "commands": {
-        "npm": {
-          "test": "cypress:run",
-          "verify": "cypress:run"
-        }
+        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run cypress:run\"",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run cypress:run\""
       }
     }
   }
 }
 ```
+
+## Static Routing Benefits
+
+1. **Transparency**: Config shows exactly what runs
+2. **Customization**: User can edit any command directly
+3. **No runtime logic**: Command already contains correct script path
+4. **Single mental model**: Same pattern as CI commands
 
 ## Agent Usage
 
@@ -221,15 +255,15 @@ Implementation agents use module configuration to:
 
 1. **Determine applicable skills**
    ```
-   modules get-domains → skill-domains get-defaults
+   modules get-domains → resolve-domain-skills
    ```
 
 2. **Run correct build commands**
    ```
-   modules get-command --module X --system Y --label Z
+   modules get-command --module X --label Y
+   eval "$COMMAND"
    ```
 
 3. **Scope verification to module**
-   ```
-   mvn test -pl {module-path}
-   ```
+   - Command includes `--module {module-path}` flag
+   - Script handles module-specific execution

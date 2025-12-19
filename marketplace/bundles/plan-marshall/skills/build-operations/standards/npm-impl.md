@@ -1,0 +1,232 @@
+# npm Implementation Standards
+
+Standards for executing npm/npx builds in JavaScript projects.
+
+---
+
+## Command Construction
+
+### npm vs npx Detection
+
+Commands are automatically routed to either `npm` or `npx` based on the command:
+
+**npx commands** (tools that should use npx):
+- `playwright` - Playwright test runner
+- `eslint` - ESLint linter
+- `prettier` - Prettier formatter
+- `stylelint` - StyleLint CSS linter
+- `tsc` - TypeScript compiler
+- `jest` - Jest test runner (when invoked directly)
+- `vitest` - Vitest test runner (when invoked directly)
+
+**npm commands** (npm scripts):
+- `run <script>` - Execute package.json script
+- `test` - Run test script
+- `install` - Install dependencies
+- `build` - Build production bundle
+
+**Examples:**
+```bash
+# These use npx automatically
+playwright test
+eslint src/
+prettier --check src/
+
+# These use npm
+run test
+run build
+test
+install
+```
+
+### Workspace Targeting
+
+For monorepo projects with npm workspaces:
+
+**Detection:**
+1. Read root `package.json`
+2. Check for `workspaces` array
+3. Validate workspace name exists
+
+**Usage:**
+```bash
+# Single workspace build
+npm run test --workspace=e-2-e-playwright
+
+# Multiple workspaces
+npm run test --workspace=pkg1 --workspace=pkg2
+```
+
+---
+
+## Build Execution
+
+### Log File Management
+
+**Log file naming:**
+```
+target/npm-output-{YYYY-MM-DD-HHmmss}.log
+```
+
+**Output capture:**
+```bash
+npm run test > target/npm-output-2025-11-26-143022.log 2>&1
+```
+
+### Timeout Management
+
+**Default timeouts:**
+- Standard builds: 120000ms (2 minutes)
+- E2E/Playwright tests: 180000ms (3 minutes)
+- Lint/format: 60000ms (1 minute)
+
+**Timeout behavior:**
+- Commands exceeding timeout return exit code 124
+- Log file contains partial output up to timeout
+- Build marked as FAILURE
+
+### Exit Code Interpretation
+
+**Exit codes:**
+- `0` - Success
+- `1` - General failure (test failures, lint errors, compilation errors)
+- `124` - Timeout
+- Other non-zero - Command-specific errors
+
+---
+
+## Output Parsing
+
+### Error Categorization
+
+**compilation_error:**
+- `SyntaxError:`
+- `TypeError:`
+- `ReferenceError:`
+- `error TS\d+:` (TypeScript)
+
+**test_failure:**
+- `✘` or `✖` (Jest/Vitest markers)
+- `FAIL` messages
+- `Expected.*to.*but.*received`
+- `\d+ tests? failed`
+
+**lint_error:**
+- `eslint` messages
+- `stylelint` messages
+- `prettier` check failures
+- ESLint format: `line:col error message rule-name`
+
+**dependency_error:**
+- `Cannot find module`
+- `Module not found`
+- `npm ERR! 404`
+- `ERESOLVE` conflicts
+
+**playwright_error:**
+- `playwright` errors
+- `page.goto: Timeout`
+- `locator.click: Timeout`
+- `selector.*not found`
+
+### File Location Extraction
+
+**Supported patterns:**
+
+1. **TypeScript/ESLint style:**
+   ```
+   src/components/Button.js:15:3
+   ```
+
+2. **Webpack style:**
+   ```
+   @ ./src/components/Button.js 15:3
+   ```
+
+3. **Jest style:**
+   ```
+   at Object.<anonymous> (src/utils/helper.js:42:10)
+   ```
+
+4. **Playwright style:**
+   ```
+   tests/login.spec.js:15:5
+   ```
+
+---
+
+## Working Directory
+
+### Default Behavior
+
+Commands execute from project root by default.
+
+### Custom Working Directory
+
+For projects with nested frontend directories:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:npm execute \
+    --command "run test" \
+    --working-dir frontend/
+```
+
+---
+
+## Best Practices
+
+### Build Command Selection
+
+**Test execution:**
+- Use `run test` for package.json test script
+- Use `run test:ci` for CI/CD environments
+- Use `run test:coverage` for coverage generation
+
+**Linting:**
+- Use `run lint` for configured linters
+- Use `npx eslint src/` for direct ESLint
+- Use `run format:check` for Prettier validation
+
+**Building:**
+- Use `run build` for production builds
+- Use `run dev` for development builds
+
+### Environment Configuration
+
+**Test environment:**
+```bash
+NODE_ENV=test CI=true npm run test
+```
+
+**Production build:**
+```bash
+NODE_ENV=production npm run build
+```
+
+**E2E tests:**
+```bash
+PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e
+```
+
+---
+
+## Script Reference
+
+**Notation**: `plan-marshall:build-operations:npm`
+
+| Subcommand | Description |
+|------------|-------------|
+| `execute` | Execute npm/npx command with log capture |
+| `parse` | Parse npm output and categorize issues |
+
+---
+
+## Issue Routing
+
+| Issue Type | Target Command |
+|------------|----------------|
+| compilation_error | `/js-implement-code` |
+| test_failure | `/js-implement-tests` |
+| lint_error | `/js-enforce-eslint` |
+| dependency_error | Manual fix |
+| playwright_error | `/js-implement-tests` |
