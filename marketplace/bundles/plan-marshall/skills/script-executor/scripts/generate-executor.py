@@ -107,19 +107,35 @@ def get_base_path(use_marketplace: bool = False) -> Path:
     )
 
 
+def _resolve_plan_marshall_path(base_path: Path, subpath: str) -> Path:
+    """Resolve path within plan-marshall bundle, handling versioned cache structure.
+
+    Tries versioned path first (plugin-cache with 1.0.0/), then non-versioned (marketplace).
+    """
+    # Try versioned path first (plugin-cache structure: plan-marshall/1.0.0/...)
+    versioned = base_path / "plan-marshall/1.0.0" / subpath
+    if versioned.exists():
+        return versioned
+
+    # Fall back to non-versioned (marketplace structure: plan-marshall/...)
+    return base_path / "plan-marshall" / subpath
+
+
 def get_inventory_script(base_path: Path) -> Path:
     """Get path to inventory script based on context."""
-    return base_path / "plan-marshall/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py"
+    return _resolve_plan_marshall_path(
+        base_path, "skills/marketplace-inventory/scripts/scan-marketplace-inventory.py"
+    )
 
 
 def get_templates_dir(base_path: Path) -> Path:
     """Get path to templates directory based on context."""
-    return base_path / "plan-marshall/skills/script-executor/templates"
+    return _resolve_plan_marshall_path(base_path, "skills/script-executor/templates")
 
 
 def get_logging_scripts_dir(base_path: Path) -> Path:
     """Get path to logging scripts directory based on context."""
-    return base_path / "plan-marshall/skills/logging/scripts"
+    return _resolve_plan_marshall_path(base_path, "skills/logging/scripts")
 
 # ============================================================================
 # SCRIPT DISCOVERY
