@@ -18,6 +18,7 @@ Examples:
     python3 .plan/execute-script.py plan-marshall:marketplace-inventory:scan-marketplace-inventory --trace-plan-id my-plan --include-descriptions
 """
 
+import os
 import subprocess
 import sys
 import time
@@ -34,6 +35,11 @@ SCRIPTS = {
     # {notation}: {absolute_path}
     {{SCRIPT_MAPPINGS}}
 }
+
+# Build PYTHONPATH from all unique script directories
+# This allows scripts to import from any skill without path manipulation
+_SCRIPT_DIRS = sorted(set(str(Path(p).parent) for p in SCRIPTS.values()))
+_PYTHONPATH = ':'.join(_SCRIPT_DIRS)
 
 # ============================================================================
 # CONFIGURATION
@@ -204,12 +210,18 @@ def main():
     stdout_capture = ''
     stderr_capture = ''
 
+    # Build environment with PYTHONPATH for cross-skill imports
+    env = os.environ.copy()
+    existing_pythonpath = env.get('PYTHONPATH', '')
+    env['PYTHONPATH'] = _PYTHONPATH + (':' + existing_pythonpath if existing_pythonpath else '')
+
     try:
         # Capture output for logging (but still stream to console)
         result = subprocess.run(
             ['python3', script_path] + script_args,
             capture_output=True,
-            text=True
+            text=True,
+            env=env
         )
         exit_code = result.returncode
         stdout_capture = result.stdout
