@@ -12,7 +12,7 @@ Usage:
     python3 ci-health.py detect
     python3 ci-health.py verify [--tool TOOL]
     python3 ci-health.py status
-    python3 ci-health.py persist --plan-dir .plan
+    python3 ci-health.py persist
 
 Output (JSON format):
     All subcommands return JSON with status field.
@@ -373,8 +373,8 @@ def main() -> int:
     persist_parser.add_argument(
         "--plan-dir",
         type=str,
-        required=True,
-        help="Path to .plan directory"
+        default=".plan",
+        help="Path to .plan directory (default: .plan)"
     )
 
     args = parser.parse_args()

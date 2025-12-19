@@ -248,7 +248,7 @@ Display detection result to user. If tool not authenticated, warn:
 
 Persist CI configuration to marshal.json:
 ```bash
-python3 .plan/execute-script.py plan-marshall:marshall-steward:ci-health persist --plan-dir .plan
+python3 .plan/execute-script.py plan-marshall:marshall-steward:ci-health persist
 ```
 
 **Output**: CI configuration persisted to marshal.json with detected provider and authenticated tools.

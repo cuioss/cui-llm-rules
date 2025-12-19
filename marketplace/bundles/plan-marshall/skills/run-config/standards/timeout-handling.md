@@ -4,6 +4,38 @@ Adaptive timeout management for **synchronous command execution** (Maven, npm, G
 
 ---
 
+## Two-Layer Timeout Concept
+
+**Key Insight**: Claude's Bash tool has a **default 120-second timeout**. Long-running builds need two timeout layers:
+
+1. **Outer timeout**: Bash tool's `timeout` parameter (prevents Claude from canceling the operation)
+2. **Inner timeout**: Shell `timeout` command (controls actual execution)
+
+```
+                TWO-LAYER TIMEOUT ARCHITECTURE
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │  Claude Bash Tool                                           │
+    │  timeout: (INNER + 30) * 1000 ms                            │
+    │  ┌───────────────────────────────────────────────────────┐  │
+    │  │  Shell timeout (inner, from run-config)               │  │
+    │  │  timeout ${TIMEOUT}s mvn verify                       │  │
+    │  │  ┌─────────────────────────────────────────────────┐  │  │
+    │  │  │  Actual command execution                       │  │  │
+    │  │  │  mvn verify                                     │  │  │
+    │  │  └─────────────────────────────────────────────────┘  │  │
+    │  └───────────────────────────────────────────────────────┘  │
+    └─────────────────────────────────────────────────────────────┘
+
+    Why two layers?
+    - Outer: Prevents Claude from canceling (must be > inner)
+    - Inner: Actual control from run-config (adaptive learning)
+```
+
+**Note**: When using Bash tool, set `timeout` parameter to `(TIMEOUT + 30) * 1000` (ms) to ensure outer > inner.
+
+---
+
 ## Overview
 
 The timeout handling system provides:
@@ -209,8 +241,8 @@ The timeout subcommand complements `await-until.py` from `script-executor`:
 TIMEOUT=$(python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get \
   --command "ci:pr_checks" --default 300)
 
-# Use in await-until
-python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+# Use in await-until with outer shell timeout as safety net
+timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
   --check-cmd "gh pr checks 123 --json state" \
   --success-field "status=success" \
   --timeout "$TIMEOUT" \
@@ -221,7 +253,7 @@ python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout set 
   --command "ci:pr_checks" --duration 180
 ```
 
-> **Note**: `await-until.py` has built-in adaptive timeout support via `--command-key`. This API provides an alternative for scripts that need explicit timeout control.
+> **Note**: `await-until.py` has built-in adaptive timeout support via `--command-key`. This API provides an alternative for scripts that need explicit timeout control. When using Bash tool, set `timeout` parameter to `600000` (ms).
 
 ---
 
@@ -239,8 +271,10 @@ timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await
 ```
 
 **Key difference from synchronous builds**:
-- **Synchronous builds**: Single timeout layer (shell `timeout` command)
-- **Polling operations**: Two timeout layers (generous external + internal adaptive)
+- **Synchronous builds**: Two timeout layers with adaptive inner (shell `timeout` + Bash tool `timeout` parameter)
+- **Polling operations**: Two timeout layers with generous outer as safety net (600s external + internal adaptive)
+
+**Note**: When using Bash tool for polling, set `timeout` parameter to `600000` (ms) to match shell timeout.
 
 ---
 

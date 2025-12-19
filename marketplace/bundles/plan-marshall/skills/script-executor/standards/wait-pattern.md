@@ -52,6 +52,41 @@ The wait pattern provides a **synchronous blocking** mechanism that:
 
 ---
 
+## Two-Layer Timeout Concept
+
+**Key Insight**: Claude's Bash tool has a **default 120-second timeout**. Long-running polling operations need two timeout layers:
+
+1. **Outer timeout**: Bash tool's `timeout` parameter (prevents Claude from canceling the operation)
+2. **Inner timeout**: await-until's adaptive timeout (controls actual polling duration)
+
+```
+                TWO-LAYER TIMEOUT ARCHITECTURE
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │  Claude Bash Tool                                           │
+    │  timeout: 600000ms (set via tool parameter)                 │
+    │  ┌───────────────────────────────────────────────────────┐  │
+    │  │  Shell timeout wrapper (generous safety net)          │  │
+    │  │  timeout 600s python3 .plan/execute-script.py ...     │  │
+    │  │  ┌─────────────────────────────────────────────────┐  │  │
+    │  │  │  await-until (adaptive internal timeout)        │  │  │
+    │  │  │  --command-key ci:pr_checks                     │  │  │
+    │  │  │                                                 │  │  │
+    │  │  │  Polls every 30s until success or timeout       │  │  │
+    │  │  │  Timeout from run-config: ~180s (learned)       │  │  │
+    │  │  └─────────────────────────────────────────────────┘  │  │
+    │  └───────────────────────────────────────────────────────┘  │
+    └─────────────────────────────────────────────────────────────┘
+
+    Why two layers?
+    - Outer (600s): Safety net - generous enough to never interfere
+    - Inner (adaptive): Actual control - learned from execution history
+```
+
+**Note**: When using Bash tool, set `timeout` parameter to match shell timeout (e.g., `600000` for 600s).
+
+---
+
 ## Design Principles
 
 ### 1. Synchronous Blocking
@@ -200,29 +235,33 @@ result = await_until(
 
 The CLI provides two modes: **explicit** (manual timeout/interval) and **adaptive** (managed via run-config).
 
+**Important**: Always wrap in shell `timeout` as safety net for Claude's Bash tool.
+
 ```bash
 # ADAPTIVE MODE (recommended): timeout/interval managed internally via run-config
-# The script fetches timeout from run-config and updates execution history after completion
-python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
-    --check-cmd "python3 .plan/execute-script.py pm-ci-integration:ci-operations:ci-provider-api ci check-status --pr-number 123" \
+# Outer shell timeout (600s) is safety net; inner adaptive timeout controls polling
+timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+    --check-cmd "python3 .plan/execute-script.py plan-marshall:ci-operations:ci_provider_api ci check-status --pr-number 123" \
     --success-field "status=success" \
     --failure-field "status=failure" \
     --command-key "ci:pr_checks"
 
 # EXPLICIT MODE: manual timeout/interval (useful for one-off operations)
-python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
-    --check-cmd "python3 .plan/execute-script.py pm-ci-integration:ci-operations:ci-provider-api ci check-status --pr-number 123" \
+timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+    --check-cmd "python3 .plan/execute-script.py plan-marshall:ci-operations:ci_provider_api ci check-status --pr-number 123" \
     --success-field "status=success" \
     --timeout 300 \
     --interval 30
 
 # Wait for Sonar analysis completion
-python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
-    --check-cmd "python3 .plan/execute-script.py pm-ci-integration:ci-operations:ci-provider-api sonar get-status --pr-number 123" \
+timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await-until poll \
+    --check-cmd "python3 .plan/execute-script.py plan-marshall:ci-operations:ci_provider_api sonar get-status --pr-number 123" \
     --success-field "qualityGate=OK" \
     --failure-field "qualityGate=ERROR" \
     --command-key "ci:sonar_analysis"
 ```
+
+**Note**: When using Bash tool, set `timeout` parameter to `600000` (ms) to match shell timeout.
 
 ### Command-Key Naming Convention
 
@@ -328,18 +367,18 @@ def get_adaptive_timeout(command_key: str) -> Optional[int]:
     result = subprocess.run([
         "python3", ".plan/execute-script.py",
         "plan-marshall:run-config:run_config",
-        "timeout", "get", "--command-key", command_key
+        "timeout", "get", "--command", command_key, "--default", "300"
     ], capture_output=True, text=True)
-    # Parse timeout_seconds from TOON output
-    return timeout_ms  # Clamped to 60s-600s bounds
+    # Returns plain number in seconds
+    return int(result.stdout.strip())  # Clamped to 60s-600s bounds
 
-def update_timeout(command_key: str, duration_ms: int) -> None:
+def update_timeout(command_key: str, duration_sec: int) -> None:
     """Update timeout via run-config timeout set."""
     subprocess.run([
         "python3", ".plan/execute-script.py",
         "plan-marshall:run-config:run_config",
-        "timeout", "set", "--command-key", command_key,
-        "--duration", str(duration_ms // 1000)
+        "timeout", "set", "--command", command_key,
+        "--duration", str(duration_sec)
     ])
 ```
 
@@ -383,7 +422,7 @@ When `--command-key` is provided, await-until delegates timeout management to `r
     │                         ▼                               │
     │  ┌───────────────────────────────────────────────────┐  │
     │  │ 4. Output result (TOON format)                    │  │
-    │  │    status=success, duration_ms=95000, ...         │  │
+    │  │    status=success, duration_sec=95, ...            │  │
     │  └───────────────────────────────────────────────────┘  │
     │                                                         │
     └─────────────────────────────────────────────────────────┘
@@ -397,9 +436,9 @@ Output uses TOON format (Tab-delimited Object Notation):
 
 ```
 status	success
-duration_ms	95000
+duration_sec	95
 polls	4
-timeout_used_ms	180000
+timeout_used_sec	180
 timeout_source	adaptive
 command_key	ci:pr_checks
 final_result.state	completed
@@ -419,9 +458,9 @@ final_result.conclusion	success
 | Field | Description |
 |-------|-------------|
 | `status` | Result status (success/timeout/failure) |
-| `duration_ms` | Actual wait duration in milliseconds |
+| `duration_sec` | Actual wait duration in seconds |
 | `polls` | Number of condition checks performed |
-| `timeout_used_ms` | Timeout value used (explicit or adaptive) |
+| `timeout_used_sec` | Timeout value used (explicit or adaptive) in seconds |
 | `timeout_source` | Source of timeout: `explicit`, `adaptive`, or `default` |
 | `command_key` | The command key used (if adaptive mode) |
 | `final_result.*` | Flattened fields from the last condition check |
