@@ -99,6 +99,67 @@ class TestDetectRedundant(ScriptTestCase):
         marketplace_perms = [m['permission'] for m in data['marketplace_in_local']]
         self.assertIn('Skill(pm-dev-java:*)', marketplace_perms)
 
+    def test_project_local_command_not_flagged_as_marketplace(self):
+        """Project-local commands should NOT be flagged as marketplace_in_local.
+
+        When a SlashCommand permission exists for a command defined in
+        .claude/commands/, it's a legitimate project-local command and
+        should NOT be flagged as belonging in global settings.
+        """
+        # Create project structure with local command
+        claude_dir = self.temp_dir / '.claude'
+        claude_dir.mkdir()
+        commands_dir = claude_dir / 'commands'
+        commands_dir.mkdir()
+
+        # Create a project-local command
+        local_command = commands_dir / 'my-local-command.md'
+        local_command.write_text("""---
+name: my-local-command
+description: A project-local command
+---
+
+# My Local Command
+
+This is a project-local command.
+""")
+
+        global_file = self.temp_dir / 'global.json'
+        global_file.write_text(json.dumps({
+            "permissions": {"allow": ["Bash(git:*)"], "deny": [], "ask": []}
+        }))
+
+        local_file = claude_dir / 'settings.local.json'
+        local_file.write_text(json.dumps({
+            "permissions": {
+                "allow": [
+                    "SlashCommand(/my-local-command)",  # Project-local - should NOT be flagged
+                    "Skill(pm-dev-java:*)"  # Marketplace - SHOULD be flagged
+                ],
+                "deny": [],
+                "ask": []
+            }
+        }))
+
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-redundant',
+            '--global-settings', str(global_file),
+            '--local-settings', str(local_file),
+            cwd=self.temp_dir
+        )
+        self.assert_success(result)
+        data = result.json()
+
+        self.assertIn('marketplace_in_local', data)
+        marketplace_perms = [m['permission'] for m in data['marketplace_in_local']]
+
+        # Project-local command should NOT be flagged
+        self.assertNotIn('SlashCommand(/my-local-command)', marketplace_perms)
+
+        # Marketplace skill SHOULD still be flagged
+        self.assertIn('Skill(pm-dev-java:*)', marketplace_perms)
+
     def test_output_includes_summary(self):
         """Output should include summary counts."""
         global_file = self.temp_dir / 'global.json'

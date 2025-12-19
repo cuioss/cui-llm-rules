@@ -84,9 +84,38 @@ def resolve_scope_to_paths(scope: str) -> tuple[Optional[str], Optional[str]]:
 # detect-redundant subcommand
 # =============================================================================
 
-def is_marketplace_permission(permission: str) -> bool:
-    """Check if a permission is a marketplace permission."""
-    return permission.startswith("Skill(") or permission.startswith("SlashCommand(/")
+def is_marketplace_permission(permission: str, project_root: Optional[Path] = None) -> bool:
+    """Check if a permission is a marketplace permission.
+
+    Args:
+        permission: The permission string to check
+        project_root: Project root directory for checking project-local commands.
+                      If None, uses current working directory.
+
+    Returns:
+        True if the permission is for a marketplace plugin (should be in global settings),
+        False if it's a project-local command or not a marketplace permission.
+    """
+    # Skill permissions are always marketplace
+    if permission.startswith("Skill("):
+        return True
+
+    # SlashCommand permissions need special handling
+    if permission.startswith("SlashCommand(/"):
+        # Extract command name from SlashCommand(/command-name)
+        match = re.match(r'^SlashCommand\(/([^)]+)\)$', permission)
+        if match:
+            command_name = match.group(1)
+            # Check if this is a project-local command
+            root = project_root or Path.cwd()
+            local_command_path = root / ".claude" / "commands" / f"{command_name}.md"
+            if local_command_path.exists():
+                # This is a project-local command, NOT a marketplace permission
+                return False
+        # SlashCommand not found locally - assume marketplace
+        return True
+
+    return False
 
 
 def extract_permission_parts(permission: str) -> tuple[str, str]:
@@ -141,6 +170,9 @@ def cmd_detect_redundant(args) -> int:
     global_allow = set(global_settings.get("permissions", {}).get("allow", []))
     local_allow = local_settings.get("permissions", {}).get("allow", [])
 
+    # Derive project root from local settings path for command detection
+    project_root = Path(local_path).parent.parent if local_path else None
+
     redundant = []
     marketplace_in_local = []
 
@@ -154,7 +186,7 @@ def cmd_detect_redundant(args) -> int:
             })
             continue
 
-        if is_marketplace_permission(local_perm):
+        if is_marketplace_permission(local_perm, project_root):
             marketplace_in_local.append({
                 "permission": local_perm,
                 "reason": "Marketplace permissions should be in global settings",
