@@ -19,6 +19,9 @@ AskUserQuestion:
     - label: "Modules"
       description: "Configure project modules"
       value: "modules"
+    - label: "Manage Commands"
+      description: "Add, remove, or reset module commands"
+      value: "commands"
     - label: "Full Reconfigure"
       description: "Run first-run wizard again"
       value: "wizard"
@@ -34,6 +37,7 @@ AskUserQuestion:
 | build | Execute "Configuration: Build System" below |
 | skill-domains | Execute "Configuration: Skill Domains" below |
 | modules | Execute "Configuration: Modules" below |
+| commands | Execute "Configuration: Manage Commands" below |
 | wizard | Load and execute: `Read references/wizard-flow.md` |
 | back | Return to Main Menu |
 
@@ -151,6 +155,149 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
   --path path/to/module \
   --domains "java,java-testing" \
   --build-systems "maven"
+```
+
+---
+
+## Configuration: Manage Commands
+
+Manage canonical commands for project modules. Allows adding profile-based commands, removing unused commands, or resetting to defaults.
+
+### Step 1: Select Module
+
+```yaml
+AskUserQuestion:
+  question: "Which module do you want to configure?"
+  header: "Module"
+  options:
+    - label: "default"
+      description: "Root project (N commands)"
+    - label: "{module-name}"
+      description: "{module-type} (N commands)"
+    - label: "All modules"
+      description: "Reconfigure all module commands"
+  multiSelect: false
+```
+
+Build options dynamically from marshal.json modules.
+
+### Step 2: Select Operation
+
+```yaml
+AskUserQuestion:
+  question: "What do you want to do with '{module}' commands?"
+  header: "Operation"
+  options:
+    - label: "View"
+      description: "Show current command configuration"
+    - label: "Add"
+      description: "Add new commands from detected profiles"
+    - label: "Remove"
+      description: "Remove commands from this module"
+    - label: "Reset"
+      description: "Reset to auto-detected defaults"
+  multiSelect: false
+```
+
+### Operation: View
+
+Show current commands for the module:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env get-available-commands \
+  --module "{module}"
+```
+
+Display output:
+```
+Commands for module '{module}' ({type}):
+  - module-tests: mvn clean test
+  - quality-gate: mvn verify -Ppre-commit
+  - verify: mvn clean verify
+  - coverage: mvn verify -Pcoverage [DETECTED]
+```
+
+### Operation: Add
+
+First, detect available profiles not yet configured:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-profiles \
+  --module "{module}"
+```
+
+Then present multi-select for profiles to add:
+
+```yaml
+AskUserQuestion:
+  question: "Select profiles to add as commands:"
+  header: "Add Commands"
+  multiSelect: true
+  options:
+    - label: "integration-tests → integration-tests"
+      description: "mvn verify -Pintegration-tests"
+    - label: "benchmark → performance"
+      description: "mvn verify -Pbenchmark"
+```
+
+Add selected profiles:
+
+```bash
+# Re-run persist with include-profiles to add specific profiles
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist \
+  --include-profiles "{module}:{profile-id},{module}:{profile-id}"
+```
+
+### Operation: Remove
+
+Present multi-select of current commands:
+
+```yaml
+AskUserQuestion:
+  question: "Select commands to remove from '{module}':"
+  header: "Remove Commands"
+  multiSelect: true
+  options:
+    - label: "coverage"
+      description: "mvn verify -Pcoverage"
+    - label: "performance"
+      description: "mvn verify -Pbenchmark"
+```
+
+Remove selected commands by editing marshal.json directly:
+
+```bash
+# Read current config, remove selected commands, write back
+python3 .plan/execute-script.py plan-marshall:json-file-operations:manage-json-file delete-field \
+  .plan/marshal.json --field "modules.{module}.commands.{canonical}"
+```
+
+### Operation: Reset
+
+Reset module to auto-detected defaults:
+
+```yaml
+AskUserQuestion:
+  question: "Reset '{module}' commands to defaults?"
+  header: "Confirm Reset"
+  options:
+    - label: "Yes - Auto-detect"
+      description: "Use smart defaults based on module type and profiles"
+    - label: "Yes - Minimal"
+      description: "Only required commands (module-tests, quality-gate, verify)"
+    - label: "Cancel"
+      description: "Keep current configuration"
+  multiSelect: false
+```
+
+Execute reset:
+
+```bash
+# Auto-detect mode
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
+
+# Minimal mode
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist --minimal
 ```
 
 ---
