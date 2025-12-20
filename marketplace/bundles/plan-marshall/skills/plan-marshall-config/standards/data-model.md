@@ -47,21 +47,42 @@ JSON structure and field definitions for project configuration.
   "modules": {
     "default": {
       "path": ".",
+      "type": "pom",
       "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"],
+      "detected_profiles": [
+        {"id": "pre-commit", "canonical": "quality-gate", "activation": {"type": "command-line"}}
+      ],
       "commands": {
-        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
-        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\"",
         "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\""
       }
     },
-    "my-ui": {
-      "path": "my-ui",
+    "my-module": {
+      "path": "my-module",
+      "type": "jar",
+      "domains": ["java-core", "java-implementation"],
+      "build_systems": ["maven"],
+      "commands": {
+        "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-module",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module my-module",
+        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
+      }
+    },
+    "my-hybrid-ui": {
+      "path": "my-hybrid-ui",
+      "type": "war",
       "domains": ["java-core", "java-implementation", "javascript-core", "javascript-implementation"],
       "build_systems": ["maven", "npm"],
       "commands": {
-        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\"",
-        "build": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run build\""
+        "module-tests": {
+          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\" --module my-hybrid-ui"
+        },
+        "quality-gate": {
+          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
+        }
       }
     }
   },
@@ -94,7 +115,16 @@ JSON structure and field definitions for project configuration.
       "create_pr": false,
       "verification_required": true,
       "branch_strategy": "direct"
+    },
+    "finalize": {
+      "commit": true
     }
+  },
+  "ci": {
+    "enabled": true,
+    "repo_url": "https://github.com/org/repo",
+    "provider": "github",
+    "sonar_project": null
   }
 }
 ```
@@ -147,7 +177,7 @@ Each technical domain follows the pattern: `{language}-core`, `{language}-implem
 
 ## Section: modules
 
-Project module configuration with domain, build system, and command mappings.
+Project module configuration with type, domain, build system, and canonical command mappings.
 
 ### Structure
 
@@ -156,40 +186,67 @@ Project module configuration with domain, build system, and command mappings.
   "modules": {
     "{module-name}": {
       "path": "relative/path",
+      "type": "jar|pom|war|quarkus|npm",
       "domains": ["domain1", "domain2"],
       "build_systems": ["system1", "system2"],
+      "detected_profiles": [
+        {"id": "profile-id", "canonical": "canonical-name", "activation": {"type": "command-line|property"}}
+      ],
       "commands": {
-        "{label}": "python3 .plan/execute-script.py plan-marshall:build-operations:{system} execute --goals \"{goals}\""
+        "{canonical-name}": "python3 .plan/execute-script.py plan-marshall:build-operations:{system} execute --goals \"{goals}\""
       }
     }
   }
 }
 ```
 
-### Example
+### Example (Single Build System)
 
 ```json
 {
   "modules": {
-    "default": {
-      "path": ".",
+    "my-module": {
+      "path": "my-module",
+      "type": "jar",
       "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"],
+      "detected_profiles": [
+        {"id": "integration-tests", "canonical": "integration-tests", "activation": {"type": "command-line"}},
+        {"id": "coverage", "canonical": "coverage", "activation": {"type": "command-line"}}
+      ],
       "commands": {
-        "test-compile": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"test-compile\"",
-        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
-        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
-        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\"",
-        "pre-commit": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\" --profile pre-commit"
+        "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-module",
+        "integration-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Pintegration-tests\" --module my-module",
+        "coverage": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Pcoverage\" --module my-module",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module my-module",
+        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
       }
-    },
-    "oauth-sheriff-core": {
-      "path": "oauth-sheriff-core",
-      "domains": ["java-core", "java-implementation"],
-      "build_systems": ["maven"],
+    }
+  }
+}
+```
+
+### Example (Hybrid Module - Maven + npm)
+
+For modules with multiple build systems, commands use nested format:
+
+```json
+{
+  "modules": {
+    "my-hybrid-ui": {
+      "path": "my-hybrid-ui",
+      "type": "war",
+      "domains": ["java-core", "javascript-core"],
+      "build_systems": ["maven", "npm"],
       "commands": {
-        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module oauth-sheriff-core",
-        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module oauth-sheriff-core"
+        "module-tests": {
+          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\" --module my-hybrid-ui"
+        },
+        "quality-gate": {
+          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
+        }
       }
     }
   }
@@ -201,17 +258,61 @@ Project module configuration with domain, build system, and command mappings.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `path` | string | Yes | Relative path from project root |
+| `type` | string | Yes | Module type: `pom`, `jar`, `war`, `quarkus`, `npm` |
 | `domains` | array | Yes | Skill domains for this module |
 | `build_systems` | array | Yes | Available build systems (for detection info) |
-| `commands` | object | Yes | Label to full command string mapping |
+| `detected_profiles` | array | No | Maven/Gradle profiles with canonical mappings |
+| `commands` | object | Yes | Canonical name to command string (or nested dict for hybrid) |
+
+### Module Types
+
+| Type | Description | Applicable Commands |
+|------|-------------|---------------------|
+| `pom` | Parent/BOM module | install, quality-gate (no tests) |
+| `jar` | Library module | All canonical commands |
+| `war` | Web application | All canonical commands |
+| `quarkus` | Quarkus application | All canonical commands + native |
+| `npm` | npm project | npm-specific commands only |
+
+### Canonical Command Names
+
+Commands use a fixed vocabulary for programmatic lookup:
+
+| Canonical | Phase | Description |
+|-----------|-------|-------------|
+| `compile` | build | Compile production code |
+| `test-compile` | build | Compile test code |
+| `module-tests` | test | Unit tests for the module |
+| `integration-tests` | test | Integration/E2E tests |
+| `coverage` | test | Test coverage reports |
+| `performance` | test | Benchmark/performance tests |
+| `quality-gate` | quality | Pre-commit checks (lint, format, static analysis) |
+| `verify` | verify | Full build verification |
+| `install` | deploy | Install to local repository |
+| `package` | deploy | Create distributable package |
 
 ### Command Resolution (Static Routing)
 
 Commands are stored as **full executable strings** - no runtime routing needed:
 
-1. Get command from `modules.{name}.commands.{label}`
-2. Execute directly with `eval "$COMMAND"`
-3. If module doesn't have the label, fall back to `modules.default.commands.{label}`
+1. Get command from `modules.{name}.commands.{canonical}`
+2. For hybrid modules, specify build system: `modules.{name}.commands.{canonical}.{system}`
+3. Execute directly with `eval "$COMMAND"`
+4. If module doesn't have the canonical, fall back to `modules.default.commands.{canonical}`
+
+### Lookup API
+
+Use the build_env script for programmatic command lookup:
+
+```bash
+# Single build system module
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env lookup \
+  --canonical "module-tests" --module "my-module"
+
+# Hybrid module with build system filter
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env lookup \
+  --canonical "module-tests" --module "my-hybrid-ui" --build-system "npm"
+```
 
 ### Static Routing Benefits
 
@@ -219,6 +320,7 @@ Commands are stored as **full executable strings** - no runtime routing needed:
 - **Customization**: User can edit marshal.json to customize any command
 - **No runtime logic**: Command already contains correct script path
 - **Single mental model**: Same pattern as CI commands
+- **Programmatic lookup**: Agents use canonical names for consistent API
 
 ## Section: build_systems
 
@@ -290,7 +392,7 @@ System-level infrastructure settings.
 
 ## Section: plan
 
-Plan-related configuration.
+Plan-related configuration including execution defaults and finalize behavior.
 
 ### Structure
 
@@ -303,6 +405,9 @@ Plan-related configuration.
       "create_pr": false,
       "verification_required": true,
       "branch_strategy": "direct"
+    },
+    "finalize": {
+      "commit": true
     }
   }
 }
@@ -318,6 +423,14 @@ Plan-related configuration.
 | `verification_required` | bool | true | true, false |
 | `branch_strategy` | string | "direct" | direct, feature |
 
+### Finalize Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `commit` | bool | true | Commit changes after finalize phase |
+
+Note: `create_pr` is in `defaults` as it applies to multiple phases. The finalize workflow skill reads both `plan.defaults.create_pr` and `plan.finalize.commit`.
+
 ## Section: ci
 
 CI provider configuration (project-level, shared via git).
@@ -327,20 +440,24 @@ CI provider configuration (project-level, shared via git).
 ```json
 {
   "ci": {
+    "enabled": true,
     "repo_url": "https://github.com/org/repo",
     "provider": "github",
-    "detected_at": "2025-01-15T10:30:00Z"
+    "detected_at": "2025-01-15T10:30:00Z",
+    "sonar_project": "my-project-key"
   }
 }
 ```
 
 ### Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `repo_url` | string | No | Git remote origin URL |
-| `provider` | string | Yes | CI provider: `github`, `gitlab`, `unknown` |
-| `detected_at` | string | No | ISO timestamp of last detection |
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `enabled` | bool | No | true | Whether to wait for CI checks during finalize |
+| `repo_url` | string | No | - | Git remote origin URL |
+| `provider` | string | Yes | - | CI provider: `github`, `gitlab`, `unknown` |
+| `detected_at` | string | No | - | ISO timestamp of last detection |
+| `sonar_project` | string | No | null | SonarQube/Cloud project key (if Sonar analysis is configured) |
 
 ### Provider Values
 

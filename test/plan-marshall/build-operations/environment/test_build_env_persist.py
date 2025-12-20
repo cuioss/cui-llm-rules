@@ -171,7 +171,7 @@ def test_detect_modules_none():
 # =============================================================================
 
 def test_persist_maven_creates_commands():
-    """Test persist creates Maven commands."""
+    """Test persist creates Maven commands with canonical names."""
     with PersistTestContext('maven') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
@@ -193,13 +193,17 @@ def test_persist_maven_creates_commands():
         assert 'commands' in config['modules']['default'], "Should have commands"
 
         commands = config['modules']['default']['commands']
-        assert 'test' in commands, "Should have test command"
+        assert 'module-tests' in commands, "Should have module-tests command (canonical name)"
         assert 'verify' in commands, "Should have verify command"
-        assert 'maven' in commands['test'], "Command should reference maven script"
+        assert 'maven' in commands['module-tests'], "Command should reference maven script"
+
+        # Verify module type is detected
+        assert 'type' in config['modules']['default'], "Should have type field"
+        assert config['modules']['default']['type'] == 'jar', "Default should be jar type"
 
 
 def test_persist_gradle_creates_commands():
-    """Test persist creates Gradle commands."""
+    """Test persist creates Gradle commands with canonical names."""
     with PersistTestContext('gradle') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
@@ -213,11 +217,12 @@ def test_persist_gradle_creates_commands():
         config = json.loads(marshal_path.read_text())
         commands = config['modules']['default']['commands']
 
-        assert 'gradle' in commands['test'], "Command should reference gradle script"
+        assert 'module-tests' in commands, "Should have module-tests command"
+        assert 'gradle' in commands['module-tests'], "Command should reference gradle script"
 
 
 def test_persist_npm_creates_commands():
-    """Test persist creates npm commands."""
+    """Test persist creates npm commands with canonical names."""
     with PersistTestContext('npm') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
@@ -231,8 +236,9 @@ def test_persist_npm_creates_commands():
         config = json.loads(marshal_path.read_text())
         commands = config['modules']['default']['commands']
 
-        assert 'npm' in commands['test'], "Command should reference npm script"
-        assert 'build' in commands, "npm should have build command"
+        assert 'module-tests' in commands, "Should have module-tests command"
+        assert 'npm' in commands['module-tests'], "Command should reference npm script"
+        assert 'package' in commands, "npm should have package command (canonical name for build)"
 
 
 def test_persist_with_modules_adds_module_flag():
@@ -251,16 +257,16 @@ def test_persist_with_modules_adds_module_flag():
         config = json.loads(marshal_path.read_text())
 
         # Default module should NOT have --module flag
-        default_cmd = config['modules']['default']['commands']['test']
+        default_cmd = config['modules']['default']['commands']['module-tests']
         assert '--module' not in default_cmd, "Default should not have --module flag"
 
         # Other modules SHOULD have --module flag
-        core_cmd = config['modules']['core']['commands']['test']
+        core_cmd = config['modules']['core']['commands']['module-tests']
         assert '--module core' in core_cmd, f"Core module should have --module flag: {core_cmd}"
 
 
-def test_persist_pre_commit_adds_profile():
-    """Test persist adds --profile pre-commit for pre-commit command."""
+def test_persist_quality_gate_has_profile():
+    """Test persist creates quality-gate command with pre-commit profile."""
     with PersistTestContext('maven') as temp_dir:
         result = run_script(
             SCRIPT_PATH,
@@ -272,9 +278,10 @@ def test_persist_pre_commit_adds_profile():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        pre_commit_cmd = config['modules']['default']['commands']['pre-commit']
+        quality_gate_cmd = config['modules']['default']['commands']['quality-gate']
 
-        assert '--profile pre-commit' in pre_commit_cmd, f"Should have --profile: {pre_commit_cmd}"
+        # quality-gate uses pre-commit profile in the goals
+        assert '-Ppre-commit' in quality_gate_cmd, f"Should have -Ppre-commit in goals: {quality_gate_cmd}"
 
 
 def test_persist_dry_run_does_not_save():
@@ -368,7 +375,7 @@ if __name__ == '__main__':
         test_persist_gradle_creates_commands,
         test_persist_npm_creates_commands,
         test_persist_with_modules_adds_module_flag,
-        test_persist_pre_commit_adds_profile,
+        test_persist_quality_gate_has_profile,
         test_persist_dry_run_does_not_save,
         test_persist_updates_build_systems,
         test_persist_preserves_existing_config,

@@ -53,6 +53,7 @@ build-operations/
 ├── standards/
 │   ├── architecture.md          # Static routing, skill boundaries
 │   ├── api-contract.md          # Shared TOON output formats
+│   ├── canonical-vocabulary.md  # Canonical command names for lookup API
 │   ├── maven-impl.md            # Maven-specific: execution, parsing
 │   ├── gradle-impl.md           # Gradle-specific: execution, parsing
 │   ├── npm-impl.md              # npm-specific: execution
@@ -150,22 +151,51 @@ build_systems: maven,npm
 modules_updated: 3
 commands_generated: 15
 
-modules[3]{name,path,commands_count}:
-default	.	5
-oauth-sheriff-core	oauth-sheriff-core	5
-oauth-sheriff-ui	oauth-sheriff-ui	5
+modules[3]{name,path,type,commands_count}:
+default	.	jar	8
+oauth-sheriff-core	oauth-sheriff-core	jar	8
+oauth-sheriff-ui	oauth-sheriff-ui	npm	5
 ```
 
-This generates `modules.{name}.commands` entries in marshal.json:
+This generates `modules.{name}.commands` entries in marshal.json using **canonical command names**:
 
 ```json
 {
   "modules": {
     "default": {
       "path": ".",
+      "type": "jar",
+      "build_systems": ["maven"],
       "commands": {
-        "test-compile": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"test-compile\"",
-        "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\""
+        "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\"",
+        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\""
+      }
+    }
+  }
+}
+```
+
+### Hybrid Module Format
+
+For modules with multiple build systems (e.g., Maven + npm), commands are nested by build system:
+
+```json
+{
+  "modules": {
+    "hybrid-module": {
+      "path": "hybrid-module",
+      "type": "jar",
+      "build_systems": ["maven", "npm"],
+      "commands": {
+        "module-tests": {
+          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\""
+        },
+        "quality-gate": {
+          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\"",
+          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run lint && npm run format:check\""
+        }
       }
     }
   }
@@ -309,6 +339,165 @@ unknown: 2
 
 ---
 
+## Workflow: Detect Module Type
+
+**Pattern**: Simple Query
+
+Detect the module type (pom, jar, war, quarkus, npm) from build files.
+
+### Step 1: Execute
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-module-type \
+    --module "oauth-sheriff-core"
+```
+
+### Step 2: Process Result
+
+```toon
+status: success
+module: oauth-sheriff-core
+build_system: maven
+type: jar
+```
+
+Possible types:
+- `pom` - Parent/BOM module
+- `jar` - Library module (default)
+- `war` - Web application
+- `quarkus` - Quarkus application
+- `npm` - npm project
+
+---
+
+## Workflow: Detect Profiles
+
+**Pattern**: Simple Query
+
+Detect Maven/Gradle profiles and classify them to canonical command names.
+
+### Step 1: Execute
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-profiles \
+    --module "default"
+```
+
+### Step 2: Process Result
+
+```toon
+status: success
+module: default
+path: /path/to/project
+count: 3
+
+profiles[3]{id,canonical,activation_type}:
+integration-tests	integration-tests	command-line
+coverage	coverage	command-line
+benchmark	performance	command-line
+```
+
+Profile activation types:
+- `command-line` - Activated via `-P` flag
+- `property` - Activated via `-D` property
+- `jdk` - Activated by JDK version
+- `os` - Activated by operating system
+- `default` - Always active
+
+---
+
+## Workflow: Lookup Canonical Command
+
+**Pattern**: Simple Query
+
+Look up a canonical command for a module. Returns the full executable command string.
+
+### Step 1: Execute
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env lookup \
+    --canonical "module-tests" --module "oauth-sheriff-core"
+```
+
+### Step 2: Process Result
+
+Returns plain text (for shell capture):
+```
+python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "clean test" --module oauth-sheriff-core
+```
+
+For hybrid modules (multiple build systems), specify `--build-system`:
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env lookup \
+    --canonical "module-tests" --module "default" --build-system "maven"
+```
+
+---
+
+## Workflow: Get Available Commands
+
+**Pattern**: Simple Query
+
+List all canonical commands configured for a module.
+
+### Step 1: Execute
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env get-available-commands \
+    --module "oauth-sheriff-core"
+```
+
+### Step 2: Process Result
+
+```toon
+status: success
+module: oauth-sheriff-core
+count: 3
+
+commands[3]{name}:
+module-tests
+verify
+quality-gate
+```
+
+---
+
+## Workflow: Validate Required Commands
+
+**Pattern**: Validation Pipeline
+
+Validate that all required commands are configured for a module type.
+
+### Step 1: Execute
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env validate-required \
+    --module "oauth-sheriff-core"
+```
+
+### Step 2: Process Result
+
+Success (all required present):
+```toon
+status: success
+module: oauth-sheriff-core
+module_type: jar
+message: All required commands are configured
+```
+
+Incomplete (missing required):
+```toon
+status: incomplete
+module: oauth-sheriff-core
+module_type: jar
+missing_count: 1
+
+missing[1]{name,description}:
+quality-gate	Static analysis, linting, formatting checks
+```
+
+---
+
 ## Storage Pattern
 
 **Split storage** (shared vs local):
@@ -337,16 +526,26 @@ Exit codes:
 
 ---
 
-## Standard Command Labels
+## Canonical Command Names
 
-| Label | Maven Goals | Gradle Tasks | npm Scripts |
-|-------|-------------|--------------|-------------|
-| `test-compile` | `test-compile` | `testClasses` | - |
-| `test` | `clean test` | `clean test` | `run test` |
-| `verify` | `clean verify` | `clean check` | `run test && run lint` |
-| `install` | `clean install` | `publishToMavenLocal` | - |
-| `pre-commit` | `clean install -Ppre-commit` | `preCommit` | - |
-| `coverage` | `clean verify -Pcoverage` | `jacocoTestReport` | `run test:coverage` |
+Commands use **canonical names** for programmatic lookup. See `standards/canonical-vocabulary.md` for full specification.
+
+| Canonical Name | Phase | Maven Goals | Gradle Tasks | npm Scripts |
+|----------------|-------|-------------|--------------|-------------|
+| `compile` | build | `compile` | `compileJava` | - |
+| `test-compile` | build | `test-compile` | `testClasses` | - |
+| `module-tests` | test | `clean test` | `clean test` | `run test` |
+| `integration-tests` | test | `clean verify -Pintegration-tests` | `clean integrationTest` | `run test:e2e` |
+| `coverage` | test | `clean verify -Pcoverage` | `clean test jacocoTestReport` | `run test:coverage` |
+| `performance` | test | `clean verify -Pbenchmark` | `clean jmh` | `run test:perf` |
+| `quality-gate` | quality | `clean verify -Ppre-commit` | `clean check` | `run lint && npm run format:check` |
+| `verify` | verify | `clean verify` | `clean build` | `run test && npm run lint` |
+| `install` | deploy | `clean install` | `clean publishToMavenLocal` | - |
+| `package` | deploy | `package` | `clean assemble` | `run build` |
+
+**Required commands** (must be configured for testable modules): `module-tests`, `quality-gate`, `verify`
+
+**Module type filtering**: Commands are filtered by module type (e.g., `pom` modules only get `install` and `quality-gate`).
 
 ---
 
@@ -373,6 +572,7 @@ Exit codes:
 
 - `standards/architecture.md` - Static routing and skill boundaries
 - `standards/api-contract.md` - Shared TOON output formats
+- `standards/canonical-vocabulary.md` - Canonical command names for lookup API
 - `standards/maven-impl.md` - Maven-specific implementation
 - `standards/gradle-impl.md` - Gradle-specific implementation
 - `standards/npm-impl.md` - npm-specific implementation

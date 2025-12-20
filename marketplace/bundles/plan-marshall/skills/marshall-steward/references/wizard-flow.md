@@ -150,7 +150,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ## Step 4: Build System and Module Detection
 
-Detect build systems, modules, and generate commands in a single delegation call.
+Detect build systems, modules, profiles, and generate canonical commands.
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
@@ -161,29 +161,85 @@ python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
 status: success
 build_systems: maven,npm
 modules_updated: 3
-commands_generated: 15
+commands_generated: 18
 
-modules[3]{name,path,commands_count}:
-default	.	5
-oauth-sheriff-core	oauth-sheriff-core	5
-oauth-sheriff-ui	oauth-sheriff-ui	5
+modules[3]{name,path,type,commands_count}:
+default	.	pom	4
+oauth-sheriff-core	oauth-sheriff-core	jar	8
+oauth-sheriff-ui	oauth-sheriff-ui	npm	6
 ```
 
 Display to user:
 ```
 Build Systems: Maven, npm
 Modules detected: 3
-  - default (5 commands)
-  - oauth-sheriff-core (5 commands)
-  - oauth-sheriff-ui (5 commands)
+  - default (pom, 4 commands)
+  - oauth-sheriff-core (jar, 8 commands)
+  - oauth-sheriff-ui (npm, 6 commands)
 ```
 
 This single command:
 - Detects available build systems (Maven, Gradle, npm)
 - Detects project modules (Maven modules, Gradle subprojects, npm workspaces)
-- Generates full command strings for each module
+- Detects module types (pom, jar, war, quarkus, npm) for command filtering
+- Detects Maven/Gradle profiles and maps to canonical command names
+- Generates full command strings using **canonical command vocabulary**
+- Supports **hybrid modules** (Maven + npm) with nested command format
 - Persists to `modules.{name}.commands` in marshal.json
 - Updates `build_systems[]` for skill reference
+
+### Profile Detection
+
+For projects with Maven/Gradle profiles, the persist command automatically detects and classifies them:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-profiles
+```
+
+**Output (TOON)**:
+```toon
+status: success
+module: default
+path: /path/to/project
+count: 3
+
+profiles[3]{id,canonical,activation_type}:
+integration-tests	integration-tests	command-line
+coverage	coverage	command-line
+benchmark	performance	command-line
+```
+
+Profile-based commands are automatically included in `persist` output with appropriate activation flags (-P or -D).
+
+### Canonical Command Names
+
+Commands use a fixed vocabulary for programmatic lookup by plan execution agents:
+
+| Canonical | Description |
+|-----------|-------------|
+| `module-tests` | Unit tests for the module |
+| `integration-tests` | Integration/E2E tests |
+| `quality-gate` | Pre-commit checks (lint, format, static analysis) |
+| `verify` | Full build verification |
+| `coverage` | Test coverage reports |
+| `performance` | Benchmark/performance tests |
+| `install` | Install to local repository |
+| `package` | Create distributable package |
+
+### Hybrid Module Support
+
+Modules with multiple build systems (e.g., Maven + npm) get nested command format:
+
+```json
+{
+  "module-tests": {
+    "maven": "python3 .plan/execute-script.py ... --goals \"clean test\"",
+    "npm": "python3 .plan/execute-script.py ... --command \"run test\""
+  }
+}
+```
+
+Use `lookup --build-system maven` or `lookup --build-system npm` to get specific command
 
 ### 4b: Skill Domain Detection
 
