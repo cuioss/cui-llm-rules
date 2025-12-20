@@ -387,6 +387,139 @@ def test_validate_required_missing_module():
 
 
 # =============================================================================
+# PERSIST --minimal Tests
+# =============================================================================
+
+class MinimalModeContext:
+    """Context manager for minimal mode tests."""
+
+    def __init__(self):
+        self.temp_dir = None
+
+    def __enter__(self):
+        self.temp_dir = Path(tempfile.mkdtemp())
+        (self.temp_dir / '.plan').mkdir()
+        return self.temp_dir
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+
+def test_persist_minimal_only_required():
+    """Test persist --minimal only generates required commands."""
+    with MinimalModeContext() as temp_dir:
+        # Create a Maven jar project
+        (temp_dir / 'pom.xml').write_text('<project><packaging>jar</packaging></project>')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'persist',
+            '--minimal',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+
+        marshal_path = temp_dir / '.plan' / 'marshal.json'
+        config = json.loads(marshal_path.read_text())
+        commands = config['modules']['default']['commands']
+
+        # Required commands should be present
+        assert 'module-tests' in commands, "Should have module-tests (required)"
+        assert 'quality-gate' in commands, "Should have quality-gate (required)"
+        assert 'verify' in commands, "Should have verify (required)"
+
+        # Non-required commands should NOT be present
+        assert 'compile' not in commands, "Should NOT have compile (not required)"
+        assert 'install' not in commands, "Should NOT have install (not required)"
+
+
+def test_persist_minimal_with_include_profiles():
+    """Test persist --minimal with --include-profiles adds selected profiles."""
+    with MinimalModeContext() as temp_dir:
+        # Create a Maven jar project with a profile
+        pom_content = '''<project>
+            <packaging>jar</packaging>
+            <profiles>
+                <profile>
+                    <id>coverage</id>
+                </profile>
+                <profile>
+                    <id>integration-tests</id>
+                </profile>
+            </profiles>
+        </project>'''
+        (temp_dir / 'pom.xml').write_text(pom_content)
+
+        result = run_script(
+            SCRIPT_PATH,
+            'persist',
+            '--minimal',
+            '--include-profiles', 'default:coverage',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+
+        marshal_path = temp_dir / '.plan' / 'marshal.json'
+        config = json.loads(marshal_path.read_text())
+        commands = config['modules']['default']['commands']
+
+        # Required commands should be present
+        assert 'module-tests' in commands, "Should have module-tests (required)"
+        assert 'quality-gate' in commands, "Should have quality-gate (required)"
+        assert 'verify' in commands, "Should have verify (required)"
+
+        # Included profile should be present
+        assert 'coverage' in commands, "Should have coverage (explicitly included)"
+
+        # Non-included profile should NOT be present
+        assert 'integration-tests' not in commands, "Should NOT have integration-tests (not included)"
+
+
+def test_persist_include_profiles_filter():
+    """Test persist --minimal with --include-profiles filters to selected profiles only."""
+    with MinimalModeContext() as temp_dir:
+        # Create a Maven jar project with multiple profiles
+        pom_content = '''<project>
+            <packaging>jar</packaging>
+            <profiles>
+                <profile><id>coverage</id></profile>
+                <profile><id>integration-tests</id></profile>
+                <profile><id>benchmark</id></profile>
+            </profiles>
+        </project>'''
+        (temp_dir / 'pom.xml').write_text(pom_content)
+
+        # Use --minimal with --include-profiles to control which commands are generated
+        result = run_script(
+            SCRIPT_PATH,
+            'persist',
+            '--minimal',
+            '--include-profiles', 'default:coverage,default:integration-tests',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+
+        marshal_path = temp_dir / '.plan' / 'marshal.json'
+        config = json.loads(marshal_path.read_text())
+        commands = config['modules']['default']['commands']
+
+        # Required commands should be present (from --minimal base)
+        assert 'module-tests' in commands, "Should have module-tests (required)"
+        assert 'quality-gate' in commands, "Should have quality-gate (required)"
+        assert 'verify' in commands, "Should have verify (required)"
+
+        # Included profiles should be present
+        assert 'coverage' in commands, "Should have coverage (explicitly included)"
+        assert 'integration-tests' in commands, "Should have integration-tests (explicitly included)"
+
+        # Non-included profile should NOT be present (benchmark maps to performance)
+        assert 'performance' not in commands, "Should NOT have performance (benchmark not included)"
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -412,6 +545,10 @@ if __name__ == '__main__':
             test_validate_required_missing_commands,
             test_validate_required_pom_module,
             test_validate_required_missing_module,
+            # Minimal mode tests
+            test_persist_minimal_only_required,
+            test_persist_minimal_with_include_profiles,
+            test_persist_include_profiles_filter,
         ])
         sys.exit(runner.run())
     finally:

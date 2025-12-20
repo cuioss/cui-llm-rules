@@ -742,13 +742,14 @@ def save_marshal_json(project_dir: Path, config: dict) -> None:
     marshal_path.write_text(json.dumps(config, indent=2))
 
 
-def generate_canonical_commands_for_type(build_system: str, module_type: str, module_name: str = None) -> dict:
+def generate_canonical_commands_for_type(build_system: str, module_type: str, module_name: str = None, minimal: bool = False) -> dict:
     """Generate canonical commands filtered by module type.
 
     Args:
         build_system: maven, gradle, or npm
         module_type: Module type (pom, jar, war, quarkus, npm)
         module_name: Module name (None or "default" for root module)
+        minimal: If True, only generate required commands (module-tests, quality-gate, verify)
 
     Returns:
         Dict of canonical_name -> command string
@@ -761,6 +762,10 @@ def generate_canonical_commands_for_type(build_system: str, module_type: str, mo
     for canonical, spec in CANONICAL_COMMANDS.items():
         # Filter by applicable_to
         if module_type not in spec["applicable_to"]:
+            continue
+
+        # In minimal mode, only generate required commands
+        if minimal and not spec.get("required", False):
             continue
 
         goals = BUILD_SYSTEM_MAPPINGS[build_system].get(canonical)
@@ -830,6 +835,17 @@ def cmd_persist(args):
         print(json.dumps({"status": "error", "message": f"Directory not found: {project_dir}"}, indent=2))
         return 1
 
+    # Parse include_profiles if provided (format: "module:profile-id,module:profile-id")
+    include_profiles_set = set()
+    if args.include_profiles:
+        for pair in args.include_profiles.split(","):
+            pair = pair.strip()
+            if ":" in pair:
+                include_profiles_set.add(pair)
+
+    # In minimal mode, skip all profile-based commands unless explicitly included
+    minimal = getattr(args, 'minimal', False)
+
     # Detect build systems
     build_result = detect_build_systems(project_dir)
     if not build_result["available_systems"]:
@@ -884,12 +900,25 @@ def cmd_persist(args):
         default_commands = generate_hybrid_commands(project_dir, None)
     else:
         # Single build system: generate flat commands
-        default_commands = generate_canonical_commands_for_type(default_system, default_type)
+        default_commands = generate_canonical_commands_for_type(default_system, default_type, minimal=minimal)
 
         # Add profile-based commands (may override type-based if profile has specific activation)
         for profile in default_profiles:
             if profile.get("canonical"):
                 canonical = profile["canonical"]
+                profile_id = profile["id"]
+
+                # Check if profile should be included
+                # In minimal mode: only include if explicitly listed in --include-profiles
+                # In normal mode: include all detected profiles
+                profile_key = f"default:{profile_id}"
+                if minimal and profile_key not in include_profiles_set:
+                    continue  # Skip this profile in minimal mode unless explicitly included
+
+                # Check if we have an include_profiles filter and this profile is not in it
+                if include_profiles_set and profile_key not in include_profiles_set:
+                    continue  # Skip profiles not in the explicit include list
+
                 activation = profile.get("activation", {})
                 activation_type = activation.get("type", "command-line")
 
@@ -902,7 +931,7 @@ def cmd_persist(args):
 
                 if should_use_profile:
                     cmd = generate_profile_command(
-                        default_system, canonical, profile["id"],
+                        default_system, canonical, profile_id,
                         activation, None
                     )
                     if cmd:
@@ -953,12 +982,25 @@ def cmd_persist(args):
             mod_commands = generate_hybrid_commands(mod_path, mod_name)
         else:
             # Single build system: generate flat commands
-            mod_commands = generate_canonical_commands_for_type(mod_system, mod_type, mod_name)
+            mod_commands = generate_canonical_commands_for_type(mod_system, mod_type, mod_name, minimal=minimal)
 
             # Add profile-based commands (may override type-based if profile has specific activation)
             for profile in mod_profiles:
                 if profile.get("canonical"):
                     canonical = profile["canonical"]
+                    profile_id = profile["id"]
+
+                    # Check if profile should be included
+                    # In minimal mode: only include if explicitly listed in --include-profiles
+                    # In normal mode: include all detected profiles (unless filtered)
+                    profile_key = f"{mod_name}:{profile_id}"
+                    if minimal and profile_key not in include_profiles_set:
+                        continue  # Skip this profile in minimal mode unless explicitly included
+
+                    # Check if we have an include_profiles filter and this profile is not in it
+                    if include_profiles_set and profile_key not in include_profiles_set:
+                        continue  # Skip profiles not in the explicit include list
+
                     activation = profile.get("activation", {})
                     activation_type = activation.get("type", "command-line")
 
@@ -1640,6 +1682,10 @@ def main():
     persist_parser = subparsers.add_parser("persist", help="Generate and persist module commands to marshal.json")
     persist_parser.add_argument("--project-dir", dest="project_dir", default=".", help="Project directory")
     persist_parser.add_argument("--dry-run", dest="dry_run", action="store_true", help="Show what would be done without saving")
+    persist_parser.add_argument("--minimal", dest="minimal", action="store_true",
+                               help="Only generate required commands (module-tests, quality-gate, verify)")
+    persist_parser.add_argument("--include-profiles", dest="include_profiles", default=None,
+                               help="Comma-separated list of module:profile-id pairs to include (e.g., 'core:coverage,core:integration-tests')")
     persist_parser.set_defaults(func=cmd_persist)
 
     # lookup subcommand

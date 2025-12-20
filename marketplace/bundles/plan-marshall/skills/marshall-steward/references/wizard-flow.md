@@ -150,10 +150,157 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ## Step 4: Build System and Module Detection
 
-Detect build systems, modules, profiles, and generate canonical commands.
+### Step 4a: Detect Build Systems, Modules, and Profiles
+
+First, detect what's available without persisting:
 
 ```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-modules
+```
+
+**Output (TOON)**:
+```toon
+status: success
+module_count: 3
+
+modules[3]{name,path,build_systems,type}:
+default	.	maven	pom
+oauth-sheriff-core	oauth-sheriff-core	maven	jar
+oauth-sheriff-ui	oauth-sheriff-ui	npm	npm
+```
+
+Then detect profiles for modules with build systems that support them:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-profiles
+```
+
+**Output (TOON)**:
+```toon
+status: success
+modules_with_profiles: 2
+
+profiles[5]{module,id,canonical,activation_type}:
+default	pre-commit	quality-gate	command-line
+default	coverage	coverage	command-line
+oauth-sheriff-core	integration-tests	integration-tests	command-line
+oauth-sheriff-core	coverage	coverage	command-line
+oauth-sheriff-core	benchmark	performance	command-line
+```
+
+Display detection summary:
+```
+Build Systems: Maven, npm
+Modules detected: 3
+  - default (pom)
+  - oauth-sheriff-core (jar)
+  - oauth-sheriff-ui (npm)
+
+Profiles detected: 5
+  - default: pre-commit → quality-gate, coverage → coverage
+  - oauth-sheriff-core: integration-tests, coverage, benchmark → performance
+```
+
+---
+
+### Step 4b: User Command Selection
+
+**Tiered approach** to handle projects of all sizes:
+
+#### Tier 1: Setup Mode Selection
+
+```yaml
+AskUserQuestion:
+  question: "How do you want to configure module commands?"
+  header: "Setup Mode"
+  options:
+    - label: "Auto-detect (Recommended)"
+      description: "Use smart defaults based on module types and detected profiles"
+    - label: "Customize per module"
+      description: "Select commands for each module individually"
+    - label: "Minimal"
+      description: "Only required commands (module-tests, quality-gate, verify)"
+  multiSelect: false
+```
+
+**Routing:**
+
+| Selection | Action |
+|-----------|--------|
+| Auto-detect | Go to Tier 2 (if profiles detected) or directly to Step 4c |
+| Customize | Go to Tier 3 (per-module selection) |
+| Minimal | Go to Step 4c with `--minimal` flag |
+
+---
+
+#### Tier 2: Profile Confirmation (Auto-detect path)
+
+Only shown if profiles were detected:
+
+```yaml
+AskUserQuestion:
+  question: "Detected specialized profiles in 2 modules. Include them?"
+  header: "Profiles"
+  multiSelect: true
+  options:
+    - label: "oauth-sheriff-core: integration-tests"
+      description: "Integration tests (mvn verify -Pintegration-tests)"
+    - label: "oauth-sheriff-core: coverage"
+      description: "JaCoCo coverage (mvn verify -Pcoverage)"
+    - label: "oauth-sheriff-core: benchmark → performance"
+      description: "JMH benchmarks (mvn verify -Pbenchmark)"
+    - label: "default: coverage"
+      description: "Coverage reporting (mvn verify -Pcoverage)"
+```
+
+Selected profiles are passed to `persist` command. Proceed to Step 4c.
+
+---
+
+#### Tier 3: Per-Module Selection (Customize path)
+
+For each module with available commands, present multi-select:
+
+```yaml
+AskUserQuestion:
+  question: "Select commands for module 'oauth-sheriff-core':"
+  header: "Commands"
+  multiSelect: true
+  options:
+    - label: "module-tests (Required)"
+      description: "Unit tests (mvn clean test)"
+    - label: "quality-gate (Required)"
+      description: "Quality checks (mvn verify -Ppre-commit)"
+    - label: "verify (Required)"
+      description: "Full verification (mvn clean verify)"
+    - label: "integration-tests [DETECTED]"
+      description: "Integration tests (mvn verify -Pintegration-tests)"
+    - label: "coverage [DETECTED]"
+      description: "Test coverage (mvn verify -Pcoverage)"
+    - label: "performance [DETECTED]"
+      description: "JMH benchmarks (mvn verify -Pbenchmark)"
+    - label: "install"
+      description: "Install to local repo (mvn clean install)"
+```
+
+Repeat for each module. Proceed to Step 4c with collected selections.
+
+---
+
+### Step 4c: Generate and Persist Commands
+
+Based on user selection, generate and persist commands:
+
+```bash
+# Auto-detect mode (with optional profile filter)
 python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
+
+# Minimal mode
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist --minimal
+
+# With specific profiles selected (from Tier 2)
+python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist \
+  --include-profiles "oauth-sheriff-core:integration-tests,oauth-sheriff-core:coverage"
 ```
 
 **Output (TOON)**:
@@ -172,59 +319,28 @@ oauth-sheriff-ui	oauth-sheriff-ui	npm	6
 Display to user:
 ```
 Build Systems: Maven, npm
-Modules detected: 3
+Modules configured: 3
   - default (pom, 4 commands)
   - oauth-sheriff-core (jar, 8 commands)
   - oauth-sheriff-ui (npm, 6 commands)
 ```
 
-This single command:
-- Detects available build systems (Maven, Gradle, npm)
-- Detects project modules (Maven modules, Gradle subprojects, npm workspaces)
-- Detects module types (pom, jar, war, quarkus, npm) for command filtering
-- Detects Maven/Gradle profiles and maps to canonical command names
-- Generates full command strings using **canonical command vocabulary**
-- Supports **hybrid modules** (Maven + npm) with nested command format
-- Persists to `modules.{name}.commands` in marshal.json
-- Updates `build_systems[]` for skill reference
-
-### Profile Detection
-
-For projects with Maven/Gradle profiles, the persist command automatically detects and classifies them:
-
-```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-profiles
-```
-
-**Output (TOON)**:
-```toon
-status: success
-module: default
-path: /path/to/project
-count: 3
-
-profiles[3]{id,canonical,activation_type}:
-integration-tests	integration-tests	command-line
-coverage	coverage	command-line
-benchmark	performance	command-line
-```
-
-Profile-based commands are automatically included in `persist` output with appropriate activation flags (-P or -D).
+---
 
 ### Canonical Command Names
 
 Commands use a fixed vocabulary for programmatic lookup by plan execution agents:
 
-| Canonical | Description |
-|-----------|-------------|
-| `module-tests` | Unit tests for the module |
-| `integration-tests` | Integration/E2E tests |
-| `quality-gate` | Pre-commit checks (lint, format, static analysis) |
-| `verify` | Full build verification |
-| `coverage` | Test coverage reports |
-| `performance` | Benchmark/performance tests |
-| `install` | Install to local repository |
-| `package` | Create distributable package |
+| Canonical | Required | Description |
+|-----------|----------|-------------|
+| `module-tests` | **Yes** | Unit tests for the module |
+| `quality-gate` | **Yes** | Pre-commit checks (lint, format, static analysis) |
+| `verify` | **Yes** | Full build verification |
+| `integration-tests` | No | Integration/E2E tests |
+| `coverage` | No | Test coverage reports |
+| `performance` | No | Benchmark/performance tests |
+| `install` | No | Install to local repository |
+| `package` | No | Create distributable package |
 
 ### Hybrid Module Support
 
@@ -239,9 +355,11 @@ Modules with multiple build systems (e.g., Maven + npm) get nested command forma
 }
 ```
 
-Use `lookup --build-system maven` or `lookup --build-system npm` to get specific command
+Use `lookup --build-system maven` or `lookup --build-system npm` to get specific command.
 
-### 4b: Skill Domain Detection
+---
+
+### Step 4d: Skill Domain Detection
 
 Detect skill domains based on project files (pom.xml → java, package.json → javascript):
 
