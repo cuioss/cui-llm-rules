@@ -1,6 +1,6 @@
 # Task Contract
 
-Standard structure for tasks created by task-plan skills. Tasks represent committable units of work derived from deliverables.
+Standard structure for tasks created by task-plan skills. Tasks represent committable units of work derived from deliverables with pre-resolved skills for 5-phase workflow execution.
 
 ## Purpose
 
@@ -8,15 +8,18 @@ Each task:
 
 - References one or more deliverables (M:N relationship)
 - Contains domain and profile for workflow routing
-- Includes explicit skills array for domain knowledge
+- Includes explicit skills array (pre-resolved during task creation)
 - Includes verification criteria
 - Specifies dependencies on other tasks (for ordering/parallelization)
 - Results in exactly one commit
+- Tracks origin (plan or fix) for finalize loop handling
 
 ## Task File Format (TOON)
 
+### Regular Task (from plan phase)
+
 ```toon
-id: TASK-1
+id: TASK-001
 title: "Create CacheConfig class"
 domain: java
 profile: implementation
@@ -25,6 +28,7 @@ skills:
   - pm-dev-java:java-cdi
 deliverables: [1]
 depends_on: none
+origin: plan
 
 description: |
   Create CacheConfig class with Redis configuration...
@@ -39,20 +43,97 @@ verification:
   criteria: All tests pass
 ```
 
+### Fix Task (from finalize phase)
+
+```toon
+id: TASK-003
+title: "Fix: Test failure in CacheTest"
+domain: java
+profile: testing
+skills:
+  - pm-dev-java:junit-core
+  - pm-dev-java:java-core
+deliverables: [1]
+depends_on: TASK-002
+origin: fix
+priority: high
+
+description: |
+  Fix test failure detected during verification.
+
+finding:
+  type: test_failure
+  file: src/test/java/com/example/CacheTest.java
+  line: 58
+  message: "AssertionError: expected 5 but was 3"
+
+steps[1]{number,title,status}:
+1,src/test/java/com/example/CacheTest.java,pending
+
+verification:
+  commands:
+    - mvn test -Dtest=CacheTest
+  criteria: Test passes
+```
+
 ## Key Fields
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | string | Unique task identifier (TASK-N) |
-| `title` | string | Task title for display |
-| `domain` | string | Single domain from deliverable (java, javascript, plan-marshall-plugin-dev) |
-| `profile` | string | Workflow type (implementation, testing) |
-| `skills` | list | Domain skills to load (explicit, from resolve-domain-skills) |
-| `deliverables` | list | Referenced deliverable numbers |
-| `depends_on` | string | Task dependencies for ordering |
-| `description` | string | Detailed task description |
-| `steps` | table | File paths to process |
-| `verification` | object | Commands and criteria |
+| Field | Type | Required | Purpose |
+|-------|------|----------|---------|
+| `id` | string | Yes | Unique task identifier (TASK-{SEQ}) |
+| `title` | string | Yes | Task title for display |
+| `domain` | string | Yes | Single domain from deliverable (java, javascript, plan-marshall-plugin-dev) |
+| `profile` | string | Yes | Workflow profile (implementation, testing, quality) |
+| `skills` | list | Yes | Domain skills pre-resolved during task creation |
+| `deliverables` | list | Yes | Referenced deliverable numbers |
+| `depends_on` | string | Yes | Task dependencies for ordering |
+| `origin` | string | Yes | Task origin: `plan` or `fix` |
+| `description` | string | Yes | Detailed task description |
+| `steps` | table | Yes | File paths to process |
+| `verification` | object | Yes | Commands and criteria |
+| `priority` | string | No | Execution priority (fix tasks) |
+| `finding` | object | No | Original finding details (fix tasks only) |
+
+## Task ID Format
+
+Tasks use sequential numbering with zero-padded format:
+
+| Format | Example | Description |
+|--------|---------|-------------|
+| `TASK-{SEQ}` | `TASK-001` | 3-digit zero-padded sequence |
+
+## Origin Field
+
+Indicates where task was created:
+
+| Value | Meaning |
+|-------|---------|
+| `plan` | Created during task-plan phase from deliverable |
+| `fix` | Created during finalize phase from finding |
+
+## Priority Field (Fix Tasks)
+
+Task execution priority for fix tasks:
+
+| Source | Default Priority |
+|--------|------------------|
+| plan phase | normal |
+| finalize:sonar | By severity (BLOCKER→critical) |
+| finalize:pr | high |
+| finalize:security | critical |
+| finalize:lint | low |
+
+## Finding Field (Fix Tasks Only)
+
+Original finding details for fix tasks:
+
+```toon
+finding:
+  type: compilation_error
+  file: src/main/java/com/example/CacheConfig.java
+  line: 42
+  message: "cannot find symbol: class RedisTemplate"
+```
 
 ## Domain and Profile
 
@@ -68,12 +149,34 @@ The `domain` field is inherited from the deliverable:
 
 ### Profile Field
 
-The `profile` field determines which workflow skill is loaded:
+The `profile` field determines which skills are loaded via `resolve-domain-skills`:
 
-| Profile | Workflow Skill | Description |
-|---------|----------------|-------------|
-| `implementation` | `config.workflow_skills.{domain}.implementation` | Create/modify production code |
-| `testing` | `config.workflow_skills.{domain}.testing` | Create/modify test code |
+| Profile | Resolution | Description |
+|---------|------------|-------------|
+| `implementation` | `resolve-domain-skills --domain X --profile implementation` | Create/modify production code |
+| `testing` | `resolve-domain-skills --domain X --profile testing` | Create/modify test code |
+| `quality` | `resolve-domain-skills --domain X --profile quality` | Documentation, verification |
+
+## Skills Pre-Resolution
+
+Skills are resolved during task-plan phase and stored in the task file:
+
+```
+task-plan phase                      execute phase
+┌────────────────────────┐           ┌────────────────────────┐
+│ resolve-domain-skills  │           │ Read task.skills       │
+│ --domain java          │           │ Load directly          │
+│ --profile impl         │           │ (no resolution call)   │
+└───────────┬────────────┘           └────────────────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│ TASK-001.toon          │
+│ skills:                │
+│   - pm-dev-java:java-core
+│   - pm-dev-java:java-cdi
+└────────────────────────┘
+```
 
 ## Skills Array
 

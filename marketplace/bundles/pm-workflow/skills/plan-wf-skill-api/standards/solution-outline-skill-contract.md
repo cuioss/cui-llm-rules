@@ -1,18 +1,41 @@
-# Solution Outline Agent Contract
+# Solution Outline Skill Contract
 
-Standard contract for solution outline agents that transform requests into solution outlines with deliverables.
+Workflow skill for outline phase - transforms requests into solution outlines with deliverables.
+
+---
 
 ## Purpose
 
-Solution outline agents analyze a request and produce a structured solution outline document containing deliverables. Each deliverable follows the [Deliverable Contract](deliverable-contract.md).
+Solution outline skills analyze a request and produce a structured solution outline document containing deliverables. Each deliverable follows the [Deliverable Contract](deliverable-contract.md).
 
-**Flow**: Request → Solution Outline (with Deliverables)
+**Flow**: Request → Solution Outline (with Deliverables) → config.toon.domains (intelligent decision)
+
+---
 
 ## Invocation
 
-**Invoked by**: `/plan-manage action=refine` command
+**Phase**: `outline`
 
-The command invokes the thin agent `pm-workflow:solution-outline-agent` which loads domain-specific skills from `config.workflow_skills.{domain}.solution_outline`.
+**Agent invocation**:
+```bash
+plan-phase-agent plan_id={plan_id} phase=outline
+```
+
+**Skill resolution**:
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --phase outline
+```
+
+Result:
+```toon
+status: success
+domain: system
+phase: outline
+workflow_skill: pm-workflow:solution-outline
+```
+
+---
 
 ## Input Parameters
 
@@ -21,28 +44,151 @@ The command invokes the thin agent `pm-workflow:solution-outline-agent` which lo
 | `plan_id` | string | Yes | Plan identifier |
 | `feedback` | string | No | User feedback from review (for revision iterations) |
 
-## Responsibilities
+---
 
-1. Load `pm-workflow:manage-solution-outline` skill for structure guidance
-2. Read request.md for the request
-3. Analyze codebase with domain knowledge
-4. Write solution_outline.md via `pm-workflow:manage-solution-outline:manage-solution-outline write` with heredoc (includes ASCII overview diagram)
-5. Document deliverables as numbered `### N. Title` sections with [Deliverable Contract](deliverable-contract.md) metadata
-6. Validate with `pm-workflow:manage-solution-outline:manage-solution-outline validate --plan-id {plan_id}`
-7. Record lessons-learned on issues
-8. **If `feedback` provided**: Incorporate user feedback into existing solution_outline.md
+## Workflow Skill Responsibilities
+
+The workflow skill autonomously:
+
+1. **Loads extensions**: Calls `resolve-workflow-skill-extension --type outline` for each domain
+2. **Loads domain knowledge**: Calls `resolve-domain-skills --profile architecture` for each domain
+3. **Analyzes codebase**: Uses architecture-level knowledge (not full implementation knowledge)
+4. **Determines relevant domains**: Claude decides which domains are relevant to the request
+5. **Creates deliverables**: Each with explicit `domain` and `profile` fields
+6. **Writes config.toon.domains**: Intelligent decision output (subset of marshal.json domains)
+7. **Validates**: Calls `manage-solution-outline validate`
+
+```
+Workflow Skill Execution:
+┌──────────────────────────────────────────────────────────────────┐
+│ 1. Load all domains from marshal.json                            │
+│ 2. For each domain:                                              │
+│    a. resolve-workflow-skill-extension --domain X --type outline │
+│    b. resolve-domain-skills --domain X --profile architecture    │
+│ 3. Analyze request + codebase                                    │
+│ 4. Determine which domains are relevant (Claude reasoning)       │
+│ 5. Create deliverables with domain + profile                     │
+│ 6. Write config.toon.domains (intelligent decision output)       │
+│ 7. Validate with manage-solution-outline validate                │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Extension Loading
+
+Extensions add domain-specific outline behavior:
+
+```bash
+# For each domain in marshal.json:
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill-extension --domain java --type outline
+# → pm-dev-java:java-outline-ext (or null if none configured)
+```
+
+Extensions provide:
+- Domain-specific deliverable patterns
+- Component organization rules
+- Change granularity guidelines
+
+---
+
+## Domain Knowledge Loading
+
+Domain knowledge uses the `architecture` profile:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-domain-skills --domain java --profile architecture
+```
+
+Result:
+```toon
+status: success
+domain: java
+profile: architecture
+
+defaults:
+  pm-dev-java:java-core: Core Java patterns
+  pm-dev-java:java-packages: Package structure
+
+optionals:
+  pm-dev-java:java-modules: Module system patterns
+```
+
+---
+
+## config.toon.domains Output
+
+The workflow skill writes detected domains to config.toon:
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set-domains \
+  --plan-id {plan_id} --domains java,javascript
+```
+
+This is an **intelligent decision output** - not a copy of marshal.json domains, but Claude's analysis of which domains are relevant to the specific request.
+
+---
+
+## Knowledge Level
+
+**Profile used**: `architecture`
+
+**Knowledge includes**:
+- Package structure conventions
+- Module boundaries and responsibilities
+- Dependency direction rules
+- Component types (service, repository, controller)
+- What constitutes a "deliverable" unit
+
+**Knowledge excludes**:
+- Implementation patterns (Builder, Factory, etc.)
+- Specific annotations (@Inject, @Nullable)
+- Testing patterns (mocking, fixtures)
+- Error handling patterns
+
+---
 
 ## Output Validation
 
-The agent MUST validate that each deliverable contains all required fields from the [Deliverable Contract](deliverable-contract.md):
+The workflow skill MUST validate that each deliverable contains all required fields from the [Deliverable Contract](deliverable-contract.md):
 
 - [ ] `change_type` metadata
 - [ ] `execution_mode` metadata
-- [ ] `domain` metadata (valid domain from config)
-- [ ] `profile` metadata (`implementation` or `testing`)
+- [ ] `domain` metadata (valid domain from marshal.json)
+- [ ] `profile` metadata (`implementation`, `testing`, or `quality`)
 - [ ] `depends` field (`none` or valid deliverable references)
 - [ ] Explicit file list (not "all files matching X")
 - [ ] Verification command and criteria
+
+---
+
+## Script API Calls
+
+### Solution Outline Operations
+
+```bash
+# Write solution outline
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline write \
+  --plan-id {plan_id} --content "$(cat <<'HEREDOC'
+...content...
+HEREDOC
+)"
+
+# Validate
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline validate \
+  --plan-id {plan_id}
+```
+
+### Config Domains Output
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-config:manage-config set-domains \
+  --plan-id {plan_id} --domains java,javascript
+```
+
+---
 
 ## Return Structure
 
@@ -50,51 +196,12 @@ The agent MUST validate that each deliverable contains all required fields from 
 status: success|error
 plan_id: {plan_id}
 deliverable_count: {N}
+domains_detected: [java, javascript]
 lessons_recorded: {count}
 message: {error message if status=error}
 ```
 
-## Thin Agent Architecture
-
-A single generic agent (`pm-workflow:solution-outline-agent`) handles all domains by loading domain-specific skills dynamically:
-
-| Domain | Solution Outline Skill |
-|--------|----------------------|
-| `plan-marshall-plugin-dev` | `pm-plugin-development:plugin-solution-outline` |
-| `java` | (system skills only - no domain-specific solution outline skill) |
-| `javascript` | (system skills only - no domain-specific solution outline skill) |
-
-The agent reads `config.workflow_skills.{domain}.solution_outline` from config.toon to determine which skill to load.
-
-## Script Execution Tracing
-
-When executing scripts, agents MUST pass plan context for logging:
-
-### Scripts with `--plan-id` Parameter
-
-Scripts that accept `--plan-id` (manage-* scripts) use it for both logic AND logging:
-
-```bash
-python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline write \
-  --plan-id {plan_id} --content "$(cat <<'HEREDOC'
-...content...
-HEREDOC
-)"
-```
-
-### Scripts without `--plan-id` Parameter
-
-Scripts that don't accept `--plan-id` use `--trace-plan-id` for logging only:
-
-```bash
-python3 .plan/execute-script.py some-bundle:some-skill:analyze-script \
-  --trace-plan-id {plan_id} --other-args
-```
-
-The `--trace-plan-id` parameter is:
-- Extracted by the executor for logging purposes
-- Stripped before passing to the script (script never sees it)
-- Enables plan-scoped logging in `.plan/plans/{plan_id}/script-execution.log`
+---
 
 ## Error Handling
 
@@ -105,12 +212,22 @@ The `--trace-plan-id` parameter is:
 | Domain unknown | Return error with valid domains |
 | Script execution fails | Record lesson-learned, return error |
 
-## Integration
+---
 
-**Callers**: `/plan-manage action=refine` command
+## Phase Transition
 
-**Data Layer**:
-- `pm-workflow:manage-plan-documents:manage-plan-documents` - Request document operations
-- `pm-workflow:manage-solution-outline:manage-solution-outline` - Solution outline validation and queries
+After completion, the orchestrator triggers [User Review Protocol](user-review-protocol.md).
 
-**Next Step**: After completion, command triggers [User Review Protocol](user-review-protocol.md)
+```
+outline ──user approval gate──▶ plan
+```
+
+---
+
+## Related Documents
+
+- [plan-init-skill-contract.md](plan-init-skill-contract.md) - Previous phase (init)
+- [task-plan-skill-contract.md](task-plan-skill-contract.md) - Next phase (plan)
+- [deliverable-contract.md](deliverable-contract.md) - Deliverable structure
+- [extension-api.md](extension-api.md) - Extension mechanism
+- [user-review-protocol.md](user-review-protocol.md) - Approval gate after outline

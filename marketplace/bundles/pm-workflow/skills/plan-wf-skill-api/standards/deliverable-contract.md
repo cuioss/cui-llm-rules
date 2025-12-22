@@ -1,6 +1,6 @@
 # Deliverable Contract
 
-Standard structure for deliverables in solution_outline.md that enables task-plan optimization.
+Standard structure for deliverables in solution_outline.md that enables task-plan optimization and 5-phase workflow skill routing.
 
 ## Purpose
 
@@ -9,7 +9,7 @@ Each deliverable MUST contain sufficient information for:
 1. **Grouping analysis**: Can this be aggregated with other deliverables?
 2. **Split detection**: Should this be split into multiple tasks?
 3. **Domain routing**: Which domain skills should be loaded?
-4. **Profile routing**: Implementation or testing workflow?
+4. **Profile routing**: Which workflow profile (implementation, testing, quality)?
 5. **Verification consolidation**: Can verification commands be merged?
 6. **Dependency ordering**: What order must deliverables execute in?
 7. **Parallelization**: Which deliverables can run concurrently?
@@ -64,7 +64,7 @@ All solution-outline skills MUST produce deliverables following this structure:
 
 ## Domain Values
 
-The `domain` field MUST be a single value from `config.domains`:
+The `domain` field MUST be a single value from `marshal.json skill_domains`:
 
 | Domain | Description |
 |--------|-------------|
@@ -72,16 +72,46 @@ The `domain` field MUST be a single value from `config.domains`:
 | `javascript` | JavaScript production and test code |
 | `plan-marshall-plugin-dev` | Marketplace plugin components |
 
-Multi-domain plans (e.g., fullstack features) have multiple domains in `config.domains`. Each deliverable selects ONE domain for its work.
+Multi-domain plans (e.g., fullstack features) have multiple domains in `marshal.json`. Each deliverable selects ONE domain for its work.
+
+> **Note**: The `system` domain is internal-only and must NEVER be assigned to deliverables.
+
+### Domain Validation
+
+Solution outline skills MUST validate domains exist in marshal.json:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  skill-domains get --domain {domain}
+```
+
+Error if domain not found in marshal.json.
 
 ## Profile Values
 
-The `profile` field determines which workflow skill is loaded:
+The `profile` field determines which workflow profile is used for skill resolution during task execution:
 
-| Profile | Description | Workflow Skill |
-|---------|-------------|----------------|
-| `implementation` | Creating/modifying production code | `config.workflow_skills.{domain}.implementation` |
-| `testing` | Creating/modifying test code | `config.workflow_skills.{domain}.testing` |
+| Profile | Description | Resolution |
+|---------|-------------|------------|
+| `implementation` | Creating/modifying production code | `resolve-domain-skills --domain X --profile implementation` |
+| `testing` | Creating/modifying test code | `resolve-domain-skills --domain X --profile testing` |
+| `quality` | Documentation, verification | `resolve-domain-skills --domain X --profile quality` |
+
+### Domain Trickle-Down Flow
+
+Domain and profile flow from deliverable to task:
+
+```
+solution_outline.md          TASK-001.toon
+┌─────────────────┐          ┌─────────────────┐
+│ domain: java    │────┬────▶│ domain: java    │
+│ profile: impl   │    │     │ profile: impl   │
+└─────────────────┘    │     │ skills: [...]   │  ← Resolved via
+                       │     └─────────────────┘    resolve-domain-skills
+                       │
+                       └─── task-plan reads domain/profile,
+                            resolves skills, writes to task
+```
 
 ## Dependency Specification
 
@@ -133,11 +163,22 @@ Solution outline skills MUST validate that each deliverable contains:
 - [ ] Explicit file list (not "all files matching X")
 - [ ] Verification command and criteria
 
+## Deliverable ID Format
+
+| Format | Example | Usage |
+|--------|---------|-------|
+| Number only | `1`, `2` | `task.deliverables: [1, 2]` |
+| Full reference | `1. Create CacheConfig` | `depends: 1. Create CacheConfig` |
+
+**Parsing rule**: Extract leading integer, ignore title portion.
+
 ## Anti-patterns (INVALID deliverables)
 
 - Missing metadata block
 - Missing `domain` field (prevents domain skill loading)
 - Missing `profile` field (prevents workflow skill selection)
+- Invalid domain (domain not in marshal.json `skill_domains`)
+- System domain (using `system` as deliverable domain - internal only)
 - "Update all agents" without file enumeration
 - Verification: "manual review" for automatable checks
 - Missing `depends` field (prevents parallelization analysis)

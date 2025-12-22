@@ -1,17 +1,66 @@
 # Task Execution Skill Contract
 
-Standard interface for task execution skills that implement tasks from plans using two-tier skill loading.
+Workflow skill for execute phase - implements tasks using two-tier skill loading.
 
 ## Purpose
 
 Task execution skills:
 
 1. Accept standardized input (plan_id, task_number)
-2. Load workflow skill based on task.profile
+2. Resolve workflow skill based on domain and profile
 3. Load domain skills from task.skills array (two-tier loading)
 4. Iterate through steps
 5. Track progress via manage-tasks
-6. Return structured output
+6. Track file changes for finalize phase
+7. Return structured output
+
+**Flow**: Task with pre-resolved skills → Implementation → File tracking → Verification
+
+---
+
+## Invocation
+
+**Phase**: `execute`
+
+**Agent invocation**:
+```bash
+plan-phase-agent plan_id={plan_id} phase=execute task_number={task_number}
+```
+
+**Skill resolution**:
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --domain {task.domain} --phase {task.profile}
+```
+
+Result (domain override exists):
+```toon
+status: success
+domain: java
+phase: implementation
+workflow_skill: pm-dev-java:java-implementation
+fallback: false
+```
+
+Result (no domain override, system fallback):
+```toon
+status: success
+domain: system
+phase: implementation
+workflow_skill: pm-workflow:task-implementation
+fallback: true
+```
+
+---
+
+## Input Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `plan_id` | string | Yes | Plan identifier |
+| `task_number` | number | Yes | Task to execute (e.g., 1 for TASK-001) |
+
+---
 
 ## Two-Tier Skill Loading
 
@@ -22,11 +71,11 @@ Task execution uses a two-tier skill loading pattern:
 | **Tier 1** | Agent frontmatter | System skills (architecture, rules) | Agent automatically |
 | **Tier 2** | `task.skills` array | Domain-specific skills | Agent from task file |
 
-### Example Task with Skills
+### Example Task with Pre-Resolved Skills
 
 ```toon
-id: TASK-1
-title: "Create CacheConfig class"
+id: TASK-001
+title: Create CacheConfig class
 domain: java
 profile: implementation
 skills:
@@ -40,25 +89,187 @@ The `task-execute-agent` will:
 1. Load system skills from its frontmatter (Tier 1)
 2. Load `pm-dev-java:java-core` and `pm-dev-java:java-cdi` (Tier 2)
 
-## Input Contract
+### Skills Pre-Resolved in Task
 
-### Required Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `plan_id` | string | Plan identifier |
-| `task_number` | number | Task to execute |
-
-### Prompt Format
+The `task.skills` array was populated during task-plan phase. Execute phase loads skills directly from the task without needing to call resolution APIs.
 
 ```
-Execute task for plan.
-
-plan_id: {plan_id}
-task_number: {task_number}
+┌─────────────────────────────────────────────────────────────┐
+│ Task Skill Loading (No Resolution Needed)                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  TASK-001.toon                                              │
+│  ┌──────────────────────────────────────────────┐           │
+│  │ domain: java                                 │           │
+│  │ profile: implementation                      │           │
+│  │ skills:                                      │           │
+│  │   - pm-dev-java:java-core      ← Pre-resolved│           │
+│  │   - pm-dev-java:java-cdi       ← Pre-resolved│           │
+│  └──────────────────────────────────────────────┘           │
+│                         │                                   │
+│                         ▼                                   │
+│  Agent loads each skill directly                            │
+│  (No resolve-domain-skills call needed)                     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Output Contract
+---
+
+## Profile Mapping to Phase
+
+The task's `profile` field maps to phase for workflow resolution:
+
+| Task Profile | Resolve Phase | Description |
+|--------------|---------------|-------------|
+| `implementation` | `implementation` | Create/modify production code |
+| `testing` | `testing` | Create/modify test code |
+| `quality` | `quality` | Documentation, standards |
+
+```bash
+# Task with profile: implementation
+resolve-workflow-skill --domain java --phase implementation
+
+# Task with profile: testing
+resolve-workflow-skill --domain java --phase testing
+```
+
+---
+
+## System Fallback Behavior
+
+When domain doesn't define a workflow skill override:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Resolution with System Fallback                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  resolve-workflow-skill --domain generic --phase impl       │
+│                         │                                   │
+│                         ▼                                   │
+│  1. Check: generic.workflow_skills.implementation           │
+│     → Not found                                             │
+│                         │                                   │
+│                         ▼                                   │
+│  2. Fallback: system.workflow_skills.implementation         │
+│     → pm-workflow:task-implementation                       │
+│                         │                                   │
+│                         ▼                                   │
+│  Return: { workflow_skill: pm-workflow:task-implementation, │
+│            fallback: true }                                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Workflow Skill Responsibilities
+
+The workflow skill autonomously:
+
+1. **Reads task**: Via manage-tasks get
+2. **Loads domain skills**: From task.skills array (Tier 2)
+3. **Iterates through steps**: Processing each file
+4. **Tracks progress**: Via step-start/step-done
+5. **Tracks file changes**: For finalize phase verification
+6. **Returns structured output**: TOON status with summary
+
+```
+Execute Phase Workflow:
+┌──────────────────────────────────────────────────────────────────┐
+│ 1. Read task via manage-tasks get                                │
+│ 2. Extract task.domain, task.profile, task.skills                │
+│ 3. resolve-workflow-skill --domain X --phase {profile}           │
+│    → Gets domain-specific OR system fallback workflow skill      │
+│ 4. Load workflow skill                                           │
+│ 5. Load each skill from task.skills array (Tier 2)               │
+│ 6. Execute workflow skill's implementation process               │
+│ 7. Track progress via manage-tasks step-start/step-done          │
+│ 8. Track file changes via manage-references add-file             │
+│ 9. Return structured TOON output                                 │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Knowledge Level
+
+**Profile used**: From `task.profile` (implementation, testing, or quality)
+
+Execute phase uses **full implementation knowledge**:
+- All core patterns
+- Implementation patterns (Builder, Factory, etc.)
+- Annotations and their usage
+- Testing patterns and frameworks
+- Error handling and logging
+
+---
+
+## Script API Calls
+
+### Task Retrieval
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get \
+  --plan-id {plan_id} --number {task_number}
+```
+
+### Workflow Skill Resolution
+
+```bash
+# Uses task.domain and task.profile
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --domain java --phase implementation
+```
+
+### Skill Loading
+
+For each skill in `task.skills`:
+```
+Skill: pm-dev-java:java-core
+Skill: pm-dev-java:java-cdi
+```
+
+### Step Progress Tracking
+
+```bash
+# Start step
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-start \
+  --plan-id {plan_id} --task {task_number} --step {step_number}
+
+# Complete step
+python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-done \
+  --plan-id {plan_id} --task {task_number} --step {step_number}
+```
+
+### File Change Tracking
+
+**CRITICAL**: Execute phase MUST track file changes for finalize phase verification.
+
+The finalize phase uses `scope: changed_only` to verify only files modified during execute. This requires execute to track all file changes in `references.toon`:
+
+```bash
+# After modifying a file, execute MUST call:
+python3 .plan/execute-script.py pm-workflow:manage-references:manage-references add-file \
+    --plan-id {plan_id} --file {file_path}
+```
+
+**Consequences of missing tracking**:
+- If `references.toon` is empty with `scope=changed_only`, finalize WARNS and falls back to `all`
+- Full project scan is slower and may flag unrelated issues
+- File tracking enables targeted verification
+
+### Progress Logging
+
+```bash
+python3 .plan/execute-script.py plan-marshall:logging:manage-log \
+  work {plan_id} INFO "[STEP] Completed step {N}: {file_path}"
+```
+
+---
+
+## Return Structure
 
 ### Success Output
 
@@ -101,6 +312,8 @@ failure:
 next_action: requires_attention
 ```
 
+---
+
 ## Output Field Definitions
 
 | Field | Type | Description |
@@ -118,47 +331,7 @@ next_action: requires_attention
 | `failure.recoverable` | boolean | Whether retry might succeed |
 | `next_action` | string | `task_complete` or `requires_attention` |
 
-## Agent Workflow
-
-The `task-execute-agent` follows this workflow:
-
-### Step 0: Read Task
-
-```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks get \
-  --plan-id {plan_id} --task {task_number}
-```
-
-Extract:
-- `task.domain`
-- `task.profile`
-- `task.skills` (array)
-
-### Step 1: Load Workflow Skill
-
-```bash
-python3 .plan/execute-script.py pm-workflow:manage-config:manage-config get \
-  --plan-id {plan_id} --field workflow_skills
-```
-
-Then load: `config.workflow_skills.{task.domain}.{task.profile}`
-
-### Step 2: Load Domain Skills (Tier 2)
-
-For each skill in `task.skills`:
-```
-Skill: {skill_name}
-```
-
-### Step 3: Execute Implementation
-
-Invoke the workflow skill's implementation workflow with:
-- `plan_id`
-- `task_number`
-
-### Step 4: Return Structured Result
-
-Return TOON output per this contract.
+---
 
 ## Thin Agent Pattern
 
@@ -188,36 +361,14 @@ Skill: plan-marshall:general-development-rules
 ## Workflow
 
 1. Read task via manage-tasks
-2. Load workflow skill from config.workflow_skills.{domain}.{profile}
+2. Load workflow skill from resolve-workflow-skill
 3. Load each skill from task.skills array
 4. Execute skill's implement workflow
-5. Return structured TOON output
+5. Track file changes via manage-references
+6. Return structured TOON output
 ```
 
-## Step Progress Tracking
-
-Skills MUST track progress via manage-tasks:
-
-### Mark Step Started
-
-```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-start \
-  --plan-id {plan_id} --task {task_number} --step {step_number}
-```
-
-### Mark Step Done
-
-```bash
-python3 .plan/execute-script.py pm-workflow:manage-tasks:manage-tasks step-done \
-  --plan-id {plan_id} --task {task_number} --step {step_number}
-```
-
-### Log Progress
-
-```bash
-python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[STEP] Completed step {N}: {file_path}"
-```
+---
 
 ## Error Handling Requirements
 
@@ -228,8 +379,8 @@ If skills fail to load:
 ```toon
 status: error
 error_type: skill_loading_failure
-component: "task-execute-agent"
-message: "Failed to load skill: {skill_name}"
+component: task-execute-agent
+message: Failed to load skill: {skill_name}
 failure:
   recoverable: false
 next_action: requires_attention
@@ -253,6 +404,8 @@ If verification fails:
 3. Include which command failed
 4. Set `recoverable: true` (fix and retry)
 
+---
+
 ## Validation Rules
 
 | Rule | Description |
@@ -261,6 +414,9 @@ If verification fails:
 | Status required | Output must include status field |
 | Summary required | Output must include execution_summary |
 | Progress tracked | All step transitions logged |
+| Files tracked | All file modifications tracked in references.toon |
+
+---
 
 ## Integration
 
@@ -270,9 +426,14 @@ If verification fails:
 
 **Dependencies**:
 - `manage-tasks` → task retrieval and progress tracking
-- `manage-config` → workflow skill resolution
+- `manage-references` → file change tracking
 - `manage-log` → work log entries
 
-**Related**:
-- [Task Contract](task-contract.md) - Task structure with domain, profile, skills
-- [Config TOON Format](config-toon-format.md) - Workflow skill configuration
+---
+
+## Related Documents
+
+- [task-plan-skill-contract.md](task-plan-skill-contract.md) - Previous phase (plan)
+- [plan-finalize-skill-contract.md](plan-finalize-skill-contract.md) - Next phase (finalize)
+- [task-contract.md](task-contract.md) - Task structure with domain, profile, skills
+- [config-toon-format.md](config-toon-format.md) - Workflow skill configuration

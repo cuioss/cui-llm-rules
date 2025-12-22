@@ -1,24 +1,116 @@
 # Task Plan Skill Contract
 
-Standard contract for task plan skills that transform deliverables into optimized, committable tasks.
+Workflow skill for plan phase - transforms solution outline deliverables into optimized, committable tasks.
 
 ## Purpose
 
-Task plan skills analyze solution outline deliverables and create optimized tasks. Each task represents a committable unit of work with explicit domain, profile, and skills fields.
+Task plan skills analyze solution outline deliverables and create optimized tasks. Each task represents a committable unit of work with explicit domain, profile, and pre-resolved skills fields.
 
-**Flow**: Solution Outline (Deliverables) → Tasks
+**Flow**: Solution Outline (Deliverables) → Tasks with pre-resolved skills
+
+---
 
 ## Invocation
 
-**Invoked by**: `pm-workflow:task-plan-agent` (thin agent that loads this skill from config.toon)
+**Phase**: `plan`
 
-The agent reads `config.workflow_skills.{domain}.task_plan` to determine which skill to load.
+**Agent invocation**:
+```bash
+plan-phase-agent plan_id={plan_id} phase=plan
+```
+
+**Skill resolution**:
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill --phase plan
+```
+
+Result:
+```toon
+status: success
+domain: system
+phase: plan
+workflow_skill: pm-workflow:task-plan
+```
+
+---
 
 ## Input Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `plan_id` | string | Yes | Plan identifier |
+
+## Workflow Skill Responsibilities
+
+The workflow skill autonomously:
+
+1. **Loads planning knowledge**: Calls `resolve-domain-skills --profile planning` per domain
+2. **Loads deliverables**: From solution_outline.md
+3. **Builds dependency graph**: From deliverable `depends` fields
+4. **Analyzes for optimization**: Aggregation and split decisions
+5. **Resolves task skills**: `resolve-domain-skills --domain X --profile Y`
+6. **Creates tasks**: With explicit `domain`, `profile`, `skills`
+
+```
+Workflow Skill Execution:
+┌──────────────────────────────────────────────────────────────────┐
+│ 1. Get unique domains from deliverables                          │
+│ 2. For each domain: resolve-domain-skills --profile planning     │
+│    → Loads planning-level knowledge                              │
+│ 3. Load deliverables via manage-solution-outline                 │
+│ 4. Build dependency graph                                        │
+│ 5. Analyze for aggregation/split                                 │
+│ 6. For each task:                                                │
+│    a. resolve-domain-skills --domain X --profile Y               │
+│    b. Create task with domain, profile, skills                   │
+│ 7. Write tasks via manage-tasks add                              │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Domain Knowledge Loading
+
+**Profile used**: `planning`
+
+```bash
+# For each unique domain in deliverables
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-domain-skills --domain java --profile planning
+```
+
+**Knowledge includes**:
+- Task decomposition patterns
+- Domain-specific planning conventions
+- How to structure tasks for the domain
+- Verification patterns
+
+**Knowledge excludes**:
+- Full implementation details
+- Specific coding patterns
+- Test framework details
+
+---
+
+## Domain Source: From Deliverable
+
+The plan phase reads domain from each deliverable:
+
+```
+solution_outline.md                      TASK-001.toon
+┌──────────────────────────────────────┐ ┌──────────────────────────────────────┐
+│ ### 1. Create CacheConfig class      │ │ domain: java          ← Inherited   │
+│ **Metadata:**                        │ │ profile: implementation              │
+│ - domain: java        ← Reads domain │ │ skills:                              │
+│ - profile: implementation            │ │   - pm-dev-java:java-core            │
+│                                      │ │   - pm-dev-java:java-cdi             │
+└──────────────────────────────────────┘ └──────────────────────────────────────┘
+                     ↓ task-plan inherits domain/profile
+                     ↓ resolves skills for execution
+```
+
+---
 
 ## Key Responsibilities
 
@@ -29,7 +121,7 @@ Apply optimization to package deliverables efficiently while maintaining:
 3. **Execution efficiency**: Minimize agent spawns and skill loads
 4. **Dependency ordering**: Tasks execute in valid dependency order
 5. **Parallelization**: Independent tasks can run concurrently
-6. **Skill resolution**: Each task gets explicit skills array for execution
+6. **Skill pre-resolution**: Each task gets pre-resolved skills array for execution
 
 ## Optimization Workflow
 
@@ -118,7 +210,8 @@ steps:
   - {file_2}
   - {file_3}
 
-depends_on: TASK-1, TASK-2
+origin: plan
+depends_on: TASK-001, TASK-002
 
 verification:
   commands:
@@ -141,14 +234,14 @@ optimization_summary:
   splits: {count of split deliverables}
   parallelizable_groups: {count of independent task groups}
 
-tasks_created[M]{number,title,deliverables,depends_on}:
-1,Update misc agents to TOON,[1 2 4],none
-2,Update pm-dev-java agents to TOON,[3],"TASK-1"
-3,Update TOON documentation,[5],none
+tasks_created[M]{id,title,deliverables,depends_on}:
+TASK-001,Update misc agents to TOON,[1 2 4],none
+TASK-002,Update pm-dev-java agents to TOON,[3],TASK-001
+TASK-003,Update TOON documentation,[5],none
 
 execution_order:
-  parallel_group_1: [TASK-1, TASK-3]
-  parallel_group_2: [TASK-2]
+  parallel_group_1: [TASK-001, TASK-003]
+  parallel_group_2: [TASK-002]
 
 lessons_recorded: {count}
 message: {error message if status=error}
@@ -187,3 +280,13 @@ Returns defaults and optionals. Task-plan:
 - `plan-marshall:plan-marshall-config:plan-marshall-config` - Skill resolution
 
 **Prerequisites**: [Solution Outline Skill](solution-outline-skill-contract.md) completion and [User Review Protocol](user-review-protocol.md) approval
+
+---
+
+## Related Documents
+
+- [solution-outline-skill-contract.md](solution-outline-skill-contract.md) - Previous phase (outline)
+- [task-execution-skill-contract.md](task-execution-skill-contract.md) - Next phase (execute)
+- [task-contract.md](task-contract.md) - Task structure and optimization rules
+- [deliverable-contract.md](deliverable-contract.md) - Deliverable structure
+- [user-review-protocol.md](user-review-protocol.md) - Approval gate before plan phase

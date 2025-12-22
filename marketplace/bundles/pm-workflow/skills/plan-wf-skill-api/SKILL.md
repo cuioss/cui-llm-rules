@@ -6,79 +6,84 @@ allowed-tools: Read
 
 # Plan Workflow Skill API
 
-**Role**: API contract definition for workflow skills. This skill defines the interface contracts for solution outline, task planning, and task execution operations.
+**Role**: API contract definition for workflow skills. This skill defines the interface contracts for the 5-phase workflow execution model.
 
-**Key Principle**: Workflow skills are **domain-agnostic**. Domain knowledge comes from `marshal.json` (via `resolve-workflow-skill`) which specifies which workflow skills to load during execution.
+**Key Principle**: Workflow skills are **domain-agnostic**. Domain knowledge comes from `marshal.json` (via `resolve-domain-skills`) which specifies which skills to load during execution.
+
+## 5-Phase Execution Model
+
+```
+┌──────┐   ┌─────────┐   ┌──────┐   ┌─────────┐   ┌──────────┐
+│ init │──▶│ outline │──▶│ plan │──▶│ execute │──▶│ finalize │
+└──────┘   └─────────┘   └──────┘   └─────────┘   └──────────┘
+```
+
+| Phase | Agent | Purpose | Output |
+|-------|-------|---------|--------|
+| **init** | `plan-phase-agent phase=init` | Initialize plan | config.toon, status.toon, request.md |
+| **outline** | `plan-phase-agent phase=outline` | Create solution outline | solution_outline.md |
+| **plan** | `plan-phase-agent phase=plan` | Decompose into tasks | TASK-*.toon |
+| **execute** | `plan-phase-agent phase=execute` | Run implementation | Modified project files |
+| **finalize** | `plan-phase-agent phase=finalize` | Verify, commit, PR | Git commit, PR |
 
 ## Contract Standards
 
 | Contract | Purpose | Document |
 |----------|---------|----------|
-| **Config TOON Format** | config.toon structure with domains and settings | [standards/config-toon-format.md](standards/config-toon-format.md) |
+| **Architecture Overview** | 5-phase model, component responsibilities, domain flow | [standards/architecture-overview.md](standards/architecture-overview.md) |
+| **Plan-Init Skill** | Initialize plan and write config.toon | [standards/plan-init-skill-contract.md](standards/plan-init-skill-contract.md) |
 | **Solution Outline Skill** | Request → Solution Outline with deliverables | [standards/solution-outline-skill-contract.md](standards/solution-outline-skill-contract.md) |
-| **User Review Protocol** | Mandatory review before task creation | [standards/user-review-protocol.md](standards/user-review-protocol.md) |
 | **Task Plan Skill** | Solution Outline → Tasks with domain/profile | [standards/task-plan-skill-contract.md](standards/task-plan-skill-contract.md) |
+| **Task Execution Skill** | Task execution with two-tier skill loading | [standards/task-execution-skill-contract.md](standards/task-execution-skill-contract.md) |
+| **Plan-Finalize Skill** | Verification, findings triage, commit/PR | [standards/plan-finalize-skill-contract.md](standards/plan-finalize-skill-contract.md) |
 | **Deliverable Contract** | Deliverable structure in solution outline | [standards/deliverable-contract.md](standards/deliverable-contract.md) |
 | **Task Contract** | Task structure with domain, profile, skills | [standards/task-contract.md](standards/task-contract.md) |
-| **Task Execution Skill** | Task execution with two-tier skill loading | [standards/task-execution-skill-contract.md](standards/task-execution-skill-contract.md) |
+| **Extension API** | Domain-specific extensions for outline and triage | [standards/extension-api.md](standards/extension-api.md) |
+| **Config TOON Format** | config.toon structure with domains and settings | [standards/config-toon-format.md](standards/config-toon-format.md) |
+| **User Review Protocol** | Mandatory review before task creation | [standards/user-review-protocol.md](standards/user-review-protocol.md) |
 
 ## Routing Flow
 
 ```
-Request → [plan-init-agent] → [solution-outline-agent] → User Review → [task-plan-agent] → Tasks → [task-execute-agent]
-              ↓                        ↓                      ↓                ↓                      ↓
-         config.toon           solution_outline.md    [User Review]      task files          two-tier skills
-         (domains)               (deliverables)        Protocol           (domain,            1. system
-                                                                          profile,            2. task.skills
-                                                                          skills)
+Request → [init] → [outline] → User Review → [plan] → Tasks → [execute] → [finalize]
+              ↓          ↓            ↓            ↓            ↓            ↓
+         config.toon  solution     approval     TASK-*.toon   project    commit/PR
+         status.toon  outline.md    gate        files         files
 ```
 
-1. `plan-init-agent` creates plan, detects domains, writes config.toon (domains + settings)
-2. `solution-outline-agent` resolves workflow skill from `marshal.json` via `resolve-workflow-skill --domain {domain} --phase solution_outline`
-3. `/plan-manage` triggers [User Review Protocol](standards/user-review-protocol.md) (mandatory)
-4. After approval, `task-plan-agent` creates tasks with domain, profile, skills fields
-5. `task-execute-agent` resolves workflow skill from `marshal.json` based on `task.profile`, loads `task.skills` array
+1. `plan-phase-agent phase=init` creates plan, writes config.toon and status.toon
+2. `plan-phase-agent phase=outline` analyzes request, determines domains, creates deliverables
+3. User approves solution outline (mandatory gate)
+4. `plan-phase-agent phase=plan` creates tasks with domain, profile, skills fields
+5. `plan-phase-agent phase=execute` executes tasks with two-tier skill loading
+6. `plan-phase-agent phase=finalize` runs verification, triages findings, commits/creates PR
 
 ## Thin Agent Pattern
 
-| Agent | Purpose | Skill Loading |
-|-------|---------|---------------|
-| `pm-workflow:plan-init-agent` | Init plan, detect domains, write config.toon | System skills only |
-| `pm-workflow:solution-outline-agent` | Create deliverables | `resolve-workflow-skill --domain {domain} --phase solution_outline` |
-| `pm-workflow:task-plan-agent` | Create tasks from deliverables | `resolve-workflow-skill --domain {domain} --phase task_plan` |
-| `pm-workflow:task-execute-agent` | Execute single task | `resolve-workflow-skill --domain {domain} --phase {profile}` + `task.skills` |
+All phases use the same parameterized agent. The agent loads system defaults + phase-specific workflow skill.
 
-## Domain Configuration
+| Agent Call | Purpose | Skill Loading |
+|------------|---------|---------------|
+| `plan-phase-agent phase=init` | Initialize plan | `resolve-workflow-skill --phase init` |
+| `plan-phase-agent phase=outline` | Create deliverables | `resolve-workflow-skill --phase outline` + extensions |
+| `plan-phase-agent phase=plan` | Create tasks | `resolve-workflow-skill --phase plan` |
+| `plan-phase-agent phase=execute` | Execute task | `resolve-workflow-skill --phase execute` + `task.skills` |
+| `plan-phase-agent phase=finalize` | Verify and commit | `resolve-workflow-skill --phase finalize` + triage extensions |
 
-Domains and workflow skills are stored in `config.toon`:
+## Domain Flow
 
-```toon
-domains: [java]
+Domains flow through the phases:
 
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
+```
+marshal.json (all domains) → outline (decides relevant) → config.toon.domains → plan/execute/finalize
 ```
 
-For multi-domain plans (e.g., fullstack):
-```toon
-domains: [java, javascript]
-
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-  javascript:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-```
+| Phase | Domain Source | How Determined |
+|-------|---------------|----------------|
+| **outline** | All from marshal.json | Claude decides which are relevant |
+| **plan** | From deliverable | Reads `deliverable.domain` |
+| **execute** | From task | Reads `task.domain`, `task.profile` |
+| **finalize** | From config.toon | Reads `config.toon.domains` |
 
 ## Traceability Flow
 
@@ -133,23 +138,20 @@ The `--trace-plan-id` parameter is:
 ## Integration
 
 **Callers**:
-- `plan-init-agent` → writes domains and settings to config.toon
-- `/plan-manage action=refine` → spawns solution-outline-agent then task-plan-agent
-- `/plan-execute` → spawns task-execute-agent for each task
-- `plan-finalize` → reads config.toon directly
+- `/plan-marshall` → Unified command, delegates to plan-orchestrator
+- `plan-orchestrator` → Routes phases, spawns plan-phase-agent
 
 **Workflow Skill Resolution**:
-- Workflow skills resolved from `marshal.json` via `plan-marshall-config resolve-workflow-skill`
-- NOT stored in config.toon (only domains and plan settings)
+- System workflow skills resolved via `resolve-workflow-skill --phase {phase}`
+- Domain skills resolved via `resolve-domain-skills --domain {domain} --profile {profile}`
+- Extensions resolved via `resolve-workflow-skill-extension --domain {domain} --type {type}`
 
-**Thin Agents** (4 generic agents):
-- `pm-workflow:plan-init-agent` - Plan creation and domain detection
-- `pm-workflow:solution-outline-agent` - Loads workflow skill, creates deliverables
-- `pm-workflow:task-plan-agent` - Loads workflow skill, creates tasks
-- `pm-workflow:task-execute-agent` - Loads workflow skill and task.skills, executes
+**Agent** (single parameterized agent):
+- `pm-workflow:plan-phase-agent` - Context isolation, loads system defaults + workflow skill
 
 **Data Layer** (used by workflow skills):
-- `pm-workflow:manage-plan-documents:manage-plan-documents` (request) - Request document operations
-- `pm-workflow:manage-solution-outline:manage-solution-outline` (solution_outline.md) - Solution outline validation and queries
+- `pm-workflow:manage-plan-documents:manage-plan-documents` - Request document operations
+- `pm-workflow:manage-solution-outline:manage-solution-outline` - Solution outline validation and queries
 - `pm-workflow:manage-tasks:manage-tasks` - Task creation with deliverable references
 - `pm-workflow:manage-config:manage-config` - Config.toon field access
+- `pm-workflow:manage-lifecycle:manage-lifecycle` - Plan status and phase management
