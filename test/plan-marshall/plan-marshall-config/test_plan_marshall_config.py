@@ -139,14 +139,16 @@ def test_resolve_domain_skills():
 
 
 def test_get_workflow_skills():
-    """Test get-workflow-skills command."""
+    """Test get-workflow-skills command (5-phase model)."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'get-workflow-skills')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'solution_outline' in result.stdout
+        # Verify 5-phase model output
+        assert 'outline' in result.stdout
+        assert 'pm-workflow:solution-outline' in result.stdout
 
 
 def test_error_without_marshal_json():

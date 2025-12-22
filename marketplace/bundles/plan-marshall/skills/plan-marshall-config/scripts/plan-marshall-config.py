@@ -23,7 +23,13 @@ script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
 from config_core import EXIT_ERROR
-from cmd_skill_domains import cmd_skill_domains, cmd_resolve_domain_skills, cmd_get_workflow_skills, cmd_resolve_workflow_skill
+from cmd_skill_domains import (
+    cmd_skill_domains,
+    cmd_resolve_domain_skills,
+    cmd_get_workflow_skills,
+    cmd_resolve_workflow_skill,
+    cmd_resolve_workflow_skill_extension,
+)
 from cmd_modules import cmd_modules
 from cmd_build_systems import cmd_build_systems
 from cmd_system_plan import cmd_system, cmd_plan
@@ -56,8 +62,17 @@ def main():
 
     sd_set = sd_sub.add_parser('set', help='Set domain config')
     sd_set.add_argument('--domain', required=True, help='Domain name')
+    sd_set.add_argument('--profile', help='Profile name (core, architecture, planning, implementation, testing, quality)')
     sd_set.add_argument('--defaults', help='Comma-separated default skills')
     sd_set.add_argument('--optionals', help='Comma-separated optional skills')
+
+    sd_get_ext = sd_sub.add_parser('get-extensions', help='Get workflow skill extensions for domain')
+    sd_get_ext.add_argument('--domain', required=True, help='Domain name')
+
+    sd_set_ext = sd_sub.add_parser('set-extensions', help='Set workflow skill extension')
+    sd_set_ext.add_argument('--domain', required=True, help='Domain name')
+    sd_set_ext.add_argument('--type', required=True, choices=['outline', 'triage'], help='Extension type')
+    sd_set_ext.add_argument('--skill', required=True, help='Extension skill reference (bundle:skill)')
 
     sd_add = sd_sub.add_parser('add', help='Add new domain')
     sd_add.add_argument('--domain', required=True, help='Domain name')
@@ -69,6 +84,11 @@ def main():
     sd_val.add_argument('--skill', required=True, help='Skill to validate')
 
     sd_sub.add_parser('detect', help='Auto-detect domains from project files')
+
+    sd_sub.add_parser('get-available', help='Get available domains based on detected build systems')
+
+    sd_configure = sd_sub.add_parser('configure', help='Configure selected domains')
+    sd_configure.add_argument('--domains', required=True, help='Comma-separated domain names to enable')
 
     # --- modules ---
     p_mod = subparsers.add_parser('modules', help='Manage project modules')
@@ -189,9 +209,19 @@ def main():
 
     # --- resolve-workflow-skill ---
     p_rws = subparsers.add_parser('resolve-workflow-skill',
-                                   help='Resolve workflow skill for domain and phase')
-    p_rws.add_argument('--domain', required=True, help='Domain name (java, javascript, plan-marshall-plugin-dev, generic)')
-    p_rws.add_argument('--phase', required=True, help='Phase name (solution_outline, task_plan, implementation, testing)')
+                                   help='Resolve system workflow skill for a phase')
+    p_rws.add_argument('--phase', required=True,
+                       choices=['init', 'outline', 'plan', 'execute', 'finalize'],
+                       help='Phase name (init, outline, plan, execute, finalize)')
+
+    # --- resolve-workflow-skill-extension ---
+    p_rwse = subparsers.add_parser('resolve-workflow-skill-extension',
+                                    help='Resolve workflow skill extension for domain and type')
+    p_rwse.add_argument('--domain', required=True,
+                        help='Domain name (java, javascript, etc.)')
+    p_rwse.add_argument('--type', required=True,
+                        choices=['outline', 'triage'],
+                        help='Extension type (outline, triage)')
 
     args = parser.parse_args()
 
@@ -238,6 +268,8 @@ def main():
         return cmd_get_workflow_skills(args)
     elif args.noun == 'resolve-workflow-skill':
         return cmd_resolve_workflow_skill(args)
+    elif args.noun == 'resolve-workflow-skill-extension':
+        return cmd_resolve_workflow_skill_extension(args)
     else:
         parser.print_help()
         return EXIT_ERROR

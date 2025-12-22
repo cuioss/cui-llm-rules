@@ -119,23 +119,41 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
 
 
 def create_nested_marshal_json(fixture_dir: Path) -> Path:
-    """Create marshal.json with nested skill_domains structure."""
+    """Create marshal.json with nested skill_domains structure.
+
+    Uses 5-phase model: init, outline, plan, execute, finalize.
+    System domain contains workflow_skills.
+    Domain-specific domains contain workflow_skill_extensions and profiles.
+    """
     config = {
         "skill_domains": {
             "system": {
                 "defaults": ["plan-marshall:general-development-rules"],
-                "optionals": ["plan-marshall:diagnostic-patterns"]
+                "optionals": ["plan-marshall:diagnostic-patterns"],
+                "workflow_skills": {
+                    "init": "pm-workflow:plan-init",
+                    "outline": "pm-workflow:solution-outline",
+                    "plan": "pm-workflow:task-plan",
+                    "execute": "pm-workflow:task-execute",
+                    "finalize": "pm-workflow:plan-finalize"
+                }
             },
             "java": {
-                "workflow_skills": {
-                    "solution_outline": "pm-workflow:solution-outline",
-                    "task_plan": "pm-workflow:task-plan",
-                    "implementation": "pm-workflow:task-implementation",
-                    "testing": "pm-workflow:task-testing"
+                "workflow_skill_extensions": {
+                    "outline": "pm-dev-java:java-outline-ext",
+                    "triage": "pm-dev-java:java-triage"
                 },
                 "core": {
                     "defaults": ["pm-dev-java:java-core"],
                     "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
+                },
+                "architecture": {
+                    "defaults": ["pm-dev-java:java-packages"],
+                    "optionals": []
+                },
+                "planning": {
+                    "defaults": [],
+                    "optionals": []
                 },
                 "implementation": {
                     "defaults": [],
@@ -144,18 +162,27 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                 "testing": {
                     "defaults": ["pm-dev-java:junit-core"],
                     "optionals": ["pm-dev-java:junit-integration"]
+                },
+                "quality": {
+                    "defaults": ["pm-dev-java:javadoc"],
+                    "optionals": []
                 }
             },
             "javascript": {
-                "workflow_skills": {
-                    "solution_outline": "pm-workflow:solution-outline",
-                    "task_plan": "pm-workflow:task-plan",
-                    "implementation": "pm-workflow:task-implementation",
-                    "testing": "pm-workflow:task-testing"
+                "workflow_skill_extensions": {
+                    "outline": "pm-dev-frontend:js-outline-ext"
                 },
                 "core": {
                     "defaults": ["pm-dev-frontend:cui-javascript"],
                     "optionals": ["pm-dev-frontend:cui-jsdoc"]
+                },
+                "architecture": {
+                    "defaults": [],
+                    "optionals": []
+                },
+                "planning": {
+                    "defaults": [],
+                    "optionals": []
                 },
                 "implementation": {
                     "defaults": [],
@@ -164,34 +191,38 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                 "testing": {
                     "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
                     "optionals": ["pm-dev-frontend:cui-cypress"]
+                },
+                "quality": {
+                    "defaults": [],
+                    "optionals": []
                 }
             },
             "plan-marshall-plugin-dev": {
-                "workflow_skills": {
-                    "solution_outline": "pm-plugin-development:plugin-solution-outline",
-                    "task_plan": "pm-plugin-development:plugin-task-plan",
-                    "implementation": "pm-plugin-development:plugin-plan-implement"
+                "workflow_skill_extensions": {
+                    "outline": "pm-plugin-development:plugin-outline-ext",
+                    "triage": "pm-plugin-development:plugin-triage"
                 },
                 "core": {
                     "defaults": ["pm-plugin-development:plugin-architecture"],
                     "optionals": []
                 },
-                "implementation": {
+                "architecture": {
                     "defaults": [],
                     "optionals": []
-                }
-            },
-            "generic": {
-                "workflow_skills": {
-                    "solution_outline": "pm-workflow:solution-outline",
-                    "task_plan": "pm-workflow:task-plan",
-                    "implementation": "pm-workflow:task-implementation"
                 },
-                "core": {
+                "planning": {
                     "defaults": [],
                     "optionals": []
                 },
                 "implementation": {
+                    "defaults": [],
+                    "optionals": []
+                },
+                "testing": {
+                    "defaults": [],
+                    "optionals": []
+                },
+                "quality": {
                     "defaults": [],
                     "optionals": []
                 }

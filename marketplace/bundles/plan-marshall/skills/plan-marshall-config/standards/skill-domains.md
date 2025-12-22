@@ -209,40 +209,61 @@ optionals:
 | `implementation` | `{domain}.core.defaults` + `{domain}.implementation.defaults` | `{domain}.core.optionals` + `{domain}.implementation.optionals` |
 | `testing` | `{domain}.core.defaults` + `{domain}.testing.defaults` | `{domain}.core.optionals` + `{domain}.testing.optionals` |
 
-## Workflow Skills Access
+## Workflow Skills Access (5-Phase Model)
 
 ### resolve-workflow-skill Command
 
-Resolves the workflow skill for a specific domain and phase combination. This is the primary method for workflow skill resolution.
+Resolves the system workflow skill for a phase. Always returns from the `system` domain.
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-workflow-skill --domain java --phase implementation
+  resolve-workflow-skill --phase outline
 ```
 
 **Parameters**:
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `--domain` | string | Yes | Domain name (java, javascript, plan-marshall-plugin-dev, generic) |
-| `--phase` | string | Yes | Phase name (solution_outline, task_plan, implementation, testing) |
+| `--phase` | string | Yes | Phase name (init, outline, plan, execute, finalize) |
+
+**Output**:
+```toon
+status: success
+phase: outline
+workflow_skill: pm-workflow:solution-outline
+```
+
+**Error Cases**:
+- System domain missing → `error: System domain not configured. Run /marshall-steward to initialize.`
+- Unknown phase → `error: Unknown phase: {phase}. Available: init, outline, plan, execute, finalize`
+
+### resolve-workflow-skill-extension Command
+
+Resolves domain-specific workflow skill extension. Returns null (not error) if extension doesn't exist.
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-workflow-skill-extension --domain java --type outline
+```
+
+**Parameters**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `--domain` | string | Yes | Domain name (java, javascript, etc.) |
+| `--type` | string | Yes | Extension type (outline, triage) |
 
 **Output**:
 ```toon
 status: success
 domain: java
-phase: implementation
-workflow_skill: pm-workflow:task-implementation
+type: outline
+extension: pm-dev-java:java-outline-ext
 ```
-
-**Error Cases**:
-- Unknown domain → `error: Unknown domain: {domain}. Available: java, javascript, plan-marshall-plugin-dev, generic`
-- No workflow_skills configured → `error: Domain '{domain}' has no workflow_skills configured`
-- Unknown phase → `error: Unknown phase: {phase} for domain: {domain}. Available: {phases}`
 
 ### get-workflow-skills Command
 
-Returns domain-agnostic workflow skills (backward compatible).
+Returns all workflow skills from the system domain (5-phase model).
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
@@ -252,10 +273,11 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 **Output**:
 ```toon
 status: success
-solution_outline: pm-workflow:solution-outline
-task_plan: pm-workflow:task-plan
-implementation: pm-workflow:task-implementation
-testing: pm-workflow:task-testing
+init: pm-workflow:plan-init
+outline: pm-workflow:solution-outline
+plan: pm-workflow:task-plan
+execute: pm-workflow:task-execute
+finalize: pm-workflow:plan-finalize
 ```
 
 ## Usage Patterns

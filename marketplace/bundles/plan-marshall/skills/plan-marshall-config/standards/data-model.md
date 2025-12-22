@@ -13,35 +13,73 @@ JSON structure and field definitions for project configuration.
   "skill_domains": {
     "system": {
       "defaults": ["plan-marshall:general-development-rules"],
-      "optionals": ["plan-marshall:diagnostic-patterns"]
+      "optionals": ["plan-marshall:diagnostic-patterns"],
+      "workflow_skills": {
+        "init": "pm-workflow:plan-init",
+        "outline": "pm-workflow:solution-outline",
+        "plan": "pm-workflow:task-plan",
+        "execute": "pm-workflow:task-execute",
+        "finalize": "pm-workflow:plan-finalize"
+      }
     },
-    "plugin-development": {
-      "defaults": ["pm-plugin-development:plugin-architecture", "pm-plugin-development:plugin-script-architecture"],
-      "optionals": ["plan-marshall:toon-usage", "plan-marshall:script-executor"]
+    "java": {
+      "workflow_skill_extensions": {
+        "outline": "pm-dev-java:java-outline-ext",
+        "triage": "pm-dev-java:java-triage"
+      },
+      "core": {
+        "defaults": ["pm-dev-java:java-core"],
+        "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
+      },
+      "architecture": {
+        "defaults": ["pm-dev-java:java-packages"],
+        "optionals": []
+      },
+      "planning": {
+        "defaults": [],
+        "optionals": []
+      },
+      "implementation": {
+        "defaults": [],
+        "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
+      },
+      "testing": {
+        "defaults": ["pm-dev-java:junit-core"],
+        "optionals": ["pm-dev-java:junit-integration"]
+      },
+      "quality": {
+        "defaults": ["pm-dev-java:javadoc"],
+        "optionals": []
+      }
     },
-    "java-core": {
-      "defaults": ["pm-dev-java:java-core"],
-      "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
-    },
-    "java-implementation": {
-      "defaults": [],
-      "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
-    },
-    "java-testing": {
-      "defaults": ["pm-dev-java:junit-core"],
-      "optionals": ["pm-dev-java:junit-integration"]
-    },
-    "javascript-core": {
-      "defaults": ["pm-dev-frontend:cui-javascript"],
-      "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
-    },
-    "javascript-implementation": {
-      "defaults": [],
-      "optionals": ["pm-dev-frontend:cui-javascript-maintenance", "pm-dev-frontend:cui-javascript-linting"]
-    },
-    "javascript-testing": {
-      "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
-      "optionals": ["pm-dev-frontend:cui-cypress"]
+    "javascript": {
+      "workflow_skill_extensions": {
+        "outline": "pm-dev-frontend:js-outline-ext"
+      },
+      "core": {
+        "defaults": ["pm-dev-frontend:cui-javascript"],
+        "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
+      },
+      "architecture": {
+        "defaults": [],
+        "optionals": []
+      },
+      "planning": {
+        "defaults": [],
+        "optionals": []
+      },
+      "implementation": {
+        "defaults": [],
+        "optionals": ["pm-dev-frontend:cui-javascript-maintenance", "pm-dev-frontend:cui-javascript-linting"]
+      },
+      "testing": {
+        "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
+        "optionals": ["pm-dev-frontend:cui-cypress"]
+      },
+      "quality": {
+        "defaults": [],
+        "optionals": []
+      }
     }
   },
   "modules": {
@@ -131,16 +169,51 @@ JSON structure and field definitions for project configuration.
 
 ## Section: skill_domains
 
-Implementation skill configuration per domain.
+Skill configuration per domain using the 5-phase model.
 
-### Structure
+### System Domain Structure
+
+The `system` domain contains workflow skills and base skills applied globally.
 
 ```json
 {
   "skill_domains": {
-    "{domain-name}": {
+    "system": {
       "defaults": ["bundle:skill", ...],
-      "optionals": ["bundle:skill", ...]
+      "optionals": ["bundle:skill", ...],
+      "workflow_skills": {
+        "init": "pm-workflow:plan-init",
+        "outline": "pm-workflow:solution-outline",
+        "plan": "pm-workflow:task-plan",
+        "execute": "pm-workflow:task-execute",
+        "finalize": "pm-workflow:plan-finalize"
+      }
+    }
+  }
+}
+```
+
+### Technical Domain Structure (Profile-Based)
+
+Technical domains (java, javascript, etc.) use profile-based organization:
+
+```json
+{
+  "skill_domains": {
+    "{domain}": {
+      "workflow_skill_extensions": {
+        "outline": "bundle:extension-skill",
+        "triage": "bundle:triage-skill"
+      },
+      "core": {
+        "defaults": ["bundle:skill", ...],
+        "optionals": ["bundle:skill", ...]
+      },
+      "architecture": { "defaults": [], "optionals": [] },
+      "planning": { "defaults": [], "optionals": [] },
+      "implementation": { "defaults": [], "optionals": [] },
+      "testing": { "defaults": [], "optionals": [] },
+      "quality": { "defaults": [], "optionals": [] }
     }
   }
 }
@@ -150,30 +223,31 @@ Implementation skill configuration per domain.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `defaults` | array | Skills always loaded for this domain |
+| `workflow_skills` | object | System domain only - maps phases to workflow skills |
+| `workflow_skill_extensions` | object | Domain-specific extensions (outline, triage) |
+| `defaults` | array | Skills always loaded |
 | `optionals` | array | Skills available for selection |
 
-### Domain Categories
+### Profiles
 
-#### System Domains
+Profiles determine which skills to load based on task context:
 
-| Domain | Purpose |
-|--------|---------|
-| `system` | Applied to all agents and skills |
-| `plugin-development` | Creating, updating, and verifying agents, commands, skills |
+| Profile | Phase | Description |
+|---------|-------|-------------|
+| `architecture` | outline | High-level design and structure |
+| `planning` | plan | Task decomposition |
+| `implementation` | execute | Production code development |
+| `testing` | execute | Test code development |
+| `quality` | finalize | Documentation and verification |
 
-#### Technical Domains
+### Extension Types
 
-Each technical domain follows the pattern: `{language}-core`, `{language}-implementation`, `{language}-testing`.
+Extensions provide domain-specific behavior without replacing workflow skills:
 
-| Domain | Purpose |
-|--------|---------|
-| `java-core` | Common Java standards (applies to implementation and testing) |
-| `java-implementation` | Production Java code |
-| `java-testing` | Java test code |
-| `javascript-core` | Common JavaScript standards (applies to implementation and testing) |
-| `javascript-implementation` | Production JavaScript code |
-| `javascript-testing` | JavaScript test code |
+| Type | Phase | Description |
+|------|-------|-------------|
+| `outline` | outline | Domain patterns and deliverable identification |
+| `triage` | finalize | Finding decision logic (fix/suppress/accept) |
 
 ## Section: modules
 

@@ -89,15 +89,49 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 Skill domains configure which implementation skills are loaded for different code types.
 
-### Detect Domains
+Uses shared configuration flow (same as wizard Step 4d).
 
-Auto-detect skill domains from project files (pom.xml → java, package.json → javascript):
+### Reconfigure Skill Domains
+
+**Step 1: Get available domains**
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains detect
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  skill-domains get-available
 ```
 
-This populates the nested `skill_domains` structure with workflow_skills, core, implementation, and testing blocks.
+**Step 2: User selection**
+
+Present AskUserQuestion with detected domains pre-selected:
+
+```yaml
+AskUserQuestion:
+  question: "Select skill domains to enable for this project:"
+  header: "Skill Domains"
+  multiSelect: true
+  options:
+    # Build dynamically from get-available output
+    # Pre-select domains already configured in marshal.json
+    - label: "Java Development [DETECTED]"
+      description: "Java code patterns, CDI, JUnit (from Maven)"
+    - label: "JavaScript Development [DETECTED]"
+      description: "Modern JS, ESLint, Jest (from npm)"
+    - label: "Requirements Engineering"
+      description: "User stories and acceptance criteria"
+    - label: "Documentation"
+      description: "Technical documentation standards"
+```
+
+**Step 3: Configure selected domains**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  skill-domains configure --domains "java,javascript"
+```
+
+This configures:
+- `system` domain (always) with workflow_skills for 5 phases
+- Each selected domain with full 5-profile structure
 
 ### List Domains
 
@@ -122,11 +156,15 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ### Update Domain Skills
 
+Update skills for a specific profile:
+
 ```bash
-# Add JavaDoc to Java defaults
+# Update implementation profile skills
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains set \
   --domain java \
-  --defaults "pm-dev-java:java-core,pm-dev-java:javadoc"
+  --profile implementation \
+  --defaults "pm-dev-java:java-core" \
+  --optionals "pm-dev-java:java-cdi,pm-dev-java:java-maintenance"
 ```
 
 ---

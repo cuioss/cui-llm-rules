@@ -218,10 +218,14 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 | `get` | `--domain` | Get full domain config (returns nested structure for technical domains) |
 | `get-defaults` | `--domain` | Get default skills (returns `core.defaults` for nested domains) |
 | `get-optionals` | `--domain` | Get optional skills (returns `core.optionals` for nested domains) |
-| `set` | `--domain [--defaults] [--optionals]` | Set domain config |
+| `set` | `--domain [--profile] [--defaults] [--optionals]` | Set domain config (use `--profile` for nested domains) |
 | `add` | `--domain --defaults [--optionals]` | Add new domain |
-| `validate` | `--domain --skill` | Check if skill valid (searches all profiles for nested domains) |
-| `detect` | (none) | Auto-detect domains from project files (pom.xml → java, package.json → javascript) |
+| `validate` | `--domain --skill` | Check if skill valid (searches all 5 profiles for nested domains) |
+| `detect` | (none) | Auto-detect domains from project files |
+| `get-extensions` | `--domain` | Get workflow skill extensions for domain |
+| `set-extensions` | `--domain --type --skill` | Set workflow skill extension (types: outline, triage) |
+| `get-available` | (none) | Get available domains based on detected build systems |
+| `configure` | `--domains` | Configure selected domains with templates |
 
 ### resolve-domain-skills
 
@@ -229,13 +233,29 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 |------------|---------|
 | `--domain --profile` | Resolve skills for domain and profile (aggregates `{domain}.core` + `{domain}.{profile}`) |
 
-Profiles are convention-based (derived from domain config keys). Standard profiles: `implementation`, `testing`. Custom profiles can be added.
+Standard profiles: `architecture`, `planning`, `implementation`, `testing`, `quality`.
+
+### resolve-workflow-skill
+
+| Parameters | Purpose |
+|------------|---------|
+| `--phase` | Resolve system workflow skill for phase (init, outline, plan, execute, finalize) |
+
+Always returns from the `system` domain's `workflow_skills`.
+
+### resolve-workflow-skill-extension
+
+| Parameters | Purpose |
+|------------|---------|
+| `--domain --type` | Resolve domain-specific workflow extension (types: outline, triage) |
+
+Returns null (not error) if extension doesn't exist for the domain.
 
 ### get-workflow-skills
 
 | Parameters | Purpose |
 |------------|---------|
-| (none) | Get domain-agnostic workflow skills (solution_outline, task_plan, implementation, testing) |
+| (none) | Get all workflow skills from system domain (5-phase model: init, outline, plan, execute, finalize) |
 
 ### Noun: modules
 
@@ -315,18 +335,31 @@ The defaults template contains only `system` domain. Technical domains (java, ja
   "skill_domains": {
     "system": {
       "defaults": ["plan-marshall:general-development-rules"],
-      "optionals": ["plan-marshall:diagnostic-patterns"]
+      "optionals": ["plan-marshall:diagnostic-patterns"],
+      "workflow_skills": {
+        "init": "pm-workflow:plan-init",
+        "outline": "pm-workflow:solution-outline",
+        "plan": "pm-workflow:task-plan",
+        "execute": "pm-workflow:task-execute",
+        "finalize": "pm-workflow:plan-finalize"
+      }
     },
     "java": {
-      "workflow_skills": {
-        "solution_outline": "pm-workflow:solution-outline",
-        "task_plan": "pm-workflow:task-plan",
-        "implementation": "pm-workflow:task-implementation",
-        "testing": "pm-workflow:task-testing"
+      "workflow_skill_extensions": {
+        "outline": "pm-dev-java:java-outline-ext",
+        "triage": "pm-dev-java:java-triage"
       },
       "core": {
         "defaults": ["pm-dev-java:java-core"],
-        "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
+        "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
+      },
+      "architecture": {
+        "defaults": ["pm-dev-java:java-packages"],
+        "optionals": []
+      },
+      "planning": {
+        "defaults": [],
+        "optionals": []
       },
       "implementation": {
         "defaults": [],
@@ -335,6 +368,10 @@ The defaults template contains only `system` domain. Technical domains (java, ja
       "testing": {
         "defaults": ["pm-dev-java:junit-core"],
         "optionals": ["pm-dev-java:junit-integration"]
+      },
+      "quality": {
+        "defaults": ["pm-dev-java:javadoc"],
+        "optionals": []
       }
     }
   },
@@ -391,20 +428,38 @@ The defaults template contains only `system` domain. Technical domains (java, ja
 
 ## Standard Domains
 
-### System Domains (Flat Structure)
+### System Domain
 
-| Domain | Purpose | Default Skills |
-|--------|---------|----------------|
-| `system` | Applied to all agents/skills | `plan-marshall:general-development-rules` |
+The `system` domain contains workflow skills (5-phase model) and base skills applied to all tasks.
 
-### Technical Domains (Nested Structure)
+| Field | Purpose |
+|-------|---------|
+| `defaults` | Base skills loaded for all tasks (`plan-marshall:general-development-rules`) |
+| `optionals` | Optional base skills available for selection |
+| `workflow_skills` | Maps 5 phases to workflow skill references |
 
-Technical domains use nested structure with `workflow_skills`, `core`, `implementation`, and `testing` profiles.
+**Workflow Phases**: `init`, `outline`, `plan`, `execute`, `finalize`
 
-| Domain | Purpose | Core Defaults | Core Optionals |
-|--------|---------|---------------|----------------|
-| `java` | Java development | `pm-dev-java:java-core` | `pm-dev-java:java-null-safety`, `pm-dev-java:java-lombok`, `pm-dev-java:javadoc` |
-| `javascript` | JavaScript/Frontend | `pm-dev-frontend:cui-javascript` | `pm-dev-frontend:cui-jsdoc`, `pm-dev-frontend:cui-javascript-project` |
+### Technical Domains (5-Profile Structure)
+
+Technical domains use nested structure with `workflow_skill_extensions` and 5 profiles.
+
+| Profile | Phase | Purpose |
+|---------|-------|---------|
+| `core` | all | Skills loaded for all profiles |
+| `architecture` | outline | High-level design, codebase analysis |
+| `planning` | plan | Task decomposition, dependencies |
+| `implementation` | execute | Production code tasks |
+| `testing` | execute | Test code tasks |
+| `quality` | finalize | Documentation, verification |
+
+**Available Domains**:
+
+| Domain | Core Defaults | Extensions |
+|--------|---------------|------------|
+| `java` | `pm-dev-java:java-core` | outline, triage |
+| `javascript` | `pm-dev-frontend:cui-javascript` | outline |
+| `plan-marshall-plugin-dev` | `pm-plugin-development:plugin-architecture` | outline, triage |
 
 Use `resolve-domain-skills --domain {domain} --profile {profile}` to get aggregated skills.
 

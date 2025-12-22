@@ -359,19 +359,75 @@ Use `lookup --build-system maven` or `lookup --build-system npm` to get specific
 
 ---
 
-### Step 4d: Skill Domain Detection
+### Step 4d: Skill Domain Configuration
 
-Detect skill domains based on project files (pom.xml → java, package.json → javascript):
+Configure skill domains based on detected build systems. User selects which domains to enable.
+
+**Step 4d-1: Get available domains**
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains detect
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  skill-domains get-available
 ```
 
-This populates `skill_domains` in marshal.json with the nested structure:
-- `{domain}.workflow_skills` - workflow phase skills
-- `{domain}.core` - foundation skills (defaults + optionals)
-- `{domain}.implementation` - implementation profile skills
-- `{domain}.testing` - testing profile skills
+**Output (TOON)**:
+```toon
+status: success
+detected_domains[2]:
+- key: java
+  name: Java Development
+  build_system: maven
+- key: javascript
+  name: Javascript Development
+  build_system: npm
+optional_domains[2]:
+- key: requirements
+  name: Requirements Engineering
+- key: documentation
+  name: Documentation
+```
+
+**Step 4d-2: User selection**
+
+```yaml
+AskUserQuestion:
+  question: "Select skill domains to enable for this project:"
+  header: "Skill Domains"
+  multiSelect: true
+  options:
+    # Build dynamically from get-available output
+    # Pre-select detected domains (those with build_system)
+    - label: "Java Development [DETECTED]"
+      description: "Java code patterns, CDI, JUnit (from Maven)"
+    - label: "JavaScript Development [DETECTED]"
+      description: "Modern JS, ESLint, Jest (from npm)"
+    - label: "Requirements Engineering"
+      description: "User stories and acceptance criteria"
+    - label: "Documentation"
+      description: "Technical documentation standards"
+```
+
+**Step 4d-3: Configure selected domains**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  skill-domains configure --domains "java,javascript"
+```
+
+**Output (TOON)**:
+```toon
+status: success
+system_domain: configured
+domains_configured: 2
+domains: java,javascript
+```
+
+This populates `skill_domains` in marshal.json with:
+- `system` domain (always) with workflow_skills for 5 phases
+- Each selected domain with nested structure:
+  - `workflow_skill_extensions` (outline, triage)
+  - `core` (defaults + optionals)
+  - 5 profile blocks (architecture, planning, implementation, testing, quality)
 
 ---
 

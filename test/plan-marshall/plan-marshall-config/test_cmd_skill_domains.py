@@ -161,8 +161,6 @@ def test_skill_domains_get_nested_structure():
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get', '--domain', 'java')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        # Should include workflow_skills
-        assert 'workflow_skills' in result.stdout
         # Should include core block
         assert 'core' in result.stdout
         # Should include implementation block
@@ -229,19 +227,19 @@ def test_skill_domains_validate_nested_profile_skill():
         assert 'in_defaults' in result.stdout.lower()
 
 
-def test_skill_domains_get_system_flat_structure():
-    """Test skill-domains get returns flat structure for system domain."""
+def test_skill_domains_get_system_has_workflow_skills():
+    """Test skill-domains get returns system domain with workflow_skills."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get', '--domain', 'system')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        # System domain uses flat structure
+        # System domain has defaults
         assert 'defaults' in result.stdout
         assert 'plan-marshall:general-development-rules' in result.stdout
-        # Should NOT have core/implementation/testing blocks
-        assert 'workflow_skills' not in result.stdout
+        # System domain now HAS workflow_skills (5-phase model)
+        assert 'workflow_skills' in result.stdout
 
 
 # =============================================================================
@@ -396,151 +394,410 @@ def test_resolve_domain_skills_unknown_profile():
         assert 'profile' in result.stdout.lower()
 
 
+def test_resolve_domain_skills_java_architecture():
+    """Test resolve-domain-skills for java + architecture profile (outline phase)."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'resolve-domain-skills',
+            '--domain', 'java',
+            '--profile', 'architecture'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Should include core defaults (java-core)
+        assert 'pm-dev-java:java-core' in result.stdout
+        # Should include architecture defaults (java-packages)
+        assert 'pm-dev-java:java-packages' in result.stdout
+
+
+def test_resolve_domain_skills_java_planning():
+    """Test resolve-domain-skills for java + planning profile (plan phase)."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'resolve-domain-skills',
+            '--domain', 'java',
+            '--profile', 'planning'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Should include core defaults (java-core)
+        assert 'pm-dev-java:java-core' in result.stdout
+        # planning profile exists but may be empty - that's OK
+
+
+def test_resolve_domain_skills_java_quality():
+    """Test resolve-domain-skills for java + quality profile (finalize phase)."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'resolve-domain-skills',
+            '--domain', 'java',
+            '--profile', 'quality'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Should include core defaults (java-core)
+        assert 'pm-dev-java:java-core' in result.stdout
+        # Should include quality defaults (javadoc)
+        assert 'pm-dev-java:javadoc' in result.stdout
+
+
 # =============================================================================
-# get-workflow-skills Tests
+# get-workflow-skills Tests (5-Phase Model)
 # =============================================================================
 
 def test_get_workflow_skills():
-    """Test get-workflow-skills returns workflow skill references."""
+    """Test get-workflow-skills returns all 5-phase workflow skill references."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'get-workflow-skills')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'solution_outline' in result.stdout
-        assert 'task_plan' in result.stdout
-        assert 'implementation' in result.stdout
-        assert 'testing' in result.stdout
+        # Verify all 5 phases are returned
+        assert 'init' in result.stdout
+        assert 'outline' in result.stdout
+        assert 'plan' in result.stdout
+        assert 'execute' in result.stdout
+        assert 'finalize' in result.stdout
+        # Verify skill references
+        assert 'pm-workflow:plan-init' in result.stdout
         assert 'pm-workflow:solution-outline' in result.stdout
         assert 'pm-workflow:task-plan' in result.stdout
 
 
 def test_get_workflow_skills_output_format():
-    """Test get-workflow-skills returns all 4 workflow skill references."""
+    """Test get-workflow-skills returns all 5 workflow skill references."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'get-workflow-skills')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        # Verify all 4 workflow skills are returned
-        assert 'pm-workflow:task-implementation' in result.stdout
-        assert 'pm-workflow:task-testing' in result.stdout
+        # Verify all 5 workflow skills are returned
+        assert 'pm-workflow:task-execute' in result.stdout
+        assert 'pm-workflow:plan-finalize' in result.stdout
 
 
 # =============================================================================
-# resolve-workflow-skill Tests
+# resolve-workflow-skill Tests (5-Phase Model - Always uses system domain)
 # =============================================================================
 
-def test_resolve_workflow_skill_java_implementation():
-    """Test resolve-workflow-skill for java + implementation phase."""
+def test_resolve_workflow_skill_init():
+    """Test resolve-workflow-skill for init phase returns system workflow skill."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'java', '--phase', 'implementation')
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill', '--phase', 'init')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-workflow:task-implementation' in result.stdout
-        assert 'domain' in result.stdout
+        assert 'pm-workflow:plan-init' in result.stdout
         assert 'phase' in result.stdout
         assert 'workflow_skill' in result.stdout
 
 
-def test_resolve_workflow_skill_java_solution_outline():
-    """Test resolve-workflow-skill for java + solution_outline phase."""
+def test_resolve_workflow_skill_outline():
+    """Test resolve-workflow-skill for outline phase returns system workflow skill."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'java', '--phase', 'solution_outline')
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill', '--phase', 'outline')
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'pm-workflow:solution-outline' in result.stdout
 
 
-def test_resolve_workflow_skill_java_testing():
-    """Test resolve-workflow-skill for java + testing phase."""
+def test_resolve_workflow_skill_plan():
+    """Test resolve-workflow-skill for plan phase returns system workflow skill."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'java', '--phase', 'testing')
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill', '--phase', 'plan')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-workflow:task-testing' in result.stdout
+        assert 'pm-workflow:task-plan' in result.stdout
 
 
-def test_resolve_workflow_skill_plugin_solution_outline():
-    """Test resolve-workflow-skill for plan-marshall-plugin-dev + solution_outline phase."""
+def test_resolve_workflow_skill_execute():
+    """Test resolve-workflow-skill for execute phase returns system workflow skill."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'plan-marshall-plugin-dev', '--phase', 'solution_outline')
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill', '--phase', 'execute')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-plugin-development:plugin-solution-outline' in result.stdout
+        assert 'pm-workflow:task-execute' in result.stdout
 
 
-def test_resolve_workflow_skill_plugin_implementation():
-    """Test resolve-workflow-skill for plan-marshall-plugin-dev + implementation phase."""
+def test_resolve_workflow_skill_finalize():
+    """Test resolve-workflow-skill for finalize phase returns system workflow skill."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'plan-marshall-plugin-dev', '--phase', 'implementation')
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill', '--phase', 'finalize')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-plugin-development:plugin-plan-implement' in result.stdout
+        assert 'pm-workflow:plan-finalize' in result.stdout
 
 
-def test_resolve_workflow_skill_generic_implementation():
-    """Test resolve-workflow-skill for generic + implementation phase."""
+def test_resolve_workflow_skill_no_system_domain():
+    """Test resolve-workflow-skill returns error when system domain is missing."""
     with PlanTestContext() as ctx:
-        create_nested_marshal_json(ctx.fixture_dir)
+        # Create marshal.json WITHOUT system domain
+        config = {
+            "skill_domains": {
+                "java": {"core": {"defaults": [], "optionals": []}}
+            },
+            "modules": {},
+            "build_systems": [],
+            "system": {"retention": {}},
+            "plan": {"defaults": {}}
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(json.dumps(config, indent=2))
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'generic', '--phase', 'implementation')
-
-        assert result.success, f"Should succeed: {result.stderr}"
-        assert 'pm-workflow:task-implementation' in result.stdout
-
-
-def test_resolve_workflow_skill_unknown_domain():
-    """Test resolve-workflow-skill with unknown domain returns error."""
-    with PlanTestContext() as ctx:
-        create_nested_marshal_json(ctx.fixture_dir)
-
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'unknown', '--phase', 'implementation')
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill', '--phase', 'outline')
 
         assert 'error' in result.stdout.lower(), "Should report error"
-        assert 'unknown' in result.stdout.lower()
+        assert 'system' in result.stdout.lower()
 
 
-def test_resolve_workflow_skill_unknown_phase():
-    """Test resolve-workflow-skill with unknown phase returns error."""
+# =============================================================================
+# resolve-workflow-skill-extension Tests
+# =============================================================================
+
+def test_resolve_workflow_skill_extension_java_outline():
+    """Test resolve-workflow-skill-extension returns outline extension for java."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'java', '--phase', 'invalid_phase')
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill-extension',
+            '--domain', 'java', '--type', 'outline')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-dev-java:java-outline-ext' in result.stdout
+        assert 'domain' in result.stdout
+        assert 'type' in result.stdout
+        assert 'extension' in result.stdout
+
+
+def test_resolve_workflow_skill_extension_java_triage():
+    """Test resolve-workflow-skill-extension returns triage extension for java."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill-extension',
+            '--domain', 'java', '--type', 'triage')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-dev-java:java-triage' in result.stdout
+
+
+def test_resolve_workflow_skill_extension_javascript_outline():
+    """Test resolve-workflow-skill-extension returns outline extension for javascript."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill-extension',
+            '--domain', 'javascript', '--type', 'outline')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-dev-frontend:js-outline-ext' in result.stdout
+
+
+def test_resolve_workflow_skill_extension_missing_type():
+    """Test resolve-workflow-skill-extension returns null for missing extension type."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        # javascript has no triage extension
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill-extension',
+            '--domain', 'javascript', '--type', 'triage')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Should return null for extension, not error
+        assert 'null' in result.stdout.lower() or 'none' in result.stdout.lower()
+
+
+def test_resolve_workflow_skill_extension_unknown_domain():
+    """Test resolve-workflow-skill-extension returns null for unknown domain (not error)."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill-extension',
+            '--domain', 'unknown', '--type', 'outline')
+
+        assert result.success, f"Should succeed (returns null, not error): {result.stderr}"
+        # Should return null for extension, not error
+        assert 'null' in result.stdout.lower() or 'none' in result.stdout.lower()
+
+
+def test_resolve_workflow_skill_extension_plugin_dev():
+    """Test resolve-workflow-skill-extension returns extensions for plugin-dev domain."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill-extension',
+            '--domain', 'plan-marshall-plugin-dev', '--type', 'outline')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'pm-plugin-development:plugin-outline-ext' in result.stdout
+
+
+# =============================================================================
+# get-extensions / set-extensions Tests
+# =============================================================================
+
+def test_get_extensions_java():
+    """Test get-extensions returns extensions for java domain."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-extensions', '--domain', 'java')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'extensions' in result.stdout
+        assert 'outline' in result.stdout
+        assert 'triage' in result.stdout
+
+
+def test_get_extensions_unknown_domain():
+    """Test get-extensions returns error for unknown domain."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-extensions', '--domain', 'unknown')
 
         assert 'error' in result.stdout.lower(), "Should report error"
-        assert 'phase' in result.stdout.lower()
 
 
-def test_resolve_workflow_skill_plugin_no_testing():
-    """Test resolve-workflow-skill for plan-marshall-plugin-dev + testing returns error (plan-marshall-plugin-dev has no testing phase)."""
+def test_set_extensions():
+    """Test set-extensions adds extension to domain."""
     with PlanTestContext() as ctx:
         create_nested_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'resolve-workflow-skill',
-            '--domain', 'plan-marshall-plugin-dev', '--phase', 'testing')
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'set-extensions',
+            '--domain', 'java', '--type', 'triage', '--skill', 'pm-dev-java:new-triage')
 
-        assert 'error' in result.stdout.lower(), "Should report error (plan-marshall-plugin-dev has no testing phase)"
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'triage' in result.stdout
+        assert 'pm-dev-java:new-triage' in result.stdout
+
+
+# =============================================================================
+# get-available / configure Tests
+# =============================================================================
+
+def test_get_available_with_maven():
+    """Test get-available returns java domain for maven build system."""
+    with PlanTestContext() as ctx:
+        # Create marshal.json with maven build system
+        config = {
+            "skill_domains": {"system": {"defaults": []}},
+            "modules": {},
+            "build_systems": [{"system": "maven", "skill": "plan-marshall:build-operations"}],
+            "system": {"retention": {}},
+            "plan": {"defaults": {}}
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(json.dumps(config, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-available')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'java' in result.stdout.lower()
+        assert 'detected_domains' in result.stdout
+
+
+def test_get_available_optional_domains():
+    """Test get-available always includes optional domains."""
+    with PlanTestContext() as ctx:
+        config = {
+            "skill_domains": {"system": {"defaults": []}},
+            "modules": {},
+            "build_systems": [],
+            "system": {"retention": {}},
+            "plan": {"defaults": {}}
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(json.dumps(config, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-available')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'optional_domains' in result.stdout
+        assert 'requirements' in result.stdout.lower()
+
+
+def test_configure_domains():
+    """Test configure adds system domain and selected domains."""
+    with PlanTestContext() as ctx:
+        config = {
+            "skill_domains": {},
+            "modules": {},
+            "build_systems": [],
+            "system": {"retention": {}},
+            "plan": {"defaults": {}}
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(json.dumps(config, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'configure', '--domains', 'java,javascript')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'system_domain' in result.stdout
+        assert 'configured' in result.stdout
+
+        # Verify marshal.json was updated
+        updated = json.loads(marshal_path.read_text())
+        assert 'system' in updated['skill_domains'], "System domain should be added"
+        assert 'java' in updated['skill_domains'], "Java domain should be added"
+        assert 'javascript' in updated['skill_domains'], "JavaScript domain should be added"
+        assert 'workflow_skills' in updated['skill_domains']['system'], "System should have workflow_skills"
+
+
+def test_configure_always_adds_system():
+    """Test configure always adds system domain even with empty selection."""
+    with PlanTestContext() as ctx:
+        config = {
+            "skill_domains": {},
+            "modules": {},
+            "build_systems": [],
+            "system": {"retention": {}},
+            "plan": {"defaults": {}}
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(json.dumps(config, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'configure', '--domains', '')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+
+        # Verify system domain was added
+        updated = json.loads(marshal_path.read_text())
+        assert 'system' in updated['skill_domains'], "System domain should always be added"
+
+
+# =============================================================================
+# set with --profile Tests
+# =============================================================================
+
+def test_set_with_profile():
+    """Test set with --profile updates specific profile."""
+    with PlanTestContext() as ctx:
+        create_nested_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'skill-domains', 'set',
+            '--domain', 'java', '--profile', 'quality',
+            '--defaults', 'pm-dev-java:new-skill')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'quality' in result.stdout
 
 
 # =============================================================================
@@ -566,7 +823,7 @@ if __name__ == '__main__':
         test_skill_domains_get_optionals_nested,
         test_skill_domains_validate_nested,
         test_skill_domains_validate_nested_profile_skill,
-        test_skill_domains_get_system_flat_structure,
+        test_skill_domains_get_system_has_workflow_skills,
         # Detect tests
         test_skill_domains_detect_runs,
         test_skill_domains_detect_no_overwrite,
@@ -576,18 +833,36 @@ if __name__ == '__main__':
         test_resolve_domain_skills_javascript_implementation,
         test_resolve_domain_skills_unknown_domain,
         test_resolve_domain_skills_unknown_profile,
+        test_resolve_domain_skills_java_architecture,
+        test_resolve_domain_skills_java_planning,
+        test_resolve_domain_skills_java_quality,
         # get-workflow-skills tests
         test_get_workflow_skills,
         test_get_workflow_skills_output_format,
-        # resolve-workflow-skill tests
-        test_resolve_workflow_skill_java_implementation,
-        test_resolve_workflow_skill_java_solution_outline,
-        test_resolve_workflow_skill_java_testing,
-        test_resolve_workflow_skill_plugin_solution_outline,
-        test_resolve_workflow_skill_plugin_implementation,
-        test_resolve_workflow_skill_generic_implementation,
-        test_resolve_workflow_skill_unknown_domain,
-        test_resolve_workflow_skill_unknown_phase,
-        test_resolve_workflow_skill_plugin_no_testing,
+        # resolve-workflow-skill tests (5-phase model)
+        test_resolve_workflow_skill_init,
+        test_resolve_workflow_skill_outline,
+        test_resolve_workflow_skill_plan,
+        test_resolve_workflow_skill_execute,
+        test_resolve_workflow_skill_finalize,
+        test_resolve_workflow_skill_no_system_domain,
+        # resolve-workflow-skill-extension tests
+        test_resolve_workflow_skill_extension_java_outline,
+        test_resolve_workflow_skill_extension_java_triage,
+        test_resolve_workflow_skill_extension_javascript_outline,
+        test_resolve_workflow_skill_extension_missing_type,
+        test_resolve_workflow_skill_extension_unknown_domain,
+        test_resolve_workflow_skill_extension_plugin_dev,
+        # get-extensions / set-extensions tests
+        test_get_extensions_java,
+        test_get_extensions_unknown_domain,
+        test_set_extensions,
+        # get-available / configure tests
+        test_get_available_with_maven,
+        test_get_available_optional_domains,
+        test_configure_domains,
+        test_configure_always_adds_system,
+        # set with --profile tests
+        test_set_with_profile,
     ])
     sys.exit(runner.run())
