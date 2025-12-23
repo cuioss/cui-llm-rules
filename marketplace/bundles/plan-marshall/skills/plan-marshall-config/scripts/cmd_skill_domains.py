@@ -120,7 +120,7 @@ def cmd_skill_domains(args) -> int:
             # Profile-based update
             if not is_nested_domain(domain_config):
                 return error_exit(f"Domain '{domain}' uses flat structure. Cannot set profile.")
-            if profile not in domain_config and profile not in ['core', 'architecture', 'planning', 'implementation', 'testing', 'quality']:
+            if profile not in domain_config and profile not in ['core', 'implementation', 'testing', 'quality']:
                 return error_exit(f"Unknown profile: {profile}")
             # Initialize profile if not exists
             if profile not in domain_config:
@@ -201,7 +201,7 @@ def cmd_skill_domains(args) -> int:
             # Collect all defaults and optionals across all profiles
             all_defaults = []
             all_optionals = []
-            for key in ['core', 'architecture', 'planning', 'implementation', 'testing', 'quality']:
+            for key in ['core', 'implementation', 'testing', 'quality']:
                 if key in domain_config:
                     all_defaults.extend(domain_config[key].get("defaults", []))
                     all_optionals.extend(domain_config[key].get("optionals", []))

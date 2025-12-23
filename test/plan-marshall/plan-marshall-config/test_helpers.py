@@ -147,14 +147,6 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                     "defaults": ["pm-dev-java:java-core"],
                     "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
                 },
-                "architecture": {
-                    "defaults": ["pm-dev-java:java-packages"],
-                    "optionals": []
-                },
-                "planning": {
-                    "defaults": [],
-                    "optionals": []
-                },
                 "implementation": {
                     "defaults": [],
                     "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
@@ -176,14 +168,6 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                     "defaults": ["pm-dev-frontend:cui-javascript"],
                     "optionals": ["pm-dev-frontend:cui-jsdoc"]
                 },
-                "architecture": {
-                    "defaults": [],
-                    "optionals": []
-                },
-                "planning": {
-                    "defaults": [],
-                    "optionals": []
-                },
                 "implementation": {
                     "defaults": [],
                     "optionals": ["pm-dev-frontend:cui-javascript-linting"]
@@ -204,14 +188,6 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
                 },
                 "core": {
                     "defaults": ["pm-plugin-development:plugin-architecture"],
-                    "optionals": []
-                },
-                "architecture": {
-                    "defaults": [],
-                    "optionals": []
-                },
-                "planning": {
-                    "defaults": [],
                     "optionals": []
                 },
                 "implementation": {

@@ -62,7 +62,7 @@ def main():
 
     sd_set = sd_sub.add_parser('set', help='Set domain config')
     sd_set.add_argument('--domain', required=True, help='Domain name')
-    sd_set.add_argument('--profile', help='Profile name (core, architecture, planning, implementation, testing, quality)')
+    sd_set.add_argument('--profile', help='Profile name (core, implementation, testing, quality)')
     sd_set.add_argument('--defaults', help='Comma-separated default skills')
     sd_set.add_argument('--optionals', help='Comma-separated optional skills')
 

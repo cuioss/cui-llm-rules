@@ -31,14 +31,6 @@ JSON structure and field definitions for project configuration.
         "defaults": ["pm-dev-java:java-core"],
         "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
       },
-      "architecture": {
-        "defaults": ["pm-dev-java:java-packages"],
-        "optionals": []
-      },
-      "planning": {
-        "defaults": [],
-        "optionals": []
-      },
       "implementation": {
         "defaults": [],
         "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
@@ -61,14 +53,6 @@ JSON structure and field definitions for project configuration.
         "defaults": ["pm-dev-frontend:cui-javascript"],
         "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
       },
-      "architecture": {
-        "defaults": [],
-        "optionals": []
-      },
-      "planning": {
-        "defaults": [],
-        "optionals": []
-      },
       "implementation": {
         "defaults": [],
         "optionals": ["pm-dev-frontend:cui-javascript-maintenance", "pm-dev-frontend:cui-javascript-linting"]
@@ -89,14 +73,6 @@ JSON structure and field definitions for project configuration.
       "core": {
         "defaults": ["pm-plugin-development:plugin-architecture"],
         "optionals": ["pm-plugin-development:plugin-script-architecture"]
-      },
-      "architecture": {
-        "defaults": [],
-        "optionals": []
-      },
-      "planning": {
-        "defaults": [],
-        "optionals": []
       },
       "implementation": {
         "defaults": [],
@@ -239,8 +215,6 @@ Technical domains (java, javascript, etc.) use profile-based organization:
         "defaults": ["bundle:skill", ...],
         "optionals": ["bundle:skill", ...]
       },
-      "architecture": { "defaults": [], "optionals": [] },
-      "planning": { "defaults": [], "optionals": [] },
       "implementation": { "defaults": [], "optionals": [] },
       "testing": { "defaults": [], "optionals": [] },
       "quality": { "defaults": [], "optionals": [] }
@@ -264,8 +238,6 @@ Profiles determine which skills to load based on task context:
 
 | Profile | Phase | Description |
 |---------|-------|-------------|
-| `architecture` | outline | High-level design and structure |
-| `planning` | plan | Task decomposition |
 | `implementation` | execute | Production code development |
 | `testing` | execute | Test code development |
 | `quality` | finalize | Documentation and verification |

@@ -31,8 +31,6 @@ The skill domains configuration uses a 5-phase workflow model with profile-based
         "defaults": ["bundle:skill"],
         "optionals": ["bundle:skill"]
       },
-      "architecture": { "defaults": [], "optionals": [] },
-      "planning": { "defaults": [], "optionals": [] },
       "implementation": { "defaults": [], "optionals": [] },
       "testing": { "defaults": [], "optionals": [] },
       "quality": { "defaults": [], "optionals": [] }
@@ -81,8 +79,6 @@ Technical domains (java, javascript, etc.) use profile-based organization:
 |-------|------|----------|-------------|
 | `workflow_skill_extensions` | object | No | Domain-specific extensions for phases |
 | `core` | object | Yes | Core skills loaded for all profiles |
-| `architecture` | object | No | Skills for outline phase |
-| `planning` | object | No | Skills for plan phase |
 | `implementation` | object | No | Skills for execute phase (production code) |
 | `testing` | object | No | Skills for execute phase (test code) |
 | `quality` | object | No | Skills for finalize phase |
@@ -127,8 +123,6 @@ Each profile contains defaults and optionals:
 
 | Profile | Phase | Use Case |
 |---------|-------|----------|
-| `architecture` | outline | High-level design, codebase structure analysis |
-| `planning` | plan | Task decomposition, dependency identification |
 | `implementation` | execute | Production code development tasks |
 | `testing` | execute | Test code development tasks |
 | `quality` | finalize | Documentation, verification, compliance |
@@ -172,14 +166,6 @@ plan-marshall-config resolve-domain-skills --domain java --profile implementatio
       "defaults": ["pm-dev-java:java-core"],
       "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
     },
-    "architecture": {
-      "defaults": ["pm-dev-java:java-packages"],
-      "optionals": []
-    },
-    "planning": {
-      "defaults": [],
-      "optionals": []
-    },
     "implementation": {
       "defaults": [],
       "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
@@ -207,14 +193,6 @@ plan-marshall-config resolve-domain-skills --domain java --profile implementatio
     "core": {
       "defaults": ["pm-dev-frontend:cui-javascript"],
       "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
-    },
-    "architecture": {
-      "defaults": [],
-      "optionals": []
-    },
-    "planning": {
-      "defaults": [],
-      "optionals": []
     },
     "implementation": {
       "defaults": [],

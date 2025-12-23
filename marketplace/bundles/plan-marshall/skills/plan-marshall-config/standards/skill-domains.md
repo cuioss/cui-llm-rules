@@ -57,14 +57,6 @@ The system domain contains workflow skills for the 5 execution phases:
         "defaults": ["pm-dev-java:java-core"],
         "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
       },
-      "architecture": {
-        "defaults": ["pm-dev-java:java-packages"],
-        "optionals": []
-      },
-      "planning": {
-        "defaults": [],
-        "optionals": []
-      },
       "implementation": {
         "defaults": [],
         "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
@@ -93,12 +85,10 @@ Domain-specific extensions that augment workflow skills. Only in technical domai
 | `outline` | outline | Domain detection, deliverable patterns |
 | `triage` | finalize | Finding decision-making (fix/suppress/accept) |
 
-### Profiles (5 Profiles)
+### Profiles
 
 | Profile | Phase Used | Purpose |
 |---------|------------|---------|
-| `architecture` | outline | High-level design patterns |
-| `planning` | plan | Task decomposition patterns |
 | `implementation` | execute (impl tasks) | Production code patterns |
 | `testing` | execute (test tasks) | Test code patterns |
 | `quality` | finalize | Verification, documentation standards |
@@ -327,7 +317,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
   skill-domains validate --domain java --skill pm-dev-java:junit-core
 ```
 
-Searches all profiles (core, architecture, planning, implementation, testing, quality) for nested domains.
+Searches all profiles (core, implementation, testing, quality) for nested domains.
 
 ## Adding New Domains
 
@@ -342,14 +332,6 @@ Searches all profiles (core, architecture, planning, implementation, testing, qu
   "core": {
     "defaults": ["pm-dev-python:python-core"],
     "optionals": ["pm-dev-python:python-typing"]
-  },
-  "architecture": {
-    "defaults": [],
-    "optionals": []
-  },
-  "planning": {
-    "defaults": [],
-    "optionals": []
   },
   "implementation": {
     "defaults": [],

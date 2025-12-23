@@ -220,7 +220,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 | `get-optionals` | `--domain` | Get optional skills (returns `core.optionals` for nested domains) |
 | `set` | `--domain [--profile] [--defaults] [--optionals]` | Set domain config (use `--profile` for nested domains) |
 | `add` | `--domain --defaults [--optionals]` | Add new domain |
-| `validate` | `--domain --skill` | Check if skill valid (searches all 5 profiles for nested domains) |
+| `validate` | `--domain --skill` | Check if skill valid (searches all profiles for nested domains) |
 | `detect` | (none) | Auto-detect domains from project files |
 | `get-extensions` | `--domain` | Get workflow skill extensions for domain |
 | `set-extensions` | `--domain --type --skill` | Set workflow skill extension (types: outline, triage) |
@@ -233,7 +233,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 |------------|---------|
 | `--domain --profile` | Resolve skills for domain and profile (aggregates `{domain}.core` + `{domain}.{profile}`) |
 
-Standard profiles: `architecture`, `planning`, `implementation`, `testing`, `quality`.
+Standard profiles: `implementation`, `testing`, `quality`.
 
 ### resolve-workflow-skill
 
@@ -353,14 +353,6 @@ The defaults template contains only `system` domain. Technical domains (java, ja
         "defaults": ["pm-dev-java:java-core"],
         "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
       },
-      "architecture": {
-        "defaults": ["pm-dev-java:java-packages"],
-        "optionals": []
-      },
-      "planning": {
-        "defaults": [],
-        "optionals": []
-      },
       "implementation": {
         "defaults": [],
         "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
@@ -440,15 +432,13 @@ The `system` domain contains workflow skills (5-phase model) and base skills app
 
 **Workflow Phases**: `init`, `outline`, `plan`, `execute`, `finalize`
 
-### Technical Domains (5-Profile Structure)
+### Technical Domains (Profile Structure)
 
-Technical domains use nested structure with `workflow_skill_extensions` and 5 profiles.
+Technical domains use nested structure with `workflow_skill_extensions` and profiles.
 
 | Profile | Phase | Purpose |
 |---------|-------|---------|
 | `core` | all | Skills loaded for all profiles |
-| `architecture` | outline | High-level design, codebase analysis |
-| `planning` | plan | Task decomposition, dependencies |
 | `implementation` | execute | Production code tasks |
 | `testing` | execute | Test code tasks |
 | `quality` | finalize | Documentation, verification |

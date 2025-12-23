@@ -394,41 +394,6 @@ def test_resolve_domain_skills_unknown_profile():
         assert 'profile' in result.stdout.lower()
 
 
-def test_resolve_domain_skills_java_architecture():
-    """Test resolve-domain-skills for java + architecture profile (outline phase)."""
-    with PlanTestContext() as ctx:
-        create_nested_marshal_json(ctx.fixture_dir)
-
-        result = run_script(
-            SCRIPT_PATH, 'resolve-domain-skills',
-            '--domain', 'java',
-            '--profile', 'architecture'
-        )
-
-        assert result.success, f"Should succeed: {result.stderr}"
-        # Should include core defaults (java-core)
-        assert 'pm-dev-java:java-core' in result.stdout
-        # Should include architecture defaults (java-packages)
-        assert 'pm-dev-java:java-packages' in result.stdout
-
-
-def test_resolve_domain_skills_java_planning():
-    """Test resolve-domain-skills for java + planning profile (plan phase)."""
-    with PlanTestContext() as ctx:
-        create_nested_marshal_json(ctx.fixture_dir)
-
-        result = run_script(
-            SCRIPT_PATH, 'resolve-domain-skills',
-            '--domain', 'java',
-            '--profile', 'planning'
-        )
-
-        assert result.success, f"Should succeed: {result.stderr}"
-        # Should include core defaults (java-core)
-        assert 'pm-dev-java:java-core' in result.stdout
-        # planning profile exists but may be empty - that's OK
-
-
 def test_resolve_domain_skills_java_quality():
     """Test resolve-domain-skills for java + quality profile (finalize phase)."""
     with PlanTestContext() as ctx:
@@ -833,8 +798,6 @@ if __name__ == '__main__':
         test_resolve_domain_skills_javascript_implementation,
         test_resolve_domain_skills_unknown_domain,
         test_resolve_domain_skills_unknown_profile,
-        test_resolve_domain_skills_java_architecture,
-        test_resolve_domain_skills_java_planning,
         test_resolve_domain_skills_java_quality,
         # get-workflow-skills tests
         test_get_workflow_skills,

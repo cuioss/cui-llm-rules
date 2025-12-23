@@ -230,7 +230,7 @@ domains: java,javascript
 **Note:** This command:
 - Always configures the `system` domain with workflow_skills
 - Applies DOMAIN_TEMPLATES for each selected domain
-- Creates full 5-profile structure for each domain
+- Creates full profile structure for each domain
 
 ---
 
@@ -286,7 +286,7 @@ extension: null
 
 Resolve all skills for a domain and profile. Returns core + profile skills.
 
-**Profiles:** architecture, planning, implementation, testing, quality
+**Profiles:** implementation, testing, quality
 
 ```bash
 plan-marshall-config resolve-domain-skills \

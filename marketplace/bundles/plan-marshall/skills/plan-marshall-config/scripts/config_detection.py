@@ -11,7 +11,6 @@ from pathlib import Path
 from config_defaults import (
     BUILD_SYSTEM_DEFAULTS,
     DOMAIN_TEMPLATES,
-    DEFAULT_PROFILES,
 )
 
 
@@ -112,46 +111,3 @@ def detect_maven_modules() -> list:
     return modules
 
 
-def migrate_domain_to_profiles(flat_config: dict) -> dict:
-    """Migrate flat domain config to profile-based structure.
-
-    Converts a flat {defaults: [], optionals: []} structure to
-    the 5-profile nested structure, preserving existing skills in core.
-
-    Args:
-        flat_config: Dict with 'defaults' and/or 'optionals' keys
-
-    Returns:
-        Dict with core + 5 profile structure
-    """
-    defaults = flat_config.get("defaults", [])
-    optionals = flat_config.get("optionals", [])
-
-    return {
-        "core": {
-            "defaults": defaults,
-            "optionals": optionals
-        },
-        "architecture": {"defaults": [], "optionals": []},
-        "planning": {"defaults": [], "optionals": []},
-        "implementation": {"defaults": [], "optionals": []},
-        "testing": {"defaults": [], "optionals": []},
-        "quality": {"defaults": [], "optionals": []}
-    }
-
-
-def is_flat_domain(domain_config: dict) -> bool:
-    """Check if domain config uses flat structure (not profile-based).
-
-    A flat domain has 'defaults' or 'optionals' at top level
-    without any profile keys.
-
-    Args:
-        domain_config: Domain configuration dict
-
-    Returns:
-        True if flat structure, False if nested/profile-based
-    """
-    has_flat_keys = 'defaults' in domain_config or 'optionals' in domain_config
-    has_profile_keys = any(k in domain_config for k in ['core', 'workflow_skills', 'workflow_skill_extensions'])
-    return has_flat_keys and not has_profile_keys

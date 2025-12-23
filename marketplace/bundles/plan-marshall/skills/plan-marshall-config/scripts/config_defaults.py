@@ -11,8 +11,11 @@ project initialization and detection.
 # core: Core skills loaded for all profiles
 RESERVED_DOMAIN_KEYS = ['workflow_skills', 'workflow_skill_extensions', 'core', 'defaults', 'optionals']
 
-# Skill profiles for technical domains (map to workflow phases)
-DEFAULT_PROFILES = ['architecture', 'planning', 'implementation', 'testing', 'quality']
+# Skill profiles for technical domains
+# - implementation: execute phase (production code)
+# - testing: execute phase (test code)
+# - quality: finalize phase
+DEFAULT_PROFILES = ['implementation', 'testing', 'quality']
 
 # System workflow skills (always from system domain)
 DEFAULT_SYSTEM_WORKFLOW_SKILLS = {
@@ -67,7 +70,7 @@ BUILD_SYSTEM_TO_DOMAIN = {
     "npm": "javascript"
 }
 
-# Domain templates with profile-based structure (5 profiles)
+# Domain templates with profile-based structure
 DOMAIN_TEMPLATES = {
     "java": {
         "workflow_skill_extensions": {
