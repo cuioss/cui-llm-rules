@@ -47,7 +47,7 @@ supplements_found: 1
 domains[3]{key,name,bundle,has_outline,has_triage}:
 java	Java Development	pm-dev-java	true	true
 javascript	JavaScript Development	pm-dev-frontend	true	true
-plugin-dev	Plugin Development	pm-plugin-development	true	true
+plan-marshall-plugin-dev	Plugin Development	pm-plugin-development	true	true
 
 supplements[1]{domain,bundle,description}:
 java	pm-dev-java-cui	CUI-specific Java patterns for logging, testing, and HTTP

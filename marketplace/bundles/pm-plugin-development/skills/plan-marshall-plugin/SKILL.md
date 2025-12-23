@@ -10,8 +10,8 @@ Domain manifest skill providing plugin development capabilities to plan-marshall
 
 ## Purpose
 
-Declares the plugin-dev domain configuration including:
-- Domain identity (key: plugin-dev)
+Declares the plan-marshall-plugin-dev domain configuration including:
+- Domain identity (key: plan-marshall-plugin-dev)
 - Workflow extensions (outline, triage)
 - Profile-based skill organization (core, implementation, testing, quality)
 

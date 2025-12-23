@@ -382,7 +382,7 @@ discovered_domains[4]:
   bundle: pm-dev-frontend
   name: JavaScript Development
   description: Modern JavaScript, ESLint, Jest testing, npm builds
-- key: plugin-dev
+- key: plan-marshall-plugin-dev
   bundle: pm-plugin-development
   name: Plugin Development
   description: Claude Code marketplace component development

@@ -42,7 +42,7 @@ The `/plan-manage` command uses thin agents with domain skill loading:
   │
   ├─ Resolve workflow skills from system domain
   │
-  ├─ For domain-specific plans (java, javascript, plugin-dev):
+  ├─ For domain-specific plans (java, javascript, plan-marshall-plugin-dev):
   │    → Task: solution-outline-agent (resolve-workflow-skill --phase outline)
   │    → Task: task-plan-agent (resolve-workflow-skill --phase plan)
   │

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/cuioss/cui-llm-rules/main/marketplace/bundles/plan-marshall/skills/domain-extension-api/schemas/domain-manifest-v1.json",
   "domain": {
-    "key": "plugin-dev",
+    "key": "plan-marshall-plugin-dev",
     "name": "Plugin Development",
     "description": "Claude Code marketplace component development"
   },
