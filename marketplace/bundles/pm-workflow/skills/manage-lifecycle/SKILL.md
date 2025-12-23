@@ -50,12 +50,12 @@ TOON format with phases table:
 
 ```toon
 title: Implement JWT Authentication
-domain: java
 current_phase: execute
 
-phases[4]{name,status}:
+phases[5]{name,status}:
 init,done
-refine,done
+outline,done
+plan,done
 execute,in_progress
 finalize,pending
 
@@ -68,11 +68,12 @@ updated: 2025-12-02T14:30:00Z
 | Field | Description |
 |-------|-------------|
 | `title` | Plan title |
-| `domain` | Domain identifier (java, javascript, plan-marshall-plugin-dev, generic) |
 | `current_phase` | Current active phase |
 | `phases` | Table of phase names and statuses |
 | `created` | ISO timestamp when created |
 | `updated` | ISO timestamp of last update |
+
+**Note**: Domain information is stored in `config.toon` (as a `domains` array), not in `status.toon`.
 
 ### Phase Statuses
 
@@ -104,11 +105,11 @@ plan_id: my-feature
 
 plan:
   title: Implement JWT Authentication
-  domain: java
   current_phase: execute
-  phases[4]{name,status}:
+  phases[5]{name,status}:
   init,done
-  refine,done
+  outline,done
+  plan,done
   execute,in_progress
   finalize,pending
 ```
@@ -121,15 +122,13 @@ Initialize status.toon for a new plan.
 python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle create \
   --plan-id {plan_id} \
   --title "Feature Title" \
-  --domain java \
-  --phases init,refine,execute,finalize \
+  --phases init,outline,plan,execute,finalize \
   [--force]
 ```
 
 **Parameters**:
 - `--plan-id` (required): Plan identifier (kebab-case)
 - `--title` (required): Plan title
-- `--domain` (required): Domain identifier (java, javascript, plan-marshall-plugin-dev, generic)
 - `--phases` (required): Comma-separated phase names
 - `--force`: Overwrite existing status.toon
 
@@ -142,7 +141,6 @@ created: true
 
 plan:
   title: Feature Title
-  domain: java
   current_phase: init
 ```
 
@@ -223,15 +221,13 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle li
 **Output** (TOON):
 ```toon
 status: success
-total: 3
+total: 2
 plans:
   - id: my-feature
     current_phase: execute
-    domain: java
     status: in_progress
   - id: bug-fix-123
     current_phase: init
-    domain: generic
     status: in_progress
 ```
 
@@ -360,16 +356,17 @@ python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle ge
 status: success
 plan_id: my-feature
 title: Implement JWT Authentication
-domain: java
 current_phase: execute
 skill: plan-execute
 skill_description: Execute implementation tasks
-total_phases: 4
-completed_phases: 2
+total_phases: 5
+completed_phases: 3
 phases:
   - name: init
     status: done
-  - name: refine
+  - name: outline
+    status: done
+  - name: plan
     status: done
   - name: execute
     status: in_progress
@@ -386,7 +383,7 @@ phases:
 | Command | Parameters | Description |
 |---------|------------|-------------|
 | `read` | `--plan-id` | Read plan status |
-| `create` | `--plan-id --title --domain --phases [--force]` | Initialize status.toon |
+| `create` | `--plan-id --title --phases [--force]` | Initialize status.toon |
 | `set-phase` | `--plan-id --phase` | Set current phase |
 | `update-phase` | `--plan-id --phase --status` | Update phase status |
 | `progress` | `--plan-id` | Calculate plan progress |
@@ -404,61 +401,21 @@ phases:
 
 ---
 
-## Domains and Phases
-
-Domains define phase sequences and skill routing via config.toon's `workflow_skills` block.
-
-### java (4 phases)
-init -> refine -> execute -> finalize
-
-### javascript (4 phases)
-init -> refine -> execute -> finalize
-
-### plan-marshall-plugin-dev (4 phases)
-init -> refine -> execute -> finalize
-
-### generic (3 phases)
-init -> execute -> finalize
-
-**Note**: Domain skill routing is configured in config.toon's `workflow_skills` block. Thin agents load domain-specific skills dynamically.
-
----
-
 ## Phase Routing
 
 The `route` command returns skill names for each phase (from script `PHASE_ROUTING`):
 
 | Phase | Skill | Description |
 |-------|-------|-------------|
-| init | `plan-init` | Initialize plan |
-| refine | `plan-refine` | Refine requirements and specifications |
+| init | `plan-init` | Initialize plan structure |
+| outline | `solution-outline` | Create solution outline with deliverables |
+| plan | `task-plan` | Create tasks from deliverables |
 | execute | `plan-execute` | Execute implementation tasks |
 | finalize | `plan-finalize` | Finalize with commit/PR |
 
-**Note**: These are skill names, not full bundle:skill notation. The actual components used:
+**Note**: These are skill names, not full bundle:skill notation.
 
-| Phase | Component | Type | Description |
-|-------|-----------|------|-------------|
-| init | `pm-workflow:plan-init-agent` | agent | Creates plan, analyzes task, creates solution outline |
-| refine | `pm-workflow:plan-refine-agent` | agent | Creates tasks from deliverables |
-| execute | `pm-workflow:plan-execute` | skill | Executes implementation tasks |
-| finalize | `pm-workflow:plan-finalize` | skill | Git workflow, commit, PR creation |
-
-### Init Phase
-
-The init phase handles complete plan initialization:
-
-```
-plan-init-agent:
-   - Creates plan directory
-   - Writes request.md from input (description/lesson/issue)
-   - Analyzes task to create solution outline with deliverables
-   - Detects domain (or uses override)
-   - Creates config.toon and status.toon
-   - Transitions phase: init → refine
-```
-
-**Note**: The `plan-finalize` skill handles git workflow (commit, push, PR) separately from task execution.
+**Note**: Domain information is managed in `config.toon` (via `domains` array), not in `status.toon`. Domains are detected during the outline phase.
 
 ---
 

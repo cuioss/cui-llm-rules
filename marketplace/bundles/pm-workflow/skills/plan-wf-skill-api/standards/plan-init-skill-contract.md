@@ -87,7 +87,6 @@ Validate:
 python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle create \
   --plan-id {plan_id} \
   --title "{title}" \
-  --domain generic \
   --phases init,outline,plan,execute,finalize
 ```
 
@@ -150,11 +149,34 @@ No domain-specific skills are loaded during init (domains not yet determined).
 
 ## Error Handling
 
+### plan_exists
+
+When the plan already exists, prompt the user with options:
+
+```
+AskUserQuestion:
+  question: "Plan '{plan_id}' already exists. What would you like to do?"
+  header: "Plan exists"
+  options:
+    - label: "Resume"
+      description: "Continue with the existing plan"
+    - label: "Replace"
+      description: "Delete existing plan and create new"
+    - label: "Rename"
+      description: "Choose a different plan ID"
+```
+
+**Option handling**:
+- **Resume**: Skip to output with existing plan data
+- **Replace**: Delete existing plan via `manage-files delete-plan`, then re-run create
+- **Rename**: Prompt for new plan_id, re-run from Step 1
+
+### Other Errors
+
 | Error | Cause | Recovery |
 |-------|-------|----------|
-| `plan_exists` | Plan ID already in use | Choose different plan_id or delete existing |
-| `invalid_plan_id` | Plan ID not kebab-case | Use valid format |
-| `branch_exists` | Git branch already exists | Use existing branch or choose different name |
+| `invalid_plan_id` | Plan ID not kebab-case | Return error, user must provide valid format |
+| `branch_exists` | Git branch already exists | Use existing branch or prompt for different name |
 
 ---
 

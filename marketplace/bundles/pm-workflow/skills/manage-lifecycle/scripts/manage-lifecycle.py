@@ -6,7 +6,7 @@ Replaces plan.md and absorbs phase-management functionality.
 
 Usage:
     python3 manage-lifecycle.py read --plan-id my-plan
-    python3 manage-lifecycle.py create --plan-id my-plan --title "Title" --domain java --phases init,refine,execute,finalize
+    python3 manage-lifecycle.py create --plan-id my-plan --title "Title" --phases init,outline,plan,execute,finalize
     python3 manage-lifecycle.py set-phase --plan-id my-plan --phase execute
     python3 manage-lifecycle.py list
     python3 manage-lifecycle.py transition --plan-id my-plan --completed init
@@ -30,22 +30,12 @@ from toon_parser import parse_toon, serialize_toon
 
 # Phase routing maps phase names to skills (for route command)
 PHASE_ROUTING = {
-    'init': ('plan-init', 'Initialize plan'),
-    'refine': ('plan-refine', 'Refine requirements and specifications'),
+    'init': ('plan-init', 'Initialize plan structure'),
+    'outline': ('solution-outline', 'Create solution outline with deliverables'),
+    'plan': ('task-plan', 'Create tasks from deliverables'),
     'execute': ('plan-execute', 'Execute implementation tasks'),
     'finalize': ('plan-finalize', 'Finalize with commit/PR'),
 }
-
-
-VALID_DOMAINS = {'java', 'javascript', 'plan-marshall-plugin-dev', 'generic'}
-
-
-def validate_domain(domain: str) -> bool:
-    """Validate domain is a known domain identifier.
-
-    Valid domains: java, javascript, plan-marshall-plugin-dev, generic
-    """
-    return domain in VALID_DOMAINS
 
 
 def validate_plan_id(plan_id: str) -> bool:
@@ -143,15 +133,6 @@ def cmd_create(args):
         })
         sys.exit(1)
 
-    if not validate_domain(args.domain):
-        output_toon({
-            'status': 'error',
-            'plan_id': args.plan_id,
-            'error': 'invalid_domain',
-            'message': f"Invalid domain: {args.domain}. Must be one of: {', '.join(sorted(VALID_DOMAINS))}"
-        })
-        sys.exit(1)
-
     # Parse phases from comma-separated argument
     phases = [p.strip() for p in args.phases.split(',') if p.strip()]
     if not phases:
@@ -167,7 +148,6 @@ def cmd_create(args):
 
     status = {
         'title': args.title,
-        'domain': args.domain,
         'current_phase': phases[0],
         'phases': [{'name': p, 'status': 'pending'} for p in phases],
         'created': now,
@@ -185,7 +165,6 @@ def cmd_create(args):
         'created': True,
         'plan': {
             'title': args.title,
-            'domain': args.domain,
             'current_phase': phases[0]
         }
     })
@@ -359,7 +338,6 @@ def cmd_list(args):
             plans.append({
                 'id': plan_dir.name,
                 'current_phase': current_phase,
-                'domain': status.get('domain', 'unknown'),
                 'status': 'in_progress'
             })
         except Exception:
@@ -538,7 +516,6 @@ def cmd_get_routing_context(args):
         'status': 'success',
         'plan_id': args.plan_id,
         'title': status.get('title', ''),
-        'domain': status.get('domain', ''),
         'current_phase': current_phase,
         'skill': skill,
         'skill_description': description,
@@ -563,10 +540,8 @@ def main():
     create_parser = subparsers.add_parser('create', help='Create status.toon')
     create_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     create_parser.add_argument('--title', required=True, help='Plan title')
-    create_parser.add_argument('--domain', required=True,
-                               help='Domain identifier (java, javascript, plan-marshall-plugin-dev, generic)')
     create_parser.add_argument('--phases', required=True,
-                               help='Comma-separated phase names (e.g., init,refine,execute,finalize)')
+                               help='Comma-separated phase names (e.g., init,outline,plan,execute,finalize)')
     create_parser.add_argument('--force', action='store_true',
                                help='Overwrite existing status')
     create_parser.set_defaults(func=cmd_create)

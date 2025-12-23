@@ -225,7 +225,6 @@ def cmd_create_or_reference(args):
             try:
                 status = parse_toon(status_path.read_text(encoding='utf-8'))
                 result['current_phase'] = status.get('current_phase', 'unknown')
-                result['domain'] = status.get('domain', 'unknown')
             except Exception:
                 # If we can't parse status.toon, just note it exists
                 result['has_status'] = True

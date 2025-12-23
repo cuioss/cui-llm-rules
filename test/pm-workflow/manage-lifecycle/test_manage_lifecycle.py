@@ -25,59 +25,55 @@ TestContext = PlanTestContext
 # Test: Create Command
 # =============================================================================
 
-def test_create_java_plan():
-    """Test creating a plan with java domain."""
-    with TestContext(plan_id='java-plan'):
+def test_create_plan():
+    """Test creating a plan with standard 5-phase model."""
+    with TestContext(plan_id='test-plan'):
         result = run_script(SCRIPT_PATH, 'create',
-            '--plan-id', 'java-plan',
+            '--plan-id', 'test-plan',
             '--title', 'Test Plan',
-            '--domain', 'java',
-            '--phases', 'init,refine,execute,finalize'
+            '--phases', 'init,outline,plan,execute,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
-        assert data['plan']['domain'] == 'java'
+        assert data['plan']['title'] == 'Test Plan'
+        assert data['plan']['current_phase'] == 'init'
+        # Domain should NOT be in output (removed from status.toon)
+        assert 'domain' not in data['plan']
 
 
-def test_create_generic_plan():
-    """Test creating a plan with generic domain."""
-    with TestContext(plan_id='generic-plan'):
+def test_create_plan_custom_phases():
+    """Test creating a plan with custom phases."""
+    with TestContext(plan_id='custom-plan'):
         result = run_script(SCRIPT_PATH, 'create',
-            '--plan-id', 'generic-plan',
-            '--title', 'Generic Test',
-            '--domain', 'generic',
+            '--plan-id', 'custom-plan',
+            '--title', 'Custom Test',
             '--phases', 'init,execute,finalize'
         )
         assert result.success, f"Script failed: {result.stderr}"
-
-
-def test_create_plan_invalid_domain():
-    """Test that creating a plan with invalid domain fails."""
-    with TestContext(plan_id='bad-plan'):
-        result = run_script(SCRIPT_PATH, 'create',
-            '--plan-id', 'bad-plan',
-            '--title', 'Bad Plan',
-            '--domain', 'invalid-domain',  # Not a valid domain
-            '--phases', 'init,execute,finalize'
-        )
-        assert not result.success, "Expected failure for invalid domain"
         data = parse_toon(result.stdout)
-        assert data['error'] == 'invalid_domain'
+        assert data['status'] == 'success'
 
 
-def test_create_plugin_plan():
-    """Test creating a plan with plan-marshall-plugin-dev domain."""
-    with TestContext(plan_id='plugin-plan'):
+def test_create_plan_force_overwrite():
+    """Test force overwrite of existing plan."""
+    with TestContext(plan_id='force-plan'):
+        # Create first plan
+        run_script(SCRIPT_PATH, 'create',
+            '--plan-id', 'force-plan',
+            '--title', 'Original Plan',
+            '--phases', 'init,outline,plan,execute,finalize'
+        )
+        # Create again with --force
         result = run_script(SCRIPT_PATH, 'create',
-            '--plan-id', 'plugin-plan',
-            '--title', 'Plugin Plan',
-            '--domain', 'plan-marshall-plugin-dev',
-            '--phases', 'init,implement,verify,finalize'
+            '--plan-id', 'force-plan',
+            '--title', 'Replaced Plan',
+            '--phases', 'init,outline,plan,execute,finalize',
+            '--force'
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
-        assert data['plan']['domain'] == 'plan-marshall-plugin-dev'
+        assert data['plan']['title'] == 'Replaced Plan'
 
 
 # =============================================================================
@@ -91,8 +87,7 @@ def test_set_phase():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'phase-plan',
             '--title', 'Phase Test',
-            '--domain', 'java',
-            '--phases', 'init,refine,execute,finalize'
+            '--phases', 'init,outline,plan,execute,finalize'
         )
         # Then set phase
         result = run_script(SCRIPT_PATH, 'set-phase',
@@ -100,6 +95,8 @@ def test_set_phase():
             '--phase', 'execute'
         )
         assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['current_phase'] == 'execute'
 
 
 def test_read_plan():
@@ -108,13 +105,17 @@ def test_read_plan():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'read-plan',
             '--title', 'Read Test',
-            '--domain', 'java',
-            '--phases', 'init,refine,execute,finalize'
+            '--phases', 'init,outline,plan,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'read',
             '--plan-id', 'read-plan'
         )
         assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['status'] == 'success'
+        assert 'plan' in data
+        # Domain should NOT be in plan (removed from status.toon)
+        assert 'domain' not in data['plan']
 
 
 # =============================================================================
@@ -127,8 +128,7 @@ def test_get_routing_context():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'routing-plan',
             '--title', 'Routing Test',
-            '--domain', 'java',
-            '--phases', 'init,refine,execute,finalize'
+            '--phases', 'init,outline,plan,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'get-routing-context',
             '--plan-id', 'routing-plan'
@@ -143,6 +143,8 @@ def test_get_routing_context():
         # Should have progress
         assert 'total_phases' in data
         assert 'completed_phases' in data
+        # Domain should NOT be in routing context (removed from status.toon)
+        assert 'domain' not in data
 
 
 def test_get_routing_context_after_transition():
@@ -151,8 +153,7 @@ def test_get_routing_context_after_transition():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'transition-routing',
             '--title', 'Transition Test',
-            '--domain', 'java',
-            '--phases', 'init,refine,execute,finalize'
+            '--phases', 'init,outline,plan,execute,finalize'
         )
         run_script(SCRIPT_PATH, 'transition',
             '--plan-id', 'transition-routing',
@@ -163,8 +164,8 @@ def test_get_routing_context_after_transition():
         )
         assert result.success, f"Script failed: {result.stderr}"
         data = parse_toon(result.stdout)
-        assert data['current_phase'] == 'refine'
-        assert data['skill'] == 'plan-refine'
+        assert data['current_phase'] == 'outline'
+        assert data['skill'] == 'solution-outline'
         assert data['completed_phases'] == 1
 
 
@@ -194,11 +195,18 @@ def test_list_with_plan():
         run_script(SCRIPT_PATH, 'create',
             '--plan-id', 'list-plan',
             '--title', 'List Test',
-            '--domain', 'generic',
             '--phases', 'init,execute,finalize'
         )
         result = run_script(SCRIPT_PATH, 'list')
         assert result.success, f"Script failed: {result.stderr}"
+        data = parse_toon(result.stdout)
+        assert data['total'] >= 1
+        # Find our plan in the list
+        plan_ids = [p['id'] for p in data['plans']]
+        assert 'list-plan' in plan_ids
+        # Domain should NOT be in list output (removed from status.toon)
+        for plan in data['plans']:
+            assert 'domain' not in plan
 
 
 # =============================================================================
@@ -209,10 +217,9 @@ if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
         # Create command
-        test_create_java_plan,
-        test_create_generic_plan,
-        test_create_plan_invalid_domain,
-        test_create_plugin_plan,
+        test_create_plan,
+        test_create_plan_custom_phases,
+        test_create_plan_force_overwrite,
         # Phase operations
         test_set_phase,
         test_read_plan,

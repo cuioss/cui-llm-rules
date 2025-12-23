@@ -214,10 +214,9 @@ def test_create_or_reference_existing_plan():
 def test_create_or_reference_existing_with_status():
     """Test create-or-reference returns phase info when status.toon exists."""
     with TestContext(plan_id='status-plan') as ctx:
-        # Create status.toon with phase info
+        # Create status.toon with phase info (domain is in config.toon, not status.toon)
         status_content = """title: Test Plan
-domain: java
-current_phase: refine
+current_phase: outline
 """
         (ctx.plan_dir / 'status.toon').write_text(status_content)
 
@@ -228,8 +227,9 @@ current_phase: refine
         data = parse_toon(result.stdout)
         assert data['status'] == 'success'
         assert data['action'] == 'exists'
-        assert data['current_phase'] == 'refine'
-        assert data['domain'] == 'java'
+        assert data['current_phase'] == 'outline'
+        # Domain should NOT be in output (stored in config.toon, not status.toon)
+        assert 'domain' not in data
 
 
 def test_create_or_reference_invalid_plan_id():

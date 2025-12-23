@@ -226,17 +226,16 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 ### Step 8: Create Status
 
-Create status.toon with detected domain and phases:
+Create status.toon with phases (5-phase model):
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle create \
   --plan-id {plan_id} \
   --title "{title_from_task_md}" \
-  --domain {domain} \
-  --phases init,refine,execute,finalize
+  --phases init,outline,plan,execute,finalize
 ```
 
-**Note**: Phases depend on domain. Use standard 4-phase for java/javascript/plan-marshall-plugin-dev, 3-phase (init,execute,finalize) for generic.
+**Note**: Domain information is stored in `config.toon` (as a `domains` array), not in `status.toon`. All plans use the standard 5-phase model.
 
 ### Step 9: Create Configuration
 
@@ -266,7 +265,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 
 ### Step 11: Transition Phase
 
-The phase transitions from init → refine after configuration completes:
+The phase transitions from init → outline after configuration completes:
 
 ```bash
 python3 .plan/execute-script.py pm-workflow:manage-lifecycle:manage-lifecycle transition \
@@ -289,7 +288,7 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 status: success
 plan_id: {plan_id}
 domain: {domain}
-next_phase: refine
+next_phase: outline
 
 source:
   type: {description|lesson|issue}
@@ -366,7 +365,7 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 
 ### Related Skills
 
-- **plan-refine** - Next phase after init completes
+- **solution-outline** - Next phase after init completes (outline phase)
 - **Domain skills** - Loaded by thin agents via marshal.json workflow_skills (resolved at runtime)
 
 ---
