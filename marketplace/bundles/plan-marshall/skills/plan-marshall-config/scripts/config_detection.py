@@ -10,7 +10,6 @@ from pathlib import Path
 
 from config_defaults import (
     BUILD_SYSTEM_DEFAULTS,
-    DOMAIN_DEFAULTS,
     DOMAIN_TEMPLATES,
     DEFAULT_PROFILES,
 )
@@ -65,11 +64,11 @@ def detect_domains() -> dict:
     if (project_root / 'pom.xml').exists() or \
        (project_root / 'build.gradle').exists() or \
        (project_root / 'build.gradle.kts').exists():
-        detected['java'] = copy.deepcopy(DOMAIN_DEFAULTS['java'])
+        detected['java'] = copy.deepcopy(DOMAIN_TEMPLATES['java'])
 
     # JavaScript detection: package.json
     if (project_root / 'package.json').exists():
-        detected['javascript'] = copy.deepcopy(DOMAIN_DEFAULTS['javascript'])
+        detected['javascript'] = copy.deepcopy(DOMAIN_TEMPLATES['javascript'])
 
     return detected
 

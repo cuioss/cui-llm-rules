@@ -4,16 +4,14 @@ Init command handler for plan-marshall-config.
 Handles: init
 """
 
-import json
-
 from config_core import (
-    DEFAULTS_TEMPLATE,
     MARSHAL_PATH,
     is_initialized,
     save_config,
     error_exit,
     success_exit,
 )
+from config_defaults import get_default_config
 from config_detection import detect_build_systems, detect_domains
 
 
@@ -22,11 +20,7 @@ def cmd_init(args) -> int:
     if is_initialized() and not getattr(args, 'force', False):
         return error_exit("marshal.json already exists. Use --force to overwrite.")
 
-    # Copy from template
-    if not DEFAULTS_TEMPLATE.exists():
-        return error_exit(f"Template not found: {DEFAULTS_TEMPLATE}")
-
-    config = json.loads(DEFAULTS_TEMPLATE.read_text(encoding='utf-8'))
+    config = get_default_config()
 
     # Auto-detect build systems
     detected_bs = detect_build_systems()

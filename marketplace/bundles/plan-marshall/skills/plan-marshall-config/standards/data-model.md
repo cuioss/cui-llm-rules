@@ -575,12 +575,12 @@ CI provider configuration (project-level, shared via git).
 
 Tool availability (`authenticated_tools`) is stored in `run-configuration.json` (local, not shared via git) since it varies per developer machine. See run-config skill for the `ci` section schema.
 
-## Template Location
+## Default Values
 
-Default values are provided by:
+Default values are defined in:
 
 ```
-plan-marshall/skills/plan-marshall-config/templates/marshal-defaults.json
+plan-marshall/skills/plan-marshall-config/scripts/config_defaults.py
 ```
 
-Copied to `.plan/marshal.json` during `init`.
+The `get_default_config()` function returns the complete default configuration used during `init`.

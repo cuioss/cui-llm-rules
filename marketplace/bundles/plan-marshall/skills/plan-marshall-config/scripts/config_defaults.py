@@ -30,6 +30,23 @@ DEFAULT_SYSTEM_DOMAIN = {
     "workflow_skills": DEFAULT_SYSTEM_WORKFLOW_SKILLS
 }
 
+# System retention defaults
+DEFAULT_SYSTEM_RETENTION = {
+    "logs_days": 1,
+    "archived_plans_days": 5,
+    "memory_days": 5,
+    "temp_on_maintenance": True
+}
+
+# Plan defaults
+DEFAULT_PLAN_DEFAULTS = {
+    "compatibility": "breaking",
+    "commit_strategy": "phase-specific",
+    "create_pr": False,
+    "verification_required": True,
+    "branch_strategy": "direct"
+}
+
 # Build system defaults (detection reference only - commands are in modules)
 BUILD_SYSTEM_DEFAULTS = {
     "maven": {
@@ -61,14 +78,6 @@ DOMAIN_TEMPLATES = {
             "defaults": ["pm-dev-java:java-core"],
             "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
         },
-        "architecture": {
-            "defaults": ["pm-dev-java:java-packages"],
-            "optionals": []
-        },
-        "planning": {
-            "defaults": [],
-            "optionals": []
-        },
         "implementation": {
             "defaults": [],
             "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
@@ -90,14 +99,6 @@ DOMAIN_TEMPLATES = {
         "core": {
             "defaults": ["pm-dev-frontend:cui-javascript"],
             "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
-        },
-        "architecture": {
-            "defaults": [],
-            "optionals": []
-        },
-        "planning": {
-            "defaults": [],
-            "optionals": []
         },
         "implementation": {
             "defaults": [],
@@ -121,14 +122,6 @@ DOMAIN_TEMPLATES = {
             "defaults": ["pm-plugin-development:plugin-architecture"],
             "optionals": []
         },
-        "architecture": {
-            "defaults": [],
-            "optionals": []
-        },
-        "planning": {
-            "defaults": [],
-            "optionals": []
-        },
         "implementation": {
             "defaults": [],
             "optionals": []
@@ -144,6 +137,23 @@ DOMAIN_TEMPLATES = {
     }
 }
 
-# Legacy DOMAIN_DEFAULTS for backward compatibility
-# New code should use DOMAIN_TEMPLATES
-DOMAIN_DEFAULTS = DOMAIN_TEMPLATES
+
+def get_default_config() -> dict:
+    """Get complete default marshal.json configuration.
+
+    Returns a new dict each time to avoid mutation issues.
+    """
+    import copy
+    return {
+        "skill_domains": {
+            "system": copy.deepcopy(DEFAULT_SYSTEM_DOMAIN)
+        },
+        "modules": {},
+        "build_systems": [],
+        "system": {
+            "retention": copy.deepcopy(DEFAULT_SYSTEM_RETENTION)
+        },
+        "plan": {
+            "defaults": copy.deepcopy(DEFAULT_PLAN_DEFAULTS)
+        }
+    }

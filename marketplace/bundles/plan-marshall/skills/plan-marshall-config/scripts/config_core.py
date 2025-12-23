@@ -26,10 +26,6 @@ PLAN_BASE_DIR = Path(os.environ.get('PLAN_BASE_DIR', '.plan'))
 MARSHAL_PATH = PLAN_BASE_DIR / 'marshal.json'
 RUN_CONFIG_PATH = PLAN_BASE_DIR / 'run-configuration.json'
 
-# Template location
-TEMPLATES_DIR = Path(__file__).parent.parent / 'templates'
-DEFAULTS_TEMPLATE = TEMPLATES_DIR / 'marshal-defaults.json'
-
 
 class MarshalNotInitializedError(Exception):
     """Raised when marshal.json doesn't exist and operation requires it."""
