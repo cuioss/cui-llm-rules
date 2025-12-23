@@ -235,11 +235,3 @@ python3 .plan/execute-script.py plan-marshall:logging:manage-log \
 - **plan-init** - Creates plan structure (request.md, config, status)
 - **plan-refine** - Creates solution outline and tasks from request
 
----
-
-## Quality Checklist
-
-- [x] Self-contained with relative paths
-- [x] All file I/O delegated to manage-* skills
-- [x] DUMB TASK RUNNER pattern
-- [x] Handles execute and finalize phases

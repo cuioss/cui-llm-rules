@@ -166,13 +166,3 @@ Read references/error-handling.md
 ```
 Apply the recovery guidance for the specific error type.
 
----
-
-## Quality Checklist
-
-- [x] Detects first-run vs returning user
-- [x] Bootstrap mechanism for executor generation
-- [x] Progressive disclosure via deferred loading
-- [x] Interactive menu for returning users
-- [x] Shared skill domain configuration (no duplication)
-- [x] TOON output format (see output-format.md)

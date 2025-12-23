@@ -186,38 +186,23 @@ python3 .plan/execute-script.py pm-workflow:manage-references:manage-references 
 
 ### Step 7: Detect Domain
 
-Determine domain from task analysis.
+Query configured domains from marshal.json and select appropriate domain for the task.
 
-| Indicator | Domain |
-|-----------|--------|
-| Java code, Maven/Gradle, .java files | `java` |
-| JavaScript, npm, .js/.ts files | `javascript` |
-| Plugin/skill/command development | `plan-marshall-plugin-dev` |
-| Generic/simple task | `generic` |
+**If domain parameter provided**: Use override value directly.
 
-**If domain parameter provided**: Use override value.
+**Otherwise**, query available domains:
 
-**If uncertain**, ask:
-
-```
-AskUserQuestion:
-  question: "What technology stack does this task primarily involve?"
-  options:
-    - label: "Java"
-      description: "Java code with Maven or Gradle"
-      value: "java"
-    - label: "JavaScript"
-      description: "JavaScript/TypeScript with npm"
-      value: "javascript"
-    - label: "Plugin Development"
-      description: "Claude Code plugin components"
-      value: "plan-marshall-plugin-dev"
-    - label: "Generic"
-      description: "Generic task, no specific technology"
-      value: "generic"
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  skill-domains list
 ```
 
-**After detecting domain**, log the decision with reasoning:
+**Domain selection logic**:
+1. If only one non-system domain configured → use it automatically
+2. If task context clearly matches one domain → use it
+3. Otherwise, ask user to select from configured domains via AskUserQuestion
+
+**After selecting domain**, log the decision:
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
@@ -376,14 +361,3 @@ This skill is called by `pm-workflow:plan-init-agent`. The agent completes the f
 |----------|---------|
 | `templates/request.md` | request.md file format |
 
----
-
-## Quality Checklist
-
-- [x] Self-contained with relative paths
-- [x] All file I/O delegated to manage-* scripts
-- [x] Preserves original task input verbatim
-- [x] Supports all three source types
-- [x] Creates config.toon with domain and finalize fields
-- [x] Creates status.toon with phases
-- [x] Does NOT create goals (that's refine phase)

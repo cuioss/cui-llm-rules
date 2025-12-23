@@ -252,12 +252,3 @@ When creating scripts that access cross-domain resources:
 4. [ ] Return clear error if resource not found
 5. [ ] Document the expected ID format in help text
 
----
-
-## Quality Checklist
-
-- [x] Self-contained with relative paths
-- [x] Stdlib-only (no external dependencies)
-- [x] JSON output format
-- [x] Comprehensive test coverage
-- [x] Error handling for all scenarios
