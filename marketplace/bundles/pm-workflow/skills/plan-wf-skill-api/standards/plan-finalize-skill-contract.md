@@ -2,6 +2,10 @@
 
 Workflow skill for finalize phase - verifies work, creates findings, delegates fixes.
 
+**Implementation**: `pm-workflow:plan-finalize`
+
+---
+
 ## Purpose
 
 The finalize skill:

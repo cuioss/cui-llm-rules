@@ -2,6 +2,8 @@
 
 Initialize plan structure with status.toon, config.toon, and references.toon.
 
+**Implementation**: `pm-workflow:plan-init`
+
 ---
 
 ## Purpose

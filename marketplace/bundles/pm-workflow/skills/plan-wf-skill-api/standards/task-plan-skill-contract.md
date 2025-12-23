@@ -2,6 +2,10 @@
 
 Workflow skill for plan phase - transforms solution outline deliverables into optimized, committable tasks.
 
+**Implementation**: `pm-workflow:task-plan`
+
+---
+
 ## Purpose
 
 Task plan skills analyze solution outline deliverables and create optimized tasks. Each task represents a committable unit of work with explicit domain, profile, and pre-resolved skills fields.

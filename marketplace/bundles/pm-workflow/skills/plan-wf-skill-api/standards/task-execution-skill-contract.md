@@ -2,6 +2,10 @@
 
 Workflow skill for execute phase - implements tasks using two-tier skill loading.
 
+**Implementation**: `pm-workflow:plan-execute`
+
+---
+
 ## Purpose
 
 Task execution skills:

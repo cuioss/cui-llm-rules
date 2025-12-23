@@ -2,6 +2,8 @@
 
 Workflow skill for outline phase - transforms requests into solution outlines with deliverables.
 
+**Implementation**: `pm-workflow:solution-outline`
+
 ---
 
 ## Purpose
