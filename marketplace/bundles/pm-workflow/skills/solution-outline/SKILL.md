@@ -2,6 +2,7 @@
 name: solution-outline
 description: Domain-agnostic solution outline creation for thin agent workflow pattern
 allowed-tools: Read, Glob, Grep, Bash
+implements: pm-workflow:plan-wf-skill-api/solution-outline-skill-contract
 ---
 
 # Solution Outline Skill

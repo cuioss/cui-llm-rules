@@ -2,6 +2,7 @@
 name: plan-init
 description: Init phase skill. Creates plan directory, request.md, config, and status. Complete initialization in a single agent call.
 allowed-tools: Read, Bash, Skill, AskUserQuestion
+implements: pm-workflow:plan-wf-skill-api/plan-init-skill-contract
 ---
 
 # Plan Init Skill

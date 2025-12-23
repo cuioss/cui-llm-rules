@@ -2,6 +2,7 @@
 name: task-plan
 description: Domain-agnostic task planning from deliverables with skill resolution and optimization
 allowed-tools: Read, Bash
+implements: pm-workflow:plan-wf-skill-api/task-plan-skill-contract
 ---
 
 # Task Plan Skill
