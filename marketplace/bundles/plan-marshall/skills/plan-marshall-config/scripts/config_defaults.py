@@ -11,7 +11,7 @@ project initialization and detection.
 # core: Core skills loaded for all profiles
 RESERVED_DOMAIN_KEYS = ['workflow_skills', 'workflow_skill_extensions', 'core', 'defaults', 'optionals']
 
-# 5-phase workflow model
+# Skill profiles for technical domains (map to workflow phases)
 DEFAULT_PROFILES = ['architecture', 'planning', 'implementation', 'testing', 'quality']
 
 # System workflow skills (always from system domain)
