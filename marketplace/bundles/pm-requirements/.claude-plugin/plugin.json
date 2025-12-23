@@ -18,6 +18,7 @@
     "./skills/planning",
     "./skills/requirements-authoring",
     "./skills/setup",
-    "./skills/traceability"
+    "./skills/traceability",
+    "./skills/plan-marshall-plugin"
   ]
 }

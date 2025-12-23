@@ -4,6 +4,11 @@ Skill domains command handlers for plan-marshall-config.
 Handles: skill-domains, resolve-domain-skills, get-workflow-skills
 """
 
+import json
+import os
+import subprocess
+from pathlib import Path
+
 from config_core import (
     EXIT_ERROR,
     MarshalNotInitializedError,
@@ -18,10 +23,229 @@ from config_core import (
 from config_defaults import (
     RESERVED_DOMAIN_KEYS,
     DEFAULT_SYSTEM_DOMAIN,
-    DOMAIN_TEMPLATES,
-    BUILD_SYSTEM_TO_DOMAIN,
 )
 from config_detection import detect_domains
+
+
+def get_plugin_cache_path() -> Path:
+    """Get the plugin cache path."""
+    env_path = os.environ.get("PLUGIN_CACHE_PATH")
+    if env_path:
+        return Path(env_path)
+    return Path.home() / ".claude" / "plugins" / "cache" / "plan-marshall"
+
+
+def discover_available_domains() -> dict:
+    """Call discover_domains.py and parse TOON output.
+
+    Returns dict with 'domains' and 'supplements' lists.
+    """
+    plugin_cache = get_plugin_cache_path()
+
+    # Find the discover_domains.py script
+    # Try non-versioned path first (standard structure)
+    script_path = plugin_cache / "plan-marshall" / "skills" / "domain-extension-api" / "scripts" / "discover_domains.py"
+    if not script_path.exists():
+        # Fall back to versioned path
+        script_path = plugin_cache / "plan-marshall" / "1.0.0" / "skills" / "domain-extension-api" / "scripts" / "discover_domains.py"
+
+    if not script_path.exists():
+        return {"domains": [], "supplements": [], "error": "discover_domains.py not found"}
+
+    try:
+        result = subprocess.run(
+            ["python3", str(script_path), "discover"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            env={**os.environ, "PLUGIN_CACHE_PATH": str(plugin_cache)}
+        )
+        if result.returncode != 0:
+            return {"domains": [], "supplements": [], "error": result.stderr}
+
+        # Parse TOON output
+        return parse_discover_toon_output(result.stdout)
+    except subprocess.TimeoutExpired:
+        return {"domains": [], "supplements": [], "error": "Discovery timed out"}
+    except Exception as e:
+        return {"domains": [], "supplements": [], "error": str(e)}
+
+
+def parse_discover_toon_output(output: str) -> dict:
+    """Parse TOON output from discover_domains.py.
+
+    Expected format:
+    status: success
+    domains_found: N
+    supplements_found: M
+
+    domains[N]{key,name,bundle,has_outline,has_triage}:
+    java\tJava Development\tpm-dev-java\ttrue\ttrue
+    ...
+
+    supplements[M]{domain,bundle,description}:
+    java\tpm-dev-java-cui\tCUI-specific Java patterns
+    ...
+    """
+    domains = []
+    supplements = []
+    current_section = None
+
+    for line in output.strip().split("\n"):
+        line = line.strip()
+        if not line:
+            current_section = None
+            continue
+
+        # Detect section headers
+        if line.startswith("domains[") and "]{" in line:
+            current_section = "domains"
+            continue
+        elif line.startswith("supplements[") and "]{" in line:
+            current_section = "supplements"
+            continue
+        elif ":" in line and "\t" not in line:
+            # Header line like "status: success"
+            continue
+
+        # Parse data rows
+        if current_section == "domains" and "\t" in line:
+            parts = line.split("\t")
+            if len(parts) >= 5:
+                domains.append({
+                    "key": parts[0],
+                    "name": parts[1],
+                    "bundle": parts[2],
+                    "has_outline": parts[3] == "true",
+                    "has_triage": parts[4] == "true"
+                })
+        elif current_section == "supplements" and "\t" in line:
+            parts = line.split("\t")
+            if len(parts) >= 3:
+                supplements.append({
+                    "domain": parts[0],
+                    "bundle": parts[1],
+                    "description": parts[2]
+                })
+
+    return {"domains": domains, "supplements": supplements}
+
+
+def load_domain_config_from_bundle(domain_key: str) -> dict | None:
+    """Load domain configuration from bundle's plan-marshall-plugin manifest.
+
+    Args:
+        domain_key: Domain key to look for (e.g., 'java', 'javascript')
+
+    Returns:
+        Domain config dict or None if not found
+    """
+    discovery = discover_available_domains()
+    domains = discovery.get("domains", [])
+
+    # Find the bundle for this domain
+    for domain in domains:
+        if domain.get("key") == domain_key:
+            bundle_name = domain.get("bundle")
+            if bundle_name:
+                return load_manifest_from_bundle(bundle_name)
+    return None
+
+
+def load_manifest_from_bundle(bundle_name: str) -> dict | None:
+    """Load plan-marshall-plugin manifest from a bundle.
+
+    Args:
+        bundle_name: Name of the bundle (e.g., 'pm-dev-java')
+
+    Returns:
+        Manifest dict or None if not found
+    """
+    plugin_cache = get_plugin_cache_path()
+
+    # Try non-versioned path first
+    manifest_path = plugin_cache / bundle_name / "skills" / "plan-marshall-plugin" / "plugin.json"
+    if not manifest_path.exists():
+        # Try versioned path
+        manifest_path = plugin_cache / bundle_name / "1.0.0" / "skills" / "plan-marshall-plugin" / "plugin.json"
+
+    if not manifest_path.exists():
+        return None
+
+    try:
+        with open(manifest_path) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def convert_manifest_to_domain_config(manifest: dict) -> dict:
+    """Convert bundle manifest to skill_domains config format.
+
+    Args:
+        manifest: Domain manifest from plugin.json
+
+    Returns:
+        Config dict compatible with marshal.json skill_domains
+    """
+    config = {}
+
+    # Extract extensions
+    extensions = manifest.get("extensions", {})
+    if extensions:
+        config["workflow_skill_extensions"] = {}
+        if "outline" in extensions:
+            config["workflow_skill_extensions"]["outline"] = extensions["outline"]
+        if "triage" in extensions:
+            config["workflow_skill_extensions"]["triage"] = extensions["triage"]
+
+    # Extract profiles
+    profiles = manifest.get("profiles", {})
+    for profile_name in ["core", "implementation", "testing", "quality"]:
+        if profile_name in profiles:
+            config[profile_name] = {
+                "defaults": profiles[profile_name].get("defaults", []),
+                "optionals": profiles[profile_name].get("optionals", [])
+            }
+
+    return config
+
+
+def merge_supplement_config(domain_config: dict, supplement_manifest: dict) -> dict:
+    """Merge supplement skills into domain config as optionals.
+
+    Args:
+        domain_config: Existing domain configuration
+        supplement_manifest: Supplement manifest from plugin.json
+
+    Returns:
+        Updated domain config with merged supplement skills
+    """
+    import copy
+    merged = copy.deepcopy(domain_config)
+
+    supplements = supplement_manifest.get("supplements", {})
+    supplement_skills = supplements.get("skills", {})
+
+    for profile_name in ["core", "implementation", "testing", "quality"]:
+        if profile_name in supplement_skills:
+            profile_data = supplement_skills[profile_name]
+
+            # Ensure profile exists in merged config
+            if profile_name not in merged:
+                merged[profile_name] = {"defaults": [], "optionals": []}
+
+            # Add defaults from supplement as optionals (supplements shouldn't force defaults)
+            supplement_defaults = profile_data.get("defaults", [])
+            supplement_optionals = profile_data.get("optionals", [])
+
+            # Merge into optionals, avoiding duplicates
+            existing_optionals = set(merged[profile_name].get("optionals", []))
+            for skill in supplement_defaults + supplement_optionals:
+                if skill not in existing_optionals:
+                    merged[profile_name]["optionals"].append(skill)
+
+    return merged
 
 
 def cmd_skill_domains(args) -> int:
@@ -226,68 +450,84 @@ def cmd_skill_domains(args) -> int:
             })
 
     elif args.verb == 'detect':
-        detected = detect_domains()
-        # Add detected domains to config
-        for domain_name, domain_config in detected.items():
-            if domain_name not in skill_domains:
-                skill_domains[domain_name] = domain_config
+        detected_keys = detect_domains()  # Returns list of domain keys
+        # Load configs from discovery for detected domains
+        for domain_key in detected_keys:
+            if domain_key not in skill_domains:
+                domain_config = load_domain_config_from_bundle(domain_key)
+                if domain_config:
+                    skill_domains[domain_key] = domain_config
         save_config(config)
-        detected_names = list(detected.keys())
         return success_exit({
-            "detected": detected_names,
-            "count": len(detected_names),
-            "message": f"Detected domains: {', '.join(detected_names)}" if detected_names else "No domains detected"
+            "detected": detected_keys,
+            "count": len(detected_keys),
+            "message": f"Detected domains: {', '.join(detected_keys)}" if detected_keys else "No domains detected"
         })
 
     elif args.verb == 'get-available':
-        # Read build_systems from marshal.json to determine available domains
-        build_systems = config.get('build_systems', [])
-        build_system_names = [bs.get('system', '') for bs in build_systems]
+        # Use dynamic discovery to find available domains and supplements
+        discovery = discover_available_domains()
 
-        detected = []
-        for system in build_system_names:
-            if system in BUILD_SYSTEM_TO_DOMAIN:
-                domain_key = BUILD_SYSTEM_TO_DOMAIN[system]
-                if domain_key not in [d['key'] for d in detected]:
-                    detected.append({
-                        'key': domain_key,
-                        'name': f"{domain_key.title()} Development",
-                        'build_system': system
-                    })
+        result = {
+            'discovered_domains': discovery.get("domains", []),
+            'supplements': discovery.get("supplements", [])
+        }
+        if "error" in discovery and discovery["error"]:
+            result['error'] = discovery["error"]
 
-        # Optional domains (always available)
-        optional = [
-            {'key': 'requirements', 'name': 'Requirements Engineering'},
-            {'key': 'documentation', 'name': 'Documentation'},
-        ]
-
-        return success_exit({
-            'detected_domains': detected,
-            'optional_domains': optional
-        })
+        return success_exit(result)
 
     elif args.verb == 'configure':
         import copy
         selected_domains = [d.strip() for d in args.domains.split(',') if d.strip()]
+        selected_supplements = []
+        if hasattr(args, 'supplements') and args.supplements:
+            selected_supplements = [s.strip() for s in args.supplements.split(',') if s.strip()]
 
         # Always add system domain with workflow_skills
         skill_domains['system'] = copy.deepcopy(DEFAULT_SYSTEM_DOMAIN)
 
-        # Apply domain templates for each selected domain
+        # Apply domain config for each selected domain from bundle manifests
         domains_configured = []
+        domains_not_found = []
+
         for domain_key in selected_domains:
-            if domain_key in DOMAIN_TEMPLATES:
-                skill_domains[domain_key] = copy.deepcopy(DOMAIN_TEMPLATES[domain_key])
+            # Load from bundle manifest
+            manifest = load_domain_config_from_bundle(domain_key)
+            if manifest:
+                domain_config = convert_manifest_to_domain_config(manifest)
+                skill_domains[domain_key] = domain_config
                 domains_configured.append(domain_key)
+            else:
+                domains_not_found.append(domain_key)
+
+        # Apply supplements to their target domains
+        supplements_applied = []
+        for supplement_bundle in selected_supplements:
+            supplement_manifest = load_manifest_from_bundle(supplement_bundle)
+            if supplement_manifest and "supplements" in supplement_manifest:
+                target_domain = supplement_manifest["supplements"].get("domain")
+                if target_domain and target_domain in skill_domains:
+                    skill_domains[target_domain] = merge_supplement_config(
+                        skill_domains[target_domain],
+                        supplement_manifest
+                    )
+                    supplements_applied.append(f"{supplement_bundle}→{target_domain}")
 
         config['skill_domains'] = skill_domains
         save_config(config)
 
-        return success_exit({
+        result = {
             'system_domain': 'configured',
             'domains_configured': len(domains_configured),
             'domains': ','.join(domains_configured)
-        })
+        }
+        if domains_not_found:
+            result['domains_not_found'] = ','.join(domains_not_found)
+        if supplements_applied:
+            result['supplements_applied'] = ','.join(supplements_applied)
+
+        return success_exit(result)
 
     return EXIT_ERROR
 

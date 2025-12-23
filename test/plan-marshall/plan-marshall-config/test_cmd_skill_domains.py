@@ -658,10 +658,10 @@ def test_set_extensions():
 # get-available / configure Tests
 # =============================================================================
 
-def test_get_available_with_maven():
-    """Test get-available returns java domain for maven build system."""
+def test_get_available_uses_discovery():
+    """Test get-available uses discovery for domains (no longer tied to build system)."""
     with PlanTestContext() as ctx:
-        # Create marshal.json with maven build system
+        # Create marshal.json - build_systems no longer affect get-available
         config = {
             "skill_domains": {"system": {"defaults": []}},
             "modules": {},
@@ -675,12 +675,13 @@ def test_get_available_with_maven():
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get-available')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'java' in result.stdout.lower()
-        assert 'detected_domains' in result.stdout
+        # New format uses discovered_domains and supplements
+        assert 'discovered_domains' in result.stdout
+        assert 'supplements' in result.stdout
 
 
-def test_get_available_optional_domains():
-    """Test get-available always includes optional domains."""
+def test_get_available_returns_supplements():
+    """Test get-available includes supplements section."""
     with PlanTestContext() as ctx:
         config = {
             "skill_domains": {"system": {"defaults": []}},
@@ -695,8 +696,9 @@ def test_get_available_optional_domains():
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get-available')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'optional_domains' in result.stdout
-        assert 'requirements' in result.stdout.lower()
+        # New format: discovered_domains and supplements (from bundle manifests)
+        assert 'discovered_domains' in result.stdout
+        assert 'supplements' in result.stdout
 
 
 def test_configure_domains():
@@ -821,8 +823,8 @@ if __name__ == '__main__':
         test_get_extensions_unknown_domain,
         test_set_extensions,
         # get-available / configure tests
-        test_get_available_with_maven,
-        test_get_available_optional_domains,
+        test_get_available_uses_discovery,
+        test_get_available_returns_supplements,
         test_configure_domains,
         test_configure_always_adds_system,
         # set with --profile tests

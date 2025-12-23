@@ -39,6 +39,7 @@
     "./skills/junit-integration",
     "./skills/javadoc",
     "./skills/java-maintenance",
-    "./skills/java-triage"
+    "./skills/java-triage",
+    "./skills/plan-marshall-plugin"
   ]
 }

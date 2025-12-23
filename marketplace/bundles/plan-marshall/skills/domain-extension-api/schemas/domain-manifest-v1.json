@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/cuioss/cui-llm-rules/main/marketplace/bundles/plan-marshall/skills/domain-extension-api/schemas/domain-manifest-v1.json",
+  "title": "Domain Manifest",
+  "description": "Schema for bundle domain capability manifests",
+  "type": "object",
+  "required": ["$schema", "domain", "profiles"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema URL (version encoded in name)",
+      "pattern": ".*domain-manifest-v1\\.json$"
+    },
+    "domain": {
+      "type": "object",
+      "description": "Domain identification",
+      "required": ["key", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Domain identifier (kebab-case)",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Description for UI"
+        }
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Workflow extension references",
+      "additionalProperties": false,
+      "properties": {
+        "outline": {
+          "type": "string",
+          "description": "Outline extension skill reference (bundle:skill)",
+          "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$"
+        },
+        "triage": {
+          "type": "string",
+          "description": "Triage extension skill reference (bundle:skill)",
+          "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$"
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "description": "Profile-based skill organization",
+      "required": ["core"],
+      "additionalProperties": false,
+      "properties": {
+        "core": {
+          "$ref": "#/$defs/profile",
+          "description": "Core skills loaded for all profiles"
+        },
+        "implementation": {
+          "$ref": "#/$defs/profile",
+          "description": "Production code implementation skills"
+        },
+        "testing": {
+          "$ref": "#/$defs/profile",
+          "description": "Test code skills"
+        },
+        "quality": {
+          "$ref": "#/$defs/profile",
+          "description": "Documentation and verification skills"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "required": ["defaults", "optionals"],
+      "additionalProperties": false,
+      "properties": {
+        "defaults": {
+          "type": "array",
+          "description": "Skills loaded by default for this profile",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$"
+          }
+        },
+        "optionals": {
+          "type": "array",
+          "description": "Skills available as options for this profile",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$"
+          }
+        }
+      }
+    }
+  }
+}

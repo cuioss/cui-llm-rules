@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/cuioss/cui-llm-rules/main/marketplace/bundles/plan-marshall/skills/domain-extension-api/schemas/domain-supplements-v1.json",
+  "title": "Domain Supplements Manifest",
+  "description": "Schema for bundle supplement capability manifests",
+  "type": "object",
+  "required": ["$schema", "supplements"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema URL (version encoded in name)",
+      "pattern": ".*domain-supplements-v1\\.json$"
+    },
+    "supplements": {
+      "type": "object",
+      "description": "Supplement configuration",
+      "required": ["domain", "skills"],
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "Target domain key to supplement",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description for wizard UI"
+        },
+        "skills": {
+          "type": "object",
+          "description": "Profile-to-skills mapping",
+          "additionalProperties": false,
+          "properties": {
+            "core": {
+              "$ref": "#/$defs/supplementProfile",
+              "description": "Skills to add to core profile"
+            },
+            "implementation": {
+              "$ref": "#/$defs/supplementProfile",
+              "description": "Skills to add to implementation profile"
+            },
+            "testing": {
+              "$ref": "#/$defs/supplementProfile",
+              "description": "Skills to add to testing profile"
+            },
+            "quality": {
+              "$ref": "#/$defs/supplementProfile",
+              "description": "Skills to add to quality profile"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "supplementProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defaults": {
+          "type": "array",
+          "description": "Skills added to defaults",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$"
+          }
+        },
+        "optionals": {
+          "type": "array",
+          "description": "Skills added to optionals",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$"
+          }
+        }
+      }
+    }
+  }
+}

@@ -28,6 +28,7 @@
     "./skills/cui-javascript-project",
     "./skills/cui-javascript-unit-testing",
     "./skills/cui-jsdoc",
-    "./skills/javascript-triage"
+    "./skills/javascript-triage",
+    "./skills/plan-marshall-plugin"
   ]
 }

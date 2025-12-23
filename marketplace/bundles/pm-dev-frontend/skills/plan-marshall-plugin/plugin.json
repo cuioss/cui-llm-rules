@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cuioss/cui-llm-rules/main/marketplace/bundles/plan-marshall/skills/domain-extension-api/schemas/domain-manifest-v1.json",
+  "domain": {
+    "key": "javascript",
+    "name": "JavaScript Development",
+    "description": "Modern JavaScript, ESLint, Jest testing, npm builds"
+  },
+  "extensions": {
+    "triage": "pm-dev-frontend:javascript-triage"
+  },
+  "profiles": {
+    "core": {
+      "defaults": ["pm-dev-frontend:cui-javascript"],
+      "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
+    },
+    "implementation": {
+      "defaults": [],
+      "optionals": ["pm-dev-frontend:cui-javascript-linting", "pm-dev-frontend:cui-javascript-maintenance"]
+    },
+    "testing": {
+      "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
+      "optionals": ["pm-dev-frontend:cui-cypress"]
+    },
+    "quality": {
+      "defaults": [],
+      "optionals": []
+    }
+  }
+}

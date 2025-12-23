@@ -4,13 +4,11 @@ Project detection functions for plan-marshall-config.
 Auto-detects build systems, domains, and modules from project files.
 """
 
-import copy
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from config_defaults import (
     BUILD_SYSTEM_DEFAULTS,
-    DOMAIN_TEMPLATES,
 )
 
 
@@ -50,24 +48,26 @@ def detect_build_systems() -> list:
     return detected
 
 
-def detect_domains() -> dict:
+def detect_domains() -> list:
     """Auto-detect technical domains from project files.
 
     Returns:
-        Dict mapping domain name to domain config (nested structure).
+        List of detected domain keys (e.g., ['java', 'javascript']).
+        Callers should use discovery to get actual domain configurations
+        from bundle manifests.
     """
-    detected = {}
+    detected = []
     project_root = Path('.')
 
     # Java detection: pom.xml or build.gradle
     if (project_root / 'pom.xml').exists() or \
        (project_root / 'build.gradle').exists() or \
        (project_root / 'build.gradle.kts').exists():
-        detected['java'] = copy.deepcopy(DOMAIN_TEMPLATES['java'])
+        detected.append('java')
 
     # JavaScript detection: package.json
     if (project_root / 'package.json').exists():
-        detected['javascript'] = copy.deepcopy(DOMAIN_TEMPLATES['javascript'])
+        detected.append('javascript')
 
     return detected
 

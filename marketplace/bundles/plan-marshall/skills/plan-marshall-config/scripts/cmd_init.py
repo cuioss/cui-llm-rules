@@ -13,6 +13,7 @@ from config_core import (
 )
 from config_defaults import get_default_config
 from config_detection import detect_build_systems, detect_domains
+from cmd_skill_domains import load_domain_config_from_bundle
 
 
 def cmd_init(args) -> int:
@@ -27,18 +28,20 @@ def cmd_init(args) -> int:
     if detected_bs:
         config['build_systems'] = detected_bs
 
-    # Auto-detect technical domains
-    detected_domains = detect_domains()
-    if detected_domains:
+    # Auto-detect technical domains (returns list of domain keys)
+    detected_keys = detect_domains()
+    if detected_keys:
         skill_domains = config.get('skill_domains', {})
-        for domain_name, domain_config in detected_domains.items():
-            if domain_name not in skill_domains:
-                skill_domains[domain_name] = domain_config
+        for domain_key in detected_keys:
+            if domain_key not in skill_domains:
+                domain_config = load_domain_config_from_bundle(domain_key)
+                if domain_config:
+                    skill_domains[domain_key] = domain_config
         config['skill_domains'] = skill_domains
 
     save_config(config)
     return success_exit({
         "created": str(MARSHAL_PATH),
         "build_systems_detected": len(detected_bs),
-        "domains_detected": list(detected_domains.keys())
+        "domains_detected": detected_keys
     })

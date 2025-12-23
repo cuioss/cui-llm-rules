@@ -63,82 +63,12 @@ BUILD_SYSTEM_DEFAULTS = {
     }
 }
 
-# Build system to domain mapping for detection
-BUILD_SYSTEM_TO_DOMAIN = {
-    "maven": "java",
-    "gradle": "java",
-    "npm": "javascript"
-}
-
-# Domain templates with profile-based structure
-DOMAIN_TEMPLATES = {
-    "java": {
-        "workflow_skill_extensions": {
-            "outline": "pm-dev-java:java-outline-ext",
-            "triage": "pm-dev-java:java-triage"
-        },
-        "core": {
-            "defaults": ["pm-dev-java:java-core"],
-            "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
-        },
-        "implementation": {
-            "defaults": [],
-            "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
-        },
-        "testing": {
-            "defaults": ["pm-dev-java:junit-core"],
-            "optionals": ["pm-dev-java:junit-integration"]
-        },
-        "quality": {
-            "defaults": ["pm-dev-java:javadoc"],
-            "optionals": []
-        }
-    },
-    "javascript": {
-        "workflow_skill_extensions": {
-            "outline": "pm-dev-frontend:js-outline-ext",
-            "triage": "pm-dev-frontend:javascript-triage"
-        },
-        "core": {
-            "defaults": ["pm-dev-frontend:cui-javascript"],
-            "optionals": ["pm-dev-frontend:cui-jsdoc", "pm-dev-frontend:cui-javascript-project"]
-        },
-        "implementation": {
-            "defaults": [],
-            "optionals": ["pm-dev-frontend:cui-javascript-linting", "pm-dev-frontend:cui-javascript-maintenance"]
-        },
-        "testing": {
-            "defaults": ["pm-dev-frontend:cui-javascript-unit-testing"],
-            "optionals": ["pm-dev-frontend:cui-cypress"]
-        },
-        "quality": {
-            "defaults": [],
-            "optionals": []
-        }
-    },
-    "plan-marshall-plugin-dev": {
-        "workflow_skill_extensions": {
-            "outline": "pm-plugin-development:plugin-outline-ext",
-            "triage": "pm-plugin-development:plugin-triage"
-        },
-        "core": {
-            "defaults": ["pm-plugin-development:plugin-architecture"],
-            "optionals": []
-        },
-        "implementation": {
-            "defaults": [],
-            "optionals": []
-        },
-        "testing": {
-            "defaults": [],
-            "optionals": []
-        },
-        "quality": {
-            "defaults": [],
-            "optionals": []
-        }
-    }
-}
+# NOTE: DOMAIN_TEMPLATES and BUILD_SYSTEM_TO_DOMAIN have been removed.
+# Domain configuration is now discovered from bundle manifests via
+# plan-marshall:domain-extension-api:discover_domains
+#
+# Each domain bundle contains skills/plan-marshall-plugin/plugin.json
+# with domain configuration. See domain-extension-api skill for details.
 
 
 def get_default_config() -> dict:

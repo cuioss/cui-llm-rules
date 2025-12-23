@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cuioss/cui-llm-rules/main/marketplace/bundles/plan-marshall/skills/domain-extension-api/schemas/domain-manifest-v1.json",
+  "domain": {
+    "key": "plugin-dev",
+    "name": "Plugin Development",
+    "description": "Claude Code marketplace component development"
+  },
+  "extensions": {
+    "triage": "pm-plugin-development:plugin-triage"
+  },
+  "profiles": {
+    "core": {
+      "defaults": ["pm-plugin-development:plugin-architecture"],
+      "optionals": ["pm-plugin-development:plugin-script-architecture"]
+    },
+    "implementation": {
+      "defaults": [],
+      "optionals": []
+    },
+    "testing": {
+      "defaults": [],
+      "optionals": []
+    },
+    "quality": {
+      "defaults": [],
+      "optionals": []
+    }
+  }
+}

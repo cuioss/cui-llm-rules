@@ -16,6 +16,7 @@
     "./skills/cui-logging",
     "./skills/cui-testing",
     "./skills/cui-http",
-    "./skills/cui-testing-http"
+    "./skills/cui-testing-http",
+    "./skills/plan-marshall-plugin"
   ]
 }

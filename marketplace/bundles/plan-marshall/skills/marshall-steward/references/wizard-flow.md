@@ -361,9 +361,9 @@ Use `lookup --build-system maven` or `lookup --build-system npm` to get specific
 
 ### Step 4d: Skill Domain Configuration
 
-Configure skill domains based on detected build systems. User selects which domains to enable.
+Configure skill domains using bundle discovery. Domains are auto-discovered from installed bundles.
 
-**Step 4d-1: Get available domains**
+**Step 4d-1: Discover available domains and supplements**
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
@@ -373,21 +373,30 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 **Output (TOON)**:
 ```toon
 status: success
-detected_domains[2]:
+discovered_domains[4]:
 - key: java
+  bundle: pm-dev-java
   name: Java Development
-  build_system: maven
+  description: Java code patterns, CDI, JUnit testing, Maven/Gradle builds
 - key: javascript
-  name: Javascript Development
-  build_system: npm
-optional_domains[2]:
+  bundle: pm-dev-frontend
+  name: JavaScript Development
+  description: Modern JavaScript, ESLint, Jest testing, npm builds
+- key: plugin-dev
+  bundle: pm-plugin-development
+  name: Plugin Development
+  description: Claude Code marketplace component development
 - key: requirements
+  bundle: pm-requirements
   name: Requirements Engineering
-- key: documentation
-  name: Documentation
+  description: User stories, acceptance criteria, specifications
+supplements[1]:
+- bundle: pm-dev-java-cui
+  target_domain: java
+  description: CUI-specific Java patterns for logging, testing, and HTTP
 ```
 
-**Step 4d-2: User selection**
+**Step 4d-2: User domain selection**
 
 ```yaml
 AskUserQuestion:
@@ -395,23 +404,53 @@ AskUserQuestion:
   header: "Skill Domains"
   multiSelect: true
   options:
-    # Build dynamically from get-available output
-    # Pre-select detected domains (those with build_system)
-    - label: "Java Development [DETECTED]"
-      description: "Java code patterns, CDI, JUnit (from Maven)"
-    - label: "JavaScript Development [DETECTED]"
-      description: "Modern JS, ESLint, Jest (from npm)"
+    # Build dynamically from discovered_domains
+    # Pre-select domains matching detected build systems
+    - label: "Java Development"
+      description: "Java code patterns, CDI, JUnit (pm-dev-java)"
+    - label: "JavaScript Development"
+      description: "Modern JS, ESLint, Jest (pm-dev-frontend)"
+    - label: "Plugin Development"
+      description: "Claude Code components (pm-plugin-development)"
     - label: "Requirements Engineering"
-      description: "User stories and acceptance criteria"
-    - label: "Documentation"
-      description: "Technical documentation standards"
+      description: "User stories and specs (pm-requirements)"
 ```
 
-**Step 4d-3: Configure selected domains**
+---
+
+### Step 4e: Supplement Selection
+
+Show supplements available for selected domains. Only displayed if supplements exist for any selected domain.
+
+**Step 4e-1: Filter supplements for selected domains**
+
+From `get-available` output, filter `supplements[]` where `target_domain` matches any selected domain.
+
+**Step 4e-2: User supplement selection**
+
+```yaml
+AskUserQuestion:
+  question: "Enable domain supplements? These add optional skills to your selected domains:"
+  header: "Supplements"
+  multiSelect: true
+  options:
+    # Build dynamically from filtered supplements
+    - label: "CUI Java Patterns"
+      description: "CUI logging, testing, HTTP for Java domain (pm-dev-java-cui)"
+```
+
+---
+
+### Step 4f: Configure selected domains with supplements
 
 ```bash
+# Without supplements
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
   skill-domains configure --domains "java,javascript"
+
+# With supplements
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  skill-domains configure --domains "java,javascript" --supplements "pm-dev-java-cui"
 ```
 
 **Output (TOON)**:
@@ -420,14 +459,16 @@ status: success
 system_domain: configured
 domains_configured: 2
 domains: java,javascript
+supplements_applied: 1
 ```
 
 This populates `skill_domains` in marshal.json with:
 - `system` domain (always) with workflow_skills for 5 phases
-- Each selected domain with nested structure:
+- Each selected domain with nested structure from bundle manifest:
   - `workflow_skill_extensions` (outline, triage)
   - `core` (defaults + optionals)
-  - 5 profile blocks (architecture, planning, implementation, testing, quality)
+  - Profile blocks (implementation, testing, quality)
+- Supplement skills merged as optionals in matching profiles
 
 ---
 

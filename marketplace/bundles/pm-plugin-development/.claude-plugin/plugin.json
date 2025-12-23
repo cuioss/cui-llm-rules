@@ -26,7 +26,8 @@
     "./skills/plugin-solution-outline",
     "./skills/plugin-task-plan",
     "./skills/plugin-triage",
-    "./skills/verification"
+    "./skills/verification",
+    "./skills/plan-marshall-plugin"
   ],
   "agents": [
     "./agents/tool-coverage-agent.md"

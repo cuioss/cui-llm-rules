@@ -463,6 +463,30 @@ Skill: plan-marshall:diagnostic-patterns
 
 **If violation found**: Flag as risky fix (requires manual intervention to add proper script call).
 
+### Step 3d: Validate plan-marshall-plugin Manifest
+
+**Conditional**: Only execute if skill name is `plan-marshall-plugin`.
+
+**Load reference**:
+```
+Read references/plan-marshall-plugin-validation.md
+```
+
+**Validation**:
+1. Extract bundle name from skill path: `marketplace/bundles/{bundle}/skills/plan-marshall-plugin`
+2. Run manifest validation:
+   ```bash
+   python3 .plan/execute-script.py plan-marshall:domain-extension-api:validate_manifest validate \
+     --bundle {bundle}
+   ```
+3. Parse validation output for issues
+4. Add findings to issue list with appropriate fix categories
+
+**Issue categorization**:
+- Schema/structure issues → Safe fix
+- Missing extension skills → Risky fix
+- Invalid skill references → Risky fix
+
 ### Step 4: Categorize and Fix
 
 **Safe fixes** (auto-apply unless --no-fix):
@@ -1017,13 +1041,14 @@ After Phase 1 creates the report directory and JSON, the LLM:
 
 ### References (references/)
 
-**Diagnosis References** (6) - **READ** before analyzing:
+**Diagnosis References** (7) - **READ** before analyzing:
 - `agents-guide.md` - Agent quality standards
 - `commands-guide.md` - Command quality standards
 - `skills-guide.md` - Skill structure standards
 - `metadata-guide.md` - plugin.json schema
 - `content-classification-guide.md` - Content type classification criteria (for doctor-skill-content)
 - `content-quality-guide.md` - Content quality analysis dimensions (for doctor-skill-content)
+- `plan-marshall-plugin-validation.md` - Domain/supplement manifest validation (for plan-marshall-plugin skills)
 
 **External Standards** (from plugin-architecture) - **READ** for script analysis:
 - `script-standards.md` - Script documentation, testing, and quality standards
