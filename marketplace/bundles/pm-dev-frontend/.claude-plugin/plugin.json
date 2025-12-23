@@ -27,6 +27,7 @@
     "./skills/cui-javascript-maintenance",
     "./skills/cui-javascript-project",
     "./skills/cui-javascript-unit-testing",
-    "./skills/cui-jsdoc"
+    "./skills/cui-jsdoc",
+    "./skills/javascript-triage"
   ]
 }

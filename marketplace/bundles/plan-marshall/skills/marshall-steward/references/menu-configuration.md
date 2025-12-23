@@ -340,18 +340,19 @@ python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
 
 ---
 
-## Thin Agent Architecture
+## Thin Agent Architecture (5-Phase Model)
 
-The pm-workflow bundle uses thin agents that load domain-specific skills dynamically:
+The pm-workflow bundle uses thin agents that load skills from system domain:
 
 | Agent | Purpose | Skill Source |
 |-------|---------|--------------|
-| `plan-init-agent` | Initialize plan, detect domains | System skills only |
-| `solution-outline-agent` | Create deliverables | `config.workflow_skills.{domain}.solution_outline` |
-| `task-plan-agent` | Create tasks from deliverables | `config.workflow_skills.{domain}.task_plan` |
-| `task-execute-agent` | Execute single task | `config.workflow_skills.{domain}.{profile}` + `task.skills` |
+| `plan-init-agent` | Initialize plan, detect domains | System defaults only |
+| `solution-outline-agent` | Create deliverables | `resolve-workflow-skill --phase outline` |
+| `task-plan-agent` | Create tasks from deliverables | `resolve-workflow-skill --phase plan` |
+| `task-execute-agent` | Execute single task | `resolve-workflow-skill --phase execute` + `task.skills` |
+| `plan-finalize-agent` | Commit, PR, triage | `resolve-workflow-skill --phase finalize` |
 
-Domain skill mappings are configured in `skill_domains` within marshal.json and written to plan's config.toon during init.
+Workflow skills are resolved from `system.workflow_skills`. Domain-specific extensions are loaded via `resolve-workflow-skill-extension --domain {domain} --type {outline|triage}`.
 
 ---
 

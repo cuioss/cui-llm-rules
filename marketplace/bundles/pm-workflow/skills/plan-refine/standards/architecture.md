@@ -63,8 +63,8 @@ pm-workflow/agents/
 | Agent | Skill Source |
 |-------|--------------|
 | `plan-init-agent` | System skills only |
-| `solution-outline-agent` | `resolve-workflow-skill --domain {domain} --phase solution_outline` |
-| `task-plan-agent` | `resolve-workflow-skill --domain {domain} --phase task_plan` |
+| `solution-outline-agent` | `resolve-workflow-skill --domain {domain} --phase outline` |
+| `task-plan-agent` | `resolve-workflow-skill --domain {domain} --phase plan` |
 | `task-execute-agent` | `resolve-workflow-skill --domain {domain} --phase {profile}` + `task.skills` |
 
 **Key Design**:
@@ -132,12 +132,12 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 /plan-manage action=refine
        │
        ├─ Task: pm-workflow:solution-outline-agent
-       │     ├─ Resolve workflow skill from marshal.json (solution_outline phase)
+       │     ├─ Resolve workflow skill from marshal.json (outline phase)
        │     ├─ Load workflow skill (pm-workflow:solution-outline)
        │     └─ Analyzes request, creates deliverables
        │
        └─ Task: pm-workflow:task-plan-agent
-             ├─ Resolve workflow skill from marshal.json (task_plan phase)
+             ├─ Resolve workflow skill from marshal.json (plan phase)
              ├─ Load workflow skill (pm-workflow:task-plan)
              └─ Reads deliverables, creates tasks with domain skills
 ```

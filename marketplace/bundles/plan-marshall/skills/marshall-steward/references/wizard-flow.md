@@ -433,30 +433,41 @@ This populates `skill_domains` in marshal.json with:
 
 ## Step 5: Verify Skill Domain Configuration
 
-Skill domains configure which implementation skills are loaded during plan execution. The thin agent architecture routes skills via `config.toon`'s workflow_skills block.
+Skill domains configure which implementation skills are loaded during plan execution. The 5-phase model uses:
+- **System domain**: Contains workflow_skills (init, outline, plan, execute, finalize)
+- **Technical domains**: Profile-based skills and workflow_skill_extensions
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config skill-domains list
 ```
 
-**Expected output**: Shows configured domains with their workflow_skills mappings:
+**Expected output**: Shows configured domains:
 ```json
 {
-  "java": {
+  "system": {
     "workflow_skills": {
-      "solution_outline": "pm-plugin-development:plugin-solution-outline",
-      "task_plan": "pm-plugin-development:plugin-task-plan",
-      "implementation": "pm-plugin-development:plugin-plan-implement",
-      "testing": "pm-plugin-development:plugin-plan-implement"
+      "init": "pm-workflow:plan-init",
+      "outline": "pm-workflow:solution-outline",
+      "plan": "pm-workflow:task-plan",
+      "execute": "pm-workflow:task-execute",
+      "finalize": "pm-workflow:plan-finalize"
+    }
+  },
+  "java": {
+    "workflow_skill_extensions": {
+      "outline": "pm-dev-java:java-outline-ext",
+      "triage": "pm-dev-java:java-triage"
     },
     "core": {...},
+    "architecture": {...},
     "implementation": {...},
-    "testing": {...}
+    "testing": {...},
+    "quality": {...}
   }
 }
 ```
 
-**Note**: The pm-workflow thin agents (solution-outline-agent, task-plan-agent, task-execute-agent) load domain-specific skills dynamically based on deliverable.domain from config.toon.
+**Note**: Workflow skills are resolved from system domain. Domain-specific behavior is provided via workflow_skill_extensions (outline, triage).
 
 ---
 

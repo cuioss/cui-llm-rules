@@ -54,7 +54,8 @@ JSON structure and field definitions for project configuration.
     },
     "javascript": {
       "workflow_skill_extensions": {
-        "outline": "pm-dev-frontend:js-outline-ext"
+        "outline": "pm-dev-frontend:js-outline-ext",
+        "triage": "pm-dev-frontend:javascript-triage"
       },
       "core": {
         "defaults": ["pm-dev-frontend:cui-javascript"],
@@ -78,6 +79,35 @@ JSON structure and field definitions for project configuration.
       },
       "quality": {
         "defaults": [],
+        "optionals": []
+      }
+    },
+    "plan-marshall-plugin-dev": {
+      "workflow_skill_extensions": {
+        "triage": "pm-plugin-development:plugin-triage"
+      },
+      "core": {
+        "defaults": ["pm-plugin-development:plugin-architecture"],
+        "optionals": ["pm-plugin-development:plugin-script-architecture"]
+      },
+      "architecture": {
+        "defaults": [],
+        "optionals": []
+      },
+      "planning": {
+        "defaults": [],
+        "optionals": []
+      },
+      "implementation": {
+        "defaults": [],
+        "optionals": ["pm-plugin-development:plugin-create", "pm-plugin-development:plugin-maintain"]
+      },
+      "testing": {
+        "defaults": [],
+        "optionals": []
+      },
+      "quality": {
+        "defaults": ["pm-plugin-development:plugin-doctor"],
         "optionals": []
       }
     }

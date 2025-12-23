@@ -110,7 +110,7 @@ The refine phase uses thin agents that load domain-specific skills dynamically:
 
 | Agent | Purpose | Skill Source |
 |-------|---------|--------------|
-| `solution-outline-agent` | Create deliverables | `config.workflow_skills.{domain}.solution_outline` |
-| `task-plan-agent` | Create tasks | `config.workflow_skills.{domain}.task_plan` |
+| `solution-outline-agent` | Create deliverables | `resolve-workflow-skill --phase outline` |
+| `task-plan-agent` | Create tasks | `resolve-workflow-skill --phase plan` |
 
-**Key**: The `/plan-manage` command invokes the thin agents, which load domain skills from config.toon's workflow_skills block.
+**Key**: The `/plan-manage` command invokes the thin agents, which load workflow skills from the system domain.

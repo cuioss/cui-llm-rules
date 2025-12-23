@@ -35,12 +35,12 @@ Extract the first domain from the result (e.g., `plan-marshall-plugin-dev`, `jav
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-workflow-skill --domain {domain} --phase solution_outline
+  resolve-workflow-skill --domain {domain} --phase outline
 ```
 
 This returns the domain-specific skill, for example:
-- `plan-marshall-plugin-dev` → `pm-plugin-development:plugin-solution-outline`
-- `java` → `pm-dev-java:java-solution-outline` (if configured)
+- `plan-marshall-plugin-dev` → `pm-plugin-development:plugin-outline-ext`
+- `java` → `pm-dev-java:java-outline-ext` (if configured)
 - `generic` → `pm-workflow:solution-outline` (fallback)
 
 ### Step 1c: Load the resolved skill

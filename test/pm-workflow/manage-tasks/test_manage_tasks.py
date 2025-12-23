@@ -150,8 +150,8 @@ def test_add_sequential_numbering():
         cleanup(temp_dir)
 
 
-def test_add_creates_slug_from_title():
-    """Slug is generated from title."""
+def test_add_creates_type_based_filename():
+    """Filename uses TASK-SEQ-TYPE format (not slug)."""
     temp_dir = setup_plan_dir()
     try:
         add_basic_task(title='Implement JWT Service!', deliverables=[1])
@@ -159,7 +159,8 @@ def test_add_creates_slug_from_title():
         task_dir = Path(os.environ['PLAN_BASE_DIR']) / 'plans' / 'test-plan' / 'tasks'
         files = list(task_dir.glob('TASK-001-*.toon'))
         assert len(files) == 1
-        assert 'implement-jwt-service' in files[0].name
+        # Filename uses type suffix (default IMPL), not title slug
+        assert files[0].name == 'TASK-001-IMPL.toon'
     finally:
         cleanup(temp_dir)
 
@@ -249,21 +250,21 @@ steps:
         cleanup(temp_dir)
 
 
-def test_add_fails_with_invalid_domain():
-    """Add fails with invalid domain value."""
+def test_add_accepts_arbitrary_domain():
+    """Add accepts any domain value (domains are config-driven, not hardcoded)."""
     temp_dir = setup_plan_dir()
     try:
         toon = build_task_toon(
-            title='Invalid domain',
+            title='Python domain',
             deliverables=[1],
-            domain='python',  # Invalid domain
+            domain='python',  # Arbitrary domain - now accepted
             description='Desc',
-            steps=['src/main/java/Component.java']
+            steps=['src/main/python/script.py']
         )
         result = run_script(SCRIPT_PATH, 'add', '--plan-id', 'test-plan', input_data=toon)
 
-        assert result.returncode != 0
-        assert 'domain' in result.stderr.lower()
+        assert result.returncode == 0
+        assert 'domain: python' in result.stdout
     finally:
         cleanup(temp_dir)
 
@@ -514,7 +515,7 @@ def test_list_empty():
 
 
 def test_list_with_tasks():
-    """List shows all tasks in table format with phase and deliverables."""
+    """List shows all tasks in table format with domain, profile, phase and deliverables."""
     temp_dir = setup_plan_dir()
     try:
         add_basic_task(title='First', deliverables=[1], steps=['src/main/java/File.java'])
@@ -525,9 +526,9 @@ def test_list_with_tasks():
         assert result.returncode == 0
         assert 'total: 2' in result.stdout
         assert 'tasks[2]' in result.stdout
-        # New format: {number,title,phase,deliverables,status,progress}
-        assert '1,First,execute,[1],pending,0/1' in result.stdout
-        assert '2,Second,execute,[2],pending,0/2' in result.stdout
+        # Format: {number,title,domain,profile,phase,deliverables,status,progress}
+        assert '1,First,java,implementation,execute,[1],pending,0/1' in result.stdout
+        assert '2,Second,java,implementation,execute,[2],pending,0/2' in result.stdout
     finally:
         cleanup(temp_dir)
 
@@ -995,25 +996,27 @@ def test_remove_step_last_fails():
 # Tests: update
 # =============================================================================
 
-def test_update_title_renames_file():
-    """Updating title renames the file."""
+def test_update_title_keeps_filename():
+    """Updating title does NOT rename file (TASK-SEQ-TYPE format is stable)."""
     temp_dir = setup_plan_dir()
     try:
         add_basic_task(title='Old Title', deliverables=[1], steps=['src/main/java/File.java'])
+
+        # Verify initial filename uses TYPE suffix, not slug
+        task_dir = Path(os.environ['PLAN_BASE_DIR']) / 'plans' / 'test-plan' / 'tasks'
+        initial_files = list(task_dir.glob('TASK-001-IMPL.toon'))
+        assert len(initial_files) == 1, "Should have TASK-001-IMPL.toon"
 
         result = run_script(SCRIPT_PATH, 'update', '--plan-id', 'test-plan',
                             '--number', '1', '--title', 'New Title')
 
         assert result.returncode == 0
-        assert 'renamed: True' in result.stdout
-        assert 'new-title' in result.stdout
+        # Filename stays the same (TASK-SEQ-TYPE format)
+        assert 'TASK-001-IMPL.toon' in result.stdout
 
-        # Verify old file gone, new file exists
-        task_dir = Path(os.environ['PLAN_BASE_DIR']) / 'plans' / 'test-plan' / 'tasks'
-        old_files = list(task_dir.glob('*old-title*'))
-        new_files = list(task_dir.glob('*new-title*'))
-        assert len(old_files) == 0
-        assert len(new_files) == 1
+        # File still exists with same name
+        final_files = list(task_dir.glob('TASK-001-IMPL.toon'))
+        assert len(final_files) == 1, "File should still be TASK-001-IMPL.toon"
     finally:
         cleanup(temp_dir)
 
@@ -1170,37 +1173,34 @@ def test_file_contains_new_fields():
 
 
 # =============================================================================
-# Tests: slug generation
+# Tests: type-based filename format
 # =============================================================================
 
-def test_slug_special_characters():
-    """Special characters are removed from slug."""
+def test_type_filename_ignores_title_special_chars():
+    """Filename uses TYPE suffix regardless of special characters in title."""
     temp_dir = setup_plan_dir()
     try:
         add_basic_task(title='Test@#$%Special!!!Characters', deliverables=[1])
 
         task_dir = Path(os.environ['PLAN_BASE_DIR']) / 'plans' / 'test-plan' / 'tasks'
-        files = list(task_dir.glob('TASK-001-*.toon'))
-        assert len(files) == 1
-        assert '@' not in files[0].name
-        assert '#' not in files[0].name
+        # Filename uses TYPE (IMPL), not slugified title
+        files = list(task_dir.glob('TASK-001-IMPL.toon'))
+        assert len(files) == 1, f"Expected TASK-001-IMPL.toon, found: {list(task_dir.glob('TASK-*.toon'))}"
     finally:
         cleanup(temp_dir)
 
 
-def test_slug_truncation():
-    """Long titles are truncated in slug."""
+def test_type_filename_ignores_title_length():
+    """Filename uses TYPE suffix regardless of title length."""
     temp_dir = setup_plan_dir()
     try:
         long_title = 'A' * 100
         add_basic_task(title=long_title, deliverables=[1])
 
         task_dir = Path(os.environ['PLAN_BASE_DIR']) / 'plans' / 'test-plan' / 'tasks'
-        files = list(task_dir.glob('TASK-001-*.toon'))
-        assert len(files) == 1
-        # Slug should be max 40 chars + TASK-001- prefix + .toon suffix
-        slug_part = files[0].stem[9:]  # Remove 'TASK-001-'
-        assert len(slug_part) <= 40
+        # Filename uses TYPE (IMPL), not truncated title
+        files = list(task_dir.glob('TASK-001-IMPL.toon'))
+        assert len(files) == 1, f"Expected TASK-001-IMPL.toon, found: {list(task_dir.glob('TASK-*.toon'))}"
     finally:
         cleanup(temp_dir)
 
@@ -1209,12 +1209,13 @@ def test_slug_truncation():
 # Tests: domain validation
 # =============================================================================
 
-def test_valid_domains():
-    """All valid domains are accepted."""
+def test_arbitrary_domains_accepted():
+    """Arbitrary domain strings are accepted (config-driven, not hardcoded)."""
     temp_dir = setup_plan_dir()
     try:
-        valid_domains = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plan-marshall-plugin-dev']
-        for i, domain in enumerate(valid_domains, 1):
+        # Various domain names - all should be accepted since domains are arbitrary
+        domains = ['java', 'my-custom-domain', 'frontend-react', 'backend-api', 'devops']
+        for i, domain in enumerate(domains, 1):
             toon = build_task_toon(
                 title=f'Task {i}',
                 deliverables=[i],
@@ -1238,13 +1239,13 @@ if __name__ == '__main__':
         # add with stdin API
         test_add_first_task,
         test_add_sequential_numbering,
-        test_add_creates_slug_from_title,
+        test_add_creates_type_based_filename,
         test_add_multiple_deliverables,
         test_add_fails_without_stdin,
         test_add_fails_without_deliverables,
         test_add_fails_with_invalid_deliverable,
         test_add_fails_without_domain,
-        test_add_fails_with_invalid_domain,
+        test_add_accepts_arbitrary_domain,
         test_add_fails_without_steps,
         test_add_with_phase,
         test_add_with_dependencies,
@@ -1289,7 +1290,7 @@ if __name__ == '__main__':
         test_remove_step,
         test_remove_step_last_fails,
         # update
-        test_update_title_renames_file,
+        test_update_title_keeps_filename,
         test_update_depends_on,
         test_update_clear_depends_on,
         # remove
@@ -1299,10 +1300,10 @@ if __name__ == '__main__':
         test_progress_calculation,
         # file content
         test_file_contains_new_fields,
-        # slug
-        test_slug_special_characters,
-        test_slug_truncation,
+        # type-based filename
+        test_type_filename_ignores_title_special_chars,
+        test_type_filename_ignores_title_length,
         # domain
-        test_valid_domains,
+        test_arbitrary_domains_accepted,
     ])
     sys.exit(runner.run())

@@ -1,31 +1,69 @@
 # Skill Domains
 
-Implementation skill management with nested structure for domains, profiles, and workflow skills.
+Implementation skill management with profile-based structure and workflow skill extensions.
 
 ## Purpose
 
 Skill domains configure which implementation skills are loaded when working on code in different domains. The structure supports:
 
-- **System Domains**: Applied globally to all agents (flat structure)
-- **Technical Domains**: Language-specific with nested profiles (java, javascript)
+- **System Domain**: Contains workflow skills for the 5-phase execution model
+- **Technical Domains**: Language-specific with profiles and workflow skill extensions (java, javascript)
+
+## 5-Phase Workflow Model
+
+The system domain contains workflow skills for the 5 execution phases:
+
+| Phase | Purpose | Workflow Skill |
+|-------|---------|----------------|
+| `init` | Initialize plan | `pm-workflow:plan-init` |
+| `outline` | Create solution outline | `pm-workflow:solution-outline` |
+| `plan` | Decompose into tasks | `pm-workflow:task-plan` |
+| `execute` | Run implementation | `pm-workflow:task-execute` |
+| `finalize` | Commit, PR, quality | `pm-workflow:plan-finalize` |
 
 ## Structure
 
-### Nested Domain Structure (Technical Domains)
+### System Domain Structure
+
+```json
+{
+  "skill_domains": {
+    "system": {
+      "defaults": ["plan-marshall:general-development-rules"],
+      "optionals": ["plan-marshall:diagnostic-patterns"],
+      "workflow_skills": {
+        "init": "pm-workflow:plan-init",
+        "outline": "pm-workflow:solution-outline",
+        "plan": "pm-workflow:task-plan",
+        "execute": "pm-workflow:task-execute",
+        "finalize": "pm-workflow:plan-finalize"
+      }
+    }
+  }
+}
+```
+
+### Technical Domain Structure (Profile-Based)
 
 ```json
 {
   "skill_domains": {
     "java": {
-      "workflow_skills": {
-        "solution_outline": "pm-workflow:solution-outline",
-        "task_plan": "pm-workflow:task-plan",
-        "implementation": "pm-workflow:task-implementation",
-        "testing": "pm-workflow:task-testing"
+      "workflow_skill_extensions": {
+        "outline": "pm-dev-java:java-outline-ext",
+        "triage": "pm-dev-java:java-triage"
       },
       "core": {
         "defaults": ["pm-dev-java:java-core"],
-        "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok", "pm-dev-java:javadoc"]
+        "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
+      },
+      "architecture": {
+        "defaults": ["pm-dev-java:java-packages"],
+        "optionals": []
+      },
+      "planning": {
+        "defaults": [],
+        "optionals": []
       },
       "implementation": {
         "defaults": [],
@@ -34,37 +72,36 @@ Skill domains configure which implementation skills are loaded when working on c
       "testing": {
         "defaults": ["pm-dev-java:junit-core"],
         "optionals": ["pm-dev-java:junit-integration"]
+      },
+      "quality": {
+        "defaults": ["pm-dev-java:javadoc"],
+        "optionals": []
       }
     }
   }
 }
 ```
 
-### Flat Domain Structure (System Domain)
+## Domain Structure Components
 
-```json
-{
-  "skill_domains": {
-    "system": {
-      "defaults": ["plan-marshall:general-development-rules"],
-      "optionals": ["plan-marshall:diagnostic-patterns"]
-    }
-  }
-}
-```
+### workflow_skill_extensions
 
-## Nested Structure Components
+Domain-specific extensions that augment workflow skills. Only in technical domains (not system).
 
-### workflow_skills
+| Type | Phase | Purpose |
+|------|-------|---------|
+| `outline` | outline | Domain detection, deliverable patterns |
+| `triage` | finalize | Finding decision-making (fix/suppress/accept) |
 
-Defines workflow-specific skills loaded by thin agents during task execution.
+### Profiles (5 Profiles)
 
-| Key | Purpose |
-|-----|---------|
-| `solution_outline` | Skill for creating solution outlines |
-| `task_plan` | Skill for task planning |
-| `implementation` | Skill for code implementation |
-| `testing` | Skill for test implementation |
+| Profile | Phase Used | Purpose |
+|---------|------------|---------|
+| `architecture` | outline | High-level design patterns |
+| `planning` | plan | Task decomposition patterns |
+| `implementation` | execute (impl tasks) | Production code patterns |
+| `testing` | execute (test tasks) | Test code patterns |
+| `quality` | finalize | Verification, documentation standards |
 
 ### core
 
@@ -77,47 +114,15 @@ Foundation skills always included when the domain is selected.
 }
 ```
 
-### implementation
-
-Profile for production code tasks.
-
-```json
-"implementation": {
-  "defaults": [],
-  "optionals": ["pm-dev-java:java-cdi", "pm-dev-java:java-maintenance"]
-}
-```
-
-### testing
-
-Profile for test code tasks.
-
-```json
-"testing": {
-  "defaults": ["pm-dev-java:junit-core"],
-  "optionals": ["pm-dev-java:junit-integration"]
-}
-```
-
-## Profile Naming Convention
-
-| Element | Purpose | Examples |
-|---------|---------|----------|
-| `{domain}` | Top-level domain entry | `java`, `javascript` |
-| `{domain}.core` | Foundation skills for domain | `java.core`, `javascript.core` |
-| `{domain}.implementation` | Implementation profile skills | `java.implementation` |
-| `{domain}.testing` | Testing profile skills | `java.testing` |
-
 ## System Domain
 
-### system
+Applied to all agents and skills. Contains workflow skills for the 5-phase model.
 
-Applied to all agents and skills. Uses flat structure (no profiles).
-
-| Field | Skills |
-|-------|--------|
+| Field | Content |
+|-------|---------|
 | defaults | `plan-marshall:general-development-rules` |
 | optionals | `plan-marshall:diagnostic-patterns` |
+| workflow_skills | 5 phases: init, outline, plan, execute, finalize |
 
 ## Technical Domains
 
@@ -125,19 +130,23 @@ Applied to all agents and skills. Uses flat structure (no profiles).
 
 Java development with CDI, JUnit, and standard patterns.
 
-**workflow_skills**:
-| Key | Skill |
-|-----|-------|
-| solution_outline | `pm-workflow:solution-outline` |
-| task_plan | `pm-workflow:task-plan` |
-| implementation | `pm-workflow:task-implementation` |
-| testing | `pm-workflow:task-testing` |
+**workflow_skill_extensions**:
+| Type | Skill |
+|------|-------|
+| outline | `pm-dev-java:java-outline-ext` |
+| triage | `pm-dev-java:java-triage` |
 
 **core**:
 | Field | Skills |
 |-------|--------|
 | defaults | `pm-dev-java:java-core` |
-| optionals | `pm-dev-java:java-null-safety`, `pm-dev-java:java-lombok`, `pm-dev-java:javadoc` |
+| optionals | `pm-dev-java:java-null-safety`, `pm-dev-java:java-lombok` |
+
+**architecture**:
+| Field | Skills |
+|-------|--------|
+| defaults | `pm-dev-java:java-packages` |
+| optionals | (none) |
 
 **implementation**:
 | Field | Skills |
@@ -151,11 +160,21 @@ Java development with CDI, JUnit, and standard patterns.
 | defaults | `pm-dev-java:junit-core` |
 | optionals | `pm-dev-java:junit-integration` |
 
+**quality**:
+| Field | Skills |
+|-------|--------|
+| defaults | `pm-dev-java:javadoc` |
+| optionals | (none) |
+
 ### javascript
 
 JavaScript/Frontend development with Jest and Cypress testing.
 
-**workflow_skills**: Same as java domain.
+**workflow_skill_extensions**:
+| Type | Skill |
+|------|-------|
+| outline | `pm-dev-frontend:js-outline-ext` |
+| triage | `pm-dev-frontend:javascript-triage` |
 
 **core**:
 | Field | Skills |
@@ -176,40 +195,6 @@ JavaScript/Frontend development with Jest and Cypress testing.
 | optionals | `pm-dev-frontend:cui-cypress` |
 
 ## Skill Resolution
-
-### resolve-domain-skills Command
-
-Aggregates `{domain}.core` + `{domain}.{profile}` skills with descriptions.
-
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-domain-skills --domain java --profile implementation
-```
-
-**Output**:
-```toon
-status: success
-domain: java
-profile: implementation
-
-defaults:
-  pm-dev-java:java-core: Java patterns, CUI conventions, CuiLogger, null-safety
-
-optionals:
-  pm-dev-java:java-null-safety: JSpecify annotations (@NullMarked, @Nullable)
-  pm-dev-java:java-lombok: Lombok annotations (@Builder, @Value, @Delegate)
-  pm-dev-java:java-cdi: CDI patterns (@ApplicationScoped, @Inject)
-  pm-dev-java:java-maintenance: Code maintenance and refactoring patterns
-```
-
-### Aggregation Logic
-
-| Profile | Defaults | Optionals |
-|---------|----------|-----------|
-| `implementation` | `{domain}.core.defaults` + `{domain}.implementation.defaults` | `{domain}.core.optionals` + `{domain}.implementation.optionals` |
-| `testing` | `{domain}.core.defaults` + `{domain}.testing.defaults` | `{domain}.core.optionals` + `{domain}.testing.optionals` |
-
-## Workflow Skills Access (5-Phase Model)
 
 ### resolve-workflow-skill Command
 
@@ -243,7 +228,7 @@ Resolves domain-specific workflow skill extension. Returns null (not error) if e
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  resolve-workflow-skill-extension --domain java --type outline
+  resolve-workflow-skill-extension --domain java --type triage
 ```
 
 **Parameters**:
@@ -257,8 +242,33 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 ```toon
 status: success
 domain: java
-type: outline
-extension: pm-dev-java:java-outline-ext
+type: triage
+extension: pm-dev-java:java-triage
+```
+
+### resolve-domain-skills Command
+
+Aggregates `{domain}.core` + `{domain}.{profile}` skills with descriptions.
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  resolve-domain-skills --domain java --profile implementation
+```
+
+**Output**:
+```toon
+status: success
+domain: java
+profile: implementation
+
+defaults:
+  pm-dev-java:java-core: Java patterns, CUI conventions, CuiLogger, null-safety
+
+optionals:
+  pm-dev-java:java-null-safety: JSpecify annotations (@NullMarked, @Nullable)
+  pm-dev-java:java-lombok: Lombok annotations (@Builder, @Value, @Delegate)
+  pm-dev-java:java-cdi: CDI patterns (@ApplicationScoped, @Inject)
+  pm-dev-java:java-maintenance: Code maintenance and refactoring patterns
 ```
 
 ### get-workflow-skills Command
@@ -280,34 +290,35 @@ execute: pm-workflow:task-execute
 finalize: pm-workflow:plan-finalize
 ```
 
+### Aggregation Logic
+
+| Profile | Defaults | Optionals |
+|---------|----------|-----------|
+| `architecture` | `{domain}.core.defaults` + `{domain}.architecture.defaults` | `{domain}.core.optionals` + `{domain}.architecture.optionals` |
+| `planning` | `{domain}.core.defaults` + `{domain}.planning.defaults` | `{domain}.core.optionals` + `{domain}.planning.optionals` |
+| `implementation` | `{domain}.core.defaults` + `{domain}.implementation.defaults` | `{domain}.core.optionals` + `{domain}.implementation.optionals` |
+| `testing` | `{domain}.core.defaults` + `{domain}.testing.defaults` | `{domain}.core.optionals` + `{domain}.testing.optionals` |
+| `quality` | `{domain}.core.defaults` + `{domain}.quality.defaults` | `{domain}.core.optionals` + `{domain}.quality.optionals` |
+
 ## Usage Patterns
 
-### Get Domain Configuration (Nested)
+### Get Domain Configuration
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
   skill-domains get --domain java
 ```
 
-Returns full nested structure including workflow_skills, core, implementation, and testing.
+Returns full nested structure including workflow_skill_extensions, core, and all profiles.
 
-### Get Domain Defaults (Backward Compatible)
-
-```bash
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains get-defaults --domain java
-```
-
-Returns `core.defaults` for nested domains.
-
-### Get Domain Optionals (Backward Compatible)
+### Get Domain Extensions
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains get-optionals --domain java
+  skill-domains get-extensions --domain java
 ```
 
-Returns `core.optionals` for nested domains.
+Returns only the workflow_skill_extensions for the domain.
 
 ### Validate Skill in Domain
 
@@ -316,7 +327,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
   skill-domains validate --domain java --skill pm-dev-java:junit-core
 ```
 
-Searches all profiles (core, implementation, testing) for nested domains.
+Searches all profiles (core, architecture, planning, implementation, testing, quality) for nested domains.
 
 ## Adding New Domains
 
@@ -324,15 +335,21 @@ Searches all profiles (core, implementation, testing) for nested domains.
 
 ```json
 "python": {
-  "workflow_skills": {
-    "solution_outline": "pm-workflow:solution-outline",
-    "task_plan": "pm-workflow:task-plan",
-    "implementation": "pm-workflow:task-implementation",
-    "testing": "pm-workflow:task-testing"
+  "workflow_skill_extensions": {
+    "outline": "pm-dev-python:python-outline-ext",
+    "triage": "pm-dev-python:python-triage"
   },
   "core": {
     "defaults": ["pm-dev-python:python-core"],
     "optionals": ["pm-dev-python:python-typing"]
+  },
+  "architecture": {
+    "defaults": [],
+    "optionals": []
+  },
+  "planning": {
+    "defaults": [],
+    "optionals": []
   },
   "implementation": {
     "defaults": [],
@@ -341,11 +358,15 @@ Searches all profiles (core, implementation, testing) for nested domains.
   "testing": {
     "defaults": ["pm-dev-python:pytest-core"],
     "optionals": []
+  },
+  "quality": {
+    "defaults": [],
+    "optionals": []
   }
 }
 ```
 
-No agent changes needed - thin agents work with any domain.
+No agent changes needed - agents work with any domain.
 
 ## Best Practices
 
@@ -363,6 +384,9 @@ No agent changes needed - thin agents work with any domain.
 
 ### Profiles
 
+- Use `architecture` for high-level design in outline phase
+- Use `planning` for task decomposition patterns
 - Use `implementation` for production code tasks
 - Use `testing` for test code tasks
-- Core skills apply to both profiles
+- Use `quality` for verification and documentation
+- Core skills apply to all profiles

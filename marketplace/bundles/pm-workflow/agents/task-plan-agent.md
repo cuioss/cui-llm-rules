@@ -24,7 +24,7 @@ If skill loading fails, STOP and report the error. Do NOT proceed without skills
 **Log skill selection**:
 ```bash
 python3 .plan/execute-script.py plan-marshall:logging:manage-log \
-  work {plan_id} INFO "[SKILL] (pm-workflow:task-plan-agent) Using workflow_skill: pm-workflow:task-plan from phase: task_plan"
+  work {plan_id} INFO "[SKILL] (pm-workflow:task-plan-agent) Using workflow_skill: pm-workflow:task-plan from phase: plan"
 ```
 
 ## Role Boundaries
@@ -95,7 +95,7 @@ lessons_recorded: {count}
 
 ```toon
 status: error
-error_type: {solution_outline_not_found|circular_dependency|skill_load_failure}
+error_type: {outline_not_found|circular_dependency|skill_load_failure}
 component: "pm-workflow:task-plan-agent"
 message: "{human readable error}"
 context:

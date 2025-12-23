@@ -16,10 +16,11 @@ sys.path.insert(0, str(FILE_OPS_DIR))
 from file_ops import atomic_write_file
 
 from manage_tasks_shared import (
-    now_iso, slugify, parse_depends_on,
+    now_iso, parse_depends_on,
     get_tasks_dir, parse_task_file, format_task_file,
     find_task_file, get_next_number,
-    parse_stdin_task, output_toon, output_error
+    parse_stdin_task, output_toon, output_error,
+    validate_profile, validate_skills
 )
 
 
@@ -44,8 +45,9 @@ def cmd_add(args) -> int:
 
     number = get_next_number(task_dir)
 
-    slug = slugify(parsed['title'])
-    filename = f"TASK-{number:03d}-{slug}.toon"
+    # Use type for filename (TASK-SEQ-TYPE format per target architecture)
+    task_type = parsed['type']
+    filename = f"TASK-{number:03d}-{task_type}.toon"
     filepath = task_dir / filename
 
     steps = []
@@ -62,6 +64,13 @@ def cmd_add(args) -> int:
         'title': parsed['title'],
         'status': 'pending',
         'phase': parsed['phase'],
+        'domain': parsed['domain'],
+        'profile': parsed['profile'],
+        'type': parsed['type'],
+        'skills': parsed['skills'],
+        'origin': parsed['origin'],
+        'priority': parsed.get('priority'),
+        'finding': parsed.get('finding'),
         'created': now,
         'updated': now,
         'deliverables': parsed['deliverables'],
@@ -86,9 +95,14 @@ def cmd_add(args) -> int:
         'task': {
             'number': number,
             'title': parsed['title'],
+            'domain': parsed['domain'],
+            'profile': parsed['profile'],
+            'type': parsed['type'],
+            'skills': parsed['skills'],
             'deliverables': parsed['deliverables'],
             'depends_on': parsed['depends_on'],
             'phase': parsed['phase'],
+            'origin': parsed['origin'],
             'status': 'pending',
             'step_count': len(steps)
         }
@@ -108,9 +122,6 @@ def cmd_update(args) -> int:
     content = filepath.read_text(encoding='utf-8')
     task = parse_task_file(content)
 
-    renamed = False
-    old_title = task['title']
-
     if args.title:
         task['title'] = args.title
     if args.description:
@@ -127,31 +138,55 @@ def cmd_update(args) -> int:
             return 1
         task['status'] = args.status
 
+    # Handle new fields
+    if getattr(args, 'domain', None):
+        task['domain'] = args.domain
+    if getattr(args, 'profile', None):
+        try:
+            task['profile'] = validate_profile(args.profile)
+        except ValueError as e:
+            output_error(str(e))
+            return 1
+    if getattr(args, 'skills', None):
+        try:
+            # Skills can be comma-separated or a list
+            if isinstance(args.skills, str):
+                skills_list = [s.strip() for s in args.skills.split(',') if s.strip()]
+            else:
+                skills_list = args.skills
+            task['skills'] = validate_skills(skills_list)
+        except ValueError as e:
+            output_error(str(e))
+            return 1
+    if getattr(args, 'deliverables', None):
+        try:
+            # Deliverables can be comma-separated or a list
+            if isinstance(args.deliverables, str):
+                deliverables_list = [int(d.strip()) for d in args.deliverables.split(',') if d.strip()]
+            else:
+                deliverables_list = [int(d) for d in args.deliverables]
+            task['deliverables'] = deliverables_list
+        except ValueError:
+            output_error("Deliverables must be comma-separated integers")
+            return 1
+
     task['updated'] = now_iso()
 
-    new_filename = filepath.name
-    if args.title and args.title != old_title:
-        new_slug = slugify(args.title)
-        new_filename = f"TASK-{args.number:03d}-{new_slug}.toon"
-        renamed = True
-
+    # Filename uses TASK-SEQ-TYPE format - doesn't change when title changes
     new_content = format_task_file(task)
-    new_filepath = task_dir / new_filename
-
-    if renamed:
-        atomic_write_file(new_filepath, new_content)
-        filepath.unlink()
-    else:
-        atomic_write_file(filepath, new_content)
+    atomic_write_file(filepath, new_content)
 
     output_toon({
         'status': 'success',
         'plan_id': args.plan_id,
-        'file': new_filename,
-        'renamed': renamed,
+        'file': filepath.name,
         'task': {
             'number': task['number'],
             'title': task['title'],
+            'domain': task.get('domain'),
+            'profile': task.get('profile'),
+            'type': task.get('type'),
+            'skills': task.get('skills', []),
             'status': task['status']
         }
     })

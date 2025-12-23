@@ -19,7 +19,7 @@ Each task:
 ### Regular Task (from plan phase)
 
 ```toon
-id: TASK-001
+id: TASK-001-IMPL
 title: "Create CacheConfig class"
 domain: java
 profile: implementation
@@ -46,7 +46,7 @@ verification:
 ### Fix Task (from finalize phase)
 
 ```toon
-id: TASK-003
+id: TASK-003-FIX
 title: "Fix: Test failure in CacheTest"
 domain: java
 profile: testing
@@ -54,7 +54,7 @@ skills:
   - pm-dev-java:junit-core
   - pm-dev-java:java-core
 deliverables: [1]
-depends_on: TASK-002
+depends_on: TASK-002-IMPL
 origin: fix
 priority: high
 
@@ -96,11 +96,25 @@ verification:
 
 ## Task ID Format
 
-Tasks use sequential numbering with zero-padded format:
+Tasks use sequential numbering with zero-padded format and type suffix:
 
 | Format | Example | Description |
 |--------|---------|-------------|
-| `TASK-{SEQ}` | `TASK-001` | 3-digit zero-padded sequence |
+| `TASK-{SEQ}-{TYPE}` | `TASK-001-IMPL` | 3-digit sequence + type suffix |
+
+### Task Types
+
+| Type | Source | Description |
+|------|--------|-------------|
+| `IMPL` | plan phase | Implementation task from deliverable |
+| `FIX` | finalize | Generic fix from finding |
+| `SONAR` | finalize:sonar | Sonar issue fix |
+| `PR` | finalize:pr | PR review comment fix |
+| `LINT` | finalize:local | Lint/format fix |
+| `SEC` | finalize:security | Security finding fix |
+| `DOC` | finalize:doc | Documentation fix |
+
+**Filename format**: `TASK-{SEQ}-{TYPE}.toon` (e.g., `TASK-001-IMPL.toon`, `TASK-003-FIX.toon`)
 
 ## Origin Field
 
@@ -171,7 +185,7 @@ task-plan phase                      execute phase
             │
             ▼
 ┌────────────────────────┐
-│ TASK-001.toon          │
+│ TASK-001-IMPL.toon     │
 │ skills:                │
 │   - pm-dev-java:java-core
 │   - pm-dev-java:java-cdi
@@ -321,7 +335,7 @@ steps:
   - {file_2}
   - {file_3}
 
-depends_on: TASK-1, TASK-2
+depends_on: TASK-001-IMPL, TASK-002-IMPL
 
 verification:
   commands:
@@ -344,18 +358,18 @@ optimization_summary:
   splits: {count of split deliverables}
   parallelizable_groups: {count of independent task groups}
 
-tasks_created[M]{number,title,deliverables,depends_on}:
-1,Update misc agents to TOON,[1 2 4],none
-2,Update pm-dev-java agents to TOON,[3],"TASK-1"
-3,Update TOON documentation,[5],none
-4,Create verification script,[6],"TASK-1" "TASK-2"
-5,Measure token savings,[6],"TASK-4"
+tasks_created[M]{id,title,deliverables,depends_on}:
+TASK-001-IMPL,Update misc agents to TOON,[1 2 4],none
+TASK-002-IMPL,Update pm-dev-java agents to TOON,[3],TASK-001-IMPL
+TASK-003-IMPL,Update TOON documentation,[5],none
+TASK-004-IMPL,Create verification script,[6],TASK-001-IMPL TASK-002-IMPL
+TASK-005-IMPL,Measure token savings,[6],TASK-004-IMPL
 
 execution_order:
-  parallel_group_1: [TASK-1, TASK-3]
-  parallel_group_2: [TASK-2]
-  parallel_group_3: [TASK-4]
-  parallel_group_4: [TASK-5]
+  parallel_group_1: [TASK-001-IMPL, TASK-003-IMPL]
+  parallel_group_2: [TASK-002-IMPL]
+  parallel_group_3: [TASK-004-IMPL]
+  parallel_group_4: [TASK-005-IMPL]
 
 lessons_recorded: {count}
 ```

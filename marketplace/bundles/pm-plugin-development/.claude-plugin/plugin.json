@@ -25,6 +25,7 @@
     "./skills/plugin-script-architecture",
     "./skills/plugin-solution-outline",
     "./skills/plugin-task-plan",
+    "./skills/plugin-triage",
     "./skills/verification"
   ],
   "agents": [

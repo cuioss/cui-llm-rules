@@ -286,6 +286,18 @@ Read standards/validation.md
 ```
 Contains: Configuration requirements, step-by-step validation checklist, output format examples
 
+### Triage Integration
+```
+Read standards/triage-integration.md
+```
+Contains: How to load domain-specific triage extensions, findings routing, decision flow, iteration loop
+
+### Lessons Integration
+```
+Read standards/lessons-integration.md
+```
+Contains: How lessons inform triage decisions, lesson query before decisions, recording new triage lessons
+
 ---
 
 ## Templates
@@ -328,3 +340,6 @@ pm-workflow:manage-lifecycle route --phase finalize → pm-workflow:plan-finaliz
 - **git-workflow** - Handles commit, push, and PR creation
 - **plan-execute** - Previous phase (executes tasks)
 - **manage-lifecycle** - Handles phase transitions
+- **java-triage** - Java triage extension (pm-dev-java)
+- **javascript-triage** - JavaScript triage extension (pm-dev-frontend)
+- **plugin-triage** - Plugin development triage extension (pm-plugin-development)

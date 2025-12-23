@@ -2,7 +2,7 @@
 """
 Query command handlers for manage-tasks.py.
 
-Contains: list, get, next subcommands.
+Contains: list, get, next, tasks-by-domain, tasks-by-profile, next-tasks subcommands.
 """
 
 from manage_tasks_shared import (
@@ -66,6 +66,8 @@ def cmd_list(args) -> int:
         table.append({
             'number': task['number'],
             'title': task['title'],
+            'domain': task.get('domain'),
+            'profile': task.get('profile'),
             'phase': task.get('phase', 'execute'),
             'deliverables': deliverables,
             'status': task['status'],
@@ -113,6 +115,10 @@ def cmd_get(args) -> int:
         'task': {
             'number': task['number'],
             'title': task['title'],
+            'domain': task.get('domain'),
+            'profile': task.get('profile'),
+            'skills': task.get('skills', []),
+            'origin': task.get('origin', 'plan'),
             'deliverables': task.get('deliverables', []),
             'depends_on': task.get('depends_on', []),
             'phase': task.get('phase', 'execute'),
@@ -244,6 +250,10 @@ def cmd_next(args) -> int:
         'next': {
             'task_number': next_task['number'],
             'task_title': next_task['title'],
+            'domain': next_task.get('domain'),
+            'profile': next_task.get('profile'),
+            'skills': next_task.get('skills', []),
+            'origin': next_task.get('origin', 'plan'),
             'phase': next_task.get('phase', 'execute'),
             'deliverables': next_task.get('deliverables', []),
             'step_number': next_step['number'],
@@ -265,4 +275,174 @@ def cmd_next(args) -> int:
             result['next'].update(deliverable_context)
 
     output_toon(result)
+    return 0
+
+
+def cmd_tasks_by_domain(args) -> int:
+    """Handle 'tasks-by-domain' subcommand.
+
+    Returns tasks filtered by domain.
+    """
+    task_dir = get_tasks_dir(args.plan_id)
+    all_tasks = get_all_tasks(task_dir)
+
+    # Filter by domain
+    domain = args.domain
+    filtered_tasks = [
+        (p, t) for p, t in all_tasks
+        if t.get('domain') == domain
+    ]
+
+    # Build table data
+    table = []
+    for path, task in filtered_tasks:
+        completed, total = calculate_progress(task)
+        table.append({
+            'number': task['number'],
+            'title': task['title'],
+            'domain': task.get('domain'),
+            'profile': task.get('profile'),
+            'status': task['status'],
+            'progress': f"{completed}/{total}"
+        })
+
+    # Compute counts
+    pending = sum(1 for _, t in filtered_tasks if t.get('status') == 'pending')
+    in_progress = sum(1 for _, t in filtered_tasks if t.get('status') == 'in_progress')
+    done_count = sum(1 for _, t in filtered_tasks if t.get('status') == 'done')
+    blocked = sum(1 for _, t in filtered_tasks if t.get('status') == 'blocked')
+
+    output_toon({
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'domain_filter': domain,
+        'counts': {
+            'total': len(filtered_tasks),
+            'pending': pending,
+            'in_progress': in_progress,
+            'done': done_count,
+            'blocked': blocked
+        },
+        'tasks_table': table
+    })
+    return 0
+
+
+def cmd_tasks_by_profile(args) -> int:
+    """Handle 'tasks-by-profile' subcommand.
+
+    Returns tasks filtered by profile.
+    """
+    task_dir = get_tasks_dir(args.plan_id)
+    all_tasks = get_all_tasks(task_dir)
+
+    # Filter by profile
+    profile = args.profile
+    filtered_tasks = [
+        (p, t) for p, t in all_tasks
+        if t.get('profile') == profile
+    ]
+
+    # Build table data
+    table = []
+    for path, task in filtered_tasks:
+        completed, total = calculate_progress(task)
+        table.append({
+            'number': task['number'],
+            'title': task['title'],
+            'domain': task.get('domain'),
+            'profile': task.get('profile'),
+            'status': task['status'],
+            'progress': f"{completed}/{total}"
+        })
+
+    # Compute counts
+    pending = sum(1 for _, t in filtered_tasks if t.get('status') == 'pending')
+    in_progress = sum(1 for _, t in filtered_tasks if t.get('status') == 'in_progress')
+    done_count = sum(1 for _, t in filtered_tasks if t.get('status') == 'done')
+    blocked = sum(1 for _, t in filtered_tasks if t.get('status') == 'blocked')
+
+    output_toon({
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'profile_filter': profile,
+        'counts': {
+            'total': len(filtered_tasks),
+            'pending': pending,
+            'in_progress': in_progress,
+            'done': done_count,
+            'blocked': blocked
+        },
+        'tasks_table': table
+    })
+    return 0
+
+
+def cmd_next_tasks(args) -> int:
+    """Handle 'next-tasks' subcommand.
+
+    Returns all tasks that are ready for parallel execution
+    (all depends_on tasks are completed).
+    """
+    task_dir = get_tasks_dir(args.plan_id)
+    all_tasks = get_all_tasks(task_dir)
+
+    # Build set of done task numbers for dependency checking
+    done_tasks = {f"TASK-{t['number']}" for _, t in all_tasks if t.get('status') == 'done'}
+
+    # Find all pending tasks with satisfied dependencies
+    ready_tasks = []
+    blocked_tasks = []
+
+    for path, task in all_tasks:
+        if task.get('status') != 'pending':
+            continue
+
+        deps = task.get('depends_on', [])
+        unmet_deps = [dep for dep in deps if dep not in done_tasks]
+
+        if not unmet_deps:
+            # All dependencies satisfied - ready for execution
+            completed, total = calculate_progress(task)
+            ready_tasks.append({
+                'number': task['number'],
+                'title': task['title'],
+                'domain': task.get('domain'),
+                'profile': task.get('profile'),
+                'skills': task.get('skills', []),
+                'deliverables': task.get('deliverables', []),
+                'progress': f"{completed}/{total}"
+            })
+        else:
+            # Has unmet dependencies
+            blocked_tasks.append({
+                'number': task['number'],
+                'title': task['title'],
+                'waiting_for': unmet_deps
+            })
+
+    # Also include in_progress tasks
+    in_progress_tasks = []
+    for path, task in all_tasks:
+        if task.get('status') == 'in_progress':
+            completed, total = calculate_progress(task)
+            in_progress_tasks.append({
+                'number': task['number'],
+                'title': task['title'],
+                'domain': task.get('domain'),
+                'profile': task.get('profile'),
+                'skills': task.get('skills', []),
+                'progress': f"{completed}/{total}"
+            })
+
+    output_toon({
+        'status': 'success',
+        'plan_id': args.plan_id,
+        'ready_count': len(ready_tasks),
+        'in_progress_count': len(in_progress_tasks),
+        'blocked_count': len(blocked_tasks),
+        'ready_tasks': ready_tasks,
+        'in_progress_tasks': in_progress_tasks,
+        'blocked_tasks': blocked_tasks
+    })
     return 0

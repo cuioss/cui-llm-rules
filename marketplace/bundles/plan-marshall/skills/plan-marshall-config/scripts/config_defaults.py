@@ -84,7 +84,8 @@ DOMAIN_TEMPLATES = {
     },
     "javascript": {
         "workflow_skill_extensions": {
-            "outline": "pm-dev-frontend:js-outline-ext"
+            "outline": "pm-dev-frontend:js-outline-ext",
+            "triage": "pm-dev-frontend:javascript-triage"
         },
         "core": {
             "defaults": ["pm-dev-frontend:cui-javascript"],

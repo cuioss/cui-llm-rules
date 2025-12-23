@@ -27,8 +27,12 @@ from file_ops import atomic_write_file, base_path
 # Constants
 # =============================================================================
 
-VALID_DOMAINS = ['java', 'java-testing', 'javascript', 'javascript-testing', 'plan-marshall-plugin-dev', 'generic']
-VALID_PHASES = ['init', 'refine', 'execute', 'finalize']
+# Domains are arbitrary strings - defined in marshal.json, not hardcoded
+VALID_PHASES = ['init', 'outline', 'plan', 'execute', 'finalize']
+# Profiles are arbitrary strings - defined in marshal.json per-domain, not hardcoded
+VALID_ORIGINS = ['plan', 'fix']
+# Task types per target architecture
+VALID_TYPES = ['IMPL', 'FIX', 'SONAR', 'PR', 'LINT', 'SEC', 'DOC']
 VALID_FILE_EXTENSIONS = [
     '.md', '.py', '.java', '.js', '.ts', '.tsx', '.jsx', '.json', '.yaml', '.yml',
     '.xml', '.sh', '.bash', '.properties', '.adoc', '.toon', '.html', '.css'
@@ -88,10 +92,21 @@ def validate_deliverables(deliverables_input) -> List[int]:
 
 
 def validate_domain(domain: str) -> str:
-    """Validate domain value."""
-    if domain not in VALID_DOMAINS:
-        raise ValueError(f"Invalid domain: {domain}. Must be one of: {', '.join(VALID_DOMAINS)}")
-    return domain
+    """Validate domain value (accepts any non-empty string).
+
+    Domains are arbitrary keys in marshal.json. Validation happens
+    at skill resolution time, not at task creation time.
+    """
+    if not domain or not domain.strip():
+        raise ValueError("Domain cannot be empty")
+    return domain.strip()
+
+
+def validate_type(task_type: str) -> str:
+    """Validate task type value."""
+    if task_type not in VALID_TYPES:
+        raise ValueError(f"Invalid type: {task_type}. Must be one of: {', '.join(VALID_TYPES)}")
+    return task_type
 
 
 def validate_phase(phase: str) -> str:
@@ -99,6 +114,41 @@ def validate_phase(phase: str) -> str:
     if phase not in VALID_PHASES:
         raise ValueError(f"Invalid phase: {phase}. Must be one of: {', '.join(VALID_PHASES)}")
     return phase
+
+
+def validate_profile(profile: str) -> str:
+    """Validate profile value (accepts any non-empty string).
+
+    Profiles are arbitrary keys in marshal.json. Validation happens
+    at skill resolution time, not at task creation time.
+    """
+    if not profile or not profile.strip():
+        raise ValueError("Profile cannot be empty")
+    return profile.strip()
+
+
+def validate_origin(origin: str) -> str:
+    """Validate origin value."""
+    if origin not in VALID_ORIGINS:
+        raise ValueError(f"Invalid origin: {origin}. Must be one of: {', '.join(VALID_ORIGINS)}")
+    return origin
+
+
+def validate_skills(skills: List[str]) -> List[str]:
+    """Validate skills list format (bundle:skill)."""
+    if not skills:
+        return []
+
+    validated = []
+    for skill in skills:
+        skill = skill.strip()
+        if not skill:
+            continue
+        if ':' not in skill:
+            raise ValueError(f"Invalid skill format: {skill}. Must be in 'bundle:skill' format.")
+        validated.append(skill)
+
+    return validated
 
 
 def validate_steps_are_file_paths(steps: list[str]) -> tuple[list[str], list[str]]:
@@ -262,12 +312,71 @@ def get_tasks_dir(plan_id: str) -> Path:
     return base_path('plans', plan_id, 'tasks')
 
 
+def parse_skills_block(lines: List[str], start_idx: int) -> Tuple[List[str], int]:
+    """Parse skills block from TOON format."""
+    skills = []
+    i = start_idx + 1
+
+    while i < len(lines):
+        line = lines[i].strip()
+        if line.startswith('- '):
+            skill = line[2:].strip()
+            if skill:
+                skills.append(skill)
+            i += 1
+        elif line == '':
+            i += 1
+        else:
+            break
+
+    return skills, i
+
+
+def parse_finding_block(lines: List[str], start_idx: int) -> Tuple[dict, int]:
+    """Parse finding block from TOON format (for fix tasks)."""
+    finding = {
+        'type': '',
+        'file': '',
+        'line': 0,
+        'message': ''
+    }
+    i = start_idx + 1
+
+    while i < len(lines):
+        line = lines[i]
+        if not line.startswith('  '):
+            break
+
+        stripped = line.strip()
+        if stripped.startswith('type:'):
+            finding['type'] = stripped[5:].strip()
+        elif stripped.startswith('file:'):
+            finding['file'] = stripped[5:].strip()
+        elif stripped.startswith('line:'):
+            try:
+                finding['line'] = int(stripped[5:].strip())
+            except ValueError:
+                finding['line'] = 0
+        elif stripped.startswith('message:'):
+            finding['message'] = stripped[8:].strip()
+        i += 1
+
+    return finding, i
+
+
 def parse_task_file(content: str) -> dict:
     """Parse a task TOON file into a dictionary."""
     result = {
         'steps': [],
         'deliverables': [],
         'depends_on': [],
+        'domain': None,
+        'profile': None,
+        'type': 'IMPL',
+        'skills': [],
+        'origin': 'plan',
+        'priority': None,
+        'finding': None,
         'delegation': {
             'skill': '',
             'workflow': '',
@@ -304,6 +413,10 @@ def parse_task_file(content: str) -> dict:
                 i += 1
         elif line.startswith('deliverables['):
             result['deliverables'], i = parse_deliverables_block(lines, i)
+        elif line.startswith('skills[') or line.startswith('skills:'):
+            result['skills'], i = parse_skills_block(lines, i)
+        elif line.startswith('finding:'):
+            result['finding'], i = parse_finding_block(lines, i)
         elif line.startswith('delegation:'):
             result['delegation'], i = parse_delegation_block(lines, i)
         elif line.startswith('verification:'):
@@ -344,10 +457,27 @@ def format_task_file(task: dict) -> str:
         f"title: {task['title']}",
         f"status: {task['status']}",
         f"phase: {task.get('phase', 'execute')}",
+        f"domain: {task.get('domain', '')}",
+        f"profile: {task.get('profile', 'implementation')}",
+        f"type: {task.get('type', 'IMPL')}",
+        f"origin: {task.get('origin', 'plan')}",
         f"created: {task['created']}",
         f"updated: {task['updated']}",
-        "",
     ]
+
+    # Add priority if present (for fix tasks)
+    if task.get('priority'):
+        lines.append(f"priority: {task['priority']}")
+
+    lines.append("")
+
+    # Skills array
+    skills = task.get('skills', [])
+    lines.append(f"skills[{len(skills)}]:")
+    for skill in skills:
+        lines.append(f"- {skill}")
+
+    lines.append("")
 
     deliverables = task.get('deliverables', [])
     lines.append(f"deliverables[{len(deliverables)}]:")
@@ -366,6 +496,16 @@ def format_task_file(task: dict) -> str:
         lines.append(f"  {desc_line}")
 
     lines.append("")
+
+    # Add finding block if present (for fix tasks)
+    finding = task.get('finding')
+    if finding:
+        lines.append("finding:")
+        lines.append(f"  type: {finding.get('type', '')}")
+        lines.append(f"  file: {finding.get('file', '')}")
+        lines.append(f"  line: {finding.get('line', 0)}")
+        lines.append(f"  message: {finding.get('message', '')}")
+        lines.append("")
 
     delegation = task.get('delegation', {})
     lines.append("delegation:")
@@ -456,10 +596,16 @@ def parse_stdin_task(stdin_content: str) -> dict:
         'title': '',
         'deliverables': [],
         'domain': '',
+        'profile': 'implementation',
+        'type': 'IMPL',
+        'skills': [],
+        'origin': 'plan',
         'phase': 'execute',
         'description': '',
         'steps': [],
         'depends_on': [],
+        'priority': None,
+        'finding': None,
         'delegation': {
             'skill': '',
             'workflow': '',
@@ -502,6 +648,30 @@ def parse_stdin_task(stdin_content: str) -> dict:
         elif line.startswith('phase:'):
             result['phase'] = line[6:].strip()
             i += 1
+
+        elif line.startswith('profile:'):
+            result['profile'] = line[8:].strip()
+            i += 1
+
+        elif line.startswith('origin:'):
+            result['origin'] = line[7:].strip()
+            i += 1
+
+        elif line.startswith('type:'):
+            result['type'] = line[5:].strip()
+            i += 1
+
+        elif line.startswith('priority:'):
+            result['priority'] = line[9:].strip()
+            i += 1
+
+        elif line.startswith('skills:'):
+            i += 1
+            while i < len(lines) and lines[i].startswith('  - '):
+                skill = lines[i][4:].strip()
+                if skill:
+                    result['skills'].append(skill)
+                i += 1
 
         elif line.startswith('description:'):
             rest = line[12:].strip()
@@ -590,7 +760,12 @@ def parse_stdin_task(stdin_content: str) -> dict:
 
     validate_domain(result['domain'])
     validate_phase(result['phase'])
+    validate_profile(result['profile'])
+    validate_type(result['type'])
     validate_deliverables(result['deliverables'])
+    result['skills'] = validate_skills(result['skills'])
+    if result['origin']:
+        validate_origin(result['origin'])
 
     step_errors, step_warnings = validate_steps_are_file_paths(result['steps'])
     if step_errors:
@@ -619,7 +794,8 @@ def output_toon(data: dict) -> None:
     lines = []
 
     # Top-level simple fields
-    for key in ['status', 'plan_id', 'file', 'renamed', 'total_tasks', 'task_number', 'step', 'phase_filter']:
+    for key in ['status', 'plan_id', 'file', 'renamed', 'total_tasks', 'task_number', 'step', 'phase_filter',
+                'domain_filter', 'profile_filter', 'ready_count', 'in_progress_count', 'blocked_count']:
         if key in data:
             lines.append(f"{key}: {data[key]}")
 
@@ -649,9 +825,15 @@ def output_toon(data: dict) -> None:
         lines.append("")
         lines.append("task:")
         task = data['task']
-        for key in ['number', 'title', 'phase', 'status', 'current_step', 'created', 'updated', 'step_count']:
-            if key in task:
+        for key in ['number', 'title', 'domain', 'profile', 'type', 'phase', 'origin', 'status', 'current_step', 'created', 'updated', 'step_count']:
+            if key in task and task[key] is not None:
                 lines.append(f"  {key}: {task[key]}")
+        if 'skills' in task:
+            skills = task['skills']
+            if skills:
+                lines.append(f"  skills: {format_list_value(skills)}")
+            else:
+                lines.append("  skills: []")
         if 'deliverables' in task:
             lines.append(f"  deliverables: {format_list_value(task['deliverables'])}")
         if 'depends_on' in task:
@@ -701,7 +883,36 @@ def output_toon(data: dict) -> None:
         lines.append("")
         lines.append(f"blocked_tasks[{len(blocked)}]{{number,title,waiting_for}}:")
         for bt in blocked:
-            lines.append(f"{bt['number']},{bt['title']},{bt['waiting_for']}")
+            waiting = bt.get('waiting_for', [])
+            if isinstance(waiting, list):
+                waiting = ', '.join(waiting)
+            lines.append(f"{bt['number']},{bt['title']},{waiting}")
+
+    # Ready tasks block (for next-tasks command)
+    if 'ready_tasks' in data:
+        ready = data['ready_tasks']
+        lines.append("")
+        lines.append(f"ready_tasks[{len(ready)}]{{number,title,domain,profile,progress}}:")
+        for rt in ready:
+            domain = rt.get('domain') or ''
+            profile = rt.get('profile') or ''
+            lines.append(f"{rt['number']},{rt['title']},{domain},{profile},{rt['progress']}")
+            if rt.get('skills'):
+                lines.append(f"  skills: {format_list_value(rt['skills'])}")
+            if rt.get('deliverables'):
+                lines.append(f"  deliverables: {format_list_value(rt['deliverables'])}")
+
+    # In-progress tasks block (for next-tasks command)
+    if 'in_progress_tasks' in data:
+        in_prog = data['in_progress_tasks']
+        lines.append("")
+        lines.append(f"in_progress_tasks[{len(in_prog)}]{{number,title,domain,profile,progress}}:")
+        for it in in_prog:
+            domain = it.get('domain') or ''
+            profile = it.get('profile') or ''
+            lines.append(f"{it['number']},{it['title']},{domain},{profile},{it['progress']}")
+            if it.get('skills'):
+                lines.append(f"  skills: {format_list_value(it['skills'])}")
 
     # Next block
     if 'next' in data:
@@ -711,13 +922,21 @@ def output_toon(data: dict) -> None:
         else:
             lines.append("next:")
             nxt = data['next']
-            for key in ['task_number', 'task_title', 'phase', 'step_number', 'step_title',
+            for key in ['task_number', 'task_title', 'domain', 'profile', 'origin', 'phase', 'step_number', 'step_title',
                         'deliverables_found', 'deliverable_count', 'deliverables_source']:
                 if key in nxt:
                     val = nxt[key]
                     if isinstance(val, bool):
                         val = 'true' if val else 'false'
                     lines.append(f"  {key}: {val}")
+            if 'skills' in nxt:
+                skills = nxt['skills']
+                if skills:
+                    lines.append("  skills:")
+                    for skill in skills:
+                        lines.append(f"    - {skill}")
+                else:
+                    lines.append("  skills: []")
             if 'deliverables' in nxt:
                 lines.append(f"  deliverables: {format_list_value(nxt['deliverables'])}")
 
@@ -733,10 +952,12 @@ def output_toon(data: dict) -> None:
     if 'tasks_table' in data:
         tasks = data['tasks_table']
         lines.append("")
-        lines.append(f"tasks[{len(tasks)}]{{number,title,phase,deliverables,status,progress}}:")
+        lines.append(f"tasks[{len(tasks)}]{{number,title,domain,profile,phase,deliverables,status,progress}}:")
         for t in tasks:
             delivs = format_list_value(t.get('deliverables', []))
-            lines.append(f"{t['number']},{t['title']},{t.get('phase', 'execute')},{delivs},{t['status']},{t['progress']}")
+            domain = t.get('domain') or ''
+            profile = t.get('profile') or ''
+            lines.append(f"{t['number']},{t['title']},{domain},{profile},{t.get('phase', 'execute')},{delivs},{t['status']},{t['progress']}")
 
     print('\n'.join(lines))
 

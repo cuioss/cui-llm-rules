@@ -40,13 +40,13 @@ The `/plan-manage` command uses thin agents with domain skill loading:
 ```
 /plan-manage action=refine plan=X
   │
-  ├─ Resolve workflow_skill from marshal.json for domain
+  ├─ Resolve workflow skills from system domain
   │
-  ├─ If solution_outline skill is NOT null:
-  │    → Task: solution-outline-agent (loads workflow skill)
-  │    → Task: task-plan-agent (loads workflow skill)
+  ├─ For domain-specific plans (java, javascript, plugin-dev):
+  │    → Task: solution-outline-agent (resolve-workflow-skill --phase outline)
+  │    → Task: task-plan-agent (resolve-workflow-skill --phase plan)
   │
-  └─ If solution_outline skill IS null (generic):
+  └─ For generic domain (no domain extensions):
        → Task: plan-refine-agent
          → Skill: plan-refine ← THIS SKILL
            → Write tool → solution_outline.md (direct)

@@ -38,6 +38,7 @@
     "./skills/junit-core",
     "./skills/junit-integration",
     "./skills/javadoc",
-    "./skills/java-maintenance"
+    "./skills/java-maintenance",
+    "./skills/java-triage"
   ]
 }

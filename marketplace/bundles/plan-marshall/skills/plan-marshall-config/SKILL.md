@@ -458,8 +458,8 @@ Technical domains use nested structure with `workflow_skill_extensions` and 5 pr
 | Domain | Core Defaults | Extensions |
 |--------|---------------|------------|
 | `java` | `pm-dev-java:java-core` | outline, triage |
-| `javascript` | `pm-dev-frontend:cui-javascript` | outline |
-| `plan-marshall-plugin-dev` | `pm-plugin-development:plugin-architecture` | outline, triage |
+| `javascript` | `pm-dev-frontend:cui-javascript` | outline, triage |
+| `plan-marshall-plugin-dev` | `pm-plugin-development:plugin-architecture` | triage |
 
 Use `resolve-domain-skills --domain {domain} --profile {profile}` to get aggregated skills.
 

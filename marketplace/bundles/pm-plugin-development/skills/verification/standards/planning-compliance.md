@@ -703,7 +703,7 @@ After each phase completes, use this verification template:
 ## Workflow Skill API Contract Verification
 
 ### Phase Completed
-{init | solution_outline | user_review | task_creation}
+{init | outline | plan | execute | finalize}
 
 ### Contract Checks
 | Check | Status | Notes |

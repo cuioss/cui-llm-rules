@@ -36,12 +36,12 @@ Tasks are stored in the plan directory:
 
 ```
 {plan_dir}/tasks/
-  TASK-001-implement-jwt-service.toon
-  TASK-002-add-auth-endpoint.toon
-  TASK-003-write-integration-tests.toon
+  TASK-001-IMPL.toon
+  TASK-002-IMPL.toon
+  TASK-003-FIX.toon
 ```
 
-**Filename format**: `TASK-{NNN}-{slug}.toon`
+**Filename format**: `TASK-{NNN}-{TYPE}.toon` where TYPE is: IMPL, FIX, SONAR, PR, LINT, SEC, DOC
 
 ---
 
@@ -52,8 +52,15 @@ number: 1
 title: Update misc agents to TOON output
 status: pending
 phase: execute
+domain: plan-marshall-plugin-dev
+profile: implementation
+origin: plan
 created: 2025-12-02T10:30:00Z
 updated: 2025-12-02T10:30:00Z
+
+skills:
+  - pm-plugin-development:plugin-maintain
+  - pm-plugin-development:plugin-architecture
 
 deliverables[3]:
 - 1
@@ -86,6 +93,18 @@ verification:
 current_step: 1
 ```
 
+**New Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `domain` | string | Task domain (arbitrary string, e.g., java, javascript, my-domain) |
+| `profile` | string | Task profile (arbitrary string, e.g., `implementation`, `testing`) |
+| `type` | string | Task type for filename: `IMPL`, `FIX`, `SONAR`, `PR`, `LINT`, `SEC`, `DOC` |
+| `skills` | list | Pre-resolved skills for task execution |
+| `origin` | string | Task origin: `plan` (from task-plan phase) or `fix` (from finalize) |
+| `priority` | int | Optional priority for fix tasks (1=high, 2=medium, 3=low) |
+| `finding` | object | Optional finding details for fix tasks |
+
 ---
 
 ## Operations
@@ -95,11 +114,14 @@ Script: `pm-workflow:manage-tasks:manage-tasks`
 | Command | Parameters | Description |
 |---------|------------|-------------|
 | `add` | `--plan-id` + stdin | Add a new task (reads definition from stdin) |
-| `update` | `--plan-id --number [--title] [--description] [--depends-on] [--status]` | Update task metadata |
+| `update` | `--plan-id --number [--title] [--description] [--depends-on] [--status] [--domain] [--profile] [--skills] [--deliverables]` | Update task metadata |
 | `remove` | `--plan-id --number` | Remove a task |
 | `list` | `--plan-id [--status] [--phase] [--deliverable] [--ready]` | List all tasks |
 | `get` | `--plan-id --number` | Get single task details |
 | `next` | `--plan-id [--phase] [--include-context] [--ignore-deps]` | Get next pending task/step |
+| `tasks-by-domain` | `--plan-id --domain` | List tasks filtered by domain |
+| `tasks-by-profile` | `--plan-id --profile` | List tasks filtered by profile |
+| `next-tasks` | `--plan-id` | Get all tasks ready for parallel execution |
 | `step-start` | `--plan-id --task --step` | Mark step as in_progress |
 | `step-done` | `--plan-id --task --step` | Mark step as done |
 | `step-skip` | `--plan-id --task --step [--reason]` | Skip a step |
@@ -118,10 +140,17 @@ The `add` command reads the task definition from stdin in TOON format. Only `--p
 title: My Task Title
 deliverables: [1, 2, 3]
 domain: plan-marshall-plugin-dev
+profile: implementation
+type: IMPL
 phase: execute
+origin: plan
 description: |
   Multi-line task description here.
   Can include any characters.
+
+skills:
+  - pm-plugin-development:plugin-maintain
+  - pm-plugin-development:plugin-architecture
 
 steps:
   - First step to execute
@@ -144,21 +173,24 @@ verification:
   manual: false
 ```
 
-**Required fields**: `title`, `deliverables`, `domain`, `steps`
+**Required fields**: `title`, `deliverables`, `domain`, `profile`, `skills`, `steps`
 
-**Optional fields**: `phase` (default: execute), `description`, `depends_on`, `delegation`, `verification`
+**Optional fields**: `phase` (default: execute), `description`, `depends_on`, `delegation`, `verification`, `origin` (default: plan), `priority`, `finding`
 
 **Field values**:
 - `deliverables`: Array of integers `[1, 2, 3]`
-- `domain`: One of `java`, `java-testing`, `javascript`, `javascript-testing`, `plan-marshall-plugin-dev`, `generic`
-- `phase`: One of `init`, `refine`, `execute`, `finalize`
+- `domain`: Domain from config.toon (e.g., `java`, `javascript`, `plan-marshall-plugin-dev`)
+- `profile`: Arbitrary profile key from marshal.json (e.g., `implementation`, `testing`, `architecture`)
+- `skills`: Array of `bundle:skill` format strings
+- `phase`: One of `init`, `outline`, `plan`, `execute`, `finalize`
 - `depends_on`: `none` or task references like `TASK-1, TASK-2`
+- `origin`: `plan` (from task-plan phase) or `fix` (from finalize phase)
 
 ### List/Next Filters
 
 | Parameter | Description |
 |-----------|-------------|
-| `--phase` | Filter by plan phase (init/refine/execute/finalize) |
+| `--phase` | Filter by plan phase (init/outline/plan/execute/finalize) |
 | `--deliverable` | Filter by deliverable number |
 | `--ready` | Only tasks with satisfied dependencies |
 | `--ignore-deps` | (next only) Ignore dependency constraints |
@@ -366,7 +398,7 @@ blocked_tasks[2]{number,title,waiting_for}:
 
 ## Phase Filtering
 
-Tasks belong to plan phases: `init`, `refine`, `execute`, `finalize`
+Tasks belong to plan phases: `init`, `outline`, `plan`, `execute`, `finalize`
 
 **Filter by phase**:
 ```bash
@@ -379,7 +411,8 @@ next --phase finalize
 
 **Phase purpose**:
 - `init`: Setup tasks (create directories, configs)
-- `refine`: Planning tasks (analysis, design)
+- `outline`: Solution outline creation
+- `plan`: Task planning and skill resolution
 - `execute`: Implementation tasks (code changes)
 - `finalize`: Cleanup tasks (docs, release)
 

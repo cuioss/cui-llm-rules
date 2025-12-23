@@ -59,7 +59,7 @@ current_step: {integer}
 | `number` | Yes | Integer | Unique task identifier (immutable after creation) |
 | `title` | Yes | String | Short descriptive title |
 | `status` | Yes | Enum | Task status (see Status Values) |
-| `phase` | Yes | String | Plan phase: `init`, `refine`, `execute`, `finalize` |
+| `phase` | Yes | String | Plan phase: `init`, `outline`, `plan`, `execute`, `finalize` |
 | `created` | Yes | ISO timestamp | When task was created |
 | `updated` | Yes | ISO timestamp | When task was last modified |
 | `deliverables` | Yes | Integer[] | List of deliverable numbers from solution_outline.md |
@@ -126,16 +126,18 @@ pending ──► in_progress ──► done
 | Phase | Description |
 |-------|-------------|
 | `init` | Setup tasks (create directories, configs) |
-| `refine` | Planning tasks (analysis, design) |
+| `outline` | Solution outline creation |
+| `plan` | Task planning and skill resolution |
 | `execute` | Implementation tasks (code changes) |
 | `finalize` | Cleanup tasks (docs, release) |
 
 ## Domain Values
 
+Domains are arbitrary strings defined in `marshal.json`. Common examples:
+
 | Domain | Description |
 |--------|-------------|
 | `java` | Production Java code |
-| `java-testing` | Java test code (JUnit, integration tests) |
 | `javascript` | Production JavaScript code |
 | `javascript-testing` | JavaScript test code (Jest, Cypress) |
 | `plan-marshall-plugin-dev` | Claude Code marketplace plugin development |

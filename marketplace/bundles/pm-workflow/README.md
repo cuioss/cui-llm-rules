@@ -4,24 +4,25 @@ Plan-based task management system that transforms high-level task descriptions i
 
 ## Architecture
 
-**Core Principle**: Thin agents load workflow skills from config.toon. Domain knowledge comes from config, not hardcoded in agents.
+**Core Principle**: Thin agents load workflow skills from system domain. Domain knowledge comes from profile-based skill resolution, not hardcoded in agents.
 
 ```
-User Request → [Thin Agents] → Workflow Skills (from config.toon) → Domain Skills (from task.skills) → Result
+User Request → [Thin Agents] → Workflow Skills (from system domain) → Domain Skills (from task.skills) → Result
 ```
 
-### 4-Phase Model
+### 5-Phase Execution Model
 
 ```
-init → refine → execute → finalize
+init → outline → plan → execute → finalize
 ```
 
-| Phase | Agent | Purpose |
-|-------|-------|---------|
-| `init` | `plan-init-agent` | Create plan, detect domains, write config.toon |
-| `refine` | `solution-outline-agent` → `task-plan-agent` | Create deliverables, then tasks |
-| `execute` | `task-execute-agent` | Execute tasks with two-tier skill loading |
-| `finalize` | (inline) | Create PR, cleanup |
+| Phase | Purpose | Output |
+|-------|---------|--------|
+| `init` | Initialize plan | config.toon, status.toon, request.md |
+| `outline` | Create solution outline | solution_outline.md |
+| `plan` | Decompose into tasks | TASK-*.toon |
+| `execute` | Run implementation | Modified project files |
+| `finalize` | Commit, PR, quality | Git commit, PR |
 
 ## Commands
 
@@ -60,14 +61,15 @@ Quick task implementation (combines create + execute).
 
 ## Thin Agent Pattern
 
-All 4 agents are domain-agnostic wrappers that load skills from config.toon:
+All agents are domain-agnostic wrappers that load skills via system domain resolution:
 
-| Agent | Loads From | Purpose |
-|-------|------------|---------|
-| `plan-init-agent` | System skills only | Creates plan, detects domains, writes workflow_skills |
-| `solution-outline-agent` | `config.workflow_skills.{domain}.solution_outline` | Creates deliverables from request |
-| `task-plan-agent` | `config.workflow_skills.{domain}.task_plan` | Creates tasks from deliverables |
-| `task-execute-agent` | `config.workflow_skills.{domain}.{profile}` + `task.skills` | Executes single task |
+| Agent | Skill Resolution | Purpose |
+|-------|-----------------|---------|
+| `plan-init-agent` | System defaults only | Creates plan, detects domains |
+| `solution-outline-agent` | `resolve-workflow-skill --phase outline` | Creates deliverables from request |
+| `task-plan-agent` | `resolve-workflow-skill --phase plan` | Creates tasks from deliverables |
+| `task-execute-agent` | `resolve-workflow-skill --phase execute` + `task.skills` | Executes single task |
+| `plan-finalize-agent` | `resolve-workflow-skill --phase finalize` | Commit, PR, triage |
 
 ## Skills
 
@@ -77,23 +79,26 @@ All 4 agents are domain-agnostic wrappers that load skills from config.toon:
 |-------|---------|
 | `plan-wf-skill-api` | **API contract** for all workflow skills |
 
-### Workflow Skills
+### Workflow Skills (System Domain)
 
-| Skill | Purpose |
-|-------|---------|
-| `solution-outline` | Domain-agnostic solution outline creation |
-| `task-plan` | Domain-agnostic task planning |
-| `task-implementation` | Domain-agnostic implementation workflow |
-| `task-testing` | Domain-agnostic testing workflow |
+Workflow skills are resolved from `system.workflow_skills`:
 
-### Phase Skills
+| Phase | Skill | Purpose |
+|-------|-------|---------|
+| `init` | `pm-workflow:plan-init` | Create plan structure |
+| `outline` | `pm-workflow:solution-outline` | Domain-agnostic solution outline creation |
+| `plan` | `pm-workflow:task-plan` | Domain-agnostic task planning |
+| `execute` | `pm-workflow:task-execute` | Domain-agnostic task execution |
+| `finalize` | `pm-workflow:plan-finalize` | Domain-agnostic finalization |
 
-| Skill | Role | Purpose |
-|-------|------|---------|
-| `plan-init` | Setup | Create plan structure, detect domains, configure |
-| `plan-refine` | Analysis | Coordinate solution outline and task plan agents |
-| `plan-execute` | Execution | Coordinate task-execute-agent for each task |
-| `plan-finalize` | Cleanup | Create PR, archive plan |
+### Workflow Skill Extensions
+
+Domain-specific extensions loaded via `resolve-workflow-skill-extension`:
+
+| Extension Type | Phase | Purpose |
+|----------------|-------|---------|
+| `outline` | outline | Domain detection, deliverable patterns |
+| `triage` | finalize | Finding decision-making (fix/suppress/accept) |
 
 ### Support Skills
 
@@ -119,34 +124,50 @@ All 4 agents are domain-agnostic wrappers that load skills from config.toon:
 
 ## Domain Configuration
 
-Domains and workflow skills are stored in `config.toon`:
+The system domain contains workflow skills in `marshal.json`:
+
+```json
+{
+  "skill_domains": {
+    "system": {
+      "workflow_skills": {
+        "init": "pm-workflow:plan-init",
+        "outline": "pm-workflow:solution-outline",
+        "plan": "pm-workflow:task-plan",
+        "execute": "pm-workflow:task-execute",
+        "finalize": "pm-workflow:plan-finalize"
+      }
+    }
+  }
+}
+```
+
+Technical domains have profile-based skills and workflow extensions:
+
+```json
+{
+  "skill_domains": {
+    "java": {
+      "workflow_skill_extensions": {
+        "outline": "pm-dev-java:java-outline-ext",
+        "triage": "pm-dev-java:java-triage"
+      },
+      "core": {
+        "defaults": ["pm-dev-java:java-core"],
+        "optionals": ["pm-dev-java:java-null-safety"]
+      },
+      "implementation": { ... },
+      "testing": { ... },
+      "quality": { ... }
+    }
+  }
+}
+```
+
+Plan-level `config.toon` stores domains for the current plan:
 
 ```toon
 domains: [java]
-
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-```
-
-For multi-domain plans (fullstack):
-```toon
-domains: [java, javascript]
-
-workflow_skills:
-  java:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
-  javascript:
-    solution_outline: pm-workflow:solution-outline
-    task_plan: pm-workflow:task-plan
-    implementation: pm-workflow:task-implementation
-    testing: pm-workflow:task-testing
 ```
 
 ## Two-Tier Skill Loading
@@ -155,8 +176,8 @@ Task execution uses two-tier skill loading:
 
 | Tier | Source | Purpose |
 |------|--------|---------|
-| **Tier 1** | Agent frontmatter | System skills (architecture, rules) |
-| **Tier 2** | `task.skills` array | Domain-specific skills (java-core, java-cdi, etc.) |
+| **Tier 1** | `resolve-workflow-skill --phase execute` | System workflow skill |
+| **Tier 2** | `task.skills` array | Domain-specific skills (resolved by task-plan) |
 
 Task-plan resolves skills during task creation:
 ```bash
@@ -185,8 +206,6 @@ pm-workflow/
     │   └── standards/           # Contract documents
     ├── solution-outline/        # Solution outline workflow skill
     ├── task-plan/               # Task planning workflow skill
-    ├── task-implementation/     # Implementation workflow skill
-    ├── task-testing/            # Testing workflow skill
     ├── plan-init/               # Init phase skill
     ├── plan-refine/             # Refine phase coordination
     ├── plan-execute/            # Execute phase coordination

@@ -105,9 +105,9 @@ Task: pm-workflow:solution-outline-agent
 ```
 
 The agent:
-1. Reads domain from config.toon, resolves `skill_domains.{domain}.workflow_skills.solution_outline` from marshal.json
-2. Loads the skill (e.g., `pm-plugin-development:plugin-solution-outline` for plan-marshall-plugin-dev domain)
-3. Executes the skill workflow
+1. Resolves workflow skill via `resolve-workflow-skill --phase outline` (returns system workflow skill)
+2. Optionally loads domain extensions via `resolve-workflow-skill-extension --domain {domain} --type outline`
+3. Executes the workflow skill
 4. Returns deliverables (each with single `domain` field)
 
 Log solution outline creation:
