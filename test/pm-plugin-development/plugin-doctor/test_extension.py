@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+"""Tests for extension validation in plugin-doctor.
+
+Tests the cmd_extension.py script that validates extension.py files.
+"""
+
+import json
+import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+# Import shared infrastructure
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from conftest import run_script, TestRunner, get_script_path
+
+# Script under test
+SCRIPT_PATH = get_script_path('pm-plugin-development', 'plugin-doctor', 'validate.py')
+
+
+class TempDirContext:
+    """Context manager for tests that need a fresh temp directory."""
+
+    def __init__(self):
+        self.temp_dir = None
+
+    def __enter__(self):
+        self.temp_dir = Path(tempfile.mkdtemp())
+        return self.temp_dir
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+
+def create_valid_extension(ext_path: Path) -> None:
+    """Create a valid extension.py file."""
+    ext_path.parent.mkdir(parents=True, exist_ok=True)
+    ext_path.write_text('''#!/usr/bin/env python3
+"""Test extension."""
+
+from pathlib import Path
+
+
+def is_applicable(project_root: str) -> bool:
+    """Check if bundle applies."""
+    return Path(project_root).exists()
+
+
+def provides_build_systems() -> list:
+    """Return build systems."""
+    return []
+
+
+def get_command_mappings() -> dict:
+    """Return command mappings."""
+    return {}
+
+
+def get_skill_domains() -> dict:
+    """Return skill domains."""
+    return {
+        "domain": {"key": "test", "name": "Test Domain"},
+        "profiles": {"core": {"defaults": [], "optionals": []}}
+    }
+
+
+def provides_triage() -> str | None:
+    """Return triage skill reference."""
+    return None
+
+
+def provides_outline() -> str | None:
+    """Return outline skill reference."""
+    return None
+''')
+
+
+def create_invalid_extension_missing_func(ext_path: Path) -> None:
+    """Create extension.py missing required functions."""
+    ext_path.parent.mkdir(parents=True, exist_ok=True)
+    ext_path.write_text('''#!/usr/bin/env python3
+"""Test extension - missing functions."""
+
+from pathlib import Path
+
+
+def is_applicable(project_root: str) -> bool:
+    """Check if bundle applies."""
+    return Path(project_root).exists()
+
+
+# Missing: provides_build_systems, get_command_mappings, get_skill_domains
+''')
+
+
+def create_invalid_extension_syntax_error(ext_path: Path) -> None:
+    """Create extension.py with syntax error."""
+    ext_path.parent.mkdir(parents=True, exist_ok=True)
+    ext_path.write_text('''#!/usr/bin/env python3
+"""Test extension - syntax error."""
+
+def is_applicable(project_root: str) -> bool:
+    return True  # missing closing
+
+def broken(
+''')
+
+
+# =============================================================================
+# Single Extension Validation Tests
+# =============================================================================
+
+def test_validate_valid_extension():
+    """Test validating a valid extension.py file."""
+    with TempDirContext() as temp_dir:
+        ext_path = temp_dir / 'extension.py'
+        create_valid_extension(ext_path)
+
+        result = run_script(SCRIPT_PATH, 'extension', '--extension', str(ext_path))
+        data = result.json()
+
+        assert data.get('valid') is True
+        assert len(data.get('issues', [])) == 0
+        functions = data.get('functions', {})
+        assert 'is_applicable' in functions
+        assert 'provides_build_systems' in functions
+        assert 'get_command_mappings' in functions
+        assert 'get_skill_domains' in functions
+        # New optional functions
+        if 'provides_triage' in functions:
+            assert functions['provides_triage'] is not None
+        if 'provides_outline' in functions:
+            assert functions['provides_outline'] is not None
+
+
+def test_validate_extension_missing_functions():
+    """Test validating extension with missing required functions."""
+    with TempDirContext() as temp_dir:
+        ext_path = temp_dir / 'extension.py'
+        create_invalid_extension_missing_func(ext_path)
+
+        result = run_script(SCRIPT_PATH, 'extension', '--extension', str(ext_path))
+        data = result.json()
+
+        assert data.get('valid') is False
+        issues = data.get('issues', [])
+        missing_funcs = [i['function'] for i in issues if i['type'] == 'missing_function']
+        assert 'provides_build_systems' in missing_funcs
+        assert 'get_command_mappings' in missing_funcs
+        # Either get_skill_domains or get_domain_supplements is required
+        assert any('get_skill_domains' in f or 'get_domain_supplements' in f for f in missing_funcs), \
+            f"Should report missing domain function: {missing_funcs}"
+
+
+def test_validate_extension_syntax_error():
+    """Test validating extension with syntax error."""
+    with TempDirContext() as temp_dir:
+        ext_path = temp_dir / 'extension.py'
+        create_invalid_extension_syntax_error(ext_path)
+
+        result = run_script(SCRIPT_PATH, 'extension', '--extension', str(ext_path))
+        data = result.json()
+
+        assert data.get('valid') is False
+        issues = data.get('issues', [])
+        assert any(i['type'] == 'syntax_error' for i in issues)
+
+
+def test_validate_extension_not_found():
+    """Test validating non-existent extension file."""
+    with TempDirContext() as temp_dir:
+        ext_path = temp_dir / 'nonexistent.py'
+
+        result = run_script(SCRIPT_PATH, 'extension', '--extension', str(ext_path))
+        data = result.json()
+
+        assert data.get('valid') is False
+        issues = data.get('issues', [])
+        assert any(i['type'] == 'file_missing' for i in issues)
+
+
+# =============================================================================
+# Bundle Validation Tests
+# =============================================================================
+
+def test_validate_bundle_with_extension():
+    """Test validating a bundle that has extension.py."""
+    with TempDirContext() as temp_dir:
+        # Create bundle structure
+        bundle_path = temp_dir / 'test-bundle'
+        ext_path = bundle_path / 'skills' / 'plan-marshall-plugin' / 'extension.py'
+        create_valid_extension(ext_path)
+
+        result = run_script(SCRIPT_PATH, 'extension', '--bundle', str(bundle_path))
+        data = result.json()
+
+        assert 'extension' in data
+        assert data['extension'].get('valid') is True
+        assert data['consistency'].get('valid') is True
+
+
+def test_validate_bundle_without_extension():
+    """Test validating a bundle without extension.py."""
+    with TempDirContext() as temp_dir:
+        # Create bundle structure without extension
+        bundle_path = temp_dir / 'test-bundle'
+        bundle_path.mkdir(parents=True)
+
+        result = run_script(SCRIPT_PATH, 'extension', '--bundle', str(bundle_path))
+        data = result.json()
+
+        assert data.get('has_extension') is False
+
+
+# =============================================================================
+# Marketplace Scan Tests
+# =============================================================================
+
+def test_scan_marketplace():
+    """Test scanning marketplace for all extensions."""
+    with TempDirContext() as temp_dir:
+        # Create marketplace structure with multiple bundles
+        marketplace = temp_dir / 'marketplace'
+        bundles = marketplace / 'bundles'
+
+        # Bundle 1: with valid extension
+        ext1_path = bundles / 'bundle1' / 'skills' / 'plan-marshall-plugin' / 'extension.py'
+        create_valid_extension(ext1_path)
+
+        # Bundle 2: without extension
+        (bundles / 'bundle2').mkdir(parents=True)
+
+        # Bundle 3: with invalid extension
+        ext3_path = bundles / 'bundle3' / 'skills' / 'plan-marshall-plugin' / 'extension.py'
+        create_invalid_extension_missing_func(ext3_path)
+
+        result = run_script(SCRIPT_PATH, 'extension', '--marketplace', str(marketplace))
+        data = result.json()
+
+        assert 'summary' in data
+        assert data['summary']['total_bundles'] == 3
+        assert data['summary']['with_extension'] == 2
+        assert data['summary']['valid'] == 1
+        assert data['summary']['invalid'] == 1
+
+
+def test_scan_marketplace_real():
+    """Test scanning the real marketplace directory."""
+    marketplace_path = Path(__file__).parent.parent.parent.parent / 'marketplace'
+
+    if not marketplace_path.exists():
+        # Skip if not running in correct directory
+        return
+
+    result = run_script(SCRIPT_PATH, 'extension', '--marketplace', str(marketplace_path))
+    data = result.json()
+
+    assert 'summary' in data
+    assert data['summary']['with_extension'] >= 6  # 6 bundles have extension.py
+    assert data['summary']['invalid'] == 0, f"All should be valid, issues: {[e for e in data.get('extensions', []) if not e.get('valid')]}"
+
+
+def test_extension_help():
+    """Test extension subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'extension', '--help')
+    assert result.success
+    assert '--extension' in result.stdout
+    assert '--bundle' in result.stdout
+    assert '--marketplace' in result.stdout
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
+if __name__ == '__main__':
+    runner = TestRunner()
+    runner.add_tests([
+        test_validate_valid_extension,
+        test_validate_extension_missing_functions,
+        test_validate_extension_syntax_error,
+        test_validate_extension_not_found,
+        test_validate_bundle_with_extension,
+        test_validate_bundle_without_extension,
+        test_scan_marketplace,
+        test_scan_marketplace_real,
+        test_extension_help,
+    ])
+    sys.exit(runner.run())

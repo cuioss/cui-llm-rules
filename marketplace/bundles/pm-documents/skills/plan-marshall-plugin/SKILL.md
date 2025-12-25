@@ -1,19 +1,18 @@
 ---
 name: plan-marshall-plugin
-description: Plugin development domain manifest for plan-marshall workflow integration
+description: Documentation domain manifest for plan-marshall workflow integration
 allowed-tools: Read
 ---
 
-# Plan Marshall Plugin - Plugin Development Domain
+# Plan Marshall Plugin - Documentation Domain
 
-Domain manifest skill providing plugin development capabilities to plan-marshall workflows.
+Domain manifest skill providing documentation capabilities to plan-marshall workflows.
 
 ## Purpose
 
-Declares the plan-marshall-plugin-dev domain configuration including:
-- Domain identity (key: plan-marshall-plugin-dev)
-- Workflow extensions (outline, triage)
-- Profile-based skill organization (core, implementation, testing, quality)
+Declares the documentation domain configuration including:
+- Domain identity (key: documentation)
+- Profile-based skill organization (core, quality)
 
 ## Configuration
 
@@ -22,9 +21,13 @@ All configuration is in `extension.py` which implements the Extension API:
 - `provides_triage()` - Triage skill reference or None
 - `provides_outline()` - Outline skill reference or None
 
+## Detection
+
+This domain is applicable when a `doc/` directory exists in the project root, indicating AsciiDoc documentation.
+
 ## Integration
 
-This extension is discovered by:
+This manifest is read by:
 - `skill-domains get-available` - Lists available domains
 - `skill-domains configure` - Applies domain configuration to marshal.json
 - `marshall-steward` wizard - Domain selection during project setup

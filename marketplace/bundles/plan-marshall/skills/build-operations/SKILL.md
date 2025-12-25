@@ -1,41 +1,55 @@
 ---
 name: build-operations
-description: Build system abstraction with unified API for Maven, Gradle, and npm operations
+description: Central build system detection and extension discovery for modular build operations
 allowed-tools: Read, Bash
 ---
 
 # Build Operations Skill
 
-Unified build system abstraction using **static routing** - one script per build system, config stores full commands.
+Central build system detection with **extension-based architecture** - domain bundles provide build-system-specific scripts via `extension.py`.
 
 ## What This Skill Provides
 
-- Build system and module detection
-- Build execution with timeout management
-- Output parsing and issue categorization
-- OpenRewrite marker handling
-- Warning classification
-- Unified TOON output format across build systems
+- Build system detection from project structure
+- Module discovery across multi-module projects
+- Extension discovery (finds applicable domain bundles)
+- Skill profile auto-detection
+- Command generation in marshal.json
+
+**Note**: Actual build execution is provided by domain bundles (`pm-dev-java:build-operations`, `pm-dev-frontend:build-operations`).
 
 ## When to Activate This Skill
 
 Activate when:
 - Detecting build systems from project structure
-- Executing build commands (compile, test, verify)
-- Parsing build output for errors and warnings
+- Discovering project modules
 - Generating module commands for marshal.json
-- Finding module paths
+- Detecting applicable skill profiles (java, javascript, documentation, requirements)
 
 ---
 
 ## Architecture
 
-**Static Routing Pattern**: Config stores full commands, wizard generates build-system-specific paths.
+**Extension Discovery Pattern**: Domain bundles register via `extension.py` in their `plan-marshall-plugin` skill.
 
 ```
-marshal.json                          Scripts
-modules.default.commands.test ─────► maven.py execute
-modules.core.commands.verify ─────► maven.py execute
+build_env.py                        Domain Bundle Extensions
+   │                                    │
+   ├── detect ─────► Find build files   │
+   │                                    │
+   ├── persist ────► discover_extensions() ─────► pm-dev-java/skills/plan-marshall-plugin/extension.py
+   │                     │                            ├── is_applicable(project_root) → True
+   │                     │                            ├── provides_build_systems() → ["maven", "gradle"]
+   │                     │                            ├── get_command_mappings() → {"module-tests": "..."}
+   │                     │                            └── get_skill_domains() → {"domain": "java", ...}
+   │                     │
+   │                     └─────────────► pm-dev-frontend/skills/plan-marshall-plugin/extension.py
+   │                                         ├── is_applicable(project_root) → True
+   │                                         └── provides_build_systems() → ["npm"]
+   │
+   └── marshal.json ─────► modules.default.commands
+                               ├── module-tests → "pm-dev-java:build-operations:maven run ..."
+                               └── quality-gate → "pm-dev-java:build-operations:maven run ..."
 ```
 
 **Load Reference**: For full architecture details:
@@ -51,19 +65,16 @@ Read standards/architecture.md
 build-operations/
 ├── SKILL.md                     # This file
 ├── standards/
-│   ├── architecture.md          # Static routing, skill boundaries
+│   ├── architecture.md          # Extension discovery, skill boundaries
 │   ├── api-contract.md          # Shared TOON output formats
-│   ├── canonical-vocabulary.md  # Canonical command names for lookup API
-│   ├── maven-impl.md            # Maven-specific: execution, parsing
-│   ├── gradle-impl.md           # Gradle-specific: execution, parsing
-│   ├── npm-impl.md              # npm-specific: execution
-│   └── pom-maintenance.md       # POM file operations
+│   └── canonical-vocabulary.md  # Canonical command names for lookup API
 └── scripts/
-    ├── build_env.py             # Detection, module discovery, persist
-    ├── maven.py                 # Maven operations
-    ├── gradle.py                # Gradle operations
-    └── npm.py                   # npm operations
+    └── build_env.py             # Detection, extension discovery, persist
 ```
+
+**Domain Bundle Scripts** (provided by extensions):
+- `pm-dev-java:build-operations` - Maven and Gradle operations
+- `pm-dev-frontend:build-operations` - npm operations
 
 ---
 
@@ -71,10 +82,15 @@ build-operations/
 
 | Script | Notation | Purpose |
 |--------|----------|---------|
-| build_env | `plan-marshall:build-operations:build_env` | Build system & module detection |
-| maven | `plan-marshall:build-operations:maven` | Maven operations |
-| gradle | `plan-marshall:build-operations:gradle` | Gradle operations |
-| npm | `plan-marshall:build-operations:npm` | npm operations |
+| build_env | `plan-marshall:build-operations:build_env` | Build system detection, extension discovery, persist |
+
+**Execution scripts** are in domain bundles:
+
+| Script | Notation | Purpose |
+|--------|----------|---------|
+| maven | `pm-dev-java:build-operations:maven` | Maven run, execute, parse |
+| gradle | `pm-dev-java:build-operations:gradle` | Gradle run, execute, parse |
+| npm | `pm-dev-frontend:build-operations:npm` | npm run, execute, parse |
 
 ---
 
@@ -206,136 +222,64 @@ For modules with multiple build systems (e.g., Maven + npm), commands are nested
 
 ## Workflow: Execute Build
 
-**Pattern**: Config-Driven Execution
+**Pattern**: Config-Driven Execution via Domain Bundles
 
-Execute a build using config-stored command.
+Execute a build using the `run` subcommand from domain bundles.
 
-### Step 1: Resolve Command from Config
+### Recommended: Use `run` Subcommand
 
-```bash
-COMMAND=$(jq -r '.modules["default"].commands.test' .plan/marshal.json)
-```
-
-### Step 2: Execute with Timeout
+The `run` subcommand combines execute + parse, using actionable mode by default:
 
 ```bash
-# Get adaptive timeout
-TIMEOUT=$(python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout get \
-    --command "build:default:test" --default 300)
-
-# Execute with timing
-START=$(date +%s)
-timeout ${TIMEOUT}s eval "$COMMAND"
-EXIT_CODE=$?
-END=$(date +%s)
-DURATION=$((END - START))
-
-# Update timeout on success
-if [ $EXIT_CODE -eq 0 ]; then
-    python3 .plan/execute-script.py plan-marshall:run-config:run_config timeout set \
-        --command "build:default:test" --duration $DURATION
-fi
+python3 .plan/execute-script.py pm-dev-java:build-operations:maven run \
+    --targets "clean test" \
+    --module oauth-sheriff-core
 ```
 
-### Alternative: Direct Script Invocation
-
-```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:maven execute \
-    --goals "clean test" \
-    --module oauth-sheriff-core \
-    --profile coverage
-```
-
-### Step 3: Process Result
+### Output (TOON format)
 
 ```toon
 status: success
-operation: execute
 exit_code: 0
-duration_ms: 45230
-log_file: .plan/temp/build-20250115-103045.log
+duration_seconds: 45.2
+log_file: target/build-20250115-103045.log
 command_executed: ./mvnw clean test -pl oauth-sheriff-core
 ```
 
+On failure, parsed errors are included automatically:
+
+```toon
+status: error
+exit_code: 1
+duration_seconds: 23.1
+log_file: target/build-20250115-103045.log
+
+issues[2]{type,file,line,message}:
+compilation_error	src/Main.java	45	cannot find symbol
+test_failure	src/test/MainTest.java	23	expected true but was false
+```
+
+### Mode Options
+
+| Mode | Description |
+|------|-------------|
+| `actionable` (default) | Filters out accepted warnings, shows only fixable issues |
+| `errors` | Only errors, no warnings |
+| `structured` | All issues with `[accepted]` markers |
+
 ---
 
-## Workflow: Parse Build Output
+## Workflow: Parse Build Output (Standalone)
 
-**Pattern**: Command Chain Execution
-
-Parse build output and categorize issues.
-
-### Step 1: Parse Log File
+Domain bundles provide separate `parse` subcommand for analyzing existing log files:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:maven parse \
-    --log .plan/temp/build-20250115-103045.log \
+python3 .plan/execute-script.py pm-dev-java:build-operations:maven parse \
+    --log target/build-20250115-103045.log \
     --mode structured
 ```
 
-### Step 2: Process Result
-
-```toon
-status: success
-build_status: FAILURE
-total_issues: 3
-
-issues[3]{type,file,line,message}:
-compilation_error	src/Main.java	45	cannot find symbol
-test_failure	src/test/MainTest.java	23	expected true but was false
-javadoc_warning	src/Utils.java	12	missing @param tag
-```
-
----
-
-## Workflow: Find Module Path
-
-**Pattern**: Simple Query
-
-Find Maven module path from artifactId.
-
-### Step 1: Execute
-
-```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:maven find-module \
-    --artifact-id oauth-sheriff-core
-```
-
-### Step 2: Process Result
-
-```toon
-status: success
-artifact_id: oauth-sheriff-core
-module_path: oauth-sheriff-core
-pom_file: oauth-sheriff-core/pom.xml
-maven_pl_argument: -pl oauth-sheriff-core
-```
-
----
-
-## Workflow: Check Acceptable Warnings
-
-**Pattern**: Command Chain Execution
-
-Categorize warnings against acceptable patterns.
-
-### Step 1: Execute
-
-```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:maven check-warnings \
-    --warnings '{"issues": [...]}' \
-    --acceptable-warnings '{"patterns": [...]}'
-```
-
-### Step 2: Process Result
-
-```toon
-status: success
-total: 15
-acceptable: 3
-fixable: 10
-unknown: 2
-```
+See `pm-dev-java:build-operations` SKILL.md for full details.
 
 ---
 
@@ -549,31 +493,60 @@ Commands use **canonical names** for programmatic lookup. See `standards/canonic
 
 ---
 
+## Extension API
+
+Domain bundles register with the central build_env.py via `extension.py`:
+
+```python
+# marketplace/bundles/{bundle}/skills/plan-marshall-plugin/extension.py
+
+def is_applicable(project_root: str) -> bool:
+    """Return True if this bundle applies to the project."""
+
+def provides_build_systems() -> list:
+    """Return list of build system keys (e.g., ['maven', 'gradle'])."""
+
+def get_command_mappings() -> dict:
+    """Return command templates with placeholders."""
+
+def get_skill_domains() -> dict:
+    """Return domain metadata for skill loading."""
+```
+
+**Available Extensions**:
+- `pm-dev-java` - Maven, Gradle detection and commands
+- `pm-dev-frontend` - npm detection and commands
+- `pm-documents` - doc/ directory detection (no build commands)
+- `pm-requirements` - Requirements.adoc detection (no build commands)
+
+---
+
 ## Integration
 
 ### With marshall-steward
 
-- Steward wizard calls `build_env persist` to generate commands (Step 4)
+- Steward wizard calls `build_env persist` to generate commands
+- persist discovers extensions and generates domain-specific commands
 - Steward does NOT contain build detection logic
 
 ### With run-config
 
-- Build operations use `run_config timeout get/set` for adaptive timeouts
-- Command key format: `build:{module}:{label}`
+- Domain bundles use `run_config` for warning filtering
+- Warning API: `warning add/list/remove` in run-config
+- Warning patterns filter actionable output in `run` subcommand
 
-### With plan-marshall-config
+### With Domain Bundles
 
-- Modules section managed via `modules get-command`, `modules set-command`
-- Fallback to `build_systems[]` for backward compatibility
+- `pm-dev-java:build-operations` provides Maven and Gradle scripts
+- `pm-dev-frontend:build-operations` provides npm scripts
+- Domain scripts use unified TOON output format
 
 ---
 
 ## References
 
-- `standards/architecture.md` - Static routing and skill boundaries
+- `standards/architecture.md` - Extension discovery and skill boundaries
 - `standards/api-contract.md` - Shared TOON output formats
 - `standards/canonical-vocabulary.md` - Canonical command names for lookup API
-- `standards/maven-impl.md` - Maven-specific implementation
-- `standards/gradle-impl.md` - Gradle-specific implementation
-- `standards/npm-impl.md` - npm-specific implementation
-- `standards/pom-maintenance.md` - POM file operations
+- `pm-dev-java:build-operations` - Maven and Gradle implementation details
+- `pm-dev-frontend:build-operations` - npm implementation details

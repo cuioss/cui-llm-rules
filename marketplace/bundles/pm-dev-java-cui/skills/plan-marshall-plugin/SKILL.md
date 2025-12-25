@@ -17,11 +17,12 @@ Declares CUI-specific supplements for the Java domain including:
 
 ## Configuration
 
-All configuration is in `plugin.json`. This skill is automatically discovered by the `domain-extension-api` discovery mechanism.
+All configuration is in `extension.py` which implements the Extension API:
+- `get_domain_supplements()` - Supplement metadata for the target domain
 
 ## Integration
 
-This manifest is read by:
+This extension is discovered by:
 - `skill-domains get-available` - Lists available supplements
 - `skill-domains configure --supplements` - Merges supplement skills into target domain
 - `marshall-steward` wizard - Supplement selection after domain selection

@@ -15,6 +15,7 @@ Usage:
     validate.py references --file <markdown-file>
     validate.py cross-file --analysis <json-file> [--llm-findings <json-file>]
     validate.py inventory --skill-path <directory>
+    validate.py extension [--extension <path> | --bundle <path> | --marketplace <path>]
 """
 
 import argparse
@@ -23,6 +24,7 @@ import sys
 from cmd_references import cmd_references
 from cmd_cross_file import cmd_cross_file
 from cmd_inventory import cmd_inventory
+from cmd_extension import cmd_extension
 
 
 def main():
@@ -40,6 +42,15 @@ Examples:
 
   # Scan skill inventory
   %(prog)s inventory --skill-path skills/plugin-doctor
+
+  # Validate all extensions in marketplace
+  %(prog)s extension --marketplace marketplace
+
+  # Validate single extension
+  %(prog)s extension --extension marketplace/bundles/pm-dev-java/skills/plan-marshall-plugin/extension.py
+
+  # Validate bundle extension
+  %(prog)s extension --bundle marketplace/bundles/pm-dev-java
 """
     )
 
@@ -61,6 +72,13 @@ Examples:
     p_inv.add_argument('--skill-path', '-s', required=True, help='Path to skill directory')
     p_inv.add_argument('--include-hidden', action='store_true', help='Include hidden files')
     p_inv.set_defaults(func=cmd_inventory)
+
+    # extension subcommand
+    p_ext = subparsers.add_parser('extension', help='Validate extension.py files')
+    p_ext.add_argument('--extension', '-e', dest='extension_path', help='Path to extension.py file')
+    p_ext.add_argument('--bundle', '-b', dest='bundle_path', help='Path to bundle directory')
+    p_ext.add_argument('--marketplace', '-m', dest='marketplace_path', help='Path to marketplace directory')
+    p_ext.set_defaults(func=cmd_extension)
 
     args = parser.parse_args()
 

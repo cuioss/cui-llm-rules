@@ -328,6 +328,121 @@ def timeout_set(command_key: str, duration: int, project_dir: str = '.') -> None
 
 
 # =============================================================================
+# Warning Subcommands
+# =============================================================================
+
+VALID_WARNING_CATEGORIES = ['transitive_dependency', 'plugin_compatibility', 'platform_specific']
+
+
+def get_acceptable_warnings(config: dict, build_system: str = 'maven') -> dict:
+    """Get acceptable_warnings section for a build system."""
+    return config.get(build_system, {}).get('acceptable_warnings', {})
+
+
+def cmd_warning_add(args) -> int:
+    """Add a warning pattern to acceptable list."""
+    try:
+        config_path = get_run_config_path(args.project_dir)
+        config = read_run_config(config_path)
+
+        category = args.category
+        pattern = args.pattern
+        build_system = args.build_system
+
+        if category not in VALID_WARNING_CATEGORIES:
+            output_error(f"Invalid category '{category}'. Valid: {VALID_WARNING_CATEGORIES}")
+            return 1
+
+        # Ensure structure exists
+        if build_system not in config:
+            config[build_system] = {}
+        if 'acceptable_warnings' not in config[build_system]:
+            config[build_system]['acceptable_warnings'] = {cat: [] for cat in VALID_WARNING_CATEGORIES}
+
+        warnings_list = config[build_system]['acceptable_warnings'].setdefault(category, [])
+
+        if pattern in warnings_list:
+            output_success("skipped", category=category, pattern=pattern, reason="Pattern already exists")
+            return 0
+
+        warnings_list.append(pattern)
+        write_json_file(config_path, config)
+
+        output_success("added", category=category, pattern=pattern, build_system=build_system)
+        return 0
+
+    except Exception as e:
+        output_error(str(e))
+        return 1
+
+
+def cmd_warning_list(args) -> int:
+    """List accepted warning patterns."""
+    try:
+        config_path = get_run_config_path(args.project_dir)
+        config = read_run_config(config_path)
+        build_system = args.build_system
+
+        warnings = get_acceptable_warnings(config, build_system)
+
+        if args.category:
+            if args.category not in VALID_WARNING_CATEGORIES:
+                output_error(f"Invalid category '{args.category}'. Valid: {VALID_WARNING_CATEGORIES}")
+                return 1
+            result = {
+                "success": True,
+                "build_system": build_system,
+                "category": args.category,
+                "patterns": warnings.get(args.category, [])
+            }
+        else:
+            result = {
+                "success": True,
+                "build_system": build_system,
+                "categories": {cat: warnings.get(cat, []) for cat in VALID_WARNING_CATEGORIES}
+            }
+
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
+
+    except Exception as e:
+        output_error(str(e))
+        return 1
+
+
+def cmd_warning_remove(args) -> int:
+    """Remove a warning pattern from acceptable list."""
+    try:
+        config_path = get_run_config_path(args.project_dir)
+        config = read_run_config(config_path)
+
+        category = args.category
+        pattern = args.pattern
+        build_system = args.build_system
+
+        if category not in VALID_WARNING_CATEGORIES:
+            output_error(f"Invalid category '{category}'. Valid: {VALID_WARNING_CATEGORIES}")
+            return 1
+
+        warnings = get_acceptable_warnings(config, build_system)
+        warnings_list = warnings.get(category, [])
+
+        if pattern not in warnings_list:
+            output_success("skipped", category=category, pattern=pattern, reason="Pattern not found")
+            return 0
+
+        warnings_list.remove(pattern)
+        write_json_file(config_path, config)
+
+        output_success("removed", category=category, pattern=pattern, build_system=build_system)
+        return 0
+
+    except Exception as e:
+        output_error(str(e))
+        return 1
+
+
+# =============================================================================
 # CLI Subcommands
 # =============================================================================
 
@@ -411,6 +526,18 @@ Examples:
 
   # Set/update timeout for a command
   %(prog)s timeout set --command "ci:pr_checks" --duration 180
+
+  # Add acceptable warning pattern
+  %(prog)s warning add --category transitive_dependency --pattern "uses transitive dependency"
+
+  # List all acceptable warnings
+  %(prog)s warning list
+
+  # List warnings for specific category
+  %(prog)s warning list --category plugin_compatibility
+
+  # Remove warning pattern
+  %(prog)s warning remove --category transitive_dependency --pattern "uses transitive dependency"
 """
     )
 
@@ -479,6 +606,79 @@ Examples:
     )
     p_timeout_set.set_defaults(func=cmd_timeout_set)
 
+    # warning command with subcommands
+    p_warning = subparsers.add_parser('warning', help='Manage acceptable warnings')
+    warning_subparsers = p_warning.add_subparsers(dest='warning_command', help='Warning operation')
+
+    # warning add
+    p_warning_add = warning_subparsers.add_parser('add', help='Add pattern to acceptable warnings')
+    p_warning_add.add_argument(
+        '--category',
+        required=True,
+        choices=VALID_WARNING_CATEGORIES,
+        help='Warning category'
+    )
+    p_warning_add.add_argument(
+        '--pattern',
+        required=True,
+        help='Warning pattern to accept'
+    )
+    p_warning_add.add_argument(
+        '--build-system',
+        default='maven',
+        help='Build system (default: maven)'
+    )
+    p_warning_add.add_argument(
+        '--project-dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    p_warning_add.set_defaults(func=cmd_warning_add)
+
+    # warning list
+    p_warning_list = warning_subparsers.add_parser('list', help='List acceptable warnings')
+    p_warning_list.add_argument(
+        '--category',
+        choices=VALID_WARNING_CATEGORIES,
+        help='Filter by category (optional)'
+    )
+    p_warning_list.add_argument(
+        '--build-system',
+        default='maven',
+        help='Build system (default: maven)'
+    )
+    p_warning_list.add_argument(
+        '--project-dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    p_warning_list.set_defaults(func=cmd_warning_list)
+
+    # warning remove
+    p_warning_remove = warning_subparsers.add_parser('remove', help='Remove pattern from acceptable warnings')
+    p_warning_remove.add_argument(
+        '--category',
+        required=True,
+        choices=VALID_WARNING_CATEGORIES,
+        help='Warning category'
+    )
+    p_warning_remove.add_argument(
+        '--pattern',
+        required=True,
+        help='Warning pattern to remove'
+    )
+    p_warning_remove.add_argument(
+        '--build-system',
+        default='maven',
+        help='Build system (default: maven)'
+    )
+    p_warning_remove.add_argument(
+        '--project-dir',
+        default='.',
+        help='Project directory (default: current directory)'
+    )
+    p_warning_remove.set_defaults(func=cmd_warning_remove)
+
     args = parser.parse_args()
 
     if not args.command:
@@ -489,6 +689,12 @@ Examples:
     if args.command == 'timeout':
         if not args.timeout_command:
             p_timeout.print_help()
+            return 1
+
+    # Handle warning subcommand
+    if args.command == 'warning':
+        if not args.warning_command:
+            p_warning.print_help()
             return 1
 
     return args.func(args)

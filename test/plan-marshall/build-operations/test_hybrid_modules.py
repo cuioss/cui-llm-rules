@@ -168,14 +168,14 @@ def test_hybrid_commands_have_correct_content():
 
         module_tests = commands['module-tests']
 
-        # Check maven command
+        # Check maven command (now uses 'run' as primary API, not 'execute')
         maven_cmd = module_tests['maven']
-        assert 'maven execute' in maven_cmd, f"Maven cmd should use maven execute: {maven_cmd}"
+        assert 'maven run' in maven_cmd, f"Maven cmd should use maven run: {maven_cmd}"
         assert 'clean test' in maven_cmd, f"Maven cmd should have clean test: {maven_cmd}"
 
-        # Check npm command
+        # Check npm command (now uses 'run' as primary API, not 'execute')
         npm_cmd = module_tests['npm']
-        assert 'npm execute' in npm_cmd, f"npm cmd should use npm execute: {npm_cmd}"
+        assert 'npm run' in npm_cmd, f"npm cmd should use npm run: {npm_cmd}"
         assert 'run test' in npm_cmd, f"npm cmd should have run test: {npm_cmd}"
 
 
@@ -228,7 +228,8 @@ def test_lookup_hybrid_with_build_system_filter():
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
-        assert 'maven execute' in result.stdout, f"Should return maven command: {result.stdout}"
+        # Commands now use 'run' as primary API
+        assert 'maven run' in result.stdout, f"Should return maven command: {result.stdout}"
         assert 'npm' not in result.stdout, f"Should not include npm: {result.stdout}"
 
 
@@ -253,7 +254,8 @@ def test_lookup_hybrid_with_npm_filter():
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
-        assert 'npm execute' in result.stdout, f"Should return npm command: {result.stdout}"
+        # Commands now use 'run' as primary API
+        assert 'npm run' in result.stdout, f"Should return npm command: {result.stdout}"
 
 
 def test_lookup_hybrid_without_filter_returns_ambiguous():
@@ -299,7 +301,8 @@ def test_lookup_non_hybrid_without_filter():
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
-        assert 'maven execute' in result.stdout, f"Should return command: {result.stdout}"
+        # Commands now use 'run' as primary API
+        assert 'maven run' in result.stdout, f"Should return command: {result.stdout}"
 
 
 # =============================================================================

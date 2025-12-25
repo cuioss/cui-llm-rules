@@ -533,6 +533,241 @@ def test_timeout_set_help():
 
 
 # =============================================================================
+# Warning Subcommand Tests
+# =============================================================================
+
+def test_warning_add_pattern():
+    """Test warning add adds pattern to acceptable list."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Initialize config
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'warning', 'add',
+                          '--category', 'transitive_dependency',
+                          '--pattern', 'uses transitive dependency',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'added'
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        patterns = config['maven']['acceptable_warnings']['transitive_dependency']
+        assert 'uses transitive dependency' in patterns
+
+
+def test_warning_add_duplicate_skips():
+    """Test warning add skips duplicate pattern."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with existing pattern
+        config = {
+            "version": 1,
+            "commands": {},
+            "maven": {
+                "acceptable_warnings": {
+                    "transitive_dependency": ["existing pattern"],
+                    "plugin_compatibility": [],
+                    "platform_specific": []
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'warning', 'add',
+                          '--category', 'transitive_dependency',
+                          '--pattern', 'existing pattern',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'skipped'
+
+
+def test_warning_add_invalid_category():
+    """Test warning add rejects invalid category."""
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'warning', 'add',
+                          '--category', 'invalid_category',
+                          '--pattern', 'test',
+                          '--project-dir', str(temp_dir))
+
+        # argparse will fail with invalid choice
+        assert result.returncode != 0
+
+
+def test_warning_list_all_categories():
+    """Test warning list returns all categories."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with patterns
+        config = {
+            "version": 1,
+            "commands": {},
+            "maven": {
+                "acceptable_warnings": {
+                    "transitive_dependency": ["pattern1", "pattern2"],
+                    "plugin_compatibility": ["pattern3"],
+                    "platform_specific": []
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'warning', 'list',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert 'categories' in data
+        assert data['categories']['transitive_dependency'] == ['pattern1', 'pattern2']
+        assert data['categories']['plugin_compatibility'] == ['pattern3']
+
+
+def test_warning_list_single_category():
+    """Test warning list with category filter."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "maven": {
+                "acceptable_warnings": {
+                    "transitive_dependency": ["pattern1", "pattern2"],
+                    "plugin_compatibility": ["pattern3"],
+                    "platform_specific": []
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'warning', 'list',
+                          '--category', 'transitive_dependency',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('category') == 'transitive_dependency'
+        assert data.get('patterns') == ['pattern1', 'pattern2']
+
+
+def test_warning_remove_pattern():
+    """Test warning remove removes pattern from list."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "maven": {
+                "acceptable_warnings": {
+                    "transitive_dependency": ["pattern1", "pattern2"],
+                    "plugin_compatibility": [],
+                    "platform_specific": []
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'warning', 'remove',
+                          '--category', 'transitive_dependency',
+                          '--pattern', 'pattern1',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'removed'
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        patterns = config['maven']['acceptable_warnings']['transitive_dependency']
+        assert 'pattern1' not in patterns
+        assert 'pattern2' in patterns
+
+
+def test_warning_remove_nonexistent_skips():
+    """Test warning remove skips non-existent pattern."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "maven": {
+                "acceptable_warnings": {
+                    "transitive_dependency": ["pattern1"],
+                    "plugin_compatibility": [],
+                    "platform_specific": []
+                }
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'warning', 'remove',
+                          '--category', 'transitive_dependency',
+                          '--pattern', 'nonexistent',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'skipped'
+
+
+def test_warning_help():
+    """Test warning subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'warning', '--help')
+    assert result.success
+    assert 'add' in result.stdout
+    assert 'list' in result.stdout
+    assert 'remove' in result.stdout
+
+
+def test_warning_add_help():
+    """Test warning add subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'warning', 'add', '--help')
+    assert result.success
+    assert '--category' in result.stdout
+    assert '--pattern' in result.stdout
+
+
+def test_warning_list_empty_config():
+    """Test warning list with empty/missing config."""
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        result = run_script(SCRIPT_PATH, 'warning', 'list',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        # All categories should be empty
+        categories = data.get('categories', {})
+        for cat in categories.values():
+            assert cat == []
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -569,5 +804,16 @@ if __name__ == '__main__':
         test_timeout_help,
         test_timeout_get_help,
         test_timeout_set_help,
+        # Warning subcommand tests
+        test_warning_add_pattern,
+        test_warning_add_duplicate_skips,
+        test_warning_add_invalid_category,
+        test_warning_list_all_categories,
+        test_warning_list_single_category,
+        test_warning_remove_pattern,
+        test_warning_remove_nonexistent_skips,
+        test_warning_help,
+        test_warning_add_help,
+        test_warning_list_empty_config,
     ])
     sys.exit(runner.run())

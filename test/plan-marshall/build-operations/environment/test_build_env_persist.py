@@ -316,7 +316,8 @@ def test_persist_updates_build_systems():
         assert 'build_systems' in config, "Should have build_systems section"
         assert len(config['build_systems']) > 0, "Should have at least one build system"
         assert config['build_systems'][0]['system'] == 'maven', "Should be maven"
-        assert config['build_systems'][0]['skill'] == 'plan-marshall:build-operations', "Should reference build-operations skill"
+        # Build operations now in domain bundles (pm-dev-java for Maven)
+        assert config['build_systems'][0]['skill'] == 'pm-dev-java:build-operations', "Should reference domain build-operations skill"
 
 
 def test_persist_preserves_existing_config():

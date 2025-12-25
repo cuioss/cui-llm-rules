@@ -51,35 +51,6 @@ BUILD_SYSTEMS = {
 }
 
 
-# Standard command labels and their goal mappings per build system (LEGACY)
-# Kept for backward compatibility - use CANONICAL_COMMANDS for new code
-COMMAND_MAPPINGS = {
-    "maven": {
-        "test-compile": "test-compile",
-        "test": "clean test",
-        "verify": "clean verify",
-        "install": "clean install",
-        "pre-commit": "clean install",
-        "coverage": "clean verify -Pcoverage"
-    },
-    "gradle": {
-        "test-compile": "testClasses",
-        "test": "clean test",
-        "verify": "clean build",
-        "install": "clean build publishToMavenLocal",
-        "pre-commit": "clean build",
-        "coverage": "clean test jacocoTestReport"
-    },
-    "npm": {
-        "test": "run test",
-        "build": "run build",
-        "lint": "run lint",
-        "verify": "run test && npm run lint",
-        "pre-commit": "run test"
-    }
-}
-
-
 # =============================================================================
 # Canonical Command Vocabulary
 # =============================================================================
@@ -158,45 +129,184 @@ CANONICAL_COMMANDS = {
 }
 
 
-# Build system mappings: canonical name -> build-system-specific goals
-BUILD_SYSTEM_MAPPINGS = {
-    "maven": {
-        "compile": "compile",
-        "test-compile": "test-compile",
-        "module-tests": "clean test",
-        "integration-tests": "clean verify -Pintegration-tests",
-        "coverage": "clean verify -Pcoverage",
-        "performance": "clean verify -Pbenchmark",
-        "quality-gate": "clean verify -Ppre-commit",
-        "verify": "clean verify",
-        "install": "clean install",
-        "package": "package",
-    },
-    "gradle": {
-        "compile": "compileJava",
-        "test-compile": "testClasses",
-        "module-tests": "clean test",
-        "integration-tests": "clean integrationTest",
-        "coverage": "clean test jacocoTestReport",
-        "performance": "clean jmh",
-        "quality-gate": "clean check",
-        "verify": "clean build",
-        "install": "clean publishToMavenLocal",
-        "package": "clean assemble",
-    },
-    "npm": {
-        "compile": None,
-        "test-compile": None,
-        "module-tests": "run test",
-        "integration-tests": "run test:e2e",
-        "coverage": "run test:coverage",
-        "performance": "run test:perf",
-        "quality-gate": "run lint && npm run format:check",
-        "verify": "run test && npm run lint",
-        "install": None,
-        "package": "run build",
-    },
-}
+# =============================================================================
+# Extension Discovery
+# =============================================================================
+
+def get_marketplace_bundles_path() -> Path:
+    """Get the path to marketplace bundles directory.
+
+    Searches for marketplace bundles in:
+    1. Source: marketplace/bundles relative to script (development)
+    2. Cache: ~/.claude/plugins/cache/plan-marshall (installed)
+
+    Returns:
+        Path to bundles directory
+    """
+    script_path = Path(__file__).resolve()
+
+    # Try to find marketplace/bundles by walking up from script location
+    # Structure: scripts -> build-operations -> skills -> plan-marshall -> bundles -> marketplace
+    current = script_path.parent
+    for _ in range(10):  # Safety limit
+        candidate = current / "bundles"
+        if candidate.is_dir() and (candidate / "plan-marshall").is_dir():
+            return candidate
+        # Also check if current IS the bundles dir
+        if current.name == "bundles" and (current / "plan-marshall").is_dir():
+            return current
+        current = current.parent
+        if current == current.parent:  # Reached root
+            break
+
+    # Fallback: check ~/.claude/plugins/cache/plan-marshall
+    cache_path = Path.home() / ".claude" / "plugins" / "cache" / "plan-marshall"
+    if cache_path.is_dir():
+        return cache_path
+
+    # Default to expected marketplace location
+    return script_path.parent.parent.parent.parent.parent / "bundles"
+
+
+def discover_extensions(project_root: Path) -> list:
+    """Discover all applicable extensions for a project.
+
+    Scans all bundles for extension.py files in skills/plan-marshall-plugin/
+    and calls is_applicable() to determine which apply.
+
+    Handles both source and cache structures:
+    - Source: bundles/{bundle}/skills/plan-marshall-plugin/extension.py
+    - Cache: {cache}/{bundle}/skills/plan-marshall-plugin/extension.py
+    - Cache versioned: {cache}/{bundle}/1.0.0/skills/plan-marshall-plugin/extension.py
+
+    Args:
+        project_root: Path to the project root
+
+    Returns:
+        List of dicts with extension info: {bundle, path, module}
+    """
+    extensions = []
+    bundles_path = get_marketplace_bundles_path()
+
+    if not bundles_path.is_dir():
+        return extensions
+
+    for bundle_dir in bundles_path.iterdir():
+        if not bundle_dir.is_dir() or bundle_dir.name.startswith('.'):
+            continue
+
+        # Try direct path first (source structure)
+        extension_path = bundle_dir / "skills" / "plan-marshall-plugin" / "extension.py"
+
+        # Try versioned path (cache structure from rsync)
+        if not extension_path.exists():
+            for version_dir in bundle_dir.iterdir():
+                if version_dir.is_dir() and not version_dir.name.startswith('.'):
+                    versioned_path = version_dir / "skills" / "plan-marshall-plugin" / "extension.py"
+                    if versioned_path.exists():
+                        extension_path = versioned_path
+                        break
+
+        if not extension_path.exists():
+            continue
+
+        # Load and execute the extension module
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                f"extension_{bundle_dir.name}",
+                extension_path
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            # Check if applicable
+            if hasattr(module, 'is_applicable') and module.is_applicable(str(project_root)):
+                extensions.append({
+                    "bundle": bundle_dir.name,
+                    "path": str(extension_path),
+                    "module": module
+                })
+        except Exception as e:
+            # Skip extensions that fail to load
+            print(f"Warning: Failed to load extension from {bundle_dir.name}: {e}", file=sys.stderr)
+            continue
+
+    return extensions
+
+
+def get_command_mappings_from_extensions(extensions: list) -> dict:
+    """Get command mappings from all applicable extensions.
+
+    Args:
+        extensions: List of extension info dicts from discover_extensions()
+
+    Returns:
+        Dict of {build_system: {canonical: command_template}}
+    """
+    mappings = {}
+
+    for ext in extensions:
+        module = ext.get("module")
+        if module and hasattr(module, 'get_command_mappings'):
+            try:
+                ext_mappings = module.get_command_mappings()
+                for build_system, commands in ext_mappings.items():
+                    if build_system not in mappings:
+                        mappings[build_system] = {}
+                    mappings[build_system].update(commands)
+            except Exception as e:
+                print(f"Warning: Failed to get mappings from {ext['bundle']}: {e}", file=sys.stderr)
+
+    return mappings
+
+
+def get_skill_domains_from_extensions(extensions: list) -> list:
+    """Get skill domains from all applicable extensions.
+
+    Args:
+        extensions: List of extension info dicts from discover_extensions()
+
+    Returns:
+        List of domain info dicts: {domain, profiles, bundle}
+    """
+    domains = []
+
+    for ext in extensions:
+        module = ext.get("module")
+        if module and hasattr(module, 'get_skill_domains'):
+            try:
+                domain_info = module.get_skill_domains()
+                if domain_info and domain_info.get("domain"):
+                    domain_info["bundle"] = ext["bundle"]
+                    domains.append(domain_info)
+            except Exception as e:
+                print(f"Warning: Failed to get domains from {ext['bundle']}: {e}", file=sys.stderr)
+
+    return domains
+
+
+def get_build_systems_from_extensions(extensions: list) -> list:
+    """Get build systems provided by all applicable extensions.
+
+    Args:
+        extensions: List of extension info dicts from discover_extensions()
+
+    Returns:
+        List of build system names
+    """
+    build_systems = set()
+
+    for ext in extensions:
+        module = ext.get("module")
+        if module and hasattr(module, 'provides_build_systems'):
+            try:
+                systems = module.provides_build_systems()
+                build_systems.update(systems)
+            except Exception as e:
+                print(f"Warning: Failed to get build systems from {ext['bundle']}: {e}", file=sys.stderr)
+
+    return list(build_systems)
 
 
 # Profile pattern to canonical name mapping
@@ -229,22 +339,6 @@ PROFILE_TO_CANONICAL = {
     "performance": "performance",
     "stress": "performance",
     "load": "performance",
-}
-
-
-# Profile modifiers that append suffixes to base canonical names
-PROFILE_MODIFIERS = {
-    "quick": {"suffix": "-quick", "description": "Fast execution mode"},
-    "stress": {"suffix": "-stress", "description": "Stress testing mode"},
-    "max": {"suffix": "-max", "description": "Maximum load mode"},
-}
-
-
-# Old label to canonical name migration mapping
-OLD_TO_CANONICAL = {
-    "test": "module-tests",
-    "pre-commit": "quality-gate",
-    "lint": "quality-gate",
 }
 
 
@@ -409,140 +503,6 @@ def detect_all_modules(project_dir: Path) -> list:
     return modules
 
 
-# =============================================================================
-# Module Type Detection
-# =============================================================================
-
-def detect_module_type(pom_path: Path) -> str:
-    """Detect module type from pom.xml packaging element.
-
-    Args:
-        pom_path: Path to pom.xml file
-
-    Returns:
-        Module type: "pom", "jar", "war", or "quarkus"
-    """
-    if not pom_path.exists():
-        return "jar"  # Default
-
-    content = pom_path.read_text()
-
-    # Check <packaging> element
-    packaging_match = re.search(r'<packaging>([^<]+)</packaging>', content)
-    if packaging_match:
-        packaging = packaging_match.group(1).strip().lower()
-        if packaging == "pom":
-            return "pom"
-        if packaging == "war":
-            return "war"
-
-    # Check for Quarkus (quarkus-maven-plugin presence)
-    if "quarkus-maven-plugin" in content:
-        return "quarkus"
-
-    return "jar"
-
-
-def detect_gradle_module_type(build_file: Path) -> str:
-    """Detect module type from build.gradle or build.gradle.kts.
-
-    Args:
-        build_file: Path to build.gradle or build.gradle.kts file
-
-    Returns:
-        Module type: "jar", "war", or "quarkus"
-    """
-    if not build_file.exists():
-        return "jar"  # Default
-
-    content = build_file.read_text()
-
-    # Check for war plugin
-    if "war" in content.lower() and ("plugin" in content.lower() or "plugins" in content.lower()):
-        if re.search(r'[\'"]war[\'"]', content) or "id 'war'" in content or 'id("war")' in content:
-            return "war"
-
-    # Check for Quarkus plugin
-    if "quarkus" in content.lower():
-        return "quarkus"
-
-    return "jar"
-
-
-def detect_npm_module_type(package_path: Path) -> str:
-    """Detect module type from package.json.
-
-    Args:
-        package_path: Path to package.json file
-
-    Returns:
-        Module type: always "npm" for npm projects
-    """
-    return "npm"
-
-
-def detect_module_type_for_path(module_path: Path, build_system: str) -> str:
-    """Detect module type for a given module path and build system.
-
-    Args:
-        module_path: Path to module directory
-        build_system: Build system (maven, gradle, npm)
-
-    Returns:
-        Module type string
-    """
-    if build_system == "maven":
-        pom_path = module_path / "pom.xml"
-        return detect_module_type(pom_path)
-    elif build_system == "gradle":
-        for build_file in ["build.gradle.kts", "build.gradle"]:
-            build_path = module_path / build_file
-            if build_path.exists():
-                return detect_gradle_module_type(build_path)
-        return "jar"
-    elif build_system == "npm":
-        return detect_npm_module_type(module_path / "package.json")
-    else:
-        return "jar"
-
-
-def cmd_detect_module_type(args):
-    """Handle detect-module-type subcommand."""
-    project_dir = Path(args.project_dir).resolve()
-    module_path = project_dir
-
-    if args.module and args.module != "default":
-        module_path = project_dir / args.module
-
-    if not module_path.exists():
-        print(f"error: Module path not found: {module_path}", file=sys.stderr)
-        return 1
-
-    # Detect build system if not specified
-    build_system = args.build_system
-    if not build_system:
-        # Auto-detect from available files
-        if (module_path / "pom.xml").exists():
-            build_system = "maven"
-        elif (module_path / "build.gradle.kts").exists() or (module_path / "build.gradle").exists():
-            build_system = "gradle"
-        elif (module_path / "package.json").exists():
-            build_system = "npm"
-        else:
-            print("error: Could not detect build system", file=sys.stderr)
-            return 1
-
-    module_type = detect_module_type_for_path(module_path, build_system)
-
-    # Output in TOON format
-    print("status: success")
-    print(f"module: {args.module or 'default'}")
-    print(f"build_system: {build_system}")
-    print(f"type: {module_type}")
-
-    return 0
-
-
 def cmd_detect_modules(args):
     """Handle detect-modules subcommand."""
     project_dir = Path(args.project_dir).resolve()
@@ -608,124 +568,12 @@ def is_hybrid_module(module_path: Path) -> bool:
     return len(detect_hybrid_build_systems(module_path)) > 1
 
 
-def generate_hybrid_commands(module_path: Path, module_name: str = None) -> dict:
-    """Generate commands for a hybrid module with all its build systems.
-
-    For hybrid modules, commands are nested by build system:
-    {
-        "module-tests": {
-            "maven": "...",
-            "npm": "..."
-        }
-    }
-
-    Args:
-        module_path: Path to module directory
-        module_name: Module name (None or "default" for root module)
-
-    Returns:
-        Dict of canonical_name -> {build_system: command} for each build system
-    """
-    build_systems = detect_hybrid_build_systems(module_path)
-    if len(build_systems) <= 1:
-        return {}  # Not hybrid, use regular command generation
-
-    commands = {}
-
-    for build_system in build_systems:
-        # Detect module type for this build system
-        mod_type = detect_module_type_for_path(module_path, build_system)
-
-        # Generate commands for this build system
-        for canonical, spec in CANONICAL_COMMANDS.items():
-            # Filter by applicable_to
-            if mod_type not in spec["applicable_to"]:
-                continue
-
-            goals = BUILD_SYSTEM_MAPPINGS.get(build_system, {}).get(canonical)
-            if goals is None:
-                continue
-
-            # Generate full command string
-            if build_system == "npm":
-                cmd = f'python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "{goals}"'
-            else:
-                cmd = f'python3 .plan/execute-script.py plan-marshall:build-operations:{build_system} execute --goals "{goals}"'
-
-            # Add module flag for non-default modules
-            if module_name and module_name != "default":
-                cmd += f" --module {module_name}"
-
-            # Initialize nested dict if needed
-            if canonical not in commands:
-                commands[canonical] = {}
-
-            commands[canonical][build_system] = cmd
-
-    return commands
+# NOTE: generate_hybrid_commands() removed - use generate_hybrid_commands_from_extensions() instead
 
 
 # =============================================================================
 # Command Generation and Persistence
 # =============================================================================
-
-def generate_command(build_system: str, label: str, module_name: str = None) -> str:
-    """Generate a full executable command string.
-
-    Args:
-        build_system: maven, gradle, or npm
-        label: Command label (test, verify, etc.)
-        module_name: Module name (None or "default" for root module)
-
-    Returns:
-        Full command string for execution
-    """
-    if build_system not in COMMAND_MAPPINGS:
-        return None
-
-    if label not in COMMAND_MAPPINGS[build_system]:
-        return None
-
-    goals = COMMAND_MAPPINGS[build_system][label]
-
-    if build_system == "npm":
-        base = f'python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "{goals}"'
-    else:
-        base = f'python3 .plan/execute-script.py plan-marshall:build-operations:{build_system} execute --goals "{goals}"'
-
-    # Add module flag for non-default modules
-    if module_name and module_name != "default":
-        base += f" --module {module_name}"
-
-    # Add profile for pre-commit
-    if label == "pre-commit":
-        base += " --profile pre-commit"
-
-    return base
-
-
-def generate_module_commands(build_system: str, module_name: str = None) -> dict:
-    """Generate all standard commands for a module.
-
-    Args:
-        build_system: maven, gradle, or npm
-        module_name: Module name (None or "default" for root module)
-
-    Returns:
-        Dict of label -> command string
-    """
-    commands = {}
-
-    if build_system not in COMMAND_MAPPINGS:
-        return commands
-
-    for label in COMMAND_MAPPINGS[build_system]:
-        cmd = generate_command(build_system, label, module_name)
-        if cmd:
-            commands[label] = cmd
-
-    return commands
-
 
 def load_marshal_json(project_dir: Path) -> dict:
     """Load marshal.json from .plan directory."""
@@ -742,10 +590,73 @@ def save_marshal_json(project_dir: Path, config: dict) -> None:
     marshal_path.write_text(json.dumps(config, indent=2))
 
 
-def generate_canonical_commands_for_type(build_system: str, module_type: str, module_name: str = None, minimal: bool = False) -> dict:
-    """Generate canonical commands filtered by module type.
+def generate_hybrid_commands_from_extensions(extension_mappings: dict, module_path: Path, module_name: str = None) -> dict:
+    """Generate commands for a hybrid module using extension mappings.
+
+    For hybrid modules, commands are nested by build system:
+    {
+        "module-tests": {
+            "maven": "...",
+            "npm": "..."
+        }
+    }
 
     Args:
+        extension_mappings: Command mappings from extensions
+        module_path: Path to module directory
+        module_name: Module name (None or "default" for root module)
+
+    Returns:
+        Dict of canonical_name -> {build_system: command} for each build system
+    """
+    build_systems = detect_hybrid_build_systems(module_path)
+    if len(build_systems) <= 1:
+        return {}  # Not hybrid, use regular command generation
+
+    commands = {}
+
+    for build_system in build_systems:
+        if build_system not in extension_mappings:
+            continue
+
+        # Detect module type for this build system
+        mod_type = detect_module_type_for_path(module_path, build_system)
+        build_mappings = extension_mappings[build_system]
+
+        # Generate commands for this build system
+        for canonical, spec in CANONICAL_COMMANDS.items():
+            # Filter by applicable_to
+            if mod_type not in spec["applicable_to"]:
+                continue
+
+            cmd_template = build_mappings.get(canonical)
+            if cmd_template is None:
+                continue
+
+            # Resolve {module} placeholder based on build system
+            if module_name and module_name != "default":
+                # npm uses --workspace, Maven/Gradle use --module
+                if build_system == "npm":
+                    cmd = cmd_template.replace("{module}", f" --workspace {module_name}")
+                else:
+                    cmd = cmd_template.replace("{module}", f" --module {module_name}")
+            else:
+                cmd = cmd_template.replace("{module}", "")
+
+            # Initialize nested dict if needed
+            if canonical not in commands:
+                commands[canonical] = {}
+
+            commands[canonical][build_system] = cmd
+
+    return commands
+
+
+def generate_commands_from_extensions(extension_mappings: dict, build_system: str, module_type: str, module_name: str = None, minimal: bool = False) -> dict:
+    """Generate canonical commands from extension mappings.
+
+    Args:
+        extension_mappings: Command mappings from get_command_mappings_from_extensions()
         build_system: maven, gradle, or npm
         module_type: Module type (pom, jar, war, quarkus, npm)
         module_name: Module name (None or "default" for root module)
@@ -756,8 +667,10 @@ def generate_canonical_commands_for_type(build_system: str, module_type: str, mo
     """
     commands = {}
 
-    if build_system not in BUILD_SYSTEM_MAPPINGS:
+    if build_system not in extension_mappings:
         return commands
+
+    build_mappings = extension_mappings[build_system]
 
     for canonical, spec in CANONICAL_COMMANDS.items():
         # Filter by applicable_to
@@ -768,19 +681,20 @@ def generate_canonical_commands_for_type(build_system: str, module_type: str, mo
         if minimal and not spec.get("required", False):
             continue
 
-        goals = BUILD_SYSTEM_MAPPINGS[build_system].get(canonical)
-        if goals is None:
+        # Get command template from extension
+        cmd_template = build_mappings.get(canonical)
+        if cmd_template is None:
             continue
 
-        # Generate full command string
-        if build_system == "npm":
-            cmd = f'python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "{goals}"'
-        else:
-            cmd = f'python3 .plan/execute-script.py plan-marshall:build-operations:{build_system} execute --goals "{goals}"'
-
-        # Add module flag for non-default modules
+        # Resolve {module} placeholder based on build system
         if module_name and module_name != "default":
-            cmd += f" --module {module_name}"
+            # npm uses --workspace, Maven/Gradle use --module
+            if build_system == "npm":
+                cmd = cmd_template.replace("{module}", f" --workspace {module_name}")
+            else:
+                cmd = cmd_template.replace("{module}", f" --module {module_name}")
+        else:
+            cmd = cmd_template.replace("{module}", "")
 
         commands[canonical] = cmd
 
@@ -806,17 +720,17 @@ def generate_profile_command(build_system: str, canonical: str, profile_id: str,
             prop_name = activation.get("property", "")
             prop_value = activation.get("value")
             if prop_value:
-                goals = f"clean verify -D{prop_name}={prop_value}"
+                targets = f"clean verify -D{prop_name}={prop_value}"
             else:
-                goals = f"clean verify -D{prop_name}"
+                targets = f"clean verify -D{prop_name}"
         else:
             # Default to -P activation
-            goals = f"clean verify -P{profile_id}"
+            targets = f"clean verify -P{profile_id}"
 
-        cmd = f'python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "{goals}"'
+        cmd = f'python3 .plan/execute-script.py pm-dev-java:build-operations:maven run --targets "{targets}"'
     elif build_system == "gradle":
         # Gradle typically uses tasks
-        cmd = f'python3 .plan/execute-script.py plan-marshall:build-operations:gradle execute --tasks "clean {profile_id}"'
+        cmd = f'python3 .plan/execute-script.py pm-dev-java:build-operations:gradle run --targets "clean {profile_id}"'
     else:
         return None
 
@@ -845,6 +759,15 @@ def cmd_persist(args):
 
     # In minimal mode, skip all profile-based commands unless explicitly included
     minimal = getattr(args, 'minimal', False)
+
+    # Discover applicable extensions for this project
+    extensions = discover_extensions(project_dir)
+
+    # Get command mappings from extensions
+    extension_mappings = get_command_mappings_from_extensions(extensions)
+
+    # Get skill domains from extensions
+    skill_domains = get_skill_domains_from_extensions(extensions)
 
     # Detect build systems
     build_result = detect_build_systems(project_dir)
@@ -897,10 +820,10 @@ def cmd_persist(args):
     # Generate commands for default module
     if default_is_hybrid:
         # Hybrid module: generate nested commands for each build system
-        default_commands = generate_hybrid_commands(project_dir, None)
+        default_commands = generate_hybrid_commands_from_extensions(extension_mappings, project_dir, None)
     else:
-        # Single build system: generate flat commands
-        default_commands = generate_canonical_commands_for_type(default_system, default_type, minimal=minimal)
+        # Single build system: generate flat commands using extension mappings
+        default_commands = generate_commands_from_extensions(extension_mappings, default_system, default_type, minimal=minimal)
 
         # Add profile-based commands (may override type-based if profile has specific activation)
         for profile in default_profiles:
@@ -979,10 +902,10 @@ def cmd_persist(args):
         # Generate commands
         if mod_is_hybrid:
             # Hybrid module: generate nested commands for each build system
-            mod_commands = generate_hybrid_commands(mod_path, mod_name)
+            mod_commands = generate_hybrid_commands_from_extensions(extension_mappings, mod_path, mod_name)
         else:
-            # Single build system: generate flat commands
-            mod_commands = generate_canonical_commands_for_type(mod_system, mod_type, mod_name, minimal=minimal)
+            # Single build system: generate flat commands using extension mappings
+            mod_commands = generate_commands_from_extensions(extension_mappings, mod_system, mod_type, mod_name, minimal=minimal)
 
             # Add profile-based commands (may override type-based if profile has specific activation)
             for profile in mod_profiles:
@@ -1022,12 +945,20 @@ def cmd_persist(args):
         modules_updated += 1
         commands_generated += len(mod_commands)
 
-    # Update build_systems section if not present
-    if "build_systems" not in config or not config["build_systems"]:
-        config["build_systems"] = [
-            {"system": system, "skill": "plan-marshall:build-operations"}
-            for system in available_systems
-        ]
+    # Update build_systems section - reference correct domain bundles
+    build_system_skill_map = {
+        "maven": "pm-dev-java:build-operations",
+        "gradle": "pm-dev-java:build-operations",
+        "npm": "pm-dev-frontend:build-operations"
+    }
+    config["build_systems"] = [
+        {"system": system, "skill": build_system_skill_map.get(system, "plan-marshall:build-operations")}
+        for system in available_systems
+    ]
+
+    # Store detected skill domains
+    if skill_domains:
+        config["detected_domains"] = skill_domains
 
     # Save unless dry run
     if not args.dry_run:
@@ -1052,34 +983,8 @@ def cmd_persist(args):
 # Canonical Lookup API
 # =============================================================================
 
-def generate_canonical_command(build_system: str, canonical: str, module_name: str = None) -> str:
-    """Generate a full executable command string for a canonical command name.
-
-    Args:
-        build_system: maven, gradle, or npm
-        canonical: Canonical command name (module-tests, verify, etc.)
-        module_name: Module name (None or "default" for root module)
-
-    Returns:
-        Full command string for execution, or None if not applicable
-    """
-    if build_system not in BUILD_SYSTEM_MAPPINGS:
-        return None
-
-    goals = BUILD_SYSTEM_MAPPINGS[build_system].get(canonical)
-    if goals is None:
-        return None
-
-    if build_system == "npm":
-        base = f'python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "{goals}"'
-    else:
-        base = f'python3 .plan/execute-script.py plan-marshall:build-operations:{build_system} execute --goals "{goals}"'
-
-    # Add module flag for non-default modules
-    if module_name and module_name != "default":
-        base += f" --module {module_name}"
-
-    return base
+# NOTE: generate_canonical_command() removed - use generate_commands_from_extensions() instead
+# Commands are now generated from extension mappings, not hardcoded BUILD_SYSTEM_MAPPINGS
 
 
 def lookup_command(canonical: str, module: str, config: dict, build_system: str = None) -> str | dict | None:

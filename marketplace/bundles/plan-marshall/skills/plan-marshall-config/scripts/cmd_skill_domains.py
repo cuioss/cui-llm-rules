@@ -2,11 +2,19 @@
 Skill domains command handlers for plan-marshall-config.
 
 Handles: skill-domains, resolve-domain-skills, get-workflow-skills
+
+Domain discovery uses extension.py files in each bundle's plan-marshall-plugin skill.
+Extension API functions:
+- get_skill_domains() -> domain metadata with profiles
+- get_domain_supplements() -> supplement metadata (for supplement bundles)
+- provides_triage() -> triage skill reference or None
+- provides_outline() -> outline skill reference or None
 """
 
-import json
+import copy
+import importlib.util
 import os
-import subprocess
+import sys
 from pathlib import Path
 
 from config_core import (
@@ -35,104 +43,163 @@ def get_plugin_cache_path() -> Path:
     return Path.home() / ".claude" / "plugins" / "cache" / "plan-marshall"
 
 
+def get_marketplace_bundles_path() -> Path:
+    """Get the path to marketplace bundles directory.
+
+    Searches for marketplace bundles in:
+    1. Source: marketplace/bundles relative to script (development)
+    2. Cache: ~/.claude/plugins/cache/plan-marshall (installed)
+
+    Returns:
+        Path to bundles directory
+    """
+    script_path = Path(__file__).resolve()
+
+    # Try to find marketplace/bundles by walking up from script location
+    current = script_path.parent
+    for _ in range(10):  # Safety limit
+        candidate = current / "bundles"
+        if candidate.is_dir() and (candidate / "plan-marshall").is_dir():
+            return candidate
+        if current.name == "bundles" and (current / "plan-marshall").is_dir():
+            return current
+        current = current.parent
+        if current == current.parent:
+            break
+
+    # Fallback: check plugin cache
+    cache_path = get_plugin_cache_path()
+    if cache_path.is_dir():
+        return cache_path
+
+    return script_path.parent.parent.parent.parent.parent / "bundles"
+
+
+def load_extension_module(extension_path: Path, bundle_name: str):
+    """Load an extension.py module dynamically.
+
+    Args:
+        extension_path: Path to extension.py file
+        bundle_name: Name of the bundle for module naming
+
+    Returns:
+        Loaded module or None if failed
+    """
+    try:
+        spec = importlib.util.spec_from_file_location(
+            f"extension_{bundle_name}",
+            extension_path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except Exception as e:
+        print(f"Warning: Failed to load extension from {bundle_name}: {e}", file=sys.stderr)
+        return None
+
+
+def discover_all_extensions() -> list:
+    """Discover all extension.py files in bundles.
+
+    Scans all bundles for extension.py files in skills/plan-marshall-plugin/
+
+    Returns:
+        List of dicts with extension info: {bundle, path, module}
+    """
+    extensions = []
+    bundles_path = get_marketplace_bundles_path()
+
+    if not bundles_path.is_dir():
+        return extensions
+
+    for bundle_dir in bundles_path.iterdir():
+        if not bundle_dir.is_dir() or bundle_dir.name.startswith('.'):
+            continue
+
+        # Try direct path first (source structure)
+        extension_path = bundle_dir / "skills" / "plan-marshall-plugin" / "extension.py"
+
+        # Try versioned path (cache structure from rsync)
+        if not extension_path.exists():
+            for version_dir in bundle_dir.iterdir():
+                if version_dir.is_dir() and not version_dir.name.startswith('.'):
+                    versioned_path = version_dir / "skills" / "plan-marshall-plugin" / "extension.py"
+                    if versioned_path.exists():
+                        extension_path = versioned_path
+                        break
+
+        if not extension_path.exists():
+            continue
+
+        module = load_extension_module(extension_path, bundle_dir.name)
+        if module:
+            extensions.append({
+                "bundle": bundle_dir.name,
+                "path": str(extension_path),
+                "module": module
+            })
+
+    return extensions
+
+
 def discover_available_domains() -> dict:
-    """Call discover_domains.py and parse TOON output.
+    """Discover domains and supplements from extension.py files.
 
     Returns dict with 'domains' and 'supplements' lists.
     """
-    plugin_cache = get_plugin_cache_path()
-
-    # Find the discover_domains.py script
-    # Try non-versioned path first (standard structure)
-    script_path = plugin_cache / "plan-marshall" / "skills" / "domain-extension-api" / "scripts" / "discover_domains.py"
-    if not script_path.exists():
-        # Fall back to versioned path
-        script_path = plugin_cache / "plan-marshall" / "1.0.0" / "skills" / "domain-extension-api" / "scripts" / "discover_domains.py"
-
-    if not script_path.exists():
-        return {"domains": [], "supplements": [], "error": "discover_domains.py not found"}
-
-    try:
-        result = subprocess.run(
-            ["python3", str(script_path), "discover"],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            env={**os.environ, "PLUGIN_CACHE_PATH": str(plugin_cache)}
-        )
-        if result.returncode != 0:
-            return {"domains": [], "supplements": [], "error": result.stderr}
-
-        # Parse TOON output
-        return parse_discover_toon_output(result.stdout)
-    except subprocess.TimeoutExpired:
-        return {"domains": [], "supplements": [], "error": "Discovery timed out"}
-    except Exception as e:
-        return {"domains": [], "supplements": [], "error": str(e)}
-
-
-def parse_discover_toon_output(output: str) -> dict:
-    """Parse TOON output from discover_domains.py.
-
-    Expected format:
-    status: success
-    domains_found: N
-    supplements_found: M
-
-    domains[N]{key,name,bundle,has_outline,has_triage}:
-    java\tJava Development\tpm-dev-java\ttrue\ttrue
-    ...
-
-    supplements[M]{domain,bundle,description}:
-    java\tpm-dev-java-cui\tCUI-specific Java patterns
-    ...
-    """
+    extensions = discover_all_extensions()
     domains = []
     supplements = []
-    current_section = None
 
-    for line in output.strip().split("\n"):
-        line = line.strip()
-        if not line:
-            current_section = None
+    for ext in extensions:
+        module = ext.get("module")
+        if not module:
             continue
 
-        # Detect section headers
-        if line.startswith("domains[") and "]{" in line:
-            current_section = "domains"
-            continue
-        elif line.startswith("supplements[") and "]{" in line:
-            current_section = "supplements"
-            continue
-        elif ":" in line and "\t" not in line:
-            # Header line like "status: success"
-            continue
+        # Check for domain (has get_skill_domains with domain.key)
+        if hasattr(module, 'get_skill_domains'):
+            try:
+                domain_info = module.get_skill_domains()
+                if domain_info and isinstance(domain_info.get("domain"), dict):
+                    domain_data = domain_info["domain"]
+                    has_triage = False
+                    has_outline = False
 
-        # Parse data rows
-        if current_section == "domains" and "\t" in line:
-            parts = line.split("\t")
-            if len(parts) >= 5:
-                domains.append({
-                    "key": parts[0],
-                    "name": parts[1],
-                    "bundle": parts[2],
-                    "has_outline": parts[3] == "true",
-                    "has_triage": parts[4] == "true"
-                })
-        elif current_section == "supplements" and "\t" in line:
-            parts = line.split("\t")
-            if len(parts) >= 3:
-                supplements.append({
-                    "domain": parts[0],
-                    "bundle": parts[1],
-                    "description": parts[2]
-                })
+                    # Check for extension functions
+                    if hasattr(module, 'provides_triage'):
+                        has_triage = module.provides_triage() is not None
+                    if hasattr(module, 'provides_outline'):
+                        has_outline = module.provides_outline() is not None
+
+                    domains.append({
+                        "key": domain_data.get("key", ""),
+                        "name": domain_data.get("name", ""),
+                        "description": domain_data.get("description", ""),
+                        "bundle": ext["bundle"],
+                        "has_triage": has_triage,
+                        "has_outline": has_outline
+                    })
+            except Exception as e:
+                print(f"Warning: Failed to get domains from {ext['bundle']}: {e}", file=sys.stderr)
+
+        # Check for supplement (has get_domain_supplements)
+        if hasattr(module, 'get_domain_supplements'):
+            try:
+                supplement_info = module.get_domain_supplements()
+                if supplement_info and supplement_info.get("domain"):
+                    supplements.append({
+                        "domain": supplement_info.get("domain", ""),
+                        "bundle": ext["bundle"],
+                        "description": supplement_info.get("description", "")
+                    })
+            except Exception as e:
+                print(f"Warning: Failed to get supplements from {ext['bundle']}: {e}", file=sys.stderr)
 
     return {"domains": domains, "supplements": supplements}
 
 
 def load_domain_config_from_bundle(domain_key: str) -> dict | None:
-    """Load domain configuration from bundle's plan-marshall-plugin manifest.
+    """Load domain configuration from bundle's extension.py.
 
     Args:
         domain_key: Domain key to look for (e.g., 'java', 'javascript')
@@ -140,67 +207,80 @@ def load_domain_config_from_bundle(domain_key: str) -> dict | None:
     Returns:
         Domain config dict or None if not found
     """
-    discovery = discover_available_domains()
-    domains = discovery.get("domains", [])
+    extensions = discover_all_extensions()
 
-    # Find the bundle for this domain
-    for domain in domains:
-        if domain.get("key") == domain_key:
-            bundle_name = domain.get("bundle")
-            if bundle_name:
-                return load_manifest_from_bundle(bundle_name)
+    for ext in extensions:
+        module = ext.get("module")
+        if not module or not hasattr(module, 'get_skill_domains'):
+            continue
+
+        try:
+            domain_info = module.get_skill_domains()
+            if not domain_info:
+                continue
+
+            domain_data = domain_info.get("domain", {})
+            if isinstance(domain_data, dict) and domain_data.get("key") == domain_key:
+                return convert_extension_to_domain_config(module, domain_info)
+        except Exception:
+            continue
+
     return None
 
 
-def load_manifest_from_bundle(bundle_name: str) -> dict | None:
-    """Load plan-marshall-plugin manifest from a bundle.
+def load_supplement_from_bundle(bundle_name: str) -> dict | None:
+    """Load supplement configuration from bundle's extension.py.
 
     Args:
-        bundle_name: Name of the bundle (e.g., 'pm-dev-java')
+        bundle_name: Name of the bundle (e.g., 'pm-dev-java-cui')
 
     Returns:
-        Manifest dict or None if not found
+        Supplement dict or None if not found
     """
-    plugin_cache = get_plugin_cache_path()
+    extensions = discover_all_extensions()
 
-    # Try non-versioned path first
-    manifest_path = plugin_cache / bundle_name / "skills" / "plan-marshall-plugin" / "plugin.json"
-    if not manifest_path.exists():
-        # Try versioned path
-        manifest_path = plugin_cache / bundle_name / "1.0.0" / "skills" / "plan-marshall-plugin" / "plugin.json"
+    for ext in extensions:
+        if ext["bundle"] != bundle_name:
+            continue
 
-    if not manifest_path.exists():
-        return None
+        module = ext.get("module")
+        if not module or not hasattr(module, 'get_domain_supplements'):
+            continue
 
-    try:
-        with open(manifest_path) as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return None
+        try:
+            return module.get_domain_supplements()
+        except Exception:
+            pass
+
+    return None
 
 
-def convert_manifest_to_domain_config(manifest: dict) -> dict:
-    """Convert bundle manifest to skill_domains config format.
+def convert_extension_to_domain_config(module, domain_info: dict) -> dict:
+    """Convert extension.py data to skill_domains config format.
 
     Args:
-        manifest: Domain manifest from plugin.json
+        module: Loaded extension module
+        domain_info: Result from get_skill_domains()
 
     Returns:
         Config dict compatible with marshal.json skill_domains
     """
     config = {}
 
-    # Extract extensions
-    extensions = manifest.get("extensions", {})
-    if extensions:
+    # Extract extensions from dedicated functions
+    if hasattr(module, 'provides_triage') or hasattr(module, 'provides_outline'):
         config["workflow_skill_extensions"] = {}
-        if "outline" in extensions:
-            config["workflow_skill_extensions"]["outline"] = extensions["outline"]
-        if "triage" in extensions:
-            config["workflow_skill_extensions"]["triage"] = extensions["triage"]
+        if hasattr(module, 'provides_outline'):
+            outline = module.provides_outline()
+            if outline:
+                config["workflow_skill_extensions"]["outline"] = outline
+        if hasattr(module, 'provides_triage'):
+            triage = module.provides_triage()
+            if triage:
+                config["workflow_skill_extensions"]["triage"] = triage
 
     # Extract profiles
-    profiles = manifest.get("profiles", {})
+    profiles = domain_info.get("profiles", {})
     for profile_name in ["core", "implementation", "testing", "quality"]:
         if profile_name in profiles:
             config[profile_name] = {
@@ -211,25 +291,23 @@ def convert_manifest_to_domain_config(manifest: dict) -> dict:
     return config
 
 
-def merge_supplement_config(domain_config: dict, supplement_manifest: dict) -> dict:
+def merge_supplement_config(domain_config: dict, supplement_data: dict) -> dict:
     """Merge supplement skills into domain config as optionals.
 
     Args:
         domain_config: Existing domain configuration
-        supplement_manifest: Supplement manifest from plugin.json
+        supplement_data: Supplement data from get_domain_supplements()
 
     Returns:
         Updated domain config with merged supplement skills
     """
-    import copy
     merged = copy.deepcopy(domain_config)
 
-    supplements = supplement_manifest.get("supplements", {})
-    supplement_skills = supplements.get("skills", {})
+    supplement_profiles = supplement_data.get("profiles", {})
 
     for profile_name in ["core", "implementation", "testing", "quality"]:
-        if profile_name in supplement_skills:
-            profile_data = supplement_skills[profile_name]
+        if profile_name in supplement_profiles:
+            profile_data = supplement_profiles[profile_name]
 
             # Ensure profile exists in merged config
             if profile_name not in merged:
@@ -478,7 +556,6 @@ def cmd_skill_domains(args) -> int:
         return success_exit(result)
 
     elif args.verb == 'configure':
-        import copy
         selected_domains = [d.strip() for d in args.domains.split(',') if d.strip()]
         selected_supplements = []
         if hasattr(args, 'supplements') and args.supplements:
@@ -487,15 +564,14 @@ def cmd_skill_domains(args) -> int:
         # Always add system domain with workflow_skills
         skill_domains['system'] = copy.deepcopy(DEFAULT_SYSTEM_DOMAIN)
 
-        # Apply domain config for each selected domain from bundle manifests
+        # Apply domain config for each selected domain from bundle extension.py
         domains_configured = []
         domains_not_found = []
 
         for domain_key in selected_domains:
-            # Load from bundle manifest
-            manifest = load_domain_config_from_bundle(domain_key)
-            if manifest:
-                domain_config = convert_manifest_to_domain_config(manifest)
+            # Load from bundle extension.py (returns converted config directly)
+            domain_config = load_domain_config_from_bundle(domain_key)
+            if domain_config:
                 skill_domains[domain_key] = domain_config
                 domains_configured.append(domain_key)
             else:
@@ -504,13 +580,13 @@ def cmd_skill_domains(args) -> int:
         # Apply supplements to their target domains
         supplements_applied = []
         for supplement_bundle in selected_supplements:
-            supplement_manifest = load_manifest_from_bundle(supplement_bundle)
-            if supplement_manifest and "supplements" in supplement_manifest:
-                target_domain = supplement_manifest["supplements"].get("domain")
+            supplement_data = load_supplement_from_bundle(supplement_bundle)
+            if supplement_data:
+                target_domain = supplement_data.get("domain")
                 if target_domain and target_domain in skill_domains:
                     skill_domains[target_domain] = merge_supplement_config(
                         skill_domains[target_domain],
-                        supplement_manifest
+                        supplement_data
                     )
                     supplements_applied.append(f"{supplement_bundle}→{target_domain}")
 

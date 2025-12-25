@@ -6,7 +6,7 @@
     "./skills/build-operations",
     "./skills/ci-operations",
     "./skills/diagnostic-patterns",
-    "./skills/domain-extension-api",
+    "./skills/extension-api",
     "./skills/file-operations-base",
     "./skills/general-development-rules",
     "./skills/json-file-operations",

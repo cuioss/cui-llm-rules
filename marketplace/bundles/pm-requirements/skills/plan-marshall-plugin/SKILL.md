@@ -16,11 +16,14 @@ Declares the requirements domain configuration including:
 
 ## Configuration
 
-All configuration is in `plugin.json`. This skill is automatically discovered by the `domain-extension-api` discovery mechanism.
+All configuration is in `extension.py` which implements the Extension API:
+- `get_skill_domains()` - Domain metadata with profiles
+- `provides_triage()` - Triage skill reference or None
+- `provides_outline()` - Outline skill reference or None
 
 ## Integration
 
-This manifest is read by:
+This extension is discovered by:
 - `skill-domains get-available` - Lists available domains
 - `skill-domains configure` - Applies domain configuration to marshal.json
 - `marshall-steward` wizard - Domain selection during project setup
