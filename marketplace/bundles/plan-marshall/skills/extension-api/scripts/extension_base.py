@@ -302,6 +302,47 @@ class ExtensionBase(ABC):
         return None
 
     # =========================================================================
+    # Command Template Helpers
+    # =========================================================================
+
+    def build_command_template(
+        self,
+        bundle: str,
+        script: str,
+        targets: str,
+        include_module_placeholder: bool = True
+    ) -> str:
+        """Build a standardized command template for get_command_mappings().
+
+        Provides consistent command template generation across all build bundles.
+
+        Args:
+            bundle: Bundle name (e.g., "pm-dev-java", "pm-dev-frontend")
+            script: Script name within plan-marshall-plugin (e.g., "maven", "npm")
+            targets: Build targets/goals (e.g., "clean test", "run build")
+            include_module_placeholder: Whether to append {module} placeholder
+
+        Returns:
+            Command template string like:
+            'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "clean test"{module}'
+
+        Example:
+            # In pm-dev-java extension:
+            def get_command_mappings(self):
+                return {
+                    "maven": {
+                        CMD_COMPILE: self.build_command_template(
+                            "pm-dev-java", "maven", "compile"
+                        ),
+                    }
+                }
+        """
+        base = f'python3 .plan/execute-script.py {bundle}:plan-marshall-plugin:{script} run --targets "{targets}"'
+        if include_module_placeholder:
+            base += "{module}"
+        return base
+
+    # =========================================================================
     # Workflow Extension Methods (override if providing capabilities)
     # =========================================================================
 

@@ -17,6 +17,10 @@ class Extension(ExtensionBase):
         root = Path(project_root)
         return (root / "doc").is_dir()
 
+    def provides_triage(self) -> str | None:
+        """Return triage skill reference."""
+        return "pm-documents:documentation-triage"
+
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""
         return {

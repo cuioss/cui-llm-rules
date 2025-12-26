@@ -48,3 +48,7 @@ class Extension(ExtensionBase):
     def provides_triage(self) -> str | None:
         """Return triage skill reference."""
         return "pm-plugin-development:plugin-triage"
+
+    def provides_outline(self) -> str | None:
+        """Return outline skill reference."""
+        return "pm-plugin-development:plugin-solution-outline"

@@ -746,6 +746,209 @@ def test_java_cui_extension_command_mappings():
 
 
 # =============================================================================
+# pm-dev-java Profile Tests
+# =============================================================================
+
+def test_java_extension_get_profiles():
+    """Test pm-dev-java get_profiles for Maven project with profiles."""
+    ext = load_extension('pm-dev-java')
+    temp_dir = Path(tempfile.mkdtemp())
+
+    try:
+        # Create pom.xml with profiles
+        (temp_dir / 'pom.xml').write_text('''<project>
+            <profiles>
+                <profile>
+                    <id>integration-tests</id>
+                    <activation>
+                        <property>
+                            <name>run.it</name>
+                        </property>
+                    </activation>
+                </profile>
+                <profile>
+                    <id>coverage</id>
+                </profile>
+            </profiles>
+        </project>''')
+
+        profiles = ext.get_profiles(str(temp_dir))
+
+        assert isinstance(profiles, list), "Should return a list"
+        assert len(profiles) == 2, f"Should detect 2 profiles, got {len(profiles)}"
+
+        profile_ids = [p['id'] for p in profiles]
+        assert 'integration-tests' in profile_ids, "Should include 'integration-tests' profile"
+        assert 'coverage' in profile_ids, "Should include 'coverage' profile"
+
+        # Verify canonical classification
+        it_profile = next(p for p in profiles if p['id'] == 'integration-tests')
+        assert it_profile['canonical'] == 'integration-tests', "Should classify as integration-tests"
+
+        coverage_profile = next(p for p in profiles if p['id'] == 'coverage')
+        assert coverage_profile['canonical'] == 'coverage', "Should classify as coverage"
+    finally:
+        cleanup_test_project(temp_dir)
+
+
+def test_java_extension_generate_profile_command_maven():
+    """Test pm-dev-java generate_profile_command for Maven."""
+    ext = load_extension('pm-dev-java')
+
+    # Test command-line profile activation
+    cmd = ext.generate_profile_command(
+        build_system="maven",
+        canonical="integration-tests",
+        profile_id="integration-tests",
+        activation={"type": "command-line"}
+    )
+
+    assert cmd is not None, "Should return a command"
+    assert "maven" in cmd, "Should use maven script"
+    assert "-Pintegration-tests" in cmd, "Should include profile flag"
+
+    # Test property activation
+    cmd_prop = ext.generate_profile_command(
+        build_system="maven",
+        canonical="integration-tests",
+        profile_id="it",
+        activation={"type": "property", "property": "run.it", "value": "true"}
+    )
+
+    assert cmd_prop is not None, "Should return a command"
+    assert "-Drun.it=true" in cmd_prop, "Should include property flag"
+
+
+def test_java_extension_generate_profile_command_gradle():
+    """Test pm-dev-java generate_profile_command for Gradle."""
+    ext = load_extension('pm-dev-java')
+
+    cmd = ext.generate_profile_command(
+        build_system="gradle",
+        canonical="integration-tests",
+        profile_id="integrationTest",
+        activation={"type": "task"}
+    )
+
+    assert cmd is not None, "Should return a command"
+    assert "gradle" in cmd, "Should use gradle script"
+    assert "integrationTest" in cmd, "Should include task name"
+
+
+def test_java_extension_classify_profile():
+    """Test pm-dev-java classify_profile helper."""
+    ext = load_extension('pm-dev-java')
+
+    # Test exact matches
+    assert ext.classify_profile("integration-tests") == "integration-tests"
+    assert ext.classify_profile("coverage") == "coverage"
+    assert ext.classify_profile("jacoco") == "coverage"
+
+    # Test case-insensitive
+    assert ext.classify_profile("INTEGRATION-TESTS") == "integration-tests"
+
+    # Test substring match
+    assert ext.classify_profile("my-integration-tests-profile") == "integration-tests"
+
+    # Test non-matching
+    assert ext.classify_profile("unknown-profile") is None
+
+
+# =============================================================================
+# pm-dev-frontend Profile Tests
+# =============================================================================
+
+def test_frontend_extension_get_profiles():
+    """Test pm-dev-frontend get_profiles for npm scripts."""
+    ext = load_extension('pm-dev-frontend')
+    temp_dir = Path(tempfile.mkdtemp())
+
+    try:
+        (temp_dir / 'package.json').write_text(json.dumps({
+            "name": "test",
+            "scripts": {
+                "test": "jest",
+                "test:e2e": "playwright test",
+                "lint": "eslint .",
+                "build": "webpack"
+            }
+        }))
+
+        profiles = ext.get_profiles(str(temp_dir))
+
+        assert isinstance(profiles, list), "Should return a list"
+        # Should detect e2e and lint as profile-like scripts
+        profile_ids = [p['id'] for p in profiles]
+        assert 'test:e2e' in profile_ids or 'lint' in profile_ids, "Should detect some profiles"
+    finally:
+        cleanup_test_project(temp_dir)
+
+
+def test_frontend_extension_generate_profile_command():
+    """Test pm-dev-frontend generate_profile_command."""
+    ext = load_extension('pm-dev-frontend')
+
+    # Use positional args to match the API signature
+    cmd = ext.generate_profile_command(
+        "npm",                    # build_system
+        "integration-tests",      # canonical (unused but required)
+        "test:e2e",               # profile_id
+        {"type": "script"}        # activation (unused but required)
+    )
+
+    assert cmd is not None, "Should return a command"
+    assert "npm" in cmd, "Should use npm script"
+    assert "test:e2e" in cmd, "Should include script name"
+
+
+# =============================================================================
+# New Triage/Outline Reference Tests
+# =============================================================================
+
+def test_requirements_extension_triage_reference():
+    """Test pm-requirements provides_triage returns valid reference."""
+    ext = load_extension('pm-requirements')
+    issues = validate_triage_outline_references(ext, 'pm-requirements')
+    assert not issues, f"Reference issues: {issues}"
+
+
+def test_documents_extension_triage_reference():
+    """Test pm-documents provides_triage returns valid reference."""
+    ext = load_extension('pm-documents')
+    issues = validate_triage_outline_references(ext, 'pm-documents')
+    assert not issues, f"Reference issues: {issues}"
+
+
+def test_plugin_dev_extension_outline_reference():
+    """Test pm-plugin-development provides_outline returns valid reference."""
+    ext = load_extension('pm-plugin-development')
+
+    outline = ext.provides_outline()
+    assert outline is not None, "Should provide outline skill"
+    assert skill_exists(outline), f"Outline skill '{outline}' should exist"
+
+
+# =============================================================================
+# Command Template Helper Tests
+# =============================================================================
+
+def test_build_command_template_helper():
+    """Test build_command_template helper method."""
+    ext = load_extension('pm-dev-java')
+
+    # Test with module placeholder
+    cmd = ext.build_command_template("pm-dev-java", "maven", "clean test")
+    assert 'python3 .plan/execute-script.py' in cmd
+    assert 'pm-dev-java:plan-marshall-plugin:maven' in cmd
+    assert '--targets "clean test"' in cmd
+    assert '{module}' in cmd
+
+    # Test without module placeholder
+    cmd_no_module = ext.build_command_template("pm-dev-java", "maven", "clean", include_module_placeholder=False)
+    assert '{module}' not in cmd_no_module
+
+
+# =============================================================================
 # Cross-Bundle Validation Tests
 # =============================================================================
 
@@ -804,6 +1007,10 @@ if __name__ == '__main__':
         test_java_extension_triage_reference,
         test_java_extension_get_modules,
         test_java_extension_get_module_type,
+        test_java_extension_get_profiles,
+        test_java_extension_generate_profile_command_maven,
+        test_java_extension_generate_profile_command_gradle,
+        test_java_extension_classify_profile,
         # pm-dev-frontend tests
         test_frontend_extension_is_applicable,
         test_frontend_extension_is_applicable_negative,
@@ -813,6 +1020,8 @@ if __name__ == '__main__':
         test_frontend_extension_command_mappings,
         test_frontend_extension_triage_reference,
         test_frontend_extension_get_modules_workspaces,
+        test_frontend_extension_get_profiles,
+        test_frontend_extension_generate_profile_command,
         # pm-plugin-development tests
         test_plugin_dev_extension_is_applicable,
         test_plugin_dev_extension_is_applicable_negative,
@@ -821,16 +1030,19 @@ if __name__ == '__main__':
         test_plugin_dev_extension_skill_references_exist,
         test_plugin_dev_extension_command_mappings,
         test_plugin_dev_extension_triage_reference,
+        test_plugin_dev_extension_outline_reference,
         # pm-requirements tests
         test_requirements_extension_is_applicable,
         test_requirements_extension_is_applicable_negative,
         test_requirements_extension_skill_domains_structure,
         test_requirements_extension_skill_references_exist,
+        test_requirements_extension_triage_reference,
         # pm-documents tests
         test_documents_extension_is_applicable,
         test_documents_extension_is_applicable_negative,
         test_documents_extension_skill_domains_structure,
         test_documents_extension_skill_references_exist,
+        test_documents_extension_triage_reference,
         # pm-dev-java-cui tests
         test_java_cui_extension_is_applicable,
         test_java_cui_extension_is_applicable_negative,
@@ -838,6 +1050,8 @@ if __name__ == '__main__':
         test_java_cui_extension_skill_domains_structure,
         test_java_cui_extension_skill_references_exist,
         test_java_cui_extension_command_mappings,
+        # Command template helper test
+        test_build_command_template_helper,
         # Cross-bundle tests
         test_all_extensions_have_unique_domain_keys,
         test_all_extensions_have_required_functions,

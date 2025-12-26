@@ -20,6 +20,10 @@ class Extension(ExtensionBase):
             (root / "Requirements.adoc").exists()
         )
 
+    def provides_triage(self) -> str | None:
+        """Return triage skill reference."""
+        return "pm-requirements:requirements-triage"
+
     def get_skill_domains(self) -> dict:
         """Domain metadata for skill loading."""
         return {

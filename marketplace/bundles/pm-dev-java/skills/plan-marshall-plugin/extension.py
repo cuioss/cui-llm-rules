@@ -63,31 +63,35 @@ class Extension(ExtensionBase):
 
     def get_command_mappings(self) -> dict:
         """Return canonical -> script invocation template."""
-        base_maven = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
-        base_gradle = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run"
+        # Use inherited build_command_template helper for consistency
+        def maven(targets: str) -> str:
+            return self.build_command_template("pm-dev-java", "maven", targets)
+
+        def gradle(targets: str) -> str:
+            return self.build_command_template("pm-dev-java", "gradle", targets)
 
         return {
             "maven": {
-                CMD_COMPILE: f'{base_maven} --targets "compile"{{module}}',
-                CMD_TEST_COMPILE: f'{base_maven} --targets "test-compile"{{module}}',
-                CMD_MODULE_TESTS: f'{base_maven} --targets "clean test"{{module}}',
-                CMD_INTEGRATION_TESTS: f'{base_maven} --targets "clean verify -Pintegration-tests"{{module}}',
-                CMD_COVERAGE: f'{base_maven} --targets "clean verify -Pcoverage"{{module}}',
-                CMD_QUALITY_GATE: f'{base_maven} --targets "clean verify -Ppre-commit"{{module}}',
-                CMD_VERIFY: f'{base_maven} --targets "clean verify"{{module}}',
-                CMD_INSTALL: f'{base_maven} --targets "clean install"{{module}}',
-                CMD_PACKAGE: f'{base_maven} --targets "package"{{module}}',
+                CMD_COMPILE: maven("compile"),
+                CMD_TEST_COMPILE: maven("test-compile"),
+                CMD_MODULE_TESTS: maven("clean test"),
+                CMD_INTEGRATION_TESTS: maven("clean verify -Pintegration-tests"),
+                CMD_COVERAGE: maven("clean verify -Pcoverage"),
+                CMD_QUALITY_GATE: maven("clean verify -Ppre-commit"),
+                CMD_VERIFY: maven("clean verify"),
+                CMD_INSTALL: maven("clean install"),
+                CMD_PACKAGE: maven("package"),
             },
             "gradle": {
-                CMD_COMPILE: f'{base_gradle} --targets "compileJava"{{module}}',
-                CMD_TEST_COMPILE: f'{base_gradle} --targets "testClasses"{{module}}',
-                CMD_MODULE_TESTS: f'{base_gradle} --targets "clean test"{{module}}',
-                CMD_INTEGRATION_TESTS: f'{base_gradle} --targets "clean integrationTest"{{module}}',
-                CMD_COVERAGE: f'{base_gradle} --targets "clean test jacocoTestReport"{{module}}',
-                CMD_QUALITY_GATE: f'{base_gradle} --targets "clean check"{{module}}',
-                CMD_VERIFY: f'{base_gradle} --targets "clean build"{{module}}',
-                CMD_INSTALL: f'{base_gradle} --targets "clean publishToMavenLocal"{{module}}',
-                CMD_PACKAGE: f'{base_gradle} --targets "clean assemble"{{module}}',
+                CMD_COMPILE: gradle("compileJava"),
+                CMD_TEST_COMPILE: gradle("testClasses"),
+                CMD_MODULE_TESTS: gradle("clean test"),
+                CMD_INTEGRATION_TESTS: gradle("clean integrationTest"),
+                CMD_COVERAGE: gradle("clean test jacocoTestReport"),
+                CMD_QUALITY_GATE: gradle("clean check"),
+                CMD_VERIFY: gradle("clean build"),
+                CMD_INSTALL: gradle("clean publishToMavenLocal"),
+                CMD_PACKAGE: gradle("clean assemble"),
             }
         }
 

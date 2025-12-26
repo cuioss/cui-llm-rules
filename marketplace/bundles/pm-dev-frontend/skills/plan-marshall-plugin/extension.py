@@ -45,20 +45,25 @@ class Extension(ExtensionBase):
 
     def get_command_mappings(self) -> dict:
         """Return canonical -> script invocation template."""
-        base_npm = "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run"
+        # Use inherited build_command_template helper for consistency
+        def npm(targets: str) -> str:
+            return self.build_command_template("pm-dev-frontend", "npm", targets)
+
+        # Common target patterns
+        run_build = "run build"
 
         return {
             "npm": {
-                CMD_COMPILE: f'{base_npm} --targets "run build"{{module}}',
-                CMD_TEST_COMPILE: f'{base_npm} --targets "run build"{{module}}',
-                CMD_MODULE_TESTS: f'{base_npm} --targets "run test"{{module}}',
-                "lint": f'{base_npm} --targets "run lint"{{module}}',
-                "lint-fix": f'{base_npm} --targets "run lint:fix"{{module}}',
-                CMD_QUALITY_GATE: f'{base_npm} --targets "run lint && npm run test"{{module}}',
-                CMD_VERIFY: f'{base_npm} --targets "run build && npm run test"{{module}}',
-                CMD_INSTALL: f'{base_npm} --targets "install"{{module}}',
-                CMD_PACKAGE: f'{base_npm} --targets "run build"{{module}}',
-                "e2e-tests": f'{base_npm} --targets "playwright test"{{module}}',
+                CMD_COMPILE: npm(run_build),
+                CMD_TEST_COMPILE: npm(run_build),
+                CMD_MODULE_TESTS: npm("run test"),
+                "lint": npm("run lint"),
+                "lint-fix": npm("run lint:fix"),
+                CMD_QUALITY_GATE: npm("run lint && npm run test"),
+                CMD_VERIFY: npm(f"{run_build} && npm run test"),
+                CMD_INSTALL: npm("install"),
+                CMD_PACKAGE: npm(run_build),
+                "e2e-tests": npm("playwright test"),
             }
         }
 
@@ -111,6 +116,61 @@ class Extension(ExtensionBase):
     def get_module_type(self, module_path: str) -> str:
         """Return the module type for a given module path."""
         return "npm"
+
+    def get_profiles(self, module_path: str) -> list:
+        """Return npm script-based profiles for a module.
+
+        npm doesn't have Maven-style profiles, but npm scripts can serve
+        a similar purpose (e.g., test:e2e, test:coverage).
+        """
+        path = Path(module_path)
+        package_json_path = path / PACKAGE_JSON
+
+        if not package_json_path.exists():
+            return []
+
+        try:
+            with open(package_json_path) as f:
+                package_data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return []
+
+        scripts = package_data.get("scripts", {})
+        profiles = []
+
+        for script_name in scripts:
+            canonical = self.classify_profile(script_name)
+            if canonical:
+                profiles.append({
+                    "id": script_name,
+                    "canonical": canonical,
+                    "activation": {"type": "script"}
+                })
+
+        return profiles
+
+    def generate_profile_command(
+        self,
+        build_system: str,
+        _canonical: str,
+        profile_id: str,
+        _activation: dict,
+        module_name: str = None
+    ) -> str | None:
+        """Generate a command string for a profile-based canonical command.
+
+        For npm, profiles are npm scripts, so we run them directly.
+        """
+        if build_system != "npm":
+            return None
+
+        # npm scripts are invoked directly
+        cmd = f'python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm run --targets "run {profile_id}"'
+
+        if module_name and module_name != "default":
+            cmd += f" --module {module_name}"
+
+        return cmd
 
     # =========================================================================
     # npm Workspace Helpers
