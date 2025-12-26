@@ -1,29 +1,15 @@
 #!/usr/bin/env python3
 """
-Extension discovery and API utilities.
+Extension discovery library.
 
 Single source of truth for discovering and loading extension.py files
-from domain bundles. Used by extension-api and plan-marshall-config.
+from domain bundles. Used by build_env.py and plan-marshall-config.
 
-Usage:
-    extension.py list [--project-dir <dir>]
-    extension.py list-all
-    extension.py get-build-systems --project-dir <dir>
-    extension.py get-command-mappings --project-dir <dir>
-    extension.py get-skill-domains [--project-dir <dir>]
-    extension.py --help
-
-Subcommands:
-    list              List applicable extensions for a project
-    list-all          List all available extensions (no applicability check)
-    get-build-systems Get build systems from applicable extensions
-    get-command-mappings Get command mappings from applicable extensions
-    get-skill-domains Get skill domains from all extensions
+This module is a library - it has no CLI. All persistence goes through
+build_env.py, and all reading goes through plan-marshall-config.
 """
 
-import argparse
 import importlib.util
-import json
 import os
 import sys
 from pathlib import Path
@@ -418,159 +404,3 @@ def generate_profile_command_from_extensions(
     return None
 
 
-# =============================================================================
-# CLI Commands
-# =============================================================================
-
-def cmd_list(args) -> int:
-    """List applicable extensions for a project."""
-    project_dir = Path(args.project_dir).resolve()
-
-    if not project_dir.exists():
-        print(f"status: error\nmessage: Directory not found: {project_dir}")
-        return 1
-
-    extensions = discover_extensions(project_dir)
-
-    print("status: success")
-    print(f"project_dir: {project_dir}")
-    print(f"count: {len(extensions)}")
-    print()
-    print(f"extensions[{len(extensions)}]" + "{bundle,build_systems}:")
-    for ext in extensions:
-        module = ext.get("module")
-        build_systems = []
-        if module and hasattr(module, 'provides_build_systems'):
-            try:
-                build_systems = module.provides_build_systems()
-            except Exception:
-                pass
-        print(f"{ext['bundle']}\t{','.join(build_systems) if build_systems else '-'}")
-
-    return 0
-
-
-def cmd_list_all(args) -> int:
-    """List all available extensions (no applicability check)."""
-    extensions = discover_all_extensions()
-
-    print("status: success")
-    print(f"count: {len(extensions)}")
-    print()
-    print(f"extensions[{len(extensions)}]" + "{bundle,has_domains,build_systems}:")
-    for ext in extensions:
-        module = ext.get("module")
-        has_domains = hasattr(module, 'get_skill_domains') if module else False
-        build_systems = []
-        if module and hasattr(module, 'provides_build_systems'):
-            try:
-                build_systems = module.provides_build_systems()
-            except Exception:
-                pass
-        print(f"{ext['bundle']}\t{has_domains}\t{','.join(build_systems) if build_systems else '-'}")
-
-    return 0
-
-
-def cmd_get_build_systems(args) -> int:
-    """Get build systems from applicable extensions."""
-    project_dir = Path(args.project_dir).resolve()
-
-    if not project_dir.exists():
-        print(f"status: error\nmessage: Directory not found: {project_dir}")
-        return 1
-
-    extensions = discover_extensions(project_dir)
-    build_systems = get_build_systems_from_extensions(extensions)
-
-    print("status: success")
-    print(f"project_dir: {project_dir}")
-    print(f"build_systems: {','.join(build_systems) if build_systems else 'none'}")
-
-    return 0
-
-
-def cmd_get_command_mappings(args) -> int:
-    """Get command mappings from applicable extensions."""
-    project_dir = Path(args.project_dir).resolve()
-
-    if not project_dir.exists():
-        print(f"status: error\nmessage: Directory not found: {project_dir}")
-        return 1
-
-    extensions = discover_extensions(project_dir)
-    mappings = get_command_mappings_from_extensions(extensions)
-
-    # Output as JSON for easy parsing
-    print(json.dumps({"status": "success", "mappings": mappings}, indent=2))
-
-    return 0
-
-
-def cmd_get_skill_domains(args) -> int:
-    """Get skill domains from extensions."""
-    if args.project_dir:
-        project_dir = Path(args.project_dir).resolve()
-        if not project_dir.exists():
-            print(f"status: error\nmessage: Directory not found: {project_dir}")
-            return 1
-        extensions = discover_extensions(project_dir)
-    else:
-        extensions = discover_all_extensions()
-
-    domains = get_skill_domains_from_extensions(extensions)
-
-    result = {
-        "status": "success",
-        "domains": [
-            {
-                "key": d.get("domain", {}).get("key") if isinstance(d.get("domain"), dict) else d.get("domain"),
-                "name": d.get("domain", {}).get("name", "") if isinstance(d.get("domain"), dict) else "",
-                "bundle": d.get("bundle", "")
-            }
-            for d in domains
-        ]
-    }
-
-    print(json.dumps(result, indent=2))
-    return 0
-
-
-def main():
-    """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Extension discovery and API utilities",
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    # list subcommand
-    list_parser = subparsers.add_parser("list", help="List applicable extensions for a project")
-    list_parser.add_argument("--project-dir", dest="project_dir", default=".", help="Project directory")
-    list_parser.set_defaults(func=cmd_list)
-
-    # list-all subcommand
-    list_all_parser = subparsers.add_parser("list-all", help="List all available extensions")
-    list_all_parser.set_defaults(func=cmd_list_all)
-
-    # get-build-systems subcommand
-    bs_parser = subparsers.add_parser("get-build-systems", help="Get build systems from applicable extensions")
-    bs_parser.add_argument("--project-dir", dest="project_dir", required=True, help="Project directory")
-    bs_parser.set_defaults(func=cmd_get_build_systems)
-
-    # get-command-mappings subcommand
-    cm_parser = subparsers.add_parser("get-command-mappings", help="Get command mappings from applicable extensions")
-    cm_parser.add_argument("--project-dir", dest="project_dir", required=True, help="Project directory")
-    cm_parser.set_defaults(func=cmd_get_command_mappings)
-
-    # get-skill-domains subcommand
-    sd_parser = subparsers.add_parser("get-skill-domains", help="Get skill domains from extensions")
-    sd_parser.add_argument("--project-dir", dest="project_dir", default=None, help="Project directory (optional)")
-    sd_parser.set_defaults(func=cmd_get_skill_domains)
-
-    args = parser.parse_args()
-    return args.func(args)
-
-
-if __name__ == "__main__":
-    sys.exit(main())

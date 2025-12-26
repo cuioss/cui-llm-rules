@@ -41,85 +41,7 @@ from extension import (
     get_modules_from_extensions,
     generate_profile_command_from_extensions,
 )
-
-
-# =============================================================================
-# Canonical Command Vocabulary
-# =============================================================================
-
-# Canonical command definitions with phase, description, required flag, applicable_to
-# Reference: extension-api/standards/canonical-commands.md
-CANONICAL_COMMANDS = {
-    # Build phase
-    "compile": {
-        "phase": "build",
-        "description": "Compile production sources only",
-        "required": False,
-        "applicable_to": ["jar", "war", "quarkus"],
-    },
-    "test-compile": {
-        "phase": "build",
-        "description": "Compile production and test sources",
-        "required": False,
-        "applicable_to": ["jar", "war", "quarkus"],
-    },
-
-    # Test phase
-    "module-tests": {
-        "phase": "test",
-        "description": "Unit tests for the module (JUnit, Jest, pytest)",
-        "required": True,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
-    },
-    "integration-tests": {
-        "phase": "test",
-        "description": "Integration tests (containers, external services)",
-        "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
-    },
-    "coverage": {
-        "phase": "test",
-        "description": "Test execution with coverage measurement",
-        "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
-    },
-    "performance": {
-        "phase": "test",
-        "description": "Performance/benchmark tests (JMH, k6, wrk)",
-        "required": False,
-        "applicable_to": ["jar", "quarkus", "npm"],
-    },
-
-    # Quality phase
-    "quality-gate": {
-        "phase": "quality",
-        "description": "Static analysis, linting, formatting checks",
-        "required": True,
-        "applicable_to": ["jar", "war", "quarkus", "pom", "npm"],
-    },
-
-    # Verify phase
-    "verify": {
-        "phase": "verify",
-        "description": "Full verification (compile + test + quality)",
-        "required": True,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
-    },
-
-    # Deploy phase
-    "install": {
-        "phase": "deploy",
-        "description": "Install artifact to local repository",
-        "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "pom"],
-    },
-    "package": {
-        "phase": "deploy",
-        "description": "Create deployable artifact (jar, war, native)",
-        "required": False,
-        "applicable_to": ["jar", "war", "quarkus", "npm"],
-    },
-}
+from extension_base import CANONICAL_COMMANDS
 
 
 # =============================================================================
@@ -219,7 +141,7 @@ def cmd_detect_modules(args):
 # Module Type and Profile Detection (via Extensions)
 # =============================================================================
 
-def detect_module_type_for_path(module_path: Path, _build_system: str = None) -> str:
+def detect_module_type_for_path(module_path: Path) -> str:
     """Detect module type for a given path via extensions."""
     extensions = discover_extensions(module_path)
 
@@ -234,7 +156,7 @@ def detect_module_type_for_path(module_path: Path, _build_system: str = None) ->
     return "jar"  # Default
 
 
-def detect_profiles_for_module(module_path: Path, _build_system: str = None) -> list:
+def detect_profiles_for_module(module_path: Path) -> list:
     """Detect profiles for a module via extensions."""
     extensions = discover_extensions(module_path)
     profiles = []
@@ -273,7 +195,7 @@ def cmd_detect_module_type(args):
     else:
         module_path = project_dir
 
-    module_type = detect_module_type_for_path(module_path, args.build_system)
+    module_type = detect_module_type_for_path(module_path)
 
     print("status: success")
     print(f"module: {args.module or 'default'}")
@@ -305,7 +227,7 @@ def cmd_detect_profiles(args):
     else:
         module_path = project_dir
 
-    profiles = detect_profiles_for_module(module_path, args.build_system)
+    profiles = detect_profiles_for_module(module_path)
 
     print("status: success")
     print(f"module: {args.module or 'default'}")
@@ -333,11 +255,6 @@ def detect_hybrid_build_systems(module_path: Path) -> list:
     """
     extensions = discover_extensions(module_path)
     return get_build_systems_from_extensions(extensions, module_path)
-
-
-def is_hybrid_module(module_path: Path) -> bool:
-    """Check if a module has multiple build systems."""
-    return len(detect_hybrid_build_systems(module_path)) > 1
 
 
 # =============================================================================
@@ -414,7 +331,7 @@ def generate_hybrid_commands_from_extensions(
         if build_system not in extension_mappings:
             continue
 
-        mod_type = detect_module_type_for_path(module_path, build_system)
+        mod_type = detect_module_type_for_path(module_path)
         build_mappings = extension_mappings[build_system]
 
         for canonical, spec in CANONICAL_COMMANDS.items():
@@ -481,11 +398,13 @@ def cmd_persist(args):
     if "modules" not in config:
         config["modules"] = {}
 
-    # Check if default module is hybrid
-    default_is_hybrid = is_hybrid_module(project_dir)
-    default_build_systems = detect_hybrid_build_systems(project_dir) if default_is_hybrid else [default_system]
-    default_type = detect_module_type_for_path(project_dir, default_system)
-    default_profiles = detect_profiles_for_module(project_dir, default_system)
+    # Detect build systems for default module (may be hybrid with multiple systems)
+    default_build_systems = detect_hybrid_build_systems(project_dir)
+    if not default_build_systems:
+        default_build_systems = [default_system]
+    default_is_hybrid = len(default_build_systems) > 1
+    default_type = detect_module_type_for_path(project_dir)
+    default_profiles = detect_profiles_for_module(project_dir)
 
     # Configure default module
     if "default" not in config["modules"]:
@@ -536,10 +455,12 @@ def cmd_persist(args):
         mod_system = module["build_system"]
         mod_path = project_dir / module["path"]
 
-        mod_is_hybrid = is_hybrid_module(mod_path)
-        mod_build_systems = detect_hybrid_build_systems(mod_path) if mod_is_hybrid else [mod_system]
-        mod_type = detect_module_type_for_path(mod_path, mod_system)
-        mod_profiles = detect_profiles_for_module(mod_path, mod_system)
+        mod_build_systems = detect_hybrid_build_systems(mod_path)
+        if not mod_build_systems:
+            mod_build_systems = [mod_system]
+        mod_is_hybrid = len(mod_build_systems) > 1
+        mod_type = detect_module_type_for_path(mod_path)
+        mod_profiles = detect_profiles_for_module(mod_path)
 
         if mod_name not in config["modules"]:
             config["modules"][mod_name] = {"path": module["path"], "domains": [], "build_systems": mod_build_systems}

@@ -68,10 +68,11 @@ All extensions **must** inherit from `ExtensionBase` and implement required meth
 
 ## Scripts
 
-| Script | Notation | Purpose |
-|--------|----------|---------|
-| extension | `plan-marshall:extension-api:extension` | Extension discovery utilities |
-| build_env | `plan-marshall:extension-api:build_env` | Build detection and command generation |
+| Script | Type | Purpose |
+|--------|------|---------|
+| extension_base.py | Library | ExtensionBase ABC, constants, helpers |
+| extension.py | Library | Extension discovery functions |
+| build_env.py | CLI | Build detection and command generation |
 
 ### Build Environment CLI
 
@@ -95,24 +96,6 @@ python3 .plan/execute-script.py plan-marshall:extension-api:build_env lookup \
 # List available commands for a module
 python3 .plan/execute-script.py plan-marshall:extension-api:build_env get-available-commands \
     --module default
-```
-
-### Extension Discovery CLI
-
-```bash
-# List applicable extensions for a project
-python3 .plan/execute-script.py plan-marshall:extension-api:extension list \
-    --project-dir /path/to/project
-
-# List all available extensions
-python3 .plan/execute-script.py plan-marshall:extension-api:extension list-all
-
-# Get build systems from applicable extensions
-python3 .plan/execute-script.py plan-marshall:extension-api:extension get-build-systems \
-    --project-dir /path/to/project
-
-# Get skill domains
-python3 .plan/execute-script.py plan-marshall:extension-api:extension get-skill-domains
 ```
 
 ### Python Import Usage

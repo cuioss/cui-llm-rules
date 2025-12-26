@@ -86,6 +86,83 @@ PROFILE_PATTERNS = {
 }
 
 
+# =============================================================================
+# Canonical Command Metadata
+# =============================================================================
+
+CANONICAL_COMMANDS = {
+    # Build phase
+    CMD_COMPILE: {
+        "phase": "build",
+        "description": "Compile production sources only",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus"],
+    },
+    CMD_TEST_COMPILE: {
+        "phase": "build",
+        "description": "Compile production and test sources",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus"],
+    },
+
+    # Test phase
+    CMD_MODULE_TESTS: {
+        "phase": "test",
+        "description": "Unit tests for the module (JUnit, Jest, pytest)",
+        "required": True,
+        "applicable_to": ["jar", "war", "quarkus", "npm"],
+    },
+    CMD_INTEGRATION_TESTS: {
+        "phase": "test",
+        "description": "Integration tests (containers, external services)",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus", "npm"],
+    },
+    CMD_COVERAGE: {
+        "phase": "test",
+        "description": "Test execution with coverage measurement",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus", "npm"],
+    },
+    CMD_PERFORMANCE: {
+        "phase": "test",
+        "description": "Performance/benchmark tests (JMH, k6, wrk)",
+        "required": False,
+        "applicable_to": ["jar", "quarkus", "npm"],
+    },
+
+    # Quality phase
+    CMD_QUALITY_GATE: {
+        "phase": "quality",
+        "description": "Static analysis, linting, formatting checks",
+        "required": True,
+        "applicable_to": ["jar", "war", "quarkus", "pom", "npm"],
+    },
+
+    # Verify phase
+    CMD_VERIFY: {
+        "phase": "verify",
+        "description": "Full verification (compile + test + quality)",
+        "required": True,
+        "applicable_to": ["jar", "war", "quarkus", "npm"],
+    },
+
+    # Deploy phase
+    CMD_INSTALL: {
+        "phase": "deploy",
+        "description": "Install artifact to local repository",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus", "pom"],
+    },
+    CMD_PACKAGE: {
+        "phase": "deploy",
+        "description": "Create deployable artifact (jar, war, native)",
+        "required": False,
+        "applicable_to": ["jar", "war", "quarkus", "npm"],
+    },
+}
+
+
 class ExtensionBase(ABC):
     """Abstract base class for domain bundle extensions.
 
