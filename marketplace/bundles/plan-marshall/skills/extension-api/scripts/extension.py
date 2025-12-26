@@ -69,27 +69,61 @@ def get_marketplace_bundles_path() -> Path:
     return script_path.parent.parent.parent.parent.parent / "bundles"
 
 
+def get_extension_base_path() -> Path:
+    """Get path to extension_base.py for import injection."""
+    return Path(__file__).parent / "extension_base.py"
+
+
 def load_extension_module(extension_path: Path, bundle_name: str):
-    """Load an extension.py module dynamically.
+    """Load an extension.py module and instantiate the Extension class.
+
+    Injects extension_base into sys.modules so extensions can import it.
 
     Args:
         extension_path: Path to extension.py file
         bundle_name: Name of the bundle for module naming
 
     Returns:
-        Loaded module or None if failed
+        Extension instance or None if failed
     """
     try:
+        # Ensure extension_base is importable by extensions
+        _ensure_extension_base_loaded()
+
         spec = importlib.util.spec_from_file_location(
             f"extension_{bundle_name}",
             extension_path
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+
+        # Get the Extension class and instantiate it
+        if hasattr(module, 'Extension'):
+            return module.Extension()
+
+        # Fallback: return module for legacy extensions
         return module
     except Exception as e:
         print(f"Warning: Failed to load extension from {bundle_name}: {e}", file=sys.stderr)
         return None
+
+
+def _ensure_extension_base_loaded():
+    """Ensure extension_base module is loaded and available for import."""
+    if 'extension_base' in sys.modules:
+        return
+
+    base_path = get_extension_base_path()
+    if not base_path.exists():
+        return
+
+    try:
+        spec = importlib.util.spec_from_file_location("extension_base", base_path)
+        base_module = importlib.util.module_from_spec(spec)
+        sys.modules['extension_base'] = base_module
+        spec.loader.exec_module(base_module)
+    except Exception as e:
+        print(f"Warning: Failed to load extension_base: {e}", file=sys.stderr)
 
 
 def find_extension_path(bundle_dir: Path) -> Path | None:

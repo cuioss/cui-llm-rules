@@ -37,8 +37,8 @@ def test_build_systems_get():
         result = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'maven')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        # Now uses plan-marshall:build-operations (not pm-dev-builder)
-        assert 'plan-marshall:build-operations' in result.stdout
+        # Build systems now reference domain-specific extension plugins
+        assert 'pm-dev-java:plan-marshall-plugin' in result.stdout
 
 
 def test_build_systems_add():
@@ -52,8 +52,8 @@ def test_build_systems_add():
 
         # Verify added
         verify = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'gradle')
-        # Now uses plan-marshall:build-operations
-        assert 'plan-marshall:build-operations' in verify.stdout
+        # Gradle is handled by pm-dev-java extension
+        assert 'pm-dev-java:plan-marshall-plugin' in verify.stdout
 
 
 def test_build_systems_remove():

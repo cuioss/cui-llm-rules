@@ -98,7 +98,8 @@ def test_build_systems_get():
         result = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'maven')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'plan-marshall:build-operations' in result.stdout
+        # Build systems now reference domain-specific extension plugins
+        assert 'pm-dev-java:plan-marshall-plugin' in result.stdout
 
 
 def test_system_retention_get():

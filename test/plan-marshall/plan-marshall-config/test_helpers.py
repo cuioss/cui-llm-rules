@@ -83,11 +83,11 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
             "build_systems": [
                 {
                     "system": "maven",
-                    "skill": "plan-marshall:build-operations"
+                    "skill": "pm-dev-java:plan-marshall-plugin"
                 },
                 {
                     "system": "npm",
-                    "skill": "plan-marshall:build-operations"
+                    "skill": "pm-dev-frontend:plan-marshall-plugin"
                 }
             ],
             "system": {

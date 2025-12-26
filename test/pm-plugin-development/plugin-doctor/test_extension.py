@@ -34,63 +34,62 @@ class TempDirContext:
 
 
 def create_valid_extension(ext_path: Path) -> None:
-    """Create a valid extension.py file."""
+    """Create a valid extension.py file using class-based approach."""
     ext_path.parent.mkdir(parents=True, exist_ok=True)
+    # Note: We can't import extension_base in test fixtures, so we define a minimal base
     ext_path.write_text('''#!/usr/bin/env python3
 """Test extension."""
 
 from pathlib import Path
 
 
-def is_applicable(project_root: str) -> bool:
-    """Check if bundle applies."""
-    return Path(project_root).exists()
+# Minimal base class for testing (actual extensions use ExtensionBase from extension_base)
+class ExtensionBase:
+    def provides_build_systems(self) -> list:
+        return []
+    def get_applicable_build_systems(self, project_root: str) -> list:
+        return []
+    def get_command_mappings(self) -> dict:
+        return {}
+    def provides_triage(self) -> str | None:
+        return None
+    def provides_outline(self) -> str | None:
+        return None
 
 
-def provides_build_systems() -> list:
-    """Return build systems."""
-    return []
+class Extension(ExtensionBase):
+    """Test extension class."""
 
+    def is_applicable(self, project_root: str) -> bool:
+        """Check if bundle applies."""
+        return Path(project_root).exists()
 
-def get_command_mappings() -> dict:
-    """Return command mappings."""
-    return {}
-
-
-def get_skill_domains() -> dict:
-    """Return skill domains."""
-    return {
-        "domain": {"key": "test", "name": "Test Domain"},
-        "profiles": {"core": {"defaults": [], "optionals": []}}
-    }
-
-
-def provides_triage() -> str | None:
-    """Return triage skill reference."""
-    return None
-
-
-def provides_outline() -> str | None:
-    """Return outline skill reference."""
-    return None
+    def get_skill_domains(self) -> dict:
+        """Return skill domains."""
+        return {
+            "domain": {"key": "test", "name": "Test Domain"},
+            "profiles": {"core": {"defaults": [], "optionals": []}}
+        }
 ''')
 
 
 def create_invalid_extension_missing_func(ext_path: Path) -> None:
-    """Create extension.py missing required functions."""
+    """Create extension.py missing required methods."""
     ext_path.parent.mkdir(parents=True, exist_ok=True)
     ext_path.write_text('''#!/usr/bin/env python3
-"""Test extension - missing functions."""
+"""Test extension - missing required methods."""
 
 from pathlib import Path
 
 
-def is_applicable(project_root: str) -> bool:
-    """Check if bundle applies."""
-    return Path(project_root).exists()
+class Extension:
+    """Extension class missing required get_skill_domains method."""
 
+    def is_applicable(self, project_root: str) -> bool:
+        """Check if bundle applies."""
+        return Path(project_root).exists()
 
-# Missing: provides_build_systems, get_command_mappings, get_skill_domains
+    # Missing: get_skill_domains (required method)
 ''')
 
 
@@ -120,22 +119,16 @@ def test_validate_valid_extension():
         result = run_script(SCRIPT_PATH, 'extension', '--extension', str(ext_path))
         data = result.json()
 
-        assert data.get('valid') is True
+        assert data.get('valid') is True, f"Should be valid: {data}"
         assert len(data.get('issues', [])) == 0
-        functions = data.get('functions', {})
-        assert 'is_applicable' in functions
-        assert 'provides_build_systems' in functions
-        assert 'get_command_mappings' in functions
-        assert 'get_skill_domains' in functions
-        # New optional functions
-        if 'provides_triage' in functions:
-            assert functions['provides_triage'] is not None
-        if 'provides_outline' in functions:
-            assert functions['provides_outline'] is not None
+        methods = data.get('methods', {})
+        # Required methods
+        assert 'is_applicable' in methods
+        assert 'get_skill_domains' in methods
 
 
 def test_validate_extension_missing_functions():
-    """Test validating extension with missing required functions."""
+    """Test validating extension with missing required methods."""
     with TempDirContext() as temp_dir:
         ext_path = temp_dir / 'extension.py'
         create_invalid_extension_missing_func(ext_path)
@@ -145,10 +138,9 @@ def test_validate_extension_missing_functions():
 
         assert data.get('valid') is False
         issues = data.get('issues', [])
-        missing_funcs = [i['function'] for i in issues if i['type'] == 'missing_function']
-        assert 'provides_build_systems' in missing_funcs
-        assert 'get_command_mappings' in missing_funcs
-        assert 'get_skill_domains' in missing_funcs, f"Should report missing get_skill_domains: {missing_funcs}"
+        # Only required methods are checked - get_skill_domains is required, provides_build_systems is optional
+        missing_methods = [i['method'] for i in issues if i['type'] == 'missing_method']
+        assert 'get_skill_domains' in missing_methods, f"Should report missing get_skill_domains: {missing_methods}"
 
 
 def test_validate_extension_syntax_error():

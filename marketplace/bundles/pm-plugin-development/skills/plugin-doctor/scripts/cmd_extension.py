@@ -21,13 +21,22 @@ from pathlib import Path
 from typing import Any
 
 
-# Required functions for extension.py
-REQUIRED_FUNCTIONS = {
+# Required methods for Extension class (self is implicit, not listed)
+REQUIRED_METHODS = {
     'is_applicable': {
-        'args': ['project_root'],
+        'args': ['project_root'],  # Note: 'self' is not included
         'return_type': 'bool',
         'description': 'Check if bundle applies to project'
     },
+    'get_skill_domains': {
+        'args': [],
+        'return_type': 'dict',
+        'description': 'Return domain metadata for skill loading'
+    }
+}
+
+# Optional methods with defaults provided by ExtensionBase
+OPTIONAL_METHODS = {
     'provides_build_systems': {
         'args': [],
         'return_type': 'list',
@@ -38,10 +47,20 @@ REQUIRED_FUNCTIONS = {
         'return_type': 'dict',
         'description': 'Return command templates'
     },
-    'get_skill_domains': {
+    'get_applicable_build_systems': {
+        'args': ['project_root'],
+        'return_type': 'list',
+        'description': 'Return applicable build systems for project'
+    },
+    'provides_triage': {
         'args': [],
-        'return_type': 'dict',
-        'description': 'Return domain metadata for skill loading'
+        'return_type': 'str | None',
+        'description': 'Return triage skill reference'
+    },
+    'provides_outline': {
+        'args': [],
+        'return_type': 'str | None',
+        'description': 'Return outline skill reference'
     }
 }
 
@@ -343,56 +362,109 @@ def validate_command_mappings(mappings: dict, build_systems: list) -> list:
     return issues
 
 
-def parse_extension_file(extension_path: Path) -> tuple[bool, list[dict], dict]:
-    """Parse extension.py file and extract function info.
+def parse_extension_file(extension_path: Path) -> tuple[bool, list[dict], dict, bool]:
+    """Parse extension.py file and extract method info from Extension class.
 
     Returns:
-        (success, errors, functions)
+        (success, errors, methods, has_extension_class)
     """
     errors = []
-    functions = {}
+    methods = {}
+    has_extension_class = False
 
     try:
         content = extension_path.read_text(encoding='utf-8')
     except (OSError, IOError) as e:
-        return False, [{'type': 'read_error', 'message': str(e)}], {}
+        return False, [{'type': 'read_error', 'message': str(e)}], {}, False
 
     try:
         tree = ast.parse(content)
     except SyntaxError as e:
-        return False, [{'type': 'syntax_error', 'message': str(e), 'line': e.lineno}], {}
+        return False, [{'type': 'syntax_error', 'message': str(e), 'line': e.lineno}], {}, False
 
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef):
-            func_name = node.name
-            args = [arg.arg for arg in node.args.args]
+    # Look for Extension class
+    for node in ast.iter_child_nodes(tree):
+        if isinstance(node, ast.ClassDef) and node.name == 'Extension':
+            has_extension_class = True
 
-            # Try to extract return type annotation
-            return_type = None
-            if node.returns:
-                if isinstance(node.returns, ast.Name):
-                    return_type = node.returns.id
-                elif isinstance(node.returns, ast.Constant):
-                    return_type = str(node.returns.value)
+            # Extract methods from Extension class
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef):
+                    method_name = item.name
+                    args = [arg.arg for arg in item.args.args]
 
-            functions[func_name] = {
-                'args': args,
-                'return_type': return_type,
-                'lineno': node.lineno
-            }
+                    # Remove 'self' from args for comparison
+                    if args and args[0] == 'self':
+                        args = args[1:]
 
-    return True, errors, functions
+                    # Try to extract return type annotation
+                    return_type = None
+                    if item.returns:
+                        if isinstance(item.returns, ast.Name):
+                            return_type = item.returns.id
+                        elif isinstance(item.returns, ast.Constant):
+                            return_type = str(item.returns.value)
+                        elif isinstance(item.returns, ast.BinOp):
+                            # Handle union types like str | None
+                            return_type = ast.unparse(item.returns)
+
+                    methods[method_name] = {
+                        'args': args,
+                        'return_type': return_type,
+                        'lineno': item.lineno
+                    }
+
+            break
+
+    return True, errors, methods, has_extension_class
+
+
+def _ensure_extension_base_loaded(extension_path: Path):
+    """Ensure extension_base module is loaded and available for import."""
+    import sys
+    if 'extension_base' in sys.modules:
+        return
+
+    # Find extension_base.py relative to marketplace structure
+    current = extension_path.parent
+    for _ in range(10):
+        base_path = current / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts' / 'extension_base.py'
+        if base_path.exists():
+            spec = importlib.util.spec_from_file_location("extension_base", base_path)
+            base_module = importlib.util.module_from_spec(spec)
+            sys.modules['extension_base'] = base_module
+            spec.loader.exec_module(base_module)
+            return
+
+        if current.name == 'bundles':
+            base_path = current.parent / 'bundles' / 'plan-marshall' / 'skills' / 'extension-api' / 'scripts' / 'extension_base.py'
+            if base_path.exists():
+                spec = importlib.util.spec_from_file_location("extension_base", base_path)
+                base_module = importlib.util.module_from_spec(spec)
+                sys.modules['extension_base'] = base_module
+                spec.loader.exec_module(base_module)
+                return
+
+        current = current.parent
+        if current == current.parent:
+            break
 
 
 def load_extension_module(extension_path: Path):
-    """Load an extension.py module dynamically."""
+    """Load an extension.py module and return Extension instance."""
     try:
+        _ensure_extension_base_loaded(extension_path)
+
         spec = importlib.util.spec_from_file_location(
             f"extension_{extension_path.parent.parent.parent.name}",
             extension_path
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+
+        # Return Extension instance if class exists
+        if hasattr(module, 'Extension'):
+            return module.Extension()
         return module
     except Exception:
         return None
@@ -403,13 +475,13 @@ def validate_extension(extension_path: Path, deep: bool = True) -> dict:
 
     Args:
         extension_path: Path to extension.py
-        deep: If True, also validate return values by executing functions
+        deep: If True, also validate return values by executing methods
     """
     result = {
         'path': str(extension_path),
         'valid': True,
         'issues': [],
-        'functions': {}
+        'methods': {}
     }
 
     if not extension_path.exists():
@@ -420,50 +492,47 @@ def validate_extension(extension_path: Path, deep: bool = True) -> dict:
         })
         return result
 
-    success, errors, functions = parse_extension_file(extension_path)
+    success, errors, methods, has_extension_class = parse_extension_file(extension_path)
 
     if not success:
         result['valid'] = False
         result['issues'].extend(errors)
         return result
 
-    result['functions'] = functions
+    if not has_extension_class:
+        result['valid'] = False
+        result['issues'].append({
+            'type': 'missing_class',
+            'message': 'Extension class not found. Extensions must define class Extension(ExtensionBase).'
+        })
+        return result
 
-    # Check required functions
-    for func_name, spec in REQUIRED_FUNCTIONS.items():
-        if func_name not in functions:
+    result['methods'] = methods
+
+    # Check required methods
+    for method_name, spec in REQUIRED_METHODS.items():
+        if method_name not in methods:
             result['valid'] = False
             result['issues'].append({
-                'type': 'missing_function',
-                'function': func_name,
-                'message': f"Missing required function: {func_name}() - {spec['description']}"
+                'type': 'missing_method',
+                'method': method_name,
+                'message': f"Missing required method: {method_name}() - {spec['description']}"
             })
             continue
 
-        func_info = functions[func_name]
+        method_info = methods[method_name]
 
-        # Check arguments
+        # Check arguments (self already removed by parser)
         expected_args = spec['args']
-        actual_args = func_info['args']
+        actual_args = method_info['args']
         if actual_args != expected_args:
             result['issues'].append({
                 'type': 'wrong_args',
-                'function': func_name,
+                'method': method_name,
                 'expected': expected_args,
                 'actual': actual_args,
                 'severity': 'warning',
-                'message': f"{func_name}() has args {actual_args}, expected {expected_args}"
-            })
-
-        # Check return type if annotated
-        if func_info['return_type'] and func_info['return_type'] != spec['return_type']:
-            result['issues'].append({
-                'type': 'wrong_return_type',
-                'function': func_name,
-                'expected': spec['return_type'],
-                'actual': func_info['return_type'],
-                'severity': 'warning',
-                'message': f"{func_name}() returns {func_info['return_type']}, expected {spec['return_type']}"
+                'message': f"{method_name}() has args {actual_args}, expected {expected_args}"
             })
 
     # Deep validation: execute functions and validate return values
@@ -545,8 +614,8 @@ def validate_bundle_consistency(bundle_path: Path) -> dict:
 
     result['has_extension'] = True
 
-    # Parse extension to check provides_build_systems()
-    success, _, functions = parse_extension_file(extension_path)
+    # Parse extension to check for Extension class
+    success, _, methods, has_extension_class = parse_extension_file(extension_path)
 
     if not success:
         result['valid'] = False
@@ -556,8 +625,16 @@ def validate_bundle_consistency(bundle_path: Path) -> dict:
         })
         return result
 
+    if not has_extension_class:
+        result['valid'] = False
+        result['issues'].append({
+            'type': 'missing_class',
+            'message': 'Extension class not found'
+        })
+        return result
+
     # Check if bundle provides build systems, it should have plan-marshall-plugin skill
-    if 'provides_build_systems' in functions:
+    if 'provides_build_systems' in methods:
         # We can't easily determine what the function returns without executing it
         # So just check if plan-marshall-plugin skill exists
         build_ops_path = bundle_path / 'skills' / 'plan-marshall-plugin'
