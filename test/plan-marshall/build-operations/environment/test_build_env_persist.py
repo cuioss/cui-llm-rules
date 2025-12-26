@@ -301,25 +301,6 @@ def test_persist_dry_run_does_not_save():
         assert not marshal_path.exists(), "Should NOT create marshal.json in dry run"
 
 
-def test_persist_updates_build_systems():
-    """Test persist updates build_systems section."""
-    with PersistTestContext('maven') as temp_dir:
-        result = run_script(
-            SCRIPT_PATH,
-            'persist',
-            '--project-dir', str(temp_dir)
-        )
-
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
-
-        assert 'build_systems' in config, "Should have build_systems section"
-        assert len(config['build_systems']) > 0, "Should have at least one build system"
-        assert config['build_systems'][0]['system'] == 'maven', "Should be maven"
-        # Build operations now in domain bundles (pm-dev-java for Maven)
-        assert config['build_systems'][0]['skill'] == 'pm-dev-java:plan-marshall-plugin', "Should reference domain plan-marshall-plugin skill"
-
-
 def test_persist_preserves_existing_config():
     """Test persist preserves existing marshal.json content."""
     with PersistTestContext('maven') as temp_dir:
@@ -378,7 +359,6 @@ if __name__ == '__main__':
         test_persist_with_modules_adds_module_flag,
         test_persist_quality_gate_has_profile,
         test_persist_dry_run_does_not_save,
-        test_persist_updates_build_systems,
         test_persist_preserves_existing_config,
         test_persist_help,
     ])

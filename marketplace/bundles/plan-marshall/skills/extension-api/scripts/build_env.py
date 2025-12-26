@@ -37,7 +37,6 @@ from extension import (
     discover_extensions,
     get_build_systems_from_extensions,
     get_command_mappings_from_extensions,
-    get_skill_domains_from_extensions,
     get_modules_from_extensions,
     generate_profile_command_from_extensions,
 )
@@ -378,7 +377,6 @@ def cmd_persist(args):
     # Discover applicable extensions
     extensions = discover_extensions(project_dir)
     extension_mappings = get_command_mappings_from_extensions(extensions)
-    skill_domains = get_skill_domains_from_extensions(extensions)
 
     # Detect build systems
     build_result = detect_build_systems(project_dir)
@@ -387,7 +385,6 @@ def cmd_persist(args):
         print("message: No build systems detected")
         return 1
 
-    available_systems = build_result["available_systems"].split(",")
     default_system = build_result["default_system"]
 
     # Detect modules
@@ -500,20 +497,6 @@ def cmd_persist(args):
         config["modules"][mod_name]["commands"] = mod_commands
         modules_updated += 1
         commands_generated += len(mod_commands)
-
-    # Update build_systems section
-    build_system_skill_map = {
-        "maven": "pm-dev-java:plan-marshall-plugin",
-        "gradle": "pm-dev-java:plan-marshall-plugin",
-        "npm": "pm-dev-frontend:plan-marshall-plugin"
-    }
-    config["build_systems"] = [
-        {"system": system, "skill": build_system_skill_map.get(system, "plan-marshall:extension-api")}
-        for system in available_systems
-    ]
-
-    if skill_domains:
-        config["detected_domains"] = skill_domains
 
     if not args.dry_run:
         save_marshal_json(project_dir, config)
