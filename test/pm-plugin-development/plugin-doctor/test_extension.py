@@ -148,9 +148,7 @@ def test_validate_extension_missing_functions():
         missing_funcs = [i['function'] for i in issues if i['type'] == 'missing_function']
         assert 'provides_build_systems' in missing_funcs
         assert 'get_command_mappings' in missing_funcs
-        # Either get_skill_domains or get_domain_supplements is required
-        assert any('get_skill_domains' in f or 'get_domain_supplements' in f for f in missing_funcs), \
-            f"Should report missing domain function: {missing_funcs}"
+        assert 'get_skill_domains' in missing_funcs, f"Should report missing get_skill_domains: {missing_funcs}"
 
 
 def test_validate_extension_syntax_error():

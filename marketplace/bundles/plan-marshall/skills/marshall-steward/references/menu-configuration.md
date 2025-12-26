@@ -87,20 +87,20 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ## Configuration: Skill Domains
 
-Skill domains configure which implementation skills are loaded for different code types. Domains and supplements are auto-discovered from installed bundles.
+Skill domains configure which implementation skills are loaded for different code types. Domains are auto-discovered from installed bundles.
 
-Uses shared configuration flow (same as wizard Step 4d-4f).
+Uses shared configuration flow (same as wizard Step 4d).
 
 ### Reconfigure Skill Domains
 
-**Step 1: Discover available domains and supplements**
+**Step 1: Discover available domains**
 
 ```bash
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
   skill-domains get-available
 ```
 
-**Output** shows `discovered_domains[]` (from bundle manifests) and `supplements[]` (optional additions).
+**Output** shows `discovered_domains[]` from bundle manifests.
 
 **Step 2: User domain selection**
 
@@ -116,6 +116,8 @@ AskUserQuestion:
     # Pre-select domains already configured in marshal.json
     - label: "Java Development"
       description: "Java code patterns, CDI, JUnit (pm-dev-java)"
+    - label: "CUI Java Development"
+      description: "CUI logging, testing, HTTP (pm-dev-java-cui)"
     - label: "JavaScript Development"
       description: "Modern JS, ESLint, Jest (pm-dev-frontend)"
     - label: "Plugin Development"
@@ -124,37 +126,16 @@ AskUserQuestion:
       description: "User stories and specs (pm-requirements)"
 ```
 
-**Step 3: Supplement selection (if applicable)**
-
-If supplements exist for selected domains, present them:
-
-```yaml
-AskUserQuestion:
-  question: "Enable domain supplements?"
-  header: "Supplements"
-  multiSelect: true
-  options:
-    # Build from supplements[] filtered by selected domains
-    - label: "CUI Java Patterns"
-      description: "CUI logging, testing, HTTP for Java domain (pm-dev-java-cui)"
-```
-
-**Step 4: Configure selected domains**
+**Step 3: Configure selected domains**
 
 ```bash
-# Without supplements
 python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains configure --domains "java,javascript"
-
-# With supplements
-python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
-  skill-domains configure --domains "java,javascript" --supplements "pm-dev-java-cui"
+  skill-domains configure --domains "java,java-cui,javascript"
 ```
 
 This configures:
 - `system` domain (always) with workflow_skills for 5 phases
 - Each selected domain with profile structure from bundle manifest
-- Supplement skills merged as optionals in matching profiles
 
 ### List Domains
 

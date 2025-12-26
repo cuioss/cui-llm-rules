@@ -43,7 +43,7 @@ def is_applicable(project_root: str) -> bool:
 **Implementation Notes**:
 - Must be deterministic (same project → same result)
 - Should be fast (file existence checks, not content analysis)
-- Supplements may use heuristics (e.g., check pom.xml content)
+- May use heuristics (e.g., check pom.xml content for specific patterns)
 
 ### provides_build_systems
 
@@ -138,13 +138,13 @@ def get_command_mappings() -> dict:
 
 ---
 
-## Domain Functions
+## Domain Function
 
-Every extension must implement **exactly one** of these functions.
+Every extension must implement this function.
 
-### get_skill_domains (Primary Domains)
+### get_skill_domains
 
-Use for bundles that define a new domain (pm-dev-java, pm-dev-frontend, pm-documents).
+Defines the domain and its skill organization.
 
 ```python
 def get_skill_domains() -> dict:
@@ -194,54 +194,6 @@ def get_skill_domains() -> dict:
             "testing": {
                 "defaults": ["pm-dev-java:junit-core"],
                 "optionals": ["pm-dev-java:junit-integration"]
-            }
-        }
-    }
-```
-
-### get_domain_supplements (Supplement Bundles)
-
-Use for bundles that extend an existing domain (pm-dev-java-cui extending java).
-
-```python
-def get_domain_supplements() -> dict:
-    """Return supplementary skills to merge into a parent domain.
-
-    Returns:
-        Dict with parent domain reference and additional skills:
-        {
-            "domain": str,        # Parent domain key to extend
-            "description": str,   # Supplement description
-            "profiles": {
-                "core": {
-                    "defaults": list[str],
-                    "optionals": list[str]
-                },
-                ...
-            }
-        }
-
-    Notes:
-        - Skills are merged into the parent domain's profiles
-        - Supplement's is_applicable() determines if it activates
-        - A project can have multiple supplements for same domain
-    """
-```
-
-**Example**:
-```python
-def get_domain_supplements() -> dict:
-    return {
-        "domain": "java",  # Extends the java domain
-        "description": "CUI-specific Java patterns for logging, testing, and HTTP",
-        "profiles": {
-            "core": {
-                "defaults": [],
-                "optionals": ["pm-dev-java-cui:cui-logging"]
-            },
-            "testing": {
-                "defaults": [],
-                "optionals": ["pm-dev-java-cui:cui-testing"]
             }
         }
     }
@@ -595,8 +547,7 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:validate ext
 ```
 
 Validation checks:
-- All required functions present
-- Exactly one domain function present (get_skill_domains OR get_domain_supplements)
+- All required functions present (is_applicable, provides_build_systems, get_command_mappings, get_skill_domains)
 - Functions are callable
 - No syntax errors
 - get_skill_domains() returns valid structure with domain.key, domain.name, profiles
@@ -611,6 +562,7 @@ Validation checks:
 | Bundle | Domain Key | Build Systems | Triage | Outline |
 |--------|------------|---------------|--------|---------|
 | pm-dev-java | java | maven, gradle | java-triage | - |
+| pm-dev-java-cui | java-cui | - | - | - |
 | pm-dev-frontend | javascript | npm | javascript-triage | - |
 | pm-documents | documentation | - | - | - |
 | pm-requirements | requirements | - | - | - |

@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """Extension API for pm-dev-java-cui bundle.
 
-Provides supplementary skills for the Java domain (CUI-specific patterns).
+Provides CUI-specific Java patterns for logging, testing, and HTTP.
 """
 
 from pathlib import Path
 
 
 def is_applicable(project_root: str) -> bool:
-    """Check if CUI Java supplement applies to the project.
+    """Check if CUI Java bundle applies to the project.
 
     Returns True if pom.xml exists and contains cui- dependencies.
-    This is a heuristic - actual activation depends on domain configuration.
     """
     root = Path(project_root)
     pom_file = root / "pom.xml"
@@ -27,7 +26,7 @@ def is_applicable(project_root: str) -> bool:
 def provides_build_systems() -> list:
     """Build system keys this bundle handles.
 
-    Supplements do not provide build systems.
+    CUI Java does not provide build systems (uses pm-dev-java).
     """
     return []
 
@@ -35,23 +34,26 @@ def provides_build_systems() -> list:
 def get_command_mappings() -> dict:
     """Return canonical -> script invocation template.
 
-    Supplements do not provide build commands.
+    CUI Java does not provide build commands (uses pm-dev-java).
     """
     return {}
 
 
-def get_domain_supplements() -> dict:
-    """Domain supplement metadata for skill loading.
+def get_skill_domains() -> dict:
+    """Domain metadata for skill loading.
 
-    Returns supplementary skills to merge into a parent domain's profiles.
+    Returns profile-based skill organization for CUI Java development.
     """
     return {
-        "domain": "java",
-        "description": "CUI-specific Java patterns for logging, testing, and HTTP",
+        "domain": {
+            "key": "java-cui",
+            "name": "CUI Java Development",
+            "description": "CUI-specific Java patterns for logging, testing, and HTTP"
+        },
         "profiles": {
             "core": {
-                "defaults": [],
-                "optionals": ["pm-dev-java-cui:cui-logging"]
+                "defaults": ["pm-dev-java-cui:cui-logging"],
+                "optionals": []
             },
             "implementation": {
                 "defaults": [],
@@ -60,6 +62,10 @@ def get_domain_supplements() -> dict:
             "testing": {
                 "defaults": [],
                 "optionals": ["pm-dev-java-cui:cui-testing", "pm-dev-java-cui:cui-testing-http"]
+            },
+            "quality": {
+                "defaults": [],
+                "optionals": []
             }
         }
     }

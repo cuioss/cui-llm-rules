@@ -48,12 +48,11 @@ extension-api/
 | `provides_build_systems() -> list` | Return build system keys (or `[]`) |
 | `get_command_mappings() -> dict` | Return command templates (or `{}`) |
 
-### Domain Functions (One Required)
+### Domain Function
 
-| Function | Use Case |
-|----------|----------|
-| `get_skill_domains() -> dict` | Primary domain bundles |
-| `get_domain_supplements() -> dict` | Supplement bundles extending a parent domain |
+| Function | Purpose |
+|----------|---------|
+| `get_skill_domains() -> dict` | Return domain metadata with profiles |
 
 ### Optional Functions
 

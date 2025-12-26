@@ -654,12 +654,81 @@ def test_documents_extension_skill_references_exist():
 
 
 # =============================================================================
+# pm-dev-java-cui Extension Tests
+# =============================================================================
+
+def test_java_cui_extension_is_applicable():
+    """Test pm-dev-java-cui is_applicable for CUI projects."""
+    ext = load_extension('pm-dev-java-cui')
+    temp_dir = Path(tempfile.mkdtemp())
+
+    try:
+        # Create pom.xml with cui dependency
+        (temp_dir / 'pom.xml').write_text('<project><dependencies><dependency>cui-core</dependency></dependencies></project>')
+        result = ext.is_applicable(str(temp_dir))
+        assert result is True, "Should be applicable to CUI project"
+    finally:
+        cleanup_test_project(temp_dir)
+
+
+def test_java_cui_extension_is_applicable_negative():
+    """Test pm-dev-java-cui is_applicable returns False for non-CUI projects."""
+    ext = load_extension('pm-dev-java-cui')
+    temp_dir = create_test_project('maven')
+
+    try:
+        result = ext.is_applicable(str(temp_dir))
+        assert result is False, "Should NOT be applicable to non-CUI Maven project"
+    finally:
+        cleanup_test_project(temp_dir)
+
+
+def test_java_cui_extension_provides_build_systems():
+    """Test pm-dev-java-cui provides_build_systems returns empty list."""
+    ext = load_extension('pm-dev-java-cui')
+    systems = ext.provides_build_systems()
+
+    assert isinstance(systems, list), "Should return a list"
+    assert len(systems) == 0, "Should return empty list (no build systems)"
+
+
+def test_java_cui_extension_skill_domains_structure():
+    """Test pm-dev-java-cui get_skill_domains returns valid structure."""
+    ext = load_extension('pm-dev-java-cui')
+    domains = ext.get_skill_domains()
+
+    issues = validate_skill_domains_structure(domains, 'pm-dev-java-cui')
+    assert not issues, f"Structure issues: {issues}"
+
+    # Verify domain key
+    assert domains['domain']['key'] == 'java-cui', "Domain key should be 'java-cui'"
+
+
+def test_java_cui_extension_skill_references_exist():
+    """Test pm-dev-java-cui skill references point to existing skills."""
+    ext = load_extension('pm-dev-java-cui')
+    domains = ext.get_skill_domains()
+
+    issues = validate_skill_references(domains, 'pm-dev-java-cui')
+    assert not issues, f"Missing skills: {issues}"
+
+
+def test_java_cui_extension_command_mappings():
+    """Test pm-dev-java-cui command mappings are empty (no build)."""
+    ext = load_extension('pm-dev-java-cui')
+    mappings = ext.get_command_mappings()
+
+    assert isinstance(mappings, dict), "Should return a dict"
+    assert len(mappings) == 0, "Should return empty mappings"
+
+
+# =============================================================================
 # Cross-Bundle Validation Tests
 # =============================================================================
 
 def test_all_extensions_have_unique_domain_keys():
     """Test that all extensions have unique domain keys."""
-    bundles = ['pm-dev-java', 'pm-dev-frontend', 'pm-plugin-development', 'pm-requirements', 'pm-documents']
+    bundles = ['pm-dev-java', 'pm-dev-java-cui', 'pm-dev-frontend', 'pm-plugin-development', 'pm-requirements', 'pm-documents']
     domain_keys = {}
 
     for bundle in bundles:
@@ -675,12 +744,12 @@ def test_all_extensions_have_unique_domain_keys():
         except FileNotFoundError:
             pass  # Skip bundles without extensions
 
-    assert len(domain_keys) == 5, f"Should have 5 unique domain keys, got {len(domain_keys)}"
+    assert len(domain_keys) == 6, f"Should have 6 unique domain keys, got {len(domain_keys)}"
 
 
 def test_all_extensions_have_required_functions():
     """Test that all extensions implement required functions."""
-    bundles = ['pm-dev-java', 'pm-dev-frontend', 'pm-plugin-development', 'pm-requirements', 'pm-documents']
+    bundles = ['pm-dev-java', 'pm-dev-java-cui', 'pm-dev-frontend', 'pm-plugin-development', 'pm-requirements', 'pm-documents']
     required = ['is_applicable', 'provides_build_systems', 'get_command_mappings', 'get_skill_domains']
 
     for bundle in bundles:
@@ -739,6 +808,13 @@ if __name__ == '__main__':
         test_documents_extension_is_applicable_negative,
         test_documents_extension_skill_domains_structure,
         test_documents_extension_skill_references_exist,
+        # pm-dev-java-cui tests
+        test_java_cui_extension_is_applicable,
+        test_java_cui_extension_is_applicable_negative,
+        test_java_cui_extension_provides_build_systems,
+        test_java_cui_extension_skill_domains_structure,
+        test_java_cui_extension_skill_references_exist,
+        test_java_cui_extension_command_mappings,
         # Cross-bundle tests
         test_all_extensions_have_unique_domain_keys,
         test_all_extensions_have_required_functions,

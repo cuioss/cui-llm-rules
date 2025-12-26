@@ -267,31 +267,6 @@ def get_skill_domains_from_extensions(extensions: list) -> list:
     return domains
 
 
-def get_domain_supplements_from_extensions(extensions: list) -> list:
-    """Get domain supplements from extensions.
-
-    Args:
-        extensions: List of extension info dicts
-
-    Returns:
-        List of supplement info dicts: {domain, description, profiles, bundle}
-    """
-    supplements = []
-
-    for ext in extensions:
-        module = ext.get("module")
-        if module and hasattr(module, 'get_domain_supplements'):
-            try:
-                supplement_info = module.get_domain_supplements()
-                if supplement_info and supplement_info.get("domain"):
-                    supplement_info["bundle"] = ext["bundle"]
-                    supplements.append(supplement_info)
-            except Exception as e:
-                print(f"Warning: get_domain_supplements() failed for {ext['bundle']}: {e}", file=sys.stderr)
-
-    return supplements
-
-
 def get_modules_from_extensions(extensions: list, project_root: Path) -> list:
     """Get project modules from extensions.
 
@@ -448,18 +423,17 @@ def cmd_list_all(args) -> int:
     print("status: success")
     print(f"count: {len(extensions)}")
     print()
-    print(f"extensions[{len(extensions)}]" + "{bundle,has_domains,has_supplements,build_systems}:")
+    print(f"extensions[{len(extensions)}]" + "{bundle,has_domains,build_systems}:")
     for ext in extensions:
         module = ext.get("module")
         has_domains = hasattr(module, 'get_skill_domains') if module else False
-        has_supplements = hasattr(module, 'get_domain_supplements') if module else False
         build_systems = []
         if module and hasattr(module, 'provides_build_systems'):
             try:
                 build_systems = module.provides_build_systems()
             except Exception:
                 pass
-        print(f"{ext['bundle']}\t{has_domains}\t{has_supplements}\t{','.join(build_systems) if build_systems else '-'}")
+        print(f"{ext['bundle']}\t{has_domains}\t{','.join(build_systems) if build_systems else '-'}")
 
     return 0
 
@@ -511,7 +485,6 @@ def cmd_get_skill_domains(args) -> int:
         extensions = discover_all_extensions()
 
     domains = get_skill_domains_from_extensions(extensions)
-    supplements = get_domain_supplements_from_extensions(extensions)
 
     result = {
         "status": "success",
@@ -522,14 +495,6 @@ def cmd_get_skill_domains(args) -> int:
                 "bundle": d.get("bundle", "")
             }
             for d in domains
-        ],
-        "supplements": [
-            {
-                "domain": s.get("domain", ""),
-                "bundle": s.get("bundle", ""),
-                "description": s.get("description", "")
-            }
-            for s in supplements
         ]
     }
 

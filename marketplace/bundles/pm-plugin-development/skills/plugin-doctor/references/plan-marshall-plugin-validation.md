@@ -1,26 +1,19 @@
 # Plan-Marshall Plugin Validation Guide
 
-Validation rules for skills named `plan-marshall-plugin` that contain domain or supplement manifests.
+Validation rules for skills named `plan-marshall-plugin` that contain domain manifests.
 
 ## When to Use This Guide
 
 Load this reference when doctoring a skill where:
 - `name` in frontmatter equals `plan-marshall-plugin`
-- The skill contains a `plugin.json` file with `domain` or `supplements` field
-
-## Manifest Types
-
-| Type | Schema Field | Purpose |
-|------|--------------|---------|
-| Domain | `domain` | Declares a new domain with profiles and extensions |
-| Supplement | `supplements` | Adds skills to an existing domain's profiles |
+- The skill contains an `extension.py` file implementing the Extension API
 
 ## Validation Script
 
-Use the domain-extension-api validation script:
+Use the plugin-doctor extension validation:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:domain-extension-api:validate_manifest validate \
+python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:validate extension \
   --bundle {bundle_name}
 ```
 
@@ -28,24 +21,32 @@ python3 .plan/execute-script.py plan-marshall:domain-extension-api:validate_mani
 
 ## Domain Manifest Validation
 
-### Required Checks
+### Required Functions
 
-| Check | Description | Fix Type |
-|-------|-------------|----------|
-| `$schema` present | Must reference domain-manifest-v1.json | Safe |
-| `domain.key` present | Domain identifier (kebab-case) | Safe |
-| `domain.name` present | Human-readable name | Safe |
-| `profiles.core` present | Core profile is required | Safe |
-| Profile structure | Each profile has `defaults` and `optionals` arrays | Safe |
-| Skill reference format | All refs match `bundle:skill` pattern | Safe |
+| Function | Description | Fix Type |
+|----------|-------------|----------|
+| `is_applicable()` | Project detection | Safe |
+| `provides_build_systems()` | Build system keys | Safe |
+| `get_command_mappings()` | Command templates | Safe |
+| `get_skill_domains()` | Domain metadata with profiles | Safe |
 
-### Extension Checks (Optional)
+### Optional Functions
 
-| Check | Description | Fix Type |
-|-------|-------------|----------|
-| `extensions.outline` exists | If declared, skill must exist | Risky |
-| `extensions.triage` exists | If declared, skill must exist | Risky |
-| Extension implements contract | Must have required sections | Risky |
+| Function | Description | Fix Type |
+|----------|-------------|----------|
+| `provides_triage()` | Triage skill reference | Risky |
+| `provides_outline()` | Outline skill reference | Risky |
+| `get_modules()` | Project module detection | Safe |
+| `get_module_type()` | Module type classification | Safe |
+| `get_profiles()` | Build profile detection | Safe |
+
+### Profile Structure
+
+The `get_skill_domains()` must return:
+- `domain.key` - Domain identifier (kebab-case)
+- `domain.name` - Human-readable name
+- `profiles.core` - Core profile (required)
+- Each profile has `defaults` and `optionals` arrays
 
 ### Profile Names
 
@@ -57,19 +58,6 @@ Valid profile names:
 
 Any other profile name is invalid.
 
-## Supplement Manifest Validation
-
-### Required Checks
-
-| Check | Description | Fix Type |
-|-------|-------------|----------|
-| `$schema` present | Must reference domain-supplements-v1.json | Safe |
-| `supplements.domain` present | Target domain key | Safe |
-| `supplements.skills` present | Profile-to-skills mapping | Safe |
-| Profile names valid | Only core/implementation/testing/quality | Safe |
-| Skill reference format | All refs match `bundle:skill` pattern | Safe |
-| Skills exist | Referenced skills must exist in bundle | Risky |
-
 ## Validation Output
 
 ### Success Output
@@ -78,17 +66,14 @@ Any other profile name is invalid.
 status: success
 type: domain
 domain: java
-schema_version: v1
 validation:
-  manifest: valid
-  extensions:
-    outline: valid (pm-dev-java:java-outline-ext exists)
-    triage: valid (pm-dev-java:java-triage exists)
+  functions: valid
   profiles:
     core: valid
     implementation: valid
     testing: valid
     quality: valid
+  skill_references: valid
 ```
 
 ### Error Output
@@ -96,38 +81,28 @@ validation:
 ```toon
 status: error
 type: domain
-domain: java
-schema_version: v1
 validation:
-  manifest: invalid
-  profiles:
-    core: missing
+  functions: invalid
 errors:
-  - Missing required profile: 'core'
+  - Missing required function: 'get_skill_domains'
 ```
 
 ## Fix Patterns
 
 ### Safe Fixes
 
-**Add missing `$schema`**:
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/cuioss/cui-llm-rules/main/marketplace/bundles/plan-marshall/skills/domain-extension-api/schemas/domain-manifest-v1.json",
-  ...
-}
-```
-
-**Fix profile structure** (add missing arrays):
-```json
-{
-  "profiles": {
-    "core": {
-      "defaults": [],
-      "optionals": []
+**Add missing function**:
+```python
+def get_skill_domains() -> dict:
+    return {
+        "domain": {
+            "key": "my-domain",
+            "name": "My Domain"
+        },
+        "profiles": {
+            "core": {"defaults": [], "optionals": []}
+        }
     }
-  }
-}
 ```
 
 ### Risky Fixes
@@ -150,32 +125,18 @@ When `skill-name` matches `plan-marshall-plugin`:
    - Run `analyze.py markdown` on SKILL.md
    - Run `validate.py references` on SKILL.md
 
-2. **Additional manifest validation** (Step 3c):
+2. **Additional extension validation** (Step 3c):
    ```bash
    # Extract bundle from path
    BUNDLE=$(echo "{skill_path}" | sed 's|.*bundles/\([^/]*\)/.*|\1|')
 
-   # Run manifest validation
-   python3 .plan/execute-script.py plan-marshall:domain-extension-api:validate_manifest validate \
+   # Run extension validation
+   python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:validate extension \
      --bundle ${BUNDLE}
    ```
 
 3. **Report findings**:
-   - Include manifest validation status in output
+   - Include extension validation status in output
    - Categorize issues as safe/risky
    - Apply safe fixes automatically
    - Prompt for risky fixes
-
-## Example Workflow
-
-```markdown
-### Step 3c: Validate Manifest (plan-marshall-plugin only)
-
-If skill name is `plan-marshall-plugin`:
-
-1. Extract bundle name from skill path
-2. Run manifest validation script
-3. Parse validation output
-4. Add findings to issue list
-5. Categorize as safe/risky based on fix type table
-```

@@ -37,23 +37,16 @@ REQUIRED_FUNCTIONS = {
         'args': [],
         'return_type': 'dict',
         'description': 'Return command templates'
-    }
-}
-
-# Domain functions - extensions must have one of these
-# get_skill_domains for domain bundles, get_domain_supplements for supplement bundles
-DOMAIN_FUNCTIONS = {
+    },
     'get_skill_domains': {
         'args': [],
         'return_type': 'dict',
         'description': 'Return domain metadata for skill loading'
-    },
-    'get_domain_supplements': {
-        'args': [],
-        'return_type': 'dict',
-        'description': 'Return supplement metadata for target domain'
     }
 }
+
+# get_skill_domains is a required function (part of REQUIRED_FUNCTIONS)
+# Moved to REQUIRED_FUNCTIONS for simplicity
 
 # Valid profile categories for get_skill_domains()
 VALID_PROFILE_CATEGORIES = ['core', 'implementation', 'testing', 'quality']
@@ -472,16 +465,6 @@ def validate_extension(extension_path: Path, deep: bool = True) -> dict:
                 'severity': 'warning',
                 'message': f"{func_name}() returns {func_info['return_type']}, expected {spec['return_type']}"
             })
-
-    # Check domain functions - need at least one of get_skill_domains or get_domain_supplements
-    has_domain_func = any(func_name in functions for func_name in DOMAIN_FUNCTIONS)
-    if not has_domain_func:
-        result['valid'] = False
-        result['issues'].append({
-            'type': 'missing_function',
-            'function': 'get_skill_domains OR get_domain_supplements',
-            'message': "Missing domain function: must have either get_skill_domains() or get_domain_supplements()"
-        })
 
     # Deep validation: execute functions and validate return values
     if deep and result['valid']:

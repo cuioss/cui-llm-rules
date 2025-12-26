@@ -6,7 +6,6 @@ Handles: skill-domains, resolve-domain-skills, get-workflow-skills
 Domain discovery uses extension.py files in each bundle's plan-marshall-plugin skill.
 Extension API functions:
 - get_skill_domains() -> domain metadata with profiles
-- get_domain_supplements() -> supplement metadata (for supplement bundles)
 - provides_triage() -> triage skill reference or None
 - provides_outline() -> outline skill reference or None
 """
@@ -37,18 +36,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "extension-api" / "
 from extension import (
     discover_all_extensions,
     get_skill_domains_from_extensions,
-    get_domain_supplements_from_extensions,
 )
 
 
 def discover_available_domains() -> dict:
-    """Discover domains and supplements from extension.py files.
+    """Discover domains from extension.py files.
 
-    Returns dict with 'domains' and 'supplements' lists.
+    Returns dict with 'domains' list.
     """
     extensions = discover_all_extensions()
     domains = []
-    supplements = []
 
     for ext in extensions:
         module = ext.get("module")
@@ -81,20 +78,7 @@ def discover_available_domains() -> dict:
             except Exception as e:
                 print(f"Warning: Failed to get domains from {ext['bundle']}: {e}", file=sys.stderr)
 
-        # Check for supplement (has get_domain_supplements)
-        if hasattr(module, 'get_domain_supplements'):
-            try:
-                supplement_info = module.get_domain_supplements()
-                if supplement_info and supplement_info.get("domain"):
-                    supplements.append({
-                        "domain": supplement_info.get("domain", ""),
-                        "bundle": ext["bundle"],
-                        "description": supplement_info.get("description", "")
-                    })
-            except Exception as e:
-                print(f"Warning: Failed to get supplements from {ext['bundle']}: {e}", file=sys.stderr)
-
-    return {"domains": domains, "supplements": supplements}
+    return {"domains": domains}
 
 
 def load_domain_config_from_bundle(domain_key: str) -> dict | None:
@@ -123,33 +107,6 @@ def load_domain_config_from_bundle(domain_key: str) -> dict | None:
                 return convert_extension_to_domain_config(module, domain_info)
         except Exception:
             continue
-
-    return None
-
-
-def load_supplement_from_bundle(bundle_name: str) -> dict | None:
-    """Load supplement configuration from bundle's extension.py.
-
-    Args:
-        bundle_name: Name of the bundle (e.g., 'pm-dev-java-cui')
-
-    Returns:
-        Supplement dict or None if not found
-    """
-    extensions = discover_all_extensions()
-
-    for ext in extensions:
-        if ext["bundle"] != bundle_name:
-            continue
-
-        module = ext.get("module")
-        if not module or not hasattr(module, 'get_domain_supplements'):
-            continue
-
-        try:
-            return module.get_domain_supplements()
-        except Exception:
-            pass
 
     return None
 
@@ -188,41 +145,6 @@ def convert_extension_to_domain_config(module, domain_info: dict) -> dict:
             }
 
     return config
-
-
-def merge_supplement_config(domain_config: dict, supplement_data: dict) -> dict:
-    """Merge supplement skills into domain config as optionals.
-
-    Args:
-        domain_config: Existing domain configuration
-        supplement_data: Supplement data from get_domain_supplements()
-
-    Returns:
-        Updated domain config with merged supplement skills
-    """
-    merged = copy.deepcopy(domain_config)
-
-    supplement_profiles = supplement_data.get("profiles", {})
-
-    for profile_name in ["core", "implementation", "testing", "quality"]:
-        if profile_name in supplement_profiles:
-            profile_data = supplement_profiles[profile_name]
-
-            # Ensure profile exists in merged config
-            if profile_name not in merged:
-                merged[profile_name] = {"defaults": [], "optionals": []}
-
-            # Add defaults from supplement as optionals (supplements shouldn't force defaults)
-            supplement_defaults = profile_data.get("defaults", [])
-            supplement_optionals = profile_data.get("optionals", [])
-
-            # Merge into optionals, avoiding duplicates
-            existing_optionals = set(merged[profile_name].get("optionals", []))
-            for skill in supplement_defaults + supplement_optionals:
-                if skill not in existing_optionals:
-                    merged[profile_name]["optionals"].append(skill)
-
-    return merged
 
 
 def cmd_skill_domains(args) -> int:
@@ -442,12 +364,11 @@ def cmd_skill_domains(args) -> int:
         })
 
     elif args.verb == 'get-available':
-        # Use dynamic discovery to find available domains and supplements
+        # Use dynamic discovery to find available domains
         discovery = discover_available_domains()
 
         result = {
-            'discovered_domains': discovery.get("domains", []),
-            'supplements': discovery.get("supplements", [])
+            'discovered_domains': discovery.get("domains", [])
         }
         if "error" in discovery and discovery["error"]:
             result['error'] = discovery["error"]
@@ -456,9 +377,6 @@ def cmd_skill_domains(args) -> int:
 
     elif args.verb == 'configure':
         selected_domains = [d.strip() for d in args.domains.split(',') if d.strip()]
-        selected_supplements = []
-        if hasattr(args, 'supplements') and args.supplements:
-            selected_supplements = [s.strip() for s in args.supplements.split(',') if s.strip()]
 
         # Always add system domain with workflow_skills
         skill_domains['system'] = copy.deepcopy(DEFAULT_SYSTEM_DOMAIN)
@@ -476,19 +394,6 @@ def cmd_skill_domains(args) -> int:
             else:
                 domains_not_found.append(domain_key)
 
-        # Apply supplements to their target domains
-        supplements_applied = []
-        for supplement_bundle in selected_supplements:
-            supplement_data = load_supplement_from_bundle(supplement_bundle)
-            if supplement_data:
-                target_domain = supplement_data.get("domain")
-                if target_domain and target_domain in skill_domains:
-                    skill_domains[target_domain] = merge_supplement_config(
-                        skill_domains[target_domain],
-                        supplement_data
-                    )
-                    supplements_applied.append(f"{supplement_bundle}→{target_domain}")
-
         config['skill_domains'] = skill_domains
         save_config(config)
 
@@ -499,8 +404,6 @@ def cmd_skill_domains(args) -> int:
         }
         if domains_not_found:
             result['domains_not_found'] = ','.join(domains_not_found)
-        if supplements_applied:
-            result['supplements_applied'] = ','.join(supplements_applied)
 
         return success_exit(result)
 

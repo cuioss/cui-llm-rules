@@ -675,30 +675,8 @@ def test_get_available_uses_discovery():
         result = run_script(SCRIPT_PATH, 'skill-domains', 'get-available')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        # New format uses discovered_domains and supplements
+        # Returns discovered_domains from bundle manifests
         assert 'discovered_domains' in result.stdout
-        assert 'supplements' in result.stdout
-
-
-def test_get_available_returns_supplements():
-    """Test get-available includes supplements section."""
-    with PlanTestContext() as ctx:
-        config = {
-            "skill_domains": {"system": {"defaults": []}},
-            "modules": {},
-            "build_systems": [],
-            "system": {"retention": {}},
-            "plan": {"defaults": {}}
-        }
-        marshal_path = ctx.fixture_dir / 'marshal.json'
-        marshal_path.write_text(json.dumps(config, indent=2))
-
-        result = run_script(SCRIPT_PATH, 'skill-domains', 'get-available')
-
-        assert result.success, f"Should succeed: {result.stderr}"
-        # New format: discovered_domains and supplements (from bundle manifests)
-        assert 'discovered_domains' in result.stdout
-        assert 'supplements' in result.stdout
 
 
 def test_configure_domains():
@@ -824,7 +802,6 @@ if __name__ == '__main__':
         test_set_extensions,
         # get-available / configure tests
         test_get_available_uses_discovery,
-        test_get_available_returns_supplements,
         test_configure_domains,
         test_configure_always_adds_system,
         # set with --profile tests

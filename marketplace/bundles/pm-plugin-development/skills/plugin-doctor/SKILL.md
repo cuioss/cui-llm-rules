@@ -1048,7 +1048,7 @@ After Phase 1 creates the report directory and JSON, the LLM:
 - `metadata-guide.md` - plugin.json schema
 - `content-classification-guide.md` - Content type classification criteria (for doctor-skill-content)
 - `content-quality-guide.md` - Content quality analysis dimensions (for doctor-skill-content)
-- `plan-marshall-plugin-validation.md` - Domain/supplement manifest validation (for plan-marshall-plugin skills)
+- `plan-marshall-plugin-validation.md` - Domain manifest validation (for plan-marshall-plugin skills)
 
 **External Standards** (from plugin-architecture) - **READ** for script analysis:
 - `script-standards.md` - Script documentation, testing, and quality standards

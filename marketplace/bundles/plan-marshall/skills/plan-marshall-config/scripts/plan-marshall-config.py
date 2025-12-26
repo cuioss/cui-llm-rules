@@ -89,7 +89,6 @@ def main():
 
     sd_configure = sd_sub.add_parser('configure', help='Configure selected domains')
     sd_configure.add_argument('--domains', required=True, help='Comma-separated domain names to enable')
-    sd_configure.add_argument('--supplements', help='Comma-separated supplement bundle names to apply')
 
     # --- modules ---
     p_mod = subparsers.add_parser('modules', help='Manage project modules')
