@@ -35,19 +35,34 @@ from config_detection import detect_domains
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "extension-api" / "scripts"))
 from extension import (
     discover_all_extensions,
+    discover_extensions,
     get_skill_domains_from_extensions,
 )
 
 
-def discover_available_domains() -> dict:
+def discover_available_domains(project_root: Path = None) -> dict:
     """Discover domains from extension.py files.
 
-    Returns dict with 'domains' list.
+    Args:
+        project_root: Optional project root for applicability check.
+                     If provided, each domain gets an 'applicable' flag.
+
+    Returns dict with 'domains' list. Each domain has:
+        - key, name, description, bundle
+        - has_triage, has_outline
+        - applicable (bool) - True if domain applies to project (when project_root provided)
     """
-    extensions = discover_all_extensions()
+    all_extensions = discover_all_extensions()
+
+    # Get applicable bundles if project_root provided
+    applicable_bundles = set()
+    if project_root:
+        applicable_extensions = discover_extensions(project_root)
+        applicable_bundles = {ext["bundle"] for ext in applicable_extensions}
+
     domains = []
 
-    for ext in extensions:
+    for ext in all_extensions:
         module = ext.get("module")
         if not module:
             continue
@@ -67,14 +82,20 @@ def discover_available_domains() -> dict:
                     if hasattr(module, 'provides_outline'):
                         has_outline = module.provides_outline() is not None
 
-                    domains.append({
+                    domain_entry = {
                         "key": domain_data.get("key", ""),
                         "name": domain_data.get("name", ""),
                         "description": domain_data.get("description", ""),
                         "bundle": ext["bundle"],
                         "has_triage": has_triage,
                         "has_outline": has_outline
-                    })
+                    }
+
+                    # Add applicability flag if project_root was provided
+                    if project_root:
+                        domain_entry["applicable"] = ext["bundle"] in applicable_bundles
+
+                    domains.append(domain_entry)
             except Exception as e:
                 print(f"Warning: Failed to get domains from {ext['bundle']}: {e}", file=sys.stderr)
 
@@ -365,7 +386,9 @@ def cmd_skill_domains(args) -> int:
 
     elif args.verb == 'get-available':
         # Use dynamic discovery to find available domains
-        discovery = discover_available_domains()
+        # Pass project root to get applicability flags
+        project_root = Path('.').resolve()
+        discovery = discover_available_domains(project_root)
 
         result = {
             'discovered_domains': discovery.get("domains", [])

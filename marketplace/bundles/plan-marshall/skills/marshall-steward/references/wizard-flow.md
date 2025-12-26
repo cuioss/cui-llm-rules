@@ -370,33 +370,55 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
   skill-domains get-available
 ```
 
-**Output (TOON)**:
-```toon
-status: success
-discovered_domains[5]:
-- key: java
-  bundle: pm-dev-java
-  name: Java Development
-  description: Java code patterns, CDI, JUnit testing, Maven/Gradle builds
-- key: java-cui
-  bundle: pm-dev-java-cui
-  name: CUI Java Development
-  description: CUI-specific Java patterns for logging, testing, and HTTP
-- key: javascript
-  bundle: pm-dev-frontend
-  name: JavaScript Development
-  description: Modern JavaScript, ESLint, Jest testing, npm builds
-- key: plan-marshall-plugin-dev
-  bundle: pm-plugin-development
-  name: Plugin Development
-  description: Claude Code marketplace component development
-- key: requirements
-  bundle: pm-requirements
-  name: Requirements Engineering
-  description: User stories, acceptance criteria, specifications
+**Output (JSON)**:
+```json
+{
+  "status": "success",
+  "discovered_domains": [
+    {
+      "key": "java",
+      "bundle": "pm-dev-java",
+      "name": "Java Development",
+      "description": "Java code patterns, CDI, JUnit testing, Maven/Gradle builds",
+      "applicable": true
+    },
+    {
+      "key": "java-cui",
+      "bundle": "pm-dev-java-cui",
+      "name": "CUI Java Development",
+      "description": "CUI-specific Java patterns for logging, testing, and HTTP",
+      "applicable": true
+    },
+    {
+      "key": "javascript",
+      "bundle": "pm-dev-frontend",
+      "name": "JavaScript Development",
+      "description": "Modern JavaScript, ESLint, Jest testing, npm builds",
+      "applicable": false
+    },
+    {
+      "key": "plan-marshall-plugin-dev",
+      "bundle": "pm-plugin-development",
+      "name": "Plugin Development",
+      "description": "Claude Code marketplace component development",
+      "applicable": false
+    },
+    {
+      "key": "requirements",
+      "bundle": "pm-requirements",
+      "name": "Requirements Engineering",
+      "description": "User stories, acceptance criteria, specifications",
+      "applicable": false
+    }
+  ]
+}
 ```
 
+The `applicable` flag indicates whether the domain's extension detected this project type (via `is_applicable()`).
+
 **Step 4d-2: User domain selection**
+
+Build options from `discovered_domains`. **Pre-select domains where `applicable: true`**.
 
 ```yaml
 AskUserQuestion:
@@ -405,18 +427,20 @@ AskUserQuestion:
   multiSelect: true
   options:
     # Build dynamically from discovered_domains
-    # Pre-select domains matching detected build systems
-    - label: "Java Development"
+    # Pre-select domains where applicable=true
+    - label: "Java Development [DETECTED]"        # applicable=true → pre-selected
       description: "Java code patterns, CDI, JUnit (pm-dev-java)"
-    - label: "CUI Java Development"
+    - label: "CUI Java Development [DETECTED]"    # applicable=true → pre-selected
       description: "CUI logging, testing, HTTP (pm-dev-java-cui)"
-    - label: "JavaScript Development"
+    - label: "JavaScript Development"              # applicable=false → not pre-selected
       description: "Modern JS, ESLint, Jest (pm-dev-frontend)"
-    - label: "Plugin Development"
+    - label: "Plugin Development"                  # applicable=false → not pre-selected
       description: "Claude Code components (pm-plugin-development)"
-    - label: "Requirements Engineering"
+    - label: "Requirements Engineering"            # applicable=false → not pre-selected
       description: "User stories and specs (pm-requirements)"
 ```
+
+**Selection Rule**: Show ALL available domains. Pre-select domains with `applicable: true`. User can add/remove any domain.
 
 **Step 4d-3: Configure selected domains**
 
