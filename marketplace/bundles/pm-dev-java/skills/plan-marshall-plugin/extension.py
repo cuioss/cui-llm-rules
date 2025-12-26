@@ -65,8 +65,31 @@ def is_applicable(project_root: str) -> bool:
 
 
 def provides_build_systems() -> list:
-    """Build system keys this bundle handles."""
+    """Build system keys this bundle handles (static declaration)."""
     return ["maven", "gradle"]
+
+
+def get_applicable_build_systems(project_root: str) -> list:
+    """Return build systems that are actually present in the project.
+
+    Args:
+        project_root: Absolute path to project root.
+
+    Returns:
+        List of build system keys present (e.g., ["maven"] or ["gradle"] or both)
+    """
+    root = Path(project_root)
+    systems = []
+
+    # Check for Maven
+    if (root / POM_XML).exists():
+        systems.append("maven")
+
+    # Check for Gradle
+    if any((root / f).exists() for f in [BUILD_GRADLE, BUILD_GRADLE_KTS, SETTINGS_GRADLE, SETTINGS_GRADLE_KTS]):
+        systems.append("gradle")
+
+    return systems
 
 
 def get_command_mappings() -> dict:
@@ -430,3 +453,54 @@ def _detect_gradle_profiles(_settings_path: Path) -> list:
     # Gradle doesn't have Maven-style profiles
     # Profile-like behavior is achieved through tasks and build variants
     return []
+
+
+# =============================================================================
+# Profile Command Generation
+# =============================================================================
+
+def generate_profile_command(
+    build_system: str,
+    canonical: str,
+    profile_id: str,
+    activation: dict,
+    module_name: str = None
+) -> str | None:
+    """Generate a command string for a profile-based canonical command.
+
+    This is Java/Maven/Gradle specific logic for generating profile commands.
+
+    Args:
+        build_system: "maven" or "gradle"
+        canonical: The canonical command name (e.g., "integration-tests")
+        profile_id: The profile ID to activate
+        activation: Dict with activation info (type, property, value)
+        module_name: Optional module name for multi-module projects
+
+    Returns:
+        Command string or None if build system not supported
+    """
+    if build_system == "maven":
+        if activation.get("type") == "property":
+            prop_name = activation.get("property", "")
+            prop_value = activation.get("value")
+            if prop_value:
+                targets = f"clean verify -D{prop_name}={prop_value}"
+            else:
+                targets = f"clean verify -D{prop_name}"
+        else:
+            targets = f"clean verify -P{profile_id}"
+
+        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "{targets}"'
+
+    elif build_system == "gradle":
+        # Gradle profiles are typically custom tasks
+        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run --targets "clean {profile_id}"'
+
+    else:
+        return None
+
+    if module_name and module_name != "default":
+        cmd += f" --module {module_name}"
+
+    return cmd

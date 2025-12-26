@@ -48,7 +48,7 @@ def get_skill_domains() -> dict:
         },
         "profiles": {
             "core": {
-                "defaults": ["pm-requirements:cui-requirements"],
+                "defaults": ["pm-requirements:requirements-authoring"],
                 "optionals": []
             },
             "implementation": {

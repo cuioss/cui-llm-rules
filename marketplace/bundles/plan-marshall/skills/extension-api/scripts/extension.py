@@ -181,11 +181,14 @@ def discover_extensions(project_root: Path) -> list:
     return applicable
 
 
-def get_build_systems_from_extensions(extensions: list) -> list:
+def get_build_systems_from_extensions(extensions: list, project_root: Path = None) -> list:
     """Get build systems provided by extensions.
 
     Args:
         extensions: List of extension info dicts from discover_extensions()
+        project_root: Optional project root for dynamic detection.
+                     If provided, uses get_applicable_build_systems().
+                     If not, uses static provides_build_systems().
 
     Returns:
         List of build system names (e.g., ["maven", "gradle", "npm"])
@@ -194,12 +197,21 @@ def get_build_systems_from_extensions(extensions: list) -> list:
 
     for ext in extensions:
         module = ext.get("module")
-        if module and hasattr(module, 'provides_build_systems'):
-            try:
+        if not module:
+            continue
+
+        try:
+            # Prefer dynamic detection if project_root provided and function exists
+            if project_root and hasattr(module, 'get_applicable_build_systems'):
+                systems = module.get_applicable_build_systems(str(project_root))
+            elif hasattr(module, 'provides_build_systems'):
                 systems = module.provides_build_systems()
-                build_systems.update(systems)
-            except Exception as e:
-                print(f"Warning: provides_build_systems() failed for {ext['bundle']}: {e}", file=sys.stderr)
+            else:
+                continue
+
+            build_systems.update(systems)
+        except Exception as e:
+            print(f"Warning: build system detection failed for {ext['bundle']}: {e}", file=sys.stderr)
 
     return list(build_systems)
 
@@ -344,6 +356,57 @@ def get_workflow_extensions_from_extensions(extensions: list) -> dict:
             workflow_extensions[ext["bundle"]] = ext_info
 
     return workflow_extensions
+
+
+def generate_profile_command_from_extensions(
+    extensions: list,
+    build_system: str,
+    canonical: str,
+    profile_id: str,
+    activation: dict,
+    module_name: str = None
+) -> str | None:
+    """Generate a profile-based command using domain extension.
+
+    Delegates to the appropriate extension's generate_profile_command() function.
+
+    Args:
+        extensions: List of extension info dicts
+        build_system: "maven", "gradle", etc.
+        canonical: The canonical command name
+        profile_id: The profile ID to activate
+        activation: Dict with activation info
+        module_name: Optional module name
+
+    Returns:
+        Command string or None if no extension handles this build system
+    """
+    for ext in extensions:
+        module = ext.get("module")
+        if not module:
+            continue
+
+        # Check if this extension handles the build system
+        if hasattr(module, 'provides_build_systems'):
+            try:
+                systems = module.provides_build_systems()
+                if build_system not in systems:
+                    continue
+            except Exception:
+                continue
+
+        # Check if extension provides profile command generation
+        if hasattr(module, 'generate_profile_command'):
+            try:
+                cmd = module.generate_profile_command(
+                    build_system, canonical, profile_id, activation, module_name
+                )
+                if cmd:
+                    return cmd
+            except Exception:
+                pass
+
+    return None
 
 
 # =============================================================================

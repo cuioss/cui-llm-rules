@@ -39,6 +39,7 @@ from extension import (
     get_command_mappings_from_extensions,
     get_skill_domains_from_extensions,
     get_modules_from_extensions,
+    generate_profile_command_from_extensions,
 )
 
 
@@ -125,30 +126,15 @@ CANONICAL_COMMANDS = {
 # Build System Detection (via Extensions)
 # =============================================================================
 
-# Build file indicators for each build system
-BUILD_FILE_INDICATORS = {
-    "maven": ["pom.xml"],
-    "gradle": ["build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts"],
-    "npm": ["package.json"],
-}
-
-
-def _build_system_files_exist(project_dir: Path, build_system: str) -> bool:
-    """Check if any indicator file for a build system exists in the project."""
-    indicators = BUILD_FILE_INDICATORS.get(build_system, [])
-    return any((project_dir / f).exists() for f in indicators)
-
-
 def detect_build_systems(project_dir: Path) -> dict:
-    """Detect all available build systems in the project directory using extensions."""
-    extensions = discover_extensions(project_dir)
-    declared_systems = get_build_systems_from_extensions(extensions)
+    """Detect all available build systems in the project directory using extensions.
 
-    # Filter to only build systems with actual files present
-    build_systems = [
-        bs for bs in declared_systems
-        if _build_system_files_exist(project_dir, bs)
-    ]
+    Extensions are discovered via is_applicable() which checks for build files.
+    Then get_applicable_build_systems() returns only systems with files present.
+    """
+    extensions = discover_extensions(project_dir)
+    # Pass project_dir to enable dynamic detection via get_applicable_build_systems()
+    build_systems = get_build_systems_from_extensions(extensions, project_dir)
 
     if not build_systems:
         return {
@@ -340,17 +326,13 @@ def cmd_detect_profiles(args):
 # =============================================================================
 
 def detect_hybrid_build_systems(module_path: Path) -> list:
-    """Detect all build systems present in a module directory."""
-    systems = []
+    """Detect all build systems present in a module directory via extensions.
 
-    if (module_path / "pom.xml").exists():
-        systems.append("maven")
-    if (module_path / "build.gradle").exists() or (module_path / "build.gradle.kts").exists():
-        systems.append("gradle")
-    if (module_path / "package.json").exists():
-        systems.append("npm")
-
-    return systems
+    Uses extension discovery to find applicable build systems.
+    Each extension's get_applicable_build_systems() checks for its build files.
+    """
+    extensions = discover_extensions(module_path)
+    return get_build_systems_from_extensions(extensions, module_path)
 
 
 def is_hybrid_module(module_path: Path) -> bool:
@@ -458,37 +440,6 @@ def generate_hybrid_commands_from_extensions(
     return commands
 
 
-def generate_profile_command(
-    build_system: str,
-    canonical: str,
-    profile_id: str,
-    activation: dict,
-    module_name: str = None
-) -> str:
-    """Generate a command string for a profile-based canonical command."""
-    if build_system == "maven":
-        if activation.get("type") == "property":
-            prop_name = activation.get("property", "")
-            prop_value = activation.get("value")
-            if prop_value:
-                targets = f"clean verify -D{prop_name}={prop_value}"
-            else:
-                targets = f"clean verify -D{prop_name}"
-        else:
-            targets = f"clean verify -P{profile_id}"
-
-        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "{targets}"'
-    elif build_system == "gradle":
-        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run --targets "clean {profile_id}"'
-    else:
-        return None
-
-    if module_name and module_name != "default":
-        cmd += f" --module {module_name}"
-
-    return cmd
-
-
 def cmd_persist(args):
     """Handle persist subcommand - detect and persist module commands."""
     project_dir = Path(args.project_dir).resolve()
@@ -568,7 +519,9 @@ def cmd_persist(args):
 
                 activation = profile.get("activation", {})
                 if canonical not in default_commands or activation.get("type") in ("property", "jdk", "os", "default"):
-                    cmd = generate_profile_command(default_system, canonical, profile["id"], activation, None)
+                    cmd = generate_profile_command_from_extensions(
+                        extensions, default_system, canonical, profile["id"], activation, None
+                    )
                     if cmd:
                         default_commands[canonical] = cmd
 
@@ -617,7 +570,9 @@ def cmd_persist(args):
 
                     activation = profile.get("activation", {})
                     if canonical not in mod_commands or activation.get("type") in ("property", "jdk", "os", "default"):
-                        cmd = generate_profile_command(mod_system, canonical, profile["id"], activation, mod_name)
+                        cmd = generate_profile_command_from_extensions(
+                            extensions, mod_system, canonical, profile["id"], activation, mod_name
+                        )
                         if cmd:
                             mod_commands[canonical] = cmd
 

@@ -49,7 +49,7 @@ def is_applicable(project_root: str) -> bool:
 
 ```python
 def provides_build_systems() -> list:
-    """Return build system keys this bundle handles.
+    """Return build system keys this bundle handles (static declaration).
 
     Returns:
         List of build system keys (e.g., ["maven", "gradle"]).
@@ -65,6 +65,43 @@ def provides_build_systems() -> list:
 **Implementation Notes**:
 - Return `[]` for bundles that don't provide build capabilities
 - Keys must match values expected by `build_env.py`
+- This is a static declaration; use `get_applicable_build_systems()` for dynamic detection
+
+### get_applicable_build_systems
+
+```python
+def get_applicable_build_systems(project_root: str) -> list:
+    """Return build systems that are actually present in the project.
+
+    Args:
+        project_root: Absolute path to project root.
+
+    Returns:
+        List of build system keys present (e.g., ["maven"] or ["gradle"] or both).
+        Empty list if no applicable build systems found.
+
+    Notes:
+        This function performs file checks to determine which build systems
+        are actually present, unlike provides_build_systems() which is static.
+    """
+```
+
+**Example** (Java):
+```python
+def get_applicable_build_systems(project_root: str) -> list:
+    root = Path(project_root)
+    systems = []
+    if (root / "pom.xml").exists():
+        systems.append("maven")
+    if (root / "build.gradle").exists() or (root / "build.gradle.kts").exists():
+        systems.append("gradle")
+    return systems
+```
+
+**Implementation Notes**:
+- Preferred over `provides_build_systems()` when detecting actual build systems
+- Called with project_root to check file existence
+- Return only build systems with actual files present
 
 ### get_command_mappings
 
@@ -425,6 +462,69 @@ def get_profiles(module_path: str) -> list:
     return profiles
 ```
 
+#### generate_profile_command
+
+```python
+def generate_profile_command(
+    build_system: str,
+    canonical: str,
+    profile_id: str,
+    activation: dict,
+    module_name: str = None
+) -> str | None:
+    """Generate a command string for a profile-based canonical command.
+
+    Args:
+        build_system: "maven" or "gradle"
+        canonical: The canonical command name (e.g., "integration-tests")
+        profile_id: The profile ID to activate
+        activation: Dict with activation info (type, property, value)
+        module_name: Optional module name for multi-module projects
+
+    Returns:
+        Command string or None if build system not supported
+
+    Notes:
+        This is called by build_env.py to generate commands for profiles
+        that have canonical mappings. It encapsulates build-system-specific
+        command generation logic.
+    """
+```
+
+**Example** (Java):
+```python
+def generate_profile_command(
+    build_system: str,
+    canonical: str,
+    profile_id: str,
+    activation: dict,
+    module_name: str = None
+) -> str | None:
+    if build_system == "maven":
+        if activation.get("type") == "property":
+            prop_name = activation.get("property", "")
+            prop_value = activation.get("value")
+            if prop_value:
+                targets = f"clean verify -D{prop_name}={prop_value}"
+            else:
+                targets = f"clean verify -D{prop_name}"
+        else:
+            targets = f"clean verify -P{profile_id}"
+
+        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "{targets}"'
+
+    elif build_system == "gradle":
+        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run --targets "clean {profile_id}"'
+
+    else:
+        return None
+
+    if module_name and module_name != "default":
+        cmd += f" --module {module_name}"
+
+    return cmd
+```
+
 ---
 
 ## Complete Extension Template
@@ -499,6 +599,10 @@ Validation checks:
 - Exactly one domain function present (get_skill_domains OR get_domain_supplements)
 - Functions are callable
 - No syntax errors
+- get_skill_domains() returns valid structure with domain.key, domain.name, profiles
+- Skill references (bundle:skill) point to existing skills
+- Build bundles cover required canonical commands (module-tests, quality-gate, verify)
+- provides_triage() and provides_outline() references exist if non-null
 
 ---
 
@@ -507,8 +611,7 @@ Validation checks:
 | Bundle | Domain Key | Build Systems | Triage | Outline |
 |--------|------------|---------------|--------|---------|
 | pm-dev-java | java | maven, gradle | java-triage | - |
-| pm-dev-java-cui | java (supplement) | - | - | - |
 | pm-dev-frontend | javascript | npm | javascript-triage | - |
 | pm-documents | documentation | - | - | - |
 | pm-requirements | requirements | - | - | - |
-| pm-plugin-development | plan-marshall-plugin-dev | - | - | plugin-solution-outline |
+| pm-plugin-development | plan-marshall-plugin-dev | - | plugin-triage | - |

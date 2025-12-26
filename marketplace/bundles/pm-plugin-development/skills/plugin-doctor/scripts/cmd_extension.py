@@ -4,10 +4,17 @@
 Validates extension.py files in plan-marshall-plugin skills.
 Checks contract compliance and extension API consistency.
 
+Validation includes:
+- Required function presence and signatures
+- get_skill_domains() return value structure
+- Skill reference existence (bundle:skill paths)
+- Required canonical command coverage for build bundles
+
 Output: JSON to stdout.
 """
 
 import ast
+import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -47,6 +54,300 @@ DOMAIN_FUNCTIONS = {
         'description': 'Return supplement metadata for target domain'
     }
 }
+
+# Valid profile categories for get_skill_domains()
+VALID_PROFILE_CATEGORIES = ['core', 'implementation', 'testing', 'quality']
+
+# Required canonical commands for bundles that provide build systems
+REQUIRED_CANONICAL_COMMANDS = ['module-tests', 'quality-gate', 'verify']
+
+
+# =============================================================================
+# Skill Reference Validation
+# =============================================================================
+
+def get_marketplace_root(extension_path: Path) -> Path | None:
+    """Find marketplace root from extension path."""
+    # Walk up to find marketplace/bundles
+    current = extension_path.parent
+    for _ in range(10):
+        if current.name == 'bundles' and (current.parent / 'bundles').exists():
+            return current.parent
+        if (current / 'marketplace' / 'bundles').exists():
+            return current / 'marketplace'
+        current = current.parent
+        if current == current.parent:
+            break
+    return None
+
+
+def skill_exists(skill_ref: str, marketplace_root: Path) -> bool:
+    """Check if a skill reference (bundle:skill) exists."""
+    if ':' not in skill_ref:
+        return False
+
+    bundle, skill = skill_ref.split(':', 1)
+    skill_path = marketplace_root / 'bundles' / bundle / 'skills' / skill
+
+    # Check for SKILL.md (primary) or at least skill directory with content
+    return skill_path.is_dir() and (
+        (skill_path / 'SKILL.md').exists() or
+        len(list(skill_path.glob('*.md'))) > 0 or
+        len(list(skill_path.glob('scripts/*.py'))) > 0
+    )
+
+
+def validate_skill_references(domains: dict, marketplace_root: Path) -> list:
+    """Validate that all skill references in profiles actually exist."""
+    issues = []
+
+    profiles = domains.get('profiles', {})
+
+    for category, config in profiles.items():
+        if not isinstance(config, dict):
+            continue
+
+        # Check defaults
+        for skill_ref in config.get('defaults', []):
+            if not skill_exists(skill_ref, marketplace_root):
+                issues.append({
+                    'type': 'missing_skill',
+                    'skill': skill_ref,
+                    'location': f'profiles.{category}.defaults',
+                    'message': f"Skill reference '{skill_ref}' does not exist"
+                })
+
+        # Check optionals
+        for skill_ref in config.get('optionals', []):
+            if not skill_exists(skill_ref, marketplace_root):
+                issues.append({
+                    'type': 'missing_skill',
+                    'skill': skill_ref,
+                    'location': f'profiles.{category}.optionals',
+                    'message': f"Skill reference '{skill_ref}' does not exist"
+                })
+
+    return issues
+
+
+def validate_triage_outline_references(module, marketplace_root: Path) -> list:
+    """Validate provides_triage() and provides_outline() return valid refs."""
+    issues = []
+
+    if hasattr(module, 'provides_triage'):
+        try:
+            triage = module.provides_triage()
+            if triage is not None:
+                if not isinstance(triage, str):
+                    issues.append({
+                        'type': 'invalid_triage',
+                        'message': 'provides_triage() must return str or None'
+                    })
+                elif not skill_exists(triage, marketplace_root):
+                    issues.append({
+                        'type': 'missing_skill',
+                        'skill': triage,
+                        'location': 'provides_triage()',
+                        'message': f"Triage skill '{triage}' does not exist"
+                    })
+        except Exception as e:
+            issues.append({
+                'type': 'triage_error',
+                'message': f'provides_triage() raised: {e}'
+            })
+
+    if hasattr(module, 'provides_outline'):
+        try:
+            outline = module.provides_outline()
+            if outline is not None:
+                if not isinstance(outline, str):
+                    issues.append({
+                        'type': 'invalid_outline',
+                        'message': 'provides_outline() must return str or None'
+                    })
+                elif not skill_exists(outline, marketplace_root):
+                    issues.append({
+                        'type': 'missing_skill',
+                        'skill': outline,
+                        'location': 'provides_outline()',
+                        'message': f"Outline skill '{outline}' does not exist"
+                    })
+        except Exception as e:
+            issues.append({
+                'type': 'outline_error',
+                'message': f'provides_outline() raised: {e}'
+            })
+
+    return issues
+
+
+# =============================================================================
+# Domain Structure Validation
+# =============================================================================
+
+def validate_skill_domains_structure(domains: dict) -> list:
+    """Validate the structure of get_skill_domains() return value."""
+    issues = []
+
+    # Must have 'domain' key
+    if 'domain' not in domains:
+        issues.append({
+            'type': 'missing_domain',
+            'message': "get_skill_domains() missing 'domain' key"
+        })
+        return issues
+
+    domain = domains['domain']
+
+    # Domain must have key and name
+    if not isinstance(domain, dict):
+        issues.append({
+            'type': 'invalid_domain',
+            'message': f"domain must be a dict, got {type(domain).__name__}"
+        })
+        return issues
+
+    if 'key' not in domain:
+        issues.append({
+            'type': 'missing_domain_key',
+            'message': "domain missing 'key'"
+        })
+    elif not isinstance(domain['key'], str) or not domain['key']:
+        issues.append({
+            'type': 'invalid_domain_key',
+            'message': "domain.key must be non-empty string"
+        })
+
+    if 'name' not in domain:
+        issues.append({
+            'type': 'missing_domain_name',
+            'message': "domain missing 'name'"
+        })
+    elif not isinstance(domain['name'], str) or not domain['name']:
+        issues.append({
+            'type': 'invalid_domain_name',
+            'message': "domain.name must be non-empty string"
+        })
+
+    # Must have 'profiles' key
+    if 'profiles' not in domains:
+        issues.append({
+            'type': 'missing_profiles',
+            'message': "get_skill_domains() missing 'profiles' key"
+        })
+        return issues
+
+    profiles = domains['profiles']
+
+    if not isinstance(profiles, dict):
+        issues.append({
+            'type': 'invalid_profiles',
+            'message': f"profiles must be a dict, got {type(profiles).__name__}"
+        })
+        return issues
+
+    # Validate each profile category
+    for category, config in profiles.items():
+        if category not in VALID_PROFILE_CATEGORIES:
+            issues.append({
+                'type': 'unknown_category',
+                'category': category,
+                'severity': 'warning',
+                'message': f"Unknown profile category '{category}'"
+            })
+            continue
+
+        if not isinstance(config, dict):
+            issues.append({
+                'type': 'invalid_category_config',
+                'category': category,
+                'message': f"profiles.{category} must be a dict"
+            })
+            continue
+
+        # Must have defaults and optionals
+        if 'defaults' not in config:
+            issues.append({
+                'type': 'missing_defaults',
+                'category': category,
+                'message': f"profiles.{category} missing 'defaults'"
+            })
+        elif not isinstance(config['defaults'], list):
+            issues.append({
+                'type': 'invalid_defaults',
+                'category': category,
+                'message': f"profiles.{category}.defaults must be a list"
+            })
+
+        if 'optionals' not in config:
+            issues.append({
+                'type': 'missing_optionals',
+                'category': category,
+                'message': f"profiles.{category} missing 'optionals'"
+            })
+        elif not isinstance(config['optionals'], list):
+            issues.append({
+                'type': 'invalid_optionals',
+                'category': category,
+                'message': f"profiles.{category}.optionals must be a list"
+            })
+
+    return issues
+
+
+# =============================================================================
+# Command Mapping Validation
+# =============================================================================
+
+def validate_command_mappings(mappings: dict, build_systems: list) -> list:
+    """Validate command mappings cover required canonicals."""
+    issues = []
+
+    if not build_systems:
+        # Non-build bundles should return empty mappings (not an error)
+        return issues
+
+    for build_system in build_systems:
+        if build_system not in mappings:
+            issues.append({
+                'type': 'missing_build_system',
+                'build_system': build_system,
+                'message': f"Missing command mappings for '{build_system}'"
+            })
+            continue
+
+        system_mappings = mappings[build_system]
+
+        # Check required canonical commands
+        for canonical in REQUIRED_CANONICAL_COMMANDS:
+            if canonical not in system_mappings:
+                issues.append({
+                    'type': 'missing_canonical',
+                    'build_system': build_system,
+                    'canonical': canonical,
+                    'message': f"Missing required canonical command '{canonical}' for {build_system}"
+                })
+
+        # Validate command format
+        for canonical, template in system_mappings.items():
+            if not isinstance(template, str):
+                issues.append({
+                    'type': 'invalid_template',
+                    'canonical': canonical,
+                    'message': f"Command template for {canonical} must be string"
+                })
+                continue
+
+            # Should use execute-script.py pattern
+            if 'python3 .plan/execute-script.py' not in template:
+                issues.append({
+                    'type': 'non_standard_template',
+                    'canonical': canonical,
+                    'severity': 'warning',
+                    'message': f"Command '{canonical}' should use execute-script.py pattern"
+                })
+
+    return issues
 
 
 def parse_extension_file(extension_path: Path) -> tuple[bool, list[dict], dict]:
@@ -90,8 +391,27 @@ def parse_extension_file(extension_path: Path) -> tuple[bool, list[dict], dict]:
     return True, errors, functions
 
 
-def validate_extension(extension_path: Path) -> dict:
-    """Validate a single extension.py file."""
+def load_extension_module(extension_path: Path):
+    """Load an extension.py module dynamically."""
+    try:
+        spec = importlib.util.spec_from_file_location(
+            f"extension_{extension_path.parent.parent.parent.name}",
+            extension_path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except Exception:
+        return None
+
+
+def validate_extension(extension_path: Path, deep: bool = True) -> dict:
+    """Validate a single extension.py file.
+
+    Args:
+        extension_path: Path to extension.py
+        deep: If True, also validate return values by executing functions
+    """
     result = {
         'path': str(extension_path),
         'valid': True,
@@ -162,6 +482,65 @@ def validate_extension(extension_path: Path) -> dict:
             'function': 'get_skill_domains OR get_domain_supplements',
             'message': "Missing domain function: must have either get_skill_domains() or get_domain_supplements()"
         })
+
+    # Deep validation: execute functions and validate return values
+    if deep and result['valid']:
+        module = load_extension_module(extension_path)
+        if module:
+            marketplace_root = get_marketplace_root(extension_path)
+
+            # Validate get_skill_domains() structure and skill references
+            if hasattr(module, 'get_skill_domains'):
+                try:
+                    domains = module.get_skill_domains()
+
+                    # Validate structure
+                    structure_issues = validate_skill_domains_structure(domains)
+                    for issue in structure_issues:
+                        if issue.get('severity') != 'warning':
+                            result['valid'] = False
+                    result['issues'].extend(structure_issues)
+
+                    # Validate skill references
+                    if marketplace_root:
+                        ref_issues = validate_skill_references(domains, marketplace_root)
+                        for issue in ref_issues:
+                            result['valid'] = False
+                        result['issues'].extend(ref_issues)
+
+                except Exception as e:
+                    result['issues'].append({
+                        'type': 'execution_error',
+                        'function': 'get_skill_domains',
+                        'message': f"get_skill_domains() raised: {e}"
+                    })
+
+            # Validate provides_build_systems() and get_command_mappings()
+            if hasattr(module, 'provides_build_systems') and hasattr(module, 'get_command_mappings'):
+                try:
+                    build_systems = module.provides_build_systems()
+                    mappings = module.get_command_mappings()
+
+                    # Validate command mappings
+                    mapping_issues = validate_command_mappings(mappings, build_systems)
+                    for issue in mapping_issues:
+                        if issue.get('severity') != 'warning':
+                            result['valid'] = False
+                    result['issues'].extend(mapping_issues)
+
+                except Exception as e:
+                    result['issues'].append({
+                        'type': 'execution_error',
+                        'function': 'get_command_mappings',
+                        'message': f"Command mapping validation failed: {e}"
+                    })
+
+            # Validate provides_triage() and provides_outline() references
+            if marketplace_root:
+                triage_outline_issues = validate_triage_outline_references(module, marketplace_root)
+                for issue in triage_outline_issues:
+                    result['valid'] = False
+                result['issues'].extend(triage_outline_issues)
 
     return result
 

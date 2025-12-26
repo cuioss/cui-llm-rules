@@ -23,8 +23,23 @@ def is_applicable(project_root: str) -> bool:
 
 
 def provides_build_systems() -> list:
-    """Build system keys this bundle handles."""
+    """Build system keys this bundle handles (static declaration)."""
     return ["npm"]
+
+
+def get_applicable_build_systems(project_root: str) -> list:
+    """Return build systems that are actually present in the project.
+
+    Args:
+        project_root: Absolute path to project root.
+
+    Returns:
+        List of build system keys present (e.g., ["npm"])
+    """
+    root = Path(project_root)
+    if (root / PACKAGE_JSON).exists():
+        return ["npm"]
+    return []
 
 
 def get_command_mappings() -> dict:
