@@ -1,6 +1,6 @@
 # Extension API Contract
 
-Complete specification for `extension.py` files that domain bundles implement.
+Complete specification for `extension.py` files that domain bundles implement. All extensions **must** inherit from `ExtensionBase`.
 
 ## File Location
 
@@ -16,14 +16,30 @@ At runtime, they're discovered from the plugin cache:
 
 ---
 
-## Required Functions
+## ExtensionBase Import
 
-All bundles with an `extension.py` must implement these functions.
+All extensions must import and inherit from `ExtensionBase`:
+
+```python
+from extension_base import ExtensionBase
+
+class Extension(ExtensionBase):
+    # Implement required methods
+    ...
+```
+
+The `extension_base` module is automatically injected into `sys.modules` when extensions are loaded.
+
+---
+
+## Required Methods (Abstract)
+
+All extensions must implement these methods - they are abstract in `ExtensionBase`.
 
 ### is_applicable
 
 ```python
-def is_applicable(project_root: str) -> bool:
+def is_applicable(self, project_root: str) -> bool:
     """Check if this bundle applies to the project.
 
     Args:
@@ -45,109 +61,10 @@ def is_applicable(project_root: str) -> bool:
 - Should be fast (file existence checks, not content analysis)
 - May use heuristics (e.g., check pom.xml content for specific patterns)
 
-### provides_build_systems
-
-```python
-def provides_build_systems() -> list:
-    """Return build system keys this bundle handles (static declaration).
-
-    Returns:
-        List of build system keys (e.g., ["maven", "gradle"]).
-        Empty list if bundle doesn't provide build systems.
-
-    Valid Keys:
-        - "maven" - Maven build system
-        - "gradle" - Gradle build system
-        - "npm" - npm/Node.js build system
-    """
-```
-
-**Implementation Notes**:
-- Return `[]` for bundles that don't provide build capabilities
-- Keys must match values expected by `build_env.py`
-- This is a static declaration; use `get_applicable_build_systems()` for dynamic detection
-
-### get_applicable_build_systems
-
-```python
-def get_applicable_build_systems(project_root: str) -> list:
-    """Return build systems that are actually present in the project.
-
-    Args:
-        project_root: Absolute path to project root.
-
-    Returns:
-        List of build system keys present (e.g., ["maven"] or ["gradle"] or both).
-        Empty list if no applicable build systems found.
-
-    Notes:
-        This function performs file checks to determine which build systems
-        are actually present, unlike provides_build_systems() which is static.
-    """
-```
-
-**Example** (Java):
-```python
-def get_applicable_build_systems(project_root: str) -> list:
-    root = Path(project_root)
-    systems = []
-    if (root / "pom.xml").exists():
-        systems.append("maven")
-    if (root / "build.gradle").exists() or (root / "build.gradle.kts").exists():
-        systems.append("gradle")
-    return systems
-```
-
-**Implementation Notes**:
-- Preferred over `provides_build_systems()` when detecting actual build systems
-- Called with project_root to check file existence
-- Return only build systems with actual files present
-
-### get_command_mappings
-
-```python
-def get_command_mappings() -> dict:
-    """Return canonical command name to script invocation mappings.
-
-    Returns:
-        Nested dict: {build_system: {canonical_name: command_template}}
-        Empty dict if bundle doesn't provide build commands.
-
-    Template Placeholders:
-        {module} - Replaced with ' --module <name>' or '' by persist
-
-    Canonical Names:
-        - compile, test-compile
-        - module-tests, integration-tests, coverage, performance
-        - quality-gate, verify, install, package
-    """
-```
-
-**Example**:
-```python
-def get_command_mappings() -> dict:
-    base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
-    return {
-        "maven": {
-            "module-tests": f'{base} --targets "clean test"{{module}}',
-            "quality-gate": f'{base} --targets "clean verify -Ppre-commit"{{module}}',
-            "verify": f'{base} --targets "clean verify"{{module}}',
-        }
-    }
-```
-
----
-
-## Domain Function
-
-Every extension must implement this function.
-
 ### get_skill_domains
 
-Defines the domain and its skill organization.
-
 ```python
-def get_skill_domains() -> dict:
+def get_skill_domains(self) -> dict:
     """Return domain metadata for skill loading.
 
     Returns:
@@ -177,78 +94,94 @@ def get_skill_domains() -> dict:
     """
 ```
 
-**Example**:
-```python
-def get_skill_domains() -> dict:
-    return {
-        "domain": {
-            "key": "java",
-            "name": "Java Development",
-            "description": "Java code patterns, CDI, JUnit testing, Maven/Gradle builds"
-        },
-        "profiles": {
-            "core": {
-                "defaults": ["pm-dev-java:java-core"],
-                "optionals": ["pm-dev-java:java-null-safety", "pm-dev-java:java-lombok"]
-            },
-            "testing": {
-                "defaults": ["pm-dev-java:junit-core"],
-                "optionals": ["pm-dev-java:junit-integration"]
-            }
-        }
-    }
-```
-
 ---
 
-## Optional Functions
+## Optional Methods (With Defaults)
 
-These functions enable workflow extensions and build system discovery.
+These methods have default implementations in `ExtensionBase`. Override only when needed.
 
-### Workflow Extensions
+### Build System Methods
 
-Return `None` if not provided.
-
-#### provides_triage
+#### provides_build_systems
 
 ```python
-def provides_triage() -> str | None:
-    """Return triage skill reference if available.
+def provides_build_systems(self) -> list:
+    """Return build system keys this bundle handles (static declaration).
 
     Returns:
-        Skill reference as 'bundle:skill' (e.g., 'pm-dev-java:java-triage')
-        or None if no triage capability.
+        List of build system keys (e.g., ["maven", "gradle"]).
+        Empty list if bundle doesn't provide build systems.
 
-    Purpose:
-        Triage skills categorize and prioritize findings during
-        the plan-finalize phase.
+    Valid Keys:
+        - "maven" - Maven build system
+        - "gradle" - Gradle build system
+        - "npm" - npm/Node.js build system
+
+    Default: []
     """
 ```
 
-#### provides_outline
+#### get_applicable_build_systems
 
 ```python
-def provides_outline() -> str | None:
-    """Return outline skill reference if available.
+def get_applicable_build_systems(self, project_root: str) -> list:
+    """Return build systems that are actually present in the project.
+
+    Args:
+        project_root: Absolute path to project root.
 
     Returns:
-        Skill reference as 'bundle:skill' (e.g., 'pm-plugin-development:plugin-solution-outline')
-        or None if no outline capability.
+        List of build system keys present (e.g., ["maven"] or ["gradle"] or both).
+        Empty list if no applicable build systems found.
 
-    Purpose:
-        Outline skills guide solution design during the
-        plan-init phase for domain-specific deliverables.
+    Default: []
     """
 ```
 
-### Build System Extensions
+#### get_command_mappings
 
-These functions enable domain-specific build detection. Return empty list or "jar" defaults if not applicable.
+```python
+def get_command_mappings(self) -> dict:
+    """Return canonical command name to script invocation mappings.
+
+    Returns:
+        Nested dict: {build_system: {canonical_name: command_template}}
+        Empty dict if bundle doesn't provide build commands.
+
+    Template Placeholders:
+        {module} - Replaced with ' --module <name>' or '' by persist
+
+    Default: {}
+    """
+```
+
+**Example using constants**:
+```python
+from extension_base import (
+    ExtensionBase,
+    CMD_MODULE_TESTS,
+    CMD_QUALITY_GATE,
+    CMD_VERIFY,
+)
+
+class Extension(ExtensionBase):
+    def get_command_mappings(self) -> dict:
+        base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
+        return {
+            "maven": {
+                CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
+                CMD_QUALITY_GATE: f'{base} --targets "clean verify -Ppre-commit"{{module}}',
+                CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
+            }
+        }
+```
+
+### Module Detection Methods
 
 #### get_modules
 
 ```python
-def get_modules(project_root: str) -> list:
+def get_modules(self, project_root: str) -> list:
     """Return project modules detected by this build system.
 
     Args:
@@ -256,51 +189,16 @@ def get_modules(project_root: str) -> list:
 
     Returns:
         List of module dicts:
-        [
-            {
-                "name": str,           # Module name
-                "path": str,           # Relative path from project root
-                "build_system": str    # Build system (maven, gradle, npm)
-            }
-        ]
+        [{"name": str, "path": str, "build_system": str}]
 
-    Examples:
-        - Maven: Parse pom.xml <modules> section
-        - Gradle: Parse settings.gradle include() statements
-        - npm: Parse package.json workspaces
+    Default: []
     """
-```
-
-**Example** (Maven):
-```python
-def get_modules(project_root: str) -> list:
-    import re
-    from pathlib import Path
-
-    modules = []
-    pom_path = Path(project_root) / "pom.xml"
-
-    if not pom_path.exists():
-        return modules
-
-    content = pom_path.read_text()
-    modules_match = re.search(r'<modules>(.*?)</modules>', content, re.DOTALL)
-    if modules_match:
-        for module in re.findall(r'<module>([^<]+)</module>', modules_match.group(1)):
-            if (Path(project_root) / module).exists():
-                modules.append({
-                    "name": module,
-                    "path": module,
-                    "build_system": "maven"
-                })
-
-    return modules
 ```
 
 #### get_module_type
 
 ```python
-def get_module_type(module_path: str) -> str:
+def get_module_type(self, module_path: str) -> str:
     """Return the module type for a given module path.
 
     Args:
@@ -308,49 +206,21 @@ def get_module_type(module_path: str) -> str:
 
     Returns:
         Module type string:
+        - "unknown" - Default for non-build bundles
         - "pom" - Parent/BOM module (Maven)
-        - "jar" - Library module (default)
+        - "jar" - Library module (Java)
         - "war" - Web application
         - "quarkus" - Quarkus application
         - "npm" - npm project
 
-    Notes:
-        - Check packaging element in pom.xml
-        - Check for Quarkus plugin
-        - Default to "jar" if unknown
+    Default: "unknown"
     """
-```
-
-**Example** (Maven):
-```python
-def get_module_type(module_path: str) -> str:
-    import re
-    from pathlib import Path
-
-    pom_path = Path(module_path) / "pom.xml"
-    if not pom_path.exists():
-        return "jar"
-
-    content = pom_path.read_text()
-
-    # Check packaging
-    match = re.search(r'<packaging>([^<]+)</packaging>', content)
-    if match:
-        packaging = match.group(1).strip().lower()
-        if packaging in ("pom", "war"):
-            return packaging
-
-    # Check for Quarkus
-    if "quarkus-maven-plugin" in content:
-        return "quarkus"
-
-    return "jar"
 ```
 
 #### get_profiles
 
 ```python
-def get_profiles(module_path: str) -> list:
+def get_profiles(self, module_path: str) -> list:
     """Return build profiles for a module.
 
     Args:
@@ -358,181 +228,206 @@ def get_profiles(module_path: str) -> list:
 
     Returns:
         List of profile dicts:
-        [
-            {
-                "id": str,                    # Profile ID
-                "canonical": str | None,      # Canonical command name or None
-                "activation": {
-                    "type": str,              # command-line, property, jdk, os, default
-                    "property": str | None,   # Property name (if type=property)
-                    "value": str | None       # Property value (if type=property)
-                }
-            }
-        ]
-
-    Canonical Mappings:
-        - integration-tests, it, e2e → "integration-tests"
-        - coverage, jacoco → "coverage"
-        - pre-commit, quality, sonar → "quality-gate"
-        - benchmark, jmh, perf → "performance"
-    """
-```
-
-**Example** (Maven):
-```python
-def get_profiles(module_path: str) -> list:
-    import re
-    from pathlib import Path
-
-    PROFILE_TO_CANONICAL = {
-        "integration-tests": "integration-tests",
-        "coverage": "coverage",
-        "jacoco": "coverage",
-        "pre-commit": "quality-gate",
-        "benchmark": "performance",
-    }
-
-    profiles = []
-    pom_path = Path(module_path) / "pom.xml"
-
-    if not pom_path.exists():
-        return profiles
-
-    content = pom_path.read_text()
-    for profile_id in re.findall(r'<profile>\s*<id>([^<]+)</id>', content):
-        canonical = None
-        for pattern, name in PROFILE_TO_CANONICAL.items():
-            if pattern in profile_id.lower():
-                canonical = name
-                break
-        profiles.append({
-            "id": profile_id.strip(),
-            "canonical": canonical,
-            "activation": {"type": "command-line"}
-        })
-
-    return profiles
-```
-
-#### generate_profile_command
-
-```python
-def generate_profile_command(
-    build_system: str,
-    canonical: str,
-    profile_id: str,
-    activation: dict,
-    module_name: str = None
-) -> str | None:
-    """Generate a command string for a profile-based canonical command.
-
-    Args:
-        build_system: "maven" or "gradle"
-        canonical: The canonical command name (e.g., "integration-tests")
-        profile_id: The profile ID to activate
-        activation: Dict with activation info (type, property, value)
-        module_name: Optional module name for multi-module projects
-
-    Returns:
-        Command string or None if build system not supported
+        [{
+            "id": str,
+            "canonical": str | None,
+            "activation": {"type": str, ...}
+        }]
 
     Notes:
-        This is called by build_env.py to generate commands for profiles
-        that have canonical mappings. It encapsulates build-system-specific
-        command generation logic.
+        Use self.classify_profile() to map profile IDs to canonical names.
+
+    Default: []
     """
 ```
 
-**Example** (Java):
+#### classify_profile (Helper)
+
 ```python
-def generate_profile_command(
-    build_system: str,
-    canonical: str,
-    profile_id: str,
-    activation: dict,
-    module_name: str = None
-) -> str | None:
-    if build_system == "maven":
-        if activation.get("type") == "property":
-            prop_name = activation.get("property", "")
-            prop_value = activation.get("value")
-            if prop_value:
-                targets = f"clean verify -D{prop_name}={prop_value}"
-            else:
-                targets = f"clean verify -D{prop_name}"
-        else:
-            targets = f"clean verify -P{profile_id}"
+def classify_profile(self, profile_id: str) -> str | None:
+    """Classify a profile ID to its canonical command name.
 
-        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --targets "{targets}"'
+    Args:
+        profile_id: The profile identifier (e.g., "integration-tests", "jacoco")
 
-    elif build_system == "gradle":
-        cmd = f'python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:gradle run --targets "clean {profile_id}"'
+    Returns:
+        Canonical command name or None if not recognized.
 
-    else:
-        return None
+    Notes:
+        Uses PROFILE_PATTERNS vocabulary. Supports:
+        - Exact match
+        - Case-insensitive match
+        - Substring match
+    """
+```
 
-    if module_name and module_name != "default":
-        cmd += f" --module {module_name}"
+### Workflow Extension Methods
 
-    return cmd
+#### provides_triage
+
+```python
+def provides_triage(self) -> str | None:
+    """Return triage skill reference if available.
+
+    Returns:
+        Skill reference as 'bundle:skill' (e.g., 'pm-dev-java:java-triage')
+        or None if no triage capability.
+
+    Default: None
+    """
+```
+
+#### provides_outline
+
+```python
+def provides_outline(self) -> str | None:
+    """Return outline skill reference if available.
+
+    Returns:
+        Skill reference as 'bundle:skill'
+        or None if no outline capability.
+
+    Default: None
+    """
 ```
 
 ---
 
-## Complete Extension Template
+## Canonical Constants
+
+Import constants from `extension_base` for type-safe command references:
+
+```python
+from extension_base import (
+    CMD_COMPILE,
+    CMD_TEST_COMPILE,
+    CMD_MODULE_TESTS,
+    CMD_INTEGRATION_TESTS,
+    CMD_COVERAGE,
+    CMD_PERFORMANCE,
+    CMD_QUALITY_GATE,
+    CMD_VERIFY,
+    CMD_INSTALL,
+    CMD_PACKAGE,
+    ALL_CANONICAL_COMMANDS,
+    PROFILE_PATTERNS,
+)
+```
+
+---
+
+## Complete Extension Examples
+
+### Minimal Extension (Skill-Only Domain)
 
 ```python
 #!/usr/bin/env python3
-"""Extension API for {bundle-name} bundle.
-
-{Description of what this bundle provides.}
-"""
+"""Extension API for pm-documents bundle."""
 
 from pathlib import Path
+from extension_base import ExtensionBase
 
 
-def is_applicable(project_root: str) -> bool:
-    """Check if this bundle applies to the project."""
-    root = Path(project_root)
-    # Implement detection logic
-    return (root / "indicator-file").exists()
+class Extension(ExtensionBase):
+    """Documentation extension for pm-documents bundle."""
 
+    def is_applicable(self, project_root: str) -> bool:
+        """Check if documentation bundle applies to the project."""
+        return (Path(project_root) / "doc").is_dir()
 
-def provides_build_systems() -> list:
-    """Build system keys this bundle handles."""
-    return []  # or ["maven", "gradle", "npm"]
-
-
-def get_command_mappings() -> dict:
-    """Return canonical -> script invocation template."""
-    return {}  # or nested dict with templates
-
-
-def get_skill_domains() -> dict:
-    """Domain metadata for skill loading."""
-    return {
-        "domain": {
-            "key": "domain-key",
-            "name": "Domain Name",
-            "description": "Domain description"
-        },
-        "profiles": {
-            "core": {"defaults": [], "optionals": []},
-            "implementation": {"defaults": [], "optionals": []},
-            "testing": {"defaults": [], "optionals": []},
-            "quality": {"defaults": [], "optionals": []}
+    def get_skill_domains(self) -> dict:
+        """Domain metadata for skill loading."""
+        return {
+            "domain": {
+                "key": "documentation",
+                "name": "Documentation",
+                "description": "AsciiDoc documentation, ADRs, and interface specifications"
+            },
+            "profiles": {
+                "core": {
+                    "defaults": ["pm-documents:cui-documentation"],
+                    "optionals": []
+                },
+                "implementation": {
+                    "defaults": [],
+                    "optionals": ["pm-documents:adr-management"]
+                },
+                "testing": {"defaults": [], "optionals": []},
+                "quality": {"defaults": [], "optionals": []}
+            }
         }
-    }
+```
+
+### Build Bundle Extension (With Commands)
+
+```python
+#!/usr/bin/env python3
+"""Extension API for pm-dev-java bundle."""
+
+from pathlib import Path
+from extension_base import (
+    ExtensionBase,
+    CMD_MODULE_TESTS,
+    CMD_QUALITY_GATE,
+    CMD_VERIFY,
+    CMD_INSTALL,
+)
 
 
-def provides_triage() -> str | None:
-    """Return triage skill reference if available."""
-    return None  # or "bundle:triage-skill"
+class Extension(ExtensionBase):
+    """Java/Maven extension for pm-dev-java bundle."""
 
+    def is_applicable(self, project_root: str) -> bool:
+        return (Path(project_root) / "pom.xml").exists()
 
-def provides_outline() -> str | None:
-    """Return outline skill reference if available."""
-    return None  # or "bundle:outline-skill"
+    def provides_build_systems(self) -> list:
+        return ["maven"]
+
+    def get_applicable_build_systems(self, project_root: str) -> list:
+        root = Path(project_root)
+        if (root / "pom.xml").exists():
+            return ["maven"]
+        return []
+
+    def get_command_mappings(self) -> dict:
+        base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
+        return {
+            "maven": {
+                CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
+                CMD_QUALITY_GATE: f'{base} --targets "clean verify -Ppre-commit"{{module}}',
+                CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
+                CMD_INSTALL: f'{base} --targets "clean install"{{module}}',
+            }
+        }
+
+    def get_skill_domains(self) -> dict:
+        return {
+            "domain": {
+                "key": "java",
+                "name": "Java Development",
+                "description": "Java code patterns, JUnit testing, Maven builds"
+            },
+            "profiles": {
+                "core": {"defaults": ["pm-dev-java:java-core"], "optionals": []},
+                "implementation": {"defaults": [], "optionals": []},
+                "testing": {"defaults": ["pm-dev-java:junit-core"], "optionals": []},
+                "quality": {"defaults": ["pm-dev-java:javadoc"], "optionals": []}
+            }
+        }
+
+    def provides_triage(self) -> str | None:
+        return "pm-dev-java:java-triage"
+
+    def get_profiles(self, module_path: str) -> list:
+        # Use inherited classify_profile() helper
+        profiles = []
+        for profile_id in self._detect_profiles(module_path):
+            profiles.append({
+                "id": profile_id,
+                "canonical": self.classify_profile(profile_id),
+                "activation": {"type": "command-line"}
+            })
+        return profiles
 ```
 
 ---
@@ -547,8 +442,8 @@ python3 .plan/execute-script.py pm-plugin-development:plugin-doctor:validate ext
 ```
 
 Validation checks:
-- All required functions present (is_applicable, provides_build_systems, get_command_mappings, get_skill_domains)
-- Functions are callable
+- Extension class exists and inherits from ExtensionBase
+- Required methods implemented (is_applicable, get_skill_domains)
 - No syntax errors
 - get_skill_domains() returns valid structure with domain.key, domain.name, profiles
 - Skill references (bundle:skill) point to existing skills

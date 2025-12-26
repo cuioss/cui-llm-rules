@@ -6,14 +6,14 @@ allowed-tools: Read, Bash
 
 # Extension API Skill
 
-Unified API for domain bundle extensions, build system detection, and command generation. Provides the contract specification for `extension.py` files and shared utilities.
+Unified API for domain bundle extensions, build system detection, and command generation. Provides the `ExtensionBase` abstract base class that all domain extensions must inherit from.
 
 ## Purpose
 
-- **Contract specification** for extension.py function signatures
-- **Build system detection** across Maven, Gradle, and npm projects
-- **Command generation** from canonical vocabulary to executable commands
-- **Shared discovery** utilities for loading extensions
+- **ExtensionBase ABC** - Abstract base class with required/optional methods
+- **Canonical constants** - `CMD_*` constants for command names
+- **Profile patterns** - `PROFILE_PATTERNS` vocabulary for classification
+- **Discovery utilities** - Loading and discovering extensions
 
 ## When to Reference This Skill
 
@@ -29,10 +29,11 @@ Reference when:
 extension-api/
 ├── SKILL.md                        # This file
 ├── scripts/
+│   ├── extension_base.py           # ExtensionBase ABC (REQUIRED)
 │   ├── extension.py                # Extension discovery utilities
 │   └── build_env.py                # Build detection and command generation
 └── standards/
-    ├── extension-contract.md       # Function signatures and contracts
+    ├── extension-contract.md       # Class specification and contracts
     └── canonical-commands.md       # Canonical command vocabulary
 ```
 
@@ -40,29 +41,28 @@ extension-api/
 
 ## Quick Reference
 
-### Required Functions (All Bundles)
+All extensions **must** inherit from `ExtensionBase` and implement required methods.
 
-| Function | Purpose |
-|----------|---------|
+### Required Methods (Abstract)
+
+| Method | Purpose |
+|--------|---------|
 | `is_applicable(project_root: str) -> bool` | Detect if bundle applies to project |
-| `provides_build_systems() -> list` | Return build system keys (or `[]`) |
-| `get_command_mappings() -> dict` | Return command templates (or `{}`) |
-
-### Domain Function
-
-| Function | Purpose |
-|----------|---------|
 | `get_skill_domains() -> dict` | Return domain metadata with profiles |
 
-### Optional Functions
+### Optional Methods (With Defaults)
 
-| Function | Purpose |
-|----------|---------|
-| `provides_triage() -> str \| None` | Return triage skill reference |
-| `provides_outline() -> str \| None` | Return outline skill reference |
-| `get_modules(project_root: str) -> list` | Return project modules |
-| `get_module_type(module_path: str) -> str` | Return module type (jar, npm, etc.) |
-| `get_profiles(module_path: str) -> list` | Return build profiles |
+| Method | Default | Purpose |
+|--------|---------|---------|
+| `provides_build_systems() -> list` | `[]` | Return build system keys |
+| `get_command_mappings() -> dict` | `{}` | Return command templates |
+| `get_applicable_build_systems(project_root) -> list` | `[]` | Detect build systems |
+| `provides_triage() -> str \| None` | `None` | Return triage skill reference |
+| `provides_outline() -> str \| None` | `None` | Return outline skill reference |
+| `get_modules(project_root: str) -> list` | `[]` | Return project modules |
+| `get_module_type(module_path: str) -> str` | `"unknown"` | Return module type |
+| `get_profiles(module_path: str) -> list` | `[]` | Return build profiles |
+| `classify_profile(profile_id: str) -> str \| None` | Pattern match | Classify profile to canonical |
 
 ---
 
@@ -143,20 +143,73 @@ build_systems = get_build_systems_from_extensions(extensions)
 
 ---
 
-## Canonical Commands
+## Canonical Command Constants
 
-Standard command names that extensions implement. See `standards/canonical-commands.md` for full specification.
+Import from `extension_base` for type-safe command references:
 
-| Canonical Name | Required | Description |
-|----------------|----------|-------------|
-| `module-tests` | Yes | Unit tests for the module |
-| `quality-gate` | Yes | Static analysis, linting |
-| `verify` | Yes | Full verification |
-| `compile` | No | Compile production sources |
-| `integration-tests` | No | Integration tests |
-| `coverage` | No | Coverage measurement |
-| `install` | No | Install to local repository |
-| `package` | No | Create deployable artifact |
+```python
+from extension_base import (
+    CMD_COMPILE,           # "compile"
+    CMD_TEST_COMPILE,      # "test-compile"
+    CMD_MODULE_TESTS,      # "module-tests"
+    CMD_INTEGRATION_TESTS, # "integration-tests"
+    CMD_COVERAGE,          # "coverage"
+    CMD_PERFORMANCE,       # "performance"
+    CMD_QUALITY_GATE,      # "quality-gate"
+    CMD_VERIFY,            # "verify"
+    CMD_INSTALL,           # "install"
+    CMD_PACKAGE,           # "package"
+    ALL_CANONICAL_COMMANDS,
+    PROFILE_PATTERNS,      # Profile ID to canonical mapping
+)
+```
+
+| Constant | Value | Required | Description |
+|----------|-------|----------|-------------|
+| `CMD_MODULE_TESTS` | `module-tests` | Yes | Unit tests for the module |
+| `CMD_QUALITY_GATE` | `quality-gate` | Yes | Static analysis, linting |
+| `CMD_VERIFY` | `verify` | Yes | Full verification |
+| `CMD_COMPILE` | `compile` | No | Compile production sources |
+| `CMD_INTEGRATION_TESTS` | `integration-tests` | No | Integration tests |
+| `CMD_COVERAGE` | `coverage` | No | Coverage measurement |
+| `CMD_INSTALL` | `install` | No | Install to local repository |
+| `CMD_PACKAGE` | `package` | No | Create deployable artifact |
+
+---
+
+## Minimal Extension Template
+
+```python
+#!/usr/bin/env python3
+"""Extension API for {bundle-name} bundle."""
+
+from pathlib import Path
+from extension_base import ExtensionBase
+
+
+class Extension(ExtensionBase):
+    """Extension for {bundle-name} bundle."""
+
+    def is_applicable(self, project_root: str) -> bool:
+        """Check if this bundle applies to the project."""
+        return (Path(project_root) / "indicator-file").exists()
+
+    def get_skill_domains(self) -> dict:
+        """Domain metadata for skill loading."""
+        return {
+            "domain": {
+                "key": "domain-key",
+                "name": "Domain Name",
+                "description": "Domain description"
+            },
+            "profiles": {
+                "core": {"defaults": [], "optionals": []},
+                "implementation": {"defaults": [], "optionals": []},
+                "testing": {"defaults": [], "optionals": []},
+                "quality": {"defaults": [], "optionals": []}
+            }
+        }
+```
 
 ---
 
@@ -164,11 +217,11 @@ Standard command names that extensions implement. See `standards/canonical-comma
 
 - **plan-marshall-config** - Uses `discover_all_extensions()` for domain configuration
 - **plugin-doctor** - Uses extension discovery for validation
-- **Domain bundles** - Implement `extension.py` per contract specification
+- **Domain bundles** - Implement `extension.py` inheriting from `ExtensionBase`
 
 ---
 
 ## References
 
-- `standards/extension-contract.md` - Complete function signatures and contracts
+- `standards/extension-contract.md` - Complete class specification and contracts
 - `standards/canonical-commands.md` - Canonical command vocabulary
