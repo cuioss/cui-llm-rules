@@ -89,7 +89,7 @@ def get_command_mappings() -> dict:
 **Example**:
 ```python
 def get_command_mappings() -> dict:
-    base = "python3 .plan/execute-script.py pm-dev-java:build-operations:maven run"
+    base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
     return {
         "maven": {
             "module-tests": f'{base} --targets "clean test"{{module}}',
@@ -214,9 +214,13 @@ def get_domain_supplements() -> dict:
 
 ## Optional Functions
 
-These functions enable workflow extensions. Return `None` if not provided.
+These functions enable workflow extensions and build system discovery.
 
-### provides_triage
+### Workflow Extensions
+
+Return `None` if not provided.
+
+#### provides_triage
 
 ```python
 def provides_triage() -> str | None:
@@ -232,7 +236,7 @@ def provides_triage() -> str | None:
     """
 ```
 
-### provides_outline
+#### provides_outline
 
 ```python
 def provides_outline() -> str | None:
@@ -246,6 +250,179 @@ def provides_outline() -> str | None:
         Outline skills guide solution design during the
         plan-init phase for domain-specific deliverables.
     """
+```
+
+### Build System Extensions
+
+These functions enable domain-specific build detection. Return empty list or "jar" defaults if not applicable.
+
+#### get_modules
+
+```python
+def get_modules(project_root: str) -> list:
+    """Return project modules detected by this build system.
+
+    Args:
+        project_root: Absolute path to project root.
+
+    Returns:
+        List of module dicts:
+        [
+            {
+                "name": str,           # Module name
+                "path": str,           # Relative path from project root
+                "build_system": str    # Build system (maven, gradle, npm)
+            }
+        ]
+
+    Examples:
+        - Maven: Parse pom.xml <modules> section
+        - Gradle: Parse settings.gradle include() statements
+        - npm: Parse package.json workspaces
+    """
+```
+
+**Example** (Maven):
+```python
+def get_modules(project_root: str) -> list:
+    import re
+    from pathlib import Path
+
+    modules = []
+    pom_path = Path(project_root) / "pom.xml"
+
+    if not pom_path.exists():
+        return modules
+
+    content = pom_path.read_text()
+    modules_match = re.search(r'<modules>(.*?)</modules>', content, re.DOTALL)
+    if modules_match:
+        for module in re.findall(r'<module>([^<]+)</module>', modules_match.group(1)):
+            if (Path(project_root) / module).exists():
+                modules.append({
+                    "name": module,
+                    "path": module,
+                    "build_system": "maven"
+                })
+
+    return modules
+```
+
+#### get_module_type
+
+```python
+def get_module_type(module_path: str) -> str:
+    """Return the module type for a given module path.
+
+    Args:
+        module_path: Absolute path to module directory.
+
+    Returns:
+        Module type string:
+        - "pom" - Parent/BOM module (Maven)
+        - "jar" - Library module (default)
+        - "war" - Web application
+        - "quarkus" - Quarkus application
+        - "npm" - npm project
+
+    Notes:
+        - Check packaging element in pom.xml
+        - Check for Quarkus plugin
+        - Default to "jar" if unknown
+    """
+```
+
+**Example** (Maven):
+```python
+def get_module_type(module_path: str) -> str:
+    import re
+    from pathlib import Path
+
+    pom_path = Path(module_path) / "pom.xml"
+    if not pom_path.exists():
+        return "jar"
+
+    content = pom_path.read_text()
+
+    # Check packaging
+    match = re.search(r'<packaging>([^<]+)</packaging>', content)
+    if match:
+        packaging = match.group(1).strip().lower()
+        if packaging in ("pom", "war"):
+            return packaging
+
+    # Check for Quarkus
+    if "quarkus-maven-plugin" in content:
+        return "quarkus"
+
+    return "jar"
+```
+
+#### get_profiles
+
+```python
+def get_profiles(module_path: str) -> list:
+    """Return build profiles for a module.
+
+    Args:
+        module_path: Absolute path to module directory.
+
+    Returns:
+        List of profile dicts:
+        [
+            {
+                "id": str,                    # Profile ID
+                "canonical": str | None,      # Canonical command name or None
+                "activation": {
+                    "type": str,              # command-line, property, jdk, os, default
+                    "property": str | None,   # Property name (if type=property)
+                    "value": str | None       # Property value (if type=property)
+                }
+            }
+        ]
+
+    Canonical Mappings:
+        - integration-tests, it, e2e → "integration-tests"
+        - coverage, jacoco → "coverage"
+        - pre-commit, quality, sonar → "quality-gate"
+        - benchmark, jmh, perf → "performance"
+    """
+```
+
+**Example** (Maven):
+```python
+def get_profiles(module_path: str) -> list:
+    import re
+    from pathlib import Path
+
+    PROFILE_TO_CANONICAL = {
+        "integration-tests": "integration-tests",
+        "coverage": "coverage",
+        "jacoco": "coverage",
+        "pre-commit": "quality-gate",
+        "benchmark": "performance",
+    }
+
+    profiles = []
+    pom_path = Path(module_path) / "pom.xml"
+
+    if not pom_path.exists():
+        return profiles
+
+    content = pom_path.read_text()
+    for profile_id in re.findall(r'<profile>\s*<id>([^<]+)</id>', content):
+        canonical = None
+        for pattern, name in PROFILE_TO_CANONICAL.items():
+            if pattern in profile_id.lower():
+                canonical = name
+                break
+        profiles.append({
+            "id": profile_id.strip(),
+            "canonical": canonical,
+            "activation": {"type": "command-line"}
+        })
+
+    return profiles
 ```
 
 ---

@@ -2,7 +2,7 @@
 """Extension validation subcommand.
 
 Validates extension.py files in plan-marshall-plugin skills.
-Checks contract compliance and build-operations consistency.
+Checks contract compliance and extension API consistency.
 
 Output: JSON to stdout.
 """
@@ -194,11 +194,11 @@ def validate_bundle_consistency(bundle_path: Path) -> dict:
         })
         return result
 
-    # Check if bundle provides build systems, it should have build-operations skill
+    # Check if bundle provides build systems, it should have plan-marshall-plugin skill
     if 'provides_build_systems' in functions:
         # We can't easily determine what the function returns without executing it
-        # So just check if build-operations skill exists
-        build_ops_path = bundle_path / 'skills' / 'build-operations'
+        # So just check if plan-marshall-plugin skill exists
+        build_ops_path = bundle_path / 'skills' / 'plan-marshall-plugin'
 
         # Only check for bundles that might have build systems
         # (pm-dev-java, pm-dev-frontend, etc.)
@@ -207,7 +207,7 @@ def validate_bundle_consistency(bundle_path: Path) -> dict:
                 result['issues'].append({
                     'type': 'missing_build_operations',
                     'severity': 'warning',
-                    'message': f"Bundle {bundle_path.name} may provide build systems but lacks build-operations skill"
+                    'message': f"Bundle {bundle_path.name} may provide build systems but lacks plan-marshall-plugin skill"
                 })
 
     return result

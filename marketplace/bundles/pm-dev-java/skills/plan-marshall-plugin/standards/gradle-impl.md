@@ -231,4 +231,4 @@ export CI=true
 | `search-markers` | Search for OpenRewrite TODO markers |
 | `check-warnings` | Categorize build warnings against acceptable patterns |
 
-**Notation**: `plan-marshall:build-operations:gradle`
+**Notation**: `pm-dev-java:plan-marshall-plugin:gradle`

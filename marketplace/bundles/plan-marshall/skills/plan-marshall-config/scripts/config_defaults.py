@@ -53,13 +53,13 @@ DEFAULT_PLAN_DEFAULTS = {
 # Build system defaults (detection reference only - commands are in modules)
 BUILD_SYSTEM_DEFAULTS = {
     "maven": {
-        "skill": "plan-marshall:build-operations"
+        "skill": "pm-dev-java:plan-marshall-plugin"
     },
     "gradle": {
-        "skill": "plan-marshall:build-operations"
+        "skill": "pm-dev-java:plan-marshall-plugin"
     },
     "npm": {
-        "skill": "plan-marshall:build-operations"
+        "skill": "pm-dev-java:plan-marshall-plugin"
     }
 }
 

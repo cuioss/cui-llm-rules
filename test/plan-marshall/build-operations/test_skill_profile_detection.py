@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
-SCRIPT_PATH = get_script_path('plan-marshall', 'build-operations', 'build_env.py')
+SCRIPT_PATH = get_script_path('plan-marshall', 'extension-api', 'build_env.py')
 
 
 # =============================================================================

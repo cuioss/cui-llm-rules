@@ -12,8 +12,6 @@ Extension API functions:
 """
 
 import copy
-import importlib.util
-import os
 import sys
 from pathlib import Path
 
@@ -34,112 +32,13 @@ from config_defaults import (
 )
 from config_detection import detect_domains
 
-
-def get_plugin_cache_path() -> Path:
-    """Get the plugin cache path."""
-    env_path = os.environ.get("PLUGIN_CACHE_PATH")
-    if env_path:
-        return Path(env_path)
-    return Path.home() / ".claude" / "plugins" / "cache" / "plan-marshall"
-
-
-def get_marketplace_bundles_path() -> Path:
-    """Get the path to marketplace bundles directory.
-
-    Searches for marketplace bundles in:
-    1. Source: marketplace/bundles relative to script (development)
-    2. Cache: ~/.claude/plugins/cache/plan-marshall (installed)
-
-    Returns:
-        Path to bundles directory
-    """
-    script_path = Path(__file__).resolve()
-
-    # Try to find marketplace/bundles by walking up from script location
-    current = script_path.parent
-    for _ in range(10):  # Safety limit
-        candidate = current / "bundles"
-        if candidate.is_dir() and (candidate / "plan-marshall").is_dir():
-            return candidate
-        if current.name == "bundles" and (current / "plan-marshall").is_dir():
-            return current
-        current = current.parent
-        if current == current.parent:
-            break
-
-    # Fallback: check plugin cache
-    cache_path = get_plugin_cache_path()
-    if cache_path.is_dir():
-        return cache_path
-
-    return script_path.parent.parent.parent.parent.parent / "bundles"
-
-
-def load_extension_module(extension_path: Path, bundle_name: str):
-    """Load an extension.py module dynamically.
-
-    Args:
-        extension_path: Path to extension.py file
-        bundle_name: Name of the bundle for module naming
-
-    Returns:
-        Loaded module or None if failed
-    """
-    try:
-        spec = importlib.util.spec_from_file_location(
-            f"extension_{bundle_name}",
-            extension_path
-        )
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        return module
-    except Exception as e:
-        print(f"Warning: Failed to load extension from {bundle_name}: {e}", file=sys.stderr)
-        return None
-
-
-def discover_all_extensions() -> list:
-    """Discover all extension.py files in bundles.
-
-    Scans all bundles for extension.py files in skills/plan-marshall-plugin/
-
-    Returns:
-        List of dicts with extension info: {bundle, path, module}
-    """
-    extensions = []
-    bundles_path = get_marketplace_bundles_path()
-
-    if not bundles_path.is_dir():
-        return extensions
-
-    for bundle_dir in bundles_path.iterdir():
-        if not bundle_dir.is_dir() or bundle_dir.name.startswith('.'):
-            continue
-
-        # Try direct path first (source structure)
-        extension_path = bundle_dir / "skills" / "plan-marshall-plugin" / "extension.py"
-
-        # Try versioned path (cache structure from rsync)
-        if not extension_path.exists():
-            for version_dir in bundle_dir.iterdir():
-                if version_dir.is_dir() and not version_dir.name.startswith('.'):
-                    versioned_path = version_dir / "skills" / "plan-marshall-plugin" / "extension.py"
-                    if versioned_path.exists():
-                        extension_path = versioned_path
-                        break
-
-        if not extension_path.exists():
-            continue
-
-        module = load_extension_module(extension_path, bundle_dir.name)
-        if module:
-            extensions.append({
-                "bundle": bundle_dir.name,
-                "path": str(extension_path),
-                "module": module
-            })
-
-    return extensions
+# Import from shared extension-api
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "extension-api" / "scripts"))
+from extension import (
+    discover_all_extensions,
+    get_skill_domains_from_extensions,
+    get_domain_supplements_from_extensions,
+)
 
 
 def discover_available_domains() -> dict:

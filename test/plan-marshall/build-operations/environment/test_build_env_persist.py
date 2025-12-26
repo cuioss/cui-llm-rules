@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
-SCRIPT_PATH = get_script_path('plan-marshall', 'build-operations', 'build_env.py')
+SCRIPT_PATH = get_script_path('plan-marshall', 'extension-api', 'build_env.py')
 
 
 # =============================================================================
@@ -317,7 +317,7 @@ def test_persist_updates_build_systems():
         assert len(config['build_systems']) > 0, "Should have at least one build system"
         assert config['build_systems'][0]['system'] == 'maven', "Should be maven"
         # Build operations now in domain bundles (pm-dev-java for Maven)
-        assert config['build_systems'][0]['skill'] == 'pm-dev-java:build-operations', "Should reference domain build-operations skill"
+        assert config['build_systems'][0]['skill'] == 'pm-dev-java:plan-marshall-plugin', "Should reference domain plan-marshall-plugin skill"
 
 
 def test_persist_preserves_existing_config():

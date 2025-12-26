@@ -98,8 +98,8 @@ JSON structure and field definitions for project configuration.
         {"id": "pre-commit", "canonical": "quality-gate", "activation": {"type": "command-line"}}
       ],
       "commands": {
-        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\"",
-        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean install\""
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\"",
+        "install": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean install\""
       }
     },
     "my-module": {
@@ -108,9 +108,9 @@ JSON structure and field definitions for project configuration.
       "domains": ["java-core", "java-implementation"],
       "build_systems": ["maven"],
       "commands": {
-        "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-module",
-        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module my-module",
-        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-module",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\" --module my-module",
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
       }
     },
     "my-hybrid-ui": {
@@ -120,12 +120,12 @@ JSON structure and field definitions for project configuration.
       "build_systems": ["maven", "npm"],
       "commands": {
         "module-tests": {
-          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-hybrid-ui",
-          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\" --module my-hybrid-ui"
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run test\" --module my-hybrid-ui"
         },
         "quality-gate": {
-          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
-          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
         }
       }
     }
@@ -133,15 +133,15 @@ JSON structure and field definitions for project configuration.
   "build_systems": [
     {
       "system": "maven",
-      "skill": "plan-marshall:build-operations"
+      "skill": "pm-dev-java:plan-marshall-plugin"
     },
     {
       "system": "gradle",
-      "skill": "plan-marshall:build-operations"
+      "skill": "pm-dev-java:plan-marshall-plugin"
     },
     {
       "system": "npm",
-      "skill": "plan-marshall:build-operations"
+      "skill": "pm-dev-java:plan-marshall-plugin"
     }
   ],
   "system": {
@@ -269,7 +269,7 @@ Project module configuration with type, domain, build system, and canonical comm
         {"id": "profile-id", "canonical": "canonical-name", "activation": {"type": "command-line|property"}}
       ],
       "commands": {
-        "{canonical-name}": "python3 .plan/execute-script.py plan-marshall:build-operations:{system} execute --goals \"{goals}\""
+        "{canonical-name}": "python3 .plan/execute-script.py {domain}:plan-marshall-plugin:{system} run --targets \"{goals}\""
       }
     }
   }
@@ -291,11 +291,11 @@ Project module configuration with type, domain, build system, and canonical comm
         {"id": "coverage", "canonical": "coverage", "activation": {"type": "command-line"}}
       ],
       "commands": {
-        "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-module",
-        "integration-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Pintegration-tests\" --module my-module",
-        "coverage": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Pcoverage\" --module my-module",
-        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module my-module",
-        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-module",
+        "integration-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Pintegration-tests\" --module my-module",
+        "coverage": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Pcoverage\" --module my-module",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\" --module my-module",
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-module"
       }
     }
   }
@@ -316,12 +316,12 @@ For modules with multiple build systems, commands use nested format:
       "build_systems": ["maven", "npm"],
       "commands": {
         "module-tests": {
-          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module my-hybrid-ui",
-          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\" --module my-hybrid-ui"
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run test\" --module my-hybrid-ui"
         },
         "quality-gate": {
-          "maven": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
-          "npm": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
+          "maven": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify -Ppre-commit\" --module my-hybrid-ui",
+          "npm": "python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command \"run lint && npm run format:check\" --module my-hybrid-ui"
         }
       }
     }
@@ -382,11 +382,11 @@ Use the build_env script for programmatic command lookup:
 
 ```bash
 # Single build system module
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env lookup \
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env lookup \
   --canonical "module-tests" --module "my-module"
 
 # Hybrid module with build system filter
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env lookup \
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env lookup \
   --canonical "module-tests" --module "my-hybrid-ui" --build-system "npm"
 ```
 
@@ -409,7 +409,7 @@ Build system detection and skill reference. Used by wizard for initial setup.
   "build_systems": [
     {
       "system": "maven",
-      "skill": "plan-marshall:build-operations"
+      "skill": "pm-dev-java:plan-marshall-plugin"
     }
   ]
 }
@@ -434,9 +434,9 @@ Command execution uses `modules.{name}.commands.{label}` directly - no runtime r
 
 | System | Skill | Detection Files |
 |--------|-------|-----------------|
-| `maven` | `plan-marshall:build-operations` | `pom.xml` |
-| `gradle` | `plan-marshall:build-operations` | `build.gradle`, `build.gradle.kts` |
-| `npm` | `plan-marshall:build-operations` | `package.json` |
+| `maven` | `pm-dev-java:plan-marshall-plugin` | `pom.xml` |
+| `gradle` | `pm-dev-java:plan-marshall-plugin` | `build.gradle`, `build.gradle.kts` |
+| `npm` | `pm-dev-frontend:plan-marshall-plugin` | `package.json` |
 
 ## Section: system
 

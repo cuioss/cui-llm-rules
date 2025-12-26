@@ -218,7 +218,7 @@ All other marker types require user confirmation before suppression.
 | `search-markers` | Search for OpenRewrite TODO markers |
 | `check-warnings` | Categorize build warnings against acceptable patterns |
 
-**Notation**: `plan-marshall:build-operations:maven`
+**Notation**: `pm-dev-java:plan-marshall-plugin:maven`
 
 ---
 

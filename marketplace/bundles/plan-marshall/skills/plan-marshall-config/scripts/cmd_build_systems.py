@@ -73,7 +73,7 @@ def cmd_build_systems(args) -> int:
         else:
             new_system = {
                 "system": system,
-                "skill": "plan-marshall:build-operations"
+                "skill": "pm-dev-java:plan-marshall-plugin"
             }
 
         build_systems.append(new_system)

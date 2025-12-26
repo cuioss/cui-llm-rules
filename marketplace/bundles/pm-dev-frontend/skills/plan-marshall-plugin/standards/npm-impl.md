@@ -166,7 +166,7 @@ Commands execute from project root by default.
 For projects with nested frontend directories:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:npm execute \
+python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute \
     --command "run test" \
     --working-dir frontend/
 ```
@@ -212,7 +212,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e
 
 ## Script Reference
 
-**Notation**: `plan-marshall:build-operations:npm`
+**Notation**: `pm-dev-frontend:plan-marshall-plugin:npm`
 
 | Subcommand | Description |
 |------------|-------------|

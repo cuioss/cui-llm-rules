@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Environment setup, permission management, and cross-cutting utilities",
   "skills": [
-    "./skills/build-operations",
     "./skills/ci-operations",
     "./skills/diagnostic-patterns",
     "./skills/extension-api",

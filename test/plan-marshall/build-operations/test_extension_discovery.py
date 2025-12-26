@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test
-SCRIPT_PATH = get_script_path('plan-marshall', 'build-operations', 'build_env.py')
+SCRIPT_PATH = get_script_path('plan-marshall', 'extension-api', 'build_env.py')
 
 
 # =============================================================================
@@ -66,7 +66,7 @@ def test_discovers_java_extension():
         # Should have maven commands from pm-dev-java extension
         commands = config['modules']['default']['commands']
         assert 'module-tests' in commands, "Should have module-tests command"
-        assert 'pm-dev-java:build-operations:maven' in commands['module-tests'], \
+        assert 'pm-dev-java:plan-marshall-plugin:maven' in commands['module-tests'], \
             f"Should use pm-dev-java script: {commands['module-tests']}"
 
 
@@ -90,7 +90,7 @@ def test_discovers_frontend_extension():
         # Should have npm commands from pm-dev-frontend extension
         commands = config['modules']['default']['commands']
         assert 'module-tests' in commands, "Should have module-tests command"
-        assert 'pm-dev-frontend:build-operations:npm' in commands['module-tests'], \
+        assert 'pm-dev-frontend:plan-marshall-plugin:npm' in commands['module-tests'], \
             f"Should use pm-dev-frontend script: {commands['module-tests']}"
 
 
@@ -114,7 +114,7 @@ def test_discovers_gradle_extension():
         # Should have gradle commands from pm-dev-java extension
         commands = config['modules']['default']['commands']
         assert 'module-tests' in commands, "Should have module-tests command"
-        assert 'pm-dev-java:build-operations:gradle' in commands['module-tests'], \
+        assert 'pm-dev-java:plan-marshall-plugin:gradle' in commands['module-tests'], \
             f"Should use pm-dev-java gradle script: {commands['module-tests']}"
 
 

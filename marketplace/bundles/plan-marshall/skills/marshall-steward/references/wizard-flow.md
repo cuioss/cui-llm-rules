@@ -155,7 +155,7 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 First, detect what's available without persisting:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-modules
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env detect-modules
 ```
 
 **Output (TOON)**:
@@ -172,7 +172,7 @@ oauth-sheriff-ui	oauth-sheriff-ui	npm	npm
 Then detect profiles for modules with build systems that support them:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-profiles
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env detect-profiles
 ```
 
 **Output (TOON)**:
@@ -293,13 +293,13 @@ Based on user selection, generate and persist commands:
 
 ```bash
 # Auto-detect mode (with optional profile filter)
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
 
 # Minimal mode
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist --minimal
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist --minimal
 
 # With specific profiles selected (from Tier 2)
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist \
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist \
   --include-profiles "oauth-sheriff-core:integration-tests,oauth-sheriff-core:coverage"
 ```
 

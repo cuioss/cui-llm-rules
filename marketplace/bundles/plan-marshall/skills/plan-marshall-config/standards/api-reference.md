@@ -405,7 +405,7 @@ plan-marshall-config modules get-command \
 status: success
 module: my-ui
 label: test
-command: python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "run test"
+command: python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command "run test"
 source: module
 ```
 
@@ -414,7 +414,7 @@ source: module
 status: success
 module: my-core
 label: verify
-command: python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals "clean verify"
+command: python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals "clean verify"
 source: default
 ```
 
@@ -426,7 +426,7 @@ Set a build command for a module.
 plan-marshall-config modules set-command \
   --module my-ui \
   --label verify \
-  --command 'python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "run lint && run test"'
+  --command 'python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command "run lint && run test"'
 ```
 
 **Output:**
@@ -434,7 +434,7 @@ plan-marshall-config modules set-command \
 status: success
 module: my-ui
 label: verify
-command: python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command "run lint && run test"
+command: python3 .plan/execute-script.py pm-dev-frontend:plan-marshall-plugin:npm execute --command "run lint && run test"
 ```
 
 ### add
@@ -505,9 +505,9 @@ plan-marshall-config build-systems list
 status: success
 build_systems[2]:
 - system: maven
-  skill: plan-marshall:build-operations
+  skill: pm-dev-java:plan-marshall-plugin
 - system: npm
-  skill: plan-marshall:build-operations
+  skill: pm-dev-java:plan-marshall-plugin
 ```
 
 ### get
@@ -522,7 +522,7 @@ plan-marshall-config build-systems get --system maven
 ```toon
 status: success
 system: maven
-skill: plan-marshall:build-operations
+skill: pm-dev-java:plan-marshall-plugin
 ```
 
 ### add

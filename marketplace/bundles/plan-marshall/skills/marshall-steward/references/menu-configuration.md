@@ -265,7 +265,7 @@ AskUserQuestion:
 Show current commands for the module:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env get-available-commands \
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env get-available-commands \
   --module "{module}"
 ```
 
@@ -283,7 +283,7 @@ Commands for module '{module}' ({type}):
 First, detect available profiles not yet configured:
 
 ```bash
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env detect-profiles \
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env detect-profiles \
   --module "{module}"
 ```
 
@@ -305,7 +305,7 @@ Add selected profiles:
 
 ```bash
 # Re-run persist with include-profiles to add specific profiles
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist \
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist \
   --include-profiles "{module}:{profile-id},{module}:{profile-id}"
 ```
 
@@ -355,10 +355,10 @@ Execute reset:
 
 ```bash
 # Auto-detect mode
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
 
 # Minimal mode
-python3 .plan/execute-script.py plan-marshall:build-operations:build_env persist --minimal
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist --minimal
 ```
 
 ---
