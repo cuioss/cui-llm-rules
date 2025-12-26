@@ -352,6 +352,11 @@ class Extension(ExtensionBase):
         return "jar"
 
     def _detect_gradle_profiles(self, _settings_path: Path) -> list:
-        """Detect Gradle profiles from settings.gradle."""
-        # Gradle doesn't have Maven-style profiles
+        """Detect Gradle profiles from settings.gradle.
+
+        Returns empty list because Gradle uses a different model than Maven profiles.
+        Gradle equivalents (custom tasks, build variants) are handled through
+        get_command_mappings() which provides the standard canonical commands.
+        Profile-based command generation is Maven-specific.
+        """
         return []

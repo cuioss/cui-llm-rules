@@ -452,13 +452,28 @@ Validation checks:
 
 ---
 
+## Additive Bundles
+
+Some domain bundles are **additive** - they extend a base domain bundle rather than standing alone. Additive bundles:
+
+- Apply **in addition to** a base bundle (both `is_applicable()` return true)
+- Do **not** provide their own triage - they rely on the base bundle's triage skill
+- Add specialized skills for a subset of projects within the base domain
+
+**Example**: `pm-dev-java-cui` is additive to `pm-dev-java`:
+- Applies when pom.xml contains CUI dependencies
+- Provides CUI-specific logging/testing skills
+- Relies on `pm-dev-java:java-triage` for triage (no `provides_triage()` override)
+
+---
+
 ## Existing Extensions
 
-| Bundle | Domain Key | Build Systems | Triage | Outline |
-|--------|------------|---------------|--------|---------|
-| pm-dev-java | java | maven, gradle | java-triage | - |
-| pm-dev-java-cui | java-cui | - | - | - |
-| pm-dev-frontend | javascript | npm | javascript-triage | - |
-| pm-documents | documentation | - | - | - |
-| pm-requirements | requirements | - | - | - |
-| pm-plugin-development | plan-marshall-plugin-dev | - | plugin-triage | - |
+| Bundle | Domain Key | Build Systems | Triage | Outline | Notes |
+|--------|------------|---------------|--------|---------|-------|
+| pm-dev-java | java | maven, gradle | java-triage | - | Base Java bundle |
+| pm-dev-java-cui | java-cui | - | - | - | Additive to pm-dev-java |
+| pm-dev-frontend | javascript | npm | javascript-triage | - | |
+| pm-documents | documentation | - | documentation-triage | - | |
+| pm-requirements | requirements | - | requirements-triage | - | |
+| pm-plugin-development | plan-marshall-plugin-dev | - | plugin-triage | plugin-solution-outline | |

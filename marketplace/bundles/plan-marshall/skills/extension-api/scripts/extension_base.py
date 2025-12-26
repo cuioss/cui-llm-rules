@@ -371,23 +371,3 @@ class ExtensionBase(ABC):
             plan-init phase for domain-specific deliverables.
         """
         return None
-
-
-# =============================================================================
-# Singleton Instance Helper
-# =============================================================================
-
-def create_extension(extension_class: type) -> 'ExtensionBase':
-    """Create and return a singleton extension instance.
-
-    Usage in extension.py:
-        class Extension(ExtensionBase):
-            ...
-
-        _instance = create_extension(Extension)
-
-        # Module-level function wrappers for backward compatibility
-        def is_applicable(project_root: str) -> bool:
-            return _instance.is_applicable(project_root)
-    """
-    return extension_class()

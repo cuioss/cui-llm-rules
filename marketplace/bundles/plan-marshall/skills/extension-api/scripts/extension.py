@@ -101,8 +101,8 @@ def load_extension_module(extension_path: Path, bundle_name: str):
         if hasattr(module, 'Extension'):
             return module.Extension()
 
-        # Fallback: return module for legacy extensions
-        return module
+        print(f"Warning: No Extension class found in {bundle_name}", file=sys.stderr)
+        return None
     except Exception as e:
         print(f"Warning: Failed to load extension from {bundle_name}: {e}", file=sys.stderr)
         return None
