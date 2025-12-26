@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from conftest import run_script, TestRunner, get_script_path
 
 # Script under test - pm-dev-frontend bundle
-SCRIPT_PATH = get_script_path('pm-dev-frontend', 'build-operations', 'npm.py')
+SCRIPT_PATH = get_script_path('pm-dev-frontend', 'plan-marshall-plugin', 'npm.py')
 FIXTURES_DIR = Path(__file__).parent / 'fixtures'
 
 

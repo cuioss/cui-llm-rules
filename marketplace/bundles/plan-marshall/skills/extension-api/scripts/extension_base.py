@@ -21,6 +21,71 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 
+# =============================================================================
+# Canonical Command Constants
+# =============================================================================
+
+CMD_COMPILE = "compile"
+CMD_TEST_COMPILE = "test-compile"
+CMD_MODULE_TESTS = "module-tests"
+CMD_INTEGRATION_TESTS = "integration-tests"
+CMD_COVERAGE = "coverage"
+CMD_PERFORMANCE = "performance"
+CMD_QUALITY_GATE = "quality-gate"
+CMD_VERIFY = "verify"
+CMD_INSTALL = "install"
+CMD_PACKAGE = "package"
+
+ALL_CANONICAL_COMMANDS = [
+    CMD_COMPILE,
+    CMD_TEST_COMPILE,
+    CMD_MODULE_TESTS,
+    CMD_INTEGRATION_TESTS,
+    CMD_COVERAGE,
+    CMD_PERFORMANCE,
+    CMD_QUALITY_GATE,
+    CMD_VERIFY,
+    CMD_INSTALL,
+    CMD_PACKAGE,
+]
+
+
+# =============================================================================
+# Profile Classification Patterns
+# =============================================================================
+
+PROFILE_PATTERNS = {
+    # Integration test patterns -> CMD_INTEGRATION_TESTS
+    "integration-tests": CMD_INTEGRATION_TESTS,
+    "integration-test": CMD_INTEGRATION_TESTS,
+    "integrationTest": CMD_INTEGRATION_TESTS,
+    "it": CMD_INTEGRATION_TESTS,
+    "e2e": CMD_INTEGRATION_TESTS,
+    "acceptance": CMD_INTEGRATION_TESTS,
+
+    # Coverage patterns -> CMD_COVERAGE
+    "coverage": CMD_COVERAGE,
+    "jacoco": CMD_COVERAGE,
+
+    # Quality patterns -> CMD_QUALITY_GATE
+    "sonar": CMD_QUALITY_GATE,
+    "pre-commit": CMD_QUALITY_GATE,
+    "precommit": CMD_QUALITY_GATE,
+    "lint": CMD_QUALITY_GATE,
+    "check": CMD_QUALITY_GATE,
+    "quality": CMD_QUALITY_GATE,
+
+    # Performance patterns -> CMD_PERFORMANCE
+    "benchmark": CMD_PERFORMANCE,
+    "benchmarks": CMD_PERFORMANCE,
+    "jmh": CMD_PERFORMANCE,
+    "perf": CMD_PERFORMANCE,
+    "performance": CMD_PERFORMANCE,
+    "stress": CMD_PERFORMANCE,
+    "load": CMD_PERFORMANCE,
+}
+
+
 class ExtensionBase(ABC):
     """Abstract base class for domain bundle extensions.
 
@@ -154,13 +219,14 @@ class ExtensionBase(ABC):
 
         Returns:
             Module type string:
+            - "unknown" - Default for non-build bundles
             - "pom" - Parent/BOM module (Maven)
-            - "jar" - Library module (default)
+            - "jar" - Library module (Java)
             - "war" - Web application
             - "quarkus" - Quarkus application
             - "npm" - npm project
         """
-        return "jar"
+        return "unknown"
 
     def get_profiles(self, module_path: str) -> list:
         """Return build profiles for a module.
@@ -176,13 +242,42 @@ class ExtensionBase(ABC):
                 "activation": {"type": str, ...}
             }]
 
-        Canonical Mappings:
-            - integration-tests, it, e2e -> "integration-tests"
-            - coverage, jacoco -> "coverage"
-            - pre-commit, quality, sonar -> "quality-gate"
-            - benchmark, jmh, perf -> "performance"
+        Notes:
+            Use classify_profile() helper to map profile IDs to canonical names.
+            See PROFILE_PATTERNS for the mapping vocabulary.
         """
         return []
+
+    def classify_profile(self, profile_id: str) -> str | None:
+        """Classify a profile ID to its canonical command name.
+
+        Args:
+            profile_id: The profile identifier (e.g., "integration-tests", "jacoco")
+
+        Returns:
+            Canonical command name (e.g., CMD_INTEGRATION_TESTS) or None if not recognized.
+
+        Notes:
+            Uses PROFILE_PATTERNS vocabulary for classification.
+            Matching is case-insensitive and supports partial matches.
+        """
+        profile_lower = profile_id.lower()
+
+        # Exact match first
+        if profile_id in PROFILE_PATTERNS:
+            return PROFILE_PATTERNS[profile_id]
+
+        # Case-insensitive exact match
+        for pattern, canonical in PROFILE_PATTERNS.items():
+            if pattern.lower() == profile_lower:
+                return canonical
+
+        # Substring match (e.g., "my-integration-tests" matches "integration-tests")
+        for pattern, canonical in PROFILE_PATTERNS.items():
+            if pattern.lower() in profile_lower:
+                return canonical
+
+        return None
 
     def generate_profile_command(
         self,

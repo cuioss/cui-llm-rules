@@ -8,7 +8,18 @@ for Maven and Gradle projects.
 import re
 from pathlib import Path
 
-from extension_base import ExtensionBase
+from extension_base import (
+    ExtensionBase,
+    CMD_COMPILE,
+    CMD_TEST_COMPILE,
+    CMD_MODULE_TESTS,
+    CMD_INTEGRATION_TESTS,
+    CMD_COVERAGE,
+    CMD_QUALITY_GATE,
+    CMD_VERIFY,
+    CMD_INSTALL,
+    CMD_PACKAGE,
+)
 
 
 # Build file constants
@@ -17,38 +28,6 @@ BUILD_GRADLE = "build.gradle"
 BUILD_GRADLE_KTS = "build.gradle.kts"
 SETTINGS_GRADLE = "settings.gradle"
 SETTINGS_GRADLE_KTS = "settings.gradle.kts"
-
-# Profile pattern to canonical name mapping
-PROFILE_TO_CANONICAL = {
-    # Integration test patterns -> "integration-tests"
-    "integration-tests": "integration-tests",
-    "integration-test": "integration-tests",
-    "integrationTest": "integration-tests",
-    "it": "integration-tests",
-    "e2e": "integration-tests",
-    "acceptance": "integration-tests",
-
-    # Coverage patterns -> "coverage"
-    "coverage": "coverage",
-    "jacoco": "coverage",
-
-    # Quality patterns -> "quality-gate"
-    "sonar": "quality-gate",
-    "pre-commit": "quality-gate",
-    "precommit": "quality-gate",
-    "lint": "quality-gate",
-    "check": "quality-gate",
-    "quality": "quality-gate",
-
-    # Performance patterns -> "performance"
-    "benchmark": "performance",
-    "benchmarks": "performance",
-    "jmh": "performance",
-    "perf": "performance",
-    "performance": "performance",
-    "stress": "performance",
-    "load": "performance",
-}
 
 
 class Extension(ExtensionBase):
@@ -89,26 +68,26 @@ class Extension(ExtensionBase):
 
         return {
             "maven": {
-                "compile": f'{base_maven} --targets "compile"{{module}}',
-                "test-compile": f'{base_maven} --targets "test-compile"{{module}}',
-                "module-tests": f'{base_maven} --targets "clean test"{{module}}',
-                "integration-tests": f'{base_maven} --targets "clean verify -Pintegration-tests"{{module}}',
-                "coverage": f'{base_maven} --targets "clean verify -Pcoverage"{{module}}',
-                "quality-gate": f'{base_maven} --targets "clean verify -Ppre-commit"{{module}}',
-                "verify": f'{base_maven} --targets "clean verify"{{module}}',
-                "install": f'{base_maven} --targets "clean install"{{module}}',
-                "package": f'{base_maven} --targets "package"{{module}}',
+                CMD_COMPILE: f'{base_maven} --targets "compile"{{module}}',
+                CMD_TEST_COMPILE: f'{base_maven} --targets "test-compile"{{module}}',
+                CMD_MODULE_TESTS: f'{base_maven} --targets "clean test"{{module}}',
+                CMD_INTEGRATION_TESTS: f'{base_maven} --targets "clean verify -Pintegration-tests"{{module}}',
+                CMD_COVERAGE: f'{base_maven} --targets "clean verify -Pcoverage"{{module}}',
+                CMD_QUALITY_GATE: f'{base_maven} --targets "clean verify -Ppre-commit"{{module}}',
+                CMD_VERIFY: f'{base_maven} --targets "clean verify"{{module}}',
+                CMD_INSTALL: f'{base_maven} --targets "clean install"{{module}}',
+                CMD_PACKAGE: f'{base_maven} --targets "package"{{module}}',
             },
             "gradle": {
-                "compile": f'{base_gradle} --targets "compileJava"{{module}}',
-                "test-compile": f'{base_gradle} --targets "testClasses"{{module}}',
-                "module-tests": f'{base_gradle} --targets "clean test"{{module}}',
-                "integration-tests": f'{base_gradle} --targets "clean integrationTest"{{module}}',
-                "coverage": f'{base_gradle} --targets "clean test jacocoTestReport"{{module}}',
-                "quality-gate": f'{base_gradle} --targets "clean check"{{module}}',
-                "verify": f'{base_gradle} --targets "clean build"{{module}}',
-                "install": f'{base_gradle} --targets "clean publishToMavenLocal"{{module}}',
-                "package": f'{base_gradle} --targets "clean assemble"{{module}}',
+                CMD_COMPILE: f'{base_gradle} --targets "compileJava"{{module}}',
+                CMD_TEST_COMPILE: f'{base_gradle} --targets "testClasses"{{module}}',
+                CMD_MODULE_TESTS: f'{base_gradle} --targets "clean test"{{module}}',
+                CMD_INTEGRATION_TESTS: f'{base_gradle} --targets "clean integrationTest"{{module}}',
+                CMD_COVERAGE: f'{base_gradle} --targets "clean test jacocoTestReport"{{module}}',
+                CMD_QUALITY_GATE: f'{base_gradle} --targets "clean check"{{module}}',
+                CMD_VERIFY: f'{base_gradle} --targets "clean build"{{module}}',
+                CMD_INSTALL: f'{base_gradle} --targets "clean publishToMavenLocal"{{module}}',
+                CMD_PACKAGE: f'{base_gradle} --targets "clean assemble"{{module}}',
             }
         }
 
@@ -280,7 +259,7 @@ class Extension(ExtensionBase):
 
         for profile_id in matches:
             profile_id = profile_id.strip()
-            canonical = self._classify_profile(profile_id)
+            canonical = self.classify_profile(profile_id)  # Use inherited helper
             activation = self._detect_profile_activation(content, profile_id)
 
             profiles.append({
@@ -290,23 +269,6 @@ class Extension(ExtensionBase):
             })
 
         return profiles
-
-    def _classify_profile(self, profile_id: str) -> str | None:
-        """Classify a profile ID to its canonical name."""
-        profile_lower = profile_id.lower()
-
-        if profile_id in PROFILE_TO_CANONICAL:
-            return PROFILE_TO_CANONICAL[profile_id]
-
-        for pattern, canonical in PROFILE_TO_CANONICAL.items():
-            if pattern.lower() == profile_lower:
-                return canonical
-
-        for pattern, canonical in PROFILE_TO_CANONICAL.items():
-            if pattern.lower() in profile_lower:
-                return canonical
-
-        return None
 
     def _detect_profile_activation(self, pom_content: str, profile_id: str) -> dict:
         """Detect how a Maven profile is activated."""

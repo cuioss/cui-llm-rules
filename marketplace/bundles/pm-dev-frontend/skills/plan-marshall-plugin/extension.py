@@ -8,7 +8,16 @@ for npm/JavaScript projects.
 import json
 from pathlib import Path
 
-from extension_base import ExtensionBase
+from extension_base import (
+    ExtensionBase,
+    CMD_COMPILE,
+    CMD_TEST_COMPILE,
+    CMD_MODULE_TESTS,
+    CMD_QUALITY_GATE,
+    CMD_VERIFY,
+    CMD_INSTALL,
+    CMD_PACKAGE,
+)
 
 
 # Build file constant
@@ -40,15 +49,15 @@ class Extension(ExtensionBase):
 
         return {
             "npm": {
-                "compile": f'{base_npm} --targets "run build"{{module}}',
-                "test-compile": f'{base_npm} --targets "run build"{{module}}',
-                "module-tests": f'{base_npm} --targets "run test"{{module}}',
+                CMD_COMPILE: f'{base_npm} --targets "run build"{{module}}',
+                CMD_TEST_COMPILE: f'{base_npm} --targets "run build"{{module}}',
+                CMD_MODULE_TESTS: f'{base_npm} --targets "run test"{{module}}',
                 "lint": f'{base_npm} --targets "run lint"{{module}}',
                 "lint-fix": f'{base_npm} --targets "run lint:fix"{{module}}',
-                "quality-gate": f'{base_npm} --targets "run lint && npm run test"{{module}}',
-                "verify": f'{base_npm} --targets "run build && npm run test"{{module}}',
-                "install": f'{base_npm} --targets "install"{{module}}',
-                "package": f'{base_npm} --targets "run build"{{module}}',
+                CMD_QUALITY_GATE: f'{base_npm} --targets "run lint && npm run test"{{module}}',
+                CMD_VERIFY: f'{base_npm} --targets "run build && npm run test"{{module}}',
+                CMD_INSTALL: f'{base_npm} --targets "install"{{module}}',
+                CMD_PACKAGE: f'{base_npm} --targets "run build"{{module}}',
                 "e2e-tests": f'{base_npm} --targets "playwright test"{{module}}',
             }
         }
