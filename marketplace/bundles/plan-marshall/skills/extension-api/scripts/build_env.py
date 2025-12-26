@@ -269,10 +269,23 @@ def load_marshal_json(project_dir: Path) -> dict:
 
 
 def save_marshal_json(project_dir: Path, config: dict) -> None:
-    """Save marshal.json to .plan directory."""
+    """Save marshal.json to .plan directory with ordered keys."""
     marshal_path = project_dir / ".plan" / "marshal.json"
     marshal_path.parent.mkdir(parents=True, exist_ok=True)
-    marshal_path.write_text(json.dumps(config, indent=2))
+
+    # Canonical key order for marshal.json
+    key_order = ["ci", "plan", "skill_domains", "modules", "system"]
+
+    # Build ordered dict: known keys first in order, then any remaining keys
+    ordered = {}
+    for key in key_order:
+        if key in config:
+            ordered[key] = config[key]
+    for key in config:
+        if key not in ordered:
+            ordered[key] = config[key]
+
+    marshal_path.write_text(json.dumps(ordered, indent=2))
 
 
 def generate_commands_from_extensions(
