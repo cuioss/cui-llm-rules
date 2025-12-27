@@ -51,42 +51,6 @@ ALL_CANONICAL_COMMANDS = [
 
 
 # =============================================================================
-# Profile Classification Patterns
-# =============================================================================
-
-PROFILE_PATTERNS = {
-    # Integration test patterns -> CMD_INTEGRATION_TESTS
-    "integration-tests": CMD_INTEGRATION_TESTS,
-    "integration-test": CMD_INTEGRATION_TESTS,
-    "integrationTest": CMD_INTEGRATION_TESTS,
-    "it": CMD_INTEGRATION_TESTS,
-    "e2e": CMD_INTEGRATION_TESTS,
-    "acceptance": CMD_INTEGRATION_TESTS,
-
-    # Coverage patterns -> CMD_COVERAGE
-    "coverage": CMD_COVERAGE,
-    "jacoco": CMD_COVERAGE,
-
-    # Quality patterns -> CMD_QUALITY_GATE
-    "sonar": CMD_QUALITY_GATE,
-    "pre-commit": CMD_QUALITY_GATE,
-    "precommit": CMD_QUALITY_GATE,
-    "lint": CMD_QUALITY_GATE,
-    "check": CMD_QUALITY_GATE,
-    "quality": CMD_QUALITY_GATE,
-
-    # Performance patterns -> CMD_PERFORMANCE
-    "benchmark": CMD_PERFORMANCE,
-    "benchmarks": CMD_PERFORMANCE,
-    "jmh": CMD_PERFORMANCE,
-    "perf": CMD_PERFORMANCE,
-    "performance": CMD_PERFORMANCE,
-    "stress": CMD_PERFORMANCE,
-    "load": CMD_PERFORMANCE,
-}
-
-
-# =============================================================================
 # Canonical Command Metadata
 # =============================================================================
 
@@ -117,18 +81,27 @@ CANONICAL_COMMANDS = {
         "description": "Integration tests (containers, external services)",
         "required": False,
         "applicable_to": ["jar", "war", "quarkus", "npm"],
+        "aliases": [
+            "integration-tests", "integration-test", "integrationTest",
+            "it", "e2e", "acceptance",
+        ],
     },
     CMD_COVERAGE: {
         "phase": "test",
         "description": "Test execution with coverage measurement",
         "required": False,
         "applicable_to": ["jar", "war", "quarkus", "npm"],
+        "aliases": ["coverage", "jacoco"],
     },
     CMD_PERFORMANCE: {
         "phase": "test",
         "description": "Performance/benchmark tests (JMH, k6, wrk)",
         "required": False,
         "applicable_to": ["jar", "quarkus", "npm"],
+        "aliases": [
+            "benchmark", "benchmarks", "jmh",
+            "perf", "performance", "stress", "load",
+        ],
     },
 
     # Quality phase
@@ -137,6 +110,10 @@ CANONICAL_COMMANDS = {
         "description": "Static analysis, linting, formatting checks",
         "required": True,
         "applicable_to": ["jar", "war", "quarkus", "pom", "npm"],
+        "aliases": [
+            "pre-commit", "precommit", "sonar",
+            "lint", "check", "quality",
+        ],
     },
 
     # Verify phase
@@ -161,6 +138,22 @@ CANONICAL_COMMANDS = {
         "applicable_to": ["jar", "war", "quarkus", "npm"],
     },
 }
+
+
+# =============================================================================
+# Profile Classification Patterns (derived from CANONICAL_COMMANDS aliases)
+# =============================================================================
+
+def _build_profile_patterns() -> dict:
+    """Build PROFILE_PATTERNS from CANONICAL_COMMANDS aliases."""
+    patterns = {}
+    for cmd, meta in CANONICAL_COMMANDS.items():
+        for alias in meta.get("aliases", []):
+            patterns[alias] = cmd
+    return patterns
+
+
+PROFILE_PATTERNS = _build_profile_patterns()
 
 
 class ExtensionBase(ABC):
