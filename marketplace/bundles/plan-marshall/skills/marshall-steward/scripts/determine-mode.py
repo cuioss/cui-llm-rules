@@ -3,12 +3,14 @@
 Plan-marshall helper script for mode detection and documentation checks.
 
 Subcommands:
-    mode        Determine wizard vs menu mode based on existing files
-    check-docs  Check if project docs need .plan/temp documentation
+    mode            Determine wizard vs menu mode based on existing files
+    check-docs      Check if project docs need .plan/temp documentation
+    check-structure Check if project-structure.toon exists
 
 Usage:
     python3 determine-mode.py mode
     python3 determine-mode.py check-docs
+    python3 determine-mode.py check-structure
 
 Output (TOON format):
     mode subcommand:
@@ -22,6 +24,13 @@ Output (TOON format):
         status	needs_update
         files_needing_update	2
         missing	CLAUDE.md,agents.md
+
+    check-structure subcommand:
+        status	exists
+        path	.plan/project-structure.toon
+
+        status	missing
+        path	.plan/project-structure.toon
 """
 
 import argparse
@@ -51,6 +60,24 @@ def determine_mode(plan_dir: Path) -> tuple[str, str]:
         return "wizard", "marshal_missing"
     else:
         return "menu", "both_exist"
+
+
+def check_structure(plan_dir: Path) -> tuple[str, Path]:
+    """
+    Check if project-structure.toon exists.
+
+    Args:
+        plan_dir: Path to the .plan directory
+
+    Returns:
+        Tuple of (status, path) where status is 'exists' or 'missing'
+    """
+    structure_path = plan_dir / "project-structure.toon"
+
+    if structure_path.exists():
+        return "exists", structure_path
+    else:
+        return "missing", structure_path
 
 
 def check_docs(project_root: Path) -> tuple[str, list[str]]:
@@ -102,6 +129,16 @@ def cmd_check_docs(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_check_structure(args: argparse.Namespace) -> int:
+    """Handle the 'check-structure' subcommand."""
+    plan_dir = Path(args.plan_dir)
+    status, path = check_structure(plan_dir)
+
+    print(f"status\t{status}")
+    print(f"path\t{path}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Plan-marshall helper for mode detection and documentation checks"
@@ -132,12 +169,26 @@ def main() -> int:
         help="Project root directory (default: .)"
     )
 
+    # check-structure subcommand
+    structure_parser = subparsers.add_parser(
+        "check-structure",
+        help="Check if project-structure.toon exists"
+    )
+    structure_parser.add_argument(
+        "--plan-dir",
+        type=str,
+        default=".plan",
+        help="Directory to check (default: .plan)"
+    )
+
     args = parser.parse_args()
 
     if args.command == "mode":
         return cmd_mode(args)
     elif args.command == "check-docs":
         return cmd_check_docs(args)
+    elif args.command == "check-structure":
+        return cmd_check_structure(args)
     else:
         parser.print_help()
         return 1

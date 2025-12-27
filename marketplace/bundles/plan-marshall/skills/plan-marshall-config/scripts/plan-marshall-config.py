@@ -132,6 +132,9 @@ def main():
     mod_persist = mod_sub.add_parser('persist-all', help='Persist full modules config (from build_env.py)')
     mod_persist.add_argument('--modules-json', required=True, help='Full modules config as JSON')
 
+    mod_infer = mod_sub.add_parser('infer-domains', help='Infer domains from build_systems for all modules')
+    mod_infer.add_argument('--force', action='store_true', help='Overwrite existing domains')
+
     # --- build-systems ---
     p_bs = subparsers.add_parser('build-systems', help='Manage build system configuration')
     bs_sub = p_bs.add_subparsers(dest='verb', help='Operation')

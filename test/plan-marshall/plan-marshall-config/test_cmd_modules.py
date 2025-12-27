@@ -178,6 +178,74 @@ def test_modules_add_duplicate_fails():
         assert 'error' in result.stdout.lower() or 'exists' in result.stdout.lower()
 
 
+def test_modules_infer_domains():
+    """Test modules infer-domains populates domains from build_systems."""
+    with PlanTestContext() as ctx:
+        # Create marshal with modules that have build_systems but empty domains
+        config = {
+            "skill_domains": {"java": {"defaults": []}},
+            "modules": {
+                "default": {"path": ".", "domains": [], "build_systems": ["maven"]},
+                "java-module": {"path": "java-module", "domains": [], "build_systems": ["maven"]},
+                "frontend-module": {"path": "frontend", "domains": [], "build_systems": ["npm"]},
+                "hybrid-module": {"path": "hybrid", "domains": [], "build_systems": ["maven", "npm"]}
+            }
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(__import__('json').dumps(config, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'modules', 'infer-domains')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'updated' in result.stdout
+        assert 'java-module' in result.stdout
+        assert 'frontend-module' in result.stdout
+        assert 'hybrid-module' in result.stdout
+
+
+def test_modules_infer_domains_skips_existing():
+    """Test modules infer-domains skips modules with existing domains."""
+    with PlanTestContext() as ctx:
+        # Create marshal with one module that already has domains
+        config = {
+            "skill_domains": {"java": {"defaults": []}},
+            "modules": {
+                "default": {"path": ".", "domains": [], "build_systems": ["maven"]},
+                "has-domains": {"path": "has-domains", "domains": ["java"], "build_systems": ["maven"]},
+                "no-domains": {"path": "no-domains", "domains": [], "build_systems": ["maven"]}
+            }
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(__import__('json').dumps(config, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'modules', 'infer-domains')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'skipped' in result.stdout
+        assert 'has-domains' in result.stdout  # Should be in skipped
+
+
+def test_modules_infer_domains_force():
+    """Test modules infer-domains --force overwrites existing domains."""
+    with PlanTestContext() as ctx:
+        # Create marshal with module that already has domains
+        config = {
+            "skill_domains": {"java": {"defaults": []}},
+            "modules": {
+                "default": {"path": ".", "domains": [], "build_systems": ["maven"]},
+                "has-domains": {"path": "has-domains", "domains": ["old-domain"], "build_systems": ["maven"]}
+            }
+        }
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(__import__('json').dumps(config, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'modules', 'infer-domains', '--force')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'updated' in result.stdout
+        assert 'has-domains' in result.stdout  # Should be in updated, not skipped
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -196,5 +264,8 @@ if __name__ == '__main__':
         test_modules_remove,
         test_modules_get_unknown_module,
         test_modules_add_duplicate_fails,
+        test_modules_infer_domains,
+        test_modules_infer_domains_skips_existing,
+        test_modules_infer_domains_force,
     ])
     sys.exit(runner.run())

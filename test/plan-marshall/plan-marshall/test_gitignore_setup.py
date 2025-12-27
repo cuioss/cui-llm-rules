@@ -36,7 +36,7 @@ class TestGitignoreSetupCreate(ScriptTestCase):
 
         self.assert_success(result)
         self.assertIn('status\tcreated', result.stdout)
-        self.assertIn('entries_added\t2', result.stdout)
+        self.assertIn('entries_added\t3', result.stdout)  # .plan/*, !marshal.json, !project-structure.toon
 
         # Verify file was created
         gitignore_path = self.temp_dir / '.gitignore'
@@ -45,6 +45,7 @@ class TestGitignoreSetupCreate(ScriptTestCase):
         content = gitignore_path.read_text()
         self.assertIn('.plan/', content)
         self.assertIn('!.plan/marshal.json', content)
+        self.assertIn('!.plan/project-structure.toon', content)
         self.assertIn('# Planning system', content)
 
 
@@ -64,7 +65,7 @@ class TestGitignoreSetupUpdate(ScriptTestCase):
 
         self.assert_success(result)
         self.assertIn('status\tupdated', result.stdout)
-        self.assertIn('entries_added\t2', result.stdout)
+        self.assertIn('entries_added\t3', result.stdout)  # .plan/*, !marshal.json, !project-structure.toon
 
         # Verify existing content preserved and new content added
         content = gitignore_path.read_text()
@@ -72,6 +73,7 @@ class TestGitignoreSetupUpdate(ScriptTestCase):
         self.assertIn('*.log', content)
         self.assertIn('.plan/', content)
         self.assertIn('!.plan/marshal.json', content)
+        self.assertIn('!.plan/project-structure.toon', content)
 
     def test_adds_only_missing_entries(self):
         """Should only add entries that are missing."""
@@ -82,10 +84,11 @@ class TestGitignoreSetupUpdate(ScriptTestCase):
 
         self.assert_success(result)
         self.assertIn('status\tupdated', result.stdout)
-        self.assertIn('entries_added\t1', result.stdout)  # Only marshal exception
+        self.assertIn('entries_added\t2', result.stdout)  # !marshal.json + !project-structure.toon
 
         content = gitignore_path.read_text()
         self.assertIn('!.plan/marshal.json', content)
+        self.assertIn('!.plan/project-structure.toon', content)
 
 
 class TestGitignoreSetupUnchanged(ScriptTestCase):
@@ -98,7 +101,7 @@ class TestGitignoreSetupUnchanged(ScriptTestCase):
     def test_unchanged_when_all_entries_exist(self):
         """Should report unchanged when all entries already present."""
         gitignore_path = self.temp_dir / '.gitignore'
-        gitignore_path.write_text(".plan/\n!.plan/marshal.json\n")
+        gitignore_path.write_text(".plan/\n!.plan/marshal.json\n!.plan/project-structure.toon\n")
 
         result = run_script(SCRIPT_PATH, '--project-root', str(self.temp_dir))
 
@@ -109,7 +112,7 @@ class TestGitignoreSetupUnchanged(ScriptTestCase):
     def test_recognizes_alternate_plan_format(self):
         """Should recognize .plan without trailing slash."""
         gitignore_path = self.temp_dir / '.gitignore'
-        gitignore_path.write_text(".plan\n!.plan/marshal.json\n")
+        gitignore_path.write_text(".plan\n!.plan/marshal.json\n!.plan/project-structure.toon\n")
 
         result = run_script(SCRIPT_PATH, '--project-root', str(self.temp_dir))
 

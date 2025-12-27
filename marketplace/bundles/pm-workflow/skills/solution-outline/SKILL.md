@@ -71,6 +71,26 @@ python3 .plan/execute-script.py pm-workflow:manage-references:manage-references 
 
 Extract `domains` array from config.toon - each deliverable will be assigned a single domain from this array.
 
+### Step 1b: Load Project Structure Context (Optional)
+
+Load project structure for intelligent placement decisions:
+
+```bash
+python3 .plan/execute-script.py pm-workflow:manage-solution-outline:manage-solution-outline \
+  get-module-context
+```
+
+If project structure exists, output includes:
+- **modules**: List with name, path, layer, responsibility, key_packages, tips
+- **placement_rules**: Patterns for where to place new components
+
+Use this context when determining:
+- Which module should own new components
+- Correct package paths within modules
+- Layer-appropriate placement (service, api, presentation, etc.)
+
+If `status: not_found`, proceed without - use standard codebase analysis.
+
 ### Step 2: Analyze Codebase
 
 Parse request intent and explore affected components. Detection patterns vary by domain:

@@ -18,6 +18,7 @@
     "./skills/permission-fix",
     "./skills/marshall-steward",
     "./skills/plan-marshall-config",
+    "./skills/project-structure",
     "./skills/run-config",
     "./skills/script-executor",
     "./skills/toon-usage",

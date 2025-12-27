@@ -84,7 +84,27 @@ Report any redundant or stale permissions found.
 
 ---
 
-## Step 5: Verify CI Tools
+## Step 5: Check Project Structure
+
+Verify project structure knowledge base exists:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:marshall-steward:determine-mode check-structure
+```
+
+**Interpret results**:
+- `status: exists` → Project structure configured ✓
+- `status: missing` → No project structure (placement context unavailable)
+
+If missing, show info message (not blocking):
+```
+[INFO] Project structure not configured. Solution outline will use standard codebase analysis.
+       To enable: /marshall-steward → Configuration → Project Structure → Regenerate
+```
+
+---
+
+## Step 6: Verify CI Tools
 
 Check CI provider detection and tool availability:
 
@@ -109,7 +129,7 @@ AskUserQuestion:
 
 ---
 
-## Step 6: Summary
+## Step 7: Summary
 
 Output health check summary:
 
@@ -126,6 +146,7 @@ wildcards:
   total: 16
   missing: 0
 redundant_permissions: 0
+project_structure: configured
 ci:
   provider: github
   required_tool: gh
@@ -147,6 +168,7 @@ wildcards:
   total: 16
   missing: 2
 redundant_permissions: 3
+project_structure: missing
 ci:
   provider: github
   required_tool: gh
@@ -156,6 +178,7 @@ issues:
   - Executor drift detected (regenerate recommended)
   - 2 plugin wildcards missing
   - 3 redundant permissions in project settings
+  - Project structure not configured
   - CI tool 'gh' not authenticated
 
 fixes_available: true

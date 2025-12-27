@@ -19,16 +19,18 @@ AskUserQuestion:
     - label: "Modules"
       description: "Define module structure (path, domains, build-systems)"
       value: "modules"
+    - label: "Project Structure"
+      description: "Manage module metadata, placement rules, conventions"
+      value: "structure"
     - label: "Manage Commands"
       description: "Configure build commands per module (test, verify, etc.)"
       value: "commands"
     - label: "Full Reconfigure"
       description: "Run first-run wizard again"
       value: "wizard"
-    - label: "Back"
-      description: "Return to main menu"
-      value: "back"
 ```
+
+**Note**: Menu limited to 4 options per AskUserQuestion. Use nested menus if needed.
 
 ## Routing
 
@@ -37,9 +39,9 @@ AskUserQuestion:
 | build | Execute "Configuration: Build System" below |
 | skill-domains | Execute "Configuration: Skill Domains" below |
 | modules | Execute "Configuration: Modules" below |
+| structure | Execute "Configuration: Project Structure" below |
 | commands | Execute "Configuration: Manage Commands" below |
 | wizard | Load and execute: `Read references/wizard-flow.md` |
-| back | Return to Main Menu |
 
 ---
 
@@ -198,6 +200,137 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
   --domains "java,java-testing" \
   --build-systems "maven"
 ```
+
+---
+
+## Configuration: Project Structure
+
+Manage project structure knowledge including module metadata, placement rules, and conventions.
+
+### Step 1: Select Operation
+
+```yaml
+AskUserQuestion:
+  question: "What would you like to do with project structure?"
+  header: "Operation"
+  options:
+    - label: "View"
+      description: "Display current project structure"
+    - label: "Edit Module"
+      description: "Update module metadata (layer, responsibility, tips)"
+    - label: "Manage Placement"
+      description: "Add or update placement rules"
+    - label: "Regenerate"
+      description: "Re-detect structure from project files"
+  multiSelect: false
+```
+
+### Operation: View
+
+Display current project structure:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure read
+```
+
+Shows all modules with their layers, responsibilities, and key packages.
+
+### Operation: Edit Module
+
+**Step 1: Select module**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module list
+```
+
+Present modules from output:
+
+```yaml
+AskUserQuestion:
+  question: "Which module do you want to edit?"
+  header: "Module"
+  options:
+    # Build dynamically from module list output
+    - label: "{module-name}"
+      description: "{layer} - {responsibility}"
+  multiSelect: false
+```
+
+**Step 2: Get current values**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module get --name "{module}"
+```
+
+**Step 3: Update fields**
+
+For each field the user wants to update:
+
+```bash
+# Update layer
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module set \
+  --name "{module}" --layer "{layer}"
+
+# Update responsibility
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module set \
+  --name "{module}" --responsibility "{description}"
+
+# Add tip
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module add-tip \
+  --name "{module}" --tip "{tip text}"
+
+# Add insight
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure module add-insight \
+  --name "{module}" --insight "{insight text}"
+```
+
+### Operation: Manage Placement
+
+**Step 1: View existing rules**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure placement list
+```
+
+**Step 2: Select action**
+
+```yaml
+AskUserQuestion:
+  question: "What placement operation?"
+  header: "Placement"
+  options:
+    - label: "Add Rule"
+      description: "Create new placement rule"
+    - label: "Query"
+      description: "Find placement for artifact type"
+    - label: "Remove Rule"
+      description: "Delete existing rule"
+  multiSelect: false
+```
+
+**Action: Add Rule**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure placement add \
+  --pattern "{pattern}" --module "{target-module}" --path-template "{path}"
+```
+
+**Action: Query**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure placement query \
+  --artifact-type "{type}"
+```
+
+### Operation: Regenerate
+
+Regenerate project structure from marshal.json modules:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure generate
+```
+
+This creates a fresh project-structure.toon from current marshal.json module definitions.
 
 ---
 

@@ -19,6 +19,29 @@ from config_core import (
 from config_detection import detect_maven_modules
 
 
+def infer_domains_from_build_systems(build_systems: list) -> list:
+    """Infer skill domains from build systems configuration.
+
+    Mapping:
+    - maven, gradle -> java
+    - npm -> javascript
+
+    Args:
+        build_systems: List of build system names
+
+    Returns:
+        List of inferred domain names
+    """
+    domains = []
+    for bs in build_systems:
+        bs_lower = bs.lower()
+        if bs_lower in ('maven', 'gradle') and 'java' not in domains:
+            domains.append('java')
+        elif bs_lower == 'npm' and 'javascript' not in domains:
+            domains.append('javascript')
+    return domains
+
+
 def infer_domains_from_module(module_path: str) -> list:
     """Infer skill domains from module content.
 
@@ -278,6 +301,45 @@ def cmd_modules(args) -> int:
         return success_exit({
             "modules_count": len(new_modules),
             "action": "persist-all"
+        })
+
+    elif args.verb == 'infer-domains':
+        # Infer domains from build_systems for all modules
+        # Only updates modules with empty or missing domains
+        updated = []
+        skipped = []
+
+        for mod_name, mod_config in modules.items():
+            if mod_name == 'default':
+                continue
+
+            existing_domains = mod_config.get('domains', [])
+            build_systems_list = mod_config.get('build_systems', [])
+
+            # Skip if domains already populated (unless --force)
+            if existing_domains and not getattr(args, 'force', False):
+                skipped.append(mod_name)
+                continue
+
+            # Infer from build_systems
+            inferred = infer_domains_from_build_systems(build_systems_list)
+            if inferred:
+                mod_config['domains'] = inferred
+                updated.append({
+                    'module': mod_name,
+                    'domains': inferred,
+                    'from_build_systems': build_systems_list
+                })
+
+        if updated:
+            config['modules'] = modules
+            save_config(config)
+
+        return success_exit({
+            "updated": updated,
+            "updated_count": len(updated),
+            "skipped": skipped,
+            "skipped_count": len(skipped)
         })
 
     return EXIT_ERROR

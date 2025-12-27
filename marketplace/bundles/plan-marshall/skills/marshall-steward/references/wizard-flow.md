@@ -6,7 +6,7 @@ Sequential structured setup for new projects. Execute steps in order.
 
 ## Step 1: Gitignore Setup
 
-Configure `.gitignore` for `.plan/` directory.
+Configure `.gitignore` for `.plan/` directory with tracked file exceptions.
 
 **BOOTSTRAP**: Use DIRECT Python call (no executor yet):
 
@@ -18,8 +18,12 @@ python3 ${PLUGIN_ROOT}/plan-marshall/skills/marshall-steward/scripts/gitignore-s
 ```toon
 status	created
 gitignore_path	/path/to/.gitignore
-entries_added	2
+entries_added	3
 ```
+
+**Tracked Files**:
+- `.plan/marshal.json` - Project configuration
+- `.plan/project-structure.toon` - Project structure knowledge
 
 | status | Meaning |
 |--------|---------|
@@ -311,6 +315,42 @@ Modules configured: 3
   - oauth-sheriff-ui (npm, 6 commands)
 ```
 
+### Step 4c-2: Infer Module Domains
+
+Auto-populate module domains from build_systems:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall-config \
+  modules infer-domains
+```
+
+**Output (TOON)**:
+```toon
+status: success
+updated_count: 3
+updated:
+  - module: oauth-sheriff-core
+    domains: java
+    from_build_systems: maven
+  - module: oauth-sheriff-ui
+    domains: javascript
+    from_build_systems: npm
+  - module: default
+    domains: java
+    from_build_systems: maven
+skipped_count: 0
+```
+
+**Domain Inference Mapping:**
+
+| Build System | Inferred Domain |
+|--------------|-----------------|
+| maven | java |
+| gradle | java |
+| npm | javascript |
+
+Hybrid modules with multiple build systems (e.g., Maven + npm) get both domains: `["java", "javascript"]`.
+
 ---
 
 ### Canonical Command Names
@@ -504,7 +544,90 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 ---
 
-## Step 6: Detect CI Provider
+## Step 6: Project Structure Initialization
+
+Generate project structure knowledge for solution outline support.
+
+### Step 6a: Generate Initial Structure
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure generate
+```
+
+**Output (TOON)**:
+```toon
+status: success
+file: .plan/project-structure.toon
+modules_generated: 3
+message: Generated structure with 3 modules
+```
+
+This creates `.plan/project-structure.toon` with:
+- Modules inferred from marshal.json
+- Layers inferred from module names
+- Empty responsibilities (to be filled by user)
+- Default layer constraints
+
+### Step 6b: User Refinement (Optional)
+
+Display generated structure and offer refinement:
+
+```yaml
+AskUserQuestion:
+  question: "Review project structure. Add module responsibilities?"
+  header: "Structure"
+  options:
+    - label: "Skip for now"
+      description: "Continue with inferred structure, refine later"
+    - label: "Add responsibilities"
+      description: "Enter brief descriptions for each module"
+  multiSelect: false
+```
+
+If user chooses "Add responsibilities", for each module prompt:
+
+```yaml
+AskUserQuestion:
+  question: "Describe module 'oauth-sheriff-core' responsibility:"
+  header: "Module"
+  options:
+    - label: "Core business logic"
+      description: "Primary domain logic and services"
+    - label: "API/Client library"
+      description: "Public interface and contracts"
+    - label: "Extension/Plugin"
+      description: "Framework extension implementation"
+  multiSelect: false
+```
+
+Update with user input:
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure \
+  module update --module oauth-sheriff-core --responsibility "Core OAuth token validation and refresh logic"
+```
+
+### Step 6c: Validate Structure
+
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure validate
+```
+
+**Output (TOON)**:
+```toon
+status: success
+file: .plan/project-structure.toon
+modules_count: 3
+has_placement: false
+has_conventions: false
+warnings:
+  - Module 'oauth-sheriff-core' missing responsibility
+```
+
+Warnings are informational - structure can be refined later via menu or during solution outline.
+
+---
+
+## Step 7: Detect CI Provider
 
 Detect CI provider and verify tools:
 
@@ -525,7 +648,7 @@ python3 .plan/execute-script.py plan-marshall:ci-operations:ci_health persist
 
 ---
 
-## Step 7: Permission Setup
+## Step 8: Permission Setup
 
 ```
 AskUserQuestion:
@@ -546,7 +669,7 @@ python3 .plan/execute-script.py plan-marshall:permission-fix:permission-fix appl
 
 ---
 
-## Step 8: Summary
+## Step 9: Summary
 
 Output final summary:
 
@@ -560,6 +683,9 @@ executor:
   script_count: 45
 marshal:
   path: .plan/marshal.json
+project_structure:
+  path: .plan/project-structure.toon
+  modules_count: 3
 build_systems:
   - maven
   - npm

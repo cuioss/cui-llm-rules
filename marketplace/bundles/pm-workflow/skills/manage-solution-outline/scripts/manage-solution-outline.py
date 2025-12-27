@@ -14,6 +14,7 @@ Usage:
     python3 manage-solution-outline.py list-deliverables --plan-id my-plan
     python3 manage-solution-outline.py read --plan-id my-plan [--raw]
     python3 manage-solution-outline.py exists --plan-id my-plan
+    python3 manage-solution-outline.py get-module-context
 """
 
 import argparse
@@ -29,10 +30,11 @@ BUNDLES_DIR = SKILL_DIR.parent.parent.parent
 sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'toon-usage' / 'scripts'))
 sys.path.insert(0, str(BUNDLES_DIR / 'plan-marshall' / 'skills' / 'file-operations-base' / 'scripts'))
 
-from toon_parser import serialize_toon
+from toon_parser import serialize_toon, parse_toon
 from file_ops import base_path, atomic_write_file
 
 SOLUTION_FILE = 'solution_outline.md'
+PROJECT_STRUCTURE_FILE = 'project-structure.toon'
 
 
 def validate_plan_id(plan_id: str) -> bool:
@@ -558,6 +560,65 @@ def cmd_write(args) -> int:
     return 0
 
 
+def cmd_get_module_context(args) -> int:
+    """Get project structure context for placement decisions.
+
+    Reads .plan/project-structure.toon and returns module information
+    to help with file placement decisions during solution outline creation.
+    """
+    plan_base = base_path()
+    structure_path = plan_base / PROJECT_STRUCTURE_FILE
+
+    if not structure_path.exists():
+        print(serialize_toon({
+            'status': 'not_found',
+            'file': PROJECT_STRUCTURE_FILE,
+            'message': 'Project structure not configured. Use /marshall-steward to initialize.',
+            'suggestion': 'Run /marshall-steward and select Configuration > Project Structure > Regenerate'
+        }))
+        return 0  # Not an error - just means no structure available
+
+    try:
+        content = structure_path.read_text(encoding='utf-8')
+        data = parse_toon(content)
+    except Exception as e:
+        print(serialize_toon({
+            'status': 'error',
+            'error': 'parse_error',
+            'file': PROJECT_STRUCTURE_FILE,
+            'message': str(e)
+        }))
+        return 1
+
+    # Extract modules summary for placement context
+    modules = data.get('modules', {})
+    placement_rules = data.get('placement_rules', [])
+
+    # Build context for LLM
+    context = {
+        'status': 'success',
+        'module_count': len(modules),
+        'modules': [],
+        'placement_rules': placement_rules
+    }
+
+    for name, mod in modules.items():
+        module_info = {
+            'name': name,
+            'path': mod.get('path', '.'),
+            'layer': mod.get('layer', 'unknown'),
+            'responsibility': mod.get('responsibility', '')
+        }
+        if mod.get('key_packages'):
+            module_info['key_packages'] = mod['key_packages']
+        if mod.get('tips'):
+            module_info['tips'] = mod['tips']
+        context['modules'].append(module_info)
+
+    print(serialize_toon(context))
+    return 0
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -594,6 +655,10 @@ def main():
     write_parser.add_argument('--plan-id', required=True, help='Plan identifier')
     write_parser.add_argument('--force', action='store_true', help='Overwrite existing file')
     write_parser.set_defaults(func=cmd_write)
+
+    # get-module-context
+    context_parser = subparsers.add_parser('get-module-context', help='Get project structure context for placement')
+    context_parser.set_defaults(func=cmd_get_module_context)
 
     args = parser.parse_args()
 
