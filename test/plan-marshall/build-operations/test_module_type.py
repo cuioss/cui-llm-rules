@@ -205,7 +205,15 @@ def test_detect_type_npm():
 def test_persist_pom_only_gets_limited_commands():
     """Test persist generates only applicable commands for pom module type."""
     with ModuleTypeContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('<project><packaging>pom</packaging></project>')
+        # pom module with a quality profile to get quality-gate command
+        (temp_dir / 'pom.xml').write_text('''<project>
+            <packaging>pom</packaging>
+            <profiles>
+                <profile>
+                    <id>pre-commit</id>
+                </profile>
+            </profiles>
+        </project>''')
 
         result = run_script(
             SCRIPT_PATH,
@@ -219,9 +227,9 @@ def test_persist_pom_only_gets_limited_commands():
         config = json.loads(marshal_path.read_text())
         commands = config['modules']['default']['commands']
 
-        # pom modules should only have install and quality-gate
+        # pom modules should only have install and quality-gate (from profile)
         assert 'install' in commands, "pom should have install"
-        assert 'quality-gate' in commands, "pom should have quality-gate"
+        assert 'quality-gate' in commands, "pom should have quality-gate (from profile)"
         assert 'module-tests' not in commands, "pom should NOT have module-tests"
         assert 'verify' not in commands, "pom should NOT have verify"
 
@@ -229,7 +237,14 @@ def test_persist_pom_only_gets_limited_commands():
 def test_persist_jar_gets_all_commands():
     """Test persist generates all commands for jar module type."""
     with ModuleTypeContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('<project></project>')
+        # jar module with profiles to get profile-based commands
+        (temp_dir / 'pom.xml').write_text('''<project>
+            <profiles>
+                <profile>
+                    <id>pre-commit</id>
+                </profile>
+            </profiles>
+        </project>''')
 
         result = run_script(
             SCRIPT_PATH,
@@ -243,10 +258,10 @@ def test_persist_jar_gets_all_commands():
         config = json.loads(marshal_path.read_text())
         commands = config['modules']['default']['commands']
 
-        # jar modules should have most commands
+        # jar modules should have most commands (static + profile-based)
         assert 'module-tests' in commands, "jar should have module-tests"
         assert 'verify' in commands, "jar should have verify"
-        assert 'quality-gate' in commands, "jar should have quality-gate"
+        assert 'quality-gate' in commands, "jar should have quality-gate (from profile)"
         assert 'install' in commands, "jar should have install"
 
 
@@ -291,11 +306,15 @@ def test_persist_output_includes_type():
 # =============================================================================
 
 def test_validate_required_pom_module():
-    """Test validate-required with pom module type."""
+    """Test validate-required with pom module type.
+
+    pom modules only require install (static) and optionally quality-gate (profile-based).
+    Since quality-gate is profile-based, it's not considered 'required' for validation.
+    """
     with ModuleTypeContext() as temp_dir:
         (temp_dir / 'pom.xml').write_text('<project><packaging>pom</packaging></project>')
 
-        # Create marshal.json with pom config that only has quality-gate
+        # Create marshal.json with pom config that has install
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         marshal_path.write_text(json.dumps({
             "modules": {
@@ -304,7 +323,7 @@ def test_validate_required_pom_module():
                     "type": "pom",
                     "build_systems": ["maven"],
                     "commands": {
-                        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\""
+                        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"install\""
                     }
                 }
             }
@@ -317,17 +336,21 @@ def test_validate_required_pom_module():
             '--project-dir', str(temp_dir)
         )
 
-        # pom modules only require quality-gate, so this should pass
-        assert result.returncode == 0, f"Should succeed with only quality-gate for pom: {result.stdout}"
+        # pom modules only require install (static command), quality-gate is profile-based
+        assert result.returncode == 0, f"Should succeed with install for pom: {result.stdout}"
         assert 'status: success' in result.stdout, "Should report success"
 
 
 def test_validate_required_jar_missing_commands():
-    """Test validate-required detects missing commands for jar type."""
+    """Test validate-required detects missing static commands for jar type.
+
+    jar modules require module-tests and verify (static commands).
+    quality-gate is profile-based and not checked here.
+    """
     with ModuleTypeContext() as temp_dir:
         (temp_dir / 'pom.xml').write_text('<project></project>')
 
-        # Create marshal.json with jar config missing required commands
+        # Create marshal.json with jar config missing required static commands
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         marshal_path.write_text(json.dumps({
             "modules": {
@@ -349,10 +372,13 @@ def test_validate_required_jar_missing_commands():
             '--project-dir', str(temp_dir)
         )
 
-        # jar modules require module-tests, verify, quality-gate
+        # jar modules require module-tests and verify (static commands)
         assert result.returncode != 0, "Should fail with missing required commands"
         assert 'incomplete' in result.stdout.lower() or 'missing' in result.stdout.lower(), \
             f"Should indicate incomplete: {result.stdout}"
+        # Should list the missing static commands
+        assert 'module-tests' in result.stdout or 'verify' in result.stdout, \
+            f"Should list missing static commands: {result.stdout}"
 
 
 # =============================================================================

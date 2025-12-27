@@ -155,23 +155,39 @@ def get_command_mappings(self) -> dict:
     """
 ```
 
+**Profile-Based Commands**: The following canonical commands are **profile-dependent** and should NOT be included in `get_command_mappings()`:
+- `integration-tests` - Generated from detected profiles matching "integration", "it", "e2e", etc.
+- `coverage` - Generated from detected profiles matching "coverage", "jacoco"
+- `performance` - Generated from detected profiles matching "benchmark", "jmh", "perf"
+- `quality-gate` - Generated from detected profiles matching "pre-commit", "sonar", "quality"
+
+These commands are dynamically generated via `get_profiles()` + `generate_profile_command()` to ensure portability across projects with different profile naming conventions.
+
 **Example using constants**:
 ```python
 from extension_base import (
     ExtensionBase,
+    CMD_COMPILE,
+    CMD_TEST_COMPILE,
     CMD_MODULE_TESTS,
-    CMD_QUALITY_GATE,
     CMD_VERIFY,
+    CMD_INSTALL,
+    CMD_PACKAGE,
 )
 
 class Extension(ExtensionBase):
     def get_command_mappings(self) -> dict:
+        # NOTE: Profile-dependent commands (integration-tests, coverage, quality-gate)
+        # are NOT included here - they are dynamically generated from detected profiles
         base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
         return {
             "maven": {
+                CMD_COMPILE: f'{base} --targets "compile"{{module}}',
+                CMD_TEST_COMPILE: f'{base} --targets "test-compile"{{module}}',
                 CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
-                CMD_QUALITY_GATE: f'{base} --targets "clean verify -Ppre-commit"{{module}}',
                 CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
+                CMD_INSTALL: f'{base} --targets "clean install"{{module}}',
+                CMD_PACKAGE: f'{base} --targets "package"{{module}}',
             }
         }
 ```
@@ -368,7 +384,6 @@ from pathlib import Path
 from extension_base import (
     ExtensionBase,
     CMD_MODULE_TESTS,
-    CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
 )
@@ -390,11 +405,12 @@ class Extension(ExtensionBase):
         return []
 
     def get_command_mappings(self) -> dict:
+        # NOTE: Profile-dependent commands (integration-tests, coverage, quality-gate)
+        # are dynamically generated from detected profiles via get_profiles()
         base = "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run"
         return {
             "maven": {
                 CMD_MODULE_TESTS: f'{base} --targets "clean test"{{module}}',
-                CMD_QUALITY_GATE: f'{base} --targets "clean verify -Ppre-commit"{{module}}',
                 CMD_VERIFY: f'{base} --targets "clean verify"{{module}}',
                 CMD_INSTALL: f'{base} --targets "clean install"{{module}}',
             }

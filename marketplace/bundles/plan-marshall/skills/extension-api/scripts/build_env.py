@@ -42,7 +42,16 @@ from extension import (
     get_modules_from_extensions,
     generate_profile_command_from_extensions,
 )
-from extension_base import CANONICAL_COMMANDS
+from extension_base import (
+    CANONICAL_COMMANDS,
+    CMD_INTEGRATION_TESTS,
+    CMD_COVERAGE,
+    CMD_PERFORMANCE,
+    CMD_QUALITY_GATE,
+)
+
+# Canonical commands that require profile detection (not provided by static get_command_mappings)
+PROFILE_BASED_CANONICALS = {CMD_INTEGRATION_TESTS, CMD_COVERAGE, CMD_PERFORMANCE, CMD_QUALITY_GATE}
 
 
 # =============================================================================
@@ -259,6 +268,57 @@ def detect_hybrid_build_systems(module_path: Path) -> list:
 
 
 # =============================================================================
+# Profile Analysis
+# =============================================================================
+
+def analyze_profile_coverage(profiles: list, module_type: str) -> dict:
+    """Analyze which profile-based canonicals are covered and which are missing.
+
+    Args:
+        profiles: List of profile dicts with 'id', 'canonical', 'activation'
+        module_type: Module type (jar, war, quarkus, etc.) for applicability check
+
+    Returns:
+        Dict with:
+        - matched: {canonical: profile_info} - profiles that matched a canonical
+        - unclassified: [profile_info] - profiles that couldn't be classified
+        - missing: [canonical] - profile-based canonicals with no matching profile
+    """
+    matched = {}
+    unclassified = []
+
+    for profile in profiles:
+        canonical = profile.get("canonical")
+        if canonical:
+            # If multiple profiles match same canonical, first wins
+            if canonical not in matched:
+                matched[canonical] = {
+                    "id": profile["id"],
+                    "activation": profile.get("activation", {"type": "command-line"})
+                }
+        else:
+            unclassified.append({
+                "id": profile["id"],
+                "activation": profile.get("activation", {"type": "command-line"})
+            })
+
+    # Determine which profile-based canonicals are missing
+    missing = []
+    for canonical in PROFILE_BASED_CANONICALS:
+        spec = CANONICAL_COMMANDS.get(canonical, {})
+        # Only report missing if applicable to this module type
+        if module_type in spec.get("applicable_to", []):
+            if canonical not in matched:
+                missing.append(canonical)
+
+    return {
+        "matched": matched,
+        "unclassified": unclassified,
+        "missing": missing
+    }
+
+
+# =============================================================================
 # Command Generation and Persistence
 # =============================================================================
 
@@ -406,10 +466,19 @@ def cmd_persist(args):
 
     config["modules"]["default"]["type"] = default_type
 
+    # Analyze profile coverage for default module
+    default_profile_analysis = analyze_profile_coverage(default_profiles, default_type)
+
     if default_profiles:
         config["modules"]["default"]["detected_profiles"] = [
             {"id": p["id"], "canonical": p.get("canonical")} for p in default_profiles
         ]
+
+    # Store profile analysis results for user prompting
+    if default_profile_analysis["unclassified"]:
+        config["modules"]["default"]["unclassified_profiles"] = default_profile_analysis["unclassified"]
+    if default_profile_analysis["missing"]:
+        config["modules"]["default"]["missing_profile_commands"] = default_profile_analysis["missing"]
 
     # Generate commands for default module
     if default_is_hybrid:
@@ -418,29 +487,30 @@ def cmd_persist(args):
         default_commands = generate_commands_from_extensions(
             extension_mappings, default_system, default_type, minimal=minimal
         )
-        # Add profile-based commands
-        for profile in default_profiles:
-            if profile.get("canonical"):
-                canonical = profile["canonical"]
-                profile_key = f"default:{profile['id']}"
-                if minimal and profile_key not in include_profiles_set:
-                    continue
-                if include_profiles_set and profile_key not in include_profiles_set:
-                    continue
+        # Add profile-based commands from detected profiles
+        for canonical, profile_info in default_profile_analysis["matched"].items():
+            profile_key = f"default:{profile_info['id']}"
+            if minimal and profile_key not in include_profiles_set:
+                continue
+            if include_profiles_set and profile_key not in include_profiles_set:
+                continue
 
-                activation = profile.get("activation", {})
-                if canonical not in default_commands or activation.get("type") in ("property", "jdk", "os", "default"):
-                    cmd = generate_profile_command_from_extensions(
-                        extensions, default_system, canonical, profile["id"], activation, None
-                    )
-                    if cmd:
-                        default_commands[canonical] = cmd
+            cmd = generate_profile_command_from_extensions(
+                extensions, default_system, canonical, profile_info["id"],
+                profile_info["activation"], None
+            )
+            if cmd:
+                default_commands[canonical] = cmd
 
     config["modules"]["default"]["commands"] = default_commands
 
     # Generate commands for detected modules
     modules_updated = 1
     commands_generated = len(default_commands)
+
+    # Track profile issues across all modules for summary
+    total_unclassified = 0
+    total_missing = 0
 
     for module in modules:
         mod_name = module["name"]
@@ -461,10 +531,21 @@ def cmd_persist(args):
 
         config["modules"][mod_name]["type"] = mod_type
 
+        # Analyze profile coverage for this module
+        mod_profile_analysis = analyze_profile_coverage(mod_profiles, mod_type)
+
         if mod_profiles:
             config["modules"][mod_name]["detected_profiles"] = [
                 {"id": p["id"], "canonical": p.get("canonical")} for p in mod_profiles
             ]
+
+        # Store profile analysis results for user prompting
+        if mod_profile_analysis["unclassified"]:
+            config["modules"][mod_name]["unclassified_profiles"] = mod_profile_analysis["unclassified"]
+            total_unclassified += len(mod_profile_analysis["unclassified"])
+        if mod_profile_analysis["missing"]:
+            config["modules"][mod_name]["missing_profile_commands"] = mod_profile_analysis["missing"]
+            total_missing += len(mod_profile_analysis["missing"])
 
         if mod_is_hybrid:
             mod_commands = generate_hybrid_commands_from_extensions(extension_mappings, mod_path, mod_name)
@@ -472,26 +553,28 @@ def cmd_persist(args):
             mod_commands = generate_commands_from_extensions(
                 extension_mappings, mod_system, mod_type, mod_name, minimal=minimal
             )
-            for profile in mod_profiles:
-                if profile.get("canonical"):
-                    canonical = profile["canonical"]
-                    profile_key = f"{mod_name}:{profile['id']}"
-                    if minimal and profile_key not in include_profiles_set:
-                        continue
-                    if include_profiles_set and profile_key not in include_profiles_set:
-                        continue
+            # Add profile-based commands from detected profiles
+            for canonical, profile_info in mod_profile_analysis["matched"].items():
+                profile_key = f"{mod_name}:{profile_info['id']}"
+                if minimal and profile_key not in include_profiles_set:
+                    continue
+                if include_profiles_set and profile_key not in include_profiles_set:
+                    continue
 
-                    activation = profile.get("activation", {})
-                    if canonical not in mod_commands or activation.get("type") in ("property", "jdk", "os", "default"):
-                        cmd = generate_profile_command_from_extensions(
-                            extensions, mod_system, canonical, profile["id"], activation, mod_name
-                        )
-                        if cmd:
-                            mod_commands[canonical] = cmd
+                cmd = generate_profile_command_from_extensions(
+                    extensions, mod_system, canonical, profile_info["id"],
+                    profile_info["activation"], mod_name
+                )
+                if cmd:
+                    mod_commands[canonical] = cmd
 
         config["modules"][mod_name]["commands"] = mod_commands
         modules_updated += 1
         commands_generated += len(mod_commands)
+
+    # Add default module stats to totals
+    total_unclassified += len(default_profile_analysis.get("unclassified", []))
+    total_missing += len(default_profile_analysis.get("missing", []))
 
     if not args.dry_run:
         # Delegate to plan-marshall-config for centralized marshal.json writes
@@ -522,6 +605,30 @@ def cmd_persist(args):
         cmd_count = len(mod_config.get("commands", {}))
         mod_type = mod_config.get("type", "jar")
         print(f"{mod_name}\t{mod_config.get('path', mod_name)}\t{mod_type}\t{cmd_count}")
+
+    # Report profile issues that may need user attention
+    if total_unclassified > 0 or total_missing > 0:
+        print()
+        print("profile_issues:")
+        print(f"  unclassified_profiles: {total_unclassified}")
+        print(f"  missing_profile_commands: {total_missing}")
+
+        if total_unclassified > 0:
+            print()
+            print("unclassified_profiles{module,profile_id}:")
+            for mod_name, mod_config in config["modules"].items():
+                for profile in mod_config.get("unclassified_profiles", []):
+                    print(f"{mod_name}\t{profile['id']}")
+
+        if total_missing > 0:
+            print()
+            print("missing_profile_commands{module,canonical}:")
+            for mod_name, mod_config in config["modules"].items():
+                for canonical in mod_config.get("missing_profile_commands", []):
+                    print(f"{mod_name}\t{canonical}")
+
+            print()
+            print("hint: Use '/marshall-steward' to configure missing profile mappings")
 
     return 0
 
@@ -644,7 +751,12 @@ def cmd_get_available_commands(args):
 
 
 def validate_required_commands(module: str, config: dict) -> list:
-    """Validate that required commands are configured for a module."""
+    """Validate that required commands are configured for a module.
+
+    Only validates static (non-profile-based) required commands.
+    Profile-based commands (integration-tests, coverage, performance, quality-gate)
+    are generated from detected profiles and are not strictly required.
+    """
     modules = config.get("modules", {})
     module_config = modules.get(module)
 
@@ -656,6 +768,9 @@ def validate_required_commands(module: str, config: dict) -> list:
 
     missing = []
     for canonical, spec in CANONICAL_COMMANDS.items():
+        # Skip profile-based canonicals - they're generated from detected profiles
+        if canonical in PROFILE_BASED_CANONICALS:
+            continue
         if spec["required"] and module_type in spec["applicable_to"]:
             if canonical not in commands:
                 missing.append(canonical)

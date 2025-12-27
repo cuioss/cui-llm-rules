@@ -274,9 +274,29 @@ def test_persist_with_modules_adds_module_flag():
         assert '--module core' in core_cmd, f"Core module should have --module flag: {core_cmd}"
 
 
-def test_persist_quality_gate_has_profile():
-    """Test persist creates quality-gate command with pre-commit profile."""
+def test_persist_profile_based_commands_from_detection():
+    """Test persist generates profile-based commands from detected profiles.
+
+    Profile-dependent commands (integration-tests, coverage, quality-gate) are
+    dynamically generated from detected Maven profiles, not hardcoded.
+    """
     with PersistTestContext('maven') as temp_dir:
+        # Create pom.xml with profiles
+        pom_content = '''<project>
+            <profiles>
+                <profile>
+                    <id>pre-commit</id>
+                </profile>
+                <profile>
+                    <id>integration-tests</id>
+                </profile>
+                <profile>
+                    <id>jacoco</id>
+                </profile>
+            </profiles>
+        </project>'''
+        (temp_dir / 'pom.xml').write_text(pom_content)
+
         result = run_script(
             SCRIPT_PATH,
             'persist',
@@ -287,10 +307,47 @@ def test_persist_quality_gate_has_profile():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        quality_gate_cmd = config['modules']['default']['commands']['quality-gate']
+        commands = config['modules']['default']['commands']
 
-        # quality-gate uses pre-commit profile in the goals
-        assert '-Ppre-commit' in quality_gate_cmd, f"Should have -Ppre-commit in goals: {quality_gate_cmd}"
+        # Should have profile-based commands generated from detected profiles
+        assert 'quality-gate' in commands, "Should have quality-gate from pre-commit profile"
+        assert '-Ppre-commit' in commands['quality-gate'], "Should use detected pre-commit profile"
+
+        assert 'integration-tests' in commands, "Should have integration-tests from profile"
+        assert '-Pintegration-tests' in commands['integration-tests'], "Should use detected profile"
+
+        assert 'coverage' in commands, "Should have coverage from jacoco profile"
+        assert '-Pjacoco' in commands['coverage'], "Should use detected jacoco profile"
+
+
+def test_persist_reports_missing_profile_commands():
+    """Test persist reports missing profile-based commands when no matching profiles found."""
+    with PersistTestContext('maven') as temp_dir:
+        # Create pom.xml without profiles
+        (temp_dir / 'pom.xml').write_text('<project></project>')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'persist',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.returncode == 0, "Should succeed"
+
+        marshal_path = temp_dir / '.plan' / 'marshal.json'
+        config = json.loads(marshal_path.read_text())
+        commands = config['modules']['default']['commands']
+
+        # Should NOT have profile-based commands without profiles
+        assert 'quality-gate' not in commands, "Should not have quality-gate without profile"
+        assert 'integration-tests' not in commands, "Should not have integration-tests without profile"
+        assert 'coverage' not in commands, "Should not have coverage without profile"
+
+        # Should report missing profile commands
+        missing = config['modules']['default'].get('missing_profile_commands', [])
+        assert 'quality-gate' in missing, "Should report quality-gate as missing"
+        assert 'integration-tests' in missing, "Should report integration-tests as missing"
+        assert 'coverage' in missing, "Should report coverage as missing"
 
 
 def test_persist_dry_run_does_not_modify():
@@ -369,7 +426,8 @@ if __name__ == '__main__':
         test_persist_gradle_creates_commands,
         test_persist_npm_creates_commands,
         test_persist_with_modules_adds_module_flag,
-        test_persist_quality_gate_has_profile,
+        test_persist_profile_based_commands_from_detection,
+        test_persist_reports_missing_profile_commands,
         test_persist_dry_run_does_not_modify,
         test_persist_preserves_existing_config,
         test_persist_help,

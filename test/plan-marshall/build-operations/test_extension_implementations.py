@@ -24,8 +24,10 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from conftest import TestRunner, PROJECT_ROOT, MARKETPLACE_ROOT
 
-# Required canonical commands for build-providing bundles
-REQUIRED_CANONICAL_COMMANDS = ['module-tests', 'quality-gate', 'verify']
+# Required canonical commands for build-providing bundles (static mappings only)
+# NOTE: Profile-based commands (integration-tests, coverage, quality-gate, performance)
+# are NOT required in static mappings - they are generated from detected profiles
+REQUIRED_CANONICAL_COMMANDS = ['module-tests', 'verify']
 
 # Valid domain profile categories
 VALID_PROFILE_CATEGORIES = ['core', 'implementation', 'testing', 'quality']

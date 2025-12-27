@@ -70,8 +70,10 @@ OPTIONAL_METHODS = {
 # Valid profile categories for get_skill_domains()
 VALID_PROFILE_CATEGORIES = ['core', 'implementation', 'testing', 'quality']
 
-# Required canonical commands for bundles that provide build systems
-REQUIRED_CANONICAL_COMMANDS = ['module-tests', 'quality-gate', 'verify']
+# Required canonical commands for bundles that provide build systems (static mappings only)
+# NOTE: Profile-based commands (integration-tests, coverage, quality-gate, performance)
+# are NOT required in static mappings - they are generated from detected profiles
+REQUIRED_CANONICAL_COMMANDS = ['module-tests', 'verify']
 
 
 # =============================================================================

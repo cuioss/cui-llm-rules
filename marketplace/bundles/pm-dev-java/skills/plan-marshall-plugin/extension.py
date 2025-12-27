@@ -13,9 +13,6 @@ from extension_base import (
     CMD_COMPILE,
     CMD_TEST_COMPILE,
     CMD_MODULE_TESTS,
-    CMD_INTEGRATION_TESTS,
-    CMD_COVERAGE,
-    CMD_QUALITY_GATE,
     CMD_VERIFY,
     CMD_INSTALL,
     CMD_PACKAGE,
@@ -70,14 +67,15 @@ class Extension(ExtensionBase):
         def gradle(targets: str) -> str:
             return self.build_command_template("pm-dev-java", "gradle", targets)
 
+        # NOTE: Profile-dependent commands (integration-tests, coverage, quality-gate)
+        # are NOT included here. They are dynamically generated from detected profiles
+        # via get_profiles() + generate_profile_command(). This ensures portability
+        # across projects with different profile naming conventions.
         return {
             "maven": {
                 CMD_COMPILE: maven("compile"),
                 CMD_TEST_COMPILE: maven("test-compile"),
                 CMD_MODULE_TESTS: maven("clean test"),
-                CMD_INTEGRATION_TESTS: maven("clean verify -Pintegration-tests"),
-                CMD_COVERAGE: maven("clean verify -Pcoverage"),
-                CMD_QUALITY_GATE: maven("clean verify -Ppre-commit"),
                 CMD_VERIFY: maven("clean verify"),
                 CMD_INSTALL: maven("clean install"),
                 CMD_PACKAGE: maven("package"),
@@ -86,9 +84,6 @@ class Extension(ExtensionBase):
                 CMD_COMPILE: gradle("compileJava"),
                 CMD_TEST_COMPILE: gradle("testClasses"),
                 CMD_MODULE_TESTS: gradle("clean test"),
-                CMD_INTEGRATION_TESTS: gradle("clean integrationTest"),
-                CMD_COVERAGE: gradle("clean test jacocoTestReport"),
-                CMD_QUALITY_GATE: gradle("clean check"),
                 CMD_VERIFY: gradle("clean build"),
                 CMD_INSTALL: gradle("clean publishToMavenLocal"),
                 CMD_PACKAGE: gradle("clean assemble"),

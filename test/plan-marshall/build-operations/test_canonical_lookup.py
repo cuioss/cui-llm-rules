@@ -340,8 +340,12 @@ def test_validate_required_all_present():
     assert "success" in result.stdout.lower(), "Status should be success"
 
 
-def test_validate_required_missing_commands():
-    """Test validate-required detects missing commands."""
+def test_validate_required_with_all_static_commands():
+    """Test validate-required succeeds when static commands present.
+
+    The 'core' module fixture has module-tests and verify (static commands).
+    quality-gate is profile-based and not required for validation.
+    """
     fixtures = get_fixtures_dir()
     result = run_script(
         SCRIPT_PATH,
@@ -350,15 +354,18 @@ def test_validate_required_missing_commands():
         '--project-dir', str(fixtures / 'single-build-system')
     )
 
-    # core module is missing quality-gate which is required for jar type
-    assert not result.success, "Should fail when required commands missing"
-    assert "incomplete" in result.stdout.lower() or "missing" in result.stdout.lower(), \
-        f"Should indicate incomplete: {result.stdout}"
-    assert "quality-gate" in result.stdout, "Should list quality-gate as missing"
+    # core module has module-tests and verify which are the required static commands
+    # quality-gate is profile-based and not strictly required
+    assert result.success, f"Should succeed with static commands: {result.stdout}"
+    assert 'success' in result.stdout.lower(), "Should indicate success"
 
 
 def test_validate_required_pom_module():
-    """Test validate-required for pom-only module."""
+    """Test validate-required for pom-only module.
+
+    pom modules only require install (static command).
+    quality-gate is profile-based and not strictly required.
+    """
     fixtures = get_fixtures_dir()
     result = run_script(
         SCRIPT_PATH,
@@ -367,10 +374,9 @@ def test_validate_required_pom_module():
         '--project-dir', str(fixtures / 'pom-only-project')
     )
 
-    # pom modules have different required commands (only quality-gate is required for pom)
-    # Since bom only has install, it should be missing quality-gate
-    assert not result.success or "quality-gate" in result.stdout, \
-        "Should either succeed or show quality-gate as missing"
+    # pom modules only require install (static), quality-gate is profile-based
+    # bom has install, so it should succeed
+    assert result.success, f"Should succeed with install for pom: {result.stdout}"
 
 
 def test_validate_required_missing_module():
@@ -414,9 +420,13 @@ class MinimalModeContext:
 
 
 def test_persist_minimal_only_required():
-    """Test persist --minimal only generates required commands."""
+    """Test persist --minimal only generates required static commands.
+
+    In minimal mode, only required static commands are generated.
+    Profile-based commands require explicit --include-profiles.
+    """
     with MinimalModeContext() as temp_dir:
-        # Create a Maven jar project
+        # Create a Maven jar project (no profiles needed for static commands)
         (temp_dir / 'pom.xml').write_text('<project><packaging>jar</packaging></project>')
 
         result = run_script(
@@ -432,10 +442,12 @@ def test_persist_minimal_only_required():
         config = json.loads(marshal_path.read_text())
         commands = config['modules']['default']['commands']
 
-        # Required commands should be present
-        assert 'module-tests' in commands, "Should have module-tests (required)"
-        assert 'quality-gate' in commands, "Should have quality-gate (required)"
-        assert 'verify' in commands, "Should have verify (required)"
+        # Required static commands should be present
+        assert 'module-tests' in commands, "Should have module-tests (required static)"
+        assert 'verify' in commands, "Should have verify (required static)"
+
+        # Profile-based commands NOT present without --include-profiles
+        assert 'quality-gate' not in commands, "quality-gate requires --include-profiles in minimal mode"
 
         # Non-required commands should NOT be present
         assert 'compile' not in commands, "Should NOT have compile (not required)"
@@ -445,10 +457,13 @@ def test_persist_minimal_only_required():
 def test_persist_minimal_with_include_profiles():
     """Test persist --minimal with --include-profiles adds selected profiles."""
     with MinimalModeContext() as temp_dir:
-        # Create a Maven jar project with a profile
+        # Create a Maven jar project with profiles
         pom_content = '''<project>
             <packaging>jar</packaging>
             <profiles>
+                <profile>
+                    <id>pre-commit</id>
+                </profile>
                 <profile>
                     <id>coverage</id>
                 </profile>
@@ -473,10 +488,13 @@ def test_persist_minimal_with_include_profiles():
         config = json.loads(marshal_path.read_text())
         commands = config['modules']['default']['commands']
 
-        # Required commands should be present
-        assert 'module-tests' in commands, "Should have module-tests (required)"
-        assert 'quality-gate' in commands, "Should have quality-gate (required)"
-        assert 'verify' in commands, "Should have verify (required)"
+        # Required static commands should be present
+        assert 'module-tests' in commands, "Should have module-tests (required static)"
+        assert 'verify' in commands, "Should have verify (required static)"
+        # quality-gate is profile-based and requires matching profile (pre-commit)
+        # but in minimal mode, only explicitly included profiles are added
+        # Note: profile-based commands from required profiles may or may not be included
+        # depending on the --include-profiles filter
 
         # Included profile should be present
         assert 'coverage' in commands, "Should have coverage (explicitly included)"
@@ -514,10 +532,10 @@ def test_persist_include_profiles_filter():
         config = json.loads(marshal_path.read_text())
         commands = config['modules']['default']['commands']
 
-        # Required commands should be present (from --minimal base)
-        assert 'module-tests' in commands, "Should have module-tests (required)"
-        assert 'quality-gate' in commands, "Should have quality-gate (required)"
-        assert 'verify' in commands, "Should have verify (required)"
+        # Required static commands should be present (from --minimal base)
+        assert 'module-tests' in commands, "Should have module-tests (required static)"
+        assert 'verify' in commands, "Should have verify (required static)"
+        # Note: quality-gate is profile-based and not in --include-profiles filter
 
         # Included profiles should be present
         assert 'coverage' in commands, "Should have coverage (explicitly included)"
@@ -550,7 +568,7 @@ if __name__ == '__main__':
             test_get_available_commands_pom_only,
             # Validate-required tests
             test_validate_required_all_present,
-            test_validate_required_missing_commands,
+            test_validate_required_with_all_static_commands,
             test_validate_required_pom_module,
             test_validate_required_missing_module,
             # Minimal mode tests
