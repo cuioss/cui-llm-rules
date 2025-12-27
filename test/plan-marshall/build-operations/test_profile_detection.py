@@ -398,6 +398,100 @@ def test_classify_profile_unknown():
         assert 'custom-unknown-profile' in result.stdout, "Should list the profile"
 
 
+def test_classify_profile_quality_gate_aliases():
+    """Test profile classification for quality-gate aliases.
+
+    Tests that aliases defined in CANONICAL_COMMANDS are correctly mapped.
+    """
+    with ProfileTestContext() as temp_dir:
+        # Test 'pre-commit' alias -> quality-gate
+        (temp_dir / 'pom.xml').write_text('''<project>
+            <profiles>
+                <profile><id>pre-commit</id></profile>
+            </profiles>
+        </project>''')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-profiles',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.returncode == 0, f"Should succeed: {result.stderr}"
+        assert 'quality-gate' in result.stdout, \
+            f"pre-commit should classify as quality-gate: {result.stdout}"
+
+
+def test_classify_profile_performance_aliases():
+    """Test profile classification for performance aliases.
+
+    Tests that aliases defined in CANONICAL_COMMANDS are correctly mapped.
+    """
+    with ProfileTestContext() as temp_dir:
+        # Test 'benchmark' alias -> performance
+        (temp_dir / 'pom.xml').write_text('''<project>
+            <profiles>
+                <profile><id>benchmark</id></profile>
+            </profiles>
+        </project>''')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-profiles',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.returncode == 0, f"Should succeed: {result.stderr}"
+        assert 'performance' in result.stdout, \
+            f"benchmark should classify as performance: {result.stdout}"
+
+
+def test_classify_profile_coverage_jacoco_alias():
+    """Test profile classification for coverage jacoco alias.
+
+    Tests that 'jacoco' alias maps to coverage canonical command.
+    """
+    with ProfileTestContext() as temp_dir:
+        (temp_dir / 'pom.xml').write_text('''<project>
+            <profiles>
+                <profile><id>jacoco</id></profile>
+            </profiles>
+        </project>''')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-profiles',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.returncode == 0, f"Should succeed: {result.stderr}"
+        assert 'coverage' in result.stdout, \
+            f"jacoco should classify as coverage: {result.stdout}"
+
+
+def test_classify_profile_integration_e2e_alias():
+    """Test profile classification for integration-tests e2e alias.
+
+    Tests that 'e2e' alias maps to integration-tests canonical command.
+    """
+    with ProfileTestContext() as temp_dir:
+        (temp_dir / 'pom.xml').write_text('''<project>
+            <profiles>
+                <profile><id>e2e</id></profile>
+            </profiles>
+        </project>''')
+
+        result = run_script(
+            SCRIPT_PATH,
+            'detect-profiles',
+            '--project-dir', str(temp_dir)
+        )
+
+        assert result.returncode == 0, f"Should succeed: {result.stderr}"
+        assert 'integration-tests' in result.stdout, \
+            f"e2e should classify as integration-tests: {result.stdout}"
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -421,5 +515,10 @@ if __name__ == '__main__':
         test_classify_profile_direct_match,
         test_classify_profile_partial_match,
         test_classify_profile_unknown,
+        # alias tests (one per canonical command)
+        test_classify_profile_quality_gate_aliases,
+        test_classify_profile_performance_aliases,
+        test_classify_profile_coverage_jacoco_alias,
+        test_classify_profile_integration_e2e_alias,
     ])
     sys.exit(runner.run())
