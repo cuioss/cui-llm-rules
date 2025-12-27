@@ -8,10 +8,10 @@ Sequential structured setup for new projects. Execute steps in order.
 
 Configure `.gitignore` for `.plan/` directory.
 
-**BOOTSTRAP**: Use DIRECT Python call with glob:
+**BOOTSTRAP**: Use DIRECT Python call (no executor yet):
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marshall-steward/scripts/gitignore-setup.py
+python3 ${PLUGIN_ROOT}/plan-marshall/skills/marshall-steward/scripts/gitignore-setup.py
 ```
 
 **Output (TOON)**:
@@ -35,10 +35,10 @@ entries_added	2
 
 Check if project docs need `.plan/temp/` documentation:
 
-**BOOTSTRAP**: Use DIRECT Python call with glob (executor not yet available):
+**BOOTSTRAP**: Use DIRECT Python call (executor not yet available):
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marshall-steward/scripts/determine-mode.py check-docs
+python3 ${PLUGIN_ROOT}/plan-marshall/skills/marshall-steward/scripts/determine-mode.py check-docs
 ```
 
 **Output (TOON)**:
@@ -65,10 +65,10 @@ If `status` is `needs_update`, add to each listed file's appropriate section:
 
 Add the executor permission to project-local settings so script execution doesn't prompt:
 
-**BOOTSTRAP**: Use DIRECT Python call with glob:
+**BOOTSTRAP**: Use DIRECT Python call (no executor yet):
 
 ```bash
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/permission-fix/scripts/permission-fix.py ensure \
+python3 ${PLUGIN_ROOT}/plan-marshall/skills/permission-fix/scripts/permission-fix.py ensure \
   --permissions "Bash(python3 .plan/execute-script.py *)" \
   --target project
 ```
@@ -92,44 +92,30 @@ This ensures script execution works without prompting, independent of global set
 
 ## Step 2: Generate Executor
 
-**BOOTSTRAP**: Since execute-script.py doesn't exist yet, use DIRECT Python call with glob:
+**BOOTSTRAP**: Use DIRECT Python call with glob (executor doesn't exist yet):
 
 ```bash
-# Direct call - no executor dependency (auto-detects marketplace or plugin-cache)
-python3 ${PLUGIN_ROOT}/plan-marshall/*/skills/marketplace-inventory/scripts/scan-marketplace-inventory.py \
-  --resource-types scripts
+python3 ${PLUGIN_ROOT}/plan-marshall/skills/script-executor/scripts/generate-executor.py generate
 ```
 
-Parse the JSON output to extract script mappings. The output contains:
-```json
-{
-  "bundles": [{
-    "name": "planning",
-    "scripts": [{
-      "name": "manage-files",
-      "skill": "manage-files",
-      "notation": "pm-workflow:manage-files:manage-files",
-      "path_formats": { "absolute": "/abs/path/manage-files.py" }
-    }]
-  }]
-}
+**Output (TOON)**:
+```toon
+status	scripts_discovered	executor_generated	logs_cleaned
+success	109	.plan/execute-script.py	0
 ```
 
-**Generate executor**:
-1. Read template from: `${PLUGIN_ROOT}/plan-marshall/*/skills/script-executor/templates/execute-script.py.template`
-2. Replace `{{SCRIPT_MAPPINGS}}` with notation→path mappings
-3. Replace `{{EXECUTION_LOG_DIR}}` with absolute path to executor scripts directory
-4. Write to: `.plan/execute-script.py`
+The script auto-detects the plugin cache location and generates `.plan/execute-script.py` with all script mappings embedded.
 
-**Verify**:
+**Verify syntax**:
 ```bash
 python3 -m py_compile .plan/execute-script.py && echo "Executor syntax OK"
 ```
 
 **Ensure executor permission** (prevents permission prompts when using executor):
 ```bash
-python3 .plan/execute-script.py plan-marshall:marketplace-sync:marketplace-sync ensure-executor \
-  --target global
+python3 ${PLUGIN_ROOT}/plan-marshall/skills/permission-fix/scripts/permission-fix.py ensure \
+  --permissions "Bash(python3 .plan/execute-script.py *)" \
+  --target project
 ```
 
 **Output**: "Executor ready with N script mappings"
