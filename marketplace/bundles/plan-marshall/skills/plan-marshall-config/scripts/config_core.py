@@ -55,9 +55,22 @@ def load_config() -> dict:
 
 
 def save_config(config: dict) -> None:
-    """Save config to marshal.json."""
+    """Save config to marshal.json with ordered keys."""
     MARSHAL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    MARSHAL_PATH.write_text(json.dumps(config, indent=2), encoding='utf-8')
+
+    # Canonical key order for marshal.json
+    key_order = ["ci", "plan", "skill_domains", "modules", "system"]
+
+    # Build ordered dict: known keys first in order, then any remaining keys
+    ordered = {}
+    for key in key_order:
+        if key in config:
+            ordered[key] = config[key]
+    for key in config:
+        if key not in ordered:
+            ordered[key] = config[key]
+
+    MARSHAL_PATH.write_text(json.dumps(ordered, indent=2), encoding='utf-8')
 
 
 def load_run_config() -> dict:

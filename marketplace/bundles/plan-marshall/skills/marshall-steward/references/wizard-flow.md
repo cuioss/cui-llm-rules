@@ -416,31 +416,43 @@ python3 .plan/execute-script.py plan-marshall:plan-marshall-config:plan-marshall
 
 The `applicable` flag indicates whether the domain's extension detected this project type (via `is_applicable()`).
 
-**Step 4d-2: User domain selection**
+**Step 4d-2: Auto-configure detected domains**
 
-Build options from `discovered_domains`. **Pre-select domains where `applicable: true`**.
+All domains with `applicable: true` are automatically configured without user interaction:
+
+```
+Detected domains (auto-configured):
+- java (pm-dev-java)
+- java-cui (pm-dev-java-cui)
+- requirements (pm-requirements)
+```
+
+**Step 4d-3: User selection for optional domains**
+
+Present non-applicable domains for optional selection. **Note: AskUserQuestion supports max 4 options.**
 
 ```yaml
 AskUserQuestion:
-  question: "Select skill domains to enable for this project:"
-  header: "Skill Domains"
+  question: "Enable additional skill domains?"
+  header: "Optional Domains"
   multiSelect: true
   options:
-    # Build dynamically from discovered_domains
-    # Pre-select domains where applicable=true
-    - label: "Java Development [DETECTED]"        # applicable=true → pre-selected
-      description: "Java code patterns, CDI, JUnit (pm-dev-java)"
-    - label: "CUI Java Development [DETECTED]"    # applicable=true → pre-selected
-      description: "CUI logging, testing, HTTP (pm-dev-java-cui)"
-    - label: "JavaScript Development"              # applicable=false → not pre-selected
+    # Show up to 4 non-applicable domains
+    - label: "JavaScript Development"
       description: "Modern JS, ESLint, Jest (pm-dev-frontend)"
-    - label: "Plugin Development"                  # applicable=false → not pre-selected
-      description: "Claude Code components (pm-plugin-development)"
-    - label: "Requirements Engineering"            # applicable=false → not pre-selected
-      description: "User stories and specs (pm-requirements)"
+    - label: "Plugin Development"
+      description: "Claude Code marketplace (pm-plugin-development)"
+    - label: "Documentation"
+      description: "AsciiDoc, ADRs (pm-documents)"
+    # If more than 4 available, show most relevant 4
 ```
 
-**Selection Rule**: Show ALL available domains. Pre-select domains with `applicable: true`. User can add/remove any domain.
+If more than 4 optional domains exist, prioritize by relevance or show multiple questions.
+
+**Selection Rule**:
+1. Auto-configure all `applicable: true` domains
+2. Ask about optional domains (max 4 per question)
+3. To add more domains later: `skill-domains configure --domains "domain1,domain2"`
 
 **Step 4d-3: Configure selected domains**
 

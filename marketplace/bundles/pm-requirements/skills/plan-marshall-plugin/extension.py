@@ -8,6 +8,8 @@ from pathlib import Path
 
 from extension_base import ExtensionBase
 
+REQUIREMENTS_FILE = "Requirements.adoc"
+
 
 class Extension(ExtensionBase):
     """Requirements extension for pm-requirements bundle."""
@@ -16,8 +18,9 @@ class Extension(ExtensionBase):
         """Check if requirements bundle applies to the project."""
         root = Path(project_root)
         return (
-            (root / "doc" / "spec" / "Requirements.adoc").exists() or
-            (root / "Requirements.adoc").exists()
+            (root / "doc" / "spec" / REQUIREMENTS_FILE).exists() or
+            (root / "doc" / REQUIREMENTS_FILE).exists() or
+            (root / REQUIREMENTS_FILE).exists()
         )
 
     def provides_triage(self) -> str | None:
