@@ -12,7 +12,7 @@ from config_core import (
     success_exit,
 )
 from config_defaults import get_default_config
-from config_detection import detect_build_systems, detect_domains
+from config_detection import detect_domains
 from cmd_skill_domains import load_domain_config_from_bundle
 
 
@@ -23,10 +23,7 @@ def cmd_init(args) -> int:
 
     config = get_default_config()
 
-    # Auto-detect build systems
-    detected_bs = detect_build_systems()
-    if detected_bs:
-        config['build_systems'] = detected_bs
+    # NOTE: build_systems is NOT persisted - determined at runtime via extensions
 
     # Auto-detect technical domains (returns list of domain keys)
     detected_keys = detect_domains()
@@ -42,6 +39,5 @@ def cmd_init(args) -> int:
     save_config(config)
     return success_exit({
         "created": str(MARSHAL_PATH),
-        "build_systems_detected": len(detected_bs),
         "domains_detected": detected_keys
     })

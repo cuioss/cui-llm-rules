@@ -75,6 +75,9 @@ def get_default_config() -> dict:
     """Get complete default marshal.json configuration.
 
     Returns a new dict each time to avoid mutation issues.
+
+    NOTE: build_systems is NOT included - it's determined at runtime
+    via extension discovery, not persisted in marshal.json.
     """
     import copy
     return {
@@ -82,7 +85,6 @@ def get_default_config() -> dict:
             "system": copy.deepcopy(DEFAULT_SYSTEM_DOMAIN)
         },
         "modules": {},
-        "build_systems": [],
         "system": {
             "retention": copy.deepcopy(DEFAULT_SYSTEM_RETENTION)
         },

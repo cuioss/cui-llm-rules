@@ -84,6 +84,51 @@ def test_init_preserves_system_domain():
             "Should include system domain"
 
 
+def test_init_no_build_systems_key():
+    """Test init does NOT create build_systems key in marshal.json.
+
+    Build systems are determined at runtime via extension discovery,
+    not persisted in marshal.json.
+    """
+    with PlanTestContext() as ctx:
+        result = run_script(SCRIPT_PATH, 'init')
+
+        assert result.success, f"Init should succeed: {result.stderr}"
+
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        config = json.loads(marshal_path.read_text())
+        assert 'build_systems' not in config, \
+            "marshal.json should NOT contain build_systems key"
+
+
+def test_init_key_ordering():
+    """Test init creates marshal.json with correct key order.
+
+    Canonical order: ci, plan, skill_domains, modules, system
+    """
+    with PlanTestContext() as ctx:
+        result = run_script(SCRIPT_PATH, 'init')
+
+        assert result.success, f"Init should succeed: {result.stderr}"
+
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        content = marshal_path.read_text()
+        config = json.loads(content)
+
+        # Get actual key order from JSON
+        actual_keys = list(config.keys())
+
+        # Expected order (only keys that exist after init)
+        expected_order = ["plan", "skill_domains", "modules", "system"]
+
+        # Filter to only keys that exist
+        actual_order = [k for k in actual_keys if k in expected_order]
+        expected_filtered = [k for k in expected_order if k in actual_keys]
+
+        assert actual_order == expected_filtered, \
+            f"Key order should be {expected_filtered}, got {actual_order}"
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -96,5 +141,7 @@ if __name__ == '__main__':
         test_init_force_overwrites,
         test_init_creates_parent_directory,
         test_init_preserves_system_domain,
+        test_init_no_build_systems_key,
+        test_init_key_ordering,
     ])
     sys.exit(runner.run())
