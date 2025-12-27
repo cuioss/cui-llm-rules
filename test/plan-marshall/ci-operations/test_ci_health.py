@@ -126,6 +126,39 @@ def test_help_flag():
     assert 'persist' in result.stdout
 
 
+def test_persist_key_ordering():
+    """Test persist maintains canonical key ordering in marshal.json.
+
+    Canonical order: ci, plan, skill_domains, modules, system
+    """
+    with PlanTestContext(plan_id='test-ordering') as ctx:
+        # Create marshal.json with keys in WRONG order
+        marshal_path = ctx.fixture_dir / 'marshal.json'
+        marshal_path.write_text(json.dumps({
+            "system": {"retention": {}},
+            "modules": {},
+            "plan": {"defaults": {}},
+            "skill_domains": {"system": {}}
+        }, indent=2))
+
+        result = run_script(SCRIPT_PATH, 'persist', '--plan-dir', str(ctx.fixture_dir))
+        assert result.success, f"Script failed: {result.stderr}"
+
+        # Verify key ordering
+        updated = json.loads(marshal_path.read_text())
+        actual_keys = list(updated.keys())
+
+        # Expected order (ci should be first since persist adds it)
+        expected_order = ["ci", "plan", "skill_domains", "modules", "system"]
+
+        # Filter to only keys that exist
+        actual_order = [k for k in actual_keys if k in expected_order]
+        expected_filtered = [k for k in expected_order if k in actual_keys]
+
+        assert actual_order == expected_filtered, \
+            f"Key order should be {expected_filtered}, got {actual_order}"
+
+
 if __name__ == '__main__':
     runner = TestRunner()
     runner.add_tests([
@@ -138,5 +171,6 @@ if __name__ == '__main__':
         test_persist_with_marshal_json,
         test_persist_generates_commands,
         test_help_flag,
+        test_persist_key_ordering,
     ])
     sys.exit(runner.run())

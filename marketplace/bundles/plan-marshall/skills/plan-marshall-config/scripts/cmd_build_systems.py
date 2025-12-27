@@ -2,14 +2,16 @@
 Build systems command handlers for plan-marshall-config.
 
 Handles: build-systems
+
+NOTE: Build systems are determined at runtime via BUILD_SYSTEM_DEFAULTS,
+not persisted in marshal.json. Commands are stored in modules, not at the
+top level. This module provides read-only access to available build systems.
 """
 
 from config_core import (
     EXIT_ERROR,
     MarshalNotInitializedError,
     require_initialized,
-    load_config,
-    save_config,
     error_exit,
     success_exit,
 )
@@ -18,93 +20,70 @@ from config_detection import detect_build_systems
 
 
 def cmd_build_systems(args) -> int:
-    """Handle build-systems noun."""
+    """Handle build-systems noun.
+
+    Build systems are defined in BUILD_SYSTEM_DEFAULTS (static configuration).
+    This provides read-only access - add/remove operations are not supported
+    as build systems are not persisted in marshal.json.
+    """
     try:
         require_initialized()
     except MarshalNotInitializedError as e:
         return error_exit(str(e))
 
-    config = load_config()
-    build_systems = config.get('build_systems', [])
-
     if args.verb == 'list':
-        systems = [{"system": bs.get("system"), "skill": bs.get("skill")} for bs in build_systems]
+        # Return all known build systems from defaults
+        systems = [
+            {"system": name, "skill": config["skill"]}
+            for name, config in BUILD_SYSTEM_DEFAULTS.items()
+        ]
         return success_exit({"build_systems": systems, "count": len(systems)})
 
     elif args.verb == 'get':
         system = args.system
-        for bs in build_systems:
-            if bs.get("system") == system:
-                return success_exit({
-                    "system": system,
-                    "skill": bs.get("skill"),
-                    "commands": bs.get("commands", {})
-                })
-        return error_exit(f"Build system not found: {system}")
+        if system in BUILD_SYSTEM_DEFAULTS:
+            return success_exit({
+                "system": system,
+                "skill": BUILD_SYSTEM_DEFAULTS[system]["skill"],
+                "commands": {}  # Commands are per-module, not global
+            })
+        return error_exit(f"Unknown build system: {system}")
 
     elif args.verb == 'get-command':
-        system = args.system
-        label = args.label
-        for bs in build_systems:
-            if bs.get("system") == system:
-                commands = bs.get("commands", {})
-                if label in commands:
-                    return success_exit({
-                        "system": system,
-                        "label": label,
-                        "command": commands[label],
-                        "skill": bs.get("skill")
-                    })
-                return error_exit(f"Command label not found: {label}")
-        return error_exit(f"Build system not found: {system}")
+        # Build system commands are per-module now, use modules get-command
+        return error_exit(
+            "Build commands are per-module. Use: modules get-command --module <name> --label <label>"
+        )
 
     elif args.verb == 'add':
         system = args.system
-        for bs in build_systems:
-            if bs.get("system") == system:
-                return error_exit(f"Build system already exists: {system}")
-
         if system in BUILD_SYSTEM_DEFAULTS:
-            defaults = BUILD_SYSTEM_DEFAULTS[system]
-            new_system = {
-                "system": system,
-                "skill": defaults["skill"]
-            }
-        else:
-            new_system = {
-                "system": system,
-                "skill": "pm-dev-java:plan-marshall-plugin"
-            }
-
-        build_systems.append(new_system)
-        config['build_systems'] = build_systems
-        save_config(config)
-        return success_exit({"system": system, "added": new_system})
+            return error_exit(f"Build system already exists: {system}")
+        # Can't add dynamically - build systems are defined in code
+        return error_exit(
+            f"Cannot add build system '{system}'. "
+            "Build systems are defined in BUILD_SYSTEM_DEFAULTS."
+        )
 
     elif args.verb == 'remove':
         system = args.system
-        original_count = len(build_systems)
-        build_systems = [bs for bs in build_systems if bs.get("system") != system]
-        if len(build_systems) == original_count:
-            return error_exit(f"Build system not found: {system}")
-        config['build_systems'] = build_systems
-        save_config(config)
-        return success_exit({"system": system, "removed": True})
+        if system not in BUILD_SYSTEM_DEFAULTS:
+            return error_exit(f"Unknown build system: {system}")
+        # Can't remove - build systems are defined in code
+        return error_exit(
+            f"Cannot remove build system '{system}'. "
+            "Build systems are defined in BUILD_SYSTEM_DEFAULTS."
+        )
 
     elif args.verb == 'detect':
+        # Detect which build systems are present in the project
         detected = detect_build_systems()
-        # Merge with existing (don't overwrite customizations)
-        existing_systems = {bs.get("system") for bs in build_systems}
-        for new_bs in detected:
-            if new_bs["system"] not in existing_systems:
-                build_systems.append(new_bs)
-        config['build_systems'] = build_systems
-        save_config(config)
         detected_names = [bs["system"] for bs in detected]
         return success_exit({
             "detected": detected_names,
             "count": len(detected_names),
-            "total": len(build_systems)
+            "note": "Build systems detected from project files. "
+                    "Use 'modules detect' to configure module-level build systems."
         })
 
     return EXIT_ERROR

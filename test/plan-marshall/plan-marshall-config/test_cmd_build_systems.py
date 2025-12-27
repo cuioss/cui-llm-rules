@@ -2,7 +2,10 @@
 """Tests for build-systems command in plan-marshall-config.
 
 Tests build-systems command variants and edge cases.
-Note: build_systems is now detection-only. Commands are stored in modules.
+
+NOTE: Build systems are defined statically in BUILD_SYSTEM_DEFAULTS.
+They are not persisted in marshal.json - that key was removed.
+Commands are stored per-module, not globally.
 """
 
 import sys
@@ -18,56 +21,54 @@ from test_helpers import SCRIPT_PATH, create_marshal_json
 # =============================================================================
 
 def test_build_systems_list():
-    """Test build-systems list."""
+    """Test build-systems list returns static defaults."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'build-systems', 'list')
 
         assert result.success, f"Should succeed: {result.stderr}"
+        # Returns all BUILD_SYSTEM_DEFAULTS (maven, gradle, npm)
         assert 'maven' in result.stdout.lower()
+        assert 'gradle' in result.stdout.lower()
         assert 'npm' in result.stdout.lower()
 
 
 def test_build_systems_get():
-    """Test build-systems get (detection reference only)."""
+    """Test build-systems get returns static defaults."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'maven')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        # Build systems now reference domain-specific extension plugins
+        # Build systems reference domain-specific extension plugins
         assert 'pm-dev-java:plan-marshall-plugin' in result.stdout
 
 
-def test_build_systems_add():
-    """Test build-systems add."""
+def test_build_systems_add_not_supported():
+    """Test build-systems add returns error (static config)."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
-        result = run_script(SCRIPT_PATH, 'build-systems', 'add', '--system', 'gradle')
+        # Try to add a new build system
+        result = run_script(SCRIPT_PATH, 'build-systems', 'add', '--system', 'cargo')
 
-        assert result.success, f"Should succeed: {result.stderr}"
-
-        # Verify added
-        verify = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'gradle')
-        # Gradle is handled by pm-dev-java extension
-        assert 'pm-dev-java:plan-marshall-plugin' in verify.stdout
+        # Should fail - can't add to static defaults
+        assert 'error' in result.stdout.lower()
+        assert 'cannot add' in result.stdout.lower() or 'BUILD_SYSTEM_DEFAULTS' in result.stdout
 
 
-def test_build_systems_remove():
-    """Test build-systems remove."""
+def test_build_systems_remove_not_supported():
+    """Test build-systems remove returns error (static config)."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'build-systems', 'remove', '--system', 'npm')
 
-        assert result.success, f"Should succeed: {result.stderr}"
-
-        # Verify removed
-        verify = run_script(SCRIPT_PATH, 'build-systems', 'get', '--system', 'npm')
-        assert 'error' in verify.stdout.lower()
+        # Should fail - can't remove from static defaults
+        assert 'error' in result.stdout.lower()
+        assert 'cannot remove' in result.stdout.lower() or 'BUILD_SYSTEM_DEFAULTS' in result.stdout
 
 
 def test_build_systems_get_unknown():
@@ -80,14 +81,27 @@ def test_build_systems_get_unknown():
         assert 'error' in result.stdout.lower(), "Should report error"
 
 
-def test_build_systems_add_duplicate_fails():
-    """Test build-systems add fails for existing system."""
+def test_build_systems_add_existing():
+    """Test build-systems add for existing system returns error."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'build-systems', 'add', '--system', 'maven')
 
+        # Should fail - maven already in defaults
         assert 'error' in result.stdout.lower() or 'exists' in result.stdout.lower()
+
+
+def test_build_systems_detect():
+    """Test build-systems detect returns detected systems."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(SCRIPT_PATH, 'build-systems', 'detect')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Should include note about module-level configuration
+        assert 'detected' in result.stdout.lower()
 
 
 # =============================================================================
@@ -99,9 +113,10 @@ if __name__ == '__main__':
     runner.add_tests([
         test_build_systems_list,
         test_build_systems_get,
-        test_build_systems_add,
-        test_build_systems_remove,
+        test_build_systems_add_not_supported,
+        test_build_systems_remove_not_supported,
         test_build_systems_get_unknown,
-        test_build_systems_add_duplicate_fails,
+        test_build_systems_add_existing,
+        test_build_systems_detect,
     ])
     sys.exit(runner.run())

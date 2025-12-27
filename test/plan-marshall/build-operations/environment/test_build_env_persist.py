@@ -41,8 +41,17 @@ class PersistTestContext:
 
     def _setup_project(self):
         """Create test project with build files."""
-        # Create .plan directory
-        (self.temp_dir / '.plan').mkdir()
+        # Create .plan directory with initial marshal.json
+        plan_dir = self.temp_dir / '.plan'
+        plan_dir.mkdir()
+
+        # Create initial marshal.json (required by plan-marshall-config)
+        (plan_dir / 'marshal.json').write_text(json.dumps({
+            "skill_domains": {"system": {}},
+            "modules": {},
+            "system": {"retention": {}},
+            "plan": {"defaults": {}}
+        }, indent=2))
 
         if self.build_system == 'maven':
             self._create_maven_project()
@@ -284,9 +293,12 @@ def test_persist_quality_gate_has_profile():
         assert '-Ppre-commit' in quality_gate_cmd, f"Should have -Ppre-commit in goals: {quality_gate_cmd}"
 
 
-def test_persist_dry_run_does_not_save():
-    """Test persist with --dry-run does not save marshal.json."""
+def test_persist_dry_run_does_not_modify():
+    """Test persist with --dry-run does not modify marshal.json."""
     with PersistTestContext('maven') as temp_dir:
+        marshal_path = temp_dir / '.plan' / 'marshal.json'
+        original_content = marshal_path.read_text()
+
         result = run_script(
             SCRIPT_PATH,
             'persist',
@@ -297,8 +309,8 @@ def test_persist_dry_run_does_not_save():
         assert result.returncode == 0, "Should succeed"
         assert 'status: success' in result.stdout, "Should report success"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        assert not marshal_path.exists(), "Should NOT create marshal.json in dry run"
+        # Verify marshal.json was NOT modified
+        assert marshal_path.read_text() == original_content, "Should NOT modify marshal.json in dry run"
 
 
 def test_persist_preserves_existing_config():
@@ -358,7 +370,7 @@ if __name__ == '__main__':
         test_persist_npm_creates_commands,
         test_persist_with_modules_adds_module_flag,
         test_persist_quality_gate_has_profile,
-        test_persist_dry_run_does_not_save,
+        test_persist_dry_run_does_not_modify,
         test_persist_preserves_existing_config,
         test_persist_help,
     ])

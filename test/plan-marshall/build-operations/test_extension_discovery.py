@@ -35,7 +35,15 @@ class ExtensionTestContext:
 
     def __enter__(self):
         self.temp_dir = Path(tempfile.mkdtemp())
-        (self.temp_dir / '.plan').mkdir()
+        plan_dir = self.temp_dir / '.plan'
+        plan_dir.mkdir()
+        # Create initial marshal.json (required by plan-marshall-config)
+        (plan_dir / 'marshal.json').write_text(json.dumps({
+            "skill_domains": {"system": {}},
+            "modules": {},
+            "system": {"retention": {}},
+            "plan": {"defaults": {}}
+        }, indent=2))
         return self.temp_dir
 
     def __exit__(self, exc_type, exc_val, exc_tb):

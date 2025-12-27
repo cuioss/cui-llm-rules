@@ -4,6 +4,7 @@ Modules command handlers for plan-marshall-config.
 Handles: modules
 """
 
+import json
 from pathlib import Path
 
 from config_core import (
@@ -262,6 +263,21 @@ def cmd_modules(args) -> int:
             "detected": detected,
             "count": len(detected),
             "total_modules": len(modules)
+        })
+
+    elif args.verb == 'persist-all':
+        # Replace entire modules section with provided JSON
+        # Used by build_env.py to persist detected modules with commands
+        try:
+            new_modules = json.loads(args.modules_json)
+        except json.JSONDecodeError as e:
+            return error_exit(f"Invalid JSON for --modules-json: {e}")
+
+        config['modules'] = new_modules
+        save_config(config)
+        return success_exit({
+            "modules_count": len(new_modules),
+            "action": "persist-all"
         })
 
     return EXIT_ERROR

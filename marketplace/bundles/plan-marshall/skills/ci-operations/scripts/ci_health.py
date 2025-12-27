@@ -282,13 +282,10 @@ def generate_ci_commands(provider: str) -> dict:
 def cmd_persist(args: argparse.Namespace) -> int:
     """Handle the 'persist' subcommand.
 
-    Splits CI config between two files:
-    - marshal.json (shared): provider, repo_url, detected_at, commands
-    - run-configuration.json (local): authenticated_tools, verified_at
+    Delegates to plan-marshall-config ci persist for centralized marshal.json writes.
     """
     plan_dir = Path(args.plan_dir)
     marshal_path = plan_dir / "marshal.json"
-    run_config_path = plan_dir / "run-configuration.json"
 
     if not marshal_path.exists():
         return error_json(f"marshal.json not found at {marshal_path}. Run /marshall-steward first.")
@@ -306,49 +303,35 @@ def cmd_persist(args: argparse.Namespace) -> int:
         if tool == "git" and tool_status["installed"]:
             git_present = True
 
-    # Timestamps
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-
     # Generate static commands for provider
     ci_commands = generate_ci_commands(provider_result["provider"])
 
-    # Build marshal.json CI config (project-level, shared)
-    marshal_ci_config = {
-        "repo_url": provider_result["repo_url"],
-        "provider": provider_result["provider"],
-        "detected_at": now,
-        "commands": ci_commands,
-    }
+    # Build command to call plan-marshall-config ci persist
+    # This centralizes all marshal.json writes through plan-marshall-config
+    # Path: ci-operations/scripts -> ci-operations -> skills -> plan-marshall -> skills -> plan-marshall-config/scripts
+    config_script = Path(__file__).parent.parent.parent / "plan-marshall-config" / "scripts" / "plan-marshall-config.py"
 
-    # Build run-configuration.json CI config (local, machine-specific)
-    run_config_ci = {
-        "git_present": git_present,
-        "authenticated_tools": authenticated_tools,
-        "verified_at": now,
-    }
+    cmd = [
+        "python3", str(config_script),
+        "ci", "persist",
+        "--provider", provider_result["provider"],
+        "--repo-url", provider_result["repo_url"] or "",
+        "--commands", json.dumps(ci_commands),
+    ]
 
-    # Update marshal.json
-    try:
-        config = json.loads(marshal_path.read_text(encoding="utf-8"))
-        config["ci"] = marshal_ci_config
-        marshal_path.write_text(json.dumps(config, indent=2), encoding="utf-8")
-    except json.JSONDecodeError as e:
-        return error_json(f"Invalid JSON in marshal.json: {e}")
-    except Exception as e:
-        return error_json(f"Failed to update marshal.json: {e}")
+    # Add optional tools and git_present
+    if authenticated_tools:
+        cmd.extend(["--tools", ",".join(authenticated_tools)])
+        cmd.extend(["--git-present", str(git_present).lower()])
 
-    # Update run-configuration.json
-    try:
-        if run_config_path.exists():
-            run_config = json.loads(run_config_path.read_text(encoding="utf-8"))
-        else:
-            run_config = {"version": 1, "commands": {}}
-        run_config["ci"] = run_config_ci
-        run_config_path.write_text(json.dumps(run_config, indent=2), encoding="utf-8")
-    except json.JSONDecodeError as e:
-        return error_json(f"Invalid JSON in run-configuration.json: {e}")
-    except Exception as e:
-        return error_json(f"Failed to update run-configuration.json: {e}")
+    # Execute with PLAN_BASE_DIR set to the plan directory
+    import os
+    env = os.environ.copy()
+    env["PLAN_BASE_DIR"] = str(plan_dir)
+
+    result = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=30)
+    if result.returncode != 0:
+        return error_json(f"Failed to persist CI config: {result.stderr or result.stdout}")
 
     # Output in TOON format
     print("status: success")

@@ -129,6 +129,9 @@ def main():
     mod_rem = mod_sub.add_parser('remove', help='Remove module')
     mod_rem.add_argument('--module', required=True, help='Module name')
 
+    mod_persist = mod_sub.add_parser('persist-all', help='Persist full modules config (from build_env.py)')
+    mod_persist.add_argument('--modules-json', required=True, help='Full modules config as JSON')
+
     # --- build-systems ---
     p_bs = subparsers.add_parser('build-systems', help='Manage build system configuration')
     bs_sub = p_bs.add_subparsers(dest='verb', help='Operation')
@@ -192,6 +195,13 @@ def main():
 
     ci_set_tools = ci_sub.add_parser('set-tools', help='Set authenticated tools')
     ci_set_tools.add_argument('--tools', required=True, help='Comma-separated tool names')
+
+    ci_persist = ci_sub.add_parser('persist', help='Persist full CI config (provider, commands, tools)')
+    ci_persist.add_argument('--provider', required=True, help='Provider name (github, gitlab, unknown)')
+    ci_persist.add_argument('--repo-url', required=True, help='Repository URL')
+    ci_persist.add_argument('--commands', help='JSON object of command name to command string')
+    ci_persist.add_argument('--tools', help='Comma-separated authenticated tool names')
+    ci_persist.add_argument('--git-present', help='Whether git is present (true/false)')
 
     # --- init ---
     p_init = subparsers.add_parser('init', help='Initialize marshal.json')

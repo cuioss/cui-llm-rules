@@ -80,16 +80,6 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
                     }
                 }
             },
-            "build_systems": [
-                {
-                    "system": "maven",
-                    "skill": "pm-dev-java:plan-marshall-plugin"
-                },
-                {
-                    "system": "npm",
-                    "skill": "pm-dev-frontend:plan-marshall-plugin"
-                }
-            ],
             "system": {
                 "retention": {
                     "logs_days": 1,
@@ -205,7 +195,6 @@ def create_nested_marshal_json(fixture_dir: Path) -> Path:
             }
         },
         "modules": {},
-        "build_systems": [],
         "system": {
             "retention": {
                 "logs_days": 1,

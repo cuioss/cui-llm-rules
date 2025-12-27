@@ -29,6 +29,8 @@ Subcommands:
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -268,26 +270,6 @@ def load_marshal_json(project_dir: Path) -> dict:
     return {}
 
 
-def save_marshal_json(project_dir: Path, config: dict) -> None:
-    """Save marshal.json to .plan directory with ordered keys."""
-    marshal_path = project_dir / ".plan" / "marshal.json"
-    marshal_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Canonical key order for marshal.json
-    key_order = ["ci", "plan", "skill_domains", "modules", "system"]
-
-    # Build ordered dict: known keys first in order, then any remaining keys
-    ordered = {}
-    for key in key_order:
-        if key in config:
-            ordered[key] = config[key]
-    for key in config:
-        if key not in ordered:
-            ordered[key] = config[key]
-
-    marshal_path.write_text(json.dumps(ordered, indent=2))
-
-
 def generate_commands_from_extensions(
     extension_mappings: dict,
     build_system: str,
@@ -512,7 +494,23 @@ def cmd_persist(args):
         commands_generated += len(mod_commands)
 
     if not args.dry_run:
-        save_marshal_json(project_dir, config)
+        # Delegate to plan-marshall-config for centralized marshal.json writes
+        config_script = Path(__file__).parent.parent.parent / "plan-marshall-config" / "scripts" / "plan-marshall-config.py"
+
+        cmd = [
+            "python3", str(config_script),
+            "modules", "persist-all",
+            "--modules-json", json.dumps(config["modules"])
+        ]
+
+        # Set PLAN_BASE_DIR to project's .plan directory
+        env = os.environ.copy()
+        env["PLAN_BASE_DIR"] = str(project_dir / ".plan")
+
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=30)
+        if result.returncode != 0:
+            print(f"error: Failed to persist modules: {result.stderr or result.stdout}", file=sys.stderr)
+            return 1
 
     print("status: success")
     print(f"build_systems: {build_result['available_systems']}")
