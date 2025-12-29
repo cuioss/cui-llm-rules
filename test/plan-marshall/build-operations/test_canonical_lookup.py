@@ -5,7 +5,6 @@ Tests lookup, get-available-commands, and validate-required subcommands.
 """
 
 import json
-import os
 import sys
 import shutil
 import tempfile
@@ -13,18 +12,25 @@ from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import run_script, TestRunner, get_script_path
+from conftest import (
+    run_script, TestRunner, get_script_path,
+    BuildTestContext, create_marshal_json, MARSHAL_KEY_MODULE_CONFIG
+)
 
 # Script under test
 SCRIPT_PATH = get_script_path('plan-marshall', 'extension-api', 'build_env.py')
 
 
 # =============================================================================
-# Test Helpers
+# Test Fixtures
 # =============================================================================
 
 class LookupFixturesContext:
-    """Context manager for tests that need marshal.json fixtures."""
+    """Context manager for tests that need multiple project fixtures.
+
+    Creates a fixtures directory with several pre-configured projects
+    for testing lookup, validation, and command listing.
+    """
 
     def __init__(self):
         self.fixtures_dir = None
@@ -45,89 +51,77 @@ class LookupFixturesContext:
         single_bs = fixtures / 'single-build-system'
         single_bs.mkdir()
         (single_bs / 'pom.xml').write_text('<project></project>')
-        plan_dir = single_bs / '.plan'
-        plan_dir.mkdir()
-        (plan_dir / 'marshal.json').write_text(json.dumps({
-            "module_config": {
-                "default": {
-                    "path": ".",
-                    "domains": ["java"],
-                    "build_systems": ["maven"],
-                    "type": "jar",
-                    "commands": {
-                        "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
-                        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
-                        "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\""
-                    }
-                },
-                "core": {
-                    "path": "core",
-                    "domains": ["java"],
-                    "build_systems": ["maven"],
-                    "type": "jar",
-                    "commands": {
-                        "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module core",
-                        "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module core"
-                    }
+        create_marshal_json(single_bs, module_config={
+            "default": {
+                "path": ".",
+                "domains": ["java"],
+                "build_systems": ["maven"],
+                "type": "jar",
+                "commands": {
+                    "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+                    "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+                    "quality-gate": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify -Ppre-commit\""
+                }
+            },
+            "core": {
+                "path": "core",
+                "domains": ["java"],
+                "build_systems": ["maven"],
+                "type": "jar",
+                "commands": {
+                    "module-tests": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\" --module core",
+                    "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\" --module core"
                 }
             }
-        }, indent=2))
+        })
 
         # Hybrid module project (Maven + npm)
         hybrid = fixtures / 'hybrid-project'
         hybrid.mkdir()
         (hybrid / 'pom.xml').write_text('<project></project>')
         (hybrid / 'package.json').write_text('{"name": "hybrid"}')
-        plan_dir = hybrid / '.plan'
-        plan_dir.mkdir()
-        (plan_dir / 'marshal.json').write_text(json.dumps({
-            "module_config": {
-                "default": {
-                    "path": ".",
-                    "domains": ["java", "javascript"],
-                    "build_systems": ["maven", "npm"],
-                    "type": "jar",
-                    "commands": {
-                        "module-tests": {
-                            "maven": {
-                                "command": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
-                                "source": "core"
-                            },
-                            "npm": {
-                                "command": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\"",
-                                "source": "core"
-                            }
+        create_marshal_json(hybrid, module_config={
+            "default": {
+                "path": ".",
+                "domains": ["java", "javascript"],
+                "build_systems": ["maven", "npm"],
+                "type": "jar",
+                "commands": {
+                    "module-tests": {
+                        "maven": {
+                            "command": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
+                            "source": "core"
                         },
-                        "verify": {
-                            "maven": {
-                                "command": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
-                                "source": "core"
-                            }
+                        "npm": {
+                            "command": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\"",
+                            "source": "core"
+                        }
+                    },
+                    "verify": {
+                        "maven": {
+                            "command": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\"",
+                            "source": "core"
                         }
                     }
                 }
             }
-        }, indent=2))
+        })
 
         # POM-only module project
         pom_only = fixtures / 'pom-only-project'
         pom_only.mkdir()
         (pom_only / 'pom.xml').write_text('<project><packaging>pom</packaging></project>')
-        plan_dir = pom_only / '.plan'
-        plan_dir.mkdir()
-        (plan_dir / 'marshal.json').write_text(json.dumps({
-            "module_config": {
-                "bom": {
-                    "path": "bom",
-                    "domains": [],
-                    "build_systems": ["maven"],
-                    "type": "pom",
-                    "commands": {
-                        "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"install\" --module bom"
-                    }
+        create_marshal_json(pom_only, module_config={
+            "bom": {
+                "path": "bom",
+                "domains": [],
+                "build_systems": ["maven"],
+                "type": "pom",
+                "commands": {
+                    "install": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"install\" --module bom"
                 }
             }
-        }, indent=2))
+        })
 
         # Empty project (no marshal.json)
         empty = fixtures / 'empty-project'
@@ -396,51 +390,27 @@ def test_validate_required_missing_module():
 # PERSIST --minimal Tests
 # =============================================================================
 
-class MinimalModeContext:
-    """Context manager for minimal mode tests."""
-
-    def __init__(self):
-        self.temp_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        plan_dir = self.temp_dir / '.plan'
-        plan_dir.mkdir()
-        # Create initial marshal.json (required by plan-marshall-config)
-        (plan_dir / 'marshal.json').write_text(json.dumps({
-            "skill_domains": {"system": {}},
-            "module_config": {},
-            "system": {"retention": {}},
-            "plan": {"defaults": {}}
-        }, indent=2))
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-
 def test_persist_minimal_only_required():
     """Test persist --minimal only generates required static commands.
 
     In minimal mode, only required static commands are generated.
     Profile-based commands require explicit --include-profiles.
     """
-    with MinimalModeContext() as temp_dir:
+    with BuildTestContext() as ctx:
         # Create a Maven jar project (no profiles needed for static commands)
-        (temp_dir / 'pom.xml').write_text('<project><packaging>jar</packaging></project>')
+        ctx.create_pom(packaging='jar')
 
         result = run_script(
             SCRIPT_PATH,
             'persist',
             '--minimal',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
-        commands = config['module_config']['default']['commands']
+        config = ctx.load_marshal_json()
+        commands = config[MARSHAL_KEY_MODULE_CONFIG]['default']['commands']
 
         # Required static commands should be present
         assert 'module-tests' in commands, "Should have module-tests (required static)"
@@ -456,45 +426,28 @@ def test_persist_minimal_only_required():
 
 def test_persist_minimal_with_include_profiles():
     """Test persist --minimal with --include-profiles adds selected profiles."""
-    with MinimalModeContext() as temp_dir:
+    with BuildTestContext() as ctx:
         # Create a Maven jar project with profiles
-        pom_content = '''<project>
-            <packaging>jar</packaging>
-            <profiles>
-                <profile>
-                    <id>pre-commit</id>
-                </profile>
-                <profile>
-                    <id>coverage</id>
-                </profile>
-                <profile>
-                    <id>integration-tests</id>
-                </profile>
-            </profiles>
-        </project>'''
-        (temp_dir / 'pom.xml').write_text(pom_content)
+        ctx.create_pom(profiles=['pre-commit', 'coverage', 'integration-tests'])
 
         result = run_script(
             SCRIPT_PATH,
             'persist',
             '--minimal',
             '--include-profiles', 'default:coverage',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
-        commands = config['module_config']['default']['commands']
+        config = ctx.load_marshal_json()
+        commands = config[MARSHAL_KEY_MODULE_CONFIG]['default']['commands']
 
         # Required static commands should be present
         assert 'module-tests' in commands, "Should have module-tests (required static)"
         assert 'verify' in commands, "Should have verify (required static)"
-        # quality-gate is profile-based and requires matching profile (pre-commit)
+        # Note: quality-gate is profile-based and requires matching profile (pre-commit)
         # but in minimal mode, only explicitly included profiles are added
-        # Note: profile-based commands from required profiles may or may not be included
-        # depending on the --include-profiles filter
 
         # Included profile should be present
         assert 'coverage' in commands, "Should have coverage (explicitly included)"
@@ -505,17 +458,9 @@ def test_persist_minimal_with_include_profiles():
 
 def test_persist_include_profiles_filter():
     """Test persist --minimal with --include-profiles filters to selected profiles only."""
-    with MinimalModeContext() as temp_dir:
+    with BuildTestContext() as ctx:
         # Create a Maven jar project with multiple profiles
-        pom_content = '''<project>
-            <packaging>jar</packaging>
-            <profiles>
-                <profile><id>coverage</id></profile>
-                <profile><id>integration-tests</id></profile>
-                <profile><id>benchmark</id></profile>
-            </profiles>
-        </project>'''
-        (temp_dir / 'pom.xml').write_text(pom_content)
+        ctx.create_pom(profiles=['coverage', 'integration-tests', 'benchmark'])
 
         # Use --minimal with --include-profiles to control which commands are generated
         result = run_script(
@@ -523,14 +468,13 @@ def test_persist_include_profiles_filter():
             'persist',
             '--minimal',
             '--include-profiles', 'default:coverage,default:integration-tests',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
-        commands = config['module_config']['default']['commands']
+        config = ctx.load_marshal_json()
+        commands = config[MARSHAL_KEY_MODULE_CONFIG]['default']['commands']
 
         # Required static commands should be present (from --minimal base)
         assert 'module-tests' in commands, "Should have module-tests (required static)"

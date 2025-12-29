@@ -4,46 +4,18 @@
 Tests detect-profiles subcommand, profile classification, and profile-based command generation.
 """
 
-import json
-import os
 import sys
-import shutil
-import tempfile
 from pathlib import Path
 
 # Import shared infrastructure
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from conftest import run_script, TestRunner, get_script_path
+from conftest import (
+    run_script, TestRunner, get_script_path,
+    BuildTestContext, MARSHAL_KEY_MODULE_CONFIG
+)
 
 # Script under test
 SCRIPT_PATH = get_script_path('plan-marshall', 'extension-api', 'build_env.py')
-
-
-# =============================================================================
-# Test Helpers
-# =============================================================================
-
-class ProfileTestContext:
-    """Context manager for profile detection tests."""
-
-    def __init__(self):
-        self.temp_dir = None
-
-    def __enter__(self):
-        self.temp_dir = Path(tempfile.mkdtemp())
-        plan_dir = self.temp_dir / '.plan'
-        plan_dir.mkdir()
-        # Create initial marshal.json (required by plan-marshall-config)
-        (plan_dir / 'marshal.json').write_text(json.dumps({
-            "skill_domains": {"system": {}},
-            "module_config": {},
-            "system": {"retention": {}},
-            "plan": {"defaults": {}}
-        }, indent=2))
-        return self.temp_dir
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
 # =============================================================================
@@ -52,8 +24,8 @@ class ProfileTestContext:
 
 def test_detect_profiles_maven_integration_tests():
     """Test detection of integration-tests profile."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'pom.xml').write_text('''<project>
             <profiles>
                 <profile>
                     <id>integration-tests</id>
@@ -71,7 +43,7 @@ def test_detect_profiles_maven_integration_tests():
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -83,19 +55,13 @@ def test_detect_profiles_maven_integration_tests():
 
 def test_detect_profiles_maven_coverage():
     """Test detection of coverage profile."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile>
-                    <id>coverage</id>
-                </profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['coverage'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -104,19 +70,13 @@ def test_detect_profiles_maven_coverage():
 
 def test_detect_profiles_maven_benchmark():
     """Test detection of benchmark profile as performance."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile>
-                    <id>benchmark</id>
-                </profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['benchmark'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -126,8 +86,8 @@ def test_detect_profiles_maven_benchmark():
 
 def test_detect_profiles_maven_property_activation():
     """Test detection of profile with property activation."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'pom.xml').write_text('''<project>
             <profiles>
                 <profile>
                     <id>integration-tests</id>
@@ -144,7 +104,7 @@ def test_detect_profiles_maven_property_activation():
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -153,28 +113,13 @@ def test_detect_profiles_maven_property_activation():
 
 def test_detect_profiles_maven_multiple():
     """Test detection of multiple profiles."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile>
-                    <id>integration-tests</id>
-                </profile>
-                <profile>
-                    <id>coverage</id>
-                </profile>
-                <profile>
-                    <id>benchmark</id>
-                </profile>
-                <profile>
-                    <id>pre-commit</id>
-                </profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['integration-tests', 'coverage', 'benchmark', 'pre-commit'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -183,13 +128,13 @@ def test_detect_profiles_maven_multiple():
 
 def test_detect_profiles_no_profiles():
     """Test detection when no profiles exist."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('<project></project>')
+    with BuildTestContext() as ctx:
+        ctx.create_pom()
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -202,33 +147,23 @@ def test_detect_profiles_no_profiles():
 
 def test_persist_detects_profiles():
     """Test persist stores detected profiles in config."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile>
-                    <id>integration-tests</id>
-                </profile>
-                <profile>
-                    <id>coverage</id>
-                </profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['integration-tests', 'coverage'])
 
         result = run_script(
             SCRIPT_PATH,
             'persist',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
+        config = ctx.load_marshal_json()
 
         # Check detected_profiles is stored
-        assert 'detected_profiles' in config['module_config']['default'], \
+        assert 'detected_profiles' in config[MARSHAL_KEY_MODULE_CONFIG]['default'], \
             "Should store detected_profiles"
-        profiles = config['module_config']['default']['detected_profiles']
+        profiles = config[MARSHAL_KEY_MODULE_CONFIG]['default']['detected_profiles']
         assert len(profiles) == 2, "Should have 2 detected profiles"
 
         # Check profile IDs are stored
@@ -239,26 +174,19 @@ def test_persist_detects_profiles():
 
 def test_persist_generates_profile_commands():
     """Test persist generates commands for detected profiles."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile>
-                    <id>integration-tests</id>
-                </profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['integration-tests'])
 
         result = run_script(
             SCRIPT_PATH,
             'persist',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
-        commands = config['module_config']['default']['commands']
+        config = ctx.load_marshal_json()
+        commands = config[MARSHAL_KEY_MODULE_CONFIG]['default']['commands']
 
         # Should have integration-tests command generated from profile
         assert 'integration-tests' in commands, \
@@ -269,8 +197,8 @@ def test_persist_generates_profile_commands():
 
 def test_persist_generates_property_activated_command():
     """Test persist generates command with property activation."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'pom.xml').write_text('''<project>
             <profiles>
                 <profile>
                     <id>integration-tests</id>
@@ -287,14 +215,13 @@ def test_persist_generates_property_activated_command():
         result = run_script(
             SCRIPT_PATH,
             'persist',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
-        commands = config['module_config']['default']['commands']
+        config = ctx.load_marshal_json()
+        commands = config[MARSHAL_KEY_MODULE_CONFIG]['default']['commands']
 
         # Should have integration-tests command with property activation
         assert 'integration-tests' in commands, "Should generate integration-tests command"
@@ -308,27 +235,20 @@ def test_persist_generates_quality_gate_from_profile():
     Profile-based commands like quality-gate are now dynamically generated
     from detected profiles, not hardcoded.
     """
-    with ProfileTestContext() as temp_dir:
+    with BuildTestContext() as ctx:
         # Create a project with quality profile
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile>
-                    <id>quality</id>
-                </profile>
-            </profiles>
-        </project>''')
+        ctx.create_pom(profiles=['quality'])
 
         result = run_script(
             SCRIPT_PATH,
             'persist',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
 
-        marshal_path = temp_dir / '.plan' / 'marshal.json'
-        config = json.loads(marshal_path.read_text())
-        commands = config['module_config']['default']['commands']
+        config = ctx.load_marshal_json()
+        commands = config[MARSHAL_KEY_MODULE_CONFIG]['default']['commands']
 
         # quality-gate should be generated from the detected 'quality' profile
         assert 'quality-gate' in commands, "Should have quality-gate command from profile"
@@ -343,17 +263,13 @@ def test_persist_generates_quality_gate_from_profile():
 
 def test_classify_profile_direct_match():
     """Test profile classification with direct match."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile><id>coverage</id></profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['coverage'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert 'coverage' in result.stdout, "Should classify as coverage"
@@ -361,8 +277,8 @@ def test_classify_profile_direct_match():
 
 def test_classify_profile_partial_match():
     """Test profile classification with partial match."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'pom.xml').write_text('''<project>
             <profiles>
                 <profile><id>my-integration-tests</id></profile>
             </profiles>
@@ -371,7 +287,7 @@ def test_classify_profile_partial_match():
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert 'integration-tests' in result.stdout, \
@@ -380,8 +296,8 @@ def test_classify_profile_partial_match():
 
 def test_classify_profile_unknown():
     """Test profile classification with unknown profile."""
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
+    with BuildTestContext() as ctx:
+        (ctx.temp_dir / 'pom.xml').write_text('''<project>
             <profiles>
                 <profile><id>custom-unknown-profile</id></profile>
             </profiles>
@@ -390,7 +306,7 @@ def test_classify_profile_unknown():
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -403,18 +319,14 @@ def test_classify_profile_quality_gate_aliases():
 
     Tests that aliases defined in CANONICAL_COMMANDS are correctly mapped.
     """
-    with ProfileTestContext() as temp_dir:
+    with BuildTestContext() as ctx:
         # Test 'pre-commit' alias -> quality-gate
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile><id>pre-commit</id></profile>
-            </profiles>
-        </project>''')
+        ctx.create_pom(profiles=['pre-commit'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -427,18 +339,14 @@ def test_classify_profile_performance_aliases():
 
     Tests that aliases defined in CANONICAL_COMMANDS are correctly mapped.
     """
-    with ProfileTestContext() as temp_dir:
+    with BuildTestContext() as ctx:
         # Test 'benchmark' alias -> performance
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile><id>benchmark</id></profile>
-            </profiles>
-        </project>''')
+        ctx.create_pom(profiles=['benchmark'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -451,17 +359,13 @@ def test_classify_profile_coverage_jacoco_alias():
 
     Tests that 'jacoco' alias maps to coverage canonical command.
     """
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile><id>jacoco</id></profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['jacoco'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
@@ -474,17 +378,13 @@ def test_classify_profile_integration_e2e_alias():
 
     Tests that 'e2e' alias maps to integration-tests canonical command.
     """
-    with ProfileTestContext() as temp_dir:
-        (temp_dir / 'pom.xml').write_text('''<project>
-            <profiles>
-                <profile><id>e2e</id></profile>
-            </profiles>
-        </project>''')
+    with BuildTestContext() as ctx:
+        ctx.create_pom(profiles=['e2e'])
 
         result = run_script(
             SCRIPT_PATH,
             'detect-profiles',
-            '--project-dir', str(temp_dir)
+            '--project-dir', str(ctx.temp_dir)
         )
 
         assert result.returncode == 0, f"Should succeed: {result.stderr}"

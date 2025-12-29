@@ -449,3 +449,357 @@ class PlanTestContext:
         # Only cleanup fixture_dir if running standalone (not via run-tests.py)
         if self._is_standalone and self.fixture_dir and self.fixture_dir.exists():
             shutil.rmtree(self.fixture_dir, ignore_errors=True)
+
+
+# =============================================================================
+# Marshal.json Schema Constants
+# =============================================================================
+
+# Key names - use these constants instead of hardcoding strings
+MARSHAL_KEY_SKILL_DOMAINS = "skill_domains"
+MARSHAL_KEY_MODULE_CONFIG = "module_config"
+MARSHAL_KEY_SYSTEM = "system"
+MARSHAL_KEY_PLAN = "plan"
+
+# Default schema for marshal.json
+MARSHAL_SCHEMA_DEFAULT = {
+    MARSHAL_KEY_SKILL_DOMAINS: {"system": {}},
+    MARSHAL_KEY_MODULE_CONFIG: {},
+    MARSHAL_KEY_SYSTEM: {"retention": {}},
+    MARSHAL_KEY_PLAN: {"defaults": {}}
+}
+
+
+def create_marshal_json(
+    base_dir: Path,
+    module_config: Optional[dict] = None,
+    skill_domains: Optional[dict] = None,
+    extra: Optional[dict] = None
+) -> Path:
+    """
+    Create marshal.json with proper schema.
+
+    Args:
+        base_dir: Directory to create .plan/marshal.json in (or directory containing marshal.json)
+        module_config: Module configuration dict (optional)
+        skill_domains: Skill domains dict (optional, defaults to {"system": {}})
+        extra: Additional top-level keys to merge (optional)
+
+    Returns:
+        Path to created marshal.json
+
+    Example:
+        marshal_path = create_marshal_json(temp_dir, module_config={
+            "default": {
+                "path": ".",
+                "type": "jar",
+                "build_systems": ["maven"],
+                "commands": {"verify": "mvn verify"}
+            }
+        })
+    """
+    # Determine the correct location for marshal.json
+    plan_dir = base_dir / '.plan'
+    if not plan_dir.exists():
+        plan_dir.mkdir(parents=True)
+    marshal_path = plan_dir / 'marshal.json'
+
+    # Build the data structure
+    data = MARSHAL_SCHEMA_DEFAULT.copy()
+    if module_config is not None:
+        data[MARSHAL_KEY_MODULE_CONFIG] = module_config
+    if skill_domains is not None:
+        data[MARSHAL_KEY_SKILL_DOMAINS] = skill_domains
+    if extra:
+        data.update(extra)
+
+    marshal_path.write_text(json.dumps(data, indent=2))
+    return marshal_path
+
+
+def create_raw_project_data(
+    base_dir: Path,
+    modules: Optional[list] = None,
+    module_details: Optional[dict] = None,
+    project_name: Optional[str] = None,
+    frameworks: Optional[list] = None
+) -> Path:
+    """
+    Create raw-project-data.json with module facts.
+
+    Args:
+        base_dir: Directory to create .plan/raw-project-data.json in
+        modules: List of module dicts with name, path, build_systems, packaging
+        module_details: Dict of module_name -> enrichment data (packages, dependencies)
+        project_name: Project name (defaults to base_dir.name)
+        frameworks: List of detected frameworks
+
+    Returns:
+        Path to created raw-project-data.json
+
+    Example:
+        raw_data_path = create_raw_project_data(temp_dir, modules=[
+            {"name": "core", "path": "core", "build_systems": ["maven"], "packaging": "jar"},
+            {"name": "web", "path": "web", "build_systems": ["maven"], "packaging": "war"}
+        ])
+    """
+    plan_dir = base_dir / '.plan'
+    if not plan_dir.exists():
+        plan_dir.mkdir(parents=True)
+    raw_data_path = plan_dir / 'raw-project-data.json'
+
+    data = {
+        "project": {
+            "root": str(base_dir),
+            "name": project_name or base_dir.name
+        },
+        "frameworks": frameworks or [],
+        "documentation": {"readme": "", "doc_files": []},
+        "modules": modules or [],
+        "module_details": module_details or {}
+    }
+
+    raw_data_path.write_text(json.dumps(data, indent=2))
+    return raw_data_path
+
+
+# =============================================================================
+# Build Test Context
+# =============================================================================
+
+class BuildTestContext:
+    """
+    Context manager for build-operations tests.
+
+    Provides a complete test environment with:
+    - Temporary directory for project files
+    - .plan directory with marshal.json
+    - Optional raw-project-data.json
+    - Automatic cleanup
+
+    Usage:
+        with BuildTestContext() as ctx:
+            # Create a pom.xml
+            (ctx.temp_dir / 'pom.xml').write_text('<project></project>')
+
+            # Run build_env.py
+            result = run_script(SCRIPT_PATH, 'persist', '--project-dir', str(ctx.temp_dir))
+
+            # Check marshal.json
+            config = ctx.load_marshal_json()
+            assert 'module_config' in config
+
+    Attributes:
+        temp_dir: Root directory for test files
+        plan_dir: The .plan directory
+    """
+
+    def __init__(
+        self,
+        module_config: Optional[dict] = None,
+        modules: Optional[list] = None,
+        module_details: Optional[dict] = None
+    ):
+        """
+        Initialize the build test context.
+
+        Args:
+            module_config: Initial module_config for marshal.json
+            modules: Initial modules list for raw-project-data.json
+            module_details: Initial module_details for raw-project-data.json
+        """
+        self.temp_dir: Optional[Path] = None
+        self.plan_dir: Optional[Path] = None
+        self._initial_module_config = module_config
+        self._initial_modules = modules
+        self._initial_module_details = module_details
+
+    def __enter__(self) -> 'BuildTestContext':
+        """Set up the test context."""
+        self.temp_dir = Path(tempfile.mkdtemp())
+        self.plan_dir = self.temp_dir / '.plan'
+        self.plan_dir.mkdir()
+
+        # Create initial marshal.json
+        create_marshal_json(self.temp_dir, module_config=self._initial_module_config)
+
+        # Create raw-project-data.json if modules provided
+        if self._initial_modules is not None:
+            create_raw_project_data(
+                self.temp_dir,
+                modules=self._initial_modules,
+                module_details=self._initial_module_details
+            )
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Clean up the test context."""
+        if self.temp_dir and self.temp_dir.exists():
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def load_marshal_json(self) -> dict:
+        """Load and return the current marshal.json content."""
+        marshal_path = self.plan_dir / 'marshal.json'
+        if not marshal_path.exists():
+            raise FileNotFoundError(f"marshal.json not found at {marshal_path}")
+        return json.loads(marshal_path.read_text())
+
+    def load_raw_project_data(self) -> dict:
+        """Load and return the current raw-project-data.json content."""
+        raw_data_path = self.plan_dir / 'raw-project-data.json'
+        if not raw_data_path.exists():
+            raise FileNotFoundError(f"raw-project-data.json not found at {raw_data_path}")
+        return json.loads(raw_data_path.read_text())
+
+    def create_pom(
+        self,
+        path: str = '.',
+        packaging: str = 'jar',
+        artifact_id: str = 'test-module',
+        with_quarkus: bool = False,
+        profiles: Optional[list] = None
+    ) -> Path:
+        """
+        Create a pom.xml file.
+
+        Args:
+            path: Relative path from temp_dir (default: root)
+            packaging: Maven packaging type (jar, war, pom)
+            artifact_id: Artifact ID
+            with_quarkus: Include Quarkus plugin
+            profiles: List of profile IDs to include
+
+        Returns:
+            Path to created pom.xml
+        """
+        target_dir = self.temp_dir / path if path != '.' else self.temp_dir
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        # Build pom content
+        parts = ['<project>']
+        if packaging != 'jar':  # jar is default, no need to specify
+            parts.append(f'  <packaging>{packaging}</packaging>')
+        parts.append(f'  <artifactId>{artifact_id}</artifactId>')
+
+        if with_quarkus:
+            parts.append('''  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>''')
+
+        if profiles:
+            parts.append('  <profiles>')
+            for profile_id in profiles:
+                parts.append(f'''    <profile>
+      <id>{profile_id}</id>
+    </profile>''')
+            parts.append('  </profiles>')
+
+        parts.append('</project>')
+
+        pom_path = target_dir / 'pom.xml'
+        pom_path.write_text('\n'.join(parts))
+        return pom_path
+
+    def create_parent_pom(self, modules: list) -> Path:
+        """
+        Create a parent pom.xml with modules section.
+
+        Args:
+            modules: List of module directory names
+
+        Returns:
+            Path to created pom.xml
+        """
+        modules_xml = '\n'.join(f'    <module>{m}</module>' for m in modules)
+        content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>parent</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <modules>
+{modules_xml}
+  </modules>
+</project>'''
+        pom_path = self.temp_dir / 'pom.xml'
+        pom_path.write_text(content)
+        return pom_path
+
+    def create_package_json(
+        self,
+        path: str = '.',
+        name: str = 'test-module',
+        version: str = '1.0.0'
+    ) -> Path:
+        """
+        Create a package.json file.
+
+        Args:
+            path: Relative path from temp_dir (default: root)
+            name: Package name
+            version: Package version
+
+        Returns:
+            Path to created package.json
+        """
+        target_dir = self.temp_dir / path if path != '.' else self.temp_dir
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        content = json.dumps({"name": name, "version": version}, indent=2)
+        pkg_path = target_dir / 'package.json'
+        pkg_path.write_text(content)
+        return pkg_path
+
+    def create_build_gradle(
+        self,
+        path: str = '.',
+        with_war: bool = False,
+        with_quarkus: bool = False,
+        kotlin: bool = False
+    ) -> Path:
+        """
+        Create a build.gradle or build.gradle.kts file.
+
+        Args:
+            path: Relative path from temp_dir (default: root)
+            with_war: Include war plugin
+            with_quarkus: Include Quarkus plugin
+            kotlin: Use Kotlin DSL (.kts)
+
+        Returns:
+            Path to created build file
+        """
+        target_dir = self.temp_dir / path if path != '.' else self.temp_dir
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        if kotlin:
+            plugins = ['java']
+            if with_war:
+                plugins.append('war')
+            if with_quarkus:
+                plugins.append('id("io.quarkus")')
+            plugin_lines = '\n    '.join(plugins)
+            content = f'''plugins {{
+    {plugin_lines}
+}}'''
+            filename = 'build.gradle.kts'
+        else:
+            plugins = ['"java"']
+            if with_war:
+                plugins.append('"war"')
+            plugin_block = ' '.join(f'id {p}' for p in plugins)
+            content = f'plugins {{ {plugin_block} }}'
+            if with_quarkus:
+                content = 'plugins { id "java"\n    id "io.quarkus" }'
+            filename = 'build.gradle'
+
+        build_path = target_dir / filename
+        build_path.write_text(content)
+        return build_path
