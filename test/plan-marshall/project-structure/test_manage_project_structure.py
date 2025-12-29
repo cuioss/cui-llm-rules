@@ -981,6 +981,148 @@ def test_dependency_add():
 
 
 # =============================================================================
+# raw-data-as-toon Command Tests
+# =============================================================================
+
+def test_raw_data_as_toon_outputs_toon():
+    """Test raw-data-as-toon outputs valid TOON format."""
+    with PlanTestContext() as ctx:
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "my-core", "path": "my-core", "build_systems": ["maven"], "packaging": "jar"},
+            {"name": "my-ui", "path": "my-ui", "build_systems": ["maven", "npm"], "packaging": "jar"}
+        ])
+
+        result = run_script(SCRIPT_PATH, 'raw-data-as-toon')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # TOON format should have key: value pairs
+        assert 'project:' in result.stdout
+        assert 'modules[' in result.stdout  # uniform array syntax
+
+
+def test_raw_data_as_toon_contains_modules():
+    """Test raw-data-as-toon output contains module data."""
+    with PlanTestContext() as ctx:
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "my-core", "path": "my-core", "build_systems": ["maven"], "packaging": "jar"},
+            {"name": "my-ui", "path": "ui-module", "build_systems": ["npm"], "packaging": "war"}
+        ])
+
+        result = run_script(SCRIPT_PATH, 'raw-data-as-toon')
+
+        assert result.success
+        # Module names should appear in output
+        assert 'my-core' in result.stdout
+        assert 'my-ui' in result.stdout
+        # Build systems should appear
+        assert 'maven' in result.stdout
+        assert 'npm' in result.stdout
+
+
+def test_raw_data_as_toon_fails_if_missing():
+    """Test raw-data-as-toon fails if raw-project-data.json doesn't exist."""
+    with PlanTestContext() as ctx:
+        # Don't create raw-project-data.json
+
+        result = run_script(SCRIPT_PATH, 'raw-data-as-toon')
+
+        assert not result.success
+        assert 'error' in result.stdout.lower()
+        assert 'collect-raw-data' in result.stdout.lower()
+
+
+def test_raw_data_as_toon_includes_module_details():
+    """Test raw-data-as-toon includes module_details in output."""
+    with PlanTestContext() as ctx:
+        create_raw_project_data(
+            ctx.fixture_dir,
+            modules=[
+                {"name": "my-core", "path": "my-core", "build_systems": ["maven"], "packaging": "jar"}
+            ],
+            module_details={
+                "my-core": {
+                    "packages": ["com.example.core", "com.example.service"],
+                    "source_files": 15,
+                    "test_files": 8
+                }
+            }
+        )
+
+        result = run_script(SCRIPT_PATH, 'raw-data-as-toon')
+
+        assert result.success
+        # Module details should appear
+        assert 'com.example.core' in result.stdout
+        assert '15' in result.stdout  # source_files
+
+
+# =============================================================================
+# modules-for-commands Command Tests
+# =============================================================================
+
+def test_modules_for_commands_outputs_toon():
+    """Test modules-for-commands outputs module data for command generation."""
+    with PlanTestContext() as ctx:
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "my-core", "path": "my-core", "build_systems": ["maven"], "packaging": "jar"},
+            {"name": "my-ui", "path": "my-ui", "build_systems": ["maven", "npm"], "packaging": "war"}
+        ])
+
+        result = run_script(SCRIPT_PATH, 'modules-for-commands')
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        # Should have uniform array format
+        assert 'modules[' in result.stdout
+        # Should contain module names
+        assert 'my-core' in result.stdout
+        assert 'my-ui' in result.stdout
+
+
+def test_modules_for_commands_includes_build_systems():
+    """Test modules-for-commands includes build_systems for each module."""
+    with PlanTestContext() as ctx:
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "hybrid-mod", "path": "hybrid-mod", "build_systems": ["maven", "npm"], "packaging": "jar"}
+        ])
+
+        result = run_script(SCRIPT_PATH, 'modules-for-commands')
+
+        assert result.success
+        # Build systems should be present
+        assert 'maven' in result.stdout
+        assert 'npm' in result.stdout
+
+
+def test_modules_for_commands_fails_if_missing():
+    """Test modules-for-commands fails if raw-project-data.json doesn't exist."""
+    with PlanTestContext() as ctx:
+        # Don't create raw-project-data.json
+
+        result = run_script(SCRIPT_PATH, 'modules-for-commands')
+
+        assert not result.success
+        assert 'error' in result.stdout.lower()
+        assert 'collect-raw-data' in result.stdout.lower()
+
+
+def test_modules_for_commands_single_module_filter():
+    """Test modules-for-commands with --module filter."""
+    with PlanTestContext() as ctx:
+        create_raw_project_data(ctx.fixture_dir, modules=[
+            {"name": "my-core", "path": "my-core", "build_systems": ["maven"], "packaging": "jar"},
+            {"name": "my-ui", "path": "my-ui", "build_systems": ["npm"], "packaging": "war"}
+        ])
+
+        result = run_script(SCRIPT_PATH, 'modules-for-commands', '--module', 'my-core')
+
+        assert result.success
+        assert 'my-core' in result.stdout
+        # Should NOT contain my-ui when filtered
+        lines = [l for l in result.stdout.split('\n') if 'my-ui' in l and not l.strip().startswith('#')]
+        assert len(lines) == 0, "Should not contain my-ui in data rows"
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -1033,5 +1175,15 @@ if __name__ == '__main__':
         # dependency tests
         test_dependency_list,
         test_dependency_add,
+        # raw-data-as-toon tests
+        test_raw_data_as_toon_outputs_toon,
+        test_raw_data_as_toon_contains_modules,
+        test_raw_data_as_toon_fails_if_missing,
+        test_raw_data_as_toon_includes_module_details,
+        # modules-for-commands tests
+        test_modules_for_commands_outputs_toon,
+        test_modules_for_commands_includes_build_systems,
+        test_modules_for_commands_fails_if_missing,
+        test_modules_for_commands_single_module_filter,
     ])
     sys.exit(runner.run())

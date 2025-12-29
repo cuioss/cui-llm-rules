@@ -64,6 +64,53 @@ class PersistTestContext:
             self._create_maven_project()
             self._create_npm_project()
 
+        # Create raw-project-data.json (source of truth for modules)
+        self._create_raw_project_data()
+
+    def _create_raw_project_data(self):
+        """Create raw-project-data.json with module facts."""
+        plan_dir = self.temp_dir / '.plan'
+        modules = []
+
+        if self.build_system in ('maven', 'mixed'):
+            if self.with_modules:
+                modules.extend([
+                    {"name": "core", "path": "core", "build_systems": ["maven"], "packaging": "jar"},
+                    {"name": "api", "path": "api", "build_systems": ["maven"], "packaging": "jar"}
+                ])
+        if self.build_system == 'gradle':
+            if self.with_modules:
+                modules.extend([
+                    {"name": "core", "path": "core", "build_systems": ["gradle"], "packaging": "jar"},
+                    {"name": "api", "path": "api", "build_systems": ["gradle"], "packaging": "jar"}
+                ])
+        if self.build_system in ('npm', 'mixed'):
+            if self.with_modules:
+                modules.extend([
+                    {"name": "ui", "path": "packages/ui", "build_systems": ["npm"], "packaging": "npm"},
+                    {"name": "lib", "path": "packages/lib", "build_systems": ["npm"], "packaging": "npm"}
+                ])
+
+        # Determine default build systems
+        default_build_systems = []
+        if self.build_system in ('maven', 'mixed'):
+            default_build_systems.append('maven')
+        if self.build_system == 'gradle':
+            default_build_systems.append('gradle')
+        if self.build_system in ('npm', 'mixed'):
+            default_build_systems.append('npm')
+
+        raw_data = {
+            "project": {"root": str(self.temp_dir), "name": self.temp_dir.name},
+            "frameworks": [],
+            "documentation": {},
+            "modules": modules,
+            "module_details": {},
+            # Store default module info for persist to use
+            "default_build_systems": default_build_systems
+        }
+        (plan_dir / 'raw-project-data.json').write_text(json.dumps(raw_data, indent=2))
+
     def _create_maven_project(self):
         """Create Maven project structure."""
         if self.with_modules:
@@ -321,8 +368,8 @@ def test_persist_profile_based_commands_from_detection():
         assert '-Pjacoco' in commands['coverage'], "Should use detected jacoco profile"
 
 
-def test_persist_reports_missing_profile_commands():
-    """Test persist reports missing profile-based commands when no matching profiles found."""
+def test_persist_no_diagnostic_fields_in_marshal():
+    """Test persist does NOT store diagnostic fields in marshal.json (they're only reported in stdout)."""
     with PersistTestContext('maven') as temp_dir:
         # Create pom.xml without profiles
         (temp_dir / 'pom.xml').write_text('<project></project>')
@@ -337,18 +384,19 @@ def test_persist_reports_missing_profile_commands():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['module_config']['default']['commands']
+        default_config = config['module_config']['default']
+        commands = default_config['commands']
 
         # Should NOT have profile-based commands without profiles
         assert 'quality-gate' not in commands, "Should not have quality-gate without profile"
         assert 'integration-tests' not in commands, "Should not have integration-tests without profile"
         assert 'coverage' not in commands, "Should not have coverage without profile"
 
-        # Should report missing profile commands
-        missing = config['module_config']['default'].get('missing_profile_commands', [])
-        assert 'quality-gate' in missing, "Should report quality-gate as missing"
-        assert 'integration-tests' in missing, "Should report integration-tests as missing"
-        assert 'coverage' in missing, "Should report coverage as missing"
+        # Diagnostic fields should NOT be stored in marshal.json (architectural change)
+        # They are now only reported in stdout for user action via run-config profile mappings
+        assert 'missing_profile_commands' not in default_config, "Should not store missing_profile_commands"
+        assert 'detected_profiles' not in default_config, "Should not store detected_profiles"
+        assert 'unclassified_profiles' not in default_config, "Should not store unclassified_profiles"
 
 
 def test_persist_dry_run_does_not_modify():
@@ -429,7 +477,7 @@ if __name__ == '__main__':
         test_persist_npm_creates_commands,
         test_persist_with_modules_adds_module_flag,
         test_persist_profile_based_commands_from_detection,
-        test_persist_reports_missing_profile_commands,
+        test_persist_no_diagnostic_fields_in_marshal,
         test_persist_dry_run_does_not_modify,
         test_persist_preserves_existing_config,
         test_persist_help,

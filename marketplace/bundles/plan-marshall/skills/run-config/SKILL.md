@@ -234,6 +234,110 @@ Maven build configurations.
 
 Categories: `transitive_dependency`, `plugin_compatibility`, `platform_specific`
 
+### profile_mappings
+
+User decisions about build profiles. Maps profile IDs to canonical commands or 'skip'.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| profile_mappings | object | `{profile_id: canonical}` mappings |
+
+Valid canonicals: `integration-tests`, `coverage`, `performance`, `quality-gate`, `skip`
+
+When `build_env persist` detects profiles it can't auto-classify, user decisions stored here are applied before command generation. Profiles mapped to 'skip' are excluded from command generation.
+
+---
+
+## Workflow: Profile Mapping Management
+
+**Pattern**: Configuration Management
+
+Manage profile-to-canonical mappings for build profiles that can't be auto-classified.
+
+### When to Use
+
+When `build_env persist` reports unmapped profiles:
+```
+unmapped_profiles[3]{module,profile_id}:
+default	jfr
+benchmark-core	analyze-jfr
+benchmark-core	quick
+
+hint: Use 'run_config profile-mapping set --profile-id <id> --canonical <canonical|skip>'
+```
+
+### Set Profile Mapping
+
+Map a profile to a canonical command or skip it:
+
+```bash
+# Map 'jfr' profile to performance canonical
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping set \
+  --profile-id jfr --canonical performance
+
+# Skip 'quick' profile (internal shortcut, not a standard command)
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping set \
+  --profile-id quick --canonical skip
+```
+
+**Valid canonicals**: `integration-tests`, `coverage`, `performance`, `quality-gate`, `skip`
+
+### Get Profile Mapping
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping get \
+  --profile-id jfr
+```
+
+**Output (JSON)**:
+```json
+{
+  "success": true,
+  "profile_id": "jfr",
+  "mapped": true,
+  "canonical": "performance"
+}
+```
+
+### List All Profile Mappings
+
+```bash
+# List all mappings
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping list
+
+# Filter by canonical
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping list \
+  --canonical skip
+```
+
+### Remove Profile Mapping
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping remove \
+  --profile-id jfr
+```
+
+### Batch Set Multiple Mappings
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping batch-set \
+  --mappings-json '{"jfr": "performance", "quick": "skip", "analyze-jfr": "skip"}'
+```
+
+### Complete Workflow
+
+```bash
+# 1. Run persist to detect unmapped profiles
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
+
+# 2. Set mappings for reported unmapped profiles
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping batch-set \
+  --mappings-json '{"jfr": "skip", "quick": "skip", "analyze-jfr": "skip"}'
+
+# 3. Re-run persist - mappings will be applied
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
+```
+
 ---
 
 ## Workflow: Timeout Handling for Synchronous Builds
@@ -343,6 +447,11 @@ timeout 600s python3 .plan/execute-script.py plan-marshall:script-executor:await
 | warning add | `plan-marshall:run-config:run_config warning add` |
 | warning list | `plan-marshall:run-config:run_config warning list` |
 | warning remove | `plan-marshall:run-config:run_config warning remove` |
+| profile-mapping set | `plan-marshall:run-config:run_config profile-mapping set` |
+| profile-mapping get | `plan-marshall:run-config:run_config profile-mapping get` |
+| profile-mapping list | `plan-marshall:run-config:run_config profile-mapping list` |
+| profile-mapping remove | `plan-marshall:run-config:run_config profile-mapping remove` |
+| profile-mapping batch-set | `plan-marshall:run-config:run_config profile-mapping batch-set` |
 | cleanup | `plan-marshall:run-config:cleanup` |
 
 Script characteristics:

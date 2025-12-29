@@ -145,8 +145,8 @@ def test_detect_profiles_no_profiles():
 # persist Tests - Profile-based Commands
 # =============================================================================
 
-def test_persist_detects_profiles():
-    """Test persist stores detected profiles in config."""
+def test_persist_no_diagnostic_fields_stored():
+    """Test persist does NOT store diagnostic fields in marshal.json (architectural change)."""
     with BuildTestContext() as ctx:
         ctx.create_pom(profiles=['integration-tests', 'coverage'])
 
@@ -159,17 +159,17 @@ def test_persist_detects_profiles():
         assert result.returncode == 0, f"Should succeed: {result.stderr}"
 
         config = ctx.load_marshal_json()
+        default_config = config[MARSHAL_KEY_MODULE_CONFIG]['default']
 
-        # Check detected_profiles is stored
-        assert 'detected_profiles' in config[MARSHAL_KEY_MODULE_CONFIG]['default'], \
-            "Should store detected_profiles"
-        profiles = config[MARSHAL_KEY_MODULE_CONFIG]['default']['detected_profiles']
-        assert len(profiles) == 2, "Should have 2 detected profiles"
+        # Diagnostic fields should NOT be stored in marshal.json
+        # They are now only reported in stdout for user action via run-config profile mappings
+        assert 'detected_profiles' not in default_config, "Should NOT store detected_profiles"
+        assert 'unclassified_profiles' not in default_config, "Should NOT store unclassified_profiles"
+        assert 'missing_profile_commands' not in default_config, "Should NOT store missing_profile_commands"
 
-        # Check profile IDs are stored
-        profile_ids = [p['id'] for p in profiles]
-        assert 'integration-tests' in profile_ids, "Should include integration-tests"
-        assert 'coverage' in profile_ids, "Should include coverage"
+        # But commands should still be generated from detected profiles
+        assert 'integration-tests' in default_config['commands'], "Should generate integration-tests command"
+        assert 'coverage' in default_config['commands'], "Should generate coverage command"
 
 
 def test_persist_generates_profile_commands():
@@ -407,7 +407,7 @@ if __name__ == '__main__':
         test_detect_profiles_maven_multiple,
         test_detect_profiles_no_profiles,
         # persist tests with profiles
-        test_persist_detects_profiles,
+        test_persist_no_diagnostic_fields_stored,
         test_persist_generates_profile_commands,
         test_persist_generates_property_activated_command,
         test_persist_generates_quality_gate_from_profile,

@@ -354,7 +354,7 @@ AskUserQuestion:
   multiSelect: false
 ```
 
-Build options dynamically from marshal.json modules.
+Build options dynamically from marshal.json module_config.
 
 ### Step 2: Select Operation
 
@@ -367,8 +367,8 @@ AskUserQuestion:
       description: "Show current command configuration"
     - label: "Add"
       description: "Add new commands from detected profiles"
-    - label: "Remove"
-      description: "Remove commands from this module"
+    - label: "Profile Mappings"
+      description: "Map unclassified profiles to commands or skip"
     - label: "Reset"
       description: "Reset to auto-detected defaults"
   multiSelect: false
@@ -423,6 +423,84 @@ python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist \
   --include-profiles "{module}:{profile-id},{module}:{profile-id}"
 ```
 
+### Operation: Profile Mappings
+
+Manage user decisions for profiles that can't be auto-classified. Mappings are stored in `run-configuration.json` and applied during command generation.
+
+**Step 1: View current mappings**
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping list
+```
+
+**Output (JSON)**:
+```json
+{
+  "success": true,
+  "count": 3,
+  "mappings": {
+    "jfr": "skip",
+    "quick": "skip",
+    "benchmark": "performance"
+  }
+}
+```
+
+**Step 2: Check for unmapped profiles**
+
+Run persist to see unmapped profiles:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist --dry-run
+```
+
+If output contains `unmapped_profiles`, present them to user:
+
+```yaml
+AskUserQuestion:
+  question: "Profile '{profile_id}' can't be auto-classified. What is it?"
+  header: "Profile"
+  options:
+    - label: "Skip (internal/unused)"
+      description: "Exclude from command generation"
+    - label: "Integration tests"
+      description: "Integration or E2E test execution"
+    - label: "Coverage"
+      description: "Code coverage analysis"
+    - label: "Performance"
+      description: "Benchmark or performance testing"
+  multiSelect: false
+```
+
+**Step 3: Save mapping**
+
+```bash
+# Single mapping
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping set \
+  --profile-id "{profile_id}" --canonical "{canonical}"
+
+# Batch mappings
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping batch-set \
+  --mappings-json '{"jfr": "skip", "quick": "skip"}'
+```
+
+**Valid canonicals**: `integration-tests`, `coverage`, `performance`, `quality-gate`, `skip`
+
+**Step 4: Re-run persist**
+
+After saving mappings, re-run persist to apply them:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
+```
+
+**Remove a mapping**:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping remove \
+  --profile-id "{profile_id}"
+```
+
 ### Operation: Remove
 
 Present multi-select of current commands:
@@ -444,7 +522,7 @@ Remove selected commands by editing marshal.json directly:
 ```bash
 # Read current config, remove selected commands, write back
 python3 .plan/execute-script.py plan-marshall:json-file-operations:manage-json-file delete-field \
-  .plan/marshal.json --field "modules.{module}.commands.{canonical}"
+  .plan/marshal.json --field "module_config.{module}.commands.{canonical}"
 ```
 
 ### Operation: Reset

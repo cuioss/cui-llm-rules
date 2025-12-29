@@ -208,6 +208,31 @@ warnings[0]:
 |------------|---------|
 | (none) | Validate structure format |
 
+### raw-data-as-toon
+
+| Parameters | Purpose |
+|------------|---------|
+| (none) | Output raw project data as TOON for LLM consumption |
+
+Reads `.plan/raw-project-data.json` and outputs in TOON format. Returns error if file doesn't exist (run `collect-raw-data` first).
+
+### modules-for-commands
+
+| Parameters | Purpose |
+|------------|---------|
+| (none) | Output module data for command generation |
+| `--module` | Filter to specific module |
+
+**Output format** (TOON uniform array):
+```toon
+modules[3]{name,path,build_systems,packaging}:
+my-core,my-core,maven,jar
+my-ui,my-ui,maven+npm,war
+e2e-tests,e2e-tests,npm,pom
+```
+
+Build systems are joined with `+` to avoid comma conflicts. This command is the API for `build_env persist` and other scripts that need module information from `raw-project-data.json`.
+
 ### Noun: module
 
 | Verb | Parameters | Purpose |

@@ -768,6 +768,376 @@ def test_warning_list_empty_config():
 
 
 # =============================================================================
+# Profile Mapping Subcommand Tests
+# =============================================================================
+
+def test_profile_mapping_set():
+    """Test profile-mapping set adds mapping."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Initialize config
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
+                          '--profile-id', 'jfr',
+                          '--canonical', 'performance',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'added'
+        assert data.get('profile_id') == 'jfr'
+        assert data.get('canonical') == 'performance'
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert config.get('profile_mappings', {}).get('jfr') == 'performance'
+
+
+def test_profile_mapping_set_skip():
+    """Test profile-mapping set with skip canonical."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
+                          '--profile-id', 'quick',
+                          '--canonical', 'skip',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('canonical') == 'skip'
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert config.get('profile_mappings', {}).get('quick') == 'skip'
+
+
+def test_profile_mapping_set_update_existing():
+    """Test profile-mapping set updates existing mapping."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        # Create config with existing mapping
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {
+                "jfr": "skip"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
+                          '--profile-id', 'jfr',
+                          '--canonical', 'performance',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'updated'
+        assert data.get('previous') == 'skip'
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert config['profile_mappings']['jfr'] == 'performance'
+
+
+def test_profile_mapping_set_invalid_canonical():
+    """Test profile-mapping set rejects invalid canonical."""
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'set',
+                          '--profile-id', 'jfr',
+                          '--canonical', 'invalid_canonical',
+                          '--project-dir', str(temp_dir))
+
+        # argparse will fail with invalid choice
+        assert result.returncode != 0
+
+
+def test_profile_mapping_get_mapped():
+    """Test profile-mapping get returns mapping."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {
+                "jfr": "performance"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'get',
+                          '--profile-id', 'jfr',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('profile_id') == 'jfr'
+        assert data.get('mapped') is True
+        assert data.get('canonical') == 'performance'
+
+
+def test_profile_mapping_get_unmapped():
+    """Test profile-mapping get returns unmapped for unknown profile."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {}
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'get',
+                          '--profile-id', 'unknown',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('profile_id') == 'unknown'
+        assert data.get('mapped') is False
+        assert 'canonical' not in data
+
+
+def test_profile_mapping_list_all():
+    """Test profile-mapping list returns all mappings."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {
+                "jfr": "skip",
+                "quick": "skip",
+                "benchmark": "performance"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'list',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('count') == 3
+        assert data.get('mappings') == {
+            "jfr": "skip",
+            "quick": "skip",
+            "benchmark": "performance"
+        }
+
+
+def test_profile_mapping_list_filter_by_canonical():
+    """Test profile-mapping list with canonical filter."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {
+                "jfr": "skip",
+                "quick": "skip",
+                "benchmark": "performance"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'list',
+                          '--canonical', 'skip',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('filter') == 'skip'
+        assert data.get('count') == 2
+        assert data.get('mappings') == {"jfr": "skip", "quick": "skip"}
+
+
+def test_profile_mapping_remove():
+    """Test profile-mapping remove removes mapping."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {
+                "jfr": "skip",
+                "quick": "skip"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'remove',
+                          '--profile-id', 'jfr',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'removed'
+        assert data.get('previous') == 'skip'
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert 'jfr' not in config['profile_mappings']
+        assert 'quick' in config['profile_mappings']
+
+
+def test_profile_mapping_remove_nonexistent_skips():
+    """Test profile-mapping remove skips non-existent mapping."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {}
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'remove',
+                          '--profile-id', 'nonexistent',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'skipped'
+
+
+def test_profile_mapping_batch_set():
+    """Test profile-mapping batch-set sets multiple mappings."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
+                          '--mappings-json', '{"jfr": "skip", "quick": "skip", "benchmark": "performance"}',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('action') == 'batch_set'
+        assert data.get('added') == 3
+        assert data.get('updated') == 0
+
+        # Verify file was updated
+        config = json.loads((plan_dir / 'run-configuration.json').read_text())
+        assert config['profile_mappings'] == {
+            "jfr": "skip",
+            "quick": "skip",
+            "benchmark": "performance"
+        }
+
+
+def test_profile_mapping_batch_set_with_updates():
+    """Test profile-mapping batch-set handles updates and adds."""
+    import json
+    with TempDirContext() as temp_dir:
+        plan_dir = temp_dir / '.plan'
+        plan_dir.mkdir(parents=True)
+
+        config = {
+            "version": 1,
+            "commands": {},
+            "profile_mappings": {
+                "jfr": "skip"
+            }
+        }
+        (plan_dir / 'run-configuration.json').write_text(json.dumps(config))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
+                          '--mappings-json', '{"jfr": "performance", "quick": "skip"}',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json()
+        assert data.get('success') is True
+        assert data.get('added') == 1
+        assert data.get('updated') == 1
+
+
+def test_profile_mapping_batch_set_invalid_canonical():
+    """Test profile-mapping batch-set rejects invalid canonical."""
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
+                          '--mappings-json', '{"jfr": "invalid"}',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json_or_error()
+        assert data.get('success') is False
+
+
+def test_profile_mapping_batch_set_invalid_json():
+    """Test profile-mapping batch-set rejects invalid JSON."""
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        result = run_script(SCRIPT_PATH, 'profile-mapping', 'batch-set',
+                          '--mappings-json', 'not valid json',
+                          '--project-dir', str(temp_dir))
+
+        data = result.json_or_error()
+        assert data.get('success') is False
+
+
+def test_profile_mapping_help():
+    """Test profile-mapping subcommand shows help."""
+    result = run_script(SCRIPT_PATH, 'profile-mapping', '--help')
+    assert result.success
+    assert 'set' in result.stdout
+    assert 'get' in result.stdout
+    assert 'list' in result.stdout
+    assert 'remove' in result.stdout
+    assert 'batch-set' in result.stdout
+
+
+def test_init_includes_profile_mappings():
+    """Test init creates profile_mappings section."""
+    import json
+    with TempDirContext() as temp_dir:
+        run_script(SCRIPT_PATH, 'init', '--project-dir', str(temp_dir))
+
+        config_file = temp_dir / '.plan' / 'run-configuration.json'
+        content = json.loads(config_file.read_text())
+
+        assert 'profile_mappings' in content, "Should have profile_mappings section"
+        assert content['profile_mappings'] == {}, "profile_mappings should be empty object"
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -783,6 +1153,7 @@ if __name__ == '__main__':
         test_init_output_includes_path,
         test_init_output_includes_structure,
         test_init_default_project_dir,
+        test_init_includes_profile_mappings,
         # Validate subcommand tests
         test_validate_valid_run_config,
         test_validate_missing_version,
@@ -815,5 +1186,21 @@ if __name__ == '__main__':
         test_warning_help,
         test_warning_add_help,
         test_warning_list_empty_config,
+        # Profile mapping subcommand tests
+        test_profile_mapping_set,
+        test_profile_mapping_set_skip,
+        test_profile_mapping_set_update_existing,
+        test_profile_mapping_set_invalid_canonical,
+        test_profile_mapping_get_mapped,
+        test_profile_mapping_get_unmapped,
+        test_profile_mapping_list_all,
+        test_profile_mapping_list_filter_by_canonical,
+        test_profile_mapping_remove,
+        test_profile_mapping_remove_nonexistent_skips,
+        test_profile_mapping_batch_set,
+        test_profile_mapping_batch_set_with_updates,
+        test_profile_mapping_batch_set_invalid_canonical,
+        test_profile_mapping_batch_set_invalid_json,
+        test_profile_mapping_help,
     ])
     sys.exit(runner.run())

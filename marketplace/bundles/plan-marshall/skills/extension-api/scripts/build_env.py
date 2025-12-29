@@ -50,6 +50,70 @@ from extension_base import (
     CMD_QUALITY_GATE,
 )
 
+
+# =============================================================================
+# Profile Mapping Integration (from run-config)
+# =============================================================================
+
+def load_profile_mappings(project_dir: Path) -> dict:
+    """Load profile mappings from run-configuration.json.
+
+    Returns dict of profile_id -> canonical (or 'skip').
+    """
+    run_config_path = project_dir / ".plan" / "run-configuration.json"
+    if not run_config_path.exists():
+        return {}
+    try:
+        config = json.loads(run_config_path.read_text())
+        return config.get('profile_mappings', {})
+    except (json.JSONDecodeError, IOError):
+        return {}
+
+
+def apply_profile_mappings(profiles: list, mappings: dict) -> list:
+    """Apply user-defined profile mappings to detected profiles.
+
+    For each profile:
+    - If profile_id is in mappings with 'skip', remove from list
+    - If profile_id is in mappings with a canonical, override the canonical
+    - If profile_id is not in mappings, keep original detection
+
+    Returns modified profiles list.
+    """
+    result = []
+    for profile in profiles:
+        profile_id = profile.get('id')
+        if profile_id in mappings:
+            mapping = mappings[profile_id]
+            if mapping == 'skip':
+                # User said to skip this profile - don't include it
+                continue
+            else:
+                # User mapped this profile to a specific canonical
+                profile = profile.copy()
+                profile['canonical'] = mapping
+        result.append(profile)
+    return result
+
+
+def get_unmapped_profiles(profiles: list, mappings: dict) -> list:
+    """Get profiles that have no auto-classification AND no user mapping.
+
+    These are profiles that need user decision.
+    """
+    unmapped = []
+    for profile in profiles:
+        profile_id = profile.get('id')
+        # If already in mappings, user has decided
+        if profile_id in mappings:
+            continue
+        # If auto-classified, no user decision needed
+        if profile.get('canonical'):
+            continue
+        # Needs user decision
+        unmapped.append(profile)
+    return unmapped
+
 # Canonical commands that require profile detection (not provided by static get_command_mappings)
 PROFILE_BASED_CANONICALS = {CMD_INTEGRATION_TESTS, CMD_COVERAGE, CMD_PERFORMANCE, CMD_QUALITY_GATE}
 
@@ -330,6 +394,42 @@ def load_marshal_json(project_dir: Path) -> dict:
     return {}
 
 
+def load_modules_from_raw_data(project_dir: Path) -> list:
+    """Load modules from raw-project-data.json (single source of truth).
+
+    Returns list of module dicts with: name, path, build_systems, packaging.
+    Returns empty list if raw-project-data.json doesn't exist.
+    """
+    raw_data_path = project_dir / ".plan" / "raw-project-data.json"
+    if not raw_data_path.exists():
+        return []
+    try:
+        raw_data = json.loads(raw_data_path.read_text())
+        return raw_data.get('modules', [])
+    except (json.JSONDecodeError, IOError):
+        return []
+
+
+def get_default_build_systems_from_raw_data(project_dir: Path) -> list:
+    """Get default build systems from raw-project-data.json.
+
+    The 'default' module build systems are stored separately since they
+    represent the root project build systems.
+    """
+    raw_data_path = project_dir / ".plan" / "raw-project-data.json"
+    if not raw_data_path.exists():
+        return []
+    try:
+        raw_data = json.loads(raw_data_path.read_text())
+        # Check for explicit default_build_systems first (set by collect-raw-data)
+        if 'default_build_systems' in raw_data:
+            return raw_data['default_build_systems']
+        # Fall back to detecting from root project files
+        return []
+    except (json.JSONDecodeError, IOError):
+        return []
+
+
 def generate_commands_from_extensions(
     extension_mappings: dict,
     build_system: str,
@@ -429,6 +529,9 @@ def cmd_persist(args):
 
     minimal = getattr(args, 'minimal', False)
 
+    # Load user-defined profile mappings from run-configuration.json
+    profile_mappings = load_profile_mappings(project_dir)
+
     # Discover applicable extensions
     extensions = discover_extensions(project_dir)
     extension_mappings = get_command_mappings_from_extensions(extensions)
@@ -442,13 +545,13 @@ def cmd_persist(args):
 
     default_system = build_result["default_system"]
 
-    # Detect modules
-    modules = detect_all_modules(project_dir)
+    # Load modules from raw-project-data.json (single source of truth)
+    modules = load_modules_from_raw_data(project_dir)
 
     # Load existing config
     config = load_marshal_json(project_dir)
-    if "modules" not in config:
-        config["modules"] = {}
+    if "module_config" not in config:
+        config["module_config"] = {}
 
     # Detect build systems for default module (may be hybrid with multiple systems)
     default_build_systems = detect_hybrid_build_systems(project_dir)
@@ -456,29 +559,25 @@ def cmd_persist(args):
         default_build_systems = [default_system]
     default_is_hybrid = len(default_build_systems) > 1
     default_type = detect_module_type_for_path(project_dir)
-    default_profiles = detect_profiles_for_module(project_dir)
+    default_profiles_raw = detect_profiles_for_module(project_dir)
+
+    # Apply user-defined profile mappings to detected profiles
+    default_profiles = apply_profile_mappings(default_profiles_raw, profile_mappings)
 
     # Configure default module
-    if "default" not in config["modules"]:
-        config["modules"]["default"] = {"path": ".", "domains": [], "build_systems": default_build_systems}
+    if "default" not in config["module_config"]:
+        config["module_config"]["default"] = {"path": ".", "domains": [], "build_systems": default_build_systems}
     else:
-        config["modules"]["default"]["build_systems"] = default_build_systems
+        config["module_config"]["default"]["build_systems"] = default_build_systems
 
-    config["modules"]["default"]["type"] = default_type
+    config["module_config"]["default"]["type"] = default_type
 
-    # Analyze profile coverage for default module
+    # Analyze profile coverage for default module (using mapped profiles)
     default_profile_analysis = analyze_profile_coverage(default_profiles, default_type)
 
-    if default_profiles:
-        config["modules"]["default"]["detected_profiles"] = [
-            {"id": p["id"], "canonical": p.get("canonical")} for p in default_profiles
-        ]
-
-    # Store profile analysis results for user prompting
-    if default_profile_analysis["unclassified"]:
-        config["modules"]["default"]["unclassified_profiles"] = default_profile_analysis["unclassified"]
-    if default_profile_analysis["missing"]:
-        config["modules"]["default"]["missing_profile_commands"] = default_profile_analysis["missing"]
+    # Clean up any old diagnostic fields from marshal.json (no longer stored there)
+    for field in ["detected_profiles", "unclassified_profiles", "missing_profile_commands"]:
+        config["module_config"]["default"].pop(field, None)
 
     # Generate commands for default module
     if default_is_hybrid:
@@ -502,50 +601,50 @@ def cmd_persist(args):
             if cmd:
                 default_commands[canonical] = cmd
 
-    config["modules"]["default"]["commands"] = default_commands
+    config["module_config"]["default"]["commands"] = default_commands
 
     # Generate commands for detected modules
     modules_updated = 1
     commands_generated = len(default_commands)
 
-    # Track profile issues across all modules for summary
-    total_unclassified = 0
-    total_missing = 0
+    # Track profiles needing user decision (not stored in marshal.json, just reported)
+    all_unmapped_profiles = []
+    unmapped_default = get_unmapped_profiles(default_profiles_raw, profile_mappings)
+    for p in unmapped_default:
+        all_unmapped_profiles.append({"module": "default", "profile_id": p["id"]})
 
     for module in modules:
         mod_name = module["name"]
-        mod_system = module["build_system"]
+        # raw-project-data.json uses build_systems (array)
+        mod_build_systems = module.get("build_systems", [])
+        mod_system = mod_build_systems[0] if mod_build_systems else default_system
         mod_path = project_dir / module["path"]
 
-        mod_build_systems = detect_hybrid_build_systems(mod_path)
-        if not mod_build_systems:
-            mod_build_systems = [mod_system]
         mod_is_hybrid = len(mod_build_systems) > 1
         mod_type = detect_module_type_for_path(mod_path)
-        mod_profiles = detect_profiles_for_module(mod_path)
+        mod_profiles_raw = detect_profiles_for_module(mod_path)
 
-        if mod_name not in config["modules"]:
-            config["modules"][mod_name] = {"path": module["path"], "domains": [], "build_systems": mod_build_systems}
+        # Apply user-defined profile mappings
+        mod_profiles = apply_profile_mappings(mod_profiles_raw, profile_mappings)
+
+        if mod_name not in config["module_config"]:
+            config["module_config"][mod_name] = {"path": module["path"], "domains": [], "build_systems": mod_build_systems}
         else:
-            config["modules"][mod_name]["build_systems"] = mod_build_systems
+            config["module_config"][mod_name]["build_systems"] = mod_build_systems
 
-        config["modules"][mod_name]["type"] = mod_type
+        config["module_config"][mod_name]["type"] = mod_type
 
-        # Analyze profile coverage for this module
+        # Analyze profile coverage for this module (using mapped profiles)
         mod_profile_analysis = analyze_profile_coverage(mod_profiles, mod_type)
 
-        if mod_profiles:
-            config["modules"][mod_name]["detected_profiles"] = [
-                {"id": p["id"], "canonical": p.get("canonical")} for p in mod_profiles
-            ]
+        # Clean up any old diagnostic fields from marshal.json
+        for field in ["detected_profiles", "unclassified_profiles", "missing_profile_commands"]:
+            config["module_config"][mod_name].pop(field, None)
 
-        # Store profile analysis results for user prompting
-        if mod_profile_analysis["unclassified"]:
-            config["modules"][mod_name]["unclassified_profiles"] = mod_profile_analysis["unclassified"]
-            total_unclassified += len(mod_profile_analysis["unclassified"])
-        if mod_profile_analysis["missing"]:
-            config["modules"][mod_name]["missing_profile_commands"] = mod_profile_analysis["missing"]
-            total_missing += len(mod_profile_analysis["missing"])
+        # Track unmapped profiles for reporting
+        unmapped_mod = get_unmapped_profiles(mod_profiles_raw, profile_mappings)
+        for p in unmapped_mod:
+            all_unmapped_profiles.append({"module": mod_name, "profile_id": p["id"]})
 
         if mod_is_hybrid:
             mod_commands = generate_hybrid_commands_from_extensions(extension_mappings, mod_path, mod_name)
@@ -568,13 +667,9 @@ def cmd_persist(args):
                 if cmd:
                     mod_commands[canonical] = cmd
 
-        config["modules"][mod_name]["commands"] = mod_commands
+        config["module_config"][mod_name]["commands"] = mod_commands
         modules_updated += 1
         commands_generated += len(mod_commands)
-
-    # Add default module stats to totals
-    total_unclassified += len(default_profile_analysis.get("unclassified", []))
-    total_missing += len(default_profile_analysis.get("missing", []))
 
     if not args.dry_run:
         # Delegate to plan-marshall-config for centralized marshal.json writes
@@ -583,7 +678,7 @@ def cmd_persist(args):
         cmd = [
             "python3", str(config_script),
             "modules", "persist-all",
-            "--modules-json", json.dumps(config["modules"])
+            "--modules-json", json.dumps(config["module_config"])
         ]
 
         # Set PLAN_BASE_DIR to project's .plan directory
@@ -599,36 +694,23 @@ def cmd_persist(args):
     print(f"build_systems: {build_result['available_systems']}")
     print(f"modules_updated: {modules_updated}")
     print(f"commands_generated: {commands_generated}")
+    print(f"profile_mappings_applied: {len(profile_mappings)}")
     print()
     print(f"modules[{modules_updated}]" + "{name,path,type,commands_count}:")
-    for mod_name, mod_config in config["modules"].items():
+    for mod_name, mod_config in config["module_config"].items():
         cmd_count = len(mod_config.get("commands", {}))
         mod_type = mod_config.get("type", "jar")
         print(f"{mod_name}\t{mod_config.get('path', mod_name)}\t{mod_type}\t{cmd_count}")
 
-    # Report profile issues that may need user attention
-    if total_unclassified > 0 or total_missing > 0:
+    # Report profiles needing user decision (not stored in marshal.json)
+    if all_unmapped_profiles:
         print()
-        print("profile_issues:")
-        print(f"  unclassified_profiles: {total_unclassified}")
-        print(f"  missing_profile_commands: {total_missing}")
-
-        if total_unclassified > 0:
-            print()
-            print("unclassified_profiles{module,profile_id}:")
-            for mod_name, mod_config in config["modules"].items():
-                for profile in mod_config.get("unclassified_profiles", []):
-                    print(f"{mod_name}\t{profile['id']}")
-
-        if total_missing > 0:
-            print()
-            print("missing_profile_commands{module,canonical}:")
-            for mod_name, mod_config in config["modules"].items():
-                for canonical in mod_config.get("missing_profile_commands", []):
-                    print(f"{mod_name}\t{canonical}")
-
-            print()
-            print("hint: Use '/marshall-steward' to configure missing profile mappings")
+        print(f"unmapped_profiles[{len(all_unmapped_profiles)}]" + "{module,profile_id}:")
+        for item in all_unmapped_profiles:
+            print(f"{item['module']}\t{item['profile_id']}")
+        print()
+        print("hint: Use 'run_config profile-mapping set --profile-id <id> --canonical <canonical|skip>'")
+        print("      to resolve unmapped profiles, then re-run persist")
 
     return 0
 

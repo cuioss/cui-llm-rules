@@ -367,26 +367,27 @@ The defaults template contains only `system` domain. Technical domains (java, ja
       }
     }
   },
-  "modules": {
+  "module_config": {
     "default": {
       "path": ".",
       "domains": ["java"],
       "build_systems": ["maven"],
+      "type": "jar",
       "commands": {
-        "test-compile": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"test-compile\"",
-        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\"",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\"",
-        "install": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean install\"",
-        "pre-commit": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean install\" --profile pre-commit"
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --goals \"clean test\"",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --goals \"clean verify\"",
+        "install": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --goals \"clean install\"",
+        "quality-gate": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --goals \"clean install\" --profile pre-commit"
       }
     },
     "my-module": {
       "path": "my-module",
       "domains": ["java"],
       "build_systems": ["maven"],
+      "type": "jar",
       "commands": {
-        "test": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean test\" --module my-module",
-        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven execute --goals \"clean verify\" --module my-module"
+        "module-tests": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --goals \"clean test\" --module my-module",
+        "verify": "python3 .plan/execute-script.py pm-dev-java:plan-marshall-plugin:maven run --goals \"clean verify\" --module my-module"
       }
     }
   },

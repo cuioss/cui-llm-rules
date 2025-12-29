@@ -40,22 +40,20 @@ Transform raw project data into rich project-structure.toon with LLM analysis.
 Check that raw data exists or collect it:
 
 ```bash
-# Check if raw data exists
-ls .plan/raw-project-data.toon
-
-# If missing, generate it:
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure collect-raw-data
 ```
 
-**Raw data location**: `.plan/raw-project-data.toon`
+This generates `.plan/raw-project-data.json` from filesystem discovery.
 
 ### Step 1: Load Raw Data
 
-Read the raw project data:
+Read raw project data in TOON format for LLM analysis:
 
+```bash
+python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure raw-data-as-toon
 ```
-Read .plan/raw-project-data.toon
-```
+
+This outputs the raw data in TOON format (token-efficient for LLM processing).
 
 This provides:
 - Module list with paths
@@ -298,11 +296,11 @@ See `plan-marshall:project-structure/standards/layer-definitions.md` for complet
 
 ### Missing Raw Data
 
-```
-Read .plan/raw-project-data.toon
-# Error: File not found
+If `collect-raw-data` reports no data:
 
-# Resolution: Generate it
+```bash
+# Resolution: Ensure project has build files (pom.xml, package.json)
+# Then regenerate:
 python3 .plan/execute-script.py plan-marshall:project-structure:manage_project_structure collect-raw-data
 ```
 

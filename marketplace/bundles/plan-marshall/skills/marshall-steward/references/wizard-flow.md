@@ -335,7 +335,71 @@ Modules configured: 3
   - oauth-sheriff-ui (npm, 6 commands)
 ```
 
-### Step 5c-2: Infer Module Domains
+### Step 5c-2: Resolve Unmapped Profiles
+
+If `build_env persist` reports unmapped profiles, resolve them interactively:
+
+**Check output for unmapped profiles**:
+```toon
+unmapped_profiles[3]{module,profile_id}:
+default	jfr
+benchmark-core	analyze-jfr
+benchmark-core	quick
+
+hint: Use 'run_config profile-mapping set ...' to resolve
+```
+
+**For each unique unmapped profile**, ask user to classify:
+
+```yaml
+AskUserQuestion:
+  question: "Profile 'jfr' detected but can't be auto-classified. What is it?"
+  header: "Profile"
+  options:
+    - label: "Skip (internal/unused)"
+      description: "Exclude from command generation"
+    - label: "Integration tests"
+      description: "Integration or E2E test execution"
+    - label: "Coverage"
+      description: "Code coverage analysis"
+    - label: "Performance"
+      description: "Benchmark or performance testing"
+  multiSelect: false
+```
+
+**Map user selection to canonical**:
+
+| Selection | Canonical |
+|-----------|-----------|
+| Skip | `skip` |
+| Integration tests | `integration-tests` |
+| Coverage | `coverage` |
+| Performance | `performance` |
+| Quality gate | `quality-gate` |
+
+**Save decision to run-config**:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping set \
+  --profile-id jfr --canonical skip
+```
+
+**Batch mode** - If multiple profiles share same classification:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:run-config:run_config profile-mapping batch-set \
+  --mappings-json '{"jfr": "skip", "analyze-jfr": "skip", "quick": "skip"}'
+```
+
+**Re-run persist** after all mappings are saved:
+
+```bash
+python3 .plan/execute-script.py plan-marshall:extension-api:build_env persist
+```
+
+This ensures marshal.json contains only resolved commands with no diagnostic artifacts.
+
+### Step 5c-3: Infer Module Domains
 
 Auto-populate module domains from build_systems:
 
@@ -578,7 +642,7 @@ Invoke the analysis skill to read raw data and generate meaningful structure:
 Skill: plan-marshall:analyze-project-architecture
 ```
 
-The LLM analysis reads `.plan/raw-project-data.json`, samples documentation and source code, then generates enriched project-structure.toon with:
+The LLM analysis uses `raw-data-as-toon` to load project data, samples documentation and source code, then generates enriched project-structure.toon with:
 - Semantic module responsibilities (not just names)
 - Verified architectural layers
 - Technology detected from imports/annotations

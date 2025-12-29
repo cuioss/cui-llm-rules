@@ -1257,6 +1257,85 @@ def cmd_collect_raw_data(args) -> int:
 
 
 # ===========================================================================
+# Command: raw-data-as-toon
+# ===========================================================================
+
+def cmd_raw_data_as_toon(args) -> int:
+    """Output raw project data as TOON for LLM consumption.
+
+    Reads .plan/raw-project-data.json and outputs it in TOON format,
+    which is more token-efficient for LLM processing.
+
+    If the file doesn't exist, returns error suggesting to run
+    collect-raw-data first.
+    """
+    try:
+        if not RAW_DATA_PATH.exists():
+            return error_exit(
+                f"{RAW_DATA_PATH} not found. Run 'collect-raw-data' command first."
+            )
+
+        raw_data = json.loads(RAW_DATA_PATH.read_text(encoding='utf-8'))
+
+        # Convert to TOON format
+        toon_output = serialize_toon(raw_data)
+        print(toon_output)
+        return 0
+    except json.JSONDecodeError as e:
+        return error_exit(f"Invalid JSON in {RAW_DATA_PATH}: {e}")
+    except Exception as e:
+        return error_exit(str(e))
+
+
+# ===========================================================================
+# Command: modules-for-commands
+# ===========================================================================
+
+def cmd_modules_for_commands(args) -> int:
+    """Output module data needed for command generation.
+
+    Reads raw-project-data.json and outputs a focused TOON format
+    with just the fields needed for build command configuration:
+    - name, path, build_systems, packaging
+
+    This is the API for build_env and other scripts that need
+    module information for command generation.
+    """
+    try:
+        if not RAW_DATA_PATH.exists():
+            return error_exit(
+                f"{RAW_DATA_PATH} not found. Run 'collect-raw-data' command first."
+            )
+
+        raw_data = json.loads(RAW_DATA_PATH.read_text(encoding='utf-8'))
+        modules = raw_data.get('modules', [])
+
+        # Apply module filter if specified
+        module_filter = getattr(args, 'module', None)
+        if module_filter:
+            modules = [m for m in modules if m.get('name') == module_filter]
+            if not modules:
+                return error_exit(f"Module not found: {module_filter}")
+
+        # Output as TOON uniform array
+        fields = ['name', 'path', 'build_systems', 'packaging']
+        print(f"modules[{len(modules)}]{{name,path,build_systems,packaging}}:")
+        for mod in modules:
+            name = mod.get('name', '')
+            path = mod.get('path', '')
+            # Join build_systems with + for TOON (avoid comma conflict)
+            build_systems = '+'.join(mod.get('build_systems', []))
+            packaging = mod.get('packaging', '')
+            print(f"{name},{path},{build_systems},{packaging}")
+
+        return 0
+    except json.JSONDecodeError as e:
+        return error_exit(f"Invalid JSON in {RAW_DATA_PATH}: {e}")
+    except Exception as e:
+        return error_exit(str(e))
+
+
+# ===========================================================================
 # Command: validate
 # ===========================================================================
 
@@ -1685,6 +1764,15 @@ def main():
     # collect-raw-data command
     collect_parser = subparsers.add_parser('collect-raw-data', help='Collect raw project data for LLM analysis')
     collect_parser.set_defaults(func=cmd_collect_raw_data)
+
+    # raw-data-as-toon command
+    raw_toon_parser = subparsers.add_parser('raw-data-as-toon', help='Output raw project data as TOON')
+    raw_toon_parser.set_defaults(func=cmd_raw_data_as_toon)
+
+    # modules-for-commands command
+    mod_cmd_parser = subparsers.add_parser('modules-for-commands', help='Output module data for command generation')
+    mod_cmd_parser.add_argument('--module', help='Filter to specific module')
+    mod_cmd_parser.set_defaults(func=cmd_modules_for_commands)
 
     # validate command
     validate_parser = subparsers.add_parser('validate', help='Validate structure format')
