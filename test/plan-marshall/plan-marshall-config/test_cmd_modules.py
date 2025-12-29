@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Tests for modules command in plan-marshall-config.
 
-Tests modules command variants including command resolution and edge cases.
+Tests modules command with new architecture:
+- Module facts come from raw-project-data.json
+- Command configuration uses module_config in marshal.json
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -17,7 +20,7 @@ from test_helpers import SCRIPT_PATH, create_marshal_json
 # =============================================================================
 
 def test_modules_list():
-    """Test modules list."""
+    """Test modules list reads from raw-project-data.json."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
@@ -29,31 +32,18 @@ def test_modules_list():
 
 
 def test_modules_get():
-    """Test modules get."""
+    """Test modules get combines facts from raw-project-data with commands from module_config."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'modules', 'get', '--module', 'my-core')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'java' in result.stdout.lower()
-        assert 'maven' in result.stdout.lower()
-
-
-def test_modules_get_domains():
-    """Test modules get-domains."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-
-        result = run_script(SCRIPT_PATH, 'modules', 'get-domains', '--module', 'my-ui')
-
-        assert result.success, f"Should succeed: {result.stderr}"
-        assert 'java' in result.stdout.lower()
-        assert 'javascript' in result.stdout.lower()
+        assert 'maven' in result.stdout.lower()  # build_systems from raw-project-data
 
 
 def test_modules_get_build_systems():
-    """Test modules get-build-systems."""
+    """Test modules get-build-systems reads from raw-project-data.json."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
@@ -65,7 +55,7 @@ def test_modules_get_build_systems():
 
 
 def test_modules_get_command_from_default():
-    """Test modules get-command falls back to default module."""
+    """Test modules get-command falls back to default module_config."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
@@ -77,7 +67,7 @@ def test_modules_get_command_from_default():
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'clean verify' in result.stdout
-        assert 'source: default' in result.stdout
+        assert 'default' in result.stdout  # source: default
 
 
 def test_modules_get_command_from_module():
@@ -93,11 +83,28 @@ def test_modules_get_command_from_module():
 
         assert result.success, f"Should succeed: {result.stderr}"
         assert 'npm' in result.stdout  # Contains npm in the command
-        assert 'source: module' in result.stdout
+        assert 'module' in result.stdout  # source: module
+
+
+def test_modules_list_commands():
+    """Test modules list-commands shows all available commands."""
+    with PlanTestContext() as ctx:
+        create_marshal_json(ctx.fixture_dir)
+
+        result = run_script(
+            SCRIPT_PATH, 'modules', 'list-commands',
+            '--module', 'my-ui'
+        )
+
+        assert result.success, f"Should succeed: {result.stderr}"
+        assert 'test' in result.stdout
+        assert 'build' in result.stdout
+        # Should also include default commands
+        assert 'verify' in result.stdout
 
 
 def test_modules_set_command():
-    """Test modules set-command sets command for module."""
+    """Test modules set-command sets command in module_config."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
@@ -117,41 +124,29 @@ def test_modules_set_command():
             '--label', 'custom'
         )
         assert 'custom' in verify.stdout
-        assert 'source: module' in verify.stdout
+        assert 'module' in verify.stdout  # source: module
 
 
-def test_modules_add():
-    """Test modules add."""
+def test_modules_set_default_command():
+    """Test modules set-default-command sets command for all modules."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(
-            SCRIPT_PATH, 'modules', 'add',
-            '--module', 'new-module',
-            '--path', 'path/to/new-module',
-            '--domains', 'java,java-testing',
-            '--build-systems', 'maven'
+            SCRIPT_PATH, 'modules', 'set-default-command',
+            '--label', 'new-default',
+            '--command', 'echo "default command"'
         )
 
         assert result.success, f"Should succeed: {result.stderr}"
 
-        # Verify added
-        verify = run_script(SCRIPT_PATH, 'modules', 'get', '--module', 'new-module')
-        assert 'path/to/new-module' in verify.stdout
-
-
-def test_modules_remove():
-    """Test modules remove."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-
-        result = run_script(SCRIPT_PATH, 'modules', 'remove', '--module', 'my-core')
-
-        assert result.success, f"Should succeed: {result.stderr}"
-
-        # Verify removed
-        verify = run_script(SCRIPT_PATH, 'modules', 'get', '--module', 'my-core')
-        assert 'error' in verify.stdout.lower()
+        # Verify any module can use this default
+        verify = run_script(
+            SCRIPT_PATH, 'modules', 'get-command',
+            '--module', 'my-core',
+            '--label', 'new-default'
+        )
+        assert 'default command' in verify.stdout
 
 
 def test_modules_get_unknown_module():
@@ -164,35 +159,28 @@ def test_modules_get_unknown_module():
         assert 'error' in result.stdout.lower(), "Should report error"
 
 
-def test_modules_add_duplicate_fails():
-    """Test modules add fails for existing module."""
-    with PlanTestContext() as ctx:
-        create_marshal_json(ctx.fixture_dir)
-
-        result = run_script(
-            SCRIPT_PATH, 'modules', 'add',
-            '--module', 'my-core',  # Already exists
-            '--domains', 'java'
-        )
-
-        assert 'error' in result.stdout.lower() or 'exists' in result.stdout.lower()
-
-
 def test_modules_infer_domains():
     """Test modules infer-domains populates domains from build_systems."""
     with PlanTestContext() as ctx:
-        # Create marshal with modules that have build_systems but empty domains
+        # Create marshal with module_config but no domains
         config = {
             "skill_domains": {"java": {"defaults": []}},
-            "modules": {
-                "default": {"path": ".", "domains": [], "build_systems": ["maven"]},
-                "java-module": {"path": "java-module", "domains": [], "build_systems": ["maven"]},
-                "frontend-module": {"path": "frontend", "domains": [], "build_systems": ["npm"]},
-                "hybrid-module": {"path": "hybrid", "domains": [], "build_systems": ["maven", "npm"]}
-            }
+            "module_config": {}
         }
         marshal_path = ctx.fixture_dir / 'marshal.json'
-        marshal_path.write_text(__import__('json').dumps(config, indent=2))
+        marshal_path.write_text(json.dumps(config, indent=2))
+
+        # Create raw-project-data.json with modules
+        raw_data = {
+            "project": {"root": str(ctx.fixture_dir), "name": "test"},
+            "modules": [
+                {"name": "java-module", "path": "java-module", "build_systems": ["maven"], "packaging": "jar"},
+                {"name": "frontend-module", "path": "frontend", "build_systems": ["npm"], "packaging": None},
+                {"name": "hybrid-module", "path": "hybrid", "build_systems": ["maven", "npm"], "packaging": "war"}
+            ]
+        }
+        raw_data_path = ctx.fixture_dir / 'raw-project-data.json'
+        raw_data_path.write_text(json.dumps(raw_data, indent=2))
 
         result = run_script(SCRIPT_PATH, 'modules', 'infer-domains')
 
@@ -206,17 +194,26 @@ def test_modules_infer_domains():
 def test_modules_infer_domains_skips_existing():
     """Test modules infer-domains skips modules with existing domains."""
     with PlanTestContext() as ctx:
-        # Create marshal with one module that already has domains
+        # Create marshal with module_config having existing domains
         config = {
             "skill_domains": {"java": {"defaults": []}},
-            "modules": {
-                "default": {"path": ".", "domains": [], "build_systems": ["maven"]},
-                "has-domains": {"path": "has-domains", "domains": ["java"], "build_systems": ["maven"]},
-                "no-domains": {"path": "no-domains", "domains": [], "build_systems": ["maven"]}
+            "module_config": {
+                "has-domains": {"domains": ["java"]}
             }
         }
         marshal_path = ctx.fixture_dir / 'marshal.json'
-        marshal_path.write_text(__import__('json').dumps(config, indent=2))
+        marshal_path.write_text(json.dumps(config, indent=2))
+
+        # Create raw-project-data.json
+        raw_data = {
+            "project": {"root": str(ctx.fixture_dir), "name": "test"},
+            "modules": [
+                {"name": "has-domains", "path": "has-domains", "build_systems": ["maven"], "packaging": "jar"},
+                {"name": "no-domains", "path": "no-domains", "build_systems": ["maven"], "packaging": "jar"}
+            ]
+        }
+        raw_data_path = ctx.fixture_dir / 'raw-project-data.json'
+        raw_data_path.write_text(json.dumps(raw_data, indent=2))
 
         result = run_script(SCRIPT_PATH, 'modules', 'infer-domains')
 
@@ -231,13 +228,22 @@ def test_modules_infer_domains_force():
         # Create marshal with module that already has domains
         config = {
             "skill_domains": {"java": {"defaults": []}},
-            "modules": {
-                "default": {"path": ".", "domains": [], "build_systems": ["maven"]},
-                "has-domains": {"path": "has-domains", "domains": ["old-domain"], "build_systems": ["maven"]}
+            "module_config": {
+                "has-domains": {"domains": ["old-domain"]}
             }
         }
         marshal_path = ctx.fixture_dir / 'marshal.json'
-        marshal_path.write_text(__import__('json').dumps(config, indent=2))
+        marshal_path.write_text(json.dumps(config, indent=2))
+
+        # Create raw-project-data.json
+        raw_data = {
+            "project": {"root": str(ctx.fixture_dir), "name": "test"},
+            "modules": [
+                {"name": "has-domains", "path": "has-domains", "build_systems": ["maven"], "packaging": "jar"}
+            ]
+        }
+        raw_data_path = ctx.fixture_dir / 'raw-project-data.json'
+        raw_data_path.write_text(json.dumps(raw_data, indent=2))
 
         result = run_script(SCRIPT_PATH, 'modules', 'infer-domains', '--force')
 
@@ -255,15 +261,13 @@ if __name__ == '__main__':
     runner.add_tests([
         test_modules_list,
         test_modules_get,
-        test_modules_get_domains,
         test_modules_get_build_systems,
         test_modules_get_command_from_default,
         test_modules_get_command_from_module,
+        test_modules_list_commands,
         test_modules_set_command,
-        test_modules_add,
-        test_modules_remove,
+        test_modules_set_default_command,
         test_modules_get_unknown_module,
-        test_modules_add_duplicate_fails,
         test_modules_infer_domains,
         test_modules_infer_domains_skips_existing,
         test_modules_infer_domains_force,

@@ -6,14 +6,34 @@ Architectural layer semantics and dependency constraints for project modules.
 
 | Layer | Description | Typical Modules |
 |-------|-------------|-----------------|
-| `extension` | Plugin/extension code, core functionality | processors, plugins, extensions |
+| `library` | Reusable code, no framework dependencies | core, common, utils, shared |
+| `extension` | Plugin/extension code, framework integrations | processors, plugins, extensions |
 | `presentation` | UI components, web interfaces | ui, frontend, webapp |
-| `service` | Business logic | service, core, domain |
+| `service` | Business logic with framework dependencies | service, domain |
 | `api` | Public API definitions | api, client, sdk |
 | `packaging` | Build artifacts, assembly | nar, assembly, dist |
 | `testing` | Test modules | integration-testing, e2e, test |
 
 ## Layer Descriptions
+
+### library
+
+Reusable code with no framework dependencies, depended on by other modules.
+
+**Characteristics**:
+- Pure Java/JavaScript without framework annotations
+- No CDI, Spring, or other DI dependencies
+- Depended on by extension, service, and api layers
+- Contains shared utilities, models, or algorithms
+- Minimal external dependencies (stdlib preferred)
+
+**Examples**:
+- `*-core` modules (e.g., oauth-sheriff-core)
+- `*-common` modules
+- `*-utils` modules
+- Shared model libraries
+
+**Note**: Script-based inference cannot reliably detect library vs extension. The LLM analysis phase determines this by examining imports and what depends on the module.
 
 ### extension
 
@@ -105,11 +125,22 @@ Test modules including integration and end-to-end tests.
 
 ```toon
 layer_rules:
+  library:
+    allowed:
+      - api
+    forbidden:
+      - presentation
+      - extension
+      - service
+      - testing
+      - packaging
+
   presentation:
     allowed:
       - extension
       - service
       - api
+      - library
     forbidden:
       - testing
       - packaging
@@ -118,6 +149,7 @@ layer_rules:
     allowed:
       - api
       - service
+      - library
     forbidden:
       - presentation
       - testing
@@ -125,13 +157,15 @@ layer_rules:
   service:
     allowed:
       - api
+      - library
     forbidden:
       - presentation
       - testing
       - packaging
 
   api:
-    allowed: []
+    allowed:
+      - library
     forbidden:
       - presentation
       - testing
@@ -143,6 +177,7 @@ layer_rules:
       - extension
       - presentation
       - service
+      - library
     forbidden:
       - testing
 
@@ -153,6 +188,7 @@ layer_rules:
       - presentation
       - service
       - api
+      - library
     forbidden: []
 ```
 
@@ -164,10 +200,16 @@ When generating structure from marshal.json, layers are inferred from module nam
 |---------|----------------|
 | `*-ui`, `*-frontend`, `*-web`, `*webapp*` | presentation |
 | `*-api` | api |
-| `*-service`, `*-core` | service |
+| `*-service` | service |
 | `*test*`, `integration*`, `e2e*`, `e-2-e*` | testing |
 | `*-nar`, `*-assembly`, `*-dist`, `*-package` | packaging |
 | (default) | extension |
+
+**Note on `library` layer**: The `library` layer cannot be reliably inferred from module names alone. Modules like `*-core`, `*-common`, `*-utils` MAY be libraries, but determining this requires analyzing:
+- Import statements (no framework annotations)
+- Dependency direction (what depends on this module)
+
+The LLM analysis phase (Phase 4) determines which modules should be `library` based on code inspection.
 
 ## Constraint Violations
 

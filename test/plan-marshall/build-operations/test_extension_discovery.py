@@ -40,7 +40,7 @@ class ExtensionTestContext:
         # Create initial marshal.json (required by plan-marshall-config)
         (plan_dir / 'marshal.json').write_text(json.dumps({
             "skill_domains": {"system": {}},
-            "modules": {},
+            "module_config": {},
             "system": {"retention": {}},
             "plan": {"defaults": {}}
         }, indent=2))
@@ -72,7 +72,7 @@ def test_discovers_java_extension():
         config = json.loads(marshal_path.read_text())
 
         # Should have maven commands from pm-dev-java extension
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
         assert 'module-tests' in commands, "Should have module-tests command"
         assert 'pm-dev-java:plan-marshall-plugin:maven' in commands['module-tests'], \
             f"Should use pm-dev-java script: {commands['module-tests']}"
@@ -96,7 +96,7 @@ def test_discovers_frontend_extension():
         config = json.loads(marshal_path.read_text())
 
         # Should have npm commands from pm-dev-frontend extension
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
         assert 'module-tests' in commands, "Should have module-tests command"
         assert 'pm-dev-frontend:plan-marshall-plugin:npm' in commands['module-tests'], \
             f"Should use pm-dev-frontend script: {commands['module-tests']}"
@@ -120,7 +120,7 @@ def test_discovers_gradle_extension():
         config = json.loads(marshal_path.read_text())
 
         # Should have gradle commands from pm-dev-java extension
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
         assert 'module-tests' in commands, "Should have module-tests command"
         assert 'pm-dev-java:plan-marshall-plugin:gradle' in commands['module-tests'], \
             f"Should use pm-dev-java gradle script: {commands['module-tests']}"
@@ -145,7 +145,7 @@ def test_discovers_multiple_extensions():
         config = json.loads(marshal_path.read_text())
 
         # Should have both build systems
-        build_systems = config['modules']['default']['build_systems']
+        build_systems = config['module_config']['default']['build_systems']
         assert 'maven' in build_systems, "Should detect maven"
         assert 'npm' in build_systems, "Should detect npm"
 
@@ -172,7 +172,7 @@ def test_java_not_applicable_without_build_files():
         config = json.loads(marshal_path.read_text())
 
         # Should only have npm, not maven/gradle
-        build_systems = config['modules']['default']['build_systems']
+        build_systems = config['module_config']['default']['build_systems']
         assert 'maven' not in build_systems, "Should not detect maven"
         assert 'gradle' not in build_systems, "Should not detect gradle"
         assert 'npm' in build_systems, "Should detect npm"
@@ -196,7 +196,7 @@ def test_frontend_not_applicable_without_package_json():
         config = json.loads(marshal_path.read_text())
 
         # Should only have maven, not npm
-        build_systems = config['modules']['default']['build_systems']
+        build_systems = config['module_config']['default']['build_systems']
         assert 'maven' in build_systems, "Should detect maven"
         assert 'npm' not in build_systems, "Should not detect npm"
 
@@ -221,7 +221,7 @@ def test_command_mappings_include_run_subcommand():
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
 
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
         module_tests = commands['module-tests']
 
         # Should use 'run' subcommand (not 'execute')
@@ -244,7 +244,7 @@ def test_command_mappings_include_execute_script_prefix():
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
 
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
         module_tests = commands['module-tests']
 
         # Should include execute-script.py prefix
@@ -272,7 +272,7 @@ def test_module_placeholder_resolved_for_default():
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
 
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
         module_tests = commands['module-tests']
 
         # Should not contain unresolved placeholder

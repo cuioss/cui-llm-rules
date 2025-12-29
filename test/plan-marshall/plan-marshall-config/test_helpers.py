@@ -42,7 +42,10 @@ def create_run_config(fixture_dir: Path, config: dict = None) -> Path:
 
 
 def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
-    """Create marshal.json in fixture directory with flat structure."""
+    """Create marshal.json in fixture directory with module_config structure.
+
+    Also creates raw-project-data.json with module facts (source of truth for modules).
+    """
     if config is None:
         config = {
             "skill_domains": {
@@ -55,25 +58,14 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
                     "optionals": []
                 }
             },
-            "modules": {
+            "module_config": {
                 "default": {
-                    "path": ".",
-                    "domains": ["java"],
-                    "build_systems": ["maven"],
                     "commands": {
                         "test": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean test\"",
                         "verify": "python3 .plan/execute-script.py plan-marshall:build-operations:maven execute --goals \"clean verify\""
                     }
                 },
-                "my-core": {
-                    "path": "my-core",
-                    "domains": ["java"],
-                    "build_systems": ["maven"]
-                },
                 "my-ui": {
-                    "path": "my-ui",
-                    "domains": ["java", "javascript"],
-                    "build_systems": ["maven", "npm"],
                     "commands": {
                         "test": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run test\"",
                         "build": "python3 .plan/execute-script.py plan-marshall:build-operations:npm execute --command \"run build\""
@@ -105,6 +97,18 @@ def create_marshal_json(fixture_dir: Path, config: dict = None) -> Path:
         }
     marshal_path = fixture_dir / 'marshal.json'
     marshal_path.write_text(json.dumps(config, indent=2))
+
+    # Also create raw-project-data.json with module facts (source of truth)
+    raw_data = {
+        "project": {"root": str(fixture_dir), "name": "test-project"},
+        "modules": [
+            {"name": "my-core", "path": "my-core", "parent": None, "build_systems": ["maven"], "packaging": "jar"},
+            {"name": "my-ui", "path": "my-ui", "parent": None, "build_systems": ["maven", "npm"], "packaging": "war"}
+        ]
+    }
+    raw_data_path = fixture_dir / 'raw-project-data.json'
+    raw_data_path.write_text(json.dumps(raw_data, indent=2))
+
     return marshal_path
 
 

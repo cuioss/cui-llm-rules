@@ -91,46 +91,39 @@ def main():
     sd_configure.add_argument('--domains', required=True, help='Comma-separated domain names to enable')
 
     # --- modules ---
-    p_mod = subparsers.add_parser('modules', help='Manage project modules')
+    # NOTE: Module facts (name, path, build_systems) come from raw-project-data.json
+    # Command configuration uses module_config section of marshal.json
+    p_mod = subparsers.add_parser('modules', help='Manage project modules and commands')
     mod_sub = p_mod.add_subparsers(dest='verb', help='Operation')
 
-    mod_sub.add_parser('list', help='List all modules')
-    mod_sub.add_parser('detect', help='Auto-detect modules')
+    mod_sub.add_parser('list', help='List all modules from raw-project-data.json')
 
-    mod_get = mod_sub.add_parser('get', help='Get module config')
+    mod_get = mod_sub.add_parser('get', help='Get module info and available commands')
     mod_get.add_argument('--module', required=True, help='Module name')
-
-    mod_get_dom = mod_sub.add_parser('get-domains', help='Get module domains')
-    mod_get_dom.add_argument('--module', required=True, help='Module name')
 
     mod_get_bs = mod_sub.add_parser('get-build-systems', help='Get module build systems')
     mod_get_bs.add_argument('--module', required=True, help='Module name')
 
-    mod_get_cmd = mod_sub.add_parser('get-command', help='Get command from module (static routing)')
+    mod_get_cmd = mod_sub.add_parser('get-command', help='Get command for module with fallback chain')
     mod_get_cmd.add_argument('--module', required=True, help='Module name')
     mod_get_cmd.add_argument('--label', required=True, help='Command label')
+    mod_get_cmd.add_argument('--build-system', help='Build system filter for hybrid modules')
 
-    mod_set_cmd = mod_sub.add_parser('set-command', help='Set command for module (static routing)')
+    mod_list_cmd = mod_sub.add_parser('list-commands', help='List available commands for module')
+    mod_list_cmd.add_argument('--module', required=True, help='Module name')
+
+    mod_set_cmd = mod_sub.add_parser('set-command', help='Set command for module')
     mod_set_cmd.add_argument('--module', required=True, help='Module name')
     mod_set_cmd.add_argument('--label', required=True, help='Command label')
     mod_set_cmd.add_argument('--command', required=True, help='Full command string')
+    mod_set_cmd.add_argument('--build-system', help='Build system for hybrid modules')
 
-    mod_add = mod_sub.add_parser('add', help='Add module')
-    mod_add.add_argument('--module', required=True, help='Module name')
-    mod_add.add_argument('--path', help='Module path')
-    mod_add.add_argument('--domains', help='Comma-separated domains')
-    mod_add.add_argument('--build-systems', help='Comma-separated build systems')
+    mod_set_def_cmd = mod_sub.add_parser('set-default-command', help='Set default command for all modules')
+    mod_set_def_cmd.add_argument('--label', required=True, help='Command label')
+    mod_set_def_cmd.add_argument('--command', required=True, help='Full command string')
 
-    mod_set = mod_sub.add_parser('set', help='Update module')
-    mod_set.add_argument('--module', required=True, help='Module name')
-    mod_set.add_argument('--domains', help='Comma-separated domains')
-    mod_set.add_argument('--build-systems', help='Comma-separated build systems')
-
-    mod_rem = mod_sub.add_parser('remove', help='Remove module')
-    mod_rem.add_argument('--module', required=True, help='Module name')
-
-    mod_persist = mod_sub.add_parser('persist-all', help='Persist full modules config (from build_env.py)')
-    mod_persist.add_argument('--modules-json', required=True, help='Full modules config as JSON')
+    mod_persist = mod_sub.add_parser('persist-all', help='Persist full module_config (from build_env.py)')
+    mod_persist.add_argument('--modules-json', required=True, help='Full module_config as JSON')
 
     mod_infer = mod_sub.add_parser('infer-domains', help='Infer domains from build_systems for all modules')
     mod_infer.add_argument('--force', action='store_true', help='Overwrite existing domains')

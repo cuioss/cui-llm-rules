@@ -36,7 +36,7 @@ class ModuleTypeContext:
         # Create initial marshal.json (required by plan-marshall-config)
         (plan_dir / 'marshal.json').write_text(json.dumps({
             "skill_domains": {"system": {}},
-            "modules": {},
+            "module_config": {},
             "system": {"retention": {}},
             "plan": {"defaults": {}}
         }, indent=2))
@@ -225,7 +225,7 @@ def test_persist_pom_only_gets_limited_commands():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # pom modules should only have install and quality-gate (from profile)
         assert 'install' in commands, "pom should have install"
@@ -256,7 +256,7 @@ def test_persist_jar_gets_all_commands():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # jar modules should have most commands (static + profile-based)
         assert 'module-tests' in commands, "jar should have module-tests"
@@ -281,7 +281,7 @@ def test_persist_sets_type_field():
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
 
-        assert config['modules']['default']['type'] == 'war', "Should set type to war"
+        assert config['module_config']['default']['type'] == 'war', "Should set type to war"
 
 
 def test_persist_output_includes_type():
@@ -317,7 +317,7 @@ def test_validate_required_pom_module():
         # Create marshal.json with pom config that has install
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         marshal_path.write_text(json.dumps({
-            "modules": {
+            "module_config": {
                 "default": {
                     "path": ".",
                     "type": "pom",
@@ -353,7 +353,7 @@ def test_validate_required_jar_missing_commands():
         # Create marshal.json with jar config missing required static commands
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         marshal_path.write_text(json.dumps({
-            "modules": {
+            "module_config": {
                 "default": {
                     "path": ".",
                     "type": "jar",

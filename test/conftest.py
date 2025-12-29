@@ -428,14 +428,17 @@ class PlanTestContext:
         if self.plan_dir and self.plan_dir.exists():
             shutil.rmtree(self.plan_dir, ignore_errors=True)
 
-        # Clean up marshal.json and project-structure.toon to ensure test isolation
+        # Clean up common files to ensure test isolation
         if self.fixture_dir:
-            marshal_path = self.fixture_dir / 'marshal.json'
-            if marshal_path.exists():
-                marshal_path.unlink()
-            structure_path = self.fixture_dir / 'project-structure.toon'
-            if structure_path.exists():
-                structure_path.unlink()
+            files_to_clean = [
+                'marshal.json',
+                'project-structure.toon',
+                'raw-project-data.json'
+            ]
+            for filename in files_to_clean:
+                filepath = self.fixture_dir / filename
+                if filepath.exists():
+                    filepath.unlink()
 
         # Restore original PLAN_BASE_DIR
         if self._original_plan_base_dir is None:

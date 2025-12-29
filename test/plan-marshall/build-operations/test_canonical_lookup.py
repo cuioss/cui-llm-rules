@@ -48,7 +48,7 @@ class LookupFixturesContext:
         plan_dir = single_bs / '.plan'
         plan_dir.mkdir()
         (plan_dir / 'marshal.json').write_text(json.dumps({
-            "modules": {
+            "module_config": {
                 "default": {
                     "path": ".",
                     "domains": ["java"],
@@ -81,7 +81,7 @@ class LookupFixturesContext:
         plan_dir = hybrid / '.plan'
         plan_dir.mkdir()
         (plan_dir / 'marshal.json').write_text(json.dumps({
-            "modules": {
+            "module_config": {
                 "default": {
                     "path": ".",
                     "domains": ["java", "javascript"],
@@ -116,7 +116,7 @@ class LookupFixturesContext:
         plan_dir = pom_only / '.plan'
         plan_dir.mkdir()
         (plan_dir / 'marshal.json').write_text(json.dumps({
-            "modules": {
+            "module_config": {
                 "bom": {
                     "path": "bom",
                     "domains": [],
@@ -409,7 +409,7 @@ class MinimalModeContext:
         # Create initial marshal.json (required by plan-marshall-config)
         (plan_dir / 'marshal.json').write_text(json.dumps({
             "skill_domains": {"system": {}},
-            "modules": {},
+            "module_config": {},
             "system": {"retention": {}},
             "plan": {"defaults": {}}
         }, indent=2))
@@ -440,7 +440,7 @@ def test_persist_minimal_only_required():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # Required static commands should be present
         assert 'module-tests' in commands, "Should have module-tests (required static)"
@@ -486,7 +486,7 @@ def test_persist_minimal_with_include_profiles():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # Required static commands should be present
         assert 'module-tests' in commands, "Should have module-tests (required static)"
@@ -530,7 +530,7 @@ def test_persist_include_profiles_filter():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # Required static commands should be present (from --minimal base)
         assert 'module-tests' in commands, "Should have module-tests (required static)"

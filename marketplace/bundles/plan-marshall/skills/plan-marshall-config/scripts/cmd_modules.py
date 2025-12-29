@@ -2,6 +2,9 @@
 Modules command handlers for plan-marshall-config.
 
 Handles: modules
+
+Module facts (name, path, build_systems) come from raw-project-data.json.
+Command configuration uses module_config section of marshal.json.
 """
 
 import json
@@ -15,8 +18,11 @@ from config_core import (
     save_config,
     error_exit,
     success_exit,
+    get_modules,
+    get_module_by_name,
+    get_module_command,
+    list_module_commands,
 )
-from config_detection import detect_maven_modules
 
 
 def infer_domains_from_build_systems(build_systems: list) -> list:
@@ -42,79 +48,6 @@ def infer_domains_from_build_systems(build_systems: list) -> list:
     return domains
 
 
-def infer_domains_from_module(module_path: str) -> list:
-    """Infer skill domains from module content.
-
-    Detection is based on:
-    - pom.xml / build.gradle -> java
-    - package.json -> javascript
-    - *.java files with 'test' in path -> java-testing
-    - *.js/*.ts files with 'test' or 'spec' -> javascript-testing
-    - e2e/playwright/cypress in path -> javascript-testing
-    """
-    domains = []
-    path = Path(module_path)
-
-    if not path.exists():
-        return domains
-
-    # Check for build files (primary indicators)
-    has_maven = (path / 'pom.xml').exists()
-    has_gradle = (path / 'build.gradle').exists() or (path / 'build.gradle.kts').exists()
-    has_npm = (path / 'package.json').exists()
-
-    # Check for Java source files
-    has_java = list(path.rglob('*.java'))
-    has_test_java = any('test' in str(f).lower() for f in has_java)
-
-    # Check for JavaScript/TypeScript source files
-    has_js = list(path.rglob('*.js')) + list(path.rglob('*.ts'))
-    has_test_js = any('test' in str(f).lower() or 'spec' in str(f).lower() for f in has_js)
-
-    # Determine Java domains
-    if has_maven or has_gradle or has_java:
-        if has_test_java:
-            domains.append('java-testing')
-        else:
-            domains.append('java')
-
-    # Determine JavaScript domains
-    if has_npm or has_js:
-        if has_test_js:
-            domains.append('javascript-testing')
-        else:
-            domains.append('javascript')
-
-    # If path contains 'test' or 'e2e', mark as testing
-    path_lower = str(path).lower()
-    if 'e2e' in path_lower or 'playwright' in path_lower or 'cypress' in path_lower:
-        if 'javascript-testing' not in domains and 'javascript' not in domains:
-            domains.append('javascript-testing')
-        elif 'javascript' in domains:
-            domains.remove('javascript')
-            domains.append('javascript-testing')
-
-    return domains if domains else ['java']  # Default to java
-
-
-def infer_build_systems_from_module(module_path: str) -> list:
-    """Infer build systems from module files."""
-    build_systems = []
-    path = Path(module_path)
-
-    if not path.exists():
-        return build_systems
-
-    if (path / 'pom.xml').exists():
-        build_systems.append('maven')
-    if (path / 'build.gradle').exists() or (path / 'build.gradle.kts').exists():
-        build_systems.append('gradle')
-    if (path / 'package.json').exists():
-        build_systems.append('npm')
-
-    return build_systems if build_systems else ['maven']
-
-
 def cmd_modules(args) -> int:
     """Handle modules noun."""
     try:
@@ -122,217 +55,177 @@ def cmd_modules(args) -> int:
     except MarshalNotInitializedError as e:
         return error_exit(str(e))
 
+    # Module facts from raw-project-data.json
+    all_modules = get_modules()
+
+    # Command config from marshal.json
     config = load_config()
-    modules = config.get('modules', {})
+    module_config = config.get('module_config', {})
 
     if args.verb == 'list':
+        # List modules from raw-project-data.json
         module_list = []
-        for name, mod_config in modules.items():
+        for mod in all_modules:
             module_list.append({
-                "name": name,
-                "path": mod_config.get("path", name),
-                "domains": mod_config.get("domains", []),
-                "build_systems": mod_config.get("build_systems", [])
+                "name": mod.get("name"),
+                "path": mod.get("path"),
+                "parent": mod.get("parent"),
+                "build_systems": mod.get("build_systems", []),
+                "packaging": mod.get("packaging")
             })
         return success_exit({"modules": module_list, "count": len(module_list)})
 
     elif args.verb == 'get':
-        module = args.module
-        if module not in modules:
-            return error_exit(f"Unknown module: {module}")
-        mod_config = modules[module]
+        module_name = args.module
+        mod = get_module_by_name(module_name)
+        if not mod:
+            return error_exit(f"Unknown module: {module_name}")
+
+        # Combine facts with command config
+        cmd_list = list_module_commands(module_name)
         return success_exit({
-            "module": module,
-            "path": mod_config.get("path", module),
-            "domains": mod_config.get("domains", []),
-            "build_systems": mod_config.get("build_systems", []),
-            "commands": mod_config.get("commands", {})
+            "module": module_name,
+            "path": mod.get("path"),
+            "parent": mod.get("parent"),
+            "build_systems": mod.get("build_systems", []),
+            "packaging": mod.get("packaging"),
+            "commands": cmd_list.get("commands", [])
         })
 
-    elif args.verb == 'get-domains':
-        module = args.module
-        if module not in modules:
-            return error_exit(f"Unknown module: {module}")
-        domains = modules[module].get("domains", [])
-        return success_exit({"module": module, "domains": domains})
-
     elif args.verb == 'get-build-systems':
-        module = args.module
-        if module not in modules:
-            return error_exit(f"Unknown module: {module}")
-        build_systems = modules[module].get("build_systems", [])
-        return success_exit({"module": module, "build_systems": build_systems})
+        module_name = args.module
+        mod = get_module_by_name(module_name)
+        if not mod:
+            return error_exit(f"Unknown module: {module_name}")
+        return success_exit({
+            "module": module_name,
+            "build_systems": mod.get("build_systems", [])
+        })
 
     elif args.verb == 'get-command':
-        module = args.module
+        module_name = args.module
         label = args.label
+        build_system = getattr(args, 'build_system', None)
 
-        if module not in modules:
-            return error_exit(f"Unknown module: {module}")
+        result = get_module_command(module_name, label, build_system)
+        if result is None:
+            return error_exit(f"Command not found: {module_name}.{label}")
 
-        mod_config = modules[module]
+        return success_exit(result)
 
-        # Static routing: check module commands directly (label -> full command string)
-        if "commands" in mod_config and label in mod_config["commands"]:
-            return success_exit({
-                "module": module,
-                "label": label,
-                "command": mod_config["commands"][label],
-                "source": "module"
-            })
-
-        # Fall back to default module
-        if "default" in modules and module != "default":
-            default_config = modules["default"]
-            if "commands" in default_config and label in default_config["commands"]:
-                return success_exit({
-                    "module": module,
-                    "label": label,
-                    "command": default_config["commands"][label],
-                    "source": "default"
-                })
-
-        return error_exit(f"Command not found: {module}.{label}")
+    elif args.verb == 'list-commands':
+        module_name = args.module
+        result = list_module_commands(module_name)
+        return success_exit(result)
 
     elif args.verb == 'set-command':
-        module = args.module
+        module_name = args.module
         label = args.label
         command = args.command
+        build_system = getattr(args, 'build_system', None)
 
-        if module not in modules:
-            return error_exit(f"Unknown module: {module}")
+        # Initialize module_config entry if needed
+        if module_name not in module_config:
+            module_config[module_name] = {"commands": {}}
+        elif "commands" not in module_config[module_name]:
+            module_config[module_name]["commands"] = {}
 
-        mod_config = modules[module]
+        # Handle hybrid modules (per-build-system commands)
+        if build_system:
+            existing = module_config[module_name]["commands"].get(label)
+            if isinstance(existing, str):
+                # Convert from simple string to dict
+                module_config[module_name]["commands"][label] = {build_system: command}
+            elif isinstance(existing, dict):
+                existing[build_system] = command
+            else:
+                module_config[module_name]["commands"][label] = {build_system: command}
+        else:
+            module_config[module_name]["commands"][label] = command
 
-        # Initialize commands dict if needed
-        if "commands" not in mod_config:
-            mod_config["commands"] = {}
-
-        mod_config["commands"][label] = command
-        config['modules'] = modules
+        config['module_config'] = module_config
         save_config(config)
 
         return success_exit({
-            "module": module,
+            "module": module_name,
             "label": label,
             "command": command,
+            "build_system": build_system,
             "action": "set"
         })
 
-    elif args.verb == 'add':
-        module = args.module
-        if module in modules:
-            return error_exit(f"Module already exists: {module}")
+    elif args.verb == 'set-default-command':
+        # Set a default command (applies to all modules without override)
+        label = args.label
+        command = args.command
 
-        path = args.path if args.path else module
-        domains = args.domains.split(',') if args.domains else []
-        build_systems_list = args.build_systems.split(',') if args.build_systems else []
+        if 'default' not in module_config:
+            module_config['default'] = {"commands": {}}
+        elif "commands" not in module_config['default']:
+            module_config['default']["commands"] = {}
 
-        modules[module] = {
-            "path": path,
-            "domains": domains,
-            "build_systems": build_systems_list
-        }
-        config['modules'] = modules
+        module_config['default']["commands"][label] = command
+        config['module_config'] = module_config
         save_config(config)
-        return success_exit({"module": module, "added": modules[module]})
 
-    elif args.verb == 'set':
-        module = args.module
-        if module not in modules:
-            return error_exit(f"Unknown module: {module}")
-
-        if args.domains:
-            modules[module]["domains"] = args.domains.split(',')
-        if args.build_systems:
-            modules[module]["build_systems"] = args.build_systems.split(',')
-
-        config['modules'] = modules
-        save_config(config)
-        return success_exit({"module": module, "updated": modules[module]})
-
-    elif args.verb == 'remove':
-        module = args.module
-        if module not in modules:
-            return error_exit(f"Unknown module: {module}")
-
-        removed = modules.pop(module)
-        config['modules'] = modules
-        save_config(config)
-        return success_exit({"module": module, "removed": removed})
-
-    elif args.verb == 'detect':
-        detected = []
-
-        # Detect Maven modules
-        maven_modules = detect_maven_modules()
-        for mod_info in maven_modules:
-            mod_path = mod_info["path"]
-            mod_name = mod_info["name"]
-            domains = infer_domains_from_module(mod_path)
-            build_systems_list = infer_build_systems_from_module(mod_path)
-
-            if mod_name not in modules:
-                modules[mod_name] = {
-                    "path": mod_path,
-                    "domains": domains,
-                    "build_systems": build_systems_list
-                }
-                detected.append(mod_name)
-
-        config['modules'] = modules
-        save_config(config)
         return success_exit({
-            "detected": detected,
-            "count": len(detected),
-            "total_modules": len(modules)
+            "label": label,
+            "command": command,
+            "action": "set-default"
         })
 
     elif args.verb == 'persist-all':
-        # Replace entire modules section with provided JSON
+        # Replace entire module_config section with provided JSON
         # Used by build_env.py to persist detected modules with commands
         try:
-            new_modules = json.loads(args.modules_json)
+            new_module_config = json.loads(args.modules_json)
         except json.JSONDecodeError as e:
             return error_exit(f"Invalid JSON for --modules-json: {e}")
 
-        config['modules'] = new_modules
+        config['module_config'] = new_module_config
         save_config(config)
         return success_exit({
-            "modules_count": len(new_modules),
+            "modules_count": len(new_module_config),
             "action": "persist-all"
         })
 
     elif args.verb == 'infer-domains':
         # Infer domains from build_systems for all modules
-        # Only updates modules with empty or missing domains
+        # Uses raw-project-data.json for build_systems, updates module_config for domains
         updated = []
         skipped = []
 
-        for mod_name, mod_config in modules.items():
+        for mod in all_modules:
+            mod_name = mod.get('name')
             if mod_name == 'default':
                 continue
 
-            existing_domains = mod_config.get('domains', [])
-            build_systems_list = mod_config.get('build_systems', [])
+            # Get existing domains from module_config
+            existing_domains = []
+            if mod_name in module_config:
+                existing_domains = module_config[mod_name].get('domains', [])
 
             # Skip if domains already populated (unless --force)
             if existing_domains and not getattr(args, 'force', False):
                 skipped.append(mod_name)
                 continue
 
-            # Infer from build_systems
-            inferred = infer_domains_from_build_systems(build_systems_list)
+            # Infer from build_systems (from raw-project-data.json)
+            build_systems = mod.get('build_systems', [])
+            inferred = infer_domains_from_build_systems(build_systems)
+
             if inferred:
-                mod_config['domains'] = inferred
+                if mod_name not in module_config:
+                    module_config[mod_name] = {}
+                module_config[mod_name]['domains'] = inferred
                 updated.append({
                     'module': mod_name,
                     'domains': inferred,
-                    'from_build_systems': build_systems_list
+                    'from_build_systems': build_systems
                 })
 
         if updated:
-            config['modules'] = modules
+            config['module_config'] = module_config
             save_config(config)
 
         return success_exit({
@@ -342,4 +235,4 @@ def cmd_modules(args) -> int:
             "skipped_count": len(skipped)
         })
 
-    return EXIT_ERROR
+    return error_exit(f"Unknown verb: {args.verb}")

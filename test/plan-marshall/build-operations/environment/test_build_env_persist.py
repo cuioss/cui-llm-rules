@@ -46,9 +46,10 @@ class PersistTestContext:
         plan_dir.mkdir()
 
         # Create initial marshal.json (required by plan-marshall-config)
+        # Uses module_config for command configuration (new architecture)
         (plan_dir / 'marshal.json').write_text(json.dumps({
             "skill_domains": {"system": {}},
-            "modules": {},
+            "module_config": {},
             "system": {"retention": {}},
             "plan": {"defaults": {}}
         }, indent=2))
@@ -197,18 +198,18 @@ def test_persist_maven_creates_commands():
         assert marshal_path.exists(), "Should create marshal.json"
 
         config = json.loads(marshal_path.read_text())
-        assert 'modules' in config, "Should have modules section"
-        assert 'default' in config['modules'], "Should have default module"
-        assert 'commands' in config['modules']['default'], "Should have commands"
+        assert 'module_config' in config, "Should have module_config section"
+        assert 'default' in config['module_config'], "Should have default module"
+        assert 'commands' in config['module_config']['default'], "Should have commands"
 
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
         assert 'module-tests' in commands, "Should have module-tests command (canonical name)"
         assert 'verify' in commands, "Should have verify command"
         assert 'maven' in commands['module-tests'], "Command should reference maven script"
 
         # Verify module type is detected
-        assert 'type' in config['modules']['default'], "Should have type field"
-        assert config['modules']['default']['type'] == 'jar', "Default should be jar type"
+        assert 'type' in config['module_config']['default'], "Should have type field"
+        assert config['module_config']['default']['type'] == 'jar', "Default should be jar type"
 
 
 def test_persist_gradle_creates_commands():
@@ -224,7 +225,7 @@ def test_persist_gradle_creates_commands():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         assert 'module-tests' in commands, "Should have module-tests command"
         assert 'gradle' in commands['module-tests'], "Command should reference gradle script"
@@ -243,7 +244,7 @@ def test_persist_npm_creates_commands():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         assert 'module-tests' in commands, "Should have module-tests command"
         assert 'npm' in commands['module-tests'], "Command should reference npm script"
@@ -266,11 +267,11 @@ def test_persist_with_modules_adds_module_flag():
         config = json.loads(marshal_path.read_text())
 
         # Default module should NOT have --module flag
-        default_cmd = config['modules']['default']['commands']['module-tests']
+        default_cmd = config['module_config']['default']['commands']['module-tests']
         assert '--module' not in default_cmd, "Default should not have --module flag"
 
         # Other modules SHOULD have --module flag
-        core_cmd = config['modules']['core']['commands']['module-tests']
+        core_cmd = config['module_config']['core']['commands']['module-tests']
         assert '--module core' in core_cmd, f"Core module should have --module flag: {core_cmd}"
 
 
@@ -307,7 +308,7 @@ def test_persist_profile_based_commands_from_detection():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # Should have profile-based commands generated from detected profiles
         assert 'quality-gate' in commands, "Should have quality-gate from pre-commit profile"
@@ -336,7 +337,7 @@ def test_persist_reports_missing_profile_commands():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # Should NOT have profile-based commands without profiles
         assert 'quality-gate' not in commands, "Should not have quality-gate without profile"
@@ -344,7 +345,7 @@ def test_persist_reports_missing_profile_commands():
         assert 'coverage' not in commands, "Should not have coverage without profile"
 
         # Should report missing profile commands
-        missing = config['modules']['default'].get('missing_profile_commands', [])
+        missing = config['module_config']['default'].get('missing_profile_commands', [])
         assert 'quality-gate' in missing, "Should report quality-gate as missing"
         assert 'integration-tests' in missing, "Should report integration-tests as missing"
         assert 'coverage' in missing, "Should report coverage as missing"
@@ -376,7 +377,8 @@ def test_persist_preserves_existing_config():
         # Create existing marshal.json with custom content
         existing_config = {
             "skill_domains": {"java": {"defaults": ["pm-dev-java:java-core"]}},
-            "system": {"retention": {"logs_days": 5}}
+            "system": {"retention": {"logs_days": 5}},
+            "module_config": {}
         }
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         marshal_path.write_text(json.dumps(existing_config))
@@ -397,8 +399,8 @@ def test_persist_preserves_existing_config():
         assert config['system']['retention']['logs_days'] == 5, "Should preserve retention"
 
         # Verify new content added
-        assert 'modules' in config, "Should add modules"
-        assert 'commands' in config['modules']['default'], "Should add commands"
+        assert 'module_config' in config, "Should add module_config"
+        assert 'commands' in config['module_config']['default'], "Should add commands"
 
 
 def test_persist_help():

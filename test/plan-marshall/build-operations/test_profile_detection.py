@@ -36,7 +36,7 @@ class ProfileTestContext:
         # Create initial marshal.json (required by plan-marshall-config)
         (plan_dir / 'marshal.json').write_text(json.dumps({
             "skill_domains": {"system": {}},
-            "modules": {},
+            "module_config": {},
             "system": {"retention": {}},
             "plan": {"defaults": {}}
         }, indent=2))
@@ -226,9 +226,9 @@ def test_persist_detects_profiles():
         config = json.loads(marshal_path.read_text())
 
         # Check detected_profiles is stored
-        assert 'detected_profiles' in config['modules']['default'], \
+        assert 'detected_profiles' in config['module_config']['default'], \
             "Should store detected_profiles"
-        profiles = config['modules']['default']['detected_profiles']
+        profiles = config['module_config']['default']['detected_profiles']
         assert len(profiles) == 2, "Should have 2 detected profiles"
 
         # Check profile IDs are stored
@@ -258,7 +258,7 @@ def test_persist_generates_profile_commands():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # Should have integration-tests command generated from profile
         assert 'integration-tests' in commands, \
@@ -294,7 +294,7 @@ def test_persist_generates_property_activated_command():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # Should have integration-tests command with property activation
         assert 'integration-tests' in commands, "Should generate integration-tests command"
@@ -328,7 +328,7 @@ def test_persist_generates_quality_gate_from_profile():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # quality-gate should be generated from the detected 'quality' profile
         assert 'quality-gate' in commands, "Should have quality-gate command from profile"

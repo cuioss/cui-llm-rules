@@ -37,7 +37,7 @@ class HybridTestContext:
         # Create initial marshal.json (required by plan-marshall-config)
         (plan_dir / 'marshal.json').write_text(json.dumps({
             "skill_domains": {"system": {}},
-            "modules": {},
+            "module_config": {},
             "system": {"retention": {}},
             "plan": {"defaults": {}}
         }, indent=2))
@@ -70,7 +70,7 @@ def test_detect_hybrid_maven_npm():
         config = json.loads(marshal_path.read_text())
 
         # Should detect both build systems
-        build_systems = config['modules']['default']['build_systems']
+        build_systems = config['module_config']['default']['build_systems']
         assert 'maven' in build_systems, "Should detect maven"
         assert 'npm' in build_systems, "Should detect npm"
         assert len(build_systems) == 2, f"Should have exactly 2 build systems: {build_systems}"
@@ -95,7 +95,7 @@ def test_detect_hybrid_gradle_npm():
         config = json.loads(marshal_path.read_text())
 
         # Should detect both build systems
-        build_systems = config['modules']['default']['build_systems']
+        build_systems = config['module_config']['default']['build_systems']
         assert 'gradle' in build_systems, "Should detect gradle"
         assert 'npm' in build_systems, "Should detect npm"
 
@@ -118,7 +118,7 @@ def test_non_hybrid_single_system():
         config = json.loads(marshal_path.read_text())
 
         # Should have only one build system
-        build_systems = config['modules']['default']['build_systems']
+        build_systems = config['module_config']['default']['build_systems']
         assert len(build_systems) == 1, f"Should have only 1 build system: {build_systems}"
         assert 'maven' in build_systems, "Should detect maven only"
 
@@ -144,7 +144,7 @@ def test_hybrid_commands_nested_format():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # module-tests should be present for both build systems
         assert 'module-tests' in commands, "Should have module-tests command"
@@ -172,7 +172,7 @@ def test_hybrid_commands_have_correct_content():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         module_tests = commands['module-tests']
 
@@ -203,7 +203,7 @@ def test_non_hybrid_commands_flat_format():
 
         marshal_path = temp_dir / '.plan' / 'marshal.json'
         config = json.loads(marshal_path.read_text())
-        commands = config['modules']['default']['commands']
+        commands = config['module_config']['default']['commands']
 
         # module-tests should be a string (flat format)
         assert 'module-tests' in commands, "Should have module-tests command"

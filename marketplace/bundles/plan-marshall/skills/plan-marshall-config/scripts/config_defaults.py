@@ -76,15 +76,17 @@ def get_default_config() -> dict:
 
     Returns a new dict each time to avoid mutation issues.
 
-    NOTE: build_systems is NOT included - it's determined at runtime
-    via extension discovery, not persisted in marshal.json.
+    NOTE:
+    - build_systems is NOT included - determined at runtime via extension discovery
+    - module_config contains command configuration only; module facts come from
+      raw-project-data.json (see plan-marshall:project-structure)
     """
     import copy
     return {
         "skill_domains": {
             "system": copy.deepcopy(DEFAULT_SYSTEM_DOMAIN)
         },
-        "modules": {},
+        "module_config": {},
         "system": {
             "retention": copy.deepcopy(DEFAULT_SYSTEM_RETENTION)
         },

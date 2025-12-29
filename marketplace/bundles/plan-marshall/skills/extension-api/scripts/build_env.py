@@ -196,7 +196,7 @@ def cmd_detect_module_type(args):
         module_path = project_dir / args.module
         if not module_path.exists():
             config = load_marshal_json(project_dir)
-            module_config = config.get("modules", {}).get(args.module)
+            module_config = config.get("module_config", {}).get(args.module)
             if module_config:
                 module_path = project_dir / module_config.get("path", args.module)
             else:
@@ -228,7 +228,7 @@ def cmd_detect_profiles(args):
         module_path = project_dir / args.module
         if not module_path.exists():
             config = load_marshal_json(project_dir)
-            module_config = config.get("modules", {}).get(args.module)
+            module_config = config.get("module_config", {}).get(args.module)
             if module_config:
                 module_path = project_dir / module_config.get("path", args.module)
             else:
@@ -639,7 +639,7 @@ def cmd_persist(args):
 
 def lookup_command(canonical: str, module: str, config: dict, build_system: str = None) -> str | dict | None:
     """Look up the executable command for a canonical name and module."""
-    modules = config.get("modules", {})
+    modules = config.get("module_config", {})
     module_config = modules.get(module)
 
     if not module_config:
@@ -684,13 +684,13 @@ def cmd_lookup(args):
 
     if result is None:
         print(f"error: Command '{args.canonical}' not found for module '{args.module}'", file=sys.stderr)
-        module_config = config.get("modules", {}).get(args.module)
+        module_config = config.get("module_config", {}).get(args.module)
         if module_config:
             available = list(module_config.get("commands", {}).keys())
             if available:
                 print(f"available: {', '.join(available)}", file=sys.stderr)
         else:
-            available_modules = list(config.get("modules", {}).keys())
+            available_modules = list(config.get("module_config", {}).keys())
             print(f"available modules: {', '.join(available_modules)}", file=sys.stderr)
         print("hint: Run '/marshall-steward' to reconfigure", file=sys.stderr)
         return 1
@@ -710,7 +710,7 @@ def cmd_lookup(args):
 
 def get_available_commands(module: str, config: dict) -> list:
     """Get list of available canonical command names for a module."""
-    modules = config.get("modules", {})
+    modules = config.get("module_config", {})
     module_config = modules.get(module)
 
     if not module_config:
@@ -730,10 +730,10 @@ def cmd_get_available_commands(args):
         print("hint: Run '/marshall-steward' to initialize configuration", file=sys.stderr)
         return 1
 
-    module_config = config.get("modules", {}).get(args.module)
+    module_config = config.get("module_config", {}).get(args.module)
     if not module_config:
         print(f"error: Module '{args.module}' not found", file=sys.stderr)
-        available_modules = list(config.get("modules", {}).keys())
+        available_modules = list(config.get("module_config", {}).keys())
         print(f"available modules: {', '.join(available_modules)}", file=sys.stderr)
         return 1
 
@@ -757,7 +757,7 @@ def validate_required_commands(module: str, config: dict) -> list:
     Profile-based commands (integration-tests, coverage, performance, quality-gate)
     are generated from detected profiles and are not strictly required.
     """
-    modules = config.get("modules", {})
+    modules = config.get("module_config", {})
     module_config = modules.get(module)
 
     if not module_config:
@@ -788,10 +788,10 @@ def cmd_validate_required(args):
         print("hint: Run '/marshall-steward' to initialize configuration", file=sys.stderr)
         return 1
 
-    module_config = config.get("modules", {}).get(args.module)
+    module_config = config.get("module_config", {}).get(args.module)
     if not module_config:
         print(f"error: Module '{args.module}' not found", file=sys.stderr)
-        available_modules = list(config.get("modules", {}).keys())
+        available_modules = list(config.get("module_config", {}).keys())
         print(f"available modules: {', '.join(available_modules)}", file=sys.stderr)
         return 1
 

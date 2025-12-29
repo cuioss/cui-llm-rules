@@ -69,14 +69,15 @@ def test_modules_list():
 
 
 def test_modules_get():
-    """Test modules get."""
+    """Test modules get returns module facts from raw-project-data.json."""
     with PlanTestContext() as ctx:
         create_marshal_json(ctx.fixture_dir)
 
         result = run_script(SCRIPT_PATH, 'modules', 'get', '--module', 'my-core')
 
         assert result.success, f"Should succeed: {result.stderr}"
-        assert 'java' in result.stdout.lower()
+        # build_systems come from raw-project-data.json
+        assert 'maven' in result.stdout.lower()
 
 
 def test_build_systems_list():
